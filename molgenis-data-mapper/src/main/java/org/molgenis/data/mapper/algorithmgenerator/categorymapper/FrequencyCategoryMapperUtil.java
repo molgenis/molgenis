@@ -1,4 +1,4 @@
-package org.molgenis.data.mapper.categorymapper.utils;
+package org.molgenis.data.mapper.algorithmgenerator.categorymapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +21,7 @@ import org.jscience.physics.amount.Amount;
 
 import com.google.common.collect.Sets;
 
-public class DurationUnitConversionUtil
+public class FrequencyCategoryMapperUtil
 {
 	private static final Pattern NUMBER_PATTERN = Pattern.compile("\\d+\\.?\\d*");
 	private static final String NON_LETTER_REGEX = "[^a-zA-Z0-9]";
@@ -143,9 +143,9 @@ public class DurationUnitConversionUtil
 		return candidateUnits.size() > 0 ? candidateUnits.get(0) : null;
 	}
 
-	public static Set<Double> extractNumbers(String description)
+	public static List<Double> extractNumbers(String description)
 	{
-		Set<Double> extractedNumbers = new HashSet<Double>();
+		List<Double> extractedNumbers = new ArrayList<Double>();
 		String lowerCasedDesc = description.toLowerCase();
 		Matcher mather = NUMBER_PATTERN.matcher(lowerCasedDesc);
 		while (mather.find())

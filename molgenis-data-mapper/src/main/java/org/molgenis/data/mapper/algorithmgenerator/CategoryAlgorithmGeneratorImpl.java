@@ -1,7 +1,7 @@
 package org.molgenis.data.mapper.algorithmgenerator;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -9,7 +9,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
-import org.molgenis.data.mapper.categorymapper.FrequencyCategoryMapper;
+import org.molgenis.data.mapper.algorithmgenerator.categorymapper.FrequencyCategoryMapper;
 
 public class CategoryAlgorithmGeneratorImpl implements CategoryAlgorithmGenerator
 {
@@ -29,14 +29,14 @@ public class CategoryAlgorithmGeneratorImpl implements CategoryAlgorithmGenerato
 
 	public String generate(AttributeMetaData targetAttributeMetaData, AttributeMetaData sourceAttributeMetaData)
 	{
-		Set<Category> targetCategories = convertToCategory(targetAttributeMetaData);
-		Set<Category> sourceCategories = convertToCategory(sourceAttributeMetaData);
+		List<Category> targetCategories = convertToCategory(targetAttributeMetaData);
+		List<Category> sourceCategories = convertToCategory(sourceAttributeMetaData);
 
 		String mapAlgorithm;
 
 		// Check if both of target and source categories contain frequency units
-		if (targetCategories.stream().anyMatch(category -> category.getAmount() != null)
-				&& sourceCategories.stream().anyMatch(category -> category.getAmount() != null))
+		if (targetCategories.stream().anyMatch(category -> category.getAmountWrapper() != null)
+				&& sourceCategories.stream().anyMatch(category -> category.getAmountWrapper() != null))
 		{
 			mapAlgorithm = mapFrequencyCategories(sourceAttributeMetaData, targetCategories, sourceCategories);
 		}
@@ -47,14 +47,14 @@ public class CategoryAlgorithmGeneratorImpl implements CategoryAlgorithmGenerato
 		return mapAlgorithm;
 	}
 
-	String mapLexicalCategories(AttributeMetaData sourceAttributeMetaData, Set<Category> targetCategories,
-			Set<Category> sourceCategories)
+	String mapLexicalCategories(AttributeMetaData sourceAttributeMetaData, List<Category> targetCategories,
+			List<Category> sourceCategories)
 	{
 		return null;
 	}
 
-	String mapFrequencyCategories(AttributeMetaData sourceAttributeMetaData, Set<Category> targetCategories,
-			Set<Category> sourceCategories)
+	String mapFrequencyCategories(AttributeMetaData sourceAttributeMetaData, List<Category> targetCategories,
+			List<Category> sourceCategories)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 		for (Category sourceCategory : sourceCategories)
@@ -81,14 +81,14 @@ public class CategoryAlgorithmGeneratorImpl implements CategoryAlgorithmGenerato
 		return stringBuilder.toString();
 	}
 
-	Category findBestCategoryMatch(Category sourceCategory, Set<Category> targetCategories)
+	Category findBestCategoryMatch(Category sourceCategory, List<Category> targetCategories)
 	{
 		Category bestTargetCategory = null;
 		double smallestFactor = -1;
 		for (Category targetCategory : targetCategories)
 		{
-			Double convertFactor = frequencyCategoryMapper.convert(sourceCategory.getAmount(),
-					targetCategory.getAmount());
+			Double convertFactor = frequencyCategoryMapper.convert(sourceCategory.getAmountWrapper(),
+					targetCategory.getAmountWrapper());
 
 			if (convertFactor == null) continue;
 
@@ -106,9 +106,9 @@ public class CategoryAlgorithmGeneratorImpl implements CategoryAlgorithmGenerato
 		return bestTargetCategory;
 	}
 
-	Set<Category> convertToCategory(AttributeMetaData attributeMetaData)
+	List<Category> convertToCategory(AttributeMetaData attributeMetaData)
 	{
-		Set<Category> categories = new HashSet<Category>();
+		List<Category> categories = new ArrayList<Category>();
 		EntityMetaData refEntity = attributeMetaData.getRefEntity();
 		if (refEntity != null)
 		{

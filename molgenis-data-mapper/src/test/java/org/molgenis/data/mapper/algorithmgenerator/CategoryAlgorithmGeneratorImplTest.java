@@ -8,6 +8,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -82,8 +83,10 @@ public class CategoryAlgorithmGeneratorImplTest
 	@Test
 	public void generate()
 	{
-		String generate = categoryAlgorithmGeneratorImpl.generate(targetAttributeMetaData, sourceAttributeMetaData);
+		String generatedAlgorithm = categoryAlgorithmGeneratorImpl.generate(targetAttributeMetaData,
+				sourceAttributeMetaData);
+		String expectedAlgorithm = "$('How often did you eat boiled or mashed potatoes (also in stew) in the past month? Baked potatoes are asked later').map({\"2\":\"4\",\"3\":\"4\",\"4\":\"3\",\"5\":\"2\",\"6\":\"2\",\"7\":\"1\",\"8\":\"1\"}, null, null).value();";
 
-		System.out.println(generate);
+		Assert.assertEquals(generatedAlgorithm, expectedAlgorithm);
 	}
 }

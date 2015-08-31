@@ -2,7 +2,6 @@ package org.molgenis.data.mapper.algorithmgenerator.bean;
 
 import javax.annotation.Nullable;
 
-import org.jscience.physics.amount.Amount;
 import org.molgenis.gson.AutoGson;
 
 import com.google.auto.value.AutoValue;
@@ -16,15 +15,15 @@ public abstract class Category
 	public abstract String getLabel();
 
 	@Nullable
-	public abstract Amount<?> getAmount();
+	public abstract AmountWrapper getAmountWrapper();
 
 	public static Category create(int code, String label)
 	{
 		return new AutoValue_Category(code, label, null);
 	}
 
-	public static Category create(int code, String label, Amount<?> amount)
+	public static Category create(int code, String label, AmountWrapper amountWrapper)
 	{
-		return new AutoValue_Category(code, label, amount);
+		return new AutoValue_Category(code, label, amountWrapper);
 	}
 }

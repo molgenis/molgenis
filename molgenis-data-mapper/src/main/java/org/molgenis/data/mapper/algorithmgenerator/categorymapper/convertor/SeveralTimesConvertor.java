@@ -1,4 +1,4 @@
-package org.molgenis.data.mapper.categorymapper.convertor;
+package org.molgenis.data.mapper.algorithmgenerator.categorymapper.convertor;
 
 import java.util.Set;
 
@@ -6,7 +6,8 @@ import javax.measure.unit.NonSI;
 import javax.measure.unit.Unit;
 
 import org.jscience.physics.amount.Amount;
-import org.molgenis.data.mapper.categorymapper.utils.DurationUnitConversionUtil;
+import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
+import org.molgenis.data.mapper.algorithmgenerator.categorymapper.FrequencyCategoryMapperUtil;
 
 import com.google.common.collect.Sets;
 
@@ -20,12 +21,13 @@ public class SeveralTimesConvertor extends AmountConvertor
 		return CRITERIA.stream().anyMatch(keyWord -> lowerCase.contains(keyWord));
 	}
 
-	Amount<?> getInternalAmount(String description)
+	AmountWrapper getInternalAmount(String description)
 	{
-		Unit<?> unit = DurationUnitConversionUtil.findDurationUnit(description);
+		Unit<?> unit = FrequencyCategoryMapperUtil.findDurationUnit(description);
 		if (unit != null)
 		{
-			return Amount.rangeOf((double) 1, NonSI.DAY.inverse().getConverterTo(unit).convert(1), unit);
+			return AmountWrapper.create(
+					Amount.rangeOf((double) 1, NonSI.DAY.inverse().getConverterTo(unit).convert(1), unit), false);
 		}
 		return null;
 	}

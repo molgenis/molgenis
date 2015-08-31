@@ -1,8 +1,9 @@
-package org.molgenis.data.mapper.categorymapper.convertor;
+package org.molgenis.data.mapper.algorithmgenerator.categorymapper.convertor;
 
 import javax.measure.unit.NonSI;
 
 import org.jscience.physics.amount.Amount;
+import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
 
 public class DailyAmountConvertor extends AmountConvertor
 {
@@ -14,8 +15,8 @@ public class DailyAmountConvertor extends AmountConvertor
 		return description.toLowerCase().contains(CRITERIA);
 	}
 
-	Amount<?> getInternalAmount(String description)
+	AmountWrapper getInternalAmount(String description)
 	{
-		return AMOUNT;
+		return AmountWrapper.create(AMOUNT);
 	}
 }
