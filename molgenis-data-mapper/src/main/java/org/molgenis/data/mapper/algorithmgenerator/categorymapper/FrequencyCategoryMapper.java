@@ -7,23 +7,45 @@ import javax.measure.unit.Unit;
 
 import org.jscience.physics.amount.Amount;
 import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
-import org.molgenis.data.mapper.algorithmgenerator.categorymapper.convertor.AmountConvertor;
-import org.molgenis.data.mapper.algorithmgenerator.categorymapper.convertor.DailyAmountConvertor;
-import org.molgenis.data.mapper.algorithmgenerator.categorymapper.convertor.NumberAmountConvertor;
-import org.molgenis.data.mapper.algorithmgenerator.categorymapper.convertor.SeveralTimesConvertor;
+import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
 
-import com.google.common.collect.Lists;
-
-public class FrequencyCategoryMapper
+public class FrequencyCategoryMapper implements CategoryMapper
 {
-	private static final List<AmountConvertor> CONVERTORS = Lists.newArrayList(new DailyAmountConvertor(),
-			new SeveralTimesConvertor(), new NumberAmountConvertor());
-
 	private static final Unit<?> STANDARD_UNIT = NonSI.WEEK.inverse();
 
 	private static final double STANDARD_ERROR = 1;
 
-	public Double convert(AmountWrapper sourceAmountWrapper, AmountWrapper targetAmountWrapper)
+	public Category findBestCategoryMatch(Category sourceCategory, List<Category> targetCategories)
+	{
+		Category bestTargetCategory = null;
+		double smallestFactor = -1;
+		for (Category targetCategory : targetCategories)
+		{
+			Double convertFactor = convert(sourceCategory.getAmountWrapper(), targetCategory.getAmountWrapper());
+
+			if (convertFactor == null) continue;
+
+			if (smallestFactor == -1)
+			{
+				smallestFactor = convertFactor;
+				bestTargetCategory = targetCategory;
+			}
+			else if (smallestFactor > convertFactor)
+			{
+				smallestFactor = convertFactor;
+				bestTargetCategory = targetCategory;
+			}
+		}
+		return bestTargetCategory;
+	}
+
+	public boolean applyCustomRules(Category sourceCategory, Category targetCategory)
+	{
+		// TODO : to be implemented in the future
+		return false;
+	}
+
+	Double convert(AmountWrapper sourceAmountWrapper, AmountWrapper targetAmountWrapper)
 	{
 		if (sourceAmountWrapper != null && targetAmountWrapper != null)
 		{
@@ -57,7 +79,7 @@ public class FrequencyCategoryMapper
 		return null;
 	}
 
-	private Amount<?> determineAmount(Amount<?> amountToDetermine, Amount<?> determinedAmount)
+	Amount<?> determineAmount(Amount<?> amountToDetermine, Amount<?> determinedAmount)
 	{
 		Amount<?> convertedAmount = amountToDetermine.to(determinedAmount.getUnit());
 
@@ -86,19 +108,6 @@ public class FrequencyCategoryMapper
 				&& sourceAmount.getUnit().isCompatible(targetAmount.getUnit());
 	}
 
-	public AmountWrapper convertDescriptionToAmount(String description)
-	{
-		String cleanedDescription = FrequencyCategoryMapperUtil.convertWordToNumber(description);
-		for (AmountConvertor convertor : CONVERTORS)
-		{
-			if (convertor.matchCriteria(cleanedDescription))
-			{
-				return convertor.getAmount(cleanedDescription);
-			}
-		}
-		return null;
-	}
-
 	Double convertFactor(Amount<?> convertedSourceAmount, Amount<?> targetAmount)
 	{
 		double lowerBoundDiff = Math.abs(targetAmount.getMinimumValue() - convertedSourceAmount.getMinimumValue());
@@ -109,6 +118,6 @@ public class FrequencyCategoryMapper
 
 	boolean isMaxValueUndetermined(Amount<?> amount1)
 	{
-		return FrequencyCategoryMapperUtil.isAmountRanged(amount1) && amount1.getMaximumValue() == Double.MAX_VALUE;
+		return CategoryMapperUtil.isAmountRanged(amount1) && amount1.getMaximumValue() == Double.MAX_VALUE;
 	}
 }

@@ -9,17 +9,22 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
+import org.molgenis.data.mapper.algorithmgenerator.categorymapper.CategoryMapper;
+import org.molgenis.data.mapper.algorithmgenerator.categorymapper.CategoryMapperUtil;
 import org.molgenis.data.mapper.algorithmgenerator.categorymapper.FrequencyCategoryMapper;
+import org.molgenis.data.mapper.algorithmgenerator.categorymapper.LexicalCategoryMapper;
 
 public class CategoryAlgorithmGeneratorImpl implements CategoryAlgorithmGenerator
 {
 	private final DataService dataService;
-
-	private final FrequencyCategoryMapper frequencyCategoryMapper = new FrequencyCategoryMapper();
+	private final FrequencyCategoryMapper frequencyCategoryMapper;
+	private final LexicalCategoryMapper lexicalCategoryMapper;
 
 	public CategoryAlgorithmGeneratorImpl(DataService dataService)
 	{
 		this.dataService = dataService;
+		lexicalCategoryMapper = new LexicalCategoryMapper();
+		frequencyCategoryMapper = new FrequencyCategoryMapper();
 	}
 
 	public boolean isSuitable(AttributeMetaData targetAttributeMetaData, AttributeMetaData sourceAttributeMetaData)
@@ -38,28 +43,24 @@ public class CategoryAlgorithmGeneratorImpl implements CategoryAlgorithmGenerato
 		if (targetCategories.stream().anyMatch(category -> category.getAmountWrapper() != null)
 				&& sourceCategories.stream().anyMatch(category -> category.getAmountWrapper() != null))
 		{
-			mapAlgorithm = mapFrequencyCategories(sourceAttributeMetaData, targetCategories, sourceCategories);
+			mapAlgorithm = mapCategories(sourceAttributeMetaData, targetCategories, sourceCategories,
+					frequencyCategoryMapper);
 		}
 		else
 		{
-			mapAlgorithm = mapLexicalCategories(sourceAttributeMetaData, targetCategories, sourceCategories);
+			mapAlgorithm = mapCategories(sourceAttributeMetaData, targetCategories, sourceCategories,
+					lexicalCategoryMapper);
 		}
 		return mapAlgorithm;
 	}
 
-	String mapLexicalCategories(AttributeMetaData sourceAttributeMetaData, List<Category> targetCategories,
-			List<Category> sourceCategories)
-	{
-		return null;
-	}
-
-	String mapFrequencyCategories(AttributeMetaData sourceAttributeMetaData, List<Category> targetCategories,
-			List<Category> sourceCategories)
+	String mapCategories(AttributeMetaData sourceAttributeMetaData, List<Category> targetCategories,
+			List<Category> sourceCategories, CategoryMapper categoryMapper)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 		for (Category sourceCategory : sourceCategories)
 		{
-			Category bestTargetCategory = findBestCategoryMatch(sourceCategory, targetCategories);
+			Category bestTargetCategory = categoryMapper.findBestCategoryMatch(sourceCategory, targetCategories);
 
 			if (bestTargetCategory != null)
 			{
@@ -81,31 +82,6 @@ public class CategoryAlgorithmGeneratorImpl implements CategoryAlgorithmGenerato
 		return stringBuilder.toString();
 	}
 
-	Category findBestCategoryMatch(Category sourceCategory, List<Category> targetCategories)
-	{
-		Category bestTargetCategory = null;
-		double smallestFactor = -1;
-		for (Category targetCategory : targetCategories)
-		{
-			Double convertFactor = frequencyCategoryMapper.convert(sourceCategory.getAmountWrapper(),
-					targetCategory.getAmountWrapper());
-
-			if (convertFactor == null) continue;
-
-			if (smallestFactor == -1)
-			{
-				smallestFactor = convertFactor;
-				bestTargetCategory = targetCategory;
-			}
-			else if (smallestFactor > convertFactor)
-			{
-				smallestFactor = convertFactor;
-				bestTargetCategory = targetCategory;
-			}
-		}
-		return bestTargetCategory;
-	}
-
 	List<Category> convertToCategory(AttributeMetaData attributeMetaData)
 	{
 		List<Category> categories = new ArrayList<Category>();
@@ -116,8 +92,7 @@ public class CategoryAlgorithmGeneratorImpl implements CategoryAlgorithmGenerato
 			{
 				Integer code = entity.getInt(refEntity.getIdAttribute().getName());
 				String label = entity.getString(refEntity.getLabelAttribute().getName());
-				Category category = Category.create(code, label,
-						frequencyCategoryMapper.convertDescriptionToAmount(label));
+				Category category = Category.create(code, label, CategoryMapperUtil.convertDescriptionToAmount(label));
 				if (!categories.contains(category))
 				{
 					categories.add(category);

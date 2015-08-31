@@ -18,11 +18,20 @@ import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 
 import org.jscience.physics.amount.Amount;
+import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
+import org.molgenis.data.mapper.algorithmgenerator.categorymapper.convertor.AmountConvertor;
+import org.molgenis.data.mapper.algorithmgenerator.categorymapper.convertor.DailyAmountConvertor;
+import org.molgenis.data.mapper.algorithmgenerator.categorymapper.convertor.NumberAmountConvertor;
+import org.molgenis.data.mapper.algorithmgenerator.categorymapper.convertor.SeveralTimesConvertor;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-public class FrequencyCategoryMapperUtil
+public class CategoryMapperUtil
 {
+	private static final List<AmountConvertor> CONVERTORS = Lists.newArrayList(new DailyAmountConvertor(),
+			new SeveralTimesConvertor(), new NumberAmountConvertor());
+
 	private static final Pattern NUMBER_PATTERN = Pattern.compile("\\d+\\.?\\d*");
 	private static final String NON_LETTER_REGEX = "[^a-zA-Z0-9]";
 	private static final List<Unit<?>> DURATION_UNITS;
@@ -85,6 +94,19 @@ public class FrequencyCategoryMapperUtil
 		{
 			return DURATION_UNITS.get(--indexOf);
 		}
+	}
+
+	public static AmountWrapper convertDescriptionToAmount(String description)
+	{
+		String cleanedDescription = convertWordToNumber(description);
+		for (AmountConvertor convertor : CONVERTORS)
+		{
+			if (convertor.matchCriteria(cleanedDescription))
+			{
+				return convertor.getAmount(cleanedDescription);
+			}
+		}
+		return null;
 	}
 
 	public static String convertWordToNumber(String description)

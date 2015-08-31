@@ -9,7 +9,7 @@ import javax.measure.unit.Unit;
 
 import org.jscience.physics.amount.Amount;
 import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
-import org.molgenis.data.mapper.algorithmgenerator.categorymapper.FrequencyCategoryMapperUtil;
+import org.molgenis.data.mapper.algorithmgenerator.categorymapper.CategoryMapperUtil;
 
 public class NumberAmountConvertor extends AmountConvertor
 {
@@ -20,8 +20,8 @@ public class NumberAmountConvertor extends AmountConvertor
 
 	AmountWrapper getInternalAmount(String description)
 	{
-		List<Double> extractNumbers = FrequencyCategoryMapperUtil.extractNumbers(description);
-		Unit<?> unit = FrequencyCategoryMapperUtil.findDurationUnit(description);
+		List<Double> extractNumbers = CategoryMapperUtil.extractNumbers(description);
+		Unit<?> unit = CategoryMapperUtil.findDurationUnit(description);
 		Collections.sort(extractNumbers);
 
 		if (extractNumbers.size() == 1)

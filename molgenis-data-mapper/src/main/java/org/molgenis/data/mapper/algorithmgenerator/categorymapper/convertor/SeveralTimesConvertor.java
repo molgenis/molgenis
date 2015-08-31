@@ -7,7 +7,7 @@ import javax.measure.unit.Unit;
 
 import org.jscience.physics.amount.Amount;
 import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
-import org.molgenis.data.mapper.algorithmgenerator.categorymapper.FrequencyCategoryMapperUtil;
+import org.molgenis.data.mapper.algorithmgenerator.categorymapper.CategoryMapperUtil;
 
 import com.google.common.collect.Sets;
 
@@ -23,7 +23,7 @@ public class SeveralTimesConvertor extends AmountConvertor
 
 	AmountWrapper getInternalAmount(String description)
 	{
-		Unit<?> unit = FrequencyCategoryMapperUtil.findDurationUnit(description);
+		Unit<?> unit = CategoryMapperUtil.findDurationUnit(description);
 		if (unit != null)
 		{
 			return AmountWrapper.create(
