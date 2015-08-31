@@ -1,5 +1,7 @@
 package org.molgenis.data.mapper.service.impl;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -10,17 +12,22 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.measure.converter.ConversionException;
+import javax.measure.converter.UnitConverter;
+import javax.measure.quantity.Quantity;
+import javax.measure.unit.Unit;
+
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.service.AlgorithmService;
+import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
@@ -47,22 +54,18 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	private static final Logger LOG = LoggerFactory.getLogger(AlgorithmServiceImpl.class);
 
 	private final DataService dataService;
-
 	private final OntologyTagService ontologyTagService;
-
 	private final SemanticSearchService semanticSearchService;
+	private final UnitResolver unitResolver;
 
 	@Autowired
 	public AlgorithmServiceImpl(DataService dataService, OntologyTagService ontologyTagService,
-			SemanticSearchService semanticSearchService)
+			SemanticSearchService semanticSearchService, UnitResolver unitResolver)
 	{
-		if (dataService == null) throw new MolgenisDataException("DataService cannot be null!");
-		if (ontologyTagService == null) throw new MolgenisDataException("OntologyTagService cannot be null!");
-		if (semanticSearchService == null) throw new MolgenisDataException("SemanticSearchService cannot be null!");
-
-		this.dataService = dataService;
-		this.ontologyTagService = ontologyTagService;
-		this.semanticSearchService = semanticSearchService;
+		this.dataService = checkNotNull(dataService);
+		this.ontologyTagService = checkNotNull(ontologyTagService);
+		this.semanticSearchService = checkNotNull(semanticSearchService);
+		this.unitResolver = checkNotNull(unitResolver);
 
 		new RhinoConfig().init();
 	}
@@ -73,17 +76,58 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			EntityMapping mapping, AttributeMetaData targetAttribute)
 	{
 		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttribute.getName());
-		Map<AttributeMetaData, Iterable<ExplainedQueryString>> matches = semanticSearchService.explainAttributes(
-				sourceEntityMetaData, targetEntityMetaData, targetAttribute);
+		Map<AttributeMetaData, Iterable<ExplainedQueryString>> matches = semanticSearchService
+				.explainAttributes(sourceEntityMetaData, targetEntityMetaData, targetAttribute);
 
-		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
-				targetEntityMetaData, targetAttribute);
+		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(targetEntityMetaData,
+				targetAttribute);
 
+		Unit<? extends Quantity> targetUnit = unitResolver.resolveUnit(targetAttribute, targetEntityMetaData);
 		for (Entry<AttributeMetaData, Iterable<ExplainedQueryString>> entry : matches.entrySet())
 		{
 			AttributeMetaData source = entry.getKey();
+
+			// determine source unit
+			Unit<? extends Quantity> sourceUnit = unitResolver.resolveUnit(source, sourceEntityMetaData);
+
+			String algorithm = null;
+			if (sourceUnit != null)
+			{
+				if (targetUnit != null && !sourceUnit.equals(targetUnit))
+				{
+					// if units are convertible, create convert algorithm
+					UnitConverter unitConverter;
+					try
+					{
+						unitConverter = sourceUnit.getConverterTo(targetUnit);
+					}
+					catch (ConversionException e)
+					{
+						unitConverter = null;
+						// algorithm sets source unit and assigns source value to target
+						algorithm = String.format("$('%s').unit('%s').value();", source.getName(),
+								sourceUnit.toString());
+					}
+
+					if (unitConverter != null)
+					{
+						// algorithm sets source unit and assigns value converted to target unit to target
+						algorithm = String.format("$('%s').unit('%s').toUnit('%s').value();", source.getName(),
+								sourceUnit.toString(), targetUnit.toString());
+					}
+				}
+				else
+				{
+					// algorithm sets source unit and assigns source value to target
+					algorithm = String.format("$('%s').unit('%s').value();", source.getName(), sourceUnit.toString());
+				}
+			}
+			if (algorithm == null)
+			{
+				// algorithm assigns source value to target
+				algorithm = String.format("$('%s').value();", source.getName());
+			}
 			AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttribute.getName());
-			String algorithm = "$('" + source.getName() + "').value();";
 			attributeMapping.setAlgorithm(algorithm);
 
 			if (isSingleMatchHighQuality(targetAttribute, tagsForAttribute, entry.getValue()))
@@ -108,9 +152,10 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		{
 			matchedTags.put(explanation.getTagName().toLowerCase(), explanation.getScore());
 		}
-		String label = StringUtils.isNotEmpty(targetAttribute.getLabel()) ? targetAttribute.getLabel().toLowerCase() : StringUtils.EMPTY;
-		String description = StringUtils.isNotEmpty(targetAttribute.getDescription()) ? targetAttribute
-				.getDescription().toLowerCase() : StringUtils.EMPTY;
+		String label = StringUtils.isNotEmpty(targetAttribute.getLabel()) ? targetAttribute.getLabel().toLowerCase()
+				: StringUtils.EMPTY;
+		String description = StringUtils.isNotEmpty(targetAttribute.getDescription())
+				? targetAttribute.getDescription().toLowerCase() : StringUtils.EMPTY;
 
 		if (isGoodMatch(matchedTags, label)) return true;
 		if (isGoodMatch(matchedTags, description)) return true;
@@ -127,8 +172,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 
 	boolean isGoodMatch(Map<String, Double> matchedTags, String label)
 	{
-		return matchedTags.containsKey(label)
-				&& matchedTags.get(label).intValue() == 100
+		return matchedTags.containsKey(label) && matchedTags.get(label).intValue() == 100
 				|| Sets.newHashSet(label.split(" ")).stream()
 						.allMatch(word -> matchedTags.containsKey(word) && matchedTags.get(word).intValue() == 100);
 	}
@@ -241,8 +285,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 		catch (RuntimeException e)
 		{
-			throw new RuntimeException("Error converting value [" + value.toString() + "] to "
-					+ targetDataType.toString(), e);
+			throw new RuntimeException(
+					"Error converting value [" + value.toString() + "] to " + targetDataType.toString(), e);
 		}
 		return convertedValue;
 	}
