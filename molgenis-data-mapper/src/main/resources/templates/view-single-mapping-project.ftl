@@ -13,8 +13,7 @@
 	<div class="col-md-12">
 		<a href="${context_url}" class="btn btn-default btn-xs">
 			<span class="glyphicon glyphicon-chevron-left"></span> Back to mapping project overview
-		</a>
-		<hr></hr>	
+		</a>	
 	</div>
 </div>
 
@@ -37,6 +36,11 @@
 		<div class="row">
 			<div class="col-md-12">
 				<p class="bg-warning text-center pull-right algorithm-color-legend">Generated algorithms with low quality</p>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<p class="bg-danger text-center pull-right algorithm-color-legend">Algorithms to discuss</p>
 			</div>
 		</div>
 	</div>
@@ -92,6 +96,8 @@
 												class="bg-warning"
 											<#elseif attributeMapping.algorithmState == "CURATED">
 												class="bg-success"
+											<#elseif attributeMapping.algorithmState == "DISCUSS">
+												class="bg-danger"
 											</#if>
 										</#if>
 									</#if>>

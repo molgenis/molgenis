@@ -19,7 +19,7 @@ public class AttributeMapping
 
 	public enum AlgorithmState
 	{
-		CURATED("CURATED"), GENERATED_HIGH("GENERATED_HIGH"), GENERATED_LOW("GENERATED_LOW");
+		CURATED("CURATED"), GENERATED_HIGH("GENERATED_HIGH"), GENERATED_LOW("GENERATED_LOW"), DISCUSS("DISCUSS");
 
 		private String label;
 
@@ -44,13 +44,11 @@ public class AttributeMapping
 	public AttributeMapping(String identifier, AttributeMetaData targetAttributeMetaData, String algorithm,
 			List<AttributeMetaData> sourceAttributeMetaDatas, String algorithmState)
 	{
-
 		this.identifier = identifier;
 		this.targetAttributeMetaData = targetAttributeMetaData;
 		this.sourceAttributeMetaDatas = sourceAttributeMetaDatas;
 		this.algorithm = algorithm;
 		this.algorithmState = convertToEnum(algorithmState);
-
 	}
 
 	/**
@@ -150,7 +148,8 @@ public class AttributeMapping
 	public String toString()
 	{
 		return "AttributeMapping [identifier=" + identifier + ", targetAttributeMetaData=" + targetAttributeMetaData
-				+ ", sourceAttributeMetaDatas=" + sourceAttributeMetaDatas + ", algorithm=" + algorithm + "]";
+				+ ", sourceAttributeMetaDatas=" + sourceAttributeMetaDatas + ", algorithm=" + algorithm
+				+ ", algorithmState=" + algorithmState + "]";
 	}
 
 	public void setAlgorithm(String algorithm)

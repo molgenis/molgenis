@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.testng.Assert.assertEquals;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -27,11 +28,13 @@ import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.GsonHttpMessageConverter;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -111,7 +114,7 @@ public class MappingServiceControllerTest
 		mockMvc.perform(
 				post(MappingServiceController.URI + "/saveattributemapping").param("mappingProjectId", "asdf")
 						.param("target", "HOP").param("source", "LifeLines").param("targetAttribute", "age")
-						.param("algorithm", "$('length').value()")).andExpect(
+						.param("algorithm", "$('length').value()").param("algorithmState", "CURATED")).andExpect(
 				redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
 		MappingProject expected = new MappingProject("hop hop hop", me);
 		expected.setIdentifier("asdf");
@@ -135,7 +138,8 @@ public class MappingServiceControllerTest
 		mockMvc.perform(
 				MockMvcRequestBuilders.post(MappingServiceController.URI + "/saveattributemapping")
 						.param("mappingProjectId", "asdf").param("target", "HOP").param("source", "LifeLines")
-						.param("targetAttribute", "height").param("algorithm", "$('length').value()")).andExpect(
+						.param("targetAttribute", "height").param("algorithm", "$('length').value()")
+						.param("algorithmState", "CURATED")).andExpect(
 				MockMvcResultMatchers.redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
 
 		MappingProject expected = new MappingProject("hop hop hop", me);
@@ -162,7 +166,8 @@ public class MappingServiceControllerTest
 		mockMvc.perform(
 				MockMvcRequestBuilders.post(MappingServiceController.URI + "/saveattributemapping")
 						.param("mappingProjectId", "asdf").param("target", "HOP").param("source", "LifeLines")
-						.param("targetAttribute", "age").param("algorithm", "")).andExpect(
+						.param("targetAttribute", "age").param("algorithm", "").param("algorithmState", "CURATED"))
+				.andExpect(
 				MockMvcResultMatchers.redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
 
 		MappingProject expected = new MappingProject("hop hop hop", me);
@@ -170,6 +175,77 @@ public class MappingServiceControllerTest
 		MappingTarget mappingTarget = expected.addTarget(hop);
 		mappingTarget.addSource(lifeLines);
 		Mockito.verify(mappingService).updateMappingProject(expected);
+	}
+
+	@Test
+	public void getFirstAttributeMappingInfo_age() throws Exception
+	{
+		when(mappingService.getMappingProject("asdf")).thenReturn(mappingProject);
+		Menu menu = mock(Menu.class);
+		when(menuReaderService.getMenu()).thenReturn(menu);
+		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
+
+		MvcResult result = mockMvc.perform(
+				MockMvcRequestBuilders.post(MappingServiceController.URI + "/firstattributemapping")
+						.param("mappingProjectId", "asdf").param("target", "HOP").param("source", "LifeLines")
+						.param("skipAlgorithmStates[]", "CURATED", "DISCUSS").accept(MediaType.APPLICATION_JSON))
+				.andReturn();
+
+		String actual = result.getResponse().getContentAsString();
+
+		assertEquals(actual,
+				"{\"mappingProjectId\":\"asdf\",\"target\":\"HOP\",\"source\":\"LifeLines\",\"targetAttribute\":\"age\"}");
+	}
+
+	@Test
+	public void getFirstAttributeMappingInfo_dob() throws Exception
+	{
+		when(mappingService.getMappingProject("asdf")).thenReturn(mappingProject);
+		Menu menu = mock(Menu.class);
+		when(menuReaderService.getMenu()).thenReturn(menu);
+		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
+
+		mappingProject.getMappingTarget("HOP").getMappingForSource("LifeLines").getAttributeMapping("age")
+				.setAlgorithmState(AlgorithmState.CURATED);
+
+		MvcResult result2 = mockMvc.perform(
+				MockMvcRequestBuilders.post(MappingServiceController.URI + "/firstattributemapping")
+						.param("mappingProjectId", "asdf").param("target", "HOP").param("source", "LifeLines")
+						.param("skipAlgorithmStates[]", "CURATED", "DISCUSS").accept(MediaType.APPLICATION_JSON))
+				.andReturn();
+
+		String actual2 = result2.getResponse().getContentAsString();
+
+		assertEquals(actual2,
+				"{\"mappingProjectId\":\"asdf\",\"target\":\"HOP\",\"source\":\"LifeLines\",\"targetAttribute\":\"dob\"}");
+	}
+
+	@Test
+	public void getFirstAttributeMappingInfo_none() throws Exception
+	{
+		when(mappingService.getMappingProject("asdf")).thenReturn(mappingProject);
+		Menu menu = mock(Menu.class);
+		when(menuReaderService.getMenu()).thenReturn(menu);
+		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
+
+		mappingProject.getMappingTarget("HOP").getMappingForSource("LifeLines").getAttributeMapping("age")
+				.setAlgorithmState(AlgorithmState.DISCUSS);
+
+		MappingTarget mappingTarget = mappingProject.getMappingTarget("HOP");
+		EntityMapping entityMapping = mappingTarget.getMappingForSource("LifeLines");
+		AttributeMapping attributeMapping = entityMapping.addAttributeMapping("dob");
+		attributeMapping.setAlgorithm("$('dob').age()");
+		attributeMapping.setAlgorithmState(AlgorithmState.DISCUSS);
+
+		MvcResult result3 = mockMvc.perform(
+				MockMvcRequestBuilders.post(MappingServiceController.URI + "/firstattributemapping")
+						.param("mappingProjectId", "asdf").param("target", "HOP").param("source", "LifeLines")
+						.param("skipAlgorithmStates[]", "CURATED", "DISCUSS").accept(MediaType.APPLICATION_JSON))
+				.andReturn();
+
+		String actual3 = result3.getResponse().getContentAsString();
+
+		assertEquals(actual3, "");
 	}
 
 }

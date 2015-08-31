@@ -1,6 +1,5 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-
 <#assign css=['mapping-service.css']>
 <#assign js=[
 	'attribute-mapping.js', 
@@ -22,24 +21,27 @@
 <div class="row">
 	<div class="col-md-12">
 		<#-- Hidden fields containing information needed for ajax requests -->
-		<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier?html}"/>
-		<input type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
-		<input type="hidden" name="source" value="${entityMapping.sourceEntityMetaData.name?html}"/>
-		<input type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
-		<input type="hidden" name="targetAttributeType" value="${attributeMapping.targetAttributeMetaData.dataType?html}"/>
+		<input id="mappingProjectId" type="hidden" name="mappingProjectId" value="${mappingProject.identifier?html}"/>
+		<input id="target" type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
+		<input id="source" type="hidden" name="source" value="${entityMapping.sourceEntityMetaData.name?html}"/>
+		<input id="targetAttribute" type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
+		<input id="targetAttributeType" type="hidden" name="targetAttributeType" value="${attributeMapping.targetAttributeMetaData.dataType?html}"/>
 	</div>
 </div>
 <div class="row">
-	<div class="col-md-12 col-lg-12">
+	<div id="attribute-mapping-toolbar" class="col-md-12 col-lg-12">
 		<a href="/menu/main/mappingservice/mappingproject/${mappingProject.identifier?html}" type="btn" class="btn btn-default btn-xs">
 			<span class="glyphicon glyphicon-chevron-left"></span>
 			Cancel and go back
 		</a>
 		<button id="save-mapping-btn" type="btn" class="btn btn-primary btn-xs">
 			<span class="glyphicon glyphicon-floppy-save"></span>
-			Save and go back
+			Save
 		</button>
-	<hr></hr>
+		<button id="save-discuss-mapping-btn" type="btn" class="btn btn-danger btn-xs">
+			<span class="glyphicon glyphicon-floppy-save"></span>
+			Save to discuss
+		</button>
 	</div>
 </div>
 <div class="row">
@@ -50,6 +52,10 @@
 <div class="row">	
 	<div class="col-md-5 col-lg-5">
 		<table class="table-borderless">
+			<tr>
+				<td class="td-align-top"><strong>Algorithm state</strong></td>
+				<td id="algorithmState" class="td-align-top"><#if attributeMapping.algorithmState??>${attributeMapping.algorithmState?html}<#else>N/A</#if></td>
+			</tr>
 			<tr>
 				<td class="td-align-top"><strong>Name</strong></td>
 				<td class="td-align-top">${attributeMapping.targetAttributeMetaData.name?html} (${attributeMapping.targetAttributeMetaData.dataType})</td>
