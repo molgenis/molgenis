@@ -33,6 +33,7 @@ import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.service.AlgorithmService;
+import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
@@ -422,10 +423,16 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
+		public UnitResolver unitResolver()
+		{
+			return new UnitResolverImpl(ontologyService());
+		}
+
+		@Bean
 		public AlgorithmService algorithmService()
 		{
 			return new AlgorithmServiceImpl(dataService(), ontologyTagService(), semanticSearchService(),
-					categoryAlgorithmGenerator());
+					unitResolver(), categoryAlgorithmGenerator());
 		}
 
 		@Bean

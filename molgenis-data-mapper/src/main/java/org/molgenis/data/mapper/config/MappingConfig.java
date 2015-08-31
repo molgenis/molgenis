@@ -9,16 +9,22 @@ import org.molgenis.data.mapper.repository.impl.MappingProjectRepositoryImpl;
 import org.molgenis.data.mapper.repository.impl.MappingTargetRepositoryImpl;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
+import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.mapper.service.impl.AlgorithmServiceImpl;
 import org.molgenis.data.mapper.service.impl.MappingServiceImpl;
+import org.molgenis.data.mapper.service.impl.UnitResolverImpl;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
+import org.molgenis.ontology.core.config.OntologyConfig;
+import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 @Configuration
+@Import(OntologyConfig.class)
 public class MappingConfig
 {
 	@Autowired
@@ -32,6 +38,9 @@ public class MappingConfig
 
 	@Autowired
 	SemanticSearchService semanticSearchService;
+
+	@Autowired
+	OntologyService ontologyService;
 
 	@Bean
 	public MappingService mappingService()
@@ -48,7 +57,7 @@ public class MappingConfig
 	@Bean
 	public AlgorithmService algorithmServiceImpl()
 	{
-		return new AlgorithmServiceImpl(dataService, ontologyTagService, semanticSearchService,
+		return new AlgorithmServiceImpl(dataService, ontologyTagService, semanticSearchService, unitResolver(),
 				categoryAlgorithmGenerator());
 	}
 
@@ -76,4 +85,9 @@ public class MappingConfig
 		return new AttributeMappingRepositoryImpl(dataService);
 	}
 
+	@Bean
+	public UnitResolver unitResolver()
+	{
+		return new UnitResolverImpl(ontologyService);
+	}
 }
