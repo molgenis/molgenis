@@ -64,16 +64,18 @@ public class VcfRepository extends AbstractRepository
 
 	public static final AttributeMetaData CHROM_META = new DefaultAttributeMetaData(CHROM,
 			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false)
-			.setDescription("The chromosome on which the variant is observed");
+					.setDescription("The chromosome on which the variant is observed");
+	// TEXT instead of STRING to handle large insertions/deletions
 	public static final AttributeMetaData ALT_META = new DefaultAttributeMetaData(ALT,
-			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false)
-			.setDescription("The alternative allele observed");
+			MolgenisFieldTypes.FieldTypeEnum.TEXT).setAggregateable(true).setNillable(false)
+					.setDescription("The alternative allele observed");
 	public static final AttributeMetaData POS_META = new DefaultAttributeMetaData(POS,
 			MolgenisFieldTypes.FieldTypeEnum.LONG).setAggregateable(true).setNillable(false)
-			.setDescription("The position on the chromosome which the variant is observed");
+					.setDescription("The position on the chromosome which the variant is observed");
+	// TEXT instead of STRING to handle large insertions/deletions
 	public static final AttributeMetaData REF_META = new DefaultAttributeMetaData(REF,
-			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false)
-			.setDescription("The reference allele");
+			MolgenisFieldTypes.FieldTypeEnum.TEXT).setAggregateable(true).setNillable(false)
+					.setDescription("The reference allele");
 	public static final AttributeMetaData FILTER_META = new DefaultAttributeMetaData(FILTER,
 			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true);
 	public static final AttributeMetaData QUAL_META = new DefaultAttributeMetaData(QUAL,
@@ -146,15 +148,14 @@ public class VcfRepository extends AbstractRepository
 	{
 		Entity entity = new MapEntity(emd);
 		entity.set(CHROM, vcfRecord.getChromosome());
-		entity.set(ALT,
-				StringUtils.join(Lists.transform(vcfRecord.getAlternateAlleles(), new Function<Allele, String>()
-				{
-					@Override
-					public String apply(Allele allele)
-					{
-						return allele.toString();
-					}
-				}), ','));
+		entity.set(ALT, StringUtils.join(Lists.transform(vcfRecord.getAlternateAlleles(), new Function<Allele, String>()
+		{
+			@Override
+			public String apply(Allele allele)
+			{
+				return allele.toString();
+			}
+		}), ','));
 
 		entity.set(POS, vcfRecord.getPosition());
 		entity.set(REF, vcfRecord.getReferenceAllele().toString());
@@ -189,9 +190,8 @@ public class VcfRepository extends AbstractRepository
 			// if a flag field exists in the line, then this field is true, although the value is null
 			if (val == null)
 			{
-				if (!vcfInfo.getKey().equals(".")
-						&& entityMetaData.getAttribute(getInfoPrefix() + vcfInfo.getKey()).getDataType().getEnumType()
-								.equals(MolgenisFieldTypes.FieldTypeEnum.BOOL))
+				if (!vcfInfo.getKey().equals(".") && entityMetaData.getAttribute(getInfoPrefix() + vcfInfo.getKey())
+						.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.BOOL))
 				{
 					val = true;
 				}
@@ -265,8 +265,8 @@ public class VcfRepository extends AbstractRepository
 				List<AttributeMetaData> metadataInfoField = new ArrayList<AttributeMetaData>();
 				for (VcfMetaInfo info : vcfMeta.getInfoMeta())
 				{
-					DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(getInfoPrefix()
-							+ info.getId(), vcfReaderFormatToMolgenisType(info)).setAggregateable(true);
+					DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(
+							getInfoPrefix() + info.getId(), vcfReaderFormatToMolgenisType(info)).setAggregateable(true);
 					attributeMetaData.setDescription(info.getDescription());
 					metadataInfoField.add(attributeMetaData);
 				}
@@ -275,8 +275,8 @@ public class VcfRepository extends AbstractRepository
 				if (hasFormatMetaData)
 				{
 					DefaultAttributeMetaData samplesAttributeMeta = new DefaultAttributeMetaData(SAMPLES,
-							MolgenisFieldTypes.FieldTypeEnum.MREF).setRefEntity(sampleEntityMetaData).setLabel(
-							"SAMPLES");
+							MolgenisFieldTypes.FieldTypeEnum.MREF).setRefEntity(sampleEntityMetaData)
+									.setLabel("SAMPLES");
 					entityMetaData.addAttributeMetaData(samplesAttributeMeta);
 				}
 				entityMetaData.setIdAttribute(INTERNAL_ID);
@@ -315,7 +315,7 @@ public class VcfRepository extends AbstractRepository
 
 			sampleEntityMetaData.addAttributeMetaData(idAttributeMetaData);
 			DefaultAttributeMetaData nameAttributeMetaData = new DefaultAttributeMetaData(NAME,
-					MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true);
+					MolgenisFieldTypes.FieldTypeEnum.TEXT).setAggregateable(true);
 			nameAttributeMetaData.setLabelAttribute(true).setLookupAttribute(true);
 			sampleEntityMetaData.addAttributeMetaData(nameAttributeMetaData);
 			for (VcfMetaFormat meta : formatMetaData)

@@ -1,5 +1,6 @@
 package org.molgenis.data.vcf.utils;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
@@ -136,6 +137,12 @@ public class VcfUtilsTest
 		entities.add(entity1);
 		entities.add(entity2);
 		entities.add(entity3);
+	}
+
+	@Test
+	public void createId()
+	{
+		assertEquals(VcfUtils.createId(entity1), "yCiiynjHRAtJPcdn7jFDGA");
 	}
 
 	@Test

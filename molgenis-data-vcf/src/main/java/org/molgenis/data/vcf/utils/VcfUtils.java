@@ -8,6 +8,9 @@ import static org.molgenis.data.vcf.VcfRepository.REF;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -25,9 +28,9 @@ import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.datastructures.Sample;
 import org.molgenis.data.vcf.datastructures.Trio;
-import org.molgenis.fieldtypes.EnumField;
-import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.vcf.meta.VcfMetaInfo;
+
+import com.google.common.io.BaseEncoding;
 
 public class VcfUtils
 {
@@ -41,16 +44,32 @@ public class VcfUtils
 	 */
 	public static String createId(Entity vcfEntity)
 	{
-		StringBuilder id = new StringBuilder();
-		id.append(StringUtils.strip(vcfEntity.get(CHROM).toString()));
-		id.append("_");
-		id.append(StringUtils.strip(vcfEntity.get(POS).toString()));
-		id.append("_");
-		id.append(StringUtils.strip(vcfEntity.get(REF).toString()));
-		id.append("_");
-		id.append(StringUtils.strip(vcfEntity.get(ALT).toString()));
+		StringBuilder strBuilder = new StringBuilder();
+		strBuilder.append(StringUtils.strip(vcfEntity.get(CHROM).toString()));
+		strBuilder.append("_");
+		strBuilder.append(StringUtils.strip(vcfEntity.get(POS).toString()));
+		strBuilder.append("_");
+		strBuilder.append(StringUtils.strip(vcfEntity.get(REF).toString()));
+		strBuilder.append("_");
+		strBuilder.append(StringUtils.strip(vcfEntity.get(ALT).toString()));
+		String idStr = strBuilder.toString();
 
-		return id.toString();
+		// use MD5 hash to prevent ids that are too long
+		MessageDigest messageDigest;
+		try
+		{
+			messageDigest = MessageDigest.getInstance("MD5");
+		}
+		catch (NoSuchAlgorithmException e)
+		{
+			throw new RuntimeException(e);
+		}
+		byte[] md5Hash = messageDigest.digest(idStr.getBytes(Charset.forName("UTF-8")));
+
+		// convert MD5 hash to string ids that can be safely used in URLs
+		String id = BaseEncoding.base64Url().omitPadding().encode(md5Hash);
+
+		return id;
 	}
 
 	/**
@@ -71,9 +90,9 @@ public class VcfUtils
 		// fixed attributes: chrom pos id ref alt qual filter
 		for (String vcfAttribute : vcfAttributes)
 		{
-			vcfRecord.append(((vcfEntity.getString(vcfAttribute) != null && !vcfEntity.getString(vcfAttribute).equals(
-					"")) ? vcfEntity.getString(vcfAttribute) : ".")
-					+ TAB);
+			vcfRecord.append(
+					((vcfEntity.getString(vcfAttribute) != null && !vcfEntity.getString(vcfAttribute).equals(""))
+							? vcfEntity.getString(vcfAttribute) : ".") + TAB);
 			// vcfRecord.append(vcfEntity.getString(vcfAttribute) + "\t");
 		}
 
@@ -88,22 +107,27 @@ public class VcfUtils
 			{
 				if (attributeMetaData.getName().startsWith(VcfRepository.getInfoPrefix()))
 				{
-					if(attributeMetaData.getDataType().getEnumType().equals(FieldTypeEnum.BOOL)){
-						if(vcfEntity.getBoolean(attributeMetaData.getName())){
-							vcfRecord.append(attributeMetaData.getName().substring(VcfRepository.getInfoPrefix().length()) + ";");
+					if (attributeMetaData.getDataType().getEnumType().equals(FieldTypeEnum.BOOL))
+					{
+						if (vcfEntity.getBoolean(attributeMetaData.getName()))
+						{
+							vcfRecord.append(
+									attributeMetaData.getName().substring(VcfRepository.getInfoPrefix().length())
+											+ ";");
 							hasInfoFields = true;
 						}
 					}
-					else{
+					else
+					{
 						vcfRecord.append(attributeMetaData.getName().substring(VcfRepository.getInfoPrefix().length())
-							+ "=" + vcfEntity.getString(attributeMetaData.getName()) + ";");
+								+ "=" + vcfEntity.getString(attributeMetaData.getName()) + ";");
 						hasInfoFields = true;
 					}
 				}
 				else
 				{
-					vcfRecord.append(attributeMetaData.getName() + "="
-							+ vcfEntity.getString(attributeMetaData.getName()) + ";");
+					vcfRecord.append(
+							attributeMetaData.getName() + "=" + vcfEntity.getString(attributeMetaData.getName()) + ";");
 					hasInfoFields = true;
 				}
 			}
@@ -201,7 +225,7 @@ public class VcfUtils
 	 */
 	public static boolean checkPreviouslyAnnotatedAndAddMetadata(File inputVcfFile, PrintWriter outputVCFWriter,
 			List<AttributeMetaData> infoFields, String checkAnnotatedBeforeValue)
-			throws MolgenisInvalidFormatException, FileNotFoundException
+					throws MolgenisInvalidFormatException, FileNotFoundException
 	{
 		boolean annotatedBefore = false;
 
@@ -218,10 +242,8 @@ public class VcfUtils
 				// detect existing annotations of the same info field
 				if (line.contains("##INFO=<ID=" + checkAnnotatedBeforeValue) && !annotatedBefore)
 				{
-					System.out
-							.println("\nThis file has already been annotated with '"
-									+ checkAnnotatedBeforeValue
-									+ "' data before it seems. Skipping any further annotation of variants that already contain this field.");
+					System.out.println("\nThis file has already been annotated with '" + checkAnnotatedBeforeValue
+							+ "' data before it seems. Skipping any further annotation of variants that already contain this field.");
 					annotatedBefore = true;
 				}
 
@@ -389,8 +411,8 @@ public class VcfUtils
 						else
 						{
 							inputVcfFileScanner.close();
-							throw new MolgenisDataException("Expected Child, Mother or Father, but found: " + element
-									+ " in line " + line);
+							throw new MolgenisDataException(
+									"Expected Child, Mother or Father, but found: " + element + " in line " + line);
 						}
 					}
 
