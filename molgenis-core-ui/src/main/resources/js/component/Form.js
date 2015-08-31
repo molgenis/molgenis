@@ -20,6 +20,7 @@
 			enableOptionalFilter: React.PropTypes.bool, // whether or not to show a control to filter optional form fields
 			saveOnBlur: React.PropTypes.bool, // save form control values on blur
 			enableFormIndex: React.PropTypes.bool, // whether or not to show a form index to navigate to form controls
+			enableAlertMessageInFormIndex: React.PropTypes.bool, // whether or not to show a alert messages above the index to navigate to form controls. (Only works if the enableFormIndex prop is set to true)
 			showHidden: React.PropTypes.bool, // whether or not to show not-visible attributes
 			categoricalMrefShowSelectAll: React.PropTypes.bool, //whether to show 'select all' and 'hide all' links under the categorical mref checkboxes
 			showAsteriskIfNotNillable: React.PropTypes.bool, //whether to show a '*' after the label when an attribute is not nillable
@@ -36,6 +37,7 @@
 				modal: false,
 				enableOptionalFilter: true,
 				enableFormIndex: true,
+				enableAlertMessageInFormIndex: true,
 				colOffset: 3,
 				saveOnBlur: false,
 				showHidden: false,
@@ -246,15 +248,20 @@
 				hideOptional: this.state.hideOptional,
 				showHidden: this.props.showHidden,
 				enableFormIndex: this.props.enableFormIndex,
+				enableAlertMessageInFormIndex: this.props.enableAlertMessageInFormIndex,
 				categoricalMrefShowSelectAll: this.props.categoricalMrefShowSelectAll,
 				showAsteriskIfNotNillable: this.props.showAsteriskIfNotNillable,
 				onValueChange : this._handleValueChange,
 				onBlur: this._handleBlur,
 				errorMessages: this.state.errorMessages
 			};
-		
-			var AlertMessage = this.state.submitMsg ? (
+			
+			var SubmitAlertMessage = this.state.submitMsg ? (
 				molgenis.ui.AlertMessage({type: this.state.submitMsg.type, message: this.state.submitMsg.message, onDismiss: this._handleAlertMessageDismiss, key: 'alert'})	
+			) : null;
+				
+			var ErrorMessageAlertMessage = !$.isEmptyObject(this.state.errorMessages) ? (
+				molgenis.ui.AlertMessage({type: 'danger', message: 'Validation has encountered at least one error!', onDismiss: this._handleAlertMessageDismiss, key: 'alert'})	
 			) : null;
 			
 			var Filter = this.props.enableOptionalFilter ? (
@@ -288,26 +295,54 @@
 					this.props.children
 				)
 			);
-
-			var FormWithMessageAndFilter = (
-				div(null,
-					AlertMessage,
-					Filter,
-					Form
-				)
-			);
+			
+			var FormWithMessageAndFilter;
+			if(this.props.enableFormIndex && this.props.enableAlertMessageInFormIndex){
+				FormWithMessageAndFilter = (
+						div(null,
+							null,
+							null,
+							Filter,
+							Form
+						)
+					);
+			}else{
+				FormWithMessageAndFilter = (
+						div(null,
+							ErrorMessageAlertMessage,
+							SubmitAlertMessage,
+							Filter,
+							Form
+						)
+					);
+			}
+			
 			
 			if(this.props.enableFormIndex) {
-				return (
-					div({className: 'row'},
-						div({className: 'col-md-10'},
-							FormWithMessageAndFilter
-						),
-						div({className: 'col-md-2'},
-							FormIndexFactory({entity: this.state.entity})
+				if(this.props.enableAlertMessageInFormIndex) {
+					return (
+						div({className: 'row'},
+							div({className: 'col-md-10'},
+								FormWithMessageAndFilter
+							),
+							div({className: 'col-md-2'},
+								FormIndexFactory({entity: this.state.entity, errorMessageAlertMessage: ErrorMessageAlertMessage, submitAlertMessage: SubmitAlertMessage})
+							)
 						)
-					)
-				);
+					);
+				}else{
+					return (
+							div({className: 'row'},
+								div({className: 'col-md-10'},
+									FormWithMessageAndFilter
+								),
+								div({className: 'col-md-2'},
+									FormIndexFactory({entity: this.state.entity, errorMessageAlertMessage: null, submitAlertMessage: null})
+								)
+							)
+						);
+				}
+				
 			} else {
 				return FormWithMessageAndFilter;
 			}
@@ -590,7 +625,7 @@
 	            	}
 	            }
             }
-            
+
             callback({valid: errorMessage === undefined, errorMessage: errorMessage});
         },
         _resolveBoolExpression: function(expression, entityInstance) {
@@ -669,6 +704,7 @@
 			categoricalMrefShowSelectAll: React.PropTypes.bool,
 			showAsteriskIfNotNillable: React.PropTypes.bool,
 			enableFormIndex: React.PropTypes.bool,
+			enableAlertMessageInFormIndex: React.PropTypes.bool,
 			errorMessages: React.PropTypes.object.isRequired,
 			onValueChange: React.PropTypes.func.isRequired,
 			onBlur: React.PropTypes.func.isRequired
@@ -780,7 +816,9 @@
 		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
 		displayName: 'FormIndex',
 		propTypes: {
-			entity: React.PropTypes.object.isRequired
+			entity: React.PropTypes.object.isRequired,
+			errorMessageAlertMessage: React.PropTypes.object,
+			submitAlertMessage: React.PropTypes.object
 		},
 		render: function() {
 			var IndexItems = [];
@@ -801,6 +839,8 @@
 			
 			return (
 				div({id: 'sidebar', className: 'affix'},
+						this.props.errorMessageAlertMessage,
+						this.props.submitAlertMessage,
 						ol({style: {listStyleType: 'none'}, className: 'list-group'},
 								IndexItems
 						)
