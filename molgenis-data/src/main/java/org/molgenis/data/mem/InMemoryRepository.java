@@ -1,6 +1,7 @@
 package org.molgenis.data.mem;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -13,6 +14,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.support.QueryImpl;
 
 import com.google.common.collect.Sets;
 
@@ -70,7 +72,14 @@ public class InMemoryRepository implements Repository
 	@Override
 	public Iterable<Entity> findAll(Query q)
 	{
-		throw new UnsupportedOperationException();
+		if (new QueryImpl().equals(q))
+		{
+			return new ArrayList<>(entities.values());
+		}
+		else
+		{
+			throw new UnsupportedOperationException();
+		}
 	}
 
 	@Override
