@@ -68,6 +68,33 @@ public class UnitResolverImplTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
+	public void resolveUnitLabelNoUnitDescriptionWithUnit_directUnitMatchRaw_kgm2()
+	{
+		AttributeMetaData attr = new DefaultAttributeMetaData("attr").setLabel("label")
+				.setDescription("area density (kg/m2)");
+		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
+		assertEquals(unit, Unit.valueOf("kg/m²"));
+	}
+
+	@Test
+	public void resolveUnitLabelNoUnitDescriptionWithUnit_unitOntologyMatch_kgm2()
+	{
+		AttributeMetaData attr = new DefaultAttributeMetaData("attr").setLabel("label")
+				.setDescription("area density (kg/m^2)");
+		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
+		assertEquals(unit, Unit.valueOf("kg/m²"));
+	}
+
+	@Test
+	public void resolveUnitLabelNoUnitDescriptionWithUnit_directUnitMatch_kgm2_2()
+	{
+		AttributeMetaData attr = new DefaultAttributeMetaData("attr").setLabel("label")
+				.setDescription("area density (kg/m²)");
+		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
+		assertEquals(unit, Unit.valueOf("kg/m²"));
+	}
+
+	@Test
 	public void resolveUnitLabelWithUnit_unitOntologyMatch()
 	{
 		AttributeMetaData attr = new DefaultAttributeMetaData("attr").setLabel("weight (kilogram)")

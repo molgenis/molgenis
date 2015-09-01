@@ -1,6 +1,5 @@
 package org.molgenis.ui.controller;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.molgenis.ui.MolgenisPluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,13 +62,14 @@ public abstract class AbstractStaticContentController extends MolgenisPluginCont
 		return "view-staticcontent-edit";
 	}
 
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@RequestMapping(value = "/edit", method = RequestMethod.POST)
 	public String submitContent(@RequestParam(value = "content", required = true) final String content,
 			final Model model)
 	{
 		try
 		{
-			this.staticContentService.submitContent(this.uniqueReference, StringEscapeUtils.escapeXml(content));
+			this.staticContentService.submitContent(this.uniqueReference, content);
 		}
 		catch (RuntimeException re)
 		{
