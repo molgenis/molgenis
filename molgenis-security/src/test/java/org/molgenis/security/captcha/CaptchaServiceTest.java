@@ -84,22 +84,4 @@ public class CaptchaServiceTest extends AbstractTestNGSpringContextTests
 		assertFalse(captchaService.validateCaptcha("invalid_answer"));
 	}
 
-	@Test
-	public void consumeCaptcha() throws CaptchaException
-	{
-		Captcha captcha = new Captcha.Builder(100, 75).build();
-		when(httpSession.getAttribute(Captcha.NAME)).thenReturn(captcha);
-		captchaService.consumeCaptcha(captcha.getAnswer());
-		verify(httpSession).removeAttribute(Captcha.NAME);
-	}
-
-	@Test
-	public void consumeCaptchaInvalid() throws CaptchaException
-	{
-		Captcha captcha = new Captcha.Builder(100, 75).build();
-		when(httpSession.getAttribute(Captcha.NAME)).thenReturn(captcha);
-		assertFalse(captchaService.consumeCaptcha("invalid"));
-		verify(httpSession, times(0)).removeAttribute(Captcha.NAME);
-		verify(httpSession, times(0)).setAttribute(eq(Captcha.NAME), any(Object.class));
-	}
 }
