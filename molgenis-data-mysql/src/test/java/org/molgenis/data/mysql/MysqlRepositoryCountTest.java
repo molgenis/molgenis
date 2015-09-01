@@ -110,7 +110,7 @@ public class MysqlRepositoryCountTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(persons.count(new QueryImpl().eq("birthday", "1950-01-31")), 1);
 		Assert.assertEquals(persons.count(new QueryImpl().gt("birthday", "1950-01-31")), 2);
 		Assert.assertEquals(
-				persons.count(new QueryImpl().gt("birthday", "1976-06-07").or().lt("birthday", "1976-06-07")), 3);
+				persons.count(new QueryImpl().gt("birthday", "1976-06-07").or().lt("birthday", "1976-06-07")), 2);
 
 		// xref
 		Assert.assertEquals(persons.count(new QueryImpl().eq("country", "US")), 2);
