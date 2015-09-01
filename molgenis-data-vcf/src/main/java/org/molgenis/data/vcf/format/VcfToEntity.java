@@ -314,6 +314,10 @@ public class VcfToEntity
 					names.add(attributeMetaData.getName());
 				}
 			}
+			if (vcfInfo.getKey().equals("."))
+			{
+				continue;
+			}
 			Object val = vcfInfo.getVal();
 			if (val instanceof List<?>)
 			{
@@ -325,6 +329,7 @@ public class VcfToEntity
 				val = null;
 			}
 			// if a flag field exists in the line, then this field is true, although the value is null
+
 			if (val == null)
 			{
 				if(names.contains(vcfInfo.getKey())){

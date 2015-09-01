@@ -6,8 +6,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.elasticsearch.common.base.Preconditions;
-import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -22,8 +20,10 @@ import org.molgenis.vcf.meta.VcfMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 
 /**
@@ -73,8 +73,13 @@ public class VcfRepository extends AbstractRepository
 
 	public VcfRepository(File file, String entityName) throws IOException
 	{
-		vcfReaderFactory = new VcfReaderFactoryImpl(file);
+		this(new VcfReaderFactoryImpl(file), entityName);
+	}
+
+	protected VcfRepository(VcfReaderFactory vcfReaderFactory, String entityName)
+	{
 		this.entityName = Preconditions.checkNotNull(entityName);
+		this.vcfReaderFactory = vcfReaderFactory;
 		this.vcfToEntitySupplier = Suppliers.memoize(this::parseVcfMeta);
 	}
 
