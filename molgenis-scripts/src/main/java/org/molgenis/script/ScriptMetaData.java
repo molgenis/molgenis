@@ -15,7 +15,7 @@ public class ScriptMetaData extends DefaultEntityMetaData
 				.setRefEntity(ScriptType.META_DATA);
 		addAttribute(Script.CONTENT).setNillable(false).setDataType(MolgenisFieldTypes.SCRIPT).setLabel("Content");
 		addAttribute(Script.GENERATE_TOKEN).setDataType(MolgenisFieldTypes.BOOL).setLabel("Generate security token")
-				.setDefaultValue(false);
+				.setDefaultValue("false");
 		addAttribute(Script.RESULT_FILE_EXTENSION).setNillable(true).setLabel("Result file extension");
 		addAttribute(Script.PARAMETERS).setNillable(true).setLabel("Parameters").setDataType(MolgenisFieldTypes.MREF)
 				.setRefEntity(ScriptParameter.META_DATA);

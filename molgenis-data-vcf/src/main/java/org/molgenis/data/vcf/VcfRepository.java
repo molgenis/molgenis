@@ -165,6 +165,15 @@ public class VcfRepository extends AbstractRepository
 		String id = VcfUtils.createId(entity);
 		entity.set(INTERNAL_ID, id);
 
+		// set all flag fields default on false.
+		for (VcfMetaInfo info : vcfMeta.getInfoMeta())
+		{
+			if (info.getType().equals(VcfMetaInfo.Type.FLAG))
+			{
+				entity.set(getInfoPrefix() + info.getId(), false);
+			}
+		}
+
 		for (VcfInfo vcfInfo : vcfRecord.getInformation())
 		{
 			Object val = vcfInfo.getVal();
@@ -176,6 +185,16 @@ public class VcfRepository extends AbstractRepository
 			if (val instanceof Float && Float.isNaN((Float) val))
 			{
 				val = null;
+			}
+			// if a flag field exists in the line, then this field is true, although the value is null
+			if (val == null)
+			{
+				if (!vcfInfo.getKey().equals(".")
+						&& entityMetaData.getAttribute(getInfoPrefix() + vcfInfo.getKey()).getDataType().getEnumType()
+								.equals(MolgenisFieldTypes.FieldTypeEnum.BOOL))
+				{
+					val = true;
+				}
 			}
 			entity.set(getInfoPrefix() + vcfInfo.getKey(), val);
 		}

@@ -1,13 +1,13 @@
-
 <#-- write HTML header and plugin menu -->
 <#--   css (optional) list of additional stylesheets to include -->
 <#--   js  (optional) list of additional js files to include -->
 <#include "resource-macros.ftl">
 <#macro header css=[] js=[]>
+<#assign cookieWall = app_settings.googleAnalyticsIpAnonymization == false && (app_settings.googleAnalyticsTrackingId?? || app_settings.googleAnalyticsTrackingIdMolgenis??) || (app_settings.googleAnalyticsTrackingId?? && !app_settings.googleAnalyticsAccountPrivacyFriendly) || (app_settings.googleAnalyticsTrackingIdMolgenis?? && !app_settings.googleAnalyticsAccountPrivacyFriendlyMolgenis)>
 <!DOCTYPE html>
 <html>
     <head>
-        <title><#if molgenis_ui.title?has_content>${molgenis_ui.title?html}</#if></title>
+        <title>${app_settings.title?html}</title>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta http-equiv="X-UA-Compatible" content="chrome=1">
@@ -28,15 +28,9 @@
     </#if>
         
         <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
-    
-    <#-- CSS selection, configurable based on RTP setting -->
-	<#if molgeniscsstheme??>		
- 		<link id="bootstrap-theme" rel="stylesheet" href="<@resource_href "/css/themes/${molgeniscsstheme}"/>" type="text/css">	
-    <#else>
-		<link rel="stylesheet" href="<@resource_href "/css/themes/bootstrap-molgenis.min.css"/>" type="text/css">
-	</#if>
+ 		<link rel="stylesheet" href="<@resource_href "/css/themes/${app_settings.bootstrapTheme?html}"/>" type="text/css" id="bootstrap-theme">
 
-    <#if app_top_logo?has_content>
+    <#if app_settings.logoTopHref?has_content>
         <link rel="stylesheet" href="<@resource_href "/css/molgenis-top-logo.css"/>" type="text/css">
     </#if>
 
@@ -44,14 +38,10 @@
         <link rel="stylesheet" href="<@resource_href "/css/${css_file_name?html}"/>" type="text/css">
     </#list>
 
-    <#if molgenis_ui.hrefCss?has_content>
-        <link rel="stylesheet" href="<@resource_href "/css/${molgenis_ui.hrefCss?html}"/>" type="text/css">
-    </#if>
+    <#if app_settings.cssHref?has_content>
+        <link rel="stylesheet" href="<@resource_href "/css/${app_settings.cssHref?html}"/>" type="text/css">
+    </#if> 
 
-    <!--[if lt IE 9]>
-        <script src="<@resource_href "/js/molgenis-ie8.js"/>"></script>
-    <![endif]-->
-    
         <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
 		<script src="<@resource_href "/js/es6-promise.min.js"/>"></script>
 		<script src="<@resource_href "/js/promise-done-6.1.0.min.js"/>"></script>
@@ -108,23 +98,20 @@
         <script>top.molgenis.ie9 = true;</script>
         <#-- required by dalliance-compiled.js to load the genomebrowsers in IE9 -->
         <script src="<@resource_href "/js/typedarray.min.js"/>"></script>
-    <![endif]-->		
-	<#if context_url??>
-		<script>top.molgenis.setContextUrl('${context_url?js_string}');</script>
-	</#if>
+    <![endif]-->
+        <script>
+            top.molgenis.setCookieWall(${cookieWall?string('true', 'false')});
+    <#if context_url??>
+            top.molgenis.setContextUrl('${context_url?js_string}');
+    </#if>
+    <#if plugin_id??>
+            top.molgenis.setPluginId('${plugin_id?js_string}');
+    </#if>
+        </script>
 	<#list js as js_file_name>
 		<script src="<@resource_href "/js/${js_file_name?html}"/>"></script>
-	</#list>		
-	<#if molgenis_ui.hrefJs?has_content>
-		<script src="<@resource_href "/js/${molgenis_ui.hrefJs?html}"/>"></script>
-	</#if>
-	<#if app_tracking_code.footer?has_content || app_tracking_code.header?has_content>
-		<script src="<@resource_href "/js/jquery.cookie.js"/>"></script>
-		<script src="<@resource_href "/js/molgenis-head-cookies.js"/>"></script>
-	</#if>
-	<#if app_tracking_code.header?has_content>
-		<script id="app-tracking-code-header" type="text/javascript">${app_tracking_code.header?string}</script>
-	</#if>
+	</#list>
+    <#include "molgenis-header-tracking.ftl"><#-- before closing </head> tag -->
 	</head>
 	<body>
 		<#-- Navbar menu -->
@@ -142,12 +129,6 @@
                 <div class="col-md-12">
                     <div id="login-modal-container-header"></div>        
                 </div>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="datasetsindexerAlerts"></div>
-                </div>    
             </div>
             
             <div class="row">
@@ -173,7 +154,14 @@
                    </div>
                 </div>
             </div>
-            
+            <#if plugin_settings_can_write?? && plugin_settings_can_write>
+            <div class="row">
+                <div class="col-md-12">
+                    <span class="glyphicon glyphicon-cog pull-right plugin-settings-btn" aria-hidden="true" style="cursor: pointer; margin-bottom: 5px;"></span>
+                    <div id="plugin-settings-container"></div>
+                </div>
+            </div>
+            </#if>
             <div class="row">
                 <div class="col-md-12">
                     <div id="plugin-container">
@@ -183,22 +171,22 @@
 <#-- Topmenu -->
 <#--TODO refactor to remove depency on 'Home'-->
 <#macro topmenu menu plugin_id pluginid_with_query_string> 
-	<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<nav class="navbar navbar-default navbar-fixed-top" style="margin-bottom: 10px" role="navigation">
         <div class="container-fluid">
 			<div class="navbar-header">
         		<#-- Logo start -->
-	    		<#if app_top_logo?has_content>
+	    		<#if app_settings.logoTopHref?has_content>
     	    		<div id="Intro">
-        	    		<img src=${app_top_logo} alt="" border="0" height="150">
+        	    		<a href="/"><img src=${app_settings.logoTopHref?html} alt="" border="0" height="150"></a>
         			</div>
     			</#if>
             
             	<#list menu.items as item> 
-                	<#if item.type != "MENU" && item.name == "Home" && app_home_logo?has_content>
+                	<#if item.type != "MENU" && item.name == "Home" && app_settings.logoNavBarHref?has_content>
  						<a class="navbar-brand" href="/menu/${menu.id?html}/${item.url?html}">
 		                	<img class="img-responsive" style="max-width:100%;max-height:100%;"
-	                		src="<#if molgenis_ui.hrefLogo?has_content>${molgenis_ui.hrefLogo?html}<#else><@resource_href "/img/logo_molgenis_small.png"/></#if>" 
-	                		alt="<#if molgenis_ui.title?has_content>${molgenis_ui.title?html}</#if>">
+	                		src="${app_settings.logoNavBarHref?html}" 
+	                		alt="${app_settings.title?html}">
                 		</a>						
 						<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-molgenis-navbar">
 		                    <span class="sr-only">Toggle navigation</span>
@@ -218,7 +206,7 @@
 						
 						<#-- Single menu items -->
 						<#if item.type != "MENU">	
-							<#if item.name != "Home" || !app_home_logo?has_content>
+							<#if item.name != "Home" || !app_settings.logoNavBarHref?has_content>
 								<#if item.url == pluginid_with_query_string>
 									<li class="active"><a href="#">${item.name?html}</a></li>
 								<#else>

@@ -2,7 +2,7 @@ package org.molgenis.app.controller;
 
 import static org.molgenis.app.controller.BackgroundController.URI;
 
-import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.controller.AbstractStaticContentController;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -19,8 +19,8 @@ import org.mockito.ArgumentCaptor;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -55,7 +55,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	private CaptchaService captchaService;
 
 	@Autowired
-	private DataService dataService;
+	private AppSettings appSettings;
 
 	private MockMvc mockMvc;
 
@@ -67,9 +67,9 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		mockMvc = MockMvcBuilders.standaloneSetup(authenticationController)
 				.setMessageConverters(new FormHttpMessageConverter(), new GsonHttpMessageConverter()).build();
 
+		reset(appSettings);
 		reset(captchaService);
 		when(captchaService.validateCaptcha("validCaptcha")).thenReturn(true);
-		when(captchaService.consumeCaptcha("validCaptcha")).thenReturn(true);
 		reset(accountService); // mocks in the config class are not resetted after each test
 	}
 
@@ -103,8 +103,8 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void registerUser_activationModeUserProxy() throws Exception
 	{
-		when(accountService.getActivationMode()).thenReturn(ActivationMode.USER);
-		when(accountService.isSelfRegistrationEnabled()).thenReturn(true);
+		when(appSettings.getSignUp()).thenReturn(true);
+		when(appSettings.getSignUpModeration()).thenReturn(false);
 
 		this.mockMvc
 				.perform(
@@ -125,8 +125,8 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void registerUser_activationModeUserProxyWithScheme() throws Exception
 	{
-		when(accountService.getActivationMode()).thenReturn(ActivationMode.USER);
-		when(accountService.isSelfRegistrationEnabled()).thenReturn(true);
+		when(appSettings.getSignUp()).thenReturn(true);
+		when(appSettings.getSignUpModeration()).thenReturn(false);
 
 		this.mockMvc
 				.perform(
@@ -148,8 +148,8 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void registerUser_activationModeUser() throws Exception
 	{
-		when(accountService.getActivationMode()).thenReturn(ActivationMode.USER);
-		when(accountService.isSelfRegistrationEnabled()).thenReturn(true);
+		when(appSettings.getSignUp()).thenReturn(true);
+		when(appSettings.getSignUpModeration()).thenReturn(false);
 
 		this.mockMvc
 				.perform(
@@ -161,14 +161,14 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 				.andExpect(
 						content().string(
 								"{\"message\":\"" + AccountController.REGISTRATION_SUCCESS_MESSAGE_USER + "\"}"));
-		verify(captchaService).consumeCaptcha("validCaptcha");
+		verify(captchaService).validateCaptcha("validCaptcha");
 	}
 
 	@Test
 	public void registerUser_activationModeAdmin() throws Exception
 	{
-		when(accountService.getActivationMode()).thenReturn(ActivationMode.ADMIN);
-		when(accountService.isSelfRegistrationEnabled()).thenReturn(true);
+		when(appSettings.getSignUp()).thenReturn(true);
+		when(appSettings.getSignUpModeration()).thenReturn(true);
 
 		this.mockMvc
 				.perform(
@@ -180,38 +180,37 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 				.andExpect(
 						content().string(
 								"{\"message\":\"" + AccountController.REGISTRATION_SUCCESS_MESSAGE_ADMIN + "\"}"));
-		verify(captchaService).consumeCaptcha("validCaptcha");
+		verify(captchaService).validateCaptcha("validCaptcha");
 	}
 
 	@Test
 	public void registerUser_invalidRegisterRequest() throws Exception
 	{
-		when(accountService.isSelfRegistrationEnabled()).thenReturn(true);
+		// when(accountService.isSelfRegistrationEnabled()).thenReturn(true);
 		this.mockMvc.perform(
 				post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
 						.param("confirmPassword", "adminpw-invalid").param("lastname", "min").param("firstname", "ad")
 						.param("captcha", "validCaptcha").contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isBadRequest());
-		verify(captchaService, times(0)).consumeCaptcha("validCaptcha");
+		verify(captchaService, times(0)).validateCaptcha("validCaptcha");
 	}
 
 	@Test
 	public void registerUser_passwordNotEqualsConfirmPassword() throws Exception
 	{
-		when(accountService.isSelfRegistrationEnabled()).thenReturn(true);
+		when(appSettings.getSignUp()).thenReturn(true);
 		this.mockMvc.perform(
 				post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
 						.param("confirmPassword", "adminpw-invalid-typo").param("email", "admin@molgenis.org")
 						.param("lastname", "min").param("firstname", "ad").param("captcha", "validCaptcha")
 						.contentType(MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isBadRequest());
-		verify(captchaService, times(0)).consumeCaptcha("validCaptcha");
+		verify(captchaService, times(0)).validateCaptcha("validCaptcha");
 	}
 
 	@Test
 	public void registerUser_invalidCaptcha() throws Exception
 	{
-		when(accountService.isSelfRegistrationEnabled()).thenReturn(true);
-
+		when(appSettings.getSignUp()).thenReturn(true);
 		this.mockMvc.perform(
 				post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
 						.param("confirmPassword", "adminpw-invalid").param("email", "admin@molgenis.org")
@@ -244,7 +243,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public AccountController accountController()
 		{
-			return new AccountController();
+			return new AccountController(accountService(), captchaService(), redirectStrategy(), appSettings());
 		}
 
 		@Bean
@@ -254,9 +253,21 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public MolgenisSettings molgenisSettings()
+		public CaptchaService captchaService()
 		{
-			return mock(MolgenisSettings.class);
+			return mock(CaptchaService.class);
+		}
+
+		@Bean
+		public RedirectStrategy redirectStrategy()
+		{
+			return mock(RedirectStrategy.class);
+		}
+
+		@Bean
+		public AppSettings appSettings()
+		{
+			return mock(AppSettings.class);
 		}
 
 		@Bean
@@ -279,21 +290,9 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public CaptchaService captchaService()
-		{
-			return mock(CaptchaService.class);
-		}
-
-		@Bean
 		public MolgenisUserService molgenisUserService()
 		{
 			return mock(MolgenisUserService.class);
-		}
-
-		@Bean
-		public RedirectStrategy redirectStrategy()
-		{
-			return mock(RedirectStrategy.class);
 		}
 	}
 }

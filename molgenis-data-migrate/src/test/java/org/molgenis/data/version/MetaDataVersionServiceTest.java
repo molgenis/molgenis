@@ -15,6 +15,8 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import org.apache.commons.io.FileUtils;
+import org.molgenis.migrate.version.MigrationUtils;
+import org.molgenis.migrate.version.MolgenisVersionService;
 import org.springframework.util.FileCopyUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;

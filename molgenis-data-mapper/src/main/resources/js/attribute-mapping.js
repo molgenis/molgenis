@@ -37,9 +37,9 @@
 			type : 'POST',
 			url : molgenis.getContextUrl() + '/mappingattribute/testscript',
 			data : JSON.stringify({
-				targetEntityName : $('input[name="target"]').val(),
-				sourceEntityName : $('input[name="source"]').val(),
-				targetAttributeName : $('input[name="targetAttribute"]').val(),
+				targetEntityName : $('#target').val(),
+				sourceEntityName : $('#source').val(),
+				targetAttributeName : $('#targetAttribute').val(),
 				algorithm : algorithm
 			}),
 			contentType : 'application/json',
@@ -114,9 +114,9 @@
 					isValidating = true;
 
 					var request = {
-						targetEntityName : $('input[name="target"]').val(),
-						sourceEntityName : $('input[name="source"]').val(),
-						targetAttributeName : $('input[name="targetAttribute"]').val(),
+						targetEntityName : $('#target').val(),
+						sourceEntityName : $('#source').val(),
+						targetAttributeName : $('#targetAttribute').val(),
 						algorithm : algorithm
 					};
 
@@ -187,10 +187,10 @@
 	 */
 	function loadAlgorithmResult(algorithm) {
 		$("#result-table-container").load("attributemappingfeedback #algorithm-result-feedback-container", {
-			mappingProjectId : $('input[name="mappingProjectId"]').val(),
-			target : $('input[name="target"]').val(),
-			source : $('input[name="source"]').val(),
-			targetAttribute : $('input[name="targetAttribute"]').val(),
+			mappingProjectId : $('#mappingProjectId').val(),
+			target : $('#target').val(),
+			source : $('#source').val(),
+			targetAttribute : $('#targetAttribute').val(),
 			algorithm : algorithm
 		}, function() {
 			$('.show-error-message').on('click', function() {
@@ -208,10 +208,10 @@
 	 */
 	function loadMappingEditor(algorithm) {
 		$("#advanced-mapping-table").load("advancedmappingeditor #advanced-mapping-editor", {
-			mappingProjectId : $('input[name="mappingProjectId"]').val(),
-			target : $('input[name="target"]').val(),
-			source : $('input[name="source"]').val(),
-			targetAttribute : $('input[name="targetAttribute"]').val(),
+			mappingProjectId : $('#mappingProjectId').val(),
+			target : $('#target').val(),
+			source : $('#source').val(),
+			targetAttribute : $('#targetAttribute').val(),
 			sourceAttribute : getSourceAttrs(algorithm)[0],
 			algorithm : algorithm
 		});
@@ -497,10 +497,63 @@
 		var form = '';
 		if(data){
 	        $.each(data, function(key, value) {
-	            form += '<input type="hidden" name="'+key+'" value="'+value+'">';
+	            form += '<input type="hidden" name="'+key.replace('"', '\"')+'" value="'+value.replace('"', '\"')+'">';
 	        });
 		}
         $('<form action="'+url+'" method="'+ method +'">'+form+'</form>').appendTo('body').submit();
+	}
+	
+	function saveAttributeMapping(algorithm, algorithmState) {
+		$.post(molgenis.getContextUrl() + "/saveattributemapping", {
+			mappingProjectId : $('#mappingProjectId').val(),
+			target : $('#target').val(),
+			source : $('#source').val(),
+			targetAttribute : $('#targetAttribute').val(),
+			algorithm : algorithm,
+			algorithmState : algorithmState}, 
+			function(data) {
+				$('#algorithmState').empty().html(algorithmState);
+				molgenis.createAlert([{message: 'This attribute mapping is saved with the state ' + algorithmState}], 'success');
+				dislpayFindFirstNotCuratedAttributeMappingButton();
+			}
+		).fail(function() {
+			$('.alerts').empty();
+			molgenis.createAlert([{message: 'Error trying to save the attribuet mapping'}], 'error');
+		});
+	}
+	
+	/**
+	 * The button only appears when there is a attribute to curate that has no status Discuss or Curated 
+	 * find first not curated attribute mapping (Not curated and not to be discussed)
+	 * If the data is unknown or similar to the displaed attribute mapping the the button will not be shown
+	 */
+	function dislpayFindFirstNotCuratedAttributeMappingButton(){
+		$.post(molgenis.getContextUrl() + "/firstattributemapping", {
+			mappingProjectId : $('#mappingProjectId').val(),
+			target : $('#target').val(),
+			'skipAlgorithmStates': ['DISCUSS', 'CURATED']
+		}, function(data) {
+			$('#find-first-to-curate-attribute-btn').remove();
+			if(data.length !== 0 && ($('#targetAttribute').val() !== data.targetAttribute || $('#source').val() !== data.source)) {
+				$('#attribute-mapping-toolbar').append($('<button id="find-first-to-curate-attribute-btn" type="btn" class="btn btn-default btn-xs">Next attribute to curate<span class="glyphicon glyphicon-chevron-right"></span></button>'));
+				$('#find-first-to-curate-attribute-btn').on('click', function() {
+					redirect('get', molgenis.getContextUrl() + '/attributeMapping', data);
+				});
+			}
+		});
+	}
+	
+	/**
+	 * When the save buttons: 'save curated' and 'save to discuss' are clicked the algorithm must be filled in.
+	 */
+	function disableEnableSaveButtons(algorithm){
+		if(null != algorithm && algorithm.length > 0){
+			$('#save-mapping-btn').prop('disabled', false);
+			$('#save-discuss-mapping-btn').prop('disabled', false);
+		}else{
+			$('#save-mapping-btn').prop('disabled', true);
+			$('#save-discuss-mapping-btn').prop('disabled', true);
+		}
 	}
 
 	$(function() {
@@ -565,13 +618,16 @@
 		checkSelectedAttributes(initialValue);
 		algorithm = editor.getSession().getValue();
 
-		editor.getSession().on('change', function() {
+		editor.getSession().on('change', function() {		
 			// check attributes if manually added
 			checkSelectedAttributes(editor.getValue());
 
 			// update algorithm
 			algorithm = editor.getSession().getValue();
-
+			
+			// update save buttons visibility
+			disableEnableSaveButtons(algorithm);
+			
 			// validate mapping
 			validateAttrMapping(algorithm);
 
@@ -625,18 +681,16 @@
 		});
 
 		// save button for saving generated mapping
-		$('#save-mapping-btn').on('click', function() {
-			$.post(molgenis.getContextUrl() + "/saveattributemapping", {
-				mappingProjectId : $('input[name="mappingProjectId"]').val(),
-				target : $('input[name="target"]').val(),
-				source : $('input[name="source"]').val(),
-				targetAttribute : $('input[name="targetAttribute"]').val(),
-				algorithm : algorithm
-			}, function(data) {
-				redirect('get', molgenis.getContextUrl() + '/mappingproject/' + $('input[name="mappingProjectId"]').val());
-			});
-		});
-
+		$('#save-mapping-btn').on('click', function() {saveAttributeMapping(algorithm, "CURATED")});
+		
+		// save button for discuss status generated mapping
+		$('#save-discuss-mapping-btn').on('click', function() {saveAttributeMapping(algorithm, "DISCUSS")});
+		
+		// Update save buttons visibility
+		disableEnableSaveButtons(editor.getSession().getValue());
+		
+		// Display next button
+		dislpayFindFirstNotCuratedAttributeMappingButton();
 
 		$('#js-function-modal-btn').on('click', function() {
 			$('#js-function-modal').modal('show');
@@ -662,7 +716,7 @@
 
 		$('#advanced-mapping-table').on('change', function() {
 			var mappedCategoryIds = {}, defaultValue = undefined, nullValue = undefined, key, val;
-
+			
 			// for each source xref value, check which target xref value
 			// was chosen
 			$('#advanced-mapping-table > tbody > tr').each(function() {

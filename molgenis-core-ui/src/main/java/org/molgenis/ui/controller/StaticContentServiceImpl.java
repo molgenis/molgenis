@@ -1,53 +1,59 @@
 package org.molgenis.ui.controller;
 
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.molgenis.framework.server.MolgenisSettings;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import org.molgenis.data.DataService;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.ui.settings.StaticContent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Controller that handles static content pages requests
- * 
- * RuntimeProperty_[KeyApp] is the way an identifier is made
+ * Controller that handles static content pages requests.
  */
 @Service
 public class StaticContentServiceImpl implements StaticContentService
 {
-	public static final String PREFIX_KEY = "app.";
+	private static final Logger LOG = LoggerFactory.getLogger(StaticContentServiceImpl.class);
 
-	private final MolgenisSettings molgenisSettings;
+	private final DataService dataService;
 
 	@Autowired
-	public StaticContentServiceImpl(final MolgenisSettings molgenisSettings)
+	public StaticContentServiceImpl(DataService dataService)
 	{
-		if (molgenisSettings == null)
-		{
-			throw new IllegalArgumentException("molgenisSettings is null");
-		}
-		this.molgenisSettings = molgenisSettings;
+		this.dataService = checkNotNull(dataService);
 	}
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU','ROLE_SYSTEM')")
 	@Transactional
-	public boolean submitContent(final String uniqueReference, String content)
+	public boolean submitContent(String key, String content)
 	{
-		if (null == content) content = "";
-
-		boolean succes;
-		if (this.molgenisSettings.propertyExists(PREFIX_KEY + uniqueReference))
+		try
 		{
-			succes = this.molgenisSettings.updateProperty(PREFIX_KEY + uniqueReference, content);
+			StaticContent staticContent = dataService.findOne(StaticContent.ENTITY_NAME, key, StaticContent.class);
+			if (staticContent == null)
+			{
+				staticContent = new StaticContent(key, dataService);
+				dataService.add(StaticContent.ENTITY_NAME, staticContent);
+			}
+			else
+			{
+				staticContent.setContent(content);
+				dataService.update(StaticContent.ENTITY_NAME, staticContent);
+			}
+			return true;
 		}
-		else
+		catch (RuntimeException e)
 		{
-			this.molgenisSettings.setProperty(PREFIX_KEY + uniqueReference, content);
-			succes = true;
+			LOG.error("", e);
+			return false;
 		}
-		return succes;
 	}
 
 	@Override
@@ -57,8 +63,11 @@ public class StaticContentServiceImpl implements StaticContentService
 	}
 
 	@Override
-	public String getContent(final String uniqueReference)
+	public String getContent(String key)
 	{
-		return StringEscapeUtils.unescapeHtml4(this.molgenisSettings.getProperty(PREFIX_KEY + uniqueReference));
+		StaticContent staticContent = RunAsSystemProxy.runAsSystem(() -> {
+			return dataService.findOne(StaticContent.ENTITY_NAME, key, StaticContent.class);
+		});
+		return staticContent != null ? staticContent.getContent() : null;
 	}
 }
