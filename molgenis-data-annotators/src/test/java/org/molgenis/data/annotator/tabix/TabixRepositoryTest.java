@@ -43,7 +43,7 @@ public class TabixRepositoryTest
 		emd.addAttributeMetaData(new DefaultAttributeMetaData("Description").setNillable(false));
 
 		entityMetaData = emd;
-		tabixRepository = new TabixRepository(tabixReader, entityMetaData);
+		tabixRepository = new TabixRepository(tabixReader, entityMetaData, CHROM, POS);
 	}
 
 	@Test
