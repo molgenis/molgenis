@@ -48,6 +48,7 @@ import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.authentication.switchuser.SwitchUserFilter;
 import org.springframework.security.web.header.writers.CacheControlHeadersWriter;
 import org.springframework.security.web.header.writers.DelegatingRequestMatcherHeaderWriter;
@@ -138,7 +139,23 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 		.formLogin().loginPage("/login").failureUrl("/login?error").and()
 
-		.logout().logoutSuccessUrl("/").and()
+		.logout().addLogoutHandler((req, res, auth) -> {
+			if (req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
+			{
+				req.setAttribute("continueWithUnsupportedBrowser", true);
+			}
+		}).logoutSuccessHandler((req, res, auth) -> {
+			StringBuilder logoutSuccessUrl = new StringBuilder("/");
+			if (req.getAttribute("continueWithUnsupportedBrowser") != null)
+			{
+				logoutSuccessUrl.append("?continueWithUnsupportedBrowser=true");
+			}
+			SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
+			logoutSuccessHandler.setDefaultTargetUrl(logoutSuccessUrl.toString());
+			logoutSuccessHandler.onLogoutSuccess(req, res, auth);
+		})
+
+		.and()
 
 		.csrf().disable();
 	}

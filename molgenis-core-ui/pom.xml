@@ -242,5 +242,10 @@
 			<artifactId>auto-value</artifactId>
 			<version>1.0</version>
 		</dependency>
+		<dependency>
+   			<groupId>eu.bitwalker</groupId>
+   			<artifactId>UserAgentUtils</artifactId>
+   			<version>1.17</version>
+		</dependency>
 	</dependencies>
 </project>
