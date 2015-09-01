@@ -129,8 +129,7 @@ public class AccountController
 	@RequestMapping(value = "/register", method = RequestMethod.POST, headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseBody
 	public Map<String, String> registerUser(@Valid @ModelAttribute RegisterRequest registerRequest,
-			@Valid @ModelAttribute CaptchaRequest captchaRequest, HttpServletRequest request)
-					throws CaptchaException, BindException, NoPermissionException
+			@Valid @ModelAttribute CaptchaRequest captchaRequest, HttpServletRequest request) throws Exception
 	{
 		if (appSettings.getSignUp())
 		{
@@ -138,7 +137,7 @@ public class AccountController
 			{
 				throw new BindException(RegisterRequest.class, "password does not match confirm password");
 			}
-			if (!captchaService.consumeCaptcha(captchaRequest.getCaptcha()))
+			if (!captchaService.validateCaptcha(captchaRequest.getCaptcha()))
 			{
 				throw new CaptchaException("invalid captcha answer");
 			}
@@ -157,8 +156,8 @@ public class AccountController
 			}
 			accountService.createUser(molgenisUser, activationUri);
 
-			String successMessage = appSettings.getSignUpModeration() ? REGISTRATION_SUCCESS_MESSAGE_ADMIN
-					: REGISTRATION_SUCCESS_MESSAGE_USER;
+			String successMessage = appSettings.getSignUpModeration() ? REGISTRATION_SUCCESS_MESSAGE_ADMIN : REGISTRATION_SUCCESS_MESSAGE_USER;
+			captchaService.removeCaptcha();
 			return Collections.singletonMap("message", successMessage);
 		}
 		else
@@ -206,6 +205,24 @@ public class AccountController
 	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
 	@ResponseBody
 	public ErrorMessageResponse handleMolgenisUserException(MolgenisUserException e)
+	{
+		LOG.debug("", e);
+		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
+	}
+
+	@ExceptionHandler(UsernameAlreadyExistsException.class)
+	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
+	@ResponseBody
+	public ErrorMessageResponse handleUsernameAlreadyExistsException(UsernameAlreadyExistsException e)
+	{
+		LOG.debug("", e);
+		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
+	}
+
+	@ExceptionHandler(EmailAlreadyExistsException.class)
+	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
+	@ResponseBody
+	public ErrorMessageResponse handleEmailAlreadyExistsException(EmailAlreadyExistsException e)
 	{
 		LOG.debug("", e);
 		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
