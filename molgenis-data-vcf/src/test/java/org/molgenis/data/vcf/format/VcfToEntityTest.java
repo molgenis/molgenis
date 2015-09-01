@@ -114,4 +114,24 @@ public class VcfToEntityTest
 		expected.set("INFO_DF2", false);
 		assertEquals(entity, expected);
 	}
+
+	@Test
+	public void testToEntityAlternativeAlleles() throws IOException
+	{
+		VcfRecord record = new VcfRecord(vcfMetaSmall, new String[]
+		{ "10", "12345", "id3", "A", "A,C,G,T,N,*", "7.9123", "pass", "DF;DF2" });
+		Entity entity = vcfToEntitySmall.toEntity(record);
+		Entity expected = new MapEntity(vcfToEntitySmall.getEntityMetaData());
+		expected.set("#CHROM", "10");
+		expected.set("ALT", "A,C,G,T,N,*");
+		expected.set("POS", 12345);
+		expected.set("REF", "A");
+		expected.set("FILTER", "pass");
+		expected.set("QUAL", "7.9123");
+		expected.set("ID", "id3");
+		expected.set("INTERNAL_ID", entity.get("INTERNAL_ID"));
+		expected.set("INFO_DF", true);
+		expected.set("INFO_DF2", true);
+		assertEquals(entity, expected);
+	}
 }

@@ -293,6 +293,10 @@ public class VcfToEntity
 
 		for (VcfInfo vcfInfo : vcfRecord.getInformation())
 		{
+			if (vcfInfo.getKey().equals("."))
+			{
+				continue;
+			}
 			Object val = vcfInfo.getVal();
 			if (val instanceof List<?>)
 			{
@@ -304,11 +308,11 @@ public class VcfToEntity
 				val = null;
 			}
 			// if a flag field exists in the line, then this field is true, although the value is null
+
 			if (val == null)
 			{
-				if (!vcfInfo.getKey().equals(".")
-						&& entityMetaData.getAttribute(VcfRepository.getInfoPrefix() + vcfInfo.getKey()).getDataType()
-								.getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.BOOL))
+				if (entityMetaData.getAttribute(VcfRepository.getInfoPrefix() + vcfInfo.getKey()).getDataType()
+						.getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.BOOL))
 				{
 					val = true;
 				}
