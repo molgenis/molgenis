@@ -3,12 +3,12 @@
 # Molgenis python api client. 
 #
 ####################################################################
-from __future__ import print_function
+
 import requests
 import json
 import re
 import os.path
-import security
+from . import security
 import timeit
 import time
 import logging
@@ -61,8 +61,16 @@ class Connect_Molgenis():
                     logfile_mode (string):       Mode of writing to logfile, e.g. w for overwrite or a for append, see `logging` manual for more details (def: w)
                     only_warn_duplicates (bool): If set to true, throw warning instead of exception when trying to add duplicate values into unique column (def: False)
                 '''
+                # because errors in the __init__ function will not go to __exit__, make sure to clean up after error
                 try:
-                    # because errors in the __init__ function will not go to __exit__, make sure to clean up after error
+                    # if no path is specified in the log_file name, it should be written in the same location where the script is called from,
+                    # not from the location molgenis is located
+                    if not os.sep in log_file:
+                        log_file = os.getcwd()+os.sep+log_file
+                    else:
+                        # if there is a path in log_file, make sure that the folder exists
+                        if not os.path.exists(os.path.dirname(log_file)):
+                            raise OSError('Folder "'+str(os.path.dirname)+'" for writing the molgenis.log file does not exist, change log_file location')
                     logging.basicConfig(filename = log_file, filemode = logfile_mode)
                     logging.getLogger().addHandler(logging.StreamHandler())
                     self.logger = logging.getLogger(__name__)
@@ -82,7 +90,6 @@ class Connect_Molgenis():
                     self.time = None
                     self.only_warn_duplicates = only_warn_duplicates
                     self.remove_pass_file = remove_pass_file
-                    self.session = None
                 except:
                     self.remove_password_files()
                     raise
@@ -150,7 +157,7 @@ class Connect_Molgenis():
                     try:
                         server_response_json = server_response.json()
                         error_message = str(server_response)+' -> '+server_response.reason+'\n'
-                        if server_response_json.has_key('errors'):
+                        if 'errors' in server_response_json:
                             if data_used:
                                 error_message += 'Used data: '+str(data_used)+'\n'
                             if entity_used:
@@ -215,7 +222,7 @@ class Connect_Molgenis():
                 Raises:
                     Exception
                 '''
-                columns_to_insert = data.keys()
+                columns_to_insert = list(data.keys())
                 columns_in_entity = self.get_column_names(entity_name)
                 difference = set(columns_to_insert).difference(set(columns_in_entity))
                 if len(difference) > 0:
@@ -235,8 +242,8 @@ class Connect_Molgenis():
                 if added_by:
                     data[added_by_column] = security.retrieve('Username')
                 # make all values str and remove if value is None or empty string
-                data = {k: v for k, v in data.items() if v!=None}
-                data = dict([a, str(x)] for a, x in data.iteritems() if len(str(x).strip())>0)
+                data = {k: v for k, v in list(data.items()) if v!=None}
+                data = dict([a, str(x)] for a, x in data.items() if len(str(x).strip())>0)
                 return data
             
             def add_entity_row_or_file_server_response(self, entity_name, data, server_response):
@@ -327,6 +334,7 @@ class Connect_Molgenis():
                 file_post_header = copy.deepcopy(self.headers)
                 del(file_post_header['Accept'])
                 del(file_post_header['Content-type'])
+                self.session.headers = {}
                 data = {'description': description}
                 if extra_data:
                     data.update(extra_data)
@@ -460,7 +468,7 @@ class Connect_Molgenis():
                 '''
                 entity_meta_data = self.get_entity_meta_data(entity_name)
                 attributes = entity_meta_data['attributes']
-                return attributes.keys()
+                return list(attributes.keys())
             
             def get_id_attribute(self, entity_name):
                 '''Get the id attribute name'''
