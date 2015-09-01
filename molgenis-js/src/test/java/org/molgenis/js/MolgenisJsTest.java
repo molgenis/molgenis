@@ -55,7 +55,7 @@ public class MolgenisJsTest
 		Entity person = new MapEntity();
 		person.set("weight", 82);
 
-		Object weight = ScriptEvaluator.eval("$('weight').unit('kg').toUnit('pound').value()", person, emd);
+		Object weight = ScriptEvaluator.eval("$('weight').unit('kg').toUnit('poundmass').value()", person, emd);
 		assertEquals(weight, 180.7790549915996);
 	}
 
