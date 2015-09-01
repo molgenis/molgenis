@@ -93,7 +93,7 @@ public class FeedbackController extends AbstractStaticContentController
 	public String submitFeedback(@Valid FeedbackForm form, @Valid @ModelAttribute CaptchaRequest captchaRequest)
 			throws CaptchaException
 	{
-		if (!captchaService.consumeCaptcha(captchaRequest.getCaptcha()))
+		if (!captchaService.validateCaptcha(captchaRequest.getCaptcha()))
 		{
 			form.setErrorMessage("Invalid captcha.");
 			return "view-feedback";
@@ -104,6 +104,7 @@ public class FeedbackController extends AbstractStaticContentController
 			MimeMessage message = createFeedbackMessage(form);
 			mailSender.send(message);
 			form.setSubmitted(true);
+			captchaService.removeCaptcha();
 		}
 		catch (MessagingException e)
 		{
