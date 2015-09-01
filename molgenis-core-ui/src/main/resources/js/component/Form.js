@@ -256,14 +256,6 @@
 				errorMessages: this.state.errorMessages
 			};
 			
-			var SubmitAlertMessage = this.state.submitMsg ? (
-				molgenis.ui.AlertMessage({type: this.state.submitMsg.type, message: this.state.submitMsg.message, onDismiss: this._handleAlertMessageDismiss, key: 'alert'})	
-			) : null;
-				
-			var ErrorMessageAlertMessage = !$.isEmptyObject(this.state.errorMessages) ? (
-				molgenis.ui.AlertMessage({type: 'danger', message: 'Validation has encountered at least one error!', onDismiss: this._handleAlertMessageDismiss, key: 'alert'})	
-			) : null;
-			
 			var Filter = this.props.enableOptionalFilter ? (
 				div({className: 'row', style: {textAlign: 'right'}, key: 'filter'},
 					div({className: 'col-md-12'},
@@ -296,17 +288,40 @@
 				)
 			);
 			
+			var SubmitAlertMessage = this.state.submitMsg ? (
+					molgenis.ui.AlertMessage({type: this.state.submitMsg.type, message: this.state.submitMsg.message, onDismiss: this._handleAlertMessageDismiss, key: 'alert'})	
+			) : null;
+						
+			var ErrorMessageAlertMessage = !$.isEmptyObject(this.state.errorMessages) ? (
+				molgenis.ui.AlertMessage({type: 'danger', message: 'Validation failed', onDismiss: undefined, key: 'alert'})	
+			) : null;
+			
 			var FormWithMessageAndFilter;
-			if(this.props.enableFormIndex && this.props.enableAlertMessageInFormIndex){
+			
+			if(this.props.enableFormIndex) {
 				FormWithMessageAndFilter = (
 						div(null,
-							null,
-							null,
+							(this.props.enableAlertMessageInFormIndex ? null : ErrorMessageAlertMessage),
+							(this.props.enableAlertMessageInFormIndex ? null : SubmitAlertMessage),
 							Filter,
 							Form
 						)
 					);
-			}else{
+				return (
+					div({className: 'row'},
+						div({className: 'col-md-10'},
+							FormWithMessageAndFilter
+						),
+						div({className: 'col-md-2'},
+							FormIndexFactory({
+								entity: this.state.entity, 
+								errorMessageAlertMessage: (this.props.enableAlertMessageInFormIndex ? ErrorMessageAlertMessage : null),
+								submitAlertMessage : (this.props.enableAlertMessageInFormIndex ? SubmitAlertMessage : null)
+							})
+						)
+					)
+				);
+			} else {
 				FormWithMessageAndFilter = (
 						div(null,
 							ErrorMessageAlertMessage,
@@ -315,35 +330,6 @@
 							Form
 						)
 					);
-			}
-			
-			
-			if(this.props.enableFormIndex) {
-				if(this.props.enableAlertMessageInFormIndex) {
-					return (
-						div({className: 'row'},
-							div({className: 'col-md-10'},
-								FormWithMessageAndFilter
-							),
-							div({className: 'col-md-2'},
-								FormIndexFactory({entity: this.state.entity, errorMessageAlertMessage: ErrorMessageAlertMessage, submitAlertMessage: SubmitAlertMessage})
-							)
-						)
-					);
-				}else{
-					return (
-							div({className: 'row'},
-								div({className: 'col-md-10'},
-									FormWithMessageAndFilter
-								),
-								div({className: 'col-md-2'},
-									FormIndexFactory({entity: this.state.entity, errorMessageAlertMessage: null, submitAlertMessage: null})
-								)
-							)
-						);
-				}
-				
-			} else {
 				return FormWithMessageAndFilter;
 			}
 		},
