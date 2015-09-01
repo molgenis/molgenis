@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -88,55 +89,14 @@ public class AlgorithmServiceImpl implements AlgorithmService
 				targetEntityMetaData, targetAttribute);
 
 		Unit<? extends Quantity> targetUnit = unitResolver.resolveUnit(targetAttribute, targetEntityMetaData);
+
 		for (Entry<AttributeMetaData, Iterable<ExplainedQueryString>> entry : matches.entrySet())
 		{
-			AttributeMetaData source = entry.getKey();
+			AttributeMetaData sourceAttribute = entry.getKey();
 
-			String algorithm = categoryAlgorithmGenerator.generate(targetAttribute, source);
+			String algorithm = generateInternalJavaScriptAlgorithm(targetAttribute, targetUnit, sourceAttribute,
+					sourceEntityMetaData);
 
-			if (StringUtils.isEmpty(algorithm))
-			{
-				// determine source unit
-				Unit<? extends Quantity> sourceUnit = unitResolver.resolveUnit(source, sourceEntityMetaData);
-
-				if (sourceUnit != null)
-				{
-					if (targetUnit != null && !sourceUnit.equals(targetUnit))
-					{
-						// if units are convertible, create convert algorithm
-						UnitConverter unitConverter;
-						try
-						{
-							unitConverter = sourceUnit.getConverterTo(targetUnit);
-						}
-						catch (ConversionException e)
-						{
-							unitConverter = null;
-							// algorithm sets source unit and assigns source value to target
-							algorithm = String.format("$('%s').unit('%s').value();", source.getName(),
-									sourceUnit.toString());
-						}
-
-						if (unitConverter != null)
-						{
-							// algorithm sets source unit and assigns value converted to target unit to target
-							algorithm = String.format("$('%s').unit('%s').toUnit('%s').value();", source.getName(),
-									sourceUnit.toString(), targetUnit.toString());
-						}
-					}
-					else
-					{
-						// algorithm sets source unit and assigns source value to target
-						algorithm = String.format("$('%s').unit('%s').value();", source.getName(),
-								sourceUnit.toString());
-					}
-				}
-				if (StringUtils.isEmpty(algorithm))
-				{
-					// algorithm assigns source value to target
-					algorithm = String.format("$('%s').value();", source.getName());
-				}
-			}
 			AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttribute.getName());
 
 			attributeMapping.setAlgorithm(algorithm);
@@ -153,6 +113,80 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			LOG.info("Creating attribute mapping: " + targetAttribute.getName() + " = " + algorithm);
 			break;
 		}
+	}
+
+	@Override
+	public String generateAlgorithm(AttributeMetaData targetAttribute, EntityMetaData targetEntityMetaData,
+			List<AttributeMetaData> sourceAttributes, EntityMetaData sourceEntityMetaData)
+	{
+		Unit<? extends Quantity> targetUnit = unitResolver.resolveUnit(targetAttribute, targetEntityMetaData);
+
+		if (sourceAttributes.size() == 1)
+		{
+			generateInternalJavaScriptAlgorithm(targetAttribute, targetUnit, sourceAttributes.get(0),
+					sourceEntityMetaData);
+		}
+
+		// First of all, we need to check if all the source attributes are of the same type
+		// return generateInternalJavaScriptAlgorithm(targetAttribute, targetUnit, sourceAttribute,
+		// sourceEntityMetaData);
+		return null;
+	}
+
+	public String generateInternalJavaScriptAlgorithm(AttributeMetaData targetAttribute,
+			Unit<? extends Quantity> targetUnit, AttributeMetaData sourceAttribute, EntityMetaData sourceEntityMetaData)
+	{
+		String algorithm = null;
+
+		if (categoryAlgorithmGenerator.isSuitable(targetAttribute, sourceAttribute))
+		{
+			algorithm = categoryAlgorithmGenerator.generate(targetAttribute, sourceAttribute);
+		}
+
+		if (StringUtils.isEmpty(algorithm))
+		{
+			// determine source unit
+			Unit<? extends Quantity> sourceUnit = unitResolver.resolveUnit(sourceAttribute, sourceEntityMetaData);
+
+			if (sourceUnit != null)
+			{
+				if (targetUnit != null && !sourceUnit.equals(targetUnit))
+				{
+					// if units are convertible, create convert algorithm
+					UnitConverter unitConverter;
+					try
+					{
+						unitConverter = sourceUnit.getConverterTo(targetUnit);
+					}
+					catch (ConversionException e)
+					{
+						unitConverter = null;
+						// algorithm sets source unit and assigns source value to target
+						algorithm = String.format("$('%s').unit('%s').value();", sourceAttribute.getName(),
+								sourceUnit.toString());
+					}
+
+					if (unitConverter != null)
+					{
+						// algorithm sets source unit and assigns value converted to target unit to target
+						algorithm = String.format("$('%s').unit('%s').toUnit('%s').value();",
+								sourceAttribute.getName(), sourceUnit.toString(), targetUnit.toString());
+					}
+				}
+				else
+				{
+					// algorithm sets source unit and assigns source value to target
+					algorithm = String.format("$('%s').unit('%s').value();", sourceAttribute.getName(),
+							sourceUnit.toString());
+				}
+			}
+			if (StringUtils.isEmpty(algorithm))
+			{
+				// algorithm assigns source value to target
+				algorithm = String.format("$('%s').value();", sourceAttribute.getName());
+			}
+		}
+		return algorithm;
 	}
 
 	boolean isSingleMatchHighQuality(AttributeMetaData targetAttribute,

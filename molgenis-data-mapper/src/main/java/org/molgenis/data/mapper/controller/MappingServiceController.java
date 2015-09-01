@@ -28,6 +28,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.importer.ImportWizardController;
+import org.molgenis.data.mapper.data.request.GenerateAlgorithmRequest;
 import org.molgenis.data.mapper.data.request.MappingServiceRequest;
 import org.molgenis.data.mapper.mapping.model.AlgorithmResult;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
@@ -500,6 +501,28 @@ public class MappingServiceController extends MolgenisPluginController
 			simpleExplainedAttributes.put(entry.getKey().getName(), entry.getValue());
 		}
 		return simpleExplainedAttributes;
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/attributemapping/algorithm", consumes = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public String getSuggestedAlgorithm(@RequestBody GenerateAlgorithmRequest generateAlgorithmRequest)
+	{
+		EntityMetaData targetEntityMetaData = dataService.getEntityMetaData(generateAlgorithmRequest
+				.getTargetEntityName());
+
+		EntityMetaData sourceEntityMetaData = dataService.getEntityMetaData(generateAlgorithmRequest
+				.getSourceEntityName());
+
+		AttributeMetaData targetAttribute = targetEntityMetaData.getAttribute(generateAlgorithmRequest
+				.getTargetAttributeName());
+
+		List<AttributeMetaData> sourceAttributes = generateAlgorithmRequest.getSourceAttributes().stream()
+				.map(name -> sourceEntityMetaData.getAttribute(name)).collect(Collectors.toList());
+
+		algorithmService.generateAlgorithm(targetAttribute, targetEntityMetaData, sourceAttributes,
+				sourceEntityMetaData);
+
+		return null;
 	}
 
 	/**

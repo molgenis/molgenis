@@ -27,6 +27,12 @@ public class CategoryAlgorithmGeneratorImpl implements CategoryAlgorithmGenerato
 		frequencyCategoryMapper = new FrequencyCategoryMapper();
 	}
 
+	public void combineCategories(List<AttributeMetaData> sourceAttributes)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
 	public boolean isSuitable(AttributeMetaData targetAttributeMetaData, AttributeMetaData sourceAttributeMetaData)
 	{
 		return targetAttributeMetaData.getDataType().getEnumType() == FieldTypeEnum.CATEGORICAL;

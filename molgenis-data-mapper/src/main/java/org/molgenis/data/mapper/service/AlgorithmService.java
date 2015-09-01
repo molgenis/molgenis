@@ -1,6 +1,7 @@
 package org.molgenis.data.mapper.service;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -52,4 +53,16 @@ public interface AlgorithmService
 	 */
 	void autoGenerateAlgorithm(EntityMetaData sourceEntityMetaData, EntityMetaData targetEntityMetaData,
 			EntityMapping mapping, AttributeMetaData targetAttribute);
+
+	/**
+	 * Generates the algorithm based on the given targetAttribute and sourceAttribute
+	 * 
+	 * @param targetAttribute
+	 * @param targetEntityMetaData
+	 * @param sourceAttributes
+	 * @param sourceEntityMetaData
+	 * @return the generate algorithm
+	 */
+	String generateAlgorithm(AttributeMetaData targetAttribute, EntityMetaData targetEntityMetaData,
+			List<AttributeMetaData> sourceAttributes, EntityMetaData sourceEntityMetaData);
 }
