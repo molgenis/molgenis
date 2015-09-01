@@ -31,7 +31,7 @@ public class ExacAnnotator
 
 	public static final String EXAC_AF = "EXAC_AF";
 	public static final String EXAC_AF_LABEL = "ExAC allele frequency";
-	public static final String EXAC_AF_ResourceAttributeName = VcfRepository.getInfoPrefix() + "AF";
+	public static final String EXAC_AF_ResourceAttributeName = "AF";
 
 	public static final String EXAC_FILE_LOCATION_PROPERTY = "exac_location";
 	public static final String EXAC_TABIX_RESOURCE = "EXACTabixResource";

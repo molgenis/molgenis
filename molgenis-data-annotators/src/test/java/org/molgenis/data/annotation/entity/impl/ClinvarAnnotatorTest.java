@@ -51,6 +51,10 @@ public class ClinvarAnnotatorTest extends AbstractTestNGSpringContextTests
 		sourceMeta.addAttributeMetaData(REF_META);
 		sourceMeta.addAttributeMetaData(ALT_META);
 
+		DefaultEntityMetaData annotatedSourceMeta = sourceMeta;
+		annotatedSourceMeta.addAttribute(ClinvarAnnotator.CLINVAR_CLNSIG);
+		annotatedSourceMeta.addAttribute(ClinvarAnnotator.CLINVAR_CLNALLE);
+
 		// no clinvar annotation
 		MapEntity source0 = new MapEntity(sourceMeta);
 		source0.set(CHROM, "1");
@@ -126,9 +130,11 @@ public class ClinvarAnnotatorTest extends AbstractTestNGSpringContextTests
 		expectedTarget0.set(POS, 883515l);
 		expectedTarget0.set(REF, "G");
 		expectedTarget0.set(ALT, "A");
+		expectedTarget0.set(ClinvarAnnotator.CLINVAR_CLNSIG, null);
+		expectedTarget0.set(ClinvarAnnotator.CLINVAR_CLNALLE, null);
 
 		// FIXME see https://github.com/molgenis/molgenis/issues/3433
-		MapEntity expectedTarget1 = new MapEntity(sourceMeta);
+		MapEntity expectedTarget1 = new MapEntity(annotatedSourceMeta);
 		expectedTarget1.set(CHROM, "1");
 		expectedTarget1.set(POS, 883516l);
 		expectedTarget1.set(REF, "G");
@@ -137,7 +143,7 @@ public class ClinvarAnnotatorTest extends AbstractTestNGSpringContextTests
 		expectedTarget1.set(ClinvarAnnotator.CLINVAR_CLNALLE, "1");
 
 		// FIXME see https://github.com/molgenis/molgenis/issues/3433
-		MapEntity expectedTarget2 = new MapEntity(sourceMeta);
+		MapEntity expectedTarget2 = new MapEntity(annotatedSourceMeta);
 		expectedTarget2.set(CHROM, "1");
 		expectedTarget2.set(POS, 883516l);
 		expectedTarget2.set(REF, "G");
@@ -146,7 +152,7 @@ public class ClinvarAnnotatorTest extends AbstractTestNGSpringContextTests
 		expectedTarget2.set(ClinvarAnnotator.CLINVAR_CLNALLE, "1,.,.");
 
 		// FIXME see https://github.com/molgenis/molgenis/issues/3433
-		MapEntity expectedTarget3 = new MapEntity(sourceMeta);
+		MapEntity expectedTarget3 = new MapEntity(annotatedSourceMeta);
 		expectedTarget3.set(CHROM, "1");
 		expectedTarget3.set(POS, 883516l);
 		expectedTarget3.set(REF, "G");
@@ -155,7 +161,7 @@ public class ClinvarAnnotatorTest extends AbstractTestNGSpringContextTests
 		expectedTarget3.set(ClinvarAnnotator.CLINVAR_CLNALLE, ".,2,.");
 
 		// FIXME see https://github.com/molgenis/molgenis/issues/3433
-		MapEntity expectedTarget4 = new MapEntity(sourceMeta);
+		MapEntity expectedTarget4 = new MapEntity(annotatedSourceMeta);
 		expectedTarget4.set(CHROM, "1");
 		expectedTarget4.set(POS, 883516l);
 		expectedTarget4.set(REF, "G");
@@ -164,7 +170,7 @@ public class ClinvarAnnotatorTest extends AbstractTestNGSpringContextTests
 		expectedTarget4.set(ClinvarAnnotator.CLINVAR_CLNALLE, ".,.,3");
 
 		// FIXME see https://github.com/molgenis/molgenis/issues/3433
-		MapEntity expectedTarget5 = new MapEntity(sourceMeta);
+		MapEntity expectedTarget5 = new MapEntity(annotatedSourceMeta);
 		expectedTarget5.set(CHROM, "1");
 		expectedTarget5.set(POS, 17349179l);
 		expectedTarget5.set(REF, "C");
@@ -173,7 +179,7 @@ public class ClinvarAnnotatorTest extends AbstractTestNGSpringContextTests
 		expectedTarget5.set(ClinvarAnnotator.CLINVAR_CLNALLE, "1");
 
 		// FIXME see https://github.com/molgenis/molgenis/issues/3433
-		MapEntity expectedTarget6 = new MapEntity(sourceMeta);
+		MapEntity expectedTarget6 = new MapEntity(annotatedSourceMeta);
 		expectedTarget6.set(CHROM, "1");
 		expectedTarget6.set(POS, 17349179l);
 		expectedTarget6.set(REF, "C");
@@ -182,7 +188,7 @@ public class ClinvarAnnotatorTest extends AbstractTestNGSpringContextTests
 		expectedTarget6.set(ClinvarAnnotator.CLINVAR_CLNALLE, "1");
 
 		// FIXME see https://github.com/molgenis/molgenis/issues/3433
-		MapEntity expectedTarget7 = new MapEntity(sourceMeta);
+		MapEntity expectedTarget7 = new MapEntity(annotatedSourceMeta);
 		expectedTarget7.set(CHROM, "1");
 		expectedTarget7.set(POS, 17349179l);
 		expectedTarget7.set(REF, "C");
@@ -191,7 +197,7 @@ public class ClinvarAnnotatorTest extends AbstractTestNGSpringContextTests
 		expectedTarget7.set(ClinvarAnnotator.CLINVAR_CLNALLE, "1,2");
 
 		// FIXME see https://github.com/molgenis/molgenis/issues/3433
-		MapEntity expectedTarget8 = new MapEntity(sourceMeta);
+		MapEntity expectedTarget8 = new MapEntity(annotatedSourceMeta);
 		expectedTarget8.set(CHROM, "1");
 		expectedTarget8.set(POS, 17349179l);
 		expectedTarget8.set(REF, "C");
@@ -200,7 +206,7 @@ public class ClinvarAnnotatorTest extends AbstractTestNGSpringContextTests
 		expectedTarget8.set(ClinvarAnnotator.CLINVAR_CLNALLE, "1,2");
 
 		// FIXME see https://github.com/molgenis/molgenis/issues/3433
-		MapEntity expectedTarget9 = new MapEntity(sourceMeta);
+		MapEntity expectedTarget9 = new MapEntity(annotatedSourceMeta);
 		expectedTarget9.set(CHROM, "1");
 		expectedTarget9.set(POS, 17349179l);
 		expectedTarget9.set(REF, "C");
@@ -208,11 +214,27 @@ public class ClinvarAnnotatorTest extends AbstractTestNGSpringContextTests
 		expectedTarget9.set(ClinvarAnnotator.CLINVAR_CLNSIG, ".,5,4");
 		expectedTarget9.set(ClinvarAnnotator.CLINVAR_CLNALLE, ".,2,3");
 
-		Iterator<Entity> targets = clinvarAnnotator.annotate(Arrays.asList(source0, source1, source2, source3, source4,
-				source5, source6, source7, source8, source9));
-		assertEquals(Lists.newArrayList(targets), Arrays.asList(expectedTarget0, expectedTarget1, expectedTarget2,
-				expectedTarget3, expectedTarget4, expectedTarget5, expectedTarget6, expectedTarget7, expectedTarget8,
-				expectedTarget9));
+		Iterator<Entity> target0 = clinvarAnnotator.annotate(Collections.singletonList(source0));
+		Iterator<Entity> target1 = clinvarAnnotator.annotate(Collections.singletonList(source1));
+		Iterator<Entity> target2 = clinvarAnnotator.annotate(Collections.singletonList(source2));
+		Iterator<Entity> target3 = clinvarAnnotator.annotate(Collections.singletonList(source3));
+		Iterator<Entity> target4 = clinvarAnnotator.annotate(Collections.singletonList(source4));
+		Iterator<Entity> target5 = clinvarAnnotator.annotate(Collections.singletonList(source5));
+		Iterator<Entity> target6 = clinvarAnnotator.annotate(Collections.singletonList(source6));
+		Iterator<Entity> target7 = clinvarAnnotator.annotate(Collections.singletonList(source7));
+		Iterator<Entity> target8 = clinvarAnnotator.annotate(Collections.singletonList(source8));
+		Iterator<Entity> target9 = clinvarAnnotator.annotate(Collections.singletonList(source9));
+		assertEquals(target0.next(), expectedTarget0);
+		assertEquals(target1.next(), expectedTarget1);
+		assertEquals(target2.next(), expectedTarget2);
+		assertEquals(target3.next(), expectedTarget3);
+		assertEquals(target4.next(), expectedTarget4);
+		assertEquals(target5.next(), expectedTarget5);
+		assertEquals(target6.next(), expectedTarget6);
+		assertEquals(target7.next(), expectedTarget7);
+		assertEquals(target8.next(), expectedTarget8);
+		assertEquals(target9.next(), expectedTarget9);
+
 	}
 
 	public static class Config

@@ -32,10 +32,10 @@ public class ClinvarAnnotator
 
 	public static final String CLINVAR_CLNSIG = "CLINVAR_CLNSIG";
 	public static final String CLINVAR_CLNSIG_LABEL = "ClinVar clinical significance";
-	public static final String CLINVAR_CLNSIG_ResourceAttributeName = VcfRepository.getInfoPrefix() + "CLNSIG";
+	public static final String CLINVAR_CLNSIG_ResourceAttributeName = "CLNSIG";
 	public static final String CLINVAR_CLNALLE = "CLINVAR_CLNALLE";
 	public static final String CLINVAR_CLNALLE_LABEL = "ClinVar clinical significant allele";
-	public static final String CLINVAR_CLINALL_ResourceAttributeName = VcfRepository.getInfoPrefix() + "CLNALLE";
+	public static final String CLINVAR_CLINALL_ResourceAttributeName = "CLNALLE";
 	public static final String CLINVAR_FILE_LOCATION_PROPERTY = "clinvar_location";
 	public static final String CLINVAR_TABIX_RESOURCE = "clinVarTabixResource";
 

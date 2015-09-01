@@ -122,18 +122,6 @@ public class VcfRepository extends AbstractRepository
 		return vcfToEntitySupplier.get().getEntityMetaData();
 	}
 
-	/**
-	 * Prefix to make INFO column names safe-ish. For example, 'Samples' is sometimes used as an INFO field and clashes
-	 * with the 'Samples' key used by Genotype-IO to store sample data in memory. By prefixing a tag we hope to create
-	 * unique INFO field names that do not clash.
-	 * 
-	 * @return
-	 */
-	public static String getInfoPrefix()
-	{
-		return INFO + "_";
-	}
-
 	@Override
 	public void close() throws IOException
 	{
