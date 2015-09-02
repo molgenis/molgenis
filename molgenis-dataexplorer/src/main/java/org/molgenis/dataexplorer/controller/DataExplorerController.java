@@ -22,6 +22,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import freemarker.core.ParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
@@ -208,12 +209,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 		// set data explorer permission
 		Permission pluginPermission = null;
-		if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE))
-			pluginPermission = Permission.WRITE;
-		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.READ))
-			pluginPermission = Permission.READ;
-		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.COUNT))
-			pluginPermission = Permission.COUNT;
+		if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE)) pluginPermission = Permission.WRITE;
+		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.READ)) pluginPermission = Permission.READ;
+		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.COUNT)) pluginPermission = Permission.COUNT;
 
 		ModulesConfigResponse modulesConfig = new ModulesConfigResponse();
 
@@ -253,16 +251,16 @@ public class DataExplorerController extends MolgenisPluginController
 					}
 					if (modDiseaseMatcher)
 					{
-						modulesConfig
-								.add(new ModuleConfig("diseasematcher", "Disease Matcher", "diseasematcher-icon.png"));
+						modulesConfig.add(new ModuleConfig("diseasematcher", "Disease Matcher",
+								"diseasematcher-icon.png"));
 					}
 					if (modReports)
 					{
 						String modEntitiesReportName = dataExplorerSettings.getEntityReport(entityName);
 						if (modEntitiesReportName != null)
 						{
-							modulesConfig
-									.add(new ModuleConfig("entitiesreport", modEntitiesReportName, "report-icon.png"));
+							modulesConfig.add(new ModuleConfig("entitiesreport", modEntitiesReportName,
+									"report-icon.png"));
 						}
 					}
 					break;
@@ -301,10 +299,10 @@ public class DataExplorerController extends MolgenisPluginController
 
 	private boolean isGenomeBrowserEntity(EntityMetaData entityMetaData)
 	{
-		AttributeMetaData attributeStartPosition = genomicDataSettings
-				.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_POS, entityMetaData);
-		AttributeMetaData attributeChromosome = genomicDataSettings
-				.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_CHROM, entityMetaData);
+		AttributeMetaData attributeStartPosition = genomicDataSettings.getAttributeMetadataForAttributeNameArray(
+				GenomicDataSettings.Meta.ATTRS_POS, entityMetaData);
+		AttributeMetaData attributeChromosome = genomicDataSettings.getAttributeMetadataForAttributeNameArray(
+				GenomicDataSettings.Meta.ATTRS_CHROM, entityMetaData);
 		return attributeStartPosition != null && attributeChromosome != null;
 	}
 
@@ -531,6 +529,11 @@ public class DataExplorerController extends MolgenisPluginController
 		try
 		{
 			return freemarkerConfigurer.getConfiguration().getTemplate(viewName + ".ftl") != null;
+		}
+		catch (ParseException e)
+		{
+			LOG.info("error parsing template: ", e);
+			return false;
 		}
 		catch (IOException e)
 		{
