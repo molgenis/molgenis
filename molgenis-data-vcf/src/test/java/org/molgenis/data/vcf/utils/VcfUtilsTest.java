@@ -82,10 +82,10 @@ public class VcfUtilsTest
 				new DefaultAttributeMetaData(VcfRepository.FILTER, MolgenisFieldTypes.FieldTypeEnum.STRING));
 		DefaultAttributeMetaData INFO = new DefaultAttributeMetaData(VcfRepository.INFO,
 				MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
-		DefaultAttributeMetaData AA = new DefaultAttributeMetaData("AC", MolgenisFieldTypes.FieldTypeEnum.STRING);
+		DefaultAttributeMetaData AC = new DefaultAttributeMetaData("AC", MolgenisFieldTypes.FieldTypeEnum.STRING);
 		DefaultAttributeMetaData AN = new DefaultAttributeMetaData("AN", MolgenisFieldTypes.FieldTypeEnum.STRING);
 		DefaultAttributeMetaData GTC = new DefaultAttributeMetaData("GTC", MolgenisFieldTypes.FieldTypeEnum.STRING);
-		INFO.addAttributePart(AA);
+		INFO.addAttributePart(AC);
 		INFO.addAttributePart(AN);
 		INFO.addAttributePart(GTC);
 		metaDataCanAnnotate.addAttributeMetaData(INFO);
@@ -100,8 +100,9 @@ public class VcfUtilsTest
 				new DefaultAttributeMetaData(VcfRepository.ID, MolgenisFieldTypes.FieldTypeEnum.STRING));
 		annotatedEntityMetadata.addAttributeMetaData(
 				new DefaultAttributeMetaData(VcfRepository.QUAL, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		annotatedEntityMetadata.addAttributeMetaData(
-				new DefaultAttributeMetaData(VcfRepository.FILTER, MolgenisFieldTypes.FieldTypeEnum.STRING));
+		annotatedEntityMetadata.addAttributeMetaData((new DefaultAttributeMetaData(VcfRepository.FILTER,
+				MolgenisFieldTypes.FieldTypeEnum.STRING)).setDescription("Test that description is not: '"
+				+ VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION + "'"));
 		INFO.addAttributePart(new DefaultAttributeMetaData("ANNO", MolgenisFieldTypes.FieldTypeEnum.STRING));
 		annotatedEntityMetadata.addAttributeMetaData(INFO);
 
