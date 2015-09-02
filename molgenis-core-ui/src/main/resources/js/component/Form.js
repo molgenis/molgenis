@@ -79,7 +79,7 @@
 			}
 			
 			if(resetProps){
-				var newState = {
+				var resetState = {
 					errorMessages : {},
 					validate: false,
 					showModal: true,
@@ -87,7 +87,7 @@
 				};
 				
 				// Reset state form component
-				this.setState(newState);
+				this.setState(resetState);
 			}
 		},
 		getInitialState: function() {
