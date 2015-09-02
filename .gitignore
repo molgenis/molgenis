@@ -19,7 +19,7 @@ molgenis-app-omx/data
 molgenis-app-ngs/data
 test-output/
 derby.log
-
+.metadata/
 .RData
 .RHistory
 molgenis-data-mysql/.factorypath
