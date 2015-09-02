@@ -136,7 +136,7 @@
 ##INFO=<ID=ALT,Number=.,Type=String,Description="Description not provided">
 ##INFO=<ID=ID,Number=.,Type=String,Description="Description not provided">
 ##INFO=<ID=QUAL,Number=.,Type=String,Description="Description not provided">
-##INFO=<ID=FILTER,Number=.,Type=String,Description="Test that description is not: 'Description is not provided'">
+##INFO=<ID=FILTER,Number=.,Type=String,Description="Test that description is not: 'Description not provided'">
 ##INFO=<ID=AC,Number=.,Type=String,Description="Description not provided">
 ##INFO=<ID=AN,Number=.,Type=String,Description="Description not provided">
 ##INFO=<ID=GTC,Number=.,Type=String,Description="Description not provided">
