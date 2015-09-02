@@ -2,6 +2,8 @@ package org.molgenis.data.annotation.resources.impl;
 
 import static org.mockito.Mockito.when;
 
+import java.io.File;
+
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.Query;
@@ -12,8 +14,6 @@ import org.molgenis.util.ResourceUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.io.File;
 
 public class ResourceImplTest
 {
@@ -68,7 +68,7 @@ public class ResourceImplTest
 	@Test
 	public void testFindAllReturnsResult()
 	{
-		File file = ResourceUtils.getFile(getClass(), "/gonl.chr1.snps_indels.r5.vcf.gz");
+		File file = ResourceUtils.getFile(getClass(), "/gonl/gonl.chr1.snps_indels.r5.vcf.gz");
 		when(config.getFile()).thenReturn(file);
 		Query query = QueryImpl.EQ("#CHROM", "1").and().eq("POS", 126108);
 
