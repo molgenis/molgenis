@@ -33,7 +33,7 @@ public class EdgeCaseExacCmdLineAnnotatorIT
 		CmdLineAnnotator.main(new String[]
 		{ name, resourceLocation, inputFile, outputFile });
 
-		assertEquals(readLines(expectedOutputFile), readLines(outputFile));
+		assertEquals(readLines(outputFile), readLines(expectedOutputFile));
 	}
 
 	private List<String> readLines(String file) throws IOException

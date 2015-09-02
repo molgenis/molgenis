@@ -30,7 +30,7 @@ public class ThousandGenomesAnnotator
 {
 	public static final String THOUSAND_GENOME_AF = "Thousand_Genomes_AF";
 	public static final String THOUSAND_GENOME_AF_LABEL = "Thousand genome allele frequency";
-	public static final String THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME = VcfRepository.getInfoPrefix() + "AF";
+	public static final String THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME = "AF";
 	public static final String THOUSAND_GENOME_CHROMOSOME_PROPERTY = "thousand_genome_chromosomes";
 	public static final String THOUSAND_GENOME_FILE_PATTERN_PROPERTY = "thousand_genome_file_pattern";
 	public static final String THOUSAND_GENOME_FOLDER_PROPERTY = "thousand_genome_root_directory";

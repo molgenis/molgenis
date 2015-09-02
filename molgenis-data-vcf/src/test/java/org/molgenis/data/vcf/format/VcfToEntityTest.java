@@ -75,13 +75,13 @@ public class VcfToEntityTest
 		DefaultAttributeMetaData infoMetaData = new DefaultAttributeMetaData(INFO,
 				MolgenisFieldTypes.FieldTypeEnum.COMPOUND).setNillable(true);
 
-		DefaultAttributeMetaData infoNS = new DefaultAttributeMetaData("INFO_NS", MolgenisFieldTypes.FieldTypeEnum.INT)
+		DefaultAttributeMetaData infoNS = new DefaultAttributeMetaData("NS", MolgenisFieldTypes.FieldTypeEnum.INT)
 				.setNillable(true).setDescription("Number of Samples With Data");
 		infoMetaData.addAttributePart(infoNS);
-		DefaultAttributeMetaData infoDF = new DefaultAttributeMetaData("INFO_DF", MolgenisFieldTypes.FieldTypeEnum.BOOL)
+		DefaultAttributeMetaData infoDF = new DefaultAttributeMetaData("DF", MolgenisFieldTypes.FieldTypeEnum.BOOL)
 				.setNillable(false).setDescription("Flag field");
 		infoMetaData.addAttributePart(infoDF);
-		DefaultAttributeMetaData infoDF2 = new DefaultAttributeMetaData("INFO_DF2",
+		DefaultAttributeMetaData infoDF2 = new DefaultAttributeMetaData("DF2",
 				MolgenisFieldTypes.FieldTypeEnum.BOOL).setNillable(false).setDescription("Flag field 2");
 		infoMetaData.addAttributePart(infoDF2);
 
@@ -109,9 +109,29 @@ public class VcfToEntityTest
 		expected.set("QUAL", "7.9123");
 		expected.set("ID", "id3");
 		expected.set("INTERNAL_ID", entity.get("INTERNAL_ID"));
-		expected.set("INFO_DF", true);
+		expected.set("DF", true);
 		// Flag fields whose flag is not present are set to false
-		expected.set("INFO_DF2", false);
+		expected.set("DF2", false);
+		assertEquals(entity, expected);
+	}
+
+	@Test
+	public void testToEntityAlternativeAlleles() throws IOException
+	{
+		VcfRecord record = new VcfRecord(vcfMetaSmall, new String[]
+		{ "10", "12345", "id3", "A", "A,C,G,T,N,*", "7.9123", "pass", "DF;DF2" });
+		Entity entity = vcfToEntitySmall.toEntity(record);
+		Entity expected = new MapEntity(vcfToEntitySmall.getEntityMetaData());
+		expected.set("#CHROM", "10");
+		expected.set("ALT", "A,C,G,T,N,*");
+		expected.set("POS", 12345);
+		expected.set("REF", "A");
+		expected.set("FILTER", "pass");
+		expected.set("QUAL", "7.9123");
+		expected.set("ID", "id3");
+		expected.set("INTERNAL_ID", entity.get("INTERNAL_ID"));
+		expected.set("INFO_DF", true);
+		expected.set("INFO_DF2", true);
 		assertEquals(entity, expected);
 	}
 }

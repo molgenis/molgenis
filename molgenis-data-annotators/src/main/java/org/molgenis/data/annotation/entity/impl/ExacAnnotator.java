@@ -38,9 +38,9 @@ public class ExacAnnotator
 	public static final String EXAC_AF_LABEL = "ExAC allele frequency";
 	public static final String EXAC_AC_HOM_LABEL = "ExAC homozygous alternative genotype count";
 	public static final String EXAC_AC_HET_LABEL = "ExAC heterozygous genotype count";
-	public static final String EXAC_AF_ResourceAttributeName = VcfRepository.getInfoPrefix() + "AF";
-	public static final String EXAC_AC_HOM_ResourceAttributeName = VcfRepository.getInfoPrefix() + "AC_Hom";
-	public static final String EXAC_AC_HET_ResourceAttributeName = VcfRepository.getInfoPrefix() + "AC_Het";
+	public static final String EXAC_AF_ResourceAttributeName = "AF";
+	public static final String EXAC_AC_HOM_ResourceAttributeName = "AC_Hom";
+	public static final String EXAC_AC_HET_ResourceAttributeName = "AC_Het";
 
 	public static final String EXAC_FILE_LOCATION_PROPERTY = "exac_location";
 	public static final String EXAC_TABIX_RESOURCE = "EXACTabixResource";
