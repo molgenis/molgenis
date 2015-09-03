@@ -83,7 +83,7 @@ class Connect_Molgenis():
                     security.require_username('Username')
                     security.require_password('Password')
                     self.api_url = server_url+'/api/v1'
-                    self.headers = self._construct_login_header()
+                    self._construct_login_header()
                     self.entity_meta_data = {}
                     self.column_meta_data = {}
                     self.added_rows = 0
@@ -137,7 +137,7 @@ class Connect_Molgenis():
                 return headers
             
             def logout(self):
-                server_response = self.session.get(self.api_url+'/logout/', headers=self.headers)
+                server_response = self.session.get(self.api_url+'/logout/')
                 self.check_server_response(server_response, 'logout')
                 return server_response
             
@@ -159,7 +159,8 @@ class Connect_Molgenis():
                         error_message = str(server_response)+' -> '+server_response.reason+'\n'
                         if 'errors' in server_response_json:
                             if data_used:
-                                error_message += 'Used data: '+str(data_used)+'\n'
+                                if not ('Bad Request' in error_message and self.only_warn_duplicates):
+                                    error_message += 'Used data: '+str(data_used)+'\n'
                             if entity_used:
                                 error_message += 'Used Entity: '+str(entity_used)+'\n'
                             if query_used:
@@ -168,10 +169,6 @@ class Connect_Molgenis():
                                 error_message += 'Used column: '+str(column_used)+'\n'
                             for error in server_response_json['errors']:
                                 error_message += error['message']+'\n'
-                                # below commented problems gives recursion depth exceeded error, have to fix that before uncommenting
-                                #if 'Not Found' in error_message:
-                                    #if entity_used: 
-                                        #error_message += 'Available columns for entity \''+entity_used+'\': '+', '.join(self.get_column_names(entity_used))
                                 # bug in error response when wrong enum value. Remove wrong part of message and add sensible one 
                                 # This should be obsolete as wrong error message has been fixed in the api, can be removed after testing
                                 if 'Invalid enum value' in error_message:
@@ -253,12 +250,15 @@ class Connect_Molgenis():
                 except Exception as e:
                     if self.only_warn_duplicates:
                         if 'Duplicate value' in str(e):
-                            message = 'Duplicate value not added, instead return id of already existing row\n'
-                            message += 'Tried to insert into '+str(entity_name)+' with data:\n'+str(data)
+                            message = 'Duplicate value not added, instead return id of already existing row'
+                            #message += 'Tried to insert into '+str(entity_name)+' with data:\n'+str(data)
                             self.logger.debug(message)
                             unqiue_att = re.search("Duplicate value '(\S+?)' for unique attribute '(\S+?)'", str(e))
-                            row = self.query_entity_rows(entity_name, query = [{'field':unqiue_att.group(2), 'operator':'EQUALS', 'value':unqiue_att.group(1)}])['items'][0]
+                            query = [{'field':unqiue_att.group(2), 'operator':'EQUALS', 'value':unqiue_att.group(1)}]
+                            row = self.query_entity_rows(entity_name, query = query)['items'][0]
                             added_id = row[self.get_id_attribute(entity_name)]
+                            if not added_id:
+                                raise Exception('No results found with query:')
                             self.logger.debug('id found for row with duplicate value: '+str(added_id))
                         else:
                             raise
@@ -272,8 +272,7 @@ class Connect_Molgenis():
                 Args:
                     entity_name (string): Name of the entity where row should be added
                     json_data (dict): Key = column name, value = column value
-                    validate_json (bool): If True, check if the given data keys correspond with the column names of entity_name.
-                                      If adding entity rows seems slow, try setting to False (def: False)
+                    validate_json (bool): If True, check if the given data keys correspond with the column names of entity_name. (def: False)
                     add_datetime (bool): If True, add a datetime to the column <datetime_column> (def: False)
                     datetime_column (str): column name where to add datetime
                     added_by (bool): If true, add the login name of the person that updated the record
@@ -288,17 +287,18 @@ class Connect_Molgenis():
                     added_by = self._added_by_default
                 if timeit.default_timer()-self.login_time > 30*60:
                     # molgenis login head times out after a certain time, so after 30 minutes resend login request
-                    self.headers = self._construct_login_header()
-                # make a string of json data (dictionary) with key=column name and value=value you want (works for 1 individual, Jonatan is going to find out how to to it with multiple)
+                    self._construct_login_header()
+                # make a string of json data (dictionary) with key=column name and value=value you want (works for 1 row)
                 # post to the entity with the json data
                 if validate_json:
                     self.validate_data(entity_name, data)
                 data = self._sanitize_data(data, add_datetime, datetime_column, added_by, added_by_column)
                 request_url = self.api_url+'/'+entity_name+'/'
-                server_response = self.session.post(request_url, data=json.dumps(data), headers=self.headers)
+                server_response = self.session.post(request_url, data=json.dumps(data))
                 self.added_rows += 1
                 added_id = self.add_entity_row_or_file_server_response(entity_name, data, server_response)
                 return added_id
+            
             def add_file(self, file_path, description, entity_name, extra_data=None, file_name=None, add_datetime=False, datetime_column='datetime_added', added_by=None, added_by_column='added_by'):
                 '''Add a file to entity File.
                 
@@ -331,18 +331,19 @@ class Connect_Molgenis():
                 if not os.path.isfile(file_path):
                     self.logger.error('File not found: '+str(file_path))
                     raise IOError('File not found: '+str(file_path))
-                file_post_header = copy.deepcopy(self.headers)
+                file_post_header = copy.deepcopy(self.session.headers)
+                old_header = copy.deepcopy(self.session.headers)
                 del(file_post_header['Accept'])
                 del(file_post_header['Content-type'])
-                self.session.headers = {}
+                self.session.headers = file_post_header
                 data = {'description': description}
                 if extra_data:
                     data.update(extra_data)
                 data = self._sanitize_data(data, add_datetime, datetime_column, added_by, added_by_column)
                 server_response = self.session.post(self.api_url+'/'+entity_name, 
                                                 files={'attachment':(os.path.basename(file_path), open(file_path,'rb'))},
-                                                data=data,
-                                                headers = file_post_header)
+                                                data=data)
+                self.session.headers = old_header
                 added_id = self.add_entity_row_or_file_server_response(entity_name, data, server_response)
                 return added_id
                 
@@ -363,7 +364,7 @@ class Connect_Molgenis():
                     self.logger.error('Can\'t search with empty query')
                     raise ValueError('Can\'t search with empty query')
                 json_query = json.dumps({'q':query})
-                server_response = self.session.post(self.api_url+'/'+entity_name+'?_method=GET', data = json_query, headers=self.headers)
+                server_response = self.session.post(self.api_url+'/'+entity_name+'?_method=GET', data = json_query)
                 server_response_json = server_response.json()
                 self.check_server_response(server_response, 'Get rows from entity',entity_used=entity_name, query_used=json_query)
                 if server_response_json['total'] >= server_response_json['num']:
@@ -388,7 +389,7 @@ class Connect_Molgenis():
                 TODO:
                     More difficult get queries
                 '''
-                server_response = self.session.get(self.api_url+'/'+entity_name, headers=self.headers)
+                server_response = self.session.get(self.api_url+'/'+entity_name)
                 server_response_json = server_response.json()
                 self.check_server_response(server_response, 'Get rows from entity',entity_used=entity_name)
                 if server_response_json['total'] >= server_response_json['num']:
@@ -397,49 +398,55 @@ class Connect_Molgenis():
                     self.logger.info('Selected '+str(server_response_json['total'])+' row(s).')
                 return server_response_json
             _updated_by_default = False
-            def update_entity_rows(self, entity_name, query, data, add_datetime=None, datetime_column='datetime_last_updated', updated_by = None, updated_by_column='updated_by'):
-                '''Update an entity row
+            def update_entity_rows(self, entity_name, data, row_id = None, query_list=None, add_datetime=None, datetime_column='datetime_last_updated', updated_by = None, updated_by_column='updated_by', validate_json=False):
+                '''Update an entity row, either by giving the attribute id name and the id for the row to update, or a query for which row to update
             
                 Args:
                     entity_name (string): Name of the entity to update
-                    query (list): List of dictionaries which contain query to select the row to update (see documentation of query_entity_rows)
                     data (dict):  Key = column name, value = column value
-                    updated_by (bool): If true, add the login name of the person that updated the record
-                    updated_by_column (string): column name where to add name of person that updated record
+                    id_attribute: The id_attribute name for the entity which you want to update the row
+                    row_id: The row id value (from id_attribute)
+                    query_list (list): List of dictionaries which contain query to select the row to update (see documentation of query_entity_rows)  (def:None)
+                    add_datetime (bool): If true, add datetime to the column datetime_column (def: False)
+                    updated_by (bool): If true, add the login name of the person that updated the record (def: False)
+                    datetime_column (string): Column name where to add datetime to if update_by=True (def: datetime_column)
+                    updated_by_column (string): column name where to add name of person that updated record (def: updated_by)
+                    validate_json (bool): If True, check if the given data keys correspond with the column names of entity_name. (def: False)
                 '''
+                data = self._sanitize_data(data, add_datetime, datetime_column, updated_by, updated_by_column)
+                id_attribute = self.get_id_attribute(entity_name)
                 if not add_datetime:
                     add_datetime = self._add_datetime_default
                 if not updated_by:
                     updated_by = self._updated_by_default
-                self.validate_data(entity_name, data)
-                entity_data = self.query_entity_rows(entity_name, query)
-                if len(entity_data['items']) == 0:
-                    self.logger.error('Query returned 0 results, no row to update.')
-                    raise Exception('Query returned 0 results, no row to update.')
-                data = self._sanitize_data(data, add_datetime, datetime_column, updated_by, updated_by_column)
-                id_attribute = self.get_id_attribute(entity_name)
+                if validate_json:
+                    self.validate_data(entity_name, data)
                 server_response_list = [] 
-                for entity_items in entity_data['items']:
-                    row_id = entity_items[id_attribute]
+                if row_id:
+                    if query_list:
+                        logging.warn('Both row_id and query_list set, will use only row_id')
                     for key in data:
-                        server_response = self.session.put(self.api_url+'/'+entity_name+'/'+str(row_id)+'/'+key, data='"'+str(data[key])+'"', headers=self.headers)
+                        server_response = self.session.put(self.api_url+'/'+entity_name+'/'+str(row_id)+'/'+key, data='"'+data[key]+'"')
+                        self.check_server_response(server_response, 'Update entity: %s, attribute: %s' % (entity_name,id_attribute),data_used=[self.api_url+'/'+entity_name+'/'+str(row_id)+'/'+key, '"'+data[key]+'"'],entity_used=entity_name)                
                         server_response_list.append(server_response)
-                        self.check_server_response(server_response, 'Update entity row', query_used=query,data_used=[self.api_url+'/'+entity_name+'/'+str(row_id)+'/'+key, '"'+str(data[key])+'"'],entity_used=entity_name)                
-                    # BELOW IS LEGACY CODE
-                    #else:
-                    #    self.logger.error('Updating multiple values at the same time not implemented yet'
-                    #                     +'Trying to update following data:\n'+str(data))
-                    #    raise NotImplementedError('Updating multiple values at the same time not implemented yet'
-                    #                             +'Trying to update following data:\n'+str(data))
-                        # if trying to update multiple columns, column values that are not given will be overwritten with null, so we need to add the existing column data into our dict
-                        # DOES NOT WORK FOR X/MREFS!!!
-                    #   for key in entity_items:
-                    #        if key != id_attribute and key not in data and key!='previous_individuals':
-                    #            data[key.encode('ascii')] = str(entity_items[key]).encode('ascii')
-                    #    server_response = requests.put(self.api_url+'/'+entity_name+'/'+row_id+'/', data=json.dumps(data), headers=self.headers)
-                    #    server_response_list.append(server_response)
-                    #    self.check_server_response(server_response, 'Update entity row (multiple values)', query_used=query,data_used=data,entity_used=entity_name)
-                return server_response_list
+                    return server_response_list
+                elif query_list:
+                    queries = []
+                    for query in query_list:
+                        queries.append(self._sanitize_data(query, False, False, False, False))
+                    entity_data = self.query_entity_rows(entity_name, queries)
+                    if len(entity_data['items']) == 0:
+                        self.logger.error('Query returned 0 results, no row to update.')
+                        raise Exception('Query returned 0 results, no row to update.')
+                    for entity_item in entity_data['items']:
+                        id_attribute = entity_item[id_attribute]
+                        for key in data:
+                            server_response = self.session.put(self.api_url+'/'+entity_name+'/'+str(entity_item[str(id_attribute)])+'/'+key, data='"'+data[key]+'"')
+                            server_response_list.append(server_response)
+                            self.check_server_response(server_response, 'Update entity: %s, attribute: %s' % (entity_name,id_attribute), query_used=queries,data_used=[self.api_url+'/'+entity_name+'/'+str(entity_item[str(id_attribute)])+'/'+key, '"'+data[key]+'"'],entity_used=entity_name)                
+                    return server_response_list
+                else:
+                    raise ValueError('update_entity_rows function called without setting either row_id or query_list (one of the two needed to know which row to update)')
         
             def get_entity_meta_data(self, entity_name):
                 '''Get metadata from entity
@@ -452,7 +459,7 @@ class Connect_Molgenis():
                 '''
                 if entity_name in self.entity_meta_data:
                     return self.entity_meta_data[entity_name]
-                server_response = self.session.get(self.api_url+'/'+entity_name+'/meta', headers=self.headers)
+                server_response = self.session.get(self.api_url+'/'+entity_name+'/meta')
                 self.check_server_response(server_response, 'Get meta data of entity',entity_used=entity_name)
                 entity_meta_data = server_response.json()
                 self.entity_meta_data[entity_name] = entity_meta_data
@@ -486,7 +493,7 @@ class Connect_Molgenis():
                 '''
                 if entity_name+column_name in self.column_meta_data:
                     return self.column_meta_data[entity_name+column_name]
-                server_response = self.session.get(self.api_url+'/'+entity_name+'/meta/'+column_name, headers=self.headers)
+                server_response = self.session.get(self.api_url+'/'+entity_name+'/meta/'+column_name)
                 self.check_server_response(server_response, 'Get meta data of column',entity_used=entity_name,column_used=column_name)
                 column_meta_data = server_response.json()
                 self.column_meta_data[entity_name+column_name] = column_meta_data
@@ -500,7 +507,7 @@ class Connect_Molgenis():
                 '''Get info of all entities 
                 '''
                 raise NotImplementedError('Not implemented yet, returns a max number (~450ish) entities, so if more entities are present (e.g. many packages available), not all entities are returned')
-                server_response = self.session.get(self.api_url+'/entities/', headers=self.headers)
+                server_response = self.session.get(self.api_url+'/entities/')
                 self.check_server_response(server_response, 'Get info from all entities')
                 return server_response
             
@@ -558,7 +565,7 @@ class Connect_Molgenis():
                 id_attribute = self.get_id_attribute(entity_name)
                 for rows in entity_data['items']:
                     row_id = rows[id_attribute]
-                    server_response = self.session.delete(self.api_url+'/'+entity_name+'/'+str(row_id)+'/', headers=self.headers)
+                    server_response = self.session.delete(self.api_url+'/'+entity_name+'/'+str(row_id)+'/')
                     self.check_server_response(server_response, 'Delete entity row',entity_used=entity_name,query_used=query_used)
                     server_response_list.append(server_response)
                 return server_response_list
