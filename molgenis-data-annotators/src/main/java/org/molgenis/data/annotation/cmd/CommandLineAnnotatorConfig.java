@@ -11,6 +11,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.utils.JarRunner;
+import org.molgenis.data.annotation.utils.JarRunnerImpl;
 import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.framework.server.MolgenisSettings;

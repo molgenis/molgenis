@@ -1,0 +1,5 @@
+##fileformat=VCFv4.1
+##INFO=<ID=GoNL_GTC,Number=.,Type=String,Description="The allele frequency for variants seen in the population used for the GoNL project">
+##INFO=<ID=GoNL_AF,Number=.,Type=String,Description="The allele frequency for variants seen in the population used for the GoNL project">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	249239510	test	C	G	.	.	GoNL_GTC=488,10,0;GoNL_AF=0.010040160642570281;

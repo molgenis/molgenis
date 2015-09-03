@@ -130,9 +130,7 @@ public class CrudRepositoryAnnotator
 	}
 
 	/**
-	 * Adds a new compound attribute to an existing mysql CrudRepository which is part of the
-	 * {@link #mysqlRepositoryCollection} or an existing CrudRepository which is not part of
-	 * {@link #mysqlRepositoryCollection}.
+	 * Adds a new compound attribute to an existing CrudRepository
 	 *
 	 * @param entityMetaData
 	 *            {@link EntityMetaData} for the existing repository

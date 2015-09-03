@@ -1,5 +1,9 @@
 package org.molgenis.data.annotator.tabix;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.molgenis.data.vcf.VcfRepository.CHROM;
+import static org.molgenis.data.vcf.VcfRepository.POS;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -15,7 +19,6 @@ import org.molgenis.data.Query;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.vcf.VcfRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +33,8 @@ public class TabixRepository extends AbstractRepository
 
 	private TabixReader reader;
 	private EntityMetaData entityMetaData;
+	private final String chromosomeAttributeName;
+	private final String positionAttributeName;
 
 	/**
 	 * Creates a new {@link TabixRepository}
@@ -43,8 +48,25 @@ public class TabixRepository extends AbstractRepository
 	 */
 	public TabixRepository(File file, EntityMetaData entityMetaData) throws IOException
 	{
+		this(file, entityMetaData, CHROM, POS);
+	}
+
+	public TabixRepository(File file, EntityMetaData entityMetaData, String chromosomeAttributeName,
+			String positionAttributeName) throws IOException
+	{
 		this.entityMetaData = entityMetaData;
 		this.reader = new TabixReader(file.getAbsolutePath());
+		this.chromosomeAttributeName = checkNotNull(chromosomeAttributeName);
+		this.positionAttributeName = checkNotNull(positionAttributeName);
+	}
+
+	TabixRepository(TabixReader reader, EntityMetaData entityMetaData, String chromosomeAttributeName,
+			String positionAttributeName)
+	{
+		this.reader = checkNotNull(reader);
+		this.entityMetaData = checkNotNull(entityMetaData);
+		this.chromosomeAttributeName = checkNotNull(chromosomeAttributeName);
+		this.positionAttributeName = checkNotNull(positionAttributeName);
 	}
 
 	public static CSVParser getCsvParser()
@@ -67,8 +89,8 @@ public class TabixRepository extends AbstractRepository
 	@Override
 	public Iterable<Entity> findAll(Query q)
 	{
-		String chromValue = getFirstEqualsValueFor(VcfRepository.CHROM, q).toString();
-		long posValue = Long.parseLong(getFirstEqualsValueFor(VcfRepository.POS, q).toString());
+		String chromValue = getFirstEqualsValueFor(chromosomeAttributeName, q).toString();
+		long posValue = Long.parseLong(getFirstEqualsValueFor(positionAttributeName, q).toString());
 		return query(chromValue, Long.valueOf(posValue));
 	}
 
@@ -92,7 +114,15 @@ public class TabixRepository extends AbstractRepository
 			String line = iterator.next();
 			while (line != null)
 			{
-				builder.add(toEntity(line));
+				Entity entity = toEntity(line);
+				if (entity.getLong(positionAttributeName) == pos)
+				{
+					builder.add(entity);
+				}
+				else
+				{
+					LOG.warn("TabixReader returns entity that does not match the query!");
+				}
 				line = iterator.next();
 			}
 		}
@@ -102,7 +132,7 @@ public class TabixRepository extends AbstractRepository
 		}
 		catch (NullPointerException e)
 		{
-			LOG.error("Error reading from tabix reader for query: " + queryString, e);
+			LOG.error("Error reading from tabix reader for query: " + queryString);
 		}
 		catch (ArrayIndexOutOfBoundsException e)
 		{
