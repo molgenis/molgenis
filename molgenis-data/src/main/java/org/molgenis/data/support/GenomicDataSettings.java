@@ -28,7 +28,7 @@ public class GenomicDataSettings extends DefaultSettingsEntity
 		if (attrNamesStr != null)
 		{
 			Set<String> attrNames = Sets.newHashSet(attrNamesStr.split(","));
-			for (AttributeMetaData attr : metadata.getAttributes())
+			for (AttributeMetaData attr : metadata.getAtomicAttributes())
 			{
 				if (attrNames.contains(attr.getName()))
 				{

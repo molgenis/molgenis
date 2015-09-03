@@ -116,7 +116,10 @@ public class VcfToEntity
 			}
 			DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(
 					info.getId()+postFix, vcfReaderFormatToMolgenisType(info)).setAggregateable(true);
-			attributeMetaData.setDescription(info.getDescription());
+			
+			attributeMetaData
+					.setDescription(StringUtils.isBlank(info.getDescription()) ? VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION : info
+							.getDescription());
 			metadataInfoField.add(attributeMetaData);
 		}
 		infoMetaData.setAttributesMetaData(metadataInfoField);
