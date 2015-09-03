@@ -76,8 +76,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			EntityMapping mapping, AttributeMetaData targetAttribute)
 	{
 		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttribute.getName());
-		Map<AttributeMetaData, Iterable<ExplainedQueryString>> matches = semanticSearchService
-				.explainAttributes(sourceEntityMetaData, targetEntityMetaData, targetAttribute);
+		Map<AttributeMetaData, Iterable<ExplainedQueryString>> matches = semanticSearchService.findAttributes(
+				sourceEntityMetaData, targetEntityMetaData, targetAttribute);
 
 		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(targetEntityMetaData,
 				targetAttribute);
@@ -129,6 +129,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			}
 			AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttribute.getName());
 			attributeMapping.setAlgorithm(algorithm);
+			attributeMapping.getSourceAttributeMetaDatas().add(source);
 
 			if (isSingleMatchHighQuality(targetAttribute, tagsForAttribute, entry.getValue()))
 			{
