@@ -11,6 +11,7 @@ import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.filter.MultiAllelicResultFilter;
+import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.query.LocusQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
@@ -30,7 +31,7 @@ public class ExacAnnotator
 
 	public static final String EXAC_AF = "EXAC_AF";
 	public static final String EXAC_AF_LABEL = "ExAC allele frequency";
-	public static final String EXAC_AF_ResourceAttributeName = VcfRepository.getInfoPrefix() + "AF";
+	public static final String EXAC_AF_ResourceAttributeName = "AF";
 
 	public static final String EXAC_FILE_LOCATION_PROPERTY = "exac_location";
 	public static final String EXAC_TABIX_RESOURCE = "EXACTabixResource";
@@ -45,9 +46,9 @@ public class ExacAnnotator
 	@Bean
 	public RepositoryAnnotator exac()
 	{
-		// TODO: description
+
 		DefaultAttributeMetaData outputAttribute = new DefaultAttributeMetaData(EXAC_AF, FieldTypeEnum.STRING)
-				.setDescription("TODO").setLabel(EXAC_AF_LABEL);
+				.setDescription("The ExAC allele frequency").setLabel(EXAC_AF_LABEL);
 
 		AnnotatorInfo exacInfo = AnnotatorInfo
 				.create(Status.READY,
@@ -66,7 +67,8 @@ public class ExacAnnotator
 				Collections.singletonList(new DefaultAttributeMetaData(EXAC_AF_ResourceAttributeName,
 						FieldTypeEnum.DECIMAL)));
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(EXAC_TABIX_RESOURCE, exacInfo, locusQueryCreator,
-				multiAllelicResultFilter, dataService, resources)
+				multiAllelicResultFilter, dataService, resources,
+				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(EXAC_FILE_LOCATION_PROPERTY, molgenisSettings))
 		{
 			@Override
 			protected Object getResourceAttributeValue(AttributeMetaData attr, Entity sourceEntity)

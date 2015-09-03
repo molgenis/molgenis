@@ -27,7 +27,7 @@ import org.testng.annotations.Test;
 public class VcfUtilsTest
 {
 	private static final Logger LOG = LoggerFactory.getLogger(VcfUtilsTest.class);
-	private DefaultEntityMetaData annotatedEntityMetadata = new DefaultEntityMetaData("test");
+	private final DefaultEntityMetaData annotatedEntityMetadata = new DefaultEntityMetaData("test");
 	public DefaultEntityMetaData metaDataCanAnnotate = new DefaultEntityMetaData("test");
 	public DefaultEntityMetaData metaDataCantAnnotate = new DefaultEntityMetaData("test");
 
@@ -82,10 +82,10 @@ public class VcfUtilsTest
 				new DefaultAttributeMetaData(VcfRepository.FILTER, MolgenisFieldTypes.FieldTypeEnum.STRING));
 		DefaultAttributeMetaData INFO = new DefaultAttributeMetaData(VcfRepository.INFO,
 				MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
-		DefaultAttributeMetaData AA = new DefaultAttributeMetaData("AC", MolgenisFieldTypes.FieldTypeEnum.STRING);
+		DefaultAttributeMetaData AC = new DefaultAttributeMetaData("AC", MolgenisFieldTypes.FieldTypeEnum.STRING);
 		DefaultAttributeMetaData AN = new DefaultAttributeMetaData("AN", MolgenisFieldTypes.FieldTypeEnum.STRING);
 		DefaultAttributeMetaData GTC = new DefaultAttributeMetaData("GTC", MolgenisFieldTypes.FieldTypeEnum.STRING);
-		INFO.addAttributePart(AA);
+		INFO.addAttributePart(AC);
 		INFO.addAttributePart(AN);
 		INFO.addAttributePart(GTC);
 		metaDataCanAnnotate.addAttributeMetaData(INFO);
@@ -100,9 +100,10 @@ public class VcfUtilsTest
 				new DefaultAttributeMetaData(VcfRepository.ID, MolgenisFieldTypes.FieldTypeEnum.STRING));
 		annotatedEntityMetadata.addAttributeMetaData(
 				new DefaultAttributeMetaData(VcfRepository.QUAL, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		annotatedEntityMetadata.addAttributeMetaData(
-				new DefaultAttributeMetaData(VcfRepository.FILTER, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		INFO.addAttributePart(new DefaultAttributeMetaData("INFO_ANNO", MolgenisFieldTypes.FieldTypeEnum.STRING));
+		annotatedEntityMetadata.addAttributeMetaData((new DefaultAttributeMetaData(VcfRepository.FILTER,
+				MolgenisFieldTypes.FieldTypeEnum.STRING)).setDescription("Test that description is not: '"
+				+ VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION + "'"));
+		INFO.addAttributePart(new DefaultAttributeMetaData("ANNO", MolgenisFieldTypes.FieldTypeEnum.STRING));
 		annotatedEntityMetadata.addAttributeMetaData(INFO);
 
 		entity1.set(VcfRepository.CHROM, "1");
@@ -148,7 +149,7 @@ public class VcfUtilsTest
 
 			File inputVcfFile = new File(ResourceUtils.getFile(getClass(), "/testWriter.vcf").getPath());
 
-			VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, Collections.emptyList(), "");
+			VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, Collections.emptyList());
 
 			for (Entity entity : entities)
 			{
@@ -171,8 +172,8 @@ public class VcfUtilsTest
 	public void vcfWriterAnnotateTest() throws IOException, MolgenisInvalidFormatException
 	{
 
-		entity1.set("INFO_ANNO", "TEST_test21");
-		entity2.set("INFO_ANNO", "TEST_test22");
+		entity1.set("ANNO", "TEST_test21");
+		entity2.set("ANNO", "TEST_test22");
 		final File outputVCFFile = File.createTempFile("output", ".vcf");
 		try
 		{
@@ -182,7 +183,7 @@ public class VcfUtilsTest
 			File resultVCFWriter = new File(ResourceUtils.getFile(getClass(), "/result_vcfWriter.vcf").getPath());
 
 			VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter,
-					annotatedEntityMetadata.getAttributes(), "INFO_ANNO");
+					annotatedEntityMetadata.getAttributes());
 
 			for (Entity entity : entities)
 			{
