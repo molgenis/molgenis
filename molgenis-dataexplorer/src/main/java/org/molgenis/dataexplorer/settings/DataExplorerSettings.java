@@ -401,9 +401,9 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		}
 	}
 
-	public void setGalaxyUrl(URI rtpValue)
+	public void setGalaxyUrl(URI galaxyUrl)
 	{
-		set(Meta.DATA_GALAXY_URL, rtpValue.toString());
+		set(Meta.DATA_GALAXY_URL, galaxyUrl.toString());
 	}
 
 	public boolean getGenomeBrowser()
