@@ -130,8 +130,8 @@ public class VcfToEntityTest
 		expected.set("QUAL", "7.9123");
 		expected.set("ID", "id3");
 		expected.set("INTERNAL_ID", entity.get("INTERNAL_ID"));
-		expected.set("INFO_DF", true);
-		expected.set("INFO_DF2", true);
+		expected.set("DF", true);
+		expected.set("DF2", true);
 		assertEquals(entity, expected);
 	}
 }
