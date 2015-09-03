@@ -20,9 +20,9 @@ public class ImportedDataToBackendCompatibilityValidator
 		this.dataService = dataService;
 	}
 
-	public void validate(Iterable<EntityMetaData> immutableCollection)
+	public void validate(Iterable<EntityMetaData> entities)
 	{
-		immutableCollection.forEach(entity -> checkIfEntityExists(entity));
+		entities.forEach(entity -> checkIfEntityExists(entity));
 	}
 
 	private void checkIfEntityExists(EntityMetaData entity)
