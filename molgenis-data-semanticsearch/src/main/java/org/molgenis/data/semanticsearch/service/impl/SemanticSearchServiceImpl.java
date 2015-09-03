@@ -24,7 +24,6 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.MetaUtils;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
 import org.molgenis.data.semanticsearch.semantic.Hit;
@@ -70,32 +69,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	private Splitter termSplitter = Splitter.onPattern("[^\\p{IsAlphabetic}]+");
 	private Joiner termJoiner = Joiner.on(' ');
 
-	@Override
-	public Iterable<AttributeMetaData> findAttributes(EntityMetaData sourceEntityMetaData,
-			EntityMetaData targetEntityMetaData, AttributeMetaData targetAttribute)
-	{
-		Iterable<String> attributeIdentifiers = semanticSearchServiceHelper
-				.getAttributeIdentifiers(sourceEntityMetaData);
-
-		QueryRule createDisMaxQueryRule = semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(
-				targetEntityMetaData, targetAttribute);
-
-		List<QueryRule> disMaxQueryRules = Lists.newArrayList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER,
-				Operator.IN, attributeIdentifiers));
-
-		if (createDisMaxQueryRule.getNestedRules().size() > 0)
-		{
-			disMaxQueryRules.addAll(Arrays.asList(new QueryRule(Operator.AND), createDisMaxQueryRule));
-		}
-
-		Iterable<Entity> attributeMetaDataEntities = dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME,
-				new QueryImpl(disMaxQueryRules));
-
-		return MetaUtils.toExistingAttributeMetaData(sourceEntityMetaData, attributeMetaDataEntities);
-	}
-
-	// TODO : remove the findAttributes method later on because of the duplicated code
-	public Map<AttributeMetaData, Iterable<ExplainedQueryString>> explainAttributes(
+	public Map<AttributeMetaData, Iterable<ExplainedQueryString>> findAttributes(
 			EntityMetaData sourceEntityMetaData, EntityMetaData targetEntityMetaData, AttributeMetaData targetAttribute)
 	{
 		Iterable<String> attributeIdentifiers = semanticSearchServiceHelper
