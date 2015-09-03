@@ -8,6 +8,7 @@ import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AbstractRepositoryEntityAnnotator;
+import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 
@@ -58,4 +59,9 @@ public class RepositoryAnnotatorImpl extends AbstractRepositoryEntityAnnotator
 		return entityAnnotator.getInfo();
 	}
 
+	@Override
+	public CmdLineAnnotatorSettingsConfigurer getCmdLineAnnotatorSettingsConfigurer()
+	{
+		return entityAnnotator.getCmdLineAnnotatorSettingsConfigurer();
+	}
 }

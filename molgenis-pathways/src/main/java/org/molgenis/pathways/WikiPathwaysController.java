@@ -69,7 +69,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 			.compile("([A-Z]*\\|)(\\|*[0-9]+\\||\\|+)+([0-9A-Z]+)(\\|*)(.*)");
 
 	private static final String HOMO_SAPIENS = "Homo sapiens";
-	public static final String EFFECT_ATTRIBUTE_NAME = VcfRepository.getInfoPrefix() + "EFF";
+	public static final String EFFECT_ATTRIBUTE_NAME = "EFF";
 	private final WikiPathwaysService wikiPathwaysService;
 	@Autowired
 	private DataService dataService;

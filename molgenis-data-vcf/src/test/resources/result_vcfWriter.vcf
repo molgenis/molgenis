@@ -140,7 +140,7 @@
 ##INFO=<ID=AC,Number=.,Type=String,Description="">
 ##INFO=<ID=AN,Number=.,Type=String,Description="">
 ##INFO=<ID=GTC,Number=.,Type=String,Description="">
-##INFO=<ID=INFO_ANNO,Number=.,Type=String,Description="">
+##INFO=<ID=ANNO,Number=.,Type=String,Description="">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
 1	10050000	test21	G	A	.	PASS	AC=21;AN=22;GTC=0,1,10;ANNO=TEST_test21;
 1	10050001	test22	G	A	.	PASS	ANNO=TEST_test22;
