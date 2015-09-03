@@ -79,9 +79,9 @@ public class ImportWriter
 	public EntityImportReport doImport(EmxImportJob job)
 	{
 		ImportedDataToBackendCompatibilityValidator validator = new ImportedDataToBackendCompatibilityValidator(dataService);
-		validator.validate(job.parsedMetaData.getEntities());
 		
 		RunAsSystemProxy.runAsSystem(() -> {
+			validator.validate(job.parsedMetaData.getEntities());
 			importTags(job.source);
 			return null;
 		});
