@@ -15,6 +15,9 @@ public class SandboxedContext extends Context
 
 		setWrapFactory(new SandboxWrapFactory());
 		setClassShutter(new SandboxClassShutter());
+		// see
+		// http://stackoverflow.com/questions/7000108/is-it-possible-to-set-the-optimization-level-for-rhinoscriptengine-in-java-6
+		setOptimizationLevel(-1);
 	}
 
 }
