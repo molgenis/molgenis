@@ -7,6 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.ImmutableCollection;
 
+/**
+ * This class serves as an early validator. It can check if an entity is valid before we process parsed data into
+ * repositories.
+ *
+ */
 public class ImportedDataToBackendCompatibilityValidator
 {
 	@Autowired
@@ -19,13 +24,20 @@ public class ImportedDataToBackendCompatibilityValidator
 
 	public void validate(ImmutableCollection<EntityMetaData> immutableCollection)
 	{
-		immutableCollection.forEach(entity -> validateEntity(entity));
+		immutableCollection.forEach(entity -> checkIfEntityExists(entity));
 	}
 
-	private void validateEntity(EntityMetaData entity)
+	private void checkIfEntityExists(EntityMetaData entity)
 	{
-		if (dataService.hasRepository(entity.getName()) || dataService.hasRepository(entity.getName().toLowerCase()))
+		if (dataService.hasRepository(entity.getName()))
 		{
+			System.out.println("Test if get here");
+			throw new MolgenisDataException("Entity with name [" + entity.getName()
+					+ "] already exists. Casing is ignored!");
+		}
+		else if (dataService.hasRepository(entity.getName().toLowerCase()))
+		{
+			System.out.println("Test if get here");
 			throw new MolgenisDataException("Entity with name [" + entity.getName()
 					+ "] already exists. Casing is ignored!");
 		}
