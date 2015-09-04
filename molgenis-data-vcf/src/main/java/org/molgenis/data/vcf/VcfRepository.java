@@ -47,6 +47,7 @@ public class VcfRepository extends AbstractRepository
 	public static final String INFO = "INFO";
 	public static final String SAMPLES = "SAMPLES_ENTITIES";
 	public static final String NAME = "NAME";
+	public static final String ORIGINAL_NAME = "ORIGINAL_NAME";
 	public static final String PREFIX = "##";
 
 	public static final AttributeMetaData CHROM_META = new DefaultAttributeMetaData(CHROM,
