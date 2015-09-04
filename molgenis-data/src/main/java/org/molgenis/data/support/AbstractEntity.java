@@ -4,11 +4,14 @@ import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.springframework.beans.BeanUtils;
 
@@ -157,15 +160,23 @@ public abstract class AbstractEntity implements Entity
 	@Override
 	public String toString()
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.append(this.getClass().getSimpleName() + "{");
-		for (String attrName : this.getAttributeNames())
-		{
-			sb.append(attrName + "='" + this.get(attrName) + "', ");
-		}
-		sb.delete(sb.length() - 2, sb.length());
-		sb.append("}");
-		return sb.toString();
+		EntityMetaData entityMetaData = getEntityMetaData();
+		return String.format("%s=[%s]", entityMetaData.getName(), toString(entityMetaData.getAttributes()));
+	}
+
+	public String toString(Iterable<AttributeMetaData> attrs)
+	{
+		return StreamSupport.stream(attrs.spliterator(), false).map(attr -> {
+			String attrName = attr.getName();
+			if (attr.getDataType().getEnumType() == FieldTypeEnum.COMPOUND)
+			{
+				return String.format("%s={%s}", attrName, toString(attr.getAttributeParts()));
+			}
+			else
+			{
+				return String.format("%s=%s", attrName, this.get(attrName));
+			}
+		}).collect(Collectors.joining(","));
 	}
 
 	public static boolean isObjectRepresentation(String objStr)
