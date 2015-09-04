@@ -40,7 +40,9 @@ import net.sf.samtools.util.BlockCompressedInputStream;
 
 public class TabixReader
 {
-	private final String filename;
+	public String mFn;
+	public BlockCompressedInputStream blockCompressedInputStream;
+
 	private int mPreset;
 	private int mSc;
 	private int mBc;
@@ -48,12 +50,18 @@ public class TabixReader
 	private int mMeta;
 	private int mSkip;
 	private String[] mSeq;
+	private TIndex[] mIndex;
 
 	public HashMap<String, Integer> mChr2tid;
 
 	private static int MAX_BIN = 37450;
 	private static int TAD_MIN_CHUNK_GAP = 32768;
 	private static int TAD_LIDX_SHIFT = 14;
+
+	private static boolean less64(final long u, final long v)
+	{ // unsigned 64-bit comparison
+		return (u < v) ^ (u < 0) ^ (v < 0);
+	}
 
 	/**
 	 * The constructor
@@ -63,7 +71,7 @@ public class TabixReader
 	 */
 	public TabixReader(final String filename) throws IOException
 	{
-		this.filename = filename;
+		blockCompressedInputStream = new BlockCompressedInputStream(new File(filename));
 		readIndex(filename);
 	}
 
@@ -96,17 +104,10 @@ public class TabixReader
 		long[] l; // linear index
 	};
 
-	private TIndex[] mIndex;
-
 	private class TIntv
 	{
 		int internalChromosomeID, beginPosition, end;
 	};
-
-	private static boolean less64(final long u, final long v)
-	{ // unsigned 64-bit comparison
-		return (u < v) ^ (u < 0) ^ (v < 0);
-	}
 
 	private static int reg2bins(final int beginposition, final int endPosition, final int[] list)
 	{
@@ -248,7 +249,8 @@ public class TabixReader
 		colon = queryString.indexOf(':');
 		hyphen = queryString.indexOf('-');
 		chr = colon >= 0 ? queryString.substring(0, colon) : queryString;
-		ret[1] = colon >= 0 ? Integer.parseInt(queryString.substring(colon + 1, hyphen >= 0 ? hyphen : queryString.length())) - 1 : 0;
+		ret[1] = colon >= 0 ? Integer.parseInt(queryString.substring(colon + 1,
+				hyphen >= 0 ? hyphen : queryString.length())) - 1 : 0;
 		ret[2] = hyphen >= 0 ? Integer.parseInt(queryString.substring(hyphen + 1)) : 0x7fffffff;
 		ret[0] = chr2tid(chr);
 		return ret;
@@ -329,28 +331,21 @@ public class TabixReader
 
 	public class Iterator
 	{
-		private BlockCompressedInputStream blockCompressedInputStream = null;
 		private int i;
 		private final int internalChromosomeID, beginPosition, endPosition;
 		private final TPair64[] off;
 		private long curr_off;
 		private boolean isEndOfFile;
 
-		public Iterator(final int _internalChromosomeID, final int _beginPosition, final int _endPosition, final TPair64[] _off, final String filename)
+		public Iterator(final int _tid, final int _beg, final int _end, final TPair64[] _off)
 		{
 			i = -1;
 			curr_off = 0;
 			isEndOfFile = false;
 			off = _off;
-			internalChromosomeID = _internalChromosomeID;
-			beginPosition = _beginPosition;
-			endPosition = _endPosition;
-			try {
-				blockCompressedInputStream = new BlockCompressedInputStream(new File(filename));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
+			internalChromosomeID = _tid;
+			beginPosition = _beg;
+			endPosition = _end;
 		}
 
 		public String next() throws IOException
@@ -358,37 +353,47 @@ public class TabixReader
 			if (isEndOfFile) return null;
 			for (;;)
 			{
-				if (curr_off == 0 || !less64(curr_off, off[i].v))
-				{ // then jump to the next chunk
-					if (i == off.length - 1) break; // no more chunks
-					if (i >= 0) assert (curr_off == off[i].v); // otherwise bug
-					if (i < 0 || off[i].v != off[i + 1].u)
-					{ // not adjacent chunks; then seek
-						blockCompressedInputStream.seek(off[i + 1].u);
-						curr_off = blockCompressedInputStream.getFilePointer();
-					}
-					++i;
-				}
-				String s;
-				if ((s = readLine(blockCompressedInputStream)) != null)
+				synchronized (blockCompressedInputStream)
 				{
-					TIntv intv;
-					char[] str = s.toCharArray();
-					curr_off = blockCompressedInputStream.getFilePointer();
-					if (str.length == 0 || str[0] == mMeta) continue;
-					intv = getIntv(s);
-					if (intv.internalChromosomeID != internalChromosomeID || intv.beginPosition >= endPosition) break; // no need to proceed
-					else if (intv.end > beginPosition && intv.beginPosition < endPosition) return s; // overlap; return
+					if (curr_off == 0 || !less64(curr_off, off[i].v))
+					{ // then jump to the next chunk
+						if (i == off.length - 1) break; // no more chunks
+						if (i >= 0) assert (curr_off == off[i].v); // otherwise bug
+						if (i < 0 || off[i].v != off[i + 1].u)
+						{ // not adjacent chunks; then seek
+							blockCompressedInputStream.seek(off[i + 1].u);
+							curr_off = blockCompressedInputStream.getFilePointer();
+						}
+						++i;
+					}
+					else
+					{
+						blockCompressedInputStream.seek(curr_off);
+					}
+					String s;
+					if ((s = readLine(blockCompressedInputStream)) != null)
+					{
+						TIntv intv;
+						char[] str = s.toCharArray();
+						curr_off = blockCompressedInputStream.getFilePointer();
+						if (str.length == 0 || str[0] == mMeta) continue;
+						intv = getIntv(s);
+						if (intv.internalChromosomeID != internalChromosomeID || intv.beginPosition >= endPosition) break; // no
+																															// need
+																															// to
+																															// proceed
+						else if (intv.end > beginPosition && intv.beginPosition < endPosition) return s; // overlap;
+																											// return
+					}
+					else break; // end of file
 				}
-				else break; // end of file
 			}
 			isEndOfFile = true;
-			blockCompressedInputStream.close();
 			return null;
 		}
 	};
 
-	public Iterator query(final int internalChromosomeID, final int beginPosition, final int endPosition, String filename)
+	public Iterator query(final int internalChromosomeID, final int beginPosition, final int endPosition)
 	{
 		TPair64[] off, chunks;
 		long min_off;
@@ -438,7 +443,7 @@ public class TabixReader
 		TPair64[] ret = new TPair64[n_off];
 		for (i = 0; i < n_off; ++i)
 			ret[i] = new TPair64(off[i].u, off[i].v); // in C, this is inefficient
-		return new TabixReader.Iterator(internalChromosomeID, beginPosition, endPosition, ret, filename);
+		return new TabixReader.Iterator(internalChromosomeID, beginPosition, endPosition, ret);
 	}
 
 	public Iterator query(final String queryString)
@@ -447,6 +452,6 @@ public class TabixReader
 		int beginPosition = x[0];
 		int endPosition = x[1];
 		int internalChromosomeID = x[2];
-		return query(beginPosition, endPosition, internalChromosomeID, this.filename);
+		return query(beginPosition, endPosition, internalChromosomeID);
 	}
 }
