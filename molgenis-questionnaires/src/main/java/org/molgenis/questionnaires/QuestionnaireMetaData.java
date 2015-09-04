@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.OwnedEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
-import org.molgenis.security.owned.OwnedEntityMetaData;
 import org.springframework.stereotype.Component;
 
 /**

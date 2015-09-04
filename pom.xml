@@ -735,6 +735,7 @@
         <module>molgenis-disease-matcher</module>
         <module>molgenis-data-examples</module>
         <module>molgenis-scripts</module>
+        <module>molgenis-scripts-core</module>
         <module>molgenis-data-import</module>
         <module>molgenis-data-mapper</module>
         <module>molgenis-pathways</module>
