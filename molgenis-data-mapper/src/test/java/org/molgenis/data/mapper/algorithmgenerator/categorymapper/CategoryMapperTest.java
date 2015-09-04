@@ -1,12 +1,14 @@
 package org.molgenis.data.mapper.algorithmgenerator.categorymapper;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.NonSI;
 import javax.measure.unit.Unit;
 
+import org.elasticsearch.common.collect.Multimaps;
 import org.jscience.physics.amount.Amount;
 import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
 import org.testng.Assert;
@@ -75,23 +77,28 @@ public class CategoryMapperTest
 	@Test
 	public void testConvertDescriptionToAmount()
 	{
-		Assert.assertEquals(CategoryMapperUtil.convertDescriptionToAmount("1-3 per month"),
-				AmountWrapper.create(Amount.rangeOf((double) 1, (double) 3, NonSI.MONTH.inverse())));
+		Assert.assertEquals(
+				CategoryMapperUtil.convertDescriptionToAmount("1-3 per month"),
+				AmountWrapper.create(Amount.rangeOf((double) 1, (double) 3, NonSI.MONTH.inverse()).to(
+						NonSI.WEEK.inverse())));
 
-		Assert.assertEquals(CategoryMapperUtil.convertDescriptionToAmount("once or twice per month"),
-				AmountWrapper.create(Amount.rangeOf((double) 1, (double) 2, NonSI.MONTH.inverse())));
+		Assert.assertEquals(
+				CategoryMapperUtil.convertDescriptionToAmount("once or twice per month"),
+				AmountWrapper.create(Amount.rangeOf((double) 1, (double) 2, NonSI.MONTH.inverse()).to(
+						NonSI.WEEK.inverse())));
 
 		Assert.assertEquals(CategoryMapperUtil.convertDescriptionToAmount("daily"),
-				AmountWrapper.create(Amount.valueOf((double) 1, NonSI.DAY.inverse())));
+				AmountWrapper.create(Amount.valueOf((double) 1, NonSI.DAY.inverse()).to(NonSI.WEEK.inverse())));
 
 		Assert.assertEquals(CategoryMapperUtil.convertDescriptionToAmount("About once a week"),
 				AmountWrapper.create(Amount.valueOf((double) 1, NonSI.WEEK.inverse())));
 
 		Assert.assertEquals(
 				CategoryMapperUtil.convertDescriptionToAmount("several times a month"),
-				AmountWrapper.create(Amount.rangeOf((double) 1,
-						NonSI.DAY.inverse().getConverterTo(NonSI.MONTH.inverse()).convert((double) 1),
-						NonSI.MONTH.inverse()), false));
+				AmountWrapper.create(
+						Amount.rangeOf((double) 2,
+								NonSI.DAY.inverse().getConverterTo(NonSI.MONTH.inverse()).convert((double) 1) - 1,
+								NonSI.MONTH.inverse()).to(NonSI.WEEK.inverse()), false));
 	}
 
 	@Test
@@ -104,17 +111,24 @@ public class CategoryMapperTest
 	@Test
 	public void testIntegration()
 	{
+		Multimaps.asMap(Collections.emptyMap());
+
 		String sourceCategory1 = "never/less than 1 per month";
 		AmountWrapper amountSourceCategory1 = CategoryMapperUtil.convertDescriptionToAmount(sourceCategory1);
 		Assert.assertTrue(CategoryMapperUtil.isAmountRanged(amountSourceCategory1.getAmount()));
-		Assert.assertEquals(amountSourceCategory1,
-				AmountWrapper.create(Amount.rangeOf((double) 0, (double) 1, NonSI.MONTH.inverse())));
+		Assert.assertEquals(
+				amountSourceCategory1.toString(),
+				AmountWrapper.create(
+						Amount.rangeOf((double) 0, (double) 1, NonSI.MONTH.inverse()).to(NonSI.WEEK.inverse()))
+						.toString());
 
 		String sourceCategory2 = "1-3 per month";
 		AmountWrapper amountSourceCategory2 = CategoryMapperUtil.convertDescriptionToAmount(sourceCategory2);
 		Assert.assertTrue(CategoryMapperUtil.isAmountRanged(amountSourceCategory2.getAmount()));
-		Assert.assertEquals(amountSourceCategory2,
-				AmountWrapper.create(Amount.rangeOf((double) 1, (double) 3, NonSI.MONTH.inverse())));
+		Assert.assertEquals(
+				amountSourceCategory2,
+				AmountWrapper.create(Amount.rangeOf((double) 1, (double) 3, NonSI.MONTH.inverse()).to(
+						NonSI.WEEK.inverse())));
 
 		String sourceCategory3 = "once a week";
 		AmountWrapper amountSourceCategory3 = CategoryMapperUtil.convertDescriptionToAmount(sourceCategory3);
@@ -138,19 +152,19 @@ public class CategoryMapperTest
 		AmountWrapper amountSourceCategory6 = CategoryMapperUtil.convertDescriptionToAmount(sourceCategory6);
 		Assert.assertFalse(CategoryMapperUtil.isAmountRanged(amountSourceCategory6.getAmount()));
 		Assert.assertEquals(amountSourceCategory6,
-				AmountWrapper.create(Amount.valueOf((double) 1, NonSI.DAY.inverse())));
+				AmountWrapper.create(Amount.valueOf((double) 1, NonSI.DAY.inverse()).to(NonSI.WEEK.inverse())));
 
 		String targetCategory1 = "Almost daily + daily";
 		AmountWrapper amountTargetCategory1 = CategoryMapperUtil.convertDescriptionToAmount(targetCategory1);
 		Assert.assertFalse(CategoryMapperUtil.isAmountRanged(amountTargetCategory1.getAmount()));
 		Assert.assertEquals(amountTargetCategory1,
-				AmountWrapper.create(Amount.valueOf((double) 1, NonSI.DAY.inverse())));
+				AmountWrapper.create(Amount.valueOf((double) 1, NonSI.DAY.inverse()).to(NonSI.WEEK.inverse())));
 
 		String targetCategory2 = "Several times a week";
 		AmountWrapper amountTargetCategory2 = CategoryMapperUtil.convertDescriptionToAmount(targetCategory2);
 		Assert.assertTrue(CategoryMapperUtil.isAmountRanged(amountTargetCategory2.getAmount()));
 		Assert.assertEquals(amountTargetCategory2,
-				AmountWrapper.create(Amount.rangeOf((double) 1, (double) 7, NonSI.WEEK.inverse()), false));
+				AmountWrapper.create(Amount.rangeOf((double) 2, (double) 6, NonSI.WEEK.inverse()), false));
 
 		String targetCategory3 = "About once a week";
 		AmountWrapper amountTargetCategory3 = CategoryMapperUtil.convertDescriptionToAmount(targetCategory3);

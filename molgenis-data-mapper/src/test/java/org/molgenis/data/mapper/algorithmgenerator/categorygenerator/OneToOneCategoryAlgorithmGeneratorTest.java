@@ -1,4 +1,4 @@
-package org.molgenis.data.mapper.algorithmgenerator;
+package org.molgenis.data.mapper.algorithmgenerator.categorygenerator;
 
 import java.util.Arrays;
 
@@ -14,10 +14,9 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 
-public class CategoryAlgorithmGeneratorImplTest
+public class OneToOneCategoryAlgorithmGeneratorTest
 {
-
-	CategoryAlgorithmGeneratorImpl categoryAlgorithmGeneratorImpl;
+	CategoryAlgorithmGenerator categoryAlgorithmGenerator;
 
 	DefaultAttributeMetaData targetAttributeMetaData;
 
@@ -27,7 +26,7 @@ public class CategoryAlgorithmGeneratorImplTest
 	public void init()
 	{
 		DataService dataService = Mockito.mock(DataService.class);
-		categoryAlgorithmGeneratorImpl = new CategoryAlgorithmGeneratorImpl(dataService);
+		categoryAlgorithmGenerator = new OneToOneCategoryAlgorithmGenerator(dataService);
 
 		DefaultEntityMetaData targetRefEntityMetaData = new DefaultEntityMetaData("POTATO_REF");
 		DefaultAttributeMetaData targetCodeAttributeMetaData = new DefaultAttributeMetaData("code", FieldTypeEnum.INT);
@@ -61,9 +60,9 @@ public class CategoryAlgorithmGeneratorImplTest
 		sourceRefEntityMetaData.addAttributeMetaData(sourceCodeAttributeMetaData);
 		sourceRefEntityMetaData.addAttributeMetaData(sourceLabelAttributeMetaData);
 
-		sourceAttributeMetaData = new DefaultAttributeMetaData(
-				"How often did you eat boiled or mashed potatoes (also in stew) in the past month? Baked potatoes are asked later",
-				FieldTypeEnum.CATEGORICAL);
+		sourceAttributeMetaData = new DefaultAttributeMetaData("MESHED_POTATO", FieldTypeEnum.CATEGORICAL);
+		sourceAttributeMetaData
+				.setLabel("How often did you eat boiled or mashed potatoes (also in stew) in the past month? Baked potatoes are asked later");
 		sourceAttributeMetaData.setRefEntity(sourceRefEntityMetaData);
 
 		MapEntity sourceEntity1 = new MapEntity(ImmutableMap.of("code", 1, "label", "Not this month"));
@@ -73,7 +72,7 @@ public class CategoryAlgorithmGeneratorImplTest
 		MapEntity sourceEntity5 = new MapEntity(ImmutableMap.of("code", 5, "label", "2-3 days per week"));
 		MapEntity sourceEntity6 = new MapEntity(ImmutableMap.of("code", 6, "label", "4-5 days per week"));
 		MapEntity sourceEntity7 = new MapEntity(ImmutableMap.of("code", 7, "label", "6-7 days per week"));
-		MapEntity sourceEntity8 = new MapEntity(ImmutableMap.of("code", 8, "label", "5 per day"));
+		MapEntity sourceEntity8 = new MapEntity(ImmutableMap.of("code", 8, "label", "9 days per week"));
 
 		Mockito.when(dataService.findAll(sourceRefEntityMetaData.getName())).thenReturn(
 				Arrays.asList(sourceEntity1, sourceEntity2, sourceEntity3, sourceEntity4, sourceEntity5, sourceEntity6,
@@ -81,11 +80,18 @@ public class CategoryAlgorithmGeneratorImplTest
 	}
 
 	@Test
-	public void generate()
+	public void testIsSuitable()
 	{
-		String generatedAlgorithm = categoryAlgorithmGeneratorImpl.generate(targetAttributeMetaData,
-				sourceAttributeMetaData);
-		String expectedAlgorithm = "$('How often did you eat boiled or mashed potatoes (also in stew) in the past month? Baked potatoes are asked later').map({\"2\":\"4\",\"3\":\"4\",\"4\":\"3\",\"5\":\"2\",\"6\":\"2\",\"7\":\"1\",\"8\":\"1\"}, null, null).value();";
+		Assert.assertTrue(categoryAlgorithmGenerator.isSuitable(targetAttributeMetaData,
+				Arrays.asList(sourceAttributeMetaData)));
+	}
+
+	@Test
+	public void testGenerate()
+	{
+		String generatedAlgorithm = categoryAlgorithmGenerator.generate(targetAttributeMetaData,
+				Arrays.asList(sourceAttributeMetaData));
+		String expectedAlgorithm = "$('MESHED_POTATO').map({\"2\":\"4\",\"3\":\"4\",\"4\":\"3\",\"5\":\"2\",\"6\":\"2\",\"7\":\"1\",\"8\":\"1\"}, null, null).value();";
 
 		Assert.assertEquals(generatedAlgorithm, expectedAlgorithm);
 	}

@@ -2,6 +2,7 @@ package org.molgenis.data.mapper.service.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -24,7 +25,9 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.mapper.algorithmgenerator.CategoryAlgorithmGenerator;
+import org.molgenis.data.mapper.algorithmgenerator.categorygenerator.CategoryAlgorithmGenerator;
+import org.molgenis.data.mapper.algorithmgenerator.categorygenerator.OneToManyCategoryAlgorithmGenerator;
+import org.molgenis.data.mapper.algorithmgenerator.categorygenerator.OneToOneCategoryAlgorithmGenerator;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
@@ -59,19 +62,19 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	private final OntologyTagService ontologyTagService;
 	private final SemanticSearchService semanticSearchService;
 	private final UnitResolver unitResolver;
-
-	private final CategoryAlgorithmGenerator categoryAlgorithmGenerator;
+	private final List<CategoryAlgorithmGenerator> categoryAlgorithmGenerators;
 
 	@Autowired
 	public AlgorithmServiceImpl(DataService dataService, OntologyTagService ontologyTagService,
-			SemanticSearchService semanticSearchService, UnitResolver unitResolver,
-			CategoryAlgorithmGenerator categoryAlgorithmGenerator)
+			SemanticSearchService semanticSearchService, UnitResolver unitResolver)
 	{
 		this.dataService = checkNotNull(dataService);
 		this.ontologyTagService = checkNotNull(ontologyTagService);
 		this.semanticSearchService = checkNotNull(semanticSearchService);
-		this.categoryAlgorithmGenerator = checkNotNull(categoryAlgorithmGenerator);
 		this.unitResolver = checkNotNull(unitResolver);
+
+		categoryAlgorithmGenerators = Arrays.asList(new OneToOneCategoryAlgorithmGenerator(dataService),
+				new OneToManyCategoryAlgorithmGenerator(dataService));
 
 		new RhinoConfig().init();
 	}
@@ -94,8 +97,14 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		{
 			AttributeMetaData sourceAttribute = entry.getKey();
 
-			String algorithm = generateInternalJavaScriptAlgorithm(targetAttribute, targetUnit, sourceAttribute,
-					sourceEntityMetaData);
+			String algorithm = null;
+
+			// String algorithm = categoryAlgorithmGenerator.generate(targetAttribute, Arrays.asList(sourceAttribute));
+
+			if (StringUtils.isEmpty(algorithm))
+			{
+				algorithm = convertUnitAlgorithm(targetAttribute, targetUnit, sourceAttribute, sourceEntityMetaData);
+			}
 
 			AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttribute.getName());
 
@@ -123,69 +132,62 @@ public class AlgorithmServiceImpl implements AlgorithmService
 
 		if (sourceAttributes.size() == 1)
 		{
-			generateInternalJavaScriptAlgorithm(targetAttribute, targetUnit, sourceAttributes.get(0),
-					sourceEntityMetaData);
+			return convertUnitAlgorithm(targetAttribute, targetUnit, sourceAttributes.get(0), sourceEntityMetaData);
 		}
 
 		// First of all, we need to check if all the source attributes are of the same type
 		// return generateInternalJavaScriptAlgorithm(targetAttribute, targetUnit, sourceAttribute,
 		// sourceEntityMetaData);
+
 		return null;
 	}
 
-	public String generateInternalJavaScriptAlgorithm(AttributeMetaData targetAttribute,
-			Unit<? extends Quantity> targetUnit, AttributeMetaData sourceAttribute, EntityMetaData sourceEntityMetaData)
+	public String convertUnitAlgorithm(AttributeMetaData targetAttribute, Unit<? extends Quantity> targetUnit,
+			AttributeMetaData sourceAttribute, EntityMetaData sourceEntityMetaData)
 	{
 		String algorithm = null;
 
-		if (categoryAlgorithmGenerator.isSuitable(targetAttribute, sourceAttribute))
-		{
-			algorithm = categoryAlgorithmGenerator.generate(targetAttribute, sourceAttribute);
-		}
+		// determine source unit
+		Unit<? extends Quantity> sourceUnit = unitResolver.resolveUnit(sourceAttribute, sourceEntityMetaData);
 
-		if (StringUtils.isEmpty(algorithm))
+		if (sourceUnit != null)
 		{
-			// determine source unit
-			Unit<? extends Quantity> sourceUnit = unitResolver.resolveUnit(sourceAttribute, sourceEntityMetaData);
-
-			if (sourceUnit != null)
+			if (targetUnit != null && !sourceUnit.equals(targetUnit))
 			{
-				if (targetUnit != null && !sourceUnit.equals(targetUnit))
+				// if units are convertible, create convert algorithm
+				UnitConverter unitConverter;
+				try
 				{
-					// if units are convertible, create convert algorithm
-					UnitConverter unitConverter;
-					try
-					{
-						unitConverter = sourceUnit.getConverterTo(targetUnit);
-					}
-					catch (ConversionException e)
-					{
-						unitConverter = null;
-						// algorithm sets source unit and assigns source value to target
-						algorithm = String.format("$('%s').unit('%s').value();", sourceAttribute.getName(),
-								sourceUnit.toString());
-					}
-
-					if (unitConverter != null)
-					{
-						// algorithm sets source unit and assigns value converted to target unit to target
-						algorithm = String.format("$('%s').unit('%s').toUnit('%s').value();",
-								sourceAttribute.getName(), sourceUnit.toString(), targetUnit.toString());
-					}
+					unitConverter = sourceUnit.getConverterTo(targetUnit);
 				}
-				else
+				catch (ConversionException e)
 				{
+					unitConverter = null;
 					// algorithm sets source unit and assigns source value to target
 					algorithm = String.format("$('%s').unit('%s').value();", sourceAttribute.getName(),
 							sourceUnit.toString());
 				}
+
+				if (unitConverter != null)
+				{
+					// algorithm sets source unit and assigns value converted to target unit to target
+					algorithm = String.format("$('%s').unit('%s').toUnit('%s').value();", sourceAttribute.getName(),
+							sourceUnit.toString(), targetUnit.toString());
+				}
 			}
-			if (StringUtils.isEmpty(algorithm))
+			else
 			{
-				// algorithm assigns source value to target
-				algorithm = String.format("$('%s').value();", sourceAttribute.getName());
+				// algorithm sets source unit and assigns source value to target
+				algorithm = String.format("$('%s').unit('%s').value();", sourceAttribute.getName(),
+						sourceUnit.toString());
 			}
 		}
+		if (StringUtils.isEmpty(algorithm))
+		{
+			// algorithm assigns source value to target
+			algorithm = String.format("$('%s').value();", sourceAttribute.getName());
+		}
+
 		return algorithm;
 	}
 

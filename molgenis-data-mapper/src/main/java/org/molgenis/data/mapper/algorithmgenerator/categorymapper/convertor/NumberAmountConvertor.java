@@ -24,14 +24,17 @@ public class NumberAmountConvertor extends AmountConvertor
 		Unit<?> unit = CategoryMapperUtil.findDurationUnit(description);
 		Collections.sort(extractNumbers);
 
-		if (extractNumbers.size() == 1)
+		if (unit != null && unit.isCompatible(STANDARD_UNIT))
 		{
-			return AmountWrapper.create(Amount.valueOf(extractNumbers.get(0), unit));
-		}
-		else if (extractNumbers.size() > 1)
-		{
-			return AmountWrapper.create(Amount.rangeOf(extractNumbers.get(0),
-					extractNumbers.get(extractNumbers.size() - 1), unit));
+			if (extractNumbers.size() == 1)
+			{
+				return AmountWrapper.create(Amount.valueOf(extractNumbers.get(0), unit).to(STANDARD_UNIT));
+			}
+			else if (extractNumbers.size() > 1)
+			{
+				return AmountWrapper.create(Amount.rangeOf(extractNumbers.get(0),
+						extractNumbers.get(extractNumbers.size() - 1), unit).to(STANDARD_UNIT));
+			}
 		}
 
 		return null;

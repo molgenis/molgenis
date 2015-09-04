@@ -24,10 +24,11 @@ public class SeveralTimesConvertor extends AmountConvertor
 	AmountWrapper getInternalAmount(String description)
 	{
 		Unit<?> unit = CategoryMapperUtil.findDurationUnit(description);
-		if (unit != null)
+		if (unit != null && unit.isCompatible(STANDARD_UNIT))
 		{
 			return AmountWrapper.create(
-					Amount.rangeOf((double) 1, NonSI.DAY.inverse().getConverterTo(unit).convert(1), unit), false);
+					Amount.rangeOf((double) 2, NonSI.DAY.inverse().getConverterTo(unit).convert(1) - 1, unit).to(
+							STANDARD_UNIT), false);
 		}
 		return null;
 	}
