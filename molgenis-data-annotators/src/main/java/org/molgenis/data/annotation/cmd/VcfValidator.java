@@ -14,13 +14,12 @@ public class VcfValidator
 {
 	private String perlLocation;
 	private String workingDirectory;
-	private String vcfValidatorLocation;
+	private String vcfToolsDirectory;
 
-	public VcfValidator(String perlLocation, String workingDirectory, String vcfValidatorLocation)
+	public VcfValidator(String perlLocation, String vcfToolsDirectory)
 	{
 		this.perlLocation = perlLocation;
-		this.workingDirectory = workingDirectory;
-		this.vcfValidatorLocation = vcfValidatorLocation;
+		this.vcfToolsDirectory = vcfToolsDirectory;
 	}
 
 	/**
@@ -33,13 +32,16 @@ public class VcfValidator
 	{
 		try
 		{
-			// Checks if the vcf-validation tool is present in home/.molgenis/vcf-tools/perl/
-			if (new File(vcfValidatorLocation).exists())
+			String vcfValidator = vcfToolsDirectory + "perl/vcf-validator";
+			// Checks if vcf-tools is present
+			if (new File(vcfValidator).exists())
 			{
-				ProcessBuilder processBuilder = new ProcessBuilder(perlLocation, "vcf-validator",
-						vcfFile.getAbsolutePath(), "-u", "-d");
+				// Set working directory, Vcf.pm should be built here
+				workingDirectory = vcfToolsDirectory + "perl/";
 
-				processBuilder.directory(new File(workingDirectory));
+				ProcessBuilder processBuilder = new ProcessBuilder(perlLocation, vcfValidator,
+						vcfFile.getAbsolutePath(), "-u", "-d").directory(new File(workingDirectory));
+
 				Process proc = processBuilder.start();
 
 				InputStream inputStream = proc.getInputStream();
@@ -98,7 +100,7 @@ public class VcfValidator
 		}
 		catch (IOException e)
 		{
-			throw new RuntimeException("Something went wrong :( " + e);
+			throw new RuntimeException("Something went wrong: " + e);
 		}
 	}
 }

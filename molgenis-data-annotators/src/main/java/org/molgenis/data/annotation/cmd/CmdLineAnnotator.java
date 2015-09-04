@@ -40,10 +40,16 @@ import ch.qos.logback.core.ConsoleAppender;
 @Component
 public class CmdLineAnnotator
 {
+
 	@Autowired
 	private ApplicationContext applicationContext;
 
 	private Boolean validate = false;
+
+	// Default settings for running vcf-validator
+	private String userHome = System.getProperty("user.home");
+	private String perlDirectory = "/usr/bin/perl";
+	private String vcfToolsDirectory = userHome + "/.molgenis/vcf-tools/";
 
 	public void run(String[] args) throws Exception
 	{
@@ -65,8 +71,8 @@ public class CmdLineAnnotator
 							+ "*********************************************\n"
 							+ "\n"
 							+ "Typical usage to annotate a VCF file:\n"
-							+ "\tjava -jar CmdLineAnnotator.jar [Annotator] [Annotation source file] [input VCF] [output VCF] [validate flag] [output attributes (optional, default:all attributes)].\n"
-							+ "\tExample: java -Xmx4g -jar CmdLineAnnotator.jar gonl GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ Cardio.vcf Cardio_gonl.vcf --validate GoNL_GTC GoNL_AF\n"
+							+ "\tjava -jar CmdLineAnnotator.jar [Annotator] [Annotation source file] [input VCF] [output VCF] [validate flag]=[perl location]|[vcf-tools directory] [output attributes (optional, default:all attributes)].\n"
+							+ "\tExample: java -Xmx4g -jar CmdLineAnnotator.jar gonl GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ Cardio.vcf Cardio_gonl.vcf --validate=/usr/bin/perl,~/.molgenis/vcf-tools/ GoNL_GTC GoNL_AF\n"
 							+ "\n"
 							+ "Help:\n"
 							+ "\tTo get a detailed description and installation instructions for a specific annotator:\n"
@@ -79,16 +85,33 @@ public class CmdLineAnnotator
 			return;
 		}
 
+		Integer nrOfArguments = 4;
 		if (args.length > 4)
 		{
-			String parameter = args[4];
-			if (parameter.equals("--validate"))
+			nrOfArguments = 5;
+
+			String validateFlag = args[4];
+			if (validateFlag.contains("--validate"))
 			{
 				validate = true;
+
+				// If validate is on, check if there are arguments for setting the configuration
+				if (validateFlag.contains("="))
+				{
+					String validateParameters = validateFlag.split("=")[1];
+					perlDirectory = validateParameters.split(",")[0];
+					vcfToolsDirectory = validateParameters.split(",")[1];
+					
+					// Replace '~' with system home because process.exec cannot parse '~'
+					if (perlDirectory.substring(0, 1).contains("~")) perlDirectory = perlDirectory.replaceFirst("~",
+							userHome);
+					if (vcfToolsDirectory.substring(0, 1).contains("~")) vcfToolsDirectory = vcfToolsDirectory
+							.replaceFirst("~", userHome);
+				}
 			}
 			else
 			{
-				System.out.println("Unknown parameter: " + parameter);
+				System.out.println("Unknown parameter: " + validateFlag);
 				return;
 			}
 		}
@@ -135,8 +158,8 @@ public class CmdLineAnnotator
 			System.out.println("WARNING: Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
 		}
 
-		List<String> attrNames = args.length > 5 ? new ArrayList<>(Arrays.asList(Arrays.copyOfRange(args, 5,
-				args.length))) : new ArrayList<>();
+		List<String> attrNames = args.length > nrOfArguments ? new ArrayList<>(Arrays.asList(Arrays.copyOfRange(args,
+				5, args.length))) : new ArrayList<>();
 
 		// engage!
 		annotator.getCmdLineAnnotatorSettingsConfigurer().addSettings(annotationSourceFile.getAbsolutePath());
@@ -224,11 +247,8 @@ public class CmdLineAnnotator
 		}
 		if (validate)
 		{
-			String userHome = System.getProperty("user.home");
-
 			System.out.println("Validating produced VCF file...");
-			VcfValidator vcfValidator = new VcfValidator("/usr/bin/perl", userHome + "/.molgenis/vcf-tools/perl/",
-					userHome + "/.molgenis/vcf-tools/perl/vcf-validator");
+			VcfValidator vcfValidator = new VcfValidator(perlDirectory, vcfToolsDirectory);
 			System.out.println(vcfValidator.validateVCF(outputVCFFile));
 		}
 		System.out.println("All done!");
