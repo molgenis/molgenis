@@ -9,6 +9,8 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 
+import org.molgenis.security.core.token.TokenService;
+import org.molgenis.security.core.token.UnknownTokenException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
