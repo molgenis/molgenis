@@ -43,6 +43,8 @@ public class CmdLineAnnotator
 	@Autowired
 	private ApplicationContext applicationContext;
 
+	private Boolean validate = false;
+
 	public void run(String[] args) throws Exception
 	{
 		Map<String, RepositoryAnnotator> configuredAnnotators = applicationContext
@@ -63,8 +65,8 @@ public class CmdLineAnnotator
 							+ "*********************************************\n"
 							+ "\n"
 							+ "Typical usage to annotate a VCF file:\n"
-							+ "\tjava -jar CmdLineAnnotator.jar [Annotator] [Annotation source file] [input VCF] [output VCF] [output attributes (optional, default:all attributes)].\n"
-							+ "\tExample: java -Xmx4g -jar CmdLineAnnotator.jar gonl GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ Cardio.vcf Cardio_gonl.vcf GoNL_GTC GoNL_AF\n"
+							+ "\tjava -jar CmdLineAnnotator.jar [Annotator] [Annotation source file] [input VCF] [output VCF] [validate flag] [output attributes (optional, default:all attributes)].\n"
+							+ "\tExample: java -Xmx4g -jar CmdLineAnnotator.jar gonl GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ Cardio.vcf Cardio_gonl.vcf --validate GoNL_GTC GoNL_AF\n"
 							+ "\n"
 							+ "Help:\n"
 							+ "\tTo get a detailed description and installation instructions for a specific annotator:\n"
@@ -75,6 +77,20 @@ public class CmdLineAnnotator
 							+ "Breakdown per category:\n"
 							+ CommandLineAnnotatorConfig.printAnnotatorsPerType(configuredFreshAnnotators));
 			return;
+		}
+
+		if (args.length > 4)
+		{
+			String parameter = args[4];
+			if (parameter.equals("--validate"))
+			{
+				validate = true;
+			}
+			else
+			{
+				System.out.println("Unknown parameter: " + parameter);
+				return;
+			}
 		}
 
 		String annotatorName = args[0];
@@ -107,7 +123,7 @@ public class CmdLineAnnotator
 			System.out.println("Input VCF file not found at " + inputVcfFile);
 			return;
 		}
-		if (inputVcfFile.isDirectory())
+		else if (inputVcfFile.isDirectory())
 		{
 			System.out.println("Input VCF file is a directory, not a file!");
 			return;
@@ -119,7 +135,7 @@ public class CmdLineAnnotator
 			System.out.println("WARNING: Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
 		}
 
-		List<String> attrNames = args.length > 4 ? new ArrayList<>(Arrays.asList(Arrays.copyOfRange(args, 4,
+		List<String> attrNames = args.length > 5 ? new ArrayList<>(Arrays.asList(Arrays.copyOfRange(args, 5,
 				args.length))) : new ArrayList<>();
 
 		// engage!
@@ -199,15 +215,23 @@ public class CmdLineAnnotator
 				Entity annotatedRecord = annotatedRecords.next();
 				outputVCFWriter.println(VcfUtils.convertToVCF(annotatedRecord, attributesToInclude));
 			}
-
-			System.out.println("All done!");
 		}
 		finally
 		{
 			outputVCFWriter.close();
+
 			vcfRepo.close();
 		}
+		if (validate)
+		{
+			String userHome = System.getProperty("user.home");
 
+			System.out.println("Validating produced VCF file...");
+			VcfValidator vcfValidator = new VcfValidator("/usr/bin/perl", userHome + "/.molgenis/vcf-tools/perl/",
+					userHome + "/.molgenis/vcf-tools/perl/vcf-validator");
+			System.out.println(vcfValidator.validateVCF(outputVCFFile));
+		}
+		System.out.println("All done!");
 	}
 
 	private void printInfo(AnnotatorInfo info)
