@@ -166,7 +166,7 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public OntologyTermRepository ontologyTermRepository()
 		{
-			return new OntologyTermRepository();
+			return new OntologyTermRepository(dataService());
 		}
 	}
 }
