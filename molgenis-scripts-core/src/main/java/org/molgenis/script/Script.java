@@ -3,6 +3,7 @@ package org.molgenis.script;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.Collections;
@@ -105,6 +106,29 @@ public class Script extends DefaultEntity
 		return META_DATA;
 	}
 
+	public String generateScript(Map<String, Object> parameterValues)
+	{
+		StringWriter stringWriter = new StringWriter();
+		String script;
+		try
+		{
+			generateScript(parameterValues, stringWriter);
+			script = stringWriter.toString();
+		}
+		finally
+		{
+			try
+			{
+				stringWriter.close();
+			}
+			catch (IOException e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+		return script;
+	}
+
 	public File generateScript(FileStore fileStore, String fileExtension, Map<String, Object> parameterValues)
 	{
 		String name = RandomStringUtils.randomAlphanumeric(10) + "." + fileExtension;
@@ -113,14 +137,12 @@ public class Script extends DefaultEntity
 		Writer w = null;
 		try
 		{
-			Template template = new Template(name + ".ftl", new StringReader(getContent()), new Configuration());
 			w = new FileWriterWithEncoding(rScriptFile, CHARSET);
-			template.process(parameterValues, w);
+			generateScript(parameterValues, w);
 		}
-		catch (TemplateException | IOException e)
+		catch (IOException e)
 		{
-			throw new GenerateScriptException("Error processing parameters for script [" + getName() + "]. "
-					+ e.getMessage());
+			throw new RuntimeException(e);
 		}
 		finally
 		{
@@ -128,5 +150,19 @@ public class Script extends DefaultEntity
 		}
 
 		return rScriptFile;
+	}
+
+	private void generateScript(Map<String, Object> parameterValues, Writer writer)
+	{
+		try
+		{
+			Template template = new Template(null, new StringReader(getContent()), new Configuration());
+			template.process(parameterValues, writer);
+		}
+		catch (TemplateException | IOException e)
+		{
+			throw new GenerateScriptException(
+					"Error processing parameters for script [" + getName() + "]. " + e.getMessage());
+		}
 	}
 }
