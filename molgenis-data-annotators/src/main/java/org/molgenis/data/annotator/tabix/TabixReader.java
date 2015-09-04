@@ -40,7 +40,7 @@ import net.sf.samtools.util.BlockCompressedInputStream;
 
 public class TabixReader
 {
-	public String mFn;
+	public String filename;
 	public BlockCompressedInputStream blockCompressedInputStream;
 
 	private int mPreset;
@@ -69,9 +69,10 @@ public class TabixReader
 	 * @param filename
 	 *            File name of the data file
 	 */
-	public TabixReader(final String filename) throws IOException
+	public TabixReader(String filename) throws IOException
 	{
-		blockCompressedInputStream = new BlockCompressedInputStream(new File(filename));
+		this.filename = filename;
+		this.blockCompressedInputStream = new BlockCompressedInputStream(new File(filename));
 		readIndex(filename);
 	}
 
@@ -129,14 +130,14 @@ public class TabixReader
 		return i;
 	}
 
-	private static int readInt(final InputStream is) throws IOException
+	public static int readInt(final InputStream is) throws IOException
 	{
 		byte[] buf = new byte[4];
 		is.read(buf);
 		return ByteBuffer.wrap(buf).order(ByteOrder.LITTLE_ENDIAN).getInt();
 	}
 
-	private static long readLong(final InputStream is) throws IOException
+	public static long readLong(final InputStream is) throws IOException
 	{
 		byte[] buf = new byte[8];
 		is.read(buf);
@@ -155,14 +156,14 @@ public class TabixReader
 
 	/**
 	 * Read the Tabix index from a file
-	 * 
-	 * @param fp
+	 *
+	 * @param file
 	 *            File pointer
 	 */
-	private void readIndex(final File fp) throws IOException
+	public void readIndex(final File file) throws IOException
 	{
-		if (fp == null) return;
-		BlockCompressedInputStream is = new BlockCompressedInputStream(fp);
+		if (file == null) return;
+		BlockCompressedInputStream is = new BlockCompressedInputStream(file);
 		byte[] buf = new byte[4];
 
 		is.read(buf, 0, 4); // read "TBI\1"
@@ -222,9 +223,9 @@ public class TabixReader
 	/**
 	 * Read the Tabix index from the default file.
 	 */
-	private void readIndex(String fileName) throws IOException
+	public void readIndex(String fileName) throws IOException
 	{
-		readIndex(new File(mFn + ".tbi"));
+		readIndex(new File(filename + ".tbi"));
 	}
 
 	/**
@@ -243,7 +244,7 @@ public class TabixReader
 
 	/**
 	 * Parse a region in the format of "chr1", "chr1:100" or "chr1:100-1000"
-	 * 
+	 *
 	 * @param queryString
 	 *            Region string
 	 * @return An array where the three elements are sequence_id, region_begin and region_end. On failure,
@@ -387,11 +388,11 @@ public class TabixReader
 						if (str.length == 0 || str[0] == mMeta) continue;
 						intv = getIntv(s);
 						if (intv.internalChromosomeID != internalChromosomeID || intv.beginPosition >= endPosition) break; // no
-																															// need
-																															// to
-																															// proceed
+						// need
+						// to
+						// proceed
 						else if (intv.end > beginPosition && intv.beginPosition < endPosition) return s; // overlap;
-																											// return
+						// return
 					}
 					else break; // end of file
 				}
