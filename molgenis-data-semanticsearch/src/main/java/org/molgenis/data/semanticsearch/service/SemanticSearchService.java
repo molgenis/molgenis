@@ -12,17 +12,6 @@ import org.molgenis.ontology.core.model.OntologyTerm;
 public interface SemanticSearchService
 {
 	/**
-	 * Find all relevant source attributes for the specified target attribute
-	 * 
-	 * @param source
-	 * @param target
-	 * @param attributeMetaData
-	 * @return AttributeMetaData of resembling attributes, sorted by relevance
-	 */
-	Iterable<AttributeMetaData> findAttributes(org.molgenis.data.EntityMetaData source, EntityMetaData target,
-			AttributeMetaData attributeMetaData);
-
-	/**
 	 * Find all relevant source attributes with an explanation
 	 * 
 	 * @param source
@@ -30,7 +19,7 @@ public interface SemanticSearchService
 	 * @param attributeMetaData
 	 * @return AttributeMetaData of resembling attributes, sorted by relevance
 	 */
-	Map<AttributeMetaData, Iterable<ExplainedQueryString>> explainAttributes(EntityMetaData source,
+	Map<AttributeMetaData, Iterable<ExplainedQueryString>> findAttributes(EntityMetaData source,
 			EntityMetaData target, AttributeMetaData attributeMetaData);
 
 	/**

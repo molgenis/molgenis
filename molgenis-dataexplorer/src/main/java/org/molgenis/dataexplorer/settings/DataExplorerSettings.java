@@ -6,8 +6,8 @@ import static org.molgenis.MolgenisFieldTypes.HYPERLINK;
 import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -115,7 +115,8 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 					.setDefaultValue(String.valueOf(DEFAULT_GENERAL_ITEM_SELECT_PANEL))
 					.setLabel("Show data item selection");
 			AttributeMetaData generalLaunchWizardAttr = new DefaultAttributeMetaData(GENERAL_LAUNCH_WIZARD)
-					.setDataType(BOOL).setNillable(false).setDefaultValue(String.valueOf(DEFAULT_GENERAL_LAUNCH_WIZARD))
+					.setDataType(BOOL).setNillable(false)
+					.setDefaultValue(String.valueOf(DEFAULT_GENERAL_LAUNCH_WIZARD))
 					.setLabel("Launch data item filter wizard");
 			AttributeMetaData generalHeaderAbbreviateAttr = new DefaultAttributeMetaData(GENERAL_HEADER_ABBREVIATE)
 					.setDataType(INT).setNillable(false)
@@ -166,8 +167,8 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 			AttributeMetaData dataGalaxyUrlAttr = new DefaultAttributeMetaData(DATA_GALAXY_URL).setDataType(HYPERLINK)
 					.setNillable(true).setLabel("Galaxy URL")
 					.setVisibleExpression("$('" + DATA_GALAXY_EXPORT + "').eq(true).value()");
-			AttributeMetaData dataGalaxyApiKeyAttr = new DefaultAttributeMetaData(DATA_GALAXY_API_KEY).setNillable(true)
-					.setLabel("Galaxy API key")
+			AttributeMetaData dataGalaxyApiKeyAttr = new DefaultAttributeMetaData(DATA_GALAXY_API_KEY)
+					.setNillable(true).setLabel("Galaxy API key")
 					.setVisibleExpression("$('" + DATA_GALAXY_EXPORT + "').eq(true).value()");
 			dataAttr.addAttributePart(dataGalaxyExportAttr);
 			dataAttr.addAttributePart(dataGalaxyUrlAttr);
@@ -178,10 +179,10 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 					.setDataType(COMPOUND).setLabel("Initialization");
 			AttributeMetaData genomeBrowserInitBrowserLinksAttr = new DefaultAttributeMetaData(
 					GENOMEBROWSER_INIT_BROWSER_LINKS).setNillable(false).setDataType(TEXT)
-							.setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_BROWSER_LINKS).setLabel("Browser links");
+					.setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_BROWSER_LINKS).setLabel("Browser links");
 			AttributeMetaData genomeBrowserInitCoordSystemAttr = new DefaultAttributeMetaData(
 					GENOMEBROWSER_INIT_COORD_SYSTEM).setNillable(false).setDataType(TEXT)
-							.setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_COORD_SYSTEM).setLabel("Coordinate system");
+					.setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_COORD_SYSTEM).setLabel("Coordinate system");
 			AttributeMetaData genomeBrowserInitLocationAttr = new DefaultAttributeMetaData(GENOMEBROWSER_INIT_LOCATION)
 					.setNillable(false).setDataType(TEXT).setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_LOCATION)
 					.setLabel("Location");
@@ -190,8 +191,8 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 					.setLabel("Sources");
 			AttributeMetaData genomeBrowserInitHighlightRegionAttr = new DefaultAttributeMetaData(
 					GENOMEBROWSER_INIT_HIGHLIGHT_REGION).setNillable(false).setDataType(BOOL)
-							.setDefaultValue(String.valueOf(DEFAULT_GENOMEBROWSER_INIT_HIGHLIGHT_REGION))
-							.setLabel("Highlight region");
+					.setDefaultValue(String.valueOf(DEFAULT_GENOMEBROWSER_INIT_HIGHLIGHT_REGION))
+					.setLabel("Highlight region");
 
 			genomeBrowserInitAttr.addAttributePart(genomeBrowserInitBrowserLinksAttr);
 			genomeBrowserInitAttr.addAttributePart(genomeBrowserInitCoordSystemAttr);
@@ -224,8 +225,8 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 					.setLabel("Distinct aggregates");
 			AttributeMetaData aggregatesDistinctOverrideAttr = new DefaultAttributeMetaData(
 					AGGREGATES_DISTINCT_OVERRIDES).setDataType(TEXT).setLabel("Distinct attribute overrides")
-							.setDescription("JSON object that maps entity names to attribute names")
-							.setVisibleExpression("$('" + AGGREGATES_DISTINCT_SELECT + "').eq(true).value()");
+					.setDescription("JSON object that maps entity names to attribute names")
+					.setVisibleExpression("$('" + AGGREGATES_DISTINCT_SELECT + "').eq(true).value()");
 			aggregatesAttr.addAttributePart(aggregatesDistinctSelectAttr);
 			aggregatesAttr.addAttributePart(aggregatesDistinctOverrideAttr);
 			return aggregatesAttr;
@@ -235,8 +236,11 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		{
 			DefaultAttributeMetaData reportsAttr = new DefaultAttributeMetaData(REPORTS).setDataType(COMPOUND)
 					.setLabel("Reports").setVisibleExpression("$('" + MOD_REPORTS + "').eq(true).value()");
-			AttributeMetaData reportsEntitiesAttr = new DefaultAttributeMetaData(REPORTS_ENTITIES).setNillable(true)
-					.setDataType(TEXT).setLabel("Reports").setDescription(
+			AttributeMetaData reportsEntitiesAttr = new DefaultAttributeMetaData(REPORTS_ENTITIES)
+					.setNillable(true)
+					.setDataType(TEXT)
+					.setLabel("Reports")
+					.setDescription(
 							"Comma-seperated report strings (e.g. MyDataSet:myreport,OtherDataSet:otherreport). The report name refers to an existing FreemarkerTemplate entity or file with name view-<report>-entitiesreport.ftl (e.g. view-myreport-entitiesreport.ftl)");
 			reportsAttr.addAttributePart(reportsEntitiesAttr);
 			return reportsAttr;
@@ -377,16 +381,16 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		set(Meta.GENERAL_HEADER_ABBREVIATE, headerAbbreviate);
 	}
 
-	public URL getGalaxyUrl()
+	public URI getGalaxyUrl()
 	{
 		String galaxyUrl = getString(Meta.DATA_GALAXY_URL);
 		if (galaxyUrl != null)
 		{
 			try
 			{
-				return new URL(galaxyUrl);
+				return new URI(galaxyUrl);
 			}
-			catch (MalformedURLException e)
+			catch (URISyntaxException e)
 			{
 				throw new RuntimeException(e);
 			}
@@ -397,7 +401,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		}
 	}
 
-	public void setGalaxyUrl(URL galaxyUrl)
+	public void setGalaxyUrl(URI galaxyUrl)
 	{
 		set(Meta.DATA_GALAXY_URL, galaxyUrl.toString());
 	}

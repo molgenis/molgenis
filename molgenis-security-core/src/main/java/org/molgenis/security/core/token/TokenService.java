@@ -1,4 +1,4 @@
-package org.molgenis.security.token;
+package org.molgenis.security.core.token;
 
 import org.springframework.security.core.userdetails.UserDetails;
 

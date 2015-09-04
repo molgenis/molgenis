@@ -4,7 +4,7 @@ import static org.molgenis.MolgenisFieldTypes.HYPERLINK;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.security.owned.OwnedEntityMetaData;
+import org.molgenis.data.support.OwnedEntityMetaData;
 import org.springframework.stereotype.Component;
 
 @Component

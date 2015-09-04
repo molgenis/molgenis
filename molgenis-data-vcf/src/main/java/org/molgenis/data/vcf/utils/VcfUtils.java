@@ -23,6 +23,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisInvalidFormatException;
+import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.datastructures.Sample;
 import org.molgenis.data.vcf.datastructures.Trio;
@@ -305,10 +306,12 @@ public class VcfUtils
 		sb.append(",Description=\"");
 		// http://samtools.github.io/hts-specs/VCFv4.1.pdf --> "The Description value must be surrounded by
 		// double-quotes. Double-quote character can be escaped with backslash \ and backslash as \\."
-		if (null != infoAttributeMetaData.getDescription())
+		if (StringUtils.isBlank(infoAttributeMetaData.getDescription()))
 		{
-			sb.append(infoAttributeMetaData.getDescription().replace("\\", "\\\\").replace("\"", "\\\""));
+			((DefaultAttributeMetaData) infoAttributeMetaData)
+					.setDescription(VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION);
 		}
+		sb.append(infoAttributeMetaData.getDescription().replace("\\", "\\\\").replace("\"", "\\\""));
 		sb.append("\">");
 		return sb.toString();
 	}
