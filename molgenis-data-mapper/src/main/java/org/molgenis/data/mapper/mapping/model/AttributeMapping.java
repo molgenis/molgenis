@@ -1,9 +1,9 @@
 package org.molgenis.data.mapper.mapping.model;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
 
 /**
@@ -60,7 +60,7 @@ public class AttributeMapping
 	{
 		this.identifier = null;
 		this.targetAttributeMetaData = target;
-		this.sourceAttributeMetaDatas = Collections.emptyList();
+		this.sourceAttributeMetaDatas = Lists.<AttributeMetaData> newArrayList();
 		this.algorithm = null;
 		this.algorithmState = null;
 	}
