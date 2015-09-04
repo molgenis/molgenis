@@ -140,6 +140,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 				algorithm = String.format("$('%s').value();", source.getName());
 			}
 			AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttr.getName());
+			attributeMapping.getSourceAttributeMetaDatas().add(source);
 			attributeMapping.setAlgorithm(algorithm);
 
 			if (isSingleMatchHighQuality(targetAttr, targetAttrTags, entry.getValue()))

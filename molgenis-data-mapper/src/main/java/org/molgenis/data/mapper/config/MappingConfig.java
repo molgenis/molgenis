@@ -1,6 +1,7 @@
 package org.molgenis.data.mapper.config;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.mapper.repository.impl.AttributeMappingRepositoryImpl;
 import org.molgenis.data.mapper.repository.impl.EntityMappingRepositoryImpl;
 import org.molgenis.data.mapper.repository.impl.MappingProjectRepositoryImpl;
@@ -16,7 +17,9 @@ import org.molgenis.data.mapper.service.impl.UnitResolverImpl;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.ontology.core.config.OntologyConfig;
+import org.molgenis.ontology.core.repository.OntologyTermRepository;
 import org.molgenis.ontology.core.service.OntologyService;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -41,11 +44,21 @@ public class MappingConfig
 
 	@Autowired
 	OntologyService ontologyService;
+	
+	@Autowired
+	IdGenerator idGenerator;
+
+	@Autowired
+	PermissionSystemService permissionSystemService;
+
+	@Autowired
+	OntologyTermRepository ontologyTermRepository;
 
 	@Bean
 	public MappingService mappingService()
 	{
-		return new MappingServiceImpl();
+		return new MappingServiceImpl(dataService, algorithmServiceImpl(), idGenerator, mappingProjectRepository(),
+				permissionSystemService);
 	}
 
 	@Bean
@@ -58,7 +71,7 @@ public class MappingConfig
 	@Bean
 	public AlgorithmTemplateService algorithmTemplateServiceImpl()
 	{
-		return new AlgorithmTemplateServiceImpl(dataService, ontologyTagService, null, null); // FIXME
+		return new AlgorithmTemplateServiceImpl(dataService, ontologyTagService, ontologyTermRepository, semanticSearchService);
 	}
 
 	@Bean

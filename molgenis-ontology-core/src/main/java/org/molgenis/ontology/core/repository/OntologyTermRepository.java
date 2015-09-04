@@ -1,5 +1,6 @@
 package org.molgenis.ontology.core.repository;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.molgenis.data.support.QueryImpl.IN;
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ENTITY_NAME;
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY;
@@ -34,8 +35,13 @@ import com.google.common.collect.FluentIterable;
  */
 public class OntologyTermRepository
 {
+	private final DataService dataService;
+
 	@Autowired
-	private DataService dataService;
+	public OntologyTermRepository(DataService dataService)
+	{
+		this.dataService = checkNotNull(dataService);
+	}
 
 	/**
 	 * FIXME write docs
