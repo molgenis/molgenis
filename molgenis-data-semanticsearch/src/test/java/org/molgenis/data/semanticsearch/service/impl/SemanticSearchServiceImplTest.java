@@ -8,6 +8,7 @@ import static org.testng.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import org.elasticsearch.common.collect.Sets;
@@ -20,6 +21,7 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
 import org.molgenis.data.semanticsearch.semantic.Hit;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
@@ -204,21 +206,24 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		when(dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME, new QueryImpl(disMaxQueryRules))).thenReturn(
 				attributeMetaDataEntities);
 
-		Iterable<AttributeMetaData> termsActual1 = semanticSearchService.findAttributes(sourceEntityMetaData,
+		Map<AttributeMetaData, Iterable<ExplainedQueryString>> termsActual1 = semanticSearchService.findAttributes(
+				sourceEntityMetaData,
 				targetEntityMetaData, targetAttribute);
 
-		Iterable<AttributeMetaData> termsExpected1 = Arrays.<AttributeMetaData> asList(attributeHeight);
+		Map<AttributeMetaData, Iterable<ExplainedQueryString>> termsExpected1 = ImmutableMap.of(attributeHeight,
+				Arrays.<ExplainedQueryString> asList());
 
-		assertEquals(termsActual1, termsExpected1);
+		assertEquals(termsActual1.toString(), termsExpected1.toString());
 
 		// Case 2
 		when(dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME, new QueryImpl(disMaxQueryRules))).thenReturn(
 				Arrays.<Entity> asList());
 
-		Iterable<AttributeMetaData> termsActual2 = semanticSearchService.findAttributes(sourceEntityMetaData,
+		Map<AttributeMetaData, Iterable<ExplainedQueryString>> termsActual2 = semanticSearchService.findAttributes(
+				sourceEntityMetaData,
 				targetEntityMetaData, targetAttribute);
 
-		Iterable<AttributeMetaData> termsExpected2 = Arrays.<AttributeMetaData> asList();
+		Map<AttributeMetaData, Iterable<ExplainedQueryString>> termsExpected2 = ImmutableMap.of();
 
 		assertEquals(termsActual2, termsExpected2);
 
