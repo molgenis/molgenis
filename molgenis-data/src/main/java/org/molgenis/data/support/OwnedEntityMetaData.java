@@ -1,8 +1,7 @@
-package org.molgenis.security.owned;
+package org.molgenis.data.support;
 
 import static org.molgenis.MolgenisFieldTypes.STRING;
 
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.stereotype.Component;
 
 /**

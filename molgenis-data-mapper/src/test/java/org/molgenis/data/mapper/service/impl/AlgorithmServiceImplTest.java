@@ -424,7 +424,13 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		public AlgorithmService algorithmService()
 		{
 			return new AlgorithmServiceImpl(dataService(), ontologyTagService(), semanticSearchService(),
-					unitResolver());
+					unitResolver(), algorithmTemplateService());
+		}
+
+		@Bean
+		public AlgorithmTemplateService algorithmTemplateService()
+		{
+			return mock(AlgorithmTemplateServiceImpl.class);
 		}
 
 		@Bean
