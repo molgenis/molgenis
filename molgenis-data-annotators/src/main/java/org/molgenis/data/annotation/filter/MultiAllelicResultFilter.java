@@ -30,6 +30,23 @@ import java.util.Map;
  * 21	45650009	rs3831401	T	G,C,TG,A	8366813.26	PASS	AC_Adj=2528,3415,1,0;AC_Het=934,1240,0,0,725,1,0,0,0,0;AC_Hom=434,725,0,0;
  * Alt-allele combinations in AC_Het field occur in the following order: T-G, T-C, T-TG, T-A, G-C, G-TG, G-A, C-TG, C-A, TG-A.
  *
+ *
+ *
+ * TODO: Smart matching of non-obvious ref and alt alleles. Right now, we only 'string match' the exact values of ref and alt alleles.
+ * However, depending on which other genotypes you call for a certain genomic position, the same variant may be denoted in a different way.
+ * For example: "1 231094050 GA G" is the same variant as the GAA/GA in "1 231094050 GAA GA,G", but to allow notation of the the AA deletion
+ * (in GAA/G), the ref was written as GAA instead of GA.
+ * 
+ * This can be tricky. Consider this variant:
+ * 1	6529182	.	TTCCTCC	TTCC
+ * 
+ * And after some puzzling, you will find that it is seen in ExAC:
+ * 1	6529182	.	TTCCTCCTCC	TTCCTCC,TTCC,T,TTCCTCCTCCTCC,TTCCTCCTCCTCCTCC,TTCCTCCTCCTCCTCCTCCTCC
+ * 
+ * But here denoted as "TTCCTCCTCC/TTCCTCC". In both cases, a TCC was deleted, but in ExAC this variant is trailed with another TCC.
+ * Finding and parsing these variants to correctly match them against databases such as 1000 Genomes and ExAC would be very valuable.
+ * 
+ *
  */
 public class MultiAllelicResultFilter implements ResultFilter
 {
