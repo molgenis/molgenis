@@ -10,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
@@ -22,11 +23,10 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisInvalidFormatException;
+import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.datastructures.Sample;
 import org.molgenis.data.vcf.datastructures.Trio;
-import org.molgenis.fieldtypes.EnumField;
-import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.vcf.meta.VcfMetaInfo;
 
 public class VcfUtils
@@ -53,14 +53,21 @@ public class VcfUtils
 		return id.toString();
 	}
 
+	public static String convertToVCF(Entity vcfEntity) throws MolgenisDataException
+	{
+		return convertToVCF(vcfEntity, Collections.emptyList());
+	}
+
 	/**
-	 * Convert an vcfEntity to a VCF line
+	 * Convert an vcfEntity to a VCF line Only output attributes that are in the attributesToInclude list, or all if
+	 * attributesToInclude is empty
 	 * 
 	 * @param vcfEntity
+	 * @param attributesToInclude
 	 * @return
 	 * @throws Exception
 	 */
-	public static String convertToVCF(Entity vcfEntity) throws MolgenisDataException
+	public static String convertToVCF(Entity vcfEntity, List<String> attributesToInclude) throws MolgenisDataException
 	{
 		StringBuilder vcfRecord = new StringBuilder();
 
@@ -74,7 +81,6 @@ public class VcfUtils
 			vcfRecord.append(((vcfEntity.getString(vcfAttribute) != null && !vcfEntity.getString(vcfAttribute).equals(
 					"")) ? vcfEntity.getString(vcfAttribute) : ".")
 					+ TAB);
-			// vcfRecord.append(vcfEntity.getString(vcfAttribute) + "\t");
 		}
 
 		List<String> infoFieldsSeen = new ArrayList<String>();
@@ -83,45 +89,32 @@ public class VcfUtils
 		for (AttributeMetaData attributeMetaData : vcfEntity.getEntityMetaData().getAttribute(VcfRepository.INFO)
 				.getAttributeParts())
 		{
-			infoFieldsSeen.add(attributeMetaData.getName());
-			if (vcfEntity.getString(attributeMetaData.getName()) != null)
+			if (attributesToInclude.isEmpty() || attributesToInclude.contains(attributeMetaData.getName()))
 			{
-				if (attributeMetaData.getName().startsWith(VcfRepository.getInfoPrefix()))
+				infoFieldsSeen.add(attributeMetaData.getName());
+				if (vcfEntity.getString(attributeMetaData.getName()) != null)
 				{
-					if(attributeMetaData.getDataType().getEnumType().equals(FieldTypeEnum.BOOL)){
-						if(vcfEntity.getBoolean(attributeMetaData.getName())){
-							vcfRecord.append(attributeMetaData.getName().substring(VcfRepository.getInfoPrefix().length()) + ";");
+
+					if (attributeMetaData.getDataType().getEnumType().equals(FieldTypeEnum.BOOL))
+					{
+						if (vcfEntity.getBoolean(attributeMetaData.getName()))
+						{
+							vcfRecord.append(attributeMetaData.getName() + ";");
 							hasInfoFields = true;
 						}
 					}
-					else{
-						vcfRecord.append(attributeMetaData.getName().substring(VcfRepository.getInfoPrefix().length())
-							+ "=" + vcfEntity.getString(attributeMetaData.getName()) + ";");
+					else
+					{
+						vcfRecord.append(attributeMetaData.getName() + "="
+								+ vcfEntity.getString(attributeMetaData.getName()) + ";");
 						hasInfoFields = true;
 					}
-				}
-				else
-				{
-					vcfRecord.append(attributeMetaData.getName() + "="
-							+ vcfEntity.getString(attributeMetaData.getName()) + ";");
-					hasInfoFields = true;
 				}
 			}
 		}
 		if (!hasInfoFields)
 		{
 			vcfRecord.append(".");
-		}
-
-		for (AttributeMetaData attributeMetaData : vcfEntity.getEntityMetaData().getAtomicAttributes())
-		{
-			if (!infoFieldsSeen.contains(attributeMetaData.getName())
-					&& attributeMetaData.getName().startsWith(VcfRepository.getInfoPrefix())
-					&& vcfEntity.getString(attributeMetaData.getName()) != null)
-			{
-				vcfRecord.append(attributeMetaData.getName().substring(VcfRepository.getInfoPrefix().length()) + "="
-						+ vcfEntity.getString(attributeMetaData.getName()) + ";");
-			}
 		}
 
 		// if we have SAMPLE data, add to output VCF
@@ -189,20 +182,30 @@ public class VcfUtils
 		return vcfRecord.toString();
 	}
 
+	public static boolean checkPreviouslyAnnotatedAndAddMetadata(File inputVcfFile, PrintWriter outputVCFWriter,
+			List<AttributeMetaData> infoFields) throws FileNotFoundException, MolgenisInvalidFormatException
+	{
+		return checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields,
+				Collections.emptyList());
+	}
+
 	/**
 	 * Checks for previous annotations
 	 * 
 	 * @param inputVcfFile
 	 * @param outputVCFWriter
 	 * @param infoFields
-	 * @param checkAnnotatedBeforeValue
+	 * @param attributesToInclude
+	 *            , the AttributeMetaData to write to the VCF file, if empty writes all attributes
 	 * @return
 	 * @throws Exception
 	 */
 	public static boolean checkPreviouslyAnnotatedAndAddMetadata(File inputVcfFile, PrintWriter outputVCFWriter,
-			List<AttributeMetaData> infoFields, String checkAnnotatedBeforeValue)
+			List<AttributeMetaData> infoFields, List<String> attributesToInclude)
 			throws MolgenisInvalidFormatException, FileNotFoundException
 	{
+		String checkAnnotatedBeforeValue = attributesToInclude.isEmpty() ? (infoFields.isEmpty() ? null : infoFields
+				.get(0).getName()) : attributesToInclude.get(0);
 		boolean annotatedBefore = false;
 
 		System.out.println("Detecting VCF column header...");
@@ -216,7 +219,8 @@ public class VcfUtils
 			while (inputVcfFileScanner.hasNextLine())
 			{
 				// detect existing annotations of the same info field
-				if (line.contains("##INFO=<ID=" + checkAnnotatedBeforeValue) && !annotatedBefore)
+				if ((checkAnnotatedBeforeValue != null) && line.contains("##INFO=<ID=" + checkAnnotatedBeforeValue)
+						&& !annotatedBefore)
 				{
 					System.out
 							.println("\nThis file has already been annotated with '"
@@ -251,7 +255,10 @@ public class VcfUtils
 
 				for (AttributeMetaData infoAttributeMetaData : getAtomicAttributesFromList(infoFields))
 				{
-					outputVCFWriter.println(attributeMetaDataToInfoField(infoAttributeMetaData));
+					if (attributesToInclude.isEmpty() || attributesToInclude.contains(infoAttributeMetaData.getName()))
+					{
+						outputVCFWriter.println(attributeMetaDataToInfoField(infoAttributeMetaData));
+					}
 				}
 			}
 
@@ -270,7 +277,7 @@ public class VcfUtils
 		return annotatedBefore;
 	}
 
-	private static List<AttributeMetaData> getAtomicAttributesFromList(Iterable<AttributeMetaData> outputAttrs)
+	public static List<AttributeMetaData> getAtomicAttributesFromList(Iterable<AttributeMetaData> outputAttrs)
 	{
 		List<AttributeMetaData> result = new ArrayList<>();
 		for (AttributeMetaData attributeMetaData : outputAttrs)
@@ -299,10 +306,12 @@ public class VcfUtils
 		sb.append(",Description=\"");
 		// http://samtools.github.io/hts-specs/VCFv4.1.pdf --> "The Description value must be surrounded by
 		// double-quotes. Double-quote character can be escaped with backslash \ and backslash as \\."
-		if (null != infoAttributeMetaData.getDescription())
+		if (StringUtils.isBlank(infoAttributeMetaData.getDescription()))
 		{
-			sb.append(infoAttributeMetaData.getDescription().replace("\\", "\\\\").replace("\"", "\\\""));
+			((DefaultAttributeMetaData) infoAttributeMetaData)
+					.setDescription(VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION);
 		}
+		sb.append(infoAttributeMetaData.getDescription().replace("\\", "\\\\").replace("\"", "\\\""));
 		sb.append("\">");
 		return sb.toString();
 	}

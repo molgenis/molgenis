@@ -41,6 +41,7 @@ import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.QueryCreator;
 import org.molgenis.data.annotation.entity.ResultFilter;
 import org.molgenis.data.annotation.filter.FirstResultFilter;
+import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.query.AttributeEqualsQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
@@ -95,10 +96,8 @@ public class CGDAnnotator
 				"INTERVENTION CATEGORIES", "INTERVENTION_CATEGORIES"), MANIFESTATION_CATEGORIES(
 				"MANIFESTATION CATEGORIES", "MANIFESTATION_CATEGORIES"), ALLELIC_CONDITIONS("ALLELIC CONDITIONS",
 				"ALLELIC_CONDITIONS"), ENTREZ_GENE_ID("ENTREZ GENE ID", "ENTREZ_GENE_ID"), HGNC_ID("HGNC ID", "HGNC_ID"), CONDITION(
-				"CONDITION", VcfRepository.getInfoPrefix() + CONDITION_LABEL), AGE_GROUP("AGE GROUP", VcfRepository
-				.getInfoPrefix() + AGE_GROUP_LABEL), INHERITANCE("INHERITANCE", VcfRepository.getInfoPrefix()
-				+ INHERITANCE_LABEL), GENERALIZED_INHERITANCE("", VcfRepository.getInfoPrefix()
-				+ GENERALIZED_INHERITANCE_LABEL);
+				"CONDITION", CONDITION_LABEL), AGE_GROUP("AGE GROUP", AGE_GROUP_LABEL), INHERITANCE("INHERITANCE", INHERITANCE_LABEL),
+				GENERALIZED_INHERITANCE("", GENERALIZED_INHERITANCE_LABEL);
 
 		private final String cgdName;// Column name as defined in CGD file
 		private final String attributeName;// Output attribute name
@@ -191,12 +190,14 @@ public class CGDAnnotator
 		return attributes;
 	}
 
-	private static class CGDEntityAnnotator extends AnnotatorImpl
+	private class CGDEntityAnnotator extends AnnotatorImpl
 	{
 		public CGDEntityAnnotator(String sourceRepositoryName, AnnotatorInfo info, QueryCreator queryCreator,
 				ResultFilter resultFilter, DataService dataService, Resources resources)
 		{
-			super(sourceRepositoryName, info, queryCreator, resultFilter, dataService, resources);
+			super(sourceRepositoryName, info, queryCreator, resultFilter, dataService, resources,
+					new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(CGD_FILE_LOCATION_PROPERTY,
+							molgenisSettings));
 		}
 
 		@Override
