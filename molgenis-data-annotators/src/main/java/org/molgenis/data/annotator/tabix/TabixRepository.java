@@ -162,11 +162,54 @@ public class TabixRepository extends AbstractRepository
 		return result;
 	}
 
+	private class TabixRepositoryIterator implements Iterator<Entity>
+	{
+		private String nextLine = null;
+
+		@Override
+		public boolean hasNext()
+		{
+			if (nextLine != null)
+			{
+				return true;
+			}
+			try
+			{
+				nextLine = reader.readLine();
+				return nextLine != null;
+			}
+			catch (IOException e)
+			{
+				return false;
+			}
+		}
+
+		@Override
+		public Entity next()
+		{
+			if (!hasNext())
+			{
+				throw new NoSuchElementException();
+			}
+			try
+			{
+				return toEntity(nextLine);
+			}
+			catch (IOException e)
+			{
+				throw new NoSuchElementException();
+			}
+			finally
+			{
+				nextLine = null;
+			}
+		}
+	}
 
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		throw new UnsupportedOperationException();
+		return new TabixRepositoryIterator();
 	}
 
 }

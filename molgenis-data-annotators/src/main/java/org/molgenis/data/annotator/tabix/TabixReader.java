@@ -143,7 +143,7 @@ public class TabixReader
 		return ByteBuffer.wrap(buf).order(ByteOrder.LITTLE_ENDIAN).getLong();
 	}
 
-	private static String readLine(final InputStream is) throws IOException
+	public static String readLine(final InputStream is) throws IOException
 	{
 		StringBuffer buf = new StringBuffer();
 		int c;
@@ -224,7 +224,15 @@ public class TabixReader
 	 */
 	private void readIndex(String fileName) throws IOException
 	{
-		readIndex(new File(fileName + ".tbi"));
+		readIndex(new File(mFn + ".tbi"));
+	}
+
+	/**
+	 * Read one line from the data file.
+	 */
+	public String readLine() throws IOException
+	{
+		return readLine(blockCompressedInputStream);
 	}
 
 	private int chr2tid(final String chr)
