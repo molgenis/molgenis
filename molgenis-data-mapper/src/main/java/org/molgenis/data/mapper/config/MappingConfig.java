@@ -9,6 +9,8 @@ import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.mapper.service.impl.AlgorithmServiceImpl;
+import org.molgenis.data.mapper.service.impl.AlgorithmTemplateService;
+import org.molgenis.data.mapper.service.impl.AlgorithmTemplateServiceImpl;
 import org.molgenis.data.mapper.service.impl.MappingServiceImpl;
 import org.molgenis.data.mapper.service.impl.UnitResolverImpl;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
@@ -49,7 +51,14 @@ public class MappingConfig
 	@Bean
 	public AlgorithmService algorithmServiceImpl()
 	{
-		return new AlgorithmServiceImpl(dataService, ontologyTagService, semanticSearchService, unitResolver());
+		return new AlgorithmServiceImpl(dataService, ontologyTagService, semanticSearchService, unitResolver(),
+				algorithmTemplateServiceImpl());
+	}
+
+	@Bean
+	public AlgorithmTemplateService algorithmTemplateServiceImpl()
+	{
+		return new AlgorithmTemplateServiceImpl(dataService, ontologyTagService, null, null); // FIXME
 	}
 
 	@Bean
