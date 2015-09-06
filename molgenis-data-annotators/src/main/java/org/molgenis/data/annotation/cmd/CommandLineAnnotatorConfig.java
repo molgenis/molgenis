@@ -11,14 +11,17 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
-import org.molgenis.data.annotation.utils.JarRunner;
-import org.molgenis.data.annotation.utils.JarRunnerImpl;
+import org.molgenis.data.convert.DateToStringConverter;
+import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.server.MolgenisSimpleSettings;
+import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.support.DefaultConversionService;
 
 /**
  * Commandline-specific annotator configuration.
@@ -27,6 +30,26 @@ import org.springframework.context.annotation.Configuration;
 @CommandLineOnlyConfiguration
 public class CommandLineAnnotatorConfig
 {
+	
+	/**
+	 * Beans that allows referencing Spring managed beans from Java code which is not managed by Spring
+	 * 
+	 * @return
+	 */
+	@Bean
+	public ApplicationContextProvider applicationContextProvider()
+	{
+		return new ApplicationContextProvider();
+	}
+	@Bean
+	ConversionService conversionService()
+	{
+		DefaultConversionService registry = new DefaultConversionService();
+		registry.addConverter(new DateToStringConverter());
+		registry.addConverter(new StringToDateConverter());
+		return registry;
+	}
+	
 	@Bean
 	MolgenisSettings settings()
 	{
