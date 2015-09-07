@@ -161,7 +161,14 @@ public abstract class AbstractEntity implements Entity
 	public String toString()
 	{
 		EntityMetaData entityMetaData = getEntityMetaData();
-		return String.format("%s=[%s]", entityMetaData.getName(), toString(entityMetaData.getAttributes()));
+		if (entityMetaData != null)
+		{
+			return String.format("%s=[%s]", entityMetaData.getName(), toString(entityMetaData.getAttributes()));
+		}
+		else
+		{
+			return getClass().getSimpleName() + "=[<missing entity meta data>]";
+		}
 	}
 
 	public String toString(Iterable<AttributeMetaData> attrs)
