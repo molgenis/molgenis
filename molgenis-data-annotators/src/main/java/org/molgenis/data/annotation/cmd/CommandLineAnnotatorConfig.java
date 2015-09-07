@@ -21,6 +21,7 @@ import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 
@@ -31,19 +32,32 @@ import org.springframework.core.convert.support.DefaultConversionService;
 @CommandLineOnlyConfiguration
 public class CommandLineAnnotatorConfig
 {
-	
 	@Value("${perlExecutable}")
 	private String perlLocation;
-	@Value("vcfToolsDir")
+	@Value("${vcfToolsDir}")
 	private String vcfToolsDirectory;
-	
+
+	/**
+	 * Needed to make @Value annotations with property placeholders work!
+	 * 
+	 * @see https
+	 *      ://stackoverflow.com/questions/17097521/spring-3-2-value-annotation-with-pure-java-configuration-does-not
+	 *      -work-but-env
+	 */
 	@Bean
-	public VcfValidator vcfValidator() {
-		System.out.println("perlLocation" + perlLocation);
-		System.out.println("vcfToolsDirectory" + vcfToolsDirectory);
+	public static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer()
+	{
+		return new PropertySourcesPlaceholderConfigurer();
+	}
+
+	@Bean
+	public VcfValidator vcfValidator()
+	{
+		System.out.println("perlLocation:" + perlLocation);
+		System.out.println("vcfToolsDirectory:" + vcfToolsDirectory);
 		return new VcfValidator(perlLocation, vcfToolsDirectory);
 	}
-	
+
 	/**
 	 * Beans that allows referencing Spring managed beans from Java code which is not managed by Spring
 	 * 
@@ -54,6 +68,7 @@ public class CommandLineAnnotatorConfig
 	{
 		return new ApplicationContextProvider();
 	}
+
 	@Bean
 	ConversionService conversionService()
 	{
@@ -62,7 +77,7 @@ public class CommandLineAnnotatorConfig
 		registry.addConverter(new StringToDateConverter());
 		return registry;
 	}
-	
+
 	@Bean
 	MolgenisSettings settings()
 	{
