@@ -75,6 +75,8 @@ public class CmdLineAnnotator
 							+ "\tExample: java -Xmx4g -jar CmdLineAnnotator.jar gonl GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ Cardio.vcf Cardio_gonl.vcf --validate=/usr/bin/perl,~/.molgenis/vcf-tools/ GoNL_GTC GoNL_AF\n"
 							+ "\n"
 							+ "Help:\n"
+							+ "\tThe default expected location of the perl executable is: /usr/bin/perl\n"
+							+ "\tThe default expected location of thevcf tool directory is: ~/.molgenis/vcf-tools\n\n"
 							+ "\tTo get a detailed description and installation instructions for a specific annotator:\n"
 							+ "\t\tjava -jar CmdLineAnnotator.jar [Annotator]\n"
 							+ "\tTo check if an annotator is ready for use:\n"
