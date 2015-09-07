@@ -1,14 +1,17 @@
 package org.molgenis.data.annotation.cmd;
 
+import static java.util.Arrays.asList;
+
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -22,6 +25,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.core.env.JOptCommandLinePropertySource;
+import org.springframework.core.env.PropertySource;
 import org.springframework.stereotype.Component;
 
 import ch.qos.logback.classic.Level;
@@ -44,6 +49,9 @@ public class CmdLineAnnotator
 	@Autowired
 	private ApplicationContext applicationContext;
 
+	@Autowired
+	VcfValidator vcfValidator;
+
 	private Boolean validate = false;
 
 	// Default settings for running vcf-validator
@@ -51,8 +59,10 @@ public class CmdLineAnnotator
 	private String perlDirectory = "/usr/bin/perl";
 	private String vcfToolsDirectory = userHome + "/.molgenis/vcf-tools/";
 
-	public void run(String[] args) throws Exception
+	public void run(OptionSet options) throws Exception
 	{
+		// PropertySource ps = new JOptCommandLinePropertySource(options);
+
 		Map<String, RepositoryAnnotator> configuredAnnotators = applicationContext
 				.getBeansOfType(RepositoryAnnotator.class);
 
@@ -62,7 +72,7 @@ public class CmdLineAnnotator
 
 		Set<String> annotatorNames = configuredFreshAnnotators.keySet();
 
-		if ((args.length < 4) && (args.length != 1))
+		if (!options.has("annotator"))
 		{
 			System.out
 					.println("\n"
@@ -87,38 +97,9 @@ public class CmdLineAnnotator
 			return;
 		}
 
-		Integer nrOfArguments = 4;
-		if (args.length > 4)
-		{
-			nrOfArguments = 5;
+		// TODO: snapt hij ~?
 
-			String validateFlag = args[4];
-			if (validateFlag.contains("--validate"))
-			{
-				validate = true;
-
-				// If validate is on, check if there are arguments for setting the configuration
-				if (validateFlag.contains("="))
-				{
-					String validateParameters = validateFlag.split("=")[1];
-					perlDirectory = validateParameters.split(",")[0];
-					vcfToolsDirectory = validateParameters.split(",")[1];
-					
-					// Replace '~' with system home because process.exec cannot parse '~'
-					if (perlDirectory.substring(0, 1).contains("~")) perlDirectory = perlDirectory.replaceFirst("~",
-							userHome);
-					if (vcfToolsDirectory.substring(0, 1).contains("~")) vcfToolsDirectory = vcfToolsDirectory
-							.replaceFirst("~", userHome);
-				}
-			}
-			else
-			{
-				System.out.println("Unknown parameter: " + validateFlag);
-				return;
-			}
-		}
-
-		String annotatorName = args[0];
+		String annotatorName = (String) options.valueOf("annotator");
 		if (!annotatorNames.contains(annotatorName))
 		{
 			System.out.println("Annotator must be one of the following: " + annotatorNames.toString());
@@ -129,20 +110,20 @@ public class CmdLineAnnotator
 		RepositoryAnnotator annotator = annotators.get(annotatorName);
 		if (annotator == null) throw new Exception("Annotator unknown: " + annotatorName);
 
-		if (args.length == 1)
+		if (!options.has("inputFile"))
 		{
 			printInfo(annotator.getInfo());
 			return;
 		}
 
-		File annotationSourceFile = new File(args[1]);
+		File annotationSourceFile = (File) options.valueOf("source");
 		if (!annotationSourceFile.exists())
 		{
 			System.out.println("Annotation source file or directory not found at " + annotationSourceFile);
 			return;
 		}
 
-		File inputVcfFile = new File(args[2]);
+		File inputVcfFile = (File) options.valueOf("input");
 		if (!inputVcfFile.exists())
 		{
 			System.out.println("Input VCF file not found at " + inputVcfFile);
@@ -154,29 +135,47 @@ public class CmdLineAnnotator
 			return;
 		}
 
-		File outputVCFFile = new File(args[3]);
+		File outputVCFFile = (File) options.valueOf("output");
 		if (outputVCFFile.exists())
 		{
 			System.out.println("WARNING: Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
 		}
 
-		List<String> attrNames = args.length > nrOfArguments ? new ArrayList<>(Arrays.asList(Arrays.copyOfRange(args,
-				5, args.length))) : new ArrayList<>();
-
 		// engage!
 		annotator.getCmdLineAnnotatorSettingsConfigurer().addSettings(annotationSourceFile.getAbsolutePath());
-		annotate(annotator, inputVcfFile, outputVCFFile, attrNames);
+		annotate(annotator, inputVcfFile, outputVCFFile, options);
 	}
 
 	public static void main(String[] args) throws Exception
 	{
 		configureLogging();
 
+		OptionSet options = parseCommandLineOptions(args);
 		// See http://stackoverflow.com/questions/4787719/spring-console-application-configured-using-annotations
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext("org.molgenis.data.annotation");
+		ctx.getEnvironment().getPropertySources().addFirst(new JOptCommandLinePropertySource(options));
+
 		CmdLineAnnotator main = ctx.getBean(CmdLineAnnotator.class);
-		main.run(args);
+		main.run(options);
 		ctx.close();
+	}
+
+	protected static OptionSet parseCommandLineOptions(String[] args)
+	{
+		OptionParser parser = new OptionParser();
+		parser.accepts("inputFile").withRequiredArg().ofType(File.class);
+		parser.acceptsAll(asList("a", "ann", "annotator"), "Annotator name").requiredIf("inputFile").withRequiredArg();
+		parser.acceptsAll(asList("s", "source", "annotatorSourceFile")).requiredIf("inputFile").withRequiredArg()
+				.ofType(File.class);
+		parser.accepts("outputFile").requiredIf("inputFile").withRequiredArg().ofType(File.class);
+		parser.acceptsAll(asList("v", "validate"), "Use VCF validator");
+		parser.accepts("perl-executable").withRequiredArg().ofType(File.class);
+		parser.accepts("vcf-tools-dir").withRequiredArg().ofType(File.class);
+		parser.acceptsAll(asList("attributes", "attrs"));
+		OptionSet options = parser.parse(args);
+		System.out.println(options.asMap());
+		System.out.println("validate = " + options.has("v"));
+		return options;
 	}
 
 	/**
@@ -190,9 +189,11 @@ public class CmdLineAnnotator
 	 *            , the attributes of the annotator to include in the output vcf, if empty outputs all
 	 * @throws Exception
 	 */
-	public void annotate(RepositoryAnnotator annotator, File inputVcfFile, File outputVCFFile,
-			List<String> attributesToInclude) throws Exception
+	public void annotate(RepositoryAnnotator annotator, File inputVcfFile, File outputVCFFile, OptionSet options)
+			throws Exception
 	{
+		List<String> attributesToInclude = options.nonOptionArguments().stream().map(Object::toString)
+				.collect(Collectors.toList());
 		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 
@@ -205,7 +206,7 @@ public class CmdLineAnnotator
 						.stream().map((attr) -> attr.getName()).collect(Collectors.toList());
 
 				boolean stop = false;
-				for (String attrName : attributesToInclude)
+				for (Object attrName : attributesToInclude)
 				{
 					if (!outputAttributeNames.contains(attrName))
 					{
@@ -247,10 +248,9 @@ public class CmdLineAnnotator
 
 			vcfRepo.close();
 		}
-		if (validate)
+		if (options.has("validate"))
 		{
 			System.out.println("Validating produced VCF file...");
-			VcfValidator vcfValidator = new VcfValidator(perlDirectory, vcfToolsDirectory);
 			System.out.println(vcfValidator.validateVCF(outputVCFFile));
 		}
 		System.out.println("All done!");
