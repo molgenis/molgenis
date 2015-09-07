@@ -92,8 +92,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			AttributeMetaData source = entry.getKey();
 
 			// use existing algorithm template if available
-			AlgorithmTemplate algorithmTemplate = algorithmTemplateService
-					.find(targetAttr, targetEntityMeta, sourceEntityMeta).findFirst().orElse(null);
+			AlgorithmTemplate algorithmTemplate = algorithmTemplateService.find(matches).findFirst().orElse(null);
 			if (algorithmTemplate != null)
 			{
 				algorithm = algorithmTemplate.render();

@@ -16,7 +16,6 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
-import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
@@ -38,9 +37,6 @@ public class AlgorithmTemplateServiceImplTest extends AbstractTestNGSpringContex
 
 	@Autowired
 	private DataService dataService;
-
-	@Autowired
-	private SemanticSearchService semanticSearchService;
 
 	private Script script0;
 	private String param0Name = "param0", param1Name = "param1";
@@ -74,21 +70,15 @@ public class AlgorithmTemplateServiceImplTest extends AbstractTestNGSpringContex
 		DefaultAttributeMetaData sourceAttr0 = sourceEntityMeta.addAttribute(sourceAttr0Name);
 		DefaultAttributeMetaData sourceAttr1 = sourceEntityMeta.addAttribute(sourceAttr1Name);
 
-		DefaultEntityMetaData targetEntityMeta = new DefaultEntityMetaData("target");
-		DefaultAttributeMetaData targetAttr = targetEntityMeta.addAttribute("targetAttr0");
-
 		ExplainedQueryString sourceAttr0Explain = ExplainedQueryString.create("a", "b", param0Name, 1.0);
 		ExplainedQueryString sourceAttr1Explain = ExplainedQueryString.create("a", "b", param1Name, 0.5);
 		Map<AttributeMetaData, Iterable<ExplainedQueryString>> attrResults = new HashMap<>();
 		attrResults.put(sourceAttr0, Arrays.asList(sourceAttr0Explain));
 		attrResults.put(sourceAttr1, Arrays.asList(sourceAttr1Explain));
-		when(semanticSearchService.findAttributes(sourceEntityMeta, targetEntityMeta, targetAttr))
-				.thenReturn(attrResults);
 
-		Stream<AlgorithmTemplate> templateStream = algorithmTemplateServiceImpl.find(targetAttr, targetEntityMeta,
-				sourceEntityMeta);
+		Stream<AlgorithmTemplate> templateStream = algorithmTemplateServiceImpl.find(attrResults);
 
-		Map<String, String> model = new HashMap<String, String>();
+		Map<String, String> model = new HashMap<>();
 		model.put(param0Name, sourceAttr0Name);
 		model.put(param1Name, sourceAttr1Name);
 		AlgorithmTemplate expectedAlgorithmTemplate = new AlgorithmTemplate(script0, model);
@@ -102,19 +92,13 @@ public class AlgorithmTemplateServiceImplTest extends AbstractTestNGSpringContex
 		@Bean
 		public AlgorithmTemplateServiceImpl algorithmTemplateServiceImpl()
 		{
-			return new AlgorithmTemplateServiceImpl(dataService(), semanticSearchService());
+			return new AlgorithmTemplateServiceImpl(dataService());
 		}
 
 		@Bean
 		public DataService dataService()
 		{
 			return mock(DataService.class);
-		}
-
-		@Bean
-		public SemanticSearchService semanticSearchService()
-		{
-			return mock(SemanticSearchService.class);
 		}
 	}
 }

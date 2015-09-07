@@ -27,7 +27,6 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
@@ -80,8 +79,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		when(algorithmTemplateService.find(any(AttributeMetaData.class), any(EntityMetaData.class),
-				any(EntityMetaData.class))).thenReturn(Stream.empty());
+		when(algorithmTemplateService.find(any(Map.class))).thenReturn(Stream.empty());
 	}
 
 	@Test

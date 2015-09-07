@@ -71,7 +71,7 @@ public class MappingConfig
 	@Bean
 	public AlgorithmTemplateService algorithmTemplateServiceImpl()
 	{
-		return new AlgorithmTemplateServiceImpl(dataService, semanticSearchService);
+		return new AlgorithmTemplateServiceImpl(dataService);
 	}
 
 	@Bean

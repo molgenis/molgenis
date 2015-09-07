@@ -12,9 +12,7 @@ import java.util.stream.StreamSupport;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
-import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.script.Script;
 import org.molgenis.script.ScriptParameter;
@@ -25,18 +23,15 @@ import org.springframework.stereotype.Service;
 public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 {
 	private final DataService dataService;
-	private final SemanticSearchService semanticSearchService;
 
 	@Autowired
-	public AlgorithmTemplateServiceImpl(DataService dataService, SemanticSearchService semanticSearchService)
+	public AlgorithmTemplateServiceImpl(DataService dataService)
 	{
 		this.dataService = checkNotNull(dataService);
-		this.semanticSearchService = checkNotNull(semanticSearchService);
 	}
 
 	@Override
-	public Stream<AlgorithmTemplate> find(AttributeMetaData targetAttr, EntityMetaData targetEntityMeta,
-			EntityMetaData sourceEntityMeta)
+	public Stream<AlgorithmTemplate> find(Map<AttributeMetaData, Iterable<ExplainedQueryString>> attrMatches)
 	{
 		// get all algorithm templates
 		Iterable<Script> jsScripts = dataService.findAll(ENTITY_NAME,
@@ -44,22 +39,18 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 
 		// select all algorithm templates that can be used with target and sources
 		return StreamSupport.stream(jsScripts.spliterator(), false)
-				.flatMap(script -> toAlgorithmTemplate(script, targetAttr, targetEntityMeta, sourceEntityMeta));
+				.flatMap(script -> toAlgorithmTemplate(script, attrMatches));
 	}
 
-	private Stream<AlgorithmTemplate> toAlgorithmTemplate(Script script, AttributeMetaData targetAttr,
-			EntityMetaData targetEntityMeta, EntityMetaData sourceEntityMeta)
+	private Stream<AlgorithmTemplate> toAlgorithmTemplate(Script script,
+			Map<AttributeMetaData, Iterable<ExplainedQueryString>> attrMatches)
 	{
-		// find source attributes related to target attribute
-		Map<AttributeMetaData, Iterable<ExplainedQueryString>> attrs = semanticSearchService
-				.findAttributes(sourceEntityMeta, targetEntityMeta, targetAttr);
-
 		// find attribute for each parameter
 		boolean paramMatch = true;
 		Map<String, String> model = new HashMap<>();
 		for (ScriptParameter param : script.getParameters())
 		{
-			AttributeMetaData attr = mapParamToAttribute(param, attrs);
+			AttributeMetaData attr = mapParamToAttribute(param, attrMatches);
 			if (attr != null)
 			{
 				model.put(param.getName(), attr.getName());
@@ -78,9 +69,9 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 	}
 
 	private AttributeMetaData mapParamToAttribute(ScriptParameter param,
-			Map<AttributeMetaData, Iterable<ExplainedQueryString>> attrs)
+			Map<AttributeMetaData, Iterable<ExplainedQueryString>> attrMatches)
 	{
-		return attrs.entrySet().stream()
+		return attrMatches.entrySet().stream()
 				.filter(entry -> StreamSupport.stream(entry.getValue().spliterator(), false)
 						.anyMatch(explain -> explain.getTagName().equalsIgnoreCase(param.getName())))
 				.map(entry -> entry.getKey()).findFirst().orElse(null);
