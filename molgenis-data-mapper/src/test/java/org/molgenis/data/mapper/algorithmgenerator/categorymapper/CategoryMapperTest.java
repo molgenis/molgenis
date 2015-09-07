@@ -1,14 +1,12 @@
 package org.molgenis.data.mapper.algorithmgenerator.categorymapper;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.NonSI;
 import javax.measure.unit.Unit;
 
-import org.elasticsearch.common.collect.Multimaps;
 import org.jscience.physics.amount.Amount;
 import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
 import org.testng.Assert;
@@ -111,8 +109,6 @@ public class CategoryMapperTest
 	@Test
 	public void testIntegration()
 	{
-		Multimaps.asMap(Collections.emptyMap());
-
 		String sourceCategory1 = "never/less than 1 per month";
 		AmountWrapper amountSourceCategory1 = CategoryMapperUtil.convertDescriptionToAmount(sourceCategory1);
 		Assert.assertTrue(CategoryMapperUtil.isAmountRanged(amountSourceCategory1.getAmount()));
