@@ -52,6 +52,7 @@
     	        enableOptionalFilter: false,
     	        saveOnBlur: true,
     	        enableFormIndex: true,
+    	        enableAlertMessageInFormIndex: true,
     	        categoricalMrefShowSelectAll: false,
     	        showAsteriskIfNotNillable: false,
     	        beforeSubmit: this._handleBeforeSubmit,
