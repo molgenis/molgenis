@@ -18,6 +18,7 @@ import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.molgenis.util.ApplicationContextProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.ConversionService;
@@ -30,6 +31,18 @@ import org.springframework.core.convert.support.DefaultConversionService;
 @CommandLineOnlyConfiguration
 public class CommandLineAnnotatorConfig
 {
+	
+	@Value("${perlExecutable}")
+	private String perlLocation;
+	@Value("vcfToolsDir")
+	private String vcfToolsDirectory;
+	
+	@Bean
+	public VcfValidator vcfValidator() {
+		System.out.println("perlLocation" + perlLocation);
+		System.out.println("vcfToolsDirectory" + vcfToolsDirectory);
+		return new VcfValidator(perlLocation, vcfToolsDirectory);
+	}
 	
 	/**
 	 * Beans that allows referencing Spring managed beans from Java code which is not managed by Spring

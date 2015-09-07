@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.env.JOptCommandLinePropertySource;
-import org.springframework.core.env.PropertySource;
 import org.springframework.stereotype.Component;
 
 import ch.qos.logback.classic.Level;
@@ -52,17 +51,9 @@ public class CmdLineAnnotator
 	@Autowired
 	VcfValidator vcfValidator;
 
-	private Boolean validate = false;
-
 	// Default settings for running vcf-validator
-	private String userHome = System.getProperty("user.home");
-	private String perlDirectory = "/usr/bin/perl";
-	private String vcfToolsDirectory = userHome + "/.molgenis/vcf-tools/";
-
 	public void run(OptionSet options) throws Exception
 	{
-		// PropertySource ps = new JOptCommandLinePropertySource(options);
-
 		Map<String, RepositoryAnnotator> configuredAnnotators = applicationContext
 				.getBeansOfType(RepositoryAnnotator.class);
 
@@ -123,7 +114,7 @@ public class CmdLineAnnotator
 			return;
 		}
 
-		File inputVcfFile = (File) options.valueOf("input");
+		File inputVcfFile = (File) options.valueOf("inputFile");
 		if (!inputVcfFile.exists())
 		{
 			System.out.println("Input VCF file not found at " + inputVcfFile);
@@ -135,7 +126,7 @@ public class CmdLineAnnotator
 			return;
 		}
 
-		File outputVCFFile = (File) options.valueOf("output");
+		File outputVCFFile = (File) options.valueOf("outputFile");
 		if (outputVCFFile.exists())
 		{
 			System.out.println("WARNING: Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
@@ -151,12 +142,17 @@ public class CmdLineAnnotator
 		configureLogging();
 
 		OptionSet options = parseCommandLineOptions(args);
-		// See http://stackoverflow.com/questions/4787719/spring-console-application-configured-using-annotations
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext("org.molgenis.data.annotation");
-		ctx.getEnvironment().getPropertySources().addFirst(new JOptCommandLinePropertySource(options));
 
+		// See http://stackoverflow.com/questions/4787719/spring-console-application-configured-using-annotations
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.getEnvironment().getPropertySources().addFirst(new JOptCommandLinePropertySource(options));
+		ctx.register(CommandLineAnnotatorConfig.class);
+		ctx.scan("org.molgenis.data.annotation","org.molgenis.data.annotation.cmd");
+		ctx.refresh();
 		CmdLineAnnotator main = ctx.getBean(CmdLineAnnotator.class);
+
 		main.run(options);
+
 		ctx.close();
 	}
 
@@ -169,8 +165,8 @@ public class CmdLineAnnotator
 				.ofType(File.class);
 		parser.accepts("outputFile").requiredIf("inputFile").withRequiredArg().ofType(File.class);
 		parser.acceptsAll(asList("v", "validate"), "Use VCF validator");
-		parser.accepts("perl-executable").withRequiredArg().ofType(File.class);
-		parser.accepts("vcf-tools-dir").withRequiredArg().ofType(File.class);
+		parser.accepts("perlExecutable").withRequiredArg().ofType(String.class);
+		parser.accepts("vcfToolsDir").withRequiredArg().ofType(String.class);
 		parser.acceptsAll(asList("attributes", "attrs"));
 		OptionSet options = parser.parse(args);
 		System.out.println(options.asMap());

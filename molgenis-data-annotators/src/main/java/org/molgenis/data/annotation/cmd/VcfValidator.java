@@ -10,16 +10,16 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-@Component
 public class VcfValidator
 {
-	@Value("perl-executable:/usr/bin/perl")
 	private String perlLocation;
-	@Value("vcf-tools-dir")
 	private String vcfToolsDirectory;
+
+	public VcfValidator(String perlLocation, String vcfToolsDirectory)
+	{
+		this.perlLocation = perlLocation;
+		this.vcfToolsDirectory = vcfToolsDirectory;
+	}
 
 	/**
 	 * Validation method that calls the perl executable of the vcf-validator. Logs vcf validation output into a log file
@@ -31,6 +31,8 @@ public class VcfValidator
 	{
 		try
 		{
+			System.out.println("perl: " + perlLocation);
+			System.out.println("vcf tools: " + vcfToolsDirectory);
 			String vcfValidator = vcfToolsDirectory + "perl/vcf-validator";
 			// Checks if vcf-tools is present
 			if (new File(vcfValidator).exists())
