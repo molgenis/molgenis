@@ -30,15 +30,19 @@ public class TransactionLogService implements MolgenisTransactionListener, Appli
 			MolgenisTransactionLogMetaData.ENTITY_NAME, LockMetaData.ENTITY_NAME);
 
 	private final DataService dataService;
+	private final boolean useTransactionLog;
 
-	public TransactionLogService(DataService dataService)
+	public TransactionLogService(DataService dataService, boolean useTransactionLog)
 	{
 		this.dataService = dataService;
+		this.useTransactionLog = useTransactionLog;
 	}
 
 	@Override
 	public void transactionStarted(String transactionId)
 	{
+		if (!useTransactionLog) return;
+
 		Entity trans = new DefaultEntity(MolgenisTransactionLogMetaData.INSTANCE, dataService);
 		trans.set(MolgenisTransactionLogMetaData.TRANSACTION_ID, transactionId);
 		trans.set(MolgenisTransactionLogMetaData.USER_NAME, SecurityUtils.getCurrentUsername());
@@ -54,12 +58,14 @@ public class TransactionLogService implements MolgenisTransactionListener, Appli
 	@Override
 	public void commitTransaction(String transactionId)
 	{
+		if (!useTransactionLog) return;
 		finishTransaction(transactionId, MolgenisTransactionLogMetaData.Status.COMMITED);
 	}
 
 	@Override
 	public void rollbackTransaction(String transactionId)
 	{
+		if (!useTransactionLog) return;
 		finishTransaction(transactionId, MolgenisTransactionLogMetaData.Status.ROLLBACK);
 	}
 
@@ -86,6 +92,8 @@ public class TransactionLogService implements MolgenisTransactionListener, Appli
 	 */
 	public synchronized void checkLocks(String entityName, MolgenisTransactionLogEntryMetaData.Type type)
 	{
+		if (!useTransactionLog) return;
+
 		runAsSystem(() -> {
 			String attrName = null;
 			switch (type)
@@ -128,6 +136,8 @@ public class TransactionLogService implements MolgenisTransactionListener, Appli
 	 */
 	public synchronized void logAndLock(EntityMetaData entityMetaData, MolgenisTransactionLogEntryMetaData.Type type)
 	{
+		if (!useTransactionLog) return;
+
 		String transactionId = (String) TransactionSynchronizationManager.getResource(TRANSACTION_ID_RESOURCE_NAME);
 		if (transactionId != null)
 		{
