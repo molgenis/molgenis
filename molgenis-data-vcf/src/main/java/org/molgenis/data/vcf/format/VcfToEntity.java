@@ -12,6 +12,7 @@ import static org.molgenis.data.vcf.VcfRepository.ID_META;
 import static org.molgenis.data.vcf.VcfRepository.INFO;
 import static org.molgenis.data.vcf.VcfRepository.INTERNAL_ID;
 import static org.molgenis.data.vcf.VcfRepository.NAME;
+import static org.molgenis.data.vcf.VcfRepository.ORIGINAL_NAME;
 import static org.molgenis.data.vcf.VcfRepository.POS;
 import static org.molgenis.data.vcf.VcfRepository.POS_META;
 import static org.molgenis.data.vcf.VcfRepository.QUAL;
@@ -282,7 +283,9 @@ public class VcfToEntity
 
 				// FIXME remove entity ID from Sample label after #1400 is fixed, see also:
 				// jquery.molgenis.table.js line 152
-				sampleEntity.set(NAME, entityPosAlt + "_" + sampleNameIterator.next());
+				String original_name = sampleNameIterator.next();
+				sampleEntity.set(NAME, entityPosAlt + "_" + original_name);
+				sampleEntity.set(ORIGINAL_NAME, original_name);
 				samples.add(sampleEntity);
 			}
 		}

@@ -63,15 +63,18 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	private final SemanticSearchService semanticSearchService;
 	private final UnitResolver unitResolver;
 	private final List<CategoryAlgorithmGenerator> categoryAlgorithmGenerators;
+	private final AlgorithmTemplateService algorithmTemplateService;
 
 	@Autowired
 	public AlgorithmServiceImpl(DataService dataService, OntologyTagService ontologyTagService,
-			SemanticSearchService semanticSearchService, UnitResolver unitResolver)
+			SemanticSearchService semanticSearchService, UnitResolver unitResolver,
+			AlgorithmTemplateService algorithmTemplateService)
 	{
 		this.dataService = checkNotNull(dataService);
 		this.ontologyTagService = checkNotNull(ontologyTagService);
 		this.semanticSearchService = checkNotNull(semanticSearchService);
 		this.unitResolver = checkNotNull(unitResolver);
+		this.algorithmTemplateService = checkNotNull(algorithmTemplateService);
 
 		categoryAlgorithmGenerators = Arrays.asList(new OneToOneCategoryAlgorithmGenerator(dataService),
 				new OneToManyCategoryAlgorithmGenerator(dataService));
@@ -81,36 +84,75 @@ public class AlgorithmServiceImpl implements AlgorithmService
 
 	@Override
 	@RunAsSystem
-	public void autoGenerateAlgorithm(EntityMetaData sourceEntityMetaData, EntityMetaData targetEntityMetaData,
-			EntityMapping mapping, AttributeMetaData targetAttribute)
+	public void autoGenerateAlgorithm(EntityMetaData sourceEntityMeta, EntityMetaData targetEntityMeta,
+			EntityMapping mapping, AttributeMetaData targetAttr)
 	{
-		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttribute.getName());
-		Map<AttributeMetaData, Iterable<ExplainedQueryString>> matches = semanticSearchService.explainAttributes(
-				sourceEntityMetaData, targetEntityMetaData, targetAttribute);
+		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttr.getName());
+		Map<AttributeMetaData, Iterable<ExplainedQueryString>> matches = semanticSearchService.findAttributes(
+				sourceEntityMeta, targetEntityMeta, targetAttr);
 
-		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
-				targetEntityMetaData, targetAttribute);
-
-		Unit<? extends Quantity> targetUnit = unitResolver.resolveUnit(targetAttribute, targetEntityMetaData);
-
+		Multimap<Relation, OntologyTerm> targetAttrTags = ontologyTagService.getTagsForAttribute(targetEntityMeta,
+				targetAttr);
+		Unit<? extends Quantity> targetUnit = unitResolver.resolveUnit(targetAttr, targetEntityMeta);
 		for (Entry<AttributeMetaData, Iterable<ExplainedQueryString>> entry : matches.entrySet())
 		{
-			AttributeMetaData sourceAttribute = entry.getKey();
+			AttributeMetaData source = entry.getKey();
+
+			// determine source unit
+			Unit<? extends Quantity> sourceUnit = unitResolver.resolveUnit(source, sourceEntityMeta);
 
 			String algorithm = null;
-
-			// String algorithm = categoryAlgorithmGenerator.generate(targetAttribute, Arrays.asList(sourceAttribute));
-
-			if (StringUtils.isEmpty(algorithm))
+			if (sourceUnit != null)
 			{
-				algorithm = convertUnitAlgorithm(targetAttribute, targetUnit, sourceAttribute, sourceEntityMetaData);
+				if (targetUnit != null && !sourceUnit.equals(targetUnit))
+				{
+					// if units are convertible, create convert algorithm
+					UnitConverter unitConverter;
+					try
+					{
+						unitConverter = sourceUnit.getConverterTo(targetUnit);
+					}
+					catch (ConversionException e)
+					{
+						unitConverter = null;
+						// algorithm sets source unit and assigns source value to target
+						algorithm = String.format("$('%s').unit('%s').value();", source.getName(),
+								sourceUnit.toString());
+					}
+
+					if (unitConverter != null)
+					{
+						// algorithm sets source unit and assigns value converted to target unit to target
+						algorithm = String.format("$('%s').unit('%s').toUnit('%s').value();", source.getName(),
+								sourceUnit.toString(), targetUnit.toString());
+					}
+				}
+				else
+				{
+					// algorithm sets source unit and assigns source value to target
+					algorithm = String.format("$('%s').unit('%s').value();", source.getName(), sourceUnit.toString());
+
+					// FIXME remove hack
+					// find suitable algorithm templates
+					AlgorithmTemplate algorithmTemplate = algorithmTemplateService
+							.find(targetAttr, targetEntityMeta, sourceEntityMeta).findFirst().orElse(null);
+					if (algorithmTemplate != null)
+					{
+						// render algorithm template
+						algorithm = algorithmTemplate.render();
+					}
+				}
 			}
-
-			AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttribute.getName());
-
+			if (algorithm == null)
+			{
+				// algorithm assigns source value to target
+				algorithm = String.format("$('%s').value();", source.getName());
+			}
+			AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttr.getName());
+			attributeMapping.getSourceAttributeMetaDatas().add(source);
 			attributeMapping.setAlgorithm(algorithm);
 
-			if (isSingleMatchHighQuality(targetAttribute, tagsForAttribute, entry.getValue()))
+			if (isSingleMatchHighQuality(targetAttr, targetAttrTags, entry.getValue()))
 			{
 				attributeMapping.setAlgorithmState(AlgorithmState.GENERATED_HIGH);
 			}
@@ -119,8 +161,24 @@ public class AlgorithmServiceImpl implements AlgorithmService
 				attributeMapping.setAlgorithmState(AlgorithmState.GENERATED_LOW);
 			}
 
-			LOG.info("Creating attribute mapping: " + targetAttribute.getName() + " = " + algorithm);
+			LOG.debug("Creating attribute mapping: " + targetAttr.getName() + " = " + algorithm);
 			break;
+		}
+
+		if (mapping.getAttributeMapping(targetAttr.getName()) == null && !targetAttrTags.isEmpty())
+		{
+			// find suitable algorithm templates
+			AlgorithmTemplate algorithmTemplate = algorithmTemplateService
+					.find(targetAttr, targetEntityMeta, sourceEntityMeta).findFirst().orElse(null);
+			if (algorithmTemplate != null)
+			{
+				// render algorithm template
+				String algorithm = algorithmTemplate.render();
+
+				// add mapping with algorithm
+				AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttr.getName());
+				attributeMapping.setAlgorithm(algorithm);
+			}
 		}
 	}
 
@@ -138,7 +196,6 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		// First of all, we need to check if all the source attributes are of the same type
 		// return generateInternalJavaScriptAlgorithm(targetAttribute, targetUnit, sourceAttribute,
 		// sourceEntityMetaData);
-
 		return null;
 	}
 

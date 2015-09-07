@@ -68,8 +68,8 @@ public class MapEntity extends AbstractEntity
 		}
 		for (AttributeMetaData attribute : metaData.getAtomicAttributes())
 		{
-			if (Iterables.contains(otherAttributes, attribute.getName())) set(attribute.getName(),
-					other.get(attribute.getName()));
+			if (Iterables.contains(otherAttributes, attribute.getName()))
+				set(attribute.getName(), other.get(attribute.getName()));
 		}
 	}
 
@@ -146,6 +146,7 @@ public class MapEntity extends AbstractEntity
 		int result = 1;
 		result = prime * result + ((entityMetaData == null) ? 0 : entityMetaData.hashCode());
 		result = prime * result + ((idAttributeName == null) ? 0 : idAttributeName.hashCode());
+		result = prime * result + ((values == null) ? 0 : values.hashCode());
 		return result;
 	}
 
@@ -173,5 +174,4 @@ public class MapEntity extends AbstractEntity
 		else if (!values.equals(other.values)) return false;
 		return true;
 	}
-
 }

@@ -1,6 +1,5 @@
 package org.molgenis.data.mapper.service.impl;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -317,7 +316,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		Map<AttributeMetaData, Iterable<ExplainedQueryString>> matches = ImmutableMap.of(sourceAttribute,
 				Arrays.asList(ExplainedQueryString.create("height", "height", "height", 100)));
 
-		when(semanticSearchService.explainAttributes(sourceEntityMetaData, targetEntityMetaData, targetAttribute))
+		when(semanticSearchService.findAttributes(sourceEntityMetaData, targetEntityMetaData, targetAttribute))
 				.thenReturn(matches);
 
 		algorithmService.autoGenerateAlgorithm(sourceEntityMetaData, targetEntityMetaData, mapping, targetAttribute);
@@ -352,8 +351,11 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityMetaData);
 
-		when(semanticSearchService.explainAttributes(sourceEntityMetaData, targetEntityMetaData, targetAttribute))
+		when(semanticSearchService.findAttributes(sourceEntityMetaData, targetEntityMetaData, targetAttribute))
 				.thenReturn(emptyMap());
+
+		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute)).thenReturn(
+				LinkedHashMultimap.create());
 
 		algorithmService.autoGenerateAlgorithm(sourceEntityMetaData, targetEntityMetaData, mapping, targetAttribute);
 
@@ -361,7 +363,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testWhenSourceHasMultipleMatchesThenNoMappingGetsCreated()
+	public void testWhenSourceHasMultipleMatchesThenFirstMappingGetsCreated()
 	{
 		DefaultEntityMetaData targetEntityMetaData = new DefaultEntityMetaData("target");
 		DefaultAttributeMetaData targetAttribute = new DefaultAttributeMetaData("targetHeight");
@@ -372,7 +374,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		DefaultAttributeMetaData sourceAttribute1 = new DefaultAttributeMetaData("sourceHeight1");
 		sourceAttribute1.setDescription("height");
 		DefaultAttributeMetaData sourceAttribute2 = new DefaultAttributeMetaData("sourceHeight2");
-		sourceAttribute1.setDescription("height");
+		sourceAttribute2.setDescription("height");
 
 		sourceEntityMetaData.addAllAttributeMetaData(Arrays.asList(sourceAttribute1, sourceAttribute2));
 
@@ -390,13 +392,23 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityMetaData);
 
-		Iterable<AttributeMetaData> mappings = asList(sourceAttribute1, sourceAttribute2);
+		Map<AttributeMetaData, Iterable<ExplainedQueryString>> mappings = ImmutableMap
+				.<AttributeMetaData, Iterable<ExplainedQueryString>> of(sourceAttribute1,
+						Arrays.<ExplainedQueryString> asList(), sourceAttribute2,
+						Arrays.<ExplainedQueryString> asList());
+
 		when(semanticSearchService.findAttributes(sourceEntityMetaData, targetEntityMetaData, targetAttribute))
 				.thenReturn(mappings);
 
+		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute)).thenReturn(
+				LinkedHashMultimap.<Relation, OntologyTerm> create());
+
+		ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute);
+
 		algorithmService.autoGenerateAlgorithm(sourceEntityMetaData, targetEntityMetaData, mapping, targetAttribute);
 
-		Assert.assertNull(mapping.getAttributeMapping("targetHeight"));
+		Assert.assertEquals(mapping.getAttributeMapping("targetHeight").getSourceAttributeMetaDatas().get(0),
+				sourceAttribute1);
 	}
 
 	@Configuration
@@ -424,7 +436,13 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		public AlgorithmService algorithmService()
 		{
 			return new AlgorithmServiceImpl(dataService(), ontologyTagService(), semanticSearchService(),
-					unitResolver());
+					unitResolver(), algorithmTemplateService());
+		}
+
+		@Bean
+		public AlgorithmTemplateService algorithmTemplateService()
+		{
+			return mock(AlgorithmTemplateServiceImpl.class);
 		}
 
 		@Bean

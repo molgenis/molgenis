@@ -1,6 +1,9 @@
 package org.molgenis.data.annotation.entity.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -30,8 +33,14 @@ public class ExacAnnotator
 {
 
 	public static final String EXAC_AF = "EXAC_AF";
+	public static final String EXAC_AC_HOM = "EXAC_AC_HOM";
+	public static final String EXAC_AC_HET = "EXAC_AC_HET";
 	public static final String EXAC_AF_LABEL = "ExAC allele frequency";
+	public static final String EXAC_AC_HOM_LABEL = "ExAC homozygous alternative genotype count";
+	public static final String EXAC_AC_HET_LABEL = "ExAC heterozygous genotype count";
 	public static final String EXAC_AF_ResourceAttributeName = "AF";
+	public static final String EXAC_AC_HOM_ResourceAttributeName = "AC_Hom";
+	public static final String EXAC_AC_HET_ResourceAttributeName = "AC_Het";
 
 	public static final String EXAC_FILE_LOCATION_PROPERTY = "exac_location";
 	public static final String EXAC_TABIX_RESOURCE = "EXACTabixResource";
@@ -47,8 +56,24 @@ public class ExacAnnotator
 	public RepositoryAnnotator exac()
 	{
 
-		DefaultAttributeMetaData outputAttribute = new DefaultAttributeMetaData(EXAC_AF, FieldTypeEnum.STRING)
+		DefaultAttributeMetaData outputAttribute_AF = new DefaultAttributeMetaData(EXAC_AF, FieldTypeEnum.STRING)
 				.setDescription("The ExAC allele frequency").setLabel(EXAC_AF_LABEL);
+		DefaultAttributeMetaData outputAttribute_AC_HOM = new DefaultAttributeMetaData(EXAC_AC_HOM,
+				FieldTypeEnum.STRING).setDescription("The ExAC homozygous alternative genotype count").setLabel(
+				EXAC_AC_HOM_LABEL);
+		DefaultAttributeMetaData outputAttribute_AC_HET = new DefaultAttributeMetaData(EXAC_AC_HET,
+				FieldTypeEnum.STRING).setDescription("The ExAC heterozygous genotype count").setLabel(
+				EXAC_AC_HET_LABEL);
+
+		List<AttributeMetaData> outputMetaData = new ArrayList<AttributeMetaData>(
+				Arrays.asList(new DefaultAttributeMetaData[]
+				{ outputAttribute_AF, outputAttribute_AC_HOM, outputAttribute_AC_HET }));
+
+		List<AttributeMetaData> resourceMetaData = new ArrayList<AttributeMetaData>(
+				Arrays.asList(new DefaultAttributeMetaData[]
+				{ new DefaultAttributeMetaData(EXAC_AF_ResourceAttributeName, FieldTypeEnum.DECIMAL),
+						new DefaultAttributeMetaData(EXAC_AC_HOM_ResourceAttributeName, FieldTypeEnum.INT),
+						new DefaultAttributeMetaData(EXAC_AC_HET_ResourceAttributeName, FieldTypeEnum.INT) }));
 
 		AnnotatorInfo exacInfo = AnnotatorInfo
 				.create(Status.READY,
@@ -58,14 +83,11 @@ public class ExacAnnotator
 								+ " and harmonize exome sequencing data from a wide variety of large-scale sequencing projects"
 								+ ", and to make summary data available for the wider scientific community.The data set provided"
 								+ " on this website spans 60,706 unrelated individuals sequenced as part of various "
-								+ "disease-specific and population genetic studies. ",
-						Collections.singletonList(outputAttribute));
+								+ "disease-specific and population genetic studies. ", outputMetaData);
 
 		// TODO: properly test multiAllelicFresultFilter
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator();
-		MultiAllelicResultFilter multiAllelicResultFilter = new MultiAllelicResultFilter(
-				Collections.singletonList(new DefaultAttributeMetaData(EXAC_AF_ResourceAttributeName,
-						FieldTypeEnum.DECIMAL)));
+		MultiAllelicResultFilter multiAllelicResultFilter = new MultiAllelicResultFilter(resourceMetaData);
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(EXAC_TABIX_RESOURCE, exacInfo, locusQueryCreator,
 				multiAllelicResultFilter, dataService, resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(EXAC_FILE_LOCATION_PROPERTY, molgenisSettings))
@@ -73,7 +95,9 @@ public class ExacAnnotator
 			@Override
 			protected Object getResourceAttributeValue(AttributeMetaData attr, Entity sourceEntity)
 			{
-				String attrName = EXAC_AF.equals(attr.getName()) ? EXAC_AF_ResourceAttributeName : attr.getName();
+				String attrName = EXAC_AF.equals(attr.getName()) ? EXAC_AF_ResourceAttributeName : EXAC_AC_HOM
+						.equals(attr.getName()) ? EXAC_AC_HOM_ResourceAttributeName : EXAC_AC_HET
+						.equals(attr.getName()) ? EXAC_AC_HET_ResourceAttributeName : attr.getName();
 				return sourceEntity.get(attrName);
 			}
 		};

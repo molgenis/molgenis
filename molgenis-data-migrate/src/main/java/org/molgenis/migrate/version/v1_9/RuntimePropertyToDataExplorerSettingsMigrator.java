@@ -3,8 +3,8 @@ package org.molgenis.migrate.version.v1_9;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.molgenis.system.core.RuntimeProperty.ENTITY_NAME;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -240,11 +240,11 @@ public class RuntimePropertyToDataExplorerSettingsMigrator implements Applicatio
 				RuntimeProperty property = getProperty(key);
 				if (property != null)
 				{
-					URL rtpValue;
+					URI rtpValue;
 					try
 					{
-						rtpValue = new URL(property.getValue());
-						URL value = dataExplorerSettings.getGalaxyUrl();
+						rtpValue = new URI(property.getValue());
+						URI value = dataExplorerSettings.getGalaxyUrl();
 						if ((rtpValue == null && value != null) || (rtpValue != null && !rtpValue.equals(value)))
 						{
 							LOG.info("Updating AppSettings for RuntimeProperty [" + key + "]");
@@ -253,7 +253,7 @@ public class RuntimePropertyToDataExplorerSettingsMigrator implements Applicatio
 						LOG.info("Deleting RuntimeProperty [" + key + "]");
 						dataService.delete(ENTITY_NAME, property.getId());
 					}
-					catch (MalformedURLException e)
+					catch (URISyntaxException e)
 					{
 						LOG.error("Failed to update AppSettings for RuntimeProperty [" + key + "]");
 					}

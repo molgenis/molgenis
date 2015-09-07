@@ -1,5 +1,6 @@
 package org.molgenis.ontology.core.repository;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.molgenis.data.support.QueryImpl.IN;
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ENTITY_NAME;
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY;
@@ -34,8 +35,36 @@ import com.google.common.collect.FluentIterable;
  */
 public class OntologyTermRepository
 {
+	private final DataService dataService;
+
 	@Autowired
-	private DataService dataService;
+	public OntologyTermRepository(DataService dataService)
+	{
+		this.dataService = checkNotNull(dataService);
+	}
+
+	/**
+	 * FIXME write docs
+	 * 
+	 * @param term
+	 * @param pageSize
+	 * @return
+	 */
+	public List<OntologyTerm> findOntologyTerms(String term, int pageSize)
+	{
+		Iterable<Entity> ontologyTermEntities;
+
+		// #1 find exact match
+		Query termNameQuery = new QueryImpl().eq(OntologyTermMetaData.ONTOLOGY_TERM_NAME, term).pageSize(pageSize);
+		ontologyTermEntities = dataService.findAll(ENTITY_NAME, termNameQuery);
+
+		if (!ontologyTermEntities.iterator().hasNext())
+		{
+			Query termsQuery = new QueryImpl().search(term).pageSize(pageSize);
+			ontologyTermEntities = dataService.findAll(ENTITY_NAME, termsQuery);
+		}
+		return Lists.newArrayList(Iterables.transform(ontologyTermEntities, OntologyTermRepository::toOntologyTerm));
+	}
 
 	/**
 	 * Finds {@link OntologyTerm}s within {@link Ontology}s.
@@ -81,8 +110,8 @@ public class OntologyTermRepository
 		List<OntologyTerm> ontologyTerms = Lists.newArrayList();
 		for (String iri : iris)
 		{
-			OntologyTerm ontologyTerm = toOntologyTerm(dataService.findOne(ENTITY_NAME,
-					QueryImpl.EQ(ONTOLOGY_TERM_IRI, iri)));
+			OntologyTerm ontologyTerm = toOntologyTerm(
+					dataService.findOne(ENTITY_NAME, QueryImpl.EQ(ONTOLOGY_TERM_IRI, iri)));
 			if (ontologyTerm == null)
 			{
 				return null;
@@ -173,9 +202,9 @@ public class OntologyTermRepository
 		for (Entity ontologyTermEntity : ontologyTermEntities)
 		{
 			Entity ontologyEntity = ontologyTermEntity.getEntity(OntologyTermMetaData.ONTOLOGY);
-			ontologyTermEntity.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH).forEach(
-					ontologyTermNodePathEntity -> children.addAll(getChildOntologyTermsByNodePath(ontologyEntity,
-							ontologyTermNodePathEntity)));
+			ontologyTermEntity.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH)
+					.forEach(ontologyTermNodePathEntity -> children
+							.addAll(getChildOntologyTermsByNodePath(ontologyEntity, ontologyTermNodePathEntity)));
 		}
 		return children;
 	}
@@ -185,14 +214,14 @@ public class OntologyTermRepository
 		String nodePath = nodePathEntity.getString(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH);
 
 		Iterable<Entity> relatedOntologyTermEntities = dataService.findAll(OntologyTermMetaData.ENTITY_NAME,
-				new QueryImpl(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, Operator.FUZZY_MATCH, "\""
-						+ nodePath + "\"")).and().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity));
+				new QueryImpl(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, Operator.FUZZY_MATCH,
+						"\"" + nodePath + "\"")).and().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity));
 
 		Iterable<Entity> childOntologyTermEntities = FluentIterable.from(relatedOntologyTermEntities)
 				.filter(entity -> qualifiedNodePath(nodePath, entity)).toList();
 
-		return Lists.newArrayList(Iterables
-				.transform(childOntologyTermEntities, OntologyTermRepository::toOntologyTerm));
+		return Lists
+				.newArrayList(Iterables.transform(childOntologyTermEntities, OntologyTermRepository::toOntologyTerm));
 	}
 
 	private boolean qualifiedNodePath(String nodePath, Entity entity)
@@ -216,8 +245,8 @@ public class OntologyTermRepository
 		Iterable<Entity> ontologyTermSynonymEntities = entity.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM);
 		if (ontologyTermSynonymEntities != null)
 		{
-			ontologyTermSynonymEntities.forEach(synonymEntity -> synonyms.add(synonymEntity
-					.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM)));
+			ontologyTermSynonymEntities.forEach(synonymEntity -> synonyms
+					.add(synonymEntity.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM)));
 		}
 		if (!synonyms.contains(entity.getString(ONTOLOGY_TERM_NAME)))
 		{
