@@ -1,6 +1,7 @@
 package org.molgenis.data.mapper.service.impl;
 
 import static java.util.Collections.emptyMap;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.DATE;
@@ -20,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AttributeMetaData;
@@ -47,6 +49,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
@@ -69,6 +72,15 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 
 	@Autowired
 	private SemanticSearchService semanticSearchService;
+
+	@Autowired
+	private AlgorithmTemplateService algorithmTemplateService;
+
+	@BeforeMethod
+	public void setUpBeforeMethod()
+	{
+		when(algorithmTemplateService.find(any(Map.class))).thenReturn(Stream.empty());
+	}
 
 	@Test
 	public void testGetSourceAttributeNames()
@@ -354,8 +366,8 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		when(semanticSearchService.findAttributes(sourceEntityMetaData, targetEntityMetaData, targetAttribute))
 				.thenReturn(emptyMap());
 
-		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute)).thenReturn(
-				LinkedHashMultimap.create());
+		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute))
+				.thenReturn(LinkedHashMultimap.create());
 
 		algorithmService.autoGenerateAlgorithm(sourceEntityMetaData, targetEntityMetaData, mapping, targetAttribute);
 
@@ -400,8 +412,8 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		when(semanticSearchService.findAttributes(sourceEntityMetaData, targetEntityMetaData, targetAttribute))
 				.thenReturn(mappings);
 
-		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute)).thenReturn(
-				LinkedHashMultimap.<Relation, OntologyTerm> create());
+		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute))
+				.thenReturn(LinkedHashMultimap.<Relation, OntologyTerm> create());
 
 		ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute);
 

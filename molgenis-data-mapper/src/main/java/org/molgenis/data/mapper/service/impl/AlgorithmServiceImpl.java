@@ -87,50 +87,51 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		Unit<? extends Quantity> targetUnit = unitResolver.resolveUnit(targetAttr, targetEntityMeta);
 		for (Entry<AttributeMetaData, Iterable<ExplainedQueryString>> entry : matches.entrySet())
 		{
+			String algorithm = null;
+
 			AttributeMetaData source = entry.getKey();
 
-			// determine source unit
-			Unit<? extends Quantity> sourceUnit = unitResolver.resolveUnit(source, sourceEntityMeta);
-
-			String algorithm = null;
-			if (sourceUnit != null)
+			// use existing algorithm template if available
+			AlgorithmTemplate algorithmTemplate = algorithmTemplateService.find(matches).findFirst().orElse(null);
+			if (algorithmTemplate != null)
 			{
-				if (targetUnit != null && !sourceUnit.equals(targetUnit))
+				algorithm = algorithmTemplate.render();
+			}
+			else
+			{
+				// determine source unit
+				Unit<? extends Quantity> sourceUnit = unitResolver.resolveUnit(source, sourceEntityMeta);
+
+				if (sourceUnit != null)
 				{
-					// if units are convertible, create convert algorithm
-					UnitConverter unitConverter;
-					try
+					if (targetUnit != null && !sourceUnit.equals(targetUnit))
 					{
-						unitConverter = sourceUnit.getConverterTo(targetUnit);
+						// if units are convertible, create convert algorithm
+						UnitConverter unitConverter;
+						try
+						{
+							unitConverter = sourceUnit.getConverterTo(targetUnit);
+						}
+						catch (ConversionException e)
+						{
+							unitConverter = null;
+							// algorithm sets source unit and assigns source value to target
+							algorithm = String.format("$('%s').unit('%s').value();", source.getName(),
+									sourceUnit.toString());
+						}
+
+						if (unitConverter != null)
+						{
+							// algorithm sets source unit and assigns value converted to target unit to target
+							algorithm = String.format("$('%s').unit('%s').toUnit('%s').value();", source.getName(),
+									sourceUnit.toString(), targetUnit.toString());
+						}
 					}
-					catch (ConversionException e)
+					else
 					{
-						unitConverter = null;
 						// algorithm sets source unit and assigns source value to target
 						algorithm = String.format("$('%s').unit('%s').value();", source.getName(),
 								sourceUnit.toString());
-					}
-
-					if (unitConverter != null)
-					{
-						// algorithm sets source unit and assigns value converted to target unit to target
-						algorithm = String.format("$('%s').unit('%s').toUnit('%s').value();", source.getName(),
-								sourceUnit.toString(), targetUnit.toString());
-					}
-				}
-				else
-				{
-					// algorithm sets source unit and assigns source value to target
-					algorithm = String.format("$('%s').unit('%s').value();", source.getName(), sourceUnit.toString());
-
-					// FIXME remove hack
-					// find suitable algorithm templates
-					AlgorithmTemplate algorithmTemplate = algorithmTemplateService
-							.find(targetAttr, targetEntityMeta, sourceEntityMeta).findFirst().orElse(null);
-					if (algorithmTemplate != null)
-					{
-						// render algorithm template
-						algorithm = algorithmTemplate.render();
 					}
 				}
 			}
@@ -151,25 +152,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			{
 				attributeMapping.setAlgorithmState(AlgorithmState.GENERATED_LOW);
 			}
-
 			LOG.debug("Creating attribute mapping: " + targetAttr.getName() + " = " + algorithm);
 			break;
-		}
-
-		if (mapping.getAttributeMapping(targetAttr.getName()) == null && !targetAttrTags.isEmpty())
-		{
-			// find suitable algorithm templates
-			AlgorithmTemplate algorithmTemplate = algorithmTemplateService
-					.find(targetAttr, targetEntityMeta, sourceEntityMeta).findFirst().orElse(null);
-			if (algorithmTemplate != null)
-			{
-				// render algorithm template
-				String algorithm = algorithmTemplate.render();
-
-				// add mapping with algorithm
-				AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttr.getName());
-				attributeMapping.setAlgorithm(algorithm);
-			}
 		}
 	}
 
