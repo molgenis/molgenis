@@ -71,7 +71,7 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 						Arrays.asList("Ontology term"))));
 		assertEquals(
 				queryCaptor.getValue().toString(),
-				"QueryImpl [rules=[ontology IN '[1, 2]',  AND , ( search 'term1' OR  search 'term2' OR  search 'term3')], pageSize=100, offset=0, sort=null]");
+				"QueryImpl [rules=[ontology IN '[1, 2]',  AND , (ontologyTermSynonym FUZZY_MATCH 'term1' OR ontologyTermSynonym FUZZY_MATCH 'term2' OR ontologyTermSynonym FUZZY_MATCH 'term3')], pageSize=100, offset=0, sort=null]");
 
 	}
 
