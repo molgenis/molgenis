@@ -84,7 +84,7 @@ public class VcfRepository extends AbstractRepository
 	{
 		this.entityName = Preconditions.checkNotNull(entityName);
 		this.vcfReaderFactory = vcfReaderFactory;
-		this.vcfToEntitySupplier = Suppliers.memoize(this::parseVcfMeta);
+		this.vcfToEntitySupplier = Suppliers.<VcfToEntity> memoize(this::parseVcfMeta);
 	}
 
 	private VcfToEntity parseVcfMeta()
@@ -117,7 +117,8 @@ public class VcfRepository extends AbstractRepository
 	public Iterator<Entity> iterator()
 	{
 		Iterator<VcfRecord> vcfRecordIterator = Iterators.unmodifiableIterator(vcfReaderFactory.get().iterator());
-		return Iterators.transform(vcfRecordIterator, vcfToEntitySupplier.get()::toEntity);
+		VcfToEntity vcfToEntity = vcfToEntitySupplier.get();
+		return Iterators.transform(vcfRecordIterator, vcfToEntity::toEntity);
 	}
 
 	@Override
