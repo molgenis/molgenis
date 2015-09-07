@@ -4,6 +4,7 @@ import static java.util.Arrays.asList;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -145,9 +146,12 @@ public class CmdLineAnnotator
 
 		// See http://stackoverflow.com/questions/4787719/spring-console-application-configured-using-annotations
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.getEnvironment().getPropertySources().addFirst(new JOptCommandLinePropertySource(options));
+		JOptCommandLinePropertySource propertySource = new JOptCommandLinePropertySource(options);
+		System.out.println("property names:");
+		Arrays.stream(propertySource.getPropertyNames()).forEach(System.out::println);
+		ctx.getEnvironment().getPropertySources().addFirst(propertySource);
 		ctx.register(CommandLineAnnotatorConfig.class);
-		ctx.scan("org.molgenis.data.annotation","org.molgenis.data.annotation.cmd");
+		ctx.scan("org.molgenis.data.annotation", "org.molgenis.data.annotation.cmd");
 		ctx.refresh();
 		CmdLineAnnotator main = ctx.getBean(CmdLineAnnotator.class);
 
@@ -165,8 +169,8 @@ public class CmdLineAnnotator
 				.ofType(File.class);
 		parser.accepts("outputFile").requiredIf("inputFile").withRequiredArg().ofType(File.class);
 		parser.acceptsAll(asList("v", "validate"), "Use VCF validator");
-		parser.accepts("perlExecutable").withRequiredArg().ofType(String.class);
-		parser.accepts("vcfToolsDir").withRequiredArg().ofType(String.class);
+		parser.accepts("perlExecutable").withRequiredArg().ofType(String.class).defaultsTo("/bin/perl");
+		parser.accepts("vcfToolsDir").withRequiredArg().ofType(String.class).defaultsTo("~/.molgenis/vcf-tools");
 		parser.acceptsAll(asList("attributes", "attrs"));
 		OptionSet options = parser.parse(args);
 		System.out.println(options.asMap());
