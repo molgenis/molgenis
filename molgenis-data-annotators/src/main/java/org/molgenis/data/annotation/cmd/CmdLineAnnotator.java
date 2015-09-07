@@ -40,8 +40,16 @@ import ch.qos.logback.core.ConsoleAppender;
 @Component
 public class CmdLineAnnotator
 {
+
 	@Autowired
 	private ApplicationContext applicationContext;
+
+	private Boolean validate = false;
+
+	// Default settings for running vcf-validator
+	private String userHome = System.getProperty("user.home");
+	private String perlDirectory = "/usr/bin/perl";
+	private String vcfToolsDirectory = userHome + "/.molgenis/vcf-tools/";
 
 	public void run(String[] args) throws Exception
 	{
@@ -63,10 +71,12 @@ public class CmdLineAnnotator
 							+ "*********************************************\n"
 							+ "\n"
 							+ "Typical usage to annotate a VCF file:\n"
-							+ "\tjava -jar CmdLineAnnotator.jar [Annotator] [Annotation source file] [input VCF] [output VCF] [output attributes (optional, default:all attributes)].\n"
-							+ "\tExample: java -Xmx4g -jar CmdLineAnnotator.jar gonl GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ Cardio.vcf Cardio_gonl.vcf GoNL_GTC GoNL_AF\n"
+							+ "\tjava -jar CmdLineAnnotator.jar [Annotator] [Annotation source file] [input VCF] [output VCF] [validate flag]=[perl location]|[vcf-tools directory] [output attributes (optional, default:all attributes)].\n"
+							+ "\tExample: java -Xmx4g -jar CmdLineAnnotator.jar gonl GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ Cardio.vcf Cardio_gonl.vcf --validate=/usr/bin/perl,~/.molgenis/vcf-tools/ GoNL_GTC GoNL_AF\n"
 							+ "\n"
 							+ "Help:\n"
+							+ "\tThe default expected location of the perl executable is: /usr/bin/perl\n"
+							+ "\tThe default expected location of thevcf tool directory is: ~/.molgenis/vcf-tools\n\n"
 							+ "\tTo get a detailed description and installation instructions for a specific annotator:\n"
 							+ "\t\tjava -jar CmdLineAnnotator.jar [Annotator]\n"
 							+ "\tTo check if an annotator is ready for use:\n"
@@ -75,6 +85,37 @@ public class CmdLineAnnotator
 							+ "Breakdown per category:\n"
 							+ CommandLineAnnotatorConfig.printAnnotatorsPerType(configuredFreshAnnotators));
 			return;
+		}
+
+		Integer nrOfArguments = 4;
+		if (args.length > 4)
+		{
+			nrOfArguments = 5;
+
+			String validateFlag = args[4];
+			if (validateFlag.contains("--validate"))
+			{
+				validate = true;
+
+				// If validate is on, check if there are arguments for setting the configuration
+				if (validateFlag.contains("="))
+				{
+					String validateParameters = validateFlag.split("=")[1];
+					perlDirectory = validateParameters.split(",")[0];
+					vcfToolsDirectory = validateParameters.split(",")[1];
+					
+					// Replace '~' with system home because process.exec cannot parse '~'
+					if (perlDirectory.substring(0, 1).contains("~")) perlDirectory = perlDirectory.replaceFirst("~",
+							userHome);
+					if (vcfToolsDirectory.substring(0, 1).contains("~")) vcfToolsDirectory = vcfToolsDirectory
+							.replaceFirst("~", userHome);
+				}
+			}
+			else
+			{
+				System.out.println("Unknown parameter: " + validateFlag);
+				return;
+			}
 		}
 
 		String annotatorName = args[0];
@@ -107,7 +148,7 @@ public class CmdLineAnnotator
 			System.out.println("Input VCF file not found at " + inputVcfFile);
 			return;
 		}
-		if (inputVcfFile.isDirectory())
+		else if (inputVcfFile.isDirectory())
 		{
 			System.out.println("Input VCF file is a directory, not a file!");
 			return;
@@ -119,8 +160,8 @@ public class CmdLineAnnotator
 			System.out.println("WARNING: Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
 		}
 
-		List<String> attrNames = args.length > 4 ? new ArrayList<>(Arrays.asList(Arrays.copyOfRange(args, 4,
-				args.length))) : new ArrayList<>();
+		List<String> attrNames = args.length > nrOfArguments ? new ArrayList<>(Arrays.asList(Arrays.copyOfRange(args,
+				5, args.length))) : new ArrayList<>();
 
 		// engage!
 		annotator.getCmdLineAnnotatorSettingsConfigurer().addSettings(annotationSourceFile.getAbsolutePath());
@@ -199,15 +240,20 @@ public class CmdLineAnnotator
 				Entity annotatedRecord = annotatedRecords.next();
 				outputVCFWriter.println(VcfUtils.convertToVCF(annotatedRecord, attributesToInclude));
 			}
-
-			System.out.println("All done!");
 		}
 		finally
 		{
 			outputVCFWriter.close();
+
 			vcfRepo.close();
 		}
-
+		if (validate)
+		{
+			System.out.println("Validating produced VCF file...");
+			VcfValidator vcfValidator = new VcfValidator(perlDirectory, vcfToolsDirectory);
+			System.out.println(vcfValidator.validateVCF(outputVCFFile));
+		}
+		System.out.println("All done!");
 	}
 
 	private void printInfo(AnnotatorInfo info)
