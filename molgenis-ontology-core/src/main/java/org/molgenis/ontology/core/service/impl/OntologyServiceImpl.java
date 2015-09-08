@@ -2,6 +2,7 @@ package org.molgenis.ontology.core.service.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -29,6 +30,14 @@ public class OntologyServiceImpl implements OntologyService
 	public List<Ontology> getOntologies()
 	{
 		return Lists.newArrayList(ontologyRepository.getOntologies());
+	}
+
+	@Override
+	public List<String> getAllOntologiesIds()
+	{
+		final List<String> allOntologiesIds = new ArrayList<String>();
+		ontologyRepository.getOntologies().forEach(e -> allOntologiesIds.add(e.getId()));
+		return allOntologiesIds;
 	}
 
 	@Override
