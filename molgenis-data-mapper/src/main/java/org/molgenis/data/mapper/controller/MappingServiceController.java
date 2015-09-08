@@ -8,6 +8,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.stream.StreamSupport;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
@@ -478,59 +480,50 @@ public class MappingServiceController extends MolgenisPluginController
 		return "forward:" + URI;
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/attributeMapping/explain", consumes = APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.POST, value = "/attributeMapping/semanticsearch", consumes = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Map<String, Iterable<ExplainedQueryString>> getExplainedAttributeMapping(
+	public Map<String, Iterable<ExplainedQueryString>> getSemanticSearchAttributeMapping(
 			@RequestBody Map<String, String> requestBody)
 	{
 		String mappingProjectId = requestBody.get("mappingProjectId");
 		String target = requestBody.get("target");
 		String source = requestBody.get("source");
 		String targetAttribute = requestBody.get("targetAttribute");
+		String searchTermsString = requestBody.get("searchTerms");
+		Set<String> searchTerms = StringUtils.isNotBlank(searchTermsString) ? Sets.newHashSet(searchTermsString
+				.split("\\s*OR\\s*")) : Collections.emptySet();
+
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
 		MappingTarget mappingTarget = project.getMappingTarget(target);
 		EntityMapping entityMapping = mappingTarget.getMappingForSource(source);
+
 		AttributeMetaData targetAttributeMetaData = entityMapping.getTargetEntityMetaData().getAttribute(
 				targetAttribute);
 
-		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
-				entityMapping.getTargetEntityMetaData(), targetAttributeMetaData);
-		
-		Map<AttributeMetaData, Iterable<ExplainedQueryString>> explainedAttributes = semanticSearchService
-				.findAttributes(entityMapping.getSourceEntityMetaData(), targetAttributeMetaData,
-						tagsForAttribute.values());
+		final Map<AttributeMetaData, Iterable<ExplainedQueryString>> relevantAttributes;
+		if (null == searchTerms || searchTerms.isEmpty())
+		{
+			// Find relevant attributes base on tags
+			Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
+					entityMapping.getTargetEntityMetaData(), targetAttributeMetaData);
+
+			relevantAttributes = semanticSearchService
+					.findAttributes(entityMapping.getSourceEntityMetaData(), targetAttributeMetaData,
+							tagsForAttribute.values());
+		}
+		else
+		{
+			// Find relevant attributes base on user defined key words
+			relevantAttributes = semanticSearchService
+					.findAttributes(entityMapping.getSourceEntityMetaData(), targetAttributeMetaData, searchTerms);
+		}
 
 		Map<String, Iterable<ExplainedQueryString>> simpleExplainedAttributes = new LinkedHashMap<String, Iterable<ExplainedQueryString>>();
-		for (Entry<AttributeMetaData, Iterable<ExplainedQueryString>> entry : explainedAttributes.entrySet())
+		for (Entry<AttributeMetaData, Iterable<ExplainedQueryString>> entry : relevantAttributes.entrySet())
 		{
 			simpleExplainedAttributes.put(entry.getKey().getName(), entry.getValue());
 		}
-		return simpleExplainedAttributes;
-	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/attributeMapping/semanticsearch", consumes = APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public Map<String, Iterable<ExplainedQueryString>> getSemanticSearchAttributeMapping(
-			@RequestBody Map<String, String> requestBody)
-	{
-		MappingProject project = mappingService.getMappingProject(requestBody.get("mappingProjectId"));
-		MappingTarget mappingTarget = project.getMappingTarget(requestBody.get("target"));
-		EntityMapping entityMapping = mappingTarget.getMappingForSource(requestBody.get("source"));
-
-		AttributeMetaData targetAttributeMetaData = entityMapping.getTargetEntityMetaData().getAttribute(
-				requestBody.get("targetAttribute"));
-
-		Set<String> searchTerms = null != requestBody.get("searchTerms") ? Sets.newHashSet(requestBody.get(
-				"searchTerms").split(" OR ")) : null;
-
-		Map<AttributeMetaData, Iterable<ExplainedQueryString>> explainedAttributes = semanticSearchService
-				.findAttributes(entityMapping.getSourceEntityMetaData(), targetAttributeMetaData, searchTerms);
-
-		Map<String, Iterable<ExplainedQueryString>> simpleExplainedAttributes = new LinkedHashMap<String, Iterable<ExplainedQueryString>>();
-		for (Entry<AttributeMetaData, Iterable<ExplainedQueryString>> entry : explainedAttributes.entrySet())
-		{
-			simpleExplainedAttributes.put(entry.getKey().getName(), entry.getValue());
-		}
 		return simpleExplainedAttributes;
 	}
 
