@@ -284,95 +284,81 @@
 			needle : "$('" + attribute + "')"
 		});
 	}
-
 	
-	/**
-	 * Hides rows of the table if atrribute source labels, names, descriptions
-	 * and tags have nothing to do with the query, hide the row
-	 */
-	function filterAttributeTable(attributes) {
-		var searchQuery = $('#attribute-search-field').val().toLowerCase(), attrLabel, attrName, attrDescription, row;
-		if (searchQuery === '') {
-			$('#attribute-mapping-table>tbody').find('tr').each(function() {
-				row = $(this);
-				if (attributes !== null) {
-					if (attributes.indexOf($(this).data('attribute-name').toLowerCase()) > -1) {
-						row.show();
-					} else {
-						row.hide();
-					}
-				} else {
-					row.hide();
-				}
-			});
-		} else {
-			$('#attribute-mapping-table>tbody').find('tr').each(function() {
-				attrLabel = $(this).data('attribute-label').toLowerCase();
-				attrName = $(this).data('attribute-label').toLowerCase();
-				attrDescription = $(this).find('td.source-attribute-information').text().toLowerCase();
-
-				$(this).show();
-
-				if (attrLabel.indexOf(searchQuery) < 0 && attrName.indexOf(searchQuery) < 0 && attrDescription.indexOf(searchQuery) < 0) {
-					$(this).hide();
-				}
-			});
-		}
-		
-		//Update the search result message above the table
-		var numberOfVisibleAttributes = $('#attribute-mapping-table>tbody tr:visible').length;
-		var totalNumberOfAttributes = $('#attribute-mapping-table>tbody tr').length;
-		$('#attribute-search-result-message').empty().append(numberOfVisibleAttributes + ' attributes have been found out of ' + totalNumberOfAttributes);
-		
-		// hide/show the header of the table depending on whether or not there are any visiable attributes
-		if(numberOfVisibleAttributes == 0){
-			$('#attribute-mapping-table>thead tr').hide();
-		}else{
-			$('#attribute-mapping-table>thead tr').show();
-		}
-	}
-
 	/**
 	 * Move suggested attributes to the top of the attribute table
 	 */
-	function rankAttributeTable(explainedAttributes){
+	function createAttributeTable(explainedAttributes, resultTable, dataExplorerUri){
+		
+		//Remove the existing content of the result table
+		resultTable.empty();
+
+		//Add the header to the result table
+		resultTable.append('<thead><tr><th>Select</th><th>Attribute</th><th>Algorithm value</th></tr></thead>');
+		
 		if(explainedAttributes != null){
-			var attributeNames = Object.keys(explainedAttributes), className, attributeLabel, attributeInfoElement, firstRow, suggestedRow, explainedQueryStrings, matchedWords;
-			for(var i = attributeNames.length - 1; i >= 0;i--){
+			
+			var tbody = $('<tbody />').appendTo(resultTable);
+			var counter = 0;
+			$.each(explainedAttributes, function(index, explainedAttribute){
 				
-				className = attributeNames[i];
-				firstRow = $('#attribute-mapping-table>tbody tr:first');
-				suggestedRow = $('#attribute-mapping-table tr[data-attribute-name="' + className + '"]');
-				attributeLabel = $(suggestedRow).attr('data-attribute-label');
-				attributeInfoElement = $(suggestedRow).find('td.source-attribute-information');
-				//Push the suggested attributes to the top of the table
-				firstRow.before(suggestedRow);
-				//highlight the matched words in attribute labels
-				explainedQueryStrings = explainedAttributes[className];
-				matchedWords = [];
-				if(explainedQueryStrings.length > 0){
-					
-					console.log("explainedQueryStrings: ", explainedQueryStrings);
-					console.log("attributeLabel: ", attributeLabel);
-					console.log("explainedAttributes[className];: ", explainedAttributes);
-					console.log("className: ", className);
-					
-					//Create a detailed explanation popover to show how the attributes get matched
-					createPopoverExplanation(suggestedRow, attributeInfoElement, attributeLabel, explainedQueryStrings);
-					
-					//Collect all matched words from all explanations
-					$.each(explainedQueryStrings, function(index, explainedQueryString){
-						var matchedWordsFromOneExplanation = extendPartialWord(attributeLabel, explainedQueryString.matchedWords.split(' '));
-						addAll(matchedWords, matchedWordsFromOneExplanation);
-					});
-					
-					//Connect matched words and highlight them together
-					$.each(connectNeighboredWords(attributeLabel, matchedWords), function(index, word){
-						$(attributeInfoElement).highlight(word);
-					});
-					
+				var attribute = explainedAttribute.attributeMetaData;
+				var explainedQueryStrings = explainedAttribute.explainedQueryStrings;
+				
+				var row = $('<tr />').attr({
+					'data-attribute-name' : attribute.name,
+					'data-attribute-label' : attribute.label,
+				});
+				
+				row.append('<td><div class="checkbox"><label><input data-attribute-name="' + attribute.label + '" type="checkbox"></label></div></td>');
+				row.append('<td class="source-attribute-information"><b>' + attribute.label + '</b> (' + attribute.dataType + ')');
+				
+				if(attribute.nillable)
+				{
+					row.append('<span class="label label-warning">nillable</span>');
 				}
-			}
+				
+				if(attribute.unique)
+				{
+					row.append('<span class="label label-default">unique</span>');
+				}
+				
+				if(attribute.description)
+				{
+					row.append('<br />' + attribute.description);
+				}
+				
+				if(attribute.dataType === 'xref' || attribute.dataType === 'categorical' || attribute.dataType === 'mref')
+				{
+					row.append('<br><a href="' + dataExplorerUri + '?entity=' + attribute.refEntity.name + '" target="_blank">category look up</a>');
+				}
+				
+				row.append('</td>').appendTo(tbody);
+				
+				if(counter < 10)
+				{
+					if(explainedQueryStrings.length > 0)
+					{
+						var matchedWords = [];
+						var attributeInfoElement = $(row).find('td.source-attribute-information');
+						var attributeLabel = attribute.label;
+						//Create a detailed explanation popover to show how the attributes get matched
+						createPopoverExplanation(row, attributeInfoElement, attributeLabel, explainedQueryStrings);
+						
+						//Collect all matched words from all explanations
+						$.each(explainedQueryStrings, function(index, explainedQueryString){
+							var matchedWordsFromOneExplanation = extendPartialWord(attributeLabel, explainedQueryString.matchedWords.split(' '));
+							addAll(matchedWords, matchedWordsFromOneExplanation);
+						});
+						
+						//Connect matched words and highlight them together
+						$.each(connectNeighboredWords(attributeLabel, matchedWords), function(index, word){
+							$(attributeInfoElement).highlight(word);
+						});
+					}
+				}
+				counter++;
+			});
 		}
 	}
 	
@@ -568,7 +554,7 @@
 	 * 		if empty uses tags
 	 * 		if not empty uses key words
 	 */
-	function findRelevantAttributes(requestBody){
+	function findRelevantAttributes(requestBody, resultTable, dataExplorerUri){
 		requestBody["searchTerms"] = $('#attribute-search-field').val();
 		$.ajax({
 			type : 'POST',
@@ -576,7 +562,7 @@
 			data : JSON.stringify(requestBody),
 			contentType : 'application/json',
 			success : function(relevantAttributes) {
-				rankAttributeTable(relevantAttributes);
+				createAttributeTable(relevantAttributes, resultTable, dataExplorerUri);
 			}
 		});
 	}
@@ -600,7 +586,7 @@
 		
 		$('.ontologytag-tooltip').css({'cursor':'pointer'}).popover({'html':true, 'placement':'right', 'trigger':'hover'});
 
-		findRelevantAttributes(requestBody);
+		findRelevantAttributes(requestBody, $('#attribute-mapping-table'), $('#dataExplorerUri').val());
 
 		// create ace editor
 		$textarea = $("#ace-editor-text-area");
@@ -701,7 +687,7 @@
 
 		// Using the semantic search functionality from the server
 		$('#attribute-search-field-button').on('click', function(e) {
-			findRelevantAttributes(requestBody);
+			findRelevantAttributes(requestBody, $('#attribute-mapping-table'), $('#dataExplorerUri').val());
 		});
 
 		// when the map tab is selected, load its contents

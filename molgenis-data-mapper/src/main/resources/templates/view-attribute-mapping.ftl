@@ -26,6 +26,7 @@
 		<input id="source" type="hidden" name="source" value="${entityMapping.sourceEntityMetaData.name?html}"/>
 		<input id="targetAttribute" type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
 		<input id="targetAttributeType" type="hidden" name="targetAttributeType" value="${attributeMapping.targetAttributeMetaData.dataType?html}"/>
+		<input id="dataExplorerUri" type="hidden" value="${dataExplorerUri?html}"/>
 	</div>
 </div>
 <div class="row">
@@ -139,38 +140,7 @@
 			<div class="row">
 				<div class="col-md-12">
 					<p id="attribute-search-result-message"></p>
-					<table id="attribute-mapping-table" class="table table-bordered scroll">
-						<thead>
-							<th>Select</th>
-							<th>Attribute</th>
-							<th>Algorithm value</th>
-						</thead>
-						<tbody>
-							<#list entityMapping.sourceEntityMetaData.attributes as source>
-								<tr data-attribute-name="${source.name?html}" data-attribute-label="${source.label?html}">
-									<td>
-										<div class="checkbox">
-											<label>
-												<input data-attribute-name="${source.name?html}" type="checkbox">
-											</label>
-										</div>
-									</td>
-									<td class="source-attribute-information">
-										<b>${source.label?html}</b> (${source.dataType?html})
-										<#if source.nillable> <span class="label label-warning">nillable</span></#if>
-										<#if source.unique> <span class="label label-default">unique</span></#if>
-										<#if source.description??><br />${source.description?html}</#if>
-										<#if source.dataType == "xref" || source.dataType == "categorical" || source.dataType == "mref">
-											<br><a href="${dataExplorerUri?html}?entity=${source.refEntity.name}" target="_blank">category look up</a>
-										</#if>
-									</td>
-									<td>
-										${source.name?html}
-									</td>
-								</tr>
-							</#list>
-						</tbody>
-					</table>
+					<table id="attribute-mapping-table" class="table table-bordered scroll"></table>
 				</div>
 			</div>
 			
