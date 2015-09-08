@@ -65,4 +65,11 @@ public interface OntologyService
 	 */
 	Integer getOntologyTermDistance(OntologyTerm ontologyTerm1, OntologyTerm ontologyTerm2);
 
+	/**
+	 * Retrieves all ontologies ids.
+	 * 
+	 * @return String Ontology Id
+	 */
+	List<String> getAllOntologiesIds();
+
 }
