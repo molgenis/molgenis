@@ -7,6 +7,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -16,7 +17,6 @@ import org.mockito.Mockito;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
@@ -165,7 +165,6 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 	public void testFindAttributes()
 	{
 		DefaultEntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("sourceEntityMetaData");
-		EntityMetaData targetEntityMetaData = new DefaultEntityMetaData("targetEntityMetaData");
 		DefaultAttributeMetaData targetAttribute = new DefaultAttributeMetaData("targetAttribute");
 
 		// Mock the id's of the attribute entities that should be searched
@@ -186,7 +185,8 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		QueryRule disMaxQueryRule = new QueryRule(rules);
 		disMaxQueryRule.setOperator(Operator.DIS_MAX);
 
-		when(semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(targetEntityMetaData, targetAttribute)).thenReturn(
+		when(semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(targetAttribute, Collections.emptyList()))
+				.thenReturn(
 				disMaxQueryRule);
 
 		MapEntity entity1 = new MapEntity(ImmutableMap.of(AttributeMetaDataMetaData.NAME, "height_0",
@@ -207,8 +207,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 				attributeMetaDataEntities);
 
 		Map<AttributeMetaData, Iterable<ExplainedQueryString>> termsActual1 = semanticSearchService.findAttributes(
-				sourceEntityMetaData,
-				targetEntityMetaData, targetAttribute);
+				sourceEntityMetaData, targetAttribute, Collections.emptyList());
 
 		Map<AttributeMetaData, Iterable<ExplainedQueryString>> termsExpected1 = ImmutableMap.of(attributeHeight,
 				Arrays.<ExplainedQueryString> asList());
@@ -220,8 +219,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 				Arrays.<Entity> asList());
 
 		Map<AttributeMetaData, Iterable<ExplainedQueryString>> termsActual2 = semanticSearchService.findAttributes(
-				sourceEntityMetaData,
-				targetEntityMetaData, targetAttribute);
+				sourceEntityMetaData, targetAttribute, Collections.emptyList());
 
 		Map<AttributeMetaData, Iterable<ExplainedQueryString>> termsExpected2 = ImmutableMap.of();
 
@@ -278,7 +276,8 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		@Bean
 		SemanticSearchService semanticSearchService()
 		{
-			return new SemanticSearchServiceImpl();
+			return new SemanticSearchServiceImpl(dataService(), ontologyService(), metaDataService(),
+					semanticSearchServiceHelper(), elasticSearchExplainService());
 		}
 
 		@Bean

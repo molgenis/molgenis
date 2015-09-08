@@ -493,9 +493,12 @@ public class MappingServiceController extends MolgenisPluginController
 		AttributeMetaData targetAttributeMetaData = entityMapping.getTargetEntityMetaData().getAttribute(
 				targetAttribute);
 
+		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
+				entityMapping.getTargetEntityMetaData(), targetAttributeMetaData);
+		
 		Map<AttributeMetaData, Iterable<ExplainedQueryString>> explainedAttributes = semanticSearchService
-				.findAttributes(entityMapping.getSourceEntityMetaData(), dataService.getEntityMetaData(target),
-						targetAttributeMetaData);
+				.findAttributes(entityMapping.getSourceEntityMetaData(), targetAttributeMetaData,
+						tagsForAttribute.values());
 
 		Map<String, Iterable<ExplainedQueryString>> simpleExplainedAttributes = new LinkedHashMap<String, Iterable<ExplainedQueryString>>();
 		for (Entry<AttributeMetaData, Iterable<ExplainedQueryString>> entry : explainedAttributes.entrySet())
@@ -517,11 +520,11 @@ public class MappingServiceController extends MolgenisPluginController
 		AttributeMetaData targetAttributeMetaData = entityMapping.getTargetEntityMetaData().getAttribute(
 				requestBody.get("targetAttribute"));
 
-		Set<String> searchTerms = Sets.newHashSet(requestBody.get("searchTerms").split(" OR "));
+		Set<String> searchTerms = null != requestBody.get("searchTerms") ? Sets.newHashSet(requestBody.get(
+				"searchTerms").split(" OR ")) : null;
 
 		Map<AttributeMetaData, Iterable<ExplainedQueryString>> explainedAttributes = semanticSearchService
-				.findAttributes(searchTerms, entityMapping.getSourceEntityMetaData(),
-						dataService.getEntityMetaData(requestBody.get("target")), targetAttributeMetaData);
+				.findAttributes(entityMapping.getSourceEntityMetaData(), targetAttributeMetaData, searchTerms);
 
 		Map<String, Iterable<ExplainedQueryString>> simpleExplainedAttributes = new LinkedHashMap<String, Iterable<ExplainedQueryString>>();
 		for (Entry<AttributeMetaData, Iterable<ExplainedQueryString>> entry : explainedAttributes.entrySet())

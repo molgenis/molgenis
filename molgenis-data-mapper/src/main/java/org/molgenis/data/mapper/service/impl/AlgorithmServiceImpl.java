@@ -78,12 +78,12 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	public void autoGenerateAlgorithm(EntityMetaData sourceEntityMeta, EntityMetaData targetEntityMeta,
 			EntityMapping mapping, AttributeMetaData targetAttr)
 	{
-		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttr.getName());
-		Map<AttributeMetaData, Iterable<ExplainedQueryString>> matches = semanticSearchService
-				.findAttributes(sourceEntityMeta, targetEntityMeta, targetAttr);
 
-		Multimap<Relation, OntologyTerm> targetAttrTags = ontologyTagService.getTagsForAttribute(targetEntityMeta,
+		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttr.getName());
+		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(targetEntityMeta,
 				targetAttr);
+		Map<AttributeMetaData, Iterable<ExplainedQueryString>> matches = semanticSearchService.findAttributes(
+				sourceEntityMeta, targetAttr, tagsForAttribute.values());
 		Unit<? extends Quantity> targetUnit = unitResolver.resolveUnit(targetAttr, targetEntityMeta);
 		for (Entry<AttributeMetaData, Iterable<ExplainedQueryString>> entry : matches.entrySet())
 		{
@@ -144,7 +144,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			attributeMapping.getSourceAttributeMetaDatas().add(source);
 			attributeMapping.setAlgorithm(algorithm);
 
-			if (isSingleMatchHighQuality(targetAttr, targetAttrTags, entry.getValue()))
+			if (isSingleMatchHighQuality(targetAttr, tagsForAttribute, entry.getValue()))
 			{
 				attributeMapping.setAlgorithmState(AlgorithmState.GENERATED_HIGH);
 			}

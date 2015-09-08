@@ -581,8 +581,7 @@
 		// Get the explained attributes
 		$.ajax({
 			type : 'POST',
-	//		url : molgenis.getContextUrl() + '/attributeMapping/explain', //TODO JJ OLD LINE
-			url : molgenis.getContextUrl() + '/attributeMapping/semanticsearch', //TODO JJ New LINE
+			url : molgenis.getContextUrl() + '/attributeMapping/explain',
 			data : JSON.stringify(requestBody),
 			contentType : 'application/json',
 			success : function(result) {

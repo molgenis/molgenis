@@ -24,7 +24,6 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
-import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.string.Stemmer;
 import org.molgenis.data.support.QueryImpl;
@@ -35,7 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 public class SemanticSearchServiceHelper
@@ -90,55 +88,15 @@ public class SemanticSearchServiceHelper
 
 	/**
 	 * Create a disMaxJunc query rule based on the label and description from target attribute as well as the
-	 * information from ontology term tags
+	 * information from given ontology terms
 	 * 
-	 * @param targetEntityMetaData
 	 * @param targetAttribute
+	 * @param ontologyTerms
+	 * 
 	 * @return disMaxJunc queryRule
 	 */
-	public QueryRule createDisMaxQueryRuleForAttribute(EntityMetaData targetEntityMetaData,
-			AttributeMetaData targetAttribute)
-	{
-		List<String> queryTerms = new ArrayList<String>();
-
-		if (StringUtils.isNotEmpty(targetAttribute.getLabel()))
-		{
-			queryTerms.add(parseQueryString(targetAttribute.getLabel()));
-		}
-
-		if (StringUtils.isNotEmpty(targetAttribute.getDescription()))
-		{
-			queryTerms.add(parseQueryString(targetAttribute.getDescription()));
-		}
-
-		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
-				targetEntityMetaData, targetAttribute);
-
-		// Handle tags with only one ontologyterm
-		tagsForAttribute.values().stream().filter(ontologyTerm -> !ontologyTerm.getIRI().contains(",")).forEach(ot -> {
-			queryTerms.addAll(parseOntologyTermQueries(ot));
-		});
-
-		QueryRule disMaxQueryRule = createDisMaxQueryRuleForTerms(queryTerms);
-
-		// Handle tags with multiple ontologyterms
-		tagsForAttribute.values().stream().filter(ontologyTerm -> ontologyTerm.getIRI().contains(",")).forEach(ot -> {
-			disMaxQueryRule.getNestedRules().add(createShouldQueryRule(ot.getIRI()));
-		});
-
-		return disMaxQueryRule;
-	}
-
-	/**
-	 * TODO JJ Create a disMaxJunc query rule based on the label and description from target attribute as well as the
-	 * information from ontology term tags
-	 * 
-	 * @param targetEntityMetaData
-	 * @param targetAttribute
-	 * @return disMaxJunc queryRule
-	 */
-	public QueryRule createDisMaxQueryRuleForAttribute(EntityMetaData targetEntityMetaData,
-			AttributeMetaData targetAttribute, List<OntologyTerm> ontologyTerms)
+	public QueryRule createDisMaxQueryRuleForAttribute(AttributeMetaData targetAttribute,
+			Collection<OntologyTerm> ontologyTerms)
 	{
 		List<String> queryTerms = new ArrayList<String>();
 
@@ -257,8 +215,8 @@ public class SemanticSearchServiceHelper
 		return allTerms;
 	}
 
-	public Map<String, String> collectExpandedQueryMap(EntityMetaData targetEntityMetaData,
-			AttributeMetaData targetAttribute, List<OntologyTerm> ontologyTerms)
+	public Map<String, String> collectExpandedQueryMap(AttributeMetaData targetAttribute,
+			Collection<OntologyTerm> ontologyTerms)
 	{
 		Map<String, String> expandedQueryMap = new LinkedHashMap<String, String>();
 
@@ -272,12 +230,7 @@ public class SemanticSearchServiceHelper
 			expandedQueryMap.put(stemmer.cleanStemPhrase(targetAttribute.getDescription()),
 					targetAttribute.getDescription());
 		}
-
-		Collection<OntologyTerm> ontologyTermTags = ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute)
-				.values();
 		
-		ontologyTerms.addAll(ontologyTermTags);
-
 		for (OntologyTerm ontologyTerm : ontologyTerms)
 		{
 			if (!ontologyTerm.getIRI().contains(","))

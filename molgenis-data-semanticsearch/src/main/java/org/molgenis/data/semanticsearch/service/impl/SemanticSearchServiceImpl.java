@@ -1,6 +1,9 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -49,34 +52,52 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 
 	private static final Logger LOG = LoggerFactory.getLogger(SemanticSearchServiceImpl.class);
 
-	@Autowired
-	private OntologyService ontologyService;
+	private final DataService dataService;
+
+	private final OntologyService ontologyService;
+
+	private final MetaDataService metaDataService;
+
+	private final SemanticSearchServiceHelper semanticSearchServiceHelper;
+
+	private final ElasticSearchExplainService elasticSearchExplainService;
 
 	@Autowired
-	private MetaDataService metaDataService;
-
-	@Autowired
-	private DataService dataService;
-
-	@Autowired
-	private SemanticSearchServiceHelper semanticSearchServiceHelper;
-
-	@Autowired
-	private ElasticSearchExplainService elasticSearchExplainService;
+	public SemanticSearchServiceImpl(DataService dataService, OntologyService ontologyService,
+			MetaDataService metaDataService, SemanticSearchServiceHelper semanticSearchServiceHelper,
+			ElasticSearchExplainService elasticSearchExplainService)
+	{
+		this.dataService = checkNotNull(dataService);
+		this.ontologyService = checkNotNull(ontologyService);
+		this.metaDataService = checkNotNull(metaDataService);
+		this.semanticSearchServiceHelper = checkNotNull(semanticSearchServiceHelper);
+		this.elasticSearchExplainService = checkNotNull(elasticSearchExplainService);
+	}
 
 	private static final float CUTOFF = 0.4f;
 
 	private Splitter termSplitter = Splitter.onPattern("[^\\p{IsAlphabetic}]+");
 	private Joiner termJoiner = Joiner.on(' ');
 
-	public Map<AttributeMetaData, Iterable<ExplainedQueryString>> findAttributes(
-			EntityMetaData sourceEntityMetaData, EntityMetaData targetEntityMetaData, AttributeMetaData targetAttribute)
+	/**
+	 * 
+	 * 
+	 * @param sourceEntityMetaData
+	 * @param targetAttribute
+	 * @param ontologyTermTags
+	 * @return
+	 */
+	@Override
+	public Map<AttributeMetaData, Iterable<ExplainedQueryString>> findAttributes(EntityMetaData sourceEntityMetaData,
+			AttributeMetaData targetAttribute, Collection<OntologyTerm> ontologyTerms)
 	{
+
 		Iterable<String> attributeIdentifiers = semanticSearchServiceHelper
 				.getAttributeIdentifiers(sourceEntityMetaData);
 
-		QueryRule disMaxQueryRule = semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(targetEntityMetaData,
-				targetAttribute);
+		QueryRule disMaxQueryRule = semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(
+targetAttribute,
+				ontologyTerms);
 
 		List<QueryRule> finalQueryRules = Lists.newArrayList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER,
 				Operator.IN, attributeIdentifiers));
@@ -90,7 +111,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 				new QueryImpl(finalQueryRules));
 
 		Map<String, String> collectExpanedQueryMap = semanticSearchServiceHelper.collectExpandedQueryMap(
-				targetEntityMetaData, targetAttribute);
+				targetAttribute, ontologyTerms);
 
 		// Because the explain-API can be computationally expensive we limit the explanation to the top 10 attributes
 		Map<AttributeMetaData, Iterable<ExplainedQueryString>> explainedAttributes = new LinkedHashMap<AttributeMetaData, Iterable<ExplainedQueryString>>();
@@ -118,57 +139,14 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	}
 
 	@Override
-	public Map<AttributeMetaData, Iterable<ExplainedQueryString>> findAttributes(Set<String> searchTerms,
-			EntityMetaData sourceEntityMetaData,
-			EntityMetaData targetEntityMetaData, AttributeMetaData targetAttribute)
+	public Map<AttributeMetaData, Iterable<ExplainedQueryString>> findAttributes(EntityMetaData sourceEntityMetaData,
+			AttributeMetaData targetAttribute, Set<String> searchTerms)
 	{
 		List<String> allOntologiesIds = ontologyService.getAllOntologiesIds();
-		List<OntologyTerm> ontologyTerms = ontologyService.findOntologyTerms(allOntologiesIds, searchTerms,
+		List<OntologyTerm> ontologyTerms = ontologyService.findExcatOntologyTerms(allOntologiesIds, searchTerms,
 				MAX_NUM_TAGS);
 
-		Iterable<String> attributeIdentifiers = semanticSearchServiceHelper
-				.getAttributeIdentifiers(sourceEntityMetaData);
-
-		QueryRule disMaxQueryRule = semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(targetEntityMetaData,
-				targetAttribute, ontologyTerms);
-
-		List<QueryRule> finalQueryRules = Lists.newArrayList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER,
-				Operator.IN, attributeIdentifiers));
-
-		if (disMaxQueryRule.getNestedRules().size() > 0)
-		{
-			finalQueryRules.addAll(Arrays.asList(new QueryRule(Operator.AND), disMaxQueryRule));
-		}
-
-		Iterable<Entity> attributeMetaDataEntities = dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME,
-				new QueryImpl(finalQueryRules));
-
-		Map<String, String> collectExpanedQueryMap = semanticSearchServiceHelper.collectExpandedQueryMap(
-				targetEntityMetaData, targetAttribute, ontologyTerms);
-
-		// Because the explain-API can be computationally expensive we limit the explanation to the top 10 attributes
-		Map<AttributeMetaData, Iterable<ExplainedQueryString>> attributes = new LinkedHashMap<AttributeMetaData, Iterable<ExplainedQueryString>>();
-		int count = 0;
-		for (Entity attributeEntity : attributeMetaDataEntities)
-		{
-			AttributeMetaData attribute = sourceEntityMetaData.getAttribute(attributeEntity
-					.getString(AttributeMetaDataMetaData.NAME));
-			if (count < 10)
-			{
-				attributes.put(
-						attribute,
-						convertAttributeEntityToExplainedAttribute(attributeEntity, sourceEntityMetaData,
-								collectExpanedQueryMap, finalQueryRules));
-			}
-			else
-			{
-
-				attributes.put(attribute, Collections.emptySet());
-			}
-			count++;
-		}
-
-		return attributes;
+		return findAttributes(sourceEntityMetaData, targetAttribute, ontologyTerms);
 	}
 
 	/**
