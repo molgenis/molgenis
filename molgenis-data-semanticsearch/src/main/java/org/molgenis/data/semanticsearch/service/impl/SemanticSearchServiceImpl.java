@@ -95,8 +95,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		Iterable<String> attributeIdentifiers = semanticSearchServiceHelper
 				.getAttributeIdentifiers(sourceEntityMetaData);
 
-		QueryRule disMaxQueryRule = semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(
-targetAttribute,
+		QueryRule disMaxQueryRule = semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(targetAttribute,
 				ontologyTerms);
 
 		List<QueryRule> finalQueryRules = Lists.newArrayList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER,
@@ -142,9 +141,16 @@ targetAttribute,
 	public Map<AttributeMetaData, Iterable<ExplainedQueryString>> findAttributes(EntityMetaData sourceEntityMetaData,
 			AttributeMetaData targetAttribute, Set<String> searchTerms)
 	{
-		List<String> allOntologiesIds = ontologyService.getAllOntologiesIds();
-		List<OntologyTerm> ontologyTerms = ontologyService.findExcatOntologyTerms(allOntologiesIds, searchTerms,
-				MAX_NUM_TAGS);
+		List<OntologyTerm> ontologyTerms;
+		if (null == searchTerms || searchTerms.size() == 0)
+		{
+			ontologyTerms = Collections.emptyList();
+		}
+		else
+		{
+			List<String> allOntologiesIds = ontologyService.getAllOntologiesIds();
+			ontologyTerms = ontologyService.findExcatOntologyTerms(allOntologiesIds, searchTerms, MAX_NUM_TAGS);
+		}
 
 		return findAttributes(sourceEntityMetaData, targetAttribute, ontologyTerms);
 	}
