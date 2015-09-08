@@ -32,9 +32,10 @@ import org.springframework.core.convert.support.DefaultConversionService;
 @CommandLineOnlyConfiguration
 public class CommandLineAnnotatorConfig
 {
-	@Value("${perlExecutable}")
+	@Value("${perl-location}")
 	private String perlLocation;
-	@Value("${vcfToolsDir}")
+
+	@Value("${vcf-tools-dir}")
 	private String vcfToolsDirectory;
 
 	/**
@@ -53,8 +54,6 @@ public class CommandLineAnnotatorConfig
 	@Bean
 	public VcfValidator vcfValidator()
 	{
-		System.out.println("perlLocation:" + perlLocation);
-		System.out.println("vcfToolsDirectory:" + vcfToolsDirectory);
 		return new VcfValidator(perlLocation, vcfToolsDirectory);
 	}
 
@@ -142,11 +141,13 @@ public class CommandLineAnnotatorConfig
 		StringBuilder sb = new StringBuilder();
 		for (AnnotatorInfo.Type type : annotatorsPerType.keySet())
 		{
-			sb.append("\t" + type + "\n");
-			for (String s : annotatorsPerType.get(type))
+			sb.append("### " + type + " ###\n");
+			for (String annotatorName : annotatorsPerType.get(type))
 			{
-				sb.append("\t\t" + s + "\n");
+				sb.append("* " + annotatorName + "\n");
 			}
+
+			sb.append("\n");
 		}
 
 		return sb.toString();

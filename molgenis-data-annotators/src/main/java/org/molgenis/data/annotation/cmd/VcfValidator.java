@@ -31,14 +31,14 @@ public class VcfValidator
 	{
 		try
 		{
-			System.out.println("perl: " + perlLocation);
-			System.out.println("vcf tools: " + vcfToolsDirectory);
-			String vcfValidator = vcfToolsDirectory + "perl/vcf-validator";
+
+			String vcfValidator = vcfToolsDirectory + File.separator + "perl" + File.separator + "vcf-validator";
+
 			// Checks if vcf-tools is present
 			if (new File(vcfValidator).exists())
 			{
 				// Set working directory, Vcf.pm should be built here
-				String workingDirectory = vcfToolsDirectory + "perl/";
+				String workingDirectory = vcfToolsDirectory + File.separator + "perl" + File.separator;
 
 				ProcessBuilder processBuilder = new ProcessBuilder(perlLocation, vcfValidator,
 						vcfFile.getAbsolutePath(), "-u", "-d").directory(new File(workingDirectory));
