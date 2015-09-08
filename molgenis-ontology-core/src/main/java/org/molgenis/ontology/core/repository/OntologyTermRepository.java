@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.collect.Iterables;
@@ -64,6 +65,41 @@ public class OntologyTermRepository
 			ontologyTermEntities = dataService.findAll(ENTITY_NAME, termsQuery);
 		}
 		return Lists.newArrayList(Iterables.transform(ontologyTermEntities, OntologyTermRepository::toOntologyTerm));
+	}
+
+	/**
+	 * Finds exact {@link OntologyTerm}s within {@link Ontology}s.
+	 * 
+	 * @param ontologyIds
+	 *            IDs of the {@link Ontology}s to search in
+	 * @param terms
+	 *            {@link List} of search terms. the {@link OntologyTerm} must match at least one of these terms
+	 * @param pageSize
+	 *            max number of results
+	 * @return {@link List} of {@link OntologyTerm}s
+	 */
+	public List<OntologyTerm> findExcatOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize)
+	{
+		List<OntologyTerm> findOntologyTerms = findOntologyTerms(ontologyIds, terms, pageSize);
+		return findOntologyTerms.stream().filter(ontologyTerm -> isOntologyTermExactMatch(terms, ontologyTerm))
+				.collect(Collectors.toList());
+	}
+
+	private boolean isOntologyTermExactMatch(Set<String> terms, OntologyTerm ontologyTerm)
+	{
+		Set<String> lowerCaseSearchTerms = terms.stream().map(term -> term.toLowerCase()).collect(Collectors.toSet());
+		for (String synonym : ontologyTerm.getSynonyms())
+		{
+			if (lowerCaseSearchTerms.contains(synonym.toLowerCase()))
+			{
+				return true;
+			}
+		}
+		if (lowerCaseSearchTerms.contains(ontologyTerm.getLabel()))
+		{
+			return true;
+		}
+		return false;
 	}
 
 	/**
