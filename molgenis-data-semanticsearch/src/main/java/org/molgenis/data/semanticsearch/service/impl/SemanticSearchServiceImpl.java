@@ -141,17 +141,9 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	public Map<AttributeMetaData, Iterable<ExplainedQueryString>> findAttributes(EntityMetaData sourceEntityMetaData,
 			AttributeMetaData targetAttribute, Set<String> searchTerms)
 	{
-		List<OntologyTerm> ontologyTerms;
-		if (null == searchTerms || searchTerms.size() == 0)
-		{
-			ontologyTerms = Collections.emptyList();
-		}
-		else
-		{
-			List<String> allOntologiesIds = ontologyService.getAllOntologiesIds();
-			ontologyTerms = ontologyService.findExcatOntologyTerms(allOntologiesIds, searchTerms, MAX_NUM_TAGS);
-		}
-
+		List<String> allOntologiesIds = ontologyService.getAllOntologiesIds();
+		List<OntologyTerm> ontologyTerms = ontologyService.findExcatOntologyTerms(allOntologiesIds, searchTerms,
+				MAX_NUM_TAGS);
 		return findAttributes(sourceEntityMetaData, targetAttribute, ontologyTerms);
 	}
 
