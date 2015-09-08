@@ -4,7 +4,6 @@ import static java.util.Arrays.asList;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +44,6 @@ import ch.qos.logback.core.ConsoleAppender;
 @Component
 public class CmdLineAnnotator
 {
-
 	@Autowired
 	private ApplicationContext applicationContext;
 
@@ -53,7 +51,7 @@ public class CmdLineAnnotator
 	VcfValidator vcfValidator;
 
 	// Default settings for running vcf-validator
-	public void run(OptionSet options) throws Exception
+	public void run(OptionSet options, OptionParser parser) throws Exception
 	{
 		Map<String, RepositoryAnnotator> configuredAnnotators = applicationContext
 				.getBeansOfType(RepositoryAnnotator.class);
@@ -64,7 +62,7 @@ public class CmdLineAnnotator
 
 		Set<String> annotatorNames = configuredFreshAnnotators.keySet();
 
-		if (!options.has("annotator"))
+		if (!options.has("annotator") || options.has("help"))
 		{
 			System.out
 					.println("\n"
@@ -72,24 +70,30 @@ public class CmdLineAnnotator
 							+ "* MOLGENIS Annotator, commandline interface *\n"
 							+ "*********************************************\n"
 							+ "\n"
-							+ "Typical usage to annotate a VCF file:\n"
-							+ "\tjava -jar CmdLineAnnotator.jar [Annotator] [Annotation source file] [input VCF] [output VCF] [validate flag]=[perl location]|[vcf-tools directory] [output attributes (optional, default:all attributes)].\n"
-							+ "\tExample: java -Xmx4g -jar CmdLineAnnotator.jar gonl GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ Cardio.vcf Cardio_gonl.vcf --validate=/usr/bin/perl,~/.molgenis/vcf-tools/ GoNL_GTC GoNL_AF\n"
-							+ "\n"
-							+ "Help:\n"
-							+ "\tThe default expected location of the perl executable is: /usr/bin/perl\n"
-							+ "\tThe default expected location of thevcf tool directory is: ~/.molgenis/vcf-tools\n\n"
-							+ "\tTo get a detailed description and installation instructions for a specific annotator:\n"
-							+ "\t\tjava -jar CmdLineAnnotator.jar [Annotator]\n"
-							+ "\tTo check if an annotator is ready for use:\n"
-							+ "\t\tjava -jar CmdLineAnnotator.jar [Annotator] [Annotation source file]\n" + "\n"
-							+ "Currently available annotators are:\n" + "\t" + annotatorNames.toString() + "\n"
-							+ "Breakdown per category:\n"
-							+ CommandLineAnnotatorConfig.printAnnotatorsPerType(configuredFreshAnnotators));
+							+ "Typical usage to annotate a VCF file:\n\n"
+							+ "java -jar CmdLineAnnotator.jar [options] [attribute names]\n"
+							+ "Example: java -Xmx4g -jar CmdLineAnnotator.jar -a gonl -s GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ -i Cardio.vcf -o Cardio_gonl.vcf -v GoNL_GTC GoNL_AF\n"
+							+ "\n" + "----------------------------------------------------\n\n"
+							+ "Available options:\n");
+
+			parser.printHelpOn(System.out);
+
+			System.out
+					.println("\n"
+							+ "----------------------------------------------------\n\n"
+							+ "To get detailed description and installation instructions for a specific annotator:\n"
+							+ "java -jar CmdLineAnnotator.jar -a [Annotator]\n\n"
+							+ "To check if an annotator is ready for use:\n"
+							+ "java -jar CmdLineAnnotator.jar -a [Annotator] -s [Annotation source file]\n\n"
+							+ "To select only a few columns from an annotation source instead of everything, use:\n"
+							+ "java -jar CmdLineAnnotator.jar -a [Annotator] -s [Annotation source file] <column1> <column2>\n\n"
+							+ "----------------------------------------------------\n");
+
+			System.out.println("List of available annotators per category:\n\n"
+					+ CommandLineAnnotatorConfig.printAnnotatorsPerType(configuredFreshAnnotators));
+
 			return;
 		}
-
-		// TODO: snapt hij ~?
 
 		String annotatorName = (String) options.valueOf("annotator");
 		if (!annotatorNames.contains(annotatorName))
@@ -102,7 +106,7 @@ public class CmdLineAnnotator
 		RepositoryAnnotator annotator = annotators.get(annotatorName);
 		if (annotator == null) throw new Exception("Annotator unknown: " + annotatorName);
 
-		if (!options.has("inputFile"))
+		if (!options.has("input"))
 		{
 			printInfo(annotator.getInfo());
 			return;
@@ -115,7 +119,7 @@ public class CmdLineAnnotator
 			return;
 		}
 
-		File inputVcfFile = (File) options.valueOf("inputFile");
+		File inputVcfFile = (File) options.valueOf("input");
 		if (!inputVcfFile.exists())
 		{
 			System.out.println("Input VCF file not found at " + inputVcfFile);
@@ -127,13 +131,12 @@ public class CmdLineAnnotator
 			return;
 		}
 
-		File outputVCFFile = (File) options.valueOf("outputFile");
+		File outputVCFFile = (File) options.valueOf("output");
 		if (outputVCFFile.exists())
 		{
 			System.out.println("WARNING: Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
 		}
 
-		// engage!
 		annotator.getCmdLineAnnotatorSettingsConfigurer().addSettings(annotationSourceFile.getAbsolutePath());
 		annotate(annotator, inputVcfFile, outputVCFFile, options);
 	}
@@ -142,40 +145,46 @@ public class CmdLineAnnotator
 	{
 		configureLogging();
 
-		OptionSet options = parseCommandLineOptions(args);
+		OptionParser parser = parseCommandLineOptions();
+		OptionSet options = parser.parse(args);
 
 		// See http://stackoverflow.com/questions/4787719/spring-console-application-configured-using-annotations
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		JOptCommandLinePropertySource propertySource = new JOptCommandLinePropertySource(options);
-		System.out.println("property names:");
-		Arrays.stream(propertySource.getPropertyNames()).forEach(System.out::println);
+
 		ctx.getEnvironment().getPropertySources().addFirst(propertySource);
 		ctx.register(CommandLineAnnotatorConfig.class);
 		ctx.scan("org.molgenis.data.annotation", "org.molgenis.data.annotation.cmd");
 		ctx.refresh();
+
 		CmdLineAnnotator main = ctx.getBean(CmdLineAnnotator.class);
 
-		main.run(options);
-
+		main.run(options, parser);
 		ctx.close();
 	}
 
-	protected static OptionSet parseCommandLineOptions(String[] args)
+	protected static OptionParser parseCommandLineOptions()
 	{
 		OptionParser parser = new OptionParser();
-		parser.accepts("inputFile").withRequiredArg().ofType(File.class);
-		parser.acceptsAll(asList("a", "ann", "annotator"), "Annotator name").requiredIf("inputFile").withRequiredArg();
-		parser.acceptsAll(asList("s", "source", "annotatorSourceFile")).requiredIf("inputFile").withRequiredArg()
+		parser.acceptsAll(asList("i", "input"), "Input VCF file").withRequiredArg().ofType(File.class);
+		parser.acceptsAll(asList("a", "annotator"), "Annotator name").requiredIf("input").withRequiredArg();
+		parser.acceptsAll(asList("s", "source"), "Source file for the annotator").requiredIf("input").withRequiredArg()
 				.ofType(File.class);
-		parser.accepts("outputFile").requiredIf("inputFile").withRequiredArg().ofType(File.class);
-		parser.acceptsAll(asList("v", "validate"), "Use VCF validator");
-		parser.accepts("perlExecutable").withRequiredArg().ofType(String.class).defaultsTo("/bin/perl");
-		parser.accepts("vcfToolsDir").withRequiredArg().ofType(String.class).defaultsTo("~/.molgenis/vcf-tools");
-		parser.acceptsAll(asList("attributes", "attrs"));
-		OptionSet options = parser.parse(args);
-		System.out.println(options.asMap());
-		System.out.println("validate = " + options.has("v"));
-		return options;
+		parser.acceptsAll(asList("o", "output"), "Output VCF file").requiredIf("input").withRequiredArg()
+				.ofType(File.class);
+		parser.acceptsAll(asList("v", "validate"), "Use VCF validator on the output file");
+		parser.acceptsAll(asList("p", "perl-location"), "Location of the perl executable").withRequiredArg()
+				.ofType(String.class)
+				.defaultsTo(File.separator + "usr" + File.separator + "bin" + File.separator + "perl");
+		parser.acceptsAll(asList("t", "vcf-tools-dir"), "Location of the vcf-tools directory")
+				.withRequiredArg()
+				.ofType(String.class)
+				.defaultsTo(
+						System.getProperty("user.home") + File.separator + ".molgenis" + File.separator + "vcf-tools"
+								+ File.separator);
+		parser.acceptsAll(asList("h", "help"), "Prints this help text");
+
+		return parser;
 	}
 
 	/**
