@@ -352,6 +352,11 @@
 				matchedWords = [];
 				if(explainedQueryStrings.length > 0){
 					
+					console.log("explainedQueryStrings: ", explainedQueryStrings);
+					console.log("attributeLabel: ", attributeLabel);
+					console.log("explainedAttributes[className];: ", explainedAttributes);
+					console.log("className: ", className);
+					
 					//Create a detailed explanation popover to show how the attributes get matched
 					createPopoverExplanation(suggestedRow, attributeInfoElement, attributeLabel, explainedQueryStrings);
 					
@@ -555,6 +560,27 @@
 			$('#save-discuss-mapping-btn').prop('disabled', true);
 		}
 	}
+	
+	/**
+	 * Get the relevant attributes
+	 * 
+	 * searchTerms
+	 * 		if empty uses tags
+	 * 		if not empty uses key words
+	 */
+	function findRelevantAttributes(requestBody){
+		requestBody["searchTerms"] = $('#attribute-search-field').val();
+		$.ajax({
+			type : 'POST',
+			url : molgenis.getContextUrl() + '/attributeMapping/semanticsearch',
+			data : JSON.stringify(requestBody),
+			contentType : 'application/json',
+			success : function(relevantAttributes) {
+				rankAttributeTable(relevantAttributes);
+			}
+		});
+	}
+	
 
 	$(function() {
 
@@ -563,7 +589,8 @@
 			'mappingProjectId' : $('[name="mappingProjectId"]').val(),
 			'target' : $('[name="target"]').val(),
 			'source' : $('[name="source"]').val(),
-			'targetAttribute' : $('[name="targetAttribute"]').val()
+			'targetAttribute' : $('[name="targetAttribute"]').val(),
+			'searchTerms' : ""
 		}, explainedAttributes, attributes = [];
 
 		// tooltip placement
@@ -573,31 +600,7 @@
 		
 		$('.ontologytag-tooltip').css({'cursor':'pointer'}).popover({'html':true, 'placement':'right', 'trigger':'hover'});
 
-		// Get the explained attributes
-		$.ajax({
-			type : 'POST',
-			url : molgenis.getContextUrl() + '/attributeMapping/explain',
-			data : JSON.stringify(requestBody),
-			contentType : 'application/json',
-			success : function(result) {
-				explainedAttributes = result;
-
-				// Create an array of attributes which are explained
-				for ( var key in explainedAttributes) {
-					attributes.push(key.toLowerCase());
-				}
-
-				// Set attributes array to null if it is empty
-				if (attributes.length < 1) {
-					attributes = null;
-				}
-
-				// Call the filterAttributeTable to only show the attributes
-				// that are explained
-				rankAttributeTable(explainedAttributes);
-				filterAttributeTable(attributes);
-			}
-		});
+		findRelevantAttributes(requestBody);
 
 		// create ace editor
 		$textarea = $("#ace-editor-text-area");
@@ -696,9 +699,9 @@
 			$('#js-function-modal').modal('show');
 		});
 
-		// look for attributes in the attribute table
-		$('#attribute-search-field').on('onkeydown onpaste oninput change keyup', function(e) {
-			filterAttributeTable(attributes);
+		// Using the semantic search functionality from the server
+		$('#attribute-search-field-button').on('click', function(e) {
+			findRelevantAttributes(requestBody);
 		});
 
 		// when the map tab is selected, load its contents

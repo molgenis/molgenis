@@ -2,6 +2,8 @@ package org.molgenis.ontology.core.service.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -32,6 +34,14 @@ public class OntologyServiceImpl implements OntologyService
 	}
 
 	@Override
+	public List<String> getAllOntologiesIds()
+	{
+		final List<String> allOntologiesIds = new ArrayList<String>();
+		ontologyRepository.getOntologies().forEach(e -> allOntologiesIds.add(e.getId()));
+		return allOntologiesIds;
+	}
+
+	@Override
 	public Ontology getOntology(String name)
 	{
 		return ontologyRepository.getOntology(name);
@@ -47,12 +57,20 @@ public class OntologyServiceImpl implements OntologyService
 	@Override
 	public List<OntologyTerm> findExcatOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize)
 	{
+		if (null == terms || terms.size() == 0)
+		{
+			return Collections.emptyList();
+		}
 		return ontologyTermRepository.findExcatOntologyTerms(ontologyIds, terms, pageSize);
 	}
 
 	@Override
 	public List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize)
 	{
+		if (null == terms || terms.size() == 0)
+		{
+			return Collections.emptyList();
+		}
 		return ontologyTermRepository.findOntologyTerms(ontologyIds, terms, pageSize);
 	}
 

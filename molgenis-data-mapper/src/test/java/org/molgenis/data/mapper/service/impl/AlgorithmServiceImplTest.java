@@ -328,8 +328,13 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		Map<AttributeMetaData, Iterable<ExplainedQueryString>> matches = ImmutableMap.of(sourceAttribute,
 				Arrays.asList(ExplainedQueryString.create("height", "height", "height", 100)));
 
-		when(semanticSearchService.findAttributes(sourceEntityMetaData, targetEntityMetaData, targetAttribute))
+		LinkedHashMultimap<Relation, OntologyTerm> ontologyTermTags = LinkedHashMultimap.create();
+
+		when(semanticSearchService.findAttributes(sourceEntityMetaData, targetAttribute, ontologyTermTags.values()))
 				.thenReturn(matches);
+
+		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute)).thenReturn(
+				ontologyTermTags);
 
 		algorithmService.autoGenerateAlgorithm(sourceEntityMetaData, targetEntityMetaData, mapping, targetAttribute);
 
@@ -363,7 +368,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityMetaData);
 
-		when(semanticSearchService.findAttributes(sourceEntityMetaData, targetEntityMetaData, targetAttribute))
+		when(semanticSearchService.findAttributes(sourceEntityMetaData, targetAttribute, Collections.emptyList()))
 				.thenReturn(emptyMap());
 
 		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute))
@@ -409,13 +414,14 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 						Arrays.<ExplainedQueryString> asList(), sourceAttribute2,
 						Arrays.<ExplainedQueryString> asList());
 
-		when(semanticSearchService.findAttributes(sourceEntityMetaData, targetEntityMetaData, targetAttribute))
+		LinkedHashMultimap<Relation, OntologyTerm> ontologyTermTags = LinkedHashMultimap
+				.<Relation, OntologyTerm> create();
+
+		when(semanticSearchService.findAttributes(sourceEntityMetaData, targetAttribute, ontologyTermTags.values()))
 				.thenReturn(mappings);
 
 		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute))
-				.thenReturn(LinkedHashMultimap.<Relation, OntologyTerm> create());
-
-		ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute);
+				.thenReturn(ontologyTermTags);
 
 		algorithmService.autoGenerateAlgorithm(sourceEntityMetaData, targetEntityMetaData, mapping, targetAttribute);
 

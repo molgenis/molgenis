@@ -87,7 +87,7 @@
 					<#else>
 						<#list tags as tag>
 							<#assign synonyms = tag.synonyms?join("</br>")>
-							<span class="label label-info ontologytag-tooltip" data-toggle="popover" title="<strong>Synonyms</strong>" data-content="${synonyms}">${tag.label}</span>
+							<span class="label label-info ontologytag-tooltip" data-toggle="popover" title="<strong>Synonyms</strong>" data-content="${synonyms}">${tag.label?html}</span>
 						</#list>
 					</#if>
 				</td>
@@ -130,6 +130,7 @@
 					<form>
 			  			<div class="form-group">
 							<input id="attribute-search-field" type="text" class="form-control" placeholder="Search all ${entityMapping.sourceEntityMetaData.attributes?size?html} attributes from ${entityMapping.sourceEntityMetaData.name?html}">
+							<button id="attribute-search-field-button" type="button">Search</button>
 						</div>
 					</form>
 				</div>

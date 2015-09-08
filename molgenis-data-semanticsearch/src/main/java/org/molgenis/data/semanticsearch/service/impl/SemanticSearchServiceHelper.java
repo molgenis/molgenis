@@ -4,6 +4,7 @@ import static java.util.Arrays.stream;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -23,7 +24,6 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
-import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.string.Stemmer;
 import org.molgenis.data.support.QueryImpl;
@@ -34,7 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 public class SemanticSearchServiceHelper
@@ -89,14 +88,15 @@ public class SemanticSearchServiceHelper
 
 	/**
 	 * Create a disMaxJunc query rule based on the label and description from target attribute as well as the
-	 * information from ontology term tags
+	 * information from given ontology terms
 	 * 
-	 * @param targetEntityMetaData
 	 * @param targetAttribute
+	 * @param ontologyTerms
+	 * 
 	 * @return disMaxJunc queryRule
 	 */
-	public QueryRule createDisMaxQueryRuleForAttribute(EntityMetaData targetEntityMetaData,
-			AttributeMetaData targetAttribute)
+	public QueryRule createDisMaxQueryRuleForAttribute(AttributeMetaData targetAttribute,
+			Collection<OntologyTerm> ontologyTerms)
 	{
 		List<String> queryTerms = new ArrayList<String>();
 
@@ -110,18 +110,15 @@ public class SemanticSearchServiceHelper
 			queryTerms.add(parseQueryString(targetAttribute.getDescription()));
 		}
 
-		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
-				targetEntityMetaData, targetAttribute);
-
 		// Handle tags with only one ontologyterm
-		tagsForAttribute.values().stream().filter(ontologyTerm -> !ontologyTerm.getIRI().contains(",")).forEach(ot -> {
+		ontologyTerms.stream().filter(ontologyTerm -> !ontologyTerm.getIRI().contains(",")).forEach(ot -> {
 			queryTerms.addAll(parseOntologyTermQueries(ot));
 		});
 
 		QueryRule disMaxQueryRule = createDisMaxQueryRuleForTerms(queryTerms);
 
 		// Handle tags with multiple ontologyterms
-		tagsForAttribute.values().stream().filter(ontologyTerm -> ontologyTerm.getIRI().contains(",")).forEach(ot -> {
+		ontologyTerms.stream().filter(ontologyTerm -> ontologyTerm.getIRI().contains(",")).forEach(ot -> {
 			disMaxQueryRule.getNestedRules().add(createShouldQueryRule(ot.getIRI()));
 		});
 
@@ -216,6 +213,39 @@ public class SemanticSearchServiceHelper
 		Set<String> allTerms = Sets.newLinkedHashSet(ontologyTerm.getSynonyms());
 		allTerms.add(ontologyTerm.getLabel());
 		return allTerms;
+	}
+
+	public Map<String, String> collectExpandedQueryMap(AttributeMetaData targetAttribute,
+			Collection<OntologyTerm> ontologyTerms)
+	{
+		Map<String, String> expandedQueryMap = new LinkedHashMap<String, String>();
+
+		if (StringUtils.isNotEmpty(targetAttribute.getLabel()))
+		{
+			expandedQueryMap.put(stemmer.cleanStemPhrase(targetAttribute.getLabel()), targetAttribute.getLabel());
+		}
+
+		if (StringUtils.isNotEmpty(targetAttribute.getDescription()))
+		{
+			expandedQueryMap.put(stemmer.cleanStemPhrase(targetAttribute.getDescription()),
+					targetAttribute.getDescription());
+		}
+		
+		for (OntologyTerm ontologyTerm : ontologyTerms)
+		{
+			if (!ontologyTerm.getIRI().contains(","))
+			{
+				collectOntologyTermQueryMap(expandedQueryMap, ontologyTerm);
+			}
+			else
+			{
+				for (String ontologyTermIri : ontologyTerm.getIRI().split(","))
+				{
+					collectOntologyTermQueryMap(expandedQueryMap, ontologyService.getOntologyTerm(ontologyTermIri));
+				}
+			}
+		}
+		return expandedQueryMap;
 	}
 
 	/**

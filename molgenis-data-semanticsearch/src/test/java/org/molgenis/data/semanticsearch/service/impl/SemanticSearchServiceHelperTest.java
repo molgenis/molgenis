@@ -126,21 +126,22 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 
 		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute_3)).thenReturn(tags);
 
+
 		// Case 1
 		QueryRule actualTargetAttributeQueryTerms_1 = semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(
-				targetEntityMetaData, targetAttribute_1);
+				targetAttribute_1, tags.values());
 		String expecteddisMaxQueryRuleToString_1 = "(label FUZZY_MATCH '1 targetattribute'description FUZZY_MATCH '1 targetattribute'label FUZZY_MATCH 'height'description FUZZY_MATCH 'height'label FUZZY_MATCH 'length body'description FUZZY_MATCH 'length body'label FUZZY_MATCH 'standing height'description FUZZY_MATCH 'standing height'label FUZZY_MATCH 'length sitting'description FUZZY_MATCH 'length sitting'label FUZZY_MATCH 'sitting height'description FUZZY_MATCH 'sitting height'label FUZZY_MATCH 'sature'description FUZZY_MATCH 'sature'label FUZZY_MATCH 'height'description FUZZY_MATCH 'height')";
 		assertEquals(actualTargetAttributeQueryTerms_1.toString(), expecteddisMaxQueryRuleToString_1);
 
 		// Case 2
 		QueryRule expecteddisMaxQueryRuleToString_2 = semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(
-				targetEntityMetaData, targetAttribute_2);
+				targetAttribute_2, tags.values());
 		String expectedTargetAttributeQueryTermsToString_2 = "(label FUZZY_MATCH 'height'description FUZZY_MATCH 'height'label FUZZY_MATCH 'length body'description FUZZY_MATCH 'length body'label FUZZY_MATCH 'standing height'description FUZZY_MATCH 'standing height'label FUZZY_MATCH 'length sitting'description FUZZY_MATCH 'length sitting'label FUZZY_MATCH 'sitting height'description FUZZY_MATCH 'sitting height'label FUZZY_MATCH 'sature'description FUZZY_MATCH 'sature'label FUZZY_MATCH 'height'description FUZZY_MATCH 'height')";
 		assertEquals(expecteddisMaxQueryRuleToString_2.toString(), expectedTargetAttributeQueryTermsToString_2);
 
 		// Case 3
 		QueryRule expecteddisMaxQueryRuleToString_3 = semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(
-				targetEntityMetaData, targetAttribute_3);
+				targetAttribute_3, tags.values());
 		String expectedTargetAttributeQueryTermsToString_3 = "(label FUZZY_MATCH '3 targetattribute'description FUZZY_MATCH '3 targetattribute'label FUZZY_MATCH 'length body'description FUZZY_MATCH 'length body'label FUZZY_MATCH 'standing height'description FUZZY_MATCH 'standing height'label FUZZY_MATCH 'length sitting'description FUZZY_MATCH 'length sitting'label FUZZY_MATCH 'sitting height'description FUZZY_MATCH 'sitting height'label FUZZY_MATCH 'sature'description FUZZY_MATCH 'sature'label FUZZY_MATCH 'height'description FUZZY_MATCH 'height')";
 		assertEquals(expecteddisMaxQueryRuleToString_3.toString(), expectedTargetAttributeQueryTermsToString_3);
 	}
@@ -279,7 +280,8 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		@Bean
 		SemanticSearchService semanticSearchService()
 		{
-			return new SemanticSearchServiceImpl();
+			return new SemanticSearchServiceImpl(dataService(), ontologyService(), metaDataService(),
+					semanticSearchServiceHelper(), elasticSearchExplainService());
 		}
 
 		@Bean
