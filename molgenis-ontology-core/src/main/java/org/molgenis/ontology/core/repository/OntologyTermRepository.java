@@ -95,7 +95,7 @@ public class OntologyTermRepository
 				return true;
 			}
 		}
-		if (lowerCaseSearchTerms.contains(ontologyTerm.getLabel()))
+		if (lowerCaseSearchTerms.contains(ontologyTerm.getLabel().toLowerCase()))
 		{
 			return true;
 		}
