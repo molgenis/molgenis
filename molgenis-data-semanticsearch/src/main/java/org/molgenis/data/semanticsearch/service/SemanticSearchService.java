@@ -2,6 +2,7 @@ package org.molgenis.data.semanticsearch.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
@@ -43,5 +44,8 @@ public interface SemanticSearchService
 	 * @return {@link List} of {@link Hit}s for {@link OntologyTerm}s found, most relevant first
 	 */
 	Hit<OntologyTerm> findTags(AttributeMetaData attribute, List<String> ontologyIds);
+
+	Map<AttributeMetaData, Iterable<ExplainedQueryString>> findAttributes(Set<String> searchTerms,
+			EntityMetaData sourceEntityMetaData, EntityMetaData targetEntityMetaData, AttributeMetaData targetAttribute);
 
 }

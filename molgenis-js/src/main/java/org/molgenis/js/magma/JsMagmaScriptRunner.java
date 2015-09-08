@@ -28,6 +28,6 @@ public class JsMagmaScriptRunner implements ScriptRunner
 	{
 		String jsScript = script.getContent();
 		Object scriptResult = jsScriptExecutor.executeScript(jsScript, parameters);
-		return scriptResult.toString();
+		return scriptResult != null ? scriptResult.toString() : null;
 	}
 }

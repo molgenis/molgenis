@@ -352,6 +352,11 @@
 				matchedWords = [];
 				if(explainedQueryStrings.length > 0){
 					
+					console.log("explainedQueryStrings: ", explainedQueryStrings);
+					console.log("attributeLabel: ", attributeLabel);
+					console.log("explainedAttributes[className];: ", explainedAttributes);
+					console.log("className: ", className);
+					
 					//Create a detailed explanation popover to show how the attributes get matched
 					createPopoverExplanation(suggestedRow, attributeInfoElement, attributeLabel, explainedQueryStrings);
 					
@@ -576,7 +581,8 @@
 		// Get the explained attributes
 		$.ajax({
 			type : 'POST',
-			url : molgenis.getContextUrl() + '/attributeMapping/explain',
+	//		url : molgenis.getContextUrl() + '/attributeMapping/explain', //TODO JJ OLD LINE
+			url : molgenis.getContextUrl() + '/attributeMapping/semanticsearch', //TODO JJ New LINE
 			data : JSON.stringify(requestBody),
 			contentType : 'application/json',
 			success : function(result) {

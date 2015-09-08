@@ -54,6 +54,12 @@ public class OntologyServiceImpl implements OntologyService
 	}
 
 	@Override
+	public List<OntologyTerm> findExcatOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize)
+	{
+		return ontologyTermRepository.findExcatOntologyTerms(ontologyIds, terms, pageSize);
+	}
+
+	@Override
 	public List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize)
 	{
 		return ontologyTermRepository.findOntologyTerms(ontologyIds, terms, pageSize);

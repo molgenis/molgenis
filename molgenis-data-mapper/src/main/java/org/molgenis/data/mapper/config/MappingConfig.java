@@ -44,7 +44,7 @@ public class MappingConfig
 
 	@Autowired
 	OntologyService ontologyService;
-	
+
 	@Autowired
 	IdGenerator idGenerator;
 
@@ -71,7 +71,7 @@ public class MappingConfig
 	@Bean
 	public AlgorithmTemplateService algorithmTemplateServiceImpl()
 	{
-		return new AlgorithmTemplateServiceImpl(dataService, ontologyTagService, ontologyTermRepository, semanticSearchService);
+		return new AlgorithmTemplateServiceImpl(dataService);
 	}
 
 	@Bean

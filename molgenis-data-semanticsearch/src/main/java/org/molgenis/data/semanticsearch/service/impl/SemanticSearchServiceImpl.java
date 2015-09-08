@@ -117,6 +117,60 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		return explainedAttributes;
 	}
 
+	@Override
+	public Map<AttributeMetaData, Iterable<ExplainedQueryString>> findAttributes(Set<String> searchTerms,
+			EntityMetaData sourceEntityMetaData,
+			EntityMetaData targetEntityMetaData, AttributeMetaData targetAttribute)
+	{
+		List<String> allOntologiesIds = ontologyService.getAllOntologiesIds();
+		List<OntologyTerm> ontologyTerms = ontologyService.findOntologyTerms(allOntologiesIds, searchTerms,
+				MAX_NUM_TAGS);
+
+		Iterable<String> attributeIdentifiers = semanticSearchServiceHelper
+				.getAttributeIdentifiers(sourceEntityMetaData);
+
+		QueryRule disMaxQueryRule = semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(targetEntityMetaData,
+				targetAttribute, ontologyTerms);
+
+		List<QueryRule> finalQueryRules = Lists.newArrayList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER,
+				Operator.IN, attributeIdentifiers));
+
+		if (disMaxQueryRule.getNestedRules().size() > 0)
+		{
+			finalQueryRules.addAll(Arrays.asList(new QueryRule(Operator.AND), disMaxQueryRule));
+		}
+
+		Iterable<Entity> attributeMetaDataEntities = dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME,
+				new QueryImpl(finalQueryRules));
+
+		Map<String, String> collectExpanedQueryMap = semanticSearchServiceHelper.collectExpandedQueryMap(
+				targetEntityMetaData, targetAttribute, ontologyTerms);
+
+		// Because the explain-API can be computationally expensive we limit the explanation to the top 10 attributes
+		Map<AttributeMetaData, Iterable<ExplainedQueryString>> attributes = new LinkedHashMap<AttributeMetaData, Iterable<ExplainedQueryString>>();
+		int count = 0;
+		for (Entity attributeEntity : attributeMetaDataEntities)
+		{
+			AttributeMetaData attribute = sourceEntityMetaData.getAttribute(attributeEntity
+					.getString(AttributeMetaDataMetaData.NAME));
+			if (count < 10)
+			{
+				attributes.put(
+						attribute,
+						convertAttributeEntityToExplainedAttribute(attributeEntity, sourceEntityMetaData,
+								collectExpanedQueryMap, finalQueryRules));
+			}
+			else
+			{
+
+				attributes.put(attribute, Collections.emptySet());
+			}
+			count++;
+		}
+
+		return attributes;
+	}
+
 	/**
 	 * A helper function to explain each of the matched attributes returned by the explain-API
 	 * 

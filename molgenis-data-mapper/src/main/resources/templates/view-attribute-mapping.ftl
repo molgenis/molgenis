@@ -87,7 +87,7 @@
 					<#else>
 						<#list tags as tag>
 							<#assign synonyms = tag.synonyms?join("</br>")>
-							<span class="label label-info ontologytag-tooltip" data-toggle="popover" title="<strong>Synonyms</strong>" data-content="${synonyms}">${tag.label}</span>
+							<span class="label label-info ontologytag-tooltip" data-toggle="popover" title="<strong>Synonyms</strong>" data-content="${synonyms}">${tag.label?html}</span>
 						</#list>
 					</#if>
 				</td>

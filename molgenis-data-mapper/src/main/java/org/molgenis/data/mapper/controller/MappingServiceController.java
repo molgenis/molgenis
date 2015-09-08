@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -69,6 +70,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import autovalue.shaded.com.google.common.common.collect.Sets;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
@@ -502,6 +505,32 @@ public class MappingServiceController extends MolgenisPluginController
 		return simpleExplainedAttributes;
 	}
 
+	@RequestMapping(method = RequestMethod.POST, value = "/attributeMapping/semanticsearch", consumes = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Map<String, Iterable<ExplainedQueryString>> getSemanticSearchAttributeMapping(
+			@RequestBody Map<String, String> requestBody)
+	{
+		MappingProject project = mappingService.getMappingProject(requestBody.get("mappingProjectId"));
+		MappingTarget mappingTarget = project.getMappingTarget(requestBody.get("target"));
+		EntityMapping entityMapping = mappingTarget.getMappingForSource(requestBody.get("source"));
+
+		AttributeMetaData targetAttributeMetaData = entityMapping.getTargetEntityMetaData().getAttribute(
+				requestBody.get("targetAttribute"));
+
+		Set<String> searchTerms = Sets.newHashSet(requestBody.get("searchTerms").split(" OR "));
+
+		Map<AttributeMetaData, Iterable<ExplainedQueryString>> explainedAttributes = semanticSearchService
+				.findAttributes(searchTerms, entityMapping.getSourceEntityMetaData(),
+						dataService.getEntityMetaData(requestBody.get("target")), targetAttributeMetaData);
+
+		Map<String, Iterable<ExplainedQueryString>> simpleExplainedAttributes = new LinkedHashMap<String, Iterable<ExplainedQueryString>>();
+		for (Entry<AttributeMetaData, Iterable<ExplainedQueryString>> entry : explainedAttributes.entrySet())
+		{
+			simpleExplainedAttributes.put(entry.getKey().getName(), entry.getValue());
+		}
+		return simpleExplainedAttributes;
+	}
+
 	/**
 	 * Creates the integrated entity for a mapping project's target
 	 * 
@@ -579,7 +608,7 @@ public class MappingServiceController extends MolgenisPluginController
 				Lists.newArrayList(dataService.getEntityMetaData(source).getAtomicAttributes()));
 		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
 
-		return VIEW_ATTRIBUTE_MAPPING;
+		return VIEW_ATTRIBUTE_MAPPING; //TODO JJ
 	}
 
 	@RequestMapping(value = "/attributemappingfeedback", method = RequestMethod.POST)

@@ -4,6 +4,7 @@ import static java.util.Arrays.stream;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -129,6 +130,44 @@ public class SemanticSearchServiceHelper
 	}
 
 	/**
+	 * TODO JJ Create a disMaxJunc query rule based on the label and description from target attribute as well as the
+	 * information from ontology term tags
+	 * 
+	 * @param targetEntityMetaData
+	 * @param targetAttribute
+	 * @return disMaxJunc queryRule
+	 */
+	public QueryRule createDisMaxQueryRuleForAttribute(EntityMetaData targetEntityMetaData,
+			AttributeMetaData targetAttribute, List<OntologyTerm> ontologyTerms)
+	{
+		List<String> queryTerms = new ArrayList<String>();
+
+		if (StringUtils.isNotEmpty(targetAttribute.getLabel()))
+		{
+			queryTerms.add(parseQueryString(targetAttribute.getLabel()));
+		}
+
+		if (StringUtils.isNotEmpty(targetAttribute.getDescription()))
+		{
+			queryTerms.add(parseQueryString(targetAttribute.getDescription()));
+		}
+
+		// Handle tags with only one ontologyterm
+		ontologyTerms.stream().filter(ontologyTerm -> !ontologyTerm.getIRI().contains(",")).forEach(ot -> {
+			queryTerms.addAll(parseOntologyTermQueries(ot));
+		});
+
+		QueryRule disMaxQueryRule = createDisMaxQueryRuleForTerms(queryTerms);
+
+		// Handle tags with multiple ontologyterms
+		ontologyTerms.stream().filter(ontologyTerm -> ontologyTerm.getIRI().contains(",")).forEach(ot -> {
+			disMaxQueryRule.getNestedRules().add(createShouldQueryRule(ot.getIRI()));
+		});
+
+		return disMaxQueryRule;
+	}
+
+	/**
 	 * Create disMaxJunc query rule based a list of queryTerm. All queryTerms are lower cased and stop words are removed
 	 * 
 	 * @param queryTerms
@@ -216,6 +255,44 @@ public class SemanticSearchServiceHelper
 		Set<String> allTerms = Sets.newLinkedHashSet(ontologyTerm.getSynonyms());
 		allTerms.add(ontologyTerm.getLabel());
 		return allTerms;
+	}
+
+	public Map<String, String> collectExpandedQueryMap(EntityMetaData targetEntityMetaData,
+			AttributeMetaData targetAttribute, List<OntologyTerm> ontologyTerms)
+	{
+		Map<String, String> expandedQueryMap = new LinkedHashMap<String, String>();
+
+		if (StringUtils.isNotEmpty(targetAttribute.getLabel()))
+		{
+			expandedQueryMap.put(stemmer.cleanStemPhrase(targetAttribute.getLabel()), targetAttribute.getLabel());
+		}
+
+		if (StringUtils.isNotEmpty(targetAttribute.getDescription()))
+		{
+			expandedQueryMap.put(stemmer.cleanStemPhrase(targetAttribute.getDescription()),
+					targetAttribute.getDescription());
+		}
+
+		Collection<OntologyTerm> ontologyTermTags = ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute)
+				.values();
+		
+		ontologyTerms.addAll(ontologyTermTags);
+
+		for (OntologyTerm ontologyTerm : ontologyTerms)
+		{
+			if (!ontologyTerm.getIRI().contains(","))
+			{
+				collectOntologyTermQueryMap(expandedQueryMap, ontologyTerm);
+			}
+			else
+			{
+				for (String ontologyTermIri : ontologyTerm.getIRI().split(","))
+				{
+					collectOntologyTermQueryMap(expandedQueryMap, ontologyService.getOntologyTerm(ontologyTermIri));
+				}
+			}
+		}
+		return expandedQueryMap;
 	}
 
 	/**
