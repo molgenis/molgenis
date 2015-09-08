@@ -130,6 +130,7 @@
 					<form>
 			  			<div class="form-group">
 							<input id="attribute-search-field" type="text" class="form-control" placeholder="Search all ${entityMapping.sourceEntityMetaData.attributes?size?html} attributes from ${entityMapping.sourceEntityMetaData.name?html}">
+							<button id="attribute-search-field-button" type="button">Search</button>
 						</div>
 					</form>
 				</div>
