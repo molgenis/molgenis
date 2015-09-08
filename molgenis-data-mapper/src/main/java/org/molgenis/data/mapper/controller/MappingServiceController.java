@@ -611,7 +611,7 @@ public class MappingServiceController extends MolgenisPluginController
 				Lists.newArrayList(dataService.getEntityMetaData(source).getAtomicAttributes()));
 		model.addAttribute("hasWritePermission", hasWritePermission(project, false));
 
-		return VIEW_ATTRIBUTE_MAPPING; //TODO JJ
+		return VIEW_ATTRIBUTE_MAPPING;
 	}
 
 	@RequestMapping(value = "/attributemappingfeedback", method = RequestMethod.POST)
