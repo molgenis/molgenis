@@ -128,13 +128,14 @@
 						${attributeMapping.targetAttributeMetaData.name?html}. By checking one of the attributes below, 
 						an algorithm will be generated and the result of your selection will be shown."></i>
 					</legend>
-					
 					<form>
-			  			<div class="input-group">
-							<input id="attribute-search-field" type="text" class="form-control" placeholder="Search all ${entityMapping.sourceEntityMetaData.attributes?size?html} attributes from ${entityMapping.sourceEntityMetaData.name?html}">
-							<span class="input-group-btn">
-								<button id="attribute-search-field-button" type="button" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
-							</span>
+						<div class="form-group">
+				  			<div class="input-group">
+								<input id="attribute-search-field" type="text" class="form-control" placeholder="Search all ${entityMapping.sourceEntityMetaData.attributes?size?html} attributes from ${entityMapping.sourceEntityMetaData.name?html}">
+								<span class="input-group-btn">
+									<button id="attribute-search-field-button" type="button" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
+								</span>
+							</div>
 						</div>
 					</form>
 				</div>

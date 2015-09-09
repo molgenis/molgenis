@@ -207,14 +207,16 @@
 	 *            time
 	 */
 	function loadMappingEditor(algorithm) {
-		$("#advanced-mapping-table").load("advancedmappingeditor #advanced-mapping-editor", {
-			mappingProjectId : $('#mappingProjectId').val(),
-			target : $('#target').val(),
-			source : $('#source').val(),
-			targetAttribute : $('#targetAttribute').val(),
-			sourceAttribute : getSourceAttrs(algorithm)[0],
-			algorithm : algorithm
-		});
+		if(algorithm){
+			$("#advanced-mapping-table").load("advancedmappingeditor #advanced-mapping-editor", {
+				mappingProjectId : $('#mappingProjectId').val(),
+				target : $('#target').val(),
+				source : $('#source').val(),
+				targetAttribute : $('#targetAttribute').val(),
+				sourceAttribute : getSourceAttrs(algorithm)[0],
+				algorithm : algorithm
+			});
+		}
 	}
 
 	/**
@@ -364,6 +366,8 @@
 				}
 				counter++;
 			});
+			
+			checkSelectedAttributes(getAceEditor().getSession().getValue());
 		}
 		
 		updateSearchResultMessage();
@@ -384,12 +388,53 @@
 		}
 	}
 	
+	function getAceEditor(){
+		
+		var $textarea = $("#ace-editor-text-area");
+		
+		if(!$textarea.data('ace')){			
+			// create ace editor
+			$textarea.ace({
+				options : {
+					enableBasicAutocompletion : true
+				},
+				readOnly : $textarea.data('readonly') === true,
+				theme : 'eclipse',
+				mode : 'javascript',
+				showGutter : true,
+				highlightActiveLine : true
+			});
+			
+			$textarea.data('ace').editor.getSession().on('change', function(object) {		
+				
+				var algorithm = $textarea.data('ace').editor.getSession().getValue();
+					// check attributes if manually added
+				checkSelectedAttributes(algorithm);
+				// update save buttons visibility
+				disableEnableSaveButtons(algorithm);
+				
+				// validate mapping
+				validateAttrMapping(algorithm);
+
+				// preview mapping results
+				loadAlgorithmResult(algorithm);
+				
+				$('#result-container').css('display', 'inline');
+			});
+		}	
+		return $textarea.data('ace').editor;
+	}
+	
 	function bindTableCheckBoxesEvents(){
 		
-		$('#attribute-mapping-table :checkbox').on('change', function() {
-			var selectedAttributes = [];
-			var editor = $("#ace-editor-text-area").data('ace').editor;
+		// on load use algorithm to set selected attributes and editor value
+		var editor = getAceEditor();
+		
+		checkSelectedAttributes(editor.getSession().getValue());
+		
+		$('#attribute-mapping-table :checkbox').on('change', function(){
 			
+			var selectedAttributes = [];
 			$('#attribute-mapping-table :checkbox:checked').each(function() {
 				selectedAttributes.push($(this).data('attribute-name'));
 			});
@@ -613,12 +658,11 @@
 			}
 		});
 	}
-	
 
 	$(function() {
 
 		// Initialize all variables
-		var editor, searchQuery, selectedAttributes, initialValue, algorithm, targetAttributeDataType, $textarea, requestBody = {
+		var aceEditor, algorithm, requestBody = {
 			'mappingProjectId' : $('[name="mappingProjectId"]').val(),
 			'target' : $('[name="target"]').val(),
 			'source' : $('[name="source"]').val(),
@@ -634,45 +678,11 @@
 		$('.ontologytag-tooltip').css({'cursor':'pointer'}).popover({'html':true, 'placement':'right', 'trigger':'hover'});
 
 		findRelevantAttributes(requestBody, $('#attribute-mapping-table'), $('#dataExplorerUri').val());
-
-		// create ace editor
-		$textarea = $("#ace-editor-text-area");
-		initialValue = $textarea.val();
-		$textarea.ace({
-			options : {
-				enableBasicAutocompletion : true
-			},
-			readOnly : $textarea.data('readonly') === true,
-			theme : 'eclipse',
-			mode : 'javascript',
-			showGutter : true,
-			highlightActiveLine : true
-		});
-		editor = $textarea.data('ace').editor;
-
-		// on load use algorithm to set selected attributes and editor value
-		checkSelectedAttributes(initialValue);
-		algorithm = editor.getSession().getValue();
-
-		editor.getSession().on('change', function() {		
-			// check attributes if manually added
-			checkSelectedAttributes(editor.getValue());
-
-			// update algorithm
-			algorithm = editor.getSession().getValue();
-			
-			// update save buttons visibility
-			disableEnableSaveButtons(algorithm);
-			
-			// validate mapping
-			validateAttrMapping(algorithm);
-
-			// preview mapping results
-			loadAlgorithmResult(algorithm);
-			
-			$('#result-container').css('display', 'inline');
-		});
-
+		
+		aceEditor = getAceEditor();
+		
+		algorithm = aceEditor.getSession().getValue();
+		
 		// if there is an algorithm present on load, show the result table
 		if (algorithm.trim()) {
 			loadAlgorithmResult(algorithm);
@@ -681,8 +691,6 @@
 			$('#result-container').css('display', 'none');
 		}
 		
-		bindTableCheckBoxesEvents();
-
 		// save button for saving generated mapping
 		$('#save-mapping-btn').on('click', function() {saveAttributeMapping(algorithm, "CURATED")});
 		
@@ -690,7 +698,7 @@
 		$('#save-discuss-mapping-btn').on('click', function() {saveAttributeMapping(algorithm, "DISCUSS")});
 		
 		// Update save buttons visibility
-		disableEnableSaveButtons(editor.getSession().getValue());
+		disableEnableSaveButtons(algorithm);
 		
 		// Display next button
 		dislpayFindFirstNotCuratedAttributeMappingButton();
@@ -703,18 +711,31 @@
 		$('#attribute-search-field-button').on('click', function(e) {
 			findRelevantAttributes(requestBody, $('#attribute-mapping-table'), $('#dataExplorerUri').val());
 		});
-
+		
+		// Bind keydown and keyup event to the textField to prevend the form from being submitted
+		$('#attribute-search-field').keydown(function(event) {
+			if(event.keyCode === 13){
+		      event.preventDefault();
+		      $('#attribute-search-field-button').trigger('click');
+		      return false;
+		    }
+		}).keyup(function(){
+			if($(this).val() === ''){
+				$('#attribute-search-field-button').trigger('click');
+			}
+		});
+		
 		// when the map tab is selected, load its contents
 		// loading on page load will fail because bootstrap tab blocks it
 		$('a[href=#map]').on('shown.bs.tab', function() {
-			loadMappingEditor(algorithm);
+			loadMappingEditor(aceEditor.getSession().getValue());
 		});
 
 		$('a[href=#script]').on('shown.bs.tab', function() {
-			// Clearing the editor will empty the algorithm
-			var newAlgorithm = algorithm;
-			editor.setValue("");
-			editor.insert(newAlgorithm, -1);
+		// when users switch back to the script tab, the value in the editor is not updated
+		// until the editor is clicked. A workaround is to move the page by calling the method to
+		// flush the changes. 
+			aceEditor.scrollPageDown();
 		});
 
 		$('#advanced-mapping-table').on('change', function() {
@@ -755,8 +776,9 @@
 				}
 			}
 
-			algorithm = generateAlgorithm(mappedCategoryIds, $('input[name="sourceAttribute"]').val(), defaultValue, nullValue);
-			loadAlgorithmResult(algorithm);
+			var categoricalAlgorithm = generateAlgorithm(mappedCategoryIds, $('input[name="sourceAttribute"]').val(), defaultValue, nullValue);
+			getAceEditor().setValue(categoricalAlgorithm);
+			loadAlgorithmResult(categoricalAlgorithm);
 		});
 	});
 
