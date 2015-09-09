@@ -26,6 +26,7 @@
 		<input id="source" type="hidden" name="source" value="${entityMapping.sourceEntityMetaData.name?html}"/>
 		<input id="targetAttribute" type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
 		<input id="targetAttributeType" type="hidden" name="targetAttributeType" value="${attributeMapping.targetAttributeMetaData.dataType?html}"/>
+		<input id="sourceAttributeSize" type="hidden" value="${entityMapping.sourceEntityMetaData.attributes?size?html}"/>
 		<input id="dataExplorerUri" type="hidden" value="${dataExplorerUri?html}"/>
 	</div>
 </div>
@@ -129,9 +130,11 @@
 					</legend>
 					
 					<form>
-			  			<div class="form-group">
+			  			<div class="input-group">
 							<input id="attribute-search-field" type="text" class="form-control" placeholder="Search all ${entityMapping.sourceEntityMetaData.attributes?size?html} attributes from ${entityMapping.sourceEntityMetaData.name?html}">
-							<button id="attribute-search-field-button" type="button">Search</button>
+							<span class="input-group-btn">
+								<button id="attribute-search-field-button" type="button" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
+							</span>
 						</div>
 					</form>
 				</div>

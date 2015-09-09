@@ -241,6 +241,7 @@
 	 */
 	function insertSelectedAttributes(selectedAttributes, editor) {
 		var existingAlgorithm = editor.getSession().getValue(), newAttributes = [], existingAttributes = getSourceAttrs(existingAlgorithm);
+		
 		$(selectedAttributes).each(function() {
 			if (existingAlgorithm.indexOf(this) === -1) {
 				insertAttribute(this, editor);
@@ -289,10 +290,8 @@
 	 * Move suggested attributes to the top of the attribute table
 	 */
 	function createAttributeTable(explainedAttributes, resultTable, dataExplorerUri){
-		
 		//Remove the existing content of the result table
 		resultTable.empty();
-
 		//Add the header to the result table
 		resultTable.append('<thead><tr><th>Select</th><th>Attribute</th><th>Algorithm value</th></tr></thead>');
 		
@@ -310,30 +309,33 @@
 					'data-attribute-label' : attribute.label,
 				});
 				
-				row.append('<td><div class="checkbox"><label><input data-attribute-name="' + attribute.label + '" type="checkbox"></label></div></td>');
-				row.append('<td class="source-attribute-information"><b>' + attribute.label + '</b> (' + attribute.dataType + ')');
+				var attributeInfo = [];
+				attributeInfo.push('<td><div class="checkbox"><label><input data-attribute-name="' + attribute.name + '" type="checkbox"></label></div></td>');
+				attributeInfo.push('<td class="source-attribute-information"><b>' + attribute.label + '</b> (' + attribute.dataType + ')');
 				
 				if(attribute.nillable)
 				{
-					row.append('<span class="label label-warning">nillable</span>');
+					attributeInfo.push('<span class="label label-warning">nillable</span>');
 				}
 				
 				if(attribute.unique)
 				{
-					row.append('<span class="label label-default">unique</span>');
+					attributeInfo.push('<span class="label label-default">unique</span>');
 				}
 				
 				if(attribute.description)
 				{
-					row.append('<br />' + attribute.description);
+					attributeInfo.push('<br />' + attribute.description);
 				}
 				
 				if(attribute.dataType === 'xref' || attribute.dataType === 'categorical' || attribute.dataType === 'mref')
 				{
-					row.append('<br><a href="' + dataExplorerUri + '?entity=' + attribute.refEntity.name + '" target="_blank">category look up</a>');
+					attributeInfo.push('<br><a href="' + dataExplorerUri + '?entity=' + attribute.refEntity + '" target="_blank">category look up</a>');
 				}
 				
-				row.append('</td>').appendTo(tbody);
+				attributeInfo.push('</td><td></td>');
+				
+				row.append(attributeInfo.join('')).appendTo(tbody);
 				
 				if(counter < 10)
 				{
@@ -348,7 +350,10 @@
 						//Collect all matched words from all explanations
 						$.each(explainedQueryStrings, function(index, explainedQueryString){
 							var matchedWordsFromOneExplanation = extendPartialWord(attributeLabel, explainedQueryString.matchedWords.split(' '));
-							addAll(matchedWords, matchedWordsFromOneExplanation);
+							$.each(matchedWordsFromOneExplanation, function(index, element){
+								matchedWords.push(element);
+							});
+							
 						});
 						
 						//Connect matched words and highlight them together
@@ -360,6 +365,62 @@
 				counter++;
 			});
 		}
+		
+		updateSearchResultMessage();
+		
+		bindTableCheckBoxesEvents();
+	}
+	
+	function updateSearchResultMessage(){
+		//Update the search result message above the table
+		var numberOfVisibleAttributes = $('#attribute-mapping-table>tbody tr:visible').length;
+		var totalNumberOfAttributes = $('#sourceAttributeSize').val();
+		$('#attribute-search-result-message').empty().append(numberOfVisibleAttributes + ' attributes have been found out of ' + totalNumberOfAttributes);
+		// hide/show the header of the table depending on whether or not there are any visiable attributes
+		if(numberOfVisibleAttributes == 0){
+			$('#attribute-mapping-table>thead tr').hide();
+		}else{
+			$('#attribute-mapping-table>thead tr').show();
+		}
+	}
+	
+	function bindTableCheckBoxesEvents(){
+		
+		$('#attribute-mapping-table :checkbox').on('change', function() {
+			var selectedAttributes = [];
+			var editor = $("#ace-editor-text-area").data('ace').editor;
+			
+			$('#attribute-mapping-table :checkbox:checked').each(function() {
+				selectedAttributes.push($(this).data('attribute-name'));
+			});
+
+			// attributes into editor
+			insertSelectedAttributes(selectedAttributes, editor);
+
+			var algorithm = editor.getSession().getValue();
+			
+			// updates algorithm
+
+			// events only fired when 1 or more attributes is selected
+			if ($('#attribute-mapping-table :checkbox:checked').length > 0) {
+
+				// on selection of an attribute, show all fields
+				$('#result-container').css('display', 'inline');
+
+				// generate result table
+				loadAlgorithmResult(algorithm);
+
+				// generate mapping editor if target attribute is an xref or
+				// categorical
+				var targetAttributeDataType = $('input[name="targetAttributeType"]').val();
+				if (targetAttributeDataType === 'xref' || targetAttributeDataType === 'categorical') {
+					loadMappingEditor(algorithm);
+				}
+			} else {
+				// events when no attributes are selected
+				$('#result-container').css('display', 'none');
+			}
+		});
 	}
 	
 	/**
@@ -425,29 +486,15 @@
 			hash[index] = matchedWord;
 			wordIndices.push(index);
 		});
-		wordIndices.sort(numberSort);
+		wordIndices.sort(function (a,b) {
+		    return a - b;
+		});
 		$.each(wordIndices, function(i, wordIndex){
 			if(hash[wordIndex]){				
 				orderedMatchedWords.push(hash[wordIndex]);
 			}
 		});
 		return orderedMatchedWords;
-	}
-	
-	/**
-	 * Define the sort method
-	 */
-	function numberSort (a,b) {
-	    return a - b;
-	}
-	
-	/**
-	 * A helper function to push all elements of the second array to the first array
-	 */
-	function addAll(originalArray, elementsToAdd){
-		$.each(elementsToAdd, function(index, element){
-			originalArray.push(element);
-		});
 	}
 	
 	/**
@@ -633,41 +680,8 @@
 			// if no algorithm present hide the mapping and result containers
 			$('#result-container').css('display', 'none');
 		}
-
-		// page update on attribute selection / deselection
-		$('#attribute-mapping-table :checkbox').on('change', function() {
-			selectedAttributes = [];
-
-			$('#attribute-mapping-table :checkbox:checked').each(function() {
-				selectedAttributes.push($(this).data('attribute-name'));
-			});
-
-			// attributes into editor
-			insertSelectedAttributes(selectedAttributes, editor);
-
-			// updates algorithm
-			algorithm = editor.getSession().getValue();
-
-			// events only fired when 1 or more attributes is selected
-			if ($('#attribute-mapping-table :checkbox:checked').length > 0) {
-
-				// on selection of an attribute, show all fields
-				$('#result-container').css('display', 'inline');
-
-				// generate result table
-				loadAlgorithmResult(algorithm);
-
-				// generate mapping editor if target attribute is an xref or
-				// categorical
-				targetAttributeDataType = $('input[name="targetAttributeType"]').val();
-				if (targetAttributeDataType === 'xref' || targetAttributeDataType === 'categorical') {
-					loadMappingEditor(algorithm);
-				}
-			} else {
-				// events when no attributes are selected
-				$('#result-container').css('display', 'none');
-			}
-		});
+		
+		bindTableCheckBoxesEvents();
 
 		// save button for saving generated mapping
 		$('#save-mapping-btn').on('click', function() {saveAttributeMapping(algorithm, "CURATED")});

@@ -43,6 +43,7 @@ import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.mapper.service.impl.AlgorithmEvaluation;
 import org.molgenis.data.semantic.Relation;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
@@ -482,7 +483,7 @@ public class MappingServiceController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/attributeMapping/semanticsearch", consumes = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Map<String, Iterable<ExplainedQueryString>> getSemanticSearchAttributeMapping(
+	public List<ExplainedAttributeMetaData> getSemanticSearchAttributeMapping(
 			@RequestBody Map<String, String> requestBody)
 	{
 		String mappingProjectId = requestBody.get("mappingProjectId");
@@ -507,24 +508,22 @@ public class MappingServiceController extends MolgenisPluginController
 			Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
 					entityMapping.getTargetEntityMetaData(), targetAttributeMetaData);
 
-			relevantAttributes = semanticSearchService
-					.findAttributes(entityMapping.getSourceEntityMetaData(), targetAttributeMetaData,
-							tagsForAttribute.values());
+			relevantAttributes = semanticSearchService.findAttributes(entityMapping.getSourceEntityMetaData(),
+					targetAttributeMetaData, tagsForAttribute.values());
 		}
 		else
 		{
 			// Find relevant attributes base on user defined key words
-			relevantAttributes = semanticSearchService
-					.findAttributes(entityMapping.getSourceEntityMetaData(), targetAttributeMetaData, searchTerms);
+			relevantAttributes = semanticSearchService.findAttributes(entityMapping.getSourceEntityMetaData(),
+					targetAttributeMetaData, searchTerms);
 		}
 
-		Map<String, Iterable<ExplainedQueryString>> simpleExplainedAttributes = new LinkedHashMap<String, Iterable<ExplainedQueryString>>();
+		List<ExplainedAttributeMetaData> attributes = new ArrayList<ExplainedAttributeMetaData>();
 		for (Entry<AttributeMetaData, Iterable<ExplainedQueryString>> entry : relevantAttributes.entrySet())
 		{
-			simpleExplainedAttributes.put(entry.getKey().getName(), entry.getValue());
+			attributes.add(ExplainedAttributeMetaData.create(entry.getKey(), entry.getValue()));
 		}
-
-		return simpleExplainedAttributes;
+		return attributes;
 	}
 
 	/**
