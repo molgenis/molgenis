@@ -522,19 +522,10 @@ public class MappingServiceController extends MolgenisPluginController
 		// Find relevant attributes base on tags
 		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
 				entityMapping.getTargetEntityMetaData(), targetAttributeMetaData);
-
-		final Map<AttributeMetaData, Iterable<ExplainedQueryString>> relevantAttributes;
-		if (searchTerms.isEmpty() && tagsForAttribute.size() > 0)
-		{
-			relevantAttributes = semanticSearchService.findAttributes(entityMapping.getSourceEntityMetaData(),
-					targetAttributeMetaData, tagsForAttribute.values());
-		}
-		else
-		{
-			// Find relevant attributes base on user defined key words
-			relevantAttributes = semanticSearchService.findAttributes(entityMapping.getSourceEntityMetaData(),
-					targetAttributeMetaData, searchTerms);
-		}
+		
+		final Map<AttributeMetaData, Iterable<ExplainedQueryString>> relevantAttributes = semanticSearchService
+				.decisionTreeToRelevantFindAttributes(entityMapping.getSourceEntityMetaData(), targetAttributeMetaData,
+						tagsForAttribute.values(), searchTerms);
 
 		List<ExplainedAttributeMetaData> attributes = new ArrayList<ExplainedAttributeMetaData>();
 		for (Entry<AttributeMetaData, Iterable<ExplainedQueryString>> entry : relevantAttributes.entrySet())

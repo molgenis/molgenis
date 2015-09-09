@@ -82,17 +82,20 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttr.getName());
 		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(targetEntityMeta,
 				targetAttr);
-		Map<AttributeMetaData, Iterable<ExplainedQueryString>> matches = semanticSearchService.findAttributes(
-				sourceEntityMeta, targetAttr, tagsForAttribute.values());
+
+		final Map<AttributeMetaData, Iterable<ExplainedQueryString>> relevantAttributes = semanticSearchService
+				.decisionTreeToRelevantFindAttributes(sourceEntityMeta, targetAttr, tagsForAttribute.values(), null);
+
 		Unit<? extends Quantity> targetUnit = unitResolver.resolveUnit(targetAttr, targetEntityMeta);
-		for (Entry<AttributeMetaData, Iterable<ExplainedQueryString>> entry : matches.entrySet())
+		for (Entry<AttributeMetaData, Iterable<ExplainedQueryString>> entry : relevantAttributes.entrySet())
 		{
 			String algorithm = null;
 
 			AttributeMetaData source = entry.getKey();
 
 			// use existing algorithm template if available
-			AlgorithmTemplate algorithmTemplate = algorithmTemplateService.find(matches).findFirst().orElse(null);
+			AlgorithmTemplate algorithmTemplate = algorithmTemplateService.find(relevantAttributes).findFirst()
+					.orElse(null);
 			if (algorithmTemplate != null)
 			{
 				algorithm = algorithmTemplate.render();

@@ -142,14 +142,38 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			AttributeMetaData targetAttribute, Set<String> searchTerms)
 	{
 		List<String> allOntologiesIds = ontologyService.getAllOntologiesIds();
-		Hit<OntologyTerm> ontologyTermHit = findTags(targetAttribute, allOntologiesIds);
 		List<OntologyTerm> ontologyTerms = ontologyService.findExcatOntologyTerms(allOntologiesIds, searchTerms,
 				MAX_NUM_TAGS);
-		if (!ontologyTerms.contains(ontologyTermHit.getResult()))
-		{
-			ontologyTerms.add(ontologyTermHit.getResult());
-		}
 		return findAttributes(sourceEntityMetaData, targetAttribute, ontologyTerms);
+	}
+
+	@Override
+	public Map<AttributeMetaData, Iterable<ExplainedQueryString>> findAttributes(EntityMetaData sourceEntityMetaData,
+			AttributeMetaData targetAttribute)
+	{
+		List<String> allOntologiesIds = ontologyService.getAllOntologiesIds();
+		Hit<OntologyTerm> ontologyTermHit = findTags(targetAttribute, allOntologiesIds);
+		return findAttributes(sourceEntityMetaData, targetAttribute, Arrays.asList(ontologyTermHit.getResult()));
+	}
+
+	@Override
+	public Map<AttributeMetaData, Iterable<ExplainedQueryString>> decisionTreeToRelevantFindAttributes(
+			EntityMetaData sourceEntityMetaData, AttributeMetaData targetAttribute,
+			Collection<OntologyTerm> ontologyTermsFromTags,
+			Set<String> searchTerms)
+	{
+		if (null != searchTerms && !searchTerms.isEmpty())
+		{
+			return this.findAttributes(sourceEntityMetaData, targetAttribute, searchTerms);
+		}
+		else if (null != ontologyTermsFromTags && ontologyTermsFromTags.size() > 0)
+		{
+			return this.findAttributes(sourceEntityMetaData, targetAttribute, ontologyTermsFromTags);
+		}
+		else
+		{
+			return this.findAttributes(sourceEntityMetaData, targetAttribute);
+		}
 	}
 
 	/**
