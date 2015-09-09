@@ -142,9 +142,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			AttributeMetaData targetAttribute, Set<String> searchTerms)
 	{
 		List<String> allOntologiesIds = ontologyService.getAllOntologiesIds();
-		List<OntologyTerm> ontologyTerms = ontologyService.findExcatOntologyTerms(allOntologiesIds, searchTerms,
-				MAX_NUM_TAGS);
-		return findAttributes(sourceEntityMetaData, targetAttribute, ontologyTerms);
+		Hit<OntologyTerm> ontologyTermHit = findTags(targetAttribute, allOntologiesIds);
+		return findAttributes(sourceEntityMetaData, targetAttribute, Arrays.asList(ontologyTermHit.getResult()));
 	}
 
 	/**

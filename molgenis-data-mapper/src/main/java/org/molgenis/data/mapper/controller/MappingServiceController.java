@@ -8,8 +8,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -481,6 +481,18 @@ public class MappingServiceController extends MolgenisPluginController
 		return "forward:" + URI;
 	}
 
+	/**
+	 * This controller will first of all check if the user-defined search terms exist. If so, the searchTerms will be
+	 * used directly in the SemanticSearchService. If the searchTerms are not defined by users, it will use the
+	 * ontologyTermTags in the SemantiSearchService. If neither of the searchTerms and the OntologyTermTags exist, it
+	 * will send the targetAttribute label to SemanticSearchService as the searchTerm.
+	 * 
+	 * If string terms are sent to the SemanticSearchService, they will be first of all converted to the ontologyTerms
+	 * using findTag method
+	 * 
+	 * @param requestBody
+	 * @return
+	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/attributeMapping/semanticsearch", consumes = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public List<ExplainedAttributeMetaData> getSemanticSearchAttributeMapping(
@@ -491,8 +503,13 @@ public class MappingServiceController extends MolgenisPluginController
 		String source = requestBody.get("source");
 		String targetAttribute = requestBody.get("targetAttribute");
 		String searchTermsString = requestBody.get("searchTerms");
-		Set<String> searchTerms = StringUtils.isNotBlank(searchTermsString) ? Sets.newHashSet(searchTermsString
-				.split("\\s*OR\\s*")) : Collections.emptySet();
+		Set<String> searchTerms = new HashSet<String>();
+
+		if (StringUtils.isNotBlank(searchTermsString))
+		{
+			searchTerms.addAll(Sets.newHashSet(searchTermsString.toLowerCase().split("\\s+or\\s+")).stream()
+					.filter(term -> StringUtils.isNotBlank(term)).map(term -> term.trim()).collect(Collectors.toSet()));
+		}
 
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
 		MappingTarget mappingTarget = project.getMappingTarget(target);
@@ -501,18 +518,19 @@ public class MappingServiceController extends MolgenisPluginController
 		AttributeMetaData targetAttributeMetaData = entityMapping.getTargetEntityMetaData().getAttribute(
 				targetAttribute);
 
-		final Map<AttributeMetaData, Iterable<ExplainedQueryString>> relevantAttributes;
-		if (null == searchTerms || searchTerms.isEmpty())
-		{
-			// Find relevant attributes base on tags
-			Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
-					entityMapping.getTargetEntityMetaData(), targetAttributeMetaData);
+		// Find relevant attributes base on tags
+		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
+				entityMapping.getTargetEntityMetaData(), targetAttributeMetaData);
 
+		final Map<AttributeMetaData, Iterable<ExplainedQueryString>> relevantAttributes;
+		if (searchTerms.isEmpty() && tagsForAttribute.size() > 0)
+		{
 			relevantAttributes = semanticSearchService.findAttributes(entityMapping.getSourceEntityMetaData(),
 					targetAttributeMetaData, tagsForAttribute.values());
 		}
 		else
 		{
+			searchTerms.add(targetAttributeMetaData.getLabel());
 			// Find relevant attributes base on user defined key words
 			relevantAttributes = semanticSearchService.findAttributes(entityMapping.getSourceEntityMetaData(),
 					targetAttributeMetaData, searchTerms);
