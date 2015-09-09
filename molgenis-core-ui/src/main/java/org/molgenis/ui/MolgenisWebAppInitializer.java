@@ -81,6 +81,7 @@ public class MolgenisWebAppInitializer
 
 		Dynamic corsFilter = servletContext.addFilter("corsFilter", CorsFilter.class);
 		corsFilter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/api/*");
+		corsFilter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/das/*");
 
 		// enable use of request scoped beans in FrontController
 		servletContext.addListener(new RequestContextListener());
