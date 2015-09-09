@@ -10,10 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.mockito.Mockito;
-import org.molgenis.das.RangeHandlingDataSource;
 import org.molgenis.das.impl.MolgenisDasTarget;
 import org.molgenis.data.DataService;
-import org.molgenis.util.HandleRequestDelegationException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -36,7 +34,7 @@ public class RangeHandlingDataSourceTest
 	private DataService dataService;
 
 	@BeforeMethod
-	public void setUp() throws HandleRequestDelegationException, Exception
+	public void setUp() throws DataSourceException, MalformedURLException
 	{
 		dataService = mock(DataService.class);
 		HashMap<URL, String> linkout = new HashMap<URL, String>();
@@ -45,11 +43,13 @@ public class RangeHandlingDataSourceTest
 		List<DasTarget> dasTarget = new ArrayList<DasTarget>();
 
 		dasTarget.add(new MolgenisDasTarget("vatiant_identifier", 0, 1000, "name,variant_description"));
-		List<String> notes = new ArrayList<String>();notes.add("track:"); notes.add("source:MOLGENIS");
-        dasFeature = new DasFeature("vatiant_identifier", "name,variant_description", new DasType("0", "", "",
-				"type"), new DasMethod("not_recorded", "not_recorded", "ECO:0000037"), 0, 1000, new Double(0),
-				DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE,
-				notes, linkout, dasTarget, new ArrayList<String>(), null);
+		List<String> notes = new ArrayList<String>();
+		notes.add("track:");
+		notes.add("source:MOLGENIS");
+		dasFeature = new DasFeature("vatiant_identifier", "name,variant_description", new DasType("0", "", "", "type"),
+				new DasMethod("not_recorded", "not_recorded", "ECO:0000037"), 0, 1000, new Double(0),
+				DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE, notes, linkout,
+				dasTarget, new ArrayList<String>(), null);
 		source = new TestDataSource();
 	}
 
@@ -64,7 +64,7 @@ public class RangeHandlingDataSourceTest
 	{
 		DasFeature dasFeatureUnderTest = source.createDasFeature(0, 1000, "vatiant_identifier", "name",
 				"variant_description", "http://www.molgenis.org/", new DasType("0", "", "", "type"),
-				new DasMethod("not_recorded", "not_recorded", "ECO:0000037"),"","",new ArrayList<String>());
+				new DasMethod("not_recorded", "not_recorded", "ECO:0000037"), "", "", new ArrayList<String>());
 		assertEquals(dasFeature, dasFeatureUnderTest);
 	}
 
