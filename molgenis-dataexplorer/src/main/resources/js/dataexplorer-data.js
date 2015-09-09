@@ -178,9 +178,9 @@
         // add track for current genomic entity
         var dallianceTrack = {
             name : entity.label || entity.name,
-            uri : window.location.origin + '/das/molgenis/dasdataset_' + entity.name + '/',
+            uri : '/das/molgenis/dasdataset_' + entity.name + '/',
             desc : entity.description,
-            stylesheet_uri : window.location.origin + '/css/selected_dataset-track.xml'
+            stylesheet_uri : '/css/selected_dataset-track.xml'
         };
         
         settings.sources.push(dallianceTrack);
@@ -189,9 +189,9 @@
             if(refEntity.name !== entity.name) {
                 var dallianceTrack = {
                     name : refEntity.label || refEntity.name,
-                    uri : window.location.origin + '/das/molgenis/dasdataset_' + refEntity.name + '/',
+                    uri : '/das/molgenis/dasdataset_' + refEntity.name + '/',
                     desc : refEntity.description,
-                    stylesheet_uri : window.location.origin + '/css/selected_dataset-track.xml'
+                    stylesheet_uri : '/css/selected_dataset-track.xml'
                 };
                 settings.sources.push(dallianceTrack);
             }
