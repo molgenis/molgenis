@@ -21,7 +21,7 @@
 			$(function() {
 		  		$('#login-modal').modal({backdrop: 'static'});
 		  	<#if errorMessage??>
-		  		$('#loginPassword').after($('<p class="text-error">${errorMessage?html}</p>'));
+		  		$('#password-field').after($('<p class="text-error">${errorMessage?html}</p>'));
 		  	</#if>
 	   		});
 	   </script>

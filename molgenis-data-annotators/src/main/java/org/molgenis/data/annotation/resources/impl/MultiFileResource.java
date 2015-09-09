@@ -1,12 +1,12 @@
 package org.molgenis.data.annotation.resources.impl;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.annotation.resources.MultiResourceConfig;
@@ -24,18 +24,17 @@ public class MultiFileResource implements Resource
 	private final MultiResourceConfig config;
 	private final RepositoryFactory factory;
 
-	public MultiFileResource(String name, MultiResourceConfig config, EntityMetaData emd, RepositoryFactory factory)
+	public MultiFileResource(String name, MultiResourceConfig config, RepositoryFactory factory)
 	{
 		this.name = name;
 		this.config = config;
 		this.factory = factory;
-		initializeResources();
-
 	}
 
 	private void initializeResources()
 	{
 		this.resources.clear();
+		this.config.refreshConfigs();
 		for (Entry<String, ResourceConfig> chromConfig : config.getConfigs().entrySet())
 		{
 			final String key = chromConfig.getKey();
@@ -70,10 +69,12 @@ public class MultiFileResource implements Resource
 	@Override
 	public boolean isAvailable()
 	{
-		if (!config.getConfigs().keySet().equals(resources.keySet()))
+		// initialize after autowiring is complete and resources is empty
+		if (resources.isEmpty())
 		{
 			initializeResources();
 		}
+		
 		for (Resource chrom : resources.values())
 		{
 			if (!chrom.isAvailable())
@@ -93,9 +94,20 @@ public class MultiFileResource implements Resource
 	@Override
 	public Iterable<Entity> findAll(Query q)
 	{
+		// initialize after autowiring is complete and resources is empty
+		isAvailable();
 		String chromValue = getFirstEqualsValueFor(VcfRepository.CHROM, q).toString();
 		Resource resource = resources.get(chromValue);
-		return resource.findAll(q);
+		
+		try
+		{
+			return resource.findAll(q);
+		}
+		catch(NullPointerException e)
+		{
+			System.out.println("No file for chromosome '" + chromValue + "', skipping..");
+			return new ArrayList<Entity>();
+		}
 	}
 
 }

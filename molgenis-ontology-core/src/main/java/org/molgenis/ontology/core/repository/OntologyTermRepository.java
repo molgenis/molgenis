@@ -1,14 +1,16 @@
 package org.molgenis.ontology.core.repository;
 
-import static org.molgenis.data.support.QueryImpl.IN;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ENTITY_NAME;
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY;
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_IRI;
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_NAME;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.collect.Iterables;
@@ -34,8 +36,71 @@ import com.google.common.collect.FluentIterable;
  */
 public class OntologyTermRepository
 {
+	private final DataService dataService;
+
 	@Autowired
-	private DataService dataService;
+	public OntologyTermRepository(DataService dataService)
+	{
+		this.dataService = checkNotNull(dataService);
+	}
+
+	/**
+	 * FIXME write docs
+	 * 
+	 * @param term
+	 * @param pageSize
+	 * @return
+	 */
+	public List<OntologyTerm> findOntologyTerms(String term, int pageSize)
+	{
+		Iterable<Entity> ontologyTermEntities;
+
+		// #1 find exact match
+		Query termNameQuery = new QueryImpl().eq(OntologyTermMetaData.ONTOLOGY_TERM_NAME, term).pageSize(pageSize);
+		ontologyTermEntities = dataService.findAll(ENTITY_NAME, termNameQuery);
+
+		if (!ontologyTermEntities.iterator().hasNext())
+		{
+			Query termsQuery = new QueryImpl().search(term).pageSize(pageSize);
+			ontologyTermEntities = dataService.findAll(ENTITY_NAME, termsQuery);
+		}
+		return Lists.newArrayList(Iterables.transform(ontologyTermEntities, OntologyTermRepository::toOntologyTerm));
+	}
+
+	/**
+	 * Finds exact {@link OntologyTerm}s within {@link Ontology}s.
+	 * 
+	 * @param ontologyIds
+	 *            IDs of the {@link Ontology}s to search in
+	 * @param terms
+	 *            {@link List} of search terms. the {@link OntologyTerm} must match at least one of these terms
+	 * @param pageSize
+	 *            max number of results
+	 * @return {@link List} of {@link OntologyTerm}s
+	 */
+	public List<OntologyTerm> findExcatOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize)
+	{
+		List<OntologyTerm> findOntologyTerms = findOntologyTerms(ontologyIds, terms, pageSize);
+		return findOntologyTerms.stream().filter(ontologyTerm -> isOntologyTermExactMatch(terms, ontologyTerm))
+				.collect(Collectors.toList());
+	}
+
+	private boolean isOntologyTermExactMatch(Set<String> terms, OntologyTerm ontologyTerm)
+	{
+		Set<String> lowerCaseSearchTerms = terms.stream().map(term -> term.toLowerCase()).collect(Collectors.toSet());
+		for (String synonym : ontologyTerm.getSynonyms())
+		{
+			if (lowerCaseSearchTerms.contains(synonym.toLowerCase()))
+			{
+				return true;
+			}
+		}
+		if (lowerCaseSearchTerms.contains(ontologyTerm.getLabel().toLowerCase()))
+		{
+			return true;
+		}
+		return false;
+	}
 
 	/**
 	 * Finds {@link OntologyTerm}s within {@link Ontology}s.
@@ -50,22 +115,20 @@ public class OntologyTermRepository
 	 */
 	public List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize)
 	{
-		Query termsQuery = IN(ONTOLOGY, ontologyIds).pageSize(pageSize).and().nest();
-		int counter = 0;
+		List<QueryRule> rules = new ArrayList<QueryRule>();
 		for (String term : terms)
 		{
-			counter = counter + 1;
-			if (counter < terms.size())
+			if (rules.size() > 0)
 			{
-				termsQuery = termsQuery.search(term).or();
+				rules.add(new QueryRule(Operator.OR));
 			}
-			else
-			{
-				termsQuery = termsQuery.search(term);
-			}
+			rules.add(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, term));
 		}
+		rules = Arrays.asList(new QueryRule(ONTOLOGY, Operator.IN, ontologyIds), new QueryRule(Operator.AND),
+				new QueryRule(rules));
 
-		Iterable<Entity> termEntities = dataService.findAll(ENTITY_NAME, termsQuery.unnest());
+		Iterable<Entity> termEntities = dataService.findAll(ENTITY_NAME, new QueryImpl(rules).pageSize(pageSize));
+
 		return Lists.newArrayList(Iterables.transform(termEntities, OntologyTermRepository::toOntologyTerm));
 	}
 

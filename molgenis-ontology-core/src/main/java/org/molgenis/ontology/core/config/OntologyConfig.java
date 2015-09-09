@@ -20,7 +20,7 @@ public class OntologyConfig
 	@Bean
 	public OntologyService ontologyService()
 	{
-		return new OntologyServiceImpl();
+		return new OntologyServiceImpl(ontologyRepository(), ontologyTermRepository());
 	}
 
 	@Bean
@@ -32,7 +32,7 @@ public class OntologyConfig
 	@Bean
 	public OntologyTermRepository ontologyTermRepository()
 	{
-		return new OntologyTermRepository();
+		return new OntologyTermRepository(dataService);
 	}
 
 	@Bean

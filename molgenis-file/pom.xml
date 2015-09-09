@@ -20,7 +20,7 @@
 		</dependency>
 		<dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-security</artifactId>
+            <artifactId>molgenis-security-core</artifactId>
             <version>${project.version}</version>
         </dependency>
 	</dependencies>

@@ -491,7 +491,7 @@ public class MappingServiceController extends MolgenisPluginController
 				targetAttribute);
 
 		Map<AttributeMetaData, Iterable<ExplainedQueryString>> explainedAttributes = semanticSearchService
-				.explainAttributes(entityMapping.getSourceEntityMetaData(), dataService.getEntityMetaData(target),
+				.findAttributes(entityMapping.getSourceEntityMetaData(), dataService.getEntityMetaData(target),
 						targetAttributeMetaData);
 
 		Map<String, Iterable<ExplainedQueryString>> simpleExplainedAttributes = new LinkedHashMap<String, Iterable<ExplainedQueryString>>();

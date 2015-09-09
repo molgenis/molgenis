@@ -21,10 +21,10 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.util.GsonHttpMessageConverter;
-import org.molgenis.util.HandleRequestDelegationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -60,7 +60,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	private MockMvc mockMvc;
 
 	@BeforeMethod
-	public void setUp() throws HandleRequestDelegationException, Exception
+	public void setUp() throws CaptchaException
 	{
 		FreeMarkerViewResolver freeMarkerViewResolver = new FreeMarkerViewResolver();
 		freeMarkerViewResolver.setSuffix(".ftl");
@@ -70,7 +70,6 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		reset(appSettings);
 		reset(captchaService);
 		when(captchaService.validateCaptcha("validCaptcha")).thenReturn(true);
-		when(captchaService.consumeCaptcha("validCaptcha")).thenReturn(true);
 		reset(accountService); // mocks in the config class are not resetted after each test
 	}
 
@@ -153,7 +152,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 						.contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isOk()).andExpect(content()
 						.string("{\"message\":\"" + AccountController.REGISTRATION_SUCCESS_MESSAGE_USER + "\"}"));
-		verify(captchaService).consumeCaptcha("validCaptcha");
+		verify(captchaService).validateCaptcha("validCaptcha");
 	}
 
 	@Test
@@ -169,7 +168,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 						.contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isOk()).andExpect(content()
 						.string("{\"message\":\"" + AccountController.REGISTRATION_SUCCESS_MESSAGE_ADMIN + "\"}"));
-		verify(captchaService).consumeCaptcha("validCaptcha");
+		verify(captchaService).validateCaptcha("validCaptcha");
 	}
 
 	@Test
@@ -181,7 +180,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 						.param("confirmPassword", "adminpw-invalid").param("lastname", "min").param("firstname", "ad")
 						.param("captcha", "validCaptcha").contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isBadRequest());
-		verify(captchaService, times(0)).consumeCaptcha("validCaptcha");
+		verify(captchaService, times(0)).validateCaptcha("validCaptcha");
 	}
 
 	@Test
@@ -192,7 +191,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 				.param("confirmPassword", "adminpw-invalid-typo").param("email", "admin@molgenis.org")
 				.param("lastname", "min").param("firstname", "ad").param("captcha", "validCaptcha")
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isBadRequest());
-		verify(captchaService, times(0)).consumeCaptcha("validCaptcha");
+		verify(captchaService, times(0)).validateCaptcha("validCaptcha");
 	}
 
 	@Test

@@ -1,5 +1,7 @@
 package org.molgenis.ontology.core.service.impl;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.List;
 import java.util.Set;
 
@@ -13,11 +15,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class OntologyServiceImpl implements OntologyService
 {
-	@Autowired
 	private OntologyRepository ontologyRepository;
+	private OntologyTermRepository ontologyTermRepository;
 
 	@Autowired
-	private OntologyTermRepository ontologyTermRepository;
+	public OntologyServiceImpl(OntologyRepository ontologyRepository, OntologyTermRepository ontologyTermRepository)
+	{
+		this.ontologyRepository = checkNotNull(ontologyRepository);
+		this.ontologyTermRepository = checkNotNull(ontologyTermRepository);
+	}
 
 	@Override
 	public List<Ontology> getOntologies()
@@ -36,6 +42,12 @@ public class OntologyServiceImpl implements OntologyService
 	{
 		return ontologyTermRepository.getOntologyTerm(iri.split(","));
 
+	}
+
+	@Override
+	public List<OntologyTerm> findExcatOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize)
+	{
+		return ontologyTermRepository.findExcatOntologyTerms(ontologyIds, terms, pageSize);
 	}
 
 	@Override
