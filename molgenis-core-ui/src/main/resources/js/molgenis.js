@@ -1043,6 +1043,7 @@ $(function() {
 	
 	// focus first input on modal display
 	$(document).on('click', '.plugin-settings-btn', function() {
+		React.unmountComponentAtNode($('#plugin-settings-container')[0]); // fix https://github.com/molgenis/molgenis/issues/3587
 		React.render(molgenis.ui.Form({
 			entity: molgenis.getPluginSettingsId(),
 			entityInstance: molgenis.getPluginId(),
