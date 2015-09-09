@@ -23,12 +23,14 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -56,6 +58,51 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
+	public void testFindExcatOntologyTerms()
+	{
+		MapEntity synonymEntity1 = new MapEntity(OntologyTermSynonymMetaData.INSTANCE);
+		synonymEntity1.set(OntologyTermSynonymMetaData.ID, "synonym-1");
+		synonymEntity1.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM, "Weight Reduction Diet");
+
+		MapEntity synonymEntity2 = new MapEntity(OntologyTermSynonymMetaData.INSTANCE);
+		synonymEntity2.set(OntologyTermSynonymMetaData.ID, "synonym-2");
+		synonymEntity2.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM, "Weight loss Diet");
+
+		MapEntity synonymEntity3 = new MapEntity(OntologyTermSynonymMetaData.INSTANCE);
+		synonymEntity3.set(OntologyTermSynonymMetaData.ID, "synonym-3");
+		synonymEntity3.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM, "Diet, Reducing");
+
+		MapEntity ontologyTermEntity1 = new MapEntity(OntologyTermMetaData.INSTANCE);
+		ontologyTermEntity1.set(OntologyTermMetaData.ID, "1");
+		ontologyTermEntity1.set(OntologyTermMetaData.ONTOLOGY, "34");
+		ontologyTermEntity1.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI, "http://www.test.nl/iri/1");
+		ontologyTermEntity1.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME, "Diet, Reducing");
+		ontologyTermEntity1.set(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
+				Arrays.asList(synonymEntity1, synonymEntity2, synonymEntity3));
+
+		MapEntity synonymEntity4 = new MapEntity(OntologyTermSynonymMetaData.INSTANCE);
+		synonymEntity4.set(OntologyTermSynonymMetaData.ID, "synonym-4");
+		synonymEntity4.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM, "Weight");
+
+		MapEntity ontologyTermEntity2 = new MapEntity(OntologyTermMetaData.INSTANCE);
+		ontologyTermEntity2.set(OntologyTermMetaData.ID, "12");
+		ontologyTermEntity2.set(OntologyTermMetaData.ONTOLOGY, "34");
+		ontologyTermEntity2.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI, "http://www.test.nl/iri/2");
+		ontologyTermEntity2.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME, "Weight");
+		ontologyTermEntity2.set(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Arrays.asList(synonymEntity4));
+
+		ArgumentCaptor<Query> queryCaptor = forClass(Query.class);
+		when(dataService.findAll(eq(OntologyTermMetaData.ENTITY_NAME), queryCaptor.capture())).thenReturn(
+				asList(ontologyTermEntity1, ontologyTermEntity2));
+
+		List<OntologyTerm> exactOntologyTerms = ontologyTermRepository.findExcatOntologyTerms(asList("1", "2"),
+				of("weight"), 100);
+
+		Assert.assertEquals(exactOntologyTerms,
+				Arrays.asList(OntologyTerm.create("http://www.test.nl/iri/2", "Weight", null, Arrays.asList("Weight"))));
+	}
+
+	@Test
 	public void testFindOntologyTerms()
 	{
 		ArgumentCaptor<Query> queryCaptor = forClass(Query.class);
@@ -71,8 +118,7 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 						Arrays.asList("Ontology term"))));
 		assertEquals(
 				queryCaptor.getValue().toString(),
-				"QueryImpl [rules=[ontology IN '[1, 2]',  AND , ( search 'term1' OR  search 'term2' OR  search 'term3')], pageSize=100, offset=0, sort=null]");
-
+				"QueryImpl [rules=[ontology IN '[1, 2]',  AND , (ontologyTermSynonym FUZZY_MATCH 'term1' OR ontologyTermSynonym FUZZY_MATCH 'term2' OR ontologyTermSynonym FUZZY_MATCH 'term3')], pageSize=100, offset=0, sort=null]");
 	}
 
 	@Test
