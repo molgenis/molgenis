@@ -1,6 +1,8 @@
 (function($, molgenis) {
 	"use strict";
 
+	var api = new molgenis.RestClient();
+	
 	$(function() {
 		var onValueChange = function(event) {
 			// check if user has read or write permission on entity
