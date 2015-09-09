@@ -485,7 +485,7 @@ public class MappingServiceController extends MolgenisPluginController
 	 * This controller will first of all check if the user-defined search terms exist. If so, the searchTerms will be
 	 * used directly in the SemanticSearchService. If the searchTerms are not defined by users, it will use the
 	 * ontologyTermTags in the SemantiSearchService. If neither of the searchTerms and the OntologyTermTags exist, it
-	 * will send the targetAttribute label to SemanticSearchService as the searchTerm.
+	 * will use the information from the targetAttribute in the SemanticSearchService
 	 * 
 	 * If string terms are sent to the SemanticSearchService, they will be first of all converted to the ontologyTerms
 	 * using findTag method
@@ -530,7 +530,6 @@ public class MappingServiceController extends MolgenisPluginController
 		}
 		else
 		{
-			searchTerms.add(targetAttributeMetaData.getLabel());
 			// Find relevant attributes base on user defined key words
 			relevantAttributes = semanticSearchService.findAttributes(entityMapping.getSourceEntityMetaData(),
 					targetAttributeMetaData, searchTerms);
