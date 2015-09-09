@@ -23,11 +23,9 @@ import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.utils.VcfUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.env.JOptCommandLinePropertySource;
-import org.springframework.stereotype.Component;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -42,17 +40,13 @@ import ch.qos.logback.core.ConsoleAppender;
  * Run..........................: java -jar molgenis-data-annotators/target/CmdLineAnnotator.jar
  * 
  */
-@Component
 public class CmdLineAnnotator
 {
 	@Autowired
 	private ApplicationContext applicationContext;
 
-	@Value("${perl-location}")
-	private String perlLocation;
-
-	@Value("${vcf-tools-dir}")
-	private String vcfToolsDirectory;
+	@Autowired
+	VcfValidator vcfValidator;
 
 	// Default settings for running vcf-validator
 	public void run(OptionSet options, OptionParser parser) throws Exception
@@ -263,7 +257,6 @@ public class CmdLineAnnotator
 		}
 		if (options.has("validate"))
 		{
-			VcfValidator vcfValidator = new VcfValidator(perlLocation, vcfToolsDirectory);
 			System.out.println("Validating produced VCF file...");
 			System.out.println(vcfValidator.validateVCF(outputVCFFile));
 		}
