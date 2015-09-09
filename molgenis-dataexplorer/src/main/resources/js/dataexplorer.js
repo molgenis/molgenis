@@ -429,7 +429,9 @@ function($, molgenis, settingsXhr) {
 			attributeFilters = {};
 			selectedAttributes = [];
 			searchQuery = null;
-			React.unmountComponentAtNode($('#data-table-container')[0]); // must occur before mod-data is loaded
+			if($('#data-table-container').length > 0) {
+				React.unmountComponentAtNode($('#data-table-container')[0]); // must occur before mod-data is loaded
+			}
 			$('#feature-filters p').remove();
 			$("#observationset-search").val("");
 			$('#data-table-pager').empty();
