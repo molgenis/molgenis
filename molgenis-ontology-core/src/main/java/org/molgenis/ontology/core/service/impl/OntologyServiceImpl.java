@@ -3,7 +3,6 @@ package org.molgenis.ontology.core.service.impl;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -59,7 +58,7 @@ public class OntologyServiceImpl implements OntologyService
 	{
 		if (null == terms || terms.size() == 0)
 		{
-			return Collections.emptyList();
+			return Lists.<OntologyTerm> newArrayList();
 		}
 		return ontologyTermRepository.findExcatOntologyTerms(ontologyIds, terms, pageSize);
 	}
@@ -69,7 +68,7 @@ public class OntologyServiceImpl implements OntologyService
 	{
 		if (null == terms || terms.size() == 0)
 		{
-			return Collections.emptyList();
+			return Lists.<OntologyTerm> newArrayList();
 		}
 		return ontologyTermRepository.findOntologyTerms(ontologyIds, terms, pageSize);
 	}
