@@ -50,6 +50,7 @@ import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
+import org.molgenis.fieldtypes.CategoricalField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
@@ -711,7 +712,8 @@ public class MappingServiceController extends MolgenisPluginController
 		String targetAttributeIdAttribute = null;
 		String targetAttributeLabelAttribute = null;
 
-		if (targetAttributeDataType instanceof XrefField || targetAttributeDataType instanceof MrefField)
+		if (targetAttributeDataType instanceof XrefField || targetAttributeDataType instanceof MrefField
+				|| targetAttributeDataType instanceof CategoricalField)
 		{
 			targetAttributeEntities = dataService.findAll(dataService.getEntityMetaData(target)
 					.getAttribute(targetAttribute).getRefEntity().getName());
@@ -741,7 +743,8 @@ public class MappingServiceController extends MolgenisPluginController
 		String sourceAttributeIdAttribute = null;
 		String sourceAttributeLabelAttribute = null;
 
-		if (sourceAttributeDataType instanceof XrefField || sourceAttributeDataType instanceof MrefField)
+		if (sourceAttributeDataType instanceof XrefField || sourceAttributeDataType instanceof MrefField
+				|| targetAttributeDataType instanceof CategoricalField)
 		{
 			sourceAttributeEntities = dataService.findAll(dataService.getEntityMetaData(source)
 					.getAttribute(sourceAttribute).getRefEntity().getName());
@@ -756,7 +759,7 @@ public class MappingServiceController extends MolgenisPluginController
 		{
 			sourceAttributeEntities = dataService.findAll(dataService.getEntityMetaData(source).getName());
 			sourceAttributeIdAttribute = dataService.getEntityMetaData(source).getIdAttribute().getName();
-			sourceAttributeLabelAttribute = sourceAttribute;
+			sourceAttributeLabelAttribute = dataService.getEntityMetaData(source).getLabelAttribute().getName();
 		}
 
 		model.addAttribute("sourceAttributeEntities", sourceAttributeEntities);
