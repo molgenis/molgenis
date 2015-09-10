@@ -64,7 +64,7 @@
 			onRowDelete: onDataChange,
 			onRowEdit: onDataChange,
 			onRowInspect: onRowInspect,
-			onRowClick: doShowGenomeBrowser() ? onRowClick : null,
+			onRowClick: (doShowGenomeBrowser() && isGenomeBrowserAttributesSelected()) ? onRowClick : null,
 			onSort: function(e) {
 				tableSort = {
 					'orders' : [ {
