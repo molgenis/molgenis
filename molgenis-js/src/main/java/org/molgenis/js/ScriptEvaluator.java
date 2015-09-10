@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -55,6 +56,18 @@ public class ScriptEvaluator
 			throw (RuntimeException) result;
 		}
 		return result;
+	}
+
+	public static List<Object> eval(final String source, final Iterable<Entity> entities,
+			final EntityMetaData entityMetaData)
+	{
+		List<Object> results = eval(Arrays.asList(source), entities, entityMetaData);
+
+		if (results.get(0) instanceof RuntimeException)
+		{
+			throw (RuntimeException) results.get(0);
+		}
+		return results;
 	}
 
 	public static List<Object> eval(final List<String> sources, final Entity entity, final EntityMetaData entityMetaData)
