@@ -75,7 +75,7 @@ public class GoNLAnnotator
 		attributes.add(goNlAfAttribute);
 
 		AnnotatorInfo thousandGenomeInfo = AnnotatorInfo
-				.create(Status.READY,
+				.create(Status.INDEV,
 						AnnotatorInfo.Type.POPULATION_REFERENCE,
 						"gonl",
 						"What genetic variation is to be found in the Dutch indigenous population? "
