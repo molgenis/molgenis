@@ -67,14 +67,14 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				+ "/CADD/1000G.vcf.gz");
 		runtimePropertyMap.put(SnpEffAnnotator.SNPEFF_JAR_LOCATION_PROPERTY, molgenisHomeDirAnnotationResources
 				+ "/Applications/snpEff/snpEff.jar");
-		runtimePropertyMap.put(CaddAnnotator.CADD_FILE_LOCATION_PROPERTY,
-				molgenisHomeDirAnnotationResources + "/CADD/1000G.vcf.gz");
-		runtimePropertyMap.put(CGDAnnotator.CGD_FILE_LOCATION_PROPERTY,
-				molgenisHomeDirAnnotationResources + "/CGD/CGD.txt");
-		runtimePropertyMap.put(ClinvarAnnotator.CLINVAR_FILE_LOCATION_PROPERTY,
-				molgenisHomeDirAnnotationResources + "/Clinvar/variant_summary.txt");
-		runtimePropertyMap.put(SnpEffAnnotator.SNPEFF_JAR_LOCATION_PROPERTY,
-				molgenisHomeDirAnnotationResources + "/Applications/snpEff/snpEff.jar");
+		runtimePropertyMap.put(CaddAnnotator.CADD_FILE_LOCATION_PROPERTY, molgenisHomeDirAnnotationResources
+				+ "/CADD/1000G.vcf.gz");
+		runtimePropertyMap.put(CGDAnnotator.CGD_FILE_LOCATION_PROPERTY, molgenisHomeDirAnnotationResources
+				+ "/CGD/CGD.txt");
+		runtimePropertyMap.put(ClinvarAnnotator.CLINVAR_FILE_LOCATION_PROPERTY, molgenisHomeDirAnnotationResources
+				+ "/Clinvar/clinvar.vcf.gz");
+		runtimePropertyMap.put(SnpEffAnnotator.SNPEFF_JAR_LOCATION_PROPERTY, molgenisHomeDirAnnotationResources
+				+ "/Applications/snpEff/snpEff.jar");
 
 		for (Entry<String, String> entry : runtimePropertyMap.entrySet())
 		{
