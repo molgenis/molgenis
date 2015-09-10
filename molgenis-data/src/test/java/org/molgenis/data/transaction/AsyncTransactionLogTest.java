@@ -41,7 +41,7 @@ public class AsyncTransactionLogTest
 	public void logTransactionFinished()
 	{
 		Entity entity = new MapEntity(new MolgenisTransactionLogMetaData(null));
-		log.addLogEntry(entity);
-		Mockito.verify(dataService, Mockito.timeout(1000)).add(MolgenisTransactionLogEntryMetaData.ENTITY_NAME, entity);
+		log.logTransactionFinished(entity);
+		Mockito.verify(dataService, Mockito.timeout(1000)).update(MolgenisTransactionLogMetaData.ENTITY_NAME, entity);
 	}
 }
