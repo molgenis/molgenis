@@ -148,7 +148,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 
 	/**
 	 * A helper function to create a list of queryTerms based on the information from the targetAttribute as well as
-	 * user defined searchTerms
+	 * user defined searchTerms. If the user defined searchTerms exist, the targetAttribute information will not be
+	 * used.
 	 * 
 	 * @param targetAttribute
 	 * @param searchTerms
@@ -163,14 +164,17 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			queryTerms.addAll(searchTerms);
 		}
 
-		if (StringUtils.isNotBlank(targetAttribute.getLabel()))
+		if (queryTerms.size() == 0)
 		{
-			queryTerms.add(targetAttribute.getLabel());
-		}
+			if (StringUtils.isNotBlank(targetAttribute.getLabel()))
+			{
+				queryTerms.add(targetAttribute.getLabel());
+			}
 
-		if (StringUtils.isNotBlank(targetAttribute.getDescription()))
-		{
-			queryTerms.add(targetAttribute.getDescription());
+			if (StringUtils.isNotBlank(targetAttribute.getDescription()))
+			{
+				queryTerms.add(targetAttribute.getDescription());
+			}
 		}
 
 		return queryTerms;
