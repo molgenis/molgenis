@@ -49,19 +49,18 @@ import com.google.common.collect.Ordering;
 
 public class SemanticSearchServiceImpl implements SemanticSearchService
 {
-	public static final int MAX_NUM_TAGS = 100;
-
 	private static final Logger LOG = LoggerFactory.getLogger(SemanticSearchServiceImpl.class);
 
 	private final DataService dataService;
-
 	private final OntologyService ontologyService;
-
 	private final MetaDataService metaDataService;
-
 	private final SemanticSearchServiceHelper semanticSearchServiceHelper;
-
 	private final ElasticSearchExplainService elasticSearchExplainService;
+
+	public static final int MAX_NUM_TAGS = 100;
+	private static final float CUTOFF = 0.4f;
+	private Splitter termSplitter = Splitter.onPattern("[^\\p{IsAlphabetic}]+");
+	private Joiner termJoiner = Joiner.on(' ');
 
 	@Autowired
 	public SemanticSearchServiceImpl(DataService dataService, OntologyService ontologyService,
@@ -74,11 +73,6 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		this.semanticSearchServiceHelper = checkNotNull(semanticSearchServiceHelper);
 		this.elasticSearchExplainService = checkNotNull(elasticSearchExplainService);
 	}
-
-	private static final float CUTOFF = 0.4f;
-
-	private Splitter termSplitter = Splitter.onPattern("[^\\p{IsAlphabetic}]+");
-	private Joiner termJoiner = Joiner.on(' ');
 
 	@Override
 	public Map<AttributeMetaData, Iterable<ExplainedQueryString>> findAttributes(EntityMetaData sourceEntityMetaData,
