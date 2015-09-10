@@ -17,14 +17,38 @@ public class TransactionConfig
 	@Autowired
 	private MolgenisTransactionManager transactionManager;
 
-	// This cannot be a app setting because apps settings are not loaded yet when we use it
-	@Value("${use.transaction.log:true}")
-	private boolean useTransactionLog;
+	@Value("${transaction.log.backend:ElasticSearch}")
+	private String transactionLogBackend;
+
+	@Bean
+	public MolgenisTransactionLogMetaData molgenisTransactionLogMetaData()
+	{
+		return new MolgenisTransactionLogMetaData(transactionLogBackend);
+	}
+
+	@Bean
+	public LockMetaData lockMetaData()
+	{
+		return new LockMetaData(molgenisTransactionLogMetaData(), transactionLogBackend);
+	}
+
+	@Bean
+	public MolgenisTransactionLogEntryMetaData molgenisTransactionLogEntryMetaData()
+	{
+		return new MolgenisTransactionLogEntryMetaData(molgenisTransactionLogMetaData(), transactionLogBackend);
+	}
+
+	@Bean
+	public AsyncTransactionLog asyncTransactionLog()
+	{
+		return new AsyncTransactionLog(dataService);
+	}
 
 	@Bean
 	public TransactionLogService transactionLogService()
 	{
-		return new TransactionLogService(dataService, useTransactionLog);
+		return new TransactionLogService(dataService, molgenisTransactionLogMetaData(),
+				molgenisTransactionLogEntryMetaData(), lockMetaData(), asyncTransactionLog());
 	}
 
 	@PostConstruct

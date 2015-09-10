@@ -536,7 +536,7 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 		GetResponse response = client.prepareGet(index, type, id).execute().actionGet();
 		if (response.isExists())
 		{
-			client.prepareDelete(index, type, id).setRefresh(true).execute().actionGet();
+			client.prepareDelete(index, type, id).execute().actionGet();
 		}
 
 		if (LOG.isDebugEnabled())
@@ -555,7 +555,6 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 	public void deleteById(Iterable<String> ids, EntityMetaData entityMetaData)
 	{
 		ids.forEach(id -> deleteById(id, entityMetaData));
-		refresh();
 	}
 
 	/*
@@ -567,6 +566,8 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 	public void delete(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
 	{
 		List<Object> ids = stream(entities.spliterator(), true).map(e -> e.getIdValue()).collect(Collectors.toList());
+		if (ids.isEmpty()) return;
+
 		if (!canBeDeleted(ids, entityMetaData))
 		{
 			throw new MolgenisDataException(
