@@ -25,6 +25,9 @@ public class CorsFilter extends OncePerRequestFilter
 			response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
 			response.addHeader("Access-Control-Allow-Headers", "Content-Type");
 			response.addHeader("Access-Control-Max-Age", "1800");
+			response.addHeader("P3P",
+					"CP=\"ALL IND DSP COR ADM CONo CUR CUSo IVAo IVDo PSA PSD TAI TELo OUR SAMo CNT COM INT NAV ONL PHY PRE PUR UNI\"");
+
 			response.setStatus(HttpServletResponse.SC_OK);
 			return;
 		}
