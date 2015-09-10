@@ -36,70 +36,71 @@ public class VcfValidator
 		{
 			String vcfValidator = vcfToolsDirectory + File.separator + "perl" + File.separator + "vcf-validator";
 
-			// Checks if vcf-tools is present
-			if (new File(vcfValidator).exists())
+			if (perlLocation == null || !new File(perlLocation).exists())
 			{
-				// Set working directory, Vcf.pm should be built here
-				String workingDirectory = vcfToolsDirectory + File.separator + "perl" + File.separator;
+				return "Perl executable not present, skipping validation.";
+			}
 
-				ProcessBuilder processBuilder = new ProcessBuilder(perlLocation, vcfValidator,
-						vcfFile.getAbsolutePath(), "-u", "-d").directory(new File(workingDirectory));
+			// Checks if vcf-tools is present
+			if (vcfValidator == null || !new File(vcfValidator).exists())
+			{
+				return "No vcf-validator present, skipping validation.";
+			}
+			// Set working directory, Vcf.pm should be built here
+			String workingDirectory = vcfToolsDirectory + File.separator + "perl" + File.separator;
 
-				Process proc = processBuilder.start();
+			ProcessBuilder processBuilder = new ProcessBuilder(perlLocation, vcfValidator, vcfFile.getAbsolutePath(),
+					"-u", "-d").directory(new File(workingDirectory));
 
-				InputStream inputStream = proc.getInputStream();
-				Scanner scanner = new Scanner(inputStream);
+			Process proc = processBuilder.start();
 
-				String line = "";
-				Integer errorCount = null;
-				Pattern p = Pattern.compile("(\\d+)\\s*errors\\s*total");
+			InputStream inputStream = proc.getInputStream();
+			Scanner scanner = new Scanner(inputStream);
 
-				String fileNameWithoutExtension = removeExtension(vcfFile.getName());
-				File logFile = new File(fileNameWithoutExtension + "-validation.log");
-				if (!logFile.exists())
+			String line = "";
+			Integer errorCount = null;
+			Pattern p = Pattern.compile("(\\d+)\\s*errors\\s*total");
+
+			String fileNameWithoutExtension = removeExtension(vcfFile.getName());
+			File logFile = new File(fileNameWithoutExtension + "-validation.log");
+			if (!logFile.exists())
+			{
+				logFile.createNewFile();
+			}
+
+			FileWriter fileWriter = new FileWriter(logFile.getAbsoluteFile(), true);
+			BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+
+			Date date = new Date();
+
+			bufferedWriter.write("### Validation report for " + vcfFile.getName() + "\n");
+			bufferedWriter.write("### Validation date: " + date + "\n");
+			while (proc.isAlive() || scanner.hasNext())
+			{
+				while (scanner.hasNext())
 				{
-					logFile.createNewFile();
-				}
-
-				FileWriter fileWriter = new FileWriter(logFile.getAbsoluteFile(), true);
-				BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-
-				Date date = new Date();
-
-				bufferedWriter.write("### Validation report for " + vcfFile.getName() + "\n");
-				bufferedWriter.write("### Validation date: " + date + "\n");
-				while (proc.isAlive() || scanner.hasNext())
-				{
-					while (scanner.hasNext())
+					line = scanner.nextLine();
+					bufferedWriter.write(line + "\n");
+					Matcher m = p.matcher(line);
+					if (m.find())
 					{
-						line = scanner.nextLine();
-						bufferedWriter.write(line + "\n");
-						Matcher m = p.matcher(line);
-						if (m.find())
-						{
-							errorCount = Integer.parseInt(m.group(1));
-						}
+						errorCount = Integer.parseInt(m.group(1));
 					}
 				}
+			}
 
-				bufferedWriter.write("\n##################################################\n");
-				bufferedWriter.close();
+			bufferedWriter.write("\n##################################################\n");
+			bufferedWriter.close();
 
-				scanner.close();
+			scanner.close();
 
-				if (errorCount == 0)
-				{
-					return "VCF file [" + vcfFile.getName() + "] passed validation.";
-				}
-				else
-				{
-					return "VCF file [" + vcfFile.getName()
-							+ "] did not pass validation, see the log for more details.";
-				}
+			if (errorCount == 0)
+			{
+				return "VCF file [" + vcfFile.getName() + "] passed validation.";
 			}
 			else
 			{
-				return "No vcf-validator present, skipping validation.";
+				return "VCF file [" + vcfFile.getName() + "] did not pass validation, see the log for more details.";
 			}
 		}
 		catch (IOException e)
