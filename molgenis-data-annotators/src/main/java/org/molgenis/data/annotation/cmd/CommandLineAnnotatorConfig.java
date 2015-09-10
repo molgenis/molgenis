@@ -32,10 +32,10 @@ import org.springframework.core.convert.support.DefaultConversionService;
 @CommandLineOnlyConfiguration
 public class CommandLineAnnotatorConfig
 {
-	@Value("${perl-location}")
+	@Value("${perl-location:@null}")
 	private String perlLocation;
 
-	@Value("${vcf-tools-dir}")
+	@Value("${vcf-tools-dir:@null}")
 	private String vcfToolsDirectory;
 
 	/**
@@ -48,7 +48,9 @@ public class CommandLineAnnotatorConfig
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer()
 	{
-		return new PropertySourcesPlaceholderConfigurer();
+		PropertySourcesPlaceholderConfigurer result = new PropertySourcesPlaceholderConfigurer();
+		result.setNullValue("@null");
+		return result;
 	}
 
 	@Bean
