@@ -11,10 +11,8 @@ import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainServ
 import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainServiceImpl;
 import org.molgenis.data.semanticsearch.explain.service.ExplainServiceHelper;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
-import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.semanticsearch.service.TagService;
-import org.molgenis.data.semanticsearch.service.impl.OntologyTagServiceImpl;
 import org.molgenis.data.semanticsearch.service.impl.SemanticSearchServiceHelper;
 import org.molgenis.data.semanticsearch.service.impl.SemanticSearchServiceImpl;
 import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
@@ -48,13 +46,7 @@ public class SemanticSearchConfig
 	@Bean
 	public SemanticSearchServiceHelper semanticSearchServiceHelper()
 	{
-		return new SemanticSearchServiceHelper(ontologyTagService(), dataService, ontologyService, termFrequencyService);
-	}
-
-	@Bean
-	public OntologyTagService ontologyTagService()
-	{
-		return new OntologyTagServiceImpl(dataService, ontologyService, tagRepository(), idGenerator);
+		return new SemanticSearchServiceHelper(dataService, ontologyService, termFrequencyService);
 	}
 
 	@Bean

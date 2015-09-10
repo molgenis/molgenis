@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -24,7 +23,6 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
-import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.string.Stemmer;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.OntologyTerm;
@@ -38,8 +36,6 @@ import com.google.common.collect.Sets;
 
 public class SemanticSearchServiceHelper
 {
-	private final OntologyTagService ontologyTagService;
-
 	private final TermFrequencyService termFrequencyService;
 
 	private final DataService dataService;
@@ -73,41 +69,34 @@ public class SemanticSearchServiceHelper
 	}
 
 	@Autowired
-	public SemanticSearchServiceHelper(OntologyTagService ontologyTagService, DataService dataService,
-			OntologyService ontologyService, TermFrequencyService termFrequencyService)
+	public SemanticSearchServiceHelper(DataService dataService, OntologyService ontologyService,
+			TermFrequencyService termFrequencyService)
 	{
-		if (null == ontologyTagService || null == dataService || null == ontologyService
-				|| null == termFrequencyService) throw new MolgenisDataException(
+		if (null == dataService || null == ontologyService || null == termFrequencyService) throw new MolgenisDataException(
 				"Service is not found, please contact your application administrator");
 
 		this.dataService = dataService;
-		this.ontologyTagService = ontologyTagService;
 		this.ontologyService = ontologyService;
 		this.termFrequencyService = termFrequencyService;
 	}
 
 	/**
-	 * Create a disMaxJunc query rule based on the label and description from target attribute as well as the
-	 * information from given ontology terms
+	 * Create a disMaxJunc query rule based on the given search terms as well as the information from given ontology
+	 * terms
 	 * 
-	 * @param targetAttribute
 	 * @param ontologyTerms
+	 * @param searchTerms
 	 * 
 	 * @return disMaxJunc queryRule
 	 */
-	public QueryRule createDisMaxQueryRuleForAttribute(AttributeMetaData targetAttribute,
-			Collection<OntologyTerm> ontologyTerms)
+	public QueryRule createDisMaxQueryRuleForAttribute(Set<String> searchTerms, Collection<OntologyTerm> ontologyTerms)
 	{
 		List<String> queryTerms = new ArrayList<String>();
 
-		if (StringUtils.isNotEmpty(targetAttribute.getLabel()))
+		if (searchTerms != null)
 		{
-			queryTerms.add(parseQueryString(targetAttribute.getLabel()));
-		}
-
-		if (StringUtils.isNotEmpty(targetAttribute.getDescription()))
-		{
-			queryTerms.add(parseQueryString(targetAttribute.getDescription()));
+			searchTerms.stream().filter(searchTerm -> StringUtils.isNotBlank(searchTerm))
+					.forEach(searchTerm -> queryTerms.add(parseQueryString(searchTerm)));
 		}
 
 		// Handle tags with only one ontologyterm
@@ -215,65 +204,14 @@ public class SemanticSearchServiceHelper
 		return allTerms;
 	}
 
-	public Map<String, String> collectExpandedQueryMap(AttributeMetaData targetAttribute,
-			Collection<OntologyTerm> ontologyTerms)
+	public Map<String, String> collectExpandedQueryMap(Set<String> queryTerms, Collection<OntologyTerm> ontologyTerms)
 	{
 		Map<String, String> expandedQueryMap = new LinkedHashMap<String, String>();
 
-		if (StringUtils.isNotEmpty(targetAttribute.getLabel()))
-		{
-			expandedQueryMap.put(stemmer.cleanStemPhrase(targetAttribute.getLabel()), targetAttribute.getLabel());
-		}
+		queryTerms.stream().filter(queryTerm -> StringUtils.isNotBlank(queryTerm))
+				.forEach(queryTerm -> expandedQueryMap.put(stemmer.cleanStemPhrase(queryTerm), queryTerm));
 
-		if (StringUtils.isNotEmpty(targetAttribute.getDescription()))
-		{
-			expandedQueryMap.put(stemmer.cleanStemPhrase(targetAttribute.getDescription()),
-					targetAttribute.getDescription());
-		}
-		
 		for (OntologyTerm ontologyTerm : ontologyTerms)
-		{
-			if (!ontologyTerm.getIRI().contains(","))
-			{
-				collectOntologyTermQueryMap(expandedQueryMap, ontologyTerm);
-			}
-			else
-			{
-				for (String ontologyTermIri : ontologyTerm.getIRI().split(","))
-				{
-					collectOntologyTermQueryMap(expandedQueryMap, ontologyService.getOntologyTerm(ontologyTermIri));
-				}
-			}
-		}
-		return expandedQueryMap;
-	}
-
-	/**
-	 * This function creates a map that contains the expanded query as key and original tag label as the value. This map
-	 * allows us to trace back which tags are used in matching
-	 * 
-	 * @param targetEntityMetaData
-	 * @param targetAttribute
-	 * @return
-	 */
-	public Map<String, String> collectExpandedQueryMap(EntityMetaData targetEntityMetaData,
-			AttributeMetaData targetAttribute)
-	{
-		Map<String, String> expandedQueryMap = new LinkedHashMap<String, String>();
-
-		if (StringUtils.isNotEmpty(targetAttribute.getLabel()))
-		{
-			expandedQueryMap.put(stemmer.cleanStemPhrase(targetAttribute.getLabel()), targetAttribute.getLabel());
-		}
-
-		if (StringUtils.isNotEmpty(targetAttribute.getDescription()))
-		{
-			expandedQueryMap.put(stemmer.cleanStemPhrase(targetAttribute.getDescription()),
-					targetAttribute.getDescription());
-		}
-
-		for (OntologyTerm ontologyTerm : ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute)
-				.values())
 		{
 			if (!ontologyTerm.getIRI().contains(","))
 			{

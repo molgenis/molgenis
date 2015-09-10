@@ -14,7 +14,7 @@ import org.molgenis.ontology.core.model.OntologyTerm;
 public interface SemanticSearchService
 {
 	/**
-	 * Find all relevant source attributes with an explanation based on ontology terms
+	 * Find all relevant source attributes with an explanation based on ontology terms and search terms
 	 * 
 	 * @param source
 	 * @param attributeMetaData
@@ -22,32 +22,8 @@ public interface SemanticSearchService
 	 * 
 	 * @return AttributeMetaData of resembling attributes, sorted by relevance
 	 */
-	Map<AttributeMetaData, Iterable<ExplainedQueryString>> findAttributes(EntityMetaData source,
-			AttributeMetaData attributeMetaData, Collection<OntologyTerm> ontologyTerms);
-
-	/**
-	 * Find all relevant source attributes with an explanation based on ontology search terms
-	 * 
-	 * @param source
-	 * @param attributeMetaData
-	 * @param searchTerms
-	 * 
-	 * @return AttributeMetaData of resembling attributes, sorted by relevance
-	 */
 	Map<AttributeMetaData, Iterable<ExplainedQueryString>> findAttributes(EntityMetaData sourceEntityMetaData,
-			AttributeMetaData targetAttribute, Set<String> searchTerms);
-
-	/**
-	 * Find all relevant source attributes with an explanation based on the automatically created tags for the targets
-	 * attributes
-	 * 
-	 * @param source
-	 * @param attributeMetaData
-	 * 
-	 * @return AttributeMetaData of resembling attributes, sorted by relevance
-	 */
-	Map<AttributeMetaData, Iterable<ExplainedQueryString>> findAttributes(EntityMetaData sourceEntityMetaData,
-			AttributeMetaData targetAttribute);
+			Set<String> queryTerms, Collection<OntologyTerm> ontologyTerms);
 
 	/**
 	 * A decision tree for getting the relevant attributes
