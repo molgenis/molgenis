@@ -6,7 +6,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -81,9 +80,8 @@ public class ExacAnnotatorTest extends AbstractTestNGSpringContextTests
 		public MolgenisSettings molgenisSettings()
 		{
 			MolgenisSettings settings = mock(MolgenisSettings.class);
-			when(settings.getProperty(ExacAnnotator.EXAC_FILE_LOCATION_PROPERTY)).thenReturn(
-					ResourceUtils.getFile(getClass(),
-							File.separatorChar + "exac" + File.separatorChar + "exac_test_set.vcf.gz").getPath());
+			when(settings.getProperty(ExacAnnotator.EXAC_FILE_LOCATION_PROPERTY))
+					.thenReturn(ResourceUtils.getFile(getClass(), "/exac/exac_test_set.vcf.gz").getPath());
 			return settings;
 		}
 

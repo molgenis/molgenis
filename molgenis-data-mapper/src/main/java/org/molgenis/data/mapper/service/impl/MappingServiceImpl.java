@@ -1,5 +1,6 @@
 package org.molgenis.data.mapper.service.impl;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
 
 import java.util.Collections;
@@ -39,20 +40,26 @@ public class MappingServiceImpl implements MappingService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MappingServiceImpl.class);
 
-	@Autowired
-	private DataService dataService;
+	private final DataService dataService;
+
+	private final AlgorithmService algorithmService;
+
+	private final IdGenerator idGenerator;
+
+	private final MappingProjectRepository mappingProjectRepository;
+
+	private final PermissionSystemService permissionSystemService;
 
 	@Autowired
-	private AlgorithmService algorithmService;
-
-	@Autowired
-	private IdGenerator idGenerator;
-
-	@Autowired
-	private MappingProjectRepository mappingProjectRepository;
-
-	@Autowired
-	private PermissionSystemService permissionSystemService;
+	public MappingServiceImpl(DataService dataService, AlgorithmService algorithmService, IdGenerator idGenerator,
+			MappingProjectRepository mappingProjectRepository, PermissionSystemService permissionSystemService)
+	{
+		this.dataService = checkNotNull(dataService);
+		this.algorithmService = checkNotNull(algorithmService);
+		this.idGenerator = checkNotNull(idGenerator);
+		this.mappingProjectRepository = checkNotNull(mappingProjectRepository);
+		this.permissionSystemService = checkNotNull(permissionSystemService);
+	}
 
 	@Override
 	@RunAsSystem

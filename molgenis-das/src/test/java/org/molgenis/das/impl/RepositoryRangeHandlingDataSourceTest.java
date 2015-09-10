@@ -11,6 +11,7 @@ import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_POS;
 import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_STOP;
 import static org.testng.AssertJUnit.assertEquals;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +32,6 @@ import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.ApplicationContextProvider;
-import org.molgenis.util.HandleRequestDelegationException;
 import org.springframework.context.ApplicationContext;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -61,7 +61,7 @@ public class RepositoryRangeHandlingDataSourceTest
 	private GenomicDataSettings genomicDataSettings;
 
 	@BeforeMethod
-	public void setUp() throws HandleRequestDelegationException, Exception
+	public void setUp() throws DataSourceException, MalformedURLException
 	{
 		dataService = mock(DataService.class);
 		genomicDataSettings = mock(GenomicDataSettings.class);

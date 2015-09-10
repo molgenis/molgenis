@@ -37,7 +37,7 @@
 				modal: false,
 				enableOptionalFilter: true,
 				enableFormIndex: true,
-				enableAlertMessageInFormIndex: true,
+				enableAlertMessageInFormIndex: false,
 				colOffset: 3,
 				saveOnBlur: false,
 				showHidden: false,

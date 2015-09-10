@@ -57,69 +57,82 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	private final OntologyTagService ontologyTagService;
 	private final SemanticSearchService semanticSearchService;
 	private final UnitResolver unitResolver;
+	private final AlgorithmTemplateService algorithmTemplateService;
 
 	@Autowired
 	public AlgorithmServiceImpl(DataService dataService, OntologyTagService ontologyTagService,
-			SemanticSearchService semanticSearchService, UnitResolver unitResolver)
+			SemanticSearchService semanticSearchService, UnitResolver unitResolver,
+			AlgorithmTemplateService algorithmTemplateService)
 	{
 		this.dataService = checkNotNull(dataService);
 		this.ontologyTagService = checkNotNull(ontologyTagService);
 		this.semanticSearchService = checkNotNull(semanticSearchService);
 		this.unitResolver = checkNotNull(unitResolver);
+		this.algorithmTemplateService = checkNotNull(algorithmTemplateService);
 
 		new RhinoConfig().init();
 	}
 
 	@Override
 	@RunAsSystem
-	public void autoGenerateAlgorithm(EntityMetaData sourceEntityMetaData, EntityMetaData targetEntityMetaData,
-			EntityMapping mapping, AttributeMetaData targetAttribute)
+	public void autoGenerateAlgorithm(EntityMetaData sourceEntityMeta, EntityMetaData targetEntityMeta,
+			EntityMapping mapping, AttributeMetaData targetAttr)
 	{
-		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttribute.getName());
+		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttr.getName());
 		Map<AttributeMetaData, Iterable<ExplainedQueryString>> matches = semanticSearchService
-				.explainAttributes(sourceEntityMetaData, targetEntityMetaData, targetAttribute);
+				.findAttributes(sourceEntityMeta, targetEntityMeta, targetAttr);
 
-		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(targetEntityMetaData,
-				targetAttribute);
-
-		Unit<? extends Quantity> targetUnit = unitResolver.resolveUnit(targetAttribute, targetEntityMetaData);
+		Multimap<Relation, OntologyTerm> targetAttrTags = ontologyTagService.getTagsForAttribute(targetEntityMeta,
+				targetAttr);
+		Unit<? extends Quantity> targetUnit = unitResolver.resolveUnit(targetAttr, targetEntityMeta);
 		for (Entry<AttributeMetaData, Iterable<ExplainedQueryString>> entry : matches.entrySet())
 		{
+			String algorithm = null;
+
 			AttributeMetaData source = entry.getKey();
 
-			// determine source unit
-			Unit<? extends Quantity> sourceUnit = unitResolver.resolveUnit(source, sourceEntityMetaData);
-
-			String algorithm = null;
-			if (sourceUnit != null)
+			// use existing algorithm template if available
+			AlgorithmTemplate algorithmTemplate = algorithmTemplateService.find(matches).findFirst().orElse(null);
+			if (algorithmTemplate != null)
 			{
-				if (targetUnit != null && !sourceUnit.equals(targetUnit))
+				algorithm = algorithmTemplate.render();
+			}
+			else
+			{
+				// determine source unit
+				Unit<? extends Quantity> sourceUnit = unitResolver.resolveUnit(source, sourceEntityMeta);
+
+				if (sourceUnit != null)
 				{
-					// if units are convertible, create convert algorithm
-					UnitConverter unitConverter;
-					try
+					if (targetUnit != null && !sourceUnit.equals(targetUnit))
 					{
-						unitConverter = sourceUnit.getConverterTo(targetUnit);
+						// if units are convertible, create convert algorithm
+						UnitConverter unitConverter;
+						try
+						{
+							unitConverter = sourceUnit.getConverterTo(targetUnit);
+						}
+						catch (ConversionException e)
+						{
+							unitConverter = null;
+							// algorithm sets source unit and assigns source value to target
+							algorithm = String.format("$('%s').unit('%s').value();", source.getName(),
+									sourceUnit.toString());
+						}
+
+						if (unitConverter != null)
+						{
+							// algorithm sets source unit and assigns value converted to target unit to target
+							algorithm = String.format("$('%s').unit('%s').toUnit('%s').value();", source.getName(),
+									sourceUnit.toString(), targetUnit.toString());
+						}
 					}
-					catch (ConversionException e)
+					else
 					{
-						unitConverter = null;
 						// algorithm sets source unit and assigns source value to target
 						algorithm = String.format("$('%s').unit('%s').value();", source.getName(),
 								sourceUnit.toString());
 					}
-
-					if (unitConverter != null)
-					{
-						// algorithm sets source unit and assigns value converted to target unit to target
-						algorithm = String.format("$('%s').unit('%s').toUnit('%s').value();", source.getName(),
-								sourceUnit.toString(), targetUnit.toString());
-					}
-				}
-				else
-				{
-					// algorithm sets source unit and assigns source value to target
-					algorithm = String.format("$('%s').unit('%s').value();", source.getName(), sourceUnit.toString());
 				}
 			}
 			if (algorithm == null)
@@ -127,10 +140,11 @@ public class AlgorithmServiceImpl implements AlgorithmService
 				// algorithm assigns source value to target
 				algorithm = String.format("$('%s').value();", source.getName());
 			}
-			AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttribute.getName());
+			AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttr.getName());
+			attributeMapping.getSourceAttributeMetaDatas().add(source);
 			attributeMapping.setAlgorithm(algorithm);
 
-			if (isSingleMatchHighQuality(targetAttribute, tagsForAttribute, entry.getValue()))
+			if (isSingleMatchHighQuality(targetAttr, targetAttrTags, entry.getValue()))
 			{
 				attributeMapping.setAlgorithmState(AlgorithmState.GENERATED_HIGH);
 			}
@@ -138,8 +152,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			{
 				attributeMapping.setAlgorithmState(AlgorithmState.GENERATED_LOW);
 			}
-
-			LOG.info("Creating attribute mapping: " + targetAttribute.getName() + " = " + algorithm);
+			LOG.debug("Creating attribute mapping: " + targetAttr.getName() + " = " + algorithm);
 			break;
 		}
 	}

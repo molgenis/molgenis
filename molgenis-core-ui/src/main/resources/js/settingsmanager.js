@@ -1,16 +1,21 @@
 (function($, molgenis) {
 	"use strict";
 
+	var api = new molgenis.RestClient();
+	
 	$(function() {
 		var onValueChange = function(event) {
-			React.render(molgenis.ui.Form({
-				entity: event.value.fullName,
-				entityInstance: event.value.simpleName,
-				mode: 'edit',
-				modal: false,
-				enableOptionalFilter: false,
-				enableFormIndex: false
-			}), $('#settings-container')[0]);
+			// check if user has read or write permission on entity
+			api.getAsync('/api/v1/' + event.value.fullName + '/meta', {'expand': ['attributes']}).done(function(entity) {
+				React.render(molgenis.ui.Form({
+					entity: entity,
+					entityInstance: event.value.simpleName,
+					mode: entity.writable ? 'edit' : 'view',
+					modal: false,
+					enableOptionalFilter: false,
+					enableFormIndex: false
+				}), $('#settings-container')[0]);
+			});
 		};
 		
 		var EntitySelectBox = React.render(molgenis.ui.EntitySelectBox({
