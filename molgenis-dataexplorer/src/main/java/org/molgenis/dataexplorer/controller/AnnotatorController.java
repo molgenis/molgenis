@@ -15,6 +15,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.CrudRepositoryAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.file.FileStore;
@@ -168,7 +169,10 @@ public class AnnotatorController
 				map.put("inputAttributeTypes", toMap(annotator.getInputMetaData()));
 				map.put("outputAttributes", outputAttrs);
 				map.put("outputAttributeTypes", toMap(annotator.getOutputMetaData()));
-				mapOfAnnotators.put(annotator.getSimpleName(), map);
+				if (annotator.getInfo().getStatus().equals(Status.READY))
+				{
+					mapOfAnnotators.put(annotator.getSimpleName(), map);
+				}
 			}
 		}
 		return mapOfAnnotators;
