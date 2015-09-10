@@ -145,7 +145,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step16RuntimePropertyToSettings(runtimePropertyToAppSettingsMigrator,
 				runtimePropertyToGenomicDataSettingsMigrator, runtimePropertyToDataExplorerSettingsMigrator,
 				runtimePropertyToStaticContentMigrator));
-		upgradeService.addUpgrade(new Step17AddAlgorithmStateDiscuss(dataSource));
+		upgradeService.addUpgrade(new Step17AddAlgorithmStateDiscuss(dataSource, searchService));
 	}
 
 	@Override
