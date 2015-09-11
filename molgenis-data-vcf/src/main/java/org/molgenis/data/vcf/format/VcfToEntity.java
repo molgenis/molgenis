@@ -74,7 +74,7 @@ public class VcfToEntity
 
 			result.addAttributeMetaData(idAttributeMetaData);
 			DefaultAttributeMetaData nameAttributeMetaData = new DefaultAttributeMetaData(NAME,
-					MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true);
+					MolgenisFieldTypes.FieldTypeEnum.TEXT).setAggregateable(true);
 			nameAttributeMetaData.setLabelAttribute(true).setLookupAttribute(true);
 			result.addAttributeMetaData(nameAttributeMetaData);
 			for (VcfMetaFormat meta : formatMetaData)
@@ -109,17 +109,18 @@ public class VcfToEntity
 		for (VcfMetaInfo info : vcfMeta.getInfoMeta())
 		{
 			String postFix = "";
-			for(AttributeMetaData attributeMetaData : entityMetaData.getAtomicAttributes()){
-				if(attributeMetaData.getName().equals(info.getId())){
-					postFix = "_"+entityName;
+			for (AttributeMetaData attributeMetaData : entityMetaData.getAtomicAttributes())
+			{
+				if (attributeMetaData.getName().equals(info.getId()))
+				{
+					postFix = "_" + entityName;
 				}
 			}
-			DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(
-					info.getId()+postFix, vcfReaderFormatToMolgenisType(info)).setAggregateable(true);
-			
-			attributeMetaData
-					.setDescription(StringUtils.isBlank(info.getDescription()) ? VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION : info
-							.getDescription());
+			DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(info.getId() + postFix,
+					vcfReaderFormatToMolgenisType(info)).setAggregateable(true);
+
+			attributeMetaData.setDescription(StringUtils.isBlank(info.getDescription())
+					? VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION : info.getDescription());
 			metadataInfoField.add(attributeMetaData);
 		}
 		infoMetaData.setAttributesMetaData(metadataInfoField);
@@ -299,15 +300,17 @@ public class VcfToEntity
 		{
 			String postFix = "";
 			List<String> names = new ArrayList<>();
-			for (AttributeMetaData attributeMetaData : entityMetaData.getAttributes()) {
-				if (attributeMetaData.getName().equals(info.getId())) {
+			for (AttributeMetaData attributeMetaData : entityMetaData.getAttributes())
+			{
+				if (attributeMetaData.getName().equals(info.getId()))
+				{
 					names.add(attributeMetaData.getName());
 				}
 			}
-			if(names.contains(info.getId())) postFix = "_" + entity.getEntityMetaData().getName();
+			if (names.contains(info.getId())) postFix = "_" + entity.getEntityMetaData().getName();
 			if (info.getType().equals(VcfMetaInfo.Type.FLAG))
 			{
-				entity.set(info.getId()+postFix, false);
+				entity.set(info.getId() + postFix, false);
 			}
 		}
 
@@ -315,8 +318,10 @@ public class VcfToEntity
 		{
 			String postFix = "";
 			List<String> names = new ArrayList<>();
-			for (AttributeMetaData attributeMetaData : entityMetaData.getAttributes()) {
-				if (attributeMetaData.getName().equals(vcfInfo.getKey())) {
+			for (AttributeMetaData attributeMetaData : entityMetaData.getAttributes())
+			{
+				if (attributeMetaData.getName().equals(vcfInfo.getKey()))
+				{
 					names.add(attributeMetaData.getName());
 				}
 			}
@@ -338,18 +343,20 @@ public class VcfToEntity
 
 			if (val == null)
 			{
-				if(names.contains(vcfInfo.getKey())){
+				if (names.contains(vcfInfo.getKey()))
+				{
 					postFix = "_" + entity.getEntityMetaData().getName();
 				}
-				if (!(vcfInfo.getKey()+postFix).equals(".")
-						&& entityMetaData.getAttribute(vcfInfo.getKey()+postFix) != null
-						&& entityMetaData.getAttribute(vcfInfo.getKey()+postFix).getDataType()
-								.getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.BOOL))
+				if (!(vcfInfo.getKey() + postFix).equals(".")
+						&& entityMetaData.getAttribute(vcfInfo.getKey() + postFix) != null
+						&& entityMetaData.getAttribute(vcfInfo.getKey() + postFix).getDataType().getEnumType()
+								.equals(MolgenisFieldTypes.FieldTypeEnum.BOOL))
 				{
 					val = true;
 				}
 			}
-			if(val != null) {
+			if (val != null)
+			{
 				entity.set(vcfInfo.getKey() + postFix, val);
 			}
 		}
