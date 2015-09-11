@@ -2,9 +2,7 @@ package org.molgenis.data.transaction;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.springframework.stereotype.Component;
 
-@Component
 public class LockMetaData extends DefaultEntityMetaData
 {
 	public static final String ENTITY_NAME = "MolgenisLock";
@@ -15,14 +13,13 @@ public class LockMetaData extends DefaultEntityMetaData
 	public static final String UPDATE_LOCKED = "updateLocked";
 	public static final String DELETE_LOCKED = "deleteLocked";
 
-	public static final LockMetaData INSTANCE = new LockMetaData();
-
-	private LockMetaData()
+	LockMetaData(MolgenisTransactionLogMetaData molgenisTransactionLogMetaData, String backend)
 	{
 		super(ENTITY_NAME);
+		setBackend(backend);
 		addAttribute(ID).setIdAttribute(true).setAuto(true).setNillable(false);
 		addAttribute(MOLGENIS_TRANSACTION_LOG).setDataType(MolgenisFieldTypes.XREF)
-				.setRefEntity(MolgenisTransactionLogMetaData.INSTANCE).setNillable(false);
+				.setRefEntity(molgenisTransactionLogMetaData).setNillable(false);
 		addAttribute(ENTITY).setNillable(false);
 		addAttribute(ADD_LOCKED).setDataType(MolgenisFieldTypes.BOOL).setNillable(false);
 		addAttribute(UPDATE_LOCKED).setDataType(MolgenisFieldTypes.BOOL).setNillable(false);

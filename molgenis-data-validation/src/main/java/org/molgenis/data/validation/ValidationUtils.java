@@ -1,6 +1,8 @@
 package org.molgenis.data.validation;
 
-import org.molgenis.data.AttributeMetaData;
+import java.util.Collections;
+import java.util.List;
+
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
@@ -24,26 +26,24 @@ public class ValidationUtils
 	 * @param attribute
 	 * @return true or false
 	 */
-	public static boolean resolveBooleanExpression(String expression, Entity entity, EntityMetaData meta,
-			AttributeMetaData attribute)
+	public static boolean resolveBooleanExpression(String expression, Entity entity, EntityMetaData meta)
+	{
+		return resolveBooleanExpressions(Collections.singletonList(expression), entity, meta).get(0);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static List<Boolean> resolveBooleanExpressions(List<String> expressions, Entity entity, EntityMetaData meta)
 	{
 		Object result = null;
 		try
 		{
-			result = ScriptEvaluator.eval(expression, entity, meta);
+			result = ScriptEvaluator.eval(expressions, entity, meta);
 		}
 		catch (EcmaError e)
 		{
 			LOG.warn("Error evaluation validationExpression", e);
 		}
 
-		if ((result == null) || !(result instanceof Boolean))
-		{
-			throw new MolgenisDataException(String.format(
-					"Invalid boolean expression '%s' for attribute '%s' of entity '%s'",
-					attribute.getValidationExpression(), attribute.getName(), meta.getName()));
-		}
-
-		return (Boolean) result;
+		return (List<Boolean>) result;
 	}
 }
