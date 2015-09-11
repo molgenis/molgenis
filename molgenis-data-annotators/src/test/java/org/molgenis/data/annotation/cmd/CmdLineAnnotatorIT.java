@@ -19,7 +19,7 @@ import org.testng.annotations.Test;
  */
 public class CmdLineAnnotatorIT
 {
-	@Test
+	@Test(enabled = false)
 	public void gonl() throws Exception
 	{
 		testAnnotator("gonl", "src/test/resources/gonl", "test.vcf", "test-out-expected.vcf");
@@ -28,14 +28,15 @@ public class CmdLineAnnotatorIT
 	@Test
 	public void hpo() throws Exception
 	{
-		testAnnotator("hpo", "src"+File.separator+"test"+File.separator+"resources"+File.separator+"hpo"+File.separator+"hpo.txt", "test.vcf", "test-out-expected.vcf");
+		testAnnotator("hpo", "src" + File.separator + "test" + File.separator + "resources" + File.separator + "hpo"
+				+ File.separator + "hpo.txt", "test.vcf", "test-out-expected.vcf");
 	}
 
 	@Test
 	public void hpoTermsOnly() throws Exception
 	{
-		testAnnotator("hpo", "src"+File.separator+"test"+File.separator+"resources"+File.separator+"hpo"+File.separator+"hpo.txt", "test.vcf", "test-out-terms-expected.vcf",
-				Arrays.asList("HPOTERMS"));
+		testAnnotator("hpo", "src" + File.separator + "test" + File.separator + "resources" + File.separator + "hpo"
+				+ File.separator + "hpo.txt", "test.vcf", "test-out-terms-expected.vcf", Arrays.asList("HPOTERMS"));
 	}
 
 	@Test
