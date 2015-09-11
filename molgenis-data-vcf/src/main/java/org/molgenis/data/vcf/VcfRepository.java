@@ -52,22 +52,24 @@ public class VcfRepository extends AbstractRepository
 
 	public static final AttributeMetaData CHROM_META = new DefaultAttributeMetaData(CHROM,
 			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false)
-			.setDescription("The chromosome on which the variant is observed");
+					.setDescription("The chromosome on which the variant is observed");
+	// TEXT instead of STRING to handle large insertions/deletions
 	public static final AttributeMetaData ALT_META = new DefaultAttributeMetaData(ALT,
-			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false)
-			.setDescription("The alternative allele observed");
+			MolgenisFieldTypes.FieldTypeEnum.TEXT).setAggregateable(true).setNillable(false)
+					.setDescription("The alternative allele observed");
 	public static final AttributeMetaData POS_META = new DefaultAttributeMetaData(POS,
 			MolgenisFieldTypes.FieldTypeEnum.LONG).setAggregateable(true).setNillable(false)
-			.setDescription("The position on the chromosome which the variant is observed");
+					.setDescription("The position on the chromosome which the variant is observed");
+	// TEXT instead of STRING to handle large insertions/deletions
 	public static final AttributeMetaData REF_META = new DefaultAttributeMetaData(REF,
-			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false)
-			.setDescription("The reference allele");
+			MolgenisFieldTypes.FieldTypeEnum.TEXT).setAggregateable(true).setNillable(false)
+					.setDescription("The reference allele");
 	public static final AttributeMetaData FILTER_META = new DefaultAttributeMetaData(FILTER,
 			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true)
-			.setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
+					.setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
 	public static final AttributeMetaData QUAL_META = new DefaultAttributeMetaData(QUAL,
 			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true)
-			.setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
+					.setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
 	public static final AttributeMetaData ID_META = new DefaultAttributeMetaData(ID,
 			MolgenisFieldTypes.FieldTypeEnum.STRING).setNillable(true).setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
 

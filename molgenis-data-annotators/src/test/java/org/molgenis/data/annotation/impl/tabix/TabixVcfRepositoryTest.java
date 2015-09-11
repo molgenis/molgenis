@@ -1,21 +1,5 @@
 package org.molgenis.data.annotation.impl.tabix;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Query;
-import org.molgenis.data.annotator.tabix.TabixVcfRepository;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.util.ResourceUtils;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Iterator;
-
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
 import static org.molgenis.data.vcf.VcfRepository.ALT;
@@ -29,6 +13,22 @@ import static org.molgenis.data.vcf.VcfRepository.REF_META;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
+
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
+import org.molgenis.data.annotator.tabix.TabixVcfRepository;
+import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.util.ResourceUtils;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 
 public class TabixVcfRepositoryTest
 {
@@ -69,7 +69,7 @@ public class TabixVcfRepositoryTest
 		Iterator<Entity> iterator = tabixVcfRepository.findAll(query).iterator();
 		iterator.hasNext();
 		Entity other = iterator.next();
-		Entity entity = newEntity("1", 10352, "TA", "T", "PASS", "100", "rs145072688", "1_10352_T_TA");
+		Entity entity = newEntity("1", 10352, "TA", "T", "PASS", "100", "rs145072688", "uVflR7Ra_O8E04Zfj-O_Og");
 		boolean equal = true;
 		for (AttributeMetaData attr : entity.getEntityMetaData().getAtomicAttributes())
 		{
@@ -83,7 +83,7 @@ public class TabixVcfRepositoryTest
 	@Test
 	public void testIterator()
 	{
-		Entity entity = newEntity("1", 10352, "TA", "T", "PASS", "100", "rs145072688", "1_10352_T_TA");
+		Entity entity = newEntity("1", 10352, "TA", "T", "PASS", "100", "rs145072688", "uVflR7Ra_O8E04Zfj-O_Og");
 
 		Iterator<Entity> iterator = tabixVcfRepository.iterator();
 		iterator.hasNext();

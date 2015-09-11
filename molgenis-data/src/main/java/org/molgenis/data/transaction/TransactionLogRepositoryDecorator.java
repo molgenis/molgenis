@@ -14,8 +14,8 @@ import org.molgenis.data.RepositoryCapability;
 
 public class TransactionLogRepositoryDecorator implements Repository
 {
-	private Repository decorated;
-	private TransactionLogService transactionLogService;
+	private final Repository decorated;
+	private final TransactionLogService transactionLogService;
 
 	public TransactionLogRepositoryDecorator(Repository decorated, TransactionLogService transactionLogService)
 	{
