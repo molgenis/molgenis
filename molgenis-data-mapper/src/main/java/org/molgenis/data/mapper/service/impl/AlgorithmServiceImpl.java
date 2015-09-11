@@ -78,21 +78,24 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	public void autoGenerateAlgorithm(EntityMetaData sourceEntityMeta, EntityMetaData targetEntityMeta,
 			EntityMapping mapping, AttributeMetaData targetAttr)
 	{
-		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttr.getName());
-		Map<AttributeMetaData, Iterable<ExplainedQueryString>> matches = semanticSearchService
-				.findAttributes(sourceEntityMeta, targetEntityMeta, targetAttr);
 
-		Multimap<Relation, OntologyTerm> targetAttrTags = ontologyTagService.getTagsForAttribute(targetEntityMeta,
+		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttr.getName());
+		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(targetEntityMeta,
 				targetAttr);
+
+		final Map<AttributeMetaData, Iterable<ExplainedQueryString>> relevantAttributes = semanticSearchService
+				.decisionTreeToRelevantFindAttributes(sourceEntityMeta, targetAttr, tagsForAttribute.values(), null);
+
 		Unit<? extends Quantity> targetUnit = unitResolver.resolveUnit(targetAttr, targetEntityMeta);
-		for (Entry<AttributeMetaData, Iterable<ExplainedQueryString>> entry : matches.entrySet())
+		for (Entry<AttributeMetaData, Iterable<ExplainedQueryString>> entry : relevantAttributes.entrySet())
 		{
 			String algorithm = null;
 
 			AttributeMetaData source = entry.getKey();
 
 			// use existing algorithm template if available
-			AlgorithmTemplate algorithmTemplate = algorithmTemplateService.find(matches).findFirst().orElse(null);
+			AlgorithmTemplate algorithmTemplate = algorithmTemplateService.find(relevantAttributes).findFirst()
+					.orElse(null);
 			if (algorithmTemplate != null)
 			{
 				algorithm = algorithmTemplate.render();
@@ -144,7 +147,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			attributeMapping.getSourceAttributeMetaDatas().add(source);
 			attributeMapping.setAlgorithm(algorithm);
 
-			if (isSingleMatchHighQuality(targetAttr, targetAttrTags, entry.getValue()))
+			if (isSingleMatchHighQuality(targetAttr, tagsForAttribute, entry.getValue()))
 			{
 				attributeMapping.setAlgorithmState(AlgorithmState.GENERATED_HIGH);
 			}

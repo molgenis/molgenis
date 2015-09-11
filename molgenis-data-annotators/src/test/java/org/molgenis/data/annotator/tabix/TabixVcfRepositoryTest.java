@@ -51,8 +51,8 @@ public class TabixVcfRepositoryTest
 	{
 		Mockito.when(tabixReader.query("13:12-12")).thenReturn(null);
 
-		Iterable<Entity> actual = tabixVcfRepository.findAll(tabixVcfRepository.query().eq(CHROM, "13").and()
-				.eq(POS, 12));
+		Iterable<Entity> actual = tabixVcfRepository
+				.findAll(tabixVcfRepository.query().eq(CHROM, "13").and().eq(POS, 12));
 
 		assertEquals(Collections.emptyList(), Lists.newArrayList(actual));
 	}
@@ -64,8 +64,8 @@ public class TabixVcfRepositoryTest
 		Mockito.when(iterator.next()).thenReturn("13\t11\tid1\tA\tC\t12\t.\t.\t.", "13\t12\tid2\tA\tC\t12\t.\t.\t.",
 				"13\t12\tid3\tA\tG\t12\t.\t.\t.", "13\t13\tid4\tA\tC\t12\t.\t.\t.", null);
 
-		Iterable<Entity> actual = tabixVcfRepository.findAll(tabixVcfRepository.query().eq(CHROM, "13").and()
-				.eq(POS, 12));
+		Iterable<Entity> actual = tabixVcfRepository
+				.findAll(tabixVcfRepository.query().eq(CHROM, "13").and().eq(POS, 12));
 
 		Entity e1 = new MapEntity(entityMetaData);
 		e1.set("#CHROM", "13");
@@ -75,7 +75,7 @@ public class TabixVcfRepositoryTest
 		e1.set("FILTER", null);
 		e1.set("QUAL", "12");
 		e1.set("ID", "id2");
-		e1.set("INTERNAL_ID", "13_12_A_C");
+		e1.set("INTERNAL_ID", "1IRDGOK5Lz_D5OTHDCufFA");
 
 		Entity e2 = new MapEntity(entityMetaData);
 		e2.set("#CHROM", "13");
@@ -85,7 +85,7 @@ public class TabixVcfRepositoryTest
 		e2.set("FILTER", null);
 		e2.set("QUAL", "12");
 		e2.set("ID", "id3");
-		e2.set("INTERNAL_ID", "13_12_A_G");
+		e2.set("INTERNAL_ID", "ld2wCadyeITy89CrL2TnWg");
 		assertEquals(Lists.newArrayList(actual), Arrays.asList(e1, e2));
 	}
 }
