@@ -123,7 +123,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	}
 
 	@Override
-	public Map<AttributeMetaData, Iterable<ExplainedQueryString>> decisionTreeToRelevantFindAttributes(
+	public Map<AttributeMetaData, Iterable<ExplainedQueryString>> decisionTreeToFindRelevantAttributes(
 			EntityMetaData sourceEntityMetaData, AttributeMetaData targetAttribute,
 			Collection<OntologyTerm> ontologyTermsFromTags, Set<String> searchTerms)
 	{

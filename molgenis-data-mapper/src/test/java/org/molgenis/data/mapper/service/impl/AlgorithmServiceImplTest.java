@@ -331,7 +331,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		LinkedHashMultimap<Relation, OntologyTerm> ontologyTermTags = LinkedHashMultimap.create();
 
 		when(
-				semanticSearchService.decisionTreeToRelevantFindAttributes(sourceEntityMetaData, targetAttribute,
+				semanticSearchService.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute,
 						ontologyTermTags.values(), null)).thenReturn(matches);
 
 		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute))
@@ -420,7 +420,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 				.<Relation, OntologyTerm> create();
 
 		when(
-				semanticSearchService.decisionTreeToRelevantFindAttributes(sourceEntityMetaData, targetAttribute,
+				semanticSearchService.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute,
 						ontologyTermTags.values(), null)).thenReturn(mappings);
 
 		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute))

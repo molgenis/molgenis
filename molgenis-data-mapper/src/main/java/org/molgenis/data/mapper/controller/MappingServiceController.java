@@ -524,7 +524,7 @@ public class MappingServiceController extends MolgenisPluginController
 				entityMapping.getTargetEntityMetaData(), targetAttributeMetaData);
 		
 		final Map<AttributeMetaData, Iterable<ExplainedQueryString>> relevantAttributes = semanticSearchService
-				.decisionTreeToRelevantFindAttributes(entityMapping.getSourceEntityMetaData(), targetAttributeMetaData,
+				.decisionTreeToFindRelevantAttributes(entityMapping.getSourceEntityMetaData(), targetAttributeMetaData,
 						tagsForAttribute.values(), searchTerms);
 
 		List<ExplainedAttributeMetaData> attributes = new ArrayList<ExplainedAttributeMetaData>();

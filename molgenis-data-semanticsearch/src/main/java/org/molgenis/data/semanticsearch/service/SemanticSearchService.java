@@ -33,7 +33,7 @@ public interface SemanticSearchService
 	 * 
 	 * @return AttributeMetaData of resembling attributes, sorted by relevance
 	 */
-	Map<AttributeMetaData, Iterable<ExplainedQueryString>> decisionTreeToRelevantFindAttributes(
+	Map<AttributeMetaData, Iterable<ExplainedQueryString>> decisionTreeToFindRelevantAttributes(
 			EntityMetaData sourceEntityMetaData, AttributeMetaData targetAttribute,
 			Collection<OntologyTerm> ontologyTermsFromTags, Set<String> searchTerms);
 
