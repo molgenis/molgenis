@@ -518,7 +518,7 @@
 						var CellContentForValue = this._createTableCellContent(value, 'c' + i);
 						return i < this.props.value.length - 1 ? [CellContentForValue, br({key: 'b' + i})] : CellContentForValue;
 					} else {
-						return null;
+						return br();
 					}
 				}.bind(this)));
 			} else {
