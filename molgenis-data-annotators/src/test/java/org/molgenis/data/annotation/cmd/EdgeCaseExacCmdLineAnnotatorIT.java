@@ -31,7 +31,7 @@ public class EdgeCaseExacCmdLineAnnotatorIT
 		String expectedOutputFile = resourceDir + "/" + expectedOutputFileName;
 
 		CmdLineAnnotator.main(new String[]
-		{ name, resourceLocation, inputFile, outputFile });
+		{ "-a", name, "-s", resourceLocation, "-i", inputFile, "-o", outputFile });
 
 		assertEquals(readLines(outputFile), readLines(expectedOutputFile));
 	}
