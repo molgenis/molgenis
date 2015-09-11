@@ -7,7 +7,6 @@ import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmS
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -34,7 +33,7 @@ import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.MapEntity;
@@ -50,7 +49,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
@@ -89,7 +87,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
 				targetEntityMetaData, targetAttribute);
 
-		Map<AttributeMetaData, Iterable<ExplainedQueryString>> relevantAttributes = semanticSearchService
+		Map<AttributeMetaData, ExplainedAttributeMetaData> relevantAttributes = semanticSearchService
 				.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute, tagsForAttribute.values(),
 						null);
 
@@ -110,14 +108,15 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 		else if (relevantAttributes.size() > 0)
 		{
-			Entry<AttributeMetaData, Iterable<ExplainedQueryString>> firstEntrySet = relevantAttributes.entrySet()
-					.stream().findFirst().get();
-			AttributeMetaData sourceAttribute = firstEntrySet.getKey();
+			Entry<AttributeMetaData, ExplainedAttributeMetaData> firstEntry = relevantAttributes.entrySet().stream()
+					.findFirst().get();
+			AttributeMetaData sourceAttribute = firstEntry.getKey();
 
 			algorithm = convertUnitsAlgorithm(targetAttribute, targetEntityMetaData, sourceAttribute,
 					sourceEntityMetaData);
 			mappedSourceAttributes = Sets.newHashSet(sourceAttribute);
-			algorithmState = isSingleMatchHighQuality(targetAttribute, tagsForAttribute, firstEntrySet.getValue()) ? GENERATED_HIGH : GENERATED_LOW;
+
+			algorithmState = firstEntry.getValue().isHighQuality() ? GENERATED_HIGH : GENERATED_LOW;
 		}
 
 		if (StringUtils.isNotBlank(algorithm))
@@ -198,38 +197,40 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		return algorithm;
 	}
 
-	boolean isSingleMatchHighQuality(AttributeMetaData targetAttribute,
-			Multimap<Relation, OntologyTerm> ontologyTermTags, Iterable<ExplainedQueryString> explanations)
-	{
-		Map<String, Double> matchedTags = new HashMap<String, Double>();
-		for (ExplainedQueryString explanation : explanations)
-		{
-			matchedTags.put(explanation.getTagName().toLowerCase(), explanation.getScore());
-		}
-		String label = StringUtils.isNotEmpty(targetAttribute.getLabel()) ? targetAttribute.getLabel().toLowerCase() : StringUtils.EMPTY;
-		String description = StringUtils.isNotEmpty(targetAttribute.getDescription()) ? targetAttribute
-				.getDescription().toLowerCase() : StringUtils.EMPTY;
+	// boolean isSingleMatchHighQuality(AttributeMetaData targetAttribute,
+	// Multimap<Relation, OntologyTerm> ontologyTermTags, Iterable<ExplainedQueryString> explanations)
+	// {
+	// Map<String, Double> matchedTags = new HashMap<String, Double>();
+	// for (ExplainedQueryString explanation : explanations)
+	// {
+	// matchedTags.put(explanation.getTagName().toLowerCase(), explanation.getScore());
+	// }
+	// String label = StringUtils.isNotEmpty(targetAttribute.getLabel()) ? targetAttribute.getLabel().toLowerCase() :
+	// StringUtils.EMPTY;
+	// String description = StringUtils.isNotEmpty(targetAttribute.getDescription()) ? targetAttribute
+	// .getDescription().toLowerCase() : StringUtils.EMPTY;
+	//
+	// if (isGoodMatch(matchedTags, label)) return true;
+	// if (isGoodMatch(matchedTags, description)) return true;
+	//
+	// for (OntologyTerm ontologyTerm : ontologyTermTags.values())
+	// {
+	// boolean allMatch = Lists.newArrayList(ontologyTerm.getLabel().toLowerCase().split(",")).stream()
+	// .allMatch(ontologyTermLabel -> isGoodMatch(matchedTags, ontologyTermLabel));
+	// if (allMatch) return true;
+	// }
 
-		if (isGoodMatch(matchedTags, label)) return true;
-		if (isGoodMatch(matchedTags, description)) return true;
-
-		for (OntologyTerm ontologyTerm : ontologyTermTags.values())
-		{
-			boolean allMatch = Lists.newArrayList(ontologyTerm.getLabel().toLowerCase().split(",")).stream()
-					.allMatch(ontologyTermLabel -> isGoodMatch(matchedTags, ontologyTermLabel));
-			if (allMatch) return true;
-		}
-
-		return false;
-	}
-
-	boolean isGoodMatch(Map<String, Double> matchedTags, String label)
-	{
-		return matchedTags.containsKey(label)
-				&& matchedTags.get(label).intValue() == 100
-				|| Sets.newHashSet(label.split(" ")).stream()
-						.allMatch(word -> matchedTags.containsKey(word) && matchedTags.get(word).intValue() == 100);
-	}
+	//
+	// return false;
+	// }
+	//
+	// boolean isGoodMatch(Map<String, Double> matchedTags, String label)
+	// {
+	// return matchedTags.containsKey(label)
+	// && matchedTags.get(label).intValue() == 100
+	// || Sets.newHashSet(label.split(" ")).stream()
+	// .allMatch(word -> matchedTags.containsKey(word) && matchedTags.get(word).intValue() == 100);
+	// }
 
 	@Override
 	public Iterable<AlgorithmEvaluation> applyAlgorithm(AttributeMetaData targetAttribute, String algorithm,

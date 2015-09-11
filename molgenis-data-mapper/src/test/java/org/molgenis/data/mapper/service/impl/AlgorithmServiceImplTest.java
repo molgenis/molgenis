@@ -9,16 +9,12 @@ import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -34,6 +30,7 @@ import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.semantic.Relation;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
@@ -54,7 +51,6 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 @ContextConfiguration(classes = AlgorithmServiceImplTest.Config.class)
@@ -78,7 +74,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		when(algorithmTemplateService.find(Matchers.<Map<AttributeMetaData, Iterable<ExplainedQueryString>>> any()))
+		when(algorithmTemplateService.find(Matchers.<Map<AttributeMetaData, ExplainedAttributeMetaData>> any()))
 				.thenReturn(Stream.empty());
 	}
 
@@ -92,56 +88,6 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	public void testGetSourceAttributeNamesNoQuotes()
 	{
 		assertEquals(algorithmService.getSourceAttributeNames("$(id)"), Collections.singletonList("id"));
-	}
-
-	@Test
-	public void testIsSingleMatchHighQuality()
-	{
-		AlgorithmServiceImpl algorithmServiceImpl = (AlgorithmServiceImpl) algorithmService;
-
-		DefaultAttributeMetaData targetAttribute1 = new DefaultAttributeMetaData("height");
-		targetAttribute1.setLabel("height");
-		Multimap<Relation, OntologyTerm> tags1 = LinkedHashMultimap.<Relation, OntologyTerm> create();
-		List<ExplainedQueryString> explanations1 = Arrays.asList(ExplainedQueryString.create("height", "height",
-				"standing height", 50.0));
-		assertFalse(algorithmServiceImpl.isSingleMatchHighQuality(targetAttribute1, tags1, explanations1));
-
-		DefaultAttributeMetaData targetAttribute2 = new DefaultAttributeMetaData("height");
-		targetAttribute2.setLabel("height");
-		Multimap<Relation, OntologyTerm> tags2 = LinkedHashMultimap.<Relation, OntologyTerm> create();
-		tags2.put(Relation.isAssociatedWith, OntologyTerm.create("http://www.molgenis.org/height", "length"));
-		List<ExplainedQueryString> explanations2 = Arrays.asList(ExplainedQueryString.create("height", "height",
-				"height", 100));
-		assertTrue(algorithmServiceImpl.isSingleMatchHighQuality(targetAttribute2, tags2, explanations2));
-
-		DefaultAttributeMetaData targetAttribute3 = new DefaultAttributeMetaData("fasting_glucose");
-		targetAttribute3.setLabel("glucose fasting");
-		Multimap<Relation, OntologyTerm> tags3 = LinkedHashMultimap.<Relation, OntologyTerm> create();
-		tags3.put(Relation.isAssociatedWith, OntologyTerm.create(
-				"http://www.molgenis.org/fasting,http://www.molgenis.org/glucose", "fasting,glucose"));
-		List<ExplainedQueryString> explanations3 = Arrays.asList(
-				ExplainedQueryString.create("fasting", "fasting", "fasting", 100),
-				ExplainedQueryString.create("glucose", "glucose", "blood glucose", 50));
-		assertFalse(algorithmServiceImpl.isSingleMatchHighQuality(targetAttribute3, tags3, explanations3));
-	}
-
-	@Test
-	public void testIsGoodMatch()
-	{
-		AlgorithmServiceImpl algorithmServiceImpl = (AlgorithmServiceImpl) algorithmService;
-
-		Map<String, Double> matchedTags = new HashMap<String, Double>();
-		matchedTags.put("height", 100.0);
-		matchedTags.put("weight", 50.0);
-		assertFalse(algorithmServiceImpl.isGoodMatch(matchedTags, "blood"));
-		assertFalse(algorithmServiceImpl.isGoodMatch(matchedTags, "weight"));
-		assertTrue(algorithmServiceImpl.isGoodMatch(matchedTags, "height"));
-
-		Map<String, Double> matchedTags2 = new HashMap<String, Double>();
-		matchedTags2.put("fasting", 100.0);
-		matchedTags2.put("glucose", 100.0);
-
-		assertTrue(algorithmServiceImpl.isGoodMatch(matchedTags2, "fasting glucose"));
 	}
 
 	@Test
@@ -325,8 +271,10 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityMetaData);
 
-		Map<AttributeMetaData, Iterable<ExplainedQueryString>> matches = ImmutableMap.of(sourceAttribute,
-				Arrays.asList(ExplainedQueryString.create("height", "height", "height", 100)));
+		Map<AttributeMetaData, ExplainedAttributeMetaData> matches = ImmutableMap.of(
+				sourceAttribute,
+				ExplainedAttributeMetaData.create(sourceAttribute,
+						Arrays.asList(ExplainedQueryString.create("height", "height", "height", 100)), true));
 
 		LinkedHashMultimap<Relation, OntologyTerm> ontologyTermTags = LinkedHashMultimap.create();
 
@@ -411,10 +359,10 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityMetaData);
 
-		Map<AttributeMetaData, Iterable<ExplainedQueryString>> mappings = ImmutableMap
-				.<AttributeMetaData, Iterable<ExplainedQueryString>> of(sourceAttribute1,
-						Arrays.<ExplainedQueryString> asList(), sourceAttribute2,
-						Arrays.<ExplainedQueryString> asList());
+		Map<AttributeMetaData, ExplainedAttributeMetaData> mappings = ImmutableMap
+				.<AttributeMetaData, ExplainedAttributeMetaData> of(sourceAttribute1,
+						ExplainedAttributeMetaData.create(sourceAttribute1), sourceAttribute2,
+						ExplainedAttributeMetaData.create(sourceAttribute2));
 
 		LinkedHashMultimap<Relation, OntologyTerm> ontologyTermTags = LinkedHashMultimap
 				.<Relation, OntologyTerm> create();

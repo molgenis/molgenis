@@ -4,8 +4,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,6 +28,7 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
 import org.molgenis.data.semanticsearch.semantic.Hit;
@@ -75,7 +76,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	}
 
 	@Override
-	public Map<AttributeMetaData, Iterable<ExplainedQueryString>> findAttributes(EntityMetaData sourceEntityMetaData,
+	public Map<AttributeMetaData, ExplainedAttributeMetaData> findAttributes(EntityMetaData sourceEntityMetaData,
 			Set<String> queryTerms, Collection<OntologyTerm> ontologyTerms)
 	{
 		Iterable<String> attributeIdentifiers = semanticSearchServiceHelper
@@ -99,7 +100,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 				ontologyTerms);
 
 		// Because the explain-API can be computationally expensive we limit the explanation to the top 10 attributes
-		Map<AttributeMetaData, Iterable<ExplainedQueryString>> explainedAttributes = new LinkedHashMap<AttributeMetaData, Iterable<ExplainedQueryString>>();
+		Map<AttributeMetaData, ExplainedAttributeMetaData> explainedAttributes = new LinkedHashMap<>();
 		int count = 0;
 		for (Entity attributeEntity : attributeMetaDataEntities)
 		{
@@ -107,14 +108,17 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 					.getString(AttributeMetaDataMetaData.NAME));
 			if (count < 10)
 			{
-				explainedAttributes.put(
-						attribute,
-						convertAttributeEntityToExplainedAttribute(attributeEntity, sourceEntityMetaData,
-								collectExpanedQueryMap, finalQueryRules));
+				Set<ExplainedQueryString> explanations = convertAttributeEntityToExplainedAttribute(attributeEntity,
+						sourceEntityMetaData, collectExpanedQueryMap, finalQueryRules);
+
+				boolean singleMatchHighQuality = isSingleMatchHighQuality(collectExpanedQueryMap, explanations);
+
+				explainedAttributes.put(attribute,
+						ExplainedAttributeMetaData.create(attribute, explanations, singleMatchHighQuality));
 			}
 			else
 			{
-				explainedAttributes.put(attribute, Collections.emptySet());
+				explainedAttributes.put(attribute, ExplainedAttributeMetaData.create(attribute));
 			}
 			count++;
 		}
@@ -122,8 +126,36 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		return explainedAttributes;
 	}
 
+	boolean isSingleMatchHighQuality(Map<String, String> collectExpanedQueryMap,
+			Iterable<ExplainedQueryString> explanations)
+	{
+		Map<String, Double> matchedTags = new HashMap<>();
+
+		for (ExplainedQueryString explanation : explanations)
+		{
+			matchedTags.put(explanation.getTagName().toLowerCase(), explanation.getScore());
+		}
+
+		for (String querySourceLabel : collectExpanedQueryMap.values())
+		{
+			boolean allMatch = Lists.newArrayList(querySourceLabel.toLowerCase().split(",")).stream()
+					.allMatch(token -> isGoodMatch(matchedTags, token));
+			if (allMatch) return true;
+		}
+		return false;
+	}
+
+	boolean isGoodMatch(Map<String, Double> matchedTags, String label)
+	{
+		label = label.toLowerCase();
+		return matchedTags.containsKey(label)
+				&& matchedTags.get(label).intValue() == 100
+				|| Sets.newHashSet(label.split(" ")).stream()
+						.allMatch(word -> matchedTags.containsKey(word) && matchedTags.get(word).intValue() == 100);
+	}
+
 	@Override
-	public Map<AttributeMetaData, Iterable<ExplainedQueryString>> decisionTreeToFindRelevantAttributes(
+	public Map<AttributeMetaData, ExplainedAttributeMetaData> decisionTreeToFindRelevantAttributes(
 			EntityMetaData sourceEntityMetaData, AttributeMetaData targetAttribute,
 			Collection<OntologyTerm> ontologyTermsFromTags, Set<String> searchTerms)
 	{
