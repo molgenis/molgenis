@@ -68,9 +68,9 @@ public class DannAnnotatorTest extends AbstractTestNGSpringContextTests
 		AttributeMetaData attributeMetaDataPos = new DefaultAttributeMetaData(VcfRepository.POS,
 				MolgenisFieldTypes.FieldTypeEnum.LONG);
 		AttributeMetaData attributeMetaDataRef = new DefaultAttributeMetaData(VcfRepository.REF,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
+				MolgenisFieldTypes.FieldTypeEnum.TEXT);
 		AttributeMetaData attributeMetaDataAlt = new DefaultAttributeMetaData(VcfRepository.ALT,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
+				MolgenisFieldTypes.FieldTypeEnum.TEXT);
 
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
 		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
@@ -210,8 +210,8 @@ public class DannAnnotatorTest extends AbstractTestNGSpringContextTests
 		public MolgenisSettings molgenisSettings()
 		{
 			MolgenisSettings settings = mock(MolgenisSettings.class);
-			when(settings.getProperty(DannAnnotator.DANN_FILE_LOCATION_PROPERTY)).thenReturn(
-					ResourceUtils.getFile(getClass(), "/dann/DANN_test_set.tsv.bgz").getPath());
+			when(settings.getProperty(DannAnnotator.DANN_FILE_LOCATION_PROPERTY))
+					.thenReturn(ResourceUtils.getFile(getClass(), "/dann/DANN_test_set.tsv.bgz").getPath());
 			return settings;
 		}
 
