@@ -208,7 +208,7 @@ public class SemanticSearchServiceHelper
 	{
 		Map<String, String> expandedQueryMap = new LinkedHashMap<String, String>();
 
-		queryTerms.stream().filter(queryTerm -> StringUtils.isNotBlank(queryTerm))
+		queryTerms.stream().filter(StringUtils::isNotBlank)
 				.forEach(queryTerm -> expandedQueryMap.put(stemmer.cleanStemPhrase(queryTerm), queryTerm));
 
 		for (OntologyTerm ontologyTerm : ontologyTerms)
