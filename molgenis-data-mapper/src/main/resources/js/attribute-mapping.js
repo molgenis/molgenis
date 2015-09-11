@@ -692,10 +692,10 @@
 		}
 		
 		// save button for saving generated mapping
-		$('#save-mapping-btn').on('click', function() {saveAttributeMapping(algorithm, "CURATED")});
+		$('#save-mapping-btn').on('click', function() {saveAttributeMapping(aceEditor.getSession().getValue(), "CURATED")});
 		
 		// save button for discuss status generated mapping
-		$('#save-discuss-mapping-btn').on('click', function() {saveAttributeMapping(algorithm, "DISCUSS")});
+		$('#save-discuss-mapping-btn').on('click', function() {saveAttributeMapping(aceEditor.getSession().getValue(), "DISCUSS")});
 		
 		// Update save buttons visibility
 		disableEnableSaveButtons(algorithm);
