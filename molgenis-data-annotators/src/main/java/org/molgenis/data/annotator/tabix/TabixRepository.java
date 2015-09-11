@@ -128,15 +128,17 @@ public class TabixRepository extends AbstractRepository
 		}
 		catch (IOException e)
 		{
-			LOG.error("Error reading from tabix reader", e);
+			LOG.error("Error reading from tabix resource", e);
 		}
 		catch (NullPointerException e)
 		{
-			LOG.error("Error reading from tabix reader for query: " + queryString);
+			LOG.warn("Unable to read from tabix resource for query: " + queryString + " (Position not present in resource file?)");
+			LOG.debug("", e);
 		}
 		catch (ArrayIndexOutOfBoundsException e)
 		{
-			LOG.error("Error reading from tabix reader for query: " + queryString + " (Unknown Chromosome?)", e);
+			LOG.warn("Unable to read from tabix resource for query: " + queryString + " (Chromosome not present in resource file?)");
+			LOG.debug("", e);
 		}
 		return builder.build();
 	}
