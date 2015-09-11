@@ -14,13 +14,11 @@ import java.util.regex.Pattern;
 
 public class VcfValidator
 {
-	private String perlLocation;
-	private String vcfToolsDirectory;
+	private String vcfValidatorLocation;
 
-	public VcfValidator(String perlLocation, String vcfToolsDirectory)
+	public VcfValidator(String vcfValidatorLocation)
 	{
-		this.perlLocation = perlLocation;
-		this.vcfToolsDirectory = vcfToolsDirectory;
+		this.vcfValidatorLocation = vcfValidatorLocation;
 	}
 
 	/**
@@ -34,23 +32,14 @@ public class VcfValidator
 	{
 		try
 		{
-			String vcfValidator = vcfToolsDirectory + File.separator + "perl" + File.separator + "vcf-validator";
-
-			if (perlLocation == null || !new File(perlLocation).exists())
-			{
-				return "Perl executable not present, skipping validation.";
-			}
-
 			// Checks if vcf-tools is present
-			if (vcfValidator == null || !new File(vcfValidator).exists())
+			if (vcfValidatorLocation == null || !new File(vcfValidatorLocation).exists())
 			{
 				return "No vcf-validator present, skipping validation.";
 			}
-			// Set working directory, Vcf.pm should be built here
-			String workingDirectory = vcfToolsDirectory + File.separator + "perl" + File.separator;
 
-			ProcessBuilder processBuilder = new ProcessBuilder(perlLocation, vcfValidator, vcfFile.getAbsolutePath(),
-					"-u", "-d").directory(new File(workingDirectory));
+			ProcessBuilder processBuilder = new ProcessBuilder(vcfValidatorLocation, vcfFile.getAbsolutePath(), "-u",
+					"-d").directory(new File(vcfValidatorLocation).getParentFile());
 
 			Process proc = processBuilder.start();
 
@@ -94,7 +83,7 @@ public class VcfValidator
 
 			scanner.close();
 
-			if (errorCount == 0)
+			if (errorCount != null && errorCount == 0)
 			{
 				return "VCF file [" + vcfFile.getName() + "] passed validation.";
 			}
