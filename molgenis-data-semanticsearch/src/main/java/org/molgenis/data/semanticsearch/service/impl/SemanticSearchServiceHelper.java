@@ -1,5 +1,6 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Arrays.stream;
 import static org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm.STOPWORDSLIST;
 
@@ -17,7 +18,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
@@ -49,12 +49,9 @@ public class SemanticSearchServiceHelper
 	public SemanticSearchServiceHelper(DataService dataService, OntologyService ontologyService,
 			TermFrequencyService termFrequencyService)
 	{
-		if (null == dataService || null == ontologyService || null == termFrequencyService) throw new MolgenisDataException(
-				"Service is not found, please contact your application administrator");
-
-		this.dataService = dataService;
-		this.ontologyService = ontologyService;
-		this.termFrequencyService = termFrequencyService;
+		this.dataService = checkNotNull(dataService);
+		this.ontologyService = checkNotNull(ontologyService);
+		this.termFrequencyService = checkNotNull(termFrequencyService);
 	}
 
 	/**

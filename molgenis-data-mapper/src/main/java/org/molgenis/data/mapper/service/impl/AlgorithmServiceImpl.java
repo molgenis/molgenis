@@ -104,7 +104,6 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			algorithm = algorithmTemplate.render();
 			algorithmState = GENERATED_HIGH;
 			mappedSourceAttributes = extractSourceAttributesFromAlgorithm(algorithm, sourceEntityMetaData);
-			mappedSourceAttributes = extractSourceAttributesFromAlgorithm(algorithm, sourceEntityMetaData);
 		}
 		else if (relevantAttributes.size() > 0)
 		{
@@ -112,10 +111,9 @@ public class AlgorithmServiceImpl implements AlgorithmService
 					.findFirst().get();
 			AttributeMetaData sourceAttribute = firstEntry.getKey();
 
-			algorithm = convertUnitsAlgorithm(targetAttribute, targetEntityMetaData, sourceAttribute,
+			algorithm = generateUnitConversionAlgorithm(targetAttribute, targetEntityMetaData, sourceAttribute,
 					sourceEntityMetaData);
 			mappedSourceAttributes = Sets.newHashSet(sourceAttribute);
-
 			algorithmState = firstEntry.getValue().isHighQuality() ? GENERATED_HIGH : GENERATED_LOW;
 		}
 
@@ -146,7 +144,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		return Collections.emptySet();
 	}
 
-	String convertUnitsAlgorithm(AttributeMetaData targetAttribute, EntityMetaData targetEntityMetaData,
+	String generateUnitConversionAlgorithm(AttributeMetaData targetAttribute, EntityMetaData targetEntityMetaData,
 			AttributeMetaData sourceAttribute, EntityMetaData sourceEntityMetaData)
 	{
 		String algorithm = null;
