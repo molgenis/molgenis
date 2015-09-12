@@ -38,6 +38,7 @@ import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -383,27 +384,31 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 				sourceAttribute1);
 	}
 
-	// @Test
-	// public testConvertUnitsAlgorithm()
-	// {
-	// AlgorithmServiceImpl algorithmServiceImpl = (AlgorithmServiceImpl) algorithmService;
-	//
-	// DefaultEntityMetaData targetEntityMetaData = new DefaultEntityMetaData("target");
-	// DefaultAttributeMetaData targetAttribute = new DefaultAttributeMetaData("targetHeight");
-	// targetAttribute.setLabel("height in m");
-	// targetEntityMetaData.addAttributeMetaData(targetAttribute);
-	//
-	// DefaultEntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("source");
-	// DefaultAttributeMetaData sourceAttribute = new DefaultAttributeMetaData("sourceHeight");
-	// sourceAttribute.setLabel("body length in cm");
-	// sourceEntityMetaData.addAttributeMetaData(sourceAttribute);
-	//
-	// when(ontologyService.getOntology("http://purl.obolibrary.org/obo/uo.owl")).thenReturn(
-	// Ontology.create("1", "http://purl.obolibrary.org/obo/uo.owl", "unit ontology"));
-	//
-	// algorithmServiceImpl.generateUnitConversionAlgorithm(targetAttribute, targetEntityMetaData, sourceAttribute,
-	// sourceEntityMetaData);
-	// }
+	@Test
+	public void testConvertUnitsAlgorithm()
+	{
+		AlgorithmServiceImpl algorithmServiceImpl = (AlgorithmServiceImpl) algorithmService;
+
+		DefaultEntityMetaData targetEntityMetaData = new DefaultEntityMetaData("target");
+		DefaultAttributeMetaData targetAttribute = new DefaultAttributeMetaData("targetHeight");
+		targetAttribute.setLabel("height in m");
+		targetEntityMetaData.addAttributeMetaData(targetAttribute);
+
+		DefaultEntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("source");
+		DefaultAttributeMetaData sourceAttribute = new DefaultAttributeMetaData("sourceHeight");
+		sourceAttribute.setLabel("body length in cm");
+		sourceEntityMetaData.addAttributeMetaData(sourceAttribute);
+
+		when(ontologyService.getOntology("http://purl.obolibrary.org/obo/uo.owl")).thenReturn(
+				Ontology.create("1", "http://purl.obolibrary.org/obo/uo.owl", "unit ontology"));
+
+		String actualAlgorithm = algorithmServiceImpl.generateUnitConversionAlgorithm(targetAttribute,
+				targetEntityMetaData, sourceAttribute, sourceEntityMetaData);
+
+		String expectedAlgorithm = "$('sourceHeight').unit('cm').toUnit('m').value();";
+
+		Assert.assertEquals(actualAlgorithm, expectedAlgorithm);
+	}
 
 	@Configuration
 	public static class Config
