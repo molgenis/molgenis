@@ -36,6 +36,7 @@ import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.data.semanticsearch.string.Stemmer;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.slf4j.Logger;
@@ -62,6 +63,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	private static final float CUTOFF = 0.4f;
 	private Splitter termSplitter = Splitter.onPattern("[^\\p{IsAlphabetic}]+");
 	private Joiner termJoiner = Joiner.on(' ');
+	private static final String UNIT_ONTOLOGY_IRI = "http://purl.obolibrary.org/obo/uo.owl";
 
 	@Autowired
 	public SemanticSearchServiceImpl(DataService dataService, OntologyService ontologyService,
@@ -171,6 +173,11 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		else if (null == ontologyTerms || ontologyTerms.size() == 0)
 		{
 			List<String> allOntologiesIds = ontologyService.getAllOntologiesIds();
+			Ontology unitOntology = ontologyService.getOntology(UNIT_ONTOLOGY_IRI);
+			if (unitOntology != null)
+			{
+				allOntologiesIds.remove(unitOntology.getId());
+			}
 			Hit<OntologyTerm> ontologyTermHit = findTags(targetAttribute, allOntologiesIds);
 			ontologyTerms = Arrays.asList(ontologyTermHit.getResult());
 		}
