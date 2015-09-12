@@ -197,41 +197,6 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		return algorithm;
 	}
 
-	// boolean isSingleMatchHighQuality(AttributeMetaData targetAttribute,
-	// Multimap<Relation, OntologyTerm> ontologyTermTags, Iterable<ExplainedQueryString> explanations)
-	// {
-	// Map<String, Double> matchedTags = new HashMap<String, Double>();
-	// for (ExplainedQueryString explanation : explanations)
-	// {
-	// matchedTags.put(explanation.getTagName().toLowerCase(), explanation.getScore());
-	// }
-	// String label = StringUtils.isNotEmpty(targetAttribute.getLabel()) ? targetAttribute.getLabel().toLowerCase() :
-	// StringUtils.EMPTY;
-	// String description = StringUtils.isNotEmpty(targetAttribute.getDescription()) ? targetAttribute
-	// .getDescription().toLowerCase() : StringUtils.EMPTY;
-	//
-	// if (isGoodMatch(matchedTags, label)) return true;
-	// if (isGoodMatch(matchedTags, description)) return true;
-	//
-	// for (OntologyTerm ontologyTerm : ontologyTermTags.values())
-	// {
-	// boolean allMatch = Lists.newArrayList(ontologyTerm.getLabel().toLowerCase().split(",")).stream()
-	// .allMatch(ontologyTermLabel -> isGoodMatch(matchedTags, ontologyTermLabel));
-	// if (allMatch) return true;
-	// }
-
-	//
-	// return false;
-	// }
-	//
-	// boolean isGoodMatch(Map<String, Double> matchedTags, String label)
-	// {
-	// return matchedTags.containsKey(label)
-	// && matchedTags.get(label).intValue() == 100
-	// || Sets.newHashSet(label.split(" ")).stream()
-	// .allMatch(word -> matchedTags.containsKey(word) && matchedTags.get(word).intValue() == 100);
-	// }
-
 	@Override
 	public Iterable<AlgorithmEvaluation> applyAlgorithm(AttributeMetaData targetAttribute, String algorithm,
 			Iterable<Entity> sourceEntities)
