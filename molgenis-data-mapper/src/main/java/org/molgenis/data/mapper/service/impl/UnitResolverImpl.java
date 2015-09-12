@@ -26,6 +26,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import utils.UnitHelper;
+
 import com.google.common.collect.Sets;
 
 public class UnitResolverImpl implements UnitResolver
@@ -135,7 +137,7 @@ public class UnitResolverImpl implements UnitResolver
 
 	String convertNumberToOntologyTermStyle(String term)
 	{
-		term = superscriptToNumber(term.replaceAll("\\^", StringUtils.EMPTY));
+		term = UnitHelper.superscriptToNumber(term.replaceAll("\\^", StringUtils.EMPTY));
 		Pattern pattern = Pattern.compile("\\w+(\\d+)");
 		Matcher matcher = pattern.matcher(term);
 
@@ -155,7 +157,7 @@ public class UnitResolverImpl implements UnitResolver
 		if (terms != null && terms.length > 0)
 		{
 			Sets.newHashSet(terms).stream().filter(StringUtils::isNotBlank).map(StringUtils::lowerCase)
-					.map(this::replaceIllegalChars).map(this::numberToSuperscript)
+					.map(this::replaceIllegalChars).map(UnitHelper::numberToSuperscript)
 					.forEach(term -> tokens.addAll(Sets.newHashSet(term.split("\\s+"))));
 
 			tokens.removeAll(NGramDistanceAlgorithm.STOPWORDSLIST);
@@ -165,36 +167,6 @@ public class UnitResolverImpl implements UnitResolver
 
 	String replaceIllegalChars(String term)
 	{
-		return superscriptToNumber(term).replaceAll("[^a-zA-Z0-9 /\\^]", " ");
-	}
-
-	private String superscriptToNumber(String str)
-	{
-		str = str.replaceAll("⁰", "0");
-		str = str.replaceAll("¹", "1");
-		str = str.replaceAll("²", "2");
-		str = str.replaceAll("³", "3");
-		str = str.replaceAll("⁴", "4");
-		str = str.replaceAll("⁵", "5");
-		str = str.replaceAll("⁶", "6");
-		str = str.replaceAll("⁷", "7");
-		str = str.replaceAll("⁸", "8");
-		str = str.replaceAll("⁹", "9");
-		return str;
-	}
-
-	private String numberToSuperscript(String str)
-	{
-		str = str.replaceAll("0", "⁰");
-		str = str.replaceAll("1", "¹");
-		str = str.replaceAll("2", "²");
-		str = str.replaceAll("3", "³");
-		str = str.replaceAll("4", "⁴");
-		str = str.replaceAll("5", "⁵");
-		str = str.replaceAll("6", "⁶");
-		str = str.replaceAll("7", "⁷");
-		str = str.replaceAll("8", "⁸");
-		str = str.replaceAll("9", "⁹");
-		return str;
+		return UnitHelper.superscriptToNumber(term).replaceAll("[^a-zA-Z0-9 /\\^]", " ");
 	}
 }

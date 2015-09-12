@@ -47,6 +47,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import utils.MagmaUnitConverter;
+
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
@@ -62,6 +64,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	private final UnitResolver unitResolver;
 	private final AlgorithmTemplateService algorithmTemplateService;
 	private final Pattern MAGMA_ATTRIBUTE_PATTERN = Pattern.compile("\\$\\('([^\\$\\(\\)]*)'\\)");
+	private final MagmaUnitConverter magmaUnitConverter = new MagmaUnitConverter();
 
 	@Autowired
 	public AlgorithmServiceImpl(DataService dataService, OntologyTagService ontologyTagService,
@@ -104,6 +107,9 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			algorithm = algorithmTemplate.render();
 			algorithmState = GENERATED_HIGH;
 			mappedSourceAttributes = extractSourceAttributesFromAlgorithm(algorithm, sourceEntityMetaData);
+
+			algorithm = convertUnitForTemplateAlgorithm(algorithm, targetAttribute, targetEntityMetaData,
+					mappedSourceAttributes, sourceEntityMetaData);
 		}
 		else if (relevantAttributes.size() > 0)
 		{
@@ -142,6 +148,30 @@ public class AlgorithmServiceImpl implements AlgorithmService
 					.collect(Collectors.toSet());
 		}
 		return Collections.emptySet();
+	}
+
+	String convertUnitForTemplateAlgorithm(String algorithm, AttributeMetaData targetAttribute,
+			EntityMetaData targetEntityMetaData, Set<AttributeMetaData> sourceAttributes,
+			EntityMetaData sourceEntityMetaData)
+	{
+		Unit<? extends Quantity> targetUnit = unitResolver.resolveUnit(targetAttribute, targetEntityMetaData);
+
+		for (AttributeMetaData sourceAttribute : sourceAttributes)
+		{
+			Unit<? extends Quantity> sourceUnit = unitResolver.resolveUnit(sourceAttribute, sourceEntityMetaData);
+
+			String convertUnit = magmaUnitConverter.convertUnit(targetUnit, sourceUnit);
+
+			if (StringUtils.isNotBlank(convertUnit))
+			{
+				String attrMagamSyntax = String.format("$('%s')", sourceAttribute.getName());
+				String unitConvertedMagamSyntax = convertUnit.startsWith(".") ? attrMagamSyntax + convertUnit : attrMagamSyntax
+						+ "." + convertUnit;
+				algorithm = StringUtils.replace(algorithm, attrMagamSyntax, unitConvertedMagamSyntax);
+			}
+		}
+
+		return algorithm;
 	}
 
 	String generateUnitConversionAlgorithm(AttributeMetaData targetAttribute, EntityMetaData targetEntityMetaData,
