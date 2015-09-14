@@ -78,9 +78,9 @@ public class VcfUtils
 		// fixed attributes: chrom pos id ref alt qual filter
 		for (String vcfAttribute : vcfAttributes)
 		{
-			vcfRecord.append(((vcfEntity.getString(vcfAttribute) != null && !vcfEntity.getString(vcfAttribute).equals(
-					"")) ? vcfEntity.getString(vcfAttribute) : ".")
-					+ TAB);
+			vcfRecord.append(
+					((vcfEntity.getString(vcfAttribute) != null && !vcfEntity.getString(vcfAttribute).equals(""))
+							? vcfEntity.getString(vcfAttribute) : ".") + TAB);
 		}
 
 		List<String> infoFieldsSeen = new ArrayList<String>();
@@ -226,10 +226,10 @@ public class VcfUtils
 	 */
 	public static boolean checkPreviouslyAnnotatedAndAddMetadata(File inputVcfFile, PrintWriter outputVCFWriter,
 			List<AttributeMetaData> infoFields, List<String> attributesToInclude)
-			throws MolgenisInvalidFormatException, FileNotFoundException
+					throws MolgenisInvalidFormatException, FileNotFoundException
 	{
-		String checkAnnotatedBeforeValue = attributesToInclude.isEmpty() ? (infoFields.isEmpty() ? null : infoFields
-				.get(0).getName()) : attributesToInclude.get(0);
+		String checkAnnotatedBeforeValue = attributesToInclude.isEmpty()
+				? (infoFields.isEmpty() ? null : infoFields.get(0).getName()) : attributesToInclude.get(0);
 		boolean annotatedBefore = false;
 
 		System.out.println("Detecting VCF column header...");
@@ -246,10 +246,8 @@ public class VcfUtils
 				if ((checkAnnotatedBeforeValue != null) && line.contains("##INFO=<ID=" + checkAnnotatedBeforeValue)
 						&& !annotatedBefore)
 				{
-					System.out
-							.println("\nThis file has already been annotated with '"
-									+ checkAnnotatedBeforeValue
-									+ "' data before it seems. Skipping any further annotation of variants that already contain this field.");
+					System.out.println("\nThis file has already been annotated with '" + checkAnnotatedBeforeValue
+							+ "' data before it seems. Skipping any further annotation of variants that already contain this field.");
 					annotatedBefore = true;
 				}
 
@@ -422,8 +420,8 @@ public class VcfUtils
 						else
 						{
 							inputVcfFileScanner.close();
-							throw new MolgenisDataException("Expected Child, Mother or Father, but found: " + element
-									+ " in line " + line);
+							throw new MolgenisDataException(
+									"Expected Child, Mother or Father, but found: " + element + " in line " + line);
 						}
 					}
 
