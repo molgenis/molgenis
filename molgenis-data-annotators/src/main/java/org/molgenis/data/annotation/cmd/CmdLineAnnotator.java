@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 
@@ -74,7 +75,7 @@ public class CmdLineAnnotator
 							+ "****************************************************\n"
 							+ "* MOLGENIS Annotator, commandline interface "
 							+ implementationVersion
-							+ "*\n"
+							+ " *\n"
 							+ "****************************************************\n"
 							+ "Typical usage to annotate a VCF file:\n\n"
 							+ "java -jar CmdLineAnnotator.jar [options] [attribute names]\n"
@@ -158,25 +159,34 @@ public class CmdLineAnnotator
 	{
 		configureLogging();
 
-		OptionParser parser = parseCommandLineOptions();
-		OptionSet options = parser.parse(args);
+		OptionParser parser = createOptionParser();
+		try
+		{
+			OptionSet options = parser.parse(args);
 
-		// See http://stackoverflow.com/questions/4787719/spring-console-application-configured-using-annotations
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		JOptCommandLinePropertySource propertySource = new JOptCommandLinePropertySource(options);
+			// See http://stackoverflow.com/questions/4787719/spring-console-application-configured-using-annotations
+			AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+			JOptCommandLinePropertySource propertySource = new JOptCommandLinePropertySource(options);
 
-		ctx.getEnvironment().getPropertySources().addFirst(propertySource);
-		ctx.register(CommandLineAnnotatorConfig.class);
-		ctx.scan("org.molgenis.data.annotation", "org.molgenis.data.annotation.cmd");
-		ctx.refresh();
+			ctx.getEnvironment().getPropertySources().addFirst(propertySource);
+			ctx.register(CommandLineAnnotatorConfig.class);
+			ctx.scan("org.molgenis.data.annotation", "org.molgenis.data.annotation.cmd");
+			ctx.refresh();
 
-		CmdLineAnnotator main = ctx.getBean(CmdLineAnnotator.class);
+			CmdLineAnnotator main = ctx.getBean(CmdLineAnnotator.class);
 
-		main.run(options, parser);
-		ctx.close();
+			main.run(options, parser);
+			ctx.close();
+
+		}
+		catch (OptionException ex)
+		{
+			System.out.println(ex.getMessage());
+		}
+
 	}
 
-	protected static OptionParser parseCommandLineOptions()
+	protected static OptionParser createOptionParser()
 	{
 		OptionParser parser = new OptionParser();
 		parser.acceptsAll(asList("i", "input"), "Input VCF file").withRequiredArg().ofType(File.class);
