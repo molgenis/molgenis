@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Explanation;
 import org.apache.lucene.search.spell.StringDistance;
 import org.elasticsearch.common.base.Joiner;
@@ -113,7 +114,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 				Set<ExplainedQueryString> explanations = convertAttributeEntityToExplainedAttribute(attributeEntity,
 						sourceEntityMetaData, collectExpanedQueryMap, finalQueryRules);
 
-				boolean singleMatchHighQuality = isSingleMatchHighQuality(collectExpanedQueryMap, explanations);
+				boolean singleMatchHighQuality = isSingleMatchHighQuality(queryTerms, collectExpanedQueryMap.values(),
+						explanations);
 
 				explainedAttributes.put(attribute,
 						ExplainedAttributeMetaData.create(attribute, explanations, singleMatchHighQuality));
@@ -128,7 +130,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		return explainedAttributes;
 	}
 
-	boolean isSingleMatchHighQuality(Map<String, String> collectExpanedQueryMap,
+	boolean isSingleMatchHighQuality(Collection<String> queryTerms, Collection<String> ontologyTermQueries,
 			Iterable<ExplainedQueryString> explanations)
 	{
 		Map<String, Double> matchedTags = new HashMap<>();
@@ -138,12 +140,13 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			matchedTags.put(explanation.getTagName().toLowerCase(), explanation.getScore());
 		}
 
-		for (String querySourceLabel : collectExpanedQueryMap.values())
-		{
-			boolean allMatch = Lists.newArrayList(querySourceLabel.toLowerCase().split(",")).stream()
-					.allMatch(token -> isGoodMatch(matchedTags, token));
-			if (allMatch) return true;
-		}
+		ontologyTermQueries.removeAll(queryTerms);
+
+		if (queryTerms.size() > 0 && queryTerms.stream().anyMatch(token -> isGoodMatch(matchedTags, token))) return true;
+
+		if (ontologyTermQueries.size() > 0
+				&& ontologyTermQueries.stream().allMatch(token -> isGoodMatch(matchedTags, token))) return true;
+
 		return false;
 	}
 
@@ -167,8 +170,10 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 
 		if (null != searchTerms && !searchTerms.isEmpty())
 		{
-			ontologyTerms = ontologyService.findExcatOntologyTerms(ontologyService.getAllOntologiesIds(), searchTerms,
-					MAX_NUM_TAGS);
+			Set<String> escapedSearchTerms = searchTerms.stream().filter(StringUtils::isNotBlank)
+					.map(QueryParser::escape).collect(Collectors.toSet());
+			ontologyTerms = ontologyService.findExcatOntologyTerms(ontologyService.getAllOntologiesIds(),
+					escapedSearchTerms, MAX_NUM_TAGS);
 		}
 		else if (null == ontologyTerms || ontologyTerms.size() == 0)
 		{
@@ -196,9 +201,9 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	 */
 	public Set<String> createLexicalSearchQueryTerms(AttributeMetaData targetAttribute, Set<String> searchTerms)
 	{
-		Set<String> queryTerms = new HashSet<String>();
+		Set<String> queryTerms = new HashSet<>();
 
-		if (searchTerms != null && searchTerms.size() > 0)
+		if (searchTerms != null && !searchTerms.isEmpty())
 		{
 			queryTerms.addAll(searchTerms);
 		}

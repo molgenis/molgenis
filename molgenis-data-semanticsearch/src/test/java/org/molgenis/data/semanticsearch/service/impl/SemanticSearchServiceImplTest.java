@@ -170,20 +170,27 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 	{
 		List<ExplainedQueryString> explanations1 = Arrays.asList(ExplainedQueryString.create("height", "height",
 				"standing height", 50.0));
-		assertFalse(semanticSearchService.isSingleMatchHighQuality(ImmutableMap.of("height", "height"), explanations1));
+		assertFalse(semanticSearchService.isSingleMatchHighQuality(Sets.newHashSet("height"),
+				Sets.newHashSet("height"), explanations1));
 
-		List<ExplainedQueryString> explanations2 = Arrays.asList(ExplainedQueryString.create("height", "height",
-				"height", 100));
-		assertTrue(semanticSearchService.isSingleMatchHighQuality(
-				ImmutableMap.of("height", "height", "length", "length"), explanations2));
+		List<ExplainedQueryString> explanations2 = Arrays.asList(ExplainedQueryString.create("body length",
+				"body length", "height", 100));
+
+		assertTrue(semanticSearchService.isSingleMatchHighQuality(Sets.newHashSet("height in meter"),
+				Sets.newHashSet("height in meter", "height"), explanations2));
 
 		List<ExplainedQueryString> explanations3 = Arrays.asList(
 				ExplainedQueryString.create("fasting", "fasting", "fasting", 100),
-				ExplainedQueryString.create("glucose", "glucose", "blood glucose", 50));
+				ExplainedQueryString.create("glucose", "blood glucose", "blood glucose", 50));
 
-		assertFalse(semanticSearchService.isSingleMatchHighQuality(
-				ImmutableMap.of("glucose fasting", "glucose fasting", "fasting,glucose", "fasting,glucose"),
-				explanations3));
+		assertFalse(semanticSearchService.isSingleMatchHighQuality(Sets.newHashSet("fasting glucose"),
+				Sets.newHashSet("fasting glucose", "fasting", "blood glucose"), explanations3));
+
+		List<ExplainedQueryString> explanations4 = Arrays.asList(ExplainedQueryString.create("number of", "number of",
+				"number", 100));
+
+		assertFalse(semanticSearchService.isSingleMatchHighQuality(Sets.newHashSet("number of cigarette smoked"),
+				Sets.newHashSet("number of cigarette smoked", "number of"), explanations4));
 	}
 
 	@Test
