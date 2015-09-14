@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 
@@ -62,12 +63,20 @@ public class CmdLineAnnotator
 
 		if (!options.has("annotator") || options.has("help"))
 		{
+
+			String implementationVersion = getClass().getPackage().getImplementationVersion();
+			if (implementationVersion == null)
+			{
+				implementationVersion = "";
+			}
+
 			System.out
 					.println("\n"
-							+ "*********************************************\n"
-							+ "* MOLGENIS Annotator, commandline interface *\n"
-							+ "*********************************************\n"
-							+ "\n"
+							+ "****************************************************\n"
+							+ "* MOLGENIS Annotator, commandline interface "
+							+ implementationVersion
+							+ " *\n"
+							+ "****************************************************\n"
 							+ "Typical usage to annotate a VCF file:\n\n"
 							+ "java -jar CmdLineAnnotator.jar [options] [attribute names]\n"
 							+ "Example: java -Xmx4g -jar CmdLineAnnotator.jar -v -a gonl -s GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ -i Cardio.vcf -o Cardio_gonl.vcf GoNL_GTC GoNL_AF\n"
@@ -150,25 +159,34 @@ public class CmdLineAnnotator
 	{
 		configureLogging();
 
-		OptionParser parser = parseCommandLineOptions();
-		OptionSet options = parser.parse(args);
+		OptionParser parser = createOptionParser();
+		try
+		{
+			OptionSet options = parser.parse(args);
 
-		// See http://stackoverflow.com/questions/4787719/spring-console-application-configured-using-annotations
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		JOptCommandLinePropertySource propertySource = new JOptCommandLinePropertySource(options);
+			// See http://stackoverflow.com/questions/4787719/spring-console-application-configured-using-annotations
+			AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+			JOptCommandLinePropertySource propertySource = new JOptCommandLinePropertySource(options);
 
-		ctx.getEnvironment().getPropertySources().addFirst(propertySource);
-		ctx.register(CommandLineAnnotatorConfig.class);
-		ctx.scan("org.molgenis.data.annotation", "org.molgenis.data.annotation.cmd");
-		ctx.refresh();
+			ctx.getEnvironment().getPropertySources().addFirst(propertySource);
+			ctx.register(CommandLineAnnotatorConfig.class);
+			ctx.scan("org.molgenis.data.annotation", "org.molgenis.data.annotation.cmd");
+			ctx.refresh();
 
-		CmdLineAnnotator main = ctx.getBean(CmdLineAnnotator.class);
+			CmdLineAnnotator main = ctx.getBean(CmdLineAnnotator.class);
 
-		main.run(options, parser);
-		ctx.close();
+			main.run(options, parser);
+			ctx.close();
+
+		}
+		catch (OptionException ex)
+		{
+			System.out.println(ex.getMessage());
+		}
+
 	}
 
-	protected static OptionParser parseCommandLineOptions()
+	protected static OptionParser createOptionParser()
 	{
 		OptionParser parser = new OptionParser();
 		parser.acceptsAll(asList("i", "input"), "Input VCF file").withRequiredArg().ofType(File.class);
@@ -178,15 +196,13 @@ public class CmdLineAnnotator
 		parser.acceptsAll(asList("o", "output"), "Output VCF file").requiredIf("input").withRequiredArg()
 				.ofType(File.class);
 		parser.acceptsAll(asList("v", "validate"), "Use VCF validator on the output file");
-		parser.acceptsAll(asList("p", "perl-location"), "Location of the perl executable").withRequiredArg()
-				.ofType(String.class)
-				.defaultsTo(File.separator + "usr" + File.separator + "bin" + File.separator + "perl");
-		parser.acceptsAll(asList("t", "vcf-tools-dir"), "Location of the vcf-tools directory")
+		parser.acceptsAll(asList("t", "vcf-validator-location"),
+				"Location of the vcf-validator executable from the vcf-tools suite")
 				.withRequiredArg()
 				.ofType(String.class)
 				.defaultsTo(
 						System.getProperty("user.home") + File.separator + ".molgenis" + File.separator + "vcf-tools"
-								+ File.separator);
+								+ File.separator + "bin" + File.separator + "vcf-validator");
 		parser.acceptsAll(asList("h", "help"), "Prints this help text");
 		parser.acceptsAll(asList("r", "replace"),
 				"Enables output file override, replacing a file with the same name as the argument for the -o option");
