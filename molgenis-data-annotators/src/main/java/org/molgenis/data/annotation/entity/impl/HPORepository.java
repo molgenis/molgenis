@@ -1,9 +1,11 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -22,10 +24,10 @@ import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 
+import com.google.common.collect.Iterables;
+
 import au.com.bytecode.opencsv.CSVParser;
 import au.com.bytecode.opencsv.CSVReader;
-
-import com.google.common.collect.Iterables;
 
 public class HPORepository extends AbstractRepository
 {
@@ -99,7 +101,9 @@ public class HPORepository extends AbstractRepository
 		{
 			entitiesByGeneSymbol = new LinkedHashMap<>();
 
-			try (CSVReader csvReader = new CSVReader(new FileReader(file), '\t', CSVParser.DEFAULT_QUOTE_CHARACTER, 1))
+			try (CSVReader csvReader = new CSVReader(
+					new InputStreamReader(new FileInputStream(file), Charset.forName("UTF-8")), '\t',
+					CSVParser.DEFAULT_QUOTE_CHARACTER, 1))
 			{
 				String[] values = csvReader.readNext();
 				while (values != null)

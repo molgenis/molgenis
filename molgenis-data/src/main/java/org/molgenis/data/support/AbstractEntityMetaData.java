@@ -222,8 +222,10 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 		if (idAttribute != null)
 		{
 			AttributeMetaData att = getAttribute(idAttribute);
-			if (att == null) throw new RuntimeException(getName() + ".getIdAttribute() failed: '" + idAttribute
-					+ "' unknown");
+			if (att == null)
+			{
+				throw new RuntimeException(getName() + ".getIdAttribute() failed: '" + idAttribute + "' unknown");
+			}
 			idAttributeMetaData = att;
 		}
 		if (idAttributeMetaData == null)
@@ -237,7 +239,7 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 				}
 			}
 
-			if (getExtends() != null)
+			if (idAttributeMetaData == null && getExtends() != null)
 			{
 				idAttributeMetaData = getExtends().getIdAttribute();
 			}
@@ -262,8 +264,10 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 		if (labelAttribute != null)
 		{
 			AttributeMetaData att = getAttribute(labelAttribute);
-			if (att == null) throw new MolgenisDataException("getLabelAttribute() failed: '" + labelAttribute
-					+ "' unknown");
+			if (att == null)
+			{
+				throw new MolgenisDataException("getLabelAttribute() failed: '" + labelAttribute + "' unknown");
+			}
 
 			return att;
 		}

@@ -1,10 +1,11 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Arrays.stream;
+import static org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm.STOPWORDSLIST;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,18 +14,14 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
-import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.string.Stemmer;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.OntologyTerm;
@@ -34,13 +31,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 public class SemanticSearchServiceHelper
 {
-	private final OntologyTagService ontologyTagService;
-
 	private final TermFrequencyService termFrequencyService;
 
 	private final DataService dataService;
@@ -49,79 +43,45 @@ public class SemanticSearchServiceHelper
 
 	private final Stemmer stemmer = new Stemmer();
 
-	public static final Set<String> STOP_WORDS;
-
 	public static final int MAX_NUM_TAGS = 3;
 
-	static
-	{
-		STOP_WORDS = new HashSet<String>(Arrays.asList("a", "you", "about", "above", "after", "again", "against",
-				"all", "am", "an", "and", "any", "are", "aren't", "as", "at", "be", "because", "been", "before",
-				"being", "below", "between", "both", "but", "by", "can't", "cannot", "could", "couldn't", "did",
-				"didn't", "do", "does", "doesn't", "doing", "don't", "down", "during", "each", "few", "for", "from",
-				"further", "had", "hadn't", "has", "hasn't", "have", "haven't", "having", "he", "he'd", "he'll",
-				"he's", "her", "here", "here's", "hers", "herself", "him", "himself", "his", "how", "how's", "i",
-				"i'd", "i'll", "i'm", "i've", "if", "in", "into", "is", "isn't", "it", "it's", "its", "itself",
-				"let's", "me", "more", "most", "mustn't", "my", "myself", "no", "nor", "not", "of", "off", "on",
-				"once", "only", "or", "other", "ought", "our", "ours", "ourselves", "out", "over", "own", "same",
-				"shan't", "she", "she'd", "she'll", "she's", "should", "shouldn't", "so", "some", "such", "than",
-				"that", "that's", "the", "their", "theirs", "them", "themselves", "then", "there", "there's", "these",
-				"they", "they'd", "they'll", "they're", "they've", "this", "those", "through", "to", "too", "under",
-				"until", "up", "very", "was", "wasn't", "we", "we'd", "we'll", "we're", "we've", "were", "weren't",
-				"what", "what's", "when", "when's", "where", "where's", "which", "while", "who", "who's", "whom",
-				"why", "why's", "with", "won't", "would", "wouldn't", "you", "you'd", "you'll", "you're", "you've",
-				"your", "yours", "yourself", "yourselves", "many", ")", "("));
-	}
-
 	@Autowired
-	public SemanticSearchServiceHelper(OntologyTagService ontologyTagService, DataService dataService,
-			OntologyService ontologyService, TermFrequencyService termFrequencyService)
+	public SemanticSearchServiceHelper(DataService dataService, OntologyService ontologyService,
+			TermFrequencyService termFrequencyService)
 	{
-		if (null == ontologyTagService || null == dataService || null == ontologyService
-				|| null == termFrequencyService) throw new MolgenisDataException(
-				"Service is not found, please contact your application administrator");
-
-		this.dataService = dataService;
-		this.ontologyTagService = ontologyTagService;
-		this.ontologyService = ontologyService;
-		this.termFrequencyService = termFrequencyService;
+		this.dataService = checkNotNull(dataService);
+		this.ontologyService = checkNotNull(ontologyService);
+		this.termFrequencyService = checkNotNull(termFrequencyService);
 	}
 
 	/**
-	 * Create a disMaxJunc query rule based on the label and description from target attribute as well as the
-	 * information from ontology term tags
+	 * Create a disMaxJunc query rule based on the given search terms as well as the information from given ontology
+	 * terms
 	 * 
-	 * @param targetEntityMetaData
-	 * @param targetAttribute
+	 * @param ontologyTerms
+	 * @param searchTerms
+	 * 
 	 * @return disMaxJunc queryRule
 	 */
-	public QueryRule createDisMaxQueryRuleForAttribute(EntityMetaData targetEntityMetaData,
-			AttributeMetaData targetAttribute)
+	public QueryRule createDisMaxQueryRuleForAttribute(Set<String> searchTerms, Collection<OntologyTerm> ontologyTerms)
 	{
 		List<String> queryTerms = new ArrayList<String>();
 
-		if (StringUtils.isNotEmpty(targetAttribute.getLabel()))
+		if (searchTerms != null)
 		{
-			queryTerms.add(parseQueryString(targetAttribute.getLabel()));
+			searchTerms.stream().filter(searchTerm -> StringUtils.isNotBlank(searchTerm))
+					.forEach(searchTerm -> queryTerms.add(parseQueryString(searchTerm)));
 		}
-
-		if (StringUtils.isNotEmpty(targetAttribute.getDescription()))
-		{
-			queryTerms.add(parseQueryString(targetAttribute.getDescription()));
-		}
-
-		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
-				targetEntityMetaData, targetAttribute);
 
 		// Handle tags with only one ontologyterm
-		tagsForAttribute.values().stream().filter(ontologyTerm -> !ontologyTerm.getIRI().contains(",")).forEach(ot -> {
+		ontologyTerms.stream().filter(ontologyTerm -> !ontologyTerm.getIRI().contains(",")).forEach(ot -> {
 			queryTerms.addAll(parseOntologyTermQueries(ot));
 		});
 
 		QueryRule disMaxQueryRule = createDisMaxQueryRuleForTerms(queryTerms);
 
 		// Handle tags with multiple ontologyterms
-		tagsForAttribute.values().stream().filter(ontologyTerm -> ontologyTerm.getIRI().contains(",")).forEach(ot -> {
+		ontologyTerms.stream().filter(ontologyTerm -> ontologyTerm.getIRI().contains(",")).forEach(ot -> {
 			disMaxQueryRule.getNestedRules().add(createShouldQueryRule(ot.getIRI()));
 		});
 
@@ -218,32 +178,14 @@ public class SemanticSearchServiceHelper
 		return allTerms;
 	}
 
-	/**
-	 * This function creates a map that contains the expanded query as key and original tag label as the value. This map
-	 * allows us to trace back which tags are used in matching
-	 * 
-	 * @param targetEntityMetaData
-	 * @param targetAttribute
-	 * @return
-	 */
-	public Map<String, String> collectExpandedQueryMap(EntityMetaData targetEntityMetaData,
-			AttributeMetaData targetAttribute)
+	public Map<String, String> collectExpandedQueryMap(Set<String> queryTerms, Collection<OntologyTerm> ontologyTerms)
 	{
 		Map<String, String> expandedQueryMap = new LinkedHashMap<String, String>();
 
-		if (StringUtils.isNotEmpty(targetAttribute.getLabel()))
-		{
-			expandedQueryMap.put(stemmer.cleanStemPhrase(targetAttribute.getLabel()), targetAttribute.getLabel());
-		}
+		queryTerms.stream().filter(StringUtils::isNotBlank)
+				.forEach(queryTerm -> expandedQueryMap.put(stemmer.cleanStemPhrase(queryTerm), queryTerm));
 
-		if (StringUtils.isNotEmpty(targetAttribute.getDescription()))
-		{
-			expandedQueryMap.put(stemmer.cleanStemPhrase(targetAttribute.getDescription()),
-					targetAttribute.getDescription());
-		}
-
-		for (OntologyTerm ontologyTerm : ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute)
-				.values())
+		for (OntologyTerm ontologyTerm : ontologyTerms)
 		{
 			if (!ontologyTerm.getIRI().contains(","))
 			{
@@ -329,7 +271,7 @@ public class SemanticSearchServiceHelper
 	{
 		String regex = "[^\\p{L}'a-zA-Z0-9\\.~^]+";
 		Set<String> searchTerms = stream(description.split(regex)).map(String::toLowerCase)
-				.filter(w -> !STOP_WORDS.contains(w) && StringUtils.isNotEmpty(w)).collect(Collectors.toSet());
+				.filter(w -> !STOPWORDSLIST.contains(w) && StringUtils.isNotEmpty(w)).collect(Collectors.toSet());
 		return searchTerms;
 	}
 }

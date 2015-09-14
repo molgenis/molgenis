@@ -4,6 +4,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
@@ -30,6 +31,9 @@ public class SemanticSearchConfig
 	DataService dataService;
 
 	@Autowired
+	MetaDataService metaDataService;
+
+	@Autowired
 	OntologyService ontologyService;
 
 	@Autowired
@@ -44,7 +48,7 @@ public class SemanticSearchConfig
 	@Bean
 	public SemanticSearchServiceHelper semanticSearchServiceHelper()
 	{
-		return new SemanticSearchServiceHelper(ontologyTagService(), dataService, ontologyService, termFrequencyService);
+		return new SemanticSearchServiceHelper(dataService, ontologyService, termFrequencyService);
 	}
 
 	@Bean
@@ -56,7 +60,8 @@ public class SemanticSearchConfig
 	@Bean
 	public SemanticSearchService semanticSearchService()
 	{
-		return new SemanticSearchServiceImpl();
+		return new SemanticSearchServiceImpl(dataService, ontologyService, metaDataService,
+				semanticSearchServiceHelper(), elasticSearchExplainService());
 	}
 
 	@Bean

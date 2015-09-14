@@ -37,7 +37,7 @@
 				modal: false,
 				enableOptionalFilter: true,
 				enableFormIndex: true,
-				enableAlertMessageInFormIndex: true,
+				enableAlertMessageInFormIndex: false,
 				colOffset: 3,
 				saveOnBlur: false,
 				showHidden: false,
@@ -429,7 +429,8 @@
 			var target = e.target;
 			
 			_.each(this.state.entity.allAttributes, function(attr) {
-				if (attr.fieldType !== 'COMPOUND') {
+				if ((attr.visible === true) && attr.fieldType !== 'COMPOUND') {
+					
 					var p = new Promise(function(resolve, reject) {
 						this._validate(attr, this._getValue(this.state.entityInstance, attr), function(validationResult) {
 							if (validationResult.valid === false) {
@@ -528,7 +529,7 @@
 			return errorMessages;
 		},
 		_validate: function(attr, value, callback) {
-            // apply validation rules, not that IE9 does not support constraint validation API 
+			// apply validation rules, not that IE9 does not support constraint validation API 
             var type = attr.fieldType;
             var nullOrUndefinedValue = value === null || value === undefined;
         	var entityInstance = _.extend({}, this.state.entityInstance);
@@ -542,7 +543,9 @@
 	            	}
 	            }
 	            else if(attr.nillable === false && (type === 'CATEGORICAL_MREF' || type === 'MREF') && (nullOrUndefinedValue || value.items.length === 0)) { // required value constraint
-	                errorMessage = 'Please enter a value.';
+	            	if (attr.visibleExpression === undefined || this._resolveBoolExpression(attr.visibleExpression, entityInstance) === true) {
+	            		errorMessage = 'Please enter a value.';
+	            	}
 	            }
 	            else if(type === 'EMAIL' && !nullOrUndefinedValue && !this._statics.REGEX_EMAIL.test(value)) {
 	                errorMessage = 'Please enter a valid email address.';

@@ -17,15 +17,15 @@ public class OneToOneCategoryAlgorithmGenerator extends CategoryAlgorithmGenerat
 	public OneToOneCategoryAlgorithmGenerator(DataService dataService)
 	{
 		super(dataService);
-		lexicalCategoryMapper = new LexicalCategoryMapper();
-		frequencyCategoryMapper = new FrequencyCategoryMapper();
+
+		this.lexicalCategoryMapper = new LexicalCategoryMapper();
+		this.frequencyCategoryMapper = new FrequencyCategoryMapper();
 	}
 
 	@Override
 	public boolean isSuitable(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)
 	{
-		return sourceAttributes.size() == 1 && isAttributeCategorical(targetAttribute)
-				&& isAttributeCategorical(sourceAttributes.get(0));
+		return sourceAttributes.size() == 1;
 	}
 
 	@Override

@@ -27,14 +27,13 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 	}
 
 	@Override
-	boolean isSuitable(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)
+	public boolean isSuitable(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)
 	{
-		return sourceAttributes.size() > 1 && isAttributeCategorical(targetAttribute)
-				&& sourceAttributes.stream().allMatch(this::isAttributeCategorical);
+		return sourceAttributes.size() > 1;
 	}
 
 	@Override
-	String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)
+	public String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 
