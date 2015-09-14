@@ -158,7 +158,7 @@ public class CmdLineAnnotator
 	{
 		configureLogging();
 
-		OptionParser parser = parseCommandLineOptions();
+		OptionParser parser = createOptionParser();
 		OptionSet options = parser.parse(args);
 
 		// See http://stackoverflow.com/questions/4787719/spring-console-application-configured-using-annotations
@@ -176,7 +176,7 @@ public class CmdLineAnnotator
 		ctx.close();
 	}
 
-	protected static OptionParser parseCommandLineOptions()
+	protected static OptionParser createOptionParser()
 	{
 		OptionParser parser = new OptionParser();
 		parser.acceptsAll(asList("i", "input"), "Input VCF file").withRequiredArg().ofType(File.class);
@@ -186,15 +186,13 @@ public class CmdLineAnnotator
 		parser.acceptsAll(asList("o", "output"), "Output VCF file").requiredIf("input").withRequiredArg()
 				.ofType(File.class);
 		parser.acceptsAll(asList("v", "validate"), "Use VCF validator on the output file");
-		parser.acceptsAll(asList("p", "perl-location"), "Location of the perl executable").withRequiredArg()
-				.ofType(String.class)
-				.defaultsTo(File.separator + "usr" + File.separator + "bin" + File.separator + "perl");
-		parser.acceptsAll(asList("t", "vcf-tools-dir"), "Location of the vcf-tools directory")
+		parser.acceptsAll(asList("t", "vcf-validator-location"),
+				"Location of the vcf-validator executable from the vcf-tools suite")
 				.withRequiredArg()
 				.ofType(String.class)
 				.defaultsTo(
 						System.getProperty("user.home") + File.separator + ".molgenis" + File.separator + "vcf-tools"
-								+ File.separator);
+								+ File.separator + "bin" + File.separator + "vcf-validator");
 		parser.acceptsAll(asList("h", "help"), "Prints this help text");
 		parser.acceptsAll(asList("r", "replace"),
 				"Enables output file override, replacing a file with the same name as the argument for the -o option");

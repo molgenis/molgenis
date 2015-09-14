@@ -32,11 +32,8 @@ import org.springframework.core.convert.support.DefaultConversionService;
 @CommandLineOnlyConfiguration
 public class CommandLineAnnotatorConfig
 {
-	@Value("${perl-location:@null}")
-	private String perlLocation;
-
-	@Value("${vcf-tools-dir:@null}")
-	private String vcfToolsDirectory;
+	@Value("${vcf-validator-location:@null}")
+	private String vcfValidatorLocation;
 
 	/**
 	 * Needed to make @Value annotations with property placeholders work!
@@ -62,7 +59,7 @@ public class CommandLineAnnotatorConfig
 	@Bean
 	public VcfValidator vcfValidator()
 	{
-		return new VcfValidator(perlLocation, vcfToolsDirectory);
+		return new VcfValidator(vcfValidatorLocation);
 	}
 
 	/**
