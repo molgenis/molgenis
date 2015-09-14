@@ -91,6 +91,11 @@ public class UnitResolverImpl implements UnitResolver
 			}
 		}
 
+		if (isUnitEmpty(unit))
+		{
+			unit = null;
+		}
+
 		return unit;
 	}
 
@@ -156,10 +161,15 @@ public class UnitResolverImpl implements UnitResolver
 		Set<String> tokens = new HashSet<>();
 		if (terms != null && terms.length > 0)
 		{
-			Sets.newHashSet(terms).stream().filter(StringUtils::isNotBlank).map(StringUtils::lowerCase)
-					.map(this::replaceIllegalChars).filter(this::notPureNumberExpression)
-					.map(UnitHelper::numberToSuperscript)
-					.forEach(term -> tokens.addAll(Sets.newHashSet(term.split("\\s+"))));
+			Sets.newHashSet(terms)
+					.stream()
+					.filter(StringUtils::isNotBlank)
+					.map(StringUtils::lowerCase)
+					.map(this::replaceIllegalChars)
+					.forEach(
+							term -> tokens.addAll(Sets.newHashSet(term.split("\\s+")).stream()
+									.filter(this::notPureNumberExpression).map(UnitHelper::numberToSuperscript)
+									.collect(Collectors.toSet())));
 
 			tokens.removeAll(NGramDistanceAlgorithm.STOPWORDSLIST);
 		}

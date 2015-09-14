@@ -48,11 +48,21 @@ public class UnitResolverImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testTokenize()
 	{
+		Set<String> tokenize = unitResolverImpl.tokenize("area density (kg/m^²)");
+		Assert.assertTrue(Sets.newHashSet("area", "density", "kg/m^²").containsAll(tokenize));
+
 		Set<String> tokenize1 = unitResolverImpl.tokenize("area density (kg/m^2)");
 		Assert.assertTrue(Sets.newHashSet("area", "density", "kg/m^²").containsAll(tokenize1));
 
 		Set<String> tokenize2 = unitResolverImpl.tokenize("area density (kg/m2)");
 		Assert.assertTrue(Sets.newHashSet("area", "density", "kg/m²").containsAll(tokenize2));
+
+		Set<String> tokenize3 = unitResolverImpl.tokenize("area 2 density2 (kg/m2)");
+		Assert.assertTrue(Sets.newHashSet("area", "density²", "kg/m²").containsAll(tokenize3));
+
+		Set<String> tokenize4 = unitResolverImpl.tokenize("area 2 density 2 (kg/m2)");
+		Assert.assertEquals(tokenize4.size(), 3);
+		Assert.assertFalse(tokenize4.containsAll(Sets.newHashSet("area", "density", "²", "kg/m²")));
 	}
 
 	@Test
@@ -65,15 +75,6 @@ public class UnitResolverImplTest extends AbstractTestNGSpringContextTests
 		Assert.assertTrue(unitResolverImpl.isUnitEmpty(unit));
 		Assert.assertTrue(unitResolverImpl.isUnitEmpty(unit1));
 		Assert.assertFalse(unitResolverImpl.isUnitEmpty(unitKg));
-	}
-
-	@Test
-	public void testNotPureNumberExpression()
-	{
-		Assert.assertFalse(unitResolverImpl.notPureNumberExpression("12"));
-		Assert.assertFalse(unitResolverImpl.notPureNumberExpression("345634512"));
-		Assert.assertTrue(unitResolverImpl.notPureNumberExpression("345634512f"));
-		Assert.assertTrue(unitResolverImpl.notPureNumberExpression("fsdfds"));
 	}
 
 	@Test
