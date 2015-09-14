@@ -83,6 +83,7 @@ public class VcfValidator
 					{
 						errorCount = Integer.parseInt(m.group(1));
 					}
+				}
 			}
 
 			bufferedWriter.write("\n##################################################\n");
