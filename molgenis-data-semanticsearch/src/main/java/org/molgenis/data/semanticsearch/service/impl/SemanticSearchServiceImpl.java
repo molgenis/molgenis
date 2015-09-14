@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -184,7 +185,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 				allOntologiesIds.remove(unitOntology.getId());
 			}
 			Hit<OntologyTerm> ontologyTermHit = findTags(targetAttribute, allOntologiesIds);
-			ontologyTerms = Arrays.asList(ontologyTermHit.getResult());
+			ontologyTerms = ontologyTermHit != null ? Arrays.asList(ontologyTermHit.getResult()) : Collections
+					.emptyList();
 		}
 
 		return findAttributes(sourceEntityMetaData, queryTerms, ontologyTerms);
