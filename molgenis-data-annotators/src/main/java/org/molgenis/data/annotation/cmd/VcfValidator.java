@@ -46,6 +46,9 @@ public class VcfValidator
 			InputStream inputStream = proc.getInputStream();
 			Scanner scanner = new Scanner(inputStream);
 
+			InputStream errorStream = proc.getErrorStream();
+			Scanner errorScanner = new Scanner(errorStream);
+
 			String line = "";
 			Integer errorCount = null;
 			Pattern p = Pattern.compile("(\\d+)\\s*errors\\s*total");
@@ -64,8 +67,17 @@ public class VcfValidator
 
 			bufferedWriter.write("### Validation report for " + vcfFile.getName() + "\n");
 			bufferedWriter.write("### Validation date: " + date + "\n");
-			while (proc.isAlive() || scanner.hasNext())
+			while (proc.isAlive() || scanner.hasNext() || errorScanner.hasNext())
 			{
+				if (errorScanner.hasNext())
+				{
+					while (errorScanner.hasNext())
+					{
+						line = errorScanner.nextLine();
+						bufferedWriter.write("ERR> " + line + "\n");
+					}
+				}
+
 				while (scanner.hasNext())
 				{
 					line = scanner.nextLine();
