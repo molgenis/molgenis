@@ -140,9 +140,15 @@ public class VcfUtils
 							formatColumn.append(sampleAttribute);
 							formatColumn.append(":");
 						}
-
-						sampleColumn.append(sample.getString(sampleAttribute));
-						sampleColumn.append(":");
+						if (sample.getString(sampleAttribute) != null)
+						{
+							sampleColumn.append(sample.getString(sampleAttribute));
+							sampleColumn.append(":");
+						}
+						else
+						{
+							sampleColumn.append(".:");
+						}
 					}
 				}
 
