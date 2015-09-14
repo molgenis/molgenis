@@ -66,7 +66,7 @@ public class UnitResolverImpl implements UnitResolver
 				}
 			}
 
-			if (unit == null)
+			if (isUnitEmpty(unit))
 			{
 				// Option 2: Search unit ontology for a match
 				OntologyTerm unitOntologyTerm = resolveUnitOntologyTerm(tokens.stream()
@@ -157,12 +157,23 @@ public class UnitResolverImpl implements UnitResolver
 		if (terms != null && terms.length > 0)
 		{
 			Sets.newHashSet(terms).stream().filter(StringUtils::isNotBlank).map(StringUtils::lowerCase)
-					.map(this::replaceIllegalChars).map(UnitHelper::numberToSuperscript)
+					.map(this::replaceIllegalChars).filter(this::notPureNumberExpression)
+					.map(UnitHelper::numberToSuperscript)
 					.forEach(term -> tokens.addAll(Sets.newHashSet(term.split("\\s+"))));
 
 			tokens.removeAll(NGramDistanceAlgorithm.STOPWORDSLIST);
 		}
 		return tokens;
+	}
+
+	boolean isUnitEmpty(Unit<? extends Quantity> unit)
+	{
+		return unit == null || (unit != null && StringUtils.isBlank(unit.toString()));
+	}
+
+	boolean notPureNumberExpression(String str)
+	{
+		return !str.matches("\\d+");
 	}
 
 	String replaceIllegalChars(String term)

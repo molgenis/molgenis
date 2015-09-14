@@ -56,6 +56,27 @@ public class UnitResolverImplTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
+	public void testIsUnitEmpty()
+	{
+		Unit<?> unit = Unit.valueOf("");
+		Unit<?> unit1 = Unit.valueOf("¹");
+		Unit<?> unitKg = Unit.valueOf("kg");
+		Assert.assertTrue(unitResolverImpl.isUnitEmpty(null));
+		Assert.assertTrue(unitResolverImpl.isUnitEmpty(unit));
+		Assert.assertTrue(unitResolverImpl.isUnitEmpty(unit1));
+		Assert.assertFalse(unitResolverImpl.isUnitEmpty(unitKg));
+	}
+
+	@Test
+	public void testNotPureNumberExpression()
+	{
+		Assert.assertFalse(unitResolverImpl.notPureNumberExpression("12"));
+		Assert.assertFalse(unitResolverImpl.notPureNumberExpression("345634512"));
+		Assert.assertTrue(unitResolverImpl.notPureNumberExpression("345634512f"));
+		Assert.assertTrue(unitResolverImpl.notPureNumberExpression("fsdfds"));
+	}
+
+	@Test
 	public void testReplaceIllegalChars()
 	{
 		Assert.assertEquals(unitResolverImpl.replaceIllegalChars("area density (kg/m^2)"), "area density  kg/m^2 ");
