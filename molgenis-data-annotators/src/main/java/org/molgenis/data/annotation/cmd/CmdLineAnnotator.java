@@ -62,12 +62,20 @@ public class CmdLineAnnotator
 
 		if (!options.has("annotator") || options.has("help"))
 		{
+
+			String implementationVersion = getClass().getPackage().getImplementationVersion();
+			if (implementationVersion == null)
+			{
+				implementationVersion = "";
+			}
+
 			System.out
 					.println("\n"
-							+ "*********************************************\n"
-							+ "* MOLGENIS Annotator, commandline interface *\n"
-							+ "*********************************************\n"
-							+ "\n"
+							+ "****************************************************\n"
+							+ "* MOLGENIS Annotator, commandline interface "
+							+ implementationVersion
+							+ "*\n"
+							+ "****************************************************\n"
 							+ "Typical usage to annotate a VCF file:\n\n"
 							+ "java -jar CmdLineAnnotator.jar [options] [attribute names]\n"
 							+ "Example: java -Xmx4g -jar CmdLineAnnotator.jar -v -a gonl -s GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ -i Cardio.vcf -o Cardio_gonl.vcf GoNL_GTC GoNL_AF\n"
