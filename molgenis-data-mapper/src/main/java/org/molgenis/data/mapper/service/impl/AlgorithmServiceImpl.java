@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -143,9 +144,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			{
 				attributeNames.add(matcher.group(1));
 			}
-
 			return attributeNames.stream().map(attributeName -> sourceEntityMetaData.getAttribute(attributeName))
-					.collect(Collectors.toSet());
+					.filter(Objects::nonNull).collect(Collectors.toSet());
 		}
 		return Collections.emptySet();
 	}
