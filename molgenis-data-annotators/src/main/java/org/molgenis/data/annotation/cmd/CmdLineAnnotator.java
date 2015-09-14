@@ -70,7 +70,7 @@ public class CmdLineAnnotator
 							+ "\n"
 							+ "Typical usage to annotate a VCF file:\n\n"
 							+ "java -jar CmdLineAnnotator.jar [options] [attribute names]\n"
-							+ "Example: java -Xmx4g -jar CmdLineAnnotator.jar -a gonl -s GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ -i Cardio.vcf -o Cardio_gonl.vcf -v GoNL_GTC GoNL_AF\n"
+							+ "Example: java -Xmx4g -jar CmdLineAnnotator.jar -v -a gonl -s GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ -i Cardio.vcf -o Cardio_gonl.vcf GoNL_GTC GoNL_AF\n"
 							+ "\n" + "----------------------------------------------------\n\n"
 							+ "Available options:\n");
 
@@ -79,10 +79,8 @@ public class CmdLineAnnotator
 			System.out
 					.println("\n"
 							+ "----------------------------------------------------\n\n"
-							+ "To get detailed description and installation instructions for a specific annotator:\n"
+							+ "To get detailed description for a specific annotator:\n"
 							+ "java -jar CmdLineAnnotator.jar -a [Annotator]\n\n"
-							+ "To check if an annotator is ready for use:\n"
-							+ "java -jar CmdLineAnnotator.jar -a [Annotator] -s [Annotation source file]\n\n"
 							+ "To select only a few columns from an annotation source instead of everything, use:\n"
 							+ "java -jar CmdLineAnnotator.jar -a [Annotator] -s [Annotation source file] <column1> <column2>\n\n"
 							+ "----------------------------------------------------\n");
@@ -132,7 +130,16 @@ public class CmdLineAnnotator
 		File outputVCFFile = (File) options.valueOf("output");
 		if (outputVCFFile.exists())
 		{
-			System.out.println("WARNING: Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
+			if (options.has("replace"))
+			{
+				System.out.println("Override enabled, replacing existing vcf with specified output: "
+						+ outputVCFFile.getAbsolutePath());
+			}
+			else
+			{
+				System.out.println("Output file already exists, please enter a different output name!");
+				return;
+			}
 		}
 
 		annotator.getCmdLineAnnotatorSettingsConfigurer().addSettings(annotationSourceFile.getAbsolutePath());
@@ -181,6 +188,8 @@ public class CmdLineAnnotator
 						System.getProperty("user.home") + File.separator + ".molgenis" + File.separator + "vcf-tools"
 								+ File.separator);
 		parser.acceptsAll(asList("h", "help"), "Prints this help text");
+		parser.acceptsAll(asList("r", "replace"),
+				"Enables output file override, replacing a file with the same name as the argument for the -o option");
 
 		return parser;
 	}
