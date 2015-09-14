@@ -213,6 +213,12 @@ public class VcfUtilsTest
 	}
 
 	@Test
+	public void createId()
+	{
+		assertEquals(VcfUtils.createId(entity1), "yCiiynjHRAtJPcdn7jFDGA");
+	}
+
+	@Test
 	public void vcfWriterRoundtripTest() throws IOException, MolgenisInvalidFormatException
 	{
 		final File outputVCFFile = File.createTempFile("output", ".vcf");

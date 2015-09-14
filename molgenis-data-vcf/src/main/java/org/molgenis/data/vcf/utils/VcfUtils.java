@@ -8,6 +8,9 @@ import static org.molgenis.data.vcf.VcfRepository.REF;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,6 +32,8 @@ import org.molgenis.data.vcf.datastructures.Sample;
 import org.molgenis.data.vcf.datastructures.Trio;
 import org.molgenis.vcf.meta.VcfMetaInfo;
 
+import com.google.common.io.BaseEncoding;
+
 public class VcfUtils
 {
 	public static final String TAB = "\t";
@@ -41,16 +46,32 @@ public class VcfUtils
 	 */
 	public static String createId(Entity vcfEntity)
 	{
-		StringBuilder id = new StringBuilder();
-		id.append(StringUtils.strip(vcfEntity.get(CHROM).toString()));
-		id.append("_");
-		id.append(StringUtils.strip(vcfEntity.get(POS).toString()));
-		id.append("_");
-		id.append(StringUtils.strip(vcfEntity.get(REF).toString()));
-		id.append("_");
-		id.append(StringUtils.strip(vcfEntity.get(ALT).toString()));
+		StringBuilder strBuilder = new StringBuilder();
+		strBuilder.append(StringUtils.strip(vcfEntity.get(CHROM).toString()));
+		strBuilder.append("_");
+		strBuilder.append(StringUtils.strip(vcfEntity.get(POS).toString()));
+		strBuilder.append("_");
+		strBuilder.append(StringUtils.strip(vcfEntity.get(REF).toString()));
+		strBuilder.append("_");
+		strBuilder.append(StringUtils.strip(vcfEntity.get(ALT).toString()));
+		String idStr = strBuilder.toString();
 
-		return id.toString();
+		// use MD5 hash to prevent ids that are too long
+		MessageDigest messageDigest;
+		try
+		{
+			messageDigest = MessageDigest.getInstance("MD5");
+		}
+		catch (NoSuchAlgorithmException e)
+		{
+			throw new RuntimeException(e);
+		}
+		byte[] md5Hash = messageDigest.digest(idStr.getBytes(Charset.forName("UTF-8")));
+
+		// convert MD5 hash to string ids that can be safely used in URLs
+		String id = BaseEncoding.base64Url().omitPadding().encode(md5Hash);
+
+		return id;
 	}
 
 	public static String convertToVCF(Entity vcfEntity) throws MolgenisDataException

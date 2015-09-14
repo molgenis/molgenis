@@ -64,9 +64,9 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 		AttributeMetaData attributeMetaDataPos = new DefaultAttributeMetaData(VcfRepository.POS,
 				MolgenisFieldTypes.FieldTypeEnum.LONG);
 		AttributeMetaData attributeMetaDataRef = new DefaultAttributeMetaData(VcfRepository.REF,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
+				MolgenisFieldTypes.FieldTypeEnum.TEXT);
 		AttributeMetaData attributeMetaDataAlt = new DefaultAttributeMetaData(VcfRepository.ALT,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
+				MolgenisFieldTypes.FieldTypeEnum.TEXT);
 		AttributeMetaData attributeMetaDataCantAnnotateChrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
 				MolgenisFieldTypes.FieldTypeEnum.LONG);
 
@@ -197,8 +197,8 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 		public MolgenisSettings molgenisSettings()
 		{
 			MolgenisSettings settings = mock(MolgenisSettings.class);
-			when(settings.getProperty(CaddAnnotator.CADD_FILE_LOCATION_PROPERTY)).thenReturn(
-					ResourceUtils.getFile(getClass(), "/cadd_test.vcf.gz").getPath());
+			when(settings.getProperty(CaddAnnotator.CADD_FILE_LOCATION_PROPERTY))
+					.thenReturn(ResourceUtils.getFile(getClass(), "/cadd_test.vcf.gz").getPath());
 			return settings;
 		}
 

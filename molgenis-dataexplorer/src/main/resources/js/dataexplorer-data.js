@@ -8,7 +8,7 @@
  */
 (function($, molgenis) {
 	"use strict";
-	
+
 	molgenis.dataexplorer = molgenis.dataexplorer || {};
 	var self = molgenis.dataexplorer.data = molgenis.dataexplorer.data || {};
 	self.createDataTable = createDataTable;
@@ -17,7 +17,7 @@
     self.setGenomeBrowserAttributes = setGenomeBrowserAttributes;
     self.setGenomeBrowserSettings = setGenomeBrowserSettings;
     self.setGenomeBrowserEntities = setGenomeBrowserEntities;
-    
+
 	var restApi = new molgenis.RestClient();
 	var genomeBrowser;
 	var genomeEntities;
@@ -30,27 +30,27 @@
     var featureInfoMap = {};
 
     var Table, tableSort;
-    
+
     $(document).on('dataChange.diseasematcher', function(e) {
     	if (e.namespace !== 'data' && Table){
     		Table.setProps({query: getQuery()});
     	}
 	});
-    
+
     /**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
     function setGenomeBrowserSettings(settings) {
     	genomeBrowserSettings = settings;
     }
-    
+
     /**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
     function setGenomeBrowserEntities(genomeEntitiesKeyValues) {
     	genomeEntities = genomeEntitiesKeyValues;
     }
-    
+
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
@@ -64,7 +64,7 @@
 			onRowDelete: onDataChange,
 			onRowEdit: onDataChange,
 			onRowInspect: onRowInspect,
-			onRowClick: doShowGenomeBrowser() ? onRowClick : null,
+			onRowClick: (doShowGenomeBrowser() && isGenomeBrowserAttributesSelected()) ? onRowClick : null,
 			onSort: function(e) {
 				tableSort = {
 					'orders' : [ {
@@ -75,18 +75,18 @@
 			}
 		}), $('#data-table-container')[0]);
 	}
-	
+
 	function onDataChange() {
 		$(document).trigger('dataChange.data');
 	}
-	
+
 	function onRowInspect(e) {
 		var entityId = e.id;
 		var entityName = e.name;
-		
+
 		$('#entityReport').load("dataexplorer/details",{entityName: entityName, entityId: entityId}, function() {
 			  $('#entityReportModal').modal("show");
-			  
+
 			  // Button event handler when a button is placed inside an entity report ftl
 			  $(".modal-body button", "#entityReport").on('click', function() {
 					$.download($(this).data('href'), {entityName: entityName, entityId: entityId}, "GET");
@@ -97,7 +97,7 @@
 	function onRowClick(entity) {
 		genomeBrowser.setLocation(entity[genomebrowserChromosomeAttribute.name],entity[genomebrowserStartAttribute.name]-50,entity[genomebrowserStartAttribute.name]+50);
 	}
-	
+
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
@@ -106,16 +106,16 @@
 			// Workaround, see http://stackoverflow.com/a/9970672
 			'dataRequest' : JSON.stringify(createDownloadDataRequest())
 		});
-		
+
 		$('#downloadModal').modal('hide');
 	}
-	
+
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
 	function createDownloadDataRequest() {
 		var entityQuery = getQuery();
-		
+
 		var dataRequest = {
 			entityName : getEntity().name,
 			attributeNames: [],
@@ -128,9 +128,9 @@
 		};
 
 		dataRequest.query.sort = tableSort;
-		
+
 		var colAttributes = molgenis.getAtomicAttributes(getAttributes(), restApi);
-		
+
 		$.each(colAttributes, function() {
 			var feature = this;
 			dataRequest.attributeNames.push(feature.name);
@@ -147,6 +147,12 @@
 		// dalliance is not compatible with IE9
 		return molgenis.ie9 !== true && genomebrowserStartAttribute !== undefined && genomebrowserChromosomeAttribute !== undefined && molgenis.dataexplorer.settings["data_genome_browser"] !== false;
 	}
+
+	//used to determine if the rowclick should be available
+	function isGenomeBrowserAttributesSelected(){
+    		var attributes = molgenis.dataexplorer.getSelectedAttributes();
+            return (attributes.indexOf(genomebrowserChromosomeAttribute)!=-1) && (attributes.indexOf(genomebrowserStartAttribute)!=-1);
+    }
 
     function getAttributeFromList(attributesString){
         var result;
@@ -170,7 +176,7 @@
             showHighlight = specificSettings.showHighlight;
         }
 		var settings = $.extend(true, {}, genomeBrowserSettings, specificSettings || {});
-		
+
         $('#genomebrowser').css('display', 'block');
         $('#genomebrowser').css('visibility', 'visible');
 
@@ -182,7 +188,7 @@
             desc : entity.description,
             stylesheet_uri : '/css/selected_dataset-track.xml'
         };
-        
+
         settings.sources.push(dallianceTrack);
         // add reference tracks for all other genomic entities
         $.each(genomeEntities, function(i, refEntity) {
@@ -196,7 +202,7 @@
                 settings.sources.push(dallianceTrack);
             }
         });
-            
+
         settings.registry = 'https://www.dasregistry.org/das/sources';
         settings.prefix = 'https://www.biodalliance.org/release-0.13/';
         genomeBrowser = new Browser(settings);
@@ -332,7 +338,7 @@
 	function getAttributesTree() {
 		return molgenis.dataexplorer.getSelectedAttributesTree();
 	}
-	
+
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
@@ -356,7 +362,12 @@
 	$(function() {
 		$(document).on('changeAttributeSelection.data', function(e, data) {
 			if(Table) {
-				Table.setProps({attrs: data.attributesTree});
+				Table.setProps(
+					{
+						attrs: data.attributesTree,
+						onRowClick: (doShowGenomeBrowser() && isGenomeBrowserAttributesSelected()) ? onRowClick : null
+					}
+				);
 			}
 		});
 
@@ -418,7 +429,7 @@
 				}
 			}
 		});
-		
+
 		$('form[name=galaxy-export-form]').submit(function(e) {
 			e.preventDefault();
 			if($(this).valid()) {
@@ -434,7 +445,7 @@
 				});
 			}
 		});
-		
+
 		$('#genomebrowser-filter-button').click(function() {
 			setDallianceFilter();
 		});
