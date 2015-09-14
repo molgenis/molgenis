@@ -45,6 +45,7 @@ public class VcfRepository extends AbstractRepository
 	public static final String ID = "ID";
 	public static final String INTERNAL_ID = "INTERNAL_ID";
 	public static final String INFO = "INFO";
+	public static final String FORMAT_GT = "GT";
 	public static final String SAMPLES = "SAMPLES_ENTITIES";
 	public static final String NAME = "NAME";
 	public static final String ORIGINAL_NAME = "ORIGINAL_NAME";
