@@ -69,15 +69,11 @@ public class VcfValidator
 			bufferedWriter.write("### Validation date: " + date + "\n");
 			while (proc.isAlive() || scanner.hasNext() || errorScanner.hasNext())
 			{
-				if (errorScanner.hasNext())
+				while (errorScanner.hasNext())
 				{
-					while (errorScanner.hasNext())
-					{
-						line = errorScanner.nextLine();
-						bufferedWriter.write("ERR> " + line + "\n");
-					}
+					line = errorScanner.nextLine();
+					bufferedWriter.write("ERR> " + line + "\n");
 				}
-
 				while (scanner.hasNext())
 				{
 					line = scanner.nextLine();
@@ -87,7 +83,6 @@ public class VcfValidator
 					{
 						errorCount = Integer.parseInt(m.group(1));
 					}
-				}
 			}
 
 			bufferedWriter.write("\n##################################################\n");
