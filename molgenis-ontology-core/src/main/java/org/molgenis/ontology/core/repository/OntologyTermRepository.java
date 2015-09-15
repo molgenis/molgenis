@@ -8,6 +8,7 @@ import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
@@ -87,7 +89,7 @@ public class OntologyTermRepository
 
 	private boolean isOntologyTermExactMatch(Set<String> terms, OntologyTerm ontologyTerm)
 	{
-		Set<String> lowerCaseSearchTerms = terms.stream().map(term -> term.toLowerCase()).collect(Collectors.toSet());
+		Set<String> lowerCaseSearchTerms = terms.stream().map(StringUtils::lowerCase).collect(Collectors.toSet());
 		for (String synonym : ontologyTerm.getSynonyms())
 		{
 			if (lowerCaseSearchTerms.contains(synonym.toLowerCase()))
@@ -130,6 +132,23 @@ public class OntologyTermRepository
 		Iterable<Entity> termEntities = dataService.findAll(ENTITY_NAME, new QueryImpl(rules).pageSize(pageSize));
 
 		return Lists.newArrayList(Iterables.transform(termEntities, OntologyTermRepository::toOntologyTerm));
+	}
+
+	public List<OntologyTerm> getAllOntologyTerms(String ontologyId)
+	{
+		Entity ontologyEntity = dataService.findOne(OntologyMetaData.ENTITY_NAME,
+				new QueryImpl().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyId));
+
+		if (ontologyEntity != null)
+		{
+			Iterable<Entity> ontologyTermEntities = dataService.findAll(OntologyTermMetaData.ENTITY_NAME,
+					new QueryImpl().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity).pageSize(Integer.MAX_VALUE));
+
+			return Lists
+					.newArrayList(Iterables.transform(ontologyTermEntities, OntologyTermRepository::toOntologyTerm));
+		}
+
+		return Collections.emptyList();
 	}
 
 	/**

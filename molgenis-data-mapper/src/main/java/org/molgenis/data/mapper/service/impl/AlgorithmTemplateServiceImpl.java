@@ -12,7 +12,7 @@ import java.util.stream.StreamSupport;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.script.Script;
 import org.molgenis.script.ScriptParameter;
@@ -31,19 +31,19 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 	}
 
 	@Override
-	public Stream<AlgorithmTemplate> find(Map<AttributeMetaData, Iterable<ExplainedQueryString>> attrMatches)
+	public Stream<AlgorithmTemplate> find(Map<AttributeMetaData, ExplainedAttributeMetaData> attrMatches)
 	{
 		// get all algorithm templates
 		Iterable<Script> jsScripts = dataService.findAll(ENTITY_NAME,
 				new QueryImpl().eq(TYPE, SCRIPT_TYPE_JAVASCRIPT_MAGMA), Script.class);
 
 		// select all algorithm templates that can be used with target and sources
-		return StreamSupport.stream(jsScripts.spliterator(), false)
-				.flatMap(script -> toAlgorithmTemplate(script, attrMatches));
+		return StreamSupport.stream(jsScripts.spliterator(), false).flatMap(
+				script -> toAlgorithmTemplate(script, attrMatches));
 	}
 
 	private Stream<AlgorithmTemplate> toAlgorithmTemplate(Script script,
-			Map<AttributeMetaData, Iterable<ExplainedQueryString>> attrMatches)
+			Map<AttributeMetaData, ExplainedAttributeMetaData> attrMatches)
 	{
 		// find attribute for each parameter
 		boolean paramMatch = true;
@@ -69,10 +69,12 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 	}
 
 	private AttributeMetaData mapParamToAttribute(ScriptParameter param,
-			Map<AttributeMetaData, Iterable<ExplainedQueryString>> attrMatches)
+			Map<AttributeMetaData, ExplainedAttributeMetaData> attrMatches)
 	{
-		return attrMatches.entrySet().stream()
-				.filter(entry -> StreamSupport.stream(entry.getValue().spliterator(), false)
+		return attrMatches
+				.entrySet()
+				.stream()
+				.filter(entry -> StreamSupport.stream(entry.getValue().getExplainedQueryStrings().spliterator(), false)
 						.anyMatch(explain -> explain.getTagName().equalsIgnoreCase(param.getName())))
 				.map(entry -> entry.getKey()).findFirst().orElse(null);
 	}

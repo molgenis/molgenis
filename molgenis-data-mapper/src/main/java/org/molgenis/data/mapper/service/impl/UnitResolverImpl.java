@@ -8,13 +8,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.Unit;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapper.service.UnitResolver;
+import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
@@ -22,12 +26,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import utils.UnitHelper;
+
+import com.google.common.collect.Sets;
+
 public class UnitResolverImpl implements UnitResolver
 {
 	private static final Logger LOG = LoggerFactory.getLogger(UnitResolverImpl.class);
 
 	static final String UNIT_ONTOLOGY_IRI = "http://purl.obolibrary.org/obo/uo.owl";
-	private static final Pattern PATTERN_BETWEEN_PARENTHESIS = Pattern.compile("\\(([^\\)]+)");
 
 	private final OntologyService ontologyService;
 
@@ -40,24 +47,13 @@ public class UnitResolverImpl implements UnitResolver
 	@Override
 	public Unit<? extends Quantity> resolveUnit(AttributeMetaData attr, EntityMetaData entityMeta)
 	{
-		// extract text between parenthesis from attribute
-		Set<String> terms = new HashSet<String>();
-		String label = attr.getLabel();
-		if (label != null)
-		{
-			extractCandidateUnitTerms(label, terms);
-		}
-		String description = attr.getDescription();
-		if (description != null)
-		{
-			extractCandidateUnitTerms(description, terms);
-		}
+		Set<String> tokens = tokenize(attr.getLabel(), attr.getDescription());
 
 		// Option 1: Check if a term matches a unit
 		Unit<? extends Quantity> unit = null;
-		if (!terms.isEmpty())
+		if (!tokens.isEmpty())
 		{
-			for (String term : terms)
+			for (String term : tokens)
 			{
 				try
 				{
@@ -70,10 +66,12 @@ public class UnitResolverImpl implements UnitResolver
 				}
 			}
 
-			if (unit == null)
+			if (isUnitEmpty(unit))
 			{
 				// Option 2: Search unit ontology for a match
-				OntologyTerm unitOntologyTerm = resolveUnitOntologyTerm(terms);
+				OntologyTerm unitOntologyTerm = resolveUnitOntologyTerm(tokens.stream()
+						.map(this::convertNumberToOntologyTermStyle).collect(Collectors.toSet()));
+
 				if (unitOntologyTerm != null)
 				{
 					// try label + synonym labels until hit
@@ -92,19 +90,25 @@ public class UnitResolverImpl implements UnitResolver
 				}
 			}
 		}
+
+		if (isUnitEmpty(unit))
+		{
+			unit = null;
+		}
+
 		return unit;
 	}
 
-	private OntologyTerm resolveUnitOntologyTerm(Set<String> terms)
+	private OntologyTerm resolveUnitOntologyTerm(Set<String> tokens)
 	{
 		OntologyTerm unitOntologyTerm;
 		Ontology unitOntology = ontologyService.getOntology(UNIT_ONTOLOGY_IRI);
 		if (unitOntology != null)
 		{
-			if (!terms.isEmpty())
+			if (!tokens.isEmpty())
 			{
 				List<String> ontologyIds = Arrays.asList(unitOntology.getId());
-				List<OntologyTerm> ontologyTerms = ontologyService.findOntologyTerms(ontologyIds, terms,
+				List<OntologyTerm> ontologyTerms = ontologyService.findExcatOntologyTerms(ontologyIds, tokens,
 						Integer.MAX_VALUE);
 				if (ontologyTerms != null && !ontologyTerms.isEmpty())
 				{
@@ -136,22 +140,54 @@ public class UnitResolverImpl implements UnitResolver
 		return unitOntologyTerm;
 	}
 
-	/**
-	 * Extracts strings between parenthesis (e.g. weight (cm) results in term 'cm')
-	 * 
-	 * @param str
-	 * @param terms
-	 */
-	private void extractCandidateUnitTerms(String str, Set<String> terms)
+	String convertNumberToOntologyTermStyle(String term)
 	{
-		Matcher matcher = PATTERN_BETWEEN_PARENTHESIS.matcher(str);
+		term = UnitHelper.superscriptToNumber(term.replaceAll("\\^", StringUtils.EMPTY));
+		Pattern pattern = Pattern.compile("\\w+(\\d+)");
+		Matcher matcher = pattern.matcher(term);
 
-		for (int pos = -1; matcher.find(pos + 1);)
+		if (matcher.find())
 		{
-			pos = matcher.start();
-			String rawTerm = matcher.group(1);
-			String term = rawTerm.replaceAll("m2", "m²").replaceAll("m3", "m³").replaceAll("s2", "s²");
-			terms.add(term);
+			String group = matcher.group(1);
+			String modifiedPart = group.trim();
+			modifiedPart = "^[" + modifiedPart + "]";
+			term = term.replaceAll(group, modifiedPart);
 		}
+		return QueryParser.escape(term);
+	}
+
+	Set<String> tokenize(String... terms)
+	{
+		Set<String> tokens = new HashSet<>();
+		if (terms != null && terms.length > 0)
+		{
+			Sets.newHashSet(terms)
+					.stream()
+					.filter(StringUtils::isNotBlank)
+					.map(StringUtils::lowerCase)
+					.map(this::replaceIllegalChars)
+					.forEach(
+							term -> tokens.addAll(Sets.newHashSet(term.split("\\s+")).stream()
+									.filter(this::notPureNumberExpression).map(UnitHelper::numberToSuperscript)
+									.collect(Collectors.toSet())));
+
+			tokens.removeAll(NGramDistanceAlgorithm.STOPWORDSLIST);
+		}
+		return tokens;
+	}
+
+	boolean isUnitEmpty(Unit<? extends Quantity> unit)
+	{
+		return unit == null || (unit != null && StringUtils.isBlank(unit.toString()));
+	}
+
+	boolean notPureNumberExpression(String str)
+	{
+		return !str.matches("\\d+");
+	}
+
+	String replaceIllegalChars(String term)
+	{
+		return UnitHelper.superscriptToNumber(term).replaceAll("[^a-zA-Z0-9 /\\^]", " ");
 	}
 }
