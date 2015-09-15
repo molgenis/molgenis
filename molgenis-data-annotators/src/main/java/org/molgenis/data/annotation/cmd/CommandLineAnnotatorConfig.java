@@ -18,8 +18,10 @@ import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.ApplicationContextProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 
@@ -30,6 +32,36 @@ import org.springframework.core.convert.support.DefaultConversionService;
 @CommandLineOnlyConfiguration
 public class CommandLineAnnotatorConfig
 {
+
+	@Value("${vcf-validator-location:@null}")
+	private String vcfValidatorLocation;
+
+	/**
+	 * Needed to make @Value annotations with property placeholders work!
+	 * 
+	 * @see https
+	 *      ://stackoverflow.com/questions/17097521/spring-3-2-value-annotation-with-pure-java-configuration-does-not
+	 *      -work-but-env
+	 */
+	@Bean
+	public static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer()
+	{
+		PropertySourcesPlaceholderConfigurer result = new PropertySourcesPlaceholderConfigurer();
+		result.setNullValue("@null");
+		return result;
+	}
+
+	@Bean
+	public CmdLineAnnotator cmdLineAnnotator()
+	{
+		return new CmdLineAnnotator();
+	}
+
+	@Bean
+	public VcfValidator vcfValidator()
+	{
+		return new VcfValidator(vcfValidatorLocation);
+	}
 
 	/**
 	 * Beans that allows referencing Spring managed beans from Java code which is not managed by Spring
@@ -169,11 +201,13 @@ public class CommandLineAnnotatorConfig
 		StringBuilder sb = new StringBuilder();
 		for (AnnotatorInfo.Type type : annotatorsPerType.keySet())
 		{
-			sb.append("\t" + type + "\n");
-			for (String s : annotatorsPerType.get(type))
+			sb.append("### " + type + " ###\n");
+			for (String annotatorName : annotatorsPerType.get(type))
 			{
-				sb.append("\t\t" + s + "\n");
+				sb.append("* " + annotatorName + "\n");
 			}
+
+			sb.append("\n");
 		}
 
 		return sb.toString();

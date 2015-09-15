@@ -165,7 +165,7 @@ public class CGDAnnotator
 
 	private AnnotatorInfo getAnnotatorInfo()
 	{
-		return AnnotatorInfo.create(Status.BETA, Type.PHENOTYPE_ASSOCIATION, NAME, "Clinical Genomics Database",
+		return AnnotatorInfo.create(Status.READY, Type.PHENOTYPE_ASSOCIATION, "CGD", "Clinical Genomics Database",
 				getOutputAttributes());
 	}
 
