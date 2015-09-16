@@ -34,7 +34,7 @@ public class MultiFileResource implements Resource
 	private void initializeResources()
 	{
 		this.resources.clear();
-		this.config.refreshConfigs();
+
 		for (Entry<String, ResourceConfig> chromConfig : config.getConfigs().entrySet())
 		{
 			final String key = chromConfig.getKey();
@@ -74,7 +74,7 @@ public class MultiFileResource implements Resource
 		{
 			initializeResources();
 		}
-		
+
 		for (Resource chrom : resources.values())
 		{
 			if (!chrom.isAvailable())
@@ -98,12 +98,12 @@ public class MultiFileResource implements Resource
 		isAvailable();
 		String chromValue = getFirstEqualsValueFor(VcfRepository.CHROM, q).toString();
 		Resource resource = resources.get(chromValue);
-		
+
 		try
 		{
 			return resource.findAll(q);
 		}
-		catch(NullPointerException e)
+		catch (NullPointerException e)
 		{
 			System.out.println("No file for chromosome '" + chromValue + "', skipping..");
 			return new ArrayList<Entity>();

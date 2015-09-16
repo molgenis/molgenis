@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -72,9 +73,11 @@ public class AlgorithmTemplateServiceImplTest extends AbstractTestNGSpringContex
 
 		ExplainedQueryString sourceAttr0Explain = ExplainedQueryString.create("a", "b", param0Name, 1.0);
 		ExplainedQueryString sourceAttr1Explain = ExplainedQueryString.create("a", "b", param1Name, 0.5);
-		Map<AttributeMetaData, Iterable<ExplainedQueryString>> attrResults = new HashMap<>();
-		attrResults.put(sourceAttr0, Arrays.asList(sourceAttr0Explain));
-		attrResults.put(sourceAttr1, Arrays.asList(sourceAttr1Explain));
+		Map<AttributeMetaData, ExplainedAttributeMetaData> attrResults = new HashMap<>();
+		attrResults.put(sourceAttr0,
+				ExplainedAttributeMetaData.create(sourceAttr0, Arrays.asList(sourceAttr0Explain), false));
+		attrResults.put(sourceAttr1,
+				ExplainedAttributeMetaData.create(sourceAttr1, Arrays.asList(sourceAttr1Explain), false));
 
 		Stream<AlgorithmTemplate> templateStream = algorithmTemplateServiceImpl.find(attrResults);
 

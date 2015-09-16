@@ -1,5 +1,7 @@
 package org.molgenis.data.annotation.entity.impl;
 
+import static org.molgenis.data.annotator.websettings.ClinvarAnnotatorSettings.Meta.CLINVAR_LOCATION;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,8 +22,6 @@ import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.resources.impl.TabixVcfRepositoryFactory;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,20 +29,21 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ClinvarAnnotator
 {
-
+	public static final String NAME = "clinvar";
 	public static final String CLINVAR_CLNSIG = "CLINVAR_CLNSIG";
 	public static final String CLINVAR_CLNSIG_LABEL = "ClinVar clinical significance";
 	public static final String CLINVAR_CLNSIG_ResourceAttributeName = "CLNSIG";
 	public static final String CLINVAR_CLNALLE = "CLINVAR_CLNALLE";
 	public static final String CLINVAR_CLNALLE_LABEL = "ClinVar clinical significant allele";
 	public static final String CLINVAR_CLINALL_ResourceAttributeName = "CLNALLE";
-	public static final String CLINVAR_FILE_LOCATION_PROPERTY = "clinvar_location";
 	public static final String CLINVAR_TABIX_RESOURCE = "clinVarTabixResource";
 
 	@Autowired
-	private MolgenisSettings molgenisSettings;
+	private Entity clinvarAnnotatorSettings;
+
 	@Autowired
 	private DataService dataService;
+
 	@Autowired
 	private Resources resources;
 
@@ -66,7 +67,7 @@ public class ClinvarAnnotator
 		AnnotatorInfo clinvarInfo = AnnotatorInfo
 				.create(Status.READY,
 						AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE,
-						"clinvar",
+						NAME,
 						" ClinVar is a freely accessible, public archive of reports of the relationships"
 								+ " among human variations and phenotypes, with supporting evidence. ClinVar thus facilitates"
 								+ " access to and communication about the relationships asserted between human variation and "
@@ -84,8 +85,7 @@ public class ClinvarAnnotator
 		ClinvarMultiAllelicResultFilter clinvarMultiAllelicResultFilter = new ClinvarMultiAllelicResultFilter();
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(CLINVAR_TABIX_RESOURCE, clinvarInfo, locusQueryCreator,
 				clinvarMultiAllelicResultFilter, dataService, resources,
-				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(CLINVAR_FILE_LOCATION_PROPERTY,
-						molgenisSettings))
+				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(CLINVAR_LOCATION, clinvarAnnotatorSettings))
 		{
 			@Override
 			protected Object getResourceAttributeValue(AttributeMetaData attr, Entity sourceEntity)
@@ -115,8 +115,7 @@ public class ClinvarAnnotator
 	Resource clinVarTabixResource()
 	{
 		Resource clinVarTabixResource = new ResourceImpl(CLINVAR_TABIX_RESOURCE, new SingleResourceConfig(
-				CLINVAR_FILE_LOCATION_PROPERTY, molgenisSettings),
-				new TabixVcfRepositoryFactory(CLINVAR_TABIX_RESOURCE));
+				CLINVAR_LOCATION, clinvarAnnotatorSettings), new TabixVcfRepositoryFactory(CLINVAR_TABIX_RESOURCE));
 
 		return clinVarTabixResource;
 	}

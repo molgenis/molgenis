@@ -15,7 +15,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import com.google.common.collect.Iterators;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -25,13 +24,13 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.util.ResourceUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.common.collect.Iterators;
 
 @ContextConfiguration(classes =
 { SnpEffAnnotatorTest.Config.class, SnpEffAnnotator.class })
@@ -45,10 +44,9 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
-		MolgenisSettings settings = mock(MolgenisSettings.class);
 		jarRunner = mock(JarRunner.class);
 
-		snpEffRepositoryAnnotator = new SnpEffAnnotator.SnpEffRepositoryAnnotator(settings,jarRunner);
+		snpEffRepositoryAnnotator = new SnpEffAnnotator.SnpEffRepositoryAnnotator(new MapEntity(), jarRunner);
 
 		metaDataCanAnnotate = new DefaultEntityMetaData("test");
 		AttributeMetaData attributeMetaDataChrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
@@ -211,8 +209,8 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 	{
 		try
 		{
-			List<String> params = Arrays.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon",
-					"-ud", "0", "-spliceSiteSize", "5");
+			List<String> params = Arrays.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon", "-ud",
+					"0", "-spliceSiteSize", "5");
 			when(jarRunner.runJar(SnpEffAnnotator.NAME, params, new File("src/test/resources/test-edgecases.vcf")))
 					.thenReturn(new File("src/test/resources/snpEffOutputCount.vcf"));
 		}
@@ -221,8 +219,8 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 			e.printStackTrace();
 		}
 
-		Iterator<Entity> results = snpEffRepositoryAnnotator.annotateRepository(entities,
-				new File("src/test/resources/test-edgecases.vcf"));
+		Iterator<Entity> results = snpEffRepositoryAnnotator.annotateRepository(entities, new File(
+				"src/test/resources/test-edgecases.vcf"));
 		int size = Iterators.size(results);
 		assertEquals(size, 14);
 	}
@@ -233,12 +231,12 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 
 		try
 		{
-			List<String> params = Arrays.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon",
-					"-ud", "0", "-spliceSiteSize", "5");
+			List<String> params = Arrays.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon", "-ud",
+					"0", "-spliceSiteSize", "5");
 			when(jarRunner.runJar(SnpEffAnnotator.NAME, params, new File("src/test/resources/test-snpeff.vcf")))
 					.thenReturn(new File("src/test/resources/snpEffOutput.vcf"));
 		}
-		catch (Exception e )
+		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
@@ -305,9 +303,9 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 	public static class Config
 	{
 		@Bean
-		public MolgenisSettings molgenisSettings()
+		public Entity snpEffAnnotatorSettings()
 		{
-			return mock(MolgenisSettings.class);
+			return new MapEntity();
 		}
 
 		@Bean

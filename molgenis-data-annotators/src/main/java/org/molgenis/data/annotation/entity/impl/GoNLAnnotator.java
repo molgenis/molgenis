@@ -1,5 +1,9 @@
 package org.molgenis.data.annotation.entity.impl;
 
+import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.CHROMOSOMES;
+import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.FILEPATTERN;
+import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.OVERRIDE_CHROMOSOME_FILES;
+import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.ROOT_DIRECTORY;
 import static org.molgenis.data.vcf.VcfRepository.ALT;
 import static org.molgenis.data.vcf.VcfRepository.REF;
 
@@ -25,7 +29,6 @@ import org.molgenis.data.annotation.resources.impl.MultiFileResource;
 import org.molgenis.data.annotation.resources.impl.MultiResourceConfigImpl;
 import org.molgenis.data.annotation.resources.impl.TabixVcfRepositoryFactory;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,6 +38,8 @@ import com.google.common.collect.FluentIterable;
 @Configuration
 public class GoNLAnnotator
 {
+	public static final String NAME = "gonl";
+
 	public static final String GONL_GENOME_AF = "GoNL_AF";
 	public static final String GONL_GENOME_GTC = "GoNL_GTC";
 	public static final String GONL_AF_LABEL = "Genome of the netherlands allele frequency";
@@ -46,18 +51,12 @@ public class GoNLAnnotator
 
 	public static final String GONL_MULTI_FILE_RESOURCE = "gonlresources";
 
-	// Runtime properties keys
-	public static final String GONL_CHROMOSOME_PROPERTY = "gonl_chromosomes";
-	public static final String GONL_FILE_PATTERN_PROPERTY = "gonl_file_pattern";
-	public static final String GONL_OVERRIDE_CHROMOSOME_FILES_PROPERTY = "gonl_override_chromosome_files";
-	public static final String GONL_ROOT_DIRECTORY_PROPERTY = "gonl_root_directory";
-
 	// Backwards capabilities properties from the old annotator
 	public static final String BC_GONL_MAF_LABEL = "GONLMAF";
 	public static final String BC_GONL_MAF = BC_GONL_MAF_LABEL;
 
 	@Autowired
-	private MolgenisSettings molgenisSettings;
+	private Entity goNLAnnotatorSettings;
 
 	@Autowired
 	private DataService dataService;
@@ -84,7 +83,7 @@ public class GoNLAnnotator
 		AnnotatorInfo thousandGenomeInfo = AnnotatorInfo
 				.create(Status.READY,
 						AnnotatorInfo.Type.POPULATION_REFERENCE,
-						"gonl",
+						NAME,
 						"What genetic variation is to be found in the Dutch indigenous population? "
 								+ "Detailed knowledge about this is not only interesting in itself, "
 								+ "it also helps to extract useful biomedical information from Dutch biobanks. "
@@ -97,16 +96,15 @@ public class GoNLAnnotator
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator();
 
 		EntityAnnotator entityAnnotator = new QueryAnnotatorImpl(GONL_MULTI_FILE_RESOURCE, thousandGenomeInfo,
-				locusQueryCreator, dataService, resources, (annotationSourceFileName) -> {
-					molgenisSettings.setProperty(GONL_ROOT_DIRECTORY_PROPERTY, annotationSourceFileName);
-					molgenisSettings.setProperty(GONL_FILE_PATTERN_PROPERTY, "gonl.chr%s.snps_indels.r5.vcf.gz");
-					molgenisSettings.setProperty(GONL_OVERRIDE_CHROMOSOME_FILES_PROPERTY,
-							"X:gonl.chrX.release4.gtc.vcf.gz");
-					molgenisSettings.setProperty(GONL_CHROMOSOME_PROPERTY,
-							"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X");
+				locusQueryCreator, dataService, resources,
+				(annotationSourceFileName) -> {
+					goNLAnnotatorSettings.set(ROOT_DIRECTORY, annotationSourceFileName);
+					goNLAnnotatorSettings.set(FILEPATTERN, "gonl.chr%s.snps_indels.r5.vcf.gz");
+					goNLAnnotatorSettings.set(OVERRIDE_CHROMOSOME_FILES, "X:gonl.chrX.release4.gtc.vcf.gz");
+					goNLAnnotatorSettings
+							.set(CHROMOSOMES, "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X");
 				})
 		{
-
 			@Override
 			protected void processQueryResults(Entity inputEntity, Iterable<Entity> annotationSourceEntities,
 					Entity resultEntity)
@@ -138,9 +136,8 @@ public class GoNLAnnotator
 	@Bean
 	Resource gonlresources()
 	{
-		MultiResourceConfig goNLConfig = new MultiResourceConfigImpl(GONL_CHROMOSOME_PROPERTY,
-				GONL_FILE_PATTERN_PROPERTY, GONL_ROOT_DIRECTORY_PROPERTY, GONL_OVERRIDE_CHROMOSOME_FILES_PROPERTY,
-				molgenisSettings);
+		MultiResourceConfig goNLConfig = new MultiResourceConfigImpl(CHROMOSOMES, FILEPATTERN, ROOT_DIRECTORY,
+				OVERRIDE_CHROMOSOME_FILES, goNLAnnotatorSettings);
 
 		return new MultiFileResource(GONL_MULTI_FILE_RESOURCE, goNLConfig, new TabixVcfRepositoryFactory(
 				GONL_MULTI_FILE_RESOURCE));

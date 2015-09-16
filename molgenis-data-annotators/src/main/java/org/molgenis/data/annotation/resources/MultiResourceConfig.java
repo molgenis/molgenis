@@ -8,6 +8,4 @@ import java.util.Map;
 public interface MultiResourceConfig
 {
 	public Map<String, ResourceConfig> getConfigs();
-
-	public void refreshConfigs();
 }

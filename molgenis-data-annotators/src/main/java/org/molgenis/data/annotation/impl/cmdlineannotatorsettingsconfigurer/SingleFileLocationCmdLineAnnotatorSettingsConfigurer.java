@@ -1,27 +1,26 @@
 package org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer;
 
+import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
-import org.molgenis.framework.server.MolgenisSettings;
 
 /**
  * CmdLineAnnotatorSettingsConfigurer that defines a single property
  */
 public class SingleFileLocationCmdLineAnnotatorSettingsConfigurer implements CmdLineAnnotatorSettingsConfigurer
 {
-	private final String fileLocationPropertyName;
-	private final MolgenisSettings molgenisSettings;
+	private final String fileLocationAttributeName;
+	private final Entity pluginSettings;
 
-	public SingleFileLocationCmdLineAnnotatorSettingsConfigurer(String fileLocationPropertyName,
-			MolgenisSettings molgenisSettings)
+	public SingleFileLocationCmdLineAnnotatorSettingsConfigurer(String fileLocationAttributeName, Entity pluginSettings)
 	{
-		this.fileLocationPropertyName = fileLocationPropertyName;
-		this.molgenisSettings = molgenisSettings;
+		this.fileLocationAttributeName = fileLocationAttributeName;
+		this.pluginSettings = pluginSettings;
 	}
 
 	@Override
 	public void addSettings(String annotationSourceFileName)
 	{
-		molgenisSettings.setProperty(fileLocationPropertyName, annotationSourceFileName);
+		pluginSettings.set(fileLocationAttributeName, annotationSourceFileName);
 	}
 
 }
