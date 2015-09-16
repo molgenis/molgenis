@@ -41,7 +41,7 @@
 			if(!this.props.required) {
 				var $clearBtn = $(this.refs.clearbtn.getDOMNode());
 				$clearBtn.on('click', function() {
-					this._handleValueChange(undefined);
+					this._handleValueChange(null);
 				}.bind(this));
 			}
 			
