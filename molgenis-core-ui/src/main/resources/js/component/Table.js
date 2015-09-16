@@ -456,7 +456,7 @@
 						if(attr.visible === true) {
 							var attrPath = path.concat(attr.name);
 							if(molgenis.isCompoundAttr(attr)) {
-								this._createColsRec(item, entity, attr.attributes, {'*': null}, Cols, attrPath, expanded);
+								this._createColsRec(item, entity, attr.attributes, {'*': null}, Cols, path, expanded);
 							} else {
 
 								if(this._isExpandedAttr(attr, selectedAttrs)) {
