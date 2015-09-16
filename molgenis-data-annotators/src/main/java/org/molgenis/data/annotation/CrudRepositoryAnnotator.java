@@ -23,6 +23,7 @@ import org.molgenis.security.user.UserAccountService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -88,6 +89,9 @@ public class CrudRepositoryAnnotator
 		LOG.info("Started annotating \"" + sourceRepo.getName() + "\" with the " + annotator.getSimpleName()
 				+ " annotator (started by \"" + user + "\")");
 
+		// Current security context
+		SecurityContext securityContext = SecurityContextHolder.getContext();
+
 		return RunAsSystemProxy.runAsSystem(() -> {
 			EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(sourceRepo.getName());
 			DefaultAttributeMetaData compoundAttributeMetaData = AnnotatorUtils.getCompoundResultAttribute(annotator,
@@ -95,6 +99,12 @@ public class CrudRepositoryAnnotator
 
 			Repository targetRepo = addAnnotatorMetadataToRepositories(entityMetaData, createCopy,
 					compoundAttributeMetaData);
+
+			if (createCopy)
+			{
+				// Give current user permissions on the created repo
+				permissionSystemService.giveUserEntityPermissions(securityContext, Arrays.asList(targetRepo.getName()));
+			}
 
 			Repository crudRepository = iterateOverEntitiesAndAnnotate(sourceRepo, targetRepo, annotator);
 
@@ -164,10 +174,6 @@ public class CrudRepositoryAnnotator
 				newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
 			}
 			newEntityMetaData.setLabel(newRepositoryLabel);
-
-			// Give current user permissions on the created repo
-			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
-					Arrays.asList(newEntityMetaData.getName()));
 
 			return dataService.getMeta().addEntityMeta(newEntityMetaData);
 		}
