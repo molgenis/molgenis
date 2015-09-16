@@ -18,6 +18,7 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.file.FileStore;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.ErrorMessageResponse;
@@ -72,6 +73,9 @@ public class AnnotatorController
 	@Autowired
 	UserAccountService userAccountService;
 
+	@Autowired
+	MolgenisPermissionService molgenisPermissionService;
+
 	/**
 	 * Gets a map of all available annotators.
 	 * 
@@ -109,7 +113,7 @@ public class AnnotatorController
 		{
 			CrudRepositoryAnnotator crudRepositoryAnnotator = new CrudRepositoryAnnotator(dataService,
 					getNewRepositoryName(annotatorNames, repository.getEntityMetaData().getSimpleName()),
-					permissionSystemService, userAccountService);
+					permissionSystemService, userAccountService, molgenisPermissionService);
 
 			for (String annotatorName : annotatorNames)
 			{
