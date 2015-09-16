@@ -1,7 +1,6 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.AGE_GROUP;
 import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.ALLELIC_CONDITIONS;
 import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.COMMENTS;
@@ -29,9 +28,9 @@ import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
+import org.molgenis.data.annotator.websettings.CGDAnnotatorSettings;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -140,11 +139,11 @@ public class CGDAnnotatorTest extends AbstractTestNGSpringContextTests
 		private DataService dataService;
 
 		@Bean
-		public MolgenisSettings molgenisSettings()
+		public Entity CGDAnnotatorSettings()
 		{
-			MolgenisSettings settings = mock(MolgenisSettings.class);
-			when(settings.getProperty(CGDAnnotator.CGD_FILE_LOCATION_PROPERTY)).thenReturn(
-					ResourceUtils.getFile(getClass(), "/cgd_example.txt").getPath());
+			Entity settings = new MapEntity();
+			settings.set(CGDAnnotatorSettings.Meta.CGD_LOCATION, ResourceUtils.getFile(getClass(), "/cgd_example.txt")
+					.getPath());
 			return settings;
 		}
 

@@ -12,7 +12,6 @@ import static org.molgenis.data.vcf.VcfRepository.REF;
 import static org.molgenis.data.vcf.VcfRepository.REF_META;
 import static org.testng.Assert.assertEquals;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 
@@ -21,19 +20,16 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.resources.Resources;
-import org.molgenis.data.annotation.resources.impl.MultiResourceConfigImpl;
 import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
+import org.molgenis.data.annotator.websettings.ClinvarAnnotatorSettings;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
-
-import com.google.common.collect.Lists;
 
 @ContextConfiguration(classes =
 { ClinvarAnnotatorTest.Config.class, ClinvarAnnotator.class })
@@ -240,16 +236,12 @@ public class ClinvarAnnotatorTest extends AbstractTestNGSpringContextTests
 	public static class Config
 	{
 		@Bean
-		public MolgenisSettings molgenisSettings()
+		public Entity clinvarAnnotatorSettings()
 		{
-			MolgenisSettings molgenisSettings = mock(MolgenisSettings.class);
-			when(molgenisSettings.getProperty(ClinvarAnnotator.CLINVAR_FILE_LOCATION_PROPERTY)).thenReturn(
-					ResourceUtils.getFile(getClass(), "/clinvar/clinvar_20150629.vcf.gz").getAbsolutePath());
-			when(
-					molgenisSettings.getProperty(ClinvarAnnotator.CLINVAR_FILE_LOCATION_PROPERTY,
-							MultiResourceConfigImpl.DEFAULT_ROOT_DIRECTORY)).thenReturn(
-					ResourceUtils.getFile(getClass(), "/clinvar/clinvar_20150629.vcf.gz").getAbsolutePath());
-			return molgenisSettings;
+			Entity settings = new MapEntity();
+			settings.set(ClinvarAnnotatorSettings.Meta.CLINVAR_LOCATION,
+					ResourceUtils.getFile(getClass(), "/clinvar/clinvar_20150629.vcf.gz").getPath());
+			return settings;
 		}
 
 		@Bean
