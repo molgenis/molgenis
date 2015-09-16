@@ -12,6 +12,7 @@ import java.util.List;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
@@ -24,9 +25,9 @@ import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.resources.impl.TabixRepositoryFactory;
+import org.molgenis.data.annotator.websettings.CaddAnnotatorSettings;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,18 +35,20 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class CaddAnnotator
 {
+	public static final String NAME = "cadd";
 	// FIXME: nomenclature: http://cadd.gs.washington.edu/info
 	public static final String CADD_SCALED = "CADD_SCALED";
 	public static final String CADD_ABS = "CADD";
 	public static final String CADD_SCALED_LABEL = "CADDSCALED";
 	public static final String CADD_ABS_LABEL = "CADDABS";
-	public static final String CADD_FILE_LOCATION_PROPERTY = "cadd_location";
 	public static final String CADD_TABIX_RESOURCE = "CADDTabixResource";
 
 	@Autowired
-	private MolgenisSettings molgenisSettings;
+	private Entity caddAnnotatorSettings;
+
 	@Autowired
 	private DataService dataService;
+
 	@Autowired
 	private Resources resources;
 
@@ -75,7 +78,7 @@ public class CaddAnnotator
 		AnnotatorInfo caddInfo = AnnotatorInfo
 				.create(Status.READY,
 						AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE,
-						"cadd",
+						NAME,
 						"CADD is a tool for scoring the deleteriousness of single nucleotide variants as well as insertion/deletions variants in the human genome.\n"
 								+ "While many variant annotation and scoring utils are around, most annotations tend to exploit a single information type (e.g. conservation) "
 								+ "and/or are restricted in scope (e.g. to missense changes). "
@@ -92,7 +95,8 @@ public class CaddAnnotator
 						attributes);
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(CADD_TABIX_RESOURCE, caddInfo, new LocusQueryCreator(),
 				new VariantResultFilter(), dataService, resources,
-				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(CADD_FILE_LOCATION_PROPERTY, molgenisSettings));
+				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(CaddAnnotatorSettings.Meta.CADD_LOCATION,
+						caddAnnotatorSettings));
 
 		return new RepositoryAnnotatorImpl(entityAnnotator);
 	}
@@ -111,9 +115,11 @@ public class CaddAnnotator
 		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("CADD_SCALED", DECIMAL));
 		repoMetaData.addAttribute("id").setIdAttribute(true).setVisible(false);
 
-		caddTabixResource = new ResourceImpl(CADD_TABIX_RESOURCE, new SingleResourceConfig(CADD_FILE_LOCATION_PROPERTY,
-				molgenisSettings), new TabixRepositoryFactory(repoMetaData));
+		caddTabixResource = new ResourceImpl(CADD_TABIX_RESOURCE, new SingleResourceConfig(
+				CaddAnnotatorSettings.Meta.CADD_LOCATION, caddAnnotatorSettings), new TabixRepositoryFactory(
+				repoMetaData));
 
 		return caddTabixResource;
 	}
+
 }

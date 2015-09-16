@@ -16,9 +16,11 @@ import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.CrudRepositoryAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.settings.SettingsEntityMeta;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.file.FileStore;
 import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.ErrorMessageResponse;
@@ -172,6 +174,11 @@ public class AnnotatorController
 				map.put("inputAttributeTypes", toMap(annotator.getInputMetaData()));
 				map.put("outputAttributes", outputAttrs);
 				map.put("outputAttributeTypes", toMap(annotator.getOutputMetaData()));
+
+				String settingsEntityName = SettingsEntityMeta.PACKAGE_NAME
+						+ org.molgenis.data.Package.PACKAGE_SEPARATOR + annotator.getInfo().getCode();
+				map.put("showSettingsButton",
+						molgenisPermissionService.hasPermissionOnEntity(settingsEntityName, Permission.WRITE));
 				mapOfAnnotators.put(annotator.getSimpleName(), map);
 			}
 		}
