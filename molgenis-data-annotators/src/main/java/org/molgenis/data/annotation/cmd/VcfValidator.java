@@ -4,13 +4,14 @@ import static org.apache.commons.io.FilenameUtils.removeExtension;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.io.output.FileWriterWithEncoding;
 
 public class VcfValidator
 {
@@ -44,10 +45,10 @@ public class VcfValidator
 			Process proc = processBuilder.start();
 
 			InputStream inputStream = proc.getInputStream();
-			Scanner scanner = new Scanner(inputStream);
+			Scanner scanner = new Scanner(inputStream, "UTF-8");
 
 			InputStream errorStream = proc.getErrorStream();
-			Scanner errorScanner = new Scanner(errorStream);
+			Scanner errorScanner = new Scanner(errorStream, "UTF-8");
 
 			String line = "";
 			Integer errorCount = null;
@@ -60,7 +61,7 @@ public class VcfValidator
 				logFile.createNewFile();
 			}
 
-			FileWriter fileWriter = new FileWriter(logFile.getAbsoluteFile(), true);
+			FileWriterWithEncoding fileWriter = new FileWriterWithEncoding(logFile.getAbsoluteFile(), "UTF-8", true);
 			BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 
 			Date date = new Date();
@@ -90,6 +91,7 @@ public class VcfValidator
 			bufferedWriter.close();
 
 			scanner.close();
+			errorScanner.close();
 
 			if (errorCount != null && errorCount == 0)
 			{
