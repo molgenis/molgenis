@@ -1,7 +1,6 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -9,20 +8,17 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.resources.Resources;
-import org.molgenis.data.annotation.resources.impl.MultiResourceConfigImpl;
 import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
+import org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -369,26 +365,16 @@ public class GoNLAnnotatorTest extends AbstractTestNGSpringContextTests
 		private DataService dataService;
 
 		@Bean
-		public MolgenisSettings molgenisSettings()
+		public Entity goNLAnnotatorSettings()
 		{
-			MolgenisSettings settings = mock(MolgenisSettings.class);
-			when(
-					settings.getProperty(GoNLAnnotator.GONL_ROOT_DIRECTORY_PROPERTY,
-							MultiResourceConfigImpl.DEFAULT_ROOT_DIRECTORY)).thenReturn(
+			Entity settings = new MapEntity();
+
+			settings.set(GoNLAnnotatorSettings.Meta.ROOT_DIRECTORY,
 					ResourceUtils.getFile(getClass(), GONL_TEST_ROOT_DIRECTORY).getPath());
-
-			when(
-					settings.getProperty(GoNLAnnotator.GONL_CHROMOSOME_PROPERTY,
-							MultiResourceConfigImpl.DEFAULT_CHROMOSOMES)).thenReturn(GONL_TEST_CHROMOSOMES);
-
-			when(
-					settings.getProperty(GoNLAnnotator.GONL_FILE_PATTERN_PROPERTY,
-							MultiResourceConfigImpl.DEFAULT_PATTERN)).thenReturn(GONL_TEST_PATTERN);
-
-			when(settings.getProperty(GoNLAnnotator.GONL_OVERRIDE_CHROMOSOME_FILES_PROPERTY)).thenReturn(
-					GoNLAnnotatorTest.GONL_TEST_OVERRIDE_CHROMOSOME_FILES_PROPERTY);
-
-			when(settings.propertyExists(GoNLAnnotator.GONL_OVERRIDE_CHROMOSOME_FILES_PROPERTY)).thenReturn(true);
+			settings.set(GoNLAnnotatorSettings.Meta.CHROMOSOMES, GONL_TEST_CHROMOSOMES);
+			settings.set(GoNLAnnotatorSettings.Meta.FILEPATTERN, GONL_TEST_PATTERN);
+			settings.set(GoNLAnnotatorSettings.Meta.OVERRIDE_CHROMOSOME_FILES,
+					GONL_TEST_OVERRIDE_CHROMOSOME_FILES_PROPERTY);
 
 			return settings;
 		}

@@ -1,6 +1,23 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import com.google.common.collect.Iterators;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.UncheckedIOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.regex.Pattern;
+
 import org.apache.commons.io.IOUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
@@ -15,35 +32,19 @@ import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.utils.JarRunner;
 import org.molgenis.data.annotation.utils.JarRunnerImpl;
+import org.molgenis.data.annotator.websettings.SnpEffAnnotatorSettings;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.UncheckedIOException;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.regex.Pattern;
-
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
+import com.google.common.collect.Iterators;
 
 /**
  * SnpEff annotator
@@ -67,7 +68,6 @@ import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
 public class SnpEffAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(SnpEffAnnotator.class);
-	public static final String SNPEFF_JAR_LOCATION_PROPERTY = "snpeff_jar_location";
 	public static final String NAME = "snpEff";
 
 	public static final String ANNOTATION = "Annotation";
@@ -94,15 +94,15 @@ public class SnpEffAnnotator
 	}
 
 	@Autowired
-	private MolgenisSettings molgenisSettings;
+	private JarRunner jarRunner;
 
 	@Autowired
-	private JarRunner jarRunner;
+	private Entity snpEffAnnotatorSettings;
 
 	@Bean
 	public RepositoryAnnotator snpEff()
 	{
-		return new SnpEffRepositoryAnnotator(molgenisSettings, jarRunner);
+		return new SnpEffRepositoryAnnotator(snpEffAnnotatorSettings, jarRunner);
 	}
 
 	@Bean
@@ -156,18 +156,18 @@ public class SnpEffAnnotator
 	{
 		private static final String CHARSET = "UTF-8";
 		private String snpEffPath;
-		private final MolgenisSettings molgenisSettings;
-		private AnnotatorInfo info = AnnotatorInfo
+		private final Entity pluginSettings;
+		private final AnnotatorInfo info = AnnotatorInfo
 				.create(Status.READY,
 						Type.EFFECT_PREDICTION,
 						NAME,
 						"Genetic variant annotation and effect prediction toolbox. It annotates and predicts the effects of variants on genes (such as amino acid changes). ",
 						getOutputMetaData());
-		private JarRunner jarRunner;
+		private final JarRunner jarRunner;
 
-		public SnpEffRepositoryAnnotator(MolgenisSettings molgenisSettings, JarRunner jarRunner)
+		public SnpEffRepositoryAnnotator(Entity pluginSettings, JarRunner jarRunner)
 		{
-			this.molgenisSettings = molgenisSettings;
+			this.pluginSettings = pluginSettings;
 			this.jarRunner = jarRunner;
 		}
 
@@ -467,9 +467,10 @@ public class SnpEffAnnotator
 
 		private String getSnpEffPath()
 		{
-			if ((molgenisSettings != null) && (snpEffPath == null))
+			if ((pluginSettings != null) && (snpEffPath == null))
 			{
-				snpEffPath = molgenisSettings.getProperty(SNPEFF_JAR_LOCATION_PROPERTY);
+				snpEffPath = RunAsSystemProxy.runAsSystem(() -> pluginSettings
+						.getString(SnpEffAnnotatorSettings.Meta.SNPEFF_JAR_LOCATION));
 
 				if (snpEffPath != null)
 				{
@@ -492,8 +493,8 @@ public class SnpEffAnnotator
 		@Override
 		public CmdLineAnnotatorSettingsConfigurer getCmdLineAnnotatorSettingsConfigurer()
 		{
-			return new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(SNPEFF_JAR_LOCATION_PROPERTY,
-					molgenisSettings);
+			return new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(
+					SnpEffAnnotatorSettings.Meta.SNPEFF_JAR_LOCATION, pluginSettings);
 		}
 	}
 
