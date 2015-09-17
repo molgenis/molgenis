@@ -22,6 +22,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
+import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -201,7 +202,7 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 	@Test
 	public void testFindTagsSync()
 	{
-		String description = "Fall " + SemanticSearchServiceHelper.STOP_WORDS + " sleep";
+		String description = "Fall " + NGramDistanceAlgorithm.STOPWORDSLIST + " sleep";
 		List<String> ontologyIds = Arrays.<String> asList("1");
 		Set<String> searchTerms = Sets.newHashSet("fall", "sleep");
 		semanticSearchServiceHelper.findTags(description, ontologyIds);

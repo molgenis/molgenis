@@ -7,7 +7,7 @@ import java.util.Set;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.semantic.Hit;
 import org.molgenis.ontology.core.model.OntologyTerm;
 
@@ -22,7 +22,7 @@ public interface SemanticSearchService
 	 * 
 	 * @return AttributeMetaData of resembling attributes, sorted by relevance
 	 */
-	Map<AttributeMetaData, Iterable<ExplainedQueryString>> findAttributes(EntityMetaData sourceEntityMetaData,
+	Map<AttributeMetaData, ExplainedAttributeMetaData> findAttributes(EntityMetaData sourceEntityMetaData,
 			Set<String> queryTerms, Collection<OntologyTerm> ontologyTerms);
 
 	/**
@@ -33,7 +33,7 @@ public interface SemanticSearchService
 	 * 
 	 * @return AttributeMetaData of resembling attributes, sorted by relevance
 	 */
-	Map<AttributeMetaData, Iterable<ExplainedQueryString>> decisionTreeToRelevantFindAttributes(
+	Map<AttributeMetaData, ExplainedAttributeMetaData> decisionTreeToFindRelevantAttributes(
 			EntityMetaData sourceEntityMetaData, AttributeMetaData targetAttribute,
 			Collection<OntologyTerm> ontologyTermsFromTags, Set<String> searchTerms);
 

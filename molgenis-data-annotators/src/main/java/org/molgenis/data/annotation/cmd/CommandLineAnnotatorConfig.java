@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.molgenis.CommandLineOnlyConfiguration;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
@@ -15,8 +16,7 @@ import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.framework.server.MolgenisSimpleSettings;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -32,6 +32,7 @@ import org.springframework.core.convert.support.DefaultConversionService;
 @CommandLineOnlyConfiguration
 public class CommandLineAnnotatorConfig
 {
+
 	@Value("${vcf-validator-location:@null}")
 	private String vcfValidatorLocation;
 
@@ -83,9 +84,63 @@ public class CommandLineAnnotatorConfig
 	}
 
 	@Bean
-	MolgenisSettings settings()
+	public Entity caddAnnotatorSettings()
 	{
-		return new MolgenisSimpleSettings();
+		return new MapEntity();
+	}
+
+	@Bean
+	public Entity snpEffAnnotatorSettings()
+	{
+		return new MapEntity();
+	}
+
+	@Bean
+	public Entity goNLAnnotatorSettings()
+	{
+		return new MapEntity();
+	}
+
+	@Bean
+	public Entity thousendGenomesAnnotatorSettings()
+	{
+		return new MapEntity();
+	}
+
+	@Bean
+	public Entity CGDAnnotatorSettings()
+	{
+		return new MapEntity();
+	}
+
+	@Bean
+	public Entity clinvarAnnotatorSettings()
+	{
+		return new MapEntity();
+	}
+
+	@Bean
+	public Entity dannAnnotatorSettings()
+	{
+		return new MapEntity();
+	}
+
+	@Bean
+	public Entity exacAnnotatorSettings()
+	{
+		return new MapEntity();
+	}
+
+	@Bean
+	public Entity fitConAnnotatorSettings()
+	{
+		return new MapEntity();
+	}
+
+	@Bean
+	public Entity HPOAnnotatorSettings()
+	{
+		return new MapEntity();
 	}
 
 	@Bean

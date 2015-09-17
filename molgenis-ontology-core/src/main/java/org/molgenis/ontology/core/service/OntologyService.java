@@ -48,6 +48,15 @@ public interface OntologyService
 	 */
 	List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize);
 
+	/**
+	 * Retrieve all ontology terms from the specified ontology
+	 * 
+	 * @param ontologyIri
+	 * 
+	 * @return all the {@link OntologyTerm}
+	 */
+	List<OntologyTerm> getAllOntologyTerms(String ontologyIri);
+
 	// voor de tag service
 	/**
 	 * Retrieves a specific OntologyTerm
