@@ -10,7 +10,6 @@ import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.IndexedRepository;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Package;
@@ -23,6 +22,8 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.util.DependencyResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +43,8 @@ import com.google.common.collect.Sets;
  */
 public class MetaDataServiceImpl implements MetaDataService
 {
+	private static final Logger LOG = LoggerFactory.getLogger(MetaDataServiceImpl.class);
+
 	private PackageRepository packageRepository;
 	private EntityMetaDataRepository entityMetaDataRepository;
 	private AttributeMetaDataRepository attributeMetaDataRepository;
@@ -116,14 +119,24 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void deleteEntityMeta(String entityName)
 	{
-		EntityMetaData emd = getEntityMetaData(entityName);
-		if ((emd != null) && !emd.isAbstract())
+		try
 		{
-			getManageableRepositoryCollection(emd).deleteEntityMeta(entityName);
+			EntityMetaData emd = getEntityMetaData(entityName);
+			if ((emd != null) && !emd.isAbstract())
+			{
+				getManageableRepositoryCollection(emd).deleteEntityMeta(entityName);
+			}
+			entityMetaDataRepository.delete(entityName);
+			if (dataService.hasRepository(entityName)) dataService.removeRepository(entityName);
 		}
-		entityMetaDataRepository.delete(entityName);
-		if (dataService.hasRepository(entityName)) dataService.removeRepository(entityName);
-		packageRepository.updatePackageCache();
+		catch (Exception exception)
+		{
+			LOG.error("Failed to delete entity metadata for entity [{}]", entityName, exception);
+		}
+		finally
+		{
+			refreshCaches();
+		}
 	}
 
 	@Transactional
