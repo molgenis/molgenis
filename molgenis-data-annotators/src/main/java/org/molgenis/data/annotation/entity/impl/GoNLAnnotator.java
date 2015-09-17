@@ -4,10 +4,15 @@ import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta
 import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.FILEPATTERN;
 import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.OVERRIDE_CHROMOSOME_FILES;
 import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.ROOT_DIRECTORY;
+import static org.molgenis.data.vcf.VcfRepository.ALT;
+import static org.molgenis.data.vcf.VcfRepository.REF;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.elasticsearch.common.collect.Iterables;
+import org.elasticsearch.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -16,7 +21,6 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
-import org.molgenis.data.annotation.filter.GoNLMultiAllelicResultFilter;
 import org.molgenis.data.annotation.query.LocusQueryCreator;
 import org.molgenis.data.annotation.resources.MultiResourceConfig;
 import org.molgenis.data.annotation.resources.Resource;
@@ -28,6 +32,8 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.google.common.collect.FluentIterable;
 
 @Configuration
 public class GoNLAnnotator
@@ -67,7 +73,8 @@ public class GoNLAnnotator
 				.setLabel(GONL_AF_LABEL);
 
 		DefaultAttributeMetaData goNlGtcAttribute = new DefaultAttributeMetaData(GONL_GENOME_GTC, FieldTypeEnum.STRING)
-				.setDescription("The allele frequency for variants seen in the population used for the GoNL project")
+				.setDescription(
+						"GenoType Counts. For each ALT allele in the same order as listed = 0/0,0/1,1/1,0/2,1/2,2/2,0/3,1/3,2/3,3/3,etc. Phasing is ignored; hence 1/0, 0|1 and 1|0 are all counted as 0/1. When one or more alleles is not called for a genotype in a specific sample (./., ./0, ./1, ./2, etc.), that sample's genotype is completely discarded for calculating GTC.")
 				.setLabel(GONL_GTC_LABEL);
 
 		attributes.add(goNlGtcAttribute);
@@ -88,10 +95,8 @@ public class GoNLAnnotator
 
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator();
 
-		GoNLMultiAllelicResultFilter goNLMultiAllelicResultFilter = new GoNLMultiAllelicResultFilter();
-
-		EntityAnnotator entityAnnotator = new AnnotatorImpl(GONL_MULTI_FILE_RESOURCE, thousandGenomeInfo,
-				locusQueryCreator, goNLMultiAllelicResultFilter, dataService, resources,
+		EntityAnnotator entityAnnotator = new QueryAnnotatorImpl(GONL_MULTI_FILE_RESOURCE, thousandGenomeInfo,
+				locusQueryCreator, dataService, resources,
 				(annotationSourceFileName) -> {
 					goNLAnnotatorSettings.set(ROOT_DIRECTORY, annotationSourceFileName);
 					goNLAnnotatorSettings.set(FILEPATTERN, "gonl.chr%s.snps_indels.r5.vcf.gz");
@@ -101,27 +106,30 @@ public class GoNLAnnotator
 				})
 		{
 			@Override
-			protected Object getResourceAttributeValue(AttributeMetaData attr, Entity entity)
+			protected void processQueryResults(Entity inputEntity, Iterable<Entity> annotationSourceEntities,
+					Entity resultEntity)
 			{
-				String attrName = null;
+				Iterable<Entity> refMatches = FluentIterable.from(annotationSourceEntities).filter(
+						gonl -> gonl.get(REF).equals(inputEntity.get(REF)));
 
-				if (GONL_GENOME_AF.equals(attr.getName()))
+				List<Entity> alleleMatches = Lists.newArrayList();
+				for (String alt : inputEntity.getString(ALT).split(","))
 				{
-					attrName = INFO_AF;
-				}
-				else if (GONL_GENOME_GTC.equals(attr.getName()))
-				{
-					attrName = INFO_GTC;
-				}
-				else
-				{
-					attrName = attr.getName();
+					alleleMatches.add(Iterables.find(refMatches, gonl -> alt.equals(gonl.getString(ALT)), null));
 				}
 
-				return entity.get(attrName);
+				String afs = alleleMatches
+						.stream()
+						.map(gonl -> gonl == null ? "." : Double.toString(gonl.getDouble(INFO_AC)
+								/ gonl.getDouble(INFO_AN))).collect(Collectors.joining("|"));
+
+				String gtcs = alleleMatches.stream().map(gonl -> gonl == null ? ".,.,." : gonl.getString(INFO_GTC))
+						.collect(Collectors.joining("|"));
+
+				resultEntity.set(GONL_GENOME_AF, afs);
+				resultEntity.set(GONL_GENOME_GTC, gtcs);
 			}
 		};
-
 		return new RepositoryAnnotatorImpl(entityAnnotator);
 	}
 
