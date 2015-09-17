@@ -171,11 +171,11 @@
 			<div class="row">
 				<div class="col-md-12">
 					<ul class="nav nav-tabs" role="tablist">
-			    		<li role="presentation" class="active"><a href="#script" aria-controls="script" role="tab" data-toggle="tab">Script</a></li>
+			    		<li id="script-tab" role="presentation" class="active"><a href="#script" aria-controls="script" role="tab" data-toggle="tab">Script</a></li>
 			    		
 			    		<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical" ||
 			    		attributeMapping.targetAttributeMetaData.dataType == "mref">
-			    			<li role="presentation"><a href="#map" aria-controls="map" role="tab" data-toggle="tab">Map</a></li>
+			    			<li id="map-tab" role="presentation"><a href="#map" aria-controls="map" role="tab" data-toggle="tab">Map</a></li>
 		    			</#if> 
 			   		</ul>
 				</div>
