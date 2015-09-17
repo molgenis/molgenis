@@ -54,6 +54,26 @@ function evalScript(script, entity) {
 				return this;
 			},
 			/**
+			 * Gives you the multiplication value of the attribute specified between
+			 * $('') notation
+			 * 
+			 * Example: $('Height').times(2).value() returns the result of
+			 * height_value * 2
+			 * 
+			 * @param factor :
+			 *            The number you multiply by
+			 * 
+			 * @memberof $
+			 * @method div
+			 */
+			times : function(factor) {
+				if ((typeof factor === 'object') && (typeof factor.value === 'function')) {
+					factor = factor.value();
+				}
+				this.val = (this.val * factor);
+				return this;
+			},
+			/**
 			 * Gives you the division value of the attribute specified between
 			 * $('') notation
 			 * 

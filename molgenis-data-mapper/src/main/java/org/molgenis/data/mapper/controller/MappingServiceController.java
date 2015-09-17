@@ -9,15 +9,17 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
@@ -40,12 +42,13 @@ import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.mapper.service.impl.AlgorithmEvaluation;
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
+import org.molgenis.fieldtypes.CategoricalField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
@@ -69,6 +72,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import autovalue.shaded.com.google.common.common.collect.Sets;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
@@ -475,31 +480,52 @@ public class MappingServiceController extends MolgenisPluginController
 		return "forward:" + URI;
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/attributeMapping/explain", consumes = APPLICATION_JSON_VALUE)
+	/**
+	 * This controller will first of all check if the user-defined search terms exist. If so, the searchTerms will be
+	 * used directly in the SemanticSearchService. If the searchTerms are not defined by users, it will use the
+	 * ontologyTermTags in the SemantiSearchService. If neither of the searchTerms and the OntologyTermTags exist, it
+	 * will use the information from the targetAttribute in the SemanticSearchService
+	 * 
+	 * If string terms are sent to the SemanticSearchService, they will be first of all converted to the ontologyTerms
+	 * using findTag method
+	 * 
+	 * @param requestBody
+	 * @return
+	 */
+	@RequestMapping(method = RequestMethod.POST, value = "/attributeMapping/semanticsearch", consumes = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Map<String, Iterable<ExplainedQueryString>> getExplainedAttributeMapping(
+	public List<ExplainedAttributeMetaData> getSemanticSearchAttributeMapping(
 			@RequestBody Map<String, String> requestBody)
 	{
 		String mappingProjectId = requestBody.get("mappingProjectId");
 		String target = requestBody.get("target");
 		String source = requestBody.get("source");
 		String targetAttribute = requestBody.get("targetAttribute");
+		String searchTermsString = requestBody.get("searchTerms");
+		Set<String> searchTerms = new HashSet<String>();
+
+		if (StringUtils.isNotBlank(searchTermsString))
+		{
+			searchTerms.addAll(Sets.newHashSet(searchTermsString.toLowerCase().split("\\s+or\\s+")).stream()
+					.filter(term -> StringUtils.isNotBlank(term)).map(term -> term.trim()).collect(Collectors.toSet()));
+		}
+
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
 		MappingTarget mappingTarget = project.getMappingTarget(target);
 		EntityMapping entityMapping = mappingTarget.getMappingForSource(source);
+
 		AttributeMetaData targetAttributeMetaData = entityMapping.getTargetEntityMetaData().getAttribute(
 				targetAttribute);
 
-		Map<AttributeMetaData, Iterable<ExplainedQueryString>> explainedAttributes = semanticSearchService
-				.findAttributes(entityMapping.getSourceEntityMetaData(), dataService.getEntityMetaData(target),
-						targetAttributeMetaData);
+		// Find relevant attributes base on tags
+		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
+				entityMapping.getTargetEntityMetaData(), targetAttributeMetaData);
 
-		Map<String, Iterable<ExplainedQueryString>> simpleExplainedAttributes = new LinkedHashMap<String, Iterable<ExplainedQueryString>>();
-		for (Entry<AttributeMetaData, Iterable<ExplainedQueryString>> entry : explainedAttributes.entrySet())
-		{
-			simpleExplainedAttributes.put(entry.getKey().getName(), entry.getValue());
-		}
-		return simpleExplainedAttributes;
+		Map<AttributeMetaData, ExplainedAttributeMetaData> relevantAttributes = semanticSearchService
+				.decisionTreeToFindRelevantAttributes(entityMapping.getSourceEntityMetaData(), targetAttributeMetaData,
+						tagsForAttribute.values(), searchTerms);
+
+		return Lists.newArrayList(relevantAttributes.values());
 	}
 
 	/**
@@ -687,7 +713,8 @@ public class MappingServiceController extends MolgenisPluginController
 		String targetAttributeIdAttribute = null;
 		String targetAttributeLabelAttribute = null;
 
-		if (targetAttributeDataType instanceof XrefField || targetAttributeDataType instanceof MrefField)
+		if (targetAttributeDataType instanceof XrefField || targetAttributeDataType instanceof MrefField
+				|| targetAttributeDataType instanceof CategoricalField)
 		{
 			targetAttributeEntities = dataService.findAll(dataService.getEntityMetaData(target)
 					.getAttribute(targetAttribute).getRefEntity().getName());
@@ -717,7 +744,8 @@ public class MappingServiceController extends MolgenisPluginController
 		String sourceAttributeIdAttribute = null;
 		String sourceAttributeLabelAttribute = null;
 
-		if (sourceAttributeDataType instanceof XrefField || sourceAttributeDataType instanceof MrefField)
+		if (sourceAttributeDataType instanceof XrefField || sourceAttributeDataType instanceof MrefField
+				|| targetAttributeDataType instanceof CategoricalField)
 		{
 			sourceAttributeEntities = dataService.findAll(dataService.getEntityMetaData(source)
 					.getAttribute(sourceAttribute).getRefEntity().getName());
@@ -732,7 +760,7 @@ public class MappingServiceController extends MolgenisPluginController
 		{
 			sourceAttributeEntities = dataService.findAll(dataService.getEntityMetaData(source).getName());
 			sourceAttributeIdAttribute = dataService.getEntityMetaData(source).getIdAttribute().getName();
-			sourceAttributeLabelAttribute = sourceAttribute;
+			sourceAttributeLabelAttribute = dataService.getEntityMetaData(source).getLabelAttribute().getName();
 		}
 
 		model.addAttribute("sourceAttributeEntities", sourceAttributeEntities);

@@ -437,15 +437,21 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 		addUpgrades();
 		boolean didUpgrade = upgradeService.upgrade();
-		if (!indexExists() || didUpgrade)
+		if (didUpgrade)
 		{
-			LOG.info("Reindexing repositories....");
+			LOG.info("Reindexing repositories due to MOLGENIS upgrade...");
+			reindex();
+			LOG.info("Reindexing done.");
+		}
+		else if (!indexExists())
+		{
+			LOG.info("Reindexing repositories due to missing Elasticsearch index...");
 			reindex();
 			LOG.info("Reindexing done.");
 		}
 		else
 		{
-			LOG.info("Index found. No need to reindex.");
+			LOG.debug("Elasticsearch index exists, no need to reindex.");
 		}
 		runAsSystem(() -> metaDataService().setDefaultBackend(getBackend()));
 	}

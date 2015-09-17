@@ -9,18 +9,16 @@ import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
+import org.mockito.Matchers;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -32,6 +30,7 @@ import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.semantic.Relation;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
@@ -39,6 +38,7 @@ import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,13 +47,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
-
-;
+import com.google.common.collect.Sets;
 
 @ContextConfiguration(classes = AlgorithmServiceImplTest.Config.class)
 public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
@@ -70,6 +69,19 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private SemanticSearchService semanticSearchService;
 
+	@Autowired
+	private AlgorithmTemplateService algorithmTemplateService;
+
+	@Autowired
+	private OntologyService ontologyService;
+
+	@BeforeMethod
+	public void setUpBeforeMethod()
+	{
+		when(algorithmTemplateService.find(Matchers.<Map<AttributeMetaData, ExplainedAttributeMetaData>> any()))
+				.thenReturn(Stream.empty());
+	}
+
 	@Test
 	public void testGetSourceAttributeNames()
 	{
@@ -80,56 +92,6 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	public void testGetSourceAttributeNamesNoQuotes()
 	{
 		assertEquals(algorithmService.getSourceAttributeNames("$(id)"), Collections.singletonList("id"));
-	}
-
-	@Test
-	public void testIsSingleMatchHighQuality()
-	{
-		AlgorithmServiceImpl algorithmServiceImpl = (AlgorithmServiceImpl) algorithmService;
-
-		DefaultAttributeMetaData targetAttribute1 = new DefaultAttributeMetaData("height");
-		targetAttribute1.setLabel("height");
-		Multimap<Relation, OntologyTerm> tags1 = LinkedHashMultimap.<Relation, OntologyTerm> create();
-		List<ExplainedQueryString> explanations1 = Arrays
-				.asList(ExplainedQueryString.create("height", "height", "standing height", 50.0));
-		assertFalse(algorithmServiceImpl.isSingleMatchHighQuality(targetAttribute1, tags1, explanations1));
-
-		DefaultAttributeMetaData targetAttribute2 = new DefaultAttributeMetaData("height");
-		targetAttribute2.setLabel("height");
-		Multimap<Relation, OntologyTerm> tags2 = LinkedHashMultimap.<Relation, OntologyTerm> create();
-		tags2.put(Relation.isAssociatedWith, OntologyTerm.create("http://www.molgenis.org/height", "length"));
-		List<ExplainedQueryString> explanations2 = Arrays
-				.asList(ExplainedQueryString.create("height", "height", "height", 100));
-		assertTrue(algorithmServiceImpl.isSingleMatchHighQuality(targetAttribute2, tags2, explanations2));
-
-		DefaultAttributeMetaData targetAttribute3 = new DefaultAttributeMetaData("fasting_glucose");
-		targetAttribute3.setLabel("glucose fasting");
-		Multimap<Relation, OntologyTerm> tags3 = LinkedHashMultimap.<Relation, OntologyTerm> create();
-		tags3.put(Relation.isAssociatedWith, OntologyTerm
-				.create("http://www.molgenis.org/fasting,http://www.molgenis.org/glucose", "fasting,glucose"));
-		List<ExplainedQueryString> explanations3 = Arrays.asList(
-				ExplainedQueryString.create("fasting", "fasting", "fasting", 100),
-				ExplainedQueryString.create("glucose", "glucose", "blood glucose", 50));
-		assertFalse(algorithmServiceImpl.isSingleMatchHighQuality(targetAttribute3, tags3, explanations3));
-	}
-
-	@Test
-	public void testIsGoodMatch()
-	{
-		AlgorithmServiceImpl algorithmServiceImpl = (AlgorithmServiceImpl) algorithmService;
-
-		Map<String, Double> matchedTags = new HashMap<String, Double>();
-		matchedTags.put("height", 100.0);
-		matchedTags.put("weight", 50.0);
-		assertFalse(algorithmServiceImpl.isGoodMatch(matchedTags, "blood"));
-		assertFalse(algorithmServiceImpl.isGoodMatch(matchedTags, "weight"));
-		assertTrue(algorithmServiceImpl.isGoodMatch(matchedTags, "height"));
-
-		Map<String, Double> matchedTags2 = new HashMap<String, Double>();
-		matchedTags2.put("fasting", 100.0);
-		matchedTags2.put("glucose", 100.0);
-
-		assertTrue(algorithmServiceImpl.isGoodMatch(matchedTags2, "fasting glucose"));
 	}
 
 	@Test
@@ -163,8 +125,8 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("age");
 		targetAttributeMetaData.setDataType(INT);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
-		attributeMapping.setAlgorithm(
-				"Math.floor((new Date('02/12/2015') - $('dob').value())/(365.2425 * 24 * 60 * 60 * 1000))");
+		attributeMapping
+				.setAlgorithm("Math.floor((new Date('02/12/2015') - $('dob').value())/(365.2425 * 24 * 60 * 60 * 1000))");
 		Object result = algorithmService.apply(attributeMapping, source, entityMetaData);
 		assertEquals(result, 41);
 	}
@@ -237,8 +199,8 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		targetAttributeMetaData.setDataType(MREF).setNillable(false).setRefEntity(refEntityMeta);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
 		attributeMapping.setAlgorithm("$('" + sourceEntityAttrName + "').value()");
-		when(dataService.findAll(refEntityName, Arrays.asList(refEntityId0, refEntityId1)))
-				.thenReturn(Arrays.asList(refEntity0, refEntity1));
+		when(dataService.findAll(refEntityName, Arrays.asList(refEntityId0, refEntityId1))).thenReturn(
+				Arrays.asList(refEntity0, refEntity1));
 
 		// source Entity
 		DefaultEntityMetaData entityMetaDataSource = new DefaultEntityMetaData(sourceEntityName);
@@ -313,11 +275,19 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityMetaData);
 
-		Map<AttributeMetaData, Iterable<ExplainedQueryString>> matches = ImmutableMap.of(sourceAttribute,
-				Arrays.asList(ExplainedQueryString.create("height", "height", "height", 100)));
+		Map<AttributeMetaData, ExplainedAttributeMetaData> matches = ImmutableMap.of(
+				sourceAttribute,
+				ExplainedAttributeMetaData.create(sourceAttribute,
+						Arrays.asList(ExplainedQueryString.create("height", "height", "height", 100)), true));
 
-		when(semanticSearchService.findAttributes(sourceEntityMetaData, targetEntityMetaData, targetAttribute))
-				.thenReturn(matches);
+		LinkedHashMultimap<Relation, OntologyTerm> ontologyTermTags = LinkedHashMultimap.create();
+
+		when(
+				semanticSearchService.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute,
+						ontologyTermTags.values(), null)).thenReturn(matches);
+
+		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute))
+				.thenReturn(ontologyTermTags);
 
 		algorithmService.autoGenerateAlgorithm(sourceEntityMetaData, targetEntityMetaData, mapping, targetAttribute);
 
@@ -351,8 +321,9 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityMetaData);
 
-		when(semanticSearchService.findAttributes(sourceEntityMetaData, targetEntityMetaData, targetAttribute))
-				.thenReturn(emptyMap());
+		when(
+				semanticSearchService.findAttributes(sourceEntityMetaData, Sets.newHashSet("targetHeight", "height"),
+						Collections.emptyList())).thenReturn(emptyMap());
 
 		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute)).thenReturn(
 				LinkedHashMultimap.create());
@@ -392,23 +363,51 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityMetaData);
 
-		Map<AttributeMetaData, Iterable<ExplainedQueryString>> mappings = ImmutableMap
-				.<AttributeMetaData, Iterable<ExplainedQueryString>> of(sourceAttribute1,
-						Arrays.<ExplainedQueryString> asList(), sourceAttribute2,
-						Arrays.<ExplainedQueryString> asList());
+		Map<AttributeMetaData, ExplainedAttributeMetaData> mappings = ImmutableMap
+				.<AttributeMetaData, ExplainedAttributeMetaData> of(sourceAttribute1,
+						ExplainedAttributeMetaData.create(sourceAttribute1), sourceAttribute2,
+						ExplainedAttributeMetaData.create(sourceAttribute2));
 
-		when(semanticSearchService.findAttributes(sourceEntityMetaData, targetEntityMetaData, targetAttribute))
-				.thenReturn(mappings);
+		LinkedHashMultimap<Relation, OntologyTerm> ontologyTermTags = LinkedHashMultimap
+				.<Relation, OntologyTerm> create();
 
-		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute)).thenReturn(
-				LinkedHashMultimap.<Relation, OntologyTerm> create());
+		when(
+				semanticSearchService.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute,
+						ontologyTermTags.values(), null)).thenReturn(mappings);
 
-		ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute);
+		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute))
+				.thenReturn(ontologyTermTags);
 
 		algorithmService.autoGenerateAlgorithm(sourceEntityMetaData, targetEntityMetaData, mapping, targetAttribute);
 
 		Assert.assertEquals(mapping.getAttributeMapping("targetHeight").getSourceAttributeMetaDatas().get(0),
 				sourceAttribute1);
+	}
+
+	@Test
+	public void testConvertUnitsAlgorithm()
+	{
+		AlgorithmServiceImpl algorithmServiceImpl = (AlgorithmServiceImpl) algorithmService;
+
+		DefaultEntityMetaData targetEntityMetaData = new DefaultEntityMetaData("target");
+		DefaultAttributeMetaData targetAttribute = new DefaultAttributeMetaData("targetHeight");
+		targetAttribute.setLabel("height in m");
+		targetEntityMetaData.addAttributeMetaData(targetAttribute);
+
+		DefaultEntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("source");
+		DefaultAttributeMetaData sourceAttribute = new DefaultAttributeMetaData("sourceHeight");
+		sourceAttribute.setLabel("body length in cm");
+		sourceEntityMetaData.addAttributeMetaData(sourceAttribute);
+
+		when(ontologyService.getOntology("http://purl.obolibrary.org/obo/uo.owl")).thenReturn(
+				Ontology.create("1", "http://purl.obolibrary.org/obo/uo.owl", "unit ontology"));
+
+		String actualAlgorithm = algorithmServiceImpl.generateUnitConversionAlgorithm(targetAttribute,
+				targetEntityMetaData, sourceAttribute, sourceEntityMetaData);
+
+		String expectedAlgorithm = "$('sourceHeight').unit('cm').toUnit('m').value();";
+
+		Assert.assertEquals(actualAlgorithm, expectedAlgorithm);
 	}
 
 	@Configuration

@@ -53,11 +53,13 @@ public class VcfRepositoryTest
 			assertTrue(it.hasNext());
 			testAttribute(it.next(), VcfRepository.CHROM, MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfRepository.ALT, MolgenisFieldTypes.STRING);
+			// TEXT to handle large insertions/deletions
+			testAttribute(it.next(), VcfRepository.ALT, MolgenisFieldTypes.TEXT);
 			assertTrue(it.hasNext());
 			testAttribute(it.next(), VcfRepository.POS, MolgenisFieldTypes.LONG);
 			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfRepository.REF, MolgenisFieldTypes.STRING);
+			// TEXT to handle large insertions/deletions
+			testAttribute(it.next(), VcfRepository.REF, MolgenisFieldTypes.TEXT);
 			assertTrue(it.hasNext());
 			testAttribute(it.next(), VcfRepository.FILTER, MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());

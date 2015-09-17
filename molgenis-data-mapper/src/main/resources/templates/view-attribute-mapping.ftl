@@ -26,6 +26,8 @@
 		<input id="source" type="hidden" name="source" value="${entityMapping.sourceEntityMetaData.name?html}"/>
 		<input id="targetAttribute" type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
 		<input id="targetAttributeType" type="hidden" name="targetAttributeType" value="${attributeMapping.targetAttributeMetaData.dataType?html}"/>
+		<input id="sourceAttributeSize" type="hidden" value="${entityMapping.sourceEntityMetaData.attributes?size?html}"/>
+		<input id="dataExplorerUri" type="hidden" value="${dataExplorerUri?html}"/>
 	</div>
 </div>
 <div class="row">
@@ -87,7 +89,7 @@
 					<#else>
 						<#list tags as tag>
 							<#assign synonyms = tag.synonyms?join("</br>")>
-							<span class="label label-info ontologytag-tooltip" data-toggle="popover" title="<strong>Synonyms</strong>" data-content="${synonyms}">${tag.label}</span>
+							<span class="label label-info ontologytag-tooltip" data-toggle="popover" title="<strong>Synonyms</strong>" data-content="${synonyms}">${tag.label?html}</span>
 						</#list>
 					</#if>
 				</td>
@@ -126,10 +128,14 @@
 						${attributeMapping.targetAttributeMetaData.name?html}. By checking one of the attributes below, 
 						an algorithm will be generated and the result of your selection will be shown."></i>
 					</legend>
-					
 					<form>
-			  			<div class="form-group">
-							<input id="attribute-search-field" type="text" class="form-control" placeholder="Search all ${entityMapping.sourceEntityMetaData.attributes?size?html} attributes from ${entityMapping.sourceEntityMetaData.name?html}">
+						<div class="form-group">
+				  			<div class="input-group">
+								<input id="attribute-search-field" type="text" class="form-control" placeholder="Search all ${entityMapping.sourceEntityMetaData.attributes?size?html} attributes from ${entityMapping.sourceEntityMetaData.name?html}">
+								<span class="input-group-btn">
+									<button id="attribute-search-field-button" type="button" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
+								</span>
+							</div>
 						</div>
 					</form>
 				</div>
@@ -138,38 +144,7 @@
 			<div class="row">
 				<div class="col-md-12">
 					<p id="attribute-search-result-message"></p>
-					<table id="attribute-mapping-table" class="table table-bordered scroll">
-						<thead>
-							<th>Select</th>
-							<th>Attribute</th>
-							<th>Algorithm value</th>
-						</thead>
-						<tbody>
-							<#list entityMapping.sourceEntityMetaData.attributes as source>
-								<tr data-attribute-name="${source.name?html}" data-attribute-label="${source.label?html}">
-									<td>
-										<div class="checkbox">
-											<label>
-												<input data-attribute-name="${source.name?html}" type="checkbox">
-											</label>
-										</div>
-									</td>
-									<td class="source-attribute-information">
-										<b>${source.label?html}</b> (${source.dataType?html})
-										<#if source.nillable> <span class="label label-warning">nillable</span></#if>
-										<#if source.unique> <span class="label label-default">unique</span></#if>
-										<#if source.description??><br />${source.description?html}</#if>
-										<#if source.dataType == "xref" || source.dataType == "categorical" || source.dataType == "mref">
-											<br><a href="${dataExplorerUri?html}?entity=${source.refEntity.name}" target="_blank">category look up</a>
-										</#if>
-									</td>
-									<td>
-										${source.name?html}
-									</td>
-								</tr>
-							</#list>
-						</tbody>
-					</table>
+					<table id="attribute-mapping-table" class="table table-bordered scroll"></table>
 				</div>
 			</div>
 			
@@ -196,11 +171,11 @@
 			<div class="row">
 				<div class="col-md-12">
 					<ul class="nav nav-tabs" role="tablist">
-			    		<li role="presentation" class="active"><a href="#script" aria-controls="script" role="tab" data-toggle="tab">Script</a></li>
+			    		<li id="script-tab" role="presentation" class="active"><a href="#script" aria-controls="script" role="tab" data-toggle="tab">Script</a></li>
 			    		
 			    		<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical" ||
 			    		attributeMapping.targetAttributeMetaData.dataType == "mref">
-			    			<li role="presentation"><a href="#map" aria-controls="map" role="tab" data-toggle="tab">Map</a></li>
+			    			<li id="map-tab" role="presentation"><a href="#map" aria-controls="map" role="tab" data-toggle="tab">Map</a></li>
 		    			</#if> 
 			   		</ul>
 				</div>

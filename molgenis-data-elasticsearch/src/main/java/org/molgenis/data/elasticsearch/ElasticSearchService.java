@@ -1,6 +1,11 @@
 package org.molgenis.data.elasticsearch;
 
 import static java.util.stream.StreamSupport.stream;
+import static org.elasticsearch.index.query.FilterBuilders.andFilter;
+import static org.elasticsearch.index.query.FilterBuilders.queryFilter;
+import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
+import static org.elasticsearch.index.query.QueryBuilders.indicesQuery;
+import static org.elasticsearch.index.query.QueryBuilders.termQuery;
 import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
 import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchIds;
 import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
@@ -40,6 +45,8 @@ import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
@@ -536,7 +543,7 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 		GetResponse response = client.prepareGet(index, type, id).execute().actionGet();
 		if (response.isExists())
 		{
-			client.prepareDelete(index, type, id).setRefresh(true).execute().actionGet();
+			client.prepareDelete(index, type, id).execute().actionGet();
 		}
 
 		if (LOG.isDebugEnabled())
@@ -555,7 +562,6 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 	public void deleteById(Iterable<String> ids, EntityMetaData entityMetaData)
 	{
 		ids.forEach(id -> deleteById(id, entityMetaData));
-		refresh();
 	}
 
 	/*
@@ -567,6 +573,8 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 	public void delete(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
 	{
 		List<Object> ids = stream(entities.spliterator(), true).map(e -> e.getIdValue()).collect(Collectors.toList());
+		if (ids.isEmpty()) return;
+
 		if (!canBeDeleted(ids, entityMetaData))
 		{
 			throw new MolgenisDataException(
@@ -1048,6 +1056,29 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 					SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexNames);
 					searchRequestGenerator.buildSearchRequest(searchRequestBuilder, type, SearchType.QUERY_AND_FETCH,
 							q, fieldsToReturn, null, null, null, entityMetaData);
+
+					// We are in a transaction, the first index is the status before the transaction started, the second
+					// index the status within the transaction. We don't want to return the deleted records and of the
+					// updated records we want the latest version (that of the transaction)
+					if (indexNames.length > 1)
+					{
+						QueryBuilder findUpdatesQuery = indicesQuery(
+								termQuery(CRUD_TYPE_FIELD_NAME, CrudType.UPDATE.name()), indexNames[1]);
+
+						// Exclude the updated records from the first index
+						QueryBuilder excludeUpdatesQuery = indicesQuery(boolQuery().mustNot(findUpdatesQuery),
+								indexNames[0]);
+
+						QueryBuilder findDeletesQuery = indicesQuery(
+								termQuery(CRUD_TYPE_FIELD_NAME, CrudType.DELETE.name()), indexNames[1]);
+
+						// Exclude deleted records fom both indices
+						BoolQueryBuilder excludeDeletesQuery = boolQuery().mustNot(findDeletesQuery);
+
+						searchRequestBuilder.setPostFilter(andFilter(queryFilter(excludeUpdatesQuery),
+								queryFilter(excludeDeletesQuery)));
+					}
+
 					if (LOG.isTraceEnabled())
 					{
 						LOG.trace("SearchRequest: " + searchRequestBuilder);
