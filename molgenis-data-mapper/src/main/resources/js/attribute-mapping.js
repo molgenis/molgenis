@@ -451,6 +451,7 @@
 
 				// on selection of an attribute, show all fields
 				$('#result-container').css('display', 'inline');
+				$('#map-tab').show();
 
 				// generate result table
 				loadAlgorithmResult(algorithm);
@@ -464,6 +465,7 @@
 			} else {
 				// events when no attributes are selected
 				$('#result-container').css('display', 'none');
+				$('#map-tab').hide();
 			}
 		});
 	}
@@ -670,6 +672,11 @@
 			'searchTerms' : ""
 		}, explainedAttributes, attributes = [];
 
+		// Hide the map tab when no attributes are selected
+		if ($('#attribute-mapping-table :checkbox:checked').length < 1) {
+			$('#map-tab').hide();
+		}
+		
 		// tooltip placement
 		$("[rel=tooltip]").tooltip({
 			placement : 'right'
