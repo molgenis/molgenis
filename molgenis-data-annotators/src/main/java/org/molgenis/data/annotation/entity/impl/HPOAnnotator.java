@@ -2,6 +2,7 @@ package org.molgenis.data.annotation.entity.impl;
 
 import static org.molgenis.data.annotation.entity.impl.HPORepository.HPO_ID_COL_NAME;
 import static org.molgenis.data.annotation.entity.impl.HPORepository.HPO_TERM_COL_NAME;
+import static org.molgenis.data.annotator.websettings.HPOAnnotatorSettings.Meta.HPO_LOCATION;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,7 +32,6 @@ import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,14 +49,15 @@ import com.google.common.base.Optional;
 @Configuration
 public class HPOAnnotator
 {
+	public static final String NAME = "hpo";
+
 	public static final String HPO_IDS = "HPOIDS";
 	public static final String HPO_TERMS = "HPOTERMS";
-	public static final String HPO_FILE_LOCATION_PROPERTY = "hpo_location";
 
 	private static final String HPO_RESOURCE = "HPOResource";
 
 	@Autowired
-	private MolgenisSettings molgenisSettings;
+	private Entity HPOAnnotatorSettings;
 
 	@Autowired
 	private DataService dataService;
@@ -68,20 +69,22 @@ public class HPOAnnotator
 	public RepositoryAnnotator hpo()
 	{
 		List<AttributeMetaData> attributes = new ArrayList<>();
-		attributes.add(new DefaultAttributeMetaData(HPO_IDS).setDataType(MolgenisFieldTypes.TEXT).setDescription("HPO identifiers"));
-		attributes.add(new DefaultAttributeMetaData(HPO_TERMS).setDataType(MolgenisFieldTypes.TEXT).setDescription("HPO terms"));
+		attributes.add(new DefaultAttributeMetaData(HPO_IDS).setDataType(MolgenisFieldTypes.TEXT).setDescription(
+				"HPO identifiers"));
+		attributes.add(new DefaultAttributeMetaData(HPO_TERMS).setDataType(MolgenisFieldTypes.TEXT).setDescription(
+				"HPO terms"));
 
 		AnnotatorInfo info = AnnotatorInfo
 				.create(Status.READY,
 						Type.PHENOTYPE_ASSOCIATION,
-						"hpo",
+						NAME,
 						"The Human Phenotype Ontology (HPO) aims to provide a standardized vocabulary of phenotypic abnormalities encountered in human disease."
 								+ "Terms in the HPO describes a phenotypic abnormality, such as atrial septal defect.The HPO is currently being developed using the medical literature, Orphanet, DECIPHER, and OMIM. HPO currently contains approximately 11,000 terms and over 115,000 annotations to hereditary diseases.",
 						attributes);
 
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(HPO_RESOURCE, info, new GeneNameQueryCreator(),
 				new HPOResultFilter(), dataService, resources,
-				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(HPO_FILE_LOCATION_PROPERTY, molgenisSettings));
+				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(HPO_LOCATION, HPOAnnotatorSettings));
 
 		return new RepositoryAnnotatorImpl(entityAnnotator);
 	}
@@ -89,7 +92,7 @@ public class HPOAnnotator
 	@Bean
 	public Resource hpoResource()
 	{
-		return new ResourceImpl(HPO_RESOURCE, new SingleResourceConfig(HPO_FILE_LOCATION_PROPERTY, molgenisSettings),
+		return new ResourceImpl(HPO_RESOURCE, new SingleResourceConfig(HPO_LOCATION, HPOAnnotatorSettings),
 				new RepositoryFactory()
 				{
 					@Override

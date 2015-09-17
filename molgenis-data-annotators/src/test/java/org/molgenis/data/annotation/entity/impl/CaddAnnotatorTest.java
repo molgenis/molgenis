@@ -1,7 +1,6 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
@@ -19,11 +18,11 @@ import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
+import org.molgenis.data.annotator.websettings.CaddAnnotatorSettings;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -54,7 +53,6 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 	public static Entity entity2;
 	public static Entity entity3;
 
-	public MolgenisSettings settings = mock(MolgenisSettings.class);
 	public ArrayList<Entity> entities;
 
 	public void setValues()
@@ -194,11 +192,11 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 		private DataService dataService;
 
 		@Bean
-		public MolgenisSettings molgenisSettings()
+		public Entity caddAnnotatorSettings()
 		{
-			MolgenisSettings settings = mock(MolgenisSettings.class);
-			when(settings.getProperty(CaddAnnotator.CADD_FILE_LOCATION_PROPERTY))
-					.thenReturn(ResourceUtils.getFile(getClass(), "/cadd_test.vcf.gz").getPath());
+			Entity settings = new MapEntity();
+			settings.set(CaddAnnotatorSettings.Meta.CADD_LOCATION,
+					ResourceUtils.getFile(getClass(), "/cadd_test.vcf.gz").getPath());
 			return settings;
 		}
 

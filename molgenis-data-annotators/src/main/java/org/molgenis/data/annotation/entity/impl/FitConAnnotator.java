@@ -1,5 +1,6 @@
 package org.molgenis.data.annotation.entity.impl;
 
+import static org.molgenis.data.annotator.websettings.FitConAnnotatorSettings.Meta.FITCON_LOCATION;
 import static org.molgenis.data.vcf.VcfRepository.ALT_META;
 import static org.molgenis.data.vcf.VcfRepository.CHROM_META;
 import static org.molgenis.data.vcf.VcfRepository.POS_META;
@@ -11,6 +12,7 @@ import java.util.List;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
@@ -25,7 +27,6 @@ import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.resources.impl.TabixRepositoryFactory;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,16 +34,19 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class FitConAnnotator
 {
+	public static final String NAME = "fitcon";
+
 	// FIXME: nomenclature: http://cadd.gs.washington.edu/info
 	public static final String FITCON_SCORE = "FITCON_SCORE";
 	public static final String FITCON_SCORE_LABEL = "FITCON_SCORE";
-	public static final String FITCON_FILE_LOCATION_PROPERTY = "fitcon_location";
 	public static final String FITCON_TABIX_RESOURCE = "FitConTabixResource";
 
 	@Autowired
-	private MolgenisSettings molgenisSettings;
+	private Entity fitConAnnotatorSettings;
+
 	@Autowired
 	private DataService dataService;
+
 	@Autowired
 	private Resources resources;
 
@@ -59,7 +63,7 @@ public class FitConAnnotator
 		AnnotatorInfo fitconInfo = AnnotatorInfo
 				.create(Status.READY,
 						AnnotatorInfo.Type.EFFECT_PREDICTION,
-						"fitcon",
+						NAME,
 						"Summary: Annotating genetic variants, especially non-coding variants, "
 								+ "for the purpose of identifying pathogenic variants remains a challenge. "
 								+ "Combined annotation-dependent depletion (CADD) is an al- gorithm designed "
@@ -79,8 +83,7 @@ public class FitConAnnotator
 						attributes);
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(FITCON_TABIX_RESOURCE, fitconInfo, new LocusQueryCreator(),
 				new VariantResultFilter(), dataService, resources,
-				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(FITCON_FILE_LOCATION_PROPERTY,
-						molgenisSettings));
+				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(FITCON_LOCATION, fitConAnnotatorSettings));
 
 		return new RepositoryAnnotatorImpl(entityAnnotator);
 	}
@@ -211,8 +214,8 @@ public class FitConAnnotator
 
 		repoMetaData.addAttribute("id").setIdAttribute(true).setVisible(false);
 
-		fitConTabixResource = new ResourceImpl(FITCON_TABIX_RESOURCE, new SingleResourceConfig(
-				FITCON_FILE_LOCATION_PROPERTY, molgenisSettings), new TabixRepositoryFactory(repoMetaData));
+		fitConTabixResource = new ResourceImpl(FITCON_TABIX_RESOURCE, new SingleResourceConfig(FITCON_LOCATION,
+				fitConAnnotatorSettings), new TabixRepositoryFactory(repoMetaData));
 
 		return fitConTabixResource;
 	}

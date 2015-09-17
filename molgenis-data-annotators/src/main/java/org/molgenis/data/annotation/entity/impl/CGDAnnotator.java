@@ -20,6 +20,7 @@ import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.GeneralizedI
 import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.GeneralizedInheritance.OTHER;
 import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.GeneralizedInheritance.RECESSIVE;
 import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.GeneralizedInheritance.XLINKED;
+import static org.molgenis.data.annotator.websettings.CGDAnnotatorSettings.Meta.CGD_LOCATION;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,7 +50,6 @@ import org.molgenis.data.annotation.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -64,7 +64,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class CGDAnnotator
 {
-	public static final String CGD_FILE_LOCATION_PROPERTY = "cgd_location";
+	public static final String NAME = "CGD";
+
 	private static String CGD_RESOURCE = "CGDResource";
 	private static final char SEPARATOR = '\t';
 
@@ -75,7 +76,7 @@ public class CGDAnnotator
 	private static final String GENERALIZED_INHERITANCE_LABEL = "CGDGIN";
 
 	@Autowired
-	private MolgenisSettings molgenisSettings;
+	private Entity CGDAnnotatorSettings;
 
 	@Autowired
 	private DataService dataService;
@@ -151,7 +152,7 @@ public class CGDAnnotator
 	@Bean
 	public Resource cgdResource()
 	{
-		return new ResourceImpl(CGD_RESOURCE, new SingleResourceConfig(CGD_FILE_LOCATION_PROPERTY, molgenisSettings),
+		return new ResourceImpl(CGD_RESOURCE, new SingleResourceConfig(CGD_LOCATION, CGDAnnotatorSettings),
 				new RepositoryFactory()
 				{
 					@Override
@@ -195,8 +196,7 @@ public class CGDAnnotator
 				ResultFilter resultFilter, DataService dataService, Resources resources)
 		{
 			super(sourceRepositoryName, info, queryCreator, resultFilter, dataService, resources,
-					new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(CGD_FILE_LOCATION_PROPERTY,
-							molgenisSettings));
+					new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(CGD_LOCATION, CGDAnnotatorSettings));
 		}
 
 		@Override
