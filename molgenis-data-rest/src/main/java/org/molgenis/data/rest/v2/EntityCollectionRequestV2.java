@@ -4,6 +4,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
 import org.molgenis.data.Sort;
+import org.molgenis.data.rsql.AggregateQueryRsql;
 import org.molgenis.data.rsql.QueryRsql;
 
 class EntityCollectionRequestV2
@@ -11,6 +12,7 @@ class EntityCollectionRequestV2
 	public static final int MAX_ROWS = 10000;
 	public static final int DEFAULT_ROW_COUNT = 100;
 	private QueryRsql q;
+	private AggregateQueryRsql aggs;
 	private Sort sort;
 	private AttributeFilter attrs;
 
@@ -70,10 +72,23 @@ class EntityCollectionRequestV2
 		this.attrs = attrs;
 	}
 
+	public AggregateQueryRsql getAggs()
+	{
+		return aggs;
+	}
+
+	public void setAggs(AggregateQueryRsql aggs)
+	{
+		this.aggs = aggs;
+	}
+
 	@Override
 	public String toString()
 	{
-		return "EntityCollectionRequestV2 [q=" + q + ", sort=" + sort + ", attrs=" + attrs + ", start=" + start
-				+ ", num=" + num + "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("EntityCollectionRequestV2 [q=").append(q).append(", aggs=").append(aggs).append(", sort=")
+				.append(sort).append(", attrs=").append(attrs).append(", start=").append(start).append(", num=")
+				.append(num).append("]");
+		return builder.toString();
 	}
 }

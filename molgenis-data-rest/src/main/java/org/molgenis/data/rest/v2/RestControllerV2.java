@@ -1,5 +1,6 @@
 package org.molgenis.data.rest.v2;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
@@ -18,10 +19,13 @@ import java.util.Map;
 import javax.validation.Valid;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AggregateQuery;
+import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisQueryException;
 import org.molgenis.data.Query;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.rest.EntityPager;
@@ -56,8 +60,8 @@ class RestControllerV2
 	@Autowired
 	public RestControllerV2(DataService dataService, MolgenisPermissionService permissionService)
 	{
-		this.dataService = dataService;
-		this.permissionService = permissionService;
+		this.dataService = requireNonNull(dataService);
+		this.permissionService = requireNonNull(permissionService);
 	}
 
 	/**
@@ -146,21 +150,36 @@ class RestControllerV2
 		Query q = request.getQ() != null ? request.getQ().createQuery(meta) : new QueryImpl();
 		q.pageSize(request.getNum()).offset(request.getStart()).sort(request.getSort());
 
-		Iterable<Entity> it = dataService.findAll(entityName, q);
-		Long count = dataService.count(entityName, q);
-		EntityPager pager = new EntityPager(request.getStart(), request.getNum(), count, it);
-
-		AttributeFilter attributeFilter = request.getAttrs();
-		List<Map<String, Object>> entities = new ArrayList<>();
-		for (Entity entity : it)
+		if (request.getAggs() != null)
 		{
-			Map<String, Object> responseData = new LinkedHashMap<String, Object>();
-			createEntityValuesResponse(entity, attributeFilter, responseData);
-			entities.add(responseData);
+			// return aggregates for aggregate query
+			AggregateQuery aggsQ = request.getAggs().createAggregateQuery(meta, q);
+			if (aggsQ.getAttributeX() == null && aggsQ.getAttributeY() == null)
+			{
+				throw new MolgenisQueryException("Aggregate query is missing 'x' or 'y' attribute");
+			}
+			AggregateResult aggs = dataService.aggregate(entityName, aggsQ);
+			return new EntityAggregatesResponse(aggs, BASE_URI + '/' + entityName);
 		}
+		else
+		{
+			// return entities for query
+			Iterable<Entity> it = dataService.findAll(entityName, q);
+			Long count = dataService.count(entityName, q);
+			EntityPager pager = new EntityPager(request.getStart(), request.getNum(), count, it);
 
-		return new EntityCollectionResponseV2(pager, entities, attributeFilter, BASE_URI + '/' + entityName, meta,
-				permissionService);
+			AttributeFilter attributeFilter = request.getAttrs();
+			List<Map<String, Object>> entities = new ArrayList<>();
+			for (Entity entity : it)
+			{
+				Map<String, Object> responseData = new LinkedHashMap<String, Object>();
+				createEntityValuesResponse(entity, attributeFilter, responseData);
+				entities.add(responseData);
+			}
+
+			return new EntityCollectionResponseV2(pager, entities, attributeFilter, BASE_URI + '/' + entityName, meta,
+					permissionService);
+		}
 	}
 
 	private Map<String, Object> createEntityResponse(Entity entity, AttributeFilter attrFilter, boolean includeMetaData)
@@ -262,7 +281,8 @@ class RestControllerV2
 						break;
 					case DATE_TIME:
 						Date dateTimeValue = entity.getDate(attrName);
-						String dateTimeValueStr = dateTimeValue != null ? getDateTimeFormat().format(dateTimeValue) : null;
+						String dateTimeValueStr = dateTimeValue != null ? getDateTimeFormat().format(dateTimeValue)
+								: null;
 						responseData.put(attrName, dateTimeValueStr);
 						break;
 					case DECIMAL:
