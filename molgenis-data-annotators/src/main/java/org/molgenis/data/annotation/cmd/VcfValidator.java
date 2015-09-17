@@ -106,7 +106,6 @@ public class VcfValidator
 		finally
 		{
 			bufferedWriter.close();
-
 			inputScanner.close();
 			errorScanner.close();
 		}
