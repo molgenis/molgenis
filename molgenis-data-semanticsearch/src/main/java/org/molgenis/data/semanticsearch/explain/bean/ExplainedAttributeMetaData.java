@@ -18,19 +18,22 @@ public abstract class ExplainedAttributeMetaData
 {
 	public static ExplainedAttributeMetaData create(AttributeMetaData attributeMetaData)
 	{
-		return new AutoValue_ExplainedAttributeMetaData(attributeToMap(attributeMetaData), Collections.emptySet());
+		return new AutoValue_ExplainedAttributeMetaData(attributeToMap(attributeMetaData), Collections.emptySet(),
+				false);
 	}
 
 	public static ExplainedAttributeMetaData create(AttributeMetaData attributeMetaData,
-			Iterable<ExplainedQueryString> explainedQueryStrings)
+			Iterable<ExplainedQueryString> explainedQueryStrings, boolean highQuality)
 	{
 		return new AutoValue_ExplainedAttributeMetaData(attributeToMap(attributeMetaData),
-				Sets.newHashSet(explainedQueryStrings));
+				Sets.newHashSet(explainedQueryStrings), highQuality);
 	}
 
 	public abstract Map<String, Object> getAttributeMetaData();
 
 	public abstract Set<ExplainedQueryString> getExplainedQueryStrings();
+
+	public abstract boolean isHighQuality();
 
 	private static Map<String, Object> attributeToMap(AttributeMetaData attributeMetaData)
 	{

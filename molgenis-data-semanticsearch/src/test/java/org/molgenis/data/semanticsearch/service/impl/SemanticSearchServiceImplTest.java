@@ -4,10 +4,13 @@ import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -21,6 +24,7 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
 import org.molgenis.data.semanticsearch.semantic.Hit;
@@ -162,6 +166,51 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 	}
 
 	@Test
+	public void testIsSingleMatchHighQuality()
+	{
+		List<ExplainedQueryString> explanations1 = Arrays.asList(ExplainedQueryString.create("height", "height",
+				"standing height", 50.0));
+		assertFalse(semanticSearchService.isSingleMatchHighQuality(Sets.newHashSet("height"),
+				Sets.newHashSet("height"), explanations1));
+
+		List<ExplainedQueryString> explanations2 = Arrays.asList(ExplainedQueryString.create("body length",
+				"body length", "height", 100));
+
+		assertTrue(semanticSearchService.isSingleMatchHighQuality(Sets.newHashSet("height in meter"),
+				Sets.newHashSet("height in meter", "height"), explanations2));
+
+		List<ExplainedQueryString> explanations3 = Arrays.asList(
+				ExplainedQueryString.create("fasting", "fasting", "fasting", 100),
+				ExplainedQueryString.create("glucose", "blood glucose", "blood glucose", 50));
+
+		assertFalse(semanticSearchService.isSingleMatchHighQuality(Sets.newHashSet("fasting glucose"),
+				Sets.newHashSet("fasting glucose", "fasting", "blood glucose"), explanations3));
+
+		List<ExplainedQueryString> explanations4 = Arrays.asList(ExplainedQueryString.create("number of", "number of",
+				"number", 100));
+
+		assertFalse(semanticSearchService.isSingleMatchHighQuality(Sets.newHashSet("number of cigarette smoked"),
+				Sets.newHashSet("number of cigarette smoked", "number of"), explanations4));
+	}
+
+	@Test
+	public void testIsGoodMatch()
+	{
+		Map<String, Double> matchedTags = new HashMap<String, Double>();
+		matchedTags.put("height", 100.0);
+		matchedTags.put("weight", 50.0);
+		assertFalse(semanticSearchService.isGoodMatch(matchedTags, "blood"));
+		assertFalse(semanticSearchService.isGoodMatch(matchedTags, "weight"));
+		assertTrue(semanticSearchService.isGoodMatch(matchedTags, "height"));
+
+		Map<String, Double> matchedTags2 = new HashMap<String, Double>();
+		matchedTags2.put("fasting", 100.0);
+		matchedTags2.put("glucose", 100.0);
+
+		assertTrue(semanticSearchService.isGoodMatch(matchedTags2, "fasting glucose"));
+	}
+
+	@Test
 	public void testFindAttributes()
 	{
 		DefaultEntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("sourceEntityMetaData");
@@ -205,11 +254,11 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		when(dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME, new QueryImpl(disMaxQueryRules))).thenReturn(
 				attributeMetaDataEntities);
 
-		Map<AttributeMetaData, Iterable<ExplainedQueryString>> termsActual1 = semanticSearchService.findAttributes(
+		Map<AttributeMetaData, ExplainedAttributeMetaData> termsActual1 = semanticSearchService.findAttributes(
 				sourceEntityMetaData, Sets.newHashSet("targetAttribute"), Collections.emptyList());
 
-		Map<AttributeMetaData, Iterable<ExplainedQueryString>> termsExpected1 = ImmutableMap.of(attributeHeight,
-				Arrays.<ExplainedQueryString> asList());
+		Map<AttributeMetaData, ExplainedAttributeMetaData> termsExpected1 = ImmutableMap.of(attributeHeight,
+				ExplainedAttributeMetaData.create(attributeHeight));
 
 		assertEquals(termsActual1.toString(), termsExpected1.toString());
 
@@ -217,10 +266,10 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		when(dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME, new QueryImpl(disMaxQueryRules))).thenReturn(
 				Arrays.<Entity> asList());
 
-		Map<AttributeMetaData, Iterable<ExplainedQueryString>> termsActual2 = semanticSearchService.findAttributes(
+		Map<AttributeMetaData, ExplainedAttributeMetaData> termsActual2 = semanticSearchService.findAttributes(
 				sourceEntityMetaData, Sets.newHashSet("targetAttribute"), Collections.emptyList());
 
-		Map<AttributeMetaData, Iterable<ExplainedQueryString>> termsExpected2 = ImmutableMap.of();
+		Map<AttributeMetaData, ExplainedAttributeMetaData> termsExpected2 = ImmutableMap.of();
 
 		assertEquals(termsActual2, termsExpected2);
 

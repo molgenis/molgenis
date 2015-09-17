@@ -94,6 +94,9 @@
                     {{this.annotatorName}}
                 </a>
             </label>
+            {{#if this.showSettingsButton}}
+            	<span id="{{this.annotatorName}}-settings-btn" class="glyphicon glyphicon-cog" aria-hidden="true" style="cursor: pointer; margin-left: 5px;"></span>
+            {{/if}}
 		</div>
 	{{/equal}}
 
@@ -110,8 +113,15 @@
                 {{this.annotatorName}}<i style="color: red"> ({{this.enabled}})</i>
             </a>
         </label>
+        {{#if this.showSettingsButton}}
+        	<span id="{{this.annotatorName}}-settings-btn" class="glyphicon glyphicon-cog" aria-hidden="true" style="cursor: pointer; margin-left: 5px;"></span>
+        {{/if}}
     </div>
 	{{/notequal}}
+	
+	{{#if this.showSettingsButton}}
+		<div id="{{this.annotatorName}}-settings-container"></div>	
+	{{/if}}
 </script>
 
 <script id="attributes-template" type="text/x-handlebars-template">
