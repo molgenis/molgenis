@@ -288,27 +288,28 @@ function($, molgenis, settingsXhr) {
 		// get entity meta data and update header and tree 
 		var entityMetaDataRequest = restApi.getAsync('/api/v1/' + state.entity + '/meta', {'expand': ['attributes']}, function(entityMetaData) {
 			selectedEntityMetaData = entityMetaData;
-			
 			self.createHeader(entityMetaData);
 			
-			selectedAttributes = $.map(entityMetaData.attributes, function(attribute) {
-				if(state.attrs === undefined || state.attrs === null) return attribute.fieldType !== 'COMPOUND' ? attribute : null;
-				else if(state.attrs === 'none') return null;
+			selectedAttributes = $.map(entityMetaData.attributes, function(attribute) {				
+				if(state.attrs === undefined || state.attrs === null || state.attrs === 'none') return null;
 				else {
-					// TODO elegant solution
-					for(var i = 0; i < state.attrs.length; ++i) {
-						var attrName = state.attrs[i]; 
+					// $.each return will only exit 1 scope, not all the way back to $.map
+					var attributesInState; 	// Use attributesInState to properly return the selectedAttributes
+					$.each(state.attrs, function(index, attrName) {
+						
+						// If '(' is present expand the attribute, default is false
+						attribute.expanded = false;
 						if(attrName.indexOf('(') !== -1) {
 							attrName = attrName.substring(0, attrName.indexOf('('));
 							attribute.expanded = true;
-						} else {
-							attribute.expanded = false;
 						}
+						
+						// If the attribute is in the state, add that attribute to the selectedAttributes
 						if(attribute.name === attrName) {
-							return attribute.fieldType !== 'COMPOUND' ? attribute : null;
+							attributesInState = attribute;
 						}
-					}
-					return null;
+					});
+					return attributesInState;
 				}
 			});
 			
