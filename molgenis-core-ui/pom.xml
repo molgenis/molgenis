@@ -171,10 +171,10 @@
 	                            <jsSourceFile>/component/Questionnaire.js</jsSourceFile>
 	                            <jsSourceFile>/component/RadioGroup.js</jsSourceFile>
 	                            <jsSourceFile>/component/RangeSlider.js</jsSourceFile>
+	                            <jsSourceFile>/component/SelectBox.js</jsSourceFile>
 	                            <jsSourceFile>/component/Spinner.js</jsSourceFile>
 	                            <jsSourceFile>/component/Table.js</jsSourceFile>
 	                            <jsSourceFile>/component/TextArea.js</jsSourceFile>
-	                            <jsSourceFile>/component/SelectBox.js</jsSourceFile>
 	                        </jsSourceFiles>
 	                        <jsFinalFile>molgenis-component.min.js</jsFinalFile>
 	                        <skipMerge>false</skipMerge>
