@@ -127,7 +127,7 @@
 					),
 					div({className: 'row'},
 						div({className: 'col-md-3'},
-							span({className: 'pull-left'}, "Rows per page:", 
+							span({className: 'pull-left'}, 'Rows per page:', 
 									molgenis.ui.SelectBox({
 										options: [
 											{value: 20, text: 20},
@@ -236,7 +236,7 @@
 			this._refreshData(this.props, _.extend({}, this.state, {start: e.start}));
 		},
 		_handleRowsPerPageChange: function(e) {
-			this.setProps({maxRows: e.target.value});
+			this.setProps({maxRows: parseInt(e.target.value)});
 		}
 	});
 

@@ -18,13 +18,13 @@
 		},
 		getDefaultProps: function(){
 			return {
-				options: [{value: "val1", text: "option1"}]
+				options: [{value: 'val1', text: 'option1'}]
 			}
 		},
 		render: function() {
 			return (
 				div(null,
-					select({className: "form-control", onChange: this.props.onChange}, this.props.options.map(function(item, i){
+					select({className: 'form-control', onChange: this.props.onChange}, this.props.options.map(function(item, i){
 						return(
 							option({value: item.value, key: i}, item.text)
 						);
