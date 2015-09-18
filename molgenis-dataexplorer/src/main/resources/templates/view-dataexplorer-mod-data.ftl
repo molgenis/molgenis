@@ -26,22 +26,6 @@
     <div class="row">
     	<div class="col-md-12">
 			<div class="data-table-pager-container">
-				<#--<div class="pull-left">
-					<form class="form-horizontal">
-						<div class="form-group">
-							<label for="config-rows-dropdown" class="col-sm-4 control-label">Rows:</label>		
-							<div class="col-sm-8">
-								<select class="form-control" id="config-rows-dropdown">
-									<option value="20">20</option>
-									<option value="30">30</option>
-									<option value="50">50</option>
-									<option value="100">100</option>
-								</select>
-							</div>
-							<div class="col-sm-12"></div>
-						</div>	
-					</form>
-				</div>	-->			
 				<div class="pull-right">
 					<a id="download-modal-button" class="btn btn-default" data-toggle="modal" data-target="#downloadModal">Download</a>
 				<#if plugin_settings.data_galaxy_export == true>
