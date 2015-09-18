@@ -15,6 +15,7 @@ import javax.sql.DataSource;
 import org.molgenis.data.version.MolgenisUpgrade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
@@ -46,7 +47,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 	private Map<String, String> packageNameChanges = new HashMap<>();
 	private Map<String, String> entityNameChanges = new HashMap<>();
 	private Map<String, Map<String, String>> attributeNameChanges = new HashMap<>();
-	private Map<String, Map<String, String>> mrefNameChanges = new HashMap<>();
+	private Map<String, Map<Attribute, String>> mrefNameChanges = new HashMap<>();
 	private Map<String, String> mrefNoChanges = new HashMap<>();
 	private Map<String, List<String>> entitiesAttributesIds = new HashMap<>();
 	private Set<String> mysqlEntities = new HashSet<>();
@@ -117,26 +118,26 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		entitiesToChange.addAll(attributeNameChanges.keySet());
 
 		// update all mref tables that have a change in the mref name
-		for (Map.Entry<String, Map<String, String>> mrefTable : mrefNameChanges.entrySet())
+		for (Map.Entry<String, Map<Attribute, String>> mrefTable : mrefNameChanges.entrySet())
 		{
 			// mref tables only have one column we need to change, so just get the first attr
-			Map.Entry<String, String> attributeChange = mrefTable.getValue().entrySet().iterator().next();
+			Map.Entry<Attribute, String> attributeChange = mrefTable.getValue().entrySet().iterator().next();
 
 			// we can't update a column name without specifying its type, so retrieve the type first
-			String type = getColumnForField(mrefTable.getKey(), attributeChange.getKey()).get("Type").toString();
+			Attribute attr = attributeChange.getKey();
+			String newAttrName = attributeChange.getValue();
+			String tableName = mrefTable.getKey();
+			String columnName = attr.getName();
+			String type = getColumnForField(tableName, columnName).get("Type").toString();
 
-			// update column name
-			template.getJdbcOperations().execute(
-					String.format("ALTER TABLE `%s` CHANGE `%s` `%s` %s", mrefTable.getKey(), attributeChange.getKey(),
-							attributeChange.getValue(), type));
+			renameColumn(tableName, columnName, type, newAttrName);
 
 			// we're done with the attributes of this mref table, now fix the table name itself
-			String entityName = mrefTable.getKey().replaceAll("_" + attributeChange.getKey() + "$", "");
+			String entityName = tableName.replaceAll("_" + attr + "$", "");
 			if (entityNameChanges.containsKey(entityName)) entityName = entityNameChanges.get(entityName);
 			String newTableName = String.format("%s_%s", entityName, attributeChange.getValue());
 
-			template.getJdbcOperations().execute(
-					String.format("RENAME TABLE `%s` TO `%s`", mrefTable.getKey(), newTableName));
+			template.getJdbcOperations().execute(String.format("RENAME TABLE `%s` TO `%s`", tableName, newTableName));
 		}
 
 		// update the rest of the mref tables
@@ -153,8 +154,8 @@ public class Step11ConvertNames extends MolgenisUpgrade
 			}
 			String newTableName = String.format("%s_%s", entityName, mrefTable.getValue());
 
-			template.getJdbcOperations().execute(
-					String.format("RENAME TABLE `%s` TO `%s`", mrefTable.getKey(), newTableName));
+			template.getJdbcOperations()
+					.execute(String.format("RENAME TABLE `%s` TO `%s`", mrefTable.getKey(), newTableName));
 		}
 
 		// update rest of entities
@@ -165,22 +166,86 @@ public class Step11ConvertNames extends MolgenisUpgrade
 			{
 				for (Map.Entry<String, String> attributeChange : attributeNameChanges.get(entity).entrySet())
 				{
-					// we can't update a column name without specifying its type, so retrieve the type first
-					String type = getColumnForField(entity, attributeChange.getKey()).get("Type").toString();
-
-					template.getJdbcOperations().execute(
-							String.format("ALTER TABLE `%s` CHANGE `%s` `%s` %s", entity, attributeChange.getKey(),
-									attributeChange.getValue(), type));
+					try
+					{
+						// we can't update a column name without specifying its type, so retrieve the type first
+						String type = getColumnForField(entity, attributeChange.getKey()).get("Type").toString();
+						renameColumn(entity, attributeChange.getKey(), type, attributeChange.getValue());
+					}
+					catch (DataAccessException dae)
+					{
+						LOG.error("Error updating attribute [{}] of entity [{}] to [{}]. {}", attributeChange.getKey(),
+								entity, attributeChange.getValue(), dae.getMessage());
+					}
 				}
 			}
 
 			// check if we need to change the entity name
 			if (entityNameChanges.containsKey(entity))
 			{
-				template.getJdbcOperations().execute(
-						String.format("RENAME TABLE `%s` TO `%s`", entity, entityNameChanges.get(entity)));
+				template.getJdbcOperations()
+						.execute(String.format("RENAME TABLE `%s` TO `%s`", entity, entityNameChanges.get(entity)));
 			}
 		}
+	}
+
+	/**
+	 * Renaming a column involves the following steps:<br>
+	 * 1) Dropping constraints pointing from/to the column<br>
+	 * 2) Renaming the column<br>
+	 * 3) Add constraint pointing from/to the renamed column<br>
+	 * 
+	 * @param tableName
+	 * @param colName
+	 * @param colType
+	 * @param newColName
+	 */
+	private void renameColumn(String tableName, String colName, String colType, String newColName)
+	{
+		// drop foreign key constraints pointing from this column
+		String fromSql = "SELECT CONSTRAINT_NAME,REFERENCED_TABLE_NAME,REFERENCED_COLUMN_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE REFERENCED_TABLE_NAME IS NOT NULL AND TABLE_NAME = '%s' AND COLUMN_NAME = '%s'";
+		List<Map<String, Object>> fkConstraintsFrom = template.getJdbcOperations()
+				.queryForList(String.format(fromSql, tableName, colName));
+
+		fkConstraintsFrom.stream().forEach(fkConstraintFrom -> {
+			String constraintName = fkConstraintFrom.get("CONSTRAINT_NAME").toString();
+			LOG.debug("Removing foreign key constraint [{}] on table [{}]", constraintName, tableName);
+			template.getJdbcOperations()
+					.execute(String.format("ALTER TABLE `%s` DROP FOREIGN KEY `%s`", tableName, constraintName));
+		});
+
+		// drop foreign key constraints pointing to this column
+		String toSql = "SELECT CONSTRAINT_NAME,TABLE_NAME,COLUMN_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE REFERENCED_TABLE_NAME = '%s' AND REFERENCED_COLUMN_NAME = '%s'";
+		List<Map<String, Object>> fkConstraintsTo = template.getJdbcOperations()
+				.queryForList(String.format(toSql, tableName, colName));
+
+		fkConstraintsTo.stream().forEach(fkConstraintTo -> {
+			String constraintName = fkConstraintTo.get("CONSTRAINT_NAME").toString();
+			String toTableName = fkConstraintTo.get("TABLE_NAME").toString();
+			LOG.debug("Removing foreign key constraint [{}] on table [{}]", constraintName, toTableName);
+			template.getJdbcOperations()
+					.execute(String.format("ALTER TABLE `%s` DROP FOREIGN KEY `%s`", toTableName, constraintName));
+		});
+
+		// update column name
+		template.getJdbcOperations().execute(
+				String.format("ALTER TABLE `%s` CHANGE `%s` `%s` %s", tableName, colName, newColName, colType));
+
+		// create foreign key constraints pointing from this column
+		fkConstraintsFrom.stream().forEach(fkConstraintFrom -> {
+			template.getJdbcOperations()
+					.execute(String.format("ALTER TABLE `%s` ADD FOREIGN KEY (%s) REFERENCES %s(%s)", tableName,
+							newColName, fkConstraintFrom.get("REFERENCED_TABLE_NAME"),
+							fkConstraintFrom.get("REFERENCED_COLUMN_NAME")));
+		});
+
+		// create foreign key constraints pointing to this column
+		fkConstraintsTo.stream().forEach(fkConstraintTo -> {
+			template.getJdbcOperations()
+					.execute(String.format("ALTER TABLE `%s` ADD FOREIGN KEY (%s) REFERENCES %s(%s)",
+							fkConstraintTo.get("TABLE_NAME"), fkConstraintTo.get("COLUMN_NAME"), tableName,
+							newColName));
+		});
 	}
 
 	/**
@@ -192,8 +257,8 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		// tags doesn't need change
 
 		// entities_tags has fullNames, which need to be updated
-		List<Map<String, Object>> entityTags = template.getJdbcOperations().queryForList(
-				"SELECT fullName FROM entities_tags");
+		List<Map<String, Object>> entityTags = template.getJdbcOperations()
+				.queryForList("SELECT fullName FROM entities_tags");
 		for (Map<String, Object> tag : entityTags)
 		{
 			String fullName = tag.get("fullName").toString();
@@ -208,8 +273,8 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		}
 
 		// packages_tags has fullNames, which need to be updated
-		List<Map<String, Object>> packagesTags = template.getJdbcOperations().queryForList(
-				"SELECT fullName FROM packages_tags");
+		List<Map<String, Object>> packagesTags = template.getJdbcOperations()
+				.queryForList("SELECT fullName FROM packages_tags");
 		for (Map<String, Object> tag : packagesTags)
 		{
 			String fullName = tag.get("fullName").toString();
@@ -224,14 +289,74 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		}
 	}
 
+	private static class Attribute
+	{
+		private final String identifier;
+		private final String name;
+		private final String dataType;
+		private final String refEntity;
+
+		public Attribute(String identifier, String name, String dataType, String refEntity)
+		{
+			this.identifier = identifier;
+			this.name = name;
+			this.dataType = dataType;
+			this.refEntity = refEntity;
+		}
+
+		public String getIdentifier()
+		{
+			return identifier;
+		}
+
+		public String getName()
+		{
+			return name;
+		}
+
+		public String getDataType()
+		{
+			return dataType;
+		}
+
+		public String getRefEntity()
+		{
+			return refEntity;
+		}
+
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((identifier == null) ? 0 : identifier.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj) return true;
+			if (obj == null) return false;
+			if (getClass() != obj.getClass()) return false;
+			Attribute other = (Attribute) obj;
+			if (identifier == null)
+			{
+				if (other.identifier != null) return false;
+			}
+			else if (!identifier.equals(other.identifier)) return false;
+			return true;
+		}
+	}
+
 	/**
 	 * Updates attribute names and refEntity references. Attribute names must be unique per entity, so this method
 	 * builds a scope per entity by iterating over the (nested) attributes.
 	 */
 	public void checkAndUpdateAttributes()
 	{
-		List<Map<String, Object>> entityAttributes = template.getJdbcOperations().queryForList(
-				"SELECT * FROM entities_attributes");
+		List<Map<String, Object>> entityAttributes = template.getJdbcOperations()
+				.queryForList("SELECT * FROM entities_attributes");
 
 		// instead of doing multiple queries, we'll build a map of entity-attribute relations
 		for (Map<String, Object> entityAttribute : entityAttributes)
@@ -296,7 +421,8 @@ public class Step11ConvertNames extends MolgenisUpgrade
 							{
 								mrefNameChanges.put(mrefTableName, Maps.newHashMap());
 							}
-							mrefNameChanges.get(mrefTableName).put(name, newName);
+							mrefNameChanges.get(mrefTableName).put(new Attribute(identifier, name, dataType, refEntity),
+									newName);
 						}
 						else
 						{
@@ -400,9 +526,8 @@ public class Step11ConvertNames extends MolgenisUpgrade
 				Map<String, String> params = Maps.newHashMap();
 				params.put("newExpression", newExpression);
 				params.put("identifier", identifier);
-				template.update(
-						String.format("UPDATE attributes SET %s=:newExpression WHERE identifier=:identifier",
-								expr.getKey()), params);
+				template.update(String.format("UPDATE attributes SET %s=:newExpression WHERE identifier=:identifier",
+						expr.getKey()), params);
 			}
 		}
 	}
@@ -418,14 +543,14 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		{
 			// get values for this attribute id
 			Map<String, String> params = Maps.newHashMap(ImmutableMap.of("id", id));
-			Map<String, Object> attribute = template.queryForMap(
-					"SELECT identifier, dataType FROM attributes WHERE identifier = :id", params);
+			Map<String, Object> attribute = template
+					.queryForMap("SELECT identifier, dataType FROM attributes WHERE identifier = :id", params);
 
 			if (attribute.get("dataType").toString().equals("compound"))
 			{
 				// possibly more attributes below this one
-				List<Map<String, Object>> attributeParts = template.queryForList(
-						"SELECT * FROM attributes_parts WHERE identifier=:id", params);
+				List<Map<String, Object>> attributeParts = template
+						.queryForList("SELECT * FROM attributes_parts WHERE identifier=:id", params);
 
 				// get the ids of these attributes and go deeper into the recursion
 				List<String> partIds = Lists.newArrayList();
@@ -443,8 +568,8 @@ public class Step11ConvertNames extends MolgenisUpgrade
 	 */
 	public void checkAndUpdateEntities()
 	{
-		List<Map<String, Object>> entities = template.getJdbcOperations().queryForList(
-				"SELECT fullName, simpleName, package, extends, abstract, backend FROM entities");
+		List<Map<String, Object>> entities = template.getJdbcOperations()
+				.queryForList("SELECT fullName, simpleName, package, extends, abstract, backend FROM entities");
 
 		// build package scopes
 		Map<String, Set<String>> scopes = Maps.newHashMap();
@@ -485,7 +610,8 @@ public class Step11ConvertNames extends MolgenisUpgrade
 					newSimpleName = makeNameUnique(newSimpleName, scopes.get(pack));
 				}
 
-				LOG.info(String.format("Entity name [%s] is not valid. Changing to [%s]...", simpleName, newSimpleName));
+				LOG.info(
+						String.format("Entity name [%s] is not valid. Changing to [%s]...", simpleName, newSimpleName));
 			}
 
 			String newPackage = pack;
@@ -684,10 +810,9 @@ public class Step11ConvertNames extends MolgenisUpgrade
 	{
 		Map<String, String> params = Maps.newHashMap();
 		params.put("name", fullyQualifiedEntityName);
-		return template
-				.queryForList(
-						"SELECT attributes.identifier, attributes.name, attributes.refEntity FROM attributes INNER JOIN entities_attributes ON entities_attributes.attributes = attributes.identifier WHERE entities_attributes.fullName = :name",
-						params);
+		return template.queryForList(
+				"SELECT attributes.identifier, attributes.name, attributes.refEntity FROM attributes INNER JOIN entities_attributes ON entities_attributes.attributes = attributes.identifier WHERE entities_attributes.fullName = :name",
+				params);
 
 	}
 
@@ -697,10 +822,9 @@ public class Step11ConvertNames extends MolgenisUpgrade
 
 		Map<String, List<String>> params = Collections.singletonMap("ids", ids);
 
-		return template
-				.queryForList(
-						"SELECT identifier, name, refEntity, dataType, expression, visibleExpression, validationExpression FROM attributes WHERE identifier IN (:ids)",
-						params);
+		return template.queryForList(
+				"SELECT identifier, name, refEntity, dataType, expression, visibleExpression, validationExpression FROM attributes WHERE identifier IN (:ids)",
+				params);
 	}
 
 	/**
@@ -718,8 +842,8 @@ public class Step11ConvertNames extends MolgenisUpgrade
 	 */
 	public void checkJPAentities() throws RuntimeException
 	{
-		List<Map<String, Object>> jpaEntities = template.getJdbcOperations().queryForList(
-				"SELECT fullName FROM entities WHERE backend = 'JPA'");
+		List<Map<String, Object>> jpaEntities = template.getJdbcOperations()
+				.queryForList("SELECT fullName FROM entities WHERE backend = 'JPA'");
 
 		for (Map<String, Object> jpaEntity : jpaEntities)
 		{
@@ -728,10 +852,8 @@ public class Step11ConvertNames extends MolgenisUpgrade
 
 			if (!entityName.equals(fixName(entityName)))
 			{
-				throw new RuntimeException(
-						"The JPA entity ["
-								+ entityName
-								+ "] did not pass validation. JPA entities cannot be automatically migrated. Please update the entities manually and rebuild the app.");
+				throw new RuntimeException("The JPA entity [" + entityName
+						+ "] did not pass validation. JPA entities cannot be automatically migrated. Please update the entities manually and rebuild the app.");
 			}
 
 			// check attributes of this JPA entity
@@ -743,12 +865,8 @@ public class Step11ConvertNames extends MolgenisUpgrade
 
 				if (!attributeName.equals(fixName(attributeName)))
 				{
-					throw new RuntimeException(
-							"The attribute ["
-									+ attributeName
-									+ "] of JPA entity ["
-									+ entityName
-									+ "] did not pass validation. JPA entities cannot be automatically migrated. Please update the entities manually and rebuild the app.");
+					throw new RuntimeException("The attribute [" + attributeName + "] of JPA entity [" + entityName
+							+ "] did not pass validation. JPA entities cannot be automatically migrated. Please update the entities manually and rebuild the app.");
 				}
 			}
 		}
@@ -870,6 +988,7 @@ public class Step11ConvertNames extends MolgenisUpgrade
 			"attributes", "base", "exist", "meta");
 
 	public static final Set<String> KEYWORDS = Sets.newHashSet();
+
 	static
 	{
 		KEYWORDS.addAll(JAVA_KEYWORDS);
