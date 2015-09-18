@@ -9,6 +9,7 @@ import org.molgenis.file.FileStore;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.omx.controller.CbmToOmxConverterControllerTest.Config;
+import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -22,11 +23,15 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @WebAppConfiguration
-@ContextConfiguration(classes = Config.class)
+@ContextConfiguration(classes =
+{ Config.class, GsonConfig.class })
 public class CbmToOmxConverterControllerTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
 	private CbmToOmxConverterController cbmToOmxConverterController;
+
+	@Autowired
+	private GsonHttpMessageConverter gsonHttpMessageConverter;
 
 	private MockMvc mockMvc;
 
@@ -34,7 +39,7 @@ public class CbmToOmxConverterControllerTest extends AbstractTestNGSpringContext
 	public void setUp()
 	{
 		mockMvc = MockMvcBuilders.standaloneSetup(cbmToOmxConverterController)
-				.setMessageConverters(new GsonHttpMessageConverter()).build();
+				.setMessageConverters(gsonHttpMessageConverter).build();
 	}
 
 	@Test
