@@ -415,10 +415,6 @@
 		$('#download-button').click(function() {
 			download();
 		});
-		
-		$('#config-rows-dropdown').change(function() {
-			Table.setProps({maxRows: $(this).val()});
-		});
 
 		$('form[name=galaxy-export-form]').validate({
 			rules : {
