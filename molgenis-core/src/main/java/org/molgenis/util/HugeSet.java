@@ -133,8 +133,14 @@ public class HugeSet<E> implements Set<E>, Closeable
 	@Override
 	public void clear()
 	{
-		if (set == null) hashSet.clear();
-		set.clear();
+		if (set == null)
+		{
+			hashSet.clear();
+		}
+		else
+		{
+			set.clear();
+		}
 	}
 
 	@Override

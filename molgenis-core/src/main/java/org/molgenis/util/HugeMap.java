@@ -99,8 +99,14 @@ public class HugeMap<K, V> implements Map<K, V>, Closeable
 	@Override
 	public void clear()
 	{
-		if (map == null) hashMap.clear();
-		map.clear();
+		if (map == null)
+		{
+			hashMap.clear();
+		}
+		else
+		{
+			map.clear();
+		}
 	}
 
 	@Override
