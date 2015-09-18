@@ -131,6 +131,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Autowired
 	public IdGenerator idGenerator;
 
+	@Autowired
+	public GsonHttpMessageConverter gsonHttpMessageConverter;
+
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
 	{
@@ -161,8 +164,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Override
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters)
 	{
-		boolean prettyPrinting = environment != null && environment.equals("development");
-		converters.add(new GsonHttpMessageConverter(prettyPrinting));
+		converters.add(gsonHttpMessageConverter);
 		converters.add(new BufferedImageHttpMessageConverter());
 		converters.add(new CsvHttpMessageConverter());
 	}
@@ -401,8 +403,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		SearchService localSearchService = embeddedElasticSearchServiceFactory.create(localDataService,
 				new EntityToSourceConverter());
 
-		List<EntityMetaData> metas = DependencyResolver.resolve(Sets.newHashSet(localDataService.getMeta()
-				.getEntityMetaDatas()));
+		List<EntityMetaData> metas = DependencyResolver
+				.resolve(Sets.newHashSet(localDataService.getMeta().getEntityMetaDatas()));
 
 		// Sort repos to the same sequence as the resolves metas
 		List<Repository> repos = Lists.newArrayList(localDataService);
@@ -493,13 +495,15 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 							new IndexedRepositoryValidationDecorator(dataService(),
 									new IndexedRepositoryExceptionTranslatorDecorator(
 											new TransactionLogIndexedRepositoryDecorator(indexedRepos,
-													transactionLogService)), new EntityAttributesValidator()),
+													transactionLogService)),
+									new EntityAttributesValidator()),
 							idGenerator), molgenisSettings);
 				}
 
-				return new RepositorySecurityDecorator(new AutoValueRepositoryDecorator(
-						new RepositoryValidationDecorator(dataService(), new TransactionLogRepositoryDecorator(
-								repository, transactionLogService), new EntityAttributesValidator()), idGenerator));
+				return new RepositorySecurityDecorator(
+						new AutoValueRepositoryDecorator(new RepositoryValidationDecorator(dataService(),
+								new TransactionLogRepositoryDecorator(repository, transactionLogService),
+								new EntityAttributesValidator()), idGenerator));
 			}
 		};
 	}

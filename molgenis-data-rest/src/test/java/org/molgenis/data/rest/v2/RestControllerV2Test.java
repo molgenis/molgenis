@@ -26,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Properties;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
@@ -36,10 +37,12 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
 import org.springframework.test.context.ContextConfiguration;
@@ -52,7 +55,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @WebAppConfiguration
-@ContextConfiguration(classes = RestControllerV2Config.class)
+@ContextConfiguration(classes = {RestControllerV2Config.class, GsonConfig.class})
 public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 {
 	private static final String ENTITY_NAME = "entity";
@@ -71,6 +74,9 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Autowired
 	private FormattingConversionService conversionService;
 
+	@Autowired
+	private GsonHttpMessageConverter gsonHttpMessageConverter;
+	
 	@Autowired
 	private DataService dataService;
 
@@ -281,9 +287,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		when(dataService.getEntityMetaData(REF_ENTITY_NAME)).thenReturn(refEntityMetaData);
 		when(dataService.getEntityMetaData(REF_REF_ENTITY_NAME)).thenReturn(refRefEntityMetaData);
 
-		boolean prettyPrint = true;
 		mockMvc = MockMvcBuilders.standaloneSetup(restControllerV2)
-				.setMessageConverters(new GsonHttpMessageConverter(prettyPrint))
+				.setMessageConverters(gsonHttpMessageConverter)
 				.setConversionService(conversionService).build();
 	}
 
@@ -356,6 +361,15 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			return conversionServiceFactoryBean.getObject();
 		}
 
+		@Bean
+	    public static PropertySourcesPlaceholderConfigurer properties() throws Exception {
+	        final PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
+	        Properties properties = new Properties();
+	        properties.setProperty("environment", "test");
+	        pspc.setProperties(properties);
+	        return pspc;
+	    }
+		
 		@Bean
 		public DataService dataService()
 		{
