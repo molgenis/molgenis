@@ -13,12 +13,17 @@
 		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
 		displayName: 'SelectBox',
 		propTypes: {
-			options: React.PropTypes.array,
+			options: React.PropTypes.arrayOf(
+				React.PropTypes.shape({
+					value: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.number]),
+					text: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.number])
+				})
+			),
 			onChange: React.PropTypes.func
 		},
 		getDefaultProps: function(){
 			return {
-				options: [{value: 'val1', text: 'option1'}]
+				options: []
 			}
 		},
 		render: function() {
