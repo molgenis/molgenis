@@ -5,8 +5,11 @@ import static com.google.common.collect.Lists.reverse;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
@@ -18,6 +21,7 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.DataServiceImpl;
+import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
@@ -26,6 +30,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -381,5 +386,70 @@ public class MetaDataServiceImpl implements MetaDataService
 	{
 		MetaValidationUtils.validateEntityMetaData(entityMetaData);
 		entityMetaDataRepository.add(entityMetaData);
+	}
+
+	// TODO Write test
+	@Override
+	public LinkedHashMap<String, Boolean> integrationTestMetaData(RepositoryCollection repositoryCollection,
+			String defaultPackage)
+	{
+		LinkedHashMap<String, Boolean> entitiesImportable = new LinkedHashMap<String, Boolean>();
+		StreamSupport.stream(repositoryCollection.getEntityNames().spliterator(), false).forEach(
+				entityName -> entitiesImportable.put(entityName, this
+						.canIntegrateEntityMetadataCheck(repositoryCollection.getRepository(entityName)
+								.getEntityMetaData())));
+
+		return entitiesImportable;
+	}
+
+	// TODO Write test
+	@Override
+	public LinkedHashMap<String, Boolean> integrationTestMetaData(
+			ImmutableMap<String, EntityMetaData> newEntitiesMetaDataMap, List<String> skipEntities,
+			String defaultPackage)
+	{
+		LinkedHashMap<String, Boolean> entitiesImportable = new LinkedHashMap<String, Boolean>();
+
+		StreamSupport.stream(newEntitiesMetaDataMap.keySet().spliterator(), false)
+				.forEach(
+				entityName -> entitiesImportable.put(
+						entityName,
+						skipEntities.contains(entityName)
+								|| this.canIntegrateEntityMetadataCheck(newEntitiesMetaDataMap.get(
+										entityName))));
+
+		return entitiesImportable;
+	}
+	
+	// TODO Write test
+	public boolean canIntegrateEntityMetadataCheck(EntityMetaData newEntityMetaData)
+	{
+		String entityName = newEntityMetaData.getName();
+		if (dataService.hasRepository(entityName))
+		{
+			EntityMetaData newEntity = newEntityMetaData;
+			EntityMetaData oldEntity = dataService.getEntityMetaData(entityName);
+
+			List<AttributeMetaData> oldAtomicAttributes = StreamSupport.stream(
+					oldEntity.getAtomicAttributes().spliterator(), false).collect(
+					Collectors.<AttributeMetaData> toList());
+
+			LinkedHashMap<String, AttributeMetaData> newAtomicAttributesMap = new LinkedHashMap<String, AttributeMetaData>();
+			StreamSupport.stream(newEntity.getAtomicAttributes().spliterator(), false).forEach(
+					attribute -> newAtomicAttributesMap.put(attribute.getName(), attribute));
+
+			for (AttributeMetaData oldAttribute : oldAtomicAttributes)
+			{
+				if (!newAtomicAttributesMap.keySet().contains(oldAttribute.getName())) return false;
+
+				DefaultAttributeMetaData oldAttributDefault = new DefaultAttributeMetaData(oldAttribute);
+				DefaultAttributeMetaData newAttributDefault = new DefaultAttributeMetaData(
+						newAtomicAttributesMap.get(oldAttribute.getName()));
+
+				if (!oldAttributDefault.isSameAs(newAttributDefault)) return false;
+			}
+		}
+
+		return true;
 	}
 }
