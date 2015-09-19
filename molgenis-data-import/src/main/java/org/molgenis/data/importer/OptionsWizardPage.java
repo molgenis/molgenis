@@ -56,14 +56,8 @@ public class OptionsWizardPage extends AbstractWizardPage
 	@Override
 	public String handleRequest(HttpServletRequest request, BindingResult result, Wizard wizard)
 	{
-		if (!(wizard instanceof ImportWizard))
-		{
-			throw new RuntimeException("Wizard must be of type '" + ImportWizard.class.getSimpleName()
-					+ "' instead of '" + wizard.getClass().getSimpleName() + "'");
-		}
-
+		ImportWizardUtil.validateImportWizard(wizard);
 		ImportWizard importWizard = (ImportWizard) wizard;
-
 		String entityImportOption = request.getParameter("entity_option");
 		importWizard.setEntityImportOption(entityImportOption);
 
@@ -82,7 +76,7 @@ public class OptionsWizardPage extends AbstractWizardPage
 			}
 			catch (MolgenisDataException e)
 			{
-				result.addError(new ObjectError("wizard", e.getMessage()));
+				ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
 				return null;
 			}
 
@@ -103,8 +97,7 @@ public class OptionsWizardPage extends AbstractWizardPage
 			}
 			catch (IOException e)
 			{
-				result.addError(new ObjectError("wizard", "Error importing file: " + e.getMessage()));
-				LOG.error("Exception importing file", e);
+				ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
 			}
 			finally
 			{
@@ -118,8 +111,7 @@ public class OptionsWizardPage extends AbstractWizardPage
 		}
 		catch (Exception e)
 		{
-			result.addError(new ObjectError("wizard", "Error validating import file: " + e.getMessage()));
-			LOG.error("Exception validating import file", e);
+			ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
 		}
 
 		return null;
