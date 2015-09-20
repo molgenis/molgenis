@@ -421,7 +421,6 @@ public class MetaDataServiceImpl implements MetaDataService
 		return entitiesImportable;
 	}
 	
-	// TODO Write test
 	public boolean canIntegrateEntityMetadataCheck(EntityMetaData newEntityMetaData)
 	{
 		String entityName = newEntityMetaData.getName();

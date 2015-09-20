@@ -1,11 +1,14 @@
 package org.molgenis.data.meta;
 
+import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 
+import org.mockito.Mockito;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Package;
 import org.molgenis.data.mem.InMemoryRepositoryCollection;
@@ -97,6 +100,97 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 		assertTrue(Iterables.elementsEqual(retrieved.getAtomicAttributes(), coderMetaData.getAtomicAttributes()));
 	}
 
+	/**
+	 * Test that a new entity has at least all attributes as of the existing entity. If not it results false.
+	 */
+	@Test
+	public void canIntegrateEntityMetadataCheckTrue()
+	{
+		String entityName = "testEntity";
+		DataServiceImpl dataServiceImpl = Mockito.mock(DataServiceImpl.class);
+		when(dataServiceImpl.hasRepository(entityName)).thenReturn(Boolean.TRUE);
+
+		DefaultEntityMetaData existingEntityMetaData = new DefaultEntityMetaData(entityName);
+		existingEntityMetaData.addAttribute("ID").setIdAttribute(true);
+
+		DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(entityName);
+		newEntityMetaData.addAttribute("ID").setIdAttribute(true);
+
+		when(dataServiceImpl.getEntityMetaData(entityName)).thenReturn(existingEntityMetaData);
+		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(dataServiceImpl);
+
+		assertTrue(metaDataService.canIntegrateEntityMetadataCheck(newEntityMetaData));
+	}
+
+	/**
+	 * Test that a new entity has at least all attributes as of the existing entity. It is allowed to the new entity to
+	 * have an extra attribute.
+	 */
+	@Test
+	public void canIntegrateEntityMetadataCheckTrue2()
+	{
+		String entityName = "testEntity";
+		DataServiceImpl dataServiceImpl = Mockito.mock(DataServiceImpl.class);
+		when(dataServiceImpl.hasRepository(entityName)).thenReturn(Boolean.TRUE);
+
+		DefaultEntityMetaData existingEntityMetaData = new DefaultEntityMetaData(entityName);
+		existingEntityMetaData.addAttribute("ID").setIdAttribute(true);
+
+		DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(entityName);
+		newEntityMetaData.addAttribute("ID").setIdAttribute(true);
+		newEntityMetaData.addAttributeMetaData(new DefaultAttributeMetaData("newAtribute"));
+
+		when(dataServiceImpl.getEntityMetaData(entityName)).thenReturn(existingEntityMetaData);
+		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(dataServiceImpl);
+
+		assertTrue(metaDataService.canIntegrateEntityMetadataCheck(newEntityMetaData));
+	}
+
+	/**
+	 * Test that a new entity has at least all attributes as of the existing entity.
+	 */
+	@Test
+	public void canIntegrateEntityMetadataCheckFalse()
+	{
+		String entityName = "testEntity";
+		DataServiceImpl dataServiceImpl = Mockito.mock(DataServiceImpl.class);
+		when(dataServiceImpl.hasRepository(entityName)).thenReturn(Boolean.TRUE);
+
+		DefaultEntityMetaData existingEntityMetaData = new DefaultEntityMetaData(entityName);
+		existingEntityMetaData.addAttribute("ID").setIdAttribute(true);
+		existingEntityMetaData.addAttributeMetaData(new DefaultAttributeMetaData("existingAttribute"));
+
+		DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(entityName);
+		newEntityMetaData.addAttribute("ID").setIdAttribute(true);
+
+		when(dataServiceImpl.getEntityMetaData(entityName)).thenReturn(existingEntityMetaData);
+		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(dataServiceImpl);
+
+		assertFalse(metaDataService.canIntegrateEntityMetadataCheck(newEntityMetaData));
+	}
+
+	/**
+	 * Test that the same attribute name but different attribute settings are resulting in false
+	 */
+	@Test
+	public void canIntegrateEntityMetadataCheckFalse2()
+	{
+		String entityName = "testEntity";
+		DataServiceImpl dataServiceImpl = Mockito.mock(DataServiceImpl.class);
+		when(dataServiceImpl.hasRepository(entityName)).thenReturn(Boolean.TRUE);
+
+		DefaultEntityMetaData existingEntityMetaData = new DefaultEntityMetaData(entityName);
+		existingEntityMetaData.addAttribute("ID").setIdAttribute(true);
+
+		DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(entityName);
+		newEntityMetaData.addAttribute("ID").setIdAttribute(false);
+
+		when(dataServiceImpl.getEntityMetaData(entityName)).thenReturn(existingEntityMetaData);
+		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(dataServiceImpl);
+
+		assertFalse(metaDataService.canIntegrateEntityMetadataCheck(newEntityMetaData));
+	}
+
 	@Configuration
 	public static class Config
 	{
@@ -105,6 +199,5 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 		{
 			return new InMemoryRepositoryCollection("mem");
 		}
-
 	}
 }
