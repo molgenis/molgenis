@@ -71,23 +71,25 @@ public class PackageWizardPage extends AbstractWizardPage
 				ImportService importService = importServiceFactory.getImportService(importWizard.getFile(),
 						repositoryCollection);
 
-				// The package name that is selected in the "package selection" page
-				String defaultPackage = request.getParameter("defaultEntity");
-
-				LinkedHashMap<String, Boolean> entitiesImportable = importService.integrationTestMetaData(
-						metaDataService,
-						repositoryCollection, defaultPackage);
-
-				importWizard.setEntitiesImportable(entitiesImportable);
-
-				List<String> entitiesNotImportable = entitiesImportable.entrySet().stream()
-						.filter(e -> e.getValue() == false).map(e -> e.getKey()).collect(Collectors.toList());
-
-				if (!entitiesNotImportable.isEmpty())
+				// Do integration test only if there are no previous errors found
+				if (!importWizard.getEntitiesImportable().containsValue(false))
 				{
-					throw new RuntimeException(
-							"You are trying to upload entities that are not compatible with the already existing entities: "
-									+ entitiesNotImportable.toString());
+					// The package name that is selected in the "package selection" page
+					String defaultPackage = request.getParameter("defaultEntity");
+
+					LinkedHashMap<String, Boolean> entitiesImportable = importService.integrationTestMetaData(
+							metaDataService, repositoryCollection, defaultPackage);
+
+					importWizard.setEntitiesImportable(entitiesImportable);
+
+					List<String> entitiesNotImportable = entitiesImportable.entrySet().stream()
+							.filter(e -> e.getValue() == false).map(e -> e.getKey()).collect(Collectors.toList());
+					if (!entitiesNotImportable.isEmpty())
+					{
+						throw new RuntimeException(
+								"You are trying to upload entities that are not compatible with the already existing entities: "
+										+ entitiesNotImportable.toString());
+					}
 				}
 			}
 			catch (RuntimeException e)
