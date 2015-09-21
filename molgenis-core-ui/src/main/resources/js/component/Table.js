@@ -49,7 +49,8 @@
 				data: null,
 				attrs: this.props.attrs,
 				sort: null,
-				start: 0
+				start: 0,
+				maxRows: this.props.maxRows
 			};
 		},
 		getDefaultProps: function() {
@@ -143,7 +144,7 @@
 							div({className: 'text-center'},
 								molgenis.ui.Pager({
 									nrItems: this.state.data.total,
-									nrItemsPerPage: this.props.maxRows,
+									nrItemsPerPage: this.state.maxRows,
 									start: this.state.data.start,
 									onPageChange: this._handlePageChange
 								})
@@ -159,7 +160,7 @@
 		_refreshData: function(props, state) {
 			var opts = {
 				attrs: {'~id' : null}, // always include the id attribute
-				num : props.maxRows
+				num : state.maxRows
 			};
 
 			// add selected attrs
@@ -236,7 +237,7 @@
 			this._refreshData(this.props, _.extend({}, this.state, {start: e.start}));
 		},
 		_handleRowsPerPageChange: function(e) {
-			this.setProps({maxRows: parseInt(e.target.value)});
+			this._refreshData(this.props, _.extend({}, this.state, {maxRows: parseInt(e.target.value)}));
 		}
 	});
 
