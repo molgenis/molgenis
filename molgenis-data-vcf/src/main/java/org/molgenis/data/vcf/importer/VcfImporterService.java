@@ -305,6 +305,6 @@ public class VcfImporterService implements ImportService
 	public LinkedHashMap<String, Boolean> integrationTestMetaData(MetaDataService metaDataService,
 			RepositoryCollection repositoryCollection, String defaultPackage)
 	{
-		return metaDataService.integrationTestMetaData(repositoryCollection, defaultPackage);
+		return metaDataService.integrationTestMetaData(repositoryCollection);
 	}
 }
