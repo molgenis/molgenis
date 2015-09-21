@@ -6,7 +6,7 @@ public class AnonymizedAggregateResult extends AggregateResult
 {
 	private int anonymizationThreshold;
 
-	public AnonymizedAggregateResult(List<List<Long>> matrix, List<String> xLabels, List<String> yLabels,
+	public AnonymizedAggregateResult(List<List<Long>> matrix, List<Object> xLabels, List<Object> yLabels,
 			int anonymizationThreshold)
 	{
 		super(matrix, xLabels, yLabels);

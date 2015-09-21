@@ -5,10 +5,10 @@ import java.util.List;
 public class AggregateResult
 {
 	private final List<List<Long>> matrix;
-	private final List<String> xLabels;
-	private final List<String> yLabels;
+	private final List<Object> xLabels;
+	private final List<Object> yLabels;
 
-	public AggregateResult(List<List<Long>> matrix, List<String> xLabels, List<String> yLabels)
+	public AggregateResult(List<List<Long>> matrix, List<Object> xLabels, List<Object> yLabels)
 	{
 		this.matrix = matrix;
 		this.xLabels = xLabels;
@@ -20,12 +20,12 @@ public class AggregateResult
 		return matrix;
 	}
 
-	public List<String> getxLabels()
+	public List<Object> getxLabels()
 	{
 		return xLabels;
 	}
 
-	public List<String> getyLabels()
+	public List<Object> getyLabels()
 	{
 		return yLabels;
 	}
