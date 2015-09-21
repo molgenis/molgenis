@@ -293,6 +293,9 @@ function($, molgenis, settingsXhr) {
 			// Loop through all the attributes in the meta data
 			selectedAttributes = $.map(entityMetaData.meta.attributes, function(attribute) {				
 				
+				// Default expansion is false
+				attribute.expanded = false;
+				
 				// If the state is empty or undefined, or is set to 'none', return null. All attributes will be shown
 				if(state.attrs === undefined || state.attrs === null || state.attrs === 'none') return null;
 				else {
@@ -303,13 +306,6 @@ function($, molgenis, settingsXhr) {
 					// Loop through all the attributes mentioned in the state
 					$.each(state.attrs, function(index, attrName) {
 						
-						// If '(' is present expand the attribute, default is false
-						attribute.expanded = false;
-						if(attrName.indexOf('(') !== -1) {
-							attrName = attrName.substring(0, attrName.indexOf('('));
-							attribute.expanded = true;
-						}
-
 						// If the attribute is in the state, add that attribute to the selectedAttributes
 						// For compound attributes, check the atomic attributes
 						if(attribute.name === attrName) {
@@ -317,7 +313,8 @@ function($, molgenis, settingsXhr) {
 						}
 						if(attribute.fieldType === 'COMPOUND') {
 							$.each(attribute.attributes, function(index, atomicAttribute) {
-								if(atomicAttribute.name === attrName) {
+								if(atomicAttribute.name === attrName) {									
+									// If the attribute within a compound is in the state, set the compound attribute expanded property to true;
 									attributesInState = atomicAttribute;
 								}
 							});
@@ -329,12 +326,18 @@ function($, molgenis, settingsXhr) {
 				}
 			});
 			
+			// Empties existing tree of selected attributes
 			selectedAttributesTree = {};
-			for(var i = 0; i < selectedAttributes.length; ++i) {
-				var key = selectedAttributes[i].name;
-				var value = selectedAttributes[i].expanded === true ? {'*': null} : null;
-				selectedAttributesTree[key] = value;	
-			}
+			
+			// For each selected attribute, check if it is expanded and fill the selectedAttributesTree map
+			$.each(selectedAttributes, function(index, attribute) {
+				var key = attribute.name;
+				var value = attribute.expanded === true ? {'*': null} : null;
+				selectedAttributesTree[key] = value;
+			});
+			
+			console.log(selectedAttributes);
+			
 			createEntityMetaTree(entityMetaData.meta, selectedAttributes);
 			
 			if (settings['launch_wizard'] === true) {
