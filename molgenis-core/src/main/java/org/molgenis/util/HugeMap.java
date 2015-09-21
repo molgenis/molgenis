@@ -14,7 +14,7 @@ import org.mapdb.DBMaker;
 
 public class HugeMap<K, V> implements Map<K, V>, Closeable
 {
-	private static final int THRESHOLD = 10000;
+	protected static final int THRESHOLD = 10000;
 	private DB mapDB;
 	private Map<K, V> map;
 	private final Map<K, V> hashMap = new HashMap<>();

@@ -19,7 +19,7 @@ import org.mapdb.DBMaker;
  */
 public class HugeSet<E> implements Set<E>, Closeable
 {
-	private static final int THRESHOLD = 10000;
+	protected static final int THRESHOLD = 10000;
 	private DB mapDB;
 	private Set<E> set;
 	private final HashSet<E> hashSet = new HashSet<>();
