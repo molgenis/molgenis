@@ -115,7 +115,7 @@ public class AnnotatorController
 		{
 			CrudRepositoryAnnotator crudRepositoryAnnotator = new CrudRepositoryAnnotator(dataService,
 					getNewRepositoryName(annotatorNames, repository.getEntityMetaData().getSimpleName()),
-					permissionSystemService, userAccountService);
+					permissionSystemService, userAccountService, molgenisPermissionService);
 
 			for (String annotatorName : annotatorNames)
 			{
