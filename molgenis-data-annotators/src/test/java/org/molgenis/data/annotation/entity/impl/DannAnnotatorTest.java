@@ -1,7 +1,6 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
@@ -19,11 +18,11 @@ import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
+import org.molgenis.data.annotator.websettings.DannAnnotatorSettings;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -58,7 +57,6 @@ public class DannAnnotatorTest extends AbstractTestNGSpringContextTests
 	public static Entity entity3;
 	public static Entity entity4;
 
-	public MolgenisSettings settings = mock(MolgenisSettings.class);
 	public ArrayList<Entity> entities;
 
 	public void setValues()
@@ -68,9 +66,9 @@ public class DannAnnotatorTest extends AbstractTestNGSpringContextTests
 		AttributeMetaData attributeMetaDataPos = new DefaultAttributeMetaData(VcfRepository.POS,
 				MolgenisFieldTypes.FieldTypeEnum.LONG);
 		AttributeMetaData attributeMetaDataRef = new DefaultAttributeMetaData(VcfRepository.REF,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
+				MolgenisFieldTypes.FieldTypeEnum.TEXT);
 		AttributeMetaData attributeMetaDataAlt = new DefaultAttributeMetaData(VcfRepository.ALT,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
+				MolgenisFieldTypes.FieldTypeEnum.TEXT);
 
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
 		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
@@ -207,10 +205,10 @@ public class DannAnnotatorTest extends AbstractTestNGSpringContextTests
 		private DataService dataService;
 
 		@Bean
-		public MolgenisSettings molgenisSettings()
+		public Entity dannAnnotatorSettings()
 		{
-			MolgenisSettings settings = mock(MolgenisSettings.class);
-			when(settings.getProperty(DannAnnotator.DANN_FILE_LOCATION_PROPERTY)).thenReturn(
+			Entity settings = new MapEntity();
+			settings.set(DannAnnotatorSettings.Meta.DANN_LOCATION,
 					ResourceUtils.getFile(getClass(), "/dann/DANN_test_set.tsv.bgz").getPath());
 			return settings;
 		}

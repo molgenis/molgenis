@@ -1,37 +1,41 @@
 package org.molgenis.data.semanticsearch.service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.semantic.Hit;
 import org.molgenis.ontology.core.model.OntologyTerm;
 
 public interface SemanticSearchService
 {
 	/**
-	 * Find all relevant source attributes for the specified target attribute
+	 * Find all relevant source attributes with an explanation based on ontology terms and search terms
 	 * 
 	 * @param source
-	 * @param target
 	 * @param attributeMetaData
+	 * @param ontologyTerms
+	 * 
 	 * @return AttributeMetaData of resembling attributes, sorted by relevance
 	 */
-	Iterable<AttributeMetaData> findAttributes(org.molgenis.data.EntityMetaData source, EntityMetaData target,
-			AttributeMetaData attributeMetaData);
+	Map<AttributeMetaData, ExplainedAttributeMetaData> findAttributes(EntityMetaData sourceEntityMetaData,
+			Set<String> queryTerms, Collection<OntologyTerm> ontologyTerms);
 
 	/**
-	 * Find all relevant source attributes with an explanation
+	 * A decision tree for getting the relevant attributes
 	 * 
-	 * @param source
-	 * @param target
-	 * @param attributeMetaData
+	 * 1. First find attributes based on searchTerms. 2. Second find attributes based on ontology terms from tags 3.
+	 * Third find attributes based on target attribute label.
+	 * 
 	 * @return AttributeMetaData of resembling attributes, sorted by relevance
 	 */
-	Map<AttributeMetaData, Iterable<ExplainedQueryString>> explainAttributes(EntityMetaData source,
-			EntityMetaData target, AttributeMetaData attributeMetaData);
+	Map<AttributeMetaData, ExplainedAttributeMetaData> decisionTreeToFindRelevantAttributes(
+			EntityMetaData sourceEntityMetaData, AttributeMetaData targetAttribute,
+			Collection<OntologyTerm> ontologyTermsFromTags, Set<String> searchTerms);
 
 	/**
 	 * Finds {@link OntologyTerm}s that can be used to tag an attribute.
@@ -54,5 +58,4 @@ public interface SemanticSearchService
 	 * @return {@link List} of {@link Hit}s for {@link OntologyTerm}s found, most relevant first
 	 */
 	Hit<OntologyTerm> findTags(AttributeMetaData attribute, List<String> ontologyIds);
-
 }

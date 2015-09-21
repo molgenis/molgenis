@@ -13,6 +13,7 @@ import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.ListEscapeUtils;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.support.DefaultConversionService;
 
 import com.google.common.base.Function;
@@ -103,7 +104,15 @@ public class DataConverter
 		}
 
 		if (getConversionService() == null) return source.toString();
-		return convert(source, String.class);
+
+		try
+		{
+			return convert(source, String.class);
+		}
+		catch (ConverterNotFoundException e)
+		{
+			return source.toString();
+		}
 	}
 
 	public static Integer toInt(Object source)

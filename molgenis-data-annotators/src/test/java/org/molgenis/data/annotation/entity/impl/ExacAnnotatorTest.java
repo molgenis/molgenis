@@ -1,12 +1,10 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -18,10 +16,10 @@ import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
+import org.molgenis.data.annotator.websettings.ExacAnnotatorSettings;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -78,12 +76,11 @@ public class ExacAnnotatorTest extends AbstractTestNGSpringContextTests
 		private DataService dataService;
 
 		@Bean
-		public MolgenisSettings molgenisSettings()
+		public Entity exacAnnotatorSettings()
 		{
-			MolgenisSettings settings = mock(MolgenisSettings.class);
-			when(settings.getProperty(ExacAnnotator.EXAC_FILE_LOCATION_PROPERTY)).thenReturn(
-					ResourceUtils.getFile(getClass(),
-							File.separatorChar + "exac" + File.separatorChar + "exac_test_set.vcf.gz").getPath());
+			Entity settings = new MapEntity();
+			settings.set(ExacAnnotatorSettings.Meta.EXAC_LOCATION,
+					ResourceUtils.getFile(getClass(), "/exac/exac_test_set.vcf.gz").getPath());
 			return settings;
 		}
 

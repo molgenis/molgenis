@@ -60,7 +60,7 @@ public class MolgenisUpgradeServiceImpl implements MolgenisUpgradeService
 		}
 		else
 		{
-			LOG.info("MetaData version:{}, current version:{} upgrade not needed",
+			LOG.debug("MetaData version:{}, current version:{} upgrade not needed",
 					versionService.getMolgenisVersionFromServerProperties(), MolgenisVersionService.CURRENT_VERSION);
 			return false;
 		}

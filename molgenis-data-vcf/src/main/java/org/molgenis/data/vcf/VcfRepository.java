@@ -34,6 +34,7 @@ import com.google.common.collect.Iterators;
 public class VcfRepository extends AbstractRepository
 {
 	private static final Logger LOG = LoggerFactory.getLogger(VcfRepository.class);
+	public static final String DEFAULT_ATTRIBUTE_DESCRIPTION = "Description not provided";
 
 	public static final String CHROM = "#CHROM";
 	public static final String ALT = "ALT";
@@ -44,28 +45,34 @@ public class VcfRepository extends AbstractRepository
 	public static final String ID = "ID";
 	public static final String INTERNAL_ID = "INTERNAL_ID";
 	public static final String INFO = "INFO";
+	public static final String FORMAT_GT = "GT";
 	public static final String SAMPLES = "SAMPLES_ENTITIES";
 	public static final String NAME = "NAME";
+	public static final String ORIGINAL_NAME = "ORIGINAL_NAME";
 	public static final String PREFIX = "##";
 
 	public static final AttributeMetaData CHROM_META = new DefaultAttributeMetaData(CHROM,
 			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false)
-			.setDescription("The chromosome on which the variant is observed");
+					.setDescription("The chromosome on which the variant is observed");
+	// TEXT instead of STRING to handle large insertions/deletions
 	public static final AttributeMetaData ALT_META = new DefaultAttributeMetaData(ALT,
-			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false)
-			.setDescription("The alternative allele observed");
+			MolgenisFieldTypes.FieldTypeEnum.TEXT).setAggregateable(true).setNillable(false)
+					.setDescription("The alternative allele observed");
 	public static final AttributeMetaData POS_META = new DefaultAttributeMetaData(POS,
 			MolgenisFieldTypes.FieldTypeEnum.LONG).setAggregateable(true).setNillable(false)
-			.setDescription("The position on the chromosome which the variant is observed");
+					.setDescription("The position on the chromosome which the variant is observed");
+	// TEXT instead of STRING to handle large insertions/deletions
 	public static final AttributeMetaData REF_META = new DefaultAttributeMetaData(REF,
-			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false)
-			.setDescription("The reference allele");
+			MolgenisFieldTypes.FieldTypeEnum.TEXT).setAggregateable(true).setNillable(false)
+					.setDescription("The reference allele");
 	public static final AttributeMetaData FILTER_META = new DefaultAttributeMetaData(FILTER,
-			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true);
+			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true)
+					.setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
 	public static final AttributeMetaData QUAL_META = new DefaultAttributeMetaData(QUAL,
-			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true);
+			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true)
+					.setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
 	public static final AttributeMetaData ID_META = new DefaultAttributeMetaData(ID,
-			MolgenisFieldTypes.FieldTypeEnum.STRING).setNillable(true);
+			MolgenisFieldTypes.FieldTypeEnum.STRING).setNillable(true).setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
 
 	private final String entityName;
 	protected Supplier<VcfToEntity> vcfToEntitySupplier;
@@ -80,7 +87,7 @@ public class VcfRepository extends AbstractRepository
 	{
 		this.entityName = Preconditions.checkNotNull(entityName);
 		this.vcfReaderFactory = vcfReaderFactory;
-		this.vcfToEntitySupplier = Suppliers.memoize(this::parseVcfMeta);
+		this.vcfToEntitySupplier = Suppliers.<VcfToEntity> memoize(this::parseVcfMeta);
 	}
 
 	private VcfToEntity parseVcfMeta()
@@ -113,7 +120,8 @@ public class VcfRepository extends AbstractRepository
 	public Iterator<Entity> iterator()
 	{
 		Iterator<VcfRecord> vcfRecordIterator = Iterators.unmodifiableIterator(vcfReaderFactory.get().iterator());
-		return Iterators.transform(vcfRecordIterator, vcfToEntitySupplier.get()::toEntity);
+		VcfToEntity vcfToEntity = vcfToEntitySupplier.get();
+		return Iterators.transform(vcfRecordIterator, vcfToEntity::toEntity);
 	}
 
 	@Override

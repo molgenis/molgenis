@@ -1,5 +1,7 @@
 package org.molgenis.data.vcf.importer;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -52,14 +54,15 @@ public class VcfImporterService implements ImportService
 			PermissionSystemService permissionSystemService)
 
 	{
-		this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
-		this.dataService = dataService;
-		this.permissionSystemService = permissionSystemService;
+		this.fileRepositoryCollectionFactory = checkNotNull(fileRepositoryCollectionFactory);
+		this.dataService = checkNotNull(dataService);
+		this.permissionSystemService = checkNotNull(permissionSystemService);
 	}
 
 	@Override
 	@Transactional
-	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction, String defaultPackage)
+	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction,
+			String defaultPackage)
 	{
 		if (databaseAction != DatabaseAction.ADD) throw new IllegalArgumentException("Only ADD is supported");
 
@@ -75,8 +78,7 @@ public class VcfImporterService implements ImportService
 					report = importVcf(repo, addedEntities);
 					List<String> entityNames = addedEntities.stream().map(emd -> emd.getName())
 							.collect(Collectors.toList());
-					permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
-							entityNames);
+					permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(), entityNames);
 				}
 			}
 			else
@@ -186,8 +188,7 @@ public class VcfImporterService implements ImportService
 		}
 	}
 
-	private EntityImportReport importVcf(Repository inRepository, List<EntityMetaData> addedEntities)
-			throws IOException
+	private EntityImportReport importVcf(Repository inRepository, List<EntityMetaData> addedEntities) throws IOException
 	{
 		EntityImportReport report = new EntityImportReport();
 		Repository sampleRepository = null;

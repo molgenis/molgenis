@@ -1,6 +1,24 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import com.google.common.collect.Iterators;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.TEXT;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.UncheckedIOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.regex.Pattern;
+
 import org.apache.commons.io.IOUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
@@ -15,35 +33,19 @@ import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.utils.JarRunner;
 import org.molgenis.data.annotation.utils.JarRunnerImpl;
+import org.molgenis.data.annotator.websettings.SnpEffAnnotatorSettings;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.UncheckedIOException;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.regex.Pattern;
-
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
+import com.google.common.collect.Iterators;
 
 /**
  * SnpEff annotator
@@ -67,7 +69,6 @@ import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
 public class SnpEffAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(SnpEffAnnotator.class);
-	public static final String SNPEFF_JAR_LOCATION_PROPERTY = "snpeff_jar_location";
 	public static final String NAME = "snpEff";
 
 	public static final String ANNOTATION = "Annotation";
@@ -94,15 +95,15 @@ public class SnpEffAnnotator
 	}
 
 	@Autowired
-	private MolgenisSettings molgenisSettings;
+	private JarRunner jarRunner;
 
 	@Autowired
-	private JarRunner jarRunner;
+	private Entity snpEffAnnotatorSettings;
 
 	@Bean
 	public RepositoryAnnotator snpEff()
 	{
-		return new SnpEffRepositoryAnnotator(molgenisSettings, jarRunner);
+		return new SnpEffRepositoryAnnotator(snpEffAnnotatorSettings, jarRunner);
 	}
 
 	@Bean
@@ -156,18 +157,15 @@ public class SnpEffAnnotator
 	{
 		private static final String CHARSET = "UTF-8";
 		private String snpEffPath;
-		private final MolgenisSettings molgenisSettings;
-		private AnnotatorInfo info = AnnotatorInfo
-				.create(Status.READY,
-						Type.EFFECT_PREDICTION,
-						NAME,
-						"Genetic variant annotation and effect prediction toolbox. It annotates and predicts the effects of variants on genes (such as amino acid changes). ",
-						getOutputMetaData());
-		private JarRunner jarRunner;
+		private final Entity pluginSettings;
+		private final AnnotatorInfo info = AnnotatorInfo.create(Status.READY, Type.EFFECT_PREDICTION, NAME,
+				"Genetic variant annotation and effect prediction toolbox. It annotates and predicts the effects of variants on genes (such as amino acid changes). ",
+				getOutputMetaData());
+		private final JarRunner jarRunner;
 
-		public SnpEffRepositoryAnnotator(MolgenisSettings molgenisSettings, JarRunner jarRunner)
+		public SnpEffRepositoryAnnotator(Entity pluginSettings, JarRunner jarRunner)
 		{
-			this.molgenisSettings = molgenisSettings;
+			this.pluginSettings = pluginSettings;
 			this.jarRunner = jarRunner;
 		}
 
@@ -208,8 +206,8 @@ public class SnpEffAnnotator
 				// inputVcf as input)
 				// iterator here
 
-				BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(
-						outputVcf.getAbsolutePath()), CHARSET));
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(new FileInputStream(outputVcf.getAbsolutePath()), CHARSET));
 
 				return new Iterator<Entity>()
 				{
@@ -351,18 +349,18 @@ public class SnpEffAnnotator
 			List<AttributeMetaData> attributes = new ArrayList<>();
 
 			DefaultAttributeMetaData annotation = new DefaultAttributeMetaData(ANNOTATION, STRING);
-			annotation
-					.setDescription("Annotated using Sequence Ontology terms. Multiple effects can be concatenated using ‘&’ (source:http://snpeff.sourceforge.net)");
+			annotation.setDescription(
+					"Annotated using Sequence Ontology terms. Multiple effects can be concatenated using ‘&’ (source:http://snpeff.sourceforge.net)");
 			attributes.add(annotation);
 
 			DefaultAttributeMetaData putative_impact = new DefaultAttributeMetaData(PUTATIVE_IMPACT, STRING);
-			putative_impact
-					.setDescription(" A simple estimation of putative impact / deleteriousness : {HIGH, MODERATE, LOW, MODIFIER}(source:http://snpeff.sourceforge.net)");
+			putative_impact.setDescription(
+					" A simple estimation of putative impact / deleteriousness : {HIGH, MODERATE, LOW, MODIFIER}(source:http://snpeff.sourceforge.net)");
 			attributes.add(putative_impact);
 
 			DefaultAttributeMetaData gene_name = new DefaultAttributeMetaData(GENE_NAME, STRING);
-			gene_name
-					.setDescription("Common gene name (HGNC). Optional: use closest gene when the variant is “intergenic”(source:http://snpeff.sourceforge.net)");
+			gene_name.setDescription(
+					"Common gene name (HGNC). Optional: use closest gene when the variant is “intergenic”(source:http://snpeff.sourceforge.net)");
 			attributes.add(gene_name);
 
 			DefaultAttributeMetaData gene_id = new DefaultAttributeMetaData(GENE_ID, STRING);
@@ -370,42 +368,43 @@ public class SnpEffAnnotator
 			attributes.add(gene_id);
 
 			DefaultAttributeMetaData feature_type = new DefaultAttributeMetaData(FEATURE_TYPE, STRING);
-			feature_type
-					.setDescription("Which type of feature is in the next field (e.g. transcript, motif, miRNA, etc.). It is preferred to use Sequence Ontology (SO) terms, but ‘custom’ (user defined) are allowed. ANN=A|stop_gained|HIGH|||transcript|... Tissue specific features may include cell type / tissue information separated by semicolon e.g.: ANN=A|histone_binding_site|LOW|||H3K4me3:HeLa-S3|...\n"
+			feature_type.setDescription(
+					"Which type of feature is in the next field (e.g. transcript, motif, miRNA, etc.). It is preferred to use Sequence Ontology (SO) terms, but ‘custom’ (user defined) are allowed. ANN=A|stop_gained|HIGH|||transcript|... Tissue specific features may include cell type / tissue information separated by semicolon e.g.: ANN=A|histone_binding_site|LOW|||H3K4me3:HeLa-S3|...\n"
 							+ "Feature ID: Depending on the annotation, this may be: Transcript ID (preferably using version number), Motif ID, miRNA, ChipSeq peak, Histone mark, etc. Note: Some features may not have ID (e.g. histone marks from custom Chip-Seq experiments may not have a unique ID). (source:http://snpeff.sourceforge.net)");
 			attributes.add(feature_type);
 
 			DefaultAttributeMetaData feature_id = new DefaultAttributeMetaData(FEATURE_ID, STRING);
-			feature_id
-					.setDescription("Depending on the annotation, this may be: Transcript ID (preferably using version number), Motif ID, miRNA, ChipSeq peak, Histone mark, etc. Note: Some features may not have ID (e.g. histone marks from custom Chip-Seq experiments may not have a unique ID).(source:http://snpeff.sourceforge.net)");
+			feature_id.setDescription(
+					"Depending on the annotation, this may be: Transcript ID (preferably using version number), Motif ID, miRNA, ChipSeq peak, Histone mark, etc. Note: Some features may not have ID (e.g. histone marks from custom Chip-Seq experiments may not have a unique ID).(source:http://snpeff.sourceforge.net)");
 			attributes.add(feature_id);
 
 			DefaultAttributeMetaData transcript_biotype = new DefaultAttributeMetaData(TRANSCRIPT_BIOTYPE, STRING);
-			transcript_biotype
-					.setDescription("The bare minimum is at least a description on whether the transcript is {“Coding”, “Noncoding”}. Whenever possible, use ENSEMBL biotypes.(source:http://snpeff.sourceforge.net)");
+			transcript_biotype.setDescription(
+					"The bare minimum is at least a description on whether the transcript is {“Coding”, “Noncoding”}. Whenever possible, use ENSEMBL biotypes.(source:http://snpeff.sourceforge.net)");
 			attributes.add(transcript_biotype);
 
 			DefaultAttributeMetaData rank_total = new DefaultAttributeMetaData(RANK_TOTAL, STRING);
-			rank_total
-					.setDescription("Exon or Intron rank / total number of exons or introns(source:http://snpeff.sourceforge.net)");
+			rank_total.setDescription(
+					"Exon or Intron rank / total number of exons or introns(source:http://snpeff.sourceforge.net)");
 			attributes.add(rank_total);
 
-			DefaultAttributeMetaData HGVS_c = new DefaultAttributeMetaData(HGVS_C, STRING);
+			DefaultAttributeMetaData HGVS_c = new DefaultAttributeMetaData(HGVS_C, TEXT);
 			HGVS_c.setDescription("Variant using HGVS notation (DNA level)(source:http://snpeff.sourceforge.net)");
 			attributes.add(HGVS_c);
 
 			DefaultAttributeMetaData HGVS_p = new DefaultAttributeMetaData(HGVS_P, STRING);
-			HGVS_p.setDescription("If variant is coding, this field describes the variant using HGVS notation (Protein level). Since transcript ID is already mentioned in ‘feature ID’, it may be omitted here.(source:http://snpeff.sourceforge.net)");
+			HGVS_p.setDescription(
+					"If variant is coding, this field describes the variant using HGVS notation (Protein level). Since transcript ID is already mentioned in ‘feature ID’, it may be omitted here.(source:http://snpeff.sourceforge.net)");
 			attributes.add(HGVS_p);
 
 			DefaultAttributeMetaData cDNA_position = new DefaultAttributeMetaData(C_DNA_POSITION, STRING);
-			cDNA_position
-					.setDescription("Position in cDNA and trancript’s cDNA length (one based)(source:http://snpeff.sourceforge.net)");
+			cDNA_position.setDescription(
+					"Position in cDNA and trancript’s cDNA length (one based)(source:http://snpeff.sourceforge.net)");
 			attributes.add(cDNA_position);
 
 			DefaultAttributeMetaData CDS_position = new DefaultAttributeMetaData(CDS_POSITION, STRING);
-			CDS_position
-					.setDescription("Position and number of coding bases (one based includes START and STOP codons)(source:http://snpeff.sourceforge.net)");
+			CDS_position.setDescription(
+					"Position and number of coding bases (one based includes START and STOP codons)(source:http://snpeff.sourceforge.net)");
 			attributes.add(CDS_position);
 
 			DefaultAttributeMetaData Protein_position = new DefaultAttributeMetaData(PROTEIN_POSITION, STRING);
@@ -413,20 +412,23 @@ public class SnpEffAnnotator
 			attributes.add(Protein_position);
 
 			DefaultAttributeMetaData Distance_to_feature = new DefaultAttributeMetaData(DISTANCE_TO_FEATURE, STRING);
-			Distance_to_feature
-					.setDescription("All items in this field are options, so the field could be empty. Up/Downstream: Distance to first / last codon Intergenic: Distance to closest gene Distance to closest Intron boundary in exon (+/- up/downstream). If same, use positive number. Distance to closest exon boundary in Intron (+/- up/downstream) Distance to first base in MOTIF Distance to first base in miRNA Distance to exon-intron boundary in splice_site or splice _region ChipSeq peak: Distance to summit (or peak center) Histone mark / Histone state: Distance to summit (or peak center)(source:http://snpeff.sourceforge.net)");
+			Distance_to_feature.setDescription(
+					"All items in this field are options, so the field could be empty. Up/Downstream: Distance to first / last codon Intergenic: Distance to closest gene Distance to closest Intron boundary in exon (+/- up/downstream). If same, use positive number. Distance to closest exon boundary in Intron (+/- up/downstream) Distance to first base in MOTIF Distance to first base in miRNA Distance to exon-intron boundary in splice_site or splice _region ChipSeq peak: Distance to summit (or peak center) Histone mark / Histone state: Distance to summit (or peak center)(source:http://snpeff.sourceforge.net)");
 			attributes.add(Distance_to_feature);
 
 			DefaultAttributeMetaData Errors = new DefaultAttributeMetaData(ERRORS, STRING);
-			Errors.setDescription("Add errors, warnings oErrors, Warnings or Information messages: Add errors, warnings or r informative message that can affect annotation accuracy. It can be added using either ‘codes’ (as shown in column 1, e.g. W1) or ‘message types’ (as shown in column 2, e.g. WARNING_REF_DOES_NOT_MATCH_GENOME). All these errors, warnings or information messages messages are optional.(source:http://snpeff.sourceforge.net)");
+			Errors.setDescription(
+					"Add errors, warnings oErrors, Warnings or Information messages: Add errors, warnings or r informative message that can affect annotation accuracy. It can be added using either ‘codes’ (as shown in column 1, e.g. W1) or ‘message types’ (as shown in column 2, e.g. WARNING_REF_DOES_NOT_MATCH_GENOME). All these errors, warnings or information messages messages are optional.(source:http://snpeff.sourceforge.net)");
 			attributes.add(Errors);
 
 			DefaultAttributeMetaData lof = new DefaultAttributeMetaData(LOF, STRING);
-			lof.setDescription("snpEff can estimate if a variant is deemed to have a loss of function on the protein.(source:http://snpeff.sourceforge.net)");
+			lof.setDescription(
+					"snpEff can estimate if a variant is deemed to have a loss of function on the protein.(source:http://snpeff.sourceforge.net)");
 			attributes.add(lof);
 
 			DefaultAttributeMetaData nmd = new DefaultAttributeMetaData(NMD, STRING);
-			nmd.setDescription("Nonsense mediate decay assessment. Some mutations may cause mRNA to be degraded thus not translated into a protein. NMD analysis marks mutations that are estimated to trigger nonsense mediated decay.(source:http://snpeff.sourceforge.net)");
+			nmd.setDescription(
+					"Nonsense mediate decay assessment. Some mutations may cause mRNA to be degraded thus not translated into a protein. NMD analysis marks mutations that are estimated to trigger nonsense mediated decay.(source:http://snpeff.sourceforge.net)");
 			attributes.add(nmd);
 
 			DefaultAttributeMetaData compoundAttributeMetaData = new DefaultAttributeMetaData(this.getFullName(),
@@ -467,9 +469,9 @@ public class SnpEffAnnotator
 
 		private String getSnpEffPath()
 		{
-			if ((molgenisSettings != null) && (snpEffPath == null))
-			{
-				snpEffPath = molgenisSettings.getProperty(SNPEFF_JAR_LOCATION_PROPERTY);
+			if ((pluginSettings != null) && (snpEffPath == null)) {
+				snpEffPath = RunAsSystemProxy
+						.runAsSystem(() -> pluginSettings.getString(SnpEffAnnotatorSettings.Meta.SNPEFF_JAR_LOCATION));
 
 				if (snpEffPath != null)
 				{
@@ -492,8 +494,8 @@ public class SnpEffAnnotator
 		@Override
 		public CmdLineAnnotatorSettingsConfigurer getCmdLineAnnotatorSettingsConfigurer()
 		{
-			return new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(SNPEFF_JAR_LOCATION_PROPERTY,
-					molgenisSettings);
+			return new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(
+					SnpEffAnnotatorSettings.Meta.SNPEFF_JAR_LOCATION, pluginSettings);
 		}
 	}
 

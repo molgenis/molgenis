@@ -456,12 +456,12 @@
 						if(attr.visible === true) {
 							var attrPath = path.concat(attr.name);
 							if(molgenis.isCompoundAttr(attr)) {
-								this._createColsRec(item, entity, attr.attributes, {'*': null}, Cols, attrPath, expanded);
+								this._createColsRec(item, entity, attr.attributes, {'*': null}, Cols, path, expanded);
 							} else {
 
 								if(this._isExpandedAttr(attr, selectedAttrs)) {
 									Cols.push(td({className: 'expanded-left', key : attrPath.join()}));
-									var value = item !== undefined && item !== null ? item[attr.name] : null;
+									var value = (item !== undefined && item !== null) ? (_.isArray(item) ? _.map(item, function(value) { return value[attr.name];}) : item[attr.name]) : null;
 									this._createColsRec(value, attr.refEntity, attr.refEntity.attributes, selectedAttrs[attr.name], Cols, attrPath, true);
 								} else {
 									if(this._canExpandAttr(attr, path)) {
@@ -518,7 +518,7 @@
 						var CellContentForValue = this._createTableCellContent(value, 'c' + i);
 						return i < this.props.value.length - 1 ? [CellContentForValue, br({key: 'b' + i})] : CellContentForValue;
 					} else {
-						return null;
+						return br();
 					}
 				}.bind(this)));
 			} else {

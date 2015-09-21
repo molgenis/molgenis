@@ -92,6 +92,15 @@ public class MolgenisJsTest
 	}
 
 	@Test
+	public void testTimes()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("height").setDataType(MolgenisFieldTypes.INT);
+		Object result = ScriptEvaluator.eval("$('height').times(100).value()", new MapEntity("height", 1.8), emd);
+		assertEquals(result, (double) 180);
+	}
+
+	@Test
 	public void div()
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");

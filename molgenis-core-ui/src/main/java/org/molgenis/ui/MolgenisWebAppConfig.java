@@ -36,6 +36,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
+import org.molgenis.data.support.OwnedEntityMetaData;
 import org.molgenis.data.transaction.TransactionLogIndexedRepositoryDecorator;
 import org.molgenis.data.transaction.TransactionLogRepositoryDecorator;
 import org.molgenis.data.transaction.TransactionLogService;
@@ -53,7 +54,6 @@ import org.molgenis.security.CorsInterceptor;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
-import org.molgenis.security.owned.OwnedEntityMetaData;
 import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
 import org.molgenis.ui.freemarker.LimitMethod;
 import org.molgenis.ui.menu.MenuMolgenisUi;
@@ -437,15 +437,21 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 		addUpgrades();
 		boolean didUpgrade = upgradeService.upgrade();
-		if (!indexExists() || didUpgrade)
+		if (didUpgrade)
 		{
-			LOG.info("Reindexing repositories....");
+			LOG.info("Reindexing repositories due to MOLGENIS upgrade...");
+			reindex();
+			LOG.info("Reindexing done.");
+		}
+		else if (!indexExists())
+		{
+			LOG.info("Reindexing repositories due to missing Elasticsearch index...");
 			reindex();
 			LOG.info("Reindexing done.");
 		}
 		else
 		{
-			LOG.info("Index found. No need to reindex.");
+			LOG.debug("Elasticsearch index exists, no need to reindex.");
 		}
 		runAsSystem(() -> metaDataService().setDefaultBackend(getBackend()));
 	}

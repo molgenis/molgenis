@@ -9,7 +9,7 @@
     </parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>1.9.0-SNAPSHOT</version>
+    <version>1.10.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <!-- More Project Information -->
@@ -735,6 +735,7 @@
         <module>molgenis-disease-matcher</module>
         <module>molgenis-data-examples</module>
         <module>molgenis-scripts</module>
+        <module>molgenis-scripts-core</module>
         <module>molgenis-data-import</module>
         <module>molgenis-data-mapper</module>
         <module>molgenis-pathways</module>
