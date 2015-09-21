@@ -165,8 +165,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>, Applica
 	 *            the default package for the entities that does not have a package
 	 * @return
 	 */
-	LinkedHashMap<String, Boolean> integrationTestMetaData(RepositoryCollection repositoryCollection,
-			String defaultPackage);
+	LinkedHashMap<String, Boolean> integrationTestMetaData(RepositoryCollection repositoryCollection);
 
 	/**
 	 * Check the integration of an entity meta data with existing entities Check only if the existing attributes are the

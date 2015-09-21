@@ -388,10 +388,8 @@ public class MetaDataServiceImpl implements MetaDataService
 		entityMetaDataRepository.add(entityMetaData);
 	}
 
-	// TODO Write test
 	@Override
-	public LinkedHashMap<String, Boolean> integrationTestMetaData(RepositoryCollection repositoryCollection,
-			String defaultPackage)
+	public LinkedHashMap<String, Boolean> integrationTestMetaData(RepositoryCollection repositoryCollection)
 	{
 		LinkedHashMap<String, Boolean> entitiesImportable = new LinkedHashMap<String, Boolean>();
 		StreamSupport.stream(repositoryCollection.getEntityNames().spliterator(), false).forEach(
@@ -402,7 +400,6 @@ public class MetaDataServiceImpl implements MetaDataService
 		return entitiesImportable;
 	}
 
-	// TODO Write test
 	@Override
 	public LinkedHashMap<String, Boolean> integrationTestMetaData(
 			ImmutableMap<String, EntityMetaData> newEntitiesMetaDataMap, List<String> skipEntities,
