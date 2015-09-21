@@ -23,7 +23,7 @@ public class CorsFilter extends OncePerRequestFilter
 			// respond to pre-flight CORS request
 			response.addHeader("Access-Control-Allow-Origin", "*");
 			response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-			response.addHeader("Access-Control-Allow-Headers", "Content-Type");
+			response.addHeader("Access-Control-Allow-Headers", "Content-Type, x-molgenis-token");
 			response.addHeader("Access-Control-Max-Age", "1800");
 			response.setStatus(HttpServletResponse.SC_OK);
 			return;
