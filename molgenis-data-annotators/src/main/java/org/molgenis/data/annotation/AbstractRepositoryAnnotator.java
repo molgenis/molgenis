@@ -32,9 +32,9 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 					.equals(annotatorAttribute.getDataType()))
 			{
 				// allow type string when required attribute is text (for backward compatibility)
-				if (repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType()
-						.equals(MolgenisFieldTypes.STRING)
-						&& annotatorAttribute.getDataType().equals(MolgenisFieldTypes.TEXT))
+				if (!(repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType()
+						.equals(MolgenisFieldTypes.STRING) && annotatorAttribute.getDataType().equals(
+						MolgenisFieldTypes.TEXT)))
 				{
 					return "a required attribute has the wrong datatype";
 				}
