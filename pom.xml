@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.sonatype.oss</groupId>
@@ -9,7 +8,7 @@
     </parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>1.10.0-SNAPSHOT</version>
+    <version>1.11.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <!-- More Project Information -->
@@ -28,7 +27,7 @@
         <connection>scm:git:git://github.com/molgenis/molgenis.git</connection>
         <url>https://github.com/molgenis/molgenis</url>
     </scm>
-    <developers/>
+    <developers />
 
     <profiles>
         <!-- release profile (default) -->
@@ -92,7 +91,7 @@
                         <source>1.8</source>
                         <target>1.8</target>
                         <compilerArguments>
-                            <Xlint/>
+                            <Xlint />
                         </compilerArguments>
                     </configuration>
                 </plugin>
@@ -210,13 +209,12 @@
                             <configuration>
                                 <tasks>
                                     <path id="generate-classpath">
-                                        <path refid="maven.compile.classpath"/>
-                                        <pathelement path="${project.basedir}/src/main/resources"/>
+                                        <path refid="maven.compile.classpath" />
+                                        <pathelement path="${project.basedir}/src/main/resources" />
                                     </path>
-                                    <java classname="org.molgenis.Molgenis" classpathref="generate-classpath"
-                                          failonerror="true">
-                                        <arg value="molgenis.properties"/>
-                                        <arg value="${project.build.directory}/generated-sources/molgenis"/>
+                                    <java classname="org.molgenis.Molgenis" classpathref="generate-classpath" failonerror="true">
+                                        <arg value="molgenis.properties" />
+                                        <arg value="${project.build.directory}/generated-sources/molgenis" />
                                     </java>
                                 </tasks>
                             </configuration>
@@ -230,14 +228,13 @@
                             <configuration>
                                 <tasks>
                                     <path id="generate-classpath">
-                                        <path refid="maven.compile.classpath"/>
-                                        <pathelement path="${project.basedir}/src/main/resources"/>
+                                        <path refid="maven.compile.classpath" />
+                                        <pathelement path="${project.basedir}/src/main/resources" />
                                     </path>
-                                    <java classname="org.molgenis.Molgenis" classpathref="generate-classpath"
-                                          failonerror="true">
-                                        <arg value="molgenis.properties"/>
-                                        <arg value="${project.build.directory}/generated-test-sources/molgenis"/>
-                                        <arg value="--generatetests"/>
+                                    <java classname="org.molgenis.Molgenis" classpathref="generate-classpath" failonerror="true">
+                                        <arg value="molgenis.properties" />
+                                        <arg value="${project.build.directory}/generated-test-sources/molgenis" />
+                                        <arg value="--generatetests" />
                                     </java>
                                 </tasks>
                             </configuration>
@@ -399,7 +396,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore/>
+                                        <ignore />
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -412,7 +409,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore/>
+                                        <ignore />
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -425,7 +422,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore/>
+                                        <ignore />
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -438,7 +435,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore/>
+                                        <ignore />
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -451,7 +448,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore/>
+                                        <ignore />
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -464,7 +461,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore/>
+                                        <ignore />
                                     </action>
                                 </pluginExecution>
                             </pluginExecutions>
