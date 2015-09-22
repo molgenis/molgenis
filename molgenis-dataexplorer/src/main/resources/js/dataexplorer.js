@@ -18,8 +18,7 @@ function($, molgenis, settingsXhr) {
     self.getIdentifierAttribute = getIdentifierAttribute;
     self.getPatientAttribute = getPatientAttribute;
 
-    var restApi = new molgenis.RestClient();
-    var restApi2 = new molgenis.RestClientV2();
+    var api = new molgenis.RestClientV2();
 	var selectedEntityMetaData = null;
 	var attributeFilters = {};
 	var selectedAttributes = [];
@@ -286,12 +285,13 @@ function($, molgenis, settingsXhr) {
 	}
 	
 	function render() {
-		var entityMetaDataRequest = restApi2.get('/api/v2/' + state.entity).done(function(entityMetaData) {
-			selectedEntityMetaData = entityMetaData.meta;
-			self.createHeader(entityMetaData.meta);
-		
+		var entityMetaDataRequest = api.get('/api/v2/' + state.entity).done(function(data) {
+			var entityMetaData = data.meta;
+			selectedEntityMetaData = entityMetaData;
+			self.createHeader(entityMetaData);
+			
 			// Loop through all the attributes in the meta data
-			selectedAttributes = $.map(entityMetaData.meta.attributes, function(attribute) {				
+			$.each(entityMetaData.attributes, function(index, attribute) {
 				
 				// Default expansion is false
 				// Expanded has to do with xref / mref attributes
@@ -300,31 +300,22 @@ function($, molgenis, settingsXhr) {
 				// If the state is empty or undefined, or is set to 'none', return null. All attributes will be shown
 				if(state.attrs === undefined || state.attrs === null || state.attrs === 'none') return null;
 				else {
-					// Use attributesInState to properly return the selectedAttributes
-					// returns in $.each will not exit all the way back to $.map
-					var attributesInState; 
 					
-					// Loop through all the attributes mentioned in the state
-					$.each(state.attrs, function(index, attrName) {
-						
+					// Loop through all the attributes mentioned in the state (url)
+					$.each(state.attrs, function(index, selectedAttrName) {
 						// If the attribute is in the state, add that attribute to the selectedAttributes
 						// For compound attributes, check the atomic attributes
-						if(attribute.name === attrName) {
-							attributesInState = attribute;
+						if(attribute.name === selectedAttrName) {
+							selectedAttributes.push(attribute);
 						}
 						if(attribute.fieldType === 'COMPOUND') {
 							$.each(attribute.attributes, function(index, atomicAttribute) {
-								if(atomicAttribute.name === attrName) {																		
-									// Add the atomic attribute to the selectedAttributes, set its expanded attribute to false
-									atomicAttribute.expanded = false;
-									attributesInState = atomicAttribute;
+								if(attribute.name === atomicAttribute.name) {
+									selectedAttributes.push(attribute);
 								}
 							});
 						}
 					});
-					
-					// set selectedAttributes with the attribute meta data for attributes in the state
-					return attributesInState;						
 				}
 			});
 			
@@ -338,10 +329,10 @@ function($, molgenis, settingsXhr) {
 				selectedAttributesTree[key] = value;
 			});
 			
-			createEntityMetaTree(entityMetaData.meta, selectedAttributes);
+			createEntityMetaTree(entityMetaData, selectedAttributes);
 			
 			if (settings['launch_wizard'] === true) {
-				self.filter.wizard.openFilterWizardModal(entityMetaData.meta, attributeFilters);
+				self.filter.wizard.openFilterWizardModal(entityMetaData, attributeFilters);
 			}
 		});
 		
