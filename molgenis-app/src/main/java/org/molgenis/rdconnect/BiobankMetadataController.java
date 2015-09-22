@@ -3,13 +3,7 @@ package org.molgenis.rdconnect;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.rdconnect.BiobankMetadataController.URI;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
@@ -56,79 +50,7 @@ public class BiobankMetadataController extends MolgenisPluginController
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public String refreshMetadata(Model model) throws Exception
 	{
-		BiobankMetadataService biobankMetadataService = new BiobankMetadataService();
-		Map<String, Object> biobankMetadata = biobankMetadataService
-				.getBiobankMetadata("http://catalogue.rd-connect.eu/api/jsonws/BiBBoxCommonServices-portlet.logapi/regbb/organization-id/10779");
-		System.out.println(biobankMetadata.toString());
-		EntityMetaData emd = dataService.getEntityMetaData("regbb");
-		MapEntity regbbMapEntity = new MapEntity(emd);
-
-		EntityMetaData emdUrl = dataService.getEntityMetaData("url");
-
-		regbbMapEntity.set("OrganizationID", biobankMetadata.get("OrganizationID"));
-		regbbMapEntity.set("type", biobankMetadata.get("type"));
-
-		List<String> urls = (List<String>) biobankMetadata.get("url");
-		
-		List<MapEntity> list  = new ArrayList();
-		for (int i = 0; i < urls.size(); i++)
-		{
-			String url = urls.get(i);
-			MapEntity urlMapEntity = new MapEntity(emdUrl);
-
-			try
-			{
-				urlMapEntity.set("url", url);
-				list.add(urlMapEntity);
-				dataService.add("url", urlMapEntity);
-			}
-			catch (Exception e)
-			{
-				// DOE NIETS
-			}
-		}
-		
-		regbbMapEntity.set("url", list);
-		regbbMapEntity.set("title", ((Map<String, Object>) biobankMetadata.get("main contact")).get("title"));
-
-		try
-		{
-			dataService.add("regbb", regbbMapEntity);
-		}
-		catch (Exception e)
-		{
-			dataService.update("regbb", regbbMapEntity);
-		}
-
-		//
-		// "OrganizationID": 10779,
-		// "type": "registry",
-		// "also listed in": [],
-		// "url": [
-		// "https://3q29deletion.patientcrossroads.org/"
-		// ],
-		// "main contact": {
-		// "title": "Welcome Jennifer Mulle!",
-		// "first name": "Jennifer",
-		// "email": "jmulle@emory.edu",
-		// "last name": "Mulle"
-		// },
-		// "last activities": "Mon Jan 12 19:37:12 GMT 2015",
-		// "date of inclusion": "Mon Jan 05 18:02:13 GMT 2015",
-		// "address": {
-		// "street2": "",
-		// "name of host institution": "Department of Epideminology",
-		// "zip": "3042",
-		// "street1": "1518 Clifton Road",
-		// "country": "",
-		// "city": "Atlanta"
-		// },
-		// "name": "3q29 deletion Registry",
-		// "ID": "http://catalogue.rd-connect.eu/id/organization-id/10779",
-		// "type of host institution": "University/Research Institute",
-		// "target population": "National"
-		//
-		//
+		biobankMetadataService.getIdCardBiobanks().forEach(e -> dataService.add("regbb", e));
 		return init(model);
 	}
 
