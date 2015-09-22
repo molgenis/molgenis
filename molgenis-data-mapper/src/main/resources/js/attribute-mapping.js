@@ -295,7 +295,7 @@
 		//Remove the existing content of the result table
 		resultTable.empty();
 		//Add the header to the result table
-		resultTable.append('<thead><tr><th>Select</th><th>Attribute</th><th>Algorithm value</th></tr></thead>');
+		resultTable.append('<thead><tr><th>Select</th><th>Attribute label</th><th>Name</th></tr></thead>');
 		
 		if(explainedAttributes != null){
 			
@@ -335,7 +335,7 @@
 					attributeInfo.push('<br><a href="' + dataExplorerUri + '?entity=' + attribute.refEntity + '" target="_blank">category look up</a>');
 				}
 				
-				attributeInfo.push('</td><td></td>');
+				attributeInfo.push('</td><td>' + attribute.name + '</td>');
 				
 				row.append(attributeInfo.join('')).appendTo(tbody);
 				
