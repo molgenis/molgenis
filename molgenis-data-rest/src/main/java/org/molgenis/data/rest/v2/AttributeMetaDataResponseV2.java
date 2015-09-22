@@ -9,7 +9,6 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Range;
 import org.molgenis.data.rest.Href;
-import org.molgenis.data.rest.RestController;
 import org.molgenis.security.core.MolgenisPermissionService;
 
 import com.google.common.base.Function;
@@ -55,7 +54,7 @@ class AttributeMetaDataResponseV2
 			AttributeFilter attrFilter, MolgenisPermissionService permissionService)
 	{
 		String attrName = attr.getName();
-		this.href = Href.concatMetaAttributeHref(RestController.BASE_URI, entityParentName, attrName);
+		this.href = Href.concatMetaAttributeHref(RestControllerV2.BASE_URI, entityParentName, attrName);
 
 		this.fieldType = attr.getDataType().getEnumType();
 		this.name = attrName;
