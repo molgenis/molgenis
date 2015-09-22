@@ -12,7 +12,6 @@ import com.google.common.collect.Sets;
 public abstract class InternalAbstractCategoryRule implements CategoryRule
 {
 	private final Splitter termSplitter = Splitter.onPattern("\\s+");
-
 	private final Set<String> words;
 
 	public InternalAbstractCategoryRule(Set<String> words)
@@ -23,10 +22,10 @@ public abstract class InternalAbstractCategoryRule implements CategoryRule
 	@Override
 	public boolean isRuleApplied(Category targetCategory, Category sourceCategory)
 	{
-		String lowerCasedTargetLabel = targetCategory.getLabel();
-		String lowerCasedSourceLabel = sourceCategory.getLabel();
+		String targetLabel = targetCategory.getLabel();
+		String sourceLabel = sourceCategory.getLabel();
 
-		return labelContainsWords(lowerCasedSourceLabel) && labelContainsWords(lowerCasedTargetLabel);
+		return labelContainsWords(sourceLabel) && labelContainsWords(targetLabel);
 	}
 
 	protected boolean labelContainsWords(String label)
