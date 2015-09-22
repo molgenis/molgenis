@@ -6,7 +6,6 @@ import org.testng.annotations.Test;
 
 public class NegativeCategoryRuleTest
 {
-
 	NegativeCategoryRule rule = new NegativeCategoryRule();
 
 	@Test
@@ -19,9 +18,9 @@ public class NegativeCategoryRuleTest
 	@Test
 	public void labelContainsPositiveWords()
 	{
-		Assert.assertTrue(rule.labelContainsNegativeWords("string NO NEVER contain the word!"));
-		Assert.assertFalse(rule.labelContainsNegativeWords("string EVER contain the word!"));
-		Assert.assertFalse(rule.labelContainsNegativeWords("string YES contain the word!"));
-		Assert.assertFalse(rule.labelContainsNegativeWords("string HAS contain the word!"));
+		Assert.assertTrue(rule.labelContainsWords("string NO NEVER contain the word!"));
+		Assert.assertFalse(rule.labelContainsWords("string EVER contain the word!"));
+		Assert.assertFalse(rule.labelContainsWords("string YES contain the word!"));
+		Assert.assertFalse(rule.labelContainsWords("string HAS contain the word!"));
 	}
 }

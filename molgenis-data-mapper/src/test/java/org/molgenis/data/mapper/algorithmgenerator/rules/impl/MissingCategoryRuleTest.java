@@ -12,15 +12,17 @@ public class MissingCategoryRuleTest
 	public void isRuleApplied()
 	{
 		Assert.assertTrue(rule.isRuleApplied(Category.create(3, "UNKNOWN"), Category.create(3, "missing")));
+		Assert.assertTrue(rule.isRuleApplied(Category.create(3, "not know"), Category.create(3, "missing")));
+		Assert.assertTrue(rule.isRuleApplied(Category.create(3, "don`t know"), Category.create(3, "missing")));
 		Assert.assertFalse(rule.isRuleApplied(Category.create(0, "has had stroke"), Category.create(1, "NO")));
 	}
 
 	@Test
 	public void labelContainsMissingeWords()
 	{
-		Assert.assertTrue(rule.labelContainsMissingWords("string unknown contain the word!"));
-		Assert.assertTrue(rule.labelContainsMissingWords("string MISSING contain the word!"));
-		Assert.assertFalse(rule.labelContainsMissingWords("string YES contain the word!"));
-		Assert.assertFalse(rule.labelContainsMissingWords("string HAS contain the word!"));
+		Assert.assertTrue(rule.labelContainsWords("string unknown contain the word!"));
+		Assert.assertTrue(rule.labelContainsWords("string MISSING contain the word!"));
+		Assert.assertFalse(rule.labelContainsWords("string YES contain the word!"));
+		Assert.assertFalse(rule.labelContainsWords("string HAS contain the word!"));
 	}
 }
