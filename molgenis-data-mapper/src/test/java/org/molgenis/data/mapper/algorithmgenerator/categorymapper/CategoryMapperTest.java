@@ -1,6 +1,7 @@
 package org.molgenis.data.mapper.algorithmgenerator.categorymapper;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.measure.quantity.Quantity;
@@ -14,7 +15,7 @@ import org.testng.annotations.Test;
 
 public class CategoryMapperTest
 {
-	FrequencyCategoryMapper categoryMapper = new FrequencyCategoryMapper();
+	FrequencyCategoryMapper categoryMapper = new FrequencyCategoryMapper(Collections.emptyList());
 
 	@Test
 	public void testConvertCategory()

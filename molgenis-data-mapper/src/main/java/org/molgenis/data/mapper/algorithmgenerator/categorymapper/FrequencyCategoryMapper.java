@@ -8,12 +8,18 @@ import javax.measure.unit.Unit;
 import org.jscience.physics.amount.Amount;
 import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
 import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
+import org.molgenis.data.mapper.algorithmgenerator.rules.CategoryRule;
 
-public class FrequencyCategoryMapper implements CategoryMapper
+public class FrequencyCategoryMapper extends CategoryMapper
 {
 	private static final Unit<?> STANDARD_UNIT = NonSI.WEEK.inverse();
 
 	private static final double STANDARD_ERROR = 1;
+
+	public FrequencyCategoryMapper(List<CategoryRule> rules)
+	{
+		super(rules);
+	}
 
 	public Category findBestCategoryMatch(Category sourceCategory, List<Category> targetCategories)
 	{

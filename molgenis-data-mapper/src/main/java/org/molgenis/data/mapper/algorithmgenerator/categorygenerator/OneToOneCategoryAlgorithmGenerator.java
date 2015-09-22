@@ -8,6 +8,11 @@ import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
 import org.molgenis.data.mapper.algorithmgenerator.categorymapper.CategoryMapper;
 import org.molgenis.data.mapper.algorithmgenerator.categorymapper.FrequencyCategoryMapper;
 import org.molgenis.data.mapper.algorithmgenerator.categorymapper.LexicalCategoryMapper;
+import org.molgenis.data.mapper.algorithmgenerator.rules.CategoryRule;
+import org.molgenis.data.mapper.algorithmgenerator.rules.impl.NegativeCategoryRule;
+import org.molgenis.data.mapper.algorithmgenerator.rules.impl.PositiveCategoryRule;
+
+import com.google.common.collect.Lists;
 
 public class OneToOneCategoryAlgorithmGenerator extends CategoryAlgorithmGenerator
 {
@@ -18,8 +23,14 @@ public class OneToOneCategoryAlgorithmGenerator extends CategoryAlgorithmGenerat
 	{
 		super(dataService);
 
-		this.lexicalCategoryMapper = new LexicalCategoryMapper();
-		this.frequencyCategoryMapper = new FrequencyCategoryMapper();
+		List<CategoryRule> rules = getRules(dataService);
+		this.lexicalCategoryMapper = new LexicalCategoryMapper(rules);
+		this.frequencyCategoryMapper = new FrequencyCategoryMapper(rules);
+	}
+
+	private List<CategoryRule> getRules(DataService dataService)
+	{
+		return Lists.newArrayList(new PositiveCategoryRule(), new NegativeCategoryRule());
 	}
 
 	@Override
@@ -40,8 +51,7 @@ public class OneToOneCategoryAlgorithmGenerator extends CategoryAlgorithmGenerat
 			List<Category> sourceCategories = convertToCategory(firstSourceAttribute);
 
 			// Check if both of target and source categories contain frequency units
-			if (targetCategories.stream().anyMatch(category -> category.getAmountWrapper() != null)
-					&& sourceCategories.stream().anyMatch(category -> category.getAmountWrapper() != null))
+			if (isFrequencyCategory(targetCategories) && isFrequencyCategory(sourceCategories))
 			{
 				mapAlgorithm = mapCategories(firstSourceAttribute, targetCategories, sourceCategories,
 						frequencyCategoryMapper);
@@ -81,5 +91,10 @@ public class OneToOneCategoryAlgorithmGenerator extends CategoryAlgorithmGenerat
 		}
 
 		return stringBuilder.toString();
+	}
+
+	boolean isFrequencyCategory(List<Category> categories)
+	{
+		return categories.stream().anyMatch(category -> category.getAmountWrapper() != null);
 	}
 }
