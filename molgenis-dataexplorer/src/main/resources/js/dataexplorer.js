@@ -294,13 +294,14 @@ function($, molgenis, settingsXhr) {
 			selectedAttributes = $.map(entityMetaData.meta.attributes, function(attribute) {				
 				
 				// Default expansion is false
+				// Expanded has to do with xref / mref attributes
 				attribute.expanded = false;
 				
 				// If the state is empty or undefined, or is set to 'none', return null. All attributes will be shown
 				if(state.attrs === undefined || state.attrs === null || state.attrs === 'none') return null;
 				else {
 					// Use attributesInState to properly return the selectedAttributes
-					// returns in $.each will only exit 1 scope, not all the way back to $.map
+					// returns in $.each will not exit all the way back to $.map
 					var attributesInState; 
 					
 					// Loop through all the attributes mentioned in the state
@@ -313,8 +314,9 @@ function($, molgenis, settingsXhr) {
 						}
 						if(attribute.fieldType === 'COMPOUND') {
 							$.each(attribute.attributes, function(index, atomicAttribute) {
-								if(atomicAttribute.name === attrName) {									
-									// If the attribute within a compound is in the state, set the compound attribute expanded property to true;
+								if(atomicAttribute.name === attrName) {																		
+									// Add the atomic attribute to the selectedAttributes, set its expanded attribute to false
+									atomicAttribute.expanded = false;
 									attributesInState = atomicAttribute;
 								}
 							});
@@ -335,8 +337,6 @@ function($, molgenis, settingsXhr) {
 				var value = attribute.expanded === true ? {'*': null} : null;
 				selectedAttributesTree[key] = value;
 			});
-			
-			console.log(selectedAttributes);
 			
 			createEntityMetaTree(entityMetaData.meta, selectedAttributes);
 			
