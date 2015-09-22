@@ -9,6 +9,7 @@ import org.molgenis.data.mapper.algorithmgenerator.categorymapper.CategoryMapper
 import org.molgenis.data.mapper.algorithmgenerator.categorymapper.FrequencyCategoryMapper;
 import org.molgenis.data.mapper.algorithmgenerator.categorymapper.LexicalCategoryMapper;
 import org.molgenis.data.mapper.algorithmgenerator.rules.CategoryRule;
+import org.molgenis.data.mapper.algorithmgenerator.rules.impl.MissingCategoryRule;
 import org.molgenis.data.mapper.algorithmgenerator.rules.impl.NegativeCategoryRule;
 import org.molgenis.data.mapper.algorithmgenerator.rules.impl.PositiveCategoryRule;
 
@@ -30,7 +31,7 @@ public class OneToOneCategoryAlgorithmGenerator extends CategoryAlgorithmGenerat
 
 	private List<CategoryRule> getRules(DataService dataService)
 	{
-		return Lists.newArrayList(new PositiveCategoryRule(), new NegativeCategoryRule());
+		return Lists.newArrayList(new PositiveCategoryRule(), new NegativeCategoryRule(), new MissingCategoryRule());
 	}
 
 	@Override
