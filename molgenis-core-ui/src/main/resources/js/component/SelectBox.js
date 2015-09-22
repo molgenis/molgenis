@@ -19,23 +19,33 @@
 					text: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.number])
 				})
 			),
-			onChange: React.PropTypes.func
+			value: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.number]),
+			onChange: React.PropTypes.func.isRequired
 		},
 		getDefaultProps: function(){
 			return {
 				options: []
 			}
 		},
+		getInitialState: function() {
+		    return {
+		    	value: this.props.value
+		    };
+		},
 		render: function() {
 			return (
 				div(null,
-					select({className: 'form-control', onChange: this.props.onChange}, this.props.options.map(function(item, i){
+					select({className: 'form-control', value: this.state.value, onChange: this._handleChange}, this.props.options.map(function(item, i){
 						return(
-							option({value: item.value, key: i}, item.text)
+							option({value: item.value, key: item.value}, item.text)
 						);
 					}))
 				)
 			);
+		},
+		_handleChange: function(e){
+			this.setState({value: e.target.value});
+			this.props.onChange(e);
 		}
 	});
 	
