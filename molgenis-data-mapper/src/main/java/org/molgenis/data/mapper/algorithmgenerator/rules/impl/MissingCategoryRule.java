@@ -6,8 +6,7 @@ import com.google.common.collect.Sets;
 
 public class MissingCategoryRule extends InternalAbstractCategoryRule
 {
-	private final static Set<String> MISSING_WORDS = Sets.newHashSet("missing", "unknown", "not know", "don`t know",
-			"dont know");
+	private final static Set<String> MISSING_WORDS = Sets.newHashSet("missing", "unknown", "not know", "dont know");
 
 	public MissingCategoryRule()
 	{

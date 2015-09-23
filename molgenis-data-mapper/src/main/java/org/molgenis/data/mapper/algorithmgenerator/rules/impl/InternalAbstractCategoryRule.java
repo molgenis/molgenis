@@ -2,6 +2,7 @@ package org.molgenis.data.mapper.algorithmgenerator.rules.impl;
 
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
@@ -12,7 +13,8 @@ import com.google.common.collect.Sets;
 
 public abstract class InternalAbstractCategoryRule implements CategoryRule
 {
-	private final Splitter termSplitter = Splitter.onPattern("\\s+");
+	private static final Splitter TERM_SPLITTER = Splitter.onPattern("\\s+");
+	private static final String ILLEGAL_CHARS_REGEX = "[^a-zA-Z0-9]";
 	private final Set<String> words;
 
 	public InternalAbstractCategoryRule(Set<String> words)
@@ -41,6 +43,12 @@ public abstract class InternalAbstractCategoryRule implements CategoryRule
 
 	protected Set<String> split(String label)
 	{
-		return Sets.newHashSet(termSplitter.split(label.toLowerCase()));
+		return Sets.newHashSet(TERM_SPLITTER.split(label.toLowerCase())).stream().map(this::removeIllegalChars)
+				.collect(Collectors.toSet());
+	}
+
+	protected String removeIllegalChars(String string)
+	{
+		return string.replaceAll(ILLEGAL_CHARS_REGEX, StringUtils.EMPTY);
 	}
 }

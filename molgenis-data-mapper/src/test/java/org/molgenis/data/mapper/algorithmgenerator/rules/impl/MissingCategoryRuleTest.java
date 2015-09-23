@@ -15,7 +15,17 @@ public class MissingCategoryRuleTest
 		Assert.assertTrue(rule.isRuleApplied(Category.create(3, "UNKNOWN"), Category.create(3, "missing")));
 		Assert.assertTrue(rule.isRuleApplied(Category.create(3, "not know"), Category.create(3, "missing")));
 		Assert.assertTrue(rule.isRuleApplied(Category.create(3, "don`t know"), Category.create(3, "missing")));
+		Assert.assertTrue(rule.isRuleApplied(Category.create(3, "don't know"), Category.create(3, "missing")));
+
 		Assert.assertFalse(rule.isRuleApplied(Category.create(0, "has had stroke"), Category.create(1, "NO")));
+	}
+
+	@Test
+	public void removeIllegalChars()
+	{
+		Assert.assertEquals(rule.removeIllegalChars("don`t"), "dont");
+		Assert.assertEquals(rule.removeIllegalChars("don&%$t"), "dont");
+		Assert.assertNotEquals(rule.removeIllegalChars("don1t"), "dont");
 	}
 
 	@Test
