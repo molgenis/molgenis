@@ -44,15 +44,15 @@ public class IdCardBiobankIndexerController extends MolgenisPluginController
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public String init(Model model) throws Exception
 	{
-		return "view-biobankrefresh";
+		return "view-idcardbiobankindexer";
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/refresh")
+	@RequestMapping(method = RequestMethod.POST, value = "/reindex")
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	public String refreshMetadata(Model model) throws Exception
+	@ResponseStatus(HttpStatus.OK)
+	public void refreshMetadata(Model model) throws Exception
 	{
-		dataService.add("rdconnect_regbb", biobankMetadataService.getIdCardBiobanks());
-		return init(model);
+		dataService.add("rdconnect_regbb", biobankMetadataService.getIdCardBiobanks()); // FIXME upsert
 	}
 
 	@ExceptionHandler(value = Throwable.class)
