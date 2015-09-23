@@ -131,7 +131,7 @@
 								div({
 									'className' : 'form-group'
 								}, 
-									label(null, "Rows per page:"),
+									label(null, "Rows per page: " + String.fromCharCode(160)),
 									molgenis.ui.SelectBox({
 										options: [
 											{value: 20, text: 20},
