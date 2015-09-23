@@ -1047,7 +1047,20 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 					{
 						SearchHit hit = batchHits[batchPos];
 						++batchPos;
-						return new DefaultEntity(entityMetaData, dataService, hit.getSource());
+						Map<String, Object> source = hit.getSource();
+						DefaultEntity defaultEntity;
+						if (source != null)
+						{
+							defaultEntity = new DefaultEntity(entityMetaData, dataService, source);
+						}
+						else
+						{
+							// for entities that are indexed and not stored return an entity with id only
+							defaultEntity = new DefaultEntity(entityMetaData, dataService);
+							String idAttrName = entityMetaData.getIdAttribute().getName();
+							defaultEntity.set(idAttrName, hit.getId());
+						}
+						return defaultEntity;
 					}
 					else throw new ArrayIndexOutOfBoundsException();
 				}
