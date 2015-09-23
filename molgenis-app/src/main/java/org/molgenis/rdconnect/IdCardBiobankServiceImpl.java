@@ -3,6 +3,8 @@ package org.molgenis.rdconnect;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -31,10 +33,6 @@ import com.google.gson.JsonParser;
 @Service
 public class IdCardBiobankServiceImpl implements IdCardBiobankService
 {
-	public final static String REGBBS_ENDPOINT_DATA = "/regbbs/data";
-	public final static String REGBBS_ENDPOINT_ORGANIZATION_ID = "/regbb/organization-id";
-	public final static String REGBBS_ATTR_ORGANIZATION_ID = "OrganizationID";
-
 	private final DataService dataService;
 	private final IdCardBiobankIndexerSettings idCardBiobankIndexerSettings;
 
@@ -81,56 +79,65 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService
 		}
 	}
 
-	private Set<String> getIdCardBiobanksOrgnizationIds()
+	private Set<String> getIdCardBiobanksOrganizationIds()
 	{
-		String regbbsEndpoint = idCardBiobankIndexerSettings.getIdCardApiBaseUri() + '/'
-				+ idCardBiobankIndexerSettings.getIdCardBiobankResourceName();
+		String regbbsEndpoint = idCardBiobankIndexerSettings.getApiBaseUri() + '/'
+				+ idCardBiobankIndexerSettings.getBiobankCollectionResource();
 		JsonArray resource = this.getResourceAsJsonArray(regbbsEndpoint);
 		return StreamSupport.stream(resource.spliterator(), false)
-				.map(j -> j.getAsJsonObject().get(REGBBS_ATTR_ORGANIZATION_ID).getAsString())
-				.collect(Collectors.toSet());
+				.map(j -> j.getAsJsonObject().get("OrganizationID").getAsString()).collect(Collectors.toSet());
 	}
 
 	@Override
 	public Iterable<Entity> getIdCardBiobanks(Iterable<String> ids)
 	{
-		return StreamSupport.stream(ids.spliterator(), false).map(e -> this.getIdCardBiobank(e))
-				.collect(Collectors.toList());
+		String value = StreamSupport.stream(ids.spliterator(), false).collect(Collectors.joining(",", "[", "]"));
+		try
+		{
+			value = URLEncoder.encode(value, "UTF-8");
+		}
+		catch (UnsupportedEncodingException e1)
+		{
+			throw new RuntimeException(e1);
+		}
+		String uri = idCardBiobankIndexerSettings.getApiBaseUri() + '/'
+				+ idCardBiobankIndexerSettings.getBiobankCollectionSelectionResource() + '/' + value;
+		JsonArray jsonArray = getResourceAsJsonArray(uri);
+		return StreamSupport.stream(jsonArray.spliterator(), false).map(jsonElement -> {
+			return toEntity(jsonElement.getAsJsonObject());
+
+		}).collect(Collectors.toList());
 	}
 
 	@Override
 	public Iterable<Entity> getIdCardBiobanks()
 	{
-		return this.getIdCardBiobanks(this.getIdCardBiobanksOrgnizationIds());
+		return this.getIdCardBiobanks(this.getIdCardBiobanksOrganizationIds());
 	}
 
-	@Override
-	public Entity getIdCardBiobank(String id)
+	private Entity toEntity(JsonObject jsonObject)
 	{
-		String uri = idCardBiobankIndexerSettings.getIdCardApiBaseUri() + REGBBS_ENDPOINT_ORGANIZATION_ID + '/' + id;
-		JsonObject root = this.getResourceAsJsonObject(uri);
 		EntityMetaData emd = dataService.getEntityMetaData("rdconnect_regbb");
 
 		MapEntity regbbMapEntity = new MapEntity(emd);
 
-		regbbMapEntity.set("OrganizationID", root.getAsJsonPrimitive("OrganizationID").getAsInt());
-		regbbMapEntity.set("type", root.getAsJsonPrimitive("type").getAsString());
-		regbbMapEntity.set(
-				"also_listed_in",
-				this.parseToListMapEntity("rdconnect_also_listed_in", "also_listed_in",
-						root.getAsJsonArray("also listed in")));
-		regbbMapEntity.set("url", this.parseToListMapEntity("rdconnect_url", "url", root.getAsJsonArray("url")));
-		
+		regbbMapEntity.set("OrganizationID", jsonObject.getAsJsonPrimitive("OrganizationID").getAsInt());
+		regbbMapEntity.set("type", jsonObject.getAsJsonPrimitive("type").getAsString());
+		regbbMapEntity.set("also_listed_in", this.parseToListMapEntity("rdconnect_also_listed_in", "also_listed_in",
+				jsonObject.getAsJsonArray("also listed in")));
+		regbbMapEntity.set("url", this.parseToListMapEntity("rdconnect_url", "url", jsonObject.getAsJsonArray("url")));
+
 		/**
 		 * "main contact" entity
 		 */
-		regbbMapEntity.set("title", root.getAsJsonObject("main contact").getAsJsonPrimitive("title").getAsString());
+		regbbMapEntity.set("title",
+				jsonObject.getAsJsonObject("main contact").getAsJsonPrimitive("title").getAsString());
 		regbbMapEntity.set("first_name",
-				root.getAsJsonObject("main contact").getAsJsonPrimitive("first name").getAsString());
-		regbbMapEntity.set("email", root.getAsJsonObject("main contact").getAsJsonPrimitive("email").getAsString());
+				jsonObject.getAsJsonObject("main contact").getAsJsonPrimitive("first name").getAsString());
+		regbbMapEntity.set("email",
+				jsonObject.getAsJsonObject("main contact").getAsJsonPrimitive("email").getAsString());
 		regbbMapEntity.set("last_name",
-				root.getAsJsonObject("main contact").getAsJsonPrimitive("last name").getAsString());
-
+				jsonObject.getAsJsonObject("main contact").getAsJsonPrimitive("last name").getAsString());
 
 		// Example format "Mon Jan 05 18:02:13 GMT 2015"
 		final String datetimePattern = "EEE MMM dd HH:mm:ss z yyyy";
@@ -139,7 +146,7 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService
 		try
 		{
 			regbbMapEntity.set("last_activities",
-					datetimeFormat.parseObject(root.getAsJsonPrimitive("last activities").getAsString()));
+					datetimeFormat.parseObject(jsonObject.getAsJsonPrimitive("last activities").getAsString()));
 		}
 		catch (ParseException e)
 		{
@@ -149,36 +156,46 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService
 		try
 		{
 			regbbMapEntity.set("date_of_inclusion",
-					datetimeFormat.parseObject(root.getAsJsonPrimitive("date of inclusion").getAsString()));
+					datetimeFormat.parseObject(jsonObject.getAsJsonPrimitive("date of inclusion").getAsString()));
 		}
 		catch (ParseException e)
 		{
 			throw new MolgenisDataException("failed to parse the 'last activities' property", e);
 		}
 
-		regbbMapEntity.set("email", root.getAsJsonObject("address").getAsJsonPrimitive("street2").getAsString());
+		regbbMapEntity.set("email", jsonObject.getAsJsonObject("address").getAsJsonPrimitive("street2").getAsString());
 		regbbMapEntity.set("name_of_host_institution",
-				root.getAsJsonObject("address").getAsJsonPrimitive("name of host institution")
-				.getAsString());
-		regbbMapEntity.set("zip", root.getAsJsonObject("address").getAsJsonPrimitive("zip").getAsString());
-		regbbMapEntity.set("street1", root.getAsJsonObject("address").getAsJsonPrimitive("street1").getAsString());
-		regbbMapEntity.set("country", root.getAsJsonObject("address").getAsJsonPrimitive("country").getAsString());
-		regbbMapEntity.set("city", root.getAsJsonObject("address").getAsJsonPrimitive("city").getAsString());
+				jsonObject.getAsJsonObject("address").getAsJsonPrimitive("name of host institution").getAsString());
+		regbbMapEntity.set("zip", jsonObject.getAsJsonObject("address").getAsJsonPrimitive("zip").getAsString());
+		regbbMapEntity.set("street1",
+				jsonObject.getAsJsonObject("address").getAsJsonPrimitive("street1").getAsString());
+		regbbMapEntity.set("country",
+				jsonObject.getAsJsonObject("address").getAsJsonPrimitive("country").getAsString());
+		regbbMapEntity.set("city", jsonObject.getAsJsonObject("address").getAsJsonPrimitive("city").getAsString());
 
-		regbbMapEntity.set("ID", root.getAsJsonPrimitive("ID").getAsString());
-		regbbMapEntity.set("type_of_host_institution", root.getAsJsonPrimitive("type of host institution")
-				.getAsString());
-		regbbMapEntity.set("target_population", root.getAsJsonPrimitive("target population").getAsString());
+		regbbMapEntity.set("ID", jsonObject.getAsJsonPrimitive("ID").getAsString());
+		regbbMapEntity.set("type_of_host_institution",
+				jsonObject.getAsJsonPrimitive("type of host institution").getAsString());
+		regbbMapEntity.set("target_population", jsonObject.getAsJsonPrimitive("target population").getAsString());
 
 		return regbbMapEntity;
+	}
+
+	@Override
+	public Entity getIdCardBiobank(String id)
+	{
+		String uri = idCardBiobankIndexerSettings.getApiBaseUri() + '/'
+				+ idCardBiobankIndexerSettings.getBiobankResource() + '/' + id;
+		JsonObject root = this.getResourceAsJsonObject(uri);
+		return toEntity(root);
 	}
 
 	private List<MapEntity> parseToListMapEntity(String entityName, String attributeName, JsonArray jsonArray)
 	{
 		EntityMetaData emd = dataService.getEntityMetaData(entityName);
 		List<MapEntity> mapEntityList = new ArrayList<MapEntity>();
-		jsonArray.spliterator().forEachRemaining(
-				e -> mapEntityList.add(this.parseToMapEntity(emd, attributeName, e.getAsString())));
+		jsonArray.spliterator()
+				.forEachRemaining(e -> mapEntityList.add(this.parseToMapEntity(emd, attributeName, e.getAsString())));
 		return mapEntityList;
 	}
 

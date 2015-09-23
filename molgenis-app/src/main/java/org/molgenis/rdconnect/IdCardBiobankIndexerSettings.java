@@ -2,11 +2,19 @@ package org.molgenis.rdconnect;
 
 public interface IdCardBiobankIndexerSettings
 {
-	String getIdCardApiBaseUri();
+	String getApiBaseUri();
 
-	void setIdCardApiBaseUri(String idCardApiBaseUri);
+	void setApiBaseUri(String idCardApiBaseUri);
 
-	String getIdCardBiobankResourceName();
+	String getBiobankResource();
 
-	void setIdCardBiobankResourceName(String idCardBiobankResourceName);
+	void setBiobankResource(String idCardBiobankResource);
+
+	String getBiobankCollectionResource();
+
+	void setBiobankCollectionResource(String biobankCollectionResource);
+
+	String getBiobankCollectionSelectionResource();
+
+	void setBiobankCollectionSelectionResource(String biobankCollectionSelectionResource);
 }
