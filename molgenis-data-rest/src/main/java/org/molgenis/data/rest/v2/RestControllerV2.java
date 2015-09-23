@@ -43,8 +43,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.google.common.collect.Lists;
-
 @Controller
 @RequestMapping(BASE_URI)
 class RestControllerV2
@@ -133,25 +131,26 @@ class RestControllerV2
 	}
 
 	/**
-	 * Example url: /api/v2/person/meta/emailaddresses
+	 * Retrieve attribute meta data 
 	 * 
 	 * @param entityName
-	 * @return EntityMetaData
+	 * @param attributeName
+	 * @return 
 	 */
 	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public AttributeMetaDataResponseV2 retrieveEntityAttributeMeta(@PathVariable("entityName") String entityName,
-			@PathVariable("attributeName") String attributeName, @Valid EntityCollectionRequestV2 request)
+			@PathVariable("attributeName") String attributeName)
 	{
-		return getAttributeMetaDataResponseV2(entityName, attributeName, request);
+		return createAttributeMetaDataResponse(entityName, attributeName);
 	}
 
 	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public AttributeMetaDataResponseV2 retrieveEntityAttributeMetaPost(@PathVariable("entityName") String entityName,
-			@PathVariable("attributeName") String attributeName, @Valid EntityCollectionRequestV2 request)
+			@PathVariable("attributeName") String attributeName)
 	{
-		return getAttributeMetaDataResponseV2(entityName, attributeName, request);
+		return createAttributeMetaDataResponse(entityName, attributeName);
 	}
 
 	@ExceptionHandler(RuntimeException.class)
@@ -163,7 +162,8 @@ class RestControllerV2
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
-	private AttributeMetaDataResponseV2 getAttributeMetaDataResponseV2(String entityName, String attributeName, EntityCollectionRequestV2 request) {
+	private AttributeMetaDataResponseV2 createAttributeMetaDataResponse(String entityName, String attributeName)
+	{
 		EntityMetaData entity = dataService.getEntityMetaData(entityName);
 		if (entity == null)
 		{
@@ -177,17 +177,16 @@ class RestControllerV2
 		}
 
 		AttributeFilter attributeFilter = new AttributeFilter();
-		
 		Iterable<AttributeMetaData> attributeParts = attribute.getAttributeParts();
 
 		if (attributeParts != null)
 		{
 			attributeParts.forEach(attributePart -> attributeFilter.add(attributePart.getName()));
 		}
-		
+
 		return new AttributeMetaDataResponseV2(entityName, attribute, attributeFilter, permissionService);
 	}
-	
+
 	private EntityCollectionResponseV2 createEntityCollectionResponse(String entityName,
 			EntityCollectionRequestV2 request)
 	{
