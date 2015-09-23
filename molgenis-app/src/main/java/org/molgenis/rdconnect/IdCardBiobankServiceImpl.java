@@ -114,8 +114,11 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService
 
 		regbbMapEntity.set("OrganizationID", root.getAsJsonPrimitive("OrganizationID").getAsInt());
 		regbbMapEntity.set("type", root.getAsJsonPrimitive("type").getAsString());
-		regbbMapEntity.set("lso_listed_in", this.paseToListMapEntity("rdconnect_lso_listed_in", "also_liste_in", root.getAsJsonArray("lso listed in")));
-		regbbMapEntity.set("url", this.paseToListMapEntity("rdconnect_url", "url", root.getAsJsonArray("url")));
+		regbbMapEntity.set(
+				"also_listed_in",
+				this.parseToListMapEntity("rdconnect_also_listed_in", "also_listed_in",
+						root.getAsJsonArray("also listed in")));
+		regbbMapEntity.set("url", this.parseToListMapEntity("rdconnect_url", "url", root.getAsJsonArray("url")));
 		
 		/**
 		 * "main contact" entity
@@ -169,16 +172,16 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService
 		return regbbMapEntity;
 	}
 
-	private List<MapEntity> paseToListMapEntity(String entityName, String attributeName, JsonArray jsonArray)
+	private List<MapEntity> parseToListMapEntity(String entityName, String attributeName, JsonArray jsonArray)
 	{
 		EntityMetaData emd = dataService.getEntityMetaData(entityName);
 		List<MapEntity> mapEntityList = new ArrayList<MapEntity>();
 		jsonArray.spliterator().forEachRemaining(
-				e -> mapEntityList.add(this.paseToMapEntity(emd, attributeName, e.getAsString())));
+				e -> mapEntityList.add(this.parseToMapEntity(emd, attributeName, e.getAsString())));
 		return mapEntityList;
 	}
 
-	private MapEntity paseToMapEntity(EntityMetaData entityMetaData, String attributeName, String value)
+	private MapEntity parseToMapEntity(EntityMetaData entityMetaData, String attributeName, String value)
 	{
 		MapEntity entity = new MapEntity(entityMetaData);
 		entity.set(attributeName, value);

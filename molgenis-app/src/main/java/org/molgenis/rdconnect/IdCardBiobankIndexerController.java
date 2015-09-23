@@ -64,13 +64,13 @@ public class IdCardBiobankIndexerController extends MolgenisPluginController
 		List<MapEntity> lsoListedIn = new ArrayList<MapEntity>();
 		List<MapEntity> url = new ArrayList<MapEntity>();
 		Map<String, List<MapEntity>> firsToAdd = new HashMap<String, List<MapEntity>>();
-		firsToAdd.put("lso_listed_in", lsoListedIn);
+		firsToAdd.put("also_listed_in", lsoListedIn);
 		firsToAdd.put("url", url);
 
 		StreamSupport.stream(biobankMetadataService.getIdCardBiobanks().spliterator(), false).forEach(
 				e -> populateLists(firsToAdd, e));
 
-		dataService.add("rdconnect_lso_listed_in", lsoListedIn);
+		dataService.add("rdconnect_also_listed_in", lsoListedIn);
 		dataService.add("rdconnect_url", url);
 		dataService.add("rdconnect_regbb", biobankMetadataService.getIdCardBiobanks());
 	}
