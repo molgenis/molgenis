@@ -23,7 +23,7 @@ public class IdCardBiobankIndexerDbSettings extends DefaultSettingsEntity implem
 	private static class Meta extends DefaultSettingsEntityMetaData
 	{
 		private static final String ID_CARD_API_BASE_URI = "idCardApiBaseUri";
-		private static final String DEFAULT_ID_CARD_API_BASE_URI = "http://catalogue.rd-connect.eu/api/jsonws/BiBBoxCommonServices-portlet.logapi/regbbs";
+		private static final String DEFAULT_ID_CARD_API_BASE_URI = "http://catalogue.rd-connect.eu/api/jsonws/BiBBoxCommonServices-portlet.logapi";
 
 		public Meta()
 		{
