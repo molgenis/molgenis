@@ -30,9 +30,14 @@ public class IdCardBiobankRepositoryRegistrator implements ApplicationListener<C
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
+		// FIXME only works when meta data was imported
 		if (dataServiceImpl.hasRepository("rdconnect_regbb"))
 		{
-			LOG.debug("Registering IdCardBiobankRepository ..."); // FIXME only works when meta data was imported
+			// replace the default registered repository (based on meta data stored in the backend with a repository
+			// that uses the index to retrieve entity ids and the ID-Card REST API to retrieve the entity attribute
+			// values.
+
+			LOG.debug("Registering IdCardBiobankRepository ...");
 			dataServiceImpl.removeRepository("rdconnect_regbb");
 			dataServiceImpl.addRepository(idCardBiobankRepository);
 			LOG.info("Registered IdCardBiobankRepository");

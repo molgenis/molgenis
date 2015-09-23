@@ -37,8 +37,9 @@ public class IdCardBiobankIndexerController extends MolgenisPluginController
 
 	public static final String ID = "idcardbiobankindexer";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
-	private final IdCardBiobankService biobankMetadataService;
+
 	private final DataService dataService;
+	private final IdCardBiobankService biobankMetadataService;
 
 	@Autowired
 	public IdCardBiobankIndexerController(DataService dataService, IdCardBiobankService biobankMetadataService)
@@ -52,12 +53,13 @@ public class IdCardBiobankIndexerController extends MolgenisPluginController
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public String init(Model model) throws Exception
 	{
-		return "view-biobankrefresh";
+		return "view-idcardbiobankindexer";
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/refresh")
+	@RequestMapping(method = RequestMethod.POST, value = "/reindex")
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	public String refreshMetadata(Model model) throws Exception
+	@ResponseStatus(HttpStatus.OK)
+	public void refreshMetadata(Model model) throws Exception
 	{
 		List<MapEntity> lsoListedIn = new ArrayList<MapEntity>();
 		List<MapEntity> url = new ArrayList<MapEntity>();
@@ -71,7 +73,6 @@ public class IdCardBiobankIndexerController extends MolgenisPluginController
 		dataService.add("rdconnect_lso_listed_in", lsoListedIn);
 		dataService.add("rdconnect_url", url);
 		dataService.add("rdconnect_regbb", biobankMetadataService.getIdCardBiobanks());
-		return init(model);
 	}
 	
 	private void populateLists(Map<String, List<MapEntity>> lists, Entity entity)

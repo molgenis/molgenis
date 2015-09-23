@@ -31,16 +31,18 @@ import com.google.gson.JsonParser;
 @Service
 public class IdCardBiobankServiceImpl implements IdCardBiobankService
 {
-	public final static String REGBBS_URL = "http://catalogue.rd-connect.eu/api/jsonws/BiBBoxCommonServices-portlet.logapi/regbbs";
-	public final static String REGBB_URL_PREFIX = "http://catalogue.rd-connect.eu/api/jsonws/BiBBoxCommonServices-portlet.logapi/regbb/organization-id/";
-	public final static String REGBBS_ORGANIZATIONID = "OrganizationID";
+	public final static String REGBBS_ENDPOINT = "/regbbs";
+	public final static String REGBBS_ENDPOINT_ORGANIZATION_ID = "/regbb/organization-id";
+	public final static String REGBBS_ATTR_ORGANIZATION_ID = "OrganizationID";
 
 	private final DataService dataService;
+	private final IdCardBiobankIndexerSettings idCardBiobankIndexerSettings;
 
 	@Autowired
-	public IdCardBiobankServiceImpl(DataService dataService)
+	public IdCardBiobankServiceImpl(DataService dataService, IdCardBiobankIndexerSettings idCardBiobankIndexerSettings)
 	{
 		this.dataService = requireNonNull(dataService);
+		this.idCardBiobankIndexerSettings = requireNonNull(idCardBiobankIndexerSettings);
 	}
 
 	public JsonObject getResourceAsJsonObject(String url)
@@ -57,7 +59,7 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService
 		}
 		catch (IOException ex)
 		{
-			throw new MolgenisDataException("Hackathon error message");
+			throw new MolgenisDataException("Hackathon error message", ex);
 		}
 	}
 
@@ -81,9 +83,11 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService
 
 	public Set<String> getIdCardBiobanksOrgnizationIds()
 	{
-		JsonArray resource = this.getResourceAsJsonArray(REGBBS_URL);
+		String regbbsEndpoint = idCardBiobankIndexerSettings.getIdCardApiBaseUri() + REGBBS_ENDPOINT;
+		JsonArray resource = this.getResourceAsJsonArray(regbbsEndpoint);
 		return StreamSupport.stream(resource.spliterator(), false)
-				.map(j -> j.getAsJsonObject().get(REGBBS_ORGANIZATIONID).getAsString()).collect(Collectors.toSet());
+				.map(j -> j.getAsJsonObject().get(REGBBS_ATTR_ORGANIZATION_ID).getAsString())
+				.collect(Collectors.toSet());
 	}
 
 	@Override
@@ -102,7 +106,8 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService
 	@Override
 	public Entity getIdCardBiobank(String id)
 	{
-		JsonObject root = this.getResourceAsJsonObject(REGBB_URL_PREFIX + id);
+		String uri = idCardBiobankIndexerSettings.getIdCardApiBaseUri() + REGBBS_ENDPOINT_ORGANIZATION_ID + '/' + id;
+		JsonObject root = this.getResourceAsJsonObject(uri);
 		EntityMetaData emd = dataService.getEntityMetaData("rdconnect_regbb");
 
 		MapEntity regbbMapEntity = new MapEntity(emd);
