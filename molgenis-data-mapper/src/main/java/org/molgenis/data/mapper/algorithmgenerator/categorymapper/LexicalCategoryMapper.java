@@ -10,7 +10,7 @@ import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 
 public class LexicalCategoryMapper extends CategoryMapper
 {
-	private final static double DEFAULT_THRESHOLD = 0.5f;
+	private final static double DEFAULT_THRESHOLD = 50.0f;
 
 	public LexicalCategoryMapper(List<CategoryRule> rules)
 	{

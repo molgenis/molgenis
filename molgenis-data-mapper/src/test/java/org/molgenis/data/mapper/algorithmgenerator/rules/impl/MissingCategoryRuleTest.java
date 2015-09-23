@@ -11,6 +11,7 @@ public class MissingCategoryRuleTest
 	@Test
 	public void isRuleApplied()
 	{
+		Assert.assertTrue(rule.isRuleApplied(Category.create(3, "dont know"), Category.create(3, "MIssing")));
 		Assert.assertTrue(rule.isRuleApplied(Category.create(3, "UNKNOWN"), Category.create(3, "missing")));
 		Assert.assertTrue(rule.isRuleApplied(Category.create(3, "not know"), Category.create(3, "missing")));
 		Assert.assertTrue(rule.isRuleApplied(Category.create(3, "don`t know"), Category.create(3, "missing")));
