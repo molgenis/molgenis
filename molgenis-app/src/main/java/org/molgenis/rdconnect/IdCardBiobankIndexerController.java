@@ -1,7 +1,7 @@
 package org.molgenis.rdconnect;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.rdconnect.BiobankMetadataController.URI;
+import static org.molgenis.rdconnect.IdCardBiobankIndexerController.URI;
 
 import org.molgenis.data.DataService;
 import org.molgenis.ui.MolgenisPluginController;
@@ -22,17 +22,17 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
 @RequestMapping(URI)
-public class BiobankMetadataController extends MolgenisPluginController
+public class IdCardBiobankIndexerController extends MolgenisPluginController
 {
-	private static final Logger LOG = LoggerFactory.getLogger(BiobankMetadataController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(IdCardBiobankIndexerController.class);
 
-	public static final String ID = "biobankmeta";
+	public static final String ID = "idcardbiobankindexer";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
-	private final BiobankMetadataService biobankMetadataService;
+	private final IdCardBiobankService biobankMetadataService;
 	private final DataService dataService;
 
 	@Autowired
-	public BiobankMetadataController(DataService dataService, BiobankMetadataService biobankMetadataService)
+	public IdCardBiobankIndexerController(DataService dataService, IdCardBiobankService biobankMetadataService)
 	{
 		super(URI);
 		this.biobankMetadataService = requireNonNull(biobankMetadataService);
