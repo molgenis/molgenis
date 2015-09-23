@@ -324,6 +324,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 				if (joinedHit.compareTo(result) > 0)
 				{
 					result = joinedHit;
+					bestMatchingSynonym = bestMatchingSynonym + " " + bestMatchingSynonymForHit;
 				}
 			}
 
@@ -388,7 +389,6 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	private Set<String> splitIntoTerms(String description)
 	{
 		return FluentIterable.from(termSplitter.split(description)).transform(String::toLowerCase)
-				.filter(w -> !NGramDistanceAlgorithm.STOPWORDSLIST.contains(w)).filter(w -> !StringUtils.isEmpty(w))
-				.toSet();
+				.filter(w -> !NGramDistanceAlgorithm.STOPWORDSLIST.contains(w)).filter(StringUtils::isNotEmpty).toSet();
 	}
 }
