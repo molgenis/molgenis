@@ -58,8 +58,8 @@ class EntityMetaDataResponseV2
 		this.label = meta.getLabel();
 
 		// filter attribute parts
-		Iterable<AttributeMetaData> filteredAttrs = attrFilter != null ? Iterables.filter(meta.getAttributes(),
-				new Predicate<AttributeMetaData>()
+		Iterable<AttributeMetaData> filteredAttrs = attrFilter != null
+				? Iterables.filter(meta.getAttributes(), new Predicate<AttributeMetaData>()
 				{
 					@Override
 					public boolean apply(AttributeMetaData attr)
@@ -68,8 +68,8 @@ class EntityMetaDataResponseV2
 					}
 				}) : meta.getAttributes();
 
-		this.attributes = Lists.newArrayList(Iterables.transform(filteredAttrs,
-				new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
+		this.attributes = Lists.newArrayList(
+				Iterables.transform(filteredAttrs, new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
 				{
 					@Override
 					public AttributeMetaDataResponseV2 apply(AttributeMetaData attr)
@@ -94,8 +94,8 @@ class EntityMetaDataResponseV2
 		this.idAttribute = idAttribute != null ? idAttribute.getName() : null;
 
 		Iterable<AttributeMetaData> lookupAttributes = meta.getLookupAttributes();
-		this.lookupAttributes = lookupAttributes != null ? Lists.newArrayList(Iterables.transform(lookupAttributes,
-				new Function<AttributeMetaData, String>()
+		this.lookupAttributes = lookupAttributes != null
+				? Lists.newArrayList(Iterables.transform(lookupAttributes, new Function<AttributeMetaData, String>()
 				{
 					@Override
 					public String apply(AttributeMetaData attribute)
@@ -106,7 +106,15 @@ class EntityMetaDataResponseV2
 
 		this.isAbstract = meta.isAbstract();
 
-		this.writable = permissionService.hasPermissionOnEntity(name, Permission.WRITE);
+		// FIXME: replace hack by using repository capabilities
+		if (meta.getName().equals("rdconnect_regbb"))
+		{
+			this.writable = false;
+		}
+		else
+		{
+			this.writable = permissionService.hasPermissionOnEntity(name, Permission.WRITE);
+		}
 	}
 
 	public String getHref()
