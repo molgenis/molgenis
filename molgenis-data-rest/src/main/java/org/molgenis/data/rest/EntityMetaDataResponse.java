@@ -117,8 +117,8 @@ public class EntityMetaDataResponse
 		if (attributesSet == null || attributesSet.contains("lookupAttributes".toLowerCase()))
 		{
 			Iterable<AttributeMetaData> lookupAttributes = meta.getLookupAttributes();
-			this.lookupAttributes = lookupAttributes != null ? Lists.newArrayList(Iterables.transform(lookupAttributes,
-					new Function<AttributeMetaData, String>()
+			this.lookupAttributes = lookupAttributes != null
+					? Lists.newArrayList(Iterables.transform(lookupAttributes, new Function<AttributeMetaData, String>()
 					{
 						@Override
 						public String apply(AttributeMetaData attribute)
@@ -135,7 +135,15 @@ public class EntityMetaDataResponse
 		}
 		else this.isAbstract = null;
 
-		this.writable = permissionService.hasPermissionOnEntity(name, Permission.WRITE);
+		// FIXME: replace hack by using repository capabilities
+		if (meta.getName().equals("rdconnect_regbb"))
+		{
+			this.writable = false;
+		}
+		else
+		{
+			this.writable = permissionService.hasPermissionOnEntity(name, Permission.WRITE);
+		}
 	}
 
 	public String getHref()
