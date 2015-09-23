@@ -23,7 +23,9 @@ public class IdCardBiobankIndexerDbSettings extends DefaultSettingsEntity implem
 	private static class Meta extends DefaultSettingsEntityMetaData
 	{
 		private static final String ID_CARD_API_BASE_URI = "idCardApiBaseUri";
+		private static final String ID_CARD_BIOBANK_RESOURCE_NAME = "idCardBiobankResourceName";
 		private static final String DEFAULT_ID_CARD_API_BASE_URI = "http://catalogue.rd-connect.eu/api/jsonws/BiBBoxCommonServices-portlet.logapi";
+		private static final String DEFAULT_ID_CARD_BIOBANK_RESOURCE_NAME = "regbbs";
 
 		public Meta()
 		{
@@ -31,6 +33,8 @@ public class IdCardBiobankIndexerDbSettings extends DefaultSettingsEntity implem
 			setLabel("ID-Card biobank indexer settings");
 			addAttribute(ID_CARD_API_BASE_URI).setDataType(STRING).setLabel("ID-Card API base URI")
 					.setDefaultValue(DEFAULT_ID_CARD_API_BASE_URI);
+			addAttribute(ID_CARD_BIOBANK_RESOURCE_NAME).setDataType(STRING).setLabel("ID-Card Biobank resource name")
+					.setDefaultValue(DEFAULT_ID_CARD_BIOBANK_RESOURCE_NAME);
 		}
 	}
 
@@ -44,5 +48,17 @@ public class IdCardBiobankIndexerDbSettings extends DefaultSettingsEntity implem
 	public void setIdCardApiBaseUri(String idCardApiBaseUri)
 	{
 		set(Meta.ID_CARD_API_BASE_URI, idCardApiBaseUri);
+	}
+
+	@Override
+	public String getIdCardBiobankResourceName()
+	{
+		return getString(Meta.ID_CARD_BIOBANK_RESOURCE_NAME);
+	}
+
+	@Override
+	public void setIdCardBiobankResourceName(String idCardBiobankResourceName)
+	{
+		set(Meta.ID_CARD_BIOBANK_RESOURCE_NAME, idCardBiobankResourceName);
 	}
 }

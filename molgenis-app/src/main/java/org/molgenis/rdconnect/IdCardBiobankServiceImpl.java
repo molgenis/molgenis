@@ -27,7 +27,7 @@ import com.google.gson.JsonParser;
 @Service
 public class IdCardBiobankServiceImpl implements IdCardBiobankService
 {
-	public final static String REGBBS_ENDPOINT = "/regbbs";
+	public final static String REGBBS_ENDPOINT_DATA = "/regbbs/data";
 	public final static String REGBBS_ENDPOINT_ORGANIZATION_ID = "/regbb/organization-id";
 	public final static String REGBBS_ATTR_ORGANIZATION_ID = "OrganizationID";
 
@@ -41,7 +41,7 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService
 		this.idCardBiobankIndexerSettings = requireNonNull(idCardBiobankIndexerSettings);
 	}
 
-	public JsonObject getResourceAsJsonObject(String url)
+	private JsonObject getResourceAsJsonObject(String url)
 	{
 		try
 		{
@@ -59,7 +59,7 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService
 		}
 	}
 
-	public JsonArray getResourceAsJsonArray(String url)
+	private JsonArray getResourceAsJsonArray(String url)
 	{
 		try
 		{
@@ -77,9 +77,10 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService
 		}
 	}
 
-	public Set<String> getIdCardBiobanksOrgnizationIds()
+	private Set<String> getIdCardBiobanksOrgnizationIds()
 	{
-		String regbbsEndpoint = idCardBiobankIndexerSettings.getIdCardApiBaseUri() + REGBBS_ENDPOINT;
+		String regbbsEndpoint = idCardBiobankIndexerSettings.getIdCardApiBaseUri() + '/'
+				+ idCardBiobankIndexerSettings.getIdCardBiobankResourceName();
 		JsonArray resource = this.getResourceAsJsonArray(regbbsEndpoint);
 		return StreamSupport.stream(resource.spliterator(), false)
 				.map(j -> j.getAsJsonObject().get(REGBBS_ATTR_ORGANIZATION_ID).getAsString())
