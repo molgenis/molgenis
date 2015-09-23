@@ -3,6 +3,10 @@ package org.molgenis.rdconnect;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -110,54 +114,77 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService
 
 		regbbMapEntity.set("OrganizationID", root.getAsJsonPrimitive("OrganizationID").getAsInt());
 		regbbMapEntity.set("type", root.getAsJsonPrimitive("type").getAsString());
-
-		// First upload this one
-		// Escaped due to demo purposes
-		// EntityMetaData emdAlsoListedIn = dataService.getEntityMetaData("lso_listed_in");
-		// JsonArray alsoListedInsJson = root.getAsJsonArray("lso_listed_in");
-		// List<MapEntity> mapEntityList = new ArrayList<MapEntity>();
-		// alsoListedInsJson.spliterator().forEachRemaining(
-		// e -> mapEntityList.add(this.createUrlMapEntity(emdAlsoListedIn, e.getAsString())));
-		// regbbMapEntity.set("lso_listed_in", mapEntityList);
-
-		// First upload this one
-		// Escaped due to demo purposes
-		// EntityMetaData emdUrl = dataService.getEntityMetaData("url");
-		// JsonArray urlsJson = root.getAsJsonArray("url");
-		// List<MapEntity> mapEntityList = new ArrayList<MapEntity>();
-		// urlsJson.spliterator().forEachRemaining(
-		// e -> mapEntityList.add(this.createUrlMapEntity(emdUrl, e.getAsString())));
-		// regbbMapEntity.set("url", mapEntityList);
-
+		regbbMapEntity.set(
+				"also_listed_in",
+				this.parseToListMapEntity("rdconnect_also_listed_in", "also_listed_in",
+						root.getAsJsonArray("also listed in")));
+		regbbMapEntity.set("url", this.parseToListMapEntity("rdconnect_url", "url", root.getAsJsonArray("url")));
+		
 		/**
 		 * "main contact" entity
 		 */
 		regbbMapEntity.set("title", root.getAsJsonObject("main contact").getAsJsonPrimitive("title").getAsString());
 		regbbMapEntity.set("first_name",
 				root.getAsJsonObject("main contact").getAsJsonPrimitive("first name").getAsString());
-		// regbbMapEntity.set("email", root.getAsJsonObject("main contact").getAsJsonPrimitive("email").getAsString());
+		regbbMapEntity.set("email", root.getAsJsonObject("main contact").getAsJsonPrimitive("email").getAsString());
 		regbbMapEntity.set("last_name",
 				root.getAsJsonObject("main contact").getAsJsonPrimitive("last name").getAsString());
 
-		// TODO DateTime
-		// regbbMapEntity.set("last_activities", root.getAsJsonObject("last activities").getAsString());
 
-		// TODO
-		// @SerializedName("date of inclusion")
-		// private DateTime dateOfInclusion;
-		//
-		// private Address address;
-		// private String name;
-		//
-		// @SerializedName("ID")
-		// private String id;
-		//
-		// @SerializedName("type of host institution")
-		// private String typeOfHostInstitutionS;
-		//
-		// @SerializedName("target population")
-		// private String targetPopulation;
+		// Example format "Mon Jan 05 18:02:13 GMT 2015"
+		final String datetimePattern = "EEE MMM dd HH:mm:ss z yyyy";
+		SimpleDateFormat datetimeFormat = new SimpleDateFormat(datetimePattern);
+
+		try
+		{
+			regbbMapEntity.set("last_activities",
+					datetimeFormat.parseObject(root.getAsJsonPrimitive("last activities").getAsString()));
+		}
+		catch (ParseException e)
+		{
+			throw new MolgenisDataException("failed to parse the 'last activities' property", e);
+		}
+
+		try
+		{
+			regbbMapEntity.set("date_of_inclusion",
+					datetimeFormat.parseObject(root.getAsJsonPrimitive("date of inclusion").getAsString()));
+		}
+		catch (ParseException e)
+		{
+			throw new MolgenisDataException("failed to parse the 'last activities' property", e);
+		}
+
+		regbbMapEntity.set("email", root.getAsJsonObject("address").getAsJsonPrimitive("street2").getAsString());
+		regbbMapEntity.set("name_of_host_institution",
+				root.getAsJsonObject("address").getAsJsonPrimitive("name of host institution")
+				.getAsString());
+		regbbMapEntity.set("zip", root.getAsJsonObject("address").getAsJsonPrimitive("zip").getAsString());
+		regbbMapEntity.set("street1", root.getAsJsonObject("address").getAsJsonPrimitive("street1").getAsString());
+		regbbMapEntity.set("country", root.getAsJsonObject("address").getAsJsonPrimitive("country").getAsString());
+		regbbMapEntity.set("city", root.getAsJsonObject("address").getAsJsonPrimitive("city").getAsString());
+
+		regbbMapEntity.set("ID", root.getAsJsonPrimitive("ID").getAsString());
+		regbbMapEntity.set("type_of_host_institution", root.getAsJsonPrimitive("type of host institution")
+				.getAsString());
+		regbbMapEntity.set("target_population", root.getAsJsonPrimitive("target population").getAsString());
 
 		return regbbMapEntity;
+	}
+
+	private List<MapEntity> parseToListMapEntity(String entityName, String attributeName, JsonArray jsonArray)
+	{
+		EntityMetaData emd = dataService.getEntityMetaData(entityName);
+		List<MapEntity> mapEntityList = new ArrayList<MapEntity>();
+		jsonArray.spliterator().forEachRemaining(
+				e -> mapEntityList.add(this.parseToMapEntity(emd, attributeName, e.getAsString())));
+		return mapEntityList;
+	}
+
+	private MapEntity parseToMapEntity(EntityMetaData entityMetaData, String attributeName, String value)
+	{
+		MapEntity entity = new MapEntity(entityMetaData);
+		entity.set(attributeName, value);
+		return entity;
 	}
 }
