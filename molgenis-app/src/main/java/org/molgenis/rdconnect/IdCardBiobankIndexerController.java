@@ -3,7 +3,16 @@ package org.molgenis.rdconnect;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.rdconnect.IdCardBiobankIndexerController.URI;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.StreamSupport;
+
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
@@ -50,8 +59,24 @@ public class IdCardBiobankIndexerController extends MolgenisPluginController
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public String refreshMetadata(Model model) throws Exception
 	{
+		List<MapEntity> lsoListedIn = new ArrayList<MapEntity>();
+		List<MapEntity> url = new ArrayList<MapEntity>();
+		Map<String, List<MapEntity>> firsToAdd = new HashMap<String, List<MapEntity>>();
+		firsToAdd.put("lso_listed_in", lsoListedIn);
+		firsToAdd.put("url", url);
+
+		StreamSupport.stream(biobankMetadataService.getIdCardBiobanks().spliterator(), false).forEach(
+				e -> populateLists(firsToAdd, e));
+
+		dataService.add("rdconnect_lso_listed_in", lsoListedIn);
+		dataService.add("rdconnect_url", url);
 		dataService.add("rdconnect_regbb", biobankMetadataService.getIdCardBiobanks());
 		return init(model);
+	}
+	
+	private void populateLists(Map<String, List<MapEntity>> lists, Entity entity)
+	{
+		lists.entrySet().forEach(e -> e.getValue().addAll((Collection<? extends MapEntity>) entity.get(e.getKey())));
 	}
 
 	@ExceptionHandler(value = Throwable.class)
