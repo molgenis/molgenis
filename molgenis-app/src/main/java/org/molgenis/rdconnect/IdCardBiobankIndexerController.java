@@ -28,8 +28,9 @@ public class IdCardBiobankIndexerController extends MolgenisPluginController
 
 	public static final String ID = "idcardbiobankindexer";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
-	private final IdCardBiobankService biobankMetadataService;
+
 	private final DataService dataService;
+	private final IdCardBiobankService biobankMetadataService;
 
 	@Autowired
 	public IdCardBiobankIndexerController(DataService dataService, IdCardBiobankService biobankMetadataService)
