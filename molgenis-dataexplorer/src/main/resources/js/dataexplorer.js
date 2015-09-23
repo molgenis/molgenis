@@ -310,8 +310,8 @@ function($, molgenis, settingsXhr) {
 						}
 						if(attribute.fieldType === 'COMPOUND') {
 							$.each(attribute.attributes, function(index, atomicAttribute) {
-								if(attribute.name === atomicAttribute.name) {
-									selectedAttributes.push(attribute);
+								if(atomicAttribute.name === selectedAttrName) {
+									selectedAttributes.push(atomicAttribute);
 								}
 							});
 						}
