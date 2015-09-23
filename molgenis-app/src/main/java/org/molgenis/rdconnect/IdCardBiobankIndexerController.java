@@ -69,8 +69,21 @@ public class IdCardBiobankIndexerController extends MolgenisPluginController
 		StreamSupport.stream(biobankMetadataService.getIdCardBiobanks().spliterator(), false).forEach(
 				e -> populateLists(firsToAdd, e));
 
-		dataService.add("rdconnect_also_listed_in", alsoListedIn);
-		dataService.add("rdconnect_url", url);
+		try{
+			dataService.add("rdconnect_also_listed_in", alsoListedIn);
+		}
+		catch (Exception e)
+		{
+			// Do nothing Fix Me
+		}
+		
+		try{
+			dataService.add("rdconnect_url", url);
+		}
+		catch (Exception e)
+		{
+			// Do nothing Fix Me
+		}
 		dataService.add("rdconnect_regbb", biobankMetadataService.getIdCardBiobanks());
 	}
 	
