@@ -33,15 +33,12 @@
 		    };
 		},
 		render: function() {
-			return (
-				div(null,
-					select({className: 'form-control', value: this.state.value, onChange: this._handleChange}, this.props.options.map(function(item, i){
+			return select({className: 'form-control', value: this.state.value, onChange: this._handleChange}, this.props.options.map(function(item, i){
 						return(
 							option({value: item.value, key: item.value}, item.text)
 						);
-					}))
-				)
-			);
+					})
+				);
 		},
 		_handleChange: function(e){
 			this.setState({value: e.target.value});

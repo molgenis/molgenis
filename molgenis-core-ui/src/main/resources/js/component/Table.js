@@ -2,7 +2,7 @@
 (function(_, React, molgenis) {
 	"use strict";
 
-	var div = React.DOM.div, table = React.DOM.table, thead = React.DOM.thead, tbody = React.DOM.tbody, tr = React.DOM.tr, th = React.DOM.th, td = React.DOM.td, a = React.DOM.a, span = React.DOM.span, em = React.DOM.em, br = React.DOM.br;
+	var div = React.DOM.div, table = React.DOM.table, thead = React.DOM.thead, tbody = React.DOM.tbody, tr = React.DOM.tr, th = React.DOM.th, td = React.DOM.td, a = React.DOM.a, span = React.DOM.span, em = React.DOM.em, br = React.DOM.br, label = React.DOM.label;
 
 	var api = new molgenis.RestClientV2();
 
@@ -127,8 +127,11 @@
 						)
 					),
 					div({className: 'row'},
-						div({className: 'col-md-3'},
-							span({className: 'pull-left'}, 'Rows per page:', 
+						div({className: 'col-md-3 form-inline'},
+								div({
+									'className' : 'form-group'
+								}, 
+									label(null, "Rows per page:"),
 									molgenis.ui.SelectBox({
 										options: [
 											{value: 20, text: 20},
