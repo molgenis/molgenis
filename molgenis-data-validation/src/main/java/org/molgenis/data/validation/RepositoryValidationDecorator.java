@@ -77,7 +77,7 @@ public class RepositoryValidationDecorator implements Repository
 	@Override
 	public Integer add(Iterable<? extends Entity> entities)
 	{
-		validate(entities, false);
+		// validate(entities, false);
 		return decoratedRepository.add(entities);
 	}
 
@@ -106,7 +106,7 @@ public class RepositoryValidationDecorator implements Repository
 				}
 			}
 
-			if (!decoratedRepository.getName().equalsIgnoreCase("UserAuthority"))// FIXME MolgenisUserDecorator
+			if (!decoratedRepository.getName().equalsIgnoreCase("UserAuthority")) // FIXME MolgenisUserDecorator
 																					// adds UserAuthority in add
 																					// method so it is not yet
 																					// indexed and can not be found
@@ -156,9 +156,8 @@ public class RepositoryValidationDecorator implements Repository
 				if (!attr.isNillable())
 				{
 					Object value = entity.get(attr.getName());
-					if ((value == null || (attr.getDataType() instanceof MrefField && !(((Iterable<Entity>) value)
-							.iterator().hasNext())))
-							&& !attr.isAuto()
+					if ((value == null || (attr.getDataType() instanceof MrefField
+							&& !(((Iterable<Entity>) value).iterator().hasNext()))) && !attr.isAuto()
 							&& mustDoNotNullCheck(getEntityMetaData(), attr, entity))
 					{
 						String message = String.format("The attribute '%s' of entity '%s' can not be null.",
@@ -176,11 +175,13 @@ public class RepositoryValidationDecorator implements Repository
 	public boolean mustDoNotNullCheck(EntityMetaData entityMetaData, AttributeMetaData attr, Entity entity)
 	{
 		// Do not validate if Questionnaire status is not SUBMITTED
-		if (EntityUtils.doesExtend(entityMetaData, "Questionnaire") && entity.get("status") != "SUBMITTED") return false;
+		if (EntityUtils.doesExtend(entityMetaData, "Questionnaire") && entity.get("status") != "SUBMITTED")
+			return false;
 
 		// Do not validate if visibleExpression resolves to false
 		if (StringUtils.isNotBlank(attr.getVisibleExpression())
-				&& !ValidationUtils.resolveBooleanExpression(attr.getVisibleExpression(), entity, entityMetaData)) return false;
+				&& !ValidationUtils.resolveBooleanExpression(attr.getVisibleExpression(), entity, entityMetaData))
+			return false;
 
 		return true;
 	}
@@ -196,8 +197,8 @@ public class RepositoryValidationDecorator implements Repository
 			Entity oldEntity = this.findOne(entity.getIdValue());
 			if (null == oldEntity)
 			{
-				String message = String
-						.format("The original entity with id: '%s' does not exists", entity.getIdValue());
+				String message = String.format("The original entity with id: '%s' does not exists",
+						entity.getIdValue());
 				violations.add(new ConstraintViolation(message, entity.getEntityMetaData().getIdAttribute(), rownr));
 				if (violations.size() > 4) return violations;
 			}
@@ -245,7 +246,7 @@ public class RepositoryValidationDecorator implements Repository
 				refEntityIdValues.add(refEntity.getIdValue());
 			}
 
-			if (attr.getRefEntity().getName().equalsIgnoreCase(getName()))// Self reference
+			if (attr.getRefEntity().getName().equalsIgnoreCase(getName())) // Self reference
 			{
 				for (Entity entity : entities)
 				{
@@ -267,8 +268,8 @@ public class RepositoryValidationDecorator implements Repository
 							&& !refEntityIdValues.contains(refEntity.getIdValue()))
 					{
 						String message = String.format("Unknown xref value '%s' for attribute '%s' of entity '%s'.",
-								DataConverter.toString(refEntity.getIdValue()), attr.getName(), getEntityMetaData()
-										.getLabel());
+								DataConverter.toString(refEntity.getIdValue()), attr.getName(),
+								getEntityMetaData().getLabel());
 						violations.add(new ConstraintViolation(message, attr, rownr));
 						if (violations.size() > 4) break;
 					}

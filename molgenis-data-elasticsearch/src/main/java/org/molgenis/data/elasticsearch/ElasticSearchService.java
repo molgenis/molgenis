@@ -197,16 +197,17 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 		// ElasticSearchService, because ElasticSearchService should not be
 		// aware of DataService. E.g. Put EntityMetaData in the SearchRequest
 		// object
-		EntityMetaData entityMetaData = (request.getDocumentType() != null && dataService != null && dataService
-				.hasRepository(request.getDocumentType())) ? dataService.getEntityMetaData(request.getDocumentType()) : null;
+		EntityMetaData entityMetaData = (request.getDocumentType() != null && dataService != null
+				&& dataService.hasRepository(request.getDocumentType()))
+						? dataService.getEntityMetaData(request.getDocumentType()) : null;
 		String documentType = request.getDocumentType() == null ? null : sanitizeMapperType(request.getDocumentType());
 		if (LOG.isTraceEnabled())
 		{
 			LOG.trace("*** REQUEST\n" + builder);
 		}
-		generator.buildSearchRequest(builder, documentType, searchType, request.getQuery(),
-				request.getFieldsToReturn(), request.getAggregateField1(), request.getAggregateField2(),
-				request.getAggregateFieldDistinct(), entityMetaData);
+		generator.buildSearchRequest(builder, documentType, searchType, request.getQuery(), request.getFieldsToReturn(),
+				request.getAggregateField1(), request.getAggregateField2(), request.getAggregateFieldDistinct(),
+				entityMetaData);
 		SearchResponse response = builder.execute().actionGet();
 		if (LOG.isTraceEnabled())
 		{
@@ -253,7 +254,14 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 	@Override
 	public void createMappings(EntityMetaData entityMetaData)
 	{
-		createMappings(entityMetaData, true, true, true);
+		if (entityMetaData.getName().equals("rdconnect_regbb"))
+		{
+			createMappings(entityMetaData, false, true, true);
+		}
+		else
+		{
+			createMappings(entityMetaData, true, true, true);
+		}
 	}
 
 	public void createMappings(String index, EntityMetaData entityMetaData)
@@ -276,8 +284,8 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 
 			if (!response.isAcknowledged())
 			{
-				throw new ElasticsearchException("Creation of mapping for documentType [" + entityName
-						+ "] failed. Response=" + response);
+				throw new ElasticsearchException(
+						"Creation of mapping for documentType [" + entityName + "] failed. Response=" + response);
 			}
 
 			if (LOG.isDebugEnabled()) LOG.debug("Created Elasticsearch mapping [" + jsonBuilder.string() + "]");
@@ -717,7 +725,8 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 					throw new ElasticsearchException("Search failed. Returned headers:" + itemResponse.getFailure());
 				}
 				GetResponse getResponse = itemResponse.getResponse();
-				return getResponse.isExists() ? new DefaultEntity(entityMetaData, dataService, getResponse.getSource()) : null;
+				return getResponse.isExists() ? new DefaultEntity(entityMetaData, dataService, getResponse.getSource())
+						: null;
 			}
 		});
 	}
@@ -828,8 +837,8 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 
 	private void updateReferences(Entity refEntity, EntityMetaData refEntityMetaData)
 	{
-		for (Pair<EntityMetaData, List<AttributeMetaData>> pair : EntityUtils.getReferencingEntityMetaData(
-				refEntityMetaData, dataService))
+		for (Pair<EntityMetaData, List<AttributeMetaData>> pair : EntityUtils
+				.getReferencingEntityMetaData(refEntityMetaData, dataService))
 		{
 			EntityMetaData entityMetaData = pair.getA();
 
@@ -843,7 +852,7 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 
 			Iterable<Entity> entities = new ElasticsearchEntityIterable(q, entityMetaData, client, dataService,
 					generator, new String[]
-					{ indexName });
+			{ indexName });
 
 			// Don't use cached ref entities but make new ones
 			entities = Iterables.transform(entities, new Function<Entity, Entity>()
@@ -1054,8 +1063,8 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 					}
 
 					SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexNames);
-					searchRequestGenerator.buildSearchRequest(searchRequestBuilder, type, SearchType.QUERY_AND_FETCH,
-							q, fieldsToReturn, null, null, null, entityMetaData);
+					searchRequestGenerator.buildSearchRequest(searchRequestBuilder, type, SearchType.QUERY_AND_FETCH, q,
+							fieldsToReturn, null, null, null, entityMetaData);
 
 					// We are in a transaction, the first index is the status before the transaction started, the second
 					// index the status within the transaction. We don't want to return the deleted records and of the
@@ -1075,8 +1084,8 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 						// Exclude deleted records fom both indices
 						BoolQueryBuilder excludeDeletesQuery = boolQuery().mustNot(findDeletesQuery);
 
-						searchRequestBuilder.setPostFilter(andFilter(queryFilter(excludeUpdatesQuery),
-								queryFilter(excludeDeletesQuery)));
+						searchRequestBuilder.setPostFilter(
+								andFilter(queryFilter(excludeUpdatesQuery), queryFilter(excludeDeletesQuery)));
 					}
 
 					if (LOG.isTraceEnabled())

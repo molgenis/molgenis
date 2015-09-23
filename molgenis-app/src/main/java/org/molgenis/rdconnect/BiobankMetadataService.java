@@ -23,12 +23,12 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 @Service
-public class BiobankMetadataService
+public class BiobankMetadataService implements IdCardBiobankService
 {
 	public final static String REGBBS_URL = "http://catalogue.rd-connect.eu/api/jsonws/BiBBoxCommonServices-portlet.logapi/regbbs";
 	public final static String REGBB_URL_PREFIX = "http://catalogue.rd-connect.eu/api/jsonws/BiBBoxCommonServices-portlet.logapi/regbb/organization-id/";
 	public final static String REGBBS_ORGANIZATIONID = "OrganizationID";
-	
+
 	// public static void main(String args[])
 	// {
 	// BiobankMetadataService biobankMetadataService = new BiobankMetadataService();
@@ -97,26 +97,29 @@ public class BiobankMetadataService
 				.map(j -> j.getAsJsonObject().get(REGBBS_ORGANIZATIONID).getAsString()).collect(Collectors.toSet());
 	}
 
+	@Override
 	public Iterable<Entity> getIdCardBiobanks(Iterable<String> ids)
 	{
 		return StreamSupport.stream(ids.spliterator(), false).map(e -> this.getIdCardBiobank(e))
 				.collect(Collectors.toList());
 	}
 
+	@Override
 	public Iterable<Entity> getIdCardBiobanks()
 	{
 		return this.getIdCardBiobanks(this.getIdCardBiobanksOrgnizationIds());
 	}
 
+	@Override
 	public Entity getIdCardBiobank(String id)
 	{
-		JsonObject root = this.getResourceAsJsonObject(REGBB_URL_PREFIX + "10779");
+		JsonObject root = this.getResourceAsJsonObject(REGBB_URL_PREFIX + id);
 		EntityMetaData emd = dataService.getEntityMetaData("rdconnect_regbb");
 
 		MapEntity regbbMapEntity = new MapEntity(emd);
 
-		regbbMapEntity.set("OrganizationID", root.get("OrganizationID"));
-		regbbMapEntity.set("type", root.get("type"));
+		regbbMapEntity.set("OrganizationID", root.getAsJsonPrimitive("OrganizationID").getAsInt());
+		regbbMapEntity.set("type", root.getAsJsonPrimitive("type").getAsString());
 
 		// First upload this one
 		// Escaped due to demo purposes
@@ -139,14 +142,12 @@ public class BiobankMetadataService
 		/**
 		 * "main contact" entity
 		 */
-		regbbMapEntity.set("title", root.getAsJsonObject("main contact").getAsJsonObject("title").getAsString());
-		regbbMapEntity.set("first_name", root.getAsJsonObject("main contact").getAsJsonObject("first name")
-				.getAsString());
-		regbbMapEntity.set("email", root.getAsJsonObject("main contact").getAsJsonObject("email")
-				.getAsString());
-		regbbMapEntity
-				.set("last_name", root.getAsJsonObject("main contact").getAsJsonObject("last name")
-				.getAsString());
+		regbbMapEntity.set("title", root.getAsJsonObject("main contact").getAsJsonPrimitive("title").getAsString());
+		regbbMapEntity.set("first_name",
+				root.getAsJsonObject("main contact").getAsJsonPrimitive("first name").getAsString());
+		// regbbMapEntity.set("email", root.getAsJsonObject("main contact").getAsJsonPrimitive("email").getAsString());
+		regbbMapEntity.set("last_name",
+				root.getAsJsonObject("main contact").getAsJsonPrimitive("last name").getAsString());
 
 		// TODO DateTime
 		// regbbMapEntity.set("last_activities", root.getAsJsonObject("last activities").getAsString());
@@ -169,7 +170,7 @@ public class BiobankMetadataService
 
 		return regbbMapEntity;
 	}
-	
+
 	private MapEntity createUrlMapEntity(EntityMetaData entityMetaData, String value)
 	{
 		final String attributeName = "url";

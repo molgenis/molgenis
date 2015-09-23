@@ -50,7 +50,7 @@ public class BiobankMetadataController extends MolgenisPluginController
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public String refreshMetadata(Model model) throws Exception
 	{
-		biobankMetadataService.getIdCardBiobanks().forEach(e -> dataService.add("regbb", e));
+		dataService.add("rdconnect_regbb", biobankMetadataService.getIdCardBiobanks());
 		return init(model);
 	}
 
