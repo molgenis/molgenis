@@ -172,7 +172,7 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService
 		regbbMapEntity.set("country",
 				jsonObject.getAsJsonObject("address").getAsJsonPrimitive("country").getAsString());
 		regbbMapEntity.set("city", jsonObject.getAsJsonObject("address").getAsJsonPrimitive("city").getAsString());
-
+		regbbMapEntity.set("name", jsonObject.getAsJsonPrimitive("name").getAsString());
 		regbbMapEntity.set("ID", jsonObject.getAsJsonPrimitive("ID").getAsString());
 		regbbMapEntity.set("type_of_host_institution",
 				jsonObject.getAsJsonPrimitive("type of host institution").getAsString());
