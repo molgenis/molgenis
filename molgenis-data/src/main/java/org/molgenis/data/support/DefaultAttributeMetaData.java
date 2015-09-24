@@ -316,7 +316,25 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		String result = "AttributeMetaData(name='" + this.getName() + "'";
 		result += " dataType='" + getDataType() + "'";
 		if (getRefEntity() != null) result += " refEntity='" + getRefEntity().getName() + "'";
-		if (getDescription() != null) result += " description='" + getDescription() + "'";
+		result += " description='" + getDescription() + "'";
+		result += " fieldType='" + fieldType + "'";
+		result += " nillable='" + nillable + "'";
+		result += " readOnly='" + readOnly + "'";
+		result += " defaultValue='" + defaultValue + "'";
+		result += " idAttribute='" + idAttribute + "'";
+		result += " labelAttribute='" + labelAttribute + "'";
+		result += " lookupAttribute='" + lookupAttribute + "'";
+		result += " expression='" + expression + "'";
+		result += " label='" + label + "'";
+		result += " visible='" + visible + "'";
+		result += " unique='" + unique + "'";
+		result += " visible='" + visible + "'";
+		result += " auto='" + auto + "'";
+		result += " attributesMetaData='" + attributesMetaData + "'";
+		result += " aggregateable='" + aggregateable + "'";
+		result += " range='" + range + "'";
+		result += " visibleExpression='" + visibleExpression + "'";
+		result += " validationExpression='" + validationExpression + "'";
 		result += ")";
 		return result;
 	}
