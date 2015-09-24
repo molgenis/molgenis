@@ -152,7 +152,6 @@ public class TransactionLogService implements MolgenisTransactionListener, Appli
 					logEntry.set(MolgenisTransactionLogEntryMetaData.MOLGENIS_TRANSACTION_LOG, log);
 					logEntry.set(MolgenisTransactionLogEntryMetaData.ENTITY, entityMetaData.getName());
 					logEntry.set(MolgenisTransactionLogEntryMetaData.TYPE, type);
-					// dataService.add(MolgenisTransactionLogEntryMetaData.ENTITY_NAME, logEntry);
 
 					asyncTransactionLog.addLogEntry(logEntry);
 
