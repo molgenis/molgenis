@@ -2,6 +2,7 @@ package org.molgenis.data.annotation;
 
 import java.util.Iterator;
 
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -30,7 +31,13 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 			if (!repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType()
 					.equals(annotatorAttribute.getDataType()))
 			{
-				return "a required attribute has the wrong datatype";
+				// allow type string when required attribute is text (for backward compatibility)
+				if (!(repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType()
+						.equals(MolgenisFieldTypes.STRING) && annotatorAttribute.getDataType().equals(
+						MolgenisFieldTypes.TEXT)))
+				{
+					return "a required attribute has the wrong datatype";
+				}
 			}
 
 			// Are the runtime property files not available, or is a webservice down? we can not annotate
