@@ -100,6 +100,8 @@ public class Step11ConvertNames extends MolgenisUpgrade
 		{
 			throw new RuntimeException(e);
 		}
+
+		new Step11bMappingProjectOwnerXref(dataSource);
 	}
 
 	/** Updates the names of columns in (mref)tables and updates the table names themselves. */
