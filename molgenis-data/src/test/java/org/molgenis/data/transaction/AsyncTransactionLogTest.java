@@ -3,6 +3,7 @@ package org.molgenis.data.transaction;
 import org.mockito.Mockito;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -32,16 +33,26 @@ public class AsyncTransactionLogTest
 	{
 		Entity entity = new MapEntity(new MolgenisTransactionLogEntryMetaData(new MolgenisTransactionLogMetaData(null),
 				null));
-		log.addLogEntry(entity);
-		Mockito.verify(dataService, Mockito.timeout(1000)).add(MolgenisTransactionLogEntryMetaData.ENTITY_NAME, entity);
 
+		Mockito.when(dataService.getRepository(MolgenisTransactionLogEntryMetaData.ENTITY_NAME)).thenReturn(
+				Mockito.mock(Repository.class));
+
+		log.addLogEntry(entity);
+
+		Mockito.verify(dataService, Mockito.timeout(1000)).getRepository(
+				MolgenisTransactionLogEntryMetaData.ENTITY_NAME);
 	}
 
 	@Test
 	public void logTransactionFinished()
 	{
 		Entity entity = new MapEntity(new MolgenisTransactionLogMetaData(null));
+
+		Mockito.when(dataService.getRepository(MolgenisTransactionLogMetaData.ENTITY_NAME)).thenReturn(
+				Mockito.mock(Repository.class));
+
 		log.logTransactionFinished(entity);
-		Mockito.verify(dataService, Mockito.timeout(1000)).update(MolgenisTransactionLogMetaData.ENTITY_NAME, entity);
+
+		Mockito.verify(dataService, Mockito.timeout(1000)).getRepository(MolgenisTransactionLogMetaData.ENTITY_NAME);
 	}
 }
