@@ -74,8 +74,9 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 		return attrMatches
 				.entrySet()
 				.stream()
+				.filter(entry -> !entry.getValue().getExplainedQueryStrings().isEmpty())
 				.filter(entry -> StreamSupport.stream(entry.getValue().getExplainedQueryStrings().spliterator(), false)
-						.anyMatch(explain -> explain.getTagName().equalsIgnoreCase(param.getName())))
+						.allMatch(explain -> explain.getTagName().equalsIgnoreCase(param.getName())))
 				.map(entry -> entry.getKey()).findFirst().orElse(null);
 	}
 }
