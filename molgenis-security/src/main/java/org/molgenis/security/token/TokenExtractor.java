@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class TokenExtractor
 {
-	protected static final String TOKEN_HEADER = "x-molgenis-token";
+	public static final String TOKEN_HEADER = "x-molgenis-token";
 	protected static final String TOKEN_PARAMETER = "molgenis-token";
 
 	public static String getToken(HttpServletRequest request)

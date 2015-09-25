@@ -1,7 +1,10 @@
 package org.molgenis.ontology.importer;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -18,6 +21,7 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.importer.EntitiesValidationReportImpl;
 import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
@@ -46,14 +50,9 @@ public class OntologyImportService implements ImportService
 	public OntologyImportService(FileRepositoryCollectionFactory fileRepositoryCollectionFactory,
 			DataService dataService, SearchService searchService, PermissionSystemService permissionSystemService)
 	{
-		if (fileRepositoryCollectionFactory == null) throw new IllegalArgumentException(
-				"fileRepositoryCollectionFactory is null");
-		if (dataService == null) throw new IllegalArgumentException("dataservice is null");
-		if (searchService == null) throw new IllegalArgumentException("seachservice is null");
-		if (permissionSystemService == null) throw new IllegalArgumentException("permissionSystemService is null");
-		this.dataService = dataService;
-		this.searchService = searchService;
-		this.permissionSystemService = permissionSystemService;
+		this.dataService = requireNonNull(dataService);
+		this.searchService = requireNonNull(searchService);
+		this.permissionSystemService = requireNonNull(permissionSystemService);
 	}
 
 	@Override
@@ -186,5 +185,12 @@ public class OntologyImportService implements ImportService
 	public Set<String> getSupportedFileExtensions()
 	{
 		return GenericImporterExtensions.getOntology();
+	}
+
+	@Override
+	public LinkedHashMap<String, Boolean> integrationTestMetaData(MetaDataService metaDataService,
+			RepositoryCollection repositoryCollection, String defaultPackage)
+	{
+		return metaDataService.integrationTestMetaData(repositoryCollection);
 	}
 }

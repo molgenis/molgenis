@@ -1,6 +1,7 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DECIMAL;
+import static org.molgenis.data.annotator.websettings.DannAnnotatorSettings.Meta.DANN_LOCATION;
 import static org.molgenis.data.vcf.VcfRepository.ALT_META;
 import static org.molgenis.data.vcf.VcfRepository.CHROM_META;
 import static org.molgenis.data.vcf.VcfRepository.POS_META;
@@ -12,6 +13,7 @@ import java.util.List;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
@@ -26,7 +28,6 @@ import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.resources.impl.TabixRepositoryFactory;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,16 +35,18 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class DannAnnotator
 {
+	public static final String NAME = "dann";
 
 	public static final String DANN_SCORE = "DANN_SCORE";
 	public static final String DANN_SCORE_LABEL = "DANNSCORE";
-	public static final String DANN_FILE_LOCATION_PROPERTY = "dann_location";
 	public static final String DANN_TABIX_RESOURCE = "DANNTabixResource";
 
 	@Autowired
-	private MolgenisSettings molgenisSettings;
+	private Entity dannAnnotatorSettings;
+
 	@Autowired
 	private DataService dataService;
+
 	@Autowired
 	private Resources resources;
 
@@ -60,7 +63,7 @@ public class DannAnnotator
 		AnnotatorInfo dannInfo = AnnotatorInfo
 				.create(Status.READY,
 						AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE,
-						"dann",
+						NAME,
 						"Annotating genetic variants, especially non-coding variants, "
 								+ "for the purpose of identifying pathogenic variants remains a challenge."
 								+ " Combined annotation-dependent depletion (CADD) is an al- gorithm designed "
@@ -82,7 +85,7 @@ public class DannAnnotator
 
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(DANN_TABIX_RESOURCE, dannInfo, new LocusQueryCreator(),
 				new VariantResultFilter(), dataService, resources,
-				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(DANN_FILE_LOCATION_PROPERTY, molgenisSettings));
+				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(DANN_LOCATION, dannAnnotatorSettings));
 
 		return new RepositoryAnnotatorImpl(entityAnnotator);
 	}
@@ -100,8 +103,8 @@ public class DannAnnotator
 		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("DANN_SCORE", DECIMAL));
 		repoMetaData.addAttribute("id").setIdAttribute(true).setVisible(false);
 
-		dannTabixResource = new ResourceImpl(DANN_TABIX_RESOURCE, new SingleResourceConfig(DANN_FILE_LOCATION_PROPERTY,
-				molgenisSettings), new TabixRepositoryFactory(repoMetaData));
+		dannTabixResource = new ResourceImpl(DANN_TABIX_RESOURCE, new SingleResourceConfig(DANN_LOCATION,
+				dannAnnotatorSettings), new TabixRepositoryFactory(repoMetaData));
 
 		return dannTabixResource;
 	}

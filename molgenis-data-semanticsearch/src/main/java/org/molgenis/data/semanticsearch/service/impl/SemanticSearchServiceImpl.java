@@ -67,6 +67,9 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	private Joiner termJoiner = Joiner.on(' ');
 	private static final String UNIT_ONTOLOGY_IRI = "http://purl.obolibrary.org/obo/uo.owl";
 
+	// We only explain the top 10 suggested attributes because beyond that the attributes are not high quliaty anymore
+	private static final int MAX_NUMBER_EXPLAINED_ATTRIBUTES = 10;
+
 	@Autowired
 	public SemanticSearchServiceImpl(DataService dataService, OntologyService ontologyService,
 			MetaDataService metaDataService, SemanticSearchServiceHelper semanticSearchServiceHelper,
@@ -110,7 +113,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		{
 			AttributeMetaData attribute = sourceEntityMetaData.getAttribute(attributeEntity
 					.getString(AttributeMetaDataMetaData.NAME));
-			if (count < 10)
+			if (count < MAX_NUMBER_EXPLAINED_ATTRIBUTES)
 			{
 				Set<ExplainedQueryString> explanations = convertAttributeEntityToExplainedAttribute(attributeEntity,
 						sourceEntityMetaData, collectExpanedQueryMap, finalQueryRules);

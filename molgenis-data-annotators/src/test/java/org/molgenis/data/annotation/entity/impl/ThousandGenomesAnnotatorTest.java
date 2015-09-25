@@ -1,7 +1,6 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -16,12 +15,11 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.resources.Resources;
-import org.molgenis.data.annotation.resources.impl.MultiResourceConfigImpl;
 import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
+import org.molgenis.data.annotator.websettings.ThousendGenomesAnnotatorSettings;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -83,27 +81,16 @@ public class ThousandGenomesAnnotatorTest extends AbstractTestNGSpringContextTes
 		private DataService dataService;
 
 		@Bean
-		public MolgenisSettings molgenisSettings()
+		public Entity thousendGenomesAnnotatorSettings()
 		{
-			MolgenisSettings settings = mock(MolgenisSettings.class);
-			when(
-					settings.getProperty(ThousandGenomesAnnotator.THOUSAND_GENOME_FOLDER_PROPERTY,
-							MultiResourceConfigImpl.DEFAULT_ROOT_DIRECTORY)).thenReturn(
+			Entity settings = new MapEntity();
+
+			settings.set(ThousendGenomesAnnotatorSettings.Meta.ROOT_DIRECTORY,
 					ResourceUtils.getFile(getClass(), THOUSAND_GENOME_TEST_FOLDER_PROPERTY).getPath());
-
-			when(
-					settings.getProperty(ThousandGenomesAnnotator.THOUSAND_GENOME_CHROMOSOME_PROPERTY,
-							MultiResourceConfigImpl.DEFAULT_CHROMOSOMES)).thenReturn(THOUSAND_GENOME_TEST_CHROMOSOMES);
-
-			when(
-					settings.getProperty(ThousandGenomesAnnotator.THOUSAND_GENOME_FILE_PATTERN_PROPERTY,
-							MultiResourceConfigImpl.DEFAULT_PATTERN)).thenReturn(THOUSAND_GENOME_TEST_PATTERN);
-
-			when(settings.getProperty(ThousandGenomesAnnotator.THOUSAND_GENOME_OVERRIDE_CHROMOSOME_FILES_PROPERTY))
-					.thenReturn(THOUSAND_GENOME_TEST_OVERRIDE_CHROMOSOME_FILES_PROPERTY);
-
-			when(settings.propertyExists(ThousandGenomesAnnotator.THOUSAND_GENOME_OVERRIDE_CHROMOSOME_FILES_PROPERTY))
-					.thenReturn(true);
+			settings.set(ThousendGenomesAnnotatorSettings.Meta.CHROMOSOMES, THOUSAND_GENOME_TEST_CHROMOSOMES);
+			settings.set(ThousendGenomesAnnotatorSettings.Meta.FILEPATTERN, THOUSAND_GENOME_TEST_PATTERN);
+			settings.set(ThousendGenomesAnnotatorSettings.Meta.OVERRIDE_CHROMOSOME_FILES,
+					THOUSAND_GENOME_TEST_OVERRIDE_CHROMOSOME_FILES_PROPERTY);
 
 			return settings;
 		}

@@ -1,5 +1,10 @@
 package org.molgenis.data.annotation.entity.impl;
 
+import static org.molgenis.data.annotator.websettings.ThousendGenomesAnnotatorSettings.Meta.CHROMOSOMES;
+import static org.molgenis.data.annotator.websettings.ThousendGenomesAnnotatorSettings.Meta.FILEPATTERN;
+import static org.molgenis.data.annotator.websettings.ThousendGenomesAnnotatorSettings.Meta.OVERRIDE_CHROMOSOME_FILES;
+import static org.molgenis.data.annotator.websettings.ThousendGenomesAnnotatorSettings.Meta.ROOT_DIRECTORY;
+
 import java.util.Collections;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -19,8 +24,6 @@ import org.molgenis.data.annotation.resources.impl.MultiFileResource;
 import org.molgenis.data.annotation.resources.impl.MultiResourceConfigImpl;
 import org.molgenis.data.annotation.resources.impl.TabixVcfRepositoryFactory;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,17 +31,15 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ThousandGenomesAnnotator
 {
+	public static final String NAME = "thousand_genomes";
+
 	public static final String THOUSAND_GENOME_AF = "Thousand_Genomes_AF";
 	public static final String THOUSAND_GENOME_AF_LABEL = "Thousand genome allele frequency";
 	public static final String THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME = "AF";
-	public static final String THOUSAND_GENOME_CHROMOSOME_PROPERTY = "thousand_genome_chromosomes";
-	public static final String THOUSAND_GENOME_FILE_PATTERN_PROPERTY = "thousand_genome_file_pattern";
-	public static final String THOUSAND_GENOME_FOLDER_PROPERTY = "thousand_genome_root_directory";
-	public static final String THOUSAND_GENOME_OVERRIDE_CHROMOSOME_FILES_PROPERTY = "thousand_override_chromosome_files";
 	public static final String THOUSAND_GENOME_MULTI_FILE_RESOURCE = "thousandGenomesSources";
 
 	@Autowired
-	private MolgenisSettings molgenisSettings;
+	private Entity thousendGenomesAnnotatorSettings;
 
 	@Autowired
 	private DataService dataService;
@@ -57,7 +58,7 @@ public class ThousandGenomesAnnotator
 		AnnotatorInfo thousandGenomeInfo = AnnotatorInfo
 				.create(Status.READY,
 						AnnotatorInfo.Type.POPULATION_REFERENCE,
-						"thousand_genomes",
+						NAME,
 						"The 1000 Genomes Project is an international collaboration to produce an "
 								+ "extensive public catalog of human genetic variation, including SNPs and structural variants, "
 								+ "and their haplotype contexts. This resource will support genome-wide association studies and other "
@@ -78,10 +79,10 @@ public class ThousandGenomesAnnotator
 
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(THOUSAND_GENOME_MULTI_FILE_RESOURCE, thousandGenomeInfo,
 				locusQueryCreator, multiAllelicResultFilter, dataService, resources, (annotationSourceFileName) -> {
-					molgenisSettings.setProperty(THOUSAND_GENOME_FOLDER_PROPERTY, annotationSourceFileName);
-					molgenisSettings.setProperty(THOUSAND_GENOME_FILE_PATTERN_PROPERTY,
+					thousendGenomesAnnotatorSettings.set(ROOT_DIRECTORY, annotationSourceFileName);
+					thousendGenomesAnnotatorSettings.set(FILEPATTERN,
 							"ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz");
-					molgenisSettings.setProperty(THOUSAND_GENOME_CHROMOSOME_PROPERTY,
+					thousendGenomesAnnotatorSettings.set(CHROMOSOMES,
 							"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22");
 				})
 		{
@@ -100,9 +101,8 @@ public class ThousandGenomesAnnotator
 	@Bean
 	Resource thousandGenomesSources()
 	{
-		MultiResourceConfig thousandGenomeConfig = new MultiResourceConfigImpl(THOUSAND_GENOME_CHROMOSOME_PROPERTY,
-				THOUSAND_GENOME_FILE_PATTERN_PROPERTY, THOUSAND_GENOME_FOLDER_PROPERTY,
-				THOUSAND_GENOME_OVERRIDE_CHROMOSOME_FILES_PROPERTY, molgenisSettings);
+		MultiResourceConfig thousandGenomeConfig = new MultiResourceConfigImpl(CHROMOSOMES, FILEPATTERN,
+				ROOT_DIRECTORY, OVERRIDE_CHROMOSOME_FILES, thousendGenomesAnnotatorSettings);
 
 		return new MultiFileResource(THOUSAND_GENOME_MULTI_FILE_RESOURCE, thousandGenomeConfig,
 				new TabixVcfRepositoryFactory(THOUSAND_GENOME_MULTI_FILE_RESOURCE));
