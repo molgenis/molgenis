@@ -388,7 +388,7 @@
 				if(validationResult.valid === true) {
 					// Resolve visible expressions
 					_.each(this.state.entity.allAttributes, function(entityAttr) {
-						if (entityAttr.visibleExpression) {
+						if (entityAttr.visibleExpression && entityAttr.visibleExpression.indexOf(e.attr) > -1) {
 							entityAttr.visible = this._resolveBoolExpression(entityAttr.visibleExpression, entityInstance);
 						}
 					}, this);
