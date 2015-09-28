@@ -85,9 +85,10 @@
         <script src="<@resource_href "/js/component/Questionnaire.js"/>"></script>
         <script src="<@resource_href "/js/component/RadioGroup.js"/>"></script>
         <script src="<@resource_href "/js/component/RangeSlider.js"/>"></script>
+        <script src="<@resource_href "/js/component/SelectBox.js"/>"></script>
         <script src="<@resource_href "/js/component/Spinner.js"/>"></script>
         <script src="<@resource_href "/js/component/Table.js"/>"></script>
-        <script src="<@resource_href "/js/component/TextArea.js"/>"></script>
+        <script src="<@resource_href "/js/component/TextArea.js"/>"></script>     
     <#else>
         <script src="<@resource_href "/js/react-with-addons.min.js"/>"></script>
         <script src="<@resource_href "/js/molgenis-component.min.js"/>"></script>

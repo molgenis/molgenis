@@ -70,13 +70,15 @@ public class AsyncTransactionLog
 						Entity entity = queue.take();
 						String type = entity.getEntityMetaData().getName();
 
+						// Do not call dataService.add because that method is transactional resulting in an infinite
+						// loop.
 						if (type.equals(MolgenisTransactionLogEntryMetaData.ENTITY_NAME))
 						{
-							dataService.add(MolgenisTransactionLogEntryMetaData.ENTITY_NAME, entity);
+							dataService.getRepository(MolgenisTransactionLogEntryMetaData.ENTITY_NAME).add(entity);
 						}
 						else if (type.equals(MolgenisTransactionLogMetaData.ENTITY_NAME))
 						{
-							dataService.update(MolgenisTransactionLogMetaData.ENTITY_NAME, entity);
+							dataService.getRepository(MolgenisTransactionLogMetaData.ENTITY_NAME).add(entity);
 						}
 
 						return null;
