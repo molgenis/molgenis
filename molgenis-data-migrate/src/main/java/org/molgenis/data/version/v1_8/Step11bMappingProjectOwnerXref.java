@@ -28,16 +28,23 @@ public class Step11bMappingProjectOwnerXref
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 
 		List<Map<String, Object>> mappingProjects = jdbcTemplate
-				.queryForList("SELECT identifier,owner from MappingProject");
+				.queryForList("SELECT identifier,owner FROM base_MappingProject");
 		mappingProjects.forEach(map -> {
 			String mappingProjectId = map.get("identifier").toString();
 			String username = map.get("owner").toString();
 			Map<String, Object> molgenisUser = jdbcTemplate
-					.queryForMap("SELECT id,username from MolgenisUser WHERE username = ?", username);
+					.queryForMap("SELECT id,username FROM base_MolgenisUser WHERE username = ?", username);
 			String molgenisUserId = molgenisUser.get("id").toString();
-			jdbcTemplate.update("UPDATE MappingProject SET owner = ? WHERE identifier = ?", molgenisUserId,
+			jdbcTemplate.update("UPDATE base_MappingProject SET owner = ? WHERE identifier = ?", molgenisUserId,
 					mappingProjectId);
 		});
+
+		// Change column type from text to varchar so that so that a foreign key can be created
+		jdbcTemplate.execute("ALTER TABLE base_MappingProject MODIFY owner VARCHAR(255)");
+
+		// MolgenisUser exists in the same backend, create a foreign key
+		jdbcTemplate.execute(
+				"ALTER TABLE base_MappingProject ADD CONSTRAINT FK_base_MappingProject_owner FOREIGN KEY (owner) REFERENCES base_MolgenisUser(id)");
 
 		LOG.info("Updated MappingProject owners string -> xref");
 	}

@@ -101,7 +101,9 @@ public class Step11ConvertNames extends MolgenisUpgrade
 			throw new RuntimeException(e);
 		}
 
-		new Step11bMappingProjectOwnerXref(dataSource);
+		// Injecting migration steps is not possible, after a release was performed future versions will use the next
+		// available step number. As a workaround a required step in a previous release is called from an existing step.
+		new Step11bMappingProjectOwnerXref(dataSource).upgrade();
 	}
 
 	/** Updates the names of columns in (mref)tables and updates the table names themselves. */
