@@ -285,6 +285,7 @@ function($, molgenis, settingsXhr) {
 	}
 	
 	function render() {
+		// get entity meta data and update header and tree
 		var entityMetaDataRequest = api.get('/api/v2/' + state.entity).done(function(data) {
 			var entityMetaData = data.meta;
 			selectedEntityMetaData = entityMetaData;
@@ -292,25 +293,29 @@ function($, molgenis, settingsXhr) {
 			
 			// Loop through all the attributes in the meta data
 			$.each(entityMetaData.attributes, function(index, attribute) {
-				
+
 				// Default expansion is false
 				// Expanded has to do with xref / mref attributes
 				attribute.expanded = false;
-				
-				// If the state is empty or undefined, or is set to 'none', return null. All attributes will be shown
-				if(state.attrs === undefined || state.attrs === null || state.attrs === 'none') return null;
-				else {
-					
+
+				// If the state is empty or undefined, or is set to
+				// 'none', return null. All attributes will be shown
+				if (state.attrs === undefined || state.attrs === null) {
+					selectedAttributes.push(attribute);
+				} else if (state.attrs === 'none') {
+					selectedAttributes = [];
+				} else {
+
 					// Loop through all the attributes mentioned in the state (url)
 					$.each(state.attrs, function(index, selectedAttrName) {
 						// If the attribute is in the state, add that attribute to the selectedAttributes
 						// For compound attributes, check the atomic attributes
-						if(attribute.name === selectedAttrName) {
+						if (attribute.name === selectedAttrName) {
 							selectedAttributes.push(attribute);
 						}
-						if(attribute.fieldType === 'COMPOUND') {
+						if (attribute.fieldType === 'COMPOUND') {
 							$.each(attribute.attributes, function(index, atomicAttribute) {
-								if(atomicAttribute.name === selectedAttrName) {
+								if (atomicAttribute.name === selectedAttrName) {
 									selectedAttributes.push(atomicAttribute);
 								}
 							});
