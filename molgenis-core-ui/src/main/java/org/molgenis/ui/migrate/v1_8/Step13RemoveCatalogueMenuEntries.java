@@ -57,7 +57,6 @@ public class Step13RemoveCatalogueMenuEntries extends MolgenisUpgrade
 
 			jdbcTemplate.update("UPDATE RuntimeProperty SET value=? WHERE Name=?", new Object[]
 			{ updatedMenuJson, "molgenis.menu" });
-
 			LOG.info("Removed catalogue plugin menu entries from menu");
 
 			// remove permissions
