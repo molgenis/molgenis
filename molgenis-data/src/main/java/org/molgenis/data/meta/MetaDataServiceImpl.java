@@ -26,6 +26,8 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.util.DependencyResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +48,8 @@ import com.google.common.collect.Sets;
  */
 public class MetaDataServiceImpl implements MetaDataService
 {
+	private static final Logger LOG = LoggerFactory.getLogger(MetaDataServiceImpl.class);
+
 	private PackageRepository packageRepository;
 	private EntityMetaDataRepository entityMetaDataRepository;
 	private AttributeMetaDataRepository attributeMetaDataRepository;
@@ -120,13 +124,24 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void deleteEntityMeta(String entityName)
 	{
-		EntityMetaData emd = getEntityMetaData(entityName);
-		if ((emd != null) && !emd.isAbstract())
+		try
 		{
-			getManageableRepositoryCollection(emd).deleteEntityMeta(entityName);
+			EntityMetaData emd = getEntityMetaData(entityName);
+			if ((emd != null) && !emd.isAbstract())
+			{
+				getManageableRepositoryCollection(emd).deleteEntityMeta(entityName);
+			}
+			entityMetaDataRepository.delete(entityName);
+			if (dataService.hasRepository(entityName)) dataService.removeRepository(entityName);
 		}
-		entityMetaDataRepository.delete(entityName);
-		if (dataService.hasRepository(entityName)) dataService.removeRepository(entityName);
+		catch (Exception exception)
+		{
+			LOG.error("Failed to delete entity metadata for entity [{}]", entityName, exception);
+		}
+		finally
+		{
+			refreshCaches();
+		}
 	}
 
 	@Transactional
@@ -153,8 +168,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	private ManageableRepositoryCollection getManageableRepositoryCollection(EntityMetaData emd)
 	{
 		RepositoryCollection backend = getBackend(emd);
-		if (!(backend instanceof ManageableRepositoryCollection))
-			throw new RuntimeException("Backend  is not a ManageableCrudRepositoryCollection");
+		if (!(backend instanceof ManageableRepositoryCollection)) throw new RuntimeException(
+				"Backend  is not a ManageableCrudRepositoryCollection");
 
 		return (ManageableRepositoryCollection) backend;
 	}
@@ -184,8 +199,8 @@ public class MetaDataServiceImpl implements MetaDataService
 			if (!dataService.hasRepository(emd.getName()))
 			{
 				Repository repo = backend.getRepository(emd.getName());
-				if (repo == null) throw new UnknownEntityException(
-						String.format("Unknown entity '%s' for backend '%s'", emd.getName(), backend.getName()));
+				if (repo == null) throw new UnknownEntityException(String.format(
+						"Unknown entity '%s' for backend '%s'", emd.getName(), backend.getName()));
 				Repository decoratedRepo = decoratorFactory.createDecoratedRepository(repo);
 				dataService.addRepository(decoratedRepo);
 			}
@@ -338,8 +353,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	public synchronized void onApplicationEvent(ContextRefreshedEvent event)
 	{
 		// Discover all backends
-		Map<String, RepositoryCollection> backendBeans = event.getApplicationContext()
-				.getBeansOfType(RepositoryCollection.class);
+		Map<String, RepositoryCollection> backendBeans = event.getApplicationContext().getBeansOfType(
+				RepositoryCollection.class);
 		backendBeans.values().forEach(this::addBackend);
 
 		// Create repositories from EntityMetaData in EntityMetaData repo
