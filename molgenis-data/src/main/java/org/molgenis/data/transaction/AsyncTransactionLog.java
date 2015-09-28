@@ -78,7 +78,7 @@ public class AsyncTransactionLog
 						}
 						else if (type.equals(MolgenisTransactionLogMetaData.ENTITY_NAME))
 						{
-							dataService.getRepository(MolgenisTransactionLogMetaData.ENTITY_NAME).add(entity);
+							dataService.getRepository(MolgenisTransactionLogMetaData.ENTITY_NAME).update(entity);
 						}
 
 						return null;
@@ -87,6 +87,10 @@ public class AsyncTransactionLog
 				catch (InterruptedException e)
 				{
 					LOG.error("InterruptedException consuming log entity from queue.", e);
+				}
+				catch (Exception e)
+				{
+					LOG.error("Exception consuming log entity from queue.", e);
 				}
 			}
 
