@@ -28,23 +28,32 @@ public class Step11bMappingProjectOwnerXref
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 
 		List<Map<String, Object>> mappingProjects = jdbcTemplate
-				.queryForList("SELECT identifier,owner FROM base_MappingProject");
+				.queryForList("SELECT identifier,owner FROM MappingProject");
 		mappingProjects.forEach(map -> {
 			String mappingProjectId = map.get("identifier").toString();
 			String username = map.get("owner").toString();
 			Map<String, Object> molgenisUser = jdbcTemplate
-					.queryForMap("SELECT id,username FROM base_MolgenisUser WHERE username = ?", username);
+					.queryForMap("SELECT id,username FROM MolgenisUser WHERE username = ?", username);
 			String molgenisUserId = molgenisUser.get("id").toString();
-			jdbcTemplate.update("UPDATE base_MappingProject SET owner = ? WHERE identifier = ?", molgenisUserId,
+			jdbcTemplate.update("UPDATE MappingProject SET owner = ? WHERE identifier = ?", molgenisUserId,
 					mappingProjectId);
 		});
 
 		// Change column type from text to varchar so that so that a foreign key can be created
-		jdbcTemplate.execute("ALTER TABLE base_MappingProject MODIFY owner VARCHAR(255)");
+		jdbcTemplate.execute("ALTER TABLE MappingProject MODIFY owner VARCHAR(255)");
 
 		// MolgenisUser exists in the same backend, create a foreign key
 		jdbcTemplate.execute(
-				"ALTER TABLE base_MappingProject ADD CONSTRAINT FK_base_MappingProject_owner FOREIGN KEY (owner) REFERENCES base_MolgenisUser(id)");
+				"ALTER TABLE MappingProject ADD CONSTRAINT FK_MappingProject_owner FOREIGN KEY (owner) REFERENCES MolgenisUser(id)");
+
+		// Update attributes table
+		String attrIdentifier = jdbcTemplate.queryForObject(
+				"SELECT identifier FROM attributes JOIN entities_attributes ON attributes.identifier = entities_attributes.attributes WHERE fullName = ? and name = ?",
+				new Object[]
+		{ "MappingProject", "owner" }, String.class);
+
+		jdbcTemplate.update("UPDATE attributes SET dataType = ?, refEntity = ? WHERE identifier = ?", "xref",
+				"MolgenisUser", attrIdentifier);
 
 		LOG.info("Updated MappingProject owners string -> xref");
 	}
