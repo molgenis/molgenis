@@ -3,6 +3,10 @@ package org.molgenis.app.promise;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -34,7 +38,7 @@ public class ProMiseClientImpl implements ProMiseClient
 	private static final String ACTION_HELLOWORLD = "HelloWorld";
 
 	private final SOAPConnectionFactory soapConnectionFactory;
-	private final String endpoint;
+	private final URL endpoint;
 
 	@Autowired
 	public ProMiseClientImpl(SOAPConnectionFactory soapConnectionFactory,
@@ -50,7 +54,29 @@ public class ProMiseClientImpl implements ProMiseClient
 					"endpoint is null, did you define 'promise.endpoint' in molgenis-server.properties?");
 		}
 		this.soapConnectionFactory = soapConnectionFactory;
-		this.endpoint = endpoint;
+
+		try
+		{
+			// enable time-out for SOAP calls
+			this.endpoint = new URL(null, endpoint, new URLStreamHandler()
+			{
+				protected URLConnection openConnection(URL url) throws IOException
+				{
+					// The url is the parent of this stream handler, so must create clone
+					URL clone = new URL(url.toString());
+					URLConnection connection = clone.openConnection();
+
+					connection.setConnectTimeout(15 * 1000); // 15 sec
+					connection.setReadTimeout(15 * 1000); // 15 sec
+					return connection;
+				}
+			});
+		}
+		catch (MalformedURLException e)
+		{
+			throw new IllegalArgumentException(
+					"'promise.endpoint' in molgenis-server.properties contains an invalid URL");
+		}
 	}
 
 	@Override
