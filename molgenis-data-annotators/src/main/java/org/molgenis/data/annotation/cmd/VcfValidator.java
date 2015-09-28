@@ -3,6 +3,7 @@ package org.molgenis.data.annotation.cmd;
 import static org.apache.commons.io.FilenameUtils.removeExtension;
 
 import java.io.BufferedWriter;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -105,9 +106,24 @@ public class VcfValidator
 		}
 		finally
 		{
-			bufferedWriter.close();
-			inputScanner.close();
-			errorScanner.close();
+			tryClose(bufferedWriter);
+			tryClose(inputScanner);
+			tryClose(errorScanner);
+		}
+	}
+
+	private void tryClose(Closeable closeable)
+	{
+		if (closeable != null)
+		{
+			try
+			{
+				closeable.close();
+			}
+			catch (Exception ignore)
+			{
+
+			}
 		}
 	}
 }
