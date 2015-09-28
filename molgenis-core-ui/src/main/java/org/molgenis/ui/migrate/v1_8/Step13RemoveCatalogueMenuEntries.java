@@ -45,16 +45,16 @@ public class Step13RemoveCatalogueMenuEntries extends MolgenisUpgrade
 		// check if RuntimeProperty table exists
 		if (!jdbcTemplate.queryForList("SHOW TABLES LIKE 'RuntimeProperty'").isEmpty())
 		{
-			String menuJson = jdbcTemplate
-					.queryForObject("SELECT Value FROM RuntimeProperty WHERE Name='molgenis.menu'", String.class);
+			String menuJson = jdbcTemplate.queryForObject(
+					"SELECT Value FROM RuntimeProperty WHERE Name='molgenis.menu'", String.class);
 
 			// new value
 			Menu menu = new Gson().fromJson(menuJson, Menu.class);
 			removePluginEntriesFromMenuRec(menu, PLUGIN_ID);
 			String updatedMenuJson = new Gson().toJson(menu);
 
-			jdbcTemplate.update("UPDATE RuntimeProperty SET value=? WHERE Name=?", new Object[]
-			{ updatedMenuJson, "molgenis.menu" });
+			jdbcTemplate.execute("UPDATE RuntimeProperty SET value='" + updatedMenuJson
+					+ "' WHERE Name='molgenis.menu'");
 			LOG.info("Removed catalogue plugin menu entries from menu");
 
 			// remove permissions
