@@ -18,7 +18,7 @@ function($, molgenis, settingsXhr) {
     self.getIdentifierAttribute = getIdentifierAttribute;
     self.getPatientAttribute = getPatientAttribute;
 
-    var restApi = new molgenis.RestClient();
+    var api = new molgenis.RestClientV2();
 	var selectedEntityMetaData = null;
 	var attributeFilters = {};
 	var selectedAttributes = [];
@@ -285,39 +285,55 @@ function($, molgenis, settingsXhr) {
 	}
 	
 	function render() {
-		// get entity meta data and update header and tree 
-		var entityMetaDataRequest = restApi.getAsync('/api/v1/' + state.entity + '/meta', {'expand': ['attributes']}, function(entityMetaData) {
+		// get entity meta data and update header and tree
+		var entityMetaDataRequest = api.get('/api/v2/' + state.entity).done(function(data) {
+			var entityMetaData = data.meta;
 			selectedEntityMetaData = entityMetaData;
-			
 			self.createHeader(entityMetaData);
 			
-			selectedAttributes = $.map(entityMetaData.attributes, function(attribute) {
-				if(state.attrs === undefined || state.attrs === null) return attribute.fieldType !== 'COMPOUND' ? attribute : null;
-				else if(state.attrs === 'none') return null;
-				else {
-					// TODO elegant solution
-					for(var i = 0; i < state.attrs.length; ++i) {
-						var attrName = state.attrs[i]; 
-						if(attrName.indexOf('(') !== -1) {
-							attrName = attrName.substring(0, attrName.indexOf('('));
-							attribute.expanded = true;
-						} else {
-							attribute.expanded = false;
+			// Loop through all the attributes in the meta data
+			$.each(entityMetaData.attributes, function(index, attribute) {
+
+				// Default expansion is false
+				// Expanded has to do with xref / mref attributes
+				attribute.expanded = false;
+
+				// If the state is empty or undefined, or is set to
+				// 'none', return null. All attributes will be shown
+				if (state.attrs === undefined || state.attrs === null) {
+					selectedAttributes.push(attribute);
+				} else if (state.attrs === 'none') {
+					selectedAttributes = [];
+				} else {
+
+					// Loop through all the attributes mentioned in the state (url)
+					$.each(state.attrs, function(index, selectedAttrName) {
+						// If the attribute is in the state, add that attribute to the selectedAttributes
+						// For compound attributes, check the atomic attributes
+						if (attribute.name === selectedAttrName) {
+							selectedAttributes.push(attribute);
 						}
-						if(attribute.name === attrName) {
-							return attribute.fieldType !== 'COMPOUND' ? attribute : null;
+						if (attribute.fieldType === 'COMPOUND') {
+							$.each(attribute.attributes, function(index, atomicAttribute) {
+								if (atomicAttribute.name === selectedAttrName) {
+									selectedAttributes.push(atomicAttribute);
+								}
+							});
 						}
-					}
-					return null;
+					});
 				}
 			});
 			
+			// Empties existing tree of selected attributes
 			selectedAttributesTree = {};
-			for(var i = 0; i < selectedAttributes.length; ++i) {
-				var key = selectedAttributes[i].name;
-				var value = selectedAttributes[i].expanded === true ? {'*': null} : null;
-				selectedAttributesTree[key] = value;	
-			}
+			
+			// For each selected attribute, check if it is expanded and fill the selectedAttributesTree map
+			$.each(selectedAttributes, function(index, attribute) {
+				var key = attribute.name;
+				var value = attribute.expanded === true ? {'*': null} : null;
+				selectedAttributesTree[key] = value;
+			});
+			
 			createEntityMetaTree(entityMetaData, selectedAttributes);
 			
 			if (settings['launch_wizard'] === true) {

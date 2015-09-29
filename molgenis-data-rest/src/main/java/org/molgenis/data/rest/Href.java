@@ -119,4 +119,16 @@ public class Href
 			throw new UnknownEntityException(qualifiedEntityName);
 		}
 	}
+	
+	public static String concatMetaEntityHrefV2(String baseUri, String qualifiedEntityName)
+	{
+		try
+		{
+			return String.format(baseUri + "/%s", UriUtils.encodePathSegment(qualifiedEntityName, "UTF-8"));
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			throw new UnknownEntityException(qualifiedEntityName);
+		}
+	}
 }

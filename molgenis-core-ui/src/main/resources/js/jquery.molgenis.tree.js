@@ -1,7 +1,7 @@
 (function($, molgenis) {
 	"use strict";
 	
-	var restApi = new molgenis.RestClient();
+	var api = new molgenis.RestClientV2();
 	
 	function createChildren(attributes, refEntityDepth, maxDepth, doSelect) {
 		var children = [];
@@ -23,7 +23,6 @@
 				classes = 'nofilter';
 			}
 			
-			
             if(this.visible) {
                 var isFolder = isFolder || molgenis.isCompoundAttr(this);
 
@@ -32,7 +31,6 @@
                     'title': this.label,
                     'tooltip': this.description,
                     'folder': isFolder,
-                    'hideCheckbox': refEntityDepth > 0,
                     'lazy': isFolder,
                     'expanded': !isFolder,
                     'selected': doSelect(this),
@@ -139,21 +137,22 @@
 					data.tree.getFirstChild().setActive(true);
 				}
 			},
-			'lazyLoad' : function (e, data) {
-				var node = data.node;
-				
-				var target;
-				var increaseDepth = 0;
-				if (molgenis.isRefAttr(node.data.attribute)){
+			'lazyLoad' : function(e, data) {
+				var node = data.node, target = node.key, increaseDepth = 0, attributes = [];
+
+				if (molgenis.isRefAttr(node.data.attribute)) {
 					target = node.data.attribute.refEntity.href;
 					increaseDepth = 1;
-				}else{
-					target = node.key;
 				}
-	
-				data.result = $.Deferred(function (dfd) {
-					restApi.getAsync(target, {'expand': ['attributes']}, function(attributeMetaData) {
-						var children = createChildren(attributeMetaData.attributes, node.data.refEntityDepth + increaseDepth, settings.maxRefEntityDepth, function() {
+
+				data.result = $.Deferred(function(dfd) {
+					api.get(target).done(function(entityMetaData) {
+						if (entityMetaData.fieldType === "COMPOUND") {
+							attributes = entityMetaData.attributes;
+						} else {
+							attributes = entityMetaData.meta.attributes;
+						}
+						var children = createChildren(attributes, node.data.refEntityDepth + increaseDepth, settings.maxRefEntityDepth, function() {
 							return node.selected;
 						});
 						dfd.resolve(children);
@@ -166,8 +165,7 @@
 			'click' : function(e, data) {
 				if (data.targetType === 'title' || data.targetType === 'icon') {
 					if (settings.onAttributeClick) {
-						var attr = data.node.data.attribute;
-						var node = getRefParentNode(data.node);
+						var attr = data.node.data.attribute, node = getRefParentNode(data.node);
 						if (node !== null) {
 							attr.parent = node.data.attribute;
 						}
@@ -177,15 +175,17 @@
 			},
 			'select' : function(e, data) {
 				if (settings.onAttributesSelect)
-					settings.onAttributesSelect({'attribute': data.node.data.attribute, 'select': data.node.selected});
+					settings.onAttributesSelect({
+						'attribute' : data.node.data.attribute,
+						'select' : data.node.selected
+					});
 			}
 		};
 		tree.fancytree(treeConfig);
 		
 		//Give the mref/xref/categorical parent of the given node or null if it does not have such a parent
 		function getRefParentNode(node) {
-			var parent = node.parent;
-			var attr = parent.data.attribute;
+			var parent = node.parent, attr = parent.data.attribute;
 			while (attr) {
 				if (attr.refEntity) {
 					return parent;

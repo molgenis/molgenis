@@ -5,6 +5,7 @@ import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -129,6 +130,29 @@ class RestControllerV2
 		return createEntityCollectionResponse(entityName, request);
 	}
 
+	/**
+	 * Retrieve attribute meta data 
+	 * 
+	 * @param entityName
+	 * @param attributeName
+	 * @return 
+	 */
+	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public AttributeMetaDataResponseV2 retrieveEntityAttributeMeta(@PathVariable("entityName") String entityName,
+			@PathVariable("attributeName") String attributeName)
+	{
+		return createAttributeMetaDataResponse(entityName, attributeName);
+	}
+
+	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public AttributeMetaDataResponseV2 retrieveEntityAttributeMetaPost(@PathVariable("entityName") String entityName,
+			@PathVariable("attributeName") String attributeName)
+	{
+		return createAttributeMetaDataResponse(entityName, attributeName);
+	}
+
 	@ExceptionHandler(RuntimeException.class)
 	@ResponseStatus(INTERNAL_SERVER_ERROR)
 	@ResponseBody
@@ -136,6 +160,31 @@ class RestControllerV2
 	{
 		LOG.error("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+	}
+
+	private AttributeMetaDataResponseV2 createAttributeMetaDataResponse(String entityName, String attributeName)
+	{
+		EntityMetaData entity = dataService.getEntityMetaData(entityName);
+		if (entity == null)
+		{
+			throw new UnknownEntityException(entityName + " not found");
+		}
+
+		AttributeMetaData attribute = entity.getAttribute(attributeName);
+		if (attribute == null)
+		{
+			throw new RuntimeException("attribute : " + attributeName + " does not exist!");
+		}
+
+		AttributeFilter attributeFilter = new AttributeFilter();
+		Iterable<AttributeMetaData> attributeParts = attribute.getAttributeParts();
+
+		if (attributeParts != null)
+		{
+			attributeParts.forEach(attributePart -> attributeFilter.add(attributePart.getName()));
+		}
+
+		return new AttributeMetaDataResponseV2(entityName, attribute, attributeFilter, permissionService);
 	}
 
 	private EntityCollectionResponseV2 createEntityCollectionResponse(String entityName,
