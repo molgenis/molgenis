@@ -18,7 +18,6 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.transaction.LockMetaData;
 import org.molgenis.data.transaction.MolgenisTransactionLogEntryMetaData;
 import org.molgenis.data.transaction.MolgenisTransactionLogMetaData;
 import org.molgenis.fieldtypes.FieldType;
@@ -33,8 +32,7 @@ import com.google.common.collect.Sets;
 public class RepositoryValidationDecorator implements Repository
 {
 	private static List<String> ENTITIES_THAT_DO_NOT_NEED_VALIDATION = Arrays.asList(
-			MolgenisTransactionLogMetaData.ENTITY_NAME, MolgenisTransactionLogEntryMetaData.ENTITY_NAME,
-			LockMetaData.ENTITY_NAME);
+			MolgenisTransactionLogMetaData.ENTITY_NAME, MolgenisTransactionLogEntryMetaData.ENTITY_NAME);
 	private final EntityAttributesValidator entityAttributesValidator;
 	private final DataService dataService;
 	private final Repository decoratedRepository;
