@@ -291,5 +291,10 @@
             <artifactId>molgenis-scripts</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-react</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 	</dependencies>
 </project>

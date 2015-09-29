@@ -1,0 +1,17 @@
+{
+  "name": "molgenis-react",
+  "version": "1.11.0",
+  "description": "Molgenis React components",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "browserify": "browserify *.js -o ../../../target/classes/js/molgenis-react.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "browserify": "^11.2.0",
+    "jest-cli": "^0.5.8",
+    "watchify": "^3.4.0"
+  }
+}
