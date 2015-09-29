@@ -1,6 +1,7 @@
 package org.molgenis.data.rest.v2;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.BOOL;
 import static org.molgenis.MolgenisFieldTypes.CATEGORICAL;
@@ -21,20 +22,28 @@ import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.mockito.Matchers;
 import org.molgenis.data.DataService;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Query;
+import org.molgenis.data.rest.utils.RestService;
 import org.molgenis.data.rest.v2.RestControllerV2Test.RestControllerV2Config;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.EnumField;
+import org.molgenis.file.FileStore;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -344,6 +353,34 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 				.andExpect(content().string(resourceCollectionResponse));
 	}
 
+	@Test
+	public void createEntities() throws Exception
+	{
+		String content = "{entities:[{id:'p1', name:'Piet'}, {id:'p2', name:'Pietje'}]}";
+		String responseBody = "{\n  \"resources\": [\n    {\n      \"id\": \"p1\",\n      \"location\": \"/api/v2/entity/p1\"\n    },\n"
+				+ "    {\n      \"id\": \"p2\",\n      \"location\": \"/api/v2/entity/p2\"\n    }\n  ]\n}";
+		mockMvc.perform(post(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
+				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(header().string("Location", "/api/v2/entity/meta"))
+				.andExpect(content().string(responseBody));
+
+		verify(dataService).add(Matchers.eq(ENTITY_NAME), Matchers.anyListOf(MapEntity.class));
+	}
+
+	@Test
+	public void updateEntities() throws Exception
+	{
+		String content = "{entities:[{id:'p1', name:'Witte Piet'}, {id:'p2', name:'Zwarte Piet'}]}";
+		String responseBody = "{\n  \"resources\": [\n    {\n      \"id\": \"p1\",\n      \"location\": \"/api/v2/entity/p1\"\n    },\n"
+				+ "    {\n      \"id\": \"p2\",\n      \"location\": \"/api/v2/entity/p2\"\n    }\n  ]\n}";
+		mockMvc.perform(put(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
+				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(header().string("Location", "/api/v2/entity/meta"))
+				.andExpect(content().string(responseBody));
+
+		verify(dataService).update(Matchers.eq(ENTITY_NAME), Matchers.anyListOf(MapEntity.class));
+	}
+
 	@Configuration
 	public static class RestControllerV2Config extends WebMvcConfigurerAdapter
 	{
@@ -369,9 +406,22 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
+		public IdGenerator idGenerator()
+		{
+			return mock(IdGenerator.class);
+		}
+
+		@Bean
+		public FileStore fileStore()
+		{
+			return mock(FileStore.class);
+		}
+
+		@Bean
 		public RestControllerV2 restController()
 		{
-			return new RestControllerV2(dataService(), molgenisPermissionService());
+			return new RestControllerV2(dataService(), molgenisPermissionService(), new RestService(dataService(),
+					idGenerator(), fileStore()));
 		}
 	}
 

@@ -1,13 +1,16 @@
 package org.molgenis.data.rest.v2;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 import java.sql.Date;
 import java.util.ArrayList;
@@ -15,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -22,10 +26,13 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.Href;
+import org.molgenis.data.rest.utils.RestService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileMeta;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -37,27 +44,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+;
 
 @Controller
 @RequestMapping(BASE_URI)
 class RestControllerV2
 {
 	private static final Logger LOG = LoggerFactory.getLogger(RestControllerV2.class);
+	private static final int MAX_ENTITIES = 1000;
 
 	public static final String BASE_URI = "/api/v2";
 
 	private final DataService dataService;
+	private final RestService restService;
 	private final MolgenisPermissionService permissionService;
 
 	@Autowired
-	public RestControllerV2(DataService dataService, MolgenisPermissionService permissionService)
+	public RestControllerV2(DataService dataService, MolgenisPermissionService permissionService,
+			RestService restService)
 	{
-		this.dataService = dataService;
-		this.permissionService = permissionService;
+		this.dataService = requireNonNull(dataService);
+		this.permissionService = requireNonNull(permissionService);
+		this.restService = requireNonNull(restService);
 	}
 
 	/**
@@ -127,6 +141,120 @@ class RestControllerV2
 			@Valid EntityCollectionRequestV2 request)
 	{
 		return createEntityCollectionResponse(entityName, request);
+	}
+
+	/**
+	 * Try to create multiple entities in one transaction. If one fails all fails.
+	 * 
+	 * @param entityName
+	 *            name of the entity where the entities are going to be added.
+	 * @param request
+	 *            EntityCollectionCreateRequestV2
+	 * @param response
+	 *            HttpServletResponse
+	 * @return EntityCollectionCreateResponseBodyV2
+	 */
+	@RequestMapping(value = "/{entityName}", method = POST, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public EntityCollectionBatchResponseBodyV2 createEntities(@PathVariable("entityName") String entityName,
+			@RequestBody EntityCollectionBatchRequestV2 request, HttpServletResponse response)
+	{
+		if (request == null)
+		{
+			throw new UnknownEntityException("Missing entities to create in body");
+		}
+
+		if (request.getEntities().size() > MAX_ENTITIES)
+		{
+			throw new UnknownEntityException("Max " + MAX_ENTITIES + " are allowed");
+		}
+
+		EntityMetaData meta = dataService.getEntityMetaData(entityName);
+		List<Entity> entities = new ArrayList<Entity>();
+		EntityCollectionBatchResponseBodyV2 responseBody = new EntityCollectionBatchResponseBodyV2();
+		for (Map<String, Object> entity : request.getEntities())
+		{
+			Entity e = this.restService.toEntity(meta, entity);
+			Object id = e.getIdValue();
+			String locationHref = Href.concatEntityHref(RestControllerV2.BASE_URI, entityName, id);
+			entities.add(e);
+			ResourcesResponseV2 entityResponse = new ResourcesResponseV2(id, locationHref);
+			responseBody.getResources().add(entityResponse);
+		}
+
+		try
+		{
+			this.dataService.add(entityName, entities);
+			response.addHeader("Location", Href.concatMetaEntityHref(RestControllerV2.BASE_URI, entityName));
+			response.setStatus(HttpServletResponse.SC_OK);
+			return responseBody;
+		}
+		catch (MolgenisDataAccessException mdae)
+		{
+			response.setStatus(HttpServletResponse.SC_EXPECTATION_FAILED);
+			return responseBody;
+		}
+
+	}
+
+	/**
+	 * Try to update multiple entities in one transaction. If one fails all fails.
+	 * 
+	 * @param entityName
+	 *            name of the entity where the entities are going to be added.
+	 * @param request
+	 *            EntityCollectionCreateRequestV2
+	 * @param response
+	 *            HttpServletResponse
+	 * @return EntityCollectionCreateResponseBodyV2
+	 */
+	@RequestMapping(value = "/{entityName}", method = PUT, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public EntityCollectionBatchResponseBodyV2 updateEntities(@PathVariable("entityName") String entityName,
+			@RequestBody EntityCollectionBatchRequestV2 request, HttpServletResponse response)
+	{
+		if (request == null)
+		{
+			throw new UnknownEntityException("Missing entities to update in body");
+		}
+
+		if (request.getEntities().size() > MAX_ENTITIES)
+		{
+			throw new UnknownEntityException("Max " + MAX_ENTITIES + " are allowed");
+		}
+
+		EntityMetaData meta = dataService.getEntityMetaData(entityName);
+		List<Entity> entities = new ArrayList<Entity>();
+		EntityCollectionBatchResponseBodyV2 responseBody = new EntityCollectionBatchResponseBodyV2();
+		String idAttributeName = meta.getIdAttribute().getName();
+		for (Map<String, Object> entity : request.getEntities())
+		{
+			Entity e = this.restService.toEntity(meta, entity);
+			if (null == e.get(idAttributeName))
+			{
+				throw new MolgenisDataException(
+						"One of the entities that you are trying to update does not have an id and therefore cannot be updated");
+			}
+			Object id = e.getIdValue();
+			String locationHref = Href.concatEntityHref(RestControllerV2.BASE_URI, entityName, id);
+			entities.add(e);
+			ResourcesResponseV2 entityResponse = new ResourcesResponseV2(id, locationHref);
+			responseBody.getResources().add(entityResponse);
+		}
+
+		try
+		{
+			this.dataService.update(entityName, entities);
+			response.addHeader("Location", Href.concatMetaEntityHref(RestControllerV2.BASE_URI, entityName));
+			response.setStatus(HttpServletResponse.SC_OK);
+			return responseBody;
+		}
+		catch (MolgenisDataAccessException mdae)
+		{
+			response.setStatus(HttpServletResponse.SC_EXPECTATION_FAILED);
+			return responseBody;
+		}
+
 	}
 
 	@ExceptionHandler(RuntimeException.class)
