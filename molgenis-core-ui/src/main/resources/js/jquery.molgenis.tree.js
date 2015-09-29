@@ -1,7 +1,7 @@
 (function($, molgenis) {
 	"use strict";
 	
-	var api = new molgenis.RestClientV2();
+	var api = new molgenis.RestClient();
 	
 	function createChildren(attributes, refEntityDepth, maxDepth, doSelect) {
 		var children = [];
@@ -31,6 +31,7 @@
                     'title': this.label,
                     'tooltip': this.description,
                     'folder': isFolder,
+                    'hideCheckbox': refEntityDepth > 0,
                     'lazy': isFolder,
                     'expanded': !isFolder,
                     'selected': doSelect(this),
@@ -146,13 +147,8 @@
 				}
 
 				data.result = $.Deferred(function(dfd) {
-					api.get(target).done(function(entityMetaData) {
-						if (entityMetaData.fieldType === "COMPOUND") {
-							attributes = entityMetaData.attributes;
-						} else {
-							attributes = entityMetaData.meta.attributes;
-						}
-						var children = createChildren(attributes, node.data.refEntityDepth + increaseDepth, settings.maxRefEntityDepth, function() {
+					api.getAsync(target, {'expand': ['attributes']}, function(entityMetaData) {
+						var children = createChildren(entityMetaData.attributes, node.data.refEntityDepth + increaseDepth, settings.maxRefEntityDepth, function() {
 							return node.selected;
 						});
 						dfd.resolve(children);

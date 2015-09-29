@@ -18,7 +18,7 @@ function($, molgenis, settingsXhr) {
     self.getIdentifierAttribute = getIdentifierAttribute;
     self.getPatientAttribute = getPatientAttribute;
 
-    var api = new molgenis.RestClientV2();
+    var api = new molgenis.RestClient();
 	var selectedEntityMetaData = null;
 	var attributeFilters = {};
 	var selectedAttributes = [];
@@ -286,8 +286,7 @@ function($, molgenis, settingsXhr) {
 	
 	function render() {
 		// get entity meta data and update header and tree
-		var entityMetaDataRequest = api.get('/api/v2/' + state.entity).done(function(data) {
-			var entityMetaData = data.meta;
+		var entityMetaDataRequest = api.getAsync('/api/v1/' + state.entity + '/meta', {expand: ['attributes']}, function(entityMetaData) {
 			selectedEntityMetaData = entityMetaData;
 			self.createHeader(entityMetaData);
 			
@@ -312,13 +311,6 @@ function($, molgenis, settingsXhr) {
 						// For compound attributes, check the atomic attributes
 						if (attribute.name === selectedAttrName) {
 							selectedAttributes.push(attribute);
-						}
-						if (attribute.fieldType === 'COMPOUND') {
-							$.each(attribute.attributes, function(index, atomicAttribute) {
-								if (atomicAttribute.name === selectedAttrName) {
-									selectedAttributes.push(atomicAttribute);
-								}
-							});
 						}
 					});
 				}
