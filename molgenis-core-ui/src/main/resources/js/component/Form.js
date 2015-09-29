@@ -390,6 +390,9 @@
 					_.each(this.state.entity.allAttributes, function(entityAttr) {
 						if (entityAttr.visibleExpression) {
 							entityAttr.visible = this._resolveBoolExpression(entityAttr.visibleExpression, entityInstance);
+							if (entityAttr.visible === false) {
+								this._updateErrorMessages(entityAttr, {valid: true});
+							}
 						}
 					}, this);
 				}
