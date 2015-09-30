@@ -18,8 +18,8 @@ import org.springframework.stereotype.Component;
 
 @SuppressWarnings("deprecation")
 @Component
-public class Step18RuntimePropertiesToAnnotatorSettings extends MolgenisUpgrade implements
-		ApplicationListener<ContextRefreshedEvent>
+public class Step18RuntimePropertiesToAnnotatorSettings extends MolgenisUpgrade
+		implements ApplicationListener<ContextRefreshedEvent>
 {
 	private final DataService dataService;
 
@@ -207,6 +207,19 @@ public class Step18RuntimePropertiesToAnnotatorSettings extends MolgenisUpgrade 
 			entity.set("id", "fitcon");
 			entity.set("fitconLocation", fitconLocation.getValue());
 			dataService.update("settings_fitcon", entity);
+		}
+
+		// Exac
+		RuntimeProperty exacLocation = dataService.findOne(RuntimeProperty.ENTITY_NAME,
+				QueryImpl.EQ(RuntimeProperty.NAME, "exac_location"), RuntimeProperty.class);
+		if (exacLocation != null)
+		{
+			runtimeProperties.add(exacLocation);
+
+			Entity entity = new DefaultEntity(dataService.getEntityMetaData("settings_exac"), dataService);
+			entity.set("id", "exac");
+			entity.set("exacLocation", exacLocation.getValue());
+			dataService.update("settings_exac", entity);
 		}
 
 		// HPO
