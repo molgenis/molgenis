@@ -16,6 +16,7 @@ import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
 import org.molgenis.security.permission.PermissionManagerControllerTest.Config;
+import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -31,7 +32,8 @@ import org.testng.annotations.Test;
 
 //TODO add additional test
 @WebAppConfiguration
-@ContextConfiguration(classes = Config.class)
+@ContextConfiguration(classes =
+{ Config.class, GsonConfig.class })
 public class PermissionManagerControllerTest extends AbstractTestNGSpringContextTests
 {
 	@Configuration
@@ -62,6 +64,9 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 	@Autowired
 	private PermissionManagerService permissionManagerService;
 
+	@Autowired
+	private GsonHttpMessageConverter gsonHttpMessageConverter;
+
 	private MockMvc mockMvc;
 	private MolgenisUser user1, user2;
 	private MolgenisGroup group1, group2;
@@ -70,7 +75,7 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 	public void setUp()
 	{
 		mockMvc = MockMvcBuilders.standaloneSetup(permissionManagerController)
-				.setMessageConverters(new GsonHttpMessageConverter()).build();
+				.setMessageConverters(gsonHttpMessageConverter).build();
 
 		reset(permissionManagerService);
 		user1 = when(mock(MolgenisUser.class).getId()).thenReturn("1").getMock();

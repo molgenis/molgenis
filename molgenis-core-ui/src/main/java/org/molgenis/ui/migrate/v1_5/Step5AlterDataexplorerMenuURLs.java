@@ -25,19 +25,14 @@ import com.google.common.base.Splitter.MapSplitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.TreeTraverser;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 /**
  * Updates dataexplorer menu items from <code>dataset</code> to <code>entity</code>.
  * 
  * @see <a href=https://github.com/molgenis/molgenis/issues/2769>#2769</a>
  * 
- *      JSON form of the menu items to upgrade is <code>{
-            "type": "plugin",
-            "id": "dataexplorer",
-            "label": "TypeTest",
-            "params": "entity\u003dorg_molgenis_test_TypeTest"
-        }</code>
+ *      JSON form of the menu items to upgrade is <code>{ "type": "plugin", "id": "dataexplorer", "label": "TypeTest",
+ *      "params": "entity\u003dorg_molgenis_test_TypeTest" }</code>
  */
 public class Step5AlterDataexplorerMenuURLs extends MolgenisUpgrade
 {
@@ -45,13 +40,14 @@ public class Step5AlterDataexplorerMenuURLs extends MolgenisUpgrade
 
 	final MapSplitter splitter = Splitter.on("&").withKeyValueSeparator("=");
 	final MapJoiner joiner = Joiner.on("&").withKeyValueSeparator("=");
-	final Gson gson = new GsonBuilder().create();
+	final Gson gson;
 	final Repository rtpRepo;
 
-	public Step5AlterDataexplorerMenuURLs(Repository rtpRepo)
+	public Step5AlterDataexplorerMenuURLs(Repository rtpRepo, Gson gson)
 	{
 		super(4, 5);
 		this.rtpRepo = rtpRepo;
+		this.gson = gson;
 	}
 
 	@Override
