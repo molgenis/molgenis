@@ -35,7 +35,7 @@ import org.mockito.Matchers;
 import org.molgenis.data.DataService;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Query;
-import org.molgenis.data.rest.utils.RestService;
+import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rest.v2.RestControllerV2Test.RestControllerV2Config;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntity;
@@ -361,7 +361,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 				+ "    {\n      \"id\": \"p2\",\n      \"location\": \"/api/v2/entity/p2\"\n    }\n  ]\n}";
 		mockMvc.perform(post(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(header().string("Location", "/api/v2/entity/meta"))
+				.andExpect(header().string("Location", "/api/v2/entity?q=id=in=(p1,p2)"))
 				.andExpect(content().string(responseBody));
 
 		verify(dataService).add(Matchers.eq(ENTITY_NAME), Matchers.anyListOf(MapEntity.class));
@@ -375,7 +375,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 				+ "    {\n      \"id\": \"p2\",\n      \"location\": \"/api/v2/entity/p2\"\n    }\n  ]\n}";
 		mockMvc.perform(put(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(header().string("Location", "/api/v2/entity/meta"))
+				.andExpect(header().string("Location", "/api/v2/entity?q=id=in=(p1,p2)"))
 				.andExpect(content().string(responseBody));
 
 		verify(dataService).update(Matchers.eq(ENTITY_NAME), Matchers.anyListOf(MapEntity.class));
@@ -421,7 +421,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		public RestControllerV2 restController()
 		{
 			return new RestControllerV2(dataService(), molgenisPermissionService(), new RestService(dataService(),
-					idGenerator(), fileStore()));
+					idGenerator(), fileStore()), idGenerator());
 		}
 	}
 

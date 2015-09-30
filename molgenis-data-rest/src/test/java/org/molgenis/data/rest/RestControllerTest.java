@@ -37,7 +37,7 @@ import org.molgenis.data.Sort;
 import org.molgenis.data.Sort.Direction;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.rest.RestControllerTest.RestControllerConfig;
-import org.molgenis.data.rest.utils.RestService;
+import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;

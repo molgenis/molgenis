@@ -26,13 +26,14 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.Href;
-import org.molgenis.data.rest.utils.RestService;
+import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileMeta;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -64,14 +65,16 @@ class RestControllerV2
 	private final DataService dataService;
 	private final RestService restService;
 	private final MolgenisPermissionService permissionService;
+	private final IdGenerator idGenerator;
 
 	@Autowired
 	public RestControllerV2(DataService dataService, MolgenisPermissionService permissionService,
-			RestService restService)
+			RestService restService, IdGenerator idGenerator)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.permissionService = requireNonNull(permissionService);
 		this.restService = requireNonNull(restService);
+		this.idGenerator = requireNonNull(idGenerator);
 	}
 
 	/**
@@ -159,6 +162,10 @@ class RestControllerV2
 	public EntityCollectionBatchResponseBodyV2 createEntities(@PathVariable("entityName") String entityName,
 			@RequestBody EntityCollectionBatchRequestV2 request, HttpServletResponse response)
 	{
+		// TODO
+		// Example:
+		// http://localhost:8080/api/v2/org_molgenis_test_Person?q=id=in=(AAAACUAZVIJSS6V2QL34UMAAAE,AAAACUAZVJM4E6V2QL34UMAAAE)
+
 		if (request == null)
 		{
 			throw new UnknownEntityException("Missing entities to create in body");
@@ -169,23 +176,40 @@ class RestControllerV2
 			throw new UnknownEntityException("Max " + MAX_ENTITIES + " are allowed");
 		}
 
-		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		List<Entity> entities = new ArrayList<Entity>();
-		EntityCollectionBatchResponseBodyV2 responseBody = new EntityCollectionBatchResponseBodyV2();
+		final EntityMetaData meta = dataService.getEntityMetaData(entityName);
+		final List<Entity> entities = new ArrayList<Entity>();
+		final EntityCollectionBatchResponseBodyV2 responseBody = new EntityCollectionBatchResponseBodyV2();
+		final List<String> ids = new ArrayList<String>();
 		for (Map<String, Object> entity : request.getEntities())
 		{
-			Entity e = this.restService.toEntity(meta, entity);
+			final Entity e = this.restService.toEntity(meta, entity);
 			Object id = e.getIdValue();
-			String locationHref = Href.concatEntityHref(RestControllerV2.BASE_URI, entityName, id);
+
+			if (null == id)
+			{
+				boolean isAutoId = meta.getIdAttribute().isAuto();
+				if (isAutoId)
+				{
+					id = idGenerator.generateId();
+				}
+				else
+				{
+					throw new MolgenisDataException("The entity: [" + entity
+							+ "] is missing an id and therefore cannot be created");
+				}
+			}
+
+			ids.add(id.toString());
 			entities.add(e);
-			ResourcesResponseV2 entityResponse = new ResourcesResponseV2(id, locationHref);
-			responseBody.getResources().add(entityResponse);
+			responseBody.getResources().add(
+					new ResourcesResponseV2(id, Href.concatEntityHref(RestControllerV2.BASE_URI, entityName, id)));
 		}
 
 		try
 		{
 			this.dataService.add(entityName, entities);
-			response.addHeader("Location", Href.concatMetaEntityHref(RestControllerV2.BASE_URI, entityName));
+			response.addHeader("Location", Href.concatEntityCollectionHref(RestControllerV2.BASE_URI, entityName, meta
+					.getIdAttribute().getName(), ids));
 			response.setStatus(HttpServletResponse.SC_OK);
 			return responseBody;
 		}
@@ -208,6 +232,7 @@ class RestControllerV2
 	 *            HttpServletResponse
 	 * @return EntityCollectionCreateResponseBodyV2
 	 */
+	@SuppressWarnings("finally")
 	@RequestMapping(value = "/{entityName}", method = PUT, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public EntityCollectionBatchResponseBodyV2 updateEntities(@PathVariable("entityName") String entityName,
@@ -226,32 +251,35 @@ class RestControllerV2
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 		List<Entity> entities = new ArrayList<Entity>();
 		EntityCollectionBatchResponseBodyV2 responseBody = new EntityCollectionBatchResponseBodyV2();
-		String idAttributeName = meta.getIdAttribute().getName();
+		List<String> ids = new ArrayList<String>();
 		for (Map<String, Object> entity : request.getEntities())
 		{
 			Entity e = this.restService.toEntity(meta, entity);
-			if (null == e.get(idAttributeName))
-			{
-				throw new MolgenisDataException(
-						"One of the entities that you are trying to update does not have an id and therefore cannot be updated");
-			}
 			Object id = e.getIdValue();
-			String locationHref = Href.concatEntityHref(RestControllerV2.BASE_URI, entityName, id);
+			if (null == id)
+			{
+				throw new MolgenisDataException("The entity: [" + entity
+						+ "] is missing an id and therefore cannot be updated");
+			}
+			ids.add(id.toString());
 			entities.add(e);
-			ResourcesResponseV2 entityResponse = new ResourcesResponseV2(id, locationHref);
-			responseBody.getResources().add(entityResponse);
+			responseBody.getResources().add(
+					new ResourcesResponseV2(id, Href.concatEntityHref(RestControllerV2.BASE_URI, entityName, id)));
 		}
 
 		try
 		{
 			this.dataService.update(entityName, entities);
-			response.addHeader("Location", Href.concatMetaEntityHref(RestControllerV2.BASE_URI, entityName));
+			response.addHeader("Location", Href.concatEntityCollectionHref(RestControllerV2.BASE_URI, entityName, meta
+					.getIdAttribute().getName(), ids));
 			response.setStatus(HttpServletResponse.SC_OK);
-			return responseBody;
 		}
 		catch (MolgenisDataAccessException mdae)
 		{
 			response.setStatus(HttpServletResponse.SC_EXPECTATION_FAILED);
+		}
+		finally
+		{
 			return responseBody;
 		}
 

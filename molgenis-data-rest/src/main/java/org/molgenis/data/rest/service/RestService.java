@@ -1,4 +1,4 @@
-package org.molgenis.data.rest.utils;
+package org.molgenis.data.rest.service;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;

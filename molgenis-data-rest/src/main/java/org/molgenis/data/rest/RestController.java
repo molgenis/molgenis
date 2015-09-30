@@ -59,7 +59,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.Sort;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.rest.utils.RestService;
+import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.DefaultEntityCollection;
 import org.molgenis.data.support.QueryImpl;

@@ -1,8 +1,10 @@
 package org.molgenis.data.rest;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 import org.molgenis.data.DataConverter;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.springframework.web.util.UriUtils;
@@ -117,6 +119,32 @@ public class Href
 		catch (UnsupportedEncodingException e)
 		{
 			throw new UnknownEntityException(qualifiedEntityName);
+		}
+	}
+
+	/**
+	 * Create an encoded href for an entity collection
+	 * 
+	 * @param qualifiedEntityName
+	 * @param entityIdValue
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 */
+	public static String concatEntityCollectionHref(String baseUri, String qualifiedEntityName,
+			String qualifiedIdAttributeName, List<String> entitiesIds)
+	{
+		try
+		{
+			String ids = String.join(",", entitiesIds);
+			return String.format(baseUri + "/%s?q=%s=in=(%s)",
+					UriUtils.encodePathSegment(qualifiedEntityName, "UTF-8"),
+					UriUtils.encodePathSegment(qualifiedIdAttributeName, "UTF-8"),
+					UriUtils.encodePathSegment(ids.toString(), "UTF-8"));
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			throw new MolgenisDataException("The creation of the entity collection href has failed. Entity: "
+					+ qualifiedEntityName + " Attribute: " + qualifiedIdAttributeName);
 		}
 	}
 }
