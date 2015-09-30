@@ -5,6 +5,7 @@ import static org.molgenis.app.promise.ProMiseDataLoaderController.URI;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -21,7 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import autovalue.shaded.com.google.common.common.collect.Lists;
 
 @Controller
 @RequestMapping(URI)
@@ -32,16 +36,16 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 
 	private final ProMiseDataParser promiseDataParser;
 	private final DataService dataService;
-	private final RadboudMapper radboudMapper;
+	private final PromiseMapperFactory promiseMapperFactory;
 
 	@Autowired
 	public ProMiseDataLoaderController(ProMiseDataParser proMiseDataParser, DataService dataService,
-			RadboudMapper radboudMapper)
+			PromiseMapperFactory promiseMapperFactory)
 	{
 		super(URI);
 		this.promiseDataParser = Objects.requireNonNull(proMiseDataParser);
 		this.dataService = Objects.requireNonNull(dataService);
-		this.radboudMapper = Objects.requireNonNull(radboudMapper);
+		this.promiseMapperFactory = Objects.requireNonNull(promiseMapperFactory);
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
@@ -50,21 +54,26 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 		return "view-promiseloader";
 	}
 
-	@RequestMapping(value = "map/{id}", method = RequestMethod.POST)
+	@RequestMapping(value = "projects", method = RequestMethod.GET)
+	@ResponseBody
+	public List<String> projects()
+	{
+		Iterable<Entity> projects = dataService.findAll(PromiseMappingProjectsMetaData.FULLY_QUALIFIED_NAME);
+		List<String> names = Lists.newArrayList();
+
+		projects.forEach(p -> names.add(p.get("name").toString()));
+
+		return names;
+	}
+
+	@RequestMapping(value = "map/{name}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
 	@Transactional
-	public void map(@PathVariable("id") String biobankId) throws IOException
+	public void map(@PathVariable("name") String projectName) throws IOException
 	{
-		switch (biobankId)
-		{
-			case "RADBOUD":
-				radboudMapper.map(biobankId);
-				break;
-			case "IBD":
-				break;
-			default:
-				break;
-		}
+		Entity project = dataService.findOne(PromiseMappingProjectsMetaData.FULLY_QUALIFIED_NAME, projectName);
+		PromiseMapper promiseMapper = promiseMapperFactory.getMapper(project.getString("mapper"));
+		promiseMapper.map(projectName);
 	}
 
 	@RequestMapping(value = "load", method = RequestMethod.POST)

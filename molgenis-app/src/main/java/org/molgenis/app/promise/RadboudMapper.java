@@ -19,31 +19,58 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.UuidGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Iterables;
 import com.google.common.hash.Hashing;
 
 @Component
-public class RadboudMapper
+public class RadboudMapper implements PromiseMapper, ApplicationListener<ContextRefreshedEvent>
 {
+	private final String ID = "RADBOUD";
+
 	private final ProMiseDataParser promiseDataParser;
 	private final DataService dataService;
+	private final PromiseMapperFactory promiseMapperFactory;
+
+	private static final Logger LOG = LoggerFactory.getLogger(RadboudMapper.class);
 
 	@Autowired
-	public RadboudMapper(ProMiseDataParser promiseDataParser, DataService dataService)
+	public RadboudMapper(ProMiseDataParser promiseDataParser, DataService dataService,
+			PromiseMapperFactory promiseMapperFactory)
 	{
 		this.promiseDataParser = Objects.requireNonNull(promiseDataParser);
 		this.dataService = Objects.requireNonNull(dataService);
+		this.promiseMapperFactory = Objects.requireNonNull(promiseMapperFactory);
+	}
+
+	@Override
+	public String getId()
+	{
+		return ID;
+	}
+
+	@Override
+	public void onApplicationEvent(ContextRefreshedEvent arg0)
+	{
+		promiseMapperFactory.registerMapper(ID, this);
 	}
 
 	public void map(String biobankId) throws IOException
 	{
-		EntityMetaData targetEntityMetaData = dataService.getEntityMetaData("bbmri_nl_sample_collections");
+		LOG.info("Downloading data for " + biobankId);
+
+		if (true) return;
 
 		Iterable<Entity> promiseBiobankEntities = promiseDataParser.parse(biobankId, 0);
 		Iterable<Entity> promiseSampleEntities = promiseDataParser.parse(biobankId, 1);
+
+		EntityMetaData targetEntityMetaData = dataService.getEntityMetaData(BBMRI_NL_SAMPLE_COLLECTIONS_ENTITY);
 
 		for (Entity promiseBiobankEntity : promiseBiobankEntities)
 		{

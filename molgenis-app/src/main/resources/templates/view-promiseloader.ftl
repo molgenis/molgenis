@@ -4,7 +4,18 @@
 
 <div class="row">
 	<div class="col-md-12">
-    	<div id="data-table-container"></div>
+		<div class="panel panel-default">
+			<div class="panel-heading">Credentials</div>
+    		<div id="data-table-container-credentials"></div>
+    	</div>
+    </div>
+</div>
+<div class="row">
+	<div class="col-md-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">Mapping Projects</div>
+    		<div id="data-table-container-mappers"></div>
+    	</div>
     </div>
 </div>
 
@@ -15,17 +26,7 @@
 			<div class="panel-heading">Promise endpoints</div>
 
 			<!-- Table -->
-			<table class="table">
-				<tr>
-					<td>Radboud</td>
-					<td id="radboud-map-btn-container"></td>
-					<td id="radboud-status">Succes!!</td>
-				</tr>
-				<tr>
-					<td>IBD</td>
-					<td id="ibd-map-btn-container"></td>
-					<td>Succes!!</td>
-				</tr>
+			<table class="table" id="promise-control-panel">
 			</table>
 		</div>
 	</div>
@@ -35,32 +36,29 @@
 <script>
 	React.render(molgenis.ui.Table({
 			entity: "promise_PromiseCredentials",
-		}), $('#data-table-container')[0]);
+		}), $('#data-table-container-credentials')[0]);
+		
+		React.render(molgenis.ui.Table({
+			entity: "promise_PromiseMappingProjects",
+		}), $('#data-table-container-mappers')[0]);
 
-/*
-    React.render(molgenis.ui.Button({
-        text: 'Load',
-        style: 'primary',
-        onClick: function() {
-            $.post(molgenis.getContextUrl() + '/load');            
-        }
-    }, 'Load'), $('#load-btn-container')[0]);
-*/
-
-    React.render(molgenis.ui.Button({
-        text: 'Map',
-        style: 'primary',
-        onClick: function() {
-            $.post(molgenis.getContextUrl() + '/map/RADBOUD');            
-        }
-    }, 'Map'), $('#radboud-map-btn-container')[0]);
-    
-    React.render(molgenis.ui.Button({
-        text: 'Map',
-        style: 'primary',
-        onClick: function() {
-            $.post(molgenis.getContextUrl() + '/map/IBD');            
-        }
-    }, 'Map'), $('#ibd-map-btn-container')[0]);
+    $(function() {
+    	$.get(molgenis.getContextUrl() + '/projects', function(projects){
+    		if (projects.length === 0){
+				$('#promise-control-panel').append('<tr><td>No ProMISe mapping projects found...</td></tr>');
+    		}else{
+	    		projects.forEach(function(project){
+	    			$('#promise-control-panel').append('<tr><td>' + project + '</td><td id="map-btn-container-' + project + '"></td><td id="radboud-status">Succes!!</td></tr>');
+					    React.render(molgenis.ui.Button({
+					        text: 'Map',
+					        style: 'primary',
+					        onClick: function() {
+					            $.post(molgenis.getContextUrl() + '/map/' + project);            
+					        }
+					    }, 'Map'), $('#map-btn-container-' + project)[0]);
+	    		});
+    		}
+    	});
+	});
 </script>
 <@footer/>
