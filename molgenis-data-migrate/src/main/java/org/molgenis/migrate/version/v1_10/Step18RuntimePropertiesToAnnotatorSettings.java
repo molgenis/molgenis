@@ -19,7 +19,8 @@ import org.springframework.stereotype.Component;
 @SuppressWarnings("deprecation")
 @Component
 public class Step18RuntimePropertiesToAnnotatorSettings extends MolgenisUpgrade
-		implements ApplicationListener<ContextRefreshedEvent> {
+		implements ApplicationListener<ContextRefreshedEvent>
+{
 	private final DataService dataService;
 
 	/**
@@ -28,30 +29,36 @@ public class Step18RuntimePropertiesToAnnotatorSettings extends MolgenisUpgrade
 	private boolean enabled = false;
 
 	@Autowired
-	public Step18RuntimePropertiesToAnnotatorSettings(DataService dataService) {
+	public Step18RuntimePropertiesToAnnotatorSettings(DataService dataService)
+	{
 		super(17, 18);
 		this.dataService = dataService;
 	}
 
 	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event) {
-		if (enabled) {
+	public void onApplicationEvent(ContextRefreshedEvent event)
+	{
+		if (enabled)
+		{
 			runAsSystem(this::migrateAnnotatorSettings);
 		}
 	}
 
 	@Override
-	public void upgrade() {
+	public void upgrade()
+	{
 		enabled = true;
 	}
 
-	private void migrateAnnotatorSettings() {
+	private void migrateAnnotatorSettings()
+	{
 		List<RuntimeProperty> runtimeProperties = new ArrayList<>();
 
 		// Cadd
 		RuntimeProperty caddLocation = dataService.findOne(RuntimeProperty.ENTITY_NAME,
 				QueryImpl.EQ(RuntimeProperty.NAME, "cadd_location"), RuntimeProperty.class);
-		if (caddLocation != null) {
+		if (caddLocation != null)
+		{
 			runtimeProperties.add(caddLocation);
 
 			Entity entity = new DefaultEntity(dataService.getEntityMetaData("settings_cadd"), dataService);
@@ -63,7 +70,8 @@ public class Step18RuntimePropertiesToAnnotatorSettings extends MolgenisUpgrade
 		// SnpEff
 		RuntimeProperty snpEffLocation = dataService.findOne(RuntimeProperty.ENTITY_NAME,
 				QueryImpl.EQ(RuntimeProperty.NAME, "snpeff_jar_location"), RuntimeProperty.class);
-		if (snpEffLocation != null) {
+		if (snpEffLocation != null)
+		{
 			runtimeProperties.add(snpEffLocation);
 
 			Entity entity = new DefaultEntity(dataService.getEntityMetaData("settings_snpEff"), dataService);
@@ -78,28 +86,32 @@ public class Step18RuntimePropertiesToAnnotatorSettings extends MolgenisUpgrade
 
 		RuntimeProperty gonlChromosomes = dataService.findOne(RuntimeProperty.ENTITY_NAME,
 				QueryImpl.EQ(RuntimeProperty.NAME, "gonl_chromosomes"), RuntimeProperty.class);
-		if (gonlChromosomes != null) {
+		if (gonlChromosomes != null)
+		{
 			runtimeProperties.add(gonlChromosomes);
 			gonlSettingsEntity.set("chromosomes", gonlChromosomes.getValue());
 		}
 
 		RuntimeProperty gonlFilePattern = dataService.findOne(RuntimeProperty.ENTITY_NAME,
 				QueryImpl.EQ(RuntimeProperty.NAME, "gonl_file_pattern"), RuntimeProperty.class);
-		if (gonlFilePattern != null) {
+		if (gonlFilePattern != null)
+		{
 			runtimeProperties.add(gonlFilePattern);
 			gonlSettingsEntity.set("filepattern", gonlFilePattern.getValue());
 		}
 
 		RuntimeProperty gonlOverrideChromosome = dataService.findOne(RuntimeProperty.ENTITY_NAME,
 				QueryImpl.EQ(RuntimeProperty.NAME, "gonl_override_chromosome_files"), RuntimeProperty.class);
-		if (gonlOverrideChromosome != null) {
+		if (gonlOverrideChromosome != null)
+		{
 			runtimeProperties.add(gonlOverrideChromosome);
 			gonlSettingsEntity.set("overrideChromosomeFiles", gonlOverrideChromosome.getValue());
 		}
 
 		RuntimeProperty gonlRootDirectory = dataService.findOne(RuntimeProperty.ENTITY_NAME,
 				QueryImpl.EQ(RuntimeProperty.NAME, "gonl_root_directory"), RuntimeProperty.class);
-		if (gonlRootDirectory != null) {
+		if (gonlRootDirectory != null)
+		{
 			runtimeProperties.add(gonlRootDirectory);
 			gonlSettingsEntity.set("rootDirectory", gonlRootDirectory.getValue());
 		}
@@ -113,28 +125,32 @@ public class Step18RuntimePropertiesToAnnotatorSettings extends MolgenisUpgrade
 
 		RuntimeProperty tgChromosomes = dataService.findOne(RuntimeProperty.ENTITY_NAME,
 				QueryImpl.EQ(RuntimeProperty.NAME, "thousand_genome_chromosomes"), RuntimeProperty.class);
-		if (tgChromosomes != null) {
+		if (tgChromosomes != null)
+		{
 			runtimeProperties.add(tgChromosomes);
 			thousendGenomesSettingsEntity.set("chromosomes", tgChromosomes.getValue());
 		}
 
 		RuntimeProperty tgFilePattern = dataService.findOne(RuntimeProperty.ENTITY_NAME,
 				QueryImpl.EQ(RuntimeProperty.NAME, "thousand_genome_file_pattern"), RuntimeProperty.class);
-		if (tgFilePattern != null) {
+		if (tgFilePattern != null)
+		{
 			runtimeProperties.add(tgFilePattern);
 			thousendGenomesSettingsEntity.set("filepattern", tgFilePattern.getValue());
 		}
 
 		RuntimeProperty tgRootDirectory = dataService.findOne(RuntimeProperty.ENTITY_NAME,
 				QueryImpl.EQ(RuntimeProperty.NAME, "thousand_genome_root_directory"), RuntimeProperty.class);
-		if (tgRootDirectory != null) {
+		if (tgRootDirectory != null)
+		{
 			runtimeProperties.add(tgRootDirectory);
 			thousendGenomesSettingsEntity.set("rootDirectory", tgRootDirectory.getValue());
 		}
 
 		RuntimeProperty tgOverrideChromFiles = dataService.findOne(RuntimeProperty.ENTITY_NAME,
 				QueryImpl.EQ(RuntimeProperty.NAME, "thousand_override_chromosome_files"), RuntimeProperty.class);
-		if (tgOverrideChromFiles != null) {
+		if (tgOverrideChromFiles != null)
+		{
 			runtimeProperties.add(tgOverrideChromFiles);
 			thousendGenomesSettingsEntity.set("overrideChromosomeFile", tgOverrideChromFiles.getValue());
 		}
@@ -144,7 +160,8 @@ public class Step18RuntimePropertiesToAnnotatorSettings extends MolgenisUpgrade
 		// CGD
 		RuntimeProperty cgdLocation = dataService.findOne(RuntimeProperty.ENTITY_NAME,
 				QueryImpl.EQ(RuntimeProperty.NAME, "cgd_location"), RuntimeProperty.class);
-		if (cgdLocation != null) {
+		if (cgdLocation != null)
+		{
 			runtimeProperties.add(cgdLocation);
 
 			Entity entity = new DefaultEntity(dataService.getEntityMetaData("settings_CGD"), dataService);
@@ -156,7 +173,8 @@ public class Step18RuntimePropertiesToAnnotatorSettings extends MolgenisUpgrade
 		// Clinvar
 		RuntimeProperty clinvarLocation = dataService.findOne(RuntimeProperty.ENTITY_NAME,
 				QueryImpl.EQ(RuntimeProperty.NAME, "clinvar_location"), RuntimeProperty.class);
-		if (clinvarLocation != null) {
+		if (clinvarLocation != null)
+		{
 			runtimeProperties.add(clinvarLocation);
 
 			Entity entity = new DefaultEntity(dataService.getEntityMetaData("settings_clinvar"), dataService);
@@ -168,7 +186,8 @@ public class Step18RuntimePropertiesToAnnotatorSettings extends MolgenisUpgrade
 		// Dann
 		RuntimeProperty dannLocation = dataService.findOne(RuntimeProperty.ENTITY_NAME,
 				QueryImpl.EQ(RuntimeProperty.NAME, "dann_location"), RuntimeProperty.class);
-		if (dannLocation != null) {
+		if (dannLocation != null)
+		{
 			runtimeProperties.add(dannLocation);
 
 			Entity entity = new DefaultEntity(dataService.getEntityMetaData("settings_dann"), dataService);
@@ -180,7 +199,8 @@ public class Step18RuntimePropertiesToAnnotatorSettings extends MolgenisUpgrade
 		// Fitcon
 		RuntimeProperty fitconLocation = dataService.findOne(RuntimeProperty.ENTITY_NAME,
 				QueryImpl.EQ(RuntimeProperty.NAME, "fitcon_location"), RuntimeProperty.class);
-		if (fitconLocation != null) {
+		if (fitconLocation != null)
+		{
 			runtimeProperties.add(fitconLocation);
 
 			Entity entity = new DefaultEntity(dataService.getEntityMetaData("settings_fitcon"), dataService);
@@ -192,7 +212,8 @@ public class Step18RuntimePropertiesToAnnotatorSettings extends MolgenisUpgrade
 		// Exac
 		RuntimeProperty exacLocation = dataService.findOne(RuntimeProperty.ENTITY_NAME,
 				QueryImpl.EQ(RuntimeProperty.NAME, "exac_location"), RuntimeProperty.class);
-		if (exacLocation != null) {
+		if (exacLocation != null)
+		{
 			runtimeProperties.add(exacLocation);
 
 			Entity entity = new DefaultEntity(dataService.getEntityMetaData("settings_exac"), dataService);
@@ -204,7 +225,8 @@ public class Step18RuntimePropertiesToAnnotatorSettings extends MolgenisUpgrade
 		// HPO
 		RuntimeProperty hpoLocation = dataService.findOne(RuntimeProperty.ENTITY_NAME,
 				QueryImpl.EQ(RuntimeProperty.NAME, "hpo_location"), RuntimeProperty.class);
-		if (hpoLocation != null) {
+		if (hpoLocation != null)
+		{
 			runtimeProperties.add(hpoLocation);
 
 			Entity entity = new DefaultEntity(dataService.getEntityMetaData("settings_hpo"), dataService);
@@ -213,7 +235,8 @@ public class Step18RuntimePropertiesToAnnotatorSettings extends MolgenisUpgrade
 			dataService.update("settings_hpo", entity);
 		}
 
-		if (!runtimeProperties.isEmpty()) {
+		if (!runtimeProperties.isEmpty())
+		{
 			dataService.delete(RuntimeProperty.ENTITY_NAME, runtimeProperties);
 		}
 	}
