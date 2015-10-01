@@ -18,6 +18,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataConverter;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisQueryException;
 import org.molgenis.data.Query;
@@ -123,7 +124,7 @@ public class QueryGeneratorReferencesTest
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
 				.nestedFilter(REF_ENTITY_ATT,
-						FilterBuilders.rangeFilter(PREFIX + refDateAttributeName).gt(value.toString())));
+						FilterBuilders.rangeFilter(PREFIX + refDateAttributeName).gt(DataConverter.toString(value))));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -135,10 +136,12 @@ public class QueryGeneratorReferencesTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(
-				QueryBuilders.matchAllQuery(),
-				FilterBuilders.nestedFilter(REF_ENTITY_ATT,
-						FilterBuilders.rangeFilter(PREFIX + refDateTimeAttributeName).gt(value.toString())));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders
+						.nestedFilter(
+								REF_ENTITY_ATT,
+								FilterBuilders.rangeFilter(PREFIX + refDateTimeAttributeName).gt(
+										DataConverter.toString(value))));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -191,7 +194,7 @@ public class QueryGeneratorReferencesTest
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
 				.nestedFilter(REF_ENTITY_ATT,
-						FilterBuilders.rangeFilter(PREFIX + refDateAttributeName).gte(value.toString())));
+						FilterBuilders.rangeFilter(PREFIX + refDateAttributeName).gte(DataConverter.toString(value))));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
