@@ -18,6 +18,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisQueryException;
@@ -130,7 +131,7 @@ public class QueryGeneratorTest
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(dateAttributeName).gt(value.toString()));
+				.rangeFilter(dateAttributeName).gt(DataConverter.toString(value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -143,7 +144,7 @@ public class QueryGeneratorTest
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(dateTimeAttributeName).gt(value.toString()));
+				.rangeFilter(dateTimeAttributeName).gt(DataConverter.toString(value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -208,7 +209,7 @@ public class QueryGeneratorTest
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(dateAttributeName).gte(value.toString()));
+				.rangeFilter(dateAttributeName).gte(DataConverter.toString(value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -221,7 +222,7 @@ public class QueryGeneratorTest
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(dateTimeAttributeName).gte(value.toString()));
+				.rangeFilter(dateTimeAttributeName).gte(DataConverter.toString(value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -286,7 +287,7 @@ public class QueryGeneratorTest
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(dateAttributeName).lte(value.toString()));
+				.rangeFilter(dateAttributeName).lte(DataConverter.toString(value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -299,7 +300,7 @@ public class QueryGeneratorTest
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(dateTimeAttributeName).lte(value.toString()));
+				.rangeFilter(dateTimeAttributeName).lte(DataConverter.toString(value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -699,7 +700,7 @@ public class QueryGeneratorTest
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(dateAttributeName).lt(value.toString()));
+				.rangeFilter(dateAttributeName).lt(DataConverter.toString(value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -712,7 +713,7 @@ public class QueryGeneratorTest
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(dateTimeAttributeName).lt(value.toString()));
+				.rangeFilter(dateTimeAttributeName).lt(DataConverter.toString(value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
