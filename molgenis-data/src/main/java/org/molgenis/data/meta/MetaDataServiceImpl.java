@@ -18,6 +18,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Package;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.RepositoryDecorator;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.DataServiceImpl;
@@ -201,7 +202,9 @@ public class MetaDataServiceImpl implements MetaDataService
 				Repository repo = backend.getRepository(emd.getName());
 				if (repo == null) throw new UnknownEntityException(String.format(
 						"Unknown entity '%s' for backend '%s'", emd.getName(), backend.getName()));
+
 				Repository decoratedRepo = decoratorFactory.createDecoratedRepository(repo);
+
 				dataService.addRepository(decoratedRepo);
 			}
 
@@ -234,7 +237,24 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public synchronized Repository addEntityMeta(EntityMetaData emd)
 	{
-		return add(emd, new NonDecoratingRepositoryDecoratorFactory());
+		if (emd.getDecorator() == null)
+		{
+			return add(emd, new NonDecoratingRepositoryDecoratorFactory());
+		}
+		else
+		{
+			return add(emd, new RepositoryDecoratorFactory()
+			{
+				@Override
+				public Repository createDecoratedRepository(Repository repository)
+				{
+					RepositoryDecorator repoDecorator = emd.getDecorator();
+					repoDecorator.setTarget(repository);
+
+					return repoDecorator;
+				}
+			});
+		}
 	}
 
 	@Transactional
