@@ -59,7 +59,6 @@
 			entity: getEntity().name,
 			attrs: getAttributesTree(),
 			query: getQuery(),
-			maxRows: 18,
 			onRowAdd: onDataChange,
 			onRowDelete: onDataChange,
 			onRowEdit: onDataChange,
