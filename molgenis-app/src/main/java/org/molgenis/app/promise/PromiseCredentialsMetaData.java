@@ -1,5 +1,6 @@
 package org.molgenis.app.promise;
 
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,8 @@ public class PromiseCredentialsMetaData extends DefaultEntityMetaData
 	public static final String PWS = "PWS";
 	public static final String SECURITYCODE = "SECURITYCODE";
 	public static final String URL = "URL";
+
+	public static final EntityMetaData INSTANCE = new PromiseCredentialsMetaData();
 
 	public PromiseCredentialsMetaData()
 	{

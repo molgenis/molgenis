@@ -9,7 +9,6 @@ import java.util.Set;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
@@ -32,22 +31,18 @@ public class PromiseMappingProjectsMetaData extends DefaultEntityMetaData
 	public static final String MAPPER = "mapper";
 
 	@Autowired
-	public PromiseMappingProjectsMetaData(DataService dataService, PromiseMapperFactory promiseMapperFactory)
+	public PromiseMappingProjectsMetaData(PromiseMapperFactory promiseMapperFactory)
 	{
 		super(ENTITY_NAME, PromisePackage.getPackage());
 
-		Objects.requireNonNull(dataService);
 		Objects.requireNonNull(promiseMapperFactory);
 
 		setLabel("ProMISe mapping projects");
 		setDescription("");
 
-		EntityMetaData credentialsEntity = dataService.getMeta().getEntityMetaData(
-				PromiseCredentialsMetaData.FULLY_QUALIFIED_NAME);
-
 		addAttribute(ID).setIdAttribute(true).setNillable(false);
-		addAttribute(CREDENTIALS).setDataType(MolgenisFieldTypes.MREF).setRefEntity(credentialsEntity)
-				.setNillable(false);
+		addAttribute(CREDENTIALS).setDataType(MolgenisFieldTypes.MREF)
+				.setRefEntity(PromiseCredentialsMetaData.INSTANCE).setNillable(false);
 		addAttribute(MAPPER).setNillable(false);
 
 		setDecorator(new RepositoryDecorator()
