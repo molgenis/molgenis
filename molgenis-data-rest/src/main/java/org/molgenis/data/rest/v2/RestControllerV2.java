@@ -6,6 +6,7 @@ import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -26,10 +28,10 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.Href;
@@ -51,30 +53,26 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-;
-
 @Controller
 @RequestMapping(BASE_URI)
 class RestControllerV2
 {
 	private static final Logger LOG = LoggerFactory.getLogger(RestControllerV2.class);
-	private static final int MAX_ENTITIES = 1000;
+	static final int MAX_ENTITIES = 1000;
 
 	public static final String BASE_URI = "/api/v2";
 
 	private final DataService dataService;
 	private final RestService restService;
 	private final MolgenisPermissionService permissionService;
-	private final IdGenerator idGenerator;
 
 	@Autowired
 	public RestControllerV2(DataService dataService, MolgenisPermissionService permissionService,
-			RestService restService, IdGenerator idGenerator)
+			RestService restService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.permissionService = requireNonNull(permissionService);
 		this.restService = requireNonNull(restService);
-		this.idGenerator = requireNonNull(idGenerator);
 	}
 
 	/**
@@ -162,61 +160,38 @@ class RestControllerV2
 	public EntityCollectionBatchResponseBodyV2 createEntities(@PathVariable("entityName") String entityName,
 			@RequestBody EntityCollectionBatchRequestV2 request, HttpServletResponse response)
 	{
-		// TODO
-		// Example:
-		// http://localhost:8080/api/v2/org_molgenis_test_Person?q=id=in=(AAAACUAZVIJSS6V2QL34UMAAAE,AAAACUAZVJM4E6V2QL34UMAAAE)
-
-		if (request == null)
-		{
-			throw new UnknownEntityException("Missing entities to create in body");
-		}
-
-		if (request.getEntities().size() > MAX_ENTITIES)
-		{
-			throw new UnknownEntityException("Max " + MAX_ENTITIES + " are allowed");
-		}
-
 		final EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		final List<Entity> entities = new ArrayList<Entity>();
-		final EntityCollectionBatchResponseBodyV2 responseBody = new EntityCollectionBatchResponseBodyV2();
-		final List<String> ids = new ArrayList<String>();
-		for (Map<String, Object> entity : request.getEntities())
-		{
-			final Entity e = this.restService.toEntity(meta, entity);
-			Object id = e.getIdValue();
-
-			if (null == id)
-			{
-				boolean isAutoId = meta.getIdAttribute().isAuto();
-				if (isAutoId)
-				{
-					id = idGenerator.generateId();
-				}
-				else
-				{
-					throw new MolgenisDataException("The entity: [" + entity
-							+ "] is missing an id and therefore cannot be created");
-				}
-			}
-
-			ids.add(id.toString());
-			entities.add(e);
-			responseBody.getResources().add(
-					new ResourcesResponseV2(id, Href.concatEntityHref(RestControllerV2.BASE_URI, entityName, id)));
-		}
+		this.generalChecksForBachOperations(request, meta, entityName);
 
 		try
 		{
+			final List<Entity> entities = request.getEntities().stream().map(e -> this.restService.toEntity(meta, e))
+					.collect(Collectors.toList());
+			final EntityCollectionBatchResponseBodyV2 responseBody = new EntityCollectionBatchResponseBodyV2();
+			final List<String> ids = new ArrayList<String>();
+
+			// Add all entities
 			this.dataService.add(entityName, entities);
+
+			int count = 0;
+			for (Entity entity : entities)
+			{
+				String id = this.getEntityId(entity, count);
+				ids.add(id);
+				responseBody.getResources().add(
+						new ResourcesResponseV2(Href.concatEntityHref(RestControllerV2.BASE_URI, entityName, id)));
+				count++;
+			}
+
 			response.addHeader("Location", Href.concatEntityCollectionHref(RestControllerV2.BASE_URI, entityName, meta
 					.getIdAttribute().getName(), ids));
-			response.setStatus(HttpServletResponse.SC_OK);
+			response.setStatus(HttpServletResponse.SC_CREATED);
 			return responseBody;
 		}
-		catch (MolgenisDataAccessException mdae)
+		catch (Exception e)
 		{
-			response.setStatus(HttpServletResponse.SC_EXPECTATION_FAILED);
-			return responseBody;
+			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+			throw e;
 		}
 
 	}
@@ -230,59 +205,153 @@ class RestControllerV2
 	 *            EntityCollectionCreateRequestV2
 	 * @param response
 	 *            HttpServletResponse
-	 * @return EntityCollectionCreateResponseBodyV2
 	 */
-	@SuppressWarnings("finally")
-	@RequestMapping(value = "/{entityName}", method = PUT, produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public EntityCollectionBatchResponseBodyV2 updateEntities(@PathVariable("entityName") String entityName,
+	@RequestMapping(value = "/{entityName}", method = PUT)
+	public synchronized void updateEntities(@PathVariable("entityName") String entityName,
 			@RequestBody EntityCollectionBatchRequestV2 request, HttpServletResponse response)
+	{
+		final EntityMetaData meta = dataService.getEntityMetaData(entityName);
+		this.generalChecksForBachOperations(request, meta, entityName);
+
+		try
+		{
+			final List<Entity> entities = request.getEntities().stream().map(e -> this.restService.toEntity(meta, e))
+					.collect(Collectors.toList());
+
+			int count = 0;
+			for (Entity entity : entities)
+			{
+				this.getEntityId(entity, count);
+				count++;
+			}
+
+			// update all entities
+			this.dataService.update(entityName, entities);
+			response.setStatus(HttpServletResponse.SC_OK);
+		}
+		catch (Exception e)
+		{
+			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+			throw e;
+		}
+	}
+
+	/**
+	 * 
+	 * @param entityName
+	 *            The name of the entity to update
+	 * @param attributeName
+	 *            The name of the attribute to update
+	 * @param request
+	 *            EntityCollectionBatchRequestV2
+	 * @param response
+	 *            HttpServletResponse
+	 */
+	@RequestMapping(value = "/{entityName}/{attributeName}", method = PUT)
+	@ResponseStatus(OK)
+	public synchronized void updateAttribute(@PathVariable("entityName") String entityName,
+			@PathVariable("attributeName") String attributeName, @RequestBody EntityCollectionBatchRequestV2 request,
+			HttpServletResponse response)
+	{
+		final EntityMetaData meta = dataService.getEntityMetaData(entityName);
+		this.generalChecksForBachOperations(request, meta, entityName);
+
+		try
+		{
+			AttributeMetaData attr = meta.getAttribute(attributeName);
+			if (attr == null)
+			{
+				throw new UnknownAttributeException("Operation failed. Attribute '" + attributeName + "' of entity '"
+						+ entityName + "' does not exist");
+			}
+
+			if (attr.isReadonly())
+			{
+				throw new MolgenisDataAccessException("Operation failed. Attribute '" + attributeName + "' of entity '"
+						+ entityName + "' is readonly");
+			}
+
+			final List<Entity> entities = request.getEntities().stream().filter(e -> e.size() == 2)
+					.map(e -> this.restService.toEntity(meta, e)).collect(Collectors.toList());
+			final List<Entity> updatedEntities = new ArrayList<Entity>();
+
+			if (entities.size() != request.getEntities().size())
+			{
+				throw new MolgenisDataException(
+						"Operation failed. When updating an attribute you must provide only an id and the to update attribute value");
+			}
+
+			int count = 0;
+			for (Entity entity : entities)
+			{
+				String id = getEntityId(entity, count);
+
+				Entity originalEntity = dataService.findOne(entityName, id);
+				if (originalEntity == null)
+				{
+					throw new UnknownEntityException("Operation failed. Entity of type " + entityName + " with id "
+							+ id + " not found");
+				}
+
+				Object value = this.restService.toEntityValue(attr, entity.get(attributeName));
+				originalEntity.set(attributeName, value);
+				updatedEntities.add(originalEntity);
+				count++;
+			}
+
+			// update all entities
+			this.dataService.update(entityName, updatedEntities);
+			response.setStatus(HttpServletResponse.SC_OK);
+		}
+		catch (Exception e)
+		{
+			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+			throw e;
+		}
+	}
+
+	/**
+	 * Repeating checks: 1. Checks if EntityCollection Batch Request V2 request is null 2. Checks if the entities max is
+	 * exceeded. 3. Existing entity metadata
+	 * 
+	 * @param request
+	 * @param meta
+	 * @param entityName
+	 */
+	private void generalChecksForBachOperations(EntityCollectionBatchRequestV2 request, EntityMetaData meta,
+			String entityName)
 	{
 		if (request == null)
 		{
-			throw new UnknownEntityException("Missing entities to update in body");
+			throw new UnknownEntityException("Operation failed. Missing entities to update in body");
 		}
 
 		if (request.getEntities().size() > MAX_ENTITIES)
 		{
-			throw new UnknownEntityException("Max " + MAX_ENTITIES + " are allowed");
+			throw new UnknownEntityException("Operation failed. Max " + MAX_ENTITIES + " are allowed");
 		}
 
-		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		List<Entity> entities = new ArrayList<Entity>();
-		EntityCollectionBatchResponseBodyV2 responseBody = new EntityCollectionBatchResponseBodyV2();
-		List<String> ids = new ArrayList<String>();
-		for (Map<String, Object> entity : request.getEntities())
+		if (meta == null)
 		{
-			Entity e = this.restService.toEntity(meta, entity);
-			Object id = e.getIdValue();
-			if (null == id)
-			{
-				throw new MolgenisDataException("The entity: [" + entity
-						+ "] is missing an id and therefore cannot be updated");
-			}
-			ids.add(id.toString());
-			entities.add(e);
-			responseBody.getResources().add(
-					new ResourcesResponseV2(id, Href.concatEntityHref(RestControllerV2.BASE_URI, entityName, id)));
+			throw new UnknownAttributeException("Operation failed. Entity '" + entityName + "' does not exist");
 		}
+	}
 
-		try
+	/**
+	 * Get entity id and perform a check, throwing an MolgenisDataException when necessary
+	 * 
+	 * @param entity
+	 * @param count
+	 * @return
+	 */
+	private String getEntityId(Entity entity, int count)
+	{
+		Object id = entity.getIdValue();
+		if (null == id)
 		{
-			this.dataService.update(entityName, entities);
-			response.addHeader("Location", Href.concatEntityCollectionHref(RestControllerV2.BASE_URI, entityName, meta
-					.getIdAttribute().getName(), ids));
-			response.setStatus(HttpServletResponse.SC_OK);
+			throw new MolgenisDataException("Entity on index " + count + " is missing an id");
 		}
-		catch (MolgenisDataAccessException mdae)
-		{
-			response.setStatus(HttpServletResponse.SC_EXPECTATION_FAILED);
-		}
-		finally
-		{
-			return responseBody;
-		}
-
+		return id.toString();
 	}
 
 	@ExceptionHandler(RuntimeException.class)
