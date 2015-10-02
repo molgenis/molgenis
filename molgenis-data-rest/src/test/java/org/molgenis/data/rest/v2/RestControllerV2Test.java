@@ -367,7 +367,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void createEntities() throws Exception
+	public void testCreateEntities() throws Exception
 	{
 		String content = "{entities:[{id:'p1', name:'Piet'}, {id:'p2', name:'Pietje'}]}";
 		String responseBody = "{\n  \"resources\": [\n    {\n      \"href\": \"/api/v2/entity/p1\"\n    },\n"
@@ -431,7 +431,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void updateEntitiesSpecificAttribute() throws Exception
+	public void testUpdateEntitiesSpecificAttribute() throws Exception
 	{
 		String content = "{entities:[{id:'0', email:'test@email.com'}]}";
 		mockMvc.perform(put(HREF_ENTITY_COLLECTION + "/email").content(content).contentType(APPLICATION_JSON))
