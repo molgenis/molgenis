@@ -66,6 +66,45 @@ class RestControllerV2
 	private final RestService restService;
 	private final MolgenisPermissionService permissionService;
 
+	// Exceptions
+	static MolgenisDataException EXCEPTION_MAX_ENTITIES_EXCEEDED = new MolgenisDataException("Operation failed. Max "
+			+ MAX_ENTITIES + " entities are allowed");
+	static MolgenisDataException EXCEPTION_NO_ENTITIES = new MolgenisDataException(
+			"Operation failed. No entities to update");
+
+	static UnknownEntityException createUnknownEntityException(String entityName)
+	{
+		return new UnknownEntityException("Operation failed. Unknown entity: '" + entityName + "'");
+	}
+
+	static UnknownAttributeException createUnknownAttributeException(String entityName, String attributeName)
+	{
+		return new UnknownAttributeException("Operation failed. Unknown attribute: '" + attributeName
+				+ "', of entity: '" + entityName + "'");
+	}
+
+	static MolgenisDataAccessException createMolgenisDataAccessExceptionReadOnlyAttribute(String entityName,
+			String attributeName)
+	{
+		return new MolgenisDataAccessException("Operation failed. Attribute '" + attributeName + "' of entity '"
+				+ entityName + "' is readonly");
+	}
+
+	static MolgenisDataException createMolgenisDataExceptionUnknownIdentifier(int count)
+	{
+		return new MolgenisDataException("Operation failed. Unknown identifier on index " + count);
+	}
+
+	static MolgenisDataException createMolgenisDataExceptionIdentifierAndValue()
+	{
+		return new MolgenisDataException("Operation failed. Entities must provide only an identifier and a value");
+	}
+
+	static UnknownEntityException createUnknownEntityExceptionNotValidId(String id)
+	{
+		return new UnknownEntityException("Operation failed. Identifier: " + id + " is not valid");
+	}
+
 	@Autowired
 	public RestControllerV2(DataService dataService, MolgenisPermissionService permissionService,
 			RestService restService)
@@ -154,11 +193,12 @@ class RestControllerV2
 	 * @param response
 	 *            HttpServletResponse
 	 * @return EntityCollectionCreateResponseBodyV2
+	 * @throws Exception
 	 */
 	@RequestMapping(value = "/{entityName}", method = POST, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public EntityCollectionBatchResponseBodyV2 createEntities(@PathVariable("entityName") String entityName,
-			@RequestBody EntityCollectionBatchRequestV2 request, HttpServletResponse response)
+			@RequestBody EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
 	{
 		final EntityMetaData meta = dataService.getEntityMetaData(entityName);
 		this.generalChecksForBachOperations(request, meta, entityName);
@@ -205,10 +245,11 @@ class RestControllerV2
 	 *            EntityCollectionCreateRequestV2
 	 * @param response
 	 *            HttpServletResponse
+	 * @throws Exception
 	 */
 	@RequestMapping(value = "/{entityName}", method = PUT)
 	public synchronized void updateEntities(@PathVariable("entityName") String entityName,
-			@RequestBody EntityCollectionBatchRequestV2 request, HttpServletResponse response)
+			@RequestBody EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
 	{
 		final EntityMetaData meta = dataService.getEntityMetaData(entityName);
 		this.generalChecksForBachOperations(request, meta, entityName);
@@ -246,12 +287,13 @@ class RestControllerV2
 	 *            EntityCollectionBatchRequestV2
 	 * @param response
 	 *            HttpServletResponse
+	 * @throws Exception
 	 */
 	@RequestMapping(value = "/{entityName}/{attributeName}", method = PUT)
 	@ResponseStatus(OK)
 	public synchronized void updateAttribute(@PathVariable("entityName") String entityName,
 			@PathVariable("attributeName") String attributeName, @RequestBody EntityCollectionBatchRequestV2 request,
-			HttpServletResponse response)
+			HttpServletResponse response) throws Exception
 	{
 		final EntityMetaData meta = dataService.getEntityMetaData(entityName);
 		this.generalChecksForBachOperations(request, meta, entityName);
@@ -261,26 +303,22 @@ class RestControllerV2
 			AttributeMetaData attr = meta.getAttribute(attributeName);
 			if (attr == null)
 			{
-				throw new UnknownAttributeException("Operation failed. Attribute '" + attributeName + "' of entity '"
-						+ entityName + "' does not exist");
+				throw RestControllerV2.createUnknownAttributeException(entityName, attributeName);
 			}
 
 			if (attr.isReadonly())
 			{
-				throw new MolgenisDataAccessException("Operation failed. Attribute '" + attributeName + "' of entity '"
-						+ entityName + "' is readonly");
+				throw RestControllerV2.createMolgenisDataAccessExceptionReadOnlyAttribute(entityName, attributeName);
 			}
 
 			final List<Entity> entities = request.getEntities().stream().filter(e -> e.size() == 2)
 					.map(e -> this.restService.toEntity(meta, e)).collect(Collectors.toList());
-			final List<Entity> updatedEntities = new ArrayList<Entity>();
-
 			if (entities.size() != request.getEntities().size())
 			{
-				throw new MolgenisDataException(
-						"Operation failed. When updating an attribute you must provide only an id and the to update attribute value");
+				throw RestControllerV2.createMolgenisDataExceptionIdentifierAndValue();
 			}
 
+			final List<Entity> updatedEntities = new ArrayList<Entity>();
 			int count = 0;
 			for (Entity entity : entities)
 			{
@@ -289,8 +327,7 @@ class RestControllerV2
 				Entity originalEntity = dataService.findOne(entityName, id);
 				if (originalEntity == null)
 				{
-					throw new UnknownEntityException("Operation failed. Entity of type " + entityName + " with id "
-							+ id + " not found");
+					throw RestControllerV2.createUnknownEntityExceptionNotValidId(id);
 				}
 
 				Object value = this.restService.toEntityValue(attr, entity.get(attributeName));
@@ -317,23 +354,24 @@ class RestControllerV2
 	 * @param request
 	 * @param meta
 	 * @param entityName
+	 * @throws Exception
 	 */
 	private void generalChecksForBachOperations(EntityCollectionBatchRequestV2 request, EntityMetaData meta,
-			String entityName)
+			String entityName) throws Exception
 	{
-		if (request == null)
+		if (request == null || request.getEntities().isEmpty())
 		{
-			throw new UnknownEntityException("Operation failed. Missing entities to update in body");
+			throw RestControllerV2.EXCEPTION_NO_ENTITIES;
 		}
 
 		if (request.getEntities().size() > MAX_ENTITIES)
 		{
-			throw new UnknownEntityException("Operation failed. Max " + MAX_ENTITIES + " are allowed");
+			throw RestControllerV2.EXCEPTION_MAX_ENTITIES_EXCEEDED;
 		}
 
 		if (meta == null)
 		{
-			throw new UnknownAttributeException("Operation failed. Entity '" + entityName + "' does not exist");
+			throw RestControllerV2.createUnknownEntityException(entityName);
 		}
 	}
 
@@ -349,7 +387,7 @@ class RestControllerV2
 		Object id = entity.getIdValue();
 		if (null == id)
 		{
-			throw new MolgenisDataException("Entity on index " + count + " is missing an id");
+			throw RestControllerV2.createMolgenisDataExceptionUnknownIdentifier(count);
 		}
 		return id.toString();
 	}

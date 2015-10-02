@@ -42,11 +42,7 @@ import org.mockito.Mockito;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
-import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
-import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rest.v2.RestControllerV2Test.RestControllerV2Config;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -69,6 +65,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -382,6 +379,26 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		verify(dataService).add(Matchers.eq(ENTITY_NAME), Matchers.anyListOf(MapEntity.class));
 	}
 
+	/**
+	 * Test all the exception that the method 'updateEntitiesExceptions' can throw
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void createEntitiesExceptions() throws Exception
+	{
+		this.testCreateEntitiesExceptions("entity", null, RestControllerV2.EXCEPTION_NO_ENTITIES);
+
+		this.testCreateEntitiesExceptions("entity", this.createMaxPlusOneEntitiesAsTestContent(),
+				RestControllerV2.EXCEPTION_MAX_ENTITIES_EXCEEDED);
+
+		this.testCreateEntitiesExceptions("entity2", "{entities:[{email:'test@email.com', extraAttribute:'test'}]}",
+				RestControllerV2.createUnknownEntityException("entity2"));
+
+		this.testCreateEntitiesExceptions("entity", "{entities:[{email:'test@email.com', extraAttribute:'test'}]}",
+				RestControllerV2.createMolgenisDataExceptionUnknownIdentifier(0));
+	}
+
 	@Test
 	public void updateEntities() throws Exception
 	{
@@ -393,28 +410,23 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	}
 
 	/**
-	 * Test all the exception that the method 'updateEntitiesSpecificAttribute' can throw
+	 * Test all the exception that the method 'updateEntitiesExceptions' can throw
 	 * 
 	 * @throws Exception
 	 */
 	@Test
 	public void updateEntitiesExceptions() throws Exception
 	{
-		this.testUpdateEntitiesExceptions("entity", null, new UnknownEntityException(
-				"Operation failed. Missing entities to update in body"));
+		this.testUpdateEntitiesExceptions("entity", null, RestControllerV2.EXCEPTION_NO_ENTITIES);
 
-		StringBuilder c = new StringBuilder();
-		c.append("{entities:[");
-		IntStream.range(0, RestControllerV2.MAX_ENTITIES).forEach(i -> c.append("{email:'test@email.com'},"));
-		c.append("{email:'test@email.com'}]}");
-		this.testUpdateEntitiesExceptions("entity", c.toString(), new UnknownEntityException("Operation failed. Max "
-				+ RestControllerV2.MAX_ENTITIES + " are allowed"));
+		this.testUpdateEntitiesExceptions("entity", this.createMaxPlusOneEntitiesAsTestContent(),
+				RestControllerV2.EXCEPTION_MAX_ENTITIES_EXCEEDED);
 
 		this.testUpdateEntitiesExceptions("entity2", "{entities:[{email:'test@email.com'}]}",
-				new UnknownEntityException("Operation failed. Entity 'entity2' does not exist"));
+				RestControllerV2.createUnknownEntityException("entity2"));
 
 		this.testUpdateEntitiesExceptions("entity", "{entities:[{email:'test@email.com', extraAttribute:'test'}]}",
-				new MolgenisDataException("Entity on index 0 is missing an id"));
+				RestControllerV2.createMolgenisDataExceptionUnknownIdentifier(0));
 	}
 
 	@Test
@@ -438,39 +450,32 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void updateEntitiesSpecificAttributeExceptions() throws Exception
 	{
-		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email", null, new UnknownEntityException(
-				"Operation failed. Missing entities to update in body"));
+		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email", null,
+				RestControllerV2.EXCEPTION_NO_ENTITIES);
 
-		StringBuilder c = new StringBuilder();
-		c.append("{entities:[");
-		IntStream.range(0, RestControllerV2.MAX_ENTITIES).forEach(i -> c.append("{email:'test@email.com'},"));
-		c.append("{email:'test@email.com'}]}");
-		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email", c.toString(), new UnknownEntityException(
-				"Operation failed. Max " + RestControllerV2.MAX_ENTITIES + " are allowed"));
+		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
+				this.createMaxPlusOneEntitiesAsTestContent(), RestControllerV2.EXCEPTION_MAX_ENTITIES_EXCEEDED);
 
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity2", "email", "{entities:[{email:'test@email.com'}]}",
-				new UnknownEntityException("Operation failed. Entity 'entity2' does not exist"));
+				RestControllerV2.createUnknownEntityException("entity2"));
 
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email2", "{entities:[{email:'test@email.com'}]}",
-				new UnknownAttributeException("Operation failed. Attribute 'email2' of entity 'entity' does not exist"));
+				RestControllerV2.createUnknownAttributeException("entity", "email2"));
 
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "decimal", "{entities:[{decimal:'42'}]}",
-				new MolgenisDataAccessException("Operation failed. Attribute 'decimal' of entity 'entity' is readonly"));
+				RestControllerV2.createMolgenisDataAccessExceptionReadOnlyAttribute("entity", "decimal"));
 
-		this.testUpdateEntitiesSpecificAttributeExceptions(
-				"entity",
-				"email",
+		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
 				"{entities:[{id:0,email:'test@email.com',extraAttribute:'test'}]}",
-				new MolgenisDataException(
-						"Operation failed. When updating an attribute you must provide only an id and the to update attribute value"));
+				RestControllerV2.createMolgenisDataExceptionIdentifierAndValue());
 
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
-				"{entities:[{email:'test@email.com', extraAttribute:'test'}]}", new MolgenisDataException(
-						"Entity on index 0 is missing an id"));
+				"{entities:[{email:'test@email.com', extraAttribute:'test'}]}",
+				RestControllerV2.createMolgenisDataExceptionUnknownIdentifier(0));
 
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
-				"{entities:[{id:4,email:'test@email.com'}]}", new UnknownEntityException(
-						"Operation failed. Entity of type entity with id 4.0 not found"));
+				"{entities:[{id:4,email:'test@email.com'}]}",
+				RestControllerV2.createUnknownEntityExceptionNotValidId("4.0"));
 	}
 
 	private void testUpdateEntitiesSpecificAttributeExceptions(String entityName, String attributeName, String content,
@@ -482,6 +487,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			EntityCollectionBatchRequestV2 request = gson.fromJson(content, EntityCollectionBatchRequestV2.class);
 			this.restControllerV2.updateAttribute(entityName, attributeName, request,
 					Mockito.mock(HttpServletResponse.class));
+			Assert.fail("should have failed");
 		}
 		catch (Exception e)
 		{
@@ -493,13 +499,50 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	{
 		try
 		{
-			Gson gson = new Gson();
-			EntityCollectionBatchRequestV2 request = gson.fromJson(content, EntityCollectionBatchRequestV2.class);
-			this.restControllerV2.updateEntities(entityName, request, Mockito.mock(HttpServletResponse.class));
+			this.restControllerV2.updateEntities(entityName, this.parseToEntityCollectionBatchRequestV2(content),
+					Mockito.mock(HttpServletResponse.class));
+			Assert.fail("should have failed");
 		}
 		catch (Exception e)
 		{
 			assertEquals(e.getMessage(), expected.getMessage());
+		}
+	}
+
+	private void testCreateEntitiesExceptions(String entityName, String content, Exception expected)
+	{
+		try
+		{
+			this.restControllerV2.createEntities(entityName, this.parseToEntityCollectionBatchRequestV2(content),
+					Mockito.mock(HttpServletResponse.class));
+			Assert.fail("should have failed");
+		}
+		catch (Exception e)
+		{
+			assertEquals(e.getMessage(), expected.getMessage());
+		}
+	}
+
+	private String createMaxPlusOneEntitiesAsTestContent()
+	{
+		StringBuilder c = new StringBuilder();
+		c.append("{entities:[");
+		IntStream.range(0, RestControllerV2.MAX_ENTITIES).forEach(i -> c.append("{email:'test@email.com'},"));
+		c.append("{email:'test@email.com'}]}");
+		return c.toString();
+	}
+
+	private EntityCollectionBatchRequestV2 parseToEntityCollectionBatchRequestV2(String content)
+	{
+		Gson gson = new Gson();
+		EntityCollectionBatchRequestV2 request = gson.fromJson(content, EntityCollectionBatchRequestV2.class);
+		if (request != null)
+		{
+			return request;
+		}
+		else
+		{
+			return new EntityCollectionBatchRequestV2();
 		}
 	}
 
