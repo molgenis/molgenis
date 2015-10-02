@@ -31,14 +31,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.testng.Assert.assertEquals;
 
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.IntStream;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.mockito.Matchers;
-import org.mockito.Mockito;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
@@ -63,13 +63,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = RestControllerV2Config.class)
@@ -385,9 +386,9 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	 * @throws Exception
 	 */
 	@Test
-	public void createEntitiesExceptions() throws Exception
+	public void testCreateEntitiesExceptions() throws Exception
 	{
-		this.testCreateEntitiesExceptions("entity", null, RestControllerV2.EXCEPTION_NO_ENTITIES);
+		this.testCreateEntitiesExceptions("entity", "{}", RestControllerV2.EXCEPTION_NO_ENTITIES);
 
 		this.testCreateEntitiesExceptions("entity", this.createMaxPlusOneEntitiesAsTestContent(),
 				RestControllerV2.EXCEPTION_MAX_ENTITIES_EXCEEDED);
@@ -400,7 +401,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void updateEntities() throws Exception
+	public void testUpdateEntities() throws Exception
 	{
 		String content = "{entities:[{id:'p1', name:'Witte Piet'}, {id:'p2', name:'Zwarte Piet'}]}";
 		mockMvc.perform(put(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON)).andExpect(
@@ -415,9 +416,9 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	 * @throws Exception
 	 */
 	@Test
-	public void updateEntitiesExceptions() throws Exception
+	public void testUpdateEntitiesExceptions() throws Exception
 	{
-		this.testUpdateEntitiesExceptions("entity", null, RestControllerV2.EXCEPTION_NO_ENTITIES);
+		this.testUpdateEntitiesExceptions("entity", "{}", RestControllerV2.EXCEPTION_NO_ENTITIES);
 
 		this.testUpdateEntitiesExceptions("entity", this.createMaxPlusOneEntitiesAsTestContent(),
 				RestControllerV2.EXCEPTION_MAX_ENTITIES_EXCEEDED);
@@ -448,9 +449,9 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	 * @throws Exception
 	 */
 	@Test
-	public void updateEntitiesSpecificAttributeExceptions() throws Exception
+	public void testUpdateEntitiesSpecificAttributeExceptions() throws Exception
 	{
-		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email", null,
+		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email", "{}",
 				RestControllerV2.EXCEPTION_NO_ENTITIES);
 
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
@@ -478,48 +479,68 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 				RestControllerV2.createUnknownEntityExceptionNotValidId("4.0"));
 	}
 
+	private void testCreateEntitiesExceptions(String entityName, String content, Exception expected) throws Exception
+	{
+		ResultActions resultActions = mockMvc.perform(post(RestControllerV2.BASE_URI + "/" + entityName).content(
+				content).contentType(APPLICATION_JSON));
+
+		this.assertEqualsErrorMessage(resultActions, expected);
+	}
+
+	private void testUpdateEntitiesExceptions(String entityName, String content, Exception expected) throws Exception
+	{
+		ResultActions resultActions = mockMvc.perform(put(RestControllerV2.BASE_URI + "/" + entityName)
+				.content(content).contentType(APPLICATION_JSON));
+
+		this.assertEqualsErrorMessage(resultActions, expected);
+	}
+
 	private void testUpdateEntitiesSpecificAttributeExceptions(String entityName, String attributeName, String content,
-			Exception expected)
+			Exception expected) throws Exception
 	{
-		try
-		{
-			Gson gson = new Gson();
-			EntityCollectionBatchRequestV2 request = gson.fromJson(content, EntityCollectionBatchRequestV2.class);
-			this.restControllerV2.updateAttribute(entityName, attributeName, request,
-					Mockito.mock(HttpServletResponse.class));
-			Assert.fail("should have failed");
-		}
-		catch (Exception e)
-		{
-			assertEquals(e.getMessage(), expected.getMessage());
-		}
+		ResultActions resultActions = mockMvc.perform(put(
+				RestControllerV2.BASE_URI + "/" + entityName + "/" + attributeName).content(content).contentType(
+				APPLICATION_JSON));
+
+		this.assertEqualsErrorMessage(resultActions, expected);
 	}
 
-	private void testUpdateEntitiesExceptions(String entityName, String content, Exception expected)
+	private void assertEqualsErrorMessage(ResultActions resultActions, Exception expected) throws JsonSyntaxException,
+			UnsupportedEncodingException
 	{
-		try
-		{
-			this.restControllerV2.updateEntities(entityName, this.parseToEntityCollectionBatchRequestV2(content),
-					Mockito.mock(HttpServletResponse.class));
-			Assert.fail("should have failed");
-		}
-		catch (Exception e)
-		{
-			assertEquals(e.getMessage(), expected.getMessage());
-		}
+		Gson gson = new Gson();
+		Errors errors = gson.fromJson(resultActions.andReturn().getResponse().getContentAsString(), Errors.class);
+		assertEquals(errors.getErrors().get(0).getMessage(), expected.getMessage());
 	}
 
-	private void testCreateEntitiesExceptions(String entityName, String content, Exception expected)
+	class Errors
 	{
-		try
+		private List<Message> errors = new ArrayList<Message>();
+
+		void setErrors(List<Message> errors)
 		{
-			this.restControllerV2.createEntities(entityName, this.parseToEntityCollectionBatchRequestV2(content),
-					Mockito.mock(HttpServletResponse.class));
-			Assert.fail("should have failed");
+			this.errors = errors;
 		}
-		catch (Exception e)
+
+		List<Message> getErrors()
 		{
-			assertEquals(e.getMessage(), expected.getMessage());
+			return this.errors;
+		}
+
+		class Message
+		{
+			private String message;
+
+			void setMessage(String message)
+			{
+				this.message = message;
+			}
+
+			String getMessage()
+			{
+				return this.message;
+			}
+
 		}
 	}
 
