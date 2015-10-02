@@ -1,5 +1,7 @@
 package org.molgenis.r;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
 import java.io.IOException;
 
