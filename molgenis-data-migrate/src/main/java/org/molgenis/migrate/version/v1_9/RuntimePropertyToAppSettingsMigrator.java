@@ -1,6 +1,6 @@
 package org.molgenis.migrate.version.v1_9;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.system.core.RuntimeProperty.ENTITY_NAME;
 
 import org.molgenis.data.DataService;
@@ -33,8 +33,8 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 	@Autowired
 	public RuntimePropertyToAppSettingsMigrator(DataService dataService, AppSettings appSettings)
 	{
-		this.dataService = checkNotNull(dataService);
-		this.appSettings = checkNotNull(appSettings);
+		this.dataService = requireNonNull(dataService);
+		this.appSettings = requireNonNull(appSettings);
 	}
 
 	private RuntimePropertyToAppSettingsMigrator migrateSettings()
@@ -104,7 +104,8 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 				RuntimeProperty property = getProperty(key);
 				if (property != null)
 				{
-					LOG.warn("RuntimeProperty app.trackingcode.header cannot be migrated to AppSettings automatically, please set the Google Analytics tracking id manually in Application settings and remove the RuntimeProperty.");
+					LOG.warn(
+							"RuntimeProperty app.trackingcode.header cannot be migrated to AppSettings automatically, please set the Google Analytics tracking id manually in Application settings and remove the RuntimeProperty.");
 				}
 			}
 
@@ -229,10 +230,9 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 						if (rtpValue != null)
 						{
 							LOG.info("Adding Settings plugin to Admin menu");
-							value = rtpValue
-									.replace(
-											"{\"type\":\"menu\",\"id\":\"admin\",\"label\":\"Admin\",\"items\":[",
-											"{\"type\":\"menu\",\"id\":\"admin\",\"label\":\"Admin\",\"items\":[{\"type\":\"plugin\",\"id\":\"settings\",\"label\":\"Settings\"},");
+							value = rtpValue.replace(
+									"{\"type\":\"menu\",\"id\":\"admin\",\"label\":\"Admin\",\"items\":[",
+									"{\"type\":\"menu\",\"id\":\"admin\",\"label\":\"Admin\",\"items\":[{\"type\":\"plugin\",\"id\":\"settings\",\"label\":\"Settings\"},");
 						}
 						appSettings.setMenu(value);
 					}
@@ -246,7 +246,8 @@ public class RuntimePropertyToAppSettingsMigrator implements ApplicationListener
 				RuntimeProperty property = getProperty(key);
 				if (property != null)
 				{
-					LOG.warn("RuntimeProperty app.trackingcode.header cannot be migrated to AppSettings automatically, please set the Google Analytics tracking id manually in Application settings and remove the RuntimeProperty.");
+					LOG.warn(
+							"RuntimeProperty app.trackingcode.header cannot be migrated to AppSettings automatically, please set the Google Analytics tracking id manually in Application settings and remove the RuntimeProperty.");
 				}
 			}
 

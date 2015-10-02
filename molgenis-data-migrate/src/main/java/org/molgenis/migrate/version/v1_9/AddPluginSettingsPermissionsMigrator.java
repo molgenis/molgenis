@@ -1,6 +1,6 @@
 package org.molgenis.migrate.version.v1_9;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_COUNT_PREFIX;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_PREFIX;
@@ -33,8 +33,8 @@ public class AddPluginSettingsPermissionsMigrator implements ApplicationListener
 	@Autowired
 	public AddPluginSettingsPermissionsMigrator(DataService dataService, MolgenisVersionService molgenisVersionService)
 	{
-		this.dataService = checkNotNull(dataService);
-		this.molgenisVersionService = checkNotNull(molgenisVersionService);
+		this.dataService = requireNonNull(dataService);
+		this.molgenisVersionService = requireNonNull(molgenisVersionService);
 	}
 
 	private AddPluginSettingsPermissionsMigrator migrateSettings()

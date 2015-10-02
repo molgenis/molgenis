@@ -1,7 +1,5 @@
 package org.molgenis.ui.controller;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import org.molgenis.data.DataService;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -26,7 +24,7 @@ public class StaticContentServiceImpl implements StaticContentService
 	@Autowired
 	public StaticContentServiceImpl(DataService dataService)
 	{
-		this.dataService = checkNotNull(dataService);
+		this.dataService = requireNonNull(dataService);
 	}
 
 	@Override
