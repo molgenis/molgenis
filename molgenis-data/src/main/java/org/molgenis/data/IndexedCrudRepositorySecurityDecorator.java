@@ -1,6 +1,6 @@
 package org.molgenis.data;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
 import org.molgenis.data.settings.AppSettings;
@@ -16,8 +16,8 @@ public class IndexedCrudRepositorySecurityDecorator extends RepositorySecurityDe
 	public IndexedCrudRepositorySecurityDecorator(IndexedRepository decoratedRepository, AppSettings appSettings)
 	{
 		super(decoratedRepository);
-		this.decoratedRepository = checkNotNull(decoratedRepository);
-		this.appSettings = checkNotNull(appSettings);
+		this.decoratedRepository = requireNonNull(decoratedRepository);
+		this.appSettings = requireNonNull(appSettings);
 	}
 
 	@Override

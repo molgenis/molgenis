@@ -1,6 +1,6 @@
 package org.molgenis.migrate.version.v1_10;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.util.ArrayList;
@@ -20,8 +20,8 @@ import org.springframework.stereotype.Component;
 
 @SuppressWarnings("deprecation")
 @Component
-public class Step17RuntimePropertiesToGafListSettings extends MolgenisUpgrade implements
-		ApplicationListener<ContextRefreshedEvent>
+public class Step17RuntimePropertiesToGafListSettings extends MolgenisUpgrade
+		implements ApplicationListener<ContextRefreshedEvent>
 {
 	private static final Logger LOG = LoggerFactory.getLogger(Step17RuntimePropertiesToGafListSettings.class);
 	private final DataService dataService;
@@ -35,7 +35,7 @@ public class Step17RuntimePropertiesToGafListSettings extends MolgenisUpgrade im
 	public Step17RuntimePropertiesToGafListSettings(DataService dataService)
 	{
 		super(16, 17);
-		this.dataService = checkNotNull(dataService);
+		this.dataService = requireNonNull(dataService);
 	}
 
 	@Override

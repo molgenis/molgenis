@@ -1,6 +1,6 @@
 package org.molgenis.ui.style;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -22,7 +22,7 @@ public class StyleServiceImpl implements StyleService
 	@Autowired
 	public StyleServiceImpl(AppSettings appSettings)
 	{
-		this.appSettings = checkNotNull(appSettings);
+		this.appSettings = requireNonNull(appSettings);
 	}
 
 	@Override

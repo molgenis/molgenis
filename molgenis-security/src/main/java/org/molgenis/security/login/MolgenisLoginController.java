@@ -1,6 +1,6 @@
 package org.molgenis.security.login;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -31,8 +31,8 @@ public class MolgenisLoginController
 	@Autowired
 	public MolgenisLoginController(ResourceFingerprintRegistry resourceFingerprintRegistry, AppSettings appSettings)
 	{
-		this.resourceFingerprintRegistry = checkNotNull(resourceFingerprintRegistry);
-		this.appSettings = checkNotNull(appSettings);
+		this.resourceFingerprintRegistry = requireNonNull(resourceFingerprintRegistry);
+		this.appSettings = requireNonNull(appSettings);
 	}
 
 	@RequestMapping(method = RequestMethod.GET)

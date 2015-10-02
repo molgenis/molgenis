@@ -1,7 +1,7 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Arrays.stream;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm.STOPWORDSLIST;
 
 import java.util.ArrayList;
@@ -49,9 +49,9 @@ public class SemanticSearchServiceHelper
 	public SemanticSearchServiceHelper(DataService dataService, OntologyService ontologyService,
 			TermFrequencyService termFrequencyService)
 	{
-		this.dataService = checkNotNull(dataService);
-		this.ontologyService = checkNotNull(ontologyService);
-		this.termFrequencyService = checkNotNull(termFrequencyService);
+		this.dataService = requireNonNull(dataService);
+		this.ontologyService = requireNonNull(ontologyService);
+		this.termFrequencyService = requireNonNull(termFrequencyService);
 	}
 
 	/**
@@ -159,8 +159,8 @@ public class SemanticSearchServiceHelper
 		for (OntologyTerm childOt : ontologyService.getChildren(ontologyTerm))
 		{
 			double boostedNumber = Math.pow(0.5, ontologyService.getOntologyTermDistance(ontologyTerm, childOt));
-			getOtLabelAndSynonyms(childOt).forEach(
-					synonym -> queryTerms.add(parseBoostQueryString(synonym, boostedNumber)));
+			getOtLabelAndSynonyms(childOt)
+					.forEach(synonym -> queryTerms.add(parseBoostQueryString(synonym, boostedNumber)));
 		}
 		return queryTerms;
 	}
@@ -206,13 +206,13 @@ public class SemanticSearchServiceHelper
 	{
 		if (ontologyTerm != null)
 		{
-			getOtLabelAndSynonyms(ontologyTerm).forEach(
-					term -> expanedQueryMap.put(stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
+			getOtLabelAndSynonyms(ontologyTerm)
+					.forEach(term -> expanedQueryMap.put(stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
 
 			for (OntologyTerm childOntologyTerm : ontologyService.getChildren(ontologyTerm))
 			{
-				getOtLabelAndSynonyms(childOntologyTerm).forEach(
-						term -> expanedQueryMap.put(stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
+				getOtLabelAndSynonyms(childOntologyTerm)
+						.forEach(term -> expanedQueryMap.put(stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
 			}
 		}
 	}
