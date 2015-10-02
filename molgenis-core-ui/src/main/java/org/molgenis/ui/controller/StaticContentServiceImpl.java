@@ -1,5 +1,7 @@
 package org.molgenis.ui.controller;
 
+import static java.util.Objects.requireNonNull;
+
 import org.molgenis.data.DataService;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
