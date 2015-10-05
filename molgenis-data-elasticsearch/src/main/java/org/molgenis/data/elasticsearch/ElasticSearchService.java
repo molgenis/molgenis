@@ -252,19 +252,14 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 	@Override
 	public void createMappings(EntityMetaData entityMetaData)
 	{
-		if (entityMetaData.getName().equals("rdconnect_regbb")) // FIXME remove hack
-		{
-			createMappings(entityMetaData, false, true, true);
-		}
-		else
-		{
-			createMappings(entityMetaData, true, true, true);
-		}
+		boolean storeSource = ElasticsearchRepositoryCollection.NAME.equals(entityMetaData.getBackend());
+		createMappings(entityMetaData, storeSource, true, true);
 	}
 
 	public void createMappings(String index, EntityMetaData entityMetaData)
 	{
-		createMappings(index, entityMetaData, true, true, true);
+		boolean storeSource = ElasticsearchRepositoryCollection.NAME.equals(entityMetaData.getBackend());
+		createMappings(index, entityMetaData, storeSource, true, true);
 	}
 
 	private void createMappings(String index, EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms,
