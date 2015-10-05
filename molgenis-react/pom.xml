@@ -17,7 +17,7 @@
 				<executions>
 					<execution>
 						<id>install node and npm</id>
-						<phase>generate-test-resources</phase>
+						<phase>compile</phase>
 						<goals>
 							<goal>install-node-and-npm</goal>
 						</goals>
@@ -29,7 +29,7 @@
 					</execution>
 					<execution>
 						<id>npm install</id>
-						<phase>generate-test-resources</phase>
+						<phase>compile</phase>
 						<goals>
 							<goal>npm</goal>
 						</goals>
