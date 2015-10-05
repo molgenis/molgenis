@@ -216,10 +216,11 @@ class RestControllerV2
 			int count = 0;
 			for (Entity entity : entities)
 			{
-				String id = this.getEntityId(entity, count);
+				String id = this.checkForEntityId(entity, count);
 				ids.add(id);
 				responseBody.getResources().add(
-						new ResourcesResponseV2(Href.concatEntityHref(RestControllerV2.BASE_URI, entityName, id)));
+						new AutoValue_ResourcesResponseV2(Href.concatEntityHref(RestControllerV2.BASE_URI, entityName,
+								id)));
 				count++;
 			}
 
@@ -262,7 +263,7 @@ class RestControllerV2
 			int count = 0;
 			for (Entity entity : entities)
 			{
-				this.getEntityId(entity, count);
+				this.checkForEntityId(entity, count);
 				count++;
 			}
 
@@ -322,7 +323,7 @@ class RestControllerV2
 			int count = 0;
 			for (Entity entity : entities)
 			{
-				String id = getEntityId(entity, count);
+				String id = checkForEntityId(entity, count);
 
 				Entity originalEntity = dataService.findOne(entityName, id);
 				if (originalEntity == null)
@@ -382,7 +383,7 @@ class RestControllerV2
 	 * @param count
 	 * @return
 	 */
-	private String getEntityId(Entity entity, int count)
+	private String checkForEntityId(Entity entity, int count)
 	{
 		Object id = entity.getIdValue();
 		if (null == id)
