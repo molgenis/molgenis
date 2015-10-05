@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.testng.Assert.assertEquals;
 
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -54,6 +55,7 @@ import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.file.FileStore;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.util.GsonHttpMessageConverter;
+import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -433,14 +435,15 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void testUpdateEntitiesSpecificAttribute() throws Exception
 	{
-		String content = "{entities:[{id:'0', email:'test@email.com'}]}";
-		mockMvc.perform(put(HREF_ENTITY_COLLECTION + "/email").content(content).contentType(APPLICATION_JSON))
+		String content = "{entities:[{id:'0', date_time:'1985-08-12T08:12:13+0200'}]}";
+		mockMvc.perform(put(HREF_ENTITY_COLLECTION + "/date_time").content(content).contentType(APPLICATION_JSON))
 				.andExpect(status().isOk());
 
 		verify(dataService, times(1)).update(Matchers.eq(ENTITY_NAME), Matchers.anyListOf(MapEntity.class));
 
 		Entity entity = dataService.findOne(ENTITY_NAME, ENTITY_ID);
-		assertEquals(entity.get("email"), "test@email.com");
+		assertEquals((new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME)).format(entity.get("date_time")),
+				"1985-08-12T08:12:13+0200");
 	}
 
 	/**
