@@ -41,7 +41,7 @@ public class PromiseMappingProjectMetaData extends DefaultEntityMetaData
 		setDescription("");
 
 		addAttribute(ID).setIdAttribute(true).setNillable(false);
-		addAttribute(CREDENTIALS).setDataType(MolgenisFieldTypes.MREF)
+		addAttribute(CREDENTIALS).setDataType(MolgenisFieldTypes.XREF)
 				.setRefEntity(PromiseCredentialsMetaData.INSTANCE).setNillable(false);
 		addAttribute(MAPPER).setNillable(false);
 

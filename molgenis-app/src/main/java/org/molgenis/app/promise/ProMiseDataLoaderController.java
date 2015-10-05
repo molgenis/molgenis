@@ -66,14 +66,14 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 		return names;
 	}
 
-	@RequestMapping(value = "map/{name}", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.OK)
+	@RequestMapping(value = "map/{name}", method = RequestMethod.GET)
+	@ResponseBody
 	@Transactional
-	public void map(@PathVariable("name") String projectName) throws IOException
+	public MappingReport map(@PathVariable("name") String projectName) throws IOException
 	{
 		Entity project = dataService.findOne(PromiseMappingProjectMetaData.FULLY_QUALIFIED_NAME, projectName);
 		PromiseMapper promiseMapper = promiseMapperFactory.getMapper(project.getString("mapper"));
-		promiseMapper.map(projectName);
+		return promiseMapper.map(projectName);
 	}
 
 	@RequestMapping(value = "load", method = RequestMethod.POST)
