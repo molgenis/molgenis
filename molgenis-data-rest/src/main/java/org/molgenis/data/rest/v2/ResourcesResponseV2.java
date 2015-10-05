@@ -1,18 +1,15 @@
 package org.molgenis.data.rest.v2;
 
-import static java.util.Objects.requireNonNull;
+import javax.validation.constraints.NotNull;
 
-public class ResourcesResponseV2
+import org.molgenis.gson.AutoGson;
+
+import com.google.auto.value.AutoValue;
+
+@AutoValue
+@AutoGson(autoValueClass = AutoValue_ResourcesResponseV2.class)
+public abstract class ResourcesResponseV2
 {
-	private final String href;
-
-	public ResourcesResponseV2(String href)
-	{
-		this.href = requireNonNull(href);
-	}
-
-	public String getHref()
-	{
-		return this.href;
-	}
+	@NotNull
+	public abstract String getHref();
 }
