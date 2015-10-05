@@ -22,9 +22,13 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.util.DependencyResolver;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -47,10 +51,17 @@ public class MetaDataServiceImpl implements MetaDataService
 	private ManageableRepositoryCollection defaultBackend;
 	private final Map<String, RepositoryCollection> backends = Maps.newHashMap();
 	private final DataServiceImpl dataService;
+	private TransactionTemplate transactionTemplate;
 
 	public MetaDataServiceImpl(DataServiceImpl dataService)
 	{
 		this.dataService = dataService;
+	}
+
+	@Autowired
+	public void setPlatformTransactionManager(PlatformTransactionManager transactionManager)
+	{
+		this.transactionTemplate = new TransactionTemplate(transactionManager);
 	}
 
 	/**
@@ -111,17 +122,21 @@ public class MetaDataServiceImpl implements MetaDataService
 	/**
 	 * Removes entity meta data if it exists.
 	 */
-	@Transactional
 	@Override
 	public void deleteEntityMeta(String entityName)
 	{
-		EntityMetaData emd = getEntityMetaData(entityName);
-		if ((emd != null) && !emd.isAbstract())
-		{
-			getManageableRepositoryCollection(emd).deleteEntityMeta(entityName);
-		}
-		entityMetaDataRepository.delete(entityName);
-		if (dataService.hasRepository(entityName)) dataService.removeRepository(entityName);
+		transactionTemplate.execute((TransactionStatus status) -> {
+			EntityMetaData emd = getEntityMetaData(entityName);
+			if ((emd != null) && !emd.isAbstract())
+			{
+				getManageableRepositoryCollection(emd).deleteEntityMeta(entityName);
+			}
+			entityMetaDataRepository.delete(entityName);
+			if (dataService.hasRepository(entityName)) dataService.removeRepository(entityName);
+			return null;
+		});
+
+		refreshCaches();
 	}
 
 	@Transactional
@@ -148,8 +163,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	private ManageableRepositoryCollection getManageableRepositoryCollection(EntityMetaData emd)
 	{
 		RepositoryCollection backend = getBackend(emd);
-		if (!(backend instanceof ManageableRepositoryCollection))
-			throw new RuntimeException("Backend  is not a ManageableCrudRepositoryCollection");
+		if (!(backend instanceof ManageableRepositoryCollection)) throw new RuntimeException(
+				"Backend  is not a ManageableCrudRepositoryCollection");
 
 		return (ManageableRepositoryCollection) backend;
 	}
@@ -179,8 +194,8 @@ public class MetaDataServiceImpl implements MetaDataService
 			if (!dataService.hasRepository(emd.getName()))
 			{
 				Repository repo = backend.getRepository(emd.getName());
-				if (repo == null) throw new UnknownEntityException(
-						String.format("Unknown entity '%s' for backend '%s'", emd.getName(), backend.getName()));
+				if (repo == null) throw new UnknownEntityException(String.format(
+						"Unknown entity '%s' for backend '%s'", emd.getName(), backend.getName()));
 				Repository decoratedRepo = decoratorFactory.createDecoratedRepository(repo);
 				dataService.addRepository(decoratedRepo);
 			}
@@ -333,8 +348,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	public synchronized void onApplicationEvent(ContextRefreshedEvent event)
 	{
 		// Discover all backends
-		Map<String, RepositoryCollection> backendBeans = event.getApplicationContext()
-				.getBeansOfType(RepositoryCollection.class);
+		Map<String, RepositoryCollection> backendBeans = event.getApplicationContext().getBeansOfType(
+				RepositoryCollection.class);
 		backendBeans.values().forEach(this::addBackend);
 
 		// Create repositories from EntityMetaData in EntityMetaData repo
