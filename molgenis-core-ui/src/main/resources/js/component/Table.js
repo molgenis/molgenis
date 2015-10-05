@@ -240,7 +240,10 @@
 			this._refreshData(this.props, _.extend({}, this.state, {start: e.start}));
 		},
 		_handleRowsPerPageChange: function(e) {
-			this._refreshData(this.props, _.extend({}, this.state, {maxRows: parseInt(e.target.value)}));
+			this._refreshData(this.props, _.extend({}, this.state, {
+				start:0, 
+				maxRows: parseInt(e.target.value)
+			}));
 		}
 	});
 

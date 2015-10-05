@@ -1,5 +1,6 @@
 package org.molgenis.migrate.version.v1_9;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
 
 import javax.sql.DataSource;
@@ -22,8 +23,6 @@ import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
-
-import com.google.common.base.Preconditions;
 
 /**
  * Migration for the introduction of attributes attribute "defaultValue".
@@ -48,16 +47,17 @@ public class Step15AddDefaultValue extends MolgenisUpgrade
 			RepositoryCollection jpaRepositoryCollection)
 	{
 		super(14, 15);
-		this.dataSource = Preconditions.checkNotNull(dataSource);
+		this.dataSource = requireNonNull(dataSource);
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
-		this.searchService = Preconditions.checkNotNull(searchService);
-		this.jpaRepositoryCollection = Preconditions.checkNotNull(jpaRepositoryCollection);
+		this.searchService = requireNonNull(searchService);
+		this.jpaRepositoryCollection = requireNonNull(jpaRepositoryCollection);
 	}
 
 	private void executeUpgradeSql(String entityName, String attributeName, String defaultValue)
 	{
-		jdbcTemplate.update("UPDATE attributes SET defaultValue = ? WHERE name = ? "
-				+ "AND identifier IN (SELECT attributes FROM entities_attributes ea WHERE ea.fullName = ?);",
+		jdbcTemplate.update(
+				"UPDATE attributes SET defaultValue = ? WHERE name = ? "
+						+ "AND identifier IN (SELECT attributes FROM entities_attributes ea WHERE ea.fullName = ?);",
 				defaultValue, attributeName, entityName);
 	}
 
@@ -78,15 +78,10 @@ public class Step15AddDefaultValue extends MolgenisUpgrade
 
 	protected void insertDefaultValuesForJPAEntities()
 	{
-		jpaRepositoryCollection
-				.stream()
-				.map(Repository::getEntityMetaData)
-				.forEach(
-						emd -> {
-							stream(emd.getAtomicAttributes().spliterator(), false).filter(
-									amd -> amd.getDefaultValue() != null).forEach(
-									amd -> executeUpgradeSql(emd.getName(), amd.getName(), amd.getDefaultValue()));
-						});
+		jpaRepositoryCollection.stream().map(Repository::getEntityMetaData).forEach(emd -> {
+			stream(emd.getAtomicAttributes().spliterator(), false).filter(amd -> amd.getDefaultValue() != null)
+					.forEach(amd -> executeUpgradeSql(emd.getName(), amd.getName(), amd.getDefaultValue()));
+		});
 	}
 
 	protected void addColumnDefaultValue()
@@ -111,7 +106,8 @@ public class Step15AddDefaultValue extends MolgenisUpgrade
 			@Override
 			protected MysqlRepository createMysqlRepository()
 			{
-				return new MysqlRepository(dataService, dataSource, new AsyncJdbcTemplate(new JdbcTemplate(dataSource)));
+				return new MysqlRepository(dataService, dataSource,
+						new AsyncJdbcTemplate(new JdbcTemplate(dataSource)));
 			}
 
 			@Override

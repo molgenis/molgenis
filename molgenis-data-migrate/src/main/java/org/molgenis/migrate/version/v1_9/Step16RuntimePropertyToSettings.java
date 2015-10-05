@@ -1,6 +1,6 @@
 package org.molgenis.migrate.version.v1_9;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import org.molgenis.framework.MolgenisUpgrade;
 import org.slf4j.Logger;
@@ -21,11 +21,12 @@ public class Step16RuntimePropertyToSettings extends MolgenisUpgrade
 			RuntimePropertyToStaticContentMigrator runtimePropertyToStaticContentMigrator)
 	{
 		super(15, 16);
-		this.runtimePropertyToAppSettingsMigrator = checkNotNull(runtimePropertyToAppSettingsMigrator);
-		this.runtimePropertyToGenomicDataSettingsMigrator = checkNotNull(runtimePropertyToGenomicDataSettingsMigrator);
-		this.runtimePropertyToDataExplorerSettingsMigrator = checkNotNull(
+		this.runtimePropertyToAppSettingsMigrator = requireNonNull(runtimePropertyToAppSettingsMigrator);
+		this.runtimePropertyToGenomicDataSettingsMigrator = requireNonNull(
+				runtimePropertyToGenomicDataSettingsMigrator);
+		this.runtimePropertyToDataExplorerSettingsMigrator = requireNonNull(
 				runtimePropertyToDataExplorerSettingsMigrator);
-		this.runtimePropertyToStaticContentMigrator = checkNotNull(runtimePropertyToStaticContentMigrator);
+		this.runtimePropertyToStaticContentMigrator = requireNonNull(runtimePropertyToStaticContentMigrator);
 	}
 
 	@Override

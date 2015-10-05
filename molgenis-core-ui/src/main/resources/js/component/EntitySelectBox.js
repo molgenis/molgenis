@@ -99,20 +99,25 @@
 		},
 		_createQuery: function(term) {
 			var rules = [];
+			var nestedRule = null; 
+			
 			if(this.props.query) {
 				rules.push(this.props.query);
 				if(term.length > 0) {
 					rules.push({operator: 'AND'});
+					nestedRule = {operator: 'NESTED', nestedRules: []};
+					rules.push(nestedRule);
 				}
 			}
 			
+			var likeRules = nestedRule === null ? rules : nestedRule.nestedRules;
 			if(term.length > 0) {
 				var attrs = this._getAttrs();
 				for(var i = 0; i < attrs.length; ++i) {
 					if(i > 0) {
-						rules.push({operator: 'OR'});	
+						likeRules.push({operator: 'OR'});	
 					}
-					rules.push({field: attrs[i], operator: 'LIKE', value: term});
+					likeRules.push({field: attrs[i], operator: 'LIKE', value: term});
 				}
 			}
 			return rules;

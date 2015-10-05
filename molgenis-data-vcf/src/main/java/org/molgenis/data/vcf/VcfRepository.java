@@ -1,5 +1,7 @@
 package org.molgenis.data.vcf;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -20,7 +22,6 @@ import org.molgenis.vcf.meta.VcfMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Iterables;
@@ -85,7 +86,7 @@ public class VcfRepository extends AbstractRepository
 
 	protected VcfRepository(VcfReaderFactory vcfReaderFactory, String entityName)
 	{
-		this.entityName = Preconditions.checkNotNull(entityName);
+		this.entityName = requireNonNull(entityName);
 		this.vcfReaderFactory = vcfReaderFactory;
 		this.vcfToEntitySupplier = Suppliers.<VcfToEntity> memoize(this::parseVcfMeta);
 	}

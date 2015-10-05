@@ -106,8 +106,7 @@ public class TransactionLogRepositoryDecorator implements Repository
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
 		{
-			transactionLogService.checkLocks(getName(), MolgenisTransactionLogEntryMetaData.Type.UPDATE);
-			transactionLogService.logAndLock(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.UPDATE);
+			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.UPDATE);
 		}
 
 		decorated.update(entity);
@@ -118,8 +117,7 @@ public class TransactionLogRepositoryDecorator implements Repository
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
 		{
-			transactionLogService.checkLocks(getName(), MolgenisTransactionLogEntryMetaData.Type.UPDATE);
-			transactionLogService.logAndLock(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.UPDATE);
+			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.UPDATE);
 		}
 		decorated.update(records);
 	}
@@ -129,8 +127,7 @@ public class TransactionLogRepositoryDecorator implements Repository
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
 		{
-			transactionLogService.checkLocks(getName(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
-			transactionLogService.logAndLock(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
+			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
 		}
 		decorated.delete(entity);
 	}
@@ -140,8 +137,7 @@ public class TransactionLogRepositoryDecorator implements Repository
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
 		{
-			transactionLogService.checkLocks(getName(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
-			transactionLogService.logAndLock(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
+			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
 		}
 		decorated.delete(entities);
 	}
@@ -151,8 +147,7 @@ public class TransactionLogRepositoryDecorator implements Repository
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
 		{
-			transactionLogService.checkLocks(getName(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
-			transactionLogService.logAndLock(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
+			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
 		}
 		decorated.deleteById(id);
 	}
@@ -162,8 +157,7 @@ public class TransactionLogRepositoryDecorator implements Repository
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
 		{
-			transactionLogService.checkLocks(getName(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
-			transactionLogService.logAndLock(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
+			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
 		}
 		decorated.deleteById(ids);
 	}
@@ -173,8 +167,7 @@ public class TransactionLogRepositoryDecorator implements Repository
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
 		{
-			transactionLogService.checkLocks(getName(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
-			transactionLogService.logAndLock(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
+			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
 		}
 		decorated.deleteAll();
 	}
@@ -184,8 +177,7 @@ public class TransactionLogRepositoryDecorator implements Repository
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
 		{
-			transactionLogService.checkLocks(getName(), MolgenisTransactionLogEntryMetaData.Type.ADD);
-			transactionLogService.logAndLock(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.ADD);
+			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.ADD);
 		}
 		decorated.add(entity);
 	}
@@ -195,8 +187,7 @@ public class TransactionLogRepositoryDecorator implements Repository
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
 		{
-			transactionLogService.checkLocks(getName(), MolgenisTransactionLogEntryMetaData.Type.ADD);
-			transactionLogService.logAndLock(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.ADD);
+			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.ADD);
 		}
 		return decorated.add(entities);
 	}
