@@ -82,6 +82,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 /**
  * ElasticSearch implementation of the SearchService interface. TODO use scroll-scan where possible:
@@ -993,7 +994,7 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 			return new Iterator<Entity>()
 			{
 				private long totalHits;
-				private SearchHit[] batchHits;
+				private List<Entity> batchEntities;
 				private int batchPos;
 
 				private int currentOffset;
@@ -1001,32 +1002,32 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 				@Override
 				public boolean hasNext()
 				{
-					if (batchHits == null)
+					if (batchEntities == null)
 					{
 						int batchOffset = offset;
 						int batchSize = pageSize != 0 ? Math.min(pageSize - currentOffset, BATCH_SIZE) : BATCH_SIZE;
 						doBatchSearch(batchOffset, batchSize);
 					}
 
-					if (batchHits.length == 0)
+					if (batchEntities.size() == 0)
 					{
 						return false;
 					}
 
-					if (batchPos < batchHits.length)
+					if (batchPos < batchEntities.size())
 					{
 						return true;
 					}
-					else if (batchPos == batchHits.length)
+					else if (batchPos == batchEntities.size())
 					{
 						long requestedHits = pageSize != 0 ? Math.min(pageSize, totalHits) : totalHits;
-						if (currentOffset + batchHits.length < requestedHits)
+						if (currentOffset + batchEntities.size() < requestedHits)
 						{
 							int batchOffset = currentOffset + BATCH_SIZE;
 							int batchSize = pageSize != 0 ? Math.min(pageSize - batchOffset, BATCH_SIZE) : BATCH_SIZE;
 							doBatchSearch(batchOffset, batchSize);
 
-							return batchHits.length > 0;
+							return batchEntities.size() > 0;
 						}
 						else
 						{
@@ -1042,22 +1043,9 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 					boolean next = hasNext();
 					if (next)
 					{
-						SearchHit hit = batchHits[batchPos];
+						Entity entity = batchEntities.get(batchPos);
 						++batchPos;
-						Map<String, Object> source = hit.getSource();
-						DefaultEntity defaultEntity;
-						if (source != null)
-						{
-							defaultEntity = new DefaultEntity(entityMetaData, dataService, source);
-						}
-						else
-						{
-							// for entities that are indexed and not stored return an entity with id only
-							defaultEntity = new DefaultEntity(entityMetaData, dataService);
-							String idAttrName = entityMetaData.getIdAttribute().getName();
-							defaultEntity.set(idAttrName, hit.getId());
-						}
-						return defaultEntity;
+						return entity;
 					}
 					else throw new ArrayIndexOutOfBoundsException();
 				}
@@ -1117,7 +1105,16 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 					}
 					SearchHits searchHits = searchResponse.getHits();
 					this.totalHits = searchHits.getTotalHits();
-					this.batchHits = searchHits.getHits();
+					SearchHit[] batchHits = searchHits.getHits();
+					if (batchHits.length > 0)
+					{
+						this.batchEntities = Lists.newArrayList(dataService.findAll(entityMetaData.getName(),
+								Arrays.stream(batchHits).map(SearchHit::getId).collect(Collectors.toList())));
+					}
+					else
+					{
+						this.batchEntities = Collections.emptyList();
+					}
 					this.batchPos = 0;
 
 					this.currentOffset = from;

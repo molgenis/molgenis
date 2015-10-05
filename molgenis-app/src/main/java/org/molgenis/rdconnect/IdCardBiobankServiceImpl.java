@@ -23,6 +23,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.MapEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,8 @@ import com.google.gson.JsonParser;
 @Service
 public class IdCardBiobankServiceImpl implements IdCardBiobankService
 {
+	private static final Logger LOG = LoggerFactory.getLogger(IdCardBiobankServiceImpl.class);
+
 	private final DataService dataService;
 	private final IdCardBiobankIndexerSettings idCardBiobankIndexerSettings;
 
@@ -47,7 +51,8 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService
 	{
 		try
 		{
-			CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+			CloseableHttpClient httpClient = HttpClientBuilder.create().build(); // FIXME add to config as bean
+			LOG.info("Retrieving [" + url + "]");
 			HttpGet request = new HttpGet(url);
 			request.addHeader("content-type", "application/json");
 			HttpResponse result = httpClient.execute(request);
@@ -66,6 +71,7 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService
 		try
 		{
 			CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+			LOG.info("Retrieving [" + url + "]");
 			HttpGet request = new HttpGet(url);
 			request.addHeader("content-type", "application/json");
 			HttpResponse result = httpClient.execute(request);

@@ -120,6 +120,18 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	}
 
 	@Override
+	public Entity findOne(Object id)
+	{
+		return repository.findOne(id);
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Iterable<Object> ids)
+	{
+		return repository.findAll(ids);
+	}
+
+	@Override
 	public void rebuildIndex()
 	{
 		elasticSearchService.rebuildIndex(repository, getEntityMetaData());

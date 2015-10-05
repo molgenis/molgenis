@@ -173,7 +173,9 @@ class RestControllerV2
 			for (Entity entity : it)
 			{
 				Map<String, Object> responseData = new LinkedHashMap<String, Object>();
-				createEntityValuesResponse(entity, attributeFilter, responseData);
+				createEntityValuesResponse(entity, attributeFilter, responseData); // FIXME performance: this performs a
+																					// request per
+																					// ref entity
 				entities.add(responseData);
 			}
 
