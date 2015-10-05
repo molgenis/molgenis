@@ -70,7 +70,6 @@ import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.transaction.LockMetaData;
 import org.molgenis.data.transaction.MolgenisTransactionListener;
 import org.molgenis.data.transaction.MolgenisTransactionLogEntryMetaData;
 import org.molgenis.data.transaction.MolgenisTransactionLogMetaData;
@@ -96,7 +95,7 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 	public static final String CRUD_TYPE_FIELD_NAME = "MolgenisCrudType";
 	private static BulkProcessorFactory BULK_PROCESSOR_FACTORY = new BulkProcessorFactory();
 	private static List<String> NON_TRANSACTIONAL_ENTITIES = Arrays.asList(MolgenisTransactionLogMetaData.ENTITY_NAME,
-			MolgenisTransactionLogEntryMetaData.ENTITY_NAME, LockMetaData.ENTITY_NAME);
+			MolgenisTransactionLogEntryMetaData.ENTITY_NAME);
 
 	public static enum IndexingMode
 	{

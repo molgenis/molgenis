@@ -1,5 +1,7 @@
 package org.molgenis.data.annotation.entity.impl;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -17,8 +19,6 @@ import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-
-import com.google.common.base.Preconditions;
 
 /**
  * Base class for any {@link EntityAnnotator} that uses a {@link QueryCreator} to query the {@link DataService} or
@@ -44,7 +44,7 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 		this.sourceRepositoryName = sourceRepositoryName;
 		this.dataService = dataService;
 		this.resources = resources;
-		this.queryCreator = Preconditions.checkNotNull(queryCreator);
+		this.queryCreator = requireNonNull(queryCreator);
 		this.info = info;
 		this.cmdLineAnnotatorSettingsConfigurer = cmdLineAnnotatorSettingsConfigurer;
 	}

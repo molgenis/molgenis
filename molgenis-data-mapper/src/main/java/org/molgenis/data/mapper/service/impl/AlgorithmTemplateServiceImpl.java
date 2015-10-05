@@ -1,6 +1,6 @@
 package org.molgenis.data.mapper.service.impl;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.js.magma.JsMagmaScriptRegistrator.SCRIPT_TYPE_JAVASCRIPT_MAGMA;
 import static org.molgenis.script.Script.ENTITY_NAME;
 import static org.molgenis.script.Script.TYPE;
@@ -27,7 +27,7 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 	@Autowired
 	public AlgorithmTemplateServiceImpl(DataService dataService)
 	{
-		this.dataService = checkNotNull(dataService);
+		this.dataService = requireNonNull(dataService);
 	}
 
 	@Override
@@ -38,8 +38,8 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 				new QueryImpl().eq(TYPE, SCRIPT_TYPE_JAVASCRIPT_MAGMA), Script.class);
 
 		// select all algorithm templates that can be used with target and sources
-		return StreamSupport.stream(jsScripts.spliterator(), false).flatMap(
-				script -> toAlgorithmTemplate(script, attrMatches));
+		return StreamSupport.stream(jsScripts.spliterator(), false)
+				.flatMap(script -> toAlgorithmTemplate(script, attrMatches));
 	}
 
 	private Stream<AlgorithmTemplate> toAlgorithmTemplate(Script script,
@@ -71,9 +71,7 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 	private AttributeMetaData mapParamToAttribute(ScriptParameter param,
 			Map<AttributeMetaData, ExplainedAttributeMetaData> attrMatches)
 	{
-		return attrMatches
-				.entrySet()
-				.stream()
+		return attrMatches.entrySet().stream()
 				.filter(entry -> StreamSupport.stream(entry.getValue().getExplainedQueryStrings().spliterator(), false)
 						.anyMatch(explain -> explain.getTagName().equalsIgnoreCase(param.getName())))
 				.map(entry -> entry.getKey()).findFirst().orElse(null);

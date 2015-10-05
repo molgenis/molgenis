@@ -1,6 +1,6 @@
 package org.molgenis.data.annotator.tabix;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.vcf.VcfRepository.CHROM;
 import static org.molgenis.data.vcf.VcfRepository.POS;
 
@@ -22,10 +22,10 @@ import org.molgenis.data.support.MapEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import au.com.bytecode.opencsv.CSVParser;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
+
+import au.com.bytecode.opencsv.CSVParser;
 
 public class TabixRepository extends AbstractRepository
 {
@@ -56,17 +56,17 @@ public class TabixRepository extends AbstractRepository
 	{
 		this.entityMetaData = entityMetaData;
 		this.reader = new TabixReader(file.getAbsolutePath());
-		this.chromosomeAttributeName = checkNotNull(chromosomeAttributeName);
-		this.positionAttributeName = checkNotNull(positionAttributeName);
+		this.chromosomeAttributeName = requireNonNull(chromosomeAttributeName);
+		this.positionAttributeName = requireNonNull(positionAttributeName);
 	}
 
 	TabixRepository(TabixReader reader, EntityMetaData entityMetaData, String chromosomeAttributeName,
 			String positionAttributeName)
 	{
-		this.reader = checkNotNull(reader);
-		this.entityMetaData = checkNotNull(entityMetaData);
-		this.chromosomeAttributeName = checkNotNull(chromosomeAttributeName);
-		this.positionAttributeName = checkNotNull(positionAttributeName);
+		this.reader = requireNonNull(reader);
+		this.entityMetaData = requireNonNull(entityMetaData);
+		this.chromosomeAttributeName = requireNonNull(chromosomeAttributeName);
+		this.positionAttributeName = requireNonNull(positionAttributeName);
 	}
 
 	public static CSVParser getCsvParser()
@@ -132,12 +132,14 @@ public class TabixRepository extends AbstractRepository
 		}
 		catch (NullPointerException e)
 		{
-			LOG.warn("Unable to read from tabix resource for query: " + queryString + " (Position not present in resource file?)");
+			LOG.warn("Unable to read from tabix resource for query: " + queryString
+					+ " (Position not present in resource file?)");
 			LOG.debug("", e);
 		}
 		catch (ArrayIndexOutOfBoundsException e)
 		{
-			LOG.warn("Unable to read from tabix resource for query: " + queryString + " (Chromosome not present in resource file?)");
+			LOG.warn("Unable to read from tabix resource for query: " + queryString
+					+ " (Chromosome not present in resource file?)");
 			LOG.debug("", e);
 		}
 		return builder.build();
