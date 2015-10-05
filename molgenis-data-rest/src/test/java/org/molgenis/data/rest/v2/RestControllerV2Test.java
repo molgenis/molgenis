@@ -383,21 +383,48 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	}
 
 	/**
-	 * Test all the exception that the method 'updateEntitiesExceptions' can throw
+	 * EXCEPTION_NO_ENTITIES
 	 * 
 	 * @throws Exception
 	 */
 	@Test
-	public void testCreateEntitiesExceptions() throws Exception
+	public void testCreateEntitiesExceptions1() throws Exception
 	{
 		this.testCreateEntitiesExceptions("entity", "{}", RestControllerV2.EXCEPTION_NO_ENTITIES);
+	}
 
+	/**
+	 * EXCEPTION_MAX_ENTITIES_EXCEEDED
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testCreateEntitiesExceptions2() throws Exception
+	{
 		this.testCreateEntitiesExceptions("entity", this.createMaxPlusOneEntitiesAsTestContent(),
 				RestControllerV2.EXCEPTION_MAX_ENTITIES_EXCEEDED);
+	}
 
+	/**
+	 * createUnknownEntityException
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testCreateEntitiesExceptions3() throws Exception
+	{
 		this.testCreateEntitiesExceptions("entity2", "{entities:[{email:'test@email.com', extraAttribute:'test'}]}",
 				RestControllerV2.createUnknownEntityException("entity2"));
+	}
 
+	/**
+	 * createMolgenisDataExceptionUnknownIdentifier
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testCreateEntitiesExceptions4() throws Exception
+	{
 		this.testCreateEntitiesExceptions("entity", "{entities:[{email:'test@email.com', extraAttribute:'test'}]}",
 				RestControllerV2.createMolgenisDataExceptionUnknownIdentifier(0));
 	}
@@ -413,21 +440,49 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	}
 
 	/**
-	 * Test all the exception that the method 'updateEntitiesExceptions' can throw
+	 * EXCEPTION_NO_ENTITIES
 	 * 
 	 * @throws Exception
 	 */
 	@Test
-	public void testUpdateEntitiesExceptions() throws Exception
+	public void testUpdateEntitiesExceptions1() throws Exception
 	{
 		this.testUpdateEntitiesExceptions("entity", "{}", RestControllerV2.EXCEPTION_NO_ENTITIES);
+	}
 
+	/**
+	 * EXCEPTION_MAX_ENTITIES_EXCEEDED
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testUpdateEntitiesExceptions2() throws Exception
+	{
 		this.testUpdateEntitiesExceptions("entity", this.createMaxPlusOneEntitiesAsTestContent(),
 				RestControllerV2.EXCEPTION_MAX_ENTITIES_EXCEEDED);
+	}
 
+	/**
+	 * createUnknownEntityException
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testUpdateEntitiesExceptions3() throws Exception
+	{
 		this.testUpdateEntitiesExceptions("entity2", "{entities:[{email:'test@email.com'}]}",
 				RestControllerV2.createUnknownEntityException("entity2"));
 
+	}
+
+	/**
+	 * createMolgenisDataExceptionUnknownIdentifier
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testUpdateEntitiesExceptions4() throws Exception
+	{
 		this.testUpdateEntitiesExceptions("entity", "{entities:[{email:'test@email.com', extraAttribute:'test'}]}",
 				RestControllerV2.createMolgenisDataExceptionUnknownIdentifier(0));
 	}
@@ -447,35 +502,99 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	}
 
 	/**
-	 * Test all the exception that the method 'updateEntitiesSpecificAttribute' can throw
+	 * EXCEPTION_NO_ENTITIES
 	 * 
 	 * @throws Exception
 	 */
 	@Test
-	public void testUpdateEntitiesSpecificAttributeExceptions() throws Exception
+	public void testUpdateEntitiesSpecificAttributeExceptions1() throws Exception
 	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email", "{}",
 				RestControllerV2.EXCEPTION_NO_ENTITIES);
+	}
 
+	/**
+	 * EXCEPTION_MAX_ENTITIES_EXCEEDED
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testUpdateEntitiesSpecificAttributeExceptions2() throws Exception
+	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
 				this.createMaxPlusOneEntitiesAsTestContent(), RestControllerV2.EXCEPTION_MAX_ENTITIES_EXCEEDED);
+	}
 
+	/**
+	 * createUnknownEntityException
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testUpdateEntitiesSpecificAttributeExceptions3() throws Exception
+	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity2", "email", "{entities:[{email:'test@email.com'}]}",
 				RestControllerV2.createUnknownEntityException("entity2"));
+	}
 
+	/**
+	 * createUnknownAttributeException
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testUpdateEntitiesSpecificAttributeExceptions4() throws Exception
+	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email2", "{entities:[{email:'test@email.com'}]}",
 				RestControllerV2.createUnknownAttributeException("entity", "email2"));
+	}
 
+	/**
+	 * createMolgenisDataAccessExceptionReadOnlyAttribute
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testUpdateEntitiesSpecificAttributeExceptions5() throws Exception
+	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "decimal", "{entities:[{decimal:'42'}]}",
 				RestControllerV2.createMolgenisDataAccessExceptionReadOnlyAttribute("entity", "decimal"));
+	}
 
+	/**
+	 * createMolgenisDataExceptionIdentifierAndValue
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testUpdateEntitiesSpecificAttributeExceptions6() throws Exception
+	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
 				"{entities:[{id:0,email:'test@email.com',extraAttribute:'test'}]}",
 				RestControllerV2.createMolgenisDataExceptionIdentifierAndValue());
+	}
 
+	/**
+	 * createMolgenisDataExceptionUnknownIdentifier
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testUpdateEntitiesSpecificAttributeExceptions7() throws Exception
+	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
 				"{entities:[{email:'test@email.com', extraAttribute:'test'}]}",
 				RestControllerV2.createMolgenisDataExceptionUnknownIdentifier(0));
+	}
+
+	/**
+	 * createUnknownEntityExceptionNotValidId
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	public void testUpdateEntitiesSpecificAttributeExceptions8() throws Exception
+	{
 
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
 				"{entities:[{id:4,email:'test@email.com'}]}",
