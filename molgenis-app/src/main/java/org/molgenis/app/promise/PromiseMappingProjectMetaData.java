@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PromiseMappingProjectsMetaData extends DefaultEntityMetaData
+public class PromiseMappingProjectMetaData extends DefaultEntityMetaData
 {
 	public static final String ENTITY_NAME = "PromiseMappingProjects";
 	public static final String FULLY_QUALIFIED_NAME = PromisePackage.NAME + '_' + ENTITY_NAME;
@@ -31,7 +31,7 @@ public class PromiseMappingProjectsMetaData extends DefaultEntityMetaData
 	public static final String MAPPER = "mapper";
 
 	@Autowired
-	public PromiseMappingProjectsMetaData(PromiseMapperFactory promiseMapperFactory)
+	public PromiseMappingProjectMetaData(PromiseMapperFactory promiseMapperFactory)
 	{
 		super(ENTITY_NAME, PromisePackage.getPackage());
 

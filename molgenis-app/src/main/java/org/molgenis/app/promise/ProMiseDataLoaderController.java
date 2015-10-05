@@ -58,7 +58,7 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 	@ResponseBody
 	public List<String> projects()
 	{
-		Iterable<Entity> projects = dataService.findAll(PromiseMappingProjectsMetaData.FULLY_QUALIFIED_NAME);
+		Iterable<Entity> projects = dataService.findAll(PromiseMappingProjectMetaData.FULLY_QUALIFIED_NAME);
 		List<String> names = Lists.newArrayList();
 
 		projects.forEach(p -> names.add(p.get("name").toString()));
@@ -71,7 +71,7 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 	@Transactional
 	public void map(@PathVariable("name") String projectName) throws IOException
 	{
-		Entity project = dataService.findOne(PromiseMappingProjectsMetaData.FULLY_QUALIFIED_NAME, projectName);
+		Entity project = dataService.findOne(PromiseMappingProjectMetaData.FULLY_QUALIFIED_NAME, projectName);
 		PromiseMapper promiseMapper = promiseMapperFactory.getMapper(project.getString("mapper"));
 		promiseMapper.map(projectName);
 	}
