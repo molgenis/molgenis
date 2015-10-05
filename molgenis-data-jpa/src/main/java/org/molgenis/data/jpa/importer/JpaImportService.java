@@ -1,7 +1,10 @@
 package org.molgenis.data.jpa.importer;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -9,6 +12,7 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntitiesValidator;
@@ -35,9 +39,9 @@ public class JpaImportService implements ImportService
 	public JpaImportService(EntitiesValidator entitiesValidator, EntitiesImporter entitiesImporter,
 			@Qualifier("JpaRepositoryCollection") RepositoryCollection repositoryCollection)
 	{
-		this.entitiesValidator = entitiesValidator;
-		this.entitiesImporter = entitiesImporter;
-		this.targetCollection = repositoryCollection;
+		this.entitiesValidator = requireNonNull(entitiesValidator);
+		this.entitiesImporter = requireNonNull(entitiesImporter);
+		this.targetCollection = requireNonNull(repositoryCollection);
 	}
 
 	@Override
@@ -107,5 +111,12 @@ public class JpaImportService implements ImportService
 	public Set<String> getSupportedFileExtensions()
 	{
 		return GenericImporterExtensions.getJPA();
+	}
+
+	@Override
+	public LinkedHashMap<String, Boolean> integrationTestMetaData(MetaDataService metaDataService,
+			RepositoryCollection repositoryCollection, String defaultPackage)
+	{
+		return metaDataService.integrationTestMetaData(repositoryCollection);
 	}
 }

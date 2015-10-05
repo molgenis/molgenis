@@ -2,7 +2,7 @@
 (function(_, React, molgenis) {
 	"use strict";
 
-	var div = React.DOM.div, table = React.DOM.table, thead = React.DOM.thead, tbody = React.DOM.tbody, tr = React.DOM.tr, th = React.DOM.th, td = React.DOM.td, a = React.DOM.a, span = React.DOM.span, em = React.DOM.em, br = React.DOM.br;
+	var div = React.DOM.div, table = React.DOM.table, thead = React.DOM.thead, tbody = React.DOM.tbody, tr = React.DOM.tr, th = React.DOM.th, td = React.DOM.td, a = React.DOM.a, span = React.DOM.span, em = React.DOM.em, br = React.DOM.br, label = React.DOM.label;
 
 	var api = new molgenis.RestClientV2();
 
@@ -49,7 +49,8 @@
 				data: null,
 				attrs: this.props.attrs,
 				sort: null,
-				start: 0
+				start: 0,
+				maxRows: this.props.maxRows
 			};
 		},
 		getDefaultProps: function() {
@@ -126,11 +127,27 @@
 						)
 					),
 					div({className: 'row'},
-						div({className: 'col-md-offset-3 col-md-6'},
+						div({className: 'col-md-3 form-inline'},
+								div({
+									'className' : 'form-group'
+								}, 
+									label(null, "Rows per page: " + String.fromCharCode(160)),
+									molgenis.ui.SelectBox({
+										options: [
+											{value: 20, text: 20},
+											{value: 30, text: 30},
+											{value: 50, text: 50},
+											{value: 100, text: 100}
+										],
+										onChange: this._handleRowsPerPageChange
+									})
+								)
+						),
+						div({className: 'col-md-6'},
 							div({className: 'text-center'},
 								molgenis.ui.Pager({
 									nrItems: this.state.data.total,
-									nrItemsPerPage: this.props.maxRows,
+									nrItemsPerPage: this.state.maxRows,
 									start: this.state.data.start,
 									onPageChange: this._handlePageChange
 								})
@@ -146,7 +163,7 @@
 		_refreshData: function(props, state) {
 			var opts = {
 				attrs: {'~id' : null}, // always include the id attribute
-				num : props.maxRows
+				num : state.maxRows
 			};
 
 			// add selected attrs
@@ -221,6 +238,12 @@
 		},
 		_handlePageChange: function(e) {
 			this._refreshData(this.props, _.extend({}, this.state, {start: e.start}));
+		},
+		_handleRowsPerPageChange: function(e) {
+			this._refreshData(this.props, _.extend({}, this.state, {
+				start:0, 
+				maxRows: parseInt(e.target.value)
+			}));
 		}
 	});
 

@@ -21,6 +21,7 @@ import org.molgenis.data.system.RepositoryTemplateLoader;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.migrate.version.v1_10.Step17RuntimePropertiesToGafListSettings;
 import org.molgenis.migrate.version.v1_10.Step18RuntimePropertiesToAnnotatorSettings;
+import org.molgenis.migrate.version.v1_10.Step19RemoveMolgenisLock;
 import org.molgenis.migrate.version.v1_5.Step1UpgradeMetaData;
 import org.molgenis.migrate.version.v1_5.Step2;
 import org.molgenis.migrate.version.v1_5.Step3AddOrderColumnToMrefTables;
@@ -113,6 +114,9 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Autowired
 	private Step18RuntimePropertiesToAnnotatorSettings step18RuntimePropertiesToAnnotatorSettings;
 
+	@Autowired
+	private Step19RemoveMolgenisLock step19RemoveMolgenisLock;
+
 	@Override
 	public ManageableRepositoryCollection getBackend()
 	{
@@ -154,6 +158,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 				runtimePropertyToStaticContentMigrator));
 		upgradeService.addUpgrade(step17RuntimePropertiesToGafListSettings);
 		upgradeService.addUpgrade(step18RuntimePropertiesToAnnotatorSettings);
+		upgradeService.addUpgrade(step19RemoveMolgenisLock);
 	}
 
 	@Override

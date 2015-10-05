@@ -1,7 +1,6 @@
 package org.molgenis.data.elasticsearch;
 
 import static java.util.stream.StreamSupport.stream;
-import static org.elasticsearch.index.query.FilterBuilders.andFilter;
 import static org.elasticsearch.index.query.FilterBuilders.queryFilter;
 import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
 import static org.elasticsearch.index.query.QueryBuilders.indicesQuery;
@@ -45,7 +44,6 @@ import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
@@ -72,7 +70,6 @@ import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.transaction.LockMetaData;
 import org.molgenis.data.transaction.MolgenisTransactionListener;
 import org.molgenis.data.transaction.MolgenisTransactionLogEntryMetaData;
 import org.molgenis.data.transaction.MolgenisTransactionLogMetaData;
@@ -98,7 +95,7 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 	public static final String CRUD_TYPE_FIELD_NAME = "MolgenisCrudType";
 	private static BulkProcessorFactory BULK_PROCESSOR_FACTORY = new BulkProcessorFactory();
 	private static List<String> NON_TRANSACTIONAL_ENTITIES = Arrays.asList(MolgenisTransactionLogMetaData.ENTITY_NAME,
-			MolgenisTransactionLogEntryMetaData.ENTITY_NAME, LockMetaData.ENTITY_NAME);
+			MolgenisTransactionLogEntryMetaData.ENTITY_NAME);
 
 	public static enum IndexingMode
 	{
@@ -254,7 +251,7 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 	@Override
 	public void createMappings(EntityMetaData entityMetaData)
 	{
-		if (entityMetaData.getName().equals("rdconnect_regbb"))
+		if (entityMetaData.getName().equals("rdconnect_regbb")) // FIXME remove hack
 		{
 			createMappings(entityMetaData, false, true, true);
 		}
@@ -1091,14 +1088,11 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 						QueryBuilder excludeUpdatesQuery = indicesQuery(boolQuery().mustNot(findUpdatesQuery),
 								indexNames[0]);
 
-						QueryBuilder findDeletesQuery = indicesQuery(
-								termQuery(CRUD_TYPE_FIELD_NAME, CrudType.DELETE.name()), indexNames[1]);
+						// NOTE: deletes cannot be handled by ES in this way, so if you do a delete then the entity will
+						// still be returned. Only after the commit of the transaction the queries won't return the
+						// entity anymore
 
-						// Exclude deleted records fom both indices
-						BoolQueryBuilder excludeDeletesQuery = boolQuery().mustNot(findDeletesQuery);
-
-						searchRequestBuilder.setPostFilter(
-								andFilter(queryFilter(excludeUpdatesQuery), queryFilter(excludeDeletesQuery)));
+						searchRequestBuilder.setPostFilter(queryFilter(excludeUpdatesQuery));
 					}
 
 					if (LOG.isTraceEnabled())
