@@ -94,7 +94,11 @@
 	}
 
 	function onRowClick(entity) {
-		genomeBrowser.setLocation(entity[genomebrowserChromosomeAttribute.name],entity[genomebrowserStartAttribute.name]-50,entity[genomebrowserStartAttribute.name]+50);
+		var chrom = entity[genomebrowserChromosomeAttribute.name];
+		var pos = entity[genomebrowserStartAttribute.name];
+		if(chrom !== undefined && chrom !== "" && pos !== undefined && pos !== ""){
+			genomeBrowser.setLocation(chrom,pos-50,pos+50);
+		}
 	}
 
 	/**
