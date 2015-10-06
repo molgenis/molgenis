@@ -86,11 +86,6 @@
 
 		$('#entityReport').load("dataexplorer/details",{entityName: entityName, entityId: entityId}, function() {
 			  $('#entityReportModal').modal("show");
-
-			  // Button event handler when a button is placed inside an entity report ftl
-			  $(".modal-body button", "#entityReport").on('click', function() {
-					$.download($(this).data('href'), {entityName: entityName, entityId: entityId}, "GET");
-			  });
 		});
 	}
 
