@@ -34,7 +34,7 @@ public class HrefTest
 	public static void testConcatEntityCollectionHref()
 	{
 		Assert.assertEquals(Href.concatEntityCollectionHref("http://molgenis.org/api/v2", "entity", "id",
-				Arrays.asList("p1", "p2")), "http://molgenis.org/api/v2/entity?q=id=in=(p1,p2)");
+				Arrays.asList("p1", "p2")), "http://molgenis.org/api/v2/entity?q=id=in=(\"p1\",\"p2\")");
 	}
 
 }
