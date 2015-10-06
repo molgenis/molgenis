@@ -58,7 +58,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 class RestControllerV2
 {
 	private static final Logger LOG = LoggerFactory.getLogger(RestControllerV2.class);
-	static final int MAX_ENTITIES = 1000;
+
+	/**
+	 * LimitRequestFieldSize 8190KB. UUID produces 36 characters. Max header Location size: 8190KB
+	 */
+	static final int MAX_ENTITIES = 100;
 
 	public static final String BASE_URI = "/api/v2";
 
