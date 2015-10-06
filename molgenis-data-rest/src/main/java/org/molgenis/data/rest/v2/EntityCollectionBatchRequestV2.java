@@ -1,20 +1,18 @@
 package org.molgenis.data.rest.v2;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class EntityCollectionBatchRequestV2
+import javax.validation.constraints.Size;
+
+import org.molgenis.gson.AutoGson;
+
+import com.google.auto.value.AutoValue;
+
+@AutoValue
+@AutoGson(autoValueClass = AutoValue_EntityCollectionBatchRequestV2.class)
+public abstract class EntityCollectionBatchRequestV2
 {
-	private List<Map<String, Object>> entities = new ArrayList<Map<String, Object>>();
-
-	public List<Map<String, Object>> getEntities()
-	{
-		return entities;
-	}
-
-	public void setEntities(List<Map<String, Object>> entities)
-	{
-		this.entities = entities;
-	}
+	@Size(min = 1, max = RestControllerV2.MAX_ENTITIES)
+	public abstract List<Map<String, Object>> getEntities();
 }

@@ -1,5 +1,6 @@
 package org.molgenis.data.rest.v2;
 
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -33,16 +34,15 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.stream.IntStream;
 
 import org.mockito.Matchers;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rest.v2.RestControllerV2Test.RestControllerV2Config;
@@ -376,7 +376,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 				+ "    {\n      \"href\": \"/api/v2/entity/p2\"\n    }\n  ]\n}";
 		mockMvc.perform(post(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
 				.andExpect(status().isCreated()).andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(header().string("Location", "/api/v2/entity?q=id=in=(p1,p2)"))
+				.andExpect(header().string("Location", "/api/v2/entity?q=id=in=(\"p1\",\"p2\")"))
 				.andExpect(content().string(responseBody));
 
 		verify(dataService).add(Matchers.eq(ENTITY_NAME), Matchers.anyListOf(MapEntity.class));
@@ -390,7 +390,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void testCreateEntitiesExceptions1() throws Exception
 	{
-		this.testCreateEntitiesExceptions("entity", "{}", RestControllerV2.EXCEPTION_NO_ENTITIES);
+		this.testCreateEntitiesExceptions("entity", "{entities:[]}", RestControllerV2.EXCEPTION_NO_ENTITIES);
 	}
 
 	/**
@@ -423,10 +423,18 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	 * @throws Exception
 	 */
 	@Test
-	public void testCreateEntitiesExceptions4() throws Exception
+	public void testCreateEntitiesSystemException() throws Exception
 	{
-		this.testCreateEntitiesExceptions("entity", "{entities:[{email:'test@email.com', extraAttribute:'test'}]}",
-				RestControllerV2.createMolgenisDataExceptionUnknownIdentifier(0));
+		Exception e = new MolgenisDataException("Check if this exception is not swallowed by the system");
+		doThrow(e).when(dataService).add(Matchers.eq(ENTITY_NAME), Matchers.anyListOf(MapEntity.class));
+
+		String content = "{entities:[{id:'p1', name:'Example data'}]}";
+		ResultActions resultActions = mockMvc
+				.perform(post(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
+				.andExpect(status().isInternalServerError()).andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(header().doesNotExist("Location"));
+
+		this.assertEqualsErrorMessage(resultActions, e);
 	}
 
 	@Test
@@ -439,6 +447,21 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		verify(dataService, times(1)).update(Matchers.eq(ENTITY_NAME), Matchers.anyListOf(MapEntity.class));
 	}
 
+	@Test
+	public void testUpdateEntitiesSystemException() throws Exception
+	{
+		Exception e = new MolgenisDataException("Check if this exception is not swallowed by the system");
+		doThrow(e).when(dataService).update(Matchers.eq(ENTITY_NAME), Matchers.anyListOf(MapEntity.class));
+
+		String content = "{entities:[{id:'p1', name:'Example data'}]}";
+		ResultActions resultActions = mockMvc
+				.perform(put(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
+				.andExpect(status().isInternalServerError()).andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(header().doesNotExist("Location"));
+
+		this.assertEqualsErrorMessage(resultActions, e);
+	}
+
 	/**
 	 * EXCEPTION_NO_ENTITIES
 	 * 
@@ -447,7 +470,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void testUpdateEntitiesExceptions1() throws Exception
 	{
-		this.testUpdateEntitiesExceptions("entity", "{}", RestControllerV2.EXCEPTION_NO_ENTITIES);
+		this.testUpdateEntitiesExceptions("entity", "{entities:[]}", RestControllerV2.EXCEPTION_NO_ENTITIES);
 	}
 
 	/**
@@ -475,18 +498,6 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 
 	}
 
-	/**
-	 * createMolgenisDataExceptionUnknownIdentifier
-	 * 
-	 * @throws Exception
-	 */
-	@Test
-	public void testUpdateEntitiesExceptions4() throws Exception
-	{
-		this.testUpdateEntitiesExceptions("entity", "{entities:[{email:'test@email.com', extraAttribute:'test'}]}",
-				RestControllerV2.createMolgenisDataExceptionUnknownIdentifier(0));
-	}
-
 	@Test
 	public void testUpdateEntitiesSpecificAttribute() throws Exception
 	{
@@ -509,7 +520,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void testUpdateEntitiesSpecificAttributeExceptions1() throws Exception
 	{
-		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email", "{}",
+		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email", "{entities:[]}",
 				RestControllerV2.EXCEPTION_NO_ENTITIES);
 	}
 
@@ -631,39 +642,9 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			UnsupportedEncodingException
 	{
 		Gson gson = new Gson();
-		Errors errors = gson.fromJson(resultActions.andReturn().getResponse().getContentAsString(), Errors.class);
+		ResponseErrors errors = gson.fromJson(resultActions.andReturn().getResponse().getContentAsString(),
+				ResponseErrors.class);
 		assertEquals(errors.getErrors().get(0).getMessage(), expected.getMessage());
-	}
-
-	class Errors
-	{
-		private List<Message> errors = new ArrayList<Message>();
-
-		void setErrors(List<Message> errors)
-		{
-			this.errors = errors;
-		}
-
-		List<Message> getErrors()
-		{
-			return this.errors;
-		}
-
-		class Message
-		{
-			private String message;
-
-			void setMessage(String message)
-			{
-				this.message = message;
-			}
-
-			String getMessage()
-			{
-				return this.message;
-			}
-
-		}
 	}
 
 	private String createMaxPlusOneEntitiesAsTestContent()
@@ -673,20 +654,6 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		IntStream.range(0, RestControllerV2.MAX_ENTITIES).forEach(i -> c.append("{email:'test@email.com'},"));
 		c.append("{email:'test@email.com'}]}");
 		return c.toString();
-	}
-
-	private EntityCollectionBatchRequestV2 parseToEntityCollectionBatchRequestV2(String content)
-	{
-		Gson gson = new Gson();
-		EntityCollectionBatchRequestV2 request = gson.fromJson(content, EntityCollectionBatchRequestV2.class);
-		if (request != null)
-		{
-			return request;
-		}
-		else
-		{
-			return new EntityCollectionBatchRequestV2();
-		}
 	}
 
 	@Configuration

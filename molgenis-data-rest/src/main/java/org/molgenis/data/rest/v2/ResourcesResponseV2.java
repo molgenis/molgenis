@@ -12,4 +12,9 @@ public abstract class ResourcesResponseV2
 {
 	@NotNull
 	public abstract String getHref();
+
+	public static ResourcesResponseV2 create(String href)
+	{
+		return new AutoValue_ResourcesResponseV2(href);
+	}
 }

@@ -213,15 +213,13 @@ class RestControllerV2
 			// Add all entities
 			this.dataService.add(entityName, entities);
 
-			int count = 0;
 			for (Entity entity : entities)
 			{
-				String id = this.checkForEntityId(entity, count);
-				ids.add(id);
+				String id = entity.getIdValue().toString();
+				ids.add(id.toString());
 				responseBody.getResources().add(
 						new AutoValue_ResourcesResponseV2(Href.concatEntityHref(RestControllerV2.BASE_URI, entityName,
 								id)));
-				count++;
 			}
 
 			response.addHeader("Location", Href.concatEntityCollectionHref(RestControllerV2.BASE_URI, entityName, meta
@@ -259,13 +257,6 @@ class RestControllerV2
 		{
 			final List<Entity> entities = request.getEntities().stream().map(e -> this.restService.toEntity(meta, e))
 					.collect(Collectors.toList());
-
-			int count = 0;
-			for (Entity entity : entities)
-			{
-				this.checkForEntityId(entity, count);
-				count++;
-			}
 
 			// update all entities
 			this.dataService.update(entityName, entities);
@@ -357,10 +348,10 @@ class RestControllerV2
 	 * @param entityName
 	 * @throws Exception
 	 */
-	private void generalChecksForBachOperations(EntityCollectionBatchRequestV2 request, EntityMetaData meta,
+	private void generalChecksForBachOperations(@Valid EntityCollectionBatchRequestV2 request, EntityMetaData meta,
 			String entityName) throws Exception
 	{
-		if (request == null || request.getEntities().isEmpty())
+		if (request.getEntities().isEmpty())
 		{
 			throw RestControllerV2.EXCEPTION_NO_ENTITIES;
 		}
