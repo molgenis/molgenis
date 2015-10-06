@@ -195,7 +195,6 @@ class ElasticsearchEntityIterable implements Iterable<Entity>
 				{
 					List<Object> entityIds = Arrays.stream(batchHits).map(SearchHit::getId)
 							.collect(Collectors.toList());
-					System.out.println(entityIds);
 					this.batchEntities = Lists.newArrayList(dataService.findAll(entityMeta.getName(), entityIds));
 				}
 				else
