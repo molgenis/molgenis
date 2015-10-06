@@ -119,6 +119,20 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 		super.deleteAll();
 	}
 
+	// retrieve entity by id via decorated repository
+	@Override
+	public Entity findOne(Object id)
+	{
+		return repository.findOne(id);
+	}
+
+	// retrieve entities by id via decorated repository
+	@Override
+	public Iterable<Entity> findAll(Iterable<Object> ids)
+	{
+		return repository.findAll(ids);
+	}
+
 	@Override
 	public void rebuildIndex()
 	{
