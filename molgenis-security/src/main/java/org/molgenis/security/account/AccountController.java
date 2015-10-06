@@ -1,6 +1,6 @@
 package org.molgenis.security.account;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.account.AccountController.URI;
 import static org.molgenis.security.user.UserAccountService.MIN_PASSWORD_LENGTH;
 
@@ -68,10 +68,10 @@ public class AccountController
 	public AccountController(AccountService accountService, CaptchaService captchaService,
 			RedirectStrategy redirectStrategy, AppSettings appSettings)
 	{
-		this.accountService = checkNotNull(accountService);
-		this.captchaService = checkNotNull(captchaService);
-		this.redirectStrategy = checkNotNull(redirectStrategy);
-		this.appSettings = checkNotNull(appSettings);
+		this.accountService = requireNonNull(accountService);
+		this.captchaService = requireNonNull(captchaService);
+		this.redirectStrategy = requireNonNull(redirectStrategy);
+		this.appSettings = requireNonNull(appSettings);
 	}
 
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
@@ -156,7 +156,8 @@ public class AccountController
 			}
 			accountService.createUser(molgenisUser, activationUri);
 
-			String successMessage = appSettings.getSignUpModeration() ? REGISTRATION_SUCCESS_MESSAGE_ADMIN : REGISTRATION_SUCCESS_MESSAGE_USER;
+			String successMessage = appSettings.getSignUpModeration() ? REGISTRATION_SUCCESS_MESSAGE_ADMIN
+					: REGISTRATION_SUCCESS_MESSAGE_USER;
 			captchaService.removeCaptcha();
 			return Collections.singletonMap("message", successMessage);
 		}

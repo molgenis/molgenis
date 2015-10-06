@@ -1,6 +1,6 @@
 package org.molgenis.migrate.version.v1_9;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.system.core.RuntimeProperty.ENTITY_NAME;
 
 import org.molgenis.data.DataService;
@@ -35,8 +35,8 @@ public class RuntimePropertyToStaticContentMigrator implements ApplicationListen
 	public RuntimePropertyToStaticContentMigrator(DataService dataService,
 			MolgenisPluginRegistry molgenisPluginRegistry)
 	{
-		this.dataService = checkNotNull(dataService);
-		this.molgenisPluginRegistry = checkNotNull(molgenisPluginRegistry);
+		this.dataService = requireNonNull(dataService);
+		this.molgenisPluginRegistry = requireNonNull(molgenisPluginRegistry);
 	}
 
 	private RuntimePropertyToStaticContentMigrator migrateSettings()

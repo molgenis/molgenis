@@ -1,6 +1,6 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -45,11 +45,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import autovalue.shaded.com.google.common.common.collect.Sets;
-
 import com.google.common.base.Splitter;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Ordering;
+
+import autovalue.shaded.com.google.common.common.collect.Sets;
 
 public class SemanticSearchServiceImpl implements SemanticSearchService
 {
@@ -75,11 +75,11 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			MetaDataService metaDataService, SemanticSearchServiceHelper semanticSearchServiceHelper,
 			ElasticSearchExplainService elasticSearchExplainService)
 	{
-		this.dataService = checkNotNull(dataService);
-		this.ontologyService = checkNotNull(ontologyService);
-		this.metaDataService = checkNotNull(metaDataService);
-		this.semanticSearchServiceHelper = checkNotNull(semanticSearchServiceHelper);
-		this.elasticSearchExplainService = checkNotNull(elasticSearchExplainService);
+		this.dataService = requireNonNull(dataService);
+		this.ontologyService = requireNonNull(ontologyService);
+		this.metaDataService = requireNonNull(metaDataService);
+		this.semanticSearchServiceHelper = requireNonNull(semanticSearchServiceHelper);
+		this.elasticSearchExplainService = requireNonNull(elasticSearchExplainService);
 	}
 
 	@Override
@@ -92,8 +92,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		QueryRule disMaxQueryRule = semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(queryTerms,
 				ontologyTerms);
 
-		List<QueryRule> finalQueryRules = Lists.newArrayList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER,
-				Operator.IN, attributeIdentifiers));
+		List<QueryRule> finalQueryRules = Lists
+				.newArrayList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER, Operator.IN, attributeIdentifiers));
 
 		if (disMaxQueryRule.getNestedRules().size() > 0)
 		{
@@ -111,8 +111,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		int count = 0;
 		for (Entity attributeEntity : attributeMetaDataEntities)
 		{
-			AttributeMetaData attribute = sourceEntityMetaData.getAttribute(attributeEntity
-					.getString(AttributeMetaDataMetaData.NAME));
+			AttributeMetaData attribute = sourceEntityMetaData
+					.getAttribute(attributeEntity.getString(AttributeMetaDataMetaData.NAME));
 			if (count < MAX_NUMBER_EXPLAINED_ATTRIBUTES)
 			{
 				Set<ExplainedQueryString> explanations = convertAttributeEntityToExplainedAttribute(attributeEntity,
@@ -146,10 +146,12 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 
 		ontologyTermQueries.removeAll(queryTerms);
 
-		if (queryTerms.size() > 0 && queryTerms.stream().anyMatch(token -> isGoodMatch(matchedTags, token))) return true;
+		if (queryTerms.size() > 0 && queryTerms.stream().anyMatch(token -> isGoodMatch(matchedTags, token)))
+			return true;
 
 		if (ontologyTermQueries.size() > 0
-				&& ontologyTermQueries.stream().allMatch(token -> isGoodMatch(matchedTags, token))) return true;
+				&& ontologyTermQueries.stream().allMatch(token -> isGoodMatch(matchedTags, token)))
+			return true;
 
 		return false;
 	}
@@ -157,8 +159,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	boolean isGoodMatch(Map<String, Double> matchedTags, String label)
 	{
 		label = label.toLowerCase();
-		return matchedTags.containsKey(label)
-				&& matchedTags.get(label).intValue() == 100
+		return matchedTags.containsKey(label) && matchedTags.get(label).intValue() == 100
 				|| Sets.newHashSet(label.split(" ")).stream()
 						.allMatch(word -> matchedTags.containsKey(word) && matchedTags.get(word).intValue() == 100);
 	}
@@ -188,8 +189,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 				allOntologiesIds.remove(unitOntology.getId());
 			}
 			Hit<OntologyTerm> ontologyTermHit = findTags(targetAttribute, allOntologiesIds);
-			ontologyTerms = ontologyTermHit != null ? Arrays.asList(ontologyTermHit.getResult()) : Collections
-					.emptyList();
+			ontologyTerms = ontologyTermHit != null ? Arrays.asList(ontologyTermHit.getResult())
+					: Collections.emptyList();
 		}
 
 		return findAttributes(sourceEntityMetaData, queryTerms, ontologyTerms);
@@ -253,8 +254,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		Explanation explanation = elasticSearchExplainService.explain(new QueryImpl(finalQueryRules),
 				dataService.getEntityMetaData(AttributeMetaDataMetaData.ENTITY_NAME), attributeId);
 
-		Set<ExplainedQueryString> detectedQueryStrings = elasticSearchExplainService.findQueriesFromExplanation(
-				collectExpanedQueryMap, explanation);
+		Set<ExplainedQueryString> detectedQueryStrings = elasticSearchExplainService
+				.findQueriesFromExplanation(collectExpanedQueryMap, explanation);
 
 		return detectedQueryStrings;
 	}
@@ -294,8 +295,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			LOG.debug("Candidates: {}", candidates);
 		}
 
-		List<Hit<OntologyTerm>> hits = candidates
-				.stream()
+		List<Hit<OntologyTerm>> hits = candidates.stream()
 				.filter(ontologyTerm -> filterOntologyTerm(splitIntoTerms(stemmer.stemAndJoin(searchTerms)),
 						ontologyTerm, stemmer))
 				.map(ontolgoyTerm -> Hit.<OntologyTerm> create(ontolgoyTerm,

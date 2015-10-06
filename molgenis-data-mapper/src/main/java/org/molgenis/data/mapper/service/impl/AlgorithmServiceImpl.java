@@ -1,6 +1,6 @@
 package org.molgenis.data.mapper.service.impl;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_HIGH;
 import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_LOW;
 
@@ -76,12 +76,12 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			SemanticSearchService semanticSearchService, UnitResolver unitResolver,
 			AlgorithmTemplateService algorithmTemplateService, MapCategoryService mapCategoryService)
 	{
-		this.dataService = checkNotNull(dataService);
-		this.ontologyTagService = checkNotNull(ontologyTagService);
-		this.semanticSearchService = checkNotNull(semanticSearchService);
-		this.unitResolver = checkNotNull(unitResolver);
-		this.algorithmTemplateService = checkNotNull(algorithmTemplateService);
-		this.mapCategoryService = checkNotNull(mapCategoryService);
+		this.dataService = requireNonNull(dataService);
+		this.ontologyTagService = requireNonNull(ontologyTagService);
+		this.semanticSearchService = requireNonNull(semanticSearchService);
+		this.unitResolver = requireNonNull(unitResolver);
+		this.algorithmTemplateService = requireNonNull(algorithmTemplateService);
+		this.mapCategoryService = requireNonNull(mapCategoryService);
 
 		new RhinoConfig().init();
 	}

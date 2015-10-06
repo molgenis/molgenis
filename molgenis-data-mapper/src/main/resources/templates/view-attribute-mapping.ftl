@@ -102,7 +102,9 @@
 						<#list categories.iterator() as category>
 							<#list refEntityMetaData.attributes as attribute>
 								<#assign attributeName = attribute.name>
-									${category[attributeName]} <#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+								<#if (category[attributeName])??>	
+									 ${category[attributeName]?string}<#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+								</#if>
 							</#list>
 							</br>
 						</#list>
