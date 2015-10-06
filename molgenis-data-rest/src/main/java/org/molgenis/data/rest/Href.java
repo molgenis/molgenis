@@ -2,6 +2,7 @@ package org.molgenis.data.rest;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.MolgenisDataException;
@@ -135,16 +136,28 @@ public class Href
 	{
 		try
 		{
-			String ids = String.join(",", entitiesIds);
+			String ids;
+			ids = entitiesIds.stream().map(Href::encodeIdToRSQL).collect(Collectors.joining(","));
 			return String.format(baseUri + "/%s?q=%s=in=(%s)",
 					UriUtils.encodePathSegment(qualifiedEntityName, "UTF-8"),
-					UriUtils.encodePathSegment(qualifiedIdAttributeName, "UTF-8"),
-					UriUtils.encodePathSegment(ids.toString(), "UTF-8"));
+					UriUtils.encodePathSegment(qualifiedIdAttributeName, "UTF-8"), ids);
 		}
 		catch (UnsupportedEncodingException e)
 		{
 			throw new MolgenisDataException("The creation of the entity collection href has failed. Entity: "
 					+ qualifiedEntityName + " Attribute: " + qualifiedIdAttributeName);
+		}
+	}
+
+	private static String encodeIdToRSQL(String id)
+	{
+		try
+		{
+			return '"' + UriUtils.encodePathSegment(id, "UTF-8") + '"';
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			return "";
 		}
 	}
 }
