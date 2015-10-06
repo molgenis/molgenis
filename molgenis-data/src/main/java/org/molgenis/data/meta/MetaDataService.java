@@ -1,5 +1,6 @@
 package org.molgenis.data.meta;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
@@ -12,6 +13,8 @@ import org.molgenis.data.RepositoryDecoratorFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
+
+import com.google.common.collect.ImmutableMap;
 
 public interface MetaDataService extends Iterable<RepositoryCollection>, ApplicationListener<ContextRefreshedEvent>,
 		Ordered
@@ -151,4 +154,31 @@ public interface MetaDataService extends Iterable<RepositoryCollection>, Applica
 
 	// FIXME remove this method
 	List<AttributeMetaData> updateSync(EntityMetaData sourceEntityMetaData);
+
+	/**
+	 * Check the integration of an entity meta data with existing entities Check only if the existing attributes are the
+	 * same as the new attributes
+	 * 
+	 * @param repositoryCollection
+	 *            the new entities
+	 * @param defaultPackage
+	 *            the default package for the entities that does not have a package
+	 * @return
+	 */
+	LinkedHashMap<String, Boolean> integrationTestMetaData(RepositoryCollection repositoryCollection);
+
+	/**
+	 * Check the integration of an entity meta data with existing entities Check only if the existing attributes are the
+	 * same as the new attributes
+	 * 
+	 * @param newEntitiesMetaDataMap
+	 *            the new entities in a map where the keys are the names
+	 * @param skipEntities
+	 *            do not check the entities, returns true.
+	 * @param defaultPackage
+	 *            the default package for the entities that does not have a package
+	 * @return
+	 */
+	LinkedHashMap<String, Boolean> integrationTestMetaData(ImmutableMap<String, EntityMetaData> newEntitiesMetaDataMap,
+			List<String> skipEntities, String defaultPackage);
 }

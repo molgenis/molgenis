@@ -21,7 +21,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.UnknownEntityException;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
@@ -34,7 +33,7 @@ public class DefaultEntity implements Entity
 
 	private final Map<String, Object> values = new CaseInsensitiveLinkedHashMap<Object>();
 	private final EntityMetaData entityMetaData;
-	private transient final DataService dataService;
+	protected transient final DataService dataService;
 
 	public DefaultEntity(EntityMetaData entityMetaData, DataService dataService, Map<String, Object> values)
 	{
@@ -68,10 +67,10 @@ public class DefaultEntity implements Entity
 			@Override
 			public Iterator<String> iterator()
 			{
-				Stream<String> atomic = stream(entityMetaData.getAtomicAttributes().spliterator(), false).map(
-						a -> a.getName());
-				Stream<String> compound = stream(entityMetaData.getAttributes().spliterator(), false).filter(
-						a -> a.getDataType().getEnumType() == FieldTypeEnum.COMPOUND).map(a -> a.getName());
+				Stream<String> atomic = stream(entityMetaData.getAtomicAttributes().spliterator(), false)
+						.map(a -> a.getName());
+				Stream<String> compound = stream(entityMetaData.getAttributes().spliterator(), false)
+						.filter(a -> a.getDataType().getEnumType() == FieldTypeEnum.COMPOUND).map(a -> a.getName());
 
 				return Stream.concat(atomic, compound).iterator();
 			}
@@ -212,7 +211,7 @@ public class DefaultEntity implements Entity
 					return MolgenisDateFormat.getDateFormat().parse(value.toString());
 				case DATE_TIME:
 					return MolgenisDateFormat.getDateTimeFormat().parse(value.toString());
-					// $CASES-OMITTED$
+				// $CASES-OMITTED$
 				default:
 					throw new MolgenisDataException("Type [" + dataType + "] is not a date type");
 
@@ -243,13 +242,11 @@ public class DefaultEntity implements Entity
 		AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
 		if (attribute == null) throw new UnknownAttributeException(attributeName);
 
-		if (value instanceof Map) return new DefaultEntity(attribute.getRefEntity(), dataService,
-				(Map<String, Object>) value);
+		if (value instanceof Map)
+			return new DefaultEntity(attribute.getRefEntity(), dataService, (Map<String, Object>) value);
 
 		value = attribute.getDataType().convert(value);
-		Entity refEntity = dataService.findOne(attribute.getRefEntity().getName(), value);
-		if (refEntity == null) throw new UnknownEntityException(attribute.getRefEntity().getName() + " with "
-				+ attribute.getRefEntity().getIdAttribute().getName() + " [" + value + "] does not exist");
+		Entity refEntity = new LazyEntity(attribute.getRefEntity(), dataService, value);
 
 		return refEntity;
 	}
@@ -258,7 +255,8 @@ public class DefaultEntity implements Entity
 	public <E extends Entity> E getEntity(String attributeName, Class<E> clazz)
 	{
 		Entity entity = getEntity(attributeName);
-		return entity != null ? new ConvertingIterable<E>(clazz, Arrays.asList(entity), dataService).iterator().next() : null;
+		return entity != null ? new ConvertingIterable<E>(clazz, Arrays.asList(entity), dataService).iterator().next()
+				: null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -278,12 +276,12 @@ public class DefaultEntity implements Entity
 
 		if (ids.get(0) instanceof Map)
 		{
-			return stream(ids.spliterator(), false).map(
-					id -> new DefaultEntity(attribute.getRefEntity(), dataService, (Map<String, Object>) id)).collect(
-					Collectors.toList());
+			return stream(ids.spliterator(), false)
+					.map(id -> new DefaultEntity(attribute.getRefEntity(), dataService, (Map<String, Object>) id))
+					.collect(Collectors.toList());
 		}
-		return from(ids).transform(attribute.getDataType()::convert).transform(
-				convertedId -> (dataService.findOne(attribute.getRefEntity().getName(), convertedId)));
+		return from(ids).transform(attribute.getDataType()::convert)
+				.transform(convertedId -> (dataService.findOne(attribute.getRefEntity().getName(), convertedId)));
 	}
 
 	@Override
@@ -307,8 +305,8 @@ public class DefaultEntity implements Entity
 		}
 		else if ((attribute.getDataType() instanceof MrefField) && (value instanceof Iterable<?>))
 		{
-			List<?> ids = stream(((Iterable<?>) value).spliterator(), false).map(
-					v -> v instanceof Entity ? ((Entity) v).getIdValue() : v).collect(Collectors.toList());
+			List<?> ids = stream(((Iterable<?>) value).spliterator(), false)
+					.map(v -> v instanceof Entity ? ((Entity) v).getIdValue() : v).collect(Collectors.toList());
 			values.put(attributeName, ids);
 		}
 		else
