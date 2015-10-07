@@ -60,9 +60,11 @@ class RestControllerV2
 	private static final Logger LOG = LoggerFactory.getLogger(RestControllerV2.class);
 
 	/**
-	 * LimitRequestFieldSize 8190KB. UUID produces 36 characters. Max header Location size: 8190KB
+	 * LimitRequestFieldSize 8190KB. UUID produces 36 characters. Max header Location size: 8190KB. MAX_ENTITIES tested
+	 * with jetty, 200 will cause an exception: Could not send response error 500: java.io.IOException: Response header
+	 * too large
 	 */
-	static final int MAX_ENTITIES = 100;
+	static final int MAX_ENTITIES = 150;
 
 	public static final String BASE_URI = "/api/v2";
 
