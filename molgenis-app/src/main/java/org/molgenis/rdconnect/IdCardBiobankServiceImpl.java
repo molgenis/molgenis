@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -129,9 +130,8 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService
 
 		regbbMapEntity.set("OrganizationID", jsonObject.getAsJsonPrimitive("OrganizationID").getAsInt());
 		regbbMapEntity.set("type", jsonObject.getAsJsonPrimitive("type").getAsString());
-		regbbMapEntity.set("also_listed_in", this.parseToListMapEntity("rdconnect_also_listed_in", "also_listed_in",
-				jsonObject.getAsJsonArray("also listed in")));
-		regbbMapEntity.set("url", this.parseToListMapEntity("rdconnect_url", "url", jsonObject.getAsJsonArray("url")));
+		regbbMapEntity.set("also_listed_in", mapJsonArrayToCsvString(jsonObject.getAsJsonArray("also listed in")));
+		regbbMapEntity.set("url", mapJsonArrayToCsvString(jsonObject.getAsJsonArray("url")));
 
 		/**
 		 * "main contact" entity
@@ -185,6 +185,12 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService
 		regbbMapEntity.set("target_population", jsonObject.getAsJsonPrimitive("target population").getAsString());
 
 		return regbbMapEntity;
+	}
+
+	private String mapJsonArrayToCsvString(JsonArray jsonArray)
+	{
+		return StreamSupport.stream(jsonArray.spliterator(), false).map(JsonElement::getAsString)
+				.collect(Collectors.joining(","));
 	}
 
 	@Override

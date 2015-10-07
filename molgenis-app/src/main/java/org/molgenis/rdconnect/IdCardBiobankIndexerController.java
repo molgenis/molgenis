@@ -60,33 +60,14 @@ public class IdCardBiobankIndexerController extends MolgenisPluginController
 	@ResponseStatus(HttpStatus.OK)
 	public void refreshMetadata(Model model) throws Exception
 	{
-		HashSet<MapEntity> alsoListedIn = new HashSet<MapEntity>();
-		HashSet<MapEntity> url = new HashSet<MapEntity>();
 		Map<String, HashSet<MapEntity>> firsToAdd = new HashMap<String, HashSet<MapEntity>>();
-		firsToAdd.put("also_listed_in", alsoListedIn);
-		firsToAdd.put("url", url);
 
-		StreamSupport.stream(biobankMetadataService.getIdCardBiobanks().spliterator(), false).forEach(
-				e -> populateLists(firsToAdd, e));
+		StreamSupport.stream(biobankMetadataService.getIdCardBiobanks().spliterator(), false)
+				.forEach(e -> populateLists(firsToAdd, e));
 
-		try{
-			dataService.add("rdconnect_also_listed_in", alsoListedIn);
-		}
-		catch (Exception e)
-		{
-			// Do nothing Fix Me
-		}
-		
-		try{
-			dataService.add("rdconnect_url", url);
-		}
-		catch (Exception e)
-		{
-			// Do nothing Fix Me
-		}
 		dataService.add("rdconnect_regbb", biobankMetadataService.getIdCardBiobanks());
 	}
-	
+
 	private void populateLists(Map<String, HashSet<MapEntity>> lists, Entity entity)
 	{
 		lists.entrySet().forEach(e -> e.getValue().addAll((Collection<? extends MapEntity>) entity.get(e.getKey())));
