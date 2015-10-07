@@ -1,5 +1,6 @@
 package org.molgenis.data.elasticsearch;
 
+import java.util.Iterator;
 import java.util.Set;
 
 import org.molgenis.data.Entity;
@@ -117,6 +118,12 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	{
 		repository.deleteAll();
 		super.deleteAll();
+	}
+
+	@Override
+	public Iterator<Entity> iterator()
+	{
+		return repository.iterator();
 	}
 
 	@Override

@@ -69,6 +69,7 @@ import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.MolgenisTransactionListener;
 import org.molgenis.data.transaction.MolgenisTransactionLogEntryMetaData;
@@ -447,7 +448,11 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 		{
 			if (transactionId != null)
 			{
-				createMappings(transactionId, entityMetaData);
+				// store entities in the index related to this transaction even if the entity should not be stored in
+				// the index, after transaction commit the transaction index is merged with the main index. Based on the
+				// main index mapping the data is (not) stored. The transaction index is removed after transaction
+				// commit or rollback.
+				createMappings(transactionId, entityMetaData, true, true, true);
 			}
 
 			for (Entity entity : entities)
@@ -521,7 +526,8 @@ public class ElasticSearchService implements SearchService, MolgenisTransactionL
 			if (response.isExists())
 			{
 				// Copy to temp transaction index and mark as deleted
-				Entity entity = get(id, entityMetaData);
+				Entity entity = new MapEntity(entityMetaData);
+				entity.set(entityMetaData.getIdAttribute().getName(), id);
 				index(transactionId, Arrays.asList(entity), entityMetaData, CrudType.DELETE, false);
 			}
 			else
