@@ -365,9 +365,20 @@
 	$(function() {
 		$(document).on('changeAttributeSelection.data', function(e, data) {
 			if(Table) {
+				var tableAttrs = Table.state.attrs;
+				var treeAttrs = data.attributesTree;
+				for(var attr in treeAttrs){
+					if(tableAttrs[attr]!==undefined && tableAttrs[attr]!==null){
+						//check if the attribute was expanded (x/mrefs), if so, and still selected, copy the * to stay expanded.
+						if(tableAttrs[attr].hasOwnProperty('*') && treeAttrs.hasOwnProperty(attr)){
+							treeAttrs[attr] = tableAttrs[attr];
+						}
+					}
+				}
 				Table.setProps(
 					{
-						attrs: data.attributesTree,
+
+						attrs: treeAttrs,
 						onRowClick: (doShowGenomeBrowser() && isGenomeBrowserAttributesSelected()) ? onRowClick : null
 					}
 				);
