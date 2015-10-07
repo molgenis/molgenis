@@ -3,16 +3,12 @@
 <@header/>
 
 <div class="row">
-	<div class="col-md-6 col-md-offset-3">
+	<div class="col-md-12">
 		<div class="panel panel-default">
-			<!-- Default panel contents -->
-			<div class="panel-heading">Promise endpoints</div>
-
-			<!-- Table -->
-			<table class="table" id="promise-control-panel">
-			</table>
-		</div>
-	</div>
+			<div class="panel-heading">Credentials</div>
+    		<div id="data-table-container-credentials"></div>
+    	</div>
+    </div>
 </div>
 <div class="row">
 	<div class="col-md-6 col-md-offset-3">
@@ -23,12 +19,16 @@
     </div>
 </div>
 <div class="row">
-	<div class="col-md-12">
+	<div class="col-md-6 col-md-offset-3">
 		<div class="panel panel-default">
-			<div class="panel-heading">Credentials</div>
-    		<div id="data-table-container-credentials"></div>
-    	</div>
-    </div>
+			<!-- Default panel contents -->
+			<div class="panel-heading">Promise endpoints</div>
+
+			<!-- Table -->
+			<table class="table" id="promise-control-panel" style="vertical-align: middle!important">
+			</table>
+		</div>
+	</div>
 </div>
 
 
@@ -74,7 +74,7 @@
 												label = '<span class="label label-warning">UNKNOWN</span>'; 
 										}
 										
-										$('#status-'+project).html(label);
+										$('#status-'+project).html('<h4>' + label + '</h4>');
 										
 										if (message) $('#message-'+project).html(message);
 									});

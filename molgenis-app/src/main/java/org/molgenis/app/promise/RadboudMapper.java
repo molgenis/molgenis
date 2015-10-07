@@ -1,5 +1,29 @@
 package org.molgenis.app.promise;
 
+import static org.molgenis.app.promise.BbmriNlCheatSheet.AGE_HIGH;
+import static org.molgenis.app.promise.BbmriNlCheatSheet.AGE_LOW;
+import static org.molgenis.app.promise.BbmriNlCheatSheet.AGE_UNIT;
+import static org.molgenis.app.promise.BbmriNlCheatSheet.BIOBANKS;
+import static org.molgenis.app.promise.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_FEE;
+import static org.molgenis.app.promise.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_JOINT_PROJECTS;
+import static org.molgenis.app.promise.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_URI;
+import static org.molgenis.app.promise.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_FEE;
+import static org.molgenis.app.promise.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_URI;
+import static org.molgenis.app.promise.BbmriNlCheatSheet.CONTACT_PERSON;
+import static org.molgenis.app.promise.BbmriNlCheatSheet.DATA_CATEGORIES;
+import static org.molgenis.app.promise.BbmriNlCheatSheet.DESCRIPTION;
+import static org.molgenis.app.promise.BbmriNlCheatSheet.DISEASE;
+import static org.molgenis.app.promise.BbmriNlCheatSheet.INSTITUTES;
+import static org.molgenis.app.promise.BbmriNlCheatSheet.MATERIALS;
+import static org.molgenis.app.promise.BbmriNlCheatSheet.NAME;
+import static org.molgenis.app.promise.BbmriNlCheatSheet.NUMBER_OF_DONORS;
+import static org.molgenis.app.promise.BbmriNlCheatSheet.OMICS;
+import static org.molgenis.app.promise.BbmriNlCheatSheet.PRINCIPAL_INVESTIGATORS;
+import static org.molgenis.app.promise.BbmriNlCheatSheet.SAMPLE_COLLECTIONS_ENTITY;
+import static org.molgenis.app.promise.BbmriNlCheatSheet.SEX;
+import static org.molgenis.app.promise.BbmriNlCheatSheet.TYPE;
+import static org.molgenis.app.promise.BbmriNlCheatSheet.WEBSITE;
+
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
@@ -14,6 +38,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.molgenis.app.promise.MappingReport.Status;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -61,57 +86,68 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 		promiseMapperFactory.registerMapper(ID, this);
 	}
 
-	public void map(String biobankId) throws IOException
+	public MappingReport map(String biobankId) throws IOException
 	{
 		LOG.info("Downloading data for " + biobankId);
-
-		if (true) return;
+		MappingReport report = new MappingReport();
+		report.setStatus(Status.ERROR);
+		try
+		{
+			Thread.sleep(3000);
+		}
+		catch (InterruptedException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if (true) return report;
 
 		Iterable<Entity> promiseBiobankEntities = promiseDataParser.parse(biobankId, 0);
 		Iterable<Entity> promiseSampleEntities = promiseDataParser.parse(biobankId, 1);
 
-		EntityMetaData targetEntityMetaData = dataService.getEntityMetaData(BBMRI_NL_SAMPLE_COLLECTIONS_ENTITY);
+		EntityMetaData targetEntityMetaData = dataService.getEntityMetaData(SAMPLE_COLLECTIONS_ENTITY);
 
 		for (Entity promiseBiobankEntity : promiseBiobankEntities)
 		{
-			Iterable<Entity> promiseBiobankSamplesEntity = getPromiseBiobankSamples(promiseBiobankEntity,
+			Iterable<Entity> promiseBiobankSamplesEntities = getPromiseBiobankSamples(promiseBiobankEntity,
 					promiseSampleEntities);
 
 			MapEntity targetEntity = new MapEntity(targetEntityMetaData);
-			targetEntity.set("id", "promise_" + promiseBiobankEntity.getString("DEELBIOBANK"));
-			targetEntity.set("name", promiseBiobankEntity.getString("TITEL"));
-			// targetEntity.set("acronym", null); //TODO Vaste mapping op basis van ID
-			targetEntity.set("type", toTypes(promiseBiobankEntity.getString("TYPEBIOBANK")));
-			targetEntity.set("disease", toDiseases()); // TODO discuss with DvE
-			targetEntity.set("data_categories", toDataCategories(promiseBiobankEntity, promiseBiobankSamplesEntity));
-			targetEntity.set("materials", toMaterials(promiseBiobankSamplesEntity));
-			targetEntity.set("omics", toOmics(promiseBiobankSamplesEntity));
-			targetEntity.set("sex", toSex(promiseBiobankSamplesEntity));
-			targetEntity.set("age_low", toAgeMinOrMax(promiseBiobankSamplesEntity, true));
-			targetEntity.set("age_high", toAgeMinOrMax(promiseBiobankSamplesEntity, false));
-			targetEntity.set("age_unit", toAgeUnit());
-			targetEntity.set("numberOfDonors", Iterables.size(promiseBiobankSamplesEntity));
-			targetEntity.set("description", promiseBiobankEntity.getString("OMSCHRIJVING"));
-			// targetEntity.set("publications", null);
-			targetEntity.set("contact_person", getCreatePersons(promiseBiobankEntity));
-			targetEntity.set("principal_investigators", toPrincipalInvestigators());
-			targetEntity.set("institutes", toInstitutes());
-			targetEntity.set("biobanks", toBiobanks());
-			targetEntity.set("website", "http://www.radboudbiobank.nl/");
-			// targetEntity.set("sample_access", null);
-			targetEntity.set("biobankSampleAccessFee", false);
-			targetEntity.set("biobankSampleAccessJointProjects", true);
-			// targetEntity.set("biobankSampleAccessDescription", null);
-			targetEntity
-					.set("biobankSampleAccessURI", "http://www.radboudbiobank.nl/nl/collecties/materiaal-opvragen/");
-			// targetEntity.set("data_access", null);
-			targetEntity.set("biobankDataAccessFee", false);
-			targetEntity.set("biobankDataAccessJointProjects", true);
-			// targetEntity.set("biobankDataAccessDescription", null);
-			targetEntity.set("biobankDataAccessURI", "http://www.radboudbiobank.nl/nl/collecties/materiaal-opvragen/");
+			targetEntity.set(BbmriNlCheatSheet.ID, "promise_" + promiseBiobankEntity.getString("DEELBIOBANK"));
+			targetEntity.set(NAME, promiseBiobankEntity.getString("TITEL"));
+			// targetEntity.set(ACRONYM, null); //TODO Vaste mapping op basis van ID
+			targetEntity.set(TYPE, toTypes(promiseBiobankEntity.getString("TYPEBIOBANK")));
+			targetEntity.set(DISEASE, toDiseases()); // TODO discuss with DvE
+			targetEntity.set(DATA_CATEGORIES, toDataCategories(promiseBiobankEntity, promiseBiobankSamplesEntities));
+			targetEntity.set(MATERIALS, toMaterials(promiseBiobankSamplesEntities));
+			targetEntity.set(OMICS, toOmics(promiseBiobankSamplesEntities));
+			targetEntity.set(SEX, toSex(promiseBiobankSamplesEntities));
+			targetEntity.set(AGE_LOW, toAgeMinOrMax(promiseBiobankSamplesEntities, true));
+			targetEntity.set(AGE_HIGH, toAgeMinOrMax(promiseBiobankSamplesEntities, false));
+			targetEntity.set(AGE_UNIT, toAgeUnit());
+			targetEntity.set(NUMBER_OF_DONORS, Iterables.size(promiseBiobankSamplesEntities));
+			targetEntity.set(DESCRIPTION, promiseBiobankEntity.getString("OMSCHRIJVING"));
+			// targetEntity.set(PUBLICATIONS, null);
+			targetEntity.set(CONTACT_PERSON, getCreatePersons(promiseBiobankEntity));
+			targetEntity.set(PRINCIPAL_INVESTIGATORS, toPrincipalInvestigators());
+			targetEntity.set(INSTITUTES, toInstitutes());
+			targetEntity.set(BIOBANKS, toBiobanks());
+			targetEntity.set(WEBSITE, "http://www.radboudbiobank.nl/");
+			// targetEntity.set(SAMPLE_ACCESS, null);
+			targetEntity.set(BIOBANK_SAMPLE_ACCESS_FEE, false);
+			targetEntity.set(BIOBANK_DATA_ACCESS_JOINT_PROJECTS, true);
+			// targetEntity.set(BIOBANK_DATA_SAMPLE_ACCESS_DESCRIPTION", null);
+			targetEntity.set(BIOBANK_SAMPLE_ACCESS_URI,
+					"http://www.radboudbiobank.nl/nl/collecties/materiaal-opvragen/");
+			// targetEntity.set(DATA_ACCESS, null);
+			targetEntity.set(BIOBANK_DATA_ACCESS_FEE, false);
+			targetEntity.set(BIOBANK_DATA_ACCESS_JOINT_PROJECTS, true);
+			// targetEntity.set(BIOBANK_DATA_ACCESS_DESCRIPTION, null);
+			targetEntity.set(BIOBANK_DATA_ACCESS_URI, "http://www.radboudbiobank.nl/nl/collecties/materiaal-opvragen/");
 
 			dataService.add("bbmri_nl_sample_collections", targetEntity);
 		}
+		return null;
 	}
 
 	private Iterable<Entity> toBiobanks()

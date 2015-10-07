@@ -32,9 +32,9 @@ public class ProMiseDataParser
 		this.promiseClient = Objects.requireNonNull(promiseClient, "promiseClient is null");
 	}
 
-	public Iterable<Entity> parse(String biobankId, Integer seqNr) throws IOException
+	public Iterable<Entity> parse(String projectName, Integer seqNr) throws IOException
 	{
-		XMLStreamReader xmlStreamReader = promiseClient.getDataForXml(biobankId, seqNr.toString());
+		XMLStreamReader xmlStreamReader = promiseClient.getDataForXml(projectName, seqNr.toString());
 		try
 		{
 			while (xmlStreamReader.hasNext())

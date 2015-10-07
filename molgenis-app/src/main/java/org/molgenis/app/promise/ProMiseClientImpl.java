@@ -27,6 +27,7 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,7 +37,7 @@ public class ProMiseClientImpl implements ProMiseClient
 {
 	private static final String NAMESPACE_VALUE = "http://tempuri.org/";
 	private static final String ACTION_GETDATAFORXML = "getDataForXML";
-	private static final String CREDENTIALS_ENTITY = PromiseCredentialsMetaData.FULLY_QUALIFIED_NAME;
+	private static final String PROJECTS_ENTITY = PromiseMappingProjectMetaData.FULLY_QUALIFIED_NAME;
 
 	private final SOAPConnectionFactory soapConnectionFactory;
 
@@ -51,17 +52,21 @@ public class ProMiseClientImpl implements ProMiseClient
 
 	@Override
 	@RunAsSystem
-	public XMLStreamReader getDataForXml(String biobankId, String seqNr) throws IOException
+	public XMLStreamReader getDataForXml(String projectName, String seqNr) throws IOException
 	{
-		Entity credentials = dataService.findOne(CREDENTIALS_ENTITY, biobankId);
+		Entity project = dataService.findOne(PROJECTS_ENTITY, projectName);
+		if (project == null) throw new MolgenisDataException("Project is null");
+
+		Entity credentials = project.getEntity(PromiseMappingProjectMetaData.CREDENTIALS);
+		if (credentials == null) throw new MolgenisDataException("Credentials is null");
 
 		Map<String, String> args = new LinkedHashMap<String, String>();
-		args.put("proj", credentials.get("PROJ").toString());
-		args.put("PWS", credentials.get("PWS").toString());
+		args.put("proj", credentials.getString("PROJ"));
+		args.put("PWS", credentials.getString("PWS"));
 		args.put("SEQNR", seqNr);
-		args.put("securitycode", credentials.get("SECURITYCODE").toString());
-		args.put("username", credentials.get("USERNAME").toString());
-		args.put("passw", credentials.get("PASSW").toString());
+		args.put("securitycode", credentials.getString("SECURITYCODE"));
+		args.put("username", credentials.getString("USERNAME"));
+		args.put("passw", credentials.getString("PASSW"));
 
 		try
 		{
