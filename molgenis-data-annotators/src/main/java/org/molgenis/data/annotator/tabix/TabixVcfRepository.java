@@ -89,9 +89,26 @@ public class TabixVcfRepository extends VcfRepository
 	public synchronized List<Entity> query(String chrom, long posFrom, long posTo)
 	{
 		String queryString = String.format("%s:%s-%s", checkNotNull(chrom), checkNotNull(posFrom), checkNotNull(posTo));
-		Collection<String> lines = getLines(tabixReader.query(queryString));
-		return lines.stream().map(line -> line.split("\t")).map(vcfToEntitySupplier.get()::toEntity)
-				.filter(entity -> positionMatches(entity, posFrom, posTo)).collect(Collectors.toList());
+		try
+		{
+			Collection<String> lines = getLines(tabixReader.query(queryString));
+			return lines.stream().map(line -> line.split("\t")).map(vcfToEntitySupplier.get()::toEntity)
+					.filter(entity -> positionMatches(entity, posFrom, posTo)).collect(Collectors.toList());
+		}
+		catch (NullPointerException e)
+		{
+			LOG.warn("Unable to read from tabix resource for query: " + queryString
+					+ " (Position not present in resource file?)");
+			LOG.debug("", e);
+		}
+		catch (ArrayIndexOutOfBoundsException e)
+		{
+			LOG.warn("Unable to read from tabix resource for query: " + queryString
+					+ " (Chromosome not present in resource file?)");
+			LOG.debug("", e);
+		}
+
+		return Collections.emptyList();
 	}
 
 	/**
