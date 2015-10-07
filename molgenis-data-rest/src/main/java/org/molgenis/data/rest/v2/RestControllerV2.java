@@ -59,12 +59,7 @@ class RestControllerV2
 {
 	private static final Logger LOG = LoggerFactory.getLogger(RestControllerV2.class);
 
-	/**
-	 * LimitRequestFieldSize 8190KB. UUID produces 36 characters. Max header Location size: 8190KB. MAX_ENTITIES tested
-	 * with jetty, 200 will cause an exception: Could not send response error 500: java.io.IOException: Response header
-	 * too large
-	 */
-	static final int MAX_ENTITIES = 150;
+	static final int MAX_ENTITIES = 1000;
 
 	public static final String BASE_URI = "/api/v2";
 
@@ -203,7 +198,7 @@ class RestControllerV2
 	 */
 	@RequestMapping(value = "/{entityName}", method = POST, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public EntityCollectionBatchResponseBodyV2 createEntities(@PathVariable("entityName") String entityName,
+	public EntityCollectionBatchCreateResponseBodyV2 createEntities(@PathVariable("entityName") String entityName,
 			@RequestBody EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
 	{
 		final EntityMetaData meta = dataService.getEntityMetaData(entityName);
@@ -213,7 +208,7 @@ class RestControllerV2
 		{
 			final List<Entity> entities = request.getEntities().stream().map(e -> this.restService.toEntity(meta, e))
 					.collect(Collectors.toList());
-			final EntityCollectionBatchResponseBodyV2 responseBody = new EntityCollectionBatchResponseBodyV2();
+			final EntityCollectionBatchCreateResponseBodyV2 responseBody = new EntityCollectionBatchCreateResponseBodyV2();
 			final List<String> ids = new ArrayList<String>();
 
 			// Add all entities
@@ -228,8 +223,9 @@ class RestControllerV2
 								id)));
 			}
 
-			response.addHeader("Location", Href.concatEntityCollectionHref(RestControllerV2.BASE_URI, entityName, meta
+			responseBody.setLocation(Href.concatEntityCollectionHref(RestControllerV2.BASE_URI, entityName, meta
 					.getIdAttribute().getName(), ids));
+
 			response.setStatus(HttpServletResponse.SC_CREATED);
 			return responseBody;
 		}

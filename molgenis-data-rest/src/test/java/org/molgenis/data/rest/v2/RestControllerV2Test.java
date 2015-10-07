@@ -372,11 +372,10 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testCreateEntities() throws Exception
 	{
 		String content = "{entities:[{id:'p1', name:'Piet'}, {id:'p2', name:'Pietje'}]}";
-		String responseBody = "{\n  \"resources\": [\n    {\n      \"href\": \"/api/v2/entity/p1\"\n    },\n"
+		String responseBody = "{\n  \"location\": \"/api/v2/entity?q=id=in=(\\\"p1\",\\\"p2\\\")\",\n  \"resources\": [\n    {\n      \"href\": \"/api/v2/entity/p1\"\n    },\n"
 				+ "    {\n      \"href\": \"/api/v2/entity/p2\"\n    }\n  ]\n}";
 		mockMvc.perform(post(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
 				.andExpect(status().isCreated()).andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(header().string("Location", "/api/v2/entity?q=id=in=(\"p1\",\"p2\")"))
 				.andExpect(content().string(responseBody));
 
 		verify(dataService).add(Matchers.eq(ENTITY_NAME), Matchers.anyListOf(MapEntity.class));
