@@ -6,6 +6,48 @@ import org.testng.annotations.Test;
 public class HrefTest
 {
 	@Test
+	public static void testEntityMetaData()
+	{
+		Assert.assertEquals(Href.concatMetaEntityHref("http://molgenis.org/api/v1", "org_test_TypeTest"),
+				"http://molgenis.org/api/v1/org_test_TypeTest/meta");
+	}
+
+	@Test
+	public static void testEntityMetaDataV2()
+	{
+		Assert.assertEquals(Href.concatMetaEntityHrefV2("http://molgenis.org/api/v2", "org_test_TypeTest"),
+				"http://molgenis.org/api/v2/org_test_TypeTest");
+	}
+
+	@Test
+	public static void testEntity()
+	{
+		Assert.assertEquals(Href.concatEntityHref("http://molgenis.org/api/v1", "org_test_TypeTest", "1"),
+				"http://molgenis.org/api/v1/org_test_TypeTest/1");
+	}
+
+	@Test
+	public static void testEntityUrlEncodeIdWithSpace()
+	{
+		Assert.assertEquals(Href.concatEntityHref("http://molgenis.org/api/v1", "org_test_TypeTest", "weird id"),
+				"http://molgenis.org/api/v1/org_test_TypeTest/weird%20id");
+	}
+
+	@Test
+	public static void testEntityUrlEncodeIdWithSlash()
+	{
+		Assert.assertEquals(Href.concatEntityHref("http://molgenis.org/api/v1", "org_test_TypeTest", "weird/id"),
+				"http://molgenis.org/api/v1/org_test_TypeTest/weird%2Fid");
+	}
+
+	@Test
+	public static void testAttributeMetaData()
+	{
+		Assert.assertEquals(Href.concatMetaAttributeHref("http://molgenis.org/api/v1", "org_test_TypeTest", "xint"),
+				"http://molgenis.org/api/v1/org_test_TypeTest/meta/xint");
+	}
+
+	@Test
 	public static void testAttribute()
 	{
 		Assert.assertEquals(Href.concatAttributeHref("http://molgenis.org/api/v1", "org_test_TypeTest", "1", "xint"),
@@ -27,5 +69,4 @@ public class HrefTest
 				Href.concatAttributeHref("http://molgenis.org/api/v1", "org_test_TypeTest", "weird/id", "xint"),
 				"http://molgenis.org/api/v1/org_test_TypeTest/weird%2Fid/xint");
 	}
-
 }
