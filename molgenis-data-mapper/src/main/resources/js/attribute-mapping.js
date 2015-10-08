@@ -739,7 +739,7 @@
 		});
 
 		$('a[href=#script]').on('shown.bs.tab', function() {
-		// when users switches back to the script tab, the value in the editor is not updated
+		// when users switch back to the script tab, the value in the editor is not updated
 		// until the editor is clicked. A workaround is to move the page by calling the method to
 		// flush the changes. 
 			aceEditor.scrollPageDown();
