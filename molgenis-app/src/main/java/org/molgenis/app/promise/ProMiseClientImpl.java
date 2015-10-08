@@ -3,9 +3,13 @@ package org.molgenis.app.promise;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Collections;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.MimeHeaders;
@@ -21,66 +25,53 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ProMiseClientImpl implements ProMiseClient
 {
-	private static final String NAMESPACE_KEY = "tem";
 	private static final String NAMESPACE_VALUE = "http://tempuri.org/";
 	private static final String ACTION_GETDATAFORXML = "getDataForXML";
-	private static final String ACTION_HELLOWORLD = "HelloWorld";
+	private static final String PROJECTS_ENTITY = PromiseMappingProjectMetaData.FULLY_QUALIFIED_NAME;
 
 	private final SOAPConnectionFactory soapConnectionFactory;
-	private final String endpoint;
+
+	private final DataService dataService;
 
 	@Autowired
-	public ProMiseClientImpl(SOAPConnectionFactory soapConnectionFactory,
-			@Value("${promise.endpoint:@null}") String endpoint)
+	public ProMiseClientImpl(SOAPConnectionFactory soapConnectionFactory, DataService dataService)
 	{
-		if (soapConnectionFactory == null)
-		{
-			throw new IllegalArgumentException("SOAPConnectionFactory is null");
-		}
-		if (endpoint == null)
-		{
-			throw new IllegalArgumentException(
-					"endpoint is null, did you define 'promise.endpoint' in molgenis-server.properties?");
-		}
-		this.soapConnectionFactory = soapConnectionFactory;
-		this.endpoint = endpoint;
+		this.dataService = Objects.requireNonNull(dataService, "DataService is null");
+		this.soapConnectionFactory = Objects.requireNonNull(soapConnectionFactory, "SOAPConnectionFactory is null");
 	}
 
 	@Override
-	public XMLStreamReader helloWorld() throws IOException
+	@RunAsSystem
+	public XMLStreamReader getDataForXml(String projectName, String seqNr) throws IOException
 	{
-		try
-		{
-			return executeSOAPRequest(ACTION_HELLOWORLD, Collections.<String, String> emptyMap());
-		}
-		catch (SOAPException e)
-		{
-			throw new IOException(e);
-		}
-	}
+		Entity project = dataService.findOne(PROJECTS_ENTITY, projectName);
+		if (project == null) throw new MolgenisDataException("Project is null");
 
-	@Override
-	public XMLStreamReader getDataForXml(String project, String pws, String seqNr, String securityCode,
-			String username, String password) throws IOException
-	{
+		Entity credentials = project.getEntity(PromiseMappingProjectMetaData.CREDENTIALS);
+		if (credentials == null) throw new MolgenisDataException("Credentials is null");
+
 		Map<String, String> args = new LinkedHashMap<String, String>();
-		args.put("proj", project);
-		args.put("PWS", pws);
+		args.put("proj", credentials.getString("PROJ"));
+		args.put("PWS", credentials.getString("PWS"));
 		args.put("SEQNR", seqNr);
-		args.put("securitycode", securityCode);
-		args.put("username", username);
-		args.put("passw", password);
+		args.put("securitycode", credentials.getString("SECURITYCODE"));
+		args.put("username", credentials.getString("USERNAME"));
+		args.put("passw", credentials.getString("PASSW"));
 
 		try
 		{
-			return executeSOAPRequest(ACTION_GETDATAFORXML, args);
+			return executeSOAPRequest(ACTION_GETDATAFORXML, createURLWithTimeout(credentials.get("URL").toString()),
+					args);
 		}
 		catch (SOAPException e)
 		{
@@ -88,7 +79,7 @@ public class ProMiseClientImpl implements ProMiseClient
 		}
 	}
 
-	private XMLStreamReader executeSOAPRequest(String action, Map<String, String> args) throws SOAPException,
+	private XMLStreamReader executeSOAPRequest(String action, URL url, Map<String, String> args) throws SOAPException,
 			IOException
 	{
 		SOAPConnection soapConnection = null;
@@ -98,7 +89,7 @@ public class ProMiseClientImpl implements ProMiseClient
 			soapConnection = soapConnectionFactory.createConnection();
 
 			// Send SOAP Message to SOAP Server
-			SOAPMessage soapResponse = soapConnection.call(createSOAPRequest(action, args), endpoint);
+			SOAPMessage soapResponse = soapConnection.call(createSOAPRequest(action, args), url);
 
 			// Fail on SOAP error
 			if (soapResponse.getSOAPBody().hasFault())
@@ -169,5 +160,29 @@ public class ProMiseClientImpl implements ProMiseClient
 		XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
 		xmlInputFactory.setProperty("javax.xml.stream.isCoalescing", true);
 		return xmlInputFactory.createXMLStreamReader(new ByteArrayInputStream(bos.toByteArray()));
+	}
+
+	private URL createURLWithTimeout(String url)
+	{
+		try
+		{
+			// enable time-out for SOAP calls
+			return new URL(null, url, new URLStreamHandler()
+			{
+				protected URLConnection openConnection(URL url) throws IOException
+				{
+					URL clone = new URL(url.toString());
+					URLConnection connection = clone.openConnection();
+
+					connection.setConnectTimeout(15 * 1000); // 15 sec
+					connection.setReadTimeout(15 * 1000); // 15 sec
+					return connection;
+				}
+			});
+		}
+		catch (MalformedURLException e)
+		{
+			throw new IllegalArgumentException(url + " is an invalid URL", e);
+		}
 	}
 }
