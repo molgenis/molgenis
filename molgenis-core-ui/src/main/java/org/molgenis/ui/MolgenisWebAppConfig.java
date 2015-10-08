@@ -411,6 +411,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		repos.forEach(repo -> {
 			localSearchService.rebuildIndex(repo, repo.getEntityMetaData());
 		});
+
+		localSearchService.optimizeIndex();
 	}
 
 	@PostConstruct

@@ -21,7 +21,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode;
+import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -31,7 +31,7 @@ import com.google.common.collect.Iterables;
 public class ElasticsearchRepositoryDecoratorTest
 {
 	private ElasticsearchRepositoryDecorator elasticSearchRepository;
-	private ElasticSearchService elasticSearchService;
+	private ElasticsearchService elasticSearchService;
 	private Repository repository;
 	private EntityMetaData repositoryEntityMetaData;
 	private String entityName;
@@ -40,7 +40,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	@BeforeMethod
 	public void setUp() throws IOException
 	{
-		elasticSearchService = mock(ElasticSearchService.class);
+		elasticSearchService = mock(ElasticsearchService.class);
 		repository = mock(Repository.class);
 		entityName = "";
 		repositoryEntityMetaData = mock(EntityMetaData.class);
@@ -199,7 +199,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	{
 		List<Object> ids = Arrays.asList(mock(Object.class), mock(Object.class));
 		elasticSearchRepository.findAll(ids);
-		verify(elasticSearchService).get(ids, repositoryEntityMetaData);
+		verify(repository).findAll(ids);
 	}
 
 	@Test
@@ -208,8 +208,8 @@ public class ElasticsearchRepositoryDecoratorTest
 		Query q = mock(Query.class);
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
-		when(elasticSearchService.search(q, repositoryEntityMetaData)).thenReturn(
-				Arrays.<Entity> asList(entity0, entity1));
+		when(elasticSearchService.search(q, repositoryEntityMetaData))
+				.thenReturn(Arrays.<Entity> asList(entity0, entity1));
 		elasticSearchRepository.findOne(q);
 		verify(elasticSearchService).search(q, repositoryEntityMetaData);
 	}
@@ -228,7 +228,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	{
 		Object id = mock(Object.class);
 		elasticSearchRepository.findOne(id);
-		verify(elasticSearchService).get(id, repositoryEntityMetaData);
+		verify(repository).findOne(id);
 	}
 
 	@Test
