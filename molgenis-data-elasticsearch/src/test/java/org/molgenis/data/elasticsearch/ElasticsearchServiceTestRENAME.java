@@ -34,8 +34,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.ElasticsearchService.BulkProcessorFactory;
-import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
+import org.molgenis.data.elasticsearch.ElasticsearchServiceRENAME.BulkProcessorFactory;
+import org.molgenis.data.elasticsearch.ElasticsearchServiceRENAME.IndexingMode;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -49,10 +49,10 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
 
-public class ElasticsearchServiceTest
+public class ElasticsearchServiceTestRENAME
 {
 	private Client client;
-	private ElasticsearchService searchService;
+	private ElasticsearchServiceRENAME searchService;
 	private String indexName;
 	private EntityToSourceConverter entityToSourceConverter;
 	private DataServiceImpl dataService;
@@ -65,12 +65,12 @@ public class ElasticsearchServiceTest
 
 		entityToSourceConverter = mock(EntityToSourceConverter.class);
 		dataService = spy(new DataServiceImpl(new NonDecoratingRepositoryDecoratorFactory()));
-		searchService = spy(new ElasticsearchService(client, indexName, dataService, entityToSourceConverter, false));
+		searchService = spy(new ElasticsearchServiceRENAME(client, indexName, dataService, entityToSourceConverter, false));
 		BulkProcessorFactory bulkProcessorFactory = mock(BulkProcessorFactory.class);
 		BulkProcessor bulkProcessor = mock(BulkProcessor.class);
 		when(bulkProcessor.awaitClose(any(Long.class), any(TimeUnit.class))).thenReturn(true);
 		when(bulkProcessorFactory.create(client)).thenReturn(bulkProcessor);
-		ElasticsearchService.setBulkProcessorFactory(bulkProcessorFactory);
+		ElasticsearchServiceRENAME.setBulkProcessorFactory(bulkProcessorFactory);
 		doNothing().when(searchService).refresh(any(String.class));
 	}
 
@@ -92,7 +92,7 @@ public class ElasticsearchServiceTest
 
 		searchService.index(entity, entityMetaData, IndexingMode.ADD);
 		verify(searchService, times(1)).index(indexName, Arrays.asList(entity), entityMetaData,
-				ElasticsearchService.CrudType.ADD, true);
+				ElasticsearchServiceRENAME.CrudType.ADD, true);
 	}
 
 	@Test
@@ -104,7 +104,7 @@ public class ElasticsearchServiceTest
 
 		searchService.index(entity, entityMetaData, IndexingMode.UPDATE);
 		verify(searchService, times(1)).index(indexName, Arrays.asList(entity), entityMetaData,
-				ElasticsearchService.CrudType.UPDATE, true);
+				ElasticsearchServiceRENAME.CrudType.UPDATE, true);
 	}
 
 	@SuppressWarnings("unchecked")

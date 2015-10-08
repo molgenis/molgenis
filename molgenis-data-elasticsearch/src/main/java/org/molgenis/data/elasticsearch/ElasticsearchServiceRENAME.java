@@ -85,9 +85,9 @@ import com.google.common.collect.Iterables;
  * 
  * @author erwin
  */
-public class ElasticsearchService implements SearchService, MolgenisTransactionListener
+public class ElasticsearchServiceRENAME implements SearchService, MolgenisTransactionListener
 {
-	private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchServiceRENAME.class);
 
 	public static final String CRUD_TYPE_FIELD_NAME = "MolgenisCrudType";
 	private static BulkProcessorFactory BULK_PROCESSOR_FACTORY = new BulkProcessorFactory();
@@ -112,7 +112,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	private final EntityToSourceConverter entityToSourceConverter;
 	private final ElasticsearchUtils elasticsearchUtils;
 
-	public ElasticsearchService(Client client, String indexName, DataService dataService,
+	public ElasticsearchServiceRENAME(Client client, String indexName, DataService dataService,
 			EntityToSourceConverter entityToSourceConverter)
 	{
 		this(client, indexName, dataService, entityToSourceConverter, true);
@@ -127,7 +127,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	 * @param entityToSourceConverter
 	 * @param createIndexIfNotExists
 	 */
-	ElasticsearchService(Client client, String indexName, DataService dataService,
+	ElasticsearchServiceRENAME(Client client, String indexName, DataService dataService,
 			EntityToSourceConverter entityToSourceConverter, boolean createIndexIfNotExists)
 	{
 		this.client = requireNonNull(client);
