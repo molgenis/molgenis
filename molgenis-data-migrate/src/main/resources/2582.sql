@@ -30,7 +30,9 @@ CREATE TABLE entities_attributes
 (
 	`order`		int(11),
 	fullName	varchar(255),
-	attributes	varchar(255)
+	attributes	varchar(255),
+	FOREIGN KEY (`fullName`) REFERENCES `entities` (`fullName`) ON DELETE CASCADE,
+	FOREIGN KEY (`attributes`) REFERENCES `attributes` (`identifier`) ON DELETE CASCADE
 );
 
 INSERT INTO entities_attributes
