@@ -35,7 +35,7 @@ import com.google.common.collect.Lists;
 public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
-	private MetaDataServiceImpl metaDataRepositories;
+	private MetaDataServiceImpl metaDataService;
 
 	@Autowired
 	private MysqlRepositoryCollection coll;
@@ -46,7 +46,7 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 	{
 		try
 		{
-			metaDataRepositories.recreateMetaDataRepositories();
+			metaDataService.recreateMetaDataRepositories();
 		}
 		catch (UnknownEntityException e)
 		{
@@ -59,17 +59,17 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("test");
 		emd.addAttribute("id").setIdAttribute(true).setNillable(false);
-		metaDataRepositories.addEntityMeta(emd);
+		metaDataService.addEntityMeta(emd);
 
 		List<String> enumOptions = Arrays.asList("enum1", "enum2");
 		AttributeMetaData enumAttr = emd.addAttribute("enum0").setDataType(new EnumField()).setEnumOptions(enumOptions);
-		metaDataRepositories.addAttribute(emd.getName(), enumAttr);
+		metaDataService.addAttribute(emd.getName(), enumAttr);
 
 		AttributeMetaData intRangeAttr = emd.addAttribute("intrange").setDataType(MolgenisFieldTypes.INT)
 				.setRange(new Range(1l, 5l));
-		metaDataRepositories.addAttribute(emd.getName(), intRangeAttr);
+		metaDataService.addAttribute(emd.getName(), intRangeAttr);
 
-		List<AttributeMetaData> retrieved = Lists.newArrayList(metaDataRepositories.getEntityMetaData(emd.getName())
+		List<AttributeMetaData> retrieved = Lists.newArrayList(metaDataService.getEntityMetaData(emd.getName())
 				.getAttributes());
 
 		assertNotNull(retrieved);
@@ -97,13 +97,13 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 	{
 		DefaultEntityMetaData test = new DefaultEntityMetaData("testje");
 		test.addAttribute("id").setIdAttribute(true).setNillable(false);
-		metaDataRepositories.addEntityMeta(test);
+		metaDataService.addEntityMeta(test);
 
 		DefaultEntityMetaData extendsTest = new DefaultEntityMetaData("extendstest");
 		extendsTest.setExtends(test);
-		metaDataRepositories.addEntityMeta(extendsTest);
+		metaDataService.addEntityMeta(extendsTest);
 
-		EntityMetaData retrieved = metaDataRepositories.getEntityMetaData("extendstest");
+		EntityMetaData retrieved = metaDataService.getEntityMetaData("extendstest");
 		assertNotNull(retrieved);
 		assertEquals(retrieved.getName(), "extendstest");
 		assertEquals(retrieved.getExtends(), test);
@@ -112,7 +112,7 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void getEntityMetaDataNotFound()
 	{
-		assertNull(metaDataRepositories.getEntityMetaData("unknown"));
+		assertNull(metaDataService.getEntityMetaData("unknown"));
 	}
 
 	@Test
@@ -120,17 +120,17 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 	{
 		DefaultEntityMetaData test = new DefaultEntityMetaData("test");
 		test.addAttribute("id").setIdAttribute(true).setNillable(false);
-		metaDataRepositories.addEntityMeta(test);
+		metaDataService.addEntityMeta(test);
 
 		DefaultEntityMetaData test1 = new DefaultEntityMetaData("test1");
 		test1.addAttribute("id").setIdAttribute(true).setNillable(false);
-		metaDataRepositories.addEntityMeta(test1);
+		metaDataService.addEntityMeta(test1);
 
 		DefaultEntityMetaData test2 = new DefaultEntityMetaData("test2");
 		test2.addAttribute("id").setIdAttribute(true).setNillable(false);
-		metaDataRepositories.addEntityMeta(test2);
+		metaDataService.addEntityMeta(test2);
 
-		List<EntityMetaData> meta = Lists.newArrayList(metaDataRepositories.getEntityMetaDatas());
+		List<EntityMetaData> meta = Lists.newArrayList(metaDataService.getEntityMetaDatas());
 		assertNotNull(meta);
 		assertEquals(meta.size(), 3);
 		assertTrue(meta.contains(test));
@@ -143,28 +143,28 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 	{
 
 		PackageImpl p1 = new PackageImpl("p1", "Package1", null);
-		metaDataRepositories.addPackage(p1);
+		metaDataService.addPackage(p1);
 
 		Package p2 = new PackageImpl("p2", "Package2", p1);
-		metaDataRepositories.addPackage(p2);
+		metaDataService.addPackage(p2);
 
 		DefaultEntityMetaData test = new DefaultEntityMetaData("test");
 		test.addAttribute("id").setIdAttribute(true).setNillable(false);
-		metaDataRepositories.addEntityMeta(test);
+		metaDataService.addEntityMeta(test);
 
 		DefaultEntityMetaData test1 = new DefaultEntityMetaData("test1", p1);
 		test1.addAttribute("id").setIdAttribute(true).setNillable(false);
-		metaDataRepositories.addEntityMeta(test1);
+		metaDataService.addEntityMeta(test1);
 
 		DefaultEntityMetaData test2 = new DefaultEntityMetaData("test2", p2);
 		test2.addAttribute("id").setIdAttribute(true).setNillable(false);
-		metaDataRepositories.addEntityMeta(test2);
+		metaDataService.addEntityMeta(test2);
 
 		DefaultEntityMetaData test3 = new DefaultEntityMetaData("test3", p2);
 		test3.addAttribute("id").setIdAttribute(true).setNillable(false);
-		metaDataRepositories.addEntityMeta(test3);
+		metaDataService.addEntityMeta(test3);
 
-		assertEquals(metaDataRepositories.getPackage("p1_p2").getEntityMetaDatas(),
+		assertEquals(metaDataService.getPackage("p1_p2").getEntityMetaDatas(),
 				Collections.unmodifiableList(Arrays.asList(test2, test3)));
 	}
 
@@ -172,9 +172,9 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 	public void addAndGetPackage()
 	{
 		PackageImpl test = new PackageImpl("ase", "The ASE package.");
-		metaDataRepositories.addPackage(test);
+		metaDataService.addPackage(test);
 
-		Package retrieved = metaDataRepositories.getPackage("ase");
+		Package retrieved = metaDataService.getPackage("ase");
 		assertEquals(retrieved, test);
 	}
 
@@ -182,14 +182,14 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 	public void getPackages()
 	{
 		PackageImpl test = new PackageImpl("ase", "The ASE package.");
-		metaDataRepositories.addPackage(test);
+		metaDataService.addPackage(test);
 
 		PackageImpl molgenis = new PackageImpl("molgenis", "The Molgenis package.");
-		metaDataRepositories.addPackage(molgenis);
+		metaDataService.addPackage(molgenis);
 
-		Package defaultPackage = metaDataRepositories.getPackage("base");
+		Package defaultPackage = metaDataService.getPackage("base");
 
-		assertEquals(metaDataRepositories.getRootPackages(), Arrays.asList(test, molgenis, defaultPackage));
+		assertEquals(metaDataService.getRootPackages(), Arrays.asList(test, molgenis, defaultPackage));
 	}
 
 }
