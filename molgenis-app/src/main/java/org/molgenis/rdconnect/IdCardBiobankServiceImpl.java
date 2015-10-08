@@ -180,17 +180,18 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService
 		regbbMapEntity.set("city", jsonObject.getAsJsonObject("address").getAsJsonPrimitive("city").getAsString());
 		regbbMapEntity.set("name", jsonObject.getAsJsonPrimitive("name").getAsString());
 		regbbMapEntity.set("ID", jsonObject.getAsJsonPrimitive("ID").getAsString());
-		regbbMapEntity.set("type_of_host_institution",
-				jsonObject.getAsJsonPrimitive("type of host institution").getAsString());
-		regbbMapEntity.set("target_population", jsonObject.getAsJsonPrimitive("target population").getAsString());
+		regbbMapEntity.set("type_of_host_institution", jsonObject.getAsJsonPrimitive("type of host institution") != null
+				? jsonObject.getAsJsonPrimitive("type of host institution").getAsString() : null);
+		regbbMapEntity.set("target_population", jsonObject.getAsJsonPrimitive("target population") != null
+				? jsonObject.getAsJsonPrimitive("target population").getAsString() : null);
 
 		return regbbMapEntity;
 	}
 
 	private String mapJsonArrayToCsvString(JsonArray jsonArray)
 	{
-		return StreamSupport.stream(jsonArray.spliterator(), false).map(JsonElement::getAsString)
-				.collect(Collectors.joining(","));
+		return jsonArray != null ? StreamSupport.stream(jsonArray.spliterator(), false).map(JsonElement::getAsString)
+				.collect(Collectors.joining(",")) : null;
 	}
 
 	@Override

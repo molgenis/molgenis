@@ -1,6 +1,10 @@
 package org.molgenis.rdconnect;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.RepositoryCapability.AGGREGATEABLE;
+import static org.molgenis.data.RepositoryCapability.QUERYABLE;
+import static org.molgenis.data.RepositoryCapability.UPDATEABLE;
+import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -59,8 +63,8 @@ public class IdCardBiobankRepository implements Repository
 	public Set<RepositoryCapability> getCapabilities()
 	{
 		Set<RepositoryCapability> repoCapabilities = new HashSet<>();
-		repoCapabilities.add(RepositoryCapability.AGGREGATEABLE);
-		repoCapabilities.add(RepositoryCapability.QUERYABLE);
+		repoCapabilities.add(AGGREGATEABLE);
+		repoCapabilities.add(QUERYABLE);
 		return repoCapabilities;
 	}
 
@@ -73,7 +77,7 @@ public class IdCardBiobankRepository implements Repository
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return metaDataService.getEntityMetaData("rdconnect_regbb");
+		return metaDataService.getEntityMetaData(IdCardBiobank.ENTITY_NAME);
 	}
 
 	@Override
@@ -99,17 +103,17 @@ public class IdCardBiobankRepository implements Repository
 	{
 		EntityMetaData entityMeta = getEntityMetaData();
 		// entities containing only id
-		Iterable<Entity> idCardBiobankIds = elasticSearchService.search(q, entityMeta);
+		Iterable<Entity> idCardBiobanks = elasticSearchService.search(q, entityMeta);
 		// retrieve entities for ids
-		Iterable<String> idCardBiobanks = Iterables.transform(idCardBiobankIds, new Function<Entity, String>()
+		Iterable<Object> idCardBiobanksIds = Iterables.transform(idCardBiobanks, new Function<Entity, Object>()
 		{
 			@Override
-			public String apply(Entity entity)
+			public Object apply(Entity entity)
 			{
-				return entity.getIdValue().toString();
+				return entity.getIdValue();
 			}
 		});
-		return idCardBiobankService.getIdCardBiobanks(idCardBiobanks);
+		return findAll(idCardBiobanksIds);
 	}
 
 	@Override
@@ -141,73 +145,93 @@ public class IdCardBiobankRepository implements Repository
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		throw new UnsupportedOperationException();
+		return elasticSearchService.aggregate(aggregateQuery, getEntityMetaData());
 	}
 
 	@Override
 	public void update(Entity entity)
 	{
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(
+				String.format("Repository [%s] is not %s", getName(), UPDATEABLE.toString()));
 	}
 
 	@Override
 	public void update(Iterable<? extends Entity> records)
 	{
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(
+				String.format("Repository [%s] is not %s", getName(), UPDATEABLE.toString()));
 	}
 
 	@Override
 	public void delete(Entity entity)
 	{
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(
+				String.format("Repository [%s] is not %s", getName(), WRITABLE.toString()));
 	}
 
 	@Override
 	public void delete(Iterable<? extends Entity> entities)
 	{
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(
+				String.format("Repository [%s] is not %s", getName(), WRITABLE.toString()));
 	}
 
 	@Override
 	public void deleteById(Object id)
 	{
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(
+				String.format("Repository [%s] is not %s", getName(), WRITABLE.toString()));
 	}
 
 	@Override
 	public void deleteById(Iterable<Object> ids)
 	{
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(
+				String.format("Repository [%s] is not %s", getName(), WRITABLE.toString()));
 	}
 
 	@Override
 	public void deleteAll()
 	{
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(
+				String.format("Repository [%s] is not %s", getName(), WRITABLE.toString()));
 	}
 
 	@Override
 	public void add(Entity entity)
 	{
-		elasticSearchService.index(entity, getEntityMetaData(), IndexingMode.UPDATE); // FIXME
+		throw new UnsupportedOperationException(
+				String.format("Repository [%s] is not %s", getName(), WRITABLE.toString()));
 	}
 
 	@Override
 	public Integer add(Iterable<? extends Entity> entities)
 	{
-		return Long.valueOf(elasticSearchService.index(entities, getEntityMetaData(), IndexingMode.UPDATE)).intValue(); // FIXME
+		throw new UnsupportedOperationException(
+				String.format("Repository [%s] is not %s", getName(), WRITABLE.toString()));
 	}
 
 	@Override
 	public void flush()
 	{
-		throw new UnsupportedOperationException();
+		elasticSearchService.flush();
 	}
 
 	@Override
 	public void clearCache()
 	{
-		throw new UnsupportedOperationException();
+		// noop
 	}
 
+	public void index(Iterable<? extends Entity> entities)
+	{
+		LOG.trace("Indexing ID-Card biobanks ...");
+		EntityMetaData entityMeta = getEntityMetaData();
+		if (!elasticSearchService.hasMapping(entityMeta))
+		{
+			elasticSearchService.createMappings(entityMeta);
+		}
+		elasticSearchService.index(entities, entityMeta, IndexingMode.UPDATE);
+		LOG.debug("Indexed ID-Card biobanks");
+	}
 }
