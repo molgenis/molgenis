@@ -36,5 +36,9 @@ public class Step11cAttributeMappingAddSourceAttributeMetaDatas
 				"AttributeMapping", attrId);
 
 		LOG.info("Added AttributeMapping.sourceAttributeMetaDatas");
+
+		// Injecting migration steps is not possible, after a release was performed future versions will use the next
+		// available step number. As a workaround a required step in a previous release is called from an existing step.
+		new Step11dEntitiesAttributesConstraints(dataSource).upgrade();
 	}
 }
