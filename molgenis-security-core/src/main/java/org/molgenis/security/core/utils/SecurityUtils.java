@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.molgenis.security.core.Permission;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -161,5 +163,18 @@ public class SecurityUtils
 		}
 
 		return authorities;
+	}
+
+	/**
+	 * Checks if client session is expired (by checking the requested sessionId).
+	 * 
+	 * 
+	 * @param request
+	 * @return true if session is expired
+	 */
+	public static boolean isSessionExpired(HttpServletRequest request)
+	{
+		return request.getRequestedSessionId() != null && !request.isRequestedSessionIdValid();
+
 	}
 }
