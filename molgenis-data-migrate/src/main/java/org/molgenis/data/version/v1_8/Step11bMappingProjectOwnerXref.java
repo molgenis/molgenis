@@ -24,7 +24,7 @@ public class Step11bMappingProjectOwnerXref
 
 	public void upgrade()
 	{
-		LOG.info("Updating metadata from version 15 to 15.1 ...");
+		LOG.info("Updating metadata from version 11 to 11.1 ...");
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 
 		List<Map<String, Object>> mappingProjects = jdbcTemplate
@@ -56,5 +56,9 @@ public class Step11bMappingProjectOwnerXref
 				"MolgenisUser", attrIdentifier);
 
 		LOG.info("Updated MappingProject owners string -> xref");
+
+		// Injecting migration steps is not possible, after a release was performed future versions will use the next
+		// available step number. As a workaround a required step in a previous release is called from an existing step.
+		new Step11cAttributeMappingAddSourceAttributeMetaDatas(dataSource).upgrade();
 	}
 }
