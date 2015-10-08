@@ -1,6 +1,6 @@
 package org.molgenis.migrate.version.v1_9;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.system.core.RuntimeProperty.ENTITY_NAME;
 
 import org.molgenis.data.DataService;
@@ -33,8 +33,8 @@ public class RuntimePropertyToGenomicDataSettingsMigrator implements Application
 	public RuntimePropertyToGenomicDataSettingsMigrator(DataService dataService,
 			GenomicDataSettings GenomicDataSettings)
 	{
-		this.dataService = checkNotNull(dataService);
-		this.genomicDataSettings = checkNotNull(GenomicDataSettings);
+		this.dataService = requireNonNull(dataService);
+		this.genomicDataSettings = requireNonNull(GenomicDataSettings);
 	}
 
 	private RuntimePropertyToGenomicDataSettingsMigrator migrateSettings()

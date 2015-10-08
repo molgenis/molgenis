@@ -5,7 +5,7 @@ import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
-import org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode;
+import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
 
@@ -29,7 +29,8 @@ public interface SearchService
 
 	void createMappings(EntityMetaData entityMetaData);
 
-	void createMappings(EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms, boolean createAllIndex);
+	void createMappings(EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms,
+			boolean createAllIndex);
 
 	/**
 	 * Refresh index, making all operations performed since the last refresh available for search
@@ -84,4 +85,9 @@ public interface SearchService
 	void flush();
 
 	void rebuildIndex(Iterable<? extends Entity> entities, EntityMetaData entityMetaData);
+
+	/**
+	 * Optimize the index for faster search operations, remove documents that are marked as deleted.
+	 */
+	void optimizeIndex();
 }

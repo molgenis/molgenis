@@ -648,7 +648,11 @@
         		}
         	}, this);
         	
-        	return evalScript(expression, form);
+        	try {
+        		return evalScript(expression, form);
+        	} catch (e) {
+        		return false;
+        	}
         },
         _statics: {
             // https://gist.github.com/dperini/729294
