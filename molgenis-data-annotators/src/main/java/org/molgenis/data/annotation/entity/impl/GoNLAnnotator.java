@@ -44,16 +44,11 @@ public class GoNLAnnotator
 	public static final String GONL_GENOME_GTC = "GoNL_GTC";
 	public static final String GONL_AF_LABEL = "Genome of the netherlands allele frequency";
 	public static final String GONL_GTC_LABEL = "Genome of the netherlands Genotype counts frequency";
-	public static final String INFO_AF = "AF";
 	public static final String INFO_GTC = "GTC";
 	public static final String INFO_AN = "AN";
 	public static final String INFO_AC = "AC";
 
 	public static final String GONL_MULTI_FILE_RESOURCE = "gonlresources";
-
-	// Backwards capabilities properties from the old annotator
-	public static final String BC_GONL_MAF_LABEL = "GONLMAF";
-	public static final String BC_GONL_MAF = BC_GONL_MAF_LABEL;
 
 	@Autowired
 	private Entity goNLAnnotatorSettings;
@@ -80,52 +75,55 @@ public class GoNLAnnotator
 		attributes.add(goNlGtcAttribute);
 		attributes.add(goNlAfAttribute);
 
-		AnnotatorInfo thousandGenomeInfo = AnnotatorInfo
-				.create(Status.READY,
-						AnnotatorInfo.Type.POPULATION_REFERENCE,
-						NAME,
-						"What genetic variation is to be found in the Dutch indigenous population? "
-								+ "Detailed knowledge about this is not only interesting in itself, "
-								+ "it also helps to extract useful biomedical information from Dutch biobanks. "
-								+ "The Dutch biobank collaboration BBMRI-NL has initiated the extensive Rainbow Project “Genome of the Netherlands” (GoNL) "
-								+ "because it offers unique opportunities for science and for the development of new treatments and diagnostic techniques. "
-								+ "A close-up look at the DNA of 750 Dutch people-250 trio’s of two parents and an adult child-plus a "
-								+ "global genetic profile of large numbers of Dutch will disclose a wealth of new information, new insights, "
-								+ "and possible applications.", attributes);
+		AnnotatorInfo thousandGenomeInfo = AnnotatorInfo.create(Status.READY, AnnotatorInfo.Type.POPULATION_REFERENCE,
+				NAME,
+				"What genetic variation is to be found in the Dutch indigenous population? "
+						+ "Detailed knowledge about this is not only interesting in itself, "
+						+ "it also helps to extract useful biomedical information from Dutch biobanks. "
+						+ "The Dutch biobank collaboration BBMRI-NL has initiated the extensive Rainbow Project “Genome of the Netherlands” (GoNL) "
+						+ "because it offers unique opportunities for science and for the development of new treatments and diagnostic techniques. "
+						+ "A close-up look at the DNA of 750 Dutch people-250 trio’s of two parents and an adult child-plus a "
+						+ "global genetic profile of large numbers of Dutch will disclose a wealth of new information, new insights, "
+						+ "and possible applications.",
+				attributes);
 
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator();
 
 		EntityAnnotator entityAnnotator = new QueryAnnotatorImpl(GONL_MULTI_FILE_RESOURCE, thousandGenomeInfo,
-				locusQueryCreator, dataService, resources,
-				(annotationSourceFileName) -> {
+				locusQueryCreator, dataService, resources, (annotationSourceFileName) -> {
 					goNLAnnotatorSettings.set(ROOT_DIRECTORY, annotationSourceFileName);
 					goNLAnnotatorSettings.set(FILEPATTERN, "gonl.chr%s.snps_indels.r5.vcf.gz");
 					goNLAnnotatorSettings.set(OVERRIDE_CHROMOSOME_FILES, "X:gonl.chrX.release4.gtc.vcf.gz");
-					goNLAnnotatorSettings
-							.set(CHROMOSOMES, "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X");
+					goNLAnnotatorSettings.set(CHROMOSOMES,
+							"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X");
 				})
 		{
 			@Override
 			protected void processQueryResults(Entity inputEntity, Iterable<Entity> annotationSourceEntities,
 					Entity resultEntity)
 			{
-				Iterable<Entity> refMatches = FluentIterable.from(annotationSourceEntities).filter(
-						gonl -> gonl.get(REF).equals(inputEntity.get(REF)));
+				String afs = null;
+				String gtcs = null;
+				Iterable<Entity> refMatches = FluentIterable.from(annotationSourceEntities)
+						.filter(gonl -> gonl.get(REF).equals(inputEntity.get(REF)));
 
-				List<Entity> alleleMatches = Lists.newArrayList();
-				for (String alt : inputEntity.getString(ALT).split(","))
+				if (inputEntity.getString(ALT) != null)
 				{
-					alleleMatches.add(Iterables.find(refMatches, gonl -> alt.equals(gonl.getString(ALT)), null));
+					List<Entity> alleleMatches = Lists.newArrayList();
+					for (String alt : inputEntity.getString(ALT).split(","))
+					{
+						alleleMatches.add(Iterables.find(refMatches, gonl -> alt.equals(gonl.getString(ALT)), null));
+					}
+
+					afs = alleleMatches.stream()
+							.map(gonl -> gonl == null ? "."
+									: Double.toString(gonl.getDouble(INFO_AC) / gonl.getDouble(INFO_AN)))
+							.collect(Collectors.joining("|"));
+
+					gtcs = alleleMatches.stream().map(gonl -> gonl == null ? ".,.,." : gonl.getString(INFO_GTC))
+							.collect(Collectors.joining("|"));
+
 				}
-
-				String afs = alleleMatches
-						.stream()
-						.map(gonl -> gonl == null ? "." : Double.toString(gonl.getDouble(INFO_AC)
-								/ gonl.getDouble(INFO_AN))).collect(Collectors.joining("|"));
-
-				String gtcs = alleleMatches.stream().map(gonl -> gonl == null ? ".,.,." : gonl.getString(INFO_GTC))
-						.collect(Collectors.joining("|"));
-
 				resultEntity.set(GONL_GENOME_AF, afs);
 				resultEntity.set(GONL_GENOME_GTC, gtcs);
 			}
@@ -139,7 +137,7 @@ public class GoNLAnnotator
 		MultiResourceConfig goNLConfig = new MultiResourceConfigImpl(CHROMOSOMES, FILEPATTERN, ROOT_DIRECTORY,
 				OVERRIDE_CHROMOSOME_FILES, goNLAnnotatorSettings);
 
-		return new MultiFileResource(GONL_MULTI_FILE_RESOURCE, goNLConfig, new TabixVcfRepositoryFactory(
-				GONL_MULTI_FILE_RESOURCE));
+		return new MultiFileResource(GONL_MULTI_FILE_RESOURCE, goNLConfig,
+				new TabixVcfRepositoryFactory(GONL_MULTI_FILE_RESOURCE));
 	}
 }
