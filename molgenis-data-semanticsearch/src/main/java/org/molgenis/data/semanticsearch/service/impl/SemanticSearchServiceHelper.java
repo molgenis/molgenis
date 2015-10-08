@@ -29,8 +29,6 @@ import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.ontology.ic.TermFrequencyService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 
 public class SemanticSearchServiceHelper
@@ -159,8 +157,8 @@ public class SemanticSearchServiceHelper
 		for (OntologyTerm childOt : ontologyService.getChildren(ontologyTerm))
 		{
 			double boostedNumber = Math.pow(0.5, ontologyService.getOntologyTermDistance(ontologyTerm, childOt));
-			getOtLabelAndSynonyms(childOt)
-					.forEach(synonym -> queryTerms.add(parseBoostQueryString(synonym, boostedNumber)));
+			getOtLabelAndSynonyms(childOt).forEach(
+					synonym -> queryTerms.add(parseBoostQueryString(synonym, boostedNumber)));
 		}
 		return queryTerms;
 	}
@@ -206,13 +204,13 @@ public class SemanticSearchServiceHelper
 	{
 		if (ontologyTerm != null)
 		{
-			getOtLabelAndSynonyms(ontologyTerm)
-					.forEach(term -> expanedQueryMap.put(stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
+			getOtLabelAndSynonyms(ontologyTerm).forEach(
+					term -> expanedQueryMap.put(stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
 
 			for (OntologyTerm childOntologyTerm : ontologyService.getChildren(ontologyTerm))
 			{
-				getOtLabelAndSynonyms(childOntologyTerm)
-						.forEach(term -> expanedQueryMap.put(stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
+				getOtLabelAndSynonyms(childOntologyTerm).forEach(
+						term -> expanedQueryMap.put(stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
 			}
 		}
 	}
@@ -231,14 +229,28 @@ public class SemanticSearchServiceHelper
 		if (entityMetaDataEntity == null) throw new MolgenisDataAccessException(
 				"Could not find EntityMetaDataEntity by the name of " + sourceEntityMetaData.getName());
 
-		return FluentIterable.from(entityMetaDataEntity.getEntities(EntityMetaDataMetaData.ATTRIBUTES))
-				.transform(new Function<Entity, String>()
-				{
-					public String apply(Entity attributeEntity)
-					{
-						return attributeEntity.getString(AttributeMetaDataMetaData.IDENTIFIER);
-					}
-				}).toList();
+		List<String> attributeIdentifiers = new ArrayList<String>();
+
+		recursivelyCollectAttributeIdentifiers(entityMetaDataEntity.getEntities(EntityMetaDataMetaData.ATTRIBUTES),
+				attributeIdentifiers);
+
+		return attributeIdentifiers;
+	}
+
+	private void recursivelyCollectAttributeIdentifiers(Iterable<Entity> attributeEntities,
+			List<String> attributeIdentifiers)
+	{
+		for (Entity attributeEntity : attributeEntities)
+		{
+			attributeIdentifiers.add(attributeEntity.getString(AttributeMetaDataMetaData.IDENTIFIER));
+
+			Iterable<Entity> entities = attributeEntity.getEntities(AttributeMetaDataMetaData.PARTS);
+
+			if (entities != null)
+			{
+				recursivelyCollectAttributeIdentifiers(entities, attributeIdentifiers);
+			}
+		}
 	}
 
 	public List<OntologyTerm> findTags(String description, List<String> ontologyIds)
