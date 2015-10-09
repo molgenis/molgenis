@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -26,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.RepositoryCapability;
@@ -437,7 +439,30 @@ public class DataExplorerController extends MolgenisPluginController
 
 		AggregateQueryImpl aggregateQuery = new AggregateQueryImpl().attrX(xAttributeMeta).attrY(yAttributeMeta)
 				.attrDistinct(distinctAttributeMeta).query(new QueryImpl(request.getQ()));
-		return dataService.aggregate(entityName, aggregateQuery);
+		AggregateResult aggregate = dataService.aggregate(entityName, aggregateQuery);
+		// FIXME hackathon hack for aggregate API changes
+		List<Object> xLabels = aggregate.getxLabels();
+		for (int i = 0; i < xLabels.size(); ++i)
+		{
+			Object xLabel = xLabels.get(i);
+			if (xLabel instanceof Entity)
+			{
+				xLabel = ((Entity) xLabel).getLabelValue();
+				xLabels.set(i, xLabel);
+			}
+		}
+		// FIXME hackathon hack for aggregate API changes
+		List<Object> yLabels = aggregate.getyLabels();
+		for (int i = 0; i < yLabels.size(); ++i)
+		{
+			Object yLabel = yLabels.get(i);
+			if (yLabel instanceof Entity)
+			{
+				yLabel = ((Entity) yLabel).getLabelValue();
+				yLabels.set(i, yLabel);
+			}
+		}
+		return aggregate;
 	}
 
 	/**
