@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import javax.sql.DataSource;
 
@@ -34,6 +35,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisReferencedEntityException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.Sort;
@@ -715,7 +717,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		// group by
 		if (select.indexOf("GROUP_CONCAT") != -1 && group.length() > 0) result.append(" GROUP BY ").append(group);
 		// order by
-		result.append(' ').append(getSortSql(q));
+		result.append(' ').append(getSortSql(q, parameters));
 		// limit
 		if (q.getPageSize() > 0) result.append(" LIMIT ").append(q.getPageSize());
 		if (q.getOffset() > 0) result.append(" OFFSET ").append(q.getOffset());
@@ -932,7 +934,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		return result.toString().trim();
 	}
 
-	protected String getSortSql(Query q)
+	protected String getSortSql(Query q, List<Object> parameters)
 	{
 		StringBuilder sortSql = new StringBuilder();
 		if (q.getSort() != null)
@@ -954,7 +956,32 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 			if (sortSql.length() > 0) sortSql = new StringBuilder("ORDER BY ").append(sortSql.substring(2));
 		}
+		// in case of a findAll(Iterable<Object> ids) MySQL returns matching rows in a random order. use ORDER BY FIELD
+		// to guarantee the right order. This is required by the Repository interface.
+		else if (q.getRules() != null && q.getRules().size() == 1)
+		{
+			QueryRule queryRule = q.getRules().iterator().next();
+			if (queryRule.getOperator() == Operator.IN && queryRule.getValue() instanceof Iterable<?>)
+			{
+				Iterable<?> values = (Iterable<?>) queryRule.getValue();
+				if (values != null && values.iterator().hasNext())
+				{
+					// use prepared statements for the values
+					String fieldIds = StreamSupport.stream(values.spliterator(), false).map(value -> "?")
+							.collect(Collectors.joining(","));
+
+					// define order of returned rows
+					sortSql = new StringBuilder("ORDER BY FIELD(").append("this.").append('`')
+							.append(queryRule.getField()).append('`').append(",").append(fieldIds).append(")");
+
+					// use prepared statements for the values
+					parameters.addAll(StreamSupport.stream(values.spliterator(), false).map(value -> value.toString())
+							.collect(Collectors.toList()));
+				}
+			}
+		}
 		return sortSql.toString();
+
 	}
 
 	protected String getUpdateSql()
