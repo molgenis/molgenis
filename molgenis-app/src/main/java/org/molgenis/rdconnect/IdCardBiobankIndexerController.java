@@ -3,15 +3,6 @@ package org.molgenis.rdconnect;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.rdconnect.IdCardBiobankIndexerController.URI;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.stream.StreamSupport;
-
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
@@ -37,15 +28,16 @@ public class IdCardBiobankIndexerController extends MolgenisPluginController
 	public static final String ID = "idcardbiobankindexer";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
-	private final DataService dataService;
 	private final IdCardBiobankService biobankMetadataService;
+	private final IdCardBiobankRepository idCardBiobankRepository;
 
 	@Autowired
-	public IdCardBiobankIndexerController(DataService dataService, IdCardBiobankService biobankMetadataService)
+	public IdCardBiobankIndexerController(IdCardBiobankService idCardBiobankService,
+			IdCardBiobankRepository idCardBiobankRepository)
 	{
 		super(URI);
-		this.biobankMetadataService = requireNonNull(biobankMetadataService);
-		this.dataService = requireNonNull(dataService);
+		this.biobankMetadataService = requireNonNull(idCardBiobankService);
+		this.idCardBiobankRepository = requireNonNull(idCardBiobankRepository);
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
@@ -60,17 +52,7 @@ public class IdCardBiobankIndexerController extends MolgenisPluginController
 	@ResponseStatus(HttpStatus.OK)
 	public void refreshMetadata(Model model) throws Exception
 	{
-		Map<String, HashSet<MapEntity>> firsToAdd = new HashMap<String, HashSet<MapEntity>>();
-
-		StreamSupport.stream(biobankMetadataService.getIdCardBiobanks().spliterator(), false)
-				.forEach(e -> populateLists(firsToAdd, e));
-
-		dataService.add("rdconnect_regbb", biobankMetadataService.getIdCardBiobanks());
-	}
-
-	private void populateLists(Map<String, HashSet<MapEntity>> lists, Entity entity)
-	{
-		lists.entrySet().forEach(e -> e.getValue().addAll((Collection<? extends MapEntity>) entity.get(e.getKey())));
+		idCardBiobankRepository.index(biobankMetadataService.getIdCardBiobanks());
 	}
 
 	@ExceptionHandler(value = Throwable.class)
