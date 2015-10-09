@@ -47,6 +47,7 @@ import org.molgenis.system.core.FreemarkerTemplateRepository;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.util.DependencyResolver;
+import org.molgenis.util.GsonConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +65,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
 
 import freemarker.template.TemplateException;
 
@@ -73,7 +75,7 @@ import freemarker.template.TemplateException;
 @EnableAsync
 @ComponentScan(basePackages = "org.molgenis", excludeFilters = @Filter(type = FilterType.ANNOTATION, value = CommandLineOnlyConfiguration.class) )
 @Import(
-{ WebAppSecurityConfig.class, DatabaseConfig.class, EmbeddedElasticSearchConfig.class })
+{ WebAppSecurityConfig.class, DatabaseConfig.class, EmbeddedElasticSearchConfig.class, GsonConfig.class })
 public class WebAppConfig extends MolgenisWebAppConfig
 {
 	private static final Logger LOG = LoggerFactory.getLogger(WebAppConfig.class);
@@ -96,6 +98,9 @@ public class WebAppConfig extends MolgenisWebAppConfig
 
 	@Autowired
 	private EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
+
+	@Autowired
+	private Gson gson;
 
 	@Autowired
 	private RuntimePropertyToAppSettingsMigrator runtimePropertyToAppSettingsMigrator;
@@ -135,12 +140,12 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step3AddOrderColumnToMrefTables(dataSource));
 		upgradeService.addUpgrade(new Step4VarcharToText(dataSource, mysqlRepositoryCollection));
 		upgradeService.addUpgrade(
-				new Step5AlterDataexplorerMenuURLs(jpaRepositoryCollection.getRepository("RuntimeProperty")));
+				new Step5AlterDataexplorerMenuURLs(jpaRepositoryCollection.getRepository("RuntimeProperty"), gson));
 		upgradeService.addUpgrade(new Step6ChangeRScriptType(dataSource, searchService));
 		upgradeService.addUpgrade(new Step7UpgradeMetaDataTo1_6(dataSource, searchService));
 		upgradeService.addUpgrade(new Step8VarcharToTextRepeated(dataSource));
 		upgradeService.addUpgrade(new Step9MysqlTablesToInnoDB(dataSource));
-		upgradeService.addUpgrade(new Step10DeleteFormReferences(dataSource));
+		upgradeService.addUpgrade(new Step10DeleteFormReferences(dataSource, gson));
 
 		SingleConnectionDataSource singleConnectionDS = null;
 		try
@@ -154,7 +159,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 
 		upgradeService.addUpgrade(new Step11ConvertNames(singleConnectionDS));
 		upgradeService.addUpgrade(new Step12ChangeElasticsearchTokenizer(embeddedElasticSearchServiceFactory));
-		upgradeService.addUpgrade(new Step13RemoveCatalogueMenuEntries(dataSource));
+		upgradeService.addUpgrade(new Step13RemoveCatalogueMenuEntries(dataSource, gson));
 		upgradeService.addUpgrade(new Step14UpdateAttributeMapping(dataSource));
 		upgradeService.addUpgrade(new Step15AddDefaultValue(dataSource, searchService, jpaRepositoryCollection));
 		upgradeService.addUpgrade(new Step16RuntimePropertyToSettings(runtimePropertyToAppSettingsMigrator,

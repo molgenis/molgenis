@@ -27,11 +27,14 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
+import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -42,8 +45,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @WebAppConfiguration
-@ContextConfiguration
-public class MappingServiceControllerTest
+@ContextConfiguration(classes = GsonConfig.class)
+public class MappingServiceControllerTest extends AbstractTestNGSpringContextTests
 {
 	@InjectMocks
 	private MappingServiceController controller;
@@ -65,6 +68,9 @@ public class MappingServiceControllerTest
 
 	@Mock
 	private SemanticSearchService semanticSearchService;
+
+	@Autowired
+	private GsonHttpMessageConverter gsonHttpMessageConverter;
 
 	@Mock
 	private MenuReaderService menuReaderService;
@@ -99,8 +105,7 @@ public class MappingServiceControllerTest
 
 		initMocks(this);
 
-		mockMvc = MockMvcBuilders.standaloneSetup(controller).setMessageConverters(new GsonHttpMessageConverter())
-				.build();
+		mockMvc = MockMvcBuilders.standaloneSetup(controller).setMessageConverters(gsonHttpMessageConverter).build();
 	}
 
 	@Test
@@ -111,11 +116,10 @@ public class MappingServiceControllerTest
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
-		mockMvc.perform(
-				post(MappingServiceController.URI + "/saveattributemapping").param("mappingProjectId", "asdf")
-						.param("target", "HOP").param("source", "LifeLines").param("targetAttribute", "age")
-						.param("algorithm", "$('length').value()").param("algorithmState", "CURATED")).andExpect(
-				redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
+		mockMvc.perform(post(MappingServiceController.URI + "/saveattributemapping").param("mappingProjectId", "asdf")
+				.param("target", "HOP").param("source", "LifeLines").param("targetAttribute", "age")
+				.param("algorithm", "$('length').value()").param("algorithmState", "CURATED"))
+				.andExpect(redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
 		MappingProject expected = new MappingProject("hop hop hop", me);
 		expected.setIdentifier("asdf");
 		MappingTarget mappingTarget = expected.addTarget(hop);
@@ -135,12 +139,11 @@ public class MappingServiceControllerTest
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
-		mockMvc.perform(
-				MockMvcRequestBuilders.post(MappingServiceController.URI + "/saveattributemapping")
-						.param("mappingProjectId", "asdf").param("target", "HOP").param("source", "LifeLines")
-						.param("targetAttribute", "height").param("algorithm", "$('length').value()")
-						.param("algorithmState", "CURATED")).andExpect(
-				MockMvcResultMatchers.redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
+		mockMvc.perform(MockMvcRequestBuilders.post(MappingServiceController.URI + "/saveattributemapping")
+				.param("mappingProjectId", "asdf").param("target", "HOP").param("source", "LifeLines")
+				.param("targetAttribute", "height").param("algorithm", "$('length').value()")
+				.param("algorithmState", "CURATED"))
+				.andExpect(MockMvcResultMatchers.redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
 
 		MappingProject expected = new MappingProject("hop hop hop", me);
 		expected.setIdentifier("asdf");
@@ -163,12 +166,10 @@ public class MappingServiceControllerTest
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
-		mockMvc.perform(
-				MockMvcRequestBuilders.post(MappingServiceController.URI + "/saveattributemapping")
-						.param("mappingProjectId", "asdf").param("target", "HOP").param("source", "LifeLines")
-						.param("targetAttribute", "age").param("algorithm", "").param("algorithmState", "CURATED"))
-				.andExpect(
-				MockMvcResultMatchers.redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
+		mockMvc.perform(MockMvcRequestBuilders.post(MappingServiceController.URI + "/saveattributemapping")
+				.param("mappingProjectId", "asdf").param("target", "HOP").param("source", "LifeLines")
+				.param("targetAttribute", "age").param("algorithm", "").param("algorithmState", "CURATED"))
+				.andExpect(MockMvcResultMatchers.redirectedUrl("/menu/main/mappingservice/mappingproject/asdf"));
 
 		MappingProject expected = new MappingProject("hop hop hop", me);
 		expected.setIdentifier("asdf");
@@ -185,8 +186,8 @@ public class MappingServiceControllerTest
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
-		MvcResult result = mockMvc.perform(
-				MockMvcRequestBuilders.post(MappingServiceController.URI + "/firstattributemapping")
+		MvcResult result = mockMvc
+				.perform(MockMvcRequestBuilders.post(MappingServiceController.URI + "/firstattributemapping")
 						.param("mappingProjectId", "asdf").param("target", "HOP").param("source", "LifeLines")
 						.param("skipAlgorithmStates[]", "CURATED", "DISCUSS").accept(MediaType.APPLICATION_JSON))
 				.andReturn();
@@ -208,8 +209,8 @@ public class MappingServiceControllerTest
 		mappingProject.getMappingTarget("HOP").getMappingForSource("LifeLines").getAttributeMapping("age")
 				.setAlgorithmState(AlgorithmState.CURATED);
 
-		MvcResult result2 = mockMvc.perform(
-				MockMvcRequestBuilders.post(MappingServiceController.URI + "/firstattributemapping")
+		MvcResult result2 = mockMvc
+				.perform(MockMvcRequestBuilders.post(MappingServiceController.URI + "/firstattributemapping")
 						.param("mappingProjectId", "asdf").param("target", "HOP").param("source", "LifeLines")
 						.param("skipAlgorithmStates[]", "CURATED", "DISCUSS").accept(MediaType.APPLICATION_JSON))
 				.andReturn();
@@ -237,8 +238,8 @@ public class MappingServiceControllerTest
 		attributeMapping.setAlgorithm("$('dob').age()");
 		attributeMapping.setAlgorithmState(AlgorithmState.DISCUSS);
 
-		MvcResult result3 = mockMvc.perform(
-				MockMvcRequestBuilders.post(MappingServiceController.URI + "/firstattributemapping")
+		MvcResult result3 = mockMvc
+				.perform(MockMvcRequestBuilders.post(MappingServiceController.URI + "/firstattributemapping")
 						.param("mappingProjectId", "asdf").param("target", "HOP").param("source", "LifeLines")
 						.param("skipAlgorithmStates[]", "CURATED", "DISCUSS").accept(MediaType.APPLICATION_JSON))
 				.andReturn();
