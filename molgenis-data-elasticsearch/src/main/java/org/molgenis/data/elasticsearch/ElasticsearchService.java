@@ -77,6 +77,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
 /**
@@ -711,18 +712,28 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			LOG.debug("Retrieved Elasticsearch '" + type + "' docs with ids [" + entityIds + "] ...");
 		}
 
-		return Iterables.transform(response, new Function<MultiGetItemResponse, Entity>()
+		return Iterables.transform(Iterables.filter(response, new Predicate<MultiGetItemResponse>()
 		{
+			// If the document was not found in the molgenis index or transaction index a response is included that
+			// states that the item doesn't exist. Filter out these responses, since the document should be located in
+			// either of the indexes.
 			@Override
-			public Entity apply(MultiGetItemResponse itemResponse)
+			public boolean apply(MultiGetItemResponse itemResponse)
 			{
 				if (itemResponse.isFailed())
 				{
 					throw new ElasticsearchException("Search failed. Returned headers:" + itemResponse.getFailure());
 				}
 				GetResponse getResponse = itemResponse.getResponse();
-				return getResponse.isExists() ? new DefaultEntity(entityMetaData, dataService, getResponse.getSource())
-						: null;
+				return getResponse.isExists();
+			}
+		}), new Function<MultiGetItemResponse, Entity>()
+		{
+			@Override
+			public Entity apply(MultiGetItemResponse itemResponse)
+			{
+				GetResponse getResponse = itemResponse.getResponse();
+				return new DefaultEntity(entityMetaData, dataService, getResponse.getSource());
 			}
 		});
 	}
