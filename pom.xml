@@ -59,6 +59,7 @@
         <spring.security.version>4.0.1.RELEASE</spring.security.version>
         <mysql.connector.java.version>5.1.28</mysql.connector.java.version>
         <hibernate.validator.version>4.2.0.Final</hibernate.validator.version>
+        <httpclient.version>4.5.1</httpclient.version>
         
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
         <molgenis.build.timestamp>${maven.build.timestamp}</molgenis.build.timestamp>

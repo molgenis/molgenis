@@ -1,23 +1,29 @@
 package org.molgenis.rdconnect;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -38,51 +44,73 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(IdCardBiobankServiceImpl.class);
 
+	private static final int ID_CARD_CONNECT_TIMEOUT = 2000;
+	private static final int ID_CARD_CONNECTION_REQUEST_TIMEOUT = 2000;
+	private static final int ID_CARD_SOCKET_TIMEOUT = 2000;
+
 	private final DataService dataService;
+	private final HttpClient httpClient;
 	private final IdCardBiobankIndexerSettings idCardBiobankIndexerSettings;
+	private final RequestConfig requestConfig;
 
 	@Autowired
-	public IdCardBiobankServiceImpl(DataService dataService, IdCardBiobankIndexerSettings idCardBiobankIndexerSettings)
+	public IdCardBiobankServiceImpl(DataService dataService, HttpClient httpClient,
+			IdCardBiobankIndexerSettings idCardBiobankIndexerSettings)
 	{
 		this.dataService = requireNonNull(dataService);
+		this.httpClient = requireNonNull(httpClient);
 		this.idCardBiobankIndexerSettings = requireNonNull(idCardBiobankIndexerSettings);
+		this.requestConfig = RequestConfig.custom().setConnectTimeout(ID_CARD_CONNECT_TIMEOUT)
+				.setConnectionRequestTimeout(ID_CARD_CONNECTION_REQUEST_TIMEOUT)
+				.setSocketTimeout(ID_CARD_SOCKET_TIMEOUT).build();
 	}
 
-	private JsonObject getResourceAsJsonObject(String url)
+	private JsonElement getResourceAsJson(String url)
 	{
-		try
+		// Create a custom response handler
+		ResponseHandler<JsonElement> responseHandler = new ResponseHandler<JsonElement>()
 		{
-			CloseableHttpClient httpClient = HttpClientBuilder.create().build(); // FIXME add to config as bean
-			LOG.info("Retrieving [" + url + "]");
-			HttpGet request = new HttpGet(url);
-			request.addHeader("content-type", "application/json");
-			HttpResponse result = httpClient.execute(request);
-			String toExtract = EntityUtils.toString(result.getEntity(), "UTF-8");
-			JsonParser parser = new JsonParser();
-			return parser.parse(toExtract).getAsJsonObject();
-		}
-		catch (IOException ex)
-		{
-			throw new MolgenisDataException("Hackathon error message", ex);
-		}
-	}
+			@Override
+			public JsonElement handleResponse(final HttpResponse response) throws ClientProtocolException, IOException
+			{
+				StatusLine statusLine = response.getStatusLine();
+				if (statusLine.getStatusCode() < 100 || statusLine.getStatusCode() >= 300)
+				{
+					throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+				}
 
-	private JsonArray getResourceAsJsonArray(String url)
-	{
+				HttpEntity entity = response.getEntity();
+				if (entity == null)
+				{
+					throw new ClientProtocolException("Response contains no content");
+				}
+
+				InputStream is = entity.getContent();
+
+				InputStreamReader reader = new InputStreamReader(is, UTF_8);
+				try
+				{
+					JsonParser parser = new JsonParser();
+					return parser.parse(reader);
+				}
+				finally
+				{
+					reader.close();
+				}
+			}
+		};
+
+		HttpGet request = new HttpGet(url);
+		request.addHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+		request.setConfig(requestConfig);
 		try
 		{
-			CloseableHttpClient httpClient = HttpClientBuilder.create().build();
 			LOG.info("Retrieving [" + url + "]");
-			HttpGet request = new HttpGet(url);
-			request.addHeader("content-type", "application/json");
-			HttpResponse result = httpClient.execute(request);
-			String toExtract = EntityUtils.toString(result.getEntity(), "UTF-8");
-			JsonParser parser = new JsonParser();
-			return parser.parse(toExtract).getAsJsonArray();
+			return httpClient.execute(request, responseHandler);
 		}
-		catch (IOException ex)
+		catch (IOException e)
 		{
-			throw new MolgenisDataException("Hackathon error message");
+			throw new MolgenisDataException(e);
 		}
 	}
 
@@ -90,7 +118,7 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService
 	{
 		String regbbsEndpoint = idCardBiobankIndexerSettings.getApiBaseUri() + '/'
 				+ idCardBiobankIndexerSettings.getBiobankCollectionResource();
-		JsonArray resource = this.getResourceAsJsonArray(regbbsEndpoint);
+		JsonArray resource = this.getResourceAsJson(regbbsEndpoint).getAsJsonArray();
 		return StreamSupport.stream(resource.spliterator(), false)
 				.map(j -> j.getAsJsonObject().get("OrganizationID").getAsString()).collect(Collectors.toSet());
 	}
@@ -109,7 +137,7 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService
 		}
 		String uri = idCardBiobankIndexerSettings.getApiBaseUri() + '/'
 				+ idCardBiobankIndexerSettings.getBiobankCollectionSelectionResource() + '/' + value;
-		JsonArray jsonArray = getResourceAsJsonArray(uri);
+		JsonArray jsonArray = getResourceAsJson(uri).getAsJsonArray();
 		return StreamSupport.stream(jsonArray.spliterator(), false).map(jsonElement -> {
 			return toEntity(jsonElement.getAsJsonObject());
 
@@ -199,17 +227,8 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService
 	{
 		String uri = idCardBiobankIndexerSettings.getApiBaseUri() + '/'
 				+ idCardBiobankIndexerSettings.getBiobankResource() + '/' + id;
-		JsonObject root = this.getResourceAsJsonObject(uri);
+		JsonObject root = this.getResourceAsJson(uri).getAsJsonObject();
 		return toEntity(root);
-	}
-
-	private List<MapEntity> parseToListMapEntity(String entityName, String attributeName, JsonArray jsonArray)
-	{
-		EntityMetaData emd = dataService.getEntityMetaData(entityName);
-		List<MapEntity> mapEntityList = new ArrayList<MapEntity>();
-		jsonArray.spliterator()
-				.forEachRemaining(e -> mapEntityList.add(this.parseToMapEntity(emd, attributeName, e.getAsString())));
-		return mapEntityList;
 	}
 
 	private MapEntity parseToMapEntity(EntityMetaData entityMetaData, String attributeName, String value)
