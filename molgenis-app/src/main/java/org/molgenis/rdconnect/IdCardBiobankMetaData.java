@@ -28,6 +28,7 @@ public class IdCardBiobankMetaData extends DefaultEntityMetaData
 		addAttribute(IdCardBiobank.FIRST_NAME).setLabel("first name");
 		addAttribute(IdCardBiobank.EMAIL).setLabel("email").setDataType(EMAIL);
 		addAttribute(IdCardBiobank.LAST_NAME).setLabel("last name");
+		addAttribute(IdCardBiobank.PHONE).setLabel("phone");
 		addAttribute(IdCardBiobank.LAST_ACTIVITIES).setLabel("last activities").setDataType(DATETIME);
 		addAttribute(IdCardBiobank.DATE_OF_INCLUSION).setLabel("date of inclusion").setDataType(DATETIME);
 		addAttribute(IdCardBiobank.STREET2).setLabel("street2");

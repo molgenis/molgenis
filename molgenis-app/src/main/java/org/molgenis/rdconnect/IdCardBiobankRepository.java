@@ -101,19 +101,7 @@ public class IdCardBiobankRepository implements Repository
 	@Override
 	public Iterable<Entity> findAll(Query q)
 	{
-		EntityMetaData entityMeta = getEntityMetaData();
-		// entities containing only id
-		Iterable<Entity> idCardBiobanks = elasticSearchService.search(q, entityMeta);
-		// retrieve entities for ids
-		Iterable<Object> idCardBiobanksIds = Iterables.transform(idCardBiobanks, new Function<Entity, Object>()
-		{
-			@Override
-			public Object apply(Entity entity)
-			{
-				return entity.getIdValue();
-			}
-		});
-		return findAll(idCardBiobanksIds);
+		return elasticSearchService.search(q, getEntityMetaData());
 	}
 
 	@Override
