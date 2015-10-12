@@ -1,221 +1,179 @@
 package org.molgenis.rdconnect;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.Iterator;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.support.MapEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.stream.JsonReader;
 
+// FIXME handle timeouts
 @Service
 public class IdCardBiobankServiceImpl implements IdCardBiobankService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(IdCardBiobankServiceImpl.class);
 
-	private final DataService dataService;
+	private static final int ID_CARD_CONNECT_TIMEOUT = 2000;
+	private static final int ID_CARD_CONNECTION_REQUEST_TIMEOUT = 2000;
+	private static final int ID_CARD_SOCKET_TIMEOUT = 2000;
+
+	private final HttpClient httpClient;
 	private final IdCardBiobankIndexerSettings idCardBiobankIndexerSettings;
+	private final RequestConfig requestConfig;
+	private final IdCardBiobankMapper idCardBiobankMapper;
 
 	@Autowired
-	public IdCardBiobankServiceImpl(DataService dataService, IdCardBiobankIndexerSettings idCardBiobankIndexerSettings)
+	public IdCardBiobankServiceImpl(HttpClient httpClient, IdCardBiobankIndexerSettings idCardBiobankIndexerSettings,
+			IdCardBiobankMapper idCardBiobankMapper)
 	{
-		this.dataService = requireNonNull(dataService);
+		this.httpClient = requireNonNull(httpClient);
 		this.idCardBiobankIndexerSettings = requireNonNull(idCardBiobankIndexerSettings);
+		this.idCardBiobankMapper = requireNonNull(idCardBiobankMapper);
+
+		this.requestConfig = RequestConfig.custom().setConnectTimeout(ID_CARD_CONNECT_TIMEOUT)
+				.setConnectionRequestTimeout(ID_CARD_CONNECTION_REQUEST_TIMEOUT)
+				.setSocketTimeout(ID_CARD_SOCKET_TIMEOUT).build();
 	}
 
-	private JsonObject getResourceAsJsonObject(String url)
+	public IdCardBiobank getIdCardBiobank(String id)
 	{
-		try
-		{
-			CloseableHttpClient httpClient = HttpClientBuilder.create().build(); // FIXME add to config as bean
-			LOG.info("Retrieving [" + url + "]");
-			HttpGet request = new HttpGet(url);
-			request.addHeader("content-type", "application/json");
-			HttpResponse result = httpClient.execute(request);
-			String toExtract = EntityUtils.toString(result.getEntity(), "UTF-8");
-			JsonParser parser = new JsonParser();
-			return parser.parse(toExtract).getAsJsonObject();
-		}
-		catch (IOException ex)
-		{
-			throw new MolgenisDataException("Hackathon error message", ex);
-		}
-	}
+		// Construct uri
+		StringBuilder uriBuilder = new StringBuilder().append(idCardBiobankIndexerSettings.getApiBaseUri()).append('/')
+				.append(idCardBiobankIndexerSettings.getBiobankResource()).append('/').append(id);
 
-	private JsonArray getResourceAsJsonArray(String url)
-	{
-		try
+		return getIdCardResource(uriBuilder.toString(), new JsonResponseHandler<IdCardBiobank>()
 		{
-			CloseableHttpClient httpClient = HttpClientBuilder.create().build();
-			LOG.info("Retrieving [" + url + "]");
-			HttpGet request = new HttpGet(url);
-			request.addHeader("content-type", "application/json");
-			HttpResponse result = httpClient.execute(request);
-			String toExtract = EntityUtils.toString(result.getEntity(), "UTF-8");
-			JsonParser parser = new JsonParser();
-			return parser.parse(toExtract).getAsJsonArray();
-		}
-		catch (IOException ex)
-		{
-			throw new MolgenisDataException("Hackathon error message");
-		}
-	}
-
-	private Set<String> getIdCardBiobanksOrganizationIds()
-	{
-		String regbbsEndpoint = idCardBiobankIndexerSettings.getApiBaseUri() + '/'
-				+ idCardBiobankIndexerSettings.getBiobankCollectionResource();
-		JsonArray resource = this.getResourceAsJsonArray(regbbsEndpoint);
-		return StreamSupport.stream(resource.spliterator(), false)
-				.map(j -> j.getAsJsonObject().get("OrganizationID").getAsString()).collect(Collectors.toSet());
+			@Override
+			public IdCardBiobank deserialize(JsonReader jsonReader) throws IOException
+			{
+				return idCardBiobankMapper.toIdCardBiobank(jsonReader);
+			}
+		});
 	}
 
 	@Override
 	public Iterable<Entity> getIdCardBiobanks(Iterable<String> ids)
 	{
+		// FIXME batching for each x ids
 		String value = StreamSupport.stream(ids.spliterator(), false).collect(Collectors.joining(",", "[", "]"));
 		try
 		{
-			value = URLEncoder.encode(value, "UTF-8");
+			value = URLEncoder.encode(value, UTF_8.name());
 		}
 		catch (UnsupportedEncodingException e1)
 		{
 			throw new RuntimeException(e1);
 		}
-		String uri = idCardBiobankIndexerSettings.getApiBaseUri() + '/'
-				+ idCardBiobankIndexerSettings.getBiobankCollectionSelectionResource() + '/' + value;
-		JsonArray jsonArray = getResourceAsJsonArray(uri);
-		return StreamSupport.stream(jsonArray.spliterator(), false).map(jsonElement -> {
-			return toEntity(jsonElement.getAsJsonObject());
+		StringBuilder uriBuilder = new StringBuilder().append(idCardBiobankIndexerSettings.getApiBaseUri()).append('/')
+				.append(idCardBiobankIndexerSettings.getBiobankCollectionSelectionResource()).append('/').append(value);
 
-		}).collect(Collectors.toList());
+		return getIdCardResource(uriBuilder.toString(), new JsonResponseHandler<Iterable<Entity>>()
+		{
+			@Override
+			public Iterable<Entity> deserialize(JsonReader jsonReader) throws IOException
+			{
+				return idCardBiobankMapper.toIdCardBiobanks(jsonReader);
+			}
+		});
+	}
+
+	private <T> T getIdCardResource(String url, ResponseHandler<T> responseHandler)
+	{
+		HttpGet request = new HttpGet(url);
+		request.addHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+		request.setConfig(requestConfig);
+		try
+		{
+			LOG.info("Retrieving [" + url + "]");
+			return httpClient.execute(request, responseHandler);
+		}
+		catch (IOException e)
+		{
+			throw new MolgenisDataException(e);
+		}
 	}
 
 	@Override
 	public Iterable<Entity> getIdCardBiobanks()
 	{
-		return this.getIdCardBiobanks(this.getIdCardBiobanksOrganizationIds());
-	}
+		// Construct uri
+		StringBuilder uriBuilder = new StringBuilder().append(idCardBiobankIndexerSettings.getApiBaseUri()).append('/')
+				.append(idCardBiobankIndexerSettings.getBiobankCollectionResource());
 
-	private Entity toEntity(JsonObject jsonObject)
-	{
-		EntityMetaData emd = dataService.getEntityMetaData("rdconnect_regbb");
+		// Retrieve biobank ids
+		Iterable<IdCardOrganization> idCardOrganizations = getIdCardResource(uriBuilder.toString(),
+				new JsonResponseHandler<Iterable<IdCardOrganization>>()
+				{
+					@Override
+					public Iterable<IdCardOrganization> deserialize(JsonReader jsonReader) throws IOException
+					{
+						return idCardBiobankMapper.toIdCardOrganizations(jsonReader);
+					}
+				});
 
-		MapEntity regbbMapEntity = new MapEntity(emd);
-
-		regbbMapEntity.set("OrganizationID", jsonObject.getAsJsonPrimitive("OrganizationID").getAsInt());
-		regbbMapEntity.set("type", jsonObject.getAsJsonPrimitive("type").getAsString());
-		regbbMapEntity.set("also_listed_in", mapJsonArrayToCsvString(jsonObject.getAsJsonArray("also listed in")));
-		regbbMapEntity.set("url", mapJsonArrayToCsvString(jsonObject.getAsJsonArray("url")));
-
-		/**
-		 * "main contact" entity
-		 */
-		regbbMapEntity.set("title",
-				jsonObject.getAsJsonObject("main contact").getAsJsonPrimitive("title").getAsString());
-		regbbMapEntity.set("first_name",
-				jsonObject.getAsJsonObject("main contact").getAsJsonPrimitive("first name").getAsString());
-		regbbMapEntity.set("email",
-				jsonObject.getAsJsonObject("main contact").getAsJsonPrimitive("email").getAsString());
-		regbbMapEntity.set("last_name",
-				jsonObject.getAsJsonObject("main contact").getAsJsonPrimitive("last name").getAsString());
-
-		// Example format "Mon Jan 05 18:02:13 GMT 2015"
-		final String datetimePattern = "EEE MMM dd HH:mm:ss z yyyy";
-		SimpleDateFormat datetimeFormat = new SimpleDateFormat(datetimePattern);
-
-		try
+		// Retrieve biobanks
+		return this.getIdCardBiobanks(new Iterable<String>()
 		{
-			regbbMapEntity.set("last_activities",
-					datetimeFormat.parseObject(jsonObject.getAsJsonPrimitive("last activities").getAsString()));
-		}
-		catch (ParseException e)
+			@Override
+			public Iterator<String> iterator()
+			{
+				return StreamSupport.stream(idCardOrganizations.spliterator(), false)
+						.map(IdCardOrganization::getOrganizationId).iterator();
+			}
+		});
+	}
+
+	private static abstract class JsonResponseHandler<T> implements ResponseHandler<T>
+	{
+		@Override
+		public T handleResponse(final HttpResponse response) throws ClientProtocolException, IOException
 		{
-			throw new MolgenisDataException("failed to parse the 'last activities' property", e);
+			StatusLine statusLine = response.getStatusLine();
+			if (statusLine.getStatusCode() < 100 || statusLine.getStatusCode() >= 300)
+			{
+				throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+			}
+
+			HttpEntity entity = response.getEntity();
+			if (entity == null)
+			{
+				throw new ClientProtocolException("Response contains no content");
+			}
+
+			JsonReader jsonReader = new JsonReader(new InputStreamReader(entity.getContent(), UTF_8));
+			try
+			{
+				return deserialize(jsonReader);
+			}
+			finally
+			{
+				jsonReader.close();
+			}
 		}
 
-		try
-		{
-			regbbMapEntity.set("date_of_inclusion",
-					datetimeFormat.parseObject(jsonObject.getAsJsonPrimitive("date of inclusion").getAsString()));
-		}
-		catch (ParseException e)
-		{
-			throw new MolgenisDataException("failed to parse the 'last activities' property", e);
-		}
-
-		regbbMapEntity.set("email", jsonObject.getAsJsonObject("address").getAsJsonPrimitive("street2").getAsString());
-		regbbMapEntity.set("name_of_host_institution",
-				jsonObject.getAsJsonObject("address").getAsJsonPrimitive("name of host institution").getAsString());
-		regbbMapEntity.set("zip", jsonObject.getAsJsonObject("address").getAsJsonPrimitive("zip").getAsString());
-		regbbMapEntity.set("street1",
-				jsonObject.getAsJsonObject("address").getAsJsonPrimitive("street1").getAsString());
-		regbbMapEntity.set("country",
-				jsonObject.getAsJsonObject("address").getAsJsonPrimitive("country").getAsString());
-		regbbMapEntity.set("city", jsonObject.getAsJsonObject("address").getAsJsonPrimitive("city").getAsString());
-		regbbMapEntity.set("name", jsonObject.getAsJsonPrimitive("name").getAsString());
-		regbbMapEntity.set("ID", jsonObject.getAsJsonPrimitive("ID").getAsString());
-		regbbMapEntity.set("type_of_host_institution", jsonObject.getAsJsonPrimitive("type of host institution") != null
-				? jsonObject.getAsJsonPrimitive("type of host institution").getAsString() : null);
-		regbbMapEntity.set("target_population", jsonObject.getAsJsonPrimitive("target population") != null
-				? jsonObject.getAsJsonPrimitive("target population").getAsString() : null);
-
-		return regbbMapEntity;
-	}
-
-	private String mapJsonArrayToCsvString(JsonArray jsonArray)
-	{
-		return jsonArray != null ? StreamSupport.stream(jsonArray.spliterator(), false).map(JsonElement::getAsString)
-				.collect(Collectors.joining(",")) : null;
-	}
-
-	@Override
-	public Entity getIdCardBiobank(String id)
-	{
-		String uri = idCardBiobankIndexerSettings.getApiBaseUri() + '/'
-				+ idCardBiobankIndexerSettings.getBiobankResource() + '/' + id;
-		JsonObject root = this.getResourceAsJsonObject(uri);
-		return toEntity(root);
-	}
-
-	private List<MapEntity> parseToListMapEntity(String entityName, String attributeName, JsonArray jsonArray)
-	{
-		EntityMetaData emd = dataService.getEntityMetaData(entityName);
-		List<MapEntity> mapEntityList = new ArrayList<MapEntity>();
-		jsonArray.spliterator()
-				.forEachRemaining(e -> mapEntityList.add(this.parseToMapEntity(emd, attributeName, e.getAsString())));
-		return mapEntityList;
-	}
-
-	private MapEntity parseToMapEntity(EntityMetaData entityMetaData, String attributeName, String value)
-	{
-		MapEntity entity = new MapEntity(entityMetaData);
-		entity.set(attributeName, value);
-		return entity;
+		public abstract T deserialize(JsonReader jsonReader) throws IOException;
 	}
 }

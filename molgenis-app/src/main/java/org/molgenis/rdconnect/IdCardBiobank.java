@@ -19,6 +19,7 @@ public class IdCardBiobank extends DefaultEntity
 	public static final String FIRST_NAME = "first_name";
 	public static final String EMAIL = "email";
 	public static final String LAST_NAME = "last_name";
+	public static final String PHONE = "phone";
 	public static final String LAST_ACTIVITIES = "last_activities";
 	public static final String DATE_OF_INCLUSION = "date_of_inclusion";
 	public static final String STREET2 = "street2";
