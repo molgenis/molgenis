@@ -2,6 +2,8 @@ package org.molgenis.data.validation;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -15,8 +17,6 @@ import org.molgenis.data.Range;
 import org.molgenis.fieldtypes.FieldType;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Sets;
-
 /**
  * Attribute data type validator.
  * 
@@ -29,12 +29,11 @@ public class EntityAttributesValidator
 
 	public Set<ConstraintViolation> validate(Entity entity, EntityMetaData meta)
 	{
-		Set<ConstraintViolation> violations = Sets.newLinkedHashSet();
+		Set<ConstraintViolation> violations = checkValidationExpressions(entity, meta);
 
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
-			ConstraintViolation violation = checkValidationExpression(entity, attr, meta);
-			if (violation != null) violations.add(violation);
+			ConstraintViolation violation = null;
 
 			switch (attr.getDataType().getEnumType())
 			{
@@ -98,18 +97,36 @@ public class EntityAttributesValidator
 		return violations;
 	}
 
-	private ConstraintViolation checkValidationExpression(Entity entity, AttributeMetaData attribute,
-			EntityMetaData meta)
+	private Set<ConstraintViolation> checkValidationExpressions(Entity entity, EntityMetaData meta)
 	{
-		if (StringUtils.isNotBlank(attribute.getValidationExpression()))
+		List<String> validationExpressions = new ArrayList<>();
+		List<AttributeMetaData> expressionAttributes = new ArrayList<>();
+
+		for (AttributeMetaData attribute : meta.getAtomicAttributes())
 		{
-			if (!ValidationUtils.resolveBooleanExpression(attribute.getValidationExpression(), entity, meta, attribute))
+			if (StringUtils.isNotBlank(attribute.getValidationExpression()))
 			{
-				return createConstraintViolation(entity, attribute, meta);
+				expressionAttributes.add(attribute);
+				validationExpressions.add(attribute.getValidationExpression());
+			}
+
+		}
+
+		Set<ConstraintViolation> violations = new LinkedHashSet<>();
+
+		if (!validationExpressions.isEmpty())
+		{
+			List<Boolean> results = ValidationUtils.resolveBooleanExpressions(validationExpressions, entity, meta);
+			for (int i = 0; i < results.size(); i++)
+			{
+				if (!results.get(i))
+				{
+					violations.add(createConstraintViolation(entity, expressionAttributes.get(i), meta));
+				}
 			}
 		}
 
-		return null;
+		return violations;
 	}
 
 	private ConstraintViolation checkEmail(Entity entity, AttributeMetaData attribute, EntityMetaData meta)
@@ -287,7 +304,8 @@ public class EntityAttributesValidator
 
 			if (!enumOptions.contains(value))
 			{
-				return createConstraintViolation(entity, attribute, meta);
+				return createConstraintViolation(entity, attribute, meta,
+						"Value must be one of " + enumOptions.toString());
 			}
 		}
 

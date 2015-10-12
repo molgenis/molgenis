@@ -63,5 +63,28 @@ public interface MappingService
 	 */
 	void deleteMappingProject(String mappingProjectId);
 
+	/**
+	 * Clones a {@link MappingProject}. Deep copies all related mappings. Automatically generates name for cloned
+	 * {@link MappingProject}.
+	 * 
+	 * @param mappingProjectId
+	 *            id of the {@link MappingProject} to clone
+	 * 
+	 * @return cloned {@link MappingProject}
+	 */
+	MappingProject cloneMappingProject(String mappingProjectId);
+
+	/**
+	 * Clones a {@link MappingProject}. Deep copies all related mappings.
+	 * 
+	 * @param mappingProjectId
+	 *            id of the {@link MappingProject} to clone
+	 * @param clonedMappingProjectName
+	 *            name of the cloned {@link MappingProject}
+	 * 
+	 * @return cloned {@link MappingProject}
+	 */
+	MappingProject cloneMappingProject(String mappingProjectId, String clonedMappingProjectName);
+
 	String generateId(FieldType dataType, Long count);
 }

@@ -35,10 +35,10 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.pathways.model.Impact;
 import org.molgenis.pathways.model.Pathway;
 import org.molgenis.pathways.service.WikiPathwaysService;
+import org.molgenis.ui.MolgenisPluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +69,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 			.compile("([A-Z]*\\|)(\\|*[0-9]+\\||\\|+)+([0-9A-Z]+)(\\|*)(.*)");
 
 	private static final String HOMO_SAPIENS = "Homo sapiens";
-	public static final String EFFECT_ATTRIBUTE_NAME = VcfRepository.getInfoPrefix() + "EFF";
+	public static final String EFFECT_ATTRIBUTE_NAME = "EFF";
 	private final WikiPathwaysService wikiPathwaysService;
 	@Autowired
 	private DataService dataService;

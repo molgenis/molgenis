@@ -1,12 +1,12 @@
 package org.molgenis.data.mem;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
@@ -14,6 +14,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.support.QueryImpl;
 
 import com.google.common.collect.Sets;
 
@@ -59,7 +60,7 @@ public class InMemoryRepository implements Repository
 	@Override
 	public Query query()
 	{
-		throw new NotImplementedException("Not implemented yet");
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -71,13 +72,20 @@ public class InMemoryRepository implements Repository
 	@Override
 	public Iterable<Entity> findAll(Query q)
 	{
-		throw new NotImplementedException("Not implemented yet");
+		if (new QueryImpl().equals(q))
+		{
+			return new ArrayList<>(entities.values());
+		}
+		else
+		{
+			throw new UnsupportedOperationException();
+		}
 	}
 
 	@Override
 	public Entity findOne(Query q)
 	{
-		throw new NotImplementedException("Not implemented yet");
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -89,7 +97,7 @@ public class InMemoryRepository implements Repository
 	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
-		throw new NotImplementedException("Not implemented yet");
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -199,7 +207,7 @@ public class InMemoryRepository implements Repository
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		throw new NotImplementedException("Not implemented yet");
+		throw new UnsupportedOperationException();
 	}
 
 }

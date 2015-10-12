@@ -11,7 +11,9 @@
 
 <div class="row">
 	<div class="col-md-12">
-		<a href="${context_url}" class="btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span> Back to mapping project overview</a>	
+		<a href="${context_url}" class="btn btn-default btn-xs">
+			<span class="glyphicon glyphicon-chevron-left"></span> Back to mapping project overview
+		</a>	
 	</div>
 </div>
 
@@ -19,6 +21,28 @@
 	<div class="col-md-6">
 		<h3>Mappings for the ${mappingProject.name?html} project</h3>
 		<p>Create and view mappings.</p>
+	</div>
+	<div class="col-md-4">
+		<div class="row">
+			<div class="col-md-12">
+				<p class="bg-success text-center pull-right algorithm-color-legend">Curated algorithms</p>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<p class="bg-info text-center pull-right algorithm-color-legend">Generated algorithms with high quality</p>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<p class="bg-warning text-center pull-right algorithm-color-legend">Generated algorithms with low quality</p>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<p class="bg-danger text-center pull-right algorithm-color-legend">Algorithms to discuss</p>
+			</div>
+		</div>
 	</div>
 </div>
 
@@ -63,7 +87,20 @@
 								</#if>
 							</td>
 							<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
-								<td>
+								<td <#if source.getAttributeMapping(attribute.name)??>
+										<#assign attributeMapping = source.getAttributeMapping(attribute.name)>
+										<#if attributeMapping.algorithmState??>
+											<#if attributeMapping.algorithmState == "GENERATED_HIGH">
+												class="bg-info"
+											<#elseif attributeMapping.algorithmState == "GENERATED_LOW">
+												class="bg-warning"
+											<#elseif attributeMapping.algorithmState == "CURATED">
+												class="bg-success"
+											<#elseif attributeMapping.algorithmState == "DISCUSS">
+												class="bg-danger"
+											</#if>
+										</#if>
+									</#if>>
 									<div class="pull-right">
 										<form method="get" action="${context_url}/attributeMapping" class="pull-right">
 											<button type="submit" class="btn btn-default btn-xs">
@@ -73,7 +110,6 @@
 											<input type="hidden" name="target" value="${selectedTarget}"/>
 											<input type="hidden" name="source" value="${source.name}"/>
 											<input type="hidden" name="targetAttribute" value="${attribute.name}"/>
-											<input type="hidden" name="showSuggestedAttributes" value="true"/>
 										</form>
 										<#if hasWritePermission && source.getAttributeMapping(attribute.name)??>
 											<form method="post" action="${context_url}/removeAttributeMapping" class="pull-right verify">
@@ -89,8 +125,11 @@
 									</div>
 									<div>
 										<#if source.getAttributeMapping(attribute.name)??>
-											<div class="ace readonly" id="algorithm-${attribute.name?js_string}-${source.name?js_string}"
-												style="height: 25px">${(source.getAttributeMapping(attribute.name).algorithm!"")?html}</div>
+											<#assign attributeMapping = source.getAttributeMapping(attribute.name)>		
+											<#list attributeMapping.sourceAttributeMetaDatas as mappedSourceAttribute>
+												${mappedSourceAttribute.label?html}<#if mappedSourceAttribute_has_next>, </#if>
+												<#if attributeMapping.algorithmState??></#if>
+											</#list>
 										<#elseif !attribute.nillable>
 											<span class="label label-danger">missing</span>
 										</#if>
@@ -111,18 +150,7 @@
 	</#if>
 </div>
 
-<div class="row">
-	<div class="col-md-2">
-		<form method="get" action="${context_url}/tagwizard">
-			<input type="hidden" name="target" value="${selectedTarget}"/>
-			<div class="btn-group" role="group">
-				<button type="submit" class="btn btn-primary">
-					<span class="glyphicon glyphicon-tag"></span> Run tag wizard
-				</button>
-			</div>
-		</form>
-	</div>	
-		
+<div class="row">		
 	<#if mappingProject.getMappingTarget(selectedTarget).entityMappings?has_content>
 		<div class="col-md-8">		
 			<a id="add-new-attr-mapping-btn" href="#" class="btn btn-success pull-right" data-toggle="modal" data-target="#create-integrated-entity-modal">

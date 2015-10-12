@@ -67,7 +67,7 @@ public class DefaultEntityValidator implements EntityValidator
 
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
-			if (!attr.isNillable() && !attr.isIdAtrribute() && !attr.isAuto() && (attr.getDefaultValue() == null))
+			if (!attr.isNillable() && !attr.isIdAtrribute() && !attr.isAuto())
 			{
 				long rownr = 0;
 				for (Entity entity : entities)
@@ -94,7 +94,7 @@ public class DefaultEntityValidator implements EntityValidator
 
 		// Do not validate is visibleExpression resolves to false
 		if (StringUtils.isNotBlank(attr.getVisibleExpression())
-				&& !ValidationUtils.resolveBooleanExpression(attr.getVisibleExpression(), entity, entityMetaData, attr)) return false;
+				&& !ValidationUtils.resolveBooleanExpression(attr.getVisibleExpression(), entity, entityMetaData)) return false;
 
 		return true;
 	}

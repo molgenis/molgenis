@@ -2,6 +2,7 @@ package org.molgenis.data.elasticsearch.request;
 
 import static org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator.DEFAULT_ANALYZER;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -22,6 +23,7 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
+import org.molgenis.util.MolgenisDateFormat;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -38,10 +40,12 @@ public class QueryGenerator implements QueryPartGenerator
 	{
 		List<QueryRule> queryRules = query.getRules();
 		if (queryRules == null || queryRules.isEmpty()) return;
-		searchRequestBuilder.setQuery(createQueryBuilder(queryRules, entityMetaData));
+
+		QueryBuilder q = createQueryBuilder(queryRules, entityMetaData);
+		searchRequestBuilder.setQuery(q);
 	}
 
-	private QueryBuilder createQueryBuilder(List<QueryRule> queryRules, EntityMetaData entityMetaData)
+	public QueryBuilder createQueryBuilder(List<QueryRule> queryRules, EntityMetaData entityMetaData)
 	{
 		QueryBuilder queryBuilder;
 
@@ -56,6 +60,7 @@ public class QueryGenerator implements QueryPartGenerator
 			// boolean query consisting of combination of query clauses
 			Operator occur = null;
 			BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+
 			for (int i = 0; i < nrQueryRules; i += 2)
 			{
 				QueryRule queryRule = queryRules.get(i);
@@ -244,7 +249,12 @@ public class QueryGenerator implements QueryPartGenerator
 				String[] attributePath = parseAttributePath(queryField);
 
 				// Workaround for Elasticsearch Date to String conversion issue
-				queryValue = queryValue instanceof java.util.Date ? queryValue.toString() : queryValue;
+				if (queryValue instanceof Date)
+				{
+					AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+					queryValue = getESDateQueryValue((Date) queryValue, attr);
+				}
+
 				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).gt(queryValue);
 				filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
 				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
@@ -259,7 +269,11 @@ public class QueryGenerator implements QueryPartGenerator
 				String[] attributePath = parseAttributePath(queryField);
 
 				// Workaround for Elasticsearch Date to String conversion issue
-				queryValue = queryValue instanceof java.util.Date ? queryValue.toString() : queryValue;
+				if (queryValue instanceof Date)
+				{
+					AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+					queryValue = getESDateQueryValue((Date) queryValue, attr);
+				}
 				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).gte(queryValue);
 				filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
 				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
@@ -305,6 +319,7 @@ public class QueryGenerator implements QueryPartGenerator
 					case CATEGORICAL_MREF:
 					case MREF:
 					case XREF:
+					case FILE:
 						if (attributePath.length > 1) throw new UnsupportedOperationException(
 								"Can not filter on references deeper than 1.");
 
@@ -334,7 +349,6 @@ public class QueryGenerator implements QueryPartGenerator
 					case COMPOUND:
 						throw new MolgenisQueryException("Illegal data type [" + dataType + "] for operator ["
 								+ queryOperator + "]");
-					case FILE:
 					case IMAGE:
 						throw new UnsupportedOperationException("Query with data type [" + dataType + "] not supported");
 					default:
@@ -351,7 +365,11 @@ public class QueryGenerator implements QueryPartGenerator
 				String[] attributePath = parseAttributePath(queryField);
 
 				// Workaround for Elasticsearch Date to String conversion issue
-				queryValue = queryValue instanceof java.util.Date ? queryValue.toString() : queryValue;
+				if (queryValue instanceof Date)
+				{
+					AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+					queryValue = getESDateQueryValue((Date) queryValue, attr);
+				}
 				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).lt(queryValue);
 				filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
 				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
@@ -365,7 +383,11 @@ public class QueryGenerator implements QueryPartGenerator
 				String[] attributePath = parseAttributePath(queryField);
 
 				// Workaround for Elasticsearch Date to String conversion issue
-				queryValue = queryValue instanceof java.util.Date ? queryValue.toString() : queryValue;
+				if (queryValue instanceof Date)
+				{
+					AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+					queryValue = getESDateQueryValue((Date) queryValue, attr);
+				}
 				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).lte(queryValue);
 				filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
 				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
@@ -385,15 +407,25 @@ public class QueryGenerator implements QueryPartGenerator
 
 				Iterator<?> iterator = iterable.iterator();
 
+				String[] attributePath = parseAttributePath(queryField);
+				AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+
 				Object queryValueFrom = iterator.next();
+
 				// Workaround for Elasticsearch Date to String conversion issue
-				queryValueFrom = queryValueFrom instanceof java.util.Date ? queryValueFrom.toString() : queryValueFrom;
+				if (queryValueFrom instanceof Date)
+				{
+					queryValueFrom = getESDateQueryValue((Date) queryValueFrom, attr);
+				}
 
 				Object queryValueTo = iterator.next();
-				// Workaround for Elasticsearch Date to String conversion issue
-				queryValueTo = queryValueTo instanceof java.util.Date ? queryValueTo.toString() : queryValueTo;
 
-				String[] attributePath = parseAttributePath(queryField);
+				// Workaround for Elasticsearch Date to String conversion issue
+				if (queryValueTo instanceof Date)
+				{
+					queryValueTo = getESDateQueryValue((Date) queryValueTo, attr);
+				}
+
 				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).gte(queryValueFrom)
 						.lte(queryValueTo);
 				filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
@@ -430,6 +462,7 @@ public class QueryGenerator implements QueryPartGenerator
 					case CATEGORICAL_MREF:
 					case MREF:
 					case XREF:
+					case FILE:
 					case SCRIPT: // due to size would result in large amount of ngrams
 					case TEXT: // due to size would result in large amount of ngrams
 					case HTML: // due to size would result in large amount of ngrams
@@ -444,7 +477,6 @@ public class QueryGenerator implements QueryPartGenerator
 								DEFAULT_ANALYZER);
 						queryBuilder = nestedQueryBuilder(attributePath, queryBuilder);
 						break;
-					case FILE:
 					case IMAGE:
 						throw new UnsupportedOperationException("Query with data type [" + dataType + "] not supported");
 					default:
@@ -460,7 +492,7 @@ public class QueryGenerator implements QueryPartGenerator
 				// 2. no attribute: search in all
 				if (queryField == null)
 				{
-					queryBuilder = QueryBuilders.matchQuery("_all", queryValue);
+					queryBuilder = QueryBuilders.matchPhraseQuery("_all", queryValue).slop(10);
 				}
 				else
 				{
@@ -494,6 +526,7 @@ public class QueryGenerator implements QueryPartGenerator
 						case CATEGORICAL_MREF:
 						case MREF:
 						case XREF:
+						case FILE:
 							if (attributePath.length > 1) throw new UnsupportedOperationException(
 									"Can not filter on references deeper than 1.");
 
@@ -503,7 +536,7 @@ public class QueryGenerator implements QueryPartGenerator
 						case COMPOUND:
 							throw new MolgenisQueryException("Illegal data type [" + dataType + "] for operator ["
 									+ queryOperator + "]");
-						case FILE:
+
 						case IMAGE:
 							throw new UnsupportedOperationException("Query with data type [" + dataType
 									+ "] not supported");
@@ -547,10 +580,21 @@ public class QueryGenerator implements QueryPartGenerator
 							break;
 						case MREF:
 						case XREF:
+						case CATEGORICAL:
+						case CATEGORICAL_MREF:
+						case FILE:
 							queryField = attr.getName() + "." + attr.getRefEntity().getLabelAttribute().getName();
 							queryBuilder = QueryBuilders.nestedQuery(attr.getName(),
 									QueryBuilders.queryString(queryField + ":(" + queryValue + ")")).scoreMode("max");
 							break;
+						case BOOL:
+						case COMPOUND:
+							throw new MolgenisQueryException("Illegal data type [" + dataType + "] for operator ["
+									+ queryOperator + "]");
+
+						case IMAGE:
+							throw new UnsupportedOperationException("Query with data type [" + dataType
+									+ "] not supported");
 						default:
 							throw new RuntimeException("Unknown data type [" + dataType + "]");
 					}
@@ -715,5 +759,15 @@ public class QueryGenerator implements QueryPartGenerator
 
 			return attr;
 		}
+	}
+
+	private String getESDateQueryValue(Date queryValue, AttributeMetaData attr)
+	{
+		if (attr.getDataType().getEnumType() == FieldTypeEnum.DATE_TIME)
+		{
+			return MolgenisDateFormat.getDateTimeFormat().format(queryValue);
+		}
+
+		return MolgenisDateFormat.getDateFormat().format(queryValue);
 	}
 }

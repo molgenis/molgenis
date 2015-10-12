@@ -4,8 +4,10 @@ import static org.molgenis.dataexplorer.controller.AnnotatorController.URI;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
@@ -14,8 +16,11 @@ import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.CrudRepositoryAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.settings.SettingsEntityMeta;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.file.FileStore;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.ErrorMessageResponse;
@@ -32,6 +37,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import com.google.common.collect.Lists;
 
 /**
  * Controller wrapper for the dataexplorer annotator
@@ -67,6 +74,9 @@ public class AnnotatorController
 
 	@Autowired
 	UserAccountService userAccountService;
+
+	@Autowired
+	MolgenisPermissionService molgenisPermissionService;
 
 	/**
 	 * Gets a map of all available annotators.
@@ -105,7 +115,7 @@ public class AnnotatorController
 		{
 			CrudRepositoryAnnotator crudRepositoryAnnotator = new CrudRepositoryAnnotator(dataService,
 					getNewRepositoryName(annotatorNames, repository.getEntityMetaData().getSimpleName()),
-					permissionSystemService, userAccountService);
+					permissionSystemService, userAccountService, molgenisPermissionService);
 
 			for (String annotatorName : annotatorNames)
 			{
@@ -153,22 +163,39 @@ public class AnnotatorController
 		if (dataSetName != null)
 		{
 			EntityMetaData entityMetaData = dataService.getEntityMetaData(dataSetName);
-
 			for (RepositoryAnnotator annotator : annotationService.getAllAnnotators())
 			{
+				List<AttributeMetaData> outputAttrs = annotator.getOutputMetaData();
+				outputAttrs = getAtomicAttributesFromList(outputAttrs);
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("description", annotator.getDescription());
 				map.put("canAnnotate", annotator.canAnnotate(entityMetaData));
-				map.put("inputAttributes", annotator.getInputMetaData().getAttributes());
-				map.put("inputAttributeTypes", toMap(annotator.getInputMetaData().getAttributes()));
-				map.put("outputAttributes", annotator.getOutputMetaData().getAttributes());
-				map.put("outputAttributeTypes", toMap(annotator.getOutputMetaData().getAttributes()));
+				map.put("inputAttributes", annotator.getInputMetaData());
+				map.put("inputAttributeTypes", toMap(annotator.getInputMetaData()));
+				map.put("outputAttributes", outputAttrs);
+				map.put("outputAttributeTypes", toMap(annotator.getOutputMetaData()));
+
+				String settingsEntityName = SettingsEntityMeta.PACKAGE_NAME
+						+ org.molgenis.data.Package.PACKAGE_SEPARATOR + annotator.getInfo().getCode();
+				map.put("showSettingsButton",
+						molgenisPermissionService.hasPermissionOnEntity(settingsEntityName, Permission.WRITE));
 				mapOfAnnotators.put(annotator.getSimpleName(), map);
 			}
-
 		}
-
 		return mapOfAnnotators;
+	}
+
+	private List<AttributeMetaData> getAtomicAttributesFromList(List<AttributeMetaData> outputAttrs)
+	{
+		if (outputAttrs.size() == 1
+				&& outputAttrs.get(0).getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
+		{
+			return getAtomicAttributesFromList(Lists.newArrayList(outputAttrs.get(0).getAttributeParts()));
+		}
+		else
+		{
+			return outputAttrs;
+		}
 	}
 
 	private Map<String, String> toMap(Iterable<AttributeMetaData> attrs)

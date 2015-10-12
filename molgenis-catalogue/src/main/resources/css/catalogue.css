@@ -13,11 +13,6 @@
     margin-bottom: 18px;    
 }
 
-#shoppingcart {
-    max-height: 500px;
-    overflow: auto;
-}
-
 .scrollable-menu {
     height: auto;
     max-height: 400px;

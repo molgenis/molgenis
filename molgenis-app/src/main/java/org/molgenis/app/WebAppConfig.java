@@ -1,47 +1,62 @@
 package org.molgenis.app;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.poi.ss.formula.eval.NotImplementedException;
+import org.molgenis.CommandLineOnlyConfiguration;
 import org.molgenis.DatabaseConfig;
-import org.molgenis.auth.GroupAuthority;
-import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
+import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.jpa.JpaRepositoryCollection;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.system.RepositoryTemplateLoader;
-import org.molgenis.data.version.v1_5.Step1UpgradeMetaData;
-import org.molgenis.data.version.v1_5.Step2;
-import org.molgenis.data.version.v1_5.Step3AddOrderColumnToMrefTables;
-import org.molgenis.data.version.v1_5.Step4VarcharToText;
-import org.molgenis.data.version.v1_6.Step7UpgradeMetaDataTo1_6;
-import org.molgenis.data.version.v1_6.Step8VarcharToTextRepeated;
-import org.molgenis.data.version.v1_6.Step9MysqlTablesToInnoDB;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
+import org.molgenis.migrate.version.v1_10.Step17RuntimePropertiesToGafListSettings;
+import org.molgenis.migrate.version.v1_10.Step18RuntimePropertiesToAnnotatorSettings;
+import org.molgenis.migrate.version.v1_10.Step19RemoveMolgenisLock;
+import org.molgenis.migrate.version.v1_5.Step1UpgradeMetaData;
+import org.molgenis.migrate.version.v1_5.Step2;
+import org.molgenis.migrate.version.v1_5.Step3AddOrderColumnToMrefTables;
+import org.molgenis.migrate.version.v1_5.Step4VarcharToText;
+import org.molgenis.migrate.version.v1_5.Step5AlterDataexplorerMenuURLs;
+import org.molgenis.migrate.version.v1_5.Step6ChangeRScriptType;
+import org.molgenis.migrate.version.v1_6.Step7UpgradeMetaDataTo1_6;
+import org.molgenis.migrate.version.v1_6.Step8VarcharToTextRepeated;
+import org.molgenis.migrate.version.v1_6.Step9MysqlTablesToInnoDB;
+import org.molgenis.migrate.version.v1_8.Step10DeleteFormReferences;
+import org.molgenis.migrate.version.v1_8.Step11ConvertNames;
+import org.molgenis.migrate.version.v1_8.Step12ChangeElasticsearchTokenizer;
+import org.molgenis.migrate.version.v1_8.Step13RemoveCatalogueMenuEntries;
+import org.molgenis.migrate.version.v1_9.RuntimePropertyToAppSettingsMigrator;
+import org.molgenis.migrate.version.v1_9.RuntimePropertyToDataExplorerSettingsMigrator;
+import org.molgenis.migrate.version.v1_9.RuntimePropertyToGenomicDataSettingsMigrator;
+import org.molgenis.migrate.version.v1_9.RuntimePropertyToStaticContentMigrator;
+import org.molgenis.migrate.version.v1_9.Step14UpdateAttributeMapping;
+import org.molgenis.migrate.version.v1_9.Step15AddDefaultValue;
+import org.molgenis.migrate.version.v1_9.Step16RuntimePropertyToSettings;
 import org.molgenis.system.core.FreemarkerTemplateRepository;
-import org.molgenis.system.core.RuntimeProperty;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.molgenis.ui.menumanager.MenuManagerService;
-import org.molgenis.ui.migrate.v1_5.Step5AlterDataexplorerMenuURLs;
-import org.molgenis.ui.migrate.v1_5.Step6ChangeRScriptType;
-import org.molgenis.ui.migrate.v1_8.Step10DeleteFormReferences;
 import org.molgenis.util.DependencyResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -55,7 +70,7 @@ import freemarker.template.TemplateException;
 @EnableTransactionManagement
 @EnableWebMvc
 @EnableAsync
-@ComponentScan("org.molgenis")
+@ComponentScan(basePackages = "org.molgenis", excludeFilters = @Filter(type = FilterType.ANNOTATION, value = CommandLineOnlyConfiguration.class))
 @Import(
 { WebAppSecurityConfig.class, DatabaseConfig.class, EmbeddedElasticSearchConfig.class })
 public class WebAppConfig extends MolgenisWebAppConfig
@@ -78,6 +93,30 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Autowired
 	private MenuManagerService menuManagerService;
 
+	@Autowired
+	private EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
+
+	@Autowired
+	private RuntimePropertyToAppSettingsMigrator runtimePropertyToAppSettingsMigrator;
+
+	@Autowired
+	private RuntimePropertyToGenomicDataSettingsMigrator runtimePropertyToGenomicDataSettingsMigrator;
+
+	@Autowired
+	private RuntimePropertyToDataExplorerSettingsMigrator runtimePropertyToDataExplorerSettingsMigrator;
+
+	@Autowired
+	private RuntimePropertyToStaticContentMigrator runtimePropertyToStaticContentMigrator;
+
+	@Autowired
+	private Step17RuntimePropertiesToGafListSettings step17RuntimePropertiesToGafListSettings;
+
+	@Autowired
+	private Step18RuntimePropertiesToAnnotatorSettings step18RuntimePropertiesToAnnotatorSettings;
+
+	@Autowired
+	private Step19RemoveMolgenisLock step19RemoveMolgenisLock;
+
 	@Override
 	public ManageableRepositoryCollection getBackend()
 	{
@@ -97,10 +136,29 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step7UpgradeMetaDataTo1_6(dataSource, searchService));
 		upgradeService.addUpgrade(new Step8VarcharToTextRepeated(dataSource));
 		upgradeService.addUpgrade(new Step9MysqlTablesToInnoDB(dataSource));
-		upgradeService.addUpgrade(new Step10DeleteFormReferences(jpaRepositoryCollection
-				.getRepository(RuntimeProperty.ENTITY_NAME), jpaRepositoryCollection
-				.getRepository(UserAuthority.ENTITY_NAME), jpaRepositoryCollection
-				.getRepository(GroupAuthority.ENTITY_NAME)));
+		upgradeService.addUpgrade(new Step10DeleteFormReferences(dataSource));
+
+		SingleConnectionDataSource singleConnectionDS = null;
+		try
+		{
+			singleConnectionDS = new SingleConnectionDataSource(dataSource.getConnection(), true);
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+
+		upgradeService.addUpgrade(new Step11ConvertNames(singleConnectionDS));
+		upgradeService.addUpgrade(new Step12ChangeElasticsearchTokenizer(embeddedElasticSearchServiceFactory));
+		upgradeService.addUpgrade(new Step13RemoveCatalogueMenuEntries(dataSource));
+		upgradeService.addUpgrade(new Step14UpdateAttributeMapping(dataSource));
+		upgradeService.addUpgrade(new Step15AddDefaultValue(dataSource, searchService, jpaRepositoryCollection));
+		upgradeService.addUpgrade(new Step16RuntimePropertyToSettings(runtimePropertyToAppSettingsMigrator,
+				runtimePropertyToGenomicDataSettingsMigrator, runtimePropertyToDataExplorerSettingsMigrator,
+				runtimePropertyToStaticContentMigrator));
+		upgradeService.addUpgrade(step17RuntimePropertiesToGafListSettings);
+		upgradeService.addUpgrade(step18RuntimePropertiesToAnnotatorSettings);
+		upgradeService.addUpgrade(step19RemoveMolgenisLock);
 	}
 
 	@Override
@@ -119,7 +177,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 			@Override
 			public boolean hasRepository(String name)
 			{
-				throw new NotImplementedException("Not implemented yet");
+				throw new UnsupportedOperationException();
 			}
 		};
 

@@ -70,12 +70,11 @@ import org.molgenis.fieldtypes.BoolField;
 import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.FileMeta;
 import org.molgenis.file.FileStore;
-import org.molgenis.framework.db.EntityNotFoundException;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.security.core.token.TokenService;
+import org.molgenis.security.core.token.UnknownTokenException;
 import org.molgenis.security.token.TokenExtractor;
-import org.molgenis.security.token.TokenService;
-import org.molgenis.security.token.UnknownTokenException;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.MolgenisDateFormat;
@@ -94,7 +93,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -601,7 +599,7 @@ public class RestController
 
 	@RequestMapping(value = "/{entityName}", method = POST)
 	public void create(@PathVariable("entityName") String entityName, @RequestBody Map<String, Object> entityMap,
-			HttpServletResponse response) throws EntityNotFoundException
+			HttpServletResponse response)
 	{
 		if (entityMap == null)
 		{
@@ -764,7 +762,6 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @throws EntityNotFoundException
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
@@ -782,7 +779,6 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @throws EntityNotFoundException
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
@@ -796,7 +792,6 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @throws EntityNotFoundException
 	 */
 	@RequestMapping(value = "/{entityName}", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
@@ -810,7 +805,6 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @throws EntityNotFoundException
 	 */
 	@RequestMapping(value = "/{entityName}", method = POST, params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
@@ -824,11 +818,9 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @throws EntityNotFoundException
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
-	@Transactional
 	public void deleteMeta(@PathVariable("entityName") String entityName)
 	{
 		deleteMetaInternal(entityName);
@@ -839,11 +831,9 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @throws EntityNotFoundException
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = POST, params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
-	@Transactional
 	public void deleteMetaPost(@PathVariable("entityName") String entityName)
 	{
 		deleteMetaInternal(entityName);

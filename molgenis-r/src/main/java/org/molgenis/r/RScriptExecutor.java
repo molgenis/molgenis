@@ -1,5 +1,7 @@
 package org.molgenis.r;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -19,16 +21,24 @@ public class RScriptExecutor
 	private static final Logger LOG = LoggerFactory.getLogger(RScriptExecutor.class);
 
 	private final String rScriptExecutable;
+	/**
+	 * Path to R libraries
+	 */
+	private final String rLibs;
 
 	@Autowired
-	public RScriptExecutor(@Value("${r_script_executable:/usr/bin/Rscript}") String rScriptExecutable)
+	public RScriptExecutor(@Value("${r_script_executable:/usr/bin/Rscript}") String rScriptExecutable,
+			@Value("${r_libs:@null}") String rLibs)
 	{
-		if (rScriptExecutable == null)
+		this.rScriptExecutable = checkNotNull(rScriptExecutable);
+		if (rLibs == null)
 		{
-			throw new IllegalArgumentException("rExecutable is null");
+			this.rLibs = System.getProperty("user.home") + File.separator + "r-packages";
 		}
-
-		this.rScriptExecutable = rScriptExecutable;
+		else
+		{
+			this.rLibs = rLibs;
+		}
 	}
 
 	/**
@@ -46,8 +56,8 @@ public class RScriptExecutor
 		// Check if r has execution rights
 		if (!file.canExecute())
 		{
-			throw new MolgenisRException("Can not execute [" + rScriptExecutable
-					+ "]. Does it have executable permissions?");
+			throw new MolgenisRException(
+					"Can not execute [" + rScriptExecutable + "]. Does it have executable permissions?");
 		}
 
 		// Check if the r script exists
@@ -60,7 +70,9 @@ public class RScriptExecutor
 		{
 			// Create r process
 			LOG.info("Running r script [" + script.getAbsolutePath() + "]");
-			Process process = Runtime.getRuntime().exec(rScriptExecutable + " " + script.getAbsolutePath());
+			ProcessBuilder processBuilder = new ProcessBuilder(rScriptExecutable, script.getAbsolutePath());
+			processBuilder.environment().put("R_LIBS", rLibs);
+			Process process = processBuilder.start();
 
 			// Capture the error output
 			final StringBuilder sb = new StringBuilder();

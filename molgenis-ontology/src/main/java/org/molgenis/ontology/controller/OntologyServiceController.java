@@ -22,10 +22,10 @@ import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.Sort;
@@ -40,7 +40,6 @@ import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
-import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.beans.OntologyServiceResult;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
@@ -56,6 +55,7 @@ import org.molgenis.ontology.roc.MatchQualityRocService;
 import org.molgenis.ontology.utils.OntologyServiceUtil;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.user.UserAccountService;
+import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -128,7 +128,8 @@ public class OntologyServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/calculate/{entityName}")
-	public String calculateRoc(@PathVariable String entityName, Model model) throws IOException, InvalidFormatException
+	public String calculateRoc(@PathVariable String entityName, Model model) throws IOException,
+			MolgenisInvalidFormatException
 	{
 		model.addAllAttributes(matchQualityRocService.calculateROC(entityName));
 		return init(model);

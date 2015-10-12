@@ -2,6 +2,7 @@ package org.molgenis.data.importer;
 
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.AGGREGATEABLE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DATA_TYPE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.DEFAULT_VALUE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.EXPRESSION;
@@ -19,6 +20,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.UNIQUE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VALIDATION_EXPRESSION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.BACKEND;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
 
@@ -43,9 +45,11 @@ import org.molgenis.data.Package;
 import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
+import org.molgenis.data.meta.MetaValidationUtils;
 import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.meta.TagMetaData;
@@ -87,14 +91,14 @@ public class EmxMetaDataParser implements MetaDataParser
 	static final List<String> SUPPORTED_ENTITY_ATTRIBUTES = Arrays.asList(
 			org.molgenis.data.meta.EntityMetaDataMetaData.LABEL.toLowerCase(),
 			org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION.toLowerCase(), "name", ABSTRACT.toLowerCase(),
-			EXTENDS.toLowerCase(), "package", EntityMetaDataMetaData.TAGS);
+			EXTENDS.toLowerCase(), "package", EntityMetaDataMetaData.TAGS, BACKEND);
 	static final List<String> SUPPORTED_ATTRIBUTE_ATTRIBUTES = Arrays.asList(AGGREGATEABLE.toLowerCase(),
 			DATA_TYPE.toLowerCase(), DESCRIPTION.toLowerCase(), ENTITY.toLowerCase(), ENUM_OPTIONS.toLowerCase(),
 			ID_ATTRIBUTE.toLowerCase(), LABEL.toLowerCase(), LABEL_ATTRIBUTE.toLowerCase(),
 			LOOKUP_ATTRIBUTE.toLowerCase(), NAME, NILLABLE.toLowerCase(), PART_OF_ATTRIBUTE.toLowerCase(),
 			RANGE_MAX.toLowerCase(), RANGE_MIN.toLowerCase(), READ_ONLY.toLowerCase(), REF_ENTITY.toLowerCase(),
 			VISIBLE.toLowerCase(), UNIQUE.toLowerCase(), TAGS.toLowerCase(), EXPRESSION.toLowerCase(),
-			VALIDATION_EXPRESSION.toLowerCase());
+			VALIDATION_EXPRESSION.toLowerCase(), DEFAULT_VALUE.toLowerCase());
 	static final String AUTO = "auto";
 
 	private final DataService dataService;
@@ -232,6 +236,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			String expression = attributeEntity.getString(EXPRESSION);
 			List<String> tagIds = attributeEntity.getList(TAGS);
 			String validationExpression = attributeEntity.getString(VALIDATION_EXPRESSION);
+			String defaultValue = attributeEntity.getString(DEFAULT_VALUE);
 
 			if (attributeNillable != null) attribute.setNillable(attributeNillable);
 
@@ -268,6 +273,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			if (unique != null) attribute.setUnique(unique);
 			if (expression != null) attribute.setExpression(expression);
 			if (validationExpression != null) attribute.setValidationExpression(validationExpression);
+			if (defaultValue != null) attribute.setDefaultValue(defaultValue);
 			attribute.setAuto(attributeIdAttribute != null && attributeIdAttribute.equalsIgnoreCase(AUTO));
 
 			if ((attributeIdAttribute != null) && !attributeIdAttribute.equalsIgnoreCase("true")
@@ -503,6 +509,16 @@ public class EmxMetaDataParser implements MetaDataParser
 					md = intermediateResults.addEntityMetaData(entityName);
 				}
 
+				String backend = entity.getString(BACKEND);
+				if (backend != null)
+				{
+					if (dataService.getMeta().getBackend(backend) == null)
+					{
+						throw new MolgenisDataException("Unknown backend '" + backend + "'");
+					}
+					md.setBackend(backend);
+				}
+
 				if (packageName != null)
 				{
 					PackageImpl p = intermediateResults.getPackage(packageName);
@@ -706,12 +722,17 @@ public class EmxMetaDataParser implements MetaDataParser
 				}
 				else
 				{
-					EntityMetaData refEntityMeta = dataService.getEntityMetaData(refEntityName);
-					if (refEntityMeta == null)
+					EntityMetaData refEntityMeta;
+					try
+					{
+						refEntityMeta = dataService.getEntityMetaData(refEntityName);
+					}
+					catch (UnknownEntityException e)
 					{
 						throw new IllegalArgumentException("attributes.refEntity error on line " + i + ": "
 								+ refEntityName + " unknown");
 					}
+
 					// allow computed xref attributes to refer to pre-existing entities
 					defaultAttributeMetaData.setRefEntity(refEntityMeta);
 				}
@@ -834,14 +855,9 @@ public class EmxMetaDataParser implements MetaDataParser
 
 		Map<String, EntityMetaData> metaDataMap = getEntityMetaDataMap(dataService, source);
 
-		// "-" is not allowed because of bug: https://github.com/molgenis/molgenis/issues/2055
-		// FIXME remove this line once this bug is fixed
-		for (String entityName : metaDataMap.keySet())
+		for (EntityMetaData emd : metaDataMap.values())
 		{
-			if (entityName.contains("-"))
-			{
-				throw new IllegalArgumentException("'-' is not allowed in an entity name (" + entityName + ")");
-			}
+			MetaValidationUtils.validateEntityMetaData(emd);
 		}
 
 		for (String sheet : source.getEntityNames())

@@ -1,13 +1,26 @@
 package org.molgenis.data.mapper.service.impl;
 
-import java.util.ArrayList;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_HIGH;
+import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_LOW;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import javax.measure.converter.ConversionException;
+import javax.measure.converter.UnitConverter;
+import javax.measure.quantity.Quantity;
+import javax.measure.unit.Unit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -15,14 +28,19 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Repository;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
+import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.service.AlgorithmService;
+import org.molgenis.data.mapper.service.UnitResolver;
+import org.molgenis.data.semantic.Relation;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
+import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.js.RhinoConfig;
 import org.molgenis.js.ScriptEvaluator;
+import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.NativeArray;
@@ -30,20 +48,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import utils.MagmaUnitConverter;
+
+import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 
 public class AlgorithmServiceImpl implements AlgorithmService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AlgorithmServiceImpl.class);
 
-	@Autowired
-	private DataService dataService;
+	private final DataService dataService;
+	private final OntologyTagService ontologyTagService;
+	private final SemanticSearchService semanticSearchService;
+	private final UnitResolver unitResolver;
+	private final AlgorithmTemplateService algorithmTemplateService;
+	private final Pattern MAGMA_ATTRIBUTE_PATTERN = Pattern.compile("\\$\\('([^\\$\\(\\)]*)'\\)");
+	private final MagmaUnitConverter magmaUnitConverter = new MagmaUnitConverter();
 
 	@Autowired
-	private SemanticSearchService semanticSearchService;
-
-	public AlgorithmServiceImpl()
+	public AlgorithmServiceImpl(DataService dataService, OntologyTagService ontologyTagService,
+			SemanticSearchService semanticSearchService, UnitResolver unitResolver,
+			AlgorithmTemplateService algorithmTemplateService)
 	{
+		this.dataService = checkNotNull(dataService);
+		this.ontologyTagService = checkNotNull(ontologyTagService);
+		this.semanticSearchService = checkNotNull(semanticSearchService);
+		this.unitResolver = checkNotNull(unitResolver);
+		this.algorithmTemplateService = checkNotNull(algorithmTemplateService);
+
 		new RhinoConfig().init();
 	}
 
@@ -52,73 +86,173 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	public void autoGenerateAlgorithm(EntityMetaData sourceEntityMetaData, EntityMetaData targetEntityMetaData,
 			EntityMapping mapping, AttributeMetaData targetAttribute)
 	{
+
 		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttribute.getName());
-		Iterable<AttributeMetaData> matches = semanticSearchService.findAttributes(sourceEntityMetaData,
+		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
 				targetEntityMetaData, targetAttribute);
-		if (Iterables.size(matches) == 1)
+
+		Map<AttributeMetaData, ExplainedAttributeMetaData> relevantAttributes = semanticSearchService
+				.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute, tagsForAttribute.values(),
+						null);
+
+		String algorithm = null;
+		AlgorithmState algorithmState = null;
+		Set<AttributeMetaData> mappedSourceAttributes = null;
+
+		// use existing algorithm template if available
+		AlgorithmTemplate algorithmTemplate = algorithmTemplateService.find(relevantAttributes).findFirst()
+				.orElse(null);
+
+		if (algorithmTemplate != null)
 		{
-			AttributeMetaData source = matches.iterator().next();
+			algorithm = algorithmTemplate.render();
+			algorithmState = GENERATED_HIGH;
+			mappedSourceAttributes = extractSourceAttributesFromAlgorithm(algorithm, sourceEntityMetaData);
+
+			algorithm = convertUnitForTemplateAlgorithm(algorithm, targetAttribute, targetEntityMetaData,
+					mappedSourceAttributes, sourceEntityMetaData);
+		}
+		else if (relevantAttributes.size() > 0)
+		{
+			Entry<AttributeMetaData, ExplainedAttributeMetaData> firstEntry = relevantAttributes.entrySet().stream()
+					.findFirst().get();
+			AttributeMetaData sourceAttribute = firstEntry.getKey();
+
+			algorithm = generateUnitConversionAlgorithm(targetAttribute, targetEntityMetaData, sourceAttribute,
+					sourceEntityMetaData);
+			mappedSourceAttributes = Sets.newHashSet(sourceAttribute);
+			algorithmState = firstEntry.getValue().isHighQuality() ? GENERATED_HIGH : GENERATED_LOW;
+		}
+
+		if (StringUtils.isNotBlank(algorithm))
+		{
 			AttributeMapping attributeMapping = mapping.addAttributeMapping(targetAttribute.getName());
-			String algorithm = "$('" + source.getName() + "').value()";
 			attributeMapping.setAlgorithm(algorithm);
-			LOG.info("Creating attribute mapping: " + targetAttribute.getName() + " = " + algorithm);
+			attributeMapping.getSourceAttributeMetaDatas().addAll(mappedSourceAttributes);
+			attributeMapping.setAlgorithmState(algorithmState);
+			LOG.debug("Creating attribute mapping: " + targetAttribute.getName() + " = " + algorithm);
 		}
 	}
 
-	@Override
-	public List<Object> applyAlgorithm(AttributeMetaData targetAttribute, String algorithm, Repository sourceRepository)
+	Set<AttributeMetaData> extractSourceAttributesFromAlgorithm(String algorithm, EntityMetaData sourceEntityMetaData)
 	{
-		List<Object> derivedValues = new ArrayList<Object>();
-		Collection<String> attributeNames = getSourceAttributeNames(algorithm);
-		if (!attributeNames.isEmpty())
+		if (StringUtils.isNotBlank(algorithm))
 		{
-			for (Entity entity : sourceRepository)
+			Set<String> attributeNames = new HashSet<>();
+			Matcher matcher = MAGMA_ATTRIBUTE_PATTERN.matcher(algorithm);
+			while (matcher.find())
 			{
-				MapEntity mapEntity = createMapEntity(attributeNames, entity);
-				if (!StringUtils.isEmpty(algorithm))
-				{
-					try
-					{
-						Object result = ScriptEvaluator
-								.eval(algorithm, mapEntity, sourceRepository.getEntityMetaData());
+				attributeNames.add(matcher.group(1));
+			}
+			return attributeNames.stream().map(attributeName -> sourceEntityMetaData.getAttribute(attributeName))
+					.filter(Objects::nonNull).collect(Collectors.toSet());
+		}
+		return Collections.emptySet();
+	}
 
-						if (result != null)
-						{
-							switch (targetAttribute.getDataType().getEnumType())
-							{
-								case DATE:
-								case DATE_TIME:
-									derivedValues.add(Context.jsToJava(result, Date.class));
-									break;
-								case INT:
-									derivedValues.add(Integer.parseInt(Context.toString(result)));
-									break;
-								case DECIMAL:
-									derivedValues.add(Context.toNumber(result));
-									break;
-								case XREF:
-								case CATEGORICAL:
-									derivedValues.add(dataService.findOne(targetAttribute.getRefEntity().getName(),
-											Context.toString(result)).getIdValue());
-									break;
-								case MREF:
-								case CATEGORICAL_MREF:
-									derivedValues.add((NativeArray) result);
-									break;
-								default:
-									derivedValues.add(Context.toString(result));
-									break;
-							}
-						}
-					}
-					catch (RuntimeException e)
-					{
-						LOG.error("error converting result", e);
-					}
-				}
+	String convertUnitForTemplateAlgorithm(String algorithm, AttributeMetaData targetAttribute,
+			EntityMetaData targetEntityMetaData, Set<AttributeMetaData> sourceAttributes,
+			EntityMetaData sourceEntityMetaData)
+	{
+		Unit<? extends Quantity> targetUnit = unitResolver.resolveUnit(targetAttribute, targetEntityMetaData);
+
+		for (AttributeMetaData sourceAttribute : sourceAttributes)
+		{
+			Unit<? extends Quantity> sourceUnit = unitResolver.resolveUnit(sourceAttribute, sourceEntityMetaData);
+
+			String convertUnit = magmaUnitConverter.convertUnit(targetUnit, sourceUnit);
+
+			if (StringUtils.isNotBlank(convertUnit))
+			{
+				String attrMagamSyntax = String.format("$('%s')", sourceAttribute.getName());
+				String unitConvertedMagamSyntax = convertUnit.startsWith(".") ? attrMagamSyntax + convertUnit : attrMagamSyntax
+						+ "." + convertUnit;
+				algorithm = StringUtils.replace(algorithm, attrMagamSyntax, unitConvertedMagamSyntax);
 			}
 		}
-		return derivedValues;
+
+		return algorithm;
+	}
+
+	String generateUnitConversionAlgorithm(AttributeMetaData targetAttribute, EntityMetaData targetEntityMetaData,
+			AttributeMetaData sourceAttribute, EntityMetaData sourceEntityMetaData)
+	{
+		String algorithm = null;
+
+		Unit<? extends Quantity> targetUnit = unitResolver.resolveUnit(targetAttribute, targetEntityMetaData);
+
+		Unit<? extends Quantity> sourceUnit = unitResolver.resolveUnit(sourceAttribute, sourceEntityMetaData);
+
+		if (sourceUnit != null)
+		{
+			if (targetUnit != null && !sourceUnit.equals(targetUnit))
+			{
+				// if units are convertible, create convert algorithm
+				UnitConverter unitConverter;
+				try
+				{
+					unitConverter = sourceUnit.getConverterTo(targetUnit);
+				}
+				catch (ConversionException e)
+				{
+					unitConverter = null;
+					// algorithm sets source unit and assigns source value to target
+					algorithm = String.format("$('%s').unit('%s').value();", sourceAttribute.getName(),
+							sourceUnit.toString());
+				}
+
+				if (unitConverter != null)
+				{
+					// algorithm sets source unit and assigns value converted to target unit to target
+					algorithm = String.format("$('%s').unit('%s').toUnit('%s').value();", sourceAttribute.getName(),
+							sourceUnit.toString(), targetUnit.toString());
+				}
+			}
+			else
+			{
+				// algorithm sets source unit and assigns source value to target
+				algorithm = String.format("$('%s').unit('%s').value();", sourceAttribute.getName(),
+						sourceUnit.toString());
+			}
+		}
+
+		if (algorithm == null)
+		{
+			// algorithm assigns source value to target
+			algorithm = String.format("$('%s').value();", sourceAttribute.getName());
+		}
+
+		return algorithm;
+	}
+
+	@Override
+	public Iterable<AlgorithmEvaluation> applyAlgorithm(AttributeMetaData targetAttribute, String algorithm,
+			Iterable<Entity> sourceEntities)
+	{
+		final Collection<String> attributeNames = getSourceAttributeNames(algorithm);
+
+		return Iterables.transform(sourceEntities, new Function<Entity, AlgorithmEvaluation>()
+		{
+			@Override
+			public AlgorithmEvaluation apply(Entity entity)
+			{
+				AlgorithmEvaluation algorithmResult = new AlgorithmEvaluation(entity);
+
+				Object derivedValue;
+				MapEntity mapEntity = createMapEntity(attributeNames, entity); // why is this necessary?
+				try
+				{
+					Object result = ScriptEvaluator.eval(algorithm, mapEntity, entity.getEntityMetaData());
+					derivedValue = convert(result, targetAttribute);
+				}
+				catch (RuntimeException e)
+				{
+					return algorithmResult.errorMessage(e.getMessage());
+				}
+
+				return algorithmResult.value(derivedValue);
+			}
+		});
 	}
 
 	private MapEntity createMapEntity(Collection<String> attributeNames, Entity entity)
@@ -144,16 +278,10 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		{
 			return null;
 		}
-		try
-		{
-			MapEntity entity = createMapEntity(getSourceAttributeNames(attributeMapping.getAlgorithm()), sourceEntity);
-			Object value = ScriptEvaluator.eval(algorithm, entity, sourceEntityMetaData);
-			return convert(value, attributeMapping.getTargetAttributeMetaData());
-		}
-		catch (RuntimeException e)
-		{
-			return null;
-		}
+
+		MapEntity entity = createMapEntity(getSourceAttributeNames(attributeMapping.getAlgorithm()), sourceEntity);
+		Object value = ScriptEvaluator.eval(algorithm, entity, sourceEntityMetaData);
+		return convert(value, attributeMapping.getTargetAttributeMetaData());
 	}
 
 	private Object convert(Object value, AttributeMetaData attributeMetaData)
@@ -164,41 +292,49 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 		Object convertedValue;
 		FieldTypeEnum targetDataType = attributeMetaData.getDataType().getEnumType();
-		switch (targetDataType)
+		try
 		{
-			case DATE:
-			case DATE_TIME:
-				convertedValue = Context.jsToJava(value, Date.class);
-				break;
-			case INT:
-				convertedValue = Integer.parseInt(Context.toString(value));
-				break;
-			case DECIMAL:
-				convertedValue = Context.toNumber(value);
-				break;
-			case XREF:
-			case CATEGORICAL:
-				convertedValue = dataService.findOne(attributeMetaData.getRefEntity().getName(),
-						Context.toString(value));
-				break;
-			case MREF:
-			case CATEGORICAL_MREF:
+			switch (targetDataType)
 			{
-				NativeArray mrefIds = (NativeArray) value;
-				if (mrefIds != null && !mrefIds.isEmpty())
+				case DATE:
+				case DATE_TIME:
+					convertedValue = Context.jsToJava(value, Date.class);
+					break;
+				case INT:
+					convertedValue = Integer.parseInt(Context.toString(value));
+					break;
+				case DECIMAL:
+					convertedValue = Context.toNumber(value);
+					break;
+				case XREF:
+				case CATEGORICAL:
+					convertedValue = dataService.findOne(attributeMetaData.getRefEntity().getName(),
+							Context.toString(value));
+					break;
+				case MREF:
+				case CATEGORICAL_MREF:
 				{
-					EntityMetaData refEntityMeta = attributeMetaData.getRefEntity();
-					convertedValue = dataService.findAll(refEntityMeta.getName(), mrefIds);
+					NativeArray mrefIds = (NativeArray) value;
+					if (mrefIds != null && !mrefIds.isEmpty())
+					{
+						EntityMetaData refEntityMeta = attributeMetaData.getRefEntity();
+						convertedValue = dataService.findAll(refEntityMeta.getName(), mrefIds);
+					}
+					else
+					{
+						convertedValue = null;
+					}
+					break;
 				}
-				else
-				{
-					convertedValue = null;
-				}
-				break;
+				default:
+					convertedValue = Context.toString(value);
+					break;
 			}
-			default:
-				convertedValue = Context.toString(value);
-				break;
+		}
+		catch (RuntimeException e)
+		{
+			throw new RuntimeException("Error converting value [" + value.toString() + "] to "
+					+ targetDataType.toString(), e);
 		}
 		return convertedValue;
 	}

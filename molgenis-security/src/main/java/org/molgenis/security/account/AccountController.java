@@ -1,7 +1,8 @@
 package org.molgenis.security.account;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.molgenis.security.account.AccountController.URI;
-import static org.molgenis.security.user.UserAccountController.MIN_PASSWORD_LENGTH;
+import static org.molgenis.security.user.UserAccountService.MIN_PASSWORD_LENGTH;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -16,7 +17,7 @@ import javax.validation.constraints.NotNull;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaRequest;
 import org.molgenis.security.captcha.CaptchaService;
@@ -58,25 +59,26 @@ public class AccountController
 	static final String REGISTRATION_SUCCESS_MESSAGE_USER = "You have successfully registered, an activation e-mail has been sent to your email.";
 	static final String REGISTRATION_SUCCESS_MESSAGE_ADMIN = "You have successfully registered, your request has been forwarded to the administrator.";
 
-	@Autowired
-	private AccountService accountService;
+	private final AccountService accountService;
+	private final CaptchaService captchaService;
+	private final RedirectStrategy redirectStrategy;
+	private final AppSettings appSettings;
 
 	@Autowired
-	private CaptchaService captchaService;
-
-	@Autowired
-	private RedirectStrategy redirectStrategy;
-
-	@Autowired
-	private MolgenisSettings molgenisSettings;
+	public AccountController(AccountService accountService, CaptchaService captchaService,
+			RedirectStrategy redirectStrategy, AppSettings appSettings)
+	{
+		this.accountService = checkNotNull(accountService);
+		this.captchaService = checkNotNull(captchaService);
+		this.redirectStrategy = checkNotNull(redirectStrategy);
+		this.appSettings = checkNotNull(appSettings);
+	}
 
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public ModelAndView getLoginForm()
 	{
 		ModelAndView model = new ModelAndView("login-modal");
-		model.addObject("enable_self_registration",
-				molgenisSettings.getBooleanProperty(AccountService.KEY_PLUGIN_AUTH_ENABLE_SELFREGISTRATION, true));
-
+		model.addObject("enable_self_registration", appSettings.getSignUp());
 		return model;
 	}
 
@@ -127,16 +129,15 @@ public class AccountController
 	@RequestMapping(value = "/register", method = RequestMethod.POST, headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseBody
 	public Map<String, String> registerUser(@Valid @ModelAttribute RegisterRequest registerRequest,
-			@Valid @ModelAttribute CaptchaRequest captchaRequest, HttpServletRequest request) throws CaptchaException,
-			BindException, NoPermissionException
+			@Valid @ModelAttribute CaptchaRequest captchaRequest, HttpServletRequest request) throws Exception
 	{
-		if (accountService.isSelfRegistrationEnabled())
+		if (appSettings.getSignUp())
 		{
 			if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword()))
 			{
 				throw new BindException(RegisterRequest.class, "password does not match confirm password");
 			}
-			if (!captchaService.consumeCaptcha(captchaRequest.getCaptcha()))
+			if (!captchaService.validateCaptcha(captchaRequest.getCaptcha()))
 			{
 				throw new CaptchaException("invalid captcha answer");
 			}
@@ -155,18 +156,8 @@ public class AccountController
 			}
 			accountService.createUser(molgenisUser, activationUri);
 
-			String successMessage;
-			switch (accountService.getActivationMode())
-			{
-				case ADMIN:
-					successMessage = REGISTRATION_SUCCESS_MESSAGE_ADMIN;
-					break;
-				case USER:
-					successMessage = REGISTRATION_SUCCESS_MESSAGE_USER;
-					break;
-				default:
-					throw new RuntimeException("Unknown activation mode " + accountService.getActivationMode());
-			}
+			String successMessage = appSettings.getSignUpModeration() ? REGISTRATION_SUCCESS_MESSAGE_ADMIN : REGISTRATION_SUCCESS_MESSAGE_USER;
+			captchaService.removeCaptcha();
 			return Collections.singletonMap("message", successMessage);
 		}
 		else
@@ -214,6 +205,24 @@ public class AccountController
 	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
 	@ResponseBody
 	public ErrorMessageResponse handleMolgenisUserException(MolgenisUserException e)
+	{
+		LOG.debug("", e);
+		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
+	}
+
+	@ExceptionHandler(UsernameAlreadyExistsException.class)
+	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
+	@ResponseBody
+	public ErrorMessageResponse handleUsernameAlreadyExistsException(UsernameAlreadyExistsException e)
+	{
+		LOG.debug("", e);
+		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
+	}
+
+	@ExceptionHandler(EmailAlreadyExistsException.class)
+	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
+	@ResponseBody
+	public ErrorMessageResponse handleEmailAlreadyExistsException(EmailAlreadyExistsException e)
 	{
 		LOG.debug("", e);
 		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));

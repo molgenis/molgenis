@@ -32,7 +32,7 @@ in mysql client create database and permissions via command:
 
 ## 3. Configure Eclipse
 
-start Eclipse from the commandline (via Dock will not work!)
+start Eclipse
 
 when asked, create fresh workspace folder (not same folder as git!)
 
@@ -79,21 +79,36 @@ Create the file ~/.molgenis/omx/molgenis-server.properties and add user and data
     admin.password=admin
     user.password=admin
 
-If these properties are not present, the MolgenisDatabasePopulator will fail (RuntimeException). This properties-file should be in your home folder, if the file is not there yet, just create it.
+If these properties are not present, the MolgenisDatabasePopulator will fail (RuntimeException). This properties-file should be in your home folder, if the file is not there yet, just create it.    
+
+If you are developing you might want to add the following
+	
+	environment=development
+
+This property allows for at runtime javascript editing and makes sure the javascript files do not get minified and bundled.
+
 
 ## 6. Import, build and run MOLGENIS in Eclipse
 
-In eclpise, if still open, close the 'Welcome' screen.
+In eclipse, if still open, close the 'Welcome' screen.
 
 Choose 'File' -> 'Import' -> 'Import existing Maven projects'
 
 Browse to your /git/molgenis directory 
 
-Select and wait to install all kinds of maven connectors (this takes a while!)
+Select it, you will then be prompted to install some maven connectors, accept these 
+(else MOLGENIS will not build properly in eclipse)
 
-Right mouse 'molgenis' -> Run as -> Maven install.
+Right mouse 'molgenis' -> Run as -> Maven build ... 
+	In Goals type: clean install. 
+	Under Goals check Update Snapshots and Resolve Workspace artifacts. 
+	In the JRE tab, add the VM argument; -Xmx2g
+	Click run
 
-Right mouse 'molgenis-app' -> Run as -> Maven build ... -> in goals type 'jetty:run' and push run button
+Right mouse 'molgenis-app' -> Run as -> Maven build ... 
+	in goals type 'jetty:run' 
+	In the JRE tab, add the VM argument; -Xmx2g
+	Click run
 
 Open your browser at http://localhost:8080/
 
@@ -122,7 +137,7 @@ Solution: start Eclipse from commandline.
 
 ### When I try to start an application, the console tells me 'Address already in use'!
 
-Run the Maven target 'jetty:stop'. If that does not help, use your opering systems process manager to kill anything running on port 8080. For example:
+Run the Maven target 'jetty:stop'. If that does not help, use your operating systems process manager to kill anything running on port 8080. For example:
 
     kill -9 `lsof -i :8080 -t`
 

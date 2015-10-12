@@ -24,7 +24,6 @@ import com.google.common.collect.Lists;
 
 public class CsvWriter extends AbstractWritable
 {
-
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
 	public static final char DEFAULT_SEPARATOR = ',';
@@ -186,7 +185,24 @@ public class CsvWriter extends AbstractWritable
 		}
 		else if (obj instanceof Entity)
 		{
-			value = ((Entity) obj).getLabelValue();
+			if (getWriteMode() != null)
+			{
+				switch (getWriteMode())
+				{
+					case ENTITY_IDS:
+						value = ((Entity) obj).getIdValue().toString();
+						break;
+					case ENTITY_LABELS:
+						value = ((Entity) obj).getLabelValue();
+						break;
+					default:
+						throw new RuntimeException("Unknown write mode [" + getWriteMode() + "]");
+				}
+			}
+			else
+			{
+				value = ((Entity) obj).getLabelValue();
+			}
 		}
 		else if (obj instanceof Iterable<?>)
 		{

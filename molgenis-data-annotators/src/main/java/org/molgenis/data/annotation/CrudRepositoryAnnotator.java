@@ -1,12 +1,12 @@
 package org.molgenis.data.annotation;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.UUID;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -15,30 +15,38 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.UserAccountService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 public class CrudRepositoryAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(CrudRepositoryAnnotator.class);
-	private static final int BATCH_SIZE = 100;
+	private static final int BATCH_SIZE = 1000;
 
 	private final String newRepositoryLabel;
 	private final DataService dataService;
 	private final PermissionSystemService permissionSystemService;
 	private final UserAccountService userAccountService;
+	private final MolgenisPermissionService molgenisPermissionService;
 
 	public CrudRepositoryAnnotator(DataService dataService, String newRepositoryName,
-			PermissionSystemService permissionSystemService, UserAccountService userAccountService)
+			PermissionSystemService permissionSystemService, UserAccountService userAccountService,
+			MolgenisPermissionService molgenisPermissionService)
 	{
 		this.dataService = dataService;
 		this.newRepositoryLabel = newRepositoryName;
 		this.permissionSystemService = permissionSystemService;
 		this.userAccountService = userAccountService;
+		this.molgenisPermissionService = molgenisPermissionService;
 	}
 
 	/**
@@ -69,25 +77,42 @@ public class CrudRepositoryAnnotator
 			throw new UnsupportedOperationException("Currently only updateable repositories can be annotated");
 		}
 
+		if (!molgenisPermissionService.hasPermissionOnEntity(sourceRepo.getName(), Permission.WRITE))
+		{
+			throw new AccessDeniedException("No write permission on entity '" + sourceRepo.getName() + "'");
+		}
+
 		if (createCopy) LOG.info("Creating a copy of " + sourceRepo.getName() + " repository, which will be labelled "
 				+ newRepositoryLabel + ". A UUID will be generated for the name/identifier");
 
+		String user = userAccountService.getCurrentUser().getUsername();
 		LOG.info("Started annotating \"" + sourceRepo.getName() + "\" with the " + annotator.getSimpleName()
-				+ " annotator (started by \"" + userAccountService.getCurrentUser().getUsername() + "\")");
+				+ " annotator (started by \"" + user + "\")");
 
-		EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(sourceRepo.getName());
-		DefaultAttributeMetaData compoundAttributeMetaData = AnnotatorUtils.getCompoundResultAttribute(annotator,
-                entityMetaData);
+		// Current security context
+		SecurityContext securityContext = SecurityContextHolder.getContext();
 
-		Repository targetRepo = addAnnotatorMetadataToRepositories(entityMetaData, createCopy,
-				compoundAttributeMetaData);
+		return RunAsSystemProxy.runAsSystem(() -> {
+			EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(sourceRepo.getName());
+			DefaultAttributeMetaData compoundAttributeMetaData = AnnotatorUtils.getCompoundResultAttribute(annotator,
+					entityMetaData);
 
-		Repository crudRepository = iterateOverEntitiesAndAnnotate(sourceRepo, targetRepo, annotator);
+			Repository targetRepo = addAnnotatorMetadataToRepositories(entityMetaData, createCopy,
+					compoundAttributeMetaData);
 
-		LOG.info("Finished annotating \"" + sourceRepo.getName() + "\" with the " + annotator.getSimpleName()
-				+ " annotator (started by \"" + userAccountService.getCurrentUser().getUsername() + "\")");
+			if (createCopy)
+			{
+				// Give current user permissions on the created repo
+				permissionSystemService.giveUserEntityPermissions(securityContext, Arrays.asList(targetRepo.getName()));
+			}
 
-		return crudRepository;
+			Repository crudRepository = iterateOverEntitiesAndAnnotate(sourceRepo, targetRepo, annotator);
+
+			LOG.info("Finished annotating \"" + sourceRepo.getName() + "\" with the " + annotator.getSimpleName()
+					+ " annotator (started by \"" + user + "\")");
+
+			return crudRepository;
+		});
 	}
 
 	/**
@@ -96,94 +121,59 @@ public class CrudRepositoryAnnotator
 	private Repository iterateOverEntitiesAndAnnotate(Repository sourceRepo, Repository targetRepo,
 			RepositoryAnnotator annotator)
 	{
-		Iterator<Entity> entityIterator = annotator.annotate(sourceRepo);
-		List<Entity> annotatedEntities = new ArrayList<>();
-		int i = 0;
+		Iterator<Entity> it = annotator.annotate(sourceRepo);
 
+		List<Entity> batch = new ArrayList<Entity>();
+		while (it.hasNext())
+		{
+			batch.add(it.next());
+			if (batch.size() == BATCH_SIZE)
+			{
+				processBatch(batch, sourceRepo, targetRepo);
+				batch.clear();
+			}
+		}
+
+		if (!batch.isEmpty())
+		{
+			processBatch(batch, sourceRepo, targetRepo);
+		}
+
+		return targetRepo == null ? sourceRepo : targetRepo;
+	}
+
+	private void processBatch(List<Entity> batch, Repository sourceRepo, Repository targetRepo)
+	{
 		if (targetRepo == null)
 		{
-			// annotate repository to itself
-			while (entityIterator.hasNext())
-			{
-				Entity entity = entityIterator.next();
-				annotatedEntities.add(entity);
-				if (annotatedEntities.size() == BATCH_SIZE)
-				{
-					dataService.update(sourceRepo.getName(), annotatedEntities);
-					i = i + annotatedEntities.size();
-					LOG.info("annotated " + i + " \"" + sourceRepo.getName() + "\" entities with the "
-							+ annotator.getSimpleName() + " annotator (started by \""
-							+ userAccountService.getCurrentUser().getUsername() + "\")");
-					annotatedEntities.clear();
-				}
-			}
-			if (annotatedEntities.size() > 0)
-			{
-				dataService.update(sourceRepo.getName(), annotatedEntities);
-				i = i + annotatedEntities.size();
-				LOG.info("annotated " + i + " \"" + sourceRepo.getName() + "\" entities with the "
-						+ annotator.getSimpleName() + " annotator (started by \""
-						+ userAccountService.getCurrentUser().getUsername() + "\")");
-				annotatedEntities.clear();
-			}
-			return dataService.getRepository(sourceRepo.getName());
+			sourceRepo.update(batch);
 		}
 		else
 		{
-			// annotate from source to target repository
-			while (entityIterator.hasNext())
-			{
-				Entity entity = entityIterator.next();
-				annotatedEntities.add(entity);
-				if (annotatedEntities.size() == BATCH_SIZE)
-				{
-					targetRepo.add(annotatedEntities);
-					i = i + annotatedEntities.size();
-					LOG.info("annotated " + i + " \"" + sourceRepo.getName() + "\" entities with the "
-							+ annotator.getSimpleName() + " annotator (started by \""
-							+ userAccountService.getCurrentUser().getUsername() + "\")");
-					annotatedEntities.clear();
-				}
-			}
-			if (annotatedEntities.size() > 0)
-			{
-				dataService.add(targetRepo.getName(), annotatedEntities);
-				i = i + annotatedEntities.size();
-				LOG.info("annotated " + i + " \"" + sourceRepo.getName() + "\" entities with the "
-						+ annotator.getSimpleName() + " annotator (started by \""
-						+ userAccountService.getCurrentUser().getUsername() + "\")");
-				annotatedEntities.clear();
-			}
-			return targetRepo;
+			targetRepo.add(batch);
 		}
 	}
 
 	/**
-	 * Adds a new compound attribute to an existing mysql CrudRepository which is part of the
-	 * {@link #mysqlRepositoryCollection} or an existing CrudRepository which is not part of
-	 * {@link #mysqlRepositoryCollection}.
+	 * Adds a new compound attribute to an existing CrudRepository
 	 *
 	 * @param entityMetaData
 	 *            {@link EntityMetaData} for the existing repository
 	 * @param createCopy
 	 * @param compoundAttributeMetaData
 	 */
-	public Repository addAnnotatorMetadataToRepositories(EntityMetaData entityMetaData, boolean createCopy,
+	private Repository addAnnotatorMetadataToRepositories(EntityMetaData entityMetaData, boolean createCopy,
 			DefaultAttributeMetaData compoundAttributeMetaData)
 	{
 		if (createCopy)
 		{
-			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(UUID.randomUUID().toString(),
+			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(RandomStringUtils.randomAlphabetic(30),
 					entityMetaData);
 			if (newEntityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
 			{
 				newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
 			}
 			newEntityMetaData.setLabel(newRepositoryLabel);
-
-			// Give current user permissions on the created repo
-			permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
-					Arrays.asList(newEntityMetaData.getName()));
 
 			return dataService.getMeta().addEntityMeta(newEntityMetaData);
 		}
@@ -196,4 +186,5 @@ public class CrudRepositoryAnnotator
 
 		return null;
 	}
+
 }

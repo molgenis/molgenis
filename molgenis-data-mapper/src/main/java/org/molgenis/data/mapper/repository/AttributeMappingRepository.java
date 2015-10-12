@@ -40,4 +40,15 @@ public interface AttributeMappingRepository
 	 */
 	abstract List<Entity> upsert(Collection<AttributeMapping> collection);
 
+	/**
+	 * Translates an algorithm to a list of {@link AttributeMetaData} based on the algorithm, and the
+	 * {@link EntityMetaData} of the source entity
+	 * 
+	 * @param algorithm
+	 * @param sourceEntityMetaData
+	 * @return a list of {@link AttributeMetaData}
+	 */
+	abstract List<AttributeMetaData> retrieveAttributeMetaDatasFromAlgorithm(String algorithm,
+			EntityMetaData sourceEntityMetaData);
+
 }

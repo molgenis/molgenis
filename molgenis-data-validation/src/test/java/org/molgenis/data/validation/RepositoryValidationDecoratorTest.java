@@ -58,7 +58,7 @@ public class RepositoryValidationDecoratorTest
 		emd.addAttribute("notnull").setNillable(false).setDefaultValue("");
 		when(decoratedRepository.getEntityMetaData()).thenReturn(emd);
 		violations = repositoryValidationDecorator.checkNillable(Arrays.asList(e2));
-		assertTrue(violations.isEmpty());
+		assertEquals(violations.size(), 1);
 
 	}
 

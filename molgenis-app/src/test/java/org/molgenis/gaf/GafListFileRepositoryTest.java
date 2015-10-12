@@ -12,7 +12,6 @@ import java.util.Iterator;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -23,9 +22,6 @@ public class GafListFileRepositoryTest
 {
 	@Autowired
 	private GafListFileImporterService gafListFileImporterService;
-
-	@Autowired
-	private MolgenisSettings molgenisSettings;
 
 	@Autowired
 	private DataService dataService;
@@ -53,7 +49,7 @@ public class GafListFileRepositoryTest
 		Iterator<Entity> it = gafListFileRepository.iterator();
 		assertTrue(it.hasNext());
 		Entity firstEntity = it.next();
-		String barcode1 = firstEntity.getString("Barcode 1");
+		String barcode1 = firstEntity.getString("Barcode_1");
 		String barcode = firstEntity.getString("barcode");
 		String barcodeType = firstEntity.getString("barcodeType");
 		assertEquals(barcode1, "AGI 1 AAGGTTCC");
@@ -83,7 +79,7 @@ public class GafListFileRepositoryTest
 		Iterator<Entity> it = gafListFileRepository.iterator();
 		assertTrue(it.hasNext());
 		Entity firstEntity = it.next();
-		String barcode1 = firstEntity.getString("Barcode 1");
+		String barcode1 = firstEntity.getString("Barcode_1");
 		String barcode = firstEntity.getString("barcode");
 		String barcodeType = firstEntity.getString("barcodeType");
 		assertEquals(barcode1, "AGI 1 AAGGTTCC");
@@ -101,12 +97,6 @@ public class GafListFileRepositoryTest
 		public DataService dataService()
 		{
 			return mock(DataService.class);
-		}
-
-		@Bean
-		public MolgenisSettings molgenisSettings()
-		{
-			return mock(MolgenisSettings.class);
 		}
 
 		@Bean

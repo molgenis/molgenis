@@ -13,7 +13,8 @@
 		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.EntityLoaderMixin, molgenis.ui.mixin.ReactLayeredComponentMixin],
 		displayName: 'EntitySelectBox',
 		propTypes: {
-			entity: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
+			entity: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]).isRequired,
+			query: React.PropTypes.object,
 			mode: React.PropTypes.oneOf(['view', 'create']),
 			name: React.PropTypes.string,
 			disabled: React.PropTypes.bool,
@@ -76,6 +77,7 @@
 			} else if(this.props.mode === 'create') {
 				return this.state.modal ? molgenis.ui.Form({
 					entity : this.state.entity.name,
+					showHidden : true,
 					cancelBtn : true,
 					modal: true,
 					onSubmitCancel : this._onModalHide,
@@ -97,12 +99,39 @@
 		},
 		_createQuery: function(term) {
 			var rules = [];
-			var attrs = this._getAttrs();
-			for(var i = 0; i < attrs.length; ++i) {
-				if(i > 0) {
-					rules.push({operator: 'OR'});	
+			var nestedRule = null; 
+			
+			if(this.props.query) {
+				rules.push(this.props.query);
+				if(term.length > 0) {
+					rules.push({operator: 'AND'});
+					nestedRule = {operator: 'NESTED', nestedRules: []};
+					rules.push(nestedRule);
 				}
-				rules.push({field: attrs[i], operator: 'LIKE', value: term});
+			}
+			
+			var likeRules = nestedRule === null ? rules : nestedRule.nestedRules;
+			if(term.length > 0) {
+				var attrs = this._getAttrs();
+				for(var i = 0; i < attrs.length; ++i) {
+					var operator = 'LIKE';
+					switch(this.state.entity.attributes[attrs[i]].fieldType) {
+						case 'INT':
+						case 'LONG':
+						case 'BOOL':
+						case 'DATE':
+						case 'DATE_TIME':
+						case 'DECIMAL':
+							operator = 'EQUALS';
+							break;
+						case 'COMPOUND':
+							continue;
+					}
+					if(i > 0) {
+						likeRules.push({operator: 'OR'});	
+					}
+					likeRules.push({field: attrs[i], operator: operator, value: term});
+				}
 			}
 			return rules;
 		},
@@ -144,7 +173,7 @@
 							property : this._getAttrs()[0]
 						} ]
 					},
-					q: query.term.length > 0 ? this._createQuery(query.term) : undefined,
+					q: this._createQuery(query.term),
 					expand: this._getAttrsWithRefEntity()
 				}
 			};

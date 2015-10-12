@@ -22,7 +22,7 @@
 			focus: React.PropTypes.bool,
 			onValueChange: React.PropTypes.func.isRequired,
 			onBlur: React.PropTypes.func,
-			categorigalMrefShowSelectAll: React.PropTypes.bool
+			categoricalMrefShowSelectAll: React.PropTypes.bool
 		},
 		getDefaultProps: function() {
 			return {
@@ -96,7 +96,7 @@
 						}) : [];
 						return molgenis.ui.CheckboxGroup(_.extend({}, controlProps, {
 							options : this.state.options,
-							selectAll: this.props.categorigalMrefShowSelectAll,
+							selectAll: this.props.categoricalMrefShowSelectAll,
 							layout : 'vertical', // FIXME make configurable
 							value : values,
 							onValueChange: function(event) {

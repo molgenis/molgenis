@@ -1,10 +1,13 @@
 package org.molgenis.data.vcf.importer;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,6 +25,7 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.importer.EntitiesValidationReportImpl;
 import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.vcf.VcfRepository;
@@ -51,9 +55,9 @@ public class VcfImporterService implements ImportService
 			PermissionSystemService permissionSystemService)
 
 	{
-		this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
-		this.dataService = dataService;
-		this.permissionSystemService = permissionSystemService;
+		this.fileRepositoryCollectionFactory = requireNonNull(fileRepositoryCollectionFactory);
+		this.dataService = requireNonNull(dataService);
+		this.permissionSystemService = requireNonNull(permissionSystemService);
 	}
 
 	@Override
@@ -73,8 +77,7 @@ public class VcfImporterService implements ImportService
 					report = importVcf(repo, addedEntities);
 					List<String> entityNames = addedEntities.stream().map(emd -> emd.getName())
 							.collect(Collectors.toList());
-					permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
-							entityNames);
+					permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(), entityNames);
 				}
 			}
 			else
@@ -98,11 +101,12 @@ public class VcfImporterService implements ImportService
 
 			throw new MolgenisDataException(e);
 		}
-        //Should not be necessary, bug in elasticsearch?
-        //"All shards failed" for big datasets if this flush is not here...
-        for(EntityMetaData entityMetaData : addedEntities) {
-            dataService.getRepository(entityMetaData.getName()).flush();
-        }
+		// Should not be necessary, bug in elasticsearch?
+		// "All shards failed" for big datasets if this flush is not here...
+		for (EntityMetaData entityMetaData : addedEntities)
+		{
+			dataService.getRepository(entityMetaData.getName()).flush();
+		}
 		return report;
 	}
 
@@ -204,7 +208,7 @@ public class VcfImporterService implements ImportService
 			DefaultEntityMetaData samplesEntityMetaData = new DefaultEntityMetaData(sampleAttribute.getRefEntity());
 			samplesEntityMetaData.setBackend(BACKEND);
 			sampleRepository = dataService.getMeta().addEntityMeta(samplesEntityMetaData);
-			permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 					Collections.singletonList(samplesEntityMetaData.getName()));
 			addedEntities.add(sampleAttribute.getRefEntity());
 		}
@@ -215,7 +219,7 @@ public class VcfImporterService implements ImportService
 		List<Entity> sampleEntities = new ArrayList<>();
 		try (Repository outRepository = dataService.getMeta().addEntityMeta(entityMetaData))
 		{
-			permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 					Collections.singletonList(entityMetaData.getName()));
 
 			addedEntities.add(entityMetaData);
@@ -293,5 +297,12 @@ public class VcfImporterService implements ImportService
 	public Set<String> getSupportedFileExtensions()
 	{
 		return GenericImporterExtensions.getVCF();
+	}
+
+	@Override
+	public LinkedHashMap<String, Boolean> integrationTestMetaData(MetaDataService metaDataService,
+			RepositoryCollection repositoryCollection, String defaultPackage)
+	{
+		return metaDataService.integrationTestMetaData(repositoryCollection);
 	}
 }

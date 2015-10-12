@@ -1,20 +1,14 @@
 package org.molgenis.data.annotation;
 
-import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertEquals;
-
 import java.util.ArrayList;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.framework.server.MolgenisSettings;
-import org.testng.annotations.Test;
 
 public abstract class AnnotatorTestData
 {
@@ -41,15 +35,14 @@ public abstract class AnnotatorTestData
 	public Entity entity3;
 	public Entity entity4;
 
-	public MolgenisSettings settings = mock(MolgenisSettings.class);
-    public ArrayList<Entity> entities;
+	public ArrayList<Entity> entities;
 
-    public AnnotatorTestData()
+	public AnnotatorTestData()
 	{
 		setValues();
 	}
 
-    public RepositoryAnnotator annotator;
+	public RepositoryAnnotator annotator;
 
 	public void setValues()
 	{
@@ -70,7 +63,7 @@ public abstract class AnnotatorTestData
 		entity3 = new MapEntity(metaDataCanAnnotate);
 		entity4 = new MapEntity(metaDataCanAnnotate);
 
-        entities = new ArrayList<>();
-        entities.add(entity);
+		entities = new ArrayList<>();
+		entities.add(entity);
 	}
 }
