@@ -10,9 +10,11 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.StreamSupport;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
@@ -36,14 +38,16 @@ public class IdCardBiobankRepository implements Repository
 
 	private final IdCardBiobankService idCardBiobankService;
 	private final ElasticSearchService elasticSearchService;
+	private final DataService dataService;
 	private final MetaDataService metaDataService;
 
 	@Autowired
 	public IdCardBiobankRepository(IdCardBiobankService idCardBiobankService, ElasticSearchService elasticSearchService,
-			MetaDataService metaDataService)
+			DataService dataService, MetaDataService metaDataService)
 	{
 		this.idCardBiobankService = requireNonNull(idCardBiobankService);
 		this.elasticSearchService = requireNonNull(elasticSearchService);
+		this.dataService = requireNonNull(dataService);
 		this.metaDataService = requireNonNull(metaDataService);
 	}
 
@@ -114,20 +118,43 @@ public class IdCardBiobankRepository implements Repository
 	@Override
 	public Entity findOne(Object id)
 	{
-		return idCardBiobankService.getIdCardBiobank(id.toString());
+		try
+		{
+			return idCardBiobankService.getIdCardBiobank(id.toString());
+		}
+		catch (RuntimeException e)
+		{
+			return (Entity) createErrorIdCardBiobank(id);
+		} // FIXME get rid of cast
 	}
 
 	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
-		return idCardBiobankService.getIdCardBiobanks(Iterables.transform(ids, new Function<Object, String>()
+		try
 		{
-			@Override
-			public String apply(Object id)
+			return idCardBiobankService.getIdCardBiobanks(Iterables.transform(ids, new Function<Object, String>()
 			{
-				return id.toString();
-			}
-		}));
+				@Override
+				public String apply(Object id)
+				{
+					return id.toString();
+				}
+			}));
+		}
+		catch (RuntimeException e)
+		{
+			return new Iterable<Entity>()
+			{
+				@Override
+				public Iterator<Entity> iterator()
+				{
+					return StreamSupport.stream(ids.spliterator(), false).map(id -> {
+						return (Entity) createErrorIdCardBiobank(id);
+					}).iterator(); // FIXME get rid of cast
+				}
+			};
+		}
 	}
 
 	@Override
@@ -221,5 +248,13 @@ public class IdCardBiobankRepository implements Repository
 		}
 		elasticSearchService.index(entities, entityMeta, IndexingMode.UPDATE);
 		LOG.debug("Indexed ID-Card biobanks");
+	}
+
+	private IdCardBiobank createErrorIdCardBiobank(Object id)
+	{
+		IdCardBiobank idCardBiobank = new IdCardBiobank(dataService);
+		idCardBiobank.set(IdCardBiobank.ORGANIZATION_ID, id);
+		idCardBiobank.set(IdCardBiobank.NAME, "Error loading data");
+		return idCardBiobank; // FIXME get rid of cast
 	}
 }
