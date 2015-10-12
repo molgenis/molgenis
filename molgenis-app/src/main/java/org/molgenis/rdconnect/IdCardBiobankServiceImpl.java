@@ -36,9 +36,9 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(IdCardBiobankServiceImpl.class);
 
-	private static final int ID_CARD_CONNECT_TIMEOUT = 20000;
-	private static final int ID_CARD_CONNECTION_REQUEST_TIMEOUT = 20000;
-	private static final int ID_CARD_SOCKET_TIMEOUT = 20000;
+	private static final int ID_CARD_CONNECT_TIMEOUT = 2000;
+	private static final int ID_CARD_CONNECTION_REQUEST_TIMEOUT = 2000;
+	private static final int ID_CARD_SOCKET_TIMEOUT = 2000;
 
 	private final HttpClient httpClient;
 	private final IdCardBiobankIndexerSettings idCardBiobankIndexerSettings;
