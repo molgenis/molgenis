@@ -30,9 +30,9 @@ public class PromiseCredentialsMetaData extends DefaultEntityMetaData
 		addAttribute(ID).setIdAttribute(true).setNillable(false);
 		addAttribute(PROJ).setNillable(false);
 		addAttribute(USERNAME).setNillable(false);
-		addAttribute(PASSW).setNillable(false);
+		addAttribute(PASSW).setNillable(false).setVisible(false);
 		addAttribute(PWS).setNillable(false);
-		addAttribute(SECURITYCODE).setNillable(false);
+		addAttribute(SECURITYCODE).setNillable(false).setVisible(false);
 		addAttribute(URL).setNillable(false);
 	}
 }
