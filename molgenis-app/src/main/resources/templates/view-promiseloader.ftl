@@ -3,14 +3,6 @@
 <@header/>
 
 <div class="row">
-	<div class="col-md-12">
-		<div class="panel panel-default">
-			<div class="panel-heading">Credentials</div>
-    		<div id="data-table-container-credentials"></div>
-    	</div>
-    </div>
-</div>
-<div class="row">
 	<div class="col-md-6 col-md-offset-3">
 		<div class="panel panel-default">
 			<div class="panel-heading">Mapping Projects</div>
@@ -29,6 +21,14 @@
 			</table>
 		</div>
 	</div>
+</div>
+<div class="row">
+	<div class="col-md-8 col-md-offset-2">
+		<div class="panel panel-default">
+			<div class="panel-heading">Credentials</div>
+    		<div id="data-table-container-credentials"></div>
+    	</div>
+    </div>
 </div>
 
 
