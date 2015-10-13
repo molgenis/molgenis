@@ -21,8 +21,8 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.elasticsearch.ElasticSearchService;
-import org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode;
+import org.molgenis.data.elasticsearch.ElasticsearchService;
+import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
@@ -44,16 +44,16 @@ public class IdCardBiobankRepository implements Repository // TODO extends Abstr
 	}
 
 	private final IdCardBiobankClient idCardBiobankService;
-	private final ElasticSearchService elasticSearchService;
+	private final ElasticsearchService elasticsearchService;
 	private final DataService dataService;
 	private final MetaDataService metaDataService;
 
 	@Autowired
-	public IdCardBiobankRepository(IdCardBiobankClient idCardBiobankClient, ElasticSearchService elasticSearchService,
+	public IdCardBiobankRepository(IdCardBiobankClient idCardBiobankClient, ElasticsearchService elasticsearchService,
 			DataService dataService, MetaDataService metaDataService)
 	{
 		this.idCardBiobankService = requireNonNull(idCardBiobankClient);
-		this.elasticSearchService = requireNonNull(elasticSearchService);
+		this.elasticsearchService = requireNonNull(elasticsearchService);
 		this.dataService = requireNonNull(dataService);
 		this.metaDataService = requireNonNull(metaDataService);
 	}
@@ -94,7 +94,7 @@ public class IdCardBiobankRepository implements Repository // TODO extends Abstr
 	@Override
 	public long count()
 	{
-		return elasticSearchService.count(getEntityMetaData());
+		return elasticsearchService.count(getEntityMetaData());
 	}
 
 	@Override
@@ -106,13 +106,13 @@ public class IdCardBiobankRepository implements Repository // TODO extends Abstr
 	@Override
 	public long count(Query q)
 	{
-		return elasticSearchService.count(q, getEntityMetaData());
+		return elasticsearchService.count(q, getEntityMetaData());
 	}
 
 	@Override
 	public Iterable<Entity> findAll(Query q)
 	{
-		return elasticSearchService.search(q, getEntityMetaData());
+		return elasticsearchService.search(q, getEntityMetaData());
 	}
 
 	@Override
@@ -167,7 +167,7 @@ public class IdCardBiobankRepository implements Repository // TODO extends Abstr
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		return elasticSearchService.aggregate(aggregateQuery, getEntityMetaData());
+		return elasticsearchService.aggregate(aggregateQuery, getEntityMetaData());
 	}
 
 	@Override
@@ -236,7 +236,7 @@ public class IdCardBiobankRepository implements Repository // TODO extends Abstr
 	@Override
 	public void flush()
 	{
-		elasticSearchService.flush();
+		elasticsearchService.flush();
 	}
 
 	@Override
@@ -254,11 +254,11 @@ public class IdCardBiobankRepository implements Repository // TODO extends Abstr
 			Iterable<? extends Entity> entities = idCardBiobankService.getIdCardBiobanks(60000l);
 
 			EntityMetaData entityMeta = getEntityMetaData();
-			if (!elasticSearchService.hasMapping(entityMeta))
+			if (!elasticsearchService.hasMapping(entityMeta))
 			{
-				elasticSearchService.createMappings(entityMeta);
+				elasticsearchService.createMappings(entityMeta);
 			}
-			elasticSearchService.index(entities, entityMeta, IndexingMode.UPDATE);
+			elasticsearchService.index(entities, entityMeta, IndexingMode.UPDATE);
 			LOG.debug("Indexed ID-Card biobanks");
 
 			idCardIndexingEvent.setStatus(IdCardIndexingEventStatus.SUCCESS);

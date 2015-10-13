@@ -10,7 +10,6 @@ import org.molgenis.data.Manageable;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.support.QueryImpl;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -140,24 +139,6 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	public Iterator<Entity> iterator()
 	{
 		return repository.iterator();
-	}
-
-	@Override
-	public Iterator<Entity> iterator()
-	{
-		return repository.iterator();
-	}
-
-	@Override
-	public Entity findOne(Object id)
-	{
-		return repository.findOne(id);
-	}
-
-	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		return repository.findAll(ids);
 	}
 
 	@Override

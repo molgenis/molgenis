@@ -23,10 +23,7 @@ import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.migrate.version.v1_10.Step17RuntimePropertiesToGafListSettings;
 import org.molgenis.migrate.version.v1_10.Step18RuntimePropertiesToAnnotatorSettings;
 import org.molgenis.migrate.version.v1_10.Step19RemoveMolgenisLock;
-<<<<<<< HEAD
-=======
 import org.molgenis.migrate.version.v1_11.Step20RebuildElasticsearchIndex;
->>>>>>> 665131f915e962546bc6fcf06df1829e890f3c4f
 import org.molgenis.migrate.version.v1_5.Step1UpgradeMetaData;
 import org.molgenis.migrate.version.v1_5.Step2;
 import org.molgenis.migrate.version.v1_5.Step3AddOrderColumnToMrefTables;

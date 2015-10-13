@@ -3,11 +3,7 @@
 	<parent>
 		<groupId>org.molgenis</groupId>
 		<artifactId>molgenis</artifactId>
-<<<<<<< HEAD
-		<version>1.10.0-hackathon_rdconnect-SNAPSHOT</version>
-=======
-		<version>1.12.0-SNAPSHOT</version>
->>>>>>> 665131f915e962546bc6fcf06df1829e890f3c4f
+		<version>1.12.0-hackathon_rdconnect-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-scripts</artifactId>
 	
