@@ -19,8 +19,6 @@
             <div class="col-md-6">
                 <h4>Indexing history</h4>
                 <div id="index-event-table-container"></div>
-                <p><mark>FIX: table sorting</mark></p>
-                <p><mark>TODO: sort table by default on date descending</mark></p>
             </div>
 	</div>
 </div>
