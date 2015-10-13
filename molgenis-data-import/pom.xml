@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.molgenis</groupId>
 		<artifactId>molgenis</artifactId>
-		<version>1.10.0-hackathon_rdconnect-SNAPSHOT</version>
+        <version>1.12.0-hackathon_rdconnect-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-data-import</artifactId>
 	<packaging>jar</packaging>

@@ -1,6 +1,6 @@
 package org.molgenis.js;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
 
@@ -20,7 +20,7 @@ public class JsScriptRunner implements ScriptRunner
 	@Autowired
 	public JsScriptRunner(JsScriptExecutor jsScriptExecutor)
 	{
-		this.jsScriptExecutor = checkNotNull(jsScriptExecutor);
+		this.jsScriptExecutor = requireNonNull(jsScriptExecutor);
 	}
 
 	@Override

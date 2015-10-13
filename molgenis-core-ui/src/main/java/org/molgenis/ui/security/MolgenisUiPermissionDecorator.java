@@ -1,6 +1,6 @@
 package org.molgenis.ui.security;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.ui.MolgenisUi;
@@ -13,8 +13,8 @@ public class MolgenisUiPermissionDecorator implements MolgenisUi
 
 	public MolgenisUiPermissionDecorator(MolgenisUi molgenisUi, MolgenisPermissionService molgenisPermissionService)
 	{
-		this.molgenisUi = checkNotNull(molgenisUi);
-		this.molgenisPermissionService = checkNotNull(molgenisPermissionService);
+		this.molgenisUi = requireNonNull(molgenisUi);
+		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
 	}
 
 	@Override

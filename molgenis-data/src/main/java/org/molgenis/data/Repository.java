@@ -45,9 +45,9 @@ public interface Repository extends Iterable<Entity>, Closeable
 	Entity findOne(Object id);
 
 	/**
-	 * find entities based on a stream of ids
+	 * find entities based on a stream of ids.
 	 * 
-	 * @return (empty) Iterable, never null
+	 * @return (empty) Iterable where the order of entities matches the order of ids, never null
 	 */
 	Iterable<Entity> findAll(Iterable<Object> ids);
 

@@ -4,10 +4,10 @@
 	function renderTable() {
 		React.render(molgenis.ui.Table({
 			entity: 'IdCardIndexingEvent',
-			enableAdd: false,
-			enableEdit: false,
-			enableDelete: false,
-			enableInspect: false
+//			enableAdd: false,
+//			enableEdit: false,
+//			enableDelete: false,
+//			enableInspect: false
 		}), $('#index-event-table-container')[0]);
 	}
 	

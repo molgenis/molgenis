@@ -1,6 +1,6 @@
 package org.molgenis.migrate.version.v1_9;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.system.core.RuntimeProperty.ENTITY_NAME;
 
 import java.net.URI;
@@ -38,8 +38,8 @@ public class RuntimePropertyToDataExplorerSettingsMigrator implements Applicatio
 	public RuntimePropertyToDataExplorerSettingsMigrator(DataService dataService,
 			DataExplorerSettings dataExplorerSettings)
 	{
-		this.dataService = checkNotNull(dataService);
-		this.dataExplorerSettings = checkNotNull(dataExplorerSettings);
+		this.dataService = requireNonNull(dataService);
+		this.dataExplorerSettings = requireNonNull(dataExplorerSettings);
 	}
 
 	private RuntimePropertyToDataExplorerSettingsMigrator migrateSettings()

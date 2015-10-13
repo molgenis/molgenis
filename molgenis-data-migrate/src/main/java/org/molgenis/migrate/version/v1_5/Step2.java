@@ -24,7 +24,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.elasticsearch.ElasticSearchService;
+import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
@@ -71,7 +71,7 @@ public class Step2 extends MolgenisUpgrade
 	private final DataService dataService;
 	private final RepositoryCollection jpaBackend;
 	private final JdbcTemplate jdbcTemplate;
-	private final ElasticSearchService searchService;
+	private final ElasticsearchService searchService;
 
 	public Step2(DataService dataService, RepositoryCollection jpaBackend, DataSource dataSource,
 			SearchService searchService)
@@ -80,7 +80,7 @@ public class Step2 extends MolgenisUpgrade
 		this.dataService = dataService;
 		this.jpaBackend = jpaBackend;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
-		this.searchService = (ElasticSearchService) searchService;
+		this.searchService = (ElasticsearchService) searchService;
 	}
 
 	@Override
