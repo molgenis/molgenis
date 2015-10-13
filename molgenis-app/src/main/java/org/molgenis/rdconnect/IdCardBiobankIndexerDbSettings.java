@@ -1,6 +1,7 @@
 package org.molgenis.rdconnect;
 
 import static org.molgenis.MolgenisFieldTypes.BOOL;
+import static org.molgenis.MolgenisFieldTypes.EMAIL;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 
 import org.molgenis.data.settings.DefaultSettingsEntity;
@@ -33,6 +34,7 @@ public class IdCardBiobankIndexerDbSettings extends DefaultSettingsEntity implem
 		private static final String BIOBANK_COLLECTIONS_RESOURCE = "biobankCollResource";
 		private static final String BIOBANK_COLLECTIONS_SELECTION_RESOURCE = "biobankCollSelResource";
 		private static final String BIOBANK_INDEXING_ENABLED = "biobankIndexingEnabled";
+		private static final String NOTIFICATION_EMAIL = "notificationEmail";
 
 		private static final String BIOBANK_INDEXING_FREQUENCY = "biobankIndexingFrequency";
 		private static final String DEFAULT_API_BASE_URI = "http://catalogue.rd-connect.eu/api/jsonws/BiBBoxCommonServices-portlet.logapi";
@@ -42,6 +44,7 @@ public class IdCardBiobankIndexerDbSettings extends DefaultSettingsEntity implem
 				+ "/data";
 		private static final boolean DEFAULT_BIOBANK_INDEXING_ENABLED = false;
 		private static final String DEFAULT_BIOBANK_INDEXING_FREQUENCY = "0 4 * * * ?";
+		private static final String DEFAULT_NOTIFICATION_EMAIL = "molgenis+idcard@gmail.com";
 
 		public Meta()
 		{
@@ -62,6 +65,9 @@ public class IdCardBiobankIndexerDbSettings extends DefaultSettingsEntity implem
 					.setDescription("Cron expression (e.g. 0 4 * * * ?)")
 					.setDefaultValue(DEFAULT_BIOBANK_INDEXING_FREQUENCY).setNillable(false)
 					.setVisibleExpression("$('" + BIOBANK_INDEXING_ENABLED + "').eq(true).value()");
+			addAttribute(NOTIFICATION_EMAIL).setDataType(EMAIL).setLabel("Notification email")
+					.setDescription("email address used for index failure notifications")
+					.setDefaultValue(DEFAULT_NOTIFICATION_EMAIL);
 		}
 	}
 
@@ -139,5 +145,17 @@ public class IdCardBiobankIndexerDbSettings extends DefaultSettingsEntity implem
 		// TODO validate if cronExpession is valid, not here but in decorator
 		set(Meta.BIOBANK_INDEXING_FREQUENCY, cronExpression);
 		applicationEventPublisher.publishEvent(new IdCardBiobankIndexingFrequencyEvent(this, cronExpression));
+	}
+
+	@Override
+	public String getNotificationEmail()
+	{
+		return getString(Meta.NOTIFICATION_EMAIL);
+	}
+
+	@Override
+	public void setNotificationEmail(String notificationEmail)
+	{
+		set(Meta.NOTIFICATION_EMAIL, notificationEmail);
 	}
 }

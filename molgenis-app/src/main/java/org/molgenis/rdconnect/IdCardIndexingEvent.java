@@ -21,9 +21,20 @@ public class IdCardIndexingEvent extends DefaultEntity
 		super(META_DATA, dataService);
 	}
 
+	public IdCardIndexingEventStatus getStatus()
+	{
+		String statusStr = getString(IdCardIndexingEvent.STATUS);
+		return statusStr != null ? IdCardIndexingEventStatus.valueOf(statusStr) : null;
+	}
+
 	public void setStatus(IdCardIndexingEventStatus idCardIndexingEventStatus)
 	{
 		set(IdCardIndexingEvent.STATUS, idCardIndexingEventStatus.toString());
+	}
+
+	public String getMessage()
+	{
+		return getString(IdCardIndexingEvent.MESSAGE);
 	}
 
 	public void setMessage(String message)

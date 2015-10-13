@@ -23,9 +23,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
-import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,30 +36,25 @@ public class IdCardBiobankRepository implements Repository // TODO extends Abstr
 {
 	private static final Logger LOG = LoggerFactory.getLogger(IdCardBiobankRepository.class);
 
-	public enum IndexAction
-	{
-		MANUAL, SCHEDULED
-	}
-
-	private final IdCardBiobankClient idCardBiobankService;
+	private final IdCardBiobankMetaData idCardBiobankMetaData;
+	private final IdCardBiobankClient idCardBiobankClient;
 	private final ElasticsearchService elasticsearchService;
 	private final DataService dataService;
-	private final MetaDataService metaDataService;
 
 	@Autowired
-	public IdCardBiobankRepository(IdCardBiobankClient idCardBiobankClient, ElasticsearchService elasticsearchService,
-			DataService dataService, MetaDataService metaDataService)
+	public IdCardBiobankRepository(IdCardBiobankMetaData idCardBiobankMetaData, IdCardBiobankClient idCardBiobankClient,
+			ElasticsearchService elasticsearchService, DataService dataService)
 	{
-		this.idCardBiobankService = requireNonNull(idCardBiobankClient);
+		this.idCardBiobankMetaData = idCardBiobankMetaData;
+		this.idCardBiobankClient = requireNonNull(idCardBiobankClient);
 		this.elasticsearchService = requireNonNull(elasticsearchService);
 		this.dataService = requireNonNull(dataService);
-		this.metaDataService = requireNonNull(metaDataService);
 	}
 
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		return idCardBiobankService.getIdCardBiobanks().iterator();
+		return idCardBiobankClient.getIdCardBiobanks().iterator();
 	}
 
 	@Override
@@ -82,13 +75,13 @@ public class IdCardBiobankRepository implements Repository // TODO extends Abstr
 	@Override
 	public String getName()
 	{
-		return getEntityMetaData().getName();
+		return IdCardBiobank.ENTITY_NAME;
 	}
 
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return metaDataService.getEntityMetaData(IdCardBiobank.ENTITY_NAME);
+		return idCardBiobankMetaData;
 	}
 
 	@Override
@@ -127,7 +120,7 @@ public class IdCardBiobankRepository implements Repository // TODO extends Abstr
 	{
 		try
 		{
-			return idCardBiobankService.getIdCardBiobank(id.toString());
+			return idCardBiobankClient.getIdCardBiobank(id.toString());
 		}
 		catch (RuntimeException e)
 		{
@@ -140,7 +133,7 @@ public class IdCardBiobankRepository implements Repository // TODO extends Abstr
 	{
 		try
 		{
-			return idCardBiobankService.getIdCardBiobanks(Iterables.transform(ids, new Function<Object, String>()
+			return idCardBiobankClient.getIdCardBiobanks(Iterables.transform(ids, new Function<Object, String>()
 			{
 				@Override
 				public String apply(Object id)
@@ -245,44 +238,6 @@ public class IdCardBiobankRepository implements Repository // TODO extends Abstr
 		// noop
 	}
 
-	public void rebuildIndex(IndexAction indexAction)
-	{
-		IdCardIndexingEvent idCardIndexingEvent = new IdCardIndexingEvent(dataService);
-		try
-		{
-			LOG.trace("Indexing ID-Card biobanks ...");
-			Iterable<? extends Entity> entities = idCardBiobankService.getIdCardBiobanks(60000l);
-
-			EntityMetaData entityMeta = getEntityMetaData();
-			if (!elasticsearchService.hasMapping(entityMeta))
-			{
-				elasticsearchService.createMappings(entityMeta);
-			}
-			elasticsearchService.index(entities, entityMeta, IndexingMode.UPDATE);
-			LOG.debug("Indexed ID-Card biobanks");
-
-			idCardIndexingEvent.setStatus(IdCardIndexingEventStatus.SUCCESS);
-			idCardIndexingEvent.setMessage("Index rebuild [" + indexAction.toString() + "]");
-		}
-		catch (RuntimeException e)
-		{
-			idCardIndexingEvent.setStatus(IdCardIndexingEventStatus.FAILED);
-			idCardIndexingEvent.setMessage(e.getMessage());
-		}
-
-		RunAsSystemProxy.runAsSystem(() -> {
-			dataService.add(IdCardIndexingEvent.ENTITY_NAME, idCardIndexingEvent);
-		});
-	}
-
-	private IdCardBiobank createErrorIdCardBiobank(Object id)
-	{
-		IdCardBiobank idCardBiobank = new IdCardBiobank(dataService);
-		idCardBiobank.set(IdCardBiobank.ORGANIZATION_ID, id);
-		idCardBiobank.set(IdCardBiobank.NAME, "Error loading data");
-		return idCardBiobank; // FIXME get rid of cast
-	}
-
 	@Override
 	public void addEntityListener(EntityListener entityListener) // TODO extends AbstractRepository?
 	{
@@ -293,5 +248,27 @@ public class IdCardBiobankRepository implements Repository // TODO extends Abstr
 	public void removeEntityListener(EntityListener entityListener) // TODO extends AbstractRepository?
 	{
 		throw new UnsupportedOperationException();
+	}
+
+	public void rebuildIndex()
+	{
+		LOG.trace("Indexing ID-Card biobanks ...");
+		Iterable<? extends Entity> entities = idCardBiobankClient.getIdCardBiobanks(60000l);
+
+		EntityMetaData entityMeta = getEntityMetaData();
+		if (!elasticsearchService.hasMapping(entityMeta))
+		{
+			elasticsearchService.createMappings(entityMeta);
+		}
+		elasticsearchService.index(entities, entityMeta, IndexingMode.UPDATE);
+		LOG.debug("Indexed ID-Card biobanks");
+	}
+
+	private IdCardBiobank createErrorIdCardBiobank(Object id)
+	{
+		IdCardBiobank idCardBiobank = new IdCardBiobank(dataService);
+		idCardBiobank.set(IdCardBiobank.ORGANIZATION_ID, id);
+		idCardBiobank.set(IdCardBiobank.NAME, "Error loading data");
+		return idCardBiobank; // FIXME get rid of cast
 	}
 }

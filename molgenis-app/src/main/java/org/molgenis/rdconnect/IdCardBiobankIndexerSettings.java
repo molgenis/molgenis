@@ -31,4 +31,8 @@ public interface IdCardBiobankIndexerSettings
 	void addListener(SettingsEntityListener settingsEntityListener);
 
 	void removeListener(SettingsEntityListener settingsEntityListener);
+
+	String getNotificationEmail();
+
+	void setNotificationEmail(String notificationEmail);
 }
