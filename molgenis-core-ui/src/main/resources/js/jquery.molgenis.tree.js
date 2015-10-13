@@ -1,7 +1,7 @@
 (function($, molgenis) {
 	"use strict";
 	
-	var api = new molgenis.RestClient();
+	var restApi = new molgenis.RestClient();
 	
 	function createChildren(attributes, refEntityDepth, maxDepth, doSelect) {
 		var children = [];
@@ -147,7 +147,7 @@
 				}
 
 				data.result = $.Deferred(function(dfd) {
-					api.getAsync(target, {'expand': ['attributes']}, function(entityMetaData) {
+					restApi.getAsync(target, {'expand': ['attributes']}, function(entityMetaData) {
 						var children = createChildren(entityMetaData.attributes, node.data.refEntityDepth + increaseDepth, settings.maxRefEntityDepth, function() {
 							return node.selected;
 						});
