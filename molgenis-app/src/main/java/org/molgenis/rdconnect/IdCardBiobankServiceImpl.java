@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.settings.SettingsEntityListener;
+import org.molgenis.rdconnect.IdCardBiobankRepository.IndexAction;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.DisallowConcurrentExecution;
@@ -154,7 +155,7 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService, Applicati
 	@Override
 	public void rebuildIndex()
 	{
-		idCardBiobankRepository.rebuildIndex();
+		idCardBiobankRepository.rebuildIndex(IndexAction.MANUAL);
 	}
 
 	@DisallowConcurrentExecution
@@ -167,7 +168,7 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService, Applicati
 		public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException
 		{
 			LOG.info("Executing scheduled rebuild index job ...");
-			idCardBiobankRepository.rebuildIndex();
+			idCardBiobankRepository.rebuildIndex(IndexAction.SCHEDULED);
 			LOG.debug("Executed scheduled rebuild index job");
 		}
 	}

@@ -41,6 +41,7 @@ public class IdCardBiobankIndexerController extends MolgenisPluginController
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public String init(Model model) throws Exception
 	{
+		model.addAttribute("id_card_biobank_registry_entity_name", IdCardBiobank.ENTITY_NAME);
 		return "view-idcardbiobankindexer";
 	}
 

@@ -38,6 +38,11 @@ public class IdCardBiobankRepository implements Repository // TODO extends Abstr
 {
 	private static final Logger LOG = LoggerFactory.getLogger(IdCardBiobankRepository.class);
 
+	public enum IndexAction
+	{
+		MANUAL, SCHEDULED
+	}
+
 	private final IdCardBiobankClient idCardBiobankService;
 	private final ElasticSearchService elasticSearchService;
 	private final DataService dataService;
@@ -240,7 +245,7 @@ public class IdCardBiobankRepository implements Repository // TODO extends Abstr
 		// noop
 	}
 
-	public void rebuildIndex()
+	public void rebuildIndex(IndexAction indexAction)
 	{
 		IdCardIndexingEvent idCardIndexingEvent = new IdCardIndexingEvent(dataService);
 		try
@@ -257,6 +262,7 @@ public class IdCardBiobankRepository implements Repository // TODO extends Abstr
 			LOG.debug("Indexed ID-Card biobanks");
 
 			idCardIndexingEvent.setStatus(IdCardIndexingEventStatus.SUCCESS);
+			idCardIndexingEvent.setMessage("Index rebuild [" + indexAction.toString() + "]");
 		}
 		catch (RuntimeException e)
 		{
