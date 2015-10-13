@@ -52,6 +52,7 @@ import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -88,7 +89,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 
 	private DefaultEntityMetaData geneMetaData;
 
-	private UuidGenerator uuidGenerator = new UuidGenerator();
+	private final UuidGenerator uuidGenerator = new UuidGenerator();
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -328,6 +329,12 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		DataServiceImpl dataService()
 		{
 			return new DataServiceImpl();
+		}
+
+		@Bean
+		PlatformTransactionManager platformTransactionManager()
+		{
+			return mock(PlatformTransactionManager.class);
 		}
 
 		@Bean

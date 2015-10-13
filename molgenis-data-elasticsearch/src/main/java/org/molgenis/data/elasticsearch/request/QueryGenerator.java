@@ -2,6 +2,7 @@ package org.molgenis.data.elasticsearch.request;
 
 import static org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator.DEFAULT_ANALYZER;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -22,6 +23,7 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
+import org.molgenis.util.MolgenisDateFormat;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -247,7 +249,12 @@ public class QueryGenerator implements QueryPartGenerator
 				String[] attributePath = parseAttributePath(queryField);
 
 				// Workaround for Elasticsearch Date to String conversion issue
-				queryValue = queryValue instanceof java.util.Date ? queryValue.toString() : queryValue;
+				if (queryValue instanceof Date)
+				{
+					AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+					queryValue = getESDateQueryValue((Date) queryValue, attr);
+				}
+
 				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).gt(queryValue);
 				filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
 				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
@@ -262,7 +269,11 @@ public class QueryGenerator implements QueryPartGenerator
 				String[] attributePath = parseAttributePath(queryField);
 
 				// Workaround for Elasticsearch Date to String conversion issue
-				queryValue = queryValue instanceof java.util.Date ? queryValue.toString() : queryValue;
+				if (queryValue instanceof Date)
+				{
+					AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+					queryValue = getESDateQueryValue((Date) queryValue, attr);
+				}
 				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).gte(queryValue);
 				filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
 				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
@@ -354,7 +365,11 @@ public class QueryGenerator implements QueryPartGenerator
 				String[] attributePath = parseAttributePath(queryField);
 
 				// Workaround for Elasticsearch Date to String conversion issue
-				queryValue = queryValue instanceof java.util.Date ? queryValue.toString() : queryValue;
+				if (queryValue instanceof Date)
+				{
+					AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+					queryValue = getESDateQueryValue((Date) queryValue, attr);
+				}
 				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).lt(queryValue);
 				filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
 				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
@@ -368,7 +383,11 @@ public class QueryGenerator implements QueryPartGenerator
 				String[] attributePath = parseAttributePath(queryField);
 
 				// Workaround for Elasticsearch Date to String conversion issue
-				queryValue = queryValue instanceof java.util.Date ? queryValue.toString() : queryValue;
+				if (queryValue instanceof Date)
+				{
+					AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+					queryValue = getESDateQueryValue((Date) queryValue, attr);
+				}
 				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).lte(queryValue);
 				filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
 				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
@@ -388,15 +407,25 @@ public class QueryGenerator implements QueryPartGenerator
 
 				Iterator<?> iterator = iterable.iterator();
 
+				String[] attributePath = parseAttributePath(queryField);
+				AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+
 				Object queryValueFrom = iterator.next();
+
 				// Workaround for Elasticsearch Date to String conversion issue
-				queryValueFrom = queryValueFrom instanceof java.util.Date ? queryValueFrom.toString() : queryValueFrom;
+				if (queryValueFrom instanceof Date)
+				{
+					queryValueFrom = getESDateQueryValue((Date) queryValueFrom, attr);
+				}
 
 				Object queryValueTo = iterator.next();
-				// Workaround for Elasticsearch Date to String conversion issue
-				queryValueTo = queryValueTo instanceof java.util.Date ? queryValueTo.toString() : queryValueTo;
 
-				String[] attributePath = parseAttributePath(queryField);
+				// Workaround for Elasticsearch Date to String conversion issue
+				if (queryValueTo instanceof Date)
+				{
+					queryValueTo = getESDateQueryValue((Date) queryValueTo, attr);
+				}
+
 				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).gte(queryValueFrom)
 						.lte(queryValueTo);
 				filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
@@ -730,5 +759,15 @@ public class QueryGenerator implements QueryPartGenerator
 
 			return attr;
 		}
+	}
+
+	private String getESDateQueryValue(Date queryValue, AttributeMetaData attr)
+	{
+		if (attr.getDataType().getEnumType() == FieldTypeEnum.DATE_TIME)
+		{
+			return MolgenisDateFormat.getDateTimeFormat().format(queryValue);
+		}
+
+		return MolgenisDateFormat.getDateFormat().format(queryValue);
 	}
 }

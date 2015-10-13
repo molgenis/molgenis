@@ -1,8 +1,9 @@
 package org.molgenis.security.login;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.util.ResourceFingerprintRegistry;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RequestMapping("/login")
 public class MolgenisLoginController
 {
+	public static final String SESSION_EXPIRED_SESSION_ATTR = "sessionExpired";
 	private static final String ERROR_MESSAGE_BAD_CREDENTIALS = "The username or password you entered is incorrect.";
 	private static final String ERROR_MESSAGE_DISABLED = "Your account is not yet activated.";
 	private static final String ERROR_MESSAGE_SESSION_AUTHENTICATION = "Your login session has expired.";
@@ -31,15 +33,22 @@ public class MolgenisLoginController
 	@Autowired
 	public MolgenisLoginController(ResourceFingerprintRegistry resourceFingerprintRegistry, AppSettings appSettings)
 	{
-		this.resourceFingerprintRegistry = checkNotNull(resourceFingerprintRegistry);
-		this.appSettings = checkNotNull(appSettings);
+		this.resourceFingerprintRegistry = requireNonNull(resourceFingerprintRegistry);
+		this.appSettings = requireNonNull(appSettings);
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
-	public String getLoginPage(Model model)
+	public String getLoginPage(Model model, HttpSession session)
 	{
 		model.addAttribute("resource_fingerprint_registry", resourceFingerprintRegistry);
 		model.addAttribute("enable_self_registration", appSettings.getSignUp());
+
+		if (session.getAttribute(SESSION_EXPIRED_SESSION_ATTR) != null)
+		{
+			model.addAttribute("errorMessage", ERROR_MESSAGE_SESSION_AUTHENTICATION);
+			session.removeAttribute("sessionExpired");
+		}
+
 		return "view-login";
 	}
 

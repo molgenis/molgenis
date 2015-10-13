@@ -1,12 +1,13 @@
 package org.molgenis.data.vcf.importer;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,6 +25,7 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.importer.EntitiesValidationReportImpl;
 import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.vcf.VcfRepository;
@@ -35,7 +37,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 
@@ -54,15 +55,13 @@ public class VcfImporterService implements ImportService
 			PermissionSystemService permissionSystemService)
 
 	{
-		this.fileRepositoryCollectionFactory = checkNotNull(fileRepositoryCollectionFactory);
-		this.dataService = checkNotNull(dataService);
-		this.permissionSystemService = checkNotNull(permissionSystemService);
+		this.fileRepositoryCollectionFactory = requireNonNull(fileRepositoryCollectionFactory);
+		this.dataService = requireNonNull(dataService);
+		this.permissionSystemService = requireNonNull(permissionSystemService);
 	}
 
 	@Override
-	@Transactional
-	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction,
-			String defaultPackage)
+	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction, String defaultPackage)
 	{
 		if (databaseAction != DatabaseAction.ADD) throw new IllegalArgumentException("Only ADD is supported");
 
@@ -188,7 +187,8 @@ public class VcfImporterService implements ImportService
 		}
 	}
 
-	private EntityImportReport importVcf(Repository inRepository, List<EntityMetaData> addedEntities) throws IOException
+	private EntityImportReport importVcf(Repository inRepository, List<EntityMetaData> addedEntities)
+			throws IOException
 	{
 		EntityImportReport report = new EntityImportReport();
 		Repository sampleRepository = null;
@@ -297,5 +297,12 @@ public class VcfImporterService implements ImportService
 	public Set<String> getSupportedFileExtensions()
 	{
 		return GenericImporterExtensions.getVCF();
+	}
+
+	@Override
+	public LinkedHashMap<String, Boolean> integrationTestMetaData(MetaDataService metaDataService,
+			RepositoryCollection repositoryCollection, String defaultPackage)
+	{
+		return metaDataService.integrationTestMetaData(repositoryCollection);
 	}
 }

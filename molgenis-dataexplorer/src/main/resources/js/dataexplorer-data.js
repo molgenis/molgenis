@@ -59,7 +59,6 @@
 			entity: getEntity().name,
 			attrs: getAttributesTree(),
 			query: getQuery(),
-			maxRows: 18,
 			onRowAdd: onDataChange,
 			onRowDelete: onDataChange,
 			onRowEdit: onDataChange,
@@ -86,16 +85,15 @@
 
 		$('#entityReport').load("dataexplorer/details",{entityName: entityName, entityId: entityId}, function() {
 			  $('#entityReportModal').modal("show");
-
-			  // Button event handler when a button is placed inside an entity report ftl
-			  $(".modal-body button", "#entityReport").on('click', function() {
-					$.download($(this).data('href'), {entityName: entityName, entityId: entityId}, "GET");
-			  });
 		});
 	}
 
 	function onRowClick(entity) {
-		genomeBrowser.setLocation(entity[genomebrowserChromosomeAttribute.name],entity[genomebrowserStartAttribute.name]-50,entity[genomebrowserStartAttribute.name]+50);
+		var chrom = entity[genomebrowserChromosomeAttribute.name];
+		var pos = entity[genomebrowserStartAttribute.name];
+		if(chrom !== undefined && chrom !== "" && pos !== undefined && pos !== ""){
+			genomeBrowser.setLocation(chrom,pos-50,pos+50);
+		}
 	}
 
 	/**
@@ -362,9 +360,20 @@
 	$(function() {
 		$(document).on('changeAttributeSelection.data', function(e, data) {
 			if(Table) {
+				var tableAttrs = Table.state.attrs;
+				var treeAttrs = data.attributesTree;
+				for(var attr in treeAttrs){
+					if(tableAttrs[attr]!==undefined && tableAttrs[attr]!==null){
+						//check if the attribute was expanded (x/mrefs), if so, and still selected, copy the * to stay expanded.
+						if(tableAttrs[attr].hasOwnProperty('*') && treeAttrs.hasOwnProperty(attr)){
+							treeAttrs[attr] = tableAttrs[attr];
+						}
+					}
+				}
 				Table.setProps(
 					{
-						attrs: data.attributesTree,
+
+						attrs: treeAttrs,
 						onRowClick: (doShowGenomeBrowser() && isGenomeBrowserAttributesSelected()) ? onRowClick : null
 					}
 				);

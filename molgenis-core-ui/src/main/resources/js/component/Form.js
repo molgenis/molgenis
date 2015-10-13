@@ -390,6 +390,9 @@
 					_.each(this.state.entity.allAttributes, function(entityAttr) {
 						if (entityAttr.visibleExpression) {
 							entityAttr.visible = this._resolveBoolExpression(entityAttr.visibleExpression, entityInstance);
+							if (entityAttr.visible === false) {
+								this._updateErrorMessages(entityAttr, {valid: true});
+							}
 						}
 					}, this);
 				}
@@ -645,7 +648,11 @@
         		}
         	}, this);
         	
-        	return evalScript(expression, form);
+        	try {
+        		return evalScript(expression, form);
+        	} catch (e) {
+        		return false;
+        	}
         },
         _statics: {
             // https://gist.github.com/dperini/729294

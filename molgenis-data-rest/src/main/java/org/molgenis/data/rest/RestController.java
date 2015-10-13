@@ -1,5 +1,6 @@
 package org.molgenis.data.rest;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL_MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
@@ -45,12 +46,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityCollection;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisReferencedEntityException;
@@ -60,16 +59,12 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.Sort;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.DefaultEntityCollection;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.fieldtypes.BoolField;
-import org.molgenis.file.FileDownloadController;
-import org.molgenis.file.FileMeta;
-import org.molgenis.file.FileStore;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.token.TokenService;
@@ -93,7 +88,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -103,7 +97,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -137,27 +130,19 @@ public class RestController
 	private final AuthenticationManager authenticationManager;
 	private final MolgenisPermissionService molgenisPermissionService;
 	private final MolgenisRSQL molgenisRSQL;
-	private final IdGenerator idGenerator;
-	private final FileStore fileStore;
+	private final RestService restService;
 
 	@Autowired
 	public RestController(DataService dataService, TokenService tokenService,
 			AuthenticationManager authenticationManager, MolgenisPermissionService molgenisPermissionService,
-			MolgenisRSQL molgenisRSQL, ResourceFingerprintRegistry resourceFingerprintRegistry,
-			IdGenerator idGenerator, FileStore fileStore)
+			ResourceFingerprintRegistry resourceFingerprintRegistry, MolgenisRSQL molgenisRSQL, RestService restService)
 	{
-		if (dataService == null) throw new IllegalArgumentException("dataService is null");
-		if (tokenService == null) throw new IllegalArgumentException("tokenService is null");
-		if (authenticationManager == null) throw new IllegalArgumentException("authenticationManager is null");
-		if (molgenisPermissionService == null) throw new IllegalArgumentException("molgenisPermissionService is null");
-
-		this.dataService = dataService;
-		this.tokenService = tokenService;
-		this.authenticationManager = authenticationManager;
-		this.molgenisPermissionService = molgenisPermissionService;
-		this.molgenisRSQL = molgenisRSQL;
-		this.idGenerator = idGenerator;
-		this.fileStore = fileStore;
+		this.dataService = requireNonNull(dataService);
+		this.tokenService = requireNonNull(tokenService);
+		this.authenticationManager = requireNonNull(authenticationManager);
+		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
+		this.molgenisRSQL = requireNonNull(molgenisRSQL);
+		this.restService = requireNonNull(restService);
 	}
 
 	/**
@@ -680,7 +665,7 @@ public class RestController
 					+ "' is readonly");
 		}
 
-		Object value = toEntityValue(attr, paramValue);
+		Object value = this.restService.toEntityValue(attr, paramValue);
 		entity.set(attributeName, value);
 		dataService.update(entityName, entity);
 	}
@@ -822,7 +807,6 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
-	@Transactional
 	public void deleteMeta(@PathVariable("entityName") String entityName)
 	{
 		deleteMetaInternal(entityName);
@@ -836,7 +820,6 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = POST, params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
-	@Transactional
 	public void deleteMetaPost(@PathVariable("entityName") String entityName)
 	{
 		deleteMetaInternal(entityName);
@@ -1031,7 +1014,7 @@ public class RestController
 			throw new UnknownEntityException("Entity of type " + entityName + " with id " + id + " not found");
 		}
 
-		Entity entity = toEntity(meta, entityMap);
+		Entity entity = this.restService.toEntity(meta, entityMap);
 		entity.set(meta.getIdAttribute().getName(), existing.getIdValue());
 
 		dataService.update(entityName, entity);
@@ -1041,7 +1024,7 @@ public class RestController
 	{
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 
-		Entity entity = toEntity(meta, entityMap);
+		Entity entity = this.restService.toEntity(meta, entityMap);
 
 		dataService.add(entityName, entity);
 		Object id = entity.getIdValue();
@@ -1051,98 +1034,6 @@ public class RestController
 		}
 
 		response.setStatus(HttpServletResponse.SC_CREATED);
-	}
-
-	// Creates a new MapEntity based from a HttpServletRequest
-	private Entity toEntity(EntityMetaData meta, Map<String, Object> request)
-	{
-		Entity entity = new MapEntity(meta);
-
-		for (AttributeMetaData attr : meta.getAtomicAttributes())
-		{
-			String paramName = attr.getName();
-			Object paramValue = request.get(paramName);
-			Object value = toEntityValue(attr, paramValue);
-			entity.set(attr.getName(), value);
-		}
-
-		return entity;
-	}
-
-	private Object toEntityValue(AttributeMetaData attr, Object paramValue)
-	{
-		Object value = null;
-
-		// Treat empty strings as null
-		if ((paramValue != null) && (paramValue instanceof String) && StringUtils.isEmpty((String) paramValue))
-		{
-			paramValue = null;
-		}
-
-		// boolean false is not posted (http feature), so if null and required, should be false
-		if ((paramValue == null) && (attr.getDataType() instanceof BoolField) && !attr.isNillable())
-		{
-			value = false;
-		}
-
-		if (paramValue != null)
-		{
-			if (attr.getDataType().getEnumType() == FieldTypeEnum.FILE)
-			{
-				MultipartFile multipartFile = (MultipartFile) paramValue;
-
-				String id = idGenerator.generateId();
-				try
-				{
-					fileStore.store(multipartFile.getInputStream(), id);
-				}
-				catch (IOException e)
-				{
-					throw new MolgenisDataException(e);
-				}
-
-				FileMeta fileEntity = new FileMeta(dataService);
-				fileEntity.setId(id);
-				fileEntity.setFilename(multipartFile.getOriginalFilename());
-				fileEntity.setContentType(multipartFile.getContentType());
-				fileEntity.setSize(multipartFile.getSize());
-				fileEntity.setUrl(ServletUriComponentsBuilder.fromCurrentRequest()
-						.replacePath(FileDownloadController.URI + "/" + id).replaceQuery(null).build().toUriString());
-				dataService.add(FileMeta.ENTITY_NAME, fileEntity);
-
-				return fileEntity;
-			}
-
-			if (attr.getDataType().getEnumType() == XREF || attr.getDataType().getEnumType() == CATEGORICAL)
-			{
-				value = dataService.findOne(attr.getRefEntity().getName(), paramValue);
-				if (value == null)
-				{
-					throw new IllegalArgumentException("No " + attr.getRefEntity().getName() + " with id " + paramValue
-							+ " found");
-				}
-			}
-			else if (attr.getDataType().getEnumType() == MREF || attr.getDataType().getEnumType() == CATEGORICAL_MREF)
-			{
-				List<Object> ids = DataConverter.toObjectList(paramValue);
-				if ((ids != null) && !ids.isEmpty())
-				{
-					Iterable<Entity> mrefs = dataService.findAll(attr.getRefEntity().getName(), ids);
-					List<Entity> mrefList = Lists.newArrayList(mrefs);
-					if (mrefList.size() != ids.size())
-					{
-						throw new IllegalArgumentException("Could not find all referencing ids for  " + attr.getName());
-					}
-
-					value = mrefList;
-				}
-			}
-			else
-			{
-				value = DataConverter.convert(paramValue, attr);
-			}
-		}
-		return value;
 	}
 
 	private AttributeMetaDataResponse getAttributeMetaDataPostInternal(String entityName, String attributeName,

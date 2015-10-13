@@ -231,6 +231,8 @@
 			var name = $(this).data('attribute-name'), inArray = $.inArray(name, sourceAttrs);
 			$(this).prop('checked', inArray >= 0);
 		});
+		
+		$('#attribute-mapping-table :checkbox').change();
 	}
 
 	/**
@@ -405,11 +407,12 @@
 				highlightActiveLine : true
 			});
 			
-			$textarea.data('ace').editor.getSession().on('change', function(object) {		
-				
+			$textarea.data('ace').editor.getSession().on('change', function(object) {
 				var algorithm = $textarea.data('ace').editor.getSession().getValue();
-					// check attributes if manually added
+				
+				// check attributes if manually added
 				checkSelectedAttributes(algorithm);
+				
 				// update save buttons visibility
 				disableEnableSaveButtons(algorithm);
 				
@@ -671,11 +674,6 @@
 			'targetAttribute' : $('[name="targetAttribute"]').val(),
 			'searchTerms' : ""
 		}, explainedAttributes, attributes = [];
-
-		// Hide the map tab when no attributes are selected
-		if ($('#attribute-mapping-table :checkbox:checked').length < 1) {
-			$('#map-tab').hide();
-		}
 		
 		// tooltip placement
 		$("[rel=tooltip]").tooltip({
@@ -694,7 +692,7 @@
 		if (algorithm.trim()) {
 			loadAlgorithmResult(algorithm);
 		} else {
-			// if no algorithm present hide the mapping and result containers
+			// if no algorithm is present hide the result container
 			$('#result-container').css('display', 'none');
 		}
 		

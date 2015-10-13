@@ -10,7 +10,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IndexedRepository;
 import org.molgenis.data.Query;
-import org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode;
+import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.transaction.annotation.Transactional;

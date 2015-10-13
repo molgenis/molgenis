@@ -102,7 +102,9 @@
 						<#list categories.iterator() as category>
 							<#list refEntityMetaData.attributes as attribute>
 								<#assign attributeName = attribute.name>
-									${category[attributeName]} <#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+								<#if (category[attributeName])??>	
+									 ${category[attributeName]?string}<#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+								</#if>
 							</#list>
 							</br>
 						</#list>
@@ -161,7 +163,7 @@
 						<i class="glyphicon glyphicon-question-sign" rel="tooltip" title="Use one of the methods below to map the values of the 
 						selected attribute(s) to the target attribute. The script editor offers large control over your algorithm, but javascript knowledge is needed.
 						<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical" ||
-				    		attributeMapping.targetAttributeMetaData.dataType == "mref" || attributeMapping.targetAttributeMetaData.dataType == "string">
+				    		attributeMapping.targetAttributeMetaData.dataType == "string">
 				    		The Map tab allows you to map the various categorical values or strings to the categorical values of the target attribute.
 				    	</#if>"></i>
 					</legend>
@@ -173,8 +175,7 @@
 					<ul class="nav nav-tabs" role="tablist">
 			    		<li id="script-tab" role="presentation" class="active"><a href="#script" aria-controls="script" role="tab" data-toggle="tab">Script</a></li>
 			    		
-			    		<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical" ||
-			    		attributeMapping.targetAttributeMetaData.dataType == "mref">
+			    		<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical">
 			    			<li id="map-tab" role="presentation"><a href="#map" aria-controls="map" role="tab" data-toggle="tab">Map</a></li>
 		    			</#if> 
 			   		</ul>
