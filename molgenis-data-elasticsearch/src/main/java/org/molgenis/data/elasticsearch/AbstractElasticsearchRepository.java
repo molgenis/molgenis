@@ -7,6 +7,7 @@ import org.elasticsearch.common.primitives.Ints;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IndexedRepository;
 import org.molgenis.data.Query;
@@ -192,5 +193,17 @@ public abstract class AbstractElasticsearchRepository implements IndexedReposito
 	public void drop()
 	{
 		elasticSearchService.delete(getEntityMetaData().getName());
+	}
+
+	@Override
+	public void addEntityListener(EntityListener entityListener)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void removeEntityListener(EntityListener entityListener)
+	{
+		throw new UnsupportedOperationException();
 	}
 }

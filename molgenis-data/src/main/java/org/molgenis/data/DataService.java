@@ -288,4 +288,7 @@ public interface DataService extends Iterable<Repository>
 	 */
 	Iterable<String> getEntityNames();
 
+	void addEntityListener(String entityName, EntityListener entityListener);
+
+	void removeEntityListener(String entityName, EntityListener entityListener);
 }

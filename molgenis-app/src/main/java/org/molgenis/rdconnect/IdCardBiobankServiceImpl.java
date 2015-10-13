@@ -1,179 +1,141 @@
 package org.molgenis.rdconnect;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Iterator;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpGet;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.settings.SettingsEntityListener;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.Job;
+import org.quartz.JobBuilder;
+import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.TriggerKey;
+import org.quartz.impl.triggers.CronTriggerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 
-import com.google.gson.stream.JsonReader;
-
-// FIXME handle timeouts
 @Service
-public class IdCardBiobankServiceImpl implements IdCardBiobankService
+public class IdCardBiobankServiceImpl implements IdCardBiobankService, ApplicationListener<ContextRefreshedEvent>
 {
 	private static final Logger LOG = LoggerFactory.getLogger(IdCardBiobankServiceImpl.class);
 
-	private static final int ID_CARD_CONNECT_TIMEOUT = 2000;
-	private static final int ID_CARD_CONNECTION_REQUEST_TIMEOUT = 2000;
-	private static final int ID_CARD_SOCKET_TIMEOUT = 2000;
+	private static final String ID_CARD_INDEX_REBUILD_TRIGGER_KEY = "idCardIndexRebuildTrigger";
+	private static final String ID_CARD_INDEX_REBUILD_JOB_KEY = "idCardIndexRebuildJob";
 
-	private final HttpClient httpClient;
+	private final IdCardBiobankRepository idCardBiobankRepository;
 	private final IdCardBiobankIndexerSettings idCardBiobankIndexerSettings;
-	private final RequestConfig requestConfig;
-	private final IdCardBiobankMapper idCardBiobankMapper;
+	private final Scheduler scheduler;
 
 	@Autowired
-	public IdCardBiobankServiceImpl(HttpClient httpClient, IdCardBiobankIndexerSettings idCardBiobankIndexerSettings,
-			IdCardBiobankMapper idCardBiobankMapper)
+	public IdCardBiobankServiceImpl(IdCardBiobankRepository idCardBiobankRepository,
+			IdCardBiobankIndexerSettings idCardBiobankIndexerSettings, Scheduler scheduler)
 	{
-		this.httpClient = requireNonNull(httpClient);
+		this.idCardBiobankRepository = requireNonNull(idCardBiobankRepository);
 		this.idCardBiobankIndexerSettings = requireNonNull(idCardBiobankIndexerSettings);
-		this.idCardBiobankMapper = requireNonNull(idCardBiobankMapper);
-
-		this.requestConfig = RequestConfig.custom().setConnectTimeout(ID_CARD_CONNECT_TIMEOUT)
-				.setConnectionRequestTimeout(ID_CARD_CONNECTION_REQUEST_TIMEOUT)
-				.setSocketTimeout(ID_CARD_SOCKET_TIMEOUT).build();
-	}
-
-	public IdCardBiobank getIdCardBiobank(String id)
-	{
-		// Construct uri
-		StringBuilder uriBuilder = new StringBuilder().append(idCardBiobankIndexerSettings.getApiBaseUri()).append('/')
-				.append(idCardBiobankIndexerSettings.getBiobankResource()).append('/').append(id);
-
-		return getIdCardResource(uriBuilder.toString(), new JsonResponseHandler<IdCardBiobank>()
-		{
-			@Override
-			public IdCardBiobank deserialize(JsonReader jsonReader) throws IOException
-			{
-				return idCardBiobankMapper.toIdCardBiobank(jsonReader);
-			}
-		});
+		this.scheduler = requireNonNull(scheduler);
 	}
 
 	@Override
-	public Iterable<Entity> getIdCardBiobanks(Iterable<String> ids)
+	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-		// FIXME batching for each x ids
-		String value = StreamSupport.stream(ids.spliterator(), false).collect(Collectors.joining(",", "[", "]"));
-		try
-		{
-			value = URLEncoder.encode(value, UTF_8.name());
-		}
-		catch (UnsupportedEncodingException e1)
-		{
-			throw new RuntimeException(e1);
-		}
-		StringBuilder uriBuilder = new StringBuilder().append(idCardBiobankIndexerSettings.getApiBaseUri()).append('/')
-				.append(idCardBiobankIndexerSettings.getBiobankCollectionSelectionResource()).append('/').append(value);
-
-		return getIdCardResource(uriBuilder.toString(), new JsonResponseHandler<Iterable<Entity>>()
+		idCardBiobankIndexerSettings.addListener(new SettingsEntityListener()
 		{
 			@Override
-			public Iterable<Entity> deserialize(JsonReader jsonReader) throws IOException
+			public void postUpdate(Entity entity)
 			{
-				return idCardBiobankMapper.toIdCardBiobanks(jsonReader);
-			}
-		});
-	}
-
-	private <T> T getIdCardResource(String url, ResponseHandler<T> responseHandler)
-	{
-		HttpGet request = new HttpGet(url);
-		request.addHeader(HttpHeaders.CONTENT_TYPE, "application/json");
-		request.setConfig(requestConfig);
-		try
-		{
-			LOG.info("Retrieving [" + url + "]");
-			return httpClient.execute(request, responseHandler);
-		}
-		catch (IOException e)
-		{
-			throw new MolgenisDataException(e);
-		}
-	}
-
-	@Override
-	public Iterable<Entity> getIdCardBiobanks()
-	{
-		// Construct uri
-		StringBuilder uriBuilder = new StringBuilder().append(idCardBiobankIndexerSettings.getApiBaseUri()).append('/')
-				.append(idCardBiobankIndexerSettings.getBiobankCollectionResource());
-
-		// Retrieve biobank ids
-		Iterable<IdCardOrganization> idCardOrganizations = getIdCardResource(uriBuilder.toString(),
-				new JsonResponseHandler<Iterable<IdCardOrganization>>()
+				try
 				{
-					@Override
-					public Iterable<IdCardOrganization> deserialize(JsonReader jsonReader) throws IOException
-					{
-						return idCardBiobankMapper.toIdCardOrganizations(jsonReader);
-					}
-				});
-
-		// Retrieve biobanks
-		return this.getIdCardBiobanks(new Iterable<String>()
-		{
-			@Override
-			public Iterator<String> iterator()
-			{
-				return StreamSupport.stream(idCardOrganizations.spliterator(), false)
-						.map(IdCardOrganization::getOrganizationId).iterator();
+					updateIndexerScheduler();
+				}
+				catch (SchedulerException e)
+				{
+					throw new RuntimeException(e);
+				}
 			}
 		});
+
+		try
+		{
+			updateIndexerScheduler();
+		}
+		catch (SchedulerException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
-	private static abstract class JsonResponseHandler<T> implements ResponseHandler<T>
+	private void updateIndexerScheduler() throws SchedulerException
 	{
-		@Override
-		public T handleResponse(final HttpResponse response) throws ClientProtocolException, IOException
+		JobKey jobKey = new JobKey(ID_CARD_INDEX_REBUILD_JOB_KEY);
+		if (idCardBiobankIndexerSettings.getBiobankIndexingEnabled())
 		{
-			StatusLine statusLine = response.getStatusLine();
-			if (statusLine.getStatusCode() < 100 || statusLine.getStatusCode() >= 300)
+			String biobankIndexingFrequency = idCardBiobankIndexerSettings.getBiobankIndexingFrequency();
+			Trigger trigger = createCronTrigger(biobankIndexingFrequency);
+			if (!scheduler.checkExists(jobKey))
 			{
-				throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
+				LOG.info("Scheduling index rebuild job with cron [{}]", biobankIndexingFrequency);
+				JobDetail job = JobBuilder.newJob(ReindexJob.class).withIdentity(ID_CARD_INDEX_REBUILD_JOB_KEY).build();
+				scheduler.scheduleJob(job, trigger);
 			}
+			else
+			{
+				TriggerKey triggerKey = new TriggerKey(ID_CARD_INDEX_REBUILD_TRIGGER_KEY);
+				Trigger oldTrigger = scheduler.getTrigger(triggerKey);
 
-			HttpEntity entity = response.getEntity();
-			if (entity == null)
-			{
-				throw new ClientProtocolException("Response contains no content");
-			}
-
-			JsonReader jsonReader = new JsonReader(new InputStreamReader(entity.getContent(), UTF_8));
-			try
-			{
-				return deserialize(jsonReader);
-			}
-			finally
-			{
-				jsonReader.close();
+				// trigger.equals(oldTrigger) doesn't return true when the cron expressions are equal
+				if (trigger instanceof CronTriggerImpl && oldTrigger instanceof CronTriggerImpl
+						&& !((CronTriggerImpl) trigger).getCronExpression()
+								.equals(((CronTriggerImpl) oldTrigger).getCronExpression()))
+				{
+					LOG.info("Rescheduling index rebuild job with cron [{}]", biobankIndexingFrequency);
+					scheduler.rescheduleJob(triggerKey, trigger);
+				}
 			}
 		}
+		else
+		{
+			if (scheduler.checkExists(jobKey))
+			{
+				LOG.info("Deleting index rebuild job");
+				scheduler.deleteJob(jobKey);
+			}
+		}
+	}
 
-		public abstract T deserialize(JsonReader jsonReader) throws IOException;
+	@Override
+	public void rebuildIndex()
+	{
+		idCardBiobankRepository.rebuildIndex();
+	}
+
+	@DisallowConcurrentExecution
+	public static class ReindexJob implements Job
+	{
+		@Autowired
+		private IdCardBiobankRepository idCardBiobankRepository;
+
+		@Override
+		public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException
+		{
+			LOG.info("Executing scheduled rebuild index job");
+			idCardBiobankRepository.rebuildIndex();
+		}
+	}
+
+	private Trigger createCronTrigger(String cronExpression)
+	{
+		return TriggerBuilder.newTrigger().withIdentity(ID_CARD_INDEX_REBUILD_TRIGGER_KEY)
+				.withSchedule(CronScheduleBuilder.cronSchedule(cronExpression)).build();
 	}
 }

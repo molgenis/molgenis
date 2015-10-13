@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IndexedRepository;
 import org.molgenis.data.Query;
@@ -200,4 +201,15 @@ public class IndexedRepositoryExceptionTranslatorDecorator implements IndexedRep
 		repository.rebuildIndex();
 	}
 
+	@Override
+	public void addEntityListener(EntityListener entityListener)
+	{
+		repository.addEntityListener(entityListener);
+	}
+
+	@Override
+	public void removeEntityListener(EntityListener entityListener)
+	{
+		repository.removeEntityListener(entityListener);
+	}
 }

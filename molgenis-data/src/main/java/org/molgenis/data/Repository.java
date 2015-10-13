@@ -88,4 +88,8 @@ public interface Repository extends Iterable<Entity>, Closeable
 	void flush();
 
 	void clearCache();
+
+	void addEntityListener(EntityListener entityListener);
+
+	void removeEntityListener(EntityListener entityListener);
 }

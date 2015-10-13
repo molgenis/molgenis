@@ -14,6 +14,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
@@ -31,8 +32,8 @@ import com.google.common.collect.Sets;
 
 public class RepositoryValidationDecorator implements Repository
 {
-	private static List<String> ENTITIES_THAT_DO_NOT_NEED_VALIDATION = Arrays.asList(
-			MolgenisTransactionLogMetaData.ENTITY_NAME, MolgenisTransactionLogEntryMetaData.ENTITY_NAME);
+	private static List<String> ENTITIES_THAT_DO_NOT_NEED_VALIDATION = Arrays
+			.asList(MolgenisTransactionLogMetaData.ENTITY_NAME, MolgenisTransactionLogEntryMetaData.ENTITY_NAME);
 	private final EntityAttributesValidator entityAttributesValidator;
 	private final DataService dataService;
 	private final Repository decoratedRepository;
@@ -497,4 +498,15 @@ public class RepositoryValidationDecorator implements Repository
 		return decoratedRepository.getCapabilities();
 	}
 
+	@Override
+	public void addEntityListener(EntityListener entityListener)
+	{
+		decoratedRepository.addEntityListener(entityListener);
+	}
+
+	@Override
+	public void removeEntityListener(EntityListener entityListener)
+	{
+		decoratedRepository.removeEntityListener(entityListener);
+	}
 }

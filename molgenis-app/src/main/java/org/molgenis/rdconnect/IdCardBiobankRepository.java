@@ -16,6 +16,7 @@ import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
@@ -32,20 +33,20 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 
 @org.springframework.stereotype.Repository
-public class IdCardBiobankRepository implements Repository
+public class IdCardBiobankRepository implements Repository // TODO extends AbstractRepository?
 {
 	private static final Logger LOG = LoggerFactory.getLogger(IdCardBiobankRepository.class);
 
-	private final IdCardBiobankService idCardBiobankService;
+	private final IdCardBiobankClient idCardBiobankService;
 	private final ElasticSearchService elasticSearchService;
 	private final DataService dataService;
 	private final MetaDataService metaDataService;
 
 	@Autowired
-	public IdCardBiobankRepository(IdCardBiobankService idCardBiobankService, ElasticSearchService elasticSearchService,
+	public IdCardBiobankRepository(IdCardBiobankClient idCardBiobankClient, ElasticSearchService elasticSearchService,
 			DataService dataService, MetaDataService metaDataService)
 	{
-		this.idCardBiobankService = requireNonNull(idCardBiobankService);
+		this.idCardBiobankService = requireNonNull(idCardBiobankClient);
 		this.elasticSearchService = requireNonNull(elasticSearchService);
 		this.dataService = requireNonNull(dataService);
 		this.metaDataService = requireNonNull(metaDataService);
@@ -238,9 +239,11 @@ public class IdCardBiobankRepository implements Repository
 		// noop
 	}
 
-	public void index(Iterable<? extends Entity> entities)
+	public void rebuildIndex()
 	{
 		LOG.trace("Indexing ID-Card biobanks ...");
+		Iterable<? extends Entity> entities = idCardBiobankService.getIdCardBiobanks(60000l);
+
 		EntityMetaData entityMeta = getEntityMetaData();
 		if (!elasticSearchService.hasMapping(entityMeta))
 		{
@@ -256,5 +259,17 @@ public class IdCardBiobankRepository implements Repository
 		idCardBiobank.set(IdCardBiobank.ORGANIZATION_ID, id);
 		idCardBiobank.set(IdCardBiobank.NAME, "Error loading data");
 		return idCardBiobank; // FIXME get rid of cast
+	}
+
+	@Override
+	public void addEntityListener(EntityListener entityListener) // TODO extends AbstractRepository?
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void removeEntityListener(EntityListener entityListener) // TODO extends AbstractRepository?
+	{
+		throw new UnsupportedOperationException();
 	}
 }
