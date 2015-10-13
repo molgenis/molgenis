@@ -57,10 +57,11 @@ public class IdCardBiobankIndexerDbSettings extends DefaultSettingsEntity implem
 					.setLabel("Biobank collection filtered resource")
 					.setDefaultValue(DEFAULT_BIOBANK_COLLECTIONS_SELECTION_RESOURCE);
 			addAttribute(BIOBANK_INDEXING_ENABLED).setDataType(BOOL).setLabel("Biobank indexing enabled")
-					.setDefaultValue(Boolean.toString(DEFAULT_BIOBANK_INDEXING_ENABLED));
+					.setDefaultValue(Boolean.toString(DEFAULT_BIOBANK_INDEXING_ENABLED)).setNillable(false);
 			addAttribute(BIOBANK_INDEXING_FREQUENCY).setDataType(STRING).setLabel("Biobank indexing frequency")
 					.setDescription("Cron expression (e.g. 0 4 * * * ?)")
-					.setDefaultValue(DEFAULT_BIOBANK_INDEXING_FREQUENCY);
+					.setDefaultValue(DEFAULT_BIOBANK_INDEXING_FREQUENCY).setNillable(false)
+					.setVisibleExpression("$('" + BIOBANK_INDEXING_ENABLED + "').eq(true).value()");
 		}
 	}
 

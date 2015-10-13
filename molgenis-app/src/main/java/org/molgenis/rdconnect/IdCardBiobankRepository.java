@@ -25,6 +25,7 @@ import org.molgenis.data.elasticsearch.ElasticSearchService;
 import org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -241,16 +242,31 @@ public class IdCardBiobankRepository implements Repository // TODO extends Abstr
 
 	public void rebuildIndex()
 	{
-		LOG.trace("Indexing ID-Card biobanks ...");
-		Iterable<? extends Entity> entities = idCardBiobankService.getIdCardBiobanks(60000l);
-
-		EntityMetaData entityMeta = getEntityMetaData();
-		if (!elasticSearchService.hasMapping(entityMeta))
+		IdCardIndexingEvent idCardIndexingEvent = new IdCardIndexingEvent(dataService);
+		try
 		{
-			elasticSearchService.createMappings(entityMeta);
+			LOG.trace("Indexing ID-Card biobanks ...");
+			Iterable<? extends Entity> entities = idCardBiobankService.getIdCardBiobanks(60000l);
+
+			EntityMetaData entityMeta = getEntityMetaData();
+			if (!elasticSearchService.hasMapping(entityMeta))
+			{
+				elasticSearchService.createMappings(entityMeta);
+			}
+			elasticSearchService.index(entities, entityMeta, IndexingMode.UPDATE);
+			LOG.debug("Indexed ID-Card biobanks");
+
+			idCardIndexingEvent.setStatus(IdCardIndexingEventStatus.SUCCESS);
 		}
-		elasticSearchService.index(entities, entityMeta, IndexingMode.UPDATE);
-		LOG.debug("Indexed ID-Card biobanks");
+		catch (RuntimeException e)
+		{
+			idCardIndexingEvent.setStatus(IdCardIndexingEventStatus.FAILED);
+			idCardIndexingEvent.setMessage(e.getMessage());
+		}
+
+		RunAsSystemProxy.runAsSystem(() -> {
+			dataService.add(IdCardIndexingEvent.ENTITY_NAME, idCardIndexingEvent);
+		});
 	}
 
 	private IdCardBiobank createErrorIdCardBiobank(Object id)

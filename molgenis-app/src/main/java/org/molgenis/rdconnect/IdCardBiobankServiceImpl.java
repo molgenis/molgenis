@@ -128,8 +128,9 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService, Applicati
 		@Override
 		public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException
 		{
-			LOG.info("Executing scheduled rebuild index job");
+			LOG.info("Executing scheduled rebuild index job ...");
 			idCardBiobankRepository.rebuildIndex();
+			LOG.debug("Executed scheduled rebuild index job");
 		}
 	}
 
