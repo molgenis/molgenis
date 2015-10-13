@@ -16,7 +16,8 @@ public class IdCardIndexingEventMetaData extends DefaultEntityMetaData
 	public IdCardIndexingEventMetaData()
 	{
 		super(IdCardIndexingEvent.ENTITY_NAME, IdCardIndexingEvent.class);
-		addAttribute(IdCardIndexingEvent.ID).setIdAttribute(true).setNillable(false).setAuto(true).setLabel("Id");
+		addAttribute(IdCardIndexingEvent.ID).setIdAttribute(true).setNillable(false).setVisible(false).setAuto(true)
+				.setLabel("Id");
 		addAttribute(IdCardIndexingEvent.DATE).setDataType(DATETIME).setNillable(false).setAuto(true).setLabel("Date");
 		addAttribute(IdCardIndexingEvent.STATUS).setDataType(new EnumField())
 				.setEnumOptions(Arrays.stream(IdCardIndexingEventStatus.values()).map(value -> value.toString())

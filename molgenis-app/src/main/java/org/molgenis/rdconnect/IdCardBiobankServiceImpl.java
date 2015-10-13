@@ -2,8 +2,10 @@ package org.molgenis.rdconnect;
 
 import static java.util.Objects.requireNonNull;
 
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.settings.SettingsEntityListener;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
@@ -36,14 +38,16 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService, Applicati
 	private final IdCardBiobankRepository idCardBiobankRepository;
 	private final IdCardBiobankIndexerSettings idCardBiobankIndexerSettings;
 	private final Scheduler scheduler;
+	private final DataService dataService;
 
 	@Autowired
 	public IdCardBiobankServiceImpl(IdCardBiobankRepository idCardBiobankRepository,
-			IdCardBiobankIndexerSettings idCardBiobankIndexerSettings, Scheduler scheduler)
+			IdCardBiobankIndexerSettings idCardBiobankIndexerSettings, Scheduler scheduler, DataService dataService)
 	{
 		this.idCardBiobankRepository = requireNonNull(idCardBiobankRepository);
 		this.idCardBiobankIndexerSettings = requireNonNull(idCardBiobankIndexerSettings);
 		this.scheduler = requireNonNull(scheduler);
+		this.dataService = requireNonNull(dataService);
 	}
 
 	@Override
@@ -56,7 +60,7 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService, Applicati
 			{
 				try
 				{
-					updateIndexerScheduler();
+					updateIndexerScheduler(false);
 				}
 				catch (SchedulerException e)
 				{
@@ -67,7 +71,7 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService, Applicati
 
 		try
 		{
-			updateIndexerScheduler();
+			updateIndexerScheduler(true);
 		}
 		catch (SchedulerException e)
 		{
@@ -75,7 +79,7 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService, Applicati
 		}
 	}
 
-	private void updateIndexerScheduler() throws SchedulerException
+	private void updateIndexerScheduler(boolean initScheduler) throws SchedulerException
 	{
 		JobKey jobKey = new JobKey(ID_CARD_INDEX_REBUILD_JOB_KEY);
 		if (idCardBiobankIndexerSettings.getBiobankIndexingEnabled())
@@ -87,6 +91,17 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService, Applicati
 				LOG.info("Scheduling index rebuild job with cron [{}]", biobankIndexingFrequency);
 				JobDetail job = JobBuilder.newJob(ReindexJob.class).withIdentity(ID_CARD_INDEX_REBUILD_JOB_KEY).build();
 				scheduler.scheduleJob(job, trigger);
+
+				if (!initScheduler)
+				{
+					// write log event to db
+					IdCardIndexingEvent idCardIndexingEvent = new IdCardIndexingEvent(dataService);
+					idCardIndexingEvent.setStatus(IdCardIndexingEventStatus.CONFIGURATION_CHANGE);
+					idCardIndexingEvent.setMessage("Indexing enabled");
+					RunAsSystemProxy.runAsSystem(() -> {
+						dataService.add(IdCardIndexingEvent.ENTITY_NAME, idCardIndexingEvent);
+					});
+				}
 			}
 			else
 			{
@@ -100,6 +115,18 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService, Applicati
 				{
 					LOG.info("Rescheduling index rebuild job with cron [{}]", biobankIndexingFrequency);
 					scheduler.rescheduleJob(triggerKey, trigger);
+
+					if (!initScheduler)
+					{
+						// write log event to db
+						IdCardIndexingEvent idCardIndexingEvent = new IdCardIndexingEvent(dataService);
+						idCardIndexingEvent.setStatus(IdCardIndexingEventStatus.CONFIGURATION_CHANGE);
+						idCardIndexingEvent
+								.setMessage(String.format("Indexing schedule update [%s]", biobankIndexingFrequency));
+						RunAsSystemProxy.runAsSystem(() -> {
+							dataService.add(IdCardIndexingEvent.ENTITY_NAME, idCardIndexingEvent);
+						});
+					}
 				}
 			}
 		}
@@ -109,6 +136,17 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService, Applicati
 			{
 				LOG.info("Deleting index rebuild job");
 				scheduler.deleteJob(jobKey);
+
+				if (!initScheduler)
+				{
+					// write log event to db
+					IdCardIndexingEvent idCardIndexingEvent = new IdCardIndexingEvent(dataService);
+					idCardIndexingEvent.setStatus(IdCardIndexingEventStatus.CONFIGURATION_CHANGE);
+					idCardIndexingEvent.setMessage("Indexing disabled");
+					RunAsSystemProxy.runAsSystem(() -> {
+						dataService.add(IdCardIndexingEvent.ENTITY_NAME, idCardIndexingEvent);
+					});
+				}
 			}
 		}
 	}
