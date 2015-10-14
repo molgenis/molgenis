@@ -63,7 +63,7 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	{
 		Iterable<MolgenisGroupMember> molgenisGroupMembers = dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, getUser(username)), MolgenisGroupMember.class);
-		// N.B. Must collect the results in a list before yielding up the RunAsSystem priorities!
+		// N.B. Must collect the results in a list before yielding up the RunAsSystem privileges!
 		return Lists.newArrayList(Iterables.transform(molgenisGroupMembers, MolgenisGroupMember::getMolgenisGroup));
 	}
 
