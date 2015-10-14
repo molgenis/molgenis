@@ -1,19 +1,30 @@
 package org.molgenis.data.importer;
 
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.elasticsearch.client.Client;
+import org.mockito.Mockito;
+import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Package;
+import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.semanticsearch.config.SemanticSearchConfig;
@@ -21,9 +32,12 @@ import org.molgenis.data.semanticsearch.service.impl.UntypedTagService;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.ontology.ic.TermFrequencyService;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
@@ -35,9 +49,34 @@ import org.testng.annotations.Test;
  */
 @Test
 @ContextConfiguration(classes =
-{ ImportTestConfig.class, SemanticSearchConfig.class })
+{ ImportTestConfig.class, SemanticSearchConfig.class, EmxImportServiceTest.Config.class })
 public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 {
+	@Configuration
+	public static class Config
+	{
+		@Bean
+		public Client client()
+		{
+			return Mockito.mock(Client.class);
+		}
+
+		@Bean
+		public EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory()
+		{
+
+			EmbeddedElasticSearchServiceFactory result = Mockito.mock(EmbeddedElasticSearchServiceFactory.class);
+			Mockito.when(result.getClient()).thenReturn(client());
+			return result;
+		}
+
+		@Bean
+		public TermFrequencyService termFrequencyService()
+		{
+			return Mockito.mock(TermFrequencyService.class);
+		}
+	}
+
 	@Autowired
 	MysqlRepositoryCollection store;
 
@@ -67,7 +106,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testValidationReport() throws IOException, InvalidFormatException, URISyntaxException
+	public void testValidationReport() throws IOException, MolgenisInvalidFormatException, URISyntaxException
 	{
 		// open test source
 		File f = ResourceUtils.getFile(getClass(), "/example_invalid.xlsx");
@@ -113,7 +152,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testImportReport() throws IOException, InvalidFormatException, InterruptedException
+	public void testImportReport() throws IOException, MolgenisInvalidFormatException, InterruptedException
 	{
 		// create test excel
 		File f = ResourceUtils.getFile(getClass(), "/example.xlsx");
@@ -158,7 +197,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testImportReportNoMeta() throws IOException, InvalidFormatException, InterruptedException
+	public void testImportReportNoMeta() throws IOException, MolgenisInvalidFormatException, InterruptedException
 	{
 
 		// create test excel
@@ -180,5 +219,41 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 
 		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_city"), new Integer(4));
 		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_person"), new Integer(4));
+	}
+
+	@Test
+	public void canImportWithAttributes()
+	{
+		File file = Mockito.mock(File.class);
+		when(file.getName()).thenReturn("file.xlsx");
+
+		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataService), new ImportWriter(
+				dataService, permissionSystemService, tagService), dataService);
+
+		RepositoryCollection source = Mockito.mock(RepositoryCollection.class);
+		when(source.getEntityNames()).thenReturn(Arrays.asList("attributes"));
+
+		assertTrue(importer.canImport(file, source));
+	}
+
+	@Test
+	public void canImportWithoutAttributes()
+	{
+		// create test excel
+		File file = Mockito.mock(File.class);
+		when(file.getName()).thenReturn("file.xlsx");
+
+		DataService dataServiceMock = Mockito.mock(DataService.class);
+		MetaDataService metaDataServiceMock = Mockito.mock(MetaDataService.class);
+		when(dataServiceMock.getMeta()).thenReturn(metaDataServiceMock);
+		when(metaDataServiceMock.getEntityMetaData("existingAttribute")).thenReturn(Mockito.mock(EntityMetaData.class));
+
+		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataServiceMock), new ImportWriter(
+				dataServiceMock, permissionSystemService, tagService), dataServiceMock);
+
+		RepositoryCollection source = Mockito.mock(RepositoryCollection.class);
+		when(source.getEntityNames()).thenReturn(Arrays.asList("existingAttribute"));
+
+		assertTrue(importer.canImport(file, source));
 	}
 }

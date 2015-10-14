@@ -46,7 +46,7 @@ import org.molgenis.file.FileStore;
 import org.molgenis.messageconverter.CsvHttpMessageConverter;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.token.TokenService;
+import org.molgenis.security.core.token.TokenService;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.ResourceFingerprintRegistry;
 import org.springframework.beans.factory.annotation.Autowired;

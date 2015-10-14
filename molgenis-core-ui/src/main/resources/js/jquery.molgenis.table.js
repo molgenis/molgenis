@@ -173,7 +173,6 @@
 		
 		// calculate number of header rows 
 		var nrHeaderRows = calculateNrHeaderRows(settings.expandAttributes);
-		console.log(settings.colAttributes, settings.expandAttributes);
 		$.each(settings.colAttributes, function(i, attribute) {
 			if(attribute.visible) {
 				var expandCollapseControl;
@@ -895,6 +894,7 @@
 		function getCreateForm(entityMetaData) {
 			React.render(molgenis.ui.Form({
 				mode: 'create',
+				showHidden: true,
 				entity : entityMetaData.name,
 				modal: true,
 				onSubmitSuccess: function() {
@@ -913,6 +913,7 @@
 				entity : settings.entityMetaData.name,
 				entityInstance: $(this).closest('tr').data('id'),
 				mode: 'edit',
+				showHidden: true,
 				modal: true,
 				onSubmitSuccess : function() {
 					settings.start = 0;

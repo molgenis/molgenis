@@ -33,8 +33,7 @@
             <div class="panel">
                 <div class="panel-heading">
                     <h4 class="panel-title clearfix">
-                        Data item selection
-                        <button type="button" title="Show shoppingcard" class="pull-right btn btn-default btn-sm" id="cart-button"><span class="glyphicon glyphicon-shopping-cart"></span></button>             
+                        Data item selection             
                     </h4>
                 </div>
                 <div class="panel-body">

@@ -12,8 +12,7 @@ import java.io.InputStream;
 import java.util.Iterator;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.util.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -54,11 +53,13 @@ public class VcfRepositoryTest
 			assertTrue(it.hasNext());
 			testAttribute(it.next(), VcfRepository.CHROM, MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfRepository.ALT, MolgenisFieldTypes.STRING);
+			// TEXT to handle large insertions/deletions
+			testAttribute(it.next(), VcfRepository.ALT, MolgenisFieldTypes.TEXT);
 			assertTrue(it.hasNext());
 			testAttribute(it.next(), VcfRepository.POS, MolgenisFieldTypes.LONG);
 			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfRepository.REF, MolgenisFieldTypes.STRING);
+			// TEXT to handle large insertions/deletions
+			testAttribute(it.next(), VcfRepository.REF, MolgenisFieldTypes.TEXT);
 			assertTrue(it.hasNext());
 			testAttribute(it.next(), VcfRepository.FILTER, MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
@@ -139,7 +140,7 @@ public class VcfRepositoryTest
 	}
 
 	@Test
-	public void iterator_noValues() throws IOException, InvalidFormatException
+	public void iterator_noValues() throws IOException
 	{
 		RepositoryCollection collection = new VcfRepositoryCollection(testnodata);
 		VcfRepository vcfRepository = (VcfRepository) collection.getRepository("testnodata");

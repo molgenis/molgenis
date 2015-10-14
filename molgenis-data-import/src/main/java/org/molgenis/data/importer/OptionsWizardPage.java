@@ -12,12 +12,14 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Package;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.validation.EntityNameValidator;
+import org.molgenis.data.meta.MetaValidationUtils;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
+import org.molgenis.util.FileExtensionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,14 +56,8 @@ public class OptionsWizardPage extends AbstractWizardPage
 	@Override
 	public String handleRequest(HttpServletRequest request, BindingResult result, Wizard wizard)
 	{
-		if (!(wizard instanceof ImportWizard))
-		{
-			throw new RuntimeException("Wizard must be of type '" + ImportWizard.class.getSimpleName()
-					+ "' instead of '" + wizard.getClass().getSimpleName() + "'");
-		}
-
+		ImportWizardUtil.validateImportWizard(wizard);
 		ImportWizard importWizard = (ImportWizard) wizard;
-
 		String entityImportOption = request.getParameter("entity_option");
 		importWizard.setEntityImportOption(entityImportOption);
 
@@ -74,10 +70,13 @@ public class OptionsWizardPage extends AbstractWizardPage
 				return null;
 			}
 
-			if (!EntityNameValidator.isValid(userGivenName))
+			try
 			{
-				result.addError(new ObjectError("wizard",
-						"Invalid entity name (only alphanumeric characters are allowed)"));
+				MetaValidationUtils.validateName(userGivenName);
+			}
+			catch (MolgenisDataException e)
+			{
+				ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
 				return null;
 			}
 
@@ -86,20 +85,19 @@ public class OptionsWizardPage extends AbstractWizardPage
 			{
 				String fileName = tmpFile.getName();
 
-				// TODO FIXME wrong way to decide the extension of the file. It will not detect, for example a file with
-				// the obo.zip extension.
-				int index = fileName.lastIndexOf('.');
-				String extension = (index > -1) ? fileName.substring(index) : "";
+				// FIXME: can this be done a bit cleaner?
+				String extension = FileExtensionUtils
+						.findExtensionFromPossibilities(fileName, fileRepositoryCollectionFactory
+								.createFileRepositoryCollection(tmpFile).getFileNameExtensions());
 
-				File file = new File(tmpFile.getParent(), userGivenName + extension);
+				File file = new File(tmpFile.getParent(), userGivenName + "." + extension);
 				FileCopyUtils.copy(tmpFile, file);
 
 				importWizard.setFile(file);
 			}
 			catch (IOException e)
 			{
-				result.addError(new ObjectError("wizard", "Error importing file: " + e.getMessage()));
-				LOG.error("Exception importing file", e);
+				ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
 			}
 			finally
 			{
@@ -113,8 +111,7 @@ public class OptionsWizardPage extends AbstractWizardPage
 		}
 		catch (Exception e)
 		{
-			result.addError(new ObjectError("wizard", "Error validating import file: " + e.getMessage()));
-			LOG.error("Exception validating import file", e);
+			ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
 		}
 
 		return null;

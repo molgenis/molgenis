@@ -7,12 +7,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.molgenis.data.MolgenisInvalidFormatException;
 
 public class ConvertGidsMain
 {
 
-	public static void main(String[] args) throws IOException, InvalidFormatException
+	public static void main(String[] args) throws IOException, MolgenisInvalidFormatException
 	{
 
 		if (args.length != 3)

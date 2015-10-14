@@ -3,6 +3,9 @@ package org.molgenis.data.mapper.repository.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -76,6 +79,23 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 
 	}
 
+	@Override
+	public List<AttributeMetaData> retrieveAttributeMetaDatasFromAlgorithm(String algorithm,
+			EntityMetaData sourceEntityMetaData)
+	{
+		List<AttributeMetaData> sourceAttributeMetaDatas = new ArrayList<AttributeMetaData>();
+
+		Pattern pattern = Pattern.compile("\\$\\('([^']+)'\\)");
+		Matcher matcher = pattern.matcher(algorithm);
+
+		while (matcher.find())
+		{
+			sourceAttributeMetaDatas.add(sourceEntityMetaData.getAttribute(matcher.group(1)));
+		}
+
+		return sourceAttributeMetaDatas;
+	}
+
 	private AttributeMapping toAttributeMapping(Entity attributeMappingEntity, EntityMetaData sourceEntityMetaData,
 			EntityMetaData targetEntityMetaData)
 	{
@@ -83,8 +103,12 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 		String targetAtributeName = attributeMappingEntity.getString(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA);
 		AttributeMetaData targetAttributeMetaData = targetEntityMetaData.getAttribute(targetAtributeName);
 		String algorithm = attributeMappingEntity.getString(AttributeMappingMetaData.ALGORITHM);
+		String algorithmState = attributeMappingEntity.getString(AttributeMappingMetaData.ALGORITHMSTATE);
+		List<AttributeMetaData> sourceAttributeMetaDatas = retrieveAttributeMetaDatasFromAlgorithm(algorithm,
+				sourceEntityMetaData);
 
-		return new AttributeMapping(identifier, targetAttributeMetaData, algorithm);
+		return new AttributeMapping(identifier, targetAttributeMetaData, algorithm, sourceAttributeMetaDatas,
+				algorithmState);
 	}
 
 	private Entity toAttributeMappingEntity(AttributeMapping attributeMapping)
@@ -94,6 +118,10 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 		attributeMappingEntity.set(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA, attributeMapping
 				.getTargetAttributeMetaData() != null ? attributeMapping.getTargetAttributeMetaData().getName() : null);
 		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHM, attributeMapping.getAlgorithm());
+		attributeMappingEntity.set(AttributeMappingMetaData.SOURCEATTRIBUTEMETADATAS, attributeMapping
+				.getSourceAttributeMetaDatas().stream().map(AttributeMetaData::getName).collect(Collectors.toList()));
+		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHMSTATE, attributeMapping.getAlgorithmState());
 		return attributeMappingEntity;
 	}
+
 }

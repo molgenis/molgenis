@@ -18,6 +18,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataConverter;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisQueryException;
 import org.molgenis.data.Query;
@@ -25,6 +26,7 @@ import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.util.MolgenisDateFormat;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -89,7 +91,7 @@ public class QueryGeneratorReferencesTest
 		refEntityMetaData.addAttribute(refDateTimeAttributeName).setDataType(MolgenisFieldTypes.DATETIME);
 		refEntityMetaData.addAttribute(refDecimalAttributeName).setDataType(MolgenisFieldTypes.DECIMAL);
 		refEntityMetaData.addAttribute(refEmailAttributeName).setDataType(MolgenisFieldTypes.EMAIL);
-		refEntityMetaData.addAttribute(refEnumAttributeName).setDataType(MolgenisFieldTypes.ENUM)
+		refEntityMetaData.addAttribute(refEnumAttributeName).setDataType(new EnumField())
 				.setEnumOptions(Arrays.asList("enum0", "enum1", "enum2"));
 		refEntityMetaData.addAttribute(refHtmlAttributeName).setDataType(MolgenisFieldTypes.HTML);
 		refEntityMetaData.addAttribute(refHyperlinkAttributeName).setDataType(MolgenisFieldTypes.HYPERLINK);
@@ -115,14 +117,14 @@ public class QueryGeneratorReferencesTest
 	@Test
 	public void generateOneQueryRuleGreaterDate() throws ParseException
 	{
-		Date value = MolgenisDateFormat.getDateFormat().parse("2015-05-22");
+		String date = "2015-05-22";
+		Date value = MolgenisDateFormat.getDateFormat().parse(date);
 		Query q = new QueryImpl().gt(PREFIX + refDateAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.nestedFilter(REF_ENTITY_ATT,
-						FilterBuilders.rangeFilter(PREFIX + refDateAttributeName).gt(value.toString())));
+				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.rangeFilter(PREFIX + refDateAttributeName).gt(date)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -134,10 +136,12 @@ public class QueryGeneratorReferencesTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(
-				QueryBuilders.matchAllQuery(),
-				FilterBuilders.nestedFilter(REF_ENTITY_ATT,
-						FilterBuilders.rangeFilter(PREFIX + refDateTimeAttributeName).gt(value.toString())));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders
+						.nestedFilter(
+								REF_ENTITY_ATT,
+								FilterBuilders.rangeFilter(PREFIX + refDateTimeAttributeName).gt(
+										DataConverter.toString(value))));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -183,14 +187,14 @@ public class QueryGeneratorReferencesTest
 	@Test
 	public void generateOneQueryRuleGreaterEqualDate() throws ParseException
 	{
-		Date value = MolgenisDateFormat.getDateFormat().parse("2015-05-22");
+		String date = "2015-05-22";
+		Date value = MolgenisDateFormat.getDateFormat().parse(date);
 		Query q = new QueryImpl().ge(PREFIX + refDateAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.nestedFilter(REF_ENTITY_ATT,
-						FilterBuilders.rangeFilter(PREFIX + refDateAttributeName).gte(value.toString())));
+				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.rangeFilter(PREFIX + refDateAttributeName).gte(date)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 

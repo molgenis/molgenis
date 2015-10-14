@@ -43,6 +43,7 @@ import org.molgenis.app.promise.MappingReport.Status;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.UuidGenerator;
 import org.slf4j.Logger;
@@ -87,15 +88,18 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 		promiseMapperFactory.registerMapper(ID, this);
 	}
 
-	public MappingReport map(String biobankId) throws IOException
+	public MappingReport map(String projectName) throws IOException
 	{
-		LOG.info("Downloading data for " + biobankId);
+		Entity project = dataService.findOne(PromiseMappingProjectMetaData.ENTITY_NAME, projectName);
+		if (project == null) throw new MolgenisDataException("Project is null");
+		
+		LOG.info("Downloading data for " + projectName);
 		MappingReport report = new MappingReport();
 		
 		try{
 	
-			Iterable<Entity> promiseBiobankEntities = promiseDataParser.parse(biobankId, 0);
-			Iterable<Entity> promiseSampleEntities = promiseDataParser.parse(biobankId, 1);
+			Iterable<Entity> promiseBiobankEntities = promiseDataParser.parse(project, 0);
+			Iterable<Entity> promiseSampleEntities = promiseDataParser.parse(project, 1);
 	
 			EntityMetaData targetEntityMetaData = dataService.getEntityMetaData(SAMPLE_COLLECTIONS_ENTITY);
 	
@@ -105,7 +109,7 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 						promiseSampleEntities);
 	
 				MapEntity targetEntity = new MapEntity(targetEntityMetaData);
-				targetEntity.set(BbmriNlCheatSheet.ID, "promise_" + promiseBiobankEntity.getString("DEELBIOBANK"));
+				targetEntity.set(BbmriNlCheatSheet.ID, project.getString("biobank_id"));
 				targetEntity.set(NAME, promiseBiobankEntity.getString("TITEL"));
 				// targetEntity.set(ACRONYM, null); //TODO Vaste mapping op basis van ID
 				targetEntity.set(TYPE, toTypes(promiseBiobankEntity.getString("TYPEBIOBANK")));

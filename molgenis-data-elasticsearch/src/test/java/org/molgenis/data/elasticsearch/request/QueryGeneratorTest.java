@@ -18,6 +18,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisQueryException;
@@ -27,6 +28,7 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.util.MolgenisDateFormat;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -90,7 +92,7 @@ public class QueryGeneratorTest
 		entityMetaData.addAttribute(dateTimeAttributeName).setDataType(MolgenisFieldTypes.DATETIME);
 		entityMetaData.addAttribute(decimalAttributeName).setDataType(MolgenisFieldTypes.DECIMAL);
 		entityMetaData.addAttribute(emailAttributeName).setDataType(MolgenisFieldTypes.EMAIL);
-		entityMetaData.addAttribute(enumAttributeName).setDataType(MolgenisFieldTypes.ENUM)
+		entityMetaData.addAttribute(enumAttributeName).setDataType(new EnumField())
 				.setEnumOptions(Arrays.asList("enum0", "enum1", "enum2"));
 		entityMetaData.addAttribute(htmlAttributeName).setDataType(MolgenisFieldTypes.HTML);
 		entityMetaData.addAttribute(hyperlinkAttributeName).setDataType(MolgenisFieldTypes.HYPERLINK);
@@ -123,26 +125,27 @@ public class QueryGeneratorTest
 	@Test
 	public void generateOneQueryRuleGreaterDate() throws ParseException
 	{
-		Date value = MolgenisDateFormat.getDateFormat().parse("2015-01-22");
+		String date = "2015-01-22";
+		Date value = MolgenisDateFormat.getDateFormat().parse(date);
 		Query q = new QueryImpl().gt(dateAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(dateAttributeName).gt(value.toString()));
+				.rangeFilter(dateAttributeName).gt(date));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
 	@Test
 	public void generateOneQueryRuleGreaterDateTime() throws ParseException
 	{
-		Date value = MolgenisDateFormat.getDateFormat().parse("2015-05-22T11:12:13+0500");
+		Date value = MolgenisDateFormat.getDateTimeFormat().parse("2015-05-22T11:12:13+0500");
 		Query q = new QueryImpl().gt(dateTimeAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(dateTimeAttributeName).gt(value.toString()));
+				.rangeFilter(dateTimeAttributeName).gt(DataConverter.toString(value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -201,26 +204,27 @@ public class QueryGeneratorTest
 	@Test
 	public void generateOneQueryRuleGreaterEqualDate() throws ParseException
 	{
-		Date value = MolgenisDateFormat.getDateFormat().parse("2015-05-22");
+		String date = "2015-05-22";
+		Date value = MolgenisDateFormat.getDateFormat().parse(date);
 		Query q = new QueryImpl().ge(dateAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(dateAttributeName).gte(value.toString()));
+				.rangeFilter(dateAttributeName).gte(date));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
 	@Test
 	public void generateOneQueryRuleGreaterEqualDateTime() throws ParseException
 	{
-		Date value = MolgenisDateFormat.getDateFormat().parse("2015-05-22T11:12:13+0500");
+		Date value = MolgenisDateFormat.getDateTimeFormat().parse("2015-05-22T11:12:13+0500");
 		Query q = new QueryImpl().ge(dateTimeAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(dateTimeAttributeName).gte(value.toString()));
+				.rangeFilter(dateTimeAttributeName).gte(DataConverter.toString(value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -279,26 +283,27 @@ public class QueryGeneratorTest
 	@Test
 	public void generateOneQueryRuleLesserEqualDate() throws ParseException
 	{
-		Date value = MolgenisDateFormat.getDateFormat().parse("2015-05-22");
+		String date = "2015-05-22";
+		Date value = MolgenisDateFormat.getDateFormat().parse(date);
 		Query q = new QueryImpl().le(dateAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(dateAttributeName).lte(value.toString()));
+				.rangeFilter(dateAttributeName).lte(date));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
 	@Test
 	public void generateOneQueryRuleLesserEqualDateTime() throws ParseException
 	{
-		Date value = MolgenisDateFormat.getDateFormat().parse("2015-05-22T11:12:13+0500");
+		Date value = MolgenisDateFormat.getDateTimeFormat().parse("2015-05-22T11:12:13+0500");
 		Query q = new QueryImpl().le(dateTimeAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(dateTimeAttributeName).lte(value.toString()));
+				.rangeFilter(dateTimeAttributeName).lte(DataConverter.toString(value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -692,26 +697,27 @@ public class QueryGeneratorTest
 	@Test
 	public void generateOneQueryRuleLesserDate() throws ParseException
 	{
-		Date value = MolgenisDateFormat.getDateFormat().parse("2015-05-22");
+		String date = "2015-05-22";
+		Date value = MolgenisDateFormat.getDateFormat().parse(date);
 		Query q = new QueryImpl().lt(dateAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(dateAttributeName).lt(value.toString()));
+				.rangeFilter(dateAttributeName).lt(date));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
 	@Test
 	public void generateOneQueryRuleLesserDateTime() throws ParseException
 	{
-		Date value = MolgenisDateFormat.getDateFormat().parse("2015-05-22T11:12:13+0500");
+		Date value = MolgenisDateFormat.getDateTimeFormat().parse("2015-05-22T11:12:13+0500");
 		Query q = new QueryImpl().lt(dateTimeAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(dateTimeAttributeName).lt(value.toString()));
+				.rangeFilter(dateTimeAttributeName).lt(DataConverter.toString(value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1438,6 +1444,18 @@ public class QueryGeneratorTest
 
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
 				.rangeFilter(longAttributeName).gte(3).lte(9));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test
+	public void generateOneQueryRuleSearchAllFields()
+	{
+		String value = "my text";
+		Query q = new QueryImpl().search(value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.matchPhraseQuery("_all", value).slop(10);
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 

@@ -6,6 +6,14 @@
 	$.fn.modal.Constructor.prototype.enforceFocus = function() {
 	};
 
+	molgenis.setCookieWall = function(cookieWall) {
+		molgenis.cookieWall = cookieWall;
+	};
+
+	molgenis.getCookieWall = function() {
+		return molgenis.cookieWall;
+	};
+	
 	molgenis.setContextUrl = function(contextUrl) {
 		molgenis.contextUrl = contextUrl;
 	};
@@ -14,8 +22,31 @@
 		return molgenis.contextUrl;
 	};
 
+	molgenis.setPluginId = function(pluginId) {
+		molgenis.pluginId = pluginId;
+	};
+
+	molgenis.getPluginId = function() {
+		return molgenis.pluginId;
+	};
+	
+	/**
+	 * Returns the plugin settings entity id
+	 */
+	molgenis.getPluginSettingsId = function() {
+		return 'settings_' +  molgenis.getPluginId();
+	};
+	
+	/**
+	 * Returns a promise with plugin settings
+	 */
+	molgenis.getPluginSettings = function() {
+		var api = new molgenis.RestClientV2();
+		return api.get('/api/v2/' + molgenis.getPluginSettingsId() + '/' + molgenis.getPluginId());
+	};
+	
 	molgenis.createAlert = function(alerts, type, container) {
-		if (type !== 'error' && type !== 'warning' && type !== 'success')
+		if (type !== 'error' && type !== 'warning' && type !== 'success' && type !== 'info')
 			type = 'error';
 		if (container === undefined) {
 			container = $('.alerts');
@@ -226,6 +257,7 @@
 			case 'CATEGORICAL_MREF':
 			case 'MREF':
 			case 'XREF':
+			case 'FILE':
 				return true;
 			default:
 				return false;
@@ -658,9 +690,9 @@ function createInput(attr, attrs, val, lbl) {
 	
 	var toRsqlValue = function(value) {
 		var rsqlValue;
-		if (value.indexOf('"') !== -1 || value.indexOf('\'') !== -1 || value.indexOf('(') !== -1 || value.indexOf(')') !== -1 || value.indexOf(';') !== -1
+		if (_.isString(value)===false || (value.indexOf('"') !== -1 || value.indexOf('\'') !== -1 || value.indexOf('(') !== -1 || value.indexOf(')') !== -1 || value.indexOf(';') !== -1
 				|| value.indexOf(',') !== -1 || value.indexOf('=') !== -1 || value.indexOf('!') !== -1 || value.indexOf('~') !== -1 || value.indexOf('<') !== -1
-				|| value.indexOf('>') !== -1) {
+				|| value.indexOf('>') !== -1 || value.indexOf(' ') !== -1)) {
 			rsqlValue = '"' + encodeURIComponent(value) + '"';
 		} else {
 			rsqlValue = encodeURIComponent(value);
@@ -750,6 +782,9 @@ function createInput(attr, attrs, val, lbl) {
 		return rsql;
 	};
 	
+	// export
+	molgenis.createRsqlQuery = createRsqlQuery;
+	
 	var createSortValue = function(sort) {
 		var qs = _.map(sort.orders, function(order) {
 			return encodeURIComponent(order.attr) + (order.direction === 'desc' ? ':desc' : '');
@@ -822,6 +857,7 @@ function createInput(attr, attrs, val, lbl) {
 
 function showSpinner(callback) {
 	var spinner = $('#spinner');
+	var login = $('#login-modal');
 	
 	if (spinner.length === 0) {
 		// do not add fade effect on modal: http://stackoverflow.com/a/22101894
@@ -858,6 +894,10 @@ function showSpinner(callback) {
 		$('#spinner').data('count', 1);
 	} else {
 		$('#spinner').data('count', count + 1);
+	}
+	
+	if (login.length > 0) {
+		hideSpinner();
 	}
 }
 
@@ -1001,6 +1041,22 @@ $(function() {
 		$(this).find('input:visible:first').focus();
 	});
 	
+	// focus first input on modal display
+	$(document).on('click', '.plugin-settings-btn', function() {
+		React.unmountComponentAtNode($('#plugin-settings-container')[0]); // fix https://github.com/molgenis/molgenis/issues/3587
+		React.render(molgenis.ui.Form({
+			entity: molgenis.getPluginSettingsId(),
+			entityInstance: molgenis.getPluginId(),
+			mode: 'edit',
+			modal: true,
+			enableOptionalFilter: false,
+			enableFormIndex: false,
+			onSubmitSuccess: function() {
+				location.reload();
+			}
+		}), $('#plugin-settings-container')[0]);
+	});
+	
 	/**
 	 * Add download functionality to JQuery. data can be string of parameters or
 	 * array/object
@@ -1058,7 +1114,34 @@ $(function() {
 		$(this).closest('div.date').find('input').val('');
 		$(this).trigger('changeDate');
 	});
+	
+	if(molgenis.getCookieWall()) {
+		// show cookie wall
+		var cookieValue = $.cookie("permissionforcookies");
+		
+		if(undefined === cookieValue){
+			$('.navbar.navbar-default.navbar-fixed-top').prepend(
+					$('<div id="accept-cookies-container" class="container-fluid">' +
+							'<div class="jumbotron">' +
+								'<p class="text-center">' + window.location.hostname + ' uses third-party analytical cookies to analyze the use of the site and improve usability. By clicking on the accept button, or by continuing to use this website, you consent to the placing of cookies.</p>' +
+								'<p class="text-center"><a id="accept-cookies" class="btn btn-primary btn-lg" href="#" role="button">Accept cookies</a></p>' + 
+							'</div>' + 
+						'</div>'
+						));
+		
+			$('body').css({'margin-top': $('#accept-cookies-container').height()});
+			
+			$('#accept-cookies').on('click', function(){
+				$.cookie("permissionforcookies", "true", {expires:365, path:'/', secure:false});
+				$('#accept-cookies-container').fadeOut(1000);
+				
+				// Reset body margin-top default value
+				setTimeout(function(){$('body').css({'margin-top': 0});}, 1000);
+			});
+		}
+	}
 });
+
 //jQuery Deparam - v0.1.0 - 6/14/2011
 //http://benalman.com/
 //Copyright (c) 2011 Ben Alman; Licensed MIT, GPL

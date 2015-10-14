@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IdGenerator;
@@ -287,19 +286,19 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	@Override
 	public String getName()
 	{
-		throw new NotImplementedException("Not implemented");
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Repository addEntityMeta(EntityMetaData entityMeta)
 	{
-		throw new NotImplementedException("Not implemented");
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Iterator<Repository> iterator()
 	{
-		throw new NotImplementedException("Not implemented");
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

@@ -1,16 +1,14 @@
 package org.molgenis.data.annotation.utils;
 
+import java.util.List;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 
-import java.util.Iterator;
-import java.util.Map;
+import autovalue.shaded.com.google.common.common.collect.Iterables;
 
 /**
  * Created by charbonb on 11/03/15.
@@ -24,34 +22,39 @@ public class AnnotatorUtils
 				MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
 		compoundAttributeMetaData.setLabel(annotator.getSimpleName());
 
-		Iterator<AttributeMetaData> attributeMetaDataIterator = annotator.getOutputMetaData().getAtomicAttributes()
-				.iterator();
+		List<AttributeMetaData> outputAttrs = annotator.getOutputMetaData();
 
-		while (attributeMetaDataIterator.hasNext())
+		if (outputAttrs.size() == 1
+				&& Iterables.get(outputAttrs, 0).getDataType().getEnumType()
+						.equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
 		{
-			AttributeMetaData currentAmd = attributeMetaDataIterator.next();
-			String currentAttributeName = currentAmd.getName();
-			if (entityMetaData.getAttribute(currentAttributeName) == null)
+			compoundAttributeMetaData = (DefaultAttributeMetaData) outputAttrs.get(0);
+		}
+		else
+		{
+			for (AttributeMetaData currentAmd : outputAttrs)
 			{
-				compoundAttributeMetaData.addAttributePart(currentAmd);
+				String currentAttributeName = currentAmd.getName();
+				if (entityMetaData.getAttribute(currentAttributeName) == null)
+				{
+					compoundAttributeMetaData.addAttributePart(currentAmd);
+				}
 			}
 		}
-
 		return compoundAttributeMetaData;
 	}
 
-	public static Entity getAnnotatedEntity(RepositoryAnnotator annotator, Entity entity, Map<String, Object> resultMap)
+	public static String getAnnotatorResourceDir()
 	{
-		DefaultEntityMetaData resultEntityMetadata = new DefaultEntityMetaData(entity.getEntityMetaData());
-		resultEntityMetadata.addAttributeMetaData(AnnotatorUtils.getCompoundResultAttribute(annotator,
-				entity.getEntityMetaData()));
+		// Annotators include files/tools
+		String molgenisHomeDir = System.getProperty("molgenis.home");
 
-		MapEntity resultEntity = new MapEntity(entity, resultEntityMetadata);
-		for (AttributeMetaData attributeMetaData : annotator.getOutputMetaData().getAtomicAttributes())
+		if (molgenisHomeDir == null)
 		{
-			resultEntity.set(attributeMetaData.getName(), resultMap.get(attributeMetaData.getName()));
+			throw new IllegalArgumentException("missing required java system property 'molgenis.home'");
 		}
 
-		return resultEntity;
+		if (!molgenisHomeDir.endsWith("/")) molgenisHomeDir = molgenisHomeDir + '/';
+		return molgenisHomeDir + "data/annotation_resources";
 	}
 }

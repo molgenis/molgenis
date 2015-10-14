@@ -1,7 +1,6 @@
 package org.molgenis.data.mapper.service.impl;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.DATE;
@@ -16,26 +15,44 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map;
+import java.util.stream.Stream;
 
+import org.mockito.Matchers;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.service.AlgorithmService;
+import org.molgenis.data.mapper.service.UnitResolver;
+import org.molgenis.data.semantic.Relation;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
+import org.molgenis.data.semanticsearch.repository.TagRepository;
+import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.ontology.core.model.Ontology;
+import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.service.OntologyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Sets;
 
 @ContextConfiguration(classes = AlgorithmServiceImplTest.Config.class)
 public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
@@ -47,7 +64,23 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	private DataService dataService;
 
 	@Autowired
+	private OntologyTagService ontologyTagService;
+
+	@Autowired
 	private SemanticSearchService semanticSearchService;
+
+	@Autowired
+	private AlgorithmTemplateService algorithmTemplateService;
+
+	@Autowired
+	private OntologyService ontologyService;
+
+	@BeforeMethod
+	public void setUpBeforeMethod()
+	{
+		when(algorithmTemplateService.find(Matchers.<Map<AttributeMetaData, ExplainedAttributeMetaData>> any()))
+				.thenReturn(Stream.empty());
+	}
 
 	@Test
 	public void testGetSourceAttributeNames()
@@ -242,13 +275,23 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityMetaData);
 
-		Iterable<AttributeMetaData> mappings = Arrays.asList(sourceAttribute);
-		when(semanticSearchService.findAttributes(sourceEntityMetaData, targetEntityMetaData, targetAttribute))
-				.thenReturn(mappings);
+		Map<AttributeMetaData, ExplainedAttributeMetaData> matches = ImmutableMap.of(
+				sourceAttribute,
+				ExplainedAttributeMetaData.create(sourceAttribute,
+						Arrays.asList(ExplainedQueryString.create("height", "height", "height", 100)), true));
+
+		LinkedHashMultimap<Relation, OntologyTerm> ontologyTermTags = LinkedHashMultimap.create();
+
+		when(
+				semanticSearchService.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute,
+						ontologyTermTags.values(), null)).thenReturn(matches);
+
+		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute))
+				.thenReturn(ontologyTermTags);
 
 		algorithmService.autoGenerateAlgorithm(sourceEntityMetaData, targetEntityMetaData, mapping, targetAttribute);
 
-		assertEquals(mapping.getAttributeMapping("targetHeight").getAlgorithm(), "$('sourceHeight').value()");
+		assertEquals(mapping.getAttributeMapping("targetHeight").getAlgorithm(), "$('sourceHeight').value();");
 	}
 
 	@Test
@@ -278,8 +321,12 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityMetaData);
 
-		when(semanticSearchService.findAttributes(sourceEntityMetaData, targetEntityMetaData, targetAttribute))
-				.thenReturn(emptyList());
+		when(
+				semanticSearchService.findAttributes(sourceEntityMetaData, Sets.newHashSet("targetHeight", "height"),
+						Collections.emptyList())).thenReturn(emptyMap());
+
+		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute)).thenReturn(
+				LinkedHashMultimap.create());
 
 		algorithmService.autoGenerateAlgorithm(sourceEntityMetaData, targetEntityMetaData, mapping, targetAttribute);
 
@@ -287,7 +334,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testWhenSourceHasMultipleMatchesThenNoMappingGetsCreated()
+	public void testWhenSourceHasMultipleMatchesThenFirstMappingGetsCreated()
 	{
 		DefaultEntityMetaData targetEntityMetaData = new DefaultEntityMetaData("target");
 		DefaultAttributeMetaData targetAttribute = new DefaultAttributeMetaData("targetHeight");
@@ -298,7 +345,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		DefaultAttributeMetaData sourceAttribute1 = new DefaultAttributeMetaData("sourceHeight1");
 		sourceAttribute1.setDescription("height");
 		DefaultAttributeMetaData sourceAttribute2 = new DefaultAttributeMetaData("sourceHeight2");
-		sourceAttribute1.setDescription("height");
+		sourceAttribute2.setDescription("height");
 
 		sourceEntityMetaData.addAllAttributeMetaData(Arrays.asList(sourceAttribute1, sourceAttribute2));
 
@@ -316,13 +363,51 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityMetaData);
 
-		Iterable<AttributeMetaData> mappings = asList(sourceAttribute1, sourceAttribute2);
-		when(semanticSearchService.findAttributes(sourceEntityMetaData, targetEntityMetaData, targetAttribute))
-				.thenReturn(mappings);
+		Map<AttributeMetaData, ExplainedAttributeMetaData> mappings = ImmutableMap
+				.<AttributeMetaData, ExplainedAttributeMetaData> of(sourceAttribute1,
+						ExplainedAttributeMetaData.create(sourceAttribute1), sourceAttribute2,
+						ExplainedAttributeMetaData.create(sourceAttribute2));
+
+		LinkedHashMultimap<Relation, OntologyTerm> ontologyTermTags = LinkedHashMultimap
+				.<Relation, OntologyTerm> create();
+
+		when(
+				semanticSearchService.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute,
+						ontologyTermTags.values(), null)).thenReturn(mappings);
+
+		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute))
+				.thenReturn(ontologyTermTags);
 
 		algorithmService.autoGenerateAlgorithm(sourceEntityMetaData, targetEntityMetaData, mapping, targetAttribute);
 
-		Assert.assertNull(mapping.getAttributeMapping("targetHeight"));
+		Assert.assertEquals(mapping.getAttributeMapping("targetHeight").getSourceAttributeMetaDatas().get(0),
+				sourceAttribute1);
+	}
+
+	@Test
+	public void testConvertUnitsAlgorithm()
+	{
+		AlgorithmServiceImpl algorithmServiceImpl = (AlgorithmServiceImpl) algorithmService;
+
+		DefaultEntityMetaData targetEntityMetaData = new DefaultEntityMetaData("target");
+		DefaultAttributeMetaData targetAttribute = new DefaultAttributeMetaData("targetHeight");
+		targetAttribute.setLabel("height in m");
+		targetEntityMetaData.addAttributeMetaData(targetAttribute);
+
+		DefaultEntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("source");
+		DefaultAttributeMetaData sourceAttribute = new DefaultAttributeMetaData("sourceHeight");
+		sourceAttribute.setLabel("body length in cm");
+		sourceEntityMetaData.addAttributeMetaData(sourceAttribute);
+
+		when(ontologyService.getOntology("http://purl.obolibrary.org/obo/uo.owl")).thenReturn(
+				Ontology.create("1", "http://purl.obolibrary.org/obo/uo.owl", "unit ontology"));
+
+		String actualAlgorithm = algorithmServiceImpl.generateUnitConversionAlgorithm(targetAttribute,
+				targetEntityMetaData, sourceAttribute, sourceEntityMetaData);
+
+		String expectedAlgorithm = "$('sourceHeight').unit('cm').toUnit('m').value();";
+
+		Assert.assertEquals(actualAlgorithm, expectedAlgorithm);
 	}
 
 	@Configuration
@@ -341,9 +426,47 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
+		public UnitResolver unitResolver()
+		{
+			return new UnitResolverImpl(ontologyService());
+		}
+
+		@Bean
 		public AlgorithmService algorithmService()
 		{
-			return new AlgorithmServiceImpl();
+			return new AlgorithmServiceImpl(dataService(), ontologyTagService(), semanticSearchService(),
+					unitResolver(), algorithmTemplateService());
+		}
+
+		@Bean
+		public AlgorithmTemplateService algorithmTemplateService()
+		{
+			return mock(AlgorithmTemplateServiceImpl.class);
+		}
+
+		@Bean
+		public OntologyService ontologyService()
+		{
+			return mock(OntologyService.class);
+		}
+
+		@Bean
+		public TagRepository tagRepository()
+		{
+			return mock(TagRepository.class);
+		}
+
+		@Bean
+		IdGenerator idGenerator()
+		{
+			IdGenerator idGenerator = mock(IdGenerator.class);
+			return idGenerator;
+		}
+
+		@Bean
+		public OntologyTagService ontologyTagService()
+		{
+			return mock(OntologyTagService.class);
 		}
 	}
 }

@@ -1,11 +1,11 @@
 /* global _: false, React: false, molgenis: true */
 (function(_, React, molgenis) {
 	"use strict";
-	
-	var div = React.DOM.div, table = React.DOM.table, thead = React.DOM.thead, tbody = React.DOM.tbody, tr = React.DOM.tr, th = React.DOM.th, td = React.DOM.td, a = React.DOM.a, span = React.DOM.span, em = React.DOM.em;
-	
+
+	var div = React.DOM.div, table = React.DOM.table, thead = React.DOM.thead, tbody = React.DOM.tbody, tr = React.DOM.tr, th = React.DOM.th, td = React.DOM.td, a = React.DOM.a, span = React.DOM.span, em = React.DOM.em, br = React.DOM.br, label = React.DOM.label;
+
 	var api = new molgenis.RestClientV2();
-	
+
 	/**
 	 * @memberOf component.mixin
 	 */
@@ -15,9 +15,13 @@
 		},
 		_isExpandedAttr: function(attr, selectedAttrs) {
 			return selectedAttrs[attr.name] !== null && selectedAttrs[attr.name] !== undefined;
+		},
+		_canExpandAttr: function(attr, path) {
+			// expanding mrefs in expanded attr not supported
+			return molgenis.isRefAttr(attr) && !(molgenis.isMrefAttr(attr) && _.size(path) > 0);
 		}
 	};
-	
+
 	/**
 	 * @memberOf component
 	 */
@@ -33,6 +37,7 @@
 			onRowEdit: React.PropTypes.func,
 			onRowDelete: React.PropTypes.func,
 			onRowInspect: React.PropTypes.func,
+			onRowClick : React.PropTypes.func,
 			enableAdd: React.PropTypes.bool,
 			enableEdit: React.PropTypes.bool,
 			enableDelete: React.PropTypes.bool,
@@ -44,7 +49,8 @@
 				data: null,
 				attrs: this.props.attrs,
 				sort: null,
-				start: 0
+				start: 0,
+				maxRows: this.props.maxRows
 			};
 		},
 		getDefaultProps: function() {
@@ -59,24 +65,28 @@
 				enableEdit: true,
 				enableDelete: true,
 				enableInspect: true,
-				onSort: function() {}
+				onRowClick : null,
+				onSort : function() {}
 			};
 		},
 		componentDidMount: function() {
-			this._refreshData(this.props);
+			this._refreshData(this.props, this.state);
 		},
 		componentWillReceiveProps : function(nextProps) {
-			this.setState({attrs: nextProps.attrs}, function() {
-				this._refreshData(nextProps);	
-			});
+			// reset pager on query change
+			var nextState = _.extend({}, this.state, {attrs: nextProps.attrs});
+			if(JSON.stringify(this.props.query) !== JSON.stringify(nextProps.query)) {
+				_.extend(nextState, {start: 0});
+			}
+			this._refreshData(nextProps, nextState);
 		},
 		render: function() {
 			if(this.state.data === null) {
 				return molgenis.ui.Spinner(); // entity not available yet
 			}
-			
+
 			var writable = this.state.data.meta.writable;
-			
+
 			var TableHeader = TableHeaderFactory({
 				entity: this.state.data.meta,
 				attrs : this.state.attrs,
@@ -99,11 +109,15 @@
 				enableInspect: this.props.enableInspect === true && this.props.onRowInspect !== null,
 				onEdit: this._handleEdit,
 				onDelete: this._handleDelete,
-				onRowInspect: this.props.onRowInspect
+				onRowInspect: this.props.onRowInspect,
+				onRowClick : this.props.onRowClick
 			});
-			
+
 			var className = 'table table-striped table-condensed table-bordered molgenis-table';
-			
+
+			if (this.props.onRowClick !== null)
+            				className = className + " table-hover";
+
 			return (
 				div(null,
 					div({className: 'molgenis-table-container'},
@@ -113,11 +127,27 @@
 						)
 					),
 					div({className: 'row'},
-						div({className: 'col-md-offset-3 col-md-6'},
+						div({className: 'col-md-3 form-inline'},
+								div({
+									'className' : 'form-group'
+								}, 
+									label(null, "Rows per page: " + String.fromCharCode(160)),
+									molgenis.ui.SelectBox({
+										options: [
+											{value: 20, text: 20},
+											{value: 30, text: 30},
+											{value: 50, text: 50},
+											{value: 100, text: 100}
+										],
+										onChange: this._handleRowsPerPageChange
+									})
+								)
+						),
+						div({className: 'col-md-6'},
 							div({className: 'text-center'},
 								molgenis.ui.Pager({
 									nrItems: this.state.data.total,
-									nrItemsPerPage: this.props.maxRows,
+									nrItemsPerPage: this.state.maxRows,
 									start: this.state.data.start,
 									onPageChange: this._handlePageChange
 								})
@@ -130,38 +160,39 @@
 				)
 			);
 		},
-		_refreshData: function(props) {
+		_refreshData: function(props, state) {
 			var opts = {
 				attrs: {'~id' : null}, // always include the id attribute
-				num : props.maxRows
+				num : state.maxRows
 			};
-			
+
 			// add selected attrs
-			if(this.state.attrs && _.size(this.state.attrs) > 0) {
-				_.extend(opts.attrs, this.state.attrs);
+			if(state.attrs && _.size(state.attrs) > 0) {
+				_.extend(opts.attrs, state.attrs);
 			}
-			
+
 			if(props.query) {
-				opts.q = props.query.q; 
+				opts.q = props.query.q;
 			}
-			if(this.state.sort) {
+			if(state.sort) {
 				opts.sort = {
 					'orders' : [ {
-						'attr' : this.state.sort.attr.name,
-						'direction' : this.state.sort.order
+						'attr' : state.sort.attr.name,
+						'direction' : state.sort.order
 					} ]
 				};
 			}
-			if(this.state.start !== 0) {
-				opts.start = this.state.start; 
+			if(state.start !== 0) {
+				opts.start = state.start;
 			}
 			api.get(props.entity, opts).done(function(data) {
-				this.setState({data: data});
+				var newState = _.extend({}, state, {data: data});
+				this.setState(newState);
 			}.bind(this));
 		},
 		_handleExpand: function(e) {
 			var attrs = JSON.parse(JSON.stringify(this.state.attrs)); // deep clone
-			
+
 			for(var i = 0, attrsAtDepth = attrs; i < e.attrPath.length; ++i) {
 				var attr = e.attrPath[i];
 				if(!attrsAtDepth[attr]) {
@@ -169,14 +200,12 @@
 				}
 				attrsAtDepth = attrsAtDepth[attr];
 			}
-			
-			this.setState({attrs: attrs}, function() {
-				this._refreshData(this.props);
-			});
+
+			this._refreshData(this.props, _.extend({}, this.state, {attrs: attrs}));
 		},
 		_handleCollapse: function(e) {
 			var attrs = _.extend({}, this.state.attrs);
-			
+
 			for(var i = 0, attrsAtDepth = attrs; i < e.attrPath.length; ++i) {
 				var attr = e.attrPath[i];
 				if(i < e.attrPath.length - 1) {
@@ -185,10 +214,8 @@
 					attrsAtDepth[attr] = null;
 				}
 			}
-			
-			this.setState({attrs: attrs}, function() {
-				this._refreshData(this.props);
-			});
+
+			this._refreshData(this.props, _.extend({}, this.state, {attrs: attrs}));
 		},
 		_handleCreate: function() {
 			this._resetTable();
@@ -203,23 +230,23 @@
 			this.props.onRowDelete();
 		},
 		_resetTable: function() {
-			this.setState({start : 0}, function() {
-				this._refreshData(this.props);
-			});
+			this._refreshData(this.props, _.extend({}, this.state, {start: 0}));
 		},
 		_handleSort: function(e) {
-			this.setState({sort : e}, function() {
-				this._refreshData(this.props);
-			});
+			this._refreshData(this.props, _.extend({}, this.state, {sort: e}));
 			this.props.onSort(e);
 		},
 		_handlePageChange: function(e) {
-			this.setState({start : e.start}, function() {
-				this._refreshData(this.props);
-			});
+			this._refreshData(this.props, _.extend({}, this.state, {start: e.start}));
+		},
+		_handleRowsPerPageChange: function(e) {
+			this._refreshData(this.props, _.extend({}, this.state, {
+				start:0, 
+				maxRows: parseInt(e.target.value)
+			}));
 		}
 	});
-	
+
 	/**
 	 * @memberOf component
 	 */
@@ -285,7 +312,7 @@
 									this._createHeadersRec(attr.refEntity.attributes, selectedAttrs[attr.name], Headers, path.concat(attr.name), true);
 								}
 								else {
-									if(molgenis.isRefAttr(attr)) {
+									if(this._canExpandAttr(attr, path)) {
 										var EntityExpandBtn = EntityExpandBtnFactory({
 											attrPath: attrPath,
 											onExpand: this.props.onExpand
@@ -299,10 +326,6 @@
 										canSort: path.length === 0, // only allow sorting of top-level attributes
 										sortOrder: this._getSortOrder(attr, path),
 										onSort: this.props.onSort,
-										canCollapse: expanded,
-										canExpand: molgenis.isRefAttr(attr), 
-										expanded: this._isExpandedAttr(attr, selectedAttrs),
-										onExpand: this.props.onExpand,
 										key: attrPath.join()
 									});
 									Headers.push(TableHeaderCell);
@@ -325,7 +348,7 @@
 		}
 	});
 	var TableHeaderFactory = React.createFactory(TableHeader);
-	
+
 	/**
 	 * @memberOf component
 	 */
@@ -346,7 +369,7 @@
 				onSort : function() {},
 			};
 		},
-		render: function() {			
+		render: function() {
 			var SortIcon = this.props.sortOrder !== null ? molgenis.ui.Icon({
 				style: {marginLeft: 5},
 				name: this.props.sortOrder === 'asc' ? 'sort-by-alphabet' : 'sort-by-alphabet-alt'
@@ -356,7 +379,7 @@
 				value: this.props.attr.label,
 				popoverValue: this.props.attr.description
 			})) : this.props.attr.label;
-			
+
 			return (
 				th({className: this.props.className},
 					this.props.canSort ? span({style: {cursor: 'pointer'}, onClick: this._handleSort},
@@ -372,10 +395,10 @@
 				path: this.props.path,
 				order : this.props.sortOrder === null ? 'asc' : (this.props.sortOrder === 'asc' ? 'desc' : 'asc')
 			});
-		}		
+		}
 	});
 	var TableHeaderCellFactory = React.createFactory(TableHeaderCell);
-	
+
 	/**
 	 * @memberOf component
 	 */
@@ -391,30 +414,32 @@
 			onEdit: React.PropTypes.func,
 			onDelete: React.PropTypes.func,
 			onRowInspect: React.PropTypes.func,
+			onRowClick : React.PropTypes.func
 		},
 		getDefaultProps: function() {
 			return {
 				onEdit: function() {},
 				onDelete: function() {},
-				onRowInspect: function() {}
+				onRowInspect: function() {},
+				onRowClick : function() {}
 			};
 		},
 		render: function() {
-			return tbody(null, 
+			return tbody(null,
 				this._createRows(this.props.data.meta)
 			);
 		},
 		_createRows: function(entity) {
 			var Rows = [];
-			
+
 			for(var i = 0; i < this.props.data.items.length; ++i) {
 				var item = this.props.data.items[i];
 
 				Rows.push(tr({
-					key : '' + i
+					key : '' + i,
+					onClick : this.props.onRowClick !== null ? this.props.onRowClick.bind(null, item):null
 				}, this._createCols(item, entity)));
 			}
-			
 			return Rows;
 		},
 		_createCols: function(item, entity) {
@@ -427,7 +452,7 @@
 				});
 				Cols.push(td({className: 'compact', key: 'edit'}, EntityEditBtn));
 			}
-			if(this.props.enableDelete === true) {		
+			if(this.props.enableDelete === true) {
 				var EntityDeleteBtn = EntityDeleteBtnFactory({
 					name: entity.name,
 					id : item[entity.idAttribute],
@@ -454,22 +479,24 @@
 						if(attr.visible === true) {
 							var attrPath = path.concat(attr.name);
 							if(molgenis.isCompoundAttr(attr)) {
-								this._createColsRec(item, entity, attr.attributes, {'*': null}, Cols, attrPath, expanded);
+								this._createColsRec(item, entity, attr.attributes, {'*': null}, Cols, path, expanded);
 							} else {
+
 								if(this._isExpandedAttr(attr, selectedAttrs)) {
 									Cols.push(td({className: 'expanded-left', key : attrPath.join()}));
-									this._createColsRec(item[attr.name], attr.refEntity, attr.refEntity.attributes, selectedAttrs[attr.name], Cols, attrPath, true);
+									var value = (item !== undefined && item !== null) ? (_.isArray(item) ? _.map(item, function(value) { return value[attr.name];}) : item[attr.name]) : null;
+									this._createColsRec(value, attr.refEntity, attr.refEntity.attributes, selectedAttrs[attr.name], Cols, attrPath, true);
 								} else {
-									if(molgenis.isRefAttr(attr)) {
+									if(this._canExpandAttr(attr, path)) {
 										Cols.push(td({key: 'e' + attrPath.join()}));
 									}
-									var value = item !== undefined ? (_.isArray(item) ? _.map(item, function(value) { return value[attr.name];}) : item[attr.name]) : null;
+									var value = (item !== undefined && item !== null) ? (_.isArray(item) ? _.map(item, function(value) { return value[attr.name];}) : item[attr.name]) : null;
 									var TableCell = TableCellFactory({
-										className: j === attrs.length - 1 && expanded ? 'expanded-right' : undefined, 
+										className: j === attrs.length - 1 && expanded ? 'expanded-right' : undefined,
 										entity: entity,
 										attr : attr,
 										value: value,
-										multiple: _.isArray(item),
+										expanded: expanded,
 										onEdit: this.props.onEdit,
 										key : attrPath.join()
 									});
@@ -486,18 +513,66 @@
 		}
 	});
 	var TableBodyFactory = React.createFactory(TableBody);
-	
+
 	/**
 	 * @memberOf component
 	 */
 	var TableCell = React.createClass({
-		mixins: [AttrUtilsMixin, molgenis.ui.mixin.ReactLayeredComponentMixin],
 		displayName: 'TableCell',
+		mixins: [AttrUtilsMixin],
 		propTypes: {
 			entity: React.PropTypes.object.isRequired,
 			attr: React.PropTypes.object.isRequired,
 			value: React.PropTypes.any,
-			multiple: React.PropTypes.bool,
+			expanded: React.PropTypes.bool,
+			className: React.PropTypes.string,
+			onEdit: React.PropTypes.func
+		},
+		shouldComponentUpdate: function(nextProps, nextState) {
+			return !_.isEqual(this.state, nextState) || !_.isEqual(this.props.entity.name, nextProps.entity.name)
+					|| !_.isEqual(this.props.attr.name, nextProps.attr.name) || !_.isEqual(this.props.value, nextProps.value);
+		},
+		render: function() {
+			var CellContentBlocks;
+			// treat expanded mref differently
+			if(this.props.expanded && _.isArray(this.props.value)) {
+				CellContentBlocks = _.flatten(_.map(this.props.value, function(value, i) {
+					if(value !== null && value !== undefined) {
+						var CellContentForValue = this._createTableCellContent(value, 'c' + i);
+						return i < this.props.value.length - 1 ? [CellContentForValue, br({key: 'b' + i})] : CellContentForValue;
+					} else {
+						return br();
+					}
+				}.bind(this)));
+			} else {
+				CellContentBlocks = this.props.value !== null && this.props.value !== undefined ? [this._createTableCellContent(this.props.value)] : [];
+			}
+
+			return td({className: this.props.className}, CellContentBlocks);
+		},
+		_createTableCellContent: function(value, key) {
+			return TableCellContentFactory({
+				entity: this.props.entity,
+				attr: this.props.attr,
+				value: value,
+				className: this.props.className,
+				onEdit: this.props.onEdit,
+				key: key
+			});
+		}
+	});
+	var TableCellFactory = React.createFactory(TableCell);
+
+	/**
+	 * @memberOf component
+	 */
+	var TableCellContent = React.createClass({
+		mixins: [AttrUtilsMixin, molgenis.ui.mixin.ReactLayeredComponentMixin],
+		displayName: 'TableCellContent',
+		propTypes: {
+			entity: React.PropTypes.object.isRequired,
+			attr: React.PropTypes.object.isRequired,
+			value: React.PropTypes.any,
 			className: React.PropTypes.string,
 			onEdit: React.PropTypes.func
 		},
@@ -516,23 +591,12 @@
 					|| !_.isEqual(this.props.attr.name, nextProps.attr.name) || !_.isEqual(this.props.value, nextProps.value);
 		},
 		render: function() {
-			var CellContent;
-			if(this.props.multiple) {
-				CellContent = ( 
-					_.flatten(_.map(this.props.value, function(value, i) {
-						return [this._createValue(value, i), i < this.props.value.length - 1 ? React.DOM.br({key: 'b' + i}) : null];	
-					}.bind(this)))
-				);
-			} else {
-				CellContent = this._createValue(this.props.value);
-			}
-				
-			return td({className: this.props.className}, CellContent);
+			return this._createValue(this.props.value);
 		},
 		renderLayer: function() {
 			if(this.state.showRef) {
 				var refEntity = this.props.attr.refEntity;
-				
+
 				var operator, value;
 				if(molgenis.isXrefAttr(this.props.attr)) {
 					operator = 'EQUALS';
@@ -543,7 +607,7 @@
 						return item[refEntity.idAttribute];
 					});
 				}
-				
+
 				var Table = molgenis.ui.Table({
 					entity: this.props.attr.refEntity.name,
 					query : {
@@ -560,7 +624,7 @@
 						this.props.onEdit(e);
 					}.bind(this)
 				});
-				
+
 				var OkBtn = (
 					div({className: 'row', style: {textAlign: 'right'}},
 						div({className: 'col-md-12'},
@@ -568,7 +632,7 @@
 						)
 					)
 				);
-				
+
 				return molgenis.ui.Modal({
 					title: this.props.attr.label,
 					show : true,
@@ -580,7 +644,7 @@
 		},
 		_createValue: function(value) {
 			var CellContent, attr = this.props.attr;
-			
+
 			if(value === undefined || value === null) {
 				CellContent = span(null, String.fromCharCode(160)); // &nbsp;
 			} else {
@@ -608,11 +672,15 @@
 						break;
 					case 'CATEGORICAL_MREF':
 					case 'MREF':
-						CellContent = _.flatten(_.map(value, function(item, i) {
-							var Anchor = a({href: '#', onClick: this._toggleModal.bind(null, true), key: 'a' + i}, span(null, item[attr.refEntity.labelAttribute]));
-							var Seperator = i < value.length - 1 ? span({key: 's' + i}, ',') : null; 
-							return [Anchor, Seperator];
-						}.bind(this)));
+						CellContent = (
+							span(null,
+									_.flatten(_.map(value, function(item, i) {
+										var Anchor = a({href: '#', onClick: this._toggleModal.bind(null, true), key: 'a' + i}, span(null, item[attr.refEntity.labelAttribute]));
+										var Seperator = i < value.length - 1 ? span({key: 's' + i}, ',') : null;
+										return [Anchor, Seperator];
+									}.bind(this)))
+							)
+						);
 						break;
 					case 'EMAIL':
 						CellContent = a({href: 'mailto:' + value}, value);
@@ -630,7 +698,7 @@
 								popoverValue: value
 							}));
 						} else {
-							CellContent = span(null, value);	
+							CellContent = span(null, value);
 						}
 						break;
 					case 'IMAGE':
@@ -640,20 +708,17 @@
 						break;
 				}
 			}
-			
+
 			return CellContent;
 		},
 		_toggleModal: function(show) {
 			this.setState({
 				showRef : show
 			});
-		},
-		_handleFileDownloadClickfunction: function(id) {
-			
 		}
 	});
-	var TableCellFactory = React.createFactory(TableCell);
-	
+	var TableCellContentFactory = React.createFactory(TableCellContent);
+
 	/**
 	 * @memberOf component
 	 */
@@ -684,7 +749,7 @@
 		}
 	});
 	var EntityExpandBtnFactory = React.createFactory(EntityExpandBtn);
-	
+
 	/**
 	 * @memberOf component
 	 */
@@ -715,7 +780,7 @@
 		}
 	});
 	var EntityCollapseBtnFactory = React.createFactory(EntityCollapseBtn);
-	
+
 	/**
 	 * @memberOf component
 	 */
@@ -749,6 +814,7 @@
 			return this.state.form ? molgenis.ui.Form({
 				entity: this.props.entity.name,
 				mode: 'create',
+				showHidden: true,
 				modal: true,
 				onSubmitSuccess: this._handleCreateConfirm,
 				onSubmitCancel: this._handleCreateCancel
@@ -774,7 +840,7 @@
 		}
 	});
 	var EntityCreateBtnFactory = React.createFactory(EntityCreateBtn);
-	
+
 	/**
 	 * @memberOf component
 	 */
@@ -809,6 +875,7 @@
 				entity : this.props.name,
 				entityInstance: this.props.id,
 				mode: 'edit',
+				showHidden: true,
 				modal: true,
 				onSubmitSuccess: this._handleEditConfirm,
 				onSubmitCancel: this._handleEditCancel
@@ -835,7 +902,7 @@
 		}
 	});
 	var EntityEditBtnFactory = React.createFactory(EntityEditBtn);
-	
+
 	/**
 	 * @memberOf component
 	 */
@@ -897,7 +964,7 @@
 		},
 	});
 	var EntityDeleteBtnFactory = React.createFactory(EntityDeleteBtn);
-	
+
 	/**
 	 * @memberOf component
 	 */
@@ -936,7 +1003,7 @@
 		}
 	});
 	var EntityInspectBtnFactory = React.createFactory(EntityInspectBtn);
-	
+
 	// export component
 	molgenis.ui = molgenis.ui || {};
 	_.extend(molgenis.ui, {

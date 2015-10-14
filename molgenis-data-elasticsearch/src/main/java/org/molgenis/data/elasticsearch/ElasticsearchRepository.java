@@ -38,8 +38,9 @@ public class ElasticsearchRepository extends AbstractElasticsearchRepository
 	@Override
 	public void rebuildIndex()
 	{
-		throw new UnsupportedOperationException(); // FIXME reindex from source
-													// documents
+		// Do nothing
+		// FIXME reindex from source documents (see https://github.com/molgenis/molgenis/issues/3309)
+		// Do not throw UnsupportedOperationException here because reindexing of repos at startup will fail
 	}
 
 }

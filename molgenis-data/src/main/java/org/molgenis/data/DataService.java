@@ -11,6 +11,9 @@ import org.molgenis.data.meta.MetaDataService;
  */
 public interface DataService extends Iterable<Repository>
 {
+
+	void setMeta(MetaDataService metaDataService);
+
 	/**
 	 * Get the MetaDataService
 	 * 
@@ -27,7 +30,7 @@ public interface DataService extends Iterable<Repository>
 	Set<RepositoryCapability> getCapabilities(String repositoryName);
 
 	/**
-	 * check ia a repository for this entity already exists
+	 * check if a repository for this entity already exists
 	 * 
 	 * @param entityName
 	 */

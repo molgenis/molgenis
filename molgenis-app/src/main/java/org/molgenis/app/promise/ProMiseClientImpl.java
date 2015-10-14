@@ -37,7 +37,6 @@ public class ProMiseClientImpl implements ProMiseClient
 {
 	private static final String NAMESPACE_VALUE = "http://tempuri.org/";
 	private static final String ACTION_GETDATAFORXML = "getDataForXML";
-	private static final String PROJECTS_ENTITY = PromiseMappingProjectMetaData.FULLY_QUALIFIED_NAME;
 
 	private final SOAPConnectionFactory soapConnectionFactory;
 
@@ -52,11 +51,8 @@ public class ProMiseClientImpl implements ProMiseClient
 
 	@Override
 	@RunAsSystem
-	public XMLStreamReader getDataForXml(String projectName, String seqNr) throws IOException
+	public XMLStreamReader getDataForXml(Entity project, String seqNr) throws IOException
 	{
-		Entity project = dataService.findOne(PROJECTS_ENTITY, projectName);
-		if (project == null) throw new MolgenisDataException("Project is null");
-
 		Entity credentials = project.getEntity(PromiseMappingProjectMetaData.CREDENTIALS);
 		if (credentials == null) throw new MolgenisDataException("Credentials is null");
 
@@ -68,6 +64,9 @@ public class ProMiseClientImpl implements ProMiseClient
 		args.put("username", credentials.getString("USERNAME"));
 		args.put("passw", credentials.getString("PASSW"));
 
+		System.out.println(args);
+		System.out.println(credentials.getString("URL"));
+		
 		try
 		{
 			return executeSOAPRequest(ACTION_GETDATAFORXML, createURLWithTimeout(credentials.get("URL").toString()),
@@ -89,14 +88,19 @@ public class ProMiseClientImpl implements ProMiseClient
 			soapConnection = soapConnectionFactory.createConnection();
 
 			// Send SOAP Message to SOAP Server
-			SOAPMessage soapResponse = soapConnection.call(createSOAPRequest(action, args), url);
-
+			SOAPMessage soapResponse = soapConnection.call(createSOAPRequest(action, args), url);	
+			
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			soapResponse.writeTo(out);
+			System.out.println("RESPONSE: " + new String(out.toByteArray()));
+			
+			
 			// Fail on SOAP error
 			if (soapResponse.getSOAPBody().hasFault())
 			{
 				throw new IOException(soapResponse.getSOAPBody().getFault().getFaultString());
 			}
-
+			
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			soapResponse.writeTo(bos);
 
@@ -151,6 +155,10 @@ public class ProMiseClientImpl implements ProMiseClient
 		headers.addHeader("SOAPAction", NAMESPACE_VALUE + action);
 
 		soapMessage.saveChanges();
+		
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		soapMessage.writeTo(out);
+		System.out.println("REQUEST: " + new String(out.toByteArray()));
 
 		return soapMessage;
 	}

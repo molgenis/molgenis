@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.csv.CsvRepository;
@@ -34,7 +33,7 @@ public class IBDParser
 	// 3) Make zip file, when you are on a Mac go to step 3.1
 	// 3.1) Go to the terminal and in the outputfolder type in: zip ibd.zip * -x "\.*"
 	// Step 3.1 will not add hidden files like .MAC__OSX file
-	public static void main(String[] args) throws IOException, InvalidFormatException
+	public static void main(String[] args) throws IOException
 	{
 
 		IBDParser vc = new IBDParser();
@@ -96,7 +95,7 @@ public class IBDParser
 	}
 
 	public void checkForMultipleConsults(String datasetName, String consultDateName, PrintWriter logfile)
-			throws IOException, InvalidFormatException
+			throws IOException
 	{
 		List<CellProcessor> processors = new ArrayList<CellProcessor>();
 		processors.add(new TrimProcessor());
@@ -179,8 +178,7 @@ public class IBDParser
 		}
 	}
 
-	private void filterCategories(String categoryFile, String featureFile, PrintWriter logfile)
-			throws InvalidFormatException, IOException
+	private void filterCategories(String categoryFile, String featureFile, PrintWriter logfile) throws IOException
 	{
 		logfile.println("########");
 		logfile.println("Categories will be filtered");

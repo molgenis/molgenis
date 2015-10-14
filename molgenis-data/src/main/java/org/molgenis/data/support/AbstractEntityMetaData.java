@@ -119,7 +119,7 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			}
 
 			@Override
-			public Object getDefaultValue()
+			public String getDefaultValue()
 			{
 				throw new UnsupportedOperationException();
 			}
@@ -225,8 +225,10 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 		if (idAttribute != null)
 		{
 			AttributeMetaData att = getAttribute(idAttribute);
-			if (att == null) throw new RuntimeException(getName() + ".getIdAttribute() failed: '" + idAttribute
-					+ "' unknown");
+			if (att == null)
+			{
+				throw new RuntimeException(getName() + ".getIdAttribute() failed: '" + idAttribute + "' unknown");
+			}
 			idAttributeMetaData = att;
 		}
 		if (idAttributeMetaData == null)
@@ -240,14 +242,14 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 				}
 			}
 
-			if (getExtends() != null)
+			if (idAttributeMetaData == null && getExtends() != null)
 			{
 				idAttributeMetaData = getExtends().getIdAttribute();
 			}
 			if (idAttributeMetaData == null && !isAbstract())
 			{
 				LOG.error("No idAttribute specified for entity{}, this attribute is required", getName());
-				// FIXME entity must be identifiable but in reality this is not always the case
+				// FIXME enable exception when https://github.com/molgenis/molgenis/issues/1400 is fixed
 				// throw new RuntimeException("No idAttribute specified, this attribute is required");
 			}
 		}
@@ -265,8 +267,10 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 		if (labelAttribute != null)
 		{
 			AttributeMetaData att = getAttribute(labelAttribute);
-			if (att == null) throw new MolgenisDataException("getLabelAttribute() failed: '" + labelAttribute
-					+ "' unknown");
+			if (att == null)
+			{
+				throw new MolgenisDataException("getLabelAttribute() failed: '" + labelAttribute + "' unknown");
+			}
 
 			return att;
 		}

@@ -1,6 +1,6 @@
 $.when( $, 
 		window.top.molgenis = window.top.molgenis || {}, 
-		$.get('dataexplorer/settings') 
+		molgenis.getPluginSettings() 
 ).then(
 function($, molgenis, settingsXhr) {	
 	"use strict";
@@ -135,8 +135,7 @@ function($, molgenis, settingsXhr) {
 		
 		if (entityMetaData.description) {
 			var description = $('<span data-placement="bottom"></span>');
-			description.html(abbreviate(entityMetaData.description, 
-					settings['header.abbreviate']||180));
+			description.html(abbreviate(entityMetaData.description, settings['header_abbreviate']));
 			description.attr('data-title', entityMetaData.description);
 			$('#entity-class-description').html(description.tooltip());
 		} else {
@@ -321,8 +320,7 @@ function($, molgenis, settingsXhr) {
 			}
 			createEntityMetaTree(entityMetaData, selectedAttributes);
 			
-			//Show wizard on show of dataexplorer if url param 'wizard=true' is added
-			if (settings['wizard.oninit'] && settings['wizard.oninit'] === 'true') {
+			if (settings['launch_wizard'] === true) {
 				self.filter.wizard.openFilterWizardModal(entityMetaData, attributeFilters);
 			}
 		});
@@ -431,7 +429,9 @@ function($, molgenis, settingsXhr) {
 			attributeFilters = {};
 			selectedAttributes = [];
 			searchQuery = null;
-			React.unmountComponentAtNode($('#data-table-container')[0]); // must occur before mod-data is loaded
+			if($('#data-table-container').length > 0) {
+				React.unmountComponentAtNode($('#data-table-container')[0]); // must occur before mod-data is loaded
+			}
 			$('#feature-filters p').remove();
 			$("#observationset-search").val("");
 			$('#data-table-pager').empty();
@@ -540,9 +540,7 @@ function($, molgenis, settingsXhr) {
 			bootbox.confirm("Are you sure you want to delete all data and metadata for this entity?", function(confirmed){
 				if(confirmed){
 					$.ajax('/api/v1/'+selectedEntityMetaData.name+'/meta', {'type': 'DELETE'}).done(function(){
-						$.post(molgenis.getContextUrl() + '/removeEntityFromMenu/' + selectedEntityMetaData.name).done(function(){
-							document.location.href = "/menu/main/dataexplorer";
-						});
+						document.location.href = "/menu/main/dataexplorer";
 					});
 				}
 			});

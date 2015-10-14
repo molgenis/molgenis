@@ -9,12 +9,11 @@ import java.util.List;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
@@ -46,7 +45,7 @@ public class GafListImporterController extends MolgenisPluginController
 	private GafListValidationReport report;
 
 	@Autowired
-	public GafListImporterController(GafListFileImporterService gafListFileImporter, MolgenisSettings molgenisSettings)
+	public GafListImporterController(GafListFileImporterService gafListFileImporter)
 	{
 		super(URI);
 		if (gafListFileImporter == null) throw new IllegalArgumentException("gafListFileImporter is null");

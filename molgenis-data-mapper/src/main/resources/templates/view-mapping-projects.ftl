@@ -11,7 +11,7 @@
 <div class="row">
 	<div class="col-md-6">
 		<h1>Mapping projects overview</h1>
-		<p>Create and view mapping projects</p>
+		<p>Create and view mapping projects. <#if importerUri??>Upload additional target entities and mapped sources <a href="${importerUri?html}">here</a>.</#if></p>
 		
 		<#if entityMetaDatas?has_content>
 			<div class="btn-group" role="group">
@@ -53,6 +53,10 @@
 											<input type="hidden" name="mappingProjectId" value="${project.identifier}"/>
 											<button type="submit" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-trash"></span></button>
 										</form>
+										<form method="post" action="${context_url}/mappingproject/clone" class="pull-left">
+                                            <input type="hidden" name="mappingProjectId" value="${project.identifier?html}"/>
+                                            <button type="submit" class="btn btn-default btn-xs clone-btn"><span class="glyphicon glyphicon-duplicate"></span></button>
+                                        </form>
 									</#if>
 			 					</td> 					
 			 					<td>

@@ -80,4 +80,12 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	{
 		dataService.update(MolgenisUser.ENTITY_NAME, user);
 	}
+
+	@Override
+	@RunAsSystem
+	public MolgenisUser getUserByEmail(String email)
+	{
+		return dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.EMAIL, email),
+				MolgenisUser.class);
+	}
 }

@@ -1,30 +1,31 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.molgenis</groupId>
 		<artifactId>molgenis</artifactId>
-		<version>1.8.0-POC_PROMISE-SNAPSHOT</version>
+		<version>1.10.0-POC-PROMISE-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-data-annotators</artifactId>
 	<packaging>jar</packaging>
 
 	<dependencies>
 		<dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-csv</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-vcf</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-csv</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-vcf</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-core</artifactId>
 			<version>${project.version}</version>
@@ -35,17 +36,17 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-		    <groupId>org.springframework</groupId>
-		    <artifactId>spring-context-support</artifactId>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
 		</dependency>
 		<dependency>
-		    <groupId>org.apache.httpcomponents</groupId>
-		    <artifactId>httpclient</artifactId>
-		    <version>4.2.1</version>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.2.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.utgenome.thirdparty</groupId>
@@ -56,17 +57,29 @@
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
 			<version>20141113</version>
-		</dependency>		
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jopt-simple</groupId>
+			<artifactId>jopt-simple</artifactId>
+			<version>4.9</version>
+		</dependency>
 	</dependencies>
-	
+
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+			</plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>
 					<archive>
 						<manifest>
 							<mainClass>org.molgenis.data.annotation.cmd.CmdLineAnnotator</mainClass>
+							<addDefaultImplementationEntries>
+              					true
+            				</addDefaultImplementationEntries>
 						</manifest>
 					</archive>
 					<descriptorRefs>
@@ -74,7 +87,7 @@
 					</descriptorRefs>
 					<finalName>CmdLineAnnotator</finalName>
 					<appendAssemblyId>false</appendAssemblyId>
-                    <skipAssembly>${skip.delivery}</skipAssembly>
+					<skipAssembly>${skip.delivery}</skipAssembly>
 				</configuration>
 				<executions>
 					<execution>
@@ -88,5 +101,5 @@
 			</plugin>
 		</plugins>
 	</build>
-	
+
 </project>

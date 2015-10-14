@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.molgenis</groupId>
 		<artifactId>molgenis</artifactId>
-		<version>1.8.0-POC_PROMISE-SNAPSHOT</version>
+		<version>1.10.0-POC-PROMISE-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-data-import</artifactId>
 	<packaging>jar</packaging>
@@ -72,6 +72,11 @@
 			<artifactId>molgenis-data-jpa</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-mysql</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-security</artifactId>

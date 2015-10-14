@@ -3,9 +3,12 @@
 	<menu label="Home" name="main">
 		<plugin id="home" name="Home" url="home"/>
         <plugin id="importwizard" name="Upload" url="importwizard"/>
-        <plugin id="catalogue" name="Catalogue" url="catalogue"/>
 		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>
-		<plugin id="mappingservice" name="Mapping Service" url="mappingservice"/>
+		<plugin id="catalogue" name="Catalogue" url="catalogue"/>
+		<menu label="Data Integration" name="dataintegration">
+			<plugin id="mappingservice" name="Mapping Service" url="mappingservice"/>
+			<plugin id="tagwizard" name="Tag Wizard" url="tagwizard"/>
+		</menu>
         <menu label="Plugins" name="plugins">
             <plugin id="questionnaires" name="Questionnaires" url="questionnaires"/>
         	<plugin id="pathways" name="Pathways" url="pathways"/>
@@ -25,6 +28,7 @@
         	<plugin id="thememanager" name="Theme Manager" url="thememanager"/>
         	<plugin id="indexmanager" name="Index manager" url="indexmanager"/>
         	<plugin id="logmanager" name="Log manager" url="logmanager"/>
+        	<plugin id="settingsmanager" name="Settings" url="settingsmanager"/>
 		</menu>
 		<menu label="About" name="background">
             <plugin id="feedback" name="Feedback" url="feedback"/>

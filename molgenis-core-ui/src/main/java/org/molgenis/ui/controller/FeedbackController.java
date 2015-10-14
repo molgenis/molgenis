@@ -1,5 +1,7 @@
 package org.molgenis.ui.controller;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,13 +12,13 @@ import javax.validation.Valid;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaRequest;
 import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.ui.MolgenisPluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,21 +49,20 @@ public class FeedbackController extends AbstractStaticContentController
 	private static final String MAIL_AUTHENTICATION_EXCEPTION_MESSAGE = "Unfortunately, we were unable to send the mail containing your feedback. Please contact the administrator.";
 	private static final String MAIL_SEND_EXCEPTION_MESSAGE = MAIL_AUTHENTICATION_EXCEPTION_MESSAGE;
 
-	@Autowired
-	private MolgenisUserService molgenisUserService;
+	private final MolgenisUserService molgenisUserService;
+	private final AppSettings appSettings;
+	private final CaptchaService captchaService;
+	private final JavaMailSender mailSender;
 
 	@Autowired
-	private MolgenisSettings molgenisSettings;
-
-	@Autowired
-	private CaptchaService captchaService;
-
-	@Autowired
-	private JavaMailSender mailSender;
-
-	public FeedbackController()
+	public FeedbackController(MolgenisUserService molgenisUserService, AppSettings appSettings,
+			CaptchaService captchaService, JavaMailSender mailSender)
 	{
 		super(ID, URI);
+		this.molgenisUserService = checkNotNull(molgenisUserService);
+		this.appSettings = checkNotNull(appSettings);
+		this.captchaService = checkNotNull(captchaService);
+		this.mailSender = checkNotNull(mailSender);
 	}
 
 	/**
@@ -92,7 +93,7 @@ public class FeedbackController extends AbstractStaticContentController
 	public String submitFeedback(@Valid FeedbackForm form, @Valid @ModelAttribute CaptchaRequest captchaRequest)
 			throws CaptchaException
 	{
-		if (!captchaService.consumeCaptcha(captchaRequest.getCaptcha()))
+		if (!captchaService.validateCaptcha(captchaRequest.getCaptcha()))
 		{
 			form.setErrorMessage("Invalid captcha.");
 			return "view-feedback";
@@ -103,6 +104,7 @@ public class FeedbackController extends AbstractStaticContentController
 			MimeMessage message = createFeedbackMessage(form);
 			mailSender.send(message);
 			form.setSubmitted(true);
+			captchaService.removeCaptcha();
 		}
 		catch (MessagingException e)
 		{
@@ -140,7 +142,7 @@ public class FeedbackController extends AbstractStaticContentController
 		{
 			helper.setReplyTo("no-reply@molgenis.org");
 		}
-		String appName = molgenisSettings.getProperty("app.name", "molgenis");
+		String appName = appSettings.getTitle();
 		helper.setSubject(String.format("[feedback-%s] %s", appName, form.getSubject()));
 		helper.setText(String.format("Feedback from %s:\n\n%s", form.getFrom(), form.getFeedback()));
 		return message;

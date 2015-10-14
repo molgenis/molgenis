@@ -1,42 +1,24 @@
 package org.molgenis.data.annotation;
 
+import java.util.Iterator;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA. User: charbonb Date: 21/02/14 Time: 11:24 To change this template use File | Settings |
  * File Templates.
  */
-public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator,
-		ApplicationListener<ContextRefreshedEvent>
+public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 {
-	@Autowired
-	AnnotationService annotatorService;
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
-	}
-
 	@Override
 	public String canAnnotate(EntityMetaData repoMetaData)
 	{
-		Iterable<AttributeMetaData> annotatorAttributes = getInputMetaData().getAttributes();
+		Iterable<AttributeMetaData> annotatorAttributes = getInputMetaData();
 		for (AttributeMetaData annotatorAttribute : annotatorAttributes)
 		{
 			// one of the needed attributes not present? we can not annotate
@@ -49,7 +31,13 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 			if (!repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType()
 					.equals(annotatorAttribute.getDataType()))
 			{
-				return "a required attribute has the wrong datatype";
+				// allow type string when required attribute is text (for backward compatibility)
+				if (!(repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType()
+						.equals(MolgenisFieldTypes.STRING) && annotatorAttribute.getDataType().equals(
+						MolgenisFieldTypes.TEXT)))
+				{
+					return "a required attribute has the wrong datatype";
+				}
 			}
 
 			// Are the runtime property files not available, or is a webservice down? we can not annotate
@@ -72,74 +60,31 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 
 	@Override
 	@Transactional
-	public Iterator<Entity> annotate(final Iterable<Entity> sourceIterable)
+	public Iterator<Entity> annotate(final Iterator<Entity> sourceIterable)
 	{
-		Iterator<Entity> source = sourceIterable.iterator();
-		return new Iterator<Entity>()
+		return this.annotate(new Iterable<Entity>()
 		{
-			int current = 0;
-			int size = 0;
-			List<Entity> results;
-			Entity result;
-
 			@Override
-			public boolean hasNext()
+			public Iterator<Entity> iterator()
 			{
-				return current < size || source.hasNext();
+				return sourceIterable;
 			}
-
-			@Override
-			public Entity next()
-			{
-				Entity sourceEntity = null;
-				if (current >= size)
-				{
-					if (source.hasNext())
-					{
-						try
-						{
-							sourceEntity = source.next();
-							results = annotateEntity(sourceEntity);
-						}
-						catch (IOException e)
-						{
-							throw new RuntimeException(e);
-						}
-						catch (InterruptedException e)
-						{
-							throw new RuntimeException(e);
-						}
-
-						size = results.size();
-					}
-					current = 0;
-				}
-				if (results.size() > 0)
-				{
-					result = results.get(current);
-				}
-				else
-				{
-					result = sourceEntity;
-				}
-				++current;
-				return result;
-			}
-
-			@Override
-			public void remove()
-			{
-				throw new UnsupportedOperationException();
-			}
-		};
+		});
 	}
-
-	public abstract List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException;
 
 	@Override
 	public String getFullName()
 	{
 		return RepositoryAnnotator.ANNOTATOR_PREFIX + getSimpleName();
+	}
+
+	@Override
+	public String getDescription()
+	{
+		String desc = "TODO";
+		AnnotatorInfo annotatorInfo = getInfo();
+		if (annotatorInfo != null) desc = annotatorInfo.getDescription();
+		return desc;
 	}
 
 }
