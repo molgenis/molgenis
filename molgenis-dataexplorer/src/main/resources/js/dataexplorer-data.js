@@ -85,11 +85,6 @@
 
 		$('#entityReport').load("dataexplorer/details",{entityName: entityName, entityId: entityId}, function() {
 			  $('#entityReportModal').modal("show");
-
-			  // Button event handler when a button is placed inside an entity report ftl
-			  $(".modal-body button", "#entityReport").on('click', function() {
-					$.download($(this).data('href'), {entityName: entityName, entityId: entityId}, "GET");
-			  });
 		});
 	}
 
@@ -365,9 +360,20 @@
 	$(function() {
 		$(document).on('changeAttributeSelection.data', function(e, data) {
 			if(Table) {
+				var tableAttrs = Table.state.attrs;
+				var treeAttrs = data.attributesTree;
+				for(var attr in treeAttrs){
+					if(tableAttrs[attr]!==undefined && tableAttrs[attr]!==null){
+						//check if the attribute was expanded (x/mrefs), if so, and still selected, copy the * to stay expanded.
+						if(tableAttrs[attr].hasOwnProperty('*') && treeAttrs.hasOwnProperty(attr)){
+							treeAttrs[attr] = tableAttrs[attr];
+						}
+					}
+				}
 				Table.setProps(
 					{
-						attrs: data.attributesTree,
+
+						attrs: treeAttrs,
 						onRowClick: (doShowGenomeBrowser() && isGenomeBrowserAttributesSelected()) ? onRowClick : null
 					}
 				);

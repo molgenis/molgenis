@@ -1,6 +1,6 @@
 package org.molgenis.migrate.version;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +28,7 @@ public class MolgenisUpgradeServiceImpl implements MolgenisUpgradeService
 	@Autowired
 	public MolgenisUpgradeServiceImpl(MolgenisVersionService versionService)
 	{
-		this.versionService = checkNotNull(versionService);
+		this.versionService = requireNonNull(versionService);
 	}
 
 	public void addUpgrade(MolgenisUpgrade upgrade)

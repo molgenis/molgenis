@@ -2,6 +2,7 @@ package org.molgenis.data.mysql;
 
 import static org.testng.Assert.assertEquals;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -91,8 +92,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		MysqlRepository repo = (MysqlRepository) metaDataRepositories.addEntityMeta(metaData);
 
 		Assert.assertEquals(repo.getInsertSql(), "INSERT INTO `MysqlPerson` (`firstName`, `lastName`) VALUES (?, ?)");
-		Assert.assertEquals(
-				repo.getCreateSql(),
+		Assert.assertEquals(repo.getCreateSql(),
 				"CREATE TABLE IF NOT EXISTS `MysqlPerson`(`firstName` TEXT NOT NULL, `lastName` VARCHAR(255) NOT NULL, PRIMARY KEY (`lastName`)) ENGINE=InnoDB;");
 
 		metaData.addAttribute("age").setDataType(MolgenisFieldTypes.INT);
@@ -100,8 +100,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 
 		Assert.assertEquals(repo.getInsertSql(),
 				"INSERT INTO `MysqlPerson` (`firstName`, `lastName`, `age`) VALUES (?, ?, ?)");
-		Assert.assertEquals(
-				repo.getCreateSql(),
+		Assert.assertEquals(repo.getCreateSql(),
 				"CREATE TABLE IF NOT EXISTS `MysqlPerson`(`firstName` TEXT NOT NULL, `lastName` VARCHAR(255) NOT NULL, `age` INTEGER, PRIMARY KEY (`lastName`)) ENGINE=InnoDB;");
 		Assert.assertEquals(repo.getCountSql(new QueryImpl(), Lists.newArrayList()),
 				"SELECT COUNT(DISTINCT this.`lastName`) FROM `MysqlPerson` AS this");
@@ -124,10 +123,10 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(params, Lists.<Object> newArrayList("%John%", "%John%", "%John%"));
 
 		// sort
-		Assert.assertEquals(repo.getSortSql(new QueryImpl().sort(new Sort("firstName", Sort.Direction.ASC))),
-				"ORDER BY `firstName` ASC");
-		Assert.assertEquals(repo.getSortSql(new QueryImpl().sort(new Sort("firstName", Sort.Direction.DESC))),
-				"ORDER BY `firstName` DESC");
+		Assert.assertEquals(repo.getSortSql(new QueryImpl().sort(new Sort("firstName", Sort.Direction.ASC)),
+				Collections.emptyList()), "ORDER BY `firstName` ASC");
+		Assert.assertEquals(repo.getSortSql(new QueryImpl().sort(new Sort("firstName", Sort.Direction.DESC)),
+				Collections.emptyList()), "ORDER BY `firstName` DESC");
 
 		params.clear();
 		Assert.assertEquals(repo.getWhereSql(
@@ -223,7 +222,8 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 	public void findAllIterableObject_Iterable()
 	{
 		String idAttributeName = "id";
-		final String exampleId = "id123";
+		final String exampleId0 = "id123";
+		final String exampleId1 = "id456";
 
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("testje");
 
@@ -238,20 +238,25 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 
 		Repository testRepository = coll.addEntityMeta(entityMetaData);
 
-		MapEntity entity = new MapEntity();
-		entity.set(idAttributeName, exampleId);
-		testRepository.add(entity);
+		MapEntity entity0 = new MapEntity();
+		entity0.set(idAttributeName, exampleId0);
+		MapEntity entity1 = new MapEntity();
+		entity1.set(idAttributeName, exampleId1);
+		testRepository.add(entity1); // add in reverse order, so we can check if returned in the correct order
+		testRepository.add(entity0);
 
 		Iterable<Entity> entities = testRepository.findAll(new Iterable<Object>()
 		{
 			@Override
 			public Iterator<Object> iterator()
 			{
-				return Collections.<Object> singletonList(exampleId).iterator();
+				return Arrays.<Object> asList(exampleId0, exampleId1).iterator();
 			}
 		});
 
-		assertEquals(Iterables.size(entities), 1);
-		assertEquals(entities.iterator().next().getIdValue(), exampleId);
+		assertEquals(Iterables.size(entities), 2);
+		Iterator<Entity> it = entities.iterator();
+		assertEquals(it.next().getIdValue(), exampleId0);
+		assertEquals(it.next().getIdValue(), exampleId1);
 	}
 }

@@ -245,4 +245,16 @@ public class AutoValueRepositoryDecorator implements Repository
 			}
 		}
 	}
+
+	@Override
+	public void addEntityListener(EntityListener entityListener)
+	{
+		decoratedRepository.addEntityListener(entityListener);
+	}
+
+	@Override
+	public void removeEntityListener(EntityListener entityListener)
+	{
+		decoratedRepository.removeEntityListener(entityListener);
+	}
 }

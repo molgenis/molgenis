@@ -1,5 +1,7 @@
 package org.molgenis.data.vcf;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,7 +28,7 @@ public class VcfReaderFactoryImpl implements VcfReaderFactory
 
 	public VcfReaderFactoryImpl(File file)
 	{
-		this.file = Preconditions.checkNotNull(file);
+		this.file = requireNonNull(file);
 		Preconditions.checkArgument(file.exists());
 	}
 

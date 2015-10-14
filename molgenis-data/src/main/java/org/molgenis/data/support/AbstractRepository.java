@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 
@@ -137,5 +138,17 @@ public abstract class AbstractRepository implements Repository
 	@Override
 	public void clearCache()
 	{
+	}
+
+	@Override
+	public void addEntityListener(EntityListener entityListener)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void removeEntityListener(EntityListener entityListener)
+	{
+		throw new UnsupportedOperationException();
 	}
 }

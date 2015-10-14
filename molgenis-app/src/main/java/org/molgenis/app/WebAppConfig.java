@@ -23,6 +23,7 @@ import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.migrate.version.v1_10.Step17RuntimePropertiesToGafListSettings;
 import org.molgenis.migrate.version.v1_10.Step18RuntimePropertiesToAnnotatorSettings;
 import org.molgenis.migrate.version.v1_10.Step19RemoveMolgenisLock;
+import org.molgenis.migrate.version.v1_11.Step20RebuildElasticsearchIndex;
 import org.molgenis.migrate.version.v1_5.Step1UpgradeMetaData;
 import org.molgenis.migrate.version.v1_5.Step2;
 import org.molgenis.migrate.version.v1_5.Step3AddOrderColumnToMrefTables;
@@ -118,6 +119,9 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Autowired
 	private Step19RemoveMolgenisLock step19RemoveMolgenisLock;
 
+	@Autowired
+	private Step20RebuildElasticsearchIndex step20RebuildElasticsearchIndex;
+
 	@Override
 	public ManageableRepositoryCollection getBackend()
 	{
@@ -160,6 +164,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(step17RuntimePropertiesToGafListSettings);
 		upgradeService.addUpgrade(step18RuntimePropertiesToAnnotatorSettings);
 		upgradeService.addUpgrade(step19RemoveMolgenisLock);
+		upgradeService.addUpgrade(step20RebuildElasticsearchIndex);
 	}
 
 	@Override

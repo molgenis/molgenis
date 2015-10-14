@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -157,6 +158,61 @@ public abstract class DefaultSettingsEntity implements Entity
 		Entity entity = getEntity();
 		entity.set(values);
 		updateEntity(entity);
+	}
+
+	public void addListener(SettingsEntityListener settingsEntityListener)
+	{
+		RunAsSystemProxy.runAsSystem(() -> {
+			dataService.addEntityListener(entityName, new EntityListener()
+			{
+				@Override
+				public void postUpdate(Entity entity)
+				{
+					settingsEntityListener.postUpdate(entity);
+				}
+
+				@Override
+				public Object getEntityId()
+				{
+					return getEntityMetaData().getSimpleName();
+				}
+			});
+		});
+	}
+
+	public void removeListener(SettingsEntityListener settingsEntityListener)
+	{
+		RunAsSystemProxy.runAsSystem(() -> {
+			dataService.removeEntityListener(entityName, new EntityListener()
+			{
+
+				@Override
+				public void postUpdate(Entity entity)
+				{
+					settingsEntityListener.postUpdate(entity);
+				}
+
+				@Override
+				public Object getEntityId()
+				{
+					return getEntityMetaData().getSimpleName();
+				}
+			});
+		});
+	}
+
+	public void addEntityListener(EntityListener entityListener)
+	{
+		RunAsSystemProxy.runAsSystem(() -> {
+			dataService.addEntityListener(entityName, entityListener);
+		});
+	}
+
+	public void removeEntityListener(EntityListener entityListener)
+	{
+		RunAsSystemProxy.runAsSystem(() -> {
+			dataService.removeEntityListener(entityName, entityListener);
+		});
 	}
 
 	private Entity getEntity()

@@ -11,6 +11,7 @@ import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Manageable;
 import org.molgenis.data.MolgenisDataException;
@@ -112,10 +113,8 @@ public class DataServiceImpl implements DataService
 	@Override
 	public synchronized Iterable<String> getEntityNames()
 	{
-		return Iterables.filter(
-				Lists.newArrayList(repositoryNames),
-				entityName -> currentUserHasRole("ROLE_SU", "ROLE_SYSTEM",
-						"ROLE_ENTITY_COUNT_" + entityName.toUpperCase()));
+		return Iterables.filter(Lists.newArrayList(repositoryNames), entityName -> currentUserHasRole("ROLE_SU",
+				"ROLE_SYSTEM", "ROLE_ENTITY_COUNT_" + entityName.toUpperCase()));
 	}
 
 	@Override
@@ -302,4 +301,15 @@ public class DataServiceImpl implements DataService
 		return getRepository(repositoryName).getCapabilities();
 	}
 
+	@Override
+	public void addEntityListener(String entityName, EntityListener entityListener)
+	{
+		getRepository(entityName).addEntityListener(entityListener);
+	}
+
+	@Override
+	public void removeEntityListener(String entityName, EntityListener entityListener)
+	{
+		getRepository(entityName).removeEntityListener(entityListener);
+	}
 }

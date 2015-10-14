@@ -11,10 +11,12 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -28,12 +30,12 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
-import org.molgenis.data.elasticsearch.ElasticSearchService.BulkProcessorFactory;
-import org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode;
+import org.molgenis.data.Repository;
+import org.molgenis.data.elasticsearch.ElasticsearchService.BulkProcessorFactory;
+import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -47,13 +49,13 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
 
-public class ElasticSearchServiceTest
+public class ElasticsearchServiceTest
 {
 	private Client client;
-	private ElasticSearchService searchService;
+	private ElasticsearchService searchService;
 	private String indexName;
 	private EntityToSourceConverter entityToSourceConverter;
-	private DataService dataService;
+	private DataServiceImpl dataService;
 
 	@BeforeMethod
 	public void beforeMethod() throws InterruptedException
@@ -63,12 +65,12 @@ public class ElasticSearchServiceTest
 
 		entityToSourceConverter = mock(EntityToSourceConverter.class);
 		dataService = spy(new DataServiceImpl(new NonDecoratingRepositoryDecoratorFactory()));
-		searchService = spy(new ElasticSearchService(client, indexName, dataService, entityToSourceConverter, false));
+		searchService = spy(new ElasticsearchService(client, indexName, dataService, entityToSourceConverter, false));
 		BulkProcessorFactory bulkProcessorFactory = mock(BulkProcessorFactory.class);
 		BulkProcessor bulkProcessor = mock(BulkProcessor.class);
 		when(bulkProcessor.awaitClose(any(Long.class), any(TimeUnit.class))).thenReturn(true);
 		when(bulkProcessorFactory.create(client)).thenReturn(bulkProcessor);
-		ElasticSearchService.setBulkProcessorFactory(bulkProcessorFactory);
+		ElasticsearchService.setBulkProcessorFactory(bulkProcessorFactory);
 		doNothing().when(searchService).refresh(any(String.class));
 	}
 
@@ -90,7 +92,7 @@ public class ElasticSearchServiceTest
 
 		searchService.index(entity, entityMetaData, IndexingMode.ADD);
 		verify(searchService, times(1)).index(indexName, Arrays.asList(entity), entityMetaData,
-				ElasticSearchService.CrudType.ADD, true);
+				ElasticsearchService.CrudType.ADD, true);
 	}
 
 	@Test
@@ -102,7 +104,7 @@ public class ElasticSearchServiceTest
 
 		searchService.index(entity, entityMetaData, IndexingMode.UPDATE);
 		verify(searchService, times(1)).index(indexName, Arrays.asList(entity), entityMetaData,
-				ElasticSearchService.CrudType.UPDATE, true);
+				ElasticsearchService.CrudType.UPDATE, true);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -122,6 +124,7 @@ public class ElasticSearchServiceTest
 		{
 			SearchHit searchHit = mock(SearchHit.class);
 			when(searchHit.getSource()).thenReturn(Collections.<String, Object> singletonMap(idAttrName, i + 1));
+			when(searchHit.getId()).thenReturn(String.valueOf(i + 1));
 			hits1[i] = searchHit;
 		}
 		when(searchHits1.getHits()).thenReturn(hits1);
@@ -136,6 +139,7 @@ public class ElasticSearchServiceTest
 		SearchHit[] hits2 = new SearchHit[totalSize - batchSize];
 		SearchHit searchHit = mock(SearchHit.class);
 		when(searchHit.getSource()).thenReturn(Collections.<String, Object> singletonMap(idAttrName, batchSize + 1));
+		when(searchHit.getId()).thenReturn(String.valueOf(batchSize + 1));
 		hits2[0] = searchHit;
 		when(searchHits2.getHits()).thenReturn(hits2);
 		when(searchHits2.getTotalHits()).thenReturn(Long.valueOf(totalSize));
@@ -145,6 +149,30 @@ public class ElasticSearchServiceTest
 		when(searchRequestBuilder.execute()).thenReturn(value1, value2);
 		when(client.prepareSearch(indexName)).thenReturn(searchRequestBuilder);
 
+		Repository repo = when(mock(Repository.class).getName()).thenReturn("entity").getMock();
+		List<Object> idsBatch0 = new ArrayList<>();
+		for (int i = 0; i < batchSize; ++i)
+		{
+			idsBatch0.add(String.valueOf(i + 1));
+		}
+		List<Object> idsBatch1 = new ArrayList<>();
+		for (int i = batchSize; i < totalSize; ++i)
+		{
+			idsBatch1.add(String.valueOf(i + 1));
+		}
+		List<Entity> entitiesBatch0 = new ArrayList<>();
+		for (int i = 0; i < batchSize; ++i)
+		{
+			entitiesBatch0.add(when(mock(Entity.class).getIdValue()).thenReturn(String.valueOf(i + 1)).getMock());
+		}
+		List<Entity> entitiesBatch1 = new ArrayList<>();
+		for (int i = batchSize; i < totalSize; ++i)
+		{
+			entitiesBatch1.add(when(mock(Entity.class).getIdValue()).thenReturn(String.valueOf(i + 1)).getMock());
+		}
+		when(repo.findAll(idsBatch0)).thenReturn(entitiesBatch0);
+		when(repo.findAll(idsBatch1)).thenReturn(entitiesBatch1);
+		dataService.addRepository(repo);
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("entity");
 		entityMetaData.addAttribute(idAttrName).setDataType(MolgenisFieldTypes.INT).setIdAttribute(true);
 		Query q = new QueryImpl();
@@ -152,7 +180,7 @@ public class ElasticSearchServiceTest
 		Iterator<Entity> it = searchResults.iterator();
 		for (int i = 1; i <= totalSize; ++i)
 		{
-			assertEquals(it.next().getIdValue(), i);
+			assertEquals(it.next().getIdValue(), String.valueOf(i));
 		}
 		assertFalse(it.hasNext());
 	}

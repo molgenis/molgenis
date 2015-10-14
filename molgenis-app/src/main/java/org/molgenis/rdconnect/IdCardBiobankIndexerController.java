@@ -28,22 +28,20 @@ public class IdCardBiobankIndexerController extends MolgenisPluginController
 	public static final String ID = "idcardbiobankindexer";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
-	private final IdCardBiobankService biobankMetadataService;
-	private final IdCardBiobankRepository idCardBiobankRepository;
+	private final IdCardBiobankService idCardBiobankService;
 
 	@Autowired
-	public IdCardBiobankIndexerController(IdCardBiobankService idCardBiobankService,
-			IdCardBiobankRepository idCardBiobankRepository)
+	public IdCardBiobankIndexerController(IdCardBiobankService idCardBiobankService)
 	{
 		super(URI);
-		this.biobankMetadataService = requireNonNull(idCardBiobankService);
-		this.idCardBiobankRepository = requireNonNull(idCardBiobankRepository);
+		this.idCardBiobankService = requireNonNull(idCardBiobankService);
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public String init(Model model) throws Exception
 	{
+		model.addAttribute("id_card_biobank_registry_entity_name", IdCardBiobank.ENTITY_NAME);
 		return "view-idcardbiobankindexer";
 	}
 
@@ -52,7 +50,7 @@ public class IdCardBiobankIndexerController extends MolgenisPluginController
 	@ResponseStatus(HttpStatus.OK)
 	public void refreshMetadata(Model model) throws Exception
 	{
-		idCardBiobankRepository.index(biobankMetadataService.getIdCardBiobanks());
+		idCardBiobankService.rebuildIndex();
 	}
 
 	@ExceptionHandler(value = Throwable.class)

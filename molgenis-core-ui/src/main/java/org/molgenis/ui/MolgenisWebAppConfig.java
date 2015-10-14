@@ -411,6 +411,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		repos.forEach(repo -> {
 			localSearchService.rebuildIndex(repo, repo.getEntityMetaData());
 		});
+
+		localSearchService.optimizeIndex();
 	}
 
 	@PostConstruct
@@ -496,16 +498,21 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 					return new IndexedCrudRepositorySecurityDecorator(new IndexedAutoValueRepositoryDecorator(
 							new IndexedRepositoryValidationDecorator(dataService(),
 									new IndexedRepositoryExceptionTranslatorDecorator(
-											new TransactionLogIndexedRepositoryDecorator(indexedRepos,
+											new TransactionLogIndexedRepositoryDecorator(
+													new EntityListenerIndexedRepositoryDecorator(indexedRepos),
 													transactionLogService)),
 									new EntityAttributesValidator()),
 							idGenerator), appSettings);
 				}
 
 				return new RepositorySecurityDecorator(
-						new AutoValueRepositoryDecorator(new RepositoryValidationDecorator(dataService(),
-								new TransactionLogRepositoryDecorator(repository, transactionLogService),
-								new EntityAttributesValidator()), idGenerator));
+						new AutoValueRepositoryDecorator(
+								new RepositoryValidationDecorator(dataService(),
+										new TransactionLogRepositoryDecorator(
+												new EntityListenerRepositoryDecorator(repository),
+												transactionLogService),
+										new EntityAttributesValidator()),
+								idGenerator));
 			}
 		};
 	}

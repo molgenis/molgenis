@@ -1,5 +1,7 @@
 package org.molgenis.rdconnect;
 
+import org.molgenis.data.settings.SettingsEntityListener;
+
 public interface IdCardBiobankIndexerSettings
 {
 	String getApiBaseUri();
@@ -17,4 +19,20 @@ public interface IdCardBiobankIndexerSettings
 	String getBiobankCollectionSelectionResource();
 
 	void setBiobankCollectionSelectionResource(String biobankCollectionSelectionResource);
+
+	boolean getBiobankIndexingEnabled();
+
+	void setBiobankIndexingEnabled(boolean biobankIndexing);
+
+	String getBiobankIndexingFrequency();
+
+	void setBiobankIndexingFrequency(String cronExpression);
+
+	void addListener(SettingsEntityListener settingsEntityListener);
+
+	void removeListener(SettingsEntityListener settingsEntityListener);
+
+	String getNotificationEmail();
+
+	void setNotificationEmail(String notificationEmail);
 }

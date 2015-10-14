@@ -12,12 +12,14 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Package;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.RepositoryDecorator;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.DataServiceImpl;
@@ -25,6 +27,7 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.util.DependencyResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -138,17 +141,38 @@ public class MetaDataServiceImpl implements MetaDataService
 			}
 			entityMetaDataRepository.delete(entityName);
 			if (dataService.hasRepository(entityName)) dataService.removeRepository(entityName);
+			deleteEntityPermissions(entityName);
+
 			return null;
 		});
 
 		refreshCaches();
 	}
 
+	private void deleteEntityPermissions(String entityName)
+	{
+		List<String> authorities = SecurityUtils.getEntityAuthorities(entityName);
+
+		// User permissions
+		if (dataService.hasRepository("UserAuthority"))
+		{
+			Iterable<Entity> userPermissions = dataService.query("UserAuthority").in("role", authorities).findAll();
+			dataService.delete("UserAuthority", userPermissions);
+		}
+
+		// Group permissions
+		if (dataService.hasRepository("GroupAuthority"))
+		{
+			Iterable<Entity> groupPermissions = dataService.query("GroupAuthority").in("role", authorities).findAll();
+			dataService.delete("GroupAuthority", groupPermissions);
+		}
+	}
+
 	@Transactional
 	@Override
 	public void delete(List<EntityMetaData> entities)
 	{
-		reverse(DependencyResolver.resolve(Sets.newHashSet(entities))).stream().map(emd -> emd.getName())
+		reverse(DependencyResolver.resolve(Sets.newHashSet(entities))).stream().map(EntityMetaData::getName)
 				.forEach(this::deleteEntityMeta);
 	}
 
@@ -168,8 +192,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	private ManageableRepositoryCollection getManageableRepositoryCollection(EntityMetaData emd)
 	{
 		RepositoryCollection backend = getBackend(emd);
-		if (!(backend instanceof ManageableRepositoryCollection)) throw new RuntimeException(
-				"Backend  is not a ManageableCrudRepositoryCollection");
+		if (!(backend instanceof ManageableRepositoryCollection))
+			throw new RuntimeException("Backend  is not a ManageableCrudRepositoryCollection");
 
 		return (ManageableRepositoryCollection) backend;
 	}
@@ -199,8 +223,8 @@ public class MetaDataServiceImpl implements MetaDataService
 			if (!dataService.hasRepository(emd.getName()))
 			{
 				Repository repo = backend.getRepository(emd.getName());
-				if (repo == null) throw new UnknownEntityException(String.format(
-						"Unknown entity '%s' for backend '%s'", emd.getName(), backend.getName()));
+				if (repo == null) throw new UnknownEntityException(
+						String.format("Unknown entity '%s' for backend '%s'", emd.getName(), backend.getName()));
 				Repository decoratedRepo = decoratorFactory.createDecoratedRepository(repo);
 				dataService.addRepository(decoratedRepo);
 			}
@@ -234,7 +258,24 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public synchronized Repository addEntityMeta(EntityMetaData emd)
 	{
-		return add(emd, new NonDecoratingRepositoryDecoratorFactory());
+		if (emd.getDecorator() == null)
+		{
+			return add(emd, new NonDecoratingRepositoryDecoratorFactory());
+		}
+		else
+		{
+			return add(emd, new RepositoryDecoratorFactory()
+			{
+				@Override
+				public Repository createDecoratedRepository(Repository repository)
+				{
+					RepositoryDecorator repoDecorator = emd.getDecorator();
+					repoDecorator.setTarget(repository);
+
+					return repoDecorator;
+				}
+			});
+		}
 	}
 
 	@Transactional
@@ -353,8 +394,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	public synchronized void onApplicationEvent(ContextRefreshedEvent event)
 	{
 		// Discover all backends
-		Map<String, RepositoryCollection> backendBeans = event.getApplicationContext().getBeansOfType(
-				RepositoryCollection.class);
+		Map<String, RepositoryCollection> backendBeans = event.getApplicationContext()
+				.getBeansOfType(RepositoryCollection.class);
 		backendBeans.values().forEach(this::addBackend);
 
 		// Create repositories from EntityMetaData in EntityMetaData repo
@@ -407,10 +448,9 @@ public class MetaDataServiceImpl implements MetaDataService
 	public LinkedHashMap<String, Boolean> integrationTestMetaData(RepositoryCollection repositoryCollection)
 	{
 		LinkedHashMap<String, Boolean> entitiesImportable = new LinkedHashMap<String, Boolean>();
-		StreamSupport.stream(repositoryCollection.getEntityNames().spliterator(), false).forEach(
-				entityName -> entitiesImportable.put(entityName, this
-						.canIntegrateEntityMetadataCheck(repositoryCollection.getRepository(entityName)
-								.getEntityMetaData())));
+		StreamSupport.stream(repositoryCollection.getEntityNames().spliterator(), false)
+				.forEach(entityName -> entitiesImportable.put(entityName, this.canIntegrateEntityMetadataCheck(
+						repositoryCollection.getRepository(entityName).getEntityMetaData())));
 
 		return entitiesImportable;
 	}
@@ -422,11 +462,9 @@ public class MetaDataServiceImpl implements MetaDataService
 	{
 		LinkedHashMap<String, Boolean> entitiesImportable = new LinkedHashMap<String, Boolean>();
 
-		StreamSupport.stream(newEntitiesMetaDataMap.keySet().spliterator(), false).forEach(
-				entityName -> entitiesImportable.put(
-						entityName,
-						skipEntities.contains(entityName)
-								|| this.canIntegrateEntityMetadataCheck(newEntitiesMetaDataMap.get(entityName))));
+		StreamSupport.stream(newEntitiesMetaDataMap.keySet().spliterator(), false)
+				.forEach(entityName -> entitiesImportable.put(entityName, skipEntities.contains(entityName)
+						|| this.canIntegrateEntityMetadataCheck(newEntitiesMetaDataMap.get(entityName))));
 
 		return entitiesImportable;
 	}
@@ -439,13 +477,13 @@ public class MetaDataServiceImpl implements MetaDataService
 			EntityMetaData newEntity = newEntityMetaData;
 			EntityMetaData oldEntity = dataService.getEntityMetaData(entityName);
 
-			List<AttributeMetaData> oldAtomicAttributes = StreamSupport.stream(
-					oldEntity.getAtomicAttributes().spliterator(), false).collect(
-					Collectors.<AttributeMetaData> toList());
+			List<AttributeMetaData> oldAtomicAttributes = StreamSupport
+					.stream(oldEntity.getAtomicAttributes().spliterator(), false)
+					.collect(Collectors.<AttributeMetaData> toList());
 
 			LinkedHashMap<String, AttributeMetaData> newAtomicAttributesMap = new LinkedHashMap<String, AttributeMetaData>();
-			StreamSupport.stream(newEntity.getAtomicAttributes().spliterator(), false).forEach(
-					attribute -> newAtomicAttributesMap.put(attribute.getName(), attribute));
+			StreamSupport.stream(newEntity.getAtomicAttributes().spliterator(), false)
+					.forEach(attribute -> newAtomicAttributesMap.put(attribute.getName(), attribute));
 
 			for (AttributeMetaData oldAttribute : oldAtomicAttributes)
 			{

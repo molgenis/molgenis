@@ -89,7 +89,7 @@ public interface DataService extends Iterable<Repository>
 	 * @param entityName
 	 *            entity name (case insensitive)
 	 * @param ids
-	 * @return
+	 * @return (empty) Iterable where the order of entities matches the order of ids, never null
 	 */
 	Iterable<Entity> findAll(String entityName, Iterable<Object> ids);
 
@@ -288,4 +288,7 @@ public interface DataService extends Iterable<Repository>
 	 */
 	Iterable<String> getEntityNames();
 
+	void addEntityListener(String entityName, EntityListener entityListener);
+
+	void removeEntityListener(String entityName, EntityListener entityListener);
 }

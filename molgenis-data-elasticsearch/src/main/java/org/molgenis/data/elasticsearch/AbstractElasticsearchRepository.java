@@ -7,10 +7,11 @@ import org.elasticsearch.common.primitives.Ints;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IndexedRepository;
 import org.molgenis.data.Query;
-import org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode;
+import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.transaction.annotation.Transactional;
@@ -192,5 +193,17 @@ public abstract class AbstractElasticsearchRepository implements IndexedReposito
 	public void drop()
 	{
 		elasticSearchService.delete(getEntityMetaData().getName());
+	}
+
+	@Override
+	public void addEntityListener(EntityListener entityListener)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void removeEntityListener(EntityListener entityListener)
+	{
+		throw new UnsupportedOperationException();
 	}
 }
