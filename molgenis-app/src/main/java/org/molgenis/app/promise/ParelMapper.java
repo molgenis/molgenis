@@ -46,6 +46,7 @@ import org.molgenis.app.promise.MappingReport.Status;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.MapEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,9 +61,7 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 	private final String ID = "PAREL";
 
 	private PromiseMapperFactory promiseMapperFactory;
-
 	private ProMiseDataParser promiseDataParser;
-
 	private DataService dataService;
 
 	private static final Logger LOG = LoggerFactory.getLogger(ParelMapper.class);
@@ -91,60 +90,72 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 	@Override
 	public MappingReport map(String projectName) throws IOException
 	{
+		Entity project = dataService.findOne(PromiseMappingProjectMetaData.FULLY_QUALIFIED_NAME, projectName);
+		if (project == null) throw new MolgenisDataException("Project is null");
+		
 		MappingReport report = new MappingReport();
-
-		LOG.info("Getting data from ProMISe for " + projectName);
 
 		try
 		{
-			Iterable<Entity> promiseBiobankEntities = promiseDataParser.parse(projectName, 0);
-			Iterable<Entity> promiseSampleEntities = promiseDataParser.parse(projectName, 1);
-
+			LOG.info("Getting data from ProMISe for " + projectName);
+			Iterable<Entity> promiseBiobankEntities = promiseDataParser.parse(project, 0);
+			
 			EntityMetaData targetEntityMetaData = Objects.requireNonNull(dataService
 					.getEntityMetaData(SAMPLE_COLLECTIONS_ENTITY));
-
+			
 			for (Entity promiseBiobankEntity : promiseBiobankEntities)
 			{
-				Iterable<Entity> promiseBiobankSamplesEntities = getPromiseBiobankSamples(promiseBiobankEntity,
-						promiseSampleEntities);
-
-				MapEntity targetEntity = new MapEntity(targetEntityMetaData);
-
-				targetEntity.set(BbmriNlCheatSheet.ID, null);
-				targetEntity.set(NAME, null);
+				Entity targetEntity = dataService.findOne(SAMPLE_COLLECTIONS_ENTITY, project.getString("biobank_id"));
+				
+				boolean biobankExists = true;
+				if (targetEntity == null){
+					targetEntity = new MapEntity(targetEntityMetaData);
+					
+					// fill hand coded fields with dummy data once
+					
+					targetEntity.set(NAME, "AUTOVALUE:" + project.getIdValue());
+					targetEntity.set(DESCRIPTION, "AUTOVALUE:description");
+					targetEntity.set(PUBLICATIONS, null);
+					targetEntity.set(CONTACT_PERSON, null);
+					targetEntity.set(PRINCIPAL_INVESTIGATORS, null);
+					targetEntity.set(INSTITUTES, null);
+					targetEntity.set(BIOBANKS, null);
+					targetEntity.set(WEBSITE, "AUTOVALUE:http://www.parelsnoer.org/page/Onderzoeker");
+					targetEntity.set(BIOBANK_SAMPLE_ACCESS_FEE, null);
+					targetEntity.set(BIOBANK_SAMPLE_ACCESS_JOINT_PROJECTS, null);
+					targetEntity.set(BIOBANK_SAMPLE_ACCESS_DESCRIPTION, "AUTOVALUE:description");
+					targetEntity.set(BIOBANK_SAMPLE_ACCESS_URI, null);
+					targetEntity.set(BIOBANK_DATA_ACCESS_FEE, null);
+					targetEntity.set(BIOBANK_DATA_ACCESS_JOINT_PROJECTS, null);
+					targetEntity.set(BIOBANK_DATA_ACCESS_DESCRIPTION, "AUTOVALUE:description");
+					targetEntity.set(BIOBANK_DATA_ACCESS_URI, null);
+					
+					biobankExists = false;
+				}					
+				
+				// map data from ProMISe		
+				targetEntity.set(BbmriNlCheatSheet.ID, project.getString("biobank_id"));
 				targetEntity.set(ACRONYM, null);
 				targetEntity.set(TYPE, toTypes(promiseBiobankEntity.getString("COLLECTION_TYPE")));
 				targetEntity.set(DISEASE, null);
 				targetEntity.set(DATA_CATEGORIES, toDataCategories(promiseBiobankEntity.getString("DATA_CATEGORIES")));
 				targetEntity.set(MATERIALS, null);
-				targetEntity.set(OMICS, toOmics(promiseBiobankSamplesEntities));
+				targetEntity.set(OMICS, null);
 				targetEntity.set(SEX, toGenders(promiseBiobankEntity.getString("SEX")));
 				targetEntity.set(AGE_LOW, null);
 				targetEntity.set(AGE_HIGH, null);
 				targetEntity.set(AGE_UNIT, null);
 				targetEntity.set(NUMBER_OF_DONORS, null);
-				targetEntity.set(DESCRIPTION, null);
-				targetEntity.set(PUBLICATIONS, null);
-				targetEntity.set(CONTACT_PERSON, null);
-				targetEntity.set(PRINCIPAL_INVESTIGATORS, null);
-				targetEntity.set(INSTITUTES, null);
-				targetEntity.set(BIOBANKS, null);
-				targetEntity.set(WEBSITE, null);
-				targetEntity.set(SAMPLE_ACCESS, null);
-				targetEntity.set(BIOBANK_SAMPLE_ACCESS_FEE, null);
-				targetEntity.set(BIOBANK_SAMPLE_ACCESS_JOINT_PROJECTS, null);
-				targetEntity.set(BIOBANK_SAMPLE_ACCESS_DESCRIPTION, null);
-				targetEntity.set(BIOBANK_SAMPLE_ACCESS_URI, null);
-				targetEntity.set(DATA_ACCESS, null);
-				targetEntity.set(BIOBANK_DATA_ACCESS_FEE, null);
-				targetEntity.set(BIOBANK_DATA_ACCESS_JOINT_PROJECTS, null);
-				targetEntity.set(BIOBANK_DATA_ACCESS_DESCRIPTION, null);
-				targetEntity.set(BIOBANK_DATA_ACCESS_URI, null);
 
-				dataService.add("bbmri_nl_sample_collections", targetEntity);
+				if (biobankExists){
+					dataService.update(SAMPLE_COLLECTIONS_ENTITY, targetEntity);
+				}else{
+					dataService.add(SAMPLE_COLLECTIONS_ENTITY, targetEntity);
+				}
+				
+				report.setStatus(Status.SUCCESS);				
 			}
 
-			report.setStatus(Status.SUCCESS);
 		}
 		catch (Exception e)
 		{
@@ -169,19 +180,6 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 			throw new RuntimeException("Unknown '" + REF_GENDER_TYPES + "' [" + ids.toString() + "]");
 		}
 		return genderTypes;
-	}
-
-	private Iterable<Entity> toOmics(Iterable<Entity> promiseBiobankSamplesEntities)
-	{
-		// TODO implement when mapping is known
-		Iterable<Object> ids = Arrays.asList("NAV");
-
-		Iterable<Entity> omicsTypes = dataService.findAll(REF_OMICS_DATA_TYPES, ids);
-		if (!omicsTypes.iterator().hasNext())
-		{
-			throw new RuntimeException("Unknown '" + REF_OMICS_DATA_TYPES + "' [" + ids.toString() + "]");
-		}
-		return omicsTypes;
 	}
 
 	private Iterable<Entity> toDataCategories(String promiseDataCategories)

@@ -15,6 +15,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,9 +33,9 @@ public class ProMiseDataParser
 		this.promiseClient = Objects.requireNonNull(promiseClient, "promiseClient is null");
 	}
 
-	public Iterable<Entity> parse(String projectName, Integer seqNr) throws IOException
+	public Iterable<Entity> parse(Entity project, Integer seqNr) throws IOException
 	{
-		XMLStreamReader xmlStreamReader = promiseClient.getDataForXml(projectName, seqNr.toString());
+		XMLStreamReader xmlStreamReader = promiseClient.getDataForXml(project, seqNr.toString());
 		try
 		{
 			while (xmlStreamReader.hasNext())
@@ -112,6 +113,9 @@ public class ProMiseDataParser
 					break;
 			}
 		}
+		
+		if (entities.isEmpty()) throw new MolgenisDataException("No ProMISe entities found in response");
+		
 		return entities;
 	}
 

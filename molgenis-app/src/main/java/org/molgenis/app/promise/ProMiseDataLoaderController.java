@@ -101,33 +101,33 @@ public class ProMiseDataLoaderController extends MolgenisPluginController
 		}
 	}
 
-	private void load(String biobankId, Integer seqNr, String label) throws IOException
-	{
-		Iterable<Entity> entities = promiseDataParser.parse(biobankId, seqNr);
-
-		String promiseEntityName = "promise" + '_' + label.toLowerCase();
-		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(promiseEntityName);
-		entityMetaData.setLabel("ProMISe " + label);
-		entityMetaData.addAttribute("_id").setIdAttribute(true).setAuto(true).setVisible(false).setNillable(false);
-
-		Set<String> attrNames = new HashSet<String>();
-		for (Entity entity : entities)
-		{
-			for (String attrName : entity.getAttributeNames())
-			{
-				if (!attrNames.contains(attrName))
-				{
-					entityMetaData.addAttribute(attrName).setDataType(MolgenisFieldTypes.TEXT).setNillable(true);
-					attrNames.add(attrName);
-				}
-			}
-		}
-
-		if (dataService.getMeta().getEntityMetaData(promiseEntityName) != null)
-		{
-			dataService.getMeta().deleteEntityMeta(promiseEntityName);
-		}
-		dataService.getMeta().addEntityMeta(entityMetaData);
-		dataService.add(promiseEntityName, entities);
-	}
+//	private void load(String biobankId, Integer seqNr, String label) throws IOException
+//	{
+//		Iterable<Entity> entities = promiseDataParser.parse(biobankId, seqNr);
+//
+//		String promiseEntityName = "promise" + '_' + label.toLowerCase();
+//		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(promiseEntityName);
+//		entityMetaData.setLabel("ProMISe " + label);
+//		entityMetaData.addAttribute("_id").setIdAttribute(true).setAuto(true).setVisible(false).setNillable(false);
+//
+//		Set<String> attrNames = new HashSet<String>();
+//		for (Entity entity : entities)
+//		{
+//			for (String attrName : entity.getAttributeNames())
+//			{
+//				if (!attrNames.contains(attrName))
+//				{
+//					entityMetaData.addAttribute(attrName).setDataType(MolgenisFieldTypes.TEXT).setNillable(true);
+//					attrNames.add(attrName);
+//				}
+//			}
+//		}
+//
+//		if (dataService.getMeta().getEntityMetaData(promiseEntityName) != null)
+//		{
+//			dataService.getMeta().deleteEntityMeta(promiseEntityName);
+//		}
+//		dataService.getMeta().addEntityMeta(entityMetaData);
+//		dataService.add(promiseEntityName, entities);
+//	}
 }

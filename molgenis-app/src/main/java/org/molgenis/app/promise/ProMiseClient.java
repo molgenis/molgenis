@@ -4,7 +4,9 @@ import java.io.IOException;
 
 import javax.xml.stream.XMLStreamReader;
 
+import org.molgenis.data.Entity;
+
 public interface ProMiseClient
 {
-	XMLStreamReader getDataForXml(String biobankId, String seqNr) throws IOException;
+	XMLStreamReader getDataForXml(Entity project, String seqNr) throws IOException;
 }

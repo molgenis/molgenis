@@ -22,23 +22,9 @@
 		</div>
 	</div>
 </div>
-<div class="row">
-	<div class="col-md-8 col-md-offset-2">
-		<div class="panel panel-default">
-			<div class="panel-heading">Credentials</div>
-    		<div id="data-table-container-credentials"></div>
-    	</div>
-    </div>
-</div>
-
 
 
 <script>
-
-	React.render(molgenis.ui.Table({
-			entity: "promise_PromiseCredentials",
-		}), $('#data-table-container-credentials')[0]);
-	
 	var updateControlPanel = function(){
 		$('#promise-control-panel').empty();
 		$.get(molgenis.getContextUrl() + '/projects', function(projects){
@@ -86,7 +72,7 @@
 	}
 		
 	React.render(molgenis.ui.Table({
-			entity: "promise_PromiseMappingProjects",
+			entity: "promise_PromiseMappingProject",
 			onRowAdd: updateControlPanel,
 			onRowEdit: updateControlPanel,
 			onRowDelete: updateControlPanel
