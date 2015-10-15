@@ -90,7 +90,7 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 
 	public MappingReport map(String projectName) throws IOException
 	{
-		Entity project = dataService.findOne(PromiseMappingProjectMetaData.ENTITY_NAME, projectName);
+		Entity project = dataService.findOne(PromiseMappingProjectMetaData.FULLY_QUALIFIED_NAME, projectName);
 		if (project == null) throw new MolgenisDataException("Project is null");
 		
 		LOG.info("Downloading data for " + projectName);
