@@ -146,7 +146,7 @@ public class CmdLineAnnotator
 			}
 			else
 			{
-				System.out.println("Output file already exists, please enter a different output name!");
+				System.out.println("Output file already exists, please either enter a different output name or use the '-r' option to overwrite the output file.");
 				return;
 			}
 		}
@@ -217,7 +217,7 @@ public class CmdLineAnnotator
 	 * @param annotator
 	 * @param inputVcfFile
 	 * @param outputVCFFile
-	 * @param attributesToInclude
+	 * @param options
 	 *            , the attributes of the annotator to include in the output vcf, if empty outputs all
 	 * @throws Exception
 	 */
