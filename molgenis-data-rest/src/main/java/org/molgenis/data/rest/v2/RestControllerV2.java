@@ -70,8 +70,8 @@ class RestControllerV2
 	private final MolgenisPermissionService permissionService;
 
 	// Exceptions
-	static MolgenisDataException EXCEPTION_MAX_ENTITIES_EXCEEDED = new MolgenisDataException("Operation failed. Max "
-			+ MAX_ENTITIES + " entities are allowed");
+	static MolgenisDataException EXCEPTION_MAX_ENTITIES_EXCEEDED = new MolgenisDataException(
+			"Operation failed. Max " + MAX_ENTITIES + " entities are allowed");
 	static MolgenisDataException EXCEPTION_NO_ENTITIES = new MolgenisDataException(
 			"Operation failed. No entities to update");
 
@@ -82,15 +82,15 @@ class RestControllerV2
 
 	static UnknownAttributeException createUnknownAttributeException(String entityName, String attributeName)
 	{
-		return new UnknownAttributeException("Operation failed. Unknown attribute: '" + attributeName
-				+ "', of entity: '" + entityName + "'");
+		return new UnknownAttributeException(
+				"Operation failed. Unknown attribute: '" + attributeName + "', of entity: '" + entityName + "'");
 	}
 
 	static MolgenisDataAccessException createMolgenisDataAccessExceptionReadOnlyAttribute(String entityName,
 			String attributeName)
 	{
-		return new MolgenisDataAccessException("Operation failed. Attribute '" + attributeName + "' of entity '"
-				+ entityName + "' is readonly");
+		return new MolgenisDataAccessException(
+				"Operation failed. Attribute '" + attributeName + "' of entity '" + entityName + "' is readonly");
 	}
 
 	static MolgenisDataException createMolgenisDataExceptionUnknownIdentifier(int count)
@@ -187,6 +187,29 @@ class RestControllerV2
 	}
 
 	/**
+	 * Retrieve attribute meta data
+	 * 
+	 * @param entityName
+	 * @param attributeName
+	 * @return
+	 */
+	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public AttributeMetaDataResponseV2 retrieveEntityAttributeMeta(@PathVariable("entityName") String entityName,
+			@PathVariable("attributeName") String attributeName)
+	{
+		return createAttributeMetaDataResponse(entityName, attributeName);
+	}
+
+	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public AttributeMetaDataResponseV2 retrieveEntityAttributeMetaPost(@PathVariable("entityName") String entityName,
+			@PathVariable("attributeName") String attributeName)
+	{
+		return createAttributeMetaDataResponse(entityName, attributeName);
+	}
+
+	/**
 	 * Try to create multiple entities in one transaction. If one fails all fails.
 	 * 
 	 * @param entityName
@@ -220,13 +243,12 @@ class RestControllerV2
 			{
 				String id = entity.getIdValue().toString();
 				ids.add(id.toString());
-				responseBody.getResources().add(
-						new AutoValue_ResourcesResponseV2(Href.concatEntityHref(RestControllerV2.BASE_URI, entityName,
-								id)));
+				responseBody.getResources().add(new AutoValue_ResourcesResponseV2(
+						Href.concatEntityHref(RestControllerV2.BASE_URI, entityName, id)));
 			}
 
-			responseBody.setLocation(Href.concatEntityCollectionHref(RestControllerV2.BASE_URI, entityName, meta
-					.getIdAttribute().getName(), ids));
+			responseBody.setLocation(Href.concatEntityCollectionHref(RestControllerV2.BASE_URI, entityName,
+					meta.getIdAttribute().getName(), ids));
 
 			response.setStatus(HttpServletResponse.SC_CREATED);
 			return responseBody;
@@ -406,6 +428,31 @@ class RestControllerV2
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
+	private AttributeMetaDataResponseV2 createAttributeMetaDataResponse(String entityName, String attributeName)
+	{
+		EntityMetaData entity = dataService.getEntityMetaData(entityName);
+		if (entity == null)
+		{
+			throw new UnknownEntityException(entityName + " not found");
+		}
+
+		AttributeMetaData attribute = entity.getAttribute(attributeName);
+		if (attribute == null)
+		{
+			throw new RuntimeException("attribute : " + attributeName + " does not exist!");
+		}
+
+		AttributeFilter attributeFilter = new AttributeFilter();
+		Iterable<AttributeMetaData> attributeParts = attribute.getAttributeParts();
+
+		if (attributeParts != null)
+		{
+			attributeParts.forEach(attributePart -> attributeFilter.add(attributePart.getName()));
+		}
+
+		return new AttributeMetaDataResponseV2(entityName, attribute, attributeFilter, permissionService);
+	}
+
 	private EntityCollectionResponseV2 createEntityCollectionResponse(String entityName,
 			EntityCollectionRequestV2 request)
 	{
@@ -530,7 +577,8 @@ class RestControllerV2
 						break;
 					case DATE_TIME:
 						Date dateTimeValue = entity.getDate(attrName);
-						String dateTimeValueStr = dateTimeValue != null ? getDateTimeFormat().format(dateTimeValue) : null;
+						String dateTimeValueStr = dateTimeValue != null ? getDateTimeFormat().format(dateTimeValue)
+								: null;
 						responseData.put(attrName, dateTimeValueStr);
 						break;
 					case DECIMAL:
