@@ -37,6 +37,7 @@ import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.Href;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.file.FileMeta;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.util.ErrorMessageResponse;
@@ -44,6 +45,7 @@ import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -406,6 +408,15 @@ class RestControllerV2
 			throw RestControllerV2.createMolgenisDataExceptionUnknownIdentifier(count);
 		}
 		return id.toString();
+	}
+	
+	@ExceptionHandler(MolgenisValidationException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	@ResponseBody
+	public ErrorMessageResponse handleValidationException(MolgenisValidationException e)
+	{
+		LOG.info("Validation exception occurred.", e);
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
 	@ExceptionHandler(RuntimeException.class)
