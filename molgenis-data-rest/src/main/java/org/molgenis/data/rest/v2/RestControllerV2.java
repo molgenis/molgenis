@@ -227,7 +227,7 @@ class RestControllerV2
 			@RequestBody EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
 	{
 		final EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		this.generalChecksForBachOperations(request, meta, entityName);
+		this.generalCheckForBatchOperations(request, meta, entityName);
 
 		try
 		{
@@ -277,7 +277,7 @@ class RestControllerV2
 			@RequestBody EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
 	{
 		final EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		this.generalChecksForBachOperations(request, meta, entityName);
+		this.generalCheckForBatchOperations(request, meta, entityName);
 
 		try
 		{
@@ -314,7 +314,7 @@ class RestControllerV2
 			HttpServletResponse response) throws Exception
 	{
 		final EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		this.generalChecksForBachOperations(request, meta, entityName);
+		this.generalCheckForBatchOperations(request, meta, entityName);
 
 		try
 		{
@@ -374,7 +374,7 @@ class RestControllerV2
 	 * @param entityName
 	 * @throws Exception
 	 */
-	private void generalChecksForBachOperations(@Valid EntityCollectionBatchRequestV2 request, EntityMetaData meta,
+	private void generalCheckForBatchOperations(@Valid EntityCollectionBatchRequestV2 request, EntityMetaData meta,
 			String entityName) throws Exception
 	{
 		if (request.getEntities().isEmpty())
