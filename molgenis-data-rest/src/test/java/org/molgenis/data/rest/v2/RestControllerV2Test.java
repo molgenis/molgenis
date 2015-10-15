@@ -51,6 +51,8 @@ import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.ConstraintViolation;
+import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.file.FileStore;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -456,6 +458,21 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		ResultActions resultActions = mockMvc
 				.perform(put(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
 				.andExpect(status().isInternalServerError()).andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(header().doesNotExist("Location"));
+
+		this.assertEqualsErrorMessage(resultActions, e);
+	}
+	
+	@Test
+	public void testUpdateEntitiesMolgenisValidationException() throws Exception
+	{
+		Exception e = new MolgenisValidationException(Collections.singleton(new ConstraintViolation("Message", 5)));
+		doThrow(e).when(dataService).update(Matchers.eq(ENTITY_NAME), Matchers.anyListOf(MapEntity.class));
+
+		String content = "{entities:[{id:'p1', name:'Example data'}]}";
+		ResultActions resultActions = mockMvc
+				.perform(put(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
+				.andExpect(status().is4xxClientError()).andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(header().doesNotExist("Location"));
 
 		this.assertEqualsErrorMessage(resultActions, e);
