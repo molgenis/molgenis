@@ -50,7 +50,7 @@ class EntityMetaDataResponseV2
 			MolgenisPermissionService permissionService)
 	{
 		String name = meta.getName();
-		this.href = Href.concatMetaEntityHref(BASE_URI, name);
+		this.href = Href.concatMetaEntityHrefV2(BASE_URI, name);
 		this.hrefCollection = String.format("%s/%s", BASE_URI, name); // FIXME apply Href escaping fix
 
 		this.name = name;
