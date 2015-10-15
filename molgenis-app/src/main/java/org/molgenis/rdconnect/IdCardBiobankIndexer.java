@@ -2,12 +2,11 @@ package org.molgenis.rdconnect;
 
 public interface IdCardBiobankIndexer
 {
-	public enum IndexAction
-	{
-		MANUAL, SCHEDULED
-	}
-
-	void rebuildIndex(IndexAction indexAction);
+	/**
+	 * @param username
+	 *            user who requested the index rebuild or null if the rebuild was initiated by the system
+	 */
+	void rebuildIndex(String username);
 
 	void onIndexConfigurationUpdate(String updateMessage);
 }

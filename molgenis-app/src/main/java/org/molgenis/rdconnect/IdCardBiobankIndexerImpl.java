@@ -32,7 +32,7 @@ public class IdCardBiobankIndexerImpl implements IdCardBiobankIndexer
 	}
 
 	@Override
-	public void rebuildIndex(IndexAction indexAction)
+	public void rebuildIndex(String username)
 	{
 		IdCardIndexingEvent idCardIndexingEvent = new IdCardIndexingEvent(dataService);
 		RuntimeException runtimeException = null;
@@ -41,7 +41,7 @@ public class IdCardBiobankIndexerImpl implements IdCardBiobankIndexer
 			idCardBiobankRepository.rebuildIndex();
 
 			idCardIndexingEvent.setStatus(IdCardIndexingEventStatus.SUCCESS);
-			idCardIndexingEvent.setMessage(String.format("Index rebuild [%s]", indexAction.toString()));
+			idCardIndexingEvent.setMessage(String.format("Index rebuild [%s]", username != null ? username : "System"));
 		}
 		catch (RuntimeException e)
 		{
@@ -56,7 +56,7 @@ public class IdCardBiobankIndexerImpl implements IdCardBiobankIndexer
 
 		if (idCardIndexingEvent.getStatus() == IdCardIndexingEventStatus.FAILED)
 		{
-			if (indexAction == IndexAction.SCHEDULED)
+			if (username == null)
 			{
 				mailSender.send(createMessage(idCardIndexingEvent));
 			}

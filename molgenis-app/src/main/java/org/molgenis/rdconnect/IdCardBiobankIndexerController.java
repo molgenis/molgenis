@@ -6,6 +6,8 @@ import static org.molgenis.rdconnect.IdCardBiobankIndexerController.URI;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
+import org.quartz.Trigger.TriggerState;
+import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -47,10 +50,23 @@ public class IdCardBiobankIndexerController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/reindex")
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	@ResponseStatus(HttpStatus.OK)
-	public void refreshMetadata(Model model) throws Exception
+	@ResponseBody
+	public IndexRebuildStatus scheduleIndexRebuild(Model model) throws Exception
 	{
-		idCardBiobankService.rebuildIndex();
+		TriggerKey triggerKey = idCardBiobankService.scheduleIndexRebuild();
+		TriggerState triggerStatus = idCardBiobankService.getIndexRebuildStatus(triggerKey);
+		return new IndexRebuildStatus(triggerKey, triggerStatus);
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/status/{triggerGroup}/{triggerName}")
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@ResponseBody
+	public IndexRebuildStatus getIndexRebuildStatus(@PathVariable String triggerGroup, @PathVariable String triggerName)
+			throws Exception
+	{
+		TriggerKey triggerKey = new TriggerKey(triggerName, triggerGroup);
+		TriggerState triggerStatus = idCardBiobankService.getIndexRebuildStatus(triggerKey);
+		return new IndexRebuildStatus(triggerKey, triggerStatus);
 	}
 
 	@ExceptionHandler(value = Throwable.class)
@@ -60,5 +76,37 @@ public class IdCardBiobankIndexerController extends MolgenisPluginController
 	{
 		LOG.error("", t);
 		return new ErrorMessageResponse(new ErrorMessage(t.getMessage()));
+	}
+
+	private static class IndexRebuildStatus
+	{
+		private final String triggerName;
+		private final String triggerGroup;
+		private final String triggerStatus;
+
+		public IndexRebuildStatus(TriggerKey triggerKey, TriggerState triggerStatus)
+		{
+			this.triggerName = requireNonNull(triggerKey).getName();
+			this.triggerGroup = requireNonNull(triggerKey).getGroup();
+			this.triggerStatus = requireNonNull(triggerStatus).toString();
+		}
+
+		@SuppressWarnings("unused")
+		public String getTriggerName()
+		{
+			return triggerName;
+		}
+
+		@SuppressWarnings("unused")
+		public String getTriggerGroup()
+		{
+			return triggerGroup;
+		}
+
+		@SuppressWarnings("unused")
+		public String getTriggerStatus()
+		{
+			return triggerStatus;
+		}
 	}
 }
