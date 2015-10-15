@@ -61,6 +61,11 @@ public interface SearchService
 
 	void delete(Iterable<? extends Entity> entities, EntityMetaData entityMetaData);
 
+	/**
+	 * Deletes data and meta data
+	 * 
+	 * @param entityName
+	 */
 	void delete(String entityName);
 
 	/**

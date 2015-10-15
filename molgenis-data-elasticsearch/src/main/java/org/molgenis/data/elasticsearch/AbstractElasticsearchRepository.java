@@ -178,6 +178,7 @@ public abstract class AbstractElasticsearchRepository implements IndexedReposito
 	public void deleteAll()
 	{
 		elasticSearchService.delete(getEntityMetaData().getName());
+		create();
 		elasticSearchService.refresh();
 	}
 
@@ -185,7 +186,6 @@ public abstract class AbstractElasticsearchRepository implements IndexedReposito
 	public void create()
 	{
 		elasticSearchService.createMappings(getEntityMetaData());
-
 	}
 
 	@Override
