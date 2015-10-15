@@ -64,11 +64,10 @@ public abstract class AbstractEntitiesImporter implements EntitiesImporter
 				{
 					for (ConstraintViolation violation : e.getViolations())
 					{
-						if (violation.getRownr() > 0)
+						if (null != violation.getRownr())
 						{
-							// Rownr +1 for header
 							violation.setImportInfo(String.format("Sheet: '%s', row: %d", entityName,
-									violation.getRownr() + 1));
+									violation.getRownr()));
 						}
 						else
 						{
