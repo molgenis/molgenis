@@ -89,7 +89,7 @@ public interface DataService extends Iterable<Repository>
 	 * @param entityName
 	 *            entity name (case insensitive)
 	 * @param ids
-	 * @return (empty) Iterable where the order of entities matches the order of ids, never null
+	 * @return
 	 */
 	Iterable<Entity> findAll(String entityName, Iterable<Object> ids);
 
