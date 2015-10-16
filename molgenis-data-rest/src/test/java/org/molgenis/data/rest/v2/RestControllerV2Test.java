@@ -404,7 +404,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testCreateEntitiesExceptions2() throws Exception
 	{
 		this.testCreateEntitiesExceptions("entity", this.createMaxPlusOneEntitiesAsTestContent(),
-				"Number of entities must be between 1 and 1000.");
+				"Number of entities cannot be more than 1000.");
 	}
 
 	/**
@@ -500,7 +500,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testUpdateEntitiesExceptions2() throws Exception
 	{
 		this.testUpdateEntitiesExceptions("entity", this.createMaxPlusOneEntitiesAsTestContent(),
-				"Number of entities must be between 1 and 1000.");
+				"Number of entities cannot be more than 1000.");
 	}
 
 	/**
@@ -551,7 +551,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testUpdateEntitiesSpecificAttributeExceptions2() throws Exception
 	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
-				this.createMaxPlusOneEntitiesAsTestContent(), "Number of entities must be between 1 and 1000.");
+				this.createMaxPlusOneEntitiesAsTestContent(), "Number of entities cannot be more than 1000.");
 	}
 
 	/**
