@@ -310,8 +310,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 
 		boolean prettyPrint = true;
 		mockMvc = MockMvcBuilders.standaloneSetup(restControllerV2)
-				.setMessageConverters(new GsonHttpMessageConverter(prettyPrint)).setConversionService(conversionService)
-				.build();
+				.setMessageConverters(new GsonHttpMessageConverter(prettyPrint))
+				.setConversionService(conversionService).build();
 	}
 
 	@Test
@@ -356,8 +356,9 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieveResourcePartialResponseSubSubAttributes() throws Exception
 	{
-		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs",
-				attrXref + '(' + refAttrId + ',' + refAttrRef + '(' + refRefAttrValue + ')' + ')'))
+		mockMvc.perform(
+				get(HREF_ENTITY_ID).param("attrs",
+						attrXref + '(' + refAttrId + ',' + refAttrRef + '(' + refRefAttrValue + ')' + ')'))
 				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string(resourcePartialSubSubAttributesResponse));
 	}
@@ -443,8 +444,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testUpdateEntities() throws Exception
 	{
 		String content = "{entities:[{id:'p1', name:'Witte Piet'}, {id:'p2', name:'Zwarte Piet'}]}";
-		mockMvc.perform(put(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
-				.andExpect(status().isOk());
+		mockMvc.perform(put(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON)).andExpect(
+				status().isOk());
 
 		verify(dataService, times(1)).update(Matchers.eq(ENTITY_NAME), Matchers.anyListOf(MapEntity.class));
 	}
@@ -467,7 +468,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void testUpdateEntitiesMolgenisValidationException() throws Exception
 	{
-		Exception e = new MolgenisValidationException(Collections.singleton(new ConstraintViolation("Message", 5)));
+		Exception e = new MolgenisValidationException(Collections.singleton(new ConstraintViolation("Message", Long
+				.valueOf(5L))));
 		doThrow(e).when(dataService).update(Matchers.eq(ENTITY_NAME), Matchers.anyListOf(MapEntity.class));
 
 		String content = "{entities:[{id:'p1', name:'Example data'}]}";
@@ -511,8 +513,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void testUpdateEntitiesExceptions3() throws Exception
 	{
-		this.testUpdateEntitiesExceptions("entity2", "{entities:[{email:'test@email.com'}]}",
-				RestControllerV2.createUnknownEntityException("entity2").getMessage());
+		this.testUpdateEntitiesExceptions("entity2", "{entities:[{email:'test@email.com'}]}", RestControllerV2
+				.createUnknownEntityException("entity2").getMessage());
 
 	}
 
@@ -599,8 +601,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testUpdateEntitiesSpecificAttributeExceptions6() throws Exception
 	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
-				"{entities:[{id:0,email:'test@email.com',extraAttribute:'test'}]}",
-				RestControllerV2.createMolgenisDataExceptionIdentifierAndValue().getMessage());
+				"{entities:[{id:0,email:'test@email.com',extraAttribute:'test'}]}", RestControllerV2
+						.createMolgenisDataExceptionIdentifierAndValue().getMessage());
 	}
 
 	/**
@@ -612,8 +614,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testUpdateEntitiesSpecificAttributeExceptions7() throws Exception
 	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
-				"{entities:[{email:'test@email.com', extraAttribute:'test'}]}",
-				RestControllerV2.createMolgenisDataExceptionUnknownIdentifier(0).getMessage());
+				"{entities:[{email:'test@email.com', extraAttribute:'test'}]}", RestControllerV2
+						.createMolgenisDataExceptionUnknownIdentifier(0).getMessage());
 	}
 
 	/**
@@ -632,16 +634,16 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 
 	private void testCreateEntitiesExceptions(String entityName, String content, String message) throws Exception
 	{
-		ResultActions resultActions = mockMvc.perform(
-				post(RestControllerV2.BASE_URI + "/" + entityName).content(content).contentType(APPLICATION_JSON));
+		ResultActions resultActions = mockMvc.perform(post(RestControllerV2.BASE_URI + "/" + entityName).content(
+				content).contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions, message);
 	}
 
 	private void testUpdateEntitiesExceptions(String entityName, String content, String message) throws Exception
 	{
-		ResultActions resultActions = mockMvc.perform(
-				put(RestControllerV2.BASE_URI + "/" + entityName).content(content).contentType(APPLICATION_JSON));
+		ResultActions resultActions = mockMvc.perform(put(RestControllerV2.BASE_URI + "/" + entityName)
+				.content(content).contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions, message);
 	}
@@ -649,15 +651,15 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	private void testUpdateEntitiesSpecificAttributeExceptions(String entityName, String attributeName, String content,
 			String message) throws Exception
 	{
-		ResultActions resultActions = mockMvc
-				.perform(put(RestControllerV2.BASE_URI + "/" + entityName + "/" + attributeName).content(content)
-						.contentType(APPLICATION_JSON));
+		ResultActions resultActions = mockMvc.perform(put(
+				RestControllerV2.BASE_URI + "/" + entityName + "/" + attributeName).content(content).contentType(
+				APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions, message);
 	}
 
-	private void assertEqualsErrorMessage(ResultActions resultActions, String message)
-			throws JsonSyntaxException, UnsupportedEncodingException
+	private void assertEqualsErrorMessage(ResultActions resultActions, String message) throws JsonSyntaxException,
+			UnsupportedEncodingException
 	{
 		MvcResult result = resultActions.andReturn();
 		String contentAsString = result.getResponse().getContentAsString();
@@ -715,8 +717,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		@Bean
 		public RestControllerV2 restController()
 		{
-			return new RestControllerV2(dataService(), molgenisPermissionService(),
-					new RestService(dataService(), idGenerator(), fileStore()));
+			return new RestControllerV2(dataService(), molgenisPermissionService(), new RestService(dataService(),
+					idGenerator(), fileStore()));
 		}
 
 	}
