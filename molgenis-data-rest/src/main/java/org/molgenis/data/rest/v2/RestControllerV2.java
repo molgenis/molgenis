@@ -46,6 +46,7 @@ import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.Href;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.file.FileMeta;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.util.ErrorMessageResponse;
@@ -53,6 +54,7 @@ import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -191,6 +193,29 @@ class RestControllerV2
 			@Valid EntityCollectionRequestV2 request)
 	{
 		return createEntityCollectionResponse(entityName, request);
+	}
+
+	/**
+	 * Retrieve attribute meta data
+	 * 
+	 * @param entityName
+	 * @param attributeName
+	 * @return
+	 */
+	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public AttributeMetaDataResponseV2 retrieveEntityAttributeMeta(@PathVariable("entityName") String entityName,
+			@PathVariable("attributeName") String attributeName)
+	{
+		return createAttributeMetaDataResponse(entityName, attributeName);
+	}
+
+	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public AttributeMetaDataResponseV2 retrieveEntityAttributeMetaPost(@PathVariable("entityName") String entityName,
+			@PathVariable("attributeName") String attributeName)
+	{
+		return createAttributeMetaDataResponse(entityName, attributeName);
 	}
 
 	/**
@@ -393,6 +418,15 @@ class RestControllerV2
 		}
 		return id.toString();
 	}
+	
+	@ExceptionHandler(MolgenisValidationException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	@ResponseBody
+	public ErrorMessageResponse handleValidationException(MolgenisValidationException e)
+	{
+		LOG.info("Validation exception occurred.", e);
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+	}
 
 	@ExceptionHandler(RuntimeException.class)
 	@ResponseStatus(INTERNAL_SERVER_ERROR)
@@ -401,6 +435,31 @@ class RestControllerV2
 	{
 		LOG.error("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+	}
+
+	private AttributeMetaDataResponseV2 createAttributeMetaDataResponse(String entityName, String attributeName)
+	{
+		EntityMetaData entity = dataService.getEntityMetaData(entityName);
+		if (entity == null)
+		{
+			throw new UnknownEntityException(entityName + " not found");
+		}
+
+		AttributeMetaData attribute = entity.getAttribute(attributeName);
+		if (attribute == null)
+		{
+			throw new RuntimeException("attribute : " + attributeName + " does not exist!");
+		}
+
+		AttributeFilter attributeFilter = new AttributeFilter();
+		Iterable<AttributeMetaData> attributeParts = attribute.getAttributeParts();
+
+		if (attributeParts != null)
+		{
+			attributeParts.forEach(attributePart -> attributeFilter.add(attributePart.getName()));
+		}
+
+		return new AttributeMetaDataResponseV2(entityName, attribute, attributeFilter, permissionService);
 	}
 
 	private EntityCollectionResponseV2 createEntityCollectionResponse(String entityName,
