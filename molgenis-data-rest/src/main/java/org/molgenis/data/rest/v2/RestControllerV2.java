@@ -1,9 +1,11 @@
 package org.molgenis.data.rest.v2;
 
+import static com.google.common.collect.Lists.transform;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
@@ -45,8 +47,9 @@ import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -54,6 +57,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import com.google.common.collect.Lists;
 
 @Controller
 @RequestMapping(BASE_URI)
@@ -68,12 +73,6 @@ class RestControllerV2
 	private final DataService dataService;
 	private final RestService restService;
 	private final MolgenisPermissionService permissionService;
-
-	// Exceptions
-	static MolgenisDataException EXCEPTION_MAX_ENTITIES_EXCEEDED = new MolgenisDataException(
-			"Operation failed. Max " + MAX_ENTITIES + " entities are allowed");
-	static MolgenisDataException EXCEPTION_NO_ENTITIES = new MolgenisDataException(
-			"Operation failed. No entities to update");
 
 	static UnknownEntityException createUnknownEntityException(String entityName)
 	{
@@ -224,10 +223,13 @@ class RestControllerV2
 	@RequestMapping(value = "/{entityName}", method = POST, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public EntityCollectionBatchCreateResponseBodyV2 createEntities(@PathVariable("entityName") String entityName,
-			@RequestBody EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
+			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
 	{
 		final EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		this.generalCheckForBatchOperations(request, meta, entityName);
+		if (meta == null)
+		{
+			throw createUnknownEntityException(entityName);
+		}
 
 		try
 		{
@@ -274,10 +276,13 @@ class RestControllerV2
 	 */
 	@RequestMapping(value = "/{entityName}", method = PUT)
 	public synchronized void updateEntities(@PathVariable("entityName") String entityName,
-			@RequestBody EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
+			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
 	{
 		final EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		this.generalCheckForBatchOperations(request, meta, entityName);
+		if (meta == null)
+		{
+			throw createUnknownEntityException(entityName);
+		}
 
 		try
 		{
@@ -310,30 +315,33 @@ class RestControllerV2
 	@RequestMapping(value = "/{entityName}/{attributeName}", method = PUT)
 	@ResponseStatus(OK)
 	public synchronized void updateAttribute(@PathVariable("entityName") String entityName,
-			@PathVariable("attributeName") String attributeName, @RequestBody EntityCollectionBatchRequestV2 request,
-			HttpServletResponse response) throws Exception
+			@PathVariable("attributeName") String attributeName,
+			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
 	{
 		final EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		this.generalCheckForBatchOperations(request, meta, entityName);
+		if (meta == null)
+		{
+			throw createUnknownEntityException(entityName);
+		}
 
 		try
 		{
 			AttributeMetaData attr = meta.getAttribute(attributeName);
 			if (attr == null)
 			{
-				throw RestControllerV2.createUnknownAttributeException(entityName, attributeName);
+				throw createUnknownAttributeException(entityName, attributeName);
 			}
 
 			if (attr.isReadonly())
 			{
-				throw RestControllerV2.createMolgenisDataAccessExceptionReadOnlyAttribute(entityName, attributeName);
+				throw createMolgenisDataAccessExceptionReadOnlyAttribute(entityName, attributeName);
 			}
 
 			final List<Entity> entities = request.getEntities().stream().filter(e -> e.size() == 2)
 					.map(e -> this.restService.toEntity(meta, e)).collect(Collectors.toList());
 			if (entities.size() != request.getEntities().size())
 			{
-				throw RestControllerV2.createMolgenisDataExceptionIdentifierAndValue();
+				throw createMolgenisDataExceptionIdentifierAndValue();
 			}
 
 			final List<Entity> updatedEntities = new ArrayList<Entity>();
@@ -345,7 +353,7 @@ class RestControllerV2
 				Entity originalEntity = dataService.findOne(entityName, id);
 				if (originalEntity == null)
 				{
-					throw RestControllerV2.createUnknownEntityExceptionNotValidId(id);
+					throw createUnknownEntityExceptionNotValidId(id);
 				}
 
 				Object value = this.restService.toEntityValue(attr, entity.get(attributeName));
@@ -366,34 +374,6 @@ class RestControllerV2
 	}
 
 	/**
-	 * Repeating checks: 1. Checks if EntityCollection Batch Request V2 request is null 2. Checks if the entities max is
-	 * exceeded. 3. Existing entity metadata
-	 * 
-	 * @param request
-	 * @param meta
-	 * @param entityName
-	 * @throws Exception
-	 */
-	private void generalCheckForBatchOperations(@Valid EntityCollectionBatchRequestV2 request, EntityMetaData meta,
-			String entityName) throws Exception
-	{
-		if (request.getEntities().isEmpty())
-		{
-			throw RestControllerV2.EXCEPTION_NO_ENTITIES;
-		}
-
-		if (request.getEntities().size() > MAX_ENTITIES)
-		{
-			throw RestControllerV2.EXCEPTION_MAX_ENTITIES_EXCEEDED;
-		}
-
-		if (meta == null)
-		{
-			throw RestControllerV2.createUnknownEntityException(entityName);
-		}
-	}
-
-	/**
 	 * Get entity id and perform a check, throwing an MolgenisDataException when necessary
 	 * 
 	 * @param entity
@@ -405,13 +385,22 @@ class RestControllerV2
 		Object id = entity.getIdValue();
 		if (null == id)
 		{
-			throw RestControllerV2.createMolgenisDataExceptionUnknownIdentifier(count);
+			throw createMolgenisDataExceptionUnknownIdentifier(count);
 		}
 		return id.toString();
 	}
-	
+
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	@ResponseStatus(BAD_REQUEST)
+	public @ResponseBody ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException exception)
+	{
+		LOG.info("Invalid method arguments.", exception);
+		return new ErrorMessageResponse(transform(exception.getBindingResult().getFieldErrors(),
+				error -> new ErrorMessage(error.getDefaultMessage())));
+	}
+
 	@ExceptionHandler(MolgenisValidationException.class)
-	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	@ResponseStatus(BAD_REQUEST)
 	@ResponseBody
 	public ErrorMessageResponse handleValidationException(MolgenisValidationException e)
 	{
@@ -424,7 +413,7 @@ class RestControllerV2
 	@ResponseBody
 	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
-		LOG.error("", e);
+		LOG.error("Runtime exception occurred.", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
