@@ -15,6 +15,6 @@ import com.google.auto.value.AutoValue;
 public abstract class EntityCollectionBatchRequestV2
 {
 	@NotEmpty(message = "Please provide at least one entity in the entities property.")
-	@Size(min = 1, max = RestControllerV2.MAX_ENTITIES, message = "Number of entities must be between {min} and {max}.")
+	@Size(max = RestControllerV2.MAX_ENTITIES, message = "Number of entities cannot be more than {max}.")
 	public abstract List<Map<String, Object>> getEntities();
 }
