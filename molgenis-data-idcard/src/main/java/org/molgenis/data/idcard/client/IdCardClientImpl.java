@@ -1,4 +1,4 @@
-package org.molgenis.rdconnect;
+package org.molgenis.data.idcard.client;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
@@ -23,6 +23,10 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.idcard.mapper.IdCardBiobankMapper;
+import org.molgenis.data.idcard.model.IdCardBiobank;
+import org.molgenis.data.idcard.model.IdCardOrganization;
+import org.molgenis.data.idcard.settings.IdCardIndexerSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,22 +37,22 @@ import com.google.gson.stream.JsonReader;
 import autovalue.shaded.com.google.common.common.primitives.Ints;
 
 @Service
-public class IdCardBiobankClientImpl implements IdCardBiobankClient
+public class IdCardClientImpl implements IdCardClient
 {
-	private static final Logger LOG = LoggerFactory.getLogger(IdCardBiobankClientImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(IdCardClientImpl.class);
 
-	private static final long ID_CARD_DEFAULT_TIMEOUT = 5000l; // 5s
+	private static final long ID_CARD_DEFAULT_TIMEOUT = 5000l; // 5s // FIXME add to settings
 
 	private final HttpClient httpClient;
-	private final IdCardBiobankIndexerSettings idCardBiobankIndexerSettings;
+	private final IdCardIndexerSettings idCardIndexerSettings;
 	private final IdCardBiobankMapper idCardBiobankMapper;
 
 	@Autowired
-	public IdCardBiobankClientImpl(HttpClient httpClient, IdCardBiobankIndexerSettings idCardBiobankIndexerSettings,
+	public IdCardClientImpl(HttpClient httpClient, IdCardIndexerSettings idCardIndexerSettings,
 			IdCardBiobankMapper idCardBiobankMapper)
 	{
 		this.httpClient = requireNonNull(httpClient);
-		this.idCardBiobankIndexerSettings = requireNonNull(idCardBiobankIndexerSettings);
+		this.idCardIndexerSettings = requireNonNull(idCardIndexerSettings);
 		this.idCardBiobankMapper = requireNonNull(idCardBiobankMapper);
 	}
 
@@ -62,8 +66,8 @@ public class IdCardBiobankClientImpl implements IdCardBiobankClient
 	public Entity getIdCardBiobank(String id, long timeout)
 	{
 		// Construct uri
-		StringBuilder uriBuilder = new StringBuilder().append(idCardBiobankIndexerSettings.getApiBaseUri()).append('/')
-				.append(idCardBiobankIndexerSettings.getBiobankResource()).append('/').append(id);
+		StringBuilder uriBuilder = new StringBuilder().append(idCardIndexerSettings.getApiBaseUri()).append('/')
+				.append(idCardIndexerSettings.getBiobankResource()).append('/').append(id);
 
 		return getIdCardResource(uriBuilder.toString(), new JsonResponseHandler<IdCardBiobank>()
 		{
@@ -94,8 +98,8 @@ public class IdCardBiobankClientImpl implements IdCardBiobankClient
 		{
 			throw new RuntimeException(e1);
 		}
-		StringBuilder uriBuilder = new StringBuilder().append(idCardBiobankIndexerSettings.getApiBaseUri()).append('/')
-				.append(idCardBiobankIndexerSettings.getBiobankCollectionSelectionResource()).append('/').append(value);
+		StringBuilder uriBuilder = new StringBuilder().append(idCardIndexerSettings.getApiBaseUri()).append('/')
+				.append(idCardIndexerSettings.getBiobankCollectionSelectionResource()).append('/').append(value);
 
 		return getIdCardResource(uriBuilder.toString(), new JsonResponseHandler<Iterable<Entity>>()
 		{
@@ -140,8 +144,8 @@ public class IdCardBiobankClientImpl implements IdCardBiobankClient
 	public Iterable<Entity> getIdCardBiobanks(long timeout)
 	{
 		// Construct uri
-		StringBuilder uriBuilder = new StringBuilder().append(idCardBiobankIndexerSettings.getApiBaseUri()).append('/')
-				.append(idCardBiobankIndexerSettings.getBiobankCollectionResource());
+		StringBuilder uriBuilder = new StringBuilder().append(idCardIndexerSettings.getApiBaseUri()).append('/')
+				.append(idCardIndexerSettings.getBiobankCollectionResource());
 
 		// Retrieve biobank ids
 		Iterable<IdCardOrganization> idCardOrganizations = getIdCardResource(uriBuilder.toString(),

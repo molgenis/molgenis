@@ -1,8 +1,9 @@
-package org.molgenis.rdconnect;
+package org.molgenis.data.idcard.indexer;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.rdconnect.IdCardBiobankIndexerController.URI;
+import static org.molgenis.data.idcard.indexer.IdCardIndexerController.URI;
 
+import org.molgenis.data.idcard.model.IdCardBiobank;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
@@ -24,24 +25,24 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
 @RequestMapping(URI)
-public class IdCardBiobankIndexerController extends MolgenisPluginController
+public class IdCardIndexerController extends MolgenisPluginController
 {
-	private static final Logger LOG = LoggerFactory.getLogger(IdCardBiobankIndexerController.class);
+	private static final Logger LOG = LoggerFactory.getLogger(IdCardIndexerController.class);
 
 	public static final String ID = "idcardbiobankindexer";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
-	private final IdCardBiobankService idCardBiobankService;
+	private final IdCardIndexerService idCardIndexerService;
 
 	@Autowired
-	public IdCardBiobankIndexerController(IdCardBiobankService idCardBiobankService)
+	public IdCardIndexerController(IdCardIndexerService idCardIndexerService)
 	{
 		super(URI);
-		this.idCardBiobankService = requireNonNull(idCardBiobankService);
+		this.idCardIndexerService = requireNonNull(idCardIndexerService);
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
-	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@PreAuthorize("hasAnyRole('ROLE_SU')") // FIXME also allow users with read or write permissions
 	public String init(Model model) throws Exception
 	{
 		model.addAttribute("id_card_biobank_registry_entity_name", IdCardBiobank.ENTITY_NAME);
@@ -49,23 +50,23 @@ public class IdCardBiobankIndexerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/reindex")
-	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@PreAuthorize("hasAnyRole('ROLE_SU')") // FIXME also allow users with write permissions
 	@ResponseBody
 	public IndexRebuildStatus scheduleIndexRebuild(Model model) throws Exception
 	{
-		TriggerKey triggerKey = idCardBiobankService.scheduleIndexRebuild();
-		TriggerState triggerStatus = idCardBiobankService.getIndexRebuildStatus(triggerKey);
+		TriggerKey triggerKey = idCardIndexerService.scheduleIndexRebuild();
+		TriggerState triggerStatus = idCardIndexerService.getIndexRebuildStatus(triggerKey);
 		return new IndexRebuildStatus(triggerKey, triggerStatus);
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/status/{triggerGroup}/{triggerName}")
-	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@PreAuthorize("hasAnyRole('ROLE_SU')") // FIXME also allow users with write permissions
 	@ResponseBody
 	public IndexRebuildStatus getIndexRebuildStatus(@PathVariable String triggerGroup, @PathVariable String triggerName)
 			throws Exception
 	{
 		TriggerKey triggerKey = new TriggerKey(triggerName, triggerGroup);
-		TriggerState triggerStatus = idCardBiobankService.getIndexRebuildStatus(triggerKey);
+		TriggerState triggerStatus = idCardIndexerService.getIndexRebuildStatus(triggerKey);
 		return new IndexRebuildStatus(triggerKey, triggerStatus);
 	}
 

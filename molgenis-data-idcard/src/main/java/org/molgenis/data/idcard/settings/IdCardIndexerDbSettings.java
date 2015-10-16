@@ -1,29 +1,24 @@
-package org.molgenis.rdconnect;
+package org.molgenis.data.idcard.settings;
 
 import static org.molgenis.MolgenisFieldTypes.BOOL;
 import static org.molgenis.MolgenisFieldTypes.EMAIL;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 
+import org.molgenis.data.idcard.indexer.IdCardIndexerController;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 @Component
-public class IdCardBiobankIndexerDbSettings extends DefaultSettingsEntity implements IdCardBiobankIndexerSettings
+public class IdCardIndexerDbSettings extends DefaultSettingsEntity implements IdCardIndexerSettings
 {
 	private static final long serialVersionUID = 1L;
 
-	private static final String ID = IdCardBiobankIndexerController.ID;
+	private static final String ID = IdCardIndexerController.ID;
 
-	private final ApplicationEventPublisher applicationEventPublisher;
-
-	@Autowired
-	public IdCardBiobankIndexerDbSettings(ApplicationEventPublisher applicationEventPublisher)
+	public IdCardIndexerDbSettings()
 	{
 		super(ID);
-		this.applicationEventPublisher = applicationEventPublisher;
 	}
 
 	@Component
@@ -130,7 +125,6 @@ public class IdCardBiobankIndexerDbSettings extends DefaultSettingsEntity implem
 	public void setBiobankIndexingEnabled(boolean biobankIndexing)
 	{
 		set(Meta.BIOBANK_INDEXING_ENABLED, biobankIndexing);
-		applicationEventPublisher.publishEvent(new IdCardBiobankIndexingEnabledEvent(this, biobankIndexing));
 	}
 
 	@Override
@@ -144,7 +138,6 @@ public class IdCardBiobankIndexerDbSettings extends DefaultSettingsEntity implem
 	{
 		// TODO validate if cronExpession is valid, not here but in decorator
 		set(Meta.BIOBANK_INDEXING_FREQUENCY, cronExpression);
-		applicationEventPublisher.publishEvent(new IdCardBiobankIndexingFrequencyEvent(this, cronExpression));
 	}
 
 	@Override

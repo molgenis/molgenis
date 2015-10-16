@@ -59,6 +59,7 @@
         <mysql.connector.java.version>5.1.28</mysql.connector.java.version>
         <hibernate.validator.version>4.2.0.Final</hibernate.validator.version>
         <httpclient.version>4.5.1</httpclient.version>
+        <google.guava.version>16.0.1</google.guava.version>
         
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
         <molgenis.build.timestamp>${maven.build.timestamp}</molgenis.build.timestamp>
@@ -725,6 +726,7 @@
         <module>molgenis-data-elasticsearch</module>
         <module>molgenis-data-semanticsearch</module>
         <module>molgenis-data-validation</module>
+        <module>molgenis-data-idcard</module>
         <module>molgenis-python</module>
         <module>molgenis-r</module>
         <module>molgenis-charts</module>

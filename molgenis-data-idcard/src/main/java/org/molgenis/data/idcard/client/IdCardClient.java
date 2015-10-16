@@ -1,11 +1,11 @@
-package org.molgenis.rdconnect;
+package org.molgenis.data.idcard.client;
 
 import org.molgenis.data.Entity;
 
 /**
  * ID-Cards: http://rd-connect.eu/platform/biobanks/id-cards-linking-up-rare-disease-research-across-the-world/
  */
-public interface IdCardBiobankClient
+public interface IdCardClient
 {
 	/**
 	 * Return all biobanks from ID-Cards as entities

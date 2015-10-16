@@ -1,4 +1,4 @@
-package org.molgenis.rdconnect;
+package org.molgenis.data.idcard;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.RepositoryCapability.AGGREGATEABLE;
@@ -23,6 +23,9 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
+import org.molgenis.data.idcard.client.IdCardClient;
+import org.molgenis.data.idcard.model.IdCardBiobank;
+import org.molgenis.data.idcard.model.IdCardBiobankMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,21 +35,23 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 
 @org.springframework.stereotype.Repository
-public class IdCardBiobankRepository implements Repository // TODO extends AbstractRepository?
+public class IdCardBiobankRepository implements Repository // TODO check if we can extend from AbstractRepository
 {
 	private static final Logger LOG = LoggerFactory.getLogger(IdCardBiobankRepository.class);
 
+	private static final long ID_CARD_INDEX_REBUILD_TIMEOUT = 60000l; // 60s // FIXME add to settings
+
 	private final IdCardBiobankMetaData idCardBiobankMetaData;
-	private final IdCardBiobankClient idCardBiobankClient;
+	private final IdCardClient idCardClient;
 	private final ElasticsearchService elasticsearchService;
 	private final DataService dataService;
 
 	@Autowired
-	public IdCardBiobankRepository(IdCardBiobankMetaData idCardBiobankMetaData, IdCardBiobankClient idCardBiobankClient,
+	public IdCardBiobankRepository(IdCardBiobankMetaData idCardBiobankMetaData, IdCardClient idCardClient,
 			ElasticsearchService elasticsearchService, DataService dataService)
 	{
 		this.idCardBiobankMetaData = idCardBiobankMetaData;
-		this.idCardBiobankClient = requireNonNull(idCardBiobankClient);
+		this.idCardClient = requireNonNull(idCardClient);
 		this.elasticsearchService = requireNonNull(elasticsearchService);
 		this.dataService = requireNonNull(dataService);
 	}
@@ -54,7 +59,7 @@ public class IdCardBiobankRepository implements Repository // TODO extends Abstr
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		return idCardBiobankClient.getIdCardBiobanks().iterator();
+		return idCardClient.getIdCardBiobanks().iterator();
 	}
 
 	@Override
@@ -120,7 +125,7 @@ public class IdCardBiobankRepository implements Repository // TODO extends Abstr
 	{
 		try
 		{
-			return idCardBiobankClient.getIdCardBiobank(id.toString());
+			return idCardClient.getIdCardBiobank(id.toString());
 		}
 		catch (RuntimeException e)
 		{
@@ -133,7 +138,7 @@ public class IdCardBiobankRepository implements Repository // TODO extends Abstr
 	{
 		try
 		{
-			return idCardBiobankClient.getIdCardBiobanks(Iterables.transform(ids, new Function<Object, String>()
+			return idCardClient.getIdCardBiobanks(Iterables.transform(ids, new Function<Object, String>()
 			{
 				@Override
 				public String apply(Object id)
@@ -239,13 +244,13 @@ public class IdCardBiobankRepository implements Repository // TODO extends Abstr
 	}
 
 	@Override
-	public void addEntityListener(EntityListener entityListener) // TODO extends AbstractRepository?
+	public void addEntityListener(EntityListener entityListener)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void removeEntityListener(EntityListener entityListener) // TODO extends AbstractRepository?
+	public void removeEntityListener(EntityListener entityListener)
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -253,7 +258,7 @@ public class IdCardBiobankRepository implements Repository // TODO extends Abstr
 	public void rebuildIndex()
 	{
 		LOG.trace("Indexing ID-Card biobanks ...");
-		Iterable<? extends Entity> entities = idCardBiobankClient.getIdCardBiobanks(60000l);
+		Iterable<? extends Entity> entities = idCardClient.getIdCardBiobanks(ID_CARD_INDEX_REBUILD_TIMEOUT);
 
 		EntityMetaData entityMeta = getEntityMetaData();
 		if (!elasticsearchService.hasMapping(entityMeta))

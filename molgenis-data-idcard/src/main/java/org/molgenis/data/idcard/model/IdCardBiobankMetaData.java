@@ -1,4 +1,4 @@
-package org.molgenis.rdconnect;
+package org.molgenis.data.idcard.model;
 
 import static org.molgenis.MolgenisFieldTypes.DATETIME;
 import static org.molgenis.MolgenisFieldTypes.EMAIL;
@@ -6,6 +6,7 @@ import static org.molgenis.MolgenisFieldTypes.HYPERLINK;
 import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 
+import org.molgenis.data.idcard.IdCardRepositoryCollection;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.stereotype.Component;
 

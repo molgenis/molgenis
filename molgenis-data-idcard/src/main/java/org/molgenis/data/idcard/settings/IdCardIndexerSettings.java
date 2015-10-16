@@ -1,8 +1,8 @@
-package org.molgenis.rdconnect;
+package org.molgenis.data.idcard.settings;
 
 import org.molgenis.data.settings.SettingsEntityListener;
 
-public interface IdCardBiobankIndexerSettings
+public interface IdCardIndexerSettings
 {
 	String getApiBaseUri();
 

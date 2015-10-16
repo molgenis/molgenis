@@ -1,4 +1,4 @@
-package org.molgenis.rdconnect;
+package org.molgenis.data.idcard.model;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;

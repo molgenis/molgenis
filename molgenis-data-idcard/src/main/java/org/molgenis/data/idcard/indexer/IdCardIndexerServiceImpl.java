@@ -1,22 +1,24 @@
-package org.molgenis.rdconnect;
+package org.molgenis.data.idcard.indexer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.idcard.indexer.IdCardIndexerJob.JOB_USERNAME;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.idcard.model.IdCardIndexingEvent;
+import org.molgenis.data.idcard.model.IdCardIndexingEventStatus;
+import org.molgenis.data.idcard.settings.IdCardIndexerSettings;
 import org.molgenis.data.settings.SettingsEntityListener;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.quartz.CronScheduleBuilder;
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -35,17 +37,16 @@ import org.springframework.stereotype.Service;
 import com.google.common.io.BaseEncoding;
 
 @Service
-public class IdCardBiobankServiceImpl implements IdCardBiobankService, ApplicationListener<ContextRefreshedEvent>
+public class IdCardIndexerServiceImpl implements IdCardIndexerService, ApplicationListener<ContextRefreshedEvent>
 {
-	private static final Logger LOG = LoggerFactory.getLogger(IdCardBiobankServiceImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(IdCardIndexerServiceImpl.class);
 
 	private static final String TRIGGER_GROUP = "idcard";
 	private static final String JOB_GROUP = "idcard";
-	private static final String JOB_USERNAME = "username";
 	private static final String INDEX_REBUILD_JOB_KEY = "indexRebuild";
 
-	private final IdCardBiobankIndexer idCardBiobankIndexer;
-	private final IdCardBiobankIndexerSettings idCardBiobankIndexerSettings;
+	private final DataService dataService;
+	private final IdCardIndexerSettings idCardIndexerSettings;
 	private final Scheduler scheduler;
 	/**
 	 * Salt used to compute trigger name for user scheduled index rebuild jobs
@@ -57,11 +58,11 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService, Applicati
 	private final String triggerNameScheduled;
 
 	@Autowired
-	public IdCardBiobankServiceImpl(IdCardBiobankIndexer idCardBiobankIndexer,
-			IdCardBiobankIndexerSettings idCardBiobankIndexerSettings, Scheduler scheduler)
+	public IdCardIndexerServiceImpl(DataService dataService, IdCardIndexerSettings idCardBiobankIndexerSettings,
+			Scheduler scheduler)
 	{
-		this.idCardBiobankIndexer = requireNonNull(idCardBiobankIndexer);
-		this.idCardBiobankIndexerSettings = requireNonNull(idCardBiobankIndexerSettings);
+		this.dataService = requireNonNull(dataService);
+		this.idCardIndexerSettings = requireNonNull(idCardBiobankIndexerSettings);
 		this.scheduler = requireNonNull(scheduler);
 
 		this.triggerNameSalt = UUID.randomUUID().toString();
@@ -71,7 +72,7 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService, Applicati
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-		idCardBiobankIndexerSettings.addListener(new SettingsEntityListener()
+		idCardIndexerSettings.addListener(new SettingsEntityListener()
 		{
 			@Override
 			public void postUpdate(Entity entity)
@@ -157,7 +158,7 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService, Applicati
 		JobDetail jobDetail = scheduler.getJobDetail(jobKey);
 		if (jobDetail == null)
 		{
-			jobDetail = JobBuilder.newJob(IdCardIndexJob.class).withIdentity(jobKey).build();
+			jobDetail = JobBuilder.newJob(IdCardIndexerJob.class).withIdentity(jobKey).build();
 			scheduler.scheduleJob(jobDetail, triggerBuilder.build());
 		}
 		else
@@ -171,9 +172,9 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService, Applicati
 	private void updateIndexerScheduler(boolean initScheduler) throws SchedulerException
 	{
 		JobKey jobKey = getIndexRebuildJobKey();
-		if (idCardBiobankIndexerSettings.getBiobankIndexingEnabled())
+		if (idCardIndexerSettings.getBiobankIndexingEnabled())
 		{
-			String biobankIndexingFrequency = idCardBiobankIndexerSettings.getBiobankIndexingFrequency();
+			String biobankIndexingFrequency = idCardIndexerSettings.getBiobankIndexingFrequency();
 			TriggerBuilder<?> triggerBuilder = createCronTrigger(biobankIndexingFrequency);
 			if (!scheduler.checkExists(jobKey))
 			{
@@ -182,7 +183,7 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService, Applicati
 
 				if (!initScheduler)
 				{
-					idCardBiobankIndexer.onIndexConfigurationUpdate("Indexing enabled");
+					onIndexConfigurationUpdate("Indexing enabled");
 				}
 			}
 			else
@@ -202,7 +203,7 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService, Applicati
 					if (!initScheduler)
 					{
 						String updateMessage = String.format("Indexing schedule update [%s]", biobankIndexingFrequency);
-						idCardBiobankIndexer.onIndexConfigurationUpdate(updateMessage);
+						onIndexConfigurationUpdate(updateMessage);
 					}
 				}
 			}
@@ -216,7 +217,7 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService, Applicati
 
 				if (!initScheduler)
 				{
-					idCardBiobankIndexer.onIndexConfigurationUpdate("Indexing disabled");
+					onIndexConfigurationUpdate("Indexing disabled");
 				}
 			}
 		}
@@ -233,27 +234,14 @@ public class IdCardBiobankServiceImpl implements IdCardBiobankService, Applicati
 				.withSchedule(CronScheduleBuilder.cronSchedule(cronExpression));
 	}
 
-	@DisallowConcurrentExecution
-	public static class IdCardIndexJob implements Job
+	private void onIndexConfigurationUpdate(String updateMessage)
 	{
-		@Autowired
-		private IdCardBiobankIndexer idCardBiobankIndexer;
-
-		@Override
-		public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException
-		{
-			try
-			{
-				LOG.info("Executing scheduled rebuild index job ...");
-				String username = jobExecutionContext.getMergedJobDataMap().getString(JOB_USERNAME);
-				idCardBiobankIndexer.rebuildIndex(username);
-				LOG.info("Executed scheduled rebuild index job");
-			}
-			catch (Throwable t)
-			{
-				LOG.error("An error occured rebuilding index", t);
-			}
-
-		}
+		// write log event to db
+		IdCardIndexingEvent idCardIndexingEvent = new IdCardIndexingEvent(dataService);
+		idCardIndexingEvent.setStatus(IdCardIndexingEventStatus.CONFIGURATION_CHANGE);
+		idCardIndexingEvent.setMessage(updateMessage);
+		RunAsSystemProxy.runAsSystem(() -> {
+			dataService.add(IdCardIndexingEvent.ENTITY_NAME, idCardIndexingEvent);
+		});
 	}
 }

@@ -1,8 +1,10 @@
-package org.molgenis.rdconnect;
+package org.molgenis.data.idcard.mapper;
 
 import java.io.IOException;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.idcard.model.IdCardBiobank;
+import org.molgenis.data.idcard.model.IdCardOrganization;
 
 import com.google.gson.stream.JsonReader;
 
