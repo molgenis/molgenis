@@ -67,7 +67,7 @@ public abstract class AbstractEntitiesImporter implements EntitiesImporter
 						if (null != violation.getRownr())
 						{
 							violation.setImportInfo(String.format("Sheet: '%s', row: %d", entityName,
-									violation.getRownr()));
+									violation.getRownr() + 1));
 						}
 						else
 						{
