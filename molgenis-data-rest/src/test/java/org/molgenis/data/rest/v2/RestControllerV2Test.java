@@ -51,6 +51,8 @@ import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.ConstraintViolation;
+import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.file.FileStore;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -65,9 +67,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -307,8 +311,26 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 
 		boolean prettyPrint = true;
 		mockMvc = MockMvcBuilders.standaloneSetup(restControllerV2)
-				.setMessageConverters(new GsonHttpMessageConverter(prettyPrint))
-				.setConversionService(conversionService).build();
+				.setMessageConverters(new GsonHttpMessageConverter(prettyPrint)).setConversionService(conversionService)
+				.build();
+	}
+
+	@Test
+	public void retrieveAtrributeMetaData()
+	{
+		Assert.assertEquals(restControllerV2.retrieveEntityAttributeMeta(ENTITY_NAME, "id").getHref(),
+				"/api/v2/entity/meta/id");
+		Assert.assertEquals(restControllerV2.retrieveEntityAttributeMeta(ENTITY_NAME, "id").getName(), "id");
+		Assert.assertEquals(restControllerV2.retrieveEntityAttributeMeta(ENTITY_NAME, "id").getDescription(), null);
+	}
+
+	@Test
+	public void retrieveAtrributeMetaDataPost()
+	{
+		Assert.assertEquals(restControllerV2.retrieveEntityAttributeMetaPost(ENTITY_NAME, "id").getHref(),
+				"/api/v2/entity/meta/id");
+		Assert.assertEquals(restControllerV2.retrieveEntityAttributeMetaPost(ENTITY_NAME, "id").getName(), "id");
+		Assert.assertEquals(restControllerV2.retrieveEntityAttributeMetaPost(ENTITY_NAME, "id").getDescription(), null);
 	}
 
 	@Test
@@ -353,9 +375,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieveResourcePartialResponseSubSubAttributes() throws Exception
 	{
-		mockMvc.perform(
-				get(HREF_ENTITY_ID).param("attrs",
-						attrXref + '(' + refAttrId + ',' + refAttrRef + '(' + refRefAttrValue + ')' + ')'))
+		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs",
+				attrXref + '(' + refAttrId + ',' + refAttrRef + '(' + refRefAttrValue + ')' + ')'))
 				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string(resourcePartialSubSubAttributesResponse));
 	}
@@ -389,7 +410,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void testCreateEntitiesExceptions1() throws Exception
 	{
-		this.testCreateEntitiesExceptions("entity", "{entities:[]}", RestControllerV2.EXCEPTION_NO_ENTITIES);
+		this.testCreateEntitiesExceptions("entity", "{entities:[]}",
+				"Please provide at least one entity in the entities property.");
 	}
 
 	/**
@@ -401,7 +423,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testCreateEntitiesExceptions2() throws Exception
 	{
 		this.testCreateEntitiesExceptions("entity", this.createMaxPlusOneEntitiesAsTestContent(),
-				RestControllerV2.EXCEPTION_MAX_ENTITIES_EXCEEDED);
+				"Number of entities cannot be more than 1000.");
 	}
 
 	/**
@@ -413,7 +435,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testCreateEntitiesExceptions3() throws Exception
 	{
 		this.testCreateEntitiesExceptions("entity2", "{entities:[{email:'test@email.com', extraAttribute:'test'}]}",
-				RestControllerV2.createUnknownEntityException("entity2"));
+				RestControllerV2.createUnknownEntityException("entity2").getMessage());
 	}
 
 	/**
@@ -433,21 +455,21 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 				.andExpect(status().isInternalServerError()).andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(header().doesNotExist("Location"));
 
-		this.assertEqualsErrorMessage(resultActions, e);
+		this.assertEqualsErrorMessage(resultActions, e.getMessage());
 	}
 
 	@Test
 	public void testUpdateEntities() throws Exception
 	{
 		String content = "{entities:[{id:'p1', name:'Witte Piet'}, {id:'p2', name:'Zwarte Piet'}]}";
-		mockMvc.perform(put(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON)).andExpect(
-				status().isOk());
+		mockMvc.perform(put(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
+				.andExpect(status().isOk());
 
 		verify(dataService, times(1)).update(Matchers.eq(ENTITY_NAME), Matchers.anyListOf(MapEntity.class));
 	}
 
 	@Test
-	public void testUpdateEntitiesSystemException() throws Exception
+	public void testUpdateEntitiesMolgenisDataException() throws Exception
 	{
 		Exception e = new MolgenisDataException("Check if this exception is not swallowed by the system");
 		doThrow(e).when(dataService).update(Matchers.eq(ENTITY_NAME), Matchers.anyListOf(MapEntity.class));
@@ -458,7 +480,22 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 				.andExpect(status().isInternalServerError()).andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(header().doesNotExist("Location"));
 
-		this.assertEqualsErrorMessage(resultActions, e);
+		this.assertEqualsErrorMessage(resultActions, e.getMessage());
+	}
+
+	@Test
+	public void testUpdateEntitiesMolgenisValidationException() throws Exception
+	{
+		Exception e = new MolgenisValidationException(Collections.singleton(new ConstraintViolation("Message", 5)));
+		doThrow(e).when(dataService).update(Matchers.eq(ENTITY_NAME), Matchers.anyListOf(MapEntity.class));
+
+		String content = "{entities:[{id:'p1', name:'Example data'}]}";
+		ResultActions resultActions = mockMvc
+				.perform(put(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
+				.andExpect(status().is4xxClientError()).andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(header().doesNotExist("Location"));
+
+		this.assertEqualsErrorMessage(resultActions, e.getMessage());
 	}
 
 	/**
@@ -469,7 +506,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void testUpdateEntitiesExceptions1() throws Exception
 	{
-		this.testUpdateEntitiesExceptions("entity", "{entities:[]}", RestControllerV2.EXCEPTION_NO_ENTITIES);
+		this.testUpdateEntitiesExceptions("entity", "{entities:[]}",
+				"Please provide at least one entity in the entities property.");
 	}
 
 	/**
@@ -481,7 +519,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testUpdateEntitiesExceptions2() throws Exception
 	{
 		this.testUpdateEntitiesExceptions("entity", this.createMaxPlusOneEntitiesAsTestContent(),
-				RestControllerV2.EXCEPTION_MAX_ENTITIES_EXCEEDED);
+				"Number of entities cannot be more than 1000.");
 	}
 
 	/**
@@ -493,7 +531,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testUpdateEntitiesExceptions3() throws Exception
 	{
 		this.testUpdateEntitiesExceptions("entity2", "{entities:[{email:'test@email.com'}]}",
-				RestControllerV2.createUnknownEntityException("entity2"));
+				RestControllerV2.createUnknownEntityException("entity2").getMessage());
 
 	}
 
@@ -520,7 +558,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testUpdateEntitiesSpecificAttributeExceptions1() throws Exception
 	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email", "{entities:[]}",
-				RestControllerV2.EXCEPTION_NO_ENTITIES);
+				"Please provide at least one entity in the entities property.");
 	}
 
 	/**
@@ -532,7 +570,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testUpdateEntitiesSpecificAttributeExceptions2() throws Exception
 	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
-				this.createMaxPlusOneEntitiesAsTestContent(), RestControllerV2.EXCEPTION_MAX_ENTITIES_EXCEEDED);
+				this.createMaxPlusOneEntitiesAsTestContent(), "Number of entities cannot be more than 1000.");
 	}
 
 	/**
@@ -544,7 +582,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testUpdateEntitiesSpecificAttributeExceptions3() throws Exception
 	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity2", "email", "{entities:[{email:'test@email.com'}]}",
-				RestControllerV2.createUnknownEntityException("entity2"));
+				RestControllerV2.createUnknownEntityException("entity2").getMessage());
 	}
 
 	/**
@@ -556,7 +594,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testUpdateEntitiesSpecificAttributeExceptions4() throws Exception
 	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email2", "{entities:[{email:'test@email.com'}]}",
-				RestControllerV2.createUnknownAttributeException("entity", "email2"));
+				RestControllerV2.createUnknownAttributeException("entity", "email2").getMessage());
 	}
 
 	/**
@@ -568,7 +606,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testUpdateEntitiesSpecificAttributeExceptions5() throws Exception
 	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "decimal", "{entities:[{decimal:'42'}]}",
-				RestControllerV2.createMolgenisDataAccessExceptionReadOnlyAttribute("entity", "decimal"));
+				RestControllerV2.createMolgenisDataAccessExceptionReadOnlyAttribute("entity", "decimal").getMessage());
 	}
 
 	/**
@@ -581,7 +619,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
 				"{entities:[{id:0,email:'test@email.com',extraAttribute:'test'}]}",
-				RestControllerV2.createMolgenisDataExceptionIdentifierAndValue());
+				RestControllerV2.createMolgenisDataExceptionIdentifierAndValue().getMessage());
 	}
 
 	/**
@@ -594,7 +632,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
 				"{entities:[{email:'test@email.com', extraAttribute:'test'}]}",
-				RestControllerV2.createMolgenisDataExceptionUnknownIdentifier(0));
+				RestControllerV2.createMolgenisDataExceptionUnknownIdentifier(0).getMessage());
 	}
 
 	/**
@@ -608,42 +646,44 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
 				"{entities:[{id:4,email:'test@email.com'}]}",
-				RestControllerV2.createUnknownEntityExceptionNotValidId("4.0"));
+				RestControllerV2.createUnknownEntityExceptionNotValidId("4.0").getMessage());
 	}
 
-	private void testCreateEntitiesExceptions(String entityName, String content, Exception expected) throws Exception
+	private void testCreateEntitiesExceptions(String entityName, String content, String message) throws Exception
 	{
-		ResultActions resultActions = mockMvc.perform(post(RestControllerV2.BASE_URI + "/" + entityName).content(
-				content).contentType(APPLICATION_JSON));
+		ResultActions resultActions = mockMvc.perform(
+				post(RestControllerV2.BASE_URI + "/" + entityName).content(content).contentType(APPLICATION_JSON));
 
-		this.assertEqualsErrorMessage(resultActions, expected);
+		this.assertEqualsErrorMessage(resultActions, message);
 	}
 
-	private void testUpdateEntitiesExceptions(String entityName, String content, Exception expected) throws Exception
+	private void testUpdateEntitiesExceptions(String entityName, String content, String message) throws Exception
 	{
-		ResultActions resultActions = mockMvc.perform(put(RestControllerV2.BASE_URI + "/" + entityName)
-				.content(content).contentType(APPLICATION_JSON));
+		ResultActions resultActions = mockMvc.perform(
+				put(RestControllerV2.BASE_URI + "/" + entityName).content(content).contentType(APPLICATION_JSON));
 
-		this.assertEqualsErrorMessage(resultActions, expected);
+		this.assertEqualsErrorMessage(resultActions, message);
 	}
 
 	private void testUpdateEntitiesSpecificAttributeExceptions(String entityName, String attributeName, String content,
-			Exception expected) throws Exception
+			String message) throws Exception
 	{
-		ResultActions resultActions = mockMvc.perform(put(
-				RestControllerV2.BASE_URI + "/" + entityName + "/" + attributeName).content(content).contentType(
-				APPLICATION_JSON));
+		ResultActions resultActions = mockMvc
+				.perform(put(RestControllerV2.BASE_URI + "/" + entityName + "/" + attributeName).content(content)
+						.contentType(APPLICATION_JSON));
 
-		this.assertEqualsErrorMessage(resultActions, expected);
+		this.assertEqualsErrorMessage(resultActions, message);
 	}
 
-	private void assertEqualsErrorMessage(ResultActions resultActions, Exception expected) throws JsonSyntaxException,
-			UnsupportedEncodingException
+	private void assertEqualsErrorMessage(ResultActions resultActions, String message)
+			throws JsonSyntaxException, UnsupportedEncodingException
 	{
+		MvcResult result = resultActions.andReturn();
+		String contentAsString = result.getResponse().getContentAsString();
+		System.out.println("content!" + contentAsString);
 		Gson gson = new Gson();
-		ResponseErrors errors = gson.fromJson(resultActions.andReturn().getResponse().getContentAsString(),
-				ResponseErrors.class);
-		assertEquals(errors.getErrors().get(0).getMessage(), expected.getMessage());
+		ResponseErrors errors = gson.fromJson(contentAsString, ResponseErrors.class);
+		assertEquals(errors.getErrors().get(0).getMessage(), message);
 	}
 
 	private String createMaxPlusOneEntitiesAsTestContent()
@@ -694,199 +734,96 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		@Bean
 		public RestControllerV2 restController()
 		{
-			return new RestControllerV2(dataService(), molgenisPermissionService(), new RestService(dataService(),
-					idGenerator(), fileStore()));
+			return new RestControllerV2(dataService(), molgenisPermissionService(),
+					new RestService(dataService(), idGenerator(), fileStore()));
 		}
+
 	}
 
-	private String resourceResponse = "{\n"
-			+ "  \"_meta\": {\n"
-			+ "    \"href\": \"/api/v2/entity/meta\",\n"
-			+ "    \"hrefCollection\": \"/api/v2/entity\",\n"
-			+ "    \"name\": \"entity\",\n"
-			+ "    \"label\": \"entity\",\n"
-			+ "    \"attributes\": [\n"
-			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/id\",\n"
-			+ "        \"fieldType\": \"STRING\",\n"
-			+ "        \"name\": \"id\",\n"
-			+ "        \"label\": \"id\",\n"
-			+ "        \"attributes\": [],\n"
-			+ "        \"maxLength\": 255,\n"
-			+ "        \"auto\": false,\n"
-			+ "        \"nillable\": true,\n"
-			+ "        \"readOnly\": true,\n"
-			+ "        \"labelAttribute\": false,\n"
-			+ "        \"unique\": true,\n"
-			+ "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n"
-			+ "        \"aggregateable\": false\n"
-			+ "      },\n"
-			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/bool\",\n"
-			+ "        \"fieldType\": \"BOOL\",\n"
-			+ "        \"name\": \"bool\",\n"
-			+ "        \"label\": \"bool\",\n"
-			+ "        \"attributes\": [],\n"
-			+ "        \"auto\": false,\n"
-			+ "        \"nillable\": true,\n"
-			+ "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n"
-			+ "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n"
-			+ "        \"aggregateable\": false\n"
-			+ "      },\n"
-			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/categorical\",\n"
-			+ "        \"fieldType\": \"CATEGORICAL\",\n"
-			+ "        \"name\": \"categorical\",\n"
-			+ "        \"label\": \"categorical\",\n"
-			+ "        \"attributes\": [],\n"
-			+ "        \"refEntity\": {\n"
-			+ "          \"href\": \"/api/v2/refEntity/meta\",\n"
-			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n"
-			+ "          \"name\": \"refEntity\",\n"
-			+ "          \"label\": \"refEntity\",\n"
-			+ "          \"attributes\": [\n"
-			+ "            {\n"
-			+ "              \"href\": \"/api/v1/refEntity/meta/id\",\n"
-			+ "              \"fieldType\": \"STRING\",\n"
-			+ "              \"name\": \"id\",\n"
-			+ "              \"label\": \"id\",\n"
-			+ "              \"attributes\": [],\n"
-			+ "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n"
-			+ "              \"nillable\": true,\n"
-			+ "              \"readOnly\": true,\n"
-			+ "              \"labelAttribute\": false,\n"
-			+ "              \"unique\": true,\n"
-			+ "              \"visible\": true,\n"
-			+ "              \"lookupAttribute\": false,\n"
-			+ "              \"aggregateable\": false\n"
-			+ "            }\n"
-			+ "          ],\n"
-			+ "          \"labelAttribute\": \"id\",\n"
-			+ "          \"idAttribute\": \"id\",\n"
-			+ "          \"lookupAttributes\": [],\n"
-			+ "          \"isAbstract\": false,\n"
-			+ "          \"writable\": false\n"
-			+ "        },\n"
-			+ "        \"auto\": false,\n"
-			+ "        \"nillable\": true,\n"
-			+ "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n"
-			+ "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n"
-			+ "        \"aggregateable\": false\n"
-			+ "      },\n"
-			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/categorical_mref\",\n"
-			+ "        \"fieldType\": \"CATEGORICAL_MREF\",\n"
-			+ "        \"name\": \"categorical_mref\",\n"
-			+ "        \"label\": \"categorical_mref\",\n"
-			+ "        \"attributes\": [],\n"
-			+ "        \"refEntity\": {\n"
-			+ "          \"href\": \"/api/v2/refEntity/meta\",\n"
-			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n"
-			+ "          \"name\": \"refEntity\",\n"
-			+ "          \"label\": \"refEntity\",\n"
-			+ "          \"attributes\": [\n"
-			+ "            {\n"
-			+ "              \"href\": \"/api/v1/refEntity/meta/id\",\n"
-			+ "              \"fieldType\": \"STRING\",\n"
-			+ "              \"name\": \"id\",\n"
-			+ "              \"label\": \"id\",\n"
-			+ "              \"attributes\": [],\n"
-			+ "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n"
-			+ "              \"nillable\": true,\n"
-			+ "              \"readOnly\": true,\n"
-			+ "              \"labelAttribute\": false,\n"
-			+ "              \"unique\": true,\n"
-			+ "              \"visible\": true,\n"
-			+ "              \"lookupAttribute\": false,\n"
-			+ "              \"aggregateable\": false\n"
-			+ "            }\n"
-			+ "          ],\n"
-			+ "          \"labelAttribute\": \"id\",\n"
-			+ "          \"idAttribute\": \"id\",\n"
-			+ "          \"lookupAttributes\": [],\n"
-			+ "          \"isAbstract\": false,\n"
-			+ "          \"writable\": false\n"
-			+ "        },\n"
-			+ "        \"auto\": false,\n"
-			+ "        \"nillable\": true,\n"
-			+ "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n"
-			+ "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n"
-			+ "        \"aggregateable\": false\n"
-			+ "      },\n"
-			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/compound\",\n"
-			+ "        \"fieldType\": \"COMPOUND\",\n"
-			+ "        \"name\": \"compound\",\n"
-			+ "        \"label\": \"compound\",\n"
-			+ "        \"attributes\": [\n"
-			+ "          {\n"
-			+ "            \"href\": \"/api/v1/entity/meta/compound_attr0\",\n"
-			+ "            \"fieldType\": \"STRING\",\n"
-			+ "            \"name\": \"compound_attr0\",\n"
-			+ "            \"label\": \"compound_attr0\",\n"
-			+ "            \"attributes\": [],\n"
-			+ "            \"maxLength\": 255,\n"
-			+ "            \"auto\": false,\n"
-			+ "            \"nillable\": true,\n"
-			+ "            \"readOnly\": false,\n"
-			+ "            \"labelAttribute\": false,\n"
-			+ "            \"unique\": false,\n"
-			+ "            \"visible\": true,\n"
-			+ "            \"lookupAttribute\": false,\n"
-			+ "            \"aggregateable\": false\n"
-			+ "          },\n"
-			+ "          {\n"
-			+ "            \"href\": \"/api/v1/entity/meta/compound_attr0Optional\",\n"
-			+ "            \"fieldType\": \"STRING\",\n"
-			+ "            \"name\": \"compound_attr0Optional\",\n"
-			+ "            \"label\": \"compound_attr0Optional\",\n"
-			+ "            \"attributes\": [],\n"
-			+ "            \"maxLength\": 255,\n"
-			+ "            \"auto\": false,\n"
-			+ "            \"nillable\": true,\n"
-			+ "            \"readOnly\": false,\n"
-			+ "            \"labelAttribute\": false,\n"
-			+ "            \"unique\": false,\n"
-			+ "            \"visible\": true,\n"
-			+ "            \"lookupAttribute\": false,\n"
-			+ "            \"aggregateable\": false\n"
-			+ "          },\n"
-			+ "          {\n"
-			+ "            \"href\": \"/api/v1/entity/meta/compound_attrcompound\",\n"
-			+ "            \"fieldType\": \"COMPOUND\",\n"
-			+ "            \"name\": \"compound_attrcompound\",\n"
-			+ "            \"label\": \"compound_attrcompound\",\n"
-			+ "            \"attributes\": [\n"
-			+ "              {\n"
-			+ "                \"href\": \"/api/v1/entity/meta/compound_attrcompound_attr0\",\n"
+	private String resourceResponse = "{\n" + "  \"_meta\": {\n" + "    \"href\": \"/api/v2/entity\",\n"
+			+ "    \"hrefCollection\": \"/api/v2/entity\",\n" + "    \"name\": \"entity\",\n"
+			+ "    \"label\": \"entity\",\n" + "    \"attributes\": [\n" + "      {\n"
+			+ "        \"href\": \"/api/v2/entity/meta/id\",\n" + "        \"fieldType\": \"STRING\",\n"
+			+ "        \"name\": \"id\",\n" + "        \"label\": \"id\",\n" + "        \"attributes\": [],\n"
+			+ "        \"maxLength\": 255,\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
+			+ "        \"readOnly\": true,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": true,\n"
+			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
+			+ "        \"aggregateable\": false\n" + "      },\n" + "      {\n"
+			+ "        \"href\": \"/api/v2/entity/meta/bool\",\n" + "        \"fieldType\": \"BOOL\",\n"
+			+ "        \"name\": \"bool\",\n" + "        \"label\": \"bool\",\n" + "        \"attributes\": [],\n"
+			+ "        \"auto\": false,\n" + "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
+			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
+			+ "        \"lookupAttribute\": false,\n" + "        \"aggregateable\": false\n" + "      },\n"
+			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/categorical\",\n"
+			+ "        \"fieldType\": \"CATEGORICAL\",\n" + "        \"name\": \"categorical\",\n"
+			+ "        \"label\": \"categorical\",\n" + "        \"attributes\": [],\n" + "        \"refEntity\": {\n"
+			+ "          \"href\": \"/api/v2/refEntity\",\n" + "          \"hrefCollection\": \"/api/v2/refEntity\",\n"
+			+ "          \"name\": \"refEntity\",\n" + "          \"label\": \"refEntity\",\n"
+			+ "          \"attributes\": [\n" + "            {\n"
+			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
+			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
+			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
+			+ "              \"auto\": false,\n" + "              \"nillable\": true,\n"
+			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": false,\n"
+			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
+			+ "              \"lookupAttribute\": false,\n" + "              \"aggregateable\": false\n"
+			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
+			+ "          \"idAttribute\": \"id\",\n" + "          \"lookupAttributes\": [],\n"
+			+ "          \"isAbstract\": false,\n" + "          \"writable\": false\n" + "        },\n"
+			+ "        \"auto\": false,\n" + "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
+			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
+			+ "        \"lookupAttribute\": false,\n" + "        \"aggregateable\": false\n" + "      },\n"
+			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/categorical_mref\",\n"
+			+ "        \"fieldType\": \"CATEGORICAL_MREF\",\n" + "        \"name\": \"categorical_mref\",\n"
+			+ "        \"label\": \"categorical_mref\",\n" + "        \"attributes\": [],\n"
+			+ "        \"refEntity\": {\n" + "          \"href\": \"/api/v2/refEntity\",\n"
+			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n" + "          \"name\": \"refEntity\",\n"
+			+ "          \"label\": \"refEntity\",\n" + "          \"attributes\": [\n" + "            {\n"
+			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
+			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
+			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
+			+ "              \"auto\": false,\n" + "              \"nillable\": true,\n"
+			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": false,\n"
+			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
+			+ "              \"lookupAttribute\": false,\n" + "              \"aggregateable\": false\n"
+			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
+			+ "          \"idAttribute\": \"id\",\n" + "          \"lookupAttributes\": [],\n"
+			+ "          \"isAbstract\": false,\n" + "          \"writable\": false\n" + "        },\n"
+			+ "        \"auto\": false,\n" + "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
+			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
+			+ "        \"lookupAttribute\": false,\n" + "        \"aggregateable\": false\n" + "      },\n"
+			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/compound\",\n"
+			+ "        \"fieldType\": \"COMPOUND\",\n" + "        \"name\": \"compound\",\n"
+			+ "        \"label\": \"compound\",\n" + "        \"attributes\": [\n" + "          {\n"
+			+ "            \"href\": \"/api/v2/entity/meta/compound_attr0\",\n"
+			+ "            \"fieldType\": \"STRING\",\n" + "            \"name\": \"compound_attr0\",\n"
+			+ "            \"label\": \"compound_attr0\",\n" + "            \"attributes\": [],\n"
+			+ "            \"maxLength\": 255,\n" + "            \"auto\": false,\n"
+			+ "            \"nillable\": true,\n" + "            \"readOnly\": false,\n"
+			+ "            \"labelAttribute\": false,\n" + "            \"unique\": false,\n"
+			+ "            \"visible\": true,\n" + "            \"lookupAttribute\": false,\n"
+			+ "            \"aggregateable\": false\n" + "          },\n" + "          {\n"
+			+ "            \"href\": \"/api/v2/entity/meta/compound_attr0Optional\",\n"
+			+ "            \"fieldType\": \"STRING\",\n" + "            \"name\": \"compound_attr0Optional\",\n"
+			+ "            \"label\": \"compound_attr0Optional\",\n" + "            \"attributes\": [],\n"
+			+ "            \"maxLength\": 255,\n" + "            \"auto\": false,\n"
+			+ "            \"nillable\": true,\n" + "            \"readOnly\": false,\n"
+			+ "            \"labelAttribute\": false,\n" + "            \"unique\": false,\n"
+			+ "            \"visible\": true,\n" + "            \"lookupAttribute\": false,\n"
+			+ "            \"aggregateable\": false\n" + "          },\n" + "          {\n"
+			+ "            \"href\": \"/api/v2/entity/meta/compound_attrcompound\",\n"
+			+ "            \"fieldType\": \"COMPOUND\",\n" + "            \"name\": \"compound_attrcompound\",\n"
+			+ "            \"label\": \"compound_attrcompound\",\n" + "            \"attributes\": [\n"
+			+ "              {\n" + "                \"href\": \"/api/v2/entity/meta/compound_attrcompound_attr0\",\n"
 			+ "                \"fieldType\": \"STRING\",\n"
 			+ "                \"name\": \"compound_attrcompound_attr0\",\n"
-			+ "                \"label\": \"compound_attrcompound_attr0\",\n"
-			+ "                \"attributes\": [],\n"
-			+ "                \"maxLength\": 255,\n"
-			+ "                \"auto\": false,\n"
-			+ "                \"nillable\": true,\n"
-			+ "                \"readOnly\": false,\n"
-			+ "                \"labelAttribute\": false,\n"
-			+ "                \"unique\": false,\n"
-			+ "                \"visible\": true,\n"
-			+ "                \"lookupAttribute\": false,\n"
-			+ "                \"aggregateable\": false\n"
-			+ "              },\n"
-			+ "              {\n"
-			+ "                \"href\": \"/api/v1/entity/meta/compound_attrcompound_attr0Optional\",\n"
+			+ "                \"label\": \"compound_attrcompound_attr0\",\n" + "                \"attributes\": [],\n"
+			+ "                \"maxLength\": 255,\n" + "                \"auto\": false,\n"
+			+ "                \"nillable\": true,\n" + "                \"readOnly\": false,\n"
+			+ "                \"labelAttribute\": false,\n" + "                \"unique\": false,\n"
+			+ "                \"visible\": true,\n" + "                \"lookupAttribute\": false,\n"
+			+ "                \"aggregateable\": false\n" + "              },\n" + "              {\n"
+			+ "                \"href\": \"/api/v2/entity/meta/compound_attrcompound_attr0Optional\",\n"
 			+ "                \"fieldType\": \"STRING\",\n"
 			+ "                \"name\": \"compound_attrcompound_attr0Optional\",\n"
 			+ "                \"label\": \"compound_attrcompound_attr0Optional\",\n"
@@ -922,7 +859,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/date\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/date\",\n"
 			+ "        \"fieldType\": \"DATE\",\n"
 			+ "        \"name\": \"date\",\n"
 			+ "        \"label\": \"date\",\n"
@@ -937,7 +874,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/date_time\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/date_time\",\n"
 			+ "        \"fieldType\": \"DATE_TIME\",\n"
 			+ "        \"name\": \"date_time\",\n"
 			+ "        \"label\": \"date_time\",\n"
@@ -952,7 +889,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/decimal\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/decimal\",\n"
 			+ "        \"fieldType\": \"DECIMAL\",\n"
 			+ "        \"name\": \"decimal\",\n"
 			+ "        \"label\": \"decimal\",\n"
@@ -967,7 +904,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/email\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/email\",\n"
 			+ "        \"fieldType\": \"EMAIL\",\n"
 			+ "        \"name\": \"email\",\n"
 			+ "        \"label\": \"email\",\n"
@@ -983,7 +920,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/enum\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/enum\",\n"
 			+ "        \"fieldType\": \"ENUM\",\n"
 			+ "        \"name\": \"enum\",\n"
 			+ "        \"label\": \"enum\",\n"
@@ -1004,7 +941,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/html\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/html\",\n"
 			+ "        \"fieldType\": \"HTML\",\n"
 			+ "        \"name\": \"html\",\n"
 			+ "        \"label\": \"html\",\n"
@@ -1020,7 +957,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/hyperlink\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/hyperlink\",\n"
 			+ "        \"fieldType\": \"HYPERLINK\",\n"
 			+ "        \"name\": \"hyperlink\",\n"
 			+ "        \"label\": \"hyperlink\",\n"
@@ -1036,7 +973,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/int\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/int\",\n"
 			+ "        \"fieldType\": \"INT\",\n"
 			+ "        \"name\": \"int\",\n"
 			+ "        \"label\": \"int\",\n"
@@ -1051,7 +988,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/long\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/long\",\n"
 			+ "        \"fieldType\": \"LONG\",\n"
 			+ "        \"name\": \"long\",\n"
 			+ "        \"label\": \"long\",\n"
@@ -1066,19 +1003,19 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/mref\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/mref\",\n"
 			+ "        \"fieldType\": \"MREF\",\n"
 			+ "        \"name\": \"mref\",\n"
 			+ "        \"label\": \"mref\",\n"
 			+ "        \"attributes\": [],\n"
 			+ "        \"refEntity\": {\n"
-			+ "          \"href\": \"/api/v2/refEntity/meta\",\n"
+			+ "          \"href\": \"/api/v2/refEntity\",\n"
 			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n"
 			+ "          \"name\": \"refEntity\",\n"
 			+ "          \"label\": \"refEntity\",\n"
 			+ "          \"attributes\": [\n"
 			+ "            {\n"
-			+ "              \"href\": \"/api/v1/refEntity/meta/id\",\n"
+			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n"
 			+ "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n"
 			+ "              \"label\": \"id\",\n"
@@ -1110,7 +1047,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/script\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/script\",\n"
 			+ "        \"fieldType\": \"SCRIPT\",\n"
 			+ "        \"name\": \"script\",\n"
 			+ "        \"label\": \"script\",\n"
@@ -1126,7 +1063,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/string\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/string\",\n"
 			+ "        \"fieldType\": \"STRING\",\n"
 			+ "        \"name\": \"string\",\n"
 			+ "        \"label\": \"string\",\n"
@@ -1142,7 +1079,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/text\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/text\",\n"
 			+ "        \"fieldType\": \"TEXT\",\n"
 			+ "        \"name\": \"text\",\n"
 			+ "        \"label\": \"text\",\n"
@@ -1158,19 +1095,19 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/xref\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/xref\",\n"
 			+ "        \"fieldType\": \"XREF\",\n"
 			+ "        \"name\": \"xref\",\n"
 			+ "        \"label\": \"xref\",\n"
 			+ "        \"attributes\": [],\n"
 			+ "        \"refEntity\": {\n"
-			+ "          \"href\": \"/api/v2/refEntity/meta\",\n"
+			+ "          \"href\": \"/api/v2/refEntity\",\n"
 			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n"
 			+ "          \"name\": \"refEntity\",\n"
 			+ "          \"label\": \"refEntity\",\n"
 			+ "          \"attributes\": [\n"
 			+ "            {\n"
-			+ "              \"href\": \"/api/v1/refEntity/meta/id\",\n"
+			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n"
 			+ "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n"
 			+ "              \"label\": \"id\",\n"
@@ -1202,7 +1139,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/boolOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/boolOptional\",\n"
 			+ "        \"fieldType\": \"BOOL\",\n"
 			+ "        \"name\": \"boolOptional\",\n"
 			+ "        \"label\": \"boolOptional\",\n"
@@ -1217,19 +1154,19 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/categoricalOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/categoricalOptional\",\n"
 			+ "        \"fieldType\": \"CATEGORICAL\",\n"
 			+ "        \"name\": \"categoricalOptional\",\n"
 			+ "        \"label\": \"categoricalOptional\",\n"
 			+ "        \"attributes\": [],\n"
 			+ "        \"refEntity\": {\n"
-			+ "          \"href\": \"/api/v2/refEntity/meta\",\n"
+			+ "          \"href\": \"/api/v2/refEntity\",\n"
 			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n"
 			+ "          \"name\": \"refEntity\",\n"
 			+ "          \"label\": \"refEntity\",\n"
 			+ "          \"attributes\": [\n"
 			+ "            {\n"
-			+ "              \"href\": \"/api/v1/refEntity/meta/id\",\n"
+			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n"
 			+ "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n"
 			+ "              \"label\": \"id\",\n"
@@ -1261,19 +1198,19 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/categorical_mrefOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/categorical_mrefOptional\",\n"
 			+ "        \"fieldType\": \"CATEGORICAL_MREF\",\n"
 			+ "        \"name\": \"categorical_mrefOptional\",\n"
 			+ "        \"label\": \"categorical_mrefOptional\",\n"
 			+ "        \"attributes\": [],\n"
 			+ "        \"refEntity\": {\n"
-			+ "          \"href\": \"/api/v2/refEntity/meta\",\n"
+			+ "          \"href\": \"/api/v2/refEntity\",\n"
 			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n"
 			+ "          \"name\": \"refEntity\",\n"
 			+ "          \"label\": \"refEntity\",\n"
 			+ "          \"attributes\": [\n"
 			+ "            {\n"
-			+ "              \"href\": \"/api/v1/refEntity/meta/id\",\n"
+			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n"
 			+ "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n"
 			+ "              \"label\": \"id\",\n"
@@ -1305,7 +1242,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/dateOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/dateOptional\",\n"
 			+ "        \"fieldType\": \"DATE\",\n"
 			+ "        \"name\": \"dateOptional\",\n"
 			+ "        \"label\": \"dateOptional\",\n"
@@ -1320,7 +1257,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/date_timeOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/date_timeOptional\",\n"
 			+ "        \"fieldType\": \"DATE_TIME\",\n"
 			+ "        \"name\": \"date_timeOptional\",\n"
 			+ "        \"label\": \"date_timeOptional\",\n"
@@ -1335,7 +1272,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/decimalOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/decimalOptional\",\n"
 			+ "        \"fieldType\": \"DECIMAL\",\n"
 			+ "        \"name\": \"decimalOptional\",\n"
 			+ "        \"label\": \"decimalOptional\",\n"
@@ -1350,7 +1287,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/emailOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/emailOptional\",\n"
 			+ "        \"fieldType\": \"EMAIL\",\n"
 			+ "        \"name\": \"emailOptional\",\n"
 			+ "        \"label\": \"emailOptional\",\n"
@@ -1366,7 +1303,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/enumOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/enumOptional\",\n"
 			+ "        \"fieldType\": \"ENUM\",\n"
 			+ "        \"name\": \"enumOptional\",\n"
 			+ "        \"label\": \"enumOptional\",\n"
@@ -1387,7 +1324,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/htmlOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/htmlOptional\",\n"
 			+ "        \"fieldType\": \"HTML\",\n"
 			+ "        \"name\": \"htmlOptional\",\n"
 			+ "        \"label\": \"htmlOptional\",\n"
@@ -1403,7 +1340,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/hyperlinkOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/hyperlinkOptional\",\n"
 			+ "        \"fieldType\": \"HYPERLINK\",\n"
 			+ "        \"name\": \"hyperlinkOptional\",\n"
 			+ "        \"label\": \"hyperlinkOptional\",\n"
@@ -1419,7 +1356,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/intOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/intOptional\",\n"
 			+ "        \"fieldType\": \"INT\",\n"
 			+ "        \"name\": \"intOptional\",\n"
 			+ "        \"label\": \"intOptional\",\n"
@@ -1434,7 +1371,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/longOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/longOptional\",\n"
 			+ "        \"fieldType\": \"LONG\",\n"
 			+ "        \"name\": \"longOptional\",\n"
 			+ "        \"label\": \"longOptional\",\n"
@@ -1449,19 +1386,19 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/mrefOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/mrefOptional\",\n"
 			+ "        \"fieldType\": \"MREF\",\n"
 			+ "        \"name\": \"mrefOptional\",\n"
 			+ "        \"label\": \"mrefOptional\",\n"
 			+ "        \"attributes\": [],\n"
 			+ "        \"refEntity\": {\n"
-			+ "          \"href\": \"/api/v2/refEntity/meta\",\n"
+			+ "          \"href\": \"/api/v2/refEntity\",\n"
 			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n"
 			+ "          \"name\": \"refEntity\",\n"
 			+ "          \"label\": \"refEntity\",\n"
 			+ "          \"attributes\": [\n"
 			+ "            {\n"
-			+ "              \"href\": \"/api/v1/refEntity/meta/id\",\n"
+			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n"
 			+ "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n"
 			+ "              \"label\": \"id\",\n"
@@ -1493,7 +1430,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/scriptOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/scriptOptional\",\n"
 			+ "        \"fieldType\": \"SCRIPT\",\n"
 			+ "        \"name\": \"scriptOptional\",\n"
 			+ "        \"label\": \"scriptOptional\",\n"
@@ -1509,7 +1446,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/stringOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/stringOptional\",\n"
 			+ "        \"fieldType\": \"STRING\",\n"
 			+ "        \"name\": \"stringOptional\",\n"
 			+ "        \"label\": \"stringOptional\",\n"
@@ -1525,7 +1462,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/textOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/textOptional\",\n"
 			+ "        \"fieldType\": \"TEXT\",\n"
 			+ "        \"name\": \"textOptional\",\n"
 			+ "        \"label\": \"textOptional\",\n"
@@ -1541,19 +1478,19 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/xrefOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/xrefOptional\",\n"
 			+ "        \"fieldType\": \"XREF\",\n"
 			+ "        \"name\": \"xrefOptional\",\n"
 			+ "        \"label\": \"xrefOptional\",\n"
 			+ "        \"attributes\": [],\n"
 			+ "        \"refEntity\": {\n"
-			+ "          \"href\": \"/api/v2/refEntity/meta\",\n"
+			+ "          \"href\": \"/api/v2/refEntity\",\n"
 			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n"
 			+ "          \"name\": \"refEntity\",\n"
 			+ "          \"label\": \"refEntity\",\n"
 			+ "          \"attributes\": [\n"
 			+ "            {\n"
-			+ "              \"href\": \"/api/v1/refEntity/meta/id\",\n"
+			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n"
 			+ "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n"
 			+ "              \"label\": \"id\",\n"
@@ -1635,27 +1572,27 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "  \"xref\": {\n" + "    \"_href\": \"/api/v2/refEntity/ref0\",\n" + "    \"id\": \"ref0\"\n" + "  },\n"
 			+ "  \"categorical_mrefOptional\": [],\n" + "  \"mrefOptional\": []\n" + "}";
 
-	private String resourcePartialAttributeResponse = "{\n" + "  \"_meta\": {\n"
-			+ "    \"href\": \"/api/v2/entity/meta\",\n" + "    \"hrefCollection\": \"/api/v2/entity\",\n"
-			+ "    \"name\": \"entity\",\n" + "    \"label\": \"entity\",\n" + "    \"attributes\": [\n" + "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/bool\",\n" + "        \"fieldType\": \"BOOL\",\n"
+	private String resourcePartialAttributeResponse = "{\n" + "  \"_meta\": {\n" + "    \"href\": \"/api/v2/entity\",\n"
+			+ "    \"hrefCollection\": \"/api/v2/entity\",\n" + "    \"name\": \"entity\",\n"
+			+ "    \"label\": \"entity\",\n" + "    \"attributes\": [\n" + "      {\n"
+			+ "        \"href\": \"/api/v2/entity/meta/bool\",\n" + "        \"fieldType\": \"BOOL\",\n"
 			+ "        \"name\": \"bool\",\n" + "        \"label\": \"bool\",\n" + "        \"attributes\": [],\n"
 			+ "        \"auto\": false,\n" + "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
 			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
 			+ "        \"lookupAttribute\": false,\n" + "        \"aggregateable\": false\n" + "      }\n" + "    ],\n"
-			+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n"
-			+ "    \"lookupAttributes\": [],\n" + "    \"isAbstract\": false,\n" + "    \"writable\": false\n"
-			+ "  },\n" + "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"bool\": true\n" + "}";
+			+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n" + "    \"lookupAttributes\": [],\n"
+			+ "    \"isAbstract\": false,\n" + "    \"writable\": false\n" + "  },\n"
+			+ "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"bool\": true\n" + "}";
 
 	private String resourcePartialSubAttributeResponse = "{\n" + "  \"_meta\": {\n"
-			+ "    \"href\": \"/api/v2/entity/meta\",\n" + "    \"hrefCollection\": \"/api/v2/entity\",\n"
+			+ "    \"href\": \"/api/v2/entity\",\n" + "    \"hrefCollection\": \"/api/v2/entity\",\n"
 			+ "    \"name\": \"entity\",\n" + "    \"label\": \"entity\",\n" + "    \"attributes\": [\n" + "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/xref\",\n" + "        \"fieldType\": \"XREF\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/xref\",\n" + "        \"fieldType\": \"XREF\",\n"
 			+ "        \"name\": \"xref\",\n" + "        \"label\": \"xref\",\n" + "        \"attributes\": [],\n"
-			+ "        \"refEntity\": {\n" + "          \"href\": \"/api/v2/refEntity/meta\",\n"
+			+ "        \"refEntity\": {\n" + "          \"href\": \"/api/v2/refEntity\",\n"
 			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n" + "          \"name\": \"refEntity\",\n"
 			+ "          \"label\": \"refEntity\",\n" + "          \"attributes\": [\n" + "            {\n"
-			+ "              \"href\": \"/api/v1/refEntity/meta/value\",\n"
+			+ "              \"href\": \"/api/v2/refEntity/meta/value\",\n"
 			+ "              \"fieldType\": \"STRING\",\n" + "              \"name\": \"value\",\n"
 			+ "              \"label\": \"value\",\n" + "              \"attributes\": [],\n"
 			+ "              \"maxLength\": 255,\n" + "              \"auto\": false,\n"
@@ -1669,27 +1606,27 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
 			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
 			+ "        \"lookupAttribute\": false,\n" + "        \"aggregateable\": false\n" + "      }\n" + "    ],\n"
-			+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n"
-			+ "    \"lookupAttributes\": [],\n" + "    \"isAbstract\": false,\n" + "    \"writable\": false\n"
-			+ "  },\n" + "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"xref\": {\n"
+			+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n" + "    \"lookupAttributes\": [],\n"
+			+ "    \"isAbstract\": false,\n" + "    \"writable\": false\n" + "  },\n"
+			+ "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"xref\": {\n"
 			+ "    \"_href\": \"/api/v2/refEntity/ref0\",\n" + "    \"value\": \"val1\"\n" + "  }\n" + "}";
 
 	private String resourcePartialSubAttributesResponse = "{\n" + "  \"_meta\": {\n"
-			+ "    \"href\": \"/api/v2/entity/meta\",\n" + "    \"hrefCollection\": \"/api/v2/entity\",\n"
+			+ "    \"href\": \"/api/v2/entity\",\n" + "    \"hrefCollection\": \"/api/v2/entity\",\n"
 			+ "    \"name\": \"entity\",\n" + "    \"label\": \"entity\",\n" + "    \"attributes\": [\n" + "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/xref\",\n" + "        \"fieldType\": \"XREF\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/xref\",\n" + "        \"fieldType\": \"XREF\",\n"
 			+ "        \"name\": \"xref\",\n" + "        \"label\": \"xref\",\n" + "        \"attributes\": [],\n"
-			+ "        \"refEntity\": {\n" + "          \"href\": \"/api/v2/refEntity/meta\",\n"
+			+ "        \"refEntity\": {\n" + "          \"href\": \"/api/v2/refEntity\",\n"
 			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n" + "          \"name\": \"refEntity\",\n"
 			+ "          \"label\": \"refEntity\",\n" + "          \"attributes\": [\n" + "            {\n"
-			+ "              \"href\": \"/api/v1/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
+			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
 			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
 			+ "              \"auto\": false,\n" + "              \"nillable\": true,\n"
 			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": false,\n"
 			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
 			+ "              \"lookupAttribute\": false,\n" + "              \"aggregateable\": false\n"
-			+ "            },\n" + "            {\n" + "              \"href\": \"/api/v1/refEntity/meta/value\",\n"
+			+ "            },\n" + "            {\n" + "              \"href\": \"/api/v2/refEntity/meta/value\",\n"
 			+ "              \"fieldType\": \"STRING\",\n" + "              \"name\": \"value\",\n"
 			+ "              \"label\": \"value\",\n" + "              \"attributes\": [],\n"
 			+ "              \"maxLength\": 255,\n" + "              \"auto\": false,\n"
@@ -1703,220 +1640,114 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
 			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
 			+ "        \"lookupAttribute\": false,\n" + "        \"aggregateable\": false\n" + "      }\n" + "    ],\n"
-			+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n"
-			+ "    \"lookupAttributes\": [],\n" + "    \"isAbstract\": false,\n" + "    \"writable\": false\n"
-			+ "  },\n" + "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"xref\": {\n"
+			+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n" + "    \"lookupAttributes\": [],\n"
+			+ "    \"isAbstract\": false,\n" + "    \"writable\": false\n" + "  },\n"
+			+ "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"xref\": {\n"
 			+ "    \"_href\": \"/api/v2/refEntity/ref0\",\n" + "    \"id\": \"ref0\",\n" + "    \"value\": \"val1\"\n"
 			+ "  }\n" + "}";
 
 	private String resourcePartialAttributesResponse = "{\n" + "  \"_meta\": {\n"
-			+ "    \"href\": \"/api/v2/entity/meta\",\n" + "    \"hrefCollection\": \"/api/v2/entity\",\n"
+			+ "    \"href\": \"/api/v2/entity\",\n" + "    \"hrefCollection\": \"/api/v2/entity\",\n"
 			+ "    \"name\": \"entity\",\n" + "    \"label\": \"entity\",\n" + "    \"attributes\": [\n" + "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/bool\",\n" + "        \"fieldType\": \"BOOL\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/bool\",\n" + "        \"fieldType\": \"BOOL\",\n"
 			+ "        \"name\": \"bool\",\n" + "        \"label\": \"bool\",\n" + "        \"attributes\": [],\n"
 			+ "        \"auto\": false,\n" + "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
 			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
 			+ "        \"lookupAttribute\": false,\n" + "        \"aggregateable\": false\n" + "      },\n"
-			+ "      {\n" + "        \"href\": \"/api/v1/entity/meta/string\",\n"
+			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/string\",\n"
 			+ "        \"fieldType\": \"STRING\",\n" + "        \"name\": \"string\",\n"
 			+ "        \"label\": \"string\",\n" + "        \"attributes\": [],\n" + "        \"maxLength\": 255,\n"
 			+ "        \"auto\": false,\n" + "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
 			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
 			+ "        \"lookupAttribute\": false,\n" + "        \"aggregateable\": false\n" + "      }\n" + "    ],\n"
-			+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n"
-			+ "    \"lookupAttributes\": [],\n" + "    \"isAbstract\": false,\n" + "    \"writable\": false\n"
-			+ "  },\n" + "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"bool\": true,\n" + "  \"string\": \"str\"\n"
-			+ "}";
+			+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n" + "    \"lookupAttributes\": [],\n"
+			+ "    \"isAbstract\": false,\n" + "    \"writable\": false\n" + "  },\n"
+			+ "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"bool\": true,\n" + "  \"string\": \"str\"\n" + "}";
 
-	private String resourceCollectionResponse = "{\n"
-			+ "  \"href\": \"/api/v2/entity\",\n"
-			+ "  \"meta\": {\n"
-			+ "    \"href\": \"/api/v2/entity/meta\",\n"
-			+ "    \"hrefCollection\": \"/api/v2/entity\",\n"
-			+ "    \"name\": \"entity\",\n"
-			+ "    \"label\": \"entity\",\n"
-			+ "    \"attributes\": [\n"
-			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/id\",\n"
-			+ "        \"fieldType\": \"STRING\",\n"
-			+ "        \"name\": \"id\",\n"
-			+ "        \"label\": \"id\",\n"
-			+ "        \"attributes\": [],\n"
-			+ "        \"maxLength\": 255,\n"
-			+ "        \"auto\": false,\n"
-			+ "        \"nillable\": true,\n"
-			+ "        \"readOnly\": true,\n"
-			+ "        \"labelAttribute\": false,\n"
-			+ "        \"unique\": true,\n"
-			+ "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n"
-			+ "        \"aggregateable\": false\n"
-			+ "      },\n"
-			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/bool\",\n"
-			+ "        \"fieldType\": \"BOOL\",\n"
-			+ "        \"name\": \"bool\",\n"
-			+ "        \"label\": \"bool\",\n"
-			+ "        \"attributes\": [],\n"
-			+ "        \"auto\": false,\n"
-			+ "        \"nillable\": true,\n"
-			+ "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n"
-			+ "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n"
-			+ "        \"aggregateable\": false\n"
-			+ "      },\n"
-			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/categorical\",\n"
-			+ "        \"fieldType\": \"CATEGORICAL\",\n"
-			+ "        \"name\": \"categorical\",\n"
-			+ "        \"label\": \"categorical\",\n"
-			+ "        \"attributes\": [],\n"
-			+ "        \"refEntity\": {\n"
-			+ "          \"href\": \"/api/v2/refEntity/meta\",\n"
-			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n"
-			+ "          \"name\": \"refEntity\",\n"
-			+ "          \"label\": \"refEntity\",\n"
-			+ "          \"attributes\": [\n"
-			+ "            {\n"
-			+ "              \"href\": \"/api/v1/refEntity/meta/id\",\n"
-			+ "              \"fieldType\": \"STRING\",\n"
-			+ "              \"name\": \"id\",\n"
-			+ "              \"label\": \"id\",\n"
-			+ "              \"attributes\": [],\n"
-			+ "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n"
-			+ "              \"nillable\": true,\n"
-			+ "              \"readOnly\": true,\n"
-			+ "              \"labelAttribute\": false,\n"
-			+ "              \"unique\": true,\n"
-			+ "              \"visible\": true,\n"
-			+ "              \"lookupAttribute\": false,\n"
-			+ "              \"aggregateable\": false\n"
-			+ "            }\n"
-			+ "          ],\n"
-			+ "          \"labelAttribute\": \"id\",\n"
-			+ "          \"idAttribute\": \"id\",\n"
-			+ "          \"lookupAttributes\": [],\n"
-			+ "          \"isAbstract\": false,\n"
-			+ "          \"writable\": false\n"
-			+ "        },\n"
-			+ "        \"auto\": false,\n"
-			+ "        \"nillable\": true,\n"
-			+ "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n"
-			+ "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n"
-			+ "        \"aggregateable\": false\n"
-			+ "      },\n"
-			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/categorical_mref\",\n"
-			+ "        \"fieldType\": \"CATEGORICAL_MREF\",\n"
-			+ "        \"name\": \"categorical_mref\",\n"
-			+ "        \"label\": \"categorical_mref\",\n"
-			+ "        \"attributes\": [],\n"
-			+ "        \"refEntity\": {\n"
-			+ "          \"href\": \"/api/v2/refEntity/meta\",\n"
-			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n"
-			+ "          \"name\": \"refEntity\",\n"
-			+ "          \"label\": \"refEntity\",\n"
-			+ "          \"attributes\": [\n"
-			+ "            {\n"
-			+ "              \"href\": \"/api/v1/refEntity/meta/id\",\n"
-			+ "              \"fieldType\": \"STRING\",\n"
-			+ "              \"name\": \"id\",\n"
-			+ "              \"label\": \"id\",\n"
-			+ "              \"attributes\": [],\n"
-			+ "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n"
-			+ "              \"nillable\": true,\n"
-			+ "              \"readOnly\": true,\n"
-			+ "              \"labelAttribute\": false,\n"
-			+ "              \"unique\": true,\n"
-			+ "              \"visible\": true,\n"
-			+ "              \"lookupAttribute\": false,\n"
-			+ "              \"aggregateable\": false\n"
-			+ "            }\n"
-			+ "          ],\n"
-			+ "          \"labelAttribute\": \"id\",\n"
-			+ "          \"idAttribute\": \"id\",\n"
-			+ "          \"lookupAttributes\": [],\n"
-			+ "          \"isAbstract\": false,\n"
-			+ "          \"writable\": false\n"
-			+ "        },\n"
-			+ "        \"auto\": false,\n"
-			+ "        \"nillable\": true,\n"
-			+ "        \"readOnly\": false,\n"
-			+ "        \"labelAttribute\": false,\n"
-			+ "        \"unique\": false,\n"
-			+ "        \"visible\": true,\n"
-			+ "        \"lookupAttribute\": false,\n"
-			+ "        \"aggregateable\": false\n"
-			+ "      },\n"
-			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/compound\",\n"
-			+ "        \"fieldType\": \"COMPOUND\",\n"
-			+ "        \"name\": \"compound\",\n"
-			+ "        \"label\": \"compound\",\n"
-			+ "        \"attributes\": [\n"
-			+ "          {\n"
-			+ "            \"href\": \"/api/v1/entity/meta/compound_attr0\",\n"
-			+ "            \"fieldType\": \"STRING\",\n"
-			+ "            \"name\": \"compound_attr0\",\n"
-			+ "            \"label\": \"compound_attr0\",\n"
-			+ "            \"attributes\": [],\n"
-			+ "            \"maxLength\": 255,\n"
-			+ "            \"auto\": false,\n"
-			+ "            \"nillable\": true,\n"
-			+ "            \"readOnly\": false,\n"
-			+ "            \"labelAttribute\": false,\n"
-			+ "            \"unique\": false,\n"
-			+ "            \"visible\": true,\n"
-			+ "            \"lookupAttribute\": false,\n"
-			+ "            \"aggregateable\": false\n"
-			+ "          },\n"
-			+ "          {\n"
-			+ "            \"href\": \"/api/v1/entity/meta/compound_attr0Optional\",\n"
-			+ "            \"fieldType\": \"STRING\",\n"
-			+ "            \"name\": \"compound_attr0Optional\",\n"
-			+ "            \"label\": \"compound_attr0Optional\",\n"
-			+ "            \"attributes\": [],\n"
-			+ "            \"maxLength\": 255,\n"
-			+ "            \"auto\": false,\n"
-			+ "            \"nillable\": true,\n"
-			+ "            \"readOnly\": false,\n"
-			+ "            \"labelAttribute\": false,\n"
-			+ "            \"unique\": false,\n"
-			+ "            \"visible\": true,\n"
-			+ "            \"lookupAttribute\": false,\n"
-			+ "            \"aggregateable\": false\n"
-			+ "          },\n"
-			+ "          {\n"
-			+ "            \"href\": \"/api/v1/entity/meta/compound_attrcompound\",\n"
-			+ "            \"fieldType\": \"COMPOUND\",\n"
-			+ "            \"name\": \"compound_attrcompound\",\n"
-			+ "            \"label\": \"compound_attrcompound\",\n"
-			+ "            \"attributes\": [\n"
-			+ "              {\n"
-			+ "                \"href\": \"/api/v1/entity/meta/compound_attrcompound_attr0\",\n"
+	private String resourceCollectionResponse = "{\n" + "  \"href\": \"/api/v2/entity\",\n" + "  \"meta\": {\n"
+			+ "    \"href\": \"/api/v2/entity\",\n" + "    \"hrefCollection\": \"/api/v2/entity\",\n"
+			+ "    \"name\": \"entity\",\n" + "    \"label\": \"entity\",\n" + "    \"attributes\": [\n" + "      {\n"
+			+ "        \"href\": \"/api/v2/entity/meta/id\",\n" + "        \"fieldType\": \"STRING\",\n"
+			+ "        \"name\": \"id\",\n" + "        \"label\": \"id\",\n" + "        \"attributes\": [],\n"
+			+ "        \"maxLength\": 255,\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
+			+ "        \"readOnly\": true,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": true,\n"
+			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
+			+ "        \"aggregateable\": false\n" + "      },\n" + "      {\n"
+			+ "        \"href\": \"/api/v2/entity/meta/bool\",\n" + "        \"fieldType\": \"BOOL\",\n"
+			+ "        \"name\": \"bool\",\n" + "        \"label\": \"bool\",\n" + "        \"attributes\": [],\n"
+			+ "        \"auto\": false,\n" + "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
+			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
+			+ "        \"lookupAttribute\": false,\n" + "        \"aggregateable\": false\n" + "      },\n"
+			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/categorical\",\n"
+			+ "        \"fieldType\": \"CATEGORICAL\",\n" + "        \"name\": \"categorical\",\n"
+			+ "        \"label\": \"categorical\",\n" + "        \"attributes\": [],\n" + "        \"refEntity\": {\n"
+			+ "          \"href\": \"/api/v2/refEntity\",\n" + "          \"hrefCollection\": \"/api/v2/refEntity\",\n"
+			+ "          \"name\": \"refEntity\",\n" + "          \"label\": \"refEntity\",\n"
+			+ "          \"attributes\": [\n" + "            {\n"
+			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
+			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
+			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
+			+ "              \"auto\": false,\n" + "              \"nillable\": true,\n"
+			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": false,\n"
+			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
+			+ "              \"lookupAttribute\": false,\n" + "              \"aggregateable\": false\n"
+			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
+			+ "          \"idAttribute\": \"id\",\n" + "          \"lookupAttributes\": [],\n"
+			+ "          \"isAbstract\": false,\n" + "          \"writable\": false\n" + "        },\n"
+			+ "        \"auto\": false,\n" + "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
+			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
+			+ "        \"lookupAttribute\": false,\n" + "        \"aggregateable\": false\n" + "      },\n"
+			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/categorical_mref\",\n"
+			+ "        \"fieldType\": \"CATEGORICAL_MREF\",\n" + "        \"name\": \"categorical_mref\",\n"
+			+ "        \"label\": \"categorical_mref\",\n" + "        \"attributes\": [],\n"
+			+ "        \"refEntity\": {\n" + "          \"href\": \"/api/v2/refEntity\",\n"
+			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n" + "          \"name\": \"refEntity\",\n"
+			+ "          \"label\": \"refEntity\",\n" + "          \"attributes\": [\n" + "            {\n"
+			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
+			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
+			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
+			+ "              \"auto\": false,\n" + "              \"nillable\": true,\n"
+			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": false,\n"
+			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
+			+ "              \"lookupAttribute\": false,\n" + "              \"aggregateable\": false\n"
+			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
+			+ "          \"idAttribute\": \"id\",\n" + "          \"lookupAttributes\": [],\n"
+			+ "          \"isAbstract\": false,\n" + "          \"writable\": false\n" + "        },\n"
+			+ "        \"auto\": false,\n" + "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
+			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
+			+ "        \"lookupAttribute\": false,\n" + "        \"aggregateable\": false\n" + "      },\n"
+			+ "      {\n" + "        \"href\": \"/api/v2/entity/meta/compound\",\n"
+			+ "        \"fieldType\": \"COMPOUND\",\n" + "        \"name\": \"compound\",\n"
+			+ "        \"label\": \"compound\",\n" + "        \"attributes\": [\n" + "          {\n"
+			+ "            \"href\": \"/api/v2/entity/meta/compound_attr0\",\n"
+			+ "            \"fieldType\": \"STRING\",\n" + "            \"name\": \"compound_attr0\",\n"
+			+ "            \"label\": \"compound_attr0\",\n" + "            \"attributes\": [],\n"
+			+ "            \"maxLength\": 255,\n" + "            \"auto\": false,\n"
+			+ "            \"nillable\": true,\n" + "            \"readOnly\": false,\n"
+			+ "            \"labelAttribute\": false,\n" + "            \"unique\": false,\n"
+			+ "            \"visible\": true,\n" + "            \"lookupAttribute\": false,\n"
+			+ "            \"aggregateable\": false\n" + "          },\n" + "          {\n"
+			+ "            \"href\": \"/api/v2/entity/meta/compound_attr0Optional\",\n"
+			+ "            \"fieldType\": \"STRING\",\n" + "            \"name\": \"compound_attr0Optional\",\n"
+			+ "            \"label\": \"compound_attr0Optional\",\n" + "            \"attributes\": [],\n"
+			+ "            \"maxLength\": 255,\n" + "            \"auto\": false,\n"
+			+ "            \"nillable\": true,\n" + "            \"readOnly\": false,\n"
+			+ "            \"labelAttribute\": false,\n" + "            \"unique\": false,\n"
+			+ "            \"visible\": true,\n" + "            \"lookupAttribute\": false,\n"
+			+ "            \"aggregateable\": false\n" + "          },\n" + "          {\n"
+			+ "            \"href\": \"/api/v2/entity/meta/compound_attrcompound\",\n"
+			+ "            \"fieldType\": \"COMPOUND\",\n" + "            \"name\": \"compound_attrcompound\",\n"
+			+ "            \"label\": \"compound_attrcompound\",\n" + "            \"attributes\": [\n"
+			+ "              {\n" + "                \"href\": \"/api/v2/entity/meta/compound_attrcompound_attr0\",\n"
 			+ "                \"fieldType\": \"STRING\",\n"
 			+ "                \"name\": \"compound_attrcompound_attr0\",\n"
-			+ "                \"label\": \"compound_attrcompound_attr0\",\n"
-			+ "                \"attributes\": [],\n"
-			+ "                \"maxLength\": 255,\n"
-			+ "                \"auto\": false,\n"
-			+ "                \"nillable\": true,\n"
-			+ "                \"readOnly\": false,\n"
-			+ "                \"labelAttribute\": false,\n"
-			+ "                \"unique\": false,\n"
-			+ "                \"visible\": true,\n"
-			+ "                \"lookupAttribute\": false,\n"
-			+ "                \"aggregateable\": false\n"
-			+ "              },\n"
-			+ "              {\n"
-			+ "                \"href\": \"/api/v1/entity/meta/compound_attrcompound_attr0Optional\",\n"
+			+ "                \"label\": \"compound_attrcompound_attr0\",\n" + "                \"attributes\": [],\n"
+			+ "                \"maxLength\": 255,\n" + "                \"auto\": false,\n"
+			+ "                \"nillable\": true,\n" + "                \"readOnly\": false,\n"
+			+ "                \"labelAttribute\": false,\n" + "                \"unique\": false,\n"
+			+ "                \"visible\": true,\n" + "                \"lookupAttribute\": false,\n"
+			+ "                \"aggregateable\": false\n" + "              },\n" + "              {\n"
+			+ "                \"href\": \"/api/v2/entity/meta/compound_attrcompound_attr0Optional\",\n"
 			+ "                \"fieldType\": \"STRING\",\n"
 			+ "                \"name\": \"compound_attrcompound_attr0Optional\",\n"
 			+ "                \"label\": \"compound_attrcompound_attr0Optional\",\n"
@@ -1952,7 +1783,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/date\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/date\",\n"
 			+ "        \"fieldType\": \"DATE\",\n"
 			+ "        \"name\": \"date\",\n"
 			+ "        \"label\": \"date\",\n"
@@ -1967,7 +1798,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/date_time\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/date_time\",\n"
 			+ "        \"fieldType\": \"DATE_TIME\",\n"
 			+ "        \"name\": \"date_time\",\n"
 			+ "        \"label\": \"date_time\",\n"
@@ -1982,7 +1813,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/decimal\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/decimal\",\n"
 			+ "        \"fieldType\": \"DECIMAL\",\n"
 			+ "        \"name\": \"decimal\",\n"
 			+ "        \"label\": \"decimal\",\n"
@@ -1997,7 +1828,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/email\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/email\",\n"
 			+ "        \"fieldType\": \"EMAIL\",\n"
 			+ "        \"name\": \"email\",\n"
 			+ "        \"label\": \"email\",\n"
@@ -2013,7 +1844,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/enum\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/enum\",\n"
 			+ "        \"fieldType\": \"ENUM\",\n"
 			+ "        \"name\": \"enum\",\n"
 			+ "        \"label\": \"enum\",\n"
@@ -2034,7 +1865,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/html\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/html\",\n"
 			+ "        \"fieldType\": \"HTML\",\n"
 			+ "        \"name\": \"html\",\n"
 			+ "        \"label\": \"html\",\n"
@@ -2050,7 +1881,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/hyperlink\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/hyperlink\",\n"
 			+ "        \"fieldType\": \"HYPERLINK\",\n"
 			+ "        \"name\": \"hyperlink\",\n"
 			+ "        \"label\": \"hyperlink\",\n"
@@ -2066,7 +1897,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/int\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/int\",\n"
 			+ "        \"fieldType\": \"INT\",\n"
 			+ "        \"name\": \"int\",\n"
 			+ "        \"label\": \"int\",\n"
@@ -2081,7 +1912,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/long\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/long\",\n"
 			+ "        \"fieldType\": \"LONG\",\n"
 			+ "        \"name\": \"long\",\n"
 			+ "        \"label\": \"long\",\n"
@@ -2096,19 +1927,19 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/mref\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/mref\",\n"
 			+ "        \"fieldType\": \"MREF\",\n"
 			+ "        \"name\": \"mref\",\n"
 			+ "        \"label\": \"mref\",\n"
 			+ "        \"attributes\": [],\n"
 			+ "        \"refEntity\": {\n"
-			+ "          \"href\": \"/api/v2/refEntity/meta\",\n"
+			+ "          \"href\": \"/api/v2/refEntity\",\n"
 			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n"
 			+ "          \"name\": \"refEntity\",\n"
 			+ "          \"label\": \"refEntity\",\n"
 			+ "          \"attributes\": [\n"
 			+ "            {\n"
-			+ "              \"href\": \"/api/v1/refEntity/meta/id\",\n"
+			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n"
 			+ "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n"
 			+ "              \"label\": \"id\",\n"
@@ -2140,7 +1971,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/script\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/script\",\n"
 			+ "        \"fieldType\": \"SCRIPT\",\n"
 			+ "        \"name\": \"script\",\n"
 			+ "        \"label\": \"script\",\n"
@@ -2156,7 +1987,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/string\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/string\",\n"
 			+ "        \"fieldType\": \"STRING\",\n"
 			+ "        \"name\": \"string\",\n"
 			+ "        \"label\": \"string\",\n"
@@ -2172,7 +2003,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/text\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/text\",\n"
 			+ "        \"fieldType\": \"TEXT\",\n"
 			+ "        \"name\": \"text\",\n"
 			+ "        \"label\": \"text\",\n"
@@ -2188,19 +2019,19 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/xref\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/xref\",\n"
 			+ "        \"fieldType\": \"XREF\",\n"
 			+ "        \"name\": \"xref\",\n"
 			+ "        \"label\": \"xref\",\n"
 			+ "        \"attributes\": [],\n"
 			+ "        \"refEntity\": {\n"
-			+ "          \"href\": \"/api/v2/refEntity/meta\",\n"
+			+ "          \"href\": \"/api/v2/refEntity\",\n"
 			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n"
 			+ "          \"name\": \"refEntity\",\n"
 			+ "          \"label\": \"refEntity\",\n"
 			+ "          \"attributes\": [\n"
 			+ "            {\n"
-			+ "              \"href\": \"/api/v1/refEntity/meta/id\",\n"
+			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n"
 			+ "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n"
 			+ "              \"label\": \"id\",\n"
@@ -2232,7 +2063,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/boolOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/boolOptional\",\n"
 			+ "        \"fieldType\": \"BOOL\",\n"
 			+ "        \"name\": \"boolOptional\",\n"
 			+ "        \"label\": \"boolOptional\",\n"
@@ -2247,19 +2078,19 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/categoricalOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/categoricalOptional\",\n"
 			+ "        \"fieldType\": \"CATEGORICAL\",\n"
 			+ "        \"name\": \"categoricalOptional\",\n"
 			+ "        \"label\": \"categoricalOptional\",\n"
 			+ "        \"attributes\": [],\n"
 			+ "        \"refEntity\": {\n"
-			+ "          \"href\": \"/api/v2/refEntity/meta\",\n"
+			+ "          \"href\": \"/api/v2/refEntity\",\n"
 			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n"
 			+ "          \"name\": \"refEntity\",\n"
 			+ "          \"label\": \"refEntity\",\n"
 			+ "          \"attributes\": [\n"
 			+ "            {\n"
-			+ "              \"href\": \"/api/v1/refEntity/meta/id\",\n"
+			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n"
 			+ "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n"
 			+ "              \"label\": \"id\",\n"
@@ -2291,19 +2122,19 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/categorical_mrefOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/categorical_mrefOptional\",\n"
 			+ "        \"fieldType\": \"CATEGORICAL_MREF\",\n"
 			+ "        \"name\": \"categorical_mrefOptional\",\n"
 			+ "        \"label\": \"categorical_mrefOptional\",\n"
 			+ "        \"attributes\": [],\n"
 			+ "        \"refEntity\": {\n"
-			+ "          \"href\": \"/api/v2/refEntity/meta\",\n"
+			+ "          \"href\": \"/api/v2/refEntity\",\n"
 			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n"
 			+ "          \"name\": \"refEntity\",\n"
 			+ "          \"label\": \"refEntity\",\n"
 			+ "          \"attributes\": [\n"
 			+ "            {\n"
-			+ "              \"href\": \"/api/v1/refEntity/meta/id\",\n"
+			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n"
 			+ "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n"
 			+ "              \"label\": \"id\",\n"
@@ -2335,7 +2166,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/dateOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/dateOptional\",\n"
 			+ "        \"fieldType\": \"DATE\",\n"
 			+ "        \"name\": \"dateOptional\",\n"
 			+ "        \"label\": \"dateOptional\",\n"
@@ -2350,7 +2181,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/date_timeOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/date_timeOptional\",\n"
 			+ "        \"fieldType\": \"DATE_TIME\",\n"
 			+ "        \"name\": \"date_timeOptional\",\n"
 			+ "        \"label\": \"date_timeOptional\",\n"
@@ -2365,7 +2196,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/decimalOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/decimalOptional\",\n"
 			+ "        \"fieldType\": \"DECIMAL\",\n"
 			+ "        \"name\": \"decimalOptional\",\n"
 			+ "        \"label\": \"decimalOptional\",\n"
@@ -2380,7 +2211,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/emailOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/emailOptional\",\n"
 			+ "        \"fieldType\": \"EMAIL\",\n"
 			+ "        \"name\": \"emailOptional\",\n"
 			+ "        \"label\": \"emailOptional\",\n"
@@ -2396,7 +2227,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/enumOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/enumOptional\",\n"
 			+ "        \"fieldType\": \"ENUM\",\n"
 			+ "        \"name\": \"enumOptional\",\n"
 			+ "        \"label\": \"enumOptional\",\n"
@@ -2417,7 +2248,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/htmlOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/htmlOptional\",\n"
 			+ "        \"fieldType\": \"HTML\",\n"
 			+ "        \"name\": \"htmlOptional\",\n"
 			+ "        \"label\": \"htmlOptional\",\n"
@@ -2433,7 +2264,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/hyperlinkOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/hyperlinkOptional\",\n"
 			+ "        \"fieldType\": \"HYPERLINK\",\n"
 			+ "        \"name\": \"hyperlinkOptional\",\n"
 			+ "        \"label\": \"hyperlinkOptional\",\n"
@@ -2449,7 +2280,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/intOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/intOptional\",\n"
 			+ "        \"fieldType\": \"INT\",\n"
 			+ "        \"name\": \"intOptional\",\n"
 			+ "        \"label\": \"intOptional\",\n"
@@ -2464,7 +2295,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/longOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/longOptional\",\n"
 			+ "        \"fieldType\": \"LONG\",\n"
 			+ "        \"name\": \"longOptional\",\n"
 			+ "        \"label\": \"longOptional\",\n"
@@ -2479,19 +2310,19 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/mrefOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/mrefOptional\",\n"
 			+ "        \"fieldType\": \"MREF\",\n"
 			+ "        \"name\": \"mrefOptional\",\n"
 			+ "        \"label\": \"mrefOptional\",\n"
 			+ "        \"attributes\": [],\n"
 			+ "        \"refEntity\": {\n"
-			+ "          \"href\": \"/api/v2/refEntity/meta\",\n"
+			+ "          \"href\": \"/api/v2/refEntity\",\n"
 			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n"
 			+ "          \"name\": \"refEntity\",\n"
 			+ "          \"label\": \"refEntity\",\n"
 			+ "          \"attributes\": [\n"
 			+ "            {\n"
-			+ "              \"href\": \"/api/v1/refEntity/meta/id\",\n"
+			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n"
 			+ "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n"
 			+ "              \"label\": \"id\",\n"
@@ -2523,7 +2354,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/scriptOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/scriptOptional\",\n"
 			+ "        \"fieldType\": \"SCRIPT\",\n"
 			+ "        \"name\": \"scriptOptional\",\n"
 			+ "        \"label\": \"scriptOptional\",\n"
@@ -2539,7 +2370,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/stringOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/stringOptional\",\n"
 			+ "        \"fieldType\": \"STRING\",\n"
 			+ "        \"name\": \"stringOptional\",\n"
 			+ "        \"label\": \"stringOptional\",\n"
@@ -2555,7 +2386,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/textOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/textOptional\",\n"
 			+ "        \"fieldType\": \"TEXT\",\n"
 			+ "        \"name\": \"textOptional\",\n"
 			+ "        \"label\": \"textOptional\",\n"
@@ -2571,19 +2402,19 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"aggregateable\": false\n"
 			+ "      },\n"
 			+ "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/xrefOptional\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/xrefOptional\",\n"
 			+ "        \"fieldType\": \"XREF\",\n"
 			+ "        \"name\": \"xrefOptional\",\n"
 			+ "        \"label\": \"xrefOptional\",\n"
 			+ "        \"attributes\": [],\n"
 			+ "        \"refEntity\": {\n"
-			+ "          \"href\": \"/api/v2/refEntity/meta\",\n"
+			+ "          \"href\": \"/api/v2/refEntity\",\n"
 			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n"
 			+ "          \"name\": \"refEntity\",\n"
 			+ "          \"label\": \"refEntity\",\n"
 			+ "          \"attributes\": [\n"
 			+ "            {\n"
-			+ "              \"href\": \"/api/v1/refEntity/meta/id\",\n"
+			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n"
 			+ "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n"
 			+ "              \"label\": \"id\",\n"
@@ -2645,26 +2476,13 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "      ],\n"
 			+ "      \"compound_attr0\": \"compoundAttr0Str\",\n"
 			+ "      \"compound_attrcompound_attr0\": \"compoundAttrCompoundAttr0Str\",\n"
-			+ "      \"date\": \"2015-05-22\",\n"
-			+ "      \"date_time\": \"2015-05-22T08:12:13+0200\",\n"
-			+ "      \"decimal\": 3.14,\n"
-			+ "      \"email\": \"my@mail.com\",\n"
-			+ "      \"enum\": \"enum0\",\n"
-			+ "      \"html\": \"<h1>html</h1>\",\n"
-			+ "      \"hyperlink\": \"http://www.molgenis.org/\",\n"
-			+ "      \"int\": 123,\n"
-			+ "      \"long\": 9223372036854775807,\n"
-			+ "      \"mref\": [\n"
-			+ "        {\n"
-			+ "          \"_href\": \"/api/v2/refEntity/ref0\",\n"
-			+ "          \"id\": \"ref0\"\n"
-			+ "        },\n"
-			+ "        {\n"
-			+ "          \"_href\": \"/api/v2/refEntity/ref0\",\n"
-			+ "          \"id\": \"ref0\"\n"
-			+ "        }\n"
-			+ "      ],\n"
-			+ "      \"script\": \"print \\\"Hello world\\\"\",\n"
+			+ "      \"date\": \"2015-05-22\",\n" + "      \"date_time\": \"2015-05-22T08:12:13+0200\",\n"
+			+ "      \"decimal\": 3.14,\n" + "      \"email\": \"my@mail.com\",\n" + "      \"enum\": \"enum0\",\n"
+			+ "      \"html\": \"<h1>html</h1>\",\n" + "      \"hyperlink\": \"http://www.molgenis.org/\",\n"
+			+ "      \"int\": 123,\n" + "      \"long\": 9223372036854775807,\n" + "      \"mref\": [\n" + "        {\n"
+			+ "          \"_href\": \"/api/v2/refEntity/ref0\",\n" + "          \"id\": \"ref0\"\n" + "        },\n"
+			+ "        {\n" + "          \"_href\": \"/api/v2/refEntity/ref0\",\n" + "          \"id\": \"ref0\"\n"
+			+ "        }\n" + "      ],\n" + "      \"script\": \"print \\\"Hello world\\\"\",\n"
 			+ "      \"string\": \"str\",\n"
 			+ "      \"text\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam consectetur auctor lectus sed tincidunt. Fusce sodales quis mauris non aliquam. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Integer maximus imperdiet velit quis vehicula. Mauris pulvinar amet.\",\n"
 			+ "      \"xref\": {\n" + "        \"_href\": \"/api/v2/refEntity/ref0\",\n" + "        \"id\": \"ref0\"\n"
@@ -2672,28 +2490,28 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "  ]\n" + "}";
 
 	private static String resourcePartialSubSubAttributesResponse = "{\n" + "  \"_meta\": {\n"
-			+ "    \"href\": \"/api/v2/entity/meta\",\n" + "    \"hrefCollection\": \"/api/v2/entity\",\n"
+			+ "    \"href\": \"/api/v2/entity\",\n" + "    \"hrefCollection\": \"/api/v2/entity\",\n"
 			+ "    \"name\": \"entity\",\n" + "    \"label\": \"entity\",\n" + "    \"attributes\": [\n" + "      {\n"
-			+ "        \"href\": \"/api/v1/entity/meta/xref\",\n" + "        \"fieldType\": \"XREF\",\n"
+			+ "        \"href\": \"/api/v2/entity/meta/xref\",\n" + "        \"fieldType\": \"XREF\",\n"
 			+ "        \"name\": \"xref\",\n" + "        \"label\": \"xref\",\n" + "        \"attributes\": [],\n"
-			+ "        \"refEntity\": {\n" + "          \"href\": \"/api/v2/refEntity/meta\",\n"
+			+ "        \"refEntity\": {\n" + "          \"href\": \"/api/v2/refEntity\",\n"
 			+ "          \"hrefCollection\": \"/api/v2/refEntity\",\n" + "          \"name\": \"refEntity\",\n"
 			+ "          \"label\": \"refEntity\",\n" + "          \"attributes\": [\n" + "            {\n"
-			+ "              \"href\": \"/api/v1/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
+			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
 			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
 			+ "              \"auto\": false,\n" + "              \"nillable\": true,\n"
 			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": false,\n"
 			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
 			+ "              \"lookupAttribute\": false,\n" + "              \"aggregateable\": false\n"
-			+ "            },\n" + "            {\n" + "              \"href\": \"/api/v1/refEntity/meta/ref\",\n"
+			+ "            },\n" + "            {\n" + "              \"href\": \"/api/v2/refEntity/meta/ref\",\n"
 			+ "              \"fieldType\": \"XREF\",\n" + "              \"name\": \"ref\",\n"
 			+ "              \"label\": \"ref\",\n" + "              \"attributes\": [],\n"
-			+ "              \"refEntity\": {\n" + "                \"href\": \"/api/v2/refRefEntity/meta\",\n"
+			+ "              \"refEntity\": {\n" + "                \"href\": \"/api/v2/refRefEntity\",\n"
 			+ "                \"hrefCollection\": \"/api/v2/refRefEntity\",\n"
 			+ "                \"name\": \"refRefEntity\",\n" + "                \"label\": \"refRefEntity\",\n"
 			+ "                \"attributes\": [\n" + "                  {\n"
-			+ "                    \"href\": \"/api/v1/refRefEntity/meta/value\",\n"
+			+ "                    \"href\": \"/api/v2/refRefEntity/meta/value\",\n"
 			+ "                    \"fieldType\": \"STRING\",\n" + "                    \"name\": \"value\",\n"
 			+ "                    \"label\": \"value\",\n" + "                    \"attributes\": [],\n"
 			+ "                    \"maxLength\": 255,\n" + "                    \"auto\": false,\n"
@@ -2714,9 +2532,9 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
 			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
 			+ "        \"lookupAttribute\": false,\n" + "        \"aggregateable\": false\n" + "      }\n" + "    ],\n"
-			+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n"
-			+ "    \"lookupAttributes\": [],\n" + "    \"isAbstract\": false,\n" + "    \"writable\": false\n"
-			+ "  },\n" + "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"xref\": {\n"
+			+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n" + "    \"lookupAttributes\": [],\n"
+			+ "    \"isAbstract\": false,\n" + "    \"writable\": false\n" + "  },\n"
+			+ "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"xref\": {\n"
 			+ "    \"_href\": \"/api/v2/refEntity/ref0\",\n" + "    \"id\": \"ref0\",\n" + "    \"ref\": {\n"
 			+ "      \"_href\": \"/api/v2/refRefEntity/refRef0\",\n" + "      \"value\": \"value\"\n" + "    }\n"
 			+ "  }\n" + "}";

@@ -23,6 +23,7 @@ import org.apache.commons.io.IOUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.AbstractRepositoryAnnotator;
 import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
@@ -323,24 +324,38 @@ public class SnpEffAnnotator
 					nmd = ann_field[2];
 				}
 			}
+			if (annotation.length >= 15)
+			{
+				entity.set(ANNOTATION, annotation[1]);
+				entity.set(PUTATIVE_IMPACT, annotation[2]);
+				entity.set(GENE_NAME, annotation[3]);
+				entity.set(GENE_ID, annotation[4]);
+				entity.set(FEATURE_TYPE, annotation[5]);
+				entity.set(FEATURE_ID, annotation[6]);
+				entity.set(TRANSCRIPT_BIOTYPE, annotation[7]);
+				entity.set(RANK_TOTAL, annotation[8]);
+				entity.set(HGVS_C, annotation[9]);
+				entity.set(HGVS_P, annotation[10]);
+				entity.set(C_DNA_POSITION, annotation[11]);
+				entity.set(CDS_POSITION, annotation[12]);
+				entity.set(PROTEIN_POSITION, annotation[13]);
+				entity.set(DISTANCE_TO_FEATURE, annotation[14]);
+				entity.set(ERRORS, annotation[15]);
+				entity.set(LOF, lof.replace("LOF=", ""));
+				entity.set(NMD, nmd.replace("NMD=", ""));
+			}
+			else
+			{
+				LOG.info("No results for CHROM:{} POS:{} REF:{} ALT:{} ", entity.getString(VcfRepository.CHROM),
+						entity.getString(VcfRepository.POS), entity.getString(VcfRepository.REF),
+						entity.getString(VcfRepository.ALT));
+			}
+		}
 
-			entity.set(ANNOTATION, annotation[1]);
-			entity.set(PUTATIVE_IMPACT, annotation[2]);
-			entity.set(GENE_NAME, annotation[3]);
-			entity.set(GENE_ID, annotation[4]);
-			entity.set(FEATURE_TYPE, annotation[5]);
-			entity.set(FEATURE_ID, annotation[6]);
-			entity.set(TRANSCRIPT_BIOTYPE, annotation[7]);
-			entity.set(RANK_TOTAL, annotation[8]);
-			entity.set(HGVS_C, annotation[9]);
-			entity.set(HGVS_P, annotation[10]);
-			entity.set(C_DNA_POSITION, annotation[11]);
-			entity.set(CDS_POSITION, annotation[12]);
-			entity.set(PROTEIN_POSITION, annotation[13]);
-			entity.set(DISTANCE_TO_FEATURE, annotation[14]);
-			entity.set(ERRORS, annotation[15]);
-			entity.set(LOF, lof.replace("LOF=", ""));
-			entity.set(NMD, nmd.replace("NMD=", ""));
+		@Override
+		public String canAnnotate(EntityMetaData repoMetaData)
+		{
+			return super.canAnnotate(repoMetaData);
 		}
 
 		@Override
@@ -469,7 +484,8 @@ public class SnpEffAnnotator
 
 		private String getSnpEffPath()
 		{
-			if ((pluginSettings != null) && (snpEffPath == null)) {
+			if ((pluginSettings != null) && (snpEffPath == null))
+			{
 				snpEffPath = RunAsSystemProxy
 						.runAsSystem(() -> pluginSettings.getString(SnpEffAnnotatorSettings.Meta.SNPEFF_JAR_LOCATION));
 
