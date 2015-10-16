@@ -2,7 +2,7 @@ package org.molgenis.data.mysql;
 
 import static org.testng.Assert.assertEquals;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -223,7 +223,8 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 	public void findAllIterableObject_Iterable()
 	{
 		String idAttributeName = "id";
-		final String exampleId = "id123";
+		final String exampleId0 = "id123";
+		final String exampleId1 = "id456";
 
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("testje");
 
@@ -238,20 +239,25 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 
 		Repository testRepository = coll.addEntityMeta(entityMetaData);
 
-		MapEntity entity = new MapEntity();
-		entity.set(idAttributeName, exampleId);
-		testRepository.add(entity);
+		MapEntity entity0 = new MapEntity();
+		entity0.set(idAttributeName, exampleId0);
+		MapEntity entity1 = new MapEntity();
+		entity1.set(idAttributeName, exampleId1);
+		testRepository.add(entity1); // add in reverse order, so we can check if returned in the correct order
+		testRepository.add(entity0);
 
 		Iterable<Entity> entities = testRepository.findAll(new Iterable<Object>()
 		{
 			@Override
 			public Iterator<Object> iterator()
 			{
-				return Collections.<Object> singletonList(exampleId).iterator();
+				return Arrays.<Object> asList(exampleId0, exampleId1).iterator();
 			}
 		});
 
-		assertEquals(Iterables.size(entities), 1);
-		assertEquals(entities.iterator().next().getIdValue(), exampleId);
+		assertEquals(Iterables.size(entities), 2);
+		Iterator<Entity> it = entities.iterator();
+		assertEquals(it.next().getIdValue(), exampleId0);
+		assertEquals(it.next().getIdValue(), exampleId1);
 	}
 }
