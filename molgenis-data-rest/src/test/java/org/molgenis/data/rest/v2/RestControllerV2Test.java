@@ -51,6 +51,8 @@ import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.ConstraintViolation;
+import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.file.FileStore;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -65,6 +67,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -307,8 +310,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 
 		boolean prettyPrint = true;
 		mockMvc = MockMvcBuilders.standaloneSetup(restControllerV2)
-				.setMessageConverters(new GsonHttpMessageConverter(prettyPrint))
-				.setConversionService(conversionService).build();
+				.setMessageConverters(new GsonHttpMessageConverter(prettyPrint)).setConversionService(conversionService)
+				.build();
 	}
 
 	@Test
@@ -353,9 +356,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieveResourcePartialResponseSubSubAttributes() throws Exception
 	{
-		mockMvc.perform(
-				get(HREF_ENTITY_ID).param("attrs",
-						attrXref + '(' + refAttrId + ',' + refAttrRef + '(' + refRefAttrValue + ')' + ')'))
+		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs",
+				attrXref + '(' + refAttrId + ',' + refAttrRef + '(' + refRefAttrValue + ')' + ')'))
 				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string(resourcePartialSubSubAttributesResponse));
 	}
@@ -389,7 +391,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void testCreateEntitiesExceptions1() throws Exception
 	{
-		this.testCreateEntitiesExceptions("entity", "{entities:[]}", RestControllerV2.EXCEPTION_NO_ENTITIES);
+		this.testCreateEntitiesExceptions("entity", "{entities:[]}",
+				"Please provide at least one entity in the entities property.");
 	}
 
 	/**
@@ -401,7 +404,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testCreateEntitiesExceptions2() throws Exception
 	{
 		this.testCreateEntitiesExceptions("entity", this.createMaxPlusOneEntitiesAsTestContent(),
-				RestControllerV2.EXCEPTION_MAX_ENTITIES_EXCEEDED);
+				"Number of entities cannot be more than 1000.");
 	}
 
 	/**
@@ -413,7 +416,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testCreateEntitiesExceptions3() throws Exception
 	{
 		this.testCreateEntitiesExceptions("entity2", "{entities:[{email:'test@email.com', extraAttribute:'test'}]}",
-				RestControllerV2.createUnknownEntityException("entity2"));
+				RestControllerV2.createUnknownEntityException("entity2").getMessage());
 	}
 
 	/**
@@ -433,21 +436,21 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 				.andExpect(status().isInternalServerError()).andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(header().doesNotExist("Location"));
 
-		this.assertEqualsErrorMessage(resultActions, e);
+		this.assertEqualsErrorMessage(resultActions, e.getMessage());
 	}
 
 	@Test
 	public void testUpdateEntities() throws Exception
 	{
 		String content = "{entities:[{id:'p1', name:'Witte Piet'}, {id:'p2', name:'Zwarte Piet'}]}";
-		mockMvc.perform(put(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON)).andExpect(
-				status().isOk());
+		mockMvc.perform(put(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
+				.andExpect(status().isOk());
 
 		verify(dataService, times(1)).update(Matchers.eq(ENTITY_NAME), Matchers.anyListOf(MapEntity.class));
 	}
 
 	@Test
-	public void testUpdateEntitiesSystemException() throws Exception
+	public void testUpdateEntitiesMolgenisDataException() throws Exception
 	{
 		Exception e = new MolgenisDataException("Check if this exception is not swallowed by the system");
 		doThrow(e).when(dataService).update(Matchers.eq(ENTITY_NAME), Matchers.anyListOf(MapEntity.class));
@@ -458,7 +461,22 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 				.andExpect(status().isInternalServerError()).andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(header().doesNotExist("Location"));
 
-		this.assertEqualsErrorMessage(resultActions, e);
+		this.assertEqualsErrorMessage(resultActions, e.getMessage());
+	}
+
+	@Test
+	public void testUpdateEntitiesMolgenisValidationException() throws Exception
+	{
+		Exception e = new MolgenisValidationException(Collections.singleton(new ConstraintViolation("Message", 5)));
+		doThrow(e).when(dataService).update(Matchers.eq(ENTITY_NAME), Matchers.anyListOf(MapEntity.class));
+
+		String content = "{entities:[{id:'p1', name:'Example data'}]}";
+		ResultActions resultActions = mockMvc
+				.perform(put(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
+				.andExpect(status().is4xxClientError()).andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(header().doesNotExist("Location"));
+
+		this.assertEqualsErrorMessage(resultActions, e.getMessage());
 	}
 
 	/**
@@ -469,7 +487,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void testUpdateEntitiesExceptions1() throws Exception
 	{
-		this.testUpdateEntitiesExceptions("entity", "{entities:[]}", RestControllerV2.EXCEPTION_NO_ENTITIES);
+		this.testUpdateEntitiesExceptions("entity", "{entities:[]}",
+				"Please provide at least one entity in the entities property.");
 	}
 
 	/**
@@ -481,7 +500,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testUpdateEntitiesExceptions2() throws Exception
 	{
 		this.testUpdateEntitiesExceptions("entity", this.createMaxPlusOneEntitiesAsTestContent(),
-				RestControllerV2.EXCEPTION_MAX_ENTITIES_EXCEEDED);
+				"Number of entities cannot be more than 1000.");
 	}
 
 	/**
@@ -493,7 +512,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testUpdateEntitiesExceptions3() throws Exception
 	{
 		this.testUpdateEntitiesExceptions("entity2", "{entities:[{email:'test@email.com'}]}",
-				RestControllerV2.createUnknownEntityException("entity2"));
+				RestControllerV2.createUnknownEntityException("entity2").getMessage());
 
 	}
 
@@ -520,7 +539,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testUpdateEntitiesSpecificAttributeExceptions1() throws Exception
 	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email", "{entities:[]}",
-				RestControllerV2.EXCEPTION_NO_ENTITIES);
+				"Please provide at least one entity in the entities property.");
 	}
 
 	/**
@@ -532,7 +551,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testUpdateEntitiesSpecificAttributeExceptions2() throws Exception
 	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
-				this.createMaxPlusOneEntitiesAsTestContent(), RestControllerV2.EXCEPTION_MAX_ENTITIES_EXCEEDED);
+				this.createMaxPlusOneEntitiesAsTestContent(), "Number of entities cannot be more than 1000.");
 	}
 
 	/**
@@ -544,7 +563,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testUpdateEntitiesSpecificAttributeExceptions3() throws Exception
 	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity2", "email", "{entities:[{email:'test@email.com'}]}",
-				RestControllerV2.createUnknownEntityException("entity2"));
+				RestControllerV2.createUnknownEntityException("entity2").getMessage());
 	}
 
 	/**
@@ -556,7 +575,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testUpdateEntitiesSpecificAttributeExceptions4() throws Exception
 	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email2", "{entities:[{email:'test@email.com'}]}",
-				RestControllerV2.createUnknownAttributeException("entity", "email2"));
+				RestControllerV2.createUnknownAttributeException("entity", "email2").getMessage());
 	}
 
 	/**
@@ -568,7 +587,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testUpdateEntitiesSpecificAttributeExceptions5() throws Exception
 	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "decimal", "{entities:[{decimal:'42'}]}",
-				RestControllerV2.createMolgenisDataAccessExceptionReadOnlyAttribute("entity", "decimal"));
+				RestControllerV2.createMolgenisDataAccessExceptionReadOnlyAttribute("entity", "decimal").getMessage());
 	}
 
 	/**
@@ -581,7 +600,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
 				"{entities:[{id:0,email:'test@email.com',extraAttribute:'test'}]}",
-				RestControllerV2.createMolgenisDataExceptionIdentifierAndValue());
+				RestControllerV2.createMolgenisDataExceptionIdentifierAndValue().getMessage());
 	}
 
 	/**
@@ -594,7 +613,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	{
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
 				"{entities:[{email:'test@email.com', extraAttribute:'test'}]}",
-				RestControllerV2.createMolgenisDataExceptionUnknownIdentifier(0));
+				RestControllerV2.createMolgenisDataExceptionUnknownIdentifier(0).getMessage());
 	}
 
 	/**
@@ -608,42 +627,44 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
 				"{entities:[{id:4,email:'test@email.com'}]}",
-				RestControllerV2.createUnknownEntityExceptionNotValidId("4.0"));
+				RestControllerV2.createUnknownEntityExceptionNotValidId("4.0").getMessage());
 	}
 
-	private void testCreateEntitiesExceptions(String entityName, String content, Exception expected) throws Exception
+	private void testCreateEntitiesExceptions(String entityName, String content, String message) throws Exception
 	{
-		ResultActions resultActions = mockMvc.perform(post(RestControllerV2.BASE_URI + "/" + entityName).content(
-				content).contentType(APPLICATION_JSON));
+		ResultActions resultActions = mockMvc.perform(
+				post(RestControllerV2.BASE_URI + "/" + entityName).content(content).contentType(APPLICATION_JSON));
 
-		this.assertEqualsErrorMessage(resultActions, expected);
+		this.assertEqualsErrorMessage(resultActions, message);
 	}
 
-	private void testUpdateEntitiesExceptions(String entityName, String content, Exception expected) throws Exception
+	private void testUpdateEntitiesExceptions(String entityName, String content, String message) throws Exception
 	{
-		ResultActions resultActions = mockMvc.perform(put(RestControllerV2.BASE_URI + "/" + entityName)
-				.content(content).contentType(APPLICATION_JSON));
+		ResultActions resultActions = mockMvc.perform(
+				put(RestControllerV2.BASE_URI + "/" + entityName).content(content).contentType(APPLICATION_JSON));
 
-		this.assertEqualsErrorMessage(resultActions, expected);
+		this.assertEqualsErrorMessage(resultActions, message);
 	}
 
 	private void testUpdateEntitiesSpecificAttributeExceptions(String entityName, String attributeName, String content,
-			Exception expected) throws Exception
+			String message) throws Exception
 	{
-		ResultActions resultActions = mockMvc.perform(put(
-				RestControllerV2.BASE_URI + "/" + entityName + "/" + attributeName).content(content).contentType(
-				APPLICATION_JSON));
+		ResultActions resultActions = mockMvc
+				.perform(put(RestControllerV2.BASE_URI + "/" + entityName + "/" + attributeName).content(content)
+						.contentType(APPLICATION_JSON));
 
-		this.assertEqualsErrorMessage(resultActions, expected);
+		this.assertEqualsErrorMessage(resultActions, message);
 	}
 
-	private void assertEqualsErrorMessage(ResultActions resultActions, Exception expected) throws JsonSyntaxException,
-			UnsupportedEncodingException
+	private void assertEqualsErrorMessage(ResultActions resultActions, String message)
+			throws JsonSyntaxException, UnsupportedEncodingException
 	{
+		MvcResult result = resultActions.andReturn();
+		String contentAsString = result.getResponse().getContentAsString();
+		System.out.println("content!" + contentAsString);
 		Gson gson = new Gson();
-		ResponseErrors errors = gson.fromJson(resultActions.andReturn().getResponse().getContentAsString(),
-				ResponseErrors.class);
-		assertEquals(errors.getErrors().get(0).getMessage(), expected.getMessage());
+		ResponseErrors errors = gson.fromJson(contentAsString, ResponseErrors.class);
+		assertEquals(errors.getErrors().get(0).getMessage(), message);
 	}
 
 	private String createMaxPlusOneEntitiesAsTestContent()
@@ -694,9 +715,10 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		@Bean
 		public RestControllerV2 restController()
 		{
-			return new RestControllerV2(dataService(), molgenisPermissionService(), new RestService(dataService(),
-					idGenerator(), fileStore()));
+			return new RestControllerV2(dataService(), molgenisPermissionService(),
+					new RestService(dataService(), idGenerator(), fileStore()));
 		}
+
 	}
 
 	private String resourceResponse = "{\n"
