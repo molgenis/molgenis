@@ -1,4 +1,4 @@
-package org.molgenis.rdconnect;
+package org.molgenis.data.idcard;
 
 import static java.util.Objects.requireNonNull;
 
@@ -13,6 +13,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.idcard.model.IdCardBiobank;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

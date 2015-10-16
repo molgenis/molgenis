@@ -1,4 +1,4 @@
-package org.molgenis.rdconnect;
+package org.molgenis.data.idcard.model;
 
 public class IdCardOrganization
 {

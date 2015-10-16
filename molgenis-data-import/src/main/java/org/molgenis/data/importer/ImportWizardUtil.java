@@ -27,8 +27,10 @@ public class ImportWizardUtil
 			String entityImportOption)
 	{
 		File file = importWizard.getFile();
-		String fileName = file != null ? file.getName() : "null";
-		LOG.warn("Import of file [" + fileName + "] failed for action [" + entityImportOption + "]", e);
+
+		LOG.warn("Import of file [" + (file != null ? file.getName() : "UNKNOWN") + "] failed for action ["
+				+ entityImportOption + "]", e);
+
 		result.addError(new ObjectError("wizard", "<b>Your import failed:</b><br />" + e.getMessage()));
 	}
 

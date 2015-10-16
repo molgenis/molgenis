@@ -357,8 +357,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void refreshCaches()
 	{
-		packageRepository.updatePackageCache();
 		RunAsSystemProxy.runAsSystem(() -> {
+			packageRepository.updatePackageCache();
 			entityMetaDataRepository.fillEntityMetaDataCache();
 			return null;
 		});
