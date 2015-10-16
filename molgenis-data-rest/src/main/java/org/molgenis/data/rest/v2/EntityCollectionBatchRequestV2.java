@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.validation.constraints.Size;
 
+import org.hibernate.validator.constraints.NotEmpty;
 import org.molgenis.gson.AutoGson;
 
 import com.google.auto.value.AutoValue;
@@ -13,6 +14,7 @@ import com.google.auto.value.AutoValue;
 @AutoGson(autoValueClass = AutoValue_EntityCollectionBatchRequestV2.class)
 public abstract class EntityCollectionBatchRequestV2
 {
-	@Size(min = 1, max = RestControllerV2.MAX_ENTITIES)
+	@NotEmpty(message = "Please provide at least one entity in the entities property.")
+	@Size(min = 1, max = RestControllerV2.MAX_ENTITIES, message = "Number of entities must be between {min} and {max}.")
 	public abstract List<Map<String, Object>> getEntities();
 }
