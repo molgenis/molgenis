@@ -674,25 +674,6 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		return findOne(new QueryImpl().eq(getEntityMetaData().getIdAttribute().getName(), id));
 	}
 
-	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		if (ids == null) return Collections.emptyList();
-		Query inQuery = new QueryImpl().in(getEntityMetaData().getIdAttribute().getName(), ids);
-		Map<Object, Entity> index = uniqueIndex(newArrayList(findAll(inQuery)), Entity::getIdValue);
-		return Iterables.transform(ids, id -> lookup(index, id));
-	}
-
-	public Entity lookup(Map<Object, Entity> index, Object id)
-	{
-		Entity result = index.get(id);
-		if (result == null)
-		{
-			LOG.warn("Couldn't find {} for id {}.", getName(), id);
-		}
-		return result;
-	}
-
 	protected String getSelectSql(Query q, List<Object> parameters)
 	{
 		StringBuilder select = new StringBuilder("SELECT ");
