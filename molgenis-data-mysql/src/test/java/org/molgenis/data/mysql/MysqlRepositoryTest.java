@@ -1,7 +1,6 @@
 package org.molgenis.data.mysql;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -92,8 +91,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		MysqlRepository repo = (MysqlRepository) metaDataRepositories.addEntityMeta(metaData);
 
 		Assert.assertEquals(repo.getInsertSql(), "INSERT INTO `MysqlPerson` (`firstName`, `lastName`) VALUES (?, ?)");
-		Assert.assertEquals(
-				repo.getCreateSql(),
+		Assert.assertEquals(repo.getCreateSql(),
 				"CREATE TABLE IF NOT EXISTS `MysqlPerson`(`firstName` TEXT NOT NULL, `lastName` VARCHAR(255) NOT NULL, PRIMARY KEY (`lastName`)) ENGINE=InnoDB;");
 
 		metaData.addAttribute("age").setDataType(MolgenisFieldTypes.INT);
@@ -101,8 +99,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 
 		Assert.assertEquals(repo.getInsertSql(),
 				"INSERT INTO `MysqlPerson` (`firstName`, `lastName`, `age`) VALUES (?, ?, ?)");
-		Assert.assertEquals(
-				repo.getCreateSql(),
+		Assert.assertEquals(repo.getCreateSql(),
 				"CREATE TABLE IF NOT EXISTS `MysqlPerson`(`firstName` TEXT NOT NULL, `lastName` VARCHAR(255) NOT NULL, `age` INTEGER, PRIMARY KEY (`lastName`)) ENGINE=InnoDB;");
 		Assert.assertEquals(repo.getCountSql(new QueryImpl(), Lists.newArrayList()),
 				"SELECT COUNT(DISTINCT this.`lastName`) FROM `MysqlPerson` AS this");
@@ -247,7 +244,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		testRepository.add(entity1); // add in reverse order, so we can check if returned in the correct order
 		testRepository.add(entity0);
 
-		Iterable<Entity> iterable = testRepository.findAll(new Iterable<Object>()
+		Iterable<Entity> entities = testRepository.findAll(new Iterable<Object>()
 		{
 			@Override
 			public Iterator<Object> iterator()
@@ -256,11 +253,9 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 			}
 		});
 
-		List<Entity> result = Lists.newArrayList(iterable);
-		assertEquals(result.size(), 4);
-		assertEquals(result.get(0).getIdValue(), exampleId0);
-		assertEquals(result.get(2).getIdValue(), exampleId1);
-		assertNull(result.get(1));
-		assertNull(result.get(3));
+		assertEquals(Iterables.size(entities), 2);
+		Iterator<Entity> it = entities.iterator();
+		assertEquals(it.next().getIdValue(), exampleId0);
+		assertEquals(it.next().getIdValue(), exampleId1);
 	}
 }
