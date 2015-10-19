@@ -135,7 +135,11 @@ public class ConstraintViolation
 			if (other.message != null) return false;
 		}
 		else if (!message.equals(other.message)) return false;
-		if (rownr != other.rownr) return false;
+		if (rownr == null)
+		{
+			if (other.rownr != null) return false;
+		}
+		else if (!rownr.equals(other.rownr)) return false;
 		if (violatedAttribute == null)
 		{
 			if (other.violatedAttribute != null) return false;
