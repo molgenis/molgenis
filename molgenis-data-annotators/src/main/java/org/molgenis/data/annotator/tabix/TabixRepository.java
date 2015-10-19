@@ -6,8 +6,10 @@ import static org.molgenis.data.vcf.VcfRepository.POS;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -89,9 +91,18 @@ public class TabixRepository extends AbstractRepository
 	@Override
 	public Iterable<Entity> findAll(Query q)
 	{
-		String chromValue = getFirstEqualsValueFor(chromosomeAttributeName, q).toString();
-		long posValue = Long.parseLong(getFirstEqualsValueFor(positionAttributeName, q).toString());
-		return query(chromValue, Long.valueOf(posValue));
+		Object posValue = getFirstEqualsValueFor(positionAttributeName, q);
+		Object chromValue = getFirstEqualsValueFor(chromosomeAttributeName, q);
+		List<Entity> result = new ArrayList<Entity>();
+
+		// if one of both required attributes is null, skip the query and return an empty list
+		if (posValue != null && chromValue != null)
+		{
+			long posLongValue = Long.parseLong(posValue.toString());
+			String chromStringValue = chromValue.toString();
+			result = query(chromStringValue, Long.valueOf(posLongValue));
+		}
+		return result;
 	}
 
 	/**
