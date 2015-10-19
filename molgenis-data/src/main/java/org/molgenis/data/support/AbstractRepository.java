@@ -21,6 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.collect.Sets;
+
 /**
  * Base class for repositories. Subclasses can override supported methods
  */
@@ -90,7 +92,7 @@ public abstract class AbstractRepository implements Repository
 	
 	private Iterable<Entity> findAllBatched(List<Object> ids)
 	{
-		Query inQuery = new QueryImpl().in(getEntityMetaData().getIdAttribute().getName(), ids);
+		Query inQuery = new QueryImpl().in(getEntityMetaData().getIdAttribute().getName(), Sets.newHashSet(ids));
 		Map<Object, Entity> indexedEntities = uniqueIndex(findAll(inQuery), Entity::getIdValue);
 		return filter(transform(ids, id -> lookup(indexedEntities, id)), notNull());
 	}
