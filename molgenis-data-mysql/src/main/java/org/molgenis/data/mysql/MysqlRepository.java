@@ -680,7 +680,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		if (ids == null) return Collections.emptyList();
 		Query inQuery = new QueryImpl().in(getEntityMetaData().getIdAttribute().getName(), ids);
 		Map<Object, Entity> index = uniqueIndex(newArrayList(findAll(inQuery)), Entity::getIdValue);
-		return Iterables.filter(Iterables.transform(ids, id -> lookup(index, id)), x -> x != null);
+		return Iterables.transform(ids, id -> lookup(index, id));
 	}
 
 	public Entity lookup(Map<Object, Entity> index, Object id)
