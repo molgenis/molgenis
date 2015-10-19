@@ -1,6 +1,7 @@
 package org.molgenis.data.mysql;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -246,18 +247,20 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		testRepository.add(entity1); // add in reverse order, so we can check if returned in the correct order
 		testRepository.add(entity0);
 
-		Iterable<Entity> entities = testRepository.findAll(new Iterable<Object>()
+		Iterable<Entity> iterable = testRepository.findAll(new Iterable<Object>()
 		{
 			@Override
 			public Iterator<Object> iterator()
 			{
-				return Arrays.<Object> asList(exampleId0, exampleId1).iterator();
+				return Arrays.<Object> asList(exampleId0, "missing", exampleId1, "nope").iterator();
 			}
 		});
 
-		assertEquals(Iterables.size(entities), 2);
-		Iterator<Entity> it = entities.iterator();
-		assertEquals(it.next().getIdValue(), exampleId0);
-		assertEquals(it.next().getIdValue(), exampleId1);
+		List<Entity> result = Lists.newArrayList(iterable);
+		assertEquals(result.size(), 4);
+		assertEquals(result.get(0).getIdValue(), exampleId0);
+		assertEquals(result.get(2).getIdValue(), exampleId1);
+		assertNull(result.get(1));
+		assertNull(result.get(3));
 	}
 }
