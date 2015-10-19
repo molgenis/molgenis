@@ -175,7 +175,7 @@ public class ElasticsearchServiceTest
 		when(repo.findAll(idsBatch1)).thenReturn(entitiesBatch1);
 		dataService.addRepository(repo);
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("entity");
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(idAttrName).setDataType(MolgenisFieldTypes.INT).setIdAttribute(true));
+		entityMetaData.addAttribute(idAttrName).setDataType(MolgenisFieldTypes.INT).setIdAttribute(true);
 		Query q = new QueryImpl();
 		Iterable<Entity> searchResults = searchService.search(q, entityMetaData);
 		Iterator<Entity> it = searchResults.iterator();
@@ -211,7 +211,7 @@ public class ElasticsearchServiceTest
 	private DefaultEntityMetaData createEntityMeta(String refEntityName)
 	{
 		DefaultEntityMetaData refEntityMetaData = new DefaultEntityMetaData(refEntityName);
-		refEntityMetaData.addAttributeMetaData(new DefaultAttributeMetaData("id").setIdAttribute(true).setUnique(true));
+		refEntityMetaData.addAttribute("id").setIdAttribute(true).setUnique(true);
 		return refEntityMetaData;
 	}
 
