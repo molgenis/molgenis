@@ -812,7 +812,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	@Override
 	public void rebuildIndex(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
 	{
-		if (ElasticsearchRepositoryCollection.NAME.equals(entityMetaData.getName()))
+		if (ElasticsearchRepositoryCollection.NAME.equals(entityMetaData.getBackend()))
 		{
 			if (DependencyResolver.hasSelfReferences(entityMetaData))
 			{
