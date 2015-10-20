@@ -11,8 +11,8 @@ public class NegativeCategoryRuleTest
 	@Test
 	public void isRuleApplied()
 	{
-		Assert.assertTrue(rule.isRuleApplied(Category.create(0, "never had stroke"), Category.create(1, "NO")));
-		Assert.assertFalse(rule.isRuleApplied(Category.create(0, "has had stroke"), Category.create(1, "NO")));
+		Assert.assertTrue(rule.isRuleApplied(Category.create("0", "never had stroke"), Category.create("1", "NO")));
+		Assert.assertFalse(rule.isRuleApplied(Category.create("0", "has had stroke"), Category.create("1", "NO")));
 	}
 
 	@Test

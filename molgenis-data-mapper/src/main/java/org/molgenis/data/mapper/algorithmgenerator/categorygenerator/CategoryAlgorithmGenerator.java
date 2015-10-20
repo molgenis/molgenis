@@ -33,7 +33,7 @@ public abstract class CategoryAlgorithmGenerator
 		{
 			for (Entity entity : dataService.findAll(refEntity.getName()))
 			{
-				Integer code = entity.getInt(refEntity.getIdAttribute().getName());
+				String code = entity.getString(refEntity.getIdAttribute().getName());
 				String label = entity.getString(refEntity.getLabelAttribute().getName());
 				Category category = Category.create(code, label, CategoryMapperUtil.convertDescriptionToAmount(label));
 				if (!categories.contains(category))

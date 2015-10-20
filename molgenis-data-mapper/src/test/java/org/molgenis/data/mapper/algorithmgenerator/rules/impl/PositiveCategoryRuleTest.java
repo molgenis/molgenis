@@ -11,8 +11,8 @@ public class PositiveCategoryRuleTest
 	@Test
 	public void isRuleApplied()
 	{
-		Assert.assertTrue(rule.isRuleApplied(Category.create(0, "has had stroke"), Category.create(1, "yes")));
-		Assert.assertFalse(rule.isRuleApplied(Category.create(0, "has had stroke"), Category.create(1, "NO")));
+		Assert.assertTrue(rule.isRuleApplied(Category.create("0", "has had stroke"), Category.create("1", "yes")));
+		Assert.assertFalse(rule.isRuleApplied(Category.create("0", "has had stroke"), Category.create("1", "NO")));
 	}
 
 	@Test
