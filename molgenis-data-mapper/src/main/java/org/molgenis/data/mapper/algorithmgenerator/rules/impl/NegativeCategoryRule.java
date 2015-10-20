@@ -6,7 +6,7 @@ import com.google.common.collect.Sets;
 
 public class NegativeCategoryRule extends InternalAbstractCategoryRule
 {
-	private final static Set<String> NEGATIVE_WORDS = Sets.newHashSet("no", "never");
+	private final static Set<String> NEGATIVE_WORDS = Sets.newHashSet("not", "no", "never");
 
 	public NegativeCategoryRule()
 	{

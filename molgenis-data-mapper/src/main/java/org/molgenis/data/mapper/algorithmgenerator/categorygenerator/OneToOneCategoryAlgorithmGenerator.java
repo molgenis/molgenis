@@ -31,7 +31,7 @@ public class OneToOneCategoryAlgorithmGenerator extends CategoryAlgorithmGenerat
 
 	private List<CategoryRule> getRules(DataService dataService)
 	{
-		return Lists.newArrayList(new PositiveCategoryRule(), new NegativeCategoryRule(), new MissingCategoryRule());
+		return Lists.newArrayList(new NegativeCategoryRule(), new PositiveCategoryRule(), new MissingCategoryRule());
 	}
 
 	@Override

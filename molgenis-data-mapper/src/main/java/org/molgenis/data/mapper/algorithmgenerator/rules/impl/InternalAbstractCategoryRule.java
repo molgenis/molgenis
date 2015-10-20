@@ -1,6 +1,7 @@
 package org.molgenis.data.mapper.algorithmgenerator.rules.impl;
 
-import java.util.Objects;
+import static java.util.Objects.requireNonNull;
+
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -19,7 +20,7 @@ public abstract class InternalAbstractCategoryRule implements CategoryRule
 
 	public InternalAbstractCategoryRule(Set<String> words)
 	{
-		this.words = Objects.requireNonNull(words);
+		this.words = requireNonNull(words);
 	}
 
 	@Override

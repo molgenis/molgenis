@@ -45,9 +45,8 @@ public class MapCategoryServiceImpl implements MapCategoryService
 
 	public boolean isValid(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)
 	{
-		return isReferenceDataType(targetAttribute)
-				&& (sourceAttributes.stream().allMatch(this::isReferenceDataType) || sourceAttributes.stream()
-						.allMatch(this::isNumericDataType));
+		return isReferenceDataType(targetAttribute) && (sourceAttributes.stream().allMatch(this::isReferenceDataType)
+				|| sourceAttributes.stream().allMatch(this::isNumericDataType));
 	}
 
 	boolean isNumericDataType(AttributeMetaData attribute)
