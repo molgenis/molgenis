@@ -1,6 +1,6 @@
 package org.molgenis.ui;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_APP_SETTINGS;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_ENVIRONMENT;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_I18N;
@@ -32,9 +32,9 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter
 	public MolgenisInterceptor(ResourceFingerprintRegistry resourceFingerprintRegistry, AppSettings appSettings,
 			@Value("${environment}") String environment)
 	{
-		this.resourceFingerprintRegistry = checkNotNull(resourceFingerprintRegistry);
-		this.appSettings = checkNotNull(appSettings);
-		this.environment = checkNotNull(environment);
+		this.resourceFingerprintRegistry = requireNonNull(resourceFingerprintRegistry);
+		this.appSettings = requireNonNull(appSettings);
+		this.environment = requireNonNull(environment);
 	}
 
 	@Override

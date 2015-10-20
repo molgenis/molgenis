@@ -4,6 +4,7 @@ import static org.elasticsearch.common.base.Preconditions.checkNotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -25,7 +26,6 @@ import com.google.common.collect.ImmutableList.Builder;
 
 /**
  * An indexed VCF Repository
- * 
  */
 public class TabixVcfRepository extends VcfRepository
 {
@@ -70,9 +70,18 @@ public class TabixVcfRepository extends VcfRepository
 	@Override
 	public Iterable<Entity> findAll(Query q)
 	{
-		String chromValue = getFirstEqualsValueFor(VcfRepository.CHROM, q).toString();
-		long posValue = Long.parseLong(getFirstEqualsValueFor(VcfRepository.POS, q).toString());
-		return query(chromValue, Long.valueOf(posValue), Long.valueOf(posValue));
+		Object posValue = getFirstEqualsValueFor(VcfRepository.POS, q);
+		Object chromValue = getFirstEqualsValueFor(VcfRepository.CHROM, q);
+		List<Entity> result = new ArrayList<Entity>();
+
+		// if one of both required attributes is null, skip the query and return an empty list
+		if (posValue != null && chromValue != null)
+		{
+			long posLongValue = Long.parseLong(posValue.toString());
+			String chromStringValue = chromValue.toString();
+			result = query(chromStringValue, Long.valueOf(posLongValue), Long.valueOf(posLongValue));
+		}
+		return result;
 	}
 
 	/**
@@ -89,9 +98,26 @@ public class TabixVcfRepository extends VcfRepository
 	public synchronized List<Entity> query(String chrom, long posFrom, long posTo)
 	{
 		String queryString = String.format("%s:%s-%s", checkNotNull(chrom), checkNotNull(posFrom), checkNotNull(posTo));
-		Collection<String> lines = getLines(tabixReader.query(queryString));
-		return lines.stream().map(line -> line.split("\t")).map(vcfToEntitySupplier.get()::toEntity)
-				.filter(entity -> positionMatches(entity, posFrom, posTo)).collect(Collectors.toList());
+		try
+		{
+			Collection<String> lines = getLines(tabixReader.query(queryString));
+			return lines.stream().map(line -> line.split("\t")).map(vcfToEntitySupplier.get()::toEntity)
+					.filter(entity -> positionMatches(entity, posFrom, posTo)).collect(Collectors.toList());
+		}
+		catch (NullPointerException e)
+		{
+			LOG.warn("Unable to read from tabix resource for query: " + queryString
+					+ " (Position not present in resource file?)");
+			LOG.debug("", e);
+		}
+		catch (ArrayIndexOutOfBoundsException e)
+		{
+			LOG.warn("Unable to read from tabix resource for query: " + queryString
+					+ " (Chromosome not present in resource file?)");
+			LOG.debug("", e);
+		}
+
+		return Collections.emptyList();
 	}
 
 	/**

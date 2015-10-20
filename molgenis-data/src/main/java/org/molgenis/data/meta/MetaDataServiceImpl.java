@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.MolgenisDataException;
@@ -26,6 +27,7 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.util.DependencyResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -139,17 +141,38 @@ public class MetaDataServiceImpl implements MetaDataService
 			}
 			entityMetaDataRepository.delete(entityName);
 			if (dataService.hasRepository(entityName)) dataService.removeRepository(entityName);
+			deleteEntityPermissions(entityName);
+
 			return null;
 		});
 
 		refreshCaches();
 	}
 
+	private void deleteEntityPermissions(String entityName)
+	{
+		List<String> authorities = SecurityUtils.getEntityAuthorities(entityName);
+
+		// User permissions
+		if (dataService.hasRepository("UserAuthority"))
+		{
+			Iterable<Entity> userPermissions = dataService.query("UserAuthority").in("role", authorities).findAll();
+			dataService.delete("UserAuthority", userPermissions);
+		}
+
+		// Group permissions
+		if (dataService.hasRepository("GroupAuthority"))
+		{
+			Iterable<Entity> groupPermissions = dataService.query("GroupAuthority").in("role", authorities).findAll();
+			dataService.delete("GroupAuthority", groupPermissions);
+		}
+	}
+
 	@Transactional
 	@Override
 	public void delete(List<EntityMetaData> entities)
 	{
-		reverse(DependencyResolver.resolve(Sets.newHashSet(entities))).stream().map(emd -> emd.getName())
+		reverse(DependencyResolver.resolve(Sets.newHashSet(entities))).stream().map(EntityMetaData::getName)
 				.forEach(this::deleteEntityMeta);
 	}
 

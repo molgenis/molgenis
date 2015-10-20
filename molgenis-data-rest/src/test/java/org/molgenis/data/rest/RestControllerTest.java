@@ -37,6 +37,7 @@ import org.molgenis.data.Sort;
 import org.molgenis.data.Sort.Direction;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.rest.RestControllerTest.RestControllerConfig;
+import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -294,9 +295,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieve() throws Exception
 	{
-		restController.retrieveEntity(ENTITY_NAME, ENTITY_ID, new String[]
-		{}, new String[]
-		{});
+		restController.retrieveEntity(ENTITY_NAME, ENTITY_ID, new String[] {}, new String[] {});
 
 		mockMvc.perform(get(HREF_ENTITY_ID))
 				.andExpect(status().isOk())
@@ -617,8 +616,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		public RestController restController()
 		{
 			return new RestController(dataService(), tokenService(), authenticationManager(),
-					molgenisPermissionService(), new MolgenisRSQL(), new ResourceFingerprintRegistry(), idGenerator(),
-					fileStore());
+					molgenisPermissionService(), new ResourceFingerprintRegistry(), new MolgenisRSQL(),
+					new RestService(dataService(), idGenerator(), fileStore()));
 		}
 	}
 
