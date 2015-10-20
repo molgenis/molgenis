@@ -8,6 +8,11 @@ public class BbmriNlCheatSheet
 	public static final String REF_DATA_CATEGORY_TYPES = "bbmri_nl_data_category_types";
 	public static final String REF_OMICS_DATA_TYPES = "bbmri_nl_omics_data_types";
 	public static final String REF_GENDER_TYPES = "bbmri_nl_gender_types";
+	public static final String REF_PUBLICATIONS = "bbmri_nl_publications";
+	public static final String REF_PERSONS = "bbmri_nl_persons";
+	public static final String REF_JURISTIC_PERSONS = "bbmri_nl_juristic_persons";
+	public static final String REF_DISEASE_TYPES = "bbmri_nl_disease_types";
+	public static final String REF_MATERIAL_TYPES = "bbmri_nl_material_types";
 
 	public static final String ID = "id";
 	public static final String NAME = "name";
