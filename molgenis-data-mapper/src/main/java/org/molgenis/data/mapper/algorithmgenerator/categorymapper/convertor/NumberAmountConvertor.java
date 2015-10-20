@@ -13,6 +13,8 @@ import org.molgenis.data.mapper.algorithmgenerator.categorymapper.CategoryMapper
 
 public class NumberAmountConvertor extends AmountConvertor
 {
+	private final static int DEFAULT_NUMBER = 0;
+
 	public boolean matchCriteria(String description)
 	{
 		return true;
@@ -32,8 +34,13 @@ public class NumberAmountConvertor extends AmountConvertor
 			}
 			else if (extractNumbers.size() > 1)
 			{
-				return AmountWrapper.create(Amount.rangeOf(extractNumbers.get(0),
-						extractNumbers.get(extractNumbers.size() - 1), unit).to(STANDARD_UNIT));
+				return AmountWrapper.create(
+						Amount.rangeOf(extractNumbers.get(0), extractNumbers.get(extractNumbers.size() - 1), unit)
+								.to(STANDARD_UNIT));
+			}
+			else
+			{
+				return AmountWrapper.create(Amount.valueOf(DEFAULT_NUMBER, unit).to(STANDARD_UNIT));
 			}
 		}
 

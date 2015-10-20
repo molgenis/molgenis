@@ -35,6 +35,7 @@ public class CategoryMapperUtil
 	private static final Pattern NUMBER_PATTERN = Pattern.compile("\\d+\\.?\\d*");
 	private static final String NON_LETTER_REGEX = "[^a-zA-Z0-9]";
 	private static final List<Unit<?>> DURATION_UNITS;
+
 	static
 	{
 		DURATION_UNITS = Arrays.asList(SI.SECOND.inverse(), NonSI.MINUTE.inverse(), NonSI.HOUR.inverse(),
@@ -42,6 +43,7 @@ public class CategoryMapperUtil
 	}
 
 	private static final Set<String> POSITIVE_ADJECTIVES;
+
 	static
 	{
 		POSITIVE_ADJECTIVES = new HashSet<String>();
@@ -49,6 +51,7 @@ public class CategoryMapperUtil
 	}
 
 	private static final Set<String> NEGATIVE_ADJECTIVES;
+
 	static
 	{
 		NEGATIVE_ADJECTIVES = new HashSet<String>();
@@ -59,6 +62,7 @@ public class CategoryMapperUtil
 
 	private static final Map<String, Integer> WORD_TO_NUMBER_MAP;
 	private static final double STANDARD_ERROR = 0.0000000001;
+
 	static
 	{
 		WORD_TO_NUMBER_MAP = new HashMap<String, Integer>();
