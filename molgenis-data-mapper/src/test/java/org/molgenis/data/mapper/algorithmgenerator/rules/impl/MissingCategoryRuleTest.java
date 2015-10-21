@@ -1,5 +1,6 @@
 package org.molgenis.data.mapper.algorithmgenerator.rules.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -11,13 +12,24 @@ public class MissingCategoryRuleTest
 	@Test
 	public void isRuleApplied()
 	{
-		Assert.assertTrue(rule.isRuleApplied(Category.create("3", "dont know"), Category.create("3", "MIssing")));
-		Assert.assertTrue(rule.isRuleApplied(Category.create("3", "UNKNOWN"), Category.create("3", "missing")));
-		Assert.assertTrue(rule.isRuleApplied(Category.create("3", "not know"), Category.create("3", "missing")));
-		Assert.assertTrue(rule.isRuleApplied(Category.create("3", "don`t know"), Category.create("3", "missing")));
-		Assert.assertTrue(rule.isRuleApplied(Category.create("3", "don't know"), Category.create("3", "missing")));
-
-		Assert.assertFalse(rule.isRuleApplied(Category.create("0", "has had stroke"), Category.create("1", "NO")));
+		Assert.assertTrue(
+				rule.createCategoryMatchQuality(Category.create("3", "dont know"), Category.create("3", "MIssing"))
+						.isRuleApplied());
+		Assert.assertTrue(
+				rule.createCategoryMatchQuality(Category.create("3", "UNKNOWN"), Category.create("3", "missing"))
+						.isRuleApplied());
+		Assert.assertTrue(
+				rule.createCategoryMatchQuality(Category.create("3", "not know"), Category.create("3", "missing"))
+						.isRuleApplied());
+		Assert.assertTrue(
+				rule.createCategoryMatchQuality(Category.create("3", "don`t know"), Category.create("3", "missing"))
+						.isRuleApplied());
+		Assert.assertTrue(
+				rule.createCategoryMatchQuality(Category.create("3", "don't know"), Category.create("3", "missing"))
+						.isRuleApplied());
+		Assert.assertFalse(
+				rule.createCategoryMatchQuality(Category.create("0", "has had stroke"), Category.create("1", "NO"))
+						.isRuleApplied());
 	}
 
 	@Test
@@ -29,11 +41,15 @@ public class MissingCategoryRuleTest
 	}
 
 	@Test
-	public void labelContainsMissingeWords()
+	public void getMatchedTermFromTheRulelabelContainsWords()
 	{
-		Assert.assertTrue(rule.labelContainsWords("string unknown contain the word!"));
-		Assert.assertTrue(rule.labelContainsWords("string MISSING contain the word!"));
-		Assert.assertFalse(rule.labelContainsWords("string YES contain the word!"));
-		Assert.assertFalse(rule.labelContainsWords("string HAS contain the word!"));
+		Assert.assertTrue(StringUtils
+				.isNotBlank(rule.getMatchedTermFromTheRulelabelContainsWords("string unknown contain the word!")));
+		Assert.assertTrue(StringUtils
+				.isNotBlank(rule.getMatchedTermFromTheRulelabelContainsWords("string MISSING contain the word!")));
+		Assert.assertTrue(
+				StringUtils.isBlank(rule.getMatchedTermFromTheRulelabelContainsWords("string YES contain the word!")));
+		Assert.assertTrue(
+				StringUtils.isBlank(rule.getMatchedTermFromTheRulelabelContainsWords("string HAS contain the word!")));
 	}
 }

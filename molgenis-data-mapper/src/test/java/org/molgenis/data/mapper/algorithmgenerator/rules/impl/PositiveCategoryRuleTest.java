@@ -1,5 +1,6 @@
 package org.molgenis.data.mapper.algorithmgenerator.rules.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -11,16 +12,24 @@ public class PositiveCategoryRuleTest
 	@Test
 	public void isRuleApplied()
 	{
-		Assert.assertTrue(rule.isRuleApplied(Category.create("0", "has had stroke"), Category.create("1", "yes")));
-		Assert.assertFalse(rule.isRuleApplied(Category.create("0", "has had stroke"), Category.create("1", "NO")));
+		Assert.assertTrue(
+				rule.createCategoryMatchQuality(Category.create("0", "has had stroke"), Category.create("1", "yes"))
+						.isRuleApplied());
+		Assert.assertFalse(
+				rule.createCategoryMatchQuality(Category.create("0", "has had stroke"), Category.create("1", "NO"))
+						.isRuleApplied());
 	}
 
 	@Test
 	public void labelContainsPositiveWords()
 	{
-		Assert.assertFalse(rule.labelContainsWords("string NO NEVER contain the word!"));
-		Assert.assertTrue(rule.labelContainsWords("string EVER contain the word!"));
-		Assert.assertTrue(rule.labelContainsWords("string YES contain the word!"));
-		Assert.assertTrue(rule.labelContainsWords("string HAS contain the word!"));
+		Assert.assertFalse(StringUtils
+				.isNotBlank(rule.getMatchedTermFromTheRulelabelContainsWords("string NO NEVER contain the word!")));
+		Assert.assertTrue(StringUtils
+				.isNotBlank(rule.getMatchedTermFromTheRulelabelContainsWords("string EVER contain the word!")));
+		Assert.assertTrue(StringUtils
+				.isNotBlank(rule.getMatchedTermFromTheRulelabelContainsWords("string YES contain the word!")));
+		Assert.assertTrue(StringUtils
+				.isNotBlank(rule.getMatchedTermFromTheRulelabelContainsWords("string HAS contain the word!")));
 	}
 }

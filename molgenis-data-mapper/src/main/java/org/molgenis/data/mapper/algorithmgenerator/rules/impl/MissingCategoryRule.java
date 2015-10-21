@@ -12,4 +12,5 @@ public class MissingCategoryRule extends InternalAbstractCategoryRule
 	{
 		super(MISSING_WORDS);
 	}
+
 }

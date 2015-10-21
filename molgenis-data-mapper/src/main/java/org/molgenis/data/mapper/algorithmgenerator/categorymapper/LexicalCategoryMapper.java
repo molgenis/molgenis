@@ -1,10 +1,12 @@
 package org.molgenis.data.mapper.algorithmgenerator.categorymapper;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
+import org.molgenis.data.mapper.algorithmgenerator.rules.CategoryMatchQuality;
 import org.molgenis.data.mapper.algorithmgenerator.rules.CategoryRule;
 import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 
@@ -41,20 +43,33 @@ public class LexicalCategoryMapper extends CategoryMapper
 
 		if (bestNGramScore < DEFAULT_THRESHOLD)
 		{
-			Optional<Category> findFirst = targetCategories.stream()
-					.filter(targetCategory -> applyCustomRules(sourceCategory, targetCategory)).findFirst();
+			Optional<?> findFirst = targetCategories.stream()
+					.map(targetCategory -> applyCustomRules(sourceCategory, targetCategory)).filter(Objects::nonNull)
+					.sorted().findFirst();
+			// List<?> collect = targetCategories.stream()
+			// .map(targetCategory -> applyCustomRules(sourceCategory, targetCategory)).filter(Objects::nonNull)
+			// .sorted().collect(Collectors.toList());
+			//
+			// for (Object element : collect)
+			// {
+			// if (element instanceof CategoryMatchQuality)
+			// {
+			// System.out.println(element);
+			// }
+			// }
 
-			if (findFirst.isPresent())
+			if (findFirst.isPresent() && findFirst.get() instanceof CategoryMatchQuality)
 			{
-				bestCategory = findFirst.get();
+				bestCategory = ((CategoryMatchQuality<?>) findFirst.get()).getTargetCategory();
 			}
 		}
 
 		return bestCategory;
 	}
 
-	public boolean applyCustomRules(Category sourceCategory, Category targetCategory)
+	public CategoryMatchQuality<?> applyCustomRules(Category sourceCategory, Category targetCategory)
 	{
-		return rules.stream().anyMatch(rule -> rule.isRuleApplied(targetCategory, sourceCategory));
+		return rules.stream().map(rule -> rule.createCategoryMatchQuality(targetCategory, sourceCategory))
+				.filter(CategoryMatchQuality::isRuleApplied).sorted().findFirst().orElse(null);
 	}
 }

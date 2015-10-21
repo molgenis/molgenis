@@ -31,43 +31,21 @@ public class OneToOneCategoryAlgorithmGeneratorTest
 
 		categoryAlgorithmGenerator = new OneToOneCategoryAlgorithmGenerator(dataService);
 
-		DefaultEntityMetaData targetRefEntityMetaData = new DefaultEntityMetaData("POTATO_REF");
-		DefaultAttributeMetaData targetCodeAttributeMetaData = new DefaultAttributeMetaData("code", FieldTypeEnum.INT);
-		targetCodeAttributeMetaData.setIdAttribute(true);
-		DefaultAttributeMetaData targetLabelAttributeMetaData = new DefaultAttributeMetaData("label",
-				FieldTypeEnum.STRING);
-		targetLabelAttributeMetaData.setLabelAttribute(true);
-		targetRefEntityMetaData.addAttributeMetaData(targetCodeAttributeMetaData);
-		targetRefEntityMetaData.addAttributeMetaData(targetLabelAttributeMetaData);
-
-		targetAttributeMetaData = new DefaultAttributeMetaData("Current Consumption Frequency of Potatoes",
-				FieldTypeEnum.CATEGORICAL);
-		targetAttributeMetaData.setRefEntity(targetRefEntityMetaData);
-
+		DefaultEntityMetaData targetRefEntityMetaData = createCategoricalRefEntityMetaData("POTATO_REF");
 		MapEntity targetEntity1 = new MapEntity(ImmutableMap.of("code", 1, "label", "Almost daily + daily"));
 		MapEntity targetEntity2 = new MapEntity(ImmutableMap.of("code", 2, "label", "Several times a week"));
 		MapEntity targetEntity3 = new MapEntity(ImmutableMap.of("code", 3, "label", "About once a week"));
 		MapEntity targetEntity4 = new MapEntity(ImmutableMap.of("code", 4, "label", "Never + fewer than once a week"));
 		MapEntity targetEntity5 = new MapEntity(ImmutableMap.of("code", 9, "label", "missing"));
 
+		targetAttributeMetaData = new DefaultAttributeMetaData("Current Consumption Frequency of Potatoes",
+				FieldTypeEnum.CATEGORICAL);
+		targetAttributeMetaData.setRefEntity(targetRefEntityMetaData);
+
 		Mockito.when(dataService.findAll(targetRefEntityMetaData.getName()))
 				.thenReturn(Arrays.asList(targetEntity1, targetEntity2, targetEntity3, targetEntity4, targetEntity5));
 
-		DefaultEntityMetaData sourceRefEntityMetaData = new DefaultEntityMetaData("LifeLines_POTATO_REF");
-
-		DefaultAttributeMetaData sourceCodeAttributeMetaData = new DefaultAttributeMetaData("code", FieldTypeEnum.INT);
-		sourceCodeAttributeMetaData.setIdAttribute(true);
-		DefaultAttributeMetaData sourceLabelAttributeMetaData = new DefaultAttributeMetaData("label",
-				FieldTypeEnum.STRING);
-		sourceLabelAttributeMetaData.setLabelAttribute(true);
-		sourceRefEntityMetaData.addAttributeMetaData(sourceCodeAttributeMetaData);
-		sourceRefEntityMetaData.addAttributeMetaData(sourceLabelAttributeMetaData);
-
-		sourceAttributeMetaData = new DefaultAttributeMetaData("MESHED_POTATO", FieldTypeEnum.CATEGORICAL);
-		sourceAttributeMetaData.setLabel(
-				"How often did you eat boiled or mashed potatoes (also in stew) in the past month? Baked potatoes are asked later");
-		sourceAttributeMetaData.setRefEntity(sourceRefEntityMetaData);
-
+		DefaultEntityMetaData sourceRefEntityMetaData = createCategoricalRefEntityMetaData("LifeLines_POTATO_REF");
 		MapEntity sourceEntity1 = new MapEntity(ImmutableMap.of("code", 1, "label", "Not this month"));
 		MapEntity sourceEntity2 = new MapEntity(ImmutableMap.of("code", 2, "label", "1 day per month"));
 		MapEntity sourceEntity3 = new MapEntity(ImmutableMap.of("code", 3, "label", "2-3 days per month"));
@@ -76,6 +54,11 @@ public class OneToOneCategoryAlgorithmGeneratorTest
 		MapEntity sourceEntity6 = new MapEntity(ImmutableMap.of("code", 6, "label", "4-5 days per week"));
 		MapEntity sourceEntity7 = new MapEntity(ImmutableMap.of("code", 7, "label", "6-7 days per week"));
 		MapEntity sourceEntity8 = new MapEntity(ImmutableMap.of("code", 8, "label", "9 days per week"));
+
+		sourceAttributeMetaData = new DefaultAttributeMetaData("MESHED_POTATO", FieldTypeEnum.CATEGORICAL);
+		sourceAttributeMetaData.setLabel(
+				"How often did you eat boiled or mashed potatoes (also in stew) in the past month? Baked potatoes are asked later");
+		sourceAttributeMetaData.setRefEntity(sourceRefEntityMetaData);
 
 		Mockito.when(dataService.findAll(sourceRefEntityMetaData.getName()))
 				.thenReturn(Arrays.asList(sourceEntity1, sourceEntity2, sourceEntity3, sourceEntity4, sourceEntity5,

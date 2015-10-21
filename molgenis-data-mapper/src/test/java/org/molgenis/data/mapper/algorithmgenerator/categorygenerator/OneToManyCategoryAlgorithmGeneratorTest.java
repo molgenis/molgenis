@@ -50,8 +50,8 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 		MapEntity targetEntity4 = new MapEntity(ImmutableMap.of("code", 4, "label", "Never + fewer than once a week"));
 		MapEntity targetEntity5 = new MapEntity(ImmutableMap.of("code", 9, "label", "missing"));
 
-		Mockito.when(dataService.findAll(targetRefEntityMetaData.getName())).thenReturn(
-				Arrays.asList(targetEntity1, targetEntity2, targetEntity3, targetEntity4, targetEntity5));
+		Mockito.when(dataService.findAll(targetRefEntityMetaData.getName()))
+				.thenReturn(Arrays.asList(targetEntity1, targetEntity2, targetEntity3, targetEntity4, targetEntity5));
 
 		DefaultEntityMetaData sourceRefEntityMetaData = new DefaultEntityMetaData("LifeLines_POTATO_REF");
 
@@ -64,8 +64,8 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 		sourceRefEntityMetaData.addAttributeMetaData(sourceLabelAttributeMetaData);
 
 		sourceAttributeMetaData = new DefaultAttributeMetaData("MESHED_POTATO", FieldTypeEnum.CATEGORICAL);
-		sourceAttributeMetaData
-				.setLabel("How often did you eat boiled or mashed potatoes (also in stew) in the past month? Baked potatoes are asked later");
+		sourceAttributeMetaData.setLabel(
+				"How often did you eat boiled or mashed potatoes (also in stew) in the past month? Baked potatoes are asked later");
 		sourceAttributeMetaData.setRefEntity(sourceRefEntityMetaData);
 
 		MapEntity sourceEntity1 = new MapEntity(ImmutableMap.of("code", 1, "label", "Not this month"));
@@ -76,9 +76,8 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 		MapEntity sourceEntity6 = new MapEntity(ImmutableMap.of("code", 6, "label", "4-5 days per week"));
 		MapEntity sourceEntity7 = new MapEntity(ImmutableMap.of("code", 7, "label", "6-7 days per week"));
 
-		Mockito.when(dataService.findAll(sourceRefEntityMetaData.getName())).thenReturn(
-				Arrays.asList(sourceEntity1, sourceEntity2, sourceEntity3, sourceEntity4, sourceEntity5, sourceEntity6,
-						sourceEntity7));
+		Mockito.when(dataService.findAll(sourceRefEntityMetaData.getName())).thenReturn(Arrays.asList(sourceEntity1,
+				sourceEntity2, sourceEntity3, sourceEntity4, sourceEntity5, sourceEntity6, sourceEntity7));
 
 		DefaultEntityMetaData sourceRefEntityMetaData1 = new DefaultEntityMetaData("Mitchelstown_POTATO_REF");
 
@@ -91,8 +90,8 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 		sourceRefEntityMetaData1.addAttributeMetaData(sourceLabelAttributeMetaData1);
 
 		sourceAttributeMetaData1 = new DefaultAttributeMetaData("MESHED_POTATO_1", FieldTypeEnum.CATEGORICAL);
-		sourceAttributeMetaData1
-				.setLabel("How often did you eat boiled or mashed potatoes (also in stew) in the past month? Baked potatoes are asked later");
+		sourceAttributeMetaData1.setLabel(
+				"How often did you eat boiled or mashed potatoes (also in stew) in the past month? Baked potatoes are asked later");
 		sourceAttributeMetaData1.setRefEntity(sourceRefEntityMetaData1);
 
 		MapEntity sourceEntity8 = new MapEntity(ImmutableMap.of("code", 1, "label", "never/less than 1 per month"));
@@ -105,8 +104,8 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 		MapEntity sourceEntity15 = new MapEntity(ImmutableMap.of("code", 8, "label", "4-5 per day"));
 		MapEntity sourceEntity16 = new MapEntity(ImmutableMap.of("code", 9, "label", "6+ per day"));
 
-		Mockito.when(dataService.findAll(sourceRefEntityMetaData1.getName())).thenReturn(
-				Arrays.asList(sourceEntity8, sourceEntity9, sourceEntity10, sourceEntity11, sourceEntity12,
+		Mockito.when(dataService.findAll(sourceRefEntityMetaData1.getName()))
+				.thenReturn(Arrays.asList(sourceEntity8, sourceEntity9, sourceEntity10, sourceEntity11, sourceEntity12,
 						sourceEntity13, sourceEntity14, sourceEntity15, sourceEntity16));
 	}
 
@@ -128,7 +127,7 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 	@Test
 	public void testGenerateWeightedMap()
 	{
-		String expected = "$('MESHED_POTATO').map({\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value();";
+		String expected = "$('MESHED_POTATO').map({\"1\":0,\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value();";
 		String actual = categoryAlgorithmGenerator.generateWeightedMap(sourceAttributeMetaData);
 
 		Assert.assertEquals(actual, expected);

@@ -8,6 +8,7 @@ import javax.measure.unit.Unit;
 import org.jscience.physics.amount.Amount;
 import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
 import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
+import org.molgenis.data.mapper.algorithmgenerator.rules.CategoryMatchQuality;
 import org.molgenis.data.mapper.algorithmgenerator.rules.CategoryRule;
 
 public class FrequencyCategoryMapper extends CategoryMapper
@@ -45,10 +46,10 @@ public class FrequencyCategoryMapper extends CategoryMapper
 		return bestTargetCategory;
 	}
 
-	public boolean applyCustomRules(Category sourceCategory, Category targetCategory)
+	public CategoryMatchQuality<?> applyCustomRules(Category sourceCategory, Category targetCategory)
 	{
-		// TODO : to be implemented in the future
-		return false;
+		// TODO
+		return null;
 	}
 
 	Double convert(AmountWrapper sourceAmountWrapper, AmountWrapper targetAmountWrapper)
