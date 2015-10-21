@@ -22,10 +22,13 @@ public class OneToOneCategoryAlgorithmGeneratorTest
 
 	DefaultAttributeMetaData sourceAttributeMetaData;
 
+	DataService dataService;
+
 	@BeforeMethod
 	public void init()
 	{
-		DataService dataService = Mockito.mock(DataService.class);
+		dataService = Mockito.mock(DataService.class);
+
 		categoryAlgorithmGenerator = new OneToOneCategoryAlgorithmGenerator(dataService);
 
 		DefaultEntityMetaData targetRefEntityMetaData = new DefaultEntityMetaData("POTATO_REF");
@@ -47,8 +50,8 @@ public class OneToOneCategoryAlgorithmGeneratorTest
 		MapEntity targetEntity4 = new MapEntity(ImmutableMap.of("code", 4, "label", "Never + fewer than once a week"));
 		MapEntity targetEntity5 = new MapEntity(ImmutableMap.of("code", 9, "label", "missing"));
 
-		Mockito.when(dataService.findAll(targetRefEntityMetaData.getName())).thenReturn(
-				Arrays.asList(targetEntity1, targetEntity2, targetEntity3, targetEntity4, targetEntity5));
+		Mockito.when(dataService.findAll(targetRefEntityMetaData.getName()))
+				.thenReturn(Arrays.asList(targetEntity1, targetEntity2, targetEntity3, targetEntity4, targetEntity5));
 
 		DefaultEntityMetaData sourceRefEntityMetaData = new DefaultEntityMetaData("LifeLines_POTATO_REF");
 
@@ -61,8 +64,8 @@ public class OneToOneCategoryAlgorithmGeneratorTest
 		sourceRefEntityMetaData.addAttributeMetaData(sourceLabelAttributeMetaData);
 
 		sourceAttributeMetaData = new DefaultAttributeMetaData("MESHED_POTATO", FieldTypeEnum.CATEGORICAL);
-		sourceAttributeMetaData
-				.setLabel("How often did you eat boiled or mashed potatoes (also in stew) in the past month? Baked potatoes are asked later");
+		sourceAttributeMetaData.setLabel(
+				"How often did you eat boiled or mashed potatoes (also in stew) in the past month? Baked potatoes are asked later");
 		sourceAttributeMetaData.setRefEntity(sourceRefEntityMetaData);
 
 		MapEntity sourceEntity1 = new MapEntity(ImmutableMap.of("code", 1, "label", "Not this month"));
@@ -74,16 +77,16 @@ public class OneToOneCategoryAlgorithmGeneratorTest
 		MapEntity sourceEntity7 = new MapEntity(ImmutableMap.of("code", 7, "label", "6-7 days per week"));
 		MapEntity sourceEntity8 = new MapEntity(ImmutableMap.of("code", 8, "label", "9 days per week"));
 
-		Mockito.when(dataService.findAll(sourceRefEntityMetaData.getName())).thenReturn(
-				Arrays.asList(sourceEntity1, sourceEntity2, sourceEntity3, sourceEntity4, sourceEntity5, sourceEntity6,
-						sourceEntity7, sourceEntity8));
+		Mockito.when(dataService.findAll(sourceRefEntityMetaData.getName()))
+				.thenReturn(Arrays.asList(sourceEntity1, sourceEntity2, sourceEntity3, sourceEntity4, sourceEntity5,
+						sourceEntity6, sourceEntity7, sourceEntity8));
 	}
 
 	@Test
 	public void testIsSuitable()
 	{
-		Assert.assertTrue(categoryAlgorithmGenerator.isSuitable(targetAttributeMetaData,
-				Arrays.asList(sourceAttributeMetaData)));
+		Assert.assertTrue(
+				categoryAlgorithmGenerator.isSuitable(targetAttributeMetaData, Arrays.asList(sourceAttributeMetaData)));
 	}
 
 	@Test
@@ -91,8 +94,51 @@ public class OneToOneCategoryAlgorithmGeneratorTest
 	{
 		String generatedAlgorithm = categoryAlgorithmGenerator.generate(targetAttributeMetaData,
 				Arrays.asList(sourceAttributeMetaData));
-		String expectedAlgorithm = "$('MESHED_POTATO').map({\"2\":\"4\",\"3\":\"4\",\"4\":\"3\",\"5\":\"2\",\"6\":\"2\",\"7\":\"1\",\"8\":\"1\"}, null, null).value();";
+		String expectedAlgorithm = "$('MESHED_POTATO').map({\"1\":\"4\",\"2\":\"4\",\"3\":\"4\",\"4\":\"3\",\"5\":\"2\",\"6\":\"2\",\"7\":\"1\",\"8\":\"1\"}, null, null).value();";
 
 		Assert.assertEquals(generatedAlgorithm, expectedAlgorithm);
+	}
+
+	@Test
+	public void testGenerateRules()
+	{
+		DefaultEntityMetaData targetRefEntityMetaData = createCategoricalRefEntityMetaData("HOP_HYPERTENSION");
+		MapEntity targetEntity1 = new MapEntity(ImmutableMap.of("code", 0, "label", "Never had high blood pressure "));
+		MapEntity targetEntity2 = new MapEntity(ImmutableMap.of("code", 1, "label", "Ever had high blood pressure "));
+		MapEntity targetEntity3 = new MapEntity(ImmutableMap.of("code", 9, "label", "Missing"));
+		Mockito.when(dataService.findAll(targetRefEntityMetaData.getName()))
+				.thenReturn(Arrays.asList(targetEntity1, targetEntity2, targetEntity3));
+		targetAttributeMetaData = new DefaultAttributeMetaData("History of Hypertension", FieldTypeEnum.CATEGORICAL);
+		targetAttributeMetaData.setRefEntity(targetRefEntityMetaData);
+
+		DefaultEntityMetaData sourceRefEntityMetaData = createCategoricalRefEntityMetaData("High_blood_pressure_ref");
+		MapEntity sourceEntity1 = new MapEntity(ImmutableMap.of("code", 1, "label", "yes"));
+		MapEntity sourceEntity2 = new MapEntity(ImmutableMap.of("code", 2, "label", "no"));
+		MapEntity sourceEntity3 = new MapEntity(ImmutableMap.of("code", 3, "label", "I do not know"));
+		Mockito.when(dataService.findAll(sourceRefEntityMetaData.getName()))
+				.thenReturn(Arrays.asList(sourceEntity1, sourceEntity2, sourceEntity3));
+
+		sourceAttributeMetaData = new DefaultAttributeMetaData("High_blood_pressure", FieldTypeEnum.CATEGORICAL);
+		sourceAttributeMetaData.setRefEntity(sourceRefEntityMetaData);
+
+		String generatedAlgorithm = categoryAlgorithmGenerator.generate(targetAttributeMetaData,
+				Arrays.asList(sourceAttributeMetaData));
+
+		String expectedAlgorithm = "$('High_blood_pressure').map({\"1\":\"1\",\"2\":\"0\",\"3\":\"9\"}, null, null).value();";
+
+		Assert.assertEquals(generatedAlgorithm, expectedAlgorithm);
+	}
+
+	private DefaultEntityMetaData createCategoricalRefEntityMetaData(String entityName)
+	{
+		DefaultEntityMetaData targetRefEntityMetaData = new DefaultEntityMetaData(entityName);
+		DefaultAttributeMetaData targetCodeAttributeMetaData = new DefaultAttributeMetaData("code", FieldTypeEnum.INT);
+		targetCodeAttributeMetaData.setIdAttribute(true);
+		DefaultAttributeMetaData targetLabelAttributeMetaData = new DefaultAttributeMetaData("label",
+				FieldTypeEnum.STRING);
+		targetLabelAttributeMetaData.setLabelAttribute(true);
+		targetRefEntityMetaData.addAttributeMetaData(targetCodeAttributeMetaData);
+		targetRefEntityMetaData.addAttributeMetaData(targetLabelAttributeMetaData);
+		return targetRefEntityMetaData;
 	}
 }
