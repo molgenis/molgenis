@@ -13,6 +13,8 @@ public class BbmriNlCheatSheet
 	public static final String REF_JURISTIC_PERSONS = "bbmri_nl_juristic_persons";
 	public static final String REF_DISEASE_TYPES = "bbmri_nl_disease_types";
 	public static final String REF_MATERIAL_TYPES = "bbmri_nl_material_types";
+	public static final String REF_AGE_TYPES = "bbmri_nl_age_types";
+	public static final String REF_COUNTRIES = "bbmri_nl_countries";
 
 	public static final String ID = "id";
 	public static final String NAME = "name";
