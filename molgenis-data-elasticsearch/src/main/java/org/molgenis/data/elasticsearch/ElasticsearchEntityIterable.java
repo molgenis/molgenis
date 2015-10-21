@@ -5,6 +5,7 @@ import static org.elasticsearch.index.query.FilterBuilders.queryFilter;
 import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
 import static org.elasticsearch.index.query.QueryBuilders.indicesQuery;
 import static org.elasticsearch.index.query.QueryBuilders.termQuery;
+import static org.molgenis.data.DataConverter.convert;
 import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
 
 import java.util.Arrays;
@@ -194,6 +195,7 @@ class ElasticsearchEntityIterable implements Iterable<Entity>
 				if (batchHits.length > 0)
 				{
 					List<Object> entityIds = Arrays.stream(batchHits).map(SearchHit::getId)
+							.map(idString -> convert(idString, entityMeta.getIdAttribute()))
 							.collect(Collectors.toList());
 					this.batchEntities = Lists.newArrayList(dataService.findAll(entityMeta.getName(), entityIds));
 				}

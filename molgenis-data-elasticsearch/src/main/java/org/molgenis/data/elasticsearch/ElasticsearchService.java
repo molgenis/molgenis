@@ -440,9 +440,12 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		{
 			if (transactionId != null)
 			{
-				// store entities in the index related to this transaction even if the entity should not be stored in
-				// the index, after transaction commit the transaction index is merged with the main index. Based on the
-				// main index mapping the data is (not) stored. The transaction index is removed after transaction
+				// store entities in the index related to this transaction even
+				// if the entity should not be stored in
+				// the index, after transaction commit the transaction index is
+				// merged with the main index. Based on the
+				// main index mapping the data is (not) stored. The transaction
+				// index is removed after transaction
 				// commit or rollback.
 				createMappings(transactionId, entityMetaData, true, true, true);
 			}
@@ -466,7 +469,8 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 
 		refresh(index);
 
-		// If not in transaction, update references now, if in transaction the references are updated in
+		// If not in transaction, update references now, if in transaction the
+		// references are updated in
 		// the commitTransaction method
 		if (updateIndex && (crudType == CrudType.UPDATE) && (transactionId == null))
 		{
@@ -511,7 +515,8 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		}
 		else
 		{
-			// Check if delete from main index or if it is delete from entity that is not committed yet and is in the
+			// Check if delete from main index or if it is delete from entity
+			// that is not committed yet and is in the
 			// temp index
 			String type = sanitizeMapperType(entityMetaData.getName());
 			GetResponse response = client.prepareGet(indexName, type, id).execute().actionGet();
@@ -554,7 +559,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#deleteById(java.lang.Iterable ,
+	 * @see org.molgenis.data.elasticsearch.SearchService#deleteById(java.lang. Iterable ,
 	 * org.molgenis.data.EntityMetaData)
 	 */
 	@Override
@@ -714,8 +719,10 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 
 		return Iterables.transform(Iterables.filter(response, new Predicate<MultiGetItemResponse>()
 		{
-			// If the document was not found in the molgenis index or transaction index a response is included that
-			// states that the item doesn't exist. Filter out these responses, since the document should be located in
+			// If the document was not found in the molgenis index or
+			// transaction index a response is included that
+			// states that the item doesn't exist. Filter out these responses,
+			// since the document should be located in
 			// either of the indexes.
 			@Override
 			public boolean apply(MultiGetItemResponse itemResponse)
@@ -805,38 +812,47 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	@Override
 	public void rebuildIndex(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
 	{
-		if (DependencyResolver.hasSelfReferences(entityMetaData))
+		// Skip reindexing if the backend is ElasticSearch, the data will be removed in the reindexing process
+		if (!ElasticsearchRepositoryCollection.NAME.equals(entityMetaData.getBackend()))
 		{
-			Iterable<Entity> iterable = Iterables.transform(entities, new Function<Entity, Entity>()
+			if (DependencyResolver.hasSelfReferences(entityMetaData))
 			{
-				@Override
-				public Entity apply(Entity input)
+				Iterable<Entity> iterable = Iterables.transform(entities, new Function<Entity, Entity>()
 				{
-					return input;
+					@Override
+					public Entity apply(Entity input)
+					{
+						return input;
+					}
+				});
+
+				Iterable<Entity> resolved = new DependencyResolver().resolveSelfReferences(iterable, entityMetaData);
+				if (hasMapping(entityMetaData))
+				{
+					delete(entityMetaData.getName());
 				}
-			});
+				createMappings(entityMetaData);
 
-			Iterable<Entity> resolved = new DependencyResolver().resolveSelfReferences(iterable, entityMetaData);
-			if (hasMapping(entityMetaData))
-			{
-				delete(entityMetaData.getName());
+				for (Entity e : resolved)
+				{
+					index(e, entityMetaData, IndexingMode.ADD);
+				}
 			}
-			createMappings(entityMetaData);
-
-			for (Entity e : resolved)
+			else
 			{
-				index(e, entityMetaData, IndexingMode.ADD);
+				if (hasMapping(entityMetaData))
+				{
+					delete(entityMetaData.getName());
+				}
+				createMappings(entityMetaData);
+
+				index(entities, entityMetaData, IndexingMode.ADD);
 			}
 		}
 		else
 		{
-			if (hasMapping(entityMetaData))
-			{
-				delete(entityMetaData.getName());
-			}
-			createMappings(entityMetaData);
-
-			index(entities, entityMetaData, IndexingMode.ADD);
+			LOG.info("Skipped rebuilding index for entity [{}] with backend [{}]", entityMetaData.getName(),
+					entityMetaData.getBackend());
 		}
 	}
 

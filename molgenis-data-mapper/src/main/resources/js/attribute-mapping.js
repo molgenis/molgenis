@@ -231,8 +231,6 @@
 			var name = $(this).data('attribute-name'), inArray = $.inArray(name, sourceAttrs);
 			$(this).prop('checked', inArray >= 0);
 		});
-		
-		$('#attribute-mapping-table :checkbox').change();
 	}
 
 	/**
