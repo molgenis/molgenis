@@ -46,17 +46,6 @@ public class LexicalCategoryMapper extends CategoryMapper
 			Optional<?> findFirst = targetCategories.stream()
 					.map(targetCategory -> applyCustomRules(sourceCategory, targetCategory)).filter(Objects::nonNull)
 					.sorted().findFirst();
-			// List<?> collect = targetCategories.stream()
-			// .map(targetCategory -> applyCustomRules(sourceCategory, targetCategory)).filter(Objects::nonNull)
-			// .sorted().collect(Collectors.toList());
-			//
-			// for (Object element : collect)
-			// {
-			// if (element instanceof CategoryMatchQuality)
-			// {
-			// System.out.println(element);
-			// }
-			// }
 
 			if (findFirst.isPresent() && findFirst.get() instanceof CategoryMatchQuality)
 			{
