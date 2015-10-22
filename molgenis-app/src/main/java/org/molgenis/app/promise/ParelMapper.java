@@ -41,8 +41,9 @@ import static org.molgenis.app.promise.BbmriNlCheatSheet.SEX;
 import static org.molgenis.app.promise.BbmriNlCheatSheet.TYPE;
 import static org.molgenis.app.promise.BbmriNlCheatSheet.WEBSITE;
 
-import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.molgenis.app.promise.MappingReport.Status;
@@ -58,6 +59,10 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Lists;
+
+import autovalue.shaded.com.google.common.common.collect.Iterables;
+
 @Component
 public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRefreshedEvent>
 {
@@ -68,6 +73,29 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 	private DataService dataService;
 
 	private static final Logger LOG = LoggerFactory.getLogger(ParelMapper.class);
+
+	private static final HashMap<String, String> materialTypesMap;
+
+	static
+	{
+		materialTypesMap = new HashMap<>();
+		materialTypesMap.put("bloed", "WHOLE BLOOD");
+		materialTypesMap.put("bloedplasma", "PLASMA");
+		materialTypesMap.put("bloedplasma (EDTA)", "PLASMA");
+		materialTypesMap.put("bloedserum", "SERUM");
+		materialTypesMap.put("DNA uit beenmergcellen", "DNA");
+		materialTypesMap.put("DNA uit bloedcellen", "DNA");
+		materialTypesMap.put("feces", "FECES");
+		materialTypesMap.put("gastrointestinale mucosa", "NAV");
+		materialTypesMap.put("liquor (CSF)", "OTHER");
+		materialTypesMap.put("mononucleaire celfractie uit beenmerg", "PERIPHERAL_BLOOD_CELLS");
+		materialTypesMap.put("mononucleaire celfractie uit bloed", "PERIPHERAL_BLOOD_CELLS");
+		materialTypesMap.put("RNA uit beenmergcellen", "RNA");
+		materialTypesMap.put("RNA uit bloecellen", "RNA");
+		materialTypesMap.put("serum", "SERUM");
+		materialTypesMap.put("urine", "URINE");
+		materialTypesMap.put("weefsel", "TISSUE_FROZEN");
+	}
 
 	@Autowired
 	public ParelMapper(PromiseMapperFactory promiseMapperFactory, ProMiseDataParser promiseDataParser,
@@ -91,7 +119,7 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 	}
 
 	@Override
-	public MappingReport map(String projectName) throws IOException
+	public MappingReport map(String projectName)
 	{
 		Entity project = dataService.findOne(PromiseMappingProjectMetaData.FULLY_QUALIFIED_NAME, projectName);
 		if (project == null) throw new MolgenisDataException("Project is null");
@@ -102,70 +130,70 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 		{
 			LOG.info("Getting data from ProMISe for " + projectName);
 			Iterable<Entity> promiseBiobankEntities = promiseDataParser.parse(project, 0);
+			Iterable<Entity> promiseSampleEntities = promiseDataParser.parse(project, 1);
 
 			EntityMetaData targetEntityMetaData = requireNonNull(
 					dataService.getEntityMetaData(SAMPLE_COLLECTIONS_ENTITY));
 
-			for (Entity promiseBiobankEntity : promiseBiobankEntities)
+			// parels should only have one biobank entity
+			Entity promiseBiobankEntity = promiseBiobankEntities.iterator().next();
+
+			// find out if a sample collection with this id already exists
+			Entity targetEntity = dataService.findOne(SAMPLE_COLLECTIONS_ENTITY, project.getString("biobank_id"));
+
+			boolean biobankExists = true;
+			if (targetEntity == null)
 			{
-				Entity targetEntity = dataService.findOne(SAMPLE_COLLECTIONS_ENTITY, project.getString("biobank_id"));
+				targetEntity = new MapEntity(targetEntityMetaData);
 
-				boolean biobankExists = true;
-				if (targetEntity == null)
-				{
-					targetEntity = new MapEntity(targetEntityMetaData);
+				// fill hand coded fields with dummy data the first time this biobank is added
+				targetEntity.set(CONTACT_PERSON, asList(getTempPerson(REF_PERSONS))); // mref
+				targetEntity.set(PRINCIPAL_INVESTIGATORS, asList(getTempPerson(REF_PERSONS))); // mref
+				targetEntity.set(INSTITUTES, asList(getTempPerson(REF_JURISTIC_PERSONS))); // mref
+				targetEntity.set(DISEASE, asList(getTempDisease())); // mref
+				targetEntity.set(OMICS, asList(getTempOmics())); // mref
+				targetEntity.set(DATA_CATEGORIES, asList(getTempDataCategories())); // mref
 
-					// fill hand coded fields with dummy data the first time this biobank is added
-					targetEntity.set(CONTACT_PERSON, asList(getTempPerson())); // mref
-					targetEntity.set(PRINCIPAL_INVESTIGATORS, asList(getTempPerson())); // mref
-					targetEntity.set(INSTITUTES, asList(getTempJuristicPerson())); // mref
-					targetEntity.set(DISEASE, asList(getTempDisease())); // mref
-					targetEntity.set(OMICS, asList(getTempOmics())); // mref
-					targetEntity.set(DATA_CATEGORIES, asList(getTempDataCategories())); // mref
+				targetEntity.set(NAME, null); // nillable
+				targetEntity.set(DESCRIPTION, null); // nillable
+				targetEntity.set(PUBLICATIONS, null); // nillable
+				targetEntity.set(BIOBANKS, null); // nillable
+				targetEntity.set(WEBSITE, "http://www.parelsnoer.org/"); // nillable
+				targetEntity.set(BIOBANK_SAMPLE_ACCESS_FEE, null); // nillable
+				targetEntity.set(BIOBANK_SAMPLE_ACCESS_JOINT_PROJECTS, null); // nillable
+				targetEntity.set(BIOBANK_SAMPLE_ACCESS_DESCRIPTION, null); // nillable
+				targetEntity.set(BIOBANK_SAMPLE_ACCESS_URI, "http://www.parelsnoer.org/page/Onderzoeker"); // nillable
+				targetEntity.set(BIOBANK_DATA_ACCESS_FEE, null); // nillable
+				targetEntity.set(BIOBANK_DATA_ACCESS_JOINT_PROJECTS, null); // nillable
+				targetEntity.set(BIOBANK_DATA_ACCESS_DESCRIPTION, null); // nillable
+				targetEntity.set(BIOBANK_DATA_ACCESS_URI, "http://www.parelsnoer.org/page/Onderzoeker"); // nillable
 
-					targetEntity.set(NAME, null); // nillable
-					targetEntity.set(DESCRIPTION, null); // nillable
-					targetEntity.set(PUBLICATIONS, null); // nillable
-					targetEntity.set(BIOBANKS, null); // nillable
-					targetEntity.set(WEBSITE, "http://www.parelsnoer.org/"); // nillable
-					targetEntity.set(BIOBANK_SAMPLE_ACCESS_FEE, null); // nillable
-					targetEntity.set(BIOBANK_SAMPLE_ACCESS_JOINT_PROJECTS, null); // nillable
-					targetEntity.set(BIOBANK_SAMPLE_ACCESS_DESCRIPTION, null); // nillable
-					targetEntity.set(BIOBANK_SAMPLE_ACCESS_URI, "http://www.parelsnoer.org/page/Onderzoeker"); // nillable
-					targetEntity.set(BIOBANK_DATA_ACCESS_FEE, null); // nillable
-					targetEntity.set(BIOBANK_DATA_ACCESS_JOINT_PROJECTS, null); // nillable
-					targetEntity.set(BIOBANK_DATA_ACCESS_DESCRIPTION, null); // nillable
-					targetEntity.set(BIOBANK_DATA_ACCESS_URI, "http://www.parelsnoer.org/page/Onderzoeker"); // nillable
-
-					biobankExists = false;
-				}
-
-				// map data from ProMISe
-				targetEntity.set(BbmriNlCheatSheet.ID, project.getString("biobank_id"));
-				targetEntity.set(ACRONYM, promiseBiobankEntity.getString("ACRONYM")); // nillable
-				targetEntity.set(TYPE, toTypes(promiseBiobankEntity.getString("COLLECTION_TYPE"))); // mref
-				targetEntity.set(MATERIALS, toMaterialTypes(promiseBiobankEntity.getString("MATERIAL_TYPES"))); // mref
-				targetEntity.set(SEX, toGenders(promiseBiobankEntity.getString("SEX"))); // mref
-				targetEntity.set(AGE_LOW, promiseBiobankEntity.getString("AGE_LOW")); // nillable
-				targetEntity.set(AGE_HIGH, promiseBiobankEntity.getString("AGE_HIGH")); // nillable
-				targetEntity.set(AGE_UNIT, toAgeType(promiseBiobankEntity.getString("AGE_UNIT")));
-				targetEntity.set(NUMBER_OF_DONORS, promiseBiobankEntity.getString("NUMBER_DONORS")); // nillable
-
-				System.out.println();
-				System.out.println(targetEntity);
-				System.out.println();
-
-				if (biobankExists)
-				{
-					dataService.update(SAMPLE_COLLECTIONS_ENTITY, targetEntity);
-				}
-				else
-				{
-					dataService.add(SAMPLE_COLLECTIONS_ENTITY, targetEntity);
-				}
-
-				report.setStatus(Status.SUCCESS);
+				biobankExists = false;
 			}
+
+			// map data from ProMISe
+			targetEntity.set(BbmriNlCheatSheet.ID, project.getString("biobank_id"));
+			targetEntity.set(ACRONYM, promiseBiobankEntity.getString("ACRONYM")); // nillable
+			targetEntity.set(TYPE, toTypes(promiseBiobankEntity.getString("COLLECTION_TYPE"))); // mref
+			targetEntity.set(MATERIALS, toMaterialTypes(promiseSampleEntities)); // mref
+			targetEntity.set(SEX, toGenders(promiseBiobankEntity.getString("SEX"))); // mref
+			targetEntity.set(AGE_LOW, promiseBiobankEntity.getString("AGE_LOW")); // nillable
+			targetEntity.set(AGE_HIGH, promiseBiobankEntity.getString("AGE_HIGH")); // nillable
+			targetEntity.set(AGE_UNIT, toAgeType(promiseBiobankEntity.getString("AGE_UNIT")));
+			targetEntity.set(NUMBER_OF_DONORS, promiseBiobankEntity.getString("NUMBER_DONORS")); // nillable
+
+			if (biobankExists)
+			{
+				LOG.info("Updating Sample Collection with id " + targetEntity.getIdValue());
+				dataService.update(SAMPLE_COLLECTIONS_ENTITY, targetEntity);
+			}
+			else
+			{
+				LOG.info("Adding new Sample Collection with id " + targetEntity.getIdValue());
+				dataService.add(SAMPLE_COLLECTIONS_ENTITY, targetEntity);
+			}
+
+			report.setStatus(Status.SUCCESS);
 
 		}
 		catch (Exception e)
@@ -194,39 +222,21 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 		return dataService.findOne(REF_DISEASE_TYPES, "NI");
 	}
 
-	private Entity getTempJuristicPerson()
+	private Entity getTempPerson(String targetRefEntity)
 	{
-		Entity juristicPerson = dataService.findOne(REF_JURISTIC_PERSONS, "TEMP");
-		if (juristicPerson == null)
+		Entity person = dataService.findOne(targetRefEntity, "TEMP");
+		if (person == null)
 		{
-			EntityMetaData juristicPersonsMetaData = requireNonNull(
-					dataService.getEntityMetaData(REF_JURISTIC_PERSONS));
-			juristicPerson = new MapEntity(juristicPersonsMetaData);
+			EntityMetaData personsMetaData = requireNonNull(dataService.getEntityMetaData(targetRefEntity));
+			person = new MapEntity(personsMetaData);
 
-			juristicPerson.set("id", "TEMP");
-			juristicPerson.set("name", "TEMP");
-			juristicPerson.set("country", dataService.findOne(REF_COUNTRIES, "NL"));
-			dataService.add(REF_JURISTIC_PERSONS, juristicPerson);
+			person.set("id", "TEMP");
+			person.set("name", "TEMP");
+			person.set("country", dataService.findOne(REF_COUNTRIES, "NL"));
+			dataService.add(targetRefEntity, person);
 		}
 
-		return juristicPerson;
-	}
-
-	private Entity getTempPerson()
-	{
-		Entity contactPerson = dataService.findOne(REF_PERSONS, "TEMP");
-		if (contactPerson == null)
-		{
-			EntityMetaData contactPersonsMetaData = requireNonNull(dataService.getEntityMetaData(REF_PERSONS));
-			contactPerson = new MapEntity(contactPersonsMetaData);
-
-			contactPerson.set("id", "TEMP");
-			contactPerson.set("name", "TEMP");
-			contactPerson.set("country", dataService.findOne(REF_COUNTRIES, "NL"));
-			dataService.add(REF_PERSONS, contactPerson);
-		}
-
-		return dataService.findOne(REF_PERSONS, "TEMP");
+		return person;
 	}
 
 	private Entity toAgeType(String ageType)
@@ -253,23 +263,6 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 		return genderTypes;
 	}
 
-	private Iterable<Entity> toDataCategories(String promiseDataCategories)
-	{
-		Object[] categories = promiseDataCategories.split(",");
-		Iterable<Object> ids = Arrays.asList(categories);
-
-		// TODO replace with actual values when we know how they should be mapped
-		ids = Arrays.asList("OTHER");
-		Iterable<Entity> categoryTypes = dataService.findAll(REF_DATA_CATEGORY_TYPES, ids);
-
-		if (!categoryTypes.iterator().hasNext())
-		{
-			throw new RuntimeException("Unknown '" + REF_DATA_CATEGORY_TYPES + "' [" + promiseDataCategories + "]");
-		}
-
-		return categoryTypes;
-	}
-
 	private Iterable<Entity> toTypes(String promiseTypes)
 	{
 		Object[] types = promiseTypes.split(",");
@@ -284,16 +277,43 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 		return collectionTypes;
 	}
 
-	private Iterable<Entity> toMaterialTypes(String promiseTypes)
+	private Iterable<Entity> toMaterialTypes(Iterable<Entity> promiseSampleEntities)
 	{
-		Object[] types = promiseTypes.split(",");
-		Iterable<Object> ids = Arrays.asList(types);
+
+		List<Object> ids = Lists.newArrayList();
+		List<String> unknown = Lists.newArrayList();
+		for (Entity sample : promiseSampleEntities)
+		{
+			System.out.println(sample);
+			String type = sample.getString("MATERIAL_TYPES");
+			if (materialTypesMap.containsKey(type))
+			{
+				ids.add(materialTypesMap.get(type));
+			}
+			else
+			{
+				unknown.add(type);
+			}
+		}
+
+		if (!unknown.isEmpty())
+		{
+			throw new RuntimeException("Unknown ProMISe material types: [" + String.join(",", unknown) + "]");
+		}
 
 		Iterable<Entity> materialTypes = dataService.findAll(REF_MATERIAL_TYPES, ids);
 
-		if (!materialTypes.iterator().hasNext())
+		if (!materialTypes.iterator().hasNext() || Iterables.size(materialTypes) != Iterables.size(ids))
 		{
-			throw new RuntimeException("Unknown '" + REF_MATERIAL_TYPES + "' [" + promiseTypes + "]");
+			List<String> bbmriMaterials = Lists.newArrayList();
+			materialTypes.forEach(type -> bbmriMaterials.add(type.getString("id")));
+
+			List<String> promiseMaterials = Lists.newArrayList();
+			materialTypes.forEach(type -> promiseMaterials.add(type.getString("MATERIAL_TYPES")));
+
+			throw new RuntimeException("ProMISe material types [" + String.join(",", promiseMaterials)
+					+ "] resulted in incomplete mapping to BBMRI material types [" + String.join(",", bbmriMaterials)
+					+ "]");
 		}
 		return materialTypes;
 	}

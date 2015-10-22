@@ -24,7 +24,6 @@ import static org.molgenis.app.promise.BbmriNlCheatSheet.SEX;
 import static org.molgenis.app.promise.BbmriNlCheatSheet.TYPE;
 import static org.molgenis.app.promise.BbmriNlCheatSheet.WEBSITE;
 
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -88,33 +87,34 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 		promiseMapperFactory.registerMapper(ID, this);
 	}
 
-	public MappingReport map(String projectName) throws IOException
+	public MappingReport map(String projectName)
 	{
 		Entity project = dataService.findOne(PromiseMappingProjectMetaData.FULLY_QUALIFIED_NAME, projectName);
 		if (project == null) throw new MolgenisDataException("Project is null");
-		
+
 		LOG.info("Downloading data for " + projectName);
 		MappingReport report = new MappingReport();
-		
-		try{
-	
+
+		try
+		{
 			Iterable<Entity> promiseBiobankEntities = promiseDataParser.parse(project, 0);
 			Iterable<Entity> promiseSampleEntities = promiseDataParser.parse(project, 1);
-	
+
 			EntityMetaData targetEntityMetaData = dataService.getEntityMetaData(SAMPLE_COLLECTIONS_ENTITY);
-	
+
 			for (Entity promiseBiobankEntity : promiseBiobankEntities)
 			{
 				Iterable<Entity> promiseBiobankSamplesEntities = getPromiseBiobankSamples(promiseBiobankEntity,
 						promiseSampleEntities);
-	
+
 				MapEntity targetEntity = new MapEntity(targetEntityMetaData);
 				targetEntity.set(BbmriNlCheatSheet.ID, project.getString("biobank_id"));
 				targetEntity.set(NAME, promiseBiobankEntity.getString("TITEL"));
 				// targetEntity.set(ACRONYM, null); //TODO Vaste mapping op basis van ID
 				targetEntity.set(TYPE, toTypes(promiseBiobankEntity.getString("TYPEBIOBANK")));
 				targetEntity.set(DISEASE, toDiseases()); // TODO discuss with DvE
-				targetEntity.set(DATA_CATEGORIES, toDataCategories(promiseBiobankEntity, promiseBiobankSamplesEntities));
+				targetEntity.set(DATA_CATEGORIES,
+						toDataCategories(promiseBiobankEntity, promiseBiobankSamplesEntities));
 				targetEntity.set(MATERIALS, toMaterials(promiseBiobankSamplesEntities));
 				targetEntity.set(OMICS, toOmics(promiseBiobankSamplesEntities));
 				targetEntity.set(SEX, toSex(promiseBiobankSamplesEntities));
@@ -139,13 +139,16 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 				targetEntity.set(BIOBANK_DATA_ACCESS_FEE, false);
 				targetEntity.set(BIOBANK_DATA_ACCESS_JOINT_PROJECTS, true);
 				// targetEntity.set(BIOBANK_DATA_ACCESS_DESCRIPTION, null);
-				targetEntity.set(BIOBANK_DATA_ACCESS_URI, "http://www.radboudbiobank.nl/nl/collecties/materiaal-opvragen/");
-	
+				targetEntity.set(BIOBANK_DATA_ACCESS_URI,
+						"http://www.radboudbiobank.nl/nl/collecties/materiaal-opvragen/");
+
 				dataService.add("bbmri_nl_sample_collections", targetEntity);
 			}
-			
+
 			report.setStatus(Status.SUCCESS);
-		}catch(Exception e){
+		}
+		catch (Exception e)
+		{
 			report.setStatus(Status.ERROR);
 			report.setMessage(e.getMessage());
 
@@ -318,7 +321,8 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 		Iterable<Entity> genderTypes = dataService.findAll("bbmri_nl_gender_types", genderTypeIds);
 		if (!genderTypeIds.iterator().hasNext())
 		{
-			throw new RuntimeException("Unknown 'bbmri_nl_gender_types' [" + StringUtils.join(genderTypeIds, ',') + "]");
+			throw new RuntimeException(
+					"Unknown 'bbmri_nl_gender_types' [" + StringUtils.join(genderTypeIds, ',') + "]");
 		}
 		return genderTypes;
 	}
@@ -450,8 +454,8 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 		Iterable<Entity> dataCategoryTypes = dataService.findAll("bbmri_nl_data_category_types", dataCategoryTypeIds);
 		if (!dataCategoryTypes.iterator().hasNext())
 		{
-			throw new RuntimeException("Unknown 'bbmri_nl_data_category_types' ["
-					+ StringUtils.join(dataCategoryTypeIds, ',') + "]");
+			throw new RuntimeException(
+					"Unknown 'bbmri_nl_data_category_types' [" + StringUtils.join(dataCategoryTypeIds, ',') + "]");
 		}
 		return dataCategoryTypes;
 	}
@@ -550,8 +554,8 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 		Iterable<Entity> materialTypes = dataService.findAll("bbmri_nl_material_types", materialTypeIds);
 		if (!materialTypes.iterator().hasNext())
 		{
-			throw new RuntimeException("Unknown 'bbmri_nl_material_types' [" + StringUtils.join(materialTypeIds, ',')
-					+ "]");
+			throw new RuntimeException(
+					"Unknown 'bbmri_nl_material_types' [" + StringUtils.join(materialTypeIds, ',') + "]");
 		}
 
 		return materialTypes;
@@ -581,8 +585,8 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 		Iterable<Entity> omicsTypes = dataService.findAll("bbmri_nl_omics_data_types", omicsTypeIds);
 		if (!omicsTypes.iterator().hasNext())
 		{
-			throw new RuntimeException("Unknown 'bbmri_nl_omics_data_types' [" + StringUtils.join(omicsTypeIds, ',')
-					+ "]");
+			throw new RuntimeException(
+					"Unknown 'bbmri_nl_omics_data_types' [" + StringUtils.join(omicsTypeIds, ',') + "]");
 		}
 		return omicsTypes;
 	}
