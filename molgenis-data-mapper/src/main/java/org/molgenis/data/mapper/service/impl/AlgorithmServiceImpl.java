@@ -4,11 +4,13 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_HIGH;
 import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_LOW;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -28,6 +30,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.mapper.algorithmgenerator.service.MapCategoryService;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
@@ -48,12 +51,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import utils.MagmaUnitConverter;
+
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-
-import utils.MagmaUnitConverter;
 
 public class AlgorithmServiceImpl implements AlgorithmService
 {
@@ -64,21 +67,31 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	private final SemanticSearchService semanticSearchService;
 	private final UnitResolver unitResolver;
 	private final AlgorithmTemplateService algorithmTemplateService;
+	private final MapCategoryService mapCategoryService;
 	private final Pattern MAGMA_ATTRIBUTE_PATTERN = Pattern.compile("\\$\\('([^\\$\\(\\)]*)'\\)");
 	private final MagmaUnitConverter magmaUnitConverter = new MagmaUnitConverter();
 
 	@Autowired
 	public AlgorithmServiceImpl(DataService dataService, OntologyTagService ontologyTagService,
 			SemanticSearchService semanticSearchService, UnitResolver unitResolver,
-			AlgorithmTemplateService algorithmTemplateService)
+			AlgorithmTemplateService algorithmTemplateService, MapCategoryService mapCategoryService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.ontologyTagService = requireNonNull(ontologyTagService);
 		this.semanticSearchService = requireNonNull(semanticSearchService);
 		this.unitResolver = requireNonNull(unitResolver);
 		this.algorithmTemplateService = requireNonNull(algorithmTemplateService);
+		this.mapCategoryService = requireNonNull(mapCategoryService);
 
 		new RhinoConfig().init();
+	}
+
+	@Override
+	public String generateAlgorithm(AttributeMetaData targetAttribute, EntityMetaData targetEntityMetaData,
+			List<AttributeMetaData> sourceAttributes, EntityMetaData sourceEntityMetaData)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
@@ -88,8 +101,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	{
 
 		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttribute.getName());
-		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(targetEntityMetaData,
-				targetAttribute);
+		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
+				targetEntityMetaData, targetAttribute);
 
 		Map<AttributeMetaData, ExplainedAttributeMetaData> relevantAttributes = semanticSearchService
 				.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute, tagsForAttribute.values(),
@@ -117,9 +130,12 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			Entry<AttributeMetaData, ExplainedAttributeMetaData> firstEntry = relevantAttributes.entrySet().stream()
 					.findFirst().get();
 			AttributeMetaData sourceAttribute = firstEntry.getKey();
-
-			algorithm = generateUnitConversionAlgorithm(targetAttribute, targetEntityMetaData, sourceAttribute,
-					sourceEntityMetaData);
+			algorithm = mapCategoryService.generate(targetAttribute, Arrays.asList(sourceAttribute));
+			if (StringUtils.isBlank(algorithm))
+			{
+				algorithm = generateUnitConversionAlgorithm(targetAttribute, targetEntityMetaData, sourceAttribute,
+						sourceEntityMetaData);
+			}
 			mappedSourceAttributes = Sets.newHashSet(sourceAttribute);
 			algorithmState = firstEntry.getValue().isHighQuality() ? GENERATED_HIGH : GENERATED_LOW;
 		}
@@ -165,8 +181,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			if (StringUtils.isNotBlank(convertUnit))
 			{
 				String attrMagamSyntax = String.format("$('%s')", sourceAttribute.getName());
-				String unitConvertedMagamSyntax = convertUnit.startsWith(".") ? attrMagamSyntax + convertUnit
-						: attrMagamSyntax + "." + convertUnit;
+				String unitConvertedMagamSyntax = convertUnit.startsWith(".") ? attrMagamSyntax + convertUnit : attrMagamSyntax
+						+ "." + convertUnit;
 				algorithm = StringUtils.replace(algorithm, attrMagamSyntax, unitConvertedMagamSyntax);
 			}
 		}
@@ -333,8 +349,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 		catch (RuntimeException e)
 		{
-			throw new RuntimeException(
-					"Error converting value [" + value.toString() + "] to " + targetDataType.toString(), e);
+			throw new RuntimeException("Error converting value [" + value.toString() + "] to "
+					+ targetDataType.toString(), e);
 		}
 		return convertedValue;
 	}
@@ -364,5 +380,4 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 		return result;
 	}
-
 }
