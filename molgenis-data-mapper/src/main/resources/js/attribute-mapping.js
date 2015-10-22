@@ -466,6 +466,7 @@
 			} else {
 				// events when no attributes are selected
 				$('#result-container').css('display', 'none');
+				$('.nav-tabs a[href=#script]').tab('show') ;
 				$('#map-tab').hide();
 			}
 		});
