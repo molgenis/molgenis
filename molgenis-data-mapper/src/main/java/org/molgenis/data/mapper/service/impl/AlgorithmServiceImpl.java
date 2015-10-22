@@ -51,12 +51,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import utils.MagmaUnitConverter;
-
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+
+import utils.MagmaUnitConverter;
 
 public class AlgorithmServiceImpl implements AlgorithmService
 {
@@ -90,8 +90,28 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	public String generateAlgorithm(AttributeMetaData targetAttribute, EntityMetaData targetEntityMetaData,
 			List<AttributeMetaData> sourceAttributes, EntityMetaData sourceEntityMetaData)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		if (sourceAttributes.size() > 0)
+		{
+			String algorithm = mapCategoryService.generate(targetAttribute, sourceAttributes);
+			if (StringUtils.isBlank(algorithm))
+			{
+				if (sourceAttributes.size() > 1)
+				{
+					for (AttributeMetaData sourceAttribute : sourceAttributes)
+					{
+						algorithm += generateAlgorithm(targetAttribute, targetEntityMetaData,
+								Arrays.asList(sourceAttribute), sourceEntityMetaData);
+					}
+				}
+				else
+				{
+					algorithm = generateUnitConversionAlgorithm(targetAttribute, targetEntityMetaData,
+							sourceAttributes.get(0), sourceEntityMetaData);
+				}
+			}
+			return algorithm;
+		}
+		return StringUtils.EMPTY;
 	}
 
 	@Override
@@ -101,8 +121,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	{
 
 		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttribute.getName());
-		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
-				targetEntityMetaData, targetAttribute);
+		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(targetEntityMetaData,
+				targetAttribute);
 
 		Map<AttributeMetaData, ExplainedAttributeMetaData> relevantAttributes = semanticSearchService
 				.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute, tagsForAttribute.values(),
@@ -181,8 +201,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			if (StringUtils.isNotBlank(convertUnit))
 			{
 				String attrMagamSyntax = String.format("$('%s')", sourceAttribute.getName());
-				String unitConvertedMagamSyntax = convertUnit.startsWith(".") ? attrMagamSyntax + convertUnit : attrMagamSyntax
-						+ "." + convertUnit;
+				String unitConvertedMagamSyntax = convertUnit.startsWith(".") ? attrMagamSyntax + convertUnit
+						: attrMagamSyntax + "." + convertUnit;
 				algorithm = StringUtils.replace(algorithm, attrMagamSyntax, unitConvertedMagamSyntax);
 			}
 		}
@@ -349,8 +369,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 		catch (RuntimeException e)
 		{
-			throw new RuntimeException("Error converting value [" + value.toString() + "] to "
-					+ targetDataType.toString(), e);
+			throw new RuntimeException(
+					"Error converting value [" + value.toString() + "] to " + targetDataType.toString(), e);
 		}
 		return convertedValue;
 	}

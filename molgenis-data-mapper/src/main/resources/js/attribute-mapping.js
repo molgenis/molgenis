@@ -440,34 +440,45 @@
 				selectedAttributes.push($(this).data('attribute-name'));
 			});
 
-			// attributes into editor
-			insertSelectedAttributes(selectedAttributes, editor);
-
 			var algorithm = editor.getSession().getValue();
 			
-			// updates algorithm
+			var generateAlgorithmRequest = {
+				'targetEntityName' : $('[name="target"]').val(),
+				'sourceEntityName' : $('[name="source"]').val(),
+				'targetAttributeName' : $('[name="targetAttribute"]').val(),
+				'sourceAttributes' : selectedAttributes
+			};
+			
+			$.ajax({
+				type : 'POST',
+				url : molgenis.getContextUrl() + '/attributemapping/algorithm',
+				data : JSON.stringify(generateAlgorithmRequest),
+				contentType : 'application/json',
+				success : function(generatedAlgorithm) {
+					console.log(generatedAlgorithm);
+					// on selection of an attribute, show all fields
+					$('#result-container').css('display', 'inline');
+					
+					// If the generated algorithm is empty
+					if(generatedAlgorithm && generatedAlgorithm.length === 0){
+						$('#result-container').css('display', 'none');
+						$('.nav-tabs a[href=#script]').tab('show') ;
+						$('#map-tab').hide();
+					}
+					
+					// generate result table
+					editor.getSession().setValue(generatedAlgorithm);
+					loadAlgorithmResult(generatedAlgorithm);
 
-			// events only fired when 1 or more attributes is selected
-			if ($('#attribute-mapping-table :checkbox:checked').length > 0) {
-
-				// on selection of an attribute, show all fields
-				$('#result-container').css('display', 'inline');
-				$('#map-tab').show();
-
-				// generate result table
-				loadAlgorithmResult(algorithm);
-
-				// generate mapping editor if target attribute is an xref or
-				// categorical
-				var targetAttributeDataType = $('input[name="targetAttributeType"]').val();
-				if (targetAttributeDataType === 'xref' || targetAttributeDataType === 'categorical') {
-					loadMappingEditor(algorithm);
+					// generate mapping editor if target attribute is an xref or
+					// categorical
+					var targetAttributeDataType = $('input[name="targetAttributeType"]').val();
+					if (targetAttributeDataType === 'xref' || targetAttributeDataType === 'categorical') {
+						loadMappingEditor(generatedAlgorithm);
+						$('#map-tab').show();
+					}
 				}
-			} else {
-				// events when no attributes are selected
-				$('#result-container').css('display', 'none');
-				$('#map-tab').hide();
-			}
+			});
 		});
 	}
 	
