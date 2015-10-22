@@ -26,52 +26,6 @@
 		return algorithm;
 	}
 
-	/**
-	 * Sends an algorithm to the server for testing.
-	 * 
-	 * @param algorithm
-	 *            the algorithm string to send to the server
-	 */
-	function testAlgorithm(algorithm) {
-		$.ajax({
-			type : 'POST',
-			url : molgenis.getContextUrl() + '/mappingattribute/testscript',
-			data : JSON.stringify({
-				targetEntityName : $('#target').val(),
-				sourceEntityName : $('#source').val(),
-				targetAttributeName : $('#targetAttribute').val(),
-				algorithm : algorithm
-			}),
-			contentType : 'application/json',
-			success : showStatistics
-		});
-	}
-
-	/**
-	 * Shows statistics for the test results.
-	 * 
-	 * @param data
-	 *            the results from the server
-	 */
-	function showStatistics(data) {
-		if (data.results.length === 0) {
-			$('#statistics-container').hide();
-			molgenis.createAlert([ {
-				'message' : 'No valid cases are produced by the algorithm. TIP: Maybe your data set is empty.'
-			} ], 'warning');
-		}
-
-		$('#stats-total').text(data.totalCount);
-		$('#stats-valid').text(data.results.length);
-		$('#stats-mean').text(jStat.mean(data.results));
-		$('#stats-median').text(jStat.median(data.results));
-		$('#stats-stdev').text(jStat.stdev(data.results));
-
-		$('#statistics-container').show();
-		if ($('.distribution').length) {
-			$('.distribution').bcgraph(data.results);
-		}
-	}
 
 	/**
 	 * Searches the source attributes in an algorithm string.
@@ -230,61 +184,6 @@
 		$('input:checkbox').each(function(index, value) {
 			var name = $(this).data('attribute-name'), inArray = $.inArray(name, sourceAttrs);
 			$(this).prop('checked', inArray >= 0);
-		});
-	}
-
-	/**
-	 * Clears the editor and inserts selected attributes.
-	 * 
-	 * @param selectedAttributes
-	 *            all the selected attributes
-	 * @param editor
-	 *            the ace algorithm editor to insert the attribute into
-	 */
-	function insertSelectedAttributes(selectedAttributes, editor) {
-		var existingAlgorithm = editor.getSession().getValue(), newAttributes = [], existingAttributes = getSourceAttrs(existingAlgorithm);
-		
-		$(selectedAttributes).each(function() {
-			if (existingAlgorithm.indexOf(this) === -1) {
-				insertAttribute(this, editor);
-			}
-		});
-
-		$(existingAttributes).each(function() {
-			if (selectedAttributes.indexOf(this) === -1) {
-				removeAttribute(this, editor);
-			}
-		});
-	}
-
-	/**
-	 * Inserts a single attribute
-	 * 
-	 * @param attribute
-	 *            One attribute to insert into the editor
-	 * @param editor
-	 *            the ace algorithm editor to insert the attribute into
-	 */
-	function insertAttribute(attribute, editor) {
-		editor.insert("$('" + attribute + "').value();");
-	}
-
-	/**
-	 * Removes a single attribute
-	 * 
-	 * @param attribute
-	 *            One attribute to remove from the editor
-	 * @param editor
-	 *            the ace algorithm editor to remove the attribute from
-	 */
-	function removeAttribute(attribute, editor) {
-		// TODO Fix removing algorithms that contain more then just .value()
-		// (like .map())
-		editor.replaceAll("", {
-			needle : "$('" + attribute + "').value();"
-		});
-		editor.replaceAll("", {
-			needle : "$('" + attribute + "')"
 		});
 	}
 	
@@ -502,6 +401,7 @@
 	
 	/**
 	 * connect the matched words that are neighbors in order to highlight them together
+	 * TODO : move these string operation related methods to the server
 	 */
 	function connectNeighboredWords(attributeLabel, matchedWords){
 		var connectedPhrases = [], connectedPhrase, potentialConnectedPhrase, orderedMatchedWords;
