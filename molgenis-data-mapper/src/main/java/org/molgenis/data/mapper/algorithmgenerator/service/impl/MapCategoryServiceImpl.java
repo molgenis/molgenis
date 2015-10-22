@@ -1,9 +1,6 @@
 package org.molgenis.data.mapper.algorithmgenerator.service.impl;
 
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DECIMAL;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.INT;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.LONG;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 
 import java.util.Arrays;
@@ -45,14 +42,7 @@ public class MapCategoryServiceImpl implements MapCategoryService
 
 	public boolean isValid(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)
 	{
-		return isReferenceDataType(targetAttribute) && (sourceAttributes.stream().allMatch(this::isReferenceDataType)
-				|| sourceAttributes.stream().allMatch(this::isNumericDataType));
-	}
-
-	boolean isNumericDataType(AttributeMetaData attribute)
-	{
-		FieldTypeEnum enumType = attribute.getDataType().getEnumType();
-		return enumType == INT || enumType == DECIMAL || enumType == LONG;
+		return isReferenceDataType(targetAttribute) && (sourceAttributes.stream().allMatch(this::isReferenceDataType));
 	}
 
 	boolean isReferenceDataType(AttributeMetaData attribute)

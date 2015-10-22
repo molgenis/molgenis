@@ -3,6 +3,7 @@ package org.molgenis.data.mapper.algorithmgenerator.categorygenerator;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -21,9 +22,12 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("##.#",
 			DecimalFormatSymbols.getInstance(new Locale("en")));
 
+	private final OneToOneCategoryAlgorithmGenerator oneToOneCategoryAlgorithmGenerator;
+
 	public OneToManyCategoryAlgorithmGenerator(DataService dataService)
 	{
 		super(dataService);
+		oneToOneCategoryAlgorithmGenerator = new OneToOneCategoryAlgorithmGenerator(dataService);
 	}
 
 	@Override
@@ -35,28 +39,49 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 	@Override
 	public String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)
 	{
+		// if the target attribute and all the source attributes contain frequency related categories
 		StringBuilder stringBuilder = new StringBuilder();
 
-		for (AttributeMetaData sourceAttribute : sourceAttributes)
+		if (suitableForGeneratingWeightedMap(targetAttribute, sourceAttributes))
 		{
-			String generateWeightedMap = generateWeightedMap(sourceAttribute);
-
-			if (StringUtils.isNotEmpty(generateWeightedMap))
+			for (AttributeMetaData sourceAttribute : sourceAttributes)
 			{
-				if (stringBuilder.length() == 0)
+				String generateWeightedMap = generateWeightedMap(sourceAttribute);
+
+				if (StringUtils.isNotEmpty(generateWeightedMap))
 				{
-					stringBuilder.append("var SUM_WEIGHT = ").append(generateWeightedMap).append('\n');
+					if (stringBuilder.length() == 0)
+					{
+						stringBuilder.append("var SUM_WEIGHT = ").append(generateWeightedMap).append('\n');
+					}
+					else
+					{
+						stringBuilder.append("SUM_WEIGHT += ").append(generateWeightedMap).append('\n');
+					}
 				}
-				else
-				{
-					stringBuilder.append("SUM_WEIGHT += ").append(generateWeightedMap).append('\n');
-				}
+			}
+			stringBuilder.append("SUM_WEIGHT").append(groupCategoryValues(targetAttribute));
+		}
+		else
+		{
+			for (AttributeMetaData sourceAttribute : sourceAttributes)
+			{
+				stringBuilder.append(
+						oneToOneCategoryAlgorithmGenerator.generate(targetAttribute, Arrays.asList(sourceAttribute)));
 			}
 		}
 
-		stringBuilder.append("SUM_WEIGHT").append(groupCategoryValues(targetAttribute));
-
 		return stringBuilder.toString();
+	}
+
+	boolean suitableForGeneratingWeightedMap(AttributeMetaData targetAttribute,
+			List<AttributeMetaData> sourceAttributes)
+	{
+		boolean isTargetSuitable = oneToOneCategoryAlgorithmGenerator
+				.isFrequencyCategory(convertToCategory(targetAttribute));
+		boolean areSourcesSuitable = sourceAttributes.stream().map(this::convertToCategory)
+				.allMatch(oneToOneCategoryAlgorithmGenerator::isFrequencyCategory);
+		return isTargetSuitable && areSourcesSuitable;
 	}
 
 	public String generateWeightedMap(AttributeMetaData attributeMetaData)
@@ -102,8 +127,8 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 		{
 			public int compare(Category o1, Category o2)
 			{
-				return Double.compare(o1.getAmountWrapper().getAmount().getEstimatedValue(), o2.getAmountWrapper()
-						.getAmount().getEstimatedValue());
+				return Double.compare(o1.getAmountWrapper().getAmount().getEstimatedValue(),
+						o2.getAmountWrapper().getAmount().getEstimatedValue());
 			}
 		});
 
