@@ -25,6 +25,8 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 
 	DefaultAttributeMetaData sourceAttributeMetaData1;
 
+	DefaultAttributeMetaData sourceAttributeMetaData2;
+
 	@BeforeMethod
 	public void init()
 	{
@@ -53,15 +55,7 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 		Mockito.when(dataService.findAll(targetRefEntityMetaData.getName()))
 				.thenReturn(Arrays.asList(targetEntity1, targetEntity2, targetEntity3, targetEntity4, targetEntity5));
 
-		DefaultEntityMetaData sourceRefEntityMetaData = new DefaultEntityMetaData("LifeLines_POTATO_REF");
-
-		DefaultAttributeMetaData sourceCodeAttributeMetaData = new DefaultAttributeMetaData("code", FieldTypeEnum.INT);
-		sourceCodeAttributeMetaData.setIdAttribute(true);
-		DefaultAttributeMetaData sourceLabelAttributeMetaData = new DefaultAttributeMetaData("label",
-				FieldTypeEnum.STRING);
-		sourceLabelAttributeMetaData.setLabelAttribute(true);
-		sourceRefEntityMetaData.addAttributeMetaData(sourceCodeAttributeMetaData);
-		sourceRefEntityMetaData.addAttributeMetaData(sourceLabelAttributeMetaData);
+		DefaultEntityMetaData sourceRefEntityMetaData = createEntityMetaData("LifeLines_POTATO_REF");
 
 		sourceAttributeMetaData = new DefaultAttributeMetaData("MESHED_POTATO", FieldTypeEnum.CATEGORICAL);
 		sourceAttributeMetaData.setLabel(
@@ -79,15 +73,7 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 		Mockito.when(dataService.findAll(sourceRefEntityMetaData.getName())).thenReturn(Arrays.asList(sourceEntity1,
 				sourceEntity2, sourceEntity3, sourceEntity4, sourceEntity5, sourceEntity6, sourceEntity7));
 
-		DefaultEntityMetaData sourceRefEntityMetaData1 = new DefaultEntityMetaData("Mitchelstown_POTATO_REF");
-
-		DefaultAttributeMetaData sourceCodeAttributeMetaData1 = new DefaultAttributeMetaData("code", FieldTypeEnum.INT);
-		sourceCodeAttributeMetaData1.setIdAttribute(true);
-		DefaultAttributeMetaData sourceLabelAttributeMetaData1 = new DefaultAttributeMetaData("label",
-				FieldTypeEnum.STRING);
-		sourceLabelAttributeMetaData1.setLabelAttribute(true);
-		sourceRefEntityMetaData1.addAttributeMetaData(sourceCodeAttributeMetaData1);
-		sourceRefEntityMetaData1.addAttributeMetaData(sourceLabelAttributeMetaData1);
+		DefaultEntityMetaData sourceRefEntityMetaData1 = createEntityMetaData("Mitchelstown_POTATO_REF");
 
 		sourceAttributeMetaData1 = new DefaultAttributeMetaData("MESHED_POTATO_1", FieldTypeEnum.CATEGORICAL);
 		sourceAttributeMetaData1.setLabel(
@@ -107,6 +93,33 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 		Mockito.when(dataService.findAll(sourceRefEntityMetaData1.getName()))
 				.thenReturn(Arrays.asList(sourceEntity8, sourceEntity9, sourceEntity10, sourceEntity11, sourceEntity12,
 						sourceEntity13, sourceEntity14, sourceEntity15, sourceEntity16));
+
+		DefaultEntityMetaData sourceRefEntityMetaData2 = createEntityMetaData("Mitchelstown_Stroke_REF");
+
+		sourceAttributeMetaData2 = new DefaultAttributeMetaData("Stroke", FieldTypeEnum.CATEGORICAL);
+		sourceAttributeMetaData2.setLabel("History of stroke");
+		sourceAttributeMetaData2.setRefEntity(sourceRefEntityMetaData2);
+
+		MapEntity sourceEntity17 = new MapEntity(ImmutableMap.of("code", 1, "label", "yes"));
+		MapEntity sourceEntity18 = new MapEntity(ImmutableMap.of("code", 2, "label", "no"));
+		MapEntity sourceEntity19 = new MapEntity(ImmutableMap.of("code", 9, "label", "missing"));
+
+		Mockito.when(dataService.findAll(sourceRefEntityMetaData2.getName()))
+				.thenReturn(Arrays.asList(sourceEntity17, sourceEntity18, sourceEntity19));
+	}
+
+	private DefaultEntityMetaData createEntityMetaData(String entityName)
+	{
+		DefaultEntityMetaData sourceRefEntityMetaData = new DefaultEntityMetaData(entityName);
+
+		DefaultAttributeMetaData sourceCodeAttributeMetaData = new DefaultAttributeMetaData("code", FieldTypeEnum.INT);
+		sourceCodeAttributeMetaData.setIdAttribute(true);
+		DefaultAttributeMetaData sourceLabelAttributeMetaData = new DefaultAttributeMetaData("label",
+				FieldTypeEnum.STRING);
+		sourceLabelAttributeMetaData.setLabelAttribute(true);
+		sourceRefEntityMetaData.addAttributeMetaData(sourceCodeAttributeMetaData);
+		sourceRefEntityMetaData.addAttributeMetaData(sourceLabelAttributeMetaData);
+		return sourceRefEntityMetaData;
 	}
 
 	@Test
@@ -136,6 +149,35 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 	@Test
 	public void testGenerateWeightedMapForTarget()
 	{
-		System.out.println(categoryAlgorithmGenerator.groupCategoryValues(targetAttributeMetaData));
+		Assert.assertEquals(categoryAlgorithmGenerator.groupCategoryValues(targetAttributeMetaData),
+				".group([0,1,2,6,7]).map({'0-1':4,'1-2':3,'2-6':2,'6-7':1}, null, null)");
+	}
+
+	@Test
+	public void testSuitableForGeneratingWeightedMap()
+	{
+		Assert.assertTrue(categoryAlgorithmGenerator.suitableForGeneratingWeightedMap(targetAttributeMetaData,
+				Arrays.asList(sourceAttributeMetaData, sourceAttributeMetaData1)));
+
+		Assert.assertFalse(categoryAlgorithmGenerator.suitableForGeneratingWeightedMap(targetAttributeMetaData,
+				Arrays.asList(sourceAttributeMetaData, sourceAttributeMetaData1, sourceAttributeMetaData2)));
+	}
+
+	@Test
+	public void testHomogenousGenerator()
+	{
+		String expectedAlgorithm = "var SUM_WEIGHT = $('MESHED_POTATO_1').map({\"1\":0.1,\"2\":0.5,\"3\":1,\"4\":3,\"5\":5.5,\"6\":7,\"7\":17.5,\"8\":31.5,\"9\":42}, null, null).value();\nSUM_WEIGHT += $('MESHED_POTATO').map({\"1\":0,\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value();\nSUM_WEIGHT.group([0,1,2,6,7]).map({'0-1':4,'1-2':3,'2-6':2,'6-7':1}, null, null)";
+		Assert.assertEquals(categoryAlgorithmGenerator.generate(targetAttributeMetaData,
+				Arrays.asList(sourceAttributeMetaData1, sourceAttributeMetaData)), expectedAlgorithm);
+	}
+
+	@Test
+	public void testHeterogenousGenerator()
+	{
+		String expectedAlgorithm = "$('MESHED_POTATO_1').map({\"1\":\"4\",\"2\":\"4\",\"3\":\"3\",\"4\":\"2\",\"5\":\"2\",\"6\":\"1\",\"7\":\"1\",\"8\":\"1\",\"9\":\"1\"}, null, null).value();$('MESHED_POTATO').map({\"1\":\"4\",\"2\":\"4\",\"3\":\"4\",\"4\":\"3\",\"5\":\"2\",\"6\":\"2\",\"7\":\"1\"}, null, null).value();$('Stroke').map({\"1\":\"2\",\"2\":\"4\",\"9\":\"9\"}, null, null).value();";
+		Assert.assertEquals(
+				categoryAlgorithmGenerator.generate(targetAttributeMetaData,
+						Arrays.asList(sourceAttributeMetaData1, sourceAttributeMetaData, sourceAttributeMetaData2)),
+				expectedAlgorithm);
 	}
 }
