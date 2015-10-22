@@ -1,4 +1,6 @@
-package org.molgenis.app.promise;
+package org.molgenis.app.promise.client;
+
+import static java.util.Objects.requireNonNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -25,36 +27,30 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ProMiseClientImpl implements ProMiseClient
+public class PromiseClientImpl implements PromiseClient
 {
 	private static final String NAMESPACE_VALUE = "http://tempuri.org/";
 	private static final String ACTION_GETDATAFORXML = "getDataForXML";
 
 	private final SOAPConnectionFactory soapConnectionFactory;
 
-	private final DataService dataService;
-
 	@Autowired
-	public ProMiseClientImpl(SOAPConnectionFactory soapConnectionFactory, DataService dataService)
+	public PromiseClientImpl(SOAPConnectionFactory soapConnectionFactory)
 	{
-		this.dataService = Objects.requireNonNull(dataService, "DataService is null");
 		this.soapConnectionFactory = Objects.requireNonNull(soapConnectionFactory, "SOAPConnectionFactory is null");
 	}
 
 	@Override
 	@RunAsSystem
-	public XMLStreamReader getDataForXml(Entity project, String seqNr) throws IOException
+	public XMLStreamReader getDataForXml(Entity credentials, String seqNr) throws IOException
 	{
-		Entity credentials = project.getEntity(PromiseMappingProjectMetaData.CREDENTIALS);
-		if (credentials == null) throw new MolgenisDataException("Credentials is null");
+		requireNonNull(credentials, "Credentials is null");
 
 		Map<String, String> args = new LinkedHashMap<String, String>();
 		args.put("proj", credentials.getString("PROJ"));

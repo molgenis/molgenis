@@ -6,6 +6,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
+import org.molgenis.app.promise.client.PromiseDataParser;
+import org.molgenis.app.promise.mapper.MappingReport;
+import org.molgenis.app.promise.mapper.PromiseMapper;
+import org.molgenis.app.promise.mapper.PromiseMapperFactory;
+import org.molgenis.app.promise.model.PromiseMappingProjectMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -38,7 +43,7 @@ public class PromiseDataLoaderController extends MolgenisPluginController
 	private final PromiseMapperFactory promiseMapperFactory;
 
 	@Autowired
-	public PromiseDataLoaderController(ProMiseDataParser proMiseDataParser, DataService dataService,
+	public PromiseDataLoaderController(PromiseDataParser proMiseDataParser, DataService dataService,
 			PromiseMapperFactory promiseMapperFactory)
 	{
 		super(URI);
@@ -53,7 +58,7 @@ public class PromiseDataLoaderController extends MolgenisPluginController
 	}
 
 	/**
-	 * Gets a list of the project names so they can be listed in the control panel
+	 * Returns a list of the project names so they can be listed in the control panel
 	 */
 	@RequestMapping(value = "projects", method = RequestMethod.GET)
 	@ResponseBody
@@ -74,7 +79,7 @@ public class PromiseDataLoaderController extends MolgenisPluginController
 	{
 		Entity project = dataService.findOne(PromiseMappingProjectMetaData.FULLY_QUALIFIED_NAME, projectName);
 		PromiseMapper promiseMapper = promiseMapperFactory.getMapper(project.getString("mapper"));
-		return promiseMapper.map(projectName);
+		return promiseMapper.map(project);
 	}
 
 	@Scheduled(cron = "0 0 0 * * *")
@@ -86,7 +91,7 @@ public class PromiseDataLoaderController extends MolgenisPluginController
 		{
 			LOG.info("Starting scheduled mapping task for ProMISe biobank " + project.getString("name"));
 			PromiseMapper promiseMapper = promiseMapperFactory.getMapper(project.getString("mapper"));
-			promiseMapper.map(project.getString("name"));
+			promiseMapper.map(project);
 		}
 	}
 }

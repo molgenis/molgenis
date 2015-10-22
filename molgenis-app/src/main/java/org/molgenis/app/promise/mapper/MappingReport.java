@@ -1,4 +1,4 @@
-package org.molgenis.app.promise;
+package org.molgenis.app.promise.mapper;
 
 public class MappingReport
 {

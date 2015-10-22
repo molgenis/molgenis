@@ -1,28 +1,29 @@
-package org.molgenis.app.promise;
+package org.molgenis.app.promise.mapper;
 
-import static org.molgenis.app.promise.BbmriNlCheatSheet.AGE_HIGH;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.AGE_LOW;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.AGE_UNIT;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.BIOBANKS;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_FEE;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_JOINT_PROJECTS;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_URI;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_FEE;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_URI;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.CONTACT_PERSON;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.DATA_CATEGORIES;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.DESCRIPTION;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.DISEASE;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.INSTITUTES;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.MATERIALS;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.NAME;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.NUMBER_OF_DONORS;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.OMICS;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.PRINCIPAL_INVESTIGATORS;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.SAMPLE_COLLECTIONS_ENTITY;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.SEX;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.TYPE;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.WEBSITE;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.AGE_HIGH;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.AGE_LOW;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.AGE_UNIT;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANKS;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_FEE;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_JOINT_PROJECTS;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_URI;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_FEE;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_URI;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.CONTACT_PERSON;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.DATA_CATEGORIES;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.DESCRIPTION;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.DISEASE;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.INSTITUTES;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.MATERIALS;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.NAME;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.NUMBER_OF_DONORS;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.OMICS;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.PRINCIPAL_INVESTIGATORS;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.SAMPLE_COLLECTIONS_ENTITY;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.SEX;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.TYPE;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.WEBSITE;
 
 import java.nio.charset.Charset;
 import java.time.LocalDate;
@@ -38,11 +39,13 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.molgenis.app.promise.MappingReport.Status;
+import org.molgenis.app.promise.client.PromiseDataParser;
+import org.molgenis.app.promise.mapper.MappingReport.Status;
+import org.molgenis.app.promise.model.BbmriNlCheatSheet;
+import org.molgenis.app.promise.model.PromiseMappingProjectMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.UuidGenerator;
 import org.slf4j.Logger;
@@ -60,14 +63,14 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 {
 	private final String ID = "RADBOUD";
 
-	private final ProMiseDataParser promiseDataParser;
+	private final PromiseDataParser promiseDataParser;
 	private final DataService dataService;
 	private final PromiseMapperFactory promiseMapperFactory;
 
 	private static final Logger LOG = LoggerFactory.getLogger(RadboudMapper.class);
 
 	@Autowired
-	public RadboudMapper(ProMiseDataParser promiseDataParser, DataService dataService,
+	public RadboudMapper(PromiseDataParser promiseDataParser, DataService dataService,
 			PromiseMapperFactory promiseMapperFactory)
 	{
 		this.promiseDataParser = Objects.requireNonNull(promiseDataParser);
@@ -87,18 +90,20 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 		promiseMapperFactory.registerMapper(ID, this);
 	}
 
-	public MappingReport map(String projectName)
+	public MappingReport map(Entity project)
 	{
-		Entity project = dataService.findOne(PromiseMappingProjectMetaData.FULLY_QUALIFIED_NAME, projectName);
-		if (project == null) throw new MolgenisDataException("Project is null");
+		requireNonNull(project);
 
-		LOG.info("Downloading data for " + projectName);
 		MappingReport report = new MappingReport();
 
 		try
 		{
-			Iterable<Entity> promiseBiobankEntities = promiseDataParser.parse(project, 0);
-			Iterable<Entity> promiseSampleEntities = promiseDataParser.parse(project, 1);
+			LOG.info("Downloading data for " + project.getString("name"));
+
+			Entity credentials = project.getEntity(PromiseMappingProjectMetaData.CREDENTIALS);
+
+			Iterable<Entity> promiseBiobankEntities = promiseDataParser.parse(credentials, 0);
+			Iterable<Entity> promiseSampleEntities = promiseDataParser.parse(credentials, 1);
 
 			EntityMetaData targetEntityMetaData = dataService.getEntityMetaData(SAMPLE_COLLECTIONS_ENTITY);
 

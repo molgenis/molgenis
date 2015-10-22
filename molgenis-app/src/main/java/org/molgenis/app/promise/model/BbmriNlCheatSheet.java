@@ -1,5 +1,8 @@
-package org.molgenis.app.promise;
+package org.molgenis.app.promise.model;
 
+/**
+ * Convenience class containing the identifiers of the BBMRI-NL MIABIS model
+ */
 public class BbmriNlCheatSheet
 {
 	public static final String SAMPLE_COLLECTIONS_ENTITY = "bbmri_nl_sample_collections";

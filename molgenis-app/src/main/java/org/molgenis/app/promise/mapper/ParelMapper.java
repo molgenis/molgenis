@@ -1,56 +1,58 @@
-package org.molgenis.app.promise;
+package org.molgenis.app.promise.mapper;
 
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.ACRONYM;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.AGE_HIGH;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.AGE_LOW;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.AGE_UNIT;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.BIOBANKS;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_DESCRIPTION;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_FEE;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_JOINT_PROJECTS;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_URI;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_DESCRIPTION;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_FEE;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_JOINT_PROJECTS;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_URI;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.CONTACT_PERSON;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.DATA_CATEGORIES;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.DESCRIPTION;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.DISEASE;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.INSTITUTES;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.MATERIALS;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.NAME;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.NUMBER_OF_DONORS;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.OMICS;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.PRINCIPAL_INVESTIGATORS;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.PUBLICATIONS;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.REF_AGE_TYPES;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.REF_COLLECTION_TYPES;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.REF_COUNTRIES;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.REF_DATA_CATEGORY_TYPES;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.REF_DISEASE_TYPES;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.REF_GENDER_TYPES;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.REF_JURISTIC_PERSONS;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.REF_MATERIAL_TYPES;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.REF_OMICS_DATA_TYPES;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.REF_PERSONS;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.SAMPLE_COLLECTIONS_ENTITY;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.SEX;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.TYPE;
-import static org.molgenis.app.promise.BbmriNlCheatSheet.WEBSITE;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.ACRONYM;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.AGE_HIGH;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.AGE_LOW;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.AGE_UNIT;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANKS;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_DESCRIPTION;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_FEE;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_JOINT_PROJECTS;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_URI;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_DESCRIPTION;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_FEE;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_JOINT_PROJECTS;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_URI;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.CONTACT_PERSON;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.DATA_CATEGORIES;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.DESCRIPTION;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.DISEASE;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.INSTITUTES;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.MATERIALS;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.NAME;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.NUMBER_OF_DONORS;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.OMICS;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.PRINCIPAL_INVESTIGATORS;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.PUBLICATIONS;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.REF_AGE_TYPES;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.REF_COLLECTION_TYPES;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.REF_COUNTRIES;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.REF_DATA_CATEGORY_TYPES;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.REF_DISEASE_TYPES;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.REF_GENDER_TYPES;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.REF_JURISTIC_PERSONS;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.REF_MATERIAL_TYPES;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.REF_OMICS_DATA_TYPES;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.REF_PERSONS;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.SAMPLE_COLLECTIONS_ENTITY;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.SEX;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.TYPE;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.WEBSITE;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.molgenis.app.promise.MappingReport.Status;
+import org.molgenis.app.promise.client.PromiseDataParser;
+import org.molgenis.app.promise.mapper.MappingReport.Status;
+import org.molgenis.app.promise.model.BbmriNlCheatSheet;
+import org.molgenis.app.promise.model.PromiseMappingProjectMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.MapEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +71,7 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 	private final String ID = "PAREL";
 
 	private PromiseMapperFactory promiseMapperFactory;
-	private ProMiseDataParser promiseDataParser;
+	private PromiseDataParser promiseDataParser;
 	private DataService dataService;
 
 	private static final Logger LOG = LoggerFactory.getLogger(ParelMapper.class);
@@ -98,7 +100,7 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 	}
 
 	@Autowired
-	public ParelMapper(PromiseMapperFactory promiseMapperFactory, ProMiseDataParser promiseDataParser,
+	public ParelMapper(PromiseMapperFactory promiseMapperFactory, PromiseDataParser promiseDataParser,
 			DataService dataService)
 	{
 		this.promiseMapperFactory = requireNonNull(promiseMapperFactory);
@@ -119,18 +121,20 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 	}
 
 	@Override
-	public MappingReport map(String projectName)
+	public MappingReport map(Entity project)
 	{
-		Entity project = dataService.findOne(PromiseMappingProjectMetaData.FULLY_QUALIFIED_NAME, projectName);
-		if (project == null) throw new MolgenisDataException("Project is null");
+		requireNonNull(project);
 
 		MappingReport report = new MappingReport();
 
 		try
 		{
-			LOG.info("Getting data from ProMISe for " + projectName);
-			Iterable<Entity> promiseBiobankEntities = promiseDataParser.parse(project, 0);
-			Iterable<Entity> promiseSampleEntities = promiseDataParser.parse(project, 1);
+			LOG.info("Getting data from ProMISe for " + project.getString("name"));
+
+			Entity credentials = project.getEntity(PromiseMappingProjectMetaData.CREDENTIALS);
+
+			Iterable<Entity> promiseBiobankEntities = promiseDataParser.parse(credentials, 0);
+			Iterable<Entity> promiseSampleEntities = promiseDataParser.parse(credentials, 1);
 
 			EntityMetaData targetEntityMetaData = requireNonNull(
 					dataService.getEntityMetaData(SAMPLE_COLLECTIONS_ENTITY));
@@ -251,7 +255,6 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 
 	private Iterable<Entity> toGenders(String promiseSex)
 	{
-		// TODO should this come from biobank or sample entities?
 		Object[] sexes = promiseSex.split(",");
 		Iterable<Object> ids = Arrays.asList(sexes);
 
@@ -279,7 +282,6 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 
 	private Iterable<Entity> toMaterialTypes(Iterable<Entity> promiseSampleEntities)
 	{
-
 		List<Object> ids = Lists.newArrayList();
 		List<String> unknown = Lists.newArrayList();
 		for (Entity sample : promiseSampleEntities)
