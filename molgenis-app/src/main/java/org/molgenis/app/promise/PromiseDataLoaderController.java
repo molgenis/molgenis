@@ -1,10 +1,10 @@
 package org.molgenis.app.promise;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.app.promise.PromiseDataLoaderController.URI;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 
 import org.molgenis.app.promise.client.PromiseDataParser;
 import org.molgenis.app.promise.mapper.MappingReport;
@@ -47,8 +47,8 @@ public class PromiseDataLoaderController extends MolgenisPluginController
 			PromiseMapperFactory promiseMapperFactory)
 	{
 		super(URI);
-		this.dataService = Objects.requireNonNull(dataService);
-		this.promiseMapperFactory = Objects.requireNonNull(promiseMapperFactory);
+		this.dataService = requireNonNull(dataService);
+		this.promiseMapperFactory = requireNonNull(promiseMapperFactory);
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
@@ -86,6 +86,8 @@ public class PromiseDataLoaderController extends MolgenisPluginController
 	@RunAsSystem
 	public void executeScheduled()
 	{
+		// TODO make configurable via MOLGENIS 'scheduler'
+
 		Iterable<Entity> projects = dataService.findAll(PromiseMappingProjectMetaData.FULLY_QUALIFIED_NAME);
 		for (Entity project : projects)
 		{

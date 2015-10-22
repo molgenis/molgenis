@@ -88,9 +88,9 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 		materialTypesMap.put("DNA uit beenmergcellen", "DNA");
 		materialTypesMap.put("DNA uit bloedcellen", "DNA");
 		materialTypesMap.put("feces", "FECES");
-		materialTypesMap.put("gastrointestinale mucosa", "NAV");
+		materialTypesMap.put("gastrointestinale mucosa", "TISSUE_FROZEN");
 		materialTypesMap.put("liquor (CSF)", "OTHER");
-		materialTypesMap.put("mononucleaire celfractie uit beenmerg", "PERIPHERAL_BLOOD_CELLS");
+		materialTypesMap.put("mononucleaire celfractie uit beenmerg", "OTHER");
 		materialTypesMap.put("mononucleaire celfractie uit bloed", "PERIPHERAL_BLOOD_CELLS");
 		materialTypesMap.put("RNA uit beenmergcellen", "RNA");
 		materialTypesMap.put("RNA uit bloecellen", "RNA");
