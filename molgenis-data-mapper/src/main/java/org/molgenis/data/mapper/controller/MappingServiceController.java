@@ -745,7 +745,7 @@ public class MappingServiceController extends MolgenisPluginController
 		String sourceAttributeLabelAttribute = null;
 
 		if (sourceAttributeDataType instanceof XrefField || sourceAttributeDataType instanceof MrefField
-				|| targetAttributeDataType instanceof CategoricalField)
+				|| sourceAttributeDataType instanceof CategoricalField)
 		{
 			sourceAttributeEntities = dataService.findAll(dataService.getEntityMetaData(source)
 					.getAttribute(sourceAttribute).getRefEntity().getName());
