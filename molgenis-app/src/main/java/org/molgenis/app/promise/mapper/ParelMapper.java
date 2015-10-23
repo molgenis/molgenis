@@ -1,5 +1,6 @@
 package org.molgenis.app.promise.mapper;
 
+import static com.google.common.collect.Lists.transform;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.app.promise.model.BbmriNlCheatSheet.ACRONYM;
@@ -63,8 +64,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
 
-import autovalue.shaded.com.google.common.common.collect.Iterables;
-
 @Component
 public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRefreshedEvent>
 {
@@ -76,27 +75,27 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 
 	private static final Logger LOG = LoggerFactory.getLogger(ParelMapper.class);
 
-	private static final HashMap<String, String> materialTypesMap;
+	private static final HashMap<String, List<String>> materialTypesMap;
 
 	static
 	{
 		materialTypesMap = new HashMap<>();
-		materialTypesMap.put("bloed", "WHOLE BLOOD");
-		materialTypesMap.put("bloedplasma", "PLASMA");
-		materialTypesMap.put("bloedplasma (EDTA)", "PLASMA");
-		materialTypesMap.put("bloedserum", "SERUM");
-		materialTypesMap.put("DNA uit beenmergcellen", "DNA");
-		materialTypesMap.put("DNA uit bloedcellen", "DNA");
-		materialTypesMap.put("feces", "FECES");
-		materialTypesMap.put("gastrointestinale mucosa", "TISSUE_FROZEN");
-		materialTypesMap.put("liquor (CSF)", "OTHER");
-		materialTypesMap.put("mononucleaire celfractie uit beenmerg", "OTHER");
-		materialTypesMap.put("mononucleaire celfractie uit bloed", "PERIPHERAL_BLOOD_CELLS");
-		materialTypesMap.put("RNA uit beenmergcellen", "RNA");
-		materialTypesMap.put("RNA uit bloecellen", "RNA");
-		materialTypesMap.put("serum", "SERUM");
-		materialTypesMap.put("urine", "URINE");
-		materialTypesMap.put("weefsel", "TISSUE_FROZEN");
+		materialTypesMap.put("bloed", asList("WHOLE BLOOD"));
+		materialTypesMap.put("bloedplasma", asList("PLASMA"));
+		materialTypesMap.put("bloedplasma (EDTA)", asList("PLASMA"));
+		materialTypesMap.put("bloedserum", asList("SERUM"));
+		materialTypesMap.put("DNA uit beenmergcellen", asList("DNA"));
+		materialTypesMap.put("DNA uit bloedcellen", asList("DNA"));
+		materialTypesMap.put("feces", asList("FECES"));
+		materialTypesMap.put("gastrointestinale mucosa", asList("TISSUE_FROZEN"));
+		materialTypesMap.put("liquor (CSF)", asList("OTHER"));
+		materialTypesMap.put("mononucleaire celfractie uit beenmerg", asList("OTHER"));
+		materialTypesMap.put("mononucleaire celfractie uit bloed", asList("PERIPHERAL_BLOOD_CELLS"));
+		materialTypesMap.put("RNA uit beenmergcellen", asList("RNA"));
+		materialTypesMap.put("RNA uit bloecellen", asList("RNA"));
+		materialTypesMap.put("serum", asList("SERUM"));
+		materialTypesMap.put("urine", asList("URINE"));
+		materialTypesMap.put("weefsel", asList("TISSUE_FROZEN", "TISSUE_PARAFFIN_EMBEDDED"));
 	}
 
 	@Autowired
@@ -159,6 +158,7 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 				targetEntity.set(DATA_CATEGORIES, asList(getTempDataCategories())); // mref
 
 				targetEntity.set(NAME, null); // nillable
+				targetEntity.set(ACRONYM, null); // nillable
 				targetEntity.set(DESCRIPTION, null); // nillable
 				targetEntity.set(PUBLICATIONS, null); // nillable
 				targetEntity.set(BIOBANKS, null); // nillable
@@ -177,7 +177,6 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 
 			// map data from ProMISe
 			targetEntity.set(BbmriNlCheatSheet.ID, project.getString("biobank_id"));
-			targetEntity.set(ACRONYM, promiseBiobankEntity.getString("ACRONYM")); // nillable
 			targetEntity.set(TYPE, toTypes(promiseBiobankEntity.getString("COLLECTION_TYPE"))); // mref
 			targetEntity.set(MATERIALS, toMaterialTypes(promiseSampleEntities)); // mref
 			targetEntity.set(SEX, toGenders(promiseBiobankEntity.getString("SEX"))); // mref
@@ -228,14 +227,14 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 
 	private Entity getTempPerson(String targetRefEntity)
 	{
-		Entity person = dataService.findOne(targetRefEntity, "TEMP");
+		Entity person = dataService.findOne(targetRefEntity, "Unknown");
 		if (person == null)
 		{
 			EntityMetaData personsMetaData = requireNonNull(dataService.getEntityMetaData(targetRefEntity));
 			person = new MapEntity(personsMetaData);
 
-			person.set("id", "TEMP");
-			person.set("name", "TEMP");
+			person.set("id", "Unknown");
+			person.set("name", "Unknown");
 			person.set("country", dataService.findOne(REF_COUNTRIES, "NL"));
 			dataService.add(targetRefEntity, person);
 		}
@@ -246,11 +245,6 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 	private Entity toAgeType(String ageType)
 	{
 		return dataService.findOne(REF_AGE_TYPES, ageType);
-	}
-
-	private String toAcronym(String acronym)
-	{
-		return acronym.substring(0, acronym.lastIndexOf("_"));
 	}
 
 	private Iterable<Entity> toGenders(String promiseSex)
@@ -282,15 +276,14 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 
 	private Iterable<Entity> toMaterialTypes(Iterable<Entity> promiseSampleEntities)
 	{
-		List<Object> ids = Lists.newArrayList();
+		List<String> ids = Lists.newArrayList();
 		List<String> unknown = Lists.newArrayList();
 		for (Entity sample : promiseSampleEntities)
 		{
-			System.out.println(sample);
 			String type = sample.getString("MATERIAL_TYPES");
 			if (materialTypesMap.containsKey(type))
 			{
-				ids.add(materialTypesMap.get(type));
+				materialTypesMap.get(type).forEach(t -> ids.add(t));
 			}
 			else
 			{
@@ -303,19 +296,12 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 			throw new RuntimeException("Unknown ProMISe material types: [" + String.join(",", unknown) + "]");
 		}
 
-		Iterable<Entity> materialTypes = dataService.findAll(REF_MATERIAL_TYPES, ids);
+		Iterable<Entity> materialTypes = dataService.findAll(REF_MATERIAL_TYPES, transform(ids, id -> (Object) id));
 
-		if (!materialTypes.iterator().hasNext() || Iterables.size(materialTypes) != Iterables.size(ids))
+		if (!materialTypes.iterator().hasNext())
 		{
-			List<String> bbmriMaterials = Lists.newArrayList();
-			materialTypes.forEach(type -> bbmriMaterials.add(type.getString("id")));
-
-			List<String> promiseMaterials = Lists.newArrayList();
-			materialTypes.forEach(type -> promiseMaterials.add(type.getString("MATERIAL_TYPES")));
-
-			throw new RuntimeException("ProMISe material types [" + String.join(",", promiseMaterials)
-					+ "] resulted in incomplete mapping to BBMRI material types [" + String.join(",", bbmriMaterials)
-					+ "]");
+			String message = String.format("Couldn't find mappings for some of the material types in %s.", ids);
+			throw new RuntimeException(message);
 		}
 		return materialTypes;
 	}
