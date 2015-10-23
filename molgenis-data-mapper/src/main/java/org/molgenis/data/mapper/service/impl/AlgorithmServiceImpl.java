@@ -1,6 +1,6 @@
 package org.molgenis.data.mapper.service.impl;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_HIGH;
 import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_LOW;
 
@@ -48,12 +48,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import utils.MagmaUnitConverter;
-
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+
+import utils.MagmaUnitConverter;
 
 public class AlgorithmServiceImpl implements AlgorithmService
 {
@@ -72,11 +72,11 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			SemanticSearchService semanticSearchService, UnitResolver unitResolver,
 			AlgorithmTemplateService algorithmTemplateService)
 	{
-		this.dataService = checkNotNull(dataService);
-		this.ontologyTagService = checkNotNull(ontologyTagService);
-		this.semanticSearchService = checkNotNull(semanticSearchService);
-		this.unitResolver = checkNotNull(unitResolver);
-		this.algorithmTemplateService = checkNotNull(algorithmTemplateService);
+		this.dataService = requireNonNull(dataService);
+		this.ontologyTagService = requireNonNull(ontologyTagService);
+		this.semanticSearchService = requireNonNull(semanticSearchService);
+		this.unitResolver = requireNonNull(unitResolver);
+		this.algorithmTemplateService = requireNonNull(algorithmTemplateService);
 
 		new RhinoConfig().init();
 	}
@@ -88,8 +88,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	{
 
 		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttribute.getName());
-		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(
-				targetEntityMetaData, targetAttribute);
+		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(targetEntityMetaData,
+				targetAttribute);
 
 		Map<AttributeMetaData, ExplainedAttributeMetaData> relevantAttributes = semanticSearchService
 				.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute, tagsForAttribute.values(),
@@ -165,8 +165,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			if (StringUtils.isNotBlank(convertUnit))
 			{
 				String attrMagamSyntax = String.format("$('%s')", sourceAttribute.getName());
-				String unitConvertedMagamSyntax = convertUnit.startsWith(".") ? attrMagamSyntax + convertUnit : attrMagamSyntax
-						+ "." + convertUnit;
+				String unitConvertedMagamSyntax = convertUnit.startsWith(".") ? attrMagamSyntax + convertUnit
+						: attrMagamSyntax + "." + convertUnit;
 				algorithm = StringUtils.replace(algorithm, attrMagamSyntax, unitConvertedMagamSyntax);
 			}
 		}
@@ -333,8 +333,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 		catch (RuntimeException e)
 		{
-			throw new RuntimeException("Error converting value [" + value.toString() + "] to "
-					+ targetDataType.toString(), e);
+			throw new RuntimeException(
+					"Error converting value [" + value.toString() + "] to " + targetDataType.toString(), e);
 		}
 		return convertedValue;
 	}

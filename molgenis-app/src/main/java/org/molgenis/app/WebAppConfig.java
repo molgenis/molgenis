@@ -10,6 +10,7 @@ import org.molgenis.DatabaseConfig;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.jpa.JpaRepositoryCollection;
@@ -17,6 +18,7 @@ import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.system.RepositoryTemplateLoader;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.migrate.version.v1_10.Step17RuntimePropertiesToGafListSettings;
@@ -70,7 +72,7 @@ import freemarker.template.TemplateException;
 @EnableTransactionManagement
 @EnableWebMvc
 @EnableAsync
-@ComponentScan(basePackages = "org.molgenis", excludeFilters = @Filter(type = FilterType.ANNOTATION, value = CommandLineOnlyConfiguration.class))
+@ComponentScan(basePackages = "org.molgenis", excludeFilters = @Filter(type = FilterType.ANNOTATION, value = CommandLineOnlyConfiguration.class) )
 @Import(
 { WebAppSecurityConfig.class, DatabaseConfig.class, EmbeddedElasticSearchConfig.class })
 public class WebAppConfig extends MolgenisWebAppConfig
@@ -90,6 +92,9 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Autowired
 	private JpaRepositoryCollection jpaRepositoryCollection;
 
+	@Autowired
+	private ElasticsearchRepositoryCollection elasticsearchRepositoryCollection;
+	
 	@Autowired
 	private MenuManagerService menuManagerService;
 
@@ -130,8 +135,8 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step2(dataService, jpaRepositoryCollection, dataSource, searchService));
 		upgradeService.addUpgrade(new Step3AddOrderColumnToMrefTables(dataSource));
 		upgradeService.addUpgrade(new Step4VarcharToText(dataSource, mysqlRepositoryCollection));
-		upgradeService.addUpgrade(new Step5AlterDataexplorerMenuURLs(jpaRepositoryCollection
-				.getRepository("RuntimeProperty")));
+		upgradeService.addUpgrade(
+				new Step5AlterDataexplorerMenuURLs(jpaRepositoryCollection.getRepository("RuntimeProperty")));
 		upgradeService.addUpgrade(new Step6ChangeRScriptType(dataSource, searchService));
 		upgradeService.addUpgrade(new Step7UpgradeMetaDataTo1_6(dataSource, searchService));
 		upgradeService.addUpgrade(new Step8VarcharToTextRepeated(dataSource));
@@ -170,8 +175,8 @@ public class WebAppConfig extends MolgenisWebAppConfig
 			@Override
 			protected MysqlRepository createMysqlRepository()
 			{
-				return new MysqlRepository(localDataService, dataSource, new AsyncJdbcTemplate(new JdbcTemplate(
-						dataSource)));
+				return new MysqlRepository(localDataService, dataSource,
+						new AsyncJdbcTemplate(new JdbcTemplate(dataSource)));
 			}
 
 			@Override
@@ -183,8 +188,8 @@ public class WebAppConfig extends MolgenisWebAppConfig
 
 		// metadata repositories get created here.
 		localDataService.getMeta().setDefaultBackend(backend);
-		List<EntityMetaData> metas = DependencyResolver.resolve(Sets.newHashSet(localDataService.getMeta()
-				.getEntityMetaDatas()));
+		List<EntityMetaData> metas = DependencyResolver
+				.resolve(Sets.newHashSet(localDataService.getMeta().getEntityMetaDatas()));
 
 		for (EntityMetaData emd : metas)
 		{
@@ -198,9 +203,13 @@ public class WebAppConfig extends MolgenisWebAppConfig
 				{
 					localDataService.addRepository(jpaRepositoryCollection.getUnderlying(emd.getName()));
 				}
+				else if (ElasticsearchRepositoryCollection.NAME.equals(emd.getBackend()))
+				{
+					localDataService.addRepository(elasticsearchRepositoryCollection.addEntityMeta(emd));
+				}
 				else
 				{
-					LOG.warn("backend unkown for metadata " + emd.getName());
+					LOG.warn("backend [{}] unknown for meta data [{}]", emd.getBackend(), emd.getName());
 				}
 			}
 		}
@@ -209,8 +218,8 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Override
 	protected void addFreemarkerVariables(Map<String, Object> freemarkerVariables)
 	{
-		freemarkerVariables.put("dataExplorerLink", new DataExplorerHyperlinkDirective(molgenisPluginRegistry(),
-				dataService));
+		freemarkerVariables.put("dataExplorerLink",
+				new DataExplorerHyperlinkDirective(molgenisPluginRegistry(), dataService));
 	}
 
 	@Override

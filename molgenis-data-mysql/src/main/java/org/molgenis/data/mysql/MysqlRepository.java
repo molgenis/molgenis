@@ -1,5 +1,7 @@
 package org.molgenis.data.mysql;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static org.elasticsearch.common.collect.Maps.uniqueIndex;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 import static org.molgenis.data.RepositoryCapability.UPDATEABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
@@ -670,13 +672,6 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	{
 		if (id == null) return null;
 		return findOne(new QueryImpl().eq(getEntityMetaData().getIdAttribute().getName(), id));
-	}
-
-	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		if (ids == null) return Collections.emptyList();
-		return findAll(new QueryImpl().in(getEntityMetaData().getIdAttribute().getName(), ids));
 	}
 
 	protected String getSelectSql(Query q, List<Object> parameters)

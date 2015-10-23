@@ -4,7 +4,7 @@ import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-import org.molgenis.data.elasticsearch.ElasticSearchService;
+import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
@@ -49,6 +49,6 @@ public class EmbeddedElasticSearchConfigTest
 	{
 		SearchService searchService = context.getBean(SearchService.class);
 		assertNotNull(searchService);
-		assertTrue(searchService instanceof ElasticSearchService);
+		assertTrue(searchService instanceof ElasticsearchService);
 	}
 }

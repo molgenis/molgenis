@@ -1,12 +1,14 @@
-package org.molgenis.app.promise;
+package org.molgenis.app.promise.model;
+
+import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Objects;
 import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.app.promise.mapper.PromiseMapperFactory;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
@@ -30,7 +32,7 @@ public class PromiseMappingProjectMetaData extends DefaultEntityMetaData
 	public static final String BIOBANK_ID = "biobank_id";
 	public static final String CREDENTIALS = "Credentials";
 	public static final String MAPPER = "mapper";
-	
+
 	public static final String LBL_NAME = "Name";
 	public static final String LBL_BIOBANK_ID = "Biobank ID";
 	public static final String LBL_CREDENTIALS = "Credentials";
@@ -41,16 +43,20 @@ public class PromiseMappingProjectMetaData extends DefaultEntityMetaData
 	{
 		super(ENTITY_NAME, PromisePackage.getPackage());
 
-		Objects.requireNonNull(promiseMapperFactory);
+		requireNonNull(promiseMapperFactory);
 
 		setLabel("ProMISe mapping projects");
 		setDescription("");
 
-		addAttribute(NAME).setIdAttribute(true).setNillable(false).setLabel(LBL_NAME).setDescription("The name of this mapping");
-		addAttribute(BIOBANK_ID).setNillable(false).setLabel(LBL_BIOBANK_ID).setDescription("The ID of the biobank in the BBMRI-NL Sample Collections entity").setUnique(true);
-		addAttribute(CREDENTIALS).setDataType(MolgenisFieldTypes.XREF)
-				.setRefEntity(PromiseCredentialsMetaData.INSTANCE).setNillable(false).setLabel(LBL_CREDENTIALS).setDescription("The ProMISe credentials for this biobank");
-		addAttribute(MAPPER).setNillable(false).setLabel(LBL_MAPPER).setDescription("The mapper to use for this biobank");
+		addAttribute(NAME).setIdAttribute(true).setNillable(false).setLabel(LBL_NAME)
+				.setDescription("The name of this mapping");
+		addAttribute(BIOBANK_ID).setNillable(false).setLabel(LBL_BIOBANK_ID)
+				.setDescription("The ID of the biobank in the BBMRI-NL Sample Collections entity").setUnique(true);
+		addAttribute(CREDENTIALS).setDataType(MolgenisFieldTypes.XREF).setRefEntity(PromiseCredentialsMetaData.INSTANCE)
+				.setNillable(false).setLabel(LBL_CREDENTIALS)
+				.setDescription("The ProMISe credentials for this biobank");
+		addAttribute(MAPPER).setNillable(false).setLabel(LBL_MAPPER)
+				.setDescription("The mapper to use for this biobank");
 
 		setDecorator(new RepositoryDecorator()
 		{

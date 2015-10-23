@@ -187,10 +187,7 @@
 		            data: form.serialize(),
 		            success: function() {
 		            	molgenis.createAlert([{'message': 'Your account has been updated.'}], 'success');
-		            },
-					error: function(xhr) {
-						molgenis.createAlert(JSON.parse(xhr.responseText).errors);  	 
-		        	}
+		            }
 		        });
 	        }
 	    });

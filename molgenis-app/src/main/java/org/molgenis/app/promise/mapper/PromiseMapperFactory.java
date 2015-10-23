@@ -1,8 +1,7 @@
-package org.molgenis.app.promise;
+package org.molgenis.app.promise.mapper;
 
 import java.util.Map;
 
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +27,7 @@ public class PromiseMapperFactory
 		PromiseMapper mapper = mappers.get(id);
 		if (mapper == null)
 		{
-			throw new MolgenisDataException("Unknown ProMISe mapper [" + id + "]");
+			throw new IllegalArgumentException("Unknown ProMISe mapper [" + id + "]");
 		}
 
 		return mapper;

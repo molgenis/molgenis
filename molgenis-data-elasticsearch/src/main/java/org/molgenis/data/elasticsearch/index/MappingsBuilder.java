@@ -9,7 +9,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.ElasticSearchService;
+import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
 
 /**
@@ -85,7 +85,7 @@ public class MappingsBuilder
 
 		jsonBuilder.startObject("properties");
 
-		jsonBuilder.startObject(ElasticSearchService.CRUD_TYPE_FIELD_NAME);
+		jsonBuilder.startObject(ElasticsearchService.CRUD_TYPE_FIELD_NAME);
 		jsonBuilder.field("type", "string").field("index", "not_analyzed");
 		jsonBuilder.endObject();
 

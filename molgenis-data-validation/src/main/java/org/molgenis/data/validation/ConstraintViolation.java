@@ -12,15 +12,15 @@ public class ConstraintViolation
 	private AttributeMetaData violatedAttribute;
 	private EntityMetaData entityMetaData;
 	private String importInfo;
-	private long rownr;
+	private Long rownr;
 
-	public ConstraintViolation(String message, long rownr)
+	public ConstraintViolation(String message, Long rownr)
 	{
 		this.message = message;
 		this.rownr = rownr;
 	}
 
-	public ConstraintViolation(String message, AttributeMetaData violatedAttribute, long rownr)
+	public ConstraintViolation(String message, AttributeMetaData violatedAttribute, Long rownr)
 	{
 		this.message = message;
 		this.violatedAttribute = violatedAttribute;
@@ -28,7 +28,7 @@ public class ConstraintViolation
 	}
 
 	public ConstraintViolation(String message, Object invalidValue, Entity entity, AttributeMetaData violatedAttribute,
-			EntityMetaData entityMetaData, long rownr)
+			EntityMetaData entityMetaData, Long rownr)
 	{
 		this.message = message;
 		this.invalidValue = invalidValue;
@@ -40,10 +40,9 @@ public class ConstraintViolation
 
 	public String getMessage()
 	{
-		if (rownr > 0)
+		if (null != rownr)
 		{
-
-			return message + " (row " + (rownr + 1) + ")";
+			return message + " (entity " + rownr + ")";
 		}
 
 		return message;
@@ -69,12 +68,12 @@ public class ConstraintViolation
 		return entityMetaData;
 	}
 
-	public long getRownr()
+	public Long getRownr()
 	{
 		return rownr;
 	}
 
-	public void setRownr(long rownr)
+	public void setRownr(Long rownr)
 	{
 		this.rownr = rownr;
 	}
@@ -99,7 +98,7 @@ public class ConstraintViolation
 		result = prime * result + ((importInfo == null) ? 0 : importInfo.hashCode());
 		result = prime * result + ((invalidValue == null) ? 0 : invalidValue.hashCode());
 		result = prime * result + ((message == null) ? 0 : message.hashCode());
-		result = prime * result + (int) (rownr ^ (rownr >>> 32));
+		result = prime * result + ((rownr == null) ? 0 : rownr.hashCode());
 		result = prime * result + ((violatedAttribute == null) ? 0 : violatedAttribute.hashCode());
 		return result;
 	}
@@ -136,7 +135,11 @@ public class ConstraintViolation
 			if (other.message != null) return false;
 		}
 		else if (!message.equals(other.message)) return false;
-		if (rownr != other.rownr) return false;
+		if (rownr == null)
+		{
+			if (other.rownr != null) return false;
+		}
+		else if (!rownr.equals(other.rownr)) return false;
 		if (violatedAttribute == null)
 		{
 			if (other.violatedAttribute != null) return false;

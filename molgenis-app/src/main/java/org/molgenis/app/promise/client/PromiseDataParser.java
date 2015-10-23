@@ -1,4 +1,4 @@
-package org.molgenis.app.promise;
+package org.molgenis.app.promise.client;
 
 import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
@@ -21,21 +21,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ProMiseDataParser
+public class PromiseDataParser
 {
 	private static final String DATA_CONTAINER_ELEMENT = "getDataForXMLResult";
 
-	private final ProMiseClient promiseClient;
+	private final PromiseClient promiseClient;
 
 	@Autowired
-	public ProMiseDataParser(ProMiseClient promiseClient)
+	public PromiseDataParser(PromiseClient promiseClient)
 	{
 		this.promiseClient = Objects.requireNonNull(promiseClient, "promiseClient is null");
 	}
 
-	public Iterable<Entity> parse(Entity project, Integer seqNr) throws IOException
+	public Iterable<Entity> parse(Entity credentials, Integer seqNr) throws IOException
 	{
-		XMLStreamReader xmlStreamReader = promiseClient.getDataForXml(project, seqNr.toString());
+		XMLStreamReader xmlStreamReader = promiseClient.getDataForXml(credentials, seqNr.toString());
 		try
 		{
 			while (xmlStreamReader.hasNext())
@@ -57,8 +57,8 @@ public class ProMiseDataParser
 							strBuilder.append('>');
 
 							XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
-							XMLStreamReader xmlContentReader = xmlInputFactory.createXMLStreamReader(new StringReader(
-									strBuilder.toString()));
+							XMLStreamReader xmlContentReader = xmlInputFactory
+									.createXMLStreamReader(new StringReader(strBuilder.toString()));
 							try
 							{
 								return parseContentContainer(xmlContentReader, rootElementName);
@@ -113,9 +113,9 @@ public class ProMiseDataParser
 					break;
 			}
 		}
-		
+
 		if (entities.isEmpty()) throw new MolgenisDataException("No ProMISe entities found in response");
-		
+
 		return entities;
 	}
 

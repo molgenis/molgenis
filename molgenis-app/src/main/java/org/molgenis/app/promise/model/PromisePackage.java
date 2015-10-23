@@ -1,4 +1,4 @@
-package org.molgenis.app.promise;
+package org.molgenis.app.promise.model;
 
 import org.molgenis.data.Package;
 import org.molgenis.data.meta.PackageImpl;

@@ -9,7 +9,10 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -97,8 +100,8 @@ public class JpaRepository extends AbstractRepository
 
 		if (LOG.isDebugEnabled()) LOG.debug("persisting " + entity.getClass().getSimpleName() + " " + entity);
 		getEntityManager().persist(jpaEntity);
-		if (LOG.isDebugEnabled()) LOG.debug("persisted " + entity.getClass().getSimpleName() + " ["
-				+ jpaEntity.getIdValue() + "]");
+		if (LOG.isDebugEnabled())
+			LOG.debug("persisted " + entity.getClass().getSimpleName() + " [" + jpaEntity.getIdValue() + "]");
 
 		entity.set(getEntityMetaData().getIdAttribute().getName(), jpaEntity.getIdValue());
 	}
@@ -160,36 +163,8 @@ public class JpaRepository extends AbstractRepository
 	{
 		if (LOG.isDebugEnabled()) LOG.debug("finding by key" + getEntityClass().getSimpleName() + " [" + id + "]");
 
-		return getEntityManager()
-				.find(getEntityClass(), getEntityMetaData().getIdAttribute().getDataType().convert(id));
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		String idAttrName = getEntityMetaData().getIdAttribute().getName();
-
-		// TODO why doesn't this work? Should work now (test it)
-		// Query q = new QueryImpl().in(idAttrName, ids);
-		// return findAll(q);
-
-		EntityManager em = getEntityManager();
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-
-		@SuppressWarnings("unchecked")
-		CriteriaQuery<Entity> cq = (CriteriaQuery<Entity>) cb.createQuery(getEntityClass());
-
-		@SuppressWarnings("unchecked")
-		Root<Entity> from = (Root<Entity>) cq.from(getEntityClass());
-		cq.select(from).where(from.get(idAttrName).in(Lists.newArrayList(ids)));
-
-		TypedQuery<Entity> tq = em.createQuery(cq);
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("finding by key " + getEntityClass().getSimpleName() + " [" + StringUtils.join(ids, ',') + "]");
-		}
-		return tq.getResultList();
+		return getEntityManager().find(getEntityClass(),
+				getEntityMetaData().getIdAttribute().getDataType().convert(id));
 	}
 
 	@Override
@@ -243,8 +218,8 @@ public class JpaRepository extends AbstractRepository
 	{
 		EntityManager em = getEntityManager();
 
-		if (LOG.isDebugEnabled()) LOG.debug("merging" + getEntityClass().getSimpleName() + " [" + entity.getIdValue()
-				+ "]");
+		if (LOG.isDebugEnabled())
+			LOG.debug("merging" + getEntityClass().getSimpleName() + " [" + entity.getIdValue() + "]");
 		em.merge(getTypedEntity(entity));
 
 		if (LOG.isDebugEnabled()) LOG.debug("flushing entity manager");
@@ -262,8 +237,8 @@ public class JpaRepository extends AbstractRepository
 		{
 			Entity entity = getTypedEntity(r);
 
-			if (LOG.isDebugEnabled()) LOG.debug("merging" + getEntityClass().getSimpleName() + " [" + r.getIdValue()
-					+ "]");
+			if (LOG.isDebugEnabled())
+				LOG.debug("merging" + getEntityClass().getSimpleName() + " [" + r.getIdValue() + "]");
 			em.merge(entity);
 
 			batchCount++;
@@ -290,8 +265,8 @@ public class JpaRepository extends AbstractRepository
 		Entity entity = findOne(getEntityMetaData().getIdAttribute().getDataType().convert(id));
 		if (entity == null)
 		{
-			throw new UnknownEntityException("Unknown entity [" + getEntityMetaData().getName() + "] with id [" + id
-					+ "]");
+			throw new UnknownEntityException(
+					"Unknown entity [" + getEntityMetaData().getName() + "] with id [" + id + "]");
 		}
 
 		delete(entity);
@@ -656,8 +631,8 @@ public class JpaRepository extends AbstractRepository
 								CriteriaBuilder cb = em.getCriteriaBuilder();
 
 								@SuppressWarnings("unchecked")
-								CriteriaQuery<Entity> cq = (CriteriaQuery<Entity>) cb.createQuery(attr.getRefEntity()
-										.getEntityClass());
+								CriteriaQuery<Entity> cq = (CriteriaQuery<Entity>) cb
+										.createQuery(attr.getRefEntity().getEntityClass());
 
 								@SuppressWarnings("unchecked")
 								Root<Entity> from = (Root<Entity>) cq.from(attr.getRefEntity().getEntityClass());

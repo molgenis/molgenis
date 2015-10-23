@@ -1,20 +1,28 @@
 package org.molgenis.data.rest.v2;
 
+import static com.google.common.collect.Lists.transform;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -22,11 +30,16 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.Href;
+import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.file.FileMeta;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.util.ErrorMessageResponse;
@@ -35,12 +48,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import com.google.common.collect.Lists;
 
 @Controller
 @RequestMapping(BASE_URI)
@@ -48,16 +66,54 @@ class RestControllerV2
 {
 	private static final Logger LOG = LoggerFactory.getLogger(RestControllerV2.class);
 
+	static final int MAX_ENTITIES = 1000;
+
 	public static final String BASE_URI = "/api/v2";
 
 	private final DataService dataService;
+	private final RestService restService;
 	private final MolgenisPermissionService permissionService;
 
-	@Autowired
-	public RestControllerV2(DataService dataService, MolgenisPermissionService permissionService)
+	static UnknownEntityException createUnknownEntityException(String entityName)
 	{
-		this.dataService = dataService;
-		this.permissionService = permissionService;
+		return new UnknownEntityException("Operation failed. Unknown entity: '" + entityName + "'");
+	}
+
+	static UnknownAttributeException createUnknownAttributeException(String entityName, String attributeName)
+	{
+		return new UnknownAttributeException(
+				"Operation failed. Unknown attribute: '" + attributeName + "', of entity: '" + entityName + "'");
+	}
+
+	static MolgenisDataAccessException createMolgenisDataAccessExceptionReadOnlyAttribute(String entityName,
+			String attributeName)
+	{
+		return new MolgenisDataAccessException(
+				"Operation failed. Attribute '" + attributeName + "' of entity '" + entityName + "' is readonly");
+	}
+
+	static MolgenisDataException createMolgenisDataExceptionUnknownIdentifier(int count)
+	{
+		return new MolgenisDataException("Operation failed. Unknown identifier on index " + count);
+	}
+
+	static MolgenisDataException createMolgenisDataExceptionIdentifierAndValue()
+	{
+		return new MolgenisDataException("Operation failed. Entities must provide only an identifier and a value");
+	}
+
+	static UnknownEntityException createUnknownEntityExceptionNotValidId(String id)
+	{
+		return new UnknownEntityException("Operation failed. Identifier: " + id + " is not valid");
+	}
+
+	@Autowired
+	public RestControllerV2(DataService dataService, MolgenisPermissionService permissionService,
+			RestService restService)
+	{
+		this.dataService = requireNonNull(dataService);
+		this.permissionService = requireNonNull(permissionService);
+		this.restService = requireNonNull(restService);
 	}
 
 	/**
@@ -129,12 +185,212 @@ class RestControllerV2
 		return createEntityCollectionResponse(entityName, request);
 	}
 
+	/**
+	 * Try to create multiple entities in one transaction. If one fails all fails.
+	 * 
+	 * @param entityName
+	 *            name of the entity where the entities are going to be added.
+	 * @param request
+	 *            EntityCollectionCreateRequestV2
+	 * @param response
+	 *            HttpServletResponse
+	 * @return EntityCollectionCreateResponseBodyV2
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/{entityName}", method = POST, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public EntityCollectionBatchCreateResponseBodyV2 createEntities(@PathVariable("entityName") String entityName,
+			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
+	{
+		final EntityMetaData meta = dataService.getEntityMetaData(entityName);
+		if (meta == null)
+		{
+			throw createUnknownEntityException(entityName);
+		}
+
+		try
+		{
+			final List<Entity> entities = request.getEntities().stream().map(e -> this.restService.toEntity(meta, e))
+					.collect(Collectors.toList());
+			final EntityCollectionBatchCreateResponseBodyV2 responseBody = new EntityCollectionBatchCreateResponseBodyV2();
+			final List<String> ids = new ArrayList<String>();
+
+			// Add all entities
+			this.dataService.add(entityName, entities);
+
+			for (Entity entity : entities)
+			{
+				String id = entity.getIdValue().toString();
+				ids.add(id.toString());
+				responseBody.getResources()
+						.add(new AutoValue_ResourcesResponseV2(Href.concatEntityHref(BASE_URI, entityName, id)));
+			}
+
+			responseBody.setLocation(
+					Href.concatEntityCollectionHref(BASE_URI, entityName, meta.getIdAttribute().getName(), ids));
+
+			response.setStatus(HttpServletResponse.SC_CREATED);
+			return responseBody;
+		}
+		catch (Exception e)
+		{
+			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+			throw e;
+		}
+
+	}
+
+	/**
+	 * Try to update multiple entities in one transaction. If one fails all fails.
+	 * 
+	 * @param entityName
+	 *            name of the entity where the entities are going to be added.
+	 * @param request
+	 *            EntityCollectionCreateRequestV2
+	 * @param response
+	 *            HttpServletResponse
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/{entityName}", method = PUT)
+	public synchronized void updateEntities(@PathVariable("entityName") String entityName,
+			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
+	{
+		final EntityMetaData meta = dataService.getEntityMetaData(entityName);
+		if (meta == null)
+		{
+			throw createUnknownEntityException(entityName);
+		}
+
+		try
+		{
+			final List<Entity> entities = request.getEntities().stream().map(e -> this.restService.toEntity(meta, e))
+					.collect(Collectors.toList());
+
+			// update all entities
+			this.dataService.update(entityName, entities);
+			response.setStatus(HttpServletResponse.SC_OK);
+		}
+		catch (Exception e)
+		{
+			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+			throw e;
+		}
+	}
+
+	/**
+	 * 
+	 * @param entityName
+	 *            The name of the entity to update
+	 * @param attributeName
+	 *            The name of the attribute to update
+	 * @param request
+	 *            EntityCollectionBatchRequestV2
+	 * @param response
+	 *            HttpServletResponse
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/{entityName}/{attributeName}", method = PUT)
+	@ResponseStatus(OK)
+	public synchronized void updateAttribute(@PathVariable("entityName") String entityName,
+			@PathVariable("attributeName") String attributeName,
+			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
+	{
+		final EntityMetaData meta = dataService.getEntityMetaData(entityName);
+		if (meta == null)
+		{
+			throw createUnknownEntityException(entityName);
+		}
+
+		try
+		{
+			AttributeMetaData attr = meta.getAttribute(attributeName);
+			if (attr == null)
+			{
+				throw createUnknownAttributeException(entityName, attributeName);
+			}
+
+			if (attr.isReadonly())
+			{
+				throw createMolgenisDataAccessExceptionReadOnlyAttribute(entityName, attributeName);
+			}
+
+			final List<Entity> entities = request.getEntities().stream().filter(e -> e.size() == 2)
+					.map(e -> this.restService.toEntity(meta, e)).collect(Collectors.toList());
+			if (entities.size() != request.getEntities().size())
+			{
+				throw createMolgenisDataExceptionIdentifierAndValue();
+			}
+
+			final List<Entity> updatedEntities = new ArrayList<Entity>();
+			int count = 0;
+			for (Entity entity : entities)
+			{
+				String id = checkForEntityId(entity, count);
+
+				Entity originalEntity = dataService.findOne(entityName, id);
+				if (originalEntity == null)
+				{
+					throw createUnknownEntityExceptionNotValidId(id);
+				}
+
+				Object value = this.restService.toEntityValue(attr, entity.get(attributeName));
+				originalEntity.set(attributeName, value);
+				updatedEntities.add(originalEntity);
+				count++;
+			}
+
+			// update all entities
+			this.dataService.update(entityName, updatedEntities);
+			response.setStatus(HttpServletResponse.SC_OK);
+		}
+		catch (Exception e)
+		{
+			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+			throw e;
+		}
+	}
+
+	/**
+	 * Get entity id and perform a check, throwing an MolgenisDataException when necessary
+	 * 
+	 * @param entity
+	 * @param count
+	 * @return
+	 */
+	private String checkForEntityId(Entity entity, int count)
+	{
+		Object id = entity.getIdValue();
+		if (null == id)
+		{
+			throw createMolgenisDataExceptionUnknownIdentifier(count);
+		}
+		return id.toString();
+	}
+
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	@ResponseStatus(BAD_REQUEST)
+	public @ResponseBody ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException exception)
+	{
+		LOG.info("Invalid method arguments.", exception);
+		return new ErrorMessageResponse(transform(exception.getBindingResult().getFieldErrors(),
+				error -> new ErrorMessage(error.getDefaultMessage())));
+	}
+
+	@ExceptionHandler(MolgenisValidationException.class)
+	@ResponseStatus(BAD_REQUEST)
+	@ResponseBody
+	public ErrorMessageResponse handleValidationException(MolgenisValidationException e)
+	{
+		LOG.info("Validation exception occurred.", e);
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+	}
+
 	@ExceptionHandler(RuntimeException.class)
 	@ResponseStatus(INTERNAL_SERVER_ERROR)
 	@ResponseBody
 	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
-		LOG.error("", e);
+		LOG.error("Runtime exception occurred.", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -262,7 +518,8 @@ class RestControllerV2
 						break;
 					case DATE_TIME:
 						Date dateTimeValue = entity.getDate(attrName);
-						String dateTimeValueStr = dateTimeValue != null ? getDateTimeFormat().format(dateTimeValue) : null;
+						String dateTimeValueStr = dateTimeValue != null ? getDateTimeFormat().format(dateTimeValue)
+								: null;
 						responseData.put(attrName, dateTimeValueStr);
 						break;
 					case DECIMAL:
