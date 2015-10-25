@@ -6,7 +6,6 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -23,8 +22,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class PromiseDataParser
 {
-	private static final String DATA_CONTAINER_ELEMENT = "getDataForXMLResult";
-
 	private final PromiseClient promiseClient;
 
 	@Autowired
@@ -33,63 +30,31 @@ public class PromiseDataParser
 		this.promiseClient = Objects.requireNonNull(promiseClient, "promiseClient is null");
 	}
 
+	//TODO: better to do this in the unmarshaller as well I think
 	public Iterable<Entity> parse(Entity credentials, Integer seqNr) throws IOException
 	{
-		XMLStreamReader xmlStreamReader = promiseClient.getDataForXml(credentials, seqNr.toString());
+		String resultXml = promiseClient.getDataForXml(credentials, seqNr.toString());
+		String rootElementName = "root";
+		StringBuilder strBuilder = new StringBuilder();
+		strBuilder.append('<');
+		strBuilder.append(rootElementName);
+		strBuilder.append('>');
+		strBuilder.append(resultXml);
+		strBuilder.append("</");
+		strBuilder.append(rootElementName);
+		strBuilder.append('>');
+
+		XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+		XMLStreamReader xmlContentReader;
 		try
 		{
-			while (xmlStreamReader.hasNext())
-			{
-
-				switch (xmlStreamReader.next())
-				{
-					case START_ELEMENT:
-						if (xmlStreamReader.getLocalName().equals(DATA_CONTAINER_ELEMENT))
-						{
-							String rootElementName = "root";
-							StringBuilder strBuilder = new StringBuilder();
-							strBuilder.append('<');
-							strBuilder.append(rootElementName);
-							strBuilder.append('>');
-							strBuilder.append(xmlStreamReader.getElementText());
-							strBuilder.append("</");
-							strBuilder.append(rootElementName);
-							strBuilder.append('>');
-
-							XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
-							XMLStreamReader xmlContentReader = xmlInputFactory
-									.createXMLStreamReader(new StringReader(strBuilder.toString()));
-							try
-							{
-								return parseContentContainer(xmlContentReader, rootElementName);
-							}
-							finally
-							{
-								xmlContentReader.close();
-							}
-						}
-						break;
-					default:
-						break;
-				}
-			}
+			xmlContentReader = xmlInputFactory.createXMLStreamReader(new StringReader(strBuilder.toString()));
+			return parseContentContainer(xmlContentReader, rootElementName);
 		}
 		catch (XMLStreamException e)
 		{
 			throw new IOException(e);
 		}
-		finally
-		{
-			try
-			{
-				xmlStreamReader.close();
-			}
-			catch (XMLStreamException e)
-			{
-				throw new RuntimeException(e);
-			}
-		}
-		return Collections.emptyList();
 	}
 
 	private static Iterable<Entity> parseContentContainer(XMLStreamReader xmlStreamReader, String parentLocalName)
