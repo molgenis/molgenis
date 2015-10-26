@@ -284,6 +284,9 @@ function($, molgenis, settingsXhr) {
 		return entityCollectionRequest;
 	}
 	
+	/**
+     * @memberOf molgenis.dataexplorer
+     */
 	function render() {
 		// get entity meta data and update header and tree
 		var entityMetaDataRequest = restApi.getAsync('/api/v1/' + state.entity + '/meta', {expand: ['attributes']}, function(entityMetaData) {
@@ -300,7 +303,7 @@ function($, molgenis, settingsXhr) {
 				// If the state is empty or undefined, or is set to
 				// 'none', return null. All attributes will be shown
 				if (state.attrs === undefined || state.attrs === null) {
-					selectedAttributes.push(attribute);
+					if(attribute.fieldType !== 'COMPOUND') selectedAttributes.push(attribute);
 				} else if (state.attrs === 'none') {
 					selectedAttributes = [];
 				} else {
