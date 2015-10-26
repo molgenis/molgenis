@@ -201,20 +201,6 @@ public abstract class DefaultSettingsEntity implements Entity
 		});
 	}
 
-	public void addEntityListener(EntityListener entityListener)
-	{
-		RunAsSystemProxy.runAsSystem(() -> {
-			dataService.addEntityListener(entityName, entityListener);
-		});
-	}
-
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		RunAsSystemProxy.runAsSystem(() -> {
-			dataService.removeEntityListener(entityName, entityListener);
-		});
-	}
-
 	private Entity getEntity()
 	{
 		String id = getEntityMetaData().getSimpleName();

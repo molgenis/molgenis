@@ -933,7 +933,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 				{
 					LOG.warn("Error executing bulk", failure);
 				}
-			}).setConcurrentRequests(0).build();
+			}).setConcurrentRequests(0).setBulkActions(50).build();
 		}
 	}
 

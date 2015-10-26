@@ -2,6 +2,7 @@ package org.molgenis.data;
 
 import java.util.List;
 
+// FIXME use something smarter than labels for the matrix
 public class AggregateResult
 {
 	private final List<List<Long>> matrix;
