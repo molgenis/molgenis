@@ -1,5 +1,6 @@
 package org.molgenis.migrate.version.v1_5;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.support.QueryImpl.EQ;
 import static org.molgenis.ui.menu.MenuItemType.MENU;
 
@@ -25,7 +26,6 @@ import com.google.common.base.Splitter.MapSplitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.TreeTraverser;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 /**
  * Updates dataexplorer menu items from <code>dataset</code> to <code>entity</code>.
@@ -45,13 +45,14 @@ public class Step5AlterDataexplorerMenuURLs extends MolgenisUpgrade
 
 	final MapSplitter splitter = Splitter.on("&").withKeyValueSeparator("=");
 	final MapJoiner joiner = Joiner.on("&").withKeyValueSeparator("=");
-	final Gson gson = new GsonBuilder().create();
+	final Gson gson;
 	final Repository rtpRepo;
 
-	public Step5AlterDataexplorerMenuURLs(Repository rtpRepo)
+	public Step5AlterDataexplorerMenuURLs(Repository rtpRepo, Gson gson)
 	{
 		super(4, 5);
-		this.rtpRepo = rtpRepo;
+		this.rtpRepo = requireNonNull(rtpRepo);
+		this.gson = requireNonNull(gson);
 	}
 
 	@Override
