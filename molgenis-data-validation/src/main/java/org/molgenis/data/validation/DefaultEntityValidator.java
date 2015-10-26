@@ -151,7 +151,7 @@ public class DefaultEntityValidator implements EntityValidator
 											.format("The attribute '%s' of entity '%s' with key '%s' must be unique, but the value '%s' already exists.",
 													attr.getName(), meta.getName(),
 													entity.getString(meta.getLabelAttribute().getName()), value);
-									violations.add(new ConstraintViolation(message, value, entity, attr, meta, 0));
+									violations.add(new ConstraintViolation(message, value, entity, attr, meta, null));
 								}
 
 								found++;

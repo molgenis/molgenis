@@ -24,6 +24,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
+import org.molgenis.data.mapper.algorithmgenerator.service.MapCategoryService;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
@@ -435,7 +436,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		public AlgorithmService algorithmService()
 		{
 			return new AlgorithmServiceImpl(dataService(), ontologyTagService(), semanticSearchService(),
-					unitResolver(), algorithmTemplateService());
+					unitResolver(), algorithmTemplateService(), mapCategoryService());
 		}
 
 		@Bean
@@ -467,6 +468,12 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		public OntologyTagService ontologyTagService()
 		{
 			return mock(OntologyTagService.class);
+		}
+
+		@Bean
+		public MapCategoryService mapCategoryService()
+		{
+			return mock(MapCategoryService.class);
 		}
 	}
 }

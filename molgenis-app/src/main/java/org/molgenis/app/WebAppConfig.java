@@ -10,6 +10,7 @@ import org.molgenis.DatabaseConfig;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.jpa.JpaRepositoryCollection;
@@ -17,12 +18,14 @@ import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.system.RepositoryTemplateLoader;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.migrate.version.v1_10.Step17RuntimePropertiesToGafListSettings;
 import org.molgenis.migrate.version.v1_10.Step18RuntimePropertiesToAnnotatorSettings;
 import org.molgenis.migrate.version.v1_10.Step19RemoveMolgenisLock;
 import org.molgenis.migrate.version.v1_11.Step20RebuildElasticsearchIndex;
+import org.molgenis.migrate.version.v1_11.Step21SetLoggingEventBackend;
 import org.molgenis.migrate.version.v1_5.Step1UpgradeMetaData;
 import org.molgenis.migrate.version.v1_5.Step2;
 import org.molgenis.migrate.version.v1_5.Step3AddOrderColumnToMrefTables;
@@ -93,6 +96,9 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Autowired
 	private JpaRepositoryCollection jpaRepositoryCollection;
 
+	@Autowired
+	private ElasticsearchRepositoryCollection elasticsearchRepositoryCollection;
+	
 	@Autowired
 	private MenuManagerService menuManagerService;
 
@@ -169,6 +175,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(step18RuntimePropertiesToAnnotatorSettings);
 		upgradeService.addUpgrade(step19RemoveMolgenisLock);
 		upgradeService.addUpgrade(step20RebuildElasticsearchIndex);
+		upgradeService.addUpgrade(new Step21SetLoggingEventBackend(dataSource));
 	}
 
 	@Override
@@ -208,9 +215,13 @@ public class WebAppConfig extends MolgenisWebAppConfig
 				{
 					localDataService.addRepository(jpaRepositoryCollection.getUnderlying(emd.getName()));
 				}
+				else if (ElasticsearchRepositoryCollection.NAME.equals(emd.getBackend()))
+				{
+					localDataService.addRepository(elasticsearchRepositoryCollection.addEntityMeta(emd));
+				}
 				else
 				{
-					LOG.warn("backend unkown for metadata " + emd.getName());
+					LOG.warn("backend [{}] unknown for meta data [{}]", emd.getBackend(), emd.getName());
 				}
 			}
 		}

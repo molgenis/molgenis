@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>molgenis</artifactId>
 		<groupId>org.molgenis</groupId>
-		<version>1.11.0-SNAPSHOT</version>
+		<version>1.12.0-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
@@ -64,6 +64,11 @@
 			<groupId>com.eaio.uuid</groupId>
 			<artifactId>uuid</artifactId>
 			<version>3.4</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.jscience</groupId>
+		    <artifactId>jscience</artifactId>
+		    <version>4.3.1</version>
 		</dependency>
 	</dependencies>
 
