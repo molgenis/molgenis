@@ -169,47 +169,6 @@ public class JpaRepository extends AbstractRepository
 
 	@Override
 	@Transactional(readOnly = true)
-	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		String idAttrName = getEntityMetaData().getIdAttribute().getName();
-
-		// TODO why doesn't this work? Should work now (test it)
-		// Query q = new QueryImpl().in(idAttrName, ids);
-		// return findAll(q);
-
-		EntityManager em = getEntityManager();
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-
-		@SuppressWarnings("unchecked")
-		CriteriaQuery<Entity> cq = (CriteriaQuery<Entity>) cb.createQuery(getEntityClass());
-
-		@SuppressWarnings("unchecked")
-		Root<Entity> from = (Root<Entity>) cq.from(getEntityClass());
-		List<Object> idsList = Lists.newArrayList(ids);
-		cq.select(from).where(from.get(idAttrName).in(idsList));
-
-		TypedQuery<Entity> tq = em.createQuery(cq);
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("finding by key " + getEntityClass().getSimpleName() + " [" + StringUtils.join(ids, ',') + "]");
-		}
-
-		List<Entity> resultList = tq.getResultList();
-		if (!resultList.isEmpty())
-		{
-			// return entities in the requested order #3912
-			Map<Object, Entity> idEntityMap = resultList.stream()
-					.collect(Collectors.toMap(Entity::getIdValue, Function.identity()));
-			final List<Entity> sortedResultList = new ArrayList<>(resultList.size());
-			idsList.forEach(id -> sortedResultList.add(idEntityMap.get(id)));
-			resultList = sortedResultList;
-		}
-
-		return resultList;
-	}
-
-	@Override
-	@Transactional(readOnly = true)
 	public Iterable<Entity> findAll(Query q)
 	{
 		queryResolver.resolveRefIdentifiers(q.getRules(), getEntityMetaData());
