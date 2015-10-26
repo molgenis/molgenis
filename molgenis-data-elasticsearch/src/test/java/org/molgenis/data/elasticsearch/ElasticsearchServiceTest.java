@@ -38,6 +38,7 @@ import org.molgenis.data.elasticsearch.ElasticsearchService.BulkProcessorFactory
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.support.DataServiceImpl;
+import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
@@ -153,22 +154,22 @@ public class ElasticsearchServiceTest
 		List<Object> idsBatch0 = new ArrayList<>();
 		for (int i = 0; i < batchSize; ++i)
 		{
-			idsBatch0.add(String.valueOf(i + 1));
+			idsBatch0.add(i + 1);
 		}
 		List<Object> idsBatch1 = new ArrayList<>();
 		for (int i = batchSize; i < totalSize; ++i)
 		{
-			idsBatch1.add(String.valueOf(i + 1));
+			idsBatch1.add(i + 1);
 		}
 		List<Entity> entitiesBatch0 = new ArrayList<>();
 		for (int i = 0; i < batchSize; ++i)
 		{
-			entitiesBatch0.add(when(mock(Entity.class).getIdValue()).thenReturn(String.valueOf(i + 1)).getMock());
+			entitiesBatch0.add(when(mock(Entity.class).getIdValue()).thenReturn(i + 1).getMock());
 		}
 		List<Entity> entitiesBatch1 = new ArrayList<>();
 		for (int i = batchSize; i < totalSize; ++i)
 		{
-			entitiesBatch1.add(when(mock(Entity.class).getIdValue()).thenReturn(String.valueOf(i + 1)).getMock());
+			entitiesBatch1.add(when(mock(Entity.class).getIdValue()).thenReturn(i + 1).getMock());
 		}
 		when(repo.findAll(idsBatch0)).thenReturn(entitiesBatch0);
 		when(repo.findAll(idsBatch1)).thenReturn(entitiesBatch1);
@@ -180,7 +181,7 @@ public class ElasticsearchServiceTest
 		Iterator<Entity> it = searchResults.iterator();
 		for (int i = 1; i <= totalSize; ++i)
 		{
-			assertEquals(it.next().getIdValue(), String.valueOf(i));
+			assertEquals(it.next().getIdValue(), i);
 		}
 		assertFalse(it.hasNext());
 	}

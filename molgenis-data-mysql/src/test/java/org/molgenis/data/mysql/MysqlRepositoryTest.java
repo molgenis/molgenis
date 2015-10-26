@@ -3,7 +3,6 @@ package org.molgenis.data.mysql;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -123,10 +122,10 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(params, Lists.<Object> newArrayList("%John%", "%John%", "%John%"));
 
 		// sort
-		Assert.assertEquals(repo.getSortSql(new QueryImpl().sort(new Sort("firstName", Sort.Direction.ASC)),
-				Collections.emptyList()), "ORDER BY `firstName` ASC");
-		Assert.assertEquals(repo.getSortSql(new QueryImpl().sort(new Sort("firstName", Sort.Direction.DESC)),
-				Collections.emptyList()), "ORDER BY `firstName` DESC");
+		Assert.assertEquals(repo.getSortSql(new QueryImpl().sort(new Sort("firstName", Sort.Direction.ASC))),
+				"ORDER BY `firstName` ASC");
+		Assert.assertEquals(repo.getSortSql(new QueryImpl().sort(new Sort("firstName", Sort.Direction.DESC))),
+				"ORDER BY `firstName` DESC");
 
 		params.clear();
 		Assert.assertEquals(repo.getWhereSql(
@@ -250,7 +249,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 			@Override
 			public Iterator<Object> iterator()
 			{
-				return Arrays.<Object> asList(exampleId0, exampleId1).iterator();
+				return Arrays.<Object> asList(exampleId0, "missing", exampleId1, "nope").iterator();
 			}
 		});
 

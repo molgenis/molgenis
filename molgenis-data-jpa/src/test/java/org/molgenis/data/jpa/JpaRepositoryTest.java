@@ -1,5 +1,6 @@
 package org.molgenis.data.jpa;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -126,6 +127,27 @@ public class JpaRepositoryTest extends BaseJpaTest
 		repo.deleteById(Arrays.asList(id));
 		assertNull(repo.findOne(p.getId()));
 	}
+	
+
+	@Test
+	public void testFindAllInvalidId()
+	{
+		Person p1 = new Person("Piet", "Paulusma");
+		repo.add(p1);
+
+		Person p2 = new Person("Paulus", "de Boskabouter");
+		repo.add(p2);
+
+		{
+			Iterable<Entity> entities = newArrayList(repo.findAll(Arrays.asList((Object) p1.getId(), "nonsense", p2.getId())));
+			assertEquals(entities, Arrays.asList(p1, p2));
+		}
+		
+		{
+			Iterable<Entity> entities = newArrayList(repo.findAll(Arrays.asList((Object) p2.getId(), "nonsense", p1.getId())));
+			assertEquals(entities, Arrays.asList(p2, p1));
+		}
+	}
 
 	@Test
 	public void testFindAll()
@@ -137,11 +159,11 @@ public class JpaRepositoryTest extends BaseJpaTest
 		repo.add(p2);
 
 		{
-			Iterable<Entity> entities = repo.findAll(Arrays.asList((Object) p1.getId(), p2.getId()));
+			Iterable<Entity> entities = newArrayList(repo.findAll(Arrays.asList((Object) p1.getId(), p2.getId())));
 			assertEquals(entities, Arrays.asList(p1, p2));
 		}
 		{
-			Iterable<Entity> entities = repo.findAll(Arrays.asList((Object) p2.getId(), p1.getId()));
+			Iterable<Entity> entities = newArrayList(repo.findAll(Arrays.asList((Object) p2.getId(), p1.getId())));
 			assertEquals(entities, Arrays.asList(p2, p1));
 		}
 	}
