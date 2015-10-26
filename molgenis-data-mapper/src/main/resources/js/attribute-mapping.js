@@ -318,8 +318,6 @@
 
 				// preview mapping results
 				loadAlgorithmResult(algorithm);
-				
-				$('#result-container').css('display', 'inline');
 			});
 		}	
 		return $textarea.data('ace').editor;
@@ -354,15 +352,15 @@
 				data : JSON.stringify(generateAlgorithmRequest),
 				contentType : 'application/json',
 				success : function(generatedAlgorithm) {
-					console.log(generatedAlgorithm);
-					// on selection of an attribute, show all fields
-					$('#result-container').css('display', 'inline');
 					
 					// If the generated algorithm is empty
-					if(generatedAlgorithm && generatedAlgorithm.length === 0){
+					if(selectedAttributes.length === 0){
 						$('#result-container').css('display', 'none');
 						$('.nav-tabs a[href=#script]').tab('show') ;
 						$('#map-tab').hide();
+					} else {
+						// on selection of an attribute, show all fields
+						$('#result-container').css('display', 'inline');
 					}
 					
 					// generate result table
