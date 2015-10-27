@@ -75,9 +75,9 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	protected void configure(HttpSecurity http) throws Exception
 	{
 		// do not write cache control headers for static resources
-		RequestMatcher matcher = new NegatedRequestMatcher(new OrRequestMatcher(new AntPathRequestMatcher(PATTERN_CSS),
-				new AntPathRequestMatcher(PATTERN_JS), new AntPathRequestMatcher(PATTERN_IMG),
-				new AntPathRequestMatcher(PATTERN_FONTS)));
+		RequestMatcher matcher = new NegatedRequestMatcher(
+				new OrRequestMatcher(new AntPathRequestMatcher(PATTERN_CSS), new AntPathRequestMatcher(PATTERN_JS),
+						new AntPathRequestMatcher(PATTERN_IMG), new AntPathRequestMatcher(PATTERN_FONTS)));
 
 		DelegatingRequestMatcherHeaderWriter cacheControlHeaderWriter = new DelegatingRequestMatcherHeaderWriter(
 				matcher, new CacheControlHeadersWriter());
@@ -102,65 +102,66 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 		expressionInterceptUrlRegistry.antMatchers("/login").permitAll()
 
-		.antMatchers("/logo/**").permitAll()
+				.antMatchers("/logo/**").permitAll()
 
-		.antMatchers("/molgenis.R").permitAll()
+				.antMatchers("/molgenis.R").permitAll()
 
-		.antMatchers(AccountController.CHANGE_PASSWORD_URI).authenticated()
+				.antMatchers(AccountController.CHANGE_PASSWORD_URI).authenticated()
 
-		.antMatchers("/account/**").permitAll()
+				.antMatchers("/account/**").permitAll()
 
-		.antMatchers(PATTERN_CSS).permitAll()
+				.antMatchers(PATTERN_CSS).permitAll()
 
-		.antMatchers(PATTERN_IMG).permitAll()
+				.antMatchers(PATTERN_IMG).permitAll()
 
-		.antMatchers(PATTERN_JS).permitAll()
+				.antMatchers(PATTERN_JS).permitAll()
 
-		.antMatchers(PATTERN_FONTS).permitAll()
+				.antMatchers(PATTERN_FONTS).permitAll()
 
-		.antMatchers("/html/**").permitAll()
+				.antMatchers("/html/**").permitAll()
 
-		.antMatchers("/plugin/void/**").permitAll()
+				.antMatchers("/plugin/void/**").permitAll()
 
-		.antMatchers("/api/**").permitAll()
+				.antMatchers("/api/**").permitAll()
 
-		.antMatchers("/search").permitAll()
+				.antMatchers("/search").permitAll()
 
-		.antMatchers("/captcha").permitAll()
+				.antMatchers("/captcha").permitAll()
 
-		.antMatchers("/dataindexerstatus").authenticated()
+				.antMatchers("/dataindexerstatus").authenticated()
 
-		.antMatchers("/permission/**/write/**").permitAll()
+				.antMatchers("/permission/**/write/**").permitAll()
 
-		.antMatchers("/scripts/**/run").authenticated()
+				.antMatchers("/scripts/**/run").authenticated()
 
-		.antMatchers("/files/**").permitAll()
+				.antMatchers("/files/**").permitAll()
 
-		.anyRequest().denyAll().and()
+				.anyRequest().denyAll().and()
 
-		.httpBasic().authenticationEntryPoint(authenticationEntryPoint()).and()
+				.httpBasic().authenticationEntryPoint(authenticationEntryPoint()).and()
 
-		.formLogin().loginPage("/login").failureUrl("/login?error").and()
+				.formLogin().loginPage("/login").failureUrl("/login?error").and()
 
-		.logout().deleteCookies("JSESSIONID").addLogoutHandler((req, res, auth) -> {
-			if (req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
-			{
-				req.setAttribute("continueWithUnsupportedBrowser", true);
-			}
-		}).logoutSuccessHandler((req, res, auth) -> {
-			StringBuilder logoutSuccessUrl = new StringBuilder("/");
-			if (req.getAttribute("continueWithUnsupportedBrowser") != null)
-			{
-				logoutSuccessUrl.append("?continueWithUnsupportedBrowser=true");
-			}
-			SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
-			logoutSuccessHandler.setDefaultTargetUrl(logoutSuccessUrl.toString());
-			logoutSuccessHandler.onLogoutSuccess(req, res, auth);
-		})
+				.logout().deleteCookies("JSESSIONID").addLogoutHandler((req, res, auth) -> {
+					if (req.getSession(false) != null
+							&& req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
+					{
+						req.setAttribute("continueWithUnsupportedBrowser", true);
+					}
+				}).logoutSuccessHandler((req, res, auth) -> {
+					StringBuilder logoutSuccessUrl = new StringBuilder("/");
+					if (req.getAttribute("continueWithUnsupportedBrowser") != null)
+					{
+						logoutSuccessUrl.append("?continueWithUnsupportedBrowser=true");
+					}
+					SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
+					logoutSuccessHandler.setDefaultTargetUrl(logoutSuccessUrl.toString());
+					logoutSuccessHandler.onLogoutSuccess(req, res, auth);
+				})
 
-		.and()
+				.and()
 
-		.csrf().disable();
+				.csrf().disable();
 	}
 
 	protected abstract void configureUrlAuthorization(
@@ -171,8 +172,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	@Bean
 	public MolgenisAnonymousAuthenticationFilter anonymousAuthFilter()
 	{
-		return new MolgenisAnonymousAuthenticationFilter(ANONYMOUS_AUTHENTICATION_KEY,
-				SecurityUtils.ANONYMOUS_USERNAME, userDetailsService());
+		return new MolgenisAnonymousAuthenticationFilter(ANONYMOUS_AUTHENTICATION_KEY, SecurityUtils.ANONYMOUS_USERNAME,
+				userDetailsService());
 	}
 
 	protected abstract List<GrantedAuthority> createAnonymousUserAuthorities();
