@@ -43,7 +43,7 @@ public class PromiseDataLoaderController extends MolgenisPluginController
 	private final PromiseMapperFactory promiseMapperFactory;
 
 	@Autowired
-	public PromiseDataLoaderController(PromiseDataParser proMiseDataParser, DataService dataService,
+	public PromiseDataLoaderController(PromiseDataParser promiseDataParser, DataService dataService,
 			PromiseMapperFactory promiseMapperFactory)
 	{
 		super(URI);
@@ -67,7 +67,7 @@ public class PromiseDataLoaderController extends MolgenisPluginController
 		Iterable<Entity> projects = dataService.findAll(PromiseMappingProjectMetaData.FULLY_QUALIFIED_NAME);
 		List<String> names = Lists.newArrayList();
 
-		projects.forEach(p -> names.add(p.get("name").toString()));
+		projects.forEach(p -> names.add(p.getString("name")));
 
 		return names;
 	}
