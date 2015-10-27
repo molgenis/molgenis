@@ -29,6 +29,7 @@ import org.quartz.TriggerKey;
 import org.quartz.impl.triggers.CronTriggerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -37,7 +38,8 @@ import org.springframework.stereotype.Service;
 import com.google.common.io.BaseEncoding;
 
 @Service
-public class IdCardIndexerServiceImpl implements IdCardIndexerService, ApplicationListener<ContextRefreshedEvent>
+public class IdCardIndexerServiceImpl
+		implements IdCardIndexerService, DisposableBean, ApplicationListener<ContextRefreshedEvent>
 {
 	private static final Logger LOG = LoggerFactory.getLogger(IdCardIndexerServiceImpl.class);
 
@@ -119,6 +121,15 @@ public class IdCardIndexerServiceImpl implements IdCardIndexerService, Applicati
 	public TriggerState getIndexRebuildStatus(TriggerKey triggerKey) throws SchedulerException
 	{
 		return scheduler.getTriggerState(triggerKey);
+	}
+
+	@Override
+	public void destroy() throws Exception
+	{
+		LOG.debug("Scheduler shutting down (waiting for jobs to complete) ...");
+		boolean waitForJobsToComplete = true;
+		scheduler.shutdown(waitForJobsToComplete);
+		LOG.info("Scheduler stopped");
 	}
 
 	/**
