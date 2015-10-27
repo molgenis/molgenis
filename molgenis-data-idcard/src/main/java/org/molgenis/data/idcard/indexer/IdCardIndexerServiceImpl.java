@@ -126,7 +126,7 @@ public class IdCardIndexerServiceImpl
 	@Override
 	public void destroy() throws Exception
 	{
-		LOG.debug("Scheduler shutting down (waiting for jobs to complete) ...");
+		LOG.debug("Stopping scheduler (waiting for jobs to complete) ...");
 		boolean waitForJobsToComplete = true;
 		scheduler.shutdown(waitForJobsToComplete);
 		LOG.info("Scheduler stopped");
