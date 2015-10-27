@@ -81,28 +81,15 @@ public class OptionsWizardPage extends AbstractWizardPage
 			}
 
 			File tmpFile = importWizard.getFile();
-			try
-			{
-				String fileName = tmpFile.getName();
+			String fileName = tmpFile.getName();
 
-				// FIXME: can this be done a bit cleaner?
-				String extension = FileExtensionUtils
-						.findExtensionFromPossibilities(fileName, fileRepositoryCollectionFactory
-								.createFileRepositoryCollection(tmpFile).getFileNameExtensions());
+			// FIXME: can this be done a bit cleaner?
+			String extension = FileExtensionUtils.findExtensionFromPossibilities(fileName,
+					fileRepositoryCollectionFactory.createFileRepositoryCollection(tmpFile).getFileNameExtensions());
 
-				File file = new File(tmpFile.getParent(), userGivenName + "." + extension);
-				FileCopyUtils.copy(tmpFile, file);
-
-				importWizard.setFile(file);
-			}
-			catch (IOException e)
-			{
-				ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
-			}
-			finally
-			{
-				tmpFile.delete();
-			}
+			File file = new File(tmpFile.getParent(), userGivenName + "." + extension);
+			tmpFile.renameTo(file);
+			importWizard.setFile(file);
 		}
 
 		try
@@ -159,7 +146,8 @@ public class OptionsWizardPage extends AbstractWizardPage
 		}
 		else
 		{
-			wizard.setValidationMessage("File did not pass validation see results below. Please resolve the errors and try again.");
+			wizard.setValidationMessage(
+					"File did not pass validation see results below. Please resolve the errors and try again.");
 		}
 
 		return msg;
