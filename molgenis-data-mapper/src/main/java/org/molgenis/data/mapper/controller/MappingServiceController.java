@@ -623,6 +623,7 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("dataExplorerUri", menuReaderService.getMenu().findMenuItemPath(DataExplorerController.ID));
 		model.addAttribute("mappingProject", project);
 		model.addAttribute("entityMapping", entityMapping);
+		model.addAttribute("sourceAttributesSize",Iterables.size(entityMapping.getSourceEntityMetaData().getAtomicAttributes()));
 		model.addAttribute("attributeMapping", attributeMapping);
 		model.addAttribute("attributes",
 				Lists.newArrayList(dataService.getEntityMetaData(source).getAtomicAttributes()));
