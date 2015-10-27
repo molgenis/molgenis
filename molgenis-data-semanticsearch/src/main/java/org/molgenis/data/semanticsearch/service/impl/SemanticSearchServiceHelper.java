@@ -6,9 +6,11 @@ import static org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm.STO
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -136,7 +138,7 @@ public class SemanticSearchServiceHelper
 		{
 			OntologyTerm ontologyTerm = ontologyService.getOntologyTerm(ontologyTermIri);
 			List<String> queryTerms = parseOntologyTermQueries(ontologyTerm);
-			Double termFrequency = termFrequencyService.getTermFrequency(ontologyTerm.getLabel());
+			Double termFrequency = getBestInverseDocumentFrequency(queryTerms);
 			shouldQueryRule.getNestedRules().add(createDisMaxQueryRuleForTermsWithBoost(queryTerms, termFrequency));
 		}
 		return shouldQueryRule;
@@ -157,8 +159,8 @@ public class SemanticSearchServiceHelper
 		for (OntologyTerm childOt : ontologyService.getChildren(ontologyTerm))
 		{
 			double boostedNumber = Math.pow(0.5, ontologyService.getOntologyTermDistance(ontologyTerm, childOt));
-			getOtLabelAndSynonyms(childOt).forEach(
-					synonym -> queryTerms.add(parseBoostQueryString(synonym, boostedNumber)));
+			getOtLabelAndSynonyms(childOt)
+					.forEach(synonym -> queryTerms.add(parseBoostQueryString(synonym, boostedNumber)));
 		}
 		return queryTerms;
 	}
@@ -204,13 +206,13 @@ public class SemanticSearchServiceHelper
 	{
 		if (ontologyTerm != null)
 		{
-			getOtLabelAndSynonyms(ontologyTerm).forEach(
-					term -> expanedQueryMap.put(stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
+			getOtLabelAndSynonyms(ontologyTerm)
+					.forEach(term -> expanedQueryMap.put(stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
 
 			for (OntologyTerm childOntologyTerm : ontologyService.getChildren(ontologyTerm))
 			{
-				getOtLabelAndSynonyms(childOntologyTerm).forEach(
-						term -> expanedQueryMap.put(stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
+				getOtLabelAndSynonyms(childOntologyTerm)
+						.forEach(term -> expanedQueryMap.put(stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
 			}
 		}
 	}
@@ -285,5 +287,18 @@ public class SemanticSearchServiceHelper
 		Set<String> searchTerms = stream(description.split(regex)).map(String::toLowerCase)
 				.filter(w -> !STOPWORDSLIST.contains(w) && StringUtils.isNotEmpty(w)).collect(Collectors.toSet());
 		return searchTerms;
+	}
+
+	Double getBestInverseDocumentFrequency(List<String> terms)
+	{
+		Optional<String> findFirst = terms.stream().sorted(new Comparator<String>()
+		{
+			public int compare(String o1, String o2)
+			{
+				return Integer.compare(o1.length(), o2.length());
+			}
+		}).findFirst();
+
+		return findFirst.isPresent() ? termFrequencyService.getTermFrequency(findFirst.get()) : null;
 	}
 }
