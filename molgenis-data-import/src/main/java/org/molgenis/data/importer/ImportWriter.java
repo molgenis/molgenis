@@ -16,6 +16,7 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IndexedRepository;
+import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Package;
 import org.molgenis.data.Query;
@@ -30,6 +31,8 @@ import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -59,6 +62,7 @@ public class ImportWriter
 	private final DataService dataService;
 	private final PermissionSystemService permissionSystemService;
 	private final TagService<LabeledResource, LabeledResource> tagService;
+	private final MolgenisPermissionService molgenisPermissionService;
 
 	/**
 	 * Creates the ImportWriter
@@ -69,11 +73,12 @@ public class ImportWriter
 	 *            {@link PermissionSystemService} to give permissions on uploaded entities
 	 */
 	public ImportWriter(DataService dataService, PermissionSystemService permissionSystemService,
-			TagService<LabeledResource, LabeledResource> tagService)
+			TagService<LabeledResource, LabeledResource> tagService, MolgenisPermissionService molgenisPermissionService)
 	{
 		this.dataService = dataService;
 		this.permissionSystemService = permissionSystemService;
 		this.tagService = tagService;
+		this.molgenisPermissionService = molgenisPermissionService;
 	}
 
 	@Transactional
@@ -371,6 +376,12 @@ public class ImportWriter
 	public int update(Repository repo, Iterable<? extends Entity> entities, DatabaseAction dbAction)
 	{
 		if (entities == null) return 0;
+
+		if (!molgenisPermissionService.hasPermissionOnEntity(repo.getName(), Permission.WRITE))
+		{
+			throw new MolgenisDataAccessException("No WRITE permission on entity '" + repo.getName()
+					+ "'. Is this entity already imported by another user who did not grant you WRITE permission?");
+		}
 
 		String idAttributeName = repo.getEntityMetaData().getIdAttribute().getName();
 		FieldType idDataType = repo.getEntityMetaData().getIdAttribute().getDataType();
