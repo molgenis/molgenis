@@ -26,6 +26,7 @@ import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
@@ -170,12 +171,14 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 						new QueryImpl().eq(EntityMetaDataMetaData.FULL_NAME, sourceEntityMetaData.getName())))
 				.thenReturn(entityMetaDataEntity);
 
-		Entity attributeEntity1 = mock(DefaultEntity.class);
-		when(attributeEntity1.getString(AttributeMetaDataMetaData.IDENTIFIER)).thenReturn("1");
-		Entity attributeEntity2 = mock(DefaultEntity.class);
-		when(attributeEntity2.getString(AttributeMetaDataMetaData.IDENTIFIER)).thenReturn("2");
+		Entity attributeEntity1 = new MapEntity();
+		attributeEntity1.set(AttributeMetaDataMetaData.IDENTIFIER,"1");
+		attributeEntity1.set(AttributeMetaDataMetaData.DATA_TYPE, "string");
+		Entity attributeEntity2 = new MapEntity();
+		attributeEntity2.set(AttributeMetaDataMetaData.IDENTIFIER, "2");
+		attributeEntity2.set(AttributeMetaDataMetaData.DATA_TYPE,"string");
 		when(entityMetaDataEntity.getEntities(EntityMetaDataMetaData.ATTRIBUTES)).thenReturn(
-				Arrays.<Entity> asList(attributeEntity1, attributeEntity2));
+				Arrays.<Entity>asList(attributeEntity1, attributeEntity2));
 
 		List<String> expactedAttributeIdentifiers = Arrays.<String> asList("1", "2");
 		assertEquals(semanticSearchServiceHelper.getAttributeIdentifiers(sourceEntityMetaData),

@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryparser.classic.QueryParser;
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -244,8 +245,11 @@ public class SemanticSearchServiceHelper
 	{
 		for (Entity attributeEntity : attributeEntities)
 		{
-			attributeIdentifiers.add(attributeEntity.getString(AttributeMetaDataMetaData.IDENTIFIER));
-
+			if (!attributeEntity.getString(AttributeMetaDataMetaData.DATA_TYPE)
+					.equals(MolgenisFieldTypes.COMPOUND.toString()))
+			{
+				attributeIdentifiers.add(attributeEntity.getString(AttributeMetaDataMetaData.IDENTIFIER));
+			}
 			Iterable<Entity> entities = attributeEntity.getEntities(AttributeMetaDataMetaData.PARTS);
 
 			if (entities != null)
