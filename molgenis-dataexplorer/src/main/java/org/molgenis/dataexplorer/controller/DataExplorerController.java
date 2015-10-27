@@ -45,7 +45,6 @@ import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
-import org.molgenis.util.GsonHttpMessageConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +64,7 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import com.google.gson.Gson;
 
 import freemarker.core.ParseException;
 
@@ -105,6 +105,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@Autowired
 	MenuManagerService menuManager;
+
+	@Autowired
+	private Gson gson;
 
 	public DataExplorerController()
 	{
@@ -320,7 +323,7 @@ public class DataExplorerController extends MolgenisPluginController
 		// http://stackoverflow.com/a/9970672
 		dataRequestStr = URLDecoder.decode(dataRequestStr, "UTF-8");
 		LOG.info("Download request: [" + dataRequestStr + "]");
-		DataRequest dataRequest = new GsonHttpMessageConverter().getGson().fromJson(dataRequestStr, DataRequest.class);
+		DataRequest dataRequest = gson.fromJson(dataRequestStr, DataRequest.class);
 
 		String fileName = "";
 		ServletOutputStream outputStream = null;
