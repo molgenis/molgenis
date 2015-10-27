@@ -4,6 +4,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.mysql.EmxImportServiceRegistrator;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.service.TagService;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +21,8 @@ public class ImporterConfiguration
 	private TagService<LabeledResource, LabeledResource> tagService;
 	@Autowired
 	private ImportServiceFactory importServiceFactory;
+	@Autowired
+	private MolgenisPermissionService molgenisPermissionService;
 
 	@Bean
 	public ImportService emxImportService()
@@ -30,7 +33,7 @@ public class ImporterConfiguration
 	@Bean
 	public ImportWriter importWriter()
 	{
-		return new ImportWriter(dataService, permissionSystemService, tagService);
+		return new ImportWriter(dataService, permissionSystemService, tagService, molgenisPermissionService);
 	}
 
 	@Bean
