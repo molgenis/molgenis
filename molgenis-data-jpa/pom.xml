@@ -1,9 +1,10 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.molgenis</groupId>
 		<artifactId>molgenis</artifactId>
-		<version>1.10.0-POC-PROMISE-SNAPSHOT</version>
+		<version>1.13.0-POC-PROMISE-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-data-jpa</artifactId>
 
@@ -14,26 +15,26 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-validation</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-		 <!-- database hibernate, connectionpool, driver -->
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-validation</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<!-- database hibernate, connectionpool, driver -->
 		<dependency>
 			<groupId>org.eclipse.persistence</groupId>
 			<artifactId>eclipselink</artifactId>
 			<version>2.5.0</version>
 		</dependency>
 		<dependency>
-		    <groupId>c3p0</groupId>
-		    <artifactId>c3p0</artifactId>
-		    <version>0.9.1.2</version>
+			<groupId>c3p0</groupId>
+			<artifactId>c3p0</artifactId>
+			<version>0.9.1.2</version>
 		</dependency>
-        <dependency>
-        	<groupId>org.hibernate</groupId>
-           	<artifactId>hibernate-validator</artifactId>
-           	<version>${hibernate.validator.version}</version>
-       	</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>${hibernate.validator.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>

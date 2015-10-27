@@ -132,6 +132,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Autowired
 	public IdGenerator idGenerator;
 
+	@Autowired
+	public GsonHttpMessageConverter gsonHttpMessageConverter;
+
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
 	{
@@ -163,7 +166,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters)
 	{
 		boolean prettyPrinting = environment != null && environment.equals("development");
-		converters.add(new GsonHttpMessageConverter(prettyPrinting));
+		converters.add(gsonHttpMessageConverter);
 		converters.add(new BufferedImageHttpMessageConverter());
 		converters.add(new CsvHttpMessageConverter());
 	}

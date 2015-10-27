@@ -26,52 +26,6 @@
 		return algorithm;
 	}
 
-	/**
-	 * Sends an algorithm to the server for testing.
-	 * 
-	 * @param algorithm
-	 *            the algorithm string to send to the server
-	 */
-	function testAlgorithm(algorithm) {
-		$.ajax({
-			type : 'POST',
-			url : molgenis.getContextUrl() + '/mappingattribute/testscript',
-			data : JSON.stringify({
-				targetEntityName : $('#target').val(),
-				sourceEntityName : $('#source').val(),
-				targetAttributeName : $('#targetAttribute').val(),
-				algorithm : algorithm
-			}),
-			contentType : 'application/json',
-			success : showStatistics
-		});
-	}
-
-	/**
-	 * Shows statistics for the test results.
-	 * 
-	 * @param data
-	 *            the results from the server
-	 */
-	function showStatistics(data) {
-		if (data.results.length === 0) {
-			$('#statistics-container').hide();
-			molgenis.createAlert([ {
-				'message' : 'No valid cases are produced by the algorithm. TIP: Maybe your data set is empty.'
-			} ], 'warning');
-		}
-
-		$('#stats-total').text(data.totalCount);
-		$('#stats-valid').text(data.results.length);
-		$('#stats-mean').text(jStat.mean(data.results));
-		$('#stats-median').text(jStat.median(data.results));
-		$('#stats-stdev').text(jStat.stdev(data.results));
-
-		$('#statistics-container').show();
-		if ($('.distribution').length) {
-			$('.distribution').bcgraph(data.results);
-		}
-	}
 
 	/**
 	 * Searches the source attributes in an algorithm string.
@@ -232,61 +186,6 @@
 			$(this).prop('checked', inArray >= 0);
 		});
 	}
-
-	/**
-	 * Clears the editor and inserts selected attributes.
-	 * 
-	 * @param selectedAttributes
-	 *            all the selected attributes
-	 * @param editor
-	 *            the ace algorithm editor to insert the attribute into
-	 */
-	function insertSelectedAttributes(selectedAttributes, editor) {
-		var existingAlgorithm = editor.getSession().getValue(), newAttributes = [], existingAttributes = getSourceAttrs(existingAlgorithm);
-		
-		$(selectedAttributes).each(function() {
-			if (existingAlgorithm.indexOf(this) === -1) {
-				insertAttribute(this, editor);
-			}
-		});
-
-		$(existingAttributes).each(function() {
-			if (selectedAttributes.indexOf(this) === -1) {
-				removeAttribute(this, editor);
-			}
-		});
-	}
-
-	/**
-	 * Inserts a single attribute
-	 * 
-	 * @param attribute
-	 *            One attribute to insert into the editor
-	 * @param editor
-	 *            the ace algorithm editor to insert the attribute into
-	 */
-	function insertAttribute(attribute, editor) {
-		editor.insert("$('" + attribute + "').value();");
-	}
-
-	/**
-	 * Removes a single attribute
-	 * 
-	 * @param attribute
-	 *            One attribute to remove from the editor
-	 * @param editor
-	 *            the ace algorithm editor to remove the attribute from
-	 */
-	function removeAttribute(attribute, editor) {
-		// TODO Fix removing algorithms that contain more then just .value()
-		// (like .map())
-		editor.replaceAll("", {
-			needle : "$('" + attribute + "').value();"
-		});
-		editor.replaceAll("", {
-			needle : "$('" + attribute + "')"
-		});
-	}
 	
 	/**
 	 * Move suggested attributes to the top of the attribute table
@@ -295,7 +194,7 @@
 		//Remove the existing content of the result table
 		resultTable.empty();
 		//Add the header to the result table
-		resultTable.append('<thead><tr><th>Select</th><th>Attribute</th><th>Algorithm value</th></tr></thead>');
+		resultTable.append('<thead><tr><th>Select</th><th>Attribute label</th><th>Name</th></tr></thead>');
 		
 		if(explainedAttributes != null){
 			
@@ -335,7 +234,7 @@
 					attributeInfo.push('<br><a href="' + dataExplorerUri + '?entity=' + attribute.refEntity + '" target="_blank">category look up</a>');
 				}
 				
-				attributeInfo.push('</td><td></td>');
+				attributeInfo.push('</td><td>' + attribute.name + '</td>');
 				
 				row.append(attributeInfo.join('')).appendTo(tbody);
 				
@@ -440,34 +339,45 @@
 				selectedAttributes.push($(this).data('attribute-name'));
 			});
 
-			// attributes into editor
-			insertSelectedAttributes(selectedAttributes, editor);
-
 			var algorithm = editor.getSession().getValue();
 			
-			// updates algorithm
+			var generateAlgorithmRequest = {
+				'targetEntityName' : $('[name="target"]').val(),
+				'sourceEntityName' : $('[name="source"]').val(),
+				'targetAttributeName' : $('[name="targetAttribute"]').val(),
+				'sourceAttributes' : selectedAttributes
+			};
+			
+			$.ajax({
+				type : 'POST',
+				url : molgenis.getContextUrl() + '/attributemapping/algorithm',
+				data : JSON.stringify(generateAlgorithmRequest),
+				contentType : 'application/json',
+				success : function(generatedAlgorithm) {
+					console.log(generatedAlgorithm);
+					// on selection of an attribute, show all fields
+					$('#result-container').css('display', 'inline');
+					
+					// If the generated algorithm is empty
+					if(generatedAlgorithm && generatedAlgorithm.length === 0){
+						$('#result-container').css('display', 'none');
+						$('.nav-tabs a[href=#script]').tab('show') ;
+						$('#map-tab').hide();
+					}
+					
+					// generate result table
+					editor.getSession().setValue(generatedAlgorithm);
+					loadAlgorithmResult(generatedAlgorithm);
 
-			// events only fired when 1 or more attributes is selected
-			if ($('#attribute-mapping-table :checkbox:checked').length > 0) {
-
-				// on selection of an attribute, show all fields
-				$('#result-container').css('display', 'inline');
-				$('#map-tab').show();
-
-				// generate result table
-				loadAlgorithmResult(algorithm);
-
-				// generate mapping editor if target attribute is an xref or
-				// categorical
-				var targetAttributeDataType = $('input[name="targetAttributeType"]').val();
-				if (targetAttributeDataType === 'xref' || targetAttributeDataType === 'categorical') {
-					loadMappingEditor(algorithm);
+					// generate mapping editor if target attribute is an xref or
+					// categorical
+					var targetAttributeDataType = $('input[name="targetAttributeType"]').val();
+					if (targetAttributeDataType === 'xref' || targetAttributeDataType === 'categorical') {
+						loadMappingEditor(generatedAlgorithm);
+						$('#map-tab').show();
+					}
 				}
-			} else {
-				// events when no attributes are selected
-				$('#result-container').css('display', 'none');
-				$('#map-tab').hide();
-			}
+			});
 		});
 	}
 	
@@ -491,6 +401,7 @@
 	
 	/**
 	 * connect the matched words that are neighbors in order to highlight them together
+	 * TODO : move these string operation related methods to the server
 	 */
 	function connectNeighboredWords(attributeLabel, matchedWords){
 		var connectedPhrases = [], connectedPhrase, potentialConnectedPhrase, orderedMatchedWords;

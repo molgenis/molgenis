@@ -48,7 +48,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -57,8 +56,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
-import com.google.common.collect.Lists;
 
 @Controller
 @RequestMapping(BASE_URI)
@@ -186,6 +183,29 @@ class RestControllerV2
 	}
 
 	/**
+	 * Retrieve attribute meta data
+	 * 
+	 * @param entityName
+	 * @param attributeName
+	 * @return
+	 */
+	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public AttributeMetaDataResponseV2 retrieveEntityAttributeMeta(@PathVariable("entityName") String entityName,
+			@PathVariable("attributeName") String attributeName)
+	{
+		return createAttributeMetaDataResponse(entityName, attributeName);
+	}
+
+	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public AttributeMetaDataResponseV2 retrieveEntityAttributeMetaPost(@PathVariable("entityName") String entityName,
+			@PathVariable("attributeName") String attributeName)
+	{
+		return createAttributeMetaDataResponse(entityName, attributeName);
+	}
+
+	/**
 	 * Try to create multiple entities in one transaction. If one fails all fails.
 	 * 
 	 * @param entityName
@@ -222,12 +242,13 @@ class RestControllerV2
 			{
 				String id = entity.getIdValue().toString();
 				ids.add(id.toString());
-				responseBody.getResources()
-						.add(new AutoValue_ResourcesResponseV2(Href.concatEntityHref(BASE_URI, entityName, id)));
+
+				responseBody.getResources().add(new AutoValue_ResourcesResponseV2(
+						Href.concatEntityHref(RestControllerV2.BASE_URI, entityName, id)));
 			}
 
-			responseBody.setLocation(
-					Href.concatEntityCollectionHref(BASE_URI, entityName, meta.getIdAttribute().getName(), ids));
+			responseBody.setLocation(Href.concatEntityCollectionHref(RestControllerV2.BASE_URI, entityName,
+					meta.getIdAttribute().getName(), ids));
 
 			response.setStatus(HttpServletResponse.SC_CREATED);
 			return responseBody;
@@ -369,7 +390,8 @@ class RestControllerV2
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	@ResponseStatus(BAD_REQUEST)
-	public @ResponseBody ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException exception)
+	public @ResponseBody ErrorMessageResponse handleMethodArgumentNotValidException(
+			MethodArgumentNotValidException exception)
 	{
 		LOG.info("Invalid method arguments.", exception);
 		return new ErrorMessageResponse(transform(exception.getBindingResult().getFieldErrors(),
@@ -392,6 +414,31 @@ class RestControllerV2
 	{
 		LOG.error("Runtime exception occurred.", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+	}
+
+	private AttributeMetaDataResponseV2 createAttributeMetaDataResponse(String entityName, String attributeName)
+	{
+		EntityMetaData entity = dataService.getEntityMetaData(entityName);
+		if (entity == null)
+		{
+			throw new UnknownEntityException(entityName + " not found");
+		}
+
+		AttributeMetaData attribute = entity.getAttribute(attributeName);
+		if (attribute == null)
+		{
+			throw new RuntimeException("attribute : " + attributeName + " does not exist!");
+		}
+
+		AttributeFilter attributeFilter = new AttributeFilter();
+		Iterable<AttributeMetaData> attributeParts = attribute.getAttributeParts();
+
+		if (attributeParts != null)
+		{
+			attributeParts.forEach(attributePart -> attributeFilter.add(attributePart.getName()));
+		}
+
+		return new AttributeMetaDataResponseV2(entityName, attribute, attributeFilter, permissionService);
 	}
 
 	private EntityCollectionResponseV2 createEntityCollectionResponse(String entityName,

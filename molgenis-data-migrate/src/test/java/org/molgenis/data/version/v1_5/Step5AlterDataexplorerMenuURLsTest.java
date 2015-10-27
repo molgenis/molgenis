@@ -52,7 +52,7 @@ public class Step5AlterDataexplorerMenuURLsTest
 	@Test
 	public void testUpgrade()
 	{
-		Step5AlterDataexplorerMenuURLs step5 = new Step5AlterDataexplorerMenuURLs(rtpRepo);
+		Step5AlterDataexplorerMenuURLs step5 = new Step5AlterDataexplorerMenuURLs(rtpRepo, gson);
 		step5.upgrade();
 		Mockito.verify(rtpRepo).update(captor.capture());
 		assertEquals(gson.fromJson(captor.getValue().getValue(), Menu.class), menuTransformed);

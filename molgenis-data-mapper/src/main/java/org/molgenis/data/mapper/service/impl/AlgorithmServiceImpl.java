@@ -4,11 +4,13 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_HIGH;
 import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_LOW;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -28,6 +30,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.mapper.algorithmgenerator.service.MapCategoryService;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
@@ -64,21 +67,51 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	private final SemanticSearchService semanticSearchService;
 	private final UnitResolver unitResolver;
 	private final AlgorithmTemplateService algorithmTemplateService;
+	private final MapCategoryService mapCategoryService;
 	private final Pattern MAGMA_ATTRIBUTE_PATTERN = Pattern.compile("\\$\\('([^\\$\\(\\)]*)'\\)");
 	private final MagmaUnitConverter magmaUnitConverter = new MagmaUnitConverter();
 
 	@Autowired
 	public AlgorithmServiceImpl(DataService dataService, OntologyTagService ontologyTagService,
 			SemanticSearchService semanticSearchService, UnitResolver unitResolver,
-			AlgorithmTemplateService algorithmTemplateService)
+			AlgorithmTemplateService algorithmTemplateService, MapCategoryService mapCategoryService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.ontologyTagService = requireNonNull(ontologyTagService);
 		this.semanticSearchService = requireNonNull(semanticSearchService);
 		this.unitResolver = requireNonNull(unitResolver);
 		this.algorithmTemplateService = requireNonNull(algorithmTemplateService);
+		this.mapCategoryService = requireNonNull(mapCategoryService);
 
 		new RhinoConfig().init();
+	}
+
+	@Override
+	public String generateAlgorithm(AttributeMetaData targetAttribute, EntityMetaData targetEntityMetaData,
+			List<AttributeMetaData> sourceAttributes, EntityMetaData sourceEntityMetaData)
+	{
+		if (sourceAttributes.size() > 0)
+		{
+			String algorithm = mapCategoryService.generate(targetAttribute, sourceAttributes);
+			if (StringUtils.isBlank(algorithm))
+			{
+				if (sourceAttributes.size() > 1)
+				{
+					for (AttributeMetaData sourceAttribute : sourceAttributes)
+					{
+						algorithm += generateAlgorithm(targetAttribute, targetEntityMetaData,
+								Arrays.asList(sourceAttribute), sourceEntityMetaData);
+					}
+				}
+				else
+				{
+					algorithm = generateUnitConversionAlgorithm(targetAttribute, targetEntityMetaData,
+							sourceAttributes.get(0), sourceEntityMetaData);
+				}
+			}
+			return algorithm;
+		}
+		return StringUtils.EMPTY;
 	}
 
 	@Override
@@ -117,9 +150,12 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			Entry<AttributeMetaData, ExplainedAttributeMetaData> firstEntry = relevantAttributes.entrySet().stream()
 					.findFirst().get();
 			AttributeMetaData sourceAttribute = firstEntry.getKey();
-
-			algorithm = generateUnitConversionAlgorithm(targetAttribute, targetEntityMetaData, sourceAttribute,
-					sourceEntityMetaData);
+			algorithm = mapCategoryService.generate(targetAttribute, Arrays.asList(sourceAttribute));
+			if (StringUtils.isBlank(algorithm))
+			{
+				algorithm = generateUnitConversionAlgorithm(targetAttribute, targetEntityMetaData, sourceAttribute,
+						sourceEntityMetaData);
+			}
 			mappedSourceAttributes = Sets.newHashSet(sourceAttribute);
 			algorithmState = firstEntry.getValue().isHighQuality() ? GENERATED_HIGH : GENERATED_LOW;
 		}
@@ -364,5 +400,4 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		}
 		return result;
 	}
-
 }

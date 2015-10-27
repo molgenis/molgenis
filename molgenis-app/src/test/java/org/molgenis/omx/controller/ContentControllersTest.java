@@ -16,6 +16,7 @@ import org.molgenis.file.FileStore;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.omx.controller.ContentControllersTest.Config;
 import org.molgenis.ui.controller.StaticContentService;
+import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -31,9 +32,13 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @WebAppConfiguration
-@ContextConfiguration(classes = Config.class)
+@ContextConfiguration(classes =
+{ Config.class, GsonConfig.class })
 public class ContentControllersTest extends AbstractTestNGSpringContextTests
 {
+	@Autowired
+	private GsonHttpMessageConverter gsonHttpMessageConverter;
+
 	@Autowired
 	private HomeController homeController;
 
@@ -61,20 +66,20 @@ public class ContentControllersTest extends AbstractTestNGSpringContextTests
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		mockMvcHome = MockMvcBuilders.standaloneSetup(homeController)
-				.setMessageConverters(new GsonHttpMessageConverter()).build();
+		mockMvcHome = MockMvcBuilders.standaloneSetup(homeController).setMessageConverters(gsonHttpMessageConverter)
+				.build();
 
-		mockMvcNews = MockMvcBuilders.standaloneSetup(newsController)
-				.setMessageConverters(new GsonHttpMessageConverter()).build();
+		mockMvcNews = MockMvcBuilders.standaloneSetup(newsController).setMessageConverters(gsonHttpMessageConverter)
+				.build();
 
 		mockMvcContact = MockMvcBuilders.standaloneSetup(contactController)
-				.setMessageConverters(new GsonHttpMessageConverter()).build();
+				.setMessageConverters(gsonHttpMessageConverter).build();
 
 		mockMvcBackground = MockMvcBuilders.standaloneSetup(backgroundController)
-				.setMessageConverters(new GsonHttpMessageConverter()).build();
+				.setMessageConverters(gsonHttpMessageConverter).build();
 
 		mockMvcReferences = MockMvcBuilders.standaloneSetup(referencesController)
-				.setMessageConverters(new GsonHttpMessageConverter()).build();
+				.setMessageConverters(gsonHttpMessageConverter).build();
 	}
 
 	@Test

@@ -260,6 +260,11 @@ public class AttributeMetaDataResponse
 		return enumOptions;
 	}
 
+	public Long getMaxLength()
+	{
+		return maxLength;
+	}
+
 	public Object getRefEntity()
 	{
 		return refEntity;
