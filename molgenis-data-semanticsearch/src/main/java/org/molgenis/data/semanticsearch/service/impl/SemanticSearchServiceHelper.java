@@ -298,7 +298,7 @@ public class SemanticSearchServiceHelper
 		return searchTerms;
 	}
 
-	Double getBestInverseDocumentFrequency(List<String> terms)
+	private Double getBestInverseDocumentFrequency(List<String> terms)
 	{
 		Optional<String> findFirst = terms.stream().sorted(new Comparator<String>()
 		{
