@@ -4,6 +4,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,6 +37,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.LinkedHashMultimap;
@@ -53,12 +55,6 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 
 	@Autowired
 	private DataService dataService;
-
-	@Autowired
-	private SemanticSearchService semanticSearchService;
-
-	@Autowired
-	private MetaDataService metaDataService;
 
 	@Test
 	public void testCreateDisMaxQueryRule()
@@ -123,14 +119,14 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		assertEquals(actualTargetAttributeQueryTerms_1.toString(), expecteddisMaxQueryRuleToString_1);
 
 		// Case 2
-		QueryRule expecteddisMaxQueryRuleToString_2 = semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(
-				Sets.newHashSet("Height"), tags.values());
+		QueryRule expecteddisMaxQueryRuleToString_2 = semanticSearchServiceHelper
+				.createDisMaxQueryRuleForAttribute(Sets.newHashSet("Height"), tags.values());
 		String expectedTargetAttributeQueryTermsToString_2 = "(label FUZZY_MATCH 'height'description FUZZY_MATCH 'height'label FUZZY_MATCH 'length body'description FUZZY_MATCH 'length body'label FUZZY_MATCH 'standing height'description FUZZY_MATCH 'standing height'label FUZZY_MATCH 'length sitting'description FUZZY_MATCH 'length sitting'label FUZZY_MATCH 'sitting height'description FUZZY_MATCH 'sitting height'label FUZZY_MATCH 'sature'description FUZZY_MATCH 'sature'label FUZZY_MATCH 'height'description FUZZY_MATCH 'height')";
 		assertEquals(expecteddisMaxQueryRuleToString_2.toString(), expectedTargetAttributeQueryTermsToString_2);
 
 		// Case 3
-		QueryRule expecteddisMaxQueryRuleToString_3 = semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(
-				Sets.newHashSet("targetAttribute 3"), tags.values());
+		QueryRule expecteddisMaxQueryRuleToString_3 = semanticSearchServiceHelper
+				.createDisMaxQueryRuleForAttribute(Sets.newHashSet("targetAttribute 3"), tags.values());
 		String expectedTargetAttributeQueryTermsToString_3 = "(label FUZZY_MATCH '3 targetattribute'description FUZZY_MATCH '3 targetattribute'label FUZZY_MATCH 'length body'description FUZZY_MATCH 'length body'label FUZZY_MATCH 'standing height'description FUZZY_MATCH 'standing height'label FUZZY_MATCH 'length sitting'description FUZZY_MATCH 'length sitting'label FUZZY_MATCH 'sitting height'description FUZZY_MATCH 'sitting height'label FUZZY_MATCH 'sature'description FUZZY_MATCH 'sature'label FUZZY_MATCH 'height'description FUZZY_MATCH 'height')";
 		assertEquals(expecteddisMaxQueryRuleToString_3.toString(), expectedTargetAttributeQueryTermsToString_3);
 	}
@@ -166,19 +162,18 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		EntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("sourceEntityMetaData");
 		Entity entityMetaDataEntity = mock(DefaultEntity.class);
 
-		when(
-				dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME,
-						new QueryImpl().eq(EntityMetaDataMetaData.FULL_NAME, sourceEntityMetaData.getName())))
-				.thenReturn(entityMetaDataEntity);
+		when(dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME,
+				new QueryImpl().eq(EntityMetaDataMetaData.FULL_NAME, sourceEntityMetaData.getName())))
+						.thenReturn(entityMetaDataEntity);
 
 		Entity attributeEntity1 = new MapEntity();
-		attributeEntity1.set(AttributeMetaDataMetaData.IDENTIFIER,"1");
+		attributeEntity1.set(AttributeMetaDataMetaData.IDENTIFIER, "1");
 		attributeEntity1.set(AttributeMetaDataMetaData.DATA_TYPE, "string");
 		Entity attributeEntity2 = new MapEntity();
 		attributeEntity2.set(AttributeMetaDataMetaData.IDENTIFIER, "2");
-		attributeEntity2.set(AttributeMetaDataMetaData.DATA_TYPE,"string");
-		when(entityMetaDataEntity.getEntities(EntityMetaDataMetaData.ATTRIBUTES)).thenReturn(
-				Arrays.<Entity>asList(attributeEntity1, attributeEntity2));
+		attributeEntity2.set(AttributeMetaDataMetaData.DATA_TYPE, "string");
+		when(entityMetaDataEntity.getEntities(EntityMetaDataMetaData.ATTRIBUTES))
+				.thenReturn(Arrays.<Entity> asList(attributeEntity1, attributeEntity2));
 
 		List<String> expactedAttributeIdentifiers = Arrays.<String> asList("1", "2");
 		assertEquals(semanticSearchServiceHelper.getAttributeIdentifiers(sourceEntityMetaData),
@@ -216,9 +211,10 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 	public void testSearchCircumflex() throws InterruptedException, ExecutionException
 	{
 		String description = "body^0.5 length^0.5";
-		Set<String> expected = Sets.newHashSet("length^0.5", "body^0.5");
+		Set<String> expected = Sets.newHashSet("length", "body", "0.5");
 		Set<String> actual = semanticSearchServiceHelper.removeStopWords(description);
-		assertEquals(actual, expected);
+		assertEquals(actual.size(), 3);
+		assertTrue(actual.containsAll(expected));
 	}
 
 	@Test
@@ -257,6 +253,16 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		Set<String> searchTerms = Sets.newHashSet("əˈnædrəməs");
 		semanticSearchServiceHelper.findTags(description, ontologyIds);
 		verify(ontologyService).findOntologyTerms(ontologyIds, searchTerms, SemanticSearchServiceHelper.MAX_NUM_TAGS);
+	}
+
+	@Test
+	public void testEscapeCharsExcludingCaretChar()
+	{
+		Assert.assertEquals(semanticSearchServiceHelper.escapeCharsExcludingCaretChar("(hypertension^4)~[]"),
+				"\\(hypertension^4\\)\\~\\[\\]");
+
+		Assert.assertEquals(semanticSearchServiceHelper.escapeCharsExcludingCaretChar("hypertension^4"),
+				"hypertension^4");
 	}
 
 	@Configuration
