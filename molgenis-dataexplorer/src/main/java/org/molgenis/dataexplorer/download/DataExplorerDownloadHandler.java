@@ -11,7 +11,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
@@ -26,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class DataExplorerDownloadHandler
 {
-	private DataService dataService;
+	private final DataService dataService;
 
 	@Autowired
 	public DataExplorerDownloadHandler(DataService dataService)
@@ -51,7 +50,8 @@ public class DataExplorerDownloadHandler
 			switch (dataRequest.getColNames())
 			{
 				case ATTRIBUTE_LABELS:
-					excelSheetWriter = excelWriter.createWritable(entityName, Lists.newArrayList(attributeNames));
+					List<String> attributeLabelsList = newArrayList(transform(attributes, AttributeMetaData::getLabel));
+					excelSheetWriter = excelWriter.createWritable(entityName, attributeLabelsList);
 					break;
 				case ATTRIBUTE_NAMES:
 					List<String> attributeNamesList = newArrayList(transform(attributes, AttributeMetaData::getName));
