@@ -39,8 +39,10 @@
 	        });
 	    });
 		
-		$('#submit-new-mapping-project-btn').click(function() {
+		$('#submit-new-mapping-project-btn').on('click', function(e) {
+			showSpinner();
 			$('#create-new-mapping-project-form').submit();
+			$('#submit-new-mapping-project-btn').hide();
 		});
 		
 		$('#create-new-mapping-project-form').validate();
