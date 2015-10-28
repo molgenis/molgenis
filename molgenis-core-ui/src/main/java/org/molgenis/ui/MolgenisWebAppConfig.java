@@ -14,6 +14,8 @@ import java.util.Properties;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
+import javax.xml.soap.SOAPConnectionFactory;
+import javax.xml.soap.SOAPException;
 
 import org.molgenis.data.AutoValueRepositoryDecorator;
 import org.molgenis.data.DataService;
@@ -513,6 +515,12 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 								new EntityAttributesValidator()), idGenerator));
 			}
 		};
+	}
+
+	@Bean
+	public SOAPConnectionFactory soapConnectionFactory() throws UnsupportedOperationException, SOAPException
+	{
+		return SOAPConnectionFactory.newInstance();
 	}
 
 	/**
