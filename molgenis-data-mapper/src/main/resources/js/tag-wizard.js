@@ -130,7 +130,7 @@
 							$('td.tag-column').empty();
 
 							molgenis.createAlert([ {
-								'message' : 'All tags have been removed succesfully removed'
+								'message' : 'All tags have been succesfully removed'
 							} ], 'success');
 						}
 					});
