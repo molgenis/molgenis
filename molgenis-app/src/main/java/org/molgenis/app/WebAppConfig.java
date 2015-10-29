@@ -18,7 +18,6 @@ import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.system.RepositoryTemplateLoader;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.migrate.version.v1_10.Step17RuntimePropertiesToGafListSettings;
@@ -48,7 +47,6 @@ import org.molgenis.migrate.version.v1_9.Step15AddDefaultValue;
 import org.molgenis.migrate.version.v1_9.Step16RuntimePropertyToSettings;
 import org.molgenis.system.core.FreemarkerTemplateRepository;
 import org.molgenis.ui.MolgenisWebAppConfig;
-import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.GsonConfig;
 import org.slf4j.Logger;
@@ -98,9 +96,6 @@ public class WebAppConfig extends MolgenisWebAppConfig
 
 	@Autowired
 	private ElasticsearchRepositoryCollection elasticsearchRepositoryCollection;
-	
-	@Autowired
-	private MenuManagerService menuManagerService;
 
 	@Autowired
 	private EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
