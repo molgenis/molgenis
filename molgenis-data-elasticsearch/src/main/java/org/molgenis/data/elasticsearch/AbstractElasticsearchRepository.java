@@ -193,19 +193,24 @@ public abstract class AbstractElasticsearchRepository implements Repository
 	public void deleteAll()
 	{
 		elasticSearchService.delete(getEntityMetaData().getName());
-		create();
+		createMappings();
 		elasticSearchService.refresh();
 	}
 
 	@Override
 	public void create()
 	{
-		elasticSearchService.createMappings(getEntityMetaData());
+		createMappings();
 	}
 
 	@Override
 	public void drop()
 	{
 		elasticSearchService.delete(getEntityMetaData().getName());
+	}
+
+	private void createMappings()
+	{
+		elasticSearchService.createMappings(getEntityMetaData());
 	}
 }
