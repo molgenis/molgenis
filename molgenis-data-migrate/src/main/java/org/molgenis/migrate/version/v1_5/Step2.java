@@ -19,13 +19,12 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.IndexedRepository;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
+import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -118,8 +117,8 @@ public class Step2 extends MolgenisUpgrade
 			EntityMetaData emd = repo.getEntityMetaData();
 			for (AttributeMetaData attr : emd.getAtomicAttributes())
 			{
-				if (attr.getDataType() instanceof MrefField) throw new MolgenisDataException(
-						"Mref not supported in upgrade");
+				if (attr.getDataType() instanceof MrefField)
+					throw new MolgenisDataException("Mref not supported in upgrade");
 
 				if (attr.getDataType() instanceof XrefField)
 				{
@@ -163,7 +162,7 @@ public class Step2 extends MolgenisUpgrade
 
 		for (Repository repo : jpaBackend)
 		{
-			((IndexedRepository) repo).rebuildIndex();
+			repo.rebuildIndex();
 		}
 	}
 

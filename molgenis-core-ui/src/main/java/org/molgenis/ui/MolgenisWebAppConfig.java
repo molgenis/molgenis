@@ -19,9 +19,6 @@ import org.molgenis.data.AutoValueRepositoryDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IdGenerator;
-import org.molgenis.data.IndexedAutoValueRepositoryDecorator;
-import org.molgenis.data.IndexedCrudRepositorySecurityDecorator;
-import org.molgenis.data.IndexedRepository;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
@@ -38,11 +35,9 @@ import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.OwnedEntityMetaData;
-import org.molgenis.data.transaction.TransactionLogIndexedRepositoryDecorator;
 import org.molgenis.data.transaction.TransactionLogRepositoryDecorator;
 import org.molgenis.data.transaction.TransactionLogService;
 import org.molgenis.data.validation.EntityAttributesValidator;
-import org.molgenis.data.validation.IndexedRepositoryValidationDecorator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
 import org.molgenis.file.FileStore;
 import org.molgenis.framework.MolgenisUpgradeService;
@@ -67,7 +62,7 @@ import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.EntityUtils;
 import org.molgenis.util.GsonHttpMessageConverter;
-import org.molgenis.util.IndexedRepositoryExceptionTranslatorDecorator;
+import org.molgenis.util.MySqlRepositoryExceptionTranslatorDecorator;
 import org.molgenis.util.ResourceFingerprintRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -491,58 +486,34 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 			@Override
 			public Repository createDecoratedRepository(Repository repository)
 			{
-				Repository decoratedRepository;
-				if (repository instanceof IndexedRepository)
+				Repository decoratedRepository = repository;
+
+				// 6. Owned decorator
+				if (EntityUtils.doesExtend(repository.getEntityMetaData(), OwnedEntityMetaData.ENTITY_NAME))
 				{
-					IndexedRepository indexedRepo = (IndexedRepository) repository;
-
-					// 6. Owned decorator
-					if (EntityUtils.doesExtend(repository.getEntityMetaData(), OwnedEntityMetaData.ENTITY_NAME))
-					{
-						indexedRepo = new OwnedEntityRepositoryDecorator(indexedRepo);
-					}
-
-					// 5. Transaction log decorator
-					indexedRepo = new TransactionLogIndexedRepositoryDecorator(indexedRepo, transactionLogService);
-
-					// 4. SQL exception translation decorator
-					String backend = indexedRepo.getEntityMetaData().getBackend();
-					if (MysqlRepositoryCollection.NAME.equals(backend))
-					{
-						indexedRepo = new IndexedRepositoryExceptionTranslatorDecorator(indexedRepo);
-					}
-
-					// 3. validation decorator
-					indexedRepo = new IndexedRepositoryValidationDecorator(dataService(), indexedRepo,
-							entityAttributesValidator);
-
-					// 2. auto value decorator
-					indexedRepo = new IndexedAutoValueRepositoryDecorator(indexedRepo, idGenerator);
-
-					// 1. security decorator
-					indexedRepo = new IndexedCrudRepositorySecurityDecorator(indexedRepo, appSettings);
-
-					decoratedRepository = indexedRepo;
+					decoratedRepository = new OwnedEntityRepositoryDecorator(decoratedRepository);
 				}
-				else
+
+				// 5. Transaction log decorator
+				decoratedRepository = new TransactionLogRepositoryDecorator(repository, transactionLogService);
+
+				// 4. SQL exception translation decorator
+				String backend = decoratedRepository.getEntityMetaData().getBackend();
+				if (MysqlRepositoryCollection.NAME.equals(backend))
 				{
-					// FIXME missing owned decoration
-
-					// 4. Transaction log decorator
-					decoratedRepository = new TransactionLogRepositoryDecorator(repository, transactionLogService);
-
-					// FIXME missing SQL exception translation decorator
-
-					// 3. validation decorator
-					decoratedRepository = new RepositoryValidationDecorator(dataService(), decoratedRepository,
-							entityAttributesValidator);
-
-					// 2. auto value decorator
-					decoratedRepository = new AutoValueRepositoryDecorator(decoratedRepository, idGenerator);
-
-					// 1. security decorator
-					decoratedRepository = new RepositorySecurityDecorator(decoratedRepository);
+					decoratedRepository = new MySqlRepositoryExceptionTranslatorDecorator(decoratedRepository);
 				}
+
+				// 3. validation decorator
+				decoratedRepository = new RepositoryValidationDecorator(dataService(), decoratedRepository,
+						entityAttributesValidator);
+
+				// 2. auto value decorator
+				decoratedRepository = new AutoValueRepositoryDecorator(decoratedRepository, idGenerator);
+
+				// 1. security decorator
+				decoratedRepository = new RepositorySecurityDecorator(decoratedRepository, appSettings);
+
 				return decoratedRepository;
 			}
 		};

@@ -6,30 +6,30 @@ import java.util.List;
 
 import org.mockito.Mockito;
 import org.molgenis.data.Entity;
-import org.molgenis.data.IndexedRepository;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Repository;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.jdbc.UncategorizedSQLException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class IndexedRepositoryExceptionTranslatorDecoratorTest
+public class MySqlRepositoryExceptionTranslatorDecoratorTest
 {
-	private IndexedRepositoryExceptionTranslatorDecorator decorator;
-	private IndexedRepository repository;
+	private MySqlRepositoryExceptionTranslatorDecorator decorator;
+	private Repository repository;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		repository = Mockito.mock(IndexedRepository.class);
-		decorator = new IndexedRepositoryExceptionTranslatorDecorator(repository);
+		repository = Mockito.mock(Repository.class);
+		decorator = new MySqlRepositoryExceptionTranslatorDecorator(repository);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void addEntityWithUncategorizedSQLException()
 	{
-		Exception e = new UncategorizedSQLException("", "", new SQLException("", "",
-				SQLExceptionTranslatorTemplate.MYSQL_ERROR_CODE_INCORRECT_STRING_VALUE));
+		Exception e = new UncategorizedSQLException("", "",
+				new SQLException("", "", SQLExceptionTranslatorTemplate.MYSQL_ERROR_CODE_INCORRECT_STRING_VALUE));
 		Entity entity = new MapEntity();
 
 		Mockito.doThrow(e).when(repository).add(entity);
@@ -47,8 +47,8 @@ public class IndexedRepositoryExceptionTranslatorDecoratorTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void addIterableextendsEntityWithUncategorizedSQLException()
 	{
-		Exception e = new UncategorizedSQLException("", "", new SQLException("", "",
-				SQLExceptionTranslatorTemplate.MYSQL_ERROR_CODE_INCORRECT_STRING_VALUE));
+		Exception e = new UncategorizedSQLException("", "",
+				new SQLException("", "", SQLExceptionTranslatorTemplate.MYSQL_ERROR_CODE_INCORRECT_STRING_VALUE));
 		List<Entity> entities = Arrays.asList(new MapEntity());
 
 		Mockito.doThrow(e).when(repository).add(entities);
@@ -66,8 +66,8 @@ public class IndexedRepositoryExceptionTranslatorDecoratorTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void updateEntityWithUncategorizedSQLException()
 	{
-		Exception e = new UncategorizedSQLException("", "", new SQLException("", "",
-				SQLExceptionTranslatorTemplate.MYSQL_ERROR_CODE_INCORRECT_STRING_VALUE));
+		Exception e = new UncategorizedSQLException("", "",
+				new SQLException("", "", SQLExceptionTranslatorTemplate.MYSQL_ERROR_CODE_INCORRECT_STRING_VALUE));
 		Entity entity = new MapEntity();
 
 		Mockito.doThrow(e).when(repository).update(entity);
@@ -85,8 +85,8 @@ public class IndexedRepositoryExceptionTranslatorDecoratorTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void updateIterableextendsEntityWithUncategorizedSQLException()
 	{
-		Exception e = new UncategorizedSQLException("", "", new SQLException("", "",
-				SQLExceptionTranslatorTemplate.MYSQL_ERROR_CODE_INCORRECT_STRING_VALUE));
+		Exception e = new UncategorizedSQLException("", "",
+				new SQLException("", "", SQLExceptionTranslatorTemplate.MYSQL_ERROR_CODE_INCORRECT_STRING_VALUE));
 		List<Entity> entities = Arrays.asList(new MapEntity());
 
 		Mockito.doThrow(e).when(repository).update(entities);

@@ -1,7 +1,6 @@
 package org.molgenis.data.mysql;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static org.elasticsearch.common.collect.Maps.uniqueIndex;
+import static org.molgenis.data.RepositoryCapability.MANAGABLE;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 import static org.molgenis.data.RepositoryCapability.UPDATEABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
@@ -13,7 +12,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -31,7 +29,6 @@ import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Manageable;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisReferencedEntityException;
 import org.molgenis.data.Query;
@@ -65,7 +62,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-public class MysqlRepository extends AbstractRepository implements Manageable
+public class MysqlRepository extends AbstractRepository
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MysqlRepository.class);
 	public static final int BATCH_SIZE = 1000;
@@ -1503,7 +1500,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return Sets.newHashSet(WRITABLE, UPDATEABLE);
+		return Sets.newHashSet(WRITABLE, UPDATEABLE, MANAGABLE);
 	}
 
 	@Override
