@@ -2,9 +2,10 @@ package org.molgenis.data.elasticsearch;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.RepositoryCapability.MANAGABLE;
-import static org.molgenis.data.RepositoryCapability.UPDATEABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -178,14 +179,17 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
+		if (this.getName().endsWith("TypeTestRef")) return new HashSet<RepositoryCapability>(
+				Arrays.asList(RepositoryCapability.QUERYABLE));
+
 		Set<RepositoryCapability> capabilities = Sets.newHashSet(decoratedRepo.getCapabilities());
 		super.getCapabilities().forEach(capability -> {
 			// Elasticsearch can write and update documents, but the parent repository might not
-			if (capability != WRITABLE && capability != UPDATEABLE && capability != MANAGABLE)
-			{
-				capabilities.add(capability);
-			}
-		});
+				if (capability != WRITABLE && capability != MANAGABLE)
+				{
+					capabilities.add(capability);
+				}
+			});
 		return capabilities;
 	}
 }
