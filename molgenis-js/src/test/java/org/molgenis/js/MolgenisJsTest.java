@@ -109,6 +109,17 @@ public class MolgenisJsTest
 	}
 
 	@Test
+	public void testGroupWithoutAttribute()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("age").setDataType(MolgenisFieldTypes.INT);
+		Object result4 = ScriptEvaluator.eval(
+				"var age_variable=new newValue(45);age_variable.group([18, 35, 56]).value();", new MapEntity("age", 47),
+				emd);
+		assertEquals(result4.toString(), "35-56");
+	}
+
+	@Test
 	public void testGroupNull()
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");

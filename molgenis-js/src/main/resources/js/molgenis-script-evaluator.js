@@ -9,14 +9,8 @@
  */
 function evalScript(script, entity) {
 
-	/**
-	 * Stores the computed attribute value after applying on of the mathematical
-	 * functions listed below
-	 * 
-	 * @version 1.0
-	 * @namespace $
-	 */
-	function $(attr) {
+	function attribute(value){
+		
 		var attribute = {
 			/**
 			 * 
@@ -364,8 +358,23 @@ function evalScript(script, entity) {
 			return false;
 		}
 
-		attribute.val = this[attr];
+		attribute.val = value;
 		return attribute
+	}
+	
+	/**
+	 * Stores the computed attribute value after applying on of the mathematical
+	 * functions listed below
+	 * 
+	 * @version 1.0
+	 * @namespace $
+	 */
+	function $(attr) {
+		return new attribute(this[attr]);
+	}
+	
+	function newValue(value) {
+		return new attribute(value);
 	}
 
 	$ = $.bind(entity);
