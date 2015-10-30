@@ -9,6 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.awt.image.BufferedImage;
 
+import org.molgenis.security.captcha.CaptchaControllerTest.Config;
+import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -25,11 +27,15 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @WebAppConfiguration
-@ContextConfiguration
+@ContextConfiguration(classes =
+{ Config.class, GsonConfig.class })
 public class CaptchaControllerTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
 	private CaptchaController captchaController;
+
+	@Autowired
+	private GsonHttpMessageConverter gsonHttpMessageConverter;
 
 	private MockMvc mockMvc;
 
@@ -37,7 +43,7 @@ public class CaptchaControllerTest extends AbstractTestNGSpringContextTests
 	public void setUp()
 	{
 		mockMvc = MockMvcBuilders.standaloneSetup(captchaController)
-				.setMessageConverters(new BufferedImageHttpMessageConverter(), new GsonHttpMessageConverter(),
+				.setMessageConverters(new BufferedImageHttpMessageConverter(), gsonHttpMessageConverter,
 						new FormHttpMessageConverter())
 				.build();
 	}

@@ -46,16 +46,6 @@ public class MolgenisRoleHierarchy implements RoleHierarchy
 				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_PLUGIN_COUNT_PREFIX + entity));
 			}
 
-			if (authority.getAuthority().equals(AUTHORITY_PLUGIN_READ_PREFIX + "IMPORTWIZARD")
-					|| authority.getAuthority().equals(AUTHORITY_PLUGIN_WRITE_PREFIX + "IMPORTWIZARD"))
-			{
-				hierarchicalAuthorities
-						.add(new SimpleGrantedAuthority(AUTHORITY_ENTITY_READ_PREFIX + "RUNTIMEPROPERTY"));
-				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_ENTITY_READ_PREFIX + "IMPORTRUN"));
-				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_ENTITY_WRITE_PREFIX + "IMPORTRUN"));
-				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_ENTITY_COUNT_PREFIX + "IMPORTRUN"));
-			}
-
 			hierarchicalAuthorities.add(authority);
 		}
 		return hierarchicalAuthorities;

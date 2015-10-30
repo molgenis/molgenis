@@ -21,9 +21,11 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.account.AccountControllerTest.Config;
 import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -42,7 +44,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @WebAppConfiguration
-@ContextConfiguration
+@ContextConfiguration(classes =
+{ Config.class, GsonConfig.class })
 public class AccountControllerTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
@@ -55,6 +58,9 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	private CaptchaService captchaService;
 
 	@Autowired
+	private GsonHttpMessageConverter gsonHttpMessageConverter;
+
+	@Autowired
 	private AppSettings appSettings;
 
 	private MockMvc mockMvc;
@@ -65,7 +71,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		FreeMarkerViewResolver freeMarkerViewResolver = new FreeMarkerViewResolver();
 		freeMarkerViewResolver.setSuffix(".ftl");
 		mockMvc = MockMvcBuilders.standaloneSetup(authenticationController)
-				.setMessageConverters(new FormHttpMessageConverter(), new GsonHttpMessageConverter()).build();
+				.setMessageConverters(new FormHttpMessageConverter(), gsonHttpMessageConverter).build();
 
 		reset(appSettings);
 		reset(captchaService);

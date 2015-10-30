@@ -16,6 +16,7 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IndexedRepository;
+import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Package;
 import org.molgenis.data.Query;
@@ -30,6 +31,8 @@ import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -59,6 +62,7 @@ public class ImportWriter
 	private final DataService dataService;
 	private final PermissionSystemService permissionSystemService;
 	private final TagService<LabeledResource, LabeledResource> tagService;
+	private final MolgenisPermissionService molgenisPermissionService;
 
 	/**
 	 * Creates the ImportWriter
@@ -69,11 +73,12 @@ public class ImportWriter
 	 *            {@link PermissionSystemService} to give permissions on uploaded entities
 	 */
 	public ImportWriter(DataService dataService, PermissionSystemService permissionSystemService,
-			TagService<LabeledResource, LabeledResource> tagService)
+			TagService<LabeledResource, LabeledResource> tagService, MolgenisPermissionService molgenisPermissionService)
 	{
 		this.dataService = dataService;
 		this.permissionSystemService = permissionSystemService;
 		this.tagService = tagService;
+		this.molgenisPermissionService = molgenisPermissionService;
 	}
 
 	@Transactional
@@ -86,7 +91,10 @@ public class ImportWriter
 		importPackages(job.parsedMetaData);
 		addEntityMetaData(job.parsedMetaData, job.report, job.metaDataChanges);
 		addEntityPermissions(job.metaDataChanges);
-		importEntityAndAttributeTags(job.parsedMetaData);
+		RunAsSystemProxy.runAsSystem(() -> {
+			importEntityAndAttributeTags(job.parsedMetaData);
+			return null;
+		});
 		importData(job.report, job.parsedMetaData.getEntities(), job.source, job.dbAction, job.defaultPackage);
 		return job.report;
 	}
@@ -100,8 +108,8 @@ public class ImportWriter
 
 		for (EntityMetaData emd : parsedMetaData.getAttributeTags().keySet())
 		{
-			for (Tag<AttributeMetaData, LabeledResource, LabeledResource> tag : parsedMetaData.getAttributeTags().get(
-					emd))
+			for (Tag<AttributeMetaData, LabeledResource, LabeledResource> tag : parsedMetaData.getAttributeTags()
+					.get(emd))
 			{
 				tagService.addAttributeTag(emd, tag);
 			}
@@ -127,23 +135,22 @@ public class ImportWriter
 				if ((fileEntityRepository == null) && (defaultPackage != null)
 						&& entityMetaData.getName().toLowerCase().startsWith(defaultPackage.toLowerCase() + "_"))
 				{
-					fileEntityRepository = source.getRepository(entityMetaData.getName().substring(
-							defaultPackage.length() + 1));
+					fileEntityRepository = source
+							.getRepository(entityMetaData.getName().substring(defaultPackage.length() + 1));
 				}
 
 				// check to prevent nullpointer when importing metadata only
 				if (fileEntityRepository != null)
 				{
 					// transforms entities so that they match the entity meta data of the output repository
-					Iterable<Entity> entities = Iterables.transform(fileEntityRepository,
-							new Function<Entity, Entity>()
-							{
-								@Override
-								public DefaultEntity apply(Entity entity)
-								{
-									return new DefaultEntityImporter(entityMetaData, dataService, entity);
-								}
-							});
+					Iterable<Entity> entities = Iterables.transform(fileEntityRepository, new Function<Entity, Entity>()
+					{
+						@Override
+						public DefaultEntity apply(Entity entity)
+						{
+							return new DefaultEntityImporter(entityMetaData, dataService, entity);
+						}
+					});
 
 					entities = new DependencyResolver().resolveSelfReferences(entities, entityMetaData);
 					int count = update(repository, entities, dbAction);
@@ -181,9 +188,9 @@ public class ImportWriter
 						Iterable<Entity> refEntities = entity.getEntities(attribute.getName());
 						if (ids != null && ids.size() != Iterators.size(refEntities.iterator()))
 						{
-							throw new UnknownEntityException("One or more values [" + ids + "] from "
-									+ attribute.getDataType() + " field " + attribute.getName()
-									+ " could not be resolved");
+							throw new UnknownEntityException(
+									"One or more values [" + ids + "] from " + attribute.getDataType() + " field "
+											+ attribute.getName() + " could not be resolved");
 						}
 						return true;
 					}
@@ -264,8 +271,8 @@ public class ImportWriter
 			for (Entity tag : tagRepo)
 			{
 				Entity transformed = new DefaultEntity(TagMetaData.INSTANCE, dataService, tag);
-				Entity existingTag = dataService
-						.findOne(TagMetaData.ENTITY_NAME, tag.getString(TagMetaData.IDENTIFIER));
+				Entity existingTag = dataService.findOne(TagMetaData.ENTITY_NAME,
+						tag.getString(TagMetaData.IDENTIFIER));
 
 				if (existingTag == null)
 				{
@@ -371,6 +378,12 @@ public class ImportWriter
 	public int update(Repository repo, Iterable<? extends Entity> entities, DatabaseAction dbAction)
 	{
 		if (entities == null) return 0;
+
+		if (!molgenisPermissionService.hasPermissionOnEntity(repo.getName(), Permission.WRITE))
+		{
+			throw new MolgenisDataAccessException("No WRITE permission on entity '" + repo.getName()
+					+ "'. Is this entity already imported by another user who did not grant you WRITE permission?");
+		}
 
 		String idAttributeName = repo.getEntityMetaData().getIdAttribute().getName();
 		FieldType idDataType = repo.getEntityMetaData().getIdAttribute().getDataType();

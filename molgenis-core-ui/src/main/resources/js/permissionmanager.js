@@ -60,6 +60,17 @@
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="none" checked></td>');
 					items.push('</tr>');
 				}
+				if(data.hierarchyPermissionMap && data.hierarchyPermissionMap[entityId.toLowerCase()]) {
+					$.each(data.hierarchyPermissionMap[entityId.toLowerCase()], function(idx, perm) {
+						items.push('<tr>');
+						items.push('<td><span class="muted inherited-permission">inherited from hierarchy</span></td>');
+						items.push('<td><input type="radio"' + (perm.type === "write" ? ' checked' : '') + ' disabled></td>');
+						items.push('<td><input type="radio"' + (perm.type === "read" ? ' checked' : '') + ' disabled></td>');
+						items.push('<td><input type="radio"' + (perm.type === "count" ? ' checked' : '') + ' disabled></td>');
+						items.push('<td><input type="radio"' + (perm.type ? '' : ' checked') + ' disabled></td>');
+						items.push('</tr>');					
+					});
+				}
 				if(data.groupPermissionMap && data.groupPermissionMap[entityId.toLowerCase()]) {
 					$.each(data.groupPermissionMap[entityId.toLowerCase()], function(idx, perm) {
 						items.push('<tr>');
@@ -106,6 +117,12 @@
 				success : function(data) {
 					$('#plugin-container .alert').remove();
 					$('#plugin-container').prepend('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> Updated plugin permissions</div>');
+					
+					//Refresh
+					$('#plugin-group-select').change();
+					$('#entity-class-group-select').change();
+					$('#plugin-user-select').change();
+					$('#entity-class-user-select').change();
 				},
 				error: function (xhr, textStatus, errorThrown) {
 					var errorMessage = JSON.parse(xhr.responseText).errorMessage;
