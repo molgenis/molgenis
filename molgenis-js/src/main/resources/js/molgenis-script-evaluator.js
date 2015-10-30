@@ -142,6 +142,63 @@ function evalScript(script, entity) {
 				return this;
 			},
 			/**
+			 * Group values into defined ranges
+			 * 
+			 * Example: age -> 19, 39, 50, 34
+			 * $('age').group({18, 35, 50, 75}).value() produces the following ranges which are left inclusive, (-∞, 18), [18, 35), [35, 50), [50, 75), [75, +∞)
+			 * the text representations are '-18','18-35','35-50','50-75','75+' 
+			 * 
+			 * @param arrayOfBounds :
+			 *            a list of values that will be the bounds of the ranges.
+			 * @param arrayOfOutliers :
+			 *            a list of outlier values that will be not be grouped and will be returned as is.
+			 * @param nullValue :
+			 *            a value to use for null instances        
+			 *         
+			 * 
+			 * @memberof $
+			 * @method group
+			 */
+			group : function(arrayOfBounds, arrayOfOutliers, nullValue) {
+				
+				// Check if the the value is an outlier value
+				if(arrayOfOutliers && arrayOfOutliers.length > 0){
+					for(var i = 0; i < arrayOfOutliers.length; i++){
+						if(this.val === arrayOfOutliers[i]) {
+							return this;
+						}
+					}
+				}
+				// find the ranges that the value fits into  
+				if(arrayOfBounds && arrayOfBounds.length > 0){
+					var originalValue = this.val;
+					if(originalValue < arrayOfBounds[0]){
+						this.val = '-' + arrayOfBounds[0]
+					}else if(originalValue >= arrayOfBounds[arrayOfBounds.length - 1]){
+						this.val = arrayOfBounds[arrayOfBounds.length - 1] + '+';
+					}
+					if(arrayOfBounds.length > 1){
+						for(var i = 1; i < arrayOfBounds.length; i++){
+							var lowerBound = arrayOfBounds[i - 1];
+							var upperBound = arrayOfBounds[i];
+							//If lowerBound is bigger than upperBound, restore the original value and stop the function
+							if(lowerBound > upperBound){
+								this.val = nullValue ? nullValue : null;
+								break;
+							}
+							if(originalValue >= lowerBound && originalValue < upperBound){
+								this.val = lowerBound + '-' + upperBound;
+								break;
+							}
+						}
+					}
+					return this;
+				}
+				
+				this.val =  nullValue ? nullValue : null;
+				return this;
+			},
+			/**
 			 * Compares two values and returns true or false
 			 * 
 			 * Example: $('Height').eq(100).value()

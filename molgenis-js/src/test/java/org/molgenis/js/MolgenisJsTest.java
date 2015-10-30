@@ -65,8 +65,8 @@ public class MolgenisJsTest
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
 		emd.addAttribute("gender").setDataType(MolgenisFieldTypes.CATEGORICAL);
 
-		Object result = ScriptEvaluator.eval("$('gender').map({'20':'2','B':'B2'}).value()", new MapEntity("gender",
-				'B'), emd);
+		Object result = ScriptEvaluator.eval("$('gender').map({'20':'2','B':'B2'}).value()",
+				new MapEntity("gender", 'B'), emd);
 		assertEquals(result.toString(), "B2");
 	}
 
@@ -89,6 +89,72 @@ public class MolgenisJsTest
 
 		Object result = ScriptEvaluator.eval("$('gender').map({'20':'2'}, 'B2', 'B3').value()", new MapEntity(), emd);
 		assertEquals(result.toString(), "B3");
+	}
+
+	@Test
+	public void testGroup()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("age").setDataType(MolgenisFieldTypes.INT);
+
+		Object result1 = ScriptEvaluator.eval("$('age').group([18, 35, 56]).value();", new MapEntity("age", 29), emd);
+		assertEquals(result1.toString(), "18-35");
+
+		Object result2 = ScriptEvaluator.eval("$('age').group([18, 35, 56], [888, 999]).value();",
+				new MapEntity("age", 999), emd);
+		assertEquals(result2.toString(), "999");
+
+		Object result3 = ScriptEvaluator.eval("$('age').group([18, 35, 56]).value();", new MapEntity("age", 47), emd);
+		assertEquals(result3.toString(), "35-56");
+	}
+
+	@Test
+	public void testGroupNull()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("age").setDataType(MolgenisFieldTypes.INT);
+
+		Object result4 = ScriptEvaluator.eval("$('age').group().value();", new MapEntity("age", 47), emd);
+		assertEquals(result4, null);
+
+		Object result5 = ScriptEvaluator.eval("$('age').group([56, 18, 35]).value();", new MapEntity("age", 47), emd);
+		assertEquals(result5, null);
+
+		Object result6 = ScriptEvaluator.eval("$('age').group([56, 18, 35], null,'123456').value();",
+				new MapEntity("age", 47), emd);
+		assertEquals(result6.toString(), "123456");
+	}
+
+	@Test
+	public void combineGroupMapFunctions()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("age").setDataType(MolgenisFieldTypes.INT);
+
+		Object result1 = ScriptEvaluator.eval(
+				"$('age').group([18, 35, 56]).map({'-18':'0','18-35':'1','35-56':'2','56+':'3'}).value();",
+				new MapEntity("age", 29), emd);
+		assertEquals(result1.toString(), "1");
+
+		Object result2 = ScriptEvaluator.eval(
+				"$('age').group([18, 35, 56]).map({'-18':'0','18-35':'1','35-56':'2','56+':'3'}).value();",
+				new MapEntity("age", 17), emd);
+		assertEquals(result2.toString(), "0");
+
+		Object result3 = ScriptEvaluator.eval(
+				"$('age').group([18, 35, 56]).map({'-18':'0','18-35':'1','35-56':'2','56+':'3'}).value();",
+				new MapEntity("age", 40), emd);
+		assertEquals(result3.toString(), "2");
+
+		Object result4 = ScriptEvaluator.eval(
+				"$('age').group([18, 35, 56]).map({'-18':'0','18-35':'1','35-56':'2','56+':'3'}).value();",
+				new MapEntity("age", 70), emd);
+		assertEquals(result4.toString(), "3");
+
+		Object result5 = ScriptEvaluator.eval(
+				"$('age').group([18, 35, 56], [999]).map({'-18':0,'18-35':1,'35-56':2,'56+':3,'999':'9'}).value();",
+				new MapEntity("age", 999), emd);
+		assertEquals(result5.toString(), "9");
 	}
 
 	@Test
