@@ -52,12 +52,10 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 				{
 					if (stringBuilder.length() == 0)
 					{
-						stringBuilder.append("var SUM_WEIGHT = ").append(generateWeightedMap).append('\n');
+						stringBuilder.append("var SUM_WEIGHT = new newValue(0);\n");
 					}
-					else
-					{
-						stringBuilder.append("SUM_WEIGHT += ").append(generateWeightedMap).append('\n');
-					}
+
+					stringBuilder.append("SUM_WEIGHT.plus(").append(generateWeightedMap).append(");\n");
 				}
 			}
 			stringBuilder.append("SUM_WEIGHT").append(groupCategoryValues(targetAttribute));
@@ -108,7 +106,7 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 		if (stringBuilder.length() > 0)
 		{
 			stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-			stringBuilder.append("}, null, null).value();");
+			stringBuilder.append("}, null, null).value()");
 		}
 
 		return stringBuilder.toString();
@@ -168,9 +166,9 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 			{
 				if (categories.size() > i - 1)
 				{
-					stringBuilder.append("'").append(sortedRangValues.get(i - 1)).append('-')
-							.append(sortedRangValues.get(i)).append("':'").append(categories.get(i - 1).getCode())
-							.append("',");
+					stringBuilder.append("\"").append(sortedRangValues.get(i - 1)).append('-')
+							.append(sortedRangValues.get(i)).append("\":\"").append(categories.get(i - 1).getCode())
+							.append("\",");
 				}
 			}
 			stringBuilder.deleteCharAt(stringBuilder.length() - 1);
