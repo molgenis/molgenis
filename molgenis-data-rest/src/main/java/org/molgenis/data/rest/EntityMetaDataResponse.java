@@ -8,7 +8,9 @@ import java.util.Set;
 
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 
@@ -37,9 +39,10 @@ public class EntityMetaDataResponse
 	/**
 	 * @param meta
 	 */
-	public EntityMetaDataResponse(EntityMetaData meta, MolgenisPermissionService permissionService)
+	public EntityMetaDataResponse(EntityMetaData meta, MolgenisPermissionService permissionService,
+			DataService dataService)
 	{
-		this(meta, null, null, permissionService);
+		this(meta, null, null, permissionService, dataService);
 	}
 
 	/**
@@ -51,7 +54,8 @@ public class EntityMetaDataResponse
 	 *            set of lowercase attribute names to expand in response
 	 */
 	public EntityMetaDataResponse(EntityMetaData meta, Set<String> attributesSet,
-			Map<String, Set<String>> attributeExpandsSet, MolgenisPermissionService permissionService)
+			Map<String, Set<String>> attributeExpandsSet, MolgenisPermissionService permissionService,
+			DataService dataService)
 	{
 		String name = meta.getName();
 		this.href = Href.concatMetaEntityHref(RestController.BASE_URI, name);
@@ -88,7 +92,7 @@ public class EntityMetaDataResponse
 						Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
 						this.attributes.put(attr.getName(), new AttributeMetaDataResponse(name, attr, subAttributesSet,
 								Collections.singletonMap("refEntity".toLowerCase(), Sets.newHashSet("idattribute")),
-								permissionService));
+								permissionService, dataService));
 					}
 					else
 					{
@@ -135,7 +139,8 @@ public class EntityMetaDataResponse
 		}
 		else this.isAbstract = null;
 
-		this.writable = permissionService.hasPermissionOnEntity(name, Permission.WRITE);
+		this.writable = permissionService.hasPermissionOnEntity(name, Permission.WRITE)
+				&& dataService.getCapabilities(name).contains(RepositoryCapability.WRITABLE);
 	}
 
 	public String getHref()
