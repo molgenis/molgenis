@@ -1,5 +1,7 @@
 package org.molgenis.data.elasticsearch.admin;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -7,9 +9,9 @@ import java.util.List;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.IndexedRepository;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -25,8 +27,7 @@ public class ElasticsearchIndexManagerServiceImpl implements ElasticsearchIndexM
 	@Autowired
 	public ElasticsearchIndexManagerServiceImpl(DataService dataService)
 	{
-		if (dataService == null) throw new IllegalArgumentException("dataService is null");
-		this.dataService = dataService;
+		this.dataService = requireNonNull(dataService);
 	}
 
 	@Override
@@ -38,7 +39,7 @@ public class ElasticsearchIndexManagerServiceImpl implements ElasticsearchIndexM
 		for (String entityName : dataService.getEntityNames())
 		{
 			Repository repository = dataService.getRepository(entityName);
-			if (repository instanceof IndexedRepository)
+			if (repository.getCapabilities().contains(RepositoryCapability.INDEXABLE))
 			{
 				indexedEntityMetaDataList.add(repository.getEntityMetaData());
 			}
@@ -61,10 +62,10 @@ public class ElasticsearchIndexManagerServiceImpl implements ElasticsearchIndexM
 	public void rebuildIndex(String entityName)
 	{
 		Repository repository = dataService.getRepository(entityName);
-		if (!(repository instanceof IndexedRepository))
+		if (!repository.getCapabilities().contains(RepositoryCapability.INDEXABLE))
 		{
 			throw new MolgenisDataAccessException("Repository [" + entityName + "] is not an indexed repository");
 		}
-		((IndexedRepository) repository).rebuildIndex();
+		repository.rebuildIndex();
 	}
 }

@@ -26,13 +26,15 @@ import org.springframework.web.filter.GenericFilterBean;
 public class ApiSessionExpirationFilter extends GenericFilterBean
 {
 	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
-			ServletException
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+			throws IOException, ServletException
 	{
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-		if (httpRequest.getRequestURI().startsWith("/api/") && SecurityUtils.isSessionExpired(httpRequest))
+		if (httpRequest.getRequestURI().startsWith("/api/") && SecurityUtils.isSessionExpired(httpRequest)
+				&& !httpRequest.getRequestURI().startsWith("/api/v1/login")
+				&& !httpRequest.getRequestURI().startsWith("/api/v1/logout"))
 		{
 			// Signal that the 'session expired' message must be shown in the login form
 			httpRequest.getSession().setAttribute(MolgenisLoginController.SESSION_EXPIRED_SESSION_ATTR, true);

@@ -893,7 +893,11 @@ public class RestController
 
 		tokenService.removeToken(token);
 		SecurityContextHolder.getContext().setAuthentication(null);
-		request.getSession().invalidate();
+
+		if (request.getSession(false) != null)
+		{
+			request.getSession().invalidate();
+		}
 	}
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)
@@ -1259,6 +1263,7 @@ public class RestController
 					EntityCollectionResponse ecr = new EntityCollectionResponse(pager, refEntityMaps,
 							Href.concatAttributeHref(RestController.BASE_URI, meta.getName(), entity.getIdValue(),
 									attrName), null, molgenisPermissionService, dataService);
+
 					entityMap.put(attrName, ecr);
 				}
 				else if ((attrType == XREF && entity.get(attr.getName()) != null)
