@@ -169,12 +169,12 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 				if (categories.size() > i - 1)
 				{
 					stringBuilder.append("'").append(sortedRangValues.get(i - 1)).append('-')
-							.append(sortedRangValues.get(i)).append("':").append(categories.get(i - 1).getCode())
-							.append(',');
+							.append(sortedRangValues.get(i)).append("':'").append(categories.get(i - 1).getCode())
+							.append("',");
 				}
 			}
 			stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-			stringBuilder.append("}, null, null)");
+			stringBuilder.append("}, null, null).value();");
 		}
 
 		return stringBuilder.toString();
