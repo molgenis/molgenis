@@ -2,13 +2,14 @@ package org.molgenis.data.semanticsearch.service.impl;
 
 import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm.STOPWORDSLIST;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,7 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
+import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.data.semanticsearch.string.Stemmer;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.OntologyTerm;
@@ -42,7 +44,13 @@ public class SemanticSearchServiceHelper
 
 	private final Stemmer stemmer = new Stemmer();
 
-	public static final int MAX_NUM_TAGS = 3;
+	public final static int MAX_NUM_TAGS = 3;
+
+	private final static char SPACE_CHAR = ' ';
+	private final static String COMMA_CHAR = ",";
+	private final static String CARET_CHARACTER = "^";
+	private final static String ESCAPED_CARET_CHARACTER = "\\^";
+	private final static String ILLEGAL_CHARS_REGEX = "[^\\p{L}'a-zA-Z0-9\\.~]+";
 
 	@Autowired
 	public SemanticSearchServiceHelper(DataService dataService, OntologyService ontologyService,
@@ -68,19 +76,19 @@ public class SemanticSearchServiceHelper
 
 		if (searchTerms != null)
 		{
-			searchTerms.stream().filter(searchTerm -> StringUtils.isNotBlank(searchTerm))
-					.forEach(searchTerm -> queryTerms.add(parseQueryString(searchTerm)));
+			queryTerms.addAll(searchTerms.stream().filter(StringUtils::isNotBlank).map(this::processQueryString)
+					.collect(Collectors.toList()));
 		}
 
 		// Handle tags with only one ontologyterm
-		ontologyTerms.stream().filter(ontologyTerm -> !ontologyTerm.getIRI().contains(",")).forEach(ot -> {
+		ontologyTerms.stream().filter(ontologyTerm -> !ontologyTerm.getIRI().contains(COMMA_CHAR)).forEach(ot -> {
 			queryTerms.addAll(parseOntologyTermQueries(ot));
 		});
 
 		QueryRule disMaxQueryRule = createDisMaxQueryRuleForTerms(queryTerms);
 
 		// Handle tags with multiple ontologyterms
-		ontologyTerms.stream().filter(ontologyTerm -> ontologyTerm.getIRI().contains(",")).forEach(ot -> {
+		ontologyTerms.stream().filter(ontologyTerm -> ontologyTerm.getIRI().contains(COMMA_CHAR)).forEach(ot -> {
 			disMaxQueryRule.getNestedRules().add(createShouldQueryRule(ot.getIRI()));
 		});
 
@@ -96,11 +104,10 @@ public class SemanticSearchServiceHelper
 	public QueryRule createDisMaxQueryRuleForTerms(List<String> queryTerms)
 	{
 		List<QueryRule> rules = new ArrayList<QueryRule>();
-		queryTerms.stream().filter(query -> StringUtils.isNotEmpty(query)).map(QueryParser::escape)
-				.map(this::reverseEscapeLuceneChar).forEach(query -> {
-					rules.add(new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, query));
-					rules.add(new QueryRule(AttributeMetaDataMetaData.DESCRIPTION, Operator.FUZZY_MATCH, query));
-				});
+		queryTerms.stream().filter(StringUtils::isNotEmpty).map(this::escapeCharsExcludingCaretChar).forEach(query -> {
+			rules.add(new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, query));
+			rules.add(new QueryRule(AttributeMetaDataMetaData.DESCRIPTION, Operator.FUZZY_MATCH, query));
+		});
 		QueryRule finalDisMaxQuery = new QueryRule(rules);
 		finalDisMaxQuery.setOperator(Operator.DIS_MAX);
 		return finalDisMaxQuery;
@@ -113,7 +120,7 @@ public class SemanticSearchServiceHelper
 	 * @param boostValue
 	 * @return a disMaxQueryRule with boosted value
 	 */
-	public QueryRule createDisMaxQueryRuleForTermsWithBoost(List<String> queryTerms, Double boostValue)
+	public QueryRule createBoostedDisMaxQueryRuleForTerms(List<String> queryTerms, Double boostValue)
 	{
 		QueryRule finalDisMaxQuery = createDisMaxQueryRuleForTerms(queryTerms);
 		if (boostValue != null && boostValue.intValue() != 0)
@@ -133,12 +140,12 @@ public class SemanticSearchServiceHelper
 	{
 		QueryRule shouldQueryRule = new QueryRule(new ArrayList<QueryRule>());
 		shouldQueryRule.setOperator(Operator.SHOULD);
-		for (String ontologyTermIri : multiOntologyTermIri.split(","))
+		for (String ontologyTermIri : multiOntologyTermIri.split(COMMA_CHAR))
 		{
 			OntologyTerm ontologyTerm = ontologyService.getOntologyTerm(ontologyTermIri);
 			List<String> queryTerms = parseOntologyTermQueries(ontologyTerm);
-			Double termFrequency = termFrequencyService.getTermFrequency(ontologyTerm.getLabel());
-			shouldQueryRule.getNestedRules().add(createDisMaxQueryRuleForTermsWithBoost(queryTerms, termFrequency));
+			Double termFrequency = getBestInverseDocumentFrequency(queryTerms);
+			shouldQueryRule.getNestedRules().add(createBoostedDisMaxQueryRuleForTerms(queryTerms, termFrequency));
 		}
 		return shouldQueryRule;
 	}
@@ -152,7 +159,7 @@ public class SemanticSearchServiceHelper
 	 */
 	public List<String> parseOntologyTermQueries(OntologyTerm ontologyTerm)
 	{
-		List<String> queryTerms = getOtLabelAndSynonyms(ontologyTerm).stream().map(term -> parseQueryString(term))
+		List<String> queryTerms = getOtLabelAndSynonyms(ontologyTerm).stream().map(this::processQueryString)
 				.collect(Collectors.<String> toList());
 
 		for (OntologyTerm childOt : ontologyService.getChildren(ontologyTerm))
@@ -186,13 +193,13 @@ public class SemanticSearchServiceHelper
 
 		for (OntologyTerm ontologyTerm : ontologyTerms)
 		{
-			if (!ontologyTerm.getIRI().contains(","))
+			if (!ontologyTerm.getIRI().contains(COMMA_CHAR))
 			{
 				collectOntologyTermQueryMap(expandedQueryMap, ontologyTerm);
 			}
 			else
 			{
-				for (String ontologyTermIri : ontologyTerm.getIRI().split(","))
+				for (String ontologyTermIri : ontologyTerm.getIRI().split(COMMA_CHAR))
 				{
 					collectOntologyTermQueryMap(expandedQueryMap, ontologyService.getOntologyTerm(ontologyTermIri));
 				}
@@ -267,27 +274,40 @@ public class SemanticSearchServiceHelper
 		return matchingOntologyTerms;
 	}
 
-	public String parseQueryString(String queryString)
+	public String processQueryString(String queryString)
 	{
-		return StringUtils.join(removeStopWords(queryString), ' ');
+		return StringUtils.join(removeStopWords(queryString), SPACE_CHAR);
 	}
 
 	public String parseBoostQueryString(String queryString, double boost)
 	{
-		return StringUtils.join(
-				removeStopWords(queryString).stream().map(word -> word + "^" + boost).collect(Collectors.toSet()), ' ');
+		return StringUtils.join(removeStopWords(queryString).stream().map(word -> word + CARET_CHARACTER + boost)
+				.collect(Collectors.toSet()), SPACE_CHAR);
 	}
 
-	public String reverseEscapeLuceneChar(String string)
+	public String escapeCharsExcludingCaretChar(String string)
 	{
-		return string.replace("\\^", "^");
+		return QueryParser.escape(string).replace(ESCAPED_CARET_CHARACTER, CARET_CHARACTER);
 	}
 
 	public Set<String> removeStopWords(String description)
 	{
-		String regex = "[^\\p{L}'a-zA-Z0-9\\.~^]+";
-		Set<String> searchTerms = stream(description.split(regex)).map(String::toLowerCase)
-				.filter(w -> !STOPWORDSLIST.contains(w) && StringUtils.isNotEmpty(w)).collect(Collectors.toSet());
+		Set<String> searchTerms = stream(description.split(ILLEGAL_CHARS_REGEX)).map(String::toLowerCase)
+				.filter(w -> !NGramDistanceAlgorithm.STOPWORDSLIST.contains(w) && StringUtils.isNotEmpty(w))
+				.collect(Collectors.toSet());
 		return searchTerms;
+	}
+
+	private Double getBestInverseDocumentFrequency(List<String> terms)
+	{
+		Optional<String> findFirst = terms.stream().sorted(new Comparator<String>()
+		{
+			public int compare(String o1, String o2)
+			{
+				return Integer.compare(o1.length(), o2.length());
+			}
+		}).findFirst();
+
+		return findFirst.isPresent() ? termFrequencyService.getTermFrequency(findFirst.get()) : null;
 	}
 }
