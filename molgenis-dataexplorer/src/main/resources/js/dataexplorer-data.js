@@ -284,6 +284,12 @@
                         info.setTitle("Chromosome:"+f.segment+" Position:"+ f.min);
                     }
                 }
+
+                var entityReportLink = $('<a href="javascript:void(0)">' + f.id + '</a>');
+                entityReportLink.click(function () {
+                	onRowInspect({id:f.id, name:getEntity().name});
+                });
+                info.add("Show details:", entityReportLink[0]);
             }
             featureInfoMap[info.tier.dasSource.name + f.id + f.label] = info;
         }
