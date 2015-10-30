@@ -33,7 +33,7 @@ public class EntityMetaDataResponse
 	private final Boolean isAbstract;
 
 	/**
-	 * Is this user allowed to add/update/delete entities of this type and is the repo has the capability?
+	 * Is this user allowed to add/update/delete entities of this type and has the repo the capability?
 	 */
 	private final Boolean writable;
 
