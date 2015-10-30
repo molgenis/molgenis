@@ -42,7 +42,7 @@ public class BatchingIterableTest
 		{
 			assertEquals(it.next().intValue(), i++);
 		}
-		assertEquals(i, 9);
+		assertEquals(i, 9, "batch size: " + batchSize);
 
 	}
 }
