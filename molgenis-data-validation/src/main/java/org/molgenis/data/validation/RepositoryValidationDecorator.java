@@ -31,8 +31,8 @@ import com.google.common.collect.Sets;
 
 public class RepositoryValidationDecorator implements Repository
 {
-	private static List<String> ENTITIES_THAT_DO_NOT_NEED_VALIDATION = Arrays.asList(
-			MolgenisTransactionLogMetaData.ENTITY_NAME, MolgenisTransactionLogEntryMetaData.ENTITY_NAME);
+	private static List<String> ENTITIES_THAT_DO_NOT_NEED_VALIDATION = Arrays
+			.asList(MolgenisTransactionLogMetaData.ENTITY_NAME, MolgenisTransactionLogEntryMetaData.ENTITY_NAME);
 	private final EntityAttributesValidator entityAttributesValidator;
 	private final DataService dataService;
 	private final Repository decoratedRepository;
@@ -154,9 +154,8 @@ public class RepositoryValidationDecorator implements Repository
 				if (!attr.isNillable())
 				{
 					Object value = entity.get(attr.getName());
-					if ((value == null || (attr.getDataType() instanceof MrefField && !(((Iterable<Entity>) value)
-							.iterator().hasNext())))
-							&& !attr.isAuto()
+					if ((value == null || (attr.getDataType() instanceof MrefField
+							&& !(((Iterable<Entity>) value).iterator().hasNext()))) && !attr.isAuto()
 							&& mustDoNotNullCheck(getEntityMetaData(), attr, entity))
 					{
 						String message = String.format("The attribute '%s' of entity '%s' can not be null.",
@@ -174,11 +173,13 @@ public class RepositoryValidationDecorator implements Repository
 	public boolean mustDoNotNullCheck(EntityMetaData entityMetaData, AttributeMetaData attr, Entity entity)
 	{
 		// Do not validate if Questionnaire status is not SUBMITTED
-		if (EntityUtils.doesExtend(entityMetaData, "Questionnaire") && entity.get("status") != "SUBMITTED") return false;
+		if (EntityUtils.doesExtend(entityMetaData, "Questionnaire") && entity.get("status") != "SUBMITTED")
+			return false;
 
 		// Do not validate if visibleExpression resolves to false
 		if (StringUtils.isNotBlank(attr.getVisibleExpression())
-				&& !ValidationUtils.resolveBooleanExpression(attr.getVisibleExpression(), entity, entityMetaData)) return false;
+				&& !ValidationUtils.resolveBooleanExpression(attr.getVisibleExpression(), entity, entityMetaData))
+			return false;
 
 		return true;
 	}
@@ -194,8 +195,8 @@ public class RepositoryValidationDecorator implements Repository
 			Entity oldEntity = this.findOne(entity.getIdValue());
 			if (null == oldEntity)
 			{
-				String message = String
-						.format("The original entity with id: '%s' does not exists", entity.getIdValue());
+				String message = String.format("The original entity with id: '%s' does not exists",
+						entity.getIdValue());
 				violations.add(new ConstraintViolation(message, entity.getEntityMetaData().getIdAttribute(), rownr));
 				if (violations.size() > 4) return violations;
 			}
@@ -265,8 +266,8 @@ public class RepositoryValidationDecorator implements Repository
 							&& !refEntityIdValues.contains(refEntity.getIdValue()))
 					{
 						String message = String.format("Unknown xref value '%s' for attribute '%s' of entity '%s'.",
-								DataConverter.toString(refEntity.getIdValue()), attr.getName(), getEntityMetaData()
-										.getLabel());
+								DataConverter.toString(refEntity.getIdValue()), attr.getName(),
+								getEntityMetaData().getLabel());
 						violations.add(new ConstraintViolation(message, attr, rownr));
 						if (violations.size() > 4) break;
 					}
@@ -496,4 +497,22 @@ public class RepositoryValidationDecorator implements Repository
 		return decoratedRepository.getCapabilities();
 	}
 
+	@Override
+	public void create()
+	{
+		decoratedRepository.create();
+
+	}
+
+	@Override
+	public void drop()
+	{
+		decoratedRepository.drop();
+	}
+
+	@Override
+	public void rebuildIndex()
+	{
+		decoratedRepository.rebuildIndex();
+	}
 }

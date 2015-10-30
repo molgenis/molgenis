@@ -1,5 +1,7 @@
 package org.molgenis.util;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
@@ -9,105 +11,93 @@ import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.IndexedRepository;
 import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 
 /**
  * Translate sql exceptions into user friendly messages
  */
-public class IndexedRepositoryExceptionTranslatorDecorator implements IndexedRepository
+public class MySqlRepositoryExceptionTranslatorDecorator implements Repository
 {
-	private IndexedRepository repository;
+	private final Repository decoratedRepo;
 
-	public IndexedRepositoryExceptionTranslatorDecorator(IndexedRepository repository)
+	public MySqlRepositoryExceptionTranslatorDecorator(Repository decoratedRepo)
 	{
-		this.repository = repository;
-	}
-
-	@Override
-	public void create()
-	{
-		repository.create();
-	}
-
-	@Override
-	public void drop()
-	{
-		repository.drop();
+		this.decoratedRepo = requireNonNull(decoratedRepo);
 	}
 
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return repository.getCapabilities();
+		return decoratedRepo.getCapabilities();
 	}
 
 	@Override
 	public String getName()
 	{
-		return repository.getName();
+		return decoratedRepo.getName();
 	}
 
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return repository.getEntityMetaData();
+		return decoratedRepo.getEntityMetaData();
 	}
 
 	@Override
 	public long count()
 	{
-		return repository.count();
+		return decoratedRepo.count();
 	}
 
 	@Override
 	public Query query()
 	{
-		return repository.query();
+		return decoratedRepo.query();
 	}
 
 	@Override
 	public long count(Query q)
 	{
-		return repository.count(q);
+		return decoratedRepo.count(q);
 	}
 
 	@Override
 	public Iterable<Entity> findAll(Query q)
 	{
-		return repository.findAll(q);
+		return decoratedRepo.findAll(q);
 	}
 
 	@Override
 	public Entity findOne(Query q)
 	{
-		return repository.findOne(q);
+		return decoratedRepo.findOne(q);
 	}
 
 	@Override
 	public Entity findOne(Object id)
 	{
-		return repository.findOne(id);
+		return decoratedRepo.findOne(id);
 	}
 
 	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
-		return repository.findAll(ids);
+		return decoratedRepo.findAll(ids);
 	}
 
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		return repository.aggregate(aggregateQuery);
+		return decoratedRepo.aggregate(aggregateQuery);
 	}
 
 	@Override
 	public void update(Entity entity)
 	{
 		SQLExceptionTranslatorTemplate.tryCatchSQLException(() -> {
-			repository.update(entity);
+			decoratedRepo.update(entity);
 		});
 	}
 
@@ -115,45 +105,45 @@ public class IndexedRepositoryExceptionTranslatorDecorator implements IndexedRep
 	public void update(Iterable<? extends Entity> records)
 	{
 		SQLExceptionTranslatorTemplate.tryCatchSQLException(() -> {
-			repository.update(records);
+			decoratedRepo.update(records);
 		});
 	}
 
 	@Override
 	public void delete(Entity entity)
 	{
-		repository.delete(entity);
+		decoratedRepo.delete(entity);
 	}
 
 	@Override
 	public void delete(Iterable<? extends Entity> entities)
 	{
-		repository.delete(entities);
+		decoratedRepo.delete(entities);
 	}
 
 	@Override
 	public void deleteById(Object id)
 	{
-		repository.deleteById(id);
+		decoratedRepo.deleteById(id);
 	}
 
 	@Override
 	public void deleteById(Iterable<Object> ids)
 	{
-		repository.deleteById(ids);
+		decoratedRepo.deleteById(ids);
 	}
 
 	@Override
 	public void deleteAll()
 	{
-		repository.deleteAll();
+		decoratedRepo.deleteAll();
 	}
 
 	@Override
 	public void add(Entity entity)
 	{
 		SQLExceptionTranslatorTemplate.tryCatchSQLException(() -> {
-			repository.add(entity);
+			decoratedRepo.add(entity);
 		});
 	}
 
@@ -163,7 +153,7 @@ public class IndexedRepositoryExceptionTranslatorDecorator implements IndexedRep
 		AtomicInteger result = new AtomicInteger();
 
 		SQLExceptionTranslatorTemplate.tryCatchSQLException(() -> {
-			Integer count = repository.add(entities);
+			Integer count = decoratedRepo.add(entities);
 			if (count != null) result.set(count);
 		});
 
@@ -173,31 +163,42 @@ public class IndexedRepositoryExceptionTranslatorDecorator implements IndexedRep
 	@Override
 	public void flush()
 	{
-		repository.flush();
+		decoratedRepo.flush();
 	}
 
 	@Override
 	public void clearCache()
 	{
-		repository.clearCache();
+		decoratedRepo.clearCache();
 	}
 
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		return repository.iterator();
+		return decoratedRepo.iterator();
 	}
 
 	@Override
 	public void close() throws IOException
 	{
-		repository.close();
+		decoratedRepo.close();
+	}
+
+	@Override
+	public void create()
+	{
+		decoratedRepo.create();
+	}
+
+	@Override
+	public void drop()
+	{
+		decoratedRepo.drop();
 	}
 
 	@Override
 	public void rebuildIndex()
 	{
-		repository.rebuildIndex();
+		decoratedRepo.rebuildIndex();
 	}
-
 }

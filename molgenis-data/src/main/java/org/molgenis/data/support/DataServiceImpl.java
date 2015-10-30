@@ -12,7 +12,6 @@ import org.molgenis.data.AggregateResult;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Manageable;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
@@ -112,10 +111,8 @@ public class DataServiceImpl implements DataService
 	@Override
 	public synchronized Iterable<String> getEntityNames()
 	{
-		return Iterables.filter(
-				Lists.newArrayList(repositoryNames),
-				entityName -> currentUserHasRole("ROLE_SU", "ROLE_SYSTEM",
-						"ROLE_ENTITY_COUNT_" + entityName.toUpperCase()));
+		return Iterables.filter(Lists.newArrayList(repositoryNames), entityName -> currentUserHasRole("ROLE_SU",
+				"ROLE_SYSTEM", "ROLE_ENTITY_COUNT_" + entityName.toUpperCase()));
 	}
 
 	@Override
@@ -223,17 +220,6 @@ public class DataServiceImpl implements DataService
 		if (repository == null) throw new UnknownEntityException("Unknown entity [" + entityName + "]");
 
 		return repository;
-	}
-
-	@Override
-	public Manageable getManageableRepository(String entityName)
-	{
-		Repository repository = getRepository(entityName);
-		if (repository instanceof Manageable)
-		{
-			return (Manageable) repository;
-		}
-		throw new MolgenisDataException("Repository [" + repository.getName() + "] is not Manageable");
 	}
 
 	@Override

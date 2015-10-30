@@ -31,7 +31,7 @@ public abstract class AbstractRepository implements Repository
 	private static final int FIND_ALL_BATCH_SIZE = 1000;
 
 	private final static Logger LOG = LoggerFactory.getLogger(AbstractRepository.class);
-	
+
 	private String name;
 
 	@Override
@@ -89,7 +89,7 @@ public abstract class AbstractRepository implements Repository
 		if (ids == null) return Collections.emptyList();
 		return concat(transform(partition(ids, FIND_ALL_BATCH_SIZE), this::findAllBatched));
 	}
-	
+
 	private Iterable<Entity> findAllBatched(List<Object> ids)
 	{
 		Query inQuery = new QueryImpl().in(getEntityMetaData().getIdAttribute().getName(), Sets.newHashSet(ids));
@@ -175,5 +175,26 @@ public abstract class AbstractRepository implements Repository
 	@Override
 	public void clearCache()
 	{
+	}
+
+	// Implement in child class if repository has capability MANAGABLE
+	@Override
+	public void create()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	// Implement in child class if repository has capability MANAGABLE
+	@Override
+	public void drop()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	// Implement in child class if repository has capability INDEXABLE
+	@Override
+	public void rebuildIndex()
+	{
+		throw new UnsupportedOperationException();
 	}
 }
