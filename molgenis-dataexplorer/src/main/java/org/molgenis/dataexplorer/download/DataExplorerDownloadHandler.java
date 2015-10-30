@@ -2,16 +2,13 @@ package org.molgenis.dataexplorer.download;
 
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.transform;
-import static com.google.common.collect.Lists.newArrayList;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
-import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
@@ -19,14 +16,15 @@ import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.excel.ExcelSheetWriter;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.excel.ExcelWriter.FileFormat;
-import org.molgenis.data.support.AbstractWritable.WriteMode;
+import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
+import org.molgenis.data.support.AbstractWritable.EntityWriteMode;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class DataExplorerDownloadHandler
 {
-	private DataService dataService;
+	private final DataService dataService;
 
 	@Autowired
 	public DataExplorerDownloadHandler(DataService dataService)
@@ -51,20 +49,21 @@ public class DataExplorerDownloadHandler
 			switch (dataRequest.getColNames())
 			{
 				case ATTRIBUTE_LABELS:
-					excelSheetWriter = excelWriter.createWritable(entityName, Lists.newArrayList(attributeNames));
+					excelSheetWriter = excelWriter.createWritable(entityName, attributes,
+							AttributeWriteMode.ATTRIBUTE_LABELS);
 					break;
 				case ATTRIBUTE_NAMES:
-					List<String> attributeNamesList = newArrayList(transform(attributes, AttributeMetaData::getName));
-					excelSheetWriter = excelWriter.createWritable(entityName, attributeNamesList);
+					excelSheetWriter = excelWriter.createWritable(entityName, attributes,
+							AttributeWriteMode.ATTRIBUTE_NAMES);
 					break;
 			}
 			switch (dataRequest.getEntityValues())
 			{
 				case ENTITY_IDS:
-					excelSheetWriter.setWriteMode(WriteMode.ENTITY_IDS);
+					excelSheetWriter.setEntityWriteMode(EntityWriteMode.ENTITY_IDS);
 					break;
 				case ENTITY_LABELS:
-					excelSheetWriter.setWriteMode(WriteMode.ENTITY_LABELS);
+					excelSheetWriter.setEntityWriteMode(EntityWriteMode.ENTITY_LABELS);
 					break;
 				default:
 					break;
@@ -91,10 +90,10 @@ public class DataExplorerDownloadHandler
 		switch (dataRequest.getEntityValues())
 		{
 			case ENTITY_IDS:
-				csvWriter.setWriteMode(WriteMode.ENTITY_IDS);
+				csvWriter.setEntityWriteMode(EntityWriteMode.ENTITY_IDS);
 				break;
 			case ENTITY_LABELS:
-				csvWriter.setWriteMode(WriteMode.ENTITY_LABELS);
+				csvWriter.setEntityWriteMode(EntityWriteMode.ENTITY_LABELS);
 				break;
 			default:
 				break;

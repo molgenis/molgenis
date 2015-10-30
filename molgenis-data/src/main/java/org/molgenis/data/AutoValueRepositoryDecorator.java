@@ -1,5 +1,7 @@
 package org.molgenis.data;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
@@ -24,8 +26,8 @@ public class AutoValueRepositoryDecorator implements Repository
 
 	public AutoValueRepositoryDecorator(Repository decoratedRepository, IdGenerator idGenerator)
 	{
-		this.decoratedRepository = decoratedRepository;
-		this.idGenerator = idGenerator;
+		this.decoratedRepository = requireNonNull(decoratedRepository);
+		this.idGenerator = requireNonNull(idGenerator);
 	}
 
 	@Override
@@ -244,5 +246,23 @@ public class AutoValueRepositoryDecorator implements Repository
 
 			}
 		}
+	}
+
+	@Override
+	public void create()
+	{
+		decoratedRepository.create();
+	}
+
+	@Override
+	public void drop()
+	{
+		decoratedRepository.drop();
+	}
+
+	@Override
+	public void rebuildIndex()
+	{
+		decoratedRepository.rebuildIndex();
 	}
 }

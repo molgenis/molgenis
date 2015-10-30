@@ -88,4 +88,19 @@ public interface Repository extends Iterable<Entity>, Closeable
 	void flush();
 
 	void clearCache();
+
+	/**
+	 * Create a new repository backend (e.g., create a table in a database; add a sheet to Excel)
+	 */
+	public void create();
+
+	/**
+	 * Drop a repository backend (e.g. drop a table in a database; remove a sheet from Excel)
+	 */
+	public void drop();
+
+	/**
+	 * Rebuild current index
+	 */
+	public void rebuildIndex();
 }
