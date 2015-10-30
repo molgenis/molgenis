@@ -163,6 +163,15 @@ function evalScript(script, entity) {
 				return this;
 			},
 			/**
+			 * Check if a value matches a regular expression
+			 * 
+			 * Example: $('Username').matches(/^[a-z0-9_-]{6,18}$/).value()
+			 */
+			matches : function(regex) {
+				this.val = regex.test(this.val);
+				return this;
+			},
+			/**
 			 * Check if a value is null
 			 * 
 			 * Example: $('Height').isNull().value()
