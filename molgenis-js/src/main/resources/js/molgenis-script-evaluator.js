@@ -27,6 +27,23 @@ function evalScript(script, entity) {
 			value : function() {
 				return this.val;
 			},
+			
+			/**
+			 * returns the result of the first value plus the second value
+			 * 
+			 * @param value: the number you want to add to the current value
+			 */
+			plus : function(value) {
+				if(!_isNull(value)){
+					if(typeof value === 'object' || typeof value === 'function') {
+						this.val = this.val + value.value();
+					}else{
+						this.val = this.val + value;
+					}
+				}
+				return this;
+			},
+			
 			/**
 			 * Gives you the exponent value of the attribute specified between
 			 * $('') notation
@@ -138,7 +155,7 @@ function evalScript(script, entity) {
 			/**
 			 * Group values into defined ranges
 			 * 
-			 * Example: age -> 19, 39, 50, 34
+			 * Example: age -> 19, 39, 50, 75
 			 * $('age').group({18, 35, 50, 75}).value() produces the following ranges which are left inclusive, (-∞, 18), [18, 35), [35, 50), [50, 75), [75, +∞)
 			 * the text representations are '-18','18-35','35-50','50-75','75+' 
 			 * 
