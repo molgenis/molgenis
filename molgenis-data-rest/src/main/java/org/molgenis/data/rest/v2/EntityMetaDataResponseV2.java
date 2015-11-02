@@ -6,7 +6,9 @@ import java.util.List;
 
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.rest.Href;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
@@ -35,9 +37,10 @@ class EntityMetaDataResponseV2
 	/**
 	 * @param meta
 	 */
-	public EntityMetaDataResponseV2(EntityMetaData meta, MolgenisPermissionService permissionService)
+	public EntityMetaDataResponseV2(EntityMetaData meta, MolgenisPermissionService permissionService,
+			DataService dataService)
 	{
-		this(meta, null, permissionService);
+		this(meta, null, permissionService, dataService);
 	}
 
 	/**
@@ -47,7 +50,7 @@ class EntityMetaDataResponseV2
 	 *            set of lowercase attribute names to include in response
 	 */
 	public EntityMetaDataResponseV2(EntityMetaData meta, AttributeFilter attrFilter,
-			MolgenisPermissionService permissionService)
+			MolgenisPermissionService permissionService, DataService dataService)
 	{
 		String name = meta.getName();
 		this.href = Href.concatMetaEntityHrefV2(BASE_URI, name);
@@ -83,7 +86,8 @@ class EntityMetaDataResponseV2
 						{
 							subAttrFilter = null;
 						}
-						return new AttributeMetaDataResponseV2(name, attr, subAttrFilter, permissionService);
+						return new AttributeMetaDataResponseV2(name, attr, subAttrFilter, permissionService,
+								dataService);
 					}
 				}));
 
@@ -106,7 +110,8 @@ class EntityMetaDataResponseV2
 
 		this.isAbstract = meta.isAbstract();
 
-		this.writable = permissionService.hasPermissionOnEntity(name, Permission.WRITE);
+		this.writable = permissionService.hasPermissionOnEntity(name, Permission.WRITE)
+				&& dataService.getCapabilities(name).contains(RepositoryCapability.WRITABLE);
 	}
 
 	public String getHref()
