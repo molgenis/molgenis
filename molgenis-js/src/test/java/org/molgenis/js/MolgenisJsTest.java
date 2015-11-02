@@ -22,6 +22,7 @@ import org.testng.annotations.Test;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 
 public class MolgenisJsTest
@@ -166,6 +167,19 @@ public class MolgenisJsTest
 				"$('age').group([18, 35, 56], [999]).map({'-18':0,'18-35':1,'35-56':2,'56+':3,'999':'9'}).value();",
 				new MapEntity("age", 999), emd);
 		assertEquals(result5.toString(), "9");
+	}
+
+	@Test
+	public void combinePlusGroupMapFunctions()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("FOOD59A1").setDataType(MolgenisFieldTypes.INT);
+		emd.addAttribute("FOOD60A1").setDataType(MolgenisFieldTypes.INT);
+		Object result1 = ScriptEvaluator.eval(
+				"var SUM_WEIGHT = new newValue(0);SUM_WEIGHT.plus($('FOOD59A1').map({\"1\":0,\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value());SUM_WEIGHT.plus($('FOOD60A1').map({\"1\":0,\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value());SUM_WEIGHT.group([0,1,2,6,7]).map({\"0-1\":\"4\",\"1-2\":\"3\",\"2-6\":\"2\",\"6-7\":\"1\", \"7+\" : \"1\"},null,null).value();",
+				new MapEntity(ImmutableMap.of("FOOD59A1", 7, "FOOD60A1", 6)), emd);
+
+		assertEquals(result1.toString(), "1");
 	}
 
 	@Test
