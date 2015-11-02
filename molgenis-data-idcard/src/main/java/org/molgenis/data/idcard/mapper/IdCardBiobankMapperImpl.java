@@ -17,7 +17,7 @@ import static org.molgenis.data.idcard.model.IdCardBiobank.PHONE;
 import static org.molgenis.data.idcard.model.IdCardBiobank.STREET1;
 import static org.molgenis.data.idcard.model.IdCardBiobank.STREET2;
 import static org.molgenis.data.idcard.model.IdCardBiobank.TARGET_POPULATION;
-import static org.molgenis.data.idcard.model.IdCardBiobank.TITLE;
+import static org.molgenis.data.idcard.model.IdCardBiobank.SALUTATION;
 import static org.molgenis.data.idcard.model.IdCardBiobank.TYPE;
 import static org.molgenis.data.idcard.model.IdCardBiobank.TYPE_OF_HOST_INSTITUTION;
 import static org.molgenis.data.idcard.model.IdCardBiobank.URL;
@@ -109,7 +109,7 @@ public class IdCardBiobankMapperImpl implements IdCardBiobankMapper
 						switch (mainContactName)
 						{
 							case "title":
-								idCardBiobank.set(TITLE, jsonReader.nextString());
+								idCardBiobank.set(SALUTATION, jsonReader.nextString());
 								break;
 							case "first name":
 								idCardBiobank.set(FIRST_NAME, jsonReader.nextString());
