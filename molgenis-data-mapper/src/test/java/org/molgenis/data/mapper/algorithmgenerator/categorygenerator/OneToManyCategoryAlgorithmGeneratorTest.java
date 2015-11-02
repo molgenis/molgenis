@@ -153,6 +153,19 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 	}
 
 	@Test
+	public void testGenerateWeightedMapForSource()
+	{
+		Assert.assertEquals(categoryAlgorithmGenerator.groupCategoryValues(sourceAttributeMetaData),
+				".group([0,1,2,3,4,5,6,7]).map({\"-0\":\"1\",\"0-1\":\"4\",\"1-2\":\"4\",\"2-3\":\"5\",\"4-5\":\"6\",\"6-7\":\"7\",\"7+\":\"7\"}, null, null).value();");
+	}
+
+	@Test
+	public void testIntegerParse()
+	{
+		System.out.println(Double.parseDouble("2.5"));
+	}
+
+	@Test
 	public void testSuitableForGeneratingWeightedMap()
 	{
 		Assert.assertTrue(categoryAlgorithmGenerator.suitableForGeneratingWeightedMap(targetAttributeMetaData,

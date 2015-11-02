@@ -14,7 +14,6 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jscience.physics.amount.Amount;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
@@ -163,9 +162,8 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 		List<Integer> sortedRangValues = new ArrayList<>();
 		for (Category targetCategory : sortedCategories)
 		{
-			Amount<?> amount = targetCategory.getAmountWrapper().getAmount();
-			int minValue = Integer.parseInt(DECIMAL_FORMAT.format(amount.getMinimumValue()));
-			int maxValue = Integer.parseInt(DECIMAL_FORMAT.format(amount.getMaximumValue()));
+			int minValue = parseAmountMinimumvalue(targetCategory);
+			int maxValue = parseAmountMaximumvalue(targetCategory);
 
 			if (!sortedRangValues.contains(minValue))
 			{
@@ -187,9 +185,9 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 		for (int categoryIndex = 0; categoryIndex < sortedCategories.size(); categoryIndex++)
 		{
 			Category category = sortedCategories.get(categoryIndex);
-			Amount<?> amount = category.getAmountWrapper().getAmount();
-			int minValue = Integer.parseInt(DECIMAL_FORMAT.format(amount.getMinimumValue()));
-			int maxValue = Integer.parseInt(DECIMAL_FORMAT.format(amount.getMaximumValue()));
+
+			int minValue = parseAmountMinimumvalue(category);
+			int maxValue = parseAmountMaximumvalue(category);
 
 			if (categoryIndex == 0)
 			{
@@ -206,8 +204,7 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 				if (categoryIndex < sortedCategories.size() - 1)
 				{
 					Category nextCategory = sortedCategories.get(categoryIndex + 1);
-					int upperBound = Integer.parseInt(
-							DECIMAL_FORMAT.format(nextCategory.getAmountWrapper().getAmount().getMinimumValue()));
+					int upperBound = parseAmountMinimumvalue(nextCategory);
 					if (upperBound != maxValue)
 					{
 						categoryRangeBoundMap.put(maxValue + "-" + upperBound, category);
@@ -217,11 +214,10 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 				if (categoryIndex > 0)
 				{
 					Category previousCategory = sortedCategories.get(categoryIndex - 1);
-					int lowerBound = Integer.parseInt(
-							DECIMAL_FORMAT.format(previousCategory.getAmountWrapper().getAmount().getMaximumValue()));
-					if (lowerBound != maxValue)
+					int lowerBound = parseAmountMaximumvalue(previousCategory);
+					if (lowerBound != minValue)
 					{
-						categoryRangeBoundMap.put(lowerBound + "-" + maxValue, category);
+						categoryRangeBoundMap.put(lowerBound + "-" + minValue, category);
 					}
 				}
 			}
@@ -231,5 +227,17 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 			}
 		}
 		return categoryRangeBoundMap;
+	}
+
+	int parseAmountMinimumvalue(Category category)
+	{
+		return (int) Double
+				.parseDouble(DECIMAL_FORMAT.format(category.getAmountWrapper().getAmount().getMinimumValue()));
+	}
+
+	int parseAmountMaximumvalue(Category category)
+	{
+		return (int) Double
+				.parseDouble(DECIMAL_FORMAT.format(category.getAmountWrapper().getAmount().getMaximumValue()));
 	}
 }
