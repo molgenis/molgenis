@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Range;
 import org.molgenis.data.rest.Href;
@@ -51,7 +52,7 @@ class AttributeMetaDataResponseV2
 	 *            set of lowercase attribute names to expand in response
 	 */
 	public AttributeMetaDataResponseV2(final String entityParentName, AttributeMetaData attr,
-			AttributeFilter attrFilter, MolgenisPermissionService permissionService)
+			AttributeFilter attrFilter, MolgenisPermissionService permissionService, DataService dataService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestControllerV2.BASE_URI, entityParentName, attrName);
@@ -69,12 +70,12 @@ class AttributeMetaDataResponseV2
 		{
 			if (attrFilter != null)
 			{
-				this.refEntity = new EntityMetaDataResponseV2(refEntity, attrFilter, permissionService);
+				this.refEntity = new EntityMetaDataResponseV2(refEntity, attrFilter, permissionService, dataService);
 			}
 			else
 			{
 				this.refEntity = new EntityMetaDataResponseV2(refEntity, createDefaultRefAttributeFilter(attr),
-						permissionService);
+						permissionService, dataService);
 			}
 		}
 		else
@@ -115,7 +116,7 @@ class AttributeMetaDataResponseV2
 								subAttrFilter = null;
 							}
 							return new AttributeMetaDataResponseV2(entityParentName, attr, subAttrFilter,
-									permissionService);
+									permissionService, dataService);
 						}
 					}));
 		}

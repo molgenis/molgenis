@@ -200,8 +200,7 @@ public class InMemoryRepository implements Repository
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return Sets.newHashSet(RepositoryCapability.QUERYABLE, RepositoryCapability.UPDATEABLE,
-				RepositoryCapability.WRITABLE);
+		return Sets.newHashSet(RepositoryCapability.QUERYABLE, RepositoryCapability.WRITABLE);
 	}
 
 	@Override
