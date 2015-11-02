@@ -4,7 +4,6 @@ import static org.molgenis.data.RepositoryCapability.AGGREGATEABLE;
 import static org.molgenis.data.RepositoryCapability.INDEXABLE;
 import static org.molgenis.data.RepositoryCapability.MANAGABLE;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
-import static org.molgenis.data.RepositoryCapability.UPDATEABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
 import java.io.IOException;
@@ -37,9 +36,10 @@ public abstract class AbstractElasticsearchRepository implements Repository
 		this.elasticSearchService = elasticSearchService;
 	}
 
+	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return Sets.newHashSet(AGGREGATEABLE, QUERYABLE, WRITABLE, UPDATEABLE, INDEXABLE, MANAGABLE);
+		return Sets.newHashSet(AGGREGATEABLE, QUERYABLE, WRITABLE, INDEXABLE, MANAGABLE);
 	}
 
 	@Override
