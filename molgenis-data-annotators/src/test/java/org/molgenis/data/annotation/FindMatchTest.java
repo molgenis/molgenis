@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.entity.impl;
+package org.molgenis.data.annotation;
 
 import static org.testng.Assert.assertTrue;
 import org.molgenis.data.annotation.FindMatch;
