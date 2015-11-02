@@ -1,21 +1,28 @@
 package org.molgenis.data;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.molgenis.data.settings.AppSettings;
+import org.molgenis.data.support.AggregateAnonymizerImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.Permission;
 
 public class RepositorySecurityDecorator implements Repository
 {
 	private final Repository decoratedRepository;
+	private final AppSettings appSettings;
+	private final AggregateAnonymizer aggregateAnonymizer;
 
-	public RepositorySecurityDecorator(Repository decoratedRepository)
+	public RepositorySecurityDecorator(Repository decoratedRepository, AppSettings appSettings)
 	{
-		this.decoratedRepository = decoratedRepository;
+		this.decoratedRepository = requireNonNull(decoratedRepository);
+		this.appSettings = requireNonNull(appSettings);
+		this.aggregateAnonymizer = new AggregateAnonymizerImpl();
 	}
 
 	@Override
@@ -173,7 +180,15 @@ public class RepositorySecurityDecorator implements Repository
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.COUNT);
-		return decoratedRepository.aggregate(aggregateQuery);
+
+		Integer threshold = appSettings.getAggregateThreshold();
+
+		AggregateResult result = decoratedRepository.aggregate(aggregateQuery);
+		if (threshold != null && threshold > 0)
+		{
+			result = aggregateAnonymizer.anonymize(result, threshold);
+		}
+		return result;
 	}
 
 	@Override
@@ -182,4 +197,24 @@ public class RepositorySecurityDecorator implements Repository
 		return decoratedRepository.getCapabilities();
 	}
 
+	@Override
+	public void rebuildIndex()
+	{
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
+		decoratedRepository.rebuildIndex();
+	}
+
+	@Override
+	public void create()
+	{
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
+		decoratedRepository.create();
+	}
+
+	@Override
+	public void drop()
+	{
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
+		decoratedRepository.drop();
+	}
 }

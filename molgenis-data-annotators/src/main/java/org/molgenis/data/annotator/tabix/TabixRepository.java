@@ -226,5 +226,4 @@ public class TabixRepository extends AbstractRepository
 	{
 		return new TabixRepositoryIterator();
 	}
-
 }

@@ -1,5 +1,32 @@
 package org.molgenis.data.rest.v2;
 
+import static com.google.common.collect.Lists.transform;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
+import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
+import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.springframework.web.bind.annotation.RequestMethod.PUT;
+
+import java.sql.Date;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -33,32 +60,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import java.sql.Date;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static com.google.common.collect.Lists.transform;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
-import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
-import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.NO_CONTENT;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-import static org.springframework.web.bind.annotation.RequestMethod.PUT;
-
 @Controller
 @RequestMapping(BASE_URI)
 class RestControllerV2
@@ -80,15 +81,15 @@ class RestControllerV2
 
 	static UnknownAttributeException createUnknownAttributeException(String entityName, String attributeName)
 	{
-		return new UnknownAttributeException(
-				"Operation failed. Unknown attribute: '" + attributeName + "', of entity: '" + entityName + "'");
+		return new UnknownAttributeException("Operation failed. Unknown attribute: '" + attributeName
+				+ "', of entity: '" + entityName + "'");
 	}
 
 	static MolgenisDataAccessException createMolgenisDataAccessExceptionReadOnlyAttribute(String entityName,
 			String attributeName)
 	{
-		return new MolgenisDataAccessException(
-				"Operation failed. Attribute '" + attributeName + "' of entity '" + entityName + "' is readonly");
+		return new MolgenisDataAccessException("Operation failed. Attribute '" + attributeName + "' of entity '"
+				+ entityName + "' is readonly");
 	}
 
 	static MolgenisDataException createMolgenisDataExceptionUnknownIdentifier(int count)
@@ -262,12 +263,13 @@ class RestControllerV2
 			{
 				String id = entity.getIdValue().toString();
 				ids.add(id.toString());
-				responseBody.getResources().add(new AutoValue_ResourcesResponseV2(
-						Href.concatEntityHref(RestControllerV2.BASE_URI, entityName, id)));
+				responseBody.getResources().add(
+						new AutoValue_ResourcesResponseV2(Href.concatEntityHref(RestControllerV2.BASE_URI, entityName,
+								id)));
 			}
 
-			responseBody.setLocation(Href.concatEntityCollectionHref(RestControllerV2.BASE_URI, entityName,
-					meta.getIdAttribute().getName(), ids));
+			responseBody.setLocation(Href.concatEntityCollectionHref(RestControllerV2.BASE_URI, entityName, meta
+					.getIdAttribute().getName(), ids));
 
 			response.setStatus(HttpServletResponse.SC_CREATED);
 			return responseBody;
@@ -457,7 +459,7 @@ class RestControllerV2
 			attributeParts.forEach(attributePart -> attributeFilter.add(attributePart.getName()));
 		}
 
-		return new AttributeMetaDataResponseV2(entityName, attribute, attributeFilter, permissionService);
+		return new AttributeMetaDataResponseV2(entityName, attribute, attributeFilter, permissionService, dataService);
 	}
 
 	private EntityCollectionResponseV2 createEntityCollectionResponse(String entityName,
@@ -482,7 +484,7 @@ class RestControllerV2
 		}
 
 		return new EntityCollectionResponseV2(pager, entities, attributeFilter, BASE_URI + '/' + entityName, meta,
-				permissionService);
+				permissionService, dataService);
 	}
 
 	private Map<String, Object> createEntityResponse(Entity entity, AttributeFilter attrFilter, boolean includeMetaData)
@@ -499,7 +501,8 @@ class RestControllerV2
 	private void createEntityMetaResponse(EntityMetaData entityMetaData, AttributeFilter attrFilter,
 			Map<String, Object> responseData)
 	{
-		responseData.put("_meta", new EntityMetaDataResponseV2(entityMetaData, attrFilter, permissionService));
+		responseData.put("_meta", new EntityMetaDataResponseV2(entityMetaData, attrFilter, permissionService,
+				dataService));
 	}
 
 	private void createEntityValuesResponse(Entity entity, AttributeFilter attrFilter, Map<String, Object> responseData)
@@ -584,8 +587,7 @@ class RestControllerV2
 						break;
 					case DATE_TIME:
 						Date dateTimeValue = entity.getDate(attrName);
-						String dateTimeValueStr = dateTimeValue != null ? getDateTimeFormat().format(dateTimeValue)
-								: null;
+						String dateTimeValueStr = dateTimeValue != null ? getDateTimeFormat().format(dateTimeValue) : null;
 						responseData.put(attrName, dateTimeValueStr);
 						break;
 					case DECIMAL:

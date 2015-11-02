@@ -19,9 +19,9 @@ import org.molgenis.data.support.QueryImpl;
 import com.google.common.collect.Sets;
 
 /**
- * Reposirory that uses a hashmap as store.
+ * Repository that uses a hashmap as store.
  * 
- * For testing purposis
+ * For testing purposes
  */
 public class InMemoryRepository implements Repository
 {
@@ -200,8 +200,7 @@ public class InMemoryRepository implements Repository
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return Sets.newHashSet(RepositoryCapability.QUERYABLE, RepositoryCapability.UPDATEABLE,
-				RepositoryCapability.WRITABLE);
+		return Sets.newHashSet(RepositoryCapability.QUERYABLE, RepositoryCapability.WRITABLE);
 	}
 
 	@Override
@@ -210,4 +209,24 @@ public class InMemoryRepository implements Repository
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public void create()
+	{
+		// Repo is not MANAGABLE
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void drop()
+	{
+		// Repo is not MANAGABLE
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void rebuildIndex()
+	{
+		// Repo is not INDEXABLE
+		throw new UnsupportedOperationException();
+	}
 }

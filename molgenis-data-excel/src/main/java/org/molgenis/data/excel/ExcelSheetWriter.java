@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.convert.DateToStringConverter;
@@ -24,19 +25,19 @@ public class ExcelSheetWriter extends AbstractWritable
 
 	/** process cells before writing */
 	private List<CellProcessor> cellProcessors;
+	private Iterable<AttributeMetaData> cachedAttributes;
 
-	private List<String> cachedAttributeNames;
-
-	ExcelSheetWriter(Sheet sheet, List<String> attributeNames, List<CellProcessor> cellProcessors)
+	ExcelSheetWriter(Sheet sheet, Iterable<AttributeMetaData> attributes, AttributeWriteMode attributeWriteMode,
+			List<CellProcessor> cellProcessors)
 	{
 		if (sheet == null) throw new IllegalArgumentException("sheet is null");
 		this.sheet = sheet;
 		this.cellProcessors = cellProcessors;
 		this.row = 0;
 
-		if (attributeNames != null)
+		if (attributes != null)
 		{
-			writeAttributeNames(attributeNames);
+			writeAttributeHeaders(attributes, attributeWriteMode);
 		}
 	}
 
@@ -47,15 +48,15 @@ public class ExcelSheetWriter extends AbstractWritable
 	public void add(Entity entity)
 	{
 		if (entity == null) throw new IllegalArgumentException("Entity cannot be null");
-		if (cachedAttributeNames == null) throw new MolgenisDataException(
+		if (cachedAttributes == null) throw new MolgenisDataException(
 				"The attribute names are not defined, call writeAttributeNames first");
 
 		int i = 0;
 		Row poiRow = sheet.createRow(row++);
-		for (String attributeName : cachedAttributeNames)
+		for (AttributeMetaData attribute : cachedAttributes)
 		{
 			Cell cell = poiRow.createCell(i++, Cell.CELL_TYPE_STRING);
-			cell.setCellValue(toValue(entity.get(attributeName)));
+			cell.setCellValue(toValue(entity.get(attribute.getName())));
 		}
 
 		entity.getIdValue();
@@ -64,28 +65,34 @@ public class ExcelSheetWriter extends AbstractWritable
 	/**
 	 * Write sheet column headers
 	 */
-	public void writeAttributeNames(Iterable<String> attributeNames)
+	public void writeAttributeHeaders(Iterable<AttributeMetaData> attributes, AttributeWriteMode attributeWriteMode)
 	{
-		if (attributeNames == null) throw new IllegalArgumentException("AttributeNames cannot be null");
+		if (attributes == null) throw new IllegalArgumentException("Attributes cannot be null");
+		if (attributeWriteMode == null) throw new IllegalArgumentException("AttributeWriteMode cannot be null");
 
-		if (cachedAttributeNames == null)
+		if (cachedAttributes == null)
 		{
-
 			Row poiRow = sheet.createRow(row++);
 
 			// write header
 			int i = 0;
-			List<String> processedAttributeNames = new ArrayList<String>();
-			for (String attributeName : attributeNames)
+			for (AttributeMetaData attribute : attributes)
 			{
-				// process column name
 				Cell cell = poiRow.createCell(i++, Cell.CELL_TYPE_STRING);
-				cell.setCellValue(AbstractCellProcessor.processCell(attributeName, true, cellProcessors));
-				processedAttributeNames.add(attributeName);
+
+				switch (attributeWriteMode)
+				{
+					case ATTRIBUTE_LABELS:
+						cell.setCellValue(AbstractCellProcessor.processCell(attribute.getLabel(), true, cellProcessors));
+						break;
+					case ATTRIBUTE_NAMES:
+						cell.setCellValue(AbstractCellProcessor.processCell(attribute.getName(), true, cellProcessors));
+						break;
+				}
 			}
 
 			// store header
-			this.cachedAttributeNames = processedAttributeNames;
+			this.cachedAttributes = attributes;
 		}
 	}
 
@@ -108,9 +115,9 @@ public class ExcelSheetWriter extends AbstractWritable
 		}
 		else if (obj instanceof Entity)
 		{
-			if (getWriteMode() != null)
+			if (getEntityWriteMode() != null)
 			{
-				switch (getWriteMode())
+				switch (getEntityWriteMode())
 				{
 					case ENTITY_IDS:
 						value = ((Entity) obj).getIdValue().toString();
@@ -119,7 +126,7 @@ public class ExcelSheetWriter extends AbstractWritable
 						value = ((Entity) obj).getLabelValue();
 						break;
 					default:
-						throw new RuntimeException("Unknown write mode [" + getWriteMode() + "]");
+						throw new RuntimeException("Unknown write mode [" + getEntityWriteMode() + "]");
 				}
 			}
 			else

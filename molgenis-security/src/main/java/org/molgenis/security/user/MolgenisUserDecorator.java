@@ -1,5 +1,7 @@
 package org.molgenis.security.user;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
@@ -30,7 +32,7 @@ public class MolgenisUserDecorator implements Repository
 
 	public MolgenisUserDecorator(Repository decoratedRepository)
 	{
-		this.decoratedRepository = decoratedRepository;
+		this.decoratedRepository = requireNonNull(decoratedRepository);
 	}
 
 	@Override
@@ -333,4 +335,21 @@ public class MolgenisUserDecorator implements Repository
 		return decoratedRepository.getCapabilities();
 	}
 
+	@Override
+	public void create()
+	{
+		decoratedRepository.create();
+	}
+
+	@Override
+	public void drop()
+	{
+		decoratedRepository.drop();
+	}
+
+	@Override
+	public void rebuildIndex()
+	{
+		decoratedRepository.rebuildIndex();
+	}
 }
