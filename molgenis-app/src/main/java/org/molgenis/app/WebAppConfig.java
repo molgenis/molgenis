@@ -10,11 +10,8 @@ import org.molgenis.DatabaseConfig;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
-<<<<<<< HEAD
 import org.molgenis.data.config.HttpClientConfig;
-=======
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
->>>>>>> 1ee3a692e03dcd0fbdf06e408482275f6e5cd2fa
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.jpa.JpaRepositoryCollection;
@@ -22,7 +19,6 @@ import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.system.RepositoryTemplateLoader;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.migrate.version.v1_10.Step17RuntimePropertiesToGafListSettings;
@@ -52,7 +48,6 @@ import org.molgenis.migrate.version.v1_9.Step15AddDefaultValue;
 import org.molgenis.migrate.version.v1_9.Step16RuntimePropertyToSettings;
 import org.molgenis.system.core.FreemarkerTemplateRepository;
 import org.molgenis.ui.MolgenisWebAppConfig;
-import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.GsonConfig;
 import org.slf4j.Logger;
@@ -82,11 +77,8 @@ import freemarker.template.TemplateException;
 @EnableAsync
 @ComponentScan(basePackages = "org.molgenis", excludeFilters = @Filter(type = FilterType.ANNOTATION, value = CommandLineOnlyConfiguration.class) )
 @Import(
-<<<<<<< HEAD
-{ WebAppSecurityConfig.class, DatabaseConfig.class, HttpClientConfig.class, EmbeddedElasticSearchConfig.class })
-=======
-{ WebAppSecurityConfig.class, DatabaseConfig.class, EmbeddedElasticSearchConfig.class, GsonConfig.class })
->>>>>>> 1ee3a692e03dcd0fbdf06e408482275f6e5cd2fa
+{ WebAppSecurityConfig.class, DatabaseConfig.class, HttpClientConfig.class, EmbeddedElasticSearchConfig.class,
+		GsonConfig.class })
 public class WebAppConfig extends MolgenisWebAppConfig
 {
 	private static final Logger LOG = LoggerFactory.getLogger(WebAppConfig.class);
@@ -106,9 +98,6 @@ public class WebAppConfig extends MolgenisWebAppConfig
 
 	@Autowired
 	private ElasticsearchRepositoryCollection elasticsearchRepositoryCollection;
-	
-	@Autowired
-	private MenuManagerService menuManagerService;
 
 	@Autowired
 	private EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;

@@ -29,7 +29,7 @@ public class IdCardIndexerController extends MolgenisPluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(IdCardIndexerController.class);
 
-	public static final String ID = "idcardbiobankindexer";
+	public static final String ID = "idcardindexer";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final IdCardIndexerService idCardIndexerService;

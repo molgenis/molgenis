@@ -109,11 +109,7 @@ public class DefaultEntity implements Entity
 			case DATE:
 				return getDate(attributeName);
 			case DATE_TIME:
-<<<<<<< HEAD
-				return getTimestamp(attributeName);
-=======
 				return getUtilDate(attributeName);
->>>>>>> 1ee3a692e03dcd0fbdf06e408482275f6e5cd2fa
 			case DECIMAL:
 				return getDouble(attributeName);
 			case EMAIL:
