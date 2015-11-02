@@ -160,6 +160,12 @@ public abstract class DefaultSettingsEntity implements Entity
 		updateEntity(entity);
 	}
 
+	/**
+	 * Adds a listener for this settings entity that fires on entity updates
+	 * 
+	 * @param settingsEntityListener
+	 *            listener for this settings entity
+	 */
 	public void addListener(SettingsEntityListener settingsEntityListener)
 	{
 		RunAsSystemProxy.runAsSystem(() -> {
@@ -180,6 +186,12 @@ public abstract class DefaultSettingsEntity implements Entity
 		});
 	}
 
+	/**
+	 * Removes a listener for this settings entity that fires on entity updates
+	 * 
+	 * @param settingsEntityListener
+	 *            listener for this settings entity
+	 */
 	public void removeListener(SettingsEntityListener settingsEntityListener)
 	{
 		RunAsSystemProxy.runAsSystem(() -> {
