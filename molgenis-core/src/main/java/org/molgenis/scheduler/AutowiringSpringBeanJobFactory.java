@@ -1,4 +1,4 @@
-package org.molgenis.data.idcard;
+package org.molgenis.scheduler;
 
 import org.quartz.spi.TriggerFiredBundle;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;

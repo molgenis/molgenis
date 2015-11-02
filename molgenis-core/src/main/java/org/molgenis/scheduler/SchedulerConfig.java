@@ -1,4 +1,4 @@
-package org.molgenis.data.idcard;
+package org.molgenis.scheduler;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -6,8 +6,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
-// TODO move to molgenis-core or something
-// TODO Check if scheduler finishes jobs on shutdown
+/**
+ * Configure a scheduler factory based on a Quartz scheduler with jobs supporting autowiring.
+ */
 @Configuration
 public class SchedulerConfig
 {
