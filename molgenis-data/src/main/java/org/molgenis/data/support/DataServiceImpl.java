@@ -11,6 +11,7 @@ import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
@@ -288,4 +289,15 @@ public class DataServiceImpl implements DataService
 		return getRepository(repositoryName).getCapabilities();
 	}
 
+	@Override
+	public void addEntityListener(String entityName, EntityListener entityListener)
+	{
+		getRepository(entityName).addEntityListener(entityListener);
+	}
+
+	@Override
+	public void removeEntityListener(String entityName, EntityListener entityListener)
+	{
+		getRepository(entityName).removeEntityListener(entityListener);
+	}
 }

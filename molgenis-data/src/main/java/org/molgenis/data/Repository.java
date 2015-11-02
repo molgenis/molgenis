@@ -103,4 +103,20 @@ public interface Repository extends Iterable<Entity>, Closeable
 	 * Rebuild current index
 	 */
 	public void rebuildIndex();
+
+	/**
+	 * Adds an entity listener for a entity that listens to entity changes
+	 * 
+	 * @param entityListener
+	 *            entity listener for a entity
+	 */
+	void addEntityListener(EntityListener entityListener);
+
+	/**
+	 * Removes an entity listener
+	 * 
+	 * @param entityListener
+	 *            entity listener for a entity
+	 */
+	void removeEntityListener(EntityListener entityListener);
 }

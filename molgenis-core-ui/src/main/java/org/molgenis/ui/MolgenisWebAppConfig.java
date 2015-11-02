@@ -488,6 +488,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 			{
 				Repository decoratedRepository = repository;
 
+				// 7. Entity listener
+				decoratedRepository = new EntityListenerRepositoryDecorator(decoratedRepository);
+
 				// 6. Owned decorator
 				if (EntityUtils.doesExtend(repository.getEntityMetaData(), OwnedEntityMetaData.ENTITY_NAME))
 				{
