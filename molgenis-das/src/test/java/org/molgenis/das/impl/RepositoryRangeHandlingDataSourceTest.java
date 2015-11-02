@@ -27,6 +27,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.elasticsearch.util.SearchResult;
+import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.MapEntity;
@@ -87,18 +88,29 @@ public class RepositoryRangeHandlingDataSourceTest
 		linkout.put(new URL("http://www.molgenis.org/"), "Link");
 
 		List<DasTarget> dasTarget = new ArrayList<DasTarget>();
-		dasTarget.add(new MolgenisDasTarget("mutation id", 10, 1000, "mutation name,description"));
+		dasTarget.add(new MolgenisDasTarget("mutation id", 10, 1000, "description"));
 		List<String> notes = new ArrayList<String>();
 		notes.add("track:dataset");
 		notes.add("source:MOLGENIS");
 
-		dasFeature = new DasFeature("mutation id", "mutation name,description", type, method, 10, 1000, new Double(0),
+		dasFeature = new DasFeature("mutation id", "description", type, method, 10, 1000, new Double(0),
 				DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE, notes, linkout,
 				dasTarget, new ArrayList<String>(), null);
 
 		Query q = new QueryImpl().eq("CHROM", "1");
 		q.pageSize(100);
 		SearchResult result = mock(SearchResult.class);
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("DAS");
+		emd.addAttributeMetaData(new DefaultAttributeMetaData("STOP"));
+		emd.addAttributeMetaData(new DefaultAttributeMetaData("linkout"));
+		emd.addAttributeMetaData(new DefaultAttributeMetaData("NAME").setLabelAttribute(true));
+		emd.addAttributeMetaData(new DefaultAttributeMetaData("INFO"));
+		emd.addAttributeMetaData(new DefaultAttributeMetaData("POS"));
+		emd.addAttributeMetaData(new DefaultAttributeMetaData("ID").setIdAttribute(true));
+		emd.addAttributeMetaData(new DefaultAttributeMetaData("CHROM"));
+
+		MapEntity entity = new MapEntity(emd);
+
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("STOP", 1000);
 		map.put("linkout", "http://www.molgenis.org/");
@@ -108,10 +120,11 @@ public class RepositoryRangeHandlingDataSourceTest
 		map.put("ID", "mutation id");
 		map.put("CHROM", "1");
 
-		MapEntity entity = new MapEntity(map);
-		resultList = new ArrayList<Hit>();
+		entity.set(new MapEntity(map));
+
+		resultList = new ArrayList<>();
 		resultList.add(new Hit("", "", map));
-		featureList = new ArrayList<DasFeature>();
+		featureList = new ArrayList<>();
 		featureList.add(dasFeature);
 		when(dataService.findAll("dataset", q)).thenReturn(Arrays.<Entity> asList(entity));
 		when(result.iterator()).thenReturn(resultList.iterator());
