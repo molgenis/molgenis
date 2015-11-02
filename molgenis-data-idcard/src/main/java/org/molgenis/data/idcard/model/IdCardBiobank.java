@@ -15,7 +15,7 @@ public class IdCardBiobank extends DefaultEntity
 	public static final String TYPE = "type";
 	public static final String ALSO_LISTED_IN = "also_listed_in";
 	public static final String URL = "url";
-	public static final String TITLE = "title";
+	public static final String SALUTATION = "title";
 	public static final String FIRST_NAME = "first_name";
 	public static final String EMAIL = "email";
 	public static final String LAST_NAME = "last_name";
