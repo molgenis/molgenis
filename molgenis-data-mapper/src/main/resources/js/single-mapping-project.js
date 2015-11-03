@@ -52,17 +52,20 @@
 	        var currentForm = this;
 	        bootbox.confirm("Are you sure?", function(result) {
 	            if (result) {
+	            	showSpinner();
 	                currentForm.submit();
 	            }
 	        });
 	        return false;
 	    });
 		
-		$('#submit-new-source-column-btn').click(function() {
-			$('#create-new-source-form').submit();
+		$('#submit-new-source-column-btn').on('click', function(e) {
+			showSpinner();
+	        $('#create-new-source-form').submit();
 		});
 		
-		$('#create-integrated-entity-btn').click(function(){
+		$('#create-integrated-entity-btn').on('click', function(e) {
+			showSpinner();
 			$('#create-integrated-entity-form').submit();
 		});
 		
