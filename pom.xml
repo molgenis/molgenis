@@ -346,38 +346,6 @@
                     <artifactId>properties-maven-plugin</artifactId>
                     <version>1.0-alpha-2</version>
                 </plugin>
-                <!-- servlet container -->
-                <plugin>
-                    <groupId>org.eclipse.jetty</groupId>
-					<artifactId>jetty-maven-plugin</artifactId>
-					<version>9.2.6.v20141205</version>
-                    <configuration>
-                        <stopPort>8079</stopPort>
-                        <stopKey>jetty-stop</stopKey>
-                        <reload>manual</reload>
-                        <systemProperties>
-							<systemProperty>
-								<name>molgenis.home</name>
-								<value>${user.home}${file.separator}.molgenis${file.separator}omx</value>
-							</systemProperty>
-						</systemProperties>
-                        <webAppConfig>
-                            <contextPath>/</contextPath>
-                            <baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
-      							<resourcesAsCSV>${basedir}/src/main/resources</resourcesAsCSV>
-    						</baseResource>
-							<webInfIncludeJarPattern>.*/molgenis-[^/]*\.jar$|.*spring-[^/]*\.jar$
-                            </webInfIncludeJarPattern>
-                        </webAppConfig>
-                    </configuration>
-                    <dependencies>
-                        <dependency>
-                            <groupId>mysql</groupId>
-                            <artifactId>mysql-connector-java</artifactId>
-                            <version>${mysql.connector.java.version}</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
                 <!-- Eclipse m2e mappings -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
