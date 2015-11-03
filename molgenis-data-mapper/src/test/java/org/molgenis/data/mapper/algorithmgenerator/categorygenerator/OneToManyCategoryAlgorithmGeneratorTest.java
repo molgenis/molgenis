@@ -160,12 +160,6 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 	}
 
 	@Test
-	public void testIntegerParse()
-	{
-		System.out.println(Double.parseDouble("2.5"));
-	}
-
-	@Test
 	public void testSuitableForGeneratingWeightedMap()
 	{
 		Assert.assertTrue(categoryAlgorithmGenerator.suitableForGeneratingWeightedMap(targetAttributeMetaData,
