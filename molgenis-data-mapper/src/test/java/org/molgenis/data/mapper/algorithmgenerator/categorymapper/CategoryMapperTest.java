@@ -175,23 +175,4 @@ public class CategoryMapperTest
 		Assert.assertEquals(amountTargetCategory4,
 				AmountWrapper.create(Amount.rangeOf((double) 0, (double) 1, NonSI.WEEK.inverse())));
 	}
-
-	@Test
-	public void testConvertFactor()
-	{
-		double convertFactor = categoryMapper.convertFactor(Amount.rangeOf((double) 1, (double) 6, NonSI.DAY.inverse()),
-				Amount.valueOf((double) 3, NonSI.DAY.inverse()));
-
-		double convertFactor2 = categoryMapper.convertFactor(
-				Amount.rangeOf((double) 1, (double) 6, NonSI.DAY.inverse()),
-				Amount.valueOf((double) 4, NonSI.DAY.inverse()));
-
-		double convertFactor3 = categoryMapper.convertFactor(
-				Amount.rangeOf((double) 1, (double) 6, NonSI.DAY.inverse()),
-				Amount.rangeOf((double) 4, (double) 5, NonSI.DAY.inverse()));
-
-		System.out.println(convertFactor);
-		System.out.println(convertFactor2);
-		System.out.println(convertFactor3);
-	}
 }
