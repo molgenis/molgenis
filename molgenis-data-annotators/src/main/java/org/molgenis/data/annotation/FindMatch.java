@@ -10,30 +10,24 @@ public class FindMatch
 		{
             return true;
 		}
-		else if (ref1.contains(ref2))
+		else if (ref1.indexOf(ref2)==0)//must start with same sequence, otherwise we have a position shift
 		{
-			int start = ref1.indexOf(ref2);
-			int stop = start + ref2.length();
-			String prefix = ref1.substring(0, start);
-			String postFix = ref1.substring(stop);
+			String postFix = ref1.substring(ref2.length());
 			for (String alt : alts2)
 			{
-				if ((prefix + alt + postFix).equals(alt1))
+				if ((alt + postFix).equals(alt1))
 				{
 					return true;
 				}
 			}
 			return false;
 		}
-		else if (ref2.contains(ref1))
+		else if (ref2.indexOf(ref1) == 0)//must start with same sequence, otherwise we have a position shift
 		{
-			int start = ref2.indexOf(ref1);
-			int stop = start + ref1.length();
-			String prefix = ref2.substring(0, start);
-			String postFix = ref2.substring(stop);
+			String postFix = ref2.substring(ref1.length());
             for (String alt : alts2)
 			{
-				if (alt.equals(prefix + alt1 + postFix))
+				if (alt.equals(alt1 + postFix))
 				{
 					return true;
 				}
