@@ -16,7 +16,9 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +49,7 @@ import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -111,6 +114,25 @@ class RestControllerV2
 		this.dataService = requireNonNull(dataService);
 		this.permissionService = requireNonNull(permissionService);
 		this.restService = requireNonNull(restService);
+	}
+
+	@Autowired
+	@RequestMapping(value = "/version", method = GET)
+	@ResponseBody
+	public Map<String, String> getVersion(@Value("${molgenis.version:@null}") String molgenisVersion,
+			@Value("${molgenis.build.date:@null}") String molgenisBuildDate)
+	{
+		if (molgenisVersion == null) throw new IllegalArgumentException("molgenisVersion is null");
+		if (molgenisBuildDate == null) throw new IllegalArgumentException("molgenisBuildDate is null");
+		molgenisBuildDate = molgenisBuildDate.equals("${maven.build.timestamp}")
+				? new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new java.util.Date()) + " by Eclipse"
+				: molgenisBuildDate;
+
+		Map<String, String> result = new HashMap<>();
+		result.put("molgenisVersion", molgenisVersion);
+		result.put("buildDate", molgenisBuildDate);
+
+		return result;
 	}
 
 	/**
