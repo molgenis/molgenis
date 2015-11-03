@@ -162,8 +162,8 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 		List<Integer> sortedRangValues = new ArrayList<>();
 		for (Category targetCategory : sortedCategories)
 		{
-			int minValue = parseAmountMinimumvalue(targetCategory);
-			int maxValue = parseAmountMaximumvalue(targetCategory);
+			int minValue = parseAmountMinimumValue(targetCategory);
+			int maxValue = parseAmountMaximumValue(targetCategory);
 
 			if (!sortedRangValues.contains(minValue))
 			{
@@ -186,8 +186,8 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 		{
 			Category category = sortedCategories.get(categoryIndex);
 
-			int minValue = parseAmountMinimumvalue(category);
-			int maxValue = parseAmountMaximumvalue(category);
+			int minValue = parseAmountMinimumValue(category);
+			int maxValue = parseAmountMaximumValue(category);
 
 			if (categoryIndex == 0)
 			{
@@ -204,7 +204,7 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 				if (categoryIndex < sortedCategories.size() - 1)
 				{
 					Category nextCategory = sortedCategories.get(categoryIndex + 1);
-					int upperBound = parseAmountMinimumvalue(nextCategory);
+					int upperBound = parseAmountMinimumValue(nextCategory);
 					if (upperBound != maxValue)
 					{
 						categoryRangeBoundMap.put(maxValue + "-" + upperBound, category);
@@ -214,7 +214,7 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 				if (categoryIndex > 0)
 				{
 					Category previousCategory = sortedCategories.get(categoryIndex - 1);
-					int lowerBound = parseAmountMaximumvalue(previousCategory);
+					int lowerBound = parseAmountMaximumValue(previousCategory);
 					if (lowerBound != minValue)
 					{
 						categoryRangeBoundMap.put(lowerBound + "-" + minValue, category);
@@ -229,13 +229,13 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 		return categoryRangeBoundMap;
 	}
 
-	int parseAmountMinimumvalue(Category category)
+	int parseAmountMinimumValue(Category category)
 	{
 		return (int) Double
 				.parseDouble(DECIMAL_FORMAT.format(category.getAmountWrapper().getAmount().getMinimumValue()));
 	}
 
-	int parseAmountMaximumvalue(Category category)
+	int parseAmountMaximumValue(Category category)
 	{
 		return (int) Double
 				.parseDouble(DECIMAL_FORMAT.format(category.getAmountWrapper().getAmount().getMaximumValue()));
