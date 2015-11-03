@@ -128,9 +128,10 @@ class RestControllerV2
 				? new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new java.util.Date()) + " by Eclipse"
 				: molgenisBuildDate;
 
-		Map result = new HashMap();
+		Map<String, String> result = new HashMap<>();
 		result.put("molgenisVersion", molgenisVersion);
 		result.put("buildDate", molgenisBuildDate);
+
 		return result;
 	}
 
