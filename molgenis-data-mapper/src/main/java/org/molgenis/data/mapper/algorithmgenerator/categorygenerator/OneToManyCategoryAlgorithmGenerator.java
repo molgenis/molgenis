@@ -6,12 +6,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jscience.physics.amount.Amount;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
@@ -52,12 +54,10 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 				{
 					if (stringBuilder.length() == 0)
 					{
-						stringBuilder.append("var SUM_WEIGHT = ").append(generateWeightedMap).append('\n');
+						stringBuilder.append("var SUM_WEIGHT = new newValue(0);\n");
 					}
-					else
-					{
-						stringBuilder.append("SUM_WEIGHT += ").append(generateWeightedMap).append('\n');
-					}
+
+					stringBuilder.append("SUM_WEIGHT.plus(").append(generateWeightedMap).append(");\n");
 				}
 			}
 			stringBuilder.append("SUM_WEIGHT").append(groupCategoryValues(targetAttribute));
@@ -108,7 +108,7 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 		if (stringBuilder.length() > 0)
 		{
 			stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-			stringBuilder.append("}, null, null).value();");
+			stringBuilder.append("}, null, null).value()");
 		}
 
 		return stringBuilder.toString();
@@ -118,12 +118,10 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 
-		List<Integer> sortedRangValues = new ArrayList<Integer>();
-
-		List<Category> categories = convertToCategory(attributeMetaData).stream()
+		List<Category> sortedCategories = convertToCategory(attributeMetaData).stream()
 				.filter(category -> category.getAmountWrapper() != null).collect(Collectors.toList());
 
-		Collections.sort(categories, new Comparator<Category>()
+		Collections.sort(sortedCategories, new Comparator<Category>()
 		{
 			public int compare(Category o1, Category o2)
 			{
@@ -132,51 +130,114 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 			}
 		});
 
-		for (Category targetCategory : categories)
-		{
-			AmountWrapper amountWrapper = targetCategory.getAmountWrapper();
-			if (amountWrapper != null)
-			{
-				Amount<?> amount = amountWrapper.getAmount();
+		List<Integer> sortedRangValues = getRangedValues(sortedCategories);
 
-				int minValue = Integer.parseInt(DECIMAL_FORMAT.format(amount.getMinimumValue()));
-				int maxValue = Integer.parseInt(DECIMAL_FORMAT.format(amount.getMaximumValue()));
+		Map<String, Category> categoryRangeBoundMap = createCategoryRangeBoundMap(sortedCategories);
 
-				if (!sortedRangValues.contains(minValue))
-				{
-					sortedRangValues.add(minValue);
-				}
-
-				if (!sortedRangValues.contains(maxValue))
-				{
-					sortedRangValues.add(maxValue);
-				}
-			}
-		}
-
-		if (sortedRangValues.size() > 0)
+		if (categoryRangeBoundMap.size() > 0)
 		{
 			if (stringBuilder.length() == 0)
 			{
 				stringBuilder.append(".group([");
 			}
+
 			sortedRangValues.stream().forEach(value -> stringBuilder.append(value).append(','));
 			stringBuilder.deleteCharAt(stringBuilder.length() - 1);
 			stringBuilder.append("]).map({");
 
-			for (int i = 1; i < sortedRangValues.size(); i++)
+			for (Entry<String, Category> entry : categoryRangeBoundMap.entrySet())
 			{
-				if (categories.size() > i - 1)
-				{
-					stringBuilder.append("'").append(sortedRangValues.get(i - 1)).append('-')
-							.append(sortedRangValues.get(i)).append("':").append(categories.get(i - 1).getCode())
-							.append(',');
-				}
+				stringBuilder.append("\"").append(entry.getKey()).append("\":\"").append(entry.getValue().getCode())
+						.append("\",");
 			}
 			stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-			stringBuilder.append("}, null, null)");
+			stringBuilder.append("}, null, null).value();");
 		}
 
 		return stringBuilder.toString();
+	}
+
+	private List<Integer> getRangedValues(List<Category> sortedCategories)
+	{
+		List<Integer> sortedRangValues = new ArrayList<>();
+		for (Category targetCategory : sortedCategories)
+		{
+			int minValue = parseAmountMinimumValue(targetCategory);
+			int maxValue = parseAmountMaximumValue(targetCategory);
+
+			if (!sortedRangValues.contains(minValue))
+			{
+				sortedRangValues.add(minValue);
+			}
+
+			if (!sortedRangValues.contains(maxValue))
+			{
+				sortedRangValues.add(maxValue);
+			}
+		}
+		return sortedRangValues;
+	}
+
+	private Map<String, Category> createCategoryRangeBoundMap(List<Category> sortedCategories)
+	{
+		Map<String, Category> categoryRangeBoundMap = new LinkedHashMap<>();
+
+		for (int categoryIndex = 0; categoryIndex < sortedCategories.size(); categoryIndex++)
+		{
+			Category category = sortedCategories.get(categoryIndex);
+
+			int minValue = parseAmountMinimumValue(category);
+			int maxValue = parseAmountMaximumValue(category);
+
+			if (categoryIndex == 0)
+			{
+				categoryRangeBoundMap.put("-" + minValue, category);
+			}
+
+			// The category contains ranged values
+			if (minValue != maxValue)
+			{
+				categoryRangeBoundMap.put(minValue + "-" + maxValue, category);
+			}
+			else
+			{
+				if (categoryIndex < sortedCategories.size() - 1)
+				{
+					Category nextCategory = sortedCategories.get(categoryIndex + 1);
+					int upperBound = parseAmountMinimumValue(nextCategory);
+					if (upperBound != maxValue)
+					{
+						categoryRangeBoundMap.put(maxValue + "-" + upperBound, category);
+					}
+				}
+
+				if (categoryIndex > 0)
+				{
+					Category previousCategory = sortedCategories.get(categoryIndex - 1);
+					int lowerBound = parseAmountMaximumValue(previousCategory);
+					if (lowerBound != minValue)
+					{
+						categoryRangeBoundMap.put(lowerBound + "-" + minValue, category);
+					}
+				}
+			}
+			if (categoryIndex == sortedCategories.size() - 1)
+			{
+				categoryRangeBoundMap.put(maxValue + "+", category);
+			}
+		}
+		return categoryRangeBoundMap;
+	}
+
+	int parseAmountMinimumValue(Category category)
+	{
+		return (int) Double
+				.parseDouble(DECIMAL_FORMAT.format(category.getAmountWrapper().getAmount().getMinimumValue()));
+	}
+
+	int parseAmountMaximumValue(Category category)
+	{
+		return (int) Double
+				.parseDouble(DECIMAL_FORMAT.format(category.getAmountWrapper().getAmount().getMaximumValue()));
 	}
 }
