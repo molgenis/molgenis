@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
@@ -248,11 +247,9 @@ public class DefaultEntity implements Entity
 			return new DefaultEntity(attribute.getRefEntity(), dataService, (Map<String, Object>) value);
 
 		FieldType dataType = attribute.getDataType();
-		if (attribute.getDataType().equals(MolgenisFieldTypes.MREF)
-				|| attribute.getDataType().equals(MolgenisFieldTypes.CATEGORICAL_MREF))
+		if (!(dataType instanceof XrefField))
 		{
-			throw new MolgenisDataException(
-					"can't use getEntity() on an mref/categorical_mref, use getEntities() instead");
+			throw new MolgenisDataException("can't use getEntity() on something that's not an xref or categorical");
 		}
 
 		value = dataType.convert(value);
@@ -275,6 +272,16 @@ public class DefaultEntity implements Entity
 	@Override
 	public Iterable<Entity> getEntities(String attributeName)
 	{
+		AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
+		if (attribute == null) throw new UnknownAttributeException(attributeName);
+
+		FieldType dataType = attribute.getDataType();
+		if (!(dataType instanceof MrefField) && !(dataType instanceof XrefField))
+		{
+			throw new MolgenisDataException(
+					"can't use getEntities() on something that's not an xref, categorical, mref or categorical_mref");
+		}
+
 		List<?> ids;
 		Object value = values.get(attributeName);
 		if (value instanceof String) ids = getList(attributeName);
@@ -283,16 +290,13 @@ public class DefaultEntity implements Entity
 		if ((ids == null) || ids.isEmpty()) return Collections.emptyList();
 		if (ids.get(0) instanceof Entity) return (Iterable<Entity>) ids;
 
-		AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
-		if (attribute == null) throw new UnknownAttributeException(attributeName);
-
 		if (ids.get(0) instanceof Map)
 		{
 			return stream(ids.spliterator(), false)
 					.map(id -> new DefaultEntity(attribute.getRefEntity(), dataService, (Map<String, Object>) id))
 					.collect(Collectors.toList());
 		}
-		return from(ids).transform(attribute.getDataType()::convert)
+		return from(ids).transform(dataType::convert)
 				.transform(convertedId -> (dataService.findOne(attribute.getRefEntity().getName(), convertedId)));
 	}
 
