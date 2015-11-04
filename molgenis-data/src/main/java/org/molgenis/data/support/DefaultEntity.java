@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
@@ -68,10 +69,10 @@ public class DefaultEntity implements Entity
 			@Override
 			public Iterator<String> iterator()
 			{
-				Stream<String> atomic = stream(entityMetaData.getAtomicAttributes().spliterator(), false).map(
-						a -> a.getName());
-				Stream<String> compound = stream(entityMetaData.getAttributes().spliterator(), false).filter(
-						a -> a.getDataType().getEnumType() == FieldTypeEnum.COMPOUND).map(a -> a.getName());
+				Stream<String> atomic = stream(entityMetaData.getAtomicAttributes().spliterator(), false)
+						.map(a -> a.getName());
+				Stream<String> compound = stream(entityMetaData.getAttributes().spliterator(), false)
+						.filter(a -> a.getDataType().getEnumType() == FieldTypeEnum.COMPOUND).map(a -> a.getName());
 
 				return Stream.concat(atomic, compound).iterator();
 			}
@@ -212,7 +213,7 @@ public class DefaultEntity implements Entity
 					return MolgenisDateFormat.getDateFormat().parse(value.toString());
 				case DATE_TIME:
 					return MolgenisDateFormat.getDateTimeFormat().parse(value.toString());
-					// $CASES-OMITTED$
+				// $CASES-OMITTED$
 				default:
 					throw new MolgenisDataException("Type [" + dataType + "] is not a date type");
 
@@ -243,10 +244,18 @@ public class DefaultEntity implements Entity
 		AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
 		if (attribute == null) throw new UnknownAttributeException(attributeName);
 
-		if (value instanceof Map) return new DefaultEntity(attribute.getRefEntity(), dataService,
-				(Map<String, Object>) value);
+		if (value instanceof Map)
+			return new DefaultEntity(attribute.getRefEntity(), dataService, (Map<String, Object>) value);
 
-		value = attribute.getDataType().convert(value);
+		FieldType dataType = attribute.getDataType();
+		if (attribute.getDataType().equals(MolgenisFieldTypes.MREF)
+				|| attribute.getDataType().equals(MolgenisFieldTypes.CATEGORICAL_MREF))
+		{
+			throw new MolgenisDataException(
+					"can't use getEntity() on an mref/categorical_mref, use getEntities() instead");
+		}
+
+		value = dataType.convert(value);
 		Entity refEntity = dataService.findOne(attribute.getRefEntity().getName(), value);
 		if (refEntity == null) throw new UnknownEntityException(attribute.getRefEntity().getName() + " with "
 				+ attribute.getRefEntity().getIdAttribute().getName() + " [" + value + "] does not exist");
@@ -258,7 +267,8 @@ public class DefaultEntity implements Entity
 	public <E extends Entity> E getEntity(String attributeName, Class<E> clazz)
 	{
 		Entity entity = getEntity(attributeName);
-		return entity != null ? new ConvertingIterable<E>(clazz, Arrays.asList(entity), dataService).iterator().next() : null;
+		return entity != null ? new ConvertingIterable<E>(clazz, Arrays.asList(entity), dataService).iterator().next()
+				: null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -278,12 +288,12 @@ public class DefaultEntity implements Entity
 
 		if (ids.get(0) instanceof Map)
 		{
-			return stream(ids.spliterator(), false).map(
-					id -> new DefaultEntity(attribute.getRefEntity(), dataService, (Map<String, Object>) id)).collect(
-					Collectors.toList());
+			return stream(ids.spliterator(), false)
+					.map(id -> new DefaultEntity(attribute.getRefEntity(), dataService, (Map<String, Object>) id))
+					.collect(Collectors.toList());
 		}
-		return from(ids).transform(attribute.getDataType()::convert).transform(
-				convertedId -> (dataService.findOne(attribute.getRefEntity().getName(), convertedId)));
+		return from(ids).transform(attribute.getDataType()::convert)
+				.transform(convertedId -> (dataService.findOne(attribute.getRefEntity().getName(), convertedId)));
 	}
 
 	@Override
@@ -307,8 +317,8 @@ public class DefaultEntity implements Entity
 		}
 		else if ((attribute.getDataType() instanceof MrefField) && (value instanceof Iterable<?>))
 		{
-			List<?> ids = stream(((Iterable<?>) value).spliterator(), false).map(
-					v -> v instanceof Entity ? ((Entity) v).getIdValue() : v).collect(Collectors.toList());
+			List<?> ids = stream(((Iterable<?>) value).spliterator(), false)
+					.map(v -> v instanceof Entity ? ((Entity) v).getIdValue() : v).collect(Collectors.toList());
 			values.put(attributeName, ids);
 		}
 		else
