@@ -1,5 +1,6 @@
 package org.molgenis.migrate.version.v1_8;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.util.Iterator;
@@ -23,12 +24,13 @@ public class Step13RemoveCatalogueMenuEntries extends MolgenisUpgrade
 	private static final String PLUGIN_ID = "catalogue";
 
 	private final DataSource dataSource;
+	private final Gson gson;
 
-	public Step13RemoveCatalogueMenuEntries(DataSource dataSource)
+	public Step13RemoveCatalogueMenuEntries(DataSource dataSource, Gson gson)
 	{
 		super(12, 13);
-		if (dataSource == null) throw new IllegalArgumentException("DataSource is null");
-		this.dataSource = dataSource;
+		this.dataSource = requireNonNull(dataSource);
+		this.gson = requireNonNull(gson);
 	}
 
 	@Override
@@ -45,16 +47,16 @@ public class Step13RemoveCatalogueMenuEntries extends MolgenisUpgrade
 		// check if RuntimeProperty table exists
 		if (!jdbcTemplate.queryForList("SHOW TABLES LIKE 'RuntimeProperty'").isEmpty())
 		{
-			String menuJson = jdbcTemplate.queryForObject(
-					"SELECT Value FROM RuntimeProperty WHERE Name='molgenis.menu'", String.class);
+			String menuJson = jdbcTemplate
+					.queryForObject("SELECT Value FROM RuntimeProperty WHERE Name='molgenis.menu'", String.class);
 
 			// new value
-			Menu menu = new Gson().fromJson(menuJson, Menu.class);
+			Menu menu = gson.fromJson(menuJson, Menu.class);
 			removePluginEntriesFromMenuRec(menu, PLUGIN_ID);
-			String updatedMenuJson = new Gson().toJson(menu);
+			String updatedMenuJson = gson.toJson(menu);
 
-			jdbcTemplate.execute("UPDATE RuntimeProperty SET value='" + updatedMenuJson
-					+ "' WHERE Name='molgenis.menu'");
+			jdbcTemplate
+					.execute("UPDATE RuntimeProperty SET value='" + updatedMenuJson + "' WHERE Name='molgenis.menu'");
 			LOG.info("Removed catalogue plugin menu entries from menu");
 
 			// remove permissions

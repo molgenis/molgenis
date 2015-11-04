@@ -10,6 +10,7 @@ import org.molgenis.DatabaseConfig;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.jpa.JpaRepositoryCollection;
@@ -23,6 +24,7 @@ import org.molgenis.migrate.version.v1_10.Step17RuntimePropertiesToGafListSettin
 import org.molgenis.migrate.version.v1_10.Step18RuntimePropertiesToAnnotatorSettings;
 import org.molgenis.migrate.version.v1_10.Step19RemoveMolgenisLock;
 import org.molgenis.migrate.version.v1_11.Step20RebuildElasticsearchIndex;
+import org.molgenis.migrate.version.v1_11.Step21SetLoggingEventBackend;
 import org.molgenis.migrate.version.v1_5.Step1UpgradeMetaData;
 import org.molgenis.migrate.version.v1_5.Step2;
 import org.molgenis.migrate.version.v1_5.Step3AddOrderColumnToMrefTables;
@@ -45,8 +47,8 @@ import org.molgenis.migrate.version.v1_9.Step15AddDefaultValue;
 import org.molgenis.migrate.version.v1_9.Step16RuntimePropertyToSettings;
 import org.molgenis.system.core.FreemarkerTemplateRepository;
 import org.molgenis.ui.MolgenisWebAppConfig;
-import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.util.DependencyResolver;
+import org.molgenis.util.GsonConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +66,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 import com.google.common.collect.Sets;
+import com.google.gson.Gson;
 
 import freemarker.template.TemplateException;
 
@@ -73,7 +76,7 @@ import freemarker.template.TemplateException;
 @EnableAsync
 @ComponentScan(basePackages = "org.molgenis", excludeFilters = @Filter(type = FilterType.ANNOTATION, value = CommandLineOnlyConfiguration.class) )
 @Import(
-{ WebAppSecurityConfig.class, DatabaseConfig.class, EmbeddedElasticSearchConfig.class })
+{ WebAppSecurityConfig.class, DatabaseConfig.class, EmbeddedElasticSearchConfig.class, GsonConfig.class })
 public class WebAppConfig extends MolgenisWebAppConfig
 {
 	private static final Logger LOG = LoggerFactory.getLogger(WebAppConfig.class);
@@ -92,10 +95,13 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	private JpaRepositoryCollection jpaRepositoryCollection;
 
 	@Autowired
-	private MenuManagerService menuManagerService;
+	private ElasticsearchRepositoryCollection elasticsearchRepositoryCollection;
 
 	@Autowired
 	private EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
+
+	@Autowired
+	private Gson gson;
 
 	@Autowired
 	private RuntimePropertyToAppSettingsMigrator runtimePropertyToAppSettingsMigrator;
@@ -135,12 +141,12 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step3AddOrderColumnToMrefTables(dataSource));
 		upgradeService.addUpgrade(new Step4VarcharToText(dataSource, mysqlRepositoryCollection));
 		upgradeService.addUpgrade(
-				new Step5AlterDataexplorerMenuURLs(jpaRepositoryCollection.getRepository("RuntimeProperty")));
+				new Step5AlterDataexplorerMenuURLs(jpaRepositoryCollection.getRepository("RuntimeProperty"), gson));
 		upgradeService.addUpgrade(new Step6ChangeRScriptType(dataSource, searchService));
 		upgradeService.addUpgrade(new Step7UpgradeMetaDataTo1_6(dataSource, searchService));
 		upgradeService.addUpgrade(new Step8VarcharToTextRepeated(dataSource));
 		upgradeService.addUpgrade(new Step9MysqlTablesToInnoDB(dataSource));
-		upgradeService.addUpgrade(new Step10DeleteFormReferences(dataSource));
+		upgradeService.addUpgrade(new Step10DeleteFormReferences(dataSource, gson));
 
 		SingleConnectionDataSource singleConnectionDS = null;
 		try
@@ -154,7 +160,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 
 		upgradeService.addUpgrade(new Step11ConvertNames(singleConnectionDS));
 		upgradeService.addUpgrade(new Step12ChangeElasticsearchTokenizer(embeddedElasticSearchServiceFactory));
-		upgradeService.addUpgrade(new Step13RemoveCatalogueMenuEntries(dataSource));
+		upgradeService.addUpgrade(new Step13RemoveCatalogueMenuEntries(dataSource, gson));
 		upgradeService.addUpgrade(new Step14UpdateAttributeMapping(dataSource));
 		upgradeService.addUpgrade(new Step15AddDefaultValue(dataSource, searchService, jpaRepositoryCollection));
 		upgradeService.addUpgrade(new Step16RuntimePropertyToSettings(runtimePropertyToAppSettingsMigrator,
@@ -164,6 +170,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(step18RuntimePropertiesToAnnotatorSettings);
 		upgradeService.addUpgrade(step19RemoveMolgenisLock);
 		upgradeService.addUpgrade(step20RebuildElasticsearchIndex);
+		upgradeService.addUpgrade(new Step21SetLoggingEventBackend(dataSource));
 	}
 
 	@Override
@@ -203,9 +210,13 @@ public class WebAppConfig extends MolgenisWebAppConfig
 				{
 					localDataService.addRepository(jpaRepositoryCollection.getUnderlying(emd.getName()));
 				}
+				else if (ElasticsearchRepositoryCollection.NAME.equals(emd.getBackend()))
+				{
+					localDataService.addRepository(elasticsearchRepositoryCollection.addEntityMeta(emd));
+				}
 				else
 				{
-					LOG.warn("backend unkown for metadata " + emd.getName());
+					LOG.warn("backend [{}] unknown for meta data [{}]", emd.getBackend(), emd.getName());
 				}
 			}
 		}

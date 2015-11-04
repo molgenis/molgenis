@@ -1,7 +1,7 @@
 package org.molgenis.data.mysql;
 
+import static org.molgenis.data.RepositoryCapability.MANAGABLE;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
-import static org.molgenis.data.RepositoryCapability.UPDATEABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
 import java.sql.Connection;
@@ -11,7 +11,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -19,7 +18,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import javax.sql.DataSource;
 
@@ -30,12 +28,10 @@ import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Manageable;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisReferencedEntityException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
-import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.Sort;
@@ -65,7 +61,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-public class MysqlRepository extends AbstractRepository implements Manageable
+public class MysqlRepository extends AbstractRepository
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MysqlRepository.class);
 	public static final int BATCH_SIZE = 1000;
@@ -106,8 +102,8 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		{
 			if (att.getDataType() instanceof MrefField)
 			{
-				DataAccessException e = tryExecute(
-						"DROP TABLE IF EXISTS `" + getTableName() + "_" + att.getName() + "`");
+				DataAccessException e = tryExecute("DROP TABLE IF EXISTS `" + getTableName() + "_" + att.getName()
+						+ "`");
 				remembered = remembered != null ? remembered : e;
 			}
 		}
@@ -348,11 +344,11 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		StringBuilder sql = new StringBuilder();
 
 		// mysql keys cannot have TEXT value, so change it to VARCHAR when needed
-		String idAttrMysqlType = (idAttribute.getDataType().getEnumType().equals(FieldTypeEnum.STRING) ? VARCHAR
-				: idAttribute.getDataType().getMysqlType());
+		String idAttrMysqlType = (idAttribute.getDataType().getEnumType().equals(FieldTypeEnum.STRING) ? VARCHAR : idAttribute
+				.getDataType().getMysqlType());
 
-		String refAttrMysqlType = (att.getRefEntity().getIdAttribute().getDataType() instanceof StringField ? VARCHAR
-				: att.getRefEntity().getIdAttribute().getDataType().getMysqlType());
+		String refAttrMysqlType = (att.getRefEntity().getIdAttribute().getDataType() instanceof StringField ? VARCHAR : att
+				.getRefEntity().getIdAttribute().getDataType().getMysqlType());
 
 		sql.append(" CREATE TABLE ").append('`').append(getTableName()).append('_').append(att.getName()).append('`')
 				.append("(`order` INT,`").append(idAttribute.getName()).append('`').append(' ').append(idAttrMysqlType)
@@ -393,12 +389,11 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 		if (idAttribute == null) throw new MolgenisDataException("Missing idAttribute for entity [" + getName() + "]");
 
-		if (idAttribute.getDataType() instanceof XrefField || idAttribute.getDataType() instanceof MrefField)
-			throw new RuntimeException(
-					"primary key(" + getTableName() + "." + idAttribute.getName() + ") cannot be XREF or MREF");
+		if (idAttribute.getDataType() instanceof XrefField || idAttribute.getDataType() instanceof MrefField) throw new RuntimeException(
+				"primary key(" + getTableName() + "." + idAttribute.getName() + ") cannot be XREF or MREF");
 
-		if (idAttribute.isNillable() == true) throw new RuntimeException(
-				"idAttribute (" + getTableName() + "." + idAttribute.getName() + ") should not be nillable");
+		if (idAttribute.isNillable() == true) throw new RuntimeException("idAttribute (" + getTableName() + "."
+				+ idAttribute.getName() + ") should not be nillable");
 
 		sql.append("PRIMARY KEY (").append('`').append(getEntityMetaData().getIdAttribute().getName()).append('`')
 				.append(')');
@@ -638,8 +633,10 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				Object value = mrefs.get(i).get(att.getName());
 				if (value instanceof Entity)
 				{
-					preparedStatement.setObject(3, refEntityIdAttribute.getDataType()
-							.convert(((Entity) value).get(refEntityIdAttribute.getName())));
+					preparedStatement.setObject(
+							3,
+							refEntityIdAttribute.getDataType().convert(
+									((Entity) value).get(refEntityIdAttribute.getName())));
 				}
 				else
 				{
@@ -672,13 +669,6 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	{
 		if (id == null) return null;
 		return findOne(new QueryImpl().eq(getEntityMetaData().getIdAttribute().getName(), id));
-	}
-
-	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		if (ids == null) return Collections.emptyList();
-		return findAll(new QueryImpl().in(getEntityMetaData().getIdAttribute().getName(), ids));
 	}
 
 	protected String getSelectSql(Query q, List<Object> parameters)
@@ -717,7 +707,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		// group by
 		if (select.indexOf("GROUP_CONCAT") != -1 && group.length() > 0) result.append(" GROUP BY ").append(group);
 		// order by
-		result.append(' ').append(getSortSql(q, parameters));
+		result.append(' ').append(getSortSql(q));
 		// limit
 		if (q.getPageSize() > 0) result.append(" LIMIT ").append(q.getPageSize());
 		if (q.getOffset() > 0) result.append(" OFFSET ").append(q.getOffset());
@@ -795,8 +785,8 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 							Repository repo = dataService.getRepository(att.getRefEntity().getName());
 							if (repo.getCapabilities().contains(QUERYABLE))
 							{
-								Query refQ = new QueryImpl().like(att.getRefEntity().getLabelAttribute().getName(),
-										r.getValue().toString());
+								Query refQ = new QueryImpl().like(att.getRefEntity().getLabelAttribute().getName(), r
+										.getValue().toString());
 								Iterator<Entity> it = repo.findAll(refQ).iterator();
 								if (it.hasNext())
 								{
@@ -806,8 +796,8 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 									{
 										Entity ref = it.next();
 										search.append("?");
-										parameters.add(att.getDataType()
-												.convert(ref.get(att.getRefEntity().getIdAttribute().getName())));
+										parameters.add(att.getDataType().convert(
+												ref.get(att.getRefEntity().getIdAttribute().getName())));
 										if (it.hasNext())
 										{
 											search.append(",");
@@ -886,8 +876,8 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 						parameters.add(attr.getDataType().convert(values.get(i)));
 					}
 
-					if (attr.getDataType() instanceof MrefField)
-						result.append(attr.getName()).append("_filter").append(mrefFilterIndex);
+					if (attr.getDataType() instanceof MrefField) result.append(attr.getName()).append("_filter")
+							.append(mrefFilterIndex);
 					else result.append("this");
 
 					result.append(".`").append(r.getField()).append("` IN (").append(in).append(')');
@@ -895,8 +885,8 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				default:
 					// comparable values...
 					FieldType type = attr.getDataType();
-					if (type instanceof MrefField)
-						predicate.append(attr.getName()).append("_filter").append(mrefFilterIndex);
+					if (type instanceof MrefField) predicate.append(attr.getName()).append("_filter")
+							.append(mrefFilterIndex);
 					else predicate.append("this");
 
 					predicate.append(".`").append(r.getField()).append('`');
@@ -925,8 +915,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 					parameters.add(attr.getDataType().convert(r.getValue()));
 
 					if (result.length() > 0 && !result.toString().endsWith(" OR ")
-							&& !result.toString().endsWith(" AND "))
-						result.append(" AND ");
+							&& !result.toString().endsWith(" AND ")) result.append(" AND ");
 					result.append(predicate);
 			}
 		}
@@ -934,7 +923,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		return result.toString().trim();
 	}
 
-	protected String getSortSql(Query q, List<Object> parameters)
+	protected String getSortSql(Query q)
 	{
 		StringBuilder sortSql = new StringBuilder();
 		if (q.getSort() != null)
@@ -956,32 +945,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 			if (sortSql.length() > 0) sortSql = new StringBuilder("ORDER BY ").append(sortSql.substring(2));
 		}
-		// in case of a findAll(Iterable<Object> ids) MySQL returns matching rows in a random order. use ORDER BY FIELD
-		// to guarantee the right order. This is required by the Repository interface.
-		else if (q.getRules() != null && q.getRules().size() == 1)
-		{
-			QueryRule queryRule = q.getRules().iterator().next();
-			if (queryRule.getOperator() == Operator.IN && queryRule.getValue() instanceof Iterable<?>)
-			{
-				Iterable<?> values = (Iterable<?>) queryRule.getValue();
-				if (values != null && values.iterator().hasNext())
-				{
-					// use prepared statements for the values
-					String fieldIds = StreamSupport.stream(values.spliterator(), false).map(value -> "?")
-							.collect(Collectors.joining(","));
-
-					// define order of returned rows
-					sortSql = new StringBuilder("ORDER BY FIELD(").append("this.").append('`')
-							.append(queryRule.getField()).append('`').append(",").append(fieldIds).append(")");
-
-					// use prepared statements for the values
-					parameters.addAll(StreamSupport.stream(values.spliterator(), false).map(value -> value.toString())
-							.collect(Collectors.toList()));
-				}
-			}
-		}
 		return sortSql.toString();
-
 	}
 
 	protected String getUpdateSql()
@@ -1182,8 +1146,8 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 										value = ((Entity) value).get(att.getRefEntity().getIdAttribute().getName());
 									}
 
-									preparedStatement.setObject(fieldIndex++,
-											att.getRefEntity().getIdAttribute().getDataType().convert(value));
+									preparedStatement.setObject(fieldIndex++, att.getRefEntity().getIdAttribute()
+											.getDataType().convert(value));
 								}
 								else
 								{
@@ -1303,14 +1267,19 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 								Object value = e.get(att.getName());
 								if (value instanceof Entity)
 								{
-									preparedStatement.setObject(fieldIndex++,
-											att.getRefEntity().getIdAttribute().getDataType().convert(((Entity) value)
-													.get(att.getRefEntity().getIdAttribute().getName())));
+									preparedStatement.setObject(
+											fieldIndex++,
+											att.getRefEntity()
+													.getIdAttribute()
+													.getDataType()
+													.convert(
+															((Entity) value).get(att.getRefEntity().getIdAttribute()
+																	.getName())));
 								}
 								else
 								{
-									preparedStatement.setObject(fieldIndex++,
-											att.getRefEntity().getIdAttribute().getDataType().convert(value));
+									preparedStatement.setObject(fieldIndex++, att.getRefEntity().getIdAttribute()
+											.getDataType().convert(value));
 								}
 							}
 							else
@@ -1376,8 +1345,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 							{
 								// this list is just as long as it's allowed to be so it probably got truncated.
 								// Retrieve the IDs explicitly in a separate query.
-								e.set(att.getName(),
-										jdbcTemplate.queryForList(getMrefSelectSql(e, att), Integer.class));
+								e.set(att.getName(), jdbcTemplate.queryForList(getMrefSelectSql(e, att), Integer.class));
 							}
 							else
 							{
@@ -1401,8 +1369,9 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				}
 				else if (att.getDataType() instanceof XrefField)
 				{
-					e.set(att.getName(), att.getRefEntity().getIdAttribute().getDataType()
-							.convert(resultSet.getObject(att.getName())));
+					e.set(att.getName(),
+							att.getRefEntity().getIdAttribute().getDataType()
+									.convert(resultSet.getObject(att.getName())));
 				}
 				else
 				{
@@ -1535,7 +1504,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return Sets.newHashSet(WRITABLE, UPDATEABLE);
+		return Sets.newHashSet(WRITABLE, MANAGABLE);
 	}
 
 	@Override

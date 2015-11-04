@@ -3,6 +3,7 @@ package org.molgenis.data.rest.v2;
 import java.util.List;
 import java.util.Map;
 
+import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -19,10 +20,11 @@ class EntityCollectionResponseV2
 	private final List<Map<String, Object>> items;
 
 	public EntityCollectionResponseV2(EntityPager entityPager, List<Map<String, Object>> items,
-			AttributeFilter attributes, String href, EntityMetaData meta, MolgenisPermissionService permissionService)
+			AttributeFilter attributes, String href, EntityMetaData meta, MolgenisPermissionService permissionService,
+			DataService dataService)
 	{
 		this.href = href;
-		this.meta = new EntityMetaDataResponseV2(meta, attributes, permissionService);
+		this.meta = new EntityMetaDataResponseV2(meta, attributes, permissionService, dataService);
 		this.start = entityPager.getStart();
 		this.num = entityPager.getNum();
 		this.total = entityPager.getTotal();

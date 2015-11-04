@@ -63,11 +63,12 @@ public class UploadWizardPage extends AbstractWizardPage
 			}
 			else
 			{
+				importWizard.setFile(file);
+
 				RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
 						.createFileRepositoryCollection(file);
 				ImportService importService = importServiceFactory.getImportService(file, repositoryCollection);
 
-				importWizard.setFile(file);
 				importWizard.setSupportedDatabaseActions(importService.getSupportedDatabaseActions());
 				importWizard.setMustChangeEntityName(importService.getMustChangeEntityName());
 			}

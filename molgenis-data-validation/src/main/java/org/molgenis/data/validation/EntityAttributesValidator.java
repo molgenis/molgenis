@@ -331,7 +331,7 @@ public class EntityAttributesValidator
 			message += String.format("Value must be less than or equal to %d characters", maxLength);
 		}
 
-		return new ConstraintViolation(message, entity.getString(attribute.getName()), entity, attribute, meta, 0);
+		return new ConstraintViolation(message, entity.getString(attribute.getName()), entity, attribute, meta, null);
 	}
 
 	private ConstraintViolation createConstraintViolation(Entity entity, AttributeMetaData attribute,
@@ -342,6 +342,7 @@ public class EntityAttributesValidator
 				attribute.getLabel(), meta.getName());
 		fullMessage += " " + message;
 
-		return new ConstraintViolation(fullMessage, entity.getString(attribute.getName()), entity, attribute, meta, 0);
+		return new ConstraintViolation(fullMessage, entity.getString(attribute.getName()), entity, attribute, meta,
+				null);
 	}
 }

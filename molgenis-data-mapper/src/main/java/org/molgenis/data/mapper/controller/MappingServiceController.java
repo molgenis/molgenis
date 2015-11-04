@@ -28,8 +28,10 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.importer.ImportWizardController;
+import org.molgenis.data.mapper.data.request.GenerateAlgorithmRequest;
 import org.molgenis.data.mapper.data.request.MappingServiceRequest;
 import org.molgenis.data.mapper.mapping.model.AlgorithmResult;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
@@ -134,7 +136,7 @@ public class MappingServiceController extends MolgenisPluginController
 	public String viewMappingProjects(Model model)
 	{
 		model.addAttribute("mappingProjects", mappingService.getAllMappingProjects());
-		model.addAttribute("entityMetaDatas", getEntityMetaDatas());
+		model.addAttribute("entityMetaDatas", getWritableEntityMetaDatas());
 		model.addAttribute("user", SecurityUtils.getCurrentUsername());
 		model.addAttribute("admin", SecurityUtils.currentUserIsSu());
 		model.addAttribute("importerUri", menuReaderService.getMenu().findMenuItemPath(ImportWizardController.ID));
@@ -528,6 +530,28 @@ public class MappingServiceController extends MolgenisPluginController
 		return Lists.newArrayList(relevantAttributes.values());
 	}
 
+	@RequestMapping(method = RequestMethod.POST, value = "/attributemapping/algorithm", consumes = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public String getSuggestedAlgorithm(@RequestBody GenerateAlgorithmRequest generateAlgorithmRequest)
+	{
+		EntityMetaData targetEntityMetaData = dataService.getEntityMetaData(generateAlgorithmRequest
+				.getTargetEntityName());
+
+		EntityMetaData sourceEntityMetaData = dataService.getEntityMetaData(generateAlgorithmRequest
+				.getSourceEntityName());
+
+		AttributeMetaData targetAttribute = targetEntityMetaData.getAttribute(generateAlgorithmRequest
+				.getTargetAttributeName());
+
+		List<AttributeMetaData> sourceAttributes = generateAlgorithmRequest.getSourceAttributes().stream()
+				.map(name -> sourceEntityMetaData.getAttribute(name)).collect(Collectors.toList());
+
+		String generateAlgorithm = algorithmService.generateAlgorithm(targetAttribute, targetEntityMetaData,
+				sourceAttributes, sourceEntityMetaData);
+
+		return generateAlgorithm;
+	}
+
 	/**
 	 * Creates the integrated entity for a mapping project's target
 	 * 
@@ -600,6 +624,7 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("dataExplorerUri", menuReaderService.getMenu().findMenuItemPath(DataExplorerController.ID));
 		model.addAttribute("mappingProject", project);
 		model.addAttribute("entityMapping", entityMapping);
+		model.addAttribute("sourceAttributesSize",Iterables.size(entityMapping.getSourceEntityMetaData().getAtomicAttributes()));
 		model.addAttribute("attributeMapping", attributeMapping);
 		model.addAttribute("attributes",
 				Lists.newArrayList(dataService.getEntityMetaData(source).getAtomicAttributes()));
@@ -745,7 +770,7 @@ public class MappingServiceController extends MolgenisPluginController
 		String sourceAttributeLabelAttribute = null;
 
 		if (sourceAttributeDataType instanceof XrefField || sourceAttributeDataType instanceof MrefField
-				|| targetAttributeDataType instanceof CategoricalField)
+				|| sourceAttributeDataType instanceof CategoricalField)
 		{
 			sourceAttributeEntities = dataService.findAll(dataService.getEntityMetaData(source)
 					.getAttribute(sourceAttribute).getRefEntity().getName());
@@ -915,6 +940,13 @@ public class MappingServiceController extends MolgenisPluginController
 	private List<EntityMetaData> getEntityMetaDatas()
 	{
 		return Lists.newArrayList(Iterables.transform(dataService.getEntityNames(), dataService::getEntityMetaData));
+	}
+
+	private List<EntityMetaData> getWritableEntityMetaDatas()
+	{
+		return getEntityMetaDatas().stream()
+				.filter(emd -> dataService.getCapabilities(emd.getName()).contains(RepositoryCapability.WRITABLE))
+				.collect(Collectors.toList());
 	}
 
 	private boolean hasWritePermission(MappingProject project)

@@ -38,8 +38,8 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 				new QueryImpl().eq(TYPE, SCRIPT_TYPE_JAVASCRIPT_MAGMA), Script.class);
 
 		// select all algorithm templates that can be used with target and sources
-		return StreamSupport.stream(jsScripts.spliterator(), false)
-				.flatMap(script -> toAlgorithmTemplate(script, attrMatches));
+		return StreamSupport.stream(jsScripts.spliterator(), false).flatMap(
+				script -> toAlgorithmTemplate(script, attrMatches));
 	}
 
 	private Stream<AlgorithmTemplate> toAlgorithmTemplate(Script script,
@@ -71,9 +71,13 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 	private AttributeMetaData mapParamToAttribute(ScriptParameter param,
 			Map<AttributeMetaData, ExplainedAttributeMetaData> attrMatches)
 	{
-		return attrMatches.entrySet().stream()
+
+		return attrMatches
+				.entrySet()
+				.stream()
+				.filter(entry -> !entry.getValue().getExplainedQueryStrings().isEmpty())
 				.filter(entry -> StreamSupport.stream(entry.getValue().getExplainedQueryStrings().spliterator(), false)
-						.anyMatch(explain -> explain.getTagName().equalsIgnoreCase(param.getName())))
+						.allMatch(explain -> explain.getTagName().equalsIgnoreCase(param.getName())))
 				.map(entry -> entry.getKey()).findFirst().orElse(null);
 	}
 }

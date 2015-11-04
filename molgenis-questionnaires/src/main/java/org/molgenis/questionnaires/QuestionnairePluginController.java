@@ -1,6 +1,5 @@
 package org.molgenis.questionnaires;
 
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.support.QueryImpl.EQ;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX;
@@ -11,6 +10,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -47,11 +47,11 @@ public class QuestionnairePluginController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String showView(Model model)
 	{
-		Iterable<Entity> questionnaireMeta = runAsSystem(() -> {
-			return QuestionnaireUtils.findQuestionnairesMetaData(dataService);
-		});
+		List<Entity> questionnaireMeta = runAsSystem(() -> Lists.newArrayList(QuestionnaireUtils
+				.findQuestionnairesMetaData(dataService)));
 
-		List<Questionnaire> questionnaires = stream(questionnaireMeta.spliterator(), false)
+		List<Questionnaire> questionnaires = questionnaireMeta
+				.stream()
 				.map(e -> e.getString(EntityMetaDataMetaData.FULL_NAME))
 				.filter(name -> SecurityUtils.currentUserIsSu()
 						|| SecurityUtils.currentUserHasRole(AUTHORITY_ENTITY_WRITE_PREFIX + name.toUpperCase()))

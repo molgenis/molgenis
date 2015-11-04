@@ -1,6 +1,5 @@
 package org.molgenis.data.jpa;
 
-import static org.molgenis.data.RepositoryCapability.UPDATEABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
 import java.io.IOException;
@@ -23,7 +22,6 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
@@ -162,34 +160,6 @@ public class JpaRepository extends AbstractRepository
 
 		return getEntityManager()
 				.find(getEntityClass(), getEntityMetaData().getIdAttribute().getDataType().convert(id));
-	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		String idAttrName = getEntityMetaData().getIdAttribute().getName();
-
-		// TODO why doesn't this work? Should work now (test it)
-		// Query q = new QueryImpl().in(idAttrName, ids);
-		// return findAll(q);
-
-		EntityManager em = getEntityManager();
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-
-		@SuppressWarnings("unchecked")
-		CriteriaQuery<Entity> cq = (CriteriaQuery<Entity>) cb.createQuery(getEntityClass());
-
-		@SuppressWarnings("unchecked")
-		Root<Entity> from = (Root<Entity>) cq.from(getEntityClass());
-		cq.select(from).where(from.get(idAttrName).in(Lists.newArrayList(ids)));
-
-		TypedQuery<Entity> tq = em.createQuery(cq);
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("finding by key " + getEntityClass().getSimpleName() + " [" + StringUtils.join(ids, ',') + "]");
-		}
-		return tq.getResultList();
 	}
 
 	@Override
@@ -708,6 +678,6 @@ public class JpaRepository extends AbstractRepository
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return Sets.newHashSet(UPDATEABLE, WRITABLE);
+		return Sets.newHashSet(WRITABLE);
 	}
 }

@@ -23,24 +23,36 @@ public abstract class BatchingIterable<T> implements Iterable<T>
 		return new Iterator<T>()
 		{
 			private int offset = 0;
+			/**
+			 * Index in this batch of last element returned by next(), -1 if next() was not called for this batch
+			 */
+			private int index = -1;
 			private Iterator<T> it = getBatch(offset, batchSize).iterator();
 
 			@Override
 			public boolean hasNext()
 			{
-				if (!it.hasNext())
+				boolean hasNext = it.hasNext();
+
+				// retrieve new batch if current batch has no more items and the number of items in this batch equals
+				// the batch size
+				if (!hasNext && index == batchSize - 1)
 				{
 					offset += batchSize;
 					it = getBatch(offset, batchSize).iterator();
+					hasNext = it.hasNext();
+					index = -1;
 				}
 
-				return it.hasNext();
+				return hasNext;
 			}
 
 			@Override
 			public T next()
 			{
-				return it.next();
+				T element = it.next();
+				++index;
+				return element;
 			}
 
 			@Override
@@ -48,7 +60,6 @@ public abstract class BatchingIterable<T> implements Iterable<T>
 			{
 				throw new UnsupportedOperationException();
 			}
-
 		};
 	}
 

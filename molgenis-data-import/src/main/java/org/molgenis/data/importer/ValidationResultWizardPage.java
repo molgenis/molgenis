@@ -12,7 +12,9 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
@@ -48,6 +50,10 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 
 	@Autowired
 	UserAccountService userAccountService;
+
+	@Autowired
+	MolgenisUserService userService;
+
 	private List<MolgenisGroup> groups;
 
 	@Override
@@ -102,7 +108,8 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 		// Convert to list because it's less impossible use in FreeMarker
 		if (!userAccountService.getCurrentUser().getSuperuser())
 		{
-			groups = Lists.newArrayList(userAccountService.getCurrentUserGroups());
+			String username = SecurityUtils.getCurrentUsername();
+			groups = RunAsSystemProxy.runAsSystem(() -> Lists.newArrayList(userService.getUserGroups(username)));
 		}
 		else
 		{
@@ -110,6 +117,7 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 		}
 
 		((ImportWizard) wizard).setGroups(groups);
+
 		return null;
 	}
 }

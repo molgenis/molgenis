@@ -1,5 +1,7 @@
 package org.molgenis.data.transaction;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
@@ -19,8 +21,8 @@ public class TransactionLogRepositoryDecorator implements Repository
 
 	public TransactionLogRepositoryDecorator(Repository decorated, TransactionLogService transactionLogService)
 	{
-		this.decorated = decorated;
-		this.transactionLogService = transactionLogService;
+		this.decorated = requireNonNull(decorated);
+		this.transactionLogService = requireNonNull(transactionLogService);
 	}
 
 	@Override
@@ -204,4 +206,21 @@ public class TransactionLogRepositoryDecorator implements Repository
 		decorated.clearCache();
 	}
 
+	@Override
+	public void create()
+	{
+		decorated.create();
+	}
+
+	@Override
+	public void drop()
+	{
+		decorated.drop();
+	}
+
+	@Override
+	public void rebuildIndex()
+	{
+		decorated.rebuildIndex();
+	}
 }
