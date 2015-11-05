@@ -131,9 +131,10 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 	@Test
 	public void testGenerate()
 	{
+		String expected = "var SUM_WEIGHT;\nif($('MESHED_POTATO').isNull() &&$('MESHED_POTATO_1').isNull()){\n\tSUM_WEIGHT = new newValue(null);\n\tSUM_WEIGHT.value();\n}else{\n\tSUM_WEIGHT = new newValue(0);\n\tSUM_WEIGHT.plus($('MESHED_POTATO').map({\"1\":0,\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value());\n\tSUM_WEIGHT.plus($('MESHED_POTATO_1').map({\"1\":0.1,\"2\":0.5,\"3\":1,\"4\":3,\"5\":5.5,\"6\":7,\"7\":17.5,\"8\":31.5,\"9\":42}, null, null).value());\n\tSUM_WEIGHT.group([0,1,2,6,7]).map({\"-0\":\"4\",\"0-1\":\"4\",\"1-2\":\"3\",\"2-6\":\"2\",\"6-7\":\"1\",\"7+\":\"1\"}, null, null).value();\n}";
 		String generateMultipleAttributes = categoryAlgorithmGenerator.generate(targetAttributeMetaData,
 				Arrays.asList(sourceAttributeMetaData, sourceAttributeMetaData1));
-		System.out.println(generateMultipleAttributes);
+		Assert.assertEquals(generateMultipleAttributes, expected);
 	}
 
 	@Test
@@ -172,9 +173,9 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 	@Test
 	public void testHomogenousGenerator()
 	{
-		String expectedAlgorithm = "var SUM_WEIGHT = new newValue(0);\nSUM_WEIGHT.plus($('MESHED_POTATO_1').map({\"1\":0.1,\"2\":0.5,\"3\":1,\"4\":3,\"5\":5.5,\"6\":7,\"7\":17.5,\"8\":31.5,\"9\":42}, null, null).value());\nSUM_WEIGHT.plus($('MESHED_POTATO').map({\"1\":0,\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value());\nSUM_WEIGHT.group([0,1,2,6,7]).map({\"-0\":\"4\",\"0-1\":\"4\",\"1-2\":\"3\",\"2-6\":\"2\",\"6-7\":\"1\",\"7+\":\"1\"}, null, null).value();";
+		String expectedAlgorithm = "var SUM_WEIGHT;\nif($('MESHED_POTATO').isNull() &&$('MESHED_POTATO_1').isNull()){\n\tSUM_WEIGHT = new newValue(null);\n\tSUM_WEIGHT.value();\n}else{\n\tSUM_WEIGHT = new newValue(0);\n\tSUM_WEIGHT.plus($('MESHED_POTATO').map({\"1\":0,\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value());\n\tSUM_WEIGHT.plus($('MESHED_POTATO_1').map({\"1\":0.1,\"2\":0.5,\"3\":1,\"4\":3,\"5\":5.5,\"6\":7,\"7\":17.5,\"8\":31.5,\"9\":42}, null, null).value());\n\tSUM_WEIGHT.group([0,1,2,6,7]).map({\"-0\":\"4\",\"0-1\":\"4\",\"1-2\":\"3\",\"2-6\":\"2\",\"6-7\":\"1\",\"7+\":\"1\"}, null, null).value();\n}";
 		Assert.assertEquals(categoryAlgorithmGenerator.generate(targetAttributeMetaData,
-				Arrays.asList(sourceAttributeMetaData1, sourceAttributeMetaData)), expectedAlgorithm);
+				Arrays.asList(sourceAttributeMetaData, sourceAttributeMetaData1)), expectedAlgorithm);
 	}
 
 	@Test
@@ -185,5 +186,23 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 				categoryAlgorithmGenerator.generate(targetAttributeMetaData,
 						Arrays.asList(sourceAttributeMetaData1, sourceAttributeMetaData, sourceAttributeMetaData2)),
 				expectedAlgorithm);
+	}
+
+	@Test
+	public void testCreateAlgorithmNullCheck()
+	{
+		String actual = "var SUM_WEIGHT;\nif($('MESHED_POTATO_1').isNull() &&$('MESHED_POTATO').isNull() &&$('Stroke').isNull()){\n\tSUM_WEIGHT = new newValue(null);\n\tSUM_WEIGHT.value();\n}";
+		String createAlgorithmNullCheck = categoryAlgorithmGenerator.createAlgorithmNullCheckIfStatement(
+				Arrays.asList(sourceAttributeMetaData1, sourceAttributeMetaData, sourceAttributeMetaData2));
+		Assert.assertEquals(createAlgorithmNullCheck, actual);
+	}
+
+	@Test
+	void testCreateAlgorithmElseBlock()
+	{
+		String actual = "else{\n\tSUM_WEIGHT = new newValue(0);\n\tSUM_WEIGHT.plus($('MESHED_POTATO_1').map({\"1\":0.1,\"2\":0.5,\"3\":1,\"4\":3,\"5\":5.5,\"6\":7,\"7\":17.5,\"8\":31.5,\"9\":42}, null, null).value());\n\tSUM_WEIGHT.plus($('MESHED_POTATO').map({\"1\":0,\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value());\n\tSUM_WEIGHT.group([0,1,2,6,7]).map({\"-0\":\"4\",\"0-1\":\"4\",\"1-2\":\"3\",\"2-6\":\"2\",\"6-7\":\"1\",\"7+\":\"1\"}, null, null).value();\n}";
+		String createAlgorithmElseBlock = categoryAlgorithmGenerator.createAlgorithmElseBlock(targetAttributeMetaData,
+				Arrays.asList(sourceAttributeMetaData1, sourceAttributeMetaData, sourceAttributeMetaData2));
+		Assert.assertEquals(createAlgorithmElseBlock, actual);
 	}
 }

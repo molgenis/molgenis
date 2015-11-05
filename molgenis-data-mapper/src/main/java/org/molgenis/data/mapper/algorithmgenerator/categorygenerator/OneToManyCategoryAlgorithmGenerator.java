@@ -46,21 +46,8 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 
 		if (suitableForGeneratingWeightedMap(targetAttribute, sourceAttributes))
 		{
-			for (AttributeMetaData sourceAttribute : sourceAttributes)
-			{
-				String generateWeightedMap = generateWeightedMap(sourceAttribute);
-
-				if (StringUtils.isNotEmpty(generateWeightedMap))
-				{
-					if (stringBuilder.length() == 0)
-					{
-						stringBuilder.append("var SUM_WEIGHT = new newValue(0);\n");
-					}
-
-					stringBuilder.append("SUM_WEIGHT.plus(").append(generateWeightedMap).append(");\n");
-				}
-			}
-			stringBuilder.append("SUM_WEIGHT").append(groupCategoryValues(targetAttribute));
+			stringBuilder.append(createAlgorithmNullCheckIfStatement(sourceAttributes))
+					.append(createAlgorithmElseBlock(targetAttribute, sourceAttributes));
 		}
 		else
 		{
@@ -71,6 +58,42 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 			}
 		}
 
+		return stringBuilder.toString();
+	}
+
+	String createAlgorithmElseBlock(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		if (sourceAttributes.size() > 0)
+		{
+			stringBuilder.append("else{\n").append("\tSUM_WEIGHT = new newValue(0);\n");
+			for (AttributeMetaData sourceAttribute : sourceAttributes)
+			{
+				String generateWeightedMap = generateWeightedMap(sourceAttribute);
+
+				if (StringUtils.isNotEmpty(generateWeightedMap))
+				{
+
+					stringBuilder.append("\tSUM_WEIGHT.plus(").append(generateWeightedMap).append(");\n");
+				}
+			}
+			stringBuilder.append("\tSUM_WEIGHT").append(groupCategoryValues(targetAttribute)).append("\n}");
+		}
+		return stringBuilder.toString();
+	}
+
+	String createAlgorithmNullCheckIfStatement(List<AttributeMetaData> sourceAttributes)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		if (sourceAttributes.size() > 0)
+		{
+			stringBuilder.append("var SUM_WEIGHT;\n").append("if(");
+			sourceAttributes.stream().forEach(
+					attribute -> stringBuilder.append("$('").append(attribute.getName()).append("').isNull() &&"));
+			stringBuilder.delete(stringBuilder.length() - 3, stringBuilder.length());
+			stringBuilder.append("){\n").append("\tSUM_WEIGHT = new newValue(null);\n")
+					.append("\tSUM_WEIGHT.value();\n}");
+		}
 		return stringBuilder.toString();
 	}
 
