@@ -2,13 +2,14 @@
 #
 # Molgenis python api client. 
 #
+# TO FIX: the __enter__ __exit__ construct means that Connect_Molgenis instance will not know which functions are available
 ####################################################################
 
 import requests
 import json
 import re
 import os.path
-from . import security
+from molgenis_api import security
 import timeit
 import time
 import logging
@@ -29,6 +30,7 @@ class Connect_Molgenis():
         self.only_warn_duplicates = only_warn_duplicates
         self.profile = profile
     def __enter__(self):
+        self.enter = True
         class Connection():
             """Actual Class with functionallity. Some simple methods for adding, updating and retrieving rows from Molgenis though the REST API
             BELOW IS OUTDATED DOCS
@@ -39,13 +41,13 @@ class Connect_Molgenis():
             Example:
                 from molgenis_api import molgenis
                 # make a connection
-                connection = connection = molgenis.Connect_Molgenis()('http://localhost:8080', 'admin', 'admin')
-                # add a row to the entity public_rnaseq_Individuals
-                connection.add_entity_row('public_rnaseq_Individuals',{'id':'John Doe','age':'26', 'gender':'Male'})
-                # get the rows from public_rnaseq_Individuals where gender = Male
-                print connection.query_entity_rows('public_rnaseq_Individuals',[{'field':'gender', 'operator':'EQUALS', 'value':'Male'}])['items'] 
-                # update row in public_rnaseqIndivduals where id=John Doe -> set gender to Female
-                connection.update_entity_row('public_rnaseq_Individuals',[{'field':'id', 'operator':'EQUALS', 'value':'John Doe'}], {'gender':'Female'})  
+                with open molgenis.Connect_Molgenis()('http://localhost:8080') as connection:
+                    # add a row to the entity public_rnaseq_Individuals
+                    connection.add_entity_row('public_rnaseq_Individuals',{'id':'John Doe','age':'26', 'gender':'Male'})
+                    # get the rows from public_rnaseq_Individuals where gender = Male
+                    print connection.query_entity_rows('public_rnaseq_Individuals',[{'field':'gender', 'operator':'EQUALS', 'value':'Male'}])['items'] 
+                    # update row in public_rnaseqIndivduals where id=John Doe -> set gender to Female
+                    connection.update_entity_row('public_rnaseq_Individuals',[{'field':'id', 'operator':'EQUALS', 'value':'John Doe'}], {'gender':'Female'})  
             """
         
             def __init__(self, server_url, remove_pass_file = True, new_pass_file = True, password_location = '~',log_file = 'molgenis.log', logging_level='DEBUG', logfile_mode = 'w', only_warn_duplicates=False):
@@ -82,11 +84,13 @@ class Connect_Molgenis():
                         security.remove_secrets_file()
                     security.require_username('Username')
                     security.require_password('Password')
-                    self.api_url = server_url+'/api/v1'
+                    self.api_v1_url = server_url+'/api/v1'
+                    self.api_v2_url = server_url+'/api/v2'
                     self._construct_login_header()
                     self.entity_meta_data = {}
                     self.column_meta_data = {}
                     self.added_rows = 0
+                    self.added_files = 0
                     self.time = None
                     self.only_warn_duplicates = only_warn_duplicates
                     self.remove_pass_file = remove_pass_file
@@ -106,29 +110,29 @@ class Connect_Molgenis():
                 '''
                 self.session = requests.Session()
                 data = json.dumps({'username': security.retrieve('Username'), 'password': security.retrieve('Password')})
-                self.logger.debug('Trying to log in with data from '+str(security.PASSPHRASE_FILE) +' to: '+str(self.api_url)+'/login/ with username: '+'*'*len(security.retrieve('Username'))+' password: '+'*'*len(security.retrieve('Password')))
-                server_response = self.session.post( self.api_url+'/login/',
+                self.logger.debug('Trying to log in with data from '+str(security.PASSPHRASE_FILE) +' to: '+str(self.api_v1_url)+'/login/ with username: '+'*'*len(security.retrieve('Username'))+' password: '+'*'*len(security.retrieve('Password')))
+                server_response = self.session.post( self.api_v1_url+'/login/',
                                                data=data, headers={'Content-type':'application/json'} )
                 try:
-                    self.check_server_response(server_response, 'retrieve token',url_used=self.api_url+'/login/')
+                    self.check_server_response(server_response, 'retrieve token',url_used=self.api_v1_url+'/login/')
                 except Exception as e:
                     if 'Unknown entity [login]' in str(e):
                         # check if http should be https or visa versa, otherwise try adding https:// in front
-                        if self.api_url.startswith('https://'): 
-                            self.logger.debug('Replacing https:// with http:// in api_url: '+str(self.api_url))
-                            self.api_url = self.api_url.lstrip('https://')
-                            self.api_url = 'http://'+self.api_url
-                        elif self.api_url.startswith('http://'): 
-                            self.logger.debug('Replacing http:// with https:// in api_url: '+str(self.api_url))
-                            self.api_url = self.api_url.lstrip('http://')
-                            self.api_url = 'https://'+self.api_url
+                        if self.api_v1_url.startswith('https://'): 
+                            self.logger.debug('Replacing https:// with http:// in api_v1_url: '+str(self.api_v1_url))
+                            self.api_v1_url = self.api_v1_url.lstrip('https://')
+                            self.api_v1_url = 'http://'+self.api_v1_url
+                        elif self.api_v1_url.startswith('http://'): 
+                            self.logger.debug('Replacing http:// with https:// in api_v1_url: '+str(self.api_v1_url))
+                            self.api_v1_url = self.api_v1_url.lstrip('http://')
+                            self.api_v1_url = 'https://'+self.api_v1_url
                         else:
-                            self.logger.debug('Adding https:// to api_url: '+str(self.api_url))
-                            self.api_url = 'https://'+self.api_url
-                        self.logger.debug('Trying to log in with data from '+str(security.PASSPHRASE_FILE) +' to: '+str(self.api_url)+'/login/ with username: '+'*'*len(security.retrieve('Username'))+' password: '+'*'*len(security.retrieve('Password')))
-                        server_response = requests.post( self.api_url+'/login/',
+                            self.logger.debug('Adding https:// to api_v1_url: '+str(self.api_v1_url))
+                            self.api_v1_url = 'https://'+self.api_v1_url
+                        self.logger.debug('Trying to log in with data from '+str(security.PASSPHRASE_FILE) +' to: '+str(self.api_v1_url)+'/login/ with username: '+'*'*len(security.retrieve('Username'))+' password: '+'*'*len(security.retrieve('Password')))
+                        server_response = requests.post( self.api_v1_url+'/login/',
                                                    data=data, headers={'Content-type':'application/json'} )
-                        self.check_server_response(server_response, 'retrieve token',url_used=self.api_url+'/login/')
+                        self.check_server_response(server_response, 'retrieve token',url_used=self.api_v1_url+'/login/')
                     else:
                         raise
                 headers = {'Content-type':'application/json', 'x-molgenis-token': server_response.json()['token'], 'Accept':'application/json'}
@@ -137,7 +141,7 @@ class Connect_Molgenis():
                 return headers
             
             def logout(self):
-                server_response = self.session.get(self.api_url+'/logout/')
+                server_response = self.session.get(self.api_v1_url+'/logout/')
                 self.check_server_response(server_response, 'logout')
                 return server_response
             
@@ -200,6 +204,8 @@ class Connect_Molgenis():
                     message = type_of_request+' -> '+str(server_response)+' - '+server_response.reason 
                     if 'Add row to entity' in type_of_request:
                         message += '. Total added rows this session: '+str(self.added_rows)
+                    elif 'Add a file' in type_of_request:
+                        message += '. Total addef files this session: '+str(self.added_files)
                     self.logger.debug(message)
                     return True
                 else:
@@ -208,7 +214,7 @@ class Connect_Molgenis():
                     # there are error messages in the response object, otherwise just warn that there is a different response than expected
                     self.logger.warning('Expected <Response [200]>, <Response 201> or <Response 204>, got '+str(server_response)+'\nReason: '+server_response.reason)
                     return False
-            
+                            
             def validate_data(self, entity_name, data):
                 '''Validate that the right column names are given, since otherwise if wrong columns are used it will create empty rows. 
                 Only the column names and auto ID get checked, not value type, as server will raise an error if wrong type is tried to be inserted
@@ -243,11 +249,31 @@ class Connect_Molgenis():
                 data = dict([a, str(x)] for a, x in data.items() if len(str(x).strip())>0)
                 return data
             
-            def add_entity_row_or_file_server_response(self, entity_name, data, server_response):
+            def add_entity_row_or_file_server_response(self, entity_name, data, server_response, add_type, api_version='v1'):
+                '''Add datetime and added by to entity row or file row
+                
+                entity_name (string): Name of the entity
+                data (dict): data that was added
+                server_resonse (obj): Server response object
+                add_type (string): Either entity_row or file'''
                 try:
-                    self.check_server_response(server_response, time.strftime('%H:%M:%S', time.gmtime(timeit.default_timer()-self.login_time))+ ' - Add row to entity '+entity_name, entity_used=entity_name, data_used=json.dumps(data))
-                    added_id = server_response.headers['location'].split('/')[-1]
+                    if add_type == 'entity_row': 
+                        message = time.strftime('%H:%M:%S', time.gmtime(timeit.default_timer()-self.login_time))+ ' - Add row to entity '+entity_name
+                    elif add_type == 'file':
+                        message = time.strftime('%H:%M:%S', time.gmtime(timeit.default_timer()-self.login_time))+ ' - Add a file to '+entity_name
+                    else:
+                        raise ValueError('add_type can only be entity_row or file')
+                    self.check_server_response(server_response, message, entity_used=entity_name, data_used=json.dumps(data))
+                    if api_version == 'v1':
+                        added_id = server_response.headers['location'].split('/')[-1]
+                    elif api_version == 'v2':
+                        # return list of IDs
+                        added_ids = server_response.json()['location'].split('q=id=in=(')[1].split(')')[0].replace('"','').split(',')
+                        return added_ids
+                    else:
+                        raise ValueError('That api version does not exist: '+str(api_version))
                 except Exception as e:
+                    raise
                     if self.only_warn_duplicates:
                         if 'Duplicate value' in str(e):
                             message = 'Duplicate value not added, instead return id of already existing row'
@@ -266,12 +292,15 @@ class Connect_Molgenis():
               
             _add_datetime_default = False
             _added_by_default = False
+             
+            _add_datetime_default = False
+            _added_by_default = False
             def add_entity_row(self, entity_name, data, validate_json=False, add_datetime=None, datetime_column='datetime_added', added_by=None, added_by_column='added_by'):
                 '''Add a row to an entity
                 
                 Args:
                     entity_name (string): Name of the entity where row should be added
-                    json_data (dict): Key = column name, value = column value
+                    data (dict): Key = column name, value = column value
                     validate_json (bool): If True, check if the given data keys correspond with the column names of entity_name. (def: False)
                     add_datetime (bool): If True, add a datetime to the column <datetime_column> (def: False)
                     datetime_column (str): column name where to add datetime
@@ -280,26 +309,83 @@ class Connect_Molgenis():
                     
                 Returns:
                     added_id (string): Id of the row that got added
+                
+                Deprecated:
+                    Can add one row through add_multiple_entity_rows as well
                 '''
                 if not add_datetime:
                     add_datetime = self._add_datetime_default
                 if not added_by:
                     added_by = self._added_by_default
-                if timeit.default_timer()-self.login_time > 30*60:
+                if timeit.default_timer()-self.login_time > 15*60:
                     # molgenis login head times out after a certain time, so after 30 minutes resend login request
                     self._construct_login_header()
-                # make a string of json data (dictionary) with key=column name and value=value you want (works for 1 row)
-                # post to the entity with the json data
                 if validate_json:
                     self.validate_data(entity_name, data)
                 data = self._sanitize_data(data, add_datetime, datetime_column, added_by, added_by_column)
-                request_url = self.api_url+'/'+entity_name+'/'
-                server_response = self.session.post(request_url, data=json.dumps(data))
-                self.added_rows += 1
-                added_id = self.add_entity_row_or_file_server_response(entity_name, data, server_response)
+                request_url = self.api_v1_url+'/'+entity_name+'/'
+                # sometimes get molgenis transaction error, if so try again
+                while True:
+                    try:
+                        # post to the entity with the json data
+                        server_response = self.session.post(request_url, data=json.dumps(data))
+                        self.added_rows += 1
+                        added_id = self.add_entity_row_or_file_server_response(entity_name, data, server_response,'entity_row')
+                        break
+                    except Exception as e:
+                        if not "for attribute 'molgenisTransactionLog' of entity 'MolgenisTransactionLogEntry" in str(e):
+                            raise
                 return added_id
-            
-            def add_file(self, file_path, description, entity_name, extra_data=None, file_name=None, add_datetime=False, datetime_column='datetime_added', added_by=None, added_by_column='added_by'):
+            def add_entity_rows(self, entity_name, data_list, validate_json=False, add_datetime=None, datetime_column='datetime_added', added_by=None, added_by_column='added_by'):
+                '''Add one or multiple rows to an entity
+                
+                Args:
+                    entity_name (string): Name of the entity where row should be added
+                    data_list (list): List of dicts with Key = column name, value = column value
+                    validate_json (bool): If True, check if the given data keys correspond with the column names of entity_name. (def: False)
+                    add_datetime (bool): If True, add a datetime to the column <datetime_column> (def: False)
+                    datetime_column (str): column name where to add datetime
+                    added_by (bool): If true, add the login name of the person that updated the record
+                    added_by_column (string): column name where to add name of person that updated record
+                    
+                Returns:
+                    added_ids (list): List of IDs of the rows that got added
+                    
+                Example:
+                    >>> with Connect_Molgenis('https://localhoost:8080') as connection:
+                    >>>     print (connection.add_entity_rows('EntityName',[{'column_A':'row 1','column_B', 'row 1'},{'column_A':'row 2','column_B':'row 2'}])
+                    >>> with Connect_Molgenis('https://localhoost:8080') as connection:
+                    >>>>     print (connection.add_entity_rows('EntityName',{'column_A':'row 1','column_B', 'row 1'})
+                    AAAACUGUI6T5KJXRMQK476QAAE
+                    
+                '''
+                if not isinstance(data_list,list):
+                    data_list = [data_list]
+                if not add_datetime:
+                    add_datetime = self._add_datetime_default
+                if not added_by:
+                    added_by = self._added_by_default
+                if timeit.default_timer()-self.login_time > 15*60:
+                    # molgenis login head times out after a certain time, so after 30 minutes resend login request
+                    self._construct_login_header()
+                if validate_json:
+                    for data in data_list:
+                        self.validate_data(entity_name, data)
+                sanitized_data_list = [self._sanitize_data(data, add_datetime, datetime_column, added_by, added_by_column) for data in data_list]
+                request_url = self.api_v2_url+'/'+entity_name+'/'
+                # sometimes get molgenis transaction error, if so try again
+                while True:
+                    try:
+                        # post to the entity with the json data
+                        server_response = self.session.post(request_url, data=json.dumps({"entities":sanitized_data_list}))
+                        self.added_rows += 1
+                        added_id = self.add_entity_row_or_file_server_response(entity_name, data_list, server_response,'entity_row','v2')
+                        break
+                    except Exception as e:
+                        if not "for attribute 'molgenisTransactionLog' of entity 'MolgenisTransactionLogEntry" in str(e):
+                            raise
+                return added_id
+            def add_file(self, file_path, description, entity_name, extra_data=None, file_name=None, add_datetime=False, datetime_column='datetime_added', added_by=None, added_by_column='added_by', io_stream = None):
                 '''Add a file to entity File.
                 
                 Args:
@@ -312,25 +398,20 @@ class Connect_Molgenis():
                     added_by_column (string): column name where to add name of person that updated record (def: added_by)
                     add_datetime (bool): If true, add the datetime that the file was added (def: False)
                     add_datetime_column (string): column name where to add datetime (def: datetime_added)
-                    
+                    io_stream (bytes): Send a file like object to use instead of file path
                 Returns:
                     file_id (string): ID if the file that got uploaded (for xref)
                     
                 Example:
                     >>> from molgenis_api import molgenis
-                    >>> connection = molgenis.Connect_Molgenis('http://localhost:8080', 'admin', 'admin')
-                    >>> print connection.add_file('/Users/Niek/UMCG/test/data/ATACseq/rundir/QC/FastQC_0.sh')
+                    >>> with open molgenis.Connect_Molgenis('http://localhost:8080') as connection:
+                            print connection.add_file('/Users/Niek/UMCG/test/data/ATACseq/rundir/QC/FastQC_0.sh')
                     AAAACTWVCYDZ6YBTJMJDWXQAAE
                 '''
                 if not add_datetime:
                     add_datetime = self._add_datetime_default
                 if not added_by:
                     added_by = self._added_by_default
-                if not file_name:
-                    file_name = os.path.basename(file_path)
-                if not os.path.isfile(file_path):
-                    self.logger.error('File not found: '+str(file_path))
-                    raise IOError('File not found: '+str(file_path))
                 file_post_header = copy.deepcopy(self.session.headers)
                 old_header = copy.deepcopy(self.session.headers)
                 del(file_post_header['Accept'])
@@ -340,11 +421,22 @@ class Connect_Molgenis():
                 if extra_data:
                     data.update(extra_data)
                 data = self._sanitize_data(data, add_datetime, datetime_column, added_by, added_by_column)
-                server_response = self.session.post(self.api_url+'/'+entity_name, 
-                                                files={'attachment':(os.path.basename(file_path), open(file_path,'rb'))},
-                                                data=data)
+                if io_stream:
+                    server_response = self.session.post(self.api_v1_url+'/'+entity_name, 
+                                                    files={'attachment':(os.path.basename(file_path), io_stream)},
+                                                    data=data)
+                else:
+                    if not file_name:
+                        file_name = os.path.basename(file_path)
+                    if not os.path.isfile(file_path):
+                        self.logger.error('File not found: '+str(file_path))
+                        raise IOError('File not found: '+str(file_path))
+                    server_response = self.session.post(self.api_v1_url+'/'+entity_name, 
+                                                    files={'attachment':(os.path.basename(file_path), open(file_path,'rb'))},
+                                                    data=data)
+                self.added_files += 1
                 self.session.headers = old_header
-                added_id = self.add_entity_row_or_file_server_response(entity_name, data, server_response)
+                added_id = self.add_entity_row_or_file_server_response(entity_name, data, server_response,'file')
                 return added_id
                 
             def query_entity_rows(self, entity_name, query):
@@ -364,7 +456,7 @@ class Connect_Molgenis():
                     self.logger.error('Can\'t search with empty query')
                     raise ValueError('Can\'t search with empty query')
                 json_query = json.dumps({'q':query})
-                server_response = self.session.post(self.api_url+'/'+entity_name+'?_method=GET', data = json_query)
+                server_response = self.session.post(self.api_v1_url+'/'+entity_name+'?_method=GET', data = json_query)
                 server_response_json = server_response.json()
                 self.check_server_response(server_response, 'Get rows from entity',entity_used=entity_name, query_used=json_query)
                 if server_response_json['total'] >= server_response_json['num']:
@@ -389,7 +481,7 @@ class Connect_Molgenis():
                 TODO:
                     More difficult get queries
                 '''
-                server_response = self.session.get(self.api_url+'/'+entity_name)
+                server_response = self.session.get(self.api_v1_url+'/'+entity_name)
                 server_response_json = server_response.json()
                 self.check_server_response(server_response, 'Get rows from entity',entity_used=entity_name)
                 if server_response_json['total'] >= server_response_json['num']:
@@ -426,8 +518,8 @@ class Connect_Molgenis():
                     if query_list:
                         logging.warn('Both row_id and query_list set, will use only row_id')
                     for key in data:
-                        server_response = self.session.put(self.api_url+'/'+entity_name+'/'+str(row_id)+'/'+key, data='"'+data[key]+'"')
-                        self.check_server_response(server_response, 'Update entity: %s, attribute: %s' % (entity_name,id_attribute),data_used=[self.api_url+'/'+entity_name+'/'+str(row_id)+'/'+key, '"'+data[key]+'"'],entity_used=entity_name)                
+                        server_response = self.session.put(self.api_v1_url+'/'+entity_name+'/'+str(row_id)+'/'+key, data='"'+data[key]+'"')
+                        self.check_server_response(server_response, 'Update entity: %s, attribute: %s' % (entity_name,id_attribute),data_used=[self.api_v1_url+'/'+entity_name+'/'+str(row_id)+'/'+key, '"'+data[key]+'"'],entity_used=entity_name)                
                         server_response_list.append(server_response)
                     return server_response_list
                 elif query_list:
@@ -439,11 +531,10 @@ class Connect_Molgenis():
                         self.logger.error('Query returned 0 results, no row to update.')
                         raise Exception('Query returned 0 results, no row to update.')
                     for entity_item in entity_data['items']:
-                        id_attribute = entity_item[id_attribute]
                         for key in data:
-                            server_response = self.session.put(self.api_url+'/'+entity_name+'/'+str(entity_item[str(id_attribute)])+'/'+key, data='"'+data[key]+'"')
+                            server_response = self.session.put(self.api_v1_url+'/'+entity_name+'/'+str(entity_item[str(id_attribute)])+'/'+key, data='"'+data[key]+'"')
                             server_response_list.append(server_response)
-                            self.check_server_response(server_response, 'Update entity: %s, attribute: %s' % (entity_name,id_attribute), query_used=queries,data_used=[self.api_url+'/'+entity_name+'/'+str(entity_item[str(id_attribute)])+'/'+key, '"'+data[key]+'"'],entity_used=entity_name)                
+                            self.check_server_response(server_response, 'Update entity: %s, attribute: %s' % (entity_name,id_attribute), query_used=queries,data_used=[self.api_v1_url+'/'+entity_name+'/'+str(entity_item[str(id_attribute)])+'/'+key, '"'+data[key]+'"'],entity_used=entity_name)                
                     return server_response_list
                 else:
                     raise ValueError('update_entity_rows function called without setting either row_id or query_list (one of the two needed to know which row to update)')
@@ -459,7 +550,7 @@ class Connect_Molgenis():
                 '''
                 if entity_name in self.entity_meta_data:
                     return self.entity_meta_data[entity_name]
-                server_response = self.session.get(self.api_url+'/'+entity_name+'/meta')
+                server_response = self.session.get(self.api_v1_url+'/'+entity_name+'/meta')
                 self.check_server_response(server_response, 'Get meta data of entity',entity_used=entity_name)
                 entity_meta_data = server_response.json()
                 self.entity_meta_data[entity_name] = entity_meta_data
@@ -493,7 +584,7 @@ class Connect_Molgenis():
                 '''
                 if entity_name+column_name in self.column_meta_data:
                     return self.column_meta_data[entity_name+column_name]
-                server_response = self.session.get(self.api_url+'/'+entity_name+'/meta/'+column_name)
+                server_response = self.session.get(self.api_v1_url+'/'+entity_name+'/meta/'+column_name)
                 self.check_server_response(server_response, 'Get meta data of column',entity_used=entity_name,column_used=column_name)
                 column_meta_data = server_response.json()
                 self.column_meta_data[entity_name+column_name] = column_meta_data
@@ -507,7 +598,7 @@ class Connect_Molgenis():
                 '''Get info of all entities 
                 '''
                 raise NotImplementedError('Not implemented yet, returns a max number (~450ish) entities, so if more entities are present (e.g. many packages available), not all entities are returned')
-                server_response = self.session.get(self.api_url+'/entities/')
+                server_response = self.session.get(self.api_v1_url+'/entities/')
                 self.check_server_response(server_response, 'Get info from all entities')
                 return server_response
             
@@ -565,7 +656,7 @@ class Connect_Molgenis():
                 id_attribute = self.get_id_attribute(entity_name)
                 for rows in entity_data['items']:
                     row_id = rows[id_attribute]
-                    server_response = self.session.delete(self.api_url+'/'+entity_name+'/'+str(row_id)+'/')
+                    server_response = self.session.delete(self.api_v1_url+'/'+entity_name+'/'+str(row_id)+'/')
                     self.check_server_response(server_response, 'Delete entity row',entity_used=entity_name,query_used=query_used)
                     server_response_list.append(server_response)
                 return server_response_list
