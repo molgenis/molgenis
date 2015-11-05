@@ -89,10 +89,9 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 		{
 			stringBuilder.append("var SUM_WEIGHT;\n").append("if(");
 			sourceAttributes.stream().forEach(
-					attribute -> stringBuilder.append("$('").append(attribute.getName()).append("').isNull() &&"));
-			stringBuilder.delete(stringBuilder.length() - 3, stringBuilder.length());
-			stringBuilder.append("){\n").append("\tSUM_WEIGHT = new newValue(null);\n")
-					.append("\tSUM_WEIGHT.value();\n}");
+					attribute -> stringBuilder.append("$('").append(attribute.getName()).append("').isNull() && "));
+			stringBuilder.delete(stringBuilder.length() - 4, stringBuilder.length());
+			stringBuilder.append("){\n").append("\tSUM_WEIGHT = new newValue();\n").append("\tSUM_WEIGHT.value();\n}");
 		}
 		return stringBuilder.toString();
 	}
