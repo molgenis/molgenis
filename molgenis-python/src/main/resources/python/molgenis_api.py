@@ -2,7 +2,6 @@
 #
 # Molgenis python api client. 
 #
-# TO FIX: the __enter__ __exit__ construct means that Connect_Molgenis instance will not know which functions are available
 ####################################################################
 
 import requests
@@ -378,7 +377,7 @@ class Connect_Molgenis():
                     try:
                         # post to the entity with the json data
                         server_response = self.session.post(request_url, data=json.dumps({"entities":sanitized_data_list}))
-                        self.added_rows += 1
+                        self.added_rows += len(sanitized_data_list)
                         added_id = self.add_entity_row_or_file_server_response(entity_name, data_list, server_response,'entity_row','v2')
                         break
                     except Exception as e:
@@ -677,3 +676,4 @@ class Connect_Molgenis():
     
     def __exit__(self, exc_type, exc_value, traceback):
         self.molgenis_connection_obj.remove_password_files()
+
