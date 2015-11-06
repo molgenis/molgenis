@@ -10,6 +10,7 @@ import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
@@ -92,9 +93,21 @@ public class TransactionLogRepositoryDecorator implements Repository
 	}
 
 	@Override
+	public Entity findOne(Object id, Fetch fetch)
+	{
+		return decorated.findOne(id, fetch);
+	}
+
+	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
 		return decorated.findAll(ids);
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
+	{
+		return decorated.findAll(ids, fetch);
 	}
 
 	@Override
