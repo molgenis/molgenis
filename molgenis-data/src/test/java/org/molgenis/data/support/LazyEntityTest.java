@@ -3,6 +3,7 @@ package org.molgenis.data.support;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
@@ -26,6 +27,7 @@ public class LazyEntityTest
 	private static final String ID_ATTR_NAME = "id";
 
 	private EntityMetaData entityMeta;
+	private AttributeMetaData idAttr;
 	private DataService dataService;
 	private Object id;
 	private LazyEntity lazyEntity;
@@ -36,7 +38,7 @@ public class LazyEntityTest
 	{
 		entityMeta = mock(EntityMetaData.class);
 		when(entityMeta.getName()).thenReturn(ENTITY_NAME);
-		AttributeMetaData idAttr = mock(AttributeMetaData.class);
+		idAttr = mock(AttributeMetaData.class);
 		when(idAttr.getName()).thenReturn(ID_ATTR_NAME);
 		when(idAttr.isIdAtrribute()).thenReturn(true);
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
@@ -73,12 +75,10 @@ public class LazyEntityTest
 	@Test
 	public void getAttributeNames()
 	{
-		String attr0Name = "attr0";
-		String attr1Name = "attr1";
-		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn(attr0Name).getMock();
-		AttributeMetaData attr1 = when(mock(AttributeMetaData.class).getName()).thenReturn(attr1Name).getMock();
-		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(attr0, attr1));
-		assertEquals(Arrays.asList(attr0Name, attr1Name), Lists.newArrayList(lazyEntity.getAttributeNames()));
+		DefaultEntity entity = new DefaultEntity(entityMeta, dataService);
+		List<String> attrNames = Arrays.asList("attr0", "attr1");
+		when(entityMeta.getAtomicAttributeNames()).thenReturn(attrNames);
+		assertEquals(Lists.newArrayList(entity.getAttributeNames()), attrNames);
 	}
 
 	@Test
@@ -209,6 +209,14 @@ public class LazyEntityTest
 		assertEquals(value, lazyEntity.getLabelValue());
 		assertEquals(value, lazyEntity.getLabelValue());
 		verify(dataService, times(1)).findOne(ENTITY_NAME, id);
+	}
+
+	@Test
+	public void getLabelValueLabelAttrIsIdAttr()
+	{
+		when(entityMeta.getLabelAttribute()).thenReturn(idAttr);
+		assertEquals(id.toString(), lazyEntity.getLabelValue());
+		verifyNoMoreInteractions(dataService);
 	}
 
 	@Test

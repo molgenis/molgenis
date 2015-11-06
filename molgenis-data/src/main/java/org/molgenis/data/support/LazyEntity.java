@@ -1,11 +1,9 @@
 package org.molgenis.data.support;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
 
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.util.Iterator;
 import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
@@ -46,22 +44,22 @@ public class LazyEntity implements Entity
 	@Override
 	public Iterable<String> getAttributeNames()
 	{
-		return new Iterable<String>()
-		{
-			@Override
-			public Iterator<String> iterator()
-			{
-				Iterable<AttributeMetaData> attrs = entityMetaData.getAtomicAttributes();
-				return stream(attrs.spliterator(), false).map(a -> a.getName()).iterator();
-			}
-		};
+		return getEntityMetaData().getAtomicAttributeNames();
 	}
 
 	@Override
 	public String getLabelValue()
 	{
-		return getLazyLoadedEntity().getLabelValue();
-
+		AttributeMetaData idAttr = getEntityMetaData().getIdAttribute();
+		AttributeMetaData labelAttr = getEntityMetaData().getLabelAttribute();
+		if (idAttr.equals(labelAttr))
+		{
+			return getIdValue().toString();
+		}
+		else
+		{
+			return getLazyLoadedEntity().getLabelValue();
+		}
 	}
 
 	@Override
