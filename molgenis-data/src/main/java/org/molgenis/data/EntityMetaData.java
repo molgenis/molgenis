@@ -69,6 +69,13 @@ public interface EntityMetaData
 	Iterable<AttributeMetaData> getAtomicAttributes();
 
 	/**
+	 * Same as {@link #getAtomicAttributes()} but returns the attribute names
+	 * 
+	 * @return attribute names
+	 */
+	Iterable<String> getAtomicAttributeNames();
+
+	/**
 	 * Attribute that is used as unique Id. Id attribute should always be provided.
 	 */
 	AttributeMetaData getIdAttribute();
