@@ -1,17 +1,7 @@
 package org.molgenis.data.idcard;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.RepositoryCapability.AGGREGATEABLE;
-import static org.molgenis.data.RepositoryCapability.QUERYABLE;
-import static org.molgenis.data.RepositoryCapability.UPDATEABLE;
-import static org.molgenis.data.RepositoryCapability.WRITABLE;
-
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.stream.StreamSupport;
-
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.DataService;
@@ -26,46 +16,49 @@ import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.idcard.client.IdCardClient;
 import org.molgenis.data.idcard.model.IdCardBiobank;
 import org.molgenis.data.idcard.model.IdCardBiobankMetaData;
-import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.idcard.settings.IdCardIndexerSettings;
+import org.molgenis.data.support.AbstractRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.stream.StreamSupport;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.RepositoryCapability.AGGREGATEABLE;
+import static org.molgenis.data.RepositoryCapability.QUERYABLE;
+import static org.molgenis.data.RepositoryCapability.UPDATEABLE;
+import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
 @org.springframework.stereotype.Repository
-public class IdCardBiobankRepository implements Repository // TODO check if we can extend from AbstractRepository
+public class IdCardBiobankRepository extends AbstractRepository implements Repository
 {
 	private static final Logger LOG = LoggerFactory.getLogger(IdCardBiobankRepository.class);
-
-	private static final long ID_CARD_INDEX_REBUILD_TIMEOUT = 60000l; // 60s // FIXME add to settings
 
 	private final IdCardBiobankMetaData idCardBiobankMetaData;
 	private final IdCardClient idCardClient;
 	private final ElasticsearchService elasticsearchService;
 	private final DataService dataService;
+	private final IdCardIndexerSettings idCardIndexerSettings;
 
 	@Autowired
 	public IdCardBiobankRepository(IdCardBiobankMetaData idCardBiobankMetaData, IdCardClient idCardClient,
-			ElasticsearchService elasticsearchService, DataService dataService)
+			ElasticsearchService elasticsearchService, DataService dataService, IdCardIndexerSettings idCardIndexerSettings)
 	{
 		this.idCardBiobankMetaData = idCardBiobankMetaData;
 		this.idCardClient = requireNonNull(idCardClient);
 		this.elasticsearchService = requireNonNull(elasticsearchService);
 		this.dataService = requireNonNull(dataService);
+		this.idCardIndexerSettings =  requireNonNull(idCardIndexerSettings);
 	}
 
 	@Override
 	public Iterator<Entity> iterator()
 	{
 		return idCardClient.getIdCardBiobanks().iterator();
-	}
-
-	@Override
-	public void close() throws IOException
-	{
-		// noop
 	}
 
 	@Override
@@ -78,27 +71,9 @@ public class IdCardBiobankRepository implements Repository // TODO check if we c
 	}
 
 	@Override
-	public String getName()
-	{
-		return IdCardBiobank.ENTITY_NAME;
-	}
-
-	@Override
 	public EntityMetaData getEntityMetaData()
 	{
 		return idCardBiobankMetaData;
-	}
-
-	@Override
-	public long count()
-	{
-		return elasticsearchService.count(getEntityMetaData());
-	}
-
-	@Override
-	public Query query()
-	{
-		return new QueryImpl();
 	}
 
 	@Override
@@ -129,8 +104,8 @@ public class IdCardBiobankRepository implements Repository // TODO check if we c
 		}
 		catch (RuntimeException e)
 		{
-			return (Entity) createErrorIdCardBiobank(id);
-		} // FIXME get rid of cast
+			return createErrorIdCardBiobank(id);
+		}
 	}
 
 	@Override
@@ -238,12 +213,6 @@ public class IdCardBiobankRepository implements Repository // TODO check if we c
 	}
 
 	@Override
-	public void clearCache()
-	{
-		// noop
-	}
-
-	@Override
 	public void addEntityListener(EntityListener entityListener)
 	{
 		throw new UnsupportedOperationException();
@@ -258,7 +227,7 @@ public class IdCardBiobankRepository implements Repository // TODO check if we c
 	public void rebuildIndex()
 	{
 		LOG.trace("Indexing ID-Card biobanks ...");
-		Iterable<? extends Entity> entities = idCardClient.getIdCardBiobanks(ID_CARD_INDEX_REBUILD_TIMEOUT);
+		Iterable<? extends Entity> entities = idCardClient.getIdCardBiobanks(idCardIndexerSettings.getReindexTimeout());
 
 		EntityMetaData entityMeta = getEntityMetaData();
 		if (!elasticsearchService.hasMapping(entityMeta))
@@ -274,6 +243,6 @@ public class IdCardBiobankRepository implements Repository // TODO check if we c
 		IdCardBiobank idCardBiobank = new IdCardBiobank(dataService);
 		idCardBiobank.set(IdCardBiobank.ORGANIZATION_ID, id);
 		idCardBiobank.set(IdCardBiobank.NAME, "Error loading data");
-		return idCardBiobank; // FIXME get rid of cast
+		return idCardBiobank;
 	}
 }
