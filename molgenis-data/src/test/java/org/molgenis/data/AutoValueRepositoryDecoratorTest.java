@@ -1,7 +1,10 @@
 package org.molgenis.data;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
@@ -12,6 +15,8 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.common.collect.Lists;
 
 public class AutoValueRepositoryDecoratorTest
 {
@@ -59,6 +64,30 @@ public class AutoValueRepositoryDecoratorTest
 
 		validateEntity(entity0);
 		validateEntity(entity1);
+	}
+
+	@Test
+	public void findAllIterableFetch()
+	{
+		Iterable<Object> ids = Arrays.<Object> asList(Integer.valueOf(0), Integer.valueOf(1));
+		Fetch fetch = new Fetch();
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		Iterable<Entity> entities = Arrays.asList(entity0, entity1);
+		when(decoratedRepository.findAll(ids, fetch)).thenReturn(entities);
+		assertEquals(Arrays.asList(entity0, entity1), Lists.newArrayList(repositoryDecorator.findAll(ids, fetch)));
+		verify(decoratedRepository, times(1)).findAll(ids, fetch);
+	}
+
+	@Test
+	public void findOneObjectFetch()
+	{
+		Object id = Integer.valueOf(0);
+		Fetch fetch = new Fetch();
+		Entity entity = mock(Entity.class);
+		when(decoratedRepository.findOne(id, fetch)).thenReturn(entity);
+		assertEquals(entity, repositoryDecorator.findOne(id, fetch));
+		verify(decoratedRepository, times(1)).findOne(id, fetch);
 	}
 
 	private void validateEntity(Entity entity)
