@@ -252,7 +252,7 @@ public class RepositoryValidationDecoratorTest
 	}
 
 	@Test
-	public void findAllIterableFetchExtendsOwned()
+	public void findOneObjectFetch()
 	{
 		DataService dataService = mock(DataService.class);
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
