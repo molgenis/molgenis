@@ -86,10 +86,24 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
+	public Entity findOne(Object id, Fetch fetch)
+	{
+		validatePermission(decoratedRepository.getName(), Permission.READ);
+		return decoratedRepository.findOne(id, fetch);
+	}
+
+	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.READ);
 		return decoratedRepository.findAll(ids);
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
+	{
+		validatePermission(decoratedRepository.getName(), Permission.READ);
+		return decoratedRepository.findAll(ids, fetch);
 	}
 
 	@Override
