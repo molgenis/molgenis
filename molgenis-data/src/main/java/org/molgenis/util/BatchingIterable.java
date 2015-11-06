@@ -1,5 +1,6 @@
 package org.molgenis.util;
 
+import java.util.Collections;
 import java.util.Iterator;
 
 /**
@@ -10,11 +11,25 @@ import java.util.Iterator;
 public abstract class BatchingIterable<T> implements Iterable<T>
 {
 	private final int batchSize;
+	private final int offset;
+	/**
+	 * Limit > 0: Number of elements to retrieve, Limit = 0: Limit undefined
+	 */
+	private final int limit;
 
 	public BatchingIterable(int batchSize)
 	{
-		this.batchSize = batchSize;
+		this(batchSize, 0, 0);
+	}
+
+	public BatchingIterable(int batchSize, int offset, int limit)
+	{
 		if (batchSize <= 0) throw new IllegalArgumentException("BatchSize must be greated then 0");
+		if (offset < 0) throw new IllegalArgumentException("Offset must be larger than or equal to 0");
+		if (limit < 0) throw new IllegalArgumentException("Limit must be larger than or equal to 0");
+		this.batchSize = batchSize;
+		this.offset = offset;
+		this.limit = limit;
 	}
 
 	@Override
@@ -22,26 +37,30 @@ public abstract class BatchingIterable<T> implements Iterable<T>
 	{
 		return new Iterator<T>()
 		{
-			private int offset = 0;
 			/**
-			 * Index in this batch of last element returned by next(), -1 if next() was not called for this batch
+			 * Element index
 			 */
-			private int index = -1;
-			private Iterator<T> it = getBatch(offset, batchSize).iterator();
+			private int index = offset;
+			/**
+			 * Element iterator for the current batch
+			 */
+			private Iterator<T> it;
 
 			@Override
 			public boolean hasNext()
 			{
+				// lazy load first batch
+				if (it == null)
+				{
+					it = nextBatch();
+				}
+
 				boolean hasNext = it.hasNext();
 
-				// retrieve new batch if current batch has no more items and the number of items in this batch equals
-				// the batch size
-				if (!hasNext && index == batchSize - 1)
+				if (!hasNext)
 				{
-					offset += batchSize;
-					it = getBatch(offset, batchSize).iterator();
+					it = nextBatch();
 					hasNext = it.hasNext();
-					index = -1;
 				}
 
 				return hasNext;
@@ -50,6 +69,12 @@ public abstract class BatchingIterable<T> implements Iterable<T>
 			@Override
 			public T next()
 			{
+				// lazy load first batch
+				if (it == null)
+				{
+					it = nextBatch();
+				}
+
 				T element = it.next();
 				++index;
 				return element;
@@ -59,6 +84,49 @@ public abstract class BatchingIterable<T> implements Iterable<T>
 			public void remove()
 			{
 				throw new UnsupportedOperationException();
+			}
+
+			private Iterator<T> nextBatch()
+			{
+				// calculate batch size
+				int nextBatchSize;
+				if (limit == 0)
+				{
+					// always retrieve first batch: index == offset
+					// retrieve next batch if previous batch contained less items then batch size
+					if (index == offset || (index - offset) % batchSize == 0)
+					{
+						nextBatchSize = batchSize;
+					}
+					else
+					{
+						nextBatchSize = 0;
+					}
+				}
+				else
+				{
+					if (index == offset + limit)
+					{
+						nextBatchSize = 0;
+					}
+					else if (index + batchSize <= offset + limit)
+					{
+						nextBatchSize = batchSize;
+					}
+					else
+					{
+						nextBatchSize = offset + limit - index;
+					}
+				}
+
+				if (nextBatchSize == 0)
+				{
+					return Collections.emptyIterator();
+				}
+				else
+				{
+					return getBatch(index, nextBatchSize).iterator();
+				}
 			}
 		};
 	}
