@@ -12,6 +12,7 @@ import org.molgenis.data.AggregateResult;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
@@ -288,4 +289,30 @@ public class DataServiceImpl implements DataService
 		return getRepository(repositoryName).getCapabilities();
 	}
 
+	@Override
+	public Iterable<Entity> findAll(String entityName, Iterable<Object> ids, Fetch fetch)
+	{
+		return getRepository(entityName).findAll(ids, fetch);
+	}
+
+	@Override
+	public Entity findOne(String entityName, Object id, Fetch fetch)
+	{
+		return getRepository(entityName).findOne(id, fetch);
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(String entityName, Iterable<Object> ids, Fetch fetch, Class<E> clazz)
+	{
+		Iterable<Entity> entities = getRepository(entityName).findAll(ids, fetch);
+		return new ConvertingIterable<E>(clazz, entities, this);
+	}
+
+	@Override
+	public <E extends Entity> E findOne(String entityName, Object id, Fetch fetch, Class<E> clazz)
+	{
+		Entity entity = getRepository(entityName).findOne(id, fetch);
+		if (entity == null) return null;
+		return EntityUtils.convert(entity, clazz, this);
+	}
 }
