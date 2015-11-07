@@ -90,33 +90,34 @@ public abstract class BatchingIterable<T> implements Iterable<T>
 			{
 				// calculate batch size
 				int nextBatchSize;
-				if (limit == 0)
+
+				// always retrieve first batch: index == offset
+				// retrieve next batch if previous batch contained less items then batch size
+				if (index == offset || (index - offset) % batchSize == 0)
 				{
-					// always retrieve first batch: index == offset
-					// retrieve next batch if previous batch contained less items then batch size
-					if (index == offset || (index - offset) % batchSize == 0)
+					if (limit == 0)
 					{
 						nextBatchSize = batchSize;
 					}
 					else
 					{
-						nextBatchSize = 0;
+						if (index == offset + limit)
+						{
+							nextBatchSize = 0;
+						}
+						else if (index + batchSize <= offset + limit)
+						{
+							nextBatchSize = batchSize;
+						}
+						else
+						{
+							nextBatchSize = offset + limit - index;
+						}
 					}
 				}
 				else
 				{
-					if (index == offset + limit)
-					{
-						nextBatchSize = 0;
-					}
-					else if (index + batchSize <= offset + limit)
-					{
-						nextBatchSize = batchSize;
-					}
-					else
-					{
-						nextBatchSize = offset + limit - index;
-					}
+					nextBatchSize = 0;
 				}
 
 				if (nextBatchSize == 0)
