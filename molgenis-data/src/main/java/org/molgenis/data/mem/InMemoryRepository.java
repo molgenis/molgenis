@@ -1,5 +1,7 @@
 package org.molgenis.data.mem;
 
+import static java.util.stream.StreamSupport.stream;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -11,6 +13,7 @@ import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
@@ -91,13 +94,32 @@ public class InMemoryRepository implements Repository
 	@Override
 	public Entity findOne(Object id)
 	{
+		return findOne(id, null);
+	}
+
+	@Override
+	public Entity findOne(Object id, Fetch fetch)
+	{
 		return entities.get(id);
 	}
 
 	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
-		throw new UnsupportedOperationException();
+		return findAll(ids, null);
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
+	{
+		return new Iterable<Entity>()
+		{
+			@Override
+			public Iterator<Entity> iterator()
+			{
+				return stream(ids.spliterator(), false).map(id -> entities.get(id)).iterator();
+			}
+		};
 	}
 
 	@Override
