@@ -94,6 +94,15 @@ public interface AttributeMetaData
 	Iterable<AttributeMetaData> getAttributeParts();
 
 	/**
+	 * Get attribute part by name (case insensitive), returns null if not found
+	 * 
+	 * @param attrName
+	 *            attribute name (case insensitive)
+	 * @return attribute or null
+	 */
+	AttributeMetaData getAttributePart(String attrName);
+
+	/**
 	 * Wether this attribute can be used to aggregate on. Default only attributes of type 'BOOL', 'XREF' and
 	 * 'CATEGORICAL' are aggregateable.
 	 */
