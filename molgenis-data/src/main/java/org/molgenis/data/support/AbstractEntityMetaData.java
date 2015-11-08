@@ -137,6 +137,12 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			}
 
 			@Override
+			public AttributeMetaData getAttributePart(String attrName)
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
 			public boolean isAuto()
 			{
 				throw new UnsupportedOperationException();
