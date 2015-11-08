@@ -16,7 +16,6 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.file.FileMeta;
-import org.molgenis.file.FileMetaMetaData;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -34,12 +33,14 @@ public class AttributeFilterToFetchConverterTest
 	private static final String REF_ATTR_NAME = "refAttr";
 
 	private EntityMetaData entityMeta;
-	private EntityMetaData fileEntityMeta;
+	private AttributeMetaData labelAttr;
+	private AttributeMetaData xrefAttr;
+	private EntityMetaData xrefEntityMeta;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		EntityMetaData xrefEntityMeta = mock(EntityMetaData.class);
+		xrefEntityMeta = mock(EntityMetaData.class);
 		when(xrefEntityMeta.getName()).thenReturn("xrefEntity");
 		AttributeMetaData refAttr0 = when(mock(AttributeMetaData.class).getName()).thenReturn(REF_ID_ATTR_NAME)
 				.getMock();
@@ -58,15 +59,14 @@ public class AttributeFilterToFetchConverterTest
 		when(xrefEntityMeta.getAttribute(REF_ATTR_NAME.toLowerCase())).thenReturn(refAttr2);
 		when(xrefEntityMeta.getAttribute(REF_ATTR_NAME)).thenReturn(refAttr2);
 		when(xrefEntityMeta.getAttributes()).thenReturn(Arrays.asList(refAttr0, refAttr1, refAttr2));
+		when(xrefEntityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(refAttr0, refAttr1, refAttr2));
 		when(xrefEntityMeta.getIdAttribute()).thenReturn(refAttr0);
 		when(xrefEntityMeta.getLabelAttribute()).thenReturn(refAttr1);
-		fileEntityMeta = new FileMetaMetaData();
 
 		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(ID_ATTR_NAME).getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);
 		when(idAttr.isIdAtrribute()).thenReturn(true);
-		AttributeMetaData labelAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(LABEL_ATTR_NAME)
-				.getMock();
+		labelAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(LABEL_ATTR_NAME).getMock();
 		when(labelAttr.isLabelAttribute()).thenReturn(true);
 		when(labelAttr.getDataType()).thenReturn(STRING);
 		AttributeMetaData compoundPartAttr = when(mock(AttributeMetaData.class).getName())
@@ -75,7 +75,7 @@ public class AttributeFilterToFetchConverterTest
 		AttributeMetaData compoundPartFileAttr = when(mock(AttributeMetaData.class).getName())
 				.thenReturn(COMPOUND_PART_FILE_ATTR_NAME).getMock();
 		when(compoundPartFileAttr.getDataType()).thenReturn(FILE);
-		when(compoundPartFileAttr.getRefEntity()).thenReturn(fileEntityMeta);
+		when(compoundPartFileAttr.getRefEntity()).thenReturn(FileMeta.META_DATA);
 		AttributeMetaData compoundAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(COMPOUND_ATTR_NAME)
 				.getMock();
 		when(compoundAttr.getDataType()).thenReturn(COMPOUND);
@@ -85,7 +85,7 @@ public class AttributeFilterToFetchConverterTest
 		when(compoundAttr.getAttributePart(COMPOUND_PART_FILE_ATTR_NAME.toLowerCase()))
 				.thenReturn(compoundPartFileAttr);
 		when(compoundAttr.getAttributePart(COMPOUND_PART_FILE_ATTR_NAME)).thenReturn(compoundPartFileAttr);
-		AttributeMetaData xrefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(XREF_ATTR_NAME).getMock();
+		xrefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(XREF_ATTR_NAME).getMock();
 		when(xrefAttr.getDataType()).thenReturn(XREF);
 		when(xrefAttr.getRefEntity()).thenReturn(xrefEntityMeta);
 
@@ -102,19 +102,29 @@ public class AttributeFilterToFetchConverterTest
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
 		when(entityMeta.getLabelAttribute()).thenReturn(labelAttr);
 		when(entityMeta.getAttributes()).thenReturn(Arrays.asList(idAttr, labelAttr, compoundAttr, xrefAttr));
+		when(entityMeta.getAtomicAttributes())
+				.thenReturn(Arrays.asList(idAttr, labelAttr, compoundPartAttr, compoundPartFileAttr, xrefAttr));
 	}
 
 	@Test
 	public void convertNoAttrFilter()
 	{
-		assertNull(AttributeFilterToFetchConverter.convert(null, entityMeta));
+		Fetch fetch = new Fetch().field(ID_ATTR_NAME).field(LABEL_ATTR_NAME).field(COMPOUND_PART_ATTR_NAME)
+				.field(COMPOUND_PART_FILE_ATTR_NAME,
+						new Fetch().field(FileMeta.ID).field(FileMeta.FILENAME).field(FileMeta.URL))
+				.field(XREF_ATTR_NAME, new Fetch().field(REF_ID_ATTR_NAME).field(REF_LABEL_ATTR_NAME));
+		assertEquals(AttributeFilterToFetchConverter.convert(null, entityMeta), fetch);
 	}
 
 	@Test
 	public void convertAttrFilterIncludeAll()
 	{
 		AttributeFilter attrFilter = new AttributeFilter().setIncludeAllAttrs(true);
-		assertNull(AttributeFilterToFetchConverter.convert(attrFilter, entityMeta));
+		Fetch fetch = new Fetch().field(ID_ATTR_NAME).field(LABEL_ATTR_NAME).field(COMPOUND_PART_ATTR_NAME)
+				.field(COMPOUND_PART_FILE_ATTR_NAME,
+						new Fetch().field(FileMeta.ID).field(FileMeta.FILENAME).field(FileMeta.URL))
+				.field(XREF_ATTR_NAME, new Fetch().field(REF_ID_ATTR_NAME).field(REF_LABEL_ATTR_NAME));
+		assertEquals(AttributeFilterToFetchConverter.convert(attrFilter, entityMeta), fetch);
 	}
 
 	@Test
@@ -139,8 +149,8 @@ public class AttributeFilterToFetchConverterTest
 		AttributeFilter attrFilter = new AttributeFilter().add(COMPOUND_ATTR_NAME);
 		assertEquals(AttributeFilterToFetchConverter.convert(attrFilter, entityMeta),
 				new Fetch().field(COMPOUND_PART_ATTR_NAME).field(COMPOUND_PART_FILE_ATTR_NAME,
-						new Fetch().field(fileEntityMeta.getIdAttribute().getName())
-								.field(fileEntityMeta.getLabelAttribute().getName()).field(FileMeta.URL)));
+						new Fetch().field(FileMeta.META_DATA.getIdAttribute().getName())
+								.field(FileMeta.META_DATA.getLabelAttribute().getName()).field(FileMeta.URL)));
 	}
 
 	@Test
@@ -166,5 +176,34 @@ public class AttributeFilterToFetchConverterTest
 	{
 		AttributeFilter attrFilter = new AttributeFilter().add("unknown");
 		AttributeFilterToFetchConverter.convert(attrFilter, entityMeta);
+	}
+
+	@Test
+	public void createDefaultEntityFetchRefs()
+	{
+		Fetch fetch = new Fetch().field(ID_ATTR_NAME).field(LABEL_ATTR_NAME).field(COMPOUND_PART_ATTR_NAME)
+				.field(COMPOUND_PART_FILE_ATTR_NAME,
+						new Fetch().field(FileMeta.ID).field(FileMeta.FILENAME).field(FileMeta.URL))
+				.field(XREF_ATTR_NAME, new Fetch().field(REF_ID_ATTR_NAME).field(REF_LABEL_ATTR_NAME));
+		assertEquals(AttributeFilterToFetchConverter.createDefaultEntityFetch(entityMeta), fetch);
+	}
+
+	@Test
+	public void createDefaultEntityFetchNoRefs()
+	{
+		assertNull(AttributeFilterToFetchConverter.createDefaultEntityFetch(xrefEntityMeta));
+	}
+
+	@Test
+	public void createDefaultEntityFetchRefAttr()
+	{
+		Fetch fetch = new Fetch().field(REF_ID_ATTR_NAME).field(REF_LABEL_ATTR_NAME);
+		assertEquals(AttributeFilterToFetchConverter.createDefaultAttributeFetch(xrefAttr), fetch);
+	}
+
+	@Test
+	public void createDefaultAttributeFetchNoRefAttr()
+	{
+		assertNull(AttributeFilterToFetchConverter.createDefaultAttributeFetch(labelAttr));
 	}
 }

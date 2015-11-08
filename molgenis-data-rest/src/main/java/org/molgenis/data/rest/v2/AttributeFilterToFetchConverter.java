@@ -8,6 +8,8 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownAttributeException;
+import org.molgenis.fieldtypes.MrefField;
+import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.file.FileMeta;
 
 /**
@@ -27,12 +29,12 @@ public class AttributeFilterToFetchConverter
 	{
 		if (attrFilter == null)
 		{
-			return null;
+			return createDefaultEntityFetch(entityMeta);
 		}
 
 		if (attrFilter.isIncludeAllAttrs())
 		{
-			return null;
+			return createDefaultEntityFetch(entityMeta);
 		}
 
 		Fetch fetch = new Fetch();
@@ -106,32 +108,17 @@ public class AttributeFilterToFetchConverter
 			case XREF:
 			{
 				AttributeFilter subAttrFilter = attrFilter != null ? attrFilter.getAttributeFilter(attr) : null;
+				Fetch subFetch;
 				if (subAttrFilter != null)
 				{
-					Fetch subFetch = convert(subAttrFilter, attr.getRefEntity());
-					fetch.field(attr.getName(), subFetch);
+					subFetch = convert(subAttrFilter, attr.getRefEntity());
+
 				}
 				else
 				{
-					// In case of no sub attribute filter return id and label. For FILE type also include the
-					// URL.
-					Fetch subFetch = new Fetch();
-
-					String idAttrName = attr.getRefEntity().getIdAttribute().getName();
-					subFetch.field(idAttrName);
-
-					String labelAttrName = attr.getRefEntity().getLabelAttribute().getName();
-					if (!labelAttrName.equals(idAttrName))
-					{
-						subFetch.field(labelAttrName);
-					}
-
-					if (attrType == FILE)
-					{
-						subFetch.field(FileMeta.URL);
-					}
-					fetch.field(attr.getName(), subFetch);
+					subFetch = createDefaultAttributeFetch(attr);
 				}
+				fetch.field(attr.getName(), subFetch);
 				break;
 			}
 				// $CASES-OMITTED$
@@ -150,5 +137,62 @@ public class AttributeFilterToFetchConverter
 					format("Unknown attribute [%s] of entity [%s]", attrName, entityMeta.getName()));
 		}
 		return attr;
+	}
+
+	/**
+	 * Create default entity fetch that fetches all attributes.
+	 * 
+	 * @param entityMeta
+	 * @return default entity fetch or null
+	 */
+	public static Fetch createDefaultEntityFetch(EntityMetaData entityMeta)
+	{
+		boolean hasRefAttr = false;
+		Fetch fetch = new Fetch();
+		for (AttributeMetaData attr : entityMeta.getAtomicAttributes())
+		{
+			Fetch subFetch = createDefaultAttributeFetch(attr);
+			if (subFetch != null)
+			{
+				hasRefAttr = true;
+			}
+			fetch.field(attr.getName(), subFetch);
+		}
+		return hasRefAttr ? fetch : null;
+	}
+
+	/**
+	 * Create default fetch for the given attribute. For attributes referencing entities the id and label value are
+	 * fetched. Additionally for file entities the URL is fetched. For other attributes the default fetch is null;
+	 * 
+	 * @param attr
+	 * @return default attribute fetch or null
+	 */
+	public static Fetch createDefaultAttributeFetch(AttributeMetaData attr)
+	{
+		Fetch fetch;
+		if (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
+		{
+			fetch = new Fetch();
+			EntityMetaData refEntityMeta = attr.getRefEntity();
+			String idAttrName = refEntityMeta.getIdAttribute().getName();
+			fetch.field(idAttrName);
+
+			String labelAttrName = refEntityMeta.getLabelAttribute().getName();
+			if (!labelAttrName.equals(idAttrName))
+			{
+				fetch.field(labelAttrName);
+			}
+
+			if (attr.getDataType().getEnumType() == FILE)
+			{
+				fetch.field(FileMeta.URL);
+			}
+		}
+		else
+		{
+			fetch = null;
+		}
+		return fetch;
 	}
 }
