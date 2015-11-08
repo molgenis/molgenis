@@ -1,7 +1,6 @@
 package org.molgenis.data.rest.v2;
 
 import static java.lang.String.format;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.FILE;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -74,16 +73,22 @@ public class AttributeFilterToFetchConverter
 			case COMPOUND:
 			{
 				AttributeFilter subAttrFilter = attrFilter != null ? attrFilter.getAttributeFilter(attr) : null;
-				if (subAttrFilter != null)
+				if (subAttrFilter != null && !subAttrFilter.isIncludeAllAttrs())
 				{
 					// include compound attribute parts defined by filter
-					stream(attr.getAttributeParts().spliterator(), false)
-							.filter(attrPart -> subAttrFilter.includeAttribute(attrPart)).forEach(attrPart -> {
-								createFetchContentRec(subAttrFilter, entityMeta, attrPart, fetch);
-							});
-					// TODO AttributeMeta.getAttributeParts() should return class that implements
-					// Iterable<AttributeMetaData> and allows for lookups by attribute name. For compounds with a huge
-					// number of attributes the code above is inefficient.
+					if (subAttrFilter.isIncludeIdAttr())
+					{
+						createFetchContentRec(subAttrFilter, entityMeta, entityMeta.getIdAttribute(), fetch);
+					}
+					if (subAttrFilter.isIncludeLabelAttr())
+					{
+						createFetchContentRec(subAttrFilter, entityMeta, entityMeta.getLabelAttribute(), fetch);
+					}
+					subAttrFilter.forEach(entry -> {
+						String attrPartName = entry.getKey();
+						AttributeMetaData attrPart = attr.getAttributePart(attrPartName);
+						createFetchContentRec(attrFilter, entityMeta, attrPart, fetch);
+					});
 				}
 				else
 				{

@@ -80,6 +80,11 @@ public class AttributeFilterToFetchConverterTest
 				.getMock();
 		when(compoundAttr.getDataType()).thenReturn(COMPOUND);
 		when(compoundAttr.getAttributeParts()).thenReturn(Arrays.asList(compoundPartAttr, compoundPartFileAttr));
+		when(compoundAttr.getAttributePart(COMPOUND_PART_ATTR_NAME.toLowerCase())).thenReturn(compoundPartAttr);
+		when(compoundAttr.getAttributePart(COMPOUND_PART_ATTR_NAME)).thenReturn(compoundPartAttr);
+		when(compoundAttr.getAttributePart(COMPOUND_PART_FILE_ATTR_NAME.toLowerCase()))
+				.thenReturn(compoundPartFileAttr);
+		when(compoundAttr.getAttributePart(COMPOUND_PART_FILE_ATTR_NAME)).thenReturn(compoundPartFileAttr);
 		AttributeMetaData xrefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(XREF_ATTR_NAME).getMock();
 		when(xrefAttr.getDataType()).thenReturn(XREF);
 		when(xrefAttr.getRefEntity()).thenReturn(xrefEntityMeta);
