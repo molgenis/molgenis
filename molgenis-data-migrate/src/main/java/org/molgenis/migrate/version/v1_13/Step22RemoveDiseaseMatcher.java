@@ -8,9 +8,6 @@ import org.molgenis.framework.MolgenisUpgrade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-/**
- * Removes
- */
 public class Step22RemoveDiseaseMatcher extends MolgenisUpgrade
 {
 	private final JdbcTemplate template;
@@ -26,9 +23,12 @@ public class Step22RemoveDiseaseMatcher extends MolgenisUpgrade
 	@Override
 	public void upgrade()
 	{
-		// remove disease matcher entity tables
+		// remove disease matcher entities + attributes
 		template.execute("DROP TABLE IF EXISTS Disease;");
 		template.execute("DROP TABLE IF EXISTS DiseaseMapping;");
+		template.execute(
+				"DELETE FROM attributes WHERE identifier IN (SELECT attributes FROM entities_attributes WHERE fullName = 'Disease' OR fullName = 'DiseaseMapping')");
+		template.execute("DELETE FROM entities WHERE fullName = 'Disease' OR fullName = 'DiseaseMapping'");
 
 		// remove settings
 		template.execute("ALTER TABLE settings_dataexplorer DROP COLUMN mod_diseasematcher");
