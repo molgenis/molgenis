@@ -387,7 +387,6 @@ public class MetaDataServiceImpl implements MetaDataService
 			{
 				RepositoryCollection col = backends.get(emd.getBackend());
 				if (col == null) throw new MolgenisDataException("Unknown backend [" + emd.getBackend() + "]");
-				System.out.println(emd.getName());
 				Repository repo = col.addEntityMeta(emd);
 				dataService.addRepository(repo);
 			}
