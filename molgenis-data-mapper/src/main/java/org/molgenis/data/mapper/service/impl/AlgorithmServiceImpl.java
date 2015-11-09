@@ -1,6 +1,5 @@
 package org.molgenis.data.mapper.service.impl;
 
-import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_HIGH;
 import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_LOW;
 
@@ -19,8 +18,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.measure.converter.ConversionException;
-import javax.measure.converter.UnitConverter;
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.Unit;
 
@@ -30,7 +27,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.mapper.algorithmgenerator.service.MapCategoryService;
+import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
@@ -56,6 +53,8 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
+import static java.util.Objects.requireNonNull;
+
 import utils.MagmaUnitConverter;
 
 public class AlgorithmServiceImpl implements AlgorithmService
@@ -67,21 +66,21 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	private final SemanticSearchService semanticSearchService;
 	private final UnitResolver unitResolver;
 	private final AlgorithmTemplateService algorithmTemplateService;
-	private final MapCategoryService mapCategoryService;
+	private final AlgorithmGeneratorService algorithmGeneratorService;
 	private final Pattern MAGMA_ATTRIBUTE_PATTERN = Pattern.compile("\\$\\('([^\\$\\(\\)]*)'\\)");
 	private final MagmaUnitConverter magmaUnitConverter = new MagmaUnitConverter();
 
 	@Autowired
 	public AlgorithmServiceImpl(DataService dataService, OntologyTagService ontologyTagService,
 			SemanticSearchService semanticSearchService, UnitResolver unitResolver,
-			AlgorithmTemplateService algorithmTemplateService, MapCategoryService mapCategoryService)
+			AlgorithmTemplateService algorithmTemplateService, AlgorithmGeneratorService algorithmGeneratorService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.ontologyTagService = requireNonNull(ontologyTagService);
 		this.semanticSearchService = requireNonNull(semanticSearchService);
 		this.unitResolver = requireNonNull(unitResolver);
 		this.algorithmTemplateService = requireNonNull(algorithmTemplateService);
-		this.mapCategoryService = requireNonNull(mapCategoryService);
+		this.algorithmGeneratorService = requireNonNull(algorithmGeneratorService);
 
 		new RhinoConfig().init();
 	}
@@ -92,23 +91,24 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	{
 		if (sourceAttributes.size() > 0)
 		{
-			String algorithm = mapCategoryService.generate(targetAttribute, sourceAttributes);
-			if (StringUtils.isBlank(algorithm))
-			{
-				if (sourceAttributes.size() > 1)
-				{
-					for (AttributeMetaData sourceAttribute : sourceAttributes)
-					{
-						algorithm += generateAlgorithm(targetAttribute, targetEntityMetaData,
-								Arrays.asList(sourceAttribute), sourceEntityMetaData);
-					}
-				}
-				else
-				{
-					algorithm = generateUnitConversionAlgorithm(targetAttribute, targetEntityMetaData,
-							sourceAttributes.get(0), sourceEntityMetaData);
-				}
-			}
+			String algorithm = algorithmGeneratorService.generate(targetAttribute, sourceAttributes,
+					targetEntityMetaData, sourceEntityMetaData);
+			// if (StringUtils.isBlank(algorithm))
+			// {
+			// if (sourceAttributes.size() > 1)
+			// {
+			// for (AttributeMetaData sourceAttribute : sourceAttributes)
+			// {
+			// algorithm += generateAlgorithm(targetAttribute, targetEntityMetaData,
+			// Arrays.asList(sourceAttribute), sourceEntityMetaData);
+			// }
+			// }
+			// else
+			// {
+			// algorithm = generateUnitConversionAlgorithm(targetAttribute, targetEntityMetaData,
+			// sourceAttributes.get(0), sourceEntityMetaData);
+			// }
+			// }
 			return algorithm;
 		}
 		return StringUtils.EMPTY;
@@ -150,12 +150,13 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			Entry<AttributeMetaData, ExplainedAttributeMetaData> firstEntry = relevantAttributes.entrySet().stream()
 					.findFirst().get();
 			AttributeMetaData sourceAttribute = firstEntry.getKey();
-			algorithm = mapCategoryService.generate(targetAttribute, Arrays.asList(sourceAttribute));
-			if (StringUtils.isBlank(algorithm))
-			{
-				algorithm = generateUnitConversionAlgorithm(targetAttribute, targetEntityMetaData, sourceAttribute,
-						sourceEntityMetaData);
-			}
+			algorithm = algorithmGeneratorService.generate(targetAttribute, Arrays.asList(sourceAttribute),
+					targetEntityMetaData, sourceEntityMetaData);
+			// if (StringUtils.isBlank(algorithm))
+			// {
+			// algorithm = generateUnitConversionAlgorithm(targetAttribute, targetEntityMetaData, sourceAttribute,
+			// sourceEntityMetaData);
+			// }
 			mappedSourceAttributes = Sets.newHashSet(sourceAttribute);
 			algorithmState = firstEntry.getValue().isHighQuality() ? GENERATED_HIGH : GENERATED_LOW;
 		}
@@ -210,56 +211,56 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		return algorithm;
 	}
 
-	String generateUnitConversionAlgorithm(AttributeMetaData targetAttribute, EntityMetaData targetEntityMetaData,
-			AttributeMetaData sourceAttribute, EntityMetaData sourceEntityMetaData)
-	{
-		String algorithm = null;
-
-		Unit<? extends Quantity> targetUnit = unitResolver.resolveUnit(targetAttribute, targetEntityMetaData);
-
-		Unit<? extends Quantity> sourceUnit = unitResolver.resolveUnit(sourceAttribute, sourceEntityMetaData);
-
-		if (sourceUnit != null)
-		{
-			if (targetUnit != null && !sourceUnit.equals(targetUnit))
-			{
-				// if units are convertible, create convert algorithm
-				UnitConverter unitConverter;
-				try
-				{
-					unitConverter = sourceUnit.getConverterTo(targetUnit);
-				}
-				catch (ConversionException e)
-				{
-					unitConverter = null;
-					// algorithm sets source unit and assigns source value to target
-					algorithm = String.format("$('%s').unit('%s').value();", sourceAttribute.getName(),
-							sourceUnit.toString());
-				}
-
-				if (unitConverter != null)
-				{
-					// algorithm sets source unit and assigns value converted to target unit to target
-					algorithm = String.format("$('%s').unit('%s').toUnit('%s').value();", sourceAttribute.getName(),
-							sourceUnit.toString(), targetUnit.toString());
-				}
-			}
-			else
-			{
-				// algorithm sets source unit and assigns source value to target
-				algorithm = String.format("$('%s').unit('%s').value();", sourceAttribute.getName(),
-						sourceUnit.toString());
-			}
-		}
-
-		if (algorithm == null)
-		{
-			// algorithm assigns source value to target
-			algorithm = String.format("$('%s').value();", sourceAttribute.getName());
-		}
-
-		return algorithm;
-	}
+	// String generateUnitConversionAlgorithm(AttributeMetaData targetAttribute, EntityMetaData targetEntityMetaData,
+	// AttributeMetaData sourceAttribute, EntityMetaData sourceEntityMetaData)
+	// {
+	// String algorithm = null;
+	//
+	// Unit<? extends Quantity> targetUnit = unitResolver.resolveUnit(targetAttribute, targetEntityMetaData);
+	//
+	// Unit<? extends Quantity> sourceUnit = unitResolver.resolveUnit(sourceAttribute, sourceEntityMetaData);
+	//
+	// if (sourceUnit != null)
+	// {
+	// if (targetUnit != null && !sourceUnit.equals(targetUnit))
+	// {
+	// // if units are convertible, create convert algorithm
+	// UnitConverter unitConverter;
+	// try
+	// {
+	// unitConverter = sourceUnit.getConverterTo(targetUnit);
+	// }
+	// catch (ConversionException e)
+	// {
+	// unitConverter = null;
+	// // algorithm sets source unit and assigns source value to target
+	// algorithm = String.format("$('%s').unit('%s').value();", sourceAttribute.getName(),
+	// sourceUnit.toString());
+	// }
+	//
+	// if (unitConverter != null)
+	// {
+	// // algorithm sets source unit and assigns value converted to target unit to target
+	// algorithm = String.format("$('%s').unit('%s').toUnit('%s').value();", sourceAttribute.getName(),
+	// sourceUnit.toString(), targetUnit.toString());
+	// }
+	// }
+	// else
+	// {
+	// // algorithm sets source unit and assigns source value to target
+	// algorithm = String.format("$('%s').unit('%s').value();", sourceAttribute.getName(),
+	// sourceUnit.toString());
+	// }
+	// }
+	//
+	// if (algorithm == null)
+	// {
+	// // algorithm assigns source value to target
+	// algorithm = String.format("$('%s').value();", sourceAttribute.getName());
+	// }
+	//
+	// return algorithm;
+	// }
 
 	@Override
 	public Iterable<AlgorithmEvaluation> applyAlgorithm(AttributeMetaData targetAttribute, String algorithm,

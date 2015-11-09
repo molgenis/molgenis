@@ -1,4 +1,4 @@
-package org.molgenis.data.mapper.algorithmgenerator.categorygenerator;
+package org.molgenis.data.mapper.algorithmgenerator.generator;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
 import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
 
@@ -35,11 +36,13 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 	@Override
 	public boolean isSuitable(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)
 	{
-		return sourceAttributes.size() > 1;
+		return isReferenceDataType(targetAttribute) && (sourceAttributes.stream().allMatch(this::isReferenceDataType))
+				&& sourceAttributes.size() > 1;
 	}
 
 	@Override
-	public String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)
+	public String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes,
+			EntityMetaData targetEntityMetaData, EntityMetaData sourceEntityMetaData)
 	{
 		// if the target attribute and all the source attributes contain frequency related categories
 		StringBuilder stringBuilder = new StringBuilder();
@@ -53,8 +56,8 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 		{
 			for (AttributeMetaData sourceAttribute : sourceAttributes)
 			{
-				stringBuilder.append(
-						oneToOneCategoryAlgorithmGenerator.generate(targetAttribute, Arrays.asList(sourceAttribute)));
+				stringBuilder.append(oneToOneCategoryAlgorithmGenerator.generate(targetAttribute,
+						Arrays.asList(sourceAttribute), targetEntityMetaData, sourceEntityMetaData));
 			}
 		}
 
