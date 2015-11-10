@@ -2,6 +2,7 @@ package org.molgenis.data;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -382,27 +383,51 @@ public class QueryRule
 	public String toString()
 	{
 		StringBuilder strBuilder = new StringBuilder();
-		if (nestedRules != null)
+		if (field != null)
 		{
-			strBuilder.append('(');
-
-			for (final QueryRule rule : nestedRules)
-			{
-				strBuilder.append(rule.toString());
-			}
-			strBuilder.append(')');
+			strBuilder.append('\'').append(field).append('\'');
 		}
-		else
+		if (operator != null && operator != Operator.NESTED)
 		{
-			if (field != null)
+			if (strBuilder.length() > 0)
 			{
-				strBuilder.append(field).append(' ');
+				strBuilder.append(' ');
 			}
 			strBuilder.append(operator);
-			if (operator != Operator.AND && operator != Operator.OR && operator != Operator.NOT)
+		}
+		if (operator != Operator.AND && operator != Operator.OR && operator != Operator.NOT
+				&& operator != Operator.NESTED)
+		{
+			if (strBuilder.length() > 0)
 			{
-				strBuilder.append(' ').append(value);
+				strBuilder.append(' ');
 			}
+			if (operator != Operator.IN)
+			{
+				strBuilder.append('\'').append(value).append('\'');
+			}
+			else
+			{
+				strBuilder.append(value);
+			}
+		}
+		if (nestedRules != null && !nestedRules.isEmpty())
+		{
+			if (strBuilder.length() > 0)
+			{
+				strBuilder.append(' ');
+			}
+			strBuilder.append('(');
+
+			for (Iterator<QueryRule> it = nestedRules.iterator(); it.hasNext();)
+			{
+				strBuilder.append(it.next());
+				if (it.hasNext())
+				{
+					strBuilder.append(", ");
+				}
+			}
+			strBuilder.append(')');
 		}
 		return strBuilder.toString();
 	}
