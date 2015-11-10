@@ -10,6 +10,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
+import org.molgenis.data.support.PartialEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +34,9 @@ public class ElasticsearchEntityFactory
 	}
 
 	/**
-	 * Creates an entity from the given Elasticsearch document source. In case
+	 * Creates an entity from the given Elasticsearch document source. If a fetch is defined the entity contains only
+	 * data for the requested attributes. Wrap such an entity in a {@link PartialEntity} that will retrieve additional
+	 * values if requested.
 	 * 
 	 * @param entityMeta
 	 * @param source
@@ -54,6 +57,13 @@ public class ElasticsearchEntityFactory
 		}
 	}
 
+	/**
+	 * Create Elasticsearch document source from entity
+	 * 
+	 * @param entityMeta
+	 * @param entity
+	 * @return Elasticsearch document source
+	 */
 	public Map<String, Object> create(EntityMetaData entityMeta, Entity entity)
 	{
 		return entityToSourceConverter.convert(entity, entityMeta);
