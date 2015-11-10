@@ -398,7 +398,11 @@ public class QueryRule
 			{
 				strBuilder.append(field).append(' ');
 			}
-			strBuilder.append(operator).append(' ').append(value);
+			strBuilder.append(operator);
+			if (operator != Operator.AND && operator != Operator.OR && operator != Operator.NOT)
+			{
+				strBuilder.append(' ').append(value);
+			}
 		}
 		return strBuilder.toString();
 	}
