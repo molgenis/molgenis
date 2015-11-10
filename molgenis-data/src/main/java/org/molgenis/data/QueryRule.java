@@ -396,7 +396,7 @@ public class QueryRule
 			strBuilder.append(operator);
 		}
 		if (operator != Operator.AND && operator != Operator.OR && operator != Operator.NOT
-				&& operator != Operator.NESTED)
+				&& operator != Operator.NESTED && operator != Operator.DIS_MAX && operator != Operator.SHOULD)
 		{
 			if (strBuilder.length() > 0)
 			{
