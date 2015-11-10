@@ -249,7 +249,8 @@ public class DefaultEntity implements Entity
 		FieldType dataType = attribute.getDataType();
 		if (!(dataType instanceof XrefField))
 		{
-			throw new MolgenisDataException("can't use getEntity() on something that's not an xref or categorical");
+			throw new MolgenisDataException(
+					"can't use getEntity() on something that's not an xref, categorical or file");
 		}
 
 		value = dataType.convert(value);
@@ -279,7 +280,7 @@ public class DefaultEntity implements Entity
 		if (!(dataType instanceof MrefField) && !(dataType instanceof XrefField))
 		{
 			throw new MolgenisDataException(
-					"can't use getEntities() on something that's not an xref, categorical, mref or categorical_mref");
+					"can't use getEntities() on something that's not an xref, mref, categorical, categorical_mref or file");
 		}
 
 		List<?> ids;
