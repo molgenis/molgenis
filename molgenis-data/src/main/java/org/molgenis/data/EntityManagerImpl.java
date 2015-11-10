@@ -15,10 +15,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.molgenis.data.support.LazyEntity;
+import org.molgenis.data.support.PartialEntity;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.util.BatchingIterable;
+import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.HashMultimap;
@@ -226,18 +228,46 @@ public class EntityManagerImpl implements EntityManager
 
 				for (Entry<String, Fetch> entry : attrSubFetch)
 				{
-					if (subFetch.hasField(entry.getKey()))
-					{
-						// TODO merge fetches
-					}
-					else
-					{
-						subFetch.field(entry.getKey(), entry.getValue());
-					}
+					mergeFetches(subFetch, entry.getKey(), entry.getValue());
 				}
+			}
+			else
+			{
+				// prefer null value (=fetch all attributes) above other values (=filter some attributes)
+				subFetch = null;
+				break;
 			}
 		}
 		return subFetch;
+	}
+
+	private void mergeFetches(Fetch fetch, String field, Fetch subFetch)
+	{
+		if (subFetch == null)
+		{
+			// prefer null value above specific value
+			fetch.field(field, null);
+		}
+		else if (fetch.hasField(field))
+		{
+			Fetch existingSubFetch = fetch.getFetch(field);
+			if (existingSubFetch != null)
+			{
+				for (Map.Entry<String, Fetch> entry : subFetch)
+				{
+					mergeFetches(existingSubFetch, entry.getKey(), entry.getValue());
+				}
+			}
+			else
+			{
+				// do nothing
+			}
+		}
+		else
+		{
+			// first value for this field
+			fetch.field(field, subFetch);
+		}
 	}
 
 	/**
@@ -287,6 +317,39 @@ public class EntityManagerImpl implements EntityManager
 		public Iterator<Object> iterator()
 		{
 			return stream(entities.spliterator(), false).map(Entity::getIdValue).iterator();
+		}
+	}
+
+	@Override
+	public <E extends Entity> E convert(Entity entity, Class<E> entityClass)
+	{
+		return entity != null ? EntityUtils.convert(entity, entityClass, dataService) : null;
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> convert(Iterable<Entity> entities, Class<E> entityClass)
+	{
+		return new Iterable<E>()
+		{
+			@Override
+			public Iterator<E> iterator()
+			{
+				return stream(entities.spliterator(), false)
+						.map(entity -> EntityUtils.convert(entity, entityClass, dataService)).iterator();
+			}
+		};
+	}
+
+	@Override
+	public Entity createEntityForPartialEntity(Entity partialEntity, Fetch fetch)
+	{
+		if (fetch == null)
+		{
+			return partialEntity;
+		}
+		else
+		{
+			return new PartialEntity(partialEntity, fetch, this);
 		}
 	}
 }
