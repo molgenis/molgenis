@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -66,9 +65,6 @@ public class BatchingIterableTest
 				{
 					batchList = Collections.emptyList();
 				}
-				System.out.println(
-						String.format("getBatch - [offset=%d, limit=%d, batchSize=%d]", offset, limit, batchSize) + ": "
-								+ StringUtils.join(batchList, ','));
 				return batchList;
 			}
 		};
