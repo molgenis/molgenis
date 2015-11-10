@@ -36,9 +36,19 @@ public class Fetch implements Iterable<Entry<String, Fetch>>
 		return attrFetchMap.get(field);
 	}
 
+	public Fetch getFetch(AttributeMetaData attr)
+	{
+		return getFetch(attr.getName());
+	}
+
 	public boolean hasField(String field)
 	{
 		return attrFetchMap.containsKey(field);
+	}
+
+	public boolean hasField(AttributeMetaData attr)
+	{
+		return hasField(attr.getName());
 	}
 
 	public Set<String> getFields()
@@ -80,7 +90,29 @@ public class Fetch implements Iterable<Entry<String, Fetch>>
 	public String toString()
 	{
 		StringBuilder builder = new StringBuilder();
-		builder.append("Fetch [attrFetchMap=").append(attrFetchMap).append("]");
+		toStringRec(builder, this);
 		return builder.toString();
+	}
+
+	private void toStringRec(StringBuilder builder, Fetch fetch)
+	{
+		builder.append('(');
+		for (Iterator<Map.Entry<String, Fetch>> it = fetch.iterator(); it.hasNext();)
+		{
+			Entry<String, Fetch> entry = it.next();
+			builder.append(entry.getKey());
+
+			Fetch subFetch = entry.getValue();
+			if (subFetch != null)
+			{
+				toStringRec(builder, subFetch);
+			}
+
+			if (it.hasNext())
+			{
+				builder.append(',');
+			}
+		}
+		builder.append(')');
 	}
 }
