@@ -31,14 +31,16 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityManager;
+import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.ElasticsearchService.BulkProcessorFactory;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
+import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
@@ -55,8 +57,9 @@ public class ElasticsearchServiceTest
 	private Client client;
 	private ElasticsearchService searchService;
 	private String indexName;
-	private EntityToSourceConverter entityToSourceConverter;
 	private DataServiceImpl dataService;
+	private EntityManager entityManager;
+	private ElasticsearchEntityFactory elasticsearchEntityFactory;
 
 	@BeforeMethod
 	public void beforeMethod() throws InterruptedException
@@ -64,9 +67,14 @@ public class ElasticsearchServiceTest
 		indexName = "molgenis";
 		client = mock(Client.class);
 
-		entityToSourceConverter = mock(EntityToSourceConverter.class);
 		dataService = spy(new DataServiceImpl(new NonDecoratingRepositoryDecoratorFactory()));
-		searchService = spy(new ElasticsearchService(client, indexName, dataService, entityToSourceConverter, false));
+		entityManager = new EntityManagerImpl(dataService);
+		SourceToEntityConverter sourceToEntityManager = mock(SourceToEntityConverter.class);
+		EntityToSourceConverter entityToSourceManager = mock(EntityToSourceConverter.class);
+		elasticsearchEntityFactory = new ElasticsearchEntityFactory(entityManager, sourceToEntityManager,
+				entityToSourceManager);
+		searchService = spy(
+				new ElasticsearchService(client, indexName, dataService, elasticsearchEntityFactory, false));
 		BulkProcessorFactory bulkProcessorFactory = mock(BulkProcessorFactory.class);
 		BulkProcessor bulkProcessor = mock(BulkProcessor.class);
 		when(bulkProcessor.awaitClose(any(Long.class), any(TimeUnit.class))).thenReturn(true);
@@ -193,7 +201,6 @@ public class ElasticsearchServiceTest
 		MapEntity entity = new MapEntity(idAttributeName);
 		entity.set(idAttributeName, id);
 		Map<String, Object> source = getSource(metaData, entity);
-		when(entityToSourceConverter.convert(entity, metaData)).thenReturn(source);
 		whenIndexEntity(client, id, entityName, source);
 		return entity;
 	}
