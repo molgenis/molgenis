@@ -206,6 +206,18 @@ public class ComputedEntityValuesDecorator implements Repository
 		decoratedRepo.rebuildIndex();
 	}
 
+	@Override
+	public void addEntityListener(EntityListener entityListener)
+	{
+		decoratedRepo.addEntityListener(entityListener);
+	}
+
+	@Override
+	public void removeEntityListener(EntityListener entityListener)
+	{
+		decoratedRepo.removeEntityListener(entityListener);
+	}
+
 	private Entity toComputedValuesEntity(Entity entity)
 	{
 		if (getEntityMetaData().hasAttributeWithExpression())

@@ -14,6 +14,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
@@ -527,5 +528,17 @@ public class RepositoryValidationDecorator implements Repository
 	public void rebuildIndex()
 	{
 		decoratedRepository.rebuildIndex();
+	}
+
+	@Override
+	public void addEntityListener(EntityListener entityListener)
+	{
+		decoratedRepository.addEntityListener(entityListener);
+	}
+
+	@Override
+	public void removeEntityListener(EntityListener entityListener)
+	{
+		decoratedRepository.removeEntityListener(entityListener);
 	}
 }

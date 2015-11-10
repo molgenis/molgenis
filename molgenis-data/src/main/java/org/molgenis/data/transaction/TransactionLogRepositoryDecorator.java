@@ -9,6 +9,7 @@ import java.util.Set;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
@@ -235,5 +236,17 @@ public class TransactionLogRepositoryDecorator implements Repository
 	public void rebuildIndex()
 	{
 		decorated.rebuildIndex();
+	}
+
+	@Override
+	public void addEntityListener(EntityListener entityListener)
+	{
+		decorated.addEntityListener(entityListener);
+	}
+
+	@Override
+	public void removeEntityListener(EntityListener entityListener)
+	{
+		decorated.removeEntityListener(entityListener);
 	}
 }

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
@@ -234,7 +235,15 @@ public class DefaultEntity implements Entity
 		if (value instanceof Map)
 			return new DefaultEntity(attribute.getRefEntity(), dataService, (Map<String, Object>) value);
 
-		value = attribute.getDataType().convert(value);
+		FieldType dataType = attribute.getDataType();
+		if (attribute.getDataType().equals(MolgenisFieldTypes.MREF)
+				|| attribute.getDataType().equals(MolgenisFieldTypes.CATEGORICAL_MREF))
+		{
+			throw new MolgenisDataException(
+					"can't use getEntity() on an mref/categorical_mref, use getEntities() instead");
+		}
+
+		value = dataType.convert(value);
 		Entity refEntity = dataService.findOne(attribute.getRefEntity().getName(), value);
 		if (refEntity == null) throw new UnknownEntityException(attribute.getRefEntity().getName() + " with "
 				+ attribute.getRefEntity().getIdAttribute().getName() + " [" + value + "] does not exist");

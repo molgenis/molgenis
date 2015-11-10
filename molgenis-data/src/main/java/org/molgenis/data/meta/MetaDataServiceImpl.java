@@ -191,8 +191,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	private ManageableRepositoryCollection getManageableRepositoryCollection(EntityMetaData emd)
 	{
 		RepositoryCollection backend = getBackend(emd);
-		if (!(backend instanceof ManageableRepositoryCollection)) throw new RuntimeException(
-				"Backend  is not a ManageableCrudRepositoryCollection");
+		if (!(backend instanceof ManageableRepositoryCollection))
+			throw new RuntimeException("Backend  is not a ManageableCrudRepositoryCollection");
 
 		return (ManageableRepositoryCollection) backend;
 	}
@@ -222,8 +222,8 @@ public class MetaDataServiceImpl implements MetaDataService
 			if (!dataService.hasRepository(emd.getName()))
 			{
 				Repository repo = backend.getRepository(emd.getName());
-				if (repo == null) throw new UnknownEntityException(String.format(
-						"Unknown entity '%s' for backend '%s'", emd.getName(), backend.getName()));
+				if (repo == null) throw new UnknownEntityException(
+						String.format("Unknown entity '%s' for backend '%s'", emd.getName(), backend.getName()));
 				Repository decoratedRepo = decoratorFactory.createDecoratedRepository(repo);
 				dataService.addRepository(decoratedRepo);
 			}
@@ -376,8 +376,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	public synchronized void onApplicationEvent(ContextRefreshedEvent event)
 	{
 		// Discover all backends
-		Map<String, RepositoryCollection> backendBeans = event.getApplicationContext().getBeansOfType(
-				RepositoryCollection.class);
+		Map<String, RepositoryCollection> backendBeans = event.getApplicationContext()
+				.getBeansOfType(RepositoryCollection.class);
 		backendBeans.values().forEach(this::addBackend);
 
 		// Create repositories from EntityMetaData in EntityMetaData repo
@@ -430,10 +430,9 @@ public class MetaDataServiceImpl implements MetaDataService
 	public LinkedHashMap<String, Boolean> integrationTestMetaData(RepositoryCollection repositoryCollection)
 	{
 		LinkedHashMap<String, Boolean> entitiesImportable = new LinkedHashMap<String, Boolean>();
-		StreamSupport.stream(repositoryCollection.getEntityNames().spliterator(), false).forEach(
-				entityName -> entitiesImportable.put(entityName, this
-						.canIntegrateEntityMetadataCheck(repositoryCollection.getRepository(entityName)
-								.getEntityMetaData())));
+		StreamSupport.stream(repositoryCollection.getEntityNames().spliterator(), false)
+				.forEach(entityName -> entitiesImportable.put(entityName, this.canIntegrateEntityMetadataCheck(
+						repositoryCollection.getRepository(entityName).getEntityMetaData())));
 
 		return entitiesImportable;
 	}
@@ -445,11 +444,9 @@ public class MetaDataServiceImpl implements MetaDataService
 	{
 		LinkedHashMap<String, Boolean> entitiesImportable = new LinkedHashMap<String, Boolean>();
 
-		StreamSupport.stream(newEntitiesMetaDataMap.keySet().spliterator(), false).forEach(
-				entityName -> entitiesImportable.put(
-						entityName,
-						skipEntities.contains(entityName)
-								|| this.canIntegrateEntityMetadataCheck(newEntitiesMetaDataMap.get(entityName))));
+		StreamSupport.stream(newEntitiesMetaDataMap.keySet().spliterator(), false)
+				.forEach(entityName -> entitiesImportable.put(entityName, skipEntities.contains(entityName)
+						|| this.canIntegrateEntityMetadataCheck(newEntitiesMetaDataMap.get(entityName))));
 
 		return entitiesImportable;
 	}
@@ -462,13 +459,13 @@ public class MetaDataServiceImpl implements MetaDataService
 			EntityMetaData newEntity = newEntityMetaData;
 			EntityMetaData oldEntity = dataService.getEntityMetaData(entityName);
 
-			List<AttributeMetaData> oldAtomicAttributes = StreamSupport.stream(
-					oldEntity.getAtomicAttributes().spliterator(), false).collect(
-					Collectors.<AttributeMetaData> toList());
+			List<AttributeMetaData> oldAtomicAttributes = StreamSupport
+					.stream(oldEntity.getAtomicAttributes().spliterator(), false)
+					.collect(Collectors.<AttributeMetaData> toList());
 
 			LinkedHashMap<String, AttributeMetaData> newAtomicAttributesMap = new LinkedHashMap<String, AttributeMetaData>();
-			StreamSupport.stream(newEntity.getAtomicAttributes().spliterator(), false).forEach(
-					attribute -> newAtomicAttributesMap.put(attribute.getName(), attribute));
+			StreamSupport.stream(newEntity.getAtomicAttributes().spliterator(), false)
+					.forEach(attribute -> newAtomicAttributesMap.put(attribute.getName(), attribute));
 
 			for (AttributeMetaData oldAttribute : oldAtomicAttributes)
 			{

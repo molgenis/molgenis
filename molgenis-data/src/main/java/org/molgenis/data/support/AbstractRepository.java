@@ -15,6 +15,7 @@ import java.util.Map;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
@@ -217,6 +218,18 @@ public abstract class AbstractRepository implements Repository
 	// Implement in child class if repository has capability INDEXABLE
 	@Override
 	public void rebuildIndex()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void addEntityListener(EntityListener entityListener)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void removeEntityListener(EntityListener entityListener)
 	{
 		throw new UnsupportedOperationException();
 	}

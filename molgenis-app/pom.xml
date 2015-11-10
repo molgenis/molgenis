@@ -186,11 +186,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-disease-matcher</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-googlespreadsheet</artifactId>
 			<version>${project.version}</version>
 			<exclusions>
