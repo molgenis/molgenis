@@ -58,7 +58,6 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		private static final boolean DEFAULT_MOD_ANNOTATORS = true;
 		private static final boolean DEFAULT_MOD_CHARTS = true;
 		private static final boolean DEFAULT_MOD_DATA = true;
-		private static final boolean DEFAULT_MOD_DISEASE_MATCHER = true;
 		private static final boolean DEFAULT_MOD_REPORT = true;
 
 		public static final String DATA = "data";
