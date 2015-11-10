@@ -1,5 +1,7 @@
 package org.molgenis.data.rest.v2;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -42,6 +44,7 @@ import java.util.stream.IntStream;
 import org.mockito.Matchers;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
@@ -307,6 +310,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 
 		Query q = new QueryImpl().offset(0).pageSize(100);
 		when(dataService.findOne(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
+		when(dataService.findOne(eq(ENTITY_NAME), eq(ENTITY_ID), any(Fetch.class))).thenReturn(entity);
 		when(dataService.count(ENTITY_NAME, q)).thenReturn(2l);
 		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Arrays.asList(entity));
 		when(dataService.findOne(REF_ENTITY_NAME, REF_ENTITY0_ID)).thenReturn(refEntity0);
@@ -316,7 +320,6 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		when(dataService.getEntityMetaData(REF_ENTITY_NAME)).thenReturn(refEntityMetaData);
 		when(dataService.getEntityMetaData(REF_REF_ENTITY_NAME)).thenReturn(refRefEntityMetaData);
 
-		boolean prettyPrint = true;
 		mockMvc = MockMvcBuilders.standaloneSetup(restControllerV2).setMessageConverters(gsonHttpMessageConverter)
 				.setConversionService(conversionService).build();
 	}
@@ -1179,7 +1182,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n" + "    \"lookupAttributes\": [],\n"
 			+ "    \"isAbstract\": false,\n" + "    \"writable\": false\n" + "  },\n"
 			+ "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"xref\": {\n"
-			+ "    \"_href\": \"/api/v2/refEntity/ref0\",\n" + "    \"value\": \"val1\"\n" + "  }\n" + "}";
+			+ "    \"_href\": \"/api/v2/refEntity/ref0\",\n" + "    \"value\": \"val0\"\n" + "  }\n" + "}";
 
 	private String resourcePartialSubAttributesResponse = "{\n" + "  \"_meta\": {\n"
 			+ "    \"href\": \"/api/v2/entity\",\n" + "    \"hrefCollection\": \"/api/v2/entity\",\n"
@@ -1213,7 +1216,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n" + "    \"lookupAttributes\": [],\n"
 			+ "    \"isAbstract\": false,\n" + "    \"writable\": false\n" + "  },\n"
 			+ "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"xref\": {\n"
-			+ "    \"_href\": \"/api/v2/refEntity/ref0\",\n" + "    \"id\": \"ref0\",\n" + "    \"value\": \"val1\"\n"
+			+ "    \"_href\": \"/api/v2/refEntity/ref0\",\n" + "    \"id\": \"ref0\",\n" + "    \"value\": \"val0\"\n"
 			+ "  }\n" + "}";
 
 	private String resourcePartialAttributesResponse = "{\n" + "  \"_meta\": {\n"

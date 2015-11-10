@@ -34,7 +34,7 @@ public class AttributeFilterToFetchConverter
 
 		if (attrFilter.isIncludeAllAttrs())
 		{
-			return createDefaultEntityFetch(entityMeta);
+			return null;
 		}
 
 		Fetch fetch = new Fetch();

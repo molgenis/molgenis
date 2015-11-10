@@ -120,11 +120,7 @@ public class AttributeFilterToFetchConverterTest
 	public void convertAttrFilterIncludeAll()
 	{
 		AttributeFilter attrFilter = new AttributeFilter().setIncludeAllAttrs(true);
-		Fetch fetch = new Fetch().field(ID_ATTR_NAME).field(LABEL_ATTR_NAME).field(COMPOUND_PART_ATTR_NAME)
-				.field(COMPOUND_PART_FILE_ATTR_NAME,
-						new Fetch().field(FileMeta.ID).field(FileMeta.FILENAME).field(FileMeta.URL))
-				.field(XREF_ATTR_NAME, new Fetch().field(REF_ID_ATTR_NAME).field(REF_LABEL_ATTR_NAME));
-		assertEquals(AttributeFilterToFetchConverter.convert(attrFilter, entityMeta), fetch);
+		assertNull(AttributeFilterToFetchConverter.convert(attrFilter, entityMeta));
 	}
 
 	@Test
