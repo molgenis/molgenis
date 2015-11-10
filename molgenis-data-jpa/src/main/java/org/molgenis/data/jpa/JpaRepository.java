@@ -158,7 +158,7 @@ public class JpaRepository extends AbstractRepository
 	{
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Fetching JPA [{}] data by id [{}]", getEntityClass().getSimpleName());
+			LOG.debug("Fetching JPA [{}] data by id [{}]", getEntityClass().getSimpleName(), id);
 		}
 
 		return getEntityManager().find(getEntityClass(),
