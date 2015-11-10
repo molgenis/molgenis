@@ -46,4 +46,29 @@ public interface EntityManager
 	 * @return
 	 */
 	Iterable<Entity> resolveReferences(EntityMetaData entityMeta, Iterable<Entity> entities, Fetch fetch);
+
+	/**
+	 * Converts entity to entity of the given class
+	 * 
+	 * @param entity
+	 * @param entityClass
+	 * @return
+	 */
+	<E extends Entity> E convert(Entity entity, Class<E> entityClass);
+
+	/**
+	 * Converts entities to entities of the given class
+	 * 
+	 * @param entity
+	 * @param entityClass
+	 * @return
+	 */
+	<E extends Entity> Iterable<E> convert(Iterable<Entity> entities, Class<E> entityClass);
+
+	/**
+	 * @param partialEntity
+	 * @param fetch
+	 * @return
+	 */
+	Entity createEntityForPartialEntity(Entity partialEntity, Fetch fetch);
 }
