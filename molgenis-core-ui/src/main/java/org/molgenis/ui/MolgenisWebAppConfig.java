@@ -413,7 +413,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 		addReposToReindex(localDataService, localMySqlEntityFactory);
 
-		SourceToEntityConverter sourceToEntityConverter = new SourceToEntityConverter(localDataService);
+		SourceToEntityConverter sourceToEntityConverter = new SourceToEntityConverter(localDataService,
+				localEntityManager);
 		EntityToSourceConverter entityToSourceConverter = new EntityToSourceConverter();
 		SearchService localSearchService = embeddedElasticSearchServiceFactory.create(localDataService,
 				new ElasticsearchEntityFactory(localEntityManager, sourceToEntityConverter, entityToSourceConverter));
