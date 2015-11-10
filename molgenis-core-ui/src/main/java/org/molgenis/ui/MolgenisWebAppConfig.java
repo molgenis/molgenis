@@ -488,6 +488,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 			{
 				Repository decoratedRepository = repository;
 
+				// 7. Entity listener
+				decoratedRepository = new EntityListenerRepositoryDecorator(decoratedRepository);
+
 				// 6. Owned decorator
 				if (EntityUtils.doesExtend(repository.getEntityMetaData(), OwnedEntityMetaData.ENTITY_NAME))
 				{
@@ -495,7 +498,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 				}
 
 				// 5. Transaction log decorator
-				decoratedRepository = new TransactionLogRepositoryDecorator(repository, transactionLogService);
+				decoratedRepository = new TransactionLogRepositoryDecorator(decoratedRepository, transactionLogService);
 
 				// 4. SQL exception translation decorator
 				String backend = decoratedRepository.getEntityMetaData().getBackend();

@@ -217,4 +217,18 @@ public class RepositorySecurityDecorator implements Repository
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.drop();
 	}
+
+	@Override
+	public void addEntityListener(EntityListener entityListener)
+	{
+		validatePermission(decoratedRepository.getName(), Permission.READ);
+		decoratedRepository.addEntityListener(entityListener);
+	}
+
+	@Override
+	public void removeEntityListener(EntityListener entityListener)
+	{
+		validatePermission(decoratedRepository.getName(), Permission.READ);
+		decoratedRepository.removeEntityListener(entityListener);
+	}
 }

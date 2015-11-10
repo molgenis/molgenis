@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
@@ -200,5 +201,17 @@ public class MySqlRepositoryExceptionTranslatorDecorator implements Repository
 	public void rebuildIndex()
 	{
 		decoratedRepo.rebuildIndex();
+	}
+
+	@Override
+	public void addEntityListener(EntityListener entityListener)
+	{
+		decoratedRepo.addEntityListener(entityListener);
+	}
+
+	@Override
+	public void removeEntityListener(EntityListener entityListener)
+	{
+		decoratedRepo.removeEntityListener(entityListener);
 	}
 }
