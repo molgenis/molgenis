@@ -65,8 +65,7 @@ public class EntityManagerImpl implements EntityManager
 	public Iterable<Entity> resolveReferences(EntityMetaData entityMeta, Iterable<Entity> entities, Fetch fetch)
 	{
 		// resolve lazy entity collections without references
-		if (entities instanceof org.molgenis.util.EntityCollection
-				&& ((org.molgenis.util.EntityCollection) entities).isLazy())
+		if (entities instanceof EntityCollection && ((EntityCollection) entities).isLazy())
 		{
 			// TODO remove cast after updating DataService/Repository interfaces to return EntityCollections
 			return dataService.findAll(entityMeta.getName(), new EntityIdIterable(entities), fetch);

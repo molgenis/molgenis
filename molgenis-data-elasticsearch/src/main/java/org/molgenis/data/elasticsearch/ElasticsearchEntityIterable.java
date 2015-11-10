@@ -24,12 +24,12 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityCollection;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.ElasticsearchService.CrudType;
 import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
 import org.molgenis.data.support.BatchingQueryResult;
-import org.molgenis.util.EntityCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,6 +141,12 @@ class ElasticsearchEntityIterable extends BatchingQueryResult implements EntityC
 			entities = Collections.emptyList();
 		}
 		return entities;
+	}
+
+	@Override
+	public Iterable<String> getAttributeNames()
+	{
+		return entityMeta.getAtomicAttributeNames();
 	}
 
 	@Override
