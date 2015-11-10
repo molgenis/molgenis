@@ -735,14 +735,14 @@ public class MysqlRepository extends AbstractRepository
 				}
 
 				List<Object> parameters = Lists.newArrayList();
-				String sql = getSelectSql(q, parameters);
+				String sql = getSelectSql(batchQuery, parameters);
 				if (LOG.isTraceEnabled())
 				{
 					LOG.trace("sql: {}, parameters: {}", sql, parameters);
 				}
 
-				RowMapper<Entity> entityMapper = mySqlEntityFactory.createRowMapper(getEntityMetaData(), q.getFetch(),
-						jdbcTemplate, getTableName());
+				RowMapper<Entity> entityMapper = mySqlEntityFactory.createRowMapper(getEntityMetaData(),
+						batchQuery.getFetch(), jdbcTemplate, getTableName());
 				return jdbcTemplate.query(sql, parameters.toArray(new Object[0]), entityMapper);
 			}
 		};
