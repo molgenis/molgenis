@@ -498,7 +498,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 				}
 
 				// 5. Transaction log decorator
-				decoratedRepository = new TransactionLogRepositoryDecorator(repository, transactionLogService);
+				decoratedRepository = new TransactionLogRepositoryDecorator(decoratedRepository, transactionLogService);
 
 				// 4. SQL exception translation decorator
 				String backend = decoratedRepository.getEntityMetaData().getBackend();
