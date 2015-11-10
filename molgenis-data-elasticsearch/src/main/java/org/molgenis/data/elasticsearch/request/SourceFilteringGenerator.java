@@ -24,26 +24,32 @@ public class SourceFilteringGenerator implements QueryPartGenerator
 			Fetch fetch = query.getFetch();
 			if (fetch != null)
 			{
-				Set<String> fields = fetch.getFields();
-				List<String> sourceIncludes = new ArrayList<>();
-				fields.forEach(field -> {
-					Fetch subFetch = fetch.getFetch(field);
-					if (subFetch != null)
-					{
-						// filter nested types. Sub fetches of sub fetches are ignored because nested
-						// types do not contain nested types (due to the indexing depth)
-						Set<String> subFields = subFetch.getFields();
-						subFields.forEach(subField -> {
-							sourceIncludes.add(field + '.' + subField);
-						});
-					}
-					else
-					{
-						sourceIncludes.add(field);
-					}
-				});
-				searchRequestBuilder.setFetchSource(sourceIncludes.toArray(new String[sourceIncludes.size()]), null);
+				String[] fields = toFetchFields(fetch);
+				searchRequestBuilder.setFetchSource(fields, null);
 			}
 		}
+	}
+
+	public static String[] toFetchFields(Fetch fetch)
+	{
+		Set<String> fields = fetch.getFields();
+		List<String> sourceIncludes = new ArrayList<>();
+		fields.forEach(field -> {
+			Fetch subFetch = fetch.getFetch(field);
+			if (subFetch != null)
+			{
+				// filter nested types. Sub fetches of sub fetches are ignored because nested
+				// types do not contain nested types (due to the indexing depth)
+				Set<String> subFields = subFetch.getFields();
+				subFields.forEach(subField -> {
+					sourceIncludes.add(field + '.' + subField);
+				});
+			}
+			else
+			{
+				sourceIncludes.add(field);
+			}
+		});
+		return sourceIncludes.toArray(new String[sourceIncludes.size()]);
 	}
 }
