@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.molgenis.data.support.QueryImpl;
+
 public class EntityReferenceResolverDecorator implements Repository
 {
 	private final Repository decoratedRepo;
@@ -75,16 +77,20 @@ public class EntityReferenceResolverDecorator implements Repository
 		return entity != null ? resolveEntityReferences(entity, q.getFetch()) : null;
 	}
 
+	// Resolve entity references
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		return decoratedRepo.iterator();
+		Iterable<Entity> entities = decoratedRepo.findAll(new QueryImpl());
+		return resolveEntityReferences(entities).iterator();
 	}
 
+	// Resolve entity references
 	@Override
 	public Entity findOne(Object id)
 	{
-		return decoratedRepo.findOne(id);
+		Entity entity = decoratedRepo.findOne(id);
+		return entity != null ? resolveEntityReferences(entity) : null;
 	}
 
 	// Resolve entity references based on given fetch
@@ -95,10 +101,12 @@ public class EntityReferenceResolverDecorator implements Repository
 		return entity != null ? resolveEntityReferences(entity, fetch) : null;
 	}
 
+	// Resolve entity references
 	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
-		return decoratedRepo.findAll(ids);
+		Iterable<Entity> entities = decoratedRepo.findAll(ids);
+		return resolveEntityReferences(entities);
 	}
 
 	// Resolve entity references based on given fetch
@@ -199,9 +207,19 @@ public class EntityReferenceResolverDecorator implements Repository
 		decoratedRepo.rebuildIndex();
 	}
 
+	private Entity resolveEntityReferences(Entity entity)
+	{
+		return entityManager.resolveReferences(getEntityMetaData(), entity, null);
+	}
+
 	private Entity resolveEntityReferences(Entity entity, Fetch fetch)
 	{
 		return entityManager.resolveReferences(getEntityMetaData(), entity, fetch);
+	}
+
+	private Iterable<Entity> resolveEntityReferences(Iterable<Entity> entities)
+	{
+		return entityManager.resolveReferences(getEntityMetaData(), entities, null);
 	}
 
 	private Iterable<Entity> resolveEntityReferences(Iterable<Entity> entities, Fetch fetch)

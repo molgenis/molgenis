@@ -7,7 +7,9 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.Arrays;
 
+import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -176,9 +178,12 @@ public class EntityReferenceResolverDecoratorTest
 	public void findAllQueryNoFetch()
 	{
 		Query q = mock(Query.class);
+		@SuppressWarnings("unchecked")
+		Iterable<Entity> entities = mock(Iterable.class);
+		when(decoratedRepo.findAll(q)).thenReturn(entities);
 		entityReferenceResolverDecorator.findAll(q);
 		verify(decoratedRepo, times(1)).findAll(q);
-		verifyZeroInteractions(entityManager);
+		verify(entityManager).resolveReferences(entityMeta, entities, null);
 	}
 
 	@Test
@@ -186,9 +191,12 @@ public class EntityReferenceResolverDecoratorTest
 	{
 		@SuppressWarnings("unchecked")
 		Iterable<Object> ids = mock(Iterable.class);
+		@SuppressWarnings("unchecked")
+		Iterable<Entity> entities = mock(Iterable.class);
+		when(decoratedRepo.findAll(ids)).thenReturn(entities);
 		entityReferenceResolverDecorator.findAll(ids);
 		verify(decoratedRepo, times(1)).findAll(ids);
-		verifyZeroInteractions(entityManager);
+		verify(entityManager).resolveReferences(entityMeta, entities, null);
 	}
 
 	@Test
@@ -210,9 +218,12 @@ public class EntityReferenceResolverDecoratorTest
 	{
 		@SuppressWarnings("unchecked")
 		Iterable<Object> ids = mock(Iterable.class);
+		@SuppressWarnings("unchecked")
+		Iterable<Entity> entities = mock(Iterable.class);
+		when(decoratedRepo.findAll(ids, null)).thenReturn(entities);
 		entityReferenceResolverDecorator.findAll(ids, null);
 		verify(decoratedRepo, times(1)).findAll(ids, null);
-		verifyZeroInteractions(entityManager);
+		verify(entityManager).resolveReferences(entityMeta, entities, null);
 	}
 
 	@Test
@@ -313,9 +324,13 @@ public class EntityReferenceResolverDecoratorTest
 	@Test
 	public void iterator()
 	{
+		QueryImpl q = new QueryImpl();
+		Iterable<Entity> entities = Arrays.asList(mock(Entity.class));
+		when(decoratedRepo.findAll(q)).thenReturn(entities);
+		when(entityManager.resolveReferences(entityMeta, entities, null)).thenReturn(entities);
 		entityReferenceResolverDecorator.iterator();
-		verify(decoratedRepo, times(1)).iterator();
-		verifyZeroInteractions(entityManager);
+		verify(decoratedRepo, times(1)).findAll(q);
+		verify(entityManager).resolveReferences(entityMeta, entities, null);
 	}
 
 	@Test
