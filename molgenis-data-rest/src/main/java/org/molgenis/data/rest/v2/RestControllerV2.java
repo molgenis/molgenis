@@ -18,6 +18,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -473,8 +474,16 @@ class RestControllerV2
 			q.fetch(fetch);
 		}
 
-		Iterable<Entity> it = dataService.findAll(entityName, q);
 		Long count = dataService.count(entityName, q);
+		Iterable<Entity> it;
+		if (count > 0)
+		{
+			it = dataService.findAll(entityName, q);
+		}
+		else
+		{
+			it = Collections.emptyList();
+		}
 		EntityPager pager = new EntityPager(request.getStart(), request.getNum(), count, it);
 
 		List<Map<String, Object>> entities = new ArrayList<>();
