@@ -2,6 +2,7 @@ package org.molgenis.util;
 
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * Iterable that returns an iterator that retrieves a new batch of objects after a given batchSize
@@ -69,10 +70,9 @@ public abstract class BatchingIterable<T> implements Iterable<T>
 			@Override
 			public T next()
 			{
-				// lazy load first batch
-				if (it == null)
+				if (!hasNext())
 				{
-					it = nextBatch();
+					throw new NoSuchElementException();
 				}
 
 				T element = it.next();

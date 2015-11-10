@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,6 +28,9 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.common.io.stream.StreamInput;
+import org.elasticsearch.common.io.stream.StreamOutput;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.molgenis.MolgenisFieldTypes;
@@ -69,7 +73,7 @@ public class ElasticsearchServiceTest
 
 		dataService = spy(new DataServiceImpl(new NonDecoratingRepositoryDecoratorFactory()));
 		entityManager = new EntityManagerImpl(dataService);
-		SourceToEntityConverter sourceToEntityManager = mock(SourceToEntityConverter.class);
+		SourceToEntityConverter sourceToEntityManager = new SourceToEntityConverter(dataService, entityManager);
 		EntityToSourceConverter entityToSourceManager = mock(EntityToSourceConverter.class);
 		elasticsearchEntityFactory = new ElasticsearchEntityFactory(entityManager, sourceToEntityManager,
 				entityToSourceManager);
@@ -127,7 +131,7 @@ public class ElasticsearchServiceTest
 
 		ListenableActionFuture<SearchResponse> value1 = mock(ListenableActionFuture.class);
 		SearchResponse searchResponse1 = mock(SearchResponse.class);
-		SearchHits searchHits1 = mock(SearchHits.class);
+
 		SearchHit[] hits1 = new SearchHit[batchSize];
 		for (int i = 0; i < batchSize; ++i)
 		{
@@ -136,22 +140,19 @@ public class ElasticsearchServiceTest
 			when(searchHit.getId()).thenReturn(String.valueOf(i + 1));
 			hits1[i] = searchHit;
 		}
-		when(searchHits1.getHits()).thenReturn(hits1);
-		when(searchHits1.getTotalHits()).thenReturn(Long.valueOf(totalSize));
+		SearchHits searchHits1 = createSearchHits(hits1, totalSize);
 		when(searchResponse1.getHits()).thenReturn(searchHits1);
 		when(value1.actionGet()).thenReturn(searchResponse1);
 
 		ListenableActionFuture<SearchResponse> value2 = mock(ListenableActionFuture.class);
 		SearchResponse searchResponse2 = mock(SearchResponse.class);
-		SearchHits searchHits2 = mock(SearchHits.class);
 
 		SearchHit[] hits2 = new SearchHit[totalSize - batchSize];
 		SearchHit searchHit = mock(SearchHit.class);
 		when(searchHit.getSource()).thenReturn(Collections.<String, Object> singletonMap(idAttrName, batchSize + 1));
 		when(searchHit.getId()).thenReturn(String.valueOf(batchSize + 1));
 		hits2[0] = searchHit;
-		when(searchHits2.getHits()).thenReturn(hits2);
-		when(searchHits2.getTotalHits()).thenReturn(Long.valueOf(totalSize));
+		SearchHits searchHits2 = createSearchHits(hits2, totalSize);
 		when(searchResponse2.getHits()).thenReturn(searchHits2);
 		when(value2.actionGet()).thenReturn(searchResponse2);
 
@@ -183,6 +184,7 @@ public class ElasticsearchServiceTest
 		when(repo.findAll(idsBatch1)).thenReturn(entitiesBatch1);
 		dataService.addRepository(repo);
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("entity");
+		entityMetaData.setBackend(ElasticsearchRepositoryCollection.NAME);
 		entityMetaData.addAttribute(idAttrName).setDataType(MolgenisFieldTypes.INT).setIdAttribute(true);
 		Query q = new QueryImpl();
 		Iterable<Entity> searchResults = searchService.search(q, entityMetaData);
@@ -230,5 +232,77 @@ public class ElasticsearchServiceTest
 		ListenableActionFuture<IndexResponse> indexResponse = mock(ListenableActionFuture.class);
 		when(indexRequestBuilder.execute()).thenReturn(indexResponse);
 		when(client.prepareIndex(indexName, entityName, id)).thenReturn(indexRequestBuilder);
+	}
+
+	private SearchHits createSearchHits(final SearchHit[] searchHits, final int totalHits)
+	{
+		return new SearchHits()
+		{
+			@Override
+			public Iterator<SearchHit> iterator()
+			{
+				return Arrays.asList(searchHits).iterator();
+			}
+
+			@Override
+			public XContentBuilder toXContent(XContentBuilder builder, Params params) throws IOException
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void writeTo(StreamOutput out) throws IOException
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void readFrom(StreamInput in) throws IOException
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public long totalHits()
+			{
+				return getTotalHits();
+			}
+
+			@Override
+			public float maxScore()
+			{
+				return getMaxScore();
+			}
+
+			@Override
+			public SearchHit[] hits()
+			{
+				return getHits();
+			}
+
+			@Override
+			public long getTotalHits()
+			{
+				return totalHits;
+			}
+
+			@Override
+			public float getMaxScore()
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public SearchHit[] getHits()
+			{
+				return searchHits;
+			}
+
+			@Override
+			public SearchHit getAt(int position)
+			{
+				throw new UnsupportedOperationException();
+			}
+		};
 	}
 }
