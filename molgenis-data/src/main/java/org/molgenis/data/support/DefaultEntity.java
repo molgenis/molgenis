@@ -257,6 +257,7 @@ public class DefaultEntity implements Entity
 		Iterable<?> ids;
 		Object value = values.get(attributeName);
 		if (value instanceof String) ids = getList(attributeName);
+		else if (value instanceof Entity) return Collections.singletonList((Entity) value);
 		else ids = (Iterable<?>) value;
 
 		if ((ids == null) || !ids.iterator().hasNext()) return Collections.emptyList();

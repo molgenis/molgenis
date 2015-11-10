@@ -100,6 +100,19 @@ public class DefaultEntityTest
 	}
 
 	@Test
+	public void getEntitiesForSingleEntity()
+	{
+		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		AttributeMetaData labelAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("label").getMock();
+		when(entityMeta.getLabelAttribute()).thenReturn(labelAttr);
+		DataService dataService = mock(DataService.class);
+
+		Entity refEntity = mock(Entity.class);
+		DefaultEntity entity = new DefaultEntity(entityMeta, dataService, Collections.singletonMap("attr", refEntity));
+		assertEquals(Lists.newArrayList(entity.getEntities("attr")), Arrays.asList(refEntity));
+	}
+
+	@Test
 	public void setStringObject()
 	{
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
