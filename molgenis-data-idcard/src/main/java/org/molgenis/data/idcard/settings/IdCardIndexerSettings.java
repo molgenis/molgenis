@@ -35,4 +35,12 @@ public interface IdCardIndexerSettings
 	String getNotificationEmail();
 
 	void setNotificationEmail(String notificationEmail);
+
+	long getReindexTimeout();
+
+	void setReindexTimeout(long timeout);
+
+	long getTimeout();
+
+	void setTimeout(long timeout);
 }

@@ -30,6 +30,8 @@ public class IdCardIndexerDbSettings extends DefaultSettingsEntity implements Id
 		private static final String BIOBANK_COLLECTIONS_SELECTION_RESOURCE = "biobankCollSelResource";
 		private static final String BIOBANK_INDEXING_ENABLED = "biobankIndexingEnabled";
 		private static final String NOTIFICATION_EMAIL = "notificationEmail";
+		private static final String INDEX_REBUILD_TIMEOUT = "rebuildTimeout";
+		private static final String INDEX_TIMEOUT = "rebuildTimeout";
 
 		private static final String BIOBANK_INDEXING_FREQUENCY = "biobankIndexingFrequency";
 		private static final String DEFAULT_API_BASE_URI = "http://catalogue.rd-connect.eu/api/jsonws/BiBBoxCommonServices-portlet.logapi";
@@ -40,6 +42,11 @@ public class IdCardIndexerDbSettings extends DefaultSettingsEntity implements Id
 		private static final boolean DEFAULT_BIOBANK_INDEXING_ENABLED = false;
 		private static final String DEFAULT_BIOBANK_INDEXING_FREQUENCY = "0 4 * * * ?";
 		private static final String DEFAULT_NOTIFICATION_EMAIL = "molgenis+idcard@gmail.com";
+
+		private static final long DEFAULT_TIMEOUT = 5000l; // 5s
+		private static final long DEFAULT_INDEX_REBUILD_TIMEOUT = 60000l; // 60s
+
+
 
 		public Meta()
 		{
@@ -136,7 +143,6 @@ public class IdCardIndexerDbSettings extends DefaultSettingsEntity implements Id
 	@Override
 	public void setBiobankIndexingFrequency(String cronExpression)
 	{
-		// TODO validate if cronExpession is valid, not here but in decorator
 		set(Meta.BIOBANK_INDEXING_FREQUENCY, cronExpression);
 	}
 
@@ -150,5 +156,25 @@ public class IdCardIndexerDbSettings extends DefaultSettingsEntity implements Id
 	public void setNotificationEmail(String notificationEmail)
 	{
 		set(Meta.NOTIFICATION_EMAIL, notificationEmail);
+	}
+
+	@Override
+	public long getReindexTimeout() {
+		return Meta.DEFAULT_INDEX_REBUILD_TIMEOUT;
+	}
+
+	@Override
+	public void setReindexTimeout(long timeout) {
+		set(Meta.INDEX_REBUILD_TIMEOUT, timeout);
+	}
+
+	@Override
+	public long getTimeout() {
+		return Meta.DEFAULT_INDEX_REBUILD_TIMEOUT;
+	}
+
+	@Override
+	public void setTimeout(long timeout) {
+		set(Meta.INDEX_REBUILD_TIMEOUT, timeout);
 	}
 }
