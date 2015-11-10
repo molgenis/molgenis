@@ -3,6 +3,7 @@ package org.molgenis.data.transaction;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.LogFactory;
 import org.molgenis.data.IdGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,8 @@ public class MolgenisTransactionManager extends JpaTransactionManager
 	public MolgenisTransactionManager(IdGenerator idGenerator)
 	{
 		super();
+		// do not log JpaTransactionManager messages if org.molgenis log level is debug or trace
+		super.logger = LogFactory.getLog(JpaTransactionManager.class);
 		setNestedTransactionAllowed(false);
 		this.idGenerator = idGenerator;
 	}
