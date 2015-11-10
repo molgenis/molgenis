@@ -85,13 +85,6 @@ public class DefaultEntityTest
 		assertEquals(result.next(), refEntity2);
 	}
 
-	@Test
-	public void testGetEntitiesForXref()
-	{
-		Iterable<Entity> result = entity.getEntities("xref");
-		assertEquals(result.iterator().next(), refEntity1);
-	}
-
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testGetEntitiesForAttributeOtherThanRef()
 	{
