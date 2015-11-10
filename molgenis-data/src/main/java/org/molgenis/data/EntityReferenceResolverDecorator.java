@@ -201,25 +201,11 @@ public class EntityReferenceResolverDecorator implements Repository
 
 	private Entity resolveEntityReferences(Entity entity, Fetch fetch)
 	{
-		if (fetch != null)
-		{
-			return entityManager.resolveReferences(getEntityMetaData(), entity, fetch);
-		}
-		else
-		{
-			return entity;
-		}
+		return entityManager.resolveReferences(getEntityMetaData(), entity, fetch);
 	}
 
 	private Iterable<Entity> resolveEntityReferences(Iterable<Entity> entities, Fetch fetch)
 	{
-		if (fetch != null)
-		{
-			return entityManager.resolveReferences(getEntityMetaData(), entities, fetch);
-		}
-		else
-		{
-			return entities;
-		}
+		return entityManager.resolveReferences(getEntityMetaData(), entities, fetch);
 	}
 }
