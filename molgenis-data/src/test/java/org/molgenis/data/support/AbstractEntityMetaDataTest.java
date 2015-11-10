@@ -100,5 +100,11 @@ public class AbstractEntityMetaDataTest
 		{
 			throw new UnsupportedOperationException();
 		}
+
+		@Override
+		public boolean hasAttributeWithExpression()
+		{
+			throw new UnsupportedOperationException();
+		}
 	}
 }

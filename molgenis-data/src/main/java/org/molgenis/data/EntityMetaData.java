@@ -96,6 +96,13 @@ public interface EntityMetaData
 	AttributeMetaData getAttribute(String attributeName);
 
 	/**
+	 * Returns whether this entity has a attribute with expression
+	 * 
+	 * @return whether this entity has a attribute with expression
+	 */
+	boolean hasAttributeWithExpression();
+
+	/**
 	 * Entity can extend another entity, adding its properties to their own
 	 */
 	public EntityMetaData getExtends();
