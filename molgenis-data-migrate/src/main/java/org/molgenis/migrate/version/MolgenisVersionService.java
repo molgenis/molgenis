@@ -39,7 +39,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MolgenisVersionService
 {
-	public static final int CURRENT_VERSION = 21;
+	public static final int CURRENT_VERSION = 22;
 
 	private static final Logger LOG = LoggerFactory.getLogger(MolgenisVersionService.class);
 
