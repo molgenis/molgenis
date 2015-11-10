@@ -180,7 +180,7 @@ public class MysqlRepository extends AbstractRepository
 	{
 		if (tableExists())
 		{
-			LOG.debug("Table for entity " + getName() + " already exists. Skipping creation");
+			LOG.debug("Table for entity {} already exists. Skipping creation", getName());
 			return;
 		}
 		try
@@ -404,9 +404,9 @@ public class MysqlRepository extends AbstractRepository
 		// close
 		sql.append(") ENGINE=InnoDB;");
 
-		if (LOG.isDebugEnabled())
+		if (LOG.isTraceEnabled())
 		{
-			LOG.debug("sql: " + sql);
+			LOG.trace("sql: " + sql);
 		}
 
 		return sql.toString();
@@ -623,12 +623,6 @@ public class MysqlRepository extends AbstractRepository
 			@Override
 			public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
 			{
-
-				if (LOG.isDebugEnabled())
-				{
-					LOG.debug("mref: " + mrefs.get(i).get(idAttribute.getName()) + ", "
-							+ mrefs.get(i).get(att.getName()));
-				}
 				preparedStatement.setInt(1, i);
 
 				preparedStatement.setObject(2, mrefs.get(i).get(idAttribute.getName()));
@@ -735,25 +729,23 @@ public class MysqlRepository extends AbstractRepository
 			@Override
 			protected List<Entity> getBatch(Query batchQuery)
 			{
-				return findAllNoBatching(batchQuery);
+				if (LOG.isDebugEnabled())
+				{
+					LOG.debug("Fetching MySQL [{}] data for query [{}]", getName(), batchQuery);
+				}
+
+				List<Object> parameters = Lists.newArrayList();
+				String sql = getSelectSql(q, parameters);
+				if (LOG.isTraceEnabled())
+				{
+					LOG.trace("sql: {}, parameters: {}", sql, parameters);
+				}
+
+				RowMapper<Entity> entityMapper = mySqlEntityFactory.createRowMapper(getEntityMetaData(), q.getFetch(),
+						jdbcTemplate, getTableName());
+				return jdbcTemplate.query(sql, parameters.toArray(new Object[0]), entityMapper);
 			}
 		};
-	}
-
-	private List<Entity> findAllNoBatching(Query q)
-	{
-		List<Object> parameters = Lists.newArrayList();
-		String sql = getSelectSql(q, parameters);
-
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("query: " + q);
-			LOG.debug("sql: " + sql + ",parameters:" + parameters);
-		}
-
-		RowMapper<Entity> entityMapper = mySqlEntityFactory.createRowMapper(getEntityMetaData(), q.getFetch(),
-				jdbcTemplate, getTableName());
-		return jdbcTemplate.query(sql, parameters.toArray(new Object[0]), entityMapper);
 	}
 
 	protected String getWhereSql(Query q, List<Object> parameters, int mrefFilterIndex)
@@ -1429,12 +1421,17 @@ public class MysqlRepository extends AbstractRepository
 	@Override
 	public long count(Query q)
 	{
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Fetching MySQL [{}] data for query [{}]", getName(), q);
+		}
+
 		List<Object> parameters = Lists.newArrayList();
 		String sql = getCountSql(q, parameters);
 
-		if (LOG.isDebugEnabled())
+		if (LOG.isTraceEnabled())
 		{
-			LOG.debug("sql: " + sql + ",parameters:" + parameters);
+			LOG.trace("sql: {}, parameters: {}", sql, parameters);
 		}
 
 		return jdbcTemplate.queryForObject(sql, parameters.toArray(new Object[0]), Long.class);

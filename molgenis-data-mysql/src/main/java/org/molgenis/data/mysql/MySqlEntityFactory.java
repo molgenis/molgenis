@@ -17,6 +17,8 @@ import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.fieldtypes.IntField;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -25,6 +27,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class MySqlEntityFactory
 {
+	private static final Logger LOG = LoggerFactory.getLogger(MySqlEntityFactory.class);
+
 	private final EntityManager entityManager;
 	private final DataService dataService;
 
@@ -86,7 +90,13 @@ public class MySqlEntityFactory
 								{
 									// this list is just as long as it's allowed to be so it probably got truncated.
 									// Retrieve the IDs explicitly in a separate query.
-									mrefIntegerIds = jdbcTemplate.queryForList(getMrefSelectSql(e, att), Integer.class);
+									String mrefSelectSql = getMrefSelectSql(e, att);
+									if (LOG.isDebugEnabled())
+									{
+										LOG.debug("Fetching MySQL [{}] data for SQL [{}]", refEntityMeta.getName(),
+												mrefSelectSql);
+									}
+									mrefIntegerIds = jdbcTemplate.queryForList(mrefSelectSql, Integer.class);
 								}
 								else
 								{
@@ -104,7 +114,13 @@ public class MySqlEntityFactory
 								{
 									// this list is just as long as it's allowed to be so it probably got truncated.
 									// Retrieve the IDs explicitly in a separate query.
-									mrefObjectIds = jdbcTemplate.queryForList(getMrefSelectSql(e, att), Object.class);
+									String mrefSelectSql = getMrefSelectSql(e, att);
+									if (LOG.isDebugEnabled())
+									{
+										LOG.debug("Fetching MySQL [{}] data for SQL [{}]", refEntityMeta.getName(),
+												mrefSelectSql);
+									}
+									mrefObjectIds = jdbcTemplate.queryForList(mrefSelectSql, Object.class);
 								}
 								else
 								{

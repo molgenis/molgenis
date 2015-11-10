@@ -65,7 +65,10 @@ public class MolgenisTransactionManager extends JpaTransactionManager
 	protected void doBegin(Object transaction, TransactionDefinition definition) throws TransactionException
 	{
 		MolgenisTransaction molgenisTransaction = (MolgenisTransaction) transaction;
-		if (LOG.isDebugEnabled()) LOG.debug("Start transaction '" + molgenisTransaction.getId() + "'");
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Start transaction [{}]", molgenisTransaction.getId());
+		}
 
 		super.doBegin(molgenisTransaction.getJpaTransaction(), definition);
 
@@ -80,7 +83,10 @@ public class MolgenisTransactionManager extends JpaTransactionManager
 	protected void doCommit(DefaultTransactionStatus status) throws TransactionException
 	{
 		MolgenisTransaction transaction = (MolgenisTransaction) status.getTransaction();
-		if (LOG.isDebugEnabled()) LOG.debug("Commit transaction '" + transaction.getId() + "'");
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Commit transaction [{}]", transaction.getId());
+		}
 
 		DefaultTransactionStatus jpaTransactionStatus = new DefaultTransactionStatus(transaction.getJpaTransaction(),
 				status.isNewTransaction(), status.isNewSynchronization(), status.isReadOnly(), status.isDebug(),
@@ -98,7 +104,10 @@ public class MolgenisTransactionManager extends JpaTransactionManager
 	protected void doRollback(DefaultTransactionStatus status) throws TransactionException
 	{
 		MolgenisTransaction transaction = (MolgenisTransaction) status.getTransaction();
-		if (LOG.isDebugEnabled()) LOG.debug("Rollback transaction '" + transaction.getId() + "'");
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Rollback transaction [{}]", transaction.getId());
+		}
 
 		DefaultTransactionStatus jpaTransactionStatus = new DefaultTransactionStatus(transaction.getJpaTransaction(),
 				status.isNewTransaction(), status.isNewSynchronization(), status.isReadOnly(), status.isDebug(),
@@ -134,7 +143,10 @@ public class MolgenisTransactionManager extends JpaTransactionManager
 	protected void doCleanupAfterCompletion(Object transaction)
 	{
 		MolgenisTransaction molgenisTransaction = (MolgenisTransaction) transaction;
-		if (LOG.isDebugEnabled()) LOG.debug("Cleanup transaction '" + molgenisTransaction.getId() + "'");
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Cleanup transaction [{}]", molgenisTransaction.getId());
+		}
 
 		super.doCleanupAfterCompletion(molgenisTransaction.getJpaTransaction());
 

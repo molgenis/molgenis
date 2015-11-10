@@ -152,7 +152,7 @@ public class QueryRule
 
 		/**
 		 * Boolean query
-		 * */
+		 */
 		SHOULD("SHOULD"),
 
 		/**
@@ -206,8 +206,8 @@ public class QueryRule
 	{
 		if (operator == Operator.AND || operator == Operator.OR)
 		{
-			throw new IllegalArgumentException("QueryRule(): Operator." + operator
-					+ " cannot be used with two arguments");
+			throw new IllegalArgumentException(
+					"QueryRule(): Operator." + operator + " cannot be used with two arguments");
 		}
 		this.field = field;
 		this.operator = operator;
@@ -248,8 +248,8 @@ public class QueryRule
 		}
 		else
 		{
-			throw new IllegalArgumentException("QueryRule(): Operator." + operator
-					+ " cannot be used with one argument");
+			throw new IllegalArgumentException(
+					"QueryRule(): Operator." + operator + " cannot be used with one argument");
 		}
 	}
 
@@ -262,8 +262,8 @@ public class QueryRule
 		}
 		else
 		{
-			throw new IllegalArgumentException("QueryRule(): Operator." + operator
-					+ " cannot be used with one argument");
+			throw new IllegalArgumentException(
+					"QueryRule(): Operator." + operator + " cannot be used with one argument");
 		}
 	}
 
@@ -278,8 +278,8 @@ public class QueryRule
 		}
 		else
 		{
-			throw new IllegalArgumentException("QueryRule(): Operator '" + operator
-					+ "' cannot be used without arguments");
+			throw new IllegalArgumentException(
+					"QueryRule(): Operator '" + operator + "' cannot be used without arguments");
 		}
 	}
 
@@ -394,8 +394,11 @@ public class QueryRule
 		}
 		else
 		{
-			strBuilder.append(this.getField() == null ? " " : (this.getField() + " "));
-			strBuilder.append(this.getOperator()).append(value == null ? " " : " '" + value + "'");
+			if (field != null)
+			{
+				strBuilder.append(field).append(' ');
+			}
+			strBuilder.append(operator).append(' ').append(value);
 		}
 		return strBuilder.toString();
 	}
@@ -424,7 +427,8 @@ public class QueryRule
 		QueryRule queryRule = (QueryRule) o;
 
 		if (field != null ? !field.equals(queryRule.field) : queryRule.field != null) return false;
-		if (nestedRules != null ? !nestedRules.equals(queryRule.nestedRules) : queryRule.nestedRules != null) return false;
+		if (nestedRules != null ? !nestedRules.equals(queryRule.nestedRules) : queryRule.nestedRules != null)
+			return false;
 		if (operator != queryRule.operator) return false;
 		if (value != null ? !value.equals(queryRule.value) : queryRule.value != null) return false;
 

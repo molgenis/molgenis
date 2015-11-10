@@ -69,12 +69,14 @@ public class QueryImpl implements Query
 
 	public QueryImpl(QueryRule queryRule)
 	{
-		this(Arrays.asList(queryRule));
+		this();
+		addRule(queryRule);
 	}
 
 	public QueryImpl(List<QueryRule> queryRules)
 	{
-		this.rules.add(new ArrayList<QueryRule>(queryRules));
+		this();
+		queryRules.forEach(this::addRule);
 	}
 
 	public void addRule(QueryRule rule)
@@ -373,29 +375,53 @@ public class QueryImpl implements Query
 	public String toString()
 	{
 		StringBuilder builder = new StringBuilder();
-		builder.append("QueryImpl [rules=");
-		builder.append(rules);
+		if (rules.size() > 0)
+		{
+			if (rules.size() == 1)
+			{
+				List<QueryRule> rule = rules.get(0);
+				if (rule.size() > 0)
+				{
+					builder.append("rules=").append(rule);
+				}
+			}
+			else
+			{
+				builder.append("rules=").append(rules);
+			}
+		}
 		if (offset != 0)
 		{
-			builder.append(", offset=");
-			builder.append(offset);
+			if (builder.length() > 0)
+			{
+				builder.append(", ");
+			}
+			builder.append("offset=").append(offset);
 		}
 		if (pageSize != 0)
 		{
-			builder.append(", pageSize=");
-			builder.append(pageSize);
+			if (builder.length() > 0)
+			{
+				builder.append(", ");
+			}
+			builder.append("pageSize=").append(pageSize);
 		}
 		if (sort != null)
 		{
-			builder.append(", sort=");
-			builder.append(sort);
+			if (builder.length() > 0)
+			{
+				builder.append(", ");
+			}
+			builder.append("sort=").append(sort);
 		}
 		if (fetch != null)
 		{
-			builder.append(", fetch=");
-			builder.append(fetch);
+			if (builder.length() > 0)
+			{
+				builder.append(", ");
+			}
+			builder.append("fetch=").append(fetch);
 		}
-		builder.append("]");
 		return builder.toString();
 	}
 }
