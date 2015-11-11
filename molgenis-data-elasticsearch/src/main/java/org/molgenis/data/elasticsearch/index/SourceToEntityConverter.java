@@ -14,6 +14,7 @@ import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownAttributeException;
+import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,11 @@ public class SourceToEntityConverter
 		DefaultEntity entity = new DefaultEntity(entityMeta, dataService);
 		source.entrySet().forEach(entry -> {
 			String attrName = entry.getKey();
+			if (attrName.equals(ElasticsearchService.CRUD_TYPE_FIELD_NAME))
+			{
+				// this entity was retrieved from a transaction index, ignore 'meta' crud type attribute
+				return;
+			}
 			AttributeMetaData attr = entityMeta.getAttribute(attrName);
 			if (attr == null)
 			{
