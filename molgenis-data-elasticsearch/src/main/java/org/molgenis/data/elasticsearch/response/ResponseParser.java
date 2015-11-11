@@ -76,7 +76,8 @@ public class ResponseParser
 					// information for labelAttribute from refeEntity and put it
 					// in the Hit result map
 					String fieldName = entry.getKey();
-					if (entityMetaData == null || entityMetaData.getAttribute(fieldName) == null
+					if (entityMetaData == null
+							|| entityMetaData.getAttribute(fieldName) == null
 							|| !entityMetaData.getAttribute(fieldName).getDataType().getEnumType().toString()
 									.equalsIgnoreCase(MolgenisFieldTypes.MREF.toString()))
 
