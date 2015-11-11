@@ -83,10 +83,7 @@ public class DefaultEntity implements Entity
 	public Object get(String attributeName)
 	{
 		AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
-		if (attribute == null)
-		{
-			throw new UnknownAttributeException(attributeName);
-		}
+		if (attribute == null) throw new UnknownAttributeException(attributeName);
 
 		FieldTypeEnum dataType = attribute.getDataType().getEnumType();
 		switch (dataType)
