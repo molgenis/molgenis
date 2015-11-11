@@ -369,7 +369,7 @@ public class AggregateResponseParser
 	 * Convert matrix labels that contain ids to label attribute values. Keeps in mind that the last label on a axis is
 	 * "Total".
 	 * 
-	 * @param idLabelsWithoutNull
+	 * @param idLabels
 	 * @param entityMetaData
 	 * @param dataService
 	 */
