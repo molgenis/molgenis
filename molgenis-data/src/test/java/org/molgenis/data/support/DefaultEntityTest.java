@@ -30,7 +30,7 @@ public class DefaultEntityTest
 	DataService dataService;
 
 	@BeforeMethod
-	public void beforeClass()
+	public void beforeMethod()
 	{
 		MockitoAnnotations.initMocks(this);
 
