@@ -1,6 +1,9 @@
 package org.molgenis.data.support;
 
+import static java.util.stream.StreamSupport.stream;
+
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
@@ -137,6 +140,12 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			}
 
 			@Override
+			public AttributeMetaData getAttributePart(String attrName)
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
 			public boolean isAuto()
 			{
 				throw new UnsupportedOperationException();
@@ -197,6 +206,20 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 				return attributeMetaData.getDataType().getEnumType() != FieldTypeEnum.COMPOUND;
 			}
 		});
+	}
+
+	@Override
+	public Iterable<String> getAtomicAttributeNames()
+	{
+		return new Iterable<String>()
+		{
+			@Override
+			public Iterator<String> iterator()
+			{
+				Iterable<AttributeMetaData> attrs = getAtomicAttributes();
+				return stream(attrs.spliterator(), false).map(AttributeMetaData::getName).iterator();
+			}
+		};
 	}
 
 	/**

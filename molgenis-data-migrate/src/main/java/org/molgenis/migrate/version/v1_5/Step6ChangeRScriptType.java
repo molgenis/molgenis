@@ -5,11 +5,14 @@ import static com.google.common.collect.Iterables.transform;
 import javax.sql.DataSource;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityManager;
+import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
+import org.molgenis.data.mysql.MySqlEntityFactory;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
@@ -90,13 +93,17 @@ public class Step6ChangeRScriptType extends MolgenisUpgrade
 	private void initializeUndecoratedMysqlRepository()
 	{
 		DataServiceImpl dataService = new DataServiceImpl();
+		EntityManager entityResolver = new EntityManagerImpl(dataService);
+		MySqlEntityFactory mySqlEntityFactory = new MySqlEntityFactory(entityResolver, dataService);
+
 		// Get the undecorated repos
 		mysql = new MysqlRepositoryCollection()
 		{
 			@Override
 			protected MysqlRepository createMysqlRepository()
 			{
-				return new MysqlRepository(dataService, dataSource, new AsyncJdbcTemplate(new JdbcTemplate(dataSource)));
+				return new MysqlRepository(dataService, mySqlEntityFactory, dataSource,
+						new AsyncJdbcTemplate(new JdbcTemplate(dataSource)));
 			}
 
 			@Override

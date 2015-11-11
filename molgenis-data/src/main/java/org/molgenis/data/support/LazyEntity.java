@@ -1,15 +1,12 @@
 package org.molgenis.data.support;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
 
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Stream;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -47,44 +44,54 @@ public class LazyEntity implements Entity
 	@Override
 	public Iterable<String> getAttributeNames()
 	{
-		// FIXME code duplication with DefaultEntity
-		return new Iterable<String>()
-		{
-			@Override
-			public Iterator<String> iterator()
-			{
-				Stream<String> atomic = stream(entityMetaData.getAtomicAttributes().spliterator(), false)
-						.map(a -> a.getName());
-				Stream<String> compound = stream(entityMetaData.getAttributes().spliterator(), false)
-						.filter(a -> a.getDataType().getEnumType() == FieldTypeEnum.COMPOUND).map(a -> a.getName());
-
-				return Stream.concat(atomic, compound).iterator();
-			}
-		};
+		return getEntityMetaData().getAtomicAttributeNames();
 	}
 
 	@Override
 	public String getLabelValue()
 	{
-		return getLazyLoadedEntity().getLabelValue();
-
+		AttributeMetaData idAttr = getEntityMetaData().getIdAttribute();
+		AttributeMetaData labelAttr = getEntityMetaData().getLabelAttribute();
+		if (idAttr.equals(labelAttr))
+		{
+			return getIdValue().toString();
+		}
+		else
+		{
+			return getLazyLoadedEntity().getLabelValue();
+		}
 	}
 
 	@Override
 	public Object get(String attributeName)
 	{
+		AttributeMetaData idAttr = entityMetaData.getIdAttribute();
+		if (attributeName.equals(idAttr.getName()))
+		{
+			return getIdValue();
+		}
 		return getLazyLoadedEntity().get(attributeName);
 	}
 
 	@Override
 	public String getString(String attributeName)
 	{
+		AttributeMetaData idAttr = entityMetaData.getIdAttribute();
+		if (attributeName.equals(idAttr.getName()))
+		{
+			return (String) getIdValue();
+		}
 		return getLazyLoadedEntity().getString(attributeName);
 	}
 
 	@Override
 	public Integer getInt(String attributeName)
 	{
+		AttributeMetaData idAttr = entityMetaData.getIdAttribute();
+		if (attributeName.equals(idAttr.getName()))
+		{
+			return (Integer) getIdValue();
+		}
 		return getLazyLoadedEntity().getInt(attributeName);
 	}
 
@@ -179,9 +186,9 @@ public class LazyEntity implements Entity
 			entity = dataService.findOne(getEntityMetaData().getName(), id);
 			if (entity == null)
 			{
-				throw new UnknownEntityException(
-						getEntityMetaData().getName() + " with " + getEntityMetaData().getIdAttribute().getName() + " ["
-								+ getIdValue().toString() + "] does not exist");
+				throw new UnknownEntityException("entity [" + getEntityMetaData().getName() + "] with "
+						+ getEntityMetaData().getIdAttribute().getName() + " [" + getIdValue().toString()
+						+ "] does not exist");
 			}
 		}
 		return entity;

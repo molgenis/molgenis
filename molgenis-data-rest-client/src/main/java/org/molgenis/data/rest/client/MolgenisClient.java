@@ -15,6 +15,8 @@ import org.molgenis.data.rest.client.bean.LoginResponse;
 import org.molgenis.data.rest.client.bean.MetaDataRequest;
 import org.molgenis.data.rest.client.bean.MetaDataResponse;
 import org.molgenis.data.rest.client.bean.QueryResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +32,7 @@ public class MolgenisClient
 {
 	private final RestTemplate template;
 	private final String apiHref;
+	private static final Logger LOG = LoggerFactory.getLogger(MolgenisClient.class);
 
 	public MolgenisClient(RestTemplate template, String apiHref)
 	{
@@ -203,6 +206,18 @@ public class MolgenisClient
 		template.exchange("{apiHref}/{entityName}/{id}", DELETE, createHttpEntity(token), Object.class, apiHref,
 				entityName, id);
 	}
+	
+	/**
+	 * Deletes an entity's metadata including all of its rows.
+	 * 
+	 * @param entityName
+	 *            name of the entity
+	 */
+	public void deleteData(String token, String entityName)
+	{
+		template.exchange("{apiHref}/{entityName}", DELETE, createHttpEntity(token), Object.class, apiHref,
+				entityName);
+	}
 
 	/**
 	 * Deletes an entity's metadata including all of its rows.
@@ -210,8 +225,9 @@ public class MolgenisClient
 	 * @param entityName
 	 *            name of the entity
 	 */
-	public void deleteMetadata(String entityName)
+	public void deleteMetadata(String token, String entityName)
 	{
-		template.delete("{apiHref}/{entityName}/meta", apiHref, entityName);
+		template.exchange("{apiHref}/{entityName}/meta", DELETE, createHttpEntity(token), Object.class, apiHref,
+				entityName);
 	}
 }

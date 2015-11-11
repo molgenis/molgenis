@@ -16,6 +16,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
@@ -76,7 +77,7 @@ public class RepositoryValidationDecorator implements Repository
 	@Override
 	public Integer add(Iterable<? extends Entity> entities)
 	{
-		// validate(entities, false);
+		validate(entities, false);
 		return decoratedRepository.add(entities);
 	}
 
@@ -105,7 +106,7 @@ public class RepositoryValidationDecorator implements Repository
 				}
 			}
 
-			if (!decoratedRepository.getName().equalsIgnoreCase("UserAuthority")) // FIXME MolgenisUserDecorator
+			if (!decoratedRepository.getName().equalsIgnoreCase("UserAuthority"))// FIXME MolgenisUserDecorator
 																					// adds UserAuthority in add
 																					// method so it is not yet
 																					// indexed and can not be found
@@ -245,7 +246,7 @@ public class RepositoryValidationDecorator implements Repository
 				refEntityIdValues.add(refEntity.getIdValue());
 			}
 
-			if (attr.getRefEntity().getName().equalsIgnoreCase(getName())) // Self reference
+			if (attr.getRefEntity().getName().equalsIgnoreCase(getName()))// Self reference
 			{
 				for (Entity entity : entities)
 				{
@@ -457,9 +458,21 @@ public class RepositoryValidationDecorator implements Repository
 	}
 
 	@Override
+	public Entity findOne(Object id, Fetch fetch)
+	{
+		return decoratedRepository.findOne(id, fetch);
+	}
+
+	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
 		return decoratedRepository.findAll(ids);
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
+	{
+		return decoratedRepository.findAll(ids, fetch);
 	}
 
 	@Override
@@ -496,6 +509,25 @@ public class RepositoryValidationDecorator implements Repository
 	public Set<RepositoryCapability> getCapabilities()
 	{
 		return decoratedRepository.getCapabilities();
+	}
+
+	@Override
+	public void create()
+	{
+		decoratedRepository.create();
+
+	}
+
+	@Override
+	public void drop()
+	{
+		decoratedRepository.drop();
+	}
+
+	@Override
+	public void rebuildIndex()
+	{
+		decoratedRepository.rebuildIndex();
 	}
 
 	@Override

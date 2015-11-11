@@ -13,6 +13,7 @@ import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
@@ -94,9 +95,21 @@ public class EntityListenerRepositoryDecorator implements Repository
 	}
 
 	@Override
+	public Entity findOne(Object id, Fetch fetch)
+	{
+		return decoratedRepository.findOne(id, fetch);
+	}
+
+	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
 		return decoratedRepository.findAll(ids);
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
+	{
+		return decoratedRepository.findAll(ids, fetch);
 	}
 
 	@Override
@@ -190,6 +203,24 @@ public class EntityListenerRepositoryDecorator implements Repository
 	public void clearCache()
 	{
 		decoratedRepository.clearCache();
+	}
+
+	@Override
+	public void create()
+	{
+		decoratedRepository.create();
+	}
+
+	@Override
+	public void drop()
+	{
+		decoratedRepository.drop();
+	}
+
+	@Override
+	public void rebuildIndex()
+	{
+		decoratedRepository.rebuildIndex();
 	}
 
 	@Override

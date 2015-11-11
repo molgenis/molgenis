@@ -1,10 +1,13 @@
 package org.molgenis.data;
 
+import static java.util.stream.StreamSupport.stream;
+
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.convert.DateToStringConverter;
@@ -15,10 +18,6 @@ import org.molgenis.util.ListEscapeUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.support.DefaultConversionService;
-
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "NP_BOOLEAN_RETURN_NULL", justification = "We want to return Boolean.TRUE, Boolean.FALSE or null")
 public class DataConverter
@@ -185,22 +184,24 @@ public class DataConverter
 	public static List<String> toList(Object source)
 	{
 		if (source == null) return null;
-		else if (source instanceof List<?>) return (List<String>) source;
 		else if (source instanceof Iterable<?>)
 		{
-			return Lists.newArrayList(Iterables.transform((Iterable<Object>) source, new Function<Object, String>()
-			{
-
-				@Override
-				public String apply(Object input)
+			return stream(((Iterable<?>) source).spliterator(), false).map(obj -> {
+				Object objValue;
+				if (obj instanceof Entity)
 				{
-					return DataConverter.toString(input);
+					objValue = ((Entity) obj).getIdValue();
 				}
-
-			}));
+				else
+				{
+					objValue = obj;
+				}
+				return DataConverter.toString(objValue);
+			}).collect(Collectors.toList());
 		}
 		else if (source instanceof String) return ListEscapeUtils.toList((String) source);
 		else return ListEscapeUtils.toList(source.toString());
+
 	}
 
 	@SuppressWarnings("unchecked")
@@ -242,6 +243,10 @@ public class DataConverter
 			ArrayList<Integer> intList = new ArrayList<Integer>();
 			for (Object o : (Iterable<?>) source)
 			{
+				if (o instanceof Entity)
+				{
+					o = ((Entity) o).getIdValue();
+				}
 				intList.add(toInt(o));
 			}
 			return intList;

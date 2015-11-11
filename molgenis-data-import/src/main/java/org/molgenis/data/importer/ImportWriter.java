@@ -15,12 +15,12 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.IndexedRepository;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Package;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.TagMetaData;
@@ -73,7 +73,8 @@ public class ImportWriter
 	 *            {@link PermissionSystemService} to give permissions on uploaded entities
 	 */
 	public ImportWriter(DataService dataService, PermissionSystemService permissionSystemService,
-			TagService<LabeledResource, LabeledResource> tagService, MolgenisPermissionService molgenisPermissionService)
+			TagService<LabeledResource, LabeledResource> tagService,
+			MolgenisPermissionService molgenisPermissionService)
 	{
 		this.dataService = dataService;
 		this.permissionSystemService = permissionSystemService;
@@ -296,6 +297,7 @@ public class ImportWriter
 		dropAddedEntities(job.metaDataChanges.getAddedEntities());
 		List<String> entities = dropAddedAttributes(job.metaDataChanges.getAddedAttributes());
 
+		// FIXME import is not transactional, but uses corrective measures to rollback
 		// Reindex
 		Set<String> entitiesToIndex = Sets.newLinkedHashSet(job.source.getEntityNames());
 		entitiesToIndex.addAll(entities);
@@ -320,9 +322,9 @@ public class ImportWriter
 			if (dataService.hasRepository(entity))
 			{
 				Repository repo = dataService.getRepository(entity);
-				if ((repo != null) && (repo instanceof IndexedRepository))
+				if (repo.getCapabilities().contains(RepositoryCapability.INDEXABLE))
 				{
-					((IndexedRepository) repo).rebuildIndex();
+					repo.rebuildIndex();
 				}
 			}
 		}

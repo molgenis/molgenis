@@ -2,47 +2,87 @@ package org.molgenis.util;
 
 import static org.testng.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class BatchingIterableTest
 {
-	@Test
-	public void iterator()
+	public static List<Integer> ITEMS_LIST;
+
+	@BeforeClass
+	public static void setUpBeforeClass()
 	{
-		for (int i = 1; i < 12; i++)
-		{
-			iterator(i);
-		}
+		ITEMS_LIST = Arrays.asList(1, 2, 3, 4);
 	}
 
-	private void iterator(final int batchSize)
+	// parameterized test testing combinations of offset, limit, batchSize
+	@DataProvider(name = "iteratorTest")
+	public static Iterator<Object[]> createData1()
 	{
-		final List<Integer> items = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9);
+		List<Object[]> paramList = new ArrayList<Object[]>();
 
-		Iterable<Integer> iterable = new BatchingIterable<Integer>(batchSize)
+		for (int batchSize = 1; batchSize < ITEMS_LIST.size() + 1; ++batchSize)
+		{
+			for (int offset = 0; offset < ITEMS_LIST.size(); ++offset)
+			{
+				// add limit that is larger than the number of items
+				for (int limit = 1; limit < ITEMS_LIST.size() - offset + 1; ++limit)
+				{
+					paramList.add(new Object[]
+					{ offset, limit, batchSize });
+				}
+				// add limit=0 (no limit) add the end to enable friendly printing order
+				paramList.add(new Object[]
+				{ offset, 0, batchSize });
+			}
+		}
+
+		return paramList.iterator();
+	}
+
+	@Test(dataProvider = "iteratorTest")
+	public void iterator(int offset, int limit, int batchSize)
+	{
+		Iterable<Integer> iterable = new BatchingIterable<Integer>(batchSize, offset, limit)
 		{
 			@Override
-			protected List<Integer> getBatch(int startIndex, int batchSize)
+			protected List<Integer> getBatch(int offset, int batchSize)
 			{
-				int toIndex = startIndex + batchSize;
-				if (startIndex >= items.size() - 1) return Collections.emptyList();
-				toIndex = items.size() - 1 < toIndex ? items.size() - 1 : toIndex;
-				return items.subList(startIndex, toIndex);
+				List<Integer> batchList;
+				if (offset < ITEMS_LIST.size())
+				{
+					int toIndex = offset + Math.min(batchSize, ITEMS_LIST.size() - offset);
+					batchList = ITEMS_LIST.subList(offset, toIndex);
+				}
+				else
+				{
+					batchList = Collections.emptyList();
+				}
+				return batchList;
 			}
 		};
 
-		int i = 1;
-		Iterator<Integer> it = iterable.iterator();
-		while (it.hasNext())
+		int expectedValue = offset + 1;
+		int actualNrItems = 0;
+		for (Iterator<Integer> it = iterable.iterator(); it.hasNext();)
 		{
-			assertEquals(it.next().intValue(), i++);
+			int intValue = it.next().intValue();
+			assertEquals(intValue, expectedValue++);
+			++actualNrItems;
 		}
-		assertEquals(i, 9);
 
+		// enable to print batch info
+		// System.out.println(String.format("[offset=%d, limit=%d, batchSize=%d]", offset, limit, batchSize) + ": "
+		// + StringUtils.join(iterable, ','));
+		int expectedNrItems = limit == 0 ? ITEMS_LIST.size() - offset : limit;
+		assertEquals(actualNrItems, expectedNrItems,
+				String.format("[offset=%d, limit=%d, batchSize=%d]", offset, limit, batchSize));
 	}
 }

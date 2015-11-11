@@ -31,12 +31,6 @@
 
     var Table, tableSort;
 
-    $(document).on('dataChange.diseasematcher', function(e) {
-    	if (e.namespace !== 'data' && Table){
-    		Table.setProps({query: getQuery()});
-    	}
-	});
-
     /**
 	 * @memberOf molgenis.dataexplorer.data
 	 */

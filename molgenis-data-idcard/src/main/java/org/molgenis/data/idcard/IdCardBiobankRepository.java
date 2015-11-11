@@ -2,8 +2,8 @@ package org.molgenis.data.idcard;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.RepositoryCapability.AGGREGATEABLE;
+import static org.molgenis.data.RepositoryCapability.MANAGABLE;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
-import static org.molgenis.data.RepositoryCapability.UPDATEABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
 import java.io.IOException;
@@ -18,6 +18,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
@@ -129,8 +130,14 @@ public class IdCardBiobankRepository implements Repository // TODO check if we c
 		}
 		catch (RuntimeException e)
 		{
-			return (Entity) createErrorIdCardBiobank(id);
+			return createErrorIdCardBiobank(id);
 		} // FIXME get rid of cast
+	}
+
+	@Override
+	public Entity findOne(Object id, Fetch fetch)
+	{
+		return findOne(id);
 	}
 
 	@Override
@@ -163,6 +170,12 @@ public class IdCardBiobankRepository implements Repository // TODO check if we c
 	}
 
 	@Override
+	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
+	{
+		return findAll(ids);
+	}
+
+	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
 		return elasticsearchService.aggregate(aggregateQuery, getEntityMetaData());
@@ -172,14 +185,14 @@ public class IdCardBiobankRepository implements Repository // TODO check if we c
 	public void update(Entity entity)
 	{
 		throw new UnsupportedOperationException(
-				String.format("Repository [%s] is not %s", getName(), UPDATEABLE.toString()));
+				String.format("Repository [%s] is not %s", getName(), WRITABLE.toString()));
 	}
 
 	@Override
 	public void update(Iterable<? extends Entity> records)
 	{
 		throw new UnsupportedOperationException(
-				String.format("Repository [%s] is not %s", getName(), UPDATEABLE.toString()));
+				String.format("Repository [%s] is not %s", getName(), WRITABLE.toString()));
 	}
 
 	@Override
@@ -255,6 +268,7 @@ public class IdCardBiobankRepository implements Repository // TODO check if we c
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public void rebuildIndex()
 	{
 		LOG.trace("Indexing ID-Card biobanks ...");
@@ -275,5 +289,19 @@ public class IdCardBiobankRepository implements Repository // TODO check if we c
 		idCardBiobank.set(IdCardBiobank.ORGANIZATION_ID, id);
 		idCardBiobank.set(IdCardBiobank.NAME, "Error loading data");
 		return idCardBiobank; // FIXME get rid of cast
+	}
+
+	@Override
+	public void create()
+	{
+		throw new UnsupportedOperationException(
+				String.format("Repository [%s] is not %s", getName(), MANAGABLE.toString()));
+	}
+
+	@Override
+	public void drop()
+	{
+		throw new UnsupportedOperationException(
+				String.format("Repository [%s] is not %s", getName(), MANAGABLE.toString()));
 	}
 }

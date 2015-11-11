@@ -16,31 +16,26 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.MolgenisQueryException;
 import org.molgenis.data.Query;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
@@ -49,15 +44,14 @@ import org.molgenis.data.rest.Href;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.file.FileMeta;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -66,8 +60,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
-import com.google.common.collect.Lists;
 
 @Controller
 @RequestMapping(BASE_URI)
@@ -125,6 +117,25 @@ class RestControllerV2
 		this.restService = requireNonNull(restService);
 	}
 
+	@Autowired
+	@RequestMapping(value = "/version", method = GET)
+	@ResponseBody
+	public Map<String, String> getVersion(@Value("${molgenis.version:@null}") String molgenisVersion,
+			@Value("${molgenis.build.date:@null}") String molgenisBuildDate)
+	{
+		if (molgenisVersion == null) throw new IllegalArgumentException("molgenisVersion is null");
+		if (molgenisBuildDate == null) throw new IllegalArgumentException("molgenisBuildDate is null");
+		molgenisBuildDate = molgenisBuildDate.equals("${maven.build.timestamp}")
+				? new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new java.util.Date()) + " by Eclipse"
+				: molgenisBuildDate;
+
+		Map<String, String> result = new HashMap<>();
+		result.put("molgenisVersion", molgenisVersion);
+		result.put("buildDate", molgenisBuildDate);
+
+		return result;
+	}
+
 	/**
 	 * Retrieve an entity instance by id, optionally specify which attributes to include in the response.
 	 * 
@@ -139,13 +150,16 @@ class RestControllerV2
 			@PathVariable("id") Object id,
 			@RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter)
 	{
-		Entity entity = dataService.findOne(entityName, id);
+		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
+		Fetch fetch = AttributeFilterToFetchConverter.convert(attributeFilter, entityMeta);
+
+		Entity entity = dataService.findOne(entityName, id, fetch);
 		if (entity == null)
 		{
 			throw new UnknownEntityException(entityName + " [" + id + "] not found");
 		}
 
-		return createEntityResponse(entity, attributeFilter, true);
+		return createEntityResponse(entity, fetch, true);
 	}
 
 	@RequestMapping(value = "/{entityName}/{id:.+}", method = POST, params = "_method=GET")
@@ -154,13 +168,16 @@ class RestControllerV2
 			@PathVariable("id") Object id,
 			@RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter)
 	{
-		Entity entity = dataService.findOne(entityName, id);
+		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
+		Fetch fetch = AttributeFilterToFetchConverter.convert(attributeFilter, entityMeta);
+
+		Entity entity = dataService.findOne(entityName, id, fetch);
 		if (entity == null)
 		{
 			throw new UnknownEntityException(entityName + " [" + id + "] not found");
 		}
 
-		return createEntityResponse(entity, attributeFilter, true);
+		return createEntityResponse(entity, fetch, true);
 	}
 
 	@RequestMapping(value = "/{entityName}/{id:.+}", method = DELETE)
@@ -401,7 +418,8 @@ class RestControllerV2
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	@ResponseStatus(BAD_REQUEST)
-	public @ResponseBody ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException exception)
+	public @ResponseBody ErrorMessageResponse handleMethodArgumentNotValidException(
+			MethodArgumentNotValidException exception)
 	{
 		LOG.info("Invalid method arguments.", exception);
 		return new ErrorMessageResponse(transform(exception.getBindingResult().getFieldErrors(),
@@ -440,15 +458,7 @@ class RestControllerV2
 			throw new RuntimeException("attribute : " + attributeName + " does not exist!");
 		}
 
-		AttributeFilter attributeFilter = new AttributeFilter();
-		Iterable<AttributeMetaData> attributeParts = attribute.getAttributeParts();
-
-		if (attributeParts != null)
-		{
-			attributeParts.forEach(attributePart -> attributeFilter.add(attributePart.getName()));
-		}
-
-		return new AttributeMetaDataResponseV2(entityName, attribute, attributeFilter, permissionService);
+		return new AttributeMetaDataResponseV2(entityName, attribute, null, permissionService, dataService);
 	}
 
 	private EntityCollectionResponseV2 createEntityCollectionResponse(String entityName,
@@ -458,236 +468,67 @@ class RestControllerV2
 
 		Query q = request.getQ() != null ? request.getQ().createQuery(meta) : new QueryImpl();
 		q.pageSize(request.getNum()).offset(request.getStart()).sort(request.getSort());
-
-		if (request.getAggs() != null)
+		Fetch fetch = AttributeFilterToFetchConverter.convert(request.getAttrs(), meta);
+		if (fetch != null)
 		{
-			// return aggregates for aggregate query
-			AggregateQuery aggsQ = request.getAggs().createAggregateQuery(meta, q);
-			if (aggsQ.getAttributeX() == null && aggsQ.getAttributeY() == null)
-			{
-				throw new MolgenisQueryException("Aggregate query is missing 'x' or 'y' attribute");
-			}
-			AggregateResult aggs = dataService.aggregate(entityName, aggsQ);
-			return new EntityAggregatesResponse(aggs, BASE_URI + '/' + entityName);
+			q.fetch(fetch);
+		}
+
+		Long count = dataService.count(entityName, q);
+		Iterable<Entity> it;
+		if (count > 0)
+		{
+			it = dataService.findAll(entityName, q);
 		}
 		else
 		{
-			// return entities for query
-			Iterable<Entity> it = dataService.findAll(entityName, q);
-			Long count = dataService.count(entityName, q);
-			EntityPager pager = new EntityPager(request.getStart(), request.getNum(), count, it);
-
-			AttributeFilter attributeFilter = request.getAttrs();
-			if (attributeFilter == null)
-			{
-				attributeFilter = AttributeFilter.ALL_ATTRS_FILTER;
-			}
-			List<Map<String, Object>> entities = new ArrayList<>();
-			createEntitiesValuesResponse(it, meta, attributeFilter, entities);
-
-			return new EntityCollectionResponseV2(pager, entities, attributeFilter, BASE_URI + '/' + entityName, meta,
-					permissionService);
+			it = Collections.emptyList();
 		}
-	}
+		EntityPager pager = new EntityPager(request.getStart(), request.getNum(), count, it);
 
-	private void createEntitiesValuesResponse(Iterable<Entity> entities, EntityMetaData entityMeta,
-			AttributeFilter attrFilter, List<Map<String, Object>> entitiesValues)
-	{
-		// create value maps, keep track of ref attributes and entities that need to be resolved
-		Map<AttributeMetaData, Set<Object>> refEntitiesIds = new HashMap<>();
-
-		for (Entity entity : entities)
+		List<Map<String, Object>> entities = new ArrayList<>();
+		for (Entity entity : it)
 		{
-			Map<String, Object> entityValues = new LinkedHashMap<>();
-			for (AttributeMetaData attr : entityMeta.getAttributes())
-			{
-				if (attrFilter.includeAttribute(attr))
-				{
-					createEntityAttrValues(entity, attr, entityValues, refEntitiesIds);
-				}
-			}
-			entitiesValues.add(entityValues);
+			Map<String, Object> responseData = new LinkedHashMap<String, Object>();
+			createEntityValuesResponse(entity, fetch, responseData);
+			entities.add(responseData);
 		}
 
-		// retrieve ref entities
-		refEntitiesIds.forEach((refAttr, refEntityIds) -> {
-			EntityMetaData refEntityMeta = refAttr.getRefEntity();
-			String refEntityName = refEntityMeta.getName();
-			Iterable<Entity> refEntities = dataService.findAll(refEntityName, refEntityIds);
-			Map<Object, Entity> refEntitiesMap = StreamSupport.stream(refEntities.spliterator(), false)
-					.collect(Collectors.toMap(Entity::getIdValue, Function.identity()));
-
-			// update value maps
-			String refAttrName = refAttr.getName();
-			FieldTypeEnum attrType = refAttr.getDataType().getEnumType();
-			entitiesValues.forEach(entityValue -> {
-				Object refAttrValue = entityValue.get(refAttrName);
-				switch (attrType)
-				{
-					case CATEGORICAL:
-					case XREF:
-					case FILE:
-						if (refAttrValue != null)
-						{
-							Entity attrRefEntity = refEntitiesMap.get(refAttrValue);
-							List<Map<String, Object>> refEntitiesValues = new ArrayList<>();
-							AttributeFilter refAttrFilter = attrFilter.getAttributeFilter(refAttr);
-							if (refAttrFilter == null)
-							{
-								refAttrFilter = createDefaultRefAttributeFilter(refAttr);
-							}
-							createEntitiesValuesResponse(Arrays.asList(attrRefEntity), refEntityMeta, refAttrFilter,
-									refEntitiesValues);
-							entityValue.put(refAttrName, refEntitiesValues.get(0));
-						}
-						break;
-					case CATEGORICAL_MREF:
-					case MREF:
-						if (refAttrValue != null)
-						{
-							Iterable<Entity> attrRefEntities = ((List<Object>) refAttrValue).stream()
-									.map(refEntitiesMap::get).collect(Collectors.toList());
-							List<Map<String, Object>> mrefEntitiesValues = new ArrayList<>();
-							AttributeFilter refAttrFilter = attrFilter.getAttributeFilter(refAttr);
-							if (refAttrFilter == null)
-							{
-								refAttrFilter = createDefaultRefAttributeFilter(refAttr);
-							}
-							createEntitiesValuesResponse(attrRefEntities, refEntityMeta, refAttrFilter,
-									mrefEntitiesValues);
-							entityValue.put(refAttrName, mrefEntitiesValues);
-						}
-						break;
-					// $CASES-OMITTED$
-					default:
-						throw new RuntimeException("Unknown data type [" + attrType + "]");
-				}
-			});
-		});
+		return new EntityCollectionResponseV2(pager, entities, fetch, BASE_URI + '/' + entityName, meta,
+				permissionService, dataService);
 	}
 
-	private void createEntityAttrValues(Entity entity, AttributeMetaData attr, Map<String, Object> entityValues,
-			Map<AttributeMetaData, Set<Object>> refEntitiesIds)
-	{
-		String attrName = attr.getName();
-		FieldTypeEnum attrType = attr.getDataType().getEnumType();
-		switch (attrType)
-		{
-			case BOOL:
-				entityValues.put(attrName, entity.getBoolean(attrName));
-				break;
-			case CATEGORICAL:
-			case XREF:
-			case FILE:
-				Entity refEntity = entity.getEntity(attrName);
-				Object value;
-				if (refEntity != null)
-				{
-					value = refEntity.getIdValue();
-
-					// bookkeeping: keep track of referred entity ids that will be resolved later
-					Set<Object> xrefEntityIds = refEntitiesIds.get(attr);
-					if (xrefEntityIds == null)
-					{
-						xrefEntityIds = new HashSet<>();
-						refEntitiesIds.put(attr, xrefEntityIds);
-					}
-					xrefEntityIds.add(value);
-				}
-				else
-				{
-					value = null;
-				}
-				entityValues.put(attrName, value);
-				break;
-			case CATEGORICAL_MREF:
-			case MREF:
-				Iterable<Entity> refEntities = entity.getEntities(attrName);
-				List<Object> refEntityIds = StreamSupport.stream(refEntities.spliterator(), false)
-						.map(Entity::getIdValue).collect(Collectors.toList());
-				entityValues.put(attrName, refEntityIds);
-
-				// bookkeeping: keep track of referred entity ids that will be resolved later
-				Set<Object> mrefEntityIds = refEntitiesIds.get(attr);
-				if (mrefEntityIds == null)
-				{
-					mrefEntityIds = new HashSet<>();
-					refEntitiesIds.put(attr, mrefEntityIds);
-				}
-				mrefEntityIds.addAll(refEntityIds);
-				break;
-			case COMPOUND:
-				Iterable<AttributeMetaData> attrParts = attr.getAttributeParts();
-				attrParts.forEach(attrPart -> createEntityAttrValues(entity, attrPart, entityValues, refEntitiesIds));
-				break;
-			case DATE:
-				Date dateValue = entity.getDate(attrName);
-				String dateValueStr = dateValue != null ? getDateFormat().format(dateValue) : null;
-				entityValues.put(attrName, dateValueStr);
-				break;
-			case DATE_TIME:
-				Date dateTimeValue = entity.getDate(attrName);
-				String dateTimeValueStr = dateTimeValue != null ? getDateTimeFormat().format(dateTimeValue) : null;
-				entityValues.put(attrName, dateTimeValueStr);
-				break;
-			case DECIMAL:
-				entityValues.put(attrName, entity.getDouble(attrName));
-				break;
-			case EMAIL:
-			case ENUM:
-			case HTML:
-			case HYPERLINK:
-			case SCRIPT:
-			case STRING:
-			case TEXT:
-				entityValues.put(attrName, entity.getString(attrName));
-				break;
-			case IMAGE:
-				throw new UnsupportedOperationException("Unsupported attribute type [" + attrType + "]");
-			case INT:
-				entityValues.put(attrName, entity.getInt(attrName));
-				break;
-			case LONG:
-				entityValues.put(attrName, entity.getLong(attrName));
-				break;
-			default:
-				throw new RuntimeException("Unknown data type [" + attrType + "]");
-		}
-	}
-
-	private Map<String, Object> createEntityResponse(Entity entity, AttributeFilter attrFilter, boolean includeMetaData)
+	private Map<String, Object> createEntityResponse(Entity entity, Fetch fetch, boolean includeMetaData)
 	{
 		Map<String, Object> responseData = new LinkedHashMap<String, Object>();
 		if (includeMetaData)
 		{
-			createEntityMetaResponse(entity.getEntityMetaData(), attrFilter, responseData);
+			createEntityMetaResponse(entity.getEntityMetaData(), fetch, responseData);
 		}
-		createEntityValuesResponse(entity, attrFilter, responseData);
+		createEntityValuesResponse(entity, fetch, responseData);
 		return responseData;
 	}
 
-	private void createEntityMetaResponse(EntityMetaData entityMetaData, AttributeFilter attrFilter,
+	private void createEntityMetaResponse(EntityMetaData entityMetaData, Fetch fetch, Map<String, Object> responseData)
+	{
+		responseData.put("_meta", new EntityMetaDataResponseV2(entityMetaData, fetch, permissionService, dataService));
+	}
+
+	private void createEntityValuesResponse(Entity entity, Fetch fetch, Map<String, Object> responseData)
+	{
+		Iterable<AttributeMetaData> attrs = entity.getEntityMetaData().getAtomicAttributes();
+		createEntityValuesResponseRec(entity, attrs, fetch, responseData);
+	}
+
+	private void createEntityValuesResponseRec(Entity entity, Iterable<AttributeMetaData> attrs, Fetch fetch,
 			Map<String, Object> responseData)
-	{
-		responseData.put("_meta", new EntityMetaDataResponseV2(entityMetaData, attrFilter, permissionService));
-	}
-
-	private void createEntityValuesResponse(Entity entity, AttributeFilter attrFilter, Map<String, Object> responseData)
-	{
-		Iterable<AttributeMetaData> attrs = entity.getEntityMetaData().getAttributes();
-		attrFilter = attrFilter != null ? attrFilter : AttributeFilter.ALL_ATTRS_FILTER;
-		createEntityValuesResponseRec(entity, attrs, attrFilter, responseData);
-	}
-
-	private void createEntityValuesResponseRec(Entity entity, Iterable<AttributeMetaData> attrs,
-			AttributeFilter attrFilter, Map<String, Object> responseData)
 	{
 		responseData.put("_href",
 				Href.concatEntityHref(BASE_URI, entity.getEntityMetaData().getName(), entity.getIdValue()));
-		for (AttributeMetaData attr : attrs)
+		for (AttributeMetaData attr : attrs) // TODO performance use fetch instead of attrs
 		{
 			String attrName = attr.getName();
-			if (attrFilter.includeAttribute(attr))
+			if (fetch == null || fetch.hasField(attr))
 			{
 				FieldTypeEnum dataType = attr.getDataType().getEnumType();
 				switch (dataType)
@@ -702,12 +543,8 @@ class RestControllerV2
 						Map<String, Object> refEntityResponse;
 						if (refEntity != null)
 						{
-							AttributeFilter refAttrFilter = attrFilter.getAttributeFilter(attr);
-							if (refAttrFilter == null)
-							{
-								refAttrFilter = createDefaultRefAttributeFilter(attr);
-							}
-							refEntityResponse = createEntityResponse(refEntity, refAttrFilter, false);
+							Fetch refAttrFetch = fetch != null ? fetch.getFetch(attr) : null;
+							refEntityResponse = createEntityResponse(refEntity, refAttrFetch, false);
 						}
 						else
 						{
@@ -722,14 +559,10 @@ class RestControllerV2
 						if (refEntities != null)
 						{
 							refEntityResponses = new ArrayList<Map<String, Object>>();
-							AttributeFilter refAttrFilter = attrFilter.getAttributeFilter(attr);
-							if (refAttrFilter == null)
-							{
-								refAttrFilter = createDefaultRefAttributeFilter(attr);
-							}
+							Fetch refAttrFetch = fetch != null ? fetch.getFetch(attrName) : null;
 							for (Entity refEntitiesEntity : refEntities)
 							{
-								refEntityResponses.add(createEntityResponse(refEntitiesEntity, refAttrFilter, false));
+								refEntityResponses.add(createEntityResponse(refEntitiesEntity, refAttrFetch, false));
 							}
 						}
 						else
@@ -739,14 +572,7 @@ class RestControllerV2
 						responseData.put(attrName, refEntityResponses);
 						break;
 					case COMPOUND:
-						Iterable<AttributeMetaData> attrParts = attr.getAttributeParts();
-						AttributeFilter compoundAttrFilter = new AttributeFilter();
-						for (AttributeMetaData attrPart : attrParts)
-						{
-							compoundAttrFilter.add(attrPart.getName());
-						}
-						createEntityValuesResponseRec(entity, attrParts, compoundAttrFilter, responseData);
-						break;
+						throw new RuntimeException("Invalid data type [" + dataType + "]");
 					case DATE:
 						Date dateValue = entity.getDate(attrName);
 						String dateValueStr = dateValue != null ? getDateFormat().format(dateValue) : null;
@@ -783,18 +609,5 @@ class RestControllerV2
 				}
 			}
 		}
-	}
-
-	static AttributeFilter createDefaultRefAttributeFilter(AttributeMetaData attr)
-	{
-		EntityMetaData refEntityMeta = attr.getRefEntity();
-		String idAttrName = refEntityMeta.getIdAttribute().getName();
-		String labelAttrName = refEntityMeta.getLabelAttribute().getName();
-		AttributeFilter attrFilter = new AttributeFilter().add(idAttrName).add(labelAttrName);
-		if (attr.getDataType().getEnumType() == FieldTypeEnum.FILE)
-		{
-			attrFilter.add(FileMeta.URL);
-		}
-		return attrFilter;
 	}
 }

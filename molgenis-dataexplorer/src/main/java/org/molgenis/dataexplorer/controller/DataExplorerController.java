@@ -177,12 +177,6 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("genomicDataSettings", genomicDataSettings);
 			model.addAttribute("genomeEntities", getGenomeBrowserEntities());
 		}
-		else if (moduleId.equals("diseasematcher"))
-		{
-			// TODO replace disease matcher table with react table and remove attrs from model
-			model.addAttribute("tableEditable", false);
-			model.addAttribute("rowClickable", false);
-		}
 		else if (moduleId.equals("entitiesreport"))
 		{
 			model.addAttribute("datasetRepository", dataService.getRepository(entityName));
@@ -205,7 +199,6 @@ public class DataExplorerController extends MolgenisPluginController
 		boolean modAnnotators = dataExplorerSettings.getModAnnotators();
 		boolean modCharts = dataExplorerSettings.getModCharts();
 		boolean modData = dataExplorerSettings.getModData();
-		boolean modDiseaseMatcher = dataExplorerSettings.getModDiseaseMatcher();
 		boolean modReports = dataExplorerSettings.getModReports();
 
 		if (modAggregates)
@@ -257,11 +250,6 @@ public class DataExplorerController extends MolgenisPluginController
 					if (modAnnotators && pluginPermission == Permission.WRITE)
 					{
 						modulesConfig.add(new ModuleConfig("annotators", "Annotators", "annotator-icon.png"));
-					}
-					if (modDiseaseMatcher)
-					{
-						modulesConfig
-								.add(new ModuleConfig("diseasematcher", "Disease Matcher", "diseasematcher-icon.png"));
 					}
 					if (modReports)
 					{

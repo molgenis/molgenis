@@ -7,17 +7,20 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
-import org.molgenis.data.Writable;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.TrimProcessor;
+import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
+import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.GenericImporterExtensions;
 
@@ -108,10 +111,19 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 		return new ExcelRepository(name, poiSheet, cellProcessors);
 	}
 
-	public Writable createWritable(String entityName, List<String> attributeNames)
+	public ExcelSheetWriter createWritable(String entityName, List<AttributeMetaData> attributes,
+			AttributeWriteMode attributeWriteMode)
 	{
 		Sheet sheet = workbook.createSheet(entityName);
-		return new ExcelSheetWriter(sheet, attributeNames, cellProcessors);
+		return new ExcelSheetWriter(sheet, attributes, attributeWriteMode, cellProcessors);
+	}
+
+	public ExcelSheetWriter createWritable(String entityName, List<String> attributeNames)
+	{
+		List<AttributeMetaData> attributes = attributeNames != null ? attributeNames.stream()
+				.<AttributeMetaData> map(attr -> new DefaultAttributeMetaData(attr)).collect(Collectors.toList()) : null;
+
+		return createWritable(entityName, attributes, AttributeWriteMode.ATTRIBUTE_NAMES);
 	}
 
 	public void save(OutputStream out) throws IOException

@@ -5,7 +5,9 @@ import static java.util.Objects.requireNonNull;
 import java.util.List;
 import java.util.Map;
 
+import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.security.core.MolgenisPermissionService;
 
@@ -32,11 +34,11 @@ class EntityCollectionResponseV2
 		this.items = null;
 	}
 
-	public EntityCollectionResponseV2(EntityPager entityPager, List<Map<String, Object>> items,
-			AttributeFilter attributes, String href, EntityMetaData meta, MolgenisPermissionService permissionService)
+	public EntityCollectionResponseV2(EntityPager entityPager, List<Map<String, Object>> items, Fetch fetch,
+			String href, EntityMetaData meta, MolgenisPermissionService permissionService, DataService dataService)
 	{
 		this.href = href;
-		this.meta = new EntityMetaDataResponseV2(meta, attributes, permissionService);
+		this.meta = new EntityMetaDataResponseV2(meta, fetch, permissionService, dataService);
 		this.start = entityPager.getStart();
 		this.num = entityPager.getNum();
 		this.total = entityPager.getTotal();
@@ -60,17 +62,17 @@ class EntityCollectionResponseV2
 		return meta;
 	}
 
-	public Integer getStart()
+	public int getStart()
 	{
 		return start;
 	}
 
-	public Integer getNum()
+	public int getNum()
 	{
 		return num;
 	}
 
-	public Long getTotal()
+	public long getTotal()
 	{
 		return total;
 	}

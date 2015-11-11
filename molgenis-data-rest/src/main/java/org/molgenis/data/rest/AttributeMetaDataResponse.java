@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Range;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -41,9 +42,9 @@ public class AttributeMetaDataResponse
 	private String validationExpression;
 
 	public AttributeMetaDataResponse(String entityParentName, AttributeMetaData attr,
-			MolgenisPermissionService permissionService)
+			MolgenisPermissionService permissionService, DataService dataService)
 	{
-		this(entityParentName, attr, null, null, permissionService);
+		this(entityParentName, attr, null, null, permissionService, dataService);
 	}
 
 	/**
@@ -56,7 +57,8 @@ public class AttributeMetaDataResponse
 	 *            set of lowercase attribute names to expand in response
 	 */
 	public AttributeMetaDataResponse(final String entityParentName, AttributeMetaData attr, Set<String> attributesSet,
-			final Map<String, Set<String>> attributeExpandsSet, MolgenisPermissionService permissionService)
+			final Map<String, Set<String>> attributeExpandsSet, MolgenisPermissionService permissionService,
+			DataService dataService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestController.BASE_URI, entityParentName, attrName);
@@ -110,7 +112,7 @@ public class AttributeMetaDataResponse
 			{
 				Set<String> subAttributesSet = attributeExpandsSet.get("refEntity".toLowerCase());
 				this.refEntity = refEntity != null ? new EntityMetaDataResponse(refEntity, subAttributesSet,
-						Collections.singletonMap("attributes".toLowerCase(), null), permissionService) : null;
+						Collections.singletonMap("attributes".toLowerCase(), null), permissionService, dataService) : null;
 			}
 			else
 			{
@@ -140,7 +142,7 @@ public class AttributeMetaDataResponse
 								Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
 								return new AttributeMetaDataResponse(entityParentName, attributeMetaData,
 										subAttributesSet, Collections.singletonMap("refEntity".toLowerCase(), null),
-										permissionService);
+										permissionService, dataService);
 							}
 							else
 							{
