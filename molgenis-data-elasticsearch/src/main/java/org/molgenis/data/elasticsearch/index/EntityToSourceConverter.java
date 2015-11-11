@@ -1,7 +1,6 @@
 package org.molgenis.data.elasticsearch.index;
 
 import java.sql.Date;
-import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -96,7 +95,7 @@ public class EntityToSourceConverter
 				value = date != null ? MolgenisDateFormat.getDateFormat().format(date) : null;
 				break;
 			case DATE_TIME:
-				Timestamp dateTime = entity.getTimestamp(attrName);
+				Date dateTime = entity.getDate(attrName);
 				value = dateTime != null ? MolgenisDateFormat.getDateTimeFormat().format(dateTime) : null;
 				break;
 			case CATEGORICAL:

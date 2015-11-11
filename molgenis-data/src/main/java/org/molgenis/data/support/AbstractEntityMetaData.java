@@ -13,7 +13,6 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Package;
 import org.molgenis.data.Range;
-import org.molgenis.data.RepositoryDecorator;
 import org.molgenis.fieldtypes.FieldType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +24,6 @@ import com.google.common.collect.TreeTraverser;
 public abstract class AbstractEntityMetaData implements EntityMetaData
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractEntityMetaData.class);
-
-	private RepositoryDecorator decorator;
 
 	private String labelAttribute;
 	private String idAttribute;
@@ -346,17 +343,5 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 		if ((attr == null) && (getExtends() != null)) attr = getExtends().getAttribute(attributeName);
 
 		return attr;
-	}
-
-	@Override
-	public RepositoryDecorator getDecorator()
-	{
-		return decorator;
-	}
-
-	public AbstractEntityMetaData setDecorator(RepositoryDecorator decorator)
-	{
-		this.decorator = decorator;
-		return this;
 	}
 }

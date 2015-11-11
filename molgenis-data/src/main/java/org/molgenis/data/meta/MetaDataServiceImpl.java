@@ -19,7 +19,6 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Package;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.RepositoryDecorator;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.DataServiceImpl;
@@ -258,24 +257,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public synchronized Repository addEntityMeta(EntityMetaData emd)
 	{
-		if (emd.getDecorator() == null)
-		{
-			return add(emd, new NonDecoratingRepositoryDecoratorFactory());
-		}
-		else
-		{
-			return add(emd, new RepositoryDecoratorFactory()
-			{
-				@Override
-				public Repository createDecoratedRepository(Repository repository)
-				{
-					RepositoryDecorator repoDecorator = emd.getDecorator();
-					repoDecorator.setTarget(repository);
-
-					return repoDecorator;
-				}
-			});
-		}
+		return add(emd, new NonDecoratingRepositoryDecoratorFactory());
 	}
 
 	@Transactional

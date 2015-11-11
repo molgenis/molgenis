@@ -109,8 +109,4 @@ public interface EntityMetaData
 
 	Class<? extends Entity> getEntityClass();
 
-	/**
-	 * Returns the decorator for this entity, or null if no decorator is present
-	 */
-	RepositoryDecorator getDecorator();
 }
