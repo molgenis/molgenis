@@ -2,6 +2,7 @@ package org.molgenis.data.elasticsearch;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.data.elasticsearch.request.SourceFilteringGenerator.toFetchFields;
 import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
 import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchIds;
 import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
@@ -15,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.elasticsearch.ElasticsearchException;
@@ -28,8 +30,10 @@ import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.deletebyquery.DeleteByQueryResponse;
 import org.elasticsearch.action.deletebyquery.IndexDeleteByQueryResponse;
+import org.elasticsearch.action.get.GetRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.get.MultiGetItemResponse;
+import org.elasticsearch.action.get.MultiGetRequest.Item;
 import org.elasticsearch.action.get.MultiGetRequestBuilder;
 import org.elasticsearch.action.get.MultiGetResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -44,20 +48,20 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.fetch.source.FetchSourceContext;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator;
-import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
 import org.molgenis.data.elasticsearch.response.ResponseParser;
-import org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils;
 import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
@@ -77,7 +81,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
 /**
@@ -106,17 +109,17 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	}
 
 	private final DataService dataService;
+	private final ElasticsearchEntityFactory elasticsearchEntityFactory;
 	private final String indexName;
 	private final Client client;
 	private final ResponseParser responseParser = new ResponseParser();
 	private final SearchRequestGenerator generator = new SearchRequestGenerator();
-	private final EntityToSourceConverter entityToSourceConverter;
 	private final ElasticsearchUtils elasticsearchUtils;
 
 	public ElasticsearchService(Client client, String indexName, DataService dataService,
-			EntityToSourceConverter entityToSourceConverter)
+			ElasticsearchEntityFactory elasticsearchEntityFactory)
 	{
-		this(client, indexName, dataService, entityToSourceConverter, true);
+		this(client, indexName, dataService, elasticsearchEntityFactory, true);
 	}
 
 	/**
@@ -129,12 +132,12 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	 * @param createIndexIfNotExists
 	 */
 	ElasticsearchService(Client client, String indexName, DataService dataService,
-			EntityToSourceConverter entityToSourceConverter, boolean createIndexIfNotExists)
+			ElasticsearchEntityFactory elasticsearchEntityFactory, boolean createIndexIfNotExists)
 	{
 		this.client = requireNonNull(client);
 		this.indexName = requireNonNull(indexName);
 		this.dataService = requireNonNull(dataService);
-		this.entityToSourceConverter = requireNonNull(entityToSourceConverter);
+		this.elasticsearchEntityFactory = requireNonNull(elasticsearchEntityFactory);
 		this.elasticsearchUtils = new ElasticsearchUtils(client);
 
 		if (createIndexIfNotExists)
@@ -196,7 +199,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		{
 			LOG.trace("*** REQUEST\n" + builder);
 		}
-		generator.buildSearchRequest(builder, documentType, searchType, request.getQuery(), request.getFieldsToReturn(),
+		generator.buildSearchRequest(builder, documentType, searchType, request.getQuery(),
 				request.getAggregateField1(), request.getAggregateField2(), request.getAggregateFieldDistinct(),
 				entityMetaData);
 		SearchResponse response = builder.execute().actionGet();
@@ -335,7 +338,6 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	{
 		String entityName = entityMetaData.getName();
 		String type = sanitizeMapperType(entityName);
-		List<String> fieldsToReturn = Collections.<String> emptyList();
 
 		if (LOG.isTraceEnabled())
 		{
@@ -346,8 +348,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			else LOG.trace("Counting Elasticsearch '" + type + "' docs ...");
 		}
 		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
-		generator.buildSearchRequest(searchRequestBuilder, type, SearchType.COUNT, q, fieldsToReturn, null, null, null,
-				entityMetaData);
+		generator.buildSearchRequest(searchRequestBuilder, type, SearchType.COUNT, q, null, null, null, entityMetaData);
 		SearchResponse searchResponse = searchRequestBuilder.execute().actionGet();
 		if (searchResponse.getFailedShards() > 0)
 		{
@@ -453,7 +454,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			for (Entity entity : entities)
 			{
 				String id = toElasticsearchId(entity, entityMetaData);
-				Map<String, Object> source = entityToSourceConverter.convert(entity, entityMetaData);
+				Map<String, Object> source = elasticsearchEntityFactory.create(entityMetaData, entity);
 				if (transactionId != null)
 				{
 					source.put(CRUD_TYPE_FIELD_NAME, crudType.name());
@@ -645,26 +646,34 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	@Override
 	public Entity get(Object entityId, EntityMetaData entityMetaData)
 	{
+		return get(entityId, entityMetaData, null);
+	}
+
+	@Override
+	public Entity get(Object entityId, EntityMetaData entityMetaData, Fetch fetch)
+	{
 		String entityName = entityMetaData.getName();
 		String type = sanitizeMapperType(entityName);
-		String id = ElasticsearchEntityUtils.toElasticsearchId(entityId);
+		String id = toElasticsearchId(entityId);
 
 		if (LOG.isTraceEnabled())
 		{
-			LOG.trace("Retrieving Elasticsearch '" + type + "' doc with id [" + id + "] ...");
+			LOG.trace("Retrieving Elasticsearch '{}' doc with id [{}] and fetch [{}] ...", type, id, fetch);
 		}
 
 		String transactionId = getCurrentTransactionId();
 		if (transactionId != null)
 		{
-			MultiGetResponse response = client.prepareMultiGet().add(transactionId, type, id).add(indexName, type, id)
-					.execute().actionGet();
+			Item transactionItem = createMultiGetItem(transactionId, type, id, fetch);
+			Item indexItem = createMultiGetItem(indexName, type, id, fetch);
+			MultiGetResponse response = client.prepareMultiGet().add(transactionItem).add(indexItem).execute()
+					.actionGet();
 
 			for (MultiGetItemResponse res : response.getResponses())
 			{
 				if ((res.getResponse() != null) && res.getResponse().isExists())
 				{
-					return new DefaultEntity(entityMetaData, dataService, res.getResponse().getSource());
+					return elasticsearchEntityFactory.create(entityMetaData, res.getResponse().getSource(), fetch);
 				}
 			}
 
@@ -672,13 +681,19 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		}
 		else
 		{
-			GetResponse response = client.prepareGet(indexName, type, id).execute().actionGet();
+			GetRequestBuilder requestBuilder = client.prepareGet(indexName, type, id);
+			if (fetch != null)
+			{
+				requestBuilder.setFetchSource(toFetchFields(fetch), null);
+			}
+			GetResponse response = requestBuilder.execute().actionGet();
 			if (LOG.isDebugEnabled())
 			{
-				LOG.debug("Retrieved Elasticsearch '" + type + "' doc with id [" + id + "]");
+				LOG.debug("Retrieved Elasticsearch '{}' doc with id [{}] and fetch [{}].", type, id, fetch);
 			}
 
-			return response.isExists() ? new DefaultEntity(entityMetaData, dataService, response.getSource()) : null;
+			return response.isExists() ? elasticsearchEntityFactory.create(entityMetaData, response.getSource(), fetch)
+					: null;
 		}
 	}
 
@@ -693,56 +708,76 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	@Override
 	public Iterable<Entity> get(Iterable<Object> entityIds, final EntityMetaData entityMetaData)
 	{
+		return get(entityIds, entityMetaData, null);
+	}
+
+	@Override
+	public Iterable<Entity> get(Iterable<Object> entityIds, final EntityMetaData entityMetaData, Fetch fetch)
+	{
 		String entityName = entityMetaData.getName();
 		String type = sanitizeMapperType(entityName);
 		String transactionId = getCurrentTransactionId();
 
 		if (LOG.isTraceEnabled())
 		{
-			LOG.trace("Retrieving Elasticsearch '" + type + "' docs with ids [" + entityIds + "] ...");
+			LOG.trace("Retrieving Elasticsearch '{}' docs with ids [{}] and fetch [{}] ...", type, entityIds, fetch);
 		}
 
-		MultiGetRequestBuilder request = client.prepareMultiGet().add(indexName, type,
-				ElasticsearchEntityUtils.toElasticsearchIds(entityIds));
+		MultiGetRequestBuilder request = client.prepareMultiGet();
+		stream(entityIds.spliterator(), false).map(id -> createMultiGetItem(indexName, type, id, fetch))
+				.forEach(request::add);
 
 		if (transactionId != null)
 		{
-			request.add(transactionId, type, ElasticsearchEntityUtils.toElasticsearchIds(entityIds));
+			stream(entityIds.spliterator(), false).map(id -> createMultiGetItem(transactionId, type, id, fetch))
+					.forEach(request::add);
 		}
 
 		MultiGetResponse response = request.execute().actionGet();
 
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Retrieved Elasticsearch '" + type + "' docs with ids [" + entityIds + "] ...");
+			LOG.debug("Retrieving Elasticsearch '{}' docs with ids [{}] and fetch [{}].", type, entityIds, fetch);
 		}
 
-		return Iterables.transform(Iterables.filter(response, new Predicate<MultiGetItemResponse>()
-		{
-			// If the document was not found in the molgenis index or
-			// transaction index a response is included that
-			// states that the item doesn't exist. Filter out these responses,
-			// since the document should be located in
-			// either of the indexes.
-			@Override
-			public boolean apply(MultiGetItemResponse itemResponse)
-			{
-				if (itemResponse.isFailed())
-				{
-					throw new ElasticsearchException("Search failed. Returned headers:" + itemResponse.getFailure());
-				}
-				GetResponse getResponse = itemResponse.getResponse();
-				return getResponse.isExists();
-			}
-		}), new Function<MultiGetItemResponse, Entity>()
+		return new Iterable<Entity>()
 		{
 			@Override
-			public Entity apply(MultiGetItemResponse itemResponse)
+			public Iterator<Entity> iterator()
 			{
-				GetResponse getResponse = itemResponse.getResponse();
-				return new DefaultEntity(entityMetaData, dataService, getResponse.getSource());
+				// If the document was not found in the molgenis index or transaction index a response is included that
+				// states that the item doesn't exist. Filter out these responses, since the document should be located
+				// in either of the indexes.
+				return stream(response.spliterator(), false).flatMap(itemResponse -> {
+					if (itemResponse.isFailed())
+					{
+						throw new ElasticsearchException(
+								"Search failed. Returned headers:" + itemResponse.getFailure());
+					}
+					GetResponse getResponse = itemResponse.getResponse();
+					if (getResponse.isExists())
+					{
+						Map<String, Object> source = getResponse.getSource();
+						Entity entity = elasticsearchEntityFactory.create(entityMetaData, source, fetch);
+						return Stream.of(entity);
+					}
+					else
+					{
+						return Stream.<Entity> empty();
+					}
+				}).iterator();
 			}
-		});
+		};
+	}
+
+	private Item createMultiGetItem(String indexName, String type, Object id, Fetch fetch)
+	{
+		Item item = new Item(indexName, type, toElasticsearchId(id));
+		if (fetch != null)
+		{
+			item.fetchSourceContext(new FetchSourceContext(toFetchFields(fetch)));
+		}
+		return item;
 	}
 
 	/*
@@ -768,7 +803,8 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			indexNames = ArrayUtils.add(indexNames, transactionId);
 		}
 
-		return new ElasticsearchEntityIterable(q, entityMetaData, client, dataService, generator, indexNames);
+		return new ElasticsearchEntityIterable(q, entityMetaData, client, elasticsearchEntityFactory, generator,
+				indexNames);
 	}
 
 	/*
@@ -884,10 +920,11 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 				q.eq(attributeMetaData.getName(), refEntity);
 			}
 
-			Iterable<Entity> entities = new ElasticsearchEntityIterable(q, entityMetaData, client, dataService,
-					generator, new String[]
+			Iterable<Entity> entities = new ElasticsearchEntityIterable(q, entityMetaData, client,
+					elasticsearchEntityFactory, generator, new String[]
 			{ indexName });
 
+			// TODO discuss whether this is still required
 			// Don't use cached ref entities but make new ones
 			entities = Iterables.transform(entities, new Function<Entity, Entity>()
 			{
@@ -1024,7 +1061,8 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 
 							if (crudType == CrudType.UPDATE)
 							{
-								updateReferences(new DefaultEntity(entityMeta, dataService, values), entityMeta);
+								updateReferences(elasticsearchEntityFactory.create(entityMeta, values, null),
+										entityMeta);
 							}
 						}
 						else if (crudType == CrudType.DELETE)

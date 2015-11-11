@@ -23,7 +23,8 @@ public class SearchRequestGenerator
 	public SearchRequestGenerator()
 	{
 		aggregateQueryGenerator = new AggregateQueryGenerator();
-		queryGenerators = Arrays.asList(new QueryGenerator(), new SortGenerator(), new LimitOffsetGenerator());
+		queryGenerators = Arrays.asList(new QueryGenerator(), new SortGenerator(), new LimitOffsetGenerator(),
+				new SourceFilteringGenerator());
 	}
 
 	/**
@@ -33,7 +34,6 @@ public class SearchRequestGenerator
 	 * @param entityNames
 	 * @param searchType
 	 * @param query
-	 * @param fieldsToReturn
 	 * @param aggAttr1
 	 *            First Field to aggregate on
 	 * @param aggAttr2
@@ -41,8 +41,8 @@ public class SearchRequestGenerator
 	 * @param entityMetaData
 	 */
 	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, List<String> entityNames,
-			SearchType searchType, Query query, List<String> fieldsToReturn, AttributeMetaData aggAttr1,
-			AttributeMetaData aggAttr2, AttributeMetaData aggAttrDistinct, EntityMetaData entityMetaData)
+			SearchType searchType, Query query, AttributeMetaData aggAttr1, AttributeMetaData aggAttr2,
+			AttributeMetaData aggAttrDistinct, EntityMetaData entityMetaData)
 	{
 		searchRequestBuilder.setSearchType(searchType);
 
@@ -50,12 +50,6 @@ public class SearchRequestGenerator
 		if (entityNames != null)
 		{
 			searchRequestBuilder.setTypes(entityNames.toArray(new String[entityNames.size()]));
-		}
-
-		// Fields
-		if ((fieldsToReturn != null) && !fieldsToReturn.isEmpty())
-		{
-			searchRequestBuilder.addFields(fieldsToReturn.toArray(new String[fieldsToReturn.size()]));
 		}
 
 		// Generate query
@@ -76,10 +70,10 @@ public class SearchRequestGenerator
 	}
 
 	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, String entityName, SearchType searchType,
-			Query query, List<String> fieldsToReturn, AttributeMetaData aggregateField1,
-			AttributeMetaData aggregateField2, AttributeMetaData aggregateFieldDistinct, EntityMetaData entityMetaData)
+			Query query, AttributeMetaData aggregateField1, AttributeMetaData aggregateField2,
+			AttributeMetaData aggregateFieldDistinct, EntityMetaData entityMetaData)
 	{
 		buildSearchRequest(searchRequestBuilder, entityName == null ? null : Arrays.asList(entityName), searchType,
-				query, fieldsToReturn, aggregateField1, aggregateField2, aggregateFieldDistinct, entityMetaData);
+				query, aggregateField1, aggregateField2, aggregateFieldDistinct, entityMetaData);
 	}
 }

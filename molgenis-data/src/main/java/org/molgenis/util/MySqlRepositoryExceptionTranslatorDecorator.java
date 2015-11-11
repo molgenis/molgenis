@@ -12,6 +12,7 @@ import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
@@ -83,9 +84,21 @@ public class MySqlRepositoryExceptionTranslatorDecorator implements Repository
 	}
 
 	@Override
+	public Entity findOne(Object id, Fetch fetch)
+	{
+		return decoratedRepo.findOne(id, fetch);
+	}
+
+	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
 		return decoratedRepo.findAll(ids);
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
+	{
+		return decoratedRepo.findAll(ids, fetch);
 	}
 
 	@Override

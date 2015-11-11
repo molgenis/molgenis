@@ -1,15 +1,16 @@
 package org.molgenis.data.rest.v2;
 
-import static org.molgenis.data.rest.v2.RestControllerV2.createDefaultRefAttributeFilter;
-
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Range;
 import org.molgenis.data.rest.Href;
+import org.molgenis.fieldtypes.MrefField;
+import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.security.core.MolgenisPermissionService;
 
 import com.google.common.base.Function;
@@ -51,8 +52,8 @@ class AttributeMetaDataResponseV2
 	 * @param attributeExpandsSet
 	 *            set of lowercase attribute names to expand in response
 	 */
-	public AttributeMetaDataResponseV2(final String entityParentName, AttributeMetaData attr,
-			AttributeFilter attrFilter, MolgenisPermissionService permissionService, DataService dataService)
+	public AttributeMetaDataResponseV2(final String entityParentName, AttributeMetaData attr, Fetch fetch,
+			MolgenisPermissionService permissionService, DataService dataService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestControllerV2.BASE_URI, entityParentName, attrName);
@@ -68,15 +69,7 @@ class AttributeMetaDataResponseV2
 		EntityMetaData refEntity = attr.getRefEntity();
 		if (refEntity != null)
 		{
-			if (attrFilter != null)
-			{
-				this.refEntity = new EntityMetaDataResponseV2(refEntity, attrFilter, permissionService, dataService);
-			}
-			else
-			{
-				this.refEntity = new EntityMetaDataResponseV2(refEntity, createDefaultRefAttributeFilter(attr),
-						permissionService, dataService);
-			}
+			this.refEntity = new EntityMetaDataResponseV2(refEntity, fetch, permissionService, dataService);
 		}
 		else
 		{
@@ -87,35 +80,39 @@ class AttributeMetaDataResponseV2
 		if (attrParts != null)
 		{
 			// filter attribute parts
-			if (attrFilter != null)
+			if (fetch != null)
 			{
 				attrParts = Iterables.filter(attrParts, new Predicate<AttributeMetaData>()
 				{
 					@Override
 					public boolean apply(AttributeMetaData attr)
 					{
-						return attrFilter.includeAttribute(attr);
+						return fetch != null ? fetch.hasField(attr) : true;
 					}
 				});
 			}
 
 			// create attribute response
-			this.attributes = Lists.newArrayList(Iterables.transform(attrParts,
-					new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
+			this.attributes = Lists.newArrayList(
+					Iterables.transform(attrParts, new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
 					{
 						@Override
 						public AttributeMetaDataResponseV2 apply(AttributeMetaData attr)
 						{
-							AttributeFilter subAttrFilter;
-							if (attrFilter != null)
+							Fetch subAttrFetch;
+							if (fetch != null)
 							{
-								subAttrFilter = attrFilter.getAttributeFilter(attr);
+								subAttrFetch = fetch.getFetch(attr);
+							}
+							else if (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
+							{
+								subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr);
 							}
 							else
 							{
-								subAttrFilter = null;
+								subAttrFetch = null;
 							}
-							return new AttributeMetaDataResponseV2(entityParentName, attr, subAttrFilter,
+							return new AttributeMetaDataResponseV2(entityParentName, attr, subAttrFetch,
 									permissionService, dataService);
 						}
 					}));

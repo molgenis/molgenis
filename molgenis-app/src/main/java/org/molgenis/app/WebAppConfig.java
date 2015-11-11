@@ -15,6 +15,7 @@ import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.jpa.JpaRepositoryCollection;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
+import org.molgenis.data.mysql.MySqlEntityFactory;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
@@ -176,7 +177,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	}
 
 	@Override
-	protected void addReposToReindex(DataServiceImpl localDataService)
+	protected void addReposToReindex(DataServiceImpl localDataService, MySqlEntityFactory localMySqlEntityFactory)
 	{
 		// Get the undecorated repos to index
 		MysqlRepositoryCollection backend = new MysqlRepositoryCollection()
@@ -184,7 +185,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 			@Override
 			protected MysqlRepository createMysqlRepository()
 			{
-				return new MysqlRepository(localDataService, dataSource,
+				return new MysqlRepository(localDataService, localMySqlEntityFactory, dataSource,
 						new AsyncJdbcTemplate(new JdbcTemplate(dataSource)));
 			}
 
