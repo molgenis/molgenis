@@ -277,10 +277,13 @@ public class DefaultEntity implements Entity
 		if (attribute == null) throw new UnknownAttributeException(attributeName);
 
 		FieldType dataType = attribute.getDataType();
-		if (!(dataType instanceof MrefField))
+
+		// FIXME this should fail on anything other than instanceof MrefField. requires an extensive code base review to
+		// find illegal use of getEntities()
+		if (!(dataType instanceof MrefField) && !(dataType instanceof XrefField))
 		{
 			throw new MolgenisDataException(
-					"can't use getEntities() on something that's not an mref or categorical_mref");
+					"can't use getEntities() on something that's not an xref, mref, categorical, categorical_mref or file");
 		}
 
 		List<?> ids;

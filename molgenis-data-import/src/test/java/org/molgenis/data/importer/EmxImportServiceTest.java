@@ -195,7 +195,8 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		// Check parents
 		List<Entity> entitiesWithParents = StreamSupport
 				.stream(dataService.getRepository("import_person").spliterator(), false)
-				.filter(e -> (e.getEntity("parent") != null)).collect(Collectors.toCollection(ArrayList::new));
+				.filter(e -> (e.getEntities("parent").iterator().hasNext()))
+				.collect(Collectors.toCollection(ArrayList::new));
 		Entity parent1 = entitiesWithParents.get(0).getEntity("parent");
 		Assert.assertEquals(parent1.getIdValue().toString(), "john");
 		Entity parent2 = entitiesWithParents.get(1).getEntity("parent");
