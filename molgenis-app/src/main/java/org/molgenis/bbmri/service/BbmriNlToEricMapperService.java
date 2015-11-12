@@ -1,37 +1,38 @@
-package org.molgenis.bbmri.eric.service;
+package org.molgenis.bbmri.service;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.ACRONYM;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.AGE_HIGH;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.AGE_LOW;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.AGE_UNIT;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.BIOBANKS;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_DESCRIPTION;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_FEE;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_JOINT_PROJECTS;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_URI;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_DESCRIPTION;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_FEE;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_JOINT_PROJECTS;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_URI;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.CONTACT_PERSON;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.DATA_CATEGORIES;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.DESCRIPTION;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.DISEASE;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.ID;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.LATITUDE;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.LONGITUDE;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.MATERIALS;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.NAME;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.NUMBER_OF_DONORS;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.SAMPLE_COLLECTIONS_ENTITY;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.SEX;
-import static org.molgenis.bbmri.eric.model.BbmriNlCheatSheet.TYPE;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.ACRONYM;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.AGE_HIGH;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.AGE_LOW;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.AGE_UNIT;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.BIOBANKS;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_DESCRIPTION;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_FEE;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_JOINT_PROJECTS;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_URI;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_DESCRIPTION;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_FEE;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_JOINT_PROJECTS;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_URI;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.CONTACT_PERSON;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.DATA_CATEGORIES;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.DESCRIPTION;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.DISEASE;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.ID;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.LATITUDE;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.LONGITUDE;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.MATERIALS;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.NAME;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.NUMBER_OF_DONORS;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.SAMPLE_COLLECTIONS_ENTITY;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.SEX;
+import static org.molgenis.bbmri.model.BbmriNlCheatSheet.TYPE;
 
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.molgenis.bbmri.settings.BbmriNlToEricMapperSettings;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -40,8 +41,6 @@ import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,27 +50,25 @@ import com.google.common.collect.Lists;
  * Translates BBMRI-NL Sample Collections and Biobanks to BBMRI-ERIC collections and biobanks.
  */
 @Service
-public class NlToEricConverter
+public class BbmriNlToEricMapperService
 {
-	private final DataService dataService;
-
-	private static final Logger LOG = LoggerFactory.getLogger(NlToEricConverter.class);
+	private static final Logger LOG = LoggerFactory.getLogger(BbmriNlToEricMapperService.class);
 
 	private final String ERIC_COLLECTIONS = "eu_bbmri_eric_collections";
 	private final String ERIC_BIOBANKS = "eu_bbmri_eric_biobanks";
 	private final String ERIC_CONTACTS = "eu_bbmri_eric_contacts";
 
-	private final String defaultContactEmail;
+	private final DataService dataService;
+	private final BbmriNlToEricMapperSettings bbmriNlToEricMapperSettings;
 
 	/**
 	 * Constructor.
 	 */
 	@Autowired
-	public NlToEricConverter(DataService dataService, @Value("${default_contact_email}") String defaultContactEmail)
+	public BbmriNlToEricMapperService(DataService dataService, BbmriNlToEricMapperSettings bbmriNlToEricMapperSettings)
 	{
-		this.defaultContactEmail = requireNonNull(defaultContactEmail,
-				"property default_contact_email not set in molgenis-server.properties");
-		this.dataService = requireNonNull(dataService, "dataService is null");
+		this.dataService = requireNonNull(dataService);
+		this.bbmriNlToEricMapperSettings = requireNonNull(bbmriNlToEricMapperSettings);
 	}
 
 	/**
@@ -81,7 +78,6 @@ public class NlToEricConverter
 	 * 
 	 * Executed around every midnight.
 	 */
-	@Scheduled(cron = "0 5 0 * * *")
 	@Transactional
 	@RunAsSystem
 	public void convertNlToEric()
@@ -327,7 +323,8 @@ public class NlToEricConverter
 		ericContact.set("phone", nlContactPerson.getString("phone"));
 
 		String email = nlContactPerson.getString("email");
-		ericContact.set("email", email == null ? defaultContactEmail : email);
+		ericContact.set("email",
+				email == null ? bbmriNlToEricMapperSettings.getMapperDefaultEmailAddress() : email);
 
 		ericContact.set("address", nlContactPerson.getString("address"));
 		ericContact.set("zip", nlContactPerson.getString("zip"));
@@ -360,7 +357,7 @@ public class NlToEricConverter
 		ericContact.set("first_name", na);
 		ericContact.set("last_name", na);
 		ericContact.set("phone", na);
-		ericContact.set("email", defaultContactEmail);
+		ericContact.set("email", bbmriNlToEricMapperSettings.getMapperDefaultEmailAddress());
 		ericContact.set("address", na);
 		ericContact.set("zip", na);
 		ericContact.set("city", na);
