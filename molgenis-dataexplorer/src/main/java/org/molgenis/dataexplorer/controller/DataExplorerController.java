@@ -14,7 +14,6 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -23,18 +22,13 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.GenomicDataSettings;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportException;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportRequest;
@@ -371,130 +365,6 @@ public class DataExplorerController extends MolgenisPluginController
 		// store url and api key in session for subsequent galaxy export requests
 		model.addAttribute(ATTR_GALAXY_URL, galaxyUrl);
 		model.addAttribute(ATTR_GALAXY_API_KEY, galaxyApiKey);
-	}
-
-	@RequestMapping(value = "/aggregate", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-	@ResponseBody
-	public AggregateResult aggregate(@Valid @RequestBody AggregateRequest request)
-	{
-		String entityName = request.getEntityName();
-		String xAttributeName = request.getXAxisAttributeName();
-		String yAttributeName = request.getYAxisAttributeName();
-		String distinctAttributeName = getDistinctAttributeName(request);
-
-		if (StringUtils.isBlank(xAttributeName) && StringUtils.isBlank(yAttributeName))
-		{
-			throw new InputValidationException("Missing aggregate attribute");
-		}
-
-		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
-
-		AttributeMetaData xAttributeMeta = null;
-		if (StringUtils.isNotBlank(xAttributeName))
-		{
-			xAttributeMeta = entityMeta.getAttribute(xAttributeName);
-			if (xAttributeMeta == null)
-			{
-				throw new InputValidationException("Unknown attribute '" + xAttributeName + "'");
-			}
-
-			if (!xAttributeMeta.isAggregateable())
-			{
-				throw new InputValidationException("Attribute '" + xAttributeName + "' is not aggregateable");
-			}
-		}
-
-		AttributeMetaData yAttributeMeta = null;
-		if (StringUtils.isNotBlank(yAttributeName))
-		{
-			yAttributeMeta = entityMeta.getAttribute(yAttributeName);
-			if (yAttributeMeta == null)
-			{
-				throw new InputValidationException("Unknow attribute '" + yAttributeName + "'");
-			}
-
-			if (!yAttributeMeta.isAggregateable())
-			{
-				throw new InputValidationException("Attribute '" + yAttributeName + "' is not aggregateable");
-			}
-		}
-		AttributeMetaData distinctAttributeMeta = null;
-		if (StringUtils.isNotBlank(distinctAttributeName))
-		{
-			distinctAttributeMeta = entityMeta.getAttribute(distinctAttributeName);
-			if (distinctAttributeName == null)
-			{
-				throw new InputValidationException("Unknow attribute '" + distinctAttributeName + "'");
-			}
-		}
-
-		AggregateQueryImpl aggregateQuery = new AggregateQueryImpl().attrX(xAttributeMeta).attrY(yAttributeMeta)
-				.attrDistinct(distinctAttributeMeta).query(new QueryImpl(request.getQ()));
-		AggregateResult aggregate = dataService.aggregate(entityName, aggregateQuery);
-		// FIXME hackathon hack for aggregate API changes
-		List<Object> xLabels = aggregate.getxLabels();
-		for (int i = 0; i < xLabels.size(); ++i)
-		{
-			Object xLabel = xLabels.get(i);
-			if (xLabel instanceof Entity)
-			{
-				xLabel = ((Entity) xLabel).getLabelValue();
-				xLabels.set(i, xLabel);
-			}
-		}
-		// FIXME hackathon hack for aggregate API changes
-		List<Object> yLabels = aggregate.getyLabels();
-		for (int i = 0; i < yLabels.size(); ++i)
-		{
-			Object yLabel = yLabels.get(i);
-			if (yLabel instanceof Entity)
-			{
-				yLabel = ((Entity) yLabel).getLabelValue();
-				yLabels.set(i, yLabel);
-			}
-		}
-		return aggregate;
-	}
-
-	/**
-	 * Retrieves the distinct attribute from the request, overriding it if the runtime property is set.
-	 * 
-	 * @param request
-	 *            the {@link AggregateRequest}
-	 * @return the name of the distinct attribute
-	 */
-	private String getDistinctAttributeName(AggregateRequest request)
-	{
-		String distinctAttributeName = request.getDistinctAttributeName();
-
-		// check if an override for attr name exists
-		String overrideDistinctAttributeName;
-
-		Map<String, String> distinctAttrOverrides = dataExplorerSettings.getAggregatesDistinctOverrides();
-		if (distinctAttrOverrides != null)
-		{
-			overrideDistinctAttributeName = distinctAttrOverrides.get(request.getEntityName());
-		}
-		else
-		{
-			overrideDistinctAttributeName = null;
-		}
-
-		if (overrideDistinctAttributeName != null)
-		{
-			if (distinctAttributeName != null)
-			{
-				LOG.info("[mod-aggregate] Overriding distinct attribute from request! Request specifies "
-						+ distinctAttributeName + ", data explorer setting specifies " + overrideDistinctAttributeName);
-			}
-			else
-			{
-				LOG.debug("[mod-aggregate] Using distinct attribute " + overrideDistinctAttributeName
-						+ " from data explorer setting");
-			}
-			return overrideDistinctAttributeName;
-		}
-		return distinctAttributeName;
 	}
 
 	/**

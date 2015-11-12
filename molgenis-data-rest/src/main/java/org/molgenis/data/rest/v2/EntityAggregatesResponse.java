@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.molgenis.data.AggregateAnonymizer;
 import org.molgenis.data.AggregateResult;
+import org.molgenis.data.AnonymizedAggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 
@@ -31,12 +33,15 @@ public class EntityAggregatesResponse extends EntityCollectionResponseV2
 		private final List<List<Long>> matrix;
 		private final List<Object> xLabels;
 		private final List<Object> yLabels;
+		private final Integer threshold;
 
-		public AggregateResultResponse(List<List<Long>> matrix, List<Object> xLabels, List<Object> yLabels)
+		public AggregateResultResponse(List<List<Long>> matrix, List<Object> xLabels, List<Object> yLabels,
+				Integer threshold)
 		{
 			this.matrix = matrix;
 			this.xLabels = xLabels;
 			this.yLabels = yLabels;
+			this.threshold = threshold;
 		}
 
 		public static AggregateResultResponse toResponse(AggregateResult aggs)
@@ -44,7 +49,30 @@ public class EntityAggregatesResponse extends EntityCollectionResponseV2
 			List<List<Long>> matrix = aggs.getMatrix();
 			List<Object> xLabels = convert(aggs.getxLabels());
 			List<Object> yLabels = convert(aggs.getyLabels());
-			return new AggregateResultResponse(matrix, xLabels, yLabels);
+			Integer threshold = toAggregateThreshold(aggs);
+			return new AggregateResultResponse(matrix, xLabels, yLabels, threshold);
+		}
+
+		private static Integer toAggregateThreshold(AggregateResult aggs)
+		{
+			Integer threshold;
+			if (aggs instanceof AnonymizedAggregateResult)
+			{
+				int thresholdInt = ((AnonymizedAggregateResult) aggs).getAnonymizationThreshold();
+				if (thresholdInt != AggregateAnonymizer.AGGREGATE_ANONYMIZATION_VALUE)
+				{
+					threshold = thresholdInt;
+				}
+				else
+				{
+					threshold = null;
+				}
+			}
+			else
+			{
+				threshold = null;
+			}
+			return threshold;
 		}
 
 		private static List<Object> convert(List<Object> xLabels)
@@ -64,7 +92,9 @@ public class EntityAggregatesResponse extends EntityCollectionResponseV2
 							case MREF:
 							case CATEGORICAL_MREF:
 							case COMPOUND:
+							case FILE:
 								break;
+							// $CASES-OMITTED$
 							default:
 								valueMap.put(attr.getName(), entity.getString(attr.getName()));
 						}
@@ -92,6 +122,11 @@ public class EntityAggregatesResponse extends EntityCollectionResponseV2
 		public List<Object> getyLabels()
 		{
 			return yLabels;
+		}
+
+		public Integer getThreshold()
+		{
+			return threshold;
 		}
 	}
 }

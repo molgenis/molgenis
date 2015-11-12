@@ -29,6 +29,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AggregateQuery;
+import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -36,6 +38,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.MolgenisQueryException;
 import org.molgenis.data.Query;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
@@ -474,28 +477,42 @@ class RestControllerV2
 			q.fetch(fetch);
 		}
 
-		Long count = dataService.count(entityName, q);
-		Iterable<Entity> it;
-		if (count > 0)
+		if (request.getAggs() != null)
 		{
-			it = dataService.findAll(entityName, q);
+			// return aggregates for aggregate query
+			AggregateQuery aggsQ = request.getAggs().createAggregateQuery(meta, q);
+			if (aggsQ.getAttributeX() == null && aggsQ.getAttributeY() == null)
+			{
+				throw new MolgenisQueryException("Aggregate query is missing 'x' or 'y' attribute");
+			}
+			AggregateResult aggs = dataService.aggregate(entityName, aggsQ);
+			return new EntityAggregatesResponse(aggs, BASE_URI + '/' + entityName);
 		}
 		else
 		{
-			it = Collections.emptyList();
-		}
-		EntityPager pager = new EntityPager(request.getStart(), request.getNum(), count, it);
+			Long count = dataService.count(entityName, q);
+			Iterable<Entity> it;
+			if (count > 0)
+			{
+				it = dataService.findAll(entityName, q);
+			}
+			else
+			{
+				it = Collections.emptyList();
+			}
+			EntityPager pager = new EntityPager(request.getStart(), request.getNum(), count, it);
 
-		List<Map<String, Object>> entities = new ArrayList<>();
-		for (Entity entity : it)
-		{
-			Map<String, Object> responseData = new LinkedHashMap<String, Object>();
-			createEntityValuesResponse(entity, fetch, responseData);
-			entities.add(responseData);
-		}
+			List<Map<String, Object>> entities = new ArrayList<>();
+			for (Entity entity : it)
+			{
+				Map<String, Object> responseData = new LinkedHashMap<String, Object>();
+				createEntityValuesResponse(entity, fetch, responseData);
+				entities.add(responseData);
+			}
 
-		return new EntityCollectionResponseV2(pager, entities, fetch, BASE_URI + '/' + entityName, meta,
-				permissionService, dataService);
+			return new EntityCollectionResponseV2(pager, entities, fetch, BASE_URI + '/' + entityName, meta,
+					permissionService, dataService);
+		}
 	}
 
 	private Map<String, Object> createEntityResponse(Entity entity, Fetch fetch, boolean includeMetaData)

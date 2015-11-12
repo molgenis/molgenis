@@ -4,7 +4,7 @@ import java.util.List;
 
 public class AnonymizedAggregateResult extends AggregateResult
 {
-	private int anonymizationThreshold;
+	private final int anonymizationThreshold;
 
 	public AnonymizedAggregateResult(List<List<Long>> matrix, List<Object> xLabels, List<Object> yLabels,
 			int anonymizationThreshold)
@@ -13,12 +13,17 @@ public class AnonymizedAggregateResult extends AggregateResult
 		this.anonymizationThreshold = anonymizationThreshold;
 	}
 
+	public int getAnonymizationThreshold()
+	{
+		return anonymizationThreshold;
+	}
+
 	@Override
 	public int hashCode()
 	{
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + anonymizationThreshold;
+		result = prime * result + getAnonymizationThreshold();
 		return result;
 	}
 
@@ -29,8 +34,7 @@ public class AnonymizedAggregateResult extends AggregateResult
 		if (!super.equals(obj)) return false;
 		if (getClass() != obj.getClass()) return false;
 		AnonymizedAggregateResult other = (AnonymizedAggregateResult) obj;
-		if (anonymizationThreshold != other.anonymizationThreshold) return false;
+		if (getAnonymizationThreshold() != other.getAnonymizationThreshold()) return false;
 		return true;
 	}
-
 }
