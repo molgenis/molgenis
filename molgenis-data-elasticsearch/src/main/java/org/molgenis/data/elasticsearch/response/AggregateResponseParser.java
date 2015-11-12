@@ -10,6 +10,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.Aggregations;
@@ -26,8 +27,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.elasticsearch.request.AggregateQueryGenerator;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
 public class AggregateResponseParser
@@ -39,8 +38,8 @@ public class AggregateResponseParser
 		Map<String, Object> aggsMap = parseAggregations(aggAttr1, aggAttr2, aggAttrDistinct, aggs);
 
 		// create labels
-		Map<String, Integer> xLabelsIdx = new HashMap<String, Integer>();
-		Map<String, Integer> yLabelsIdx = aggAttr2 != null ? new HashMap<String, Integer>() : null;
+		Map<Object, Integer> xLabelsIdx = new HashMap<>();
+		Map<Object, Integer> yLabelsIdx = aggAttr2 != null ? new HashMap<>() : null;
 		for (Map.Entry<String, Object> entry : aggsMap.entrySet())
 		{
 			String xLabel = entry.getKey();
@@ -53,16 +52,16 @@ public class AggregateResponseParser
 			}
 		}
 
-		List<String> xLabels = new ArrayList<String>(xLabelsIdx.keySet());
+		List<Object> xLabels = new ArrayList<>(xLabelsIdx.keySet());
 		Collections.sort(xLabels, new AggregateLabelComparable());
 		int nrXLabels = xLabels.size();
 		for (int i = 0; i < nrXLabels; ++i)
 			xLabelsIdx.put(xLabels.get(i), i);
 
-		List<String> yLabels;
+		List<Object> yLabels;
 		if (aggAttr2 != null)
 		{
-			yLabels = new ArrayList<String>(yLabelsIdx.keySet());
+			yLabels = new ArrayList<>(yLabelsIdx.keySet());
 			Collections.sort(yLabels, new AggregateLabelComparable());
 			int nrYLabels = yLabels.size();
 			for (int i = 0; i < nrYLabels; ++i)
@@ -374,41 +373,27 @@ public class AggregateResponseParser
 	 * @param entityMetaData
 	 * @param dataService
 	 */
-	private void convertIdtoLabelLabels(List<String> idLabels, EntityMetaData entityMetaData, DataService dataService)
+	private void convertIdtoLabelLabels(List<Object> idLabels, EntityMetaData entityMetaData, DataService dataService)
 	{
 		final int nrLabels = idLabels.size();
 		if (nrLabels > 0)
 		{
 			// Get entities for ids
 			// Use Iterables.transform to work around List<String> to Iterable<Object> cast error
-			Iterable<Entity> entities = dataService.findAll(entityMetaData.getName(),
-					Iterables.transform(Iterables.filter(idLabels, new Predicate<String>()
-					{
-						@Override
-						public boolean apply(String label)
-						{
-							// exclude missing value label
-							return label != null;
-						}
-					}), new Function<String, Object>()
-					{
-						@Override
-						public Object apply(String id)
-						{
-							return id;
-						}
-					}));
+			List<Object> idLabelsWithoutNull = idLabels.stream().filter(idLabel -> idLabel != null)
+					.collect(Collectors.toList());
+			Iterable<Entity> entities = dataService.findAll(entityMetaData.getName(), idLabelsWithoutNull);
 
 			// Map entity ids to labels
-			Map<String, String> idToLabelMap = new HashMap<String, String>();
+			Map<String, Entity> idToLabelMap = new HashMap<>();
 			for (Entity entity : entities)
 			{
-				idToLabelMap.put(entity.getIdValue().toString(), entity.getLabelValue());
+				idToLabelMap.put(entity.getIdValue().toString(), entity);
 			}
 
 			for (int i = 0; i < nrLabels; ++i)
 			{
-				String id = idLabels.get(i);
+				Object id = idLabels.get(i);
 				if (id != null) // missing value label
 				{
 					idLabels.set(i, idToLabelMap.get(id));
@@ -417,12 +402,13 @@ public class AggregateResponseParser
 		}
 	}
 
-	private static class AggregateLabelComparable implements Comparator<String>
+	private static class AggregateLabelComparable implements Comparator<Object>
 	{
 		@Override
-		public int compare(String o1, String o2)
+		public int compare(Object o1, Object o2)
 		{
-			return o1 == null ? 1 : (o2 == null ? -1 : o1.compareTo(o2));
+			return o1 == null ? 1 : (o2 == null ? -1 : o1.toString().compareTo(o2.toString())); // FIXME check if this
+																								// is allowed?
 		}
 	}
 }
