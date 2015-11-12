@@ -20,7 +20,6 @@
 	
 	var restApi = new molgenis.RestClient();
 	var restApiV2 = new molgenis.RestClientV2();
-	var totalTemplate, missingTemplate, messageTemplate;
 	
 	/**
 	 * @memberOf molgenis.dataexplorer.aggregates
@@ -96,9 +95,8 @@
 	 * @memberOf molgenis.dataexplorer.aggregates
 	 */
 	function updateAggregatesTable(xAttributeName, yAttributeName, distinctAttributeName) {
-		if (!xAttributeName && !yAttributeName) {
-			$('#aggregate-table-container').html('');
-			return;
+		if($('#aggregate-table-container').length > 0) {
+			React.unmountComponentAtNode($('#aggregate-table-container')[0]);
 		}
 		
 		React.render(molgenis.ui.AggregateTable({
@@ -145,11 +143,7 @@
 		return molgenis.dataexplorer.getEntityQuery().q;
 	}
 	
-	$(function() {
-		totalTemplate = Handlebars.compile($("#aggregates-total-template").html());
-		missingTemplate = Handlebars.compile($("#aggregates-missing-template").html());
-		messageTemplate = Handlebars.compile($("#aggregates-no-result-message-template").html());
-		
+	$(function() {		
 		// bind event handlers with namespace
 		$(document).on('changeAttributeSelection.aggregates', function(e, data) {
 			molgenis.dataexplorer.aggregates.createAggregatesTable();

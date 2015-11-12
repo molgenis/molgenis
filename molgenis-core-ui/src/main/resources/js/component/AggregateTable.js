@@ -11,7 +11,7 @@
 	/**
 	 * @memberOf component
 	 */
-	var AggregateTable = React.createClass({ // FIXME add no aggregates message + i18n
+	var AggregateTable = React.createClass({
 		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
 		displayName: 'Table',
 		propTypes: {
@@ -124,7 +124,7 @@
 			return (
 				th({key: 'last'},
 					div({className: 'text-center'},
-						'Total' // FIXME i18n totalTemplate({})
+						'Total'
 					)
 				)
 			);
@@ -221,7 +221,7 @@
 			var isTableAnonymized = false;
 			
 			var Cells = [];
-			Cells.push(th({key: 'c-last-first'}, 'Total')); // FIXME i18n
+			Cells.push(th({key: 'c-last-first'}, 'Total'));
 			for(var col = 0; col < nrCols; ++col) {
 				var colTotal = 0;
 				var isColAnonymized = false;
@@ -267,7 +267,7 @@
 		},
 		_toLabel: function(label) {
 			if(label === null) {
-				return 'N/A'; // FIXME i18n FIXME label can be object
+				return 'N/A';
 			}
 			else if(this.props.attr.refEntity) {
 				return label[this.props.attr.refEntity.labelAttribute];
