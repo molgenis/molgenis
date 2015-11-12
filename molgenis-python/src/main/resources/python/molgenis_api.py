@@ -265,8 +265,6 @@ class Connect_Molgenis():
                         return added_id
                     elif api_version == 'v2':
                         # return list of IDs
-                        print(server_response)
-                        print(server_response.json())
                         added_ids = server_response.json()['location'].split('in=(')[1].split(')')[0].replace('"','').split(',')
                         return added_ids
                     else:
@@ -321,6 +319,8 @@ class Connect_Molgenis():
                     raise TypeError('data_list should be of type list or dict')
                 elif not isinstance(data_list,list):
                     data_list = [data_list]
+                if len(data_list) == 0:
+                    raise ValueError('data_list is an empty list, needs to contain a dictionary')
                 if not add_datetime:
                     add_datetime = self._add_datetime_default
                 if not added_by:
@@ -337,6 +337,9 @@ class Connect_Molgenis():
                 # post to the entity with the json data
                 server_response = self.session.post(request_url, data=json.dumps({"entities":sanitized_data_list}))
                 self.added_rows += len(sanitized_data_list)
+                if entity_name == 'public_rnaseq_Info':
+                    print(data_list)
+                    exit()
                 added_ids = self._add_entity_rows_or_file_server_response(entity_name, data_list, server_response,'entity_row','v2',ignore_duplicates=ignore_duplicates)
                 return added_ids
             def add_file(self, file_path, description, entity_name, extra_data=None, file_name=None, add_datetime=False, datetime_column='datetime_added', added_by=None, added_by_column='added_by', io_stream = None,ignore_duplicates=False):
