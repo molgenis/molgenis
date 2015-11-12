@@ -3,23 +3,26 @@ package org.molgenis.data.mapper.algorithmgenerator.service.impl;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapper.algorithmgenerator.generator.AlgorithmGenerator;
+import org.molgenis.data.mapper.algorithmgenerator.generator.NumericAlgorithmGenerator;
 import org.molgenis.data.mapper.algorithmgenerator.generator.OneToManyCategoryAlgorithmGenerator;
 import org.molgenis.data.mapper.algorithmgenerator.generator.OneToOneCategoryAlgorithmGenerator;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
+import org.molgenis.data.mapper.service.UnitResolver;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 {
 	private final List<AlgorithmGenerator> generators;
 
-	public AlgorithmGeneratorServiceImpl(DataService dataService)
+	@Autowired
+	public AlgorithmGeneratorServiceImpl(DataService dataService, UnitResolver unitResolver)
 	{
 		this.generators = Arrays.asList(new OneToOneCategoryAlgorithmGenerator(dataService),
-				new OneToManyCategoryAlgorithmGenerator(dataService));
+				new OneToManyCategoryAlgorithmGenerator(dataService), new NumericAlgorithmGenerator(unitResolver));
 	}
 
 	public String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes,
@@ -33,6 +36,22 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 						sourceEntityMetaData);
 			}
 		}
-		return StringUtils.EMPTY;
+
+		return generateMixTypes(targetAttribute, sourceAttributes, targetEntityMetaData, sourceEntityMetaData);
+	}
+
+	String generateMixTypes(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes,
+			EntityMetaData targetEntityMetaData, EntityMetaData sourceEntityMetaData)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		if (sourceAttributes.size() > 1)
+		{
+			for (AttributeMetaData sourceAttribute : sourceAttributes)
+			{
+				stringBuilder.append(generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityMetaData,
+						sourceEntityMetaData));
+			}
+		}
+		return stringBuilder.toString();
 	}
 }

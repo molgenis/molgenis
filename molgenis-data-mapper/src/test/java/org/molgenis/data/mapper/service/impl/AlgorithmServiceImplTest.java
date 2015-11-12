@@ -472,7 +472,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public AlgorithmGeneratorService mapCategoryService()
 		{
-			return mock(AlgorithmGeneratorServiceImpl.class);
+			return new AlgorithmGeneratorServiceImpl(dataService(), unitResolver());
 		}
 	}
 }

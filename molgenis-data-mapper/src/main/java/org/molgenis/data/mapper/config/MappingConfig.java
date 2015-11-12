@@ -66,7 +66,7 @@ public class MappingConfig
 	@Bean
 	public AlgorithmGeneratorService mapCategoryService()
 	{
-		return new AlgorithmGeneratorServiceImpl(dataService);
+		return new AlgorithmGeneratorServiceImpl(dataService, unitResolver());
 	}
 
 	@Bean

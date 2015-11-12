@@ -4,6 +4,7 @@ import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DECIMAL;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.INT;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.LONG;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.measure.converter.ConversionException;
@@ -11,7 +12,6 @@ import javax.measure.converter.UnitConverter;
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.Unit;
 
-import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
@@ -33,20 +33,25 @@ public class NumericAlgorithmGenerator implements AlgorithmGenerator
 	public String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes,
 			EntityMetaData targetEntityMetaData, EntityMetaData sourceEntityMetaData)
 	{
+		StringBuilder algorithm = new StringBuilder();
 		if (sourceAttributes.size() > 0)
 		{
 			if (sourceAttributes.size() == 1)
 			{
-				generateUnitConversionAlgorithm(targetAttribute, targetEntityMetaData, sourceAttributes.get(0),
-						sourceEntityMetaData);
+				algorithm.append(generateUnitConversionAlgorithm(targetAttribute, targetEntityMetaData,
+						sourceAttributes.get(0), sourceEntityMetaData));
 			}
 			else
 			{
-
+				for (AttributeMetaData sourceAttribute : sourceAttributes)
+				{
+					algorithm.append(generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityMetaData,
+							sourceEntityMetaData));
+				}
 			}
 		}
 
-		return StringUtils.EMPTY;
+		return algorithm.toString();
 	}
 
 	public boolean isSuitable(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)

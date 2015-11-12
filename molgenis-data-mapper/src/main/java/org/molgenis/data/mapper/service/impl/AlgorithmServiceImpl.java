@@ -91,25 +91,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	{
 		if (sourceAttributes.size() > 0)
 		{
-			String algorithm = algorithmGeneratorService.generate(targetAttribute, sourceAttributes,
-					targetEntityMetaData, sourceEntityMetaData);
-			// if (StringUtils.isBlank(algorithm))
-			// {
-			// if (sourceAttributes.size() > 1)
-			// {
-			// for (AttributeMetaData sourceAttribute : sourceAttributes)
-			// {
-			// algorithm += generateAlgorithm(targetAttribute, targetEntityMetaData,
-			// Arrays.asList(sourceAttribute), sourceEntityMetaData);
-			// }
-			// }
-			// else
-			// {
-			// algorithm = generateUnitConversionAlgorithm(targetAttribute, targetEntityMetaData,
-			// sourceAttributes.get(0), sourceEntityMetaData);
-			// }
-			// }
-			return algorithm;
+			return algorithmGeneratorService.generate(targetAttribute, sourceAttributes, targetEntityMetaData,
+					sourceEntityMetaData);
 		}
 		return StringUtils.EMPTY;
 	}
@@ -119,7 +102,6 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	public void autoGenerateAlgorithm(EntityMetaData sourceEntityMetaData, EntityMetaData targetEntityMetaData,
 			EntityMapping mapping, AttributeMetaData targetAttribute)
 	{
-
 		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttribute.getName());
 		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(targetEntityMetaData,
 				targetAttribute);
@@ -152,11 +134,6 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			AttributeMetaData sourceAttribute = firstEntry.getKey();
 			algorithm = algorithmGeneratorService.generate(targetAttribute, Arrays.asList(sourceAttribute),
 					targetEntityMetaData, sourceEntityMetaData);
-			// if (StringUtils.isBlank(algorithm))
-			// {
-			// algorithm = generateUnitConversionAlgorithm(targetAttribute, targetEntityMetaData, sourceAttribute,
-			// sourceEntityMetaData);
-			// }
 			mappedSourceAttributes = Sets.newHashSet(sourceAttribute);
 			algorithmState = firstEntry.getValue().isHighQuality() ? GENERATED_HIGH : GENERATED_LOW;
 		}
@@ -210,57 +187,6 @@ public class AlgorithmServiceImpl implements AlgorithmService
 
 		return algorithm;
 	}
-
-	// String generateUnitConversionAlgorithm(AttributeMetaData targetAttribute, EntityMetaData targetEntityMetaData,
-	// AttributeMetaData sourceAttribute, EntityMetaData sourceEntityMetaData)
-	// {
-	// String algorithm = null;
-	//
-	// Unit<? extends Quantity> targetUnit = unitResolver.resolveUnit(targetAttribute, targetEntityMetaData);
-	//
-	// Unit<? extends Quantity> sourceUnit = unitResolver.resolveUnit(sourceAttribute, sourceEntityMetaData);
-	//
-	// if (sourceUnit != null)
-	// {
-	// if (targetUnit != null && !sourceUnit.equals(targetUnit))
-	// {
-	// // if units are convertible, create convert algorithm
-	// UnitConverter unitConverter;
-	// try
-	// {
-	// unitConverter = sourceUnit.getConverterTo(targetUnit);
-	// }
-	// catch (ConversionException e)
-	// {
-	// unitConverter = null;
-	// // algorithm sets source unit and assigns source value to target
-	// algorithm = String.format("$('%s').unit('%s').value();", sourceAttribute.getName(),
-	// sourceUnit.toString());
-	// }
-	//
-	// if (unitConverter != null)
-	// {
-	// // algorithm sets source unit and assigns value converted to target unit to target
-	// algorithm = String.format("$('%s').unit('%s').toUnit('%s').value();", sourceAttribute.getName(),
-	// sourceUnit.toString(), targetUnit.toString());
-	// }
-	// }
-	// else
-	// {
-	// // algorithm sets source unit and assigns source value to target
-	// algorithm = String.format("$('%s').unit('%s').value();", sourceAttribute.getName(),
-	// sourceUnit.toString());
-	// }
-	// }
-	//
-	// if (algorithm == null)
-	// {
-	// // algorithm assigns source value to target
-	// algorithm = String.format("$('%s').value();", sourceAttribute.getName());
-	// }
-	//
-	// return algorithm;
-	// }
 
 	@Override
 	public Iterable<AlgorithmEvaluation> applyAlgorithm(AttributeMetaData targetAttribute, String algorithm,
