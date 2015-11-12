@@ -697,7 +697,6 @@
         <module>molgenis-charts</module>
         <module>molgenis-js</module>
         <module>molgenis-model-registry</module>
-        <module>molgenis-disease-matcher</module>
         <module>molgenis-data-examples</module>
         <module>molgenis-scripts</module>
         <module>molgenis-scripts-core</module>

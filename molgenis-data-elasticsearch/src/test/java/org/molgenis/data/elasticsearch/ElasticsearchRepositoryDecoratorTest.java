@@ -4,6 +4,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
@@ -19,7 +20,10 @@ import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.support.AggregateQueryImpl;
@@ -203,6 +207,18 @@ public class ElasticsearchRepositoryDecoratorTest
 	}
 
 	@Test
+	public void findAllIterableObjectFetch()
+	{
+		List<Object> ids = Arrays.asList(mock(Object.class), mock(Object.class));
+		Fetch fetch = new Fetch();
+		Iterable<Entity> entities = Arrays.asList(mock(Entity.class), mock(Entity.class));
+		when(repository.findAll(ids, fetch)).thenReturn(entities);
+		assertEquals(elasticSearchRepository.findAll(ids, fetch), entities);
+		verify(repository, times(1)).findAll(ids, fetch);
+		verifyNoMoreInteractions(repository);
+	}
+
+	@Test
 	public void findOneQuery()
 	{
 		Query q = mock(Query.class);
@@ -212,6 +228,22 @@ public class ElasticsearchRepositoryDecoratorTest
 				.thenReturn(Arrays.<Entity> asList(entity0, entity1));
 		elasticSearchRepository.findOne(q);
 		verify(elasticSearchService).search(q, repositoryEntityMetaData);
+	}
+
+	@Test
+	public void findOneQueryIsIdQuery()
+	{
+		Object id = Integer.valueOf(0);
+		Fetch fetch = new Fetch();
+		Query q = mock(Query.class);
+		QueryRule queryRule = new QueryRule(idAttrName, Operator.EQUALS, id);
+		when(q.getRules()).thenReturn(Arrays.asList(queryRule));
+		when(q.getFetch()).thenReturn(fetch);
+
+		Entity entity = mock(Entity.class);
+		when(repository.findOne(id, fetch)).thenReturn(entity);
+		assertEquals(elasticSearchRepository.findOne(q), entity);
+		verify(repository, times(1)).findOne(id, fetch);
 	}
 
 	@Test
@@ -229,6 +261,19 @@ public class ElasticsearchRepositoryDecoratorTest
 		Object id = mock(Object.class);
 		elasticSearchRepository.findOne(id);
 		verify(repository).findOne(id);
+	}
+
+	@Test
+	public void findOneObjectFetch()
+	{
+		Object id = mock(Object.class);
+		Fetch fetch = new Fetch();
+
+		Entity entity = mock(Entity.class);
+		when(repository.findOne(id, fetch)).thenReturn(entity);
+		assertEquals(elasticSearchRepository.findOne(id, fetch), entity);
+		verify(repository, times(1)).findOne(id, fetch);
+		verifyNoMoreInteractions(repository);
 	}
 
 	@Test

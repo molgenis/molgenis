@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 import javax.sql.DataSource;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityManager;
+import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
@@ -20,6 +22,7 @@ import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
+import org.molgenis.data.mysql.MySqlEntityFactory;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
@@ -69,13 +72,17 @@ public class Step1UpgradeMetaData extends MolgenisUpgrade
 
 		LOG.info("Create bare mysql repository collection for the metadata...");
 		DataServiceImpl dataService = new DataServiceImpl();
+		EntityManager entityResolver = new EntityManagerImpl(dataService);
+		MySqlEntityFactory mySqlEntityFactory = new MySqlEntityFactory(entityResolver, dataService);
+
 		// Get the undecorated repos
 		undecoratedMySQL = new MysqlRepositoryCollection()
 		{
 			@Override
 			protected MysqlRepository createMysqlRepository()
 			{
-				return new MysqlRepository(dataService, dataSource, new AsyncJdbcTemplate(new JdbcTemplate(dataSource)));
+				return new MysqlRepository(dataService, mySqlEntityFactory, dataSource,
+						new AsyncJdbcTemplate(new JdbcTemplate(dataSource)));
 			}
 
 			@Override
@@ -167,7 +174,8 @@ public class Step1UpgradeMetaData extends MolgenisUpgrade
 		List<Entity> attributeParts_v1_4 = Lists.newArrayList(searchService.search(
 				EQ(AttributeMetaDataMetaData1_4.PART_OF_ATTRIBUTE,
 						attribute_v1_4.get(AttributeMetaDataMetaData1_4.NAME)).and().eq(
-						AttributeMetaDataMetaData1_4.ENTITY, attribute_v1_4.get(AttributeMetaDataMetaData1_4.ENTITY)),
+								AttributeMetaDataMetaData1_4.ENTITY,
+								attribute_v1_4.get(AttributeMetaDataMetaData1_4.ENTITY)),
 				new AttributeMetaDataMetaData1_4()));
 		Entity attribute_v1_5FromRepo = attributeRepository.findOne(attribute_v1_4.getIdValue());
 		attribute_v1_5FromRepo.set(AttributeMetaDataMetaData.PARTS, attributeParts_v1_4);

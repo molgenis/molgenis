@@ -1,6 +1,8 @@
 package org.molgenis.data.validation;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -10,7 +12,10 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -18,6 +23,8 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.common.collect.Lists;
 
 public class RepositoryValidationDecoratorTest
 {
@@ -28,8 +35,9 @@ public class RepositoryValidationDecoratorTest
 	public void beforeMethod()
 	{
 		decoratedRepository = mock(Repository.class);
-		repositoryValidationDecorator = new RepositoryValidationDecorator(new DataServiceImpl(
-				new NonDecoratingRepositoryDecoratorFactory()), decoratedRepository, new EntityAttributesValidator());
+		repositoryValidationDecorator = new RepositoryValidationDecorator(
+				new DataServiceImpl(new NonDecoratingRepositoryDecoratorFactory()), decoratedRepository,
+				new EntityAttributesValidator());
 	}
 
 	@Test
@@ -87,8 +95,8 @@ public class RepositoryValidationDecoratorTest
 		Entity entity2 = new MapEntity();
 		entity2.set(requiredMrefAttrName, Arrays.asList(refEntity0));
 
-		Set<ConstraintViolation> violations = repositoryValidationDecorator.checkNillable(Arrays.asList(entity0,
-				entity1, entity2));
+		Set<ConstraintViolation> violations = repositoryValidationDecorator
+				.checkNillable(Arrays.asList(entity0, entity1, entity2));
 		assertEquals(violations.size(), 2);
 	}
 
@@ -217,5 +225,50 @@ public class RepositoryValidationDecoratorTest
 		violations = repositoryValidationDecorator.checkUniques(Arrays.asList(new3, new4), emd.getAttribute("unique"),
 				true);
 		assertEquals(violations.size(), 1);
+	}
+
+	@Test
+	public void findAllIterableFetch()
+	{
+		DataService dataService = mock(DataService.class);
+		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		Repository decoratedRepository = mock(Repository.class);
+		when(decoratedRepository.getEntityMetaData()).thenReturn(entityMeta);
+		EntityAttributesValidator entityAttributesValidator = mock(EntityAttributesValidator.class);
+
+		@SuppressWarnings("resource")
+		RepositoryValidationDecorator myRepositoryValidationDecorator = new RepositoryValidationDecorator(dataService,
+				decoratedRepository, entityAttributesValidator);
+
+		Iterable<Object> ids = Arrays.<Object> asList(Integer.valueOf(0), Integer.valueOf(1));
+		Fetch fetch = new Fetch();
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		Iterable<Entity> entities = Arrays.asList(entity0, entity1);
+		when(decoratedRepository.findAll(ids, fetch)).thenReturn(entities);
+		assertEquals(Arrays.asList(entity0, entity1),
+				Lists.newArrayList(myRepositoryValidationDecorator.findAll(ids, fetch)));
+		verify(decoratedRepository, times(1)).findAll(ids, fetch);
+	}
+
+	@Test
+	public void findOneObjectFetch()
+	{
+		DataService dataService = mock(DataService.class);
+		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		Repository decoratedRepository = mock(Repository.class);
+		when(decoratedRepository.getEntityMetaData()).thenReturn(entityMeta);
+		EntityAttributesValidator entityAttributesValidator = mock(EntityAttributesValidator.class);
+
+		@SuppressWarnings("resource")
+		RepositoryValidationDecorator myRepositoryValidationDecorator = new RepositoryValidationDecorator(dataService,
+				decoratedRepository, entityAttributesValidator);
+
+		Object id = Integer.valueOf(0);
+		Fetch fetch = new Fetch();
+		Entity entity = mock(Entity.class);
+		when(decoratedRepository.findOne(id, fetch)).thenReturn(entity);
+		assertEquals(entity, myRepositoryValidationDecorator.findOne(id, fetch));
+		verify(decoratedRepository, times(1)).findOne(id, fetch);
 	}
 }

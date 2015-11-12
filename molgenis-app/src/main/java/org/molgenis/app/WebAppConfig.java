@@ -15,6 +15,7 @@ import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.jpa.JpaRepositoryCollection;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
+import org.molgenis.data.mysql.MySqlEntityFactory;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
@@ -25,6 +26,7 @@ import org.molgenis.migrate.version.v1_10.Step18RuntimePropertiesToAnnotatorSett
 import org.molgenis.migrate.version.v1_10.Step19RemoveMolgenisLock;
 import org.molgenis.migrate.version.v1_11.Step20RebuildElasticsearchIndex;
 import org.molgenis.migrate.version.v1_11.Step21SetLoggingEventBackend;
+import org.molgenis.migrate.version.v1_13.Step22RemoveDiseaseMatcher;
 import org.molgenis.migrate.version.v1_5.Step1UpgradeMetaData;
 import org.molgenis.migrate.version.v1_5.Step2;
 import org.molgenis.migrate.version.v1_5.Step3AddOrderColumnToMrefTables;
@@ -171,10 +173,11 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(step19RemoveMolgenisLock);
 		upgradeService.addUpgrade(step20RebuildElasticsearchIndex);
 		upgradeService.addUpgrade(new Step21SetLoggingEventBackend(dataSource));
+		upgradeService.addUpgrade(new Step22RemoveDiseaseMatcher(dataSource));
 	}
 
 	@Override
-	protected void addReposToReindex(DataServiceImpl localDataService)
+	protected void addReposToReindex(DataServiceImpl localDataService, MySqlEntityFactory localMySqlEntityFactory)
 	{
 		// Get the undecorated repos to index
 		MysqlRepositoryCollection backend = new MysqlRepositoryCollection()
@@ -182,7 +185,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 			@Override
 			protected MysqlRepository createMysqlRepository()
 			{
-				return new MysqlRepository(localDataService, dataSource,
+				return new MysqlRepository(localDataService, localMySqlEntityFactory, dataSource,
 						new AsyncJdbcTemplate(new JdbcTemplate(dataSource)));
 			}
 
