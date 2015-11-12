@@ -481,12 +481,18 @@ class RestControllerV2
 		{
 			// return aggregates for aggregate query
 			AggregateQuery aggsQ = request.getAggs().createAggregateQuery(meta, q);
-			if (aggsQ.getAttributeX() == null && aggsQ.getAttributeY() == null)
+			AttributeMetaData xAttr = aggsQ.getAttributeX();
+			AttributeMetaData yAttr = aggsQ.getAttributeY();
+			if (xAttr == null && yAttr == null)
 			{
 				throw new MolgenisQueryException("Aggregate query is missing 'x' or 'y' attribute");
 			}
 			AggregateResult aggs = dataService.aggregate(entityName, aggsQ);
-			return new EntityAggregatesResponse(aggs, BASE_URI + '/' + entityName);
+			AttributeMetaDataResponseV2 xAttrResponse = xAttr != null
+					? new AttributeMetaDataResponseV2(entityName, xAttr, fetch, permissionService, dataService) : null;
+			AttributeMetaDataResponseV2 yAttrResponse = yAttr != null
+					? new AttributeMetaDataResponseV2(entityName, yAttr, fetch, permissionService, dataService) : null;
+			return new EntityAggregatesResponse(aggs, xAttrResponse, yAttrResponse, BASE_URI + '/' + entityName);
 		}
 		else
 		{

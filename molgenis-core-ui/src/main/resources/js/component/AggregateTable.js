@@ -44,11 +44,13 @@
 
 			var className = 'table table-striped';
 			var AggregateTableHeader = AggregateTableHeaderFactory({
-				labels: this.state.data.aggs.yLabels
+				labels: this.state.data.aggs.yLabels,
+				attr: this.state.data.yAttr
 			});
 			
 			var AggregateTableBody = AggregateTableBodyFactory({
 				labels: this.state.data.aggs.xLabels,
+				attr: this.state.data.xAttr,
 				dimension: this.state.data.aggs.yLabels.length === 0 ? 1 : 2,
 				matrix: this.state.data.aggs.matrix,
 				threshold: this.state.data.aggs.threshold
@@ -82,13 +84,17 @@
 	var AggregateTableHeader = React.createClass({
 		displayName: 'AggregateTableHeader',
 		propTypes: {
-			labels: React.PropTypes.array.isRequired
+			labels: React.PropTypes.array.isRequired,
+			attr: React.PropTypes.object
 		},
 		render: function() {
 			var HeaderCells = [];
 			HeaderCells.push(this._createHeaderFirst());
-			for(var i = 0; i < this.props.labels.length; ++i) {
-				HeaderCells.push(this._createHeader(this.props.labels[i], i));
+			if(this.props.attr) {
+				for(var i = 0; i < this.props.labels.length; ++i) {
+					var label = this._toLabel(this.props.labels[i]);
+					HeaderCells.push(this._createHeader(label, i));
+				}
 			}
 			HeaderCells.push(this._createHeaderLast());
 			
@@ -122,6 +128,16 @@
 					)
 				)
 			);
+		},
+		_toLabel: function(label) {
+			if(label === null) {
+				return 'N/A';
+			}
+			else if(this.props.attr.refEntity) {
+				return label[this.props.attr.refEntity.labelAttribute];
+			} else {
+				return label;
+			}
 		}
 	});
 	var AggregateTableHeaderFactory = React.createFactory(AggregateTableHeader);
@@ -130,6 +146,7 @@
 		displayName: 'AggregateTableBody',
 		propTypes: {
 			labels: React.PropTypes.array.isRequired,
+			attr: React.PropTypes.object.isRequired,
 			matrix: React.PropTypes.array.isRequired,
 			dimension: React.PropTypes.number,
 			threshold: React.PropTypes.number,
@@ -151,7 +168,7 @@
 		},
 		_createRow: function(label, rowData, rowIndex) {
 			var Cells = [];
-			Cells.push(th({key: 'c' + rowIndex + '-first'}, label !== null ? label : 'N/A')); // FIXME i18n FIXME label can be object
+			Cells.push(th({key: 'c' + rowIndex + '-first'}, this._toLabel(label)));
 			
 			if(this.props.dimension > 1) {
 				var count = 0;
@@ -247,6 +264,16 @@
 			return (
 				tr({key: 'r-last'}, Cells)
 			);
+		},
+		_toLabel: function(label) {
+			if(label === null) {
+				return 'N/A'; // FIXME i18n FIXME label can be object
+			}
+			else if(this.props.attr.refEntity) {
+				return label[this.props.attr.refEntity.labelAttribute];
+			} else {
+				return label;
+			}
 		}
 	});
 	var AggregateTableBodyFactory = React.createFactory(AggregateTableBody);

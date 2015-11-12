@@ -16,16 +16,31 @@ import org.molgenis.data.Entity;
 public class EntityAggregatesResponse extends EntityCollectionResponseV2
 {
 	private final AggregateResultResponse aggs;
+	private final AttributeMetaDataResponseV2 xAttr;
+	private final AttributeMetaDataResponseV2 yAttr;
 
-	public EntityAggregatesResponse(AggregateResult aggs, String href)
+	public EntityAggregatesResponse(AggregateResult aggs, AttributeMetaDataResponseV2 xAttr,
+			AttributeMetaDataResponseV2 yAttr, String href)
 	{
 		super(href);
 		this.aggs = checkNotNull(AggregateResultResponse.toResponse(aggs));
+		this.xAttr = xAttr;
+		this.yAttr = yAttr;
 	}
 
 	public AggregateResultResponse getAggs()
 	{
 		return aggs;
+	}
+
+	public AttributeMetaDataResponseV2 getXAttr()
+	{
+		return xAttr;
+	}
+
+	public AttributeMetaDataResponseV2 getYAttr()
+	{
+		return yAttr;
 	}
 
 	public static class AggregateResultResponse

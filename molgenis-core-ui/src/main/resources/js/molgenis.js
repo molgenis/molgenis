@@ -715,7 +715,7 @@ function createInput(attr, attrs, val, lbl) {
 			if(rsql.length > 0) {
 				rsql += ';';
 			}
-			rsql += 'distinct==' + toRsqlValue(aggs.y);
+			rsql += 'distinct==' + toRsqlValue(aggs.distinct);
 		}
 		return rsql;
 	};
