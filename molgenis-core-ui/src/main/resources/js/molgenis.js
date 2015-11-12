@@ -700,6 +700,26 @@ function createInput(attr, attrs, val, lbl) {
 		return rsqlValue;
 	};
 	
+	var createRsqlAggregateQuery = function(aggs) {
+		var rsql = '';
+		if(aggs.x) {
+			rsql += 'x==' + toRsqlValue(aggs.x);
+		}
+		if(aggs.y) {
+			if(rsql.length > 0) {
+				rsql += ';';
+			}
+			rsql += 'y==' + toRsqlValue(aggs.y);
+		}
+		if(aggs.distinct) {
+			if(rsql.length > 0) {
+				rsql += ';';
+			}
+			rsql += 'distinct==' + toRsqlValue(aggs.distinct);
+		}
+		return rsql;
+	};
+	
 	var createRsqlQuery = function(rules) {
 		var rsql = '';
 		
@@ -804,13 +824,17 @@ function createInput(attr, attrs, val, lbl) {
 		var qs;
 		if (options) {
 			var items = [];
-			if (options.attrs) {
-				items.push('attrs=' + createAttrsValue(options.attrs));
-			}
+			
 			if(options.q) {
 				if(options.q.length > 0) {
 					items.push('q=' + createRsqlQuery(options.q));
 				}
+			}
+			if(options.aggs) {
+				items.push('aggs=' + createRsqlAggregateQuery(options.aggs));
+			}
+			if (options.attrs) {
+				items.push('attrs=' + createAttrsValue(options.attrs));
 			}
 			if(options.sort) {
 				items.push('sort=' + createSortValue(options.sort));
