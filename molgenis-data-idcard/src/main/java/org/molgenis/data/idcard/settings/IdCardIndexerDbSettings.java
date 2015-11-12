@@ -2,6 +2,7 @@ package org.molgenis.data.idcard.settings;
 
 import static org.molgenis.MolgenisFieldTypes.BOOL;
 import static org.molgenis.MolgenisFieldTypes.EMAIL;
+import static org.molgenis.MolgenisFieldTypes.LONG;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 
 import org.molgenis.data.idcard.indexer.IdCardIndexerController;
@@ -28,19 +29,23 @@ public class IdCardIndexerDbSettings extends DefaultSettingsEntity implements Id
 		private static final String CRON_REGEX = "/^\\s*($|#|\\w+\\s*=|(\\?|\\*|(?:[0-5]?\\d)(?:(?:-|\\/|\\,)(?:[0-5]?\\d))?(?:,(?:[0-5]?\\d)(?:(?:-|\\/|\\,)(?:[0-5]?\\d))?)*)\\s+(\\?|\\*|(?:[0-5]?\\d)(?:(?:-|\\/|\\,)(?:[0-5]?\\d))?(?:,(?:[0-5]?\\d)(?:(?:-|\\/|\\,)(?:[0-5]?\\d))?)*)\\s+(\\?|\\*|(?:[01]?\\d|2[0-3])(?:(?:-|\\/|\\,)(?:[01]?\\d|2[0-3]))?(?:,(?:[01]?\\d|2[0-3])(?:(?:-|\\/|\\,)(?:[01]?\\d|2[0-3]))?)*)\\s+(\\?|\\*|(?:0?[1-9]|[12]\\d|3[01])(?:(?:-|\\/|\\,)(?:0?[1-9]|[12]\\d|3[01]))?(?:,(?:0?[1-9]|[12]\\d|3[01])(?:(?:-|\\/|\\,)(?:0?[1-9]|[12]\\d|3[01]))?)*)\\s+(\\?|\\*|(?:[1-9]|1[012])(?:(?:-|\\/|\\,)(?:[1-9]|1[012]))?(?:L|W)?(?:,(?:[1-9]|1[012])(?:(?:-|\\/|\\,)(?:[1-9]|1[012]))?(?:L|W)?)*|\\?|\\*|(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)(?:(?:-)(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))?(?:,(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)(?:(?:-)(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))?)*)\\s+(\\?|\\*|(?:[0-6])(?:(?:-|\\/|\\,|#)(?:[0-6]))?(?:L)?(?:,(?:[0-6])(?:(?:-|\\/|\\,|#)(?:[0-6]))?(?:L)?)*|\\?|\\*|(?:MON|TUE|WED|THU|FRI|SAT|SUN)(?:(?:-)(?:MON|TUE|WED|THU|FRI|SAT|SUN))?(?:,(?:MON|TUE|WED|THU|FRI|SAT|SUN)(?:(?:-)(?:MON|TUE|WED|THU|FRI|SAT|SUN))?)*)(|\\s)+(\\?|\\*|(?:|\\d{4})(?:(?:-|\\/|\\,)(?:|\\d{4}))?(?:,(?:|\\d{4})(?:(?:-|\\/|\\,)(?:|\\d{4}))?)*))$/";
 
 		private static final String API_BASE_URI = "apiBaseUri";
+		private static final String API_TIMEOUT = "apiTimeout";
 		private static final String BIOBANK_RESOURCE = "biobankResource";
 		private static final String BIOBANK_COLLECTIONS_RESOURCE = "biobankCollResource";
 		private static final String BIOBANK_COLLECTIONS_SELECTION_RESOURCE = "biobankCollSelResource";
 		private static final String BIOBANK_INDEXING_ENABLED = "biobankIndexingEnabled";
+		private static final String BIOBANK_INDEXING_TIMEOUT = "biobankIndexingTimeout";
 		private static final String NOTIFICATION_EMAIL = "notificationEmail";
 
 		private static final String BIOBANK_INDEXING_FREQUENCY = "biobankIndexingFrequency";
 		private static final String DEFAULT_API_BASE_URI = "http://catalogue.rd-connect.eu/api/jsonws/BiBBoxCommonServices-portlet.logapi";
+		private static final long DEFAULT_API_TIMEOUT = 5000l;
 		private static final String DEFAULT_BIOBANK_RESOURCE = "regbb/organization-id";
 		private static final String DEFAULT_BIOBANK_COLLECTIONS_RESOURCE = "regbbs";
 		private static final String DEFAULT_BIOBANK_COLLECTIONS_SELECTION_RESOURCE = DEFAULT_BIOBANK_COLLECTIONS_RESOURCE
 				+ "/data";
 		private static final boolean DEFAULT_BIOBANK_INDEXING_ENABLED = false;
+		private static final long DEFAULT_BIOBANK_INDEXING_TIMEOUT = 60000l;
 		private static final String DEFAULT_BIOBANK_INDEXING_FREQUENCY = "0 4 * * * ?";
 		private static final String DEFAULT_NOTIFICATION_EMAIL = "molgenis+idcard@gmail.com";
 
@@ -50,6 +55,8 @@ public class IdCardIndexerDbSettings extends DefaultSettingsEntity implements Id
 			setLabel("ID-Card biobank indexer settings");
 			addAttribute(API_BASE_URI).setDataType(STRING).setLabel("API base URI")
 					.setDefaultValue(DEFAULT_API_BASE_URI);
+			addAttribute(API_TIMEOUT).setDataType(LONG).setLabel("API timeout")
+					.setDefaultValue(Long.toString(DEFAULT_API_TIMEOUT));
 			addAttribute(BIOBANK_RESOURCE).setDataType(STRING).setLabel("Biobank resource")
 					.setDefaultValue(DEFAULT_BIOBANK_RESOURCE);
 			addAttribute(BIOBANK_COLLECTIONS_RESOURCE).setDataType(STRING).setLabel("Biobank collection resource")
@@ -59,6 +66,8 @@ public class IdCardIndexerDbSettings extends DefaultSettingsEntity implements Id
 					.setDefaultValue(DEFAULT_BIOBANK_COLLECTIONS_SELECTION_RESOURCE);
 			addAttribute(BIOBANK_INDEXING_ENABLED).setDataType(BOOL).setLabel("Biobank indexing enabled")
 					.setDefaultValue(Boolean.toString(DEFAULT_BIOBANK_INDEXING_ENABLED)).setNillable(false);
+			addAttribute(BIOBANK_INDEXING_TIMEOUT).setDataType(LONG).setLabel("Biobank indexing timeout")
+					.setDefaultValue(Long.toString(DEFAULT_BIOBANK_INDEXING_TIMEOUT)).setNillable(false);
 			addAttribute(BIOBANK_INDEXING_FREQUENCY).setDataType(STRING).setLabel("Biobank indexing frequency")
 					.setDescription("Cron expression (e.g. 0 4 * * * ?)")
 					.setDefaultValue(DEFAULT_BIOBANK_INDEXING_FREQUENCY).setNillable(false)
@@ -81,6 +90,18 @@ public class IdCardIndexerDbSettings extends DefaultSettingsEntity implements Id
 	public void setApiBaseUri(String apiBaseUri)
 	{
 		set(Meta.API_BASE_URI, apiBaseUri);
+	}
+
+	@Override
+	public long getApiTimeout()
+	{
+		return getLong(Meta.API_TIMEOUT);
+	}
+
+	@Override
+	public void setApiTimeout(long timeout)
+	{
+		set(Meta.API_TIMEOUT, timeout);
 	}
 
 	@Override
@@ -141,7 +162,6 @@ public class IdCardIndexerDbSettings extends DefaultSettingsEntity implements Id
 	@Override
 	public void setBiobankIndexingFrequency(String cronExpression)
 	{
-		// TODO validate if cronExpession is valid, not here but in decorator
 		set(Meta.BIOBANK_INDEXING_FREQUENCY, cronExpression);
 	}
 
@@ -155,5 +175,17 @@ public class IdCardIndexerDbSettings extends DefaultSettingsEntity implements Id
 	public void setNotificationEmail(String notificationEmail)
 	{
 		set(Meta.NOTIFICATION_EMAIL, notificationEmail);
+	}
+
+	@Override
+	public void setIndexRebuildTimeout(long timeout)
+	{
+		set(Meta.BIOBANK_INDEXING_TIMEOUT, timeout);
+	}
+
+	@Override
+	public long getIndexRebuildTimeout()
+	{
+		return getLong(Meta.BIOBANK_INDEXING_TIMEOUT);
 	}
 }

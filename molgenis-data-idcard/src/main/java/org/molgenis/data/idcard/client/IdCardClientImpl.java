@@ -41,8 +41,6 @@ public class IdCardClientImpl implements IdCardClient
 {
 	private static final Logger LOG = LoggerFactory.getLogger(IdCardClientImpl.class);
 
-	private static final long ID_CARD_DEFAULT_TIMEOUT = 5000l; // 5s // FIXME add to settings
-
 	private final HttpClient httpClient;
 	private final IdCardIndexerSettings idCardIndexerSettings;
 	private final IdCardBiobankMapper idCardBiobankMapper;
@@ -59,7 +57,7 @@ public class IdCardClientImpl implements IdCardClient
 	@Override
 	public Entity getIdCardBiobank(String id)
 	{
-		return getIdCardBiobank(id, ID_CARD_DEFAULT_TIMEOUT);
+		return getIdCardBiobank(id, idCardIndexerSettings.getApiTimeout());
 	}
 
 	@Override
@@ -82,13 +80,12 @@ public class IdCardClientImpl implements IdCardClient
 	@Override
 	public Iterable<Entity> getIdCardBiobanks(Iterable<String> ids)
 	{
-		return getIdCardBiobanks(ids, ID_CARD_DEFAULT_TIMEOUT);
+		return getIdCardBiobanks(ids, idCardIndexerSettings.getApiTimeout());
 	}
 
 	@Override
 	public Iterable<Entity> getIdCardBiobanks(Iterable<String> ids, long timeout)
 	{
-		// FIXME batching for each x ids
 		String value = StreamSupport.stream(ids.spliterator(), false).collect(Collectors.joining(",", "[", "]"));
 		try
 		{
@@ -137,7 +134,7 @@ public class IdCardClientImpl implements IdCardClient
 	@Override
 	public Iterable<Entity> getIdCardBiobanks()
 	{
-		return getIdCardBiobanks(ID_CARD_DEFAULT_TIMEOUT);
+		return getIdCardBiobanks(idCardIndexerSettings.getApiTimeout());
 	}
 
 	@Override

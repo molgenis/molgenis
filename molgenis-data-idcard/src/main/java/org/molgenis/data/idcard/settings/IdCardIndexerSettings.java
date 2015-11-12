@@ -8,6 +8,10 @@ public interface IdCardIndexerSettings
 
 	void setApiBaseUri(String idCardApiBaseUri);
 
+	long getApiTimeout();
+
+	void setApiTimeout(long timeout);
+
 	String getBiobankResource();
 
 	void setBiobankResource(String idCardBiobankResource);
@@ -35,4 +39,8 @@ public interface IdCardIndexerSettings
 	String getNotificationEmail();
 
 	void setNotificationEmail(String notificationEmail);
+
+	long getIndexRebuildTimeout();
+
+	void setIndexRebuildTimeout(long timeout);
 }

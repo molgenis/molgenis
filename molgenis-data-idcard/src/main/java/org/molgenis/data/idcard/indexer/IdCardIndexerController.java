@@ -42,7 +42,7 @@ public class IdCardIndexerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
-	@PreAuthorize("hasAnyRole('ROLE_SU')") // FIXME also allow users with read or write permissions
+	@PreAuthorize("hasAnyRole('ROLE_SU, ROLE_ENTITY_READ_IDCARDINDEXER')")
 	public String init(Model model) throws Exception
 	{
 		model.addAttribute("id_card_biobank_registry_entity_name", IdCardBiobank.ENTITY_NAME);
@@ -50,7 +50,7 @@ public class IdCardIndexerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/reindex")
-	@PreAuthorize("hasAnyRole('ROLE_SU')") // FIXME also allow users with write permissions
+	@PreAuthorize("hasAnyRole('ROLE_SU, ROLE_ENTITY_WRITE_IDCARDINDEXER')")
 	@ResponseBody
 	public IndexRebuildStatus scheduleIndexRebuild(Model model) throws Exception
 	{
@@ -60,7 +60,7 @@ public class IdCardIndexerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/status/{triggerGroup}/{triggerName}")
-	@PreAuthorize("hasAnyRole('ROLE_SU')") // FIXME also allow users with write permissions
+	@PreAuthorize("hasAnyRole('ROLE_SU, ROLE_ENTITY_READ_IDCARDINDEXER')")
 	@ResponseBody
 	public IndexRebuildStatus getIndexRebuildStatus(@PathVariable String triggerGroup, @PathVariable String triggerName)
 			throws Exception
