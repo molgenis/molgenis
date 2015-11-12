@@ -1,4 +1,4 @@
-package org.molgenis.bbmri.eric.model;
+package org.molgenis.bbmri.model;
 
 /**
  * Convenience class containing the identifiers of the BBMRI-NL MIABIS model
