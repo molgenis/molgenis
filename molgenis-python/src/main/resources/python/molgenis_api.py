@@ -9,15 +9,15 @@ import json
 import re
 import os.path
 from molgenis_api import security
-import timeit
 import time
 import logging
 from datetime import datetime
 import copy
+import timeit
 
 class Connect_Molgenis():
     """This class only has __enter__ and __exit__ function to force use of with statement. This way the passwords saved to file can be cleaned up"""
-    def __init__(self, server_url, remove_pass_file = True, new_pass_file = True, password_location = '~',log_file = 'molgenis.log', logging_level='DEBUG', logfile_mode = 'w', only_warn_duplicates=False, profile=True):
+    def __init__(self, server_url, remove_pass_file = True, new_pass_file = True, password_location = '~',log_file = 'molgenis.log', logging_level='DEBUG', logfile_mode = 'w', profile=True):
         """Pass all args and kwargs to the actual Connection class in __enter__()"""
         self.server_url = server_url
         self.remove_pass_file = remove_pass_file
@@ -26,7 +26,6 @@ class Connect_Molgenis():
         self.log_file = log_file
         self.logging_level = logging_level
         self.logfile_mode = logfile_mode
-        self.only_warn_duplicates = only_warn_duplicates
         self.profile = profile
     def __enter__(self):
         self.enter = True
@@ -49,7 +48,7 @@ class Connect_Molgenis():
                     connection.update_entity_row('public_rnaseq_Individuals',[{'field':'id', 'operator':'EQUALS', 'value':'John Doe'}], {'gender':'Female'})  
             """
         
-            def __init__(self, server_url, remove_pass_file = True, new_pass_file = True, password_location = '~',log_file = 'molgenis.log', logging_level='DEBUG', logfile_mode = 'w', only_warn_duplicates=False):
+            def __init__(self, server_url, remove_pass_file = True, new_pass_file = True, password_location = '~',log_file = 'molgenis.log', logging_level='DEBUG', logfile_mode = 'w'):
                 '''Initialize Python api to talk to Molgenis Rest API
                 
                 Args:
@@ -60,7 +59,6 @@ class Connect_Molgenis():
                     log_file (string):           Path to write logfile with debug info etc to (def: molgenis.log)
                     logging_level (string):      The level of logging to use. See Python's `logging` manual for info on levels (def: DEBUG)
                     logfile_mode (string):       Mode of writing to logfile, e.g. w for overwrite or a for append, see `logging` manual for more details (def: w)
-                    only_warn_duplicates (bool): If set to true, throw warning instead of exception when trying to add duplicate values into unique column (def: False)
                 '''
                 # because errors in the __init__ function will not go to __exit__, make sure to clean up after error
                 try:
@@ -77,6 +75,7 @@ class Connect_Molgenis():
                     self.logger = logging.getLogger(__name__)
                     self.logger.setLevel(level=getattr(logging, logging_level))
                     self.login_time = None
+                    self.time_start = timeit.default_timer()
                     security.overwrite_passphrase_location(password_location)
                     if new_pass_file:
                         self.remove_pass_file = True
@@ -90,8 +89,6 @@ class Connect_Molgenis():
                     self.column_meta_data = {}
                     self.added_rows = 0
                     self.added_files = 0
-                    self.time = None
-                    self.only_warn_duplicates = only_warn_duplicates
                     self.remove_pass_file = remove_pass_file
                 except:
                     self.remove_password_files()
@@ -162,7 +159,7 @@ class Connect_Molgenis():
                         error_message = str(server_response)+' -> '+server_response.reason+'\n'
                         if 'errors' in server_response_json:
                             if data_used:
-                                if not ('Bad Request' in error_message and self.only_warn_duplicates):
+                                if not ('Bad Request' in error_message):
                                     error_message += 'Used data: '+str(data_used)+'\n'
                             if entity_used:
                                 error_message += 'Used Entity: '+str(entity_used)+'\n'
@@ -204,7 +201,7 @@ class Connect_Molgenis():
                     if 'Add row to entity' in type_of_request:
                         message += '. Total added rows this session: '+str(self.added_rows)
                     elif 'Add a file' in type_of_request:
-                        message += '. Total addef files this session: '+str(self.added_files)
+                        message += '. Total added files this session: '+str(self.added_files)
                     self.logger.debug(message)
                     return True
                 else:
@@ -247,95 +244,57 @@ class Connect_Molgenis():
                 data = {k: v for k, v in list(data.items()) if v!=None}
                 data = dict([a, str(x)] for a, x in data.items() if len(str(x).strip())>0)
                 return data
-            
-            def add_entity_row_or_file_server_response(self, entity_name, data, server_response, add_type, api_version='v1'):
+                        
+            def _add_entity_rows_or_file_server_response(self, entity_name, data, server_response, add_type, api_version='v2',ignore_duplicates=False):
                 '''Add datetime and added by to entity row or file row
                 
                 entity_name (string): Name of the entity
                 data (dict): data that was added
                 server_resonse (obj): Server response object
                 add_type (string): Either entity_row or file'''
+                if add_type == 'entity_row': 
+                    message = time.strftime('%H:%M:%S', time.gmtime(timeit.default_timer()-self.time_start))+ '-' + time.strftime('%H:%M:%S', time.gmtime(timeit.default_timer()-self.login_time))+ ' - Add row to entity '+entity_name
+                elif add_type == 'file':
+                    message = time.strftime('%H:%M:%S', time.gmtime(timeit.default_timer()-self.login_time))+ ' - Add a file to '+entity_name
+                else:
+                    raise ValueError('add_type can only be entity_row or file')
                 try:
-                    if add_type == 'entity_row': 
-                        message = time.strftime('%H:%M:%S', time.gmtime(timeit.default_timer()-self.login_time))+ ' - Add row to entity '+entity_name
-                    elif add_type == 'file':
-                        message = time.strftime('%H:%M:%S', time.gmtime(timeit.default_timer()-self.login_time))+ ' - Add a file to '+entity_name
-                    else:
-                        raise ValueError('add_type can only be entity_row or file')
                     self.check_server_response(server_response, message, entity_used=entity_name, data_used=json.dumps(data))
                     if api_version == 'v1':
                         added_id = server_response.headers['location'].split('/')[-1]
+                        return added_id
                     elif api_version == 'v2':
                         # return list of IDs
-                        added_ids = server_response.json()['location'].split('q=id=in=(')[1].split(')')[0].replace('"','').split(',')
+                        print(server_response)
+                        print(server_response.json())
+                        added_ids = server_response.json()['location'].split('in=(')[1].split(')')[0].replace('"','').split(',')
                         return added_ids
                     else:
                         raise ValueError('That api version does not exist: '+str(api_version))
                 except Exception as e:
-                    raise
-                    if self.only_warn_duplicates:
-                        if 'Duplicate value' in str(e):
-                            message = 'Duplicate value not added, instead return id of already existing row'
-                            #message += 'Tried to insert into '+str(entity_name)+' with data:\n'+str(data)
-                            self.logger.debug(message)
-                            unqiue_att = re.search("Duplicate value '(\S+?)' for unique attribute '(\S+?)'", str(e))
-                            query = [{'field':unqiue_att.group(2), 'operator':'EQUALS', 'value':unqiue_att.group(1)}]
+                    if 'Duplicate value' in str(e) and ignore_duplicates:
+                        message = 'Duplicate value not added, instead return id of already existing row'
+                        self.logger.debug(message)
+                        unique_attributes = re.findall("Duplicate value '(\S+?)' for unique attribute '(\S+?)'", str(e))
+                        added_ids = []
+                        for unique_att in unique_attributes:
+                            query = [{'field':unique_att[1], 'operator':'EQUALS', 'value':unique_att[0]}]
                             row = self.query_entity_rows(entity_name, query = query)['items'][0]
                             added_id = row[self.get_id_attribute(entity_name)]
+                            added_ids.append(added_id)
                             if not added_id:
                                 raise Exception('No results found with query:')
                             self.logger.debug('id found for row with duplicate value: '+str(added_id))
-                        else:
-                            raise
-                return added_id  
+                        return added_ids
+                    else:
+                        raise
+                raise Exception('Code logic broken, check _add_entity_rows_or_file_server_response function')
               
             _add_datetime_default = False
             _added_by_default = False
-             
             _add_datetime_default = False
             _added_by_default = False
-            def add_entity_row(self, entity_name, data, validate_json=False, add_datetime=None, datetime_column='datetime_added', added_by=None, added_by_column='added_by'):
-                '''Add a row to an entity
-                
-                Args:
-                    entity_name (string): Name of the entity where row should be added
-                    data (dict): Key = column name, value = column value
-                    validate_json (bool): If True, check if the given data keys correspond with the column names of entity_name. (def: False)
-                    add_datetime (bool): If True, add a datetime to the column <datetime_column> (def: False)
-                    datetime_column (str): column name where to add datetime
-                    added_by (bool): If true, add the login name of the person that updated the record
-                    added_by_column (string): column name where to add name of person that updated record
-                    
-                Returns:
-                    added_id (string): Id of the row that got added
-                
-                Deprecated:
-                    Can add one row through add_multiple_entity_rows as well
-                '''
-                if not add_datetime:
-                    add_datetime = self._add_datetime_default
-                if not added_by:
-                    added_by = self._added_by_default
-                if timeit.default_timer()-self.login_time > 15*60:
-                    # molgenis login head times out after a certain time, so after 30 minutes resend login request
-                    self._construct_login_header()
-                if validate_json:
-                    self.validate_data(entity_name, data)
-                data = self._sanitize_data(data, add_datetime, datetime_column, added_by, added_by_column)
-                request_url = self.api_v1_url+'/'+entity_name+'/'
-                # sometimes get molgenis transaction error, if so try again
-                while True:
-                    try:
-                        # post to the entity with the json data
-                        server_response = self.session.post(request_url, data=json.dumps(data))
-                        self.added_rows += 1
-                        added_id = self.add_entity_row_or_file_server_response(entity_name, data, server_response,'entity_row')
-                        break
-                    except Exception as e:
-                        if not "for attribute 'molgenisTransactionLog' of entity 'MolgenisTransactionLogEntry" in str(e):
-                            raise
-                return added_id
-            def add_entity_rows(self, entity_name, data_list, validate_json=False, add_datetime=None, datetime_column='datetime_added', added_by=None, added_by_column='added_by'):
+            def add_entity_rows(self, entity_name, data_list, validate_json=False, add_datetime=None, datetime_column='datetime_added', added_by=None, added_by_column='added_by',ignore_duplicates=False):
                 '''Add one or multiple rows to an entity
                 
                 Args:
@@ -358,7 +317,9 @@ class Connect_Molgenis():
                     AAAACUGUI6T5KJXRMQK476QAAE
                     
                 '''
-                if not isinstance(data_list,list):
+                if not isinstance(data_list,list) and not isinstance(data_list,dict):
+                    raise TypeError('data_list should be of type list or dict')
+                elif not isinstance(data_list,list):
                     data_list = [data_list]
                 if not add_datetime:
                     add_datetime = self._add_datetime_default
@@ -370,21 +331,15 @@ class Connect_Molgenis():
                 if validate_json:
                     for data in data_list:
                         self.validate_data(entity_name, data)
+
                 sanitized_data_list = [self._sanitize_data(data, add_datetime, datetime_column, added_by, added_by_column) for data in data_list]
                 request_url = self.api_v2_url+'/'+entity_name+'/'
-                # sometimes get molgenis transaction error, if so try again
-                while True:
-                    try:
-                        # post to the entity with the json data
-                        server_response = self.session.post(request_url, data=json.dumps({"entities":sanitized_data_list}))
-                        self.added_rows += len(sanitized_data_list)
-                        added_id = self.add_entity_row_or_file_server_response(entity_name, data_list, server_response,'entity_row','v2')
-                        break
-                    except Exception as e:
-                        if not "for attribute 'molgenisTransactionLog' of entity 'MolgenisTransactionLogEntry" in str(e):
-                            raise
-                return added_id
-            def add_file(self, file_path, description, entity_name, extra_data=None, file_name=None, add_datetime=False, datetime_column='datetime_added', added_by=None, added_by_column='added_by', io_stream = None):
+                # post to the entity with the json data
+                server_response = self.session.post(request_url, data=json.dumps({"entities":sanitized_data_list}))
+                self.added_rows += len(sanitized_data_list)
+                added_ids = self._add_entity_rows_or_file_server_response(entity_name, data_list, server_response,'entity_row','v2',ignore_duplicates=ignore_duplicates)
+                return added_ids
+            def add_file(self, file_path, description, entity_name, extra_data=None, file_name=None, add_datetime=False, datetime_column='datetime_added', added_by=None, added_by_column='added_by', io_stream = None,ignore_duplicates=False):
                 '''Add a file to entity File.
                 
                 Args:
@@ -431,11 +386,12 @@ class Connect_Molgenis():
                         self.logger.error('File not found: '+str(file_path))
                         raise IOError('File not found: '+str(file_path))
                     server_response = self.session.post(self.api_v1_url+'/'+entity_name, 
-                                                    files={'attachment':(os.path.basename(file_path), open(file_path,'rb'))},
-                                                    data=data)
+                                            files={'attachment':(os.path.basename(file_path), open(file_path,'rb'))},
+                                            data=data)
+
                 self.added_files += 1
                 self.session.headers = old_header
-                added_id = self.add_entity_row_or_file_server_response(entity_name, data, server_response,'file')
+                added_id = self._add_entity_rows_or_file_server_response(entity_name, data, server_response,'file',ignore_duplicates=ignore_duplicates)
                 return added_id
                 
             def query_entity_rows(self, entity_name, query):
@@ -670,8 +626,7 @@ class Connect_Molgenis():
                                                   password_location = self.password_location,
                                                   log_file = self.log_file,
                                                   logging_level = self.logging_level,
-                                                  logfile_mode = self.logfile_mode,
-                                                  only_warn_duplicates = self.only_warn_duplicates)
+                                                  logfile_mode = self.logfile_mode)
         return self.molgenis_connection_obj
     
     def __exit__(self, exc_type, exc_value, traceback):
