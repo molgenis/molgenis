@@ -142,6 +142,7 @@ public class BbmriNlToEricMapperController extends MolgenisPluginController
 		}
 		catch (Throwable t)
 		{
+			LOG.warn(t.getMessage());
 		}
 	}
 
