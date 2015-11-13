@@ -186,7 +186,8 @@ public class BbmriNlToEricMapperService
 		ericCollection.set("data_access_description", nlSampleCollection.getString(BIOBANK_DATA_ACCESS_DESCRIPTION));
 		ericCollection.set("data_access_uri", nlSampleCollection.getString(BIOBANK_DATA_ACCESS_URI));
 		ericCollection.set("size", nlSampleCollection.getInt(NUMBER_OF_DONORS));
-		ericCollection.set("order_of_magnitude", toOrderOfMagnitude(nlSampleCollection.getInt(NUMBER_OF_DONORS)));
+		ericCollection.set("order_of_magnitude", nlSampleCollection.getInt(NUMBER_OF_DONORS) == null ? 0
+				: toOrderOfMagnitude(nlSampleCollection.getInt(NUMBER_OF_DONORS)));
 		ericCollection.set("timestamp", new Date());
 		ericCollection.set("collaboration_commercial", null);
 		ericCollection.set("collaboration_non_for_profit", null);
