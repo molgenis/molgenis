@@ -67,16 +67,15 @@ public class BbmriNlToEricMapperController extends MolgenisPluginController
 	@ResponseStatus(value = HttpStatus.OK)
 	public void scheduleMappingJob() throws SchedulerException
 	{
-		if (!dataService.hasRepository("bbmri_nl_sample_collections"))
-		{
-			throw new MolgenisDataException("Missing required source mapping entity [bbmri_nl_sample_collections]");
-		}
-		if (!dataService.hasRepository("eu_bbmri_eric_collections"))
-		{
-			throw new MolgenisDataException("Missing required source mapping entity [eu_bbmri_eric_collections]");
-		}
+		doScheduleMappingJob(createCronTrigger());
+	}
 
-		scheduleMappingJob();
+	@RequestMapping(value = "/scheduleMappingJobNow", method = POST)
+	@ResponseBody
+	@ResponseStatus(value = HttpStatus.OK)
+	public void scheduleMappingJobNow() throws SchedulerException
+	{
+		doScheduleMappingJob(null);
 	}
 
 	@Override
@@ -107,8 +106,17 @@ public class BbmriNlToEricMapperController extends MolgenisPluginController
 				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
 	}
 
-	private void doScheduleMappingJob() throws SchedulerException
+	private void doScheduleMappingJob(Trigger trigger) throws SchedulerException
 	{
+		if (!dataService.hasRepository("bbmri_nl_sample_collections"))
+		{
+			throw new MolgenisDataException("Missing required source mapping entity [bbmri_nl_sample_collections]");
+		}
+		if (!dataService.hasRepository("eu_bbmri_eric_collections"))
+		{
+			throw new MolgenisDataException("Missing required source mapping entity [eu_bbmri_eric_collections]");
+		}
+
 		if (bbmriNlToEricMapperSettings.getScheduledMappingEnabled())
 		{
 			if (scheduler.getJobDetail(new JobKey("bbmrinltoericmapper")) != null)
@@ -116,11 +124,16 @@ public class BbmriNlToEricMapperController extends MolgenisPluginController
 				throw new MolgenisDataException("Scheduling already enabled.");
 			}
 
-			Trigger trigger = TriggerBuilder.newTrigger().withIdentity("System")
-					.withSchedule(CronScheduleBuilder.cronSchedule("0 5 0 * * *")).build();
-			JobDetail jobDetail = JobBuilder.newJob(BbmriNlToEricMapperJob.class).withIdentity("bbmrinltoericmapper")
-					.build();
-			scheduler.scheduleJob(jobDetail, trigger);
+			if (trigger != null)
+			{
+				JobDetail jobDetail = JobBuilder.newJob(BbmriNlToEricMapperJob.class)
+						.withIdentity("bbmrinltoericmapper").build();
+				scheduler.scheduleJob(jobDetail, trigger);
+			}
+			else
+			{
+				scheduler.triggerJob(new JobKey("bbmrinltoericmapper-manual"));
+			}
 		}
 		else
 		{
@@ -133,10 +146,17 @@ public class BbmriNlToEricMapperController extends MolgenisPluginController
 	{
 		try
 		{
-			doScheduleMappingJob();
+			doScheduleMappingJob(createCronTrigger());
 		}
 		catch (Throwable t)
 		{
 		}
+	}
+
+	private Trigger createCronTrigger()
+	{
+		Trigger trigger = TriggerBuilder.newTrigger().withIdentity("System")
+				.withSchedule(CronScheduleBuilder.cronSchedule("0 5 0 * * *")).build();
+		return trigger;
 	}
 }

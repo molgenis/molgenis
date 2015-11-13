@@ -396,6 +396,12 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
+	public void retrieveResourceCollectionAggregation() throws Exception
+	{
+
+	}
+
+	@Test
 	public void testCreateEntities() throws Exception
 	{
 		String content = "{entities:[{id:'p1', name:'Piet'}, {id:'p2', name:'Pietje'}]}";
