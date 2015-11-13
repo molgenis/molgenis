@@ -7,6 +7,8 @@
     <div class="col-md-10 col-md-offset-1 well">
         <p>Enable BBMRI-NL to BBMRI-ERIC mapper scheduler that nightly converts current BBMRI-NL data.</p>
         <p class="warning">Once enabled the mapper scheduler cannot be disabled</p>
-        <div id="enable-mapper-scheduler-btn-container"></span>   
+        <div id="enable-mapper-scheduler-btn-container"></div>
+        <p>Besides night conversion, you can start a conversion job now.</p>
+        <div id="schedule-now-btn-container"></div>
     </div>
 </div>
