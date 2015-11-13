@@ -7,13 +7,13 @@ import org.molgenis.data.EntityCollection;
 
 public class DefaultEntityCollection implements EntityCollection
 {
-	private final Iterable<String> entityNames;
+	private final Iterable<String> attrNames;
 	private final Iterable<Entity> entities;
 
-	public DefaultEntityCollection(Iterable<Entity> entities, Iterable<String> entityNames)
+	public DefaultEntityCollection(Iterable<Entity> entities, Iterable<String> attrNames)
 	{
 		this.entities = entities;
-		this.entityNames = entityNames;
+		this.attrNames = attrNames;
 	}
 
 	@Override
@@ -25,7 +25,12 @@ public class DefaultEntityCollection implements EntityCollection
 	@Override
 	public Iterable<String> getAttributeNames()
 	{
-		return entityNames;
+		return attrNames;
 	}
 
+	@Override
+	public boolean isLazy()
+	{
+		return false;
+	}
 }

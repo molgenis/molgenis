@@ -1,5 +1,6 @@
 package org.molgenis.data.mysql;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.RepositoryCapability.MANAGABLE;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
@@ -28,6 +29,7 @@ import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisReferencedEntityException;
 import org.molgenis.data.Query;
@@ -37,12 +39,9 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.Sort;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.BatchingQueryResult;
-import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
-import org.molgenis.fieldtypes.IntField;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.TextField;
@@ -69,6 +68,7 @@ public class MysqlRepository extends AbstractRepository
 	private final JdbcTemplate jdbcTemplate;
 	private final AsyncJdbcTemplate asyncJdbcTemplate;
 	private final DataService dataService;
+	private final MySqlEntityFactory mySqlEntityFactory;
 	private final DataSource dataSource;
 	private static final String VARCHAR = "VARCHAR(255)";
 
@@ -81,12 +81,14 @@ public class MysqlRepository extends AbstractRepository
 	 *            {@link AsyncJdbcTemplate} to use to execute DDL statements in an isolated transaction on the Mysql
 	 *            database
 	 */
-	public MysqlRepository(DataService dataService, DataSource dataSource, AsyncJdbcTemplate asyncJdbcTemplate)
+	public MysqlRepository(DataService dataService, MySqlEntityFactory mySqlEntityFactory, DataSource dataSource,
+			AsyncJdbcTemplate asyncJdbcTemplate)
 	{
-		this.dataService = dataService;
-		this.dataSource = dataSource;
+		this.dataService = requireNonNull(dataService);
+		this.mySqlEntityFactory = requireNonNull(mySqlEntityFactory);
+		this.dataSource = requireNonNull(dataSource);
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
-		this.asyncJdbcTemplate = asyncJdbcTemplate;
+		this.asyncJdbcTemplate = requireNonNull(asyncJdbcTemplate);
 	}
 
 	public void setMetaData(EntityMetaData metaData)
@@ -102,8 +104,8 @@ public class MysqlRepository extends AbstractRepository
 		{
 			if (att.getDataType() instanceof MrefField)
 			{
-				DataAccessException e = tryExecute("DROP TABLE IF EXISTS `" + getTableName() + "_" + att.getName()
-						+ "`");
+				DataAccessException e = tryExecute(
+						"DROP TABLE IF EXISTS `" + getTableName() + "_" + att.getName() + "`");
 				remembered = remembered != null ? remembered : e;
 			}
 		}
@@ -178,7 +180,7 @@ public class MysqlRepository extends AbstractRepository
 	{
 		if (tableExists())
 		{
-			LOG.debug("Table for entity " + getName() + " already exists. Skipping creation");
+			LOG.debug("Table for entity {} already exists. Skipping creation", getName());
 			return;
 		}
 		try
@@ -344,11 +346,11 @@ public class MysqlRepository extends AbstractRepository
 		StringBuilder sql = new StringBuilder();
 
 		// mysql keys cannot have TEXT value, so change it to VARCHAR when needed
-		String idAttrMysqlType = (idAttribute.getDataType().getEnumType().equals(FieldTypeEnum.STRING) ? VARCHAR : idAttribute
-				.getDataType().getMysqlType());
+		String idAttrMysqlType = (idAttribute.getDataType().getEnumType().equals(FieldTypeEnum.STRING) ? VARCHAR
+				: idAttribute.getDataType().getMysqlType());
 
-		String refAttrMysqlType = (att.getRefEntity().getIdAttribute().getDataType() instanceof StringField ? VARCHAR : att
-				.getRefEntity().getIdAttribute().getDataType().getMysqlType());
+		String refAttrMysqlType = (att.getRefEntity().getIdAttribute().getDataType() instanceof StringField ? VARCHAR
+				: att.getRefEntity().getIdAttribute().getDataType().getMysqlType());
 
 		sql.append(" CREATE TABLE ").append('`').append(getTableName()).append('_').append(att.getName()).append('`')
 				.append("(`order` INT,`").append(idAttribute.getName()).append('`').append(' ').append(idAttrMysqlType)
@@ -389,11 +391,12 @@ public class MysqlRepository extends AbstractRepository
 
 		if (idAttribute == null) throw new MolgenisDataException("Missing idAttribute for entity [" + getName() + "]");
 
-		if (idAttribute.getDataType() instanceof XrefField || idAttribute.getDataType() instanceof MrefField) throw new RuntimeException(
-				"primary key(" + getTableName() + "." + idAttribute.getName() + ") cannot be XREF or MREF");
+		if (idAttribute.getDataType() instanceof XrefField || idAttribute.getDataType() instanceof MrefField)
+			throw new RuntimeException(
+					"primary key(" + getTableName() + "." + idAttribute.getName() + ") cannot be XREF or MREF");
 
-		if (idAttribute.isNillable() == true) throw new RuntimeException("idAttribute (" + getTableName() + "."
-				+ idAttribute.getName() + ") should not be nillable");
+		if (idAttribute.isNillable() == true) throw new RuntimeException(
+				"idAttribute (" + getTableName() + "." + idAttribute.getName() + ") should not be nillable");
 
 		sql.append("PRIMARY KEY (").append('`').append(getEntityMetaData().getIdAttribute().getName()).append('`')
 				.append(')');
@@ -401,9 +404,9 @@ public class MysqlRepository extends AbstractRepository
 		// close
 		sql.append(") ENGINE=InnoDB;");
 
-		if (LOG.isDebugEnabled())
+		if (LOG.isTraceEnabled())
 		{
-			LOG.debug("sql: " + sql);
+			LOG.trace("sql: " + sql);
 		}
 
 		return sql.toString();
@@ -620,12 +623,6 @@ public class MysqlRepository extends AbstractRepository
 			@Override
 			public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
 			{
-
-				if (LOG.isDebugEnabled())
-				{
-					LOG.debug("mref: " + mrefs.get(i).get(idAttribute.getName()) + ", "
-							+ mrefs.get(i).get(att.getName()));
-				}
 				preparedStatement.setInt(1, i);
 
 				preparedStatement.setObject(2, mrefs.get(i).get(idAttribute.getName()));
@@ -633,10 +630,8 @@ public class MysqlRepository extends AbstractRepository
 				Object value = mrefs.get(i).get(att.getName());
 				if (value instanceof Entity)
 				{
-					preparedStatement.setObject(
-							3,
-							refEntityIdAttribute.getDataType().convert(
-									((Entity) value).get(refEntityIdAttribute.getName())));
+					preparedStatement.setObject(3, refEntityIdAttribute.getDataType()
+							.convert(((Entity) value).get(refEntityIdAttribute.getName())));
 				}
 				else
 				{
@@ -671,6 +666,13 @@ public class MysqlRepository extends AbstractRepository
 		return findOne(new QueryImpl().eq(getEntityMetaData().getIdAttribute().getName(), id));
 	}
 
+	@Override
+	public Entity findOne(Object id, Fetch fetch)
+	{
+		if (id == null) return null;
+		return findOne(new QueryImpl().eq(getEntityMetaData().getIdAttribute().getName(), id).fetch(fetch));
+	}
+
 	protected String getSelectSql(Query q, List<Object> parameters)
 	{
 		StringBuilder select = new StringBuilder("SELECT ");
@@ -678,24 +680,28 @@ public class MysqlRepository extends AbstractRepository
 		int count = 0;
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 		{
-			if (att.getExpression() == null)
+			if (q.getFetch() == null || q.getFetch().hasField(att.getName()))
 			{
-				if (count > 0) select.append(", ");
+				if (att.getExpression() == null)
+				{
+					if (count > 0) select.append(", ");
 
-				// TODO needed when autoids are used to join
-				if (att.getDataType() instanceof MrefField)
-				{
-					select.append("GROUP_CONCAT(DISTINCT(").append('`').append(att.getName()).append('`').append('.')
-							.append('`').append(att.getName()).append('`').append(") ORDER BY `").append(att.getName())
-							.append("`.`order`) AS ").append('`').append(att.getName()).append('`');
+					// TODO needed when autoids are used to join
+					if (att.getDataType() instanceof MrefField)
+					{
+						select.append("GROUP_CONCAT(DISTINCT(").append('`').append(att.getName()).append('`')
+								.append('.').append('`').append(att.getName()).append('`').append(") ORDER BY `")
+								.append(att.getName()).append("`.`order`) AS ").append('`').append(att.getName())
+								.append('`');
+					}
+					else
+					{
+						select.append("this.").append('`').append(att.getName()).append('`');
+						if (group.length() > 0) group.append(", this.").append('`').append(att.getName()).append('`');
+						else group.append("this.").append('`').append(att.getName()).append('`');
+					}
+					count++;
 				}
-				else
-				{
-					select.append("this.").append('`').append(att.getName()).append('`');
-					if (group.length() > 0) group.append(", this.").append('`').append(att.getName()).append('`');
-					else group.append("this.").append('`').append(att.getName()).append('`');
-				}
-				count++;
 			}
 		}
 
@@ -718,33 +724,28 @@ public class MysqlRepository extends AbstractRepository
 	@Override
 	public Iterable<Entity> findAll(Query q)
 	{
-		if ((q.getOffset() != 0) || (q.getPageSize() != 0))
-		{
-			return findAllNoBatching(q);
-		}
-
 		return new BatchingQueryResult(BATCH_SIZE, q)
 		{
 			@Override
-			protected Iterable<Entity> getBatch(Query batchQuery)
+			protected List<Entity> getBatch(Query batchQuery)
 			{
-				return findAllNoBatching(batchQuery);
+				if (LOG.isDebugEnabled())
+				{
+					LOG.debug("Fetching MySQL [{}] data for query [{}]", getName(), batchQuery);
+				}
+
+				List<Object> parameters = Lists.newArrayList();
+				String sql = getSelectSql(batchQuery, parameters);
+				if (LOG.isTraceEnabled())
+				{
+					LOG.trace("sql: {}, parameters: {}", sql, parameters);
+				}
+
+				RowMapper<Entity> entityMapper = mySqlEntityFactory.createRowMapper(getEntityMetaData(),
+						batchQuery.getFetch(), jdbcTemplate, getTableName());
+				return jdbcTemplate.query(sql, parameters.toArray(new Object[0]), entityMapper);
 			}
 		};
-	}
-
-	private Iterable<Entity> findAllNoBatching(Query q)
-	{
-		List<Object> parameters = Lists.newArrayList();
-		String sql = getSelectSql(q, parameters);
-
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("query: " + q);
-			LOG.debug("sql: " + sql + ",parameters:" + parameters);
-		}
-
-		return jdbcTemplate.query(sql, parameters.toArray(new Object[0]), new EntityMapper(getEntityMetaData()));
 	}
 
 	protected String getWhereSql(Query q, List<Object> parameters, int mrefFilterIndex)
@@ -785,8 +786,8 @@ public class MysqlRepository extends AbstractRepository
 							Repository repo = dataService.getRepository(att.getRefEntity().getName());
 							if (repo.getCapabilities().contains(QUERYABLE))
 							{
-								Query refQ = new QueryImpl().like(att.getRefEntity().getLabelAttribute().getName(), r
-										.getValue().toString());
+								Query refQ = new QueryImpl().like(att.getRefEntity().getLabelAttribute().getName(),
+										r.getValue().toString());
 								Iterator<Entity> it = repo.findAll(refQ).iterator();
 								if (it.hasNext())
 								{
@@ -796,8 +797,8 @@ public class MysqlRepository extends AbstractRepository
 									{
 										Entity ref = it.next();
 										search.append("?");
-										parameters.add(att.getDataType().convert(
-												ref.get(att.getRefEntity().getIdAttribute().getName())));
+										parameters.add(att.getDataType()
+												.convert(ref.get(att.getRefEntity().getIdAttribute().getName())));
 										if (it.hasNext())
 										{
 											search.append(",");
@@ -876,8 +877,8 @@ public class MysqlRepository extends AbstractRepository
 						parameters.add(attr.getDataType().convert(values.get(i)));
 					}
 
-					if (attr.getDataType() instanceof MrefField) result.append(attr.getName()).append("_filter")
-							.append(mrefFilterIndex);
+					if (attr.getDataType() instanceof MrefField)
+						result.append(attr.getName()).append("_filter").append(mrefFilterIndex);
 					else result.append("this");
 
 					result.append(".`").append(r.getField()).append("` IN (").append(in).append(')');
@@ -885,8 +886,8 @@ public class MysqlRepository extends AbstractRepository
 				default:
 					// comparable values...
 					FieldType type = attr.getDataType();
-					if (type instanceof MrefField) predicate.append(attr.getName()).append("_filter")
-							.append(mrefFilterIndex);
+					if (type instanceof MrefField)
+						predicate.append(attr.getName()).append("_filter").append(mrefFilterIndex);
 					else predicate.append("this");
 
 					predicate.append(".`").append(r.getField()).append('`');
@@ -915,7 +916,8 @@ public class MysqlRepository extends AbstractRepository
 					parameters.add(attr.getDataType().convert(r.getValue()));
 
 					if (result.length() > 0 && !result.toString().endsWith(" OR ")
-							&& !result.toString().endsWith(" AND ")) result.append(" AND ");
+							&& !result.toString().endsWith(" AND "))
+						result.append(" AND ");
 					result.append(predicate);
 			}
 		}
@@ -1146,8 +1148,8 @@ public class MysqlRepository extends AbstractRepository
 										value = ((Entity) value).get(att.getRefEntity().getIdAttribute().getName());
 									}
 
-									preparedStatement.setObject(fieldIndex++, att.getRefEntity().getIdAttribute()
-											.getDataType().convert(value));
+									preparedStatement.setObject(fieldIndex++,
+											att.getRefEntity().getIdAttribute().getDataType().convert(value));
 								}
 								else
 								{
@@ -1267,19 +1269,14 @@ public class MysqlRepository extends AbstractRepository
 								Object value = e.get(att.getName());
 								if (value instanceof Entity)
 								{
-									preparedStatement.setObject(
-											fieldIndex++,
-											att.getRefEntity()
-													.getIdAttribute()
-													.getDataType()
-													.convert(
-															((Entity) value).get(att.getRefEntity().getIdAttribute()
-																	.getName())));
+									preparedStatement.setObject(fieldIndex++,
+											att.getRefEntity().getIdAttribute().getDataType().convert(((Entity) value)
+													.get(att.getRefEntity().getIdAttribute().getName())));
 								}
 								else
 								{
-									preparedStatement.setObject(fieldIndex++, att.getRefEntity().getIdAttribute()
-											.getDataType().convert(value));
+									preparedStatement.setObject(fieldIndex++,
+											att.getRefEntity().getIdAttribute().getDataType().convert(value));
 								}
 							}
 							else
@@ -1310,92 +1307,6 @@ public class MysqlRepository extends AbstractRepository
 			}
 		}
 
-	}
-
-	private class EntityMapper implements RowMapper<Entity>
-	{
-		private static final int GROUP_CONCAT_MAX_LEN = 1024;
-		private final EntityMetaData entityMetaData;
-
-		private EntityMapper(EntityMetaData entityMetaData)
-		{
-			this.entityMetaData = entityMetaData;
-		}
-
-		@Override
-		public Entity mapRow(ResultSet resultSet, int i) throws SQLException
-		{
-			Entity e = new DefaultEntity(entityMetaData, dataService);
-
-			for (AttributeMetaData att : entityMetaData.getAtomicAttributes())
-			{
-				if (att.getExpression() != null)
-				{
-					continue;
-				}
-				if (att.getDataType() instanceof MrefField)
-				{
-					// TODO: convert to typed lists (or arrays?)
-					String mrefIds = resultSet.getString(att.getName());
-					if (mrefIds != null)
-					{
-						if (att.getRefEntity().getIdAttribute().getDataType() instanceof IntField)
-						{
-							if (mrefIds.length() >= GROUP_CONCAT_MAX_LEN)
-							{
-								// this list is just as long as it's allowed to be so it probably got truncated.
-								// Retrieve the IDs explicitly in a separate query.
-								e.set(att.getName(), jdbcTemplate.queryForList(getMrefSelectSql(e, att), Integer.class));
-							}
-							else
-							{
-								e.set(att.getName(), DataConverter.toIntList(mrefIds));
-							}
-						}
-						else
-						{
-							if (mrefIds.length() >= GROUP_CONCAT_MAX_LEN)
-							{
-								// this list is just as long as it's allowed to be so it probably got truncated.
-								// Retrieve the IDs explicitly in a separate query.
-								e.set(att.getName(), jdbcTemplate.queryForList(getMrefSelectSql(e, att), Object.class));
-							}
-							else
-							{
-								e.set(att.getName(), DataConverter.toObjectList(mrefIds));
-							}
-						}
-					}
-				}
-				else if (att.getDataType() instanceof XrefField)
-				{
-					e.set(att.getName(),
-							att.getRefEntity().getIdAttribute().getDataType()
-									.convert(resultSet.getObject(att.getName())));
-				}
-				else
-				{
-					e.set(att.getName(), att.getDataType().convert(resultSet.getObject(att.getName())));
-				}
-			}
-			for (AttributeMetaData att : entityMetaData.getAtomicAttributes())
-			{
-				if (att.getExpression() != null)
-				{
-					// at least one attribute is computed
-					return new EntityWithComputedAttributes(e);
-				}
-			}
-			return e;
-
-		}
-
-		private String getMrefSelectSql(Entity e, AttributeMetaData att)
-		{
-			return String.format("SELECT `%s` FROM `%s_%1$s` WHERE `%s` = '%s' ORDER BY `order`", att.getName(),
-					getTableName(), entityMetaData.getIdAttribute().getName().toLowerCase(),
-					e.get(entityMetaData.getIdAttribute().getName()));
-		}
 	}
 
 	public boolean tableExists()
@@ -1510,12 +1421,17 @@ public class MysqlRepository extends AbstractRepository
 	@Override
 	public long count(Query q)
 	{
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Fetching MySQL [{}] data for query [{}]", getName(), q);
+		}
+
 		List<Object> parameters = Lists.newArrayList();
 		String sql = getCountSql(q, parameters);
 
-		if (LOG.isDebugEnabled())
+		if (LOG.isTraceEnabled())
 		{
-			LOG.debug("sql: " + sql + ",parameters:" + parameters);
+			LOG.trace("sql: {}, parameters: {}", sql, parameters);
 		}
 
 		return jdbcTemplate.queryForObject(sql, parameters.toArray(new Object[0]), Long.class);
@@ -1531,15 +1447,20 @@ public class MysqlRepository extends AbstractRepository
 		getMrefQueryFields(q.getRules(), mrefQueryFields);
 
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
-			if (att.getDataType() instanceof MrefField)
+		{
+			if (q.getFetch() == null || q.getFetch().hasField(att.getName()))
 			{
-				from.append(" LEFT JOIN ").append('`').append(getTableName()).append('_').append(att.getName())
-						.append('`').append(" AS ").append('`').append(att.getName()).append('`').append(" ON (this.")
-						.append('`').append(idAttribute.getName()).append('`').append(" = ").append('`')
-						.append(att.getName()).append('`').append('.').append('`').append(idAttribute.getName())
-						.append('`').append(')');
+				if (att.getDataType() instanceof MrefField)
+				{
+					from.append(" LEFT JOIN ").append('`').append(getTableName()).append('_').append(att.getName())
+							.append('`').append(" AS ").append('`').append(att.getName()).append('`')
+							.append(" ON (this.").append('`').append(idAttribute.getName()).append('`').append(" = ")
+							.append('`').append(att.getName()).append('`').append('.').append('`')
+							.append(idAttribute.getName()).append('`').append(')');
 
+				}
 			}
+		}
 
 		for (int i = 0; i < mrefQueryFields.size(); i++)
 		{

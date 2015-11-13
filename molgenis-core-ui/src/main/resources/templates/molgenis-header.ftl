@@ -65,6 +65,7 @@
         <script src="<@resource_href "/js/component/wrapper/JQRangeSlider.js"/>"></script>
         <script src="<@resource_href "/js/component/wrapper/JQueryForm.js"/>"></script>
         <script src="<@resource_href "/js/component/wrapper/Select2.js"/>"></script>
+        <script src="<@resource_href "/js/component/AggregateTable.js"/>"></script>
         <script src="<@resource_href "/js/component/AlertMessage.js"/>"></script>
         <script src="<@resource_href "/js/component/AttributeControl.js"/>"></script>
         <script src="<@resource_href "/js/component/BoolControl.js"/>"></script>

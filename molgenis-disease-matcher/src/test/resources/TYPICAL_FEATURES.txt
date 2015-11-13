@@ -1,3 +1,0 @@
-#Format: diseaseId<tab>gene-symbol<tab>gene-id(entrez)<tab>HPO-ID<tab>HPO-term-name
-OMIM:303100	CHM	1121	HP:0000505	Visual impairment
-ORPHANET:2318	ZNF423	23090	HP:0002311	Incoordination

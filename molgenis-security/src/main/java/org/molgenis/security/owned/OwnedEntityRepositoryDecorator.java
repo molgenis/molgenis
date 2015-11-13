@@ -9,7 +9,9 @@ import java.util.Set;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
@@ -117,9 +119,42 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	}
 
 	@Override
+	public Entity findOne(Object id, Fetch fetch)
+	{
+		Entity e = decoratedRepo.findOne(id, fetch);
+
+		if (mustAddRowLevelSecurity())
+		{
+			if (!SecurityUtils.getCurrentUsername().equals(getOwnerUserName(e))) return null;
+		}
+
+		return e;
+	}
+
+	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
 		Iterable<Entity> entities = decoratedRepo.findAll(ids);
+		if (mustAddRowLevelSecurity())
+		{
+			entities = Iterables.filter(entities, new Predicate<Entity>()
+			{
+				@Override
+				public boolean apply(Entity e)
+				{
+					return SecurityUtils.getCurrentUsername().equals(getOwnerUserName(e));
+				}
+
+			});
+		}
+
+		return entities;
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
+	{
+		Iterable<Entity> entities = decoratedRepo.findAll(ids, fetch);
 		if (mustAddRowLevelSecurity())
 		{
 			entities = Iterables.filter(entities, new Predicate<Entity>()
@@ -315,5 +350,17 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	public void rebuildIndex()
 	{
 		decoratedRepo.rebuildIndex();
+	}
+
+	@Override
+	public void addEntityListener(EntityListener entityListener)
+	{
+		decoratedRepo.addEntityListener(entityListener);
+	}
+
+	@Override
+	public void removeEntityListener(EntityListener entityListener)
+	{
+		decoratedRepo.removeEntityListener(entityListener);
 	}
 }

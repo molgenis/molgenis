@@ -5,6 +5,8 @@ import static java.util.stream.StreamSupport.stream;
 
 import javax.sql.DataSource;
 
+import org.molgenis.data.EntityManager;
+import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
@@ -13,6 +15,7 @@ import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
+import org.molgenis.data.mysql.MySqlEntityFactory;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
@@ -99,6 +102,8 @@ public class Step15AddDefaultValue extends MolgenisUpgrade
 	protected void reindexAttributesRepository()
 	{
 		DataServiceImpl dataService = new DataServiceImpl();
+		EntityManager entityResolver = new EntityManagerImpl(dataService);
+		MySqlEntityFactory mySqlEntityFactory = new MySqlEntityFactory(entityResolver, dataService);
 
 		// Get the undecorated attribute repo
 		MysqlRepositoryCollection undecoratedMySQL = new MysqlRepositoryCollection()
@@ -106,7 +111,7 @@ public class Step15AddDefaultValue extends MolgenisUpgrade
 			@Override
 			protected MysqlRepository createMysqlRepository()
 			{
-				return new MysqlRepository(dataService, dataSource,
+				return new MysqlRepository(dataService, mySqlEntityFactory, dataSource,
 						new AsyncJdbcTemplate(new JdbcTemplate(dataSource)));
 			}
 

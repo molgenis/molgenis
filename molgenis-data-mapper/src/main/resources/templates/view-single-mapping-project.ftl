@@ -153,7 +153,7 @@
 <div class="row">		
 	<#if mappingProject.getMappingTarget(selectedTarget).entityMappings?has_content>
 		<div class="col-md-8">		
-			<a id="add-new-attr-mapping-btn" href="#" class="btn btn-success pull-right" data-toggle="modal" data-target="#create-integrated-entity-modal">
+			<a id="create-integrated-entity-open-modal-btn" href="#" class="btn btn-success pull-right" data-toggle="modal" data-target="#create-integrated-entity-modal">
 				<span class="glyphicon glyphicon-play"></span> Create integrated dataset
 			</a>
 		</div>
@@ -172,7 +172,7 @@
         		<form id="create-new-source-form" method="post" action="${context_url}/addEntityMapping">	
 					<div class="form-group">
 	            		<label>Select a new source to map against the target attribute</label>
-  						<select name="source" class="form-control" required="required" placeholder="Select a target entity">
+  						<select name="source" id="source-entity-select" class="form-control" required="required" placeholder="Select source entity">
 	    					<#list entityMetaDatas as entityMetaData>
     							<option value="${entityMetaData.name?html}">${entityMetaData.name?html}</option>
 	    					</#list>
