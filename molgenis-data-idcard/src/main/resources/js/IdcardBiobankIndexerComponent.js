@@ -10,27 +10,30 @@
 	var IdcardBiobankIndexerComponent = React.createClass({
 		displayName: 'IdcardBiobankIndexerComponent',
 		propTypes: {
-			entity: React.PropTypes.string.isRequired,
+			biobankEntity: React.PropTypes.string.isRequired,
+			indexEntity: React.PropTypes.string.isRequired,
             buttonEnabled: React.PropTypes.bool,
 			onButtonClick: React.PropTypes.func
 		},
 		getInitialState: function() {
 			return {
-				entity: "",
-				buttonDisabled: false,
+				biobankEntity: "",
+                indexEntity: "",
+                buttonDisabled: false,
 				onButtonClick: function() {}
 			};
 		},
 		getDefaultProps: function() {
 			return {
-				entity: "",
-				buttonDisabled: false,
+				biobankEntity: "",
+                indexEntity: "",
+                buttonDisabled: false,
                 onButtonClick: function() {}
 			};
 		},
 		render: function() {
 				Table = molgenis.ui.Table({
-            		entity: this.props.entity,
+            		entity: this.props.indexEntity,
             		sort: {
             			attr: {
             				name: 'date'
@@ -62,9 +65,9 @@
                                 	a({href:"http://rd-connect.eu/",target:"_blank"},
                                 	"RD-Connect")),
                                 p({id:"index-event-table-container"},"MOLGENIS indexes biobanks and patient registries from ID-Card such that they can be queried, ",
-                                	a({href:"/menu/main/dataexplorer?entity="+this.props.entityName+"?html}",target:"_blank"},"displayed "),//FIXME: entityname prop
-                                	"and referred to from other entities. Querying biobank and patient registries is performed on the index build by MOLGENIS, the resulting entities are retrieved"
-                                	,strong(null,"live"),"from ID-Card for display."),
+                                	a({href:"/menu/main/dataexplorer?entity="+this.props.biobankEntity,target:"_blank"},"displayed "),
+                                	"and referred to from other entities. Querying biobank and patient registries is performed on the index build by MOLGENIS, the resulting entities are retrieved "
+                                	,strong(null,"live")," from ID-Card for display."),
                                 h4(null,"How to use"),
                                 p(null,"Indexing biobanks and patient registries is disabled by default and can be enabled/disabled by opening the settings panel (by selecting the settings cog on the top right). Additionally the index frequency can be changed in the settings panel."),
                                 p(null,"Select the Reindex button in case you want to perform a manual index rebuild. Note that reindexing might take a couple of minutes and does not cancel any scheduled index rebuilds."),
