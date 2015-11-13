@@ -135,10 +135,10 @@ public class BbmriNlToEricMapperService
 					}
 				}
 
-				LOG.info(String.format(
-						"Finished mapping. Added %d sample collections. Updated %d sample collections. Added %d biobanks. Updated %d biobanks.",
-						collectionsAdded, collectionsUpdated, biobanksAdded, biobanksUpdated));
 			}
+			LOG.info(String.format(
+					"Finished mapping. Added %d sample collections. Updated %d sample collections. Added %d biobanks. Updated %d biobanks.",
+					collectionsAdded, collectionsUpdated, biobanksAdded, biobanksUpdated));
 		}
 		catch (Exception e)
 		{
@@ -323,8 +323,7 @@ public class BbmriNlToEricMapperService
 		ericContact.set("phone", nlContactPerson.getString("phone"));
 
 		String email = nlContactPerson.getString("email");
-		ericContact.set("email",
-				email == null ? bbmriNlToEricMapperSettings.getMapperDefaultEmailAddress() : email);
+		ericContact.set("email", email == null ? bbmriNlToEricMapperSettings.getMapperDefaultEmailAddress() : email);
 
 		ericContact.set("address", nlContactPerson.getString("address"));
 		ericContact.set("zip", nlContactPerson.getString("zip"));
@@ -402,7 +401,7 @@ public class BbmriNlToEricMapperService
 	 */
 	private int toOrderOfMagnitude(int numberOfDonors)
 	{
-		if (numberOfDonors == 0) throw new IllegalArgumentException("can't take log10 of 0");
+		if (numberOfDonors == 0) return 0;
 		return (int) Math.log10(numberOfDonors);
 	}
 }
