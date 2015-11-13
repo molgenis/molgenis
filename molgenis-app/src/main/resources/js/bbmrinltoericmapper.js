@@ -11,5 +11,15 @@
 				});
 			}
 		}, 'Reindex'), $('#enable-mapper-scheduler-btn-container')[0]);
+		
+		React.render(molgenis.ui.Button({
+			text : 'Run now',
+			size: 'small',
+			onClick : function() {
+				$.post(molgenis.getContextUrl() + '/scheduleMappingJobNow').done(function(job) {
+					molgenis.createAlert([{'message': 'Scheduled mapping job, execution starts now.'}], 'success');
+				});
+			}
+		}, 'Reindex'), $('#schedule-now-btn-container')[0]);
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));
