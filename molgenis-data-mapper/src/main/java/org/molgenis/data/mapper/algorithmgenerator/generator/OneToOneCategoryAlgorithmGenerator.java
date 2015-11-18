@@ -16,7 +16,7 @@ import org.molgenis.data.mapper.algorithmgenerator.rules.impl.PositiveCategoryRu
 
 import com.google.common.collect.Lists;
 
-public class OneToOneCategoryAlgorithmGenerator extends CategoryAlgorithmGenerator
+public class OneToOneCategoryAlgorithmGenerator extends AbstractCategoryAlgorithmGenerator
 {
 	private final FrequencyCategoryMapper frequencyCategoryMapper;
 	private final LexicalCategoryMapper lexicalCategoryMapper;

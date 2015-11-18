@@ -41,6 +41,8 @@ public class NumericAlgorithmGeneratorTest extends AbstractTestNGSpringContextTe
 
 	DefaultAttributeMetaData sourceAttribute;
 
+	DefaultAttributeMetaData sourceAttribute1;
+
 	@BeforeMethod
 	public void setup()
 	{
@@ -58,6 +60,11 @@ public class NumericAlgorithmGeneratorTest extends AbstractTestNGSpringContextTe
 		sourceAttribute.setDataType(MolgenisFieldTypes.DECIMAL);
 		sourceAttribute.setLabel("body length in cm");
 		sourceEntityMetaData.addAttributeMetaData(sourceAttribute);
+
+		sourceAttribute1 = new DefaultAttributeMetaData("sourceHeight1");
+		sourceAttribute1.setDataType(MolgenisFieldTypes.DECIMAL);
+		sourceAttribute1.setLabel("body length in cm second time");
+		sourceEntityMetaData.addAttributeMetaData(sourceAttribute1);
 	}
 
 	@Test
@@ -66,6 +73,12 @@ public class NumericAlgorithmGeneratorTest extends AbstractTestNGSpringContextTe
 		String generate = numericAlgorithmGenerator.generate(targetAttribute, Arrays.asList(sourceAttribute),
 				targetEntityMetaData, sourceEntityMetaData);
 		assertEquals(generate, "$('sourceHeight').unit('cm').toUnit('m').value();");
+
+		String generateAverageValue = numericAlgorithmGenerator.generate(targetAttribute,
+				Arrays.asList(sourceAttribute, sourceAttribute1), targetEntityMetaData, sourceEntityMetaData);
+		String expected = "var counter = 0;\nvar SUM=newValue(0);\nif(!$('sourceHeight').isNull().value()){\n\tSUM.plus($('sourceHeight').unit('cm').toUnit('m').value());\n\tcounter++;\n}\nif(!$('sourceHeight1').isNull().value()){\n\tSUM.plus($('sourceHeight1').unit('cm').toUnit('m').value());\n\tcounter++;\n}\nif(counter !== 0){\n\tSUM.div(counter);\n\tSUM.value();\n}else{\n\tnull;}";
+
+		assertEquals(generateAverageValue, expected);
 	}
 
 	@Test

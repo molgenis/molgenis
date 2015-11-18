@@ -16,11 +16,11 @@ import org.molgenis.data.mapper.algorithmgenerator.categorymapper.CategoryMapper
 
 import com.google.common.base.Preconditions;
 
-public abstract class CategoryAlgorithmGenerator implements AlgorithmGenerator
+public abstract class AbstractCategoryAlgorithmGenerator implements AlgorithmGenerator
 {
 	private final DataService dataService;
 
-	public CategoryAlgorithmGenerator(DataService dataService)
+	public AbstractCategoryAlgorithmGenerator(DataService dataService)
 	{
 		this.dataService = Preconditions.checkNotNull(dataService);
 	}

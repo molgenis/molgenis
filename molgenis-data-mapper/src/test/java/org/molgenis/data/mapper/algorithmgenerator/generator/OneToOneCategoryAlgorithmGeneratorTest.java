@@ -17,7 +17,7 @@ import com.google.common.collect.Lists;
 
 public class OneToOneCategoryAlgorithmGeneratorTest
 {
-	CategoryAlgorithmGenerator categoryAlgorithmGenerator;
+	AbstractCategoryAlgorithmGenerator categoryAlgorithmGenerator;
 
 	DefaultAttributeMetaData targetAttributeMetaData;
 

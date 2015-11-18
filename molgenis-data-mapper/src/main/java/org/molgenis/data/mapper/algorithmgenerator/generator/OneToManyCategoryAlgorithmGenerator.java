@@ -20,7 +20,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
 import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
 
-public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenerator
+public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorithmGenerator
 {
 	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("##.#",
 			DecimalFormatSymbols.getInstance(new Locale("en")));

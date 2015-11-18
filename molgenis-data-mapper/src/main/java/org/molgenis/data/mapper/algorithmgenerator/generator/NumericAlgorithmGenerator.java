@@ -34,23 +34,26 @@ public class NumericAlgorithmGenerator implements AlgorithmGenerator
 			EntityMetaData targetEntityMetaData, EntityMetaData sourceEntityMetaData)
 	{
 		StringBuilder algorithm = new StringBuilder();
-		if (sourceAttributes.size() > 0)
-		{
-			if (sourceAttributes.size() == 1)
-			{
-				algorithm.append(generateUnitConversionAlgorithm(targetAttribute, targetEntityMetaData,
-						sourceAttributes.get(0), sourceEntityMetaData));
-			}
-			else
-			{
-				for (AttributeMetaData sourceAttribute : sourceAttributes)
-				{
-					algorithm.append(generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityMetaData,
-							sourceEntityMetaData));
-				}
-			}
-		}
 
+		if (sourceAttributes.size() == 1)
+		{
+			algorithm.append(generateUnitConversionAlgorithm(targetAttribute, targetEntityMetaData,
+					sourceAttributes.get(0), sourceEntityMetaData));
+		}
+		else if (sourceAttributes.size() > 1)
+		{
+			algorithm.append("var counter = 0;\nvar SUM=newValue(0);\n");
+			for (AttributeMetaData sourceAttribute : sourceAttributes)
+			{
+				String generate = generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityMetaData,
+						sourceEntityMetaData);
+				algorithm.append("if(!$('").append(sourceAttribute.getName()).append("').isNull().value()){\n\t")
+						.append("SUM.plus(")
+						.append(generate.endsWith(";") ? generate.substring(0, generate.length() - 1) : generate)
+						.append(");\n\tcounter++;\n}\n");
+			}
+			algorithm.append("if(counter !== 0){\n\tSUM.div(counter);\n\tSUM.value();\n}else{\n\tnull;\n}");
+		}
 		return algorithm.toString();
 	}
 
