@@ -72,8 +72,9 @@
 					y: props.y,
 					distinct: props.distinct
 				},
-				q: props.q
+				q: props.query
 			};
+			
 			api.get(props.entity, opts).done(function(data) {
 				var newState = _.extend({}, state, {data: data});
 				this.setState(newState);
