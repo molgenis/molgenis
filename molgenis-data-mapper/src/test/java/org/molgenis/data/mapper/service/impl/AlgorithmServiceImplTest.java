@@ -73,9 +73,6 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private AlgorithmTemplateService algorithmTemplateService;
 
-	@Autowired
-	private OntologyService ontologyService;
-
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
@@ -380,35 +377,6 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(mapping.getAttributeMapping("targetHeight").getSourceAttributeMetaDatas().get(0),
 				sourceAttribute1);
 	}
-	//
-	// @Test
-	// public void testConvertUnitsAlgorithm()
-	// {
-	// AlgorithmServiceImpl algorithmServiceImpl = (AlgorithmServiceImpl) algorithmService;
-	//
-	// DefaultEntityMetaData targetEntityMetaData = new DefaultEntityMetaData("target");
-	// DefaultAttributeMetaData targetAttribute = new DefaultAttributeMetaData("targetHeight");
-	// targetAttribute.setLabel("height in m");
-	// targetEntityMetaData.addAttributeMetaData(targetAttribute);
-	//
-	// DefaultEntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("source");
-	// DefaultAttributeMetaData sourceAttribute = new DefaultAttributeMetaData("sourceHeight");
-	// sourceAttribute.setLabel("body length in cm");
-	// sourceEntityMetaData.addAttributeMetaData(sourceAttribute);
-	//
-	// when(ontologyService.getOntology("http://purl.obolibrary.org/obo/uo.owl"))
-	// .thenReturn(Ontology.create("1", "http://purl.obolibrary.org/obo/uo.owl", "unit ontology"));
-	//
-	// algorithmService.generateAlgorithm(targetAttribute, targetEntityMetaData, Lists.newArrayList(sourceAttribute),
-	// sourceEntityMetaData);
-	//
-	// String actualAlgorithm = algorithmService.generateAlgorithm(targetAttribute, targetEntityMetaData,
-	// Lists.newArrayList(sourceAttribute), sourceEntityMetaData);
-	//
-	// String expectedAlgorithm = "$('sourceHeight').unit('cm').toUnit('m').value();";
-	//
-	// Assert.assertEquals(actualAlgorithm, expectedAlgorithm);
-	// }
 
 	@Configuration
 	public static class Config
@@ -435,7 +403,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		public AlgorithmService algorithmService()
 		{
 			return new AlgorithmServiceImpl(dataService(), ontologyTagService(), semanticSearchService(),
-					unitResolver(), algorithmTemplateService(), mapCategoryService());
+					algorithmGeneratorService());
 		}
 
 		@Bean
@@ -470,9 +438,9 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public AlgorithmGeneratorService mapCategoryService()
+		public AlgorithmGeneratorService algorithmGeneratorService()
 		{
-			return new AlgorithmGeneratorServiceImpl(dataService(), unitResolver());
+			return new AlgorithmGeneratorServiceImpl(dataService(), unitResolver(), algorithmTemplateService());
 		}
 	}
 }

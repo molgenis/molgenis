@@ -64,16 +64,16 @@ public class MappingConfig
 	}
 
 	@Bean
-	public AlgorithmGeneratorService mapCategoryService()
+	public AlgorithmGeneratorService algorithmGeneratorService()
 	{
-		return new AlgorithmGeneratorServiceImpl(dataService, unitResolver());
+		return new AlgorithmGeneratorServiceImpl(dataService, unitResolver(), algorithmTemplateServiceImpl());
 	}
 
 	@Bean
 	public AlgorithmService algorithmServiceImpl()
 	{
-		return new AlgorithmServiceImpl(dataService, ontologyTagService, semanticSearchService, unitResolver(),
-				algorithmTemplateServiceImpl(), mapCategoryService());
+		return new AlgorithmServiceImpl(dataService, ontologyTagService, semanticSearchService,
+				algorithmGeneratorService());
 	}
 
 	@Bean
