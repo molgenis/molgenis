@@ -26,9 +26,9 @@ public class SeveralTimesConvertor extends AmountConvertor
 		Unit<?> unit = CategoryMapperUtil.findDurationUnit(description);
 		if (unit != null && unit.isCompatible(STANDARD_UNIT))
 		{
-			return AmountWrapper.create(
-					Amount.rangeOf((double) 2, NonSI.DAY.inverse().getConverterTo(unit).convert(1) - 1, unit).to(
-							STANDARD_UNIT), false);
+			return AmountWrapper
+					.create(Amount.rangeOf((double) 3, NonSI.DAY.inverse().getConverterTo(unit).convert(1) - 1, unit)
+							.to(STANDARD_UNIT), false);
 		}
 		return null;
 	}
