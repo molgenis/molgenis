@@ -93,6 +93,23 @@ public class MolgenisJsTest
 	}
 
 	@Test
+	public void testAverageValueOfMultipleNumericAttributes()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("SBP_1").setDataType(MolgenisFieldTypes.DECIMAL);
+		emd.addAttribute("SBP_2").setDataType(MolgenisFieldTypes.DECIMAL);
+		String script = "var counter = 0;\nvar SUM=newValue(0);\nif(!$('SBP_1').isNull().value()){\n\tSUM.plus($('SBP_1').value());\n\tcounter++;\n}\nif(!$('SBP_2').isNull().value()){\n\tSUM.plus($('SBP_2').value());\n\tcounter++;\n}\nif(counter !== 0){\n\tSUM.div(counter);\nSUM.value();\n}\nelse{\n\tnull;\n}";
+		Object result1 = ScriptEvaluator.eval(script, new MapEntity(ImmutableMap.of("SBP_1", 120, "SBP_2", 124)), emd);
+		assertEquals(result1.toString(), "122.0");
+
+		Object result2 = ScriptEvaluator.eval(script, new MapEntity(ImmutableMap.of("SBP_1", 120)), emd);
+		assertEquals(result2.toString(), "120.0");
+
+		Object result3 = ScriptEvaluator.eval(script, new MapEntity(), emd);
+		assertEquals(result3, null);
+	}
+
+	@Test
 	public void testGroup()
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
