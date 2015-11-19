@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 public class MolgenisPythonController
 {
-	private static final String URI = "/molgenis.python";
+	private static final String URI = "/molgenis.py";
 	private static final String API_URI = "/api/";
 
 	@RequestMapping(method = RequestMethod.GET, value = URI)
@@ -40,6 +40,6 @@ public class MolgenisPythonController
 
 		model.addAttribute("api_url", apiUrl);
 
-		return "molgenis.python";
+		return "molgenis.py";
 	}
 }

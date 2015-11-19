@@ -2,9 +2,11 @@ import requests;
 import json;
 import urllib;
 
-
-from urllib.parse import quote_plus
-  
+try:
+	from urllib.parse import quote_plus
+except ImportError:
+	# Python 2
+	from urllib import quote_plus
 
 class Session():
 	'''Representation of a session with the MOLGENIS REST API.
