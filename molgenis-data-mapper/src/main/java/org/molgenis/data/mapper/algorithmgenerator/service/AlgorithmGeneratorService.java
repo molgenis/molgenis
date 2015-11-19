@@ -10,10 +10,10 @@ import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 
 public interface AlgorithmGeneratorService
 {
-	public abstract String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes,
+	abstract String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes,
 			EntityMetaData targetEntityMetaData, EntityMetaData sourceEntityMetaData);
 
-	public abstract GeneratedAlgorithm generate(AttributeMetaData targetAttribute,
+	abstract GeneratedAlgorithm generate(AttributeMetaData targetAttribute,
 			Map<AttributeMetaData, ExplainedAttributeMetaData> sourceAttributes, EntityMetaData targetEntityMetaData,
 			EntityMetaData sourceEntityMetaData);
 }
