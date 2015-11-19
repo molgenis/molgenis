@@ -5,10 +5,13 @@ import static org.mockito.Mockito.mock;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
+import org.molgenis.data.EntityManager;
+import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
+import org.molgenis.data.mysql.MySqlEntityFactory;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.semanticsearch.config.SemanticSearchConfig;
@@ -59,8 +62,8 @@ public class ImportTestConfig
 		metaDataService().setDefaultBackend(mysqlRepositoryCollection());
 
 		// Login
-		SecurityContextHolder.getContext().setAuthentication(
-				new TestingAuthenticationToken("admin", "admin", "ROLE_SYSTEM"));
+		SecurityContextHolder.getContext()
+				.setAuthentication(new TestingAuthenticationToken("admin", "admin", "ROLE_SYSTEM"));
 	}
 
 	@Bean
@@ -76,6 +79,18 @@ public class ImportTestConfig
 	}
 
 	@Bean
+	public EntityManager entityManager()
+	{
+		return new EntityManagerImpl(dataService());
+	}
+
+	@Bean
+	public MySqlEntityFactory mySqlEntityFactory()
+	{
+		return new MySqlEntityFactory(entityManager(), dataService());
+	}
+
+	@Bean
 	public AsyncJdbcTemplate asyncJdbcTemplate()
 	{
 		return new AsyncJdbcTemplate(new JdbcTemplate(dataSource()));
@@ -85,7 +100,7 @@ public class ImportTestConfig
 	@Scope("prototype")
 	public MysqlRepository mysqlRepository()
 	{
-		return new MysqlRepository(dataService(), dataSource(), asyncJdbcTemplate());
+		return new MysqlRepository(dataService(), mySqlEntityFactory(), dataSource(), asyncJdbcTemplate());
 	}
 
 	@Bean

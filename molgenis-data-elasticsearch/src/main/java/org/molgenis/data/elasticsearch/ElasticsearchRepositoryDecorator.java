@@ -1,15 +1,20 @@
 package org.molgenis.data.elasticsearch;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.RepositoryCapability.MANAGABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.springframework.transaction.annotation.Transactional;
@@ -130,11 +135,53 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 		return decoratedRepo.findOne(id);
 	}
 
+	// retrieve entity by id via decorated repository
+	@Override
+	public Entity findOne(Object id, Fetch fetch)
+	{
+		return decoratedRepo.findOne(id, fetch);
+	}
+
+	@Override
+	public Entity findOne(Query q)
+	{
+		// optimization:
+		// retrieve entity by id via decorated repository in case query is of the form: <id attribute> EQUALS <id>
+		List<QueryRule> queryRules = q.getRules();
+		if (queryRules != null && queryRules.size() == 1)
+		{
+			QueryRule queryRule = queryRules.get(0);
+			if (queryRule.getOperator() == EQUALS)
+			{
+				String idAttrName = getEntityMetaData().getIdAttribute().getName();
+				if (queryRule.getField().equals(idAttrName))
+				{
+					return decoratedRepo.findOne(queryRule.getValue(), q.getFetch());
+				}
+			}
+		}
+
+		return super.findOne(q);
+	}
+
 	// retrieve entities by id via decorated repository
 	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
 		return decoratedRepo.findAll(ids);
+	}
+
+	// retrieve entities by id via decorated repository
+	@Override
+	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
+	{
+		return decoratedRepo.findAll(ids, fetch);
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Query q)
+	{
+		return super.findAll(q);
 	}
 
 	// retrieve all entities via decorated repository
@@ -180,11 +227,11 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 		Set<RepositoryCapability> capabilities = Sets.newHashSet(decoratedRepo.getCapabilities());
 		super.getCapabilities().forEach(capability -> {
 			// Elasticsearch can write and update documents, but the parent repository might not
-				if (capability != WRITABLE && capability != MANAGABLE)
-				{
-					capabilities.add(capability);
-				}
-			});
+			if (capability != WRITABLE && capability != MANAGABLE)
+			{
+				capabilities.add(capability);
+			}
+		});
 		return capabilities;
 	}
 }

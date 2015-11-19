@@ -189,13 +189,6 @@ public class RuntimePropertyToDataExplorerSettingsMigrator implements Applicatio
 				RuntimeProperty property = getProperty(key);
 				if (property != null)
 				{
-					boolean rtpValue = Boolean.parseBoolean(property.getValue());
-					boolean value = dataExplorerSettings.getModDiseaseMatcher();
-					if (rtpValue != value)
-					{
-						LOG.info("Updating DataExplorerSettings for RuntimeProperty [" + key + "]");
-						dataExplorerSettings.setModDiseaseMatcher(rtpValue);
-					}
 					LOG.info("Deleting RuntimeProperty [" + key + "]");
 					dataService.delete(ENTITY_NAME, property.getId());
 				}

@@ -17,6 +17,9 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
 /** Test for Query */
 @ContextConfiguration(classes = MysqlTestConfig.class)
 public class MysqlRepositoryCountTest extends AbstractTestNGSpringContextTests
@@ -27,8 +30,10 @@ public class MysqlRepositoryCountTest extends AbstractTestNGSpringContextTests
 	DataService dataService;
 
 	@Test
-	public void test()
+	public void test() throws ParseException
 	{
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
 		// define model
 		DefaultEntityMetaData countryMD = new DefaultEntityMetaData("query_country");
 		countryMD.addAttribute("code").setNillable(false).setIdAttribute(true); // TODO: make this an enum!
@@ -56,7 +61,7 @@ public class MysqlRepositoryCountTest extends AbstractTestNGSpringContextTests
 		e.set("email", "foo@localhost");
 		e.set("firstName", "john");
 		e.set("lastName", "doe");
-		e.set("birthday", "1976-06-07");
+		e.set("birthday", (sdf.parse("1976-06-07")));
 		e.set("height", 180);
 		e.set("active", true);
 		e.set("country", "US");
@@ -66,7 +71,7 @@ public class MysqlRepositoryCountTest extends AbstractTestNGSpringContextTests
 		e.set("email", "bar@localhost");
 		e.set("firstName", "jane");
 		e.set("lastName", "doe");
-		e.set("birthday", "1980-06-07");
+		e.set("birthday", sdf.parse("1980-06-07"));
 		e.set("height", 165);
 		e.set("active", false);
 		e.set("country", "US");
@@ -75,7 +80,7 @@ public class MysqlRepositoryCountTest extends AbstractTestNGSpringContextTests
 		e.set("email", "donald@localhost");
 		e.set("firstName", "donald");
 		e.set("lastName", "duck");
-		e.set("birthday", "1950-01-31");
+		e.set("birthday", sdf.parse("1950-01-31"));
 		e.set("height", 55);
 		e.set("active", true);
 		e.set("country", "NL");
@@ -107,10 +112,10 @@ public class MysqlRepositoryCountTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(persons.count(new QueryImpl().eq("active", true).or().eq("height", 165)), 3);
 
 		// date
-		Assert.assertEquals(persons.count(new QueryImpl().eq("birthday", "1950-01-31")), 1);
-		Assert.assertEquals(persons.count(new QueryImpl().gt("birthday", "1950-01-31")), 2);
+		Assert.assertEquals(persons.count(new QueryImpl().eq("birthday", sdf.parse("1950-01-31"))), 1);
+		Assert.assertEquals(persons.count(new QueryImpl().gt("birthday", sdf.parse("1950-01-31"))), 2);
 		Assert.assertEquals(
-				persons.count(new QueryImpl().gt("birthday", "1976-06-07").or().lt("birthday", "1976-06-07")), 2);
+				persons.count(new QueryImpl().gt("birthday", sdf.parse("1976-06-07")).or().lt("birthday", sdf.parse("1976-06-07"))), 2);
 
 		// xref
 		Assert.assertEquals(persons.count(new QueryImpl().eq("country", "US")), 2);

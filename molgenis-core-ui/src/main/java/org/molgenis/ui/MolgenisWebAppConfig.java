@@ -16,8 +16,12 @@ import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.molgenis.data.AutoValueRepositoryDecorator;
+import org.molgenis.data.ComputedEntityValuesDecorator;
 import org.molgenis.data.DataService;
+import org.molgenis.data.EntityManager;
+import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.EntityReferenceResolverDecorator;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
@@ -25,12 +29,15 @@ import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.RepositorySecurityDecorator;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
+import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
+import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
+import org.molgenis.data.mysql.MySqlEntityFactory;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
@@ -93,6 +100,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 
 public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
@@ -331,6 +339,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		result.setPreferFileSystemAccess(false);
 		result.setTemplateLoaderPath("classpath:/templates/");
 		result.setDefaultEncoding("UTF-8");
+		Properties freemarkerSettings = new Properties();
+		freemarkerSettings.setProperty(Configuration.LOCALIZED_LOOKUP_KEY, Boolean.FALSE.toString());
+		result.setFreemarkerSettings(freemarkerSettings);
 
 		Map<String, Object> freemarkerVariables = Maps.newHashMap();
 		freemarkerVariables.put("limit", new LimitMethod());
@@ -388,19 +399,25 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	protected abstract ManageableRepositoryCollection getBackend();
 
-	protected abstract void addReposToReindex(DataServiceImpl localDataService);
+	protected abstract void addReposToReindex(DataServiceImpl localDataService,
+			MySqlEntityFactory localMySqlEntityFactory);
 
 	protected void reindex()
 	{
 		// Create local dataservice and metadataservice
 		DataServiceImpl localDataService = new DataServiceImpl();
+		EntityManager localEntityManager = new EntityManagerImpl(localDataService);
+		MySqlEntityFactory localMySqlEntityFactory = new MySqlEntityFactory(localEntityManager, localDataService);
 		MetaDataService metaDataService = new MetaDataServiceImpl(localDataService);
 		localDataService.setMeta(metaDataService);
 
-		addReposToReindex(localDataService);
+		addReposToReindex(localDataService, localMySqlEntityFactory);
 
+		SourceToEntityConverter sourceToEntityConverter = new SourceToEntityConverter(localDataService,
+				localEntityManager);
+		EntityToSourceConverter entityToSourceConverter = new EntityToSourceConverter();
 		SearchService localSearchService = embeddedElasticSearchServiceFactory.create(localDataService,
-				new EntityToSourceConverter());
+				new ElasticsearchEntityFactory(localEntityManager, sourceToEntityConverter, entityToSourceConverter));
 
 		List<EntityMetaData> metas = DependencyResolver
 				.resolve(Sets.newHashSet(localDataService.getMeta().getEntityMetaDatas()));
@@ -478,6 +495,12 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@Bean
+	public EntityManager entityManager()
+	{
+		return new EntityManagerImpl(dataService());
+	}
+
+	@Bean
 	public RepositoryDecoratorFactory repositoryDecoratorFactory()
 	{
 		// Moving this inner class to a separate class results in a FatalBeanException on application startup
@@ -488,14 +511,23 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 			{
 				Repository decoratedRepository = repository;
 
-				// 6. Owned decorator
-				if (EntityUtils.doesExtend(repository.getEntityMetaData(), OwnedEntityMetaData.ENTITY_NAME))
+				// 9. Owned decorator
+				if (EntityUtils.doesExtend(decoratedRepository.getEntityMetaData(), OwnedEntityMetaData.ENTITY_NAME))
 				{
 					decoratedRepository = new OwnedEntityRepositoryDecorator(decoratedRepository);
 				}
 
+				// 8. Entity reference resolver decorator
+				decoratedRepository = new EntityReferenceResolverDecorator(decoratedRepository, entityManager());
+
+				// 7. Computed entity values decorator
+				decoratedRepository = new ComputedEntityValuesDecorator(decoratedRepository);
+
+				// 6. Entity listener
+				decoratedRepository = new EntityListenerRepositoryDecorator(decoratedRepository);
+
 				// 5. Transaction log decorator
-				decoratedRepository = new TransactionLogRepositoryDecorator(repository, transactionLogService);
+				decoratedRepository = new TransactionLogRepositoryDecorator(decoratedRepository, transactionLogService);
 
 				// 4. SQL exception translation decorator
 				String backend = decoratedRepository.getEntityMetaData().getBackend();

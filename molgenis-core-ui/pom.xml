@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.molgenis</groupId>
 		<artifactId>molgenis</artifactId>
-		<version>1.13.0-SNAPSHOT</version>
+		<version>1.14.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-core-ui</artifactId>
 	<packaging>jar</packaging>
@@ -151,6 +151,7 @@
 	                            <jsSourceFile>/component/wrapper/JQRangeSlider.js</jsSourceFile>
 	                            <jsSourceFile>/component/wrapper/JQueryForm.js</jsSourceFile>
 	                            <jsSourceFile>/component/wrapper/Select2.js</jsSourceFile>
+	                            <jsSourceFile>/component/AggregateTable.js</jsSourceFile>
 	                            <jsSourceFile>/component/AlertMessage.js</jsSourceFile>
 	                            <jsSourceFile>/component/AttributeControl.js</jsSourceFile>
 	                            <jsSourceFile>/component/BoolControl.js</jsSourceFile>

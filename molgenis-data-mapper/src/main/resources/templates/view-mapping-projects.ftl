@@ -15,7 +15,7 @@
 		
 		<#if entityMetaDatas?has_content>
 			<div class="btn-group" role="group">
-				<button type="button" id="submit-new-source-column-btn" class="btn btn-primary" data-toggle="modal" data-target="#create-new-mapping-project-modal"><span class="glyphicon glyphicon-plus"></span>&nbsp;Add Mapping Project</button>
+				<button type="button" id="add-mapping-project-btn" class="btn btn-primary" data-toggle="modal" data-target="#create-new-mapping-project-modal"><span class="glyphicon glyphicon-plus"></span>&nbsp;Add Mapping Project</button>
 			</div>
 		</#if>	
 		<hr/>
@@ -24,7 +24,7 @@
 <div class="row">
 	<div class="col-md-6">
 		<#if mappingProjects?has_content>
-			<table class="table table-bordered">
+			<table class="table table-bordered" id="mapping-projects-tbl">
 	 			<thead>
 	 				<tr>
 	 					<th></th>
@@ -119,7 +119,7 @@
 						
 						<div class="form-group">
 							<label>Select the Target entity</label>
-							<select name="target-entity" class="form-control" required="required" placeholder="Select a target entity">
+							<select name="target-entity" id="target-entity-select" class="form-control" required="required" placeholder="Select a target entity">
 		    					<#list entityMetaDatas as entityMetaData>
 		    						<option value="${entityMetaData.name?html}">${entityMetaData.name?html}</option>
 		    					</#list>
