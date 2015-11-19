@@ -7,8 +7,8 @@ import org.molgenis.data.EntityMetaData;
 
 public interface AlgorithmGenerator
 {
-	abstract String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes,
+	String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes,
 			EntityMetaData targetEntityMetaData, EntityMetaData sourceEntityMetaData);
 
-	abstract boolean isSuitable(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes);
+	boolean isSuitable(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes);
 }
