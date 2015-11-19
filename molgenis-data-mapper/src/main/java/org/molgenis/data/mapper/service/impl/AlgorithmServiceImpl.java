@@ -172,7 +172,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 					convertedValue = Context.jsToJava(value, Date.class);
 					break;
 				case INT:
-					convertedValue = Integer.parseInt(Context.toString(value));
+					// Round it up or down to the nearest integer value
+					convertedValue = Math.round(Double.parseDouble(Context.toString(value)));
 					break;
 				case DECIMAL:
 					convertedValue = Context.toNumber(value);
