@@ -275,17 +275,19 @@ public class DefaultEntity implements Entity
 					"can't use getEntities() on something that's not an xref, mref, categorical, categorical_mref or file");
 		}
 
-		List<?> ids;
+		Iterable<?> ids;
 
 		Object value = values.get(attributeName);
 		if (value instanceof String) ids = getList(attributeName);
 		else if (value instanceof Entity) return Collections.singletonList((Entity) value);
-		else ids = (List<?>) value;
+		else ids = (Iterable<?>) value;
 
 		if ((ids == null) || !ids.iterator().hasNext()) return Collections.emptyList();
-		if (ids.iterator().next() instanceof Entity) return (Iterable<Entity>) ids;
 
-		if (ids.get(0) instanceof Map)
+		Object firstItem = ids.iterator().next();
+		if (firstItem instanceof Entity) return (Iterable<Entity>) ids;
+
+		if (firstItem instanceof Map)
 		{
 			return stream(ids.spliterator(), false)
 					.map(id -> new DefaultEntity(attribute.getRefEntity(), dataService, (Map<String, Object>) id))

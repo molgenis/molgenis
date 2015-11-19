@@ -5,7 +5,6 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -33,6 +32,7 @@ public class DefaultEntityTest
 	private DefaultEntityMetaData emd;
 	private DefaultEntity entity;
 	private Date utilDate = new Date();
+
 	@Mock
 	DataService dataService;
 
@@ -139,40 +139,6 @@ public class DefaultEntityTest
 		List<String> attrNames = Arrays.asList("attr0", "attr1");
 		when(entityMeta.getAtomicAttributeNames()).thenReturn(attrNames);
 		assertEquals(Lists.newArrayList(entity.getAttributeNames()), attrNames);
-	}
-
-	@Test
-	public void getEntities()
-	{
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		AttributeMetaData labelAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("label").getMock();
-		when(entityMeta.getLabelAttribute()).thenReturn(labelAttr);
-		DataService dataService = mock(DataService.class);
-
-		Entity refEntity = mock(Entity.class);
-		Iterable<Entity> entities = new Iterable<Entity>()
-		{
-			@Override
-			public Iterator<Entity> iterator()
-			{
-				return Arrays.asList(refEntity).iterator();
-			}
-		};
-		DefaultEntity entity = new DefaultEntity(entityMeta, dataService, Collections.singletonMap("attr", entities));
-		assertEquals(entity.getEntities("attr"), entities);
-	}
-
-	@Test
-	public void getEntitiesForSingleEntity()
-	{
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		AttributeMetaData labelAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("label").getMock();
-		when(entityMeta.getLabelAttribute()).thenReturn(labelAttr);
-		DataService dataService = mock(DataService.class);
-
-		Entity refEntity = mock(Entity.class);
-		DefaultEntity entity = new DefaultEntity(entityMeta, dataService, Collections.singletonMap("attr", refEntity));
-		assertEquals(Lists.newArrayList(entity.getEntities("attr")), Arrays.asList(refEntity));
 	}
 
 	@Test
