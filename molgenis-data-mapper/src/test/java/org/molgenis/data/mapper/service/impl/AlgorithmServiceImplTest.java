@@ -126,7 +126,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		attributeMapping.setAlgorithm(
 				"Math.floor((new Date('02/12/2015') - $('dob').value())/(365.2425 * 24 * 60 * 60 * 1000))");
 		Object result = algorithmService.apply(attributeMapping, source, entityMetaData);
-		assertEquals(result.toString(), "41");
+		assertEquals(result, (long) 41);
 	}
 
 	@Test
