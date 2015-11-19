@@ -25,8 +25,7 @@ public class TransactionLogService implements MolgenisTransactionListener
 	private final MolgenisTransactionLogEntryMetaData molgenisTransactionLogEntryMetaData;
 	private final AsyncTransactionLog asyncTransactionLog;
 
-	public TransactionLogService(DataService dataService,
-			MolgenisTransactionLogMetaData molgenisTransactionLogMetaData,
+	public TransactionLogService(DataService dataService, MolgenisTransactionLogMetaData molgenisTransactionLogMetaData,
 			MolgenisTransactionLogEntryMetaData molgenisTransactionLogEntryMetaData,
 			AsyncTransactionLog asyncTransactionLog)
 	{
@@ -81,7 +80,7 @@ public class TransactionLogService implements MolgenisTransactionListener
 					Entity logEntry = new DefaultEntity(molgenisTransactionLogEntryMetaData, dataService);
 					logEntry.set(MolgenisTransactionLogEntryMetaData.MOLGENIS_TRANSACTION_LOG, log);
 					logEntry.set(MolgenisTransactionLogEntryMetaData.ENTITY, entityMetaData.getName());
-					logEntry.set(MolgenisTransactionLogEntryMetaData.TYPE, type);
+					logEntry.set(MolgenisTransactionLogEntryMetaData.TYPE, type.name());
 
 					asyncTransactionLog.addLogEntry(logEntry);
 				}

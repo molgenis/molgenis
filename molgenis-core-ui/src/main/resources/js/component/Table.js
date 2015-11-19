@@ -32,6 +32,7 @@
 			entity: React.PropTypes.string.isRequired,
 			attrs: React.PropTypes.object,
 			query: React.PropTypes.object,
+			sort: React.PropTypes.object,
 			maxRows: React.PropTypes.number,
 			onRowAdd: React.PropTypes.func,
 			onRowEdit: React.PropTypes.func,
@@ -48,7 +49,7 @@
 			return {
 				data: null,
 				attrs: this.props.attrs,
-				sort: null,
+				sort: this.props.sort,
 				start: 0,
 				maxRows: this.props.maxRows
 			};

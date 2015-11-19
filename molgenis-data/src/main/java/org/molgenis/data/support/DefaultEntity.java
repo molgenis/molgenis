@@ -7,11 +7,9 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -36,18 +34,21 @@ public class DefaultEntity implements Entity
 	private final EntityMetaData entityMetaData;
 	private transient final DataService dataService;
 
+	// TODO remove dependency on DataService
 	public DefaultEntity(EntityMetaData entityMetaData, DataService dataService, Map<String, Object> values)
 	{
 		this(entityMetaData, dataService);
 		this.values.putAll(values);
 	}
 
+	// TODO remove dependency on DataService
 	public DefaultEntity(EntityMetaData entityMetaData, DataService dataService, Entity entity)
 	{
 		this(entityMetaData, dataService);
 		set(entity);
 	}
 
+	// TODO remove dependency on DataService
 	public DefaultEntity(EntityMetaData entityMetaData, DataService dataService)
 	{
 		this.entityMetaData = entityMetaData;
@@ -63,19 +64,7 @@ public class DefaultEntity implements Entity
 	@Override
 	public Iterable<String> getAttributeNames()
 	{
-		return new Iterable<String>()
-		{
-			@Override
-			public Iterator<String> iterator()
-			{
-				Stream<String> atomic = stream(entityMetaData.getAtomicAttributes().spliterator(), false)
-						.map(a -> a.getName());
-				Stream<String> compound = stream(entityMetaData.getAttributes().spliterator(), false)
-						.filter(a -> a.getDataType().getEnumType() == FieldTypeEnum.COMPOUND).map(a -> a.getName());
-
-				return Stream.concat(atomic, compound).iterator();
-			}
-		};
+		return getEntityMetaData().getAtomicAttributeNames();
 	}
 
 	@Override
@@ -287,12 +276,14 @@ public class DefaultEntity implements Entity
 		}
 
 		List<?> ids;
+
 		Object value = values.get(attributeName);
 		if (value instanceof String) ids = getList(attributeName);
+		else if (value instanceof Entity) return Collections.singletonList((Entity) value);
 		else ids = (List<?>) value;
 
-		if ((ids == null) || ids.isEmpty()) return Collections.emptyList();
-		if (ids.get(0) instanceof Entity) return (Iterable<Entity>) ids;
+		if ((ids == null) || !ids.iterator().hasNext()) return Collections.emptyList();
+		if (ids.iterator().next() instanceof Entity) return (Iterable<Entity>) ids;
 
 		if (ids.get(0) instanceof Map)
 		{
@@ -314,25 +305,7 @@ public class DefaultEntity implements Entity
 	@Override
 	public void set(String attributeName, Object value)
 	{
-		// XRefs are stores as id in the values map, MRef as list of id
-		AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
-		if (attribute == null) throw new UnknownAttributeException(attributeName);
-
-		if ((attribute.getDataType() instanceof XrefField) && (value instanceof Entity))
-		{
-			Entity refEntity = (Entity) value;
-			values.put(attributeName, refEntity.getIdValue());
-		}
-		else if ((attribute.getDataType() instanceof MrefField) && (value instanceof Iterable<?>))
-		{
-			List<?> ids = stream(((Iterable<?>) value).spliterator(), false)
-					.map(v -> v instanceof Entity ? ((Entity) v).getIdValue() : v).collect(Collectors.toList());
-			values.put(attributeName, ids);
-		}
-		else
-		{
-			values.put(attributeName, value);
-		}
+		values.put(attributeName, value);
 	}
 
 	@Override
@@ -377,5 +350,4 @@ public class DefaultEntity implements Entity
 		else if (!getIdValue().equals(other.getIdValue())) return false;
 		return true;
 	}
-
 }

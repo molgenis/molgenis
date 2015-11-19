@@ -45,11 +45,35 @@ public interface Repository extends Iterable<Entity>, Closeable
 	Entity findOne(Object id);
 
 	/**
+	 * Find one entity based on id.
+	 * 
+	 * @param id
+	 *            entity id
+	 * @param fetch
+	 *            fetch defining which attributes to retrieve
+	 * @return entity or null
+	 * @throws MolgenisDataAccessException
+	 */
+	Entity findOne(Object id, Fetch fetch);
+
+	/**
 	 * find entities based on a stream of ids.
 	 * 
 	 * @return (empty) Iterable where the order of entities matches the order of ids, never null
 	 */
 	Iterable<Entity> findAll(Iterable<Object> ids);
+
+	/**
+	 * Find entities based on id.
+	 * 
+	 * @param ids
+	 *            entity ids
+	 * @param fetch
+	 *            fetch defining which attributes to retrieve
+	 * @return (empty) Iterable where the order of entities matches the order of ids, never null
+	 * @throws MolgenisDataAccessException
+	 */
+	Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch);
 
 	/**
 	 * 
@@ -103,4 +127,20 @@ public interface Repository extends Iterable<Entity>, Closeable
 	 * Rebuild current index
 	 */
 	public void rebuildIndex();
+
+	/**
+	 * Adds an entity listener for a entity that listens to entity changes
+	 * 
+	 * @param entityListener
+	 *            entity listener for a entity
+	 */
+	void addEntityListener(EntityListener entityListener);
+
+	/**
+	 * Removes an entity listener
+	 * 
+	 * @param entityListener
+	 *            entity listener for a entity
+	 */
+	void removeEntityListener(EntityListener entityListener);
 }

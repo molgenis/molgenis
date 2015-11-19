@@ -1,6 +1,5 @@
 package org.molgenis.data.elasticsearch.util;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -12,28 +11,25 @@ public class SearchRequest
 {
 	private String documentType;
 	private QueryImpl query;
-	private final List<String> fieldsToReturn;
 	private AttributeMetaData aggregateField1;
 	private AttributeMetaData aggregateField2;
 	private AttributeMetaData aggregateFieldDistinct;
 
 	public SearchRequest()
 	{
-		fieldsToReturn = new ArrayList<String>();
 	}
 
-	public SearchRequest(String documentType, Query query, List<String> fieldsToReturn)
+	public SearchRequest(String documentType, Query query)
 	{
 		this.documentType = documentType;
 		this.query = new QueryImpl(query);
-		this.fieldsToReturn = fieldsToReturn;
 	}
 
 	public SearchRequest(String documentType, Query query, List<String> fieldsToReturn,
 			AttributeMetaData aggregateField1, AttributeMetaData aggregateField2,
 			AttributeMetaData aggregateFieldDistinct)
 	{
-		this(documentType, query, fieldsToReturn);
+		this(documentType, query);
 		this.aggregateField1 = aggregateField1;
 		this.aggregateField2 = aggregateField2;
 		this.aggregateFieldDistinct = aggregateFieldDistinct;
@@ -52,11 +48,6 @@ public class SearchRequest
 		}
 
 		return query;
-	}
-
-	public List<String> getFieldsToReturn()
-	{
-		return fieldsToReturn;
 	}
 
 	public AttributeMetaData getAggregateField1()
@@ -89,7 +80,6 @@ public class SearchRequest
 		result = prime * result + ((aggregateField1 == null) ? 0 : aggregateField1.hashCode());
 		result = prime * result + ((aggregateField2 == null) ? 0 : aggregateField2.hashCode());
 		result = prime * result + ((aggregateFieldDistinct == null) ? 0 : aggregateField2.hashCode());
-		result = prime * result + ((fieldsToReturn == null) ? 0 : fieldsToReturn.hashCode());
 		result = prime * result + ((query == null) ? 0 : query.hashCode());
 		return result;
 	}
@@ -121,11 +111,6 @@ public class SearchRequest
 			if (other.aggregateFieldDistinct != null) return false;
 		}
 		else if (!aggregateFieldDistinct.equals(other.aggregateFieldDistinct)) return false;
-		if (fieldsToReturn == null)
-		{
-			if (other.fieldsToReturn != null) return false;
-		}
-		else if (!fieldsToReturn.equals(other.fieldsToReturn)) return false;
 		if (query == null)
 		{
 			if (other.query != null) return false;

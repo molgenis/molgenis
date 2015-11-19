@@ -15,12 +15,15 @@ import java.util.Map;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Sets;
 
 /**
@@ -79,6 +82,12 @@ public abstract class AbstractRepository implements Repository
 	@Override
 	public Entity findOne(Object id)
 	{
+		return findOne(id, null);
+	}
+
+	@Override
+	public Entity findOne(Object id, Fetch fetch)
+	{
 		throw new UnsupportedOperationException();
 	}
 
@@ -86,13 +95,28 @@ public abstract class AbstractRepository implements Repository
 	@Transactional(readOnly = true)
 	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
-		if (ids == null) return Collections.emptyList();
-		return concat(transform(partition(ids, FIND_ALL_BATCH_SIZE), this::findAllBatched));
+		return findAll(ids, null);
 	}
 
-	private Iterable<Entity> findAllBatched(List<Object> ids)
+	@Override
+	@Transactional(readOnly = true)
+	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
 	{
-		Query inQuery = new QueryImpl().in(getEntityMetaData().getIdAttribute().getName(), Sets.newHashSet(ids));
+		if (ids == null) return Collections.emptyList();
+		return concat(transform(partition(ids, FIND_ALL_BATCH_SIZE), new Function<List<Object>, Iterable<Entity>>()
+		{
+			@Override
+			public Iterable<Entity> apply(List<Object> ids)
+			{
+				return findAllBatched(ids, fetch);
+			}
+		}));
+	}
+
+	private Iterable<Entity> findAllBatched(List<Object> ids, Fetch fetch)
+	{
+		Query inQuery = new QueryImpl().in(getEntityMetaData().getIdAttribute().getName(), Sets.newHashSet(ids))
+				.fetch(fetch);
 		Map<Object, Entity> indexedEntities = uniqueIndex(findAll(inQuery), Entity::getIdValue);
 		return filter(transform(ids, id -> lookup(indexedEntities, id)), notNull());
 	}
@@ -194,6 +218,18 @@ public abstract class AbstractRepository implements Repository
 	// Implement in child class if repository has capability INDEXABLE
 	@Override
 	public void rebuildIndex()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void addEntityListener(EntityListener entityListener)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void removeEntityListener(EntityListener entityListener)
 	{
 		throw new UnsupportedOperationException();
 	}

@@ -7,10 +7,13 @@ import javax.sql.DataSource;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityManager;
+import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
+import org.molgenis.data.mysql.MySqlEntityFactory;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
@@ -53,6 +56,8 @@ public class Step8VarcharToTextRepeated extends MolgenisUpgrade
 	public void upgrade()
 	{
 		DataServiceImpl dataService = new DataServiceImpl();
+		EntityManager entityResolver = new EntityManagerImpl(dataService);
+		MySqlEntityFactory mySqlEntityFactory = new MySqlEntityFactory(entityResolver, dataService);
 
 		// Get the undecorated repos
 		MysqlRepositoryCollection undecoratedMySQL = new MysqlRepositoryCollection()
@@ -60,7 +65,8 @@ public class Step8VarcharToTextRepeated extends MolgenisUpgrade
 			@Override
 			protected MysqlRepository createMysqlRepository()
 			{
-				return new MysqlRepository(dataService, dataSource, new AsyncJdbcTemplate(new JdbcTemplate(dataSource)));
+				return new MysqlRepository(dataService, mySqlEntityFactory, dataSource,
+						new AsyncJdbcTemplate(new JdbcTemplate(dataSource)));
 			}
 
 			@Override
@@ -90,7 +96,8 @@ public class Step8VarcharToTextRepeated extends MolgenisUpgrade
 						{
 							// mysql keys cannot be text so leave those columns untouched
 							if (!(amd.isIdAtrribute() || fieldType instanceof CategoricalMrefField
-									|| fieldType instanceof CategoricalField || fieldType instanceof MrefField || fieldType instanceof XrefField))
+									|| fieldType instanceof CategoricalField || fieldType instanceof MrefField
+									|| fieldType instanceof XrefField))
 							{
 								if (amd.isUnique())
 								{
