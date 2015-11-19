@@ -53,7 +53,7 @@ class Session():
         response.raise_for_status();
         return response;
 
-    def get(self, entity, q=None, attributes=None, num = 1000, start = 0, sortColumn= None, sortOrder = None):
+    def get(self, entity, q=None, attributes=None, num = 100, start = 0, sortColumn= None, sortOrder = None):
         '''Retrieves entity rows from an entity repository.
 
         Args:
