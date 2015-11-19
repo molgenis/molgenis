@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 public class MolgenisPythonController
 {
 	private static final String URI = "/molgenis.python";
-	private static final String API_URI = "/api/v1/";
+	private static final String API_URI = "/api/";
 
 	@RequestMapping(method = RequestMethod.GET, value = URI)
 	public String showMolgenisPythonApiClient(HttpServletRequest request, Model model)
