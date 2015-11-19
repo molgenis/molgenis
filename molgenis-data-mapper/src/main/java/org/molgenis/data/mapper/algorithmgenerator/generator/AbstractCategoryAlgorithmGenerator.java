@@ -25,7 +25,7 @@ public abstract class AbstractCategoryAlgorithmGenerator implements AlgorithmGen
 		this.dataService = Preconditions.checkNotNull(dataService);
 	}
 
-	boolean isReferenceDataType(AttributeMetaData attribute)
+	boolean isXrefDataType(AttributeMetaData attribute)
 	{
 		FieldTypeEnum enumType = attribute.getDataType().getEnumType();
 		return enumType == CATEGORICAL || enumType == XREF;

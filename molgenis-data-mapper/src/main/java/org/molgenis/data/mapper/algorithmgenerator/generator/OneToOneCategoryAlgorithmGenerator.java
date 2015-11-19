@@ -38,7 +38,7 @@ public class OneToOneCategoryAlgorithmGenerator extends AbstractCategoryAlgorith
 	@Override
 	public boolean isSuitable(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)
 	{
-		return isReferenceDataType(targetAttribute) && (sourceAttributes.stream().allMatch(this::isReferenceDataType))
+		return isXrefDataType(targetAttribute) && (sourceAttributes.stream().allMatch(this::isXrefDataType))
 				&& sourceAttributes.size() == 1;
 	}
 
