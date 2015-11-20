@@ -125,6 +125,10 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 			{
 				user = createMolgenisUser(email);
 			}
+			else if (!user.getUsername().equals(principal))
+			{
+				throw new BadCredentialsException(format("A user with username [%s] already exists", email));
+			}
 
 			// create authentication
 			Collection<? extends GrantedAuthority> authorities = molgenisUserDetailsService.getAuthorities(user);
