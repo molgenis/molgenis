@@ -1,8 +1,12 @@
-package org.molgenis.data.mapper.algorithmgenerator.categorygenerator;
+package org.molgenis.data.mapper.algorithmgenerator.generator;
+
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -12,18 +16,20 @@ import org.molgenis.data.mapper.algorithmgenerator.categorymapper.CategoryMapper
 
 import com.google.common.base.Preconditions;
 
-public abstract class CategoryAlgorithmGenerator
+public abstract class AbstractCategoryAlgorithmGenerator implements AlgorithmGenerator
 {
 	private final DataService dataService;
 
-	public CategoryAlgorithmGenerator(DataService dataService)
+	public AbstractCategoryAlgorithmGenerator(DataService dataService)
 	{
 		this.dataService = Preconditions.checkNotNull(dataService);
 	}
 
-	public abstract boolean isSuitable(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes);
-
-	public abstract String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes);
+	boolean isXrefOrCategorialDataType(AttributeMetaData attribute)
+	{
+		FieldTypeEnum enumType = attribute.getDataType().getEnumType();
+		return enumType == CATEGORICAL || enumType == XREF;
+	}
 
 	public List<Category> convertToCategory(AttributeMetaData attributeMetaData)
 	{
