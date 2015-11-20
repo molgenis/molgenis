@@ -41,6 +41,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 		private static final String SIGNUP = "signup";
 		private static final String SIGNUP_MODERATION = "signup_moderation";
 		private static final String GOOGLE_SIGN_IN = "google_sign_in";
+		private static final String GOOGLE_APP_CLIENT_ID = "google_app_client_id";
 		public static final String MENU = "molgenis_menu";
 		private static final String LANGUAGE_CODE = "language_code";
 		private static final String BOOTSTRAP_THEME = "bootstrap_theme";
@@ -60,6 +61,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 		private static final boolean DEFAULT_SIGNUP = false;
 		private static final boolean DEFAULT_SIGNUP_MODERATION = true;
 		private static final boolean DEFAULT_GOOGLE_SIGN_IN = true;
+		private static final String DEFAULT_GOOGLE_APP_CLIENT_ID = "130634143611-e2518d1uqu0qtec89pjgn50gbg95jin4.apps.googleusercontent.com";
 		private static final String DEFAULT_LANGUAGE_CODE = "en";
 		private static final String DEFAULT_BOOTSTRAP_THEME = "bootstrap-molgenis.min.css";
 		private static final boolean DEFAULT_GOOGLE_ANALYTICS_IP_ANONYMIZATION = true;
@@ -82,6 +84,10 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 			addAttribute(GOOGLE_SIGN_IN).setDataType(BOOL).setNillable(false)
 					.setDefaultValue(String.valueOf(DEFAULT_GOOGLE_SIGN_IN)).setLabel("Enable Google Sign-In")
 					.setDescription("Enable users to sign in with their existing Google account");
+			addAttribute(GOOGLE_APP_CLIENT_ID).setDataType(STRING).setNillable(false)
+					.setDefaultValue(DEFAULT_GOOGLE_APP_CLIENT_ID).setLabel("Google app client ID")
+					.setDescription("Google app client ID used during Google Sign-In")
+					.setVisibleExpression("$('" + GOOGLE_SIGN_IN + "').eq(true).value()");
 			addAttribute(LOGO_NAVBAR_HREF).setDataType(STRING).setNillable(true).setLabel("Logo in navigation bar")
 					.setDefaultValue(DEFAULT_LOGO_NAVBAR_HREF)
 					.setDescription("HREF to logo image used instead of home plugin label");
@@ -365,5 +371,17 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 	{
 		Boolean value = getBoolean(Meta.GOOGLE_SIGN_IN);
 		return value != null ? value.booleanValue() : false;
+	}
+
+	@Override
+	public void setGoogleAppClientId(String googleAppClientId)
+	{
+		set(Meta.GOOGLE_APP_CLIENT_ID, googleAppClientId);
+	}
+
+	@Override
+	public String getGoogleAppClientId()
+	{
+		return getString(Meta.GOOGLE_APP_CLIENT_ID);
 	}
 }

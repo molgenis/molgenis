@@ -75,4 +75,8 @@ public interface AppSettings
 	void setGoogleSignIn(boolean signIn);
 
 	boolean getGoogleSignIn();
+
+	void setGoogleAppClientId(String googleAppClientId);
+
+	String getGoogleAppClientId();
 }
