@@ -40,6 +40,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 		private static final String FOOTER = "footer";
 		private static final String SIGNUP = "signup";
 		private static final String SIGNUP_MODERATION = "signup_moderation";
+		private static final String GOOGLE_SIGN_IN = "google_sign_in";
 		public static final String MENU = "molgenis_menu";
 		private static final String LANGUAGE_CODE = "language_code";
 		private static final String BOOTSTRAP_THEME = "bootstrap_theme";
@@ -58,6 +59,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 		private static final String DEFAULT_LOGO_NAVBAR_HREF = "/img/logo_molgenis_small.png";
 		private static final boolean DEFAULT_SIGNUP = false;
 		private static final boolean DEFAULT_SIGNUP_MODERATION = true;
+		private static final boolean DEFAULT_GOOGLE_SIGN_IN = true;
 		private static final String DEFAULT_LANGUAGE_CODE = "en";
 		private static final String DEFAULT_BOOTSTRAP_THEME = "bootstrap-molgenis.min.css";
 		private static final boolean DEFAULT_GOOGLE_ANALYTICS_IP_ANONYMIZATION = true;
@@ -77,6 +79,9 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 			addAttribute(SIGNUP_MODERATION).setDataType(BOOL).setNillable(false)
 					.setDefaultValue(String.valueOf(DEFAULT_SIGNUP_MODERATION)).setLabel("Sign up moderation")
 					.setDescription("Admins must accept sign up requests before account activation");
+			addAttribute(GOOGLE_SIGN_IN).setDataType(BOOL).setNillable(false)
+					.setDefaultValue(String.valueOf(DEFAULT_GOOGLE_SIGN_IN)).setLabel("Enable Google Sign-In")
+					.setDescription("Enable users to sign in with their existing Google account");
 			addAttribute(LOGO_NAVBAR_HREF).setDataType(STRING).setNillable(true).setLabel("Logo in navigation bar")
 					.setDefaultValue(DEFAULT_LOGO_NAVBAR_HREF)
 					.setDescription("HREF to logo image used instead of home plugin label");
@@ -346,6 +351,19 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 	public boolean getGoogleAnalyticsAccountPrivacyFriendlyMolgenis()
 	{
 		Boolean value = getBoolean(Meta.GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS);
+		return value != null ? value.booleanValue() : false;
+	}
+
+	@Override
+	public void setGoogleSignIn(boolean googleSignIn)
+	{
+		set(Meta.GOOGLE_SIGN_IN, googleSignIn);
+	}
+
+	@Override
+	public boolean getGoogleSignIn()
+	{
+		Boolean value = getBoolean(Meta.GOOGLE_SIGN_IN);
 		return value != null ? value.booleanValue() : false;
 	}
 }

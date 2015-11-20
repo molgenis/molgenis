@@ -72,4 +72,7 @@ public interface AppSettings
 
 	boolean getGoogleAnalyticsAccountPrivacyFriendlyMolgenis();
 
+	void setGoogleSignIn(boolean signIn);
+
+	boolean getGoogleSignIn();
 }
