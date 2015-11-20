@@ -12,6 +12,9 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta http-equiv="X-UA-Compatible" content="chrome=1">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+    <#if app_settings.googleSignIn>
+        <meta name="google-signin-client_id" content="${app_settings.googleAppClientId?html}">
+    </#if>
         <link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
         
 	<#-- Bundle of third party CSS resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
@@ -51,6 +54,19 @@
         <script src="<@resource_href "/js/handlebars.min.js"/>"></script>
         <script src="<@resource_href "/js/molgenis.js"/>"></script>
         <script src="<@resource_href "/js/molgenis-script-evaluator.js"/>"></script>
+    <#if app_settings.googleSignIn>
+        <#if authenticated?? && authenticated>
+        <#-- Include script tag before platform.js script loading, else onLoad could be called before the onLoad function is available -->
+        <script>
+            function onLoad() {
+                gapi.load('auth2', function() {
+                    gapi.auth2.init();
+                });
+            }
+        </script>
+        </#if>
+        <script src="https://apis.google.com/js/platform.js<#if authenticated?? && authenticated>?onload=onLoad</#if>" async defer></script>
+    </#if>
     <#if environment == "development">
         <#-- Important: Update minify-maven-plugin configuration in molgenis-core-ui/pom.xml when modifying the list below -->
         <script src="<@resource_href "/js/react-with-addons.js"/>"></script>
@@ -232,12 +248,20 @@
 				</ul>
 				
 				<#if authenticated?? && authenticated>
-					<form class="navbar-form navbar-right" method="post" action="/logout">
-						<button id="signout-button" type="submit" class="btn btn-primary">Sign out</button>
+					<form id="logout-form" class="navbar-form navbar-right" method="post" action="/logout">
+						<button id="signout-button" type="button" class="btn btn-primary">Sign out</button>
+						<script>
+                            $("#signout-button").click(function() {
+                                var auth2 = gapi.auth2.getAuthInstance();
+                                auth2.signOut().then(function () {
+                                    $('#logout-form').submit();
+                                });
+                            });
+						</script>
 					</form>
 				<#else>
 					<form class="navbar-form navbar-right" method="post" action="/login">
-						<a id="open-button" type="btn" class="btn btn-default modal-href" href="/account/login" data-target="login-modal-container-header">Sign in</a>
+                        <a id="open-button" type="btn" class="btn btn-default" data-toggle="modal" data-target="#login-modal">Sign in</a>
 					</form>
 				</#if>
 			</div>
