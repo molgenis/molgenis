@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.molgenis</groupId>
 		<artifactId>molgenis</artifactId>
-		<version>1.13.0-SNAPSHOT</version>
+		<version>1.14.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-data-elasticsearch</artifactId>
 	
@@ -26,7 +26,12 @@
         <dependency>
             <groupId>org.elasticsearch</groupId>
             <artifactId>elasticsearch</artifactId>
-            <version>1.7.2</version>
+            <version>1.7.3</version>
+        </dependency>
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>4.2.1</version>
         </dependency>
 	</dependencies>
 </project>

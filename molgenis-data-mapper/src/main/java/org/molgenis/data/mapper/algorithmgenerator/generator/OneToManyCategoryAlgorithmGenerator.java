@@ -1,4 +1,4 @@
-package org.molgenis.data.mapper.algorithmgenerator.categorygenerator;
+package org.molgenis.data.mapper.algorithmgenerator.generator;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -16,13 +16,14 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
 import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
 
-public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenerator
+public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorithmGenerator
 {
 	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("##.#",
-			DecimalFormatSymbols.getInstance(new Locale("en")));
+			DecimalFormatSymbols.getInstance(Locale.ENGLISH));
 
 	private final OneToOneCategoryAlgorithmGenerator oneToOneCategoryAlgorithmGenerator;
 
@@ -35,42 +36,66 @@ public class OneToManyCategoryAlgorithmGenerator extends CategoryAlgorithmGenera
 	@Override
 	public boolean isSuitable(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)
 	{
-		return sourceAttributes.size() > 1;
+		return isXrefOrCategorialDataType(targetAttribute) && (sourceAttributes.stream().allMatch(this::isXrefOrCategorialDataType))
+				&& sourceAttributes.size() > 1;
 	}
 
 	@Override
-	public String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)
+	public String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes,
+			EntityMetaData targetEntityMetaData, EntityMetaData sourceEntityMetaData)
 	{
 		// if the target attribute and all the source attributes contain frequency related categories
 		StringBuilder stringBuilder = new StringBuilder();
 
 		if (suitableForGeneratingWeightedMap(targetAttribute, sourceAttributes))
 		{
+			stringBuilder.append(createAlgorithmNullCheckIfStatement(sourceAttributes))
+					.append(createAlgorithmElseBlock(targetAttribute, sourceAttributes));
+		}
+		else
+		{
+			for (AttributeMetaData sourceAttribute : sourceAttributes)
+			{
+				stringBuilder.append(oneToOneCategoryAlgorithmGenerator.generate(targetAttribute,
+						Arrays.asList(sourceAttribute), targetEntityMetaData, sourceEntityMetaData));
+			}
+		}
+
+		return stringBuilder.toString();
+	}
+
+	String createAlgorithmElseBlock(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		if (sourceAttributes.size() > 0)
+		{
+			stringBuilder.append("else{\n").append("\tSUM_WEIGHT = new newValue(0);\n");
 			for (AttributeMetaData sourceAttribute : sourceAttributes)
 			{
 				String generateWeightedMap = generateWeightedMap(sourceAttribute);
 
 				if (StringUtils.isNotEmpty(generateWeightedMap))
 				{
-					if (stringBuilder.length() == 0)
-					{
-						stringBuilder.append("var SUM_WEIGHT = new newValue(0);\n");
-					}
 
-					stringBuilder.append("SUM_WEIGHT.plus(").append(generateWeightedMap).append(");\n");
+					stringBuilder.append("\tSUM_WEIGHT.plus(").append(generateWeightedMap).append(");\n");
 				}
 			}
-			stringBuilder.append("SUM_WEIGHT").append(groupCategoryValues(targetAttribute));
+			stringBuilder.append("\tSUM_WEIGHT").append(groupCategoryValues(targetAttribute)).append("\n}");
 		}
-		else
-		{
-			for (AttributeMetaData sourceAttribute : sourceAttributes)
-			{
-				stringBuilder.append(
-						oneToOneCategoryAlgorithmGenerator.generate(targetAttribute, Arrays.asList(sourceAttribute)));
-			}
-		}
+		return stringBuilder.toString();
+	}
 
+	String createAlgorithmNullCheckIfStatement(List<AttributeMetaData> sourceAttributes)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		if (sourceAttributes.size() > 0)
+		{
+			stringBuilder.append("var SUM_WEIGHT;\n").append("if(");
+			sourceAttributes.stream().forEach(attribute -> stringBuilder.append("$('").append(attribute.getName())
+					.append("').isNull().value() && "));
+			stringBuilder.delete(stringBuilder.length() - 4, stringBuilder.length());
+			stringBuilder.append("){\n").append("\tSUM_WEIGHT = new newValue();\n").append("\tSUM_WEIGHT.value();\n}");
+		}
 		return stringBuilder.toString();
 	}
 
