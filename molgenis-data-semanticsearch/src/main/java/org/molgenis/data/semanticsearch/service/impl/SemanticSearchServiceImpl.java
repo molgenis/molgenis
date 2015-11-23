@@ -1,7 +1,5 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
-import static java.util.Objects.requireNonNull;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -48,6 +46,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.google.common.base.Splitter;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Ordering;
+
+import static java.util.Objects.requireNonNull;
 
 import autovalue.shaded.com.google.common.common.collect.Sets;
 
@@ -118,8 +118,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 				Set<ExplainedQueryString> explanations = convertAttributeEntityToExplainedAttribute(attributeEntity,
 						sourceEntityMetaData, collectExpanedQueryMap, finalQueryRules);
 
-				boolean singleMatchHighQuality = isSingleMatchHighQuality(queryTerms, collectExpanedQueryMap.values(),
-						explanations);
+				boolean singleMatchHighQuality = isSingleMatchHighQuality(queryTerms,
+						Sets.newHashSet(collectExpanedQueryMap.values()), explanations);
 
 				explainedAttributes.put(attribute,
 						ExplainedAttributeMetaData.create(attribute, explanations, singleMatchHighQuality));

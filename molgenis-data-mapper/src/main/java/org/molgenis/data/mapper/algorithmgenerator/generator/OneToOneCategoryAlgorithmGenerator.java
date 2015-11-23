@@ -1,9 +1,10 @@
-package org.molgenis.data.mapper.algorithmgenerator.categorygenerator;
+package org.molgenis.data.mapper.algorithmgenerator.generator;
 
 import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
 import org.molgenis.data.mapper.algorithmgenerator.categorymapper.CategoryMapper;
 import org.molgenis.data.mapper.algorithmgenerator.categorymapper.FrequencyCategoryMapper;
@@ -15,7 +16,7 @@ import org.molgenis.data.mapper.algorithmgenerator.rules.impl.PositiveCategoryRu
 
 import com.google.common.collect.Lists;
 
-public class OneToOneCategoryAlgorithmGenerator extends CategoryAlgorithmGenerator
+public class OneToOneCategoryAlgorithmGenerator extends AbstractCategoryAlgorithmGenerator
 {
 	private final FrequencyCategoryMapper frequencyCategoryMapper;
 	private final LexicalCategoryMapper lexicalCategoryMapper;
@@ -37,11 +38,13 @@ public class OneToOneCategoryAlgorithmGenerator extends CategoryAlgorithmGenerat
 	@Override
 	public boolean isSuitable(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)
 	{
-		return sourceAttributes.size() == 1;
+		return isXrefOrCategorialDataType(targetAttribute) && (sourceAttributes.stream().allMatch(this::isXrefOrCategorialDataType))
+				&& sourceAttributes.size() == 1;
 	}
 
 	@Override
-	public String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)
+	public String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes,
+			EntityMetaData targetEntityMetaData, EntityMetaData sourceEntityMetaData)
 	{
 		String mapAlgorithm = null;
 		if (sourceAttributes.size() > 0)
