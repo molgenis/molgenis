@@ -3,7 +3,6 @@ package org.molgenis.security.google;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.MolgenisGroup.NAME;
-import static org.molgenis.auth.MolgenisUser.EMAIL;
 import static org.molgenis.data.support.QueryImpl.EQ;
 import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
@@ -49,7 +48,10 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 	private static final Logger LOG = LoggerFactory.getLogger(GoogleAuthenticationProcessingFilter.class);
 
 	public static final String GOOGLE_AUTHENTICATION_URL = "/login/google";
-	private static final String PARAM_ID_TOKEN = "id_token";
+	static final String PARAM_ID_TOKEN = "id_token";
+	private static final String MOLGENIS_USER_USERNAME_PREFIX = "google:";
+	private static final String PROFILE_KEY_GIVEN_NAME = "given_name";
+	private static final String PROFILE_KEY_FAMILY_NAME = "family_name";
 
 	private final GooglePublicKeysManager googlePublicKeysManager;
 	private final DataService dataService;
@@ -116,35 +118,63 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 	private Authentication createAuthentication(Payload payload)
 	{
 		String email = payload.getEmail();
-		String principal = payload.getEmail();
+		if (email == null)
+		{
+			throw new AuthenticationServiceException(
+					"Google ID token is missing required [email] claim, did you forget to specify scope [email]?");
+		}
+		String principal = payload.getSubject();
 		String credentials = payload.getAccessTokenHash();
 
 		return runAsSystem(() -> {
-			MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME, EQ(EMAIL, email), MolgenisUser.class);
+			String username = MOLGENIS_USER_USERNAME_PREFIX + principal;
+			MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME, username, MolgenisUser.class);
 			if (user == null)
 			{
-				user = createMolgenisUser(email);
+				String givenName = payload.containsKey(PROFILE_KEY_GIVEN_NAME)
+						? payload.get(PROFILE_KEY_GIVEN_NAME).toString() : null;
+				String familyName = payload.containsKey(PROFILE_KEY_FAMILY_NAME)
+						? payload.get(PROFILE_KEY_FAMILY_NAME).toString() : null;
+				user = createMolgenisUser(username, email, givenName, familyName);
 			}
-			else if (!user.getUsername().equals(principal))
+			else if (!user.getUsername().equals(username))
 			{
 				throw new BadCredentialsException(format("A user with username [%s] already exists", email));
 			}
 
 			// create authentication
 			Collection<? extends GrantedAuthority> authorities = molgenisUserDetailsService.getAuthorities(user);
-			return new UsernamePasswordAuthenticationToken(principal, credentials, authorities);
+			return new UsernamePasswordAuthenticationToken(username, credentials, authorities);
 		});
 	}
 
-	private MolgenisUser createMolgenisUser(String email)
+	private MolgenisUser createMolgenisUser(String username, String email, String givenName, String familyName)
 	{
+		if (!appSettings.getSignUp())
+		{
+			throw new AuthenticationServiceException("Google authentication not possible: sign up disabled");
+		}
+
+		if (appSettings.getSignUpModeration())
+		{
+			throw new AuthenticationServiceException("Google authentication not possible: sign up moderation enabled");
+		}
+
 		// create user
 		LOG.info("first login for [{}], creating MOLGENIS user", email);
 		MolgenisUser user = new MolgenisUser();
-		user.setUsername(email);
+		user.setUsername(username);
 		user.setPassword(UUID.randomUUID().toString());
 		user.setEmail(email);
 		user.setActive(true);
+		if (givenName != null)
+		{
+			user.setFirstName(givenName);
+		}
+		if (familyName != null)
+		{
+			user.setLastName(familyName);
+		}
 		dataService.add(MolgenisUser.ENTITY_NAME, user);
 
 		// add user to all-users group

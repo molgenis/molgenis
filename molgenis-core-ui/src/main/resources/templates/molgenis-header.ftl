@@ -4,6 +4,7 @@
 <#include "resource-macros.ftl">
 <#macro header css=[] js=[]>
 <#assign cookieWall = app_settings.googleAnalyticsIpAnonymization == false && (app_settings.googleAnalyticsTrackingId?? || app_settings.googleAnalyticsTrackingIdMolgenis??) || (app_settings.googleAnalyticsTrackingId?? && !app_settings.googleAnalyticsAccountPrivacyFriendly) || (app_settings.googleAnalyticsTrackingIdMolgenis?? && !app_settings.googleAnalyticsAccountPrivacyFriendlyMolgenis)>
+<#assign googleSignIn = app_settings.googleSignIn && app_settings.signUp && !app_settings.signUpModeration>
 <!DOCTYPE html>
 <html>
     <head>
@@ -12,7 +13,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta http-equiv="X-UA-Compatible" content="chrome=1">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-    <#if app_settings.googleSignIn>
+    <#if googleSignIn>
         <meta name="google-signin-client_id" content="${app_settings.googleAppClientId?html}">
     </#if>
         <link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
@@ -54,7 +55,7 @@
         <script src="<@resource_href "/js/handlebars.min.js"/>"></script>
         <script src="<@resource_href "/js/molgenis.js"/>"></script>
         <script src="<@resource_href "/js/molgenis-script-evaluator.js"/>"></script>
-    <#if app_settings.googleSignIn>
+    <#if googleSignIn>
         <#if authenticated?? && authenticated>
         <#-- Include script tag before platform.js script loading, else onLoad could be called before the onLoad function is available -->
         <script>

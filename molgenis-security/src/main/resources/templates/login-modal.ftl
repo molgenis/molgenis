@@ -1,4 +1,5 @@
 <#-- Bootstrap login modal -->
+<#assign googleSignIn = app_settings.googleSignIn && app_settings.signUp && !app_settings.signUpModeration>
 <div id="login-modal" class="modal"<#if disableClose?? && disableClose == "true"><#else> tabindex="-1"</#if> aria-labelledby="login-modal-label" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -9,7 +10,7 @@
                 <h4 class="modal-title" id="login-modal-label">Sign in</h4>
             </div>
             <div class="modal-body">
-            <#if app_settings.googleSignIn>
+            <#if googleSignIn>
                 <div class="row">
                     <div class="col-md-5">
                         <form id="login-google-form" role="form" method="POST" action="/login/google">
@@ -42,11 +43,11 @@
                                 </div>
                             </div>
                         </form>
-            <#if app_settings.googleSignIn>
+            <#if googleSignIn>
                     </div>
                 </div>
             </#if>
-            <#if app_settings.signUp == true>
+            <#if app_settings.signUp>
                 <div class="row" style="margin-top: 20px;">
                     <div class="col-md-12 text-center">
                         <small>Don't have an account? <a class="modal-href" href="/account/register" data-target="register-modal-container">Sign up</a></small>

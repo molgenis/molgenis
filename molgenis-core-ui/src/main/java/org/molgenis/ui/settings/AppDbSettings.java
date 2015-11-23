@@ -80,10 +80,12 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 					.setLabel("Allow users to sign up");
 			addAttribute(SIGNUP_MODERATION).setDataType(BOOL).setNillable(false)
 					.setDefaultValue(String.valueOf(DEFAULT_SIGNUP_MODERATION)).setLabel("Sign up moderation")
-					.setDescription("Admins must accept sign up requests before account activation");
+					.setDescription("Admins must accept sign up requests before account activation")
+					.setVisibleExpression("$('" + SIGNUP + "').eq(true).value()");
 			addAttribute(GOOGLE_SIGN_IN).setDataType(BOOL).setNillable(false)
 					.setDefaultValue(String.valueOf(DEFAULT_GOOGLE_SIGN_IN)).setLabel("Enable Google Sign-In")
-					.setDescription("Enable users to sign in with their existing Google account");
+					.setDescription("Enable users to sign in with their existing Google account").setVisibleExpression(
+							"$('" + SIGNUP + "').eq(true).value() && $('" + SIGNUP_MODERATION + "').eq(false).value()");
 			addAttribute(GOOGLE_APP_CLIENT_ID).setDataType(STRING).setNillable(false)
 					.setDefaultValue(DEFAULT_GOOGLE_APP_CLIENT_ID).setLabel("Google app client ID")
 					.setDescription("Google app client ID used during Google Sign-In")

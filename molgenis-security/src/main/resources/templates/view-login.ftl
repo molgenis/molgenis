@@ -1,11 +1,12 @@
 <#include "resource-macros.ftl">
+<#assign googleSignIn = app_settings.googleSignIn && appSettings.signUp && !appSettings.signUpModeration>
 <!DOCTYPE html>
 <html>
 	<head>
 		<title>Login</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-	<#if app_settings.googleSignIn>
+	<#if googleSignIn>
         <meta name="google-signin-client_id" content="${app_settings.googleAppClientId?html}">
     </#if>
 		<link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
@@ -16,7 +17,7 @@
 		<script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
 		<script src="<@resource_href "/js/handlebars.min.js"/>"></script>
 		<script src="<@resource_href "/js/molgenis.js"/>"></script>
-    <#if app_settings.googleSignIn>
+    <#if googleSignIn>
 		<#-- Include script tag before platform.js script loading, else onLoad could be called before the onLoad function is available -->
 		<script>
             function onLoad() {
