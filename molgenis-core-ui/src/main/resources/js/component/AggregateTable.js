@@ -41,6 +41,9 @@
 			if(this.state.data === null) {
 				return molgenis.ui.Spinner(); // entity not available yet
 			}
+			if (this.state.data.aggs.matrix.length == 0) {
+				return div(null, [br(), span(null, "No results found")]);
+			}
 
 			var className = 'table table-striped';
 			var AggregateTableHeader = AggregateTableHeaderFactory({
