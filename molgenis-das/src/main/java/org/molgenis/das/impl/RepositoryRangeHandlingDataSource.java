@@ -66,12 +66,10 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 
 		String posAttribute = null;
 		String chromosomeAttribute = null;
-		String idAttribute = null;
 		String stopAttribute = null;
 		String refAttribute = null;
 		String altAttribute = null;
 		String descriptionAttribute = null;
-		String nameAttribute = null;
 		String linkAttribute = null;
 		String patientAttribute = null;
 
@@ -100,8 +98,6 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 			Integer valueStart = null;
 			Integer valueStop = null;
 			String valueDescription = null;
-			String valueIdentifier = null;
-			String valueName = null;
 			String valueLink = null;
 			String valuePatient = null;
 			String valueRef = null;
@@ -109,21 +105,17 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 
 			posAttribute = getAttributeName(posAttribute, GenomicDataSettings.Meta.ATTRS_POS, entity);
 			chromosomeAttribute = getAttributeName(chromosomeAttribute, GenomicDataSettings.Meta.ATTRS_CHROM, entity);
-			idAttribute = getAttributeName(idAttribute, GenomicDataSettings.Meta.ATTRS_IDENTIFIER, entity);
 			stopAttribute = getAttributeName(stopAttribute, GenomicDataSettings.Meta.ATTRS_STOP, entity);
 			descriptionAttribute = getAttributeName(descriptionAttribute, GenomicDataSettings.Meta.ATTRS_DESCRIPTION,
 					entity);
 			refAttribute = getAttributeName(refAttribute, GenomicDataSettings.Meta.ATTRS_REF, entity);
 			altAttribute = getAttributeName(altAttribute, GenomicDataSettings.Meta.ATTRS_ALT, entity);
-			nameAttribute = getAttributeName(nameAttribute, GenomicDataSettings.Meta.ATTRS_NAME, entity);
 			linkAttribute = getAttributeName(linkAttribute, GenomicDataSettings.Meta.ATTRS_LINKOUT, entity);
 			patientAttribute = getAttributeName(patientAttribute, GenomicDataSettings.Meta.ATTRS_PATIENT_ID, entity);
 
 			try
 			{
 				valueStart = entity.getInt(posAttribute);
-				valueIdentifier = StringUtils.isNotEmpty(idAttribute)
-						&& StringUtils.isNotEmpty(entity.getString(idAttribute)) ? entity.getString(idAttribute) : "-";
 			}
 			catch (ClassCastException e)
 			{
@@ -136,7 +128,6 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 			valueStop = Iterables.contains(attributes, stopAttribute) ? entity.getInt(stopAttribute) : valueStart;
 			valueDescription = Iterables.contains(attributes, descriptionAttribute)
 					? entity.getString(descriptionAttribute) : "";
-			valueName = Iterables.contains(attributes, nameAttribute) ? entity.getString(nameAttribute) : "";
 			valueLink = Iterables.contains(attributes, linkAttribute) ? entity.getString(linkAttribute) : "";
 			valuePatient = Iterables.contains(attributes, patientAttribute) ? entity.getString(patientAttribute) : "";
 
@@ -181,7 +172,7 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 					++score;
 				}
 
-				feature = createDasFeature(valueStart, valueStop, valueIdentifier, valueName, valueDescription,
+				feature = createDasFeature(valueStart, valueStop, entity.getIdValue().toString(), entity.getLabelValue(), valueDescription,
 						valueLink, type, method, dataSet, valuePatient, notes);
 				features.add(feature);
 			}
