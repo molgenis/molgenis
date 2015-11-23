@@ -26,13 +26,14 @@ import org.springframework.web.filter.GenericFilterBean;
 public class ApiSessionExpirationFilter extends GenericFilterBean
 {
 	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-			throws IOException, ServletException
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
+			ServletException
 	{
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-		if (httpRequest.getRequestURI().startsWith("/api/") && SecurityUtils.isSessionExpired(httpRequest)
+		if (!SecurityUtils.currentUserIsAuthenticated() && httpRequest.getRequestURI().startsWith("/api/")
+				&& SecurityUtils.isSessionExpired(httpRequest)
 				&& !httpRequest.getRequestURI().startsWith("/api/v1/login")
 				&& !httpRequest.getRequestURI().startsWith("/api/v1/logout")
 				&& !httpRequest.getRequestURI().startsWith("/api/v2/version"))
