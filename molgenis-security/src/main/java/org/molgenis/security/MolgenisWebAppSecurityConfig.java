@@ -75,9 +75,9 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	protected void configure(HttpSecurity http) throws Exception
 	{
 		// do not write cache control headers for static resources
-		RequestMatcher matcher = new NegatedRequestMatcher(
-				new OrRequestMatcher(new AntPathRequestMatcher(PATTERN_CSS), new AntPathRequestMatcher(PATTERN_JS),
-						new AntPathRequestMatcher(PATTERN_IMG), new AntPathRequestMatcher(PATTERN_FONTS)));
+		RequestMatcher matcher = new NegatedRequestMatcher(new OrRequestMatcher(new AntPathRequestMatcher(PATTERN_CSS),
+				new AntPathRequestMatcher(PATTERN_JS), new AntPathRequestMatcher(PATTERN_IMG),
+				new AntPathRequestMatcher(PATTERN_FONTS)));
 
 		DelegatingRequestMatcherHeaderWriter cacheControlHeaderWriter = new DelegatingRequestMatcherHeaderWriter(
 				matcher, new CacheControlHeadersWriter());
@@ -89,10 +89,10 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		http.addFilterBefore(anonymousAuthFilter(), AnonymousAuthenticationFilter.class);
 		http.authenticationProvider(anonymousAuthenticationProvider());
 
-		http.addFilterBefore(tokenAuthenticationFilter(), MolgenisAnonymousAuthenticationFilter.class);
+		http.addFilterBefore(apiSessionExpirationFilter(), MolgenisAnonymousAuthenticationFilter.class);
 		http.authenticationProvider(tokenAuthenticationProvider());
 
-		http.addFilterBefore(apiSessionExpirationFilter(), TokenAuthenticationFilter.class);
+		http.addFilterBefore(tokenAuthenticationFilter(), ApiSessionExpirationFilter.class);
 
 		http.addFilterAfter(changePasswordFilter(), SwitchUserFilter.class);
 
@@ -100,55 +100,87 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 				.authorizeRequests();
 		configureUrlAuthorization(expressionInterceptUrlRegistry);
 
-		expressionInterceptUrlRegistry.antMatchers("/login").permitAll()
+		expressionInterceptUrlRegistry
+				.antMatchers("/login")
+				.permitAll()
 
-				.antMatchers("/logo/**").permitAll()
+				.antMatchers("/logo/**")
+				.permitAll()
 
-				.antMatchers("/molgenis.R").permitAll()
+				.antMatchers("/molgenis.R")
+				.permitAll()
 
-				.antMatchers(AccountController.CHANGE_PASSWORD_URI).authenticated()
+				.antMatchers("/molgenis.py")
+				.permitAll()
 
-				.antMatchers("/account/**").permitAll()
+				.antMatchers(AccountController.CHANGE_PASSWORD_URI)
+				.authenticated()
 
-				.antMatchers(PATTERN_CSS).permitAll()
+				.antMatchers("/account/**")
+				.permitAll()
 
-				.antMatchers(PATTERN_IMG).permitAll()
+				.antMatchers(PATTERN_CSS)
+				.permitAll()
 
-				.antMatchers(PATTERN_JS).permitAll()
+				.antMatchers(PATTERN_IMG)
+				.permitAll()
 
-				.antMatchers(PATTERN_FONTS).permitAll()
+				.antMatchers(PATTERN_JS)
+				.permitAll()
 
-				.antMatchers("/html/**").permitAll()
+				.antMatchers(PATTERN_FONTS)
+				.permitAll()
 
-				.antMatchers("/plugin/void/**").permitAll()
+				.antMatchers("/html/**")
+				.permitAll()
 
-				.antMatchers("/api/**").permitAll()
+				.antMatchers("/plugin/void/**")
+				.permitAll()
 
-				.antMatchers("/search").permitAll()
+				.antMatchers("/api/**")
+				.permitAll()
 
-				.antMatchers("/captcha").permitAll()
+				.antMatchers("/search")
+				.permitAll()
 
-				.antMatchers("/dataindexerstatus").authenticated()
+				.antMatchers("/captcha")
+				.permitAll()
 
-				.antMatchers("/permission/**/write/**").permitAll()
+				.antMatchers("/dataindexerstatus")
+				.authenticated()
 
-				.antMatchers("/scripts/**/run").authenticated()
+				.antMatchers("/permission/**/write/**")
+				.permitAll()
 
-				.antMatchers("/files/**").permitAll()
+				.antMatchers("/scripts/**/run")
+				.authenticated()
 
-				.anyRequest().denyAll().and()
+				.antMatchers("/files/**")
+				.permitAll()
 
-				.httpBasic().authenticationEntryPoint(authenticationEntryPoint()).and()
+				.anyRequest()
+				.denyAll()
+				.and()
 
-				.formLogin().loginPage("/login").failureUrl("/login?error").and()
+				.httpBasic()
+				.authenticationEntryPoint(authenticationEntryPoint())
+				.and()
 
-				.logout().deleteCookies("JSESSIONID").addLogoutHandler((req, res, auth) -> {
-					if (req.getSession(false) != null
-							&& req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
-					{
-						req.setAttribute("continueWithUnsupportedBrowser", true);
-					}
-				}).logoutSuccessHandler((req, res, auth) -> {
+				.formLogin()
+				.loginPage("/login")
+				.failureUrl("/login?error")
+				.and()
+
+				.logout()
+				.deleteCookies("JSESSIONID")
+				.addLogoutHandler(
+						(req, res, auth) -> {
+							if (req.getSession(false) != null
+									&& req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
+							{
+								req.setAttribute("continueWithUnsupportedBrowser", true);
+							}
+						}).logoutSuccessHandler((req, res, auth) -> {
 					StringBuilder logoutSuccessUrl = new StringBuilder("/");
 					if (req.getAttribute("continueWithUnsupportedBrowser") != null)
 					{
@@ -172,8 +204,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	@Bean
 	public MolgenisAnonymousAuthenticationFilter anonymousAuthFilter()
 	{
-		return new MolgenisAnonymousAuthenticationFilter(ANONYMOUS_AUTHENTICATION_KEY, SecurityUtils.ANONYMOUS_USERNAME,
-				userDetailsService());
+		return new MolgenisAnonymousAuthenticationFilter(ANONYMOUS_AUTHENTICATION_KEY,
+				SecurityUtils.ANONYMOUS_USERNAME, userDetailsService());
 	}
 
 	protected abstract List<GrantedAuthority> createAnonymousUserAuthorities();

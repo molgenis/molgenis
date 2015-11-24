@@ -1,4 +1,4 @@
-package org.molgenis.data.mapper.algorithmgenerator.categorygenerator;
+package org.molgenis.data.mapper.algorithmgenerator.generator;
 
 import java.util.Arrays;
 
@@ -13,14 +13,19 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
 public class OneToOneCategoryAlgorithmGeneratorTest
 {
-	CategoryAlgorithmGenerator categoryAlgorithmGenerator;
+	AbstractCategoryAlgorithmGenerator categoryAlgorithmGenerator;
 
 	DefaultAttributeMetaData targetAttributeMetaData;
 
 	DefaultAttributeMetaData sourceAttributeMetaData;
+
+	DefaultEntityMetaData targetEntityMetaData;
+
+	DefaultEntityMetaData sourceEntityMetaData;
 
 	DataService dataService;
 
@@ -45,6 +50,9 @@ public class OneToOneCategoryAlgorithmGeneratorTest
 		Mockito.when(dataService.findAll(targetRefEntityMetaData.getName()))
 				.thenReturn(Arrays.asList(targetEntity1, targetEntity2, targetEntity3, targetEntity4, targetEntity5));
 
+		targetEntityMetaData = new DefaultEntityMetaData("target");
+		targetEntityMetaData.addAttributeMetaData(targetAttributeMetaData);
+
 		DefaultEntityMetaData sourceRefEntityMetaData = createCategoricalRefEntityMetaData("LifeLines_POTATO_REF");
 		MapEntity sourceEntity1 = new MapEntity(ImmutableMap.of("code", 1, "label", "Not this month"));
 		MapEntity sourceEntity2 = new MapEntity(ImmutableMap.of("code", 2, "label", "1 day per month"));
@@ -63,6 +71,9 @@ public class OneToOneCategoryAlgorithmGeneratorTest
 		Mockito.when(dataService.findAll(sourceRefEntityMetaData.getName()))
 				.thenReturn(Arrays.asList(sourceEntity1, sourceEntity2, sourceEntity3, sourceEntity4, sourceEntity5,
 						sourceEntity6, sourceEntity7, sourceEntity8));
+
+		sourceEntityMetaData = new DefaultEntityMetaData("source");
+		sourceEntityMetaData.addAllAttributeMetaData(Lists.newArrayList(sourceAttributeMetaData));
 	}
 
 	@Test
@@ -76,7 +87,7 @@ public class OneToOneCategoryAlgorithmGeneratorTest
 	public void testGenerate()
 	{
 		String generatedAlgorithm = categoryAlgorithmGenerator.generate(targetAttributeMetaData,
-				Arrays.asList(sourceAttributeMetaData));
+				Arrays.asList(sourceAttributeMetaData), targetEntityMetaData, sourceEntityMetaData);
 		String expectedAlgorithm = "$('MESHED_POTATO').map({\"1\":\"4\",\"2\":\"4\",\"3\":\"4\",\"4\":\"3\",\"5\":\"2\",\"6\":\"2\",\"7\":\"1\",\"8\":\"1\"}, null, null).value();";
 
 		Assert.assertEquals(generatedAlgorithm, expectedAlgorithm);
@@ -105,7 +116,7 @@ public class OneToOneCategoryAlgorithmGeneratorTest
 		sourceAttributeMetaData.setRefEntity(sourceRefEntityMetaData);
 
 		String generatedAlgorithm = categoryAlgorithmGenerator.generate(targetAttributeMetaData,
-				Arrays.asList(sourceAttributeMetaData));
+				Arrays.asList(sourceAttributeMetaData), targetEntityMetaData, sourceEntityMetaData);
 
 		String expectedAlgorithm = "$('High_blood_pressure').map({\"1\":\"1\",\"2\":\"0\",\"3\":\"9\"}, null, null).value();";
 
