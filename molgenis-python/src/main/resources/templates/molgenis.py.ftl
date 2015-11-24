@@ -121,6 +121,20 @@ class Session():
         response.raise_for_status();
         return response;
 
+    def update(self, entity_name, entity_id, data = {}):
+        '''Update an entity row, either by giving the attribute id name and the id for the row to update, or a query for which row to update
+            
+        Args:
+            entity_name (string): Name of the entity to update
+            entity_id: The id of the entity to update 
+            data (dict):  Key = column name, value = column value
+        '''
+        server_response_list = []
+        for key in data:
+            server_response = self.session.put(self.url+'v2'+quote_plus(entity_name)+'/'+str(entity_id)+'/'+key, data='"'+data[key]+'"')
+            server_response_list.append(server_response)
+        return server_response_list
+
     def delete(self, entity, id):
         '''Deletes a single entity row from an entity repository.'''
         response = self.session.delete(self.url + "v1/" + quote_plus(entity)+ "/" + quote_plus(id), headers = self._get_token_header())
