@@ -16,7 +16,7 @@ class Session():
     >>> session.login('user', 'password')
     >>> session.get('Person')
     '''
-    def __init__(self, url<#if api_url??>="${api_url}"</#if>):
+    def __init__(self, url="http://localhost:8080/api/"):
         '''Constructs a new Session.
         Args:
         url -- URL of the REST API. Should be of form 'http[s]://<molgenis server>[:port]/api/'
@@ -25,7 +25,7 @@ class Session():
         >>> connection = molgenis.Session('http://localhost:8080/api/')
         '''
         self.url = url
-        <#if token??>self.token = "${token}"</#if>
+        
         self.session = requests.Session()
 
     def login(self, username, password):
@@ -118,22 +118,10 @@ class Session():
             data = json.dumps({"entities" : entities}))
         if response.status_code == 201:
             return [resource["href"].split("/")[-1] for resource in response.json()["resources"]]
+        if 'errors' in response.json() and 'message' in response.json()['errors'][0]:
+            print(response.json()['errors'][0]['message'])
         response.raise_for_status();
         return response;
-
-    def update(self, entity_name, entity_id, data = {}):
-        '''Update an entity row, either by giving the attribute id name and the id for the row to update, or a query for which row to update
-            
-        Args:
-            entity_name (string): Name of the entity to update
-            entity_id: The id of the entity to update 
-            data (dict):  Key = column name, value = column value
-        '''
-        server_response_list = []
-        for key in data:
-            server_response = self.session.put(self.url+'v2'+quote_plus(entity_name)+'/'+str(entity_id)+'/'+key, data='"'+data[key]+'"')
-            server_response_list.append(server_response)
-        return server_response_list
 
     def delete(self, entity, id):
         '''Deletes a single entity row from an entity repository.'''
@@ -144,7 +132,8 @@ class Session():
     def get_entity_meta_data(self, entity):
         '''Retrieves the metadata for an entity repository.'''
         response = self.session.get(self.url + "v1/" + quote_plus(entity) + "/meta?expand=attributes", headers = self._get_token_header()).json()
-        response.raise_for_status();
+        if not isinstance(response,dict):
+            response.raise_for_status();
         return response;
 
     def get_attribute_meta_data(self, entity, attribute):
