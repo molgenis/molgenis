@@ -35,20 +35,16 @@ class EntityCollectionResponseV2
 	}
 
 	public EntityCollectionResponseV2(EntityPager entityPager, List<Map<String, Object>> items, Fetch fetch,
-			String href, EntityMetaData meta, MolgenisPermissionService permissionService, DataService dataService)
+			String href, EntityMetaData meta, MolgenisPermissionService permissionService, DataService dataService,
+			String prevHref, String nextHref)
 	{
 		this.href = href;
 		this.meta = new EntityMetaDataResponseV2(meta, fetch, permissionService, dataService);
 		this.start = entityPager.getStart();
 		this.num = entityPager.getNum();
 		this.total = entityPager.getTotal();
-
-		Integer prevStart = entityPager.getPrevStart();
-		this.prevHref = prevStart != null ? this.href + "?start=" + prevStart + "&num=" + this.num : null;
-
-		Integer nextStart = entityPager.getNextStart();
-		this.nextHref = nextStart != null ? this.href + "?start=" + nextStart + "&num=" + this.num : null;
-
+		this.prevHref = prevHref;
+		this.nextHref = nextHref;
 		this.items = items;
 	}
 
@@ -91,5 +87,4 @@ class EntityCollectionResponseV2
 	{
 		return items;
 	}
-
 }
