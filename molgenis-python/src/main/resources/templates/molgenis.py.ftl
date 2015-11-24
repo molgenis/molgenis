@@ -41,7 +41,7 @@ class Session():
             headers={"Content-Type":"application/json"})
         if response.status_code == 200:
             self.token = response.json()["token"]
-        response.raise_for_status();
+        self._raise_for_status(response)();
         return response;
 
     def logout(self):
@@ -50,7 +50,7 @@ class Session():
             headers = self._get_token_header())
         if response.status_code == 200:
             self.token = None
-        response.raise_for_status();
+        self._raise_for_status(response)();
         return response;
 
     def get(self, entity, q=None, attributes=None, num = 100, start = 0, sortColumn= None, sortOrder = None):
@@ -79,7 +79,7 @@ class Session():
                 params={"attributes":attributes, "num": num, "start": start, "sortColumn":sortColumn, "sortOrder": sortOrder})
         if response.status_code == 200:
             return response.json()["items"]
-        response.raise_for_status();
+        self._raise_for_status(response)();
         return response;
 
     def add(self, entity, data = {}, files = {}, **kwargs):
@@ -108,7 +108,7 @@ class Session():
             files = files)
         if response.status_code == 201:
             return response.headers["Location"].split("/")[-1]
-        response.raise_for_status()
+        self._raise_for_status(response)()
         return response
 
     def add_all(self, entity, entities):
@@ -120,26 +120,26 @@ class Session():
             return [resource["href"].split("/")[-1] for resource in response.json()["resources"]]
         if 'errors' in response.json() and 'message' in response.json()['errors'][0]:
             print(response.json()['errors'][0]['message'])
-        response.raise_for_status();
+        self._raise_for_status(response)();
         return response;
 
     def delete(self, entity, id):
         '''Deletes a single entity row from an entity repository.'''
         response = self.session.delete(self.url + "v1/" + quote_plus(entity)+ "/" + quote_plus(id), headers = self._get_token_header())
-        response.raise_for_status();
+        self._raise_for_status(response)();
         return response;
 
     def get_entity_meta_data(self, entity):
         '''Retrieves the metadata for an entity repository.'''
         response = self.session.get(self.url + "v1/" + quote_plus(entity) + "/meta?expand=attributes", headers = self._get_token_header()).json()
         if not isinstance(response,dict):
-            response.raise_for_status();
+            self._raise_for_status(response)();
         return response;
 
     def get_attribute_meta_data(self, entity, attribute):
         '''Retrieves the metadata for a single attribute of an entity repository.'''
         response = self.session.get(self.url + "v1/" + quote_plus(entity) + "/meta/"+ quote_plus(attribute), headers = self._get_token_header()).json()
-        response.raise_for_status();
+        self._raise_for_status(response)();
         return response;
 
     def _get_token_header(self):
@@ -161,3 +161,8 @@ class Session():
         z = x.copy()
         z.update(y)
         return z
+
+	def _raise_for_status(self, response):
+        if 'errors' in response.json() and 'message' in response.json()['errors'][0]:
+            print(response.json()['errors'][0]['message'])
+        response.raise_for_status()
