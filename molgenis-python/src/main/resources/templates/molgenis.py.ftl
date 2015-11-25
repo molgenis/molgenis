@@ -132,7 +132,7 @@ class Session():
         '''
         server_response_list = []
         for key in data:
-            response = self.session.put(self.url+'v1/'+quote_plus(entity_name)+'/'+str(row_id)+'/'+key, data='"'+data[key]+'"')
+            response = self.session.put(self.url+'v1/'+quote_plus(entity_name)+'/'+str(row_id)+'/'+key, data='"'+data[key]+'"', headers = self._get_token_header_with_content_type())
             self._raise_for_status(response);
             server_response_list.append(response)
         return server_response_list
