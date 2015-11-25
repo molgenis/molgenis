@@ -79,7 +79,7 @@ class Session():
                 params={"attributes":attributes, "num": num, "start": start, "sortColumn":sortColumn, "sortOrder": sortOrder})
         if response.status_code == 200:
             return response.json()["items"]
-        self._raise_for_status(response)();
+        self._raise_for_status(response);
         return response;
 
     def add(self, entity, data = {}, files = {}, **kwargs):
@@ -108,7 +108,7 @@ class Session():
             files = files)
         if response.status_code == 201:
             return response.headers["Location"].split("/")[-1]
-        self._raise_for_status(response)()
+        self._raise_for_status(response)
         return response
 
     def add_all(self, entity, entities):
@@ -120,20 +120,36 @@ class Session():
             return [resource["href"].split("/")[-1] for resource in response.json()["resources"]]
         if 'errors' in response.json() and 'message' in response.json()['errors'][0]:
             print(response.json()['errors'][0]['message'])
-        self._raise_for_status(response)();
+        self._raise_for_status(response);
         return response;
 
     def delete(self, entity, id):
         '''Deletes a single entity row from an entity repository.'''
         response = self.session.delete(self.url + "v1/" + quote_plus(entity)+ "/" + quote_plus(id), headers = self._get_token_header())
-        self._raise_for_status(response)();
+        self._raise_for_status(response);
         return response;
+
+    def update(self, entity_name, entity_id, data = {}, **kwargs):
+        '''Updates 1 or more attributes of a single entity row
+
+        Args:
+        entity -- fully qualified name of the entity
+        row_id -- id of the row of the entity to update
+        data -- dictionary mapping attribute name to non-file attribute value for the entity row, gets merged with the kwargs argument
+        **kwargs -- keyword arguments get merged with the data argument
+        '''
+        server_response_list = []
+        for key in data:
+            server_response = self.session.put(self.url+'v1/'+quote_plus(entity_name)+'/'+str(row_id)+'/'+key, data='"'+data[key]+'"')
+            self._raise_for_status(response);
+            server_response_list.append(server_response)
+        return server_response_list
 
     def get_entity_meta_data(self, entity):
         '''Retrieves the metadata for an entity repository.'''
         response = self.session.get(self.url + "v1/" + quote_plus(entity) + "/meta?expand=attributes", headers = self._get_token_header()).json()
         if not isinstance(response,dict):
-            self._raise_for_status(response)();
+            self._raise_for_status(response);
         return response;
 
     def get_attribute_meta_data(self, entity, attribute):
@@ -154,7 +170,7 @@ class Session():
         headers = self._get_token_header()
         headers.update({"Content-Type":"application/json"})
         return headers
-
+        
     @staticmethod
     def _merge_two_dicts(x, y):
         '''Given two dicts, merge them into a new dict as a shallow copy.'''
@@ -162,7 +178,7 @@ class Session():
         z.update(y)
         return z
 
-	def _raise_for_status(self, response):
+    def _raise_for_status(self, response):
         if 'errors' in response.json() and 'message' in response.json()['errors'][0]:
             print(response.json()['errors'][0]['message'])
         response.raise_for_status()
