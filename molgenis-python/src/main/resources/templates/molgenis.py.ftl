@@ -188,4 +188,5 @@ class Session():
         except requests.exceptions.HTTPError as e:
             if error:
                 raise requests.exceptions.HTTPError(str(e)+'\n'+error)
-            
+            else:
+                raise
