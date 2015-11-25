@@ -98,6 +98,16 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 		materialTypesMap.put("weefsel", asList("TISSUE_FROZEN", "TISSUE_PARAFFIN_EMBEDDED"));
 	}
 
+	private static final HashMap<String, List<String>> tissueTypesMap;
+
+	static
+	{
+		tissueTypesMap = new HashMap<>();
+		tissueTypesMap.put("1", asList("TISSUE_PARAFFIN_EMBEDDED"));
+		tissueTypesMap.put("2", asList("TISSUE_FROZEN"));
+		tissueTypesMap.put("9", asList("OTHER"));
+	}
+
 	@Autowired
 	public ParelMapper(PromiseMapperFactory promiseMapperFactory, PromiseDataParser promiseDataParser,
 			DataService dataService)
@@ -280,14 +290,29 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 		List<String> unknown = Lists.newArrayList();
 		for (Entity sample : promiseSampleEntities)
 		{
-			String type = sample.getString("MATERIAL_TYPES");
-			if (materialTypesMap.containsKey(type))
+			String tissue = sample.getString("MATERIAL_TYPES_SUB");
+			if (tissue != null && !tissue.equals("-1"))
 			{
-				materialTypesMap.get(type).forEach(t -> ids.add(t));
+				if (tissueTypesMap.containsKey(tissue))
+				{
+					tissueTypesMap.get(tissue).forEach(t -> ids.add(t));
+				}
+				else
+				{
+					unknown.add(tissue);
+				}
 			}
 			else
 			{
-				unknown.add(type);
+				String type = sample.getString("MATERIAL_TYPES");
+				if (materialTypesMap.containsKey(type))
+				{
+					materialTypesMap.get(type).forEach(t -> ids.add(t));
+				}
+				else
+				{
+					unknown.add(type);
+				}
 			}
 		}
 
