@@ -522,7 +522,7 @@ function($, molgenis, settingsXhr) {
 			self.filter.wizard.openFilterWizardModal(selectedEntityMetaData, attributeFilters);
 		});
 
-		$('#module-nav').on('click', 'a', function(e) {
+		$('#module-nav').on('click', 'ul.nav > li > a', function(e) {
 			$(document).trigger('changeModule', $(this).data('id'));
 		});
 	
