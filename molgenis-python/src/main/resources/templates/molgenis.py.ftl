@@ -125,7 +125,7 @@ class Session():
 
     def delete(self, entity, id):
         '''Deletes a single entity row from an entity repository.'''
-        response = self.session.delete(self.url + "v1/" + quote_plus(entity)+ "/" + quote_plus(id), headers = self._get_token_header())
+        response = self.session.delete(self.url + "v1/" + quote_plus(entity)+ "/" + quote_plus(str(id))+'/', headers = self._get_token_header())
         self._raise_for_status(response);
         return response;
 
