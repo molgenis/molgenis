@@ -16,7 +16,7 @@ class Session():
     >>> session.login('user', 'password')
     >>> session.get('Person')
     '''
-    def __init__(self, url<#if api_url??>="${api_url}"</#if>):
+    def __init__(self, url="http://localhost:8080/api/"):
         '''Constructs a new Session.
         Args:
         url -- URL of the REST API. Should be of form 'http[s]://<molgenis server>[:port]/api/'
@@ -25,7 +25,7 @@ class Session():
         >>> connection = molgenis.Session('http://localhost:8080/api/')
         '''
         self.url = url
-        <#if token??>self.token = "${token}"</#if>
+        
         self.session = requests.Session()
 
     def login(self, username, password):
@@ -41,7 +41,7 @@ class Session():
             headers={"Content-Type":"application/json"})
         if response.status_code == 200:
             self.token = response.json()["token"]
-        self._raise_for_status(response)();
+        self._raise_for_status(response);
         return response;
 
     def logout(self):
@@ -50,7 +50,7 @@ class Session():
             headers = self._get_token_header())
         if response.status_code == 200:
             self.token = None
-        self._raise_for_status(response)();
+        self._raise_for_status(response);
         return response;
 
     def get(self, entity, q=None, attributes=None, num = 100, start = 0, sortColumn= None, sortOrder = None):
@@ -118,14 +118,6 @@ class Session():
             data = json.dumps({"entities" : entities}))
         if response.status_code == 201:
             return [resource["href"].split("/")[-1] for resource in response.json()["resources"]]
-        if 'errors' in response.json() and 'message' in response.json()['errors'][0]:
-            print(response.json()['errors'][0]['message'])
-        self._raise_for_status(response);
-        return response;
-
-    def delete(self, entity, id):
-        '''Deletes a single entity row from an entity repository.'''
-        response = self.session.delete(self.url + "v1/" + quote_plus(entity)+ "/" + quote_plus(str(id))+'/', headers = self._get_token_header())
         self._raise_for_status(response);
         return response;
 
@@ -140,10 +132,16 @@ class Session():
         '''
         server_response_list = []
         for key in data:
-            server_response = self.session.put(self.url+'v1/'+quote_plus(entity_name)+'/'+str(row_id)+'/'+key, data='"'+data[key]+'"')
+            response = self.session.put(self.url+'v1/'+quote_plus(entity_name)+'/'+str(row_id)+'/'+key, data='"'+data[key]+'"')
             self._raise_for_status(response);
             server_response_list.append(response)
         return server_response_list
+
+    def delete(self, entity, id):
+        '''Deletes a single entity row from an entity repository.'''
+        response = self.session.delete(self.url + "v1/" + quote_plus(entity)+ "/" + quote_plus(str(id))+'/', headers = self._get_token_header())
+        self._raise_for_status(response);
+        return response;
 
     def get_entity_meta_data(self, entity):
         '''Retrieves the metadata for an entity repository.'''
@@ -155,7 +153,7 @@ class Session():
     def get_attribute_meta_data(self, entity, attribute):
         '''Retrieves the metadata for a single attribute of an entity repository.'''
         response = self.session.get(self.url + "v1/" + quote_plus(entity) + "/meta/"+ quote_plus(attribute), headers = self._get_token_header()).json()
-        self._raise_for_status(response)();
+        self._raise_for_status(response);
         return response;
 
     def _get_token_header(self):
@@ -179,6 +177,15 @@ class Session():
         return z
 
     def _raise_for_status(self, response):
-        if 'errors' in response.json() and 'message' in response.json()['errors'][0]:
-            print(response.json()['errors'][0]['message'])
-        response.raise_for_status()
+        error = None
+        try:
+            if 'errors' in response.json() and 'message' in response.json()['errors'][0]:
+                error = (response.json()['errors'][0]['message'])
+        except json.decoder.JSONDecodeError:
+            pass
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            if error:
+                raise requests.exceptions.HTTPError(str(e)+'\n'+error)
+            
