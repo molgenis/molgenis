@@ -346,6 +346,7 @@ function($, molgenis, settingsXhr) {
 			if(state.mod) {
 				moduleTab = $('a[data-toggle="tab"][data-target="#tab-' + state.mod + '"]', container);
 			} else {
+				
 				moduleTab = $('a[data-toggle="tab"]', container).first();
 			}
 			
@@ -427,9 +428,12 @@ function($, molgenis, settingsXhr) {
 		});
 			
 		$(document).on('changeEntity', function(e, entity) {
-			// reset state, keep same mod
-			state.entity = entity;
-			state.attributes = [];
+			// reset state
+			state = {
+				entity: entity,
+				attributes: [],
+				mod : null
+			};
 			pushState();
 			
 			// reset			
