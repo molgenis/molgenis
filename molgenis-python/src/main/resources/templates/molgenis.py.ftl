@@ -129,7 +129,7 @@ class Session():
         self._raise_for_status(response);
         return response;
 
-    def update(self, entity_name, entity_id, data = {}, **kwargs):
+    def update(self, entity_name, row_id, data = {}, **kwargs):
         '''Updates 1 or more attributes of a single entity row
 
         Args:
@@ -142,7 +142,7 @@ class Session():
         for key in data:
             server_response = self.session.put(self.url+'v1/'+quote_plus(entity_name)+'/'+str(row_id)+'/'+key, data='"'+data[key]+'"')
             self._raise_for_status(response);
-            server_response_list.append(server_response)
+            server_response_list.append(response)
         return server_response_list
 
     def get_entity_meta_data(self, entity):
