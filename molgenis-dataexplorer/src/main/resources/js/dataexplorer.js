@@ -427,12 +427,9 @@ function($, molgenis, settingsXhr) {
 		});
 			
 		$(document).on('changeEntity', function(e, entity) {
-			// reset state
-			state = {
-				entity: entity,
-				attributes: [],
-				mod : null
-			};
+			// reset state, keep same mod
+			state.entity = entity;
+			state.attributes = [];
 			pushState();
 			
 			// reset			
