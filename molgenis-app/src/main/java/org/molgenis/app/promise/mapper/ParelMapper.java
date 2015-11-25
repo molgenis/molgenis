@@ -95,7 +95,10 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 		materialTypesMap.put("RNA uit bloedcellen", asList("RNA"));
 		materialTypesMap.put("serum", asList("SERUM"));
 		materialTypesMap.put("urine", asList("URINE"));
-		materialTypesMap.put("weefsel", asList("TISSUE_FROZEN", "TISSUE_PARAFFIN_EMBEDDED"));
+		materialTypesMap.put("weefsel", asList("TISSUE_FROZEN", "TISSUE_PARAFFIN_EMBEDDED")); // when a Parel doesn't
+																								// distinguish between
+																								// tissue types, add
+																								// them both
 	}
 
 	private static final HashMap<String, List<String>> tissueTypesMap;
@@ -290,6 +293,7 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 		List<String> unknown = Lists.newArrayList();
 		for (Entity sample : promiseSampleEntities)
 		{
+			// when MATERIAL_TYPES_SUB = -1, there is no tissue stored
 			String tissue = sample.getString("MATERIAL_TYPES_SUB");
 			if (tissue != null && !tissue.equals("-1"))
 			{
