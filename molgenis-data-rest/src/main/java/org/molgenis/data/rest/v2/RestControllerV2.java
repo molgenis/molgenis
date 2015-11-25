@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -63,6 +64,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Controller
 @RequestMapping(BASE_URI)
@@ -201,17 +203,17 @@ class RestControllerV2
 	@RequestMapping(value = "/{entityName}", method = GET)
 	@ResponseBody
 	public EntityCollectionResponseV2 retrieveEntityCollection(@PathVariable("entityName") String entityName,
-			@Valid EntityCollectionRequestV2 request)
+			@Valid EntityCollectionRequestV2 request, HttpServletRequest httpRequest)
 	{
-		return createEntityCollectionResponse(entityName, request);
+		return createEntityCollectionResponse(entityName, request, httpRequest);
 	}
 
 	@RequestMapping(value = "/{entityName}", method = POST, params = "_method=GET")
 	@ResponseBody
 	public EntityCollectionResponseV2 retrieveEntityCollectionPost(@PathVariable("entityName") String entityName,
-			@Valid EntityCollectionRequestV2 request)
+			@Valid EntityCollectionRequestV2 request, HttpServletRequest httpRequest)
 	{
-		return createEntityCollectionResponse(entityName, request);
+		return createEntityCollectionResponse(entityName, request, httpRequest);
 	}
 
 	/**
@@ -465,7 +467,7 @@ class RestControllerV2
 	}
 
 	private EntityCollectionResponseV2 createEntityCollectionResponse(String entityName,
-			EntityCollectionRequestV2 request)
+			EntityCollectionRequestV2 request, HttpServletRequest httpRequest)
 	{
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 
@@ -516,8 +518,39 @@ class RestControllerV2
 				entities.add(responseData);
 			}
 
+			UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(getFullURL(httpRequest));
+			
+			String prevHref = null;
+			if (pager.getPrevStart() != null)
+			{
+				builder.replaceQueryParam("start", pager.getPrevStart());
+				prevHref = builder.build(false).toUriString();
+			}
+			
+			String nextHref = null;
+			if (pager.getNextStart() != null)
+			{
+				builder.replaceQueryParam("start", pager.getNextStart());
+				nextHref = builder.build(false).toUriString();
+			}
+
 			return new EntityCollectionResponseV2(pager, entities, fetch, BASE_URI + '/' + entityName, meta,
-					permissionService, dataService);
+					permissionService, dataService, prevHref, nextHref);
+		}
+	}
+
+	private String getFullURL(HttpServletRequest request)
+	{
+		StringBuffer requestURL = request.getRequestURL();
+		String queryString = request.getQueryString();
+
+		if (queryString == null)
+		{
+			return requestURL.toString();
+		}
+		else
+		{
+			return requestURL.append('?').append(queryString).toString();
 		}
 	}
 
