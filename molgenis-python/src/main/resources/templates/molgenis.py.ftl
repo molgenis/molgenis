@@ -16,7 +16,7 @@ class Session():
     >>> session.login('user', 'password')
     >>> session.get('Person')
     '''
-    def __init__(self, url="http://localhost:8080/api/"):
+    def __init__(self, url<#if api_url??>="${api_url}"</#if>):
         '''Constructs a new Session.
         Args:
         url -- URL of the REST API. Should be of form 'http[s]://<molgenis server>[:port]/api/'
@@ -25,7 +25,7 @@ class Session():
         >>> connection = molgenis.Session('http://localhost:8080/api/')
         '''
         self.url = url
-        
+        <#if token??>self.token = "${token}"</#if>
         self.session = requests.Session()
 
     def login(self, username, password):
