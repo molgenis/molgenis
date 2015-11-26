@@ -41,6 +41,8 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Lists;
+
 @Test
 public class VcfUtilsTest
 {
@@ -262,7 +264,7 @@ public class VcfUtilsTest
 			File resultVCFWriter = new File(ResourceUtils.getFile(getClass(), "/result_vcfWriter.vcf").getPath());
 
 			VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter,
-					annotatedEntityMetadata.getAttributes());
+					Lists.newArrayList(annotatedEntityMetadata.getAttributes()));
 
 			for (Entity entity : entities)
 			{

@@ -64,7 +64,7 @@ public class DefaultEntity implements Entity
 	@Override
 	public Iterable<String> getAttributeNames()
 	{
-		return getEntityMetaData().getAtomicAttributeNames();
+		return EntityMetaDataUtils.getAttributeNames(entityMetaData.getAtomicAttributes());
 	}
 
 	@Override
