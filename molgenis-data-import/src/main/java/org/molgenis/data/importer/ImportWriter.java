@@ -28,6 +28,7 @@ import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.data.support.EntityDecorator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.framework.db.EntityImportReport;
@@ -143,24 +144,96 @@ public class ImportWriter
 				// check to prevent nullpointer when importing metadata only
 				if (fileEntityRepository != null)
 				{
+					boolean selfReferencing = DependencyResolver.hasSelfReferences(entityMetaData);
+
 					// transforms entities so that they match the entity meta data of the output repository
 					Iterable<Entity> entities = Iterables.transform(fileEntityRepository, new Function<Entity, Entity>()
 					{
 						@Override
-						public DefaultEntity apply(Entity entity)
+						public Entity apply(Entity entity)
 						{
-							return new DefaultEntityImporter(entityMetaData, dataService, entity);
+							Entity decoratedEntity;
+							if (selfReferencing)
+							{
+								decoratedEntity = new SelfReferencingEntityDecorator(entity, entityMetaData,
+										dataService);
+							}
+							else
+							{
+								decoratedEntity = new EntityDecorator(entity, entityMetaData, dataService);
+							}
+							return decoratedEntity;
 						}
 					});
 
-					entities = new DependencyResolver().resolveSelfReferences(entities, entityMetaData);
+					if (selfReferencing)
+					{
+						entities = new DependencyResolver().resolveSelfReferences(entities, entityMetaData);
+					}
 					int count = update(repository, entities, dbAction);
 
-					// Fix self referenced entities were not imported
-					update(repository, this.keepSelfReferencedEntities(entities), DatabaseAction.UPDATE);
-
+					if (selfReferencing)
+					{
+						// Fix self referenced entities were not imported
+						update(repository, this.keepSelfReferencedEntities(entities), DatabaseAction.UPDATE);
+					}
 					report.addEntityCount(name, count);
 				}
+			}
+		}
+	}
+
+	/**
+	 * A wrapper for a to import entity
+	 * 
+	 * When importing, some references (Entity) are still not imported. This wrapper accepts this inconsistency in the
+	 * dataService. For example xref and mref.
+	 */
+	private static class SelfReferencingEntityDecorator extends EntityDecorator
+	{
+		private static final long serialVersionUID = 1L;
+
+		public SelfReferencingEntityDecorator(Entity entity, EntityMetaData entityMetaData, DataService dataService)
+		{
+			super(entity, entityMetaData, dataService);
+		}
+
+		/**
+		 * getEntity returns null when attributeName is not resulting in an entity
+		 */
+		@Override
+		public Entity getEntity(String attributeName)
+		{
+			try
+			{
+				return super.getEntity(attributeName);
+			}
+			catch (UnknownEntityException uee)
+			{
+				// self reference? ignore UnknownEntityExceptions those are solved in a later step
+				if (getEntityMetaData().getName()
+						.equals(getEntityMetaData().getAttribute(attributeName).getRefEntity().getName()))
+				{
+					return null;
+				}
+				throw uee;
+			}
+		}
+
+		/**
+		 * getEntities filters the entities that are still not imported
+		 */
+		@Override
+		public Iterable<Entity> getEntities(String attributeName)
+		{
+			if (getEntityMetaData().getName()
+					.equals(getEntityMetaData().getAttribute(attributeName).getRefEntity().getName()))
+			{
+				return from(super.getEntities(attributeName)).filter(notNull());
+			}
+			else
+			{
+				return super.getEntities(attributeName);
 			}
 		}
 	}
@@ -553,65 +626,6 @@ public class ImportWriter
 		{
 			IOUtils.closeQuietly(existingIds);
 			IOUtils.closeQuietly(ids);
-		}
-	}
-
-	/**
-	 * A wrapper for a to import entity
-	 * 
-	 * When importing, some references (Entity) are still not imported. This wrapper accepts this inconsistency in the
-	 * dataService. For example xref and mref.
-	 */
-	private class DefaultEntityImporter extends DefaultEntity
-	{
-		/**
-		 * Auto generated
-		 */
-		private static final long serialVersionUID = -5994977400560081655L;
-		private final EntityMetaData entityMetaData;
-
-		public DefaultEntityImporter(EntityMetaData entityMetaData, DataService dataService, Entity entity)
-		{
-			super(entityMetaData, dataService, entity);
-			this.entityMetaData = entityMetaData;
-		}
-
-		/**
-		 * getEntity returns null when attributeName is not resulting in an entity
-		 */
-		@Override
-		public Entity getEntity(String attributeName)
-		{
-			try
-			{
-				return super.getEntity(attributeName);
-			}
-			catch (UnknownEntityException uee)
-			{
-				// self reference? ignore UnknownEntityExceptions those are solved in a later step
-				if (entityMetaData.getName()
-						.equals(entityMetaData.getAttribute(attributeName).getRefEntity().getName()))
-				{
-					return null;
-				}
-				throw uee;
-			}
-		}
-
-		/**
-		 * getEntities filters the entities that are still not imported
-		 */
-		@Override
-		public Iterable<Entity> getEntities(String attributeName)
-		{
-			if (entityMetaData.getName().equals(entityMetaData.getAttribute(attributeName).getRefEntity().getName()))
-			{
-				return from(super.getEntities(attributeName)).filter(notNull());
-			}
-			else
-			{
-				return super.getEntities(attributeName);
-			}
 		}
 	}
 }
