@@ -293,9 +293,9 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 		List<String> unknown = Lists.newArrayList();
 		for (Entity sample : promiseSampleEntities)
 		{
-			// when MATERIAL_TYPES_SUB = -1, there is no tissue stored
+			String type = sample.getString("MATERIAL_TYPES");
 			String tissue = sample.getString("MATERIAL_TYPES_SUB");
-			if (tissue != null && !tissue.equals("-1"))
+			if (type.equals("weefsel") && tissue != null)
 			{
 				if (tissueTypesMap.containsKey(tissue))
 				{
@@ -308,7 +308,6 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 			}
 			else
 			{
-				String type = sample.getString("MATERIAL_TYPES");
 				if (materialTypesMap.containsKey(type))
 				{
 					materialTypesMap.get(type).forEach(t -> ids.add(t));
@@ -318,9 +317,11 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 					unknown.add(type);
 				}
 			}
+
 		}
 
 		if (!unknown.isEmpty())
+
 		{
 			throw new RuntimeException("Unknown ProMISe material types: [" + String.join(",", unknown) + "]");
 		}
@@ -328,6 +329,7 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 		Iterable<Entity> materialTypes = dataService.findAll(REF_MATERIAL_TYPES, transform(ids, id -> (Object) id));
 
 		if (!materialTypes.iterator().hasNext())
+
 		{
 			String message = String.format("Couldn't find mappings for some of the material types in %s.", ids);
 			throw new RuntimeException(message);
