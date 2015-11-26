@@ -848,47 +848,38 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	@Override
 	public void rebuildIndex(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
 	{
-		// Skip reindexing if the backend is ElasticSearch, the data will be removed in the reindexing process
-		if (!ElasticsearchRepositoryCollection.NAME.equals(entityMetaData.getBackend()))
+		if (DependencyResolver.hasSelfReferences(entityMetaData))
 		{
-			if (DependencyResolver.hasSelfReferences(entityMetaData))
+			Iterable<Entity> iterable = Iterables.transform(entities, new Function<Entity, Entity>()
 			{
-				Iterable<Entity> iterable = Iterables.transform(entities, new Function<Entity, Entity>()
+				@Override
+				public Entity apply(Entity input)
 				{
-					@Override
-					public Entity apply(Entity input)
-					{
-						return input;
-					}
-				});
-
-				Iterable<Entity> resolved = new DependencyResolver().resolveSelfReferences(iterable, entityMetaData);
-				if (hasMapping(entityMetaData))
-				{
-					delete(entityMetaData.getName());
+					return input;
 				}
-				createMappings(entityMetaData);
+			});
 
-				for (Entity e : resolved)
-				{
-					index(e, entityMetaData, IndexingMode.ADD);
-				}
+			Iterable<Entity> resolved = new DependencyResolver().resolveSelfReferences(iterable, entityMetaData);
+			if (hasMapping(entityMetaData))
+			{
+				delete(entityMetaData.getName());
 			}
-			else
-			{
-				if (hasMapping(entityMetaData))
-				{
-					delete(entityMetaData.getName());
-				}
-				createMappings(entityMetaData);
+			createMappings(entityMetaData);
 
-				index(entities, entityMetaData, IndexingMode.ADD);
+			for (Entity e : resolved)
+			{
+				index(e, entityMetaData, IndexingMode.ADD);
 			}
 		}
 		else
 		{
-			LOG.info("Skipped rebuilding index for entity [{}] with backend [{}]", entityMetaData.getName(),
-					entityMetaData.getBackend());
+			if (hasMapping(entityMetaData))
+			{
+				delete(entityMetaData.getName());
+			}
+			createMappings(entityMetaData);
+
+			index(entities, entityMetaData, IndexingMode.ADD);
 		}
 	}
 
