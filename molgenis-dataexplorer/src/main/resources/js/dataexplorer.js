@@ -17,6 +17,7 @@ function($, molgenis, settingsXhr) {
     self.getChromosomeAttribute = getChromosomeAttribute;
     self.getIdentifierAttribute = getIdentifierAttribute;
     self.getPatientAttribute = getPatientAttribute;
+    self.getSelectedModule = getSelectedModule;
 
     var restApi = new molgenis.RestClient();
 	var selectedEntityMetaData = null;
@@ -47,6 +48,9 @@ function($, molgenis, settingsXhr) {
 	
 	var state;
 	
+	function getSelectedModule() {
+		return state.mod;
+	}
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
@@ -339,6 +343,7 @@ function($, molgenis, settingsXhr) {
 		// get entity modules and load visible module
 		$.get(molgenis.getContextUrl() + '/modules?entity=' + state.entity).done(function(data) {
 			var container = $('#module-nav');
+			modules = data.modules;
 			createModuleNav(data.modules, state.entity, container);
 			
 			// select first tab
@@ -349,6 +354,7 @@ function($, molgenis, settingsXhr) {
 				
 				moduleTab = $('a[data-toggle="tab"]', container).first();
 			}
+			state.mod = moduleTab.data('id');
 			
 			// show tab once entity meta data is available
 			$.when(entityMetaDataRequest).done(function(){
@@ -452,7 +458,7 @@ function($, molgenis, settingsXhr) {
 			$.each(modules, function() {
 				$(document).off('.' + this.id);	
 			});
-			
+	
 			render();
 		});
 		

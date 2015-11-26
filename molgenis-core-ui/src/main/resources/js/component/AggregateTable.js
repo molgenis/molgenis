@@ -41,8 +41,9 @@
 			if(this.state.data === null) {
 				return molgenis.ui.Spinner(); // entity not available yet
 			}
+			
 			if (this.state.data.aggs.matrix.length == 0) {
-				return div(null, [br(), span(null, "No results found")]);
+				return div(null, span(null, "No results found"));
 			}
 
 			var className = 'table table-striped';
@@ -80,7 +81,9 @@
 			
 			api.get(props.entity, opts).done(function(data) {
 				var newState = _.extend({}, state, {data: data});
-				this.setState(newState);
+				if (this.isMounted()) {
+					this.setState(newState);
+				}
 			}.bind(this));
 		}
 	});
@@ -219,7 +222,7 @@
 			);
 		},
 		_createRowLast: function() {
-			var nrCols = this.props.matrix[0].length;
+			var nrCols = this.props.matrix.length == 0 ? 0 : this.props.matrix[0].length;
 			
 			var tableTotal = 0;
 			var isTableAnonymized = false;
