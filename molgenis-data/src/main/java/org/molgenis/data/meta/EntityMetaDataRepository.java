@@ -95,8 +95,8 @@ class EntityMetaDataRepository
 			Iterable<Entity> attributeEntities = entity.getEntities(EntityMetaDataMetaData.ATTRIBUTES);
 			if (attributeEntities != null)
 			{
-				stream(attributeEntities.spliterator(), false).map(attributeRepository::toAttributeMetaData).forEach(
-						entityMetaData::addAttributeMetaData);
+				stream(attributeEntities.spliterator(), false).map(attributeRepository::toAttributeMetaData)
+						.forEach(entityMetaData::addAttributeMetaData);
 			}
 		}
 		for (Entity entity : entities)
@@ -105,14 +105,14 @@ class EntityMetaDataRepository
 			final DefaultEntityMetaData entityMetaData = entityMetaDataCache.get(entity.get(FULL_NAME));
 			if (extendsEntity != null)
 			{
-				final DefaultEntityMetaData extendsEntityMetaData = entityMetaDataCache.get(extendsEntity
-						.get(FULL_NAME));
+				final DefaultEntityMetaData extendsEntityMetaData = entityMetaDataCache
+						.get(extendsEntity.get(FULL_NAME));
 				entityMetaData.setExtends(extendsEntityMetaData);
 			}
 			final Entity packageEntity = entity.getEntity(PACKAGE);
 
-			PackageImpl p = (PackageImpl) packageRepository.getPackage(packageEntity
-					.getString(PackageMetaData.FULL_NAME));
+			PackageImpl p = (PackageImpl) packageRepository
+					.getPackage(packageEntity.getString(PackageMetaData.FULL_NAME));
 			if (null != p)
 			{
 				entityMetaData.setPackage(p);
@@ -142,7 +142,6 @@ class EntityMetaDataRepository
 	 */
 	public void add(EntityMetaData entityMetaData)
 	{
-		LOG.debug("Adding" + entityMetaData);
 		DefaultEntityMetaData emd = new DefaultEntityMetaData(entityMetaData.getSimpleName());
 		emd.setLabel(entityMetaData.getLabel());
 		emd.setAbstract(entityMetaData.isAbstract());
@@ -180,7 +179,7 @@ class EntityMetaDataRepository
 			emd.setIdAttribute(idAttribute.getName());
 			entity.set(ID_ATTRIBUTE, idAttribute.getName());
 		}
-		Iterable<AttributeMetaData> attributes = entityMetaData.getAttributes();
+		Iterable<AttributeMetaData> attributes = entityMetaData.getOwnAttributes();
 		if (attributes != null)
 		{
 			entity.set(ATTRIBUTES,
@@ -237,8 +236,8 @@ class EntityMetaDataRepository
 	 */
 	public void deleteAll()
 	{
-		List<Entity> entities = Lists.newLinkedList(new DependencyResolver().resolveSelfReferences(repository,
-				META_DATA));
+		List<Entity> entities = Lists
+				.newLinkedList(new DependencyResolver().resolveSelfReferences(repository, META_DATA));
 		Collections.reverse(entities);
 		for (Entity entity : entities)
 		{
