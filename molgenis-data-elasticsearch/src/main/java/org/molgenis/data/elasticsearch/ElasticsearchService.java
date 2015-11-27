@@ -870,11 +870,13 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	 */
 	private void rebuildIndexWhenElasticSearchBackend(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
 	{
-		List<Entity> inMemoryCopy = new ArrayList<Entity>();
+		ArrayList<Entity> inMemoryCopy = new ArrayList<Entity>();
 		if (LOG.isDebugEnabled()) LOG.debug("Copy entity data into inmemory. Entity name: [" + entityMetaData.getName()
 				+ "]");
 		entities.forEach(e -> inMemoryCopy.add(e));
+		inMemoryCopy.trimToSize();
 		this.rebuildIndexGeneric(inMemoryCopy, entityMetaData);
+		inMemoryCopy.clear();
 	}
 
 	/**
