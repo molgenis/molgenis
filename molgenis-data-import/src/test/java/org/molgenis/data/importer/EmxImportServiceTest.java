@@ -126,8 +126,9 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
 		// create importer
-		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataService), new ImportWriter(
-				dataService, permissionSystemService, tagService, molgenisPermissionService), dataService);
+		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataService),
+				new ImportWriter(dataService, permissionSystemService, tagService, molgenisPermissionService),
+				dataService);
 
 		// generate report
 		EntitiesValidationReport report = importer.validateImport(f, source);
@@ -174,8 +175,9 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(source.getNumberOfSheets(), 4);
 		Assert.assertNotNull(source.getRepository("attributes"));
 
-		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataService), new ImportWriter(
-				dataService, permissionSystemService, tagService, molgenisPermissionService), dataService);
+		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataService),
+				new ImportWriter(dataService, permissionSystemService, tagService, molgenisPermissionService),
+				dataService);
 
 		// test import
 		EntityImportReport report = importer.doImport(source, DatabaseAction.ADD, Package.DEFAULT_PACKAGE_NAME);
@@ -193,7 +195,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		// Check parents
 		List<Entity> entitiesWithParents = StreamSupport
 				.stream(dataService.getRepository("import_person").spliterator(), false)
-				.filter(e -> e.getEntities("parent").iterator().hasNext())
+				.filter(e -> (e.getEntities("parent").iterator().hasNext()))
 				.collect(Collectors.toCollection(ArrayList::new));
 		Entity parent1 = entitiesWithParents.get(0).getEntity("parent");
 		Assert.assertEquals(parent1.getIdValue().toString(), "john");
@@ -217,8 +219,9 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		File f = ResourceUtils.getFile(getClass(), "/example.xlsx");
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
-		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataService), new ImportWriter(
-				dataService, permissionSystemService, tagService, molgenisPermissionService), dataService);
+		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataService),
+				new ImportWriter(dataService, permissionSystemService, tagService, molgenisPermissionService),
+				dataService);
 
 		// test import
 		importer.doImport(source, DatabaseAction.ADD, Package.DEFAULT_PACKAGE_NAME);
@@ -240,8 +243,9 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		File file = Mockito.mock(File.class);
 		when(file.getName()).thenReturn("file.xlsx");
 
-		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataService), new ImportWriter(
-				dataService, permissionSystemService, tagService, molgenisPermissionService), dataService);
+		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataService),
+				new ImportWriter(dataService, permissionSystemService, tagService, molgenisPermissionService),
+				dataService);
 
 		RepositoryCollection source = Mockito.mock(RepositoryCollection.class);
 		when(source.getEntityNames()).thenReturn(Arrays.asList("attributes"));
@@ -261,8 +265,9 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		when(dataServiceMock.getMeta()).thenReturn(metaDataServiceMock);
 		when(metaDataServiceMock.getEntityMetaData("existingAttribute")).thenReturn(Mockito.mock(EntityMetaData.class));
 
-		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataServiceMock), new ImportWriter(
-				dataServiceMock, permissionSystemService, tagService, molgenisPermissionService), dataServiceMock);
+		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataServiceMock),
+				new ImportWriter(dataServiceMock, permissionSystemService, tagService, molgenisPermissionService),
+				dataServiceMock);
 
 		RepositoryCollection source = Mockito.mock(RepositoryCollection.class);
 		when(source.getEntityNames()).thenReturn(Arrays.asList("existingAttribute"));
