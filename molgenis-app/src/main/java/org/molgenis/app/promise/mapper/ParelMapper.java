@@ -95,7 +95,20 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 		materialTypesMap.put("RNA uit bloedcellen", asList("RNA"));
 		materialTypesMap.put("serum", asList("SERUM"));
 		materialTypesMap.put("urine", asList("URINE"));
-		materialTypesMap.put("weefsel", asList("TISSUE_FROZEN", "TISSUE_PARAFFIN_EMBEDDED"));
+		materialTypesMap.put("weefsel", asList("TISSUE_FROZEN", "TISSUE_PARAFFIN_EMBEDDED")); // when a Parel doesn't
+																								// distinguish between
+																								// tissue types, add
+																								// them both
+	}
+
+	private static final HashMap<String, List<String>> tissueTypesMap;
+
+	static
+	{
+		tissueTypesMap = new HashMap<>();
+		tissueTypesMap.put("1", asList("TISSUE_PARAFFIN_EMBEDDED"));
+		tissueTypesMap.put("2", asList("TISSUE_FROZEN"));
+		tissueTypesMap.put("9", asList("OTHER"));
 	}
 
 	@Autowired
@@ -281,17 +294,34 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 		for (Entity sample : promiseSampleEntities)
 		{
 			String type = sample.getString("MATERIAL_TYPES");
-			if (materialTypesMap.containsKey(type))
+			String tissue = sample.getString("MATERIAL_TYPES_SUB");
+			if (type.equals("weefsel") && tissue != null)
 			{
-				materialTypesMap.get(type).forEach(t -> ids.add(t));
+				if (tissueTypesMap.containsKey(tissue))
+				{
+					tissueTypesMap.get(tissue).forEach(t -> ids.add(t));
+				}
+				else
+				{
+					unknown.add(tissue);
+				}
 			}
 			else
 			{
-				unknown.add(type);
+				if (materialTypesMap.containsKey(type))
+				{
+					materialTypesMap.get(type).forEach(t -> ids.add(t));
+				}
+				else
+				{
+					unknown.add(type);
+				}
 			}
+
 		}
 
 		if (!unknown.isEmpty())
+
 		{
 			throw new RuntimeException("Unknown ProMISe material types: [" + String.join(",", unknown) + "]");
 		}
@@ -299,6 +329,7 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 		Iterable<Entity> materialTypes = dataService.findAll(REF_MATERIAL_TYPES, transform(ids, id -> (Object) id));
 
 		if (!materialTypes.iterator().hasNext())
+
 		{
 			String message = String.format("Couldn't find mappings for some of the material types in %s.", ids);
 			throw new RuntimeException(message);
