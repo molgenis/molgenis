@@ -383,19 +383,19 @@
 		});
 
 		$(document).on('updateAttributeFilters.data', function(e, data) {
-			if (molgenis.dataexplorer.getSelectedModule() == 'data') {
-				/**
-				 * Validation before using the setLocation of the browser
-				 */
-				function setLocation(chr, viewStart, viewEnd){
-					var maxViewWidth = 999999999;
-					if(chr){
-						viewStart = viewStart && viewStart > 0 ? viewStart : 1;
-						viewEnd = viewEnd && viewEnd > 0 ? viewEnd : viewStart + maxViewWidth;
-						genomeBrowser.setLocation(chr, viewStart, viewEnd);
-					}
+			/**
+			 * Validation before using the setLocation of the browser
+			 */
+			function setLocation(chr, viewStart, viewEnd){
+				var maxViewWidth = 999999999;
+				if(chr){
+					viewStart = viewStart && viewStart > 0 ? viewStart : 1;
+					viewEnd = viewEnd && viewEnd > 0 ? viewEnd : viewStart + maxViewWidth;
+					genomeBrowser.setLocation(chr, viewStart, viewEnd);
 				}
-	
+			}
+			
+			if (molgenis.dataexplorer.getSelectedModule() == 'data') {	
 				if(molgenis.dataexplorer.settings["genomebrowser"] !== 'false'){
 					// TODO implement elegant solution for genome browser specific code
 					$.each(data.filters, function() {
