@@ -48,9 +48,13 @@ function($, molgenis, settingsXhr) {
 	
 	var state;
 	
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
 	function getSelectedModule() {
 		return state.mod;
 	}
+	
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
