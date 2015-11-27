@@ -19,8 +19,9 @@ public class GeneNetworksAnnotatorSettings extends DefaultSettingsEntity
 	@Component
 	public static class Meta extends DefaultSettingsEntityMetaData
 	{
-		public static final String EXAM_ENTITY = "examEntity";
+		public static final String PROJECT_ENTITY = "examEntity";
 		public static final String VARIANT_ENTITY_ATTRIBUTE = "entityName";
+		public static final String GENE_NETWORK_URL = "url";
 
 		public Meta()
 		{
@@ -28,8 +29,10 @@ public class GeneNetworksAnnotatorSettings extends DefaultSettingsEntity
 			setLabel("Gene Network annotator settings");
 			String defaultEntity = "Examination";
 			String defaultEntityAttribute = "entityName";
-			addAttribute(EXAM_ENTITY).setLabel("Examination Entity Name").setDefaultValue(defaultEntity);
+			String defaultUrlAttribute = "http://molgenis27.target.rug.nl";
+			addAttribute(PROJECT_ENTITY).setLabel("Examination Entity Name").setDefaultValue(defaultEntity);
 			addAttribute(VARIANT_ENTITY_ATTRIBUTE).setLabel("Variant Entity Attribute Name").setDefaultValue(defaultEntityAttribute);
+			addAttribute(GENE_NETWORK_URL).setLabel("Adress of the Gene network server").setDefaultValue(defaultUrlAttribute);
 		}
 	}
 
