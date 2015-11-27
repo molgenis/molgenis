@@ -72,9 +72,9 @@ public class CrudRepositoryAnnotator
 	public Repository annotate(RepositoryAnnotator annotator, Repository sourceRepo, boolean createCopy)
 			throws IOException
 	{
-		if (!sourceRepo.getCapabilities().contains(RepositoryCapability.UPDATEABLE) && !createCopy)
+		if (!sourceRepo.getCapabilities().contains(RepositoryCapability.WRITABLE) && !createCopy)
 		{
-			throw new UnsupportedOperationException("Currently only updateable repositories can be annotated");
+			throw new UnsupportedOperationException("Currently only writable repositories can be annotated");
 		}
 
 		if (!molgenisPermissionService.hasPermissionOnEntity(sourceRepo.getName(), Permission.WRITE))

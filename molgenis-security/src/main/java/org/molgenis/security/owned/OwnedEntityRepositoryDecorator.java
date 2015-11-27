@@ -1,5 +1,7 @@
 package org.molgenis.security.owned;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
@@ -7,9 +9,11 @@ import java.util.Set;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.IndexedRepository;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.OwnedEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
@@ -27,84 +31,97 @@ import com.google.common.collect.Iterables;
  * 
  * Admins are not effected.
  */
-public class OwnedEntityRepositoryDecorator implements IndexedRepository
+public class OwnedEntityRepositoryDecorator implements Repository
 {
-	private final IndexedRepository decorated;
+	private final Repository decoratedRepo;
 
-	public OwnedEntityRepositoryDecorator(IndexedRepository decorated)
+	public OwnedEntityRepositoryDecorator(Repository decoratedRepo)
 	{
-		this.decorated = decorated;
+		this.decoratedRepo = requireNonNull(decoratedRepo);
 	}
 
 	@Override
 	public Iterator<Entity> iterator()
 	{
 		if (mustAddRowLevelSecurity()) return findAll(new QueryImpl()).iterator();
-		return decorated.iterator();
+		return decoratedRepo.iterator();
 	}
 
 	@Override
 	public void close() throws IOException
 	{
-		decorated.close();
+		decoratedRepo.close();
 	}
 
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return decorated.getCapabilities();
+		return decoratedRepo.getCapabilities();
 	}
 
 	@Override
 	public String getName()
 	{
-		return decorated.getName();
+		return decoratedRepo.getName();
 	}
 
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return decorated.getEntityMetaData();
+		return decoratedRepo.getEntityMetaData();
 	}
 
 	@Override
 	public long count()
 	{
 		if (mustAddRowLevelSecurity()) return count(new QueryImpl());
-		return decorated.count();
+		return decoratedRepo.count();
 	}
 
 	@Override
 	public Query query()
 	{
-		return decorated.query();
+		return decoratedRepo.query();
 	}
 
 	@Override
 	public long count(Query q)
 	{
 		if (mustAddRowLevelSecurity()) addRowLevelSecurity(q);
-		return decorated.count(q);
+		return decoratedRepo.count(q);
 	}
 
 	@Override
 	public Iterable<Entity> findAll(Query q)
 	{
 		if (mustAddRowLevelSecurity()) addRowLevelSecurity(q);
-		return decorated.findAll(q);
+		return decoratedRepo.findAll(q);
 	}
 
 	@Override
 	public Entity findOne(Query q)
 	{
 		if (mustAddRowLevelSecurity()) addRowLevelSecurity(q);
-		return decorated.findOne(q);
+		return decoratedRepo.findOne(q);
 	}
 
 	@Override
 	public Entity findOne(Object id)
 	{
-		Entity e = decorated.findOne(id);
+		Entity e = decoratedRepo.findOne(id);
+
+		if (mustAddRowLevelSecurity())
+		{
+			if (!SecurityUtils.getCurrentUsername().equals(getOwnerUserName(e))) return null;
+		}
+
+		return e;
+	}
+
+	@Override
+	public Entity findOne(Object id, Fetch fetch)
+	{
+		Entity e = decoratedRepo.findOne(id, fetch);
 
 		if (mustAddRowLevelSecurity())
 		{
@@ -117,7 +134,27 @@ public class OwnedEntityRepositoryDecorator implements IndexedRepository
 	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
-		Iterable<Entity> entities = decorated.findAll(ids);
+		Iterable<Entity> entities = decoratedRepo.findAll(ids);
+		if (mustAddRowLevelSecurity())
+		{
+			entities = Iterables.filter(entities, new Predicate<Entity>()
+			{
+				@Override
+				public boolean apply(Entity e)
+				{
+					return SecurityUtils.getCurrentUsername().equals(getOwnerUserName(e));
+				}
+
+			});
+		}
+
+		return entities;
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
+	{
+		Iterable<Entity> entities = decoratedRepo.findAll(ids, fetch);
 		if (mustAddRowLevelSecurity())
 		{
 			entities = Iterables.filter(entities, new Predicate<Entity>()
@@ -138,15 +175,15 @@ public class OwnedEntityRepositoryDecorator implements IndexedRepository
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
 		if (mustAddRowLevelSecurity()) addRowLevelSecurity(aggregateQuery.getQuery());
-		return decorated.aggregate(aggregateQuery);
+		return decoratedRepo.aggregate(aggregateQuery);
 	}
 
 	@Override
 	public void update(Entity entity)
 	{
-		if (mustAddRowLevelSecurity()) entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME,
-				SecurityUtils.getCurrentUsername());
-		decorated.update(entity);
+		if (mustAddRowLevelSecurity())
+			entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername());
+		decoratedRepo.update(entity);
 	}
 
 	@Override
@@ -166,14 +203,14 @@ public class OwnedEntityRepositoryDecorator implements IndexedRepository
 			});
 		}
 
-		decorated.update(entities);
+		decoratedRepo.update(entities);
 	}
 
 	@Override
 	public void delete(Entity entity)
 	{
 		if (mustAddRowLevelSecurity() && !SecurityUtils.getCurrentUsername().equals(getOwnerUserName(entity))) return;
-		decorated.delete(entity);
+		decoratedRepo.delete(entity);
 	}
 
 	@Override
@@ -192,7 +229,7 @@ public class OwnedEntityRepositoryDecorator implements IndexedRepository
 			});
 		}
 
-		decorated.delete(entities);
+		decoratedRepo.delete(entities);
 	}
 
 	@Override
@@ -204,7 +241,7 @@ public class OwnedEntityRepositoryDecorator implements IndexedRepository
 			if ((entity != null) && !SecurityUtils.getCurrentUsername().equals(getOwnerUserName(entity))) return;
 		}
 
-		decorated.deleteById(id);
+		decoratedRepo.deleteById(id);
 	}
 
 	@Override
@@ -212,11 +249,11 @@ public class OwnedEntityRepositoryDecorator implements IndexedRepository
 	{
 		if (mustAddRowLevelSecurity())
 		{
-			delete(decorated.findAll(ids));
+			delete(decoratedRepo.findAll(ids));
 		}
 		else
 		{
-			decorated.deleteById(ids);
+			decoratedRepo.deleteById(ids);
 		}
 	}
 
@@ -225,11 +262,11 @@ public class OwnedEntityRepositoryDecorator implements IndexedRepository
 	{
 		if (mustAddRowLevelSecurity())
 		{
-			delete(decorated);
+			delete(decoratedRepo);
 		}
 		else
 		{
-			decorated.deleteAll();
+			decoratedRepo.deleteAll();
 		}
 	}
 
@@ -241,7 +278,7 @@ public class OwnedEntityRepositoryDecorator implements IndexedRepository
 			entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername());
 		}
 
-		decorated.add(entity);
+		decoratedRepo.add(entity);
 	}
 
 	@Override
@@ -261,19 +298,19 @@ public class OwnedEntityRepositoryDecorator implements IndexedRepository
 			});
 		}
 
-		return decorated.add(entities);
+		return decoratedRepo.add(entities);
 	}
 
 	@Override
 	public void flush()
 	{
-		decorated.flush();
+		decoratedRepo.flush();
 	}
 
 	@Override
 	public void clearCache()
 	{
-		decorated.clearCache();
+		decoratedRepo.clearCache();
 	}
 
 	private boolean mustAddRowLevelSecurity()
@@ -300,18 +337,30 @@ public class OwnedEntityRepositoryDecorator implements IndexedRepository
 	@Override
 	public void create()
 	{
-		decorated.create();
+		decoratedRepo.create();
 	}
 
 	@Override
 	public void drop()
 	{
-		decorated.drop();
+		decoratedRepo.drop();
 	}
 
 	@Override
 	public void rebuildIndex()
 	{
-		decorated.rebuildIndex();
+		decoratedRepo.rebuildIndex();
+	}
+
+	@Override
+	public void addEntityListener(EntityListener entityListener)
+	{
+		decoratedRepo.addEntityListener(entityListener);
+	}
+
+	@Override
+	public void removeEntityListener(EntityListener entityListener)
+	{
+		decoratedRepo.removeEntityListener(entityListener);
 	}
 }

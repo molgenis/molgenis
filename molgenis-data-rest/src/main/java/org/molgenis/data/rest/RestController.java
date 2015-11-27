@@ -181,7 +181,8 @@ public class RestController
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		return new EntityMetaDataResponse(meta, attributeSet, attributeExpandSet, molgenisPermissionService);
+		return new EntityMetaDataResponse(meta, attributeSet, attributeExpandSet, molgenisPermissionService,
+				dataService);
 	}
 
 	/**
@@ -201,7 +202,8 @@ public class RestController
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
 
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		return new EntityMetaDataResponse(meta, attributesSet, attributeExpandSet, molgenisPermissionService);
+		return new EntityMetaDataResponse(meta, attributesSet, attributeExpandSet, molgenisPermissionService,
+				dataService);
 	}
 
 	/**
@@ -891,7 +893,11 @@ public class RestController
 
 		tokenService.removeToken(token);
 		SecurityContextHolder.getContext().setAuthentication(null);
-		request.getSession().invalidate();
+
+		if (request.getSession(false) != null)
+		{
+			request.getSession().invalidate();
+		}
 	}
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)
@@ -1044,7 +1050,7 @@ public class RestController
 		if (attributeMetaData != null)
 		{
 			return new AttributeMetaDataResponse(entityName, attributeMetaData, attributeSet, attributeExpandSet,
-					molgenisPermissionService);
+					molgenisPermissionService, dataService);
 		}
 		else
 		{
@@ -1104,7 +1110,8 @@ public class RestController
 				}
 
 				EntityPager pager = new EntityPager(request.getStart(), request.getNum(), (long) count, mrefEntities);
-				return new EntityCollectionResponse(pager, refEntityMaps, attrHref, null, molgenisPermissionService);
+				return new EntityCollectionResponse(pager, refEntityMaps, attrHref, null, molgenisPermissionService,
+						dataService);
 			case CATEGORICAL:
 			case XREF:
 				Map<String, Object> entityXrefAttributeMap = getEntityAsMap((Entity) entity.get(refAttributeName),
@@ -1157,7 +1164,7 @@ public class RestController
 		}
 
 		return new EntityCollectionResponse(pager, entities, BASE_URI + "/" + entityName, meta,
-				molgenisPermissionService);
+				molgenisPermissionService, dataService);
 	}
 
 	// Transforms an entity to a Map so it can be transformed to json
@@ -1189,7 +1196,7 @@ public class RestController
 					{
 						Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
 						entityMap.put(attrName, new AttributeMetaDataResponse(meta.getName(), attr, subAttributesSet,
-								null, molgenisPermissionService));
+								null, molgenisPermissionService, dataService));
 					}
 					else
 					{
@@ -1255,7 +1262,8 @@ public class RestController
 
 					EntityCollectionResponse ecr = new EntityCollectionResponse(pager, refEntityMaps,
 							Href.concatAttributeHref(RestController.BASE_URI, meta.getName(), entity.getIdValue(),
-									attrName), null, molgenisPermissionService);
+									attrName), null, molgenisPermissionService, dataService);
+
 					entityMap.put(attrName, ecr);
 				}
 				else if ((attrType == XREF && entity.get(attr.getName()) != null)

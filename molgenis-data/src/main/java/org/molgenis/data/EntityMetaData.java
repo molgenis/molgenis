@@ -69,6 +69,13 @@ public interface EntityMetaData
 	Iterable<AttributeMetaData> getAtomicAttributes();
 
 	/**
+	 * Same as {@link #getAtomicAttributes()} but returns the attribute names
+	 * 
+	 * @return attribute names
+	 */
+	Iterable<String> getAtomicAttributeNames();
+
+	/**
 	 * Attribute that is used as unique Id. Id attribute should always be provided.
 	 */
 	AttributeMetaData getIdAttribute();
@@ -87,6 +94,13 @@ public interface EntityMetaData
 	 * Get attribute by name (case insensitive), returns null if not found
 	 */
 	AttributeMetaData getAttribute(String attributeName);
+
+	/**
+	 * Returns whether this entity has a attribute with expression
+	 * 
+	 * @return whether this entity has a attribute with expression
+	 */
+	boolean hasAttributeWithExpression();
 
 	/**
 	 * Entity can extend another entity, adding its properties to their own

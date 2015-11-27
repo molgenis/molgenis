@@ -2,27 +2,21 @@ package org.molgenis.data.support;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static junit.framework.Assert.assertEquals;
-import static org.mockito.ArgumentCaptor.forClass;
-import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.RepositoryCapability;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-
-import com.google.common.collect.Lists;
-
-import junit.framework.Assert;
 
 public class AbstractRepositoryTest
 {
@@ -70,6 +64,13 @@ public class AbstractRepositoryTest
 		assertEquals(newArrayList(), newArrayList(result));
 	}
 
+	@Test(expectedExceptions = UnsupportedOperationException.class)
+	public void testFindAllFetchIdsForRepositoryThatDoesntHaveFindAll()
+	{
+		Iterable<Entity> result = abstractRepository.findAll(newArrayList("1", "2", "3"), new Fetch());
+		assertEquals(newArrayList(), newArrayList(result));
+	}
+
 	@Test
 	public void testFindAllIdsForRepository()
 	{
@@ -79,6 +80,23 @@ public class AbstractRepositoryTest
 		assertEquals(newArrayList(createEntity("1"), createEntity("2"), createEntity("3"), createEntity("1"),
 				createEntity("2")), newArrayList(result));
 
+	}
+
+	@Test
+	public void testFindAllFetchIdsForRepository()
+	{
+		Mockito.doReturn(newArrayList(createEntity("3"), createEntity("1"), createEntity("2"))).when(abstractRepository)
+				.findAll(Matchers.any(Query.class));
+		Iterable<Entity> result = abstractRepository.findAll(newArrayList("1", "2", "3", "1", "2"), new Fetch());
+		assertEquals(newArrayList(createEntity("1"), createEntity("2"), createEntity("3"), createEntity("1"),
+				createEntity("2")), newArrayList(result));
+
+	}
+
+	@Test(expectedExceptions = UnsupportedOperationException.class)
+	public void findOneObjectFetch()
+	{
+		abstractRepository.findOne(Integer.valueOf(0), new Fetch());
 	}
 
 	private Entity createEntity(String id)

@@ -17,6 +17,8 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.request.QueryGenerator;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainService
@@ -26,6 +28,7 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 	private final Client client;
 
 	private final QueryGenerator queryGenerator = new QueryGenerator();
+	private static final Logger LOG = LoggerFactory.getLogger(ElasticSearchExplainServiceImpl.class);
 
 	@Autowired
 	public ElasticSearchExplainServiceImpl(Client client, ExplainServiceHelper explainServiceHelper)
@@ -44,6 +47,11 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 		ExplainResponse explainResponse = explainRequestBuilder.get();
 		if (explainResponse.hasExplanation())
 		{
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug(explainResponse.getExplanation().toString());
+			}
+
 			return explainResponse.getExplanation();
 		}
 		return null;

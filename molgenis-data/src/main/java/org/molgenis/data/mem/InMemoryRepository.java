@@ -1,5 +1,7 @@
 package org.molgenis.data.mem;
 
+import static java.util.stream.StreamSupport.stream;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -10,7 +12,9 @@ import java.util.Set;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
@@ -19,9 +23,9 @@ import org.molgenis.data.support.QueryImpl;
 import com.google.common.collect.Sets;
 
 /**
- * Reposirory that uses a hashmap as store.
+ * Repository that uses a hashmap as store.
  * 
- * For testing purposis
+ * For testing purposes
  */
 public class InMemoryRepository implements Repository
 {
@@ -91,13 +95,32 @@ public class InMemoryRepository implements Repository
 	@Override
 	public Entity findOne(Object id)
 	{
+		return findOne(id, null);
+	}
+
+	@Override
+	public Entity findOne(Object id, Fetch fetch)
+	{
 		return entities.get(id);
 	}
 
 	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
-		throw new UnsupportedOperationException();
+		return findAll(ids, null);
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
+	{
+		return new Iterable<Entity>()
+		{
+			@Override
+			public Iterator<Entity> iterator()
+			{
+				return stream(ids.spliterator(), false).map(id -> entities.get(id)).iterator();
+			}
+		};
 	}
 
 	@Override
@@ -200,8 +223,7 @@ public class InMemoryRepository implements Repository
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return Sets.newHashSet(RepositoryCapability.QUERYABLE, RepositoryCapability.UPDATEABLE,
-				RepositoryCapability.WRITABLE);
+		return Sets.newHashSet(RepositoryCapability.QUERYABLE, RepositoryCapability.WRITABLE);
 	}
 
 	@Override
@@ -210,4 +232,36 @@ public class InMemoryRepository implements Repository
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public void create()
+	{
+		// Repo is not MANAGABLE
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void drop()
+	{
+		// Repo is not MANAGABLE
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void rebuildIndex()
+	{
+		// Repo is not INDEXABLE
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void addEntityListener(EntityListener entityListener)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void removeEntityListener(EntityListener entityListener)
+	{
+		throw new UnsupportedOperationException();
+	}
 }

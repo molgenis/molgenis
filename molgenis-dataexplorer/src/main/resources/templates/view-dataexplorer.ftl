@@ -5,8 +5,7 @@
 	"jquery.molgenis.tree.css",
 	"ui.fancytree.min.css",
 	"dataexplorer.css",
-	"dataexplorer-filter.css",
-	"diseasematcher.css"]>
+	"dataexplorer-filter.css"]>
 <#assign js=[
     "jquery.bootstrap.wizard.min.js",
 	"dataexplorer-filter.js",

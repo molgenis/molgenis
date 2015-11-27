@@ -1,6 +1,7 @@
 package org.molgenis.data.support;
 
-import java.util.ArrayList;
+import static java.util.Objects.requireNonNull;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -14,8 +15,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Range;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
-
-import com.google.common.collect.Lists;
+import org.molgenis.util.CaseInsensitiveLinkedHashMap;
 
 /**
  * Default implementation of the AttributeMetaData interface
@@ -38,7 +38,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private boolean visible = true; // remove?
 	private boolean unique = false;
 	private boolean auto = false;
-	private List<AttributeMetaData> attributesMetaData;
+	private Map<String, AttributeMetaData> attributePartsMap;
 	private boolean aggregateable = false;
 	private Range range;
 	private String visibleExpression;
@@ -46,16 +46,14 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 
 	public DefaultAttributeMetaData(String name, FieldTypeEnum fieldType)
 	{
-		if (name == null) throw new IllegalArgumentException("Name cannot be null");
-		if (fieldType == null) throw new IllegalArgumentException("FieldType cannot be null");
-		this.name = name;
-		this.fieldType = MolgenisFieldTypes.getType(fieldType.toString().toLowerCase());
+		this.name = requireNonNull(name);
+		this.fieldType = MolgenisFieldTypes.getType(requireNonNull(fieldType).toString().toLowerCase());
 	}
 
 	public DefaultAttributeMetaData(String name)
 	{
 		if (name == null) throw new IllegalArgumentException("Name cannot be null");
-		this.name = name;
+		this.name = requireNonNull(name);
 		this.fieldType = MolgenisFieldTypes.STRING;
 	}
 
@@ -97,12 +95,12 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		Iterable<AttributeMetaData> attributeParts = attributeMetaData.getAttributeParts();
 		if (attributeParts != null)
 		{
-			List<AttributeMetaData> attributesMetaData = new ArrayList<AttributeMetaData>();
+			Map<String, AttributeMetaData> attributePartsMap = new CaseInsensitiveLinkedHashMap<>();
 			for (AttributeMetaData attributePart : attributeParts)
 			{
-				attributesMetaData.add(new DefaultAttributeMetaData(attributePart));
+				attributePartsMap.put(attributePart.getName(), new DefaultAttributeMetaData(attributePart));
 			}
-			this.attributesMetaData = attributesMetaData;
+			this.attributePartsMap = attributePartsMap;
 		}
 	}
 
@@ -228,21 +226,31 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	@Override
 	public Iterable<AttributeMetaData> getAttributeParts()
 	{
-		return this.attributesMetaData != null ? this.attributesMetaData : Collections.<AttributeMetaData> emptyList();
+		return this.attributePartsMap != null ? this.attributePartsMap.values()
+				: Collections.<AttributeMetaData> emptyList();
+	}
+
+	@Override
+	public AttributeMetaData getAttributePart(String attrName)
+	{
+		return attributePartsMap != null ? attributePartsMap.get(attrName) : null;
 	}
 
 	public void addAttributePart(AttributeMetaData attributePart)
 	{
-		if (this.attributesMetaData == null)
+		if (this.attributePartsMap == null)
 		{
-			this.attributesMetaData = new ArrayList<AttributeMetaData>();
+			this.attributePartsMap = new CaseInsensitiveLinkedHashMap<>();
 		}
-		this.attributesMetaData.add(attributePart);
+		this.attributePartsMap.put(attributePart.getName(), attributePart);
 	}
 
 	public void setAttributesMetaData(Iterable<AttributeMetaData> attributeParts)
 	{
-		this.attributesMetaData = Lists.newArrayList(attributeParts);
+		this.attributePartsMap = new CaseInsensitiveLinkedHashMap<>();
+		attributeParts.forEach(attrPart -> {
+			attributePartsMap.put(attrPart.getName(), attrPart);
+		});
 	}
 
 	@Override
@@ -330,7 +338,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		result += " unique='" + unique + "'";
 		result += " visible='" + visible + "'";
 		result += " auto='" + auto + "'";
-		result += " attributesMetaData='" + attributesMetaData + "'";
+		result += " attributesMetaData='" + attributePartsMap + "'";
 		result += " aggregateable='" + aggregateable + "'";
 		result += " range='" + range + "'";
 		result += " visibleExpression='" + visibleExpression + "'";

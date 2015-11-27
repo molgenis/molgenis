@@ -1,12 +1,14 @@
 package org.molgenis.data.rest.v2;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.molgenis.data.AttributeMetaData;
 
-class AttributeFilter implements Iterable<AttributeFilter>
+class AttributeFilter implements Iterable<Entry<String, AttributeFilter>>
 {
 	public static final AttributeFilter ALL_ATTRS_FILTER = new AttributeFilter().setIncludeAllAttrs(true);
 
@@ -104,9 +106,9 @@ class AttributeFilter implements Iterable<AttributeFilter>
 	}
 
 	@Override
-	public Iterator<AttributeFilter> iterator()
+	public Iterator<Entry<String, AttributeFilter>> iterator()
 	{
-		return attributes.values().iterator();
+		return Collections.unmodifiableMap(attributes).entrySet().iterator();
 	}
 
 	public AttributeFilter add(String name)

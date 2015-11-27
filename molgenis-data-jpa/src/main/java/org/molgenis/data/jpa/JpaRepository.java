@@ -1,6 +1,5 @@
 package org.molgenis.data.jpa;
 
-import static org.molgenis.data.RepositoryCapability.UPDATEABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
 import java.io.IOException;
@@ -9,10 +8,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -26,7 +22,6 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
@@ -161,7 +156,10 @@ public class JpaRepository extends AbstractRepository
 	@Transactional(readOnly = true)
 	public Entity findOne(Object id)
 	{
-		if (LOG.isDebugEnabled()) LOG.debug("finding by key" + getEntityClass().getSimpleName() + " [" + id + "]");
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Fetching JPA [{}] data by id [{}]", getEntityClass().getSimpleName(), id);
+		}
 
 		return getEntityManager().find(getEntityClass(),
 				getEntityMetaData().getIdAttribute().getDataType().convert(id));
@@ -193,7 +191,7 @@ public class JpaRepository extends AbstractRepository
 		if (q.getOffset() > 0) tq.setFirstResult(q.getOffset());
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("finding " + getEntityClass().getSimpleName() + " " + q);
+			LOG.debug("Fetching JPA [{}] data for query [{}]", getEntityClass().getSimpleName(), q);
 		}
 		return tq.getResultList();
 	}
@@ -683,6 +681,6 @@ public class JpaRepository extends AbstractRepository
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return Sets.newHashSet(UPDATEABLE, WRITABLE);
+		return Sets.newHashSet(WRITABLE);
 	}
 }

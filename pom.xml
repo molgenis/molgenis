@@ -8,7 +8,7 @@
     </parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>1.13.0-SNAPSHOT</version>
+    <version>1.14.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <!-- More Project Information -->
@@ -58,7 +58,8 @@
         <spring.security.version>4.0.1.RELEASE</spring.security.version>
         <mysql.connector.java.version>5.1.28</mysql.connector.java.version>
         <hibernate.validator.version>4.2.0.Final</hibernate.validator.version>
-        
+        <httpclient.version>4.5.1</httpclient.version>
+        <google.guava.version>16.0.1</google.guava.version>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
         <molgenis.build.timestamp>${maven.build.timestamp}</molgenis.build.timestamp>
     </properties>
@@ -345,38 +346,6 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>properties-maven-plugin</artifactId>
                     <version>1.0-alpha-2</version>
-                </plugin>
-                <!-- servlet container -->
-                <plugin>
-                    <groupId>org.eclipse.jetty</groupId>
-					<artifactId>jetty-maven-plugin</artifactId>
-					<version>9.2.6.v20141205</version>
-                    <configuration>
-                        <stopPort>8079</stopPort>
-                        <stopKey>jetty-stop</stopKey>
-                        <reload>manual</reload>
-                        <systemProperties>
-							<systemProperty>
-								<name>molgenis.home</name>
-								<value>${user.home}${file.separator}.molgenis${file.separator}omx</value>
-							</systemProperty>
-						</systemProperties>
-                        <webAppConfig>
-                            <contextPath>/</contextPath>
-                            <baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
-      							<resourcesAsCSV>${basedir}/src/main/resources</resourcesAsCSV>
-    						</baseResource>
-							<webInfIncludeJarPattern>.*/molgenis-[^/]*\.jar$|.*spring-[^/]*\.jar$
-                            </webInfIncludeJarPattern>
-                        </webAppConfig>
-                    </configuration>
-                    <dependencies>
-                        <dependency>
-                            <groupId>mysql</groupId>
-                            <artifactId>mysql-connector-java</artifactId>
-                            <version>${mysql.connector.java.version}</version>
-                        </dependency>
-                    </dependencies>
                 </plugin>
                 <!-- Eclipse m2e mappings -->
                 <plugin>
@@ -724,12 +693,12 @@
         <module>molgenis-data-elasticsearch</module>
         <module>molgenis-data-semanticsearch</module>
         <module>molgenis-data-validation</module>
+        <module>molgenis-data-idcard</module>
         <module>molgenis-python</module>
         <module>molgenis-r</module>
         <module>molgenis-charts</module>
         <module>molgenis-js</module>
         <module>molgenis-model-registry</module>
-        <module>molgenis-disease-matcher</module>
         <module>molgenis-data-examples</module>
         <module>molgenis-scripts</module>
         <module>molgenis-scripts-core</module>

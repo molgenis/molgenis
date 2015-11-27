@@ -31,12 +31,6 @@
 
     var Table, tableSort;
 
-    $(document).on('dataChange.diseasematcher', function(e) {
-    	if (e.namespace !== 'data' && Table){
-    		Table.setProps({query: getQuery()});
-    	}
-	});
-
     /**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
@@ -267,8 +261,8 @@
                 if(selectedTrack) {
                     var a = $('<a href="javascript:void(0)">' + f.id + '</a>');
                     var attr;
-                    $.each(getAttributes(), function (key, attribute) {
-                        if (attribute === genomebrowserIdentifierAttribute) {
+					$.each(getAttributes(), function (key, attribute) {
+						if (attribute.name === entity.idAttribute) {
                             attr = attribute;
                         }
                     });
@@ -276,14 +270,22 @@
                         createFilter(attr, undefined, undefined, f.id);
                     });
                     if (f.id !== "-" && attr !== undefined) {
-                        info.setTitle(f.id);
-                        info.add('Filter on mutation:', a[0]);
-                        //cache the information
+						if(attr.visible) {
+							info.setTitle(f.id);
+							info.add('Filter on mutation:', a[0]);
+							//cache the information
+						}
                     }
                     else{
                         info.setTitle("Chromosome:"+f.segment+" Position:"+ f.min);
                     }
                 }
+
+                var entityReportLink = $('<a href="javascript:void(0)">Show details</a>');
+                entityReportLink.click(function () {
+                	onRowInspect({id:f.id, name:getEntity().name});
+                });
+                info.add("", entityReportLink[0]);
             }
             featureInfoMap[info.tier.dasSource.name + f.id + f.label] = info;
         }
