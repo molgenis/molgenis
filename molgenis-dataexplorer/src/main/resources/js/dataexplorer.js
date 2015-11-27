@@ -346,6 +346,7 @@ function($, molgenis, settingsXhr) {
 			if(state.mod) {
 				moduleTab = $('a[data-toggle="tab"][data-target="#tab-' + state.mod + '"]', container);
 			} else {
+				
 				moduleTab = $('a[data-toggle="tab"]', container).first();
 			}
 			
@@ -522,7 +523,7 @@ function($, molgenis, settingsXhr) {
 			self.filter.wizard.openFilterWizardModal(selectedEntityMetaData, attributeFilters);
 		});
 
-		$('#module-nav').on('click', 'a', function(e) {
+		$('#module-nav').on('click', 'ul.nav > li > a', function(e) {
 			$(document).trigger('changeModule', $(this).data('id'));
 		});
 	
