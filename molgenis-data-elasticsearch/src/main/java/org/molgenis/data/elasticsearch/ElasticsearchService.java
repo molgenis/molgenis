@@ -10,6 +10,7 @@ import static org.molgenis.data.transaction.MolgenisTransactionManager.TRANSACTI
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -847,6 +848,44 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	 */
 	@Override
 	public void rebuildIndex(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
+	{
+		if (LOG.isDebugEnabled()) LOG.debug("Start rebuilding index for entity: [" + entityMetaData.getName() + "]");
+		if (storeSource(entityMetaData))
+		{
+			this.rebuildIndexWhenElasticSearchBackend(entities, entityMetaData);
+		}
+		else
+		{
+			this.rebuildIndexGeneric(entities, entityMetaData);
+		}
+		if (LOG.isDebugEnabled()) LOG.debug("Finished rebuilding index for entity: [" + entityMetaData.getName() + "]");
+	}
+
+	/**
+	 * Rebuild Elasticsearch index when the source is living in Elasticsearch itself. This operation requires a way to
+	 * temporary save the data so we can drop and rebuild the index for this document. The data will be saved in memory.
+	 * 
+	 * @param entities
+	 * @param entityMetaData
+	 */
+	private void rebuildIndexWhenElasticSearchBackend(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
+	{
+		List<Entity> inMemoryCopy = new ArrayList<Entity>();
+		if (LOG.isDebugEnabled()) LOG.debug("Copy entity data into inmemory. Entity name: [" + entityMetaData.getName()
+				+ "]");
+		entities.forEach(e -> inMemoryCopy.add(e));
+		this.rebuildIndexGeneric(inMemoryCopy, entityMetaData);
+	}
+
+	/**
+	 * Rebuild Elasticsearch index when the source is living in another backend than the Elasticsearch itself.
+	 * 
+	 * @param entities
+	 *            entities that will be reindexed.
+	 * @param entityMetaData
+	 *            meta data information about the entities that will be reindexed.
+	 */
+	private void rebuildIndexGeneric(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
 	{
 		if (DependencyResolver.hasSelfReferences(entityMetaData))
 		{
