@@ -222,7 +222,7 @@
 			);
 		},
 		_createRowLast: function() {
-			var nrCols = this.props.matrix.length == 0 ? 0 : this.props.matrix[0].length;
+			var nrCols = this.props.matrix[0].length;
 			
 			var tableTotal = 0;
 			var isTableAnonymized = false;
