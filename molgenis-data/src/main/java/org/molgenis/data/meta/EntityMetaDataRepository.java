@@ -1,7 +1,5 @@
 package org.molgenis.data.meta;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
@@ -31,8 +29,6 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.DependencyResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
@@ -49,8 +45,6 @@ class EntityMetaDataRepository
 	private final ManageableRepositoryCollection collection;
 	private final Map<String, DefaultEntityMetaData> entityMetaDataCache = new HashMap<>();
 	private final AttributeMetaDataRepository attributeRepository;
-
-	private static final Logger LOG = LoggerFactory.getLogger(EntityMetaDataRepository.class);
 
 	public EntityMetaDataRepository(ManageableRepositoryCollection collection, PackageRepository packageRepository,
 			AttributeMetaDataRepository attributeRepository)
@@ -182,9 +176,8 @@ class EntityMetaDataRepository
 		Iterable<AttributeMetaData> attributes = entityMetaData.getOwnAttributes();
 		if (attributes != null)
 		{
-			entity.set(ATTRIBUTES,
-					stream(attributes.spliterator(), false).map(attributeRepository::add).collect(toList()));
-			emd.addAllAttributeMetaData(newArrayList(attributes));
+			entity.set(ATTRIBUTES, attributeRepository.add(attributes));
+			emd.addAllAttributeMetaData(attributes);
 		}
 		else
 		{

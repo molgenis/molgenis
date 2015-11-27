@@ -1,5 +1,6 @@
 package org.molgenis.data.meta;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.AGGREGATEABLE;
@@ -26,6 +27,10 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.VALIDATION_EXPRES
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE_EXPRESSION;
 
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -39,6 +44,7 @@ import org.molgenis.fieldtypes.CompoundField;
 import org.molgenis.fieldtypes.EnumField;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
 
 /**
  * Helper class around the {@link AttributeMetaDataMetaData} repository. Internal implementation class, use
@@ -56,7 +62,7 @@ class AttributeMetaDataRepository
 
 	public AttributeMetaDataRepository(ManageableRepositoryCollection collection)
 	{
-		this.repository = collection.addEntityMeta(META_DATA);
+		this.repository = requireNonNull(collection).addEntityMeta(META_DATA);
 		uuidGenerator = new UuidGenerator();
 	}
 
@@ -80,57 +86,78 @@ class AttributeMetaDataRepository
 	 */
 	public Entity add(AttributeMetaData att)
 	{
-		Entity attributeMetaDataEntity = new MapEntity(META_DATA);
-		// autoid
-		attributeMetaDataEntity.set(IDENTIFIER, uuidGenerator.generateId());
-		attributeMetaDataEntity.set(NAME, att.getName());
-		attributeMetaDataEntity.set(DATA_TYPE, att.getDataType());
-		attributeMetaDataEntity.set(ID_ATTRIBUTE, att.isIdAtrribute());
-		attributeMetaDataEntity.set(NILLABLE, att.isNillable());
-		attributeMetaDataEntity.set(AUTO, att.isAuto());
-		attributeMetaDataEntity.set(VISIBLE, att.isVisible());
-		attributeMetaDataEntity.set(LABEL, att.getLabel());
-		attributeMetaDataEntity.set(DESCRIPTION, att.getDescription());
-		attributeMetaDataEntity.set(AGGREGATEABLE, att.isAggregateable());
-		attributeMetaDataEntity.set(LOOKUP_ATTRIBUTE, att.isLookupAttribute());
-		attributeMetaDataEntity.set(LABEL_ATTRIBUTE, att.isLabelAttribute());
-		attributeMetaDataEntity.set(READ_ONLY, att.isReadonly());
-		attributeMetaDataEntity.set(UNIQUE, att.isUnique());
-		attributeMetaDataEntity.set(EXPRESSION, att.getExpression());
-		attributeMetaDataEntity.set(VISIBLE_EXPRESSION, att.getVisibleExpression());
-		attributeMetaDataEntity.set(VALIDATION_EXPRESSION, att.getValidationExpression());
-		attributeMetaDataEntity.set(DEFAULT_VALUE, att.getDefaultValue());
+		return add(Arrays.asList(att)).iterator().next();
+	}
 
-		if ((att.getDataType() instanceof EnumField) && (att.getEnumOptions() != null))
+	public Iterable<Entity> add(Iterable<AttributeMetaData> attrs)
+	{
+		Iterable<List<AttributeMetaData>> batches = Iterables.partition(attrs, 1000);
+		return new Iterable<Entity>()
 		{
-			attributeMetaDataEntity.set(ENUM_OPTIONS, Joiner.on(",").join(att.getEnumOptions()));
-		}
-
-		if (att.getRange() != null)
-		{
-			attributeMetaDataEntity.set(RANGE_MIN, att.getRange().getMin());
-			attributeMetaDataEntity.set(RANGE_MAX, att.getRange().getMax());
-		}
-
-		if (att.getRefEntity() != null)
-		{
-			String entityName = att.getRefEntity().getName();
-			attributeMetaDataEntity.set(REF_ENTITY, entityName);
-		}
-
-		// recursive for compound attribute parts
-		if (att.getDataType() instanceof CompoundField)
-		{
-			Iterable<AttributeMetaData> attributeParts = att.getAttributeParts();
-			if (attributeParts != null)
+			@Override
+			public Iterator<Entity> iterator()
 			{
-				attributeMetaDataEntity.set(PARTS,
-						stream(attributeParts.spliterator(), false).map(this::add).collect(toList()));
+				return stream(batches.spliterator(), false).flatMap(batch -> {
+					List<Entity> attrEntities = convertToAttrEntities(attrs);
+					repository.add(attrEntities);
+					return attrEntities.stream();
+				}).iterator();
 			}
-		}
 
-		repository.add(attributeMetaDataEntity);
-		return attributeMetaDataEntity;
+			private List<Entity> convertToAttrEntities(Iterable<AttributeMetaData> attrs)
+			{
+				return stream(attrs.spliterator(), false).map(this::convertToAttrEntity).collect(toList());
+			}
+
+			private Entity convertToAttrEntity(AttributeMetaData attr)
+			{
+				Entity attributeMetaDataEntity = new MapEntity(META_DATA);
+				attributeMetaDataEntity.set(IDENTIFIER, uuidGenerator.generateId());
+				attributeMetaDataEntity.set(NAME, attr.getName());
+				attributeMetaDataEntity.set(DATA_TYPE, attr.getDataType());
+				attributeMetaDataEntity.set(ID_ATTRIBUTE, attr.isIdAtrribute());
+				attributeMetaDataEntity.set(NILLABLE, attr.isNillable());
+				attributeMetaDataEntity.set(AUTO, attr.isAuto());
+				attributeMetaDataEntity.set(VISIBLE, attr.isVisible());
+				attributeMetaDataEntity.set(LABEL, attr.getLabel());
+				attributeMetaDataEntity.set(DESCRIPTION, attr.getDescription());
+				attributeMetaDataEntity.set(AGGREGATEABLE, attr.isAggregateable());
+				attributeMetaDataEntity.set(LOOKUP_ATTRIBUTE, attr.isLookupAttribute());
+				attributeMetaDataEntity.set(LABEL_ATTRIBUTE, attr.isLabelAttribute());
+				attributeMetaDataEntity.set(READ_ONLY, attr.isReadonly());
+				attributeMetaDataEntity.set(UNIQUE, attr.isUnique());
+				attributeMetaDataEntity.set(EXPRESSION, attr.getExpression());
+				attributeMetaDataEntity.set(VISIBLE_EXPRESSION, attr.getVisibleExpression());
+				attributeMetaDataEntity.set(VALIDATION_EXPRESSION, attr.getValidationExpression());
+				attributeMetaDataEntity.set(DEFAULT_VALUE, attr.getDefaultValue());
+
+				if ((attr.getDataType() instanceof EnumField) && (attr.getEnumOptions() != null))
+				{
+					attributeMetaDataEntity.set(ENUM_OPTIONS, Joiner.on(',').join(attr.getEnumOptions()));
+				}
+
+				if (attr.getRange() != null)
+				{
+					attributeMetaDataEntity.set(RANGE_MIN, attr.getRange().getMin());
+					attributeMetaDataEntity.set(RANGE_MAX, attr.getRange().getMax());
+				}
+
+				if (attr.getRefEntity() != null)
+				{
+					String entityName = attr.getRefEntity().getName();
+					attributeMetaDataEntity.set(REF_ENTITY, entityName);
+				}
+
+				// recursive for compound attribute parts
+				if (attr.getDataType() instanceof CompoundField)
+				{
+					List<Entity> attrPartsEntities = convertToAttrEntities(attr.getAttributeParts());
+					repository.add(attrPartsEntities);
+					attributeMetaDataEntity.set(PARTS, attrPartsEntities);
+				}
+				return attributeMetaDataEntity;
+			}
+		};
 	}
 
 	/**
@@ -179,11 +206,11 @@ class AttributeMetaDataRepository
 		attributeMetaData.setVisible(entity.getBoolean(VISIBLE));
 		attributeMetaData.setLabel(entity.getString(LABEL));
 		attributeMetaData.setDescription(entity.getString(DESCRIPTION));
-		attributeMetaData.setAggregateable(entity.getBoolean(AGGREGATEABLE) == null ? false : entity
-				.getBoolean(AGGREGATEABLE));
+		attributeMetaData
+				.setAggregateable(entity.getBoolean(AGGREGATEABLE) == null ? false : entity.getBoolean(AGGREGATEABLE));
 		attributeMetaData.setEnumOptions(entity.getList(ENUM_OPTIONS));
-		attributeMetaData.setLabelAttribute(entity.getBoolean(LABEL_ATTRIBUTE) == null ? false : entity
-				.getBoolean(LABEL_ATTRIBUTE));
+		attributeMetaData.setLabelAttribute(
+				entity.getBoolean(LABEL_ATTRIBUTE) == null ? false : entity.getBoolean(LABEL_ATTRIBUTE));
 		attributeMetaData.setReadOnly(entity.getBoolean(READ_ONLY) == null ? false : entity.getBoolean(READ_ONLY));
 		attributeMetaData.setUnique(entity.getBoolean(UNIQUE) == null ? false : entity.getBoolean(UNIQUE));
 		attributeMetaData.setExpression(entity.getString(EXPRESSION));
@@ -202,8 +229,8 @@ class AttributeMetaDataRepository
 		Iterable<Entity> parts = entity.getEntities(PARTS);
 		if (parts != null)
 		{
-			stream(parts.spliterator(), false).map(this::toAttributeMetaData).forEach(
-					attributeMetaData::addAttributePart);
+			stream(parts.spliterator(), false).map(this::toAttributeMetaData)
+					.forEach(attributeMetaData::addAttributePart);
 		}
 		attributeMetaData.setVisibleExpression(entity.getString(VISIBLE_EXPRESSION));
 		attributeMetaData.setValidationExpression(entity.getString(VALIDATION_EXPRESSION));
