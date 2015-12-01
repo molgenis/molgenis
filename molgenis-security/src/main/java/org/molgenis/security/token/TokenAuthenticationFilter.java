@@ -55,8 +55,7 @@ public class TokenAuthenticationFilter extends GenericFilterBean
 				}
 				catch (AuthenticationException e)
 				{
-					((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED);
-					return;
+					// Cannot authenticate the user based on the token, act as if it wasn't there
 				}
 			}
 		}
