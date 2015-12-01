@@ -884,14 +884,11 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		Repository tempRepository = dataService.getMeta().addEntityMeta(tempEntityMetaData);
 		dataService.add(tempRepository.getName(), entities);
 
-		// Remove original entity
-		dataService.delete(entityMetaData.getName(), entities);
-		dataService.getMeta().deleteEntityMeta(entityMetaData.getName());
-
-		// Copy entity to an original entity
+		// Find the temporary saved entities
 		Iterable<? extends Entity> tempEntities = dataService.findAll(tempEntityMetaData.getName());
-		Repository originalRepository = dataService.getMeta().addEntityMeta(entityMetaData);
-		dataService.add(originalRepository.getName(), tempEntities);
+
+		// Rebuild index
+		this.rebuildIndexGeneric(tempEntities, entityMetaData);
 
 		// Remove temporary entity
 		dataService.delete(tempEntityMetaData.getName(), tempEntities);
