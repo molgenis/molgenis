@@ -10,7 +10,6 @@ import static org.molgenis.data.transaction.MolgenisTransactionManager.TRANSACTI
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -59,6 +58,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
@@ -68,9 +68,12 @@ import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
+import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.transaction.MolgenisTransactionListener;
 import org.molgenis.data.transaction.MolgenisTransactionLogEntryMetaData;
 import org.molgenis.data.transaction.MolgenisTransactionLogMetaData;
@@ -93,7 +96,6 @@ import com.google.common.collect.Iterables;
 public class ElasticsearchService implements SearchService, MolgenisTransactionListener
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchService.class);
-
 	public static final String CRUD_TYPE_FIELD_NAME = "MolgenisCrudType";
 	private static BulkProcessorFactory BULK_PROCESSOR_FACTORY = new BulkProcessorFactory();
 	private static List<String> NON_TRANSACTIONAL_ENTITIES = Arrays.asList(MolgenisTransactionLogMetaData.ENTITY_NAME,
@@ -852,7 +854,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		if (LOG.isDebugEnabled()) LOG.debug("Start rebuilding index for entity: [" + entityMetaData.getName() + "]");
 		if (storeSource(entityMetaData))
 		{
-			this.rebuildIndexWhenElasticSearchBackend(entities, entityMetaData);
+			this.rebuildIndexElasticSearchEntity(entities, entityMetaData);
 		}
 		else
 		{
@@ -862,21 +864,38 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	}
 
 	/**
-	 * Rebuild Elasticsearch index when the source is living in Elasticsearch itself. This operation requires a way to
-	 * temporary save the data so we can drop and rebuild the index for this document. The data will be saved in memory.
+	 * Rebuild Elasticsearch index when the source is living in Elasticearch itself. This operation requires a way to
+	 * temporary save the data so we can drop and rebuild the index for this document.
 	 * 
 	 * @param entities
 	 * @param entityMetaData
 	 */
-	private void rebuildIndexWhenElasticSearchBackend(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
+	void rebuildIndexElasticSearchEntity(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
 	{
-		ArrayList<Entity> inMemoryCopy = new ArrayList<Entity>();
-		if (LOG.isDebugEnabled()) LOG.debug("Copy entity data into inmemory. Entity name: [" + entityMetaData.getName()
+		if (LOG.isDebugEnabled()) LOG.debug("Copy entity data into a temporary entity. Entity name: ["
+				+ entityMetaData.getName()
 				+ "]");
-		entities.forEach(e -> inMemoryCopy.add(e));
-		inMemoryCopy.trimToSize();
-		this.rebuildIndexGeneric(inMemoryCopy, entityMetaData);
-		inMemoryCopy.clear();
+		
+		UuidGenerator uuidg = new UuidGenerator();
+		DefaultEntityMetaData tempEntityMetaData = new DefaultEntityMetaData(uuidg.generateId(), entityMetaData);
+		tempEntityMetaData.setPackage(new PackageImpl("elasticsearch_temporary_entity", "This entity (Original: "
+				+ entityMetaData.getName()
+				+ ") is temporary build to make rebuilding of Elasticsearch entities posible."));
+		Repository tempRepository = dataService.getMeta().addEntityMeta(tempEntityMetaData);
+		dataService.add(tempRepository.getName(), entities);
+
+		// Remove original entity
+		dataService.delete(entityMetaData.getName(), entities);
+		dataService.getMeta().deleteEntityMeta(entityMetaData.getName());
+
+		// Copy entity to an original entity
+		Iterable<? extends Entity> tempEntities = dataService.findAll(tempEntityMetaData.getName());
+		Repository originalRepository = dataService.getMeta().addEntityMeta(entityMetaData);
+		dataService.add(originalRepository.getName(), tempEntities);
+
+		// Remove temporary entity
+		dataService.delete(tempEntityMetaData.getName(), tempEntities);
+		dataService.getMeta().deleteEntityMeta(tempEntityMetaData.getName());
 	}
 
 	/**
