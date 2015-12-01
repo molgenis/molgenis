@@ -102,7 +102,7 @@ class AttributeMetaDataResponseV2
 							Fetch subAttrFetch;
 							if (fetch != null)
 							{
-								subAttrFetch = fetch.getFetch(attr);
+								subAttrFetch = fetch;
 							}
 							else if (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
 							{

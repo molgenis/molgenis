@@ -74,7 +74,7 @@ class EntityMetaDataResponseV2
 					@Override
 					public boolean apply(AttributeMetaData attr)
 					{
-						// fetch only contains compound attributes, the REST API meta response contains a tree of
+						// fetch only contains atomic attributes, the REST API meta response contains a tree of
 						// attributes. the algorithm below determines whether or not to include this compound attribute.
 						boolean keep;
 						if (attr.getDataType().getEnumType() == FieldTypeEnum.COMPOUND)
@@ -112,7 +112,7 @@ class EntityMetaDataResponseV2
 						Fetch subAttrFetch;
 						if (fetch != null)
 						{
-							subAttrFetch = fetch.getFetch(attr);
+							subAttrFetch = fetch;
 						}
 						else if (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
 						{
@@ -122,6 +122,7 @@ class EntityMetaDataResponseV2
 						{
 							subAttrFetch = null;
 						}
+
 						return new AttributeMetaDataResponseV2(name, attr, subAttrFetch, permissionService,
 								dataService);
 					}
