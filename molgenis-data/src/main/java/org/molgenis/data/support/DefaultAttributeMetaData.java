@@ -1,6 +1,7 @@
 package org.molgenis.data.support;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.AGGREGATEABLE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.AUTO;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DATA_TYPE;
@@ -49,7 +50,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private Map<String, AttributeChangeListener> changeListeners;
 
 	private final String name;
-	private FieldType fieldType = MolgenisFieldTypes.STRING;
+	private FieldType fieldType;
 	private String description;
 	private boolean nillable = true;
 	private boolean readOnly = false;
@@ -69,17 +70,21 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private String visibleExpression;
 	private String validationExpression;
 
-	public DefaultAttributeMetaData(String name, FieldTypeEnum fieldType)
-	{
-		this.name = requireNonNull(name);
-		this.fieldType = MolgenisFieldTypes.getType(requireNonNull(fieldType).toString().toLowerCase());
-	}
-
 	public DefaultAttributeMetaData(String name)
 	{
-		if (name == null) throw new IllegalArgumentException("Name cannot be null");
+		this(name, STRING);
+	}
+
+	public DefaultAttributeMetaData(String name, FieldTypeEnum fieldType)
+	{
+		this(name, MolgenisFieldTypes.getType(requireNonNull(fieldType).toString().toLowerCase()));
+	}
+
+	private DefaultAttributeMetaData(String name, FieldType fieldType)
+	{
 		this.name = requireNonNull(name);
-		this.fieldType = MolgenisFieldTypes.STRING;
+		this.label = name;
+		this.fieldType = requireNonNull(fieldType);
 	}
 
 	/**
@@ -106,7 +111,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		EntityMetaData refEntity = attributeMetaData.getRefEntity();
 		this.refEntity = refEntity != null ? new DefaultEntityMetaData(refEntity) : null; // deep copy
 		this.expression = attributeMetaData.getExpression();
-		this.label = attributeMetaData.getLabel();
+		setLabel(attributeMetaData.getLabel());
 		this.visible = attributeMetaData.isVisible();
 		this.unique = attributeMetaData.isUnique();
 		this.auto = attributeMetaData.isAuto();
@@ -293,12 +298,16 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	@Override
 	public String getLabel()
 	{
-		return label == null ? name : label;
+		return label;
 	}
 
 	public DefaultAttributeMetaData setLabel(String label)
 	{
 		this.label = label;
+		if (this.label == null)
+		{
+			this.label = this.name;
+		}
 		fireChangeEvent(LABEL);
 		return this;
 	}

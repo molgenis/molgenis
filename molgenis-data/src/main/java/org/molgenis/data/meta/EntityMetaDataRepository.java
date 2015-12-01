@@ -176,7 +176,7 @@ class EntityMetaDataRepository
 		Iterable<AttributeMetaData> attributes = entityMetaData.getOwnAttributes();
 		if (attributes != null)
 		{
-			entity.set(ATTRIBUTES, attributeRepository.add(attributes));
+			entity.set(ATTRIBUTES, Lists.newArrayList(attributeRepository.add(attributes)));
 			emd.addAllAttributeMetaData(attributes);
 		}
 		else

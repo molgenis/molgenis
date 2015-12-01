@@ -312,6 +312,10 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	public void setIdAttribute(String idAttrName)
 	{
 		this.idAttrName = idAttrName;
+		if (this.labelAttrName == null)
+		{
+			this.labelAttrName = idAttrName;
+		}
 		clearCache();
 	}
 
@@ -325,6 +329,10 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	public void setLabelAttribute(String labelAttrName)
 	{
 		this.labelAttrName = labelAttrName;
+		if (this.labelAttrName == null)
+		{
+			this.labelAttrName = idAttrName;
+		}
 		clearCache();
 	}
 
@@ -455,20 +463,21 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 		{
 			if (idAttrName != null)
 			{
-				cachedIdAttr = attributes.get(idAttrName);
+				cachedIdAttr = getCachedAllAttrs().get(idAttrName);
+				if (cachedIdAttr == null && extends_ != null)
+				{
+					cachedIdAttr = extends_.getAttribute(idAttrName);
+				}
 			}
 			else
 			{
-				if (extends_ != null)
+				// if the entity id attribute name was not set search for the id attribute
+				Stream<AttributeMetaData> stream = getCachedAllAttrs().values().stream();
+				cachedIdAttr = stream.filter(AttributeMetaData::isIdAtrribute).findFirst().orElse(null);
+
+				if (cachedIdAttr == null && extends_ != null)
 				{
 					cachedIdAttr = extends_.getIdAttribute();
-				}
-
-				if (cachedIdAttr == null)
-				{
-					// if the entity id attribute name was not set search for the id attribute
-					Stream<AttributeMetaData> stream = getCachedAllAttrs().values().stream();
-					cachedIdAttr = stream.filter(AttributeMetaData::isIdAtrribute).findFirst().orElse(null);
 				}
 			}
 
@@ -487,27 +496,27 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 		{
 			if (labelAttrName != null)
 			{
-				cachedLabelAttr = attributes.get(labelAttrName);
+				cachedLabelAttr = getCachedAllAttrs().get(labelAttrName);
+				if (cachedLabelAttr == null && extends_ != null)
+				{
+					cachedLabelAttr = extends_.getAttribute(idAttrName);
+				}
 			}
 			else
 			{
-				if (extends_ != null)
+				// if the entity label attribute name was not set search for the label attribute
+				Stream<AttributeMetaData> stream = getCachedAllAttrs().values().stream();
+				cachedLabelAttr = stream.filter(AttributeMetaData::isLabelAttribute).findFirst().orElse(null);
+
+				if (cachedLabelAttr == null && extends_ != null)
 				{
 					cachedLabelAttr = extends_.getLabelAttribute();
 				}
 
-				if (cachedLabelAttr != null)
+				if (cachedLabelAttr == null)
 				{
-					// if the entity label attribute name was not set search for the label attribute
-					Stream<AttributeMetaData> stream = getCachedAllAttrs().values().stream();
-					cachedLabelAttr = stream.filter(AttributeMetaData::isLabelAttribute).findFirst().orElse(null);
+					cachedLabelAttr = getCachedIdAttr();
 				}
-			}
-
-			// return the id attribute if no label attribute exists (see docs)
-			if (cachedLabelAttr == null)
-			{
-				cachedLabelAttr = getCachedIdAttr();
 			}
 		}
 		return cachedLabelAttr;

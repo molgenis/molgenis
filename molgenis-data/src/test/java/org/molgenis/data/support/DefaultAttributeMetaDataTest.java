@@ -63,6 +63,12 @@ public class DefaultAttributeMetaDataTest
 	}
 
 	@Test
+	public void DefaultAttributeMetaDataUnknownLabelUseName()
+	{
+		assertEquals(new DefaultAttributeMetaData("attribute").getLabel(), "attribute");
+	}
+
+	@Test
 	public void addChangeListener()
 	{
 		AttributeChangeListener changeListener = mock(AttributeChangeListener.class);
