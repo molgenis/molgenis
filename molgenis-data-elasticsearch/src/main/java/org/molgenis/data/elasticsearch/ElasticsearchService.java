@@ -874,8 +874,6 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	{
 		if (dataService.getMeta().hasBackend(ElasticsearchRepositoryCollection.NAME))
 		{
-			if (LOG.isDebugEnabled()) LOG.debug("Start rebuilding index of entity: [" + entityMetaData.getName() + "]");
-		
 			UuidGenerator uuidg = new UuidGenerator();
 			DefaultEntityMetaData tempEntityMetaData = new DefaultEntityMetaData(uuidg.generateId(), entityMetaData);
 			tempEntityMetaData.setPackage(new PackageImpl("elasticsearch_temporary_entity", "This entity (Original: "
@@ -895,7 +893,8 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			dataService.delete(tempEntityMetaData.getName(), tempEntities);
 			dataService.getMeta().deleteEntityMeta(tempEntityMetaData.getName());
 
-			if (LOG.isDebugEnabled()) LOG.debug("End rebuilding index of entity: [" + entityMetaData.getName() + "]");
+			if (LOG.isDebugEnabled()) LOG.debug("Finished rebuilding index of entity: [" + entityMetaData.getName()
+					+ "]");
 		}
 		else
 		{
