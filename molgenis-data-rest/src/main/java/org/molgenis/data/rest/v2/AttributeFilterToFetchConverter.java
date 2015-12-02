@@ -89,7 +89,7 @@ public class AttributeFilterToFetchConverter
 					subAttrFilter.forEach(entry -> {
 						String attrPartName = entry.getKey();
 						AttributeMetaData attrPart = attr.getAttributePart(attrPartName);
-						createFetchContentRec(attrFilter, entityMeta, attrPart, fetch);
+						createFetchContentRec(subAttrFilter, entityMeta, attrPart, fetch);
 					});
 				}
 				else
