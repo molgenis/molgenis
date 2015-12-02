@@ -32,6 +32,7 @@ public class EntityMetaDataResponse
 	private final String idAttribute;
 	private final List<String> lookupAttributes;
 	private final Boolean isAbstract;
+	private String languageCode;
 
 	/**
 	 * Is this user allowed to add/update/delete entities of this type and has the repo the capability?
@@ -143,6 +144,8 @@ public class EntityMetaDataResponse
 
 		this.writable = permissionService.hasPermissionOnEntity(name, Permission.WRITE)
 				&& dataService.getCapabilities(name).contains(RepositoryCapability.WRITABLE);
+
+		this.languageCode = languageService.getCurrentUserLanguageCode();
 	}
 
 	public String getHref()
@@ -199,4 +202,10 @@ public class EntityMetaDataResponse
 	{
 		return writable;
 	}
+
+	public String getLanguageCode()
+	{
+		return languageCode;
+	}
+
 }

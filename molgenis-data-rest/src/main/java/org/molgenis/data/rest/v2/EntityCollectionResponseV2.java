@@ -88,4 +88,5 @@ class EntityCollectionResponseV2
 	{
 		return items;
 	}
+
 }

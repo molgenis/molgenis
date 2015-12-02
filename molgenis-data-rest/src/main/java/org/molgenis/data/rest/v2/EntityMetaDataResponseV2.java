@@ -41,6 +41,7 @@ class EntityMetaDataResponseV2
 	 * Is this user allowed to add/update/delete entities of this type?
 	 */
 	private final Boolean writable;
+	private String languageCode;
 
 	/**
 	 * @param meta
@@ -149,6 +150,7 @@ class EntityMetaDataResponseV2
 
 		this.writable = permissionService.hasPermissionOnEntity(name, Permission.WRITE)
 				&& dataService.getCapabilities(name).contains(RepositoryCapability.WRITABLE);
+		this.languageCode = languageService.getCurrentUserLanguageCode();
 	}
 
 	public String getHref()
@@ -205,4 +207,10 @@ class EntityMetaDataResponseV2
 	{
 		return writable;
 	}
+
+	public String getLanguageCode()
+	{
+		return languageCode;
+	}
+
 }

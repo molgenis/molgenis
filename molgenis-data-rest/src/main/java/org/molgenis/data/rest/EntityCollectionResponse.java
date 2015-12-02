@@ -77,5 +77,4 @@ public class EntityCollectionResponse
 	{
 		return items;
 	}
-
 }
