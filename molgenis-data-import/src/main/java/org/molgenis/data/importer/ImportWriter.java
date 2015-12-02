@@ -966,43 +966,5 @@ public class ImportWriter
 			else if (!getIdValue().equals(other.getIdValue())) return false;
 			return true;
 		}
-
-		// /**
-		// * getEntity returns null when attributeName is not resulting in an entity
-		// */
-		// @Override
-		// public Entity getEntity(String attributeName)
-		// {
-		// try
-		// {
-		// return super.getEntity(attributeName);
-		// }
-		// catch (UnknownEntityException uee)
-		// {
-		// // self reference? ignore UnknownEntityExceptions those are solved in a later step
-		// if (entityMetaData.getName()
-		// .equals(entityMetaData.getAttribute(attributeName).getRefEntity().getName()))
-		// {
-		// return null;
-		// }
-		// throw uee;
-		// }
-		// }
-		//
-		// /**
-		// * getEntities filters the entities that are still not imported
-		// */
-		// @Override
-		// public Iterable<Entity> getEntities(String attributeName)
-		// {
-		// if (entityMetaData.getName().equals(entityMetaData.getAttribute(attributeName).getRefEntity().getName()))
-		// {
-		// return from(super.getEntities(attributeName)).filter(notNull());
-		// }
-		// else
-		// {
-		// return super.getEntities(attributeName);
-		// }
-		// }
 	}
 }
