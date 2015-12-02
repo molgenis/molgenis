@@ -93,8 +93,8 @@ class AttributeMetaDataResponseV2
 			}
 
 			// create attribute response
-			this.attributes = Lists.newArrayList(
-					Iterables.transform(attrParts, new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
+			this.attributes = Lists.newArrayList(Iterables.transform(attrParts,
+					new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
 					{
 						@Override
 						public AttributeMetaDataResponseV2 apply(AttributeMetaData attr)
@@ -102,7 +102,7 @@ class AttributeMetaDataResponseV2
 							Fetch subAttrFetch;
 							if (fetch != null)
 							{
-								subAttrFetch = fetch;
+								subAttrFetch = fetch.getFetch(attr);
 							}
 							else if (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
 							{

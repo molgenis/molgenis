@@ -68,13 +68,13 @@ class EntityMetaDataResponseV2
 		this.label = meta.getLabel();
 
 		// filter attribute parts
-		Iterable<AttributeMetaData> filteredAttrs = fetch != null
-				? Iterables.filter(meta.getAttributes(), new Predicate<AttributeMetaData>()
+		Iterable<AttributeMetaData> filteredAttrs = fetch != null ? Iterables.filter(meta.getAttributes(),
+				new Predicate<AttributeMetaData>()
 				{
 					@Override
 					public boolean apply(AttributeMetaData attr)
 					{
-						// fetch only contains atomic attributes, the REST API meta response contains a tree of
+						// fetch only contains compound attributes, the REST API meta response contains a tree of
 						// attributes. the algorithm below determines whether or not to include this compound attribute.
 						boolean keep;
 						if (attr.getDataType().getEnumType() == FieldTypeEnum.COMPOUND)
@@ -103,8 +103,8 @@ class EntityMetaDataResponseV2
 					}
 				}) : meta.getAttributes();
 
-		this.attributes = Lists.newArrayList(
-				Iterables.transform(filteredAttrs, new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
+		this.attributes = Lists.newArrayList(Iterables.transform(filteredAttrs,
+				new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
 				{
 					@Override
 					public AttributeMetaDataResponseV2 apply(AttributeMetaData attr)
@@ -112,7 +112,7 @@ class EntityMetaDataResponseV2
 						Fetch subAttrFetch;
 						if (fetch != null)
 						{
-							subAttrFetch = fetch;
+							subAttrFetch = fetch.getFetch(attr);
 						}
 						else if (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
 						{
@@ -123,8 +123,7 @@ class EntityMetaDataResponseV2
 							subAttrFetch = null;
 						}
 
-						return new AttributeMetaDataResponseV2(name, attr, subAttrFetch, permissionService,
-								dataService);
+						return new AttributeMetaDataResponseV2(name, attr, subAttrFetch, permissionService, dataService);
 					}
 				}));
 
@@ -135,8 +134,8 @@ class EntityMetaDataResponseV2
 		this.idAttribute = idAttribute != null ? idAttribute.getName() : null;
 
 		Iterable<AttributeMetaData> lookupAttributes = meta.getLookupAttributes();
-		this.lookupAttributes = lookupAttributes != null
-				? Lists.newArrayList(Iterables.transform(lookupAttributes, new Function<AttributeMetaData, String>()
+		this.lookupAttributes = lookupAttributes != null ? Lists.newArrayList(Iterables.transform(lookupAttributes,
+				new Function<AttributeMetaData, String>()
 				{
 					@Override
 					public String apply(AttributeMetaData attribute)
