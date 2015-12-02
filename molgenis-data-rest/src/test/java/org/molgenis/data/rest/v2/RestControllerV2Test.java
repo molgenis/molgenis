@@ -115,6 +115,10 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	private String attrBool;
 	private String attrString;
 	private String attrXref;
+	private String attrCompound;
+	private String attrCompoundAttr0;
+	private String attrCompoundAttrCompound;
+	private String attrCompoundAttrCompoundAttr0;
 	private String refAttrValue;
 	private String refAttrId;
 	private String refAttrRef;
@@ -143,10 +147,10 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		attrBool = "bool";
 		String attrCategorical = "categorical";
 		String attrCategoricalMref = "categorical_mref";
-		String attrCompound = "compound";
-		String attrCompoundAttr0 = "compound_attr0";
-		String attrCompoundAttrCompound = "compound_attrcompound";
-		String attrCompoundAttrCompoundAttr0 = "compound_attrcompound_attr0";
+		attrCompound = "compound";
+		attrCompoundAttr0 = "compound_attr0";
+		attrCompoundAttrCompound = "compound_attrcompound";
+		attrCompoundAttrCompoundAttr0 = "compound_attrcompound_attr0";
 		String attrDate = "date";
 		String attrDateTime = "date_time";
 		String attrDecimal = "decimal";
@@ -355,6 +359,23 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs", attrBool)).andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string(resourcePartialAttributeResponse));
+	}
+
+	@Test
+	public void retrieveResourcePartialResponseAttributeInCompound() throws Exception
+	{
+		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs", attrCompound + '(' + attrCompoundAttr0 + ')'))
+				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(content().string(resourcePartialAttributeInCompoundResponse));
+	}
+
+	@Test
+	public void retrieveResourcePartialResponseAttributeInCompoundInCompound() throws Exception
+	{
+		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs",
+				attrCompound + '(' + attrCompoundAttrCompound + '(' + attrCompoundAttrCompoundAttr0 + "))"))
+				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(content().string(resourcePartialAttributeInCompoundInCompoundResponse));
 	}
 
 	@Test
@@ -1156,6 +1177,55 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n" + "    \"lookupAttributes\": [],\n"
 			+ "    \"isAbstract\": false,\n" + "    \"writable\": false\n" + "  },\n"
 			+ "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"bool\": true\n" + "}";
+
+	private String resourcePartialAttributeInCompoundResponse = "{\n" + "  \"_meta\": {\n"
+			+ "    \"href\": \"/api/v2/entity\",\n" + "    \"hrefCollection\": \"/api/v2/entity\",\n"
+			+ "    \"name\": \"entity\",\n" + "    \"label\": \"entity\",\n" + "    \"attributes\": [\n" + "      {\n"
+			+ "        \"href\": \"/api/v2/entity/meta/compound\",\n" + "        \"fieldType\": \"COMPOUND\",\n"
+			+ "        \"name\": \"compound\",\n" + "        \"label\": \"compound\",\n" + "        \"attributes\": [\n"
+			+ "          {\n" + "            \"href\": \"/api/v2/entity/meta/compound_attr0\",\n"
+			+ "            \"fieldType\": \"STRING\",\n" + "            \"name\": \"compound_attr0\",\n"
+			+ "            \"label\": \"compound_attr0\",\n" + "            \"attributes\": [],\n"
+			+ "            \"maxLength\": 255,\n" + "            \"auto\": false,\n"
+			+ "            \"nillable\": true,\n" + "            \"readOnly\": false,\n"
+			+ "            \"labelAttribute\": false,\n" + "            \"unique\": false,\n"
+			+ "            \"visible\": true,\n" + "            \"lookupAttribute\": false,\n"
+			+ "            \"aggregateable\": false\n" + "          }\n" + "        ],\n" + "        \"auto\": false,\n"
+			+ "        \"nillable\": true,\n" + "        \"readOnly\": false,\n"
+			+ "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n" + "        \"visible\": true,\n"
+			+ "        \"lookupAttribute\": false,\n" + "        \"aggregateable\": false\n" + "      }\n" + "    ],\n"
+			+ "    \"labelAttribute\": \"id\",\n" + "    \"idAttribute\": \"id\",\n" + "    \"lookupAttributes\": [],\n"
+			+ "    \"isAbstract\": false,\n" + "    \"writable\": false\n" + "  },\n"
+			+ "  \"_href\": \"/api/v2/entity/0\",\n" + "  \"compound_attr0\": \"compoundAttr0Str\"\n" + "}";
+
+	private String resourcePartialAttributeInCompoundInCompoundResponse = "{\n" + "  \"_meta\": {\n"
+			+ "    \"href\": \"/api/v2/entity\",\n" + "    \"hrefCollection\": \"/api/v2/entity\",\n"
+			+ "    \"name\": \"entity\",\n" + "    \"label\": \"entity\",\n" + "    \"attributes\": [\n" + "      {\n"
+			+ "        \"href\": \"/api/v2/entity/meta/compound\",\n" + "        \"fieldType\": \"COMPOUND\",\n"
+			+ "        \"name\": \"compound\",\n" + "        \"label\": \"compound\",\n" + "        \"attributes\": [\n"
+			+ "          {\n" + "            \"href\": \"/api/v2/entity/meta/compound_attrcompound\",\n"
+			+ "            \"fieldType\": \"COMPOUND\",\n" + "            \"name\": \"compound_attrcompound\",\n"
+			+ "            \"label\": \"compound_attrcompound\",\n" + "            \"attributes\": [\n"
+			+ "              {\n" + "                \"href\": \"/api/v2/entity/meta/compound_attrcompound_attr0\",\n"
+			+ "                \"fieldType\": \"STRING\",\n"
+			+ "                \"name\": \"compound_attrcompound_attr0\",\n"
+			+ "                \"label\": \"compound_attrcompound_attr0\",\n" + "                \"attributes\": [],\n"
+			+ "                \"maxLength\": 255,\n" + "                \"auto\": false,\n"
+			+ "                \"nillable\": true,\n" + "                \"readOnly\": false,\n"
+			+ "                \"labelAttribute\": false,\n" + "                \"unique\": false,\n"
+			+ "                \"visible\": true,\n" + "                \"lookupAttribute\": false,\n"
+			+ "                \"aggregateable\": false\n" + "              }\n" + "            ],\n"
+			+ "            \"auto\": false,\n" + "            \"nillable\": true,\n"
+			+ "            \"readOnly\": false,\n" + "            \"labelAttribute\": false,\n"
+			+ "            \"unique\": false,\n" + "            \"visible\": true,\n"
+			+ "            \"lookupAttribute\": false,\n" + "            \"aggregateable\": false\n" + "          }\n"
+			+ "        ],\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
+			+ "        \"readOnly\": false,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": false,\n"
+			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
+			+ "        \"aggregateable\": false\n" + "      }\n" + "    ],\n" + "    \"labelAttribute\": \"id\",\n"
+			+ "    \"idAttribute\": \"id\",\n" + "    \"lookupAttributes\": [],\n" + "    \"isAbstract\": false,\n"
+			+ "    \"writable\": false\n" + "  },\n" + "  \"_href\": \"/api/v2/entity/0\",\n"
+			+ "  \"compound_attrcompound_attr0\": \"compoundAttrCompoundAttr0Str\"\n" + "}";
 
 	private String resourcePartialSubAttributeResponse = "{\n" + "  \"_meta\": {\n"
 			+ "    \"href\": \"/api/v2/entity\",\n" + "    \"hrefCollection\": \"/api/v2/entity\",\n"
