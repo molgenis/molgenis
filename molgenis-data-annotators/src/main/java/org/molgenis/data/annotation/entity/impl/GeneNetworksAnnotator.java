@@ -179,7 +179,7 @@ public class GeneNetworksAnnotator
 					sb.append("Annotated with Gene Network Annotator on: " + LocalDateTime.now().toLocalDate());
 
 					sb.append("Terms used: ");
-					JSONArray termsArray = jsonObject.getJSONArray("terms:\n");
+					JSONArray termsArray = jsonObject.getJSONArray("terms");
 					for (int i = 0; i < termsArray.length(); i++)
 					{
 						sb.append(((JSONObject) termsArray.get(i)).getJSONObject("term").getString("id")+"\n");
