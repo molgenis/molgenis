@@ -872,27 +872,36 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	 */
 	void rebuildIndexElasticSearchEntity(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
 	{
-		if (LOG.isDebugEnabled()) LOG.debug("Copy entity data into a temporary entity. Entity name: ["
-				+ entityMetaData.getName()
-				+ "]");
+		if (dataService.getMeta().hasBackend(ElasticsearchRepositoryCollection.NAME))
+		{
+			if (LOG.isDebugEnabled()) LOG.debug("Start rebuilding index of entity: [" + entityMetaData.getName() + "]");
 		
-		UuidGenerator uuidg = new UuidGenerator();
-		DefaultEntityMetaData tempEntityMetaData = new DefaultEntityMetaData(uuidg.generateId(), entityMetaData);
-		tempEntityMetaData.setPackage(new PackageImpl("elasticsearch_temporary_entity", "This entity (Original: "
-				+ entityMetaData.getName()
-				+ ") is temporary build to make rebuilding of Elasticsearch entities posible."));
-		Repository tempRepository = dataService.getMeta().addEntityMeta(tempEntityMetaData);
-		dataService.add(tempRepository.getName(), entities);
+			UuidGenerator uuidg = new UuidGenerator();
+			DefaultEntityMetaData tempEntityMetaData = new DefaultEntityMetaData(uuidg.generateId(), entityMetaData);
+			tempEntityMetaData.setPackage(new PackageImpl("elasticsearch_temporary_entity", "This entity (Original: "
+					+ entityMetaData.getName()
+					+ ") is temporary build to make rebuilding of Elasticsearch entities posible."));
 
-		// Find the temporary saved entities
-		Iterable<? extends Entity> tempEntities = dataService.findAll(tempEntityMetaData.getName());
+			Repository tempRepository = dataService.getMeta().addEntityMeta(tempEntityMetaData);
+			dataService.add(tempRepository.getName(), entities);
 
-		// Rebuild index
-		this.rebuildIndexGeneric(tempEntities, entityMetaData);
+			// Find the temporary saved entities
+			Iterable<? extends Entity> tempEntities = dataService.findAll(tempEntityMetaData.getName());
 
-		// Remove temporary entity
-		dataService.delete(tempEntityMetaData.getName(), tempEntities);
-		dataService.getMeta().deleteEntityMeta(tempEntityMetaData.getName());
+			// Rebuild index
+			this.rebuildIndexGeneric(tempEntities, entityMetaData);
+
+			// Remove temporary entity
+			dataService.delete(tempEntityMetaData.getName(), tempEntities);
+			dataService.getMeta().deleteEntityMeta(tempEntityMetaData.getName());
+
+			if (LOG.isDebugEnabled()) LOG.debug("End rebuilding index of entity: [" + entityMetaData.getName() + "]");
+		}
+		else
+		{
+			if (LOG.isDebugEnabled()) LOG.debug("Rebuild index of entity: [" + entityMetaData.getName()
+					+ "] is skipped because the " + ElasticsearchRepositoryCollection.NAME + " backend is unknown");
+		}
 	}
 
 	/**
