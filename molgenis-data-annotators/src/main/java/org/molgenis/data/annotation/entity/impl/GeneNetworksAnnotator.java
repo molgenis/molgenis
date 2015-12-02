@@ -84,6 +84,8 @@ public class GeneNetworksAnnotator
 	// FIXME: this whole thing is a POC and should not be used for any "real" work!!!!
 	public static class GeneNetworksRepositoryAnnotator extends AbstractRepositoryAnnotator
 	{
+		private static final String TERMS_USED = "termsFound";
+		private static final String TERMS_UNUSED = "termsNotFound";
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
 		private DataService dataService;
@@ -172,20 +174,30 @@ public class GeneNetworksAnnotator
 					}
 					results.put(geneName, resultsForGene);
 				}
-				if (superEntity.getEntityMetaData().getAttribute(ANNOTATION_LOG) != null)
+
+				if (superEntity.getEntityMetaData().getAttribute(TERMS_USED) != null)
 				{
 					StringBuilder sb = new StringBuilder();
-					if (superEntity.getString(ANNOTATION_LOG) != null) sb.append(superEntity.getString(ANNOTATION_LOG)+"\n");
-					sb.append("Annotated with Gene Network Annotator on: " + LocalDateTime.now().toLocalDate());
-
-					sb.append("Terms used: ");
 					JSONArray termsArray = jsonObject.getJSONArray("terms");
 					for (int i = 0; i < termsArray.length(); i++)
 					{
-						sb.append(((JSONObject) termsArray.get(i)).getJSONObject("term").getString("id")+"\n");
+						if(i != 0) sb.append(",");
+						sb.append(((JSONObject) termsArray.get(i)).getJSONObject("term").getString("id"));
 					}
-					sb.append("Terms Not Found: " + jsonObject.getJSONArray("termsNotFound").toString() + "\n");
-					superEntity.set(ANNOTATION_LOG, sb.toString());
+					superEntity.set(TERMS_USED, sb.toString());
+					dataService.update(pluginSettings.getString(GeneNetworksAnnotatorSettings.Meta.PROJECT_ENTITY),
+							superEntity);
+				}
+				if (superEntity.getEntityMetaData().getAttribute(TERMS_UNUSED) != null)
+				{
+					StringBuilder sb = new StringBuilder();
+					JSONArray termsArray = jsonObject.getJSONArray("termsNotFound");
+					for (int i = 0; i < termsArray.length(); i++)
+					{
+						if(i != 0) sb.append(",");
+						sb.append((termsArray.get(i)));
+					}
+					superEntity.set(TERMS_UNUSED, sb.toString());
 					dataService.update(pluginSettings.getString(GeneNetworksAnnotatorSettings.Meta.PROJECT_ENTITY),
 							superEntity);
 				}
