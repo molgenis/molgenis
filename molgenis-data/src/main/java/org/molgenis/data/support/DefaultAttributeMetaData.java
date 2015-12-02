@@ -34,7 +34,8 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private boolean lookupAttribute = false; // remove?
 	private EntityMetaData refEntity;
 	private String expression;
-	private String label;
+	private String label;// The default label
+	private final Map<String, String> labelByLanguageCode = new HashMap<>();
 	private boolean visible = true; // remove?
 	private boolean unique = false;
 	private boolean auto = false;
@@ -226,8 +227,8 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	@Override
 	public Iterable<AttributeMetaData> getAttributeParts()
 	{
-		return this.attributePartsMap != null ? this.attributePartsMap.values()
-				: Collections.<AttributeMetaData> emptyList();
+		return this.attributePartsMap != null ? this.attributePartsMap.values() : Collections
+				.<AttributeMetaData> emptyList();
 	}
 
 	@Override
@@ -263,6 +264,19 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	{
 		this.label = label;
 		return this;
+	}
+
+	public DefaultAttributeMetaData setLabel(String languageCode, String label)
+	{
+		labelByLanguageCode.put(languageCode, label);
+		return this;
+	}
+
+	@Override
+	public String getLabel(String languageCode)
+	{
+		String label = labelByLanguageCode.get(languageCode);
+		return label != null ? label : getLabel();
 	}
 
 	@Override
@@ -460,9 +474,8 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 				if (((EnumField) getDataType()).getEnumOptions() == null)
 				{
 					if (((EnumField) other.getDataType()).getEnumOptions() != null) return false;
-					if (!((EnumField) getDataType()).getEnumOptions()
-							.equals(((EnumField) other.getDataType()).getEnumOptions()))
-						return true;
+					if (!((EnumField) getDataType()).getEnumOptions().equals(
+							((EnumField) other.getDataType()).getEnumOptions())) return true;
 				}
 			}
 		}
@@ -530,4 +543,5 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 
 		return true;
 	}
+
 }

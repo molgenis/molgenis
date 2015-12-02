@@ -46,6 +46,7 @@ import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
@@ -79,19 +80,21 @@ import com.google.common.collect.Sets;
 public class EmxMetaDataParser implements MetaDataParser
 {
 
+	// Sheet names
+	public static final String ENTITIES = EntityMetaDataMetaData.ENTITY_NAME;
 	public static final String PACKAGES = PackageMetaData.ENTITY_NAME;
 	public static final String TAGS = TagMetaData.ENTITY_NAME;
 	public static final String ATTRIBUTES = AttributeMetaDataMetaData.ENTITY_NAME;
+	public static final String LANGUAGES = LanguageMetaData.ENTITY_NAME;
 
 	public static final String ENTITY = "entity";
 	public static final String PART_OF_ATTRIBUTE = "partOfAttribute";
 
-	// Sheet names
-	public static final String ENTITIES = EntityMetaDataMetaData.ENTITY_NAME;
 	static final List<String> SUPPORTED_ENTITY_ATTRIBUTES = Arrays.asList(
 			org.molgenis.data.meta.EntityMetaDataMetaData.LABEL.toLowerCase(),
 			org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION.toLowerCase(), "name", ABSTRACT.toLowerCase(),
 			EXTENDS.toLowerCase(), "package", EntityMetaDataMetaData.TAGS, BACKEND);
+
 	static final List<String> SUPPORTED_ATTRIBUTE_ATTRIBUTES = Arrays.asList(AGGREGATEABLE.toLowerCase(),
 			DATA_TYPE.toLowerCase(), DESCRIPTION.toLowerCase(), ENTITY.toLowerCase(), ENUM_OPTIONS.toLowerCase(),
 			ID_ATTRIBUTE.toLowerCase(), LABEL.toLowerCase(), LABEL_ATTRIBUTE.toLowerCase(),
@@ -99,6 +102,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			RANGE_MAX.toLowerCase(), RANGE_MIN.toLowerCase(), READ_ONLY.toLowerCase(), REF_ENTITY.toLowerCase(),
 			VISIBLE.toLowerCase(), UNIQUE.toLowerCase(), TAGS.toLowerCase(), EXPRESSION.toLowerCase(),
 			VALIDATION_EXPRESSION.toLowerCase(), DEFAULT_VALUE.toLowerCase());
+
 	static final String AUTO = "auto";
 
 	private final DataService dataService;
@@ -126,6 +130,12 @@ public class EmxMetaDataParser implements MetaDataParser
 		parseAttributesSheet(source.getRepository(ATTRIBUTES), intermediateResults);
 		parseEntitiesSheet(source.getRepository(ENTITIES), intermediateResults);
 		reiterateToMapRefEntity(source.getRepository(ATTRIBUTES), intermediateResults);
+
+		// languages tab
+		if (source.hasRepository(LanguageMetaData.ENTITY_NAME))
+		{
+			intermediateResults.addEntityMetaData(LanguageMetaData.INSTANCE);
+		}
 
 		return intermediateResults;
 	}
@@ -166,7 +176,8 @@ public class EmxMetaDataParser implements MetaDataParser
 	{
 		for (AttributeMetaData attr : attributesRepo.getEntityMetaData().getAtomicAttributes())
 		{
-			if (!SUPPORTED_ATTRIBUTE_ATTRIBUTES.contains(attr.getName().toLowerCase()))
+			if (!SUPPORTED_ATTRIBUTE_ATTRIBUTES.contains(attr.getName().toLowerCase())
+					&& !attr.getName().toLowerCase().startsWith(LABEL + '.'))
 			{
 				throw new IllegalArgumentException("Unsupported attribute metadata: attributes. " + attr.getName());
 			}
@@ -316,6 +327,20 @@ public class EmxMetaDataParser implements MetaDataParser
 			}
 
 			attribute.setLabel(attributeEntity.getString(LABEL));
+			for (AttributeMetaData attr : attributeEntity.getEntityMetaData().getAtomicAttributes())
+			{
+				if (attr.getName().startsWith(LABEL + '.'))
+				{
+					String languageCode = attr.getName().substring(attr.getName().indexOf('.') + 1,
+							attr.getName().length());
+					String label = attributeEntity.getString(attr.getName());
+					if (label != null)
+					{
+						attribute.setLabel(languageCode, label);
+					}
+				}
+			}
+
 			attribute.setDescription(attributeEntity.getString(DESCRIPTION));
 
 			if (attribute.getDataType() instanceof EnumField)

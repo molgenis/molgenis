@@ -43,6 +43,7 @@ import org.molgenis.data.MolgenisQueryException;
 import org.molgenis.data.Query;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.Href;
 import org.molgenis.data.rest.service.RestService;
@@ -79,6 +80,7 @@ class RestControllerV2
 	private final DataService dataService;
 	private final RestService restService;
 	private final MolgenisPermissionService permissionService;
+	private final LanguageService languageService;
 
 	static UnknownEntityException createUnknownEntityException(String entityName)
 	{
@@ -87,15 +89,15 @@ class RestControllerV2
 
 	static UnknownAttributeException createUnknownAttributeException(String entityName, String attributeName)
 	{
-		return new UnknownAttributeException(
-				"Operation failed. Unknown attribute: '" + attributeName + "', of entity: '" + entityName + "'");
+		return new UnknownAttributeException("Operation failed. Unknown attribute: '" + attributeName
+				+ "', of entity: '" + entityName + "'");
 	}
 
 	static MolgenisDataAccessException createMolgenisDataAccessExceptionReadOnlyAttribute(String entityName,
 			String attributeName)
 	{
-		return new MolgenisDataAccessException(
-				"Operation failed. Attribute '" + attributeName + "' of entity '" + entityName + "' is readonly");
+		return new MolgenisDataAccessException("Operation failed. Attribute '" + attributeName + "' of entity '"
+				+ entityName + "' is readonly");
 	}
 
 	static MolgenisDataException createMolgenisDataExceptionUnknownIdentifier(int count)
@@ -115,11 +117,12 @@ class RestControllerV2
 
 	@Autowired
 	public RestControllerV2(DataService dataService, MolgenisPermissionService permissionService,
-			RestService restService)
+			RestService restService, LanguageService languageService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.permissionService = requireNonNull(permissionService);
 		this.restService = requireNonNull(restService);
+		this.languageService = requireNonNull(languageService);
 	}
 
 	@Autowired
@@ -130,9 +133,8 @@ class RestControllerV2
 	{
 		if (molgenisVersion == null) throw new IllegalArgumentException("molgenisVersion is null");
 		if (molgenisBuildDate == null) throw new IllegalArgumentException("molgenisBuildDate is null");
-		molgenisBuildDate = molgenisBuildDate.equals("${maven.build.timestamp}")
-				? new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new java.util.Date()) + " by Eclipse"
-				: molgenisBuildDate;
+		molgenisBuildDate = molgenisBuildDate.equals("${maven.build.timestamp}") ? new SimpleDateFormat(
+				"yyyy-MM-dd HH:mm").format(new java.util.Date()) + " by Eclipse" : molgenisBuildDate;
 
 		Map<String, String> result = new HashMap<>();
 		result.put("molgenisVersion", molgenisVersion);
@@ -276,12 +278,13 @@ class RestControllerV2
 			{
 				String id = entity.getIdValue().toString();
 				ids.add(id.toString());
-				responseBody.getResources().add(new AutoValue_ResourcesResponseV2(
-						Href.concatEntityHref(RestControllerV2.BASE_URI, entityName, id)));
+				responseBody.getResources().add(
+						new AutoValue_ResourcesResponseV2(Href.concatEntityHref(RestControllerV2.BASE_URI, entityName,
+								id)));
 			}
 
-			responseBody.setLocation(Href.concatEntityCollectionHref(RestControllerV2.BASE_URI, entityName,
-					meta.getIdAttribute().getName(), ids));
+			responseBody.setLocation(Href.concatEntityCollectionHref(RestControllerV2.BASE_URI, entityName, meta
+					.getIdAttribute().getName(), ids));
 
 			response.setStatus(HttpServletResponse.SC_CREATED);
 			return responseBody;
@@ -463,7 +466,8 @@ class RestControllerV2
 			throw new RuntimeException("attribute : " + attributeName + " does not exist!");
 		}
 
-		return new AttributeMetaDataResponseV2(entityName, attribute, null, permissionService, dataService);
+		return new AttributeMetaDataResponseV2(entityName, attribute, null, permissionService, dataService,
+				languageService);
 	}
 
 	private EntityCollectionResponseV2 createEntityCollectionResponse(String entityName,
@@ -490,10 +494,10 @@ class RestControllerV2
 				throw new MolgenisQueryException("Aggregate query is missing 'x' or 'y' attribute");
 			}
 			AggregateResult aggs = dataService.aggregate(entityName, aggsQ);
-			AttributeMetaDataResponseV2 xAttrResponse = xAttr != null
-					? new AttributeMetaDataResponseV2(entityName, xAttr, fetch, permissionService, dataService) : null;
-			AttributeMetaDataResponseV2 yAttrResponse = yAttr != null
-					? new AttributeMetaDataResponseV2(entityName, yAttr, fetch, permissionService, dataService) : null;
+			AttributeMetaDataResponseV2 xAttrResponse = xAttr != null ? new AttributeMetaDataResponseV2(entityName,
+					xAttr, fetch, permissionService, dataService, languageService) : null;
+			AttributeMetaDataResponseV2 yAttrResponse = yAttr != null ? new AttributeMetaDataResponseV2(entityName,
+					yAttr, fetch, permissionService, dataService, languageService) : null;
 			return new EntityAggregatesResponse(aggs, xAttrResponse, yAttrResponse, BASE_URI + '/' + entityName);
 		}
 		else
@@ -519,14 +523,14 @@ class RestControllerV2
 			}
 
 			UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(getFullURL(httpRequest));
-			
+
 			String prevHref = null;
 			if (pager.getPrevStart() != null)
 			{
 				builder.replaceQueryParam("start", pager.getPrevStart());
 				prevHref = builder.build(false).toUriString();
 			}
-			
+
 			String nextHref = null;
 			if (pager.getNextStart() != null)
 			{
@@ -535,7 +539,7 @@ class RestControllerV2
 			}
 
 			return new EntityCollectionResponseV2(pager, entities, fetch, BASE_URI + '/' + entityName, meta,
-					permissionService, dataService, prevHref, nextHref);
+					permissionService, dataService, languageService, prevHref, nextHref);
 		}
 	}
 
@@ -567,7 +571,8 @@ class RestControllerV2
 
 	private void createEntityMetaResponse(EntityMetaData entityMetaData, Fetch fetch, Map<String, Object> responseData)
 	{
-		responseData.put("_meta", new EntityMetaDataResponseV2(entityMetaData, fetch, permissionService, dataService));
+		responseData.put("_meta", new EntityMetaDataResponseV2(entityMetaData, fetch, permissionService, dataService,
+				languageService));
 	}
 
 	private void createEntityValuesResponse(Entity entity, Fetch fetch, Map<String, Object> responseData)
@@ -636,8 +641,7 @@ class RestControllerV2
 						break;
 					case DATE_TIME:
 						Date dateTimeValue = entity.getDate(attrName);
-						String dateTimeValueStr = dateTimeValue != null ? getDateTimeFormat().format(dateTimeValue)
-								: null;
+						String dateTimeValueStr = dateTimeValue != null ? getDateTimeFormat().format(dateTimeValue) : null;
 						responseData.put(attrName, dateTimeValueStr);
 						break;
 					case DECIMAL:

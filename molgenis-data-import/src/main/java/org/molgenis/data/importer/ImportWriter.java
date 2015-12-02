@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.molgenis.data.AttributeMetaData;
@@ -23,6 +24,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Tag;
@@ -38,6 +40,7 @@ import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.DependencyResolver;
+import org.molgenis.util.EntityUtils;
 import org.molgenis.util.HugeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,8 +76,7 @@ public class ImportWriter
 	 *            {@link PermissionSystemService} to give permissions on uploaded entities
 	 */
 	public ImportWriter(DataService dataService, PermissionSystemService permissionSystemService,
-			TagService<LabeledResource, LabeledResource> tagService,
-			MolgenisPermissionService molgenisPermissionService)
+			TagService<LabeledResource, LabeledResource> tagService, MolgenisPermissionService molgenisPermissionService)
 	{
 		this.dataService = dataService;
 		this.permissionSystemService = permissionSystemService;
@@ -85,6 +87,8 @@ public class ImportWriter
 	@Transactional
 	public EntityImportReport doImport(EmxImportJob job)
 	{
+		// languages first
+		importLanguages(job.report, job.parsedMetaData.getEntities(), job.source, job.dbAction);
 		RunAsSystemProxy.runAsSystem(() -> {
 			importTags(job.source);
 			return null;
@@ -100,6 +104,22 @@ public class ImportWriter
 		return job.report;
 	}
 
+	private void importLanguages(EntityImportReport report, Collection<EntityMetaData> resolved,
+			RepositoryCollection source, DatabaseAction dbAction)
+	{
+		if (resolved.stream().filter(e -> e.getName().equalsIgnoreCase(LanguageMetaData.ENTITY_NAME)).findFirst()
+				.isPresent())
+		{
+			Iterable<Entity> transformed = EntityUtils
+					.asStream(source.getRepository(EmxMetaDataParser.LANGUAGES))
+					.map(e -> new DefaultEntityImporter(dataService.getRepository(LanguageMetaData.ENTITY_NAME)
+							.getEntityMetaData(), dataService, e)).collect(Collectors.toList());
+
+			int count = update(dataService.getRepository(LanguageMetaData.ENTITY_NAME), transformed, dbAction);
+			report.addEntityCount(LanguageMetaData.ENTITY_NAME, count);
+		}
+	}
+
 	private void importEntityAndAttributeTags(ParsedMetaData parsedMetaData)
 	{
 		for (Tag<EntityMetaData, LabeledResource, LabeledResource> tag : parsedMetaData.getEntityTags())
@@ -109,8 +129,8 @@ public class ImportWriter
 
 		for (EntityMetaData emd : parsedMetaData.getAttributeTags().keySet())
 		{
-			for (Tag<AttributeMetaData, LabeledResource, LabeledResource> tag : parsedMetaData.getAttributeTags()
-					.get(emd))
+			for (Tag<AttributeMetaData, LabeledResource, LabeledResource> tag : parsedMetaData.getAttributeTags().get(
+					emd))
 			{
 				tagService.addAttributeTag(emd, tag);
 			}
@@ -127,7 +147,8 @@ public class ImportWriter
 		{
 			String name = entityMetaData.getName();
 
-			if (dataService.hasRepository(name))
+			// Languages are already done
+			if (!name.equalsIgnoreCase(LanguageMetaData.ENTITY_NAME) && dataService.hasRepository(name))
 			{
 				Repository repository = dataService.getRepository(name);
 				Repository fileEntityRepository = source.getRepository(entityMetaData.getName());
@@ -136,22 +157,23 @@ public class ImportWriter
 				if ((fileEntityRepository == null) && (defaultPackage != null)
 						&& entityMetaData.getName().toLowerCase().startsWith(defaultPackage.toLowerCase() + "_"))
 				{
-					fileEntityRepository = source
-							.getRepository(entityMetaData.getName().substring(defaultPackage.length() + 1));
+					fileEntityRepository = source.getRepository(entityMetaData.getName().substring(
+							defaultPackage.length() + 1));
 				}
 
 				// check to prevent nullpointer when importing metadata only
 				if (fileEntityRepository != null)
 				{
 					// transforms entities so that they match the entity meta data of the output repository
-					Iterable<Entity> entities = Iterables.transform(fileEntityRepository, new Function<Entity, Entity>()
-					{
-						@Override
-						public DefaultEntity apply(Entity entity)
-						{
-							return new DefaultEntityImporter(entityMetaData, dataService, entity);
-						}
-					});
+					Iterable<Entity> entities = Iterables.transform(fileEntityRepository,
+							new Function<Entity, Entity>()
+							{
+								@Override
+								public DefaultEntity apply(Entity entity)
+								{
+									return new DefaultEntityImporter(entityMetaData, dataService, entity);
+								}
+							});
 
 					entities = new DependencyResolver().resolveSelfReferences(entities, entityMetaData);
 					int count = update(repository, entities, dbAction);
@@ -189,9 +211,9 @@ public class ImportWriter
 						Iterable<Entity> refEntities = entity.getEntities(attribute.getName());
 						if (ids != null && ids.size() != Iterators.size(refEntities.iterator()))
 						{
-							throw new UnknownEntityException(
-									"One or more values [" + ids + "] from " + attribute.getDataType() + " field "
-											+ attribute.getName() + " could not be resolved");
+							throw new UnknownEntityException("One or more values [" + ids + "] from "
+									+ attribute.getDataType() + " field " + attribute.getName()
+									+ " could not be resolved");
 						}
 						return true;
 					}
@@ -225,7 +247,8 @@ public class ImportWriter
 		{
 			String name = entityMetaData.getName();
 			if (!EmxMetaDataParser.ENTITIES.equals(name) && !EmxMetaDataParser.ATTRIBUTES.equals(name)
-					&& !EmxMetaDataParser.PACKAGES.equals(name) && !EmxMetaDataParser.TAGS.equals(name))
+					&& !EmxMetaDataParser.PACKAGES.equals(name) && !EmxMetaDataParser.TAGS.equals(name)
+					&& !EmxMetaDataParser.LANGUAGES.equals(name))
 			{
 				if (dataService.getMeta().getEntityMetaData(entityMetaData.getName()) == null)
 				{
@@ -272,8 +295,8 @@ public class ImportWriter
 			for (Entity tag : tagRepo)
 			{
 				Entity transformed = new DefaultEntity(TagMetaData.INSTANCE, dataService, tag);
-				Entity existingTag = dataService.findOne(TagMetaData.ENTITY_NAME,
-						tag.getString(TagMetaData.IDENTIFIER));
+				Entity existingTag = dataService
+						.findOne(TagMetaData.ENTITY_NAME, tag.getString(TagMetaData.IDENTIFIER));
 
 				if (existingTag == null)
 				{

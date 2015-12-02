@@ -32,6 +32,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.UuidGenerator;
@@ -49,15 +50,15 @@ class AttributeMetaDataRepository
 	public static final AttributeMetaDataMetaData META_DATA = AttributeMetaDataMetaData.INSTANCE;
 
 	private final UuidGenerator uuidGenerator;
-
 	private final Repository repository;
-
 	private EntityMetaDataRepository entityMetaDataRepository;
+	private final LanguageService languageService;
 
-	public AttributeMetaDataRepository(ManageableRepositoryCollection collection)
+	public AttributeMetaDataRepository(ManageableRepositoryCollection collection, LanguageService languageService)
 	{
 		this.repository = collection.addEntityMeta(META_DATA);
 		uuidGenerator = new UuidGenerator();
+		this.languageService = languageService;
 	}
 
 	public void setEntityMetaDataRepository(EntityMetaDataRepository entityMetaDataRepository)
@@ -127,6 +128,14 @@ class AttributeMetaDataRepository
 				attributeMetaDataEntity.set(PARTS,
 						stream(attributeParts.spliterator(), false).map(this::add).collect(toList()));
 			}
+		}
+
+		// Language attributes
+		for (String languageCode : languageService.getLanguageCodes())
+		{
+			String attributeName = LABEL + '.' + languageCode;
+			String label = att.getLabel(languageCode);
+			if (label != null) attributeMetaDataEntity.set(attributeName, label);
 		}
 
 		repository.add(attributeMetaDataEntity);
@@ -208,6 +217,14 @@ class AttributeMetaDataRepository
 		attributeMetaData.setVisibleExpression(entity.getString(VISIBLE_EXPRESSION));
 		attributeMetaData.setValidationExpression(entity.getString(VALIDATION_EXPRESSION));
 		attributeMetaData.setDefaultValue(entity.getString(DEFAULT_VALUE));
+
+		// Language attributes
+		for (String languageCode : languageService.getLanguageCodes())
+		{
+			String attributeName = LABEL + '.' + languageCode;
+			String label = entity.getString(attributeName);
+			if (label != null) attributeMetaData.setLabel(languageCode, label);
+		}
 
 		return attributeMetaData;
 	}

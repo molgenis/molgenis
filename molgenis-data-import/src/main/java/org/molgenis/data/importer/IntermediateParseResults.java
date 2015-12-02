@@ -58,6 +58,11 @@ public final class IntermediateParseResults
 		this.entityTags = new ArrayList<Tag<EntityMetaData, LabeledResource, LabeledResource>>();
 	}
 
+	public void addEntityMetaData(DefaultEntityMetaData entityMetaData)
+	{
+		entities.put(entityMetaData.getName(), entityMetaData);
+	}
+
 	public void addTagEntity(String identifier, Entity tagEntity)
 	{
 		tags.put(identifier, tagEntity);

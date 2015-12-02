@@ -22,8 +22,8 @@ public final class ParsedMetaData
 {
 	private final ImmutableMap<String, EntityMetaData> entities;
 	private final ImmutableMap<String, Package> packages;
-	private ImmutableSetMultimap<EntityMetaData, Tag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags;
-	private ImmutableList<Tag<EntityMetaData, LabeledResource, LabeledResource>> entityTags;
+	private final ImmutableSetMultimap<EntityMetaData, Tag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags;
+	private final ImmutableList<Tag<EntityMetaData, LabeledResource, LabeledResource>> entityTags;
 
 	public ParsedMetaData(List<? extends EntityMetaData> entities, Map<String, ? extends Package> packages,
 			SetMultimap<String, Tag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags,

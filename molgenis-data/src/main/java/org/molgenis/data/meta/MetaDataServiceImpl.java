@@ -21,10 +21,14 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.i18n.LanguageMetaData;
+import org.molgenis.data.i18n.LanguageRepositoryDecorator;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.util.DependencyResolver;
@@ -59,10 +63,17 @@ public class MetaDataServiceImpl implements MetaDataService
 	private final Map<String, RepositoryCollection> backends = Maps.newHashMap();
 	private final DataServiceImpl dataService;
 	private TransactionTemplate transactionTemplate;
+	private LanguageService languageService;
 
 	public MetaDataServiceImpl(DataServiceImpl dataService)
 	{
 		this.dataService = dataService;
+	}
+
+	@Autowired
+	public void setLanguageService(LanguageService languageService)
+	{
+		this.languageService = languageService;
 	}
 
 	@Autowired
@@ -85,6 +96,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		this.defaultBackend = backend;
 		backends.put(backend.getName(), backend);
 
+		LanguageMetaData.INSTANCE.setBackend(backend.getName());
 		PackageMetaData.INSTANCE.setBackend(backend.getName());
 		TagMetaData.INSTANCE.setBackend(backend.getName());
 		EntityMetaDataMetaData.INSTANCE.setBackend(backend.getName());
@@ -96,6 +108,12 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	private void bootstrapMetaRepos()
 	{
+		Repository languageRepo = defaultBackend.addEntityMeta(LanguageMetaData.INSTANCE);
+		dataService.addRepository(new LanguageRepositoryDecorator(languageRepo, dataService));
+
+		// Add language attributes to the AttributeMetaDataMetaData
+		languageService.getLanguageCodes().stream().map(code -> AttributeMetaDataMetaData.LABEL + '.' + code)
+				.forEach(AttributeMetaDataMetaData.INSTANCE::addAttribute);
 
 		Repository tagRepo = defaultBackend.addEntityMeta(TagMetaData.INSTANCE);
 		dataService.addRepository(tagRepo);
@@ -104,7 +122,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		dataService.addRepository(packages);
 		packageRepository = new PackageRepository(packages);
 
-		attributeMetaDataRepository = new AttributeMetaDataRepository(defaultBackend);
+		attributeMetaDataRepository = new AttributeMetaDataRepository(defaultBackend, languageService);
 		entityMetaDataRepository = new EntityMetaDataRepository(defaultBackend, packageRepository,
 				attributeMetaDataRepository);
 		attributeMetaDataRepository.setEntityMetaDataRepository(entityMetaDataRepository);
@@ -191,8 +209,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	private ManageableRepositoryCollection getManageableRepositoryCollection(EntityMetaData emd)
 	{
 		RepositoryCollection backend = getBackend(emd);
-		if (!(backend instanceof ManageableRepositoryCollection))
-			throw new RuntimeException("Backend  is not a ManageableCrudRepositoryCollection");
+		if (!(backend instanceof ManageableRepositoryCollection)) throw new RuntimeException(
+				"Backend  is not a ManageableCrudRepositoryCollection");
 
 		return (ManageableRepositoryCollection) backend;
 	}
@@ -209,9 +227,8 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	@Transactional
 	@Override
-	public Repository add(EntityMetaData emd, RepositoryDecoratorFactory decoratorFactory)
+	public synchronized Repository add(EntityMetaData emd, RepositoryDecoratorFactory decoratorFactory)
 	{
-
 		MetaValidationUtils.validateEntityMetaData(emd);
 		RepositoryCollection backend = getBackend(emd);
 
@@ -222,8 +239,8 @@ public class MetaDataServiceImpl implements MetaDataService
 			if (!dataService.hasRepository(emd.getName()))
 			{
 				Repository repo = backend.getRepository(emd.getName());
-				if (repo == null) throw new UnknownEntityException(
-						String.format("Unknown entity '%s' for backend '%s'", emd.getName(), backend.getName()));
+				if (repo == null) throw new UnknownEntityException(String.format(
+						"Unknown entity '%s' for backend '%s'", emd.getName(), backend.getName()));
 				Repository decoratedRepo = decoratorFactory.createDecoratedRepository(repo);
 				dataService.addRepository(decoratedRepo);
 			}
@@ -255,7 +272,7 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	@Transactional
 	@Override
-	public synchronized Repository addEntityMeta(EntityMetaData emd)
+	public Repository addEntityMeta(EntityMetaData emd)
 	{
 		return add(emd, new NonDecoratingRepositoryDecoratorFactory());
 	}
@@ -373,12 +390,15 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
+	@RunAsSystem
 	public synchronized void onApplicationEvent(ContextRefreshedEvent event)
 	{
 		// Discover all backends
-		Map<String, RepositoryCollection> backendBeans = event.getApplicationContext()
-				.getBeansOfType(RepositoryCollection.class);
+		Map<String, RepositoryCollection> backendBeans = event.getApplicationContext().getBeansOfType(
+				RepositoryCollection.class);
 		backendBeans.values().forEach(this::addBackend);
+
+		Map<String, EntityMetaData> emds = event.getApplicationContext().getBeansOfType(EntityMetaData.class);
 
 		// Create repositories from EntityMetaData in EntityMetaData repo
 		for (EntityMetaData emd : entityMetaDataRepository.getMetaDatas())
@@ -393,8 +413,9 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		// Discover static EntityMetaData
-		Map<String, EntityMetaData> emds = event.getApplicationContext().getBeansOfType(EntityMetaData.class);
-		DependencyResolver.resolve(Sets.newHashSet(emds.values())).forEach(this::addEntityMeta);
+		DependencyResolver.resolve(Sets.newHashSet(emds.values())).stream()
+				.filter(emd -> !dataService.hasRepository(emd.getName())).forEach(this::addEntityMeta);
+
 		// Update update manageable backends, JPA throws exception
 		DependencyResolver.resolve(Sets.newHashSet(emds.values())).stream().filter(this::isManageableBackend)
 				.forEach(this::updateEntityMeta);
@@ -430,9 +451,10 @@ public class MetaDataServiceImpl implements MetaDataService
 	public LinkedHashMap<String, Boolean> integrationTestMetaData(RepositoryCollection repositoryCollection)
 	{
 		LinkedHashMap<String, Boolean> entitiesImportable = new LinkedHashMap<String, Boolean>();
-		StreamSupport.stream(repositoryCollection.getEntityNames().spliterator(), false)
-				.forEach(entityName -> entitiesImportable.put(entityName, this.canIntegrateEntityMetadataCheck(
-						repositoryCollection.getRepository(entityName).getEntityMetaData())));
+		StreamSupport.stream(repositoryCollection.getEntityNames().spliterator(), false).forEach(
+				entityName -> entitiesImportable.put(entityName, this
+						.canIntegrateEntityMetadataCheck(repositoryCollection.getRepository(entityName)
+								.getEntityMetaData())));
 
 		return entitiesImportable;
 	}
@@ -444,9 +466,11 @@ public class MetaDataServiceImpl implements MetaDataService
 	{
 		LinkedHashMap<String, Boolean> entitiesImportable = new LinkedHashMap<String, Boolean>();
 
-		StreamSupport.stream(newEntitiesMetaDataMap.keySet().spliterator(), false)
-				.forEach(entityName -> entitiesImportable.put(entityName, skipEntities.contains(entityName)
-						|| this.canIntegrateEntityMetadataCheck(newEntitiesMetaDataMap.get(entityName))));
+		StreamSupport.stream(newEntitiesMetaDataMap.keySet().spliterator(), false).forEach(
+				entityName -> entitiesImportable.put(
+						entityName,
+						skipEntities.contains(entityName)
+								|| this.canIntegrateEntityMetadataCheck(newEntitiesMetaDataMap.get(entityName))));
 
 		return entitiesImportable;
 	}
@@ -459,13 +483,13 @@ public class MetaDataServiceImpl implements MetaDataService
 			EntityMetaData newEntity = newEntityMetaData;
 			EntityMetaData oldEntity = dataService.getEntityMetaData(entityName);
 
-			List<AttributeMetaData> oldAtomicAttributes = StreamSupport
-					.stream(oldEntity.getAtomicAttributes().spliterator(), false)
-					.collect(Collectors.<AttributeMetaData> toList());
+			List<AttributeMetaData> oldAtomicAttributes = StreamSupport.stream(
+					oldEntity.getAtomicAttributes().spliterator(), false).collect(
+					Collectors.<AttributeMetaData> toList());
 
 			LinkedHashMap<String, AttributeMetaData> newAtomicAttributesMap = new LinkedHashMap<String, AttributeMetaData>();
-			StreamSupport.stream(newEntity.getAtomicAttributes().spliterator(), false)
-					.forEach(attribute -> newAtomicAttributesMap.put(attribute.getName(), attribute));
+			StreamSupport.stream(newEntity.getAtomicAttributes().spliterator(), false).forEach(
+					attribute -> newAtomicAttributesMap.put(attribute.getName(), attribute));
 
 			for (AttributeMetaData oldAttribute : oldAtomicAttributes)
 			{

@@ -15,9 +15,14 @@ public interface AttributeMetaData
 	String getName();
 
 	/**
-	 * Label of the attribute if set else returns name
+	 * Label of the attribute in the default language if set else returns name
 	 */
 	String getLabel();
+
+	/**
+	 * Label of the attribute in the requested language if set else returns name
+	 */
+	String getLabel(String countryCode);
 
 	/**
 	 * Description of the attribute

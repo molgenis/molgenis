@@ -8,6 +8,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Range;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.rest.Href;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
@@ -53,14 +54,14 @@ class AttributeMetaDataResponseV2
 	 *            set of lowercase attribute names to expand in response
 	 */
 	public AttributeMetaDataResponseV2(final String entityParentName, AttributeMetaData attr, Fetch fetch,
-			MolgenisPermissionService permissionService, DataService dataService)
+			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestControllerV2.BASE_URI, entityParentName, attrName);
 
 		this.fieldType = attr.getDataType().getEnumType();
 		this.name = attrName;
-		this.label = attr.getLabel();
+		this.label = attr.getLabel(languageService.getCurrentUserLanguageCode());
 		this.description = attr.getDescription();
 		this.enumOptions = attr.getEnumOptions();
 		this.maxLength = attr.getDataType().getMaxLength();
@@ -69,7 +70,8 @@ class AttributeMetaDataResponseV2
 		EntityMetaData refEntity = attr.getRefEntity();
 		if (refEntity != null)
 		{
-			this.refEntity = new EntityMetaDataResponseV2(refEntity, fetch, permissionService, dataService);
+			this.refEntity = new EntityMetaDataResponseV2(refEntity, fetch, permissionService, dataService,
+					languageService);
 		}
 		else
 		{
@@ -93,8 +95,8 @@ class AttributeMetaDataResponseV2
 			}
 
 			// create attribute response
-			this.attributes = Lists.newArrayList(
-					Iterables.transform(attrParts, new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
+			this.attributes = Lists.newArrayList(Iterables.transform(attrParts,
+					new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
 					{
 						@Override
 						public AttributeMetaDataResponseV2 apply(AttributeMetaData attr)
@@ -113,7 +115,7 @@ class AttributeMetaDataResponseV2
 								subAttrFetch = null;
 							}
 							return new AttributeMetaDataResponseV2(entityParentName, attr, subAttrFetch,
-									permissionService, dataService);
+									permissionService, dataService, languageService);
 						}
 					}));
 		}

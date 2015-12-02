@@ -23,7 +23,7 @@ import com.google.common.collect.TreeTraverser;
 
 public abstract class AbstractEntityMetaData implements EntityMetaData
 {
-	private static final Logger LOG = LoggerFactory.getLogger(AbstractEntityMetaData.class);
+	private final Logger LOG = LoggerFactory.getLogger(getClass());
 
 	private String labelAttribute;
 	private String idAttribute;
@@ -189,6 +189,12 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			{
 				throw new UnsupportedOperationException();
 			}
+
+			@Override
+			public String getLabel(String countryCode)
+			{
+				throw new UnsupportedOperationException();
+			}
 		}).skip(1);
 	}
 
@@ -253,7 +259,7 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 		}
 		if (idAttributeMetaData == null)
 		{
-			for (AttributeMetaData attribute : getAttributesTraverser())
+			for (AttributeMetaData attribute : getAtomicAttributes())
 			{
 				if (attribute.isIdAtrribute())
 				{
@@ -268,7 +274,7 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			}
 			if (idAttributeMetaData == null && !isAbstract())
 			{
-				LOG.error("No idAttribute specified for entity{}, this attribute is required", getName());
+				LOG.error("No idAttribute specified for entity '{}', this attribute is required", getName());
 				// FIXME enable exception when https://github.com/molgenis/molgenis/issues/1400 is fixed
 				// throw new RuntimeException("No idAttribute specified, this attribute is required");
 			}
@@ -344,4 +350,5 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 
 		return attr;
 	}
+
 }

@@ -12,6 +12,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.rest.Href;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
@@ -45,9 +46,9 @@ class EntityMetaDataResponseV2
 	 * @param meta
 	 */
 	public EntityMetaDataResponseV2(EntityMetaData meta, MolgenisPermissionService permissionService,
-			DataService dataService)
+			DataService dataService, LanguageService languageService)
 	{
-		this(meta, null, permissionService, dataService);
+		this(meta, null, permissionService, dataService, languageService);
 	}
 
 	/**
@@ -57,7 +58,7 @@ class EntityMetaDataResponseV2
 	 *            set of lowercase attribute names to include in response
 	 */
 	public EntityMetaDataResponseV2(EntityMetaData meta, Fetch fetch, MolgenisPermissionService permissionService,
-			DataService dataService)
+			DataService dataService, LanguageService languageService)
 	{
 		String name = meta.getName();
 		this.href = Href.concatMetaEntityHrefV2(BASE_URI, name);
@@ -68,8 +69,8 @@ class EntityMetaDataResponseV2
 		this.label = meta.getLabel();
 
 		// filter attribute parts
-		Iterable<AttributeMetaData> filteredAttrs = fetch != null
-				? Iterables.filter(meta.getAttributes(), new Predicate<AttributeMetaData>()
+		Iterable<AttributeMetaData> filteredAttrs = fetch != null ? Iterables.filter(meta.getAttributes(),
+				new Predicate<AttributeMetaData>()
 				{
 					@Override
 					public boolean apply(AttributeMetaData attr)
@@ -103,8 +104,8 @@ class EntityMetaDataResponseV2
 					}
 				}) : meta.getAttributes();
 
-		this.attributes = Lists.newArrayList(
-				Iterables.transform(filteredAttrs, new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
+		this.attributes = Lists.newArrayList(Iterables.transform(filteredAttrs,
+				new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
 				{
 					@Override
 					public AttributeMetaDataResponseV2 apply(AttributeMetaData attr)
@@ -123,7 +124,7 @@ class EntityMetaDataResponseV2
 							subAttrFetch = null;
 						}
 						return new AttributeMetaDataResponseV2(name, attr, subAttrFetch, permissionService,
-								dataService);
+								dataService, languageService);
 					}
 				}));
 
@@ -134,8 +135,8 @@ class EntityMetaDataResponseV2
 		this.idAttribute = idAttribute != null ? idAttribute.getName() : null;
 
 		Iterable<AttributeMetaData> lookupAttributes = meta.getLookupAttributes();
-		this.lookupAttributes = lookupAttributes != null
-				? Lists.newArrayList(Iterables.transform(lookupAttributes, new Function<AttributeMetaData, String>()
+		this.lookupAttributes = lookupAttributes != null ? Lists.newArrayList(Iterables.transform(lookupAttributes,
+				new Function<AttributeMetaData, String>()
 				{
 					@Override
 					public String apply(AttributeMetaData attribute)

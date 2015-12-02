@@ -59,6 +59,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.Sort;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.DefaultEntityCollection;
@@ -131,11 +132,13 @@ public class RestController
 	private final MolgenisPermissionService molgenisPermissionService;
 	private final MolgenisRSQL molgenisRSQL;
 	private final RestService restService;
+	private final LanguageService languageService;
 
 	@Autowired
 	public RestController(DataService dataService, TokenService tokenService,
 			AuthenticationManager authenticationManager, MolgenisPermissionService molgenisPermissionService,
-			ResourceFingerprintRegistry resourceFingerprintRegistry, MolgenisRSQL molgenisRSQL, RestService restService)
+			ResourceFingerprintRegistry resourceFingerprintRegistry, MolgenisRSQL molgenisRSQL,
+			RestService restService, LanguageService languageService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.tokenService = requireNonNull(tokenService);
@@ -143,6 +146,7 @@ public class RestController
 		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
 		this.molgenisRSQL = requireNonNull(molgenisRSQL);
 		this.restService = requireNonNull(restService);
+		this.languageService = requireNonNull(languageService);
 	}
 
 	/**
@@ -182,7 +186,7 @@ public class RestController
 
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 		return new EntityMetaDataResponse(meta, attributeSet, attributeExpandSet, molgenisPermissionService,
-				dataService);
+				dataService, languageService);
 	}
 
 	/**
@@ -203,7 +207,7 @@ public class RestController
 
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 		return new EntityMetaDataResponse(meta, attributesSet, attributeExpandSet, molgenisPermissionService,
-				dataService);
+				dataService, languageService);
 	}
 
 	/**
@@ -1050,7 +1054,7 @@ public class RestController
 		if (attributeMetaData != null)
 		{
 			return new AttributeMetaDataResponse(entityName, attributeMetaData, attributeSet, attributeExpandSet,
-					molgenisPermissionService, dataService);
+					molgenisPermissionService, dataService, languageService);
 		}
 		else
 		{
@@ -1111,7 +1115,7 @@ public class RestController
 
 				EntityPager pager = new EntityPager(request.getStart(), request.getNum(), (long) count, mrefEntities);
 				return new EntityCollectionResponse(pager, refEntityMaps, attrHref, null, molgenisPermissionService,
-						dataService);
+						dataService, languageService);
 			case CATEGORICAL:
 			case XREF:
 				Map<String, Object> entityXrefAttributeMap = getEntityAsMap((Entity) entity.get(refAttributeName),
@@ -1164,7 +1168,7 @@ public class RestController
 		}
 
 		return new EntityCollectionResponse(pager, entities, BASE_URI + "/" + entityName, meta,
-				molgenisPermissionService, dataService);
+				molgenisPermissionService, dataService, languageService);
 	}
 
 	// Transforms an entity to a Map so it can be transformed to json
@@ -1196,7 +1200,7 @@ public class RestController
 					{
 						Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
 						entityMap.put(attrName, new AttributeMetaDataResponse(meta.getName(), attr, subAttributesSet,
-								null, molgenisPermissionService, dataService));
+								null, molgenisPermissionService, dataService, languageService));
 					}
 					else
 					{
@@ -1262,7 +1266,7 @@ public class RestController
 
 					EntityCollectionResponse ecr = new EntityCollectionResponse(pager, refEntityMaps,
 							Href.concatAttributeHref(RestController.BASE_URI, meta.getName(), entity.getIdValue(),
-									attrName), null, molgenisPermissionService, dataService);
+									attrName), null, molgenisPermissionService, dataService, languageService);
 
 					entityMap.put(attrName, ecr);
 				}
