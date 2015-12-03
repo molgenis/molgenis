@@ -851,7 +851,6 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	@Override
 	public void rebuildIndex(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
 	{
-		if (LOG.isDebugEnabled()) LOG.debug("Start rebuilding index for entity: [" + entityMetaData.getName() + "]");
 		if (storeSource(entityMetaData))
 		{
 			this.rebuildIndexElasticSearchEntity(entities, entityMetaData);
@@ -860,7 +859,6 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		{
 			this.rebuildIndexGeneric(entities, entityMetaData);
 		}
-		if (LOG.isDebugEnabled()) LOG.debug("Finished rebuilding index for entity: [" + entityMetaData.getName() + "]");
 	}
 
 	/**
@@ -874,44 +872,38 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	{
 		if (dataService.getMeta().hasBackend(ElasticsearchRepositoryCollection.NAME))
 		{
-			if (MolgenisTransactionLogMetaData.ENTITY_NAME.equals(entityMetaData.getName()))
-			{
-				// When rebuilding the index of the MolgenisTransactionLog the next exception is thrown:
-				// ERROR o.m.d.t.AsyncTransactionLog - Exception consuming log entity from queue.
-				// entity [MolgenisTransactionLog] with transactionId [xxxxxxxxxxxxx] does not exist
-				if (LOG.isInfoEnabled()) LOG.info("Rebuild index of entity: ["
-						+ MolgenisTransactionLogMetaData.ENTITY_NAME + "] is not supported");
-				return;
-			}
-			else
-			{
-				UuidGenerator uuidg = new UuidGenerator();
-				DefaultEntityMetaData tempEntityMetaData = new DefaultEntityMetaData(uuidg.generateId(), entityMetaData);
-				tempEntityMetaData.setPackage(new PackageImpl("elasticsearch_temporary_entity",
-						"This entity (Original: " + entityMetaData.getName()
-								+ ") is temporary build to make rebuilding of Elasticsearch entities posible."));
+			UuidGenerator uuidg = new UuidGenerator();
+			DefaultEntityMetaData tempEntityMetaData = new DefaultEntityMetaData(uuidg.generateId(), entityMetaData);
+			tempEntityMetaData.setPackage(new PackageImpl("elasticsearch_temporary_entity", "This entity (Original: "
+					+ entityMetaData.getName()
+					+ ") is temporary build to make rebuilding of Elasticsearch entities posible."));
 
-				// Add temporary repository into Elasticsearch
-				Repository tempRepository = dataService.getMeta().addEntityMeta(tempEntityMetaData);
+			// Add temporary repository into Elasticsearch
+			Repository tempRepository = dataService.getMeta().addEntityMeta(tempEntityMetaData);
 
-				// Add temporary repository entities into Elasticsearch
-				dataService.add(tempRepository.getName(), entities);
+			// Add temporary repository entities into Elasticsearch
+			dataService.add(tempRepository.getName(), entities);
 
-				// Find the temporary saved entities
-				Iterable<? extends Entity> tempEntities = dataService.findAll(tempEntityMetaData.getName());
+			// Find the temporary saved entities
+			Iterable<? extends Entity> tempEntities = dataService.findAll(tempEntityMetaData.getName());
 
-				// Rebuild index
-				this.rebuildIndexGeneric(tempEntities, entityMetaData);
+			/**
+			 * Rebuild index
+			 * 
+			 * When rebuilding the index of the MolgenisTransactionLog the next exception can be thrown: ERROR
+			 * o.m.d.t.AsyncTransactionLog - Exception consuming log entity from queue. entity UnknownEntityException:
+			 * entity [MolgenisTransactionLog] with transactionId [xxxxxxxxxxxxx] does not exist. This is not a problem.
+			 */
+			this.rebuildIndexGeneric(tempEntities, entityMetaData);
 
-				// Remove temporary entity
-				dataService.delete(tempEntityMetaData.getName(), tempEntities);
+			// Remove temporary entity
+			dataService.delete(tempEntityMetaData.getName(), tempEntities);
 
-				// Remove temporary repository from Elasticsearch
-				dataService.getMeta().deleteEntityMeta(tempEntityMetaData.getName());
+			// Remove temporary repository from Elasticsearch
+			dataService.getMeta().deleteEntityMeta(tempEntityMetaData.getName());
 
-				if (LOG.isInfoEnabled()) LOG.info("Finished rebuilding index of entity: [" + entityMetaData.getName()
-						+ "]");
-			}
+			if (LOG.isInfoEnabled()) LOG.info("Finished rebuilding index of entity: [" + entityMetaData.getName()
+					+ "] with backend ElasticSearch");
 		}
 		else
 		{
