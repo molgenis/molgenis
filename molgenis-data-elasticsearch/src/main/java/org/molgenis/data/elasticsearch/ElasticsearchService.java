@@ -887,13 +887,6 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			// Find the temporary saved entities
 			Iterable<? extends Entity> tempEntities = dataService.findAll(tempEntityMetaData.getName());
 
-			/**
-			 * Rebuild index
-			 * 
-			 * When rebuilding the index of the MolgenisTransactionLog the next exception can be thrown: ERROR
-			 * o.m.d.t.AsyncTransactionLog - Exception consuming log entity from queue. entity UnknownEntityException:
-			 * entity [MolgenisTransactionLog] with transactionId [xxxxxxxxxxxxx] does not exist. This is not a problem.
-			 */
 			this.rebuildIndexGeneric(tempEntities, entityMetaData);
 
 			// Remove temporary entity
