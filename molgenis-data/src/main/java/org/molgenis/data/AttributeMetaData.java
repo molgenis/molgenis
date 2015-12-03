@@ -50,9 +50,9 @@ public interface AttributeMetaData
 	boolean isVisible();
 
 	/**
-	 * Default value
+	 * Default value expression
 	 */
-	Object getDefaultValue();
+	String getDefaultValue();
 
 	/**
 	 * Whether attribute is primary key
@@ -92,6 +92,15 @@ public interface AttributeMetaData
 	 * @return Iterable of attributes or empty Iterable if no attribute parts exist
 	 */
 	Iterable<AttributeMetaData> getAttributeParts();
+
+	/**
+	 * Get attribute part by name (case insensitive), returns null if not found
+	 * 
+	 * @param attrName
+	 *            attribute name (case insensitive)
+	 * @return attribute or null
+	 */
+	AttributeMetaData getAttributePart(String attrName);
 
 	/**
 	 * Wether this attribute can be used to aggregate on. Default only attributes of type 'BOOL', 'XREF' and

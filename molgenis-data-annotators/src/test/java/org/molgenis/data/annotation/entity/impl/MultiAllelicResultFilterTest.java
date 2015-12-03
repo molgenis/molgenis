@@ -10,6 +10,7 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -140,7 +141,7 @@ public class MultiAllelicResultFilterTest
 				Collections.singletonList(new DefaultAttributeMetaData("annotation",
 						MolgenisFieldTypes.FieldTypeEnum.STRING)));
 		Optional<Entity> result2 = filter.filterResults(Collections.singletonList(resultEntity2), entity1);
-		assertEquals(Lists.newArrayList(result2.asSet()).get(0).getString("annotation"), "");
+		Assert.assertTrue(Lists.newArrayList(result2.asSet()).size() == 0);
 
 	}
 

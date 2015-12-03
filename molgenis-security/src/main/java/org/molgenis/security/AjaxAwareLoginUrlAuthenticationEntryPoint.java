@@ -6,6 +6,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.security.login.MolgenisLoginController;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.ELRequestMatcher;
@@ -36,10 +38,22 @@ public class AjaxAwareLoginUrlAuthenticationEntryPoint extends LoginUrlAuthentic
 		}
 		else if (isRestRequest(request))
 		{
+			if (SecurityUtils.isSessionExpired(request))
+			{
+				// Signal that 'session expired' message must be shown to the user
+				request.getSession().setAttribute(MolgenisLoginController.SESSION_EXPIRED_SESSION_ATTR, true);
+			}
+
 			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
 		}
 		else
 		{
+			if (SecurityUtils.isSessionExpired(request))
+			{
+				// Signal that 'session expired' message must be shown to the user
+				request.getSession().setAttribute("sessionExpired", true);
+			}
+
 			super.commence(request, response, authException);
 		}
 	}

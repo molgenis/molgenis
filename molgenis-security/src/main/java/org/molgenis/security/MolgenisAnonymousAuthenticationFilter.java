@@ -9,8 +9,10 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
-import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.core.runas.SystemSecurityToken;
+import org.molgenis.security.core.utils.SecurityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
@@ -32,6 +34,7 @@ import org.springframework.web.filter.GenericFilterBean;
  */
 public class MolgenisAnonymousAuthenticationFilter extends GenericFilterBean implements InitializingBean
 {
+	private static final Logger LOG = LoggerFactory.getLogger(MolgenisAnonymousAuthenticationFilter.class);
 
 	// ~ Instance fields
 	// ================================================================================================
@@ -66,25 +69,25 @@ public class MolgenisAnonymousAuthenticationFilter extends GenericFilterBean imp
 	}
 
 	@Override
-	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException,
-			ServletException
+	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
+			throws IOException, ServletException
 	{
 		if (SecurityContextHolder.getContext().getAuthentication() == null)
 		{
 			SecurityContextHolder.getContext().setAuthentication(createAuthentication((HttpServletRequest) req));
 
-			if (logger.isDebugEnabled())
+			if (LOG.isDebugEnabled())
 			{
-				logger.debug("Populated SecurityContextHolder with anonymous token: '"
+				LOG.debug("Populated SecurityContextHolder with anonymous token: '"
 						+ SecurityContextHolder.getContext().getAuthentication() + "'");
 			}
 		}
 		else
 		{
-			if (logger.isDebugEnabled())
+			if (LOG.isTraceEnabled())
 			{
-				logger.debug("SecurityContextHolder not populated with anonymous token, as it already contained: '"
-						+ SecurityContextHolder.getContext().getAuthentication() + "'");
+				LOG.trace("SecurityContextHolder not populated with anonymous token, as it already contained: '{}'",
+						SecurityContextHolder.getContext().getAuthentication());
 			}
 		}
 

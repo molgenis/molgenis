@@ -15,12 +15,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.resources.MultiResourceConfig;
 import org.molgenis.data.annotation.resources.ResourceConfig;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -32,7 +30,6 @@ public class MultiFileResourceTest
 	private MultiFileResource multiFileResource;
 	@Mock
 	private MultiResourceConfig config;
-	private EntityMetaData emd;
 	@Mock
 	private RepositoryFactory factory;
 	private Map<String, ResourceConfig> configs;
@@ -48,11 +45,10 @@ public class MultiFileResourceTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		emd = new DefaultEntityMetaData("name");
 		MockitoAnnotations.initMocks(this);
 		configs = ImmutableMap.of("3", chrom3Config, "4", chrom4Config);
 		when(config.getConfigs()).thenReturn(configs);
-		multiFileResource = new MultiFileResource("name", config, emd, factory);
+		multiFileResource = new MultiFileResource("name", config, factory);
 	}
 
 	@Test
@@ -127,27 +123,5 @@ public class MultiFileResourceTest
 
 		when(chrom5Config.getFile()).thenReturn(File.createTempFile("chrom5", "tmp"));
 		assertTrue(multiFileResource.isAvailable());
-	}
-
-	@Test
-	public void whenConfigIsRemovedThenIsAvailableUpdates() throws IOException
-	{
-		File chrom3File = File.createTempFile("chrom3", "tmp");
-		when(chrom3Config.getFile()).thenReturn(chrom3File);
-		File chrom4File = File.createTempFile("chrom4", "tmp");
-		when(chrom4Config.getFile()).thenReturn(chrom4File);
-
-		when(factory.createRepository(chrom3File)).thenReturn(chrom3Repository);
-		when(factory.createRepository(chrom4File)).thenReturn(chrom4Repository);
-		assertTrue(multiFileResource.isAvailable());
-
-		when(config.getConfigs()).thenReturn(ImmutableMap.<String, ResourceConfig> of("3", chrom3Config));
-
-		when(chrom4Config.getFile()).thenReturn(new File("bogus4"));
-		assertTrue(multiFileResource.isAvailable());
-
-		when(chrom3Config.getFile()).thenReturn(new File("bogus3"));
-		assertFalse(multiFileResource.isAvailable());
-
 	}
 }

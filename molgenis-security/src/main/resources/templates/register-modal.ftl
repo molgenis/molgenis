@@ -60,15 +60,15 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-4 control-label" for="reg-last-name">Last name</label>
+                        <label class="col-md-4 control-label" for="reg-last-name">Last name *</label>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" id="reg-last-name" name="lastname">
+                            <input type="text" class="form-control" id="reg-last-name" name="lastname" required>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-md-4 control-label" for="reg-first-name">First name</label>
+                        <label class="col-md-4 control-label" for="reg-first-name">First name *</label>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" id="reg-first-name" name="firstname">
+                            <input type="text" class="form-control" id="reg-first-name" name="firstname" required>
                         </div>
                     </div>
                     <div class="form-group">
@@ -104,7 +104,7 @@
                     <h4>Code validation</h4>
                     <div class="form-group">
                         <div class="col-md-6 col-md-offset-4">
-                            <a href="#" id="captcha-href"><img id="captcha-img" src="/captcha"></a>
+                            <a href="#" id="captcha-href"><img id="captcha-img" /></a>
                         </div>
                     </div>
                     <div class="form-group">
@@ -151,6 +151,10 @@
         });
 
         <#-- modal events -->
+		modal.on('show.bs.modal', function (e) {
+			$('#captcha-img').attr('src', '/captcha?_=' + Date.now());
+		});
+
         modal.on('hide.bs.modal', function (e) {
             e.stopPropagation();
             form[0].reset();
@@ -162,9 +166,11 @@
     
         <#-- form events -->
         form.submit(function(e) {   
-            e.preventDefault();
+       	    e.preventDefault();
             e.stopPropagation();
-            if(form.valid() && !submitBtn.attr('disabled')) {
+			$('.alert', modal).remove();
+            
+			if(form.valid() && !submitBtn.attr('disabled')) {
                 submitBtn.attr('disabled','disabled');
                 
                 $.ajax({
@@ -178,7 +184,9 @@
                         submitBtn.removeAttr('disabled');
                     },
                     error: function(xhr) {
-                        molgenis.createAlert(JSON.parse(xhr.responseText).errors, 'error', $('.modal-body', modal));
+                    	if (xhr.responseText) {
+                        	molgenis.createAlert(JSON.parse(xhr.responseText).errors, 'error', $('.modal-body', modal));
+                        }
                         submitBtn.removeAttr('disabled');
                     }
                 });

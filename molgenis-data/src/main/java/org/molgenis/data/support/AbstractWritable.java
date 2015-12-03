@@ -5,21 +5,37 @@ import org.molgenis.data.Writable;
 
 public abstract class AbstractWritable implements Writable
 {
-	public enum WriteMode
+	public enum EntityWriteMode
 	{
 		ENTITY_LABELS, ENTITY_IDS
 	}
 
-	private WriteMode writeMode;
-
-	public WriteMode getWriteMode()
+	public enum AttributeWriteMode
 	{
-		return writeMode;
+		ATTRIBUTE_NAMES, ATTRIBUTE_LABELS
 	}
 
-	public void setWriteMode(WriteMode writeMode)
+	private EntityWriteMode entityWriteMode;
+	private AttributeWriteMode attributeWriteMode;
+
+	public EntityWriteMode getEntityWriteMode()
 	{
-		this.writeMode = writeMode;
+		return entityWriteMode;
+	}
+
+	public void setEntityWriteMode(EntityWriteMode entityWriteMode)
+	{
+		this.entityWriteMode = entityWriteMode;
+	}
+
+	public AttributeWriteMode getAttributeWriteMode()
+	{
+		return attributeWriteMode;
+	}
+
+	public void setAttributeWriteMode(AttributeWriteMode attributeWriteMode)
+	{
+		this.attributeWriteMode = attributeWriteMode;
 	}
 
 	@Override

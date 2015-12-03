@@ -52,7 +52,8 @@
     	        enableOptionalFilter: false,
     	        saveOnBlur: true,
     	        enableFormIndex: true,
-    	        categorigalMrefShowSelectAll: false,
+    	        enableAlertMessageInFormIndex: true,
+    	        categoricalMrefShowSelectAll: false,
     	        showAsteriskIfNotNillable: false,
     	        beforeSubmit: this._handleBeforeSubmit,
     	        onValueChange: this._handleValueChange,
@@ -71,10 +72,45 @@
 			this.setState({entityInstance: entityInstance});
 		},
 		_handleBeforeSubmit: function(arr, $form, options) {
+			
+			var values = {};
+        	_.each(this.state.entity.allAttributes, function(attr) {
+        		var value = this.state.entityInstance[attr.name];
+        		
+        		if (value !== null && value !== undefined) {
+        			 switch(attr.fieldType) {
+                     case 'CATEGORICAL':
+                     case 'XREF':
+                    	 values[attr.name] = value[attr.refEntity.idAttribute];
+                         break;
+                     case 'CATEGORICAL_MREF':
+                     case 'MREF':
+                         values[attr.name] = _.map(value.items, function(item) {
+                        	 return item[attr.refEntity.idAttribute]; 
+                         }).join();
+                         break;
+                     case 'COMPOUND':
+                    	 //nothing, no value
+                    	 break;
+                     default:
+                    	 values[attr.name] = value;
+                         break;
+        			 }
+        		}
+        	}, this);
+        	
 			for(var i = 0; i < arr.length; ++i) {
-				if(arr[i].name === 'status') {
+				var attrName = arr[i].name;
+				var attr = this.state.entity.allAttributes[attrName];
+				
+				//Set value of attribute with visibleExpression that is not visible to null
+				if (attr.visibleExpression && evalScript(attr.visibleExpression, values) === false) {
+					arr[i].value = null;
+				}
+				
+				//Set status to SUBMITTED
+				if(attrName === 'status') {
 					arr[i].value = 'SUBMITTED';
-					break;
 				}
 			}
 		},

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.molgenis.security.core.Permission;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -142,5 +144,37 @@ public class SecurityUtils
 	public static String getPluginWriteAuthority(String pluginId)
 	{
 		return AUTHORITY_PLUGIN_WRITE_PREFIX + pluginId.toUpperCase();
+	}
+
+	/**
+	 * Get all possible authorities (roles) for an entity
+	 * 
+	 * @param entityName
+	 * @return
+	 */
+	public static List<String> getEntityAuthorities(String entityName)
+	{
+		List<String> authorities = new ArrayList<>();
+		for (Permission permission : Permission.values())
+		{
+			String authority = String.format("%s%s_%s", AUTHORITY_ENTITY_PREFIX, permission.name(),
+					entityName.toUpperCase());
+			authorities.add(authority);
+		}
+
+		return authorities;
+	}
+
+	/**
+	 * Checks if client session is expired (by checking the requested sessionId).
+	 * 
+	 * 
+	 * @param request
+	 * @return true if session is expired
+	 */
+	public static boolean isSessionExpired(HttpServletRequest request)
+	{
+		return request.getRequestedSessionId() != null && !request.isRequestedSessionIdValid();
+
 	}
 }

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -89,7 +90,11 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 
 		while (matcher.find())
 		{
-			sourceAttributeMetaDatas.add(sourceEntityMetaData.getAttribute(matcher.group(1)));
+			AttributeMetaData attribute = sourceEntityMetaData.getAttribute(matcher.group(1));
+			if (!sourceAttributeMetaDatas.contains(attribute))
+			{
+				sourceAttributeMetaDatas.add(attribute);
+			}
 		}
 
 		return sourceAttributeMetaDatas;
@@ -114,11 +119,12 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 	{
 		Entity attributeMappingEntity = new MapEntity(META_DATA);
 		attributeMappingEntity.set(AttributeMappingMetaData.IDENTIFIER, attributeMapping.getIdentifier());
-		attributeMappingEntity.set(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA, attributeMapping
-				.getTargetAttributeMetaData() != null ? attributeMapping.getTargetAttributeMetaData().getName() : null);
+		attributeMappingEntity.set(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA,
+				attributeMapping.getTargetAttributeMetaData() != null
+						? attributeMapping.getTargetAttributeMetaData().getName() : null);
 		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHM, attributeMapping.getAlgorithm());
-		attributeMappingEntity.set(AttributeMappingMetaData.SOURCEATTRIBUTEMETADATAS,
-				attributeMapping.getSourceAttributeMetaDatas());
+		attributeMappingEntity.set(AttributeMappingMetaData.SOURCEATTRIBUTEMETADATAS, attributeMapping
+				.getSourceAttributeMetaDatas().stream().map(AttributeMetaData::getName).collect(Collectors.toList()));
 		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHMSTATE, attributeMapping.getAlgorithmState());
 		return attributeMappingEntity;
 	}

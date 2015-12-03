@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -48,13 +49,36 @@ public class ScriptEvaluator
 	 */
 	public static Object eval(final String source, final Entity entity, final EntityMetaData entityMetaData)
 	{
-
-		Object result = Iterables.get(eval(source, Collections.singleton(entity), entityMetaData), 0);
+		Object result = Iterables.get(
+				eval(Collections.singletonList(source), Collections.singleton(entity), entityMetaData), 0);
 		if (result instanceof RuntimeException)
 		{
 			throw (RuntimeException) result;
 		}
 		return result;
+	}
+
+	public static List<Object> eval(final String source, final Iterable<Entity> entities,
+			final EntityMetaData entityMetaData)
+	{
+		List<Object> results = eval(Arrays.asList(source), entities, entityMetaData);
+
+		if (results.get(0) instanceof RuntimeException)
+		{
+			throw (RuntimeException) results.get(0);
+		}
+		return results;
+	}
+
+	public static List<Object> eval(final List<String> sources, final Entity entity, final EntityMetaData entityMetaData)
+	{
+		List<Object> results = eval(sources, Collections.singleton(entity), entityMetaData);
+
+		if (results.get(0) instanceof RuntimeException)
+		{
+			throw (RuntimeException) results.get(0);
+		}
+		return results;
 	}
 
 	/**
@@ -71,7 +95,7 @@ public class ScriptEvaluator
 	 *             if there's a syntax error in the script
 	 */
 	@SuppressWarnings("unchecked")
-	public static List<Object> eval(final String source, final Iterable<Entity> entities,
+	protected static List<Object> eval(final List<String> sources, final Iterable<Entity> entities,
 			final EntityMetaData entityMetaData)
 	{
 		if (JS_SCRIPT == null)
@@ -103,8 +127,12 @@ public class ScriptEvaluator
 					try
 					{
 						Scriptable scriptableEntity = mapEntity(entity, entityMetaData, cx, scriptableObject);
-						result.add(evalScript.call(cx, scriptableObject, scriptableObject, new Object[]
-						{ source, scriptableEntity }));
+
+						for (String source : sources)
+						{
+							result.add(evalScript.call(cx, scriptableObject, scriptableObject, new Object[]
+							{ source, scriptableEntity }));
+						}
 					}
 					catch (EcmaError error)
 					{

@@ -1,12 +1,9 @@
 package org.molgenis.data.annotation;
 
-import org.testng.annotations.Test;
-
 import static org.testng.Assert.assertEquals;
 
-/**
- * Created by charbonb on 30/04/15.
- */
+import org.testng.annotations.Test;
+
 public abstract class AbstractAnnotatorTest extends AnnotatorTestData {
 
     @Test

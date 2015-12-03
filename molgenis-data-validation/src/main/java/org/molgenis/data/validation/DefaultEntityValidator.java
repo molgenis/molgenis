@@ -67,7 +67,7 @@ public class DefaultEntityValidator implements EntityValidator
 
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
-			if (!attr.isNillable() && !attr.isIdAtrribute() && !attr.isAuto() && (attr.getDefaultValue() == null))
+			if (!attr.isNillable() && !attr.isIdAtrribute() && !attr.isAuto())
 			{
 				long rownr = 0;
 				for (Entity entity : entities)
@@ -94,7 +94,7 @@ public class DefaultEntityValidator implements EntityValidator
 
 		// Do not validate is visibleExpression resolves to false
 		if (StringUtils.isNotBlank(attr.getVisibleExpression())
-				&& !ValidationUtils.resolveBooleanExpression(attr.getVisibleExpression(), entity, entityMetaData, attr)) return false;
+				&& !ValidationUtils.resolveBooleanExpression(attr.getVisibleExpression(), entity, entityMetaData)) return false;
 
 		return true;
 	}
@@ -151,7 +151,7 @@ public class DefaultEntityValidator implements EntityValidator
 											.format("The attribute '%s' of entity '%s' with key '%s' must be unique, but the value '%s' already exists.",
 													attr.getName(), meta.getName(),
 													entity.getString(meta.getLabelAttribute().getName()), value);
-									violations.add(new ConstraintViolation(message, value, entity, attr, meta, 0));
+									violations.add(new ConstraintViolation(message, value, entity, attr, meta, null));
 								}
 
 								found++;

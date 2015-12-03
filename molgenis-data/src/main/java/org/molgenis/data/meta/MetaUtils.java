@@ -17,7 +17,18 @@ public class MetaUtils
 	public static List<AttributeMetaData> updateEntityMeta(MetaDataService metaDataService, EntityMetaData entityMeta,
 			boolean sync)
 	{
+		String backend = entityMeta.getBackend() != null ? entityMeta.getBackend() : metaDataService
+				.getDefaultBackend().getName();
+
 		EntityMetaData existingEntityMetaData = metaDataService.getEntityMetaData(entityMeta.getName());
+		if (!existingEntityMetaData.getBackend().equals(backend))
+		{
+			throw new MolgenisDataException(
+					"Changing the backend of an entity is not supported. You tried to change the backend of entity '"
+							+ entityMeta.getName() + "' from '" + existingEntityMetaData.getBackend() + "' to '"
+							+ backend + "'");
+		}
+
 		List<AttributeMetaData> addedAttributes = Lists.newArrayList();
 
 		for (AttributeMetaData attr : existingEntityMetaData.getAttributes())
@@ -73,6 +84,7 @@ public class MetaUtils
 	{
 		return FluentIterable.from(attributeMetaDataEntities).transform(new Function<Entity, AttributeMetaData>()
 		{
+			@Override
 			public AttributeMetaData apply(Entity attributeMetaDataEntity)
 			{
 				String attributeName = attributeMetaDataEntity.getString(AttributeMetaDataMetaData.NAME);

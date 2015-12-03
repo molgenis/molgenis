@@ -2,6 +2,7 @@ package org.molgenis.data;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -152,7 +153,7 @@ public class QueryRule
 
 		/**
 		 * Boolean query
-		 * */
+		 */
 		SHOULD("SHOULD"),
 
 		/**
@@ -211,8 +212,8 @@ public class QueryRule
 	{
 		if (operator == Operator.AND || operator == Operator.OR)
 		{
-			throw new IllegalArgumentException("QueryRule(): Operator." + operator
-					+ " cannot be used with two arguments");
+			throw new IllegalArgumentException(
+					"QueryRule(): Operator." + operator + " cannot be used with two arguments");
 		}
 		this.field = field;
 		this.operator = operator;
@@ -253,8 +254,8 @@ public class QueryRule
 		}
 		else
 		{
-			throw new IllegalArgumentException("QueryRule(): Operator." + operator
-					+ " cannot be used with one argument");
+			throw new IllegalArgumentException(
+					"QueryRule(): Operator." + operator + " cannot be used with one argument");
 		}
 	}
 
@@ -267,8 +268,8 @@ public class QueryRule
 		}
 		else
 		{
-			throw new IllegalArgumentException("QueryRule(): Operator." + operator
-					+ " cannot be used with one argument");
+			throw new IllegalArgumentException(
+					"QueryRule(): Operator." + operator + " cannot be used with one argument");
 		}
 	}
 
@@ -283,8 +284,8 @@ public class QueryRule
 		}
 		else
 		{
-			throw new IllegalArgumentException("QueryRule(): Operator '" + operator
-					+ "' cannot be used without arguments");
+			throw new IllegalArgumentException(
+					"QueryRule(): Operator '" + operator + "' cannot be used without arguments");
 		}
 	}
 
@@ -387,20 +388,51 @@ public class QueryRule
 	public String toString()
 	{
 		StringBuilder strBuilder = new StringBuilder();
-		if (nestedRules != null)
+		if (field != null)
 		{
+			strBuilder.append('\'').append(field).append('\'');
+		}
+		if (operator != null && operator != Operator.NESTED)
+		{
+			if (strBuilder.length() > 0)
+			{
+				strBuilder.append(' ');
+			}
+			strBuilder.append(operator);
+		}
+		if (operator != Operator.AND && operator != Operator.OR && operator != Operator.NOT
+				&& operator != Operator.NESTED && operator != Operator.DIS_MAX && operator != Operator.SHOULD)
+		{
+			if (strBuilder.length() > 0)
+			{
+				strBuilder.append(' ');
+			}
+			if (operator != Operator.IN)
+			{
+				strBuilder.append('\'').append(value).append('\'');
+			}
+			else
+			{
+				strBuilder.append(value);
+			}
+		}
+		if (nestedRules != null && !nestedRules.isEmpty())
+		{
+			if (strBuilder.length() > 0)
+			{
+				strBuilder.append(' ');
+			}
 			strBuilder.append('(');
 
-			for (final QueryRule rule : nestedRules)
+			for (Iterator<QueryRule> it = nestedRules.iterator(); it.hasNext();)
 			{
-				strBuilder.append(rule.toString());
+				strBuilder.append(it.next());
+				if (it.hasNext())
+				{
+					strBuilder.append(", ");
+				}
 			}
 			strBuilder.append(')');
-		}
-		else
-		{
-			strBuilder.append(this.getField() == null ? " " : (this.getField() + " "));
-			strBuilder.append(this.getOperator()).append(value == null ? " " : " '" + value + "'");
 		}
 		return strBuilder.toString();
 	}
@@ -429,7 +461,8 @@ public class QueryRule
 		QueryRule queryRule = (QueryRule) o;
 
 		if (field != null ? !field.equals(queryRule.field) : queryRule.field != null) return false;
-		if (nestedRules != null ? !nestedRules.equals(queryRule.nestedRules) : queryRule.nestedRules != null) return false;
+		if (nestedRules != null ? !nestedRules.equals(queryRule.nestedRules) : queryRule.nestedRules != null)
+			return false;
 		if (operator != queryRule.operator) return false;
 		if (value != null ? !value.equals(queryRule.value) : queryRule.value != null) return false;
 

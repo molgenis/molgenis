@@ -55,6 +55,8 @@ public interface RepositoryAnnotator
 
 	String getFullName();
 
+	CmdLineAnnotatorSettingsConfigurer getCmdLineAnnotatorSettingsConfigurer();
+
 	default String getDescription()
 	{
 		return getInfo() == null ? "no description" : getInfo().getDescription();

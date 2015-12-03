@@ -14,10 +14,10 @@ import java.util.List;
 import javax.servlet.http.Part;
 import javax.validation.Valid;
 
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.file.FileStore;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPlugin;
-import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.MolgenisUi;
 import org.molgenis.ui.MolgenisUiMenu;
 import org.molgenis.ui.MolgenisUiMenuItem;
@@ -52,21 +52,23 @@ public class MenuManagerController extends MolgenisPluginController
 	private final MenuManagerService menuManagerService;
 	private final FileStore fileStore;
 	private final MolgenisUi molgenisUi;
+	private final AppSettings appSettings;
 
 	private static final String ERRORMESSAGE_LOGO = "The logo needs to be an image file like png or jpg.";
 
 	@Autowired
 	public MenuManagerController(MenuManagerService menuManagerService, FileStore fileStore, MolgenisUi molgenisUi,
-			MolgenisSettings molgenisSettings)
+			AppSettings appSettings)
 	{
 		super(URI);
 		if (menuManagerService == null) throw new IllegalArgumentException("menuManagerService is null");
 		if (molgenisUi == null) throw new IllegalArgumentException("molgenisUi is null");
 		if (fileStore == null) throw new IllegalArgumentException("fileStore is null");
-
+		if (appSettings == null) throw new IllegalArgumentException("appSettings is null");
 		this.menuManagerService = menuManagerService;
 		this.molgenisUi = molgenisUi;
 		this.fileStore = fileStore;
+		this.appSettings = appSettings;
 	}
 
 	@RequestMapping(method = GET)
@@ -155,8 +157,8 @@ public class MenuManagerController extends MolgenisPluginController
 			String file = "/logo/" + FileUploadUtils.getOriginalFileName(part);
 			fileStore.store(part.getInputStream(), file);
 
-			// Update logo RuntimeProperty
-			molgenisUi.setHrefLogo(file);
+			// Set logo
+			appSettings.setLogoNavBarHref(file);
 		}
 
 		return init(model);

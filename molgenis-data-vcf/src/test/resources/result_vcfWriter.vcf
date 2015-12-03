@@ -130,18 +130,18 @@
 ##INFO=<ID=AC,Number=.,Type=Integer,Description="Allele count in genotypes">
 ##INFO=<ID=AN,Number=1,Type=Integer,Description="Total number of alleles in called genotypes">
 ##INFO=<ID=GTC,Number=G,Type=Integer,Description="GenoType Counts. Listed in the same order as the ALT alleles in case multiple ALT alleles are present = 0/0,0/1,1/1,0/2,1/2,2/2,0/3,1/3,2/3,3/3,etc. Phasing is ignored; hence 0/1, 1/0, 0|1 and 1|0 are all counted as 0/1. Incomplete gentotypes (./., ./0, ./1, ./2, etc.) are completely discarded for calculating GTC.">
-##INFO=<ID=#CHROM,Number=.,Type=String,Description="">
-##INFO=<ID=POS,Number=.,Type=Float,Description="">
-##INFO=<ID=REF,Number=.,Type=String,Description="">
-##INFO=<ID=ALT,Number=.,Type=String,Description="">
-##INFO=<ID=ID,Number=.,Type=String,Description="">
-##INFO=<ID=QUAL,Number=.,Type=String,Description="">
-##INFO=<ID=FILTER,Number=.,Type=String,Description="">
-##INFO=<ID=AC,Number=.,Type=String,Description="">
-##INFO=<ID=AN,Number=.,Type=String,Description="">
-##INFO=<ID=GTC,Number=.,Type=String,Description="">
-##INFO=<ID=INFO_ANNO,Number=.,Type=String,Description="">
+##INFO=<ID=#CHROM,Number=.,Type=String,Description="Description not provided">
+##INFO=<ID=POS,Number=.,Type=Float,Description="Description not provided">
+##INFO=<ID=REF,Number=.,Type=String,Description="Description not provided">
+##INFO=<ID=ALT,Number=.,Type=String,Description="Description not provided">
+##INFO=<ID=ID,Number=.,Type=String,Description="Description not provided">
+##INFO=<ID=QUAL,Number=.,Type=String,Description="Description not provided">
+##INFO=<ID=FILTER,Number=.,Type=String,Description="Test that description is not: 'Description not provided'">
+##INFO=<ID=AC,Number=.,Type=String,Description="Description not provided">
+##INFO=<ID=AN,Number=.,Type=String,Description="Description not provided">
+##INFO=<ID=GTC,Number=.,Type=String,Description="Description not provided">
+##INFO=<ID=ANNO,Number=.,Type=String,Description="Description not provided">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
 1	10050000	test21	G	A	.	PASS	AC=21;AN=22;GTC=0,1,10;ANNO=TEST_test21;
-1	10050001	test22	G	A	.	PASS	AC=22;AN=23;GTC=1,2,11;ANNO=TEST_test22;
-1	10050002	test23	G	A	.	PASS	AC=23;AN=24;GTC=2,3,12;ANNO=TEST_test23;
+1	10050001	test22	G	A	.	PASS	ANNO=TEST_test22;
+1	10050002	test23	G	A	.	PASS	.

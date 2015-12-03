@@ -20,6 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import org.mockito.Matchers;
@@ -33,10 +34,12 @@ import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.Sort;
 import org.molgenis.data.Sort.Direction;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.rest.RestControllerTest.RestControllerConfig;
+import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -46,7 +49,8 @@ import org.molgenis.file.FileStore;
 import org.molgenis.messageconverter.CsvHttpMessageConverter;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.token.TokenService;
+import org.molgenis.security.core.token.TokenService;
+import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.ResourceFingerprintRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +67,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @WebAppConfiguration
-@ContextConfiguration(classes = RestControllerConfig.class)
+@ContextConfiguration(classes =
+{ RestControllerConfig.class, GsonConfig.class })
 public class RestControllerTest extends AbstractTestNGSpringContextTests
 {
 	private static String ENTITY_NAME = "Person";
@@ -83,6 +88,9 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 	@Autowired
 	private MetaDataService metaDataService;
+
+	@Autowired
+	private GsonHttpMessageConverter gsonHttpMessageConverter;
 
 	private MockMvc mockMvc;
 
@@ -148,7 +156,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(repo.getName()).thenReturn(ENTITY_NAME);
 
 		mockMvc = MockMvcBuilders.standaloneSetup(restController)
-				.setMessageConverters(new GsonHttpMessageConverter(), new CsvHttpMessageConverter()).build();
+				.setMessageConverters(gsonHttpMessageConverter, new CsvHttpMessageConverter()).build();
 	}
 
 	@Test
@@ -233,6 +241,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void retrieveEntityMetaWritable() throws Exception
 	{
 		when(molgenisPermissionService.hasPermissionOnEntity(ENTITY_NAME, Permission.WRITE)).thenReturn(true);
+		when(dataService.getCapabilities(ENTITY_NAME)).thenReturn(
+				new HashSet<RepositoryCapability>(Arrays.asList(RepositoryCapability.WRITABLE)));
 		mockMvc.perform(get(HREF_ENTITY_META))
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
@@ -245,6 +255,26 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 										+ "\",\"attributes\":{\"name\":{\"href\":\""
 										+ HREF_ENTITY_META
 										+ "/name\"},\"id\":{\"href\":\"/api/v1/Person/meta/id\"},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\"}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":true}"));
+	}
+
+	@Test
+	public void retrieveEntityMetaNotWritable() throws Exception
+	{
+		when(molgenisPermissionService.hasPermissionOnEntity(ENTITY_NAME, Permission.WRITE)).thenReturn(true);
+		when(dataService.getCapabilities(ENTITY_NAME)).thenReturn(
+				new HashSet<RepositoryCapability>(Arrays.asList(RepositoryCapability.QUERYABLE)));
+		mockMvc.perform(get(HREF_ENTITY_META))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(
+						content()
+								.string("{\"href\":\""
+										+ HREF_ENTITY_META
+										+ "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\""
+										+ ENTITY_NAME
+										+ "\",\"attributes\":{\"name\":{\"href\":\""
+										+ HREF_ENTITY_META
+										+ "/name\"},\"id\":{\"href\":\"/api/v1/Person/meta/id\"},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\"}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":false}"));
 	}
 
 	@Test
@@ -430,7 +460,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(repo.getName()).thenReturn(ENTITY_NAME);
 		when(meta.getName()).thenReturn(ENTITY_NAME);
 
-		mockMvc = MockMvcBuilders.standaloneSetup(restController).setMessageConverters(new GsonHttpMessageConverter())
+		mockMvc = MockMvcBuilders.standaloneSetup(restController).setMessageConverters(gsonHttpMessageConverter)
 				.build();
 
 		mockMvc.perform(get(HREF_ENTITY_ID + "/name")).andExpect(status().isOk())
@@ -617,8 +647,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		public RestController restController()
 		{
 			return new RestController(dataService(), tokenService(), authenticationManager(),
-					molgenisPermissionService(), new MolgenisRSQL(), new ResourceFingerprintRegistry(), idGenerator(),
-					fileStore());
+					molgenisPermissionService(), new ResourceFingerprintRegistry(), new MolgenisRSQL(),
+					new RestService(dataService(), idGenerator(), fileStore()));
 		}
 	}
 

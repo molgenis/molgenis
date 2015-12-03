@@ -7,44 +7,25 @@ import static org.testng.Assert.assertNotNull;
 
 import java.util.Collections;
 
-import org.molgenis.framework.server.MolgenisSettings;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class MenuMolgenisUiTest
 {
-	private MolgenisSettings molgenisSettings;
 	private MenuReaderService menuReaderService;
 	private MenuMolgenisUi menuMolgenisUi;
 
 	@BeforeMethod
 	public void setUp()
 	{
-		molgenisSettings = mock(MolgenisSettings.class);
 		menuReaderService = mock(MenuReaderService.class);
-		menuMolgenisUi = new MenuMolgenisUi(molgenisSettings, menuReaderService);
+		menuMolgenisUi = new MenuMolgenisUi(menuReaderService);
 	}
 
-	@Test(expectedExceptions = IllegalArgumentException.class)
+	@Test(expectedExceptions = NullPointerException.class)
 	public void MenuMolgenisUi()
 	{
-		new MenuMolgenisUi(null, null);
-	}
-
-	@Test
-	public void getHrefCss()
-	{
-		String href = "href";
-		when(molgenisSettings.getProperty(MenuMolgenisUi.KEY_HREF_CSS)).thenReturn(href);
-		assertEquals(menuMolgenisUi.getHrefCss(), href);
-	}
-
-	@Test
-	public void getHrefLogo()
-	{
-		String href = "href";
-		when(molgenisSettings.getProperty(MenuMolgenisUi.KEY_HREF_LOGO)).thenReturn(href);
-		assertEquals(menuMolgenisUi.getHrefLogo(), href);
+		new MenuMolgenisUi(null);
 	}
 
 	@Test
@@ -79,13 +60,5 @@ public class MenuMolgenisUiTest
 		menu.setItems(Collections.<MenuItem> singletonList(subMenu));
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		assertNotNull(menuMolgenisUi.getMenu(id));
-	}
-
-	@Test
-	public void getTitle()
-	{
-		String title = "title";
-		when(molgenisSettings.getProperty(MenuMolgenisUi.KEY_TITLE, "MOLGENIS")).thenReturn(title);
-		assertEquals(menuMolgenisUi.getTitle(), title);
 	}
 }

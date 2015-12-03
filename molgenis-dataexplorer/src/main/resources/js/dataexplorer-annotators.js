@@ -41,7 +41,9 @@
 
                         var outputAttributes = resultMap[key]["outputAttributes"];
                         var outputAttributeTypes = resultMap[key]["outputAttributeTypes"];
-
+                        
+                        var showSettingsButton = resultMap[key]["showSettingsButton"];
+                        
                         var inputmetadataString = createAttributeHtml(inputAttributes, inputAttributeTypes);
                         var outputmetadataString = createAttributeHtml(outputAttributes, outputAttributeTypes);
 
@@ -51,7 +53,8 @@
                                 'annotatorName' : key,
                                 'description' : desc,
                                 'inputMetaData' : inputmetadataString,
-                                'outputMetaData' : outputmetadataString
+                                'outputMetaData' : outputmetadataString,
+                                'showSettingsButton' : showSettingsButton
                             }));
                         } else {
                             disabledAnnotatorContainer.append(annotatorTemplate({
@@ -59,9 +62,27 @@
                                 'annotatorName' : key,
                                 'description' : desc,
                                 'inputMetaData' : inputmetadataString,
-                                'outputMetaData' : outputmetadataString
+                                'outputMetaData' : outputmetadataString,
+                                'showSettingsButton' : showSettingsButton
                             }));
                         }
+                        
+                        (function (key) {
+                        	$(document).on('click',  '#' + key + '-settings-btn', function() {
+                        		React.unmountComponentAtNode($('#' + key + '-settings-container')[0]); // fix https://github.com/molgenis/molgenis/issues/3587
+                        		React.render(molgenis.ui.Form({
+                        			entity: 'settings_' + key,
+                        			entityInstance: key,
+                        			mode: 'edit',
+                        			modal: true,
+                        			enableOptionalFilter: false,
+                        			enableFormIndex: false,
+                        			onSubmitSuccess: function() {
+                        				location.reload();
+                        			}
+                        		}), $('#' + key + '-settings-container')[0]);
+                        	});
+                        })(key);
 					}
 					
 					$('#selected-dataset-name').html(dataset.name);

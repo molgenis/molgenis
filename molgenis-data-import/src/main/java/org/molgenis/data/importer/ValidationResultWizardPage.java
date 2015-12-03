@@ -1,6 +1,5 @@
 package org.molgenis.data.importer;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -13,7 +12,9 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
@@ -24,7 +25,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 
 import com.google.common.collect.Lists;
 
@@ -50,6 +50,10 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 
 	@Autowired
 	UserAccountService userAccountService;
+
+	@Autowired
+	MolgenisUserService userService;
+
 	private List<MolgenisGroup> groups;
 
 	@Override
@@ -62,12 +66,7 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 	@Transactional
 	public String handleRequest(HttpServletRequest request, BindingResult result, Wizard wizard)
 	{
-		if (!(wizard instanceof ImportWizard))
-		{
-			throw new RuntimeException("Wizard must be of type '" + ImportWizard.class.getSimpleName()
-					+ "' instead of '" + wizard.getClass().getSimpleName() + "'");
-		}
-
+		ImportWizardUtil.validateImportWizard(wizard);
 		ImportWizard importWizard = (ImportWizard) wizard;
 		String entityImportOption = importWizard.getEntityImportOption();
 
@@ -76,7 +75,7 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 			try
 			{
 				// convert input to database action
-				DatabaseAction entityDbAction = toDatabaseAction(entityImportOption);
+				DatabaseAction entityDbAction = ImportWizardUtil.toDatabaseAction(entityImportOption);
 				if (entityDbAction == null) throw new IOException("unknown database action: " + entityImportOption);
 
 				RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
@@ -97,15 +96,11 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 			}
 			catch (RuntimeException e)
 			{
-				File file = importWizard.getFile();
-				LOG.warn("Import of file [" + file.getName() + "] failed for action [" + entityImportOption + "]", e);
-				result.addError(new ObjectError("wizard", "<b>Your import failed:</b><br />" + e.getMessage()));
+				ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
 			}
 			catch (IOException e)
 			{
-				File file = importWizard.getFile();
-				LOG.warn("Import of file [" + file.getName() + "] failed for action [" + entityImportOption + "]", e);
-				result.addError(new ObjectError("wizard", "<b>Your import failed:</b><br />" + e.getMessage()));
+				ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
 			}
 
 		}
@@ -113,7 +108,8 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 		// Convert to list because it's less impossible use in FreeMarker
 		if (!userAccountService.getCurrentUser().getSuperuser())
 		{
-			groups = Lists.newArrayList(userAccountService.getCurrentUserGroups());
+			String username = SecurityUtils.getCurrentUsername();
+			groups = RunAsSystemProxy.runAsSystem(() -> Lists.newArrayList(userService.getUserGroups(username)));
 		}
 		else
 		{
@@ -121,19 +117,7 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 		}
 
 		((ImportWizard) wizard).setGroups(groups);
+
 		return null;
-	}
-
-	private DatabaseAction toDatabaseAction(String actionStr)
-	{
-		// convert input to database action
-		DatabaseAction dbAction;
-
-		if (actionStr.equals("add")) dbAction = DatabaseAction.ADD;
-		else if (actionStr.equals("add_update")) dbAction = DatabaseAction.ADD_UPDATE_EXISTING;
-		else if (actionStr.equals("update")) dbAction = DatabaseAction.UPDATE;
-		else dbAction = null;
-
-		return dbAction;
 	}
 }

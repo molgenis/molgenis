@@ -9,7 +9,6 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.file.FileStore;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,7 @@ public class GafListFileImporterService
 	private static final Logger LOG = LoggerFactory.getLogger(GafListFileImporterService.class);
 
 	@Autowired
-	private MolgenisSettings molgenisSettings;
+	private GafListSettings gafListSettings;
 
 	@Autowired
 	private GafListValidator gafListValidator;
@@ -55,7 +54,7 @@ public class GafListFileImporterService
 
 		if (!report.getValidRunIds().isEmpty())
 		{
-			final String gaflistEntityName = molgenisSettings.getProperty(GafListFileRepository.GAFLIST_ENTITYNAME);
+			final String gaflistEntityName = gafListSettings.getEntityName();
 			GafListFileRepository gafListFileRepositoryToImport = new GafListFileRepository(tmpFile, null, null, report);
 			report.setDataSetName(gaflistEntityName);
 			report.setDataSetIdentifier(gaflistEntityName);

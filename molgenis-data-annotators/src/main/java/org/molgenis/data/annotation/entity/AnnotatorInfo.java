@@ -35,7 +35,8 @@ public abstract class AnnotatorInfo
 
 	public abstract List<AttributeMetaData> getOutputAttributes();
 
-	public static AnnotatorInfo create(Status status, Type type, String code, String description, List<AttributeMetaData> outputAttributes)
+	public static AnnotatorInfo create(Status status, Type type, String code, String description,
+			List<AttributeMetaData> outputAttributes)
 	{
 		return new AutoValue_AnnotatorInfo(status, type, code, description, outputAttributes);
 	}

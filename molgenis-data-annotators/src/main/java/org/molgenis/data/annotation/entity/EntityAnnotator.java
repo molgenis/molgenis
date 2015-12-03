@@ -1,9 +1,10 @@
 package org.molgenis.data.annotation.entity;
 
+import java.util.List;
+
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-
-import java.util.List;
+import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
 
 /**
  * Simple interface to implement for fine-grained annotators.
@@ -32,4 +33,6 @@ public interface EntityAnnotator extends Annotator
 	 * @return Indication if the required source repository is present in the dataService
 	 */
 	boolean sourceExists();
+
+	public CmdLineAnnotatorSettingsConfigurer getCmdLineAnnotatorSettingsConfigurer();
 }

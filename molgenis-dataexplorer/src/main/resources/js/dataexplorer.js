@@ -1,6 +1,6 @@
 $.when( $, 
 		window.top.molgenis = window.top.molgenis || {}, 
-		$.get('dataexplorer/settings') 
+		molgenis.getPluginSettings() 
 ).then(
 function($, molgenis, settingsXhr) {	
 	"use strict";
@@ -135,8 +135,7 @@ function($, molgenis, settingsXhr) {
 		
 		if (entityMetaData.description) {
 			var description = $('<span data-placement="bottom"></span>');
-			description.html(abbreviate(entityMetaData.description, 
-					settings['header.abbreviate']||180));
+			description.html(abbreviate(entityMetaData.description, settings['header_abbreviate']));
 			description.attr('data-title', entityMetaData.description);
 			$('#entity-class-description').html(description.tooltip());
 		} else {
@@ -285,44 +284,54 @@ function($, molgenis, settingsXhr) {
 		return entityCollectionRequest;
 	}
 	
+	/**
+     * @memberOf molgenis.dataexplorer
+     */
 	function render() {
-		// get entity meta data and update header and tree 
-		var entityMetaDataRequest = restApi.getAsync('/api/v1/' + state.entity + '/meta', {'expand': ['attributes']}, function(entityMetaData) {
+		// get entity meta data and update header and tree
+		var entityMetaDataRequest = restApi.getAsync('/api/v1/' + state.entity + '/meta', {expand: ['attributes']}, function(entityMetaData) {
 			selectedEntityMetaData = entityMetaData;
-			
 			self.createHeader(entityMetaData);
 			
-			selectedAttributes = $.map(entityMetaData.attributes, function(attribute) {
-				if(state.attrs === undefined || state.attrs === null) return attribute.fieldType !== 'COMPOUND' ? attribute : null;
-				else if(state.attrs === 'none') return null;
-				else {
-					// TODO elegant solution
-					for(var i = 0; i < state.attrs.length; ++i) {
-						var attrName = state.attrs[i]; 
-						if(attrName.indexOf('(') !== -1) {
-							attrName = attrName.substring(0, attrName.indexOf('('));
-							attribute.expanded = true;
-						} else {
-							attribute.expanded = false;
+			// Loop through all the attributes in the meta data
+			$.each(entityMetaData.attributes, function(index, attribute) {
+
+				// Default expansion is false
+				// Expanded has to do with xref / mref attributes
+				attribute.expanded = false;
+
+				// If the state is empty or undefined, or is set to
+				// 'none', return null. All attributes will be shown
+				if (state.attrs === undefined || state.attrs === null) {
+					if(attribute.fieldType !== 'COMPOUND') selectedAttributes.push(attribute);
+				} else if (state.attrs === 'none') {
+					selectedAttributes = [];
+				} else {
+
+					// Loop through all the attributes mentioned in the state (url)
+					$.each(state.attrs, function(index, selectedAttrName) {
+						// If the attribute is in the state, add that attribute to the selectedAttributes
+						// For compound attributes, check the atomic attributes
+						if (attribute.name === selectedAttrName) {
+							selectedAttributes.push(attribute);
 						}
-						if(attribute.name === attrName) {
-							return attribute.fieldType !== 'COMPOUND' ? attribute : null;
-						}
-					}
-					return null;
+					});
 				}
 			});
 			
+			// Empties existing tree of selected attributes
 			selectedAttributesTree = {};
-			for(var i = 0; i < selectedAttributes.length; ++i) {
-				var key = selectedAttributes[i].name;
-				var value = selectedAttributes[i].expanded === true ? {'*': null} : null;
-				selectedAttributesTree[key] = value;	
-			}
+			
+			// For each selected attribute, check if it is expanded and fill the selectedAttributesTree map
+			$.each(selectedAttributes, function(index, attribute) {
+				var key = attribute.name;
+				var value = attribute.expanded === true ? {'*': null} : null;
+				selectedAttributesTree[key] = value;
+			});
+			
 			createEntityMetaTree(entityMetaData, selectedAttributes);
 			
-			//Show wizard on show of dataexplorer if url param 'wizard=true' is added
-			if (settings['wizard.oninit'] && settings['wizard.oninit'] === 'true') {
+			if (settings['launch_wizard'] === true) {
 				self.filter.wizard.openFilterWizardModal(entityMetaData, attributeFilters);
 			}
 		});
@@ -337,6 +346,7 @@ function($, molgenis, settingsXhr) {
 			if(state.mod) {
 				moduleTab = $('a[data-toggle="tab"][data-target="#tab-' + state.mod + '"]', container);
 			} else {
+				
 				moduleTab = $('a[data-toggle="tab"]', container).first();
 			}
 			
@@ -431,7 +441,9 @@ function($, molgenis, settingsXhr) {
 			attributeFilters = {};
 			selectedAttributes = [];
 			searchQuery = null;
-			React.unmountComponentAtNode($('#data-table-container')[0]); // must occur before mod-data is loaded
+			if($('#data-table-container').length > 0) {
+				React.unmountComponentAtNode($('#data-table-container')[0]); // must occur before mod-data is loaded
+			}
 			$('#feature-filters p').remove();
 			$("#observationset-search").val("");
 			$('#data-table-pager').empty();
@@ -511,7 +523,7 @@ function($, molgenis, settingsXhr) {
 			self.filter.wizard.openFilterWizardModal(selectedEntityMetaData, attributeFilters);
 		});
 
-		$('#module-nav').on('click', 'a', function(e) {
+		$('#module-nav').on('click', 'ul.nav > li > a', function(e) {
 			$(document).trigger('changeModule', $(this).data('id'));
 		});
 	

@@ -2,6 +2,7 @@ package org.molgenis.data.importer;
 
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.AGGREGATEABLE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DATA_TYPE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.DEFAULT_VALUE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.EXPRESSION;
@@ -97,7 +98,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			LOOKUP_ATTRIBUTE.toLowerCase(), NAME, NILLABLE.toLowerCase(), PART_OF_ATTRIBUTE.toLowerCase(),
 			RANGE_MAX.toLowerCase(), RANGE_MIN.toLowerCase(), READ_ONLY.toLowerCase(), REF_ENTITY.toLowerCase(),
 			VISIBLE.toLowerCase(), UNIQUE.toLowerCase(), TAGS.toLowerCase(), EXPRESSION.toLowerCase(),
-			VALIDATION_EXPRESSION.toLowerCase());
+			VALIDATION_EXPRESSION.toLowerCase(), DEFAULT_VALUE.toLowerCase());
 	static final String AUTO = "auto";
 
 	private final DataService dataService;
@@ -235,6 +236,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			String expression = attributeEntity.getString(EXPRESSION);
 			List<String> tagIds = attributeEntity.getList(TAGS);
 			String validationExpression = attributeEntity.getString(VALIDATION_EXPRESSION);
+			String defaultValue = attributeEntity.getString(DEFAULT_VALUE);
 
 			if (attributeNillable != null) attribute.setNillable(attributeNillable);
 
@@ -271,6 +273,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			if (unique != null) attribute.setUnique(unique);
 			if (expression != null) attribute.setExpression(expression);
 			if (validationExpression != null) attribute.setValidationExpression(validationExpression);
+			if (defaultValue != null) attribute.setDefaultValue(defaultValue);
 			attribute.setAuto(attributeIdAttribute != null && attributeIdAttribute.equalsIgnoreCase(AUTO));
 
 			if ((attributeIdAttribute != null) && !attributeIdAttribute.equalsIgnoreCase("true")

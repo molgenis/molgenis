@@ -1,5 +1,7 @@
 package org.molgenis.data.mysql;
 
+import static org.testng.Assert.assertEquals;
+
 import java.util.Arrays;
 
 import org.molgenis.MolgenisFieldTypes;
@@ -25,7 +27,7 @@ public class MysqlRepositoryCompoundTest extends MysqlRepositoryAbstractDatatype
 		rootMD.addAttribute("col1").setDataType(MolgenisFieldTypes.BOOL).setNillable(false);
 		rootMD.addAttribute("compound").setDataType(MolgenisFieldTypes.COMPOUND)
 				.setAttributesMetaData(Arrays.<AttributeMetaData> asList(attributePart));
-		rootMD.addAttribute("col3").setDataType(MolgenisFieldTypes.BOOL).setDefaultValue(true);
+		rootMD.addAttribute("col3").setDataType(MolgenisFieldTypes.BOOL);
 
 		return rootMD;
 	}
@@ -37,12 +39,21 @@ public class MysqlRepositoryCompoundTest extends MysqlRepositoryAbstractDatatype
 	}
 
 	@Override
-	public Entity defaultEntity()
+	public Entity createTestEntity()
 	{
 		Entity e = new MapEntity();
 		e.set("col1", false);
 		e.set("col2", false);
+		e.set("col3", true);
 		return e;
+	}
+
+	@Override
+	public void verifyTestEntity(Entity e)
+	{
+		assertEquals(e.getBoolean("col1"), Boolean.FALSE);
+		assertEquals(e.get("col2"), Boolean.FALSE);
+		assertEquals(e.get("col3"), Boolean.TRUE);
 	}
 
 	@Override

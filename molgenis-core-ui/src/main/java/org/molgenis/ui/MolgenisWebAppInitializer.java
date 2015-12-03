@@ -10,6 +10,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
 import org.molgenis.security.CorsFilter;
+import org.molgenis.ui.browserdetection.BrowserDetectionFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.ContextLoaderListener;
@@ -71,8 +72,13 @@ public class MolgenisWebAppInitializer
 		}
 
 		// add filters
+		Dynamic browserDetectionFiler = servletContext
+				.addFilter("browserDetectionFilter", BrowserDetectionFilter.class);
+		browserDetectionFiler.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, "*");
+
 		Dynamic etagFilter = servletContext.addFilter("etagFilter", ShallowEtagHeaderFilter.class);
 		etagFilter.addMappingForServletNames(EnumSet.of(DispatcherType.REQUEST), true, "dispatcher");
+
 		Dynamic corsFilter = servletContext.addFilter("corsFilter", CorsFilter.class);
 		corsFilter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/api/*");
 

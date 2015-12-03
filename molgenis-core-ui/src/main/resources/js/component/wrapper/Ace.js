@@ -86,6 +86,11 @@
 			var container = this.refs.editor.getDOMNode();
 			var editor = ace.edit(container);	
 			editor.setReadOnly(this.props.readOnly === true || this.props.disabled === true);
+			if(editor.getValue() !== this.state.value) {
+				// I THINK this always means the value got updated programmatically so we can safely update the editor's value
+				editor.setValue(this.state.value, 0);
+				editor.clearSelection();
+			}
 		},
 		_handleChange: function(value) {
 			// apply constraint: maximum number of characters allowed in input

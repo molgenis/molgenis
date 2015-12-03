@@ -12,7 +12,6 @@ import java.util.Iterator;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -23,9 +22,6 @@ public class GafListFileRepositoryTest
 {
 	@Autowired
 	private GafListFileImporterService gafListFileImporterService;
-
-	@Autowired
-	private MolgenisSettings molgenisSettings;
 
 	@Autowired
 	private DataService dataService;
@@ -101,12 +97,6 @@ public class GafListFileRepositoryTest
 		public DataService dataService()
 		{
 			return mock(DataService.class);
-		}
-
-		@Bean
-		public MolgenisSettings molgenisSettings()
-		{
-			return mock(MolgenisSettings.class);
 		}
 
 		@Bean

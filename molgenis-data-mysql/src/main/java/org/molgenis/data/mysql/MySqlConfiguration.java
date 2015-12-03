@@ -6,8 +6,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.elasticsearch.IndexedManageableRepositoryCollectionDecorator;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.importer.ImportServiceFactory;
-import org.molgenis.security.permission.PermissionSystemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,13 +19,10 @@ public class MySqlConfiguration
 	private DataService dataService;
 
 	@Autowired
+	private MySqlEntityFactory mySqlEntityFactory;
+
+	@Autowired
 	private DataSource dataSource;
-
-	@Autowired
-	private ImportServiceFactory importServiceFactory;
-
-	@Autowired
-	private PermissionSystemService permissionSystemService;
 
 	@Autowired
 	private SearchService searchService;
@@ -42,7 +37,7 @@ public class MySqlConfiguration
 	@Scope("prototype")
 	public MysqlRepository mysqlRepository()
 	{
-		return new MysqlRepository(dataService, dataSource, asyncJdbcTemplate());
+		return new MysqlRepository(dataService, mySqlEntityFactory, dataSource, asyncJdbcTemplate());
 	}
 
 	@Bean(name =

@@ -13,8 +13,7 @@
 	<div class="col-md-12">
 		<a href="${context_url}" class="btn btn-default btn-xs">
 			<span class="glyphicon glyphicon-chevron-left"></span> Back to mapping project overview
-		</a>
-		<hr></hr>	
+		</a>	
 	</div>
 </div>
 
@@ -37,6 +36,11 @@
 		<div class="row">
 			<div class="col-md-12">
 				<p class="bg-warning text-center pull-right algorithm-color-legend">Generated algorithms with low quality</p>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<p class="bg-danger text-center pull-right algorithm-color-legend">Algorithms to discuss</p>
 			</div>
 		</div>
 	</div>
@@ -92,6 +96,8 @@
 												class="bg-warning"
 											<#elseif attributeMapping.algorithmState == "CURATED">
 												class="bg-success"
+											<#elseif attributeMapping.algorithmState == "DISCUSS">
+												class="bg-danger"
 											</#if>
 										</#if>
 									</#if>>
@@ -147,7 +153,7 @@
 <div class="row">		
 	<#if mappingProject.getMappingTarget(selectedTarget).entityMappings?has_content>
 		<div class="col-md-8">		
-			<a id="add-new-attr-mapping-btn" href="#" class="btn btn-success pull-right" data-toggle="modal" data-target="#create-integrated-entity-modal">
+			<a id="create-integrated-entity-open-modal-btn" href="#" class="btn btn-success pull-right" data-toggle="modal" data-target="#create-integrated-entity-modal">
 				<span class="glyphicon glyphicon-play"></span> Create integrated dataset
 			</a>
 		</div>
@@ -166,7 +172,7 @@
         		<form id="create-new-source-form" method="post" action="${context_url}/addEntityMapping">	
 					<div class="form-group">
 	            		<label>Select a new source to map against the target attribute</label>
-  						<select name="source" class="form-control" required="required" placeholder="Select a target entity">
+  						<select name="source" id="source-entity-select" class="form-control" required="required" placeholder="Select source entity">
 	    					<#list entityMetaDatas as entityMetaData>
     							<option value="${entityMetaData.name?html}">${entityMetaData.name?html}</option>
 	    					</#list>

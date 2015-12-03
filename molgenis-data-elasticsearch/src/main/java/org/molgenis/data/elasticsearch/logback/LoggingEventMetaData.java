@@ -1,6 +1,7 @@
 package org.molgenis.data.elasticsearch.logback;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +21,7 @@ public class LoggingEventMetaData extends DefaultEntityMetaData
 	private LoggingEventMetaData()
 	{
 		super(ENTITY_NAME);
+		setBackend(ElasticsearchRepositoryCollection.NAME);
 		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false).setVisible(false);
 		addAttribute(TIMESTAMP).setDataType(MolgenisFieldTypes.DATETIME);
 		addAttribute(THREAD);

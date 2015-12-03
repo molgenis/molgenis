@@ -89,7 +89,7 @@
     <#assign dataType=attribute.dataType.enumType>
 	<tr id="attribute-${entity.name?replace(" ", "_")?html}${attribute.name?replace(" ", "_")?html}">
         <td><#list depth as lvl>&nbsp;</#list>${attribute.label?html}<#if attribute.idAtrribute> <em>(id attribute)</em></#if><#if attribute.labelAttribute> <em>(label attribute)</em></#if><#if attribute.lookupAttribute> <em>(lookup attribute)</em></#if></td>
-    	<td><#if attribute.defaultValue?has_content><#if dataType == "BOOL">${attribute.defaultValue?string("true", "false")}<#else>${attribute.defaultValue?html}</#if></#if></td>
+    	<td><#if attribute.defaultValue?has_content>${attribute.defaultValue?html}</#if></td>
     	<td>${dataType?html}<#if dataType == "CATEGORICAL" || dataType == "CATEGORICAL_MREF" || dataType == "MREF" || dataType == "XREF"> (<a href="#entity-${attribute.refEntity.name?replace(" ", "_")?html}">${attribute.refEntity.label?html}</a>)</#if></td>
     	<td>
     	    <#assign constraints = []>

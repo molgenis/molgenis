@@ -1,5 +1,7 @@
 package org.molgenis.data.mysql;
 
+import static org.testng.Assert.assertEquals;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
@@ -14,12 +16,11 @@ public class MysqlRepositoryBoolTest extends MysqlRepositoryAbstractDatatypeTest
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EditableEntityMetaData varcharMD = new DefaultEntityMetaData("BoolTest")
-				.setLabel("Bool Test");
+		EditableEntityMetaData varcharMD = new DefaultEntityMetaData("BoolTest").setLabel("Bool Test");
 		varcharMD.setIdAttribute("col1");
 		varcharMD.addAttribute("col1").setDataType(MolgenisFieldTypes.BOOL).setNillable(false);
 		varcharMD.addAttribute("col2").setDataType(MolgenisFieldTypes.BOOL);
-		varcharMD.addAttribute("col3").setDataType(MolgenisFieldTypes.BOOL).setDefaultValue(true);
+		varcharMD.addAttribute("col3").setDataType(MolgenisFieldTypes.BOOL);
 		return varcharMD;
 	}
 
@@ -30,11 +31,12 @@ public class MysqlRepositoryBoolTest extends MysqlRepositoryAbstractDatatypeTest
 	}
 
 	@Override
-	public Entity defaultEntity()
+	public Entity createTestEntity()
 	{
 		Entity e = new MapEntity();
 		e.set("col1", false);
 		e.set("col2", false);
+		e.set("col3", true);
 		return e;
 	}
 
@@ -43,5 +45,13 @@ public class MysqlRepositoryBoolTest extends MysqlRepositoryAbstractDatatypeTest
 	public void test() throws Exception
 	{
 		super.test();
+	}
+
+	@Override
+	public void verifyTestEntity(Entity e)
+	{
+		assertEquals(e.getBoolean("col1"), Boolean.FALSE);
+		assertEquals(e.get("col2"), Boolean.FALSE);
+		assertEquals(e.get("col3"), Boolean.TRUE);
 	}
 }

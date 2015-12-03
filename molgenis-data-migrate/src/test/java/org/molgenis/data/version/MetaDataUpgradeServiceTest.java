@@ -6,12 +6,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.molgenis.framework.MolgenisUpgrade;
+import org.molgenis.migrate.version.MolgenisUpgradeServiceImpl;
+import org.molgenis.migrate.version.MolgenisVersionService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class MetaDataUpgradeServiceTest
 {
-	private MolgenisUpgradeService metaDataUpgradeService;
+	private MolgenisUpgradeServiceImpl metaDataUpgradeService;
 	private MolgenisVersionService metaDataVersionService;
 	private MolgenisUpgrade upgradeFrom0;
 
@@ -19,7 +22,7 @@ public class MetaDataUpgradeServiceTest
 	public void beforeMethod()
 	{
 		metaDataVersionService = mock(MolgenisVersionService.class);
-		metaDataUpgradeService = new MolgenisUpgradeService(metaDataVersionService);
+		metaDataUpgradeService = new MolgenisUpgradeServiceImpl(metaDataVersionService);
 		upgradeFrom0 = mock(MolgenisUpgrade.class);
 		when(upgradeFrom0.getFromVersion()).thenReturn(0);
 		metaDataUpgradeService.addUpgrade(upgradeFrom0);
@@ -28,8 +31,8 @@ public class MetaDataUpgradeServiceTest
 	@Test
 	public void upgradeNotNeeded()
 	{
-		when(metaDataVersionService.getMolgenisVersionFromServerProperties()).thenReturn(
-				MolgenisVersionService.CURRENT_VERSION);
+		when(metaDataVersionService.getMolgenisVersionFromServerProperties())
+				.thenReturn(MolgenisVersionService.CURRENT_VERSION);
 		metaDataUpgradeService.upgrade();
 		verify(metaDataVersionService, never()).updateToCurrentVersion();
 		verify(upgradeFrom0, never()).upgrade();

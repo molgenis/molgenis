@@ -2,10 +2,13 @@ package org.molgenis.data;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -108,4 +111,72 @@ public class DataServiceImplTest
 		dataService.removeRepository("Entity4");
 	}
 
+	@Test
+	public void findAllStringIterableFetch()
+	{
+		Iterable<Object> ids = Arrays.asList(0);
+		Fetch fetch = new Fetch();
+		Iterable<Entity> entities = Arrays.asList(mock(Entity.class));
+		when(repo1.findAll(ids, fetch)).thenReturn(entities);
+		assertEquals(dataService.findAll("Entity1", ids, fetch), entities);
+		verify(repo1, times(1)).findAll(ids, fetch);
+	}
+
+	@Test
+	public void findOneStringObjectFetch()
+	{
+		Object id = Integer.valueOf(0);
+		Fetch fetch = new Fetch();
+		Entity entity = mock(Entity.class);
+		when(repo1.findOne(id, fetch)).thenReturn(entity);
+		assertEquals(dataService.findOne("Entity1", id, fetch), entity);
+		verify(repo1, times(1)).findOne(id, fetch);
+	}
+
+	@Test
+	public void findOneStringObjectFetchEntityNull()
+	{
+		Object id = Integer.valueOf(0);
+		Fetch fetch = new Fetch();
+		when(repo1.findOne(id, fetch)).thenReturn(null);
+		assertNull(dataService.findOne("Entity1", id, fetch));
+		verify(repo1, times(1)).findOne(id, fetch);
+	}
+
+	@Test
+	public void findAllStringIterableFetchClass()
+	{
+		Iterable<Object> ids = Arrays.asList(0);
+		Fetch fetch = new Fetch();
+		Class<Entity> clazz = Entity.class;
+		Iterable<Entity> entities = Arrays.asList(mock(Entity.class));
+		when(repo1.findAll(ids, fetch)).thenReturn(entities);
+		// how to check return value? converting iterable can't be mocked.
+		dataService.findAll("Entity1", ids, fetch, clazz);
+		verify(repo1, times(1)).findAll(ids, fetch);
+	}
+
+	@Test
+	public void findOneStringObjectFetchClass()
+	{
+		Object id = Integer.valueOf(0);
+		Fetch fetch = new Fetch();
+		Class<Entity> clazz = Entity.class;
+		Entity entity = mock(Entity.class);
+		when(repo1.findOne(id, fetch)).thenReturn(entity);
+		// how to check return value? converting iterable can't be mocked.
+		dataService.findOne("Entity1", id, fetch, clazz);
+		verify(repo1, times(1)).findOne(id, fetch);
+	}
+
+	@Test
+	public void findOneStringObjectFetchClassEntityNull()
+	{
+		Object id = Integer.valueOf(0);
+		Fetch fetch = new Fetch();
+		Class<Entity> clazz = Entity.class;
+		when(repo1.findOne(id, fetch)).thenReturn(null);
+		assertNull(dataService.findOne("Entity1", id, fetch, clazz));
+		verify(repo1, times(1)).findOne(id, fetch);
+	}
 }

@@ -20,6 +20,14 @@ public interface MolgenisUserService
 	MolgenisUser getUser(String username);
 
 	/**
+	 * Find a user by it's email.
+	 * 
+	 * @param email
+	 * @return the user or null if not found
+	 */
+	MolgenisUser getUserByEmail(String email);
+
+	/**
 	 * Returns the groups that the given user belongs to
 	 * 
 	 * @param username

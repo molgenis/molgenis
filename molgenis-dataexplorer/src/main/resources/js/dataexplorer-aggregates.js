@@ -19,8 +19,7 @@
 	self.updateAggregatesTable = updateAggregatesTable;
 	
 	var restApi = new molgenis.RestClient();
-
-	var totalTemplate, missingTemplate, messageTemplate;
+	var restApiV2 = new molgenis.RestClientV2();
 	
 	/**
 	 * @memberOf molgenis.dataexplorer.aggregates
@@ -41,15 +40,15 @@
 			createAttributeDropdown($('#x-aggr-div'), aggregableAttributes, 'x-aggr-attribute', aggregableAttributes[0], true);
 			createAttributeDropdown($('#y-aggr-div'), aggregableAttributes, 'y-aggr-attribute', aggregableAttributes.length > 1 ? aggregableAttributes[1] : false);
 			$('#distinct-attr-select').empty();
-			if( molgenis.dataexplorer.settings && (molgenis.dataexplorer.settings['mod.aggregates.distinct.hide']==='true') ){
+			if (molgenis.dataexplorer.settings['agg_distinct'] === false){
 				$('#distinct-attr').hide();
 			} else {
 				$('#distinct-attr').show();
-				if( molgenis.dataexplorer.settings && 
-						molgenis.dataexplorer.settings.hasOwnProperty('mod.aggregates.distinct.override.'+getEntity().name)) {
+				if (molgenis.dataexplorer.settings['agg_distinct_overrides'] && JSON.parse(molgenis.dataexplorer.settings['agg_distinct_overrides'])[getEntity().name]) {
 					// show fixed value for this entity
-					$('#distinct-attr-select').append($('<p>').addClass('form-control-static')
-							.text(molgenis.dataexplorer.settings['mod.aggregates.distinct.override.'+getEntity().name]));
+					var distinctAttr = JSON.parse(molgenis.dataexplorer.settings['agg_distinct_overrides'])[getEntity().name];
+					var distinctAttrLabel = getEntity().attributes[distinctAttr].label;
+					$('#distinct-attr-select').append($('<p>').addClass('form-control-static').text(distinctAttrLabel));
 				} else {
 					var distinctAttributes = $.grep(attributes, function(attribute) {
 						// see: https://github.com/molgenis/molgenis/issues/1938
@@ -96,111 +95,17 @@
 	 * @memberOf molgenis.dataexplorer.aggregates
 	 */
 	function updateAggregatesTable(xAttributeName, yAttributeName, distinctAttributeName) {
-		if (!xAttributeName && !yAttributeName) {
-			$('#aggregate-table-container').html('');
-			return;
+		if($('#aggregate-table-container').length > 0) {
+			React.unmountComponentAtNode($('#aggregate-table-container')[0]);
 		}
 		
-		var data = {
-			'entityName': getEntity().name,
-			'xAxisAttributeName': xAttributeName,
-			'yAxisAttributeName': yAttributeName,
-			'distinctAttributeName': distinctAttributeName,
-			'q': getEntityQuery()
-		};
-		$.ajax({
-			type : 'POST',
-			url : molgenis.getContextUrl() + '/aggregate',
-			data : JSON.stringify(data),
-			contentType : 'application/json',
-			success : function(aggregateResult) {
-				var countAboveZero = false;
-                var items = ['<table class="table table-striped" >'];
-				items.push('<tr>');
-				items.push('<td style="width: 18%"></td>');
-
-				$.each(aggregateResult.yLabels, function(index, label){
-					items.push('<th><div class="text-center">' + (label === null ? missingTemplate({}) : htmlEscape(label)) + '</div></th>');
-				});
-				items.push('<th><div class="text-center">' + totalTemplate({}) + '</div></th></tr>');
-
-				var columnCounts = [];
-				$.each(aggregateResult.matrix, function(index, row) {
-					items.push('<tr>');
-					var label = aggregateResult.xLabels[index];
-					items.push('<th>' + (label === null ? missingTemplate({}) : htmlEscape(label)) + '</th>');
-
-					var rowCount = 0;
-					var rowCountIsAnonimized = false;
-					$.each(row, function(index, count) {
-                        if(!countAboveZero) {
-                            countAboveZero = count > 0 || count == -1;
-                        }
-						if (!columnCounts[index]) {
-							columnCounts[index] = {count: 0, anonymized: false};
-						}
-                        if (count == AGGREGATE_ANONYMIZATION_VALUE) {
-                            rowCountIsAnonimized = true;
-                            rowCount += aggregateResult.anonymizationThreshold;
-                            columnCounts[index].count += aggregateResult.anonymizationThreshold;
-                            columnCounts[index].anonymized = true;
-                        } else {
-                            rowCount += count;
-                            columnCounts[index].count += count;
-                        }
-
-                        if(yAttributeName!==undefined&&yAttributeName!=="") {
-                            items.push('<td><div class="text-center">');
-                            if (count == AGGREGATE_ANONYMIZATION_VALUE) {
-                                items.push('&le;' + aggregateResult.anonymizationThreshold);
-                            } else {
-                                items.push(count);
-                            }
-                            items.push('</div></td>');
-                        }
-					});
-
-					items.push('<td><div class="text-center">');
-					if (rowCountIsAnonimized) {
-						items.push('&le;');
-					}
-					items.push(rowCount + '</div></td>');
-					items.push('</tr>');
-				});
-				
-				items.push('<tr>');
-				items.push('<th>' + totalTemplate({}) + '</th>');
-				
-				var grandTotal = {count: 0, anonymized: false};
-				$.each(columnCounts, function(){
-					items.push('<td><div class="text-center">');
-					if (this.anonymized) {
-						items.push('&le;');
-						grandTotal.anonymized = true;
-					}
-					
-					grandTotal.count += this.count;
-					items.push(this.count);
-					items.push('</div></td>');
-				});
-
-                if(yAttributeName!==undefined&&yAttributeName!=="") {
-                    items.push('<td><div class="text-center">');
-                    if (grandTotal.anonymized) items.push('&le;');
-                    items.push(grandTotal.count);
-                    items.push('</div></td>');
-                }
-				
-				items.push('</tr>');
-				
-				items.push('</table>');
-				if(!countAboveZero){
-                    items.length = 0;
-                    items.push(messageTemplate({}));
-                }
-				$('#aggregate-table-container').html(items.join(''));
-			}
-		});
+		React.render(molgenis.ui.AggregateTable({
+			entity : getEntity().name,
+			x: xAttributeName,
+			y: yAttributeName,
+			distinct: distinctAttributeName,
+			query: getEntityQuery()
+		}), $('#aggregate-table-container')[0]);
 	}
 	
 	/**
@@ -238,11 +143,7 @@
 		return molgenis.dataexplorer.getEntityQuery().q;
 	}
 	
-	$(function() {
-		totalTemplate = Handlebars.compile($("#aggregates-total-template").html());
-		missingTemplate = Handlebars.compile($("#aggregates-missing-template").html());
-		messageTemplate = Handlebars.compile($("#aggregates-no-result-message-template").html());
-		
+	$(function() {		
 		// bind event handlers with namespace
 		$(document).on('changeAttributeSelection.aggregates', function(e, data) {
 			molgenis.dataexplorer.aggregates.createAggregatesTable();

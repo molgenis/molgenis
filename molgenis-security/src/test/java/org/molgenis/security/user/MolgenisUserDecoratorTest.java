@@ -6,11 +6,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.auth.UserAuthorityRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.ApplicationContextProvider;
@@ -68,5 +71,23 @@ public class MolgenisUserDecoratorTest
 		verify(passwordEncoder).encode(password);
 		verify(decoratedRepository).add(entity);
 		verify(userAuthorityRepository, times(1)).add(any(UserAuthority.class));
+	}
+
+	@Test
+	public void findAllIterableFetch()
+	{
+		Iterable<Object> ids = Arrays.<Object> asList(Integer.valueOf(0), Integer.valueOf(1));
+		Fetch fetch = new Fetch();
+		molgenisUserDecorator.findAll(ids, fetch);
+		verify(decoratedRepository, times(1)).findAll(ids, fetch);
+	}
+
+	@Test
+	public void findOneObjectFetch()
+	{
+		Object id = Integer.valueOf(0);
+		Fetch fetch = new Fetch();
+		molgenisUserDecorator.findOne(id, fetch);
+		verify(decoratedRepository, times(1)).findOne(id, fetch);
 	}
 }

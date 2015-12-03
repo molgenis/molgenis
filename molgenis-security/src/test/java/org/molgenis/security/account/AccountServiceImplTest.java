@@ -23,8 +23,8 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,43 +40,6 @@ import org.testng.annotations.Test;
 @ContextConfiguration
 public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 {
-	@Configuration
-	static class Config
-	{
-		@Bean
-		public AccountService accountService()
-		{
-			return new AccountServiceImpl();
-		}
-
-		@Bean
-		public DataService dataService()
-		{
-			return mock(DataService.class);
-		}
-
-		@Bean
-		public MolgenisSettings molgenisSettings()
-		{
-
-			MolgenisSettings molgenisSettings = mock(MolgenisSettings.class);
-			when(molgenisSettings.getProperty("plugin.auth.activation_mode")).thenReturn("user");
-			return molgenisSettings;
-		}
-
-		@Bean
-		public JavaMailSender mailSender()
-		{
-			return mock(JavaMailSender.class);
-		}
-
-		@Bean
-		public MolgenisUserService molgenisUserService()
-		{
-			return mock(MolgenisUserService.class);
-		}
-	}
-
 	@Autowired
 	private AccountService accountService;
 
@@ -86,10 +49,14 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private JavaMailSender javaMailSender;
 
+	@Autowired
+	private AppSettings appSettings;
+
 	@BeforeMethod
 	public void setUp()
 	{
 		reset(dataService);
+		when(appSettings.getSignUpModeration()).thenReturn(false);
 
 		MolgenisGroup allUsersGroup = mock(MolgenisGroup.class);
 		when(
@@ -136,7 +103,7 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void createUser() throws URISyntaxException
+	public void createUser() throws URISyntaxException, UsernameAlreadyExistsException, EmailAlreadyExistsException
 	{
 		MolgenisUser molgenisUser = new MolgenisUser();
 		molgenisUser.setEmail("user@molgenis.org");
@@ -193,5 +160,39 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 
 		verify(dataService).update(MolgenisUser.ENTITY_NAME, user);
 		assertNotEquals(user.getPassword(), "oldpass");
+	}
+
+	@Configuration
+	static class Config
+	{
+		@Bean
+		public AccountService accountService()
+		{
+			return new AccountServiceImpl(dataService(), mailSender(), molgenisUserService(), appSettings());
+		}
+
+		@Bean
+		public DataService dataService()
+		{
+			return mock(DataService.class);
+		}
+
+		@Bean
+		public AppSettings appSettings()
+		{
+			return mock(AppSettings.class);
+		}
+
+		@Bean
+		public JavaMailSender mailSender()
+		{
+			return mock(JavaMailSender.class);
+		}
+
+		@Bean
+		public MolgenisUserService molgenisUserService()
+		{
+			return mock(MolgenisUserService.class);
+		}
 	}
 }

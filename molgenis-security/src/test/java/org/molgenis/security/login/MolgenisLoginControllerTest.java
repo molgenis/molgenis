@@ -6,8 +6,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.login.MolgenisLoginControllerTest.Config;
+import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.ResourceFingerprintRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +24,15 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @WebAppConfiguration
-@ContextConfiguration(classes = Config.class)
+@ContextConfiguration(classes =
+{ Config.class, GsonConfig.class })
 public class MolgenisLoginControllerTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
 	private MolgenisLoginController molgenisLoginController;
+
+	@Autowired
+	private GsonHttpMessageConverter gsonHttpMessageConverter;
 
 	private MockMvc mockMvc;
 
@@ -35,7 +40,7 @@ public class MolgenisLoginControllerTest extends AbstractTestNGSpringContextTest
 	public void setUp()
 	{
 		mockMvc = MockMvcBuilders.standaloneSetup(molgenisLoginController)
-				.setMessageConverters(new GsonHttpMessageConverter()).build();
+				.setMessageConverters(gsonHttpMessageConverter).build();
 	}
 
 	@Test
@@ -57,7 +62,7 @@ public class MolgenisLoginControllerTest extends AbstractTestNGSpringContextTest
 		@Bean
 		public MolgenisLoginController molgenisLoginController()
 		{
-			return new MolgenisLoginController(resourceFingerprintRegistry());
+			return new MolgenisLoginController(resourceFingerprintRegistry(), appSettings());
 		}
 
 		@Bean
@@ -67,10 +72,9 @@ public class MolgenisLoginControllerTest extends AbstractTestNGSpringContextTest
 		}
 
 		@Bean
-		public MolgenisSettings molgenisSettings()
+		public AppSettings appSettings()
 		{
-			return mock(MolgenisSettings.class);
+			return mock(AppSettings.class);
 		}
-
 	}
 }

@@ -68,7 +68,7 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 		dataSource.setUser(dbUser);
 		dataSource.setPassword(dbPassword);
 		dataSource.setMinPoolSize(5);
-		dataSource.setMaxPoolSize(200);
+		dataSource.setMaxPoolSize(150);
 		dataSource.setTestConnectionOnCheckin(true);
 		dataSource.setIdleConnectionTestPeriod(120);
 		return dataSource;

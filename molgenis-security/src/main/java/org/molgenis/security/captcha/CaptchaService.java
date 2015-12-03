@@ -53,21 +53,8 @@ public class CaptchaService
 		return captcha.isCorrect(captchaAnswer);
 	}
 
-	/**
-	 * Validates and consumes a captcha. Validates the answer and removes the captcha from the user's session if the
-	 * answer was correct. A captcha can be consumed only once.
-	 * 
-	 * @returns boolean indicating if answer is correct and the captcha was consumed
-	 * @throws CaptchaException
-	 *             if no captcha found to consume
-	 */
-	public boolean consumeCaptcha(String captchaAnswer) throws CaptchaException
+	public void removeCaptcha()
 	{
-		if (!validateCaptcha(captchaAnswer))
-		{
-			return false;
-		}
 		session.removeAttribute(Captcha.NAME);
-		return true;
 	}
 }

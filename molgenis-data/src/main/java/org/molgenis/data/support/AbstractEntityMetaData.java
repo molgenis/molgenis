@@ -1,6 +1,9 @@
 package org.molgenis.data.support;
 
+import static java.util.stream.StreamSupport.stream;
+
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
@@ -116,7 +119,7 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			}
 
 			@Override
-			public Object getDefaultValue()
+			public String getDefaultValue()
 			{
 				throw new UnsupportedOperationException();
 			}
@@ -131,6 +134,12 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			public Iterable<AttributeMetaData> getAttributeParts()
 			{
 				return getAttributes();
+			}
+
+			@Override
+			public AttributeMetaData getAttributePart(String attrName)
+			{
+				throw new UnsupportedOperationException();
 			}
 
 			@Override
@@ -196,6 +205,20 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 		});
 	}
 
+	@Override
+	public Iterable<String> getAtomicAttributeNames()
+	{
+		return new Iterable<String>()
+		{
+			@Override
+			public Iterator<String> iterator()
+			{
+				Iterable<AttributeMetaData> attrs = getAtomicAttributes();
+				return stream(attrs.spliterator(), false).map(AttributeMetaData::getName).iterator();
+			}
+		};
+	}
+
 	/**
 	 * Gets the fully qualified name of this EntityMetaData.
 	 */
@@ -222,8 +245,10 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 		if (idAttribute != null)
 		{
 			AttributeMetaData att = getAttribute(idAttribute);
-			if (att == null) throw new RuntimeException(getName() + ".getIdAttribute() failed: '" + idAttribute
-					+ "' unknown");
+			if (att == null)
+			{
+				throw new RuntimeException(getName() + ".getIdAttribute() failed: '" + idAttribute + "' unknown");
+			}
 			idAttributeMetaData = att;
 		}
 		if (idAttributeMetaData == null)
@@ -237,7 +262,7 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 				}
 			}
 
-			if (getExtends() != null)
+			if (idAttributeMetaData == null && getExtends() != null)
 			{
 				idAttributeMetaData = getExtends().getIdAttribute();
 			}
@@ -262,8 +287,10 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 		if (labelAttribute != null)
 		{
 			AttributeMetaData att = getAttribute(labelAttribute);
-			if (att == null) throw new MolgenisDataException("getLabelAttribute() failed: '" + labelAttribute
-					+ "' unknown");
+			if (att == null)
+			{
+				throw new MolgenisDataException("getLabelAttribute() failed: '" + labelAttribute + "' unknown");
+			}
 
 			return att;
 		}

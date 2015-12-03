@@ -21,7 +21,6 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
@@ -135,7 +134,6 @@ public class ResourcesTest extends AbstractTestNGSpringContextTests
 		assertEquals(resources.findAll("blah", q), Arrays.asList(e1));
 	}
 
-	@Configuration
 	public static class Config
 	{
 		@Bean
@@ -157,7 +155,5 @@ public class ResourcesTest extends AbstractTestNGSpringContextTests
 		{
 			return new ResourcesImpl();
 		}
-
 	}
-
 }

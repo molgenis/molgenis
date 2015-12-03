@@ -1,5 +1,7 @@
 package org.molgenis.data;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
@@ -24,8 +26,8 @@ public class AutoValueRepositoryDecorator implements Repository
 
 	public AutoValueRepositoryDecorator(Repository decoratedRepository, IdGenerator idGenerator)
 	{
-		this.decoratedRepository = decoratedRepository;
-		this.idGenerator = idGenerator;
+		this.decoratedRepository = requireNonNull(decoratedRepository);
+		this.idGenerator = requireNonNull(idGenerator);
 	}
 
 	@Override
@@ -137,9 +139,21 @@ public class AutoValueRepositoryDecorator implements Repository
 	}
 
 	@Override
+	public Entity findOne(Object id, Fetch fetch)
+	{
+		return decoratedRepository.findOne(id, fetch);
+	}
+
+	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
 		return decoratedRepository.findAll(ids);
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
+	{
+		return decoratedRepository.findAll(ids, fetch);
 	}
 
 	@Override
@@ -244,5 +258,35 @@ public class AutoValueRepositoryDecorator implements Repository
 
 			}
 		}
+	}
+
+	@Override
+	public void create()
+	{
+		decoratedRepository.create();
+	}
+
+	@Override
+	public void drop()
+	{
+		decoratedRepository.drop();
+	}
+
+	@Override
+	public void rebuildIndex()
+	{
+		decoratedRepository.rebuildIndex();
+	}
+
+	@Override
+	public void addEntityListener(EntityListener entityListener)
+	{
+		decoratedRepository.addEntityListener(entityListener);
+	}
+
+	@Override
+	public void removeEntityListener(EntityListener entityListener)
+	{
+		decoratedRepository.removeEntityListener(entityListener);
 	}
 }

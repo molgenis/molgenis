@@ -6,9 +6,7 @@ import java.util.List;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
-import org.springframework.stereotype.Component;
 
-@Component
 public class MolgenisTransactionLogEntryMetaData extends DefaultEntityMetaData
 {
 	public static final String ENTITY_NAME = "MolgenisTransactionLogEntry";
@@ -18,14 +16,13 @@ public class MolgenisTransactionLogEntryMetaData extends DefaultEntityMetaData
 	public static final String ENTITY = "entity";
 	public static final String TYPE = "type";
 
-	public static final MolgenisTransactionLogEntryMetaData INSTANCE = new MolgenisTransactionLogEntryMetaData();
-
-	private MolgenisTransactionLogEntryMetaData()
+	MolgenisTransactionLogEntryMetaData(MolgenisTransactionLogMetaData molgenisTransactionLogMetaData, String backend)
 	{
 		super(ENTITY_NAME);
+		setBackend(backend);
 		addAttribute(ID).setIdAttribute(true).setAuto(true).setNillable(false).setVisible(false);
 		addAttribute(MOLGENIS_TRANSACTION_LOG).setDataType(MolgenisFieldTypes.XREF).setRefEntity(
-				MolgenisTransactionLogMetaData.INSTANCE);
+				molgenisTransactionLogMetaData);
 		addAttribute(ENTITY).setNillable(false);
 		addAttribute(TYPE).setDataType(new EnumField()).setEnumOptions(Type.getOptions()).setNillable(false);
 	}

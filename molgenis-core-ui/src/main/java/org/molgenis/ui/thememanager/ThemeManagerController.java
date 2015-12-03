@@ -5,7 +5,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 import javax.validation.Valid;
 
-import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.style.StyleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;

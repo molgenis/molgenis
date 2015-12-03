@@ -15,6 +15,8 @@
  */
 package org.molgenis.util;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -24,7 +26,6 @@ import java.lang.reflect.Type;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
-import org.molgenis.gson.AutoValueTypeAdapterFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpInputMessage;
@@ -36,7 +37,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
@@ -59,32 +59,6 @@ public class GsonHttpMessageConverter extends BaseHttpMessageConverter<Object>
 	private boolean prefixJson = false;
 
 	/**
-	 * Construct a new {@code GsonHttpMessageConverter} with a default {@link Gson#Gson() Gson}.
-	 */
-	public GsonHttpMessageConverter()
-	{
-		this(false);
-	}
-
-	/**
-	 * Construct a new {@code GsonHttpMessageConverter} with a default {@link Gson#Gson() Gson}.
-	 */
-	public GsonHttpMessageConverter(boolean prettyPrinting)
-	{
-		super(MediaType.APPLICATION_JSON, APPLICATION_JAVASCRIPT);
-
-		GsonBuilder builder = new GsonBuilder().setDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME)
-				.disableHtmlEscaping();
-		if (prettyPrinting)
-		{
-			builder = builder.setPrettyPrinting();
-		}
-
-		builder.registerTypeAdapterFactory(new AutoValueTypeAdapterFactory());
-		gson = builder.create();
-	}
-
-	/**
 	 * Construct a new {@code GsonHttpMessageConverter}.
 	 * 
 	 * @param gson
@@ -93,7 +67,7 @@ public class GsonHttpMessageConverter extends BaseHttpMessageConverter<Object>
 	public GsonHttpMessageConverter(Gson gson)
 	{
 		super(MediaType.APPLICATION_JSON, APPLICATION_JAVASCRIPT);
-		this.gson = gson;
+		this.gson = requireNonNull(gson);
 	}
 
 	public void setType(Type type)
@@ -104,11 +78,6 @@ public class GsonHttpMessageConverter extends BaseHttpMessageConverter<Object>
 	public Type getType()
 	{
 		return type;
-	}
-
-	public Gson getGson()
-	{
-		return gson;
 	}
 
 	/**
@@ -144,8 +113,8 @@ public class GsonHttpMessageConverter extends BaseHttpMessageConverter<Object>
 	}
 
 	@Override
-	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage) throws IOException,
-			HttpMessageNotReadableException
+	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage)
+			throws IOException, HttpMessageNotReadableException
 	{
 		Reader json = new InputStreamReader(inputMessage.getBody(), getCharset(inputMessage.getHeaders()));
 		try
@@ -192,8 +161,8 @@ public class GsonHttpMessageConverter extends BaseHttpMessageConverter<Object>
 	}
 
 	@Override
-	protected void writeInternal(Object o, HttpOutputMessage outputMessage) throws IOException,
-			HttpMessageNotWritableException
+	protected void writeInternal(Object o, HttpOutputMessage outputMessage)
+			throws IOException, HttpMessageNotWritableException
 	{
 
 		OutputStreamWriter writer = new OutputStreamWriter(outputMessage.getBody(),

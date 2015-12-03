@@ -29,7 +29,7 @@ public class MysqlRepositoryTextTest extends MysqlRepositoryAbstractDatatypeTest
 	}
 
 	@Override
-	public Entity defaultEntity()
+	public Entity createTestEntity()
 	{
 		Entity e = new MapEntity();
 		e.set("col1", "lorem");

@@ -85,7 +85,7 @@ public class JDBCMetaDatabase extends Model
 			${name(entity)}_${name(field)}_field.setEnumOptions(${name(entity)}_${name(field)}_field_enumoptions);
 							</#if>
 							<#if field.defaultValue != ''>
-			${name(entity)}_${name(field)}_field.setDevaultValue("${field.defaultValue}");
+			${name(entity)}_${name(field)}_field.setDefaultValue("${field.defaultValue}");
 							</#if>
 							<#if field.description != ''>
 			${name(entity)}_${name(field)}_field.setDescription("${field.description?j_string}");

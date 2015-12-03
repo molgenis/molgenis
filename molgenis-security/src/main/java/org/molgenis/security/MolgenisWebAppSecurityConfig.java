@@ -14,13 +14,14 @@ import org.molgenis.data.DataService;
 import org.molgenis.security.account.AccountController;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.MolgenisPermissionServiceImpl;
+import org.molgenis.security.session.ApiSessionExpirationFilter;
 import org.molgenis.security.token.DataServiceTokenService;
 import org.molgenis.security.token.TokenAuthenticationFilter;
 import org.molgenis.security.token.TokenAuthenticationProvider;
 import org.molgenis.security.token.TokenGenerator;
-import org.molgenis.security.token.TokenService;
 import org.molgenis.security.user.MolgenisUserDetailsChecker;
 import org.molgenis.security.user.MolgenisUserDetailsService;
 import org.molgenis.security.user.MolgenisUserService;
@@ -48,6 +49,7 @@ import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.authentication.switchuser.SwitchUserFilter;
 import org.springframework.security.web.header.writers.CacheControlHeadersWriter;
 import org.springframework.security.web.header.writers.DelegatingRequestMatcherHeaderWriter;
@@ -87,8 +89,10 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		http.addFilterBefore(anonymousAuthFilter(), AnonymousAuthenticationFilter.class);
 		http.authenticationProvider(anonymousAuthenticationProvider());
 
-		http.addFilterBefore(tokenAuthenticationFilter(), MolgenisAnonymousAuthenticationFilter.class);
+		http.addFilterBefore(apiSessionExpirationFilter(), MolgenisAnonymousAuthenticationFilter.class);
 		http.authenticationProvider(tokenAuthenticationProvider());
+
+		http.addFilterBefore(tokenAuthenticationFilter(), ApiSessionExpirationFilter.class);
 
 		http.addFilterAfter(changePasswordFilter(), SwitchUserFilter.class);
 
@@ -96,51 +100,100 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 				.authorizeRequests();
 		configureUrlAuthorization(expressionInterceptUrlRegistry);
 
-		expressionInterceptUrlRegistry.antMatchers("/login").permitAll()
+		expressionInterceptUrlRegistry
+				.antMatchers("/login")
+				.permitAll()
 
-		.antMatchers("/logo/**").permitAll()
+				.antMatchers("/logo/**")
+				.permitAll()
 
-		.antMatchers("/molgenis.R").permitAll()
+				.antMatchers("/molgenis.R")
+				.permitAll()
 
-		.antMatchers(AccountController.CHANGE_PASSWORD_URI).authenticated()
+				.antMatchers("/molgenis.py")
+				.permitAll()
 
-		.antMatchers("/account/**").permitAll()
+				.antMatchers(AccountController.CHANGE_PASSWORD_URI)
+				.authenticated()
 
-		.antMatchers(PATTERN_CSS).permitAll()
+				.antMatchers("/account/**")
+				.permitAll()
 
-		.antMatchers(PATTERN_IMG).permitAll()
+				.antMatchers(PATTERN_CSS)
+				.permitAll()
 
-		.antMatchers(PATTERN_JS).permitAll()
+				.antMatchers(PATTERN_IMG)
+				.permitAll()
 
-		.antMatchers(PATTERN_FONTS).permitAll()
+				.antMatchers(PATTERN_JS)
+				.permitAll()
 
-		.antMatchers("/html/**").permitAll()
+				.antMatchers(PATTERN_FONTS)
+				.permitAll()
 
-		.antMatchers("/plugin/void/**").permitAll()
+				.antMatchers("/html/**")
+				.permitAll()
 
-		.antMatchers("/api/**").permitAll()
+				.antMatchers("/plugin/void/**")
+				.permitAll()
 
-		.antMatchers("/search").permitAll()
+				.antMatchers("/api/**")
+				.permitAll()
 
-		.antMatchers("/captcha").permitAll()
+				.antMatchers("/search")
+				.permitAll()
 
-		.antMatchers("/dataindexerstatus").authenticated()
+				.antMatchers("/captcha")
+				.permitAll()
 
-		.antMatchers("/permission/**/write/**").permitAll()
+				.antMatchers("/dataindexerstatus")
+				.authenticated()
 
-		.antMatchers("/scripts/**/run").authenticated()
+				.antMatchers("/permission/**/write/**")
+				.permitAll()
 
-		.antMatchers("/files/**").permitAll()
+				.antMatchers("/scripts/**/run")
+				.authenticated()
 
-		.anyRequest().denyAll().and()
+				.antMatchers("/files/**")
+				.permitAll()
 
-		.httpBasic().authenticationEntryPoint(authenticationEntryPoint()).and()
+				.anyRequest()
+				.denyAll()
+				.and()
 
-		.formLogin().loginPage("/login").failureUrl("/login?error").and()
+				.httpBasic()
+				.authenticationEntryPoint(authenticationEntryPoint())
+				.and()
 
-		.logout().logoutSuccessUrl("/").and()
+				.formLogin()
+				.loginPage("/login")
+				.failureUrl("/login?error")
+				.and()
 
-		.csrf().disable();
+				.logout()
+				.deleteCookies("JSESSIONID")
+				.addLogoutHandler(
+						(req, res, auth) -> {
+							if (req.getSession(false) != null
+									&& req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
+							{
+								req.setAttribute("continueWithUnsupportedBrowser", true);
+							}
+						}).logoutSuccessHandler((req, res, auth) -> {
+					StringBuilder logoutSuccessUrl = new StringBuilder("/");
+					if (req.getAttribute("continueWithUnsupportedBrowser") != null)
+					{
+						logoutSuccessUrl.append("?continueWithUnsupportedBrowser=true");
+					}
+					SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
+					logoutSuccessHandler.setDefaultTargetUrl(logoutSuccessUrl.toString());
+					logoutSuccessHandler.onLogoutSuccess(req, res, auth);
+				})
+
+				.and()
+
+				.csrf().disable();
 	}
 
 	protected abstract void configureUrlAuthorization(
@@ -272,5 +325,11 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	public LoginUrlAuthenticationEntryPoint authenticationEntryPoint()
 	{
 		return new AjaxAwareLoginUrlAuthenticationEntryPoint("/login");
+	}
+
+	@Bean
+	public ApiSessionExpirationFilter apiSessionExpirationFilter()
+	{
+		return new ApiSessionExpirationFilter();
 	}
 }

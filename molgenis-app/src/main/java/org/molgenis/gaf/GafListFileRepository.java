@@ -17,7 +17,6 @@ import org.molgenis.data.processor.CellProcessor;
  */
 public class GafListFileRepository extends CsvRepository
 {
-	public static final String GAFLIST_ENTITYNAME = "gafList.protocol.name";
 	private final GafListValidationReport report;
 
 	public GafListFileRepository(File tmpFile, @Nullable List<CellProcessor> cellProcessors, Character separator,

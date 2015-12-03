@@ -6,9 +6,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import java.util.Collections;
 import java.util.Map;
 
-import org.molgenis.file.FileStore;
-import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.core.service.OntologyService;
+import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,9 +22,6 @@ public class OntologyManagerController extends MolgenisPluginController
 	public static final String ID = "ontologymanager";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	public static final String ONTOLOGY_MANAGER_PLUGIN = "OntologyManagerPlugin";
-
-	@Autowired
-	private FileStore fileStore;
 
 	@Autowired
 	private OntologyService ontologyService;

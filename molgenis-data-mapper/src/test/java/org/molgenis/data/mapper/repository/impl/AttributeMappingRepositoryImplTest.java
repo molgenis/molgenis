@@ -29,6 +29,7 @@ import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.ontology.core.config.OntologyConfig;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
 @ContextConfiguration(classes =
-{ AttributeMappingRepositoryImplTest.Config.class, MappingConfig.class })
+{ AttributeMappingRepositoryImplTest.Config.class, MappingConfig.class, OntologyConfig.class })
 public class AttributeMappingRepositoryImplTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
@@ -111,8 +112,8 @@ public class AttributeMappingRepositoryImplTest extends AbstractTestNGSpringCont
 		List<AttributeMetaData> sourceAttributeMetaDatas = new ArrayList<AttributeMetaData>();
 		targetAttributeMetaData.setDataType(MolgenisFieldTypes.STRING);
 
-		Collection<AttributeMapping> attributeMappings = Arrays.asList(new AttributeMapping(null,
-				targetAttributeMetaData, "algorithm", sourceAttributeMetaDatas));
+		Collection<AttributeMapping> attributeMappings = Arrays
+				.asList(new AttributeMapping(null, targetAttributeMetaData, "algorithm", sourceAttributeMetaDatas));
 
 		Mockito.when(idGenerator.generateId()).thenReturn("attributeMappingID");
 

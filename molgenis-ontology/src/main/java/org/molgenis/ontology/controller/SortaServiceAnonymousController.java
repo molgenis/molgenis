@@ -35,13 +35,13 @@ import org.molgenis.data.processor.LowerCaseProcessor;
 import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.file.FileStore;
-import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.sorta.MatchingTaskEntityMetaData;
 import org.molgenis.ontology.sorta.SortaModifiableCsvRepository;
 import org.molgenis.ontology.sorta.SortaService;
 import org.molgenis.ontology.sorta.SortaServiceImpl;
 import org.molgenis.ontology.utils.SortaServiceUtil;
+import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -100,8 +100,8 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 
 	@RequestMapping(method = POST, value = "/match/upload")
 	public String upload(@RequestParam(value = "selectOntologies", required = true) String ontologyIri,
-			@RequestParam(value = "file", required = true) Part file, HttpServletRequest httpServletRequest, Model model)
-			throws UnsupportedEncodingException, IOException
+			@RequestParam(value = "file", required = true) Part file, HttpServletRequest httpServletRequest,
+			Model model) throws UnsupportedEncodingException, IOException
 	{
 
 		String fileName = httpServletRequest.getSession().getId() + "_input.csv";
@@ -124,8 +124,9 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 		{
 			File uploadFile = new File(filePath.toString());
 			SortaModifiableCsvRepository csvRepository = new SortaModifiableCsvRepository(uploadFile.getName(),
-					new CsvRepository(uploadFile, Arrays.<CellProcessor> asList(new LowerCaseProcessor(),
-							new TrimProcessor()), SortaServiceImpl.DEFAULT_SEPARATOR));
+					new CsvRepository(uploadFile,
+							Arrays.<CellProcessor> asList(new LowerCaseProcessor(), new TrimProcessor()),
+							SortaServiceImpl.DEFAULT_SEPARATOR));
 
 			if (validateUserInputHeader(csvRepository) && validateUserInputContent(csvRepository))
 			{
@@ -156,8 +157,9 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 				String ontologyIri = ontologyIriObject.toString();
 				File uploadFile = new File(filePath.toString());
 				SortaModifiableCsvRepository csvRepository = new SortaModifiableCsvRepository(uploadFile.getName(),
-						new CsvRepository(uploadFile, Arrays.<CellProcessor> asList(new LowerCaseProcessor(),
-								new TrimProcessor()), SortaServiceImpl.DEFAULT_SEPARATOR));
+						new CsvRepository(uploadFile,
+								Arrays.<CellProcessor> asList(new LowerCaseProcessor(), new TrimProcessor()),
+								SortaServiceImpl.DEFAULT_SEPARATOR));
 
 				List<String> columnHeaders = createDownloadTableHeaders(csvRepository);
 				csvWriter = new CsvWriter(response.getOutputStream(), SortaServiceImpl.DEFAULT_SEPARATOR);
@@ -241,8 +243,9 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 			Model model)
 	{
 		SortaModifiableCsvRepository csvRepository = new SortaModifiableCsvRepository(uploadFile.getName(),
-				new CsvRepository(uploadFile, Arrays.<CellProcessor> asList(new LowerCaseProcessor(),
-						new TrimProcessor()), SortaServiceImpl.DEFAULT_SEPARATOR));
+				new CsvRepository(uploadFile,
+						Arrays.<CellProcessor> asList(new LowerCaseProcessor(), new TrimProcessor()),
+						SortaServiceImpl.DEFAULT_SEPARATOR));
 
 		HttpSession session = httpServletRequest.getSession();
 		session.setAttribute("filePath", uploadFile.getAbsoluteFile());

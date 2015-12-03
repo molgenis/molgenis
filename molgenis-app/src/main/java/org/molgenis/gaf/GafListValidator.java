@@ -18,7 +18,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,16 +29,6 @@ public class GafListValidator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(GafListValidator.class);
 
-	/**
-	 * RuntimeProperty.class.getSimpleName() + "_gafList.validator.";
-	 */
-	public static final String GAF_LIST_VALIDATOR_PREFIX = "gafList.validator.";
-
-	/**
-	 * RuntimeProperty.class.getSimpleName() + "_gafList.validator.example.";
-	 */
-	public static final String GAF_LIST_VALIDATOR_EXAMPLE_PREFIX = "gafList.validator.example.";
-
 	public static final List<String> COLUMNS = GAFCol.getAllColumnsNames();
 
 	static final String BARCODE_NONE = "None";
@@ -48,12 +37,12 @@ public class GafListValidator
 	private DataService dataService;
 
 	@Autowired
-	private MolgenisSettings molgenisSettings;
+	private GafListSettings gafListSettings;
 
 	public GafListValidationReport validate(GafListValidationReport report, Repository repository, List<String> columns)
 			throws IOException
 	{
-		final String gaflistEntityName = molgenisSettings.getProperty(GafListFileRepository.GAFLIST_ENTITYNAME);
+		final String gaflistEntityName = gafListSettings.getEntityName();
 		EntityMetaData entityMetaData = dataService.getEntityMetaData(gaflistEntityName);
 
 		if (null == entityMetaData)
@@ -66,7 +55,7 @@ public class GafListValidator
 			Map<String, Pattern> patternMap = new HashMap<String, Pattern>();
 			for (String colName : columns)
 			{
-				String pattern = molgenisSettings.getProperty(GAF_LIST_VALIDATOR_PREFIX + colName);
+				String pattern = gafListSettings.getRegExpPattern(colName);
 				if (pattern != null) patternMap.put(colName, Pattern.compile(pattern));
 			}
 
@@ -74,7 +63,7 @@ public class GafListValidator
 			Map<String, String> patternExampleMap = new HashMap<String, String>();
 			for (String colName : columns)
 			{
-				String example = molgenisSettings.getProperty(GAF_LIST_VALIDATOR_EXAMPLE_PREFIX + colName);
+				String example = gafListSettings.getExample(colName);
 				if (example != null) patternExampleMap.put(colName, example);
 			}
 
@@ -149,7 +138,7 @@ public class GafListValidator
 	 */
 	private void validateInternalSampleIdIncremental(List<Entity> entities, GafListValidationReport report)
 	{
-		final String gaflistEntityName = molgenisSettings.getProperty(GafListFileRepository.GAFLIST_ENTITYNAME);
+		final String gaflistEntityName = gafListSettings.getEntityName();
 		Map<Integer, Integer> toImportInternalSampleIds = new HashMap<Integer, Integer>();
 
 		int row = 2;

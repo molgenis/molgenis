@@ -2,6 +2,7 @@ package org.molgenis.data.meta;
 
 import java.util.Set;
 
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
@@ -10,6 +11,9 @@ import org.molgenis.model.ReservedKeywords;
 
 import com.google.common.collect.Sets;
 
+/**
+ * Validates if metadata is internally consistent and correct.
+ */
 public class MetaValidationUtils
 {
 	public static final int MAX_ATTRIBUTE_LENGTH = 30;
@@ -30,7 +34,7 @@ public class MetaValidationUtils
 	/**
 	 * Checks if a name is a reserved keyword.
 	 */
-	public static void checkForKeyword(String name)
+	private static void checkForKeyword(String name)
 	{
 		if (KEYWORDS.contains(name) || KEYWORDS.contains(name.toUpperCase()))
 		{
@@ -69,28 +73,58 @@ public class MetaValidationUtils
 	/**
 	 * Recursively traverses attributes and validates the names.
 	 */
-	public static void validateAttributeNames(Iterable<AttributeMetaData> amds)
+	private static void validateAttributes(Iterable<AttributeMetaData> amds)
 	{
 		for (AttributeMetaData amd : amds)
 		{
-			validateName(amd.getName());
+			validateAttribute(amd);
 			if (amd.getDataType() instanceof CompoundField)
 			{
-				validateAttributeNames(amd.getAttributeParts());
+				validateAttributes(amd.getAttributeParts());
+			}
+		}
+	}
+
+	protected static void validateAttribute(AttributeMetaData amd)
+	{
+		validateName(amd.getName());
+		if (amd.getDefaultValue() != null)
+		{
+			if (amd.isIdAtrribute())
+			{
+				throw new MolgenisDataException("ID attribute " + amd.getName() + " cannot have default value");
+			}
+
+			if (amd.isUnique())
+			{
+				throw new MolgenisDataException("Unique attribute " + amd.getName() + " cannot have default value");
+			}
+
+			if (amd.getExpression() != null)
+			{
+				throw new MolgenisDataException("Computed attribute " + amd.getName() + " cannot have default value");
+			}
+
+			FieldTypeEnum fieldType = amd.getDataType().getEnumType();
+			if (fieldType == FieldTypeEnum.XREF || fieldType == FieldTypeEnum.MREF)
+			{
+				throw new MolgenisDataException(
+						"Attribute "
+								+ amd.getName()
+								+ " cannot have default value since specifying a default value for XREF and MREF data types is not yet supported.");
 			}
 		}
 	}
 
 	/**
-	 * Validates the names of an entity and all its attributes.
+	 * Validates an entity and all of its attributes.
 	 */
 	public static void validateEntityMetaData(EntityMetaData emd)
 	{
-		validateName(emd.getSimpleName());
-
 		try
 		{
-			validateAttributeNames(emd.getAttributes());
+			validateName(emd.getSimpleName());
+			validateAttributes(emd.getAttributes());
 		}
 		catch (MolgenisDataException e)
 		{

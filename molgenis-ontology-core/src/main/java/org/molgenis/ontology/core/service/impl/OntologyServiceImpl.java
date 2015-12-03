@@ -1,5 +1,8 @@
 package org.molgenis.ontology.core.service.impl;
 
+import static java.util.Objects.requireNonNull;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -13,16 +16,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class OntologyServiceImpl implements OntologyService
 {
-	@Autowired
 	private OntologyRepository ontologyRepository;
+	private OntologyTermRepository ontologyTermRepository;
 
 	@Autowired
-	private OntologyTermRepository ontologyTermRepository;
+	public OntologyServiceImpl(OntologyRepository ontologyRepository, OntologyTermRepository ontologyTermRepository)
+	{
+		this.ontologyRepository = requireNonNull(ontologyRepository);
+		this.ontologyTermRepository = requireNonNull(ontologyTermRepository);
+	}
 
 	@Override
 	public List<Ontology> getOntologies()
 	{
 		return Lists.newArrayList(ontologyRepository.getOntologies());
+	}
+
+	@Override
+	public List<String> getAllOntologiesIds()
+	{
+		final List<String> allOntologiesIds = new ArrayList<String>();
+		ontologyRepository.getOntologies().forEach(e -> allOntologiesIds.add(e.getId()));
+		return allOntologiesIds;
 	}
 
 	@Override
@@ -39,8 +54,28 @@ public class OntologyServiceImpl implements OntologyService
 	}
 
 	@Override
+	public List<OntologyTerm> getAllOntologyTerms(String ontologyIri)
+	{
+		return ontologyTermRepository.getAllOntologyTerms(ontologyIri);
+	}
+
+	@Override
+	public List<OntologyTerm> findExcatOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize)
+	{
+		if (null == terms || terms.size() == 0)
+		{
+			return Lists.<OntologyTerm> newArrayList();
+		}
+		return ontologyTermRepository.findExcatOntologyTerms(ontologyIds, terms, pageSize);
+	}
+
+	@Override
 	public List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize)
 	{
+		if (null == terms || terms.size() == 0)
+		{
+			return Lists.<OntologyTerm> newArrayList();
+		}
 		return ontologyTermRepository.findOntologyTerms(ontologyIds, terms, pageSize);
 	}
 

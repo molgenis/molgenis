@@ -30,7 +30,7 @@
 		$('#create-script-btn').click(function(e) {
 			React.render(molgenis.ui.Form({
 				mode: 'create',
-				entity : 'script',
+				entity : 'Script',
 				modal: true,
 				onSubmitSuccess : function() {
 					location.reload();

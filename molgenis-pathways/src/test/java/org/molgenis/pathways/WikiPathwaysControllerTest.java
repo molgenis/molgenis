@@ -82,7 +82,7 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 	{
 		vcf = new DefaultEntityMetaData("VCF");
 		vcf.addAttribute("id").setIdAttribute(true);
-		vcf.addAttribute("INFO_EFF");
+		vcf.addAttribute("EFF");
 	}
 
 	@Test
@@ -152,11 +152,11 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 								+ "<Xref Database='Ensembl' ID='ENSG00000196497' />" + "</DataNode></gpml>");
 		Repository vcfRepo = mock(Repository.class);
 		Entity row1 = new MapEntity(vcf);
-		row1.set("INFO_EFF", "INTRON(LOW||||1417|TUSC2|protein_coding|CODING|NM_000057.3|7|1)	GT	1|0");
+		row1.set("EFF", "INTRON(LOW||||1417|TUSC2|protein_coding|CODING|NM_000057.3|7|1)	GT	1|0");
 		Entity row2 = new MapEntity(vcf);
-		row2.set("INFO_EFF", "INTRON(LOW||||1417|IPO4|protein_coding|CODING|NM_000057.3|8|1)	GT	1|0");
+		row2.set("EFF", "INTRON(LOW||||1417|IPO4|protein_coding|CODING|NM_000057.3|8|1)	GT	1|0");
 		Entity row3 = new MapEntity(vcf);
-		row2.set("INFO_EFF", "INTRON(MODERATE||||1417|IPO4|protein_coding|CODING|NM_000057.3|8|1)	GT	1|0");
+		row2.set("EFF", "INTRON(MODERATE||||1417|IPO4|protein_coding|CODING|NM_000057.3|8|1)	GT	1|0");
 		when(vcfRepo.spliterator()).thenReturn(Arrays.asList(row1, row2, row3).spliterator());
 		when(dataService.getRepository("VCF")).thenReturn(vcfRepo);
 
@@ -197,9 +197,9 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 	{
 		Repository vcfRepo = mock(Repository.class);
 		Entity row1 = new MapEntity(vcf);
-		row1.set("INFO_EFF", "INTRON(LOW||||1417|TUSC2|protein_coding|CODING|NM_000057.3|7|1)	GT	1|0");
+		row1.set("EFF", "INTRON(LOW||||1417|TUSC2|protein_coding|CODING|NM_000057.3|7|1)	GT	1|0");
 		Entity row2 = new MapEntity(vcf);
-		row2.set("INFO_EFF", "INTRON(MODERATE||||1417|IPO4|protein_coding|CODING|NM_000057.3|8|1)	GT	1|0");
+		row2.set("EFF", "INTRON(MODERATE||||1417|IPO4|protein_coding|CODING|NM_000057.3|8|1)	GT	1|0");
 		when(vcfRepo.spliterator()).thenReturn(Arrays.asList(row1, row2).spliterator());
 
 		when(dataService.getRepository("VCF")).thenReturn(vcfRepo);

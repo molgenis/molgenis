@@ -4,8 +4,9 @@ import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
-import org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode;
+import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
 
@@ -29,7 +30,8 @@ public interface SearchService
 
 	void createMappings(EntityMetaData entityMetaData);
 
-	void createMappings(EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms, boolean createAllIndex);
+	void createMappings(EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms,
+			boolean createAllIndex);
 
 	/**
 	 * Refresh index, making all operations performed since the last refresh available for search
@@ -60,6 +62,11 @@ public interface SearchService
 
 	void delete(Iterable<? extends Entity> entities, EntityMetaData entityMetaData);
 
+	/**
+	 * Deletes data and meta data
+	 * 
+	 * @param entityName
+	 */
 	void delete(String entityName);
 
 	/**
@@ -67,11 +74,39 @@ public interface SearchService
 	 * 
 	 * @param entityId
 	 * @param entityMetaData
-	 * @return
+	 * @return entity or null
 	 */
 	Entity get(Object entityId, EntityMetaData entityMetaData);
 
+	/**
+	 * Returns entity with given id and attribute values defined by fetch or null if entity does not exist
+	 * 
+	 * @param entityId
+	 * @param entityMetaData
+	 * @param fetch
+	 * @return entity or null
+	 */
+	Entity get(Object entityId, EntityMetaData entityMetaData, Fetch fetch);
+
+	/**
+	 * Returns entities with given ids
+	 * 
+	 * @param entityIds
+	 * @param entityMetaData
+	 * @param fetch
+	 * @return entities
+	 */
 	Iterable<Entity> get(Iterable<Object> entityIds, EntityMetaData entityMetaData);
+
+	/**
+	 * Returns entities with given ids and attribute values defined by fetch
+	 * 
+	 * @param entityIds
+	 * @param entityMetaData
+	 * @param fetch
+	 * @return entities with attribute values defined by fetch
+	 */
+	Iterable<Entity> get(Iterable<Object> entityIds, EntityMetaData entityMetaData, Fetch fetch);
 
 	// TODO replace Iterable<Entity> with EntityCollection and add EntityCollection.getTotal()
 	Iterable<Entity> search(Query q, EntityMetaData entityMetaData);
@@ -84,4 +119,9 @@ public interface SearchService
 	void flush();
 
 	void rebuildIndex(Iterable<? extends Entity> entities, EntityMetaData entityMetaData);
+
+	/**
+	 * Optimize the index for faster search operations, remove documents that are marked as deleted.
+	 */
+	void optimizeIndex();
 }

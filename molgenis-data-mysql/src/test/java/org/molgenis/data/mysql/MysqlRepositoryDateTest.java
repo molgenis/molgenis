@@ -1,5 +1,10 @@
 package org.molgenis.data.mysql;
 
+import static org.testng.Assert.assertEquals;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
@@ -11,17 +16,17 @@ import org.molgenis.data.support.MapEntity;
 public class MysqlRepositoryDateTest extends MysqlRepositoryAbstractDatatypeTest
 {
 
+	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EditableEntityMetaData varcharMD = new DefaultEntityMetaData("DateTest")
-				.setLabel("Date Test");
-		varcharMD.setIdAttribute("col1");
-		varcharMD.addAttribute("col1").setDataType(MolgenisFieldTypes.DATE).setNillable(false);
-		varcharMD.addAttribute("col2").setDataType(MolgenisFieldTypes.DATE);
-		varcharMD.addAttribute("col3").setDataType(MolgenisFieldTypes.DATE).setDefaultValue("1992-03-13");
-		// TODO: better way to construct defaults, e.g. from formatted string "2014-04-03"
-		return varcharMD;
+		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("DateTest").setLabel("Date Test");
+		entityMetaData.setIdAttribute("col1");
+		entityMetaData.addAttribute("col1").setDataType(MolgenisFieldTypes.DATE).setNillable(false);
+		entityMetaData.addAttribute("col2").setDataType(MolgenisFieldTypes.DATE);
+		entityMetaData.addAttribute("col3").setDataType(MolgenisFieldTypes.DATE);
+		return entityMetaData;
 	}
 
 	@Override
@@ -31,11 +36,20 @@ public class MysqlRepositoryDateTest extends MysqlRepositoryAbstractDatatypeTest
 	}
 
 	@Override
-	public Entity defaultEntity()
+	public Entity createTestEntity()
 	{
 		Entity e = new MapEntity();
 		e.set("col1", "2012-03-13");
 		e.set("col2", "2012-03-14");
+		e.set("col3", "1992-03-13");
 		return e;
+	}
+
+	@Override
+	public void verifyTestEntity(Entity e) throws ParseException
+	{
+		assertEquals(e.get("col1"), new java.sql.Date(sdf.parse("2012-03-13").getTime()));
+		assertEquals(e.get("col2"), new java.sql.Date(sdf.parse("2012-03-14").getTime()));
+		assertEquals(e.getUtilDate("col3"), sdf.parse("1992-03-13"));
 	}
 }

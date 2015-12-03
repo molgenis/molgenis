@@ -22,13 +22,14 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMessage.RecipientType;
 
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.file.FileStore;
-import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.data.DataService;
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.ui.controller.FeedbackControllerTest.Config;
+import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -48,7 +49,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @WebAppConfiguration
-@ContextConfiguration(classes = Config.class)
+@ContextConfiguration(classes =
+{ Config.class, GsonConfig.class })
 public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
@@ -61,16 +63,13 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 	private JavaMailSender javaMailSender;
 
 	@Autowired
-	private MolgenisSettings molgenisSettings;
-
-	@Autowired
-	private StaticContentService staticContentService;
-
-	@Autowired
 	private CaptchaService captchaService;
 
 	@Autowired
-	private FileStore fileStore;
+	private GsonHttpMessageConverter gsonHttpMessageConverter;
+
+	@Autowired
+	private AppSettings appSettings;
 
 	private MockMvc mockMvcFeedback;
 
@@ -79,14 +78,15 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 	@BeforeMethod
 	public void beforeMethod() throws CaptchaException
 	{
-		reset(javaMailSender, molgenisSettings, molgenisUserService);
+		reset(javaMailSender, appSettings, molgenisUserService);
+		when(appSettings.getTitle()).thenReturn("app123");
 		mockMvcFeedback = MockMvcBuilders.standaloneSetup(feedbackController)
-				.setMessageConverters(new GsonHttpMessageConverter()).build();
+				.setMessageConverters(gsonHttpMessageConverter).build();
 		authentication = new TestingAuthenticationToken("userName", null);
 		authentication.setAuthenticated(true);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		reset(captchaService);
-		when(captchaService.consumeCaptcha("validCaptcha")).thenReturn(true);
+		when(captchaService.validateCaptcha("validCaptcha")).thenReturn(true);
 	}
 
 	@Test
@@ -141,12 +141,10 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 		when(javaMailSender.createMimeMessage()).thenReturn(message);
 		List<String> adminEmails = Collections.singletonList("molgenis@molgenis.org");
 		when(molgenisUserService.getSuEmailAddresses()).thenReturn(adminEmails);
-		when(molgenisSettings.getProperty("app.name", "molgenis")).thenReturn("app123");
 		mockMvcFeedback
-				.perform(
-						MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
-								.param("subject", "Feedback form").param("email", "user@domain.com")
-								.param("feedback", "Feedback.\nLine two.").param("captcha", "validCaptcha"))
+				.perform(MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
+						.param("subject", "Feedback form").param("email", "user@domain.com")
+						.param("feedback", "Feedback.\nLine two.").param("captcha", "validCaptcha"))
 				.andExpect(status().isOk()).andExpect(view().name("view-feedback"))
 				.andExpect(model().attribute("feedbackForm", hasProperty("submitted", equalTo(true))));
 		verify(message, times(1)).setRecipients(RecipientType.TO, new InternetAddress[]
@@ -157,55 +155,16 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 		verify(message, times(1)).setSubject("[feedback-app123] Feedback form");
 		verify(message, times(1)).setText("Feedback from First Last (user@domain.com):\n\n" + "Feedback.\nLine two.");
 		verify(javaMailSender, times(1)).send(message);
-		verify(captchaService, times(1)).consumeCaptcha("validCaptcha");
-	}
-
-	@Test
-	public void submitAppNameNotSpecified() throws Exception
-	{
-		MimeMessage message = mock(MimeMessage.class);
-		when(javaMailSender.createMimeMessage()).thenReturn(message);
-		List<String> adminEmails = Collections.singletonList("molgenis@molgenis.org");
-		when(molgenisUserService.getSuEmailAddresses()).thenReturn(adminEmails);
-		when(molgenisSettings.getProperty("app.name", "molgenis")).thenReturn("molgenis");
-		mockMvcFeedback
-				.perform(
-						MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
-								.param("subject", "Feedback form").param("email", "user@domain.com")
-								.param("feedback", "Feedback.\nLine two.").param("captcha", "validCaptcha"))
-				.andExpect(status().isOk()).andExpect(view().name("view-feedback"))
-				.andExpect(model().attribute("feedbackForm", hasProperty("submitted", equalTo(true))));
-		verify(message, times(1)).setSubject("[feedback-molgenis] Feedback form");
-		verify(captchaService, times(1)).consumeCaptcha("validCaptcha");
-	}
-
-	@Test
-	public void submitAppNameAndSubjectNotSpecified() throws Exception
-	{
-		MimeMessage message = mock(MimeMessage.class);
-		when(javaMailSender.createMimeMessage()).thenReturn(message);
-		List<String> adminEmails = Collections.singletonList("molgenis@molgenis.org");
-		when(molgenisUserService.getSuEmailAddresses()).thenReturn(adminEmails);
-		when(molgenisSettings.getProperty("app.name", "molgenis")).thenReturn("molgenis");
-		mockMvcFeedback
-				.perform(
-						MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
-								.param("email", "user@domain.com").param("feedback", "Feedback.\nLine two.")
-								.param("captcha", "validCaptcha")).andExpect(status().isOk())
-				.andExpect(view().name("view-feedback"))
-				.andExpect(model().attribute("feedbackForm", hasProperty("submitted", equalTo(true))));
-		verify(message, times(1)).setSubject("[feedback-molgenis] <no subject>");
-		verify(captchaService, times(1)).consumeCaptcha("validCaptcha");
+		verify(captchaService, times(1)).validateCaptcha("validCaptcha");
 	}
 
 	@Test
 	public void submitFeedbackNotSpecified() throws Exception
 	{
-		mockMvcFeedback.perform(
-				MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
-						.param("subject", "Feedback form").param("email", "user@domain.com").param("feedback", "")
-						.param("captcha", "validCaptcha")).andExpect(status().is4xxClientError());
-		verify(captchaService, times(0)).consumeCaptcha("validCaptcha");
+		mockMvcFeedback.perform(MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
+				.param("subject", "Feedback form").param("email", "user@domain.com").param("feedback", "")
+				.param("captcha", "validCaptcha")).andExpect(status().is4xxClientError());
+		verify(captchaService, times(0)).validateCaptcha("validCaptcha");
 	}
 
 	@Test
@@ -215,34 +174,27 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 		when(javaMailSender.createMimeMessage()).thenReturn(message);
 		List<String> adminEmails = Collections.singletonList("molgenis@molgenis.org");
 		when(molgenisUserService.getSuEmailAddresses()).thenReturn(adminEmails);
-		when(molgenisSettings.getProperty("app.name", "molgenis")).thenReturn("app123");
 		doThrow(new MailSendException("ERRORRR!")).when(javaMailSender).send(message);
 		mockMvcFeedback
-				.perform(
-						MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
-								.param("subject", "Feedback form").param("email", "user@domain.com")
-								.param("feedback", "Feedback.\nLine two.").param("captcha", "validCaptcha"))
-				.andExpect(status().isOk())
-				.andExpect(view().name("view-feedback"))
+				.perform(MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
+						.param("subject", "Feedback form").param("email", "user@domain.com")
+						.param("feedback", "Feedback.\nLine two.").param("captcha", "validCaptcha"))
+				.andExpect(status().isOk()).andExpect(view().name("view-feedback"))
 				.andExpect(model().attribute("feedbackForm", hasProperty("submitted", equalTo(false))))
-				.andExpect(
-						model().attribute(
-								"feedbackForm",
-								hasProperty("errorMessage",
-										equalTo("Unfortunately, we were unable to send the mail containing "
-												+ "your feedback. Please contact the administrator."))));
-		verify(captchaService, times(1)).consumeCaptcha("validCaptcha");
+				.andExpect(model().attribute("feedbackForm",
+						hasProperty("errorMessage", equalTo("Unfortunately, we were unable to send the mail containing "
+								+ "your feedback. Please contact the administrator."))));
+		verify(captchaService, times(1)).validateCaptcha("validCaptcha");
 	}
 
 	@Test
 	public void submitInvalidCaptcha() throws Exception
 	{
-		when(captchaService.consumeCaptcha("validCaptcha")).thenReturn(false);
+		when(captchaService.validateCaptcha("validCaptcha")).thenReturn(false);
 		mockMvcFeedback
-				.perform(
-						MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
-								.param("subject", "Feedback form").param("email", "user@domain.com")
-								.param("feedback", "Feedback.\nLine two.").param("captcha", "invalidCaptcha"))
+				.perform(MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
+						.param("subject", "Feedback form").param("email", "user@domain.com")
+						.param("feedback", "Feedback.\nLine two.").param("captcha", "invalidCaptcha"))
 				.andExpect(status().isOk()).andExpect(view().name("view-feedback"))
 				.andExpect(model().attribute("feedbackForm", hasProperty("submitted", equalTo(false))))
 				.andExpect(model().attribute("feedbackForm", hasProperty("errorMessage", equalTo("Invalid captcha."))));
@@ -254,7 +206,7 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public FeedbackController feedbackController()
 		{
-			return new FeedbackController();
+			return new FeedbackController(molgenisUserService(), appSettings(), captchaService(), mailSender());
 		}
 
 		@Bean
@@ -264,15 +216,15 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public MolgenisSettings molgenisSettings()
+		public AppSettings appSettings()
 		{
-			return mock(MolgenisSettings.class);
+			return mock(AppSettings.class);
 		}
 
 		@Bean
-		public MolgenisPluginRegistry molgenisPluginRegistry()
+		public CaptchaService captchaService()
 		{
-			return mock(MolgenisPluginRegistry.class);
+			return mock(CaptchaService.class);
 		}
 
 		@Bean
@@ -282,22 +234,21 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
+		public MolgenisPluginRegistry molgenisPluginRegistry()
+		{
+			return mock(MolgenisPluginRegistry.class);
+		}
+
+		@Bean
+		public DataService dataService()
+		{
+			return mock(DataService.class);
+		}
+
+		@Bean
 		public StaticContentService staticContentService()
 		{
 			return mock(StaticContentService.class);
 		}
-
-		@Bean
-		public FileStore fileStore()
-		{
-			return mock(FileStore.class);
-		}
-
-		@Bean
-		public CaptchaService captchaService()
-		{
-			return mock(CaptchaService.class);
-		}
-
 	}
 }

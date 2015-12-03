@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.molgenis</groupId>
 		<artifactId>molgenis</artifactId>
-		<version>1.9.0-SNAPSHOT</version>
+		<version>1.14.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-core-ui</artifactId>
 	<packaging>jar</packaging>
@@ -83,6 +83,7 @@
 	                            <jsSourceFile>underscore-min.js</jsSourceFile>
 	                            <jsSourceFile>jquery-ui-1.9.2.custom.min.js</jsSourceFile> <!-- JQRangeSlider dependency -->
 	                            <jsSourceFile>jquery.form.min.js</jsSourceFile> <!-- Form dependency -->
+	                            <jsSourceFile>jquery.cookie-1.4.1.min.js</jsSourceFile>
 	                            <jsSourceFile>ace/src-min-noconflict/ace.js</jsSourceFile> <!-- Ace dependency -->
 	                            <jsSourceFile>moment-with-locales.min.js</jsSourceFile> <!-- DateTimePicker dependency -->
 	                            <jsSourceFile>bootstrap-datetimepicker.min.js</jsSourceFile> <!-- DateTimePicker dependency -->
@@ -150,6 +151,7 @@
 	                            <jsSourceFile>/component/wrapper/JQRangeSlider.js</jsSourceFile>
 	                            <jsSourceFile>/component/wrapper/JQueryForm.js</jsSourceFile>
 	                            <jsSourceFile>/component/wrapper/Select2.js</jsSourceFile>
+	                            <jsSourceFile>/component/AggregateTable.js</jsSourceFile>
 	                            <jsSourceFile>/component/AlertMessage.js</jsSourceFile>
 	                            <jsSourceFile>/component/AttributeControl.js</jsSourceFile>
 	                            <jsSourceFile>/component/BoolControl.js</jsSourceFile>
@@ -170,6 +172,7 @@
 	                            <jsSourceFile>/component/Questionnaire.js</jsSourceFile>
 	                            <jsSourceFile>/component/RadioGroup.js</jsSourceFile>
 	                            <jsSourceFile>/component/RangeSlider.js</jsSourceFile>
+	                            <jsSourceFile>/component/SelectBox.js</jsSourceFile>
 	                            <jsSourceFile>/component/Spinner.js</jsSourceFile>
 	                            <jsSourceFile>/component/Table.js</jsSourceFile>
 	                            <jsSourceFile>/component/TextArea.js</jsSourceFile>
@@ -208,6 +211,11 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-mysql</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-system</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -237,19 +245,14 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-data-migrate</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-scripts</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>com.google.auto.value</groupId>
 			<artifactId>auto-value</artifactId>
 			<version>1.0</version>
+		</dependency>
+		<dependency>
+   			<groupId>eu.bitwalker</groupId>
+   			<artifactId>UserAgentUtils</artifactId>
+   			<version>1.17</version>
 		</dependency>
 	</dependencies>
 </project>

@@ -5,10 +5,14 @@ import static com.google.common.collect.Lists.reverse;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.MolgenisDataException;
@@ -18,20 +22,31 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.DataServiceImpl;
+import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.util.DependencyResolver;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 /**
  * MetaData service. Administration of the {@link Package}, {@link EntityMetaData} and {@link AttributeMetaData} of the
  * metadata of the repositories.
+ * 
+ * TODO: This class smells. It started out as a simple administration but taken on a new role: to bootstrap the
+ * repositories and orchestrate changes in metadata. There's a second, higher level, class in here that needs to be
+ * refactored out. See also {@link MetaValidationUtils} which does some of this work now already.
  * 
  * <img src="http://yuml.me/041e5382.png" alt="Metadata entities" width="640"/>
  */
@@ -43,10 +58,17 @@ public class MetaDataServiceImpl implements MetaDataService
 	private ManageableRepositoryCollection defaultBackend;
 	private final Map<String, RepositoryCollection> backends = Maps.newHashMap();
 	private final DataServiceImpl dataService;
+	private TransactionTemplate transactionTemplate;
 
 	public MetaDataServiceImpl(DataServiceImpl dataService)
 	{
 		this.dataService = dataService;
+	}
+
+	@Autowired
+	public void setPlatformTransactionManager(PlatformTransactionManager transactionManager)
+	{
+		this.transactionTemplate = new TransactionTemplate(transactionManager);
 	}
 
 	/**
@@ -107,24 +129,49 @@ public class MetaDataServiceImpl implements MetaDataService
 	/**
 	 * Removes entity meta data if it exists.
 	 */
-	@Transactional
 	@Override
 	public void deleteEntityMeta(String entityName)
 	{
-		EntityMetaData emd = getEntityMetaData(entityName);
-		if ((emd != null) && !emd.isAbstract())
+		transactionTemplate.execute((TransactionStatus status) -> {
+			EntityMetaData emd = getEntityMetaData(entityName);
+			if ((emd != null) && !emd.isAbstract())
+			{
+				getManageableRepositoryCollection(emd).deleteEntityMeta(entityName);
+			}
+			entityMetaDataRepository.delete(entityName);
+			if (dataService.hasRepository(entityName)) dataService.removeRepository(entityName);
+			deleteEntityPermissions(entityName);
+
+			return null;
+		});
+
+		refreshCaches();
+	}
+
+	private void deleteEntityPermissions(String entityName)
+	{
+		List<String> authorities = SecurityUtils.getEntityAuthorities(entityName);
+
+		// User permissions
+		if (dataService.hasRepository("UserAuthority"))
 		{
-			getManageableRepositoryCollection(emd).deleteEntityMeta(entityName);
+			Iterable<Entity> userPermissions = dataService.query("UserAuthority").in("role", authorities).findAll();
+			dataService.delete("UserAuthority", userPermissions);
 		}
-		entityMetaDataRepository.delete(entityName);
-		if (dataService.hasRepository(entityName)) dataService.removeRepository(entityName);
+
+		// Group permissions
+		if (dataService.hasRepository("GroupAuthority"))
+		{
+			Iterable<Entity> groupPermissions = dataService.query("GroupAuthority").in("role", authorities).findAll();
+			dataService.delete("GroupAuthority", groupPermissions);
+		}
 	}
 
 	@Transactional
 	@Override
 	public void delete(List<EntityMetaData> entities)
 	{
-		reverse(DependencyResolver.resolve(Sets.newHashSet(entities))).stream().map(emd -> emd.getName())
+		reverse(DependencyResolver.resolve(Sets.newHashSet(entities))).stream().map(EntityMetaData::getName)
 				.forEach(this::deleteEntityMeta);
 	}
 
@@ -144,8 +191,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	private ManageableRepositoryCollection getManageableRepositoryCollection(EntityMetaData emd)
 	{
 		RepositoryCollection backend = getBackend(emd);
-		if (!(backend instanceof ManageableRepositoryCollection)) throw new RuntimeException(
-				"Backend  is not a ManageableCrudRepositoryCollection");
+		if (!(backend instanceof ManageableRepositoryCollection))
+			throw new RuntimeException("Backend  is not a ManageableCrudRepositoryCollection");
 
 		return (ManageableRepositoryCollection) backend;
 	}
@@ -175,8 +222,8 @@ public class MetaDataServiceImpl implements MetaDataService
 			if (!dataService.hasRepository(emd.getName()))
 			{
 				Repository repo = backend.getRepository(emd.getName());
-				if (repo == null) throw new UnknownEntityException(String.format(
-						"Unknown entity '%s' for backend '%s'", emd.getName(), backend.getName()));
+				if (repo == null) throw new UnknownEntityException(
+						String.format("Unknown entity '%s' for backend '%s'", emd.getName(), backend.getName()));
 				Repository decoratedRepo = decoratorFactory.createDecoratedRepository(repo);
 				dataService.addRepository(decoratedRepo);
 			}
@@ -292,8 +339,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void refreshCaches()
 	{
-		packageRepository.updatePackageCache();
 		RunAsSystemProxy.runAsSystem(() -> {
+			packageRepository.updatePackageCache();
 			entityMetaDataRepository.fillEntityMetaDataCache();
 			return null;
 		});
@@ -329,8 +376,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	public synchronized void onApplicationEvent(ContextRefreshedEvent event)
 	{
 		// Discover all backends
-		Map<String, RepositoryCollection> backendBeans = event.getApplicationContext().getBeansOfType(
-				RepositoryCollection.class);
+		Map<String, RepositoryCollection> backendBeans = event.getApplicationContext()
+				.getBeansOfType(RepositoryCollection.class);
 		backendBeans.values().forEach(this::addBackend);
 
 		// Create repositories from EntityMetaData in EntityMetaData repo
@@ -345,9 +392,18 @@ public class MetaDataServiceImpl implements MetaDataService
 			}
 		}
 
-		// Discover EntityMetaData
+		// Discover static EntityMetaData
 		Map<String, EntityMetaData> emds = event.getApplicationContext().getBeansOfType(EntityMetaData.class);
 		DependencyResolver.resolve(Sets.newHashSet(emds.values())).forEach(this::addEntityMeta);
+		// Update update manageable backends, JPA throws exception
+		DependencyResolver.resolve(Sets.newHashSet(emds.values())).stream().filter(this::isManageableBackend)
+				.forEach(this::updateEntityMeta);
+	}
+
+	private boolean isManageableBackend(EntityMetaData emd)
+	{
+		// Might work for more than just MySQL backend, but not JPA backend
+		return emd.getBackend() == null || "MySql".equals(emd.getBackend());
 	}
 
 	@Override
@@ -368,5 +424,61 @@ public class MetaDataServiceImpl implements MetaDataService
 	{
 		MetaValidationUtils.validateEntityMetaData(entityMetaData);
 		entityMetaDataRepository.add(entityMetaData);
+	}
+
+	@Override
+	public LinkedHashMap<String, Boolean> integrationTestMetaData(RepositoryCollection repositoryCollection)
+	{
+		LinkedHashMap<String, Boolean> entitiesImportable = new LinkedHashMap<String, Boolean>();
+		StreamSupport.stream(repositoryCollection.getEntityNames().spliterator(), false)
+				.forEach(entityName -> entitiesImportable.put(entityName, this.canIntegrateEntityMetadataCheck(
+						repositoryCollection.getRepository(entityName).getEntityMetaData())));
+
+		return entitiesImportable;
+	}
+
+	@Override
+	public LinkedHashMap<String, Boolean> integrationTestMetaData(
+			ImmutableMap<String, EntityMetaData> newEntitiesMetaDataMap, List<String> skipEntities,
+			String defaultPackage)
+	{
+		LinkedHashMap<String, Boolean> entitiesImportable = new LinkedHashMap<String, Boolean>();
+
+		StreamSupport.stream(newEntitiesMetaDataMap.keySet().spliterator(), false)
+				.forEach(entityName -> entitiesImportable.put(entityName, skipEntities.contains(entityName)
+						|| this.canIntegrateEntityMetadataCheck(newEntitiesMetaDataMap.get(entityName))));
+
+		return entitiesImportable;
+	}
+
+	public boolean canIntegrateEntityMetadataCheck(EntityMetaData newEntityMetaData)
+	{
+		String entityName = newEntityMetaData.getName();
+		if (dataService.hasRepository(entityName))
+		{
+			EntityMetaData newEntity = newEntityMetaData;
+			EntityMetaData oldEntity = dataService.getEntityMetaData(entityName);
+
+			List<AttributeMetaData> oldAtomicAttributes = StreamSupport
+					.stream(oldEntity.getAtomicAttributes().spliterator(), false)
+					.collect(Collectors.<AttributeMetaData> toList());
+
+			LinkedHashMap<String, AttributeMetaData> newAtomicAttributesMap = new LinkedHashMap<String, AttributeMetaData>();
+			StreamSupport.stream(newEntity.getAtomicAttributes().spliterator(), false)
+					.forEach(attribute -> newAtomicAttributesMap.put(attribute.getName(), attribute));
+
+			for (AttributeMetaData oldAttribute : oldAtomicAttributes)
+			{
+				if (!newAtomicAttributesMap.keySet().contains(oldAttribute.getName())) return false;
+
+				DefaultAttributeMetaData oldAttributDefault = new DefaultAttributeMetaData(oldAttribute);
+				DefaultAttributeMetaData newAttributDefault = new DefaultAttributeMetaData(
+						newAtomicAttributesMap.get(oldAttribute.getName()));
+
+				if (!oldAttributDefault.isSameAs(newAttributDefault)) return false;
+			}
+		}
+
+		return true;
 	}
 }

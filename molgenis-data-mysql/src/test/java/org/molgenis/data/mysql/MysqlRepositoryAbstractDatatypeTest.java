@@ -30,8 +30,22 @@ public abstract class MysqlRepositoryAbstractDatatypeTest extends AbstractTestNG
 	/** Define the expected mysql create table for the data model */
 	public abstract String createSql();
 
-	/** Define a test object to be used */
-	public abstract Entity defaultEntity();
+	/**
+	 * Define a test object to be used
+	 * 
+	 * @throws Exception
+	 */
+	public abstract Entity createTestEntity() throws Exception;
+
+	/**
+	 * verify the returned entity
+	 * 
+	 * @throws Exception
+	 */
+	public void verifyTestEntity(Entity e) throws Exception
+	{
+
+	}
 
 	public EntityMetaData getMetaData()
 	{
@@ -54,25 +68,17 @@ public abstract class MysqlRepositoryAbstractDatatypeTest extends AbstractTestNG
 		Assert.assertEquals(repo.getCreateSql(), createSql());
 
 		// verify default value
-		Entity defaultEntity = defaultEntity();
+		Entity defaultEntity = createTestEntity();
 		LOG.debug("inserting: " + defaultEntity);
-		repo.add(defaultEntity());
+		repo.add(defaultEntity);
 
 		for (Entity e : repo)
 		{
 			LOG.debug("found back " + e);
-			Object value = e.get("col3");
-			Object defaultValue = repo.getEntityMetaData().getAttribute("col3").getDefaultValue();
-			LOG.debug("defaultClass=" + defaultValue.getClass().getName() + " - valueClass="
-					+ value.getClass().getName());
-			Assert.assertEquals(defaultValue, value);
-
+			verifyTestEntity(e);
 		}
 
 		// verify not null error
-		// TODO
-
-		// verify default
 		// TODO
 
 		// allow time for logger to finish... (premature end of program results in loss of output)

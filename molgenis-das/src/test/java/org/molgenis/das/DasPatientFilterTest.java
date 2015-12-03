@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertEquals;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +20,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mockito.ArgumentCaptor;
 import org.molgenis.das.impl.DasURLFilter;
-import org.molgenis.util.HandleRequestDelegationException;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -37,7 +37,7 @@ public class DasPatientFilterTest
 	private RequestDispatcher requestDispatcher;
 
 	@BeforeTest
-	public void setUp() throws HandleRequestDelegationException, Exception
+	public void setUp() throws MalformedURLException
 	{
 		Map<URL, String> linkout = new HashMap<URL, String>();
 		linkout.put(new URL("http://www.molgenis.org/"), "Link");
@@ -58,8 +58,8 @@ public class DasPatientFilterTest
 	}
 
 	@Test()
-	public void doFilterPatientTest() throws UnimplementedFeatureException, DataSourceException, IOException,
-			ServletException
+	public void doFilterPatientTest()
+			throws UnimplementedFeatureException, DataSourceException, IOException, ServletException
 	{
 		ArgumentCaptor<HttpServletRequest> argumentRequest = ArgumentCaptor.forClass(HttpServletRequest.class);
 		ArgumentCaptor<HttpServletResponse> argumentResponse = ArgumentCaptor.forClass(HttpServletResponse.class);
@@ -69,8 +69,8 @@ public class DasPatientFilterTest
 	}
 
 	// @Test()
-	public void doFilterNoPatientTest() throws UnimplementedFeatureException, DataSourceException, IOException,
-			ServletException
+	public void doFilterNoPatientTest()
+			throws UnimplementedFeatureException, DataSourceException, IOException, ServletException
 	{
 		filter.doFilter(requestNoPatient, responseNoPatient, chain);
 		verify(chain).doFilter(eq(requestNoPatient), eq(responseNoPatient));

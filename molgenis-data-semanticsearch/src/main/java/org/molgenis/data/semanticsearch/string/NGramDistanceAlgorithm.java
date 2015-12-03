@@ -49,7 +49,7 @@ public class NGramDistanceAlgorithm
 				"here's", "hers", "herself", "him", "himself", "his", "how", "how's", "i", "i'd", "i'll", "i'm",
 				"i've", "if", "in", "into", "is", "isn't", "it", "it's", "its", "itself", "let's", "me", "more",
 				"most", "mustn't", "my", "myself", "no", "nor", "not", "of", "off", "on", "once", "only", "or",
-				"other", "ought", "our", "ours ", " ourselves", "out", "over", "own", "same", "shan't", "she", "she'd",
+				"other", "ought", "our", "ours", "ourselves", "out", "over", "own", "same", "shan't", "she", "she'd",
 				"she'll", "she's", "should", "shouldn't", "so", "some", "such", "than", "that", "that's", "the",
 				"their", "theirs", "them", "themselves", "then", "there", "there's", "these", "they", "they'd",
 				"they'll", "they're", "they've", "this", "those", "through", "to", "too", "under", "until", "up",

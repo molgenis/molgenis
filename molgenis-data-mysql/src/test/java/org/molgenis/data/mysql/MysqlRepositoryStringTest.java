@@ -28,7 +28,7 @@ public class MysqlRepositoryStringTest extends MysqlRepositoryAbstractDatatypeTe
 	}
 
 	@Override
-	public Entity defaultEntity()
+	public Entity createTestEntity()
 	{
 		Entity e = new MapEntity();
 		e.set("col1", "col2value");

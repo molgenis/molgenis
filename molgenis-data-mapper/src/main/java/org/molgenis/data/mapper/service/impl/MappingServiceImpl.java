@@ -1,5 +1,6 @@
 package org.molgenis.data.mapper.service.impl;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
 
 import java.util.Collections;
@@ -39,20 +40,26 @@ public class MappingServiceImpl implements MappingService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MappingServiceImpl.class);
 
-	@Autowired
-	private DataService dataService;
+	private final DataService dataService;
+
+	private final AlgorithmService algorithmService;
+
+	private final IdGenerator idGenerator;
+
+	private final MappingProjectRepository mappingProjectRepository;
+
+	private final PermissionSystemService permissionSystemService;
 
 	@Autowired
-	private AlgorithmService algorithmService;
-
-	@Autowired
-	private IdGenerator idGenerator;
-
-	@Autowired
-	private MappingProjectRepository mappingProjectRepository;
-
-	@Autowired
-	private PermissionSystemService permissionSystemService;
+	public MappingServiceImpl(DataService dataService, AlgorithmService algorithmService, IdGenerator idGenerator,
+			MappingProjectRepository mappingProjectRepository, PermissionSystemService permissionSystemService)
+	{
+		this.dataService = requireNonNull(dataService);
+		this.algorithmService = requireNonNull(algorithmService);
+		this.idGenerator = requireNonNull(idGenerator);
+		this.mappingProjectRepository = requireNonNull(mappingProjectRepository);
+		this.permissionSystemService = requireNonNull(permissionSystemService);
+	}
 
 	@Override
 	@RunAsSystem
@@ -156,8 +163,8 @@ public class MappingServiceImpl implements MappingService
 		targetMetaData.setPackage(PackageImpl.defaultPackage);
 		targetMetaData.setLabel(newEntityName);
 		targetMetaData.addAttribute("source");
-		if (dataService.hasRepository(newEntityName)) throw new MolgenisDataException("A repository with name ["
-				+ newEntityName + "] already exists");
+		if (dataService.hasRepository(newEntityName))
+			throw new MolgenisDataException("A repository with name [" + newEntityName + "] already exists");
 		Repository targetRepo = dataService.getMeta().addEntityMeta(targetMetaData);
 		permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 				Collections.singletonList(targetRepo.getName()));
@@ -204,9 +211,8 @@ public class MappingServiceImpl implements MappingService
 					generateId(targetMetaData.getIdAttribute().getDataType(), targetRepository.count()));
 		}
 		target.set("source", sourceMapping.getName());
-		sourceMapping.getAttributeMappings().forEach(
-				attributeMapping -> applyMappingToAttribute(attributeMapping, sourceEntity, target,
-						sourceEntityMetaData));
+		sourceMapping.getAttributeMappings().forEach(attributeMapping -> applyMappingToAttribute(attributeMapping,
+				sourceEntity, target, sourceEntityMetaData));
 		return target;
 	}
 

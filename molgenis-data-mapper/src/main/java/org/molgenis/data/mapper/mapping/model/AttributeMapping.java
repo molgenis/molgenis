@@ -1,9 +1,9 @@
 package org.molgenis.data.mapper.mapping.model;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
 
 /**
@@ -19,7 +19,7 @@ public class AttributeMapping
 
 	public enum AlgorithmState
 	{
-		CURATED("CURATED"), GENERATED_HIGH("GENERATED_HIGH"), GENERATED_LOW("GENERATED_LOW");
+		CURATED("CURATED"), GENERATED_HIGH("GENERATED_HIGH"), GENERATED_LOW("GENERATED_LOW"), DISCUSS("DISCUSS");
 
 		private String label;
 
@@ -44,13 +44,11 @@ public class AttributeMapping
 	public AttributeMapping(String identifier, AttributeMetaData targetAttributeMetaData, String algorithm,
 			List<AttributeMetaData> sourceAttributeMetaDatas, String algorithmState)
 	{
-
 		this.identifier = identifier;
 		this.targetAttributeMetaData = targetAttributeMetaData;
 		this.sourceAttributeMetaDatas = sourceAttributeMetaDatas;
 		this.algorithm = algorithm;
 		this.algorithmState = convertToEnum(algorithmState);
-
 	}
 
 	/**
@@ -62,7 +60,7 @@ public class AttributeMapping
 	{
 		this.identifier = null;
 		this.targetAttributeMetaData = target;
-		this.sourceAttributeMetaDatas = Collections.emptyList();
+		this.sourceAttributeMetaDatas = Lists.<AttributeMetaData> newArrayList();
 		this.algorithm = null;
 		this.algorithmState = null;
 	}
@@ -150,7 +148,8 @@ public class AttributeMapping
 	public String toString()
 	{
 		return "AttributeMapping [identifier=" + identifier + ", targetAttributeMetaData=" + targetAttributeMetaData
-				+ ", sourceAttributeMetaDatas=" + sourceAttributeMetaDatas + ", algorithm=" + algorithm + "]";
+				+ ", sourceAttributeMetaDatas=" + sourceAttributeMetaDatas + ", algorithm=" + algorithm
+				+ ", algorithmState=" + algorithmState + "]";
 	}
 
 	public void setAlgorithm(String algorithm)

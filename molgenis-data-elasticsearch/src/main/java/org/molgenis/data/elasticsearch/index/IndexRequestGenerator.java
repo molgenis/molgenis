@@ -1,5 +1,6 @@
 package org.molgenis.data.elasticsearch.index;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL_MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
@@ -18,6 +19,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
+import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,16 +36,13 @@ public class IndexRequestGenerator
 
 	private final Client client;
 	private final String indexName;
-	private final EntityToSourceConverter entityToSourceConverter;
+	private final ElasticsearchEntityFactory elasticsearchEntityFactory;
 
-	public IndexRequestGenerator(Client client, String indexName, EntityToSourceConverter entityToSourceConverter)
+	public IndexRequestGenerator(Client client, String indexName, ElasticsearchEntityFactory elasticsearchEntityFactory)
 	{
-		if (client == null) throw new IllegalArgumentException("Client is null");
-		if (indexName == null) throw new IllegalArgumentException("IndexName is null");
-		if (entityToSourceConverter == null) throw new IllegalArgumentException("EntityToSourceConverter is null");
-		this.client = client;
-		this.indexName = indexName;
-		this.entityToSourceConverter = entityToSourceConverter;
+		this.client = requireNonNull(client);
+		this.indexName = requireNonNull(indexName);
+		this.elasticsearchEntityFactory = requireNonNull(elasticsearchEntityFactory);
 	}
 
 	public Iterable<BulkRequestBuilder> buildIndexRequest(final Repository repository)
@@ -93,7 +92,7 @@ public class IndexRequestGenerator
 				for (; row < maxRow; ++row)
 				{
 					Entity entity = it.next();
-					Map<String, Object> doc = entityToSourceConverter.convert(entity, entityMetaData);
+					Map<String, Object> doc = elasticsearchEntityFactory.create(entityMetaData, entity);
 					IndexRequestBuilder request = client.prepareIndex(indexName,
 							MapperTypeSanitizer.sanitizeMapperType(repository.getName()));
 

@@ -20,6 +20,7 @@ import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.GeneralizedI
 import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.GeneralizedInheritance.OTHER;
 import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.GeneralizedInheritance.RECESSIVE;
 import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.GeneralizedInheritance.XLINKED;
+import static org.molgenis.data.annotator.websettings.CGDAnnotatorSettings.Meta.CGD_LOCATION;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,6 +42,7 @@ import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.QueryCreator;
 import org.molgenis.data.annotation.entity.ResultFilter;
 import org.molgenis.data.annotation.filter.FirstResultFilter;
+import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.query.AttributeEqualsQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
@@ -48,8 +50,6 @@ import org.molgenis.data.annotation.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -64,7 +64,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class CGDAnnotator
 {
-	public static final String CGD_FILE_LOCATION_PROPERTY = "cgd_location";
+	public static final String NAME = "CGD";
+
 	private static String CGD_RESOURCE = "CGDResource";
 	private static final char SEPARATOR = '\t';
 
@@ -75,7 +76,7 @@ public class CGDAnnotator
 	private static final String GENERALIZED_INHERITANCE_LABEL = "CGDGIN";
 
 	@Autowired
-	private MolgenisSettings molgenisSettings;
+	private Entity CGDAnnotatorSettings;
 
 	@Autowired
 	private DataService dataService;
@@ -95,10 +96,8 @@ public class CGDAnnotator
 				"INTERVENTION CATEGORIES", "INTERVENTION_CATEGORIES"), MANIFESTATION_CATEGORIES(
 				"MANIFESTATION CATEGORIES", "MANIFESTATION_CATEGORIES"), ALLELIC_CONDITIONS("ALLELIC CONDITIONS",
 				"ALLELIC_CONDITIONS"), ENTREZ_GENE_ID("ENTREZ GENE ID", "ENTREZ_GENE_ID"), HGNC_ID("HGNC ID", "HGNC_ID"), CONDITION(
-				"CONDITION", VcfRepository.getInfoPrefix() + CONDITION_LABEL), AGE_GROUP("AGE GROUP", VcfRepository
-				.getInfoPrefix() + AGE_GROUP_LABEL), INHERITANCE("INHERITANCE", VcfRepository.getInfoPrefix()
-				+ INHERITANCE_LABEL), GENERALIZED_INHERITANCE("", VcfRepository.getInfoPrefix()
-				+ GENERALIZED_INHERITANCE_LABEL);
+				"CONDITION", CONDITION_LABEL), AGE_GROUP("AGE GROUP", AGE_GROUP_LABEL), INHERITANCE("INHERITANCE",
+				INHERITANCE_LABEL), GENERALIZED_INHERITANCE("", GENERALIZED_INHERITANCE_LABEL);
 
 		private final String cgdName;// Column name as defined in CGD file
 		private final String attributeName;// Output attribute name
@@ -153,7 +152,7 @@ public class CGDAnnotator
 	@Bean
 	public Resource cgdResource()
 	{
-		return new ResourceImpl(CGD_RESOURCE, new SingleResourceConfig(CGD_FILE_LOCATION_PROPERTY, molgenisSettings),
+		return new ResourceImpl(CGD_RESOURCE, new SingleResourceConfig(CGD_LOCATION, CGDAnnotatorSettings),
 				new RepositoryFactory()
 				{
 					@Override
@@ -166,7 +165,7 @@ public class CGDAnnotator
 
 	private AnnotatorInfo getAnnotatorInfo()
 	{
-		return AnnotatorInfo.create(Status.BETA, Type.PHENOTYPE_ASSOCIATION, "CGD", "Clinical Genomics Database",
+		return AnnotatorInfo.create(Status.READY, Type.PHENOTYPE_ASSOCIATION, "CGD", "Clinical Genomics Database",
 				getOutputAttributes());
 	}
 
@@ -191,12 +190,13 @@ public class CGDAnnotator
 		return attributes;
 	}
 
-	private static class CGDEntityAnnotator extends AnnotatorImpl
+	private class CGDEntityAnnotator extends AnnotatorImpl
 	{
 		public CGDEntityAnnotator(String sourceRepositoryName, AnnotatorInfo info, QueryCreator queryCreator,
 				ResultFilter resultFilter, DataService dataService, Resources resources)
 		{
-			super(sourceRepositoryName, info, queryCreator, resultFilter, dataService, resources);
+			super(sourceRepositoryName, info, queryCreator, resultFilter, dataService, resources,
+					new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(CGD_LOCATION, CGDAnnotatorSettings));
 		}
 
 		@Override

@@ -6,8 +6,11 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.IntStream;
 
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -35,6 +38,14 @@ public class HugeSetTest
 	public void add()
 	{
 		hugeSet.add("test");
+		assertEquals(hugeSet.size(), 1);
+	}
+
+	@Test
+	public void addLarge()
+	{
+		fillToThreshold();
+		assertEquals(hugeSet.size(), HugeSet.THRESHOLD);
 	}
 
 	@Test
@@ -42,6 +53,14 @@ public class HugeSetTest
 	{
 		List<String> contents = Arrays.asList("test1", "test2", "test3");
 		hugeSet.addAll(contents);
+		hugeSet.clear();
+		assertTrue(hugeSet.isEmpty());
+	}
+
+	@Test
+	public void clearLarge()
+	{
+		fillToThreshold();
 		hugeSet.clear();
 		assertTrue(hugeSet.isEmpty());
 	}
@@ -56,6 +75,14 @@ public class HugeSetTest
 	}
 
 	@Test
+	public void containsLarge()
+	{
+		fillToThreshold();
+		assertTrue(hugeSet.contains("2"));
+		assertFalse(hugeSet.contains("test"));
+	}
+
+	@Test
 	public void containsAll()
 	{
 		List<String> contents = Arrays.asList("test1", "test2", "test3");
@@ -64,10 +91,36 @@ public class HugeSetTest
 	}
 
 	@Test
+	public void containsAllLarge()
+	{
+		fillToThreshold();
+		Set<String> contents = new HashSet<>();
+		IntStream.range(0, HugeSet.THRESHOLD).mapToObj(Integer::toString).forEach(contents::add);
+		assertTrue(hugeSet.containsAll(contents));
+	}
+
+	@Test
 	public void iterator()
 	{
 		List<String> contents = Arrays.asList("test1", "test2", "test3");
 		hugeSet.addAll(contents);
+
+		Iterator<String> it = hugeSet.iterator();
+		assertEquals(Iterators.size(it), contents.size());
+
+		for (String s : hugeSet)
+		{
+			assertTrue(contents.contains(s));
+		}
+	}
+
+	@Test
+	public void iteratorLarge()
+	{
+		fillToThreshold();
+
+		Set<String> contents = new HashSet<>();
+		IntStream.range(0, HugeSet.THRESHOLD).mapToObj(Integer::toString).forEach(contents::add);
 
 		Iterator<String> it = hugeSet.iterator();
 		assertEquals(Iterators.size(it), contents.size());
@@ -88,10 +141,30 @@ public class HugeSetTest
 	}
 
 	@Test
+	public void removeLarge()
+	{
+		fillToThreshold();
+		hugeSet.remove("1");
+		assertEquals(hugeSet.size(), HugeSet.THRESHOLD - 1);
+	}
+
+	@Test
 	public void removeAll()
 	{
 		List<String> contents = Arrays.asList("test1", "test2", "test3");
 		hugeSet.addAll(contents);
+		hugeSet.removeAll(contents);
+		assertEquals(hugeSet.size(), 0);
+	}
+
+	@Test
+	public void removeAllLarge()
+	{
+		fillToThreshold();
+
+		Set<String> contents = new HashSet<>();
+		IntStream.range(0, HugeSet.THRESHOLD).mapToObj(Integer::toString).forEach(contents::add);
+
 		hugeSet.removeAll(contents);
 		assertEquals(hugeSet.size(), 0);
 	}
@@ -106,22 +179,30 @@ public class HugeSetTest
 	}
 
 	@Test
-	public void size()
+	public void retainAllLarge()
 	{
-		hugeSet.add("test1");
-		hugeSet.add("test2");
-		hugeSet.add("test3");
-
-		assertEquals(hugeSet.size(), 3);
+		fillToThreshold();
+		hugeSet.retainAll(Arrays.asList("2", "3"));
+		assertEquals(hugeSet.size(), 2);
 	}
 
 	@Test
 	public void toArray()
 	{
+		List<String> contents = Arrays.asList("test1", "test2", "test3");
+		hugeSet.addAll(contents);
+		assertEquals(hugeSet.toArray().length, 3);
 	}
 
 	@Test
-	public void toArrayT()
+	public void toArrayLarge()
 	{
+		fillToThreshold();
+		assertEquals(hugeSet.toArray().length, HugeSet.THRESHOLD);
+	}
+
+	private void fillToThreshold()
+	{
+		IntStream.range(0, HugeSet.THRESHOLD).mapToObj(Integer::toString).forEach(hugeSet::add);
 	}
 }

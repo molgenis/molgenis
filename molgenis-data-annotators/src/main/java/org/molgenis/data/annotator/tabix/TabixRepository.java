@@ -1,9 +1,15 @@
 package org.molgenis.data.annotator.tabix;
 
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.vcf.VcfRepository.CHROM;
+import static org.molgenis.data.vcf.VcfRepository.POS;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -15,14 +21,13 @@ import org.molgenis.data.Query;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.vcf.VcfRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import au.com.bytecode.opencsv.CSVParser;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
+
+import au.com.bytecode.opencsv.CSVParser;
 
 public class TabixRepository extends AbstractRepository
 {
@@ -30,6 +35,8 @@ public class TabixRepository extends AbstractRepository
 
 	private TabixReader reader;
 	private EntityMetaData entityMetaData;
+	private final String chromosomeAttributeName;
+	private final String positionAttributeName;
 
 	/**
 	 * Creates a new {@link TabixRepository}
@@ -43,8 +50,25 @@ public class TabixRepository extends AbstractRepository
 	 */
 	public TabixRepository(File file, EntityMetaData entityMetaData) throws IOException
 	{
+		this(file, entityMetaData, CHROM, POS);
+	}
+
+	public TabixRepository(File file, EntityMetaData entityMetaData, String chromosomeAttributeName,
+			String positionAttributeName) throws IOException
+	{
 		this.entityMetaData = entityMetaData;
 		this.reader = new TabixReader(file.getAbsolutePath());
+		this.chromosomeAttributeName = requireNonNull(chromosomeAttributeName);
+		this.positionAttributeName = requireNonNull(positionAttributeName);
+	}
+
+	TabixRepository(TabixReader reader, EntityMetaData entityMetaData, String chromosomeAttributeName,
+			String positionAttributeName)
+	{
+		this.reader = requireNonNull(reader);
+		this.entityMetaData = requireNonNull(entityMetaData);
+		this.chromosomeAttributeName = requireNonNull(chromosomeAttributeName);
+		this.positionAttributeName = requireNonNull(positionAttributeName);
 	}
 
 	public static CSVParser getCsvParser()
@@ -67,9 +91,18 @@ public class TabixRepository extends AbstractRepository
 	@Override
 	public Iterable<Entity> findAll(Query q)
 	{
-		String chromValue = getFirstEqualsValueFor(VcfRepository.CHROM, q).toString();
-		long posValue = Long.parseLong(getFirstEqualsValueFor(VcfRepository.POS, q).toString());
-		return query(chromValue, Long.valueOf(posValue));
+		Object posValue = getFirstEqualsValueFor(positionAttributeName, q);
+		Object chromValue = getFirstEqualsValueFor(chromosomeAttributeName, q);
+		List<Entity> result = new ArrayList<Entity>();
+
+		// if one of both required attributes is null, skip the query and return an empty list
+		if (posValue != null && chromValue != null)
+		{
+			long posLongValue = Long.parseLong(posValue.toString());
+			String chromStringValue = chromValue.toString();
+			result = query(chromStringValue, Long.valueOf(posLongValue));
+		}
+		return result;
 	}
 
 	/**
@@ -92,21 +125,33 @@ public class TabixRepository extends AbstractRepository
 			String line = iterator.next();
 			while (line != null)
 			{
-				builder.add(toEntity(line));
+				Entity entity = toEntity(line);
+				if (entity.getLong(positionAttributeName) == pos)
+				{
+					builder.add(entity);
+				}
+				else
+				{
+					LOG.warn("TabixReader returns entity that does not match the query!");
+				}
 				line = iterator.next();
 			}
 		}
 		catch (IOException e)
 		{
-			LOG.error("Error reading from tabix reader", e);
+			LOG.error("Error reading from tabix resource", e);
 		}
 		catch (NullPointerException e)
 		{
-			LOG.error("Error reading from tabix reader for query: " + queryString, e);
+			LOG.warn("Unable to read from tabix resource for query: " + queryString
+					+ " (Position not present in resource file?)");
+			LOG.debug("", e);
 		}
 		catch (ArrayIndexOutOfBoundsException e)
 		{
-			LOG.error("Error reading from tabix reader for query: " + queryString + " (Unknown Chromosome?)", e);
+			LOG.warn("Unable to read from tabix resource for query: " + queryString
+					+ " (Chromosome not present in resource file?)");
+			LOG.debug("", e);
 		}
 		return builder.build();
 	}
@@ -181,5 +226,4 @@ public class TabixRepository extends AbstractRepository
 	{
 		return new TabixRepositoryIterator();
 	}
-
 }

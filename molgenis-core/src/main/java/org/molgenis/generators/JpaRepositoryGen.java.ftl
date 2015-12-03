@@ -19,6 +19,10 @@ import org.molgenis.data.support.QueryResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+/**
+ * <#if JavaName(entity) == "RuntimeProperty">@deprecated replaced by setting classes that derive from {@link org.molgenis.data.settings.DefaultSettingsEntity}</#if>
+ */
+<#if JavaName(entity) == "RuntimeProperty">@Deprecated</#if>
 @Repository("${JavaName(entity)}Repository")
 public class ${JavaName(entity)}Repository extends JpaRepository
 {	

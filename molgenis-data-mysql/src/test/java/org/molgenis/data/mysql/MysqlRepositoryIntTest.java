@@ -6,6 +6,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.testng.Assert;
 
 /** Test for MolgenisFieldTypes.INT */
 public class MysqlRepositoryIntTest extends MysqlRepositoryAbstractDatatypeTest
@@ -17,7 +18,7 @@ public class MysqlRepositoryIntTest extends MysqlRepositoryAbstractDatatypeTest
 		varcharMD.setIdAttribute("col1");
 		varcharMD.addAttribute("col1").setDataType(MolgenisFieldTypes.INT).setNillable(false);
 		varcharMD.addAttribute("col2").setDataType(MolgenisFieldTypes.INT);
-		varcharMD.addAttribute("col3").setDataType(MolgenisFieldTypes.INT).setDefaultValue(-1);
+		varcharMD.addAttribute("col3").setDataType(MolgenisFieldTypes.INT);
 		return varcharMD;
 	}
 
@@ -28,11 +29,20 @@ public class MysqlRepositoryIntTest extends MysqlRepositoryAbstractDatatypeTest
 	}
 
 	@Override
-	public Entity defaultEntity()
+	public Entity createTestEntity()
 	{
 		Entity e = new MapEntity();
 		e.set("col1", 1);
-		e.set("col2", 1);
+		e.set("col2", 3);
+		e.set("col3", -3);
 		return e;
+	}
+
+	@Override
+	public void verifyTestEntity(Entity e) throws Exception
+	{
+		Assert.assertEquals(e.get("col1"), 1);
+		Assert.assertEquals(e.get("col2"), 3);
+		Assert.assertEquals(e.get("col3"), -3);
 	}
 }

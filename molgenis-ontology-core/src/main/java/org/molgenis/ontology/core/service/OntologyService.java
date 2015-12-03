@@ -23,6 +23,19 @@ public interface OntologyService
 	Ontology getOntology(String iri);
 
 	/**
+	 * Finds ontology terms that are exact matches to a certain search string.
+	 * 
+	 * @param ontologies
+	 *            {@link Ontology}s to search in
+	 * @param search
+	 *            search term
+	 * @param pageSize
+	 *            number of results to return.
+	 * @return List of {@link OntologyTerm}s that match the search term.
+	 */
+	List<OntologyTerm> findExcatOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize);
+
+	/**
 	 * Finds ontology terms that match a certain search string.
 	 * 
 	 * @param ontologies
@@ -34,6 +47,15 @@ public interface OntologyService
 	 * @return List of {@link OntologyTerm}s that match the search term.
 	 */
 	List<OntologyTerm> findOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize);
+
+	/**
+	 * Retrieve all ontology terms from the specified ontology
+	 * 
+	 * @param ontologyIri
+	 * 
+	 * @return all the {@link OntologyTerm}
+	 */
+	List<OntologyTerm> getAllOntologyTerms(String ontologyIri);
 
 	// voor de tag service
 	/**
@@ -65,4 +87,10 @@ public interface OntologyService
 	 */
 	Integer getOntologyTermDistance(OntologyTerm ontologyTerm1, OntologyTerm ontologyTerm2);
 
+	/**
+	 * Retrieves all ontologies ids.
+	 * 
+	 * @return String Ontology Id
+	 */
+	List<String> getAllOntologiesIds();
 }

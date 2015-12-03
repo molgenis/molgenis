@@ -40,6 +40,14 @@ public class RunAsSystemProxy implements Advice, MethodInterceptor
 
 	}
 
+	public static void runAsSystem(Runnable runnable)
+	{
+		runAsSystem(() -> {
+			runnable.run();
+			return null;
+		});
+	}
+
 	public static <T, X extends Throwable> T runAsSystem(RunnableAsSystem<T, X> runnable) throws X
 	{
 		// Remember the original context

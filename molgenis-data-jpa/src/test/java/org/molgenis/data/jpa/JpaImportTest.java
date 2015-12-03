@@ -76,7 +76,7 @@ public class JpaImportTest extends BaseJpaTest
 		{
 			assertEquals(e.getViolations().size(), 1);
 			assertEquals(e.getViolations().iterator().next().getViolatedAttribute().getName(), "lastName");
-			assertEquals(e.getViolations().iterator().next().getRownr(), 2);
+			assertEquals(e.getViolations().iterator().next().getRownr(), Long.valueOf(2));
 		}
 	}
 
@@ -123,7 +123,7 @@ public class JpaImportTest extends BaseJpaTest
 		{
 			assertEquals(e.getViolations().size(), 2);
 			assertEquals(e.getViolations().iterator().next().getViolatedAttribute().getName(), "father");
-			assertEquals(e.getViolations().iterator().next().getRownr(), 1);
+			assertEquals(e.getViolations().iterator().next().getRownr(), Long.valueOf(1));
 		}
 	}
 
@@ -158,7 +158,7 @@ public class JpaImportTest extends BaseJpaTest
 		{
 			assertEquals(e.getViolations().size(), 1);
 			assertEquals(e.getViolations().iterator().next().getViolatedAttribute().getName(), "children");
-			assertEquals(e.getViolations().iterator().next().getRownr(), 3);
+			assertEquals(e.getViolations().iterator().next().getRownr(), Long.valueOf(3));
 		}
 	}
 }

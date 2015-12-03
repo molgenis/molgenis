@@ -1,5 +1,7 @@
 package org.molgenis.data.mysql;
 
+import static org.testng.Assert.assertEquals;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
@@ -13,12 +15,11 @@ public class MysqlRepositoryDecimalTest extends MysqlRepositoryAbstractDatatypeT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EditableEntityMetaData varcharMD = new DefaultEntityMetaData("DecimalTest")
-				.setLabel("Decimal Test");
+		EditableEntityMetaData varcharMD = new DefaultEntityMetaData("DecimalTest").setLabel("Decimal Test");
 		varcharMD.setIdAttribute("col1");
 		varcharMD.addAttribute("col1").setDataType(MolgenisFieldTypes.DECIMAL).setNillable(false);
 		varcharMD.addAttribute("col2").setDataType(MolgenisFieldTypes.DECIMAL);
-		varcharMD.addAttribute("col3").setDataType(MolgenisFieldTypes.DECIMAL).setDefaultValue(1.3);
+		varcharMD.addAttribute("col3").setDataType(MolgenisFieldTypes.DECIMAL);
 		return varcharMD;
 	}
 
@@ -29,11 +30,20 @@ public class MysqlRepositoryDecimalTest extends MysqlRepositoryAbstractDatatypeT
 	}
 
 	@Override
-	public Entity defaultEntity()
+	public Entity createTestEntity()
 	{
 		Entity e = new MapEntity();
 		e.set("col1", 2.9);
 		e.set("col2", 3.1);
+		e.set("col3", 5);
 		return e;
+	}
+
+	@Override
+	public void verifyTestEntity(Entity e) throws Exception
+	{
+		assertEquals(e.get("col1"), 2.9);
+		assertEquals(e.get("col2"), 3.1);
+		assertEquals(e.get("col3"), 5.0);
 	}
 }

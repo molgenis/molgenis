@@ -1,12 +1,17 @@
 package org.molgenis.data.importer;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
@@ -31,12 +36,10 @@ public class EmxImportService implements ImportService
 	@Autowired
 	public EmxImportService(MetaDataParser parser, ImportWriter writer, DataService dataService)
 	{
-		if (parser == null) throw new IllegalArgumentException("parser is null");
-		if (writer == null) throw new IllegalArgumentException("writer is null");
 		LOG.debug("EmxImportService created");
-		this.parser = parser;
-		this.writer = writer;
-		this.dataService = dataService;
+		this.parser = requireNonNull(parser);
+		this.writer = requireNonNull(writer);
+		this.dataService = requireNonNull(dataService);
 	}
 
 	@Override
@@ -124,5 +127,15 @@ public class EmxImportService implements ImportService
 	public Set<String> getSupportedFileExtensions()
 	{
 		return GenericImporterExtensions.getEMX();
+	}
+
+	@Override
+	public LinkedHashMap<String, Boolean> integrationTestMetaData(MetaDataService metaDataService,
+			RepositoryCollection repositoryCollection, String defaultPackage)
+	{
+		List<String> skipEntities = Arrays.asList(EmxMetaDataParser.ATTRIBUTES, EmxMetaDataParser.PACKAGES,
+				EmxMetaDataParser.ENTITIES, EmxMetaDataParser.TAGS);
+		ParsedMetaData parsedMetaData = parser.parse(repositoryCollection, defaultPackage);
+		return metaDataService.integrationTestMetaData(parsedMetaData.getEntityMap(), skipEntities, defaultPackage);
 	}
 }

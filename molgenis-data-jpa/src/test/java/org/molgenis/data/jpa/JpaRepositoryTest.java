@@ -1,5 +1,6 @@
 package org.molgenis.data.jpa;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -126,6 +127,27 @@ public class JpaRepositoryTest extends BaseJpaTest
 		repo.deleteById(Arrays.asList(id));
 		assertNull(repo.findOne(p.getId()));
 	}
+	
+
+	@Test
+	public void testFindAllInvalidId()
+	{
+		Person p1 = new Person("Piet", "Paulusma");
+		repo.add(p1);
+
+		Person p2 = new Person("Paulus", "de Boskabouter");
+		repo.add(p2);
+
+		{
+			Iterable<Entity> entities = newArrayList(repo.findAll(Arrays.asList((Object) p1.getId(), "nonsense", p2.getId())));
+			assertEquals(entities, Arrays.asList(p1, p2));
+		}
+		
+		{
+			Iterable<Entity> entities = newArrayList(repo.findAll(Arrays.asList((Object) p2.getId(), "nonsense", p1.getId())));
+			assertEquals(entities, Arrays.asList(p2, p1));
+		}
+	}
 
 	@Test
 	public void testFindAll()
@@ -136,10 +158,14 @@ public class JpaRepositoryTest extends BaseJpaTest
 		Person p2 = new Person("Paulus", "de Boskabouter");
 		repo.add(p2);
 
-		Iterable<Entity> it = repo.findAll(Arrays.asList((Object) p1.getId(), p2.getId()));
-		assertEquals(Iterables.size(it), 2);
-		assertTrue(Iterables.contains(it, p1));
-		assertTrue(Iterables.contains(it, p2));
+		{
+			Iterable<Entity> entities = newArrayList(repo.findAll(Arrays.asList((Object) p1.getId(), p2.getId())));
+			assertEquals(entities, Arrays.asList(p1, p2));
+		}
+		{
+			Iterable<Entity> entities = newArrayList(repo.findAll(Arrays.asList((Object) p2.getId(), p1.getId())));
+			assertEquals(entities, Arrays.asList(p2, p1));
+		}
 	}
 
 	@Test
@@ -323,8 +349,8 @@ public class JpaRepositoryTest extends BaseJpaTest
 		Person p2 = new Person("Piet", "de Boskabouter");
 		repo.add(Arrays.asList(p1, p2));
 
-		Iterable<Entity> it = repo.findAll(new QueryImpl().eq("lastName", "Paulusma").or()
-				.eq("lastName", "de Boskabouter"));
+		Iterable<Entity> it = repo
+				.findAll(new QueryImpl().eq("lastName", "Paulusma").or().eq("lastName", "de Boskabouter"));
 		assertEquals(Iterables.size(it), 2);
 		assertTrue(Iterables.contains(it, p1));
 		assertTrue(Iterables.contains(it, p2));
@@ -368,8 +394,8 @@ public class JpaRepositoryTest extends BaseJpaTest
 		Person p3 = new Person("Klaas", "Vaak");
 		repo.add(Arrays.asList(p1, p2, p3));
 
-		Iterable<Entity> it = repo.findAll(new QueryImpl().eq("lastName", "Vaak").or().nest()
-				.eq("firstName", "Unknown").and().eq("lastName", "de Boskabouter").unnest());
+		Iterable<Entity> it = repo.findAll(new QueryImpl().eq("lastName", "Vaak").or().nest().eq("firstName", "Unknown")
+				.and().eq("lastName", "de Boskabouter").unnest());
 		assertEquals(Iterables.size(it), 1);
 		assertTrue(Iterables.contains(it, p3));
 	}
@@ -398,8 +424,8 @@ public class JpaRepositoryTest extends BaseJpaTest
 		Person p3 = new Person("Klaas", "Vaak");
 		repo.add(Arrays.asList(p1, p2, p3));
 
-		Iterable<Entity> it = repo.findAll(new QueryImpl().eq("lastName", "Vaak").or().nest()
-				.eq("firstName", "Unknown").and().eq("lastName", "Unknown").unnest());
+		Iterable<Entity> it = repo.findAll(new QueryImpl().eq("lastName", "Vaak").or().nest().eq("firstName", "Unknown")
+				.and().eq("lastName", "Unknown").unnest());
 		assertEquals(Iterables.size(it), 1);
 		assertTrue(Iterables.contains(it, p3));
 	}
@@ -413,8 +439,8 @@ public class JpaRepositoryTest extends BaseJpaTest
 		Person p3 = new Person("Klaas", "Vaak");
 		repo.add(Arrays.asList(p1, p2, p3));
 
-		Iterable<Entity> it = repo.findAll(new QueryImpl().eq("lastName", "Unknown").or().nest()
-				.eq("firstName", "Piet").and().eq("lastName", "de Boskabouter").unnest());
+		Iterable<Entity> it = repo.findAll(new QueryImpl().eq("lastName", "Unknown").or().nest().eq("firstName", "Piet")
+				.and().eq("lastName", "de Boskabouter").unnest());
 		assertEquals(Iterables.size(it), 1);
 		assertTrue(Iterables.contains(it, p2));
 	}
@@ -456,8 +482,8 @@ public class JpaRepositoryTest extends BaseJpaTest
 		Person p3 = new Person("Klaas", "Vaak");
 		repo.add(Arrays.asList(p1, p2, p3));
 
-		Iterable<Entity> it = repo.findAll(new QueryImpl().eq("lastName", "Unknown").or().nest()
-				.eq("firstName", "Piet").and().eq("lastName", "Unknown").unnest());
+		Iterable<Entity> it = repo.findAll(new QueryImpl().eq("lastName", "Unknown").or().nest().eq("firstName", "Piet")
+				.and().eq("lastName", "Unknown").unnest());
 		assertEquals(Iterables.size(it), 0);
 	}
 
@@ -601,8 +627,8 @@ public class JpaRepositoryTest extends BaseJpaTest
 		Person p3 = new Person("Klaas", "Vaak");
 		repo.add(Arrays.asList(p1, p2, p3));
 
-		Iterable<Entity> it = repo.findAll(new QueryImpl().pageSize(1).offset(1)
-				.sort(new Sort("lastName", Direction.ASC)));
+		Iterable<Entity> it = repo
+				.findAll(new QueryImpl().pageSize(1).offset(1).sort(new Sort("lastName", Direction.ASC)));
 
 		assertEquals(Iterables.size(it), 1);
 		assertTrue(Iterables.contains(it, p3));
