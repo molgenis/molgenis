@@ -8,23 +8,20 @@
 <div class="row">
 	<div class="col-md-offset-4 col-md-4 well">
 		<div class="row">
-			<div class="col-md-offset-1">
-				<#if ontologies?? & (ontologies?size > 0)>
-				<center><strong>Please select ontologies for annotation:</strong></center>
-				<div class="radio">
-					<#list ontologies as ontology>
-						<label class="checkbox">
-							<input name="selectOntologies" type="radio" value="${ontology.ontologyIRI?html}" <#if (ontology_index == 0) >checked</#if>> 
-							<a href="${ontology.ontologyIRI?html}" target="_blank">${ontology.ontologyName?html}</a>
-						</label>
-					</#list>
-				</div>
-				<#else>
-					<center>
-						<span>There are no ontologies avaiable!</span>
-						<a href="${context_url?replace("ontologyservice","ontologyindexer")?html}" target="_blank">Please upload new ontologies!</a>
-					</center>
-				</#if>
+			<div class="col-md-12">
+			<#if ontologies?? & (ontologies?size > 0)>
+				<center><strong>Please select ontologies for annotation</strong></center><br>
+				<select name="selectOntologies" class="form-control">
+				  <#list ontologies as ontology>
+				  	<option value="${ontology.ontologyIRI?html}" <#if (ontology_index == 0) >selected</#if>><a href="${ontology.ontologyIRI?html}" target="_blank">${ontology.ontologyName?html}</a></option>
+				  </#list>
+				</select>
+			<#else>
+				<center>
+					<span>There are no ontologies avaiable!</span>
+					<a href="${context_url?replace("ontologyservice","ontologyindexer")?html}" target="_blank">Please upload new ontologies!</a>
+				</center>
+			</#if>
 			</div>
 		</div>
 	</div>
@@ -73,7 +70,7 @@
 				molgenis.createAlert([{'message':'There are not ontologies avaiable!'}], 'error');
 				return false;
 			}
-			if($('[name="selectOntologies"]:checked').length === 0) {
+			if($('[name="selectOntologies"] option:selected').length === 0) {
 				molgenis.createAlert([{'message':'Please select an ontology to match against!'}], 'error');
 				return false;
 			}
@@ -100,7 +97,7 @@
 				molgenis.createAlert([{'message' :'There are not ontologies avaiable!'}], 'error');
 				return false;
 			}
-			if($('[name="selectOntologies"]:checked').length === 0) {
+			if($('[name="selectOntologies"] option:selected').length === 0) {
 				molgenis.createAlert([{'message' :'Please select an ontology to match against!'}], 'error');
 				return false;
 			}
