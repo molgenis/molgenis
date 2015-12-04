@@ -21,7 +21,7 @@ public class OntologyManagerController extends MolgenisPluginController
 {
 	public static final String ID = "ontologymanager";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
-	public static final String ONTOLOGY_MANAGER_PLUGIN = "OntologyManagerPlugin";
+	public static final String ONTOLOGY_MANAGER_PLUGIN = "ontology-manager-view";
 
 	@Autowired
 	private OntologyService ontologyService;
@@ -34,6 +34,14 @@ public class OntologyManagerController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model) throws Exception
 	{
+		model.addAttribute("ontologies", ontologyService.getOntologies());
+		return ONTOLOGY_MANAGER_PLUGIN;
+	}
+
+	@RequestMapping(method = RequestMethod.POST)
+	public String delete(Model model) throws Exception
+	{
+		model.addAttribute("ontologies", ontologyService.getOntologies());
 		return ONTOLOGY_MANAGER_PLUGIN;
 	}
 
