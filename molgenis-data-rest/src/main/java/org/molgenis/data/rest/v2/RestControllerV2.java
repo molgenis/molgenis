@@ -584,7 +584,7 @@ class RestControllerV2
 		for (AttributeMetaData attr : attrs) // TODO performance use fetch instead of attrs
 		{
 			String attrName = attr.getName();
-			if (fetch == null || fetch.hasField(attr))
+			if (fetch == null || fetch.hasField(attrName))
 			{
 				FieldTypeEnum dataType = attr.getDataType().getEnumType();
 				switch (dataType)
