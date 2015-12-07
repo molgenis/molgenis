@@ -1,5 +1,6 @@
 package org.molgenis.data.importer;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -11,24 +12,34 @@ import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.Package;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.security.user.UserAccountService;
+import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.http.HttpRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
 import com.google.common.collect.Lists;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
-@Component
+@Controller
+@RequestMapping(MolgenisPluginController.PLUGIN_URI_PREFIX +"importer")
 public class ValidationResultWizardPage extends AbstractWizardPage
 {
 	private static final long serialVersionUID = 1L;
@@ -64,16 +75,13 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 
 	@Override
 	@Transactional
-	public String handleRequest(HttpServletRequest request, BindingResult result, Wizard wizard)
-	{
+	public String handleRequest(HttpServletRequest request, BindingResult result, Wizard wizard) {
 		ImportWizardUtil.validateImportWizard(wizard);
 		ImportWizard importWizard = (ImportWizard) wizard;
 		String entityImportOption = importWizard.getEntityImportOption();
 
-		if (entityImportOption != null)
-		{
-			try
-			{
+		if (entityImportOption != null) {
+			try {
 				// convert input to database action
 				DatabaseAction entityDbAction = ImportWizardUtil.toDatabaseAction(entityImportOption);
 				if (entityDbAction == null) throw new IOException("unknown database action: " + entityImportOption);
@@ -83,41 +91,22 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 				ImportService importService = importServiceFactory.getImportService(importWizard.getFile(),
 						repositoryCollection);
 
-				synchronized (this)
-				{
+				synchronized (this) {
 					ImportRun importRun = importRunService.addImportRun(SecurityUtils.getCurrentUsername());
 					((ImportWizard) wizard).setImportRunId(importRun.getId());
 
 					asyncImportJobs.execute(new ImportJob(importService, SecurityContextHolder.getContext(),
 							repositoryCollection, entityDbAction, importRun.getId(), importRunService, request
-									.getSession(), importWizard.getDefaultEntity()));
+							.getSession(), importWizard.getDefaultEntity()));
 				}
 
-			}
-			catch (RuntimeException e)
-			{
+			} catch (RuntimeException e) {
 				ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
-			}
-			catch (IOException e)
-			{
+			} catch (IOException e) {
 				ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
 			}
 
 		}
-
-		// Convert to list because it's less impossible use in FreeMarker
-		if (!userAccountService.getCurrentUser().getSuperuser())
-		{
-			String username = SecurityUtils.getCurrentUsername();
-			groups = RunAsSystemProxy.runAsSystem(() -> Lists.newArrayList(userService.getUserGroups(username)));
-		}
-		else
-		{
-			groups = Lists.newArrayList(dataService.findAll(MolgenisGroup.ENTITY_NAME, MolgenisGroup.class));
-		}
-
-		((ImportWizard) wizard).setGroups(groups);
-
 		return null;
 	}
 }

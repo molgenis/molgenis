@@ -86,6 +86,7 @@ public class GeneNetworksAnnotator
 	{
 		private static final String TERMS_USED = "termsFound";
 		private static final String TERMS_UNUSED = "termsNotFound";
+		private static final String LINKOUT = "geneNetworkLink";
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
 		private DataService dataService;
@@ -185,6 +186,19 @@ public class GeneNetworksAnnotator
 						sb.append(((JSONObject) termsArray.get(i)).getJSONObject("term").getString("id"));
 					}
 					superEntity.set(TERMS_USED, sb.toString());
+					dataService.update(pluginSettings.getString(GeneNetworksAnnotatorSettings.Meta.PROJECT_ENTITY),
+							superEntity);
+				}
+				if (superEntity.getEntityMetaData().getAttribute(LINKOUT) != null)
+				{
+					StringBuilder sb = new StringBuilder();
+					JSONArray termsArray = jsonObject.getJSONArray("terms");
+					for (int i = 0; i < termsArray.length(); i++)
+					{
+						if(i != 0) sb.append(",");
+						sb.append(((JSONObject) termsArray.get(i)).getJSONObject("term").getString("id"));
+					}
+					superEntity.set(LINKOUT, pluginSettings.getString(GeneNetworksAnnotatorSettings.Meta.GENE_NETWORK_URL) + "/diagnosis/" +sb.toString());
 					dataService.update(pluginSettings.getString(GeneNetworksAnnotatorSettings.Meta.PROJECT_ENTITY),
 							superEntity);
 				}
