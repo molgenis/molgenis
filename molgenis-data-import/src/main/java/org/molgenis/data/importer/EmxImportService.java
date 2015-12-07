@@ -86,16 +86,13 @@ public class EmxImportService implements ImportService
 			try
 			{
 				writer.rollbackSchemaChanges(job);
+				dataService.getMeta().refreshCaches();
 			}
 			catch (Exception ignore)
 			{
 				LOG.error("Error rolling back schema changes", ignore);
 			}
 			throw e;
-		}
-		finally
-		{
-			dataService.getMeta().refreshCaches();
 		}
 	}
 

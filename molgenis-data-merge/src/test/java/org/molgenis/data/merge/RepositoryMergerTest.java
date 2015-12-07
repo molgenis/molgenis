@@ -4,8 +4,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,6 +29,8 @@ import org.springframework.stereotype.Component;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.common.collect.Lists;
 
 /**
  * Created by charbonb on 01/09/14.
@@ -79,6 +81,7 @@ public class RepositoryMergerTest
 		DefaultAttributeMetaData idAttribute = new DefaultAttributeMetaData("ID",
 				MolgenisFieldTypes.FieldTypeEnum.STRING);
 		idAttribute.setIdAttribute(true);
+		idAttribute.setNillable(false);
 		idAttribute.setVisible(false);
 		entityMetaDataMerged.addAttributeMetaData(idAttribute);
 		entityMetaDataMerged.setIdAttribute("ID");
@@ -135,8 +138,8 @@ public class RepositoryMergerTest
 		RepositoryMerger repositoryMerger = new RepositoryMerger(dataService);
 
 		// check metaData
-		assertEquals(entityMetaDataMerged.getAttributes(),
-				repositoryMerger.mergeMetaData(repositoryList, commonAttributes, "mergedRepo").getAttributes());
+		assertEquals(Lists.newArrayList(entityMetaDataMerged.getAttributes()), Lists.newArrayList(
+				repositoryMerger.mergeMetaData(repositoryList, commonAttributes, "mergedRepo").getAttributes()));
 	}
 
 	@Test
