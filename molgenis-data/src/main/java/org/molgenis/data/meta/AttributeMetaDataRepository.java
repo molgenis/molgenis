@@ -52,6 +52,8 @@ import com.google.common.collect.Iterables;
  */
 class AttributeMetaDataRepository
 {
+	private static final int BATCH_SIZE = 1000;
+
 	public static final AttributeMetaDataMetaData META_DATA = AttributeMetaDataMetaData.INSTANCE;
 
 	private final UuidGenerator uuidGenerator;
@@ -91,7 +93,7 @@ class AttributeMetaDataRepository
 
 	public Iterable<Entity> add(Iterable<AttributeMetaData> attrs)
 	{
-		Iterable<List<AttributeMetaData>> batches = Iterables.partition(attrs, 1000);
+		Iterable<List<AttributeMetaData>> batches = Iterables.partition(attrs, BATCH_SIZE);
 		return new Iterable<Entity>()
 		{
 			@Override
