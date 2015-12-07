@@ -30,6 +30,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.ElasticsearchService.CrudType;
 import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
 import org.molgenis.data.support.BatchingQueryResult;
+import org.molgenis.data.support.EntityMetaDataUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -146,7 +147,7 @@ class ElasticsearchEntityIterable extends BatchingQueryResult implements EntityC
 	@Override
 	public Iterable<String> getAttributeNames()
 	{
-		return entityMeta.getAtomicAttributeNames();
+		return EntityMetaDataUtils.getAttributeNames(entityMeta.getAtomicAttributes());
 	}
 
 	@Override
