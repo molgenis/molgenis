@@ -85,8 +85,8 @@ class AttributeMetaDataResponseV2
 			attrParts = filterAttributes(fetch, attrParts);
 
 			// create attribute response
-			this.attributes = Lists.newArrayList(
-					Iterables.transform(attrParts, new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
+			this.attributes = Lists.newArrayList(Iterables.transform(attrParts,
+					new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
 					{
 						@Override
 						public AttributeMetaDataResponseV2 apply(AttributeMetaData attr)
