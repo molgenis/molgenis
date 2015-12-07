@@ -27,6 +27,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
@@ -164,6 +165,20 @@ public class JpaRepository extends AbstractRepository
 		return getEntityManager().find(getEntityClass(),
 				getEntityMetaData().getIdAttribute().getDataType().convert(id));
 	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Entity findOne(Object id, Fetch fetch)
+	{
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Fetching JPA [{}] data by id [{}]", getEntityClass().getSimpleName(), id);
+		}
+
+		return getEntityManager().find(getEntityClass(),
+				getEntityMetaData().getIdAttribute().getDataType().convert(id));
+	}
+
 
 	@Override
 	@Transactional(readOnly = true)
