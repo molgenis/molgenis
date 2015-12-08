@@ -133,7 +133,7 @@ class AttributeMetaDataRepository
 		// Language attributes
 		for (String languageCode : languageService.getLanguageCodes())
 		{
-			String attributeName = LABEL + '.' + languageCode;
+			String attributeName = LABEL + '-' + languageCode;
 			String label = att.getLabel(languageCode);
 			if (label != null) attributeMetaDataEntity.set(attributeName, label);
 		}
@@ -221,7 +221,7 @@ class AttributeMetaDataRepository
 		// Language attributes
 		for (String languageCode : languageService.getLanguageCodes())
 		{
-			String attributeName = LABEL + '.' + languageCode;
+			String attributeName = LABEL + '-' + languageCode;
 			String label = entity.getString(attributeName);
 			if (label != null) attributeMetaData.setLabel(languageCode, label);
 		}

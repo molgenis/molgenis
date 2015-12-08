@@ -315,6 +315,20 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 	}
 
 	@Override
+	public AttributeMetaData getLabelAttribute(String languageCode)
+	{
+		for (AttributeMetaData attribute : getAttributesTraverser())
+		{
+			if (attribute.isLabelAttribute() && attribute.getName().endsWith('-' + languageCode))
+			{
+				return attribute;
+			}
+		}
+
+		return getLabelAttribute();
+	}
+
+	@Override
 	public Iterable<AttributeMetaData> getLookupAttributes()
 	{
 		return Iterables.filter(getAttributesTraverser(), new Predicate<AttributeMetaData>()

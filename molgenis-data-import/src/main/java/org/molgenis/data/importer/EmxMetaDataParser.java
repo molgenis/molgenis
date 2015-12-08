@@ -46,6 +46,7 @@ import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.i18n.I18nUtils;
 import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
@@ -177,7 +178,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		for (AttributeMetaData attr : attributesRepo.getEntityMetaData().getAtomicAttributes())
 		{
 			if (!SUPPORTED_ATTRIBUTE_ATTRIBUTES.contains(attr.getName().toLowerCase())
-					&& !attr.getName().toLowerCase().startsWith(LABEL + '.'))
+					&& !(I18nUtils.isI18n(attr.getName()) && attr.getName().toLowerCase().startsWith(LABEL)))
 			{
 				throw new IllegalArgumentException("Unsupported attribute metadata: attributes. " + attr.getName());
 			}
@@ -329,14 +330,16 @@ public class EmxMetaDataParser implements MetaDataParser
 			attribute.setLabel(attributeEntity.getString(LABEL));
 			for (AttributeMetaData attr : attributeEntity.getEntityMetaData().getAtomicAttributes())
 			{
-				if (attr.getName().startsWith(LABEL + '.'))
+				if (I18nUtils.isI18n(attr.getName()))
 				{
-					String languageCode = attr.getName().substring(attr.getName().indexOf('.') + 1,
-							attr.getName().length());
-					String label = attributeEntity.getString(attr.getName());
-					if (label != null)
+					if (attr.getName().startsWith(LABEL))
 					{
-						attribute.setLabel(languageCode, label);
+						String label = attributeEntity.getString(attr.getName());
+						if (label != null)
+						{
+							String languageCode = I18nUtils.getLanguageCode(attr.getName());
+							attribute.setLabel(languageCode, label);
+						}
 					}
 				}
 			}
@@ -507,7 +510,9 @@ public class EmxMetaDataParser implements MetaDataParser
 		{
 			for (AttributeMetaData attr : entitiesRepo.getEntityMetaData().getAtomicAttributes())
 			{
-				if (!EmxMetaDataParser.SUPPORTED_ENTITY_ATTRIBUTES.contains(attr.getName().toLowerCase()))
+				if (!EmxMetaDataParser.SUPPORTED_ENTITY_ATTRIBUTES.contains(attr.getName().toLowerCase())
+						&& !(I18nUtils.isI18n(attr.getName()) && attr.getName().startsWith(
+								org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION)))
 				{
 					throw new IllegalArgumentException("Unsupported entity metadata: entities." + attr.getName());
 				}
@@ -558,6 +563,23 @@ public class EmxMetaDataParser implements MetaDataParser
 
 				md.setLabel(entity.getString(org.molgenis.data.meta.EntityMetaDataMetaData.LABEL));
 				md.setDescription(entity.getString(org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION));
+
+				for (AttributeMetaData attr : entity.getEntityMetaData().getAtomicAttributes())
+				{
+					if (I18nUtils.isI18n(attr.getName()))
+					{
+						if (attr.getName().startsWith(org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION))
+						{
+							String description = entity.getString(attr.getName());
+							if (description != null)
+							{
+								String languageCode = I18nUtils.getLanguageCode(attr.getName());
+								md.setDescription(languageCode, description);
+							}
+						}
+					}
+				}
+
 				if (entity.getBoolean(ABSTRACT) != null) md.setAbstract(entity.getBoolean(ABSTRACT));
 				List<String> tagIds = entity.getList(TAGS);
 

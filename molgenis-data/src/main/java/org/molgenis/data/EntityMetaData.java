@@ -51,6 +51,11 @@ public interface EntityMetaData
 	String getDescription();
 
 	/**
+	 * Description of the entity in the requested language
+	 */
+	String getDescription(String languageCode);
+
+	/**
 	 * Returns all attributes. In case of compound attributes (attributes consisting of multiple atomic attributes) only
 	 * the compound attribute is returned. This attribute can be used to retrieve parts of the compound attribute.
 	 * 
@@ -84,6 +89,11 @@ public interface EntityMetaData
 	 * Attribute that is used as unique label. If no label exist, returns getIdAttribute().
 	 */
 	AttributeMetaData getLabelAttribute();
+
+	/**
+	 * Gets the correct label attribute for the given language, or the default if not found
+	 */
+	AttributeMetaData getLabelAttribute(String languageCode);
 
 	/**
 	 * Returns attributes that must be searched in case of xref/mref search

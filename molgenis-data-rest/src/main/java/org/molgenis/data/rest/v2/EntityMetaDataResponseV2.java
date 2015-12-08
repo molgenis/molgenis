@@ -66,7 +66,7 @@ class EntityMetaDataResponseV2
 		this.hrefCollection = String.format("%s/%s", BASE_URI, name); // FIXME apply Href escaping fix
 
 		this.name = name;
-		this.description = meta.getDescription();
+		this.description = meta.getDescription(languageService.getCurrentUserLanguageCode());
 		this.label = meta.getLabel();
 
 		// filter attribute parts
@@ -118,7 +118,8 @@ class EntityMetaDataResponseV2
 						}
 						else if (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
 						{
-							subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr);
+							subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr,
+									languageCode);
 						}
 						else
 						{
@@ -129,7 +130,9 @@ class EntityMetaDataResponseV2
 					}
 				}));
 
-		AttributeMetaData labelAttribute = meta.getLabelAttribute();
+		languageCode = languageService.getCurrentUserLanguageCode();
+
+		AttributeMetaData labelAttribute = meta.getLabelAttribute(languageCode);
 		this.labelAttribute = labelAttribute != null ? labelAttribute.getName() : null;
 
 		AttributeMetaData idAttribute = meta.getIdAttribute();
@@ -150,7 +153,6 @@ class EntityMetaDataResponseV2
 
 		this.writable = permissionService.hasPermissionOnEntity(name, Permission.WRITE)
 				&& dataService.getCapabilities(name).contains(RepositoryCapability.WRITABLE);
-		this.languageCode = languageService.getCurrentUserLanguageCode();
 	}
 
 	public String getHref()

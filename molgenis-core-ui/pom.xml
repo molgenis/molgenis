@@ -176,6 +176,7 @@
 	                            <jsSourceFile>/component/Spinner.js</jsSourceFile>
 	                            <jsSourceFile>/component/Table.js</jsSourceFile>
 	                            <jsSourceFile>/component/TextArea.js</jsSourceFile>
+	                            <jsSourceFile>/component/LanguageSelectBox.js</jsSourceFile>
 	                        </jsSourceFiles>
 	                        <jsFinalFile>molgenis-component.min.js</jsFinalFile>
 	                        <skipMerge>false</skipMerge>

@@ -26,25 +26,21 @@
             if(this.visible) {
                 var isFolder = isFolder || molgenis.isCompoundAttr(this);
                 
-                //i18n attribute, TODO proper regexp or attr i18n == true??
-                //TODO move this to RestClient?
-                if (this.name.indexOf('.') < 0 || this.name.endsWith('.' + languageCode)) {
-                	children.push({
-                		'key': this.href,
-                		'title': this.label,
-                		'tooltip': this.description,
-                		'folder': isFolder,
-                		'hideCheckbox': refEntityDepth > 0,
-                		'lazy': isFolder,
-                		'expanded': !isFolder,
-                		'selected': doSelect(this),
-                		'data': {
-                			'attribute': this
-                		},
-                		'refEntityDepth': refEntityDepth,
-                		'extraClasses': classes
-                	});
-                }
+                children.push({
+                	'key': this.href,
+                	'title': this.label,
+                	'tooltip': this.description,
+                	'folder': isFolder,
+                	'hideCheckbox': refEntityDepth > 0,
+                	'lazy': isFolder,
+                	'expanded': !isFolder,
+                	'selected': doSelect(this),
+                	'data': {
+                		'attribute': this
+                	},
+                	'refEntityDepth': refEntityDepth,
+                	'extraClasses': classes
+                });
             }
 		});
 		return children;
@@ -141,12 +137,6 @@
 				if (data.tree.getFirstChild()) {
 					data.tree.getFirstChild().setActive(true);
 				}
-				
-				var selects = [];
-				tree.fancytree("getRootNode").visit(function(node) {
-					selects.push({'attribute': node.data.attribute, 'select': node.isSelected()});
-				});
-				settings.onAttributesSelect(selects);
 			},
 			'lazyLoad' : function(e, data) {
 				var node = data.node, target = node.key, increaseDepth = 0, attributes = [];

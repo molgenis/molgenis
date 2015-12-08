@@ -22,6 +22,15 @@ public interface EditableEntityMetaData extends EntityMetaData
 	EditableEntityMetaData setDescription(String string);
 
 	/**
+	 * Set description for language
+	 * 
+	 * @param languageCode
+	 * @param description
+	 * @return
+	 */
+	EditableEntityMetaData setDescription(String languageCode, String description);
+
+	/**
 	 * set extends entity metadata
 	 * 
 	 * @param extendsEntityMeta

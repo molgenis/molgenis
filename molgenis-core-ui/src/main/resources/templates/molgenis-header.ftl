@@ -90,6 +90,7 @@
         <script src="<@resource_href "/js/component/Spinner.js"/>"></script>
         <script src="<@resource_href "/js/component/Table.js"/>"></script>
         <script src="<@resource_href "/js/component/TextArea.js"/>"></script>     
+        <script src="<@resource_href "/js/component/LanguageSelectBox.js"/>"></script>     
     <#else>
         <script src="<@resource_href "/js/react-with-addons.min.js"/>"></script>
         <script src="<@resource_href "/js/molgenis-component.min.js"/>"></script>
@@ -235,11 +236,15 @@
 					<form class="navbar-form navbar-right" method="post" action="/logout">
 						<button id="signout-button" type="submit" class="btn btn-primary">Sign out</button>
 					</form>
+					
+					<div id="language-select-box" class="navbar-right"></div>
 				<#else>
 					<form class="navbar-form navbar-right" method="post" action="/login">
 						<a id="open-button" type="btn" class="btn btn-default modal-href" href="/account/login" data-target="login-modal-container-header">Sign in</a>
 					</form>
 				</#if>
+				
+				
 			</div>
 			<#-- Navbar items end -->
 			

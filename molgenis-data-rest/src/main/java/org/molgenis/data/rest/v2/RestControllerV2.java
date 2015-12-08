@@ -158,7 +158,8 @@ class RestControllerV2
 			@RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter)
 	{
 		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
-		Fetch fetch = AttributeFilterToFetchConverter.convert(attributeFilter, entityMeta);
+		Fetch fetch = AttributeFilterToFetchConverter.convert(attributeFilter, entityMeta,
+				languageService.getCurrentUserLanguageCode());
 
 		Entity entity = dataService.findOne(entityName, id, fetch);
 		if (entity == null)
@@ -176,7 +177,8 @@ class RestControllerV2
 			@RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter)
 	{
 		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
-		Fetch fetch = AttributeFilterToFetchConverter.convert(attributeFilter, entityMeta);
+		Fetch fetch = AttributeFilterToFetchConverter.convert(attributeFilter, entityMeta,
+				languageService.getCurrentUserLanguageCode());
 
 		Entity entity = dataService.findOne(entityName, id, fetch);
 		if (entity == null)
@@ -477,7 +479,8 @@ class RestControllerV2
 
 		Query q = request.getQ() != null ? request.getQ().createQuery(meta) : new QueryImpl();
 		q.pageSize(request.getNum()).offset(request.getStart()).sort(request.getSort());
-		Fetch fetch = AttributeFilterToFetchConverter.convert(request.getAttrs(), meta);
+		Fetch fetch = AttributeFilterToFetchConverter.convert(request.getAttrs(), meta,
+				languageService.getCurrentUserLanguageCode());
 		if (fetch != null)
 		{
 			q.fetch(fetch);

@@ -63,6 +63,7 @@ public class EntityMetaDataResponse
 		String name = meta.getName();
 		this.href = Href.concatMetaEntityHref(RestController.BASE_URI, name);
 		this.hrefCollection = String.format("%s/%s", RestController.BASE_URI, name); // FIXME apply Href escaping fix
+		this.languageCode = languageService.getCurrentUserLanguageCode();
 
 		if (attributesSet == null || attributesSet.contains("name".toLowerCase()))
 		{
@@ -72,7 +73,7 @@ public class EntityMetaDataResponse
 
 		if (attributesSet == null || attributesSet.contains("description".toLowerCase()))
 		{
-			this.description = meta.getDescription();
+			this.description = meta.getDescription(languageService.getCurrentUserLanguageCode());
 		}
 		else this.description = null;
 
@@ -109,7 +110,7 @@ public class EntityMetaDataResponse
 
 		if (attributesSet == null || attributesSet.contains("labelAttribute".toLowerCase()))
 		{
-			AttributeMetaData labelAttribute = meta.getLabelAttribute();
+			AttributeMetaData labelAttribute = meta.getLabelAttribute(this.languageCode);
 			this.labelAttribute = labelAttribute != null ? labelAttribute.getName() : null;
 		}
 		else this.labelAttribute = null;
@@ -144,8 +145,6 @@ public class EntityMetaDataResponse
 
 		this.writable = permissionService.hasPermissionOnEntity(name, Permission.WRITE)
 				&& dataService.getCapabilities(name).contains(RepositoryCapability.WRITABLE);
-
-		this.languageCode = languageService.getCurrentUserLanguageCode();
 	}
 
 	public String getHref()

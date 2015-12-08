@@ -8,9 +8,12 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -111,9 +114,19 @@ public class MetaDataServiceImpl implements MetaDataService
 		Repository languageRepo = defaultBackend.addEntityMeta(LanguageMetaData.INSTANCE);
 		dataService.addRepository(new LanguageRepositoryDecorator(languageRepo, dataService));
 
+		Supplier<Stream<String>> languageCodes = () -> languageService.getLanguageCodes().stream();
+
 		// Add language attributes to the AttributeMetaDataMetaData
-		languageService.getLanguageCodes().stream().map(code -> AttributeMetaDataMetaData.LABEL + '.' + code)
+		languageCodes.get().map(code -> AttributeMetaDataMetaData.LABEL + '-' + code)
 				.forEach(AttributeMetaDataMetaData.INSTANCE::addAttribute);
+
+		// Add description attributes to the EntityMetaDataMetaData
+		languageCodes
+				.get()
+				.map(code -> EntityMetaDataMetaData.DESCRIPTION + '-' + code)
+				.forEach(
+						attrName -> EntityMetaDataMetaData.INSTANCE.addAttribute(attrName).setDataType(
+								MolgenisFieldTypes.TEXT));
 
 		Repository tagRepo = defaultBackend.addEntityMeta(TagMetaData.INSTANCE);
 		dataService.addRepository(tagRepo);
@@ -124,7 +137,7 @@ public class MetaDataServiceImpl implements MetaDataService
 
 		attributeMetaDataRepository = new AttributeMetaDataRepository(defaultBackend, languageService);
 		entityMetaDataRepository = new EntityMetaDataRepository(defaultBackend, packageRepository,
-				attributeMetaDataRepository);
+				attributeMetaDataRepository, languageService);
 		attributeMetaDataRepository.setEntityMetaDataRepository(entityMetaDataRepository);
 
 		dataService.addRepository(attributeMetaDataRepository.getRepository());

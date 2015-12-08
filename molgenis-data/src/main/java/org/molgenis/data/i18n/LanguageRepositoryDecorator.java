@@ -16,6 +16,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 
 public class LanguageRepositoryDecorator implements Repository
@@ -139,7 +140,7 @@ public class LanguageRepositoryDecorator implements Repository
 		String languageCode = entity.getString(LanguageMetaData.CODE);
 
 		AttributeMetaData existing = AttributeMetaDataMetaData.INSTANCE.getAttribute(AttributeMetaDataMetaData.LABEL
-				+ '.' + languageCode);
+				+ '-' + languageCode);
 
 		if (existing != null)
 		{
@@ -183,14 +184,25 @@ public class LanguageRepositoryDecorator implements Repository
 		// Create new label and description attributes for the added language
 		String languageCode = entity.getString(LanguageMetaData.CODE);
 
-		AttributeMetaData attr = new DefaultAttributeMetaData(AttributeMetaDataMetaData.LABEL + '.' + languageCode)
+		// Atribute label
+		AttributeMetaData attrLabel = new DefaultAttributeMetaData(AttributeMetaDataMetaData.LABEL + '-' + languageCode)
 				.setNillable(true);
 
 		// Add the attribute to the attributes table
-		dataService.getMeta().getDefaultBackend().addAttribute(AttributeMetaDataMetaData.ENTITY_NAME, attr);
+		dataService.getMeta().getDefaultBackend().addAttribute(AttributeMetaDataMetaData.ENTITY_NAME, attrLabel);
 
 		// Update AttributeMetaDataMetaData
-		AttributeMetaDataMetaData.INSTANCE.addAttributeMetaData(attr);
+		AttributeMetaDataMetaData.INSTANCE.addAttributeMetaData(attrLabel);
+
+		// EntityMeta description
+		AttributeMetaData attrDescription = new DefaultAttributeMetaData(EntityMetaDataMetaData.DESCRIPTION + '-'
+				+ languageCode).setNillable(true);
+
+		// Add the attribute to the entities table
+		dataService.getMeta().getDefaultBackend().addAttribute(EntityMetaDataMetaData.ENTITY_NAME, attrDescription);
+
+		// UpdateEntityMetaDataMetaData
+		EntityMetaDataMetaData.INSTANCE.addAttributeMetaData(attrDescription);
 	}
 
 	@Override

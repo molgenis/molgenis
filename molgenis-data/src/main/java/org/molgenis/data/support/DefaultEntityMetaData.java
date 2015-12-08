@@ -3,6 +3,7 @@ package org.molgenis.data.support;
 import static java.util.stream.StreamSupport.stream;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData implements Edi
 	private String label;
 	private boolean abstract_ = false;
 	private String description;
+	private final Map<String, String> descriptionByLanguageCode = new HashMap<>();
 	private EntityMetaData extends_;
 	private Package pack;
 	private String backend;
@@ -185,9 +187,23 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData implements Edi
 	}
 
 	@Override
+	public String getDescription(String languageCode)
+	{
+		String description = descriptionByLanguageCode.get(languageCode);
+		return description != null ? description : getDescription();
+	}
+
+	@Override
 	public EditableEntityMetaData setDescription(String description)
 	{
 		this.description = description;
+		return this;
+	}
+
+	@Override
+	public EditableEntityMetaData setDescription(String languageCode, String description)
+	{
+		this.descriptionByLanguageCode.put(languageCode, description);
 		return this;
 	}
 

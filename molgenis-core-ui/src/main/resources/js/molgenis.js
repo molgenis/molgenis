@@ -1,6 +1,6 @@
 (function($, molgenis) {
 	"use strict";
-
+	
 	// workaround for "Uncaught RangeError: Maximum call stack size exceeded"
 	// http://stackoverflow.com/a/19190216
 	$.fn.modal.Constructor.prototype.enforceFocus = function() {
@@ -493,7 +493,7 @@ function createInput(attr, attrs, val, lbl) {
 	molgenis.RestClient.prototype.getAsync = function(resourceUri, options, callback) {
 		return this._get(resourceUri, options, true, callback);
 	};
-
+	
 	molgenis.RestClient.prototype._get = function(resourceUri, options, async, callback) {
 		var resource = null;
 		
@@ -987,6 +987,11 @@ function handleBarHelperBlocks(Handlebars) {
 }
 
 $(function() {
+	var languageSelectBox = document.getElementById('language-select-box');
+	if (languageSelectBox) {
+		React.render(molgenis.ui.LanguageSelectBox({}),  languageSelectBox);
+	}
+	
 	// disable all ajax request caching
 	$.ajaxSetup({
 		cache : false

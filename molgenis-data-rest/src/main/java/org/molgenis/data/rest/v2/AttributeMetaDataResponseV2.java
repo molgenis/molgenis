@@ -108,7 +108,8 @@ class AttributeMetaDataResponseV2
 							}
 							else if (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
 							{
-								subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr);
+								subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr,
+										languageService.getCurrentUserLanguageCode());
 							}
 							else
 							{
