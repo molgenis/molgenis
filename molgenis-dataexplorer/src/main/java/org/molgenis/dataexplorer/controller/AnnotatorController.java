@@ -120,9 +120,8 @@ public class AnnotatorController
 							   @RequestParam("dataset-identifier") String entityName,
 							   @RequestParam(value = "createCopy", required = false) boolean createCopy)
 	{
-		//TODO: figure out order of annotators
 		Repository repository = dataService.getRepository(entityName);
-		AnnotationRun annotationRun = annotatorRunService.addAnnotationRun(userAccountService.getCurrentUser().getUsername());
+		AnnotationRun annotationRun = annotatorRunService.addAnnotationRun(userAccountService.getCurrentUser().getUsername(), annotatorNames, entityName);
 		if (annotatorNames != null && repository != null)
 		{
 			asyncAnnotatorJobs.execute(new AnnotatorJob(dataService, SecurityContextHolder.getContext(), annotatorNames, annotationRun.getId(), annotatorRunService, request

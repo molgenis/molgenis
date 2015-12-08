@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.Date;
 
@@ -24,12 +25,14 @@ public class AnnotatorRunService
 	}
 
 	@RunAsSystem
-	public AnnotationRun addAnnotationRun(String userName)
+	public AnnotationRun addAnnotationRun(String userName, String[] annotatorNames, String entityName)
 	{
 		AnnotationRun annotationRun = new AnnotationRun();
 		annotationRun.setStartDate(new Date());
 		annotationRun.setStatus("RUNNING");
 		annotationRun.setUserName(userName);
+		annotationRun.setAnnotatorsSelected(String.join(",", annotatorNames));
+		annotationRun.setTarget(entityName);
 		dataService.add(AnnotationRun.ENTITY_NAME, annotationRun);
 
 		return annotationRun;
@@ -83,7 +86,7 @@ public class AnnotatorRunService
 			AnnotationRun annotationRun = dataService.findOne(AnnotationRun.ENTITY_NAME, annotationRunId, AnnotationRun.class);
 			if (annotationRun != null)
 			{
-				annotationRun.setAnnotatorsFinished(annotationRun.getAnnotatorsFinished() + "," + annotator);
+				annotationRun.setAnnotatorsFinished((StringUtils.isEmpty(annotationRun.getAnnotatorsFinished())?annotationRun.getAnnotatorsFinished()+",":"")+ annotator);
 				dataService.update(AnnotationRun.ENTITY_NAME, annotationRun);
 			}
 		}
@@ -101,7 +104,7 @@ public class AnnotatorRunService
 			AnnotationRun annotationRun = dataService.findOne(AnnotationRun.ENTITY_NAME, annotationRunId, AnnotationRun.class);
 			if (annotationRun != null)
 			{
-				annotationRun.setAnnotatorsFailed(annotationRun.getAnnotatorsFailed() + "," + annotator);
+				annotationRun.setAnnotatorsFailed((StringUtils.isEmpty(annotationRun.getAnnotatorsFailed())?annotationRun.getAnnotatorsFailed()+",":"")+ annotator);
 				dataService.update(AnnotationRun.ENTITY_NAME, annotationRun);
 			}
 		}
@@ -119,7 +122,7 @@ public class AnnotatorRunService
 			AnnotationRun annotationRun = dataService.findOne(AnnotationRun.ENTITY_NAME, annotationRunId, AnnotationRun.class);
 			if (annotationRun != null)
 			{
-				annotationRun.setAnnotatorsStarted(annotationRun.getAnnotatorsStarted() + "," + annotator);
+				annotationRun.setAnnotatorsStarted(annotator);
 				dataService.update(AnnotationRun.ENTITY_NAME, annotationRun);
 			}
 		}

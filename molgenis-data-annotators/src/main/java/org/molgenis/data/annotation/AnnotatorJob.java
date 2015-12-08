@@ -33,10 +33,11 @@ public class AnnotatorJob implements Runnable
 			PermissionSystemService permissionSystemService, UserAccountService userAccountService,
 			MolgenisPermissionService molgenisPermissionService, AnnotationService annotationService)
 	{
-		//FIXME: add entity name
-		//FIXME: update selected annotators
 		//FIXME: give proper messages
 		//FIXME: add nullchecks for concats
+		//TODO: figure out order of annotators
+		//TODO unit test everything
+		//TODO move whole system to Quartz
 		this.securityContext = securityContext;
 		this.dataService = dataService;
 		this.annotationRunId = annotationRunId;
