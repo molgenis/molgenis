@@ -86,8 +86,7 @@ class TestStringMethods(unittest.TestCase):
     s = molgenis.Session(self.api_url)
     s.login('admin', 'admin')
     meta = s.get_entity_meta_data('MolgenisUser')
-    print(meta)
-    self.assertEquals({}, meta)
+    self.assertEquals('username', meta['labelAttribute'])
 
 if __name__ == '__main__':
     unittest.main()
