@@ -43,7 +43,9 @@ import org.molgenis.data.support.EntityMetaDataUtils;
 import org.molgenis.data.support.LazyEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
+import org.molgenis.fieldtypes.IntField;
 import org.molgenis.fieldtypes.MrefField;
+import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -814,6 +816,18 @@ public class ImportWriter
 			}
 
 			value = dataType.convert(value);
+
+			// referenced entity id value must match referenced entity id attribute data type
+			FieldType refIdAttr = attribute.getRefEntity().getIdAttribute().getDataType();
+			if (refIdAttr instanceof StringField && !(value instanceof String))
+			{
+				value = String.valueOf(value);
+			}
+			else if (refIdAttr instanceof IntField && !(value instanceof Integer))
+			{
+				value = Integer.valueOf(value.toString());
+			}
+
 			Entity refEntity;
 			if (selfReferencing)
 			{
@@ -904,8 +918,23 @@ public class ImportWriter
 					@Override
 					public Iterator<Entity> iterator()
 					{
-						return stream(ids.spliterator(), false)
-								.<Entity> map(id -> new LazyEntity(refEntityMeta, dataService, id)).iterator();
+						return stream(ids.spliterator(), false).map(id -> {
+							// referenced entity id value must match referenced entity id attribute data type
+							if (refEntityMeta.getIdAttribute().getDataType() instanceof StringField
+									&& !(id instanceof String))
+							{
+								return String.valueOf(id);
+							}
+							else if (refEntityMeta.getIdAttribute().getDataType() instanceof IntField
+									&& !(id instanceof Integer))
+							{
+								return Integer.valueOf(id.toString());
+							}
+							else
+							{
+								return id;
+							}
+						}).<Entity> map(id -> new LazyEntity(refEntityMeta, dataService, id)).iterator();
 					}
 				};
 			}
