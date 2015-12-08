@@ -88,5 +88,14 @@ class TestStringMethods(unittest.TestCase):
     meta = s.get_entity_meta_data('MolgenisUser')
     self.assertEquals('username', meta['labelAttribute'])
 
+  def test_get_attribute_meta(self):
+    s = molgenis.Session(self.api_url)
+    s.login('admin', 'admin')
+    meta = s.get_attribute_meta_data('MolgenisUser', 'username')
+    self.assertItemsEqual({'aggregateable': False, 'attributes': [], 'auto': False, 'description': '',
+      'fieldType': 'STRING', 'href': '/api/v1/MolgenisUser/meta/username', 'label': 'Username', 
+      'labelAttribute': True, 'lookupAttribute': True, 'maxLength': 255, 'nillable': False, 
+      'readOnly': False, 'unique': True, 'visible': True, 'name': 'username'}, meta)
+
 if __name__ == '__main__':
     unittest.main()
