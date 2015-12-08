@@ -70,7 +70,7 @@
  				</tr>
  			</thead>
  			<tbody>
-				<#list mappingProject.getMappingTarget(selectedTarget).target.getAtomicAttributes().iterator() as attribute>
+				<#list mappingProject.getMappingTarget(selectedTarget).target.getAtomicAttributes() as attribute>
 					<#if !attribute.isIdAtrribute()>
 						<tr>
 							<td>
