@@ -110,6 +110,10 @@ public class AnnotatorController
 			@RequestParam("dataset-identifier") String entityName,
 			@RequestParam(value = "createCopy", required = false) boolean createCopy)
 	{
+		//TODO: figure out order of annotators
+		//TODO: update status for annotationRun
+		//TODO: return annotationRunID instead of entityName
+
 		Repository repository = dataService.getRepository(entityName);
 		if (annotatorNames != null && repository != null)
 		{
