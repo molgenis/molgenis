@@ -7,7 +7,6 @@ import static org.testng.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -133,12 +132,13 @@ public class DefaultEntityTest
 	public void getAttributeNames()
 	{
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
+		AttributeMetaData attr1 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr1").getMock();
+		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(attr0, attr1));
 		DataService dataService = mock(DataService.class);
 
 		DefaultEntity entity = new DefaultEntity(entityMeta, dataService);
-		List<String> attrNames = Arrays.asList("attr0", "attr1");
-		when(entityMeta.getAtomicAttributeNames()).thenReturn(attrNames);
-		assertEquals(Lists.newArrayList(entity.getAttributeNames()), attrNames);
+		assertEquals(Lists.newArrayList(entity.getAttributeNames()), Arrays.asList("attr0", "attr1"));
 	}
 
 	@Test

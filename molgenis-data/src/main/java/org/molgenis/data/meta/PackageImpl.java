@@ -1,12 +1,17 @@
 package org.molgenis.data.meta;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
+import org.molgenis.data.PackageChangeListener;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.support.MapEntity;
@@ -18,26 +23,33 @@ import com.google.common.collect.Lists;
  */
 public class PackageImpl implements Package
 {
+	private Map<String, PackageChangeListener> changeListeners;
+
+	private final String simpleName;
+	private final String description;
+	private Package parent;
+
 	private final List<PackageImpl> subPackages = new ArrayList<PackageImpl>();
 	private final List<EntityMetaData> entities = new ArrayList<EntityMetaData>();
 	private final List<Tag<Package, LabeledResource, LabeledResource>> tags = new ArrayList<Tag<Package, LabeledResource, LabeledResource>>();
 	public static final Package defaultPackage = new PackageImpl(Package.DEFAULT_PACKAGE_NAME, "The default package",
 			null);
 
-	final private String simpleName;
-	final private String description;
-	private Package parent;
-
-	public PackageImpl(String simpleName, String description, PackageImpl parent)
+	public PackageImpl(String simpleName)
 	{
-		this.description = description;
-		this.simpleName = simpleName;
-		this.parent = parent;
+		this(simpleName, null);
 	}
 
 	public PackageImpl(String simpleName, String description)
 	{
 		this(simpleName, description, null);
+	}
+
+	public PackageImpl(String simpleName, String description, PackageImpl parent)
+	{
+		this.simpleName = requireNonNull(simpleName);
+		this.description = description;
+		this.parent = parent;
 	}
 
 	@Override
@@ -120,21 +132,25 @@ public class PackageImpl implements Package
 	void addSubPackage(PackageImpl p)
 	{
 		subPackages.add(p);
+		fireChangeEvent();
 	}
 
 	void addEntity(EntityMetaData entityMetaData)
 	{
 		entities.add(entityMetaData);
+		fireChangeEvent();
 	}
 
 	public void addTag(Tag<Package, LabeledResource, LabeledResource> tag)
 	{
 		tags.add(tag);
+		fireChangeEvent();
 	}
 
 	public void setParent(Package parent)
 	{
 		this.parent = parent;
+		fireChangeEvent();
 	}
 
 	@Override
@@ -208,5 +224,32 @@ public class PackageImpl implements Package
 	public Iterable<Tag<Package, LabeledResource, LabeledResource>> getTags()
 	{
 		return Collections.<Tag<Package, LabeledResource, LabeledResource>> unmodifiableList(tags);
+	}
+
+	@Override
+	public void addChangeListener(PackageChangeListener changeListener)
+	{
+		if (changeListeners == null)
+		{
+			changeListeners = new HashMap<>();
+		}
+		changeListeners.put(changeListener.getId(), changeListener);
+	}
+
+	@Override
+	public void removeChangeListener(String packageListenerId)
+	{
+		if (changeListeners != null)
+		{
+			changeListeners.remove(packageListenerId);
+		}
+	}
+
+	private void fireChangeEvent()
+	{
+		if (changeListeners != null)
+		{
+			changeListeners.values().forEach(changeListener -> changeListener.onChange(this));
+		}
 	}
 }

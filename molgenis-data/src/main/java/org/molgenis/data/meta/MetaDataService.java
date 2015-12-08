@@ -181,4 +181,12 @@ public interface MetaDataService extends Iterable<RepositoryCollection>, Applica
 	 */
 	LinkedHashMap<String, Boolean> integrationTestMetaData(ImmutableMap<String, EntityMetaData> newEntitiesMetaDataMap,
 			List<String> skipEntities, String defaultPackage);
+	
+	/**
+	 * Has backend will check if the requested backend already exists and is registered.
+	 * 
+	 * @param backendName
+	 * @return
+	 */
+	boolean hasBackend(String backendName);
 }
