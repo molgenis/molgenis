@@ -2,10 +2,11 @@ package org.molgenis.dataexplorer.controller;
 
 import static org.molgenis.dataexplorer.controller.AnnotatorController.URI;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import org.molgenis.MolgenisFieldTypes;
@@ -14,8 +15,10 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.CrudRepositoryAnnotator;
+import org.molgenis.data.annotation.AnnotatorJob;
+import org.molgenis.data.annotation.AnnotatorRunService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotators.AnnotationRun;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.settings.SettingsEntityMeta;
 import org.molgenis.data.validation.EntityValidator;
@@ -29,8 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,6 +43,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.collect.Lists;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Controller wrapper for the dataexplorer annotator
@@ -54,6 +59,8 @@ public class AnnotatorController
 	private static final Logger LOG = LoggerFactory.getLogger(AnnotatorController.class);
 
 	public static final String URI = "/annotators";
+
+	private final ExecutorService asyncAnnotatorJobs = Executors.newCachedThreadPool();
 
 	@Autowired
 	DataService dataService;
@@ -78,6 +85,9 @@ public class AnnotatorController
 
 	@Autowired
 	MolgenisPermissionService molgenisPermissionService;
+
+	@Autowired
+	AnnotatorRunService annotatorRunService;
 
 	/**
 	 * Gets a map of all available annotators.
@@ -106,53 +116,22 @@ public class AnnotatorController
 	 */
 	@RequestMapping(value = "/annotate-data", method = RequestMethod.POST)
 	@ResponseBody
-	@Transactional
-	public String annotateData(@RequestParam(value = "annotatorNames", required = false) String[] annotatorNames,
-			@RequestParam("dataset-identifier") String entityName,
-			@RequestParam(value = "createCopy", required = false) boolean createCopy)
+	public String annotateData(HttpServletRequest request, @RequestParam(value = "annotatorNames", required = false) String[] annotatorNames,
+							   @RequestParam("dataset-identifier") String entityName,
+							   @RequestParam(value = "createCopy", required = false) boolean createCopy)
 	{
 		//TODO: figure out order of annotators
-		//TODO: update status for annotationRun
-		//TODO: return annotationRunID instead of entityName
-
 		Repository repository = dataService.getRepository(entityName);
+		AnnotationRun annotationRun = annotatorRunService.addAnnotationRun(userAccountService.getCurrentUser().getUsername());
 		if (annotatorNames != null && repository != null)
 		{
-			CrudRepositoryAnnotator crudRepositoryAnnotator = new CrudRepositoryAnnotator(dataService,
-					getNewRepositoryName(annotatorNames, repository.getEntityMetaData().getSimpleName()),
-					permissionSystemService, userAccountService, molgenisPermissionService);
-
-			for (String annotatorName : annotatorNames)
-			{
-				RepositoryAnnotator annotator = annotationService.getAnnotatorByName(annotatorName);
-				if (annotator != null)
-				{
-					// running annotator
-					try
-					{
-						repository = crudRepositoryAnnotator.annotate(annotator, repository, createCopy);
-						entityName = repository.getName();
-						createCopy = false;
-					}
-					catch (IOException e)
-					{
-						throw new RuntimeException(e.getMessage());
-					}
-				}
-			}
+			asyncAnnotatorJobs.execute(new AnnotatorJob(dataService, SecurityContextHolder.getContext(), annotatorNames, annotationRun.getId(), annotatorRunService, request
+					.getSession(), repository, permissionSystemService, userAccountService,molgenisPermissionService,annotationService));
 		}
-		return entityName;
+		return annotationRun.getId();
 	}
 
-	private String getNewRepositoryName(String[] annotatorNames, String repositoryName)
-	{
-		String newRepositoryName = repositoryName;
-		for (String annotatorName : annotatorNames)
-		{
-			newRepositoryName = newRepositoryName + "_" + annotatorName;
-		}
-		return newRepositoryName;
-	}
+
 
 	/**
 	 * Sets a map of annotators, whether they can be used by the selected data set.
