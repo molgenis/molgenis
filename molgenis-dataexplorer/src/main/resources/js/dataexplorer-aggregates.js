@@ -155,7 +155,11 @@
 		
 		$(document).on('changeQuery.aggregates', function(e, entitySearchQuery) {
 			if (molgenis.dataexplorer.getSelectedModule() === 'aggregates') {
-				molgenis.dataexplorer.aggregates.createAggregatesTable();
+				var xAttribute = $('#x-aggr-attribute').val();
+				var yAttribute = $('#y-aggr-attribute').val();
+				var distinctAttributeName = $('#distinct-aggr-attribute').val();
+				
+				molgenis.dataexplorer.aggregates.updateAggregatesTable(xAttribute, yAttribute, distinctAttributeName);
 			}
 		});
 		
