@@ -2,13 +2,15 @@ package org.molgenis.data.importer;
 
 import static com.google.common.base.Predicates.notNull;
 import static com.google.common.collect.FluentIterable.from;
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.molgenis.data.AttributeMetaData;
@@ -36,11 +38,9 @@ import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.DependencyResolver;
-import org.molgenis.util.EntityUtils;
 import org.molgenis.util.HugeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,34 +88,36 @@ public class ImportWriter
 	public EntityImportReport doImport(EmxImportJob job)
 	{
 		// languages first
-		importLanguages(job.report, job.parsedMetaData.getEntities(), job.source, job.dbAction);
-		RunAsSystemProxy.runAsSystem(() -> {
-			importTags(job.source);
-			return null;
-		});
+		importLanguages(job.report, job.parsedMetaData.getLanguages(), job.dbAction, job.metaDataChanges);
+		runAsSystem(() -> importTags(job.source));
 		importPackages(job.parsedMetaData);
 		addEntityMetaData(job.parsedMetaData, job.report, job.metaDataChanges);
 		addEntityPermissions(job.metaDataChanges);
-		RunAsSystemProxy.runAsSystem(() -> {
-			importEntityAndAttributeTags(job.parsedMetaData);
-			return null;
-		});
+		runAsSystem(() -> importEntityAndAttributeTags(job.parsedMetaData));
 		importData(job.report, job.parsedMetaData.getEntities(), job.source, job.dbAction, job.defaultPackage);
+
 		return job.report;
 	}
 
-	private void importLanguages(EntityImportReport report, Collection<EntityMetaData> resolved,
-			RepositoryCollection source, DatabaseAction dbAction)
+	private void importLanguages(EntityImportReport report, Map<String, Entity> languages, DatabaseAction dbAction,
+			MetaDataChanges metaDataChanges)
 	{
-		if (resolved.stream().filter(e -> e.getName().equalsIgnoreCase(LanguageMetaData.ENTITY_NAME)).findFirst()
-				.isPresent())
+		if (!languages.isEmpty())
 		{
-			Iterable<Entity> transformed = EntityUtils
-					.asStream(source.getRepository(EmxMetaDataParser.LANGUAGES))
-					.map(e -> new DefaultEntityImporter(dataService.getRepository(LanguageMetaData.ENTITY_NAME)
-							.getEntityMetaData(), dataService, e)).collect(Collectors.toList());
+			Repository repo = dataService.getRepository(LanguageMetaData.ENTITY_NAME);
 
-			int count = update(dataService.getRepository(LanguageMetaData.ENTITY_NAME), transformed, dbAction);
+			List<Entity> transformed = languages.values().stream()
+					.map(e -> new DefaultEntityImporter(repo.getEntityMetaData(), dataService, e)).collect(toList());
+
+			// Find new ones
+			transformed.stream().map(Entity::getIdValue).forEach(id -> {
+				if (repo.findOne(id) == null)
+				{
+					metaDataChanges.addLanguage(languages.get(id));
+				}
+			});
+
+			int count = update(repo, transformed, dbAction);
 			report.addEntityCount(LanguageMetaData.ENTITY_NAME, count);
 		}
 	}
@@ -317,6 +319,7 @@ public class ImportWriter
 	public void rollbackSchemaChanges(EmxImportJob job)
 	{
 		LOG.info("Rolling back changes.");
+		dataService.delete(LanguageMetaData.ENTITY_NAME, job.metaDataChanges.getAddedLanguages());
 		dropAddedEntities(job.metaDataChanges.getAddedEntities());
 		List<String> entities = dropAddedAttributes(job.metaDataChanges.getAddedAttributes());
 

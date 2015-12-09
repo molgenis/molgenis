@@ -139,14 +139,24 @@ public class LanguageRepositoryDecorator implements Repository
 
 		String languageCode = entity.getString(LanguageMetaData.CODE);
 
-		AttributeMetaData existing = AttributeMetaDataMetaData.INSTANCE.getAttribute(AttributeMetaDataMetaData.LABEL
-				+ '-' + languageCode);
-
-		if (existing != null)
+		// Delete label-{languageCode} attr from AttributeMetaDataMetaData
+		AttributeMetaData attributeLabel = AttributeMetaDataMetaData.INSTANCE
+				.getAttribute(AttributeMetaDataMetaData.LABEL + '-' + languageCode);
+		if (attributeLabel != null)
 		{
-			AttributeMetaDataMetaData.INSTANCE.removeAttributeMetaData(existing);
+			AttributeMetaDataMetaData.INSTANCE.removeAttributeMetaData(attributeLabel);
 			dataService.getMeta().getDefaultBackend()
-					.deleteAttribute(AttributeMetaDataMetaData.ENTITY_NAME, existing.getName());
+					.deleteAttribute(AttributeMetaDataMetaData.ENTITY_NAME, attributeLabel.getName());
+		}
+
+		// Delete description-{languageCode} attr from EntityMetaDataMetaData
+		AttributeMetaData entityDescription = EntityMetaDataMetaData.INSTANCE
+				.getAttribute(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode);
+		if (entityDescription != null)
+		{
+			EntityMetaDataMetaData.INSTANCE.removeAttributeMetaData(entityDescription);
+			dataService.getMeta().getDefaultBackend()
+					.deleteAttribute(EntityMetaDataMetaData.ENTITY_NAME, entityDescription.getName());
 		}
 	}
 

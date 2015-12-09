@@ -135,7 +135,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		// languages tab
 		if (source.hasRepository(LanguageMetaData.ENTITY_NAME))
 		{
-			intermediateResults.addEntityMetaData(LanguageMetaData.INSTANCE);
+			parseLanguages(source.getRepository(LANGUAGES), intermediateResults);
 		}
 
 		return intermediateResults;
@@ -662,6 +662,11 @@ public class EmxMetaDataParser implements MetaDataParser
 		}
 	}
 
+	private void parseLanguages(Repository repo, IntermediateParseResults intermediateResults)
+	{
+		repo.forEach(intermediateResults::addLanguage);
+	}
+
 	private void parsePackageTags(Repository repo, IntermediateParseResults intermediateResults)
 	{
 		if (repo != null)
@@ -805,7 +810,8 @@ public class EmxMetaDataParser implements MetaDataParser
 			}
 
 			return new ParsedMetaData(resolveEntityDependencies(entities), intermediateResults.getPackages(),
-					intermediateResults.getAttributeTags(), intermediateResults.getEntityTags());
+					intermediateResults.getAttributeTags(), intermediateResults.getEntityTags(),
+					intermediateResults.getLanguages());
 		}
 		else
 		{
@@ -817,8 +823,11 @@ public class EmxMetaDataParser implements MetaDataParser
 			IntermediateParseResults intermediateResults = parseTagsSheet(source.getRepository(TAGS));
 			parsePackagesSheet(source.getRepository(PACKAGES), intermediateResults);
 			parsePackageTags(source.getRepository(PACKAGES), intermediateResults);
+			parseLanguages(source.getRepository(LANGUAGES), intermediateResults);
+
 			return new ParsedMetaData(resolveEntityDependencies(metadataList), intermediateResults.getPackages(),
-					intermediateResults.getAttributeTags(), intermediateResults.getEntityTags());
+					intermediateResults.getAttributeTags(), intermediateResults.getEntityTags(),
+					intermediateResults.getLanguages());
 		}
 
 	}
@@ -918,7 +927,8 @@ public class EmxMetaDataParser implements MetaDataParser
 					report.addPackage(packageName);
 				}
 			}
-			else if (!ENTITIES.equals(sheet) && !ATTRIBUTES.equals(sheet) && !TAGS.equals(sheet))
+			else if (!ENTITIES.equals(sheet) && !ATTRIBUTES.equals(sheet) && !TAGS.equals(sheet)
+					&& !LANGUAGES.equals(sheet))
 			{
 				// check if sheet is known
 				report = report.addEntity(sheet, metaDataMap.containsKey(sheet));
