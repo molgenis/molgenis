@@ -86,7 +86,7 @@ public class AnnotatorRunService
 			AnnotationRun annotationRun = dataService.findOne(AnnotationRun.ENTITY_NAME, annotationRunId, AnnotationRun.class);
 			if (annotationRun != null)
 			{
-				annotationRun.setAnnotatorsFinished((StringUtils.isEmpty(annotationRun.getAnnotatorsFinished())?annotationRun.getAnnotatorsFinished()+",":"")+ annotator);
+				annotationRun.setAnnotatorsFinished((!StringUtils.isEmpty(annotationRun.getAnnotatorsFinished())?annotationRun.getAnnotatorsFinished()+",":"")+ annotator);
 				dataService.update(AnnotationRun.ENTITY_NAME, annotationRun);
 			}
 		}
@@ -104,7 +104,7 @@ public class AnnotatorRunService
 			AnnotationRun annotationRun = dataService.findOne(AnnotationRun.ENTITY_NAME, annotationRunId, AnnotationRun.class);
 			if (annotationRun != null)
 			{
-				annotationRun.setAnnotatorsFailed((StringUtils.isEmpty(annotationRun.getAnnotatorsFailed())?annotationRun.getAnnotatorsFailed()+",":"")+ annotator);
+				annotationRun.setAnnotatorsFailed((!StringUtils.isEmpty(annotationRun.getAnnotatorsFailed())?annotationRun.getAnnotatorsFailed()+",":"")+ annotator);
 				dataService.update(AnnotationRun.ENTITY_NAME, annotationRun);
 			}
 		}

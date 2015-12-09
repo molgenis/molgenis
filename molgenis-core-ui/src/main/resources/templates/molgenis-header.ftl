@@ -54,6 +54,8 @@
     <#if environment == "development">
         <#-- Important: Update minify-maven-plugin configuration in molgenis-core-ui/pom.xml when modifying the list below -->
         <script src="<@resource_href "/js/react-with-addons.js"/>"></script>
+        <script src="<@resource_href "/js/progressbar.min.js"/>"></script>
+        <script src="<@resource_href "/js/dropzone.js"/>"></script>
         <script src="<@resource_href "/js/component/mixin/AttributeLoaderMixin.js"/>"></script>
         <script src="<@resource_href "/js/component/mixin/DeepPureRenderMixin.js"/>"></script>
         <script src="<@resource_href "/js/component/mixin/EntityInstanceLoaderMixin.js"/>"></script>
@@ -92,6 +94,7 @@
         <script src="<@resource_href "/js/component/TextArea.js"/>"></script>     
     <#else>
         <script src="<@resource_href "/js/react-with-addons.min.js"/>"></script>
+        <script src="<@resource_href "/js/progressbar.min.js"/>"></script>
         <script src="<@resource_href "/js/molgenis-component.min.js"/>"></script>
     </#if>
         

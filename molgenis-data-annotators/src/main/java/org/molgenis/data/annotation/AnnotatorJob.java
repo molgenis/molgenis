@@ -11,6 +11,9 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class AnnotatorJob implements Runnable
 {
@@ -64,23 +67,16 @@ public class AnnotatorJob implements Runnable
 			CrudRepositoryAnnotator crudRepositoryAnnotator = new CrudRepositoryAnnotator(dataService,
 					getNewRepositoryName(annotatorNames, repository.getEntityMetaData().getSimpleName()),
 					permissionSystemService, userAccountService, molgenisPermissionService);
-
-			for (String annotatorName : annotatorNames)
+			ArrayList<String> annotatorList = new ArrayList<>(Arrays.asList(annotatorNames));
+			//FIXME: ugly hack to make sure gene name is added first
+			//TODO: annotator dependency resolver
+			if(annotatorList.contains("snpEff")){
+				annotatorList.remove("snpEff");
+				runSingleAnnotator(crudRepositoryAnnotator, "snpEff");
+			}
+			for (String annotatorName : annotatorList)
 			{
-				annotatorRunService.updateAnnotatorStarted(annotationRunId, annotatorName);
-				RepositoryAnnotator annotator = annotationService.getAnnotatorByName(annotatorName);
-				if (annotator != null)
-				{
-					try
-					{
-						repository = crudRepositoryAnnotator.annotate(annotator, repository, false);
-					}
-					catch (Exception e)
-					{
-						annotatorRunService.updateAnnotatorFailed(annotationRunId, annotatorName);
-					}
-				}
-				annotatorRunService.updateAnnotatorFinished(annotationRunId, annotatorName);
+				runSingleAnnotator(crudRepositoryAnnotator, annotatorName);
 			}
 
 			session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
@@ -102,6 +98,23 @@ public class AnnotatorJob implements Runnable
 			LOG.info("Annotations failed.", e);
 			annotatorRunService.failAnnotationRun(annotationRunId, e.getMessage());
 		}
+	}
+
+	private void runSingleAnnotator(CrudRepositoryAnnotator crudRepositoryAnnotator, String annotatorName) {
+		annotatorRunService.updateAnnotatorStarted(annotationRunId, annotatorName);
+		RepositoryAnnotator annotator = annotationService.getAnnotatorByName(annotatorName);
+		if (annotator != null)
+        {
+            try
+            {
+                repository = crudRepositoryAnnotator.annotate(annotator, repository, false);
+            }
+            catch (Exception e)
+            {
+                annotatorRunService.updateAnnotatorFailed(annotationRunId, annotatorName);
+            }
+        }
+		annotatorRunService.updateAnnotatorFinished(annotationRunId, annotatorName);
 	}
 
 	private String getNewRepositoryName(String[] annotatorNames, String repositoryName)
