@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -52,11 +53,12 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private final String name;
 	private FieldType fieldType;
 	private String description;
+	private final Map<String, String> descriptionByLanguageCode = new HashMap<>();
 	private boolean nillable = true;
 	private boolean readOnly = false;
 	private String defaultValue = null;
 	private boolean idAttribute = false;
-	private boolean labelAttribute = false; // remove?
+	private boolean labelAttribute = false;
 	private boolean lookupAttribute = false; // remove?
 	private EntityMetaData refEntity;
 	private String expression;
@@ -152,6 +154,26 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		this.description = description;
 		fireChangeEvent(DESCRIPTION);
 		return this;
+	}
+
+	@Override
+	public String getDescription(String languageCode)
+	{
+		String description = descriptionByLanguageCode.get(languageCode);
+		return description != null ? description : getDescription();
+	}
+
+	public DefaultAttributeMetaData setDescription(String languageCode, String description)
+	{
+		descriptionByLanguageCode.put(languageCode, description);
+		fireChangeEvent(DESCRIPTION + '-' + languageCode);
+		return this;
+	}
+
+	@Override
+	public Set<String> getDescriptionLanguageCodes()
+	{
+		return Collections.unmodifiableSet(descriptionByLanguageCode.keySet());
 	}
 
 	@Override
@@ -316,6 +338,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setLabel(String languageCode, String label)
 	{
 		labelByLanguageCode.put(languageCode, label);
+		fireChangeEvent(LABEL + '-' + languageCode);
 		return this;
 	}
 
@@ -324,6 +347,12 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	{
 		String label = labelByLanguageCode.get(languageCode);
 		return label != null ? label : getLabel();
+	}
+
+	@Override
+	public Set<String> getLabelLanguageCodes()
+	{
+		return Collections.unmodifiableSet(labelByLanguageCode.keySet());
 	}
 
 	@Override

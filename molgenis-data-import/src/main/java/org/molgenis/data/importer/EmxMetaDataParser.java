@@ -178,7 +178,8 @@ public class EmxMetaDataParser implements MetaDataParser
 		for (AttributeMetaData attr : attributesRepo.getEntityMetaData().getAtomicAttributes())
 		{
 			if (!SUPPORTED_ATTRIBUTE_ATTRIBUTES.contains(attr.getName().toLowerCase())
-					&& !(I18nUtils.isI18n(attr.getName()) && attr.getName().toLowerCase().startsWith(LABEL)))
+					&& !((I18nUtils.isI18n(attr.getName()) && (attr.getName().toLowerCase().startsWith(LABEL) || attr
+							.getName().toLowerCase().startsWith(DESCRIPTION)))))
 			{
 				throw new IllegalArgumentException("Unsupported attribute metadata: attributes. " + attr.getName());
 			}
@@ -339,6 +340,15 @@ public class EmxMetaDataParser implements MetaDataParser
 						{
 							String languageCode = I18nUtils.getLanguageCode(attr.getName());
 							attribute.setLabel(languageCode, label);
+						}
+					}
+					else if (attr.getName().startsWith(DESCRIPTION))
+					{
+						String description = attributeEntity.getString(attr.getName());
+						if (description != null)
+						{
+							String languageCode = I18nUtils.getLanguageCode(attr.getName());
+							attribute.setDescription(languageCode, description);
 						}
 					}
 				}

@@ -159,11 +159,14 @@ class EntityMetaDataRepository
 		emd.setBackend(entityMetaData.getBackend() == null ? collection.getName() : entityMetaData.getBackend());
 
 		// Language attributes
-		for (String languageCode : languageService.getLanguageCodes())
+		for (String languageCode : entityMetaData.getDescriptionLanguageCodes())
 		{
 			String description = entityMetaData.getDescription(languageCode);
 			if (description != null) emd.setDescription(languageCode, description);
+		}
 
+		for (String languageCode : entityMetaData.getLabelLanguageCodes())
+		{
 			String label = entityMetaData.getLabel(languageCode);
 			if (label != null) emd.setLabel(languageCode, label);
 		}
@@ -238,17 +241,19 @@ class EntityMetaDataRepository
 		}
 
 		// Language attributes
-		for (String languageCode : languageService.getLanguageCodes())
+		for (String languageCode : emd.getDescriptionLanguageCodes())
 		{
 			String attributeName = DESCRIPTION + '-' + languageCode;
 			String description = emd.getDescription(languageCode);
 			if (description != null) entityMetaDataEntity.set(attributeName, description);
+		}
 
-			attributeName = LABEL + '-' + languageCode;
+		for (String languageCode : emd.getLabelLanguageCodes())
+		{
+			String attributeName = LABEL + '-' + languageCode;
 			String label = emd.getLabel(languageCode);
 			if (label != null) entityMetaDataEntity.set(attributeName, label);
 		}
-
 		return entityMetaDataEntity;
 	}
 

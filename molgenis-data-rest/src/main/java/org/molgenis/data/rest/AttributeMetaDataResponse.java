@@ -84,7 +84,7 @@ public class AttributeMetaDataResponse
 
 		if (attributesSet == null || attributesSet.contains("description".toLowerCase()))
 		{
-			this.description = attr.getDescription();
+			this.description = attr.getDescription(languageService.getCurrentUserLanguageCode());
 		}
 		else this.description = null;
 

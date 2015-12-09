@@ -4,9 +4,11 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.molgenis.data.AttributeChangeListener;
@@ -93,8 +95,18 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 		this.entityClass = entityMetaData.getEntityClass();
 		setPackage(entityMetaData.getPackage());
 		this.label = entityMetaData.getLabel();
+		for (String languageCode : entityMetaData.getLabelLanguageCodes())
+		{
+			setLabel(languageCode, entityMetaData.getLabel(languageCode));
+		}
+
 		this.abstract_ = entityMetaData.isAbstract();
 		this.description = entityMetaData.getDescription();
+		for (String languageCode : entityMetaData.getDescriptionLanguageCodes())
+		{
+			setDescription(languageCode, entityMetaData.getDescription(languageCode));
+		}
+
 		EntityMetaData extends_ = entityMetaData.getExtends();
 		this.extends_ = extends_ != null ? new DefaultEntityMetaData(extends_) : null;
 		this.backend = entityMetaData.getBackend();
@@ -285,6 +297,12 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	{
 		this.descriptionByLanguageCode.put(languageCode, description);
 		return this;
+	}
+
+	@Override
+	public Set<String> getDescriptionLanguageCodes()
+	{
+		return Collections.unmodifiableSet(descriptionByLanguageCode.keySet());
 	}
 
 	@Override
@@ -659,4 +677,11 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 		this.labelByLanguageCode.put(languageCode, label);
 		return this;
 	}
+
+	@Override
+	public Set<String> getLabelLanguageCodes()
+	{
+		return Collections.unmodifiableSet(labelByLanguageCode.keySet());
+	}
+
 }

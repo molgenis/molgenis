@@ -149,6 +149,16 @@ public class LanguageRepositoryDecorator implements Repository
 					.deleteAttribute(AttributeMetaDataMetaData.ENTITY_NAME, attributeLabel.getName());
 		}
 
+		// Delete description-{languageCode} attr from AttributeMetaDataMetaData
+		AttributeMetaData attributeDescription = AttributeMetaDataMetaData.INSTANCE
+				.getAttribute(AttributeMetaDataMetaData.DESCRIPTION + '-' + languageCode);
+		if (attributeDescription != null)
+		{
+			AttributeMetaDataMetaData.INSTANCE.removeAttributeMetaData(attributeDescription);
+			dataService.getMeta().getDefaultBackend()
+					.deleteAttribute(AttributeMetaDataMetaData.ENTITY_NAME, attributeDescription.getName());
+		}
+
 		// Delete description-{languageCode} attr from EntityMetaDataMetaData
 		AttributeMetaData entityDescription = EntityMetaDataMetaData.INSTANCE
 				.getAttribute(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode);
@@ -213,6 +223,12 @@ public class LanguageRepositoryDecorator implements Repository
 
 		// Update AttributeMetaDataMetaData
 		AttributeMetaDataMetaData.INSTANCE.addAttributeMetaData(attrLabel);
+
+		// Attribute description
+		AttributeMetaData attrDescription = new DefaultAttributeMetaData(AttributeMetaDataMetaData.DESCRIPTION + '-'
+				+ languageCode).setNillable(true);
+		dataService.getMeta().getDefaultBackend().addAttribute(AttributeMetaDataMetaData.ENTITY_NAME, attrDescription);
+		AttributeMetaDataMetaData.INSTANCE.addAttributeMetaData(attrDescription);
 
 		// EntityMeta description
 		AttributeMetaData entityDescription = new DefaultAttributeMetaData(EntityMetaDataMetaData.DESCRIPTION + '-'

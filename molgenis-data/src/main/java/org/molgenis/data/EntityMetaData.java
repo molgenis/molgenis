@@ -1,5 +1,7 @@
 package org.molgenis.data;
 
+import java.util.Set;
+
 /**
  * EntityMetaData defines the structure and attributes of an Entity. Attributes are unique. Other software components
  * can use this to interact with Entity and/or to configure backends and frontends, including Repository instances.
@@ -51,6 +53,11 @@ public interface EntityMetaData
 	String getLabel(String languageCode);
 
 	/**
+	 * Get available label language codes
+	 */
+	Set<String> getLabelLanguageCodes();
+
+	/**
 	 * Description of the entity
 	 */
 	String getDescription();
@@ -59,6 +66,11 @@ public interface EntityMetaData
 	 * Description of the entity in the requested language
 	 */
 	String getDescription(String languageCode);
+
+	/**
+	 * Get available description language codes
+	 */
+	Set<String> getDescriptionLanguageCodes();
 
 	/**
 	 * Returns all attributes. In case of compound attributes (attributes consisting of atomic attributes) only the

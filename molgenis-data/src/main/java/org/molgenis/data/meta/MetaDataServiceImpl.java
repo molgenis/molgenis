@@ -120,6 +120,14 @@ public class MetaDataServiceImpl implements MetaDataService
 		languageCodes.get().map(code -> AttributeMetaDataMetaData.LABEL + '-' + code)
 				.forEach(AttributeMetaDataMetaData.INSTANCE::addAttribute);
 
+		// Add description attributes to the AttributeMetaDataMetaData
+		languageCodes
+				.get()
+				.map(code -> AttributeMetaDataMetaData.DESCRIPTION + '-' + code)
+				.forEach(
+						attrName -> AttributeMetaDataMetaData.INSTANCE.addAttribute(attrName).setDataType(
+								MolgenisFieldTypes.TEXT));
+
 		// Add description attributes to the EntityMetaDataMetaData
 		languageCodes
 				.get()

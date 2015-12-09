@@ -160,11 +160,18 @@ class AttributeMetaDataRepository
 				}
 
 				// Language attributes
-				for (String languageCode : languageService.getLanguageCodes())
+				for (String languageCode : attr.getLabelLanguageCodes())
 				{
 					String attributeName = LABEL + '-' + languageCode;
 					String label = attr.getLabel(languageCode);
 					if (label != null) attributeMetaDataEntity.set(attributeName, label);
+				}
+
+				for (String languageCode : attr.getDescriptionLanguageCodes())
+				{
+					String attributeName = DESCRIPTION + '-' + languageCode;
+					String description = attr.getDescription(languageCode);
+					if (description != null) attributeMetaDataEntity.set(attributeName, description);
 				}
 
 				return attributeMetaDataEntity;
@@ -254,6 +261,10 @@ class AttributeMetaDataRepository
 			String attributeName = LABEL + '-' + languageCode;
 			String label = entity.getString(attributeName);
 			if (label != null) attributeMetaData.setLabel(languageCode, label);
+
+			attributeName = DESCRIPTION + '-' + languageCode;
+			String description = entity.getString(attributeName);
+			if (description != null) attributeMetaData.setDescription(languageCode, description);
 		}
 
 		return attributeMetaData;

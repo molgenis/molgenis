@@ -64,7 +64,7 @@ class AttributeMetaDataResponseV2
 		this.fieldType = attr.getDataType().getEnumType();
 		this.name = attrName;
 		this.label = attr.getLabel(languageService.getCurrentUserLanguageCode());
-		this.description = attr.getDescription();
+		this.description = attr.getDescription(languageService.getCurrentUserLanguageCode());
 		this.enumOptions = attr.getEnumOptions();
 		this.maxLength = attr.getDataType().getMaxLength();
 		this.expression = attr.getExpression();
