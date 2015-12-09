@@ -1,5 +1,7 @@
 package org.molgenis.ui;
 
+import com.google.common.collect.Lists;
+
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -20,7 +22,7 @@ public class MolgenisFreemarkerObjectWrapper extends DefaultObjectWrapper
 			// Fix for https://github.com/molgenis/molgenis/issues/4227
 			// If a method returning an Iterable in some cases returns a List and in other cases a e.g. FluentIterable
 			// then it is unclear whether <#list iterable> or <#list iterable.iterator()> should be used.
-			obj = ((Iterable<?>) obj).iterator();
+			obj = Lists.newArrayList(((Iterable<?>) obj));
 		}
 		return super.handleUnknownType(obj);
 	}
