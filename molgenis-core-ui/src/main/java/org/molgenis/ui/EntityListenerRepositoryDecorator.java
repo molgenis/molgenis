@@ -3,9 +3,7 @@ package org.molgenis.ui;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
 import org.molgenis.data.AggregateQuery;
@@ -18,10 +16,13 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.SetMultimap;
+
 public class EntityListenerRepositoryDecorator implements Repository
 {
 	private final Repository decoratedRepository;
-	private Map<Object, EntityListener> entityListeners;
+	private SetMultimap<Object, EntityListener> entityListeners;
 
 	public EntityListenerRepositoryDecorator(Repository decoratedRepository)
 	{
@@ -125,11 +126,10 @@ public class EntityListenerRepositoryDecorator implements Repository
 
 		if (entityListeners != null)
 		{
-			EntityListener entityListener = entityListeners.get(entity.getIdValue());
-			if (entityListener != null)
-			{
+			Set<EntityListener> entityEntityListeners = entityListeners.get(entity.getIdValue());
+			entityEntityListeners.forEach(entityListener -> {
 				entityListener.postUpdate(entity);
-			}
+			});
 		}
 	}
 
@@ -142,11 +142,10 @@ public class EntityListenerRepositoryDecorator implements Repository
 		{
 			for (Entity entity : records)
 			{
-				EntityListener entityListener = entityListeners.get(entity.getIdValue());
-				if (entityListener != null)
-				{
+				Set<EntityListener> entityEntityListeners = entityListeners.get(entity.getIdValue());
+				entityEntityListeners.forEach(entityListener -> {
 					entityListener.postUpdate(entity);
-				}
+				});
 			}
 		}
 	}
@@ -228,7 +227,7 @@ public class EntityListenerRepositoryDecorator implements Repository
 	{
 		if (entityListeners == null)
 		{
-			entityListeners = new HashMap<>();
+			entityListeners = HashMultimap.<Object, EntityListener> create();
 		}
 		entityListeners.put(entityListener.getEntityId(), entityListener);
 	}
@@ -238,7 +237,7 @@ public class EntityListenerRepositoryDecorator implements Repository
 	{
 		if (entityListeners != null)
 		{
-			entityListeners.remove(entityListener.getEntityId());
+			entityListeners.remove(entityListener.getEntityId(), entityListener);
 		}
 	}
 }
