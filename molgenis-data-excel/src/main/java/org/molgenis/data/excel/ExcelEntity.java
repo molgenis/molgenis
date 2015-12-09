@@ -95,11 +95,7 @@ public class ExcelEntity extends AbstractMetaDataEntity
 	@Override
 	public void set(Entity values)
 	{
-		if (cachedValueMap == null)
-		{
-			cachedValueMap = new CaseInsensitiveLinkedHashMap<>();
-		}
-		values.getAttributeNames().forEach(attr -> cachedValueMap.put(attr, values.get(attr)));
+		colNamesMap.keySet().forEach(attr -> set(attr, values.get(attr)));
 	}
 
 	@Override

@@ -122,6 +122,6 @@ public class ExcelEntityTest
 
 		excelEntity.set(entity);
 		assertEquals(excelEntity.get("attr1"), "test1");
-		assertEquals(excelEntity.get("attr2"), "test2");
+		assertNull(excelEntity.get("attr2"));
 	}
 }
