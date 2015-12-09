@@ -158,6 +158,16 @@ public class LanguageRepositoryDecorator implements Repository
 			dataService.getMeta().getDefaultBackend()
 					.deleteAttribute(EntityMetaDataMetaData.ENTITY_NAME, entityDescription.getName());
 		}
+
+		// Delete label-{languageCode} attr from EntityMetaDataMetaData
+		AttributeMetaData entityLabel = EntityMetaDataMetaData.INSTANCE.getAttribute(EntityMetaDataMetaData.LABEL + '-'
+				+ languageCode);
+		if (entityLabel != null)
+		{
+			EntityMetaDataMetaData.INSTANCE.removeAttributeMetaData(entityLabel);
+			dataService.getMeta().getDefaultBackend()
+					.deleteAttribute(EntityMetaDataMetaData.ENTITY_NAME, entityLabel.getName());
+		}
 	}
 
 	@Override
@@ -205,14 +215,16 @@ public class LanguageRepositoryDecorator implements Repository
 		AttributeMetaDataMetaData.INSTANCE.addAttributeMetaData(attrLabel);
 
 		// EntityMeta description
-		AttributeMetaData attrDescription = new DefaultAttributeMetaData(EntityMetaDataMetaData.DESCRIPTION + '-'
+		AttributeMetaData entityDescription = new DefaultAttributeMetaData(EntityMetaDataMetaData.DESCRIPTION + '-'
 				+ languageCode).setNillable(true);
+		dataService.getMeta().getDefaultBackend().addAttribute(EntityMetaDataMetaData.ENTITY_NAME, entityDescription);
+		EntityMetaDataMetaData.INSTANCE.addAttributeMetaData(entityDescription);
 
-		// Add the attribute to the entities table
-		dataService.getMeta().getDefaultBackend().addAttribute(EntityMetaDataMetaData.ENTITY_NAME, attrDescription);
-
-		// UpdateEntityMetaDataMetaData
-		EntityMetaDataMetaData.INSTANCE.addAttributeMetaData(attrDescription);
+		// EntityMeta label
+		AttributeMetaData entityLabel = new DefaultAttributeMetaData(EntityMetaDataMetaData.LABEL + '-' + languageCode)
+				.setNillable(true);
+		dataService.getMeta().getDefaultBackend().addAttribute(EntityMetaDataMetaData.ENTITY_NAME, entityLabel);
+		EntityMetaDataMetaData.INSTANCE.addAttributeMetaData(entityLabel);
 	}
 
 	@Override

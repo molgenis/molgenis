@@ -128,6 +128,10 @@ public class MetaDataServiceImpl implements MetaDataService
 						attrName -> EntityMetaDataMetaData.INSTANCE.addAttribute(attrName).setDataType(
 								MolgenisFieldTypes.TEXT));
 
+		// Add language attributes to the EntityMetaDataMetaData
+		languageCodes.get().map(code -> EntityMetaDataMetaData.LABEL + '-' + code)
+				.forEach(EntityMetaDataMetaData.INSTANCE::addAttribute);
+
 		Repository tagRepo = defaultBackend.addEntityMeta(TagMetaData.INSTANCE);
 		dataService.addRepository(tagRepo);
 

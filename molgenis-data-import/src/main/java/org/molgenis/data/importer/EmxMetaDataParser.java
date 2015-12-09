@@ -511,8 +511,9 @@ public class EmxMetaDataParser implements MetaDataParser
 			for (AttributeMetaData attr : entitiesRepo.getEntityMetaData().getAtomicAttributes())
 			{
 				if (!EmxMetaDataParser.SUPPORTED_ENTITY_ATTRIBUTES.contains(attr.getName().toLowerCase())
-						&& !(I18nUtils.isI18n(attr.getName()) && attr.getName().startsWith(
-								org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION)))
+						&& !(I18nUtils.isI18n(attr.getName()) && (attr.getName().startsWith(
+								org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION) || attr.getName()
+								.startsWith(org.molgenis.data.meta.EntityMetaDataMetaData.LABEL))))
 				{
 					throw new IllegalArgumentException("Unsupported entity metadata: entities." + attr.getName());
 				}
@@ -575,6 +576,15 @@ public class EmxMetaDataParser implements MetaDataParser
 							{
 								String languageCode = I18nUtils.getLanguageCode(attr.getName());
 								md.setDescription(languageCode, description);
+							}
+						}
+						else if (attr.getName().startsWith(org.molgenis.data.meta.EntityMetaDataMetaData.LABEL))
+						{
+							String label = entity.getString(attr.getName());
+							if (label != null)
+							{
+								String languageCode = I18nUtils.getLanguageCode(attr.getName());
+								md.setLabel(languageCode, label);
 							}
 						}
 					}

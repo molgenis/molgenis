@@ -46,6 +46,11 @@ public interface EntityMetaData
 	String getLabel();
 
 	/**
+	 * Label of the entity in the requested language
+	 */
+	String getLabel(String languageCode);
+
+	/**
 	 * Description of the entity
 	 */
 	String getDescription();

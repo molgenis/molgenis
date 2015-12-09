@@ -79,7 +79,7 @@ public class EntityMetaDataResponse
 
 		if (attributesSet == null || attributesSet.contains("label".toLowerCase()))
 		{
-			label = meta.getLabel();
+			label = meta.getLabel(languageService.getCurrentUserLanguageCode());
 		}
 		else this.label = null;
 

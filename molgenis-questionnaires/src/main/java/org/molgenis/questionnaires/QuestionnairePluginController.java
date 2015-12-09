@@ -129,8 +129,8 @@ public class QuestionnairePluginController extends MolgenisPluginController
 	private Questionnaire toQuestionnaireModel(Entity entity, EntityMetaData emd)
 	{
 		QuestionnaireStatus status = QuestionnaireStatus.valueOf(entity.getString(QuestionnaireMetaData.ATTR_STATUS));
-		return new Questionnaire(emd.getName(), emd.getLabel(), status, emd.getDescription(languageService
-				.getCurrentUserLanguageCode()), entity.getIdValue());
+		return new Questionnaire(emd.getName(), emd.getLabel(languageService.getCurrentUserLanguageCode()), status,
+				emd.getDescription(languageService.getCurrentUserLanguageCode()), entity.getIdValue());
 	}
 
 	private Entity findQuestionnaireEntity(String name)

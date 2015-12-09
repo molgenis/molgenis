@@ -64,7 +64,7 @@ class EntityMetaDataResponseV2
 
 		this.name = name;
 		this.description = meta.getDescription(languageService.getCurrentUserLanguageCode());
-		this.label = meta.getLabel();
+		this.label = meta.getLabel(languageService.getCurrentUserLanguageCode());
 
 		// filter attribute parts
 		Iterable<AttributeMetaData> filteredAttrs = filterAttributes(fetch, meta.getAttributes());

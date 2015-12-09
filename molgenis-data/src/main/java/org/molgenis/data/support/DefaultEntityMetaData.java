@@ -31,6 +31,7 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 
 	private Package package_;
 	private String label;
+	private final Map<String, String> labelByLanguageCode = new HashMap<>();
 	private boolean abstract_;
 	private String description;
 	private final Map<String, String> descriptionByLanguageCode = new HashMap<>();
@@ -643,5 +644,19 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 		}
 
 		return getLabelAttribute();
+	}
+
+	@Override
+	public String getLabel(String languageCode)
+	{
+		String label = labelByLanguageCode.get(languageCode);
+		return label != null ? label : getLabel();
+	}
+
+	@Override
+	public EditableEntityMetaData setLabel(String languageCode, String label)
+	{
+		this.labelByLanguageCode.put(languageCode, label);
+		return this;
 	}
 }
