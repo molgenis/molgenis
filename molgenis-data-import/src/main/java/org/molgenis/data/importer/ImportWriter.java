@@ -534,7 +534,7 @@ public class ImportWriter
 				case UPDATE:
 					int errorCount = 0;
 					StringBuilder msg = new StringBuilder();
-					msg.append("Trying to update not exsisting ").append(repo.getName()).append(" entities:");
+					msg.append("Trying to update non-existing ").append(repo.getName()).append(" entities:");
 
 					for (Entity entity : entities)
 					{
