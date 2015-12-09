@@ -51,8 +51,8 @@ public interface EntityMetaData
 	String getDescription();
 
 	/**
-	 * Returns all attributes. In case of compound attributes (attributes consisting of multiple atomic attributes) only
-	 * the compound attribute is returned. This attribute can be used to retrieve parts of the compound attribute.
+	 * Returns all attributes. In case of compound attributes (attributes consisting of atomic attributes) only the
+	 * compound attribute is returned. This attribute can be used to retrieve parts of the compound attribute.
 	 * 
 	 * In case EntityMetaData extends other EntityMetaData then the attributes of this EntityMetaData as well as its
 	 * parent class are returned.
@@ -60,13 +60,27 @@ public interface EntityMetaData
 	Iterable<AttributeMetaData> getAttributes();
 
 	/**
-	 * Returns all atomic attributes. In case of compound attributes (attributes consisting of multiple atomic
-	 * attributes) only the descendant atomic attributes are returned. The compound attribute itself is not returned.
+	 * Same as {@link #getAttributes()} but does not return attributes of its parent class.
+	 * 
+	 * @return
+	 */
+	Iterable<AttributeMetaData> getOwnAttributes();
+
+	/**
+	 * Returns all atomic attributes. In case of compound attributes (attributes consisting of atomic attributes) only
+	 * the descendant atomic attributes are returned. The compound attribute itself is not returned.
 	 * 
 	 * In case EntityMetaData extends other EntityMetaData then the attributes of this EntityMetaData as well as its
 	 * parent class are returned.
 	 */
 	Iterable<AttributeMetaData> getAtomicAttributes();
+
+	/**
+	 * Same as {@link #getAtomicAttributes()} but does not return attributes of its parent class.
+	 * 
+	 * @return
+	 */
+	Iterable<AttributeMetaData> getOwnAtomicAttributes();
 
 	/**
 	 * Attribute that is used as unique Id. Id attribute should always be provided.
@@ -89,10 +103,16 @@ public interface EntityMetaData
 	AttributeMetaData getAttribute(String attributeName);
 
 	/**
+	 * Returns whether this entity has a attribute with expression
+	 * 
+	 * @return whether this entity has a attribute with expression
+	 */
+	boolean hasAttributeWithExpression();
+
+	/**
 	 * Entity can extend another entity, adding its properties to their own
 	 */
 	public EntityMetaData getExtends();
 
 	Class<? extends Entity> getEntityClass();
-
 }

@@ -1,21 +1,25 @@
 package org.molgenis.data.rest.v2;
 
+import static org.molgenis.data.rest.v2.AttributeMetaDataResponseV2.filterAttributes;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 
 import java.util.List;
 
-import org.elasticsearch.common.collect.Lists;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.rest.Href;
+import org.molgenis.fieldtypes.MrefField;
+import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 class EntityMetaDataResponseV2
 {
@@ -49,8 +53,8 @@ class EntityMetaDataResponseV2
 	 * @param attrFilter
 	 *            set of lowercase attribute names to include in response
 	 */
-	public EntityMetaDataResponseV2(EntityMetaData meta, AttributeFilter attrFilter,
-			MolgenisPermissionService permissionService, DataService dataService)
+	public EntityMetaDataResponseV2(EntityMetaData meta, Fetch fetch, MolgenisPermissionService permissionService,
+			DataService dataService)
 	{
 		String name = meta.getName();
 		this.href = Href.concatMetaEntityHrefV2(BASE_URI, name);
@@ -61,15 +65,7 @@ class EntityMetaDataResponseV2
 		this.label = meta.getLabel();
 
 		// filter attribute parts
-		Iterable<AttributeMetaData> filteredAttrs = attrFilter != null ? Iterables.filter(meta.getAttributes(),
-				new Predicate<AttributeMetaData>()
-				{
-					@Override
-					public boolean apply(AttributeMetaData attr)
-					{
-						return attrFilter.includeAttribute(attr);
-					}
-				}) : meta.getAttributes();
+		Iterable<AttributeMetaData> filteredAttrs = filterAttributes(fetch, meta.getAttributes());
 
 		this.attributes = Lists.newArrayList(Iterables.transform(filteredAttrs,
 				new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
@@ -77,17 +73,28 @@ class EntityMetaDataResponseV2
 					@Override
 					public AttributeMetaDataResponseV2 apply(AttributeMetaData attr)
 					{
-						AttributeFilter subAttrFilter;
-						if (attrFilter != null)
+						Fetch subAttrFetch;
+						if (fetch != null)
 						{
-							subAttrFilter = attrFilter.getAttributeFilter(attr);
+							if (attr.getDataType().getEnumType() == FieldTypeEnum.COMPOUND)
+							{
+								subAttrFetch = fetch;
+							}
+							else
+							{
+								subAttrFetch = fetch.getFetch(attr);
+							}
+						}
+						else if (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
+						{
+							subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr);
 						}
 						else
 						{
-							subAttrFilter = null;
+							subAttrFetch = null;
 						}
-						return new AttributeMetaDataResponseV2(name, attr, subAttrFilter, permissionService,
-								dataService);
+
+						return new AttributeMetaDataResponseV2(name, attr, subAttrFetch, permissionService, dataService);
 					}
 				}));
 

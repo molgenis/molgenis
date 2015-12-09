@@ -3,9 +3,12 @@ package org.molgenis;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
+import org.molgenis.data.EntityManager;
+import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
+import org.molgenis.data.mysql.MySqlEntityFactory;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
@@ -48,8 +51,8 @@ public class MysqlTestConfig
 		metaDataService().setDefaultBackend(mysqlRepositoryCollection());
 
 		// Login
-		SecurityContextHolder.getContext().setAuthentication(
-				new TestingAuthenticationToken("admin", "admin", "ROLE_SYSTEM"));
+		SecurityContextHolder.getContext()
+				.setAuthentication(new TestingAuthenticationToken("admin", "admin", "ROLE_SYSTEM"));
 	}
 
 	@Bean
@@ -65,6 +68,18 @@ public class MysqlTestConfig
 	}
 
 	@Bean
+	public EntityManager entityResolver()
+	{
+		return new EntityManagerImpl(dataService());
+	}
+
+	@Bean
+	public MySqlEntityFactory mySqlEntityFactory()
+	{
+		return new MySqlEntityFactory(entityResolver(), dataService());
+	}
+
+	@Bean
 	public AsyncJdbcTemplate asyncJdbcTemplate()
 	{
 		return new AsyncJdbcTemplate(new JdbcTemplate(dataSource()));
@@ -74,7 +89,7 @@ public class MysqlTestConfig
 	@Scope("prototype")
 	public MysqlRepository mysqlRepository()
 	{
-		return new MysqlRepository(dataService(), dataSource(), asyncJdbcTemplate());
+		return new MysqlRepository(dataService(), mySqlEntityFactory(), dataSource(), asyncJdbcTemplate());
 	}
 
 	@Bean

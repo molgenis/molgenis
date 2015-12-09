@@ -5,8 +5,7 @@
 	"jquery.molgenis.tree.css",
 	"ui.fancytree.min.css",
 	"dataexplorer.css",
-	"dataexplorer-filter.css",
-	"diseasematcher.css"]>
+	"dataexplorer-filter.css"]>
 <#assign js=[
     "jquery.bootstrap.wizard.min.js",
 	"dataexplorer-filter.js",
@@ -33,7 +32,7 @@
                         <select class="form-control" id="dataset-select" data-placeholder="Choose an Entity">
                                 <option value=""></option><#-- Required for placeholder to work with select2 -->
                         <#if entitiesMeta?has_content>
-                            <#list entitiesMeta.iterator() as entityMeta>
+                            <#list entitiesMeta as entityMeta>
                                 <option value="${entityMeta.name?html}"<#if selectedEntityName?? && (entityMeta.name == selectedEntityName)> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label?html}<#else>${entityMeta.name?html}</#if></option>
                             </#list>
                         </#if>

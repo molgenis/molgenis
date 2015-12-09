@@ -4,6 +4,7 @@ import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
@@ -73,11 +74,39 @@ public interface SearchService
 	 * 
 	 * @param entityId
 	 * @param entityMetaData
-	 * @return
+	 * @return entity or null
 	 */
 	Entity get(Object entityId, EntityMetaData entityMetaData);
 
+	/**
+	 * Returns entity with given id and attribute values defined by fetch or null if entity does not exist
+	 * 
+	 * @param entityId
+	 * @param entityMetaData
+	 * @param fetch
+	 * @return entity or null
+	 */
+	Entity get(Object entityId, EntityMetaData entityMetaData, Fetch fetch);
+
+	/**
+	 * Returns entities with given ids
+	 * 
+	 * @param entityIds
+	 * @param entityMetaData
+	 * @param fetch
+	 * @return entities
+	 */
 	Iterable<Entity> get(Iterable<Object> entityIds, EntityMetaData entityMetaData);
+
+	/**
+	 * Returns entities with given ids and attribute values defined by fetch
+	 * 
+	 * @param entityIds
+	 * @param entityMetaData
+	 * @param fetch
+	 * @return entities with attribute values defined by fetch
+	 */
+	Iterable<Entity> get(Iterable<Object> entityIds, EntityMetaData entityMetaData, Fetch fetch);
 
 	// TODO replace Iterable<Entity> with EntityCollection and add EntityCollection.getTotal()
 	Iterable<Entity> search(Query q, EntityMetaData entityMetaData);

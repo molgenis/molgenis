@@ -2,6 +2,7 @@ package org.molgenis.data.rest.v2;
 
 import java.util.Set;
 
+import org.molgenis.data.rest.convert.AggregateQueryRsqlConverter;
 import org.molgenis.data.rest.convert.QueryRsqlConverter;
 import org.molgenis.data.rest.convert.SortConverter;
 import org.springframework.context.annotation.Bean;
@@ -22,6 +23,7 @@ public class RestConfig extends WebMvcConfigurerAdapter
 		registry.addConverter(attributeFilterConverter());
 		registry.addConverter(sortConverter());
 		registry.addConverter(rsqlQueryConverter());
+		registry.addConverter(aggregateQueryRsqlConverter());
 	}
 
 	@Bean
@@ -40,6 +42,12 @@ public class RestConfig extends WebMvcConfigurerAdapter
 	public QueryRsqlConverter rsqlQueryConverter()
 	{
 		return new QueryRsqlConverter(rsqlParser());
+	}
+
+	@Bean
+	public AggregateQueryRsqlConverter aggregateQueryRsqlConverter()
+	{
+		return new AggregateQueryRsqlConverter(rsqlParser());
 	}
 
 	@Bean

@@ -94,6 +94,15 @@ public interface AttributeMetaData
 	Iterable<AttributeMetaData> getAttributeParts();
 
 	/**
+	 * Get attribute part by name (case insensitive), returns null if not found
+	 * 
+	 * @param attrName
+	 *            attribute name (case insensitive)
+	 * @return attribute or null
+	 */
+	AttributeMetaData getAttributePart(String attrName);
+
+	/**
 	 * Wether this attribute can be used to aggregate on. Default only attributes of type 'BOOL', 'XREF' and
 	 * 'CATEGORICAL' are aggregateable.
 	 */
@@ -120,4 +129,32 @@ public interface AttributeMetaData
 	String getValidationExpression();
 
 	boolean isSameAs(AttributeMetaData attributeMetaData);
+
+	Iterable<AttributeChangeListener> getChangeListeners();
+
+	/**
+	 * Add listener that listens to attribute property changes
+	 * 
+	 * @param changeListener
+	 */
+	void addChangeListener(AttributeChangeListener changeListener);
+
+	/**
+	 * Add listeners that listens to attribute property changes
+	 * 
+	 * @param changeListeners
+	 */
+	void addChangeListeners(Iterable<AttributeChangeListener> changeListeners);
+
+	/**
+	 * Remove listener with the given listener id
+	 * 
+	 * @param changeListenerId
+	 */
+	void removeChangeListener(String changeListenerId);
+
+	/**
+	 * Remove all attribute listeners
+	 */
+	void removeChangeListeners();
 }

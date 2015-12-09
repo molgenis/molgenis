@@ -33,13 +33,3 @@
 			molgenis.dataexplorer.aggregates.createAggregatesTable();
 		});
 </script>
-<script id="aggregates-total-template" type="text/x-handlebars-template">
-    ${i18n.dataexplorer_aggregates_total?html}
-</script>
-<script id="aggregates-missing-template" type="text/x-handlebars-template">
-    ${i18n.dataexplorer_aggregates_missing?html}
-</script>
-<script id="aggregates-no-result-message-template" type="text/x-handlebars-template">
-    <br><div>${i18n.dataexplorer_aggregates_no_result_message?html}<div>
-</script>
-

@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
@@ -18,9 +19,13 @@ public class QueryImpl implements Query
 {
 	private final List<List<QueryRule>> rules = new ArrayList<List<QueryRule>>();
 
-	private int pageSize;
 	private int offset;
+	private int pageSize;
 	private Sort sort;
+	/**
+	 * {@link Fetch} that defines which entity attributes to retrieve.
+	 */
+	private Fetch fetch;
 	private Repository repository;
 
 	public static Query query()
@@ -59,16 +64,19 @@ public class QueryImpl implements Query
 		this.pageSize = q.getPageSize();
 		this.offset = q.getOffset();
 		this.sort = q.getSort();
+		this.fetch = q.getFetch();
 	}
 
 	public QueryImpl(QueryRule queryRule)
 	{
-		this(Arrays.asList(queryRule));
+		this();
+		addRule(queryRule);
 	}
 
 	public QueryImpl(List<QueryRule> queryRules)
 	{
-		this.rules.add(new ArrayList<QueryRule>(queryRules));
+		this();
+		queryRules.forEach(this::addRule);
 	}
 
 	public void addRule(QueryRule rule)
@@ -100,8 +108,8 @@ public class QueryImpl implements Query
 	@Override
 	public List<QueryRule> getRules()
 	{
-		if (this.rules.size() > 1) throw new MolgenisDataException(
-				"Nested query not closed, use unnest() or unnestAll()");
+		if (this.rules.size() > 1)
+			throw new MolgenisDataException("Nested query not closed, use unnest() or unnestAll()");
 
 		if (this.rules.size() > 0)
 		{
@@ -297,10 +305,36 @@ public class QueryImpl implements Query
 	}
 
 	@Override
-	public String toString()
+	public Iterator<Entity> iterator()
 	{
-		return "QueryImpl [rules=" + getRules() + ", pageSize=" + pageSize + ", offset=" + offset + ", sort=" + sort
-				+ "]";
+		if (repository == null) throw new RuntimeException("Query failed: repository not set");
+		return repository.findAll(this).iterator();
+	}
+
+	@Override
+	public Fetch getFetch()
+	{
+		return fetch;
+	}
+
+	@Override
+	public void setFetch(Fetch fetch)
+	{
+		this.fetch = fetch;
+	}
+
+	@Override
+	public Fetch fetch()
+	{
+		this.fetch = new Fetch();
+		return getFetch();
+	}
+
+	@Override
+	public Query fetch(Fetch fetch)
+	{
+		setFetch(fetch);
+		return this;
 	}
 
 	@Override
@@ -338,9 +372,56 @@ public class QueryImpl implements Query
 	}
 
 	@Override
-	public Iterator<Entity> iterator()
+	public String toString()
 	{
-		if (repository == null) throw new RuntimeException("Query failed: repository not set");
-		return repository.findAll(this).iterator();
+		StringBuilder builder = new StringBuilder();
+		if (rules.size() > 0)
+		{
+			if (rules.size() == 1)
+			{
+				List<QueryRule> rule = rules.get(0);
+				if (rule.size() > 0)
+				{
+					builder.append("rules=").append(rule);
+				}
+			}
+			else
+			{
+				builder.append("rules=").append(rules);
+			}
+		}
+		if (offset != 0)
+		{
+			if (builder.length() > 0)
+			{
+				builder.append(", ");
+			}
+			builder.append("offset=").append(offset);
+		}
+		if (pageSize != 0)
+		{
+			if (builder.length() > 0)
+			{
+				builder.append(", ");
+			}
+			builder.append("pageSize=").append(pageSize);
+		}
+		if (sort != null)
+		{
+			if (builder.length() > 0)
+			{
+				builder.append(", ");
+			}
+			builder.append("sort=").append(sort);
+		}
+		if (fetch != null)
+		{
+			if (builder.length() > 0)
+			{
+				builder.append(", ");
+			}
+			builder.append("fetch=").append(fetch);
+		}
+		return builder.toString();
 	}
 }

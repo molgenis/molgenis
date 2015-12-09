@@ -22,6 +22,7 @@ import org.testng.annotations.Test;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 
 public class MolgenisJsTest
@@ -65,8 +66,8 @@ public class MolgenisJsTest
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
 		emd.addAttribute("gender").setDataType(MolgenisFieldTypes.CATEGORICAL);
 
-		Object result = ScriptEvaluator.eval("$('gender').map({'20':'2','B':'B2'}).value()", new MapEntity("gender",
-				'B'), emd);
+		Object result = ScriptEvaluator.eval("$('gender').map({'20':'2','B':'B2'}).value()",
+				new MapEntity("gender", 'B'), emd);
 		assertEquals(result.toString(), "B2");
 	}
 
@@ -89,6 +90,141 @@ public class MolgenisJsTest
 
 		Object result = ScriptEvaluator.eval("$('gender').map({'20':'2'}, 'B2', 'B3').value()", new MapEntity(), emd);
 		assertEquals(result.toString(), "B3");
+	}
+
+	@Test
+	public void testAverageValueOfMultipleNumericAttributes()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("SBP_1").setDataType(MolgenisFieldTypes.DECIMAL);
+		emd.addAttribute("SBP_2").setDataType(MolgenisFieldTypes.DECIMAL);
+		String script = "var counter = 0;\nvar SUM=newValue(0);\nif(!$('SBP_1').isNull().value()){\n\tSUM.plus($('SBP_1').value());\n\tcounter++;\n}\nif(!$('SBP_2').isNull().value()){\n\tSUM.plus($('SBP_2').value());\n\tcounter++;\n}\nif(counter !== 0){\n\tSUM.div(counter);\nSUM.value();\n}\nelse{\n\tnull;\n}";
+		Object result1 = ScriptEvaluator.eval(script, new MapEntity(ImmutableMap.of("SBP_1", 120, "SBP_2", 124)), emd);
+		assertEquals(result1.toString(), "122.0");
+
+		Object result2 = ScriptEvaluator.eval(script, new MapEntity(ImmutableMap.of("SBP_1", 120)), emd);
+		assertEquals(result2.toString(), "120.0");
+
+		Object result3 = ScriptEvaluator.eval(script, new MapEntity(), emd);
+		assertEquals(result3, null);
+	}
+
+	@Test
+	public void testGroup()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("age").setDataType(MolgenisFieldTypes.INT);
+
+		Object result1 = ScriptEvaluator.eval("$('age').group([18, 35, 56]).value();", new MapEntity("age", 29), emd);
+		assertEquals(result1.toString(), "18-35");
+
+		Object result2 = ScriptEvaluator.eval("$('age').group([18, 35, 56], [888, 999]).value();",
+				new MapEntity("age", 999), emd);
+		assertEquals(result2.toString(), "999");
+
+		Object result3 = ScriptEvaluator.eval("$('age').group([18, 35, 56]).value();", new MapEntity("age", 47), emd);
+		assertEquals(result3.toString(), "35-56");
+	}
+
+	@Test
+	public void testGroupNull()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("age").setDataType(MolgenisFieldTypes.INT);
+
+		Object result4 = ScriptEvaluator.eval("$('age').group().value();", new MapEntity("age", 47), emd);
+		assertEquals(result4, null);
+
+		Object result5 = ScriptEvaluator.eval("$('age').group([56, 18, 35]).value();", new MapEntity("age", 47), emd);
+		assertEquals(result5, null);
+
+		Object result6 = ScriptEvaluator.eval("$('age').group([56, 18, 35], null,'123456').value();",
+				new MapEntity("age", 47), emd);
+		assertEquals(result6.toString(), "123456");
+	}
+
+	@Test
+	public void testGroupConstantValue()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("age").setDataType(MolgenisFieldTypes.INT);
+		Object result4 = ScriptEvaluator.eval(
+				"var age_variable=new newValue(45);age_variable.group([18, 35, 56]).value();", new MapEntity("age", 47),
+				emd);
+		assertEquals(result4.toString(), "35-56");
+	}
+
+	@Test
+	public void combineGroupMapFunctions()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("age").setDataType(MolgenisFieldTypes.INT);
+
+		Object result1 = ScriptEvaluator.eval(
+				"$('age').group([18, 35, 56]).map({'-18':'0','18-35':'1','35-56':'2','56+':'3'}).value();",
+				new MapEntity("age", 29), emd);
+		assertEquals(result1.toString(), "1");
+
+		Object result2 = ScriptEvaluator.eval(
+				"$('age').group([18, 35, 56]).map({'-18':'0','18-35':'1','35-56':'2','56+':'3'}).value();",
+				new MapEntity("age", 17), emd);
+		assertEquals(result2.toString(), "0");
+
+		Object result3 = ScriptEvaluator.eval(
+				"$('age').group([18, 35, 56]).map({'-18':'0','18-35':'1','35-56':'2','56+':'3'}).value();",
+				new MapEntity("age", 40), emd);
+		assertEquals(result3.toString(), "2");
+
+		Object result4 = ScriptEvaluator.eval(
+				"$('age').group([18, 35, 56]).map({'-18':'0','18-35':'1','35-56':'2','56+':'3'}).value();",
+				new MapEntity("age", 70), emd);
+		assertEquals(result4.toString(), "3");
+
+		Object result5 = ScriptEvaluator.eval(
+				"$('age').group([18, 35, 56], [999]).map({'-18':0,'18-35':1,'35-56':2,'56+':3,'999':'9'}).value();",
+				new MapEntity("age", 999), emd);
+		assertEquals(result5.toString(), "9");
+	}
+
+	@Test
+	public void combinePlusGroupMapFunctions()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("FOOD59A1").setDataType(MolgenisFieldTypes.INT);
+		emd.addAttribute("FOOD60A1").setDataType(MolgenisFieldTypes.INT);
+		Object result1 = ScriptEvaluator.eval(
+				"var SUM_WEIGHT = new newValue(0);SUM_WEIGHT.plus($('FOOD59A1').map({\"1\":0,\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value());SUM_WEIGHT.plus($('FOOD60A1').map({\"1\":0,\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value());SUM_WEIGHT.group([0,1,2,6,7]).map({\"0-1\":\"4\",\"1-2\":\"3\",\"2-6\":\"2\",\"6-7\":\"1\", \"7+\" : \"1\"},null,null).value();",
+				new MapEntity(ImmutableMap.of("FOOD59A1", 7, "FOOD60A1", 6)), emd);
+
+		assertEquals(result1.toString(), "1");
+	}
+
+	@Test
+	public void testPlusValue()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("height").setDataType(MolgenisFieldTypes.INT);
+		Object result = ScriptEvaluator.eval("$('height').plus(100).value()", new MapEntity("height", 180), emd);
+		assertEquals(result, (double) 280);
+	}
+
+	@Test
+	public void testPlusObject()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("height").setDataType(MolgenisFieldTypes.INT);
+		Object result1 = ScriptEvaluator.eval("$('height').plus(new newValue(100)).value()",
+				new MapEntity("height", 180), emd);
+		assertEquals(result1, (double) 280);
+	}
+
+	@Test
+	public void testPlusNullValue()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("person");
+		emd.addAttribute("height").setDataType(MolgenisFieldTypes.INT);
+		Object result1 = ScriptEvaluator.eval("$('height').plus(null).value()", new MapEntity("height", 180), emd);
+		assertEquals(result1, 180);
 	}
 
 	@Test

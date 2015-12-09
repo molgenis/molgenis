@@ -10,8 +10,8 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.common.unit.TimeValue;
 import org.molgenis.data.Entity;
+import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
-import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.context.ApplicationContext;
@@ -29,6 +29,7 @@ public class MolgenisAppender extends AppenderBase<ILoggingEvent>
 	private static final String INDEX_NAME = "molgenis";
 
 	private BulkProcessor bulkProcessor;
+	private ElasticsearchEntityFactory elasticsearchEntityFactory;
 
 	@Override
 	protected void append(ILoggingEvent eventObject)
@@ -63,10 +64,15 @@ public class MolgenisAppender extends AppenderBase<ILoggingEvent>
 						}).setFlushInterval(FLUSH_INTERVAL).build();
 
 			}
+			if (elasticsearchEntityFactory == null)
+			{
+				ApplicationContext ctx = ApplicationContextProvider.getApplicationContext();
+				elasticsearchEntityFactory = ctx.getBean(ElasticsearchEntityFactory.class);
+			}
 
 			Entity entity = toEntity(eventObject);
 			String id = entity.getString(LoggingEventMetaData.IDENTIFIER);
-			Map<String, Object> source = new EntityToSourceConverter().convert(entity, LoggingEventMetaData.INSTANCE);
+			Map<String, Object> source = elasticsearchEntityFactory.create(LoggingEventMetaData.INSTANCE, entity);
 
 			bulkProcessor.add(new IndexRequest(INDEX_NAME, LoggingEventMetaData.INSTANCE.getName(), id).source(source));
 		}
