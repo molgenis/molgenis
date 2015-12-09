@@ -630,4 +630,18 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 			entityMeta.clearCache();
 		}
 	}
+
+	@Override
+	public AttributeMetaData getLabelAttribute(String languageCode)
+	{
+		for (AttributeMetaData attribute : getAtomicAttributes())
+		{
+			if (attribute.isLabelAttribute() && attribute.getName().endsWith('-' + languageCode))
+			{
+				return attribute;
+			}
+		}
+
+		return getLabelAttribute();
+	}
 }
