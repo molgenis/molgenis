@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
@@ -84,7 +85,7 @@ public class AnnotatorController
 	 * @param dataSetName
 	 * @return annotatorMap
 	 * 
-	 * */
+	 */
 	@RequestMapping(value = "/get-available-annotators", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Map<String, Object>> getMapOfAvailableAnnotators(@RequestBody String dataSetName)
@@ -102,7 +103,7 @@ public class AnnotatorController
 	 * @param createCopy
 	 * @return repositoryName
 	 * 
-	 * */
+	 */
 	@RequestMapping(value = "/annotate-data", method = RequestMethod.POST)
 	@ResponseBody
 	@Transactional
@@ -155,7 +156,7 @@ public class AnnotatorController
 	 * @param dataSetName
 	 * @return mapOfAnnotators
 	 * 
-	 * */
+	 */
 	private Map<String, Map<String, Object>> setMapOfAnnotators(String dataSetName)
 	{
 		Map<String, Map<String, Object>> mapOfAnnotators = new HashMap<String, Map<String, Object>>();
@@ -170,9 +171,9 @@ public class AnnotatorController
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("description", annotator.getDescription());
 				map.put("canAnnotate", annotator.canAnnotate(entityMetaData));
-				map.put("inputAttributes", annotator.getInputMetaData());
+				map.put("inputAttributes", createAttrsResponse(annotator.getInputMetaData()));
 				map.put("inputAttributeTypes", toMap(annotator.getInputMetaData()));
-				map.put("outputAttributes", outputAttrs);
+				map.put("outputAttributes", createAttrsResponse(outputAttrs));
 				map.put("outputAttributeTypes", toMap(annotator.getOutputMetaData()));
 
 				String settingsEntityName = SettingsEntityMeta.PACKAGE_NAME
@@ -183,6 +184,16 @@ public class AnnotatorController
 			}
 		}
 		return mapOfAnnotators;
+	}
+
+	private List<Map<String, Object>> createAttrsResponse(List<AttributeMetaData> inputMetaData)
+	{
+		return inputMetaData.stream().map(attr -> {
+			Map<String, Object> attrMap = new HashMap<String, Object>();
+			attrMap.put("name", attr.getName());
+			attrMap.put("description", attr.getDescription());
+			return attrMap;
+		}).collect(Collectors.toList());
 	}
 
 	private List<AttributeMetaData> getAtomicAttributesFromList(List<AttributeMetaData> outputAttrs)

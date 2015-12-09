@@ -518,4 +518,10 @@ public class MetaDataServiceImpl implements MetaDataService
 
 		return true;
 	}
+
+	@Override
+	public boolean hasBackend(String backendName)
+	{
+		return backends.containsKey(backendName);
+	}
 }

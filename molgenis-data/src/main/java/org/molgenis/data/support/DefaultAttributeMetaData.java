@@ -1,7 +1,30 @@
 package org.molgenis.data.support;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.STRING;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.AGGREGATEABLE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.AUTO;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.DATA_TYPE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.DEFAULT_VALUE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.EXPRESSION;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.ID_ATTRIBUTE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.LOOKUP_ATTRIBUTE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.NILLABLE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.PARTS;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MAX;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MIN;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.READ_ONLY;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.REF_ENTITY;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.UNIQUE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.VALIDATION_EXPRESSION;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE_EXPRESSION;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -10,6 +33,7 @@ import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeChangeListener;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Range;
@@ -23,8 +47,10 @@ import org.molgenis.util.CaseInsensitiveLinkedHashMap;
  */
 public class DefaultAttributeMetaData implements AttributeMetaData
 {
-	private String name;
-	private FieldType fieldType = MolgenisFieldTypes.STRING;
+	private Map<String, AttributeChangeListener> changeListeners;
+
+	private final String name;
+	private FieldType fieldType;
 	private String description;
 	private boolean nillable = true;
 	private boolean readOnly = false;
@@ -45,23 +71,21 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private String visibleExpression;
 	private String validationExpression;
 
-	public DefaultAttributeMetaData(String name, FieldTypeEnum fieldType)
-	{
-		this.name = requireNonNull(name);
-		this.fieldType = MolgenisFieldTypes.getType(requireNonNull(fieldType).toString().toLowerCase());
-	}
-
 	public DefaultAttributeMetaData(String name)
 	{
-		if (name == null) throw new IllegalArgumentException("Name cannot be null");
-		this.name = requireNonNull(name);
-		this.fieldType = MolgenisFieldTypes.STRING;
+		this(name, STRING);
 	}
 
-	public DefaultAttributeMetaData(String newName, AttributeMetaData attributeMetaData)
+	public DefaultAttributeMetaData(String name, FieldTypeEnum fieldType)
 	{
-		this(attributeMetaData);
-		this.name = newName;
+		this(name, MolgenisFieldTypes.getType(requireNonNull(fieldType).toString().toLowerCase()));
+	}
+
+	private DefaultAttributeMetaData(String name, FieldType fieldType)
+	{
+		this.name = requireNonNull(name);
+		this.label = name;
+		this.fieldType = requireNonNull(fieldType);
 	}
 
 	/**
@@ -70,6 +94,11 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	 * @param attributeMetaData
 	 */
 	public DefaultAttributeMetaData(AttributeMetaData attributeMetaData)
+	{
+		this(attributeMetaData.getName(), attributeMetaData);
+	}
+
+	public DefaultAttributeMetaData(String newName, AttributeMetaData attributeMetaData)
 	{
 		this.name = attributeMetaData.getName();
 		this.fieldType = attributeMetaData.getDataType();
@@ -83,7 +112,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		EntityMetaData refEntity = attributeMetaData.getRefEntity();
 		this.refEntity = refEntity != null ? new DefaultEntityMetaData(refEntity) : null; // deep copy
 		this.expression = attributeMetaData.getExpression();
-		this.label = attributeMetaData.getLabel();
+		setLabel(attributeMetaData.getLabel());
 		this.visible = attributeMetaData.isVisible();
 		this.unique = attributeMetaData.isUnique();
 		this.auto = attributeMetaData.isAuto();
@@ -91,6 +120,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		this.range = attributeMetaData.getRange();
 		this.visibleExpression = attributeMetaData.getVisibleExpression();
 		this.validationExpression = attributeMetaData.getValidationExpression();
+		addChangeListeners(attributeMetaData.getChangeListeners());
 
 		// deep copy
 		Iterable<AttributeMetaData> attributeParts = attributeMetaData.getAttributeParts();
@@ -120,6 +150,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setDescription(String description)
 	{
 		this.description = description;
+		fireChangeEvent(DESCRIPTION);
 		return this;
 	}
 
@@ -132,6 +163,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setDataType(FieldType type)
 	{
 		this.fieldType = type;
+		fireChangeEvent(DATA_TYPE);
 		return this;
 	}
 
@@ -144,6 +176,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setNillable(boolean nillable)
 	{
 		this.nillable = nillable;
+		fireChangeEvent(NILLABLE);
 		return this;
 	}
 
@@ -161,6 +194,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setReadOnly(boolean readOnly)
 	{
 		this.readOnly = readOnly;
+		fireChangeEvent(READ_ONLY);
 		return this;
 	}
 
@@ -173,6 +207,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setDefaultValue(String defaultValue)
 	{
 		this.defaultValue = defaultValue;
+		fireChangeEvent(DEFAULT_VALUE);
 		return this;
 	}
 
@@ -185,6 +220,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setIdAttribute(boolean idAttribute)
 	{
 		this.idAttribute = idAttribute;
+		fireChangeEvent(ID_ATTRIBUTE);
 		return this;
 	}
 
@@ -197,6 +233,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setLabelAttribute(boolean labelAttribute)
 	{
 		this.labelAttribute = labelAttribute;
+		fireChangeEvent(LABEL_ATTRIBUTE);
 		return this;
 	}
 
@@ -209,6 +246,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setRefEntity(EntityMetaData refEntity)
 	{
 		this.refEntity = refEntity;
+		fireChangeEvent(REF_ENTITY);
 		return this;
 	}
 
@@ -221,6 +259,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setExpression(String expression)
 	{
 		this.expression = expression;
+		fireChangeEvent(EXPRESSION);
 		return this;
 	}
 
@@ -244,6 +283,8 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 			this.attributePartsMap = new CaseInsensitiveLinkedHashMap<>();
 		}
 		this.attributePartsMap.put(attributePart.getName(), attributePart);
+
+		fireChangeEvent(PARTS);
 	}
 
 	public void setAttributesMetaData(Iterable<AttributeMetaData> attributeParts)
@@ -252,17 +293,23 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		attributeParts.forEach(attrPart -> {
 			attributePartsMap.put(attrPart.getName(), attrPart);
 		});
+		fireChangeEvent(PARTS);
 	}
 
 	@Override
 	public String getLabel()
 	{
-		return label == null ? name : label;
+		return label;
 	}
 
 	public DefaultAttributeMetaData setLabel(String label)
 	{
 		this.label = label;
+		if (this.label == null)
+		{
+			this.label = this.name;
+		}
+		fireChangeEvent(LABEL);
 		return this;
 	}
 
@@ -288,6 +335,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setVisible(boolean visible)
 	{
 		this.visible = visible;
+		fireChangeEvent(VISIBLE);
 		return this;
 	}
 
@@ -305,6 +353,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setUnique(boolean unique)
 	{
 		this.unique = unique;
+		fireChangeEvent(UNIQUE);
 		return this;
 	}
 
@@ -317,6 +366,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setAuto(boolean auto)
 	{
 		this.auto = auto;
+		fireChangeEvent(AUTO);
 		return this;
 	}
 
@@ -329,6 +379,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setLookupAttribute(boolean lookupAttribute)
 	{
 		this.lookupAttribute = lookupAttribute;
+		fireChangeEvent(LOOKUP_ATTRIBUTE);
 		return this;
 	}
 
@@ -370,6 +421,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setAggregateable(boolean aggregateable)
 	{
 		this.aggregateable = aggregateable;
+		fireChangeEvent(AGGREGATEABLE);
 		return this;
 	}
 
@@ -382,6 +434,8 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setRange(Range range)
 	{
 		this.range = range;
+		fireChangeEvent(RANGE_MIN);
+		fireChangeEvent(RANGE_MAX);
 		return this;
 	}
 
@@ -402,7 +456,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		{
 			((EnumField) fieldType).setEnumOptions(enumOptions);
 		}
-
+		fireChangeEvent(ENUM_OPTIONS);
 		return this;
 	}
 
@@ -415,6 +469,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setVisibleExpression(String visibleExpression)
 	{
 		this.visibleExpression = visibleExpression;
+		fireChangeEvent(VISIBLE_EXPRESSION);
 		return this;
 	}
 
@@ -427,6 +482,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setValidationExpression(String validationExpression)
 	{
 		this.validationExpression = validationExpression;
+		fireChangeEvent(VALIDATION_EXPRESSION);
 		return this;
 	}
 
@@ -542,6 +598,58 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		else if (!getValidationExpression().equals(other.getValidationExpression())) return false;
 
 		return true;
+	}
+
+	@Override
+	public Collection<AttributeChangeListener> getChangeListeners()
+	{
+		if (changeListeners != null)
+		{
+			return changeListeners.values();
+		}
+		else
+		{
+			return Collections.emptySet();
+		}
+	}
+
+	@Override
+	public void addChangeListener(AttributeChangeListener changeListener)
+	{
+		if (changeListeners == null)
+		{
+			changeListeners = new HashMap<>();
+		}
+		changeListeners.put(changeListener.getId(), changeListener);
+	}
+
+	@Override
+	public void addChangeListeners(Iterable<AttributeChangeListener> changeListeners)
+	{
+		changeListeners.forEach(this::addChangeListener);
+	}
+
+	@Override
+	public void removeChangeListener(String changeListenerId)
+	{
+		if (changeListeners != null)
+		{
+			changeListeners.remove(changeListenerId);
+		}
+	}
+
+	@Override
+	public void removeChangeListeners()
+	{
+		changeListeners = null;
+	}
+
+	private void fireChangeEvent(String attrName)
+	{
+		if (changeListeners != null)
+		{
+			changeListeners.values().forEach(changeListener -> changeListener.onChange(attrName, this));
+		}
 	}
 
 }

@@ -58,6 +58,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
@@ -67,9 +68,12 @@ import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
+import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.transaction.MolgenisTransactionListener;
 import org.molgenis.data.transaction.MolgenisTransactionLogEntryMetaData;
 import org.molgenis.data.transaction.MolgenisTransactionLogMetaData;
@@ -92,7 +96,6 @@ import com.google.common.collect.Iterables;
 public class ElasticsearchService implements SearchService, MolgenisTransactionListener
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchService.class);
-
 	public static final String CRUD_TYPE_FIELD_NAME = "MolgenisCrudType";
 	private static BulkProcessorFactory BULK_PROCESSOR_FACTORY = new BulkProcessorFactory();
 	private static List<String> NON_TRANSACTIONAL_ENTITIES = Arrays.asList(MolgenisTransactionLogMetaData.ENTITY_NAME,
@@ -848,47 +851,103 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	@Override
 	public void rebuildIndex(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
 	{
-		// Skip reindexing if the backend is ElasticSearch, the data will be removed in the reindexing process
-		if (!ElasticsearchRepositoryCollection.NAME.equals(entityMetaData.getBackend()))
+		if (storeSource(entityMetaData))
 		{
-			if (DependencyResolver.hasSelfReferences(entityMetaData))
+			this.rebuildIndexElasticSearchEntity(entities, entityMetaData);
+		}
+		else
+		{
+			this.rebuildIndexGeneric(entities, entityMetaData);
+		}
+	}
+
+	/**
+	 * Rebuild Elasticsearch index when the source is living in Elasticearch itself. This operation requires a way to
+	 * temporary save the data so we can drop and rebuild the index for this document.
+	 * 
+	 * @param entities
+	 * @param entityMetaData
+	 */
+	void rebuildIndexElasticSearchEntity(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
+	{
+		if (dataService.getMeta().hasBackend(ElasticsearchRepositoryCollection.NAME))
+		{
+			UuidGenerator uuidg = new UuidGenerator();
+			DefaultEntityMetaData tempEntityMetaData = new DefaultEntityMetaData(uuidg.generateId(), entityMetaData);
+			tempEntityMetaData.setPackage(new PackageImpl("elasticsearch_temporary_entity", "This entity (Original: "
+					+ entityMetaData.getName()
+					+ ") is temporary build to make rebuilding of Elasticsearch entities posible."));
+
+			// Add temporary repository into Elasticsearch
+			Repository tempRepository = dataService.getMeta().addEntityMeta(tempEntityMetaData);
+
+			// Add temporary repository entities into Elasticsearch
+			dataService.add(tempRepository.getName(), entities);
+
+			// Find the temporary saved entities
+			Iterable<? extends Entity> tempEntities = dataService.findAll(tempEntityMetaData.getName());
+
+			this.rebuildIndexGeneric(tempEntities, entityMetaData);
+
+			// Remove temporary entity
+			dataService.delete(tempEntityMetaData.getName(), tempEntities);
+
+			// Remove temporary repository from Elasticsearch
+			dataService.getMeta().deleteEntityMeta(tempEntityMetaData.getName());
+
+			if (LOG.isInfoEnabled()) LOG.info("Finished rebuilding index of entity: [" + entityMetaData.getName()
+					+ "] with backend ElasticSearch");
+		}
+		else
+		{
+			if (LOG.isDebugEnabled()) LOG
+					.debug("Rebuild index of entity: [" + entityMetaData.getName()
+					+ "] is skipped because the " + ElasticsearchRepositoryCollection.NAME + " backend is unknown");
+		}
+	}
+
+	/**
+	 * Rebuild Elasticsearch index when the source is living in another backend than the Elasticsearch itself.
+	 * 
+	 * @param entities
+	 *            entities that will be reindexed.
+	 * @param entityMetaData
+	 *            meta data information about the entities that will be reindexed.
+	 */
+	private void rebuildIndexGeneric(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
+	{
+		if (DependencyResolver.hasSelfReferences(entityMetaData))
+		{
+			Iterable<Entity> iterable = Iterables.transform(entities, new Function<Entity, Entity>()
 			{
-				Iterable<Entity> iterable = Iterables.transform(entities, new Function<Entity, Entity>()
+				@Override
+				public Entity apply(Entity input)
 				{
-					@Override
-					public Entity apply(Entity input)
-					{
-						return input;
-					}
-				});
-
-				Iterable<Entity> resolved = new DependencyResolver().resolveSelfReferences(iterable, entityMetaData);
-				if (hasMapping(entityMetaData))
-				{
-					delete(entityMetaData.getName());
+					return input;
 				}
-				createMappings(entityMetaData);
+			});
 
-				for (Entity e : resolved)
-				{
-					index(e, entityMetaData, IndexingMode.ADD);
-				}
+			Iterable<Entity> resolved = new DependencyResolver().resolveSelfReferences(iterable, entityMetaData);
+			if (hasMapping(entityMetaData))
+			{
+				delete(entityMetaData.getName());
 			}
-			else
-			{
-				if (hasMapping(entityMetaData))
-				{
-					delete(entityMetaData.getName());
-				}
-				createMappings(entityMetaData);
+			createMappings(entityMetaData);
 
-				index(entities, entityMetaData, IndexingMode.ADD);
+			for (Entity e : resolved)
+			{
+				index(e, entityMetaData, IndexingMode.ADD);
 			}
 		}
 		else
 		{
-			LOG.info("Skipped rebuilding index for entity [{}] with backend [{}]", entityMetaData.getName(),
-					entityMetaData.getBackend());
+			if (hasMapping(entityMetaData))
+			{
+				delete(entityMetaData.getName());
+			}
+			createMappings(entityMetaData);
+
+			index(entities, entityMetaData, IndexingMode.ADD);
 		}
 	}
 

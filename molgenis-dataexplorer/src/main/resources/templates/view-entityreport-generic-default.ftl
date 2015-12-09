@@ -12,8 +12,8 @@
 		<table class="table">
 			<tbody>
 				<tr>
+				<#if (entity.getEntityMetaData().getAtomicAttributes())?is_hash>
 					<#list entity.getEntityMetaData().getAtomicAttributes().iterator() as atomicAttribute>
-
                         <#assign key = atomicAttribute.getName()>
 
 						<#if counter == 3>
@@ -46,6 +46,41 @@
 						<th>&nbsp;</th>
 						<td>&nbsp;</td>
 					</#list>
+				<#else>
+					<#list entity.getEntityMetaData().getAtomicAttributes() as atomicAttribute>
+                        <#assign key = atomicAttribute.getName()>
+
+						<#if counter == 3>
+							</tr>
+							<tr>
+							<#assign counter = 0>
+						</#if>
+							
+						<th>${key?html}</th>
+						<#if entity.get(key)??>
+							<#if entity.get(key)?is_sequence>
+								<td>
+								<#list entity.get(key) as value>
+									${value!?html}<#if value_has_next>, </#if>
+								</#list>
+								</td>
+							<#else>
+								<td>${entity.getString(key)!?html}</td>
+							</#if>
+						<#else>
+							<td>&nbsp;</td>
+						</#if>
+						
+						<#assign counter = counter + 1>
+					</#list>
+					
+					<#-- fill last row with empty data -->
+					<#assign counter = 3 - counter>
+					<#list 1..counter as i>
+						<th>&nbsp;</th>
+						<td>&nbsp;</td>
+					</#list>
+				</#if>
 				</tr>
 			</tbody>
 		</table>	
