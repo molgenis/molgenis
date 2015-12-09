@@ -15,9 +15,9 @@ import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
-import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.meta.TagMetaData;
@@ -30,6 +30,7 @@ import org.molgenis.framework.MolgenisUpgrade;
 import org.molgenis.migrate.version.v1_4.AttributeMetaDataMetaData1_4;
 import org.molgenis.migrate.version.v1_4.EntityMetaDataMetaData1_4;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.ui.settings.AppDbSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -81,8 +82,8 @@ public class Step1UpgradeMetaData extends MolgenisUpgrade
 			@Override
 			protected MysqlRepository createMysqlRepository()
 			{
-				return new MysqlRepository(dataService, mySqlEntityFactory, dataSource,
-						new AsyncJdbcTemplate(new JdbcTemplate(dataSource)));
+				return new MysqlRepository(dataService, mySqlEntityFactory, dataSource, new AsyncJdbcTemplate(
+						new JdbcTemplate(dataSource)));
 			}
 
 			@Override
@@ -91,7 +92,8 @@ public class Step1UpgradeMetaData extends MolgenisUpgrade
 				throw new UnsupportedOperationException();
 			}
 		};
-		MetaDataService metaData = new MetaDataServiceImpl(dataService);
+		MetaDataServiceImpl metaData = new MetaDataServiceImpl(dataService);
+		metaData.setLanguageService(new LanguageService(dataService, new AppDbSettings()));
 		RunAsSystemProxy.runAsSystem(() -> metaData.setDefaultBackend(undecoratedMySQL));
 
 		LOG.info("Read attribute order from ElasticSearch and write to the bare mysql repositories...");
@@ -174,8 +176,7 @@ public class Step1UpgradeMetaData extends MolgenisUpgrade
 		List<Entity> attributeParts_v1_4 = Lists.newArrayList(searchService.search(
 				EQ(AttributeMetaDataMetaData1_4.PART_OF_ATTRIBUTE,
 						attribute_v1_4.get(AttributeMetaDataMetaData1_4.NAME)).and().eq(
-								AttributeMetaDataMetaData1_4.ENTITY,
-								attribute_v1_4.get(AttributeMetaDataMetaData1_4.ENTITY)),
+						AttributeMetaDataMetaData1_4.ENTITY, attribute_v1_4.get(AttributeMetaDataMetaData1_4.ENTITY)),
 				new AttributeMetaDataMetaData1_4()));
 		Entity attribute_v1_5FromRepo = attributeRepository.findOne(attribute_v1_4.getIdValue());
 		attribute_v1_5FromRepo.set(AttributeMetaDataMetaData.PARTS, attributeParts_v1_4);

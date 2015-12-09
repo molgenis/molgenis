@@ -66,6 +66,7 @@ import org.molgenis.ui.menu.MenuReaderServiceImpl;
 import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.ui.menumanager.MenuManagerServiceImpl;
 import org.molgenis.ui.security.MolgenisUiPermissionDecorator;
+import org.molgenis.ui.settings.AppDbSettings;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.EntityUtils;
@@ -411,7 +412,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		MySqlEntityFactory localMySqlEntityFactory = new MySqlEntityFactory(localEntityManager, localDataService);
 
 		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(localDataService);
-		metaDataService.setLanguageService(new LanguageService(localDataService, null));
+		metaDataService.setLanguageService(new LanguageService(localDataService, new AppDbSettings()));
 		localDataService.setMeta(metaDataService);
 
 		addReposToReindex(localDataService, localMySqlEntityFactory);
