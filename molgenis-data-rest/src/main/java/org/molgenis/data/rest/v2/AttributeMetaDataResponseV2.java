@@ -1,5 +1,7 @@
 package org.molgenis.data.rest.v2;
 
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
+
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -80,21 +82,11 @@ class AttributeMetaDataResponseV2
 		if (attrParts != null)
 		{
 			// filter attribute parts
-			if (fetch != null)
-			{
-				attrParts = Iterables.filter(attrParts, new Predicate<AttributeMetaData>()
-				{
-					@Override
-					public boolean apply(AttributeMetaData attr)
-					{
-						return fetch != null ? fetch.hasField(attr) : true;
-					}
-				});
-			}
+			attrParts = filterAttributes(fetch, attrParts);
 
 			// create attribute response
-			this.attributes = Lists.newArrayList(
-					Iterables.transform(attrParts, new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
+			this.attributes = Lists.newArrayList(Iterables.transform(attrParts,
+					new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
 					{
 						@Override
 						public AttributeMetaDataResponseV2 apply(AttributeMetaData attr)
@@ -102,7 +94,14 @@ class AttributeMetaDataResponseV2
 							Fetch subAttrFetch;
 							if (fetch != null)
 							{
-								subAttrFetch = fetch.getFetch(attr);
+								if (attr.getDataType().getEnumType() == FieldTypeEnum.COMPOUND)
+								{
+									subAttrFetch = fetch;
+								}
+								else
+								{
+									subAttrFetch = fetch.getFetch(attr);
+								}
 							}
 							else if (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
 							{
@@ -134,6 +133,44 @@ class AttributeMetaDataResponseV2
 		this.visible = attr.isVisible();
 		this.visibleExpression = attr.getVisibleExpression();
 		this.validationExpression = attr.getValidationExpression();
+	}
+
+	public static Iterable<AttributeMetaData> filterAttributes(Fetch fetch, Iterable<AttributeMetaData> attrs)
+	{
+		if (fetch != null)
+		{
+			return Iterables.filter(attrs, new Predicate<AttributeMetaData>()
+			{
+				@Override
+				public boolean apply(AttributeMetaData attr)
+				{
+					return filterAttributeRec(fetch, attr);
+				}
+			});
+		}
+		else
+		{
+			return attrs;
+		}
+	}
+
+	public static boolean filterAttributeRec(Fetch fetch, AttributeMetaData attr)
+	{
+		if (attr.getDataType().getEnumType() == COMPOUND)
+		{
+			for (AttributeMetaData attrPart : attr.getAttributeParts())
+			{
+				if (filterAttributeRec(fetch, attrPart))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		else
+		{
+			return fetch.hasField(attr);
+		}
 	}
 
 	public String getHref()

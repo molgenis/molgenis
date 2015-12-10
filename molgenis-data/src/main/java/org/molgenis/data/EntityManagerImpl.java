@@ -5,6 +5,7 @@ import static java.util.stream.StreamSupport.stream;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -101,7 +102,7 @@ public class EntityManagerImpl implements EntityManager
 			@Override
 			protected Iterable<Entity> getBatch(int offset, int batchSize)
 			{
-				List<Entity> entities = it.next();
+				List<Entity> entities = it.hasNext() ? it.next() : Collections.emptyList();
 				if (entities.isEmpty())
 				{
 					return entities;
@@ -120,8 +121,8 @@ public class EntityManagerImpl implements EntityManager
 		SetMultimap<String, Object> lazyRefEntityIdsMap = HashMultimap.<String, Object> create(resolvableAttrs.size(),
 				16);
 		// entity name --> attributes referring to this entity
-		SetMultimap<String, AttributeMetaData> refEntityAttrsMap = HashMultimap
-				.<String, AttributeMetaData> create(resolvableAttrs.size(), 2);
+		SetMultimap<String, AttributeMetaData> refEntityAttrsMap = HashMultimap.<String, AttributeMetaData> create(
+				resolvableAttrs.size(), 2);
 
 		// fill maps
 		for (AttributeMetaData attr : resolvableAttrs)
@@ -169,8 +170,8 @@ public class EntityManagerImpl implements EntityManager
 			// retrieve referenced entities
 			Iterable<Entity> refEntities = dataService.findAll(refEntityName, entry.getValue(), subFetch);
 
-			Map<Object, Entity> refEntitiesIdMap = stream(refEntities.spliterator(), false)
-					.collect(Collectors.toMap(Entity::getIdValue, Function.identity()));
+			Map<Object, Entity> refEntitiesIdMap = stream(refEntities.spliterator(), false).collect(
+					Collectors.toMap(Entity::getIdValue, Function.identity()));
 
 			for (AttributeMetaData attr : attrs)
 			{
@@ -199,10 +200,10 @@ public class EntityManagerImpl implements EntityManager
 						Iterable<Entity> lazyRefEntities = entity.getEntities(attrName);
 						List<Entity> mrefEntities = stream(lazyRefEntities.spliterator(), true).map(lazyRefEntity -> {
 							// replace lazy entity with real entity
-							Object refEntityId = lazyRefEntity.getIdValue();
-							Entity refEntity = refEntitiesIdMap.get(refEntityId);
-							return refEntity;
-						}).collect(Collectors.toList());
+								Object refEntityId = lazyRefEntity.getIdValue();
+								Entity refEntity = refEntitiesIdMap.get(refEntityId);
+								return refEntity;
+							}).collect(Collectors.toList());
 						entity.set(attrName, mrefEntities);
 					}
 				}
@@ -333,8 +334,8 @@ public class EntityManagerImpl implements EntityManager
 			@Override
 			public Iterator<E> iterator()
 			{
-				return stream(entities.spliterator(), false)
-						.map(entity -> EntityUtils.convert(entity, entityClass, dataService)).iterator();
+				return stream(entities.spliterator(), false).map(
+						entity -> EntityUtils.convert(entity, entityClass, dataService)).iterator();
 			}
 		};
 	}

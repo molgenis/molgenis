@@ -74,4 +74,18 @@ public interface Package
 	 * @return
 	 */
 	Iterable<Tag<Package, LabeledResource, LabeledResource>> getTags();
+
+	/**
+	 * Add listener that gets fired when a package property changes
+	 * 
+	 * @param changeListener
+	 */
+	void addChangeListener(PackageChangeListener changeListener);
+
+	/**
+	 * Remove package property change listener
+	 * 
+	 * @param packageListenerId
+	 */
+	void removeChangeListener(String packageListenerId);
 }

@@ -129,4 +129,32 @@ public interface AttributeMetaData
 	String getValidationExpression();
 
 	boolean isSameAs(AttributeMetaData attributeMetaData);
+
+	Iterable<AttributeChangeListener> getChangeListeners();
+
+	/**
+	 * Add listener that listens to attribute property changes
+	 * 
+	 * @param changeListener
+	 */
+	void addChangeListener(AttributeChangeListener changeListener);
+
+	/**
+	 * Add listeners that listens to attribute property changes
+	 * 
+	 * @param changeListeners
+	 */
+	void addChangeListeners(Iterable<AttributeChangeListener> changeListeners);
+
+	/**
+	 * Remove listener with the given listener id
+	 * 
+	 * @param changeListenerId
+	 */
+	void removeChangeListener(String changeListenerId);
+
+	/**
+	 * Remove all attribute listeners
+	 */
+	void removeChangeListeners();
 }

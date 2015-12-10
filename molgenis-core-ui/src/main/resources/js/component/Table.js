@@ -188,7 +188,9 @@
 			}
 			api.get(props.entity, opts).done(function(data) {
 				var newState = _.extend({}, state, {data: data});
-				this.setState(newState);
+				if (this.isMounted()) {
+					this.setState(newState);
+				}
 			}.bind(this));
 		},
 		_handleExpand: function(e) {
@@ -469,10 +471,10 @@
 				});
 				Cols.push(td({className: 'compact', key: 'inspect'}, EntityInspectBtn));
 			}
-			this._createColsRec(item, entity, entity.attributes, this.props.attrs, Cols, [], false);
+			this._createColsRec(item, entity, entity.attributes, this.props.attrs, Cols, [], false, undefined);
 			return Cols;
 		},
-		_createColsRec: function(item, entity, attrs, selectedAttrs, Cols, path, expanded) {
+		_createColsRec: function(item, entity, attrs, selectedAttrs, Cols, path, expanded, parentAttr) {
 			if(_.size(selectedAttrs) > 0) {
 				for(var j = 0; j < attrs.length; ++j) {
 					var attr = attrs[j];
@@ -480,13 +482,13 @@
 						if(attr.visible === true) {
 							var attrPath = path.concat(attr.name);
 							if(molgenis.isCompoundAttr(attr)) {
-								this._createColsRec(item, entity, attr.attributes, {'*': null}, Cols, path, expanded);
+								this._createColsRec(item, entity, attr.attributes, {'*': null}, Cols, path, expanded, parentAttr);
 							} else {
 
 								if(this._isExpandedAttr(attr, selectedAttrs)) {
 									Cols.push(td({className: 'expanded-left', key : attrPath.join()}));
 									var value = (item !== undefined && item !== null) ? (_.isArray(item) ? _.map(item, function(value) { return value[attr.name];}) : item[attr.name]) : null;
-									this._createColsRec(value, attr.refEntity, attr.refEntity.attributes, selectedAttrs[attr.name], Cols, attrPath, true);
+									this._createColsRec(value, attr.refEntity, attr.refEntity.attributes, selectedAttrs[attr.name], Cols, attrPath, true, attr);
 								} else {
 									if(this._canExpandAttr(attr, path)) {
 										Cols.push(td({key: 'e' + attrPath.join()}));
@@ -499,7 +501,8 @@
 										value: value,
 										expanded: expanded,
 										onEdit: this.props.onEdit,
-										key : attrPath.join()
+										key : attrPath.join(),
+										parentAttr : parentAttr
 									});
 									Cols.push(TableCell);
 								}
@@ -527,7 +530,8 @@
 			value: React.PropTypes.any,
 			expanded: React.PropTypes.bool,
 			className: React.PropTypes.string,
-			onEdit: React.PropTypes.func
+			onEdit: React.PropTypes.func,
+			parentAttr: React.PropTypes.object
 		},
 		shouldComponentUpdate: function(nextProps, nextState) {
 			return !_.isEqual(this.state, nextState) || !_.isEqual(this.props.entity.name, nextProps.entity.name)
@@ -536,7 +540,7 @@
 		render: function() {
 			var CellContentBlocks;
 			// treat expanded mref differently
-			if(this.props.expanded && _.isArray(this.props.value)) {
+			if(this.props.expanded && _.isArray(this.props.value) && this.props.parentAttr.fieldType === "MREF") {
 				CellContentBlocks = _.flatten(_.map(this.props.value, function(value, i) {
 					if(value !== null && value !== undefined) {
 						var CellContentForValue = this._createTableCellContent(value, 'c' + i);

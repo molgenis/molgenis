@@ -41,6 +41,10 @@
 			if(this.state.data === null) {
 				return molgenis.ui.Spinner(); // entity not available yet
 			}
+			
+			if (this.state.data.aggs.matrix.length == 0) {
+				return div(null, span(null, "No results found"));
+			}
 
 			var className = 'table table-striped';
 			var AggregateTableHeader = AggregateTableHeaderFactory({
@@ -72,11 +76,14 @@
 					y: props.y,
 					distinct: props.distinct
 				},
-				q: props.q
+				q: props.query
 			};
+			
 			api.get(props.entity, opts).done(function(data) {
 				var newState = _.extend({}, state, {data: data});
-				this.setState(newState);
+				if (this.isMounted()) {
+					this.setState(newState);
+				}
 			}.bind(this));
 		}
 	});

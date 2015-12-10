@@ -97,12 +97,12 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		http.addFilterBefore(anonymousAuthFilter(), AnonymousAuthenticationFilter.class);
 		http.authenticationProvider(anonymousAuthenticationProvider());
 
-		http.addFilterBefore(tokenAuthenticationFilter(), MolgenisAnonymousAuthenticationFilter.class);
+		http.addFilterBefore(apiSessionExpirationFilter(), MolgenisAnonymousAuthenticationFilter.class);
 		http.authenticationProvider(tokenAuthenticationProvider());
 
-		http.addFilterBefore(googleAuthenticationProcessingFilter(), TokenAuthenticationFilter.class);
+		http.addFilterBefore(tokenAuthenticationFilter(), ApiSessionExpirationFilter.class);
 
-		http.addFilterBefore(apiSessionExpirationFilter(), GoogleAuthenticationProcessingFilter.class);
+		http.addFilterBefore(googleAuthenticationProcessingFilter(), TokenAuthenticationFilter.class);
 
 		http.addFilterAfter(changePasswordFilter(), SwitchUserFilter.class);
 

@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
@@ -22,6 +21,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.fieldtypes.FieldType;
+import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.util.CaseInsensitiveLinkedHashMap;
 import org.molgenis.util.MolgenisDateFormat;
@@ -64,7 +64,7 @@ public class DefaultEntity implements Entity
 	@Override
 	public Iterable<String> getAttributeNames()
 	{
-		return getEntityMetaData().getAtomicAttributeNames();
+		return EntityMetaDataUtils.getAttributeNames(entityMetaData.getAtomicAttributes());
 	}
 
 	@Override
@@ -236,11 +236,10 @@ public class DefaultEntity implements Entity
 			return new DefaultEntity(attribute.getRefEntity(), dataService, (Map<String, Object>) value);
 
 		FieldType dataType = attribute.getDataType();
-		if (attribute.getDataType().equals(MolgenisFieldTypes.MREF)
-				|| attribute.getDataType().equals(MolgenisFieldTypes.CATEGORICAL_MREF))
+		if (!(dataType instanceof XrefField))
 		{
 			throw new MolgenisDataException(
-					"can't use getEntity() on an mref/categorical_mref, use getEntities() instead");
+					"can't use getEntity() on something that's not an xref, categorical or file");
 		}
 
 		value = dataType.convert(value);
@@ -263,25 +262,38 @@ public class DefaultEntity implements Entity
 	@Override
 	public Iterable<Entity> getEntities(String attributeName)
 	{
+		AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
+		if (attribute == null) throw new UnknownAttributeException(attributeName);
+
+		FieldType dataType = attribute.getDataType();
+
+		// FIXME this should fail on anything other than instanceof MrefField. requires an extensive code base review to
+		// find illegal use of getEntities()
+		if (!(dataType instanceof MrefField) && !(dataType instanceof XrefField))
+		{
+			throw new MolgenisDataException(
+					"can't use getEntities() on something that's not an xref, mref, categorical, categorical_mref or file");
+		}
+
 		Iterable<?> ids;
+
 		Object value = values.get(attributeName);
 		if (value instanceof String) ids = getList(attributeName);
 		else if (value instanceof Entity) return Collections.singletonList((Entity) value);
 		else ids = (Iterable<?>) value;
 
 		if ((ids == null) || !ids.iterator().hasNext()) return Collections.emptyList();
-		if (ids.iterator().next() instanceof Entity) return (Iterable<Entity>) ids;
 
-		AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
-		if (attribute == null) throw new UnknownAttributeException(attributeName);
+		Object firstItem = ids.iterator().next();
+		if (firstItem instanceof Entity) return (Iterable<Entity>) ids;
 
-		if (ids.iterator().next() instanceof Map)
+		if (firstItem instanceof Map)
 		{
 			return stream(ids.spliterator(), false)
 					.map(id -> new DefaultEntity(attribute.getRefEntity(), dataService, (Map<String, Object>) id))
 					.collect(Collectors.toList());
 		}
-		return from(ids).transform(attribute.getDataType()::convert)
+		return from(ids).transform(dataType::convert)
 				.transform(convertedId -> (dataService.findOne(attribute.getRefEntity().getName(), convertedId)));
 	}
 

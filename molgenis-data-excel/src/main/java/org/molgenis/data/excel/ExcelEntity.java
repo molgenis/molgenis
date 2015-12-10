@@ -9,6 +9,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractMetaDataEntity;
+import org.molgenis.util.CaseInsensitiveLinkedHashMap;
 
 /**
  * Entity implementation for Excel.
@@ -22,6 +23,8 @@ public class ExcelEntity extends AbstractMetaDataEntity
 	private final transient Row row;
 	private final Map<String, Integer> colNamesMap;
 	private final List<CellProcessor> cellProcessors;
+
+	private transient Map<String, Object> cachedValueMap;
 
 	public ExcelEntity(Row row, Map<String, Integer> colNamesMap, List<CellProcessor> cellProcessors,
 			EntityMetaData entityMetaData)
@@ -44,32 +47,55 @@ public class ExcelEntity extends AbstractMetaDataEntity
 	@Override
 	public Object get(String attributeName)
 	{
-		Integer col = colNamesMap.get(attributeName);
-		if (col != null)
+		if (cachedValueMap == null)
 		{
-			Cell cell = row.getCell(col);
-			if (cell != null)
-			{
-				return ExcelUtils.toValue(cell, cellProcessors);
-			}
+			cachedValueMap = new CaseInsensitiveLinkedHashMap<>();
 		}
 
-		return null;
+		Object value;
+		if (cachedValueMap.containsKey(attributeName))
+		{
+			value = cachedValueMap.get(attributeName);
+		}
+		else
+		{
+			Integer col = colNamesMap.get(attributeName);
+			if (col != null)
+			{
+				Cell cell = row.getCell(col);
+				if (cell != null)
+				{
+					value = ExcelUtils.toValue(cell, cellProcessors);
+				}
+				else
+				{
+					value = null;
+				}
+			}
+			else
+			{
+				value = null;
+			}
+
+			cachedValueMap.put(attributeName, value);
+		}
+		return value;
 	}
 
-	/**
-	 * @throws UnsupportedOperationException
-	 */
 	@Override
 	public void set(String attributeName, Object value)
 	{
-		throw new UnsupportedOperationException();
+		if (cachedValueMap == null)
+		{
+			cachedValueMap = new CaseInsensitiveLinkedHashMap<>();
+		}
+		cachedValueMap.put(attributeName, value);
 	}
 
 	@Override
 	public void set(Entity values)
 	{
-		throw new UnsupportedOperationException();
+		colNamesMap.keySet().forEach(attr -> set(attr, values.get(attr)));
 	}
 
 	@Override

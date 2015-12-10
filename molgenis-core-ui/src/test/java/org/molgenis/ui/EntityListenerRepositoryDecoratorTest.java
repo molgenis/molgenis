@@ -42,6 +42,28 @@ public class EntityListenerRepositoryDecoratorTest
 
 	@SuppressWarnings("resource")
 	@Test
+	public void updateEntityWithListeners()
+	{
+		Repository decoratedRepository = mock(Repository.class);
+		EntityListenerRepositoryDecorator entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(
+				decoratedRepository);
+		EntityListener entityListener0 = when(mock(EntityListener.class).getEntityId()).thenReturn(Integer.valueOf(1))
+				.getMock();
+		EntityListener entityListener1 = when(mock(EntityListener.class).getEntityId()).thenReturn(Integer.valueOf(1))
+				.getMock();
+		entityListenerRepositoryDecorator.addEntityListener(entityListener0);
+		entityListenerRepositoryDecorator.addEntityListener(entityListener1);
+
+		Entity entity = when(mock(Entity.class).getIdValue()).thenReturn(Integer.valueOf(1)).getMock();
+		entityListenerRepositoryDecorator.update(entity);
+
+		verify(decoratedRepository).update(entity);
+		verify(entityListener0, times(1)).postUpdate(entity);
+		verify(entityListener1, times(1)).postUpdate(entity);
+	}
+
+	@SuppressWarnings("resource")
+	@Test
 	public void updateEntityWithoutListener()
 	{
 		Repository decoratedRepository = mock(Repository.class);
@@ -131,7 +153,7 @@ public class EntityListenerRepositoryDecoratorTest
 
 		verify(decoratedRepository).update(entities);
 	}
-	
+
 	@SuppressWarnings("resource")
 	@Test
 	public void removeEntityListener()

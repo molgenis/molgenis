@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.elasticsearch.common.collect.Iterables;
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -33,7 +32,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Iterables;
 
 @Configuration
 public class GoNLAnnotator
@@ -115,13 +116,16 @@ public class GoNLAnnotator
 						alleleMatches.add(Iterables.find(refMatches, gonl -> alt.equals(gonl.getString(ALT)), null));
 					}
 
-					afs = alleleMatches.stream()
-							.map(gonl -> gonl == null ? "."
-									: Double.toString(gonl.getDouble(INFO_AC) / gonl.getDouble(INFO_AN)))
-							.collect(Collectors.joining("|"));
+					if (!Iterables.all(alleleMatches, Predicates.isNull()))
+					{
+						afs = alleleMatches.stream()
+								.map(gonl -> gonl == null ? ""
+										: Double.toString(gonl.getDouble(INFO_AC) / gonl.getDouble(INFO_AN)))
+								.collect(Collectors.joining("|"));
 
-					gtcs = alleleMatches.stream().map(gonl -> gonl == null ? ".,.,." : gonl.getString(INFO_GTC))
-							.collect(Collectors.joining("|"));
+						gtcs = alleleMatches.stream().map(gonl -> gonl == null ? "" : gonl.getString(INFO_GTC))
+								.collect(Collectors.joining("|"));
+					}
 
 				}
 				resultEntity.set(GONL_GENOME_AF, afs);
@@ -129,6 +133,7 @@ public class GoNLAnnotator
 			}
 		};
 		return new RepositoryAnnotatorImpl(entityAnnotator);
+
 	}
 
 	@Bean
