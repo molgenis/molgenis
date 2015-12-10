@@ -45,30 +45,36 @@ public class Step24UpdateApplicationSettings extends MolgenisUpgrade
 
 		// add google_sign_in setting
 		String googleSignInId = idGenerator.generateId();
+		boolean googleSignInIdDefaultValue = true;
 		jdbcTemplate.update(
 				"INSERT INTO attributes (`identifier`,`name`,`dataType`,`refEntity`,`expression`,`nillable`,`auto`,`idAttribute`,`lookupAttribute`,`visible`,`label`,`description`,`aggregateable`,`enumOptions`,`rangeMin`,`rangeMax`,`labelAttribute`,`readOnly`,`unique`,`visibleExpression`,`validationExpression`,`defaultValue`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				googleSignInId, "google_sign_in", "bool", null, null, false, false, false, false, true,
 				"Enable Google Sign-In", "Enable users to sign in with their existing Google account", false, null,
-				null, null, false, false, false, "$('signup').eq(true).value()", null, Boolean.TRUE.toString());
+				null, null, false, false, false, "$('signup').eq(true).value()", null,
+				String.valueOf(googleSignInIdDefaultValue));
 
 		jdbcTemplate.update("INSERT INTO entities_attributes (`order`, `fullName`, `attributes`) VALUES (?, ?, ?)", 4,
 				"settings_app", googleSignInId);
 
 		// add google_app_client_id setting
 		String googleAppClientId = idGenerator.generateId();
+		String googleAppClientIdDefaultValue = "130634143611-e2518d1uqu0qtec89pjgn50gbg95jin4.apps.googleusercontent.com";
 		jdbcTemplate.update(
 				"INSERT INTO attributes (`identifier`,`name`,`dataType`,`refEntity`,`expression`,`nillable`,`auto`,`idAttribute`,`lookupAttribute`,`visible`,`label`,`description`,`aggregateable`,`enumOptions`,`rangeMin`,`rangeMax`,`labelAttribute`,`readOnly`,`unique`,`visibleExpression`,`validationExpression`,`defaultValue`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				googleAppClientId, "google_app_client_id", "string", null, null, false, false, false, false, true,
 				"Google app client ID", "Google app client ID used during Google Sign-In", false, null, null, null,
-				false, false, false, "$('google_sign_in').eq(true).value()", null, Boolean.TRUE.toString());
+				false, false, false, "$('google_sign_in').eq(true).value()", null, googleAppClientIdDefaultValue);
 
 		jdbcTemplate.update("INSERT INTO entities_attributes (`order`, `fullName`, `attributes`) VALUES (?, ?, ?)", 5,
 				"settings_app", googleAppClientId);
 
-		// update existing settings
-		jdbcTemplate.execute("ALTER TABLE settings_app ADD COLUMN `google_sign_in` tinyint(1) NOT NULL DEFAULT 1");
-		jdbcTemplate.execute(
-				"ALTER TABLE settings_app ADD COLUMN `google_app_client_id` text DEFAULT \"130634143611-e2518d1uqu0qtec89pjgn50gbg95jin4.apps.googleusercontent.com\"");
+		// update existing settings table
+		jdbcTemplate.execute("ALTER TABLE settings_app ADD COLUMN `google_sign_in` tinyint(1) NOT NULL");
+		jdbcTemplate.execute("ALTER TABLE settings_app ADD COLUMN `google_app_client_id` text");
+
+		// update existing settings entity
+		jdbcTemplate.update("UPDATE settings_app SET google_sign_in = ?, google_app_client_id = ? WHERE id = ?",
+				googleSignInIdDefaultValue, googleAppClientIdDefaultValue, "app");
 
 		LOG.debug("Updated application settings");
 	}
