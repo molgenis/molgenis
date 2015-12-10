@@ -253,10 +253,14 @@
 						<button id="signout-button" type="button" class="btn btn-primary">Sign out</button>
 						<script>
                             $("#signout-button").click(function() {
+                            <#if googleSignIn>
                                 var auth2 = gapi.auth2.getAuthInstance();
                                 auth2.signOut().then(function () {
+                            </#if>
                                     $('#logout-form').submit();
+                            <#if googleSignIn>
                                 });
+                            </#if>
                             });
 						</script>
 					</form>

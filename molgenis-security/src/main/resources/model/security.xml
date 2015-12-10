@@ -24,6 +24,7 @@
 			<field name="City" type="string" nillable="true" description="Added from the old definition of MolgenisUser. City of this contact."/>
 			<field name="Country" type="string" nillable="true" description="Added from the old definition of MolgenisUser. Country of this contact."/>
 			<field name="changePassword" label="Change password" type="boolean" default="false" description="If true the user must first change his password before he can proceed" />
+			<field name="googleAccountId" label="Google account ID" type="string" nillable="true" description="An identifier for the user, unique among all Google accounts and never reused." />
 			<unique fields="username"/>
 			<unique fields="Email"/>
 		</entity>

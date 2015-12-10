@@ -3,6 +3,8 @@ package org.molgenis.security.google;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.MolgenisGroup.NAME;
+import static org.molgenis.auth.MolgenisUser.EMAIL;
+import static org.molgenis.auth.MolgenisUser.GOOGLEACCOUNTID;
 import static org.molgenis.data.support.QueryImpl.EQ;
 import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
@@ -49,7 +51,6 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 
 	public static final String GOOGLE_AUTHENTICATION_URL = "/login/google";
 	static final String PARAM_ID_TOKEN = "id_token";
-	private static final String MOLGENIS_USER_USERNAME_PREFIX = "google:";
 	private static final String PROFILE_KEY_GIVEN_NAME = "given_name";
 	private static final String PROFILE_KEY_FAMILY_NAME = "family_name";
 
@@ -123,32 +124,48 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 			throw new AuthenticationServiceException(
 					"Google ID token is missing required [email] claim, did you forget to specify scope [email]?");
 		}
+		Boolean emailVerified = payload.getEmailVerified();
+		if (emailVerified != null && emailVerified.booleanValue() == false)
+		{
+			throw new AuthenticationServiceException("Google account email is not verified");
+		}
 		String principal = payload.getSubject();
 		String credentials = payload.getAccessTokenHash();
 
 		return runAsSystem(() -> {
-			String username = MOLGENIS_USER_USERNAME_PREFIX + principal;
-			MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME, username, MolgenisUser.class);
+			MolgenisUser user;
+
+			user = dataService.findOne(MolgenisUser.ENTITY_NAME, EQ(GOOGLEACCOUNTID, principal), MolgenisUser.class);
 			if (user == null)
 			{
-				String givenName = payload.containsKey(PROFILE_KEY_GIVEN_NAME)
-						? payload.get(PROFILE_KEY_GIVEN_NAME).toString() : null;
-				String familyName = payload.containsKey(PROFILE_KEY_FAMILY_NAME)
-						? payload.get(PROFILE_KEY_FAMILY_NAME).toString() : null;
-				user = createMolgenisUser(username, email, givenName, familyName);
-			}
-			else if (!user.getUsername().equals(username))
-			{
-				throw new BadCredentialsException(format("A user with username [%s] already exists", email));
+				// no user with google account
+				user = dataService.findOne(MolgenisUser.ENTITY_NAME, EQ(EMAIL, email), MolgenisUser.class);
+				if (user != null)
+				{
+					// connect google account to user
+					user.setGoogleAccountId(principal);
+					dataService.update(MolgenisUser.ENTITY_NAME, user);
+				}
+				else
+				{
+					// create new user
+					String username = email;
+					String givenName = payload.containsKey(PROFILE_KEY_GIVEN_NAME)
+							? payload.get(PROFILE_KEY_GIVEN_NAME).toString() : null;
+					String familyName = payload.containsKey(PROFILE_KEY_FAMILY_NAME)
+							? payload.get(PROFILE_KEY_FAMILY_NAME).toString() : null;
+					user = createMolgenisUser(username, email, givenName, familyName, principal);
+				}
 			}
 
 			// create authentication
 			Collection<? extends GrantedAuthority> authorities = molgenisUserDetailsService.getAuthorities(user);
-			return new UsernamePasswordAuthenticationToken(username, credentials, authorities);
+			return new UsernamePasswordAuthenticationToken(user.getUsername(), credentials, authorities);
 		});
 	}
 
-	private MolgenisUser createMolgenisUser(String username, String email, String givenName, String familyName)
+	private MolgenisUser createMolgenisUser(String username, String email, String givenName, String familyName,
+			String googleAccountId)
 	{
 		if (!appSettings.getSignUp())
 		{
@@ -161,7 +178,7 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 		}
 
 		// create user
-		LOG.info("first login for [{}], creating MOLGENIS user", email);
+		LOG.info("first login for [{}], creating MOLGENIS user", username);
 		MolgenisUser user = new MolgenisUser();
 		user.setUsername(username);
 		user.setPassword(UUID.randomUUID().toString());
@@ -175,6 +192,7 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 		{
 			user.setLastName(familyName);
 		}
+		user.setGoogleAccountId(googleAccountId);
 		dataService.add(MolgenisUser.ENTITY_NAME, user);
 
 		// add user to all-users group
