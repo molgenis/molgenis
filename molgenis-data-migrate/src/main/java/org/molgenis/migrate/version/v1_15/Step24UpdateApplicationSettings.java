@@ -39,8 +39,8 @@ public class Step24UpdateApplicationSettings extends MolgenisUpgrade
 		// add new settings between other settings
 		for (int order = 4; order <= 12; ++order)
 		{
-			String orderSql = "UPDATE attributes LEFT JOIN entities_attributes ON attributes.identifier = entities_attributes.attributes SET `order` = ? WHERE fullName = ?";
-			jdbcTemplate.update(orderSql, order + 2, "settings_app");
+			String orderSql = "UPDATE attributes LEFT JOIN entities_attributes ON attributes.identifier = entities_attributes.attributes SET `order` = ? WHERE fullName = ? and `order` = ?";
+			jdbcTemplate.update(orderSql, order + 2, "settings_app", order);
 		}
 
 		// add google_sign_in setting
