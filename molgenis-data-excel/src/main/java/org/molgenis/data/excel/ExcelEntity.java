@@ -82,19 +82,20 @@ public class ExcelEntity extends AbstractMetaDataEntity
 		return value;
 	}
 
-	/**
-	 * @throws UnsupportedOperationException
-	 */
 	@Override
 	public void set(String attributeName, Object value)
 	{
-		throw new UnsupportedOperationException();
+		if (cachedValueMap == null)
+		{
+			cachedValueMap = new CaseInsensitiveLinkedHashMap<>();
+		}
+		cachedValueMap.put(attributeName, value);
 	}
 
 	@Override
 	public void set(Entity values)
 	{
-		throw new UnsupportedOperationException();
+		colNamesMap.keySet().forEach(attr -> set(attr, values.get(attr)));
 	}
 
 	@Override
