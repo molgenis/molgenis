@@ -47,7 +47,8 @@ public class Step24UpdateApplicationSettings extends MolgenisUpgrade
 				"INSERT INTO attributes (`identifier`,`name`,`dataType`,`refEntity`,`expression`,`nillable`,`auto`,`idAttribute`,`lookupAttribute`,`visible`,`label`,`description`,`aggregateable`,`enumOptions`,`rangeMin`,`rangeMax`,`labelAttribute`,`readOnly`,`unique`,`visibleExpression`,`validationExpression`,`defaultValue`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				googleSignInId, "google_sign_in", "bool", null, null, false, false, false, false, true,
 				"Enable Google Sign-In", "Enable users to sign in with their existing Google account", false, null,
-				null, null, false, false, false, "$('signup').eq(true).value()", null,
+				null, null, false, false, false,
+				"$('signup').eq(true).value() && $('signup_moderation').eq(false).value()", null,
 				String.valueOf(googleSignInIdDefaultValue));
 
 		jdbcTemplate.update("INSERT INTO entities_attributes (`order`, `fullName`, `attributes`) VALUES (?, ?, ?)", 4,
