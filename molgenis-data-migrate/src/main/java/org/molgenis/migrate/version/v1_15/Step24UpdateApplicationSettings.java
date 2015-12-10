@@ -65,6 +65,11 @@ public class Step24UpdateApplicationSettings extends MolgenisUpgrade
 		jdbcTemplate.update("INSERT INTO entities_attributes (`order`, `fullName`, `attributes`) VALUES (?, ?, ?)", 5,
 				"settings_app", googleAppClientId);
 
+		// update existing settings
+		jdbcTemplate.execute("ALTER TABLE settings_app ADD COLUMN `google_sign_in` tinyint(1) NOT NULL DEFAULT 1");
+		jdbcTemplate.execute(
+				"ALTER TABLE settings_app ADD COLUMN `google_app_client_id` text DEFAULT \"130634143611-e2518d1uqu0qtec89pjgn50gbg95jin4.apps.googleusercontent.com\"");
+
 		LOG.debug("Updated application settings");
 	}
 }
