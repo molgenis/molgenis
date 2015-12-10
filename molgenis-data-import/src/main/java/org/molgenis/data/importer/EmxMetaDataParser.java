@@ -843,7 +843,11 @@ public class EmxMetaDataParser implements MetaDataParser
 			IntermediateParseResults intermediateResults = parseTagsSheet(source.getRepository(TAGS));
 			parsePackagesSheet(source.getRepository(PACKAGES), intermediateResults);
 			parsePackageTags(source.getRepository(PACKAGES), intermediateResults);
-			parseLanguages(source.getRepository(LANGUAGES), intermediateResults);
+
+			if (source.hasRepository(LanguageMetaData.ENTITY_NAME))
+			{
+				parseLanguages(source.getRepository(LANGUAGES), intermediateResults);
+			}
 
 			return new ParsedMetaData(resolveEntityDependencies(metadataList), intermediateResults.getPackages(),
 					intermediateResults.getAttributeTags(), intermediateResults.getEntityTags(),
