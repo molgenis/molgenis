@@ -1,0 +1,145 @@
+<div class="row">
+    <div class="col-md-3">
+        Select a project:<br>
+        <div id="entity-select-container"></div>
+        <br>
+        <br>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-3">
+        <form name="upload-form" action="/plugin/importer/importFile/"
+              enctype="multipart/form-data" method="post">
+            <input type="file" name="file" data-filename-placement="inside" title="Select a file...">
+            <br>
+            <input name="uploadbutton" type="submit" value="Upload file" class="btn btn-primary" style="min-width: 180px ">
+        </form>
+    </div>
+    <div class="col-md-3" id="importRun"></div>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <br>
+        <form name="annotation-form" action="/annotators/annotate-data/"
+              enctype="multipart/form-data" method="post">
+            <input type="hidden" name="dataset-identifier" size="40">
+            <input type="hidden" name="annotatorNames" size="40" value="snpEff,cadd">
+            <input name="annotationbutton" type="submit" value="Diagnose!" class="btn btn-primary disabled" style="min-width: 180px ">
+        </form>
+    </div>
+    <div class="col-md-3" id="annotateRun"></div>
+</div>
+<div class="row">
+    <div  class="col-md-12" id="data-table-container"></div>
+</div>
+
+<script>
+    console.log("still here!");
+    var refreshIntervalId;
+    var filename;
+    var selectedProject;
+
+    $('form[name=upload-form]').submit(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if($(this).valid()) {
+            $.ajax({
+                type : $(this).attr('method'),
+                url : $(this).attr('action'),
+                data : new FormData($(this)[0]), // not supported in IE9
+                contentType: false,
+                processData: false,
+                success: function(name) {
+                    clearInterval(refreshIntervalId);
+                    refreshIntervalId = setInterval(
+                            function ()
+                            {
+                                molgenis.RestClient.prototype.getAsync('/api/v1/ImportRun/', {'q' : [ {
+                                            'field' : 'id',
+                                            'operator' : 'EQUALS',
+                                            'value' : name
+                                        } ]},
+                                        function(importRun) {
+                                            var container = $('#importRun');
+                                            container.html("");
+                                            importRun.items.forEach(function(entry) {
+                                                container.append('<img id="img" src="http://2.bp.blogspot.com/-uGns9Rcyr2E/UlQDjhKxx1I/AAAAAAAADFc/0PMbw67Jwhw/s1600/progress_bar.gif" />');
+                                                if(entry.status==="FINISHED"){
+                                                    container.hide();
+                                                    clearInterval(refreshIntervalId);
+                                                    $('[name="file"]').addClass('disabled');
+                                                    $('[name="uploadbutton"]').addClass('disabled');
+                                                    $('[name="annotationbutton"]').removeClass('disabled');
+                                                    filename = $('[name="file"]').val().split("\\").pop().slice(0, -4);
+                                                    $('[name="dataset-identifier"]').val(filename);
+                                                }
+                                            });
+                                        });
+                            }, 500);
+                }
+            });
+        }
+    });
+
+
+    $('form[name=annotation-form]').submit(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if($(this).valid()) {
+            $.ajax({
+                type : $(this).attr('method'),
+                url : $(this).attr('action'),
+                data : new FormData($(this)[0]), // not supported in IE9
+                contentType: false,
+                processData: false,
+                success: function(name) {
+                    clearInterval(refreshIntervalId);
+                    refreshIntervalId = setInterval(
+                            function ()
+                            {
+                                molgenis.RestClient.prototype.getAsync('/api/v1/AnnotationRun/', {'q' : [ {
+                                            'field' : 'id',
+                                            'operator' : 'EQUALS',
+                                            'value' : name
+                                        } ]},
+                                        function(importRun) {
+                                            var container = $('#annotateRun');
+                                            container.html("");
+                                            importRun.items.forEach(function(entry) {
+                                                container.append('<img id="img" src="http://2.bp.blogspot.com/-uGns9Rcyr2E/UlQDjhKxx1I/AAAAAAAADFc/0PMbw67Jwhw/s1600/progress_bar.gif" />');
+                                                if(entry.status==="FINISHED"){
+                                                    container.hide();
+                                                    Table = React.render(molgenis.ui.Table({
+                                                        entity: filename,
+                                                        sort:
+                                                        {
+                                                            attr:
+                                                            {
+                                                                name: 'ID'
+                                                            },
+                                                            order: 'desc',
+                                                            path: []
+                                                        },
+                                                        enableAdd: false,
+                                                        enableEdit: false,
+                                                        enableDelete: false,
+                                                        enableInspect: false
+                                                    }), $('#data-table-container')[0]);
+                                                }
+                                            });
+                                        });
+                            }, 2000);
+                }
+            });
+        }
+    });
+
+    EntitySelectBox = React.render(molgenis.ui.EntitySelectBox({
+        entity: 'Project',
+        onValueChange: function(val){
+            selectedProject = val;
+        }
+    }), $('#entity-select-container')[0]);
+
+</script>
