@@ -29,6 +29,7 @@ import org.molgenis.migrate.version.v1_11.Step20RebuildElasticsearchIndex;
 import org.molgenis.migrate.version.v1_11.Step21SetLoggingEventBackend;
 import org.molgenis.migrate.version.v1_13.Step22RemoveDiseaseMatcher;
 import org.molgenis.migrate.version.v1_14.Step23RebuildElasticsearchIndex;
+import org.molgenis.migrate.version.v1_15.Step24UpdateApplicationSettings;
 import org.molgenis.migrate.version.v1_5.Step1UpgradeMetaData;
 import org.molgenis.migrate.version.v1_5.Step2;
 import org.molgenis.migrate.version.v1_5.Step3AddOrderColumnToMrefTables;
@@ -181,6 +182,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step21SetLoggingEventBackend(dataSource));
 		upgradeService.addUpgrade(new Step22RemoveDiseaseMatcher(dataSource));
 		upgradeService.addUpgrade(step23RebuildElasticsearchIndex);
+		upgradeService.addUpgrade(new Step24UpdateApplicationSettings(dataSource, idGenerator));
 	}
 
 	@Override

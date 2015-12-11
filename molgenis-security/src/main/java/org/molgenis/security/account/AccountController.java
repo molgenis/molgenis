@@ -75,11 +75,9 @@ public class AccountController
 	}
 
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
-	public ModelAndView getLoginForm()
+	public String getLoginForm()
 	{
-		ModelAndView model = new ModelAndView("login-modal");
-		model.addObject("enable_self_registration", appSettings.getSignUp());
-		return model;
+		return "login-modal";
 	}
 
 	@RequestMapping(value = "/register", method = RequestMethod.GET)
