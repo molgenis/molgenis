@@ -350,7 +350,9 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			}
 			else LOG.trace("Counting Elasticsearch '" + type + "' docs ...");
 		}
+
 		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
+
 		generator.buildSearchRequest(searchRequestBuilder, type, SearchType.COUNT, q, null, null, null, entityMetaData);
 		SearchResponse searchResponse = searchRequestBuilder.execute().actionGet();
 		if (searchResponse.getFailedShards() > 0)
@@ -372,6 +374,50 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			}
 		}
 
+		String transactionId = getCurrentTransactionId();
+		if (transactionId != null && !NON_TRANSACTIONAL_ENTITIES.contains(entityMetaData.getName()))
+		{
+			if (hasMapping(transactionId, entityMetaData))
+			{
+				// count added entities in transaction index
+				Query countAddedQ = q != null ? new QueryImpl(q) : new QueryImpl();
+				if (countAddedQ.getRules() != null && !countAddedQ.getRules().isEmpty())
+				{
+					countAddedQ.and();
+				}
+				countAddedQ.eq(CRUD_TYPE_FIELD_NAME, CrudType.ADD.toString());
+				SearchRequestBuilder countAddSearchRequestBuilder = client.prepareSearch(transactionId);
+				generator.buildSearchRequest(countAddSearchRequestBuilder, type, SearchType.COUNT, countAddedQ, null,
+						null, null, entityMetaData);
+				SearchResponse countAddSearchResponse = countAddSearchRequestBuilder.get();
+				if (countAddSearchResponse.getFailedShards() > 0)
+				{
+					throw new ElasticsearchException(
+							"Search failed. Returned headers:" + countAddSearchResponse.getHeaders());
+				}
+				long addedCount = countAddSearchResponse.getHits().totalHits();
+
+				// count deleted entities in transaction index
+				Query countDeletedQ = q != null ? new QueryImpl(q) : new QueryImpl();
+				if (countDeletedQ.getRules() != null && !countDeletedQ.getRules().isEmpty())
+				{
+					countDeletedQ.and();
+				}
+				countDeletedQ.eq(CRUD_TYPE_FIELD_NAME, CrudType.DELETE.toString());
+				SearchRequestBuilder countDeletedSearchRequestBuilder = client.prepareSearch(transactionId);
+				generator.buildSearchRequest(countDeletedSearchRequestBuilder, type, SearchType.COUNT, countDeletedQ,
+						null, null, null, entityMetaData);
+				SearchResponse countDeletedSearchResponse = countDeletedSearchRequestBuilder.get();
+				if (countDeletedSearchResponse.getFailedShards() > 0)
+				{
+					throw new ElasticsearchException(
+							"Search failed. Returned headers:" + countDeletedSearchResponse.getHeaders());
+				}
+				long deletedCount = countDeletedSearchResponse.getHits().totalHits();
+
+				count = count + addedCount - deletedCount;
+			}
+		}
 		return count;
 	}
 
@@ -451,7 +497,10 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 				// main index mapping the data is (not) stored. The transaction
 				// index is removed after transaction
 				// commit or rollback.
-				createMappings(transactionId, entityMetaData, true, true, true);
+				if (!hasMapping(transactionId, entityMetaData))
+				{
+					createMappings(transactionId, entityMetaData, true, true, true);
+				}
 			}
 
 			for (Entity entity : entities)
@@ -519,9 +568,20 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		}
 		else
 		{
+			// store entities in the index related to this transaction even
+			// if the entity should not be stored in
+			// the index, after transaction commit the transaction index is
+			// merged with the main index. Based on the
+			// main index mapping the data is (not) stored. The transaction
+			// index is removed after transaction
+			// commit or rollback.
+			if (!hasMapping(transactionId, entityMetaData))
+			{
+				createMappings(transactionId, entityMetaData, true, true, true);
+			}
+
 			// Check if delete from main index or if it is delete from entity
-			// that is not committed yet and is in the
-			// temp index
+			// that is not committed yet and is in the temp index
 			String type = sanitizeMapperType(entityMetaData.getName());
 			GetResponse response = client.prepareGet(indexName, type, id).execute().actionGet();
 			if (response.isExists())
@@ -874,9 +934,12 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		{
 			UuidGenerator uuidg = new UuidGenerator();
 			DefaultEntityMetaData tempEntityMetaData = new DefaultEntityMetaData(uuidg.generateId(), entityMetaData);
-			tempEntityMetaData.setPackage(new PackageImpl("elasticsearch_temporary_entity", "This entity (Original: "
-					+ entityMetaData.getName()
-					+ ") is temporary build to make rebuilding of Elasticsearch entities posible."));
+			tempEntityMetaData
+					.setPackage(
+							new PackageImpl("elasticsearch_temporary_entity",
+									"This entity (Original: " + entityMetaData
+											.getName()
+									+ ") is temporary build to make rebuilding of Elasticsearch entities posible."));
 
 			// Add temporary repository into Elasticsearch
 			Repository tempRepository = dataService.getMeta().addEntityMeta(tempEntityMetaData);
@@ -900,8 +963,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		}
 		else
 		{
-			if (LOG.isDebugEnabled()) LOG
-					.debug("Rebuild index of entity: [" + entityMetaData.getName()
+			if (LOG.isDebugEnabled()) LOG.debug("Rebuild index of entity: [" + entityMetaData.getName()
 					+ "] is skipped because the " + ElasticsearchRepositoryCollection.NAME + " backend is unknown");
 		}
 	}
