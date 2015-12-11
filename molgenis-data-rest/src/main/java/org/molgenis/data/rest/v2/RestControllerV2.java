@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -407,6 +408,21 @@ class RestControllerV2
 			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
 			throw e;
 		}
+	}
+
+	@RequestMapping(value = "/i18n", method = GET, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Map<String, String> getI18nStrings()
+	{
+		Map<String, String> translations = new HashMap<>();
+
+		ResourceBundle bundle = languageService.getBundle();
+		for (String key : bundle.keySet())
+		{
+			translations.put(key, bundle.getString(key));
+		}
+
+		return translations;
 	}
 
 	/**

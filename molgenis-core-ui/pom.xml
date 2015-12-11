@@ -140,6 +140,7 @@
 	                        <!-- Specify files one-by-one to preserve order -->
 	                        <jsSourceFiles>
 	                            <!-- Important: Update molgenis-header.ftl when modifying the list below -->
+	                            <jsSourceFile>/component/mixin/I18nStringsMixin.js</jsSourceFile>
 	                            <jsSourceFile>/component/mixin/AttributeLoaderMixin.js</jsSourceFile>
 	                            <jsSourceFile>/component/mixin/DeepPureRenderMixin.js</jsSourceFile>
 	                            <jsSourceFile>/component/mixin/EntityInstanceLoaderMixin.js</jsSourceFile>

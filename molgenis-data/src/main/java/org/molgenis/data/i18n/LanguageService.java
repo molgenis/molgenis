@@ -5,6 +5,8 @@ import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.util.EntityUtils.asStream;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -35,6 +37,17 @@ public class LanguageService
 	{
 		return asStream(dataService.findAll(LanguageMetaData.ENTITY_NAME)).map(e -> e.getString(LanguageMetaData.CODE))
 				.collect(toList());
+	}
+
+	public ResourceBundle getBundle(String languageCode)
+	{
+		return ResourceBundle.getBundle(I18nStringMetaData.ENTITY_NAME, new Locale(languageCode),
+				new MolgenisResourceBundleControl(dataService));
+	}
+
+	public ResourceBundle getBundle()
+	{
+		return getBundle(getCurrentUserLanguageCode());
 	}
 
 	/**

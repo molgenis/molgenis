@@ -24,6 +24,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.i18n.I18nStringMetaData;
 import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.i18n.LanguageRepositoryDecorator;
 import org.molgenis.data.i18n.LanguageService;
@@ -99,6 +100,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		this.defaultBackend = backend;
 		backends.put(backend.getName(), backend);
 
+		I18nStringMetaData.INSTANCE.setBackend(backend.getName());
 		LanguageMetaData.INSTANCE.setBackend(backend.getName());
 		PackageMetaData.INSTANCE.setBackend(backend.getName());
 		TagMetaData.INSTANCE.setBackend(backend.getName());
@@ -113,6 +115,9 @@ public class MetaDataServiceImpl implements MetaDataService
 	{
 		Repository languageRepo = defaultBackend.addEntityMeta(LanguageMetaData.INSTANCE);
 		dataService.addRepository(new LanguageRepositoryDecorator(languageRepo, dataService));
+
+		Repository i18StringsRepo = defaultBackend.addEntityMeta(I18nStringMetaData.INSTANCE);
+		dataService.addRepository(i18StringsRepo);
 
 		Supplier<Stream<String>> languageCodes = () -> languageService.getLanguageCodes().stream();
 
@@ -139,6 +144,9 @@ public class MetaDataServiceImpl implements MetaDataService
 		// Add language attributes to the EntityMetaDataMetaData
 		languageCodes.get().map(code -> EntityMetaDataMetaData.LABEL + '-' + code)
 				.forEach(EntityMetaDataMetaData.INSTANCE::addAttribute);
+
+		// Add language attributes to I18nStringMetaData
+		languageCodes.get().forEach(I18nStringMetaData.INSTANCE::addLanguage);
 
 		Repository tagRepo = defaultBackend.addEntityMeta(TagMetaData.INSTANCE);
 		dataService.addRepository(tagRepo);

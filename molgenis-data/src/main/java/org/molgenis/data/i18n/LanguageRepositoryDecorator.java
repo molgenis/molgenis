@@ -178,6 +178,10 @@ public class LanguageRepositoryDecorator implements Repository
 			dataService.getMeta().getDefaultBackend()
 					.deleteAttribute(EntityMetaDataMetaData.ENTITY_NAME, entityLabel.getName());
 		}
+
+		// Delete language attribute from I18nStringMetaData
+		I18nStringMetaData.INSTANCE.removeLanguage(languageCode);
+		dataService.getMeta().getDefaultBackend().deleteAttribute(I18nStringMetaData.ENTITY_NAME, languageCode);
 	}
 
 	@Override
@@ -241,6 +245,16 @@ public class LanguageRepositoryDecorator implements Repository
 				.setNillable(true);
 		dataService.getMeta().getDefaultBackend().addAttribute(EntityMetaDataMetaData.ENTITY_NAME, entityLabel);
 		EntityMetaDataMetaData.INSTANCE.addAttributeMetaData(entityLabel);
+
+		// I18nString
+		if (I18nStringMetaData.INSTANCE.addLanguage(languageCode))
+		{
+			dataService
+					.getMeta()
+					.getDefaultBackend()
+					.addAttribute(I18nStringMetaData.ENTITY_NAME,
+							I18nStringMetaData.INSTANCE.getAttribute(languageCode));
+		}
 	}
 
 	@Override

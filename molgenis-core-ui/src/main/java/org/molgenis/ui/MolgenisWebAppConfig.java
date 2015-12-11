@@ -143,6 +143,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Autowired
 	public EntityAttributesValidator entityAttributesValidator;
 
+	@Autowired
+	public LanguageService languageService;
+
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
 	{
@@ -215,7 +218,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public MolgenisInterceptor molgenisInterceptor()
 	{
-		return new MolgenisInterceptor(resourceFingerprintRegistry(), appSettings, environment);
+		return new MolgenisInterceptor(resourceFingerprintRegistry(), appSettings, languageService, environment);
 	}
 
 	@Bean
