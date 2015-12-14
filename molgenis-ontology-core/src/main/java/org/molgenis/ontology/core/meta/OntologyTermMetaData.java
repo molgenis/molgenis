@@ -23,8 +23,8 @@ public class OntologyTermMetaData extends DefaultEntityMetaData
 		super(SIMPLE_NAME, OntologyPackage.getPackageInstance());
 
 		addAttributeMetaData(new DefaultAttributeMetaData(ID).setIdAttribute(true).setNillable(false).setVisible(false));
-		addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_IRI, FieldTypeEnum.STRING).setNillable(false));
-		addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_NAME, FieldTypeEnum.STRING).setNillable(false)
+		addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_IRI, FieldTypeEnum.STRING).setNillable(false).setLookupAttribute(true));
+		addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_NAME, FieldTypeEnum.STRING).setNillable(false).setLookupAttribute(true)
 				.setLabelAttribute(true));
 		addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_SYNONYM, FieldTypeEnum.MREF).setNillable(true)
 				.setRefEntity(OntologyTermSynonymMetaData.INSTANCE));

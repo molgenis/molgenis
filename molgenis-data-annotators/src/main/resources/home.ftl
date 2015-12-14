@@ -1,41 +1,34 @@
-<div class="row">
-    <div class="col-md-3">
-        Select a project:<br>
-        <div id="entity-select-container"></div>
-        <br>
-        <br>
+<div class="row searchcontainer">
+    <div class="row searchcontainer">
+        <div class="col-md-12">
+            <div class="searchheader noselect defaultcursor" data-reactid=".0.1.0">Diagnostics portal - Your diagnosis at the push of a button!</div>
+            <div id="entity-select-container"></div>
+        </div>
     </div>
-</div>
-<div class="row">
-    <div class="col-md-3">
-        <form name="upload-form" action="/plugin/importer/importFile/"
-              enctype="multipart/form-data" method="post">
-            <input type="file" name="file" data-filename-placement="inside" title="Select a file...">
-            <br>
-            <input name="uploadbutton" type="submit" value="Upload file" class="btn btn-primary" style="min-width: 180px ">
-        </form>
+    <div class="row searchcontainer">
+        <div class="col-md-12">
+            <div id="ontology-select-container"></div>
+        </div>
     </div>
-    <div class="col-md-3" id="importRun"></div>
+    <div class="row searchcontainer">
+        <div class="col-md-6">
+            <form name="upload-form" action="/plugin/importer/importFile/"
+                  enctype="multipart/form-data" method="post">
+                <div style="background:white;"><input type="file" name="file" data-filename-placement="inside" title="Select a file...">      </div> <br>
+                <input name="uploadbutton" type="submit" value="Upload file" class="btn btn-primary disabled" style="min-width: 180px;color:#4d4d4d;background:rgb(255,225,0)">
+            </form>
+        </div>
+        <div class="col-md-4"><div id="importRun"></div><div class="col-md-12" id="annotateRun"></div></div>
+    </div>
 </div>
 
-<div class="row">
-    <div class="col-md-3">
-        <br>
         <form name="annotation-form" action="/annotators/annotate-data/"
               enctype="multipart/form-data" method="post">
             <input type="hidden" name="dataset-identifier" size="40">
-            <input type="hidden" name="annotatorNames" size="40" value="snpEff,cadd">
-            <input name="annotationbutton" type="submit" value="Diagnose!" class="btn btn-primary disabled" style="min-width: 180px ">
+            <input type="hidden" name="annotatorNames" size="40" value="snpEff,cadd,GeneNetwork">
         </form>
-    </div>
-    <div class="col-md-3" id="annotateRun"></div>
-</div>
-<div class="row">
-    <div  class="col-md-12" id="data-table-container"></div>
-</div>
 
 <script>
-    console.log("still here!");
     var refreshIntervalId;
     var filename;
     var selectedProject;
@@ -70,9 +63,21 @@
                                                     clearInterval(refreshIntervalId);
                                                     $('[name="file"]').addClass('disabled');
                                                     $('[name="uploadbutton"]').addClass('disabled');
-                                                    $('[name="annotationbutton"]').removeClass('disabled');
                                                     filename = $('[name="file"]').val().split("\\").pop().slice(0, -4);
                                                     $('[name="dataset-identifier"]').val(filename);
+                                                    selectedProject['entityName'] = filename;
+                                                    selectedProject['Phenotypes'] = selectedPhenotypes;
+                                                    selectedProject['Patient'] = selectedProject.Patient.ID;
+                                                    var entities;
+                                                    entities = {"entities":[selectedProject]}
+                                                    $.ajax({
+                                                        type: 'PUT',
+                                                        url: "/api/v2/Project/",
+                                                        contentType: "application/json",
+                                                        data: JSON.stringify(entities)
+                                                    }).done(function() {
+                                                        $('form[name=annotation-form]').submit();
+                                                    });
                                                 }
                                             });
                                         });
@@ -110,22 +115,7 @@
                                                 container.append('<img id="img" src="http://2.bp.blogspot.com/-uGns9Rcyr2E/UlQDjhKxx1I/AAAAAAAADFc/0PMbw67Jwhw/s1600/progress_bar.gif" />');
                                                 if(entry.status==="FINISHED"){
                                                     container.hide();
-                                                    Table = React.render(molgenis.ui.Table({
-                                                        entity: filename,
-                                                        sort:
-                                                        {
-                                                            attr:
-                                                            {
-                                                                name: 'ID'
-                                                            },
-                                                            order: 'desc',
-                                                            path: []
-                                                        },
-                                                        enableAdd: false,
-                                                        enableEdit: false,
-                                                        enableDelete: false,
-                                                        enableInspect: false
-                                                    }), $('#data-table-container')[0]);
+                                                    window.location.href = "/menu/plugins/background?project="+selectedProject.ID;
                                                 }
                                             });
                                         });
@@ -137,9 +127,20 @@
 
     EntitySelectBox = React.render(molgenis.ui.EntitySelectBox({
         entity: 'Project',
+        placeholder: "Select a project",
         onValueChange: function(val){
-            selectedProject = val;
+            selectedProject = val.value;
+            $('[name="uploadbutton"]').removeClass('disabled');
         }
     }), $('#entity-select-container')[0]);
+
+    ontologySelectBox = React.render(molgenis.ui.EntitySelectBox({
+        entity: 'Ontology_OntologyTerm',
+        multiple: true,
+        placeholder: "Select phenotypes",
+        onValueChange: function(val){
+            selectedPhenotypes = val.value.map(function(a) {return a.id;});
+        }
+    }), $('#ontology-select-container')[0]);
 
 </script>

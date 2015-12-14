@@ -26,7 +26,7 @@
     <#else>
         <link rel="stylesheet" href="<@resource_href "/css/molgenis-component.min.css"/>" type="text/css">
     </#if>
-        
+        <link rel="stylesheet" href="<@resource_href "/css/base.css"/>" type="text/css">
         <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
  		<link rel="stylesheet" href="<@resource_href "/css/themes/${app_settings.bootstrapTheme?html}"/>" type="text/css" id="bootstrap-theme">
 
