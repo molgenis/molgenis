@@ -50,13 +50,22 @@ public abstract class BatchingIterable<T> implements Iterable<T>
 			@Override
 			public boolean hasNext()
 			{
+				boolean hasNext;
+
 				// lazy load first batch
 				if (it == null)
 				{
 					it = nextBatch();
+					hasNext = it.hasNext();
+					if (!hasNext)
+					{
+						return false;
+					}
 				}
-
-				boolean hasNext = it.hasNext();
+				else
+				{
+					hasNext = it.hasNext();
+				}
 
 				if (!hasNext)
 				{
