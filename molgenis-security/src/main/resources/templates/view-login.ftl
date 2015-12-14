@@ -1,5 +1,5 @@
 <#include "resource-macros.ftl">
-<#assign googleSignIn = app_settings.googleSignIn && appSettings.signUp && !appSettings.signUpModeration>
+<#assign googleSignIn = app_settings.googleSignIn && app_settings.signUp && !app_settings.signUpModeration>
 <!DOCTYPE html>
 <html>
 	<head>
