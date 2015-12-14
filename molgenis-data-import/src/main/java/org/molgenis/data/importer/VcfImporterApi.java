@@ -1,7 +1,5 @@
 package org.molgenis.data.importer;
 
-import static org.molgenis.data.importer.ValidationResultWizardPageCopy.URI;
-
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.Package;
@@ -25,25 +23,22 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static org.molgenis.data.importer.VcfImporterApi.URI;
+
 @Controller
 @RequestMapping(URI)
-public class ValidationResultWizardPageCopy extends MolgenisPluginController
+public class VcfImporterApi
 {
 	private static final long serialVersionUID = 1L;
-	private static final Logger LOG = LoggerFactory.getLogger(ValidationResultWizardPageCopy.class);
+	private static final Logger LOG = LoggerFactory.getLogger(VcfImporterApi.class);
 	private final ExecutorService asyncImportJobs = Executors.newCachedThreadPool();
 
 	public static final String ID = "importer";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
-	public ValidationResultWizardPageCopy()
-	{
-		super(URI);
-	}
 
 	@Autowired
 	private ImportServiceFactory importServiceFactory;

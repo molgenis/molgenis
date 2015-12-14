@@ -1,31 +1,34 @@
-<div class="row searchcontainer">
-    <div class="row searchcontainer">
+   <div class="well"> <div class="row">
         <div class="col-md-12">
-            <div class="searchheader noselect defaultcursor" data-reactid=".0.1.0">Diagnostics portal - Your diagnosis at the push of a button!</div>
-            <div id="entity-select-container"></div>
+            <div><h2>Diagnostics portal - Your diagnosis at the push of a button!</h2></div>
+            <div id="entity-select-container"><br></div>
         </div>
     </div>
-    <div class="row searchcontainer">
+    <div class="row">
         <div class="col-md-12">
-            <div id="ontology-select-container"></div>
+            <div id="ontology-select-container"><br></div>
         </div>
     </div>
-    <div class="row searchcontainer">
+    <div class="row">
         <div class="col-md-6">
             <form name="upload-form" action="/plugin/importer/importFile/"
                   enctype="multipart/form-data" method="post">
-                <div style="background:white;"><input type="file" name="file" data-filename-placement="inside" title="Select a file...">      </div> <br>
-                <input name="uploadbutton" type="submit" value="Upload file" class="btn btn-primary disabled" style="min-width: 180px;color:#4d4d4d;background:rgb(255,225,0)">
-            </form>
+                <div style="background:white;"><input type="file" name="file" data-filename-placement="inside" title="Select a file..."></div> <br>
+                <input name="uploadbutton" type="submit" value="Diagnose!" class="btn btn-primary disabled" style="min-width: 180px;">
+            </form><br>
         </div>
         <div class="col-md-4"><div id="importRun"></div><div class="col-md-12" id="annotateRun"></div></div>
     </div>
-</div>
+    <div class="row">
+        <div class="col-md-6">
+            <div id="progress-container" style="min-height: 120px;"></div>
+        </div>
+    </div>
 
         <form name="annotation-form" action="/annotators/annotate-data/"
               enctype="multipart/form-data" method="post">
             <input type="hidden" name="dataset-identifier" size="40">
-            <input type="hidden" name="annotatorNames" size="40" value="snpEff,cadd,GeneNetwork">
+            <input type="hidden" name="annotatorNames" size="40" value="snpEff,cadd">
         </form>
 
 <script>
@@ -58,6 +61,7 @@
                                             container.html("");
                                             importRun.items.forEach(function(entry) {
                                                 container.append('<img id="img" src="http://2.bp.blogspot.com/-uGns9Rcyr2E/UlQDjhKxx1I/AAAAAAAADFc/0PMbw67Jwhw/s1600/progress_bar.gif" />');
+                                                progress.setProps({value : "Importing VCF file"});
                                                 if(entry.status==="FINISHED"){
                                                     container.hide();
                                                     clearInterval(refreshIntervalId);
@@ -78,6 +82,10 @@
                                                     }).done(function() {
                                                         $('form[name=annotation-form]').submit();
                                                     });
+                                                }
+                                                if(entry.status==="FAILED"){
+                                                    container.hide();
+                                                    progress.setProps({value : entry.message});
                                                 }
                                             });
                                         });
@@ -112,10 +120,18 @@
                                             var container = $('#annotateRun');
                                             container.html("");
                                             importRun.items.forEach(function(entry) {
+                                                var text = "Annotators selected: " + entry.annotatorsSelected+"\n";
+                                                text = text + "Currently annotating with: " + entry.annotatorsStarted+"\n";
+                                                text = text + "Annotators already completed: " + entry.annotatorsFinished+"\n";
+                                                progress.setProps({value : text});
                                                 container.append('<img id="img" src="http://2.bp.blogspot.com/-uGns9Rcyr2E/UlQDjhKxx1I/AAAAAAAADFc/0PMbw67Jwhw/s1600/progress_bar.gif" />');
                                                 if(entry.status==="FINISHED"){
                                                     container.hide();
                                                     window.location.href = "/menu/plugins/background?project="+selectedProject.ID;
+                                                }
+                                                if(entry.status==="FAILED"){
+                                                    container.hide();
+                                                    progress.setProps({value : entry.message});
                                                 }
                                             });
                                         });
@@ -142,5 +158,10 @@
             selectedPhenotypes = val.value.map(function(a) {return a.id;});
         }
     }), $('#ontology-select-container')[0]);
+
+    progress = React.render(molgenis.ui.TextArea({
+        readOnly: true,
+        value: ""
+    }), $('#progress-container')[0]);
 
 </script>

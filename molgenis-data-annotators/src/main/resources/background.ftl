@@ -1,30 +1,28 @@
-<div class="searchcontainer">
-    <div class="row">
+ <div class="row">
         <div class="col-md-12">
-            <div class="searchheader noselect defaultcursor" data-reactid=".0.1.0">Diagnostics portal - Your diagnosis at the push of a button!</div>
+            <div>Diagnostics portal - Your diagnosis at the push of a button!</div>
             <br>
         </div>
     </div>
     <div class="row">
         <div class="col-md-1" >&nbsp</div>
-        <div class="col-md-4" >
-            <div  style="background:white;"> Phenotypes used for this analysis result:
+        <div class="col-md-4 well" >
+            <div> Phenotypes used for this analysis result:
                 <div id="terms-used-container">&nbsp;</div>
             </div>
         </div>
         <div class="col-md-1" ></div>
-        <div class="col-md-4" >
-            <div  style="background:white;"> Phenotypes not used for this analysis result:
+        <div class="col-md-4 well">
+            <div> Phenotypes not used for this analysis result:
                 <div id="terms-not-used-container">&nbsp;</div>
             </div>
         </div>
         <div class="col-md-2" ></div>
     </div>
     <div class="row"><div class="col-md-12">&nbsp</div></div>
-</div>
 
 <div class="row">
-    <div  class="col-md-12" id="data-table-container"></div>
+    <div class="col-md-12" id="data-table-container"></div>
 </div>
 
 <script>
@@ -50,12 +48,13 @@ molgenis.RestClient.prototype.getAsync('/api/v1/Project/', {'q' : [ {
                 'POS':null,
                 'REF':null,
                 'ALT':null,
-                'MOLGENIS_cadd':{'CADD_SCALED':null},
-                'molgenis_annotated_GeneNetwork':{
-                    'Gene network link': null,
-                    'GeneDescription': null,
-                    'weightedZScore': null
-                }
+                'MOLGENIS_cadd':{'CADD_SCALED':null}
+                //,
+                //'molgenis_annotated_GeneNetwork':{
+                //    'Gene network link': null,
+                //    'GeneDescription': null,
+                //    'weightedZScore': null
+                //}
             };
             $('#terms-used-container').html(" "+project.items[0].termsFound);
             $('#terms-not-used-container').html(" "+project.items[0].termsNotFound);
@@ -64,7 +63,7 @@ molgenis.RestClient.prototype.getAsync('/api/v1/Project/', {'q' : [ {
                 attrs: attributes,
                 sort: {
                     attr: {
-                        name: 'weightedZScore'
+                        name: 'CADD_SCALED'
                     },
                     order: 'desc',
                     path: []
