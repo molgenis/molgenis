@@ -25,7 +25,6 @@ import org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 
 public abstract class AbstractElasticsearchRepository implements Repository
@@ -75,7 +74,8 @@ public abstract class AbstractElasticsearchRepository implements Repository
 	public Entity findOne(Query q)
 	{
 		Iterable<Entity> entities = elasticSearchService.search(q, getEntityMetaData());
-		return !Iterables.isEmpty(entities) ? entities.iterator().next() : null;
+		Iterator<Entity> it = entities.iterator();
+		return it.hasNext() ? it.next() : null;
 	}
 
 	@Override
