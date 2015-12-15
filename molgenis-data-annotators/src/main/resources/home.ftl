@@ -36,6 +36,7 @@
 <script>
     var refreshIntervalId;
     var filename;
+    var selectedProject;
 
     $.get("/plugin/importwizard/uuid/")
             .done(function(uuid) {
@@ -74,18 +75,18 @@
                                                     clearInterval(refreshIntervalId);
                                                     $('[name="file"]').addClass('disabled');
                                                     $('[name="uploadbutton"]').addClass('disabled');
-                                                    filename = $('[name="file"]').val().split("\\").pop().slice(0, -4);
+                                                    filename = filename.split("\\").pop().slice(0, -4);
                                                     $('[name="dataset-identifier"]').val(filename);
 
-                                                    var selectedProject= {
-                                                        'id':filename,
+                                                    selectedProject= {
+                                                        'ID':filename,
                                                         'entityName':filename,
                                                         'Phenotypes':selectedPhenotypes
                                                     }
                                                     var entities;
                                                     entities = {"entities":[selectedProject]}
                                                     $.ajax({
-                                                        type: 'PUT',
+                                                        type: 'POST',
                                                         url: "/api/v2/Project/",
                                                         contentType: "application/json",
                                                         data: JSON.stringify(entities)
