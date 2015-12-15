@@ -20,7 +20,7 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.importer.ImportResultsWizardPage;
-import org.molgenis.data.importer.ImportWizardController;
+import org.molgenis.data.importer.ImporterController;
 import org.molgenis.data.importer.OptionsWizardPage;
 import org.molgenis.data.importer.PackageWizardPage;
 import org.molgenis.data.importer.UploadWizardPage;
@@ -54,7 +54,7 @@ import org.testng.annotations.Test;
 public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 {
 
-	private ImportWizardController controller;
+	private ImporterController controller;
 	private WebRequest webRequest;
 
 	private MolgenisGroup group1;
@@ -121,9 +121,9 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		ImportResultsWizardPage importResultsWizardPage = mock(ImportResultsWizardPage.class);
 		PackageWizardPage packageWizardPage = mock(PackageWizardPage.class);
 
-		controller = new ImportWizardController(uploadWizardPage, optionsWizardPage, packageWizardPage,
+		controller = new ImporterController(uploadWizardPage, optionsWizardPage, packageWizardPage,
 				validationResultWizardPage, importResultsWizardPage, dataService, grantedAuthoritiesMapper,
-				userAccountService);
+				userAccountService, null, null, null, null, null);
 
 		List<GroupAuthority> authorities = new ArrayList<>();
 

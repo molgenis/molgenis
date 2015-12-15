@@ -1,29 +1,31 @@
-   <div class="well"> <div class="row">
-        <div class="col-md-12">
-            <div><h2>Diagnostics portal - Your diagnosis at the push of a button!</h2></div>
-            <div id="entity-select-container"><br></div>
+   <div class="well">
+       <div class="row">
+            <div class="col-md-12">
+                <div><h2>Diagnostics portal - Your diagnosis at the push of a button!</h2></div>
+            </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            <div id="ontology-select-container"><br></div>
+        <div class="row">
+            <div class="col-md-12">
+                <div id="ontology-select-container"></div>
+            </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-md-6">
-            <form name="upload-form" action="/plugin/importer/importFile/"
-                  enctype="multipart/form-data" method="post">
-                <div style="background:white;"><input type="file" name="file" data-filename-placement="inside" title="Select a file..."></div> <br>
-                <input name="uploadbutton" type="submit" value="Diagnose!" class="btn btn-primary disabled" style="min-width: 180px;">
-            </form><br>
+        <div class="row">
+            <div class="col-md-6">
+                <form name="upload-form" action="/plugin/importwizard/importFile/"
+                      enctype="multipart/form-data" method="post">
+                    <input type="file" name="file" data-filename-placement="inside" title="Select a file..."><br>
+                    <input type="hidden" name="filename" size="40">
+                    <input name="uploadbutton" type="submit" value="Diagnose!" class="btn btn-primary" style="min-width: 180px;">
+                </form><br>
+            </div>
+            <div class="col-md-4"><div id="importRun"></div><div class="col-md-12" id="annotateRun"></div></div>
         </div>
-        <div class="col-md-4"><div id="importRun"></div><div class="col-md-12" id="annotateRun"></div></div>
+        <div class="row">
+            <div class="col-md-6">
+                <div id="progress-container" style="min-height: 120px;"></div>
+            </div>
     </div>
-    <div class="row">
-        <div class="col-md-6">
-            <div id="progress-container" style="min-height: 120px;"></div>
-        </div>
-    </div>
+       </div>
 
         <form name="annotation-form" action="/annotators/annotate-data/"
               enctype="multipart/form-data" method="post">
@@ -34,7 +36,12 @@
 <script>
     var refreshIntervalId;
     var filename;
-    var selectedProject;
+
+    $.get("/plugin/importwizard/uuid/")
+            .done(function(uuid) {
+        filename = uuid + ".vcf";
+        $('[name="filename"]').val(filename);
+    });
 
     $('form[name=upload-form]').submit(function(e) {
         e.preventDefault();
@@ -69,9 +76,12 @@
                                                     $('[name="uploadbutton"]').addClass('disabled');
                                                     filename = $('[name="file"]').val().split("\\").pop().slice(0, -4);
                                                     $('[name="dataset-identifier"]').val(filename);
-                                                    selectedProject['entityName'] = filename;
-                                                    selectedProject['Phenotypes'] = selectedPhenotypes;
-                                                    selectedProject['Patient'] = selectedProject.Patient.ID;
+
+                                                    var selectedProject= {
+                                                        'id':filename,
+                                                        'entityName':filename,
+                                                        'Phenotypes':selectedPhenotypes
+                                                    }
                                                     var entities;
                                                     entities = {"entities":[selectedProject]}
                                                     $.ajax({
@@ -141,15 +151,6 @@
         }
     });
 
-    EntitySelectBox = React.render(molgenis.ui.EntitySelectBox({
-        entity: 'Project',
-        placeholder: "Select a project",
-        onValueChange: function(val){
-            selectedProject = val.value;
-            $('[name="uploadbutton"]').removeClass('disabled');
-        }
-    }), $('#entity-select-container')[0]);
-
     ontologySelectBox = React.render(molgenis.ui.EntitySelectBox({
         entity: 'Ontology_OntologyTerm',
         multiple: true,
@@ -163,5 +164,9 @@
         readOnly: true,
         value: ""
     }), $('#progress-container')[0]);
+
+    progress = React.render(molgenis.ui.Input({
+        type: "file"
+    }), $('#file-container')[0]);
 
 </script>

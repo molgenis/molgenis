@@ -30,7 +30,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.importer.ImportWizardController;
+import org.molgenis.data.importer.ImporterController;
 import org.molgenis.data.mapper.data.request.GenerateAlgorithmRequest;
 import org.molgenis.data.mapper.data.request.MappingServiceRequest;
 import org.molgenis.data.mapper.mapping.model.AlgorithmResult;
@@ -139,7 +139,7 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("entityMetaDatas", getWritableEntityMetaDatas());
 		model.addAttribute("user", SecurityUtils.getCurrentUsername());
 		model.addAttribute("admin", SecurityUtils.currentUserIsSu());
-		model.addAttribute("importerUri", menuReaderService.getMenu().findMenuItemPath(ImportWizardController.ID));
+		model.addAttribute("importerUri", menuReaderService.getMenu().findMenuItemPath(ImporterController.ID));
 		return VIEW_MAPPING_PROJECTS;
 	}
 
