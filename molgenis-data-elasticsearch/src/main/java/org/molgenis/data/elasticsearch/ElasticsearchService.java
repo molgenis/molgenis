@@ -149,18 +149,19 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#getTypes()
-	 */
 	@Override
 	public Iterable<String> getTypes()
 	{
-		if (LOG.isTraceEnabled()) LOG.trace("Retrieving Elasticsearch type names ...");
+		if (LOG.isTraceEnabled())
+		{
+			LOG.trace("Retrieving Elasticsearch type names ...");
+		}
 		GetMappingsResponse mappingsResponse = client.admin().indices().prepareGetMappings(indexName).execute()
 				.actionGet();
-		if (LOG.isDebugEnabled()) LOG.debug("Retrieved Elasticsearch type names");
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Retrieved Elasticsearch type names");
+		}
 
 		final ImmutableOpenMap<String, MappingMetaData> indexMappings = mappingsResponse.getMappings().get(indexName);
 		return new Iterable<String>()
@@ -174,11 +175,6 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		};
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#search(org.elasticsearch .action.search.SearchRequest)
-	 */
 	@Override
 	@Deprecated
 	public SearchResult search(SearchRequest request)
@@ -213,11 +209,6 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		return responseParser.parseSearchResponse(request, response, entityMetaData, dataService);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#hasMapping(org.molgenis .data.EntityMetaData)
-	 */
 	@Override
 	public boolean hasMapping(EntityMetaData entityMetaData)
 	{
@@ -243,11 +234,6 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		return indexMappings.containsKey(docType);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#createMappings(org.molgenis .data.EntityMetaData)
-	 */
 	@Override
 	public void createMappings(EntityMetaData entityMetaData)
 	{
@@ -288,12 +274,6 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#createMappings(org.molgenis .data.EntityMetaData, boolean,
-	 * boolean, boolean)
-	 */
 	@Override
 	public void createMappings(EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms,
 			boolean createAllIndex)
@@ -301,41 +281,33 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		createMappings(indexName, entityMetaData, storeSource, enableNorms, createAllIndex);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#refresh()
-	 */
 	@Override
-	public void refresh()
+	public void refresh(EntityMetaData entityMeta)
 	{
-		if (LOG.isTraceEnabled()) LOG.trace("Refreshing Elasticsearch index [" + indexName + "]");
-		refresh(indexName);
-		if (LOG.isDebugEnabled()) LOG.debug("Refreshed Elasticsearch index [" + indexName + "]");
+		String transactionId = getCurrentTransactionId();
+		if (transactionId != null && !NON_TRANSACTIONAL_ENTITIES.contains(entityMeta.getName()))
+		{
+			refresh(transactionId);
+		}
+		else
+		{
+			refresh(indexName);
+		}
 	}
 
-	public void refresh(String index)
+	private void refresh(String index)
 	{
+		if (LOG.isTraceEnabled()) LOG.trace("Refreshing Elasticsearch index [{}] ...", index);
 		elasticsearchUtils.refreshIndex(index);
+		if (LOG.isDebugEnabled()) LOG.debug("Refreshed Elasticsearch index [{}]", index);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#count(org.molgenis.data .EntityMetaData)
-	 */
 	@Override
 	public long count(EntityMetaData entityMetaData)
 	{
 		return count(null, entityMetaData);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#count(org.molgenis.data .Query,
-	 * org.molgenis.data.EntityMetaData)
-	 */
 	@Override
 	public long count(Query q, EntityMetaData entityMetaData)
 	{
@@ -346,9 +318,12 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		{
 			if (q != null)
 			{
-				LOG.trace("Counting Elasticsearch '" + type + "' docs using query [" + q + "] ...");
+				LOG.trace("Counting Elasticsearch [{}] docs using query [{}] ...", type, q);
 			}
-			else LOG.trace("Counting Elasticsearch '" + type + "' docs ...");
+			else
+			{
+				LOG.trace("Counting Elasticsearch [{}] docs", type);
+			}
 		}
 		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
 		generator.buildSearchRequest(searchRequestBuilder, type, SearchType.COUNT, q, null, null, null, entityMetaData);
@@ -360,27 +335,20 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		long count = searchResponse.getHits().totalHits();
 		if (LOG.isDebugEnabled())
 		{
+			long ms = searchResponse.getTookInMillis();
 			if (q != null)
 			{
-				LOG.debug("Counted " + count + " Elasticsearch '" + type + "' docs using query [" + q + "] in "
-						+ searchResponse.getTookInMillis() + "ms");
+				LOG.debug("Counted {} Elasticsearch [{}] docs using query [{}] in {}ms", count, type, q, ms);
 			}
 			else
 			{
-				LOG.debug("Counted " + count + " Elasticsearch '" + type + "' docs in "
-						+ searchResponse.getTookInMillis() + "ms");
+				LOG.debug("Counted {} Elasticsearch [{}] docs in {}ms", count, type, q, ms);
 			}
 		}
 
 		return count;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#index(org.molgenis.data .Entity,
-	 * org.molgenis.data.EntityMetaData, org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode)
-	 */
 	@Override
 	public void index(Entity entity, EntityMetaData entityMetaData, IndexingMode indexingMode)
 	{
@@ -400,12 +368,6 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		index(index, Arrays.asList(entity), entityMetaData, crudType, updateIndex);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#index(java.lang.Iterable, org.molgenis.data.EntityMetaData,
-	 * org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode)
-	 */
 	@Override
 	public long index(Iterable<? extends Entity> entities, EntityMetaData entityMetaData, IndexingMode indexingMode)
 	{
@@ -462,6 +424,10 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 				{
 					source.put(CRUD_TYPE_FIELD_NAME, crudType.name());
 				}
+				if (LOG.isDebugEnabled())
+				{
+					LOG.debug("Adding [{}] with id [{}] to index [{}] ...", type, id, index);
+				}
 				bulkProcessor.add(new IndexRequest().index(index).type(type).id(id).source(source));
 				++nrIndexedEntities;
 			}
@@ -470,8 +436,6 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		{
 			elasticsearchUtils.waitForCompletion(bulkProcessor);
 		}
-
-		refresh(index);
 
 		// If not in transaction, update references now, if in transaction the
 		// references are updated in
@@ -484,12 +448,6 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		return nrIndexedEntities;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#delete(org.molgenis.data .Entity,
-	 * org.molgenis.data.EntityMetaData)
-	 */
 	@Override
 	public void delete(Entity entity, EntityMetaData entityMetaData)
 	{
@@ -497,12 +455,6 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		deleteById(elasticsearchId, entityMetaData);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#deleteById(java.lang.String ,
-	 * org.molgenis.data.EntityMetaData)
-	 */
 	@Override
 	public void deleteById(String id, EntityMetaData entityMetaData)
 	{
@@ -560,23 +512,12 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#deleteById(java.lang. Iterable ,
-	 * org.molgenis.data.EntityMetaData)
-	 */
 	@Override
 	public void deleteById(Iterable<String> ids, EntityMetaData entityMetaData)
 	{
 		ids.forEach(id -> deleteById(id, entityMetaData));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#delete(java.lang.Iterable, org.molgenis.data.EntityMetaData)
-	 */
 	@Override
 	public void delete(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
 	{
@@ -592,11 +533,6 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		deleteById(toElasticsearchIds(ids), entityMetaData);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#delete(org.molgenis.data .EntityMetaData)
-	 */
 	@Override
 	public void delete(String entityName)
 	{
@@ -635,16 +571,10 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 				throw new ElasticsearchException("Delete all entities of type '" + entityName + "' failed.");
 			}
 		}
-		refresh();
 	}
 
 	/**
 	 * Retrieve a stored entity from the index. Can only be used if the mapping was created with storeSource=true.
-	 */
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#get(java.lang.Object, org.molgenis.data.EntityMetaData)
 	 */
 	@Override
 	public Entity get(Object entityId, EntityMetaData entityMetaData)
@@ -661,7 +591,14 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 
 		if (LOG.isTraceEnabled())
 		{
-			LOG.trace("Retrieving Elasticsearch '{}' doc with id [{}] and fetch [{}] ...", type, id, fetch);
+			if (fetch == null)
+			{
+				LOG.trace("Retrieving Elasticsearch [{}] doc with id [{}] ...", type, id);
+			}
+			else
+			{
+				LOG.trace("Retrieving Elasticsearch [{}] doc with id [{}] and fetch [{}] ...", type, id, fetch);
+			}
 		}
 
 		String transactionId = getCurrentTransactionId();
@@ -692,7 +629,14 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			GetResponse response = requestBuilder.execute().actionGet();
 			if (LOG.isDebugEnabled())
 			{
-				LOG.debug("Retrieved Elasticsearch '{}' doc with id [{}] and fetch [{}].", type, id, fetch);
+				if (fetch == null)
+				{
+					LOG.debug("Retrieved Elasticsearch [{}] doc with id [{}]", type, id);
+				}
+				else
+				{
+					LOG.debug("Retrieved Elasticsearch [{}] doc with id [{}] and fetch [{}]", type, id, fetch);
+				}
 			}
 
 			return response.isExists() ? elasticsearchEntityFactory.create(entityMetaData, response.getSource(), fetch)
@@ -702,11 +646,6 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 
 	/**
 	 * Retrieve stored entities from the index. Can only be used if the mapping was created with storeSource=true.
-	 */
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#get(java.lang.Iterable, org.molgenis.data.EntityMetaData)
 	 */
 	@Override
 	public Iterable<Entity> get(Iterable<Object> entityIds, final EntityMetaData entityMetaData)
@@ -723,7 +662,15 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 
 		if (LOG.isTraceEnabled())
 		{
-			LOG.trace("Retrieving Elasticsearch '{}' docs with ids [{}] and fetch [{}] ...", type, entityIds, fetch);
+			if (fetch == null)
+			{
+				LOG.trace("Retrieving Elasticsearch [{}] docs with ids [{}] ...", type, entityIds);
+			}
+			else
+			{
+				LOG.trace("Retrieving Elasticsearch [{}] docs with ids [{}] and fetch [{}] ...", type, entityIds,
+						fetch);
+			}
 		}
 
 		MultiGetRequestBuilder request = client.prepareMultiGet();
@@ -740,7 +687,14 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Retrieving Elasticsearch '{}' docs with ids [{}] and fetch [{}].", type, entityIds, fetch);
+			if (fetch == null)
+			{
+				LOG.debug("Retrieved Elasticsearch [{}] docs with ids [{}]", type, entityIds);
+			}
+			else
+			{
+				LOG.debug("Retrieved Elasticsearch [{}] docs with ids [{}] and fetch [{}]", type, entityIds, fetch);
+			}
 		}
 
 		return new Iterable<Entity>()
@@ -783,12 +737,6 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		return item;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#search(org.molgenis.data .Query,
-	 * org.molgenis.data.EntityMetaData)
-	 */
 	@Override
 	public Iterable<Entity> search(Query q, final EntityMetaData entityMetaData)
 	{
@@ -810,12 +758,6 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 				indexNames);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#aggregate(org.molgenis. data.AggregateQuery,
-	 * org.molgenis.data.EntityMetaData)
-	 */
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery, final EntityMetaData entityMetaData)
 	{
@@ -829,11 +771,6 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		return searchResults.getAggregate();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#flush()
-	 */
 	@Override
 	public void flush()
 	{
@@ -842,12 +779,6 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		if (LOG.isDebugEnabled()) LOG.debug("Flushed Elasticsearch index [" + indexName + "]");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#rebuildIndex(java.lang. Iterable,
-	 * org.molgenis.data.EntityMetaData)
-	 */
 	@Override
 	public void rebuildIndex(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
 	{
@@ -874,9 +805,12 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		{
 			UuidGenerator uuidg = new UuidGenerator();
 			DefaultEntityMetaData tempEntityMetaData = new DefaultEntityMetaData(uuidg.generateId(), entityMetaData);
-			tempEntityMetaData.setPackage(new PackageImpl("elasticsearch_temporary_entity", "This entity (Original: "
-					+ entityMetaData.getName()
-					+ ") is temporary build to make rebuilding of Elasticsearch entities posible."));
+			tempEntityMetaData
+					.setPackage(
+							new PackageImpl("elasticsearch_temporary_entity",
+									"This entity (Original: " + entityMetaData
+											.getName()
+									+ ") is temporary build to make rebuilding of Elasticsearch entities posible."));
 
 			// Add temporary repository into Elasticsearch
 			Repository tempRepository = dataService.getMeta().addEntityMeta(tempEntityMetaData);
@@ -900,8 +834,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		}
 		else
 		{
-			if (LOG.isDebugEnabled()) LOG
-					.debug("Rebuild index of entity: [" + entityMetaData.getName()
+			if (LOG.isDebugEnabled()) LOG.debug("Rebuild index of entity: [" + entityMetaData.getName()
 					+ "] is skipped because the " + ElasticsearchRepositoryCollection.NAME + " backend is unknown");
 		}
 	}
@@ -1101,46 +1034,57 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			if (searchResponse.getHits().getTotalHits() > 0)
 			{
 				BulkProcessor bulkProcessor = BULK_PROCESSOR_FACTORY.create(client);
-
-				searchResponse = client.prepareSearchScroll(searchResponse.getScrollId())
-						.setScroll(TimeValue.timeValueMinutes(5)).execute().actionGet();
-
-				while (searchResponse.getHits().getHits().length > 0)
+				try
 				{
-					for (SearchHit hit : searchResponse.getHits())
-					{
-						String entityName = hit.type();
-						Map<String, Object> values = hit.getSource();
-						CrudType crudType = CrudType.valueOf((String) values.remove(CRUD_TYPE_FIELD_NAME));
-						EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
-
-						if ((crudType == CrudType.UPDATE) || (crudType == CrudType.ADD))
-						{
-							bulkProcessor.add(new IndexRequest(indexName, entityName, hit.id()).source(values));
-
-							if (crudType == CrudType.UPDATE)
-							{
-								updateReferences(elasticsearchEntityFactory.create(entityMeta, values, null),
-										entityMeta);
-							}
-						}
-						else if (crudType == CrudType.DELETE)
-						{
-							deleteById(indexName, hit.id(), entityMeta);
-						}
-					}
-
 					searchResponse = client.prepareSearchScroll(searchResponse.getScrollId())
 							.setScroll(TimeValue.timeValueMinutes(5)).execute().actionGet();
+
+					while (searchResponse.getHits().getHits().length > 0)
+					{
+						for (SearchHit hit : searchResponse.getHits())
+						{
+							String entityName = hit.type();
+							Map<String, Object> values = hit.getSource();
+							CrudType crudType = CrudType.valueOf((String) values.remove(CRUD_TYPE_FIELD_NAME));
+							EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
+
+							if ((crudType == CrudType.UPDATE) || (crudType == CrudType.ADD))
+							{
+								if (LOG.isDebugEnabled())
+								{
+									LOG.debug("Adding [{}] with id [{}] to index [{}] ...", entityName, hit.id(),
+											indexName);
+								}
+								bulkProcessor.add(new IndexRequest(indexName, entityName, hit.id()).source(values));
+
+								if (crudType == CrudType.UPDATE)
+								{
+									updateReferences(elasticsearchEntityFactory.create(entityMeta, values, null),
+											entityMeta);
+								}
+							}
+							else if (crudType == CrudType.DELETE)
+							{
+								deleteById(indexName, hit.id(), entityMeta);
+							}
+						}
+
+						searchResponse = client.prepareSearchScroll(searchResponse.getScrollId())
+								.setScroll(TimeValue.timeValueMinutes(5)).execute().actionGet();
+					}
 				}
-				bulkProcessor.close();
+				finally
+				{
+					elasticsearchUtils.waitForCompletion(bulkProcessor);
+				}
+				refresh(indexName);
 			}
-			refresh();
 		}
 		finally
 		{
 			cleanUpTrans(transactionId);
 		}
+
 	}
 
 	@Override
@@ -1156,7 +1100,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			elasticsearchUtils.deleteIndex(transactionId);
 		}
 
-		flush();
+		flush(); // persist changes on disk
 	}
 
 	/**
