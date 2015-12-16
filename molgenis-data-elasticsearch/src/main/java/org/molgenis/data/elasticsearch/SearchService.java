@@ -36,7 +36,7 @@ public interface SearchService
 	/**
 	 * Refresh index, making all operations performed since the last refresh available for search
 	 */
-	void refresh();
+	void refresh(EntityMetaData entityMeta);
 
 	long count(EntityMetaData entityMetaData);
 
