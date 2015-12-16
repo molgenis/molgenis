@@ -342,10 +342,54 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			}
 			else
 			{
-				LOG.debug("Counted {} Elasticsearch [{}] docs in {}ms", count, type, q, ms);
+				LOG.debug("Counted {} Elasticsearch [{}] docs in {}ms", count, type, ms);
 			}
 		}
 
+		String transactionId = getCurrentTransactionId();
+		if (transactionId != null && !NON_TRANSACTIONAL_ENTITIES.contains(entityMetaData.getName()))
+		{
+			if (hasMapping(transactionId, entityMetaData))
+			{
+				// count added entities in transaction index
+				Query countAddedQ = q != null ? new QueryImpl(q) : new QueryImpl();
+				if (countAddedQ.getRules() != null && !countAddedQ.getRules().isEmpty())
+				{
+					countAddedQ.and();
+				}
+				countAddedQ.eq(CRUD_TYPE_FIELD_NAME, CrudType.ADD.toString());
+				SearchRequestBuilder countAddSearchRequestBuilder = client.prepareSearch(transactionId);
+				generator.buildSearchRequest(countAddSearchRequestBuilder, type, SearchType.COUNT, countAddedQ, null,
+						null, null, entityMetaData);
+				SearchResponse countAddSearchResponse = countAddSearchRequestBuilder.get();
+				if (countAddSearchResponse.getFailedShards() > 0)
+				{
+					throw new ElasticsearchException(
+							"Search failed. Returned headers:" + countAddSearchResponse.getHeaders());
+				}
+				long addedCount = countAddSearchResponse.getHits().totalHits();
+
+				// count deleted entities in transaction index
+				Query countDeletedQ = q != null ? new QueryImpl(q) : new QueryImpl();
+				if (countDeletedQ.getRules() != null && !countDeletedQ.getRules().isEmpty())
+				{
+					countDeletedQ.and();
+				}
+				countDeletedQ.eq(CRUD_TYPE_FIELD_NAME, CrudType.DELETE.toString());
+				SearchRequestBuilder countDeletedSearchRequestBuilder = client.prepareSearch(transactionId);
+				generator.buildSearchRequest(countDeletedSearchRequestBuilder, type, SearchType.COUNT, countDeletedQ,
+						null, null, null, entityMetaData);
+				SearchResponse countDeletedSearchResponse = countDeletedSearchRequestBuilder.get();
+				if (countDeletedSearchResponse.getFailedShards() > 0)
+				{
+					throw new ElasticsearchException(
+							"Search failed. Returned headers:" + countDeletedSearchResponse.getHeaders());
+				}
+				long deletedCount = countDeletedSearchResponse.getHits().totalHits();
+
+				count = count + addedCount - deletedCount;
+			}
+		}
 		return count;
 	}
 
@@ -413,7 +457,10 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 				// main index mapping the data is (not) stored. The transaction
 				// index is removed after transaction
 				// commit or rollback.
-				createMappings(transactionId, entityMetaData, true, true, true);
+				if (!hasMapping(transactionId, entityMetaData))
+				{
+					createMappings(transactionId, entityMetaData, true, true, true);
+				}
 			}
 
 			for (Entity entity : entities)
@@ -422,12 +469,23 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 				Map<String, Object> source = elasticsearchEntityFactory.create(entityMetaData, entity);
 				if (transactionId != null)
 				{
+					if (crudType == CrudType.UPDATE)
+					{
+						// updating a document in the transactional index is the same as adding the new updated
+						// document.
+						GetResponse response = client.prepareGet(transactionId, type, id).execute().actionGet();
+						if (response.isExists())
+						{
+							crudType = CrudType.ADD;
+						}
+					}
 					source.put(CRUD_TYPE_FIELD_NAME, crudType.name());
 				}
 				if (LOG.isDebugEnabled())
 				{
-					LOG.debug("Adding [{}] with id [{}] to index [{}] ...", type, id, index);
+					LOG.debug("Indexing [{}] with id [{}] in index [{}] mode [{}] ...", type, id, index, crudType);
 				}
+
 				bulkProcessor.add(new IndexRequest().index(index).type(type).id(id).source(source));
 				++nrIndexedEntities;
 			}
