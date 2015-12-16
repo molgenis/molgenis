@@ -249,7 +249,7 @@ public class GeneNetworksAnnotator
 		{
 			long resultCount = dataService
 					.count(pluginSettings.getString(GeneNetworksAnnotatorSettings.Meta.PROJECT_ENTITY), new QueryImpl()
-							.eq(GeneNetworksAnnotatorSettings.Meta.VARIANT_ENTITY_ATTRIBUTE, repoMetaData.getName()));
+							.eq(pluginSettings.getString(GeneNetworksAnnotatorSettings.Meta.VARIANT_ENTITY_ATTRIBUTE), repoMetaData.getName()));
 			if (resultCount <= 0)
 			{
 				return "No matching entity found in: "

@@ -27,8 +27,8 @@ public class GeneNetworksAnnotatorSettings extends DefaultSettingsEntity
 		{
 			super(ID);
 			setLabel("Gene Network annotator settings");
-			String defaultEntity = "Examination";
-			String defaultEntityAttribute = "entityName";
+			String defaultEntity = "Project";
+			String defaultEntityAttribute = "ID";
 			String defaultUrlAttribute = "http://molgenis27.target.rug.nl";
 			addAttribute(PROJECT_ENTITY).setLabel("Examination Entity Name").setDefaultValue(defaultEntity);
 			addAttribute(VARIANT_ENTITY_ATTRIBUTE).setLabel("Variant Entity Attribute Name").setDefaultValue(defaultEntityAttribute);

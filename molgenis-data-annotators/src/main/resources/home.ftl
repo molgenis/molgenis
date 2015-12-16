@@ -80,8 +80,9 @@
 
                                                     selectedProject= {
                                                         'ID':filename,
-                                                        'entityName':filename,
-                                                        'Phenotypes':selectedPhenotypes
+                                                        'Fileame':$('[name="file"]').val(),
+                                                        'Phenotypes':selectedPhenotypes,
+                                                        'ImportRun': entry.id
                                                     }
                                                     var entities;
                                                     entities = {"entities":[selectedProject]}

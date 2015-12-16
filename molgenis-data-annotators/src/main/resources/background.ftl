@@ -59,7 +59,7 @@ molgenis.RestClient.prototype.getAsync('/api/v1/Project/', {'q' : [ {
             $('#terms-used-container').html(" "+project.items[0].termsFound);
             $('#terms-not-used-container').html(" "+project.items[0].termsNotFound);
             Table = React.render(molgenis.ui.Table({
-                entity: project.items[0].entityName,
+                entity: project.items[0].ID,
                 attrs: attributes,
                 sort: {
                     attr: {
