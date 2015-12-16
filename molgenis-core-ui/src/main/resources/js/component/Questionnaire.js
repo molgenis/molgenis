@@ -39,7 +39,7 @@
     			div({className: 'row', style: {textAlign: 'right'}},
 					div({className: 'col-md-12'},
 						molgenis.ui.Button({text: this.state.i18nStrings.questionnaire_save_and_continue, onClick: this.props.onContinueLaterClick}),
-						molgenis.ui.Button({type: 'button', style: 'primary', css: {marginLeft: 5}, text: this.state.i18nStrings.submit, onClick: this._onSubmitClick})
+						molgenis.ui.Button({type: 'button', style: 'primary', css: {marginLeft: 5}, text: this.state.i18nStrings.questionnaire_submit, onClick: this._onSubmitClick})
 					)
 				)
 			) : null;
