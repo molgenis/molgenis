@@ -9,6 +9,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.i18n.I18nStringMetaData;
 import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.semantic.LabeledResource;
@@ -49,9 +50,13 @@ public final class IntermediateParseResults
 	 */
 	private final Map<String, Entity> tags;
 	/**
-	 * Contains all language enities from the entities sheet
+	 * Contains all language enities from the languages sheet
 	 */
 	private final Map<String, Entity> languages;
+	/**
+	 * Contains all i18nString entities from the i18nstrings sheet
+	 */
+	private final Map<String, Entity> i18nStrings;
 
 	public IntermediateParseResults()
 	{
@@ -61,6 +66,7 @@ public final class IntermediateParseResults
 		this.attributeTags = LinkedHashMultimap.create();
 		this.entityTags = new ArrayList<>();
 		this.languages = new LinkedHashMap<>();
+		this.i18nStrings = new LinkedHashMap<>();
 	}
 
 	public void addEntityMetaData(DefaultEntityMetaData entityMetaData)
@@ -111,6 +117,11 @@ public final class IntermediateParseResults
 		languages.put(language.getString(LanguageMetaData.CODE), language);
 	}
 
+	public void addI18nString(Entity i18nString)
+	{
+		i18nStrings.put(i18nString.getString(I18nStringMetaData.MSGID), i18nString);
+	}
+
 	/**
 	 * Checks if it knows entity with given simple name.
 	 * 
@@ -158,11 +169,17 @@ public final class IntermediateParseResults
 		return ImmutableMap.copyOf(languages);
 	}
 
+	public ImmutableMap<String, Entity> getI18nStrings()
+	{
+		return ImmutableMap.copyOf(i18nStrings);
+	}
+
 	@Override
 	public String toString()
 	{
 		return "IntermediateParseResults [entities=" + entities + ", packages=" + packages + ", attributeTags="
-				+ attributeTags + ", entityTags=" + entityTags + ", tags=" + tags + ", languages=" + languages + "]";
+				+ attributeTags + ", entityTags=" + entityTags + ", tags=" + tags + ", languages=" + languages
+				+ ", i18nStrings=" + i18nStrings + "]";
 	}
 
 	@Override
@@ -173,6 +190,7 @@ public final class IntermediateParseResults
 		result = prime * result + ((attributeTags == null) ? 0 : attributeTags.hashCode());
 		result = prime * result + ((entities == null) ? 0 : entities.hashCode());
 		result = prime * result + ((entityTags == null) ? 0 : entityTags.hashCode());
+		result = prime * result + ((i18nStrings == null) ? 0 : i18nStrings.hashCode());
 		result = prime * result + ((languages == null) ? 0 : languages.hashCode());
 		result = prime * result + ((packages == null) ? 0 : packages.hashCode());
 		result = prime * result + ((tags == null) ? 0 : tags.hashCode());
@@ -201,6 +219,11 @@ public final class IntermediateParseResults
 			if (other.entityTags != null) return false;
 		}
 		else if (!entityTags.equals(other.entityTags)) return false;
+		if (i18nStrings == null)
+		{
+			if (other.i18nStrings != null) return false;
+		}
+		else if (!i18nStrings.equals(other.i18nStrings)) return false;
 		if (languages == null)
 		{
 			if (other.languages != null) return false;

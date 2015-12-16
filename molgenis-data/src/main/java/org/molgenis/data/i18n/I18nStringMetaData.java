@@ -9,12 +9,14 @@ public class I18nStringMetaData extends DefaultEntityMetaData
 	public static final I18nStringMetaData INSTANCE = new I18nStringMetaData();
 	public static final String ENTITY_NAME = "i18nstrings";
 	public static final String MSGID = "msgid";
-	private static final String EN = "en";
+	public static final String DESCRIPTION = "description";
+	public static final String EN = "en";
 
 	private I18nStringMetaData()
 	{
 		super(ENTITY_NAME);
 		addAttribute(MSGID).setNillable(false).setIdAttribute(true);
+		addAttribute(DESCRIPTION).setNillable(true).setDataType(MolgenisFieldTypes.TEXT);
 		addAttribute(EN).setNillable(true).setDataType(MolgenisFieldTypes.TEXT);
 	}
 

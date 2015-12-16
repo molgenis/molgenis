@@ -24,6 +24,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.i18n.I18nStringDecorator;
 import org.molgenis.data.i18n.I18nStringMetaData;
 import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.i18n.LanguageRepositoryDecorator;
@@ -117,7 +118,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		dataService.addRepository(new LanguageRepositoryDecorator(languageRepo, dataService));
 
 		Repository i18StringsRepo = defaultBackend.addEntityMeta(I18nStringMetaData.INSTANCE);
-		dataService.addRepository(i18StringsRepo);
+		dataService.addRepository(new I18nStringDecorator(i18StringsRepo));
 
 		Supplier<Stream<String>> languageCodes = () -> languageService.getLanguageCodes().stream();
 

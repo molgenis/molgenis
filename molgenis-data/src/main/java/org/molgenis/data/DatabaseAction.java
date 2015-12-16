@@ -15,5 +15,10 @@ public enum DatabaseAction
 	/**
 	 * update records, throw an error if records are missing in the database
 	 */
-	UPDATE
+	UPDATE,
+
+	/**
+	 * Adds new records, ignores existing records
+	 */
+	ADD_IGNORE_EXISTING
 };

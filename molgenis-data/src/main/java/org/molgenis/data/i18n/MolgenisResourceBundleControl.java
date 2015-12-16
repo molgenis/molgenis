@@ -1,5 +1,7 @@
 package org.molgenis.data.i18n;
 
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.ListResourceBundle;
@@ -8,12 +10,17 @@ import java.util.ResourceBundle;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
+/**
+ * ResourceBundle Control that gets it content from the i18nstrings repository
+ */
 public class MolgenisResourceBundleControl extends ResourceBundle.Control
 {
+	private static final Logger LOG = LoggerFactory.getLogger(MolgenisResourceBundleControl.class);
 	private final DataService dataService;
 
 	public MolgenisResourceBundleControl(DataService dataService)
@@ -25,10 +32,16 @@ public class MolgenisResourceBundleControl extends ResourceBundle.Control
 	public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
 			throws IllegalAccessException, InstantiationException, IOException
 	{
-		if (!baseName.equals(I18nStringMetaData.ENTITY_NAME)) return null;
-		// if (dataService.findOne(LanguageMetaData.ENTITY_NAME, locale.getLanguage()) == null) return null;
+		String languageCode = locale.getLanguage();
 
-		return new MolgenisResourceBundle(dataService, locale.getLanguage());
+		// Only handle i18nstrings bundle
+		if (!baseName.equals(I18nStringMetaData.ENTITY_NAME)) return null;
+
+		// Only handle languages that are present in the languages repository
+		if (runAsSystem(() -> dataService.query(LanguageMetaData.ENTITY_NAME).eq(LanguageMetaData.CODE, languageCode)
+				.count()) == 0) return null;
+
+		return new MolgenisResourceBundle(dataService, languageCode);
 	}
 
 	protected static class MolgenisResourceBundle extends ListResourceBundle
@@ -40,13 +53,12 @@ public class MolgenisResourceBundleControl extends ResourceBundle.Control
 		{
 			this.dataService = dataService;
 			this.languageCode = languageCode;
-			setParent(ResourceBundle.getBundle("i18n", new Locale(languageCode)));
 		}
 
 		@Override
 		protected Object[][] getContents()
 		{
-			List<Entity> entities = RunAsSystemProxy.runAsSystem(() -> Lists.newArrayList(dataService
+			List<Entity> entities = runAsSystem(() -> Lists.newArrayList(dataService
 					.findAll(I18nStringMetaData.ENTITY_NAME)));
 
 			Object[][] contents = new Object[entities.size()][2];
@@ -54,8 +66,17 @@ public class MolgenisResourceBundleControl extends ResourceBundle.Control
 			int i = 0;
 			for (Entity entity : entities)
 			{
+				String msgid = entity.getString(I18nStringMetaData.MSGID);
+				String msg = entity.getString(languageCode);
+				if (msg == null)
+				{
+					// Missing translation for this language
+					LOG.warn("Missing '{}' msg for language '{}'", msgid, languageCode);
+					msg = "#" + msgid + "#";
+				}
+
 				contents[i++] = new Object[]
-				{ entity.getString(I18nStringMetaData.MSGID), entity.getString(languageCode) };
+				{ msgid, msg };
 			}
 
 			return contents;

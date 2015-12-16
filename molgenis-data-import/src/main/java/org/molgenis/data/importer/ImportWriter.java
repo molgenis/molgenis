@@ -35,6 +35,7 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.i18n.I18nStringMetaData;
 import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.LabeledResource;
@@ -62,6 +63,7 @@ import org.molgenis.util.MolgenisDateFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Function;
@@ -101,17 +103,21 @@ public class ImportWriter
 		this.molgenisPermissionService = molgenisPermissionService;
 	}
 
-	@Transactional
+	// Use transaction isolation level SERIALIZABLE to prevent problems with the async template, to do ddl statements
+	// without influencing on the current transaction
+	@Transactional(isolation = Isolation.SERIALIZABLE)
 	public EntityImportReport doImport(EmxImportJob job)
 	{
 		// languages first
 		importLanguages(job.report, job.parsedMetaData.getLanguages(), job.dbAction, job.metaDataChanges);
+
 		runAsSystem(() -> importTags(job.source));
 		importPackages(job.parsedMetaData);
 		addEntityMetaData(job.parsedMetaData, job.report, job.metaDataChanges);
 		addEntityPermissions(job.metaDataChanges);
 		runAsSystem(() -> importEntityAndAttributeTags(job.parsedMetaData));
 		importData(job.report, job.parsedMetaData.getEntities(), job.source, job.dbAction, job.defaultPackage);
+		importI18nStrings(job.report, job.parsedMetaData.getI18nStrings(), job.dbAction);
 
 		return job.report;
 	}
@@ -137,6 +143,21 @@ public class ImportWriter
 
 			int count = update(repo, transformed, dbAction);
 			report.addEntityCount(LanguageMetaData.ENTITY_NAME, count);
+		}
+	}
+
+	private void importI18nStrings(EntityImportReport report, Map<String, Entity> i18nStrings, DatabaseAction dbAction)
+	{
+		if (!i18nStrings.isEmpty())
+		{
+			Repository repo = dataService.getRepository(I18nStringMetaData.ENTITY_NAME);
+
+			List<Entity> transformed = i18nStrings.values().stream()
+					.map(e -> new DefaultEntityImporter(I18nStringMetaData.INSTANCE, dataService, e, false))
+					.collect(toList());
+
+			int count = update(repo, transformed, dbAction);
+			report.addEntityCount(I18nStringMetaData.ENTITY_NAME, count);
 		}
 	}
 
@@ -167,8 +188,9 @@ public class ImportWriter
 		{
 			String name = entityMetaData.getName();
 
-			// Languages are already done
-			if (!name.equalsIgnoreCase(LanguageMetaData.ENTITY_NAME) && dataService.hasRepository(name))
+			// Languages and i18nstrings are already done
+			if (!name.equalsIgnoreCase(LanguageMetaData.ENTITY_NAME)
+					&& !name.equalsIgnoreCase(I18nStringMetaData.ENTITY_NAME) && dataService.hasRepository(name))
 			{
 				Repository repository = dataService.getRepository(name);
 				Repository fileEntityRepository = source.getRepository(entityMetaData.getName());
@@ -275,7 +297,7 @@ public class ImportWriter
 			String name = entityMetaData.getName();
 			if (!EmxMetaDataParser.ENTITIES.equals(name) && !EmxMetaDataParser.ATTRIBUTES.equals(name)
 					&& !EmxMetaDataParser.PACKAGES.equals(name) && !EmxMetaDataParser.TAGS.equals(name)
-					&& !EmxMetaDataParser.LANGUAGES.equals(name))
+					&& !EmxMetaDataParser.LANGUAGES.equals(name) && !EmxMetaDataParser.I18NSTRINGS.equals(name))
 			{
 				if (dataService.getMeta().getEntityMetaData(entityMetaData.getName()) == null)
 				{
@@ -465,7 +487,8 @@ public class ImportWriter
 					int batchCount = 0;
 					while (it.hasNext())
 					{
-						q.eq(idAttributeName, it.next());
+						Object id = it.next();
+						q.eq(idAttributeName, id);
 						batchCount++;
 						if (batchCount == batchSize || !it.hasNext())
 						{
@@ -515,13 +538,40 @@ public class ImportWriter
 
 					count = repo.add(entities);
 					break;
-
-				case ADD_UPDATE_EXISTING:
+				case ADD_IGNORE_EXISTING:
 					int batchSize = 1000;
 					List<Entity> existingEntities = Lists.newArrayList();
 					List<Entity> newEntities = Lists.newArrayList();
 
 					Iterator<? extends Entity> it = entities.iterator();
+					while (it.hasNext())
+					{
+						Entity entity = it.next();
+						count++;
+						Object id = idDataType.convert(entity.get(idAttributeName));
+						if (!existingIds.contains(id))
+						{
+							newEntities.add(entity);
+							if (newEntities.size() == batchSize)
+							{
+								repo.add(newEntities);
+								newEntities.clear();
+							}
+						}
+					}
+
+					if (!newEntities.isEmpty())
+					{
+						repo.add(newEntities);
+					}
+
+					break;
+				case ADD_UPDATE_EXISTING:
+					batchSize = 1000;
+					existingEntities = Lists.newArrayList();
+					newEntities = Lists.newArrayList();
+
+					it = entities.iterator();
 					while (it.hasNext())
 					{
 						Entity entity = it.next();

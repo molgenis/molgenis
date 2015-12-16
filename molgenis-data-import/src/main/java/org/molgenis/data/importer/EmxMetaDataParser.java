@@ -46,6 +46,7 @@ import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.i18n.I18nStringMetaData;
 import org.molgenis.data.i18n.I18nUtils;
 import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState;
@@ -87,6 +88,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	public static final String TAGS = TagMetaData.ENTITY_NAME;
 	public static final String ATTRIBUTES = AttributeMetaDataMetaData.ENTITY_NAME;
 	public static final String LANGUAGES = LanguageMetaData.ENTITY_NAME;
+	public static final String I18NSTRINGS = I18nStringMetaData.ENTITY_NAME;
 
 	public static final String ENTITY = "entity";
 	public static final String PART_OF_ATTRIBUTE = "partOfAttribute";
@@ -133,9 +135,15 @@ public class EmxMetaDataParser implements MetaDataParser
 		reiterateToMapRefEntity(source.getRepository(ATTRIBUTES), intermediateResults);
 
 		// languages tab
-		if (source.hasRepository(LanguageMetaData.ENTITY_NAME))
+		if (source.hasRepository(LANGUAGES))
 		{
 			parseLanguages(source.getRepository(LANGUAGES), intermediateResults);
+		}
+
+		// i18nstrings tab
+		if (source.hasRepository(I18NSTRINGS))
+		{
+			parseI18nStrings(source.getRepository(I18NSTRINGS), intermediateResults);
 		}
 
 		return intermediateResults;
@@ -687,6 +695,11 @@ public class EmxMetaDataParser implements MetaDataParser
 		repo.forEach(intermediateResults::addLanguage);
 	}
 
+	private void parseI18nStrings(Repository repo, IntermediateParseResults intermediateResults)
+	{
+		repo.forEach(intermediateResults::addI18nString);
+	}
+
 	private void parsePackageTags(Repository repo, IntermediateParseResults intermediateResults)
 	{
 		if (repo != null)
@@ -831,7 +844,7 @@ public class EmxMetaDataParser implements MetaDataParser
 
 			return new ParsedMetaData(resolveEntityDependencies(entities), intermediateResults.getPackages(),
 					intermediateResults.getAttributeTags(), intermediateResults.getEntityTags(),
-					intermediateResults.getLanguages());
+					intermediateResults.getLanguages(), intermediateResults.getI18nStrings());
 		}
 		else
 		{
@@ -844,14 +857,19 @@ public class EmxMetaDataParser implements MetaDataParser
 			parsePackagesSheet(source.getRepository(PACKAGES), intermediateResults);
 			parsePackageTags(source.getRepository(PACKAGES), intermediateResults);
 
-			if (source.hasRepository(LanguageMetaData.ENTITY_NAME))
+			if (source.hasRepository(LANGUAGES))
 			{
 				parseLanguages(source.getRepository(LANGUAGES), intermediateResults);
 			}
 
+			if (source.hasRepository(I18NSTRINGS))
+			{
+				parseI18nStrings(source.getRepository(I18NSTRINGS), intermediateResults);
+			}
+
 			return new ParsedMetaData(resolveEntityDependencies(metadataList), intermediateResults.getPackages(),
 					intermediateResults.getAttributeTags(), intermediateResults.getEntityTags(),
-					intermediateResults.getLanguages());
+					intermediateResults.getLanguages(), intermediateResults.getI18nStrings());
 		}
 
 	}
@@ -952,7 +970,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				}
 			}
 			else if (!ENTITIES.equals(sheet) && !ATTRIBUTES.equals(sheet) && !TAGS.equals(sheet)
-					&& !LANGUAGES.equals(sheet))
+					&& !LANGUAGES.equals(sheet) && !I18NSTRINGS.equals(sheet))
 			{
 				// check if sheet is known
 				report = report.addEntity(sheet, metaDataMap.containsKey(sheet));

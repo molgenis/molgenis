@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class LanguageService
 {
+	public static final String FALLBACK_LANGUAGE = "en";
 	private final DataService dataService;
 	private final AppSettings appSettings;
 
@@ -39,12 +40,18 @@ public class LanguageService
 				.collect(toList());
 	}
 
+	/**
+	 * Get ResourceBundle for a language
+	 */
 	public ResourceBundle getBundle(String languageCode)
 	{
 		return ResourceBundle.getBundle(I18nStringMetaData.ENTITY_NAME, new Locale(languageCode),
 				new MolgenisResourceBundleControl(dataService));
 	}
 
+	/**
+	 * Get ResourceBundle for the current user language
+	 */
 	public ResourceBundle getBundle()
 	{
 		return getBundle(getCurrentUserLanguageCode());
@@ -66,6 +73,11 @@ public class LanguageService
 				if (user != null)
 				{
 					languageCode = user.getString("languageCode");
+					if ((languageCode != null)
+							&& (dataService.findOne(LanguageMetaData.ENTITY_NAME, languageCode) == null))
+					{
+						languageCode = null;
+					}
 				}
 			}
 
@@ -73,6 +85,10 @@ public class LanguageService
 			{
 				// Use app default
 				languageCode = appSettings.getLanguageCode();
+				if ((languageCode == null) || (dataService.findOne(LanguageMetaData.ENTITY_NAME, languageCode) == null))
+				{
+					languageCode = FALLBACK_LANGUAGE;
+				}
 			}
 
 			return languageCode;

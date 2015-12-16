@@ -12,6 +12,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
@@ -135,16 +136,20 @@ public class LanguageRepositoryDecorator implements Repository
 	@Override
 	public void delete(Entity entity)
 	{
-		decorated.delete(entity);
-
 		String languageCode = entity.getString(LanguageMetaData.CODE);
+		if (languageCode.equalsIgnoreCase(LanguageService.FALLBACK_LANGUAGE))
+		{
+			throw new MolgenisDataException("It is not possible to delete '" + languageCode
+					+ "'. This is the default language.");
+		}
+
+		decorated.delete(entity);
 
 		// Delete label-{languageCode} attr from AttributeMetaDataMetaData
 		AttributeMetaData attributeLabel = AttributeMetaDataMetaData.INSTANCE
 				.getAttribute(AttributeMetaDataMetaData.LABEL + '-' + languageCode);
 		if (attributeLabel != null)
 		{
-			AttributeMetaDataMetaData.INSTANCE.removeAttributeMetaData(attributeLabel);
 			dataService.getMeta().getDefaultBackend()
 					.deleteAttribute(AttributeMetaDataMetaData.ENTITY_NAME, attributeLabel.getName());
 		}
@@ -154,7 +159,6 @@ public class LanguageRepositoryDecorator implements Repository
 				.getAttribute(AttributeMetaDataMetaData.DESCRIPTION + '-' + languageCode);
 		if (attributeDescription != null)
 		{
-			AttributeMetaDataMetaData.INSTANCE.removeAttributeMetaData(attributeDescription);
 			dataService.getMeta().getDefaultBackend()
 					.deleteAttribute(AttributeMetaDataMetaData.ENTITY_NAME, attributeDescription.getName());
 		}
@@ -164,7 +168,6 @@ public class LanguageRepositoryDecorator implements Repository
 				.getAttribute(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode);
 		if (entityDescription != null)
 		{
-			EntityMetaDataMetaData.INSTANCE.removeAttributeMetaData(entityDescription);
 			dataService.getMeta().getDefaultBackend()
 					.deleteAttribute(EntityMetaDataMetaData.ENTITY_NAME, entityDescription.getName());
 		}
@@ -174,14 +177,13 @@ public class LanguageRepositoryDecorator implements Repository
 				+ languageCode);
 		if (entityLabel != null)
 		{
-			EntityMetaDataMetaData.INSTANCE.removeAttributeMetaData(entityLabel);
 			dataService.getMeta().getDefaultBackend()
 					.deleteAttribute(EntityMetaDataMetaData.ENTITY_NAME, entityLabel.getName());
 		}
 
 		// Delete language attribute from I18nStringMetaData
-		I18nStringMetaData.INSTANCE.removeLanguage(languageCode);
 		dataService.getMeta().getDefaultBackend().deleteAttribute(I18nStringMetaData.ENTITY_NAME, languageCode);
+		I18nStringMetaData.INSTANCE.removeLanguage(languageCode);
 	}
 
 	@Override
