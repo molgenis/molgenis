@@ -1,7 +1,6 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import com.google.common.base.Optional;
-
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
@@ -26,12 +25,21 @@ public class MultiAllelicResultFilterTest
 	private MapEntity entity1;
 	private MapEntity entity2;
 	private MapEntity entity3;
+	private MapEntity entity7;
+	private MapEntity entity8;
+	private MapEntity entity9;
+	private MapEntity entity10;
 	private MapEntity resultEntity1;
 	private MapEntity resultEntity2;
 	private MapEntity resultEntity3;
 	private MapEntity resultEntity4;
 	private MapEntity resultEntity5;
 	private MapEntity resultEntity6;
+	private MapEntity resultEntity7;
+	private MapEntity resultEntity8;
+	private MapEntity resultEntity9;
+	private MapEntity resultEntity10;
+
 
 	@BeforeMethod
 	public void setUp()
@@ -74,6 +82,30 @@ public class MultiAllelicResultFilterTest
 		entity3.set(VcfRepository.REF, "C");
 		entity3.set(VcfRepository.ALT, "A,T,G");
 		entity3.set(VcfRepository.ID, "entity3");
+		entity7 = new MapEntity(emd);
+		entity7.set(VcfRepository.CHROM, "1");
+		entity7.set(VcfRepository.POS, 100);
+		entity7.set(VcfRepository.REF, "TTCCTCC");
+		entity7.set(VcfRepository.ALT, "TTCC");
+		entity7.set(VcfRepository.ID, "entity3");
+		entity8 = new MapEntity(emd);
+		entity8.set(VcfRepository.CHROM, "1");
+		entity8.set(VcfRepository.POS, 100);
+		entity8.set(VcfRepository.REF, "TTCCTCCTCC");
+		entity8.set(VcfRepository.ALT, "TTCCTCC");
+		entity8.set(VcfRepository.ID, "entity3");
+		entity9 = new MapEntity(emd);
+		entity9.set(VcfRepository.CHROM, "1");
+		entity9.set(VcfRepository.POS, 100);
+		entity9.set(VcfRepository.REF, "GA");
+		entity9.set(VcfRepository.ALT, "G");
+		entity9.set(VcfRepository.ID, "entity3");
+		entity10 = new MapEntity(emd);
+		entity10.set(VcfRepository.CHROM, "1");
+		entity10.set(VcfRepository.POS, 100);
+		entity10.set(VcfRepository.REF, "GAA");
+		entity10.set(VcfRepository.ALT, "GA");
+		entity10.set(VcfRepository.ID, "entity3");
 
 		resultEntity1 = new MapEntity(resultEmd);
 		resultEntity1.set(VcfRepository.CHROM, "1");
@@ -122,6 +154,39 @@ public class MultiAllelicResultFilterTest
 		resultEntity6.set(VcfRepository.ALT, "G,A");
 		resultEntity6.set("annotation", "10,11");
 		resultEntity6.set(VcfRepository.ID, "resultEntity6");
+
+		resultEntity7 = new MapEntity(resultEmd);
+		resultEntity7.set(VcfRepository.CHROM, "1");
+		resultEntity7.set(VcfRepository.POS, 100);
+		resultEntity7.set(VcfRepository.REF, "TTCCTCCTCC");
+		resultEntity7.set(VcfRepository.ALT, "TTGGTCC,TTCCTCC");
+		resultEntity7.set("annotation", "12,13");
+		resultEntity7.set(VcfRepository.ID, "resultEntity3");
+
+		resultEntity8 = new MapEntity(resultEmd);
+		resultEntity8.set(VcfRepository.CHROM, "1");
+		resultEntity8.set(VcfRepository.POS, 100);
+		resultEntity8.set(VcfRepository.REF, "TTCCTCC");
+		resultEntity8.set(VcfRepository.ALT, "TTGGT,TTCC");
+		resultEntity8.set("annotation", "14,15");
+		resultEntity8.set(VcfRepository.ID, "resultEntity3");
+
+		resultEntity9 = new MapEntity(resultEmd);
+		resultEntity9.set(VcfRepository.CHROM, "1");
+		resultEntity9.set(VcfRepository.POS, 100);
+		resultEntity9.set(VcfRepository.REF, "GAA");
+		resultEntity9.set(VcfRepository.ALT, "GA,G");
+		resultEntity9.set("annotation", "16,17");
+		resultEntity9.set(VcfRepository.ID, "resultEntity3");
+
+		resultEntity10 = new MapEntity(resultEmd);
+		resultEntity10.set(VcfRepository.CHROM, "1");
+		resultEntity10.set(VcfRepository.POS, 100);
+		resultEntity10.set(VcfRepository.REF, "GA");
+		resultEntity10.set(VcfRepository.ALT, "GC,G");
+		resultEntity10.set("annotation", "18,19");
+		resultEntity10.set(VcfRepository.ID, "resultEntity3");
+
 	}
 
 	@Test
@@ -208,6 +273,49 @@ public class MultiAllelicResultFilterTest
 						MolgenisFieldTypes.FieldTypeEnum.STRING)));
 		Optional<Entity> result8 = filter.filterResults(Collections.singletonList(resultEntity5), entity1);
 		assertEquals(Lists.newArrayList(result8.asSet()).get(0).getString("annotation"), "8");
+
+	}
+
+	@Test
+	public void filterResultsTest9()
+	{
+		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(
+				Collections.singletonList(new DefaultAttributeMetaData("annotation",
+						MolgenisFieldTypes.FieldTypeEnum.STRING)));
+		Optional<Entity> result = filter.filterResults(Collections.singletonList(resultEntity7), entity7);
+		assertEquals(Lists.newArrayList(result.asSet()).get(0).getString("annotation"), "13");
+	}
+
+	@Test
+	public void filterResultsTest10()
+	{
+		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(
+				Collections.singletonList(new DefaultAttributeMetaData("annotation",
+						MolgenisFieldTypes.FieldTypeEnum.STRING)));
+		Optional<Entity> result = filter.filterResults(Collections.singletonList(resultEntity8), entity8);
+		assertEquals(Lists.newArrayList(result.asSet()).get(0).getString("annotation"), "15");
+
+	}
+
+	@Test
+	public void filterResultsTest11()
+	{
+		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(
+				Collections.singletonList(new DefaultAttributeMetaData("annotation",
+						MolgenisFieldTypes.FieldTypeEnum.STRING)));
+		Optional<Entity> result = filter.filterResults(Collections.singletonList(resultEntity9), entity9);
+		assertEquals(Lists.newArrayList(result.asSet()).get(0).getString("annotation"), "16");
+
+	}
+
+	@Test
+	public void filterResultsTest12()
+	{
+		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(
+				Collections.singletonList(new DefaultAttributeMetaData("annotation",
+						MolgenisFieldTypes.FieldTypeEnum.STRING)));
+		Optional<Entity> result = filter.filterResults(Collections.singletonList(resultEntity10), entity10);
+		assertEquals(Lists.newArrayList(result.asSet()).get(0).getString("annotation"), "19");
 
 	}
 }
