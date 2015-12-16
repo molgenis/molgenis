@@ -5,7 +5,6 @@ import static java.util.Objects.requireNonNull;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.GsonBuilder;
 
@@ -20,7 +19,6 @@ public class MenuReaderServiceImpl implements MenuReaderService
 	}
 
 	@Override
-	@Transactional(readOnly = true)
 	@RunAsSystem
 	public Menu getMenu()
 	{
