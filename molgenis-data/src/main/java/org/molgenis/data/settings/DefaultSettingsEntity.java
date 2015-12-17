@@ -23,6 +23,8 @@ public abstract class DefaultSettingsEntity implements Entity
 	@Autowired
 	private DataService dataService;
 
+	private transient Entity cachedEntity;
+
 	public DefaultSettingsEntity(String entityId)
 	{
 		this.entityName = SettingsEntityMeta.PACKAGE_NAME + '_' + entityId;
@@ -215,16 +217,40 @@ public abstract class DefaultSettingsEntity implements Entity
 
 	private Entity getEntity()
 	{
-		String id = getEntityMetaData().getSimpleName();
-		return RunAsSystemProxy.runAsSystem(() -> {
-			return dataService.findOne(entityName, id);
-		});
+		if (cachedEntity == null)
+		{
+			String id = getEntityMetaData().getSimpleName();
+			cachedEntity = RunAsSystemProxy.runAsSystem(() -> {
+				Entity entity = dataService.findOne(entityName, id);
+
+				// refresh cache on settings update
+				dataService.addEntityListener(entityName, new EntityListener()
+				{
+					@Override
+					public void postUpdate(Entity entity)
+					{
+						cachedEntity = entity;
+					}
+
+					@Override
+					public Object getEntityId()
+					{
+						return id;
+					}
+				});
+				return entity;
+			});
+
+		}
+		return cachedEntity;
 	}
 
 	private void updateEntity(Entity entity)
 	{
 		RunAsSystemProxy.runAsSystem(() -> {
 			dataService.update(entityName, entity);
+
+			// cache refresh is handled via entity listener
 			return null;
 		});
 	}

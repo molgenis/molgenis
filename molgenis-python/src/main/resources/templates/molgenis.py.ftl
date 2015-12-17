@@ -129,15 +129,15 @@ class Session():
 
     def get_entity_meta_data(self, entity):
         '''Retrieves the metadata for an entity repository.'''
-        response = self.session.get(self.url + "v1/" + quote_plus(entity) + "/meta?expand=attributes", headers = self._get_token_header()).json()
+        response = self.session.get(self.url + "v1/" + quote_plus(entity) + "/meta?expand=attributes", headers = self._get_token_header())
         response.raise_for_status();
-        return response;
+        return response.json();
 
     def get_attribute_meta_data(self, entity, attribute):
         '''Retrieves the metadata for a single attribute of an entity repository.'''
-        response = self.session.get(self.url + "v1/" + quote_plus(entity) + "/meta/"+ quote_plus(attribute), headers = self._get_token_header()).json()
+        response = self.session.get(self.url + "v1/" + quote_plus(entity) + "/meta/"+ quote_plus(attribute), headers = self._get_token_header())
         response.raise_for_status();
-        return response;
+        return response.json();
 
     def _get_token_header(self):
         '''Creates an 'x-molgenis-token' header for the current session.'''

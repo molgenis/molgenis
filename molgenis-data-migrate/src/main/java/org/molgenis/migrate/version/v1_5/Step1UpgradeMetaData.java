@@ -194,7 +194,7 @@ public class Step1UpgradeMetaData extends MolgenisUpgrade
 		searchService.delete(TagMetaData.ENTITY_NAME);
 		searchService.delete(PackageMetaData.ENTITY_NAME);
 
-		searchService.refresh();
+		searchService.refresh(null);
 
 		LOG.info("Deleting metadata indices DONE.");
 

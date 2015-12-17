@@ -12,8 +12,7 @@
 		<table class="table">
 			<tbody>
 				<tr>
-					<#list entity.getEntityMetaData().getAtomicAttributes().iterator() as atomicAttribute>
-
+					<#list entity.getEntityMetaData().getAtomicAttributes() as atomicAttribute>
                         <#assign key = atomicAttribute.getName()>
 
 						<#if counter == 3>
@@ -24,15 +23,10 @@
 							
 						<th>${key?html}</th>
 						<#if entity.get(key)??>
-							<#if entity.get(key)?is_sequence>
-								<td>
-								<#list entity.get(key) as value>
-									${value!?html}<#if value_has_next>, </#if>
-								</#list>
-								</td>
-							<#else>
-								<td>${entity.getString(key)!?html}</td>
-							</#if>
+							<#assign type=atomicAttribute.getDataType().getEnumType()>
+                            <td><#if type == "CATEGORICAL_MREF" || type == "MREF"><#list entity.getEntities(key) as entity>${entity.getLabelValue()!?html}<#sep>, </#sep></#list>
+                            <#elseif type == "CATEGORICAL" || type == "FILE" || type == "XREF"><#if entity.getEntity(key)??>${entity.getEntity(key).getLabelValue()!?html}</#if>
+                            <#else>${entity.getString(key)!?html}</#if></td>
 						<#else>
 							<td>&nbsp;</td>
 						</#if>
