@@ -11,17 +11,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-public class Step25UpdateApplicationSettings extends MolgenisUpgrade
+public class Step24UpdateApplicationSettings extends MolgenisUpgrade
 {
-	private final Logger LOG = LoggerFactory.getLogger(Step25UpdateApplicationSettings.class);
+	private final Logger LOG = LoggerFactory.getLogger(Step24UpdateApplicationSettings.class);
 
 	private final JdbcTemplate jdbcTemplate;
 	private final IdGenerator idGenerator;
 
 	@Autowired
-	public Step25UpdateApplicationSettings(DataSource dataSource, IdGenerator idGenerator)
+	public Step24UpdateApplicationSettings(DataSource dataSource, IdGenerator idGenerator)
 	{
-		super(24, 25);
+		super(23, 24);
 		this.jdbcTemplate = new JdbcTemplate(requireNonNull(dataSource));
 		this.idGenerator = requireNonNull(idGenerator);
 	}

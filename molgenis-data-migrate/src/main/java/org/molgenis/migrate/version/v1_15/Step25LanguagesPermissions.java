@@ -17,9 +17,9 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 @Component
-public class Step24LanguagesPermissions extends MolgenisUpgrade implements ApplicationListener<ContextRefreshedEvent>
+public class Step25LanguagesPermissions extends MolgenisUpgrade implements ApplicationListener<ContextRefreshedEvent>
 {
-	private static final Logger LOG = LoggerFactory.getLogger(Step24LanguagesPermissions.class);
+	private static final Logger LOG = LoggerFactory.getLogger(Step25LanguagesPermissions.class);
 	private final DataService dataService;
 
 	/**
@@ -28,9 +28,9 @@ public class Step24LanguagesPermissions extends MolgenisUpgrade implements Appli
 	private boolean enabled;
 
 	@Autowired
-	public Step24LanguagesPermissions(DataService dataService)
+	public Step25LanguagesPermissions(DataService dataService)
 	{
-		super(23, 24);
+		super(24, 25);
 		this.dataService = dataService;
 	}
 
