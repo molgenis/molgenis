@@ -11,17 +11,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-public class Step24UpdateApplicationSettings extends MolgenisUpgrade
+public class Step25UpdateApplicationSettings extends MolgenisUpgrade
 {
-	private final Logger LOG = LoggerFactory.getLogger(Step24UpdateApplicationSettings.class);
+	private final Logger LOG = LoggerFactory.getLogger(Step25UpdateApplicationSettings.class);
 
 	private final JdbcTemplate jdbcTemplate;
 	private final IdGenerator idGenerator;
 
 	@Autowired
-	public Step24UpdateApplicationSettings(DataSource dataSource, IdGenerator idGenerator)
+	public Step25UpdateApplicationSettings(DataSource dataSource, IdGenerator idGenerator)
 	{
-		super(23, 24);
+		super(24, 25);
 		this.jdbcTemplate = new JdbcTemplate(requireNonNull(dataSource));
 		this.idGenerator = requireNonNull(idGenerator);
 	}
@@ -43,13 +43,13 @@ public class Step24UpdateApplicationSettings extends MolgenisUpgrade
 		// add google_sign_in setting
 		String googleSignInId = idGenerator.generateId();
 		boolean googleSignInIdDefaultValue = true;
-		jdbcTemplate.update(
-				"INSERT INTO attributes (`identifier`,`name`,`dataType`,`refEntity`,`expression`,`nillable`,`auto`,`idAttribute`,`lookupAttribute`,`visible`,`label`,`description`,`aggregateable`,`enumOptions`,`rangeMin`,`rangeMax`,`labelAttribute`,`readOnly`,`unique`,`visibleExpression`,`validationExpression`,`defaultValue`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-				googleSignInId, "google_sign_in", "bool", null, null, false, false, false, false, true,
-				"Enable Google Sign-In", "Enable users to sign in with their existing Google account", false, null,
-				null, null, false, false, false,
-				"$('signup').eq(true).value() && $('signup_moderation').eq(false).value()", null,
-				String.valueOf(googleSignInIdDefaultValue));
+		jdbcTemplate
+				.update("INSERT INTO attributes (`identifier`,`name`,`dataType`,`refEntity`,`expression`,`nillable`,`auto`,`idAttribute`,`lookupAttribute`,`visible`,`label`,`description`,`aggregateable`,`enumOptions`,`rangeMin`,`rangeMax`,`labelAttribute`,`readOnly`,`unique`,`visibleExpression`,`validationExpression`,`defaultValue`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+						googleSignInId, "google_sign_in", "bool", null, null, false, false, false, false, true,
+						"Enable Google Sign-In", "Enable users to sign in with their existing Google account", false,
+						null, null, null, false, false, false,
+						"$('signup').eq(true).value() && $('signup_moderation').eq(false).value()", null,
+						String.valueOf(googleSignInIdDefaultValue));
 
 		jdbcTemplate.update("INSERT INTO entities_attributes (`order`, `fullName`, `attributes`) VALUES (?, ?, ?)", 4,
 				"settings_app", googleSignInId);
@@ -57,11 +57,12 @@ public class Step24UpdateApplicationSettings extends MolgenisUpgrade
 		// add google_app_client_id setting
 		String googleAppClientId = idGenerator.generateId();
 		String googleAppClientIdDefaultValue = "130634143611-e2518d1uqu0qtec89pjgn50gbg95jin4.apps.googleusercontent.com";
-		jdbcTemplate.update(
-				"INSERT INTO attributes (`identifier`,`name`,`dataType`,`refEntity`,`expression`,`nillable`,`auto`,`idAttribute`,`lookupAttribute`,`visible`,`label`,`description`,`aggregateable`,`enumOptions`,`rangeMin`,`rangeMax`,`labelAttribute`,`readOnly`,`unique`,`visibleExpression`,`validationExpression`,`defaultValue`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-				googleAppClientId, "google_app_client_id", "string", null, null, false, false, false, false, true,
-				"Google app client ID", "Google app client ID used during Google Sign-In", false, null, null, null,
-				false, false, false, "$('google_sign_in').eq(true).value()", null, googleAppClientIdDefaultValue);
+		jdbcTemplate
+				.update("INSERT INTO attributes (`identifier`,`name`,`dataType`,`refEntity`,`expression`,`nillable`,`auto`,`idAttribute`,`lookupAttribute`,`visible`,`label`,`description`,`aggregateable`,`enumOptions`,`rangeMin`,`rangeMax`,`labelAttribute`,`readOnly`,`unique`,`visibleExpression`,`validationExpression`,`defaultValue`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+						googleAppClientId, "google_app_client_id", "string", null, null, false, false, false, false,
+						true, "Google app client ID", "Google app client ID used during Google Sign-In", false, null,
+						null, null, false, false, false, "$('google_sign_in').eq(true).value()", null,
+						googleAppClientIdDefaultValue);
 
 		jdbcTemplate.update("INSERT INTO entities_attributes (`order`, `fullName`, `attributes`) VALUES (?, ?, ?)", 5,
 				"settings_app", googleAppClientId);
