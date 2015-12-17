@@ -140,12 +140,12 @@
 	                        <!-- Specify files one-by-one to preserve order -->
 	                        <jsSourceFiles>
 	                            <!-- Important: Update molgenis-header.ftl when modifying the list below -->
-	                            <jsSourceFile>/component/mixin/I18nStringsMixin.js</jsSourceFile>
 	                            <jsSourceFile>/component/mixin/AttributeLoaderMixin.js</jsSourceFile>
 	                            <jsSourceFile>/component/mixin/DeepPureRenderMixin.js</jsSourceFile>
 	                            <jsSourceFile>/component/mixin/EntityInstanceLoaderMixin.js</jsSourceFile>
 	                            <jsSourceFile>/component/mixin/EntityLoaderMixin.js</jsSourceFile>
 	                            <jsSourceFile>/component/mixin/GroupMixin.js</jsSourceFile>
+	                            <jsSourceFile>/component/mixin/I18nStringsMixin.js</jsSourceFile>
 	                            <jsSourceFile>/component/mixin/ReactLayeredComponentMixin.js</jsSourceFile>
 	                            <jsSourceFile>/component/wrapper/Ace.js</jsSourceFile>
 	                            <jsSourceFile>/component/wrapper/DateTimePicker.js</jsSourceFile>
@@ -167,6 +167,7 @@
 	                            <jsSourceFile>/component/FormControlGroup.js</jsSourceFile>
 	                            <jsSourceFile>/component/Icon.js</jsSourceFile>
 	                            <jsSourceFile>/component/Input.js</jsSourceFile>
+	                            <jsSourceFile>/component/LanguageSelectBox.js</jsSourceFile>
 	                            <jsSourceFile>/component/Modal.js</jsSourceFile>
 	                            <jsSourceFile>/component/Pager.js</jsSourceFile>
 	                            <jsSourceFile>/component/Popover.js</jsSourceFile>
@@ -177,7 +178,6 @@
 	                            <jsSourceFile>/component/Spinner.js</jsSourceFile>
 	                            <jsSourceFile>/component/Table.js</jsSourceFile>
 	                            <jsSourceFile>/component/TextArea.js</jsSourceFile>
-	                            <jsSourceFile>/component/LanguageSelectBox.js</jsSourceFile>
 	                        </jsSourceFiles>
 	                        <jsFinalFile>molgenis-component.min.js</jsFinalFile>
 	                        <skipMerge>false</skipMerge>
