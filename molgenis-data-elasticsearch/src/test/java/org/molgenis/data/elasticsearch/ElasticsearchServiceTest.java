@@ -84,7 +84,7 @@ public class ElasticsearchServiceTest
 		when(bulkProcessor.awaitClose(any(Long.class), any(TimeUnit.class))).thenReturn(true);
 		when(bulkProcessorFactory.create(client)).thenReturn(bulkProcessor);
 		ElasticsearchService.setBulkProcessorFactory(bulkProcessorFactory);
-		doNothing().when(searchService).refresh(any(String.class));
+		doNothing().when(searchService).refresh(any(EntityMetaData.class));
 	}
 
 	@BeforeClass

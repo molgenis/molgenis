@@ -410,6 +410,9 @@ class RestControllerV2
 		}
 	}
 
+	/**
+	 * Get the i18n resource strings in the language of the current user
+	 */
 	@RequestMapping(value = "/i18n", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Map<String, String> getI18nStrings()

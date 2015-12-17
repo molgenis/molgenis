@@ -1,5 +1,6 @@
 package org.molgenis.ui;
 
+import static freemarker.template.Configuration.VERSION_2_3_23;
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_CSS;
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_FONTS;
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_IMG;
@@ -340,14 +341,20 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public FreeMarkerConfigurer freeMarkerConfigurer() throws IOException, TemplateException
 	{
-		FreeMarkerConfigurer result = new FreeMarkerConfigurer();
+		FreeMarkerConfigurer result = new FreeMarkerConfigurer()
+		{
+			@Override
+			protected void postProcessConfiguration(Configuration config) throws IOException, TemplateException
+			{
+				config.setObjectWrapper(new MolgenisFreemarkerObjectWrapper(VERSION_2_3_23));
+			}
+		};
 		result.setPreferFileSystemAccess(false);
 		result.setTemplateLoaderPath("classpath:/templates/");
 		result.setDefaultEncoding("UTF-8");
 		Properties freemarkerSettings = new Properties();
 		freemarkerSettings.setProperty(Configuration.LOCALIZED_LOOKUP_KEY, Boolean.FALSE.toString());
 		result.setFreemarkerSettings(freemarkerSettings);
-
 		Map<String, Object> freemarkerVariables = Maps.newHashMap();
 		freemarkerVariables.put("limit", new LimitMethod());
 		freemarkerVariables.put("hasPermission", new HasPermissionDirective(molgenisPermissionService));
