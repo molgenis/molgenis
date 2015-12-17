@@ -7,6 +7,7 @@ import static org.testng.Assert.assertEquals;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.commons.io.FileUtils;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.ImmutableSettings;
@@ -68,33 +69,15 @@ public class ElasticsearchServiceIntegrationTest
 		{
 			ELASTICSEARCH_CLIENT.close();
 		}
-		catch (Exception e)
+		finally
 		{
-			System.err.println("Error closing client");
-		}
-
-		try
-		{
-			NODE.close();
-		}
-		catch (Exception e)
-		{
-			System.err.println("Error closing node");
-		}
-
-		// resources might not be released, try to delete target directory for max 30s
-		boolean ok;
-		for (int i = 0; i < 10; ++i)
-		{
-			ok = ELASTICSEARCH_DIR.delete();
-			if (ok)
+			try
 			{
-				break;
+				NODE.close();
 			}
-			else
+			finally
 			{
-				System.err.println("Unable to delete Elasticsearch index, retrying in 1s (attempt " + i + "/10)");
-				Thread.sleep(1000);
+				FileUtils.deleteDirectory(ELASTICSEARCH_DIR);
 			}
 		}
 	}
@@ -145,7 +128,7 @@ public class ElasticsearchServiceIntegrationTest
 	}
 
 	@Test
-	public void transactionalCountAddAndAdd()
+	public void transactionalCountAddAndTransactionAdd()
 	{
 		// entity in existing index
 		Entity entity0 = new DefaultEntity(entityMeta, dataService);
@@ -180,7 +163,7 @@ public class ElasticsearchServiceIntegrationTest
 	}
 
 	@Test
-	public void transactionalCountAddAndUpdate()
+	public void transactionalCountAddAndTransactionUpdate()
 	{
 		// entity in existing index
 		Entity entity0 = new DefaultEntity(entityMeta, dataService);
@@ -213,7 +196,7 @@ public class ElasticsearchServiceIntegrationTest
 	}
 
 	@Test
-	public void transactionalCountAddAndDelete()
+	public void transactionalCountAddAndTransactionDelete()
 	{
 		// entity in existing index
 		Entity entity0 = new DefaultEntity(entityMeta, dataService);
@@ -246,7 +229,7 @@ public class ElasticsearchServiceIntegrationTest
 	}
 
 	@Test
-	public void transactionalCountAddAndDeleteAdd()
+	public void transactionalCountAddAndTransactionDeleteAdd()
 	{
 		// entity in existing index
 		Entity entity0 = new DefaultEntity(entityMeta, dataService);
@@ -287,7 +270,7 @@ public class ElasticsearchServiceIntegrationTest
 	}
 
 	@Test
-	public void transactionalCountAddAndAddUpdate()
+	public void transactionalCountAddAndTransactionAddUpdate()
 	{
 		// entity in existing index
 		Entity entity0 = new DefaultEntity(entityMeta, dataService);
@@ -328,7 +311,7 @@ public class ElasticsearchServiceIntegrationTest
 	}
 
 	@Test
-	public void transactionalCountAddAndAddDelete()
+	public void transactionalCountAddAndTransactionAddDelete()
 	{
 		// entity in existing index
 		Entity entity0 = new DefaultEntity(entityMeta, dataService);
@@ -367,7 +350,7 @@ public class ElasticsearchServiceIntegrationTest
 	}
 
 	@Test
-	public void transactionalCountAddAndDeleteAddUpdate()
+	public void transactionalCountAddAndTransactionDeleteAddUpdate()
 	{
 		// entity in existing index
 		Entity entity0 = new DefaultEntity(entityMeta, dataService);

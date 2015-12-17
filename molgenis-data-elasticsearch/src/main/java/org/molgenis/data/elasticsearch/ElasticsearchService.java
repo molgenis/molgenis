@@ -154,13 +154,12 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	{
 		if (LOG.isTraceEnabled())
 		{
-			LOG.trace("Retrieving Elasticsearch type names ...");
+			LOG.trace("Retrieving Elasticsearch mappings ...");
 		}
-		GetMappingsResponse mappingsResponse = client.admin().indices().prepareGetMappings(indexName).execute()
-				.actionGet();
+		GetMappingsResponse mappingsResponse = client.admin().indices().prepareGetMappings(indexName).get();
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Retrieved Elasticsearch type names");
+			LOG.debug("Retrieved Elasticsearch mappings");
 		}
 
 		final ImmutableOpenMap<String, MappingMetaData> indexMappings = mappingsResponse.getMappings().get(indexName);
@@ -201,7 +200,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		generator.buildSearchRequest(builder, documentType, searchType, request.getQuery(),
 				request.getAggregateField1(), request.getAggregateField2(), request.getAggregateFieldDistinct(),
 				entityMetaData);
-		SearchResponse response = builder.execute().actionGet();
+		SearchResponse response = builder.get();
 		if (LOG.isTraceEnabled())
 		{
 			LOG.trace("*** RESPONSE\n" + response);
@@ -254,11 +253,11 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		{
 			XContentBuilder jsonBuilder = MappingsBuilder.buildMapping(entityMetaData, storeSource, enableNorms,
 					createAllIndex);
-			if (LOG.isTraceEnabled()) LOG.trace("Creating Elasticsearch mapping [" + jsonBuilder.string() + "] ...");
+			if (LOG.isTraceEnabled()) LOG.trace("Creating Elasticsearch mapping [{}] ...", jsonBuilder.string());
 			String entityName = entityMetaData.getName();
 
 			PutMappingResponse response = client.admin().indices().preparePutMapping(index)
-					.setType(sanitizeMapperType(entityName)).setSource(jsonBuilder).execute().actionGet();
+					.setType(sanitizeMapperType(entityName)).setSource(jsonBuilder).get();
 
 			if (!response.isAcknowledged())
 			{
@@ -266,7 +265,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 						"Creation of mapping for documentType [" + entityName + "] failed. Response=" + response);
 			}
 
-			if (LOG.isDebugEnabled()) LOG.debug("Created Elasticsearch mapping [" + jsonBuilder.string() + "]");
+			if (LOG.isDebugEnabled()) LOG.debug("Created Elasticsearch mapping [{}]", jsonBuilder.string());
 		}
 		catch (IOException e)
 		{
@@ -327,7 +326,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		}
 		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
 		generator.buildSearchRequest(searchRequestBuilder, type, SearchType.COUNT, q, null, null, null, entityMetaData);
-		SearchResponse searchResponse = searchRequestBuilder.execute().actionGet();
+		SearchResponse searchResponse = searchRequestBuilder.get();
 		if (searchResponse.getFailedShards() > 0)
 		{
 			throw new ElasticsearchException("Search failed. Returned headers:" + searchResponse.getHeaders());
@@ -473,7 +472,12 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 					{
 						// updating a document in the transactional index is the same as adding the new updated
 						// document.
-						GetResponse response = client.prepareGet(transactionId, type, id).execute().actionGet();
+						GetResponse response = client.prepareGet(transactionId, type, id).get();
+						if (LOG.isDebugEnabled())
+						{
+							LOG.debug("Retrieved document type [{}] with id [{}] in index [{}]", type, id,
+									transactionId);
+						}
 						if (response.isExists())
 						{
 							crudType = CrudType.ADD;
@@ -533,7 +537,11 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			// that is not committed yet and is in the
 			// temp index
 			String type = sanitizeMapperType(entityMetaData.getName());
-			GetResponse response = client.prepareGet(indexName, type, id).execute().actionGet();
+			GetResponse response = client.prepareGet(indexName, type, id).get();
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("Retrieved document type [{}] with id [{}] in index [{}]", type, id, indexName);
+			}
 			if (response.isExists())
 			{
 				// Copy to temp transaction index and mark as deleted
@@ -557,11 +565,14 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		{
 			LOG.trace("Deleting Elasticsearch '" + type + "' doc with id [" + id + "] ...");
 		}
-
-		GetResponse response = client.prepareGet(index, type, id).execute().actionGet();
+		GetResponse response = client.prepareGet(index, type, id).get();
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Retrieved document type [{}] with id [{}] in index [{}]", type, id, index);
+		}
 		if (response.isExists())
 		{
-			client.prepareDelete(index, type, id).execute().actionGet();
+			client.prepareDelete(index, type, id).get();
 		}
 
 		if (LOG.isDebugEnabled())
@@ -600,13 +611,16 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		{
 			LOG.trace("Deleting all Elasticsearch '" + type + "' docs ...");
 		}
-
 		TypesExistsResponse typesExistsResponse = client.admin().indices().prepareTypesExists(indexName).setTypes(type)
-				.execute().actionGet();
+				.get();
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Checked whether type [{}] exists in index [{}]", type, indexName);
+		}
 		if (typesExistsResponse.isExists())
 		{
 			DeleteMappingResponse deleteMappingResponse = client.admin().indices().prepareDeleteMapping(indexName)
-					.setType(type).execute().actionGet();
+					.setType(type).get();
 			if (!deleteMappingResponse.isAcknowledged())
 			{
 				throw new ElasticsearchException("Delete of mapping '" + entityName + "' failed.");
@@ -619,7 +633,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		}
 
 		DeleteByQueryResponse deleteByQueryResponse = client.prepareDeleteByQuery(indexName)
-				.setQuery(new TermQueryBuilder("_type", type)).execute().actionGet();
+				.setQuery(new TermQueryBuilder("_type", type)).get();
 
 		if (deleteByQueryResponse != null)
 		{
@@ -684,7 +698,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			{
 				requestBuilder.setFetchSource(toFetchFields(fetch), null);
 			}
-			GetResponse response = requestBuilder.execute().actionGet();
+			GetResponse response = requestBuilder.get();
 			if (LOG.isDebugEnabled())
 			{
 				if (fetch == null)
@@ -741,7 +755,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 					.forEach(request::add);
 		}
 
-		MultiGetResponse response = request.execute().actionGet();
+		MultiGetResponse response = request.get();
 
 		if (LOG.isDebugEnabled())
 		{
@@ -833,7 +847,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	public void flush()
 	{
 		if (LOG.isTraceEnabled()) LOG.trace("Flushing Elasticsearch index [" + indexName + "] ...");
-		client.admin().indices().prepareFlush(indexName).execute().actionGet();
+		client.admin().indices().prepareFlush(indexName).get();
 		if (LOG.isDebugEnabled()) LOG.debug("Flushed Elasticsearch index [" + indexName + "]");
 	}
 
@@ -1042,7 +1056,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 
 	public GetMappingsResponse getMappings()
 	{
-		return client.admin().indices().prepareGetMappings(indexName).execute().actionGet();
+		return client.admin().indices().prepareGetMappings(indexName).get();
 	}
 
 	// Checks if entities can be deleted, have no ref entities pointing to it
@@ -1095,7 +1109,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 				try
 				{
 					searchResponse = client.prepareSearchScroll(searchResponse.getScrollId())
-							.setScroll(TimeValue.timeValueMinutes(5)).execute().actionGet();
+							.setScroll(TimeValue.timeValueMinutes(5)).get();
 
 					while (searchResponse.getHits().getHits().length > 0)
 					{
@@ -1128,7 +1142,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 						}
 
 						searchResponse = client.prepareSearchScroll(searchResponse.getScrollId())
-								.setScroll(TimeValue.timeValueMinutes(5)).execute().actionGet();
+								.setScroll(TimeValue.timeValueMinutes(5)).get();
 					}
 				}
 				finally
