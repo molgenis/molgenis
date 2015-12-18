@@ -11,8 +11,8 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MySqlEntityFactory;
@@ -23,6 +23,7 @@ import org.molgenis.fieldtypes.TextField;
 import org.molgenis.framework.MolgenisUpgrade;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.ui.settings.AppDbSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -58,9 +59,8 @@ public class Step15AddDefaultValue extends MolgenisUpgrade
 
 	private void executeUpgradeSql(String entityName, String attributeName, String defaultValue)
 	{
-		jdbcTemplate.update(
-				"UPDATE attributes SET defaultValue = ? WHERE name = ? "
-						+ "AND identifier IN (SELECT attributes FROM entities_attributes ea WHERE ea.fullName = ?);",
+		jdbcTemplate.update("UPDATE attributes SET defaultValue = ? WHERE name = ? "
+				+ "AND identifier IN (SELECT attributes FROM entities_attributes ea WHERE ea.fullName = ?);",
 				defaultValue, attributeName, entityName);
 	}
 
@@ -81,10 +81,15 @@ public class Step15AddDefaultValue extends MolgenisUpgrade
 
 	protected void insertDefaultValuesForJPAEntities()
 	{
-		jpaRepositoryCollection.stream().map(Repository::getEntityMetaData).forEach(emd -> {
-			stream(emd.getAtomicAttributes().spliterator(), false).filter(amd -> amd.getDefaultValue() != null)
-					.forEach(amd -> executeUpgradeSql(emd.getName(), amd.getName(), amd.getDefaultValue()));
-		});
+		jpaRepositoryCollection
+				.stream()
+				.map(Repository::getEntityMetaData)
+				.forEach(
+						emd -> {
+							stream(emd.getAtomicAttributes().spliterator(), false).filter(
+									amd -> amd.getDefaultValue() != null).forEach(
+									amd -> executeUpgradeSql(emd.getName(), amd.getName(), amd.getDefaultValue()));
+						});
 	}
 
 	protected void addColumnDefaultValue()
@@ -111,8 +116,8 @@ public class Step15AddDefaultValue extends MolgenisUpgrade
 			@Override
 			protected MysqlRepository createMysqlRepository()
 			{
-				return new MysqlRepository(dataService, mySqlEntityFactory, dataSource,
-						new AsyncJdbcTemplate(new JdbcTemplate(dataSource)));
+				return new MysqlRepository(dataService, mySqlEntityFactory, dataSource, new AsyncJdbcTemplate(
+						new JdbcTemplate(dataSource)));
 			}
 
 			@Override
@@ -121,7 +126,8 @@ public class Step15AddDefaultValue extends MolgenisUpgrade
 				throw new UnsupportedOperationException();
 			}
 		};
-		MetaDataService metaData = new MetaDataServiceImpl(dataService);
+		MetaDataServiceImpl metaData = new MetaDataServiceImpl(dataService);
+		metaData.setLanguageService(new LanguageService(dataService, new AppDbSettings()));
 		RunAsSystemProxy.runAsSystem(() -> metaData.setDefaultBackend(undecoratedMySQL));
 
 		searchService.delete(AttributeMetaDataMetaData.ENTITY_NAME);

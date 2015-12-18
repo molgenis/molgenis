@@ -30,6 +30,7 @@ import org.molgenis.migrate.version.v1_11.Step21SetLoggingEventBackend;
 import org.molgenis.migrate.version.v1_13.Step22RemoveDiseaseMatcher;
 import org.molgenis.migrate.version.v1_14.Step23RebuildElasticsearchIndex;
 import org.molgenis.migrate.version.v1_15.Step24UpdateApplicationSettings;
+import org.molgenis.migrate.version.v1_15.Step25LanguagesPermissions;
 import org.molgenis.migrate.version.v1_5.Step1UpgradeMetaData;
 import org.molgenis.migrate.version.v1_5.Step2;
 import org.molgenis.migrate.version.v1_5.Step3AddOrderColumnToMrefTables;
@@ -79,7 +80,7 @@ import freemarker.template.TemplateException;
 @EnableTransactionManagement
 @EnableWebMvc
 @EnableAsync
-@ComponentScan(basePackages = "org.molgenis", excludeFilters = @Filter(type = FilterType.ANNOTATION, value = CommandLineOnlyConfiguration.class) )
+@ComponentScan(basePackages = "org.molgenis", excludeFilters = @Filter(type = FilterType.ANNOTATION, value = CommandLineOnlyConfiguration.class))
 @Import(
 { WebAppSecurityConfig.class, DatabaseConfig.class, HttpClientConfig.class, EmbeddedElasticSearchConfig.class,
 		GsonConfig.class })
@@ -136,6 +137,9 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Autowired
 	private Step23RebuildElasticsearchIndex step23RebuildElasticsearchIndex;
 
+	@Autowired
+	private Step25LanguagesPermissions step25LanguagesPermissions;
+
 	@Override
 	public ManageableRepositoryCollection getBackend()
 	{
@@ -149,8 +153,8 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step2(dataService, jpaRepositoryCollection, dataSource, searchService));
 		upgradeService.addUpgrade(new Step3AddOrderColumnToMrefTables(dataSource));
 		upgradeService.addUpgrade(new Step4VarcharToText(dataSource, mysqlRepositoryCollection));
-		upgradeService.addUpgrade(
-				new Step5AlterDataexplorerMenuURLs(jpaRepositoryCollection.getRepository("RuntimeProperty"), gson));
+		upgradeService.addUpgrade(new Step5AlterDataexplorerMenuURLs(jpaRepositoryCollection
+				.getRepository("RuntimeProperty"), gson));
 		upgradeService.addUpgrade(new Step6ChangeRScriptType(dataSource, searchService));
 		upgradeService.addUpgrade(new Step7UpgradeMetaDataTo1_6(dataSource, searchService));
 		upgradeService.addUpgrade(new Step8VarcharToTextRepeated(dataSource));
@@ -183,6 +187,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step22RemoveDiseaseMatcher(dataSource));
 		upgradeService.addUpgrade(step23RebuildElasticsearchIndex);
 		upgradeService.addUpgrade(new Step24UpdateApplicationSettings(dataSource, idGenerator));
+		upgradeService.addUpgrade(step25LanguagesPermissions);
 	}
 
 	@Override
@@ -207,8 +212,8 @@ public class WebAppConfig extends MolgenisWebAppConfig
 
 		// metadata repositories get created here.
 		localDataService.getMeta().setDefaultBackend(backend);
-		List<EntityMetaData> metas = DependencyResolver
-				.resolve(Sets.newHashSet(localDataService.getMeta().getEntityMetaDatas()));
+		List<EntityMetaData> metas = DependencyResolver.resolve(Sets.newHashSet(localDataService.getMeta()
+				.getEntityMetaDatas()));
 
 		for (EntityMetaData emd : metas)
 		{
@@ -237,8 +242,8 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Override
 	protected void addFreemarkerVariables(Map<String, Object> freemarkerVariables)
 	{
-		freemarkerVariables.put("dataExplorerLink",
-				new DataExplorerHyperlinkDirective(molgenisPluginRegistry(), dataService));
+		freemarkerVariables.put("dataExplorerLink", new DataExplorerHyperlinkDirective(molgenisPluginRegistry(),
+				dataService));
 	}
 
 	@Override

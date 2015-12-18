@@ -4,6 +4,8 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -174,5 +176,16 @@ public class EntityUtils
 		}
 
 		return false;
+	}
+
+	/**
+	 * Get an Iterable of entities as a stream of entities
+	 * 
+	 * @param entities
+	 * @return
+	 */
+	public static Stream<Entity> asStream(Iterable<Entity> entities)
+	{
+		return StreamSupport.stream(entities.spliterator(), false);
 	}
 }

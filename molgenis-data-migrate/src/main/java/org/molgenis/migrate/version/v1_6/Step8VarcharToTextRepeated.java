@@ -10,7 +10,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MySqlEntityFactory;
@@ -25,6 +25,7 @@ import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.framework.MolgenisUpgrade;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.ui.settings.AppDbSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -39,9 +40,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
  */
 public class Step8VarcharToTextRepeated extends MolgenisUpgrade
 {
-	private JdbcTemplate template;
+	private final JdbcTemplate template;
 
-	private DataSource dataSource;
+	private final DataSource dataSource;
 
 	private static final Logger LOG = LoggerFactory.getLogger(Step8VarcharToTextRepeated.class);
 
@@ -65,8 +66,8 @@ public class Step8VarcharToTextRepeated extends MolgenisUpgrade
 			@Override
 			protected MysqlRepository createMysqlRepository()
 			{
-				return new MysqlRepository(dataService, mySqlEntityFactory, dataSource,
-						new AsyncJdbcTemplate(new JdbcTemplate(dataSource)));
+				return new MysqlRepository(dataService, mySqlEntityFactory, dataSource, new AsyncJdbcTemplate(
+						new JdbcTemplate(dataSource)));
 			}
 
 			@Override
@@ -75,7 +76,8 @@ public class Step8VarcharToTextRepeated extends MolgenisUpgrade
 				throw new UnsupportedOperationException();
 			}
 		};
-		MetaDataService metaData = new MetaDataServiceImpl(dataService);
+		MetaDataServiceImpl metaData = new MetaDataServiceImpl(dataService);
+		metaData.setLanguageService(new LanguageService(dataService, new AppDbSettings()));
 		RunAsSystemProxy.runAsSystem(() -> metaData.setDefaultBackend(undecoratedMySQL));
 
 		// find all entities with backend = MySQL
@@ -96,8 +98,7 @@ public class Step8VarcharToTextRepeated extends MolgenisUpgrade
 						{
 							// mysql keys cannot be text so leave those columns untouched
 							if (!(amd.isIdAtrribute() || fieldType instanceof CategoricalMrefField
-									|| fieldType instanceof CategoricalField || fieldType instanceof MrefField
-									|| fieldType instanceof XrefField))
+									|| fieldType instanceof CategoricalField || fieldType instanceof MrefField || fieldType instanceof XrefField))
 							{
 								if (amd.isUnique())
 								{

@@ -10,6 +10,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Range;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.security.core.MolgenisPermissionService;
 
 import com.google.common.base.Function;
@@ -42,9 +43,9 @@ public class AttributeMetaDataResponse
 	private String validationExpression;
 
 	public AttributeMetaDataResponse(String entityParentName, AttributeMetaData attr,
-			MolgenisPermissionService permissionService, DataService dataService)
+			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService)
 	{
-		this(entityParentName, attr, null, null, permissionService, dataService);
+		this(entityParentName, attr, null, null, permissionService, dataService, languageService);
 	}
 
 	/**
@@ -58,7 +59,7 @@ public class AttributeMetaDataResponse
 	 */
 	public AttributeMetaDataResponse(final String entityParentName, AttributeMetaData attr, Set<String> attributesSet,
 			final Map<String, Set<String>> attributeExpandsSet, MolgenisPermissionService permissionService,
-			DataService dataService)
+			DataService dataService, LanguageService languageService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestController.BASE_URI, entityParentName, attrName);
@@ -77,13 +78,13 @@ public class AttributeMetaDataResponse
 
 		if (attributesSet == null || attributesSet.contains("label".toLowerCase()))
 		{
-			this.label = attr.getLabel();
+			this.label = attr.getLabel(languageService.getCurrentUserLanguageCode());
 		}
 		else this.label = null;
 
 		if (attributesSet == null || attributesSet.contains("description".toLowerCase()))
 		{
-			this.description = attr.getDescription();
+			this.description = attr.getDescription(languageService.getCurrentUserLanguageCode());
 		}
 		else this.description = null;
 
@@ -112,7 +113,8 @@ public class AttributeMetaDataResponse
 			{
 				Set<String> subAttributesSet = attributeExpandsSet.get("refEntity".toLowerCase());
 				this.refEntity = refEntity != null ? new EntityMetaDataResponse(refEntity, subAttributesSet,
-						Collections.singletonMap("attributes".toLowerCase(), null), permissionService, dataService) : null;
+						Collections.singletonMap("attributes".toLowerCase(), null), permissionService, dataService,
+						languageService) : null;
 			}
 			else
 			{
@@ -142,7 +144,7 @@ public class AttributeMetaDataResponse
 								Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
 								return new AttributeMetaDataResponse(entityParentName, attributeMetaData,
 										subAttributesSet, Collections.singletonMap("refEntity".toLowerCase(), null),
-										permissionService, dataService);
+										permissionService, dataService, languageService);
 							}
 							else
 							{

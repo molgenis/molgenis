@@ -8,6 +8,7 @@ import java.util.Map;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.security.core.MolgenisPermissionService;
 
@@ -36,10 +37,10 @@ class EntityCollectionResponseV2
 
 	public EntityCollectionResponseV2(EntityPager entityPager, List<Map<String, Object>> items, Fetch fetch,
 			String href, EntityMetaData meta, MolgenisPermissionService permissionService, DataService dataService,
-			String prevHref, String nextHref)
+			LanguageService languageService, String prevHref, String nextHref)
 	{
 		this.href = href;
-		this.meta = new EntityMetaDataResponseV2(meta, fetch, permissionService, dataService);
+		this.meta = new EntityMetaDataResponseV2(meta, fetch, permissionService, dataService, languageService);
 		this.start = entityPager.getStart();
 		this.num = entityPager.getNum();
 		this.total = entityPager.getTotal();
@@ -87,4 +88,5 @@ class EntityCollectionResponseV2
 	{
 		return items;
 	}
+
 }
