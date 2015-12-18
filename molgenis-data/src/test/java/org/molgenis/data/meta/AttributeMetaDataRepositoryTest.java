@@ -14,6 +14,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
+import org.molgenis.data.i18n.LanguageService;
 import org.testng.annotations.Test;
 
 public class AttributeMetaDataRepositoryTest
@@ -21,7 +22,7 @@ public class AttributeMetaDataRepositoryTest
 	@Test(expectedExceptions = NullPointerException.class)
 	public void AttributeMetaDataRepository()
 	{
-		new AttributeMetaDataRepository(null);
+		new AttributeMetaDataRepository(null, null);
 	}
 
 	@Test
@@ -29,8 +30,10 @@ public class AttributeMetaDataRepositoryTest
 	{
 		ManageableRepositoryCollection repoCollection = mock(ManageableRepositoryCollection.class);
 		Repository repo = mock(Repository.class);
+		LanguageService languageService = mock(LanguageService.class);
 		when(repoCollection.addEntityMeta(AttributeMetaDataRepository.META_DATA)).thenReturn(repo);
-		AttributeMetaDataRepository attributeMetaDataRepository = new AttributeMetaDataRepository(repoCollection);
+		AttributeMetaDataRepository attributeMetaDataRepository = new AttributeMetaDataRepository(repoCollection,
+				languageService);
 		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
 		when(attr0.getDataType()).thenReturn(STRING);
 		Entity attrEntity0 = attributeMetaDataRepository.add(attr0);
@@ -43,8 +46,10 @@ public class AttributeMetaDataRepositoryTest
 	{
 		ManageableRepositoryCollection repoCollection = mock(ManageableRepositoryCollection.class);
 		Repository repo = mock(Repository.class);
+		LanguageService languageService = mock(LanguageService.class);
 		when(repoCollection.addEntityMeta(AttributeMetaDataRepository.META_DATA)).thenReturn(repo);
-		AttributeMetaDataRepository attributeMetaDataRepository = new AttributeMetaDataRepository(repoCollection);
+		AttributeMetaDataRepository attributeMetaDataRepository = new AttributeMetaDataRepository(repoCollection,
+				languageService);
 
 		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
 		when(attr0.getDataType()).thenReturn(STRING);

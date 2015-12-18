@@ -37,6 +37,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.UuidGenerator;
@@ -57,15 +58,15 @@ class AttributeMetaDataRepository
 	public static final AttributeMetaDataMetaData META_DATA = AttributeMetaDataMetaData.INSTANCE;
 
 	private final UuidGenerator uuidGenerator;
-
 	private final Repository repository;
-
 	private EntityMetaDataRepository entityMetaDataRepository;
+	private final LanguageService languageService;
 
-	public AttributeMetaDataRepository(ManageableRepositoryCollection collection)
+	public AttributeMetaDataRepository(ManageableRepositoryCollection collection, LanguageService languageService)
 	{
 		this.repository = requireNonNull(collection).addEntityMeta(META_DATA);
 		uuidGenerator = new UuidGenerator();
+		this.languageService = languageService;
 	}
 
 	public void setEntityMetaDataRepository(EntityMetaDataRepository entityMetaDataRepository)
@@ -157,6 +158,22 @@ class AttributeMetaDataRepository
 					repository.add(attrPartsEntities);
 					attributeMetaDataEntity.set(PARTS, attrPartsEntities);
 				}
+
+				// Language attributes
+				for (String languageCode : attr.getLabelLanguageCodes())
+				{
+					String attributeName = LABEL + '-' + languageCode;
+					String label = attr.getLabel(languageCode);
+					if (label != null) attributeMetaDataEntity.set(attributeName, label);
+				}
+
+				for (String languageCode : attr.getDescriptionLanguageCodes())
+				{
+					String attributeName = DESCRIPTION + '-' + languageCode;
+					String description = attr.getDescription(languageCode);
+					if (description != null) attributeMetaDataEntity.set(attributeName, description);
+				}
+
 				return attributeMetaDataEntity;
 			}
 		};
@@ -208,11 +225,11 @@ class AttributeMetaDataRepository
 		attributeMetaData.setVisible(entity.getBoolean(VISIBLE));
 		attributeMetaData.setLabel(entity.getString(LABEL));
 		attributeMetaData.setDescription(entity.getString(DESCRIPTION));
-		attributeMetaData
-				.setAggregateable(entity.getBoolean(AGGREGATEABLE) == null ? false : entity.getBoolean(AGGREGATEABLE));
+		attributeMetaData.setAggregateable(entity.getBoolean(AGGREGATEABLE) == null ? false : entity
+				.getBoolean(AGGREGATEABLE));
 		attributeMetaData.setEnumOptions(entity.getList(ENUM_OPTIONS));
-		attributeMetaData.setLabelAttribute(
-				entity.getBoolean(LABEL_ATTRIBUTE) == null ? false : entity.getBoolean(LABEL_ATTRIBUTE));
+		attributeMetaData.setLabelAttribute(entity.getBoolean(LABEL_ATTRIBUTE) == null ? false : entity
+				.getBoolean(LABEL_ATTRIBUTE));
 		attributeMetaData.setReadOnly(entity.getBoolean(READ_ONLY) == null ? false : entity.getBoolean(READ_ONLY));
 		attributeMetaData.setUnique(entity.getBoolean(UNIQUE) == null ? false : entity.getBoolean(UNIQUE));
 		attributeMetaData.setExpression(entity.getString(EXPRESSION));
@@ -231,12 +248,24 @@ class AttributeMetaDataRepository
 		Iterable<Entity> parts = entity.getEntities(PARTS);
 		if (parts != null)
 		{
-			stream(parts.spliterator(), false).map(this::toAttributeMetaData)
-					.forEach(attributeMetaData::addAttributePart);
+			stream(parts.spliterator(), false).map(this::toAttributeMetaData).forEach(
+					attributeMetaData::addAttributePart);
 		}
 		attributeMetaData.setVisibleExpression(entity.getString(VISIBLE_EXPRESSION));
 		attributeMetaData.setValidationExpression(entity.getString(VALIDATION_EXPRESSION));
 		attributeMetaData.setDefaultValue(entity.getString(DEFAULT_VALUE));
+
+		// Language attributes
+		for (String languageCode : languageService.getLanguageCodes())
+		{
+			String attributeName = LABEL + '-' + languageCode;
+			String label = entity.getString(attributeName);
+			if (label != null) attributeMetaData.setLabel(languageCode, label);
+
+			attributeName = DESCRIPTION + '-' + languageCode;
+			String description = entity.getString(attributeName);
+			if (description != null) attributeMetaData.setDescription(languageCode, description);
+		}
 
 		return attributeMetaData;
 	}

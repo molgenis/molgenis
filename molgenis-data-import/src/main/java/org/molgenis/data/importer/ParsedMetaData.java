@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
 import org.molgenis.data.semantic.LabeledResource;
@@ -22,12 +23,15 @@ public final class ParsedMetaData
 {
 	private final ImmutableMap<String, EntityMetaData> entities;
 	private final ImmutableMap<String, Package> packages;
-	private ImmutableSetMultimap<EntityMetaData, Tag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags;
-	private ImmutableList<Tag<EntityMetaData, LabeledResource, LabeledResource>> entityTags;
+	private final ImmutableSetMultimap<EntityMetaData, Tag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags;
+	private final ImmutableList<Tag<EntityMetaData, LabeledResource, LabeledResource>> entityTags;
+	private final ImmutableMap<String, Entity> languages;
+	private final ImmutableMap<String, Entity> i18nStrings;
 
 	public ParsedMetaData(List<? extends EntityMetaData> entities, Map<String, ? extends Package> packages,
 			SetMultimap<String, Tag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags,
-			List<Tag<EntityMetaData, LabeledResource, LabeledResource>> entityTags)
+			List<Tag<EntityMetaData, LabeledResource, LabeledResource>> entityTags, Map<String, Entity> languages,
+			ImmutableMap<String, Entity> i18nStrings)
 	{
 		if (entities == null)
 		{
@@ -61,6 +65,8 @@ public final class ParsedMetaData
 		}
 		this.attributeTags = attrTagBuilder.build();
 		this.entityTags = ImmutableList.copyOf(entityTags);
+		this.languages = ImmutableMap.copyOf(languages);
+		this.i18nStrings = ImmutableMap.copyOf(i18nStrings);
 	}
 
 	public ImmutableCollection<EntityMetaData> getEntities()
@@ -88,11 +94,21 @@ public final class ParsedMetaData
 		return entityTags;
 	}
 
+	public ImmutableMap<String, Entity> getLanguages()
+	{
+		return languages;
+	}
+
+	public ImmutableMap<String, Entity> getI18nStrings()
+	{
+		return i18nStrings;
+	}
+
 	@Override
 	public String toString()
 	{
 		return "ParsedMetaData [entities=" + entities + ", packages=" + packages + ", attributeTags=" + attributeTags
-				+ ", entityTags=" + entityTags + "]";
+				+ ", entityTags=" + entityTags + ", languages=" + languages + ", i18nStrings=" + i18nStrings + "]";
 	}
 
 	@Override
@@ -103,6 +119,8 @@ public final class ParsedMetaData
 		result = prime * result + ((attributeTags == null) ? 0 : attributeTags.hashCode());
 		result = prime * result + ((entities == null) ? 0 : entities.hashCode());
 		result = prime * result + ((entityTags == null) ? 0 : entityTags.hashCode());
+		result = prime * result + ((i18nStrings == null) ? 0 : i18nStrings.hashCode());
+		result = prime * result + ((languages == null) ? 0 : languages.hashCode());
 		result = prime * result + ((packages == null) ? 0 : packages.hashCode());
 		return result;
 	}
@@ -129,6 +147,16 @@ public final class ParsedMetaData
 			if (other.entityTags != null) return false;
 		}
 		else if (!entityTags.equals(other.entityTags)) return false;
+		if (i18nStrings == null)
+		{
+			if (other.i18nStrings != null) return false;
+		}
+		else if (!i18nStrings.equals(other.i18nStrings)) return false;
+		if (languages == null)
+		{
+			if (other.languages != null) return false;
+		}
+		else if (!languages.equals(other.languages)) return false;
 		if (packages == null)
 		{
 			if (other.packages != null) return false;

@@ -8,21 +8,21 @@
 
 <div class="row">
 	<div class="col-md-6">
-		<h1>My questionnaires</h1>
-		<p>Submitted and open questionnaires</p>
+		<h1>${i18n.questionnaires_title?html}</h1>
+		<p>${i18n.questionnaires_description?html}</p>
 	</div>  	
 </div>
 
 <#if questionnaires?size == 0>
-<h3>No questionnaires found</h3>
+<h3>${i18n.questionnaires_no_questionnaires_found_message?html}</h3>
 <#else>
 <div class="row">
 	<div class="col-md-6">
 		<table class="table table-bordered">
 	 		<thead>
 	 			<tr>
-	 				<th>Questionnaire</th>
-	 				<th>Status</th>
+	 				<th>${i18n.questionnaires_table_questionnaire_header?html}</th>
+	 				<th>${i18n.questionnaires_table_status_header?html}</th>
 	 				<th></th>
 	 			</tr>
 	 		</thead>
@@ -31,19 +31,19 @@
 	 				<tr>	
 	 					<td>${questionnaire.label!?html}</td>
 						<#if questionnaire.status == 'NOT_STARTED'>
-		 					<td>Not started yet</td>
+		 					<td>${i18n.questionnaires_table_status_not_started?html}</td>
 		 					<td> 
-								<a class="btn btn-primary" href="${context_url}/${questionnaire.name?url('UTF-8')}">Start questionnaire</a>
+								<a class="btn btn-primary" href="${context_url}/${questionnaire.name?url('UTF-8')}">${i18n.questionnaires_table_start_questionnaire_button?html}</a>
 							</td>
 						<#elseif questionnaire.status == 'OPEN'>
-							<td>Open</td>
+							<td>${i18n.questionnaires_table_status_open?html}</td>
 		 					<td> 
-								<a class="btn btn-primary" href="${context_url}/${questionnaire.name?url('UTF-8')}">Continue questionnaire</a>
+								<a class="btn btn-primary" href="${context_url}/${questionnaire.name?url('UTF-8')}">${i18n.questionnaires_table_continue_questionnaire_button?html}</a>
 							</td>
 						<#elseif questionnaire.status == 'SUBMITTED'>
-							<td>Submitted</td>
+							<td>${i18n.questionnaires_table_status_submitted?html}</td>
 		 					<td>
-		 						<a class="btn btn-primary" href="${context_url}/${questionnaire.name?url('UTF-8')}">View questionnaire</a>
+		 						<a class="btn btn-primary" href="${context_url}/${questionnaire.name?url('UTF-8')}">${i18n.questionnaires_table_view_questionnaire_button?html}</a>
 		 					</td>
 						</#if>
 		 			</tr>

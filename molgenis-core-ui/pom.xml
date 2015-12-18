@@ -145,6 +145,7 @@
 	                            <jsSourceFile>/component/mixin/EntityInstanceLoaderMixin.js</jsSourceFile>
 	                            <jsSourceFile>/component/mixin/EntityLoaderMixin.js</jsSourceFile>
 	                            <jsSourceFile>/component/mixin/GroupMixin.js</jsSourceFile>
+	                            <jsSourceFile>/component/mixin/I18nStringsMixin.js</jsSourceFile>
 	                            <jsSourceFile>/component/mixin/ReactLayeredComponentMixin.js</jsSourceFile>
 	                            <jsSourceFile>/component/wrapper/Ace.js</jsSourceFile>
 	                            <jsSourceFile>/component/wrapper/DateTimePicker.js</jsSourceFile>
@@ -166,6 +167,7 @@
 	                            <jsSourceFile>/component/FormControlGroup.js</jsSourceFile>
 	                            <jsSourceFile>/component/Icon.js</jsSourceFile>
 	                            <jsSourceFile>/component/Input.js</jsSourceFile>
+	                            <jsSourceFile>/component/LanguageSelectBox.js</jsSourceFile>
 	                            <jsSourceFile>/component/Modal.js</jsSourceFile>
 	                            <jsSourceFile>/component/Pager.js</jsSourceFile>
 	                            <jsSourceFile>/component/Popover.js</jsSourceFile>

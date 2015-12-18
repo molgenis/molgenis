@@ -4,8 +4,11 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.molgenis.data.AttributeChangeListener;
@@ -30,16 +33,18 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 
 	private Package package_;
 	private String label;
+	private final Map<String, String> labelByLanguageCode = new HashMap<>();
 	private boolean abstract_;
 	private String description;
+	private final Map<String, String> descriptionByLanguageCode = new HashMap<>();
 	private EntityMetaData extends_;
 	private String backend;
-	private Map<String, AttributeMetaData> attributes;
+	private final Map<String, AttributeMetaData> attributes;
 	private String idAttrName;
 	private String labelAttrName;
 
 	// bookkeeping to improve performance of getters
-	private AttributeChangeListener attrChangeListener;
+	private final AttributeChangeListener attrChangeListener;
 	private PackageChangeListener packageChangeListener;
 	private transient String cachedName;
 	private transient Map<String, AttributeMetaData> cachedAllAttrs;
@@ -90,8 +95,18 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 		this.entityClass = entityMetaData.getEntityClass();
 		setPackage(entityMetaData.getPackage());
 		this.label = entityMetaData.getLabel();
+		for (String languageCode : entityMetaData.getLabelLanguageCodes())
+		{
+			setLabel(languageCode, entityMetaData.getLabel(languageCode));
+		}
+
 		this.abstract_ = entityMetaData.isAbstract();
 		this.description = entityMetaData.getDescription();
+		for (String languageCode : entityMetaData.getDescriptionLanguageCodes())
+		{
+			setDescription(languageCode, entityMetaData.getDescription(languageCode));
+		}
+
 		EntityMetaData extends_ = entityMetaData.getExtends();
 		this.extends_ = extends_ != null ? new DefaultEntityMetaData(extends_) : null;
 		this.backend = entityMetaData.getBackend();
@@ -263,11 +278,31 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	}
 
 	@Override
+	public String getDescription(String languageCode)
+	{
+		String description = descriptionByLanguageCode.get(languageCode);
+		return description != null ? description : getDescription();
+	}
+
+	@Override
 	public void addAttributeMetaData(AttributeMetaData attr)
 	{
 		attr.addChangeListener(attrChangeListener);
 		attributes.put(attr.getName(), attr);
 		clearCache();
+	}
+
+	@Override
+	public EditableEntityMetaData setDescription(String languageCode, String description)
+	{
+		this.descriptionByLanguageCode.put(languageCode, description);
+		return this;
+	}
+
+	@Override
+	public Set<String> getDescriptionLanguageCodes()
+	{
+		return Collections.unmodifiableSet(descriptionByLanguageCode.keySet());
 	}
 
 	@Override
@@ -378,8 +413,8 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 		strBuilder.append(this.getName()).append('\'');
 		if (isAbstract()) strBuilder.append(" abstract='true'");
 		if (getExtends() != null) strBuilder.append(" extends='" + getExtends().getName()).append('\'');
-		if (getIdAttribute() != null)
-			strBuilder.append(" idAttribute='").append(getIdAttribute().getName()).append('\'');
+		if (getIdAttribute() != null) strBuilder.append(" idAttribute='").append(getIdAttribute().getName())
+				.append('\'');
 		if (getDescription() != null) strBuilder.append(" description='")
 				.append(getDescription().substring(0, Math.min(25, getDescription().length())))
 				.append(getDescription().length() > 25 ? "...'" : "'");
@@ -614,4 +649,39 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 			entityMeta.clearCache();
 		}
 	}
+
+	@Override
+	public AttributeMetaData getLabelAttribute(String languageCode)
+	{
+		for (AttributeMetaData attribute : getAtomicAttributes())
+		{
+			if (attribute.isLabelAttribute() && attribute.getName().endsWith('-' + languageCode))
+			{
+				return attribute;
+			}
+		}
+
+		return getLabelAttribute();
+	}
+
+	@Override
+	public String getLabel(String languageCode)
+	{
+		String label = labelByLanguageCode.get(languageCode);
+		return label != null ? label : getLabel();
+	}
+
+	@Override
+	public EditableEntityMetaData setLabel(String languageCode, String label)
+	{
+		this.labelByLanguageCode.put(languageCode, label);
+		return this;
+	}
+
+	@Override
+	public Set<String> getLabelLanguageCodes()
+	{
+		return Collections.unmodifiableSet(labelByLanguageCode.keySet());
+	}
+
 }

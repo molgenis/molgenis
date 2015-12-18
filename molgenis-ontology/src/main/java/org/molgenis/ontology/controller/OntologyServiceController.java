@@ -32,6 +32,7 @@ import org.molgenis.data.Sort;
 import org.molgenis.data.Sort.Direction;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.csv.CsvWriter;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;
 import org.molgenis.data.processor.TrimProcessor;
@@ -96,6 +97,9 @@ public class OntologyServiceController extends MolgenisPluginController
 
 	@Autowired
 	private MolgenisPermissionService molgenisPermissionService;
+
+	@Autowired
+	private LanguageService languageService;
 
 	public static final String ID = "ontologyservice";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
@@ -279,7 +283,7 @@ public class OntologyServiceController extends MolgenisPluginController
 		uploadProgress.setUserClickMode(userAccountService.getCurrentUser().getUsername(), isMatched);
 		EntityPager pager = new EntityPager(start, num, count, null);
 		return new EntityCollectionResponse(pager, entityMaps, "/match/retrieve", OntologyTermMetaData.INSTANCE,
-				molgenisPermissionService, dataService);
+				molgenisPermissionService, dataService, languageService);
 	}
 
 	@RequestMapping(method = POST, value = "/match")
