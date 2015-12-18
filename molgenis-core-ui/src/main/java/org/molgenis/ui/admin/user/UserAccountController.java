@@ -1,5 +1,6 @@
 package org.molgenis.ui.admin.user;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.user.UserAccountService.MIN_PASSWORD_LENGTH;
 import static org.molgenis.ui.admin.user.UserAccountController.URI;
 
@@ -48,10 +49,8 @@ public class UserAccountController extends MolgenisPluginController
 	public UserAccountController(UserAccountService userAccountService, LanguageService languageService)
 	{
 		super(URI);
-		if (userAccountService == null) throw new IllegalArgumentException("UserAccountService is null");
-		if (languageService == null) throw new IllegalArgumentException("LanguageService is null");
-		this.userAccountService = userAccountService;
-		this.languageService = languageService;
+		this.userAccountService = requireNonNull(userAccountService);
+		this.languageService = requireNonNull(languageService);
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
