@@ -112,6 +112,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	@Autowired
 	private AppSettings appSettings;
+	
+	@Autowired
+	private AppDbSettings appDbSettings;
 
 	@Autowired
 	private MolgenisPermissionService molgenisPermissionService;
@@ -422,7 +425,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		MySqlEntityFactory localMySqlEntityFactory = new MySqlEntityFactory(localEntityManager, localDataService);
 
 		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(localDataService);
-		metaDataService.setLanguageService(new LanguageService(localDataService, new AppDbSettings()));
+		metaDataService.setLanguageService(new LanguageService(localDataService, appDbSettings));
 		localDataService.setMeta(metaDataService);
 
 		addReposToReindex(localDataService, localMySqlEntityFactory);
