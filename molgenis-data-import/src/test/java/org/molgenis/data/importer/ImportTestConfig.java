@@ -8,6 +8,7 @@ import javax.sql.DataSource;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.IdGenerator;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
@@ -25,6 +26,7 @@ import org.molgenis.ontology.core.repository.OntologyRepository;
 import org.molgenis.ontology.core.repository.OntologyTermRepository;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.security.permission.PermissionSystemService;
+import org.molgenis.ui.settings.AppDbSettings;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -62,8 +64,8 @@ public class ImportTestConfig
 		metaDataService().setDefaultBackend(mysqlRepositoryCollection());
 
 		// Login
-		SecurityContextHolder.getContext()
-				.setAuthentication(new TestingAuthenticationToken("admin", "admin", "ROLE_SYSTEM"));
+		SecurityContextHolder.getContext().setAuthentication(
+				new TestingAuthenticationToken("admin", "admin", "ROLE_SYSTEM"));
 	}
 
 	@Bean
@@ -176,5 +178,11 @@ public class ImportTestConfig
 	IdGenerator idGenerator()
 	{
 		return mock(IdGenerator.class);
+	}
+
+	@Bean
+	public LanguageService languageService()
+	{
+		return new LanguageService(dataService(), new AppDbSettings());
 	}
 }

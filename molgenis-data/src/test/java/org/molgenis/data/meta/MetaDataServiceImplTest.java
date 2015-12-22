@@ -16,7 +16,9 @@ import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Package;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.mem.InMemoryRepositoryCollection;
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -70,7 +72,11 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 		personEntity.set(EntityMetaDataMetaData.SIMPLE_NAME, "Person");
 		personEntity.set(EntityMetaDataMetaData.ABSTRACT, true);
 
-		metaDataServiceImpl = new MetaDataServiceImpl(new DataServiceImpl());
+		DataServiceImpl dataService = new DataServiceImpl();
+		metaDataServiceImpl = new MetaDataServiceImpl(dataService);
+
+		AppSettings appSettings = Mockito.mock(AppSettings.class);
+		metaDataServiceImpl.setLanguageService(new LanguageService(dataService, appSettings));
 		metaDataServiceImpl.setDefaultBackend(manageableCrudRepositoryCollection);
 
 		assertEquals(metaDataServiceImpl.getRootPackages(), Arrays.asList(defaultPackage));
@@ -101,7 +107,10 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 
 		// reboot
 
-		metaDataServiceImpl = new MetaDataServiceImpl(new DataServiceImpl());
+		DataServiceImpl dataService = new DataServiceImpl();
+		metaDataServiceImpl = new MetaDataServiceImpl(dataService);
+		AppSettings appSettings = Mockito.mock(AppSettings.class);
+		metaDataServiceImpl.setLanguageService(new LanguageService(dataService, appSettings));
 		metaDataServiceImpl.setDefaultBackend(manageableCrudRepositoryCollection);
 		retrieved = metaDataServiceImpl.getEntityMetaData("Coder");
 		assertEquals(retrieved.getIdAttribute().getName(), "ID");
@@ -208,7 +217,7 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 																						// test
 		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(dataServiceImpl);
 		RepositoryCollection repositoryCollection = Mockito.mock(RepositoryCollection.class);
-		
+
 		when(repositoryCollection.getEntityNames()).thenReturn(Lists.newArrayList("attributes"));
 
 		DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData("attributes");

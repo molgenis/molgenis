@@ -8,8 +8,8 @@ import javax.sql.DataSource;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MySqlEntityFactory;
@@ -18,6 +18,7 @@ import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.framework.MolgenisUpgrade;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.ui.settings.AppDbSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -68,8 +69,8 @@ public class Step7UpgradeMetaDataTo1_6 extends MolgenisUpgrade
 			@Override
 			protected MysqlRepository createMysqlRepository()
 			{
-				return new MysqlRepository(dataService, mySqlEntityFactory, dataSource,
-						new AsyncJdbcTemplate(new JdbcTemplate(dataSource)));
+				return new MysqlRepository(dataService, mySqlEntityFactory, dataSource, new AsyncJdbcTemplate(
+						new JdbcTemplate(dataSource)));
 			}
 
 			@Override
@@ -78,7 +79,8 @@ public class Step7UpgradeMetaDataTo1_6 extends MolgenisUpgrade
 				throw new UnsupportedOperationException();
 			}
 		};
-		MetaDataService metaData = new MetaDataServiceImpl(dataService);
+		MetaDataServiceImpl metaData = new MetaDataServiceImpl(dataService);
+		metaData.setLanguageService(new LanguageService(dataService, new AppDbSettings()));
 		RunAsSystemProxy.runAsSystem(() -> metaData.setDefaultBackend(undecoratedMySQL));
 
 		searchService.delete(AttributeMetaDataMetaData.ENTITY_NAME);

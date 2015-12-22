@@ -46,6 +46,9 @@ import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.i18n.I18nStringMetaData;
+import org.molgenis.data.i18n.I18nUtils;
+import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
@@ -79,19 +82,22 @@ import com.google.common.collect.Sets;
 public class EmxMetaDataParser implements MetaDataParser
 {
 
+	// Sheet names
+	public static final String ENTITIES = EntityMetaDataMetaData.ENTITY_NAME;
 	public static final String PACKAGES = PackageMetaData.ENTITY_NAME;
 	public static final String TAGS = TagMetaData.ENTITY_NAME;
 	public static final String ATTRIBUTES = AttributeMetaDataMetaData.ENTITY_NAME;
+	public static final String LANGUAGES = LanguageMetaData.ENTITY_NAME;
+	public static final String I18NSTRINGS = I18nStringMetaData.ENTITY_NAME;
 
 	public static final String ENTITY = "entity";
 	public static final String PART_OF_ATTRIBUTE = "partOfAttribute";
 
-	// Sheet names
-	public static final String ENTITIES = EntityMetaDataMetaData.ENTITY_NAME;
 	static final List<String> SUPPORTED_ENTITY_ATTRIBUTES = Arrays.asList(
 			org.molgenis.data.meta.EntityMetaDataMetaData.LABEL.toLowerCase(),
 			org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION.toLowerCase(), "name", ABSTRACT.toLowerCase(),
 			EXTENDS.toLowerCase(), "package", EntityMetaDataMetaData.TAGS, BACKEND);
+
 	static final List<String> SUPPORTED_ATTRIBUTE_ATTRIBUTES = Arrays.asList(AGGREGATEABLE.toLowerCase(),
 			DATA_TYPE.toLowerCase(), DESCRIPTION.toLowerCase(), ENTITY.toLowerCase(), ENUM_OPTIONS.toLowerCase(),
 			ID_ATTRIBUTE.toLowerCase(), LABEL.toLowerCase(), LABEL_ATTRIBUTE.toLowerCase(),
@@ -99,6 +105,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			RANGE_MAX.toLowerCase(), RANGE_MIN.toLowerCase(), READ_ONLY.toLowerCase(), REF_ENTITY.toLowerCase(),
 			VISIBLE.toLowerCase(), UNIQUE.toLowerCase(), TAGS.toLowerCase(), EXPRESSION.toLowerCase(),
 			VALIDATION_EXPRESSION.toLowerCase(), DEFAULT_VALUE.toLowerCase());
+
 	static final String AUTO = "auto";
 
 	private final DataService dataService;
@@ -126,6 +133,18 @@ public class EmxMetaDataParser implements MetaDataParser
 		parseAttributesSheet(source.getRepository(ATTRIBUTES), intermediateResults);
 		parseEntitiesSheet(source.getRepository(ENTITIES), intermediateResults);
 		reiterateToMapRefEntity(source.getRepository(ATTRIBUTES), intermediateResults);
+
+		// languages tab
+		if (source.hasRepository(LANGUAGES))
+		{
+			parseLanguages(source.getRepository(LANGUAGES), intermediateResults);
+		}
+
+		// i18nstrings tab
+		if (source.hasRepository(I18NSTRINGS))
+		{
+			parseI18nStrings(source.getRepository(I18NSTRINGS), intermediateResults);
+		}
 
 		return intermediateResults;
 	}
@@ -166,7 +185,9 @@ public class EmxMetaDataParser implements MetaDataParser
 	{
 		for (AttributeMetaData attr : attributesRepo.getEntityMetaData().getAtomicAttributes())
 		{
-			if (!SUPPORTED_ATTRIBUTE_ATTRIBUTES.contains(attr.getName().toLowerCase()))
+			if (!SUPPORTED_ATTRIBUTE_ATTRIBUTES.contains(attr.getName().toLowerCase())
+					&& !((I18nUtils.isI18n(attr.getName()) && (attr.getName().toLowerCase().startsWith(LABEL) || attr
+							.getName().toLowerCase().startsWith(DESCRIPTION)))))
 			{
 				throw new IllegalArgumentException("Unsupported attribute metadata: attributes. " + attr.getName());
 			}
@@ -316,6 +337,31 @@ public class EmxMetaDataParser implements MetaDataParser
 			}
 
 			attribute.setLabel(attributeEntity.getString(LABEL));
+			for (AttributeMetaData attr : attributeEntity.getEntityMetaData().getAtomicAttributes())
+			{
+				if (I18nUtils.isI18n(attr.getName()))
+				{
+					if (attr.getName().startsWith(LABEL))
+					{
+						String label = attributeEntity.getString(attr.getName());
+						if (label != null)
+						{
+							String languageCode = I18nUtils.getLanguageCode(attr.getName());
+							attribute.setLabel(languageCode, label);
+						}
+					}
+					else if (attr.getName().startsWith(DESCRIPTION))
+					{
+						String description = attributeEntity.getString(attr.getName());
+						if (description != null)
+						{
+							String languageCode = I18nUtils.getLanguageCode(attr.getName());
+							attribute.setDescription(languageCode, description);
+						}
+					}
+				}
+			}
+
 			attribute.setDescription(attributeEntity.getString(DESCRIPTION));
 
 			if (attribute.getDataType() instanceof EnumField)
@@ -482,7 +528,10 @@ public class EmxMetaDataParser implements MetaDataParser
 		{
 			for (AttributeMetaData attr : entitiesRepo.getEntityMetaData().getAtomicAttributes())
 			{
-				if (!EmxMetaDataParser.SUPPORTED_ENTITY_ATTRIBUTES.contains(attr.getName().toLowerCase()))
+				if (!EmxMetaDataParser.SUPPORTED_ENTITY_ATTRIBUTES.contains(attr.getName().toLowerCase())
+						&& !(I18nUtils.isI18n(attr.getName()) && (attr.getName().startsWith(
+								org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION) || attr.getName()
+								.startsWith(org.molgenis.data.meta.EntityMetaDataMetaData.LABEL))))
 				{
 					throw new IllegalArgumentException("Unsupported entity metadata: entities." + attr.getName());
 				}
@@ -533,6 +582,32 @@ public class EmxMetaDataParser implements MetaDataParser
 
 				md.setLabel(entity.getString(org.molgenis.data.meta.EntityMetaDataMetaData.LABEL));
 				md.setDescription(entity.getString(org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION));
+
+				for (AttributeMetaData attr : entity.getEntityMetaData().getAtomicAttributes())
+				{
+					if (I18nUtils.isI18n(attr.getName()))
+					{
+						if (attr.getName().startsWith(org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION))
+						{
+							String description = entity.getString(attr.getName());
+							if (description != null)
+							{
+								String languageCode = I18nUtils.getLanguageCode(attr.getName());
+								md.setDescription(languageCode, description);
+							}
+						}
+						else if (attr.getName().startsWith(org.molgenis.data.meta.EntityMetaDataMetaData.LABEL))
+						{
+							String label = entity.getString(attr.getName());
+							if (label != null)
+							{
+								String languageCode = I18nUtils.getLanguageCode(attr.getName());
+								md.setLabel(languageCode, label);
+							}
+						}
+					}
+				}
+
 				if (entity.getBoolean(ABSTRACT) != null) md.setAbstract(entity.getBoolean(ABSTRACT));
 				List<String> tagIds = entity.getList(TAGS);
 
@@ -613,6 +688,16 @@ public class EmxMetaDataParser implements MetaDataParser
 
 			intermediateResults.addPackage(name, new PackageImpl(simpleName, description, parent));
 		}
+	}
+
+	private void parseLanguages(Repository repo, IntermediateParseResults intermediateResults)
+	{
+		repo.forEach(intermediateResults::addLanguage);
+	}
+
+	private void parseI18nStrings(Repository repo, IntermediateParseResults intermediateResults)
+	{
+		repo.forEach(intermediateResults::addI18nString);
 	}
 
 	private void parsePackageTags(Repository repo, IntermediateParseResults intermediateResults)
@@ -758,7 +843,8 @@ public class EmxMetaDataParser implements MetaDataParser
 			}
 
 			return new ParsedMetaData(resolveEntityDependencies(entities), intermediateResults.getPackages(),
-					intermediateResults.getAttributeTags(), intermediateResults.getEntityTags());
+					intermediateResults.getAttributeTags(), intermediateResults.getEntityTags(),
+					intermediateResults.getLanguages(), intermediateResults.getI18nStrings());
 		}
 		else
 		{
@@ -770,8 +856,20 @@ public class EmxMetaDataParser implements MetaDataParser
 			IntermediateParseResults intermediateResults = parseTagsSheet(source.getRepository(TAGS));
 			parsePackagesSheet(source.getRepository(PACKAGES), intermediateResults);
 			parsePackageTags(source.getRepository(PACKAGES), intermediateResults);
+
+			if (source.hasRepository(LANGUAGES))
+			{
+				parseLanguages(source.getRepository(LANGUAGES), intermediateResults);
+			}
+
+			if (source.hasRepository(I18NSTRINGS))
+			{
+				parseI18nStrings(source.getRepository(I18NSTRINGS), intermediateResults);
+			}
+
 			return new ParsedMetaData(resolveEntityDependencies(metadataList), intermediateResults.getPackages(),
-					intermediateResults.getAttributeTags(), intermediateResults.getEntityTags());
+					intermediateResults.getAttributeTags(), intermediateResults.getEntityTags(),
+					intermediateResults.getLanguages(), intermediateResults.getI18nStrings());
 		}
 
 	}
@@ -871,7 +969,8 @@ public class EmxMetaDataParser implements MetaDataParser
 					report.addPackage(packageName);
 				}
 			}
-			else if (!ENTITIES.equals(sheet) && !ATTRIBUTES.equals(sheet) && !TAGS.equals(sheet))
+			else if (!ENTITIES.equals(sheet) && !ATTRIBUTES.equals(sheet) && !TAGS.equals(sheet)
+					&& !LANGUAGES.equals(sheet) && !I18NSTRINGS.equals(sheet))
 			{
 				// check if sheet is known
 				report = report.addEntity(sheet, metaDataMap.containsKey(sheet));

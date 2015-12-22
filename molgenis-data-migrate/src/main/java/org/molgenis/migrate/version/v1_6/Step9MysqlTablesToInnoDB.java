@@ -7,7 +7,7 @@ import javax.sql.DataSource;
 
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityManagerImpl;
-import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MySqlEntityFactory;
@@ -17,6 +17,7 @@ import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.framework.MolgenisUpgrade;
 import org.molgenis.migrate.version.MigrationUtils;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.ui.settings.AppDbSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -31,9 +32,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
  */
 public class Step9MysqlTablesToInnoDB extends MolgenisUpgrade
 {
-	private JdbcTemplate template;
+	private final JdbcTemplate template;
 
-	private DataSource dataSource;
+	private final DataSource dataSource;
 
 	private static final Logger LOG = LoggerFactory.getLogger(Step9MysqlTablesToInnoDB.class);
 
@@ -57,8 +58,8 @@ public class Step9MysqlTablesToInnoDB extends MolgenisUpgrade
 			@Override
 			protected MysqlRepository createMysqlRepository()
 			{
-				return new MysqlRepository(dataService, mySqlEntityFactory, dataSource,
-						new AsyncJdbcTemplate(new JdbcTemplate(dataSource)));
+				return new MysqlRepository(dataService, mySqlEntityFactory, dataSource, new AsyncJdbcTemplate(
+						new JdbcTemplate(dataSource)));
 			}
 
 			@Override
@@ -67,7 +68,8 @@ public class Step9MysqlTablesToInnoDB extends MolgenisUpgrade
 				throw new UnsupportedOperationException();
 			}
 		};
-		MetaDataService metaData = new MetaDataServiceImpl(dataService);
+		MetaDataServiceImpl metaData = new MetaDataServiceImpl(dataService);
+		metaData.setLanguageService(new LanguageService(dataService, new AppDbSettings()));
 		RunAsSystemProxy.runAsSystem(() -> metaData.setDefaultBackend(undecoratedMySQL));
 
 		LOG.info("Migrating non-InnoDB tables to InnoDB...");
