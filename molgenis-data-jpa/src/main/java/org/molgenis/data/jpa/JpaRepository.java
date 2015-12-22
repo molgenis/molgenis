@@ -154,7 +154,6 @@ public class JpaRepository extends AbstractRepository
 	}
 
 	@Override
-	@Transactional(readOnly = true)
 	public Entity findOne(Object id)
 	{
 		if (LOG.isDebugEnabled())
@@ -167,7 +166,6 @@ public class JpaRepository extends AbstractRepository
 	}
 
 	@Override
-	@Transactional(readOnly = true)
 	public Entity findOne(Object id, Fetch fetch)
 	{
 		if (LOG.isDebugEnabled())
@@ -178,7 +176,6 @@ public class JpaRepository extends AbstractRepository
 		return getEntityManager().find(getEntityClass(),
 				getEntityMetaData().getIdAttribute().getDataType().convert(id));
 	}
-
 
 	@Override
 	@Transactional(readOnly = true)
