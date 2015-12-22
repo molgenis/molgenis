@@ -37,7 +37,7 @@ public class Step25LanguagesPermissions extends MolgenisUpgrade implements Appli
 	@Override
 	public void upgrade()
 	{
-		LOG.info("Updating metadata from version 23 to 24");
+		LOG.info("Updating metadata from version 24 to 25");
 		enabled = true;
 	}
 
@@ -48,18 +48,18 @@ public class Step25LanguagesPermissions extends MolgenisUpgrade implements Appli
 		{
 			RunAsSystemProxy.runAsSystem(() -> {
 				// allow all users to read the app languages
-					MolgenisGroup allUsersGroup = dataService.findOne(MolgenisGroup.ENTITY_NAME,
-							QueryImpl.EQ(MolgenisGroup.NAME, AccountService.ALL_USER_GROUP), MolgenisGroup.class);
+				MolgenisGroup allUsersGroup = dataService.findOne(MolgenisGroup.ENTITY_NAME,
+						QueryImpl.EQ(MolgenisGroup.NAME, AccountService.ALL_USER_GROUP), MolgenisGroup.class);
 
-					if (allUsersGroup != null)
-					{
-						GroupAuthority usersGroupLanguagesAuthority = new GroupAuthority();
-						usersGroupLanguagesAuthority.setMolgenisGroup(allUsersGroup);
-						usersGroupLanguagesAuthority.setRole(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX
-								+ LanguageMetaData.ENTITY_NAME);
-						dataService.add(GroupAuthority.ENTITY_NAME, usersGroupLanguagesAuthority);
-					}
-				});
+				if (allUsersGroup != null)
+				{
+					GroupAuthority usersGroupLanguagesAuthority = new GroupAuthority();
+					usersGroupLanguagesAuthority.setMolgenisGroup(allUsersGroup);
+					usersGroupLanguagesAuthority
+							.setRole(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + LanguageMetaData.ENTITY_NAME);
+					dataService.add(GroupAuthority.ENTITY_NAME, usersGroupLanguagesAuthority);
+				}
+			});
 		}
 	}
 }
