@@ -9,6 +9,8 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.i18n.I18nStringMetaData;
+import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Tag;
@@ -47,15 +49,29 @@ public final class IntermediateParseResults
 	 * Contains all tag entities from the tag sheet
 	 */
 	private final Map<String, Entity> tags;
+	/**
+	 * Contains all language enities from the languages sheet
+	 */
+	private final Map<String, Entity> languages;
+	/**
+	 * Contains all i18nString entities from the i18nstrings sheet
+	 */
+	private final Map<String, Entity> i18nStrings;
 
 	public IntermediateParseResults()
 	{
-		this.tags = new LinkedHashMap<String, Entity>();
-		this.entities = new LinkedHashMap<String, DefaultEntityMetaData>();
-		this.packages = new LinkedHashMap<String, PackageImpl>();
-		this.attributeTags = LinkedHashMultimap
-				.<String, Tag<AttributeMetaData, LabeledResource, LabeledResource>> create();
-		this.entityTags = new ArrayList<Tag<EntityMetaData, LabeledResource, LabeledResource>>();
+		this.tags = new LinkedHashMap<>();
+		this.entities = new LinkedHashMap<>();
+		this.packages = new LinkedHashMap<>();
+		this.attributeTags = LinkedHashMultimap.create();
+		this.entityTags = new ArrayList<>();
+		this.languages = new LinkedHashMap<>();
+		this.i18nStrings = new LinkedHashMap<>();
+	}
+
+	public void addEntityMetaData(DefaultEntityMetaData entityMetaData)
+	{
+		entities.put(entityMetaData.getName(), entityMetaData);
 	}
 
 	public void addTagEntity(String identifier, Entity tagEntity)
@@ -94,6 +110,16 @@ public final class IntermediateParseResults
 	public EditableEntityMetaData getEntityMetaData(String name)
 	{
 		return entities.get(name);
+	}
+
+	public void addLanguage(Entity language)
+	{
+		languages.put(language.getString(LanguageMetaData.CODE), language);
+	}
+
+	public void addI18nString(Entity i18nString)
+	{
+		i18nStrings.put(i18nString.getString(I18nStringMetaData.MSGID), i18nString);
 	}
 
 	/**
@@ -138,11 +164,22 @@ public final class IntermediateParseResults
 		return ImmutableList.copyOf(entityTags);
 	}
 
+	public ImmutableMap<String, Entity> getLanguages()
+	{
+		return ImmutableMap.copyOf(languages);
+	}
+
+	public ImmutableMap<String, Entity> getI18nStrings()
+	{
+		return ImmutableMap.copyOf(i18nStrings);
+	}
+
 	@Override
 	public String toString()
 	{
-		return "ParsedMetaData [entities=" + entities + ", packages=" + packages + ", attributeTags=" + attributeTags
-				+ ", entityTags=" + entityTags + "]";
+		return "IntermediateParseResults [entities=" + entities + ", packages=" + packages + ", attributeTags="
+				+ attributeTags + ", entityTags=" + entityTags + ", tags=" + tags + ", languages=" + languages
+				+ ", i18nStrings=" + i18nStrings + "]";
 	}
 
 	@Override
@@ -153,7 +190,10 @@ public final class IntermediateParseResults
 		result = prime * result + ((attributeTags == null) ? 0 : attributeTags.hashCode());
 		result = prime * result + ((entities == null) ? 0 : entities.hashCode());
 		result = prime * result + ((entityTags == null) ? 0 : entityTags.hashCode());
+		result = prime * result + ((i18nStrings == null) ? 0 : i18nStrings.hashCode());
+		result = prime * result + ((languages == null) ? 0 : languages.hashCode());
 		result = prime * result + ((packages == null) ? 0 : packages.hashCode());
+		result = prime * result + ((tags == null) ? 0 : tags.hashCode());
 		return result;
 	}
 
@@ -179,11 +219,26 @@ public final class IntermediateParseResults
 			if (other.entityTags != null) return false;
 		}
 		else if (!entityTags.equals(other.entityTags)) return false;
+		if (i18nStrings == null)
+		{
+			if (other.i18nStrings != null) return false;
+		}
+		else if (!i18nStrings.equals(other.i18nStrings)) return false;
+		if (languages == null)
+		{
+			if (other.languages != null) return false;
+		}
+		else if (!languages.equals(other.languages)) return false;
 		if (packages == null)
 		{
 			if (other.packages != null) return false;
 		}
 		else if (!packages.equals(other.packages)) return false;
+		if (tags == null)
+		{
+			if (other.tags != null) return false;
+		}
+		else if (!tags.equals(other.tags)) return false;
 		return true;
 	}
 

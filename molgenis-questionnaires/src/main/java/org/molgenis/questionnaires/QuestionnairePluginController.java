@@ -14,6 +14,7 @@ import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.OwnedEntityMetaData;
@@ -35,13 +36,16 @@ public class QuestionnairePluginController extends MolgenisPluginController
 
 	private final DataService dataService;
 	private final ThankYouTextService thankYouTextService;
+	private final LanguageService languageService;
 
 	@Autowired
-	public QuestionnairePluginController(DataService dataService, ThankYouTextService thankYouTextService)
+	public QuestionnairePluginController(DataService dataService, ThankYouTextService thankYouTextService,
+			LanguageService languageService)
 	{
 		super(URI);
 		this.dataService = dataService;
 		this.thankYouTextService = thankYouTextService;
+		this.languageService = languageService;
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
@@ -125,7 +129,8 @@ public class QuestionnairePluginController extends MolgenisPluginController
 	private Questionnaire toQuestionnaireModel(Entity entity, EntityMetaData emd)
 	{
 		QuestionnaireStatus status = QuestionnaireStatus.valueOf(entity.getString(QuestionnaireMetaData.ATTR_STATUS));
-		return new Questionnaire(emd.getName(), emd.getLabel(), status, emd.getDescription(), entity.getIdValue());
+		return new Questionnaire(emd.getName(), emd.getLabel(languageService.getCurrentUserLanguageCode()), status,
+				emd.getDescription(languageService.getCurrentUserLanguageCode()), entity.getIdValue());
 	}
 
 	private Entity findQuestionnaireEntity(String name)

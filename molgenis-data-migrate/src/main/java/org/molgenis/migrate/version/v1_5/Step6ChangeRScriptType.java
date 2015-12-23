@@ -9,7 +9,7 @@ import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MySqlEntityFactory;
@@ -23,6 +23,7 @@ import org.molgenis.script.Script;
 import org.molgenis.script.ScriptParameter;
 import org.molgenis.script.ScriptType;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.ui.settings.AppDbSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -44,9 +45,9 @@ public class Step6ChangeRScriptType extends MolgenisUpgrade
 	private final SearchService searchService;
 	private Repository scriptTypeRepo;
 	private Repository scriptRepo;
-	private DataSource dataSource;
+	private final DataSource dataSource;
 	private MysqlRepositoryCollection mysql;
-	private MetaDataService metaData;
+	private MetaDataServiceImpl metaData;
 
 	public Step6ChangeRScriptType(DataSource dataSource, SearchService searchService)
 	{
@@ -102,8 +103,8 @@ public class Step6ChangeRScriptType extends MolgenisUpgrade
 			@Override
 			protected MysqlRepository createMysqlRepository()
 			{
-				return new MysqlRepository(dataService, mySqlEntityFactory, dataSource,
-						new AsyncJdbcTemplate(new JdbcTemplate(dataSource)));
+				return new MysqlRepository(dataService, mySqlEntityFactory, dataSource, new AsyncJdbcTemplate(
+						new JdbcTemplate(dataSource)));
 			}
 
 			@Override
@@ -113,6 +114,7 @@ public class Step6ChangeRScriptType extends MolgenisUpgrade
 			}
 		};
 		metaData = new MetaDataServiceImpl(dataService);
+		metaData.setLanguageService(new LanguageService(dataService, new AppDbSettings()));
 		RunAsSystemProxy.runAsSystem(this::initRepositories);
 	}
 

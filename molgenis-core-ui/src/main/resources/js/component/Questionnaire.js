@@ -5,7 +5,7 @@
     var div = React.DOM.div;
     
     var Questionnaire = React.createClass({
-    	mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.EntityLoaderMixin, molgenis.ui.mixin.EntityInstanceLoaderMixin],
+    	mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.EntityLoaderMixin, molgenis.ui.mixin.EntityInstanceLoaderMixin, molgenis.ui.mixin.I18nStringsMixin],
     	displayName: 'Questionnaire',
     	propTypes: {
     		entity: React.PropTypes.string.isRequired,
@@ -23,13 +23,14 @@
 			return {
 				entity : null,			// transfered from props to state, loaded from server if required
 				entityInstance : null,	// transfered from props to state, loaded from server if required
+				i18nStrings : null //loaded from server
 			};
     	},
     	_onSubmitClick: function(e) {
     		this.refs.form.submit(e);
     	},
     	render: function() {
-    		if(this.state.entity === null || this.state.entityInstance === null) {
+    		if(this.state.entity === null || this.state.entityInstance === null || this.state.i18nStrings === null) {
 				return molgenis.ui.Spinner();
 			}
 			
@@ -37,8 +38,8 @@
     		var QuestionnaireButtons = this.state.entityInstance.status !== 'SUBMITTED' ? (
     			div({className: 'row', style: {textAlign: 'right'}},
 					div({className: 'col-md-12'},
-						molgenis.ui.Button({text: 'Save and Continue Later', onClick: this.props.onContinueLaterClick}),
-						molgenis.ui.Button({type: 'button', style: 'primary', css: {marginLeft: 5}, text: 'Submit', onClick: this._onSubmitClick})
+						molgenis.ui.Button({text: this.state.i18nStrings.questionnaire_save_and_continue, onClick: this.props.onContinueLaterClick}),
+						molgenis.ui.Button({type: 'button', style: 'primary', css: {marginLeft: 5}, text: this.state.i18nStrings.questionnaire_submit, onClick: this._onSubmitClick})
 					)
 				)
 			) : null;

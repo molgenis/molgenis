@@ -15,11 +15,29 @@ public interface EditableEntityMetaData extends EntityMetaData
 	EditableEntityMetaData setLabel(String string);
 
 	/**
+	 * Set label for language
+	 * 
+	 * @param languageCode
+	 * @param label
+	 * @return
+	 */
+	EditableEntityMetaData setLabel(String languageCode, String label);
+
+	/**
 	 * Set description
 	 * 
 	 * @param string
 	 */
 	EditableEntityMetaData setDescription(String string);
+
+	/**
+	 * Set description for language
+	 * 
+	 * @param languageCode
+	 * @param description
+	 * @return
+	 */
+	EditableEntityMetaData setDescription(String languageCode, String description);
 
 	/**
 	 * set extends entity metadata

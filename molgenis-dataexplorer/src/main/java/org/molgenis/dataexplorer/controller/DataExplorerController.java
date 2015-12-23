@@ -14,7 +14,6 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -27,6 +26,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
@@ -104,6 +104,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@Autowired
 	private Gson gson;
+
+	@Autowired
+	private LanguageService languageService;
 
 	public DataExplorerController()
 	{
@@ -202,19 +205,12 @@ public class DataExplorerController extends MolgenisPluginController
 
 		// set data explorer permission
 		Permission pluginPermission = null;
-		if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE))
-			pluginPermission = Permission.WRITE;
-		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.READ))
-			pluginPermission = Permission.READ;
-		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.COUNT))
-			pluginPermission = Permission.COUNT;
+		if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE)) pluginPermission = Permission.WRITE;
+		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.READ)) pluginPermission = Permission.READ;
+		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.COUNT)) pluginPermission = Permission.COUNT;
 
 		ModulesConfigResponse modulesConfig = new ModulesConfigResponse();
-
-		String i18nLocale = appSettings.getLanguageCode();
-		Locale locale = new Locale(i18nLocale, i18nLocale);
-		ResourceBundle i18n = ResourceBundle.getBundle("i18n", locale);
-
+		ResourceBundle i18n = languageService.getBundle();
 		String aggregatesTitle = i18n.getString("dataexplorer_aggregates_title");
 
 		if (pluginPermission != null)
@@ -250,8 +246,8 @@ public class DataExplorerController extends MolgenisPluginController
 						String modEntitiesReportName = dataExplorerSettings.getEntityReport(entityName);
 						if (modEntitiesReportName != null)
 						{
-							modulesConfig
-									.add(new ModuleConfig("entitiesreport", modEntitiesReportName, "report-icon.png"));
+							modulesConfig.add(new ModuleConfig("entitiesreport", modEntitiesReportName,
+									"report-icon.png"));
 						}
 					}
 					break;
@@ -290,10 +286,10 @@ public class DataExplorerController extends MolgenisPluginController
 
 	private boolean isGenomeBrowserEntity(EntityMetaData entityMetaData)
 	{
-		AttributeMetaData attributeStartPosition = genomicDataSettings
-				.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_POS, entityMetaData);
-		AttributeMetaData attributeChromosome = genomicDataSettings
-				.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_CHROM, entityMetaData);
+		AttributeMetaData attributeStartPosition = genomicDataSettings.getAttributeMetadataForAttributeNameArray(
+				GenomicDataSettings.Meta.ATTRS_POS, entityMetaData);
+		AttributeMetaData attributeChromosome = genomicDataSettings.getAttributeMetadataForAttributeNameArray(
+				GenomicDataSettings.Meta.ATTRS_CHROM, entityMetaData);
 		return attributeStartPosition != null && attributeChromosome != null;
 	}
 

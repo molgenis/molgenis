@@ -37,6 +37,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.Sort;
 import org.molgenis.data.Sort.Direction;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.rest.RestControllerTest.RestControllerConfig;
 import org.molgenis.data.rest.service.RestService;
@@ -644,11 +645,17 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
+		public LanguageService languageService()
+		{
+			return mock(LanguageService.class);
+		}
+
+		@Bean
 		public RestController restController()
 		{
 			return new RestController(dataService(), tokenService(), authenticationManager(),
 					molgenisPermissionService(), new ResourceFingerprintRegistry(), new MolgenisRSQL(),
-					new RestService(dataService(), idGenerator(), fileStore()));
+					new RestService(dataService(), idGenerator(), fileStore()), languageService());
 		}
 	}
 
