@@ -10,7 +10,6 @@ import org.molgenis.data.Package;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.support.FileRepositoryCollection;
-import org.molgenis.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +17,8 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
+
+import com.google.common.io.Resources;
 
 /**
  * Imports i18n static strings from molgenis-core-ui/src/main/resources/i18n.xlsx at startup.
@@ -46,7 +47,7 @@ public class I18nStringsPopulator implements ApplicationListener<ContextRefreshe
 	{
 		LOG.info("Importing i18n strings...");
 
-		File file = ResourceUtils.getFile("i18n.xlsx");
+		File file = new File(Resources.getResource("i18n.xlsx").getPath());
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
