@@ -66,6 +66,9 @@ public class ResourceUtils
 	/**
 	 * Workaround for http://bugs.java.com/bugdatabase/view_bug.do?bug_id=4466485
 	 * 
+	 * This workaround is not working for file resources in jars. You will get a NullPointerException because the URL
+	 * cannot be converted to URI.
+	 * 
 	 * @param resourceUrl
 	 * @return
 	 */
@@ -81,7 +84,7 @@ public class ResourceUtils
 		}
 		catch (NullPointerException npe)
 		{
-			LOG.error("NullPointerException is thrown. Resource url: {}", resourceUrl);
+			LOG.error("NullPointerException is thrown. Resource url: {} ", resourceUrl);
 			throw new RuntimeException(npe);
 		}
 	}
