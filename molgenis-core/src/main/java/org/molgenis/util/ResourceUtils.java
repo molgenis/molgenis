@@ -81,7 +81,7 @@ public class ResourceUtils
 		}
 		catch (NullPointerException npe)
 		{
-			LOG.error("NullPointerException is thrown. Resource url: ", resourceUrl);
+			LOG.error("NullPointerException is thrown. Resource url: {}", resourceUrl);
 			throw new RuntimeException(npe);
 		}
 	}
