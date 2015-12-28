@@ -7,10 +7,14 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.io.Resources;
 
 public class ResourceUtils
 {
+	private static final Logger LOG = LoggerFactory.getLogger(ResourceUtils.class);
 	private static final Charset CHARSET_UTF8 = Charset.forName("UTF-8");
 
 	private ResourceUtils()
@@ -74,6 +78,11 @@ public class ResourceUtils
 		catch (URISyntaxException e)
 		{
 			throw new RuntimeException(e);
+		}
+		catch (NullPointerException npe)
+		{
+			LOG.error("NullPointerException is thrown. Resource url: {}", resourceUrl);
+			throw new RuntimeException(npe);
 		}
 	}
 
