@@ -53,9 +53,8 @@ public class I18nStringsPopulator implements ApplicationListener<ContextRefreshe
 
 		// "i18n is saved as a Application/Library resource.
 		// "It is not possible to use it as a file but should streamed as a resource"
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		InputStream is = classLoader.getResourceAsStream(i18nFileName);
-		
+		InputStream is = I18nStringsPopulator.class.getClassLoader().getResourceAsStream(i18nFileName);
+
 		try
 		{
 			File fileInTempDir = fileStore.store(is, i18nFileName);
