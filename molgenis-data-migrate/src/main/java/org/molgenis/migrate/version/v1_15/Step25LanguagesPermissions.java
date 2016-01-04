@@ -48,18 +48,18 @@ public class Step25LanguagesPermissions extends MolgenisUpgrade implements Appli
 		{
 			RunAsSystemProxy.runAsSystem(() -> {
 				// allow all users to read the app languages
-				MolgenisGroup allUsersGroup = dataService.findOne(MolgenisGroup.ENTITY_NAME,
-						QueryImpl.EQ(MolgenisGroup.NAME, AccountService.ALL_USER_GROUP), MolgenisGroup.class);
+					MolgenisGroup allUsersGroup = dataService.findOne(MolgenisGroup.ENTITY_NAME,
+							QueryImpl.EQ(MolgenisGroup.NAME, AccountService.ALL_USER_GROUP), MolgenisGroup.class);
 
-				if (allUsersGroup != null)
-				{
-					GroupAuthority usersGroupLanguagesAuthority = new GroupAuthority();
-					usersGroupLanguagesAuthority.setMolgenisGroup(allUsersGroup);
-					usersGroupLanguagesAuthority
-							.setRole(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + LanguageMetaData.ENTITY_NAME);
-					dataService.add(GroupAuthority.ENTITY_NAME, usersGroupLanguagesAuthority);
-				}
-			});
+					if (allUsersGroup != null)
+					{
+						GroupAuthority usersGroupLanguagesAuthority = new GroupAuthority();
+						usersGroupLanguagesAuthority.setMolgenisGroup(allUsersGroup);
+						usersGroupLanguagesAuthority.setRole(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX
+								+ LanguageMetaData.ENTITY_NAME.toUpperCase());
+						dataService.add(GroupAuthority.ENTITY_NAME, usersGroupLanguagesAuthority);
+					}
+				});
 		}
 	}
 }
