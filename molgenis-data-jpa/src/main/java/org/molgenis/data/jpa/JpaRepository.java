@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -106,10 +107,22 @@ public class JpaRepository extends AbstractRepository
 	@Transactional
 	public Integer add(Iterable<? extends Entity> entities)
 	{
+		return add(entities.iterator());
+	}
+
+	@Override
+	@Transactional
+	public Integer add(Stream<? extends Entity> entities)
+	{
+		return add(entities.iterator());
+	}
+
+	private Integer add(Iterator<? extends Entity> it)
+	{
 		Integer count = 0;
-		for (Entity e : entities)
+		while (it.hasNext())
 		{
-			add(e);
+			add(it.next());
 			count++;
 		}
 		return count;

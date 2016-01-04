@@ -1,17 +1,26 @@
 package org.molgenis.data.validation;
 
+import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.MREF;
+import static org.molgenis.MolgenisFieldTypes.STRING;
+import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.mockito.ArgumentCaptor;
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -21,6 +30,7 @@ import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
+import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -38,6 +48,121 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator = new RepositoryValidationDecorator(
 				new DataServiceImpl(new NonDecoratingRepositoryDecoratorFactory()), decoratedRepository,
 				new EntityAttributesValidator());
+	}
+
+	// entity attributes validation
+	// unique validation
+	// reference validation
+	// nillable validation
+	// read-only validation
+	@SuppressWarnings(
+	{ "rawtypes", "unchecked", "resource" })
+	@Test
+	public void addStream()
+	{
+		// ref entity meta
+		String refEntityName = "refEntity";
+
+		String refAttrIdName = "refId";
+
+		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(refAttrIdName).getMock();
+		when(refIdAttr.getDataType()).thenReturn(STRING);
+
+		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
+		when(refEntityMeta.getName()).thenReturn(refEntityName);
+		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
+		when(refEntityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(refIdAttr));
+
+		// ref entities
+		String refEntity0Id = "id0";
+		Entity refEntity0 = mock(Entity.class);
+		when(refEntity0.getEntityMetaData()).thenReturn(refEntityMeta);
+		when(refEntity0.getIdValue()).thenReturn(refEntity0Id);
+		when(refEntity0.get(refAttrIdName)).thenReturn(refEntity0Id);
+		when(refEntity0.getString(refAttrIdName)).thenReturn(refEntity0Id);
+
+		List<Entity> refEntities = Arrays.asList(refEntity0);
+
+		// entity meta
+		String entityName = "entity";
+
+		String attrIdName = "id";
+		String attrXrefName = "xrefAttr";
+		String attrNillableXrefName = "nillableXrefAttr";
+		String attrMrefName = "mrefAttr";
+		String attrNillableMrefName = "nillableMrefAttr";
+
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrIdName).getMock();
+		when(idAttr.getDataType()).thenReturn(STRING);
+
+		AttributeMetaData xrefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrXrefName).getMock();
+		when(xrefAttr.getRefEntity()).thenReturn(refEntityMeta);
+		when(xrefAttr.getDataType()).thenReturn(XREF);
+		when(xrefAttr.isNillable()).thenReturn(false);
+
+		AttributeMetaData nillableXrefAttr = when(mock(AttributeMetaData.class).getName())
+				.thenReturn(attrNillableXrefName).getMock();
+		when(nillableXrefAttr.getRefEntity()).thenReturn(refEntityMeta);
+		when(nillableXrefAttr.getDataType()).thenReturn(XREF);
+		when(nillableXrefAttr.isNillable()).thenReturn(true);
+
+		AttributeMetaData mrefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrMrefName).getMock();
+		when(mrefAttr.getRefEntity()).thenReturn(refEntityMeta);
+		when(mrefAttr.getDataType()).thenReturn(MREF);
+		when(mrefAttr.isNillable()).thenReturn(false);
+
+		AttributeMetaData nillableMrefAttr = when(mock(AttributeMetaData.class).getName())
+				.thenReturn(attrNillableMrefName).getMock();
+		when(nillableMrefAttr.getRefEntity()).thenReturn(refEntityMeta);
+		when(nillableMrefAttr.getDataType()).thenReturn(MREF);
+		when(nillableMrefAttr.isNillable()).thenReturn(true);
+
+		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		when(entityMeta.getName()).thenReturn(entityName);
+		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
+		when(entityMeta.getAttribute(attrIdName)).thenReturn(idAttr);
+		when(entityMeta.getAttribute(attrXrefName)).thenReturn(xrefAttr);
+		when(entityMeta.getAttribute(attrNillableXrefName)).thenReturn(nillableXrefAttr);
+		when(entityMeta.getAttribute(attrMrefName)).thenReturn(mrefAttr);
+		when(entityMeta.getAttribute(attrNillableMrefName)).thenReturn(nillableMrefAttr);
+		when(entityMeta.getAtomicAttributes())
+				.thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr, nillableMrefAttr));
+
+		// entities
+		Entity entity0 = mock(Entity.class);
+		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
+		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
+		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
+		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
+
+		// actual tests
+		Repository decoratedRepo = mock(Repository.class);
+		when(decoratedRepo.getEntityMetaData()).thenReturn(entityMeta);
+
+		Repository refRepo = mock(Repository.class);
+		when(refRepo.getEntityMetaData()).thenReturn(refEntityMeta);
+
+		DataService dataService = mock(DataService.class);
+		when(dataService.getRepository(entityName)).thenReturn(decoratedRepo);
+		when(dataService.getRepository(refEntityName)).thenReturn(refRepo);
+		when(dataService.findAll(refEntityName, new QueryImpl().fetch(new Fetch().field(refAttrIdName))))
+				.thenReturn(refEntities);
+
+		EntityAttributesValidator entityAttributesValidator = mock(EntityAttributesValidator.class);
+		RepositoryValidationDecorator repositoryValidationDecorator = new RepositoryValidationDecorator(dataService,
+				decoratedRepo, entityAttributesValidator);
+
+		List<Entity> entities = Arrays.asList(entity0);
+		repositoryValidationDecorator.add(entities.stream());
+
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(decoratedRepo, times(1)).add(captor.capture());
+		Stream<Entity> stream = captor.getValue();
+		stream.collect(Collectors.toList()); // process stream to enable validation
+
+		verify(entityAttributesValidator, times(1)).validate(entity0, entityMeta);
 	}
 
 	@Test

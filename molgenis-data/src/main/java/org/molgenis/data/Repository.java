@@ -2,6 +2,7 @@ package org.molgenis.data;
 
 import java.io.Closeable;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * Repository gives access to a collection of Entity. Synonyms: EntityReader, EntitySource, EntityCollection
@@ -108,6 +109,14 @@ public interface Repository extends Iterable<Entity>, Closeable
 
 	/** Stream add multiple entities */
 	Integer add(Iterable<? extends Entity> entities);
+
+	/**
+	 * Add entities to repisotory
+	 * 
+	 * @param entities
+	 * @return number of added entities
+	 */
+	Integer add(Stream<? extends Entity> entities);
 
 	void flush();
 

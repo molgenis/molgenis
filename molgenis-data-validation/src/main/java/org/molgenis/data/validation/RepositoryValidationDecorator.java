@@ -1,10 +1,20 @@
 package org.molgenis.data.validation;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singleton;
+import static java.util.stream.StreamSupport.stream;
+
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -20,6 +30,7 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.MolgenisTransactionLogEntryMetaData;
 import org.molgenis.data.transaction.MolgenisTransactionLogMetaData;
 import org.molgenis.fieldtypes.FieldType;
@@ -78,6 +89,117 @@ public class RepositoryValidationDecorator implements Repository
 	public Integer add(Iterable<? extends Entity> entities)
 	{
 		validate(entities, false);
+		return decoratedRepository.add(entities);
+	}
+
+	@Override
+	public Integer add(Stream<? extends Entity> entities)
+	{
+		if (!ENTITIES_THAT_DO_NOT_NEED_VALIDATION.contains(getName()))
+		{
+			// all reference attributes
+			List<AttributeMetaData> refAttrs = stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
+					.filter(attr -> (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
+							&& attr.getExpression() == null)
+					.collect(Collectors.toList());
+
+			Map<String, HugeSet<Object>> refEntitiesIds;
+			if (!refAttrs.isEmpty())
+			{
+				refEntitiesIds = new HashMap<>();
+				refAttrs.forEach(refAttr -> {
+					EntityMetaData refEntityMeta = refAttr.getRefEntity();
+					String refEntityName = refEntityMeta.getName();
+					HugeSet<Object> refEntityIds = refEntitiesIds.get(refEntityName);
+					if (refEntityIds == null)
+					{
+						refEntityIds = new HugeSet<>();
+						refEntitiesIds.put(refEntityName, refEntityIds);
+
+						Query q = new QueryImpl().fetch(new Fetch().field(refEntityMeta.getIdAttribute().getName()));
+						for (Entity refEntity : dataService.findAll(refEntityName, q))
+						{
+							refEntityIds.add(refEntity.getIdValue());
+						}
+					}
+				});
+			}
+			else
+			{
+				refEntitiesIds = null;
+			}
+
+			AtomicInteger rownr = new AtomicInteger();
+			entities = entities.filter(entity -> {
+
+				Set<ConstraintViolation> violations = null;
+
+				// entity attributes validation
+				Set<ConstraintViolation> attrViolations = entityAttributesValidator.validate(entity,
+						getEntityMetaData());
+				if (attrViolations != null && !attrViolations.isEmpty())
+				{
+					if (violations == null)
+					{
+						violations = new LinkedHashSet<>();
+					}
+					violations.addAll(attrViolations);
+				}
+
+				// unique validation
+
+				// reference validation
+				for (AttributeMetaData refAttr : refAttrs)
+				{
+					HugeSet<Object> refEntityIds = refEntitiesIds.get(refAttr.getRefEntity().getName());
+
+					Iterable<Entity> refEntities;
+					if (refAttr.getDataType() instanceof XrefField)
+					{
+						Entity refEntity = entity.getEntity(refAttr.getName());
+						if (refEntity != null)
+						{
+							refEntities = singleton(refEntity);
+						}
+						else
+						{
+							refEntities = emptyList();
+						}
+					}
+					else
+					{
+						refEntities = entity.getEntities(refAttr.getName());
+					}
+
+					for (Entity refEntity : refEntities)
+					{
+						if (!refEntityIds.contains(refEntity.getIdValue()))
+						{
+							boolean selfReference = entity.getEntityMetaData().getName()
+									.equals(refAttr.getRefEntity().getName());
+							if (!(selfReference && entity.getIdValue().equals(refEntity.getIdValue())))
+							{
+								String message = String.format(
+										"Unknown xref value '%s' for attribute '%s' of entity '%s'.",
+										DataConverter.toString(refEntity.getIdValue()), refAttr.getName(),
+										getEntityMetaData().getLabel());
+								if (violations == null)
+								{
+									violations = new LinkedHashSet<>();
+								}
+								violations.add(new ConstraintViolation(message, refAttr, Long.valueOf(rownr.get())));
+							}
+						}
+					}
+				}
+
+				if (violations != null && !violations.isEmpty())
+				{
+					throw new MolgenisValidationException(violations);
+				}
+				return true;
+			});
+		}
 		return decoratedRepository.add(entities);
 	}
 

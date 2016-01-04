@@ -1,5 +1,6 @@
 package org.molgenis.data.elasticsearch;
 
+import static java.util.Collections.singleton;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -104,7 +105,7 @@ public class ElasticsearchServiceTest
 		MapEntity entity = createEntityAndRegisterSource(entityMetaData, "id0");
 
 		searchService.index(entity, entityMetaData, IndexingMode.ADD);
-		verify(searchService, times(1)).index(indexName, Arrays.asList(entity), entityMetaData,
+		verify(searchService, times(1)).index(indexName, singleton(entity).iterator(), entityMetaData,
 				ElasticsearchService.CrudType.ADD, true);
 	}
 
@@ -116,7 +117,7 @@ public class ElasticsearchServiceTest
 		when(dataService.getEntityNames()).thenReturn(Lists.newArrayList());
 
 		searchService.index(entity, entityMetaData, IndexingMode.UPDATE);
-		verify(searchService, times(1)).index(indexName, Arrays.asList(entity), entityMetaData,
+		verify(searchService, times(1)).index(indexName, singleton(entity).iterator(), entityMetaData,
 				ElasticsearchService.CrudType.UPDATE, true);
 	}
 

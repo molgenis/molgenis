@@ -6,6 +6,7 @@ import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.AggregateAnonymizerImpl;
@@ -171,6 +172,13 @@ public class RepositorySecurityDecorator implements Repository
 
 	@Override
 	public Integer add(Iterable<? extends Entity> entities)
+	{
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
+		return decoratedRepository.add(entities);
+	}
+
+	@Override
+	public Integer add(Stream<? extends Entity> entities)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		return decoratedRepository.add(entities);

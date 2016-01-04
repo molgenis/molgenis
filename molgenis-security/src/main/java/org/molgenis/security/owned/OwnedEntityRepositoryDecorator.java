@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
@@ -295,6 +296,20 @@ public class OwnedEntityRepositoryDecorator implements Repository
 					return true;
 				}
 
+			});
+		}
+
+		return decoratedRepo.add(entities);
+	}
+
+	@Override
+	public Integer add(Stream<? extends Entity> entities)
+	{
+		if (mustAddRowLevelSecurity())
+		{
+			entities = entities.map(entity -> {
+				entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername());
+				return entity;
 			});
 		}
 

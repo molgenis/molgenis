@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.UserAuthority;
@@ -77,6 +78,17 @@ public class MolgenisUserDecorator implements Repository
 		addSuperuserAuthorities(entities);
 
 		return nr;
+	}
+
+	@Override
+	public Integer add(Stream<? extends Entity> entities)
+	{
+		entities = entities.map(entity -> {
+			encodePassword(entity);
+			addSuperuserAuthority(entity);
+			return entity;
+		});
+		return decoratedRepository.add(entities);
 	}
 
 	@Override

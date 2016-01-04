@@ -6,6 +6,7 @@ import static java.util.stream.StreamSupport.stream;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.molgenis.data.support.EntityWithComputedAttributes;
 
@@ -172,6 +173,12 @@ public class ComputedEntityValuesDecorator implements Repository
 
 	@Override
 	public Integer add(Iterable<? extends Entity> entities)
+	{
+		return decoratedRepo.add(entities);
+	}
+
+	@Override
+	public Integer add(Stream<? extends Entity> entities)
 	{
 		return decoratedRepo.add(entities);
 	}

@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
@@ -169,6 +170,13 @@ public class DataServiceImpl implements DataService
 	@Override
 	@Transactional
 	public void add(String entityName, Iterable<? extends Entity> entities)
+	{
+		getRepository(entityName).add(entities);
+	}
+
+	@Override
+	@Transactional
+	public void add(String entityName, Stream<? extends Entity> entities)
 	{
 		getRepository(entityName).add(entities);
 	}

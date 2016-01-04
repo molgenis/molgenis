@@ -408,7 +408,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		String index = transactionId != null ? transactionId : indexName;
 		CrudType crudType = indexingMode == IndexingMode.ADD ? CrudType.ADD : CrudType.UPDATE;
 
-		index(index, Arrays.asList(entity), entityMetaData, crudType, updateIndex);
+		index(index, Collections.singleton(entity).iterator(), entityMetaData, crudType, updateIndex);
 	}
 
 	@Override
@@ -422,7 +422,21 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		String index = transactionId != null ? transactionId : indexName;
 
 		CrudType crudType = indexingMode == IndexingMode.ADD ? CrudType.ADD : CrudType.UPDATE;
-		return index(index, entities, entityMetaData, crudType, true);
+		return index(index, entities.iterator(), entityMetaData, crudType, true);
+	}
+
+	@Override
+	public long index(Stream<? extends Entity> entities, EntityMetaData entityMetaData, IndexingMode indexingMode)
+	{
+		String transactionId = null;
+		if (!NON_TRANSACTIONAL_ENTITIES.contains(entityMetaData.getName()))
+		{
+			transactionId = getCurrentTransactionId();
+		}
+		String index = transactionId != null ? transactionId : indexName;
+
+		CrudType crudType = indexingMode == IndexingMode.ADD ? CrudType.ADD : CrudType.UPDATE;
+		return index(index, entities.iterator(), entityMetaData, crudType, true);
 	}
 
 	private String getCurrentTransactionId()
@@ -430,7 +444,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		return (String) TransactionSynchronizationManager.getResource(TRANSACTION_ID_RESOURCE_NAME);
 	}
 
-	long index(String index, Iterable<? extends Entity> entities, EntityMetaData entityMetaData, CrudType crudType,
+	long index(String index, Iterator<? extends Entity> it, EntityMetaData entityMetaData, CrudType crudType,
 			boolean updateIndex)
 	{
 		String entityName = entityMetaData.getName();
@@ -462,8 +476,9 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 				}
 			}
 
-			for (Entity entity : entities)
+			while (it.hasNext())
 			{
+				Entity entity = it.next();
 				String id = toElasticsearchId(entity, entityMetaData);
 				Map<String, Object> source = elasticsearchEntityFactory.create(entityMetaData, entity);
 				if (transactionId != null)
@@ -492,19 +507,19 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 
 				bulkProcessor.add(new IndexRequest().index(index).type(type).id(id).source(source));
 				++nrIndexedEntities;
+
+				// If not in transaction, update references now, if in transaction the
+				// references are updated in
+				// the commitTransaction method
+				if (updateIndex && (crudType == CrudType.UPDATE) && (transactionId == null))
+				{
+					updateReferences(entity, entityMetaData);
+				}
 			}
 		}
 		finally
 		{
 			elasticsearchUtils.waitForCompletion(bulkProcessor);
-		}
-
-		// If not in transaction, update references now, if in transaction the
-		// references are updated in
-		// the commitTransaction method
-		if (updateIndex && (crudType == CrudType.UPDATE) && (transactionId == null))
-		{
-			updateReferences(entities, entityMetaData);
 		}
 
 		return nrIndexedEntities;
@@ -547,7 +562,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 				// Copy to temp transaction index and mark as deleted
 				Entity entity = new MapEntity(entityMetaData);
 				entity.set(entityMetaData.getIdAttribute().getName(), id);
-				index(transactionId, Arrays.asList(entity), entityMetaData, CrudType.DELETE, false);
+				index(transactionId, Collections.singleton(entity).iterator(), entityMetaData, CrudType.DELETE, false);
 			}
 			else
 			{
@@ -999,7 +1014,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 				}
 			});
 
-			index(indexName, entities, entityMetaData, CrudType.UPDATE, false);
+			index(indexName, entities.iterator(), entityMetaData, CrudType.UPDATE, false);
 		}
 	}
 

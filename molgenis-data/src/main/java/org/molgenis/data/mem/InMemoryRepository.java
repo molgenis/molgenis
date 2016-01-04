@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
@@ -206,6 +208,17 @@ public class InMemoryRepository implements Repository
 			i++;
 		}
 		return i;
+	}
+
+	@Override
+	public Integer add(Stream<? extends Entity> entities)
+	{
+		AtomicInteger count = new AtomicInteger();
+		entities.forEach(entity -> {
+			add(entity);
+			count.incrementAndGet();
+		});
+		return count.get();
 	}
 
 	@Override

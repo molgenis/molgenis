@@ -1,6 +1,7 @@
 package org.molgenis.data;
 
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.molgenis.data.meta.MetaDataService;
 
@@ -177,6 +178,16 @@ public interface DataService extends Iterable<Repository>
 	 * @param entities
 	 */
 	void add(String entityName, Iterable<? extends Entity> entities);
+
+	/**
+	 * Adds entities to it's repository
+	 *
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 * @param entities
+	 *            entity stream
+	 */
+	void add(String entityName, Stream<? extends Entity> entities);
 
 	/**
 	 * Updates an entity

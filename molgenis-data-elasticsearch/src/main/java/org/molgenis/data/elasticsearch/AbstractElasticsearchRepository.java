@@ -9,6 +9,7 @@ import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.elasticsearch.common.primitives.Ints;
 import org.molgenis.data.AggregateQuery;
@@ -141,6 +142,15 @@ public abstract class AbstractElasticsearchRepository implements Repository
 		long nrIndexedEntities = elasticSearchService.index(entities, getEntityMetaData(), IndexingMode.ADD);
 		elasticSearchService.refresh(getEntityMetaData());
 		;
+		return Ints.checkedCast(nrIndexedEntities);
+	}
+
+	@Override
+	@Transactional
+	public Integer add(Stream<? extends Entity> entities)
+	{
+		long nrIndexedEntities = elasticSearchService.index(entities, getEntityMetaData(), IndexingMode.ADD);
+		elasticSearchService.refresh(getEntityMetaData());
 		return Ints.checkedCast(nrIndexedEntities);
 	}
 

@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
@@ -187,6 +188,12 @@ public abstract class AbstractRepository implements Repository
 
 	@Override
 	public Integer add(Iterable<? extends Entity> entities)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Integer add(Stream<? extends Entity> entities)
 	{
 		throw new UnsupportedOperationException();
 	}
