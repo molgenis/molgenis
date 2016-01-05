@@ -339,25 +339,26 @@ public class EmxMetaDataParser implements MetaDataParser
 			}
 
 			attribute.setLabel(attributeEntity.getString(LABEL));
-			for (AttributeMetaData attr : attributeEntity.getEntityMetaData().getAtomicAttributes())
+
+			for (String attr : attributeEntity.getAttributeNames())
 			{
-				if (I18nUtils.isI18n(attr.getName()))
+				if (isI18n(attr))
 				{
-					if (attr.getName().startsWith(LABEL))
+					if (attr.startsWith(LABEL))
 					{
-						String label = attributeEntity.getString(attr.getName());
+						String label = attributeEntity.getString(attr);
 						if (label != null)
 						{
-							String languageCode = I18nUtils.getLanguageCode(attr.getName());
+							String languageCode = getLanguageCode(attr);
 							attribute.setLabel(languageCode, label);
 						}
 					}
-					else if (attr.getName().startsWith(DESCRIPTION))
+					else if (attr.startsWith(DESCRIPTION))
 					{
-						String description = attributeEntity.getString(attr.getName());
+						String description = attributeEntity.getString(attr);
 						if (description != null)
 						{
-							String languageCode = I18nUtils.getLanguageCode(attr.getName());
+							String languageCode = getLanguageCode(attr);
 							attribute.setDescription(languageCode, description);
 						}
 					}
@@ -585,25 +586,25 @@ public class EmxMetaDataParser implements MetaDataParser
 				md.setLabel(entity.getString(org.molgenis.data.meta.EntityMetaDataMetaData.LABEL));
 				md.setDescription(entity.getString(org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION));
 
-				for (AttributeMetaData attr : entity.getEntityMetaData().getAtomicAttributes())
+				for (String attributeName : entity.getAttributeNames())
 				{
-					if (I18nUtils.isI18n(attr.getName()))
+					if (isI18n(attributeName))
 					{
-						if (attr.getName().startsWith(org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION))
+						if (attributeName.startsWith(org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION))
 						{
-							String description = entity.getString(attr.getName());
+							String description = entity.getString(attributeName);
 							if (description != null)
 							{
-								String languageCode = I18nUtils.getLanguageCode(attr.getName());
+								String languageCode = getLanguageCode(attributeName);
 								md.setDescription(languageCode, description);
 							}
 						}
-						else if (attr.getName().startsWith(org.molgenis.data.meta.EntityMetaDataMetaData.LABEL))
+						else if (attributeName.startsWith(org.molgenis.data.meta.EntityMetaDataMetaData.LABEL))
 						{
-							String label = entity.getString(attr.getName());
+							String label = entity.getString(attributeName);
 							if (label != null)
 							{
-								String languageCode = I18nUtils.getLanguageCode(attr.getName());
+								String languageCode = getLanguageCode(attributeName);
 								md.setLabel(languageCode, label);
 							}
 						}
