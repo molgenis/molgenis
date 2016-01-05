@@ -68,8 +68,11 @@
         </#if>
         <script src="https://apis.google.com/js/platform.js<#if authenticated?? && authenticated>?onload=onLoad</#if>" async defer></script>
     </#if>
-    <#if environment == "development">
-        <#-- Important: Update minify-maven-plugin configuration in molgenis-core-ui/pom.xml when modifying the list below -->
+
+	<script src="<@resource_href "/js/component/Button.js"/>"></script>
+
+    <#----<#if environment == "development">
+        <#-- Important: Update minify-maven-plugin configuration in molgenis-core-ui/pom.xml when modifying the list below 
         <script src="<@resource_href "/js/react-with-addons.js"/>"></script>
         <script src="<@resource_href "/js/component/mixin/I18nStringsMixin.js"/>"></script>
         <script src="<@resource_href "/js/component/mixin/AttributeLoaderMixin.js"/>"></script>
@@ -87,7 +90,6 @@
         <script src="<@resource_href "/js/component/AlertMessage.js"/>"></script>
         <script src="<@resource_href "/js/component/AttributeControl.js"/>"></script>
         <script src="<@resource_href "/js/component/BoolControl.js"/>"></script>
-        <script src="<@resource_href "/js/component/Button.js"/>"></script>
         <script src="<@resource_href "/js/component/CheckboxGroup.js"/>"></script>
         <script src="<@resource_href "/js/component/CodeEditor.js"/>"></script>
         <script src="<@resource_href "/js/component/DateControl.js"/>"></script>
@@ -113,7 +115,7 @@
         <script src="<@resource_href "/js/react-with-addons.min.js"/>"></script>
         <script src="<@resource_href "/js/molgenis-component.min.js"/>"></script>
     </#if>
-        
+        -->
     <!--[if IE 9]>
         <#-- used to disable the genomebrowser in IE9 -->
         <script>top.molgenis.ie9 = true;</script>
