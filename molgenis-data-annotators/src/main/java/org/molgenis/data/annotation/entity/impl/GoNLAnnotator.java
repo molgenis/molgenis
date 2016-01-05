@@ -110,22 +110,33 @@ public class GoNLAnnotator
 				String afs = null;
 				String gtcs = null;
 				List<Entity> refMatches = Lists.newArrayList();
-				for (Entity resourceEntity : annotationSourceEntities) {
-					if (resourceEntity.get(VcfRepository.REF).equals(inputEntity.get(VcfRepository.REF))) {
-						  refMatches.add(resourceEntity);
-					} else if (inputEntity.getString(VcfRepository.REF).indexOf(resourceEntity.getString(VcfRepository.REF)) == 0) {
-						postFixResource = inputEntity.getString(VcfRepository.REF).substring(resourceEntity.getString(VcfRepository.REF).length());
-						resourceEntity.set(VcfRepository.REF, resourceEntity.getString(VcfRepository.REF)+postFixResource);
+				for (Entity resourceEntity : annotationSourceEntities)
+				{
+					if (resourceEntity.get(VcfRepository.REF).equals(inputEntity.get(VcfRepository.REF)))
+					{
+						refMatches.add(resourceEntity);
+					}
+					else if (inputEntity.getString(VcfRepository.REF)
+							.indexOf(resourceEntity.getString(VcfRepository.REF)) == 0)
+					{
+						postFixResource = inputEntity.getString(VcfRepository.REF)
+								.substring(resourceEntity.getString(VcfRepository.REF).length());
+						resourceEntity.set(VcfRepository.REF,
+								resourceEntity.getString(VcfRepository.REF) + postFixResource);
 						String newAltString = Arrays.asList(resourceEntity.getString(ALT).split(",")).stream()
-								.map(alt -> alt+postFixResource)
-								.collect(Collectors.joining(","));
+								.map(alt -> alt + postFixResource).collect(Collectors.joining(","));
 						resourceEntity.set(VcfRepository.ALT, newAltString);
 						refMatches.add(resourceEntity);
-					} else if (resourceEntity.getString(VcfRepository.REF).indexOf(inputEntity.getString(VcfRepository.REF)) == 0) {
-						int postFixInputLength = resourceEntity.getString(VcfRepository.REF).substring(inputEntity.getString(VcfRepository.REF).length()).length();
-						resourceEntity.set(VcfRepository.REF, resourceEntity.getString(VcfRepository.REF).substring(0,(resourceEntity.getString(VcfRepository.REF).length()-postFixInputLength)));
+					}
+					else if (resourceEntity.getString(VcfRepository.REF)
+							.indexOf(inputEntity.getString(VcfRepository.REF)) == 0)
+					{
+						int postFixInputLength = resourceEntity.getString(VcfRepository.REF)
+								.substring(inputEntity.getString(VcfRepository.REF).length()).length();
+						resourceEntity.set(VcfRepository.REF, resourceEntity.getString(VcfRepository.REF).substring(0,
+								(resourceEntity.getString(VcfRepository.REF).length() - postFixInputLength)));
 						String newAltString = Arrays.asList(resourceEntity.getString(ALT).split(",")).stream()
-								.map(alt -> alt.substring(0,(alt.length()-postFixInputLength)))
+								.map(alt -> alt.substring(0, (alt.length() - postFixInputLength)))
 								.collect(Collectors.joining(","));
 						resourceEntity.set(VcfRepository.ALT, newAltString);
 						refMatches.add(resourceEntity);
@@ -133,10 +144,11 @@ public class GoNLAnnotator
 				}
 				if (inputEntity.getString(ALT) != null)
 				{
-					List<Entity> alleleMatches  = Lists.newArrayList();
+					List<Entity> alleleMatches = Lists.newArrayList();
 					for (String alt : inputEntity.getString(ALT).split(","))
 					{
-						alleleMatches.add(Iterables.find(refMatches, gonl -> (alt).equals((gonl.getString(ALT))), null));
+						alleleMatches
+								.add(Iterables.find(refMatches, gonl -> (alt).equals((gonl.getString(ALT))), null));
 					}
 
 					if (!Iterables.all(alleleMatches, Predicates.isNull()))
