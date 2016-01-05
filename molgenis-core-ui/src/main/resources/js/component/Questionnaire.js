@@ -1,130 +1,158 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-    "use strict";
-    
-    var div = React.DOM.div;
-    
-    var Questionnaire = React.createClass({
-    	mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.EntityLoaderMixin, molgenis.ui.mixin.EntityInstanceLoaderMixin, molgenis.ui.mixin.I18nStringsMixin],
-    	displayName: 'Questionnaire',
-    	propTypes: {
-    		entity: React.PropTypes.string.isRequired,
-    		entityInstance: React.PropTypes.string.isRequired,
-    		onContinueLaterClick: React.PropTypes.func,
-    		successUrl: React.PropTypes.string
-    	},
-    	getDefaultProps: function() {
-    		return {
-    			successUrl: null,
-    			onContinueLaterClick: function() {}
-    		};
-    	},
-    	getInitialState: function() {
-			return {
-				entity : null,			// transfered from props to state, loaded from server if required
-				entityInstance : null,	// transfered from props to state, loaded from server if required
-				i18nStrings : null //loaded from server
-			};
-    	},
-    	_onSubmitClick: function(e) {
-    		this.refs.form.submit(e);
-    	},
-    	render: function() {
-    		if(this.state.entity === null || this.state.entityInstance === null || this.state.i18nStrings === null) {
-				return molgenis.ui.Spinner();
+/**
+ * @module Questionnaire
+ */
+
+import React from 'react';
+import _ from 'underscore';
+
+import Button from './Button';
+import Modal from './Modal';
+import Form from './Form';
+import Spinner from './Spinner';
+
+import DeepPureRenderMixin from './mixin/DeepPureRenderMixin';
+import EntityLoaderMixin from './mixin/EntityLoaderMixin';
+import EntityInstanceLoaderMixin from './mixin/EntityInstanceLoaderMixin';
+import I18nStringsMixin from './mixin/I18nStringsMixin';
+
+var div = React.DOM.div;
+
+/**
+ * @memberOf Questionnaire
+ */
+var Questionnaire = React.createClass({
+	mixins : [ DeepPureRenderMixin, EntityLoaderMixin, EntityInstanceLoaderMixin, I18nStringsMixin ],
+	displayName : 'Questionnaire',
+	propTypes : {
+		entity : React.PropTypes.string.isRequired,
+		entityInstance : React.PropTypes.string.isRequired,
+		onContinueLaterClick : React.PropTypes.func,
+		successUrl : React.PropTypes.string
+	},
+	getDefaultProps : function() {
+		return {
+			successUrl : null,
+			onContinueLaterClick : function() {
 			}
-			
-    		// a edit form with save-on-blur doesn't have a submit button 
-    		var QuestionnaireButtons = this.state.entityInstance.status !== 'SUBMITTED' ? (
-    			div({className: 'row', style: {textAlign: 'right'}},
-					div({className: 'col-md-12'},
-						molgenis.ui.Button({text: this.state.i18nStrings.questionnaire_save_and_continue, onClick: this.props.onContinueLaterClick}),
-						molgenis.ui.Button({type: 'button', style: 'primary', css: {marginLeft: 5}, text: this.state.i18nStrings.questionnaire_submit, onClick: this._onSubmitClick})
-					)
-				)
-			) : null;
-	
-    		var Form = molgenis.ui.Form({
-    			entity: this.state.entity,
-    			entityInstance: this.state.entityInstance,
-    			mode: this.state.entityInstance.status === 'SUBMITTED' ? 'view' : 'edit',
-    			formLayout: 'vertical',
-    			modal: false,
-    	        enableOptionalFilter: false,
-    	        saveOnBlur: true,
-    	        enableFormIndex: true,
-    	        enableAlertMessageInFormIndex: true,
-    	        categoricalMrefShowSelectAll: false,
-    	        showAsteriskIfNotNillable: false,
-    	        beforeSubmit: this._handleBeforeSubmit,
-    	        onValueChange: this._handleValueChange,
-    	        onSubmitSuccess: this._handleSubmitSuccess,
-    	        ref: 'form'
-    	    }, QuestionnaireButtons); 
-    		
-    		return div(null,
-    			Form
-    		);
-		},
-		_handleValueChange:function(e) {
-			// update value in entity instance
-			var entityInstance = _.extend({}, this.state.entityInstance);
-			entityInstance[e.attr] = e.value;
-			this.setState({entityInstance: entityInstance});
-		},
-		_handleBeforeSubmit: function(arr, $form, options) {
-			
-			var values = {};
-        	_.each(this.state.entity.allAttributes, function(attr) {
-        		var value = this.state.entityInstance[attr.name];
-        		
-        		if (value !== null && value !== undefined) {
-        			 switch(attr.fieldType) {
-                     case 'CATEGORICAL':
-                     case 'XREF':
-                    	 values[attr.name] = value[attr.refEntity.idAttribute];
-                         break;
-                     case 'CATEGORICAL_MREF':
-                     case 'MREF':
-                         values[attr.name] = _.map(value.items, function(item) {
-                        	 return item[attr.refEntity.idAttribute]; 
-                         }).join();
-                         break;
-                     case 'COMPOUND':
-                    	 //nothing, no value
-                    	 break;
-                     default:
-                    	 values[attr.name] = value;
-                         break;
-        			 }
-        		}
-        	}, this);
-        	
-			for(var i = 0; i < arr.length; ++i) {
-				var attrName = arr[i].name;
-				var attr = this.state.entity.allAttributes[attrName];
-				
-				//Set value of attribute with visibleExpression that is not visible to null
-				if (attr.visibleExpression && evalScript(attr.visibleExpression, values) === false) {
-					arr[i].value = null;
-				}
-				
-				//Set status to SUBMITTED
-				if(attrName === 'status') {
-					arr[i].value = 'SUBMITTED';
+		};
+	},
+	getInitialState : function() {
+		return {
+			// transfered from props to state, loaded from server if
+			// required
+			entity : null,
+			// transfered from props to state, loaded from server if
+			// required
+			entityInstance : null,
+			i18nStrings : null
+		// loaded from server
+		};
+	},
+	_onSubmitClick : function(e) {
+		this.refs.form.submit(e);
+	},
+	render : function() {
+		if (this.state.entity === null || this.state.entityInstance === null || this.state.i18nStrings === null) {
+			return Spinner();
+		}
+
+		// a edit form with save-on-blur doesn't have a submit button
+		var QuestionnaireButtons = this.state.entityInstance.status !== 'SUBMITTED' ? (div({
+			className : 'row',
+			style : {
+				textAlign : 'right'
+			}
+		}, div({
+			className : 'col-md-12'
+		}, Button({
+			text : this.state.i18nStrings.questionnaire_save_and_continue,
+			onClick : this.props.onContinueLaterClick
+		}), Button({
+			type : 'button',
+			style : 'primary',
+			css : {
+				marginLeft : 5
+			},
+			text : this.state.i18nStrings.questionnaire_submit,
+			onClick : this._onSubmitClick
+		})))) : null;
+
+		var form = Form({
+			entity : this.state.entity,
+			entityInstance : this.state.entityInstance,
+			mode : this.state.entityInstance.status === 'SUBMITTED' ? 'view' : 'edit',
+			formLayout : 'vertical',
+			modal : false,
+			enableOptionalFilter : false,
+			saveOnBlur : true,
+			enableFormIndex : true,
+			enableAlertMessageInFormIndex : true,
+			categoricalMrefShowSelectAll : false,
+			showAsteriskIfNotNillable : false,
+			beforeSubmit : this._handleBeforeSubmit,
+			onValueChange : this._handleValueChange,
+			onSubmitSuccess : this._handleSubmitSuccess,
+			ref : 'form'
+		}, QuestionnaireButtons);
+
+		return div(null, form);
+	},
+	_handleValueChange : function(e) {
+		// update value in entity instance
+		var entityInstance = _.extend({}, this.state.entityInstance);
+		entityInstance[e.attr] = e.value;
+		this.setState({
+			entityInstance : entityInstance
+		});
+	},
+	_handleBeforeSubmit : function(arr, $form, options) {
+		var values = {};
+		_.each(this.state.entity.allAttributes, function(attr) {
+			var value = this.state.entityInstance[attr.name];
+
+			if (value !== null && value !== undefined) {
+				switch (attr.fieldType) {
+				case 'CATEGORICAL':
+				case 'XREF':
+					values[attr.name] = value[attr.refEntity.idAttribute];
+					break;
+				case 'CATEGORICAL_MREF':
+				case 'MREF':
+					values[attr.name] = _.map(value.items, function(item) {
+						return item[attr.refEntity.idAttribute];
+					}).join();
+					break;
+				case 'COMPOUND':
+					// nothing, no value
+					break;
+				default:
+					values[attr.name] = value;
+					break;
 				}
 			}
-		},
-		_handleSubmitSuccess: function() {
-			if (this.props.successUrl !== null) {
-				document.location = this.props.successUrl;
+		}, this);
+
+		for (var i = 0; i < arr.length; ++i) {
+			var attrName = arr[i].name;
+			var attr = this.state.entity.allAttributes[attrName];
+
+			// Set value of attribute with visibleExpression that is not
+			// visible to null
+			if (attr.visibleExpression && evalScript(attr.visibleExpression, values) === false) {
+				arr[i].value = null;
+			}
+
+			// Set status to SUBMITTED
+			if (attrName === 'status') {
+				arr[i].value = 'SUBMITTED';
 			}
 		}
-    });
-    
-    // export component
-    molgenis.ui = molgenis.ui || {};
-    _.extend(molgenis.ui, {
-    	Questionnaire: React.createFactory(Questionnaire)
-    });
-}(_, React, molgenis));	    
+	},
+	_handleSubmitSuccess : function() {
+		if (this.props.successUrl !== null) {
+			document.location = this.props.successUrl;
+		}
+	}
+});
+
+export default React.createFactory(Questionnaire);
