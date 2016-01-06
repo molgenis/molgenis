@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
@@ -177,6 +178,15 @@ public class I18nStringDecorator implements Repository
 
 	@Override
 	public Integer add(Iterable<? extends Entity> entities)
+	{
+		Integer result = decorated.add(entities);
+		ResourceBundle.clearCache();
+
+		return result;
+	}
+
+	@Override
+	public Integer add(Stream<? extends Entity> entities)
 	{
 		Integer result = decorated.add(entities);
 		ResourceBundle.clearCache();
