@@ -41,6 +41,14 @@ class AttributeFilter implements Iterable<Entry<String, AttributeFilter>>
 		return includeAllAttrs;
 	}
 
+	/**
+	 * Indicates if this filter is {@link #includeAllAttrs}, and NO other attributes are selected.
+	 */
+	public boolean isStar()
+	{
+		return includeAllAttrs && (attributes == null || attributes.keySet().isEmpty());
+	}
+
 	AttributeFilter setIncludeAllAttrs(boolean includeAllAttrs)
 	{
 		this.includeAllAttrs = includeAllAttrs;
