@@ -4,7 +4,7 @@
 // with the paths option (compulsory when using jQuery as it is a named module) and then shimming any scripts 
 // that do not have AMD support. This is common with most jQuery plugins.
 require.config({
-	baseUrl : 'scripts',
+	baseUrl : '/src/main/resources/js',
 	paths : {
 		jquery : '/components/jquery/jquery-2.1.1.min',
 		domready : '/components/requirejs/requirejs-domready',
@@ -13,7 +13,7 @@ require.config({
 		react : '/components/react/react-with-addons',
 		molgenis : '/modules/molgenis',
 		underscore : '/components/underscore/underscore-min',
-		Button : 'component/Button'
+		react_button : '/component/Button'
 	},
 	shim : {
 		handlebars : {
@@ -51,5 +51,7 @@ define(function(require) {
 	
 	domReady(function() {
 		// Init common module code here
+		// TODO common modules, like React components????
+		console.log('ready!');
 	});
 });
