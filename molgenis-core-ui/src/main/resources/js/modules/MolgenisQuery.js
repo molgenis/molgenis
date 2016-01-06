@@ -1,6 +1,3 @@
-/**
- * @class MolgenisQuery
- */
 define(function(require, exports, module) {
 	/**
 	 * This module can be used to query the MOLGENIS backend
@@ -9,7 +6,6 @@ define(function(require, exports, module) {
 	 */
 
 	'use strict';
-
 	var $ = require('jquery');
 
 	/**
@@ -24,7 +20,7 @@ define(function(require, exports, module) {
 	 * 
 	 * @memberOf MolgenisQuery
 	 */
-	exports.getAtomicAttributes = function(attributes, restClient) {
+	exports.prototype.prototype.getAtomicAttributes = function(attributes, restClient) {
 		var atomicAttributes = [];
 		function createAtomicAttributesRec(attributes) {
 			$.each(attributes, function(i, attribute) {
@@ -34,10 +30,12 @@ define(function(require, exports, module) {
 						'expand' : [ 'attributes' ]
 					});
 					createAtomicAttributesRec(attribute.attributes);
-				} else
+				} else {
 					atomicAttributes.push(attribute);
+				}
 			});
 		}
+
 		createAtomicAttributesRec(attributes);
 		return atomicAttributes;
 	};
@@ -55,7 +53,7 @@ define(function(require, exports, module) {
 	 * 
 	 * @memberOf MolgenisQuery
 	 */
-	exports.getCompoundAttributes = function(attributes, restClient) {
+	exports.prototype.getCompoundAttributes = function(attributes, restClient) {
 		var compoundAttributes = [];
 		function createAtomicAttributesRec(attributes) {
 			$.each(attributes, function(i, attribute) {
@@ -83,7 +81,7 @@ define(function(require, exports, module) {
 	 * 
 	 * @memberOf MolgenisQuery
 	 */
-	exports.getAllAttributes = function(attributes, restClient) {
+	exports.prototype.getAllAttributes = function(attributes, restClient) {
 		var tree = [];
 		function createAttributesRec(attributes) {
 			$.each(attributes, function(i, attribute) {
@@ -109,7 +107,7 @@ define(function(require, exports, module) {
 	 * 
 	 * @memberOf MolgenisQuery
 	 */
-	exports.getAttributeLabel = function(attribute) {
+	exports.prototype.getAttributeLabel = function(attribute) {
 		var label = attribute.label || attribute.name;
 		if (attribute.parent) {
 			var parentLabel = attribute.parent.label || attribute.parent.name;
@@ -126,7 +124,7 @@ define(function(require, exports, module) {
 	 * 
 	 * @memberOf MolgenisQuery
 	 */
-	exports.hasWritePermission = function(entityName) {
+	exports.prototype.hasWritePermission = function(entityName) {
 		var writable = false;
 
 		$.ajax({
@@ -148,7 +146,7 @@ define(function(require, exports, module) {
 	 * 
 	 * @memberOf MolgenisQuery
 	 */
-	exports.isRefAttr = function(attribute) {
+	exports.prototype.isRefAttr = function(attribute) {
 		switch (attribute.fieldType) {
 		case 'CATEGORICAL':
 		case 'CATEGORICAL_MREF':
@@ -168,7 +166,7 @@ define(function(require, exports, module) {
 	 * 
 	 * @memberOf MolgenisQuery
 	 */
-	exports.isXrefAttr = function(attribute) {
+	exports.prototype.isXrefAttr = function(attribute) {
 		return attribute.fieldType === 'CATEGORICAL' || attribute.fieldType === 'XREF' || attribute.fieldType === 'FILE';
 	};
 
@@ -179,7 +177,7 @@ define(function(require, exports, module) {
 	 * 
 	 * @memberOf MolgenisQuery
 	 */
-	exports.isMrefAttr = function(attribute) {
+	exports.prototype.isMrefAttr = function(attribute) {
 		return attribute.fieldType === 'CATEGORICAL_MREF' || attribute.fieldType === 'MREF';
 	};
 
@@ -190,7 +188,7 @@ define(function(require, exports, module) {
 	 * 
 	 * @memberOf MolgenisQuery
 	 */
-	exports.isCompoundAttr = function(attribute) {
+	exports.prototype.isCompoundAttr = function(attribute) {
 		return attribute.fieldType === 'COMPOUND';
 	};
 });
