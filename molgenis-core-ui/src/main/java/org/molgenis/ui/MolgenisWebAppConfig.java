@@ -35,6 +35,7 @@ import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
@@ -67,6 +68,7 @@ import org.molgenis.ui.menu.MenuReaderServiceImpl;
 import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.ui.menumanager.MenuManagerServiceImpl;
 import org.molgenis.ui.security.MolgenisUiPermissionDecorator;
+import org.molgenis.ui.settings.AppDbSettings;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.EntityUtils;
@@ -113,6 +115,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	private AppSettings appSettings;
 
 	@Autowired
+	private AppDbSettings appDbSettings;
+
+	@Autowired
 	private MolgenisPermissionService molgenisPermissionService;
 
 	@Autowired
@@ -145,6 +150,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	@Autowired
 	public ExpressionValidator expressionValidator;
+
+	public LanguageService languageService;
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
@@ -218,7 +225,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public MolgenisInterceptor molgenisInterceptor()
 	{
-		return new MolgenisInterceptor(resourceFingerprintRegistry(), appSettings, environment);
+		return new MolgenisInterceptor(resourceFingerprintRegistry(), appSettings, languageService, environment);
 	}
 
 	@Bean
@@ -419,7 +426,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		DataServiceImpl localDataService = new DataServiceImpl();
 		EntityManager localEntityManager = new EntityManagerImpl(localDataService);
 		MySqlEntityFactory localMySqlEntityFactory = new MySqlEntityFactory(localEntityManager, localDataService);
-		MetaDataService metaDataService = new MetaDataServiceImpl(localDataService);
+
+		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(localDataService);
+		metaDataService.setLanguageService(new LanguageService(localDataService, appDbSettings));
 		localDataService.setMeta(metaDataService);
 
 		addReposToReindex(localDataService, localMySqlEntityFactory);

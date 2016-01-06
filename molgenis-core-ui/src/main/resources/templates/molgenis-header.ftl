@@ -71,6 +71,7 @@
     <#if environment == "development">
         <#-- Important: Update minify-maven-plugin configuration in molgenis-core-ui/pom.xml when modifying the list below -->
         <script src="<@resource_href "/js/react-with-addons.js"/>"></script>
+        <script src="<@resource_href "/js/component/mixin/I18nStringsMixin.js"/>"></script>
         <script src="<@resource_href "/js/component/mixin/AttributeLoaderMixin.js"/>"></script>
         <script src="<@resource_href "/js/component/mixin/DeepPureRenderMixin.js"/>"></script>
         <script src="<@resource_href "/js/component/mixin/EntityInstanceLoaderMixin.js"/>"></script>
@@ -107,6 +108,7 @@
         <script src="<@resource_href "/js/component/Spinner.js"/>"></script>
         <script src="<@resource_href "/js/component/Table.js"/>"></script>
         <script src="<@resource_href "/js/component/TextArea.js"/>"></script>     
+        <script src="<@resource_href "/js/component/LanguageSelectBox.js"/>"></script>     
     <#else>
         <script src="<@resource_href "/js/react-with-addons.min.js"/>"></script>
         <script src="<@resource_href "/js/molgenis-component.min.js"/>"></script>
@@ -264,11 +266,15 @@
                             });
 						</script>
 					</form>
+					
+					<div id="language-select-box" class="navbar-right"></div>
 				<#else>
 					<form class="navbar-form navbar-right" method="post" action="/login">
                         <a id="open-button" type="btn" class="btn btn-default" data-toggle="modal" data-target="#login-modal">Sign in</a>
 					</form>
 				</#if>
+				
+				
 			</div>
 			<#-- Navbar items end -->
 			

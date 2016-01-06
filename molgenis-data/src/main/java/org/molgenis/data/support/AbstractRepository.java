@@ -34,7 +34,7 @@ public abstract class AbstractRepository implements Repository
 {
 	private static final int FIND_ALL_BATCH_SIZE = 1000;
 
-	private final static Logger LOG = LoggerFactory.getLogger(AbstractRepository.class);
+	private final Logger LOG = LoggerFactory.getLogger(getClass());
 
 	private String name;
 
@@ -116,8 +116,8 @@ public abstract class AbstractRepository implements Repository
 
 	private Iterable<Entity> findAllBatched(List<Object> ids, Fetch fetch)
 	{
-		Query inQuery = new QueryImpl().in(getEntityMetaData().getIdAttribute().getName(), Sets.newHashSet(ids))
-				.fetch(fetch);
+		Query inQuery = new QueryImpl().in(getEntityMetaData().getIdAttribute().getName(), Sets.newHashSet(ids)).fetch(
+				fetch);
 		Map<Object, Entity> indexedEntities = uniqueIndex(findAll(inQuery), Entity::getIdValue);
 		return filter(transform(ids, id -> lookup(indexedEntities, id)), notNull());
 	}
@@ -127,7 +127,7 @@ public abstract class AbstractRepository implements Repository
 		Entity result = index.get(id);
 		if (result == null)
 		{
-			LOG.warn("Couldn't find {} for id {}.", getName(), id);
+			LOG.warn("Lookup: Couldn't find {} for id {}.", getName(), id);
 		}
 		return result;
 	}

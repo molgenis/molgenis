@@ -793,11 +793,12 @@
 			}
 			
 			var submitBtnText = this.props.mode === 'create' ? 'Create' : 'Save changes';
+			var submitBtnName = this.props.mode === 'create' ? 'create' : 'save-changes';
 			return (
 				div({className: 'row', style: {textAlign: 'right'}},
 					div({className: divClasses},
-						this.props.cancelBtn ? molgenis.ui.Button({text: 'Cancel', onClick: this.props.onCancelClick}, 'Cancel') : null,
-						molgenis.ui.Button({type: 'button', style: 'primary', css: {marginLeft: 5}, text: submitBtnText, onClick: this.props.onSubmitClick})
+						this.props.cancelBtn ? molgenis.ui.Button({name:'cancel', text: 'Cancel', onClick: this.props.onCancelClick}, 'Cancel') : null,
+						molgenis.ui.Button({type: 'button', style: 'primary', css: {marginLeft: 5}, name: submitBtnName, text: submitBtnText, onClick: this.props.onSubmitClick})
 					)
 				)
 			);

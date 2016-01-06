@@ -1,5 +1,6 @@
 package org.molgenis.ui.admin.user;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.user.UserAccountService.MIN_PASSWORD_LENGTH;
 import static org.molgenis.ui.admin.user.UserAccountController.URI;
 
@@ -10,6 +11,7 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.MolgenisPluginController;
@@ -25,6 +27,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -40,13 +43,14 @@ public class UserAccountController extends MolgenisPluginController
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final UserAccountService userAccountService;
+	private final LanguageService languageService;
 
 	@Autowired
-	public UserAccountController(UserAccountService userAccountService)
+	public UserAccountController(UserAccountService userAccountService, LanguageService languageService)
 	{
 		super(URI);
-		if (userAccountService == null) throw new IllegalArgumentException("UserAccountService is null");
-		this.userAccountService = userAccountService;
+		this.userAccountService = requireNonNull(userAccountService);
+		this.languageService = requireNonNull(languageService);
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
@@ -57,6 +61,26 @@ public class UserAccountController extends MolgenisPluginController
 		model.addAttribute("groups", Lists.newArrayList(userAccountService.getCurrentUserGroups()));
 		model.addAttribute("min_password_length", MIN_PASSWORD_LENGTH);
 		return "view-useraccount";
+	}
+
+	@RequestMapping(value = "/language/update", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.OK)
+	public void updateUserLanguage(@RequestParam("languageCode") String languageCode)
+	{
+		try
+		{
+			if (!languageService.getLanguageCodes().contains(languageCode))
+			{
+				throw new MolgenisUserException("Unknown language code '" + languageCode + "'");
+			}
+			MolgenisUser user = userAccountService.getCurrentUser();
+			user.setLanguageCode(languageCode);
+			userAccountService.updateCurrentUser(user);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	@RequestMapping(value = "/update", method = RequestMethod.POST, headers = "Content-Type=application/x-www-form-urlencoded")

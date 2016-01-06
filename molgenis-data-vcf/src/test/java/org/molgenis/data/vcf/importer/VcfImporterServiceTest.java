@@ -20,8 +20,10 @@ import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Package;
 import org.molgenis.data.Repository;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.mem.InMemoryRepositoryCollection;
 import org.molgenis.data.meta.MetaDataServiceImpl;
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.validation.EntityAttributesValidator;
@@ -40,6 +42,7 @@ public class VcfImporterServiceTest
 	{
 		DataServiceImpl dataService = new DataServiceImpl();
 		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(dataService);
+		metaDataService.setLanguageService(new LanguageService(dataService, Mockito.mock(AppSettings.class)));
 		metaDataService.setDefaultBackend(new InMemoryRepositoryCollection("ElasticSearch"));
 		dataService.setMeta(metaDataService);
 
@@ -69,6 +72,7 @@ public class VcfImporterServiceTest
 	{
 		DataServiceImpl dataService = new DataServiceImpl();
 		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(dataService);
+		metaDataService.setLanguageService(new LanguageService(dataService, Mockito.mock(AppSettings.class)));
 		metaDataService.setDefaultBackend(new InMemoryRepositoryCollection("ElasticSearch")
 		{
 			// enable data validation
@@ -109,8 +113,8 @@ public class VcfImporterServiceTest
 
 		File testdata = new File(FileUtils.getTempDirectory(), "testdata.vcf");
 
-		Mockito.when(fileRepositoryCollectionFactory.createFileRepositoryCollection(testdata))
-				.thenReturn(fileRepositoryCollection);
+		Mockito.when(fileRepositoryCollectionFactory.createFileRepositoryCollection(testdata)).thenReturn(
+				fileRepositoryCollection);
 		Mockito.when(fileRepositoryCollection.getEntityNames()).thenReturn(Collections.singletonList(entityName));
 
 		Repository repo = Mockito.mock(Repository.class);
