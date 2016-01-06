@@ -1,7 +1,14 @@
 package org.molgenis.data.validation;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
+import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.unmodifiableMap;
+import static java.util.Collections.unmodifiableSet;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
 
 import java.io.IOException;
@@ -46,16 +53,24 @@ public class RepositoryValidationDecorator implements Repository
 {
 	private static List<String> ENTITIES_THAT_DO_NOT_NEED_VALIDATION = Arrays
 			.asList(MolgenisTransactionLogMetaData.ENTITY_NAME, MolgenisTransactionLogEntryMetaData.ENTITY_NAME);
-	private final EntityAttributesValidator entityAttributesValidator;
+
+	private enum ValidationMode
+	{
+		ADD, UPDATE
+	}
+
 	private final DataService dataService;
 	private final Repository decoratedRepository;
+	private final EntityAttributesValidator entityAttributesValidator;
+	private final ExpressionValidator expressionValidator;
 
 	public RepositoryValidationDecorator(DataService dataService, Repository repository,
-			EntityAttributesValidator entityAttributesValidator)
+			EntityAttributesValidator entityAttributesValidator, ExpressionValidator expressionValidator)
 	{
-		this.decoratedRepository = repository;
-		this.dataService = dataService;
-		this.entityAttributesValidator = entityAttributesValidator;
+		this.dataService = requireNonNull(dataService);
+		this.decoratedRepository = requireNonNull(repository);
+		this.entityAttributesValidator = requireNonNull(entityAttributesValidator);
+		this.expressionValidator = requireNonNull(expressionValidator);
 	}
 
 	@Override
@@ -95,112 +110,548 @@ public class RepositoryValidationDecorator implements Repository
 	@Override
 	public Integer add(Stream<? extends Entity> entities)
 	{
-		if (!ENTITIES_THAT_DO_NOT_NEED_VALIDATION.contains(getName()))
+		try (ValidationResource validationResource = new ValidationResource())
 		{
-			// all reference attributes
-			List<AttributeMetaData> refAttrs = stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
-					.filter(attr -> (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
-							&& attr.getExpression() == null)
-					.collect(Collectors.toList());
+			entities = validate(entities, validationResource, ValidationMode.ADD);
+			return decoratedRepository.add(entities);
+		}
+	}
 
-			Map<String, HugeSet<Object>> refEntitiesIds;
-			if (!refAttrs.isEmpty())
+	@Override
+	public String getName()
+	{
+		return decoratedRepository.getName();
+	}
+
+	@Override
+	public EntityMetaData getEntityMetaData()
+	{
+		return decoratedRepository.getEntityMetaData();
+	}
+
+	@Override
+	public Iterator<Entity> iterator()
+	{
+		return decoratedRepository.iterator();
+	}
+
+	@Override
+	public void close() throws IOException
+	{
+		decoratedRepository.close();
+	}
+
+	@Override
+	public void flush()
+	{
+		decoratedRepository.flush();
+	}
+
+	@Override
+	public void clearCache()
+	{
+		decoratedRepository.clearCache();
+	}
+
+	@Override
+	public long count()
+	{
+		return decoratedRepository.count();
+	}
+
+	@Override
+	public Query query()
+	{
+		return decoratedRepository.query();
+	}
+
+	@Override
+	public long count(Query q)
+	{
+		return decoratedRepository.count(q);
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Query q)
+	{
+		return decoratedRepository.findAll(q);
+	}
+
+	@Override
+	public Entity findOne(Query q)
+	{
+		return decoratedRepository.findOne(q);
+	}
+
+	@Override
+	public Entity findOne(Object id)
+	{
+		return decoratedRepository.findOne(id);
+	}
+
+	@Override
+	public Entity findOne(Object id, Fetch fetch)
+	{
+		return decoratedRepository.findOne(id, fetch);
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Iterable<Object> ids)
+	{
+		return decoratedRepository.findAll(ids);
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
+	{
+		return decoratedRepository.findAll(ids, fetch);
+	}
+
+	@Override
+	public void delete(Iterable<? extends Entity> entities)
+	{
+		decoratedRepository.delete(entities);
+	}
+
+	@Override
+	public void deleteById(Object id)
+	{
+		decoratedRepository.deleteById(id);
+	}
+
+	@Override
+	public void deleteById(Iterable<Object> ids)
+	{
+		decoratedRepository.deleteById(ids);
+	}
+
+	@Override
+	public void deleteAll()
+	{
+		decoratedRepository.deleteAll();
+	}
+
+	@Override
+	public AggregateResult aggregate(AggregateQuery aggregateQuery)
+	{
+		return decoratedRepository.aggregate(aggregateQuery);
+	}
+
+	@Override
+	public Set<RepositoryCapability> getCapabilities()
+	{
+		return decoratedRepository.getCapabilities();
+	}
+
+	@Override
+	public void create()
+	{
+		decoratedRepository.create();
+
+	}
+
+	@Override
+	public void drop()
+	{
+		decoratedRepository.drop();
+	}
+
+	@Override
+	public void rebuildIndex()
+	{
+		decoratedRepository.rebuildIndex();
+	}
+
+	@Override
+	public void addEntityListener(EntityListener entityListener)
+	{
+		decoratedRepository.addEntityListener(entityListener);
+	}
+
+	@Override
+	public void removeEntityListener(EntityListener entityListener)
+	{
+		decoratedRepository.removeEntityListener(entityListener);
+	}
+
+	private Stream<? extends Entity> validate(Stream<? extends Entity> entities, ValidationResource validationResource,
+			ValidationMode validationMode)
+	{
+		if (ENTITIES_THAT_DO_NOT_NEED_VALIDATION.contains(getName()))
+		{
+			return entities;
+		}
+
+		// prepare validation
+		initValidation(validationResource);
+
+		// add validation operation to stream
+		return entities.filter(entity -> {
+			validationResource.incrementRow();
+
+			validateEntityValueRequired(entity, validationResource);
+
+			validateEntityValueTypes(entity, validationResource);
+
+			validateEntityValueUniqueness(entity, validationResource);
+
+			validateEntityValueReferences(entity, validationResource);
+
+			if (validationMode == ValidationMode.UPDATE)
 			{
-				refEntitiesIds = new HashMap<>();
-				refAttrs.forEach(refAttr -> {
-					EntityMetaData refEntityMeta = refAttr.getRefEntity();
-					String refEntityName = refEntityMeta.getName();
-					HugeSet<Object> refEntityIds = refEntitiesIds.get(refEntityName);
-					if (refEntityIds == null)
-					{
-						refEntityIds = new HugeSet<>();
-						refEntitiesIds.put(refEntityName, refEntityIds);
+				validateEntityValueReadOnly(entity, validationResource);
+			}
 
-						Query q = new QueryImpl().fetch(new Fetch().field(refEntityMeta.getIdAttribute().getName()));
-						for (Entity refEntity : dataService.findAll(refEntityName, q))
+			if (validationResource.hasViolations())
+			{
+				throw new MolgenisValidationException(validationResource.getViolations());
+			}
+
+			return true;
+		});
+	}
+
+	private void initValidation(ValidationResource validationResource)
+	{
+		initRequiredValueValidation(validationResource);
+		initReferenceValidation(validationResource);
+		initUniqueValidation(validationResource);
+	}
+
+	private void initRequiredValueValidation(ValidationResource validationResource)
+	{
+		List<AttributeMetaData> requiredValueAttrs = stream(getEntityMetaData().getAtomicAttributes().spliterator(),
+				false).filter(attr -> !attr.isNillable() && attr.getExpression() == null).collect(Collectors.toList());
+
+		validationResource.setRequiredValueAttrs(requiredValueAttrs);
+	}
+
+	private void initReferenceValidation(ValidationResource validationResource)
+	{
+		// get reference attrs
+		List<AttributeMetaData> refAttrs = stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
+				.filter(attr -> (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
+						&& attr.getExpression() == null)
+				.collect(Collectors.toList());
+
+		// get referenced entity ids
+		if (!refAttrs.isEmpty())
+		{
+			Map<String, HugeSet<Object>> refEntitiesIds = new HashMap<>();
+			refAttrs.forEach(refAttr -> {
+				EntityMetaData refEntityMeta = refAttr.getRefEntity();
+				String refEntityName = refEntityMeta.getName();
+				HugeSet<Object> refEntityIds = refEntitiesIds.get(refEntityName);
+				if (refEntityIds == null)
+				{
+					refEntityIds = new HugeSet<>();
+					refEntitiesIds.put(refEntityName, refEntityIds);
+
+					Query q = new QueryImpl().fetch(new Fetch().field(refEntityMeta.getIdAttribute().getName()));
+					for (Entity refEntity : dataService.findAll(refEntityName, q))
+					{
+						refEntityIds.add(refEntity.getIdValue());
+					}
+				}
+			});
+
+			validationResource.setRefEntitiesIds(refEntitiesIds);
+		}
+
+		validationResource.setRefAttrs(refAttrs);
+	}
+
+	private void initUniqueValidation(ValidationResource validationResource)
+	{
+		// get unique attributes
+		List<AttributeMetaData> uniqueAttrs = stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
+				.filter(attr -> attr.isUnique() && attr.getExpression() == null).collect(Collectors.toList());
+
+		// get existing values for each attributes
+		if (!uniqueAttrs.isEmpty())
+		{
+			Map<String, HugeSet<Object>> uniqueAttrsValues = new HashMap<>();
+
+			Fetch fetch = new Fetch();
+			uniqueAttrs.forEach(uniqueAttr -> {
+				uniqueAttrsValues.put(uniqueAttr.getName(), new HugeSet<>());
+				fetch.field(uniqueAttr.getName());
+			});
+
+			Query q = new QueryImpl().fetch(fetch);
+			for (Entity entity : decoratedRepository.findAll(q))
+			{
+				uniqueAttrs.forEach(uniqueAttr -> {
+					HugeSet<Object> uniqueAttrValues = uniqueAttrsValues.get(uniqueAttr.getName());
+					Object attrValue = entity.get(uniqueAttr.getName());
+					if (attrValue != null)
+					{
+						if (uniqueAttr.getDataType() instanceof XrefField)
 						{
-							refEntityIds.add(refEntity.getIdValue());
+							attrValue = ((Entity) attrValue).getIdValue();
 						}
+						uniqueAttrValues.add(attrValue);
 					}
 				});
 			}
-			else
+
+			validationResource.setUniqueAttrsValues(uniqueAttrsValues);
+		}
+
+		validationResource.setUniqueAttrs(uniqueAttrs);
+	}
+
+	private void validateEntityValueRequired(Entity entity, ValidationResource validationResource)
+	{
+		validationResource.getRequiredValueAttrs().forEach(nonNillableAttr -> {
+			Object value = entity.get(nonNillableAttr.getName());
+			if (value == null || (nonNillableAttr.getDataType() instanceof MrefField
+					&& !entity.getEntities(nonNillableAttr.getName()).iterator().hasNext()))
 			{
-				refEntitiesIds = null;
+				boolean isValid = false;
+
+				// FIXME remove hack (see https://github.com/molgenis/molgenis/issues/4308)
+				// Do not validate if Questionnaire status is not SUBMITTED
+				if (EntityUtils.doesExtend(getEntityMetaData(), "Questionnaire")
+						&& !"SUBMITTED".equals(entity.getString("status")))
+				{
+					isValid = true;
+				}
+				// Do not validate if visibleExpression resolves to false
+				else if (nonNillableAttr.getVisibleExpression() != null && !expressionValidator
+						.resolveBooleanExpression(nonNillableAttr.getVisibleExpression(), entity, getEntityMetaData()))
+				{
+
+					isValid = true;
+				}
+
+				if (!isValid)
+				{
+					String message = format("The attribute '%s' of entity '%s' can not be null.",
+							nonNillableAttr.getName(), getName());
+
+					ConstraintViolation constraintViolation = new ConstraintViolation(message, nonNillableAttr,
+							Long.valueOf(validationResource.getRow()));
+					validationResource.addViolation(constraintViolation);
+				}
 			}
+		});
+	}
 
-			AtomicInteger rownr = new AtomicInteger();
-			entities = entities.filter(entity -> {
-
-				Set<ConstraintViolation> violations = null;
-
-				// entity attributes validation
-				Set<ConstraintViolation> attrViolations = entityAttributesValidator.validate(entity,
-						getEntityMetaData());
-				if (attrViolations != null && !attrViolations.isEmpty())
-				{
-					if (violations == null)
-					{
-						violations = new LinkedHashSet<>();
-					}
-					violations.addAll(attrViolations);
-				}
-
-				// unique validation
-
-				// reference validation
-				for (AttributeMetaData refAttr : refAttrs)
-				{
-					HugeSet<Object> refEntityIds = refEntitiesIds.get(refAttr.getRefEntity().getName());
-
-					Iterable<Entity> refEntities;
-					if (refAttr.getDataType() instanceof XrefField)
-					{
-						Entity refEntity = entity.getEntity(refAttr.getName());
-						if (refEntity != null)
-						{
-							refEntities = singleton(refEntity);
-						}
-						else
-						{
-							refEntities = emptyList();
-						}
-					}
-					else
-					{
-						refEntities = entity.getEntities(refAttr.getName());
-					}
-
-					for (Entity refEntity : refEntities)
-					{
-						if (!refEntityIds.contains(refEntity.getIdValue()))
-						{
-							boolean selfReference = entity.getEntityMetaData().getName()
-									.equals(refAttr.getRefEntity().getName());
-							if (!(selfReference && entity.getIdValue().equals(refEntity.getIdValue())))
-							{
-								String message = String.format(
-										"Unknown xref value '%s' for attribute '%s' of entity '%s'.",
-										DataConverter.toString(refEntity.getIdValue()), refAttr.getName(),
-										getEntityMetaData().getLabel());
-								if (violations == null)
-								{
-									violations = new LinkedHashSet<>();
-								}
-								violations.add(new ConstraintViolation(message, refAttr, Long.valueOf(rownr.get())));
-							}
-						}
-					}
-				}
-
-				if (violations != null && !violations.isEmpty())
-				{
-					throw new MolgenisValidationException(violations);
-				}
-				return true;
+	private void validateEntityValueTypes(Entity entity, ValidationResource validationResource)
+	{
+		// entity attributes validation
+		Set<ConstraintViolation> attrViolations = entityAttributesValidator.validate(entity, getEntityMetaData());
+		if (attrViolations != null && !attrViolations.isEmpty())
+		{
+			attrViolations.forEach(attrViolation -> {
+				validationResource.addViolation(attrViolation);
 			});
 		}
-		return decoratedRepository.add(entities);
+	}
+
+	private void validateEntityValueUniqueness(Entity entity, ValidationResource validationResource)
+	{
+		validationResource.getUniqueAttrs().forEach(uniqueAttr -> {
+			Object attrValue = entity.get(uniqueAttr.getName());
+			if (attrValue != null)
+			{
+				if (uniqueAttr.getDataType() instanceof XrefField)
+				{
+					attrValue = ((Entity) attrValue).getIdValue();
+				}
+
+				HugeSet<Object> uniqueAttrValues = validationResource.getUniqueAttrsValues().get(uniqueAttr.getName());
+				boolean isNewValue = uniqueAttrValues.add(attrValue);
+				if (!isNewValue)
+				{
+					ConstraintViolation constraintViolation = new ConstraintViolation(
+							format("Duplicate value '%s' for unique attribute '%s' from entity '%s'", attrValue,
+									uniqueAttr.getName(), getName()),
+							uniqueAttr, Long.valueOf(validationResource.getRow()));
+					validationResource.addViolation(constraintViolation);
+				}
+			}
+		});
+	}
+
+	private void validateEntityValueReferences(Entity entity, ValidationResource validationResource)
+	{
+		validationResource.getRefAttrs().forEach(refAttr -> {
+			HugeSet<Object> refEntityIds = validationResource.getRefEntitiesIds().get(refAttr.getRefEntity().getName());
+
+			Iterable<Entity> refEntities;
+			if (refAttr.getDataType() instanceof XrefField)
+			{
+				Entity refEntity = entity.getEntity(refAttr.getName());
+				if (refEntity != null)
+				{
+					refEntities = singleton(refEntity);
+				}
+				else
+				{
+					refEntities = emptyList();
+				}
+			}
+			else
+			{
+				refEntities = entity.getEntities(refAttr.getName());
+			}
+
+			for (Entity refEntity : refEntities)
+			{
+				if (!refEntityIds.contains(refEntity.getIdValue()))
+				{
+					boolean selfReference = entity.getEntityMetaData().getName()
+							.equals(refAttr.getRefEntity().getName());
+					if (!(selfReference && entity.getIdValue().equals(refEntity.getIdValue())))
+					{
+						String message = String.format("Unknown xref value '%s' for attribute '%s' of entity '%s'.",
+								DataConverter.toString(refEntity.getIdValue()), refAttr.getName(), getName());
+
+						ConstraintViolation constraintViolation = new ConstraintViolation(message, refAttr,
+								Long.valueOf(validationResource.getRow()));
+						validationResource.addViolation(constraintViolation);
+					}
+				}
+			}
+		});
+	}
+
+	private void validateEntityValueReadOnly(Entity entity, ValidationResource validationResource)
+	{
+
+	}
+
+	/**
+	 * Container with validation data used during stream validation
+	 */
+	private static class ValidationResource implements AutoCloseable
+	{
+		private AtomicInteger rowNr = new AtomicInteger();
+		private List<AttributeMetaData> requiredValueAttrs;
+		private List<AttributeMetaData> refAttrs;
+		private Map<String, HugeSet<Object>> refEntitiesIds;
+		private List<AttributeMetaData> uniqueAttrs;
+		private Map<String, HugeSet<Object>> uniqueAttrsValues;
+		private Set<ConstraintViolation> violations;
+
+		public ValidationResource()
+		{
+			rowNr = new AtomicInteger();
+		}
+
+		public int getRow()
+		{
+			return rowNr.get();
+		}
+
+		public void incrementRow()
+		{
+			rowNr.incrementAndGet();
+		}
+
+		public List<AttributeMetaData> getRequiredValueAttrs()
+		{
+			return requiredValueAttrs != null ? unmodifiableList(requiredValueAttrs) : emptyList();
+		}
+
+		public void setRequiredValueAttrs(List<AttributeMetaData> requiredValueAttrs)
+		{
+			this.requiredValueAttrs = requiredValueAttrs;
+		}
+
+		public List<AttributeMetaData> getRefAttrs()
+		{
+			return unmodifiableList(refAttrs);
+		}
+
+		public void setRefAttrs(List<AttributeMetaData> refAttrs)
+		{
+			this.refAttrs = refAttrs;
+		}
+
+		public Map<String, HugeSet<Object>> getRefEntitiesIds()
+		{
+			return refEntitiesIds != null ? unmodifiableMap(refEntitiesIds) : emptyMap();
+		}
+
+		public void setRefEntitiesIds(Map<String, HugeSet<Object>> refEntitiesIds)
+		{
+			this.refEntitiesIds = refEntitiesIds;
+		}
+
+		public List<AttributeMetaData> getUniqueAttrs()
+		{
+			return uniqueAttrs != null ? unmodifiableList(uniqueAttrs) : emptyList();
+		}
+
+		public void setUniqueAttrs(List<AttributeMetaData> uniqueAttrs)
+		{
+			this.uniqueAttrs = uniqueAttrs;
+		}
+
+		public Map<String, HugeSet<Object>> getUniqueAttrsValues()
+		{
+			return uniqueAttrsValues != null ? unmodifiableMap(uniqueAttrsValues) : emptyMap();
+		}
+
+		public void setUniqueAttrsValues(Map<String, HugeSet<Object>> uniqueAttrsValues)
+		{
+			this.uniqueAttrsValues = uniqueAttrsValues;
+		}
+
+		public boolean hasViolations()
+		{
+			return violations != null && !violations.isEmpty();
+		}
+
+		public void addViolation(ConstraintViolation constraintViolation)
+		{
+			if (violations == null)
+			{
+				violations = new LinkedHashSet<>();
+			}
+			violations.add(constraintViolation);
+		}
+
+		public Set<ConstraintViolation> getViolations()
+		{
+			return violations != null ? unmodifiableSet(violations) : emptySet();
+		}
+
+		@Override
+		public void close()
+		{
+			if (refEntitiesIds != null)
+			{
+				for (HugeSet<Object> refEntityIds : refEntitiesIds.values())
+				{
+					try
+					{
+						refEntityIds.close();
+					}
+					catch (IOException e)
+					{
+						throw new RuntimeException(e);
+					}
+				}
+			}
+			if (uniqueAttrsValues != null)
+			{
+				for (HugeSet<Object> uniqueAttrValues : uniqueAttrsValues.values())
+				{
+					try
+					{
+						uniqueAttrValues.close();
+					}
+					catch (IOException e)
+					{
+						throw new RuntimeException(e);
+					}
+				}
+			}
+		}
 	}
 
 	private void validate(Iterable<? extends Entity> entities, boolean forUpdate)
@@ -294,15 +745,16 @@ public class RepositoryValidationDecorator implements Repository
 		return violations;
 	}
 
-	public boolean mustDoNotNullCheck(EntityMetaData entityMetaData, AttributeMetaData attr, Entity entity)
+	private boolean mustDoNotNullCheck(EntityMetaData entityMetaData, AttributeMetaData attr, Entity entity)
 	{
+		// FIXME remove hack (see https://github.com/molgenis/molgenis/issues/4308)
 		// Do not validate if Questionnaire status is not SUBMITTED
 		if (EntityUtils.doesExtend(entityMetaData, "Questionnaire") && entity.get("status") != "SUBMITTED")
 			return false;
 
 		// Do not validate if visibleExpression resolves to false
 		if (StringUtils.isNotBlank(attr.getVisibleExpression())
-				&& !ValidationUtils.resolveBooleanExpression(attr.getVisibleExpression(), entity, entityMetaData))
+				&& !expressionValidator.resolveBooleanExpression(attr.getVisibleExpression(), entity, entityMetaData))
 			return false;
 
 		return true;
@@ -505,162 +957,5 @@ public class RepositoryValidationDecorator implements Repository
 	{
 		FieldType idDataType = getEntityMetaData().getIdAttribute().getDataType();
 		return idDataType.convert(id).equals(idDataType.convert(entity.getIdValue()));
-	}
-
-	@Override
-	public String getName()
-	{
-		return decoratedRepository.getName();
-	}
-
-	@Override
-	public EntityMetaData getEntityMetaData()
-	{
-		return decoratedRepository.getEntityMetaData();
-	}
-
-	@Override
-	public Iterator<Entity> iterator()
-	{
-		return decoratedRepository.iterator();
-	}
-
-	@Override
-	public void close() throws IOException
-	{
-		decoratedRepository.close();
-	}
-
-	@Override
-	public void flush()
-	{
-		decoratedRepository.flush();
-	}
-
-	@Override
-	public void clearCache()
-	{
-		decoratedRepository.clearCache();
-	}
-
-	@Override
-	public long count()
-	{
-		return decoratedRepository.count();
-	}
-
-	@Override
-	public Query query()
-	{
-		return decoratedRepository.query();
-	}
-
-	@Override
-	public long count(Query q)
-	{
-		return decoratedRepository.count(q);
-	}
-
-	@Override
-	public Iterable<Entity> findAll(Query q)
-	{
-		return decoratedRepository.findAll(q);
-	}
-
-	@Override
-	public Entity findOne(Query q)
-	{
-		return decoratedRepository.findOne(q);
-	}
-
-	@Override
-	public Entity findOne(Object id)
-	{
-		return decoratedRepository.findOne(id);
-	}
-
-	@Override
-	public Entity findOne(Object id, Fetch fetch)
-	{
-		return decoratedRepository.findOne(id, fetch);
-	}
-
-	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		return decoratedRepository.findAll(ids);
-	}
-
-	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
-	{
-		return decoratedRepository.findAll(ids, fetch);
-	}
-
-	@Override
-	public void delete(Iterable<? extends Entity> entities)
-	{
-		decoratedRepository.delete(entities);
-	}
-
-	@Override
-	public void deleteById(Object id)
-	{
-		decoratedRepository.deleteById(id);
-	}
-
-	@Override
-	public void deleteById(Iterable<Object> ids)
-	{
-		decoratedRepository.deleteById(ids);
-	}
-
-	@Override
-	public void deleteAll()
-	{
-		decoratedRepository.deleteAll();
-	}
-
-	@Override
-	public AggregateResult aggregate(AggregateQuery aggregateQuery)
-	{
-		return decoratedRepository.aggregate(aggregateQuery);
-	}
-
-	@Override
-	public Set<RepositoryCapability> getCapabilities()
-	{
-		return decoratedRepository.getCapabilities();
-	}
-
-	@Override
-	public void create()
-	{
-		decoratedRepository.create();
-
-	}
-
-	@Override
-	public void drop()
-	{
-		decoratedRepository.drop();
-	}
-
-	@Override
-	public void rebuildIndex()
-	{
-		decoratedRepository.rebuildIndex();
-	}
-
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		decoratedRepository.addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		decoratedRepository.removeEntityListener(entityListener);
 	}
 }

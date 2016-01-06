@@ -25,6 +25,7 @@ import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.validation.EntityAttributesValidator;
+import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
 import org.molgenis.data.vcf.VcfRepositoryCollection;
 import org.molgenis.framework.db.EntityImportReport;
@@ -75,7 +76,8 @@ public class VcfImporterServiceTest
 			public Repository addEntityMeta(EntityMetaData entityMetaData)
 			{
 				Repository repo = super.addEntityMeta(entityMetaData);
-				return new RepositoryValidationDecorator(dataService, repo, new EntityAttributesValidator());
+				return new RepositoryValidationDecorator(dataService, repo, new EntityAttributesValidator(),
+						new ExpressionValidator());
 			}
 		});
 		dataService.setMeta(metaDataService);

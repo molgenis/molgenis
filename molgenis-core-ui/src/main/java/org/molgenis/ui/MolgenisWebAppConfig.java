@@ -46,6 +46,7 @@ import org.molgenis.data.support.OwnedEntityMetaData;
 import org.molgenis.data.transaction.TransactionLogRepositoryDecorator;
 import org.molgenis.data.transaction.TransactionLogService;
 import org.molgenis.data.validation.EntityAttributesValidator;
+import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
 import org.molgenis.file.FileStore;
 import org.molgenis.framework.MolgenisUpgradeService;
@@ -141,6 +142,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	@Autowired
 	public EntityAttributesValidator entityAttributesValidator;
+
+	@Autowired
+	public ExpressionValidator expressionValidator;
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
@@ -545,7 +549,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 				// 3. validation decorator
 				decoratedRepository = new RepositoryValidationDecorator(dataService(), decoratedRepository,
-						entityAttributesValidator);
+						entityAttributesValidator, expressionValidator);
 
 				// 2. auto value decorator
 				decoratedRepository = new AutoValueRepositoryDecorator(decoratedRepository, idGenerator);

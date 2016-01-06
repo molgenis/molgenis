@@ -253,7 +253,7 @@ public class VcfImporterService implements ImportService
 
 				if (!sampleEntities.isEmpty())
 				{
-					sampleRepository.add(sampleEntities);
+					sampleRepository.add(sampleEntities.stream());
 					sampleEntityCount += sampleEntities.size();
 				}
 
