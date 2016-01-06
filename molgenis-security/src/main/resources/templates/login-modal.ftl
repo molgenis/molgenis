@@ -18,10 +18,14 @@
                             <div class="g-signin2" data-width="200" data-longtitle="true" data-theme="dark" data-onsuccess="onSignIn"></div>
                         </form>
                         <script>
-                            function onSignIn(googleUser) {
-                                $('#google-id-token').val(googleUser.getAuthResponse().id_token);
-                                $('#login-google-form').submit();
-                            }
+                        	require(['main'], function(){
+                        		require(['jquery'], function($){
+		                            function onSignIn(googleUser) {
+		                                $('#google-id-token').val(googleUser.getAuthResponse().id_token);
+		                                $('#login-google-form').submit();
+		                            }                        	
+                        		});
+                        	});
                         </script>
                     </div>
                     <div class="col-md-6" style="border-left: 1px solid #e5e5e5">
@@ -61,46 +65,50 @@
 <div id="register-modal-container"></div>
 <div id="resetpassword-modal-container"></div>
 <script type="text/javascript">
-  	$(function() {
-  		var modal = $('#login-modal');
-  		var submitBtn = $('#login-btn');
-  		var form = $('#login-form');
-  		form.validate();
-  		
-  		<#-- modal events -->
-  		modal.on('hide.bs.modal', function (e) {
-  			e.stopPropagation();
-	  		form[0].reset();
-	  		$('.text-error', modal).remove();
-	  		$('.alert', modal).remove();
-  		});
-  		
-  		<#-- form events -->
-  		form.submit(function(e) {
-	    	if(!form.valid()) {
-	    		e.preventDefault();
-	    		e.stopPropagation();
-	    	}
+  	require(['main'], function(){
+		require(['jquery'], function($){
+		  	$(function() {
+		  		var modal = $('#login-modal');
+		  		var submitBtn = $('#login-btn');
+		  		var form = $('#login-form');
+		  		form.validate();
+		  		
+		  		<#-- modal events -->
+		  		modal.on('hide.bs.modal', function (e) {
+		  			e.stopPropagation();
+			  		form[0].reset();
+			  		$('.text-error', modal).remove();
+			  		$('.alert', modal).remove();
+		  		});
+		  		
+		  		<#-- form events -->
+		  		form.submit(function(e) {
+			    	if(!form.valid()) {
+			    		e.preventDefault();
+			    		e.stopPropagation();
+			    	}
+			    });
+			    submitBtn.click(function(e) {
+			    	e.preventDefault();
+			    	e.stopPropagation();
+			    	form.submit();
+			    });
+				$('input', form).add(submitBtn).keydown(function(e) { <#-- use keydown, because keypress doesn't work cross-browser -->
+					if(e.which == 13) {
+			    		e.preventDefault();
+					    e.stopPropagation();
+						form.submit();
+			    	}
+				});
+				
+				<#-- submodal events -->
+				$(document).on('molgenis-registered', function(e, msg) {
+					$('.modal-header', modal).first().after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
+				});
+				$(document).on('molgenis-passwordresetted', function(e, msg) {
+					$('.modal-header', modal).first().after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
+				});
+		    });
 	    });
-	    submitBtn.click(function(e) {
-	    	e.preventDefault();
-	    	e.stopPropagation();
-	    	form.submit();
-	    });
-		$('input', form).add(submitBtn).keydown(function(e) { <#-- use keydown, because keypress doesn't work cross-browser -->
-			if(e.which == 13) {
-	    		e.preventDefault();
-			    e.stopPropagation();
-				form.submit();
-	    	}
-		});
-		
-		<#-- submodal events -->
-		$(document).on('molgenis-registered', function(e, msg) {
-			$('.modal-header', modal).first().after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
-		});
-		$(document).on('molgenis-passwordresetted', function(e, msg) {
-			$('.modal-header', modal).first().after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
-		});
     });
 </script>
