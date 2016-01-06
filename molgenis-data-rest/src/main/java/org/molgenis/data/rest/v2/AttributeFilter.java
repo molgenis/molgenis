@@ -24,8 +24,6 @@ import org.molgenis.data.Entity;
  */
 class AttributeFilter implements Iterable<Entry<String, AttributeFilter>>
 {
-	public static final AttributeFilter ALL_ATTRS_FILTER = new AttributeFilter().setIncludeAllAttrs(true);
-
 	private final Map<String, AttributeFilter> attributes;
 	private boolean includeAllAttrs;
 	private boolean includeIdAttr;
