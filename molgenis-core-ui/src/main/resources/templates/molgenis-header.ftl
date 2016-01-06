@@ -50,7 +50,7 @@
 		 The data-main attribute defines the initialization point of the application. 
 		 RequireJS uses the script in data-main to look for other scripts and dependencies. 
 		-->
-		<script type="text/javascript" src="<@resource_href "/js/components/requirejs/require.js" />" data-main="<@resource_href "/scripts/main.js" />"></script>
+		<script type="application/javascript" src="<@resource_href "/js/components/requirejs/require.js" />" data-main="<@resource_href "/js/main.js" />"></script>
     
     <#-- GOOGLE SIGN IN -->
 	<#if googleSignIn>
@@ -124,7 +124,7 @@
         <script src="<@resource_href "/js/typedarray.min.js"/>"></script>
     <![endif]-->
        
-        <script>
+     <#--   <script>
             top.molgenis.setCookieWall(${cookieWall?string('true', 'false')});
     <#if context_url??>
             top.molgenis.setContextUrl('${context_url?js_string}');
@@ -132,7 +132,7 @@
     <#if plugin_id??>
             top.molgenis.setPluginId('${plugin_id?js_string}');
     </#if>
-        </script>
+        </script>-->
 	<#list js as js_file_name>
 		<script src="<@resource_href "/js/${js_file_name?html}"/>"></script>
 	</#list>
@@ -223,7 +223,8 @@
     			</#list>
     			<#-- Logo end -->
 			</div>
-    		<h1>BUTTON HERE</h1>
+    		<h1>BUTTON HERE!!!!</h1>
+    		
 			<div id="test_div"><script>require(['<@resource_href "/js/test.js"/>'])</script></div>
     		<#-- Navbar items start -->
         	<div class="collapse navbar-collapse" id="bs-molgenis-navbar">
