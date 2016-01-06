@@ -13,12 +13,12 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta http-equiv="X-UA-Compatible" content="chrome=1">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-    <#if googleSignIn>
-        <meta name="google-signin-client_id" content="${app_settings.googleAppClientId?html}">
-    </#if>
-        <link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
+	<#if googleSignIn>
+    	<meta name="google-signin-client_id" content="${app_settings.googleAppClientId?html}">
+ 	</#if>
         
-	<#-- Bundle of third party CSS resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
+        <link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
+		<#-- Bundle of third party CSS resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
         <link rel="stylesheet" href="<@resource_href "/css/molgenis-bundle.min.css"/>" type="text/css">
     
 	<#if environment == "development">
@@ -46,16 +46,14 @@
         <link rel="stylesheet" href="<@resource_href "/css/${app_settings.cssHref?html}"/>" type="text/css">
     </#if> 
 
-        <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
-		<script src="<@resource_href "/js/es6-promise.min.js"/>"></script>
-		<script src="<@resource_href "/js/promise-done-6.1.0.min.js"/>"></script>
-		<script src="<@resource_href "/js/promise-done-6.1.0.min.js"/>"></script>
-        <script src="<@resource_href "/js/molgenis-bundle.min.js"/>"></script>
-        <script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
-        <script src="<@resource_href "/js/handlebars.min.js"/>"></script>
-        <script src="<@resource_href "/js/molgenis.js"/>"></script>
-        <script src="<@resource_href "/js/molgenis-script-evaluator.js"/>"></script>
-    <#if googleSignIn>
+		<#---
+		 The data-main attribute defines the initialization point of the application. 
+		 RequireJS uses the script in data-main to look for other scripts and dependencies. 
+		-->
+		<script type="text/javascript" src="<@resource_href "/js/components/requirejs/require.js" />" data-main="<@resource_href "/scripts/main.js" />"></script>
+    
+    <#-- GOOGLE SIGN IN -->
+	<#if googleSignIn>
         <#if authenticated?? && authenticated>
         <#-- Include script tag before platform.js script loading, else onLoad could be called before the onLoad function is available -->
         <script>
@@ -68,19 +66,21 @@
         </#if>
         <script src="https://apis.google.com/js/platform.js<#if authenticated?? && authenticated>?onload=onLoad</#if>" async defer></script>
     </#if>
+  	<#-- /GOOGLE SIGN IN -->
 
+	<#-- REACT
 	<script src="<@resource_href "/js/component/Button.js"/>"></script>
+	<script src="<@resource_href "/js/component/FormControl.js"/>"></script>
+	<script src="<@resource_href "/js/component/Form.js"/>"></script>
+	<script src="<@resource_href "/js/component/FormIndex.js"/>"></script>
+	<script src="<@resource_href "/js/component/FormControls.js"/>"></script>
+	<script src="<@resource_href "/js/component/FormControlDescription.js"/>"></script>
+	<#-- /REACT -->
+	
 
     <#----<#if environment == "development">
         <#-- Important: Update minify-maven-plugin configuration in molgenis-core-ui/pom.xml when modifying the list below 
-        <script src="<@resource_href "/js/react-with-addons.js"/>"></script>
         <script src="<@resource_href "/js/component/mixin/I18nStringsMixin.js"/>"></script>
-        <script src="<@resource_href "/js/component/mixin/AttributeLoaderMixin.js"/>"></script>
-        <script src="<@resource_href "/js/component/mixin/DeepPureRenderMixin.js"/>"></script>
-        <script src="<@resource_href "/js/component/mixin/EntityInstanceLoaderMixin.js"/>"></script>
-        <script src="<@resource_href "/js/component/mixin/EntityLoaderMixin.js"/>"></script>
-        <script src="<@resource_href "/js/component/mixin/GroupMixin.js"/>"></script>
-        <script src="<@resource_href "/js/component/mixin/ReactLayeredComponentMixin.js"/>"></script>
         <script src="<@resource_href "/js/component/wrapper/Ace.js"/>"></script>
         <script src="<@resource_href "/js/component/wrapper/DateTimePicker.js"/>"></script>
         <script src="<@resource_href "/js/component/wrapper/JQRangeSlider.js"/>"></script>
@@ -116,12 +116,14 @@
         <script src="<@resource_href "/js/molgenis-component.min.js"/>"></script>
     </#if>
         -->
+    
     <!--[if IE 9]>
         <#-- used to disable the genomebrowser in IE9 -->
         <script>top.molgenis.ie9 = true;</script>
         <#-- required by dalliance-compiled.js to load the genomebrowsers in IE9 -->
         <script src="<@resource_href "/js/typedarray.min.js"/>"></script>
     <![endif]-->
+       
         <script>
             top.molgenis.setCookieWall(${cookieWall?string('true', 'false')});
     <#if context_url??>
@@ -221,7 +223,8 @@
     			</#list>
     			<#-- Logo end -->
 			</div>
-    		
+    		<h1>BUTTON HERE</h1>
+			<div id="test_div"><script>require(['<@resource_href "/js/test.js"/>'])</script></div>
     		<#-- Navbar items start -->
         	<div class="collapse navbar-collapse" id="bs-molgenis-navbar">
 				<ul class="nav navbar-nav">
