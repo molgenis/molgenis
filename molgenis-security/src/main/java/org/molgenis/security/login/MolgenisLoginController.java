@@ -18,7 +18,7 @@ public class MolgenisLoginController
 {
 	public static final String SESSION_EXPIRED_SESSION_ATTR = "sessionExpired";
 	private static final String ERROR_MESSAGE_BAD_CREDENTIALS = "The username or password you entered is incorrect.";
-	private static final String ERROR_MESSAGE_DISABLED = "Your account is not yet activated.";
+	public static final String ERROR_MESSAGE_DISABLED = "Your account is not yet activated.";
 	private static final String ERROR_MESSAGE_SESSION_AUTHENTICATION = "Your login session has expired.";
 	private static final String ERROR_MESSAGE_UNKNOWN = "Sign in failed.";
 
