@@ -3,10 +3,10 @@ define(function(require, exports, module) {
 
 	var molgenis = {};
 		
-	var showSpinner = require('spinner').showSpinner()
+	var showSpinner = require('spinner').showSpinner();
 	var hideSpinner = require('spinner').hideSpinner();
 	
-	var handlebarHelper = require('/modules/HandlebarHelpers');
+	var handlebarHelper = require('modules/HandlebarHelpers');
 
 	// workaround for "Uncaught RangeError: Maximum call stack size exceeded"
 	// http://stackoverflow.com/a/19190216
@@ -53,8 +53,10 @@ define(function(require, exports, module) {
 	};
 
 	molgenis.createAlert = function(alerts, type, container) {
-		if (type !== 'error' && type !== 'warning' && type !== 'success' && type !== 'info')
+		if (type !== 'error' && type !== 'warning' && type !== 'success' && type !== 'info') {
 			type = 'error';
+		}
+		
 		if (container === undefined) {
 			container = $('.alerts');
 			container.empty();
@@ -68,8 +70,9 @@ define(function(require, exports, module) {
 		items.push(type.charAt(0).toUpperCase() + type.slice(1));
 		items.push('!</strong> ');
 		$.each(alerts, function(i, alert) {
-			if (i > 0)
+			if (i > 0) {
 				items.push('<br/>');
+			}
 			items.push('<span>' + alert.message + '</span>');
 		});
 		items.push('</div>');
@@ -81,51 +84,56 @@ define(function(require, exports, module) {
 	molgenis.i18n.get = function(str, lang) {
 		lang = typeof lang !== 'undefined' ? lang : 'en';
 		var i18nObj;
-		if (str && (str.charAt(0) !== '{' || str.charAt(str.length - 1) !== '}'))
+		
+		if (str && (str.charAt(0) !== '{' || str.charAt(str.length - 1) !== '}')) {
 			i18nObj = {
 				'en' : str
 			};
-		else
+		} else {
 			i18nObj = JSON.parse(str ? str : '{}');
+		}
+		
 		return i18nObj[lang];
 	};
+	
 	molgenis.i18n.getAll = function(str, lang) {
 		lang = typeof lang !== 'undefined' ? lang : 'en';
 		var i18nObj;
-		if (str && (str.charAt(0) !== '{' || str.charAt(str.length - 1) !== '}'))
+		if (str && (str.charAt(0) !== '{' || str.charAt(str.length - 1) !== '}')) {
 			i18nObj = {
 				'en' : str
 			};
-		else
+		} else {
 			i18nObj = JSON.parse(str ? str : '{}');
+		}
 		return i18nObj;
 	};
 
 	
 
 
-// Add endsWith function to the string class
-if (typeof String.prototype.endsWith !== 'function') {
-	String.prototype.endsWith = function(suffix) {
-		return this.indexOf(suffix, this.length - suffix.length) !== -1;
-	};
-}
-
-function getCurrentTimezoneOffset() {
-	function padNumber(number, length) {
-		var str = "" + number;
-		while (str.length < length) {
-			str = '0' + str;
-		}
-
-		return str;
+	// Add endsWith function to the string class
+	if (typeof String.prototype.endsWith !== 'function') {
+		String.prototype.endsWith = function(suffix) {
+			return this.indexOf(suffix, this.length - suffix.length) !== -1;
+		};
 	}
 
-	var offset = new Date().getTimezoneOffset();
-	offset = ((offset < 0 ? '+' : '-') + padNumber(parseInt(Math.abs(offset / 60)), 2) + padNumber(Math.abs(offset % 60), 2));
-
-	return offset;
-}
+	function getCurrentTimezoneOffset() {
+		function padNumber(number, length) {
+			var str = "" + number;
+			while (str.length < length) {
+				str = '0' + str;
+			}
+	
+			return str;
+		}
+	
+		var offset = new Date().getTimezoneOffset();
+		offset = ((offset < 0 ? '+' : '-') + padNumber(parseInt(Math.abs(offset / 60)), 2) + padNumber(Math.abs(offset % 60), 2));
+	
+		return offset;
+	}
 
 function() {
 	var entityMap = {
@@ -554,9 +562,8 @@ $(function() {
 			var current = result;
 
 			// If the first keys part contains [ and the last ends with ], then
-			// []
-			// are correctly balanced.
-			if (keys[0].indexOf('[') >= 0 && /\]$/.test(keys[last])) {
+			// [] are correctly balanced.
+			if (keys[0].indexOf('[') >= 0 && '/\]$/'.test(keys[last])) {
 				// Remove the trailing ] from the last keys part.
 				keys[last] = keys[last].replace(/\]$/, '');
 				// Split first keys part into two parts on the [ and add them
