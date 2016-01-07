@@ -10,9 +10,11 @@ define(function(require, exports, module) {
 
 	var $ = require('jquery');
 	var restApi = require('modules/RestClientV1');
-
-	var _this_ = this;
 	var molgenis = require('modules/MolgenisQuery');
+
+	// Save a reference to module's global scope outside the exports.
+	// This is used to both export a function and also call it within the module
+	var _this_ = this;
 
 	/**
 	 * @memberOf MolgenisTable
