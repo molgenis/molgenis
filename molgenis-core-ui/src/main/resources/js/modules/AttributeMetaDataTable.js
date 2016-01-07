@@ -1,9 +1,19 @@
-(function($, molgenis) {
+define(function(require, exports, module) {
+	/**
+	 * @module AttributeMetaDataTable
+	 */
+
 	"use strict";
-	var restApi = new molgenis.RestClient();
+	
+	var $ = require('jquery');
+	var restApi = require('modules/RestClientV1');
+	
 	var ATTRIBUTE_KEYS = [ 'name', 'label', 'fieldType', 'description', 'nillable', 'readOnly', 'unique' ];
 
-	$.fn.attributeMetadataTable = function(options) {
+	/**
+	 * @memberOf AttributeMetaDataTable
+	 */
+	exports.prototype.createAttributeMetadataTable = function(options) {
 		var container = this;
 		var attributeMetadata = options.attributeMetadata;
 		container.html('');
@@ -66,7 +76,5 @@
 				});
 			});
 		}
-
 	}
-
-}($, window.top.molgenis = window.top.molgenis || {}));
+});
