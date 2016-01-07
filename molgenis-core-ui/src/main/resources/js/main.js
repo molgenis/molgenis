@@ -1,10 +1,11 @@
 'use strict';
-//console.log('setting configuration...');
-// First we’re setting a baseUrl to the src/main/resources/js folder, then letting RequireJS know where our 
-// libraries are with the paths option (compulsory when using jQuery as it is a named module) and 
-// then shimming any scripts that do not have AMD support. This is common with most jQuery plugins.
+
+console.log('loading requirejs configuration...');
+
 require.config({
-	baseUrl : 'js/',
+	// Set a baseUrl to the js/ folder, and let RequireJS know where our
+	// libraries are with the paths option (compulsory when using jQuery as it
+	// is a named module)
 	baseUrl : '/js/',
 	paths : {
 		jquery : 'components/jquery/jquery-2.1.1.min',
@@ -12,17 +13,20 @@ require.config({
 		handlebars : 'components/handlebars/handlebars',
 		bootstrap : 'components/bootstrap/bootstrap.min',
 		react : 'components/react/react-with-addons',
-		molgenis : 'modules/molgenis',
 		underscore : 'components/underscore/underscore-min',
-		react_button : 'component/Button'
+		molgenis : 'modules/molgenis'
 	},
+	// Shim any scripts that do not have AMD support
+	// This is common with most jQuery plugins
 	shim : {
-		bootstrap : {
-			deps : 'jquery'
-		},
 		handlebars : {
 			exports : 'Handlebars'
 		},
+		underscore : {
+			exports : '_'
+		},
+		bootstrap : [ 'jquery' ],
+		domready : [ 'jquery' ],
 		'plugins/jQEditRangeSlider-min.js' : [ 'jquery' ],
 		'plugins/jquery-sortable-min.js' : [ 'jquery' ],
 		'plugins/jquery.bootstrap.pager.js' : [ 'jquery' ],
@@ -36,15 +40,17 @@ require.config({
 		'plugins/jquery.molgenis.xrefmrefsearch.js' : [ 'jquery' ],
 		'plugins/jquery.validate.min.js' : [ 'jquery' ],
 		'plugins/select2-patched.js' : [ 'jquery' ],
-		'plugins/bootstrap.file-input.js' : [ 'bootstrap' ],
-		'plugins/bootstrap-datetimepicker.min.js' : [ 'bootstrap' ],
-		'plugins/bootstrap-fileupload.min.js' : [ 'bootstrap' ]
+		'plugins/bootstrap.file-input.js' : [ 'jquery', 'bootstrap' ],
+		'plugins/bootstrap-datetimepicker.min.js' : [ 'jquery', 'bootstrap' ],
+		'plugins/bootstrap-fileupload.min.js' : [ 'jquery', 'bootstrap' ]
 	}
 });
 
 // Specify the Core libraries which are required, and also any modules that you
 // might want to load and initialise on every page
 define(function(require) {
+	console.log('loading main dependencies...')
+
 	var $ = require('jquery');
 	var domReady = require('domready');
 	var Handlebars = require('handlebars');
@@ -52,10 +58,10 @@ define(function(require) {
 	var React = require('react');
 	var molgenis = require('molgenis');
 	var _ = require('underscore');
-	
+
 	domReady(function() {
 		// Init common module code here
 		// TODO common modules, like React components????
-		console.log('All scripts loaded and DOM is ready!');
+		console.log('All dependencies loaded and DOM ready!');
 	});
 });
