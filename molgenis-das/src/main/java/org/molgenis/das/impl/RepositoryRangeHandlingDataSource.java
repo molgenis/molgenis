@@ -192,6 +192,7 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 
 	protected Iterable<Entity> queryDataSet(String segmentId, String dataSet, int maxbins)
 	{
+
 		String chromosomeAttribute = config.getAttributeNameForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_CHROM,
 				dataService.getEntityMetaData(dataSet));
 		Query q = new QueryImpl().eq(chromosomeAttribute, segmentId);

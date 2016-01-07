@@ -1,6 +1,7 @@
 package org.molgenis.data.meta.system;
 
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 
@@ -9,6 +10,7 @@ import static org.molgenis.MolgenisFieldTypes.ENUM;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.MolgenisFieldTypes.INT;
 
+@Component
 public class ImportRunMetaData extends DefaultEntityMetaData {
     public static final String ID = "id";
     public static final String STARTDATE = "startDate";

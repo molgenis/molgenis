@@ -1,6 +1,11 @@
-package org.molgenis.data.system;
+package org.molgenis.auth;
 
+import com.google.auto.value.AutoValue;
+
+@AutoValue
 public class MolgenisUser {
+    public static final String ENTITY_NAME = "MolgenisUser";
+
     String id;
     String username;
     String password_;

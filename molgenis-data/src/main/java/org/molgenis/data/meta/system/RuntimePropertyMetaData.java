@@ -1,7 +1,9 @@
 package org.molgenis.data.meta.system;
 
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.springframework.stereotype.Component;
 
+@Component
 public class RuntimePropertyMetaData extends DefaultEntityMetaData {
     public static final String ID = "id";
     public static final String NAME = "Name";

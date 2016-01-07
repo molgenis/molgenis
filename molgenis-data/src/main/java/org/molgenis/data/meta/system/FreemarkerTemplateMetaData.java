@@ -1,9 +1,11 @@
 package org.molgenis.data.meta.system;
 
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.springframework.stereotype.Component;
 
 import static org.molgenis.MolgenisFieldTypes.SCRIPT;
 
+@Component
 public class FreemarkerTemplateMetaData extends DefaultEntityMetaData
 {
 	public static final String ID = "id";
