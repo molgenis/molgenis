@@ -12,7 +12,7 @@ import com.google.gson.Gson;
 
 public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 {
-	private AttributeMetaData targetAttributeMetaData;
+	private final AttributeMetaData targetAttributeMetaData;
 	private Map<String, ExpressionEvaluator> evaluators;
 
 	/**
@@ -23,7 +23,7 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 	 */
 	public MapOfStringsExpressionEvaluator(AttributeMetaData attributeMetaData, EntityMetaData entityMetaData)
 	{
-		targetAttributeMetaData = attributeMetaData;
+		targetAttributeMetaData = new DefaultAttributeMetaData(attributeMetaData);
 		String expression = attributeMetaData.getExpression();
 		if (expression == null)
 		{

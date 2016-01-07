@@ -21,9 +21,11 @@
                         	require(['main'], function(){
                         		require(['jquery'], function($){
 		                            function onSignIn(googleUser) {
-		                                $('#google-id-token').val(googleUser.getAuthResponse().id_token);
-		                                $('#login-google-form').submit();
-		                            }                        	
+		                            	<#if !(errorMessage??)>
+		                                	$('#google-id-token').val(googleUser.getAuthResponse().id_token);
+		                                	$('#login-google-form').submit();
+		                                 </#if>
+		                            }                   	
                         		});
                         	});
                         </script>
