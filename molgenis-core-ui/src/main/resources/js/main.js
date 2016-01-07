@@ -5,6 +5,7 @@
 // then shimming any scripts that do not have AMD support. This is common with most jQuery plugins.
 require.config({
 	baseUrl : 'js/',
+	baseUrl : '/js/',
 	paths : {
 		jquery : 'components/jquery/jquery-2.1.1.min',
 		domready : 'components/requirejs/requirejs-domready',
