@@ -6,7 +6,7 @@ define(function(require) {
 	var molgenis = require('molgenis');
 	var _ = require('underscore');
 
-	var DeepPureRenderMixin = require('/component/mixin/DeepPureRenderMixin');
+	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
 
 	var button = React.DOM.button, a = React.DOM.a;
 
