@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<molgenis name="org.molgenis.system">
+<molgenis name="org.molgenis.data.system">
 	<module name="core">
 		<entity name="RuntimeProperty" xref_label="Name">
 			<field name="id" type="autoid" hidden="true"

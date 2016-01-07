@@ -10,7 +10,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.MolgenisUpgrade;
-import org.molgenis.system.core.RuntimeProperty;
+import org.molgenis.data.system.core.RuntimeProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;

@@ -6,7 +6,7 @@ import java.io.StringReader;
 
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.system.core.FreemarkerTemplate;
+import org.molgenis.data.system.core.FreemarkerTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -10,7 +10,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.framework.MolgenisUpgrade;
-import org.molgenis.system.core.RuntimeProperty;
+import org.molgenis.data.system.core.RuntimeProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

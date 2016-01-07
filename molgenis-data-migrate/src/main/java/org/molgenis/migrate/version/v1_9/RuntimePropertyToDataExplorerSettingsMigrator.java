@@ -1,7 +1,7 @@
 package org.molgenis.migrate.version.v1_9;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.system.core.RuntimeProperty.ENTITY_NAME;
+import static org.molgenis.data.system.core.RuntimeProperty.ENTITY_NAME;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -12,7 +12,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.settings.DataExplorerSettings;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
-import org.molgenis.system.core.RuntimeProperty;
+import org.molgenis.data.system.core.RuntimeProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -51,7 +51,7 @@ import org.molgenis.migrate.version.v1_9.RuntimePropertyToStaticContentMigrator;
 import org.molgenis.migrate.version.v1_9.Step14UpdateAttributeMapping;
 import org.molgenis.migrate.version.v1_9.Step15AddDefaultValue;
 import org.molgenis.migrate.version.v1_9.Step16RuntimePropertyToSettings;
-import org.molgenis.system.core.FreemarkerTemplateRepository;
+import org.molgenis.data.system.core.FreemarkerTemplateRepository;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.GsonConfig;

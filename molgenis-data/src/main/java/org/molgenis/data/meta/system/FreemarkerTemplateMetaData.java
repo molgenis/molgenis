@@ -1,0 +1,21 @@
+package org.molgenis.data.meta.system;
+
+import org.molgenis.data.support.DefaultEntityMetaData;
+
+import static org.molgenis.MolgenisFieldTypes.SCRIPT;
+
+public class FreemarkerTemplateMetaData extends DefaultEntityMetaData
+{
+	public static final String ID = "id";
+	public static final String NAME = "Name";
+	public static final String VALUE = "Value";
+
+	public FreemarkerTemplateMetaData()
+	{
+		super("freemarkerTemplate");
+		addAttribute(ID).setAuto(true).setVisible(false)
+				.setDescription("automatically generated internal id, only for internal use.");
+		addAttribute(NAME).setDescription("Name of the entity").setNillable(false);
+		addAttribute(VALUE).setDataType(SCRIPT).setNillable(false);
+	}
+}

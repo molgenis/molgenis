@@ -14,7 +14,7 @@ import org.elasticsearch.common.base.Joiner;
 import org.elasticsearch.common.base.Joiner.MapJoiner;
 import org.molgenis.data.Repository;
 import org.molgenis.framework.MolgenisUpgrade;
-import org.molgenis.system.core.RuntimeProperty;
+import org.molgenis.data.system.core.RuntimeProperty;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuItem;
 import org.molgenis.ui.menu.MenuItemType;
