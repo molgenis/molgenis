@@ -87,7 +87,8 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl implements
 		// allow all users to read the app languages
 		GroupAuthority usersGroupLanguagesAuthority = new GroupAuthority();
 		usersGroupLanguagesAuthority.setMolgenisGroup(allUsersGroup);
-		usersGroupLanguagesAuthority.setRole(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + LanguageMetaData.ENTITY_NAME);
+		usersGroupLanguagesAuthority.setRole(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX
+				+ LanguageMetaData.ENTITY_NAME.toUpperCase());
 		dataService.add(GroupAuthority.ENTITY_NAME, usersGroupLanguagesAuthority);
 	}
 
