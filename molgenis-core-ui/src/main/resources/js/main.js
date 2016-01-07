@@ -10,7 +10,7 @@ require.config({
 	paths : {
 		jquery : 'components/jquery/jquery-2.1.1.min',
 		domready : 'components/requirejs/requirejs-domready',
-		handlebars : 'components/handlebars/handlebars',
+		handlebars : 'components/handlebars/handlebars-v4.0.5',
 		bootstrap : 'components/bootstrap/bootstrap.min',
 		react : 'components/react/react-with-addons',
 		underscore : 'components/underscore/underscore-min',
@@ -19,9 +19,6 @@ require.config({
 	// Shim any scripts that do not have AMD support
 	// This is common with most jQuery plugins
 	shim : {
-		handlebars : {
-			exports : 'Handlebars'
-		},
 		underscore : {
 			exports : '_'
 		},
