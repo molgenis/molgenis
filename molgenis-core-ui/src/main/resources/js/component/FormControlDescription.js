@@ -1,5 +1,7 @@
 define(function(require, exports, module) {
-
+	/**
+	 * @module FormControlDescription
+	 */
 	"use strict";
 
 	var React = require('react-with-addons.min');
@@ -13,7 +15,7 @@ define(function(require, exports, module) {
 	/**
 	 * @memberOf component
 	 */
-	exports.FormControlDescription = React.createClass({
+	var FormControlDescription = React.createClass({
 		mixins : [ DeepPureRenderMixin ],
 		displayName : 'FormControlDescription',
 		propTypes : {
@@ -50,4 +52,6 @@ define(function(require, exports, module) {
 			}, DescriptionParts);
 		}
 	});
+
+	module.exports = React.createFactory(FormControlDescription);
 });
