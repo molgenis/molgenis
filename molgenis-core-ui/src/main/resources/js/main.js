@@ -2,8 +2,17 @@
 
 console.log('loading requirejs configuration...');
 
+// We need this to get readable error messages
+// Without this piece it will only show errors
+// occurring in the require.js file
+require.onError = function(error) {
+	console.log('error:', error);
+	throw error;
+};
+
+// Configuration for RequireJS
 require.config({
-	// Set a baseUrl to the js/ folder, and let RequireJS know where our
+	// Set a baseUrl to the /js/ folder, and let RequireJS know where our
 	// libraries are with the paths option (compulsory when using jQuery as it
 	// is a named module)
 	baseUrl : '/js/',
@@ -14,7 +23,10 @@ require.config({
 		bootstrap : 'components/bootstrap/bootstrap.min',
 		react : 'components/react/react-with-addons',
 		underscore : 'components/underscore/underscore-min',
-		molgenis : 'modules/molgenis'
+		validate : 'plugins/jquery.validate.min',
+		// Create the molgenis object in the global scope
+		molgenis : 'modules/MolgenisGlobalObject'
+
 	},
 	// Shim any scripts that do not have AMD support
 	// This is common with most jQuery plugins
@@ -24,6 +36,7 @@ require.config({
 		},
 		bootstrap : [ 'jquery' ],
 		domready : [ 'jquery' ],
+		validate : [ 'jquery' ],
 		'plugins/jQEditRangeSlider-min.js' : [ 'jquery' ],
 		'plugins/jquery-sortable-min.js' : [ 'jquery' ],
 		'plugins/jquery.bootstrap.pager.js' : [ 'jquery' ],
@@ -31,11 +44,6 @@ require.config({
 		'plugins/jquery.cookie-1.4.1.min.js' : [ 'jquery' ],
 		'plugins/jquery.fancytree.min.js' : [ 'jquery' ],
 		'plugins/jquery.form.min.js' : [ 'jquery' ],
-		'plugins/jquery.molgenis.attributemetadata.table.js' : [ 'jquery' ],
-		'plugins/jquery.molgenis.table.js' : [ 'jquery' ],
-		'plugins/jquery.molgenis.tree.js' : [ 'jquery' ],
-		'plugins/jquery.molgenis.xrefmrefsearch.js' : [ 'jquery' ],
-		'plugins/jquery.validate.min.js' : [ 'jquery' ],
 		'plugins/select2-patched.js' : [ 'jquery' ],
 		'plugins/bootstrap.file-input.js' : [ 'jquery', 'bootstrap' ],
 		'plugins/bootstrap-datetimepicker.min.js' : [ 'jquery', 'bootstrap' ],
@@ -53,12 +61,14 @@ define(function(require) {
 	var Handlebars = require('handlebars');
 	var Bootstrap = require('bootstrap');
 	var React = require('react');
-	var molgenis = require('molgenis');
 	var _ = require('underscore');
+	var validate = require('validate');
+	var molgenis = require('molgenis');
 
 	domReady(function() {
 		// Init common module code here
 		// TODO common modules, like React components????
 		console.log('All dependencies loaded and DOM ready!');
+
 	});
 });
