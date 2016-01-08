@@ -44,58 +44,7 @@
 			});
 		};
 	
-		/*
-		 * Create a table cell to show data of a certain type Is used by the
-		 * dataexplorer and the forms plugin
-		 */
-		function formatTableCellValue(rawValue, dataType, editable, nillable) {
-			var htmlElement;
-	
-			if (dataType === undefined) {
-				return '<span>&nbsp;</span>';
-			}
-	
-			if (dataType.toLowerCase() == 'bool') {
-				htmlElement = '<input type="checkbox" ';
-				if (rawValue === true) {
-					htmlElement += 'checked ';
-				}
-				if (editable !== true) {
-					htmlElement += 'disabled="disabled"';
-				}
-	
-				htmlElement += '/>';
-	
-				if (dataType.toLowerCase() == 'bool' && nillable === true && (rawValue === undefined || rawValue === '')) {
-					htmlElement = $(htmlElement);
-					htmlElement.prop('indeterminate', true);
-				}
-	
-				return htmlElement;
-			}
-	
-			if (typeof rawValue === 'undefined' || rawValue === null) {
-				return '<span>&nbsp;</span>';
-			}
-	
-			if (dataType.toLowerCase() === "hyperlink") {
-				return htmlElement = '<a target="_blank" href="' + rawValue + '">' + htmlEscape(rawValue) + '</a>';
-	
-			} else if (dataType.toLowerCase() === "email") {
-				return htmlElement = '<a href="mailto:' + rawValue + '">' + htmlEscape(rawValue) + '</a>';
-	
-			} else if (dataType.toLowerCase() != 'html') {
-				if (rawValue.length > 50) {
-					var abbr = htmlEscape(abbreviate(rawValue, 50));
-					return htmlElement = '<span class="show-popover"  data-content="' + htmlEscape(rawValue) + '" data-toggle="popover">' + abbr + "</span>";
-				} else {
-					return '<span>' + htmlEscape(rawValue) + '</span>';
-				}
-	
-			} else {
-				return '<span>' + htmlEscape(rawValue) + '</span>';
-			}
-		}
+		
 	
 		/**
 		 * Is s is longer then maxLength cut it and add ...

@@ -13,7 +13,7 @@ define(function(require, exports, module) {
 	var molgenis = require('modules/MolgenisQuery');
 
 	var Form = require('component/Form');
-	
+
 	// Save a reference to module's global scope outside the exports.
 	// This is used to both export a function and also call it within the module
 	var _this_ = this;
@@ -539,7 +539,7 @@ define(function(require, exports, module) {
 		case 'CATEGORICAL':
 		case 'CATEGORICAL_MREF':
 			if (undefined === rawValue) {
-				cell.append(formatTableCellValue(undefined, undefined));
+				cell.append(_this_.formatTableCellValue(undefined, undefined));
 			} else {
 				var refEntity = settings.refEntitiesMeta[attribute.refEntity.href];
 				var refAttribute = refEntity.labelAttribute;
@@ -555,7 +555,7 @@ define(function(require, exports, module) {
 					switch (attribute.fieldType) {
 					case 'CATEGORICAL':
 					case 'XREF':
-						var $cellValue = $('<a href="#">').append(formatTableCellValue(rawValue[refAttribute], refAttributeType));
+						var $cellValue = $('<a href="#">').append(_this_.formatTableCellValue(rawValue[refAttribute], refAttributeType));
 						$cellValue.click(function(event) {
 							_this_.openRefAttributeModal(attribute, refEntity, refAttribute, rawValue);
 							event.stopPropagation();
@@ -565,10 +565,10 @@ define(function(require, exports, module) {
 					case 'CATEGORICAL_MREF':
 					case 'MREF':
 						if (!rawValue.items.length) {
-							cell.append(formatTableCellValue(undefined, refAttributeType));
+							cell.append(_this_.formatTableCellValue(undefined, refAttributeType));
 						} else {
 							$.each(rawValue.items, function(i, rawValue) {
-								var $cellValuePart = $('<a href="#">').append(formatTableCellValue(rawValue[refAttribute], refAttributeType));
+								var $cellValuePart = $('<a href="#">').append(_this_.formatTableCellValue(rawValue[refAttribute], refAttributeType));
 								$cellValuePart.click(function(event) {
 									_this_.openRefAttributeModal(attribute, refEntity, refAttribute, rawValue);
 									event.stopPropagation();
@@ -587,10 +587,10 @@ define(function(require, exports, module) {
 			}
 			break;
 		case 'BOOL':
-			cell.append(formatTableCellValue(rawValue, attribute.fieldType, undefined, attribute.nillable));
+			cell.append(_this_.formatTableCellValue(rawValue, attribute.fieldType, undefined, attribute.nillable));
 			break;
 		default:
-			cell.append(formatTableCellValue(rawValue, attribute.fieldType));
+			cell.append(_this_.formatTableCellValue(rawValue, attribute.fieldType));
 			break;
 		}
 	}
@@ -990,7 +990,7 @@ define(function(require, exports, module) {
 		});
 
 		_this_.getCreateForm(entityMetaData);
-		
+
 		// edit row
 		$(container).on('click', '.edit-row-btn', function(e) {
 			e.preventDefault();
@@ -1125,7 +1125,7 @@ define(function(require, exports, module) {
 
 		return this;
 	};
-	
+
 	/**
 	 * Create input element for a molgenis data type
 	 * 
@@ -1227,6 +1227,61 @@ define(function(require, exports, module) {
 	}
 
 	/**
+	 * Create a table cell to show data of a certain type Is used by the
+	 * dataexplorer and the forms plugin
+	 * 
+	 * @memberOf MolgenisTable
+	 */
+	exports.formatTableCellValue = function(rawValue, dataType, editable, nillable) {
+		var htmlElement;
+
+		if (dataType === undefined) {
+			return '<span>&nbsp;</span>';
+		}
+
+		if (dataType.toLowerCase() == 'bool') {
+			htmlElement = '<input type="checkbox" ';
+			if (rawValue === true) {
+				htmlElement += 'checked ';
+			}
+			if (editable !== true) {
+				htmlElement += 'disabled="disabled"';
+			}
+
+			htmlElement += '/>';
+
+			if (dataType.toLowerCase() == 'bool' && nillable === true && (rawValue === undefined || rawValue === '')) {
+				htmlElement = $(htmlElement);
+				htmlElement.prop('indeterminate', true);
+			}
+
+			return htmlElement;
+		}
+
+		if (typeof rawValue === 'undefined' || rawValue === null) {
+			return '<span>&nbsp;</span>';
+		}
+
+		if (dataType.toLowerCase() === "hyperlink") {
+			return htmlElement = '<a target="_blank" href="' + rawValue + '">' + htmlEscape(rawValue) + '</a>';
+
+		} else if (dataType.toLowerCase() === "email") {
+			return htmlElement = '<a href="mailto:' + rawValue + '">' + htmlEscape(rawValue) + '</a>';
+
+		} else if (dataType.toLowerCase() != 'html') {
+			if (rawValue.length > 50) {
+				var abbr = htmlEscape(abbreviate(rawValue, 50));
+				return htmlElement = '<span class="show-popover"  data-content="' + htmlEscape(rawValue) + '" data-toggle="popover">' + abbr + "</span>";
+			} else {
+				return '<span>' + htmlEscape(rawValue) + '</span>';
+			}
+
+		} else {
+			return '<span>' + htmlEscape(rawValue) + '</span>';
+		}
+	}
+
+	/**
 	 * @memberOf MolgenisTable
 	 */
 	exports.prototype.getCreateForm = function(entityMetaData) {
@@ -1241,7 +1296,7 @@ define(function(require, exports, module) {
 			}
 		}), $('<div>')[0]);
 	}
-	
+
 	/**
 	 * @memberOf MolgenisTable
 	 */
