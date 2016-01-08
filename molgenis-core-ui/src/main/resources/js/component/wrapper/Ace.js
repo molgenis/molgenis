@@ -5,7 +5,7 @@ define(function(require, exports, module) {
 	"use strict";
 
 	var React = require('react');
-	var ace = require('components/ace/src-min-noconflict/ace');
+	var ace = require('ace');
 
 	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
 

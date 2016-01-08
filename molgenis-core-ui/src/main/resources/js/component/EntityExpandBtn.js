@@ -42,5 +42,5 @@ define(function(require, exports, module) {
 		}
 	});
 
-	modules.exports = React.createFactory(EntityExpandBtn);
+	module.exports = React.createFactory(EntityExpandBtn);
 });

@@ -50,5 +50,5 @@ define(function(require, exports, module) {
 		}
 	});
 
-	modules.exports = React.createFactory(EntityInspectBtn);
+	module.exports = React.createFactory(EntityInspectBtn);
 });

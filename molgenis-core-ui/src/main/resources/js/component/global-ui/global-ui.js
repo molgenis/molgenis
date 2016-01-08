@@ -5,8 +5,8 @@ define(function(require, exports, module) {
 
 	'use strict';
 
-	var mixin = require('component/global-ui/mixin');
-	var wrapper = require('component/global-ui/wrapper');
+	var mixin = require('component/global-ui/Mixin');
+	var wrapper = require('component/global-ui/Wrapper');
 
 	// All the React components
 	var Button = require('component/Button');

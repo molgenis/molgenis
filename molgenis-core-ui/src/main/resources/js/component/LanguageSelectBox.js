@@ -15,7 +15,7 @@ define(function(require, exports, module) {
 
 	var Select2 = require('component/wrapper/Select2');
 
-	var api = require('RestClientV1');
+	var api = require('modules/RestClientV1');
 
 	/**
 	 * Shows a Select2 box for switching the user language

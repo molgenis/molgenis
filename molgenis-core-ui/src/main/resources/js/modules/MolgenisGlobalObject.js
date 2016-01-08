@@ -3,6 +3,8 @@ define(function(require, exports, module) {
 	 * @module MolgenisGlobalObject
 	 */
 
+	console.log('set molgenis object');
+	
 	'use strict';
 	var ui = require('component/global-ui/global-ui');
 	var alert = require('modules/MolgenisAlert');

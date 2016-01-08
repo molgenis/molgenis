@@ -5,9 +5,10 @@ console.log('loading requirejs configuration...');
 // We need this to get readable error messages
 // Without this piece it will only show errors
 // occurring in the require.js file
-require.onError = function(error) {
-	console.log('error:', error);
-	throw error;
+requirejs.onError = function (error) {
+    console.log(error.requireType);
+    console.log('modules: ' + error.requireModules);
+    throw error;
 };
 
 // Configuration for RequireJS
@@ -26,12 +27,16 @@ require.config({
 		underscore : 'components/underscore/underscore-min',
 		validate : 'plugins/jquery.validate.min',
 		molgenis : 'modules/MolgenisGlobalObject',
+		ace : 'components/ace/src-min-noconflict/ace'
 	},
 	// Shim any scripts that do not have AMD support
 	// This is common with most jQuery plugins
 	shim : {
 		underscore : {
 			exports : '_'
+		},
+		ace : {
+			exports : 'ace'
 		},
 		bootstrap : [ 'jquery' ],
 		domready : [ 'jquery' ],

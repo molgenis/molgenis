@@ -5,8 +5,7 @@ define(function(require, exports, module) {
 	"use strict";
 
 	var $ = require('jquery');
-	var React
-	-require('react');
+	var React = require('react');
 
 	var span = React.DOM.span;
 	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');

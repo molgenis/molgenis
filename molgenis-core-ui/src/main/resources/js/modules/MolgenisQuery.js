@@ -20,7 +20,7 @@ define(function(require, exports, module) {
 	 * 
 	 * @memberOf MolgenisQuery
 	 */
-	exports.prototype.prototype.getAtomicAttributes = function(attributes, restClient) {
+	exports.prototype.getAtomicAttributes = function(attributes, restClient) {
 		var atomicAttributes = [];
 		function createAtomicAttributesRec(attributes) {
 			$.each(attributes, function(i, attribute) {

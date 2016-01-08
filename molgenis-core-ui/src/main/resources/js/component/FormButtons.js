@@ -6,7 +6,7 @@ define(function(require, exports, module) {
 
 	var React = require('react-with-addons.min');
 	var _ = require('underscore-min');
-	var api = require('RestClientV1');
+	var api = require('modules/RestClientV1');
 
 	var Button = require('component/Button');
 
