@@ -1,9 +1,10 @@
-define(function(require) {
-
+define(function(require, exports, module) {
+	/**
+	 * @module Button
+	 */
 	"use strict";
 
 	var React = require('react');
-	var molgenis = require('molgenis');
 	var _ = require('underscore');
 
 	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
@@ -93,7 +94,5 @@ define(function(require) {
 		}
 	});
 
-	Button.prototype = {};
-
-	return Button;
+	module.exports = React.createFactory(Button);
 });
