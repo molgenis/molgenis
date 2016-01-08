@@ -51,11 +51,42 @@
 		 RequireJS uses the script in data-main to look for other scripts and dependencies. 
 		-->
 		<script type="application/javascript" src="<@resource_href "/js/components/requirejs/require.js" />" data-main="<@resource_href "/js/main.js" />"></script>
+	  	
+	  	<!--[if IE 9]>
+        	<#-- used to disable the genomebrowser in IE9 -->
+        	<script>
+	        	require(['main'], function() {
+	            	require(['molgenis', 'jquery'], function(molgenis, $){
+	        			molgenis.ie9 = true;
+	    			});
+				});
+        	</script>
+        	<#-- required by dalliance-compiled.js to load the genomebrowsers in IE9 -->
+        	<script src="<@resource_href "/js/typedarray.min.js"/>"></script>
+   	 	<![endif]-->
+		
+		<#-- Place model variables in the molgenis global object -->
+		<script>
+            require(['main'], function() {
+            	require(['molgenis', 'jquery'], function(molgenis){
+            		molgenis.cookieWall = ${cookieWall?string('true', 'false')};
+				<#if context_url??>
+       				molgenis.contextUrl = '${context_url?js_string}';
+				</#if>
+				<#if plugin_id??>
+        			molgenis.pluginId = '${plugin_id?js_string}';
+				</#if>
+            	});
+            });
+        </script>
     
     <#-- GOOGLE SIGN IN -->
 	<#if googleSignIn>
         <#if authenticated?? && authenticated>
-        <#-- Include script tag before platform.js script loading, else onLoad could be called before the onLoad function is available -->
+        <#-- 
+        Include script tag before platform.js script loading, else onLoad could be 
+        called before the onLoad function is available 
+        -->
         <script>
             function onLoad() {
                 gapi.load('auth2', function() {
@@ -64,75 +95,10 @@
             }
         </script>
         </#if>
+		
         <script src="https://apis.google.com/js/platform.js<#if authenticated?? && authenticated>?onload=onLoad</#if>" async defer></script>
-    </#if>
-  	<#-- /GOOGLE SIGN IN -->
-
-	<#-- REACT
-	<script src="<@resource_href "/js/component/Button.js"/>"></script>
-	<script src="<@resource_href "/js/component/FormControl.js"/>"></script>
-	<script src="<@resource_href "/js/component/Form.js"/>"></script>
-	<script src="<@resource_href "/js/component/FormIndex.js"/>"></script>
-	<script src="<@resource_href "/js/component/FormControls.js"/>"></script>
-	<script src="<@resource_href "/js/component/FormControlDescription.js"/>"></script>
-	<#-- /REACT -->
-	
-
-    <#----<#if environment == "development">
-        <#-- Important: Update minify-maven-plugin configuration in molgenis-core-ui/pom.xml when modifying the list below 
-        <script src="<@resource_href "/js/component/mixin/I18nStringsMixin.js"/>"></script>
-        <script src="<@resource_href "/js/component/wrapper/Ace.js"/>"></script>
-        <script src="<@resource_href "/js/component/wrapper/DateTimePicker.js"/>"></script>
-        <script src="<@resource_href "/js/component/wrapper/JQRangeSlider.js"/>"></script>
-        <script src="<@resource_href "/js/component/wrapper/JQueryForm.js"/>"></script>
-        <script src="<@resource_href "/js/component/wrapper/Select2.js"/>"></script>
-        <script src="<@resource_href "/js/component/AggregateTable.js"/>"></script>
-        <script src="<@resource_href "/js/component/AlertMessage.js"/>"></script>
-        <script src="<@resource_href "/js/component/AttributeControl.js"/>"></script>
-        <script src="<@resource_href "/js/component/BoolControl.js"/>"></script>
-        <script src="<@resource_href "/js/component/CheckboxGroup.js"/>"></script>
-        <script src="<@resource_href "/js/component/CodeEditor.js"/>"></script>
-        <script src="<@resource_href "/js/component/DateControl.js"/>"></script>
-        <script src="<@resource_href "/js/component/Dialog.js"/>"></script>
-        <script src="<@resource_href "/js/component/EntitySelectBox.js"/>"></script>
-        <script src="<@resource_href "/js/component/Form.js"/>"></script>
-        <script src="<@resource_href "/js/component/FormControl.js"/>"></script>
-        <script src="<@resource_href "/js/component/FormControlGroup.js"/>"></script>
-        <script src="<@resource_href "/js/component/Icon.js"/>"></script>
-        <script src="<@resource_href "/js/component/Input.js"/>"></script>
-        <script src="<@resource_href "/js/component/Modal.js"/>"></script>
-        <script src="<@resource_href "/js/component/Pager.js"/>"></script>
-        <script src="<@resource_href "/js/component/Popover.js"/>"></script>
-        <script src="<@resource_href "/js/component/Questionnaire.js"/>"></script>
-        <script src="<@resource_href "/js/component/RadioGroup.js"/>"></script>
-        <script src="<@resource_href "/js/component/RangeSlider.js"/>"></script>
-        <script src="<@resource_href "/js/component/SelectBox.js"/>"></script>
-        <script src="<@resource_href "/js/component/Spinner.js"/>"></script>
-        <script src="<@resource_href "/js/component/Table.js"/>"></script>
-        <script src="<@resource_href "/js/component/TextArea.js"/>"></script>     
-        <script src="<@resource_href "/js/component/LanguageSelectBox.js"/>"></script>     
-    <#else>
-        <script src="<@resource_href "/js/react-with-addons.min.js"/>"></script>
-        <script src="<@resource_href "/js/molgenis-component.min.js"/>"></script>
-    </#if>
-        -->
-    
-    <!--[if IE 9]>
-        <#-- used to disable the genomebrowser in IE9 -->
-        <script>top.molgenis.ie9 = true;</script>
-        <#-- required by dalliance-compiled.js to load the genomebrowsers in IE9 -->
-        <script src="<@resource_href "/js/typedarray.min.js"/>"></script>
-    <![endif]-->
-       
-     <#--   <script>
-            top.molgenis.setCookieWall(${cookieWall?string('true', 'false')});
-    <#if context_url??>
-            top.molgenis.setContextUrl('${context_url?js_string}');
-    </#if>
-    <#if plugin_id??>
-            top.molgenis.setPluginId('${plugin_id?js_string}');
-    </#if>
-        </script>-->
+    </#if> 
+       	
 	<#list js as js_file_name>
 		<script src="<@resource_href "/js/${js_file_name?html}"/>"></script>
 	</#list>
@@ -190,6 +156,12 @@
             <div class="row">
                 <div class="col-md-12">
                     <div id="plugin-container">
+                    	<h1>BUTTON HERE!!!!</h1>
+						<div id="test_div">
+							<script>
+								require(['test'])
+							</script>
+						</div>
 </#macro>
 
 
@@ -223,9 +195,7 @@
     			</#list>
     			<#-- Logo end -->
 			</div>
-    		<h1>BUTTON HERE!!!!</h1>
     		
-			<div id="test_div"><script>require(['<@resource_href "/js/test.js"/>'])</script></div>
     		<#-- Navbar items start -->
         	<div class="collapse navbar-collapse" id="bs-molgenis-navbar">
 				<ul class="nav navbar-nav">
