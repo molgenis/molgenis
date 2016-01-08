@@ -1,5 +1,5 @@
 require([ 'main' ], function() {
-	require([ 'jquery', 'underscore', 'handlebars', 'plugins/jquery-sortable-min', 'plugins/select2-patched' ], function($, _, Handlebars) {
+	require([ 'jquery', 'underscore', 'handlebars', 'plugins/jquery-sortable-min', 'plugins/select2-patched', 'domReady!' ], function($, _, Handlebars) {
 		/**
 		 * @page menumanager
 		 */
