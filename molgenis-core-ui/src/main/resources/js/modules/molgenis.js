@@ -62,37 +62,13 @@
 	
 		
 	
-		molgenis.I18nStrings = function(callback) {
-			if (!molgenis.i18nStrings) {
-				$.ajax({
-					type : 'GET',
-					url : '/api/v2/i18n',
-					contentType : 'application/json',
-					async : true,
-					success : function(data) {
-						molgenis.i18nStrings = data;
-						callback(data);
-					}
-				});
-			} else {
-				callback(molgenis.i18nStrings);
-			}
-		}
+		
 	
 		var languageSelectBox = document.getElementById('language-select-box');
 		if (languageSelectBox) {
 			React.render(molgenis.ui.LanguageSelectBox({}), languageSelectBox);
 		}
-	
-		// disable all ajax request caching
-		$.ajaxSetup({
-			cache : false
-		});
-	
-
-	
 		
-	
 		// async load bootstrap modal and display
 		$(document).on('click', 'a.modal-href', function(e) {
 			e.preventDefault();
