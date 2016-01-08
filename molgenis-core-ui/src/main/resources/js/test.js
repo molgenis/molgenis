@@ -4,7 +4,7 @@ require([ 'main' ], function() {
 		console.log('TEST:', 'loaded test function');
 
 		React.render(Button({
-			style : 'button',
+			style : 'success',
 			size : 'large',
 			text : 'EUREKA IT WORKS HAHAHAHAHA',
 			disabled : false
