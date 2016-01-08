@@ -1,9 +1,13 @@
 define(function(require, exports, module) {
-
+	/**
+	 * @module FormControl
+	 */
 	"use strict";
 
 	var React = require('react-with-addons.min');
 	var _ = require('underscore-min');
+
+	var AttributeControl = require('component/AttributeControl');
 
 	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
 	var AttributeLoaderMixin = require('component/mixin/AttributeLoaderMixin');
@@ -11,9 +15,9 @@ define(function(require, exports, module) {
 	var div = React.DOM.div, span = React.DOM.span, label = React.DOM.label, strong = React.DOM.strong;
 
 	/**
-	 * @memberOf component
+	 * @memberOf FormControl
 	 */
-	exports.FormControl = React.createClass({
+	var FormControl = React.createClass({
 		mixins : [ DeepPureRenderMixin, AttributeLoaderMixin ],
 		displayName : 'FormControl',
 		propTypes : {
@@ -109,7 +113,7 @@ define(function(require, exports, module) {
 				attributeControlProps.readOnly = true;
 			}
 
-			var control = molgenis.ui.AttributeControl(attributeControlProps);
+			var control = AttributeControl(attributeControlProps);
 
 			if (this.props.formLayout === 'horizontal') {
 				return (div({
@@ -150,4 +154,6 @@ define(function(require, exports, module) {
 			return value;
 		}
 	});
+
+	module.exports = React.createFactory(FormControl);
 });
