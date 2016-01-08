@@ -1,5 +1,7 @@
 define(function(require, exports, module) {
-
+	/**
+	 * @module FormButtons
+	 */
 	"use strict";
 
 	var React = require('react-with-addons.min');
@@ -13,9 +15,9 @@ define(function(require, exports, module) {
 	var div = React.DOM.div;
 
 	/**
-	 * @memberOf component
+	 * @memberOf FormButtons
 	 */
-	exports.FormButtons = React.createClass({
+	var FormButtons = React.createClass({
 		mixins : [ DeepPureRenderMixin ],
 		displayName : 'FormButtons',
 		propTypes : {
@@ -65,4 +67,6 @@ define(function(require, exports, module) {
 			}))));
 		}
 	});
+
+	module.exports = React.createFactory(FormButtons);
 });
