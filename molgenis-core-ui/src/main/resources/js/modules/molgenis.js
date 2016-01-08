@@ -1,113 +1,8 @@
-	define(function(require, exports, module) {
-		"use strict";
+		
 	
-		var molgenis = {};
+		
 	
-		var $ = require('jquery');
-		var React = require('react');
-		var _ = require('underscore');
-		var handlebarHelper = require('modules/HandlebarHelpers');
-	
-		// workaround for "Uncaught RangeError: Maximum call stack size exceeded"
-		// http://stackoverflow.com/a/19190216
-		$.fn.modal.Constructor.prototype.enforceFocus = function() {
-		};
-	
-		molgenis.setCookieWall = function(cookieWall) {
-			molgenis.cookieWall = cookieWall;
-		};
-	
-		molgenis.getCookieWall = function() {
-			return molgenis.cookieWall;
-		};
-	
-		molgenis.setContextUrl = function(contextUrl) {
-			molgenis.contextUrl = contextUrl;
-		};
-	
-		molgenis.getContextUrl = function() {
-			return molgenis.contextUrl;
-		};
-	
-		molgenis.setPluginId = function(pluginId) {
-			molgenis.pluginId = pluginId;
-		};
-	
-		molgenis.getPluginId = function() {
-			return molgenis.pluginId;
-		};
-	
-		/**
-		 * Returns the plugin settings entity id
-		 */
-		molgenis.getPluginSettingsId = function() {
-			return 'settings_' + molgenis.getPluginId();
-		};
-	
-		/**
-		 * Returns a promise with plugin settings
-		 */
-		molgenis.getPluginSettings = function() {
-			var api = new molgenis.RestClientV2();
-			return api.get('/api/v2/' + molgenis.getPluginSettingsId() + '/' + molgenis.getPluginId());
-		};
-	
-		molgenis.createAlert = function(alerts, type, container) {
-			if (type !== 'error' && type !== 'warning' && type !== 'success' && type !== 'info') {
-				type = 'error';
-			}
-	
-			if (container === undefined) {
-				container = $('.alerts');
-				container.empty();
-			}
-	
-			var items = [];
-			items.push('<div class="alert alert-');
-			items.push(type === 'error' ? 'danger' : type); // backwards
-			// compatibility
-			items.push('"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>');
-			items.push(type.charAt(0).toUpperCase() + type.slice(1));
-			items.push('!</strong> ');
-			$.each(alerts, function(i, alert) {
-				if (i > 0) {
-					items.push('<br/>');
-				}
-				items.push('<span>' + alert.message + '</span>');
-			});
-			items.push('</div>');
-	
-			container.prepend(items.join(''));
-		};
-	
-		molgenis.i18n = molgenis.i18n || {};
-		molgenis.i18n.get = function(str, lang) {
-			lang = typeof lang !== 'undefined' ? lang : 'en';
-			var i18nObj;
-	
-			if (str && (str.charAt(0) !== '{' || str.charAt(str.length - 1) !== '}')) {
-				i18nObj = {
-					'en' : str
-				};
-			} else {
-				i18nObj = JSON.parse(str ? str : '{}');
-			}
-	
-			return i18nObj[lang];
-		};
-	
-		molgenis.i18n.getAll = function(str, lang) {
-			lang = typeof lang !== 'undefined' ? lang : 'en';
-			var i18nObj;
-			if (str && (str.charAt(0) !== '{' || str.charAt(str.length - 1) !== '}')) {
-				i18nObj = {
-					'en' : str
-				};
-			} else {
-				i18nObj = JSON.parse(str ? str : '{}');
-			}
-			return i18nObj;
-		};
+		
 	
 		// Add endsWith function to the string class
 		if (typeof String.prototype.endsWith !== 'function') {
@@ -216,104 +111,7 @@
 			return s.substr(0, maxLength - 3) + '...';
 		}
 	
-		/**
-		 * Create input element for a molgenis data type
-		 * 
-		 * @param dataType
-		 *            molgenis data type
-		 * @param attrs
-		 *            input attributes
-		 * @param val
-		 *            input value
-		 * @param lbl
-		 *            input label (for checkbox and radio inputs)
-		 * 
-		 * @deprecated use AttributeControl.js
-		 */
-		function createInput(attr, attrs, val, lbl) {
-			function createBasicInput(type, attrs, val) {
-				var $input = $('<input type="' + type + '">');
-				if (attrs) {
-					$input.attr(attrs);
-				}
-				if (val !== undefined) {
-					$input.val(val);
-				}
-				return $input;
-			}
-			var dataType = attr.fieldType;
-			var label, $input, $div, opts;
-			switch (dataType) {
-			case 'BOOL':
-				label = $('<label class="radio">');
-				$input = createBasicInput('radio', attrs, val);
-				return label.append($input).append(val ? 'True' : 'False');
-			case 'CATEGORICAL':
-				label = $('<label>');
-				$input = createBasicInput('checkbox', attrs, val);
-				return $('<div class="checkbox">').append(label.append($input).append(lbl));
-			case 'DATE':
-			case 'DATE_TIME':
-				$div = $('<div>').addClass('group-append date input-group');
-				$input = createBasicInput('text', attrs, val).addClass('form-control').attr('data-date-format', dataType === 'DATE' ? 'YYYY-MM-DD' : 'YYYY-MM-DDTHH:mm:ssZZ')
-						.appendTo($div);
-				if (attr.nillable) {
-					$input.addClass('nillable');
-					$('<span>').addClass('input-group-addon').append($('<span>').addClass('glyphicon glyphicon-remove empty-date-input clear-date-time-btn')).appendTo($div);
-				}
-				$('<span>').addClass('input-group-addon datepickerbutton').append($('<span>').addClass('glyphicon glyphicon-calendar')).appendTo($div);
-				$div.datetimepicker(dataType === 'DATE' ? {
-					format : 'YYYY-MM-DD'
-				} : {
-					format : 'YYYY-MM-DDTHH:mm:ssZZ'
-				});
-				return $div;
-			case 'DECIMAL':
-				$input = createBasicInput('number', $.extend({}, attrs, {
-					'step' : 'any'
-				}), val).addClass('form-control');
-				if (!attr.nillable) {
-					$input.prop('required', true);
-				}
-				return $input;
-			case 'INT':
-			case 'LONG':
-				opts = $.extend({}, attrs, {
-					'step' : '1'
-				});
-				if (attr.range) {
-					if (typeof attr.range.min) {
-						opts.min = attr.range.min;
-					}
-					if (typeof attr.range.max !== 'undefined') {
-						opts.max = attr.range.max;
-					}
-				}
-				$input = createBasicInput('number', opts, val).addClass('form-control');
-				if (!attr.nillable) {
-					$input.prop('required', true);
-				}
-				return $input;
-			case 'EMAIL':
-				return createBasicInput('email', attrs, val).addClass('form-control');
-			case 'HTML':
-			case 'HYPERLINK':
-			case 'STRING':
-			case 'TEXT':
-			case 'ENUM':
-			case 'SCRIPT':
-				return createBasicInput('text', attrs, val).addClass('form-control');
-			case 'CATEGORICAL_MREF':
-			case 'MREF':
-			case 'XREF':
-				return createBasicInput('hidden', attrs, val).addClass('form-control');
-			case 'FILE':
-			case 'IMAGE':
-				throw 'Unsupported data type: ' + dataType;
-			default:
-				throw 'Unknown data type: ' + dataType;
-			}
-		}
+		
 	
 		molgenis.I18nStrings = function(callback) {
 			if (!molgenis.i18nStrings) {
@@ -342,35 +140,9 @@
 			cache : false
 		});
 	
-//		// use ajaxPrefilter instead of ajaxStart and ajaxStop
-//		// to work around issue http://bugs.jquery.com/ticket/13680
-//		$.ajaxPrefilter(function(options, _, jqXHR) {
-//			if (options.showSpinner !== false) {
-//				showSpinner();
-//				jqXHR.always(hideSpinner);
-//			}
-//		});
+
 	
-		$(document).ajaxError(function(event, xhr, settings, e) {
-			if (xhr.status === 401) {
-				document.location = "/login";
-			}
-			try {
-				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
-			} catch (e) {
-				molgenis.createAlert([ {
-					'message' : 'An error occurred. Please contact the administrator.'
-				} ], 'error');
-			}
-		});
-	
-		window.onerror = function(msg, url, line) {
-			molgenis.createAlert([ {
-				'message' : 'An error occurred. Please contact the administrator.'
-			}, {
-				'message' : msg
-			} ], 'error');
-		};
+		
 	
 		// async load bootstrap modal and display
 		$(document).on('click', 'a.modal-href', function(e) {
@@ -428,52 +200,7 @@
 			}), $('#plugin-settings-container')[0]);
 		});
 	
-		/**
-		 * Add download functionality to JQuery. data can be string of parameters or
-		 * array/object
-		 * 
-		 * Default method is POST
-		 * 
-		 * Usage:
-		 * <code>download('/localhost:8080', 'param1=value1&param2=value2')</code>
-		 * Or:
-		 * <code>download('/localhost:8080', {param1 : 'value1', param2 : 'value2'})</code>
-		 * 
-		 */
-		$.download = function(url, data, method) {
-			if (!method) {
-				method = 'POST';
-			}
-	
-			data = typeof data == 'string' ? data : $.param(data);
-	
-			// split params into form inputs
-			var inputs = [];
-			$.each(data.split('&'), function() {
-				var pair = this.split('=');
-				inputs.push('<input type="hidden" name="' + pair[0] + '" value="' + pair[1] + '" />');
-			});
-	
-			// send request and remove form from dom
-			$('<form action="' + url + '" method="' + method + '">').html(inputs.join('')).appendTo('body').submit().remove();
-		};
-	
-		// serialize form as json object
-		$.fn.serializeObject = function() {
-			var o = {};
-			var a = this.serializeArray();
-			$.each(a, function() {
-				if (o[this.name] !== undefined) {
-					if (!o[this.name].push) {
-						o[this.name] = [ o[this.name] ];
-					}
-					o[this.name].push(this.value || '');
-				} else {
-					o[this.name] = this.value || '';
-				}
-			});
-			return o;
-		};
+		
 	
 		// Call handleBarHelperBlock function to set helper blocks for entire
 		// application
