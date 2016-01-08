@@ -10,21 +10,21 @@ define(function(require, exports, module) {
 	var apiBaseUri = '/api/v1/';
 
 	/**
-	 * @memberOf RestClient V1
+	 * @memberOf RestClientV1
 	 */
 	exports.prototype.get = function(resourceUri, options) {
 		return this._get(resourceUri, options, false);
 	};
 
 	/**
-	 * @memberOf RestClient V1
+	 * @memberOf RestClientV1
 	 */
 	exports.prototype.getAsync = function(resourceUri, options, callback) {
 		return this._get(resourceUri, options, true, callback);
 	};
 
 	/**
-	 * @memberOf RestClient V1
+	 * @memberOf RestClientV1
 	 */
 	exports.prototype._get = function(resourceUri, options, async, callback) {
 		var resource = null;
@@ -87,7 +87,7 @@ define(function(require, exports, module) {
 	};
 
 	/**
-	 * @memberOf RestClient V1
+	 * @memberOf RestClientV1
 	 */
 	exports.prototype._ajax = function(config) {
 		if (self.token) {
@@ -102,7 +102,7 @@ define(function(require, exports, module) {
 	};
 
 	/**
-	 * @memberOf RestClient V1
+	 * @memberOf RestClientV1
 	 */
 	exports.prototype._toApiUri = function(resourceUri, options) {
 		var qs = "";
@@ -121,21 +121,21 @@ define(function(require, exports, module) {
 	};
 
 	/**
-	 * @memberOf RestClient V1
+	 * @memberOf RestClientV1
 	 */
 	exports.prototype.getPrimaryKeyFromHref = function(href) {
 		return href.substring(href.lastIndexOf('/') + 1);
 	};
 
 	/**
-	 * @memberOf RestClient V1
+	 * @memberOf RestClientV1
 	 */
 	exports.prototype.getHref = function(entityName, primaryKey) {
 		return apiBaseUri + entityName + (primaryKey ? '/' + primaryKey : '');
 	};
 
 	/**
-	 * @memberOf RestClient V1
+	 * @memberOf RestClientV1
 	 */
 	exports.prototype.remove = function(href, callback) {
 		return this._ajax({
@@ -151,7 +151,7 @@ define(function(require, exports, module) {
 	};
 
 	/**
-	 * @memberOf RestClient V1
+	 * @memberOf RestClientV1
 	 */
 	exports.prototype.update = function(href, entity, callback, showSpinner) {
 		return this._ajax({
@@ -169,7 +169,7 @@ define(function(require, exports, module) {
 	};
 
 	/**
-	 * @memberOf RestClient V1
+	 * @memberOf RestClientV1
 	 */
 	exports.prototype.entityExists = function(resourceUri) {
 		var result = false;
@@ -186,7 +186,7 @@ define(function(require, exports, module) {
 	};
 
 	/**
-	 * @memberOf RestClient V1
+	 * @memberOf RestClientV1
 	 */
 	exports.prototype.login = function(username, password, callback) {
 		$.ajax({
@@ -212,7 +212,7 @@ define(function(require, exports, module) {
 	};
 
 	/**
-	 * @memberOf RestClient V1
+	 * @memberOf RestClientV1
 	 */
 	exports.prototype.logout = function(callback) {
 		this._ajax({
@@ -224,4 +224,6 @@ define(function(require, exports, module) {
 			}
 		});
 	};
+
+	exports.module = apiBaseUri;
 });

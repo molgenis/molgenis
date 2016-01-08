@@ -12,6 +12,8 @@ define(function(require, exports, module) {
 	var restApi = require('modules/RestClientV1');
 	var molgenis = require('modules/MolgenisQuery');
 
+	var Form = require('component/Form');
+	
 	// Save a reference to module's global scope outside the exports.
 	// This is used to both export a function and also call it within the module
 	var _this_ = this;
@@ -994,7 +996,7 @@ define(function(require, exports, module) {
 			e.preventDefault();
 			e.stopPropagation();
 
-			React.render(molgenis.ui.Form({
+			React.render(Form({
 				entity : settings.entityMetaData.name,
 				entityInstance : $(this).closest('tr').data('id'),
 				mode : 'edit',
@@ -1128,7 +1130,7 @@ define(function(require, exports, module) {
 	 * @memberOf MolgenisTable
 	 */
 	exports.prototype.getCreateForm = function(entityMetaData) {
-		React.render(molgenis.ui.Form({
+		React.render(Form({
 			mode : 'create',
 			showHidden : true,
 			entity : entityMetaData.name,

@@ -4,7 +4,7 @@ define(function(require, exports, module) {
 	 * 
 	 * @module RestClientV2
 	 */
-	
+
 	'use strict';
 	var $ = require('jquery')
 	var rsqlQuery = require('/modules/RsqlQuery');
@@ -12,7 +12,7 @@ define(function(require, exports, module) {
 	var apiBaseUri = '/api/v2/';
 
 	/**
-	 * 
+	 * @memberOf RestClientV2
 	 */
 	exports.RestClientV2.prototype.get = function(resourceUri, options) {
 		if (!resourceUri.startsWith('/api/')) {
@@ -71,7 +71,7 @@ define(function(require, exports, module) {
 	};
 
 	/**
-	 * 
+	 * @memberOf RestClientV2
 	 */
 	exports.RestClientV2.prototype.remove = function(name, id) {
 		return $.ajax({
@@ -79,4 +79,6 @@ define(function(require, exports, module) {
 			url : apiBaseUri + encodeURI(name) + '/' + encodeURI(id)
 		});
 	};
+
+	exports.module = apiBaseUri;
 });
