@@ -1,13 +1,17 @@
 define(function(require, exports, module) {
-
+	/**
+	 * @module Form
+	 */
+	
 	"use strict";
 
 	var React = require('react-with-addons.min');
-	var molgenis = require('molgenis');
 	var _ = require('underscore-min');
+	var api = require('modules/RestClientV1');
 
 	var FormControls = require('component/FormControls');
 	var FormButtons = require('component/FormButtons');
+	var Modal = require('component/Modal');
 
 	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
 	var EntityLoaderMixin = require('component/mixin/EntityLoaderMixin');
@@ -15,12 +19,11 @@ define(function(require, exports, module) {
 	var ReactLayeredComponentMixin = require('component/mixin/ReactLayeredComponentMixin');
 
 	var div = React.DOM.div, span = React.DOM.span;
-	var api = new molgenis.RestClient();
 
 	/**
-	 * @memberOf component
+	 * @memberOf Form
 	 */
-	exports.Form = React
+	exports.prototype.Form = React
 			.createClass({
 				mixins : [ DeepPureRenderMixin, EntityLoaderMixin, EntityInstanceLoaderMixin, ReactLayeredComponentMixin ],
 				displayName : 'Form',
@@ -220,7 +223,7 @@ define(function(require, exports, module) {
 							title = '';
 						}
 
-						return (molgenis.ui.Modal({
+						return (Modal.createModal({
 							title : title,
 							size : 'large',
 							show : this.state.showModal,

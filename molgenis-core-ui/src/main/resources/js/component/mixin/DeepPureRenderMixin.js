@@ -10,9 +10,11 @@ define(function(require, exports, module) {
 	 * 
 	 * @memberOf DeepPureRenderMixin
 	 */
-	exports.prototype.DeepPureRenderMixin = {
+	var DeepPureRenderMixin = {
 		shouldComponentUpdate : function(nextProps, nextState) {
 			return !_.isEqual(this.state, nextState) || !_.isEqual(this.props, nextProps);
 		}
 	};
+
+	module.exports = DeepPureRenderMixin;
 });

@@ -3,13 +3,12 @@ define(function(require, exports, module) {
 	"use strict";
 
 	var React = require('react-with-addons.min');
-	var molgenis = require('molgenis');
 	var _ = require('underscore-min');
+	var api = require('modules/RestClientV1');
 
 	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
 
 	var span = React.DOM.span, a = React.DOM.a;
-	var api = new molgenis.RestClient();
 
 	/**
 	 * @memberOf component

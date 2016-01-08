@@ -3,7 +3,6 @@ define(function(require, exports, module) {
 	"use strict";
 
 	var React = require('react-with-addons.min');
-	var molgenis = require('molgenis');
 	var _ = require('underscore-min');
 
 	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');

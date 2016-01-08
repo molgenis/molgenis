@@ -1,6 +1,12 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-    "use strict";
+define(function(require, exports, module) {
+	/**
+	 * @module ReactLayeredComponentMixin
+	 */
+	"use strict";
+
+	var React = require('react');
+	var _ = require('underscore');
+
 
 	/**
 	 * See http://stackoverflow.com/a/26789089

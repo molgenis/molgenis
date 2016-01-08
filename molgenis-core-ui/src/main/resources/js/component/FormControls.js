@@ -3,17 +3,21 @@ define(function(require, exports, module) {
 	"use strict";
 
 	var React = require('react-with-addons.min');
-	var molgenis = require('molgenis');
 	var _ = require('underscore-min');
+	var api = require('modules/RestClientV1');
+
+	var FormControlGroup = require('component/FormControlGroup');
+	var FormControl = require('component/FormControl');
+
+	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
 
 	var div = React.DOM.div;
-	var api = new molgenis.RestClient();
 
 	/**
 	 * @memberOf FormControls
 	 */
 	exports.FormControls = React.createClass({
-		mixins : [ molgenis.DeepPureRenderMixin ],
+		mixins : [ DeepPureRenderMixin ],
 		displayName : 'FormControls',
 		propTypes : {
 			entity : React.PropTypes.object.isRequired,
@@ -40,7 +44,7 @@ define(function(require, exports, module) {
 				if (attributes.hasOwnProperty(key)) {
 					var attr = attributes[key];
 					if (this.props.mode !== 'create' || (this.props.mode === 'create' && attr.auto !== true)) {
-						var ControlFactory = attr.fieldType === 'COMPOUND' ? molgenis.ui.FormControlGroup : molgenis.ui.FormControl;
+						var ControlFactory = attr.fieldType === 'COMPOUND' ? FormControlGroup : FormControl;
 						var controlProps = {
 							entity : this.props.entity,
 							entityInstance : this.props.value,
