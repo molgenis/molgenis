@@ -75,8 +75,13 @@
 						var value = props.value !== undefined ? props.value[attr.refEntity.idAttribute] : undefined;
 						
 						var CategoricalControl = props.multiple === true ? molgenis.ui.CheckboxGroup : molgenis.ui.RadioGroup;
+						var options = this.state.options;
+						if (CategoricalControl === molgenis.ui.RadioGroup && controlProps.required === false) {
+							options = options.concat({value: '', label: this.state.i18nStrings.form_bool_missing});
+						}
+						
 						return CategoricalControl(_.extend({}, controlProps, {
-							options : this.state.options,
+							options : options,
 							layout : props.layout || 'vertical',
 							value : value,
 							onValueChange : function(event) {
@@ -124,8 +129,13 @@
 						}
 						
 						var EnumControl = props.multiple === true ? molgenis.ui.CheckboxGroup : molgenis.ui.RadioGroup;
+						var options = this.state.options;
+						if (EnumControl === molgenis.ui.RadioGroup && controlProps.required === false) {
+							options = options.concat({value: '', label: this.state.i18nStrings.form_bool_missing});
+						}
+						
 						return EnumControl(_.extend({}, controlProps, {
-							options : this.state.options,
+							options : options,
 							layout : props.layout
 						}));
 					case 'FILE':
