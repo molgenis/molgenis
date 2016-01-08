@@ -75,6 +75,7 @@
 				</#if>
 				<#if plugin_id??>
         			molgenis.pluginId = '${plugin_id?js_string}';
+        			molgenis.pluginSettingsId = 'settings_' + molgenis.pluginId();
 				</#if>
             	});
             });
@@ -156,12 +157,6 @@
             <div class="row">
                 <div class="col-md-12">
                     <div id="plugin-container">
-                    	<h1>BUTTON HERE!!!!</h1>
-						<div id="test_div">
-							<script>
-								require(['test'])
-							</script>
-						</div>
 </#macro>
 
 
@@ -230,15 +225,19 @@
 					<form id="logout-form" class="navbar-form navbar-right" method="post" action="/logout">
 						<button id="signout-button" type="button" class="btn btn-primary">Sign out</button>
 						<script>
-                            $("#signout-button").click(function() {
-                            <#if googleSignIn>
-                                var auth2 = gapi.auth2.getAuthInstance();
-                                auth2.signOut().then(function () {
-                            </#if>
-                                    $('#logout-form').submit();
-                            <#if googleSignIn>
-                                });
-                            </#if>
+							require(['main'], function(){
+								require(['jquery'], function($){
+	                            	$("#signout-button").click(function() {
+		                            <#if googleSignIn>
+		                                var auth2 = gapi.auth2.getAuthInstance();
+		                                auth2.signOut().then(function () {
+		                            </#if>
+		                                    $('#logout-form').submit();
+		                            <#if googleSignIn>
+		                                });
+		                            </#if>
+		                            });
+	                            });
                             });
 						</script>
 					</form>
