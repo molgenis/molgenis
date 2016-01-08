@@ -400,13 +400,13 @@ define(function(require, exports, module) {
 			// trigger initSelection
 			break;
 		case 'DATE':
-			var datepicker = createInput(attribute, {
+			var datepicker = _this_.createInput(attribute, {
 				'style' : 'min-width: 100px'
 			}, entity[attribute.name]);
 			cell.html(datepicker);
 			break;
 		case 'DATE_TIME':
-			var datepicker = createInput(attribute, {
+			var datepicker = _this_.createInput(attribute, {
 				'style' : 'min-width: 210px'
 			}, entity[attribute.name]);
 			cell.html(datepicker);
@@ -414,7 +414,7 @@ define(function(require, exports, module) {
 		case 'DECIMAL':
 		case 'INT':
 		case 'LONG':
-			var input = createInput(attribute, null, entity[attribute.name]);
+			var input = _this_.createInput(attribute, null, entity[attribute.name]);
 			input.addClass('number-input');
 			cell.html(input);
 			break;
@@ -1125,6 +1125,106 @@ define(function(require, exports, module) {
 
 		return this;
 	};
+	
+	/**
+	 * Create input element for a molgenis data type
+	 * 
+	 * @param dataType
+	 *            molgenis data type
+	 * @param attrs
+	 *            input attributes
+	 * @param val
+	 *            input value
+	 * @param lbl
+	 *            input label (for checkbox and radio inputs)
+	 * 
+	 * @deprecated use AttributeControl.js
+	 * @memberOf MolgenisTable
+	 */
+	exports.createInput = function(attr, attrs, val, lbl) {
+		function createBasicInput(type, attrs, val) {
+			var $input = $('<input type="' + type + '">');
+			if (attrs) {
+				$input.attr(attrs);
+			}
+			if (val !== undefined) {
+				$input.val(val);
+			}
+			return $input;
+		}
+		var dataType = attr.fieldType;
+		var label, $input, $div, opts;
+		switch (dataType) {
+		case 'BOOL':
+			label = $('<label class="radio">');
+			$input = createBasicInput('radio', attrs, val);
+			return label.append($input).append(val ? 'True' : 'False');
+		case 'CATEGORICAL':
+			label = $('<label>');
+			$input = createBasicInput('checkbox', attrs, val);
+			return $('<div class="checkbox">').append(label.append($input).append(lbl));
+		case 'DATE':
+		case 'DATE_TIME':
+			$div = $('<div>').addClass('group-append date input-group');
+			$input = createBasicInput('text', attrs, val).addClass('form-control').attr('data-date-format', dataType === 'DATE' ? 'YYYY-MM-DD' : 'YYYY-MM-DDTHH:mm:ssZZ')
+					.appendTo($div);
+			if (attr.nillable) {
+				$input.addClass('nillable');
+				$('<span>').addClass('input-group-addon').append($('<span>').addClass('glyphicon glyphicon-remove empty-date-input clear-date-time-btn')).appendTo($div);
+			}
+			$('<span>').addClass('input-group-addon datepickerbutton').append($('<span>').addClass('glyphicon glyphicon-calendar')).appendTo($div);
+			$div.datetimepicker(dataType === 'DATE' ? {
+				format : 'YYYY-MM-DD'
+			} : {
+				format : 'YYYY-MM-DDTHH:mm:ssZZ'
+			});
+			return $div;
+		case 'DECIMAL':
+			$input = createBasicInput('number', $.extend({}, attrs, {
+				'step' : 'any'
+			}), val).addClass('form-control');
+			if (!attr.nillable) {
+				$input.prop('required', true);
+			}
+			return $input;
+		case 'INT':
+		case 'LONG':
+			opts = $.extend({}, attrs, {
+				'step' : '1'
+			});
+			if (attr.range) {
+				if (typeof attr.range.min) {
+					opts.min = attr.range.min;
+				}
+				if (typeof attr.range.max !== 'undefined') {
+					opts.max = attr.range.max;
+				}
+			}
+			$input = createBasicInput('number', opts, val).addClass('form-control');
+			if (!attr.nillable) {
+				$input.prop('required', true);
+			}
+			return $input;
+		case 'EMAIL':
+			return createBasicInput('email', attrs, val).addClass('form-control');
+		case 'HTML':
+		case 'HYPERLINK':
+		case 'STRING':
+		case 'TEXT':
+		case 'ENUM':
+		case 'SCRIPT':
+			return createBasicInput('text', attrs, val).addClass('form-control');
+		case 'CATEGORICAL_MREF':
+		case 'MREF':
+		case 'XREF':
+			return createBasicInput('hidden', attrs, val).addClass('form-control');
+		case 'FILE':
+		case 'IMAGE':
+			throw 'Unsupported data type: ' + dataType;
+		default:
+			throw 'Unknown data type: ' + dataType;
+		}
+	}
 
 	/**
 	 * @memberOf MolgenisTable
