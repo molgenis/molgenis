@@ -1136,7 +1136,7 @@ public class MysqlRepository extends AbstractRepository
 											&& (att.getDataType() instanceof StringField))
 									{
 										throw new MolgenisDataException(
-												"Missing auto id value. Please use the 'AutoIdCrudRepositoryDecorator' to add auto id capabilities.");
+												"Missing auto id value. Please use the 'AutoValueRepositoryDecorator' to add auto id capabilities.");
 									}
 									preparedStatement.setObject(fieldIndex++, null);
 								}
