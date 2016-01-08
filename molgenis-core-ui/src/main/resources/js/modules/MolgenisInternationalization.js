@@ -2,6 +2,11 @@ define(function(require, exports, module) {
 	/**
 	 * @module MolgenisInternationalization
 	 */
+	'use strict';
+	
+	var $ = require('jquery')
+	var React = require('react');
+	var LanguageSelectBox = require('component/LanguageSelectBox');
 
 	var i18n = {};
 
@@ -48,6 +53,10 @@ define(function(require, exports, module) {
 		} else {
 			callback(i18n.i18nStrings);
 		}
+	}
+
+	i18n.renderLanguageSelectBox = function(element) {
+		React.render(LanguageSelectBox({}), element);
 	}
 
 	module.exports = i18n;
