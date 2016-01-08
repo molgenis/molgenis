@@ -2,7 +2,7 @@ define(function(require, exports, module) {
 	/**
 	 * @module Form
 	 */
-	
+
 	"use strict";
 
 	var React = require('react-with-addons.min');
@@ -12,18 +12,23 @@ define(function(require, exports, module) {
 	var FormControls = require('component/FormControls');
 	var FormButtons = require('component/FormButtons');
 	var Modal = require('component/Modal');
+	var Button = require('component/Button');
+	var Spinner = require('component/Spinner');
+	var AlertMessage = require('component/AlertMessage');
 
 	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
 	var EntityLoaderMixin = require('component/mixin/EntityLoaderMixin');
 	var EntityInstanceLoaderMixin = require('component/mixin/EntityInstanceLoaderMixin');
 	var ReactLayeredComponentMixin = require('component/mixin/ReactLayeredComponentMixin');
 
+	var JQueryForm = require('component/wrapper/JQueryForm');
+
 	var div = React.DOM.div, span = React.DOM.span;
 
 	/**
 	 * @memberOf Form
 	 */
-	exports.prototype.Form = React
+	var Form = React
 			.createClass({
 				mixins : [ DeepPureRenderMixin, EntityLoaderMixin, EntityInstanceLoaderMixin, ReactLayeredComponentMixin ],
 				displayName : 'Form',
@@ -236,11 +241,11 @@ define(function(require, exports, module) {
 				_renderForm : function() {
 					// return empty div if entity data is not yet available
 					if (this.state.entity === null) {
-						return molgenis.ui.Spinner();
+						return Spinner();
 					}
 					// return empty div if entity value is not yet available
 					if ((this.props.mode === 'edit' || this.props.mode === 'view') && this.state.entityInstance === null) {
-						return molgenis.ui.Spinner();
+						return Spinner();
 					}
 
 					var action, method;
@@ -301,7 +306,7 @@ define(function(require, exports, module) {
 						key : 'filter'
 					}, div({
 						className : 'col-md-12'
-					}, molgenis.ui.Button({
+					}, Button({
 						icon : this.state.hideOptional ? 'eye-open' : 'eye-close',
 						title : this.state.hideOptional ? 'Show all fields' : 'Hide optional fields',
 						size : 'xsmall',
@@ -312,7 +317,7 @@ define(function(require, exports, module) {
 						onClick : this._handleOptionalFilterClick
 					})))) : null;
 
-					var Form = (molgenis.ui.wrapper.JQueryForm(formProps, FormControlsFactory(formControlsProps), this.props.mode !== 'view'
+					var Form = (JQueryForm(formProps, FormControlsFactory(formControlsProps), this.props.mode !== 'view'
 							&& !(this.props.mode === 'edit' && this.props.saveOnBlur) ? FormButtonsFactory({
 						mode : this.props.mode,
 						formLayout : this.props.formLayout,
@@ -322,14 +327,14 @@ define(function(require, exports, module) {
 						onSubmitClick : this.submit
 					}) : null, this.props.children));
 
-					var SubmitAlertMessage = this.state.submitMsg ? (molgenis.ui.AlertMessage({
+					var SubmitAlertMessage = this.state.submitMsg ? (AlertMessage({
 						type : this.state.submitMsg.type,
 						message : this.state.submitMsg.message,
 						onDismiss : this._handleAlertMessageDismiss,
 						key : 'alert'
 					})) : null;
 
-					var ErrorMessageAlertMessage = !$.isEmptyObject(this.state.errorMessages) ? (molgenis.ui.AlertMessage({
+					var ErrorMessageAlertMessage = !$.isEmptyObject(this.state.errorMessages) ? (AlertMessage({
 						type : 'danger',
 						message : 'Validation failed',
 						onDismiss : undefined,
@@ -744,4 +749,6 @@ define(function(require, exports, module) {
 					return entityInstance[attr.name];
 				}
 			});
+	
+	module.exports = React.createFactory(Form);
 });
