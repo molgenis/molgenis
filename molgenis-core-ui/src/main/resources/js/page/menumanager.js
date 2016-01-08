@@ -1,39 +1,42 @@
-(function($, molgenis) {
-	"use strict";
+require([ 'main' ], function() {
+	require([ 'jquery', 'underscore', 'handlebars', 'plugins/jquery-sortable-min', 'plugins/select2-patched' ], function($, _, Handlebars) {
+		/**
+		 * @page menumanager
+		 */
+		"use strict";
 
-	function serializeMenu(container) {
-		function serializeMenuRec(list, menu) {
-			list.children('li').each(function() {
-				var id = $(this).data('id');
-				var label = $(this).data('label');
-				if ($(this).hasClass('highlight')) {
-					var sublist = $(this).children('ol');
-					var submenu = [];
-					menu.push({
-						'id' : id,
-						'label' : label,
-						'items' : submenu,
-						'type' : 'menu'
-					});
-					serializeMenuRec(sublist, submenu);
+		function serializeMenu(container) {
+			function serializeMenuRec(list, menu) {
+				list.children('li').each(function() {
+					var id = $(this).data('id');
+					var label = $(this).data('label');
+					if ($(this).hasClass('highlight')) {
+						var sublist = $(this).children('ol');
+						var submenu = [];
+						menu.push({
+							'id' : id,
+							'label' : label,
+							'items' : submenu,
+							'type' : 'menu'
+						});
+						serializeMenuRec(sublist, submenu);
 
-				} else {
-					menu.push({
-						'id' : id,
-						'label' : label,
-						'params' : $(this).data('params'),
-						'type' : 'plugin'
-					});
-				}
-			});
+					} else {
+						menu.push({
+							'id' : id,
+							'label' : label,
+							'params' : $(this).data('params'),
+							'type' : 'plugin'
+						});
+					}
+				});
+			}
+			var list = $('ol.root', container);
+			var menu = [];
+			serializeMenuRec(list, menu);
+			return menu[0];
 		}
-		var list = $('ol.root', container);
-		var menu = [];
-		serializeMenuRec(list, menu);
-		return menu[0];
-	}
 
-	$(function() {
 		var menuTemplate = Handlebars.compile($("#menu-template").html());
 		var itemTemplate = Handlebars.compile($("#item-template").html());
 
@@ -160,5 +163,6 @@
 				});
 			}
 		});
+
 	});
-}($, window.top.molgenis = window.top.molgenis || {}));
+});
