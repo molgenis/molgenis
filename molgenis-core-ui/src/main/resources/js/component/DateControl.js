@@ -1,26 +1,35 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-	"use strict";
-	
+define(function(require, exports, module) {
 	/**
-	 * @memberOf component
+	 * @module DateControl
+	 */
+	"use strict";
+
+	var React = require('react');
+	var _ = require('underscore');
+
+	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
+
+	var DateTimePicker = require('component/wrapper/DateTimePicker');
+
+	/**
+	 * @memberOf DateControl
 	 */
 	var DateControl = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
-		displayName: 'DateControl',
-		propTypes: {
-			name: React.PropTypes.string,
-			time: React.PropTypes.bool,
-			placeholder: React.PropTypes.string,
-			required: React.PropTypes.bool,
-			disabled: React.PropTypes.bool,
-			focus: React.PropTypes.bool,
-			value: React.PropTypes.string,
-			onValueChange: React.PropTypes.func.isRequired
+		mixins : [ DeepPureRenderMixin ],
+		displayName : 'DateControl',
+		propTypes : {
+			name : React.PropTypes.string,
+			time : React.PropTypes.bool,
+			placeholder : React.PropTypes.string,
+			required : React.PropTypes.bool,
+			disabled : React.PropTypes.bool,
+			focus : React.PropTypes.bool,
+			value : React.PropTypes.string,
+			onValueChange : React.PropTypes.func.isRequired
 		},
-		render: function() {
-			return molgenis.ui.wrapper.DateTimePicker({
-				name: this.props.name,
+		render : function() {
+			return DateTimePicker({
+				name : this.props.name,
 				time : this.props.time,
 				placeholder : this.props.placeholder,
 				required : this.props.required,
@@ -31,14 +40,12 @@
 				onChange : this._handleChange
 			});
 		},
-		_handleChange: function(value) {
-			this.props.onValueChange({value: value});
+		_handleChange : function(value) {
+			this.props.onValueChange({
+				value : value
+			});
 		}
 	});
-	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	_.extend(molgenis.ui, {
-		DateControl: React.createFactory(DateControl)
-	});
-}(_, React, molgenis));
+
+	module.exports = React.createFactory(DateControl)
+});
