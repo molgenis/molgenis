@@ -3,9 +3,6 @@
 	
 		var molgenis = {};
 	
-		var showSpinner = require('spinner').showSpinner();
-		var hideSpinner = require('spinner').hideSpinner();
-	
 		var $ = require('jquery');
 		var React = require('react');
 		var _ = require('underscore');
@@ -345,14 +342,14 @@
 			cache : false
 		});
 	
-		// use ajaxPrefilter instead of ajaxStart and ajaxStop
-		// to work around issue http://bugs.jquery.com/ticket/13680
-		$.ajaxPrefilter(function(options, _, jqXHR) {
-			if (options.showSpinner !== false) {
-				showSpinner();
-				jqXHR.always(hideSpinner);
-			}
-		});
+//		// use ajaxPrefilter instead of ajaxStart and ajaxStop
+//		// to work around issue http://bugs.jquery.com/ticket/13680
+//		$.ajaxPrefilter(function(options, _, jqXHR) {
+//			if (options.showSpinner !== false) {
+//				showSpinner();
+//				jqXHR.always(hideSpinner);
+//			}
+//		});
 	
 		$(document).ajaxError(function(event, xhr, settings, e) {
 			if (xhr.status === 401) {
