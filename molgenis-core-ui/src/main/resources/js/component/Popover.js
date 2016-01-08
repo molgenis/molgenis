@@ -1,14 +1,20 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
+define(function(require,exports,module), function(){
+	/**
+	 * @module Popover
+	 */
 	"use strict";
 	
+	var $ = require('jquery');
+	var React - require('react');
+	
 	var span = React.DOM.span;
+	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
 	
 	/**
-	 * @memberOf component
+	 * @memberOf Popover
 	 */
 	var Popover = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		displayName: 'Popover',
 		propTypes: {
 			value: React.PropTypes.string.isRequired,
@@ -35,9 +41,5 @@
 		}
 	});
 	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	_.extend(molgenis.ui, {
-		Popover: React.createFactory(Popover)
-	});
-}(_, React, molgenis));
+	module.exports = React.createFactory(Popover);
+});
