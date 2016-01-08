@@ -1,78 +1,94 @@
-(function(_, React, molgenis) {
+define(function(require, exports, module) {
+	/**
+	 * @module LanguageSelectBox
+	 */
 	"use strict";
-	
-	var api = new molgenis.RestClient();
-	
+
+	var React = require('react');
+	var _ = require('underscore');
+
+	var Button = require('component/Button');
+	var Modal = require('component/Modal');
+	var Spinner = require('component/Spinner');
+
+	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
+
+	var Select2 = require('component/wrapper/Select2');
+
+	var api = require('RestClientV1');
+
 	/**
 	 * Shows a Select2 box for switching the user language
 	 * 
-	 * @memberOf component
+	 * @memberOf LanguageSelectBox
 	 */
-	var LanguageSelectBox = React.createClass({	
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
-		displayName: 'LanguageSelectBox',
-		propTypes: {
-			onValueChange: React.PropTypes.func
+	var LanguageSelectBox = React.createClass({
+		mixins : [ DeepPureRenderMixin ],
+		displayName : 'LanguageSelectBox',
+		propTypes : {
+			onValueChange : React.PropTypes.func
 		},
-		getInitialState: function() {
+		getInitialState : function() {
 			return {
-				select2Data: null,
-				selectedLanguage: null
+				select2Data : null,
+				selectedLanguage : null
 			};
 		},
-		componentDidMount: function() {
+		componentDidMount : function() {
 			this._loadLanguages();
 		},
-		render: function() {
+		render : function() {
 			if (this.state.select2Data === null) {
-				return molgenis.ui.Spinner();
+				return Spinner();
 			}
-			
+
 			if (this.state.select2Data.length > 1) {
-				return molgenis.ui.wrapper.Select2({
-					options: {
-						data: this.state.select2Data,
+				return Select2({
+					options : {
+						data : this.state.select2Data,
 					},
-					value: this.state.selectedLanguage,
-					name: 'languages',
-					onChange: this._handleChange
+					value : this.state.selectedLanguage,
+					name : 'languages',
+					onChange : this._handleChange
 				});
 			}
-			
-			return  React.DOM.div();
+
+			return React.DOM.div();
 		},
-		_loadLanguages: function() {
+		_loadLanguages : function() {
 			var self = this;
 			api.getAsync('/api/v2/languages').done(function(languages) {
 				var selectedLanguage = null;
-				var select2Data = languages.items.map(function(item){
+				var select2Data = languages.items.map(function(item) {
 					if (item.code === languages.meta.languageCode) {
-						selectedLanguage = {id: item.code, text: item.name};
+						selectedLanguage = {
+							id : item.code,
+							text : item.name
+						};
 					}
-					return {id: item.code, text: item.name}
+					return {
+						id : item.code,
+						text : item.name
+					}
 				});
-				
+
 				self.setState({
-					select2Data: select2Data,
-					selectedLanguage: selectedLanguage
+					select2Data : select2Data,
+					selectedLanguage : selectedLanguage
 				});
 			});
 		},
-		_handleChange: function(language) {
-			 $.ajax({
-				 type: 'POST',
-		         url:  '/plugin/useraccount/language/update',
-		         data: 'languageCode=' + language.id,
-		         success: function() {
-		        	 location.reload(true);
-		         }
-			 });
+		_handleChange : function(language) {
+			$.ajax({
+				type : 'POST',
+				url : '/plugin/useraccount/language/update',
+				data : 'languageCode=' + language.id,
+				success : function() {
+					location.reload(true);
+				}
+			});
 		}
 	});
-	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	_.extend(molgenis.ui, {
-		LanguageSelectBox: React.createFactory(LanguageSelectBox)
-	});
-}(_, React, molgenis));
+
+	module.exports = React.createFactory(LanguageSelectBox)
+});

@@ -1,53 +1,69 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
+define(function(require, exports, module) {
+	/**
+	 * @module RangeSlider
+	 */
 	"use strict";
-	
+
+	var React = require('react');
+	var _ = require('underscore');
+
+	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
+
+	var JQRangeSlider = require('component/wrapper/JQRangeSlider');
+
 	/**
 	 * Range slider control for number types
 	 * 
-	 * @memberOf component
+	 * @memberOf RangeSlider
 	 */
 	var RangeSlider = React.createClass({ // FIXME support readOnly
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
-		displayName: 'RangeSlider',
-		propTypes: {
+		mixins : [ DeepPureRenderMixin ],
+		displayName : 'RangeSlider',
+		propTypes : {
 			id : React.PropTypes.string,
-			range: React.PropTypes.shape({min: React.PropTypes.number.isRequired, max: React.PropTypes.number.isRequired}).isRequired,
-			value: React.PropTypes.arrayOf(React.PropTypes.number),
-			step: React.PropTypes.string,
-			disabled: React.PropTypes.bool,
+			range : React.PropTypes.shape({
+				min : React.PropTypes.number.isRequired,
+				max : React.PropTypes.number.isRequired
+			}).isRequired,
+			value : React.PropTypes.arrayOf(React.PropTypes.number),
+			step : React.PropTypes.string,
+			disabled : React.PropTypes.bool,
 			onValueChange : React.PropTypes.func.isRequired
 		},
-		render: function() {
+		render : function() {
 			var range = this.props.range;
 			var value = this.props.value;
-			
+
 			var fromValue = value && value[0] ? value[0] : range.min;
 			var toValue = value && value[1] ? value[1] : range.max;
 			var options = {
-				symmetricPositionning: true,
-				bounds: {min: range.min, max: range.max},
-				defaultValues: {min: fromValue, max: toValue},
-				step: this.props.step,
-				type: 'number'
+				symmetricPositionning : true,
+				bounds : {
+					min : range.min,
+					max : range.max
+				},
+				defaultValues : {
+					min : fromValue,
+					max : toValue
+				},
+				step : this.props.step,
+				type : 'number'
 			};
-			
-			return molgenis.ui.wrapper.JQRangeSlider({
-				id: this.props.id,
+
+			return JQRangeSlider({
+				id : this.props.id,
 				options : options,
 				disabled : this.props.disabled,
 				value : [ fromValue, toValue ],
 				onChange : this._handleChange
 			});
 		},
-		_handleChange: function(value) {
-			this.props.onValueChange({value: value});
+		_handleChange : function(value) {
+			this.props.onValueChange({
+				value : value
+			});
 		}
 	});
-	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	_.extend(molgenis.ui, {
-		RangeSlider: React.createFactory(RangeSlider)
-	});
-}(_, React, molgenis));
+
+	module.exports = React.createFactory(RangeSlider)
+});

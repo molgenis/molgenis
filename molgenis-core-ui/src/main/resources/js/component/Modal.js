@@ -2,12 +2,13 @@ define(function(require, exports, module) {
 	/**
 	 * @module Modal
 	 */
-
 	"use strict";
 
 	var $ = require('jquery');
 	var React = require('react-with-addons.min');
+
 	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
+
 	var div = React.DOM.div, button = React.DOM.button, span = React.DOM.span, h4 = React.DOM.h4;
 
 	/**

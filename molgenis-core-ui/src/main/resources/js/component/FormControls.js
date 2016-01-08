@@ -1,5 +1,7 @@
 define(function(require, exports, module) {
-
+	/**
+	 * @module FormControls
+	 */
 	"use strict";
 
 	var React = require('react-with-addons.min');
@@ -16,7 +18,7 @@ define(function(require, exports, module) {
 	/**
 	 * @memberOf FormControls
 	 */
-	exports.FormControls = React.createClass({
+	var FormControls = React.createClass({
 		mixins : [ DeepPureRenderMixin ],
 		displayName : 'FormControls',
 		propTypes : {
@@ -102,4 +104,6 @@ define(function(require, exports, module) {
 			return attr.name + '-link';
 		}
 	});
+
+	module.exports = React.createFactory(FormControls);
 });

@@ -1,5 +1,7 @@
 define(function(require, exports, module) {
-
+	/**
+	 * @module FormIndex
+	 */
 	"use strict";
 
 	var React = require('react-with-addons.min');
@@ -11,9 +13,9 @@ define(function(require, exports, module) {
 	var api = new molgenis.RestClient();
 
 	/**
-	 * @memberOf component
+	 * @memberOf FormIndex
 	 */
-	exports.FormIndex = React.createClass({
+	var FormIndex = React.createClass({
 		mixins : [ DeepPureRenderMixin ],
 		displayName : 'FormIndex',
 		propTypes : {
@@ -53,4 +55,6 @@ define(function(require, exports, module) {
 			return '#' + attr.name + '-link';
 		}
 	});
+
+	module.exports = React.createFactory(FormIndex);
 });
