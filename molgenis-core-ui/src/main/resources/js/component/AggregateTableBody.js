@@ -7,9 +7,6 @@ define(function(require, exports, module) {
 	var React = require('react');
 	var _ = require('underscore');
 
-	var AggregateTableHeader = require('component/AggregateTableHeader');
-	var AggregateTableBody = require('component/AggregateTableBody');
-
 	var tbody = React.DOM.tbody, tr = React.DOM.tr, th = React.DOM.th, td = React.DOM.td, label = React.DOM.label;
 
 	var AggregateTableBody = React.createClass({
