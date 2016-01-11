@@ -86,6 +86,18 @@ public interface DataService extends Iterable<Repository>
 	Iterable<Entity> findAll(String entityName);
 
 	/**
+	 * Find all entities of the given type. Returns empty Stream if no matches.
+	 * 
+	 * @throws MolgenisDataException
+	 *             if the repository of the entity isn't a Queryable
+	 * @throws MolgenisDataAccessException
+	 * 
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 */
+	Stream<Entity> findAllAsStream(String entityName);
+
+	/**
 	 * type-safe find all entities
 	 * 
 	 * @throws MolgenisDataAccessException
@@ -96,7 +108,17 @@ public interface DataService extends Iterable<Repository>
 	<E extends Entity> Iterable<E> findAll(String entityName, Class<E> clazz);
 
 	/**
-	 * Find entities that match a query. Returns empty Iterable if no matches.
+	 * type-safe find all entities
+	 * 
+	 * @throws MolgenisDataAccessException
+	 * 
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 */
+	<E extends Entity> Stream<E> findAllAsStream(String entityName, Class<E> clazz);
+
+	/**
+	 * Find entities that match a query. Returns empty stream if no matches.
 	 * 
 	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
 	 * 
@@ -108,6 +130,18 @@ public interface DataService extends Iterable<Repository>
 	Iterable<Entity> findAll(String entityName, Query q);
 
 	/**
+	 * Find entities that match a query. Returns empty stream if no matches.
+	 * 
+	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
+	 * 
+	 * @throws MolgenisDataAccessException
+	 * 
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 */
+	Stream<Entity> findAllAsStream(String entityName, Query q);
+
+	/**
 	 * type-safe find entities that match a query
 	 * 
 	 * @throws MolgenisDataAccessException
@@ -116,6 +150,16 @@ public interface DataService extends Iterable<Repository>
 	 *            entity name (case insensitive)
 	 */
 	<E extends Entity> Iterable<E> findAll(String entityName, Query q, Class<E> clazz);
+
+	/**
+	 * type-safe find entities that match a query
+	 * 
+	 * @throws MolgenisDataAccessException
+	 * 
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 */
+	<E extends Entity> Stream<E> findAllAsStream(String entityName, Query q, Class<E> clazz);
 
 	/**
 	 * Find entities based on id. Returns empty Iterable if no matches.

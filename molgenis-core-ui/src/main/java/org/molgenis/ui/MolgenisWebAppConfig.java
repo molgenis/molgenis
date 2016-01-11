@@ -151,6 +151,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Autowired
 	public ExpressionValidator expressionValidator;
 
+	@Autowired
 	public LanguageService languageService;
 
 	@Override

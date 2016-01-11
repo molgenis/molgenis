@@ -851,6 +851,17 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	@Override
 	public Iterable<Entity> search(Query q, final EntityMetaData entityMetaData)
 	{
+		return searchInternal(q, entityMetaData);
+	}
+
+	@Override
+	public Stream<Entity> searchAsStream(Query q, EntityMetaData entityMetaData)
+	{
+		return searchInternal(q, entityMetaData).asStream();
+	}
+
+	private ElasticsearchEntityIterable searchInternal(Query q, EntityMetaData entityMetaData)
+	{
 		String[] indexNames = new String[]
 		{ indexName };
 

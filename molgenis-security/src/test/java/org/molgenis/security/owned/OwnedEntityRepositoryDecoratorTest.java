@@ -19,6 +19,7 @@ import org.mockito.ArgumentCaptor;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
+import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.OwnedEntityMetaData;
 import org.springframework.security.authentication.TestingAuthenticationToken;
@@ -311,5 +312,31 @@ public class OwnedEntityRepositoryDecoratorTest
 		when(decoratedRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = ownedEntityRepositoryDecorator.findAll(entityIds, fetch);
 		assertEquals(expectedEntities.collect(Collectors.toList()), emptyList());
+	}
+
+	@Test
+	public void findAllAsStreamNotExtendsOwned()
+	{
+		Entity entity0 = mock(Entity.class);
+		Query query = mock(Query.class);
+		when(decoratedRepository.findAllAsStream(query)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = ownedEntityRepositoryDecorator.findAllAsStream(query);
+		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+	}
+
+	@Test
+	public void findAllAsStreamExtendsOwned()
+	{
+		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
+		authentication.setAuthenticated(false);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(entityMeta.getExtends()).thenReturn(new OwnedEntityMetaData());
+
+		Entity entity0 = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("username").getMock();
+		Query query = mock(Query.class);
+		when(decoratedRepository.findAllAsStream(query)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = ownedEntityRepositoryDecorator.findAllAsStream(query);
+		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+		verify(query, times(1)).eq(OwnedEntityMetaData.ATTR_OWNER_USERNAME, "username");
 	}
 }

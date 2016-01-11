@@ -150,6 +150,15 @@ public interface SearchService
 	// TODO replace Iterable<Entity> with EntityCollection and add EntityCollection.getTotal()
 	Iterable<Entity> search(Query q, EntityMetaData entityMetaData);
 
+	/**
+	 * TODO replace Stream<Entity> with EntityCollection and add EntityCollection.getTotal()
+	 * 
+	 * @param q
+	 * @param entityMetaData
+	 * @return
+	 */
+	Stream<Entity> searchAsStream(Query q, EntityMetaData entityMetaData);
+
 	AggregateResult aggregate(AggregateQuery aggregateQuery, EntityMetaData entityMetaData);
 
 	/**

@@ -170,6 +170,16 @@ public class AutoValueRepositoryDecoratorTest
 		verify(decoratedRepository, times(1)).findOne(id, fetch);
 	}
 
+	@Test
+	public void findAllAsStream()
+	{
+		Entity entity0 = mock(Entity.class);
+		Query query = mock(Query.class);
+		when(decoratedRepository.findAllAsStream(query)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = repositoryDecorator.findAllAsStream(query);
+		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+	}
+
 	private void validateEntity(Entity entity)
 	{
 		assertNull(entity.getDate(ATTR_DATE_AUTO_DEFAULT));

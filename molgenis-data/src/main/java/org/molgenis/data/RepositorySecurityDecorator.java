@@ -73,6 +73,13 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
+	public Stream<Entity> findAllAsStream(Query q)
+	{
+		validatePermission(decoratedRepository.getName(), Permission.READ);
+		return decoratedRepository.findAllAsStream(q);
+	}
+
+	@Override
 	public Entity findOne(Query q)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.READ);

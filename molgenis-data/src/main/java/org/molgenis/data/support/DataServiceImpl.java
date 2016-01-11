@@ -137,9 +137,21 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
+	public Stream<Entity> findAllAsStream(String entityName)
+	{
+		return findAllAsStream(entityName, new QueryImpl());
+	}
+
+	@Override
 	public Iterable<Entity> findAll(String entityName, Query q)
 	{
 		return getRepository(entityName).findAll(q);
+	}
+
+	@Override
+	public Stream<Entity> findAllAsStream(String entityName, Query q)
+	{
+		return getRepository(entityName).findAllAsStream(q);
 	}
 
 	@Override
@@ -260,6 +272,15 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
+	public <E extends Entity> Stream<E> findAllAsStream(String entityName, Query q, Class<E> clazz)
+	{
+		Stream<Entity> entities = getRepository(entityName).findAllAsStream(q);
+		return entities.map(entity -> {
+			return EntityUtils.convert(entity, clazz, this);
+		});
+	}
+
+	@Override
 	public <E extends Entity> Iterable<E> findAll(String entityName, Iterable<Object> ids, Class<E> clazz)
 	{
 		Iterable<Entity> entities = getRepository(entityName).findAll(ids);
@@ -286,6 +307,12 @@ public class DataServiceImpl implements DataService
 	public <E extends Entity> Iterable<E> findAll(String entityName, Class<E> clazz)
 	{
 		return findAll(entityName, new QueryImpl(), clazz);
+	}
+
+	@Override
+	public <E extends Entity> Stream<E> findAllAsStream(String entityName, Class<E> clazz)
+	{
+		return findAllAsStream(entityName, new QueryImpl(), clazz);
 	}
 
 	@Override

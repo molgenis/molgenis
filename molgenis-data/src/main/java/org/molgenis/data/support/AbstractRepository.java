@@ -78,6 +78,12 @@ public abstract class AbstractRepository implements Repository
 	}
 
 	@Override
+	public Stream<Entity> findAllAsStream(Query q)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public Entity findOne(Query q)
 	{
 		throw new UnsupportedOperationException();

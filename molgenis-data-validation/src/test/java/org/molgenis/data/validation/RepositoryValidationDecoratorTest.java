@@ -26,6 +26,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
+import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -2850,5 +2851,15 @@ public class RepositoryValidationDecoratorTest
 		when(decoratedRepository.findOne(id, fetch)).thenReturn(entity);
 		assertEquals(entity, myRepositoryValidationDecorator.findOne(id, fetch));
 		verify(decoratedRepository, times(1)).findOne(id, fetch);
+	}
+
+	@Test
+	public void findAllAsStream()
+	{
+		Entity entity0 = mock(Entity.class);
+		Query query = mock(Query.class);
+		when(decoratedRepo.findAllAsStream(query)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = repositoryValidationDecorator.findAllAsStream(query);
+		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
 }

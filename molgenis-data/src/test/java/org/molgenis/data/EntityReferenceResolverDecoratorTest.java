@@ -210,6 +210,32 @@ public class EntityReferenceResolverDecoratorTest
 	}
 
 	@Test
+	public void findAllAsStreamFetch()
+	{
+		Entity entity0 = mock(Entity.class);
+		Query query = mock(Query.class);
+		Fetch fetch = mock(Fetch.class);
+		when(query.getFetch()).thenReturn(fetch);
+		Stream<Entity> entities = Stream.of(entity0);
+		when(decoratedRepo.findAllAsStream(query)).thenReturn(entities);
+		when(entityManager.resolveReferences(entityMeta, entities, fetch)).thenReturn(entities);
+		Stream<Entity> expectedEntities = entityReferenceResolverDecorator.findAllAsStream(query);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0));
+	}
+
+	@Test
+	public void findAllAsStreamNoFetch()
+	{
+		Entity entity0 = mock(Entity.class);
+		Query query = mock(Query.class);
+		Stream<Entity> entities = Stream.of(entity0);
+		when(decoratedRepo.findAllAsStream(query)).thenReturn(entities);
+		when(entityManager.resolveReferences(entityMeta, entities, null)).thenReturn(entities);
+		Stream<Entity> expectedEntities = entityReferenceResolverDecorator.findAllAsStream(query);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0));
+	}
+
+	@Test
 	public void findAllIterableObject()
 	{
 		@SuppressWarnings("unchecked")

@@ -100,6 +100,16 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	}
 
 	@Override
+	public Stream<Entity> findAllAsStream(Query q)
+	{
+		if (mustAddRowLevelSecurity())
+		{
+			addRowLevelSecurity(q);
+		}
+		return decoratedRepo.findAllAsStream(q);
+	}
+
+	@Override
 	public Entity findOne(Query q)
 	{
 		if (mustAddRowLevelSecurity()) addRowLevelSecurity(q);

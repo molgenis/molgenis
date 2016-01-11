@@ -89,6 +89,19 @@ public class InMemoryRepository implements Repository
 	}
 
 	@Override
+	public Stream<Entity> findAllAsStream(Query q)
+	{
+		if (new QueryImpl().equals(q))
+		{
+			return entities.values().stream();
+		}
+		else
+		{
+			throw new UnsupportedOperationException();
+		}
+	}
+
+	@Override
 	public Entity findOne(Query q)
 	{
 		throw new UnsupportedOperationException();

@@ -64,6 +64,14 @@ public class ComputedEntityValuesDecorator implements Repository
 	}
 
 	@Override
+	public Stream<Entity> findAllAsStream(Query q)
+	{
+		Stream<Entity> entities = decoratedRepo.findAllAsStream(q);
+		// compute values with attributes with expressions
+		return toComputedValuesEntities(entities);
+	}
+
+	@Override
 	public void close() throws IOException
 	{
 		decoratedRepo.close();

@@ -172,4 +172,14 @@ public class AbstractElasticsearchRepositoryTest
 		Stream<Entity> expectedEntities = repository.findAll(entityIds, fetch);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
+
+	@Test
+	public void findAllAsStream()
+	{
+		Entity entity0 = mock(Entity.class);
+		Query query = mock(Query.class);
+		when(searchService.searchAsStream(query, entityMeta)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = repository.findAllAsStream(query);
+		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+	}
 }

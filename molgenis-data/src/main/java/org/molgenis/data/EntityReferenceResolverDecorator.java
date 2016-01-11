@@ -64,6 +64,14 @@ public class EntityReferenceResolverDecorator implements Repository
 		return resolveEntityReferences(entities, q.getFetch());
 	}
 
+	// Resolve entity references based on given fetch
+	@Override
+	public Stream<Entity> findAllAsStream(Query q)
+	{
+		Stream<Entity> entities = decoratedRepo.findAllAsStream(q);
+		return resolveEntityReferences(entities, q.getFetch());
+	}
+
 	@Override
 	public void close() throws IOException
 	{

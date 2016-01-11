@@ -239,6 +239,12 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 		return super.findAll(q);
 	}
 
+	@Override
+	public Stream<Entity> findAllAsStream(Query q)
+	{
+		return super.findAllAsStream(q);
+	}
+
 	// retrieve all entities via decorated repository
 	@Override
 	public Iterator<Entity> iterator()

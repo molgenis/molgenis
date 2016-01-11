@@ -32,6 +32,13 @@ public interface Repository extends Iterable<Entity>, Closeable
 	Iterable<Entity> findAll(Query q);
 
 	/**
+	 * type-safe find entities that match a query
+	 * 
+	 * @return (empty) Stream, never null
+	 */
+	Stream<Entity> findAllAsStream(Query q);
+
+	/**
 	 * Find an entity base on a query
 	 * 
 	 * Returns null if not exists.
