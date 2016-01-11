@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -37,7 +38,6 @@ public class EntityListenerRepositoryDecoratorTest
 		new EntityListenerRepositoryDecorator(null);
 	}
 
-	@SuppressWarnings("resource")
 	@Test
 	public void addStream()
 	{
@@ -46,7 +46,6 @@ public class EntityListenerRepositoryDecoratorTest
 		assertEquals(entityListenerRepositoryDecorator.add(entities), Integer.valueOf(123));
 	}
 
-	@SuppressWarnings("resource")
 	@Test
 	public void deleteStream()
 	{
@@ -188,7 +187,7 @@ public class EntityListenerRepositoryDecoratorTest
 	}
 
 	@SuppressWarnings(
-	{ "resource", "unchecked" })
+	{ "resource", "unchecked", "rawtypes" })
 	@Test
 	public void updateStreamWithListeners()
 	{
@@ -274,5 +273,32 @@ public class EntityListenerRepositoryDecoratorTest
 
 		verify(decoratedRepository).update(entity);
 		verify(entityListener0, times(0)).postUpdate(entity);
+	}
+
+	@Test
+	public void findAllStream()
+	{
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		Stream<Object> entityIds = Stream.of(id0, id1);
+		when(decoratedRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
+		Stream<Entity> expectedEntities = entityListenerRepositoryDecorator.findAll(entityIds);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+	}
+
+	@Test
+	public void findAllStreamFetch()
+	{
+		Fetch fetch = new Fetch();
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		Stream<Object> entityIds = Stream.of(id0, id1);
+		when(decoratedRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
+		Stream<Entity> expectedEntities = entityListenerRepositoryDecorator.findAll(entityIds, fetch);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
 }

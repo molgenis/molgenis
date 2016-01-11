@@ -219,6 +219,20 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 		return decoratedRepo.findAll(ids, fetch);
 	}
 
+	// retrieve entities by id via decorated repository
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids)
+	{
+		return decoratedRepo.findAll(ids);
+	}
+
+	// retrieve entities by id via decorated repository
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
+	{
+		return decoratedRepo.findAll(ids, fetch);
+	}
+
 	@Override
 	public Iterable<Entity> findAll(Query q)
 	{

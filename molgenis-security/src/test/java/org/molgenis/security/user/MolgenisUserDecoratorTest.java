@@ -84,7 +84,6 @@ public class MolgenisUserDecoratorTest
 			@Override
 			public Integer answer(InvocationOnMock invocation) throws Throwable
 			{
-				@SuppressWarnings("unchecked")
 				Stream<Entity> entities = (Stream<Entity>) invocation.getArguments()[0];
 				List<Entity> entitiesList = entities.collect(Collectors.toList());
 				return entitiesList.size();
@@ -117,7 +116,6 @@ public class MolgenisUserDecoratorTest
 		assertEquals(captor.getValue().collect(Collectors.toList()), Arrays.asList(entity0));
 		verify(entity0).set(eq(MolgenisUser.PASSWORD_), anyString());
 		// TODO add authority tests
-
 	}
 
 	@Test
@@ -152,5 +150,32 @@ public class MolgenisUserDecoratorTest
 		Fetch fetch = new Fetch();
 		molgenisUserDecorator.findOne(id, fetch);
 		verify(decoratedRepository, times(1)).findOne(id, fetch);
+	}
+
+	@Test
+	public void findAllStream()
+	{
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		Stream<Object> entityIds = Stream.of(id0, id1);
+		when(decoratedRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
+		Stream<Entity> expectedEntities = molgenisUserDecorator.findAll(entityIds);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+	}
+
+	@Test
+	public void findAllStreamFetch()
+	{
+		Fetch fetch = new Fetch();
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		Stream<Object> entityIds = Stream.of(id0, id1);
+		when(decoratedRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
+		Stream<Entity> expectedEntities = molgenisUserDecorator.findAll(entityIds, fetch);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
 }

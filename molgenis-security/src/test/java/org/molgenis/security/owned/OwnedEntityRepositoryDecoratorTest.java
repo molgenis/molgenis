@@ -1,5 +1,6 @@
 package org.molgenis.security.owned;
 
+import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -85,6 +86,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		verify(decoratedRepository, times(1)).delete(entities);
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Test
 	public void deleteStreamEntityExtendsOwned()
 	{
@@ -208,5 +210,106 @@ public class OwnedEntityRepositoryDecoratorTest
 		when(decoratedRepository.findOne(id, fetch)).thenReturn(entity);
 		ownedEntityRepositoryDecorator.findOne(id, fetch);
 		verify(decoratedRepository, times(1)).findOne(id, fetch);
+	}
+
+	@Test
+	public void findAllStreamNotExtendsOwned()
+	{
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		Stream<Object> entityIds = Stream.of(id0, id1);
+		when(decoratedRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
+		Stream<Entity> expectedEntities = ownedEntityRepositoryDecorator.findAll(entityIds);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+	}
+
+	@Test
+	public void findAllStreamExtendsOwned()
+	{
+		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
+		authentication.setAuthenticated(false);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(entityMeta.getExtends()).thenReturn(new OwnedEntityMetaData());
+
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("username").getMock();
+		Entity entity1 = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("username").getMock();
+		Stream<Object> entityIds = Stream.of(id0, id1);
+		when(decoratedRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
+		Stream<Entity> expectedEntities = ownedEntityRepositoryDecorator.findAll(entityIds);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+	}
+
+	@Test
+	public void findAllStreamExtendsOwnedBySomeoneElse()
+	{
+		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
+		authentication.setAuthenticated(false);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(entityMeta.getExtends()).thenReturn(new OwnedEntityMetaData());
+
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("notme").getMock();
+		Entity entity1 = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("notme").getMock();
+		Stream<Object> entityIds = Stream.of(id0, id1);
+		when(decoratedRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
+		Stream<Entity> expectedEntities = ownedEntityRepositoryDecorator.findAll(entityIds);
+		assertEquals(expectedEntities.collect(Collectors.toList()), emptyList());
+	}
+
+	@Test
+	public void findAllStreamFetchNotExtendsOwned()
+	{
+		Fetch fetch = new Fetch();
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		Stream<Object> entityIds = Stream.of(id0, id1);
+		when(decoratedRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
+		Stream<Entity> expectedEntities = ownedEntityRepositoryDecorator.findAll(entityIds, fetch);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+	}
+
+	@Test
+	public void findAllStreamFetchExtendsOwned()
+	{
+		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
+		authentication.setAuthenticated(false);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(entityMeta.getExtends()).thenReturn(new OwnedEntityMetaData());
+
+		Fetch fetch = new Fetch();
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("username").getMock();
+		Entity entity1 = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("username").getMock();
+		Stream<Object> entityIds = Stream.of(id0, id1);
+		when(decoratedRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
+		Stream<Entity> expectedEntities = ownedEntityRepositoryDecorator.findAll(entityIds, fetch);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+	}
+
+	@Test
+	public void findAllStreamFetchExtendsOwnedBySomeoneElse()
+	{
+		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
+		authentication.setAuthenticated(false);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(entityMeta.getExtends()).thenReturn(new OwnedEntityMetaData());
+
+		Fetch fetch = new Fetch();
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("notme").getMock();
+		Entity entity1 = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("notme").getMock();
+		Stream<Object> entityIds = Stream.of(id0, id1);
+		when(decoratedRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
+		Stream<Entity> expectedEntities = ownedEntityRepositoryDecorator.findAll(entityIds, fetch);
+		assertEquals(expectedEntities.collect(Collectors.toList()), emptyList());
 	}
 }

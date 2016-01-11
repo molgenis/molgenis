@@ -113,6 +113,12 @@ public class InMemoryRepository implements Repository
 	}
 
 	@Override
+	public Stream<Entity> findAll(Stream<Object> ids)
+	{
+		return ids.map(id -> entities.get(id));
+	}
+
+	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
 	{
 		return new Iterable<Entity>()
@@ -123,6 +129,12 @@ public class InMemoryRepository implements Repository
 				return stream(ids.spliterator(), false).map(id -> entities.get(id)).iterator();
 			}
 		};
+	}
+
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
+	{
+		return ids.map(id -> entities.get(id));
 	}
 
 	@Override

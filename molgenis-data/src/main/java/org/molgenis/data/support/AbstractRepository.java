@@ -6,9 +6,11 @@ import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.partition;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Maps.uniqueIndex;
+import static java.util.stream.StreamSupport.stream;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -25,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 
 /**
@@ -101,6 +104,13 @@ public abstract class AbstractRepository implements Repository
 
 	@Override
 	@Transactional(readOnly = true)
+	public Stream<Entity> findAll(Stream<Object> ids)
+	{
+		return findAll(ids, null);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
 	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
 	{
 		if (ids == null) return Collections.emptyList();
@@ -112,6 +122,17 @@ public abstract class AbstractRepository implements Repository
 				return findAllBatched(ids, fetch);
 			}
 		}));
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
+	{
+		Iterator<List<Object>> batches = Iterators.partition(ids.iterator(), FIND_ALL_BATCH_SIZE);
+		Iterable<List<Object>> iterable = () -> batches;
+		return stream(iterable.spliterator(), false).flatMap(batch -> {
+			return stream(findAllBatched(batch, fetch).spliterator(), false);
+		});
 	}
 
 	private Iterable<Entity> findAllBatched(List<Object> ids, Fetch fetch)

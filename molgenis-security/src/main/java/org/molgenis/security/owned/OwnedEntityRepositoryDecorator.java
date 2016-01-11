@@ -113,7 +113,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 
 		if (mustAddRowLevelSecurity())
 		{
-			if (!SecurityUtils.getCurrentUsername().equals(getOwnerUserName(e))) return null;
+			if (!currentUserIsOwner(e)) return null;
 		}
 
 		return e;
@@ -126,7 +126,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 
 		if (mustAddRowLevelSecurity())
 		{
-			if (!SecurityUtils.getCurrentUsername().equals(getOwnerUserName(e))) return null;
+			if (!currentUserIsOwner(e)) return null;
 		}
 
 		return e;
@@ -143,12 +143,23 @@ public class OwnedEntityRepositoryDecorator implements Repository
 				@Override
 				public boolean apply(Entity e)
 				{
-					return SecurityUtils.getCurrentUsername().equals(getOwnerUserName(e));
+					return currentUserIsOwner(e);
 				}
 
 			});
 		}
 
+		return entities;
+	}
+
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids)
+	{
+		Stream<Entity> entities = decoratedRepo.findAll(ids);
+		if (mustAddRowLevelSecurity())
+		{
+			entities = entities.filter(this::currentUserIsOwner);
+		}
 		return entities;
 	}
 
@@ -163,12 +174,23 @@ public class OwnedEntityRepositoryDecorator implements Repository
 				@Override
 				public boolean apply(Entity e)
 				{
-					return SecurityUtils.getCurrentUsername().equals(getOwnerUserName(e));
+					return currentUserIsOwner(e);
 				}
 
 			});
 		}
 
+		return entities;
+	}
+
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
+	{
+		Stream<Entity> entities = decoratedRepo.findAll(ids, fetch);
+		if (mustAddRowLevelSecurity())
+		{
+			entities = entities.filter(this::currentUserIsOwner);
+		}
 		return entities;
 	}
 
@@ -225,7 +247,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	@Override
 	public void delete(Entity entity)
 	{
-		if (mustAddRowLevelSecurity() && !SecurityUtils.getCurrentUsername().equals(getOwnerUserName(entity))) return;
+		if (mustAddRowLevelSecurity() && !currentUserIsOwner(entity)) return;
 		decoratedRepo.delete(entity);
 	}
 
@@ -239,7 +261,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 				@Override
 				public boolean apply(Entity entity)
 				{
-					return SecurityUtils.getCurrentUsername().equals(getOwnerUserName(entity));
+					return currentUserIsOwner(entity);
 				}
 
 			});
@@ -253,9 +275,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	{
 		if (mustAddRowLevelSecurity())
 		{
-			entities = entities.filter(entity -> {
-				return SecurityUtils.getCurrentUsername().equals(getOwnerUserName(entity));
-			});
+			entities = entities.filter(this::currentUserIsOwner);
 		}
 
 		decoratedRepo.delete(entities);
@@ -267,7 +287,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 		if (mustAddRowLevelSecurity())
 		{
 			Entity entity = findOne(id);
-			if ((entity != null) && !SecurityUtils.getCurrentUsername().equals(getOwnerUserName(entity))) return;
+			if ((entity != null) && !currentUserIsOwner(entity)) return;
 		}
 
 		decoratedRepo.deleteById(id);
@@ -405,5 +425,10 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	public void removeEntityListener(EntityListener entityListener)
 	{
 		decoratedRepo.removeEntityListener(entityListener);
+	}
+
+	private boolean currentUserIsOwner(Entity entity)
+	{
+		return SecurityUtils.getCurrentUsername().equals(getOwnerUserName(entity));
 	}
 }

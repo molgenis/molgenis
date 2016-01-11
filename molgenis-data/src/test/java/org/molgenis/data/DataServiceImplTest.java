@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.molgenis.data.support.DataServiceImpl;
@@ -203,5 +204,53 @@ public class DataServiceImplTest
 		when(repo1.findOne(id, fetch)).thenReturn(null);
 		assertNull(dataService.findOne("Entity1", id, fetch, clazz));
 		verify(repo1, times(1)).findOne(id, fetch);
+	}
+
+	@Test
+	public void testFindAllStringStream()
+	{
+		Object id0 = "id0";
+		Stream<Object> ids = Stream.of(id0);
+		Entity entity0 = mock(Entity.class);
+		when(repo1.findAll(ids)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = dataService.findAll("Entity1", ids);
+		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+	}
+
+	@Test
+	public void testFindAllStringStreamClass()
+	{
+		Object id0 = "id0";
+		Stream<Object> ids = Stream.of(id0);
+		Entity entity0 = mock(Entity.class);
+		Class<Entity> clazz = Entity.class;
+		when(repo1.findAll(ids)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = dataService.findAll("Entity1", ids, clazz);
+		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+	}
+
+	@Test
+	public void testFindAllStringStreamFetch()
+	{
+		Object id0 = "id0";
+		Stream<Object> ids = Stream.of(id0);
+		Entity entity0 = mock(Entity.class);
+		Fetch fetch = new Fetch();
+		when(repo1.findAll(ids, fetch)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = dataService.findAll("Entity1", ids, fetch);
+		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+	}
+
+	@Test
+	public void testFindAllStringStreamFetchClass()
+	{
+		Object id0 = "id0";
+		Stream<Object> ids = Stream.of(id0);
+		Entity entity0 = mock(Entity.class);
+		Class<Entity> clazz = Entity.class;
+		Fetch fetch = new Fetch();
+		when(repo1.findAll(ids, fetch)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = dataService.findAll("Entity1", ids, fetch, clazz);
+		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
 }

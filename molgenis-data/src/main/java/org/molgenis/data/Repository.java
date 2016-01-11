@@ -65,6 +65,13 @@ public interface Repository extends Iterable<Entity>, Closeable
 	Iterable<Entity> findAll(Iterable<Object> ids);
 
 	/**
+	 * find entities based on a stream of ids.
+	 * 
+	 * @return (empty) Stream where the order of entities matches the order of ids, never null
+	 */
+	Stream<Entity> findAll(Stream<Object> ids);
+
+	/**
 	 * Find entities based on id.
 	 * 
 	 * @param ids
@@ -75,6 +82,18 @@ public interface Repository extends Iterable<Entity>, Closeable
 	 * @throws MolgenisDataAccessException
 	 */
 	Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch);
+
+	/**
+	 * Find entities based on id.
+	 * 
+	 * @param ids
+	 *            entity ids
+	 * @param fetch
+	 *            fetch defining which attributes to retrieve
+	 * @return (empty) Stream where the order of entities matches the order of ids, never null
+	 * @throws MolgenisDataAccessException
+	 */
+	Stream<Entity> findAll(Stream<Object> ids, Fetch fetch);
 
 	/**
 	 * 

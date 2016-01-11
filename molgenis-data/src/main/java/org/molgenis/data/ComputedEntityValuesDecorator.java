@@ -118,6 +118,22 @@ public class ComputedEntityValuesDecorator implements Repository
 	}
 
 	@Override
+	public Stream<Entity> findAll(Stream<Object> ids)
+	{
+		Stream<Entity> entities = decoratedRepo.findAll(ids);
+		// compute values with attributes with expressions
+		return toComputedValuesEntities(entities);
+	}
+
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
+	{
+		Stream<Entity> entities = decoratedRepo.findAll(ids, fetch);
+		// compute values with attributes with expressions
+		return toComputedValuesEntities(entities);
+	}
+
+	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
 		return decoratedRepo.aggregate(aggregateQuery);
@@ -279,6 +295,20 @@ public class ComputedEntityValuesDecorator implements Repository
 		else
 		{
 			return it;
+		}
+	}
+
+	private Stream<Entity> toComputedValuesEntities(Stream<Entity> entities)
+	{
+		if (getEntityMetaData().hasAttributeWithExpression())
+		{
+			return entities.map(entity -> {
+				return new EntityWithComputedAttributes(entity);
+			});
+		}
+		else
+		{
+			return entities;
 		}
 	}
 }

@@ -104,6 +104,18 @@ public abstract class AbstractElasticsearchRepository implements Repository
 	}
 
 	@Override
+	public Stream<Entity> findAll(Stream<Object> ids)
+	{
+		return elasticSearchService.get(ids, getEntityMetaData());
+	}
+
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
+	{
+		return elasticSearchService.get(ids, getEntityMetaData(), fetch);
+	}
+
+	@Override
 	public Iterator<Entity> iterator()
 	{
 		return findAll(new QueryImpl()).iterator();

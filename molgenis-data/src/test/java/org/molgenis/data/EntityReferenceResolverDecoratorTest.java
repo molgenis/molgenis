@@ -250,6 +250,43 @@ public class EntityReferenceResolverDecoratorTest
 	}
 
 	@Test
+	public void findAllStream()
+	{
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		Entity entity0WithRefs = mock(Entity.class);
+		Entity entity1WithRefs = mock(Entity.class);
+		Stream<Object> entityIds = Stream.of(id0, id1);
+		Stream<Entity> entities = Stream.of(entity0, entity1);
+		when(decoratedRepo.findAll(entityIds)).thenReturn(entities);
+		when(entityManager.resolveReferences(entityMeta, entities, null))
+				.thenReturn(Stream.of(entity0WithRefs, entity1WithRefs));
+		Stream<Entity> expectedEntities = entityReferenceResolverDecorator.findAll(entityIds);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0WithRefs, entity1WithRefs));
+	}
+
+	@Test
+	public void findAllStreamFetch()
+	{
+		Fetch fetch = new Fetch();
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		Entity entity0WithRefs = mock(Entity.class);
+		Entity entity1WithRefs = mock(Entity.class);
+		Stream<Object> entityIds = Stream.of(id0, id1);
+		Stream<Entity> entities = Stream.of(entity0, entity1);
+		when(decoratedRepo.findAll(entityIds, fetch)).thenReturn(entities);
+		when(entityManager.resolveReferences(entityMeta, entities, fetch))
+				.thenReturn(Stream.of(entity0WithRefs, entity1WithRefs));
+		Stream<Entity> expectedEntities = entityReferenceResolverDecorator.findAll(entityIds, fetch);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0WithRefs, entity1WithRefs));
+	}
+
+	@Test
 	public void findOneQueryFetchEntity()
 	{
 		Fetch fetch = new Fetch();

@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -56,5 +57,32 @@ public class I18nStringDecoratorTest
 		doNothing().when(decoratedRepo).update(captor.capture());
 		i18nStringDecorator.update(entities);
 		assertEquals(captor.getValue().collect(Collectors.toList()), Arrays.asList(entity0));
+	}
+
+	@Test
+	public void findAllStream()
+	{
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		Stream<Object> entityIds = Stream.of(id0, id1);
+		when(decoratedRepo.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
+		Stream<Entity> expectedEntities = i18nStringDecorator.findAll(entityIds);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+	}
+
+	@Test
+	public void findAllStreamFetch()
+	{
+		Fetch fetch = new Fetch();
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		Stream<Object> entityIds = Stream.of(id0, id1);
+		when(decoratedRepo.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
+		Stream<Entity> expectedEntities = i18nStringDecorator.findAll(entityIds, fetch);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
 }

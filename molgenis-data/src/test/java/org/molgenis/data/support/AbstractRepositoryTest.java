@@ -1,11 +1,15 @@
 package org.molgenis.data.support;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static junit.framework.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.mockito.Matchers;
@@ -118,7 +122,38 @@ public class AbstractRepositoryTest
 		abstractRepository.findOne(Integer.valueOf(0), new Fetch());
 	}
 
-	private Entity createEntity(String id)
+	@Test
+	public void findAllStream()
+	{
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = when(mock(Entity.class).getIdValue()).thenReturn(id0).getMock();
+		Entity entity1 = when(mock(Entity.class).getIdValue()).thenReturn(id1).getMock();
+		Stream<Object> entityIds = Stream.of(id0, id1);
+
+		Mockito.doReturn(Arrays.asList(entity0, entity1)).when(abstractRepository).findAll(Matchers.any(Query.class));
+
+		Stream<Entity> expectedEntities = abstractRepository.findAll(entityIds);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+	}
+
+	@Test
+	public void findAllStreamFetch()
+	{
+		Fetch fetch = new Fetch();
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = when(mock(Entity.class).getIdValue()).thenReturn(id0).getMock();
+		Entity entity1 = when(mock(Entity.class).getIdValue()).thenReturn(id1).getMock();
+		Stream<Object> entityIds = Stream.of(id0, id1);
+
+		Mockito.doReturn(Arrays.asList(entity0, entity1)).when(abstractRepository).findAll(Matchers.any(Query.class));
+
+		Stream<Entity> expectedEntities = abstractRepository.findAll(entityIds, fetch);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+	}
+
+	private Entity createEntity(Object id)
 	{
 		Entity entity = new DefaultEntity(entityMetaData, null);
 		entity.set("id", id);

@@ -350,4 +350,34 @@ public class DataServiceImpl implements DataService
 	{
 		getRepository(entityName).removeEntityListener(entityListener);
 	}
+
+	@Override
+	public Stream<Entity> findAll(String entityName, Stream<Object> ids)
+	{
+		return getRepository(entityName).findAll(ids);
+	}
+
+	@Override
+	public <E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Class<E> clazz)
+	{
+		Stream<Entity> entities = getRepository(entityName).findAll(ids);
+		return entities.map(entity -> {
+			return EntityUtils.convert(entity, clazz, this);
+		});
+	}
+
+	@Override
+	public Stream<Entity> findAll(String entityName, Stream<Object> ids, Fetch fetch)
+	{
+		return getRepository(entityName).findAll(ids, fetch);
+	}
+
+	@Override
+	public <E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Fetch fetch, Class<E> clazz)
+	{
+		Stream<Entity> entities = getRepository(entityName).findAll(ids, fetch);
+		return entities.map(entity -> {
+			return EntityUtils.convert(entity, clazz, this);
+		});
+	}
 }

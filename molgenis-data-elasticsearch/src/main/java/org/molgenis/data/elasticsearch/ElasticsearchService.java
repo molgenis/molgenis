@@ -752,6 +752,30 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	@Override
 	public Iterable<Entity> get(Iterable<Object> entityIds, final EntityMetaData entityMetaData, Fetch fetch)
 	{
+		return new Iterable<Entity>()
+		{
+			@Override
+			public Iterator<Entity> iterator()
+			{
+				Stream<Object> stream = stream(entityIds.spliterator(), false);
+				return get(stream, entityMetaData, fetch).iterator();
+			}
+
+		};
+	}
+
+	/**
+	 * Retrieve stored entities from the index. Can only be used if the mapping was created with storeSource=true.
+	 */
+	@Override
+	public Stream<Entity> get(Stream<Object> entityIds, final EntityMetaData entityMetaData)
+	{
+		return get(entityIds, entityMetaData, null);
+	}
+
+	@Override
+	public Stream<Entity> get(Stream<Object> entityIds, final EntityMetaData entityMetaData, Fetch fetch)
+	{
 		String entityName = entityMetaData.getName();
 		String type = sanitizeMapperType(entityName);
 		String transactionId = getCurrentTransactionId();
@@ -770,14 +794,13 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		}
 
 		MultiGetRequestBuilder request = client.prepareMultiGet();
-		stream(entityIds.spliterator(), false).map(id -> createMultiGetItem(indexName, type, id, fetch))
-				.forEach(request::add);
-
-		if (transactionId != null)
-		{
-			stream(entityIds.spliterator(), false).map(id -> createMultiGetItem(transactionId, type, id, fetch))
-					.forEach(request::add);
-		}
+		entityIds.forEach(id -> {
+			request.add(createMultiGetItem(indexName, type, id, fetch));
+			if (transactionId != null)
+			{
+				request.add(createMultiGetItem(transactionId, type, id, fetch));
+			}
+		});
 
 		MultiGetResponse response = request.get();
 
@@ -793,34 +816,26 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			}
 		}
 
-		return new Iterable<Entity>()
-		{
-			@Override
-			public Iterator<Entity> iterator()
+		// If the document was not found in the molgenis index or transaction index a response is included that
+		// states that the item doesn't exist. Filter out these responses, since the document should be located
+		// in either of the indexes.
+		return stream(response.spliterator(), false).flatMap(itemResponse -> {
+			if (itemResponse.isFailed())
 			{
-				// If the document was not found in the molgenis index or transaction index a response is included that
-				// states that the item doesn't exist. Filter out these responses, since the document should be located
-				// in either of the indexes.
-				return stream(response.spliterator(), false).flatMap(itemResponse -> {
-					if (itemResponse.isFailed())
-					{
-						throw new ElasticsearchException(
-								"Search failed. Returned headers:" + itemResponse.getFailure());
-					}
-					GetResponse getResponse = itemResponse.getResponse();
-					if (getResponse.isExists())
-					{
-						Map<String, Object> source = getResponse.getSource();
-						Entity entity = elasticsearchEntityFactory.create(entityMetaData, source, fetch);
-						return Stream.of(entity);
-					}
-					else
-					{
-						return Stream.<Entity> empty();
-					}
-				}).iterator();
+				throw new ElasticsearchException("Search failed. Returned headers:" + itemResponse.getFailure());
 			}
-		};
+			GetResponse getResponse = itemResponse.getResponse();
+			if (getResponse.isExists())
+			{
+				Map<String, Object> source = getResponse.getSource();
+				Entity entity = elasticsearchEntityFactory.create(entityMetaData, source, fetch);
+				return Stream.of(entity);
+			}
+			else
+			{
+				return Stream.<Entity> empty();
+			}
+		});
 	}
 
 	private Item createMultiGetItem(String indexName, String type, Object id, Fetch fetch)
@@ -1024,14 +1039,6 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			});
 
 			index(indexName, entities.iterator(), entityMetaData, CrudType.UPDATE, false);
-		}
-	}
-
-	private void updateReferences(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
-	{
-		for (Entity entity : entities)
-		{
-			updateReferences(entity, entityMetaData);
 		}
 	}
 

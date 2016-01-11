@@ -114,10 +114,18 @@ public interface SearchService
 	 * 
 	 * @param entityIds
 	 * @param entityMetaData
-	 * @param fetch
 	 * @return entities
 	 */
 	Iterable<Entity> get(Iterable<Object> entityIds, EntityMetaData entityMetaData);
+
+	/**
+	 * Returns entities with given ids
+	 * 
+	 * @param entityIds
+	 * @param entityMetaData
+	 * @return
+	 */
+	Stream<Entity> get(Stream<Object> entityIds, EntityMetaData entityMetaData);
 
 	/**
 	 * Returns entities with given ids and attribute values defined by fetch
@@ -128,6 +136,16 @@ public interface SearchService
 	 * @return entities with attribute values defined by fetch
 	 */
 	Iterable<Entity> get(Iterable<Object> entityIds, EntityMetaData entityMetaData, Fetch fetch);
+
+	/**
+	 * Returns entities with given ids and attribute values defined by fetch
+	 * 
+	 * @param entityIds
+	 * @param entityMetaData
+	 * @param fetch
+	 * @return entities with attribute values defined by fetch
+	 */
+	Stream<Entity> get(Stream<Object> entityIds, EntityMetaData entityMetaData, Fetch fetch);
 
 	// TODO replace Iterable<Entity> with EntityCollection and add EntityCollection.getTotal()
 	Iterable<Entity> search(Query q, EntityMetaData entityMetaData);

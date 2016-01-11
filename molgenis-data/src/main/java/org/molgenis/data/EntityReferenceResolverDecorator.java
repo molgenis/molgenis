@@ -110,11 +110,27 @@ public class EntityReferenceResolverDecorator implements Repository
 		return resolveEntityReferences(entities);
 	}
 
+	// Resolve entity references
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids)
+	{
+		Stream<Entity> entities = decoratedRepo.findAll(ids);
+		return resolveEntityReferences(entities);
+	}
+
 	// Resolve entity references based on given fetch
 	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
 	{
 		Iterable<Entity> entities = decoratedRepo.findAll(ids, fetch);
+		return resolveEntityReferences(entities, fetch);
+	}
+
+	// Resolve entity references based on given fetch
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
+	{
+		Stream<Entity> entities = decoratedRepo.findAll(ids, fetch);
 		return resolveEntityReferences(entities, fetch);
 	}
 
@@ -254,6 +270,16 @@ public class EntityReferenceResolverDecorator implements Repository
 	}
 
 	private Iterable<Entity> resolveEntityReferences(Iterable<Entity> entities, Fetch fetch)
+	{
+		return entityManager.resolveReferences(getEntityMetaData(), entities, fetch);
+	}
+
+	private Stream<Entity> resolveEntityReferences(Stream<Entity> entities)
+	{
+		return entityManager.resolveReferences(getEntityMetaData(), entities, null);
+	}
+
+	private Stream<Entity> resolveEntityReferences(Stream<Entity> entities, Fetch fetch)
 	{
 		return entityManager.resolveReferences(getEntityMetaData(), entities, fetch);
 	}
