@@ -79,7 +79,7 @@ define(function(require, exports, module) {
 				onClick : this._onSubmitClick
 			})))) : null;
 
-			var Form = Form({
+			var form = Form({
 				entity : this.state.entity,
 				entityInstance : this.state.entityInstance,
 				mode : this.state.entityInstance.status === 'SUBMITTED' ? 'view' : 'edit',
@@ -97,7 +97,7 @@ define(function(require, exports, module) {
 				ref : 'form'
 			}, QuestionnaireButtons);
 
-			return div(null, Form);
+			return div(null, form);
 		},
 		_handleValueChange : function(e) {
 			// update value in entity instance

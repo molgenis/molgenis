@@ -12,7 +12,7 @@ define(function(require, exports, module) {
 	 * 
 	 * @memberOf MolgenisAlert
 	 */
-	exports.prototype.createAlert = function(alerts, type, container) {
+	exports.createAlert = function(alerts, type, container) {
 		if (type !== 'error' && type !== 'warning' && type !== 'success' && type !== 'info') {
 			type = 'error';
 		}
