@@ -12,7 +12,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IdGenerator;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
@@ -163,11 +162,19 @@ public class MappingServiceImpl implements MappingService
 		targetMetaData.setPackage(PackageImpl.defaultPackage);
 		targetMetaData.setLabel(newEntityName);
 		targetMetaData.addAttribute("source");
-		if (dataService.hasRepository(newEntityName))
-			throw new MolgenisDataException("A repository with name [" + newEntityName + "] already exists");
-		Repository targetRepo = dataService.getMeta().addEntityMeta(targetMetaData);
-		permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
-				Collections.singletonList(targetRepo.getName()));
+
+		Repository targetRepo;
+		if (!dataService.hasRepository(newEntityName))
+		{
+			targetRepo = dataService.getMeta().addEntityMeta(targetMetaData);
+			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
+					Collections.singletonList(targetRepo.getName()));
+		}
+		else
+		{
+			targetRepo = dataService.getRepository(newEntityName);
+		}
+
 		try
 		{
 			applyMappingsToRepositories(mappingTarget, targetRepo);
@@ -197,7 +204,15 @@ public class MappingServiceImpl implements MappingService
 		{
 			MapEntity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
 					sourceMapping.getSourceEntityMetaData(), targetRepo);
-			targetRepo.add(mappedEntity);
+
+			if (targetRepo.findOne(mappedEntity.getIdValue()) != null)
+			{
+				targetRepo.update(mappedEntity);
+			}
+			else
+			{
+				targetRepo.add(mappedEntity);
+			}
 		}
 	}
 
@@ -205,12 +220,8 @@ public class MappingServiceImpl implements MappingService
 			EntityMetaData targetMetaData, EntityMetaData sourceEntityMetaData, Repository targetRepository)
 	{
 		MapEntity target = new MapEntity(targetMetaData);
-		if (!targetMetaData.getIdAttribute().isAuto())
-		{
-			target.set(targetMetaData.getIdAttribute().getName(),
-					generateId(targetMetaData.getIdAttribute().getDataType(), targetRepository.count()));
-		}
 		target.set("source", sourceMapping.getName());
+
 		sourceMapping.getAttributeMappings().forEach(attributeMapping -> applyMappingToAttribute(attributeMapping,
 				sourceEntity, target, sourceEntityMetaData));
 		return target;
@@ -235,10 +246,8 @@ public class MappingServiceImpl implements MappingService
 	private void applyMappingToAttribute(AttributeMapping attributeMapping, Entity sourceEntity, MapEntity target,
 			EntityMetaData entityMetaData)
 	{
-		if (!attributeMapping.getTargetAttributeMetaData().isIdAtrribute())
-		{
-			target.set(attributeMapping.getTargetAttributeMetaData().getName(),
-					algorithmService.apply(attributeMapping, sourceEntity, entityMetaData));
-		}
+		// TODO: skip id when id is AUTO
+		target.set(attributeMapping.getTargetAttributeMetaData().getName(),
+				algorithmService.apply(attributeMapping, sourceEntity, entityMetaData));
 	}
 }

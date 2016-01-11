@@ -71,7 +71,7 @@
  			</thead>
  			<tbody>
 				<#list mappingProject.getMappingTarget(selectedTarget).target.getAtomicAttributes() as attribute>
-					<#if !attribute.isIdAtrribute()>
+					<#--<#if !attribute.isIdAtrribute()>-->
 						<tr>
 							<td>
 								<b>${attribute.label?html}</b> (${attribute.dataType})
@@ -137,7 +137,7 @@
 								</td>
 							</#list>
 						</tr>
-					</#if>
+					<#--</#if>-->
 				</#list>
 			</tbody>
 		</table>
