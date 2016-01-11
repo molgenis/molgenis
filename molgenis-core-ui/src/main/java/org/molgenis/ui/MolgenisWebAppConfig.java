@@ -481,15 +481,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public void initRepositories()
 	{
 		dataService().setMeta(metaDataService());
-		metaDataService().addEntityMeta(new AuthorityMetaData());
-		metaDataService().addEntityMeta(new RuntimePropertyMetaData());
-		metaDataService().addEntityMeta(new FreemarkerTemplateMetaData());
-		metaDataService().addEntityMeta(new GroupAuthorityMetaData());
-		metaDataService().addEntityMeta(new UserAuthorityMetaData());
-		metaDataService().addEntityMeta(new MolgenisUserMetaData());
-		metaDataService().addEntityMeta(new MolgenisGroupMetaData());
-		metaDataService().addEntityMeta(new MolgenisGroupMemberMetaData());
-		metaDataService().addEntityMeta(new ImportRunMetaData());
 		addUpgrades();
 		boolean didUpgrade = upgradeService.upgrade();
 		if (didUpgrade)
@@ -508,6 +499,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		{
 			LOG.debug("Elasticsearch index exists, no need to reindex.");
 		}
+
 		runAsSystem(() -> metaDataService().setDefaultBackend(getBackend()));
 	}
 

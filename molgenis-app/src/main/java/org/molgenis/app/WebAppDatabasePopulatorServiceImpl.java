@@ -46,6 +46,16 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	@RunAsSystem
 	public void populateDatabase()
 	{
+		dataService.getMeta().addEntityMeta(new AuthorityMetaData());
+		dataService.getMeta().addEntityMeta(new RuntimePropertyMetaData());
+		dataService.getMeta().addEntityMeta(new FreemarkerTemplateMetaData());
+		dataService.getMeta().addEntityMeta(new GroupAuthorityMetaData());
+		dataService.getMeta().addEntityMeta(new UserAuthorityMetaData());
+		dataService.getMeta().addEntityMeta(new MolgenisUserMetaData());
+		dataService.getMeta().addEntityMeta(new MolgenisGroupMetaData());
+		dataService.getMeta().addEntityMeta(new MolgenisGroupMemberMetaData());
+		dataService.getMeta().addEntityMeta(new ImportRunMetaData());
+
 		molgenisSecurityWebAppDatabasePopulatorService.populateDatabase(this.dataService, HomeController.ID);
 
 		MolgenisUser anonymousUser = molgenisSecurityWebAppDatabasePopulatorService.getAnonymousUser();

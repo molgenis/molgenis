@@ -7,7 +7,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class MolgenisUser  extends org.molgenis.data.support.AbstractEntity implements org.molgenis.data.Entity{
-    public static final String ENTITY_NAME = "MolgenisUser";
+    public static final String ENTITY_NAME = "molgenisUser";
     public static final String USERNAME = "username";
     public static final String SUPERUSER = "superuser";
     public static final String PASSWORD_ = "password_";
@@ -231,7 +231,6 @@ public class MolgenisUser  extends org.molgenis.data.support.AbstractEntity impl
     @Override
     public Object get(String name)
     {
-        name = name.toLowerCase();
         if (name.equals("id"))
             return getId();
         if (name.equals(USERNAME))

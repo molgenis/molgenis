@@ -14,29 +14,29 @@ public class MolgenisUserMetaData extends DefaultEntityMetaData {
     public static final String ACTIVATIONCODE= "activationCode";
     public static final String ACTIVE = "active";
     public static final String SUPERUSER = "superuser";
-    public static final String FIRSTNAME = "FirstName";
-    public static final String MIDDLENAMES = "MiddleNames";
-    public static final String LASTNAME = "LastName";
-    public static final String TITLE = "Title";
-    public static final String AFFILIATIONS = "Affiliation";
-    public static final String DEPARTMENT = "Department";
-    public static final String ROLE = "Role";
-    public static final String ADDRESS = "Address";
-    public static final String PHONE= "Phone";
-    public static final String EMAIL = "Email";
-    public static final String FAX = "Fax";
+    public static final String FIRSTNAME = "firstName";
+    public static final String MIDDLENAMES = "middleNames";
+    public static final String LASTNAME = "lastName";
+    public static final String TITLE = "litle";
+    public static final String AFFILIATIONS = "affiliation";
+    public static final String DEPARTMENT = "department";
+    public static final String ROLE = "role";
+    public static final String ADDRESS = "address";
+    public static final String PHONE= "phone";
+    public static final String EMAIL = "email";
+    public static final String FAX = "fax";
     public static final String TOLLFREEPHONE = "tollFreePhone";
-    public static final String CITY = "City";
-    public static final String COUNTRY = "Country";
+    public static final String CITY = "city";
+    public static final String COUNTRY = "country";
     public static final String CHANGEPASSWORD = "changePassword";
     public static final String LANGUAGECODE= "languageCode";
     public static final String GOOGLEACCOUNTID = "googleAccountId";
 
     public MolgenisUserMetaData() {
-        super("molgenisUser");
+        super("MolgenisUser");
         setDescription("Anyone who can login");
         addAttribute(ID).setAuto(true).setVisible(false)
-                .setDescription("automatically generated internal id, only for internal use.");
+                .setDescription("automatically generated internal id, only for internal use.").setIdAttribute(true).setNillable(false);
         addAttribute(USERNAME).setLabel("Username").setLookupAttribute(true).setUnique(true);
         addAttribute(PASSWORD).setLabel("Password").setDescription("This is the hashed password, enter a new plaintext password to update.");
         addAttribute(ACTIVATIONCODE).setLabel("Activation code").setNillable(true).setDescription("Used as alternative authentication mechanism to verify user email and/or if user has lost password.");

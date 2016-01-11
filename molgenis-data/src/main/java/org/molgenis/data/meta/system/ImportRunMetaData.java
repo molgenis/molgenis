@@ -24,7 +24,7 @@ public class ImportRunMetaData extends DefaultEntityMetaData {
     public ImportRunMetaData() {
         super("importRun");
         addAttribute(ID).setAuto(true).setVisible(false)
-                .setDescription("automatically generated internal id, only for internal use.");
+                .setDescription("automatically generated internal id, only for internal use.").setIdAttribute(true).setNillable(false);
         addAttribute(STARTDATE).setDataType(DATETIME).setNillable(false);
         addAttribute(ENDDATE).setDataType(DATETIME).setNillable(true);
         addAttribute(USERNAME).setNillable(false);

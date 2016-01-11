@@ -45,7 +45,6 @@ public class MolgenisGroup  extends org.molgenis.data.support.AbstractEntity imp
     @Override
     public Object get(String name)
     {
-        name = name.toLowerCase();
         if (name.equals(ID))
             return getId();
         if (name.equals(NAME))

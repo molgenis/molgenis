@@ -13,7 +13,7 @@ public class GroupAuthorityMetaData extends DefaultEntityMetaData {
     public GroupAuthorityMetaData() {
         super("groupAuthority");
         addAttribute(ID).setAuto(true).setVisible(false)
-                .setDescription("automatically generated internal id, only for internal use.");
+                .setDescription("automatically generated internal id, only for internal use.").setIdAttribute(true).setNillable(false);
         addAttribute(MOLGENISGROUP).setDataType(XREF).setRefEntity(new MolgenisGroupMetaData());
     }
 }

@@ -10,8 +10,8 @@ import java.util.Set;
 @AutoValue
 public class MolgenisGroupMember  extends org.molgenis.data.support.AbstractEntity implements org.molgenis.data.Entity{
     public static final String ENTITY_NAME = "MolgenisGroupMember";
-    public static final String MOLGENISUSER = "molgenisuser";
-    public static final String MOLGENISGROUP = "molgenisgroup";
+    public static final String MOLGENISUSER = "molgenisUser";
+    public static final String MOLGENISGROUP = "molgenisGroup";
 
     String id;
     MolgenisUser molgenisUser;

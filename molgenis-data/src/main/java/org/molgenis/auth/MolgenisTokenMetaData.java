@@ -20,7 +20,7 @@ public class MolgenisTokenMetaData extends DefaultEntityMetaData {
     public MolgenisTokenMetaData() {
         super("molgenisToken");
         addAttribute(ID).setAuto(true).setVisible(false)
-                .setDescription("automatically generated internal id, only for internal use.");
+                .setDescription("automatically generated internal id, only for internal use.").setIdAttribute(true).setNillable(false);
         addAttribute(MOLGENISUSER).setDataType(XREF).setRefEntity(new MolgenisUserMetaData());
         addAttribute(TOKEN).setLabel("Token").setUnique(true);
         addAttribute(EXPIRATIONDATE).setDataType(DATETIME).setLabel("Expiration date").setNillable(true).setDescription("When expiration date is null it will never expire");

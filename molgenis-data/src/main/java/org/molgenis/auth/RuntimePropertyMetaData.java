@@ -11,7 +11,7 @@ public class RuntimePropertyMetaData extends DefaultEntityMetaData {
     public RuntimePropertyMetaData() {
         super("runtimeProperty");
         addAttribute(ID).setAuto(true).setVisible(false)
-                .setDescription("automatically generated internal id, only for internal use.");
+                .setDescription("automatically generated internal id, only for internal use.").setIdAttribute(true).setNillable(false);
         addAttribute(NAME).setUnique(true);
         addAttribute(VALUE).setNillable(false);
     }

@@ -72,10 +72,9 @@ public class MolgenisToken extends org.molgenis.data.support.AbstractEntity impl
     @Override
     public Object get(String name)
     {
-        name = name.toLowerCase();
         if (name.equals("id"))
             return getId();
-        if (name.equals("molgenisuser"))
+        if (name.equals("molgenisUser"))
             return getMolgenisUser();
         if (name.equals(TOKEN))
             return getToken();

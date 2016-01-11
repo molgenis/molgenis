@@ -252,7 +252,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	{
 		FreeMarkerConfigurer result = super.freeMarkerConfigurer();
 		// Look up unknown templates in the FreemarkerTemplate repository
-		result.setPostTemplateLoaders(new RepositoryTemplateLoader(dataService.getRepository(FreemarkerTemplate.ENTITY_NAME)));
+		//result.setPostTemplateLoaders(new RepositoryTemplateLoader(dataService.getRepository(FreemarkerTemplate.ENTITY_NAME)));
 		return result;
 	}
 }

@@ -42,7 +42,6 @@ public class GroupAuthority extends org.molgenis.data.support.AbstractEntity imp
     @Override
     public Object get(String name)
     {
-        name = name.toLowerCase();
         if (name.equals(ROLE))
             return getRole();
         if (name.equals("id"))

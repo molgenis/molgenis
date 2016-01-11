@@ -16,7 +16,7 @@ public class MolgenisGroupMetaData extends DefaultEntityMetaData {
 
         setExtends(new AuthorityMetaData());
         addAttribute(ID).setAuto(true).setVisible(false)
-                .setDescription("automatically generated internal id, only for internal use.");
+                .setDescription("automatically generated internal id, only for internal use.").setIdAttribute(true).setNillable(false);
         addAttribute(NAME).setLabel("Name");
         addAttribute(ACTIVE).setLabel("Active").setDataType(BOOL).setDefaultValue("true").setDescription("Boolean to indicate whether this group is in use.");
     }

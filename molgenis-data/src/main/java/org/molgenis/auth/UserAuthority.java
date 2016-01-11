@@ -8,7 +8,7 @@ import java.util.Set;
 
 public class UserAuthority extends org.molgenis.data.support.AbstractEntity implements org.molgenis.data.Entity, org.molgenis.auth.Authority{
     public static final String ENTITY_NAME = "UserAuthority";
-    public static final String MOLGENISUSER = "molgenisuser";
+    public static final String MOLGENISUSER = "molgenisUser";
     public static final String ROLE = "role";
 
     String id;
@@ -42,7 +42,6 @@ public class UserAuthority extends org.molgenis.data.support.AbstractEntity impl
     @Override
     public Object get(String name)
     {
-        name = name.toLowerCase();
         if (name.equals(ROLE))
             return getRole();
         if (name.equals("id"))
