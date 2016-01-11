@@ -140,6 +140,16 @@ public class TransactionLogRepositoryDecorator implements Repository
 	}
 
 	@Override
+	public void update(Stream<? extends Entity> entities)
+	{
+		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
+		{
+			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.UPDATE);
+		}
+		decorated.update(entities);
+	}
+
+	@Override
 	public void delete(Entity entity)
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
@@ -151,6 +161,16 @@ public class TransactionLogRepositoryDecorator implements Repository
 
 	@Override
 	public void delete(Iterable<? extends Entity> entities)
+	{
+		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
+		{
+			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
+		}
+		decorated.delete(entities);
+	}
+
+	@Override
+	public void delete(Stream<? extends Entity> entities)
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
 		{

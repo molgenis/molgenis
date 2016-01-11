@@ -208,6 +208,21 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	}
 
 	@Override
+	public void update(Stream<? extends Entity> entities)
+	{
+		if (mustAddRowLevelSecurity())
+		{
+			entities = entities.filter(entity -> {
+				// do not allow owner value changes
+				entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername());
+				return true;
+			});
+		}
+
+		decoratedRepo.update(entities);
+	}
+
+	@Override
 	public void delete(Entity entity)
 	{
 		if (mustAddRowLevelSecurity() && !SecurityUtils.getCurrentUsername().equals(getOwnerUserName(entity))) return;
@@ -227,6 +242,19 @@ public class OwnedEntityRepositoryDecorator implements Repository
 					return SecurityUtils.getCurrentUsername().equals(getOwnerUserName(entity));
 				}
 
+			});
+		}
+
+		decoratedRepo.delete(entities);
+	}
+
+	@Override
+	public void delete(Stream<? extends Entity> entities)
+	{
+		if (mustAddRowLevelSecurity())
+		{
+			entities = entities.filter(entity -> {
+				return SecurityUtils.getCurrentUsername().equals(getOwnerUserName(entity));
 			});
 		}
 

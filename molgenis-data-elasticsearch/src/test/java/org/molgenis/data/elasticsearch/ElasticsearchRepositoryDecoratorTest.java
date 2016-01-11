@@ -10,9 +10,11 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
@@ -86,6 +88,20 @@ public class ElasticsearchRepositoryDecoratorTest
 	}
 
 	@Test
+	public void addStream()
+	{
+		List<Entity> entities = new ArrayList<Entity>();
+		for (int i = 0; i < 1100; ++i)
+		{
+			entities.add(mock(Entity.class));
+		}
+		elasticSearchRepository.add(entities.stream());
+		verify(repository, times(2)).add(Matchers.<Stream<Entity>> any());
+		verify(elasticSearchService, times(2)).index(Matchers.<Stream<Entity>> any(), eq(repositoryEntityMetaData),
+				eq(IndexingMode.ADD));
+	}
+
+	@Test
 	public void aggregate()
 	{
 		when(elasticSearchRepository.getName()).thenReturn("entity");
@@ -149,6 +165,19 @@ public class ElasticsearchRepositoryDecoratorTest
 		elasticSearchRepository.delete(entities);
 		verify(repository).delete(entities);
 		verify(elasticSearchService).delete(Matchers.<Iterable<Entity>> any(), eq(repositoryEntityMetaData));
+	}
+
+	@Test
+	public void deleteStream()
+	{
+		List<Entity> entities = new ArrayList<Entity>();
+		for (int i = 0; i < 1100; ++i)
+		{
+			entities.add(mock(Entity.class));
+		}
+		elasticSearchRepository.delete(entities.stream());
+		verify(repository, times(2)).delete(Matchers.<Stream<Entity>> any());
+		verify(elasticSearchService, times(2)).delete(Matchers.<Stream<Entity>> any(), eq(repositoryEntityMetaData));
 	}
 
 	@Test
@@ -317,6 +346,23 @@ public class ElasticsearchRepositoryDecoratorTest
 		verify(repository).update(entities);
 		verify(elasticSearchService).index(Matchers.<Iterable<Entity>> any(), eq(repositoryEntityMetaData),
 				eq(IndexingMode.UPDATE));
+	}
+
+	@Test
+	public void updateStream()
+	{
+		List<Entity> entities = new ArrayList<Entity>();
+		for (int i = 0; i < 1100; ++i)
+		{
+			entities.add(mock(Entity.class));
+		}
+		elasticSearchRepository.update(entities.stream());
+		verify(repository, times(1)).update(entities.subList(0, 1000));
+		verify(repository, times(1)).update(entities.subList(1000, 1100));
+		verify(elasticSearchService, times(1)).index(entities.subList(0, 1000), repositoryEntityMetaData,
+				IndexingMode.UPDATE);
+		verify(elasticSearchService, times(1)).index(entities.subList(1000, 1100), repositoryEntityMetaData,
+				IndexingMode.UPDATE);
 	}
 
 	@Test

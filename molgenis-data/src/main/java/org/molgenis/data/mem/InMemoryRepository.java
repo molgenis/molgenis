@@ -148,6 +148,12 @@ public class InMemoryRepository implements Repository
 		records.forEach(this::update);
 	}
 
+	@Override
+	public void update(Stream<? extends Entity> entities)
+	{
+		entities.forEach(this::update);
+	}
+
 	private Object getId(Entity entity)
 	{
 		return entity.get(metadata.getIdAttribute().getName());
@@ -161,6 +167,12 @@ public class InMemoryRepository implements Repository
 
 	@Override
 	public void delete(Iterable<? extends Entity> entities)
+	{
+		entities.forEach(this::delete);
+	}
+
+	@Override
+	public void delete(Stream<? extends Entity> entities)
 	{
 		entities.forEach(this::delete);
 	}

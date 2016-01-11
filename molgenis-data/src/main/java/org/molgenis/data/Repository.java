@@ -89,11 +89,26 @@ public interface Repository extends Iterable<Entity>, Closeable
 	/* Streaming update multiple entities */
 	void update(Iterable<? extends Entity> records);
 
+	/**
+	 * Updates the given entities
+	 * 
+	 * @param entities
+	 */
+	void update(Stream<? extends Entity> entities);
+
 	/* Delete one entity */
 	void delete(Entity entity);
 
 	/* Streaming delete multiple entities */
 	void delete(Iterable<? extends Entity> entities);
+
+	/**
+	 * Delete entities from repository
+	 * 
+	 * @param entities
+	 *            entity stream
+	 */
+	void delete(Stream<? extends Entity> entities);
 
 	/* Delete one entity based on id */
 	void deleteById(Object id);

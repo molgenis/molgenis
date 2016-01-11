@@ -15,7 +15,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -43,6 +42,7 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
+import org.elasticsearch.common.collect.Iterators;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -96,6 +96,9 @@ import com.google.common.collect.Iterables;
 public class ElasticsearchService implements SearchService, MolgenisTransactionListener
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchService.class);
+
+	private static final int BATCH_SIZE = 1000;
+
 	public static final String CRUD_TYPE_FIELD_NAME = "MolgenisCrudType";
 	private static BulkProcessorFactory BULK_PROCESSOR_FACTORY = new BulkProcessorFactory();
 	private static List<String> NON_TRANSACTIONAL_ENTITIES = Arrays.asList(MolgenisTransactionLogMetaData.ENTITY_NAME,
@@ -605,16 +608,22 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	@Override
 	public void delete(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
 	{
-		List<Object> ids = stream(entities.spliterator(), true).map(e -> e.getIdValue()).collect(Collectors.toList());
-		if (ids.isEmpty()) return;
+		delete(stream(entities.spliterator(), true), entityMetaData);
+	}
 
-		if (!canBeDeleted(ids, entityMetaData))
-		{
-			throw new MolgenisDataException(
-					"Cannot delete entity because there are other entities referencing it. Delete these first.");
-		}
+	@Override
+	public void delete(Stream<? extends Entity> entities, EntityMetaData entityMetaData)
+	{
+		Stream<Object> entityIds = entities.map(entity -> entity.getIdValue());
+		Iterators.partition(entityIds.iterator(), BATCH_SIZE).forEachRemaining(batchEntityIds -> {
+			if (!canBeDeleted(batchEntityIds, entityMetaData))
+			{
+				throw new MolgenisDataException(
+						"Cannot delete entity because there are other entities referencing it. Delete these first.");
+			}
 
-		deleteById(toElasticsearchIds(ids), entityMetaData);
+			deleteById(toElasticsearchIds(batchEntityIds), entityMetaData);
+		});
 	}
 
 	@Override

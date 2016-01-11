@@ -197,6 +197,13 @@ public class DataServiceImpl implements DataService
 
 	@Override
 	@Transactional
+	public void update(String entityName, Stream<? extends Entity> entities)
+	{
+		getRepository(entityName).update(entities);
+	}
+
+	@Override
+	@Transactional
 	public void delete(String entityName, Entity entity)
 	{
 		getRepository(entityName).delete(entity);
@@ -205,6 +212,13 @@ public class DataServiceImpl implements DataService
 	@Override
 	@Transactional
 	public void delete(String entityName, Iterable<? extends Entity> entities)
+	{
+		getRepository(entityName).delete(entities);
+	}
+
+	@Override
+	@Transactional
+	public void delete(String entityName, Stream<? extends Entity> entities)
 	{
 		getRepository(entityName).delete(entities);
 	}

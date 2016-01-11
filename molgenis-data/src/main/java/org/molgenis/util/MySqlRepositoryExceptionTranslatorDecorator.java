@@ -125,6 +125,14 @@ public class MySqlRepositoryExceptionTranslatorDecorator implements Repository
 	}
 
 	@Override
+	public void update(Stream<? extends Entity> entities)
+	{
+		SQLExceptionTranslatorTemplate.tryCatchSQLException(() -> {
+			decoratedRepo.update(entities);
+		});
+	}
+
+	@Override
 	public void delete(Entity entity)
 	{
 		decoratedRepo.delete(entity);
@@ -134,6 +142,12 @@ public class MySqlRepositoryExceptionTranslatorDecorator implements Repository
 	public void delete(Iterable<? extends Entity> entities)
 	{
 		decoratedRepo.delete(entities);
+	}
+
+	@Override
+	public void delete(Stream<? extends Entity> entities)
+	{
+		decoratedRepo.delete(entities); // FIXME why no exception translation here?
 	}
 
 	@Override

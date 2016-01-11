@@ -116,8 +116,8 @@ public abstract class AbstractRepository implements Repository
 
 	private Iterable<Entity> findAllBatched(List<Object> ids, Fetch fetch)
 	{
-		Query inQuery = new QueryImpl().in(getEntityMetaData().getIdAttribute().getName(), Sets.newHashSet(ids)).fetch(
-				fetch);
+		Query inQuery = new QueryImpl().in(getEntityMetaData().getIdAttribute().getName(), Sets.newHashSet(ids))
+				.fetch(fetch);
 		Map<Object, Entity> indexedEntities = uniqueIndex(findAll(inQuery), Entity::getIdValue);
 		return filter(transform(ids, id -> lookup(indexedEntities, id)), notNull());
 	}
@@ -151,6 +151,12 @@ public abstract class AbstractRepository implements Repository
 	}
 
 	@Override
+	public void update(Stream<? extends Entity> entities)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public void delete(Entity entity)
 	{
 		throw new UnsupportedOperationException();
@@ -158,6 +164,12 @@ public abstract class AbstractRepository implements Repository
 
 	@Override
 	public void delete(Iterable<? extends Entity> entities)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void delete(Stream<? extends Entity> entities)
 	{
 		throw new UnsupportedOperationException();
 	}

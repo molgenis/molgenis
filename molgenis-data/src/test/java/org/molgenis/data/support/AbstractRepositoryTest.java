@@ -6,6 +6,7 @@ import static junit.framework.Assert.assertEquals;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.mockito.Matchers;
 import org.mockito.Mockito;
@@ -55,6 +56,24 @@ public class AbstractRepositoryTest
 	public void beforeMethod()
 	{
 		Mockito.reset(abstractRepository);
+	}
+
+	@Test(expectedExceptions = UnsupportedOperationException.class)
+	public void addStream()
+	{
+		abstractRepository.add(Stream.empty());
+	}
+
+	@Test(expectedExceptions = UnsupportedOperationException.class)
+	public void deleteStream()
+	{
+		abstractRepository.delete(Stream.empty());
+	}
+
+	@Test(expectedExceptions = UnsupportedOperationException.class)
+	public void updateStream()
+	{
+		abstractRepository.update(Stream.empty());
 	}
 
 	@Test(expectedExceptions = UnsupportedOperationException.class)

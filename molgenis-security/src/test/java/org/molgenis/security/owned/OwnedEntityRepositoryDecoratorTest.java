@@ -1,5 +1,6 @@
 package org.molgenis.security.owned;
 
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -9,7 +10,11 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.mockito.ArgumentCaptor;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
@@ -35,6 +40,102 @@ public class OwnedEntityRepositoryDecoratorTest
 		decoratedRepository = mock(Repository.class);
 		when(decoratedRepository.getEntityMetaData()).thenReturn(entityMeta);
 		ownedEntityRepositoryDecorator = new OwnedEntityRepositoryDecorator(decoratedRepository);
+	}
+
+	@Test
+	public void addStream()
+	{
+		Stream<Entity> entities = Stream.of(mock(Entity.class));
+		ownedEntityRepositoryDecorator.add(entities);
+		verify(decoratedRepository, times(1)).add(entities);
+	}
+
+	@Test
+	public void addStreamExtendsOwned()
+	{
+		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
+		authentication.setAuthenticated(false);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(entityMeta.getExtends()).thenReturn(new OwnedEntityMetaData());
+
+		Entity entity0 = mock(Entity.class);
+		when(entity0.getIdValue()).thenReturn("0");
+		Entity entity1 = mock(Entity.class);
+		when(entity1.getIdValue()).thenReturn("0");
+		Stream<Entity> entities = Stream.of(entity0, entity1);
+		ownedEntityRepositoryDecorator.add(entities);
+
+		@SuppressWarnings(
+		{ "unchecked", "rawtypes" })
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(decoratedRepository, times(1)).add(captor.capture());
+		List<Entity> myEntities = captor.getValue().collect(Collectors.toList());
+		assertEquals(myEntities, Arrays.asList(entity0, entity1));
+		verify(entity0, times(1)).set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, "username");
+		verify(entity1, times(1)).set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, "username");
+	}
+
+	@Test
+	public void deleteStream()
+	{
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		Stream<Entity> entities = Stream.of(entity0, entity1);
+		ownedEntityRepositoryDecorator.delete(entities);
+		verify(decoratedRepository, times(1)).delete(entities);
+	}
+
+	@Test
+	public void deleteStreamEntityExtendsOwned()
+	{
+		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
+		authentication.setAuthenticated(false);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(entityMeta.getExtends()).thenReturn(new OwnedEntityMetaData());
+
+		Entity myEntity = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("username").getMock();
+		Entity notMyEntity = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("notme").getMock();
+		ownedEntityRepositoryDecorator.delete(Stream.of(myEntity, notMyEntity));
+
+		@SuppressWarnings("unchecked")
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(decoratedRepository, times(1)).delete(captor.capture());
+		List<Entity> myEntities = captor.getValue().collect(Collectors.toList());
+		assertEquals(myEntities, Arrays.asList(myEntity));
+	}
+
+	@SuppressWarnings(
+	{ "unchecked", "rawtypes" })
+	@Test
+	public void updateStream()
+	{
+		Entity entity0 = mock(Entity.class);
+		Stream<Entity> entities = Stream.of(entity0);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		doNothing().when(decoratedRepository).update(captor.capture());
+		ownedEntityRepositoryDecorator.update(entities);
+		assertEquals(captor.getValue().collect(Collectors.toList()), Arrays.asList(entity0));
+	}
+
+	@SuppressWarnings(
+	{ "unchecked", "rawtypes" })
+	@Test
+	public void updateStreamExtendsOwned()
+	{
+		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
+		authentication.setAuthenticated(false);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(entityMeta.getExtends()).thenReturn(new OwnedEntityMetaData());
+
+		Entity entity0 = mock(Entity.class);
+		when(entity0.get(OwnedEntityMetaData.ATTR_OWNER_USERNAME)).thenReturn("usernameUpdate");
+		Stream<Entity> entities = Stream.of(entity0);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		doNothing().when(decoratedRepository).update(captor.capture());
+		ownedEntityRepositoryDecorator.update(entities);
+		List<Entity> entityList = captor.getValue().collect(Collectors.toList());
+		assertEquals(entityList, Arrays.asList(entity0));
+		verify(entityList.get(0)).set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, "username");
 	}
 
 	@Test

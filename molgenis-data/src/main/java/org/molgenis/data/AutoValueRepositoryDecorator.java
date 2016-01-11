@@ -192,6 +192,12 @@ public class AutoValueRepositoryDecorator implements Repository
 	}
 
 	@Override
+	public void update(Stream<? extends Entity> entities)
+	{
+		decoratedRepository.update(entities);
+	}
+
+	@Override
 	public void delete(Entity entity)
 	{
 		decoratedRepository.delete(entity);
@@ -199,6 +205,12 @@ public class AutoValueRepositoryDecorator implements Repository
 
 	@Override
 	public void delete(Iterable<? extends Entity> entities)
+	{
+		decoratedRepository.delete(entities);
+	}
+
+	@Override
+	public void delete(Stream<? extends Entity> entities)
 	{
 		decoratedRepository.delete(entities);
 	}

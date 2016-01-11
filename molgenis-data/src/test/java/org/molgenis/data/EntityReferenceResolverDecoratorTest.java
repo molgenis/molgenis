@@ -1,14 +1,19 @@
 package org.molgenis.data;
 
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.mockito.ArgumentCaptor;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -54,6 +59,14 @@ public class EntityReferenceResolverDecoratorTest
 		entityReferenceResolverDecorator.add(entities);
 		verify(decoratedRepo, times(1)).add(entities);
 		verifyZeroInteractions(entityManager);
+	}
+
+	@Test
+	public void addStream()
+	{
+		Stream<Entity> entities = Stream.empty();
+		when(decoratedRepo.add(entities)).thenReturn(123);
+		assertEquals(entityReferenceResolverDecorator.add(entities), Integer.valueOf(123));
 	}
 
 	@Test
@@ -117,6 +130,16 @@ public class EntityReferenceResolverDecoratorTest
 
 	@Test
 	public void deleteIterableextendsEntity()
+	{
+		@SuppressWarnings("unchecked")
+		Iterable<Entity> entities = mock(Iterable.class);
+		entityReferenceResolverDecorator.delete(entities);
+		verify(decoratedRepo, times(1)).delete(entities);
+		verifyZeroInteractions(entityManager);
+	}
+
+	@Test
+	public void deleteStream()
 	{
 		@SuppressWarnings("unchecked")
 		Iterable<Entity> entities = mock(Iterable.class);
@@ -366,5 +389,18 @@ public class EntityReferenceResolverDecoratorTest
 		entityReferenceResolverDecorator.update(entities);
 		verify(decoratedRepo, times(1)).update(entities);
 		verifyZeroInteractions(entityManager);
+	}
+
+	@SuppressWarnings(
+	{ "unchecked", "rawtypes" })
+	@Test
+	public void updateStream()
+	{
+		Entity entity0 = mock(Entity.class);
+		Stream<Entity> entities = Stream.of(entity0);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		doNothing().when(decoratedRepo).update(captor.capture());
+		entityReferenceResolverDecorator.update(entities);
+		assertEquals(captor.getValue().collect(Collectors.toList()), Arrays.asList(entity0));
 	}
 }

@@ -135,6 +135,13 @@ public class I18nStringDecorator implements Repository
 	}
 
 	@Override
+	public void update(Stream<? extends Entity> records)
+	{
+		decorated.update(records);
+		ResourceBundle.clearCache();
+	}
+
+	@Override
 	public void delete(Entity entity)
 	{
 		decorated.delete(entity);
@@ -143,6 +150,13 @@ public class I18nStringDecorator implements Repository
 
 	@Override
 	public void delete(Iterable<? extends Entity> entities)
+	{
+		decorated.delete(entities);
+		ResourceBundle.clearCache();
+	}
+
+	@Override
+	public void delete(Stream<? extends Entity> entities)
 	{
 		decorated.delete(entities);
 		ResourceBundle.clearCache();

@@ -75,6 +75,15 @@ public interface SearchService
 	void delete(Iterable<? extends Entity> entities, EntityMetaData entityMetaData);
 
 	/**
+	 * Deletes entities from index
+	 * 
+	 * @param entities
+	 *            entity stream
+	 * @param entityMetaData
+	 */
+	void delete(Stream<? extends Entity> entities, EntityMetaData entityMetaData);
+
+	/**
 	 * Deletes data and meta data
 	 * 
 	 * @param entityName

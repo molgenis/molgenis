@@ -100,13 +100,23 @@ public class MolgenisUserDecorator implements Repository
 			public Entity apply(Entity entity)
 			{
 				updatePassword(entity);
+				updateSuperuserAuthority(entity);
 				return entity;
 			}
 		}));
 
 		// id is only guaranteed to be generated at flush time
 		decoratedRepository.flush();
-		updateSuperuserAuthorities(entities);
+	}
+
+	@Override
+	public void update(Stream<? extends Entity> entities)
+	{
+		entities = entities.map(entity -> {
+			updatePassword(entity);
+			return entity;
+		});
+		decoratedRepository.update(entities);
 	}
 
 	private void updatePassword(Entity entity)
@@ -327,6 +337,12 @@ public class MolgenisUserDecorator implements Repository
 
 	@Override
 	public void delete(Iterable<? extends Entity> entities)
+	{
+		decoratedRepository.delete(entities);
+	}
+
+	@Override
+	public void delete(Stream<? extends Entity> entities)
 	{
 		decoratedRepository.delete(entities);
 	}

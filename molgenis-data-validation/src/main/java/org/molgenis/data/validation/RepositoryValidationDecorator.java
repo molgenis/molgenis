@@ -12,6 +12,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -85,6 +86,16 @@ public class RepositoryValidationDecorator implements Repository
 	{
 		validate(entities, true);
 		decoratedRepository.update(entities);
+	}
+
+	@Override
+	public void update(Stream<? extends Entity> entities)
+	{
+		try (ValidationResource validationResource = new ValidationResource())
+		{
+			entities = validate(entities, validationResource, ValidationMode.UPDATE);
+			decoratedRepository.update(entities);
+		}
 	}
 
 	@Override
@@ -214,6 +225,12 @@ public class RepositoryValidationDecorator implements Repository
 	}
 
 	@Override
+	public void delete(Stream<? extends Entity> entities)
+	{
+		decoratedRepository.delete(entities);
+	}
+
+	@Override
 	public void deleteById(Object id)
 	{
 		decoratedRepository.deleteById(id);
@@ -283,7 +300,7 @@ public class RepositoryValidationDecorator implements Repository
 		}
 
 		// prepare validation
-		initValidation(validationResource);
+		initValidation(validationResource, validationMode);
 
 		// add validation operation to stream
 		return entities.filter(entity -> {
@@ -293,7 +310,7 @@ public class RepositoryValidationDecorator implements Repository
 
 			validateEntityValueTypes(entity, validationResource);
 
-			validateEntityValueUniqueness(entity, validationResource);
+			validateEntityValueUniqueness(entity, validationResource, validationMode);
 
 			validateEntityValueReferences(entity, validationResource);
 
@@ -311,11 +328,15 @@ public class RepositoryValidationDecorator implements Repository
 		});
 	}
 
-	private void initValidation(ValidationResource validationResource)
+	private void initValidation(ValidationResource validationResource, ValidationMode validationMode)
 	{
 		initRequiredValueValidation(validationResource);
 		initReferenceValidation(validationResource);
 		initUniqueValidation(validationResource);
+		if (validationMode == ValidationMode.UPDATE)
+		{
+			initReadonlyValidation(validationResource);
+		}
 	}
 
 	private void initRequiredValueValidation(ValidationResource validationResource)
@@ -370,11 +391,11 @@ public class RepositoryValidationDecorator implements Repository
 		// get existing values for each attributes
 		if (!uniqueAttrs.isEmpty())
 		{
-			Map<String, HugeSet<Object>> uniqueAttrsValues = new HashMap<>();
+			Map<String, HugeMap<Object, Object>> uniqueAttrsValues = new HashMap<>();
 
 			Fetch fetch = new Fetch();
 			uniqueAttrs.forEach(uniqueAttr -> {
-				uniqueAttrsValues.put(uniqueAttr.getName(), new HugeSet<>());
+				uniqueAttrsValues.put(uniqueAttr.getName(), new HugeMap<>());
 				fetch.field(uniqueAttr.getName());
 			});
 
@@ -382,7 +403,7 @@ public class RepositoryValidationDecorator implements Repository
 			for (Entity entity : decoratedRepository.findAll(q))
 			{
 				uniqueAttrs.forEach(uniqueAttr -> {
-					HugeSet<Object> uniqueAttrValues = uniqueAttrsValues.get(uniqueAttr.getName());
+					HugeMap<Object, Object> uniqueAttrValues = uniqueAttrsValues.get(uniqueAttr.getName());
 					Object attrValue = entity.get(uniqueAttr.getName());
 					if (attrValue != null)
 					{
@@ -390,7 +411,7 @@ public class RepositoryValidationDecorator implements Repository
 						{
 							attrValue = ((Entity) attrValue).getIdValue();
 						}
-						uniqueAttrValues.add(attrValue);
+						uniqueAttrValues.put(attrValue, entity.getIdValue());
 					}
 				});
 			}
@@ -399,6 +420,14 @@ public class RepositoryValidationDecorator implements Repository
 		}
 
 		validationResource.setUniqueAttrs(uniqueAttrs);
+	}
+
+	private void initReadonlyValidation(ValidationResource validationResource)
+	{
+		List<AttributeMetaData> readonlyAttrs = stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
+				.filter(attr -> attr.isReadonly() && attr.getExpression() == null).collect(Collectors.toList());
+
+		validationResource.setReadonlyAttrs(readonlyAttrs);
 	}
 
 	private void validateEntityValueRequired(Entity entity, ValidationResource validationResource)
@@ -450,7 +479,8 @@ public class RepositoryValidationDecorator implements Repository
 		}
 	}
 
-	private void validateEntityValueUniqueness(Entity entity, ValidationResource validationResource)
+	private void validateEntityValueUniqueness(Entity entity, ValidationResource validationResource,
+			ValidationMode validationMode)
 	{
 		validationResource.getUniqueAttrs().forEach(uniqueAttr -> {
 			Object attrValue = entity.get(uniqueAttr.getName());
@@ -461,15 +491,27 @@ public class RepositoryValidationDecorator implements Repository
 					attrValue = ((Entity) attrValue).getIdValue();
 				}
 
-				HugeSet<Object> uniqueAttrValues = validationResource.getUniqueAttrsValues().get(uniqueAttr.getName());
-				boolean isNewValue = uniqueAttrValues.add(attrValue);
-				if (!isNewValue)
+				HugeMap<Object, Object> uniqueAttrValues = validationResource.getUniqueAttrsValues()
+						.get(uniqueAttr.getName());
+				Object existingEntityId = uniqueAttrValues.get(attrValue);
+				if (existingEntityId != null)
+				{
+					System.out.println(existingEntityId);
+					System.out.println(entity.getIdValue());
+				}
+				if ((validationMode == ValidationMode.ADD && existingEntityId != null)
+						|| (validationMode == ValidationMode.UPDATE && existingEntityId != null
+								&& !existingEntityId.equals(entity.getIdValue())))
 				{
 					ConstraintViolation constraintViolation = new ConstraintViolation(
 							format("Duplicate value '%s' for unique attribute '%s' from entity '%s'", attrValue,
 									uniqueAttr.getName(), getName()),
 							uniqueAttr, Long.valueOf(validationResource.getRow()));
 					validationResource.addViolation(constraintViolation);
+				}
+				else
+				{
+					uniqueAttrValues.put(attrValue, entity.getIdValue());
 				}
 			}
 		});
@@ -514,13 +556,55 @@ public class RepositoryValidationDecorator implements Repository
 						validationResource.addViolation(constraintViolation);
 					}
 				}
+				validationResource.addRefEntityId(getName(), refEntity.getIdValue());
 			}
 		});
 	}
 
+	@SuppressWarnings("unchecked")
 	private void validateEntityValueReadOnly(Entity entity, ValidationResource validationResource)
 	{
+		Entity entityToUpdate = findOne(entity.getIdValue());
+		validationResource.getReadonlyAttrs().forEach(readonlyAttr -> {
+			Object value = entity.get(readonlyAttr.getName());
+			Object existingValue = entityToUpdate.get(readonlyAttr.getName());
 
+			if (readonlyAttr instanceof XrefField)
+			{
+				if (value != null)
+				{
+					value = ((Entity) value).getIdValue();
+				}
+				if (existingValue != null)
+				{
+					value = ((Entity) existingValue).getIdValue();
+				}
+			}
+			else if (readonlyAttr instanceof MrefField)
+			{
+				List<Object> entityIds = new ArrayList<>();
+				((Iterable<Entity>) value).forEach(mrefEntity -> {
+					entityIds.add(mrefEntity.getIdValue());
+				});
+				value = entityIds;
+
+				List<Object> existingEntityIds = new ArrayList<>();
+				((Iterable<Entity>) existingValue).forEach(mrefEntity -> {
+					existingEntityIds.add(mrefEntity.getIdValue());
+				});
+				existingValue = existingEntityIds;
+			}
+
+			if (value != null && existingValue != null && !value.equals(existingValue))
+			{
+				validationResource
+						.addViolation(
+								new ConstraintViolation(
+										format("The attribute '%s' of entity '%s' can not be changed it is readonly.",
+												readonlyAttr.getName(), getName()),
+										Long.valueOf(validationResource.getRow())));
+			}
+		});
 	}
 
 	/**
@@ -533,7 +617,8 @@ public class RepositoryValidationDecorator implements Repository
 		private List<AttributeMetaData> refAttrs;
 		private Map<String, HugeSet<Object>> refEntitiesIds;
 		private List<AttributeMetaData> uniqueAttrs;
-		private Map<String, HugeSet<Object>> uniqueAttrsValues;
+		private Map<String, HugeMap<Object, Object>> uniqueAttrsValues;
+		private List<AttributeMetaData> readonlyAttrs;
 		private Set<ConstraintViolation> violations;
 
 		public ValidationResource()
@@ -581,6 +666,16 @@ public class RepositoryValidationDecorator implements Repository
 			this.refEntitiesIds = refEntitiesIds;
 		}
 
+		public void addRefEntityId(String name, Object idValue)
+		{
+			HugeSet<Object> refEntityIds = refEntitiesIds.get(name);
+			// only add entity id if this validation run requires entity
+			if (refEntityIds != null)
+			{
+				refEntityIds.add(idValue);
+			}
+		}
+
 		public List<AttributeMetaData> getUniqueAttrs()
 		{
 			return uniqueAttrs != null ? unmodifiableList(uniqueAttrs) : emptyList();
@@ -591,14 +686,24 @@ public class RepositoryValidationDecorator implements Repository
 			this.uniqueAttrs = uniqueAttrs;
 		}
 
-		public Map<String, HugeSet<Object>> getUniqueAttrsValues()
+		public Map<String, HugeMap<Object, Object>> getUniqueAttrsValues()
 		{
 			return uniqueAttrsValues != null ? unmodifiableMap(uniqueAttrsValues) : emptyMap();
 		}
 
-		public void setUniqueAttrsValues(Map<String, HugeSet<Object>> uniqueAttrsValues)
+		public void setUniqueAttrsValues(Map<String, HugeMap<Object, Object>> uniqueAttrsValues)
 		{
 			this.uniqueAttrsValues = uniqueAttrsValues;
+		}
+
+		public List<AttributeMetaData> getReadonlyAttrs()
+		{
+			return readonlyAttrs != null ? unmodifiableList(readonlyAttrs) : emptyList();
+		}
+
+		public void setReadonlyAttrs(List<AttributeMetaData> readonlyAttrs)
+		{
+			this.readonlyAttrs = readonlyAttrs;
 		}
 
 		public boolean hasViolations()
@@ -639,7 +744,7 @@ public class RepositoryValidationDecorator implements Repository
 			}
 			if (uniqueAttrsValues != null)
 			{
-				for (HugeSet<Object> uniqueAttrValues : uniqueAttrsValues.values())
+				for (HugeMap<Object, Object> uniqueAttrValues : uniqueAttrsValues.values())
 				{
 					try
 					{
@@ -716,6 +821,7 @@ public class RepositoryValidationDecorator implements Repository
 
 	}
 
+	@SuppressWarnings("unchecked")
 	protected Set<ConstraintViolation> checkNillable(Iterable<? extends Entity> entities)
 	{
 		Set<ConstraintViolation> violations = Sets.newHashSet();

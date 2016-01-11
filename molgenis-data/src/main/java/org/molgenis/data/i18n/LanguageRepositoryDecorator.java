@@ -136,6 +136,12 @@ public class LanguageRepositoryDecorator implements Repository
 	}
 
 	@Override
+	public void update(Stream<? extends Entity> entities)
+	{
+		decorated.update(entities);
+	}
+
+	@Override
 	public void delete(Entity entity)
 	{
 		String languageCode = entity.getString(LanguageMetaData.CODE);
@@ -190,6 +196,12 @@ public class LanguageRepositoryDecorator implements Repository
 
 	@Override
 	public void delete(Iterable<? extends Entity> entities)
+	{
+		entities.forEach(this::delete);
+	}
+
+	@Override
+	public void delete(Stream<? extends Entity> entities)
 	{
 		entities.forEach(this::delete);
 	}

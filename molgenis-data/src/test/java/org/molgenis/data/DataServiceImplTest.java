@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
@@ -66,6 +67,30 @@ public class DataServiceImplTest
 		when(repoToRemove.getName()).thenReturn("Entity3");
 		dataService.addRepository(repoToRemove);
 
+	}
+
+	@Test
+	public void addStream()
+	{
+		Stream<Entity> entities = Stream.empty();
+		dataService.add("Entity1", entities);
+		verify(repo1, times(1)).add(entities);
+	}
+
+	@Test
+	public void updateStream()
+	{
+		Stream<Entity> entities = Stream.empty();
+		dataService.update("Entity1", entities);
+		verify(repo1, times(1)).update(entities);
+	}
+
+	@Test
+	public void deleteStream()
+	{
+		Stream<Entity> entities = Stream.empty();
+		dataService.delete("Entity1", entities);
+		verify(repo1, times(1)).delete(entities);
 	}
 
 	@Test

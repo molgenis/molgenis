@@ -1,4 +1,4 @@
-package org.molgenis.data.i18n;
+package org.molgenis.data;
 
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -12,21 +12,19 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.mockito.ArgumentCaptor;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Repository;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class I18nStringDecoratorTest
+public class ComputedEntityValuesDecoratorTest
 {
 	private Repository decoratedRepo;
-	private I18nStringDecorator i18nStringDecorator;
+	private ComputedEntityValuesDecorator computedEntityValuesDecorator;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
 		decoratedRepo = mock(Repository.class);
-		i18nStringDecorator = new I18nStringDecorator(decoratedRepo);
+		computedEntityValuesDecorator = new ComputedEntityValuesDecorator(decoratedRepo);
 	}
 
 	@Test
@@ -34,14 +32,14 @@ public class I18nStringDecoratorTest
 	{
 		Stream<Entity> entities = Stream.empty();
 		when(decoratedRepo.add(entities)).thenReturn(123);
-		assertEquals(i18nStringDecorator.add(entities), Integer.valueOf(123));
+		assertEquals(computedEntityValuesDecorator.add(entities), Integer.valueOf(123));
 	}
 
 	@Test
 	public void deleteStream()
 	{
-		Stream<Entity> entities = Stream.empty();
-		i18nStringDecorator.delete(entities);
+		Stream<Entity> entities = Stream.of(mock(Entity.class));
+		computedEntityValuesDecorator.delete(entities);
 		verify(decoratedRepo, times(1)).delete(entities);
 	}
 
@@ -54,7 +52,7 @@ public class I18nStringDecoratorTest
 		Stream<Entity> entities = Stream.of(entity0);
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		doNothing().when(decoratedRepo).update(captor.capture());
-		i18nStringDecorator.update(entities);
+		computedEntityValuesDecorator.update(entities);
 		assertEquals(captor.getValue().collect(Collectors.toList()), Arrays.asList(entity0));
 	}
 }

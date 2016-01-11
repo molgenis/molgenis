@@ -7,6 +7,7 @@ import static org.testng.Assert.assertNull;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -15,12 +16,89 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
 
 public class InMemoryRepositoryTest
 {
+	private EntityMetaData entityMeta;
+	private InMemoryRepository inMemoryRepository;
+
+	@BeforeMethod
+	public void setUpBeforeMethod()
+	{
+		entityMeta = mock(EntityMetaData.class);
+		when(entityMeta.getName()).thenReturn("entity");
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
+		AttributeMetaData labelAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("label").getMock();
+		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
+		when(entityMeta.getAttribute("label")).thenReturn(labelAttr);
+		inMemoryRepository = new InMemoryRepository(entityMeta);
+	}
+
+	@Test
+	public void addStream()
+	{
+		Entity entity0 = mock(Entity.class);
+		when(entity0.getIdValue()).thenReturn("id0");
+		when(entity0.get("id")).thenReturn("id0");
+		when(entity0.getString("id")).thenReturn("id0");
+		Entity entity1 = mock(Entity.class);
+		when(entity1.getIdValue()).thenReturn("id1");
+		when(entity1.get("id")).thenReturn("id1");
+		when(entity1.getString("id")).thenReturn("id1");
+		Stream<Entity> entities = Stream.of(entity0, entity1);
+		assertEquals(inMemoryRepository.add(entities), Integer.valueOf(2));
+	}
+
+	@Test
+	public void deleteStream()
+	{
+		// add two
+		Entity entity0 = mock(Entity.class);
+		when(entity0.getIdValue()).thenReturn("id0");
+		when(entity0.get("id")).thenReturn("id0");
+		when(entity0.getString("id")).thenReturn("id0");
+		Entity entity1 = mock(Entity.class);
+		when(entity1.getIdValue()).thenReturn("id1");
+		when(entity1.get("id")).thenReturn("id1");
+		when(entity1.getString("id")).thenReturn("id1");
+		Stream<Entity> entities = Stream.of(entity0, entity1);
+		inMemoryRepository.add(entities);
+
+		// delete one
+		inMemoryRepository.delete(Stream.of(entity0));
+
+		// get all
+		assertEquals(Lists.newArrayList(inMemoryRepository.iterator()), Arrays.asList(entity1));
+	}
+
+	@Test
+	public void updateStream()
+	{
+		// add two
+		Entity entity0 = mock(Entity.class);
+		when(entity0.getIdValue()).thenReturn("id0");
+		when(entity0.get("id")).thenReturn("id0");
+		when(entity0.getString("id")).thenReturn("id0");
+		Entity entity1 = mock(Entity.class);
+		when(entity1.getIdValue()).thenReturn("id1");
+		when(entity1.get("id")).thenReturn("id1");
+		when(entity1.getString("id")).thenReturn("id1");
+		Stream<Entity> entities = Stream.of(entity0, entity1);
+		inMemoryRepository.add(entities);
+
+		// update two
+		entity0.set("label", "label0");
+		entity1.set("label", "label1");
+		inMemoryRepository.update(Stream.of(entity0));
+
+		// get all
+		assertEquals(Lists.newArrayList(inMemoryRepository.iterator()), Arrays.asList(entity0, entity1));
+	}
+
 	@Test
 	public void findAll() throws IOException
 	{

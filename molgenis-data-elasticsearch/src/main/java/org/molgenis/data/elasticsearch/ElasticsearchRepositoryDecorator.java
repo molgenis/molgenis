@@ -109,6 +109,17 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 
 	@Override
 	@Transactional
+	public void update(Stream<? extends Entity> entities)
+	{
+		// TODO look into performance improvements
+		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
+			decoratedRepo.update(batch);
+			super.update(batch);
+		});
+	}
+
+	@Override
+	@Transactional
 	public void delete(Entity entity)
 	{
 		decoratedRepo.delete(entity);
@@ -121,6 +132,17 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	{
 		decoratedRepo.delete(entities);
 		super.delete(entities);
+	}
+
+	@Override
+	@Transactional
+	public void delete(Stream<? extends Entity> entities)
+	{
+		// TODO look into performance improvements
+		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
+			decoratedRepo.delete(batch.stream());
+			super.delete(batch.stream());
+		});
 	}
 
 	@Override

@@ -1,13 +1,23 @@
 package org.molgenis.security.user;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.mockito.ArgumentCaptor;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.auth.UserAuthorityRepository;
@@ -55,6 +65,59 @@ public class MolgenisUserDecoratorTest
 		verify(passwordEncoder).encode(password);
 		verify(decoratedRepository).add(entity);
 		verify(userAuthorityRepository, times(0)).add(any(UserAuthority.class));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void addStream()
+	{
+		String password = "password";
+		Entity entity0 = new MapEntity();
+		entity0.set(MolgenisUser.PASSWORD_, password);
+		entity0.set(MolgenisUser.SUPERUSER, false);
+		Entity entity1 = new MapEntity();
+		entity1.set(MolgenisUser.PASSWORD_, password);
+		entity1.set(MolgenisUser.SUPERUSER, false);
+
+		when(decoratedRepository.add(any(Stream.class))).thenAnswer(new Answer<Integer>()
+		{
+			@Override
+			public Integer answer(InvocationOnMock invocation) throws Throwable
+			{
+				@SuppressWarnings("unchecked")
+				Stream<Entity> entities = (Stream<Entity>) invocation.getArguments()[0];
+				List<Entity> entitiesList = entities.collect(Collectors.toList());
+				return entitiesList.size();
+			}
+		});
+		assertEquals(molgenisUserDecorator.add(Stream.of(entity0, entity1)), Integer.valueOf(2));
+		verify(passwordEncoder, times(2)).encode(password);
+		verify(userAuthorityRepository, times(0)).add(any(UserAuthority.class));
+	}
+
+	@Test
+	public void deleteStream()
+	{
+		Stream<Entity> entities = Stream.empty();
+		molgenisUserDecorator.delete(entities);
+		verify(decoratedRepository, times(1)).delete(entities);
+	}
+
+	@SuppressWarnings(
+	{ "unchecked", "rawtypes" })
+	@Test
+	public void updateStream()
+	{
+		Entity entity0 = mock(Entity.class);
+		entity0.set(MolgenisUser.PASSWORD_, "password");
+		Stream<Entity> entities = Stream.of(entity0);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		doNothing().when(decoratedRepository).update(captor.capture());
+		decoratedRepository.update(entities);
+		assertEquals(captor.getValue().collect(Collectors.toList()), Arrays.asList(entity0));
+		verify(entity0).set(eq(MolgenisUser.PASSWORD_), anyString());
+		// TODO add authority tests
+
 	}
 
 	@Test

@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
+import org.elasticsearch.common.collect.Iterators;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -1001,6 +1002,16 @@ public class MysqlRepository extends AbstractRepository
 		this.deleteById(deleteByIdBatch);
 	}
 
+	@Override
+	public void delete(Stream<? extends Entity> entities)
+	{
+		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
+			resetXrefValuesBySelfReference(batch);
+			// TODO pass stream to deleteById, when deleteById(Stream) exists
+			deleteById(batch.stream().map(Entity::getIdValue).collect(Collectors.toList()));
+		});
+	}
+
 	/**
 	 * Use before a delete action of a entity with XREF data type where the entity and refEntity are the same entities.
 	 *
@@ -1009,7 +1020,7 @@ public class MysqlRepository extends AbstractRepository
 	private void resetXrefValuesBySelfReference(Iterable<? extends Entity> entities)
 	{
 		List<String> xrefAttributesWithSelfReference = new ArrayList<String>();
-		for (AttributeMetaData attributeMetaData : getEntityMetaData().getAttributes())
+		for (AttributeMetaData attributeMetaData : getEntityMetaData().getAttributes()) // FIXME bug: getAtomicAttrs
 		{
 			if (attributeMetaData.getDataType().getEnumType().equals(FieldTypeEnum.XREF)
 					&& getEntityMetaData().getName().equals(attributeMetaData.getRefEntity().getName()))
@@ -1213,11 +1224,22 @@ public class MysqlRepository extends AbstractRepository
 	@Override
 	public void update(Iterable<? extends Entity> entities)
 	{
+		update(entities.iterator());
+	}
+
+	@Override
+	public void update(Stream<? extends Entity> entities)
+	{
+		update(entities.iterator());
+	}
+
+	private void update(Iterator<? extends Entity> entities)
+	{
 		// TODO, split in subbatches
 		final List<Entity> batch = new ArrayList<Entity>();
-		if (entities != null) for (Entity e : entities)
+		if (entities != null) while (entities.hasNext())
 		{
-			batch.add(e);
+			batch.add(entities.next());
 		}
 		final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 		final List<Object> ids = new ArrayList<Object>();
@@ -1317,7 +1339,6 @@ public class MysqlRepository extends AbstractRepository
 				addMrefs(mrefs.get(att.getName()), att);
 			}
 		}
-
 	}
 
 	public boolean tableExists()

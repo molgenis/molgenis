@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import javax.persistence.EntityManager;
@@ -281,6 +282,36 @@ public class JpaRepository extends AbstractRepository
 
 	@Override
 	@Transactional
+	public void update(Stream<? extends Entity> entities)
+	{
+		EntityManager em = getEntityManager();
+		int batchSize = 500;
+		AtomicInteger batchCount = new AtomicInteger();
+		entities.forEach(r -> {
+			Entity entity = getTypedEntity(r);
+
+			if (LOG.isDebugEnabled())
+				LOG.debug("merging" + getEntityClass().getSimpleName() + " [" + r.getIdValue() + "]");
+			em.merge(entity);
+
+			batchCount.incrementAndGet();
+			if (batchCount.get() == batchSize)
+			{
+				if (LOG.isDebugEnabled()) LOG.debug("flushing entity manager");
+				em.flush();
+
+				if (LOG.isDebugEnabled()) LOG.debug("clearing entity manager");
+				em.clear();
+				batchCount.set(0);
+			}
+		});
+
+		if (LOG.isDebugEnabled()) LOG.debug("flushing entity manager");
+		em.flush();
+	}
+
+	@Override
+	@Transactional
 	public void deleteById(Object id)
 	{
 		if (LOG.isDebugEnabled()) LOG.debug("removing " + getEntityClass().getSimpleName() + " [" + id + "]");
@@ -324,6 +355,24 @@ public class JpaRepository extends AbstractRepository
 				LOG.debug("removing " + getEntityClass().getSimpleName() + " [" + r.getIdValue() + "]");
 			}
 		}
+
+		if (LOG.isDebugEnabled()) LOG.debug("flushing entity manager");
+		em.flush();
+	}
+
+	@Override
+	@Transactional
+	public void delete(Stream<? extends Entity> entities)
+	{
+		EntityManager em = getEntityManager();
+
+		entities.forEach(r -> {
+			em.remove(findOne(r.getIdValue()));
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("removing " + getEntityClass().getSimpleName() + " [" + r.getIdValue() + "]");
+			}
+		});
 
 		if (LOG.isDebugEnabled()) LOG.debug("flushing entity manager");
 		em.flush();

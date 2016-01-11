@@ -129,6 +129,13 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
+	public void update(Stream<? extends Entity> entities)
+	{
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
+		decoratedRepository.update(entities);
+	}
+
+	@Override
 	public void delete(Entity entity)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
@@ -137,6 +144,13 @@ public class RepositorySecurityDecorator implements Repository
 
 	@Override
 	public void delete(Iterable<? extends Entity> entities)
+	{
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
+		decoratedRepository.delete(entities);
+	}
+
+	@Override
+	public void delete(Stream<? extends Entity> entities)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.delete(entities);

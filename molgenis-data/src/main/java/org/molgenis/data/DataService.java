@@ -212,6 +212,16 @@ public interface DataService extends Iterable<Repository>
 	void update(String entityName, Iterable<? extends Entity> entities);
 
 	/**
+	 * Updates entities
+	 * 
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 * @param entities
+	 *            entity stream
+	 */
+	void update(String entityName, Stream<? extends Entity> entities);
+
+	/**
 	 * Deletes an entity
 	 * 
 	 * @throws MolgenisDataException
@@ -234,6 +244,16 @@ public interface DataService extends Iterable<Repository>
 	 *            entity name (case insensitive)
 	 */
 	void delete(String entityName, Iterable<? extends Entity> entity);
+
+	/**
+	 * Delete entities from it's repository
+	 *
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 * @param entities
+	 *            entity stream
+	 */
+	void delete(String entityName, Stream<? extends Entity> entities);
 
 	/**
 	 * Deletes an entity by it's id
