@@ -1,7 +1,7 @@
 package org.molgenis.auth;
 
-public abstract class Authority {
-    public static final String ENTITY_NAME = "Authority";
-
-    String role;
+public interface Authority extends org.molgenis.data.Entity
+{
+    public String getRole();
+    public void setRole(String role);
 }
