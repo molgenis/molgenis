@@ -37,7 +37,7 @@ public class Step25LanguagesPermissions extends MolgenisUpgrade implements Appli
 	@Override
 	public void upgrade()
 	{
-		LOG.info("Updating metadata from version 23 to 24");
+		LOG.info("Updating metadata from version 24 to 25");
 		enabled = true;
 	}
 
@@ -56,7 +56,7 @@ public class Step25LanguagesPermissions extends MolgenisUpgrade implements Appli
 						GroupAuthority usersGroupLanguagesAuthority = new GroupAuthority();
 						usersGroupLanguagesAuthority.setMolgenisGroup(allUsersGroup);
 						usersGroupLanguagesAuthority.setRole(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX
-								+ LanguageMetaData.ENTITY_NAME);
+								+ LanguageMetaData.ENTITY_NAME.toUpperCase());
 						dataService.add(GroupAuthority.ENTITY_NAME, usersGroupLanguagesAuthority);
 					}
 				});

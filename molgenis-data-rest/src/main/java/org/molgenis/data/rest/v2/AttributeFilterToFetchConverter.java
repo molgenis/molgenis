@@ -21,20 +21,18 @@ public class AttributeFilterToFetchConverter
 	 * Converts {@link AttributeFilter} to {@link Fetch} based on {@link EntityMetaData}.
 	 * 
 	 * @param attrFilter
+	 *            the {@link AttributeFilter} to convert
 	 * @param entityMeta
-	 * @return {@link Fetch} or null for 'all attributes' {@link AttributeFilter}
+	 *            {@link EntityMetaData} for the entity
+	 * @return {@link Fetch}, or null for 'all attributes' {@link AttributeFilter} there are no refEntities
 	 * @throws UnknownAttributeException
+	 *             if the entity does not have one of the attributes mentioned in the filter
 	 */
 	public static Fetch convert(AttributeFilter attrFilter, EntityMetaData entityMeta, String languageCode)
 	{
-		if (attrFilter == null)
+		if (attrFilter == null || attrFilter.isStar())
 		{
 			return createDefaultEntityFetch(entityMeta, languageCode);
-		}
-
-		if (attrFilter.isIncludeAllAttrs())
-		{
-			return null;
 		}
 
 		Fetch fetch = new Fetch();
@@ -47,7 +45,8 @@ public class AttributeFilterToFetchConverter
 	{
 		if (attrFilter.isIncludeAllAttrs())
 		{
-			return;
+			entityMeta.getAtomicAttributes()
+					.forEach(attr -> fetch.field(attr.getName(), createDefaultAttributeFetch(attr, languageCode)));
 		}
 
 		if (attrFilter.isIncludeIdAttr())

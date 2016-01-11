@@ -27,7 +27,9 @@ public class FileStore
 		}
 		finally
 		{
+			fos.flush();
 			fos.close();
+			is.close();
 		}
 		return file;
 	}
