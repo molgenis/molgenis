@@ -335,7 +335,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		FreeMarkerViewResolver resolver = new FreeMarkerViewResolver();
 		resolver.setCache(true);
 		resolver.setSuffix(".ftl");
-
+		resolver.setContentType("text/html;charset=UTF-8");
 		return resolver;
 	}
 
