@@ -1,0 +1,57 @@
+{
+  "name": "molgenis-core-ui",
+  "version": "1.16.0-SNAPSHOT",
+  "description": "Molgenis modular javascript",
+  "main": "main.js",
+  "scripts": {
+    "build": "webpack"
+  },
+  "repository": {
+ 	  "type": "git",
+  	  "url": "git+ssh://git@github.com/molgenis/molgenis.git"
+  },
+  "author": "MOLGENIS",
+  "license": "LGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/molgenis/molgenis/issues"
+  },
+  "homepage": "https://github.com/molgenis/molgenis#readme",
+  "dependencies": {
+    "bootstrap": "3.3.6",
+    "jquery": "2.2.0",
+    "react": "0.13.3",
+    "underscore": "1.8.2",
+    "ace-editor-builds" : "1.2.0",
+    "jquery-ui": "1.10.5", 
+    "moment" : "2.9.0",
+    "eonasdan-bootstrap-datetimepicker" : "4.15.35",
+    "urijs" : "1.17.0",
+    "jquery-form" : "3.50.0",
+    "jquery.cookie" : "1.4.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.4.0",
+    "babel-core": "^6.3.13",
+    "babel-loader": "^6.2.1",
+    "babel-plugin-react-transform": "^1.1.0",
+    "babel-preset-es2015": "^6.3.13",
+    "babel-preset-react": "^6.3.13",
+    "css-loader": "^0.23.1",
+    "expect": "^1.6.0",
+    "express": "^4.13.3",
+    "faucet": "0.0.1",
+    "file-loader": "^0.8.5",
+    "fs": "0.0.2",
+    "less": "^2.5.3",
+    "less-loader": "^2.2.2",
+    "node-libs-browser": "^0.5.2",
+    "react-transform-hmr": "^1.0.0",
+    "skin-deep": "^0.13.0",
+    "style-loader": "^0.13.0",
+    "tape": "^4.4.0",
+    "url-loader": "^0.5.7",
+    "webpack": "^1.9.11",
+    "webpack-dev-middleware": "^1.2.0",
+    "webpack-hot-middleware": "^2.2.0"
+  }
+}
