@@ -1,7 +1,7 @@
 {
   "name": "molgenis-core-ui",
   "version": "1.16.0-SNAPSHOT",
-  "description": "Molgenis modular javascript",
+  "description": "Dependencies for the MOLGENIS core-ui module",
   "main": "main.js",
   "scripts": {
     "build": "webpack"
@@ -27,7 +27,17 @@
     "eonasdan-bootstrap-datetimepicker" : "4.15.35",
     "urijs" : "1.17.0",
     "jquery-form" : "3.50.0",
-    "jquery.cookie" : "1.4.1"
+    "jquery.cookie" : "1.4.1",
+	"handlebars" : "4.0.5",
+	"jquery-validation" : "1.14.0",
+	"typedarray" : "0.0.6",
+	"svg-pan-zoom" : "3.2.6",
+	"javascript-natural-sort" : "0.7.1",
+	"jquery-deparam" : "0.5.2",
+	"jquery.fancytree" : "2.14.0",
+	"bootbox" : "4.4.0",
+	"bootstrap-fileinput" : "4.2.8",
+	"tinymce" : "4.3.2"
   },
   "devDependencies": {
     "babel-cli": "^6.4.0",
