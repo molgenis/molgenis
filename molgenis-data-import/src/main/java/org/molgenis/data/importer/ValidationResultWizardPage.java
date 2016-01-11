@@ -12,6 +12,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.system.ImportRun;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
@@ -106,7 +107,7 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 		}
 
 		// Convert to list because it's less impossible use in FreeMarker
-		if (!userAccountService.getCurrentUser().getSuperuser())
+		if (!userAccountService.getCurrentUser().isSuperuser())
 		{
 			String username = SecurityUtils.getCurrentUsername();
 			groups = RunAsSystemProxy.runAsSystem(() -> Lists.newArrayList(userService.getUserGroups(username)));

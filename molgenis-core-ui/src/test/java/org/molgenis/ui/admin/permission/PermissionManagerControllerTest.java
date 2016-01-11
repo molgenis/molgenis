@@ -87,9 +87,9 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 
 		reset(permissionManagerService);
 		user1 = when(mock(MolgenisUser.class).getId()).thenReturn("1").getMock();
-		when(user1.getSuperuser()).thenReturn(true);
+		when(user1.isSuperuser()).thenReturn(true);
 		user2 = when(mock(MolgenisUser.class).getId()).thenReturn("2").getMock();
-		when(user2.getSuperuser()).thenReturn(false);
+		when(user2.isSuperuser()).thenReturn(false);
 		when(permissionManagerService.getUsers()).thenReturn(Arrays.<MolgenisUser> asList(user1, user2));
 		when(permissionManagerService.getGroups()).thenReturn(Arrays.<MolgenisGroup> asList(group1, group2));
 

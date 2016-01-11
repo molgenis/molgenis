@@ -2,7 +2,6 @@ package org.molgenis.auth;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.system.GroupAuthorityMetaData;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -10,6 +9,7 @@ import java.util.Set;
 public class GroupAuthority extends org.molgenis.data.support.AbstractEntity implements Authority{
     public static final String ENTITY_NAME = "GroupAuthority";
     public static final String MOLGENISGROUP = "molgenisgroup";
+    public static final String ROLE = "role";
 
     String id;
     MolgenisGroup molgenisGroup;
@@ -43,7 +43,7 @@ public class GroupAuthority extends org.molgenis.data.support.AbstractEntity imp
     public Object get(String name)
     {
         name = name.toLowerCase();
-        if (name.equals("role"))
+        if (name.equals(ROLE))
             return getRole();
         if (name.equals("id"))
             return getId();

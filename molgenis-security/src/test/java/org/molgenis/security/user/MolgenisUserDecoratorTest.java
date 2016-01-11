@@ -10,7 +10,7 @@ import java.util.Arrays;
 
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.UserAuthority;
-import org.molgenis.auth.UserAuthorityRepository;
+//import org.molgenis.auth.UserAuthorityRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
@@ -27,7 +27,7 @@ public class MolgenisUserDecoratorTest
 	private Repository decoratedRepository;
 	private MolgenisUserDecorator molgenisUserDecorator;
 	private PasswordEncoder passwordEncoder;
-	private UserAuthorityRepository userAuthorityRepository;
+	//private UserAuthorityRepository userAuthorityRepository;
 
 	@BeforeMethod
 	public void setUp()
@@ -37,10 +37,10 @@ public class MolgenisUserDecoratorTest
 		ApplicationContext ctx = mock(ApplicationContext.class);
 		passwordEncoder = mock(PasswordEncoder.class);
 		when(ctx.getBean(PasswordEncoder.class)).thenReturn(passwordEncoder);
-		userAuthorityRepository = mock(UserAuthorityRepository.class);
+		//userAuthorityRepository = mock(UserAuthorityRepository.class);
 		DataService dataService = mock(DataService.class);
 		when(ctx.getBean(DataService.class)).thenReturn(dataService);
-		when(dataService.getRepository(UserAuthority.ENTITY_NAME)).thenReturn(userAuthorityRepository);
+		//when(dataService.getRepository(UserAuthority.ENTITY_NAME)).thenReturn(userAuthorityRepository);
 		new ApplicationContextProvider().setApplicationContext(ctx);
 	}
 
@@ -54,7 +54,7 @@ public class MolgenisUserDecoratorTest
 		molgenisUserDecorator.add(entity);
 		verify(passwordEncoder).encode(password);
 		verify(decoratedRepository).add(entity);
-		verify(userAuthorityRepository, times(0)).add(any(UserAuthority.class));
+		//verify(userAuthorityRepository, times(0)).add(any(UserAuthority.class));
 	}
 
 	@Test
@@ -70,7 +70,7 @@ public class MolgenisUserDecoratorTest
 		molgenisUserDecorator.add(entity);
 		verify(passwordEncoder).encode(password);
 		verify(decoratedRepository).add(entity);
-		verify(userAuthorityRepository, times(1)).add(any(UserAuthority.class));
+		//verify(userAuthorityRepository, times(1)).add(any(UserAuthority.class));
 	}
 
 	@Test

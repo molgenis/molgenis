@@ -80,7 +80,7 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 
 		ArgumentCaptor<MolgenisUser> argument = ArgumentCaptor.forClass(MolgenisUser.class);
 		verify(dataService).update(eq(MolgenisUser.ENTITY_NAME), argument.capture());
-		assertTrue(argument.getValue().getActive());
+		assertTrue(argument.getValue().isActive());
 		verify(javaMailSender).send(any(SimpleMailMessage.class));
 		// TODO improve test
 	}
@@ -110,7 +110,7 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 		accountService.createUser(molgenisUser, "http://molgenis.org/activate");
 		ArgumentCaptor<MolgenisUser> argument = ArgumentCaptor.forClass(MolgenisUser.class);
 		verify(dataService).add(eq(MolgenisUser.ENTITY_NAME), argument.capture());
-		assertFalse(argument.getValue().getActive());
+		assertFalse(argument.getValue().isActive());
 		verify(javaMailSender).send(any(SimpleMailMessage.class));
 		// TODO improve test
 	}

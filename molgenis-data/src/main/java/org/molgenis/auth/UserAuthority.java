@@ -2,7 +2,6 @@ package org.molgenis.auth;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.system.UserAuthorityMetaData;
 
 import java.util.LinkedHashSet;
 import java.util.Set;

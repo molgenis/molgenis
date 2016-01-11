@@ -27,8 +27,8 @@ public class MolgenisUserViewData
 
 		fullName = firstName + ' ' + middleName + ' ' + lastName;
 
-		this.active = mu.getActive();
-		this.superuser = mu.getSuperuser();
+		this.active = mu.isActive();
+		this.superuser = mu.isSuperuser();
 
 		for (MolgenisGroup mg : molgenisGroups)
 		{

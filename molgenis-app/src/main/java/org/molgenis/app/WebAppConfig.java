@@ -21,6 +21,7 @@ import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.system.RepositoryTemplateLoader;
+import org.molgenis.data.system.core.FreemarkerTemplate;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.migrate.version.v1_10.Step17RuntimePropertiesToGafListSettings;
 import org.molgenis.migrate.version.v1_10.Step18RuntimePropertiesToAnnotatorSettings;
@@ -51,7 +52,7 @@ import org.molgenis.migrate.version.v1_9.RuntimePropertyToStaticContentMigrator;
 import org.molgenis.migrate.version.v1_9.Step14UpdateAttributeMapping;
 import org.molgenis.migrate.version.v1_9.Step15AddDefaultValue;
 import org.molgenis.migrate.version.v1_9.Step16RuntimePropertyToSettings;
-import org.molgenis.data.system.core.FreemarkerTemplateRepository;
+//import org.molgenis.data.system.core.FreemarkerTemplateRepository;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.GsonConfig;
@@ -91,8 +92,8 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Autowired
 	private DataService dataService;
 
-	@Autowired
-	private FreemarkerTemplateRepository freemarkerTemplateRepository;
+	//@Autowired
+	//private FreemarkerTemplateRepository freemarkerTemplateRepository;
 
 	@Autowired
 	@Qualifier("MysqlRepositoryCollection")
@@ -153,8 +154,8 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step2(dataService, jpaRepositoryCollection, dataSource, searchService));
 		upgradeService.addUpgrade(new Step3AddOrderColumnToMrefTables(dataSource));
 		upgradeService.addUpgrade(new Step4VarcharToText(dataSource, mysqlRepositoryCollection));
-		upgradeService.addUpgrade(new Step5AlterDataexplorerMenuURLs(jpaRepositoryCollection
-				.getRepository("RuntimeProperty"), gson));
+		//upgradeService.addUpgrade(new Step5AlterDataexplorerMenuURLs(mysqlRepositoryCollection
+		//		.getRepository("RuntimeProperty"), gson));
 		upgradeService.addUpgrade(new Step6ChangeRScriptType(dataSource, searchService));
 		upgradeService.addUpgrade(new Step7UpgradeMetaDataTo1_6(dataSource, searchService));
 		upgradeService.addUpgrade(new Step8VarcharToTextRepeated(dataSource));
@@ -251,7 +252,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	{
 		FreeMarkerConfigurer result = super.freeMarkerConfigurer();
 		// Look up unknown templates in the FreemarkerTemplate repository
-		result.setPostTemplateLoaders(new RepositoryTemplateLoader(freemarkerTemplateRepository));
+		result.setPostTemplateLoaders(new RepositoryTemplateLoader(dataService.getRepository(FreemarkerTemplate.ENTITY_NAME)));
 		return result;
 	}
 }

@@ -2,7 +2,6 @@ package org.molgenis.auth;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.system.MolgenisUserMetaData;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -12,6 +11,10 @@ public class MolgenisUser  extends org.molgenis.data.support.AbstractEntity impl
     public static final String USERNAME = "username";
     public static final String SUPERUSER = "superuser";
     public static final String PASSWORD_ = "password_";
+    public static final String EMAIL = "email";
+    public static final String GOOGLEACCOUNTID = "googleaccountid";
+    public static final String ACTIVATIONCODE = "activationcode";
+    public static final String ACTIVE = "active";
 
     String id;
     String username;
@@ -235,9 +238,9 @@ public class MolgenisUser  extends org.molgenis.data.support.AbstractEntity impl
             return getUsername();
         if (name.equals(PASSWORD_))
             return getPassword();
-        if (name.equals("activationcode"))
+        if (name.equals(ACTIVATIONCODE))
             return getActivationCode();
-        if (name.equals("active"))
+        if (name.equals(ACTIVE))
             return isActive();
         if (name.equals(SUPERUSER))
             return isSuperuser();
@@ -259,7 +262,7 @@ public class MolgenisUser  extends org.molgenis.data.support.AbstractEntity impl
             return getAddress();
         if (name.equals("phone"))
             return getPhone();
-        if (name.equals("email"))
+        if (name.equals(EMAIL))
             return getEmail();
         if (name.equals("fax"))
             return getFax();
@@ -273,7 +276,7 @@ public class MolgenisUser  extends org.molgenis.data.support.AbstractEntity impl
             return isChangePassword();
         if (name.equals("languagecode"))
             return getLanguageCode();
-        if (name.equals("googleaccountid"))
+        if (name.equals(GOOGLEACCOUNTID))
             return getGoogleAccountId();
         return null;
     }

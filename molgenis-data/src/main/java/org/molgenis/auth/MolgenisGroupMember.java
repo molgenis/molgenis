@@ -3,7 +3,6 @@ package org.molgenis.auth;
 import com.google.auto.value.AutoValue;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.system.MolgenisGroupMemberMetaData;
 
 import java.util.LinkedHashSet;
 import java.util.Set;

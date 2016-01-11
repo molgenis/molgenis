@@ -1,5 +1,6 @@
-package org.molgenis.data.meta.system;
+package org.molgenis.auth;
 
+import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.stereotype.Component;
 
