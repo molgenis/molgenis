@@ -2,13 +2,13 @@
  * @module mixin
  */
 
-var AttributeLoaderMixin = require('./AttributeLoaderMixin');
-var DeepPureRenderMixin = require('./DeepPureRenderMixin');
-var EntityInstanceLoaderMixin = require('./EntityInstanceLoaderMixin');
-var EntityLoaderMixin = require('./EntityLoaderMixin');
-var GroupMixin = require('./GroupMixin');
-var I18nStringsMixin = require('./I18nStringsMixin');
-var ReactLayeredComponentMixin = require('./ReactLayeredComponentMixin');
+import AttributeLoaderMixin from './AttributeLoaderMixin';
+import DeepPureRenderMixin from './DeepPureRenderMixin';
+import EntityInstanceLoaderMixin from './EntityInstanceLoaderMixin';
+import EntityLoaderMixin from './EntityLoaderMixin';
+import GroupMixin from './GroupMixin';
+import I18nStringsMixin from './I18nStringsMixin';
+import ReactLayeredComponentMixin from './ReactLayeredComponentMixin';
 
 var mixin = {
 	'AttributeLoaderMixin' : AttributeLoaderMixin,
