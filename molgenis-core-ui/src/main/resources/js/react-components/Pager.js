@@ -7,7 +7,7 @@ define(function(require, exports, module) {
 	var React = require('react');
 	var _ = require('underscore');
 
-	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
+	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
 
 	var ul = React.DOM.ul, li = React.DOM.li, div = React.DOM.div, span = React.DOM.span, a = React.DOM.a;
 

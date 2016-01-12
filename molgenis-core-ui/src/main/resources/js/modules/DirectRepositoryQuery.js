@@ -9,7 +9,7 @@ define(function(require, exports, module) {
 	/**
 	 * 
 	 */
-	exports.prototype.setSearchboxClickHandler = function(searchbox, button, dataset, dataexplorer) {
+	exports.setSearchboxClickHandler = function(searchbox, button, dataset, dataexplorer) {
 		$(function() {
 			$(button).on('click', function() {
 				var queryValue = $(searchbox).val();

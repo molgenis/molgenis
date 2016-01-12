@@ -6,21 +6,21 @@ define(function(require, exports, module) {
 
 	var React = require('react');
 	var _ = require('underscore');
-	var api = require('modules/RestClientV1');
+	var api = require('../modules/RestClientV1');
 
-	var Input = require('component/Input');
-	var TextArea = require('component/TextArea');
-	var BoolControl = require('component/BoolControl');
-	var Spinner = require('component/Spinner');
-	var RadioGroup = require('component/RadioGroup');
-	var CheckboxGroup = require('component/CheckboxGroup');
-	var CodeEditor = require('component/CodeEditor');
-	var DateControl = require('component/DateControl');
-	var EntitySelectBox = require('component/EntitySelectBox');
+	var Input = require('./Input');
+	var TextArea = require('./TextArea');
+	var BoolControl = require('./BoolControl');
+	var Spinner = require('./Spinner');
+	var RadioGroup = require('./RadioGroup');
+	var CheckboxGroup = require('./CheckboxGroup');
+	var CodeEditor = require('./CodeEditor');
+	var DateControl = require('./DateControl');
+	var EntitySelectBox = require('./EntitySelectBox');
 
-	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
-	var AttributeLoaderMixin = require('component/mixin/AttributeLoaderMixin');
-	var I18nStringsMixin = require('component/mixin/I18nStringsMixin');
+	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
+	var AttributeLoaderMixin = require('./mixin/AttributeLoaderMixin');
+	var I18nStringsMixin = require('./mixin/I18nStringsMixin');
 
 	/**
 	 * REST entity attribute control

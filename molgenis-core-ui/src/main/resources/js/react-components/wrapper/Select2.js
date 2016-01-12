@@ -8,7 +8,7 @@ define(function(require, exports, module) {
 	var $ = require('jquery');
 	var React = require('react');
 
-	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
+	var DeepPureRenderMixin = require('../mixin/DeepPureRenderMixin');
 
 	var input = React.DOM.input, span = React.DOM.span, div = React.DOM.div;
 

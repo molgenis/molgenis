@@ -7,9 +7,9 @@ define(function(require, exports, module) {
 	var React = require('react');
 	var _ = require('underscore');
 
-	var Button = require('component/Button');
+	var Button = require('./Button');
 
-	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
+	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
 
 	/**
 	 * @memberOf EntityInspectBtn

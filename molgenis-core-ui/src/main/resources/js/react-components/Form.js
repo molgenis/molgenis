@@ -5,23 +5,23 @@ define(function(require, exports, module) {
 
 	"use strict";
 
-	var React = require('react-with-addons.min');
-	var _ = require('underscore-min');
-	var api = require('modules/RestClientV1');
+	var React = require('react');
+	var _ = require('underscore');
+	var api = require('../modules/RestClientV1');
 
-	var FormControls = require('component/FormControls');
-	var FormButtons = require('component/FormButtons');
-	var Modal = require('component/Modal');
-	var Button = require('component/Button');
-	var Spinner = require('component/Spinner');
-	var AlertMessage = require('component/AlertMessage');
+	var FormControls = require('./FormControls');
+	var FormButtons = require('./FormButtons');
+	var Modal = require('./Modal');
+	var Button = require('./Button');
+	var Spinner = require('./Spinner');
+	var AlertMessage = require('./AlertMessage');
 
-	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
-	var EntityLoaderMixin = require('component/mixin/EntityLoaderMixin');
-	var EntityInstanceLoaderMixin = require('component/mixin/EntityInstanceLoaderMixin');
-	var ReactLayeredComponentMixin = require('component/mixin/ReactLayeredComponentMixin');
+	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
+	var EntityLoaderMixin = require('./mixin/EntityLoaderMixin');
+	var EntityInstanceLoaderMixin = require('./mixin/EntityInstanceLoaderMixin');
+	var ReactLayeredComponentMixin = require('./mixin/ReactLayeredComponentMixin');
 
-	var JQueryForm = require('component/wrapper/JQueryForm');
+	var JQueryForm = require('./wrapper/JQueryForm');
 
 	var div = React.DOM.div, span = React.DOM.span;
 

@@ -12,7 +12,7 @@ define(function(require, exports, module) {
 	/**
 	 * 
 	 */
-	exports.prototype.createAttrsValue = function(attrs) {
+	exports.createAttrsValue = function(attrs) {
 		var items = [];
 		for ( var key in attrs) {
 			if (attrs.hasOwnProperty(key)) {
@@ -36,7 +36,7 @@ define(function(require, exports, module) {
 	/**
 	 * 
 	 */
-	exports.prototype.toRsqlValue = function(value) {
+	exports.toRsqlValue = function(value) {
 		var rsqlValue;
 		if (_.isString(value) === false
 				|| (value.indexOf('"') !== -1 || value.indexOf('\'') !== -1 || value.indexOf('(') !== -1 || value.indexOf(')') !== -1 || value.indexOf(';') !== -1
@@ -52,7 +52,7 @@ define(function(require, exports, module) {
 	/**
 	 * 
 	 */
-	exports.prototype.createRsqlAggregateQuery = function(aggs) {
+	exports.createRsqlAggregateQuery = function(aggs) {
 		var rsql = '';
 		if (aggs.x) {
 			rsql += 'x==' + toRsqlValue(aggs.x);
@@ -75,7 +75,7 @@ define(function(require, exports, module) {
 	/**
 	 * 
 	 */
-	exports.prototype.createRsqlQuery = function(rules) {
+	exports.createRsqlQuery = function(rules) {
 		var rsql = '';
 
 		// simplify query
@@ -160,7 +160,7 @@ define(function(require, exports, module) {
 	/**
 	 * 
 	 */
-	exports.prototype.createSortValue = function(sort) {
+	exports.createSortValue = function(sort) {
 		var qs = _.map(sort.orders, function(order) {
 			return encodeURIComponent(order.attr) + (order.direction === 'desc' ? ':desc' : '');
 		}).join(','); // do not encode comma

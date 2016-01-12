@@ -7,15 +7,15 @@ define(function(require, exports, module) {
 	var React = require('react');
 	var _ = require('underscore');
 
-	var Button = require('component/Button');
-	var Modal = require('component/Modal');
-	var Spinner = require('component/Spinner');
+	var Button = require('./Button');
+	var Modal = require('./Modal');
+	var Spinner = require('./Spinner');
 
-	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
+	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
 
-	var Select2 = require('component/wrapper/Select2');
+	var Select2 = require('./wrapper/Select2');
 
-	var api = require('modules/RestClientV1');
+	var api = require('../modules/RestClientV1');
 
 	/**
 	 * Shows a Select2 box for switching the user language

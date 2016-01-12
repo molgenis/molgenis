@@ -7,9 +7,9 @@ define(function(require, exports, module) {
 	var React = require('react');
 	var _ = require('underscore');
 
-	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
+	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
 
-	var DateTimePicker = require('component/wrapper/DateTimePicker');
+	var DateTimePicker = require('./wrapper/DateTimePicker');
 
 	/**
 	 * @memberOf DateControl

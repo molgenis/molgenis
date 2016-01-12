@@ -7,7 +7,7 @@ define(function(require, exports, module) {
 
 	var $ = require('jquery');
 
-	exports.prototype.staticContentEditor = function() {
+	exports.staticContentEditor = function() {
 		tinymce
 				.init({
 					selector : "textarea#elm1",

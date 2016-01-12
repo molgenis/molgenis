@@ -7,18 +7,18 @@ define(function(require, exports, module) {
 	var React = require('react');
 	var _ = require('underscore');
 
-	var api = require('modules/RestClientV2');
-	var Button = require('component/Button');
-	var Modal = require('component/Modal');
-	var TableHeader = require('component/TableHeader');
-	var TableBody = require('component/TableBody');
-	var EntityInspectBtn = require('component/EntityInspectBtn');
-	var Spinner = require('component/Spinner');
-	var Pager = require('component/Pager');
-	var SelectBox = require('component/SelectBox');
+	var api = require('../modules/RestClientV2');
+	var Button = require('./Button');
+	var Modal = require('./Modal');
+	var TableHeader = require('./TableHeader');
+	var TableBody = require('./TableBody');
+	var EntityInspectBtn = require('./EntityInspectBtn');
+	var Spinner = require('./Spinner');
+	var Pager = require('./Pager');
+	var SelectBox = require('./SelectBox');
 
-	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
-	var AttrUtilsMixin = require('component/mixin/AttrUtilsMixin');
+	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
+	var AttrUtilsMixin = require('./mixin/AttrUtilsMixin');
 
 	var div = React.DOM.div, table = React.DOM.table, span = React.DOM.span, em = React.DOM.em, label = React.DOM.label;
 

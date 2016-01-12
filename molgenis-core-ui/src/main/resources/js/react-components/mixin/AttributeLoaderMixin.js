@@ -4,7 +4,7 @@ define(function(require, exports, module) {
 	 */
 	"use strict";
 
-	var api = require('modules/RestClientV1');
+	var api = require('../../modules/RestClientV1');
 	var _ = require('underscore');
 
 	/**

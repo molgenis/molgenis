@@ -7,9 +7,9 @@ define(function(require, exports, module) {
 	var React = require('react');
 	var _ = require('underscore');
 
-	var TableCellContent = require('component/TableCellContent');
+	var TableCellContent = require('./TableCellContent');
 
-	var AttrUtilsMixin = require('component/mixin/AttrUtilsMixin');
+	var AttrUtilsMixin = require('./mixin/AttrUtilsMixin');
 
 	var td = React.DOM.td, br = React.DOM.br;
 

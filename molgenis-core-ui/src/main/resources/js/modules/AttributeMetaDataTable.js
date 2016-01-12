@@ -13,7 +13,7 @@ define(function(require, exports, module) {
 	/**
 	 * @memberOf AttributeMetaDataTable
 	 */
-	exports.prototype.createAttributeMetadataTable = function(options) {
+	exports.createAttributeMetadataTable = function(options) {
 		var container = this;
 		var attributeMetadata = options.attributeMetadata;
 		container.html('');

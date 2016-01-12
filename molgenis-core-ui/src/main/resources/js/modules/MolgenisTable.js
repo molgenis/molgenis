@@ -21,7 +21,7 @@ define(function(require, exports, module) {
 	/**
 	 * @memberOf MolgenisTable
 	 */
-	exports.prototype.createTable = function(settings) {
+	exports.createTable = function(settings) {
 		// Create elements
 		var items = [];
 		items.push('<div class="row">');
@@ -76,7 +76,7 @@ define(function(require, exports, module) {
 	/**
 	 * @memberOf MolgenisTable
 	 */
-	exports.prototype.getTableMetaData = function(settings, callback) {
+	exports.getTableMetaData = function(settings, callback) {
 		if (settings.attributes && settings.attributes.length > 0) {
 			var colAttributes = molgenis.getAtomicAttributes(settings.attributes, restApi);
 			// get meta data for referenced entities
@@ -121,7 +121,7 @@ define(function(require, exports, module) {
 	/**
 	 * @memberOf MolgenisTable
 	 */
-	exports.prototype.getTableData = function(settings, callback) {
+	exports.getTableData = function(settings, callback) {
 		var attributeNames = $.map(settings.colAttributes, function(attribute) {
 			if (attribute.visible) {
 				return attribute.name;
@@ -171,7 +171,7 @@ define(function(require, exports, module) {
 	/**
 	 * @memberOf molgenis.table
 	 */
-	exports.prototype.calculateNrHeaderRows = function(attributes) {
+	exports.calculateNrHeaderRows = function(attributes) {
 		var level = 1;
 		if (attributes) {
 			var key;
@@ -191,7 +191,7 @@ define(function(require, exports, module) {
 	/**
 	 * 
 	 */
-	exports.prototype.createTableHeader = function(settings) {
+	exports.createTableHeader = function(settings) {
 		var container = $('.molgenis-table thead', settings.container);
 
 		var items = [];
@@ -250,7 +250,7 @@ define(function(require, exports, module) {
 	/**
 	 * @memberOf MolgenisTable
 	 */
-	exports.prototype.createTableBody = function(data, settings) {
+	exports.createTableBody = function(data, settings) {
 		var container = $('.molgenis-table tbody', settings.container);
 		var items = [];
 		var tabindex = 1;
@@ -301,7 +301,7 @@ define(function(require, exports, module) {
 	/**
 	 * @memberOf MolgenisTable
 	 */
-	exports.prototype.renderAttribute = function(entity, attribute) {
+	exports.renderAttribute = function(entity, attribute) {
 		var cell = $('<td>').data('id', entity.href + '/' + encodeURIComponent(attribute.name));
 		_this_.renderCell(cell, entity, attribute, settings);
 		if (settings.editenabled) {
@@ -313,7 +313,7 @@ define(function(require, exports, module) {
 	/**
 	 * @memberOf MolgenisTable
 	 */
-	exports.prototype.renderCell = function(cell, entity, attribute, settings) {
+	exports.renderCell = function(cell, entity, attribute, settings) {
 		if (settings.editenabled && !attribute.readOnly) {
 			_this_.renderEditCell(cell, entity, attribute, settings);
 		} else {
@@ -324,7 +324,7 @@ define(function(require, exports, module) {
 	/**
 	 * @memberOf MolgenisTable
 	 */
-	exports.prototype.renderEditCell = function(cell, entity, attribute, settings) {
+	exports.renderEditCell = function(cell, entity, attribute, settings) {
 		cell.empty();
 
 		var value = entity[attribute.name];
@@ -529,7 +529,7 @@ define(function(require, exports, module) {
 	/**
 	 * @memberOf MolgenisTable
 	 */
-	exports.prototype.renderViewCell = function(cell, entity, attribute, settings) {
+	exports.renderViewCell = function(cell, entity, attribute, settings) {
 		cell.empty();
 		var rawValue = entity[attribute.name];
 
@@ -598,7 +598,7 @@ define(function(require, exports, module) {
 	/**
 	 * @memberOf MolgenisTable
 	 */
-	exports.prototype.openRefAttributeModal = function(attribute, refEntity, refAttribute, refValue) {
+	exports.openRefAttributeModal = function(attribute, refEntity, refAttribute, refValue) {
 		// create modal structure
 		var modal = $('#table-ref-modal');
 		if (!modal.length) {
@@ -665,7 +665,7 @@ define(function(require, exports, module) {
 	/**
 	 * @memberOf MolgenisTable
 	 */
-	exports.prototype.persistCell = function(cell, settings) {
+	exports.persistCell = function(cell, settings) {
 		var row = cell.closest('tr').index();
 		var col = cell.index();
 		var attribute = cell.closest('table').find('th').eq(col).data('attr');
@@ -809,7 +809,7 @@ define(function(require, exports, module) {
 	/**
 	 * @memberOf MolgenisTable
 	 */
-	exports.prototype.createTablePager = function(data, settings) {
+	exports.createTablePager = function(data, settings) {
 		var container = $('.molgenis-table-pager', settings.container);
 
 		if (data.total > settings.maxRows) {
@@ -832,7 +832,7 @@ define(function(require, exports, module) {
 	/**
 	 * @memberOf MolgenisTable
 	 */
-	exports.prototype.refresh = function(settings) {
+	exports.refresh = function(settings) {
 		_this_.getTableData(settings, function(data) {
 			_this_.createTableBody(data, settings);
 			_this_.createTablePager(data, settings);
@@ -843,7 +843,7 @@ define(function(require, exports, module) {
 	/**
 	 * @memberOf MolgenisTable
 	 */
-	exports.prototype.createTableFooter = function(data, settings) {
+	exports.createTableFooter = function(data, settings) {
 		var container = $('.molgenis-table-info', settings.container);
 		container.html(data.total + ' item' + (data.total !== 1 ? 's' : '') + ' found');
 	}
@@ -851,12 +851,12 @@ define(function(require, exports, module) {
 	/**
 	 * @memberOf MolgenisTable
 	 */
-	exports.prototype.table = function(options) {
+	exports.table = function(options) {
 		var container = this;
 
 		// call plugin method
 		if (typeof options == 'string') {
-			var args = Array.prototype.slice.call(arguments, 1);
+			var args = Array.slice.call(arguments, 1);
 			if (args.length === 0)
 				return container.data('table')[options]();
 			else if (args.length === 1)
@@ -1284,7 +1284,7 @@ define(function(require, exports, module) {
 	/**
 	 * @memberOf MolgenisTable
 	 */
-	exports.prototype.getCreateForm = function(entityMetaData) {
+	exports.getCreateForm = function(entityMetaData) {
 		React.render(Form({
 			mode : 'create',
 			showHidden : true,
@@ -1300,7 +1300,7 @@ define(function(require, exports, module) {
 	/**
 	 * @memberOf MolgenisTable
 	 */
-	exports.prototype.getDefaultTreeSettings = {
+	exports.getDefaultTreeSettings = {
 		'entityMetaData' : null,
 		'maxRows' : 20,
 		'attributes' : null,

@@ -12,7 +12,7 @@ define(function(require, exports, module) {
 	/**
 	 * @memberOf Spinner
 	 */
-	exports.prototype.showSpinner = function(callback) {
+	exports.showSpinner = function(callback) {
 		var spinner = $('#spinner');
 		var login = $('#login-modal');
 
@@ -62,7 +62,7 @@ define(function(require, exports, module) {
 	/**
 	 * @memberOf Spinner
 	 */
-	exports.prototype.hideSpinner = function() {
+	exports.hideSpinner = function() {
 		if ($('#spinner').length !== 0) {
 			var count = $('#spinner').data('count');
 			if (count === 1) {

@@ -20,7 +20,7 @@ define(function(require, exports, module) {
 	 * 
 	 * @memberOf MolgenisQuery
 	 */
-	exports.prototype.getAtomicAttributes = function(attributes, restClient) {
+	exports.getAtomicAttributes = function(attributes, restClient) {
 		var atomicAttributes = [];
 		function createAtomicAttributesRec(attributes) {
 			$.each(attributes, function(i, attribute) {
@@ -53,7 +53,7 @@ define(function(require, exports, module) {
 	 * 
 	 * @memberOf MolgenisQuery
 	 */
-	exports.prototype.getCompoundAttributes = function(attributes, restClient) {
+	exports.getCompoundAttributes = function(attributes, restClient) {
 		var compoundAttributes = [];
 		function createAtomicAttributesRec(attributes) {
 			$.each(attributes, function(i, attribute) {
@@ -81,7 +81,7 @@ define(function(require, exports, module) {
 	 * 
 	 * @memberOf MolgenisQuery
 	 */
-	exports.prototype.getAllAttributes = function(attributes, restClient) {
+	exports.getAllAttributes = function(attributes, restClient) {
 		var tree = [];
 		function createAttributesRec(attributes) {
 			$.each(attributes, function(i, attribute) {
@@ -107,7 +107,7 @@ define(function(require, exports, module) {
 	 * 
 	 * @memberOf MolgenisQuery
 	 */
-	exports.prototype.getAttributeLabel = function(attribute) {
+	exports.getAttributeLabel = function(attribute) {
 		var label = attribute.label || attribute.name;
 		if (attribute.parent) {
 			var parentLabel = attribute.parent.label || attribute.parent.name;
@@ -124,7 +124,7 @@ define(function(require, exports, module) {
 	 * 
 	 * @memberOf MolgenisQuery
 	 */
-	exports.prototype.hasWritePermission = function(entityName) {
+	exports.hasWritePermission = function(entityName) {
 		var writable = false;
 
 		$.ajax({
@@ -146,7 +146,7 @@ define(function(require, exports, module) {
 	 * 
 	 * @memberOf MolgenisQuery
 	 */
-	exports.prototype.isRefAttr = function(attribute) {
+	exports.isRefAttr = function(attribute) {
 		switch (attribute.fieldType) {
 		case 'CATEGORICAL':
 		case 'CATEGORICAL_MREF':
@@ -166,7 +166,7 @@ define(function(require, exports, module) {
 	 * 
 	 * @memberOf MolgenisQuery
 	 */
-	exports.prototype.isXrefAttr = function(attribute) {
+	exports.isXrefAttr = function(attribute) {
 		return attribute.fieldType === 'CATEGORICAL' || attribute.fieldType === 'XREF' || attribute.fieldType === 'FILE';
 	};
 
@@ -177,7 +177,7 @@ define(function(require, exports, module) {
 	 * 
 	 * @memberOf MolgenisQuery
 	 */
-	exports.prototype.isMrefAttr = function(attribute) {
+	exports.isMrefAttr = function(attribute) {
 		return attribute.fieldType === 'CATEGORICAL_MREF' || attribute.fieldType === 'MREF';
 	};
 
@@ -188,7 +188,7 @@ define(function(require, exports, module) {
 	 * 
 	 * @memberOf MolgenisQuery
 	 */
-	exports.prototype.isCompoundAttr = function(attribute) {
+	exports.isCompoundAttr = function(attribute) {
 		return attribute.fieldType === 'COMPOUND';
 	};
 });

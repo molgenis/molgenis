@@ -5,7 +5,7 @@ define(function(require, exports, module) {
 	'use strict';
 
 	var _ = require('underscore');
-	var molgenis = require('modules/MolgenisQuery');
+	var molgenis = require('../../modules/MolgenisQuery');
 
 	var AttrUtilsMixin = {
 		_isSelectedAttr : function(attr, selectedAttrs) {

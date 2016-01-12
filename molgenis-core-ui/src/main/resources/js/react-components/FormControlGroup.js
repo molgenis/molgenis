@@ -7,14 +7,14 @@ define(function(require, exports, module) {
 	var React = require('react');
 	var _ = require('underscore');
 
-	var Button = require('component/Button');
-	var Modal = require('component/Modal');
-	var Spinner = require('component/Spinner');
-	var FormControlGroup = require('component/FormControlGroup');
-	var FormControl = require('component/FormControl');
+	var Button = require('./Button');
+	var Modal = require('./Modal');
+	var Spinner = require('./Spinner');
+	var FormControlGroup = require('./FormControlGroup');
+	var FormControl = require('./FormControl');
 
-	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
-	var AttributeLoaderMixin = require('component/mixin/AttributeLoaderMixin');
+	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
+	var AttributeLoaderMixin = require('./mixin/AttributeLoaderMixin');
 
 	var div = React.DOM.div, p = React.DOM.p, fieldset = React.DOM.fieldset, legend = React.DOM.legend;
 	;

@@ -7,7 +7,7 @@ define(function(require, exports, module) {
 	var React = require('react');
 	var _ = require('underscore');
 
-	var Input = require('component/Input');
+	var Input = require('../Input');
 
 	var div = React.DOM.div, label = React.DOM.label;
 

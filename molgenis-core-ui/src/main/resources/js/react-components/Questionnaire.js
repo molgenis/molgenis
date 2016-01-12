@@ -7,15 +7,15 @@ define(function(require, exports, module) {
 	var React = require('react');
 	var _ = require('underscore');
 
-	var Button = require('component/Button');
-	var Modal = require('component/Modal');
-	var Form = require('component/Form');
-	var Spinner = require('component/Spinner');
+	var Button = require('./Button');
+	var Modal = require('./Modal');
+	var Form = require('./Form');
+	var Spinner = require('./Spinner');
 
-	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
-	var EntityLoaderMixin = require('component/mixin/EntityLoaderMixin');
-	var EntityInstanceLoaderMixin = require('component/mixin/EntityInstanceLoaderMixin');
-	var I18nStringsMixin = require('component/mixin/I18nStringsMixin');
+	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
+	var EntityLoaderMixin = require('./mixin/EntityLoaderMixin');
+	var EntityInstanceLoaderMixin = require('./mixin/EntityInstanceLoaderMixin');
+	var I18nStringsMixin = require('./mixin/I18nStringsMixin');
 
 	var div = React.DOM.div;
 

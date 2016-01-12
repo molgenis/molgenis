@@ -4,13 +4,13 @@ define(function(require, exports, module) {
 	 */
 	"use strict";
 
-	var React = require('react-with-addons.min');
-	var _ = require('underscore-min');
+	var React = require('react');
+	var _ = require('underscore');
 
-	var AttributeControl = require('component/AttributeControl');
+	var AttributeControl = require('./AttributeControl');
 
-	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
-	var AttributeLoaderMixin = require('component/mixin/AttributeLoaderMixin');
+	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
+	var AttributeLoaderMixin = require('./mixin/AttributeLoaderMixin');
 
 	var div = React.DOM.div, span = React.DOM.span, label = React.DOM.label, strong = React.DOM.strong;
 

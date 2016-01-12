@@ -4,14 +4,14 @@ define(function(require, exports, module) {
 	 */
 	"use strict";
 
-	var React = require('react-with-addons.min');
-	var _ = require('underscore-min');
-	var api = require('modules/RestClientV1');
+	var React = require('react');
+	var _ = require('underscore');
+	var api = require('../modules/RestClientV1');
 
-	var FormControlGroup = require('component/FormControlGroup');
-	var FormControl = require('component/FormControl');
+	var FormControlGroup = require('./FormControlGroup');
+	var FormControl = require('./FormControl');
 
-	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
+	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
 
 	var div = React.DOM.div;
 

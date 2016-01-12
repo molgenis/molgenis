@@ -6,16 +6,16 @@ define(function(require, exports, module) {
 
 	var React = require('react');
 	var _ = require('underscore');
-	var molgenis = require('modules/MolgenisQuery');
+	var molgenis = require('../modules/MolgenisQuery');
 
-	var Button = require('component/Button');
-	var Icon = require('component/Icon');
-	var Modal = require('component/Modal');
-	var Table = require('component/Table');
-	var Popover = require('component/Popover');
+	var Button = require('./Button');
+	var Icon = require('./Icon');
+	var Modal = require('./Modal');
+	var Table = require('./Table');
+	var Popover = require('./Popover');
 
-	var AttrUtilsMixin = require('component/mixin/AttrUtilsMixin');
-	var ReactLayeredComponentMixin = require('component/mixin/ReactLayeredComponentMixin');
+	var AttrUtilsMixin = require('./mixin/AttrUtilsMixin');
+	var ReactLayeredComponentMixin = require('./mixin/ReactLayeredComponentMixin');
 
 	var div = React.DOM.div, a = React.DOM.a, span = React.DOM.span;
 

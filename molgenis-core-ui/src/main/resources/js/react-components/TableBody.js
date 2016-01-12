@@ -6,14 +6,14 @@ define(function(require, exports, module) {
 
 	var React = require('react');
 	var _ = require('underscore');
-	var molgenis = require('modules/MolgenisQuery');
+	var molgenis = require('../modules/MolgenisQuery');
 
-	var EntityDeleteBtn = require('component/EntityDeleteBtn');
-	var EntityInspectBtn = require('component/EntityInspectBtn');
-	var EntityEditBtn = require('component/EntityEditBtn');
+	var EntityDeleteBtn = require('./EntityDeleteBtn');
+	var EntityInspectBtn = require('./EntityInspectBtn');
+	var EntityEditBtn = require('./EntityEditBtn');
 
-	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
-	var AttrUtilsMixin = require('component/mixin/AttrUtilsMixin');
+	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
+	var AttrUtilsMixin = require('./mixin/AttrUtilsMixin');
 
 	var tbody = React.DOM.tbody, tr = React.DOM.tr, th = React.DOM.th, td = React.DOM.td;
 

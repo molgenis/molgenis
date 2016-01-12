@@ -8,7 +8,7 @@ define(function(require, exports, module) {
 	var React = require('react');
 
 	var span = React.DOM.span;
-	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
+	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
 
 	/**
 	 * @memberOf Popover

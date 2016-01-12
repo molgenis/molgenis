@@ -7,10 +7,10 @@ define(function(require, exports, module) {
 	var React = require('react');
 	var _ = require('underscore');
 
-	var Button = require('component/Button');
-	var Modal = require('component/Modal');
+	var Button = require('./Button');
+	var Modal = require('./Modal');
 
-	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
+	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
 
 	var div = React.DOM.div;
 

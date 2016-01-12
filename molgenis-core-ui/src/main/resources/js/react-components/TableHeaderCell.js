@@ -8,10 +8,10 @@ define(function(require, exports, module) {
 	var React = require('react');
 	var _ = require('underscore');
 
-	var Popover = require('component/Popover');
+	var Popover = require('./Popover');
 
-	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
-	var AttrUtilsMixin = require('component/mixin/AttrUtilsMixin');
+	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
+	var AttrUtilsMixin = require('./mixin/AttrUtilsMixin');
 
 	var th = React.DOM.th, span = React.DOM.span;
 

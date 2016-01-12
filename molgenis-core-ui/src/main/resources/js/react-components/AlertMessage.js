@@ -9,7 +9,7 @@ define(function(require, exports, module) {
 
 	var div = React.DOM.div, span = React.DOM.span, button = React.DOM.button;
 
-	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
+	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
 
 	/**
 	 * @memberOf AlertMessage

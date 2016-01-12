@@ -7,13 +7,13 @@ define(function(require, exports, module) {
 	var React = require('react');
 	var _ = require('underscore');
 
-	var AggregateTableHeader = require('component/AggregateTableHeader');
-	var AggregateTableBody = require('component/AggregateTableBody');
+	var AggregateTableHeader = require('./AggregateTableHeader');
+	var AggregateTableBody = require('./AggregateTableBody');
 
-	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
+	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
 
 	var div = React.DOM.div, table = React.DOM.table, span = React.DOM.span;
-	var api = require('modules/RestClientV2');
+	var api = require('../modules/RestClientV2');
 
 	var AGGREGATE_ANONYMIZATION_VALUE = -1;
 

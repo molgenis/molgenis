@@ -15,7 +15,7 @@ define(function(require, exports, module) {
 	/**
 	 * @memberOf MolgenisTree
 	 */
-	exports.prototype.createChildren = function(attributes, refEntityDepth, maxDepth, languageCode, doSelect) {
+	exports.createChildren = function(attributes, refEntityDepth, maxDepth, languageCode, doSelect) {
 		var children = [];
 
 		$.each(attributes, function() {
@@ -68,7 +68,7 @@ define(function(require, exports, module) {
 
 		// call plugin method
 		if (typeof options == 'string') {
-			var args = Array.prototype.slice.call(arguments, 1);
+			var args = Array.slice.call(arguments, 1);
 			if (args.length === 0)
 				return container.data('tree')[options]();
 			else if (args.length === 1)
@@ -266,7 +266,7 @@ define(function(require, exports, module) {
 
 	// Give the mref/xref/categorical parent of the given node or null if it
 	// does not have such a parent
-	exports.prototype.getRefParentNode = function(node) {
+	exports.getRefParentNode = function(node) {
 		var parent = node.parent, attr = parent.data.attribute;
 		while (attr) {
 			if (attr.refEntity) {

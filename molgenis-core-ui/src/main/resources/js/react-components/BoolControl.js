@@ -7,12 +7,12 @@ define(function(require, exports, module) {
 	var React = require('react');
 	var _ = require('underscore');
 
-	var Spinner = require('component/Spinner');
-	var RadioGroup = require('component/RadioGroup');
-	var CheckboxGroup = require('component/CheckboxGroup');
+	var Spinner = require('./Spinner');
+	var RadioGroup = require('./RadioGroup');
+	var CheckboxGroup = require('./CheckboxGroup');
 
-	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
-	var I18nStringsMixin = require('component/mixin/I18nStringsMixin');
+	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
+	var I18nStringsMixin = require('./mixin/I18nStringsMixin');
 
 	var div = React.DOM.div, label = React.DOM.label;
 

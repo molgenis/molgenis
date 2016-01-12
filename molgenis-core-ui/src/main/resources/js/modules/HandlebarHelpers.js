@@ -12,7 +12,7 @@ define(function(require, exports, module) {
 	/**
 	 * Helper block function container
 	 */
-	exports.prototype.handleBarHelperBlocks = function() {
+	exports.handleBarHelperBlocks = function() {
 		Handlebars.registerHelper('equal', function(lvalue, rvalue, options) {
 			if (arguments.length < 3)
 				throw new Error("Handlebars Helper equal needs 2 parameters");

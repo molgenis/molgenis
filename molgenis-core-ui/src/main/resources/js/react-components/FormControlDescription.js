@@ -4,11 +4,11 @@ define(function(require, exports, module) {
 	 */
 	"use strict";
 
-	var React = require('react-with-addons.min');
-	var _ = require('underscore-min');
-	var api = require('modules/RestClientV1');
+	var React = require('react');
+	var _ = require('underscore');
+	var api = require('../modules/RestClientV1');
 
-	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
+	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
 
 	var span = React.DOM.span, a = React.DOM.a;
 

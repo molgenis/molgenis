@@ -1,81 +1,73 @@
-define(function(require, exports, module) {
-	/**
-	 * @module
-	 */
+/**
+ * @module
+ */
+import mixin from './mixin';
+import wrapper from './wrapper';
 
-	'use strict';
+// The React components
+import Button from './Button';
+import AggregateTable from './AggregateTable';
+import AlertMessage from './AlertMessage';
+import AttributeControl from './AttributeControl';
+import BoolControl from './BoolControl';
+import CheckboxGroup from './CheckboxGroup';
+import CodeEditor from './CodeEditor';
+import DateControl from './DateControl';
+import Dialog from './Dialog';
+import EntitySelectBox from './EntitySelectBox';
+import Form from './Form';
+import FormButtons from './FormButtons';
+import FormControl from './FormControl';
+import FormControlDescription from './FormControlDescription';
+import FormControlGroup from './FormControlGroup';
+import FormControls from './FormControls';
+import FormIndex from './FormIndex';
+import Icon from './Icon';
+import Input from './Input';
+import LanguageSelectBox from './LanguageSelectBox';
+import Modal from './Modal';
+import Pager from './Pager';
+import Popover from './Popover';
+import Questionnaire from './Questionnaire';
+import RadioGroup from './RadioGroup';
+import RangeSlider from './RangeSlider';
+import SelectBox from './SelectBox';
+import Spinner from './Spinner';
+import Table from './Table';
+import TextArea from './TextArea';
 
-	var mixin = require('component/global-ui/Mixin');
-	var wrapper = require('component/global-ui/Wrapper');
-
-	// All the React components
-	var Button = require('component/Button');
-	var AggregateTable = require('component/AggregateTable');
-	var AlertMessage = require('component/AlertMessage');
-	var AttributeControl = require('component/AttributeControl');
-	var BoolControl = require('component/BoolControl');
-	var Button = require('component/Button');
-	var CheckboxGroup = require('component/CheckboxGroup');
-	var CodeEditor = require('component/CodeEditor');
-	var DateControl = require('component/DateControl');
-	var Dialog = require('component/Dialog');
-	var EntitySelectBox = require('component/EntitySelectBox');
-	var Form = require('component/Form');
-	var FormButtons = require('component/FormButtons');
-	var FormControl = require('component/FormControl');
-	var FormControlDescription = require('component/FormControlDescription');
-	var FormControlGroup = require('component/FormControlGroup');
-	var FormControls = require('component/FormControls');
-	var FormIndex = require('component/FormIndex');
-	var Icon = require('component/Icon');
-	var Input = require('component/Input');
-	var LanguageSelectBox = require('component/LanguageSelectBox');
-	var Modal = require('component/Modal');
-	var Pager = require('component/Pager');
-	var Popover = require('component/Popover');
-	var Questionnaire = require('component/Questionnaire');
-	var RadioGroup = require('component/RadioGroup');
-	var RangeSlider = require('component/RangeSlider');
-	var SelectBox = require('component/SelectBox');
-	var Spinner = require('component/Spinner');
-	var Table = require('component/Table');
-	var TextArea = require('component/TextArea');
-
-	exports.ui = {
-		'mixin' : mixin,
-		'wrapper' : wrapper,
-		'Button' : Button,
-		'AggregateTable' : AggregateTable,
-		'AlertMessage' : AlertMessage,
-		'AttributeControl' : AttributeControl,
-		'BoolControl' : BoolControl,
-		'Button' : Button,
-		'CheckboxGroup' : CheckboxGroup,
-		'CodeEditor' : CodeEditor,
-		'DateControl' : DateControl,
-		'Dialog' : Dialog,
-		'EntitySelectBox' : EntitySelectBox,
-		'Form' : Form,
-		'FormButtons' : FormButtons,
-		'FormControl' : FormControl,
-		'FormControlDescription' : FormControlDescription,
-		'FormControlGroup' : FormControlGroup,
-		'FormControls' : FormControls,
-		'FormIndex' : FormIndex,
-		'Icon' : Icon,
-		'Input' : Input,
-		'LanguageSelectBox' : LanguageSelectBox,
-		'Modal' : Modal,
-		'Pager' : Pager,
-		'Popover' : Popover,
-		'Questionnaire' : Questionnaire,
-		'RadioGroup' : RadioGroup,
-		'RangeSlider' : RangeSlider,
-		'SelectBox' : SelectBox,
-		'Spinner' : Spinner,
-		'Table' : Table,
-		'TextArea' : TextArea
-	};
-
-	module.exports = ui;
-});
+export default {
+	'mixin' : mixin,
+	'wrapper' : wrapper,
+	'Button' : Button,
+	'AggregateTable' : AggregateTable,
+	'AlertMessage' : AlertMessage,
+	'AttributeControl' : AttributeControl,
+	'BoolControl' : BoolControl,
+	'Button' : Button,
+	'CheckboxGroup' : CheckboxGroup,
+	'CodeEditor' : CodeEditor,
+	'DateControl' : DateControl,
+	'Dialog' : Dialog,
+	'EntitySelectBox' : EntitySelectBox,
+	'Form' : Form,
+	'FormButtons' : FormButtons,
+	'FormControl' : FormControl,
+	'FormControlDescription' : FormControlDescription,
+	'FormControlGroup' : FormControlGroup,
+	'FormControls' : FormControls,
+	'FormIndex' : FormIndex,
+	'Icon' : Icon,
+	'Input' : Input,
+	'LanguageSelectBox' : LanguageSelectBox,
+	'Modal' : Modal,
+	'Pager' : Pager,
+	'Popover' : Popover,
+	'Questionnaire' : Questionnaire,
+	'RadioGroup' : RadioGroup,
+	'RangeSlider' : RangeSlider,
+	'SelectBox' : SelectBox,
+	'Spinner' : Spinner,
+	'Table' : Table,
+	'TextArea' : TextArea
+};

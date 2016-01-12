@@ -7,9 +7,9 @@ define(function(require, exports, module) {
 	var React = require('react');
 	var _ = require('underscore');
 
-	var DeepPureRenderMixin = require('component/mixin/DeepPureRenderMixin');
+	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
 
-	var JQRangeSlider = require('component/wrapper/JQRangeSlider');
+	var JQRangeSlider = require('./wrapper/JQRangeSlider');
 
 	/**
 	 * Range slider control for number types
