@@ -1,7 +1,7 @@
 /**
  * @module MolgenisGlobalObject
  */
-import ui from '../react-components';
+import ui from './react-components';
 import alert from './MolgenisAlert';
 import i18n from './MolgenisInternationalization';
 
