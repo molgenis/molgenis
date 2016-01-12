@@ -5,22 +5,23 @@
 //##### into molgenis-bundle.js                                    #####
 //######################################################################
 
-var $ = require('jquery');
-window.$ = $;
+var $ = window.$ = window.jQuery = require('jquery');
 var Bootstrap = require('bootstrap');
 var React = require('react');
 var _ = require('underscore');
 var validate = require('jquery-validation');
-var Handlebars = require('handlebars/dist/handlebars.min.js');
+var Handlebars = require('handlebars/dist/handlebars.min');
+window.molgenis = require('./modules/MolgenisGlobalObject');
 
 // Create the molgenis object in the global scope
 // Used for backwards compatibility
-// var molgenis = require('molgenis');
 
 //######################################################################
-// ##### Any code written here will be executed synchronously in   #####
-// ##### the browser when the script molgenis-bundle.js is loaded. #####
+//##### Any code written here will be executed synchronously in    #####
+//##### the browser when the script molgenis-bundle.js is loaded.  #####
 //######################################################################
+
+
 
 /*
  * Code that we should do something with
