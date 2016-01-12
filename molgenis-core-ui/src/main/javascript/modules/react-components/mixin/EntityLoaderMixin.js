@@ -6,8 +6,8 @@ define(function(require, exports, module) {
 	"use strict";
 
 	var _ = require('underscore');
-	var api = require('../../modules/RestClientV1');
-	var molgenis = require('../../modules/MolgenisQuery');
+	var api = require('../../RestClientV1');
+	var molgenis = require('../../MolgenisQuery');
 
 	/**
 	 * Loads an entity (meta data) from this.props.entity and stores in

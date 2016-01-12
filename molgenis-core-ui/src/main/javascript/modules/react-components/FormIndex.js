@@ -4,7 +4,7 @@
 
 import React from 'react';
 import _ from 'underscore';
-import api from '../modules/RestClientV1';
+import api from '../RestClientV1';
 
 import DeepPureRenderMixin from './mixin/DeepPureRenderMixin';
 

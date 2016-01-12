@@ -3,7 +3,7 @@
  */
 "use strict";
 
-import api from '../modules/RestClientV1';
+import api from '../RestClientV1';
 import React from 'react';
 import _ from 'underscore';
 

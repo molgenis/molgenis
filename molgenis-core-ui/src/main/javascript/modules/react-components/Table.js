@@ -7,7 +7,7 @@ define(function(require, exports, module) {
 	var React = require('react');
 	var _ = require('underscore');
 
-	var api = require('../modules/RestClientV2');
+	var api = require('../RestClientV2');
 	var Button = require('./Button');
 	var Modal = require('./Modal');
 	var TableHeader = require('./TableHeader');

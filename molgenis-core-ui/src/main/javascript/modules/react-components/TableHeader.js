@@ -5,7 +5,7 @@
 
 import React from 'react';
 import _ from 'underscore';
-import molgenis from '../modules/MolgenisQuery';
+import molgenis from '../MolgenisQuery';
 
 import TableHeaderCell from './TableHeaderCell';
 import EntityCreateBtn from './EntityCreateBtn';

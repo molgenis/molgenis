@@ -6,7 +6,7 @@ define(function(require, exports, module) {
 
 	var React = require('react');
 	var _ = require('underscore');
-	var molgenis = require('../modules/MolgenisQuery');
+	var molgenis = require('../MolgenisQuery');
 
 	var EntityDeleteBtn = require('./EntityDeleteBtn');
 	var EntityInspectBtn = require('./EntityInspectBtn');

@@ -7,7 +7,7 @@ define(function(require, exports, module) {
 
 	var React = require('react');
 	var _ = require('underscore');
-	var api = require('../modules/RestClientV1');
+	var api = require('../RestClientV1');
 
 	var FormControls = require('./FormControls');
 	var FormButtons = require('./FormButtons');

@@ -13,7 +13,7 @@ define(function(require, exports, module) {
 	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
 
 	var div = React.DOM.div, table = React.DOM.table, span = React.DOM.span;
-	var api = require('../modules/RestClientV2');
+	var api = require('../RestClientV2');
 
 	var AGGREGATE_ANONYMIZATION_VALUE = -1;
 

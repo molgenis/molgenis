@@ -6,7 +6,7 @@
 import React from 'react';
 import _ from 'underscore';
 
-import api from '../modules/RestClientV2';
+import api from '../RestClientV2';
 import Button from './Button';
 import Dialog from './Dialog';
 
