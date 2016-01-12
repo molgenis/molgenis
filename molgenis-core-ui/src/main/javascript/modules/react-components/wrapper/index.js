@@ -2,12 +2,12 @@
  * @module wrapper
  */
 
-var Ace = require('./Ace');
-var DateTimePicker = require('./DateTimePicker');
-var JQRangeSlider = require('./JQRangeSlider');
-var JQueryForm = require('./JQueryForm');
-var Select2 = require('./Select2');
-var TinyMce = require('./TinyMce');
+import Ace from './Ace';
+import DateTimePicker from './DateTimePicker';
+import JQRangeSlider from './JQRangeSlider';
+import JQueryForm from './JQueryForm';
+import Select2 from './Select2';
+import TinyMce from './TinyMce';
 
 var wrapper = {
 	'Ace' : Ace,
