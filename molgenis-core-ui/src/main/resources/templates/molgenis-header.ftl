@@ -48,7 +48,6 @@
 
 		<#-- Main entry point for the application. Contains a bundle for all global dependencies like bootstrap, jquery and react -->
 		<script type="application/javascript" src="<@resource_href "/js/dist/molgenis-bundle.js"/>"></script>
-		<script>console.log('Done loading the bundle.');</script>
 	  	
 	  	<!--[if IE 9]>
         	<#-- used to disable the genomebrowser in IE9 -->
