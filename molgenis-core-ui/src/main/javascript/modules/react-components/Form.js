@@ -23,6 +23,10 @@ import JQueryForm from './wrapper/JQueryForm';
 
 const {div, span} = React.DOM;
 
+function getPromises(promises) {
+	return Promise.all(promises)
+}
+
 /**
  * @memberOf Form
  */
@@ -478,7 +482,7 @@ var Form = React
 				}
 			}, this);
 
-			Promise.all(promises).done(function(results) {
+			getPromises(promises).done(function(results) {
 				var valid = true;
 				for (var i = 0; i < results.length && valid; i++) {
 					valid = valid && results[i];
