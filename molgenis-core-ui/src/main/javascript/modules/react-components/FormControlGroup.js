@@ -8,7 +8,6 @@ import _ from 'underscore';
 import Button from './Button';
 import Modal from './Modal';
 import Spinner from './Spinner';
-import FormControlGroup from './FormControlGroup';
 import FormControl from './FormControl';
 
 import DeepPureRenderMixin from './mixin/DeepPureRenderMixin';
