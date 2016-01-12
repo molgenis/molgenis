@@ -7,6 +7,7 @@ define(function(require, exports, module) {
 	var React = require('react');
 	var _ = require('underscore');
 	var api = require('../RestClientV1');
+	var URI = require('urijs');
 
 	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
 

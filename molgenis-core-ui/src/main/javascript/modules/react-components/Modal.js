@@ -6,6 +6,7 @@ define(function(require, exports, module) {
 
 	var $ = require('jquery');
 	var React = require('react');
+	var classSet = require ('react-classset');
 
 	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
 
@@ -46,7 +47,7 @@ define(function(require, exports, module) {
 			// http://stackoverflow.com/a/18169689
 		},
 		render : function() {
-			var modalDialogClasses = React.addons.classSet({
+			var modalDialogClasses = classSet({
 				'modal-dialog' : true,
 				'modal-sm' : this.props.size == 'small',
 				'modal-lg' : this.props.size == 'large'
@@ -94,5 +95,5 @@ define(function(require, exports, module) {
 		}
 	});
 
-	module.exports = Modal;
+	module.exports = React.createFactory(Modal);
 });

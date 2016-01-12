@@ -6,6 +6,7 @@ define(function(require, exports, module) {
 
 	var React = require('react');
 	var _ = require('underscore');
+	var Icon = require('./Icon');
 
 	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
 
@@ -69,7 +70,7 @@ define(function(require, exports, module) {
 					onClick : this.props.onClick
 				};
 
-				return (button(buttonProps, this.props.icon ? molgenis.ui.Icon({
+				return (button(buttonProps, this.props.icon ? Icon({
 					name : this.props.icon
 				}) : null, this.props.text ? (this.props.icon ? ' ' + this.props.text : this.props.text) : null));
 			} else {
@@ -87,7 +88,7 @@ define(function(require, exports, module) {
 					onClick : this.props.onClick
 				};
 
-				return (a(anchorProps, this.props.icon ? molgenis.ui.Icon({
+				return (a(anchorProps, this.props.icon ? Icon({
 					name : this.props.icon
 				}) : null, this.props.text ? (this.props.icon ? ' ' + this.props.text : this.props.text) : null));
 			}
