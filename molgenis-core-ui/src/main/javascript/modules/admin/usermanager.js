@@ -4,6 +4,7 @@ import {contextUrl} from '../MolgenisGlobalObject';
 import Form from '../react-components/Form';
 import React from 'react';
 import Bootstrap from 'bootstrap';
+import 'babel-polyfill';
 
 function setViewState(viewState) {
 	// viewState: "users" | "groups"
