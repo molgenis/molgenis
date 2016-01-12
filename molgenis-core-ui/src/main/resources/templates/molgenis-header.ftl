@@ -46,20 +46,15 @@
         <link rel="stylesheet" href="<@resource_href "/css/${app_settings.cssHref?html}"/>" type="text/css">
     </#if> 
 
-		<#---
-		 The data-main attribute defines the initialization point of the application. 
-		 RequireJS uses the script in data-main to look for other scripts and dependencies. 
-		-->
-		<script type="application/javascript" src="<@resource_href "/js/components/requirejs/require.js" />" data-main="<@resource_href "/js/main.js" />"></script>
+		<#-- Main entry point for the application. Contains a bundle for all global dependencies like bootstrap, jquery and react -->
+		<script type="application/javascript" src="<@resource_href "/js/dist/molgenis-bundle.js"/>"></script>
+		<script>console.log('Done loading the bundle.');</script>
 	  	
 	  	<!--[if IE 9]>
         	<#-- used to disable the genomebrowser in IE9 -->
         	<script>
-	        	require(['main'], function() {
-	            	require(['molgenis', 'jquery'], function(molgenis, $){
-	        			molgenis.ie9 = true;
-	    			});
-				});
+        	<#-- TODO molgenis object in window -->
+				molgenis.ie9 = true;
         	</script>
         	<#-- required by dalliance-compiled.js to load the genomebrowsers in IE9 -->
         	<script src="<@resource_href "/js/typedarray.min.js"/>"></script>
@@ -67,18 +62,15 @@
 		
 		<#-- Place model variables in the molgenis global object -->
 		<script>
-            require(['main'], function() {
-            	require(['molgenis', 'jquery'], function(molgenis){
-            		molgenis.cookieWall = ${cookieWall?string('true', 'false')};
-				<#if context_url??>
-       				molgenis.contextUrl = '${context_url?js_string}';
-				</#if>
-				<#if plugin_id??>
-        			molgenis.pluginId = '${plugin_id?js_string}';
-        			molgenis.pluginSettingsId = 'settings_' + molgenis.pluginId();
-				</#if>
-            	});
-            });
+           	var molgenis = {};
+    		molgenis.cookieWall = ${cookieWall?string('true', 'false')};
+		<#if context_url??>
+			molgenis.contextUrl = '${context_url?js_string}';
+		</#if>
+		<#if plugin_id??>
+			molgenis.pluginId = '${plugin_id?js_string}';
+			molgenis.pluginSettingsId = 'settings_' + molgenis.pluginId;
+		</#if>
         </script>
     
     <#-- GOOGLE SIGN IN -->
@@ -225,19 +217,16 @@
 					<form id="logout-form" class="navbar-form navbar-right" method="post" action="/logout">
 						<button id="signout-button" type="button" class="btn btn-primary">Sign out</button>
 						<script>
-							require(['main'], function(){
-								require(['jquery'], function($){
-	                            	$("#signout-button").click(function() {
-		                            <#if googleSignIn>
-		                                var auth2 = gapi.auth2.getAuthInstance();
-		                                auth2.signOut().then(function () {
-		                            </#if>
-		                                    $('#logout-form').submit();
-		                            <#if googleSignIn>
-		                                });
-		                            </#if>
-		                            });
+							
+	                    	$("#signout-button").click(function() {
+	                        <#if googleSignIn>
+	                            var auth2 = gapi.auth2.getAuthInstance();
+	                            auth2.signOut().then(function () {
+	                        </#if>
+	                            	$('#logout-form').submit();
+	                        <#if googleSignIn>
 	                            });
+	                        </#if>
                             });
 						</script>
 					</form>
