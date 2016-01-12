@@ -60,7 +60,7 @@ var AttributeLoaderMixin = {
 		} else {
 			this.setState({
 				attr : attr
-			
+			});
 		}
 	}
 };
