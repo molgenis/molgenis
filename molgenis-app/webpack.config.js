@@ -12,6 +12,7 @@ var configuration = {
 	// Set an entry point for every module in the molgenis application
 	entry : {
 		'molgenis-core-ui' : './molgenis-core-ui/src/main/javascript/core-ui-webpack.js',
+		'usermanager' : './molgenis-core-ui/src/main/javascript/modules/admin/usermanager'
 	},
 	// Quick build for reloading or something...
 	output : {
