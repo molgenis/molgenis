@@ -34,7 +34,6 @@ import org.molgenis.generators.Generator;
 import org.molgenis.generators.JpaRepositoryGen;
 import org.molgenis.generators.JpaRepositorySourceGen;
 import org.molgenis.generators.db.DatabaseConfigGen;
-import org.molgenis.generators.db.EntitiesImporterGen;
 import org.molgenis.generators.db.EntitiesValidatorGen;
 import org.molgenis.generators.db.JDBCMetaDatabaseGen;
 import org.molgenis.generators.db.PersistenceGen;
@@ -210,7 +209,6 @@ public class Molgenis
 
 		if (options.generate_entityio)
 		{
-			generators.add(new EntitiesImporterGen());
 			generators.add(new EntitiesValidatorGen());
 		}
 
@@ -257,8 +255,7 @@ public class Molgenis
 
 	/**
 	 * Apply all generators on the model
-	 * 
-	 * @param model
+	 *
 	 */
 	public void generate() throws Exception
 	{

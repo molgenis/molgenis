@@ -7,11 +7,14 @@ import org.apache.commons.logging.LogFactory;
 import org.molgenis.data.IdGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import javax.sql.DataSource;
 
 /**
  * TransactionManager used by Molgenis.
@@ -24,7 +27,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * Each transaction is given a unique transaction id.
  * 
  */
-public class MolgenisTransactionManager extends JpaTransactionManager
+public class MolgenisTransactionManager extends DataSourceTransactionManager
 {
 	private static final long serialVersionUID = 1L;
 	public static final String TRANSACTION_ID_RESOURCE_NAME = "transactionId";
@@ -32,9 +35,9 @@ public class MolgenisTransactionManager extends JpaTransactionManager
 	private final IdGenerator idGenerator;
 	private final List<MolgenisTransactionListener> transactionListeners = new ArrayList<>();
 
-	public MolgenisTransactionManager(IdGenerator idGenerator)
+	public MolgenisTransactionManager(IdGenerator idGenerator, DataSource dataSource)
 	{
-		super();
+		super(dataSource);
 		// do not log JpaTransactionManager messages if org.molgenis log level is debug or trace
 		super.logger = LogFactory.getLog(JpaTransactionManager.class);
 		setNestedTransactionAllowed(false);
@@ -73,7 +76,7 @@ public class MolgenisTransactionManager extends JpaTransactionManager
 			LOG.debug("Start transaction [{}]", molgenisTransaction.getId());
 		}
 
-		super.doBegin(molgenisTransaction.getJpaTransaction(), definition);
+		super.doBegin(molgenisTransaction.getTransaction(), definition);
 
 		if (!definition.isReadOnly())
 		{
@@ -91,7 +94,7 @@ public class MolgenisTransactionManager extends JpaTransactionManager
 			LOG.debug("Commit transaction [{}]", transaction.getId());
 		}
 
-		DefaultTransactionStatus jpaTransactionStatus = new DefaultTransactionStatus(transaction.getJpaTransaction(),
+		DefaultTransactionStatus jpaTransactionStatus = new DefaultTransactionStatus(transaction.getTransaction(),
 				status.isNewTransaction(), status.isNewSynchronization(), status.isReadOnly(), status.isDebug(),
 				status.getSuspendedResources());
 
@@ -112,7 +115,7 @@ public class MolgenisTransactionManager extends JpaTransactionManager
 			LOG.debug("Rollback transaction [{}]", transaction.getId());
 		}
 
-		DefaultTransactionStatus jpaTransactionStatus = new DefaultTransactionStatus(transaction.getJpaTransaction(),
+		DefaultTransactionStatus jpaTransactionStatus = new DefaultTransactionStatus(transaction.getTransaction(),
 				status.isNewTransaction(), status.isNewSynchronization(), status.isReadOnly(), status.isDebug(),
 				status.getSuspendedResources());
 
@@ -129,7 +132,7 @@ public class MolgenisTransactionManager extends JpaTransactionManager
 	{
 		MolgenisTransaction transaction = (MolgenisTransaction) status.getTransaction();
 
-		DefaultTransactionStatus jpaTransactionStatus = new DefaultTransactionStatus(transaction.getJpaTransaction(),
+		DefaultTransactionStatus jpaTransactionStatus = new DefaultTransactionStatus(transaction.getTransaction(),
 				status.isNewTransaction(), status.isNewSynchronization(), status.isReadOnly(), status.isDebug(),
 				status.getSuspendedResources());
 
@@ -139,7 +142,7 @@ public class MolgenisTransactionManager extends JpaTransactionManager
 	@Override
 	protected boolean isExistingTransaction(Object transaction)
 	{
-		return super.isExistingTransaction(((MolgenisTransaction) transaction).getJpaTransaction());
+		return super.isExistingTransaction(((MolgenisTransaction) transaction).getTransaction());
 	}
 
 	@Override
@@ -151,7 +154,7 @@ public class MolgenisTransactionManager extends JpaTransactionManager
 			LOG.debug("Cleanup transaction [{}]", molgenisTransaction.getId());
 		}
 
-		super.doCleanupAfterCompletion(molgenisTransaction.getJpaTransaction());
+		super.doCleanupAfterCompletion(molgenisTransaction.getTransaction());
 
 		TransactionSynchronizationManager.unbindResourceIfPossible(TRANSACTION_ID_RESOURCE_NAME);
 	}
@@ -160,14 +163,14 @@ public class MolgenisTransactionManager extends JpaTransactionManager
 	protected Object doSuspend(Object transaction)
 	{
 		MolgenisTransaction molgenisTransaction = (MolgenisTransaction) transaction;
-		return super.doSuspend(molgenisTransaction.getJpaTransaction());
+		return super.doSuspend(molgenisTransaction.getTransaction());
 	}
 
 	@Override
 	protected void doResume(Object transaction, Object suspendedResources)
 	{
 		MolgenisTransaction molgenisTransaction = (MolgenisTransaction) transaction;
-		super.doResume(molgenisTransaction.getJpaTransaction(), suspendedResources);
+		super.doResume(molgenisTransaction.getTransaction(), suspendedResources);
 	}
 
 }

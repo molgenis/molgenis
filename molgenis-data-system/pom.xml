@@ -59,7 +59,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-data-jpa</artifactId>
+			<artifactId>molgenis-data</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

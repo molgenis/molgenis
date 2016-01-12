@@ -14,7 +14,6 @@ import org.molgenis.data.config.HttpClientConfig;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
-import org.molgenis.data.jpa.JpaRepositoryCollection;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MySqlEntityFactory;
 import org.molgenis.data.mysql.MysqlRepository;
@@ -100,9 +99,6 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	private ManageableRepositoryCollection mysqlRepositoryCollection;
 
 	@Autowired
-	private JpaRepositoryCollection jpaRepositoryCollection;
-
-	@Autowired
 	private ElasticsearchRepositoryCollection elasticsearchRepositoryCollection;
 
 	@Autowired
@@ -151,7 +147,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	public void addUpgrades()
 	{
 		upgradeService.addUpgrade(new Step1UpgradeMetaData(dataSource, searchService));
-		upgradeService.addUpgrade(new Step2(dataService, jpaRepositoryCollection, dataSource, searchService));
+		upgradeService.addUpgrade(new Step2(dataService, null, dataSource, searchService));
 		upgradeService.addUpgrade(new Step3AddOrderColumnToMrefTables(dataSource));
 		upgradeService.addUpgrade(new Step4VarcharToText(dataSource, mysqlRepositoryCollection));
 		//upgradeService.addUpgrade(new Step5AlterDataexplorerMenuURLs(mysqlRepositoryCollection
@@ -176,7 +172,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step12ChangeElasticsearchTokenizer(embeddedElasticSearchServiceFactory));
 		upgradeService.addUpgrade(new Step13RemoveCatalogueMenuEntries(dataSource, gson));
 		upgradeService.addUpgrade(new Step14UpdateAttributeMapping(dataSource));
-		upgradeService.addUpgrade(new Step15AddDefaultValue(dataSource, searchService, jpaRepositoryCollection));
+		upgradeService.addUpgrade(new Step15AddDefaultValue(dataSource, searchService, null));
 		upgradeService.addUpgrade(new Step16RuntimePropertyToSettings(runtimePropertyToAppSettingsMigrator,
 				runtimePropertyToGenomicDataSettingsMigrator, runtimePropertyToDataExplorerSettingsMigrator,
 				runtimePropertyToStaticContentMigrator));
@@ -223,10 +219,6 @@ public class WebAppConfig extends MolgenisWebAppConfig
 				if (MysqlRepositoryCollection.NAME.equals(emd.getBackend()))
 				{
 					localDataService.addRepository(backend.addEntityMeta(emd));
-				}
-				else if (JpaRepositoryCollection.NAME.equals(emd.getBackend()))
-				{
-					localDataService.addRepository(jpaRepositoryCollection.getUnderlying(emd.getName()));
 				}
 				else if (ElasticsearchRepositoryCollection.NAME.equals(emd.getBackend()))
 				{

@@ -11,12 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.orm.jpa.JpaDialect;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.JpaVendorAdapter;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect;
-import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.TransactionManagementConfigurer;
@@ -75,35 +69,9 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 	}
 
 	@Bean
-	public JpaDialect jpaDialect()
-	{
-		return new EclipseLinkJpaDialect();
-	}
-
-	@Bean
-	public JpaVendorAdapter jpaVendorAdapter()
-	{
-		EclipseLinkJpaVendorAdapter eclipseLinkJpaVendorAdapter = new EclipseLinkJpaVendorAdapter();
-		return eclipseLinkJpaVendorAdapter;
-	}
-
-	@Bean
-	public FactoryBean<EntityManagerFactory> localEntityManagerFactoryBean()
-	{
-		LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
-		entityManagerFactoryBean.setPersistenceUnitName(DEFAULT_PERSISTENCE_UNIT_NAME);
-		entityManagerFactoryBean.setDataSource(dataSource());
-		entityManagerFactoryBean.setJpaDialect(jpaDialect());
-		entityManagerFactoryBean.setJpaVendorAdapter(jpaVendorAdapter());
-		entityManagerFactoryBean.setJpaPropertyMap(Collections.singletonMap("eclipselink.weaving", "false")); // TODO use load time weaving
-		// entityManagerFactoryBean.setLoadTimeWeaver(loadTimeWeaver); // TODO use load time weaving
-		return entityManagerFactoryBean;
-	}
-	
-	@Bean
 	public PlatformTransactionManager transactionManager()
 	{
-		return new MolgenisTransactionManager(idGenerator);
+		return new MolgenisTransactionManager(idGenerator, dataSource());
 	}
 	
 	@Override

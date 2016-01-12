@@ -7,6 +7,7 @@ import java.util.Arrays;
 
 import static org.molgenis.MolgenisFieldTypes.DATETIME;
 import static org.molgenis.MolgenisFieldTypes.ENUM;
+import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.MolgenisFieldTypes.INT;
 
@@ -28,7 +29,7 @@ public class ImportRunMetaData extends DefaultEntityMetaData {
         addAttribute(STARTDATE).setDataType(DATETIME).setNillable(false);
         addAttribute(ENDDATE).setDataType(DATETIME).setNillable(true);
         addAttribute(USERNAME).setNillable(false);
-        addAttribute(STATUS).setDataType(ENUM).setNillable(false).setEnumOptions(Arrays.asList("RUNNING,FINISHED,FAILED"));
+        addAttribute(STATUS).setDataType(STRING).setNillable(false).setEnumOptions(Arrays.asList("RUNNING","FINISHED","FAILED"));
         addAttribute(MESSAGE).setDataType(TEXT).setNillable(true);
         addAttribute(PROGRESS).setDataType(INT).setNillable(false);
         addAttribute(IMPORTEDENTITIES).setDataType(TEXT).setNillable(true);

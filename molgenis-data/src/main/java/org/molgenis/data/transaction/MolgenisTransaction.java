@@ -1,5 +1,7 @@
 package org.molgenis.data.transaction;
 
+import org.springframework.transaction.PlatformTransactionManager;
+
 /**
  * Class representing a transaction in Molgenis.
  * 
@@ -8,12 +10,12 @@ package org.molgenis.data.transaction;
 public class MolgenisTransaction
 {
 	private String id;
-	private Object jpaTransaction;
+	private Object transaction;
 
-	public MolgenisTransaction(String id, Object jpaTransaction)
+	public MolgenisTransaction(String id, Object transaction)
 	{
 		this.id = id;
-		this.jpaTransaction = jpaTransaction;
+		this.transaction = transaction;
 	}
 
 	public String getId()
@@ -26,9 +28,9 @@ public class MolgenisTransaction
 		this.id = id;
 	}
 
-	public Object getJpaTransaction()
+	public Object getTransaction()
 	{
-		return jpaTransaction;
+		return transaction;
 	}
 
 	@Override
