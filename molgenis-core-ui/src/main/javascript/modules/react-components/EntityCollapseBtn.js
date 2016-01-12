@@ -1,46 +1,44 @@
-define(function(require, exports, module) {
-	/**
-	 * @module EntityCollapseBtn
-	 */
-	"use strict";
+/**
+ * @module EntityCollapseBtn
+ */
+"use strict";
 
-	var React = require('react');
-	var _ = require('underscore');
+import React from 'react';
+import _ from 'underscore';
 
-	var Button = require('./Button');
+import Button from './Button';
 
-	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
+import DeepPureRenderMixin from './mixin/DeepPureRenderMixin';
 
-	/**
-	 * @memberOf EntityCollapseBtn
-	 */
-	var EntityCollapseBtn = React.createClass({
-		mixins : [ DeepPureRenderMixin ],
-		displayName : 'EntityCollapseBtn',
-		propTypes : {
-			attrPath : React.PropTypes.array.isRequired,
-			onCollapse : React.PropTypes.func,
-		},
-		getDefaultProps : function() {
-			return {
-				onCollapse : function() {
-				}
-			};
-		},
-		render : function() {
-			return Button({
-				icon : 'collapse-up',
-				size : 'xsmall',
-				title : 'Collapse entity',
-				onClick : this._handleCollapse
-			});
-		},
-		_handleCollapse : function() {
-			this.props.onCollapse({
-				attrPath : this.props.attrPath
-			});
-		}
-	});
-
-	module.exports = React.createFactory(EntityCollapseBtn);
+/**
+ * @memberOf EntityCollapseBtn
+ */
+var EntityCollapseBtn = React.createClass({
+	mixins : [ DeepPureRenderMixin ],
+	displayName : 'EntityCollapseBtn',
+	propTypes : {
+		attrPath : React.PropTypes.array.isRequired,
+		onCollapse : React.PropTypes.func,
+	},
+	getDefaultProps : function() {
+		return {
+			onCollapse : function() {
+			}
+		};
+	},
+	render : function() {
+		return Button({
+			icon : 'collapse-up',
+			size : 'xsmall',
+			title : 'Collapse entity',
+			onClick : this._handleCollapse
+		});
+	},
+	_handleCollapse : function() {
+		this.props.onCollapse({
+			attrPath : this.props.attrPath
+		});
+	}
 });
+
+export default React.createFactory(EntityCollapseBtn);

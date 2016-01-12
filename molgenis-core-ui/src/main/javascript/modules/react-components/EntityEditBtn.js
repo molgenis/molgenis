@@ -75,4 +75,3 @@ var EntityEditBtn = React.createClass({
 });
 
 export default React.createFactory(EntityEditBtn);
-

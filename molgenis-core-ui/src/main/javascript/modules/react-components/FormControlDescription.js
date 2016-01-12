@@ -1,58 +1,55 @@
-define(function(require, exports, module) {
-	/**
-	 * @module FormControlDescription
-	 */
-	"use strict";
+/**
+ * @module FormControlDescription
+ */
 
-	var React = require('react');
-	var _ = require('underscore');
-	var api = require('../RestClientV1');
-	var URI = require('urijs');
+import React from 'react';
+import _ from 'underscore';
+import api from '../RestClientV1';
+import URI from 'urijs';
 
-	var DeepPureRenderMixin = require('./mixin/DeepPureRenderMixin');
+import DeepPureRenderMixin from './mixin/DeepPureRenderMixin';
 
-	var span = React.DOM.span, a = React.DOM.a;
+var span = React.DOM.span, a = React.DOM.a;
 
-	/**
-	 * @memberOf component
-	 */
-	var FormControlDescription = React.createClass({
-		mixins : [ DeepPureRenderMixin ],
-		displayName : 'FormControlDescription',
-		propTypes : {
-			description : React.PropTypes.string.isRequired
-		},
-		render : function() {
-			var text = this.props.description;
+/**
+ * @memberOf component
+ */
+var FormControlDescription = React.createClass({
+	mixins : [ DeepPureRenderMixin ],
+	displayName : 'FormControlDescription',
+	propTypes : {
+		description : React.PropTypes.string.isRequired
+	},
+	render : function() {
+		var text = this.props.description;
 
-			var keyIdx = 0;
-			var idx = 0;
-			var DescriptionParts = [];
-			URI.withinString(text, function(url, start, end) {
-				if (start > idx) {
-					DescriptionParts.push(span({
-						key : '' + keyIdx++
-					}, text.substr(idx, start)));
-				}
-				DescriptionParts.push(a({
-					href : url,
-					target : '_blank',
-					key : '' + keyIdx++
-				}, url));
-
-				idx = end;
-				return url;
-			});
-			if (idx < text.length) {
+		var keyIdx = 0;
+		var idx = 0;
+		var DescriptionParts = [];
+		URI.withinString(text, function(url, start, end) {
+			if (start > idx) {
 				DescriptionParts.push(span({
 					key : '' + keyIdx++
-				}, text.substr(idx)));
+				}, text.substr(idx, start)));
 			}
-			return span({
-				className : 'help-block'
-			}, DescriptionParts);
-		}
-	});
+			DescriptionParts.push(a({
+				href : url,
+				target : '_blank',
+				key : '' + keyIdx++
+			}, url));
 
-	module.exports = React.createFactory(FormControlDescription);
+			idx = end;
+			return url;
+		});
+		if (idx < text.length) {
+			DescriptionParts.push(span({
+				key : '' + keyIdx++
+			}, text.substr(idx)));
+		}
+		return span({
+			className : 'help-block'
+		}, DescriptionParts);
+	}
 });
+
+export default React.createFactory(FormControlDescription);
