@@ -3,13 +3,14 @@ package org.molgenis.integrationtest.data;
 import static org.molgenis.MolgenisFieldTypes.DATE;
 import static org.testng.Assert.assertEquals;
 
-import java.text.SimpleDateFormat;
+import java.text.ParseException;
+import java.util.Date;
 
 import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.util.MolgenisDateFormat;
 
 public abstract class AbstractDateDatatypeTest extends AbstractDatatypeTest
 {
@@ -25,21 +26,37 @@ public abstract class AbstractDateDatatypeTest extends AbstractDatatypeTest
 	}
 
 	@Override
-	public void populateTestEntity(DefaultEntity entity) throws Exception
+	public void populateTestEntity(Entity entity) throws Exception
 	{
-		entity.set("col1", "2012-03-13");
-		entity.set("col2", "2012-03-14");
-		entity.set("col3", "1992-03-13");
+		entity.set("col1", parseDate("2012-03-13"));
+		entity.set("col2", parseDate("2012-03-14"));
+		entity.set("col3", parseDate("1992-03-13"));
 	}
 
 	@Override
-	public void verifyTestEntity(Entity entity) throws Exception
+	public void verifyTestEntityAfterInsert(Entity entity) throws Exception
 	{
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
-		assertEquals(entity.get("col1"), new java.sql.Date(sdf.parse("2012-03-13").getTime()));
-		assertEquals(entity.get("col2"), new java.sql.Date(sdf.parse("2012-03-14").getTime()));
-		assertEquals(entity.getUtilDate("col3"), sdf.parse("1992-03-13"));
+		assertEquals(entity.get("col1"), parseDate("2012-03-13"));
+		assertEquals(entity.getDate("col2"), parseDate("2012-03-14"));
+		assertEquals(entity.getUtilDate("col3"), parseDate("1992-03-13"));
 	}
 
+	@Override
+	public void updateTestEntity(Entity entity) throws Exception
+	{
+		entity.set("col2", parseDate("2000-03-14"));
+	}
+
+	@Override
+	public void verifyTestEntityAfterUpdate(Entity entity) throws Exception
+	{
+		entity.set("col1", parseDate("2012-03-13"));
+		entity.set("col2", parseDate("2000-03-14"));
+		entity.set("col3", parseDate("1992-03-13"));
+	}
+
+	private Date parseDate(String date) throws ParseException
+	{
+		return MolgenisDateFormat.getDateFormat().parse(date);
+	}
 }

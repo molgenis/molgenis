@@ -11,7 +11,6 @@ import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 
 public abstract class AbstractCompoundDatatypeTest extends AbstractDatatypeTest
@@ -34,7 +33,7 @@ public abstract class AbstractCompoundDatatypeTest extends AbstractDatatypeTest
 	}
 
 	@Override
-	public void populateTestEntity(DefaultEntity entity) throws Exception
+	public void populateTestEntity(Entity entity) throws Exception
 	{
 		entity.set("col1", false);
 		entity.set("col2", false);
@@ -42,10 +41,24 @@ public abstract class AbstractCompoundDatatypeTest extends AbstractDatatypeTest
 	}
 
 	@Override
-	public void verifyTestEntity(Entity entity) throws Exception
+	public void verifyTestEntityAfterInsert(Entity entity) throws Exception
 	{
 		assertEquals(entity.getBoolean("col1"), Boolean.FALSE);
 		assertEquals(entity.get("col2"), Boolean.FALSE);
+		assertEquals(entity.get("col3"), Boolean.TRUE);
+	}
+
+	@Override
+	public void updateTestEntity(Entity entity) throws Exception
+	{
+		entity.set("col2", true);
+	}
+
+	@Override
+	public void verifyTestEntityAfterUpdate(Entity entity) throws Exception
+	{
+		assertEquals(entity.getBoolean("col1"), Boolean.FALSE);
+		assertEquals(entity.get("col2"), Boolean.TRUE);
 		assertEquals(entity.get("col3"), Boolean.TRUE);
 	}
 

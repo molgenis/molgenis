@@ -6,7 +6,6 @@ import static org.testng.Assert.assertEquals;
 import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 
 public class AbstractIntDatatypeTest extends AbstractDatatypeTest
@@ -24,7 +23,7 @@ public class AbstractIntDatatypeTest extends AbstractDatatypeTest
 	}
 
 	@Override
-	public void populateTestEntity(DefaultEntity entity) throws Exception
+	public void populateTestEntity(Entity entity) throws Exception
 	{
 		entity.set("col1", 1);
 		entity.set("col2", 3);
@@ -32,7 +31,7 @@ public class AbstractIntDatatypeTest extends AbstractDatatypeTest
 	}
 
 	@Override
-	public void verifyTestEntity(Entity entity) throws Exception
+	public void verifyTestEntityAfterInsert(Entity entity) throws Exception
 	{
 		assertEquals(entity.get("col1"), 1);
 		assertEquals(entity.get("col2"), 3);
