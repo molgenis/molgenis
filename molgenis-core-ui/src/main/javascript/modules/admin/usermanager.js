@@ -1,4 +1,3 @@
-import 'babel-polyfill';
 import api from '../RestClientV1';
 import $ from 'jquery';
 import Form from '../react-components/Form';
