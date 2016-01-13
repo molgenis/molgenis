@@ -31,8 +31,6 @@ import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.generators.DataTypeGen;
 import org.molgenis.generators.EntityMetaDataGen;
 import org.molgenis.generators.Generator;
-import org.molgenis.generators.JpaRepositoryGen;
-import org.molgenis.generators.JpaRepositorySourceGen;
 import org.molgenis.generators.db.DatabaseConfigGen;
 import org.molgenis.generators.db.EntitiesValidatorGen;
 import org.molgenis.generators.db.JDBCMetaDatabaseGen;
@@ -189,17 +187,11 @@ public class Molgenis
 
 			generators.add(new DataTypeGen());
 			generators.add(new EntityMetaDataGen());
-			generators.add(new JpaRepositoryGen());
 			generators.add(new JDBCMetaDatabaseGen());
 
 			if (options.generate_persistence)
 			{
 				generators.add(new PersistenceGen());
-			}
-
-			if (options.generate_jpa_repository_source)
-			{
-				generators.add(new JpaRepositorySourceGen());
 			}
 		}
 		else

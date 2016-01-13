@@ -7,7 +7,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class MolgenisGroup  extends org.molgenis.data.support.AbstractEntity implements org.molgenis.data.Entity{
-    public static final String ENTITY_NAME = "MolgenisGroup";
+    public static final String ENTITY_NAME = "molgenisGroup";
     public static final String NAME = "name";
     public static final String ID = "id";
     public static final String ACTIVE = "active";

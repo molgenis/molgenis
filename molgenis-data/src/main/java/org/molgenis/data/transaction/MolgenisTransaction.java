@@ -4,18 +4,16 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * Class representing a transaction in Molgenis.
- * 
- * Wraps the JpaTransaction object because JPA needs a JpaTransaction to work
  */
 public class MolgenisTransaction
 {
 	private String id;
-	private Object transaction;
+	private Object dataSourceTransaction;
 
-	public MolgenisTransaction(String id, Object transaction)
+	public MolgenisTransaction(String id, Object dataSourceTransaction)
 	{
 		this.id = id;
-		this.transaction = transaction;
+		this.dataSourceTransaction = dataSourceTransaction;
 	}
 
 	public String getId()
@@ -28,9 +26,9 @@ public class MolgenisTransaction
 		this.id = id;
 	}
 
-	public Object getTransaction()
+	public Object getDataSourceTransaction()
 	{
-		return transaction;
+		return dataSourceTransaction;
 	}
 
 	@Override

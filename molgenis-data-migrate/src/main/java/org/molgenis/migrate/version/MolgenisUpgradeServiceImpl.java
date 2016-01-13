@@ -44,6 +44,10 @@ public class MolgenisUpgradeServiceImpl implements MolgenisUpgradeService
 	@Override
 	public boolean upgrade()
 	{
+		if (versionService.getMolgenisVersionFromServerProperties() < 25)
+		{
+			throw new UnsupportedOperationException("Upgrading from versions below 1.15 is not supported, please update to 1.15 first.");
+		}
 		if (versionService.getMolgenisVersionFromServerProperties() < MolgenisVersionService.CURRENT_VERSION)
 		{
 			LOG.info("MetaData version:{}, current version:{} upgrade needed",
