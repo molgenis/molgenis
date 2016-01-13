@@ -1,25 +1,19 @@
-'use strict';
 
-//######################################################################
-//##### Anything required here will get bundled                    #####
-//##### into molgenis-bundle.js                                    #####
-//######################################################################
+//##############################################################################
+//##### Anything required here will get bundled                            #####
+//##### into molgenis-core-ui.bundle.js                                    #####
+//##############################################################################
 
-var $ = window.$ = window.jQuery = require('jquery');
-var Bootstrap = require('bootstrap');
-var React = require('react');
-var _ = require('underscore');
-var validate = require('jquery-validation');
-var Handlebars = require('handlebars/dist/handlebars.min');
 window.molgenis = require('./modules/MolgenisGlobalObject');
+window.$ = require('jquery');
 
 // Create the molgenis object in the global scope
 // Used for backwards compatibility
 
-//######################################################################
-//##### Any code written here will be executed synchronously in    #####
-//##### the browser when the script molgenis-bundle.js is loaded.  #####
-//######################################################################
+//##############################################################################
+//##### Any code written here will be executed synchronously in            #####
+//##### the browser when the script molgenis-core-ui.bundle.js is loaded.  #####
+//##############################################################################
 
 
 

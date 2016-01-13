@@ -45,9 +45,16 @@
     <#if app_settings.cssHref?has_content>
         <link rel="stylesheet" href="<@resource_href "/css/${app_settings.cssHref?html}"/>" type="text/css">
     </#if> 
-
-		<#-- Main entry point for the application. Contains a bundle for all global dependencies like bootstrap, jquery and react -->
-		<script type="application/javascript" src="<@resource_href "/js/dist/molgenis-core-ui.bundle.js"/>"></script>
+		<#-- Babel polyfill 
+		<script type="application/javascript" src="<@resource_href "/js/dist/polyfill.js"/>"></script>
+		-->
+		<#-- Common molgenis bundle. Contains global dependencies like bootstrap, jquery and react -->
+		<script type="application/javascript" src="<@resource_href "/js/dist/molgenis-common.bundle.js"/>"></script>
+		
+		<#if !js?has_content>
+		<#-- molgenis-core-ui entry point -->
+		<script type="application/javascript" src="<@resource_href "/js/dist/molgenis-global.bundle.js"/>"></script>
+		</#if>
 	  	
 	  	<!--[if IE 9]>
         	<#-- used to disable the genomebrowser in IE9 -->

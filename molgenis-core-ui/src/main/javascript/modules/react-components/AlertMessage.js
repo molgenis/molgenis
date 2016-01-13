@@ -1,10 +1,9 @@
 /**
  * @module AlertMessage
  */
-"use strict";
-
 import React from 'react';
 import _ from 'underscore';
+import Icon from './Icon';
 
 var div = React.DOM.div, span = React.DOM.span, button = React.DOM.button;
 
@@ -34,9 +33,7 @@ var AlertMessage = React.createClass({
 		span({
 			'aria-hidden' : true,
 		}, String.fromCharCode(215)) // &times;
-		) : null, this.props.type === 'danger' ? molgenis.ui.Icon({
-			name : 'exclamation-sign'
-		}) : null, this.props.type === 'danger' ? ' ' + this.props.message : this.props.message));
+		) : null, this.props.type === 'danger' ? Icon({name : 'exclamation-sign'}) : null, this.props.type === 'danger' ? ' ' + this.props.message : this.props.message));
 	}
 });
 

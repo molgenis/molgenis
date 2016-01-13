@@ -1,10 +1,9 @@
+import 'babel-polyfill';
 import api from '../RestClientV1';
 import $ from 'jquery';
 import {contextUrl} from '../MolgenisGlobalObject';
 import Form from '../react-components/Form';
 import React from 'react';
-import Bootstrap from 'bootstrap';
-import 'babel-polyfill';
 
 function setViewState(viewState) {
 	// viewState: "users" | "groups"
@@ -191,3 +190,5 @@ $(function() {
 		setActivation('group', $(this).data('id'), this);
 	});
 });
+
+window.$ = window.jquery = $;
