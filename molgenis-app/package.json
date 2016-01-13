@@ -34,7 +34,6 @@
     "jquery.fancytree": "2.14.0",
     "moment": "2.9.0",
     "react": "0.13.3",
-    "react-classset": "0.0.2",
     "svg-pan-zoom": "3.2.6",
     "tinymce": "4.3.2",
     "typedarray": "0.0.6",

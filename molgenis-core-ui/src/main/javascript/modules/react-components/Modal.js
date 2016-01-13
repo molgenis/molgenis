@@ -3,9 +3,7 @@
  */
 
 import $ from 'jquery';
-import React from 'react';
-import classSet from 'react-classset';
-
+import React from 'react/addons';
 import DeepPureRenderMixin from './mixin/DeepPureRenderMixin';
 
 var div = React.DOM.div, button = React.DOM.button, span = React.DOM.span, h4 = React.DOM.h4;
@@ -45,7 +43,7 @@ var Modal = React.createClass({
 		// http://stackoverflow.com/a/18169689
 	},
 	render : function() {
-		var modalDialogClasses = classSet({
+		var modalDialogClasses = React.addons.classSet({
 			'modal-dialog' : true,
 			'modal-sm' : this.props.size == 'small',
 			'modal-lg' : this.props.size == 'large'
