@@ -5,13 +5,17 @@ import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
+import org.elasticsearch.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IdGenerator;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
@@ -34,6 +38,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.collect.Maps;
 
 public class MappingServiceImpl implements MappingService
 {
@@ -156,15 +162,15 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
-	public String applyMappings(MappingTarget mappingTarget, String newEntityName)
+	public String applyMappings(MappingTarget mappingTarget, String entityName)
 	{
-		DefaultEntityMetaData targetMetaData = new DefaultEntityMetaData(newEntityName, mappingTarget.getTarget());
+		DefaultEntityMetaData targetMetaData = new DefaultEntityMetaData(entityName, mappingTarget.getTarget());
 		targetMetaData.setPackage(PackageImpl.defaultPackage);
-		targetMetaData.setLabel(newEntityName);
+		targetMetaData.setLabel(entityName);
 		targetMetaData.addAttribute("source");
 
 		Repository targetRepo;
-		if (!dataService.hasRepository(newEntityName))
+		if (!dataService.hasRepository(entityName))
 		{
 			targetRepo = dataService.getMeta().addEntityMeta(targetMetaData);
 			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
@@ -172,7 +178,13 @@ public class MappingServiceImpl implements MappingService
 		}
 		else
 		{
-			targetRepo = dataService.getRepository(newEntityName);
+			targetRepo = dataService.getRepository(entityName);
+
+			if (!isTargetMetaCompatible(targetRepo, targetMetaData))
+			{
+				throw new MolgenisDataException(
+						"Target entity " + entityName + " exists but is not compatible with the target mappings.");
+			}
 		}
 
 		try
@@ -188,15 +200,51 @@ public class MappingServiceImpl implements MappingService
 		}
 	}
 
-	private void applyMappingsToRepositories(MappingTarget mappingTarget, Repository targetRepo)
+	private boolean isTargetMetaCompatible(Repository targetRepo, EntityMetaData mappingTargetMetaData)
 	{
-		for (EntityMapping sourceMapping : mappingTarget.getEntityMappings())
+		Map<String, AttributeMetaData> targetRepoAttributeMap = Maps.newHashMap();
+		targetRepo.getEntityMetaData().getAtomicAttributes()
+				.forEach(attr -> targetRepoAttributeMap.put(attr.getName(), attr));
+
+		for (AttributeMetaData mappingTargetAttr : mappingTargetMetaData.getAtomicAttributes())
 		{
-			applyMappingToRepo(sourceMapping, targetRepo);
+			String mappingTargetAttrName = mappingTargetAttr.getName();
+			if (targetRepoAttributeMap.containsKey(mappingTargetAttrName)
+					&& targetRepoAttributeMap.get(mappingTargetAttrName).isSameAs(mappingTargetAttr))
+			{
+				continue;
+
+			}
+			else
+			{
+				return false;
+			}
 		}
+		return true;
 	}
 
-	private void applyMappingToRepo(EntityMapping sourceMapping, Repository targetRepo)
+	private void applyMappingsToRepositories(MappingTarget mappingTarget, Repository targetRepo)
+	{
+		// collect (mapped) ids from all sources to keep track of deleted entities
+		List<Object> targetRepoIds = Lists.newArrayList();
+		List<String> mappedSourceIds = Lists.newArrayList();
+
+		targetRepo.forEach(entity -> targetRepoIds.add(entity.getIdValue().toString()));
+
+		for (EntityMapping sourceMapping : mappingTarget.getEntityMappings())
+		{
+			applyMappingToRepo(sourceMapping, targetRepo, mappedSourceIds);
+		}
+
+		targetRepoIds.removeAll(mappedSourceIds);
+		if (!targetRepoIds.isEmpty())
+		{
+			targetRepo.deleteById(targetRepoIds);
+		}
+
+	}
+
+	private void applyMappingToRepo(EntityMapping sourceMapping, Repository targetRepo, List<String> mappedSourceIds)
 	{
 		EntityMetaData targetMetaData = targetRepo.getEntityMetaData();
 		Repository sourceRepo = dataService.getRepository(sourceMapping.getName());
@@ -204,6 +252,8 @@ public class MappingServiceImpl implements MappingService
 		{
 			MapEntity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
 					sourceMapping.getSourceEntityMetaData(), targetRepo);
+
+			mappedSourceIds.add(mappedEntity.getIdValue().toString());
 
 			if (targetRepo.findOne(mappedEntity.getIdValue()) != null)
 			{
