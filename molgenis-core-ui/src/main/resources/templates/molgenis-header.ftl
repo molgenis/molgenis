@@ -45,9 +45,6 @@
     <#if app_settings.cssHref?has_content>
         <link rel="stylesheet" href="<@resource_href "/css/${app_settings.cssHref?html}"/>" type="text/css">
     </#if> 
-		<#-- Babel polyfill 
-		<script type="application/javascript" src="<@resource_href "/js/dist/polyfill.js"/>"></script>
-		-->
 		<#-- Common molgenis bundle. Contains global dependencies like bootstrap, jquery and react -->
 		<script type="application/javascript" src="<@resource_href "/js/dist/molgenis-common.bundle.js"/>"></script>
 		

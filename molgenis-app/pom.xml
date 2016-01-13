@@ -87,28 +87,6 @@
 						</execution> -->
 				</executions>
 			</plugin>
-			<plugin>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>2.7</version>
-				<executions>
-					<execution>
-						<id>copy-polyfill</id>
-						<phase>validate</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>target/classes/js/dist</outputDirectory>
-							<resources>
-								<resource>
-									<directory>node_modules/babel-polyfill/dist</directory>
-									<filtering>false</filtering>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 			<!-- minify resources -->
 			<plugin>
 				<groupId>com.samaxes.maven</groupId>
