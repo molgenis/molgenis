@@ -1,8 +1,8 @@
 /**************************************************************
  * This module holds all the methods to query the REST api v1 *
- *                                                          *
- * @module RestClientV1                                          *
- *************************************************************/
+ *                                                            *
+ * @module RestClientV1                                       *
+ **************************************************************/
 var $ = require('jquery');
 
 class RestClientV1 {
@@ -159,7 +159,7 @@ class RestClientV1 {
         $.ajax({
             type: 'POST',
             dataType: 'json',
-            url: apiBaseUri + 'login',
+            url: this.apiBaseUri + 'login',
             contentType: 'application/json',
             async: true,
             data: JSON.stringify({
@@ -180,7 +180,7 @@ class RestClientV1 {
 
     logout(callback) {
         this._ajax({
-            url: apiBaseUri + 'logout',
+            url: this.apiBaseUri + 'logout',
             async: true,
             success: function () {
                 self.token = null;
