@@ -1,4 +1,4 @@
-package ${package};
+package org.molgenis;
 
 import java.beans.PropertyVetoException;
 import java.util.Collections;
@@ -28,13 +28,13 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 {
 	private static final String DEFAULT_PERSISTENCE_UNIT_NAME = "molgenis";
 
-	@Value("${r"${db_driver:com.mysql.jdbc.Driver}"}")
+	@Value("${db_driver:com.mysql.jdbc.Driver}")
 	private String dbDriverClass;
-	@Value("${r"${db_uri:@null}"}")
+	@Value("${db_uri:@null}")
 	private String dbJdbcUri;
-	@Value("${r"${db_user:@null}"}")
+	@Value("${db_user:@null}")
 	private String dbUser;
-	@Value("${r"${db_password:@null}"}")
+	@Value("${db_password:@null}")
 	private String dbPassword;
 	
 	@Autowired

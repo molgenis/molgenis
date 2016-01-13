@@ -132,14 +132,14 @@ class RestControllerV2
 	public Map<String, String> getVersion(@Value("${molgenis.version:@null}") String molgenisVersion,
 			@Value("${molgenis.build.date:@null}") String molgenisBuildDate)
 	{
-		if (molgenisVersion == null) throw new IllegalArgumentException("molgenisVersion is null");
-		if (molgenisBuildDate == null) throw new IllegalArgumentException("molgenisBuildDate is null");
-		molgenisBuildDate = molgenisBuildDate.equals("${maven.build.timestamp}") ? new SimpleDateFormat(
-				"yyyy-MM-dd HH:mm").format(new java.util.Date()) + " by Eclipse" : molgenisBuildDate;
+		//if (molgenisVersion == null) throw new IllegalArgumentException("molgenisVersion is null");
+		//if (molgenisBuildDate == null) throw new IllegalArgumentException("molgenisBuildDate is null");
+		//molgenisBuildDate = molgenisBuildDate.equals("${maven.build.timestamp}") ? new SimpleDateFormat(
+		//		"yyyy-MM-dd HH:mm").format(new java.util.Date()) + " by Eclipse" : molgenisBuildDate;
 
 		Map<String, String> result = new HashMap<>();
-		result.put("molgenisVersion", molgenisVersion);
-		result.put("buildDate", molgenisBuildDate);
+		//result.put("molgenisVersion", molgenisVersion);
+		//result.put("buildDate", molgenisBuildDate);
 
 		return result;
 	}
