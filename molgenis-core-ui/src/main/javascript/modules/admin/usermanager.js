@@ -1,7 +1,6 @@
 import 'babel-polyfill';
 import api from '../RestClientV1';
 import $ from 'jquery';
-import {contextUrl} from '../MolgenisGlobalObject';
 import Form from '../react-components/Form';
 import React from 'react';
 
@@ -9,7 +8,7 @@ function setViewState(viewState) {
 	// viewState: "users" | "groups"
 	$.ajax({
 		type : 'PUT',
-		url : contextUrl + '/setViewState/' + viewState,
+		url : molgenis.contextUrl + '/setViewState/' + viewState,
 	});
 }
 
@@ -61,7 +60,7 @@ function setActivation(type, id, checkbox) {
 			id : id,
 			active : active
 		}),
-		url : contextUrl + '/activation',
+		url : molgenis.contextUrl + '/activation',
 		success : function(data) {
 			var styleClass = data.success ? 'success' : 'warning'
 			if (data.type === "group") {
@@ -90,7 +89,7 @@ function changeGroupMembership(userId, groupId, checkbox) {
 		},
 		type : 'PUT',
 		dataType : 'json',
-		url : contextUrl + '/changeGroupMembership',
+		url : molgenis.contextUrl + '/changeGroupMembership',
 		data : JSON.stringify({
 			userId : userId,
 			groupId : groupId,
@@ -118,7 +117,7 @@ function addUserToAllUsersGroup(userId, callback) {
 				},
 				type : 'PUT',
 				dataType : 'json',
-				url : contextUrl + '/changeGroupMembership',
+				url : molgenis.contextUrl + '/changeGroupMembership',
 				data : JSON.stringify({
 					userId : userId,
 					groupId : groupId,
