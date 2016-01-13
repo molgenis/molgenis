@@ -20,6 +20,7 @@ import EntityInstanceLoaderMixin from './mixin/EntityInstanceLoaderMixin';
 import ReactLayeredComponentMixin from './mixin/ReactLayeredComponentMixin';
 
 import JQueryForm from './wrapper/JQueryForm';
+import Promise from 'promise';
 
 const {div, span} = React.DOM;
 
