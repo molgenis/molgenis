@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
@@ -84,6 +85,12 @@ public class EntityListenerRepositoryDecorator implements Repository
 	}
 
 	@Override
+	public Stream<Entity> findAllAsStream(Query q)
+	{
+		return decoratedRepository.findAllAsStream(q);
+	}
+
+	@Override
 	public Entity findOne(Query q)
 	{
 		return decoratedRepository.findOne(q);
@@ -108,7 +115,19 @@ public class EntityListenerRepositoryDecorator implements Repository
 	}
 
 	@Override
+	public Stream<Entity> findAll(Stream<Object> ids)
+	{
+		return decoratedRepository.findAll(ids);
+	}
+
+	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
+	{
+		return decoratedRepository.findAll(ids, fetch);
+	}
+
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
 		return decoratedRepository.findAll(ids, fetch);
 	}
@@ -151,6 +170,22 @@ public class EntityListenerRepositoryDecorator implements Repository
 	}
 
 	@Override
+	public void update(Stream<? extends Entity> entities)
+	{
+		if (entityListeners != null)
+		{
+			entities = entities.filter(entity -> {
+				Set<EntityListener> entityEntityListeners = entityListeners.get(entity.getIdValue());
+				entityEntityListeners.forEach(entityListener -> {
+					entityListener.postUpdate(entity);
+				});
+				return true;
+			});
+		}
+		decoratedRepository.update(entities);
+	}
+
+	@Override
 	public void delete(Entity entity)
 	{
 		decoratedRepository.delete(entity);
@@ -158,6 +193,12 @@ public class EntityListenerRepositoryDecorator implements Repository
 
 	@Override
 	public void delete(Iterable<? extends Entity> entities)
+	{
+		decoratedRepository.delete(entities);
+	}
+
+	@Override
+	public void delete(Stream<? extends Entity> entities)
 	{
 		decoratedRepository.delete(entities);
 	}
@@ -188,6 +229,12 @@ public class EntityListenerRepositoryDecorator implements Repository
 
 	@Override
 	public Integer add(Iterable<? extends Entity> entities)
+	{
+		return decoratedRepository.add(entities);
+	}
+
+	@Override
+	public Integer add(Stream<? extends Entity> entities)
 	{
 		return decoratedRepository.add(entities);
 	}

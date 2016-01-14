@@ -6,11 +6,14 @@ import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.partition;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Maps.uniqueIndex;
+import static java.util.stream.StreamSupport.stream;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
@@ -24,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 
 /**
@@ -74,6 +78,12 @@ public abstract class AbstractRepository implements Repository
 	}
 
 	@Override
+	public Stream<Entity> findAllAsStream(Query q)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public Entity findOne(Query q)
 	{
 		throw new UnsupportedOperationException();
@@ -100,6 +110,13 @@ public abstract class AbstractRepository implements Repository
 
 	@Override
 	@Transactional(readOnly = true)
+	public Stream<Entity> findAll(Stream<Object> ids)
+	{
+		return findAll(ids, null);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
 	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
 	{
 		if (ids == null) return Collections.emptyList();
@@ -113,10 +130,21 @@ public abstract class AbstractRepository implements Repository
 		}));
 	}
 
+	@Override
+	@Transactional(readOnly = true)
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
+	{
+		Iterator<List<Object>> batches = Iterators.partition(ids.iterator(), FIND_ALL_BATCH_SIZE);
+		Iterable<List<Object>> iterable = () -> batches;
+		return stream(iterable.spliterator(), false).flatMap(batch -> {
+			return stream(findAllBatched(batch, fetch).spliterator(), false);
+		});
+	}
+
 	private Iterable<Entity> findAllBatched(List<Object> ids, Fetch fetch)
 	{
-		Query inQuery = new QueryImpl().in(getEntityMetaData().getIdAttribute().getName(), Sets.newHashSet(ids)).fetch(
-				fetch);
+		Query inQuery = new QueryImpl().in(getEntityMetaData().getIdAttribute().getName(), Sets.newHashSet(ids))
+				.fetch(fetch);
 		Map<Object, Entity> indexedEntities = uniqueIndex(findAll(inQuery), Entity::getIdValue);
 		return filter(transform(ids, id -> lookup(indexedEntities, id)), notNull());
 	}
@@ -150,6 +178,12 @@ public abstract class AbstractRepository implements Repository
 	}
 
 	@Override
+	public void update(Stream<? extends Entity> entities)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public void delete(Entity entity)
 	{
 		throw new UnsupportedOperationException();
@@ -157,6 +191,12 @@ public abstract class AbstractRepository implements Repository
 
 	@Override
 	public void delete(Iterable<? extends Entity> entities)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void delete(Stream<? extends Entity> entities)
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -187,6 +227,12 @@ public abstract class AbstractRepository implements Repository
 
 	@Override
 	public Integer add(Iterable<? extends Entity> entities)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Integer add(Stream<? extends Entity> entities)
 	{
 		throw new UnsupportedOperationException();
 	}

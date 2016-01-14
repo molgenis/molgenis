@@ -6,6 +6,7 @@ import static java.util.stream.StreamSupport.stream;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.molgenis.data.support.EntityWithComputedAttributes;
 
@@ -58,6 +59,14 @@ public class ComputedEntityValuesDecorator implements Repository
 	public Iterable<Entity> findAll(Query q)
 	{
 		Iterable<Entity> entities = decoratedRepo.findAll(q);
+		// compute values with attributes with expressions
+		return toComputedValuesEntities(entities);
+	}
+
+	@Override
+	public Stream<Entity> findAllAsStream(Query q)
+	{
+		Stream<Entity> entities = decoratedRepo.findAllAsStream(q);
 		// compute values with attributes with expressions
 		return toComputedValuesEntities(entities);
 	}
@@ -117,6 +126,22 @@ public class ComputedEntityValuesDecorator implements Repository
 	}
 
 	@Override
+	public Stream<Entity> findAll(Stream<Object> ids)
+	{
+		Stream<Entity> entities = decoratedRepo.findAll(ids);
+		// compute values with attributes with expressions
+		return toComputedValuesEntities(entities);
+	}
+
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
+	{
+		Stream<Entity> entities = decoratedRepo.findAll(ids, fetch);
+		// compute values with attributes with expressions
+		return toComputedValuesEntities(entities);
+	}
+
+	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
 		return decoratedRepo.aggregate(aggregateQuery);
@@ -135,6 +160,12 @@ public class ComputedEntityValuesDecorator implements Repository
 	}
 
 	@Override
+	public void update(Stream<? extends Entity> entities)
+	{
+		decoratedRepo.update(entities);
+	}
+
+	@Override
 	public void delete(Entity entity)
 	{
 		decoratedRepo.delete(entity);
@@ -142,6 +173,12 @@ public class ComputedEntityValuesDecorator implements Repository
 
 	@Override
 	public void delete(Iterable<? extends Entity> entities)
+	{
+		decoratedRepo.delete(entities);
+	}
+
+	@Override
+	public void delete(Stream<? extends Entity> entities)
 	{
 		decoratedRepo.delete(entities);
 	}
@@ -172,6 +209,12 @@ public class ComputedEntityValuesDecorator implements Repository
 
 	@Override
 	public Integer add(Iterable<? extends Entity> entities)
+	{
+		return decoratedRepo.add(entities);
+	}
+
+	@Override
+	public Integer add(Stream<? extends Entity> entities)
 	{
 		return decoratedRepo.add(entities);
 	}
@@ -260,6 +303,20 @@ public class ComputedEntityValuesDecorator implements Repository
 		else
 		{
 			return it;
+		}
+	}
+
+	private Stream<Entity> toComputedValuesEntities(Stream<Entity> entities)
+	{
+		if (getEntityMetaData().hasAttributeWithExpression())
+		{
+			return entities.map(entity -> {
+				return new EntityWithComputedAttributes(entity);
+			});
+		}
+		else
+		{
+			return entities;
 		}
 	}
 }

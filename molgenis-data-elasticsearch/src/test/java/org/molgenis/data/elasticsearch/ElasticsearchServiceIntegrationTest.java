@@ -6,6 +6,8 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
@@ -25,6 +27,7 @@ import org.molgenis.data.mem.InMemoryRepository;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.QueryImpl;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
@@ -32,6 +35,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
 public class ElasticsearchServiceIntegrationTest
@@ -125,6 +129,36 @@ public class ElasticsearchServiceIntegrationTest
 		elasticsearchService.refresh(entityMeta);
 		Entity updatedEntity = elasticsearchService.get("0", entityMeta);
 		assertEquals(updatedEntity, entity);
+	}
+
+	@Test
+	public void indexAddAndGetStream()
+	{
+		Entity entity = new DefaultEntity(entityMeta, dataService);
+		entity.set(idAttrName, "0");
+		entity.set(labelAttrName, "label");
+		elasticsearchService.index(Stream.of(entity), entityMeta, IndexingMode.ADD);
+		elasticsearchService.refresh(entityMeta);
+		Entity updatedEntity = elasticsearchService.get("0", entityMeta);
+		assertEquals(updatedEntity, entity);
+	}
+
+	@Test
+	public void indexAddDeleteAndGetStream()
+	{
+		Entity entity0 = new DefaultEntity(entityMeta, dataService);
+		entity0.set(idAttrName, "0");
+		entity0.set(labelAttrName, "label0");
+		Entity entity1 = new DefaultEntity(entityMeta, dataService);
+		entity1.set(idAttrName, "1");
+		entity1.set(labelAttrName, "label1");
+
+		elasticsearchService.index(Stream.of(entity0, entity1), entityMeta, IndexingMode.ADD);
+		elasticsearchService.refresh(entityMeta);
+		elasticsearchService.delete(Stream.of(entity0), entityMeta);
+		elasticsearchService.refresh(entityMeta);
+		Iterable<Entity> updatedEntity = elasticsearchService.search(new QueryImpl(), entityMeta);
+		assertEquals(Lists.newArrayList(updatedEntity), Arrays.asList(entity1));
 	}
 
 	@Test

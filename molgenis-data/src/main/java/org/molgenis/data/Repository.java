@@ -2,6 +2,7 @@ package org.molgenis.data;
 
 import java.io.Closeable;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * Repository gives access to a collection of Entity. Synonyms: EntityReader, EntitySource, EntityCollection
@@ -29,6 +30,13 @@ public interface Repository extends Iterable<Entity>, Closeable
 	 * @return (empty) Iterable, never null
 	 */
 	Iterable<Entity> findAll(Query q);
+
+	/**
+	 * type-safe find entities that match a query
+	 * 
+	 * @return (empty) Stream, never null
+	 */
+	Stream<Entity> findAllAsStream(Query q);
 
 	/**
 	 * Find an entity base on a query
@@ -64,6 +72,13 @@ public interface Repository extends Iterable<Entity>, Closeable
 	Iterable<Entity> findAll(Iterable<Object> ids);
 
 	/**
+	 * find entities based on a stream of ids.
+	 * 
+	 * @return (empty) Stream where the order of entities matches the order of ids, never null
+	 */
+	Stream<Entity> findAll(Stream<Object> ids);
+
+	/**
 	 * Find entities based on id.
 	 * 
 	 * @param ids
@@ -74,6 +89,18 @@ public interface Repository extends Iterable<Entity>, Closeable
 	 * @throws MolgenisDataAccessException
 	 */
 	Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch);
+
+	/**
+	 * Find entities based on id.
+	 * 
+	 * @param ids
+	 *            entity ids
+	 * @param fetch
+	 *            fetch defining which attributes to retrieve
+	 * @return (empty) Stream where the order of entities matches the order of ids, never null
+	 * @throws MolgenisDataAccessException
+	 */
+	Stream<Entity> findAll(Stream<Object> ids, Fetch fetch);
 
 	/**
 	 * 
@@ -88,11 +115,26 @@ public interface Repository extends Iterable<Entity>, Closeable
 	/* Streaming update multiple entities */
 	void update(Iterable<? extends Entity> records);
 
+	/**
+	 * Updates the given entities
+	 * 
+	 * @param entities
+	 */
+	void update(Stream<? extends Entity> entities);
+
 	/* Delete one entity */
 	void delete(Entity entity);
 
 	/* Streaming delete multiple entities */
 	void delete(Iterable<? extends Entity> entities);
+
+	/**
+	 * Delete entities from repository
+	 * 
+	 * @param entities
+	 *            entity stream
+	 */
+	void delete(Stream<? extends Entity> entities);
 
 	/* Delete one entity based on id */
 	void deleteById(Object id);
@@ -108,6 +150,14 @@ public interface Repository extends Iterable<Entity>, Closeable
 
 	/** Stream add multiple entities */
 	Integer add(Iterable<? extends Entity> entities);
+
+	/**
+	 * Add entities to repisotory
+	 * 
+	 * @param entities
+	 * @return number of added entities
+	 */
+	Integer add(Stream<? extends Entity> entities);
 
 	void flush();
 

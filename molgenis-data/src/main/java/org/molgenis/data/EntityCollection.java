@@ -1,5 +1,7 @@
 package org.molgenis.data;
 
+import java.util.stream.Stream;
+
 public interface EntityCollection extends Iterable<Entity>
 {
 	Iterable<String> getAttributeNames();
@@ -10,4 +12,11 @@ public interface EntityCollection extends Iterable<Entity>
 	 * @return whether this entity collection is lazy
 	 */
 	public boolean isLazy();
+
+	/**
+	 * Returns entity collection as a stream
+	 * 
+	 * @return entity stream
+	 */
+	public Stream<Entity> asStream();
 }

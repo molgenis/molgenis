@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.UserAuthority;
@@ -80,6 +81,17 @@ public class MolgenisUserDecorator implements Repository
 	}
 
 	@Override
+	public Integer add(Stream<? extends Entity> entities)
+	{
+		entities = entities.map(entity -> {
+			encodePassword(entity);
+			addSuperuserAuthority(entity);
+			return entity;
+		});
+		return decoratedRepository.add(entities);
+	}
+
+	@Override
 	public void update(Iterable<? extends Entity> entities)
 	{
 		decoratedRepository.update(Iterables.transform(entities, new Function<Entity, Entity>()
@@ -88,13 +100,23 @@ public class MolgenisUserDecorator implements Repository
 			public Entity apply(Entity entity)
 			{
 				updatePassword(entity);
+				updateSuperuserAuthority(entity);
 				return entity;
 			}
 		}));
 
 		// id is only guaranteed to be generated at flush time
 		decoratedRepository.flush();
-		updateSuperuserAuthorities(entities);
+	}
+
+	@Override
+	public void update(Stream<? extends Entity> entities)
+	{
+		entities = entities.map(entity -> {
+			updatePassword(entity);
+			return entity;
+		});
+		decoratedRepository.update(entities);
 	}
 
 	private void updatePassword(Entity entity)
@@ -140,15 +162,6 @@ public class MolgenisUserDecorator implements Repository
 			userAuthority.setRole(SecurityUtils.AUTHORITY_SU);
 
 			getUserAuthorityRepository().add(userAuthority);
-		}
-	}
-
-	private void updateSuperuserAuthorities(Iterable<? extends Entity> entities)
-	{
-		// performance improvement: add filtered iterable to repo
-		for (Entity entity : entities)
-		{
-			updateSuperuserAuthority(entity);
 		}
 	}
 
@@ -278,6 +291,12 @@ public class MolgenisUserDecorator implements Repository
 	}
 
 	@Override
+	public Stream<Entity> findAllAsStream(Query q)
+	{
+		return decoratedRepository.findAllAsStream(q);
+	}
+
+	@Override
 	public Entity findOne(Query q)
 	{
 		return decoratedRepository.findOne(q);
@@ -302,7 +321,19 @@ public class MolgenisUserDecorator implements Repository
 	}
 
 	@Override
+	public Stream<Entity> findAll(Stream<Object> ids)
+	{
+		return decoratedRepository.findAll(ids);
+	}
+
+	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
+	{
+		return decoratedRepository.findAll(ids, fetch);
+	}
+
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
 		return decoratedRepository.findAll(ids, fetch);
 	}
@@ -315,6 +346,12 @@ public class MolgenisUserDecorator implements Repository
 
 	@Override
 	public void delete(Iterable<? extends Entity> entities)
+	{
+		decoratedRepository.delete(entities);
+	}
+
+	@Override
+	public void delete(Stream<? extends Entity> entities)
 	{
 		decoratedRepository.delete(entities);
 	}

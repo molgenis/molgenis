@@ -115,14 +115,46 @@ public class EntityManagerImpl implements EntityManager
 		};
 	}
 
+	@Override
+	public Stream<Entity> resolveReferences(EntityMetaData entityMeta, Stream<Entity> entities, Fetch fetch)
+	{
+		// FIXME how to enable this optimization?
+		// // resolve lazy entity collections without references
+		// if (entities instanceof EntityCollection && ((EntityCollection) entities).isLazy())
+		// {
+		// // TODO remove cast after updating DataService/Repository interfaces to return EntityCollections
+		// return dataService.findAll(entityMeta.getName(), new EntityIdIterable(entities), fetch);
+		// }
+
+		// no fetch exists that described what to resolve
+		if (fetch == null)
+		{
+			return entities;
+		}
+
+		List<AttributeMetaData> resolvableAttrs = getResolvableAttrs(entityMeta, fetch);
+
+		// entity has no references, nothing to resolve
+		if (resolvableAttrs.isEmpty())
+		{
+			return entities;
+		}
+
+		Iterable<List<Entity>> iterable = () -> Iterators.partition(entities.iterator(), BATCH_SIZE);
+		return stream(iterable.spliterator(), false).flatMap(batch -> {
+			List<Entity> batchWithReferences = resolveReferences(resolvableAttrs, batch, fetch);
+			return batchWithReferences.stream();
+		});
+	}
+
 	private List<Entity> resolveReferences(List<AttributeMetaData> resolvableAttrs, List<Entity> entities, Fetch fetch)
 	{
 		// entity name --> entity ids
 		SetMultimap<String, Object> lazyRefEntityIdsMap = HashMultimap.<String, Object> create(resolvableAttrs.size(),
 				16);
 		// entity name --> attributes referring to this entity
-		SetMultimap<String, AttributeMetaData> refEntityAttrsMap = HashMultimap.<String, AttributeMetaData> create(
-				resolvableAttrs.size(), 2);
+		SetMultimap<String, AttributeMetaData> refEntityAttrsMap = HashMultimap
+				.<String, AttributeMetaData> create(resolvableAttrs.size(), 2);
 
 		// fill maps
 		for (AttributeMetaData attr : resolvableAttrs)
@@ -170,8 +202,8 @@ public class EntityManagerImpl implements EntityManager
 			// retrieve referenced entities
 			Iterable<Entity> refEntities = dataService.findAll(refEntityName, entry.getValue(), subFetch);
 
-			Map<Object, Entity> refEntitiesIdMap = stream(refEntities.spliterator(), false).collect(
-					Collectors.toMap(Entity::getIdValue, Function.identity()));
+			Map<Object, Entity> refEntitiesIdMap = stream(refEntities.spliterator(), false)
+					.collect(Collectors.toMap(Entity::getIdValue, Function.identity()));
 
 			for (AttributeMetaData attr : attrs)
 			{
@@ -200,10 +232,10 @@ public class EntityManagerImpl implements EntityManager
 						Iterable<Entity> lazyRefEntities = entity.getEntities(attrName);
 						List<Entity> mrefEntities = stream(lazyRefEntities.spliterator(), true).map(lazyRefEntity -> {
 							// replace lazy entity with real entity
-								Object refEntityId = lazyRefEntity.getIdValue();
-								Entity refEntity = refEntitiesIdMap.get(refEntityId);
-								return refEntity;
-							}).collect(Collectors.toList());
+							Object refEntityId = lazyRefEntity.getIdValue();
+							Entity refEntity = refEntitiesIdMap.get(refEntityId);
+							return refEntity;
+						}).collect(Collectors.toList());
 						entity.set(attrName, mrefEntities);
 					}
 				}
@@ -334,8 +366,8 @@ public class EntityManagerImpl implements EntityManager
 			@Override
 			public Iterator<E> iterator()
 			{
-				return stream(entities.spliterator(), false).map(
-						entity -> EntityUtils.convert(entity, entityClass, dataService)).iterator();
+				return stream(entities.spliterator(), false)
+						.map(entity -> EntityUtils.convert(entity, entityClass, dataService)).iterator();
 			}
 		};
 	}

@@ -1,14 +1,19 @@
 package org.molgenis.data;
 
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.mockito.ArgumentCaptor;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -54,6 +59,14 @@ public class EntityReferenceResolverDecoratorTest
 		entityReferenceResolverDecorator.add(entities);
 		verify(decoratedRepo, times(1)).add(entities);
 		verifyZeroInteractions(entityManager);
+	}
+
+	@Test
+	public void addStream()
+	{
+		Stream<Entity> entities = Stream.empty();
+		when(decoratedRepo.add(entities)).thenReturn(123);
+		assertEquals(entityReferenceResolverDecorator.add(entities), Integer.valueOf(123));
 	}
 
 	@Test
@@ -126,6 +139,16 @@ public class EntityReferenceResolverDecoratorTest
 	}
 
 	@Test
+	public void deleteStream()
+	{
+		@SuppressWarnings("unchecked")
+		Iterable<Entity> entities = mock(Iterable.class);
+		entityReferenceResolverDecorator.delete(entities);
+		verify(decoratedRepo, times(1)).delete(entities);
+		verifyZeroInteractions(entityManager);
+	}
+
+	@Test
 	public void deleteAll()
 	{
 		entityReferenceResolverDecorator.deleteAll();
@@ -187,6 +210,32 @@ public class EntityReferenceResolverDecoratorTest
 	}
 
 	@Test
+	public void findAllAsStreamFetch()
+	{
+		Entity entity0 = mock(Entity.class);
+		Query query = mock(Query.class);
+		Fetch fetch = mock(Fetch.class);
+		when(query.getFetch()).thenReturn(fetch);
+		Stream<Entity> entities = Stream.of(entity0);
+		when(decoratedRepo.findAllAsStream(query)).thenReturn(entities);
+		when(entityManager.resolveReferences(entityMeta, entities, fetch)).thenReturn(entities);
+		Stream<Entity> expectedEntities = entityReferenceResolverDecorator.findAllAsStream(query);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0));
+	}
+
+	@Test
+	public void findAllAsStreamNoFetch()
+	{
+		Entity entity0 = mock(Entity.class);
+		Query query = mock(Query.class);
+		Stream<Entity> entities = Stream.of(entity0);
+		when(decoratedRepo.findAllAsStream(query)).thenReturn(entities);
+		when(entityManager.resolveReferences(entityMeta, entities, null)).thenReturn(entities);
+		Stream<Entity> expectedEntities = entityReferenceResolverDecorator.findAllAsStream(query);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0));
+	}
+
+	@Test
 	public void findAllIterableObject()
 	{
 		@SuppressWarnings("unchecked")
@@ -224,6 +273,43 @@ public class EntityReferenceResolverDecoratorTest
 		entityReferenceResolverDecorator.findAll(ids, null);
 		verify(decoratedRepo, times(1)).findAll(ids, null);
 		verify(entityManager).resolveReferences(entityMeta, entities, null);
+	}
+
+	@Test
+	public void findAllStream()
+	{
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		Entity entity0WithRefs = mock(Entity.class);
+		Entity entity1WithRefs = mock(Entity.class);
+		Stream<Object> entityIds = Stream.of(id0, id1);
+		Stream<Entity> entities = Stream.of(entity0, entity1);
+		when(decoratedRepo.findAll(entityIds)).thenReturn(entities);
+		when(entityManager.resolveReferences(entityMeta, entities, null))
+				.thenReturn(Stream.of(entity0WithRefs, entity1WithRefs));
+		Stream<Entity> expectedEntities = entityReferenceResolverDecorator.findAll(entityIds);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0WithRefs, entity1WithRefs));
+	}
+
+	@Test
+	public void findAllStreamFetch()
+	{
+		Fetch fetch = new Fetch();
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		Entity entity0WithRefs = mock(Entity.class);
+		Entity entity1WithRefs = mock(Entity.class);
+		Stream<Object> entityIds = Stream.of(id0, id1);
+		Stream<Entity> entities = Stream.of(entity0, entity1);
+		when(decoratedRepo.findAll(entityIds, fetch)).thenReturn(entities);
+		when(entityManager.resolveReferences(entityMeta, entities, fetch))
+				.thenReturn(Stream.of(entity0WithRefs, entity1WithRefs));
+		Stream<Entity> expectedEntities = entityReferenceResolverDecorator.findAll(entityIds, fetch);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0WithRefs, entity1WithRefs));
 	}
 
 	@Test
@@ -366,5 +452,18 @@ public class EntityReferenceResolverDecoratorTest
 		entityReferenceResolverDecorator.update(entities);
 		verify(decoratedRepo, times(1)).update(entities);
 		verifyZeroInteractions(entityManager);
+	}
+
+	@SuppressWarnings(
+	{ "unchecked", "rawtypes" })
+	@Test
+	public void updateStream()
+	{
+		Entity entity0 = mock(Entity.class);
+		Stream<Entity> entities = Stream.of(entity0);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		doNothing().when(decoratedRepo).update(captor.capture());
+		entityReferenceResolverDecorator.update(entities);
+		assertEquals(captor.getValue().collect(Collectors.toList()), Arrays.asList(entity0));
 	}
 }
