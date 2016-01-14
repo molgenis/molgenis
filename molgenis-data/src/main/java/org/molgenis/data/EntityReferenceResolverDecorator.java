@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.molgenis.data.support.QueryImpl;
 
@@ -63,6 +64,14 @@ public class EntityReferenceResolverDecorator implements Repository
 		return resolveEntityReferences(entities, q.getFetch());
 	}
 
+	// Resolve entity references based on given fetch
+	@Override
+	public Stream<Entity> findAllAsStream(Query q)
+	{
+		Stream<Entity> entities = decoratedRepo.findAllAsStream(q);
+		return resolveEntityReferences(entities, q.getFetch());
+	}
+
 	@Override
 	public void close() throws IOException
 	{
@@ -109,11 +118,27 @@ public class EntityReferenceResolverDecorator implements Repository
 		return resolveEntityReferences(entities);
 	}
 
+	// Resolve entity references
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids)
+	{
+		Stream<Entity> entities = decoratedRepo.findAll(ids);
+		return resolveEntityReferences(entities);
+	}
+
 	// Resolve entity references based on given fetch
 	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
 	{
 		Iterable<Entity> entities = decoratedRepo.findAll(ids, fetch);
+		return resolveEntityReferences(entities, fetch);
+	}
+
+	// Resolve entity references based on given fetch
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
+	{
+		Stream<Entity> entities = decoratedRepo.findAll(ids, fetch);
 		return resolveEntityReferences(entities, fetch);
 	}
 
@@ -136,6 +161,12 @@ public class EntityReferenceResolverDecorator implements Repository
 	}
 
 	@Override
+	public void update(Stream<? extends Entity> entities)
+	{
+		decoratedRepo.update(entities);
+	}
+
+	@Override
 	public void delete(Entity entity)
 	{
 		decoratedRepo.delete(entity);
@@ -143,6 +174,12 @@ public class EntityReferenceResolverDecorator implements Repository
 
 	@Override
 	public void delete(Iterable<? extends Entity> entities)
+	{
+		decoratedRepo.delete(entities);
+	}
+
+	@Override
+	public void delete(Stream<? extends Entity> entities)
 	{
 		decoratedRepo.delete(entities);
 	}
@@ -173,6 +210,12 @@ public class EntityReferenceResolverDecorator implements Repository
 
 	@Override
 	public Integer add(Iterable<? extends Entity> entities)
+	{
+		return decoratedRepo.add(entities);
+	}
+
+	@Override
+	public Integer add(Stream<? extends Entity> entities)
 	{
 		return decoratedRepo.add(entities);
 	}
@@ -235,6 +278,16 @@ public class EntityReferenceResolverDecorator implements Repository
 	}
 
 	private Iterable<Entity> resolveEntityReferences(Iterable<Entity> entities, Fetch fetch)
+	{
+		return entityManager.resolveReferences(getEntityMetaData(), entities, fetch);
+	}
+
+	private Stream<Entity> resolveEntityReferences(Stream<Entity> entities)
+	{
+		return entityManager.resolveReferences(getEntityMetaData(), entities, null);
+	}
+
+	private Stream<Entity> resolveEntityReferences(Stream<Entity> entities, Fetch fetch)
 	{
 		return entityManager.resolveReferences(getEntityMetaData(), entities, fetch);
 	}

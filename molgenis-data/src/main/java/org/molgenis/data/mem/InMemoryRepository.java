@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
@@ -87,6 +89,19 @@ public class InMemoryRepository implements Repository
 	}
 
 	@Override
+	public Stream<Entity> findAllAsStream(Query q)
+	{
+		if (new QueryImpl().equals(q))
+		{
+			return entities.values().stream();
+		}
+		else
+		{
+			throw new UnsupportedOperationException();
+		}
+	}
+
+	@Override
 	public Entity findOne(Query q)
 	{
 		throw new UnsupportedOperationException();
@@ -111,6 +126,12 @@ public class InMemoryRepository implements Repository
 	}
 
 	@Override
+	public Stream<Entity> findAll(Stream<Object> ids)
+	{
+		return ids.map(id -> entities.get(id));
+	}
+
+	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
 	{
 		return new Iterable<Entity>()
@@ -121,6 +142,12 @@ public class InMemoryRepository implements Repository
 				return stream(ids.spliterator(), false).map(id -> entities.get(id)).iterator();
 			}
 		};
+	}
+
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
+	{
+		return ids.map(id -> entities.get(id));
 	}
 
 	@Override
@@ -146,6 +173,12 @@ public class InMemoryRepository implements Repository
 		records.forEach(this::update);
 	}
 
+	@Override
+	public void update(Stream<? extends Entity> entities)
+	{
+		entities.forEach(this::update);
+	}
+
 	private Object getId(Entity entity)
 	{
 		return entity.get(metadata.getIdAttribute().getName());
@@ -159,6 +192,12 @@ public class InMemoryRepository implements Repository
 
 	@Override
 	public void delete(Iterable<? extends Entity> entities)
+	{
+		entities.forEach(this::delete);
+	}
+
+	@Override
+	public void delete(Stream<? extends Entity> entities)
 	{
 		entities.forEach(this::delete);
 	}
@@ -206,6 +245,17 @@ public class InMemoryRepository implements Repository
 			i++;
 		}
 		return i;
+	}
+
+	@Override
+	public Integer add(Stream<? extends Entity> entities)
+	{
+		AtomicInteger count = new AtomicInteger();
+		entities.forEach(entity -> {
+			add(entity);
+			count.incrementAndGet();
+		});
+		return count.get();
 	}
 
 	@Override

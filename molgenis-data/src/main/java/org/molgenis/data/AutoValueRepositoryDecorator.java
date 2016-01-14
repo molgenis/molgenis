@@ -1,12 +1,18 @@
 package org.molgenis.data;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.MolgenisFieldTypes.DATE;
+import static org.molgenis.MolgenisFieldTypes.DATETIME;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -73,6 +79,17 @@ public class AutoValueRepositoryDecorator implements Repository
 	}
 
 	@Override
+	public Integer add(Stream<? extends Entity> entities)
+	{
+		List<AttributeMetaData> autoAttrs = getAutoAttrs();
+		if (!autoAttrs.isEmpty())
+		{
+			entities = entities.map(entity -> initAutoAttrs(entity, autoAttrs));
+		}
+		return decoratedRepository.add(entities);
+	}
+
+	@Override
 	public Iterator<Entity> iterator()
 	{
 		return decoratedRepository.iterator();
@@ -127,6 +144,12 @@ public class AutoValueRepositoryDecorator implements Repository
 	}
 
 	@Override
+	public Stream<Entity> findAllAsStream(Query q)
+	{
+		return decoratedRepository.findAllAsStream(q);
+	}
+
+	@Override
 	public Entity findOne(Query q)
 	{
 		return decoratedRepository.findOne(q);
@@ -151,7 +174,19 @@ public class AutoValueRepositoryDecorator implements Repository
 	}
 
 	@Override
+	public Stream<Entity> findAll(Stream<Object> ids)
+	{
+		return decoratedRepository.findAll(ids);
+	}
+
+	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
+	{
+		return decoratedRepository.findAll(ids, fetch);
+	}
+
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
 		return decoratedRepository.findAll(ids, fetch);
 	}
@@ -175,6 +210,12 @@ public class AutoValueRepositoryDecorator implements Repository
 	}
 
 	@Override
+	public void update(Stream<? extends Entity> entities)
+	{
+		decoratedRepository.update(entities);
+	}
+
+	@Override
 	public void delete(Entity entity)
 	{
 		decoratedRepository.delete(entity);
@@ -182,6 +223,12 @@ public class AutoValueRepositoryDecorator implements Repository
 
 	@Override
 	public void delete(Iterable<? extends Entity> entities)
+	{
+		decoratedRepository.delete(entities);
+	}
+
+	@Override
+	public void delete(Stream<? extends Entity> entities)
 	{
 		decoratedRepository.delete(entities);
 	}
@@ -288,5 +335,35 @@ public class AutoValueRepositoryDecorator implements Repository
 	public void removeEntityListener(EntityListener entityListener)
 	{
 		decoratedRepository.removeEntityListener(entityListener);
+	}
+
+	private List<AttributeMetaData> getAutoAttrs()
+	{
+		return stream(getEntityMetaData().getAtomicAttributes().spliterator(), false).filter(AttributeMetaData::isAuto)
+				.collect(Collectors.toList());
+	}
+
+	private Entity initAutoAttrs(Entity entity, List<AttributeMetaData> autoAttrs)
+	{
+		autoAttrs.forEach(autoAttr -> {
+			// set auto values unless a value already exists
+			String autoAttrName = autoAttr.getName();
+			if (entity.get(autoAttrName) == null)
+			{
+				if (autoAttr.isIdAtrribute())
+				{
+					entity.set(autoAttrName, idGenerator.generateId());
+				}
+				else if (autoAttr.getDataType().equals(DATE) || autoAttr.getDataType().equals(DATETIME))
+				{
+					entity.set(autoAttrName, new Date());
+				}
+				else
+				{
+					throw new RuntimeException("Invalid auto attribute: " + autoAttr.toString());
+				}
+			}
+		});
+		return entity;
 	}
 }

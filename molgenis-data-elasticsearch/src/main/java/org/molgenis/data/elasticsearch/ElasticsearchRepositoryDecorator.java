@@ -8,7 +8,10 @@ import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
+import org.elasticsearch.common.collect.Iterators;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
@@ -26,6 +29,8 @@ import com.google.common.collect.Sets;
  */
 public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepository
 {
+	private static final int BATCH_SIZE = 1000;
+
 	private final Repository decoratedRepo;
 
 	public ElasticsearchRepositoryDecorator(Repository decoratedRepo, SearchService elasticSearchService)
@@ -56,6 +61,20 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 		super.add(entities);
 
 		return count;
+	}
+
+	@Override
+	@Transactional
+	public Integer add(Stream<? extends Entity> entities)
+	{
+		// TODO look into performance improvements
+		AtomicInteger count = new AtomicInteger();
+		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
+			Integer batchCount = decoratedRepo.add(batch.stream());
+			super.add(batch.stream());
+			count.addAndGet(batchCount);
+		});
+		return count.get();
 	}
 
 	@Override
@@ -90,6 +109,17 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 
 	@Override
 	@Transactional
+	public void update(Stream<? extends Entity> entities)
+	{
+		// TODO look into performance improvements
+		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
+			decoratedRepo.update(batch);
+			super.update(batch);
+		});
+	}
+
+	@Override
+	@Transactional
 	public void delete(Entity entity)
 	{
 		decoratedRepo.delete(entity);
@@ -102,6 +132,17 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	{
 		decoratedRepo.delete(entities);
 		super.delete(entities);
+	}
+
+	@Override
+	@Transactional
+	public void delete(Stream<? extends Entity> entities)
+	{
+		// TODO look into performance improvements
+		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
+			decoratedRepo.delete(batch.stream());
+			super.delete(batch.stream());
+		});
 	}
 
 	@Override
@@ -178,10 +219,30 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 		return decoratedRepo.findAll(ids, fetch);
 	}
 
+	// retrieve entities by id via decorated repository
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids)
+	{
+		return decoratedRepo.findAll(ids);
+	}
+
+	// retrieve entities by id via decorated repository
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
+	{
+		return decoratedRepo.findAll(ids, fetch);
+	}
+
 	@Override
 	public Iterable<Entity> findAll(Query q)
 	{
 		return super.findAll(q);
+	}
+
+	@Override
+	public Stream<Entity> findAllAsStream(Query q)
+	{
+		return super.findAllAsStream(q);
 	}
 
 	// retrieve all entities via decorated repository
