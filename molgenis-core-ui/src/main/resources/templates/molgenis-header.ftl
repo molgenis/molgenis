@@ -13,12 +13,12 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta http-equiv="X-UA-Compatible" content="chrome=1">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-	<#if googleSignIn>
-    	<meta name="google-signin-client_id" content="${app_settings.googleAppClientId?html}">
- 	</#if>
-        
+    <#if googleSignIn>
+        <meta name="google-signin-client_id" content="${app_settings.googleAppClientId?html}">
+    </#if>
         <link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
-		<#-- Bundle of third party CSS resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
+        
+	<#-- Bundle of third party CSS resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
         <link rel="stylesheet" href="<@resource_href "/css/molgenis-bundle.min.css"/>" type="text/css">
     
 	<#if environment == "development">
@@ -45,44 +45,19 @@
     <#if app_settings.cssHref?has_content>
         <link rel="stylesheet" href="<@resource_href "/css/${app_settings.cssHref?html}"/>" type="text/css">
     </#if> 
-		<#-- Common molgenis bundle. Contains global dependencies like bootstrap, jquery and react -->
-		<script type="application/javascript" src="<@resource_href "/js/dist/molgenis-common.bundle.js"/>"></script>
-		
-		<#if !js?has_content>
-		<#-- molgenis-core-ui entry point -->
-		<script type="application/javascript" src="<@resource_href "/js/dist/molgenis-global.bundle.js"/>"></script>
-		</#if>
-	  	
-	  	<!--[if IE 9]>
-        	<#-- used to disable the genomebrowser in IE9 -->
-        	<script>
-        	<#-- TODO molgenis object in window -->
-				molgenis.ie9 = true;
-        	</script>
-        	<#-- required by dalliance-compiled.js to load the genomebrowsers in IE9 -->
-        	<script src="<@resource_href "/js/typedarray.min.js"/>"></script>
-   	 	<![endif]-->
-		
-		<#-- Place model variables in the molgenis global object -->
-		<script>
-           	var molgenis = {};
-    		molgenis.cookieWall = ${cookieWall?string('true', 'false')};
-		<#if context_url??>
-			molgenis.contextUrl = '${context_url?js_string}';
-		</#if>
-		<#if plugin_id??>
-			molgenis.pluginId = '${plugin_id?js_string}';
-			molgenis.pluginSettingsId = 'settings_' + molgenis.pluginId;
-		</#if>
-        </script>
-    
-    <#-- GOOGLE SIGN IN -->
-	<#if googleSignIn>
+
+        <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
+		<script src="<@resource_href "/js/es6-promise.min.js"/>"></script>
+		<script src="<@resource_href "/js/promise-done-6.1.0.min.js"/>"></script>
+		<script src="<@resource_href "/js/promise-done-6.1.0.min.js"/>"></script>
+        <script src="<@resource_href "/js/molgenis-bundle.min.js"/>"></script>
+        <script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
+        <script src="<@resource_href "/js/handlebars.min.js"/>"></script>
+        <script src="<@resource_href "/js/molgenis.js"/>"></script>
+        <script src="<@resource_href "/js/molgenis-script-evaluator.js"/>"></script>
+    <#if googleSignIn>
         <#if authenticated?? && authenticated>
-        <#-- 
-        Include script tag before platform.js script loading, else onLoad could be 
-        called before the onLoad function is available 
-        -->
+        <#-- Include script tag before platform.js script loading, else onLoad could be called before the onLoad function is available -->
         <script>
             function onLoad() {
                 gapi.load('auth2', function() {
@@ -91,10 +66,26 @@
             }
         </script>
         </#if>
-		
         <script src="https://apis.google.com/js/platform.js<#if authenticated?? && authenticated>?onload=onLoad</#if>" async defer></script>
-    </#if> 
-       	
+    </#if>
+    <script src="<@resource_href "/js/react-with-addons.min.js"/>"></script>
+    <script src="<@resource_href "/js/molgenis-component.min.js"/>"></script>
+        
+    <!--[if IE 9]>
+        <#-- used to disable the genomebrowser in IE9 -->
+        <script>top.molgenis.ie9 = true;</script>
+        <#-- required by dalliance-compiled.js to load the genomebrowsers in IE9 -->
+        <script src="<@resource_href "/js/typedarray.min.js"/>"></script>
+    <![endif]-->
+        <script>
+            top.molgenis.setCookieWall(${cookieWall?string('true', 'false')});
+    <#if context_url??>
+            top.molgenis.setContextUrl('${context_url?js_string}');
+    </#if>
+    <#if plugin_id??>
+            top.molgenis.setPluginId('${plugin_id?js_string}');
+    </#if>
+        </script>
 	<#list js as js_file_name>
 		<script src="<@resource_href "/js/${js_file_name?html}"/>"></script>
 	</#list>
@@ -220,16 +211,15 @@
 					<form id="logout-form" class="navbar-form navbar-right" method="post" action="/logout">
 						<button id="signout-button" type="button" class="btn btn-primary">Sign out</button>
 						<script>
-							
-	                    	$("#signout-button").click(function() {
-	                        <#if googleSignIn>
-	                            var auth2 = gapi.auth2.getAuthInstance();
-	                            auth2.signOut().then(function () {
-	                        </#if>
-	                            	$('#logout-form').submit();
-	                        <#if googleSignIn>
-	                            });
-	                        </#if>
+                            $("#signout-button").click(function() {
+                            <#if googleSignIn>
+                                var auth2 = gapi.auth2.getAuthInstance();
+                                auth2.signOut().then(function () {
+                            </#if>
+                                    $('#logout-form').submit();
+                            <#if googleSignIn>
+                                });
+                            </#if>
                             });
 						</script>
 					</form>

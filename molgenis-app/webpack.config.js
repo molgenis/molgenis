@@ -5,7 +5,10 @@ var webpack = require('webpack');
 var configuration = {
     // Resolve location of node modules and molgenis modules specific javascript
     resolve: {
-        root: [path.resolve('../molgenis-core-ui/src/main/javascript'), path.resolve('./node_modules')]
+        root: [path.resolve('../molgenis-core-ui/src/main/javascript'), path.resolve('./node_modules')],
+        alias: {
+            'react-components': 'modules/react-components'
+        }
     },
     // The base directory for resolving the entry option
     context: path.join(__dirname, '../'),

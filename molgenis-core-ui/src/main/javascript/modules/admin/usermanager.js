@@ -1,8 +1,8 @@
 import 'babel-polyfill';
 import api from '../RestClientV1';
 import $ from 'jquery';
-import {contextUrl} from '../MolgenisGlobalObject';
-import Form from '../react-components/Form';
+import molgenis from '../MolgenisGlobalObject';
+import Form from 'react-components/Form';
 import React from 'react';
 
 function setViewState(viewState) {

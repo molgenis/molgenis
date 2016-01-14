@@ -7,7 +7,7 @@
 	</parent>
 	<artifactId>molgenis-core-ui</artifactId>
 	<packaging>jar</packaging>
-	<build>	
+	<build>
 		<plugins>
 			<!-- compile XML schemas -->
 			<plugin>

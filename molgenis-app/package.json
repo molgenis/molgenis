@@ -1,7 +1,7 @@
 {
-  "name": "molgenis-core-ui",
+  "name": "molgenis",
   "version": "1.16.0-SNAPSHOT",
-  "description": "Dependencies for the MOLGENIS core-ui module",
+  "description": "Dependencies for MOLGENIS client-side javascript",
   "main": "main.js",
   "scripts": {
     "build": "webpack"

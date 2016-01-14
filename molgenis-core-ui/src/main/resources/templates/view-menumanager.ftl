@@ -1,7 +1,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 <#assign css=["jquery-sortable.css", "menumanager.css"]>
-<#assign js=["page/menumanager.js"]>
+<#assign js=["jquery-sortable-min.js", "menumanager.js"]>
 <@header css js/>
 
 <div class="row" id="menu-editor-container">
