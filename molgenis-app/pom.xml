@@ -60,6 +60,33 @@
 			</resource>
 		</resources>
 		<plugins>
+			<!-- Bundle the javascript specified in webpack.config.js to target/generated-resources/js/dist -->
+			<plugin>
+				<groupId>com.github.eirslett</groupId>
+				<artifactId>frontend-maven-plugin</artifactId>
+				<version>0.0.27</version>
+				<executions>
+					<execution>
+						<id>install node and npm</id>
+						<goals>
+							<goal>install-node-and-npm</goal>
+						</goals>
+						<configuration>
+							<nodeVersion>v4.2.4</nodeVersion>
+							<npmVersion>2.14.15</npmVersion>
+						</configuration>
+					</execution>
+					<execution>
+						<id>npm install</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+					</execution>
+					<!-- <execution> <id>webpack build</id> <goals> <goal>webpack</goal> 
+						</goals> <configuration> <outputdir>target/classes/js/dist</outputdir> </configuration> 
+						</execution> -->
+				</executions>
+			</plugin>
 			<!-- minify resources -->
 			<plugin>
 				<groupId>com.samaxes.maven</groupId>
@@ -104,8 +131,7 @@
 						<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
 							<resourcesAsCSV>${basedir}/src/main/resources</resourcesAsCSV>
 						</baseResource>
-						<webInfIncludeJarPattern>.*/molgenis-[^/]*\.jar$|.*spring-[^/]*\.jar$
-						</webInfIncludeJarPattern>
+						<webInfIncludeJarPattern>.*/molgenis-[^/]*\.jar$|.*spring-[^/]*\.jar$</webInfIncludeJarPattern>
 					</webAppConfig>
 				</configuration>
 				<dependencies>

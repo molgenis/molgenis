@@ -7,7 +7,7 @@
 	"dataexplorer.css",
 	"dataexplorer-filter.css"]>
 <#assign js=[
-    "jquery.bootstrap.wizard.min.js",
+    "plugins/jquery.bootstrap.wizard.min.js",
 	"dataexplorer-filter.js",
 	"dataexplorer-filter-dialog.js",
 	"dataexplorer-filter-wizard.js",

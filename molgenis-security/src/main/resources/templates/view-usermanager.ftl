@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=["usermanager.css"]>
-<#assign js=["usermanager.js"]>
+<#assign js=["dist/usermanager.bundle.js"]>
 
 <@header css js/>
 <div class="container-fluid">
