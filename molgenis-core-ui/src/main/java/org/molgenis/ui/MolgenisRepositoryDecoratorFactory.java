@@ -15,6 +15,7 @@ import org.molgenis.data.support.OwnedEntityMetaData;
 import org.molgenis.data.transaction.TransactionLogRepositoryDecorator;
 import org.molgenis.data.transaction.TransactionLogService;
 import org.molgenis.data.validation.EntityAttributesValidator;
+import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
 import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
 import org.molgenis.util.EntityUtils;
@@ -28,10 +29,11 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final IdGenerator idGenerator;
 	private final AppSettings appSettings;
 	private final DataService dataService;
+	private final ExpressionValidator expressionValidator;
 
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager, TransactionLogService transactionLogService,
 			EntityAttributesValidator entityAttributesValidator, IdGenerator idGenerator, AppSettings appSettings,
-			DataService dataService)
+			DataService dataService, ExpressionValidator expressionValidator)
 	{
 		this.entityManager = entityManager;
 		this.transactionLogService = transactionLogService;
@@ -39,6 +41,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.idGenerator = idGenerator;
 		this.appSettings = appSettings;
 		this.dataService = dataService;
+		this.expressionValidator = expressionValidator;
 	}
 
 	@Override
@@ -73,7 +76,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 
 		// 3. validation decorator
 		decoratedRepository = new RepositoryValidationDecorator(dataService, decoratedRepository,
-				entityAttributesValidator);
+				entityAttributesValidator, expressionValidator);
 
 		// 2. auto value decorator
 		decoratedRepository = new AutoValueRepositoryDecorator(decoratedRepository, idGenerator);

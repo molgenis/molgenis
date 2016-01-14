@@ -27,6 +27,7 @@ import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.data.transaction.TransactionConfig;
 import org.molgenis.data.transaction.TransactionLogService;
 import org.molgenis.data.validation.EntityAttributesValidator;
+import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.file.FileMetaMetaData;
 import org.molgenis.js.RhinoConfig;
 import org.molgenis.mysql.embed.EmbeddedMysqlDatabaseBuilder;
@@ -58,7 +59,7 @@ import com.google.common.io.Files;
 @Import(
 { EmbeddedElasticSearchConfig.class, ElasticsearchEntityFactory.class, TransactionConfig.class,
 		ElasticsearchRepositoryCollection.class, RunAsSystemBeanPostProcessor.class, FileMetaMetaData.class,
-		OwnedEntityMetaData.class, RhinoConfig.class })
+		OwnedEntityMetaData.class, RhinoConfig.class, ExpressionValidator.class })
 public abstract class AbstractDataApiTestConfig
 {
 	@Autowired
@@ -66,6 +67,9 @@ public abstract class AbstractDataApiTestConfig
 
 	@Autowired
 	private TransactionLogService transactionLogService;
+
+	@Autowired
+	public ExpressionValidator expressionValidator;
 
 	protected AbstractDataApiTestConfig()
 	{
@@ -144,7 +148,7 @@ public abstract class AbstractDataApiTestConfig
 			public Repository createDecoratedRepository(Repository repository)
 			{
 				return new MolgenisRepositoryDecoratorFactory(entityManager(), transactionLogService,
-						entityAttributesValidator(), idGenerator(), appSettings(), dataService())
+						entityAttributesValidator(), idGenerator(), appSettings(), dataService(), expressionValidator)
 						.createDecoratedRepository(repository);
 			}
 		};
