@@ -1,5 +1,5 @@
 {
-  "name": "molgenis-core-ui",
+  "name": "MOLGENIS",
   "version": "1.16.0-SNAPSHOT",
   "description": "Dependencies for the MOLGENIS UI",
   "scripts": {
@@ -35,6 +35,7 @@
     "moment": "2.9.x",
     "promise-done": "1.0.x",
     "react": "0.14.x",
+    "react-dom": "0.14.x",
     "svg-pan-zoom": "3.2.x",
     "tinymce": "4.3.x",
     "typedarray": "0.0.x",
@@ -61,7 +62,6 @@
     "less-loader": "2.2.x",
     "node-libs-browser": "0.5.x",
     "react-addons-test-utils": "0.14.x",
-    "react-dom": "0.14.x",
     "react-transform-hmr": "1.0.x",
     "skin-deep": "0.13.x",
     "style-loader": "0.13.x",
@@ -72,11 +72,17 @@
     "webpack-hot-middleware": "2.2.x"
   },
   "jest": {
-    "testDirectoryName": "js",
-    "testPathDirs": ["src/test/resources"],
-    "unmockedModulePathPatterns": ["<rootDir>/node_modules/react"]
-  }
-  "jest-webpack-alias": {
-    "profile": "dev"
+    "scriptPreprocessor": "<rootDir>/node_modules/babel-jest",
+    "testPathDirs": [
+      "../molgenis-core-ui/src/test/javascript"
+    ],
+    "unmockedModulePathPatterns": [
+      "<rootDir>/node_modules/react",
+      "<rootDir>/node_modules/react-dom",
+      "<rootDir>/node_modules/react-addons-test-utils"
+    ],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/node_modules/"
+    ]
   }
 }
