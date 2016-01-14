@@ -2,12 +2,20 @@ package org.molgenis.data.vcf.utils;
 
 import static org.molgenis.data.vcf.VcfRepository.ALT;
 import static org.molgenis.data.vcf.VcfRepository.CHROM;
+import static org.molgenis.data.vcf.VcfRepository.FILTER;
+import static org.molgenis.data.vcf.VcfRepository.FORMAT_GT;
+import static org.molgenis.data.vcf.VcfRepository.ID;
+import static org.molgenis.data.vcf.VcfRepository.INFO;
+import static org.molgenis.data.vcf.VcfRepository.NAME;
 import static org.molgenis.data.vcf.VcfRepository.POS;
+import static org.molgenis.data.vcf.VcfRepository.QUAL;
 import static org.molgenis.data.vcf.VcfRepository.REF;
+import static org.molgenis.data.vcf.VcfRepository.SAMPLES;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -15,11 +23,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -36,7 +44,8 @@ import com.google.common.io.BaseEncoding;
 
 public class VcfUtils
 {
-	public static final String TAB = "\t";
+	private static List<String> VCF_ATTRIBUTE_NAMES = Arrays.asList(new String[]
+	{ CHROM, POS, ID, REF, ALT, QUAL, FILTER });
 
 	/**
 	 * Creates a internal molgenis id from a vcf entity
@@ -74,9 +83,9 @@ public class VcfUtils
 		return id;
 	}
 
-	public static String convertToVCF(Entity vcfEntity) throws MolgenisDataException
+	public static void writeToVcf(Entity vcfEntity, BufferedWriter writer) throws MolgenisDataException, IOException
 	{
-		return convertToVCF(vcfEntity, Collections.emptyList());
+		writeToVcf(vcfEntity, Collections.emptyList(), writer);
 	}
 
 	/**
@@ -86,48 +95,53 @@ public class VcfUtils
 	 * @param vcfEntity
 	 * @param attributesToInclude
 	 * @return
+	 * @throws IOException
 	 * @throws Exception
 	 */
-	public static String convertToVCF(Entity vcfEntity, List<String> attributesToInclude) throws MolgenisDataException
+	public static void writeToVcf(Entity vcfEntity, List<String> attributesToInclude, BufferedWriter writer)
+			throws MolgenisDataException, IOException
 	{
-		StringBuilder vcfRecord = new StringBuilder();
-
-		List<String> vcfAttributes = Arrays.asList(new String[]
-		{ VcfRepository.CHROM, VcfRepository.POS, VcfRepository.ID, VcfRepository.REF, VcfRepository.ALT,
-				VcfRepository.QUAL, VcfRepository.FILTER });
-
 		// fixed attributes: chrom pos id ref alt qual filter
-		for (String vcfAttribute : vcfAttributes)
+		for (String vcfAttribute : VCF_ATTRIBUTE_NAMES)
 		{
-			vcfRecord.append(((vcfEntity.getString(vcfAttribute) != null && !vcfEntity.getString(vcfAttribute).equals(
-					"")) ? vcfEntity.getString(vcfAttribute) : ".")
-					+ TAB);
+			String value = vcfEntity.getString(vcfAttribute);
+			if (value != null && !value.isEmpty())
+			{
+				writer.write(value);
+			}
+			else
+			{
+				writer.write('.');
+			}
+			writer.write('\t');
 		}
 
-		List<String> infoFieldsSeen = new ArrayList<String>();
 		boolean hasInfoFields = false;
 		// flexible 'info' field, one column with potentially many data items
-		for (AttributeMetaData attributeMetaData : vcfEntity.getEntityMetaData().getAttribute(VcfRepository.INFO)
-				.getAttributeParts())
+		for (AttributeMetaData attributeMetaData : vcfEntity.getEntityMetaData().getAttribute(INFO).getAttributeParts())
 		{
-			if (attributesToInclude.isEmpty() || attributesToInclude.contains(attributeMetaData.getName()))
+			String infoAttrName = attributeMetaData.getName();
+			if (attributesToInclude.isEmpty() || attributesToInclude.contains(infoAttrName))
 			{
-				infoFieldsSeen.add(attributeMetaData.getName());
-				if (vcfEntity.getString(attributeMetaData.getName()) != null)
+				if (attributeMetaData.getDataType().getEnumType() == FieldTypeEnum.BOOL)
 				{
-
-					if (attributeMetaData.getDataType().getEnumType().equals(FieldTypeEnum.BOOL))
+					Boolean infoAttrBoolValue = vcfEntity.getBoolean(infoAttrName);
+					if (infoAttrBoolValue != null && infoAttrBoolValue.booleanValue() == true)
 					{
-						if (vcfEntity.getBoolean(attributeMetaData.getName()))
-						{
-							vcfRecord.append(attributeMetaData.getName() + ";");
-							hasInfoFields = true;
-						}
+						writer.append(infoAttrName);
+						writer.append(';');
+						hasInfoFields = true;
 					}
-					else
+				}
+				else
+				{
+					String infoAttrStringValue = vcfEntity.getString(infoAttrName);
+					if (infoAttrStringValue != null)
 					{
-						vcfRecord.append(attributeMetaData.getName() + "="
-								+ vcfEntity.getString(attributeMetaData.getName()) + ";");
+						writer.append(infoAttrName);
+						writer.append('=');
+						writer.append(infoAttrStringValue);
+						writer.append(';');
 						hasInfoFields = true;
 					}
 				}
@@ -135,57 +149,61 @@ public class VcfUtils
 		}
 		if (!hasInfoFields)
 		{
-			vcfRecord.append(".");
+			writer.append('.');
 		}
 
 		// if we have SAMPLE data, add to output VCF
-		Iterable<Entity> sampleEntities = vcfEntity.getEntities(VcfRepository.SAMPLES);
-		if (sampleEntities != null && !Iterables.isEmpty(sampleEntities))
+		Iterable<Entity> sampleEntities = vcfEntity.getEntities(SAMPLES);
+		if (sampleEntities != null)
 		{
-			// add tab
-			vcfRecord.append(TAB);
 			boolean firstSample = true;
-
-			for (Entity sample : sampleEntities)
+			for (Iterator<Entity> it = sampleEntities.iterator(); it.hasNext();)
 			{
+				if (firstSample)
+				{
+					writer.append('\t');
+				}
+
+				Entity sample = it.next();
+
 				StringBuilder formatColumn = new StringBuilder();
 				StringBuilder sampleColumn = new StringBuilder();
 
 				// write GT first if available
-				for (String sampleAttribute : sample.getAttributeNames())
+				if (sample.getEntityMetaData().getAttribute(FORMAT_GT) != null)
 				{
-					if (sampleAttribute.equals(VcfRepository.FORMAT_GT))
+					if (firstSample)
 					{
-						if (firstSample)
-						{
-							formatColumn.append(sampleAttribute);
-							formatColumn.append(":");
-						}
-						if (sample.getString(sampleAttribute) != null)
-						{
-							sampleColumn.append(sample.getString(sampleAttribute));
-							sampleColumn.append(":");
-						}
-						else
-						{
-							sampleColumn.append(".:");
-						}
+						formatColumn.append(FORMAT_GT);
+						formatColumn.append(':');
+					}
+					String sampleAttrValue = sample.getString(FORMAT_GT);
+					if (sampleAttrValue != null)
+					{
+						sampleColumn.append(sampleAttrValue);
+						sampleColumn.append(':');
+					}
+					else
+					{
+						sampleColumn.append(".:");
 					}
 				}
 
-				for (String sampleAttribute : sample.getAttributeNames())
+				for (AttributeMetaData sampleAttr : sample.getEntityMetaData().getAttributes())
 				{
-					if (!sampleAttribute.equals(VcfRepository.FORMAT_GT))
+					String sampleAttribute = sampleAttr.getName();
+					if (!sampleAttribute.equals(FORMAT_GT))
 					{
 						// leave out autogenerated ID and NAME columns since this will greatly bloat the output file for
 						// many samples
 						// FIXME: chance to clash with existing ID and NAME columns in FORMAT ?? what happens then?
-						if (!sampleAttribute.equals(VcfRepository.ID) && !sampleAttribute.equals(VcfRepository.NAME))
+						if (!sampleAttribute.equals(ID) && !sampleAttribute.equals(NAME))
 						{
-							if (sample.getString(sampleAttribute) != null)
+							String sampleAttrValue = sample.getString(sampleAttribute);
+							if (sampleAttrValue != null)
 							{
-								sampleColumn.append(sample.getString(sampleAttribute));
-								sampleColumn.append(":");
+								sampleColumn.append(sampleAttrValue);
+								sampleColumn.append(':');
 							}
 							else
 							{
@@ -196,7 +214,7 @@ public class VcfUtils
 							if (firstSample)
 							{
 								formatColumn.append(sampleAttribute);
-								formatColumn.append(":");
+								formatColumn.append(':');
 							}
 
 						}
@@ -207,7 +225,8 @@ public class VcfUtils
 				if (firstSample && formatColumn.length() > 0) // FIXME: do we expect this??
 				{
 					formatColumn.deleteCharAt(formatColumn.length() - 1); // delete trailing ':'
-					vcfRecord.append(formatColumn.toString() + TAB);
+					writer.write(formatColumn.toString());
+					writer.write('\t');
 					firstSample = false;
 				}
 				else if (firstSample)
@@ -218,17 +237,18 @@ public class VcfUtils
 
 				// now add SAMPLE data
 				sampleColumn.deleteCharAt(sampleColumn.length() - 1);// delete trailing ':'
-				vcfRecord.append(sampleColumn.toString() + TAB);
-			}
-			// after all samples, delete trailing '\t'
-			vcfRecord.deleteCharAt(vcfRecord.length() - 1); // FIXME: need a check??
-		}
+				writer.write(sampleColumn.toString());
 
-		return vcfRecord.toString();
+				if (it.hasNext())
+				{
+					writer.write('\t');
+				}
+			}
+		}
 	}
 
-	public static boolean checkPreviouslyAnnotatedAndAddMetadata(File inputVcfFile, PrintWriter outputVCFWriter,
-			List<AttributeMetaData> infoFields) throws FileNotFoundException, MolgenisInvalidFormatException
+	public static boolean checkPreviouslyAnnotatedAndAddMetadata(File inputVcfFile, BufferedWriter outputVCFWriter,
+			List<AttributeMetaData> infoFields) throws MolgenisInvalidFormatException, IOException
 	{
 		return checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields,
 				Collections.emptyList());
@@ -243,14 +263,15 @@ public class VcfUtils
 	 * @param attributesToInclude
 	 *            , the AttributeMetaData to write to the VCF file, if empty writes all attributes
 	 * @return
-	 * @throws Exception
+	 * @throws MolgenisInvalidFormatException
+	 * @throws IOException
 	 */
-	public static boolean checkPreviouslyAnnotatedAndAddMetadata(File inputVcfFile, PrintWriter outputVCFWriter,
+	public static boolean checkPreviouslyAnnotatedAndAddMetadata(File inputVcfFile, BufferedWriter outputVCFWriter,
 			List<AttributeMetaData> infoFields, List<String> attributesToInclude)
-			throws MolgenisInvalidFormatException, FileNotFoundException
+					throws MolgenisInvalidFormatException, IOException
 	{
-		String checkAnnotatedBeforeValue = attributesToInclude.isEmpty() ? (infoFields.isEmpty() ? null : infoFields
-				.get(0).getName()) : attributesToInclude.get(0);
+		String checkAnnotatedBeforeValue = attributesToInclude.isEmpty()
+				? (infoFields.isEmpty() ? null : infoFields.get(0).getName()) : attributesToInclude.get(0);
 		boolean annotatedBefore = false;
 
 		System.out.println("Detecting VCF column header...");
@@ -267,15 +288,14 @@ public class VcfUtils
 				if ((checkAnnotatedBeforeValue != null) && line.contains("##INFO=<ID=" + checkAnnotatedBeforeValue)
 						&& !annotatedBefore)
 				{
-					System.out
-							.println("\nThis file has already been annotated with '"
-									+ checkAnnotatedBeforeValue
-									+ "' data before it seems. Skipping any further annotation of variants that already contain this field.");
+					System.out.println("\nThis file has already been annotated with '" + checkAnnotatedBeforeValue
+							+ "' data before it seems. Skipping any further annotation of variants that already contain this field.");
 					annotatedBefore = true;
 				}
 
 				// read and print to output until we find the header
-				outputVCFWriter.println(line);
+				outputVCFWriter.write(line);
+				outputVCFWriter.newLine();
 				line = inputVcfFileScanner.nextLine();
 				if (!line.startsWith(VcfRepository.PREFIX))
 				{
@@ -286,7 +306,7 @@ public class VcfUtils
 			System.out.println("\nHeader line found:\n" + line);
 
 			// check the header line
-			if (!line.startsWith(VcfRepository.CHROM))
+			if (!line.startsWith(CHROM))
 			{
 				outputVCFWriter.close();
 				inputVcfFileScanner.close();
@@ -302,13 +322,15 @@ public class VcfUtils
 				{
 					if (attributesToInclude.isEmpty() || attributesToInclude.contains(infoAttributeMetaData.getName()))
 					{
-						outputVCFWriter.println(attributeMetaDataToInfoField(infoAttributeMetaData));
+						outputVCFWriter.write(attributeMetaDataToInfoField(infoAttributeMetaData));
+						outputVCFWriter.newLine();
 					}
 				}
 			}
 
 			// print header
-			outputVCFWriter.println(line);
+			outputVCFWriter.write(line);
+			outputVCFWriter.newLine();
 		}
 		else
 		{
@@ -356,7 +378,8 @@ public class VcfUtils
 			((DefaultAttributeMetaData) infoAttributeMetaData)
 					.setDescription(VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION);
 		}
-		sb.append(infoAttributeMetaData.getDescription().replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " "));
+		sb.append(
+				infoAttributeMetaData.getDescription().replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " "));
 		sb.append("\">");
 		return sb.toString();
 	}
@@ -443,8 +466,8 @@ public class VcfUtils
 						else
 						{
 							inputVcfFileScanner.close();
-							throw new MolgenisDataException("Expected Child, Mother or Father, but found: " + element
-									+ " in line " + line);
+							throw new MolgenisDataException(
+									"Expected Child, Mother or Father, but found: " + element + " in line " + line);
 						}
 					}
 
