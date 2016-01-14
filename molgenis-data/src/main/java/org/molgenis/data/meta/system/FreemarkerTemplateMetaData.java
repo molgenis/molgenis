@@ -14,10 +14,10 @@ public class FreemarkerTemplateMetaData extends DefaultEntityMetaData
 
 	public FreemarkerTemplateMetaData()
 	{
-		super("freemarkerTemplate");
+		super("FreemarkerTemplate");
 		addAttribute(ID).setAuto(true).setVisible(false)
 				.setDescription("automatically generated internal id, only for internal use.").setIdAttribute(true).setNillable(false);
-		addAttribute(NAME).setDescription("Name of the entity").setNillable(false);
-		addAttribute(VALUE).setDataType(SCRIPT).setNillable(false);
+		addAttribute(NAME).setDescription("Name of the entity").setNillable(false).setLabelAttribute(true).setUnique(true);
+		addAttribute(VALUE).setDataType(SCRIPT).setNillable(false).setDescription("");
 	}
 }

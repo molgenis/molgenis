@@ -538,60 +538,85 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public boolean isSameAs(AttributeMetaData other)
 	{
 		if (this == other) return true;
-		if (other == null) return false;
+		if (other == null)
+			return false;
 
-		if (isAggregateable() != other.isAggregateable()) return false;
-		if (isAuto() != other.isAuto()) return false;
+		if (isAggregateable() != other.isAggregateable())
+			return false;
+		if (isAuto() != other.isAuto())
+			return false;
 		if (getDescription() == null)
 		{
-			if (other.getDescription() != null) return false;
+			if (other.getDescription() != null) {
+				return false;
+			}
 		}
-		else if (!getDescription().equals(other.getDescription())) return false;
+		else if (!getDescription().equals(other.getDescription()))
+			return false;
 		if (getDataType() == null)
 		{
-			if (other.getDataType() != null) return false;
+			if (other.getDataType() != null)
+				return false;
 		}
 		else
 		{
-			if (getDataType().getEnumType() != other.getDataType().getEnumType()) return false;
+			if (getDataType().getEnumType() != other.getDataType().getEnumType())
+				return false;
 			if (getDataType().getEnumType() == FieldTypeEnum.ENUM)
 			{
 				if (((EnumField) getDataType()).getEnumOptions() == null)
 				{
-					if (((EnumField) other.getDataType()).getEnumOptions() != null) return false;
+					if (((EnumField) other.getDataType()).getEnumOptions() != null)
+						return false;
 					if (!((EnumField) getDataType()).getEnumOptions().equals(
-							((EnumField) other.getDataType()).getEnumOptions())) return true;
+							((EnumField) other.getDataType()).getEnumOptions()))
+						return true;
 				}
 			}
 		}
-		if (isIdAtrribute() != other.isIdAtrribute()) return false;
+		if (isIdAtrribute() != other.isIdAtrribute())
+			return false;
 		if (getLabel() == null)
 		{
-			if (other.getLabel() != null) return false;
+			if (other.getLabel() != null)
+				return false;
 		}
-		else if (!getLabel().equals(other.getLabel())) return false;
-		if (isLabelAttribute() != other.isLabelAttribute()) return false;
-		if (isLookupAttribute() != other.isLookupAttribute()) return false;
+		else if (!getLabel().equals(other.getLabel()))
+			return false;
+		if (isLabelAttribute() != other.isLabelAttribute())
+			return false;
+		if (isLookupAttribute() != other.isLookupAttribute())
+			return false;
 		if (getName() == null)
 		{
-			if (other.getName() != null) return false;
+			if (other.getName() != null)
+				return false;
 		}
-		else if (!getName().equals(other.getName())) return false;
-		if (isNillable() != other.isNillable()) return false;
+		else if (!getName().equals(other.getName()))
+			return false;
+		if (isNillable() != other.isNillable())
+			return false;
 
 		if (getRange() == null)
 		{
-			if (other.getRange() != null) return false;
+			if (other.getRange() != null)
+				return false;
 		}
-		else if (!getRange().equals(other.getRange())) return false;
-		if (isReadonly() != other.isReadonly()) return false;
+		else if (!getRange().equals(other.getRange()))
+			return false;
+		if (isReadonly() != other.isReadonly())
+			return false;
 		if (getRefEntity() == null)
 		{
-			if (other.getRefEntity() != null) return false;
+			if (other.getRefEntity() != null)
+				return false;
 		}
-		else if (!getRefEntity().getName().equals(other.getRefEntity().getName())) return false;
-		if (isUnique() != other.isUnique()) return false;
-		if (isVisible() != other.isVisible()) return false;
+		else if (!getRefEntity().getName().equals(other.getRefEntity().getName()))
+			return false;
+		if (isUnique() != other.isUnique())
+			return false;
+		if (isVisible() != other.isVisible())
+			return false;
 
 		// attributeparts
 		Iterator<AttributeMetaData> attributeParts = getAttributeParts().iterator();

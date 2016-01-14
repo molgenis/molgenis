@@ -15,6 +15,6 @@ public class AuthorityMetaData extends DefaultEntityMetaData {
     public AuthorityMetaData() {
         super("authority");
         setAbstract(true);
-        addAttribute(ROLE);
+        addAttribute(ROLE).setLabel("role").setNillable(true);
     }
 }

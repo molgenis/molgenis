@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -29,6 +30,7 @@ import org.molgenis.data.i18n.I18nStringMetaData;
 import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.i18n.LanguageRepositoryDecorator;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.system.ImportRunMetaData;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -93,7 +95,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	 * Setter for the ManageableCrudRepositoryCollection, to be called after it's created. This resolves the circular
 	 * dependency {@link MysqlRepositoryCollection} => decorated {@link MetaDataService} => {@link RepositoryCreator}
 	 * 
-	 * @param ManageableRepositoryCollection
+	 * @param backend
 	 */
 	@Override
 	public MetaDataService setDefaultBackend(ManageableRepositoryCollection backend)
@@ -107,6 +109,8 @@ public class MetaDataServiceImpl implements MetaDataService
 		TagMetaData.INSTANCE.setBackend(backend.getName());
 		EntityMetaDataMetaData.INSTANCE.setBackend(backend.getName());
 		AttributeMetaDataMetaData.INSTANCE.setBackend(backend.getName());
+
+		ImportRunMetaData.INSTANCE.setBackend(backend.getName());
 
 		bootstrapMetaRepos();
 		return this;

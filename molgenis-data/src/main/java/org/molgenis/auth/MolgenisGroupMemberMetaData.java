@@ -12,10 +12,10 @@ public class MolgenisGroupMemberMetaData extends DefaultEntityMetaData {
     public static final String MOLGENISGROUP = "molgenisGroup";
 
     public MolgenisGroupMemberMetaData() {
-        super("molgenisGroupMember");
+        super("MolgenisGroupMember");
         addAttribute(ID).setAuto(true).setVisible(false)
-                .setDescription("automatically generated internal id, only for internal use.").setIdAttribute(true).setNillable(false);
-        addAttribute(MOLGENISUSER).setDataType(XREF).setRefEntity(new MolgenisUserMetaData());
-        addAttribute(MOLGENISGROUP).setDataType(XREF).setRefEntity(new MolgenisGroupMetaData());;
+                .setDescription("").setIdAttribute(true).setNillable(false).setLabelAttribute(true);
+        addAttribute(MOLGENISUSER).setDataType(XREF).setRefEntity(new MolgenisUserMetaData()).setAggregateable(true).setDescription("").setNillable(false);
+        addAttribute(MOLGENISGROUP).setDataType(XREF).setRefEntity(new MolgenisGroupMetaData()).setAggregateable(true).setDescription("").setNillable(false);
     }
 }

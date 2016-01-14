@@ -13,10 +13,10 @@ public class UserAuthorityMetaData extends DefaultEntityMetaData {
     String id;
 
     public UserAuthorityMetaData() {
-        super("userAuthority");
-        setExtends(new AuthorityMetaData());
+        super("UserAuthority");
         addAttribute(ID).setAuto(true).setVisible(false)
-                .setDescription("automatically generated internal id, only for internal use.").setIdAttribute(true).setNillable(false);
-        addAttribute(MOLGENISUSER).setDataType(XREF).setRefEntity(new MolgenisUserMetaData());
+                .setDescription("").setIdAttribute(true).setNillable(false).setLabelAttribute(true);
+        addAttribute(MOLGENISUSER).setDataType(XREF).setRefEntity(new MolgenisUserMetaData()).setAggregateable(true).setDescription("").setNillable(false);
+        addAttribute(AuthorityMetaData.ROLE).setDescription("").setNillable(false);
     }
 }
