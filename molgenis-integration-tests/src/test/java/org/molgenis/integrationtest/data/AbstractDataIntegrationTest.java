@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 
 public abstract class AbstractDataIntegrationTest extends AbstractTestNGSpringContextTests
 {
@@ -30,6 +31,12 @@ public abstract class AbstractDataIntegrationTest extends AbstractTestNGSpringCo
 
 	@Autowired
 	AsyncTransactionLog asyncTransactionLog;
+
+	@BeforeClass
+	public void init()
+	{
+		SecuritySupport.login();
+	}
 
 	@AfterClass
 	public void cleanUp()

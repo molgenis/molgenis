@@ -28,6 +28,7 @@ import org.molgenis.data.transaction.TransactionConfig;
 import org.molgenis.data.transaction.TransactionLogService;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.file.FileMetaMetaData;
+import org.molgenis.js.RhinoConfig;
 import org.molgenis.mysql.embed.EmbeddedMysqlDatabaseBuilder;
 import org.molgenis.security.core.runas.RunAsSystemBeanPostProcessor;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -57,7 +58,7 @@ import com.google.common.io.Files;
 @Import(
 { EmbeddedElasticSearchConfig.class, ElasticsearchEntityFactory.class, TransactionConfig.class,
 		ElasticsearchRepositoryCollection.class, RunAsSystemBeanPostProcessor.class, FileMetaMetaData.class,
-		OwnedEntityMetaData.class })
+		OwnedEntityMetaData.class, RhinoConfig.class })
 public abstract class AbstractDataApiTestConfig
 {
 	@Autowired

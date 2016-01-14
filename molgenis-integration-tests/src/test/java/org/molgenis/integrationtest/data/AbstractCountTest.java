@@ -19,8 +19,6 @@ public abstract class AbstractCountTest extends AbstractDataIntegrationTest
 {
 	public void testIt() throws ParseException
 	{
-		SecuritySupport.login();
-
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
 		// define model
