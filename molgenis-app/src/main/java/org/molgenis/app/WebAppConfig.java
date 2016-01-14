@@ -23,6 +23,7 @@ import org.molgenis.data.system.RepositoryTemplateLoader;
 import org.molgenis.data.system.core.FreemarkerTemplate;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 //import org.molgenis.data.system.core.FreemarkerTemplateRepository;
+import org.molgenis.migrate.version.v1_16.Step27migrateJpaBackend;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.GsonConfig;
@@ -87,7 +88,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Override
 	public void addUpgrades()
 	{
-		//
+		upgradeService.addUpgrade(new Step27migrateJpaBackend(dataSource, MysqlRepositoryCollection.NAME));
 	}
 
 	@Override

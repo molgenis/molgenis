@@ -481,7 +481,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public void initRepositories()
 	{
 		dataService().setMeta(metaDataService());
-		//addUpgrades();
+		addUpgrades();
 		boolean didUpgrade = upgradeService.upgrade();
 		if (didUpgrade)
 		{

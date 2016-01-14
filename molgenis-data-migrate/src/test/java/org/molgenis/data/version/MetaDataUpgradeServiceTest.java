@@ -24,7 +24,7 @@ public class MetaDataUpgradeServiceTest
 		metaDataVersionService = mock(MolgenisVersionService.class);
 		metaDataUpgradeService = new MolgenisUpgradeServiceImpl(metaDataVersionService);
 		upgradeFrom0 = mock(MolgenisUpgrade.class);
-		when(upgradeFrom0.getFromVersion()).thenReturn(0);
+		when(upgradeFrom0.getFromVersion()).thenReturn(26);
 		metaDataUpgradeService.addUpgrade(upgradeFrom0);
 	}
 
@@ -41,7 +41,7 @@ public class MetaDataUpgradeServiceTest
 	@Test
 	public void upgradeNeeded()
 	{
-		when(metaDataVersionService.getMolgenisVersionFromServerProperties()).thenReturn(0);
+		when(metaDataVersionService.getMolgenisVersionFromServerProperties()).thenReturn(25);
 		metaDataUpgradeService.upgrade();
 		verify(metaDataVersionService, times(1)).updateToCurrentVersion();
 		verify(upgradeFrom0, times(1)).upgrade();
