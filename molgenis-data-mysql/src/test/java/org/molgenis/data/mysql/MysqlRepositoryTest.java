@@ -1,7 +1,10 @@
 package org.molgenis.data.mysql;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -35,6 +38,126 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 
 	@Autowired
 	MetaDataServiceImpl metaDataRepositories;
+
+	@Test
+	public void addStreamFindAll()
+	{
+		DefaultEntityMetaData metaData = new DefaultEntityMetaData("IntValue");
+		metaData.addAttribute("intAttr").setDataType(MolgenisFieldTypes.INT).setIdAttribute(true).setNillable(false);
+
+		Repository repo = metaDataRepositories.addEntityMeta(metaData);
+
+		int count = 2099;
+		List<Entity> entities = new ArrayList<>();
+		for (int i = 0; i < count; i++)
+		{
+			Entity e = new MapEntity("intAttr");
+			e.set("intAttr", i);
+			entities.add(e);
+		}
+		repo.add(entities.stream());
+
+		int i = 0;
+		for (Entity e : repo)
+		{
+			assertEquals(e.getInt("intAttr"), Integer.valueOf(i++));
+		}
+
+		assertEquals(Iterables.size(repo), count);
+		assertEquals(Iterables.size(repo.findAll(new QueryImpl().ge("intAttr", 999))), 1100);
+		assertEquals(Iterables.size(repo.findAll(new QueryImpl().eq("intAttr", 999))), 1);
+		assertEquals(Iterables.size(repo.findAll(new QueryImpl().eq("intAttr", -1))), 0);
+		assertEquals(Iterables.size(repo.findAll(new QueryImpl().le("intAttr", count))), count);
+
+		Iterable<Entity> it = repo.findAll(new QueryImpl().setOffset(10).setPageSize(20));
+		assertEquals(Iterables.size(it), 20);
+		i = 10;
+		for (Entity e : it)
+		{
+			assertEquals(e.getInt("intAttr"), Integer.valueOf(i++));
+		}
+
+		repo.deleteAll(); // cleanup
+	}
+
+	@Test
+	public void addStreamUpdateStreamFindAll()
+	{
+		DefaultEntityMetaData metaData = new DefaultEntityMetaData("addStreamUpdateStreamFindAll");
+		metaData.addAttribute("intAttr").setDataType(MolgenisFieldTypes.INT).setIdAttribute(true).setNillable(false);
+		metaData.addAttribute("strAttr").setNillable(false);
+
+		Repository repo = metaDataRepositories.addEntityMeta(metaData);
+
+		int count = 2099;
+		List<Entity> entities = new ArrayList<>();
+		for (int i = 0; i < count; i++)
+		{
+			Entity e = new MapEntity("intAttr");
+			e.set("intAttr", i);
+			e.set("strAttr", "str" + i);
+			entities.add(e);
+		}
+		repo.add(entities.stream());
+
+		Entity entity0 = entities.get(0);
+		entity0.set("strAttr", "newstr0");
+		Entity entity1 = entities.get(1);
+		entity1.set("strAttr", "newstr1");
+		repo.update(Arrays.asList(entity0, entity1));
+		assertNull(repo.findOne(new QueryImpl().eq("strAttr", "str0")));
+		assertNull(repo.findOne(new QueryImpl().eq("strAttr", "str1")));
+		assertNotNull(repo.findOne(new QueryImpl().eq("strAttr", "newstr0")));
+		assertNotNull(repo.findOne(new QueryImpl().eq("strAttr", "newstr1")));
+		repo.deleteAll(); // cleanup
+	}
+
+	@SuppressWarnings("resource")
+	@Test
+	public void addStreamDeleteStreamFindAll()
+	{
+		DefaultEntityMetaData metaData = new DefaultEntityMetaData("IntValue");
+		metaData.addAttribute("intAttr").setDataType(MolgenisFieldTypes.INT).setIdAttribute(true).setNillable(false);
+
+		Repository repo = metaDataRepositories.addEntityMeta(metaData);
+
+		int count = 2099;
+		List<Entity> entities = new ArrayList<>();
+		List<Entity> entitiesToDelete = new ArrayList<>();
+		for (int i = 0; i < count; i++)
+		{
+			Entity e = new MapEntity("intAttr");
+			e.set("intAttr", i);
+			entities.add(e);
+			if (i < 100)
+			{
+				entitiesToDelete.add(e);
+			}
+		}
+		repo.add(entities.stream());
+		repo.delete(entitiesToDelete);
+
+		int i = 100;
+		for (Entity e : repo)
+		{
+			assertEquals(e.getInt("intAttr"), Integer.valueOf(i++));
+		}
+
+		assertEquals(Iterables.size(repo), count - 100);
+		assertEquals(Iterables.size(repo.findAll(new QueryImpl().ge("intAttr", 999))), 1100);
+		assertEquals(Iterables.size(repo.findAll(new QueryImpl().eq("intAttr", 999))), 1);
+		assertEquals(Iterables.size(repo.findAll(new QueryImpl().eq("intAttr", -1))), 0);
+		assertEquals(Iterables.size(repo.findAll(new QueryImpl().le("intAttr", count))), count - 100);
+
+		Iterable<Entity> it = repo.findAll(new QueryImpl().setOffset(10).setPageSize(20));
+		assertEquals(Iterables.size(it), 20);
+		i = 10 + 100;
+		for (Entity e : it)
+		{
+			assertEquals(e.getInt("intAttr"), Integer.valueOf(i++));
+		}
+		repo.deleteAll(); // cleanup
+	}
 
 	@Test
 	public void testFindAll()

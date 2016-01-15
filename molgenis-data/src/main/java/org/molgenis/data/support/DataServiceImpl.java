@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
@@ -136,9 +137,21 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
+	public Stream<Entity> findAllAsStream(String entityName)
+	{
+		return findAllAsStream(entityName, new QueryImpl());
+	}
+
+	@Override
 	public Iterable<Entity> findAll(String entityName, Query q)
 	{
 		return getRepository(entityName).findAll(q);
+	}
+
+	@Override
+	public Stream<Entity> findAllAsStream(String entityName, Query q)
+	{
+		return getRepository(entityName).findAllAsStream(q);
 	}
 
 	@Override
@@ -175,6 +188,13 @@ public class DataServiceImpl implements DataService
 
 	@Override
 	@Transactional
+	public void add(String entityName, Stream<? extends Entity> entities)
+	{
+		getRepository(entityName).add(entities);
+	}
+
+	@Override
+	@Transactional
 	public void update(String entityName, Entity entity)
 	{
 		getRepository(entityName).update(entity);
@@ -189,6 +209,13 @@ public class DataServiceImpl implements DataService
 
 	@Override
 	@Transactional
+	public void update(String entityName, Stream<? extends Entity> entities)
+	{
+		getRepository(entityName).update(entities);
+	}
+
+	@Override
+	@Transactional
 	public void delete(String entityName, Entity entity)
 	{
 		getRepository(entityName).delete(entity);
@@ -197,6 +224,13 @@ public class DataServiceImpl implements DataService
 	@Override
 	@Transactional
 	public void delete(String entityName, Iterable<? extends Entity> entities)
+	{
+		getRepository(entityName).delete(entities);
+	}
+
+	@Override
+	@Transactional
+	public void delete(String entityName, Stream<? extends Entity> entities)
 	{
 		getRepository(entityName).delete(entities);
 	}
@@ -238,6 +272,15 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
+	public <E extends Entity> Stream<E> findAllAsStream(String entityName, Query q, Class<E> clazz)
+	{
+		Stream<Entity> entities = getRepository(entityName).findAllAsStream(q);
+		return entities.map(entity -> {
+			return EntityUtils.convert(entity, clazz, this);
+		});
+	}
+
+	@Override
 	public <E extends Entity> Iterable<E> findAll(String entityName, Iterable<Object> ids, Class<E> clazz)
 	{
 		Iterable<Entity> entities = getRepository(entityName).findAll(ids);
@@ -264,6 +307,12 @@ public class DataServiceImpl implements DataService
 	public <E extends Entity> Iterable<E> findAll(String entityName, Class<E> clazz)
 	{
 		return findAll(entityName, new QueryImpl(), clazz);
+	}
+
+	@Override
+	public <E extends Entity> Stream<E> findAllAsStream(String entityName, Class<E> clazz)
+	{
+		return findAllAsStream(entityName, new QueryImpl(), clazz);
 	}
 
 	@Override
@@ -327,5 +376,35 @@ public class DataServiceImpl implements DataService
 	public void removeEntityListener(String entityName, EntityListener entityListener)
 	{
 		getRepository(entityName).removeEntityListener(entityListener);
+	}
+
+	@Override
+	public Stream<Entity> findAll(String entityName, Stream<Object> ids)
+	{
+		return getRepository(entityName).findAll(ids);
+	}
+
+	@Override
+	public <E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Class<E> clazz)
+	{
+		Stream<Entity> entities = getRepository(entityName).findAll(ids);
+		return entities.map(entity -> {
+			return EntityUtils.convert(entity, clazz, this);
+		});
+	}
+
+	@Override
+	public Stream<Entity> findAll(String entityName, Stream<Object> ids, Fetch fetch)
+	{
+		return getRepository(entityName).findAll(ids, fetch);
+	}
+
+	@Override
+	public <E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Fetch fetch, Class<E> clazz)
+	{
+		Stream<Entity> entities = getRepository(entityName).findAll(ids, fetch);
+		return entities.map(entity -> {
+			return EntityUtils.convert(entity, clazz, this);
+		});
 	}
 }

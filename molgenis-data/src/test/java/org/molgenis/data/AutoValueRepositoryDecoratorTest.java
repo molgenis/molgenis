@@ -1,5 +1,7 @@
 package org.molgenis.data;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -9,7 +11,13 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.mockito.ArgumentCaptor;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -66,6 +74,51 @@ public class AutoValueRepositoryDecoratorTest
 		validateEntity(entity1);
 	}
 
+	@SuppressWarnings("unchecked")
+	@Test
+	public void addStream()
+	{
+		Entity entity0 = new MapEntity(entityMetaData);
+		Entity entity1 = new MapEntity(entityMetaData);
+		Stream<Entity> entities = Stream.of(entity0, entity1);
+
+		when(decoratedRepository.add(any(Stream.class))).thenAnswer(new Answer<Integer>()
+		{
+			@Override
+			public Integer answer(InvocationOnMock invocation) throws Throwable
+			{
+				Stream<Entity> entities = (Stream<Entity>) invocation.getArguments()[0];
+				List<Entity> entityList = entities.collect(Collectors.toList());
+				return entityList.size();
+			}
+		});
+		assertEquals(repositoryDecorator.add(entities), Integer.valueOf(2));
+
+		validateEntity(entity0);
+		validateEntity(entity1);
+	}
+
+	@Test
+	public void deleteStream()
+	{
+		Stream<Entity> entities = Stream.of(mock(Entity.class));
+		repositoryDecorator.delete(entities);
+		verify(decoratedRepository, times(1)).delete(entities);
+	}
+
+	@SuppressWarnings(
+	{ "unchecked", "rawtypes" })
+	@Test
+	public void updateStream()
+	{
+		Entity entity0 = mock(Entity.class);
+		Stream<Entity> entities = Stream.of(entity0);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		doNothing().when(decoratedRepository).update(captor.capture());
+		repositoryDecorator.update(entities);
+		assertEquals(Arrays.asList(entity0), captor.getValue().collect(Collectors.toList()));
+	}
+
 	@Test
 	public void findAllIterableFetch()
 	{
@@ -80,6 +133,33 @@ public class AutoValueRepositoryDecoratorTest
 	}
 
 	@Test
+	public void findAllStream()
+	{
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		Stream<Object> entityIds = Stream.of(id0, id1);
+		when(decoratedRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
+		Stream<Entity> expectedEntities = repositoryDecorator.findAll(entityIds);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+	}
+
+	@Test
+	public void findAllStreamFetch()
+	{
+		Fetch fetch = new Fetch();
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		Stream<Object> entityIds = Stream.of(id0, id1);
+		when(decoratedRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
+		Stream<Entity> expectedEntities = repositoryDecorator.findAll(entityIds, fetch);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+	}
+
+	@Test
 	public void findOneObjectFetch()
 	{
 		Object id = Integer.valueOf(0);
@@ -88,6 +168,16 @@ public class AutoValueRepositoryDecoratorTest
 		when(decoratedRepository.findOne(id, fetch)).thenReturn(entity);
 		assertEquals(entity, repositoryDecorator.findOne(id, fetch));
 		verify(decoratedRepository, times(1)).findOne(id, fetch);
+	}
+
+	@Test
+	public void findAllAsStream()
+	{
+		Entity entity0 = mock(Entity.class);
+		Query query = mock(Query.class);
+		when(decoratedRepository.findAllAsStream(query)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = repositoryDecorator.findAllAsStream(query);
+		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
 
 	private void validateEntity(Entity entity)

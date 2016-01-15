@@ -38,6 +38,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Properties;
 import java.util.stream.IntStream;
 
@@ -70,6 +71,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -84,12 +86,14 @@ import org.testng.annotations.Test;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 
 @WebAppConfiguration
 @ContextConfiguration(classes =
 { RestControllerV2Config.class, GsonConfig.class })
 public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 {
+	private static final String SELF_REF_ENTITY_NAME = "selfRefEntity";
 	private static final String ENTITY_NAME = "entity";
 	private static final String REF_ENTITY_NAME = "refEntity";
 	private static final String REF_REF_ENTITY_NAME = "refRefEntity";
@@ -108,6 +112,9 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
+	
+	@Autowired
+	private Gson gson;
 
 	@Autowired
 	private DataService dataService;
@@ -134,6 +141,15 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		DefaultEntityMetaData refRefEntityMetaData = new DefaultEntityMetaData(REF_REF_ENTITY_NAME);
 		refRefEntityMetaData.addAttribute(refRefAttrId).setDataType(STRING).setIdAttribute(true);
 		refRefEntityMetaData.addAttribute(refRefAttrValue).setDataType(STRING);
+		
+		DefaultEntityMetaData selfRefEntityMetaData = new DefaultEntityMetaData(SELF_REF_ENTITY_NAME);
+		selfRefEntityMetaData.addAttribute("id").setDataType(STRING).setIdAttribute(true);
+		selfRefEntityMetaData.addAttribute("selfRef").setDataType(XREF).setRefEntity(selfRefEntityMetaData);
+		
+		Entity selfRefEntity = new DefaultEntity(selfRefEntityMetaData, dataService);
+		selfRefEntity.set("id", "0");
+		selfRefEntity.set("selfRef", selfRefEntity);
+		
 
 		refAttrId = "id";
 		refAttrValue = "value";
@@ -316,6 +332,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		Query q = new QueryImpl().offset(0).pageSize(100);
 		when(dataService.findOne(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
 		when(dataService.findOne(eq(ENTITY_NAME), eq(ENTITY_ID), any(Fetch.class))).thenReturn(entity);
+		when(dataService.findOne(eq(SELF_REF_ENTITY_NAME), eq("0"), any(Fetch.class))).thenReturn(selfRefEntity);
 		when(dataService.count(ENTITY_NAME, q)).thenReturn(2l);
 		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Arrays.asList(entity));
 		when(dataService.findOne(REF_ENTITY_NAME, REF_ENTITY0_ID)).thenReturn(refEntity0);
@@ -324,7 +341,14 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		when(dataService.getEntityMetaData(ENTITY_NAME)).thenReturn(entityMetaData);
 		when(dataService.getEntityMetaData(REF_ENTITY_NAME)).thenReturn(refEntityMetaData);
 		when(dataService.getEntityMetaData(REF_REF_ENTITY_NAME)).thenReturn(refRefEntityMetaData);
-
+		when(dataService.getEntityMetaData(SELF_REF_ENTITY_NAME)).thenReturn(selfRefEntityMetaData);
+		
+		Assert.assertEquals(entity.getIdValue(), ENTITY_ID);
+		Assert.assertEquals(refEntity0.getIdValue(), REF_ENTITY0_ID);
+		Assert.assertEquals(refEntity1.getIdValue(), REF_ENTITY1_ID);
+		Assert.assertEquals(refRefEntity.getIdValue(), REF_REF_ENTITY_ID);
+		Assert.assertEquals(selfRefEntity.getIdValue(), "0");
+		
 		mockMvc = MockMvcBuilders.standaloneSetup(restControllerV2).setMessageConverters(gsonHttpMessageConverter)
 				.setConversionService(conversionService).build();
 	}
@@ -642,6 +666,31 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "decimal", "{entities:[{decimal:'42'}]}",
 				RestControllerV2.createMolgenisDataAccessExceptionReadOnlyAttribute("entity", "decimal").getMessage());
 	}
+	
+	@Test
+	public void testSelfRefWithAllAttrsEqualsSelfRefWithoutAttrs() throws Exception {
+		MockHttpServletResponse responseWithAttrs = mockMvc.perform(get(
+				RestControllerV2.BASE_URI + "/selfRefEntity/0?attrs=*").contentType(APPLICATION_JSON)).andReturn().getResponse();
+		assertEquals(responseWithAttrs.getStatus(), 200);
+		MockHttpServletResponse responseWithoutAttrs = mockMvc.perform(get(
+				RestControllerV2.BASE_URI + "/selfRefEntity/0").contentType(APPLICATION_JSON)).andReturn().getResponse();
+		assertEquals(responseWithoutAttrs.getStatus(), 200);
+		assertEquals(responseWithAttrs.getContentAsString(), responseWithoutAttrs.getContentAsString());
+		Map<String, Object> lvl1 = gson.fromJson(responseWithAttrs.getContentAsString(), new TypeToken<Map<String, Object>>(){}.getType());
+		assertEquals(lvl1.get("selfRef").toString(), "{_href=/api/v2/selfRefEntity/0, id=0}");
+	}
+	
+	@Test
+	public void testSelfRefWithNestedFetch() throws Exception {
+		MockHttpServletResponse responseWithAttrs = mockMvc.perform(get(
+				RestControllerV2.BASE_URI + "/selfRefEntity/0?attrs=*,selfRef(*,selfRef(*))").contentType(APPLICATION_JSON)).andReturn().getResponse();
+		assertEquals(responseWithAttrs.getStatus(), 200);
+		Map<String, Object> lvl1 = gson.fromJson(responseWithAttrs.getContentAsString(), new TypeToken<Map<String, Object>>(){}.getType());
+		@SuppressWarnings("unchecked")
+		Map<String, Object> lvl2 = (Map<String, Object>) lvl1.get("selfRef");
+		assertEquals(lvl2.get("selfRef").toString(), "{_href=/api/v2/selfRefEntity/0, id=0, selfRef={_href=/api/v2/selfRefEntity/0, id=0}}");
+	}
+	
 
 	/**
 	 * createMolgenisDataExceptionIdentifierAndValue

@@ -1,5 +1,6 @@
 package org.molgenis.data.vcf.utils;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.molgenis.data.vcf.VcfRepository.ALT;
 import static org.molgenis.data.vcf.VcfRepository.ALT_META;
 import static org.molgenis.data.vcf.VcfRepository.CHROM;
@@ -19,9 +20,12 @@ import static org.molgenis.data.vcf.VcfRepository.SAMPLES;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,6 +34,7 @@ import org.apache.commons.io.FileUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -162,7 +167,7 @@ public class VcfUtilsTest
 
 	// regression test for https://github.com/molgenis/molgenis/issues/3643
 	@Test
-	public void convertToVcfInfoGtFirst()
+	public void convertToVcfInfoGtFirst() throws MolgenisDataException, IOException
 	{
 		String formatDpAttrName = "DP";
 		String formatEcAttrName = "EC";
@@ -210,8 +215,17 @@ public class VcfUtilsTest
 		vcfEntity.set(formatEcAttrName, "AD_val");
 		vcfEntity.set(formatGtAttrName, "GT_val");
 
-		String vcf = VcfUtils.convertToVCF(vcfEntity);
-		assertEquals(vcf, "1	565286	rs1578391	C	T	.	flt	.	GT:DP:EC	1/1:5:5");
+		StringWriter strWriter = new StringWriter();
+		BufferedWriter writer = new BufferedWriter(strWriter);
+		try
+		{
+			VcfUtils.writeToVcf(vcfEntity, writer);
+		}
+		finally
+		{
+			writer.close();
+		}
+		assertEquals(strWriter.toString(), "1	565286	rs1578391	C	T	.	flt	.	GT:DP:EC	1/1:5:5");
 	}
 
 	@Test
@@ -226,7 +240,8 @@ public class VcfUtilsTest
 		final File outputVCFFile = File.createTempFile("output", ".vcf");
 		try
 		{
-			PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
+			BufferedWriter outputVCFWriter = new BufferedWriter(
+					new OutputStreamWriter(new FileOutputStream(outputVCFFile), UTF_8));
 
 			File inputVcfFile = new File(ResourceUtils.getFile(getClass(), "/testWriter.vcf").getPath());
 
@@ -234,8 +249,8 @@ public class VcfUtilsTest
 
 			for (Entity entity : entities)
 			{
-				outputVCFWriter.println(VcfUtils.convertToVCF(entity));
-
+				VcfUtils.writeToVcf(entity, outputVCFWriter);
+				outputVCFWriter.newLine();
 			}
 			outputVCFWriter.close();
 			assertTrue(FileUtils.contentEqualsIgnoreEOL(inputVcfFile, outputVCFFile, "UTF8"));
@@ -258,7 +273,8 @@ public class VcfUtilsTest
 		final File outputVCFFile = File.createTempFile("output", ".vcf");
 		try
 		{
-			PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
+			BufferedWriter outputVCFWriter = new BufferedWriter(
+					new OutputStreamWriter(new FileOutputStream(outputVCFFile), UTF_8));
 
 			File inputVcfFile = new File(ResourceUtils.getFile(getClass(), "/testWriter.vcf").getPath());
 			File resultVCFWriter = new File(ResourceUtils.getFile(getClass(), "/result_vcfWriter.vcf").getPath());
@@ -269,8 +285,8 @@ public class VcfUtilsTest
 			for (Entity entity : entities)
 			{
 				MapEntity mapEntity = new MapEntity(entity, annotatedEntityMetadata);
-				outputVCFWriter.println(VcfUtils.convertToVCF(mapEntity));
-
+				VcfUtils.writeToVcf(mapEntity, outputVCFWriter);
+				outputVCFWriter.newLine();
 			}
 			outputVCFWriter.close();
 			assertTrue(FileUtils.contentEqualsIgnoreEOL(resultVCFWriter, outputVCFFile, "UTF8"));

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
@@ -72,6 +73,12 @@ public class MySqlRepositoryExceptionTranslatorDecorator implements Repository
 	}
 
 	@Override
+	public Stream<Entity> findAllAsStream(Query q)
+	{
+		return decoratedRepo.findAllAsStream(q);
+	}
+
+	@Override
 	public Entity findOne(Query q)
 	{
 		return decoratedRepo.findOne(q);
@@ -96,7 +103,19 @@ public class MySqlRepositoryExceptionTranslatorDecorator implements Repository
 	}
 
 	@Override
+	public Stream<Entity> findAll(Stream<Object> ids)
+	{
+		return decoratedRepo.findAll(ids);
+	}
+
+	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
+	{
+		return decoratedRepo.findAll(ids, fetch);
+	}
+
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
 		return decoratedRepo.findAll(ids, fetch);
 	}
@@ -124,6 +143,14 @@ public class MySqlRepositoryExceptionTranslatorDecorator implements Repository
 	}
 
 	@Override
+	public void update(Stream<? extends Entity> entities)
+	{
+		SQLExceptionTranslatorTemplate.tryCatchSQLException(() -> {
+			decoratedRepo.update(entities);
+		});
+	}
+
+	@Override
 	public void delete(Entity entity)
 	{
 		decoratedRepo.delete(entity);
@@ -133,6 +160,12 @@ public class MySqlRepositoryExceptionTranslatorDecorator implements Repository
 	public void delete(Iterable<? extends Entity> entities)
 	{
 		decoratedRepo.delete(entities);
+	}
+
+	@Override
+	public void delete(Stream<? extends Entity> entities)
+	{
+		decoratedRepo.delete(entities); // FIXME why no exception translation here?
 	}
 
 	@Override
@@ -163,6 +196,19 @@ public class MySqlRepositoryExceptionTranslatorDecorator implements Repository
 
 	@Override
 	public Integer add(Iterable<? extends Entity> entities)
+	{
+		AtomicInteger result = new AtomicInteger();
+
+		SQLExceptionTranslatorTemplate.tryCatchSQLException(() -> {
+			Integer count = decoratedRepo.add(entities);
+			if (count != null) result.set(count);
+		});
+
+		return result.get();
+	}
+
+	@Override
+	public Integer add(Stream<? extends Entity> entities)
 	{
 		AtomicInteger result = new AtomicInteger();
 

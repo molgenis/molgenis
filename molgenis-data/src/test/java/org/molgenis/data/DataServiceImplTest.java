@@ -15,9 +15,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -66,6 +69,30 @@ public class DataServiceImplTest
 		when(repoToRemove.getName()).thenReturn("Entity3");
 		dataService.addRepository(repoToRemove);
 
+	}
+
+	@Test
+	public void addStream()
+	{
+		Stream<Entity> entities = Stream.empty();
+		dataService.add("Entity1", entities);
+		verify(repo1, times(1)).add(entities);
+	}
+
+	@Test
+	public void updateStream()
+	{
+		Stream<Entity> entities = Stream.empty();
+		dataService.update("Entity1", entities);
+		verify(repo1, times(1)).update(entities);
+	}
+
+	@Test
+	public void deleteStream()
+	{
+		Stream<Entity> entities = Stream.empty();
+		dataService.delete("Entity1", entities);
+		verify(repo1, times(1)).delete(entities);
 	}
 
 	@Test
@@ -178,5 +205,93 @@ public class DataServiceImplTest
 		when(repo1.findOne(id, fetch)).thenReturn(null);
 		assertNull(dataService.findOne("Entity1", id, fetch, clazz));
 		verify(repo1, times(1)).findOne(id, fetch);
+	}
+
+	@Test
+	public void findAllStringStream()
+	{
+		Object id0 = "id0";
+		Stream<Object> ids = Stream.of(id0);
+		Entity entity0 = mock(Entity.class);
+		when(repo1.findAll(ids)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = dataService.findAll("Entity1", ids);
+		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+	}
+
+	@Test
+	public void findAllStringStreamClass()
+	{
+		Object id0 = "id0";
+		Stream<Object> ids = Stream.of(id0);
+		Entity entity0 = mock(Entity.class);
+		Class<Entity> clazz = Entity.class;
+		when(repo1.findAll(ids)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = dataService.findAll("Entity1", ids, clazz);
+		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+	}
+
+	@Test
+	public void findAllStringStreamFetch()
+	{
+		Object id0 = "id0";
+		Stream<Object> ids = Stream.of(id0);
+		Entity entity0 = mock(Entity.class);
+		Fetch fetch = new Fetch();
+		when(repo1.findAll(ids, fetch)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = dataService.findAll("Entity1", ids, fetch);
+		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+	}
+
+	@Test
+	public void findAllStringStreamFetchClass()
+	{
+		Object id0 = "id0";
+		Stream<Object> ids = Stream.of(id0);
+		Entity entity0 = mock(Entity.class);
+		Class<Entity> clazz = Entity.class;
+		Fetch fetch = new Fetch();
+		when(repo1.findAll(ids, fetch)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = dataService.findAll("Entity1", ids, fetch, clazz);
+		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+	}
+
+	@Test
+	public void findAllStreamString()
+	{
+		Entity entity0 = mock(Entity.class);
+		when(repo1.findAllAsStream(new QueryImpl())).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = dataService.findAllAsStream("Entity1");
+		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+	}
+
+	@Test
+	public void findAllStreamStringClass()
+	{
+		Class<Entity> clazz = Entity.class;
+		Entity entity0 = mock(Entity.class);
+		when(repo1.findAllAsStream(new QueryImpl())).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = dataService.findAllAsStream("Entity1", clazz);
+		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+	}
+
+	@Test
+	public void findAllStreamStringQuery()
+	{
+		Entity entity0 = mock(Entity.class);
+		Query query = mock(Query.class);
+		when(repo1.findAllAsStream(query)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = dataService.findAllAsStream("Entity1", query);
+		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+	}
+
+	@Test
+	public void findAllStreamStringQueryClass()
+	{
+		Class<Entity> clazz = Entity.class;
+		Entity entity0 = mock(Entity.class);
+		Query query = mock(Query.class);
+		when(repo1.findAllAsStream(query)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = dataService.findAllAsStream("Entity1", query, clazz);
+		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
 }
