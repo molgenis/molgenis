@@ -24,10 +24,6 @@ import Promise from 'promise';
 
 const {div, span} = React.DOM;
 
-function getPromises(promises) {
-	return Promise.all(promises)
-}
-
 /**
  * @memberOf Form
  */
@@ -482,8 +478,7 @@ var Form = React
 					promises.push(p);
 				}
 			}, this);
-
-			getPromises(promises).done(function(results) {
+			Promise.all(promises).then(function(results) {
 				var valid = true;
 				for (var i = 0; i < results.length && valid; i++) {
 					valid = valid && results[i];

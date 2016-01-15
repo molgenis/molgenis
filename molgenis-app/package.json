@@ -1,10 +1,10 @@
 {
-  "name": "molgenis",
+  "name": "MOLGENIS",
   "version": "1.16.0-SNAPSHOT",
-  "description": "Dependencies for MOLGENIS client-side javascript",
-  "main": "main.js",
+  "description": "Dependencies for the MOLGENIS UI",
   "scripts": {
-    "build": "webpack"
+    "build": "webpack",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -44,19 +44,20 @@
   "devDependencies": {
     "babel-cli": "^6.4.0",
     "babel-core": "^6.3.13",
+    "babel-jest": "^6.0.1",
     "babel-loader": "^6.2.1",
     "babel-plugin-react-transform": "^1.1.0",
     "babel-preset-es2015": "^6.3.13",
     "babel-preset-react": "^6.3.13",
     "css-loader": "^0.23.1",
-    "dependo": "^0.1.6",
     "expect": "^1.6.0",
     "express": "^4.13.3",
     "faucet": "0.0.1",
     "file-loader": "^0.8.5",
     "fs": "0.0.2",
-    "less": "^2.5.3",
-    "less-loader": "^2.2.2",
+    "jest": "^0.1.40",
+    "jest-cli": "0.8.x",
+    "jest-webpack-alias": "2.1.x",
     "node-libs-browser": "^0.5.2",
     "react-transform-hmr": "^1.0.0",
     "skin-deep": "^0.13.0",

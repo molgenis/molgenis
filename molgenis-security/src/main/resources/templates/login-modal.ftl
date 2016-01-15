@@ -63,7 +63,6 @@
 <div id="register-modal-container"></div>
 <div id="resetpassword-modal-container"></div>
 <script type="text/javascript">
-console.log('I NEED JQUERY NOW BECAUSE IM INLINE JAVASCRIPT HURP DURR');
 $(function() {
 	var modal = $('#login-modal');
 	var submitBtn = $('#login-btn');
