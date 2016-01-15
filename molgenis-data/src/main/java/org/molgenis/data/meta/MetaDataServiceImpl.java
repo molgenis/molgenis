@@ -302,6 +302,13 @@ public class MetaDataServiceImpl implements MetaDataService
 
 		Repository repo = backend.addEntityMeta(getEntityMetaData(emd.getName()));
 		Repository decoratedRepo = decoratorFactory.createDecoratedRepository(repo);
+
+		//FIXME: update this to a dynamic solution once the metadata can be edited
+		//add specific decorators
+
+		//is this the right place to do this?
+		//add freemarker to configurer?
+
 		dataService.addRepository(decoratedRepo);
 
 		// Return decorated repo

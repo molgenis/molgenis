@@ -63,9 +63,6 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Autowired
 	private DataService dataService;
 
-	//@Autowired
-	//private FreemarkerTemplateRepository freemarkerTemplateRepository;
-
 	@Autowired
 	@Qualifier("MysqlRepositoryCollection")
 	private ManageableRepositoryCollection mysqlRepositoryCollection;
