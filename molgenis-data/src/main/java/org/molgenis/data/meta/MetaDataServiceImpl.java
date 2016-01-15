@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.auth.MolgenisUserDecorator;
 import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -30,11 +31,13 @@ import org.molgenis.data.i18n.I18nStringMetaData;
 import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.i18n.LanguageRepositoryDecorator;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.system.FreemarkerTemplateMetaData;
 import org.molgenis.data.meta.system.ImportRunMetaData;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
+import org.molgenis.data.system.RepositoryTemplateLoader;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -50,6 +53,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 /**
  * MetaData service. Administration of the {@link Package}, {@link EntityMetaData} and {@link AttributeMetaData} of the
@@ -76,6 +80,9 @@ public class MetaDataServiceImpl implements MetaDataService
 	{
 		this.dataService = dataService;
 	}
+
+	@Autowired
+	private FreeMarkerConfigurer freemarkerConfigurer;
 
 	@Autowired
 	public void setLanguageService(LanguageService languageService)
@@ -303,11 +310,14 @@ public class MetaDataServiceImpl implements MetaDataService
 		Repository repo = backend.addEntityMeta(getEntityMetaData(emd.getName()));
 		Repository decoratedRepo = decoratorFactory.createDecoratedRepository(repo);
 
-		//FIXME: update this to a dynamic solution once the metadata can be edited
-		//add specific decorators
+		if(decoratedRepo.getName().equals(MolgenisUserMetaData.ENTITY_NAME)){
+			decoratedRepo = new MolgenisUserDecorator(decoratedRepo);
+		}
 
 		//is this the right place to do this?
-		//add freemarker to configurer?
+		if(decoratedRepo.getName().equals(FreemarkerTemplateMetaData.ENTITY_NAME)){
+			freemarkerConfigurer.setPostTemplateLoaders(new RepositoryTemplateLoader(dataService.getRepository(FreemarkerTemplateMetaData.ENTITY_NAME)));
+		}
 
 		dataService.addRepository(decoratedRepo);
 

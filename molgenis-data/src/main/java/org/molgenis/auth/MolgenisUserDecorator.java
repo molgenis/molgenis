@@ -1,4 +1,4 @@
-package org.molgenis.security.user;
+package org.molgenis.auth;
 
 import static java.util.Objects.requireNonNull;
 

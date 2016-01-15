@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.UserAuthority;
+import org.molgenis.auth.MolgenisUserDecorator;
 //import org.molgenis.auth.UserAuthorityRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;

@@ -35,9 +35,10 @@ public class MolgenisUserMetaData extends DefaultEntityMetaData {
     public static final String CHANGEPASSWORD = "changePassword";
     public static final String LANGUAGECODE= "languageCode";
     public static final String GOOGLEACCOUNTID = "googleAccountId";
+    public static final String ENTITY_NAME = "MolgenisUser";
 
     public MolgenisUserMetaData() {
-        super("MolgenisUser");
+        super(ENTITY_NAME);
         setDescription("Anyone who can login");
 
         addAttribute(ID).setAuto(true).setVisible(false)
