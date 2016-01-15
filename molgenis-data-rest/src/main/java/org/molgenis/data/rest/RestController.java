@@ -487,7 +487,7 @@ public class RestController
 				return null;
 			}
 
-			entities = dataService.findAll(entityName, q);
+			entities = dataService.findAllAsIterable(entityName, q);
 		}
 		catch (ConversionFailedException | RSQLParserException | UnknownAttributeException | IllegalArgumentException
 				| UnsupportedOperationException | UnknownEntityException e)
@@ -1157,7 +1157,7 @@ public class RestController
 		List<QueryRule> queryRules = request.getQ() == null ? Collections.<QueryRule> emptyList() : request.getQ();
 		Query q = new QueryImpl(queryRules).pageSize(request.getNum()).offset(request.getStart()).sort(sort);
 
-		Iterable<Entity> it = dataService.findAll(entityName, q);
+		Iterable<Entity> it = dataService.findAllAsIterable(entityName, q);
 		Long count = repository.count(q);
 		EntityPager pager = new EntityPager(request.getStart(), request.getNum(), count, it);
 

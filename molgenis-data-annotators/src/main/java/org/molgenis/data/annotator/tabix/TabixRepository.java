@@ -89,7 +89,7 @@ public class TabixRepository extends AbstractRepository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Iterable<Entity> findAllAsIterable(Query q)
 	{
 		Object posValue = getFirstEqualsValueFor(positionAttributeName, q);
 		Object chromValue = getFirstEqualsValueFor(chromosomeAttributeName, q);

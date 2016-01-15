@@ -372,7 +372,7 @@ public class RuntimePropertyToDataExplorerSettingsMigrator implements Applicatio
 			{
 				String prefix = "plugin.dataexplorer.mod.aggregates.distinct.override";
 				Map<String, String> rtpValue = new LinkedHashMap<String, String>();
-				for (RuntimeProperty runtimeProperty : dataService.findAll(ENTITY_NAME, RuntimeProperty.class))
+				for (RuntimeProperty runtimeProperty : dataService.findAllAsIterable(ENTITY_NAME, RuntimeProperty.class))
 				{
 					String name = runtimeProperty.getName();
 					if (name.startsWith(prefix))

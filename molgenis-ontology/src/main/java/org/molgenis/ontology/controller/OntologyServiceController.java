@@ -118,7 +118,7 @@ public class OntologyServiceController extends MolgenisPluginController
 		String username = userAccountService.getCurrentUser().getUsername();
 
 		if (uploadProgress.isUserExists(username)) return matchResult(uploadProgress.getCurrentJob(username), model);
-		model.addAttribute("existingTasks", OntologyServiceUtil.getEntityAsMap(dataService.findAll(
+		model.addAttribute("existingTasks", OntologyServiceUtil.getEntityAsMap(dataService.findAllAsIterable(
 				MatchingTaskEntityMetaData.ENTITY_NAME,
 				new QueryImpl().eq(MatchingTaskEntityMetaData.MOLGENIS_USER, username))));
 		return "ontology-match-view";
@@ -216,7 +216,7 @@ public class OntologyServiceController extends MolgenisPluginController
 		if (dataService.hasRepository(entityName) && !uploadProgress.isUserExists(userName))
 		{
 			// Remove all the matching terms from MatchingTaskContentEntity table
-			Iterable<Entity> iterableMatchingEntities = dataService.findAll(
+			Iterable<Entity> iterableMatchingEntities = dataService.findAllAsIterable(
 					MatchingTaskContentEntityMetaData.ENTITY_NAME,
 					new QueryImpl().eq(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName));
 			dataService.delete(MatchingTaskContentEntityMetaData.ENTITY_NAME, iterableMatchingEntities);
@@ -257,7 +257,7 @@ public class OntologyServiceController extends MolgenisPluginController
 		int start = entityPager.getStart();
 		int num = entityPager.getNum();
 
-		for (Entity mappingEntity : dataService.findAll(
+		for (Entity mappingEntity : dataService.findAllAsIterable(
 				MatchingTaskContentEntityMetaData.ENTITY_NAME,
 				query.offset(start)
 						.pageSize(num)
@@ -376,7 +376,7 @@ public class OntologyServiceController extends MolgenisPluginController
 			Entity matchingTaskEntity = dataService.findOne(MatchingTaskEntityMetaData.ENTITY_NAME,
 					new QueryImpl().eq(MatchingTaskEntityMetaData.IDENTIFIER, entityName));
 
-			for (Entity mappingEntity : dataService.findAll(MatchingTaskContentEntityMetaData.ENTITY_NAME,
+			for (Entity mappingEntity : dataService.findAllAsIterable(MatchingTaskContentEntityMetaData.ENTITY_NAME,
 					new QueryImpl().eq(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName)))
 			{
 				Entity inputEntity = dataService.findOne(

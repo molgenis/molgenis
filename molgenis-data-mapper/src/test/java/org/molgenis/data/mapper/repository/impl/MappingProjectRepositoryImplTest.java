@@ -146,7 +146,7 @@ public class MappingProjectRepositoryImplTest extends AbstractTestNGSpringContex
 	{
 		Query q = new QueryImpl();
 		q.eq(OWNER, "flup");
-		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(asList(mappingProjectEntity));
+		when(dataService.findAllAsIterable(ENTITY_NAME, q)).thenReturn(asList(mappingProjectEntity));
 		when(userService.getUser("flup")).thenReturn(owner);
 		when(mappingTargetRepository.toMappingTargets(mappingTargetEntities)).thenReturn(
 				asList(mappingTarget1, mappingTarget2));
@@ -160,7 +160,7 @@ public class MappingProjectRepositoryImplTest extends AbstractTestNGSpringContex
 	{
 		Query q = new QueryImpl();
 		q.eq(OWNER, "flup");
-		when(dataService.findAll(ENTITY_NAME)).thenReturn(asList(mappingProjectEntity));
+		when(dataService.findAllAsIterable(ENTITY_NAME)).thenReturn(asList(mappingProjectEntity));
 		when(userService.getUser("flup")).thenReturn(owner);
 		when(mappingTargetRepository.toMappingTargets(mappingTargetEntities)).thenReturn(
 				asList(mappingTarget1, mappingTarget2));

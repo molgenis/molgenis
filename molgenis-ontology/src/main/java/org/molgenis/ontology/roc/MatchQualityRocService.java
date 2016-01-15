@@ -73,7 +73,7 @@ public class MatchQualityRocService
 						new QueryImpl().eq(MatchingTaskContentEntityMetaData.REF_ENTITY, matchingTaskIdentifier));
 
 				// Get all validated matches
-				Iterable<Entity> validatedMatchEntities = dataService.findAll(
+				Iterable<Entity> validatedMatchEntities = dataService.findAllAsIterable(
 						MatchingTaskContentEntityMetaData.ENTITY_NAME,
 						new QueryImpl().eq(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName).and().nest()
 								.eq(MatchingTaskContentEntityMetaData.VALIDATED, true).or()

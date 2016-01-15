@@ -122,7 +122,7 @@ public class ResourcesTest extends AbstractTestNGSpringContextTests
 		Exception ex = new RuntimeException();
 		when(resource.findAll(q)).thenThrow(ex);
 		when(resource.isAvailable()).thenReturn(false);
-		when(dataService.findAll("resourceName", q)).thenReturn(Arrays.asList(e1));
+		when(dataService.findAllAsIterable("resourceName", q)).thenReturn(Arrays.asList(e1));
 		assertEquals(resources.findAll("resourceName", q), Arrays.asList(e1));
 	}
 
@@ -130,7 +130,7 @@ public class ResourcesTest extends AbstractTestNGSpringContextTests
 	public void ifResourceDoesNotExistThenQueryIsDelegated()
 	{
 		Query q = QueryImpl.EQ("id", "5");
-		when(dataService.findAll("blah", q)).thenReturn(Arrays.asList(e1));
+		when(dataService.findAllAsIterable("blah", q)).thenReturn(Arrays.asList(e1));
 		assertEquals(resources.findAll("blah", q), Arrays.asList(e1));
 	}
 

@@ -165,11 +165,11 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		when(webRequest.getParameter("entityIds")).thenReturn("entity1,entity2");
 		when(dataService.findOne(MolgenisGroup.ENTITY_NAME, "ID", MolgenisGroup.class)).thenReturn(group1);
 		when(
-				dataService.findAll(GroupAuthority.ENTITY_NAME,
+				dataService.findAllAsIterable(GroupAuthority.ENTITY_NAME,
 						new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, group1), GroupAuthority.class)).thenReturn(
 				authorities);
 		when(
-				dataService.findAll(GroupAuthority.ENTITY_NAME, new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, "ID"),
+				dataService.findAllAsIterable(GroupAuthority.ENTITY_NAME, new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, "ID"),
 						GroupAuthority.class)).thenReturn(authorities);
 		List<String> names = Arrays.asList("entity1,entity2,entity3,entity4,entity5".split(","));
 		when(dataService.getEntityNames()).thenReturn(names);

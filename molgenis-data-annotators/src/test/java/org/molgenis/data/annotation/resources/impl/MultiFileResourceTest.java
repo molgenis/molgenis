@@ -59,7 +59,7 @@ public class MultiFileResourceTest
 		when(factory.createRepository(chrom3File)).thenReturn(chrom3Repository);
 		Query q = QueryImpl.EQ("#CHROM", "3").and().eq("POS", 12345);
 		List<Entity> result = Lists.newArrayList();
-		when(chrom3Repository.findAll(q)).thenReturn(result);
+		when(chrom3Repository.findAllAsIterable(q)).thenReturn(result);
 		assertSame(result, multiFileResource.findAll(q));
 	}
 

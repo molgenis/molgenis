@@ -130,10 +130,10 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(dataService.findOne(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
 
 		Query q = new QueryImpl().eq("name", "Piet").pageSize(10).offset(5);
-		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Arrays.asList(entity));
+		when(dataService.findAllAsIterable(ENTITY_NAME, q)).thenReturn(Arrays.asList(entity));
 
 		Query q2 = new QueryImpl().sort(new Sort().on("name", Direction.DESC)).pageSize(100).offset(0);
-		when(dataService.findAll(ENTITY_NAME, q2)).thenReturn(entities);
+		when(dataService.findAllAsIterable(ENTITY_NAME, q2)).thenReturn(entities);
 
 		DefaultAttributeMetaData attrEnum = new DefaultAttributeMetaData("enum", FieldTypeEnum.ENUM)
 				.setEnumOptions(Arrays.asList("enum0, enum1"));

@@ -57,7 +57,7 @@ public class AlgorithmTemplateServiceImplTest extends AbstractTestNGSpringContex
 		script0.set(Script.PARAMETERS, Arrays.asList(param0, param1));
 
 		Query q = new QueryImpl().eq(TYPE, SCRIPT_TYPE_JAVASCRIPT_MAGMA);
-		when(dataService.findAll(Script.ENTITY_NAME, q, Script.class)).thenReturn(Arrays.asList(script0));
+		when(dataService.findAll(Script.ENTITY_NAME, q, Script.class)).thenReturn(Stream.of(script0));
 		when(dataService.findOne(ScriptParameter.ENTITY_NAME, param0Name)).thenReturn(param0);
 		when(dataService.findOne(ScriptParameter.ENTITY_NAME, param1Name)).thenReturn(param1);
 	}

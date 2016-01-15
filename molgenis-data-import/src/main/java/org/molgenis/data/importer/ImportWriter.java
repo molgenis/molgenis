@@ -95,7 +95,8 @@ public class ImportWriter
 	 *            {@link PermissionSystemService} to give permissions on uploaded entities
 	 */
 	public ImportWriter(DataService dataService, PermissionSystemService permissionSystemService,
-			TagService<LabeledResource, LabeledResource> tagService, MolgenisPermissionService molgenisPermissionService)
+			TagService<LabeledResource, LabeledResource> tagService,
+			MolgenisPermissionService molgenisPermissionService)
 	{
 		this.dataService = dataService;
 		this.permissionSystemService = permissionSystemService;
@@ -170,8 +171,8 @@ public class ImportWriter
 
 		for (EntityMetaData emd : parsedMetaData.getAttributeTags().keySet())
 		{
-			for (Tag<AttributeMetaData, LabeledResource, LabeledResource> tag : parsedMetaData.getAttributeTags().get(
-					emd))
+			for (Tag<AttributeMetaData, LabeledResource, LabeledResource> tag : parsedMetaData.getAttributeTags()
+					.get(emd))
 			{
 				tagService.addAttributeTag(emd, tag);
 			}
@@ -199,8 +200,8 @@ public class ImportWriter
 				if ((fileEntityRepository == null) && (defaultPackage != null)
 						&& entityMetaData.getName().toLowerCase().startsWith(defaultPackage.toLowerCase() + "_"))
 				{
-					fileEntityRepository = source.getRepository(entityMetaData.getName().substring(
-							defaultPackage.length() + 1));
+					fileEntityRepository = source
+							.getRepository(entityMetaData.getName().substring(defaultPackage.length() + 1));
 				}
 
 				// check to prevent nullpointer when importing metadata only
@@ -209,16 +210,14 @@ public class ImportWriter
 					boolean selfReferencing = DependencyResolver.hasSelfReferences(entityMetaData);
 
 					// transforms entities so that they match the entity meta data of the output repository
-					Iterable<Entity> entities = Iterables.transform(fileEntityRepository,
-							new Function<Entity, Entity>()
-							{
-								@Override
-								public Entity apply(Entity entity)
-								{
-									return new DefaultEntityImporter(entityMetaData, dataService, entity,
-											selfReferencing);
-								}
-							});
+					Iterable<Entity> entities = Iterables.transform(fileEntityRepository, new Function<Entity, Entity>()
+					{
+						@Override
+						public Entity apply(Entity entity)
+						{
+							return new DefaultEntityImporter(entityMetaData, dataService, entity, selfReferencing);
+						}
+					});
 
 					if (selfReferencing)
 					{
@@ -260,9 +259,9 @@ public class ImportWriter
 						Iterable<Entity> refEntities = entity.getEntities(attribute.getName());
 						if (ids != null && ids.size() != Iterators.size(refEntities.iterator()))
 						{
-							throw new UnknownEntityException("One or more values [" + ids + "] from "
-									+ attribute.getDataType() + " field " + attribute.getName()
-									+ " could not be resolved");
+							throw new UnknownEntityException(
+									"One or more values [" + ids + "] from " + attribute.getDataType() + " field "
+											+ attribute.getName() + " could not be resolved");
 						}
 						return true;
 					}
@@ -344,8 +343,8 @@ public class ImportWriter
 			for (Entity tag : tagRepo)
 			{
 				Entity transformed = new DefaultEntity(TagMetaData.INSTANCE, dataService, tag);
-				Entity existingTag = dataService
-						.findOne(TagMetaData.ENTITY_NAME, tag.getString(TagMetaData.IDENTIFIER));
+				Entity existingTag = dataService.findOne(TagMetaData.ENTITY_NAME,
+						tag.getString(TagMetaData.IDENTIFIER));
 
 				if (existingTag == null)
 				{
@@ -492,10 +491,9 @@ public class ImportWriter
 						batchCount++;
 						if (batchCount == batchSize || !it.hasNext())
 						{
-							for (Entity existing : repo.findAll(q))
-							{
+							repo.findAll(q).forEach(existing -> {
 								existingIds.add(existing.getIdValue());
-							}
+							});
 							q = new QueryImpl();
 							batchCount = 0;
 						}
@@ -827,7 +825,7 @@ public class ImportWriter
 						return MolgenisDateFormat.getDateFormat().parse(value.toString());
 					case DATE_TIME:
 						return MolgenisDateFormat.getDateTimeFormat().parse(value.toString());
-						// $CASES-OMITTED$
+					// $CASES-OMITTED$
 					default:
 						throw new MolgenisDataException("Type [" + dataType + "] is not a date type");
 
@@ -882,8 +880,8 @@ public class ImportWriter
 			AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
 			if (attribute == null) throw new UnknownAttributeException(attributeName);
 
-			if (value instanceof Map) return new DefaultEntity(attribute.getRefEntity(), dataService,
-					(Map<String, Object>) value);
+			if (value instanceof Map)
+				return new DefaultEntity(attribute.getRefEntity(), dataService, (Map<String, Object>) value);
 
 			FieldType dataType = attribute.getDataType();
 			if (!(dataType instanceof XrefField))
@@ -924,8 +922,8 @@ public class ImportWriter
 		public <E extends Entity> E getEntity(String attributeName, Class<E> clazz)
 		{
 			Entity entity = getEntity(attributeName);
-			return entity != null ? new ConvertingIterable<E>(clazz, Arrays.asList(entity), dataService).iterator()
-					.next() : null;
+			return entity != null
+					? new ConvertingIterable<E>(clazz, Arrays.asList(entity), dataService).iterator().next() : null;
 		}
 
 		@Override
@@ -978,8 +976,8 @@ public class ImportWriter
 
 			if (firstItem instanceof Map)
 			{
-				return stream(ids.spliterator(), false).map(
-						id -> new DefaultEntity(attribute.getRefEntity(), dataService, (Map<String, Object>) id))
+				return stream(ids.spliterator(), false)
+						.map(id -> new DefaultEntity(attribute.getRefEntity(), dataService, (Map<String, Object>) id))
 						.collect(Collectors.toList());
 			}
 			if (selfReferencing)
@@ -995,24 +993,23 @@ public class ImportWriter
 					@Override
 					public Iterator<Entity> iterator()
 					{
-						return stream(ids.spliterator(), false)
-								.map(id -> {
-									// referenced entity id value must match referenced entity id attribute data type
-									if (refEntityMeta.getIdAttribute().getDataType() instanceof StringField
-											&& !(id instanceof String))
-									{
-										return String.valueOf(id);
-									}
-									else if (refEntityMeta.getIdAttribute().getDataType() instanceof IntField
-											&& !(id instanceof Integer))
-									{
-										return Integer.valueOf(id.toString());
-									}
-									else
-									{
-										return id;
-									}
-								}).<Entity> map(id -> new LazyEntity(refEntityMeta, dataService, id)).iterator();
+						return stream(ids.spliterator(), false).map(id -> {
+							// referenced entity id value must match referenced entity id attribute data type
+							if (refEntityMeta.getIdAttribute().getDataType() instanceof StringField
+									&& !(id instanceof String))
+							{
+								return String.valueOf(id);
+							}
+							else if (refEntityMeta.getIdAttribute().getDataType() instanceof IntField
+									&& !(id instanceof Integer))
+							{
+								return Integer.valueOf(id.toString());
+							}
+							else
+							{
+								return id;
+							}
+						}).<Entity> map(id -> new LazyEntity(refEntityMeta, dataService, id)).iterator();
 					}
 				};
 			}

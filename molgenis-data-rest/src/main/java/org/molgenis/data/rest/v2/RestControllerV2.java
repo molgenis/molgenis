@@ -528,7 +528,7 @@ class RestControllerV2
 			Iterable<Entity> it;
 			if (count > 0)
 			{
-				it = dataService.findAll(entityName, q);
+				it = dataService.findAllAsIterable(entityName, q);
 			}
 			else
 			{

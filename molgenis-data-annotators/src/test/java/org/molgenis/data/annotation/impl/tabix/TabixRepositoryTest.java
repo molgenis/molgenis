@@ -59,7 +59,7 @@ public class TabixRepositoryTest
 	public void testQuery()
 	{
 		Query query = tabixRepository.query().eq(VcfRepository.CHROM, "1").and().eq(VcfRepository.POS, "100");
-		assertEquals(tabixRepository.findAll(query), Arrays.asList(newEntity("1", 100, "C", "T", -0.03, 2.003),
+		assertEquals(tabixRepository.findAllAsIterable(query), Arrays.asList(newEntity("1", 100, "C", "T", -0.03, 2.003),
 				newEntity("1", 100, "C", "G", -0.4, 4.321), newEntity("1", 100, "C", "A", 2.102, 43.2)));
 	}
 
@@ -73,7 +73,7 @@ public class TabixRepositoryTest
 	public void testUnknownChromosome()
 	{
 		Query query = tabixRepository.query().eq(VcfRepository.CHROM, "MT").and().eq(VcfRepository.POS, "100");
-		assertEquals(tabixRepository.findAll(query), Collections.emptyList());
+		assertEquals(tabixRepository.findAllAsIterable(query), Collections.emptyList());
 	}
 
 	@Test

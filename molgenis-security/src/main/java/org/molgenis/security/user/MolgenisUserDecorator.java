@@ -285,15 +285,9 @@ public class MolgenisUserDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
 		return decoratedRepository.findAll(q);
-	}
-
-	@Override
-	public Stream<Entity> findAllAsStream(Query q)
-	{
-		return decoratedRepository.findAllAsStream(q);
 	}
 
 	@Override
@@ -315,21 +309,9 @@ public class MolgenisUserDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		return decoratedRepository.findAll(ids);
-	}
-
-	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		return decoratedRepository.findAll(ids);
-	}
-
-	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
-	{
-		return decoratedRepository.findAll(ids, fetch);
 	}
 
 	@Override

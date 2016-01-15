@@ -16,9 +16,6 @@ import java.util.Set;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -65,21 +62,6 @@ public class HPORepository extends AbstractRepository
 	public Iterator<Entity> iterator()
 	{
 		return getEntities().iterator();
-	}
-
-	@Override
-	public Iterable<Entity> findAll(Query q)
-	{
-		if (q.getRules().isEmpty()) return getEntities();
-		if ((q.getRules().size() != 1) || (q.getRules().get(0).getOperator() != Operator.EQUALS))
-		{
-			throw new MolgenisDataException("The only query allowed on this Repository is gene EQUALS");
-		}
-
-		String geneSymbol = (String) q.getRules().get(0).getValue();
-		List<Entity> entities = getEntitiesByGeneSymbol().get(geneSymbol);
-
-		return entities != null ? entities : Collections.emptyList();
 	}
 
 	@Override

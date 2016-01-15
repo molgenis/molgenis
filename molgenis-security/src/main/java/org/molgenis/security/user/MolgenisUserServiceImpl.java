@@ -35,7 +35,7 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	@RunAsSystem
 	public List<String> getSuEmailAddresses()
 	{
-		Iterable<MolgenisUser> superUsers = dataService.findAll(MolgenisUser.ENTITY_NAME,
+		Iterable<MolgenisUser> superUsers = dataService.findAllAsIterable(MolgenisUser.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisUser.SUPERUSER, true), MolgenisUser.class);
 
 		return superUsers != null ? Lists.transform(Lists.newArrayList(superUsers),
@@ -61,7 +61,7 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	@RunAsSystem
 	public Iterable<MolgenisGroup> getUserGroups(String username)
 	{
-		Iterable<MolgenisGroupMember> molgenisGroupMembers = dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
+		Iterable<MolgenisGroupMember> molgenisGroupMembers = dataService.findAllAsIterable(MolgenisGroupMember.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, getUser(username)), MolgenisGroupMember.class);
 		// N.B. Must collect the results in a list before yielding up the RunAsSystem privileges!
 		return Lists.newArrayList(Iterables.transform(molgenisGroupMembers, MolgenisGroupMember::getMolgenisGroup));

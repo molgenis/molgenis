@@ -81,7 +81,7 @@ public class OntologyServiceImpl implements OntologyService
 	@Override
 	public Iterable<Entity> getAllOntologyEntities()
 	{
-		return dataService.findAll(OntologyMetaData.ENTITY_NAME);
+		return dataService.findAllAsIterable(OntologyMetaData.ENTITY_NAME);
 	}
 
 	@Override

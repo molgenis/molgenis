@@ -79,15 +79,9 @@ public class EntityListenerRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
 		return decoratedRepository.findAll(q);
-	}
-
-	@Override
-	public Stream<Entity> findAllAsStream(Query q)
-	{
-		return decoratedRepository.findAllAsStream(q);
 	}
 
 	@Override
@@ -109,21 +103,9 @@ public class EntityListenerRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		return decoratedRepository.findAll(ids);
-	}
-
-	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		return decoratedRepository.findAll(ids);
-	}
-
-	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
-	{
-		return decoratedRepository.findAll(ids, fetch);
 	}
 
 	@Override
@@ -153,23 +135,6 @@ public class EntityListenerRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void update(Iterable<? extends Entity> records)
-	{
-		decoratedRepository.update(records);
-
-		if (entityListeners != null)
-		{
-			for (Entity entity : records)
-			{
-				Set<EntityListener> entityEntityListeners = entityListeners.get(entity.getIdValue());
-				entityEntityListeners.forEach(entityListener -> {
-					entityListener.postUpdate(entity);
-				});
-			}
-		}
-	}
-
-	@Override
 	public void update(Stream<? extends Entity> entities)
 	{
 		if (entityListeners != null)
@@ -192,12 +157,6 @@ public class EntityListenerRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void delete(Iterable<? extends Entity> entities)
-	{
-		decoratedRepository.delete(entities);
-	}
-
-	@Override
 	public void delete(Stream<? extends Entity> entities)
 	{
 		decoratedRepository.delete(entities);
@@ -210,7 +169,7 @@ public class EntityListenerRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
 		decoratedRepository.deleteById(ids);
 	}
@@ -225,12 +184,6 @@ public class EntityListenerRepositoryDecorator implements Repository
 	public void add(Entity entity)
 	{
 		decoratedRepository.add(entity);
-	}
-
-	@Override
-	public Integer add(Iterable<? extends Entity> entities)
-	{
-		return decoratedRepository.add(entities);
 	}
 
 	@Override

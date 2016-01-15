@@ -319,8 +319,8 @@ public class OwnedEntityRepositoryDecoratorTest
 	{
 		Entity entity0 = mock(Entity.class);
 		Query query = mock(Query.class);
-		when(decoratedRepository.findAllAsStream(query)).thenReturn(Stream.of(entity0));
-		Stream<Entity> entities = ownedEntityRepositoryDecorator.findAllAsStream(query);
+		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = ownedEntityRepositoryDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
 
@@ -334,8 +334,8 @@ public class OwnedEntityRepositoryDecoratorTest
 
 		Entity entity0 = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("username").getMock();
 		Query query = mock(Query.class);
-		when(decoratedRepository.findAllAsStream(query)).thenReturn(Stream.of(entity0));
-		Stream<Entity> entities = ownedEntityRepositoryDecorator.findAllAsStream(query);
+		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = ownedEntityRepositoryDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 		verify(query, times(1)).eq(OwnedEntityMetaData.ATTR_OWNER_USERNAME, "username");
 	}

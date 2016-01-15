@@ -56,7 +56,7 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 		MapEntity targetEntity4 = new MapEntity(ImmutableMap.of("code", 4, "label", "Never + fewer than once a week"));
 		MapEntity targetEntity5 = new MapEntity(ImmutableMap.of("code", 9, "label", "missing"));
 
-		Mockito.when(dataService.findAll(targetRefEntityMetaData.getName()))
+		Mockito.when(dataService.findAllAsIterable(targetRefEntityMetaData.getName()))
 				.thenReturn(Arrays.asList(targetEntity1, targetEntity2, targetEntity3, targetEntity4, targetEntity5));
 
 		targetEntityMetaData = new DefaultEntityMetaData("target");
@@ -77,7 +77,7 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 		MapEntity sourceEntity6 = new MapEntity(ImmutableMap.of("code", 6, "label", "4-5 days per week"));
 		MapEntity sourceEntity7 = new MapEntity(ImmutableMap.of("code", 7, "label", "6-7 days per week"));
 
-		Mockito.when(dataService.findAll(sourceRefEntityMetaData.getName())).thenReturn(Arrays.asList(sourceEntity1,
+		Mockito.when(dataService.findAllAsIterable(sourceRefEntityMetaData.getName())).thenReturn(Arrays.asList(sourceEntity1,
 				sourceEntity2, sourceEntity3, sourceEntity4, sourceEntity5, sourceEntity6, sourceEntity7));
 
 		DefaultEntityMetaData sourceRefEntityMetaData1 = createEntityMetaData("Mitchelstown_POTATO_REF");
@@ -97,7 +97,7 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 		MapEntity sourceEntity15 = new MapEntity(ImmutableMap.of("code", 8, "label", "4-5 per day"));
 		MapEntity sourceEntity16 = new MapEntity(ImmutableMap.of("code", 9, "label", "6+ per day"));
 
-		Mockito.when(dataService.findAll(sourceRefEntityMetaData1.getName()))
+		Mockito.when(dataService.findAllAsIterable(sourceRefEntityMetaData1.getName()))
 				.thenReturn(Arrays.asList(sourceEntity8, sourceEntity9, sourceEntity10, sourceEntity11, sourceEntity12,
 						sourceEntity13, sourceEntity14, sourceEntity15, sourceEntity16));
 
@@ -111,7 +111,7 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 		MapEntity sourceEntity18 = new MapEntity(ImmutableMap.of("code", 2, "label", "no"));
 		MapEntity sourceEntity19 = new MapEntity(ImmutableMap.of("code", 9, "label", "missing"));
 
-		Mockito.when(dataService.findAll(sourceRefEntityMetaData2.getName()))
+		Mockito.when(dataService.findAllAsIterable(sourceRefEntityMetaData2.getName()))
 				.thenReturn(Arrays.asList(sourceEntity17, sourceEntity18, sourceEntity19));
 
 		sourceEntityMetaData = new DefaultEntityMetaData("source");

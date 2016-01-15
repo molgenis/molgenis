@@ -66,17 +66,10 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.READ);
 		return decoratedRepository.findAll(q);
-	}
-
-	@Override
-	public Stream<Entity> findAllAsStream(Query q)
-	{
-		validatePermission(decoratedRepository.getName(), Permission.READ);
-		return decoratedRepository.findAllAsStream(q);
 	}
 
 	@Override
@@ -101,24 +94,10 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		validatePermission(decoratedRepository.getName(), Permission.READ);
-		return decoratedRepository.findAll(ids);
-	}
-
-	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.READ);
 		return decoratedRepository.findAll(ids);
-	}
-
-	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
-	{
-		validatePermission(decoratedRepository.getName(), Permission.READ);
-		return decoratedRepository.findAll(ids, fetch);
 	}
 
 	@Override
@@ -143,13 +122,6 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
-	public void update(Iterable<? extends Entity> records)
-	{
-		validatePermission(decoratedRepository.getName(), Permission.WRITE);
-		decoratedRepository.update(records);
-	}
-
-	@Override
 	public void update(Stream<? extends Entity> entities)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
@@ -161,13 +133,6 @@ public class RepositorySecurityDecorator implements Repository
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.delete(entity);
-	}
-
-	@Override
-	public void delete(Iterable<? extends Entity> entities)
-	{
-		validatePermission(decoratedRepository.getName(), Permission.WRITE);
-		decoratedRepository.delete(entities);
 	}
 
 	@Override
@@ -185,7 +150,7 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.deleteById(ids);
@@ -203,13 +168,6 @@ public class RepositorySecurityDecorator implements Repository
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.add(entity);
-	}
-
-	@Override
-	public Integer add(Iterable<? extends Entity> entities)
-	{
-		validatePermission(decoratedRepository.getName(), Permission.WRITE);
-		return decoratedRepository.add(entities);
 	}
 
 	@Override

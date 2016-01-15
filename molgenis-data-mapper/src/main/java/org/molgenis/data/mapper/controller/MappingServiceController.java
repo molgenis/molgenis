@@ -280,7 +280,7 @@ public class MappingServiceController extends MolgenisPluginController
 		Long num = mappingServiceRequest.getNum();
 		Query query = new QueryImpl().offset(offset.intValue()).pageSize(num.intValue());
 		String sourceEntityName = mappingServiceRequest.getSourceEntityName();
-		Iterable<Entity> sourceEntities = dataService.findAll(sourceEntityName, query);
+		Iterable<Entity> sourceEntities = dataService.findAllAsIterable(sourceEntityName, query);
 
 		long total = dataService.count(sourceEntityName, new QueryImpl());
 		long nrSuccess = 0, nrErrors = 0;
@@ -613,7 +613,7 @@ public class MappingServiceController extends MolgenisPluginController
 		EntityMetaData refEntityMetaData = attributeMapping.getTargetAttributeMetaData().getRefEntity();
 		if (refEntityMetaData != null)
 		{
-			Iterable<Entity> refEntities = dataService.findAll(refEntityMetaData.getName());
+			Iterable<Entity> refEntities = dataService.findAllAsIterable(refEntityMetaData.getName());
 			model.addAttribute("categories", refEntities);
 		}
 
@@ -678,7 +678,7 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("source", source);
 		model.addAttribute("targetAttribute", dataService.getEntityMetaData(target).getAttribute(targetAttribute));
 
-		FluentIterable<Entity> sourceEntities = FluentIterable.from(dataService.findAll(source)).limit(10);
+		FluentIterable<Entity> sourceEntities = FluentIterable.from(dataService.findAllAsIterable(source)).limit(10);
 		ImmutableList<AlgorithmResult> algorithmResults = sourceEntities.transform(
 				sourceEntity -> {
 					try
@@ -741,7 +741,7 @@ public class MappingServiceController extends MolgenisPluginController
 		if (targetAttributeDataType instanceof XrefField || targetAttributeDataType instanceof MrefField
 				|| targetAttributeDataType instanceof CategoricalField)
 		{
-			targetAttributeEntities = dataService.findAll(dataService.getEntityMetaData(target)
+			targetAttributeEntities = dataService.findAllAsIterable(dataService.getEntityMetaData(target)
 					.getAttribute(targetAttribute).getRefEntity().getName());
 
 			targetAttributeIdAttribute = dataService.getEntityMetaData(target).getAttribute(targetAttribute)
@@ -752,7 +752,7 @@ public class MappingServiceController extends MolgenisPluginController
 		}
 		else
 		{
-			targetAttributeEntities = dataService.findAll(dataService.getEntityMetaData(target).getName());
+			targetAttributeEntities = dataService.findAllAsIterable(dataService.getEntityMetaData(target).getName());
 			targetAttributeIdAttribute = dataService.getEntityMetaData(target).getIdAttribute().getName();
 			targetAttributeLabelAttribute = dataService.getEntityMetaData(target).getLabelAttribute().getName();
 		}
@@ -772,7 +772,7 @@ public class MappingServiceController extends MolgenisPluginController
 		if (sourceAttributeDataType instanceof XrefField || sourceAttributeDataType instanceof MrefField
 				|| sourceAttributeDataType instanceof CategoricalField)
 		{
-			sourceAttributeEntities = dataService.findAll(dataService.getEntityMetaData(source)
+			sourceAttributeEntities = dataService.findAllAsIterable(dataService.getEntityMetaData(source)
 					.getAttribute(sourceAttribute).getRefEntity().getName());
 
 			sourceAttributeIdAttribute = dataService.getEntityMetaData(source).getAttribute(sourceAttribute)
@@ -783,7 +783,7 @@ public class MappingServiceController extends MolgenisPluginController
 		}
 		else
 		{
-			sourceAttributeEntities = dataService.findAll(dataService.getEntityMetaData(source).getName());
+			sourceAttributeEntities = dataService.findAllAsIterable(dataService.getEntityMetaData(source).getName());
 			sourceAttributeIdAttribute = dataService.getEntityMetaData(source).getIdAttribute().getName();
 			sourceAttributeLabelAttribute = dataService.getEntityMetaData(source).getLabelAttribute().getName();
 		}

@@ -60,7 +60,7 @@ public class ResourcesImpl implements Resources
 				LOG.warn("Resource {} is unavailable, trying dataService instead.", name);
 			}
 		}
-		return dataService.findAll(name, q);
+		return dataService.findAllAsIterable(name, q);
 	}
 
 	public Set<String> getResourcesNames()

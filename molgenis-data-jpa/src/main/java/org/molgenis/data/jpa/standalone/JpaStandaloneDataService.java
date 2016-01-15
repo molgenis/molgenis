@@ -26,8 +26,8 @@ public class JpaStandaloneDataService extends DataServiceImpl
 {
 	private final EntityManager entityManager;
 
-	public JpaStandaloneDataService(String dbUrl, String dbUsername, String dbPassword) throws ClassNotFoundException,
-			NoSuchMethodException, SecurityException
+	public JpaStandaloneDataService(String dbUrl, String dbUsername, String dbPassword)
+			throws ClassNotFoundException, NoSuchMethodException, SecurityException
 	{
 		super(new NonDecoratingRepositoryDecoratorFactory());
 
@@ -44,8 +44,8 @@ public class JpaStandaloneDataService extends DataServiceImpl
 		}
 	}
 
-	private JpaRepository createJpaRepository(EntityType<?> entityType) throws ClassNotFoundException,
-			NoSuchMethodException, SecurityException
+	private JpaRepository createJpaRepository(EntityType<?> entityType)
+			throws ClassNotFoundException, NoSuchMethodException, SecurityException
 	{
 		String repoClassName = entityType.getJavaType().getName() + "Repository";
 
@@ -54,8 +54,8 @@ public class JpaStandaloneDataService extends DataServiceImpl
 		Constructor<? extends JpaRepository> constructor = repoClass.getConstructor(EntityManager.class,
 				EntityValidator.class, QueryResolver.class);
 
-		return BeanUtils.instantiateClass(constructor, entityManager, new DefaultEntityValidator(this,
-				new EntityAttributesValidator()), new QueryResolver(this));
+		return BeanUtils.instantiateClass(constructor, entityManager,
+				new DefaultEntityValidator(this, new EntityAttributesValidator()), new QueryResolver(this));
 	}
 
 	@Override
@@ -74,20 +74,6 @@ public class JpaStandaloneDataService extends DataServiceImpl
 	}
 
 	@Override
-	public void add(final String entityName, final Iterable<? extends Entity> entities)
-	{
-		doInTransaction(new TransactionCallback<Object>()
-		{
-			@Override
-			public Object execute()
-			{
-				JpaStandaloneDataService.super.add(entityName, entities);
-				return null;
-			}
-		});
-	}
-
-	@Override
 	public void update(final String entityName, final Entity entity)
 	{
 		doInTransaction(new TransactionCallback<Object>()
@@ -102,20 +88,6 @@ public class JpaStandaloneDataService extends DataServiceImpl
 	}
 
 	@Override
-	public void update(final String entityName, final Iterable<? extends Entity> entities)
-	{
-		doInTransaction(new TransactionCallback<Object>()
-		{
-			@Override
-			public Object execute()
-			{
-				JpaStandaloneDataService.super.update(entityName, entities);
-				return null;
-			}
-		});
-	}
-
-	@Override
 	public void delete(final String entityName, final Entity entity)
 	{
 		doInTransaction(new TransactionCallback<Object>()
@@ -124,20 +96,6 @@ public class JpaStandaloneDataService extends DataServiceImpl
 			public Object execute()
 			{
 				JpaStandaloneDataService.super.delete(entityName, entity);
-				return null;
-			}
-		});
-	}
-
-	@Override
-	public void delete(final String entityName, final Iterable<? extends Entity> entities)
-	{
-		doInTransaction(new TransactionCallback<Object>()
-		{
-			@Override
-			public Object execute()
-			{
-				JpaStandaloneDataService.super.delete(entityName, entities);
 				return null;
 			}
 		});

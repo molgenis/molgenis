@@ -14,13 +14,15 @@ import static org.testng.AssertJUnit.assertEquals;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -126,7 +128,14 @@ public class RepositoryRangeHandlingDataSourceTest
 		resultList.add(new Hit("", "", map));
 		featureList = new ArrayList<>();
 		featureList.add(dasFeature);
-		when(dataService.findAll("dataset", q)).thenReturn(Arrays.<Entity> asList(entity));
+		when(dataService.findAll("dataset", q)).thenAnswer(new Answer<Stream<Entity>>()
+		{
+			@Override
+			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
+			{
+				return Stream.of(entity);
+			}
+		});
 		when(result.iterator()).thenReturn(resultList.iterator());
 
 		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_CHROM, entity.getEntityMetaData()))

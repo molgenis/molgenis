@@ -78,7 +78,7 @@ public class Step6ChangeRScriptType extends MolgenisUpgrade
 
 	private Iterable<Entity> updateScriptTypeInScriptEntities(Entity newScriptType, String currentScriptType)
 	{
-		Iterable<Entity> rScriptEntities = scriptRepo.findAll(QueryImpl.EQ(Script.TYPE, currentScriptType));
+		Iterable<Entity> rScriptEntities = scriptRepo.findAllAsIterable(QueryImpl.EQ(Script.TYPE, currentScriptType));
 		updateScriptType(newScriptType, rScriptEntities);
 		return rScriptEntities;
 	}

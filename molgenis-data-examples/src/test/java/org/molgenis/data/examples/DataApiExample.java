@@ -42,8 +42,8 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 		dataService.update(UserMetaData.ENTITY_NAME, klaas);
 
 		// Find all active
-		dataService.findAll(UserMetaData.ENTITY_NAME, EQ(UserMetaData.ACTIVE, true), User.class).forEach(
-				System.out::println);
+		dataService.findAll(UserMetaData.ENTITY_NAME, EQ(UserMetaData.ACTIVE, true), User.class)
+				.forEach(System.out::println);
 		// OR ??
 		dataService.getRepository(UserMetaData.ENTITY_NAME).query().eq(UserMetaData.ACTIVE, true)
 				.forEach(System.out::println);
@@ -57,7 +57,7 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 
 		// Add streaming
 		File usersCsv = ResourceUtils.getFile("users.csv");
-		dataService.add(UserMetaData.ENTITY_NAME, new CsvRepository(usersCsv, null));
+		dataService.add(UserMetaData.ENTITY_NAME, new CsvRepository(usersCsv, null).stream());
 		printUsers();
 	}
 

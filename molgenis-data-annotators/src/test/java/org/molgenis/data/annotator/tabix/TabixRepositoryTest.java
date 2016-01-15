@@ -51,7 +51,7 @@ public class TabixRepositoryTest
 	{
 		Mockito.when(tabixReader.query("13:12-12")).thenReturn(null);
 
-		Iterable<Entity> actual = tabixRepository.findAll(tabixRepository.query().eq(CHROM, "13").and().eq(POS, 12));
+		Iterable<Entity> actual = tabixRepository.findAllAsIterable(tabixRepository.query().eq(CHROM, "13").and().eq(POS, 12));
 
 		assertEquals(Collections.emptyList(), Lists.newArrayList(actual));
 	}
@@ -63,7 +63,7 @@ public class TabixRepositoryTest
 		Mockito.when(iterator.next()).thenReturn("id1\t13\t11\tnope", "id2\t13\t12\tyup", "id3\t13\t12\tyup",
 				"id3\t13\t13\tnope", null);
 
-		Iterable<Entity> actual = tabixRepository.findAll(tabixRepository.query().eq(CHROM, "13").and().eq(POS, 12));
+		Iterable<Entity> actual = tabixRepository.findAllAsIterable(tabixRepository.query().eq(CHROM, "13").and().eq(POS, 12));
 
 		Entity e1 = new MapEntity(entityMetaData);
 		e1.set("ID", "id2");

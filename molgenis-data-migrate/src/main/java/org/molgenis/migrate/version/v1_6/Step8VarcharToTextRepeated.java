@@ -81,7 +81,7 @@ public class Step8VarcharToTextRepeated extends MolgenisUpgrade
 		RunAsSystemProxy.runAsSystem(() -> metaData.setDefaultBackend(undecoratedMySQL));
 
 		// find all entities with backend = MySQL
-		Iterable<Entity> entities = dataService.findAll("entities");
+		Iterable<Entity> entities = dataService.findAllAsIterable("entities");
 		entities.forEach(entity -> {
 			if (entity.get("backend").equals("MySQL"))
 			{

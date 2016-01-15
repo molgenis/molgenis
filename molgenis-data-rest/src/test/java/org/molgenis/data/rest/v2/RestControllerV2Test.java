@@ -334,7 +334,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		when(dataService.findOne(eq(ENTITY_NAME), eq(ENTITY_ID), any(Fetch.class))).thenReturn(entity);
 		when(dataService.findOne(eq(SELF_REF_ENTITY_NAME), eq("0"), any(Fetch.class))).thenReturn(selfRefEntity);
 		when(dataService.count(ENTITY_NAME, q)).thenReturn(2l);
-		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Arrays.asList(entity));
+		when(dataService.findAllAsIterable(ENTITY_NAME, q)).thenReturn(Arrays.asList(entity));
 		when(dataService.findOne(REF_ENTITY_NAME, REF_ENTITY0_ID)).thenReturn(refEntity0);
 		when(dataService.findOne(REF_ENTITY_NAME, REF_ENTITY1_ID)).thenReturn(refEntity1);
 		when(dataService.findOne(REF_REF_ENTITY_NAME, REF_REF_ENTITY_ID)).thenReturn(refRefEntity);

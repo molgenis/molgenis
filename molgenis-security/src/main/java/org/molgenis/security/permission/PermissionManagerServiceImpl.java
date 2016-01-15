@@ -57,7 +57,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@Transactional(readOnly = true)
 	public List<MolgenisUser> getUsers()
 	{
-		return Lists.newArrayList(dataService.findAll(MolgenisUser.ENTITY_NAME, MolgenisUser.class));
+		return Lists.newArrayList(dataService.findAllAsIterable(MolgenisUser.ENTITY_NAME, MolgenisUser.class));
 	}
 
 	@Override
@@ -65,7 +65,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@Transactional(readOnly = true)
 	public List<MolgenisGroup> getGroups()
 	{
-		return Lists.newArrayList(dataService.findAll(MolgenisGroup.ENTITY_NAME, MolgenisGroup.class));
+		return Lists.newArrayList(dataService.findAllAsIterable(MolgenisGroup.ENTITY_NAME, MolgenisGroup.class));
 	}
 
 	@Override
@@ -143,7 +143,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 		if (molgenisUser == null) throw new RuntimeException("unknown user id [" + userId + "]");
 		List<Authority> userPermissions = getUserPermissions(molgenisUser, authorityPrefix);
 
-		Iterable<MolgenisGroupMember> groupMembersIt = dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
+		Iterable<MolgenisGroupMember> groupMembersIt = dataService.findAllAsIterable(MolgenisGroupMember.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser), MolgenisGroupMember.class);
 
 		if (groupMembersIt == null)
@@ -241,7 +241,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 	private List<Authority> getUserPermissions(MolgenisUser molgenisUser, final String authorityPrefix)
 	{
-		Iterable<UserAuthority> authorities = dataService.findAll(UserAuthority.ENTITY_NAME,
+		Iterable<UserAuthority> authorities = dataService.findAllAsIterable(UserAuthority.ENTITY_NAME,
 				new QueryImpl().eq(UserAuthority.MOLGENISUSER, molgenisUser), UserAuthority.class);
 
 		return Lists.<Authority> newArrayList(Iterables.filter(authorities, new Predicate<Authority>()
@@ -271,7 +271,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 	private List<Authority> getGroupPermissions(List<MolgenisGroup> molgenisGroups, final String authorityPrefix)
 	{
-		Iterable<GroupAuthority> authorities = dataService.findAll(GroupAuthority.ENTITY_NAME,
+		Iterable<GroupAuthority> authorities = dataService.findAllAsIterable(GroupAuthority.ENTITY_NAME,
 				new QueryImpl().in(GroupAuthority.MOLGENISGROUP, molgenisGroups), GroupAuthority.class);
 
 		return Lists.<Authority> newArrayList(Iterables.filter(authorities, new Predicate<Authority>()

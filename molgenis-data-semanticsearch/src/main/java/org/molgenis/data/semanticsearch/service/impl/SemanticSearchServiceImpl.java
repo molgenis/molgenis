@@ -100,7 +100,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			finalQueryRules.addAll(Arrays.asList(new QueryRule(Operator.AND), disMaxQueryRule));
 		}
 
-		Iterable<Entity> attributeMetaDataEntities = dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME,
+		Iterable<Entity> attributeMetaDataEntities = dataService.findAllAsIterable(AttributeMetaDataMetaData.ENTITY_NAME,
 				new QueryImpl(finalQueryRules));
 
 		Map<String, String> collectExpanedQueryMap = semanticSearchServiceHelper.collectExpandedQueryMap(queryTerms,

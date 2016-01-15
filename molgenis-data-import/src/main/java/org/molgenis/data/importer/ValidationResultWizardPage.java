@@ -113,7 +113,7 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 		}
 		else
 		{
-			groups = Lists.newArrayList(dataService.findAll(MolgenisGroup.ENTITY_NAME, MolgenisGroup.class));
+			groups = Lists.newArrayList(dataService.findAllAsIterable(MolgenisGroup.ENTITY_NAME, MolgenisGroup.class));
 		}
 
 		((ImportWizard) wizard).setGroups(groups);

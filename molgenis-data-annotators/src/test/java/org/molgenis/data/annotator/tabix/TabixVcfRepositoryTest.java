@@ -52,7 +52,7 @@ public class TabixVcfRepositoryTest
 		Mockito.when(tabixReader.query("13:12-12")).thenReturn(null);
 
 		Iterable<Entity> actual = tabixVcfRepository
-				.findAll(tabixVcfRepository.query().eq(CHROM, "13").and().eq(POS, 12));
+				.findAllAsIterable(tabixVcfRepository.query().eq(CHROM, "13").and().eq(POS, 12));
 
 		assertEquals(Collections.emptyList(), Lists.newArrayList(actual));
 	}
@@ -65,7 +65,7 @@ public class TabixVcfRepositoryTest
 				"13\t12\tid3\tA\tG\t12\t.\t.\t.", "13\t13\tid4\tA\tC\t12\t.\t.\t.", null);
 
 		Iterable<Entity> actual = tabixVcfRepository
-				.findAll(tabixVcfRepository.query().eq(CHROM, "13").and().eq(POS, 12));
+				.findAllAsIterable(tabixVcfRepository.query().eq(CHROM, "13").and().eq(POS, 12));
 
 		Entity e1 = new MapEntity(entityMetaData);
 		e1.set("#CHROM", "13");

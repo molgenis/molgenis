@@ -183,15 +183,15 @@ public class RepositoryValidationDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Iterable<Entity> findAllAsIterable(Query q)
 	{
-		return decoratedRepository.findAll(q);
+		return decoratedRepository.findAllAsIterable(q);
 	}
 
 	@Override
-	public Stream<Entity> findAllAsStream(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
-		return decoratedRepository.findAllAsStream(q);
+		return decoratedRepository.findAll(q);
 	}
 
 	@Override
@@ -387,7 +387,7 @@ public class RepositoryValidationDecorator implements Repository
 					refEntitiesIds.put(refEntityName, refEntityIds);
 
 					Query q = new QueryImpl().fetch(new Fetch().field(refEntityMeta.getIdAttribute().getName()));
-					for (Entity refEntity : dataService.findAll(refEntityName, q))
+					for (Entity refEntity : dataService.findAllAsIterable(refEntityName, q))
 					{
 						refEntityIds.add(refEntity.getIdValue());
 					}
@@ -418,7 +418,7 @@ public class RepositoryValidationDecorator implements Repository
 			});
 
 			Query q = new QueryImpl().fetch(fetch);
-			for (Entity entity : decoratedRepository.findAll(q))
+			for (Entity entity : decoratedRepository.findAllAsIterable(q))
 			{
 				uniqueAttrs.forEach(uniqueAttr -> {
 					HugeMap<Object, Object> uniqueAttrValues = uniqueAttrsValues.get(uniqueAttr.getName());
@@ -939,7 +939,7 @@ public class RepositoryValidationDecorator implements Repository
 
 		try
 		{
-			for (Entity refEntity : dataService.findAll(attr.getRefEntity().getName()))
+			for (Entity refEntity : dataService.findAllAsIterable(attr.getRefEntity().getName()))
 			{
 				refEntityIdValues.add(refEntity.getIdValue());
 			}

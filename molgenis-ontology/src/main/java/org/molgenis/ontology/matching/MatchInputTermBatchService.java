@@ -75,7 +75,7 @@ public class MatchInputTermBatchService
 		{
 			// Match input terms with code
 			List<Entity> entitiesToAdd = new ArrayList<Entity>();
-			for (Entity entity : dataService.findAll(entityName))
+			for (Entity entity : dataService.findAllAsIterable(entityName))
 			{
 				MapEntity matchingTaskContentEntity = new MapEntity();
 				matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.INPUT_TERM, entity.getIdValue());

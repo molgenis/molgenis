@@ -1,6 +1,7 @@
 package org.molgenis.data.mysql;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.RepositoryCapability.MANAGABLE;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
@@ -11,7 +12,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import javax.sql.DataSource;
 
@@ -724,9 +725,9 @@ public class MysqlRepository extends AbstractRepository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
-		return new BatchingQueryResult(BATCH_SIZE, q)
+		BatchingQueryResult batchingQueryResult = new BatchingQueryResult(BATCH_SIZE, q)
 		{
 			@Override
 			protected List<Entity> getBatch(Query batchQuery)
@@ -748,6 +749,7 @@ public class MysqlRepository extends AbstractRepository
 				return jdbcTemplate.query(sql, parameters.toArray(new Object[0]), entityMapper);
 			}
 		};
+		return StreamSupport.stream(batchingQueryResult.spliterator(), false);
 	}
 
 	protected String getWhereSql(Query q, List<Object> parameters, int mrefFilterIndex)
@@ -982,24 +984,7 @@ public class MysqlRepository extends AbstractRepository
 	@Override
 	public void delete(Entity entity)
 	{
-		this.delete(Arrays.asList(new Entity[]
-		{ entity }));
-
-	}
-
-	@Override
-	public void delete(Iterable<? extends Entity> entities)
-	{
-		// todo, split in subbatchs
-		final List<Object> deleteByIdBatch = new ArrayList<Object>();
-
-		this.resetXrefValuesBySelfReference(entities);
-
-		for (Entity e : entities)
-		{
-			deleteByIdBatch.add(e.getIdValue());
-		}
-		this.deleteById(deleteByIdBatch);
+		this.delete(Stream.of(entity));
 	}
 
 	@Override
@@ -1043,7 +1028,7 @@ public class MysqlRepository extends AbstractRepository
 				}
 			}
 		}
-		this.update(updateBatch);
+		this.update(updateBatch.iterator());
 	}
 
 	public String getDeleteSql()
@@ -1057,18 +1042,13 @@ public class MysqlRepository extends AbstractRepository
 	@Override
 	public void deleteById(Object id)
 	{
-		this.deleteById(Arrays.asList(new Object[]
-		{ id }));
+		this.deleteById(Stream.of(id));
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
-		final List<Object> idList = new ArrayList<Object>();
-		for (Object id : ids)
-		{
-			idList.add(id);
-		}
+		final List<Object> idList = ids.collect(toList());
 
 		jdbcTemplate.batchUpdate(getDeleteSql(), new BatchPreparedStatementSetter()
 		{
@@ -1089,13 +1069,7 @@ public class MysqlRepository extends AbstractRepository
 	@Override
 	public void deleteAll()
 	{
-		delete(this);
-	}
-
-	@Override
-	public Integer add(Iterable<? extends Entity> entities)
-	{
-		return add(entities.iterator());
+		delete(this.stream());
 	}
 
 	@Override
@@ -1210,21 +1184,13 @@ public class MysqlRepository extends AbstractRepository
 	public void add(Entity entity)
 	{
 		if (entity == null) throw new RuntimeException("MysqlRepository.add() failed: entity was null");
-		add(Arrays.asList(new Entity[]
-		{ entity }));
+		add(Stream.of(entity));
 	}
 
 	@Override
 	public void update(Entity entity)
 	{
-		update(Arrays.asList(new Entity[]
-		{ entity }));
-	}
-
-	@Override
-	public void update(Iterable<? extends Entity> entities)
-	{
-		update(entities.iterator());
+		update(Stream.of(entity));
 	}
 
 	@Override

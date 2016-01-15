@@ -90,7 +90,7 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 		}
 		else
 		{
-			annotatationSourceEntities = dataService.findAll(sourceRepositoryName, q);
+			annotatationSourceEntities = dataService.findAllAsIterable(sourceRepositoryName, q);
 		}
 		DefaultEntityMetaData meta = new DefaultEntityMetaData(entity.getEntityMetaData());
 		info.getOutputAttributes().forEach(meta::addAttributeMetaData);

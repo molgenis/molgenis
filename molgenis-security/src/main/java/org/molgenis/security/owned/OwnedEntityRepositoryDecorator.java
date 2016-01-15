@@ -93,20 +93,13 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
-	{
-		if (mustAddRowLevelSecurity()) addRowLevelSecurity(q);
-		return decoratedRepo.findAll(q);
-	}
-
-	@Override
-	public Stream<Entity> findAllAsStream(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
 		if (mustAddRowLevelSecurity())
 		{
 			addRowLevelSecurity(q);
 		}
-		return decoratedRepo.findAllAsStream(q);
+		return decoratedRepo.findAll(q);
 	}
 
 	@Override
@@ -143,26 +136,6 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		Iterable<Entity> entities = decoratedRepo.findAll(ids);
-		if (mustAddRowLevelSecurity())
-		{
-			entities = Iterables.filter(entities, new Predicate<Entity>()
-			{
-				@Override
-				public boolean apply(Entity e)
-				{
-					return currentUserIsOwner(e);
-				}
-
-			});
-		}
-
-		return entities;
-	}
-
-	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		Stream<Entity> entities = decoratedRepo.findAll(ids);
@@ -170,26 +143,6 @@ public class OwnedEntityRepositoryDecorator implements Repository
 		{
 			entities = entities.filter(this::currentUserIsOwner);
 		}
-		return entities;
-	}
-
-	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
-	{
-		Iterable<Entity> entities = decoratedRepo.findAll(ids, fetch);
-		if (mustAddRowLevelSecurity())
-		{
-			entities = Iterables.filter(entities, new Predicate<Entity>()
-			{
-				@Override
-				public boolean apply(Entity e)
-				{
-					return currentUserIsOwner(e);
-				}
-
-			});
-		}
-
 		return entities;
 	}
 
@@ -301,19 +254,6 @@ public class OwnedEntityRepositoryDecorator implements Repository
 		}
 
 		decoratedRepo.deleteById(id);
-	}
-
-	@Override
-	public void deleteById(Iterable<Object> ids)
-	{
-		if (mustAddRowLevelSecurity())
-		{
-			delete(decoratedRepo.findAll(ids));
-		}
-		else
-		{
-			decoratedRepo.deleteById(ids);
-		}
 	}
 
 	@Override

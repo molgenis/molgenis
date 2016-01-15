@@ -72,7 +72,7 @@ public class ResourceImpl implements Resource
 	@Override
 	public Iterable<Entity> findAll(Query q)
 	{
-		return getRepository().findAll(q);
+		return getRepository().findAllAsIterable(q);
 	}
 
 	private boolean needsRefresh()
