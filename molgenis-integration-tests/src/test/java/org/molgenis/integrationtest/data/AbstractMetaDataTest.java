@@ -2,6 +2,7 @@ package org.molgenis.integrationtest.data;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -89,11 +90,15 @@ public abstract class AbstractMetaDataTest extends AbstractDataIntegrationTest
 		assertNotNull(retrievedEntityMetaData.getAttribute("strAttr"));
 		assertEquals(Iterables.size(retrievedEntityMetaData.getAtomicAttributes()), 3);
 
-		// TODO
+		// TODO, fails -> fix deleteAttribute
 		// Delete attribute
 		// metaDataService.deleteAttribute("test_test1_TestEntity", "strAttr");
 		// retrievedEntityMetaData = metaDataService.getEntityMetaData("test_test1_TestEntity");
 		// assertNull(retrievedEntityMetaData.getAttribute("strAttr"));
 		// assertEquals(Iterables.size(retrievedEntityMetaData.getAtomicAttributes()), 2);
+
+		// Delete EntityMetaData
+		metaDataService.deleteEntityMeta("test_test1_TestEntity");
+		assertNull(metaDataService.getEntityMetaData("test_test1_TestEntity"));
 	}
 }
