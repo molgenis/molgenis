@@ -95,7 +95,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	 * Setter for the ManageableCrudRepositoryCollection, to be called after it's created. This resolves the circular
 	 * dependency {@link MysqlRepositoryCollection} => decorated {@link MetaDataService} => {@link RepositoryCreator}
 	 * 
-	 * @param backend
+	 * @param ManageableRepositoryCollection
 	 */
 	@Override
 	public MetaDataService setDefaultBackend(ManageableRepositoryCollection backend)

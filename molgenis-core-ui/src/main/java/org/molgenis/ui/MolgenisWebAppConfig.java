@@ -480,9 +480,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@PostConstruct
 	public void initRepositories()
 	{
-		dataService().setMeta(metaDataService());
 		addUpgrades();
 		boolean didUpgrade = upgradeService.upgrade();
+		dataService().setMeta(metaDataService());
 		if (didUpgrade)
 		{
 			LOG.info("Reindexing repositories due to MOLGENIS upgrade...");

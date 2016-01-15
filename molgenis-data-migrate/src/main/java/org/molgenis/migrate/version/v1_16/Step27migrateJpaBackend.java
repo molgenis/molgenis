@@ -29,6 +29,6 @@ public class Step27migrateJpaBackend extends MolgenisUpgrade
 	public void upgrade()
 	{
 		LOG.info("update entities with jpa backend, new backend: " + backend);
-		template.execute("DROP TABLE IF EXISTS Disease;");
+		template.execute("update entities set backend='" + backend + "' where backend = 'JPA'");
 	}
 }
