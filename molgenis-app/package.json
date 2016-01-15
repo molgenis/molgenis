@@ -4,7 +4,7 @@
   "description": "Dependencies for the MOLGENIS UI",
   "scripts": {
     "build": "webpack",
-    "test": "jest"
+    "test": "webpack --config webpack.test.config.js; node ./target/test-classes/js/dist/test.bundle.js > target/tests.tap; cat target/tests.tap"
   },
   "repository": {
     "type": "git",
@@ -55,11 +55,8 @@
     "faucet": "0.0.1",
     "file-loader": "^0.8.5",
     "fs": "0.0.2",
-    "jest": "^0.1.40",
-    "jest-cli": "0.8.x",
-    "jest-webpack-alias": "2.1.x",
     "node-libs-browser": "^0.5.2",
-    "react-transform-hmr": "^1.0.0",
+    "null-loader": "^0.1.1",
     "skin-deep": "^0.13.0",
     "style-loader": "^0.13.0",
     "tape": "^4.4.0",

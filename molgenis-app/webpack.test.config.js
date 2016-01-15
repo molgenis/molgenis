@@ -5,7 +5,9 @@ var webpack = require('webpack');
 var configuration = {
     // Resolve location of node modules and molgenis modules specific javascript
     resolve: {
-        root: [path.resolve('../molgenis-core-ui/src/main/javascript'), path.resolve('./node_modules')],
+        root: [path.resolve('../molgenis-core-ui/src/main/javascript'),
+            path.resolve('../molgenis-core-ui/src/test/javascript'),
+            path.resolve('./node_modules')],
         alias: {
             'react-components': 'modules/react-components'
         }
@@ -14,24 +16,21 @@ var configuration = {
     context: path.join(__dirname, '../'),
     // Set an entry point for every module in the molgenis application
     entry: {
-        'molgenis-common': './molgenis-core-ui/src/main/javascript/molgenis-common-webpack.js',
-        'molgenis-global': './molgenis-core-ui/src/main/javascript/molgenis-global-webpack.js'
+        'test': './molgenis-core-ui/src/test/javascript/testsuite.js'
     },
     output: {
-        path: './target/classes/js/dist/',
-        filename: '[name].bundle.js',
-        publicPath: '/js/dist/'
+        path: './target/test-classes/js/dist/',
+        filename: '[name].bundle.js'
     },
+    target: "node",
     // Source map creation strategy
     devtool: 'cheap-module-eval-source-map',
     plugins: [
         new webpack.ProvidePlugin({$: "jquery", jQuery: "jquery"}),
         new webpack.optimize.OccurenceOrderPlugin(),
         new webpack.NoErrorsPlugin(),
-        new webpack.optimize.CommonsChunkPlugin(
-            /* chunkName= */"molgenis-common",
-            /* filename= */"molgenis-common.bundle.js"
-        )
+        new webpack.IgnorePlugin(/react-addons|react-dom/)
+        // Disables 0.14 react addons, see https://github.com/glenjamin/skin-deep
     ],
     resolveLoader: {
         root: [path.resolve('./node_modules')]
@@ -51,7 +50,7 @@ var configuration = {
             }
         }, {
             test: /\.css$/,
-            loader: 'style-loader!css-loader'
+            loader: 'null-loader'
         }, {
             test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
             loader: "file"
@@ -66,6 +65,6 @@ var configuration = {
             loader: "url?limit=10000&mimetype=image/svg+xml"
         }]
     }
-}
+};
 
 module.exports = configuration;

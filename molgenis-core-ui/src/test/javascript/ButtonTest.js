@@ -1,35 +1,35 @@
-// src/test/modules/react-components/ButtonTest.js
-jest.dontMock('../../../main/javascript/modules/react-components/Button');
+import test from 'tape';
+import React from 'react';
+import sd from 'skin-deep';
+import Button from 'react-components/Button';
 
-// import does not work
-// require('react') does not work (cant find it)
-var React = require('../../../../../molgenis-app/node_modules/react');
-var ReactDOM = require('../../../../../molgenis-app/node_modules/react-dom');
-var TestUtils = require('../../../../../molgenis-app/node_modules/react-addons-test-utils');
+test('Button onClick() gets mounted', assert => {
+    let clicked = false;
 
-// import located in the Button module does not work
-const Button = require('../../../main/javascript/modules/react-components/Button');
+    const tree = sd.shallowRender(Button({
+        onClick: c => clicked = true
+    }));
+    const instance = tree.getMountedInstance();
+    const vdom = tree.getRenderOutput();
 
-describe('Button', function(){
-	it('Generates an event after a click', function() {
-
-		console.log('RUNNING TEST');
-		
-		// Returns a freshly generated, unused mock function
-		var callback = jest.genMockFunction();
-
-		// Render a button that
-		var Button = TestUtils.renderIntoDocument(
-				Button({onClick: callback})
-		    );
-	    
-	    // Simulate a click
-	    TestUtils.Simulate.click(TestUtils.findRenderedDOMComponentWithTag(Button, 'button'));
-	    
-	    // Expect the click to generate a callback
-	    expect(callback).toBeCalled();	  
-	});
+    tree.props.onClick();
+    assert.ok(clicked, "Button generates an event after a click");
+    assert.end();
 });
+
+test('Button with Icon and text', assert => {
+    const tree = sd.shallowRender(Button({
+        icon: "thumbs-up",
+        text: "Okay"
+    }));
+
+    assert.equal(tree.toString(),
+        '<button class="btn btn-default" type="button"><span><span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span><span class="sr-only">thumbs-up</span></span> Okay</button>',
+        "Button renders the icon as a glyphicon");
+
+    assert.end();
+});
+
 
 // TODO TEST ALL THESE OTHER PROPS
 // id : React.PropTypes.string,
