@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/molgenis/molgenis#readme",
   "dependencies": {
-    "babel-polyfill": "^6.3.14",
+    "babel-polyfill": "^6.3.13",
     "bootbox": "4.4.0",
     "bootstrap": "3.3.6",
     "bootstrap-fileinput": "4.2.8",
@@ -42,7 +42,7 @@
     "urijs": "1.17.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.4.0",
+    "babel-cli": "^6.3.13",
     "babel-core": "^6.3.13",
     "babel-jest": "^6.0.1",
     "babel-loader": "^6.2.1",
