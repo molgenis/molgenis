@@ -4,7 +4,13 @@
 		<div class="col-md-4">
 			<div class="form-group">
             	<label class="control-label" for="name">Entity name *</label>
-            	<input type="text" class="form-control" name="name" required placeholder="Enter entity name">
+            	<input type="text" class="form-control" name="name" required placeholder="Enter entity name"
+					   value="${wizard.file.name
+					   ?keep_before_last(".")
+					   ?js_string[0..*29]
+					   ?replace("\\.|\\*|\\$|\\&|\\%|\\^|\\(|\\)|\\#|\\!|\\@|\\?",'_','r')
+					   ?replace("^[0-9]",'_','r')
+					   }">
         	</div>
         </div>
     </div>
