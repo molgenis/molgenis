@@ -16,18 +16,14 @@ import java.util.Properties;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
-import org.molgenis.data.AutoValueRepositoryDecorator;
-import org.molgenis.data.ComputedEntityValuesDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.EntityReferenceResolverDecorator;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
-import org.molgenis.data.RepositorySecurityDecorator;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
@@ -40,15 +36,11 @@ import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.MySqlEntityFactory;
-import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.OwnedEntityMetaData;
-import org.molgenis.data.transaction.TransactionLogRepositoryDecorator;
 import org.molgenis.data.transaction.TransactionLogService;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
-import org.molgenis.data.validation.RepositoryValidationDecorator;
 import org.molgenis.file.FileStore;
 import org.molgenis.framework.MolgenisUpgradeService;
 import org.molgenis.framework.db.WebAppDatabasePopulator;
@@ -60,7 +52,6 @@ import org.molgenis.security.CorsInterceptor;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
-import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
 import org.molgenis.ui.freemarker.LimitMethod;
 import org.molgenis.ui.menu.MenuMolgenisUi;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -71,9 +62,7 @@ import org.molgenis.ui.security.MolgenisUiPermissionDecorator;
 import org.molgenis.ui.settings.AppDbSettings;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.DependencyResolver;
-import org.molgenis.util.EntityUtils;
 import org.molgenis.util.GsonHttpMessageConverter;
-import org.molgenis.util.MySqlRepositoryExceptionTranslatorDecorator;
 import org.molgenis.util.ResourceFingerprintRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -440,8 +429,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		SearchService localSearchService = embeddedElasticSearchServiceFactory.create(localDataService,
 				new ElasticsearchEntityFactory(localEntityManager, sourceToEntityConverter, entityToSourceConverter));
 
-		List<EntityMetaData> metas = DependencyResolver
-				.resolve(Sets.newHashSet(localDataService.getMeta().getEntityMetaDatas()));
+		List<EntityMetaData> metas = DependencyResolver.resolve(Sets.newHashSet(localDataService.getMeta()
+				.getEntityMetaDatas()));
 
 		// Sort repos to the same sequence as the resolves metas
 		List<Repository> repos = Lists.newArrayList(localDataService);
@@ -530,44 +519,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 			@Override
 			public Repository createDecoratedRepository(Repository repository)
 			{
-				Repository decoratedRepository = repository;
-
-				// 9. Owned decorator
-				if (EntityUtils.doesExtend(decoratedRepository.getEntityMetaData(), OwnedEntityMetaData.ENTITY_NAME))
-				{
-					decoratedRepository = new OwnedEntityRepositoryDecorator(decoratedRepository);
-				}
-
-				// 8. Entity reference resolver decorator
-				decoratedRepository = new EntityReferenceResolverDecorator(decoratedRepository, entityManager());
-
-				// 7. Computed entity values decorator
-				decoratedRepository = new ComputedEntityValuesDecorator(decoratedRepository);
-
-				// 6. Entity listener
-				decoratedRepository = new EntityListenerRepositoryDecorator(decoratedRepository);
-
-				// 5. Transaction log decorator
-				decoratedRepository = new TransactionLogRepositoryDecorator(decoratedRepository, transactionLogService);
-
-				// 4. SQL exception translation decorator
-				String backend = decoratedRepository.getEntityMetaData().getBackend();
-				if (MysqlRepositoryCollection.NAME.equals(backend))
-				{
-					decoratedRepository = new MySqlRepositoryExceptionTranslatorDecorator(decoratedRepository);
-				}
-
-				// 3. validation decorator
-				decoratedRepository = new RepositoryValidationDecorator(dataService(), decoratedRepository,
-						entityAttributesValidator, expressionValidator);
-
-				// 2. auto value decorator
-				decoratedRepository = new AutoValueRepositoryDecorator(decoratedRepository, idGenerator);
-
-				// 1. security decorator
-				decoratedRepository = new RepositorySecurityDecorator(decoratedRepository, appSettings);
-
-				return decoratedRepository;
+				return new MolgenisRepositoryDecoratorFactory(entityManager(), transactionLogService,
+						entityAttributesValidator, idGenerator, appSettings, dataService(), expressionValidator)
+						.createDecoratedRepository(repository);
 			}
 		};
 	}

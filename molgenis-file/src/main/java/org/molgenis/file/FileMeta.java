@@ -3,6 +3,7 @@ package org.molgenis.file;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.data.support.OwnedEntityMetaData;
 
 public class FileMeta extends DefaultEntity
 {
@@ -70,6 +71,11 @@ public class FileMeta extends DefaultEntity
 	public void setUrl(String url)
 	{
 		set(URL, url);
+	}
+
+	public String getOwnerUsername()
+	{
+		return getString(OwnedEntityMetaData.ATTR_OWNER_USERNAME);
 	}
 
 	@Override
