@@ -1,16 +1,17 @@
-package org.molgenis.integrationtest.data.elasticsearch;
+package org.molgenis.integrationtest.data.mysql;
 
 import org.molgenis.integrationtest.data.AbstractDataServiceTest;
-import org.molgenis.integrationtest.data.elasticsearch.ElasticsearchDataServiceTest.DataServiceElasticsearchTestConfig;
+import org.molgenis.integrationtest.data.myqsl.AbstractMySqlTestConfig;
+import org.molgenis.integrationtest.data.mysql.MySqlDataServiceTest.DataServiceMySqlTestConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
-@ContextConfiguration(classes = DataServiceElasticsearchTestConfig.class)
-public class ElasticsearchDataServiceTest extends AbstractDataServiceTest
+@ContextConfiguration(classes = DataServiceMySqlTestConfig.class)
+public class MySqlDataServiceTest extends AbstractDataServiceTest
 {
 	@Configuration
-	public static class DataServiceElasticsearchTestConfig extends AbstractElasticsearchTestConfig
+	public static class DataServiceMySqlTestConfig extends AbstractMySqlTestConfig
 	{
 	}
 

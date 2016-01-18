@@ -5,18 +5,26 @@ import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.generate;
 import static java.util.stream.Stream.of;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Package;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -26,11 +34,13 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
 
 public abstract class AbstractDataServiceTest extends AbstractDataIntegrationTest
 {
 	private static final String ENTITY_NAME = "test_TestEntity";
 	private static final String ID = "id";
+	private static final String ATTR_STR = "strAttr";
 	private EditableEntityMetaData entityMetaData;
 
 	@BeforeClass
@@ -39,6 +49,7 @@ public abstract class AbstractDataServiceTest extends AbstractDataIntegrationTes
 		Package p = new PackageImpl("test");
 		entityMetaData = new DefaultEntityMetaData("TestEntity", p);
 		entityMetaData.addAttribute(ID).setIdAttribute(true).setNillable(false).setAuto(true);
+		entityMetaData.addAttribute(ATTR_STR).setNillable(true);
 		metaDataService.addEntityMeta(entityMetaData);
 	}
 
@@ -218,7 +229,228 @@ public abstract class AbstractDataServiceTest extends AbstractDataIntegrationTes
 
 	public void testFindAllTypedStream()
 	{
+		List<Entity> entities = create(5);
+		dataService.add(ENTITY_NAME, entities);
+		Stream<Object> ids = concat(entities.stream().map(Entity::getIdValue), of("bogus"));
+		Stream<TestEntity> retrieved = dataService.findAll(ENTITY_NAME, ids, TestEntity.class);
+		assertEquals(retrieved.count(), entities.size());
 
+		ids = concat(entities.stream().map(Entity::getIdValue), of("bogus"));
+		retrieved = dataService.findAll(ENTITY_NAME, ids, TestEntity.class);
+		assertEquals(retrieved.iterator().next().getId(), entities.get(0).getIdValue());
+	}
+
+	public void testFindAllStreamFetch()
+	{
+		List<Entity> entities = create(5);
+		dataService.add(ENTITY_NAME, entities);
+		Stream<Object> ids = concat(entities.stream().map(Entity::getIdValue), of("bogus"));
+		Stream<Entity> retrieved = dataService.findAll(ENTITY_NAME, ids, new Fetch().field(ID));
+		assertEquals(retrieved.count(), entities.size());
+	}
+
+	public void testFindAllTypedFetchStream()
+	{
+		List<Entity> entities = create(5);
+		dataService.add(ENTITY_NAME, entities);
+		Stream<Object> ids = concat(entities.stream().map(Entity::getIdValue), of("bogus"));
+		Stream<TestEntity> retrieved = dataService.findAll(ENTITY_NAME, ids, TestEntity.class);
+		assertEquals(retrieved.count(), entities.size());
+
+		ids = concat(entities.stream().map(Entity::getIdValue), of("bogus"));
+		retrieved = dataService.findAll(ENTITY_NAME, ids, new Fetch().field(ID), TestEntity.class);
+		assertEquals(retrieved.iterator().next().getId(), entities.get(0).getIdValue());
+	}
+
+	public void testFindAllAsStream()
+	{
+		List<Entity> entities = create(5);
+		dataService.add(ENTITY_NAME, entities);
+		assertEquals(dataService.findAllAsStream(ENTITY_NAME).count(), entities.size());
+	}
+
+	public void testFindAllAsStreamTyped()
+	{
+		List<Entity> entities = create(5);
+		dataService.add(ENTITY_NAME, entities);
+		assertEquals(dataService.findAllAsStream(ENTITY_NAME, TestEntity.class).count(), entities.size());
+		assertEquals(dataService.findAllAsStream(ENTITY_NAME, TestEntity.class).findFirst().get().getId(), entities
+				.get(0).getIdValue());
+	}
+
+	public void testFindAsStreamQuery()
+	{
+		List<Entity> entities = create(5);
+		dataService.add(ENTITY_NAME, entities);
+		Stream<Entity> found = dataService.findAllAsStream(ENTITY_NAME,
+				new QueryImpl().eq(ID, entities.get(0).getIdValue()));
+		assertEquals(found.count(), 1);
+
+		found = dataService.findAllAsStream(ENTITY_NAME, new QueryImpl().eq(ID, entities.get(0).getIdValue()));
+		assertEquals(found.findFirst().get().getIdValue(), entities.get(0).getIdValue());
+	}
+
+	public void testFindAsStreamQueryTyped()
+	{
+		List<Entity> entities = create(5);
+		dataService.add(ENTITY_NAME, entities);
+		Stream<TestEntity> found = dataService.findAllAsStream(ENTITY_NAME,
+				new QueryImpl().eq(ID, entities.get(0).getIdValue()), TestEntity.class);
+		assertEquals(found.count(), 1);
+
+		found = dataService.findAllAsStream(ENTITY_NAME, new QueryImpl().eq(ID, entities.get(0).getIdValue()),
+				TestEntity.class);
+		assertEquals(found.findFirst().get().getId(), entities.get(0).getIdValue());
+	}
+
+	public void testFindOne()
+	{
+		List<Entity> entities = create(1);
+		dataService.add(ENTITY_NAME, entities);
+		assertNotNull(dataService.findOne(ENTITY_NAME, entities.get(0).getIdValue()));
+	}
+
+	public void testFindOneTyped()
+	{
+		List<Entity> entities = create(1);
+		dataService.add(ENTITY_NAME, entities);
+		TestEntity testEntity = dataService.findOne(ENTITY_NAME, entities.get(0).getIdValue(), TestEntity.class);
+		assertNotNull(testEntity);
+		assertEquals(testEntity.getId(), entities.get(0).getIdValue());
+	}
+
+	public void testFindOneFetch()
+	{
+		List<Entity> entities = create(1);
+		dataService.add(ENTITY_NAME, entities);
+		assertNotNull(dataService.findOne(ENTITY_NAME, entities.get(0).getIdValue(), new Fetch().field(ID)));
+	}
+
+	public void testFindOneFetchTyped()
+	{
+		List<Entity> entities = create(1);
+		dataService.add(ENTITY_NAME, entities);
+		TestEntity testEntity = dataService.findOne(ENTITY_NAME, entities.get(0).getIdValue(), new Fetch().field(ID),
+				TestEntity.class);
+		assertNotNull(testEntity);
+		assertEquals(testEntity.getId(), entities.get(0).getIdValue());
+	}
+
+	public void testFindOneQuery()
+	{
+		List<Entity> entities = create(1);
+		dataService.add(ENTITY_NAME, entities);
+		Entity entity = dataService.findOne(ENTITY_NAME, new QueryImpl().eq(ID, entities.get(0).getIdValue()));
+		assertNotNull(entity);
+	}
+
+	public void testFindOneQueryTyped()
+	{
+		List<Entity> entities = create(1);
+		dataService.add(ENTITY_NAME, entities);
+		TestEntity entity = dataService.findOne(ENTITY_NAME, new QueryImpl().eq(ID, entities.get(0).getIdValue()),
+				TestEntity.class);
+		assertNotNull(entity);
+		assertEquals(entity.getId(), entities.get(0).getIdValue());
+	}
+
+	public void testGetCapabilities()
+	{
+		Set<RepositoryCapability> capabilities = dataService.getCapabilities(ENTITY_NAME);
+		assertNotNull(capabilities);
+		assertEquals(capabilities.size(), 5);
+	}
+
+	public void testGetEntityMetaData()
+	{
+		EntityMetaData emd = dataService.getEntityMetaData(ENTITY_NAME);
+		assertNotNull(emd);
+		assertEquals(emd, entityMetaData);
+	}
+
+	public void testGetEntityNames()
+	{
+		Iterable<String> names = dataService.getEntityNames();
+		assertNotNull(names);
+		assertTrue(Iterables.contains(names, ENTITY_NAME));
+	}
+
+	public void testGetMeta()
+	{
+		assertNotNull(dataService.getMeta());
+	}
+
+	public void testGetRepository()
+	{
+		Repository repo = dataService.getRepository(ENTITY_NAME);
+		assertNotNull(repo);
+		assertEquals(repo.getName(), ENTITY_NAME);
+
+		try
+		{
+			dataService.getRepository("bogus");
+			fail("Should have thrown UnknownEntityException");
+		}
+		catch (UnknownEntityException e)
+		{
+			// Expected
+		}
+	}
+
+	public void testHasRepository()
+	{
+		assertTrue(dataService.hasRepository(ENTITY_NAME));
+		assertFalse(dataService.hasRepository("bogus"));
+	}
+
+	public void testIterator()
+	{
+		assertNotNull(dataService.iterator());
+		assertTrue(Iterators.contains(dataService.iterator(), dataService.getRepository(ENTITY_NAME)));
+	}
+
+	public void testQuery()
+	{
+		assertNotNull(dataService.query(ENTITY_NAME));
+		try
+		{
+			dataService.query("bogus");
+			fail("Should have thrown UnknownEntityException");
+		}
+		catch (UnknownEntityException e)
+		{
+			// Expected
+		}
+	}
+
+	public void testUpdate()
+	{
+		Entity entity = create(1).get(0);
+		dataService.add(ENTITY_NAME, entity);
+		entity = dataService.findOne(ENTITY_NAME, entity.getIdValue());
+		assertNotNull(entity);
+		assertNull(entity.get(ATTR_STR));
+
+		entity.set(ATTR_STR, "qwerty");
+		dataService.update(ENTITY_NAME, entity);
+		entity = dataService.findOne(ENTITY_NAME, entity.getIdValue());
+		assertNotNull(entity.get(ATTR_STR));
+		assertEquals(entity.get(ATTR_STR), "qwerty");
+	}
+
+	public void testUpdateStream()
+	{
+		Entity entity = create(1).get(0);
+		dataService.add(ENTITY_NAME, entity);
+		entity = dataService.findOne(ENTITY_NAME, entity.getIdValue());
+		assertNotNull(entity);
+		assertNull(entity.get(ATTR_STR));
+
+		entity.set(ATTR_STR, "qwerty");
+		dataService.update(ENTITY_NAME, of(entity));
+		entity = dataService.findOne(ENTITY_NAME, entity.getIdValue());
+		assertNotNull(entity.get(ATTR_STR));
+		assertEquals(entity.get(ATTR_STR), "qwerty");
 	}
 
 	private List<Entity> create(int count)
@@ -233,7 +465,7 @@ public abstract class AbstractDataServiceTest extends AbstractDataIntegrationTes
 
 	private void assertPresent(List<Entity> entities)
 	{
-		entities.stream().forEach(this::assertPresent);
+		entities.forEach(this::assertPresent);
 	}
 
 	private void assertPresent(Entity entity)
