@@ -22,7 +22,12 @@ import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.system.RepositoryTemplateLoader;
 import org.molgenis.data.system.core.FreemarkerTemplate;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
-//import org.molgenis.data.system.core.FreemarkerTemplateRepository;
+import org.molgenis.migrate.version.v1_11.Step20RebuildElasticsearchIndex;
+import org.molgenis.migrate.version.v1_11.Step21SetLoggingEventBackend;
+import org.molgenis.migrate.version.v1_13.Step22RemoveDiseaseMatcher;
+import org.molgenis.migrate.version.v1_14.Step23RebuildElasticsearchIndex;
+import org.molgenis.migrate.version.v1_15.Step24UpdateApplicationSettings;
+import org.molgenis.migrate.version.v1_15.Step25LanguagesPermissions;
 import org.molgenis.migrate.version.v1_16.Step27migrateJpaBackend;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.molgenis.util.DependencyResolver;
@@ -76,6 +81,12 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Autowired
 	private Gson gson;
 
+	@Autowired
+	private Step20RebuildElasticsearchIndex step20RebuildElasticsearchIndex;
+
+	@Autowired
+	private Step23RebuildElasticsearchIndex step23RebuildElasticsearchIndex;
+
 	@Override
 	public ManageableRepositoryCollection getBackend()
 	{
@@ -85,6 +96,12 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Override
 	public void addUpgrades()
 	{
+		upgradeService.addUpgrade(step20RebuildElasticsearchIndex);
+		upgradeService.addUpgrade(new Step21SetLoggingEventBackend(dataSource));
+		upgradeService.addUpgrade(new Step22RemoveDiseaseMatcher(dataSource));
+		upgradeService.addUpgrade(step23RebuildElasticsearchIndex);
+		upgradeService.addUpgrade(new Step24UpdateApplicationSettings(dataSource, idGenerator));
+		upgradeService.addUpgrade(new Step25LanguagesPermissions(dataService));
 		upgradeService.addUpgrade(new Step27migrateJpaBackend(dataSource, MysqlRepositoryCollection.NAME));
 	}
 
@@ -144,8 +161,6 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	public FreeMarkerConfigurer freeMarkerConfigurer() throws IOException, TemplateException
 	{
 		FreeMarkerConfigurer result = super.freeMarkerConfigurer();
-		// Look up unknown templates in the FreemarkerTemplate repository
-		//result.setPostTemplateLoaders(new RepositoryTemplateLoader(dataService.getRepository(FreemarkerTemplate.ENTITY_NAME)));
 		return result;
 	}
 }
