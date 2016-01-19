@@ -11,6 +11,7 @@ import static org.testng.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.DataService;
@@ -92,8 +93,8 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 		ontologyTermEntity2.set(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Arrays.asList(synonymEntity4));
 
 		ArgumentCaptor<Query> queryCaptor = forClass(Query.class);
-		when(dataService.findAllAsIterable(eq(OntologyTermMetaData.ENTITY_NAME), queryCaptor.capture()))
-				.thenReturn(asList(ontologyTermEntity1, ontologyTermEntity2));
+		when(dataService.findAll(eq(OntologyTermMetaData.ENTITY_NAME), queryCaptor.capture()))
+				.thenReturn(Stream.of(ontologyTermEntity1, ontologyTermEntity2));
 
 		List<OntologyTerm> exactOntologyTerms = ontologyTermRepository.findExcatOntologyTerms(asList("1", "2"),
 				of("weight"), 100);
@@ -106,8 +107,8 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 	public void testFindOntologyTerms()
 	{
 		ArgumentCaptor<Query> queryCaptor = forClass(Query.class);
-		when(dataService.findAllAsIterable(eq(OntologyTermMetaData.ENTITY_NAME), queryCaptor.capture()))
-				.thenReturn(asList(ontologyTermEntity));
+		when(dataService.findAll(eq(OntologyTermMetaData.ENTITY_NAME), queryCaptor.capture()))
+				.thenReturn(Stream.of(ontologyTermEntity));
 
 		List<OntologyTerm> terms = ontologyTermRepository.findOntologyTerms(asList("1", "2"),
 				of("term1", "term2", "term3"), 100);
@@ -146,10 +147,10 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 		ontologyTerm_3.set(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, Arrays.asList(nodePathEntity_3));
 		ontologyTerm_3.set(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Collections.emptyList());
 
-		when(dataService.findAllAsIterable(OntologyTermMetaData.ENTITY_NAME,
+		when(dataService.findAll(OntologyTermMetaData.ENTITY_NAME,
 				new QueryImpl(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, Operator.FUZZY_MATCH,
 						"\"0[0].1[1]\"")).and().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity)))
-								.thenReturn(Arrays.asList(ontologyTerm_2, ontologyTerm_3));
+								.thenReturn(Stream.of(ontologyTerm_2, ontologyTerm_3));
 
 		List<OntologyTerm> childOntologyTermsByNodePath = ontologyTermRepository
 				.getChildOntologyTermsByNodePath(ontologyEntity, nodePathEntity_1);

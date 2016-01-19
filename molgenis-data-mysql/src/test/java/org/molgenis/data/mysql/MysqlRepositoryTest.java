@@ -375,5 +375,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		Iterator<Entity> it = entities.iterator();
 		assertEquals(it.next().getIdValue(), exampleId0);
 		assertEquals(it.next().getIdValue(), exampleId1);
+
+		testRepository.deleteAll(); // cleanup
 	}
 }

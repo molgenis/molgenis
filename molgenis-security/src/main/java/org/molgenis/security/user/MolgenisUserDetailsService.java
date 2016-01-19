@@ -1,5 +1,7 @@
 package org.molgenis.security.user;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -100,22 +102,16 @@ public class MolgenisUserDetailsService implements UserDetailsService
 
 	private List<UserAuthority> getUserAuthorities(MolgenisUser molgenisUser)
 	{
-		Iterable<UserAuthority> it = dataService.findAllAsIterable(UserAuthority.ENTITY_NAME,
-				new QueryImpl().eq(UserAuthority.MOLGENISUSER, molgenisUser), UserAuthority.class);
-		return it == null ? Lists.<UserAuthority> newArrayList() : Lists.newArrayList(it);
+		return dataService.findAll(UserAuthority.ENTITY_NAME,
+				new QueryImpl().eq(UserAuthority.MOLGENISUSER, molgenisUser), UserAuthority.class).collect(toList());
 	}
 
 	private List<GroupAuthority> getGroupAuthorities(MolgenisUser molgenisUser)
 	{
-		Iterable<MolgenisGroupMember> groupMembersIt = dataService.findAllAsIterable(MolgenisGroupMember.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser), MolgenisGroupMember.class);
-
-		if (groupMembersIt == null)
-		{
-			return Lists.newArrayList();
-		}
-
-		List<MolgenisGroupMember> groupMembers = Lists.newArrayList(groupMembersIt);
+		List<MolgenisGroupMember> groupMembers = dataService
+				.findAll(MolgenisGroupMember.ENTITY_NAME,
+						new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser), MolgenisGroupMember.class)
+				.collect(toList());
 
 		if (!groupMembers.isEmpty())
 		{
@@ -129,8 +125,10 @@ public class MolgenisUserDetailsService implements UserDetailsService
 						}
 					});
 
-			return Lists.newArrayList(dataService.findAllAsIterable(GroupAuthority.ENTITY_NAME,
-					new QueryImpl().in(GroupAuthority.MOLGENISGROUP, molgenisGroups), GroupAuthority.class));
+			return dataService
+					.findAll(GroupAuthority.ENTITY_NAME,
+							new QueryImpl().in(GroupAuthority.MOLGENISGROUP, molgenisGroups), GroupAuthority.class)
+					.collect(toList());
 		}
 		return null;
 	}

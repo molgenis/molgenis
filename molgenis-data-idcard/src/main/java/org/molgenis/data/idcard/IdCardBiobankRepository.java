@@ -9,7 +9,7 @@ import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.stream.StreamSupport;
+import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
@@ -29,9 +29,6 @@ import org.molgenis.data.support.AbstractRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
 
 @org.springframework.stereotype.Repository
 public class IdCardBiobankRepository extends AbstractRepository
@@ -84,9 +81,9 @@ public class IdCardBiobankRepository extends AbstractRepository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
-		return elasticsearchService.search(q, getEntityMetaData());
+		return elasticsearchService.searchAsStream(q, getEntityMetaData());
 	}
 
 	@Override
@@ -116,41 +113,6 @@ public class IdCardBiobankRepository extends AbstractRepository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		try
-		{
-			return idCardClient.getIdCardBiobanks(Iterables.transform(ids, new Function<Object, String>()
-			{
-				@Override
-				public String apply(Object id)
-				{
-					return id.toString();
-				}
-			}));
-		}
-		catch (RuntimeException e)
-		{
-			return new Iterable<Entity>()
-			{
-				@Override
-				public Iterator<Entity> iterator()
-				{
-					return StreamSupport.stream(ids.spliterator(), false).map(id -> {
-						return (Entity) createErrorIdCardBiobank(id);
-					}).iterator(); // FIXME get rid of cast
-				}
-			};
-		}
-	}
-
-	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
-	{
-		return findAll(ids);
-	}
-
-	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
 		return elasticsearchService.aggregate(aggregateQuery, getEntityMetaData());
@@ -164,21 +126,7 @@ public class IdCardBiobankRepository extends AbstractRepository
 	}
 
 	@Override
-	public void update(Iterable<? extends Entity> records)
-	{
-		throw new UnsupportedOperationException(
-				String.format("Repository [%s] is not %s", getName(), WRITABLE.toString()));
-	}
-
-	@Override
 	public void delete(Entity entity)
-	{
-		throw new UnsupportedOperationException(
-				String.format("Repository [%s] is not %s", getName(), WRITABLE.toString()));
-	}
-
-	@Override
-	public void delete(Iterable<? extends Entity> entities)
 	{
 		throw new UnsupportedOperationException(
 				String.format("Repository [%s] is not %s", getName(), WRITABLE.toString()));
@@ -192,7 +140,7 @@ public class IdCardBiobankRepository extends AbstractRepository
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
 		throw new UnsupportedOperationException(
 				String.format("Repository [%s] is not %s", getName(), WRITABLE.toString()));
@@ -207,13 +155,6 @@ public class IdCardBiobankRepository extends AbstractRepository
 
 	@Override
 	public void add(Entity entity)
-	{
-		throw new UnsupportedOperationException(
-				String.format("Repository [%s] is not %s", getName(), WRITABLE.toString()));
-	}
-
-	@Override
-	public Integer add(Iterable<? extends Entity> entities)
 	{
 		throw new UnsupportedOperationException(
 				String.format("Repository [%s] is not %s", getName(), WRITABLE.toString()));

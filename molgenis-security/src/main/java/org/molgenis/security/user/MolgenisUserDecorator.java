@@ -26,9 +26,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-
 public class MolgenisUserDecorator implements Repository
 {
 	private final Repository decoratedRepository;
@@ -61,26 +58,6 @@ public class MolgenisUserDecorator implements Repository
 	}
 
 	@Override
-	public Integer add(Iterable<? extends Entity> entities)
-	{
-		Integer nr = decoratedRepository.add(Iterables.transform(entities, new Function<Entity, Entity>()
-		{
-			@Override
-			public Entity apply(Entity entity)
-			{
-				encodePassword(entity);
-				return entity;
-			}
-		}));
-
-		// id is only guaranteed to be generated at flush time
-		decoratedRepository.flush();
-		addSuperuserAuthorities(entities);
-
-		return nr;
-	}
-
-	@Override
 	public Integer add(Stream<? extends Entity> entities)
 	{
 		entities = entities.map(entity -> {
@@ -89,24 +66,6 @@ public class MolgenisUserDecorator implements Repository
 			return entity;
 		});
 		return decoratedRepository.add(entities);
-	}
-
-	@Override
-	public void update(Iterable<? extends Entity> entities)
-	{
-		decoratedRepository.update(Iterables.transform(entities, new Function<Entity, Entity>()
-		{
-			@Override
-			public Entity apply(Entity entity)
-			{
-				updatePassword(entity);
-				updateSuperuserAuthority(entity);
-				return entity;
-			}
-		}));
-
-		// id is only guaranteed to be generated at flush time
-		decoratedRepository.flush();
 	}
 
 	@Override
@@ -138,15 +97,6 @@ public class MolgenisUserDecorator implements Repository
 		String password = entity.getString(MolgenisUser.PASSWORD_);
 		String encodedPassword = getPasswordEncoder().encode(password);
 		entity.set(MolgenisUser.PASSWORD_, encodedPassword);
-	}
-
-	private void addSuperuserAuthorities(Iterable<? extends Entity> entities)
-	{
-		// performance improvement: add filtered iterable to repo
-		for (Entity entity : entities)
-		{
-			addSuperuserAuthority(entity);
-		}
 	}
 
 	private void addSuperuserAuthority(Entity entity)
@@ -327,12 +277,6 @@ public class MolgenisUserDecorator implements Repository
 	}
 
 	@Override
-	public void delete(Iterable<? extends Entity> entities)
-	{
-		decoratedRepository.delete(entities);
-	}
-
-	@Override
 	public void delete(Stream<? extends Entity> entities)
 	{
 		decoratedRepository.delete(entities);
@@ -345,7 +289,7 @@ public class MolgenisUserDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
 		decoratedRepository.deleteById(ids);
 	}

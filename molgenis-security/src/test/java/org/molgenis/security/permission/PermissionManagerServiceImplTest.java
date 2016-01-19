@@ -1,6 +1,7 @@
 package org.molgenis.security.permission;
 
 import static java.util.stream.Collectors.toList;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -24,9 +25,6 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.permission.Permission;
-import org.molgenis.security.permission.PermissionManagerServiceImpl;
-import org.molgenis.security.permission.Permissions;
 import org.molgenis.security.permission.PermissionManagerServiceImplTest.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -313,7 +311,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 		verify(dataService).delete(GroupAuthority.ENTITY_NAME,
 				Arrays.asList(groupEntity1Authority, groupEntity2Authority));
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(dataService).add(GroupAuthority.ENTITY_NAME, captor.capture());
+		verify(dataService).add(eq(GroupAuthority.ENTITY_NAME), captor.capture());
 		assertEquals(captor.getValue().collect(toList()), authorities);
 	}
 
@@ -327,7 +325,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 		verify(dataService).delete(GroupAuthority.ENTITY_NAME,
 				Arrays.asList(groupPlugin1Authority, groupPlugin2Authority));
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(dataService).add(GroupAuthority.ENTITY_NAME, captor.capture());
+		verify(dataService).add(eq(GroupAuthority.ENTITY_NAME), captor.capture());
 		assertEquals(captor.getValue().collect(toList()), authorities);
 	}
 
@@ -341,7 +339,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 		verify(dataService).delete(UserAuthority.ENTITY_NAME,
 				Arrays.asList(userEntity2Authority, userEntity3Authority));
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(dataService).add(UserAuthority.ENTITY_NAME, captor.capture());
+		verify(dataService).add(eq(UserAuthority.ENTITY_NAME), captor.capture());
 		assertEquals(captor.getValue().collect(toList()), authorities);
 	}
 
@@ -355,7 +353,7 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 		verify(dataService).delete(UserAuthority.ENTITY_NAME,
 				Arrays.asList(userPlugin2Authority, userPlugin3Authority));
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(dataService).add(UserAuthority.ENTITY_NAME, captor.capture());
+		verify(dataService).add(eq(UserAuthority.ENTITY_NAME), captor.capture());
 		assertEquals(captor.getValue().collect(toList()), authorities);
 	}
 }

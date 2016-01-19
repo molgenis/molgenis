@@ -66,7 +66,7 @@ public class TabixVcfRepositoryTest
 	{
 		Query query = tabixVcfRepository.query().eq(VcfRepository.CHROM, "1").and().eq(VcfRepository.POS, "10352");
 
-		Iterator<Entity> iterator = tabixVcfRepository.findAllAsIterable(query).iterator();
+		Iterator<Entity> iterator = tabixVcfRepository.findAll(query).iterator();
 		iterator.hasNext();
 		Entity other = iterator.next();
 		Entity entity = newEntity("1", 10352, "TA", "T", "PASS", "100", "rs145072688", "uVflR7Ra_O8E04Zfj-O_Og");

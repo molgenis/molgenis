@@ -1,5 +1,6 @@
 package org.molgenis.data.mysql;
 
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.RepositoryCapability.MANAGABLE;
@@ -992,8 +993,7 @@ public class MysqlRepository extends AbstractRepository
 	{
 		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
 			resetXrefValuesBySelfReference(batch);
-			// TODO pass stream to deleteById, when deleteById(Stream) exists
-			deleteById(batch.stream().map(Entity::getIdValue).collect(Collectors.toList()));
+			deleteById(batch.stream().map(Entity::getIdValue));
 		});
 	}
 
@@ -1031,7 +1031,7 @@ public class MysqlRepository extends AbstractRepository
 		this.update(updateBatch.iterator());
 	}
 
-	public String getDeleteSql()
+	String getDeleteSql()
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("DELETE FROM ").append('`').append(getTableName()).append('`').append(" WHERE ").append('`')
@@ -1069,7 +1069,39 @@ public class MysqlRepository extends AbstractRepository
 	@Override
 	public void deleteAll()
 	{
-		delete(this.stream());
+		Stream<AttributeMetaData> selfReferencingAttrs = StreamSupport
+				.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
+				.filter(attr -> attr.getDataType() instanceof XrefField);
+
+		selfReferencingAttrs.forEach(selfReferencingXrefAttr -> {
+			if (!selfReferencingXrefAttr.isNillable())
+			{
+				// update value with id attribute name (instead of NULL) won't work due to
+				// http://bugs.mysql.com/bug.php?id=7412. For more information read the paragraph "Until InnoDB
+				// implements deferred constraint checking, some things will be impossible, such as deleting a
+				// record that refers to itself using a foreign key." in
+				// http://dev.mysql.com/doc/refman/5.1/en/innodb-foreign-key-constraints.html
+				throw new MolgenisDataException(
+						format("Self-referencing not-null attribute [%s] of entity [%s] cannot be deleted",
+								selfReferencingXrefAttr.getName(), getName()));
+			}
+
+			String updateSql = new StringBuilder().append("UPDATE `").append(getTableName()).append("` SET `")
+					.append(selfReferencingXrefAttr.getName()).append("` = ").append("NULL").toString();
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("Updating nillable self-referencing xref attribute: " + updateSql);
+			}
+			jdbcTemplate.update(updateSql);
+		});
+
+		String deleteSql = new StringBuilder().append("DELETE FROM ").append('`').append(getTableName()).append('`')
+				.toString();
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug(format("Deleting all [%s] entities: %s", getName(), deleteSql));
+		}
+		jdbcTemplate.update(deleteSql);
 	}
 
 	@Override

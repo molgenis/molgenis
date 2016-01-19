@@ -5,11 +5,13 @@ import static org.molgenis.data.importer.ImportWizardController.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.molgenis.auth.Authority;
 import org.molgenis.auth.GroupAuthority;
@@ -228,25 +230,26 @@ public class ImportWizardController extends AbstractWizardController
 	private GroupAuthority getGroupAuthority(String groupId, String entityClassId)
 	{
 		GroupAuthority authority = new GroupAuthority();
-		dataService.findAll(GroupAuthority.ENTITY_NAME, new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, groupId),
-				GroupAuthority.class).forEach(groupAuthority -> {
-					String entity = "";
-					if (groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_COUNT_PREFIX)
-							|| groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX))
-					{
-						entity = groupAuthority.getRole()
-								.substring(SecurityUtils.AUTHORITY_ENTITY_COUNT_PREFIX.length());
-					}
-					else if (groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX))
-					{
-						entity = groupAuthority.getRole()
-								.substring(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX.length());
-					}
-					if (entity.equals(entityClassId.toUpperCase()))
-					{
-						authority = groupAuthority;
-					}
-				});
+		Stream<GroupAuthority> stream = dataService.findAll(GroupAuthority.ENTITY_NAME,
+				new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, groupId), GroupAuthority.class);
+		for (Iterator<GroupAuthority> it = stream.iterator(); it.hasNext();)
+		{
+			GroupAuthority groupAuthority = it.next();
+			String entity = "";
+			if (groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_COUNT_PREFIX)
+					|| groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX))
+			{
+				entity = groupAuthority.getRole().substring(SecurityUtils.AUTHORITY_ENTITY_COUNT_PREFIX.length());
+			}
+			else if (groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX))
+			{
+				entity = groupAuthority.getRole().substring(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX.length());
+			}
+			if (entity.equals(entityClassId.toUpperCase()))
+			{
+				authority = groupAuthority;
+			}
+		}
 		return authority;
 
 	}

@@ -409,7 +409,15 @@ public class ChartDataServiceImpl implements ChartDataService
 				q.addRule(queryRule);
 			}
 
-			iterable = ((Repository) iterable).findAllAsIterable(q);
+			final Iterable<Entity> AllEntitiesIterable = iterable;
+			iterable = new Iterable<Entity>()
+			{
+				@Override
+				public Iterator<Entity> iterator()
+				{
+					return ((Repository) AllEntitiesIterable).findAll(q).iterator();
+				}
+			};
 		}
 
 		List<Target> rowTargets = new ArrayList<Target>();

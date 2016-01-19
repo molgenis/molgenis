@@ -186,6 +186,37 @@ public class JpaRepository extends AbstractRepository
 
 	@Override
 	@Transactional(readOnly = true)
+	public Stream<Entity> findAll(Query q)
+	{
+		queryResolver.resolveRefIdentifiers(q.getRules(), getEntityMetaData());
+
+		EntityManager em = getEntityManager();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+
+		@SuppressWarnings("unchecked")
+		CriteriaQuery<Entity> cq = (CriteriaQuery<Entity>) cb.createQuery(getEntityClass());
+
+		@SuppressWarnings("unchecked")
+		Root<Entity> from = (Root<Entity>) cq.from(getEntityClass());
+		cq.select(from).distinct(true);// We need distinct, sometimes double rows are returned by EL when doing a mref
+										// search
+
+		// add filters
+		createWhere(q, from, cq, cb);
+
+		TypedQuery<Entity> tq = em.createQuery(cq);
+
+		if (q.getPageSize() > 0) tq.setMaxResults(q.getPageSize());
+		if (q.getOffset() > 0) tq.setFirstResult(q.getOffset());
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Fetching JPA [{}] data for query [{}]", getEntityClass().getSimpleName(), q);
+		}
+		return tq.getResultList().stream();
+	}
+
+	@Override
+	@Transactional(readOnly = true)
 	public Entity findOne(Query q)
 	{
 		Iterator<Entity> it = findAll(q).iterator();

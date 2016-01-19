@@ -1,6 +1,7 @@
 package org.molgenis.data.mapper.algorithmgenerator.generator;
 
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 import org.mockito.Mockito;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -47,8 +48,8 @@ public class OneToOneCategoryAlgorithmGeneratorTest
 				FieldTypeEnum.CATEGORICAL);
 		targetAttributeMetaData.setRefEntity(targetRefEntityMetaData);
 
-		Mockito.when(dataService.findAllAsIterable(targetRefEntityMetaData.getName()))
-				.thenReturn(Arrays.asList(targetEntity1, targetEntity2, targetEntity3, targetEntity4, targetEntity5));
+		Mockito.when(dataService.findAll(targetRefEntityMetaData.getName()))
+				.thenReturn(Stream.of(targetEntity1, targetEntity2, targetEntity3, targetEntity4, targetEntity5));
 
 		targetEntityMetaData = new DefaultEntityMetaData("target");
 		targetEntityMetaData.addAttributeMetaData(targetAttributeMetaData);
@@ -68,8 +69,8 @@ public class OneToOneCategoryAlgorithmGeneratorTest
 				"How often did you eat boiled or mashed potatoes (also in stew) in the past month? Baked potatoes are asked later");
 		sourceAttributeMetaData.setRefEntity(sourceRefEntityMetaData);
 
-		Mockito.when(dataService.findAllAsIterable(sourceRefEntityMetaData.getName()))
-				.thenReturn(Arrays.asList(sourceEntity1, sourceEntity2, sourceEntity3, sourceEntity4, sourceEntity5,
+		Mockito.when(dataService.findAll(sourceRefEntityMetaData.getName()))
+				.thenReturn(Stream.of(sourceEntity1, sourceEntity2, sourceEntity3, sourceEntity4, sourceEntity5,
 						sourceEntity6, sourceEntity7, sourceEntity8));
 
 		sourceEntityMetaData = new DefaultEntityMetaData("source");
@@ -100,8 +101,8 @@ public class OneToOneCategoryAlgorithmGeneratorTest
 		MapEntity targetEntity1 = new MapEntity(ImmutableMap.of("code", 0, "label", "Never had high blood pressure "));
 		MapEntity targetEntity2 = new MapEntity(ImmutableMap.of("code", 1, "label", "Ever had high blood pressure "));
 		MapEntity targetEntity3 = new MapEntity(ImmutableMap.of("code", 9, "label", "Missing"));
-		Mockito.when(dataService.findAllAsIterable(targetRefEntityMetaData.getName()))
-				.thenReturn(Arrays.asList(targetEntity1, targetEntity2, targetEntity3));
+		Mockito.when(dataService.findAll(targetRefEntityMetaData.getName()))
+				.thenReturn(Stream.of(targetEntity1, targetEntity2, targetEntity3));
 		targetAttributeMetaData = new DefaultAttributeMetaData("History of Hypertension", FieldTypeEnum.CATEGORICAL);
 		targetAttributeMetaData.setRefEntity(targetRefEntityMetaData);
 
@@ -109,8 +110,8 @@ public class OneToOneCategoryAlgorithmGeneratorTest
 		MapEntity sourceEntity1 = new MapEntity(ImmutableMap.of("code", 1, "label", "yes"));
 		MapEntity sourceEntity2 = new MapEntity(ImmutableMap.of("code", 2, "label", "no"));
 		MapEntity sourceEntity3 = new MapEntity(ImmutableMap.of("code", 3, "label", "I do not know"));
-		Mockito.when(dataService.findAllAsIterable(sourceRefEntityMetaData.getName()))
-				.thenReturn(Arrays.asList(sourceEntity1, sourceEntity2, sourceEntity3));
+		Mockito.when(dataService.findAll(sourceRefEntityMetaData.getName()))
+				.thenReturn(Stream.of(sourceEntity1, sourceEntity2, sourceEntity3));
 
 		sourceAttributeMetaData = new DefaultAttributeMetaData("High_blood_pressure", FieldTypeEnum.CATEGORICAL);
 		sourceAttributeMetaData.setRefEntity(sourceRefEntityMetaData);

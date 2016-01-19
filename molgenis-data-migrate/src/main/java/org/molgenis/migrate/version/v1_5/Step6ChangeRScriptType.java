@@ -1,6 +1,6 @@
 package org.molgenis.migrate.version.v1_5;
 
-import static com.google.common.collect.Iterables.transform;
+import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
@@ -76,16 +76,15 @@ public class Step6ChangeRScriptType extends MolgenisUpgrade
 		LOG.info("Updating R script type DONE");
 	}
 
-	private Iterable<Entity> updateScriptTypeInScriptEntities(Entity newScriptType, String currentScriptType)
+	private void updateScriptTypeInScriptEntities(Entity newScriptType, String currentScriptType)
 	{
-		Iterable<Entity> rScriptEntities = scriptRepo.findAllAsIterable(QueryImpl.EQ(Script.TYPE, currentScriptType));
+		Stream<Entity> rScriptEntities = scriptRepo.findAll(QueryImpl.EQ(Script.TYPE, currentScriptType));
 		updateScriptType(newScriptType, rScriptEntities);
-		return rScriptEntities;
 	}
 
-	private void updateScriptType(Entity newScriptType, Iterable<Entity> rScriptEntities)
+	private void updateScriptType(Entity newScriptType, Stream<Entity> rScriptEntities)
 	{
-		scriptRepo.update(transform(rScriptEntities, entity -> {
+		scriptRepo.update(rScriptEntities.map(entity -> {
 			entity.set(Script.TYPE, newScriptType);
 			return entity;
 		}));
@@ -103,8 +102,8 @@ public class Step6ChangeRScriptType extends MolgenisUpgrade
 			@Override
 			protected MysqlRepository createMysqlRepository()
 			{
-				return new MysqlRepository(dataService, mySqlEntityFactory, dataSource, new AsyncJdbcTemplate(
-						new JdbcTemplate(dataSource)));
+				return new MysqlRepository(dataService, mySqlEntityFactory, dataSource,
+						new AsyncJdbcTemplate(new JdbcTemplate(dataSource)));
 			}
 
 			@Override

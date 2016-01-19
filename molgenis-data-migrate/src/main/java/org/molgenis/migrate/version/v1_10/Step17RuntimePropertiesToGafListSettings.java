@@ -57,7 +57,7 @@ public class Step17RuntimePropertiesToGafListSettings extends MolgenisUpgrade
 	private void migrateGafListSettings()
 	{
 		List<RuntimeProperty> runtimeProperties = new ArrayList<>();
-		dataService.findAllAsIterable(RuntimeProperty.ENTITY_NAME, RuntimeProperty.class).forEach(prop -> {
+		dataService.findAll(RuntimeProperty.ENTITY_NAME, RuntimeProperty.class).forEach(prop -> {
 			if (prop.getName().startsWith("gafList"))
 			{
 				runtimeProperties.add(prop);

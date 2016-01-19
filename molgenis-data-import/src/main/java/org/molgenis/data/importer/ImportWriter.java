@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.io.IOUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -534,7 +535,7 @@ public class ImportWriter
 						throw new MolgenisDataException(msg.toString());
 					}
 
-					count = repo.add(entities);
+					count = repo.add(StreamSupport.stream(entities.spliterator(), false));
 					break;
 				case ADD_IGNORE_EXISTING:
 					int batchSize = 1000;
@@ -552,7 +553,7 @@ public class ImportWriter
 							newEntities.add(entity);
 							if (newEntities.size() == batchSize)
 							{
-								repo.add(newEntities);
+								repo.add(newEntities.stream());
 								newEntities.clear();
 							}
 						}
@@ -560,7 +561,7 @@ public class ImportWriter
 
 					if (!newEntities.isEmpty())
 					{
-						repo.add(newEntities);
+						repo.add(newEntities.stream());
 					}
 
 					break;
@@ -580,7 +581,7 @@ public class ImportWriter
 							existingEntities.add(entity);
 							if (existingEntities.size() == batchSize)
 							{
-								repo.update(existingEntities);
+								repo.update(existingEntities.stream());
 								existingEntities.clear();
 							}
 						}
@@ -589,7 +590,7 @@ public class ImportWriter
 							newEntities.add(entity);
 							if (newEntities.size() == batchSize)
 							{
-								repo.add(newEntities);
+								repo.add(newEntities.stream());
 								newEntities.clear();
 							}
 						}
@@ -597,12 +598,12 @@ public class ImportWriter
 
 					if (!existingEntities.isEmpty())
 					{
-						repo.update(existingEntities);
+						repo.update(existingEntities.stream());
 					}
 
 					if (!newEntities.isEmpty())
 					{
-						repo.add(newEntities);
+						repo.add(newEntities.stream());
 					}
 					break;
 
@@ -638,7 +639,7 @@ public class ImportWriter
 						}
 						throw new MolgenisDataException(msg.toString());
 					}
-					repo.update(entities);
+					repo.update(StreamSupport.stream(entities.spliterator(), false));
 					break;
 
 				default:

@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
@@ -89,7 +90,7 @@ public class TabixRepository extends AbstractRepository
 	}
 
 	@Override
-	public Iterable<Entity> findAllAsIterable(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
 		Object posValue = getFirstEqualsValueFor(positionAttributeName, q);
 		Object chromValue = getFirstEqualsValueFor(chromosomeAttributeName, q);
@@ -102,7 +103,7 @@ public class TabixRepository extends AbstractRepository
 			String chromStringValue = chromValue.toString();
 			result = query(chromStringValue, Long.valueOf(posLongValue));
 		}
-		return result;
+		return result.stream();
 	}
 
 	/**
