@@ -1,11 +1,15 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-    "use strict";
-    
+import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
+import EntityLoaderMixin from "./mixin/EntityLoaderMixin";
+import EntityInstanceLoaderMixin from "./mixin/EntityInstanceLoaderMixin";
+import I18nStringsMixin from "./mixin/I18nStringsMixin";
+import React from "react";
+import FormFactory from "./Form";
+
+
     var div = React.DOM.div;
     
     var Questionnaire = React.createClass({
-    	mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.EntityLoaderMixin, molgenis.ui.mixin.EntityInstanceLoaderMixin, molgenis.ui.mixin.I18nStringsMixin],
+    	mixins: [DeepPureRenderMixin, EntityLoaderMixin, EntityInstanceLoaderMixin, I18nStringsMixin],
     	displayName: 'Questionnaire',
     	propTypes: {
     		entity: React.PropTypes.string.isRequired,
@@ -44,7 +48,7 @@
 				)
 			) : null;
 	
-    		var Form = molgenis.ui.Form({
+    		var Form = FormFactory({
     			entity: this.state.entity,
     			entityInstance: this.state.entityInstance,
     			mode: this.state.entityInstance.status === 'SUBMITTED' ? 'view' : 'edit',
@@ -122,9 +126,4 @@
 		}
     });
     
-    // export component
-    molgenis.ui = molgenis.ui || {};
-    _.extend(molgenis.ui, {
-    	Questionnaire: React.createFactory(Questionnaire)
-    });
-}(_, React, molgenis));	    
+export default React.createFactory(Questionnaire);

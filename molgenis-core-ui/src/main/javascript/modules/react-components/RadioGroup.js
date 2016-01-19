@@ -1,13 +1,12 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-	"use strict";
-	
+import React from "react";
+import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
+import GroupMixin from "./mixin/GroupMixin";
 	/**
 	 * @memberOf component
 	 */
 	var RadioGroup = React.createClass({
 		displayName: 'RadioGroup',
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.GroupMixin],
+		mixins: [DeepPureRenderMixin, GroupMixin],
 		propTypes: {
 			name: React.PropTypes.string.isRequired,
 			layout: React.PropTypes.oneOf(['horizontal', 'vertical']),
@@ -45,9 +44,4 @@
 		}
 	});
 	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	_.extend(molgenis.ui, {
-		RadioGroup: React.createFactory(RadioGroup)
-	});
-}(_, React, molgenis));
+export default React.createFactory(RadioGroup);

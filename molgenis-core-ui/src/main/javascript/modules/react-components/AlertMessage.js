@@ -1,14 +1,13 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-	"use strict";
-	
+import React from "react";
+import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
+
 	var div = React.DOM.div, span = React.DOM.span, button = React.DOM.button;
 	
 	/**
 	 * @memberOf component
 	 */
 	var AlertMessage = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		displayName: 'AlertMessage',
 		propTypes: {
 			type: React.PropTypes.oneOf(['success', 'info', 'warning', 'danger']),
@@ -27,10 +26,5 @@
 			);
 		}
 	});
-	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	_.extend(molgenis.ui, {
-		AlertMessage: React.createFactory(AlertMessage)
-	});
-}(_, React, molgenis));
+
+export default React.createFactory(AlertMessage);

@@ -1,13 +1,11 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-    "use strict";
+import React from "react";
 
 	/**
 	 * See http://stackoverflow.com/a/26789089
 	 * 
 	 * @memberOf component.mixin
 	 */
-	var ReactLayeredComponentMixin = {
+const ReactLayeredComponentMixin = {
 	    componentWillUnmount: function() {
 	        this._unrenderLayer();
 	        document.body.removeChild(this._target);
@@ -38,11 +36,5 @@
 	        React.unmountComponentAtNode(this._target);
 	    }
 	};
-    
-    // export component
-    molgenis.ui = molgenis.ui || {};
-	molgenis.ui.mixin = molgenis.ui.mixin || {};
-	_.extend(molgenis.ui.mixin, {
-		ReactLayeredComponentMixin: ReactLayeredComponentMixin
-	});
-}(_, React, molgenis));
+
+export default ReactLayeredComponentMixin;

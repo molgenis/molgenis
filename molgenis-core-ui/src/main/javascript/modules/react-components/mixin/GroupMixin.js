@@ -1,7 +1,8 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-	"use strict";
-	
+import React from "react";
+import Input from "../Input";
+import Button from "../Button";
+
+
 	var div = React.DOM.div, label = React.DOM.label;
 	
 	/**
@@ -9,13 +10,13 @@
 	 *  
 	 * @memberOf component.mixin
 	 */
-	var GroupMixin = {
+	const GroupMixin = {
 		render: function() {
 			var type = this.props.type;
 			var options = this.props.options;
 			
 			var inputs = _.map(options, function(option, i) {
-				var control = molgenis.ui.Input({
+				var control = Input({
 					type : type,
 					name : this.props.name,
 					checked : this._isChecked(option),
@@ -49,8 +50,8 @@
 					inputs,
 					type === 'checkbox' ? div({className: 'row'},
 						div({className: 'col-md-12'},
-							this.props.selectAll ? molgenis.ui.Button({style: 'link', size: 'small', text: 'Select all', disabled: this.props.disabled, onClick: this._selectAll}) : null,
-							this.props.selectAll ? molgenis.ui.Button({style: 'link', size: 'small', text: 'Deselect all', disabled: this.props.disabled, onClick: this._deselectAll}) : null			
+							this.props.selectAll ? Button({style: 'link', size: 'small', text: 'Select all', disabled: this.props.disabled, onClick: this._selectAll}) : null,
+							this.props.selectAll ? Button({style: 'link', size: 'small', text: 'Deselect all', disabled: this.props.disabled, onClick: this._deselectAll}) : null
 						)
 					) : null
 					
@@ -62,11 +63,5 @@
 			return value === '' ? null : value;
 		}
 	};
-	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	molgenis.ui.mixin = molgenis.ui.mixin || {};
-	_.extend(molgenis.ui.mixin, {
-		GroupMixin: GroupMixin
-	});
-}(_, React, molgenis));
+
+export default GroupMixin;

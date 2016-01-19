@@ -1,20 +1,17 @@
 // molgenis entity REST API client
-(function($, molgenis) {
-    "use strict";
-    var self = molgenis.RestClient = molgenis.RestClient || {};
+import $ from "jquery";
 
-    molgenis.RestClient = function RestClient() {
-    };
+export default class RestClient {
 
-    molgenis.RestClient.prototype.get = function(resourceUri, options) {
+    get(resourceUri, options) {
         return this._get(resourceUri, options, false);
     };
 
-    molgenis.RestClient.prototype.getAsync = function(resourceUri, options, callback) {
+    getAsync(resourceUri, options, callback) {
         return this._get(resourceUri, options, true, callback);
     };
 
-    molgenis.RestClient.prototype._get = function(resourceUri, options, async, callback) {
+    _get(resourceUri, options, async, callback) {
         var resource = null;
 
         var config = {
@@ -37,8 +34,8 @@
         // because it might not fit in the URL
         if(options) {
             // backward compatibility for legacy code
-            if(options.q && Object.prototype.toString.call(options.q) !== '[object Array]') {
-                var obj = jQuery.extend({}, options.q);
+            if(options.q && Arrays.isArray(options.q)) {
+                var obj = $.extend({}, options.q);
                 delete options.q;
                 for(var i = 0, keys = Object.keys(obj); i < keys.length; ++i) {
                     options[keys[i]] = obj[keys[i]];
@@ -74,11 +71,11 @@
             return promise;
     };
 
-    molgenis.RestClient.prototype._ajax = function(config) {
-        if (self.token) {
+    _ajax(config) {
+        if (this.token) {
             $.extend(config, {
                 headers : {
-                    'x-molgenis-token' : self.token
+                    'x-molgenis-token' : this.token
                 }
             });
         }
@@ -86,7 +83,7 @@
         return $.ajax(config);
     };
 
-    molgenis.RestClient.prototype._toApiUri = function(resourceUri, options) {
+    _toApiUri(resourceUri, options) {
         var qs = "";
         if (resourceUri.indexOf('?') != -1) {
             var uriParts = resourceUri.split('?');
@@ -104,15 +101,15 @@
         return resourceUri + qs;
     };
 
-    molgenis.RestClient.prototype.getPrimaryKeyFromHref = function(href) {
+    getPrimaryKeyFromHref(href) {
         return href.substring(href.lastIndexOf('/') + 1);
     };
 
-    molgenis.RestClient.prototype.getHref = function(entityName, primaryKey) {
+    getHref(entityName, primaryKey) {
         return '/api/v1/' + entityName + (primaryKey ? '/' + primaryKey : '');
     };
 
-    molgenis.RestClient.prototype.remove = function(href, callback) {
+    remove(href, callback) {
         return this._ajax({
             type : 'POST',
             url : href,
@@ -123,7 +120,7 @@
         });
     };
 
-    molgenis.RestClient.prototype.update = function(href, entity, callback, showSpinner) {
+    update(href, entity, callback, showSpinner) {
         return this._ajax({
             type : 'POST',
             url : href + '?_method=PUT',
@@ -136,7 +133,7 @@
         });
     };
 
-    molgenis.RestClient.prototype.entityExists = function(resourceUri) {
+    entityExists(resourceUri) {
         var result = false;
         this._ajax({
             dataType : 'json',
@@ -150,7 +147,7 @@
         return result;
     };
 
-    molgenis.RestClient.prototype.login = function(username, password, callback) {
+    login(username, password, callback) {
         $.ajax({
             type : 'POST',
             dataType : 'json',
@@ -162,7 +159,7 @@
                 password : password
             }),
             success : function(loginResult) {
-                self.token = loginResult.token;
+                this.token = loginResult.token;
                 callback.success({
                     username : loginResult.username,
                     firstname : loginResult.firstname,
@@ -173,14 +170,14 @@
         });
     };
 
-    molgenis.RestClient.prototype.logout = function(callback) {
+    logout(callback) {
         this._ajax({
             url : '/api/v1/logout',
             async : true,
             success : function() {
-                self.token = null;
+                this.token = null;
                 callback();
             }
         });
     };
-}($, window.top.molgenis = window.top.molgenis || {}));
+}

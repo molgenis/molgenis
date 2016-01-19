@@ -1,7 +1,7 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-	"use strict";
-	
+import React from "react";
+import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
+import I18nStringsMixin from "./mixin/I18nStringsMixin";
+
 	var div = React.DOM.div, label = React.DOM.label;
 	
 	/**
@@ -10,7 +10,7 @@
 	 * @memberOf component
 	 */
 	var BoolControl = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.I18nStringsMixin],
+		mixins: [DeepPureRenderMixin, I18nStringsMixin],
 		displayName: 'BoolControl',
 		propTypes: {
 			id: React.PropTypes.string,
@@ -95,9 +95,4 @@
 		}
 	});
 	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	_.extend(molgenis.ui, {
-		BoolControl: React.createFactory(BoolControl)
-	});
-}(_, React, molgenis));
+export default React.createFactory(BoolControl);

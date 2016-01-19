@@ -1,14 +1,13 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-	"use strict";
-	
+import React from "react";
+import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
+
 	var textarea = React.DOM.textarea;
 	
 	/**
 	 * @memberOf component
 	 */
 	var TextArea = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		displayName: 'TextArea',
 		propTypes: {
 			id: React.PropTypes.string,
@@ -67,9 +66,4 @@
 		}
 	});
 	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	_.extend(molgenis.ui, {
-		TextArea: React.createFactory(TextArea)
-	});
-}(_, React, molgenis));
+export default React.createFactory(TextArea);

@@ -1,10 +1,13 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-	"use strict";
+import React from "react";
+import RestClientV2 from "rest-client/RestClientV2";
+import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
+import Spinner from "./Spinner";
+import Button from "./Button";
+import _ from "underscore";
 
 	var div = React.DOM.div, table = React.DOM.table, thead = React.DOM.thead, tbody = React.DOM.tbody, tr = React.DOM.tr, th = React.DOM.th, td = React.DOM.td, a = React.DOM.a, span = React.DOM.span, em = React.DOM.em, br = React.DOM.br, label = React.DOM.label;
 
-	var api = new molgenis.RestClientV2();
+	var api = new RestClientV2();
 
 	/**
 	 * @memberOf component.mixin
@@ -26,7 +29,7 @@
 	 * @memberOf component
 	 */
 	var Table = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, AttrUtilsMixin],
+		mixins: [DeepPureRenderMixin, AttrUtilsMixin],
 		displayName: 'Table',
 		propTypes: {
 			entity: React.PropTypes.string.isRequired,
@@ -83,7 +86,7 @@
 		},
 		render: function() {
 			if(this.state.data === null) {
-				return molgenis.ui.Spinner(); // entity not available yet
+				return Spinner(); // entity not available yet
 			}
 
 			var writable = this.state.data.meta.writable;
@@ -912,7 +915,7 @@
 	 * @memberOf component
 	 */
 	var EntityDeleteBtn = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.ReactLayeredComponentMixin],
+		mixins: [DeepPureRenderMixin, ReactLayeredComponentMixin],
 		displayName: 'EntityDeleteBtn',
 		propTypes: {
 			name: React.PropTypes.string.isRequired,
@@ -974,7 +977,7 @@
 	 * @memberOf component
 	 */
 	var EntityInspectBtn = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		displayName: 'EntityInspectBtn',
 		propTypes: {
 			name: React.PropTypes.string.isRequired,
@@ -992,7 +995,7 @@
 	    	};
 	    },
 		render: function() {
-			return molgenis.ui.Button({
+			return Button({
 				icon: 'search',
 				style: 'info',
 				title: 'Inspect row',
@@ -1009,9 +1012,4 @@
 	});
 	var EntityInspectBtnFactory = React.createFactory(EntityInspectBtn);
 
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	_.extend(molgenis.ui, {
-		Table: React.createFactory(Table)
-	});
-}(_, React, molgenis));
+export default React.createFactory(Table);

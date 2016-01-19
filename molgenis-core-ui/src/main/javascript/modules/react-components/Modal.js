@@ -1,6 +1,6 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-	"use strict";
+import React from "react";
+import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
+import $ from "jquery";
 
 	var div = React.DOM.div, button = React.DOM.button, span = React.DOM.span, h4 = React.DOM.h4;
 	
@@ -8,7 +8,7 @@
      * @memberOf component
      */
     var Modal = React.createClass({
-    	mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+    	mixins: [DeepPureRenderMixin],
         displayName: 'Modal',
         propTypes: {
         	title: React.PropTypes.string.isRequired,
@@ -77,10 +77,5 @@
     		}
     	}
     });
-    
-    // export component
-    molgenis.ui = molgenis.ui || {};
-    _.extend(molgenis.ui, {
-        Modal: React.createFactory(Modal)
-    });
-}(_, React, molgenis));
+
+export default React.createFactory(Modal);

@@ -1,14 +1,13 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-	"use strict";
-	
+import React from "react";
+import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
+
 	var span = React.DOM.span;
 	
 	/**
 	 * @memberOf component
 	 */
 	var Icon = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		displayName: 'Icon',
 		propTypes: {
 			name: React.PropTypes.string.isRequired,
@@ -26,9 +25,4 @@
 		}
 	});
 	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	_.extend(molgenis.ui, {
-		Icon: React.createFactory(Icon)
-	});
-}(_, React, molgenis));
+export default React.createFactory(Icon);

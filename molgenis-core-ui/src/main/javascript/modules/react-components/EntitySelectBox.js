@@ -1,16 +1,20 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-	"use strict";
-	
+import React from "react";
+import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
+import EntityLoaderMixin from "./mixin/EntityLoaderMixin";
+import ReactLayeredComponentMixin from "./mixin/ReactLayeredComponentMixin";
+import RestClient from "rest-client/RestClientV1";
+import Spinner from "./Spinner";
+import Select2 from "./wrapper/Select2";
+
 	var div = React.DOM.div;
 	
-	var api = new molgenis.RestClient();
+	var api = new RestClient();
 	
 	/**
 	 * @memberOf component
 	 */
 	var EntitySelectBox = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.EntityLoaderMixin, molgenis.ui.mixin.ReactLayeredComponentMixin],
+		mixins: [DeepPureRenderMixin, EntityLoaderMixin, ReactLayeredComponentMixin],
 		displayName: 'EntitySelectBox',
 		propTypes: {
 			entity: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]).isRequired,
@@ -40,7 +44,7 @@
 		render: function() {
 			if(this.state.entity === null) {
 				// entity meta data not fetched yet
-				return molgenis.ui.Spinner();
+				return Spinner();
 			}
 			
 			var props = this.props;
@@ -58,7 +62,7 @@
 			    formatSelection: this._select2FormatSelection
 			};
 			
-			return molgenis.ui.wrapper.Select2({
+			return Select2({
 				options : options,
 				name : this.props.name,
 				disabled : this.props.disabled,
@@ -73,7 +77,7 @@
 		},
 		renderLayer: function() {
 			if(this.state.entity === null) {
-				return molgenis.ui.Spinner();
+				return Spinner();
 			} else if(this.props.mode === 'create') {
 				return this.state.modal ? molgenis.ui.Form({
 					entity : this.state.entity.name,
@@ -209,9 +213,4 @@
 		}
 	});
 	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	_.extend(molgenis.ui, {
-		EntitySelectBox: React.createFactory(EntitySelectBox)
-	});
-}(_, React, molgenis));
+export default React.createFactory(EntitySelectBox);

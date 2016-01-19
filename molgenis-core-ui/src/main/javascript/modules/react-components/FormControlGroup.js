@@ -1,6 +1,9 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-    "use strict";
+import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
+import AttributeLoaderMixin from "./mixin/AttributeLoaderMixin";
+
+import FormControl from "./FormControl";
+import Spinner from "./Spinner";
+import _ from "underscore";
 
     var div = React.DOM.div, p = React.DOM.p, fieldset = React.DOM.fieldset, legend = React.DOM.legend;;
     
@@ -8,7 +11,7 @@
 	 * @memberOf component
 	 */
 	var FormControlGroup = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.AttributeLoaderMixin],
+		mixins: [DeepPureRenderMixin, AttributeLoaderMixin],
 		displayName: 'FormControlGroup',
 		propTypes: {
 			entity: React.PropTypes.object,
@@ -33,7 +36,7 @@
 		render: function() {
 			if (this.state.attr === null) {
 				// attribute not available yet
-				return molgenis.ui.Spinner();
+				return Spinner();
 			}
 			var attributes = this.state.attr.attributes;
 			
@@ -43,7 +46,7 @@
 			var hasVisible = false;
 			for(var i = 0; i < attributes.length; ++i) {
 				var attr = attributes[i];
-                var ControlFactory = attr.fieldType === 'COMPOUND' ? molgenis.ui.FormControlGroup : molgenis.ui.FormControl;
+                var ControlFactory = attr.fieldType === 'COMPOUND' ? FormControlGroupFactory : FormControl;
                 var controlProps = {
                     entity : this.props.entity,
                     attr : attr,
@@ -102,10 +105,6 @@
 			return Fieldset;
 		}
 	});
-	
-    // export component
-    molgenis.ui = molgenis.ui || {};
-    _.extend(molgenis.ui, {
-        FormControlGroup: React.createFactory(FormControlGroup)
-    });
-}(_, React, molgenis));
+
+const FormControlGroupFactory = React.createFactory(FormControlGroup);
+export default FormControlGroupFactory;

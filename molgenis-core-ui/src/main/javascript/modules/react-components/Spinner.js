@@ -1,14 +1,13 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-	"use strict";
-	
+import React from "react";
+import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
+
 	var div = React.DOM.div, img = React.DOM.img;
 	
 	/**
 	 * @memberOf component
 	 */
 	var Spinner = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		displayName: 'Spinner',
 		render: function() {
 			return (
@@ -19,9 +18,4 @@
 		}
 	});
 	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	_.extend(molgenis.ui, {
-		Spinner: React.createFactory(Spinner)
-	});
-}(_, React, molgenis));
+export default React.createFactory(Spinner);

@@ -1,15 +1,25 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-    "use strict";
+import React from "react";
+import RestClient from "rest-client/RestClientV1";
+import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
+import EntityLoaderMixin from "./mixin/EntityLoaderMixin";
+import EntityInstanceLoaderMixin from "./mixin/EntityInstanceLoaderMixin";
+import Modal from "./Modal";
+import Spinner from "./Spinner";
+import Button from "./Button";
+import _ from "underscore";
+import $ from "jquery";
+import JQueryForm from "./wrapper/JQueryForm";
+import AlertMessage from "./AlertMessage";
+import Promise from "promise";
 
     var div = React.DOM.div, span = React.DOM.span, ol = React.DOM.ol, li = React.DOM.li, a = React.DOM.a;
-    var api = new molgenis.RestClient();
+    var api = new RestClient();
     
 	/**
 	 * @memberOf component
 	 */
 	var Form = React.createClass({
-		mixins: [molgenis.DeepPureRenderMixin, molgenis.ui.mixin.EntityLoaderMixin, molgenis.ui.mixin.EntityInstanceLoaderMixin, molgenis.ui.mixin.ReactLayeredComponentMixin],
+		mixins: [DeepPureRenderMixin, EntityLoaderMixin, EntityInstanceLoaderMixin, ReactLayeredComponentMixin],
 		displayName: 'Form',
 		propTypes: {
 			entity: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]).isRequired,
@@ -191,7 +201,7 @@
 				}
 				
 				return (
-					molgenis.ui.Modal({title: title, size: 'large', show: this.state.showModal, onHide: this._handleCancel},
+					Modal({title: title, size: 'large', show: this.state.showModal, onHide: this._handleCancel},
 						Form
 					)
 				);
@@ -202,11 +212,11 @@
 		_renderForm: function() {
 			// return empty div if entity data is not yet available
 			if(this.state.entity === null) {
-				return molgenis.ui.Spinner();
+				return Spinner();
 			}
 			// return empty div if entity value is not yet available
 			if((this.props.mode === 'edit' || this.props.mode === 'view') && this.state.entityInstance === null) {
-				return molgenis.ui.Spinner();
+				return Spinner();
 			}
 			
 			var action, method;
@@ -259,7 +269,7 @@
 			var Filter = this.props.enableOptionalFilter ? (
 				div({className: 'row', style: {textAlign: 'right'}, key: 'filter'},
 					div({className: 'col-md-12'},
- 						molgenis.ui.Button({
+ 						Button({
 							icon : this.state.hideOptional ? 'eye-open' : 'eye-close',
 							title: this.state.hideOptional ? 'Show all fields' : 'Hide optional fields',
 							size: 'xsmall',
@@ -272,9 +282,10 @@
 					)
 				)
 			) : null;
-					
+
+			//TODO: Rename; this shadows the Form class!
 			var Form = (
-				molgenis.ui.wrapper.JQueryForm(formProps,
+				JQueryForm(formProps,
 					FormControlsFactory(formControlsProps),
  					this.props.mode !== 'view' && !(this.props.mode === 'edit' && this.props.saveOnBlur) ? FormButtonsFactory({
  						mode : this.props.mode,
@@ -289,11 +300,11 @@
 			);
 			
 			var SubmitAlertMessage = this.state.submitMsg ? (
-					molgenis.ui.AlertMessage({type: this.state.submitMsg.type, message: this.state.submitMsg.message, onDismiss: this._handleAlertMessageDismiss, key: 'alert'})	
+					AlertMessage({type: this.state.submitMsg.type, message: this.state.submitMsg.message, onDismiss: this._handleAlertMessageDismiss, key: 'alert'})
 			) : null;
 						
 			var ErrorMessageAlertMessage = !$.isEmptyObject(this.state.errorMessages) ? (
-				molgenis.ui.AlertMessage({type: 'danger', message: 'Validation failed', onDismiss: undefined, key: 'alert'})	
+				AlertMessage({type: 'danger', message: 'Validation failed', onDismiss: undefined, key: 'alert'})
 			) : null;
 			
 			var FormWithMessageAndFilter;
@@ -687,7 +698,7 @@
 	 * @memberOf component
 	 */
 	var FormControls = React.createClass({
-		mixins: [molgenis.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		displayName: 'FormControls',
 		propTypes: {
 			entity: React.PropTypes.object.isRequired,
@@ -769,7 +780,7 @@
 	 * @memberOf component
 	 */
 	var FormButtons = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		displayName: 'FormButtons',
 		propTypes: {
 			mode: React.PropTypes.oneOf(['create', 'edit']).isRequired,
@@ -797,8 +808,8 @@
 			return (
 				div({className: 'row', style: {textAlign: 'right'}},
 					div({className: divClasses},
-						this.props.cancelBtn ? molgenis.ui.Button({name:'cancel', text: 'Cancel', onClick: this.props.onCancelClick}, 'Cancel') : null,
-						molgenis.ui.Button({type: 'button', style: 'primary', css: {marginLeft: 5}, name: submitBtnName, text: submitBtnText, onClick: this.props.onSubmitClick})
+						this.props.cancelBtn ? Button({name:'cancel', text: 'Cancel', onClick: this.props.onCancelClick}, 'Cancel') : null,
+						Button({type: 'button', style: 'primary', css: {marginLeft: 5}, name: submitBtnName, text: submitBtnText, onClick: this.props.onSubmitClick})
 					)
 				)
 			);
@@ -810,7 +821,7 @@
 	 * @memberOf component
 	 */
 	var FormIndex = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		displayName: 'FormIndex',
 		propTypes: {
 			entity: React.PropTypes.object.isRequired,
@@ -850,9 +861,4 @@
 	});
 	var FormIndexFactory = React.createFactory(FormIndex);
 	
-    // export component
-    molgenis.ui = molgenis.ui || {};
-    _.extend(molgenis.ui, {
-        Form: React.createFactory(Form)
-    });
-}(_, React, molgenis));	
+export default React.createFactory(Form)

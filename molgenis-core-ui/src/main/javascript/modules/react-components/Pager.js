@@ -1,14 +1,14 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-	"use strict";
-	
+import React from "react";
+import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
+
+
 	var ul = React.DOM.ul, li = React.DOM.li, div = React.DOM.div, span = React.DOM.span, a = React.DOM.a;
 	
 	/**
 	 * @memberOf component
 	 */
 	var Pager = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		displayName: 'Pager',
 		propTypes: {
 			nrItems: React.PropTypes.number.isRequired,
@@ -73,9 +73,4 @@
 		}
 	});
 	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	_.extend(molgenis.ui, {
-		Pager: React.createFactory(Pager)
-	});
-}(_, React, molgenis));
+export default React.createFactory(Pager);

@@ -1,7 +1,10 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-	"use strict";
-	
+import RestClient from "rest-client/RestClientV1";
+import React from "react";
+import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
+import AttributeLoaderMixin from "./mixin/AttributeLoaderMixin";
+import I18nStringsMixin from "./mixin/I18nStringsMixin";
+import _ from "underscore";
+
 	var api = new molgenis.RestClient();
 	
 	/**
@@ -10,7 +13,7 @@
 	 * @memberOf component
 	 */
 	var AttributeControl = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.AttributeLoaderMixin, molgenis.ui.mixin.I18nStringsMixin],
+		mixins: [DeepPureRenderMixin, AttributeLoaderMixin, I18nStringsMixin],
 		displayName: 'AttributeControl',
 		propTypes: {
 			attr: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
@@ -309,10 +312,5 @@
 			}
 		}
 	});
-	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	_.extend(molgenis.ui, {
-		AttributeControl: React.createFactory(AttributeControl)
-	});
-}(_, React, molgenis));
+
+export default React.createFactory(AttributeControl);

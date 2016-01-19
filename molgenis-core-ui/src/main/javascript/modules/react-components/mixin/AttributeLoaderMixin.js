@@ -1,13 +1,12 @@
-/* global _: false, molgenis: true */
-(function(_, molgenis) {
-	"use strict";
-	
+import RestClient from "rest-client/RestClientV1";
+import _ from "underscore";
+
 	var api = new molgenis.RestClient();
 	
 	/**
 	 * @memberOf component.mixin
 	 */
-	var AttributeLoaderMixin = {
+const AttributeLoaderMixin = {
 		componentDidMount: function() {
 			this._initAttr(this.props.attr);
 		},
@@ -55,11 +54,5 @@
 			}
 		}
 	};
-	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	molgenis.ui.mixin = molgenis.ui.mixin || {};
-	_.extend(molgenis.ui.mixin, {
-		AttributeLoaderMixin: AttributeLoaderMixin
-	});
-}(_, molgenis));
+
+export default AttributeLoaderMixin;

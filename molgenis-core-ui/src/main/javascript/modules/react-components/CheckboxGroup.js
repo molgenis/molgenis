@@ -1,12 +1,11 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-	"use strict";
-	
+import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
+import GroupMixin from "./mixin/GroupMixin";
+
 	/**
 	 * @memberOf component
 	 */
 	var CheckboxGroup = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.GroupMixin],
+		mixins: [DeepPureRenderMixin, GroupMixin],
 		displayName: 'CheckboxGroup',
 		propTypes: {
 			name: React.PropTypes.string,
@@ -71,10 +70,5 @@
 			this.props.onValueChange({value: []});
 		},
 	});
-	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	_.extend(molgenis.ui, {
-		CheckboxGroup: React.createFactory(CheckboxGroup)
-	});
-}(_, React, molgenis));
+
+export default React.createFactory(CheckboxGroup);

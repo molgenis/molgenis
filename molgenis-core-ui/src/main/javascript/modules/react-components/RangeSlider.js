@@ -1,14 +1,14 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-	"use strict";
-	
+import React from "react";
+import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
+import JQRangeSlider from "./wrapper/JQRangeSlider";
+
 	/**
 	 * Range slider control for number types
 	 * 
 	 * @memberOf component
 	 */
 	var RangeSlider = React.createClass({ // FIXME support readOnly
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		displayName: 'RangeSlider',
 		propTypes: {
 			id : React.PropTypes.string,
@@ -32,7 +32,7 @@
 				type: 'number'
 			};
 			
-			return molgenis.ui.wrapper.JQRangeSlider({
+			return JQRangeSlider({
 				id: this.props.id,
 				options : options,
 				disabled : this.props.disabled,
@@ -45,9 +45,4 @@
 		}
 	});
 	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	_.extend(molgenis.ui, {
-		RangeSlider: React.createFactory(RangeSlider)
-	});
-}(_, React, molgenis));
+export default React.createFactory(RangeSlider);

@@ -1,6 +1,10 @@
-/* global _: false, React: false, URI: false, molgenis: true */
-(function(_, React, URI, molgenis) {
-    "use strict";
+import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
+import AttributeLoaderMixin from "./mixin/AttributeLoaderMixin";
+import React from "react";
+import AttributeControm from "./AttributeControl";
+import Spinner from "./Spinner";
+import URI from "urijs";
+import _ from "underscore";
 
     var div = React.DOM.div, span = React.DOM.span, label = React.DOM.label, strong = React.DOM.strong, a = React.DOM.a;
     
@@ -9,7 +13,7 @@
      * @memberOf component
      */
     var FormControl = React.createClass({
-        mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.AttributeLoaderMixin],
+        mixins: [DeepPureRenderMixin, AttributeLoaderMixin],
         displayName: 'FormControl',
         propTypes: {
             entity: React.PropTypes.object.isRequired,
@@ -40,7 +44,7 @@
         render: function() {
             if(this.state.attr === null) {
                 // attribute not fetched yet
-            	return molgenis.ui.Spinner();
+            	return Spinner();
             }
             
             var attr = this.state.attr;
@@ -148,7 +152,7 @@
      * @memberOf component
      */
     var FormControlDescription = React.createClass({
-    	mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+    	mixins: [DeepPureRenderMixin],
         displayName: 'FormControlDescription',
         propTypes: {
         	description: React.PropTypes.string.isRequired
@@ -176,9 +180,4 @@
     });
     var FormControlDescriptionFactory = React.createFactory(FormControlDescription);
     
-    // export component
-    molgenis.ui = molgenis.ui || {};
-    _.extend(molgenis.ui, {
-        FormControl: React.createFactory(FormControl)
-    });
-}(_, React, URI, molgenis));
+export default React.createFactory(FormControl);

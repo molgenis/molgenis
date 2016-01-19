@@ -1,15 +1,14 @@
-/* global _: false, molgenis: true */
-(function(_, molgenis) {
-	"use strict";
-	
-	var api = new molgenis.RestClient();
+import RestClient from "rest-client/RestClientV1";
+import _ from "underscore";
+
+	var api = new RestClient();
 	
 	/**
 	 * Loads an entity instance (row of data) from this.props.entityInstance and stores in this.state.entityInstance
 	 * 
 	 * @memberOf component.mixin
 	 */
-	var EntityInstanceLoaderMixin = {
+	const EntityInstanceLoaderMixin = {
 		_isEntityInstanceLoaded: function(entityInstance) {
 			return (this.props.mode !== 'create') && (typeof entityInstance === 'object') && (_.size(entityInstance) > 1); 
 		},
@@ -68,11 +67,5 @@
 			}
 		}
 	};
-	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	molgenis.ui.mixin = molgenis.ui.mixin || {};
-	_.extend(molgenis.ui.mixin, {
-		EntityInstanceLoaderMixin: EntityInstanceLoaderMixin
-	});
-}(_, molgenis));
+
+export default EntityInstanceLoaderMixin;

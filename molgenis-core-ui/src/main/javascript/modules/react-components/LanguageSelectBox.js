@@ -1,7 +1,10 @@
-(function(_, React, molgenis) {
-	"use strict";
-	
-	var api = new molgenis.RestClient();
+import RestClient from "rest-client/RestClientV1";
+import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
+import Spinner from "./Spinner";
+import Select2 from "./wrapper/Select2";
+import React from "react";
+
+	var api = new RestClient();
 	
 	/**
 	 * Shows a Select2 box for switching the user language
@@ -9,7 +12,7 @@
 	 * @memberOf component
 	 */
 	var LanguageSelectBox = React.createClass({	
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		displayName: 'LanguageSelectBox',
 		propTypes: {
 			onValueChange: React.PropTypes.func
@@ -25,11 +28,11 @@
 		},
 		render: function() {
 			if (this.state.select2Data === null) {
-				return molgenis.ui.Spinner();
+				return Spinner();
 			}
 			
 			if (this.state.select2Data.length > 1) {
-				return molgenis.ui.wrapper.Select2({
+				return Select2({
 					options: {
 						data: this.state.select2Data,
 					},
@@ -70,9 +73,4 @@
 		}
 	});
 	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	_.extend(molgenis.ui, {
-		LanguageSelectBox: React.createFactory(LanguageSelectBox)
-	});
-}(_, React, molgenis));
+export default React.createFactory(LanguageSelectBox);

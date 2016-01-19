@@ -1,7 +1,6 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-	"use strict";
-	
+import React from "react";
+import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
+
 	var div = React.DOM.div;
 	var select = React.DOM.select;
 	var option = React.DOM.option;
@@ -10,7 +9,7 @@
 	 * @memberOf component
 	 */
 	var SelectBox = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		displayName: 'SelectBox',
 		propTypes: {
 			options: React.PropTypes.arrayOf(
@@ -46,9 +45,4 @@
 		}
 	});
 	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	_.extend(molgenis.ui, {
-		SelectBox: React.createFactory(SelectBox)
-	});
-}(_, React, molgenis));
+export default React.createFactory(SelectBox);

@@ -1,12 +1,11 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-	"use strict";
-	
+import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
+import React from "react";
+import DateTimePicker from "./wrapper/DateTimePicker";
 	/**
 	 * @memberOf component
 	 */
 	var DateControl = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		displayName: 'DateControl',
 		propTypes: {
 			name: React.PropTypes.string,
@@ -19,7 +18,7 @@
 			onValueChange: React.PropTypes.func.isRequired
 		},
 		render: function() {
-			return molgenis.ui.wrapper.DateTimePicker({
+			return DateTimePicker({
 				name: this.props.name,
 				time : this.props.time,
 				placeholder : this.props.placeholder,
@@ -36,9 +35,4 @@
 		}
 	});
 	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	_.extend(molgenis.ui, {
-		DateControl: React.createFactory(DateControl)
-	});
-}(_, React, molgenis));
+export default React.createFactory(DateControl);

@@ -1,7 +1,6 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-	"use strict";
-	
+import React from "react";
+import Icon from "./Icon";
+
 	var button = React.DOM.button, a = React.DOM.a;
 	
 	/**
@@ -64,7 +63,7 @@
 				
 				return (
 					button(buttonProps,
-						this.props.icon ? molgenis.ui.Icon({name: this.props.icon}) : null,
+						this.props.icon ? Icon({name: this.props.icon}) : null,
 						this.props.text ? (this.props.icon ? ' ' + this.props.text : this.props.text) : null
 					)
 				);
@@ -85,7 +84,7 @@
 				
 				return (
 					a(anchorProps,
-						this.props.icon ? molgenis.ui.Icon({name: this.props.icon}) : null,
+						this.props.icon ? Icon({name: this.props.icon}) : null,
 						this.props.text ? (this.props.icon ? ' ' + this.props.text : this.props.text) : null
 					)
 				); 
@@ -93,9 +92,4 @@
 		}
 	});
 	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	_.extend(molgenis.ui, {
-		Button: React.createFactory(Button)
-	});
-}(_, React, molgenis));
+export default React.createFactory(Button);

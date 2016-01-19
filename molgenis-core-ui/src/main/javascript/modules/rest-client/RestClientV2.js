@@ -1,5 +1,5 @@
-(function($, molgenis) {
-    "use strict";
+import _ from 'underscore';
+import $ from 'jquery';
 
     var apiBaseUri = '/api/v2/';
 
@@ -53,7 +53,7 @@
         return rsql;
     };
 
-    var createRsqlQuery = function(rules) {
+    export function createRsqlQuery(rules) {
         var rsql = '';
 
         // simplify query
@@ -135,9 +135,6 @@
         return rsql;
     };
 
-    // export
-    molgenis.createRsqlQuery = createRsqlQuery;
-
     var createSortValue = function(sort) {
         var qs = _.map(sort.orders, function(order) {
             return encodeURIComponent(order.attr) + (order.direction === 'desc' ? ':desc' : '');
@@ -145,10 +142,9 @@
         return qs;
     };
 
-    molgenis.RestClientV2 = function RestClientV2() {
-    };
+export default class RestClientV2 {
 
-    molgenis.RestClientV2.prototype.get = function(resourceUri, options) {
+    get(resourceUri, options) {
         if(!resourceUri.startsWith('/api/')) {
             // assume that resourceUri is a entity name
             resourceUri = apiBaseUri + htmlEscape(resourceUri);
@@ -204,11 +200,10 @@
         }
     };
 
-    molgenis.RestClientV2.prototype.remove = function(name, id) {
+    remove(name, id) {
         return $.ajax({
             type : 'DELETE',
             url : apiBaseUri + encodeURI(name) + '/' + encodeURI(id)
         });
     };
-
-}($, window.top.molgenis = window.top.molgenis || {}));
+}

@@ -1,10 +1,11 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-	"use strict";
+import React from "react";
+import RestClientV2 from "rest-client/RestClientV2";
+import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
+import _ from "underscore";
 
 	var div = React.DOM.div, table = React.DOM.table, thead = React.DOM.thead, tbody = React.DOM.tbody, tr = React.DOM.tr, th = React.DOM.th, td = React.DOM.td, a = React.DOM.a, span = React.DOM.span, em = React.DOM.em, br = React.DOM.br, label = React.DOM.label;
 
-	var api = new molgenis.RestClientV2();
+	var api = new RestClientV2();
 
 	var AGGREGATE_ANONYMIZATION_VALUE = -1;
 	
@@ -12,7 +13,7 @@
 	 * @memberOf component
 	 */
 	var AggregateTable = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		displayName: 'Table',
 		propTypes: {
 			entity: React.PropTypes.string.isRequired,
@@ -285,9 +286,4 @@
 	});
 	var AggregateTableBodyFactory = React.createFactory(AggregateTableBody);
 	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	_.extend(molgenis.ui, {
-		AggregateTable: React.createFactory(AggregateTable)
-	});
-}(_, React, molgenis));
+export default React.createFactory(AggregateTable);

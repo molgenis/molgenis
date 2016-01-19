@@ -1,7 +1,6 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-	"use strict";
-	
+import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
+import _ from "underscore";
+
 	var input = React.DOM.input, div = React.DOM.div, span = React.DOM.span;
 	
 	/**
@@ -9,7 +8,7 @@
 	 */
 	var Input = React.createClass({
 		displayName: 'Input',
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		propTypes: {
 			type: React.PropTypes.string.isRequired,
 			id: React.PropTypes.string,
@@ -194,9 +193,4 @@
 		}
 	});
 	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	_.extend(molgenis.ui, {
-		Input: React.createFactory(Input)
-	});
-}(_, React, molgenis));
+export default React.createFactory(Input);

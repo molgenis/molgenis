@@ -1,14 +1,13 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-	"use strict";
-	
+import React from "react";
+import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
+
 	var span = React.DOM.span;
 	
 	/**
 	 * @memberOf component
 	 */
 	var Popover = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		displayName: 'Popover',
 		propTypes: {
 			value: React.PropTypes.string.isRequired,
@@ -34,10 +33,5 @@
 			}, this.props.value);
 		}
 	});
-	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	_.extend(molgenis.ui, {
-		Popover: React.createFactory(Popover)
-	});
-}(_, React, molgenis));
+
+export default React.createFactory(Popover);

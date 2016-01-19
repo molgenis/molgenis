@@ -1,14 +1,14 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-	"use strict";
-	
+import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
+import React from "react";
+import Button from "./Button";
+
 	var div = React.DOM.div;
 	
 	/**
 	 * @memberOf component
 	 */
 	var Dialog = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		displayName: 'Dialog',
 		propTypes: {
 			type: React.PropTypes.oneOf(['alert', 'confirm']),
@@ -21,16 +21,11 @@
 				div({className: 'row', style: {textAlign: 'right'}},
 					div({className: 'col-md-12'},
 						this.props.type === 'confirm' ? molgenis.ui.Button({text: 'Cancel', onClick: this.props.onCancel}, 'Cancel') : null,
-						molgenis.ui.Button({text: 'Ok', style: 'primary', css: {marginLeft: 5}, onClick: this.props.onConfirm}, 'Ok')
+						Button({text: 'Ok', style: 'primary', css: {marginLeft: 5}, onClick: this.props.onConfirm}, 'Ok')
 					)
 				)
 			);
 		}
 	});
 	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	_.extend(molgenis.ui, {
-		Dialog: React.createFactory(Dialog)
-	});
-}(_, React, molgenis));
+export default React.createFactory(Dialog);
