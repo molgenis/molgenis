@@ -6,6 +6,7 @@ import RestClient from "rest-client/RestClientV1";
 import Spinner from "./Spinner";
 import Select2 from "./wrapper/Select2";
 import Form from "./Form";
+import _ from "underscore";
 
 	var div = React.DOM.div;
 	
