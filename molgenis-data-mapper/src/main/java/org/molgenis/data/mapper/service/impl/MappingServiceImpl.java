@@ -169,6 +169,8 @@ public class MappingServiceImpl implements MappingService
 		targetMetaData.setLabel(entityName);
 		targetMetaData.addAttribute("source");
 
+		// add a new repository if the target repo doesn't exist, or check if the target repository is compatible with
+		// the result of the mappings
 		Repository targetRepo;
 		if (!dataService.hasRepository(entityName))
 		{
@@ -200,10 +202,21 @@ public class MappingServiceImpl implements MappingService
 		}
 	}
 
-	private boolean isTargetMetaCompatible(Repository targetRepo, EntityMetaData mappingTargetMetaData)
+	/**
+	 * Compares the attributes of the target repository and the results of the mapping and sees if they're compatible.
+	 * It is possible for the target repository to have more attributes than the mapping, allowing for multiple mapping
+	 * projects writing to one target.
+	 * 
+	 * @param targetRepository
+	 *            the target repository
+	 * @param mappingTargetMetaData
+	 *            the metadata of the mapping result entity
+	 * @return true if the mapping can be written to the target repository
+	 */
+	private boolean isTargetMetaCompatible(Repository targetRepository, EntityMetaData mappingTargetMetaData)
 	{
 		Map<String, AttributeMetaData> targetRepoAttributeMap = Maps.newHashMap();
-		targetRepo.getEntityMetaData().getAtomicAttributes()
+		targetRepository.getEntityMetaData().getAtomicAttributes()
 				.forEach(attr -> targetRepoAttributeMap.put(attr.getName(), attr));
 
 		for (AttributeMetaData mappingTargetAttr : mappingTargetMetaData.getAtomicAttributes())
@@ -213,7 +226,6 @@ public class MappingServiceImpl implements MappingService
 					&& targetRepoAttributeMap.get(mappingTargetAttrName).isSameAs(mappingTargetAttr))
 			{
 				continue;
-
 			}
 			else
 			{
@@ -228,7 +240,6 @@ public class MappingServiceImpl implements MappingService
 		// collect (mapped) ids from all sources to keep track of deleted entities
 		List<Object> targetRepoIds = Lists.newArrayList();
 		List<String> mappedSourceIds = Lists.newArrayList();
-
 		targetRepo.forEach(entity -> targetRepoIds.add(entity.getIdValue().toString()));
 
 		for (EntityMapping sourceMapping : mappingTarget.getEntityMappings())
@@ -236,6 +247,7 @@ public class MappingServiceImpl implements MappingService
 			applyMappingToRepo(sourceMapping, targetRepo, mappedSourceIds);
 		}
 
+		// remove all entities from the target that weren't present in the source anymore
 		targetRepoIds.removeAll(mappedSourceIds);
 		if (!targetRepoIds.isEmpty())
 		{
@@ -296,7 +308,6 @@ public class MappingServiceImpl implements MappingService
 	private void applyMappingToAttribute(AttributeMapping attributeMapping, Entity sourceEntity, MapEntity target,
 			EntityMetaData entityMetaData)
 	{
-		// TODO: skip id when id is AUTO
 		target.set(attributeMapping.getTargetAttributeMetaData().getName(),
 				algorithmService.apply(attributeMapping, sourceEntity, entityMetaData));
 	}

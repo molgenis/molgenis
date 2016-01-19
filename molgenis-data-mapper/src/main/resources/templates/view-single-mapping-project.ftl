@@ -71,73 +71,71 @@
  			</thead>
  			<tbody>
 				<#list mappingProject.getMappingTarget(selectedTarget).target.getAtomicAttributes() as attribute>
-					<#--<#if !attribute.isIdAtrribute()>-->
-						<tr>
-							<td>
-								<b>${attribute.label?html}</b> (${attribute.dataType})
-								<#if !attribute.nillable> <span class="label label-default">required</span></#if>
-								<#if attribute.unique> <span class="label label-default">unique</span></#if>
-								<#if attribute.description??><br />${attribute.description?html}</#if>
-								<#if attribute.tags??><br />${attribute.tags?html}</#if>
-								<#if attributeTagMap[attribute.name]??>
-									<br />
-									<#list attributeTagMap[attribute.name] as tag>
-										<span class="label label-danger"> ${tag.label}</span>
-									</#list>
-								</#if>
-							</td>
-							<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
-								<td <#if source.getAttributeMapping(attribute.name)??>
-										<#assign attributeMapping = source.getAttributeMapping(attribute.name)>
-										<#if attributeMapping.algorithmState??>
-											<#if attributeMapping.algorithmState == "GENERATED_HIGH">
-												class="bg-info"
-											<#elseif attributeMapping.algorithmState == "GENERATED_LOW">
-												class="bg-warning"
-											<#elseif attributeMapping.algorithmState == "CURATED">
-												class="bg-success"
-											<#elseif attributeMapping.algorithmState == "DISCUSS">
-												class="bg-danger"
-											</#if>
+					<tr>
+						<td>
+							<b>${attribute.label?html}</b> (${attribute.dataType})
+							<#if !attribute.nillable> <span class="label label-default">required</span></#if>
+							<#if attribute.unique> <span class="label label-default">unique</span></#if>
+							<#if attribute.description??><br />${attribute.description?html}</#if>
+							<#if attribute.tags??><br />${attribute.tags?html}</#if>
+							<#if attributeTagMap[attribute.name]??>
+								<br />
+								<#list attributeTagMap[attribute.name] as tag>
+									<span class="label label-danger"> ${tag.label}</span>
+								</#list>
+							</#if>
+						</td>
+						<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
+							<td <#if source.getAttributeMapping(attribute.name)??>
+									<#assign attributeMapping = source.getAttributeMapping(attribute.name)>
+									<#if attributeMapping.algorithmState??>
+										<#if attributeMapping.algorithmState == "GENERATED_HIGH">
+											class="bg-info"
+										<#elseif attributeMapping.algorithmState == "GENERATED_LOW">
+											class="bg-warning"
+										<#elseif attributeMapping.algorithmState == "CURATED">
+											class="bg-success"
+										<#elseif attributeMapping.algorithmState == "DISCUSS">
+											class="bg-danger"
 										</#if>
-									</#if>>
-									<div class="pull-right">
-										<form method="get" action="${context_url}/attributeMapping" class="pull-right">
+									</#if>
+								</#if>>
+								<div class="pull-right">
+									<form method="get" action="${context_url}/attributeMapping" class="pull-right">
+										<button type="submit" class="btn btn-default btn-xs">
+											<span class="glyphicon glyphicon-pencil"></span>
+										</button>
+										<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
+										<input type="hidden" name="target" value="${selectedTarget}"/>
+										<input type="hidden" name="source" value="${source.name}"/>
+										<input type="hidden" name="targetAttribute" value="${attribute.name}"/>
+									</form>
+									<#if hasWritePermission && source.getAttributeMapping(attribute.name)??>
+										<form method="post" action="${context_url}/removeAttributeMapping" class="pull-right verify">
 											<button type="submit" class="btn btn-default btn-xs">
-												<span class="glyphicon glyphicon-pencil"></span>
+												<span class="glyphicon glyphicon-remove"></span>
 											</button>
 											<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
 											<input type="hidden" name="target" value="${selectedTarget}"/>
 											<input type="hidden" name="source" value="${source.name}"/>
-											<input type="hidden" name="targetAttribute" value="${attribute.name}"/>
+											<input type="hidden" name="attribute" value="${attribute.name}"/>
 										</form>
-										<#if hasWritePermission && source.getAttributeMapping(attribute.name)??>
-											<form method="post" action="${context_url}/removeAttributeMapping" class="pull-right verify">
-												<button type="submit" class="btn btn-default btn-xs">
-													<span class="glyphicon glyphicon-remove"></span>
-												</button>
-												<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
-												<input type="hidden" name="target" value="${selectedTarget}"/>
-												<input type="hidden" name="source" value="${source.name}"/>
-												<input type="hidden" name="attribute" value="${attribute.name}"/>
-											</form>
-										</#if>
-									</div>
-									<div>
-										<#if source.getAttributeMapping(attribute.name)??>
-											<#assign attributeMapping = source.getAttributeMapping(attribute.name)>		
-											<#list attributeMapping.sourceAttributeMetaDatas as mappedSourceAttribute>
-												${mappedSourceAttribute.label?html}<#if mappedSourceAttribute_has_next>, </#if>
-												<#if attributeMapping.algorithmState??></#if>
-											</#list>
-										<#elseif !attribute.nillable>
-											<span class="label label-danger">missing</span>
-										</#if>
-									</div>
-								</td>
-							</#list>
-						</tr>
-					<#--</#if>-->
+									</#if>
+								</div>
+								<div>
+									<#if source.getAttributeMapping(attribute.name)??>
+										<#assign attributeMapping = source.getAttributeMapping(attribute.name)>		
+										<#list attributeMapping.sourceAttributeMetaDatas as mappedSourceAttribute>
+											${mappedSourceAttribute.label?html}<#if mappedSourceAttribute_has_next>, </#if>
+											<#if attributeMapping.algorithmState??></#if>
+										</#list>
+									<#elseif !attribute.nillable>
+										<span class="label label-danger">missing</span>
+									</#if>
+								</div>
+							</td>
+						</#list>
+					</tr>
 				</#list>
 			</tbody>
 		</table>
