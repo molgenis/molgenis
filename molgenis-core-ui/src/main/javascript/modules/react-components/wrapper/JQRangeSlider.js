@@ -1,6 +1,5 @@
-/* global $: false, _: false, React: false, molgenis: true */
-(function($, _, React, molgenis) {
-	"use strict";
+import React from "react";
+import DeepPureRenderMixin from "../mixin/DeepPureRenderMixin";
 
 	var div = React.DOM.div;
 	
@@ -11,7 +10,7 @@
 	 */
 	var JQRangeSlider = React.createClass({
 		displayName: 'JQRangeSlider',
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		propTypes: {
 			id: React.PropTypes.string,
 			options: React.PropTypes.object,
@@ -54,13 +53,7 @@
 				$container.editRangeSlider(this.props.disabled ? 'disable' : 'enable');
 				$container.editRangeSlider('values', this.props.value[0], this.props.value[1]);
 			}
-		},
+		}
 	});
 	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	molgenis.ui.wrapper = molgenis.ui.wrapper || {};
-	_.extend(molgenis.ui.wrapper, {
-		JQRangeSlider: React.createFactory(JQRangeSlider)
-	});
-}($, _, React, molgenis));
+export default React.createFactory(JQRangeSlider);

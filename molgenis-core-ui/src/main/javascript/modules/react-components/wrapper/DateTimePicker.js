@@ -1,6 +1,5 @@
-/* global $: false, _: false, React: false, molgenis: true */
-(function($, _, React, molgenis) {
-	"use strict";
+import React from "react";
+import DeepPureRenderMixin from "../mixin/DeepPureRenderMixin";
 
 	var div = React.DOM.div, input = React.DOM.input, span = React.DOM.span;
 	
@@ -11,7 +10,7 @@
 	 */
 	var DateTimePicker = React.createClass({ // FIXME should use controlled input
 		displayName: 'DateTimePicker',
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		propTypes: {
 			id: React.PropTypes.string,
 			name: React.PropTypes.string,
@@ -106,10 +105,4 @@
 		}
 	});
 	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	molgenis.ui.wrapper = molgenis.ui.wrapper || {};
-	_.extend(molgenis.ui.wrapper, {
-		DateTimePicker : React.createFactory(DateTimePicker)
-	});
-}($, _, React, molgenis));
+export default React.createFactory(DateTimePicker);

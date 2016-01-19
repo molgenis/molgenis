@@ -1,6 +1,7 @@
 import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
 import React from "react";
 import Button from "./Button";
+import Modal from "./Modal";
 
 	var div = React.DOM.div;
 	
@@ -17,10 +18,10 @@ import Button from "./Button";
 			onConfirm: React.PropTypes.func, // alert and confirm dialogs
 		},
 		render: function() {
-			return molgenis.ui.Modal({title: this.props.message, show: true},
+			return Modal({title: this.props.message, show: true},
 				div({className: 'row', style: {textAlign: 'right'}},
 					div({className: 'col-md-12'},
-						this.props.type === 'confirm' ? molgenis.ui.Button({text: 'Cancel', onClick: this.props.onCancel}, 'Cancel') : null,
+						this.props.type === 'confirm' ? Button({text: 'Cancel', onClick: this.props.onCancel}, 'Cancel') : null,
 						Button({text: 'Ok', style: 'primary', css: {marginLeft: 5}, onClick: this.props.onConfirm}, 'Ok')
 					)
 				)

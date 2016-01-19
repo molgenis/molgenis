@@ -1,7 +1,7 @@
 import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
 import AttributeLoaderMixin from "./mixin/AttributeLoaderMixin";
 import React from "react";
-import AttributeControm from "./AttributeControl";
+import AttributeControl from "./AttributeControl";
 import Spinner from "./Spinner";
 import URI from "urijs";
 import _ from "underscore";
@@ -99,7 +99,7 @@ import _ from "underscore";
             	attributeControlProps.readOnly = true;
             }
             
-            var control = molgenis.ui.AttributeControl(attributeControlProps);
+            var control = AttributeControl(attributeControlProps);
             
             if(this.props.formLayout === 'horizontal') {
                 return(

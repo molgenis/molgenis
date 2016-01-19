@@ -1,9 +1,12 @@
 import React from "react";
 import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
 import I18nStringsMixin from "./mixin/I18nStringsMixin";
+import Spinner from "./Spinner";
+import CheckboxGroup from "./CheckboxGroup";
+import RadioGroup from "./RadioGroup";
 
 	var div = React.DOM.div, label = React.DOM.label;
-	
+
 	/**
 	 * Input control for BOOL type with checkbox or radio buttons
 	 * 
@@ -40,7 +43,7 @@ import I18nStringsMixin from "./mixin/I18nStringsMixin";
     	},
 		render: function() {
 			if(this.state.i18nStrings === null) {
-				return molgenis.ui.Spinner();
+				return Spinner();
 			}
 			
 			var options = [{value: 'true', label: this.state.i18nStrings.form_bool_true}, {value: 'false', label: this.state.i18nStrings.form_bool_false}];
@@ -48,7 +51,7 @@ import I18nStringsMixin from "./mixin/I18nStringsMixin";
 				options = options.concat({value: '', label: this.state.i18nStrings.form_bool_missing});
 			}
 			
-			var Element = this.props.multiple ? molgenis.ui.CheckboxGroup : molgenis.ui.RadioGroup;
+			var Element = this.props.multiple ? CheckboxGroup : RadioGroup;
 			return Element({
 				id: this.props.id,
 				name: this.props.name,

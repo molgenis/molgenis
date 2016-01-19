@@ -1,7 +1,7 @@
-/* global _: false, React: false, ace: false, molgenis: true */
-(function(_, React, ace, molgenis) {
-	"use strict";
-	
+import React from "react";
+import DeepPureRenderMixin from "../mixin/DeepPureRenderMixin";
+import ace from "brace";
+
 	var div = React.DOM.div, textarea = React.DOM.textarea;
 	
 	ace.config.set("basePath", "/js/ace/src-min-noconflict");
@@ -13,7 +13,7 @@
 	 */
 	var Ace = React.createClass({
 		displayName: 'Ace',
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		propTypes: {
 			name: React.PropTypes.string,
 			required: React.PropTypes.bool,
@@ -99,13 +99,7 @@
 			}
 			this.setState({value: value});
 			this.props.onChange(value);
-		},
+		}
 	});
-	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	molgenis.ui.wrapper = molgenis.ui.wrapper || {};
-	_.extend(molgenis.ui.wrapper, {
-		Ace: React.createFactory(Ace)
-	});
-}(_, React, ace, molgenis));
+
+export default React.createFactory(Ace);

@@ -11,6 +11,8 @@ import $ from "jquery";
 import JQueryForm from "./wrapper/JQueryForm";
 import AlertMessage from "./AlertMessage";
 import Promise from "promise";
+import FormControlGroup from "./FormControlGroup";
+import FormControl from "./FormControl";
 
     var div = React.DOM.div, span = React.DOM.span, ol = React.DOM.ol, li = React.DOM.li, a = React.DOM.a;
     var api = new RestClient();
@@ -725,7 +727,7 @@ import Promise from "promise";
 				if(attributes.hasOwnProperty(key)) {
 					var attr = attributes[key];
 					if(this.props.mode !== 'create' || (this.props.mode === 'create' && attr.auto !== true)) {
-						var ControlFactory = attr.fieldType === 'COMPOUND' ? molgenis.ui.FormControlGroup : molgenis.ui.FormControl;
+						var ControlFactory = attr.fieldType === 'COMPOUND' ? FormControlGroup : FormControl;
 						var controlProps = {
 							entity : this.props.entity,
 							entityInstance : this.props.value,

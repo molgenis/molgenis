@@ -4,6 +4,20 @@ import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
 import Spinner from "./Spinner";
 import Button from "./Button";
 import _ from "underscore";
+import SelectBox from "./SelectBox";
+import Pager from "./Pager";
+import Icon from "./Icon";
+import Popover from "./Popover";
+import ReactLayeredComponentMixin from "./mixin/ReactLayeredComponentMixin";
+import Modal from "./Modal";
+import FormFactory from "./Form";
+import Dialog from "./Dialog";
+import {
+	isRefAttr,
+	isXrefAttr,
+	isMrefAttr,
+	isCompoundAttr
+} from "rest-client/AttributeFunctions";
 
 	var div = React.DOM.div, table = React.DOM.table, thead = React.DOM.thead, tbody = React.DOM.tbody, tr = React.DOM.tr, th = React.DOM.th, td = React.DOM.td, a = React.DOM.a, span = React.DOM.span, em = React.DOM.em, br = React.DOM.br, label = React.DOM.label;
 
@@ -21,7 +35,7 @@ import _ from "underscore";
 		},
 		_canExpandAttr: function(attr, path) {
 			// expanding mrefs in expanded attr not supported
-			return molgenis.isRefAttr(attr) && !(molgenis.isMrefAttr(attr) && _.size(path) > 0);
+			return isRefAttr(attr) && !(isMrefAttr(attr) && _.size(path) > 0);
 		}
 	};
 
@@ -136,7 +150,7 @@ import _ from "underscore";
 									'className' : 'form-group'
 								}, 
 									label(null, "Rows per page: " + String.fromCharCode(160)),
-									molgenis.ui.SelectBox({
+									SelectBox({
 										options: [
 											{value: 20, text: 20},
 											{value: 30, text: 30},
@@ -149,7 +163,7 @@ import _ from "underscore";
 						),
 						div({className: 'col-md-6'},
 							div({className: 'text-center'},
-								molgenis.ui.Pager({
+								Pager({
 									nrItems: this.state.data.total,
 									nrItemsPerPage: this.state.maxRows,
 									start: this.state.data.start,
@@ -305,7 +319,7 @@ import _ from "underscore";
 					if(attrs[i].visible === true) {
 						var attr = attrs[i];
 						if(this._isSelectedAttr(attr, selectedAttrs)) {
-							if(molgenis.isCompoundAttr(attr)) {
+							if(isCompoundAttr(attr)) {
 								this._createHeadersRec(attr.attributes, {'*': null}, Headers, path, expanded);
 							} else {
 								var attrPath = path.concat(attr.name);
@@ -359,7 +373,7 @@ import _ from "underscore";
 	 * @memberOf component
 	 */
 	var TableHeaderCell = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, AttrUtilsMixin],
+		mixins: [DeepPureRenderMixin, AttrUtilsMixin],
 		displayName: 'TableHeaderCell',
 		propTypes: {
 			attr: React.PropTypes.object.isRequired,
@@ -376,12 +390,12 @@ import _ from "underscore";
 			};
 		},
 		render: function() {
-			var SortIcon = this.props.sortOrder !== null ? molgenis.ui.Icon({
+			var SortIcon = this.props.sortOrder !== null ? Icon({
 				style: {marginLeft: 5},
 				name: this.props.sortOrder === 'asc' ? 'sort-by-alphabet' : 'sort-by-alphabet-alt'
 			}) : null;
 
-			var Label = this.props.attr.description ? span(null, molgenis.ui.Popover({
+			var Label = this.props.attr.description ? span(null, Popover({
 				value: this.props.attr.label,
 				popoverValue: this.props.attr.description
 			})) : this.props.attr.label;
@@ -409,7 +423,7 @@ import _ from "underscore";
 	 * @memberOf component
 	 */
 	var TableBody = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, AttrUtilsMixin],
+		mixins: [DeepPureRenderMixin, AttrUtilsMixin],
 		displayName: 'TableBody',
 		propTypes: {
 			data: React.PropTypes.object.isRequired,
@@ -484,7 +498,7 @@ import _ from "underscore";
 					if(this._isSelectedAttr(attr, selectedAttrs)) {
 						if(attr.visible === true) {
 							var attrPath = path.concat(attr.name);
-							if(molgenis.isCompoundAttr(attr)) {
+							if(isCompoundAttr(attr)) {
 								this._createColsRec(item, entity, attr.attributes, {'*': null}, Cols, path, expanded, parentAttr);
 							} else {
 
@@ -575,7 +589,7 @@ import _ from "underscore";
 	 * @memberOf component
 	 */
 	var TableCellContent = React.createClass({
-		mixins: [AttrUtilsMixin, molgenis.ui.mixin.ReactLayeredComponentMixin],
+		mixins: [AttrUtilsMixin, ReactLayeredComponentMixin],
 		displayName: 'TableCellContent',
 		propTypes: {
 			entity: React.PropTypes.object.isRequired,
@@ -606,7 +620,7 @@ import _ from "underscore";
 				var refEntity = this.props.attr.refEntity;
 
 				var operator, value;
-				if(molgenis.isXrefAttr(this.props.attr)) {
+				if(isXrefAttr(this.props.attr)) {
 					operator = 'EQUALS';
 					value = this.props.value[refEntity.idAttribute];
 				} else {
@@ -616,7 +630,7 @@ import _ from "underscore";
 					});
 				}
 
-				var Table = molgenis.ui.Table({
+				var nestedTable = Table({
 					entity: this.props.attr.refEntity.name,
 					query : {
 						'q' : [ {
@@ -636,16 +650,16 @@ import _ from "underscore";
 				var OkBtn = (
 					div({className: 'row', style: {textAlign: 'right'}},
 						div({className: 'col-md-12'},
-							molgenis.ui.Button({text: 'Ok', style: 'primary', onClick: this._toggleModal.bind(null, false)}, 'Ok')
+							Button({text: 'Ok', style: 'primary', onClick: this._toggleModal.bind(null, false)}, 'Ok')
 						)
 					)
 				);
 
-				return molgenis.ui.Modal({
+				return Modal({
 					title: this.props.attr.label,
 					show : true,
 					onHide: this._toggleModal.bind(null, false)
-				}, Table, OkBtn);
+				}, nestedTable, OkBtn);
 			} else {
 				return null;
 			}
@@ -670,7 +684,7 @@ import _ from "underscore";
 								a({href: '#', onClick: this._toggleModal.bind(null, true)}, span(null, value[attr.refEntity.labelAttribute])),
 								' ',
 								a({href: value['url']},
-									molgenis.ui.Icon({
+									Icon({
 										name: 'download',
 										style: {cursor: 'pointer'}
 									})
@@ -701,7 +715,7 @@ import _ from "underscore";
 					case 'TEXT':
 						var maxLength = 50;
 						if(value.length > maxLength) {
-							CellContent = span(null, molgenis.ui.Popover({
+							CellContent = span(null, Popover({
 								value: value.substring(0, maxLength - 3) + '...',
 								popoverValue: value
 							}));
@@ -731,7 +745,7 @@ import _ from "underscore";
 	 * @memberOf component
 	 */
 	var EntityExpandBtn = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		displayName: 'EntityExpandBtn',
 		propTypes: {
 			attrPath: React.PropTypes.array.isRequired,
@@ -743,7 +757,7 @@ import _ from "underscore";
 	    	};
 	    },
 		render: function() {
-			return molgenis.ui.Button({
+			return Button({
 				icon: 'expand',
 				size: 'xsmall',
 				title: 'Expand entity',
@@ -762,7 +776,7 @@ import _ from "underscore";
 	 * @memberOf component
 	 */
 	var EntityCollapseBtn = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		displayName: 'EntityCollapseBtn',
 		propTypes: {
 			attrPath: React.PropTypes.array.isRequired,
@@ -774,7 +788,7 @@ import _ from "underscore";
 	    	};
 	    },
 		render: function() {
-			return molgenis.ui.Button({
+			return Button({
 				icon: 'collapse-up',
 				size: 'xsmall',
 				title: 'Collapse entity',
@@ -793,7 +807,7 @@ import _ from "underscore";
 	 * @memberOf component
 	 */
 	var EntityCreateBtn = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.ReactLayeredComponentMixin],
+		mixins: [DeepPureRenderMixin, ReactLayeredComponentMixin],
 		displayName: 'EntityCreateBtn',
 		propTypes: {
 			entity: React.PropTypes.object.isRequired,
@@ -810,7 +824,7 @@ import _ from "underscore";
 	    	};
 	    },
 		render: function() {
-			return molgenis.ui.Button({
+			return Button({
 				icon: 'plus',
 				title: 'Add row',
 				style: 'success',
@@ -819,7 +833,7 @@ import _ from "underscore";
 			});
 		},
 		renderLayer: function() {
-			return this.state.form ? molgenis.ui.Form({
+			return this.state.form ? Form({
 				entity: this.props.entity.name,
 				mode: 'create',
 				showHidden: true,
@@ -853,7 +867,7 @@ import _ from "underscore";
 	 * @memberOf component
 	 */
 	var EntityEditBtn = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.ReactLayeredComponentMixin],
+		mixins: [DeepPureRenderMixin, ReactLayeredComponentMixin],
 		displayName: 'EntityEditBtn',
 		propTypes: {
 			name: React.PropTypes.string.isRequired,
@@ -871,7 +885,7 @@ import _ from "underscore";
 	    	};
 	    },
 		render: function() {
-			return molgenis.ui.Button({
+			return Button({
 				icon: 'edit',
 				title: 'Edit row',
 				size: 'xsmall',
@@ -879,7 +893,7 @@ import _ from "underscore";
 			});
 		},
 		renderLayer: function() {
-			return this.state.form ? molgenis.ui.Form({
+			return this.state.form ? Form({
 				entity : this.props.name,
 				entityInstance: this.props.id,
 				mode: 'edit',
@@ -933,7 +947,7 @@ import _ from "underscore";
 	    	};
 	    },
 		render: function() {
-			return molgenis.ui.Button({
+			return Button({
 				icon: 'trash',
 				title: 'Delete row',
 				style: 'danger',
@@ -942,7 +956,7 @@ import _ from "underscore";
 			});
 		},
 		renderLayer: function() {
-			return this.state.dialog ? molgenis.ui.Dialog({
+			return this.state.dialog ? Dialog({
 				type: 'confirm',
 				message : 'Are you sure you want to delete this row?',
 				onCancel : this._handleDeleteCancel,

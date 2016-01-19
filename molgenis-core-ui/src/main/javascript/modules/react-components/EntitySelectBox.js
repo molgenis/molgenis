@@ -5,6 +5,7 @@ import ReactLayeredComponentMixin from "./mixin/ReactLayeredComponentMixin";
 import RestClient from "rest-client/RestClientV1";
 import Spinner from "./Spinner";
 import Select2 from "./wrapper/Select2";
+import Form from "./Form";
 
 	var div = React.DOM.div;
 	
@@ -79,7 +80,7 @@ import Select2 from "./wrapper/Select2";
 			if(this.state.entity === null) {
 				return Spinner();
 			} else if(this.props.mode === 'create') {
-				return this.state.modal ? molgenis.ui.Form({
+				return this.state.modal ? Form({
 					entity : this.state.entity.name,
 					showHidden : true,
 					cancelBtn : true,

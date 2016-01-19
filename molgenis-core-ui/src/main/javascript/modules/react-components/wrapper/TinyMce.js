@@ -1,7 +1,8 @@
-/* global _: false, React: false, tinymce: false, molgenis: true */
-(function(_, React, tinymce, molgenis) {
-	"use strict";
-	
+import React from "react";
+import DeepPureRenderMixin from "../mixin/DeepPureRenderMixin";
+import $ from "jquery";
+import tinymce from "tinymce";
+
 	var textarea = React.DOM.textarea;
 	
 	/**
@@ -11,14 +12,14 @@
 	 */
 	var TinyMce = React.createClass({ // FIXME continue with component
 		displayName: 'TinyMce',
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		propTypes: {
 			name: React.PropTypes.string,
 			required: React.PropTypes.bool,
 			readOnly: React.PropTypes.bool,
 			disabled: React.PropTypes.bool,
 			value: React.PropTypes.string,
-			onChange: React.PropTypes.func.isRequired,
+			onChange: React.PropTypes.func.isRequired
 		},
 		getInitialState: function() {
 			return {value: this.props.value};
@@ -69,13 +70,7 @@
 		_handleChange: function(value) {
 			this.setState({value: value});
 			this.props.onChange(value);
-		},
+		}
 	});
-	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	molgenis.ui.wrapper = molgenis.ui.wrapper || {};
-	_.extend(molgenis.ui.wrapper, {
-		TinyMce: React.createFactory(TinyMce)
-	});
-}(_, React, tinymce, molgenis));
+
+export default React.createFactory(TinyMce);

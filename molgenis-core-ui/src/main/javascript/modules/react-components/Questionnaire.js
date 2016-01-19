@@ -4,7 +4,8 @@ import EntityInstanceLoaderMixin from "./mixin/EntityInstanceLoaderMixin";
 import I18nStringsMixin from "./mixin/I18nStringsMixin";
 import React from "react";
 import FormFactory from "./Form";
-
+import Spinner from "./Spinner";
+import Button from "./Button";
 
     var div = React.DOM.div;
     
@@ -35,15 +36,15 @@ import FormFactory from "./Form";
     	},
     	render: function() {
     		if(this.state.entity === null || this.state.entityInstance === null || this.state.i18nStrings === null) {
-				return molgenis.ui.Spinner();
+				return Spinner();
 			}
 			
     		// a edit form with save-on-blur doesn't have a submit button 
     		var QuestionnaireButtons = this.state.entityInstance.status !== 'SUBMITTED' ? (
     			div({className: 'row', style: {textAlign: 'right'}},
 					div({className: 'col-md-12'},
-						molgenis.ui.Button({text: this.state.i18nStrings.questionnaire_save_and_continue, onClick: this.props.onContinueLaterClick}),
-						molgenis.ui.Button({type: 'button', style: 'primary', css: {marginLeft: 5}, text: this.state.i18nStrings.questionnaire_submit, onClick: this._onSubmitClick})
+						Button({text: this.state.i18nStrings.questionnaire_save_and_continue, onClick: this.props.onContinueLaterClick}),
+						Button({type: 'button', style: 'primary', css: {marginLeft: 5}, text: this.state.i18nStrings.questionnaire_submit, onClick: this._onSubmitClick})
 					)
 				)
 			) : null;

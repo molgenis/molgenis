@@ -1,7 +1,8 @@
-/* global _: false, React: false, molgenis: true */
-(function(_, React, molgenis) {
-    "use strict";
-    
+import React from "react";
+import DeepPureRenderMixin from "../mixin/DeepPureRenderMixin";
+import $ from "jquery";
+import _ from "underscore";
+
     var form = React.DOM.form;
 			
     /**
@@ -11,7 +12,7 @@
 	 */
 	var JQueryForm = React.createClass({
 		displayName: 'JQueryForm',
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		propTypes: {
 			className: React.PropTypes.string,
 			action: React.PropTypes.string.isRequired,
@@ -19,7 +20,7 @@
 			noValidate: React.PropTypes.bool,
 			beforeSubmit: React.PropTypes.func,
 			success: React.PropTypes.func,
-			error: React.PropTypes.func,
+			error: React.PropTypes.func
 		},
 		submit: function() {
 			var $form = $(this.refs.form.getDOMNode());
@@ -46,10 +47,4 @@
 		}
 	});
 	
-    // export component
-    molgenis.ui = molgenis.ui || {};
-    molgenis.ui.wrapper = molgenis.ui.wrapper || {};
-    _.extend(molgenis.ui.wrapper, {
-        JQueryForm: React.createFactory(JQueryForm)
-    });
-}(_, React, molgenis));
+export default React.createFactory(JQueryForm);

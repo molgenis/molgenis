@@ -1,7 +1,8 @@
-/* global $: false, _: false, React: false, molgenis: true */
-(function($, _, React, molgenis) {
-	"use strict";
-	
+import React from "react";
+import DeepPureRenderMixin from "../mixin/DeepPureRenderMixin";
+import $ from "jquery";
+import Button from "../Button";
+
 	var input = React.DOM.input, span = React.DOM.span, div = React.DOM.div;
 	
 	/**
@@ -11,7 +12,7 @@
 	 */
 	var Select2 = React.createClass({
 		displayName: 'Select2',
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		propTypes: {
 			options: React.PropTypes.object,
 			readOnly: React.PropTypes.bool,
@@ -54,7 +55,7 @@
 					div({className: 'input-group select2-bootstrap-append'},
 						inputControl,
 						span({className: 'input-group-btn'},
- 							molgenis.ui.Button({
+ 							Button({
 								icon : this.props.addonBtnIcon,
 								title: this.props.addonBtnTitle,
 								disabled : this.props.readOnly || this.props.disabled,
@@ -105,11 +106,5 @@
 			$container.select2('destroy');
 		}
 	});
-	
-	// export component
-	molgenis.ui = molgenis.ui || {};
-	molgenis.ui.wrapper = molgenis.ui.wrapper || {};
-	_.extend(molgenis.ui.wrapper, {
-		Select2: React.createFactory(Select2)
-	});
-}($, _, React, molgenis));
+
+export default React.createFactory(Select2);

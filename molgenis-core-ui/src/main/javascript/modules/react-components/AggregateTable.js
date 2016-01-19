@@ -2,6 +2,7 @@ import React from "react";
 import RestClientV2 from "rest-client/RestClientV2";
 import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
 import _ from "underscore";
+import Spinner from "./Spinner";
 
 	var div = React.DOM.div, table = React.DOM.table, thead = React.DOM.thead, tbody = React.DOM.tbody, tr = React.DOM.tr, th = React.DOM.th, td = React.DOM.td, a = React.DOM.a, span = React.DOM.span, em = React.DOM.em, br = React.DOM.br, label = React.DOM.label;
 
@@ -40,7 +41,7 @@ import _ from "underscore";
 		},
 		render: function() {
 			if(this.state.data === null) {
-				return molgenis.ui.Spinner(); // entity not available yet
+				return Spinner(); // entity not available yet
 			}
 			
 			if (this.state.data.aggs.matrix.length == 0) {

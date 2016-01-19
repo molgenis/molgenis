@@ -1,5 +1,6 @@
 import React from "react";
 import Icon from "./Icon";
+import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
 
 	var button = React.DOM.button, a = React.DOM.a;
 	
@@ -7,7 +8,7 @@ import Icon from "./Icon";
 	 * @memberOf component
 	 */
 	var Button = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [DeepPureRenderMixin],
 		displayName: 'Button',
 		propTypes: {
 			id : React.PropTypes.string,

@@ -4,8 +4,16 @@ import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
 import AttributeLoaderMixin from "./mixin/AttributeLoaderMixin";
 import I18nStringsMixin from "./mixin/I18nStringsMixin";
 import _ from "underscore";
+import Spinner from "./Spinner";
+import BoolControl from "./BoolControl";
+import CheckboxGroup from "./CheckboxGroup";
+import RadioGroup from "./RadioGroup";
+import CodeEditor from "./CodeEditor";
+import TextArea from "./TextArea";
+import Input from "./Input";
+import DateControl from "./DateControl";
 
-	var api = new molgenis.RestClient();
+	var api = new RestClient();
 	
 	/**
 	 * REST entity attribute control
@@ -42,7 +50,7 @@ import _ from "underscore";
 		render: function() {
 			if((this.state.attr === null) || (this.state.i18nStrings === null)) {
 				// attribute not available yet
-				return molgenis.ui.Spinner();
+				return Spinner();
 			}
 			
 			var props = this.props;
@@ -64,22 +72,22 @@ import _ from "underscore";
 				
 				switch(attr.fieldType) {
 					case 'BOOL':
-						return molgenis.ui.BoolControl(_.extend({}, controlProps, {
+						return BoolControl(_.extend({}, controlProps, {
 							label : props.label,
 							layout : props.layout || 'horizontal',
 						}));
 					case 'CATEGORICAL':
 						if(this.state.options === undefined) {
 							// options not yet available
-							return molgenis.ui.Spinner();
+							return Spinner();
 						}
 						
 						// convert entity to component value
 						var value = props.value !== undefined ? props.value[attr.refEntity.idAttribute] : undefined;
 						
-						var CategoricalControl = props.multiple === true ? molgenis.ui.CheckboxGroup : molgenis.ui.RadioGroup;
+						var CategoricalControl = props.multiple === true ? CheckboxGroup : RadioGroup;
 						var options = this.state.options;
-						if (CategoricalControl === molgenis.ui.RadioGroup && controlProps.required === false) {
+						if (CategoricalControl === RadioGroup && controlProps.required === false) {
 							options = options.concat({value: '', label: this.state.i18nStrings.form_bool_missing});
 						}
 						
@@ -96,14 +104,14 @@ import _ from "underscore";
 					case 'CATEGORICAL_MREF':
 						if(this.state.options === undefined) {
 							// options not yet available
-							return molgenis.ui.Spinner();
+							return Spinner();
 						}
 	
 						// convert entities to component values
 						var values = props.value ? _.map(this._pagedValueToValue(props.value), function(item) {
 							return item[attr.refEntity.idAttribute];
 						}) : [];
-						return molgenis.ui.CheckboxGroup(_.extend({}, controlProps, {
+						return CheckboxGroup(_.extend({}, controlProps, {
 							options : this.state.options,
 							selectAll: this.props.categoricalMrefShowSelectAll,
 							layout : 'vertical', // FIXME make configurable
@@ -128,12 +136,12 @@ import _ from "underscore";
 					case 'ENUM':
 						if(this.state.options === undefined) {
 							// options not yet available
-							return molgenis.ui.Spinner();
+							return Spinner();
 						}
 						
-						var EnumControl = props.multiple === true ? molgenis.ui.CheckboxGroup : molgenis.ui.RadioGroup;
+						var EnumControl = props.multiple === true ? CheckboxGroup : RadioGroup;
 						var options = this.state.options;
-						if (EnumControl === molgenis.ui.RadioGroup && controlProps.required === false) {
+						if (EnumControl === RadioGroup && controlProps.required === false) {
 							options = options.concat({value: '', label: this.state.i18nStrings.form_bool_missing});
 						}
 						
@@ -144,7 +152,7 @@ import _ from "underscore";
 					case 'FILE':
 						return this._createFileControl(controlProps);
 					case 'HTML':
-						return molgenis.ui.CodeEditor(_.extend({}, controlProps, {
+						return CodeEditor(_.extend({}, controlProps, {
 							placeholder : this.props.placeholder,
 							language: 'html',
 							maxLength: attr.maxLength
@@ -159,13 +167,13 @@ import _ from "underscore";
 					case 'MREF':
 						return this._createEntitySelectBox(controlProps, props.multiple || true, props.placeholder || this.state.i18nStrings.form_mref_control_placeholder, props.value);
 					case 'SCRIPT':
-						return molgenis.ui.CodeEditor(_.extend({}, controlProps, {
+						return CodeEditor(_.extend({}, controlProps, {
 							placeholder : this.props.placeholder
 						}));
 					case 'STRING':
 						return this._createStringControl(controlProps, 'text', props.placeholder || '');
 					case 'TEXT':
-						return molgenis.ui.TextArea(_.extend({}, controlProps, {
+						return TextArea(_.extend({}, controlProps, {
 							placeholder : this.props.placeholder,
 							maxLength: attr.maxLength
 						}));
@@ -176,7 +184,7 @@ import _ from "underscore";
 						throw 'Unknown data type: ' + attr.fieldType;
 				}
 			} else {
-				return molgenis.ui.Input({
+				return Input({
 					type: 'text',
 					disabled: true,
 					placeholder: this.state.i18nStrings.form_computed_control_placeholder,
@@ -205,16 +213,16 @@ import _ from "underscore";
 			var max = range ? range.max : undefined;
 			var placeholder = this.props.placeholder || this.state.i18nStrings.form_number_control_placeholder;
 
-			return molgenis.ui.Input(_.extend({}, controlProps, {
+			return Input(_.extend({}, controlProps, {
 				type : 'number',
 				placeholder : placeholder,
 				step : step,
 				min : min,
-				max : max,
+				max : max
 			}));
 		},
 		_createFileControl: function(controlProps) {
-			return molgenis.ui.Input(_.extend({}, controlProps, {
+			return Input(_.extend({}, controlProps, {
 				type : 'file',
 				value: this.props.value ? this.props.value.filename : null,
 				onValueChange: function(event) {
@@ -224,20 +232,20 @@ import _ from "underscore";
 			}));
 		},
 		_createStringControl: function(controlProps, type, placeholder) {
-			return molgenis.ui.Input(_.extend({}, controlProps, {
+			return Input(_.extend({}, controlProps, {
 				type : type,
 				placeholder : placeholder,
-				maxLength : this.state.attr.maxLength,
+				maxLength : this.state.attr.maxLength
 			}));
 		},
 		_createDateControl: function(controlProps, time, placeholder) {
-			return molgenis.ui.DateControl(_.extend({}, controlProps, {
+			return DateControl(_.extend({}, controlProps, {
 				placeholder : placeholder,
-				time : time,
+				time : time
 			}));
 		},
 		_createEntitySelectBox: function(controlProps, multiple, placeholder, value) {
-			return molgenis.ui.EntitySelectBox(_.extend({}, controlProps, {
+			return EntitySelectBox(_.extend({}, controlProps, {
 				mode: 'create',
 				placeholder : placeholder,
 				multiple : multiple,

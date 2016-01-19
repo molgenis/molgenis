@@ -1,6 +1,8 @@
 import _ from "underscore";
 import restClient from "rest-client/RestClientV1";
 
+import getAllAttributes from "rest-client/AttributeFunctions";
+
 	var api = new RestClient();
 	
 	/**
@@ -45,7 +47,7 @@ import restClient from "rest-client/RestClientV1";
 		_loadEntity: function(href) {
 			api.getAsync(href, {'expand': ['attributes']}).done(function(entity) {
 				if (this.isMounted()) {
-					var attributes = molgenis.getAllAttributes(entity.attributes, api);
+					var attributes = getAllAttributes(entity.attributes, api);
 					entity.allAttributes = {}
 					for (var i = 0; i < attributes.length; i++) {
 						entity.allAttributes[attributes[i].name] = attributes[i];

@@ -1,7 +1,7 @@
 import RestClient from "rest-client/RestClientV1";
 import _ from "underscore";
 
-	var api = new molgenis.RestClient();
+	var api = new RestClient();
 	
 	/**
 	 * @memberOf component.mixin
