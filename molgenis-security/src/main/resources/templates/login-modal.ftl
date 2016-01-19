@@ -18,12 +18,12 @@
                             <div class="g-signin2" data-width="200" data-longtitle="true" data-theme="dark" data-onsuccess="onSignIn"></div>
                         </form>
                         <script>
-	                        function onSignIn(googleUser) {
-	                        	<#if !(errorMessage??)>
-	                            	$('#google-id-token').val(googleUser.getAuthResponse().id_token);
-	                            	$('#login-google-form').submit();
-	                             </#if>
-	                        }                   	
+                            function onSignIn(googleUser) {
+                                <#if !(errorMessage??)>
+                                    $('#google-id-token').val(googleUser.getAuthResponse().id_token);
+                                    $('#login-google-form').submit();
+                                </#if>
+                            }
                         </script>
                     </div>
                     <div class="col-md-6" style="border-left: 1px solid #e5e5e5">

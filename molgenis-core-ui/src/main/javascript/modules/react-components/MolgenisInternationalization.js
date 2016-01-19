@@ -4,7 +4,7 @@
 
 import $ from 'jquery';
 import React from 'react';
-import LanguageSelectBox from './react-components/LanguageSelectBox';
+import LanguageSelectBox from './LanguageSelectBox';
 
 var i18nStrings = {};
 

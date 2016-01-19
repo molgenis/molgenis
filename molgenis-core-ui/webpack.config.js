@@ -5,21 +5,29 @@ var webpack = require('webpack');
 var configuration = {
     // Resolve location of node modules and molgenis modules specific javascript
     resolve: {
-        root: [path.resolve('../molgenis-core-ui/src/main/javascript'), path.resolve('./node_modules')],
+        root: [path.resolve('./src/main/javascript'), path.resolve('./node_modules')],
         alias: {
-            'react-components': 'modules/react-components'
+            'react-components': 'modules/react-components',
+            'jquery-ui': 'plugins/jquery-ui-1.9.2.custom.min',
+            'jq-edit-rangeslider': 'plugins/jQEditRangeSlider-min',
+            'select2': 'plugins/select2-patched'
         }
     },
     // The base directory for resolving the entry option
-    context: path.join(__dirname, '../'),
-    // Set an entry point for every module in the molgenis application
+    context: __dirname,
     entry: {
-        'molgenis-common': './molgenis-core-ui/src/main/javascript/molgenis-common-webpack.js',
-        'molgenis-global': './molgenis-core-ui/src/main/javascript/molgenis-global-webpack.js'
+        'global-ui': ['./src/main/javascript/molgenis-global-ui-webpack'],
+        'global': ['./src/main/javascript/molgenis-global-webpack'],
+        'rest-client': ['./src/main/javascript/modules/RestClientV1',
+            './src/main/javascript/modules/RestClientV2',
+            './src/main/javascript/modules/MolgenisQuery'],
+        'react-components': ['react-components'],
+        'vendor-bundle': ["jquery", "bootstrap", "underscore", "jquery-ui", "jquery.cookie",
+            "brace", "moment", "eonasdan-bootstrap-datetimepicker", "jq-edit-rangeslider", "select2", "urijs"]
     },
     output: {
         path: './target/classes/js/dist/',
-        filename: '[name].bundle.js',
+        filename: 'molgenis-[name].js',
         publicPath: '/js/dist/'
     },
     // Source map creation strategy
@@ -28,10 +36,8 @@ var configuration = {
         new webpack.ProvidePlugin({$: "jquery", jQuery: "jquery"}),
         new webpack.optimize.OccurenceOrderPlugin(),
         new webpack.NoErrorsPlugin(),
-        new webpack.optimize.CommonsChunkPlugin(
-            /* chunkName= */"molgenis-common",
-            /* filename= */"molgenis-common.bundle.js"
-        )
+        new webpack.optimize.CommonsChunkPlugin(['vendor-bundle', "react-components"],
+            'molgenis-[name].js')
     ],
     resolveLoader: {
         root: [path.resolve('./node_modules')]

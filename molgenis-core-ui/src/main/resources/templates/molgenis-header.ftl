@@ -49,8 +49,11 @@
         <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
 		<script src="<@resource_href "/js/es6-promise.min.js"/>"></script>
 		<script src="<@resource_href "/js/promise-done-6.1.0.min.js"/>"></script>
-		<script src="<@resource_href "/js/promise-done-6.1.0.min.js"/>"></script>
-        <script src="<@resource_href "/js/molgenis-bundle.min.js"/>"></script>
+	    <script src="<@resource_href "/js/dist/molgenis-react-components.js"/>"></script>
+        <script src="<@resource_href "/js/dist/molgenis-vendor-bundle.js"/>"></script>
+		<script src="<@resource_href "/js/dist/molgenis-global.js"/>"></script>
+	    <script src="<@resource_href "/js/dist/molgenis-global-ui.js"/>"></script>
+	    <script src="<@resource_href "/js/dist/molgenis-rest-client.js"/>"></script>
         <script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
         <script src="<@resource_href "/js/handlebars.min.js"/>"></script>
         <script src="<@resource_href "/js/molgenis.js"/>"></script>
@@ -68,8 +71,6 @@
         </#if>
         <script src="https://apis.google.com/js/platform.js<#if authenticated?? && authenticated>?onload=onLoad</#if>" async defer></script>
     </#if>
-    <script src="<@resource_href "/js/react-with-addons.min.js"/>"></script>
-    <script src="<@resource_href "/js/molgenis-component.min.js"/>"></script>
         
     <!--[if IE 9]>
         <#-- used to disable the genomebrowser in IE9 -->

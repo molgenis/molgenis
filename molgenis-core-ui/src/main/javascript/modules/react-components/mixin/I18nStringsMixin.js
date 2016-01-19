@@ -1,4 +1,4 @@
-import {I18nStrings} from '../../MolgenisInternationalization';
+import {I18nStrings} from '../MolgenisInternationalization';
 
 var I18nStringsMixin = {
 	componentDidMount: function() {

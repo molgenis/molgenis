@@ -12,6 +12,7 @@ import EntityEditBtn from './EntityEditBtn';
 
 import DeepPureRenderMixin from './mixin/DeepPureRenderMixin';
 import AttrUtilsMixin from './mixin/AttrUtilsMixin';
+import TableCellFactory from './TableCell';
 
 var tbody = React.DOM.tbody, tr = React.DOM.tr, th = React.DOM.th, td = React.DOM.td;
 

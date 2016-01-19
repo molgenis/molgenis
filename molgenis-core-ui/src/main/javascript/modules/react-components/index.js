@@ -44,7 +44,6 @@ export default {
 	'AlertMessage' : AlertMessage,
 	'AttributeControl' : AttributeControl,
 	'BoolControl' : BoolControl,
-	'Button' : Button,
 	'CheckboxGroup' : CheckboxGroup,
 	'CodeEditor' : CodeEditor,
 	'DateControl' : DateControl,
