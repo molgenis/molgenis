@@ -155,7 +155,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		dataService.addRepository(tagRepo);
 
 		Repository packages = defaultBackend.addEntityMeta(PackageRepository.META_DATA);
-		dataService.addRepository(packages);
+		dataService.addRepository(new MetaDataRepositoryDecorator(packages));
 		packageRepository = new PackageRepository(packages);
 
 		attributeMetaDataRepository = new AttributeMetaDataRepository(defaultBackend, languageService);
@@ -163,8 +163,8 @@ public class MetaDataServiceImpl implements MetaDataService
 				attributeMetaDataRepository, languageService);
 		attributeMetaDataRepository.setEntityMetaDataRepository(entityMetaDataRepository);
 
-		dataService.addRepository(attributeMetaDataRepository.getRepository());
-		dataService.addRepository(entityMetaDataRepository.getRepository());
+		dataService.addRepository(new MetaDataRepositoryDecorator(attributeMetaDataRepository.getRepository()));
+		dataService.addRepository(new MetaDataRepositoryDecorator(entityMetaDataRepository.getRepository()));
 		entityMetaDataRepository.fillEntityMetaDataCache();
 	}
 
