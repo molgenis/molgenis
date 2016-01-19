@@ -12,7 +12,7 @@ test('Button onClick() gets mounted', assert => {
     const instance = tree.getMountedInstance();
     const vdom = tree.getRenderOutput();
 
-    tree.props.onClick();
+    tree.subTree('button').props.onClick();
     assert.ok(clicked, "Button generates an event after a click");
     assert.end();
 });
