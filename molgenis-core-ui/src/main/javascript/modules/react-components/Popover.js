@@ -1,0 +1,42 @@
+/**
+ * @module Popover
+ */
+
+import $ from 'jquery';
+import React from 'react';
+
+var span = React.DOM.span;
+import DeepPureRenderMixin from './mixin/DeepPureRenderMixin';
+
+/**
+ * @memberOf Popover
+ */
+var Popover = React.createClass({
+	mixins : [ DeepPureRenderMixin ],
+	displayName : 'Popover',
+	propTypes : {
+		value : React.PropTypes.string.isRequired,
+		popoverValue : React.PropTypes.string.isRequired,
+	},
+	componentDidMount : function() {
+		var $container = $(this.refs.popover.getDOMNode());
+		$container.popover({
+			trigger : 'hover click',
+			placement : 'bottom',
+			container : 'body'
+		});
+	},
+	componentWillUnmount : function() {
+		var $container = $(this.refs.popover.getDOMNode());
+		$container.popover('destroy');
+	},
+	render : function() {
+		return span({
+			'data-content' : this.props.popoverValue,
+			'data-toggle' : 'popover',
+			ref : 'popover'
+		}, this.props.value);
+	}
+});
+
+export default React.createFactory(Popover);
