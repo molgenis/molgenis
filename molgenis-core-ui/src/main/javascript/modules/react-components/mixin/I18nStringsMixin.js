@@ -1,4 +1,4 @@
-import I18nStrings from "i18n/I18nStrings";
+import {I18nStrings} from "i18n/I18nStrings";
 
 const I18nStringsMixin = {
     componentDidMount: function () {

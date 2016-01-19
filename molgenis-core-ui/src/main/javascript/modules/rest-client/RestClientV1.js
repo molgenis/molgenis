@@ -34,7 +34,7 @@ export default class RestClient {
         // because it might not fit in the URL
         if(options) {
             // backward compatibility for legacy code
-            if(options.q && Arrays.isArray(options.q)) {
+            if(options.q && !Array.isArray(options.q)) {
                 var obj = $.extend({}, options.q);
                 delete options.q;
                 for(var i = 0, keys = Object.keys(obj); i < keys.length; ++i) {

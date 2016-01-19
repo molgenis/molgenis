@@ -3,6 +3,7 @@ import RestClient from "rest-client/RestClientV1";
 import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
 import EntityLoaderMixin from "./mixin/EntityLoaderMixin";
 import EntityInstanceLoaderMixin from "./mixin/EntityInstanceLoaderMixin";
+import ReactLayeredComponentMixin from "./mixin/ReactLayeredComponentMixin";
 import Modal from "./Modal";
 import Spinner from "./Spinner";
 import Button from "./Button";

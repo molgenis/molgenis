@@ -12,6 +12,7 @@ import ReactLayeredComponentMixin from "./mixin/ReactLayeredComponentMixin";
 import Modal from "./Modal";
 import FormFactory from "./Form";
 import Dialog from "./Dialog";
+import Form from "./Form";
 import {
 	isRefAttr,
 	isXrefAttr,

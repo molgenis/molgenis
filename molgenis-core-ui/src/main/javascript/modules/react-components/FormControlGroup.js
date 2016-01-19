@@ -4,6 +4,7 @@ import AttributeLoaderMixin from "./mixin/AttributeLoaderMixin";
 import FormControl from "./FormControl";
 import Spinner from "./Spinner";
 import _ from "underscore";
+import React from "react";
 
     var div = React.DOM.div, p = React.DOM.p, fieldset = React.DOM.fieldset, legend = React.DOM.legend;;
     

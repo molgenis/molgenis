@@ -1,5 +1,6 @@
 import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
 import _ from "underscore";
+import React from "react";
 
 	var input = React.DOM.input, div = React.DOM.div, span = React.DOM.span;
 	

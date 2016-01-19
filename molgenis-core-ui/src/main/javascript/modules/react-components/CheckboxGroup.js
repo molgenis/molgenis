@@ -1,5 +1,6 @@
 import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
 import GroupMixin from "./mixin/GroupMixin";
+import React from "react";
 
 	/**
 	 * @memberOf component

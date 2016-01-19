@@ -1,7 +1,7 @@
 import React from "react";
 import Input from "../Input";
 import Button from "../Button";
-
+import _ from "underscore";
 
 	var div = React.DOM.div, label = React.DOM.label;
 	

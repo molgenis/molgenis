@@ -1,7 +1,7 @@
 import React from "react";
 import DeepPureRenderMixin from "../mixin/DeepPureRenderMixin";
 import $ from "jquery";
-import tinymce from "tinymce";
+import tinymce from "tinymce/tinymce.min";
 
 	var textarea = React.DOM.textarea;
 	

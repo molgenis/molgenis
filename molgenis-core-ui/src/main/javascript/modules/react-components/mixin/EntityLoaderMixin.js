@@ -1,7 +1,7 @@
 import _ from "underscore";
-import restClient from "rest-client/RestClientV1";
+import RestClient from "rest-client/RestClientV1";
 
-import getAllAttributes from "rest-client/AttributeFunctions";
+import {getAllAttributes} from "rest-client/AttributeFunctions";
 
 	var api = new RestClient();
 	
