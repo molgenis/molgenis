@@ -2,9 +2,11 @@ package org.molgenis.security;
 
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_COUNT_PREFIX;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_COUNT_PREFIX;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_WRITEMETA_PREFIX;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX;
 
 import java.util.ArrayList;
@@ -23,7 +25,14 @@ public class MolgenisRoleHierarchy implements RoleHierarchy
 		Collection<GrantedAuthority> hierarchicalAuthorities = new ArrayList<GrantedAuthority>();
 		for (GrantedAuthority authority : authorities)
 		{
-			if (authority.getAuthority().startsWith(AUTHORITY_ENTITY_WRITE_PREFIX))
+			if (authority.getAuthority().startsWith(AUTHORITY_ENTITY_WRITEMETA_PREFIX))
+			{
+				String entity = authority.getAuthority().substring(AUTHORITY_ENTITY_WRITEMETA_PREFIX.length());
+				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_ENTITY_WRITE_PREFIX + entity));
+				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_ENTITY_READ_PREFIX + entity));
+				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_ENTITY_COUNT_PREFIX + entity));
+			}
+			else if (authority.getAuthority().startsWith(AUTHORITY_ENTITY_WRITE_PREFIX))
 			{
 				String entity = authority.getAuthority().substring(AUTHORITY_ENTITY_WRITE_PREFIX.length());
 				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_ENTITY_READ_PREFIX + entity));
@@ -33,6 +42,13 @@ public class MolgenisRoleHierarchy implements RoleHierarchy
 			{
 				String entity = authority.getAuthority().substring(AUTHORITY_ENTITY_READ_PREFIX.length());
 				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_ENTITY_COUNT_PREFIX + entity));
+			}
+			else if (authority.getAuthority().startsWith(AUTHORITY_PLUGIN_WRITEMETA_PREFIX))
+			{
+				String entity = authority.getAuthority().substring(AUTHORITY_PLUGIN_WRITEMETA_PREFIX.length());
+				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_PLUGIN_WRITE_PREFIX + entity));
+				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_PLUGIN_READ_PREFIX + entity));
+				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_PLUGIN_COUNT_PREFIX + entity));
 			}
 			else if (authority.getAuthority().startsWith(AUTHORITY_PLUGIN_WRITE_PREFIX))
 			{
