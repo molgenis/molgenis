@@ -96,87 +96,6 @@
 		return i18nObj;
 	};
 
-	/**
-	 * Returns all atomic attributes. In case of compound attributes (attributes
-	 * consisting of multiple atomic attributes) only the descendant atomic
-	 * attributes are returned. The compound attribute itself is not returned.
-	 * 
-	 * @param attributes
-	 * @param restClient
-	 */
-	molgenis.getAtomicAttributes = function(attributes, restClient) {
-		var atomicAttributes = [];
-		function createAtomicAttributesRec(attributes) {
-			$.each(attributes, function(i, attribute) {
-				if (attribute.fieldType === 'COMPOUND') {
-					// FIXME improve performance by retrieving async
-					attribute = restClient.get(attribute.href, {
-						'expand' : [ 'attributes' ]
-					});
-					createAtomicAttributesRec(attribute.attributes);
-				} else
-					atomicAttributes.push(attribute);
-			});
-		}
-		createAtomicAttributesRec(attributes);
-		return atomicAttributes;
-	};
-
-	/**
-	 * Returns all compound attributes. In case of compound attributes
-	 * (attributes consisting of multiple atomic attributes) only the descendant
-	 * atomic attributes are returned. The compound attribute itself is not
-	 * returned.
-	 * 
-	 * @param attributes
-	 * @param restClient
-	 */
-	molgenis.getCompoundAttributes = function(attributes, restClient) {
-		var compoundAttributes = [];
-		function createAtomicAttributesRec(attributes) {
-			$.each(attributes, function(i, attribute) {
-				if (attribute.fieldType === 'COMPOUND') {
-					// FIXME improve performance by retrieving async
-					attribute = restClient.get(attribute.href, {
-						'expand' : [ 'attributes' ]
-					});
-					compoundAttributes.push(attribute);
-					createAtomicAttributesRec(attribute.attributes);
-				}
-			});
-		}
-		createAtomicAttributesRec(attributes);
-		return compoundAttributes;
-	};
-	
-	molgenis.getAllAttributes = function(attributes, restClient) {
-		var tree = [];
-		function createAttributesRec(attributes) {
-			$.each(attributes, function(i, attribute) {
-				tree.push(attribute);
-				if (attribute.fieldType === 'COMPOUND') {
-					// FIXME improve performance by retrieving async
-					attribute = restClient.get(attribute.href, {
-						'expand' : [ 'attributes' ]
-					});
-					createAttributesRec(attribute.attributes);
-				}
-			});
-		}
-		createAttributesRec(attributes);
-		return tree;
-	};
-	
-	molgenis.getAttributeLabel = function(attribute) {
-		var label = attribute.label || attribute.name;
-		if (attribute.parent) {
-			var parentLabel = attribute.parent.label || attribute.parent.name;
-			label = parentLabel + '.' + label;
-		}
-		
-		return label;
-	};
-
 	/*
 	 * Natural Sort algorithm for Javascript - Version 0.7 - Released under MIT
 	 * license Author: Jim Palmer (based on chunking idea from Dave Koelle)
@@ -249,31 +168,6 @@
 		});
 
 		return writable;
-	};
-	
-	molgenis.isRefAttr = function(attr) {
-		switch(attr.fieldType) {
-			case 'CATEGORICAL':
-			case 'CATEGORICAL_MREF':
-			case 'MREF':
-			case 'XREF':
-			case 'FILE':
-				return true;
-			default:
-				return false;
-		}  
-	};
-	
-	molgenis.isXrefAttr = function(attr) {
-		return attr.fieldType === 'CATEGORICAL' || attr.fieldType === 'XREF' || attr.fieldType === 'FILE';
-	};
-	
-	molgenis.isMrefAttr = function(attr) {
-		return attr.fieldType === 'CATEGORICAL_MREF' || attr.fieldType === 'MREF';
-	};
-	
-	molgenis.isCompoundAttr = function(attr) {
-		return attr.fieldType === 'COMPOUND';
 	};
 }($, window.top.molgenis = window.top.molgenis || {}));
 
