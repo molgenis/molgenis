@@ -53,11 +53,8 @@ import org.testng.annotations.Test;
 { Config.class })
 public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 {
-
 	private ImportWizardController controller;
 	private WebRequest webRequest;
-
-	private MolgenisGroup group1;
 
 	@Autowired
 	DataService dataService;
@@ -133,25 +130,25 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		group1.setName("TestGroup");
 
 		MapEntity entity1 = new MapEntity("Entity1");
-		entity1.set("groupauthority_role", SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX + "ENTITY1");
+		entity1.set("groupauthority_role", SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY1");
 		entity1.set("molgenisGroup", group1);
 		GroupAuthority authority1 = new GroupAuthority();
 		authority1.set(entity1);
 
 		MapEntity entity2 = new MapEntity("Entity2");
-		entity2.set("groupauthority_role", SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX + "ENTITY2");
+		entity2.set("groupauthority_role", SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY2");
 		entity2.set("molgenisGroup", group1);
 		GroupAuthority authority2 = new GroupAuthority();
 		authority2.set(entity2);
 
 		MapEntity entity3 = new MapEntity("Entity2");
-		entity3.set("groupauthority_role", SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX + "ENTITY3");
+		entity3.set("groupauthority_role", SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY3");
 		entity3.set("molgenisGroup", group1);
 		GroupAuthority authority3 = new GroupAuthority();
 		authority3.set(entity3);
 
 		MapEntity entity4 = new MapEntity("Entity2");
-		entity4.set("groupauthority_role", SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX + "ENTITY4");
+		entity4.set("groupauthority_role", SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY4");
 		entity4.set("molgenisGroup", group1);
 		GroupAuthority authority4 = new GroupAuthority();
 		authority4.set(entity4);
@@ -199,7 +196,7 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		Map<String, List<Permission>> groupPermissions = permissions.getGroupPermissions();
 
 		Permission permission = new Permission();
-		permission.setType("write");
+		permission.setType("writemeta");
 		permission.setGroup("TestGroup");
 		assertEquals(groupPermissions.get("entity1"), Arrays.asList(permission));
 		assertEquals(groupPermissions.get("entity2"), Arrays.asList(permission));

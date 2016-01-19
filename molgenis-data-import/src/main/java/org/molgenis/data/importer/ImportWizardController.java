@@ -1,6 +1,11 @@
 package org.molgenis.data.importer;
 
 import static org.molgenis.data.importer.ImportWizardController.URI;
+import static org.molgenis.security.core.Permission.COUNT;
+import static org.molgenis.security.core.Permission.NONE;
+import static org.molgenis.security.core.Permission.READ;
+import static org.molgenis.security.core.Permission.WRITE;
+import static org.molgenis.security.core.Permission.WRITEMETA;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -130,12 +135,11 @@ public class ImportWizardController extends AbstractWizardController
 			String param = "radio-" + entityClassId;
 			String value = webRequest.getParameter(param);
 			if (value != null
-					&& (SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX
+					&& (SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX
 							+ entityClassId.toUpperCase()) || userAccountService.getCurrentUser().getSuperuser()))
 			{
-				if ((value.equalsIgnoreCase(org.molgenis.security.core.Permission.READ.toString())
-						|| value.equalsIgnoreCase(org.molgenis.security.core.Permission.COUNT.toString()) || value
-							.equalsIgnoreCase(org.molgenis.security.core.Permission.WRITE.toString())))
+				if (value.equalsIgnoreCase(READ.toString()) || value.equalsIgnoreCase(COUNT.toString())
+						|| value.equalsIgnoreCase(WRITE.toString()) || value.equalsIgnoreCase(WRITEMETA.toString()))
 				{
 					authority.setMolgenisGroup(dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId,
 							MolgenisGroup.class));
@@ -148,7 +152,7 @@ public class ImportWizardController extends AbstractWizardController
 					}
 					else dataService.update(GroupAuthority.ENTITY_NAME, authority);
 				}
-				else if (value.equalsIgnoreCase(org.molgenis.security.core.Permission.NONE.toString()))
+				else if (value.equalsIgnoreCase(NONE.toString()))
 				{
 					if (authority.getId() != null) dataService.delete(GroupAuthority.ENTITY_NAME, authority.getId());
 				}
@@ -245,6 +249,10 @@ public class ImportWizardController extends AbstractWizardController
 			else if (groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX))
 			{
 				entity = groupAuthority.getRole().substring(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX.length());
+			}
+			else if (groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX))
+			{
+				entity = groupAuthority.getRole().substring(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX.length());
 			}
 			if (entity.equals(entityClassId.toUpperCase()))
 			{
