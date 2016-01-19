@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -154,6 +155,12 @@ class ElasticsearchEntityIterable extends BatchingQueryResult implements EntityC
 	public boolean isLazy()
 	{
 		return !ElasticsearchRepositoryCollection.NAME.equals(entityMeta.getBackend());
+	}
+
+	@Override
+	public Stream<Entity> asStream()
+	{
+		return stream(this.spliterator(), false);
 	}
 
 	private Iterable<Entity> createEntityReferences(SearchHits searchHits)

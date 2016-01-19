@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
@@ -84,6 +85,12 @@ public class I18nStringDecorator implements Repository
 	}
 
 	@Override
+	public Stream<Entity> findAllAsStream(Query q)
+	{
+		return decorated.findAllAsStream(q);
+	}
+
+	@Override
 	public Entity findOne(Query q)
 	{
 		return decorated.findOne(q);
@@ -108,7 +115,19 @@ public class I18nStringDecorator implements Repository
 	}
 
 	@Override
+	public Stream<Entity> findAll(Stream<Object> ids)
+	{
+		return decorated.findAll(ids);
+	}
+
+	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
+	{
+		return decorated.findAll(ids, fetch);
+	}
+
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
 		return decorated.findAll(ids, fetch);
 	}
@@ -134,6 +153,13 @@ public class I18nStringDecorator implements Repository
 	}
 
 	@Override
+	public void update(Stream<? extends Entity> records)
+	{
+		decorated.update(records);
+		ResourceBundle.clearCache();
+	}
+
+	@Override
 	public void delete(Entity entity)
 	{
 		decorated.delete(entity);
@@ -142,6 +168,13 @@ public class I18nStringDecorator implements Repository
 
 	@Override
 	public void delete(Iterable<? extends Entity> entities)
+	{
+		decorated.delete(entities);
+		ResourceBundle.clearCache();
+	}
+
+	@Override
+	public void delete(Stream<? extends Entity> entities)
 	{
 		decorated.delete(entities);
 		ResourceBundle.clearCache();
@@ -177,6 +210,15 @@ public class I18nStringDecorator implements Repository
 
 	@Override
 	public Integer add(Iterable<? extends Entity> entities)
+	{
+		Integer result = decorated.add(entities);
+		ResourceBundle.clearCache();
+
+		return result;
+	}
+
+	@Override
+	public Integer add(Stream<? extends Entity> entities)
 	{
 		Integer result = decorated.add(entities);
 		ResourceBundle.clearCache();

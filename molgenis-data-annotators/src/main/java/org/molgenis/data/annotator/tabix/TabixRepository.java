@@ -122,19 +122,26 @@ public class TabixRepository extends AbstractRepository
 		try
 		{
 			org.molgenis.data.annotator.tabix.TabixReader.Iterator iterator = reader.query(queryString);
-			String line = iterator.next();
-			while (line != null)
+			if (iterator != null)
 			{
-				Entity entity = toEntity(line);
-				if (entity.getLong(positionAttributeName) == pos)
+				String line = iterator.next();
+				while (line != null)
 				{
-					builder.add(entity);
+					Entity entity = toEntity(line);
+					if (entity.getLong(positionAttributeName) == pos)
+					{
+						builder.add(entity);
+					}
+					else
+					{
+						LOG.warn("TabixReader returns entity that does not match the query!");
+					}
+					line = iterator.next();
 				}
-				else
-				{
-					LOG.warn("TabixReader returns entity that does not match the query!");
-				}
-				line = iterator.next();
+			}
+			else
+			{
+				return ImmutableList.of(); // empty list
 			}
 		}
 		catch (IOException e)

@@ -1,6 +1,7 @@
 package org.molgenis.data;
 
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.molgenis.data.meta.MetaDataService;
 
@@ -37,6 +38,21 @@ public interface DataService extends Iterable<Repository>
 	boolean hasRepository(String entityName);
 
 	/**
+	 * Get a CrudRepository by entity name
+	 * 
+	 * @throws UnknownEntityException
+	 *             when the repository can not be found
+	 * 
+	 * @throws MolgenisDataException
+	 *             if the repository doesn't implement CrudRepository
+	 * @throws MolgenisDataAccessException
+	 * 
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 */
+	Repository getRepository(String entityName);
+
+	/**
 	 * Returns the meta data for the given entity
 	 * 
 	 * @throws UnknownEntityException
@@ -70,7 +86,39 @@ public interface DataService extends Iterable<Repository>
 	Iterable<Entity> findAll(String entityName);
 
 	/**
-	 * Find entities that match a query. Returns empty Iterable if no matches.
+	 * Find all entities of the given type. Returns empty Stream if no matches.
+	 * 
+	 * @throws MolgenisDataException
+	 *             if the repository of the entity isn't a Queryable
+	 * @throws MolgenisDataAccessException
+	 * 
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 */
+	Stream<Entity> findAllAsStream(String entityName);
+
+	/**
+	 * type-safe find all entities
+	 * 
+	 * @throws MolgenisDataAccessException
+	 * 
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 */
+	<E extends Entity> Iterable<E> findAll(String entityName, Class<E> clazz);
+
+	/**
+	 * type-safe find all entities
+	 * 
+	 * @throws MolgenisDataAccessException
+	 * 
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 */
+	<E extends Entity> Stream<E> findAllAsStream(String entityName, Class<E> clazz);
+
+	/**
+	 * Find entities that match a query. Returns empty stream if no matches.
 	 * 
 	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
 	 * 
@@ -80,6 +128,38 @@ public interface DataService extends Iterable<Repository>
 	 *            entity name (case insensitive)
 	 */
 	Iterable<Entity> findAll(String entityName, Query q);
+
+	/**
+	 * Find entities that match a query. Returns empty stream if no matches.
+	 * 
+	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
+	 * 
+	 * @throws MolgenisDataAccessException
+	 * 
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 */
+	Stream<Entity> findAllAsStream(String entityName, Query q);
+
+	/**
+	 * type-safe find entities that match a query
+	 * 
+	 * @throws MolgenisDataAccessException
+	 * 
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 */
+	<E extends Entity> Iterable<E> findAll(String entityName, Query q, Class<E> clazz);
+
+	/**
+	 * type-safe find entities that match a query
+	 * 
+	 * @throws MolgenisDataAccessException
+	 * 
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 */
+	<E extends Entity> Stream<E> findAllAsStream(String entityName, Query q, Class<E> clazz);
 
 	/**
 	 * Find entities based on id. Returns empty Iterable if no matches.
@@ -92,6 +172,16 @@ public interface DataService extends Iterable<Repository>
 	 * @return (empty) Iterable where the order of entities matches the order of ids, never null
 	 */
 	Iterable<Entity> findAll(String entityName, Iterable<Object> ids);
+
+	/**
+	 * type-safe find entities that match a stream of ids
+	 * 
+	 * @throws MolgenisDataAccessException
+	 * 
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 */
+	<E extends Entity> Iterable<E> findAll(String entityName, Iterable<Object> ids, Class<E> clazz);
 
 	/**
 	 * Find entities based on id.
@@ -108,6 +198,76 @@ public interface DataService extends Iterable<Repository>
 	Iterable<Entity> findAll(String entityName, Iterable<Object> ids, Fetch fetch);
 
 	/**
+	 * Type-safe find entities based on id.
+	 * 
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 * @param ids
+	 *            entity ids
+	 * @param fetch
+	 *            fetch defining which attributes to retrieve
+	 * @param clazz
+	 *            typed entity class
+	 * @return (empty) Iterable of entities of the give type where the order of entities matches the order of ids, never
+	 *         null
+	 * @throws MolgenisDataAccessException
+	 */
+	<E extends Entity> Iterable<E> findAll(String entityName, Iterable<Object> ids, Fetch fetch, Class<E> clazz);
+
+	/**
+	 * Find entities based on id. Returns empty stream if no matches.
+	 * 
+	 * @throws MolgenisDataAccessException
+	 * 
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 * @param ids
+	 * @return (empty) Stream where the order of entities matches the order of ids, never null
+	 */
+	Stream<Entity> findAll(String entityName, Stream<Object> ids);
+
+	/**
+	 * type-safe find entities that match a stream of ids
+	 * 
+	 * @throws MolgenisDataAccessException
+	 * 
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 */
+	<E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Class<E> clazz);
+
+	/**
+	 * Find entities based on id.
+	 * 
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 * @param ids
+	 *            entity ids
+	 * @param fetch
+	 *            fetch defining which attributes to retrieve
+	 * @return (empty) Stream where the order of entities matches the order of ids, never null
+	 * @throws MolgenisDataAccessException
+	 */
+	Stream<Entity> findAll(String entityName, Stream<Object> ids, Fetch fetch);
+
+	/**
+	 * Type-safe find entities based on id.
+	 * 
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 * @param ids
+	 *            entity ids
+	 * @param fetch
+	 *            fetch defining which attributes to retrieve
+	 * @param clazz
+	 *            typed entity class
+	 * @return (empty) Stream of entities of the give type where the order of entities matches the order of ids, never
+	 *         null
+	 * @throws MolgenisDataAccessException
+	 */
+	<E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Fetch fetch, Class<E> clazz);
+
+	/**
 	 * Find one entity based on id. Returns null if not exists
 	 * 
 	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
@@ -118,6 +278,18 @@ public interface DataService extends Iterable<Repository>
 	 *            entity name (case insensitive)
 	 */
 	Entity findOne(String entityName, Object id);
+
+	/**
+	 * 
+	 * @throws MolgenisDataAccessException
+	 * 
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 * @param id
+	 * @param clazz
+	 * @return
+	 */
+	<E extends Entity> E findOne(String entityName, Object id, Class<E> clazz);
 
 	/**
 	 * Find one entity based on id. Returns null if not exists
@@ -145,6 +317,22 @@ public interface DataService extends Iterable<Repository>
 	Entity findOne(String entityName, Object id, Fetch fetch);
 
 	/**
+	 * Type-safe find one entity based on id.
+	 * 
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 * @param id
+	 *            entity id
+	 * @param fetch
+	 *            fetch defining which attributes to retrieve
+	 * @param clazz
+	 *            typed entity class
+	 * @return entity of the given type or null
+	 * @throws MolgenisDataAccessException
+	 */
+	<E extends Entity> E findOne(String entityName, Object id, Fetch fetch, Class<E> clazz);
+
+	/**
 	 * Find one entity based on id. Returns null if not exists
 	 * 
 	 * @throws MolgenisDataException
@@ -155,6 +343,16 @@ public interface DataService extends Iterable<Repository>
 	 *            entity name (case insensitive)
 	 */
 	Entity findOne(String entityName, Query q);
+
+	/**
+	 * type-save find an entity by it's id
+	 * 
+	 * @throws MolgenisDataAccessException
+	 * 
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 */
+	<E extends Entity> E findOne(String entityName, Query q, Class<E> clazz);
 
 	/**
 	 * Adds an entity to it's repository
@@ -179,6 +377,16 @@ public interface DataService extends Iterable<Repository>
 	void add(String entityName, Iterable<? extends Entity> entities);
 
 	/**
+	 * Adds entities to it's repository
+	 *
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 * @param entities
+	 *            entity stream
+	 */
+	void add(String entityName, Stream<? extends Entity> entities);
+
+	/**
 	 * Updates an entity
 	 * 
 	 * @throws MolgenisDataException
@@ -199,6 +407,16 @@ public interface DataService extends Iterable<Repository>
 	 * @param entities
 	 */
 	void update(String entityName, Iterable<? extends Entity> entities);
+
+	/**
+	 * Updates entities
+	 * 
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 * @param entities
+	 *            entity stream
+	 */
+	void update(String entityName, Stream<? extends Entity> entities);
 
 	/**
 	 * Deletes an entity
@@ -225,6 +443,16 @@ public interface DataService extends Iterable<Repository>
 	void delete(String entityName, Iterable<? extends Entity> entity);
 
 	/**
+	 * Delete entities from it's repository
+	 *
+	 * @param entityName
+	 *            entity name (case insensitive)
+	 * @param entities
+	 *            entity stream
+	 */
+	void delete(String entityName, Stream<? extends Entity> entities);
+
+	/**
 	 * Deletes an entity by it's id
 	 * 
 	 * @throws MolgenisDataAccessException
@@ -243,107 +471,7 @@ public interface DataService extends Iterable<Repository>
 	 */
 	void deleteAll(String entityName);
 
-	/**
-	 * Get a CrudRepository by entity name
-	 * 
-	 * @throws UnknownEntityException
-	 *             when the repository can not be found
-	 * 
-	 * @throws MolgenisDataException
-	 *             if the repository doesn't implement CrudRepository
-	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 */
-	Repository getRepository(String entityName);
-
 	Query query(String entityName);
-
-	/**
-	 * type-safe find entities that match a query
-	 * 
-	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 */
-	<E extends Entity> Iterable<E> findAll(String entityName, Query q, Class<E> clazz);
-
-	/**
-	 * type-safe find all entities
-	 * 
-	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 */
-	<E extends Entity> Iterable<E> findAll(String entityName, Class<E> clazz);
-
-	/**
-	 * type-safe find entities that match a stream of ids
-	 * 
-	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 */
-	<E extends Entity> Iterable<E> findAll(String entityName, Iterable<Object> ids, Class<E> clazz);
-
-	/**
-	 * Type-safe find entities based on id.
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 * @param ids
-	 *            entity ids
-	 * @param fetch
-	 *            fetch defining which attributes to retrieve
-	 * @param clazz
-	 *            typed entity class
-	 * @return (empty) Iterable of entities of the give type where the order of entities matches the order of ids, never
-	 *         null
-	 * @throws MolgenisDataAccessException
-	 */
-	<E extends Entity> Iterable<E> findAll(String entityName, Iterable<Object> ids, Fetch fetch, Class<E> clazz);
-
-	/**
-	 * 
-	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 * @param id
-	 * @param clazz
-	 * @return
-	 */
-	<E extends Entity> E findOne(String entityName, Object id, Class<E> clazz);
-
-	/**
-	 * Type-safe find one entity based on id.
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 * @param id
-	 *            entity id
-	 * @param fetch
-	 *            fetch defining which attributes to retrieve
-	 * @param clazz
-	 *            typed entity class
-	 * @return entity of the given type or null
-	 * @throws MolgenisDataAccessException
-	 */
-	<E extends Entity> E findOne(String entityName, Object id, Fetch fetch, Class<E> clazz);
-
-	/**
-	 * type-save find an entity by it's id
-	 * 
-	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 */
-	<E extends Entity> E findOne(String entityName, Query q, Class<E> clazz);
 
 	/**
 	 * Creates counts off all possible combinations of xAttr and yAttr attributes of an entity

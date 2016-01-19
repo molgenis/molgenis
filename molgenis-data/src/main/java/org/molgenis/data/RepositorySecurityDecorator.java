@@ -6,6 +6,7 @@ import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.AggregateAnonymizerImpl;
@@ -72,6 +73,13 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
+	public Stream<Entity> findAllAsStream(Query q)
+	{
+		validatePermission(decoratedRepository.getName(), Permission.READ);
+		return decoratedRepository.findAllAsStream(q);
+	}
+
+	@Override
 	public Entity findOne(Query q)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.READ);
@@ -100,7 +108,21 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
+	public Stream<Entity> findAll(Stream<Object> ids)
+	{
+		validatePermission(decoratedRepository.getName(), Permission.READ);
+		return decoratedRepository.findAll(ids);
+	}
+
+	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
+	{
+		validatePermission(decoratedRepository.getName(), Permission.READ);
+		return decoratedRepository.findAll(ids, fetch);
+	}
+
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.READ);
 		return decoratedRepository.findAll(ids, fetch);
@@ -128,6 +150,13 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
+	public void update(Stream<? extends Entity> entities)
+	{
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
+		decoratedRepository.update(entities);
+	}
+
+	@Override
 	public void delete(Entity entity)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
@@ -136,6 +165,13 @@ public class RepositorySecurityDecorator implements Repository
 
 	@Override
 	public void delete(Iterable<? extends Entity> entities)
+	{
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
+		decoratedRepository.delete(entities);
+	}
+
+	@Override
+	public void delete(Stream<? extends Entity> entities)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.delete(entities);
@@ -171,6 +207,13 @@ public class RepositorySecurityDecorator implements Repository
 
 	@Override
 	public Integer add(Iterable<? extends Entity> entities)
+	{
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
+		return decoratedRepository.add(entities);
+	}
+
+	@Override
+	public Integer add(Stream<? extends Entity> entities)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		return decoratedRepository.add(entities);
