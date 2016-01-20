@@ -6,6 +6,7 @@ import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserHasRole;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
@@ -36,28 +37,30 @@ public class CatalogueController extends MolgenisPluginController
 	}
 
 	@RequestMapping
-	public String showView(@RequestParam(value = "entity", required = false) String selectedEntityName, Model model)
+	public String showView(final @RequestParam(value = "entity", required = false) String selectedEntityName,
+			Model model)
 	{
-		boolean showEntitySelect = true;
+		AtomicBoolean showEntitySelectBoolean = new AtomicBoolean(true);
 		List<EntityMetaData> emds = Lists.newArrayList();
-		for (String entityName : dataService.getEntityNames())
-		{
+		dataService.getEntityNames().forEach(entityName -> {
 			if (currentUserHasRole(AUTHORITY_SU, AUTHORITY_ENTITY_READ_PREFIX + entityName.toUpperCase()))
 			{
 				emds.add(dataService.getEntityMetaData(entityName));
 				if (StringUtils.isNotBlank(selectedEntityName) && selectedEntityName.equalsIgnoreCase(entityName))
 				{
 					// Hide entity dropdown
-					showEntitySelect = false;
+					showEntitySelectBoolean.set(false);
 				}
 			}
-		}
+		});
+		boolean showEntitySelect = showEntitySelectBoolean.get();
 
 		model.addAttribute("showEntitySelect", showEntitySelect);
 
+		String selectedEntityNameValue = selectedEntityName;
 		if (showEntitySelect)
 		{
-			if (StringUtils.isNotBlank(selectedEntityName))
+			if (StringUtils.isNotBlank(selectedEntityNameValue))
 			{
 				// selectedEntityName not found -> show warning
 				model.addAttribute("warningMessage",
@@ -67,12 +70,12 @@ public class CatalogueController extends MolgenisPluginController
 			if (!emds.isEmpty())
 			{
 				// Select first entity
-				selectedEntityName = emds.get(0).getName();
+				selectedEntityNameValue = emds.get(0).getName();
 			}
 		}
 
 		model.addAttribute("entitiesMeta", emds);
-		model.addAttribute("selectedEntityName", selectedEntityName);
+		model.addAttribute("selectedEntityName", selectedEntityNameValue);
 
 		return VIEW_NAME;
 	}

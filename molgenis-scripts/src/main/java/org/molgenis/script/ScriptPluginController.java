@@ -1,5 +1,6 @@
 package org.molgenis.script;
 
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.script.ScriptPluginController.URI;
 
 import org.molgenis.data.DataService;
@@ -9,8 +10,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-
-import com.google.common.collect.Lists;
 
 @Controller
 @RequestMapping(URI)
@@ -31,9 +30,9 @@ public class ScriptPluginController extends MolgenisPluginController
 	public String listScripts(Model model)
 	{
 
-		model.addAttribute("scripts", Lists.newArrayList(dataService.findAll(Script.ENTITY_NAME, Script.class)));
+		model.addAttribute("scripts", dataService.findAll(Script.ENTITY_NAME, Script.class).collect(toList()));
 		model.addAttribute("parameters",
-				Lists.newArrayList(dataService.findAll(ScriptParameter.ENTITY_NAME, ScriptParameter.class)));
+				dataService.findAll(ScriptParameter.ENTITY_NAME, ScriptParameter.class).collect(toList()));
 		return "view-scripts";
 	}
 }

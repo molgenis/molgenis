@@ -146,11 +146,11 @@ public class CrudRepositoryAnnotator
 	{
 		if (targetRepo == null)
 		{
-			sourceRepo.update(batch);
+			sourceRepo.update(batch.stream());
 		}
 		else
 		{
-			targetRepo.add(batch);
+			targetRepo.add(batch.stream());
 		}
 	}
 

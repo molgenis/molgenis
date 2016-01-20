@@ -58,17 +58,9 @@ public class EntityReferenceResolverDecorator implements Repository
 
 	// Resolve entity references based on given fetch
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
-		Iterable<Entity> entities = decoratedRepo.findAll(q);
-		return resolveEntityReferences(entities, q.getFetch());
-	}
-
-	// Resolve entity references based on given fetch
-	@Override
-	public Stream<Entity> findAllAsStream(Query q)
-	{
-		Stream<Entity> entities = decoratedRepo.findAllAsStream(q);
+		Stream<Entity> entities = decoratedRepo.findAll(q);
 		return resolveEntityReferences(entities, q.getFetch());
 	}
 
@@ -90,7 +82,7 @@ public class EntityReferenceResolverDecorator implements Repository
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		Iterable<Entity> entities = decoratedRepo.findAll(new QueryImpl());
+		Stream<Entity> entities = decoratedRepo.findAll(new QueryImpl());
 		return resolveEntityReferences(entities).iterator();
 	}
 
@@ -112,26 +104,10 @@ public class EntityReferenceResolverDecorator implements Repository
 
 	// Resolve entity references
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		Iterable<Entity> entities = decoratedRepo.findAll(ids);
-		return resolveEntityReferences(entities);
-	}
-
-	// Resolve entity references
-	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		Stream<Entity> entities = decoratedRepo.findAll(ids);
 		return resolveEntityReferences(entities);
-	}
-
-	// Resolve entity references based on given fetch
-	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
-	{
-		Iterable<Entity> entities = decoratedRepo.findAll(ids, fetch);
-		return resolveEntityReferences(entities, fetch);
 	}
 
 	// Resolve entity references based on given fetch
@@ -155,12 +131,6 @@ public class EntityReferenceResolverDecorator implements Repository
 	}
 
 	@Override
-	public void update(Iterable<? extends Entity> records)
-	{
-		decoratedRepo.update(records);
-	}
-
-	@Override
 	public void update(Stream<? extends Entity> entities)
 	{
 		decoratedRepo.update(entities);
@@ -170,12 +140,6 @@ public class EntityReferenceResolverDecorator implements Repository
 	public void delete(Entity entity)
 	{
 		decoratedRepo.delete(entity);
-	}
-
-	@Override
-	public void delete(Iterable<? extends Entity> entities)
-	{
-		decoratedRepo.delete(entities);
 	}
 
 	@Override
@@ -191,7 +155,7 @@ public class EntityReferenceResolverDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
 		decoratedRepo.deleteById(ids);
 	}
@@ -206,12 +170,6 @@ public class EntityReferenceResolverDecorator implements Repository
 	public void add(Entity entity)
 	{
 		decoratedRepo.add(entity);
-	}
-
-	@Override
-	public Integer add(Iterable<? extends Entity> entities)
-	{
-		return decoratedRepo.add(entities);
 	}
 
 	@Override
@@ -270,16 +228,6 @@ public class EntityReferenceResolverDecorator implements Repository
 	private Entity resolveEntityReferences(Entity entity, Fetch fetch)
 	{
 		return entityManager.resolveReferences(getEntityMetaData(), entity, fetch);
-	}
-
-	private Iterable<Entity> resolveEntityReferences(Iterable<Entity> entities)
-	{
-		return entityManager.resolveReferences(getEntityMetaData(), entities, null);
-	}
-
-	private Iterable<Entity> resolveEntityReferences(Iterable<Entity> entities, Fetch fetch)
-	{
-		return entityManager.resolveReferences(getEntityMetaData(), entities, fetch);
 	}
 
 	private Stream<Entity> resolveEntityReferences(Stream<Entity> entities)

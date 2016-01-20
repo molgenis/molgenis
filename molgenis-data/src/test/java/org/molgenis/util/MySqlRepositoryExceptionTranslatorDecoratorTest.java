@@ -9,7 +9,6 @@ import static org.testng.Assert.assertEquals;
 
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,8 +23,6 @@ import org.molgenis.data.support.MapEntity;
 import org.springframework.jdbc.UncategorizedSQLException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import com.google.common.collect.Lists;
 
 public class MySqlRepositoryExceptionTranslatorDecoratorTest
 {
@@ -56,25 +53,6 @@ public class MySqlRepositoryExceptionTranslatorDecoratorTest
 		Entity entity = new MapEntity();
 		decorator.add(entity);
 		Mockito.verify(decoratedRepo).add(entity);
-	}
-
-	@Test(expectedExceptions = MolgenisDataException.class)
-	public void addIterableextendsEntityWithUncategorizedSQLException()
-	{
-		Exception e = new UncategorizedSQLException("", "",
-				new SQLException("", "", SQLExceptionTranslatorTemplate.MYSQL_ERROR_CODE_INCORRECT_STRING_VALUE));
-		List<Entity> entities = Arrays.asList(new MapEntity());
-
-		Mockito.doThrow(e).when(decoratedRepo).add(entities);
-		decorator.add(entities);
-	}
-
-	@Test
-	public void addIterableextendsEntityNoException()
-	{
-		List<Entity> entities = Arrays.asList(new MapEntity());
-		decorator.add(entities);
-		Mockito.verify(decoratedRepo).add(entities);
 	}
 
 	@Test
@@ -145,38 +123,6 @@ public class MySqlRepositoryExceptionTranslatorDecoratorTest
 		Mockito.verify(decoratedRepo).update(entity);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class)
-	public void updateIterableextendsEntityWithUncategorizedSQLException()
-	{
-		Exception e = new UncategorizedSQLException("", "",
-				new SQLException("", "", SQLExceptionTranslatorTemplate.MYSQL_ERROR_CODE_INCORRECT_STRING_VALUE));
-		List<Entity> entities = Arrays.asList(new MapEntity());
-
-		Mockito.doThrow(e).when(decoratedRepo).update(entities);
-		decorator.update(entities);
-	}
-
-	@Test
-	public void updateIterableextendsEntityNoException()
-	{
-		List<Entity> entities = Arrays.asList(new MapEntity());
-		decorator.update(entities);
-		Mockito.verify(decoratedRepo).update(entities);
-	}
-
-	@Test
-	public void findAllIterableFetch()
-	{
-		Iterable<Object> ids = Arrays.<Object> asList(Integer.valueOf(0), Integer.valueOf(1));
-		Fetch fetch = new Fetch();
-		Entity entity0 = mock(Entity.class);
-		Entity entity1 = mock(Entity.class);
-		Iterable<Entity> entities = Arrays.asList(entity0, entity1);
-		when(decoratedRepo.findAll(ids, fetch)).thenReturn(entities);
-		assertEquals(Arrays.asList(entity0, entity1), Lists.newArrayList(decorator.findAll(ids, fetch)));
-		verify(decoratedRepo, times(1)).findAll(ids, fetch);
-	}
-
 	@Test
 	public void findOne()
 	{
@@ -220,8 +166,8 @@ public class MySqlRepositoryExceptionTranslatorDecoratorTest
 	{
 		Entity entity0 = mock(Entity.class);
 		Query query = mock(Query.class);
-		when(decoratedRepo.findAllAsStream(query)).thenReturn(Stream.of(entity0));
-		Stream<Entity> entities = decorator.findAllAsStream(query);
+		when(decoratedRepo.findAll(query)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = decorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
 }

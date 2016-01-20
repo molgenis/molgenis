@@ -79,15 +79,9 @@ public class I18nStringDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
 		return decorated.findAll(q);
-	}
-
-	@Override
-	public Stream<Entity> findAllAsStream(Query q)
-	{
-		return decorated.findAllAsStream(q);
 	}
 
 	@Override
@@ -109,21 +103,9 @@ public class I18nStringDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		return decorated.findAll(ids);
-	}
-
-	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		return decorated.findAll(ids);
-	}
-
-	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
-	{
-		return decorated.findAll(ids, fetch);
 	}
 
 	@Override
@@ -146,13 +128,6 @@ public class I18nStringDecorator implements Repository
 	}
 
 	@Override
-	public void update(Iterable<? extends Entity> records)
-	{
-		decorated.update(records);
-		ResourceBundle.clearCache();
-	}
-
-	@Override
 	public void update(Stream<? extends Entity> records)
 	{
 		decorated.update(records);
@@ -163,13 +138,6 @@ public class I18nStringDecorator implements Repository
 	public void delete(Entity entity)
 	{
 		decorated.delete(entity);
-		ResourceBundle.clearCache();
-	}
-
-	@Override
-	public void delete(Iterable<? extends Entity> entities)
-	{
-		decorated.delete(entities);
 		ResourceBundle.clearCache();
 	}
 
@@ -188,7 +156,7 @@ public class I18nStringDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
 		decorated.deleteById(ids);
 		ResourceBundle.clearCache();
@@ -206,15 +174,6 @@ public class I18nStringDecorator implements Repository
 	{
 		decorated.add(entity);
 		ResourceBundle.clearCache();
-	}
-
-	@Override
-	public Integer add(Iterable<? extends Entity> entities)
-	{
-		Integer result = decorated.add(entities);
-		ResourceBundle.clearCache();
-
-		return result;
 	}
 
 	@Override

@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -68,7 +69,7 @@ public class TabixVcfRepository extends VcfRepository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
 		Object posValue = getFirstEqualsValueFor(VcfRepository.POS, q);
 		Object chromValue = getFirstEqualsValueFor(VcfRepository.CHROM, q);
@@ -81,7 +82,7 @@ public class TabixVcfRepository extends VcfRepository
 			String chromStringValue = chromValue.toString();
 			result = query(chromStringValue, Long.valueOf(posLongValue), Long.valueOf(posLongValue));
 		}
-		return result;
+		return result.stream();
 	}
 
 	/**

@@ -1,6 +1,7 @@
 package org.molgenis.data.annotation.resources.impl;
 
 import java.io.File;
+import java.util.Iterator;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -72,7 +73,14 @@ public class ResourceImpl implements Resource
 	@Override
 	public Iterable<Entity> findAll(Query q)
 	{
-		return getRepository().findAll(q);
+		return new Iterable<Entity>()
+		{
+			@Override
+			public Iterator<Entity> iterator()
+			{
+				return getRepository().findAll(q).iterator();
+			}
+		};
 	}
 
 	private boolean needsRefresh()

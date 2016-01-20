@@ -15,6 +15,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -56,11 +57,9 @@ public class EntityImportService
 					@Override
 					public Iterable<Entity> load(CacheKey key) throws Exception
 					{
-
-						Iterable<Entity> result = dataService.findAll(key.getEnityName(),
-								new QueryImpl().in(key.getAttrName(), key.getKeyValues()));
-
-						return result;
+						return dataService
+								.findAll(key.getEnityName(), new QueryImpl().in(key.getAttrName(), key.getKeyValues()))
+								.collect(Collectors.toList());
 					}
 				});
 	}
@@ -127,8 +126,8 @@ public class EntityImportService
 					// can stop.
 					if (!attrResolved && !attr.getRefEntity().getName().equalsIgnoreCase(entityName))
 					{
-						throw new MolgenisValidationException(Sets.newHashSet(createViolation(attr, entityMetaData,
-								entityToImport, rownr)));
+						throw new MolgenisValidationException(
+								Sets.newHashSet(createViolation(attr, entityMetaData, entityToImport, rownr)));
 					}
 				}
 			}
@@ -172,7 +171,8 @@ public class EntityImportService
 					for (AttributeMetaData attr : entityMetaData.getAttributes())
 					{
 						FieldTypeEnum enumType = attr.getDataType().getEnumType();
-						if ((enumType == MREF || enumType == CATEGORICAL_MREF || enumType == XREF || enumType == CATEGORICAL)
+						if ((enumType == MREF || enumType == CATEGORICAL_MREF || enumType == XREF
+								|| enumType == CATEGORICAL)
 								&& attr.getRefEntity().getName().equalsIgnoreCase(entityName))
 						{
 							resolved = resolved && resolveEntityRef(entityName, entityToImport, attr);
@@ -205,8 +205,8 @@ public class EntityImportService
 				for (AttributeMetaData attr : entityMetaData.getAttributes())
 				{
 					FieldTypeEnum enumType = attr.getDataType().getEnumType();
-					if ((enumType == MREF || enumType == CATEGORICAL_MREF || enumType == XREF || enumType == CATEGORICAL)
-							&& attr.getRefEntity().getName().equalsIgnoreCase(entityName)
+					if ((enumType == MREF || enumType == CATEGORICAL_MREF || enumType == XREF
+							|| enumType == CATEGORICAL) && attr.getRefEntity().getName().equalsIgnoreCase(entityName)
 							&& !resolveEntityRef(entityName, entity, attr))
 					{
 						long rowNr = getRowNr(entity, entitiesToImport, entityMetaData.getLabelAttribute().getName());
@@ -293,8 +293,9 @@ public class EntityImportService
 				}
 				else
 				{
-					throw new MolgenisDataException("keys are missing: "
-							+ repo.getEntityMetaData().getEntityClass().getSimpleName() + "." + Arrays.asList(keyNames));
+					throw new MolgenisDataException(
+							"keys are missing: " + repo.getEntityMetaData().getEntityClass().getSimpleName() + "."
+									+ Arrays.asList(keyNames));
 				}
 			}
 		}
@@ -332,10 +333,8 @@ public class EntityImportService
 				}
 			}
 
-			Iterable<Entity> selectForUpdate = repo.findAll(q);
 			// separate existing from new entities
-			for (Entity p : selectForUpdate)
-			{
+			repo.findAll(q).forEach(p -> {
 				// reconstruct composite key so we can use the entityIndex
 				StringBuilder combinedKeyBuilder = new StringBuilder();
 				for (String key : keyNames)
@@ -349,7 +348,7 @@ public class EntityImportService
 				e.set(p);
 
 				existingEntities.add(e);
-			}
+			});
 
 			// copy remaining to newEntities
 			newEntities = new ArrayList<Entity>(entityIndex.values());
@@ -367,23 +366,20 @@ public class EntityImportService
 		switch (dbAction)
 		{
 
-		// will test for existing entities before add
-		// (so only add if existingEntities.size == 0).
+			// will test for existing entities before add
+			// (so only add if existingEntities.size == 0).
 			case ADD:
 				if (existingEntities.size() == 0)
 				{
-					repo.add(newEntities);
+					repo.add(newEntities.stream());
 				}
 				else
 				{
-					throw new MolgenisDataException("Tried to add existing "
-							+ entityName
-							+ " elements as new insert: "
-							+ Arrays.asList(keyNames)
-							+ "="
+					throw new MolgenisDataException("Tried to add existing " + entityName + " elements as new insert: "
+							+ Arrays.asList(keyNames) + "="
 							+ existingEntities.subList(0, Math.min(5, existingEntities.size()))
-							+ (existingEntities.size() > 5 ? " and " + (existingEntities.size() - 5) + "more" : ""
-									+ existingEntities));
+							+ (existingEntities.size() > 5 ? " and " + (existingEntities.size() - 5) + "more"
+									: "" + existingEntities));
 				}
 				break;
 
@@ -391,15 +387,15 @@ public class EntityImportService
 			// add(missingEntities)
 			// so allows user to be sloppy in adding/updating
 			case ADD_UPDATE_EXISTING:
-				repo.add(newEntities);
-				repo.update(existingEntities);
+				repo.add(newEntities.stream());
+				repo.update(existingEntities.stream());
 				break;
 
 			// update while testing for newEntities.size == 0
 			case UPDATE:
 				if (newEntities.size() == 0)
 				{
-					repo.update(existingEntities);
+					repo.update(existingEntities.stream());
 				}
 				else
 				{
@@ -570,9 +566,9 @@ public class EntityImportService
 		String key = attr.getName() + "_" + foreignAttr;
 		Object value = entity.get(key);
 
-		String message = String
-				.format("Could not resolve attribute '%s' with value '%s' of entity '%s'. This is a reference to entity '%s'.This happens when the key is missing in the referencing entity or when there are duplicate keys.",
-						attr.getName(), value, entityMetaData.getName(), attr.getRefEntity().getName());
+		String message = String.format(
+				"Could not resolve attribute '%s' with value '%s' of entity '%s'. This is a reference to entity '%s'.This happens when the key is missing in the referencing entity or when there are duplicate keys.",
+				attr.getName(), value, entityMetaData.getName(), attr.getRefEntity().getName());
 
 		return new ConstraintViolation(message, value, entity, attr, entityMetaData, rownr);
 	}

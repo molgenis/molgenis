@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -125,66 +124,6 @@ public class EntityListenerRepositoryDecoratorTest
 		entityListenerRepositoryDecorator.update(entity);
 
 		verify(decoratedRepository).update(entity);
-	}
-
-	@SuppressWarnings("resource")
-	@Test
-	public void updateIterableextendsEntityWithListeners()
-	{
-		Repository decoratedRepository = mock(Repository.class);
-		EntityListenerRepositoryDecorator entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(
-				decoratedRepository);
-		EntityListener entityListener0 = when(mock(EntityListener.class).getEntityId()).thenReturn(Integer.valueOf(1))
-				.getMock();
-		EntityListener entityListener1 = when(mock(EntityListener.class).getEntityId()).thenReturn(Integer.valueOf(2))
-				.getMock();
-		entityListenerRepositoryDecorator.addEntityListener(entityListener0);
-		entityListenerRepositoryDecorator.addEntityListener(entityListener1);
-
-		Entity entity0 = when(mock(Entity.class).getIdValue()).thenReturn(Integer.valueOf(1)).getMock();
-		Entity entity1 = when(mock(Entity.class).getIdValue()).thenReturn(Integer.valueOf(2)).getMock();
-		List<Entity> entities = Arrays.asList(entity0, entity1);
-		entityListenerRepositoryDecorator.update(entities);
-
-		verify(decoratedRepository).update(entities);
-		verify(entityListener0, times(1)).postUpdate(entity0);
-		verify(entityListener1, times(1)).postUpdate(entity1);
-	}
-
-	@SuppressWarnings("resource")
-	@Test
-	public void updateIterableextendsEntityWithSomeListeners()
-	{
-		Repository decoratedRepository = mock(Repository.class);
-		EntityListenerRepositoryDecorator entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(
-				decoratedRepository);
-		EntityListener entityListener1 = when(mock(EntityListener.class).getEntityId()).thenReturn(Integer.valueOf(2))
-				.getMock();
-		entityListenerRepositoryDecorator.addEntityListener(entityListener1);
-
-		Entity entity0 = when(mock(Entity.class).getIdValue()).thenReturn(Integer.valueOf(1)).getMock();
-		Entity entity1 = when(mock(Entity.class).getIdValue()).thenReturn(Integer.valueOf(2)).getMock();
-		List<Entity> entities = Arrays.asList(entity0, entity1);
-		entityListenerRepositoryDecorator.update(entities);
-
-		verify(decoratedRepository).update(entities);
-		verify(entityListener1, times(1)).postUpdate(entity1);
-	}
-
-	@SuppressWarnings("resource")
-	@Test
-	public void updateIterableextendsEntityNoListeners()
-	{
-		Repository decoratedRepository = mock(Repository.class);
-		EntityListenerRepositoryDecorator entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(
-				decoratedRepository);
-
-		Entity entity0 = when(mock(Entity.class).getIdValue()).thenReturn(Integer.valueOf(1)).getMock();
-		Entity entity1 = when(mock(Entity.class).getIdValue()).thenReturn(Integer.valueOf(2)).getMock();
-		List<Entity> entities = Arrays.asList(entity0, entity1);
-		entityListenerRepositoryDecorator.update(entities);
-
-		verify(decoratedRepository).update(entities);
 	}
 
 	@SuppressWarnings(
@@ -308,8 +247,8 @@ public class EntityListenerRepositoryDecoratorTest
 	{
 		Entity entity0 = mock(Entity.class);
 		Query query = mock(Query.class);
-		when(decoratedRepository.findAllAsStream(query)).thenReturn(Stream.of(entity0));
-		Stream<Entity> entities = entityListenerRepositoryDecorator.findAllAsStream(query);
+		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = entityListenerRepositoryDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
 }

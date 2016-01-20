@@ -136,15 +136,6 @@ public class MolgenisUserDecoratorTest
 	}
 
 	@Test
-	public void findAllIterableFetch()
-	{
-		Iterable<Object> ids = Arrays.<Object> asList(Integer.valueOf(0), Integer.valueOf(1));
-		Fetch fetch = new Fetch();
-		molgenisUserDecorator.findAll(ids, fetch);
-		verify(decoratedRepository, times(1)).findAll(ids, fetch);
-	}
-
-	@Test
 	public void findOneObjectFetch()
 	{
 		Object id = Integer.valueOf(0);
@@ -185,8 +176,8 @@ public class MolgenisUserDecoratorTest
 	{
 		Entity entity0 = mock(Entity.class);
 		Query query = mock(Query.class);
-		when(decoratedRepository.findAllAsStream(query)).thenReturn(Stream.of(entity0));
-		Stream<Entity> entities = molgenisUserDecorator.findAllAsStream(query);
+		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = molgenisUserDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
 }

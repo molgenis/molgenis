@@ -77,15 +77,9 @@ public class TransactionLogRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
 		return decorated.findAll(q);
-	}
-
-	@Override
-	public Stream<Entity> findAllAsStream(Query q)
-	{
-		return decorated.findAllAsStream(q);
 	}
 
 	@Override
@@ -107,21 +101,9 @@ public class TransactionLogRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		return decorated.findAll(ids);
-	}
-
-	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		return decorated.findAll(ids);
-	}
-
-	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
-	{
-		return decorated.findAll(ids, fetch);
 	}
 
 	@Override
@@ -148,16 +130,6 @@ public class TransactionLogRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void update(Iterable<? extends Entity> records)
-	{
-		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
-		{
-			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.UPDATE);
-		}
-		decorated.update(records);
-	}
-
-	@Override
 	public void update(Stream<? extends Entity> entities)
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
@@ -175,16 +147,6 @@ public class TransactionLogRepositoryDecorator implements Repository
 			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
 		}
 		decorated.delete(entity);
-	}
-
-	@Override
-	public void delete(Iterable<? extends Entity> entities)
-	{
-		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
-		{
-			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
-		}
-		decorated.delete(entities);
 	}
 
 	@Override
@@ -208,7 +170,7 @@ public class TransactionLogRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
 		{
@@ -235,16 +197,6 @@ public class TransactionLogRepositoryDecorator implements Repository
 			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.ADD);
 		}
 		decorated.add(entity);
-	}
-
-	@Override
-	public Integer add(Iterable<? extends Entity> entities)
-	{
-		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
-		{
-			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.ADD);
-		}
-		return decorated.add(entities);
 	}
 
 	@Override

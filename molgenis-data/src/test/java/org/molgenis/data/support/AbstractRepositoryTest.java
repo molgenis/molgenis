@@ -1,6 +1,5 @@
 package org.molgenis.data.support;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -81,42 +80,6 @@ public class AbstractRepositoryTest
 	}
 
 	@Test(expectedExceptions = UnsupportedOperationException.class)
-	public void testFindAllIdsForRepositoryThatDoesntHaveFindAll()
-	{
-		Iterable<Entity> result = abstractRepository.findAll(newArrayList("1", "2", "3"));
-		assertEquals(newArrayList(), newArrayList(result));
-	}
-
-	@Test(expectedExceptions = UnsupportedOperationException.class)
-	public void testFindAllFetchIdsForRepositoryThatDoesntHaveFindAll()
-	{
-		Iterable<Entity> result = abstractRepository.findAll(newArrayList("1", "2", "3"), new Fetch());
-		assertEquals(newArrayList(), newArrayList(result));
-	}
-
-	@Test
-	public void testFindAllIdsForRepository()
-	{
-		Mockito.doReturn(newArrayList(createEntity("3"), createEntity("1"), createEntity("2"))).when(abstractRepository)
-				.findAll(Matchers.any(Query.class));
-		Iterable<Entity> result = abstractRepository.findAll(newArrayList("1", "2", "3", "1", "2"));
-		assertEquals(newArrayList(createEntity("1"), createEntity("2"), createEntity("3"), createEntity("1"),
-				createEntity("2")), newArrayList(result));
-
-	}
-
-	@Test
-	public void testFindAllFetchIdsForRepository()
-	{
-		Mockito.doReturn(newArrayList(createEntity("3"), createEntity("1"), createEntity("2"))).when(abstractRepository)
-				.findAll(Matchers.any(Query.class));
-		Iterable<Entity> result = abstractRepository.findAll(newArrayList("1", "2", "3", "1", "2"), new Fetch());
-		assertEquals(newArrayList(createEntity("1"), createEntity("2"), createEntity("3"), createEntity("1"),
-				createEntity("2")), newArrayList(result));
-
-	}
-
-	@Test(expectedExceptions = UnsupportedOperationException.class)
 	public void findOneObjectFetch()
 	{
 		abstractRepository.findOne(Integer.valueOf(0), new Fetch());
@@ -131,7 +94,7 @@ public class AbstractRepositoryTest
 		Entity entity1 = when(mock(Entity.class).getIdValue()).thenReturn(id1).getMock();
 		Stream<Object> entityIds = Stream.of(id0, id1);
 
-		Mockito.doReturn(Arrays.asList(entity0, entity1)).when(abstractRepository).findAll(Matchers.any(Query.class));
+		Mockito.doReturn(Stream.of(entity0, entity1)).when(abstractRepository).findAll(Matchers.any(Query.class));
 
 		Stream<Entity> expectedEntities = abstractRepository.findAll(entityIds);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
@@ -147,16 +110,9 @@ public class AbstractRepositoryTest
 		Entity entity1 = when(mock(Entity.class).getIdValue()).thenReturn(id1).getMock();
 		Stream<Object> entityIds = Stream.of(id0, id1);
 
-		Mockito.doReturn(Arrays.asList(entity0, entity1)).when(abstractRepository).findAll(Matchers.any(Query.class));
+		Mockito.doReturn(Stream.of(entity0, entity1)).when(abstractRepository).findAll(Matchers.any(Query.class));
 
 		Stream<Entity> expectedEntities = abstractRepository.findAll(entityIds, fetch);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
-	}
-
-	private Entity createEntity(Object id)
-	{
-		Entity entity = new DefaultEntity(entityMetaData, null);
-		entity.set("id", id);
-		return entity;
 	}
 }
