@@ -12,6 +12,8 @@ import CodeEditor from "./CodeEditor";
 import TextArea from "./TextArea";
 import Input from "./Input";
 import DateControl from "./DateControl";
+import EntitySelectBox from "./EntitySelectBox";
+
 
 	var api = new RestClient();
 	
