@@ -116,7 +116,7 @@
 					</dependency>
 				</dependencies>
 			</plugin>
-			<!-- execute molgenis generator -->
+			<!-- execute molgenis generator -->  
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>

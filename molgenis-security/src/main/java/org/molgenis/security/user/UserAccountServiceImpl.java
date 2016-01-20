@@ -19,7 +19,6 @@ public class UserAccountServiceImpl implements UserAccountService
 	private PasswordEncoder passwordEncoder;
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_USERACCOUNT')")
 	@Transactional(readOnly = true)
 	public MolgenisUser getCurrentUser()
 	{
@@ -27,7 +26,6 @@ public class UserAccountServiceImpl implements UserAccountService
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_USERACCOUNT')")
 	@Transactional(readOnly = true)
 	public Iterable<MolgenisGroup> getCurrentUserGroups()
 	{

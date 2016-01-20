@@ -1,18 +1,17 @@
 package org.molgenis.data.annotation.cmd;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.PrintWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import joptsimple.OptionException;
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -34,6 +33,9 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.ConsoleAppender;
+import joptsimple.OptionException;
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
 
 /**
  * 
@@ -70,29 +72,22 @@ public class CmdLineAnnotator
 				implementationVersion = "";
 			}
 
-			System.out
-					.println("\n"
-							+ "****************************************************\n"
-							+ "* MOLGENIS Annotator, commandline interface "
-							+ implementationVersion
-							+ " *\n"
-							+ "****************************************************\n"
-							+ "Typical usage to annotate a VCF file:\n\n"
-							+ "java -jar CmdLineAnnotator.jar [options] [attribute names]\n"
-							+ "Example: java -Xmx4g -jar CmdLineAnnotator.jar -v -a gonl -s GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ -i Cardio.vcf -o Cardio_gonl.vcf GoNL_GTC GoNL_AF\n"
-							+ "\n" + "----------------------------------------------------\n\n"
-							+ "Available options:\n");
+			System.out.println("\n" + "****************************************************\n"
+					+ "* MOLGENIS Annotator, commandline interface " + implementationVersion + " *\n"
+					+ "****************************************************\n"
+					+ "Typical usage to annotate a VCF file:\n\n"
+					+ "java -jar CmdLineAnnotator.jar [options] [attribute names]\n"
+					+ "Example: java -Xmx4g -jar CmdLineAnnotator.jar -v -a gonl -s GoNL/release5_noContam_noChildren_with_AN_AC_GTC_stripped/ -i Cardio.vcf -o Cardio_gonl.vcf GoNL_GTC GoNL_AF\n"
+					+ "\n" + "----------------------------------------------------\n\n" + "Available options:\n");
 
 			parser.printHelpOn(System.out);
 
-			System.out
-					.println("\n"
-							+ "----------------------------------------------------\n\n"
-							+ "To get detailed description for a specific annotator:\n"
-							+ "java -jar CmdLineAnnotator.jar -a [Annotator]\n\n"
-							+ "To select only a few columns from an annotation source instead of everything, use:\n"
-							+ "java -jar CmdLineAnnotator.jar -a [Annotator] -s [Annotation source file] <column1> <column2>\n\n"
-							+ "----------------------------------------------------\n");
+			System.out.println("\n" + "----------------------------------------------------\n\n"
+					+ "To get detailed description for a specific annotator:\n"
+					+ "java -jar CmdLineAnnotator.jar -a [Annotator]\n\n"
+					+ "To select only a few columns from an annotation source instead of everything, use:\n"
+					+ "java -jar CmdLineAnnotator.jar -a [Annotator] -s [Annotation source file] <column1> <column2>\n\n"
+					+ "----------------------------------------------------\n");
 
 			System.out.println("List of available annotators per category:\n\n"
 					+ CommandLineAnnotatorConfig.printAnnotatorsPerType(configuredFreshAnnotators));
@@ -146,7 +141,8 @@ public class CmdLineAnnotator
 			}
 			else
 			{
-				System.out.println("Output file already exists, please either enter a different output name or use the '-r' option to overwrite the output file.");
+				System.out.println(
+						"Output file already exists, please either enter a different output name or use the '-r' option to overwrite the output file.");
 				return;
 			}
 		}
@@ -197,12 +193,9 @@ public class CmdLineAnnotator
 				.ofType(File.class);
 		parser.acceptsAll(asList("v", "validate"), "Use VCF validator on the output file");
 		parser.acceptsAll(asList("t", "vcf-validator-location"),
-				"Location of the vcf-validator executable from the vcf-tools suite")
-				.withRequiredArg()
-				.ofType(String.class)
-				.defaultsTo(
-						System.getProperty("user.home") + File.separator + ".molgenis" + File.separator + "vcf-tools"
-								+ File.separator + "bin" + File.separator + "vcf-validator");
+				"Location of the vcf-validator executable from the vcf-tools suite").withRequiredArg()
+				.ofType(String.class).defaultsTo(System.getProperty("user.home") + File.separator + ".molgenis"
+						+ File.separator + "vcf-tools" + File.separator + "bin" + File.separator + "vcf-validator");
 		parser.acceptsAll(asList("h", "help"), "Prints this help text");
 		parser.acceptsAll(asList("r", "replace"),
 				"Enables output file override, replacing a file with the same name as the argument for the -o option");
@@ -226,7 +219,9 @@ public class CmdLineAnnotator
 	{
 		List<String> attributesToInclude = options.nonOptionArguments().stream().map(Object::toString)
 				.collect(Collectors.toList());
-		PrintWriter outputVCFWriter = new PrintWriter(outputVCFFile, "UTF-8");
+
+		BufferedWriter outputVCFWriter = new BufferedWriter(
+				new OutputStreamWriter(new FileOutputStream(outputVCFFile), UTF_8));
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 
 		try
@@ -271,7 +266,8 @@ public class CmdLineAnnotator
 			while (annotatedRecords.hasNext())
 			{
 				Entity annotatedRecord = annotatedRecords.next();
-				outputVCFWriter.println(VcfUtils.convertToVCF(annotatedRecord, attributesToInclude));
+				VcfUtils.writeToVcf(annotatedRecord, attributesToInclude, outputVCFWriter);
+				outputVCFWriter.newLine();
 			}
 		}
 		finally

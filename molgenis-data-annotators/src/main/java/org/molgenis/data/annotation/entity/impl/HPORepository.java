@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -68,9 +69,9 @@ public class HPORepository extends AbstractRepository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
-		if (q.getRules().isEmpty()) return getEntities();
+		if (q.getRules().isEmpty()) return getEntities().stream();
 		if ((q.getRules().size() != 1) || (q.getRules().get(0).getOperator() != Operator.EQUALS))
 		{
 			throw new MolgenisDataException("The only query allowed on this Repository is gene EQUALS");
@@ -79,7 +80,7 @@ public class HPORepository extends AbstractRepository
 		String geneSymbol = (String) q.getRules().get(0).getValue();
 		List<Entity> entities = getEntitiesByGeneSymbol().get(geneSymbol);
 
-		return entities != null ? entities : Collections.emptyList();
+		return entities != null ? entities.stream() : Stream.empty();
 	}
 
 	@Override

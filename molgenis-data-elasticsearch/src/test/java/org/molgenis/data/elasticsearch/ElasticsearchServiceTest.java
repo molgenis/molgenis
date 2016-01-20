@@ -5,8 +5,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -20,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -33,6 +32,8 @@ import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
@@ -41,7 +42,6 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.ElasticsearchService.BulkProcessorFactory;
-import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
 import org.molgenis.data.support.DataServiceImpl;
@@ -53,8 +53,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import com.google.common.collect.Lists;
 
 public class ElasticsearchServiceTest
 {
@@ -95,29 +93,6 @@ public class ElasticsearchServiceTest
 	@AfterClass
 	public void afterClass()
 	{
-	}
-
-	@Test
-	public void indexEntityAdd()
-	{
-		DefaultEntityMetaData entityMetaData = createEntityMeta("entity");
-		MapEntity entity = createEntityAndRegisterSource(entityMetaData, "id0");
-
-		searchService.index(entity, entityMetaData, IndexingMode.ADD);
-		verify(searchService, times(1)).index(indexName, Arrays.asList(entity), entityMetaData,
-				ElasticsearchService.CrudType.ADD, true);
-	}
-
-	@Test
-	public void indexEntityUpdateNoRefs()
-	{
-		DefaultEntityMetaData entityMetaData = createEntityMeta("entity");
-		MapEntity entity = createEntityAndRegisterSource(entityMetaData, "id0");
-		when(dataService.getEntityNames()).thenReturn(Lists.newArrayList());
-
-		searchService.index(entity, entityMetaData, IndexingMode.UPDATE);
-		verify(searchService, times(1)).index(indexName, Arrays.asList(entity), entityMetaData,
-				ElasticsearchService.CrudType.UPDATE, true);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -180,8 +155,22 @@ public class ElasticsearchServiceTest
 		{
 			entitiesBatch1.add(when(mock(Entity.class).getIdValue()).thenReturn(i + 1).getMock());
 		}
-		when(repo.findAll(idsBatch0)).thenReturn(entitiesBatch0);
-		when(repo.findAll(idsBatch1)).thenReturn(entitiesBatch1);
+		when(repo.findAll(idsBatch0.stream())).thenAnswer(new Answer<Stream<Entity>>()
+		{
+			@Override
+			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
+			{
+				return entitiesBatch0.stream();
+			}
+		});
+		when(repo.findAll(idsBatch1.stream())).thenAnswer(new Answer<Stream<Entity>>()
+		{
+			@Override
+			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
+			{
+				return entitiesBatch1.stream();
+			}
+		});
 		dataService.addRepository(repo);
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("entity");
 		entityMetaData.setBackend(ElasticsearchRepositoryCollection.NAME);

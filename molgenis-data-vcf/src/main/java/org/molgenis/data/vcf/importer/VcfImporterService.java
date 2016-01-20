@@ -1,6 +1,7 @@
 package org.molgenis.data.vcf.importer;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.StreamSupport.stream;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,7 +62,8 @@ public class VcfImporterService implements ImportService
 	}
 
 	@Override
-	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction, String defaultPackage)
+	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction,
+			String defaultPackage)
 	{
 		if (databaseAction != DatabaseAction.ADD) throw new IllegalArgumentException("Only ADD is supported");
 
@@ -187,8 +189,7 @@ public class VcfImporterService implements ImportService
 		}
 	}
 
-	private EntityImportReport importVcf(Repository inRepository, List<EntityMetaData> addedEntities)
-			throws IOException
+	private EntityImportReport importVcf(Repository inRepository, List<EntityMetaData> addedEntities) throws IOException
 	{
 		EntityImportReport report = new EntityImportReport();
 		Repository sampleRepository = null;
@@ -241,7 +242,7 @@ public class VcfImporterService implements ImportService
 
 							if (sampleEntities.size() == BATCH_SIZE)
 							{
-								sampleRepository.add(sampleEntities);
+								sampleRepository.add(sampleEntities.stream());
 								sampleEntityCount += sampleEntities.size();
 								sampleEntities.clear();
 							}
@@ -252,7 +253,7 @@ public class VcfImporterService implements ImportService
 
 				if (!sampleEntities.isEmpty())
 				{
-					sampleRepository.add(sampleEntities);
+					sampleRepository.add(sampleEntities.stream());
 					sampleEntityCount += sampleEntities.size();
 				}
 
@@ -262,7 +263,7 @@ public class VcfImporterService implements ImportService
 				if (sampleEntityCount > 0) report.addEntityCount(sampleRepository.getName(), sampleEntityCount);
 			}
 
-			outRepository.add(inRepository);
+			outRepository.add(stream(inRepository.spliterator(), false));
 		}
 
 		report.addNewEntity(entityName);

@@ -102,7 +102,7 @@ class AttributeMetaDataRepository
 			{
 				return stream(batches.spliterator(), false).flatMap(batch -> {
 					List<Entity> attrEntities = convertToAttrEntities(attrs);
-					repository.add(attrEntities);
+					repository.add(attrEntities.stream());
 					return attrEntities.stream();
 				}).iterator();
 			}
@@ -155,7 +155,7 @@ class AttributeMetaDataRepository
 				if (attr.getDataType() instanceof CompoundField)
 				{
 					List<Entity> attrPartsEntities = convertToAttrEntities(attr.getAttributeParts());
-					repository.add(attrPartsEntities);
+					repository.add(attrPartsEntities.stream());
 					attributeMetaDataEntity.set(PARTS, attrPartsEntities);
 				}
 
@@ -225,11 +225,11 @@ class AttributeMetaDataRepository
 		attributeMetaData.setVisible(entity.getBoolean(VISIBLE));
 		attributeMetaData.setLabel(entity.getString(LABEL));
 		attributeMetaData.setDescription(entity.getString(DESCRIPTION));
-		attributeMetaData.setAggregateable(entity.getBoolean(AGGREGATEABLE) == null ? false : entity
-				.getBoolean(AGGREGATEABLE));
+		attributeMetaData
+				.setAggregateable(entity.getBoolean(AGGREGATEABLE) == null ? false : entity.getBoolean(AGGREGATEABLE));
 		attributeMetaData.setEnumOptions(entity.getList(ENUM_OPTIONS));
-		attributeMetaData.setLabelAttribute(entity.getBoolean(LABEL_ATTRIBUTE) == null ? false : entity
-				.getBoolean(LABEL_ATTRIBUTE));
+		attributeMetaData.setLabelAttribute(
+				entity.getBoolean(LABEL_ATTRIBUTE) == null ? false : entity.getBoolean(LABEL_ATTRIBUTE));
 		attributeMetaData.setReadOnly(entity.getBoolean(READ_ONLY) == null ? false : entity.getBoolean(READ_ONLY));
 		attributeMetaData.setUnique(entity.getBoolean(UNIQUE) == null ? false : entity.getBoolean(UNIQUE));
 		attributeMetaData.setExpression(entity.getString(EXPRESSION));
@@ -248,8 +248,8 @@ class AttributeMetaDataRepository
 		Iterable<Entity> parts = entity.getEntities(PARTS);
 		if (parts != null)
 		{
-			stream(parts.spliterator(), false).map(this::toAttributeMetaData).forEach(
-					attributeMetaData::addAttributePart);
+			stream(parts.spliterator(), false).map(this::toAttributeMetaData)
+					.forEach(attributeMetaData::addAttributePart);
 		}
 		attributeMetaData.setVisibleExpression(entity.getString(VISIBLE_EXPRESSION));
 		attributeMetaData.setValidationExpression(entity.getString(VALIDATION_EXPRESSION));

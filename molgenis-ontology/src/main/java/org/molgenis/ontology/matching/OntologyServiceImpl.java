@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -81,7 +82,14 @@ public class OntologyServiceImpl implements OntologyService
 	@Override
 	public Iterable<Entity> getAllOntologyEntities()
 	{
-		return dataService.findAll(OntologyMetaData.ENTITY_NAME);
+		return new Iterable<Entity>()
+		{
+			@Override
+			public Iterator<Entity> iterator()
+			{
+				return dataService.findAll(OntologyMetaData.ENTITY_NAME).iterator();
+			}
+		};
 	}
 
 	@Override
@@ -117,8 +125,7 @@ public class OntologyServiceImpl implements OntologyService
 		Entity ontologyEntity = getOntologyEntity(ontologyIri);
 		if (ontologyEntity != null)
 		{
-			return dataService.findOne(
-					OntologyTermMetaData.ENTITY_NAME,
+			return dataService.findOne(OntologyTermMetaData.ENTITY_NAME,
 					new QueryImpl().eq(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ontologyTermIri).and()
 							.eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity));
 		}
@@ -177,8 +184,8 @@ public class OntologyServiceImpl implements OntologyService
 	public OntologyServiceResult searchEntity(String ontologyIri, Entity inputEntity)
 	{
 		Entity ontologyEntity = getOntologyEntity(ontologyIri);
-		if (ontologyEntity == null) throw new IllegalArgumentException("Ontology IRI " + ontologyIri
-				+ " does not exist in the database!");
+		if (ontologyEntity == null)
+			throw new IllegalArgumentException("Ontology IRI " + ontologyIri + " does not exist in the database!");
 
 		List<Entity> relevantEntities = new ArrayList<Entity>();
 
@@ -203,8 +210,8 @@ public class OntologyServiceImpl implements OntologyService
 				}
 				else if (StringUtils.isNotEmpty(inputEntity.getString(attributeName)))
 				{
-					rulesForOtherFields.add(new QueryRule(attributeName, Operator.EQUALS, inputEntity
-							.getString(attributeName)));
+					rulesForOtherFields
+							.add(new QueryRule(attributeName, Operator.EQUALS, inputEntity.getString(attributeName)));
 				}
 			}
 		}
@@ -230,8 +237,9 @@ public class OntologyServiceImpl implements OntologyService
 			QueryRule queryRule = new QueryRule(combinedRules);
 			queryRule.setOperator(Operator.DIS_MAX);
 
-			List<QueryRule> finalQueryRules = Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY,
-					Operator.EQUALS, ontologyEntity), new QueryRule(Operator.AND), queryRule);
+			List<QueryRule> finalQueryRules = Arrays.asList(
+					new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
+					new QueryRule(Operator.AND), queryRule);
 
 			EntityMetaData entityMetaData = dataService.getEntityMetaData(OntologyTermMetaData.ENTITY_NAME);
 			for (Entity entity : searchService.search(new QueryImpl(finalQueryRules).pageSize(MAX_NUMBER_MATCHES),
@@ -276,6 +284,7 @@ public class OntologyServiceImpl implements OntologyService
 
 		Collections.sort(relevantEntities, new Comparator<Entity>()
 		{
+			@Override
 			public int compare(Entity entity1, Entity entity2)
 			{
 				return entity2.getDouble(COMBINED_SCORE).compareTo(entity1.getDouble(COMBINED_SCORE));
@@ -308,14 +317,15 @@ public class OntologyServiceImpl implements OntologyService
 		{
 			List<MapEntity> synonymEntities = FluentIterable.from(entities).transform(new Function<Entity, MapEntity>()
 			{
+				@Override
 				public MapEntity apply(Entity input)
 				{
 					MapEntity mapEntity = new MapEntity();
 					for (String attrName : input.getAttributeNames())
 						mapEntity.set(attrName, input.get(attrName));
 
-					String ontologyTermSynonym = removeIllegalCharWithSingleWhiteSpace(input
-							.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM));
+					String ontologyTermSynonym = removeIllegalCharWithSingleWhiteSpace(
+							input.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM));
 					double score_1 = NGramDistanceAlgorithm.stringMatching(queryString, ontologyTermSynonym);
 					mapEntity.set(SCORE, score_1);
 
@@ -324,6 +334,7 @@ public class OntologyServiceImpl implements OntologyService
 
 			}).toSortedList(new Comparator<MapEntity>()
 			{
+				@Override
 				public int compare(MapEntity o1, MapEntity o2)
 				{
 					return o2.getDouble(SCORE).compareTo(o1.getDouble(SCORE));
@@ -344,8 +355,8 @@ public class OntologyServiceImpl implements OntologyService
 				StringBuilder tempCombinedSynonym = new StringBuilder().append(topMatchedSynonym)
 						.append(SINGLE_WHITESPACE).append(nextMatchedSynonym);
 
-				double newScore = NGramDistanceAlgorithm.stringMatching(queryString.replaceAll(ILLEGAL_CHARACTERS_PATTERN,
-						SINGLE_WHITESPACE),
+				double newScore = NGramDistanceAlgorithm.stringMatching(
+						queryString.replaceAll(ILLEGAL_CHARACTERS_PATTERN, SINGLE_WHITESPACE),
 						tempCombinedSynonym.toString().replaceAll(ILLEGAL_CHARACTERS_PATTERN, SINGLE_WHITESPACE));
 
 				if (newScore > ngramScore)
@@ -368,9 +379,8 @@ public class OntologyServiceImpl implements OntologyService
 			{
 				if (synonymStemmedWordSet.contains(originalWord) && weightedWordSimilarity.containsKey(originalWord))
 				{
-					topMatchedSynonymEntity.set(COMBINED_SCORE,
-							(topMatchedSynonymEntity.getDouble(COMBINED_SCORE) + weightedWordSimilarity
-									.get(originalWord)));
+					topMatchedSynonymEntity.set(COMBINED_SCORE, (topMatchedSynonymEntity.getDouble(COMBINED_SCORE)
+							+ weightedWordSimilarity.get(originalWord)));
 				}
 			}
 			return topMatchedSynonymEntity;

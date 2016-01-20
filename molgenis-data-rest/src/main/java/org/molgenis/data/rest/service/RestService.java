@@ -1,6 +1,7 @@
 package org.molgenis.data.rest.service;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL_MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
@@ -28,8 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import com.google.common.collect.Lists;
 
 @Service
 public class RestService
@@ -124,8 +123,8 @@ public class RestService
 				value = dataService.findOne(attr.getRefEntity().getName(), paramValue);
 				if (value == null)
 				{
-					throw new IllegalArgumentException("No " + attr.getRefEntity().getName() + " with id " + paramValue
-							+ " found");
+					throw new IllegalArgumentException(
+							"No " + attr.getRefEntity().getName() + " with id " + paramValue + " found");
 				}
 			}
 			else if (attr.getDataType().getEnumType() == MREF || attr.getDataType().getEnumType() == CATEGORICAL_MREF)
@@ -133,8 +132,8 @@ public class RestService
 				List<Object> ids = DataConverter.toObjectList(paramValue);
 				if ((ids != null) && !ids.isEmpty())
 				{
-					Iterable<Entity> mrefs = dataService.findAll(attr.getRefEntity().getName(), ids);
-					List<Entity> mrefList = Lists.newArrayList(mrefs);
+					List<Entity> mrefList = dataService.findAll(attr.getRefEntity().getName(), ids.stream())
+							.collect(toList());
 					if (mrefList.size() != ids.size())
 					{
 						throw new IllegalArgumentException("Could not find all referencing ids for  " + attr.getName());

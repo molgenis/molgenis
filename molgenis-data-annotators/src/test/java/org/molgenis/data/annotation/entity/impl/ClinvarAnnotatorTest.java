@@ -14,6 +14,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.stream.Stream;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -248,7 +249,7 @@ public class ClinvarAnnotatorTest extends AbstractTestNGSpringContextTests
 		public DataService dataService()
 		{
 			DataService dataService = mock(DataService.class);
-			when(dataService.findAll(any(String.class), any(Query.class))).thenReturn(Collections.emptyList());
+			when(dataService.findAll(any(String.class), any(Query.class))).thenReturn(Stream.empty());
 			return dataService;
 		}
 
