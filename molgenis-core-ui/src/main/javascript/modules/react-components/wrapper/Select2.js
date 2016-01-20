@@ -2,6 +2,7 @@ import React from "react";
 import DeepPureRenderMixin from "../mixin/DeepPureRenderMixin";
 import $ from "jquery";
 import Button from "../Button";
+import _ from "underscore";
 
 	var input = React.DOM.input, span = React.DOM.span, div = React.DOM.div;
 	
