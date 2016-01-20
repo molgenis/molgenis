@@ -82,15 +82,9 @@ public class MetaDataRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
 		return decorated.findAll(q);
-	}
-
-	@Override
-	public Stream<Entity> findAllAsStream(Query q)
-	{
-		return decorated.findAllAsStream(q);
 	}
 
 	@Override
@@ -112,21 +106,9 @@ public class MetaDataRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		return decorated.findAll(ids);
-	}
-
-	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		return decorated.findAll(ids);
-	}
-
-	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
-	{
-		return decorated.findAll(ids, fetch);
 	}
 
 	@Override
@@ -148,12 +130,6 @@ public class MetaDataRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void update(Iterable<? extends Entity> records)
-	{
-		decorated.update(records);
-	}
-
-	@Override
 	public void update(Stream<? extends Entity> entities)
 	{
 		decorated.update(entities);
@@ -163,12 +139,6 @@ public class MetaDataRepositoryDecorator implements Repository
 	public void delete(Entity entity)
 	{
 		decorated.delete(entity);
-	}
-
-	@Override
-	public void delete(Iterable<? extends Entity> entities)
-	{
-		decorated.delete(entities);
 	}
 
 	@Override
@@ -184,7 +154,7 @@ public class MetaDataRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
 		decorated.deleteById(ids);
 	}
@@ -199,12 +169,6 @@ public class MetaDataRepositoryDecorator implements Repository
 	public void add(Entity entity)
 	{
 		decorated.add(entity);
-	}
-
-	@Override
-	public Integer add(Iterable<? extends Entity> entities)
-	{
-		return decorated.add(entities);
 	}
 
 	@Override
