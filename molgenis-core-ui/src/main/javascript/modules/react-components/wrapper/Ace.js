@@ -34,7 +34,7 @@ import ace from "brace";
 			};
 		},
 		getInitialState: function() {
-			return {value: this.props.value};
+			return {value: this.props.value || ''};
 		},
 		componentWillReceiveProps : function(nextProps) {
 			this.setState({value: nextProps.value});
