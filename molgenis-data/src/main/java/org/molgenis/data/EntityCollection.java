@@ -1,9 +1,18 @@
 package org.molgenis.data;
 
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public interface EntityCollection extends Iterable<Entity>
 {
+	/**
+	 * Streams the {@link Entity}s
+	 */
+	default Stream<Entity> stream()
+	{
+		return StreamSupport.stream(spliterator(), false);
+	}
+
 	Iterable<String> getAttributeNames();
 
 	/**
@@ -13,10 +22,4 @@ public interface EntityCollection extends Iterable<Entity>
 	 */
 	public boolean isLazy();
 
-	/**
-	 * Returns entity collection as a stream
-	 * 
-	 * @return entity stream
-	 */
-	public Stream<Entity> asStream();
 }

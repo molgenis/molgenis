@@ -10,10 +10,13 @@ import static org.molgenis.security.core.Permission.WRITEMETA;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.molgenis.auth.Authority;
 import org.molgenis.auth.GroupAuthority;
@@ -42,8 +45,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 
-import com.google.common.collect.Lists;
-
 @Controller
 @RequestMapping(URI)
 public class ImportWizardController extends AbstractWizardController
@@ -69,7 +70,8 @@ public class ImportWizardController extends AbstractWizardController
 		super(URI, "importWizard");
 		if (uploadWizardPage == null) throw new IllegalArgumentException("UploadWizardPage is null");
 		if (optionsWizardPage == null) throw new IllegalArgumentException("OptionsWizardPage is null");
-		if (validationResultWizardPage == null) throw new IllegalArgumentException("ValidationResultWizardPage is null");
+		if (validationResultWizardPage == null)
+			throw new IllegalArgumentException("ValidationResultWizardPage is null");
 		if (importResultsWizardPage == null) throw new IllegalArgumentException("ImportResultsWizardPage is null");
 		this.uploadWizardPage = uploadWizardPage;
 		this.optionsWizardPage = optionsWizardPage;
@@ -126,23 +128,29 @@ public class ImportWizardController extends AbstractWizardController
 	@ResponseStatus(HttpStatus.OK)
 	public void addGroupEntityClassPermissions(@RequestParam String groupId, WebRequest webRequest)
 	{
-		List<String> entities = Lists.newArrayList(dataService.getEntityNames());
-
-		for (String entityClassId : entities)
-		{
-
+		dataService.getEntityNames().forEach(entityClassId -> {
 			GroupAuthority authority = getGroupAuthority(groupId, entityClassId);
 			String param = "radio-" + entityClassId;
 			String value = webRequest.getParameter(param);
+<<<<<<< HEAD
 			if (value != null
 					&& (SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX
 							+ entityClassId.toUpperCase()) || userAccountService.getCurrentUser().getSuperuser()))
 			{
 				if (value.equalsIgnoreCase(READ.toString()) || value.equalsIgnoreCase(COUNT.toString())
 						|| value.equalsIgnoreCase(WRITE.toString()) || value.equalsIgnoreCase(WRITEMETA.toString()))
+=======
+			if (value != null && (SecurityUtils
+					.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX + entityClassId.toUpperCase())
+					|| userAccountService.getCurrentUser().getSuperuser()))
+			{
+				if ((value.equalsIgnoreCase(org.molgenis.security.core.Permission.READ.toString())
+						|| value.equalsIgnoreCase(org.molgenis.security.core.Permission.COUNT.toString())
+						|| value.equalsIgnoreCase(org.molgenis.security.core.Permission.WRITE.toString())))
+>>>>>>> molgenis/master
 				{
-					authority.setMolgenisGroup(dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId,
-							MolgenisGroup.class));
+					authority.setMolgenisGroup(
+							dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class));
 					authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_"
 							+ entityClassId.toUpperCase());
 					if (authority.getId() == null)
@@ -158,8 +166,8 @@ public class ImportWizardController extends AbstractWizardController
 				}
 				else
 				{
-					throw new RuntimeException("Unknown value: " + value + " for permission on entity: "
-							+ entityClassId);
+					throw new RuntimeException(
+							"Unknown value: " + value + " for permission on entity: " + entityClassId);
 				}
 			}
 			else
@@ -167,15 +175,14 @@ public class ImportWizardController extends AbstractWizardController
 				if (value != null) throw new MolgenisDataAccessException(
 						"Current user is not allowed to change the permissions for this entity: " + entityClassId);
 			}
-		}
+		});
 	}
 
 	private List<Authority> getGroupPermissions(MolgenisGroup molgenisGroup)
 	{
-		Iterable<GroupAuthority> authorities = dataService.findAll(GroupAuthority.ENTITY_NAME,
-				new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, molgenisGroup), GroupAuthority.class);
-
-		return Lists.newArrayList(authorities);
+		return dataService.findAll(GroupAuthority.ENTITY_NAME,
+				new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, molgenisGroup), GroupAuthority.class)
+				.collect(Collectors.toList());
 	}
 
 	private Permissions createPermissions(List<? extends Authority> entityAuthorities, List<String> entityIds)
@@ -237,9 +244,11 @@ public class ImportWizardController extends AbstractWizardController
 	private GroupAuthority getGroupAuthority(String groupId, String entityClassId)
 	{
 		GroupAuthority authority = new GroupAuthority();
-		for (GroupAuthority groupAuthority : dataService.findAll(GroupAuthority.ENTITY_NAME,
-				new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, groupId), GroupAuthority.class))
+		Stream<GroupAuthority> stream = dataService.findAll(GroupAuthority.ENTITY_NAME,
+				new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, groupId), GroupAuthority.class);
+		for (Iterator<GroupAuthority> it = stream.iterator(); it.hasNext();)
 		{
+			GroupAuthority groupAuthority = it.next();
 			String entity = "";
 			if (groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_COUNT_PREFIX)
 					|| groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX))
@@ -260,6 +269,7 @@ public class ImportWizardController extends AbstractWizardController
 			}
 		}
 		return authority;
+
 	}
 
 	private String getAuthorityEntityId(String role)

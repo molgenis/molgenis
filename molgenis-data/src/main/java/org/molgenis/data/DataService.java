@@ -2,6 +2,7 @@ package org.molgenis.data;
 
 import java.util.Set;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.molgenis.data.meta.MetaDataService;
 
@@ -12,6 +13,13 @@ import org.molgenis.data.meta.MetaDataService;
  */
 public interface DataService extends Iterable<Repository>
 {
+	/**
+	 * Streams the {@link Repository}s
+	 */
+	default Stream<Repository> stream()
+	{
+		return StreamSupport.stream(spliterator(), false);
+	}
 
 	void setMeta(MetaDataService metaDataService);
 
@@ -74,18 +82,6 @@ public interface DataService extends Iterable<Repository>
 	long count(String entityName, Query q);
 
 	/**
-	 * Find all entities of the given type. Returns empty Iterable if no matches.
-	 * 
-	 * @throws MolgenisDataException
-	 *             if the repository of the entity isn't a Queryable
-	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 */
-	Iterable<Entity> findAll(String entityName);
-
-	/**
 	 * Find all entities of the given type. Returns empty Stream if no matches.
 	 * 
 	 * @throws MolgenisDataException
@@ -95,7 +91,7 @@ public interface DataService extends Iterable<Repository>
 	 * @param entityName
 	 *            entity name (case insensitive)
 	 */
-	Stream<Entity> findAllAsStream(String entityName);
+	Stream<Entity> findAll(String entityName);
 
 	/**
 	 * type-safe find all entities
@@ -105,17 +101,7 @@ public interface DataService extends Iterable<Repository>
 	 * @param entityName
 	 *            entity name (case insensitive)
 	 */
-	<E extends Entity> Iterable<E> findAll(String entityName, Class<E> clazz);
-
-	/**
-	 * type-safe find all entities
-	 * 
-	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 */
-	<E extends Entity> Stream<E> findAllAsStream(String entityName, Class<E> clazz);
+	<E extends Entity> Stream<E> findAll(String entityName, Class<E> clazz);
 
 	/**
 	 * Find entities that match a query. Returns empty stream if no matches.
@@ -127,19 +113,7 @@ public interface DataService extends Iterable<Repository>
 	 * @param entityName
 	 *            entity name (case insensitive)
 	 */
-	Iterable<Entity> findAll(String entityName, Query q);
-
-	/**
-	 * Find entities that match a query. Returns empty stream if no matches.
-	 * 
-	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
-	 * 
-	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 */
-	Stream<Entity> findAllAsStream(String entityName, Query q);
+	Stream<Entity> findAll(String entityName, Query q);
 
 	/**
 	 * type-safe find entities that match a query
@@ -149,70 +123,7 @@ public interface DataService extends Iterable<Repository>
 	 * @param entityName
 	 *            entity name (case insensitive)
 	 */
-	<E extends Entity> Iterable<E> findAll(String entityName, Query q, Class<E> clazz);
-
-	/**
-	 * type-safe find entities that match a query
-	 * 
-	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 */
-	<E extends Entity> Stream<E> findAllAsStream(String entityName, Query q, Class<E> clazz);
-
-	/**
-	 * Find entities based on id. Returns empty Iterable if no matches.
-	 * 
-	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 * @param ids
-	 * @return (empty) Iterable where the order of entities matches the order of ids, never null
-	 */
-	Iterable<Entity> findAll(String entityName, Iterable<Object> ids);
-
-	/**
-	 * type-safe find entities that match a stream of ids
-	 * 
-	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 */
-	<E extends Entity> Iterable<E> findAll(String entityName, Iterable<Object> ids, Class<E> clazz);
-
-	/**
-	 * Find entities based on id.
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 * @param ids
-	 *            entity ids
-	 * @param fetch
-	 *            fetch defining which attributes to retrieve
-	 * @return (empty) Iterable where the order of entities matches the order of ids, never null
-	 * @throws MolgenisDataAccessException
-	 */
-	Iterable<Entity> findAll(String entityName, Iterable<Object> ids, Fetch fetch);
-
-	/**
-	 * Type-safe find entities based on id.
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 * @param ids
-	 *            entity ids
-	 * @param fetch
-	 *            fetch defining which attributes to retrieve
-	 * @param clazz
-	 *            typed entity class
-	 * @return (empty) Iterable of entities of the give type where the order of entities matches the order of ids, never
-	 *         null
-	 * @throws MolgenisDataAccessException
-	 */
-	<E extends Entity> Iterable<E> findAll(String entityName, Iterable<Object> ids, Fetch fetch, Class<E> clazz);
+	<E extends Entity> Stream<E> findAll(String entityName, Query q, Class<E> clazz);
 
 	/**
 	 * Find entities based on id. Returns empty stream if no matches.
@@ -368,15 +279,6 @@ public interface DataService extends Iterable<Repository>
 	void add(String entityName, Entity entity);
 
 	/**
-	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 * @param entities
-	 */
-	void add(String entityName, Iterable<? extends Entity> entities);
-
-	/**
 	 * Adds entities to it's repository
 	 *
 	 * @param entityName
@@ -399,16 +301,6 @@ public interface DataService extends Iterable<Repository>
 	void update(String entityName, Entity entity);
 
 	/**
-	 * 
-	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 * @param entities
-	 */
-	void update(String entityName, Iterable<? extends Entity> entities);
-
-	/**
 	 * Updates entities
 	 * 
 	 * @param entityName
@@ -429,18 +321,6 @@ public interface DataService extends Iterable<Repository>
 	 *            entity name (case insensitive)
 	 */
 	void delete(String entityName, Entity entity);
-
-	/**
-	 * Deletes entities
-	 * 
-	 * @throws MolgenisDataException
-	 *             if the repository of the entity isn't an Updateable
-	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 */
-	void delete(String entityName, Iterable<? extends Entity> entity);
 
 	/**
 	 * Delete entities from it's repository
@@ -484,7 +364,7 @@ public interface DataService extends Iterable<Repository>
 	/**
 	 * Get names of all the entities in this source
 	 */
-	Iterable<String> getEntityNames();
+	Stream<String> getEntityNames();
 
 	/**
 	 * Adds an entity listener for a entity of the given class that listens to entity changes
@@ -501,5 +381,4 @@ public interface DataService extends Iterable<Repository>
 	 *            entity listener for a entity
 	 */
 	void removeEntityListener(String entityName, EntityListener entityListener);
-
 }

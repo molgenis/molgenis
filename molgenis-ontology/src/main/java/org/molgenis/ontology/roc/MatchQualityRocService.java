@@ -11,12 +11,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisInvalidFormatException;
+import org.molgenis.data.Query;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.excel.ExcelSheetWriter;
 import org.molgenis.data.excel.ExcelWriter;
@@ -53,8 +54,8 @@ public class MatchQualityRocService
 		this.ontologyService = ontologyService;
 	}
 
-	public Map<String, Object> calculateROC(String matchingTaskIdentifier) throws IOException,
-			MolgenisInvalidFormatException
+	public Map<String, Object> calculateROC(String matchingTaskIdentifier)
+			throws IOException, MolgenisInvalidFormatException
 	{
 		Map<String, Object> data = new HashMap<String, Object>();
 		if (StringUtils.isNotEmpty(matchingTaskIdentifier))
@@ -73,15 +74,14 @@ public class MatchQualityRocService
 						new QueryImpl().eq(MatchingTaskContentEntityMetaData.REF_ENTITY, matchingTaskIdentifier));
 
 				// Get all validated matches
-				Iterable<Entity> validatedMatchEntities = dataService.findAll(
-						MatchingTaskContentEntityMetaData.ENTITY_NAME,
-						new QueryImpl().eq(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName).and().nest()
-								.eq(MatchingTaskContentEntityMetaData.VALIDATED, true).or()
-								.ge(MatchingTaskContentEntityMetaData.SCORE, threshold).unnest());
+				Query q = new QueryImpl().eq(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName).and().nest()
+						.eq(MatchingTaskContentEntityMetaData.VALIDATED, true).or()
+						.ge(MatchingTaskContentEntityMetaData.SCORE, threshold).unnest();
+				Stream<Entity> validatedMatchEntities = dataService
+						.findAll(MatchingTaskContentEntityMetaData.ENTITY_NAME, q);
 
 				List<Entity> resultEntities = new ArrayList<Entity>();
-				for (Entity validatedMatchEntity : validatedMatchEntities)
-				{
+				validatedMatchEntities.forEach(validatedMatchEntity -> {
 					String matchedCodeIdentifier = validatedMatchEntity
 							.getString(MatchingTaskContentEntityMetaData.MATCHED_TERM);
 					boolean manualMatchExists = matchedCodeIdentifier != null && !matchedCodeIdentifier.equals("NULL");
@@ -97,8 +97,8 @@ public class MatchQualityRocService
 						for (Map<String, Object> candidateMatch : searchResult.getOntologyTerms())
 						{
 							rank++;
-							String candidateMatchIdentifier = candidateMatch
-									.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI).toString();
+							String candidateMatchIdentifier = candidateMatch.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI)
+									.toString();
 
 							if (candidateMatchIdentifier.equals(matchedCodeIdentifier))
 							{
@@ -112,7 +112,7 @@ public class MatchQualityRocService
 					entity.set("Rank", rank);
 					entity.set("Match", manualMatchExists);
 					resultEntities.add(entity);
-				}
+				});
 
 				ExcelWriter excelWriter = new ExcelWriter(file, FileFormat.XLS);
 				createRocExcelSheet(resultEntities, entityName, excelWriter);
@@ -123,7 +123,7 @@ public class MatchQualityRocService
 				data.put("entityName", matchingTaskIdentifier);
 				data.put("rocfilePath", file.getAbsolutePath());
 				data.put("totalNumber", totalNumberOfTerms);
-				data.put("validatedNumber", Iterables.size(validatedMatchEntities));
+				data.put("validatedNumber", dataService.count(MatchingTaskContentEntityMetaData.ENTITY_NAME, q));
 				data.put("rocEntities", OntologyServiceUtil.getEntityAsMap(excelRepositoryCollection.getSheet(0)));
 			}
 		}

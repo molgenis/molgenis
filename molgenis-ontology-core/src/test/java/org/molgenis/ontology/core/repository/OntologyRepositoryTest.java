@@ -6,8 +6,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -47,23 +48,17 @@ public class OntologyRepositoryTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testGetOntologies()
 	{
-		when(dataService.findAll(eq(OntologyMetaData.ENTITY_NAME))).thenReturn(asList(ontologyEntity));
-		List<Ontology> ontologies = new ArrayList<Ontology>();
-		for (Ontology ontology : ontologyRepository.getOntologies())
-		{
-			ontologies.add(ontology);
-		}
-
+		when(dataService.findAll(eq(OntologyMetaData.ENTITY_NAME))).thenReturn(Stream.of(ontologyEntity));
+		List<Ontology> ontologies = ontologyRepository.getOntologies().collect(Collectors.toList());
 		assertEquals(ontologies, asList(Ontology.create("1", "http://www.ontology.com/test", "testOntology")));
 	}
 
 	@Test
 	public void testGetOntology()
 	{
-		when(
-				dataService.findOne(OntologyMetaData.ENTITY_NAME,
-						QueryImpl.EQ(OntologyMetaData.ONTOLOGY_IRI, "http://www.ontology.com/test"))).thenReturn(
-				ontologyEntity);
+		when(dataService.findOne(OntologyMetaData.ENTITY_NAME,
+				QueryImpl.EQ(OntologyMetaData.ONTOLOGY_IRI, "http://www.ontology.com/test")))
+						.thenReturn(ontologyEntity);
 		assertEquals(ontologyRepository.getOntology("http://www.ontology.com/test"),
 				Ontology.create("1", "http://www.ontology.com/test", "testOntology"));
 	}

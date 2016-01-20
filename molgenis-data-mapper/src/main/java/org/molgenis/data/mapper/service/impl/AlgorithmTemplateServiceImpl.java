@@ -34,12 +34,11 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 	public Stream<AlgorithmTemplate> find(Map<AttributeMetaData, ExplainedAttributeMetaData> attrMatches)
 	{
 		// get all algorithm templates
-		Iterable<Script> jsScripts = dataService.findAll(ENTITY_NAME,
+		Stream<Script> jsScripts = dataService.findAll(ENTITY_NAME,
 				new QueryImpl().eq(TYPE, SCRIPT_TYPE_JAVASCRIPT_MAGMA), Script.class);
 
 		// select all algorithm templates that can be used with target and sources
-		return StreamSupport.stream(jsScripts.spliterator(), false).flatMap(
-				script -> toAlgorithmTemplate(script, attrMatches));
+		return jsScripts.flatMap(script -> toAlgorithmTemplate(script, attrMatches));
 	}
 
 	private Stream<AlgorithmTemplate> toAlgorithmTemplate(Script script,
@@ -72,10 +71,7 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 			Map<AttributeMetaData, ExplainedAttributeMetaData> attrMatches)
 	{
 
-		return attrMatches
-				.entrySet()
-				.stream()
-				.filter(entry -> !entry.getValue().getExplainedQueryStrings().isEmpty())
+		return attrMatches.entrySet().stream().filter(entry -> !entry.getValue().getExplainedQueryStrings().isEmpty())
 				.filter(entry -> StreamSupport.stream(entry.getValue().getExplainedQueryStrings().spliterator(), false)
 						.allMatch(explain -> explain.getTagName().equalsIgnoreCase(param.getName())))
 				.map(entry -> entry.getKey()).findFirst().orElse(null);

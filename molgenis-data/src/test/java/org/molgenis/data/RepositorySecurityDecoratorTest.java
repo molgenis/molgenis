@@ -1,5 +1,6 @@
 package org.molgenis.data;
 
+import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -19,8 +20,6 @@ import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import com.google.common.collect.Lists;
 
 public class RepositorySecurityDecoratorTest
 {
@@ -85,11 +84,13 @@ public class RepositorySecurityDecoratorTest
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		Iterable<Object> ids = Arrays.<Object> asList(Integer.valueOf(0), Integer.valueOf(1));
+		Stream<Object> ids = Stream.of(Integer.valueOf(0), Integer.valueOf(1));
 		Fetch fetch = new Fetch();
-		Iterable<Entity> entities = Arrays.asList(mock(Entity.class), mock(Entity.class));
-		when(decoratedRepository.findAll(ids, fetch)).thenReturn(entities);
-		assertEquals(entities, Lists.newArrayList(repositorySecurityDecorator.findAll(ids, fetch)));
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		Stream<Entity> entities = Stream.of(entity0, entity1);
+		when(decoratedRepository.findAll(ids, fetch)).thenReturn(Stream.of(entity0, entity1));
+		assertEquals(entities.collect(toList()), repositorySecurityDecorator.findAll(ids, fetch).collect(toList()));
 		verify(decoratedRepository, times(1)).findAll(ids, fetch);
 	}
 
@@ -243,9 +244,9 @@ public class RepositorySecurityDecoratorTest
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		Iterable<Object> ids = Arrays.<Object> asList(Integer.valueOf(0), Integer.valueOf(1));
+		Stream<Object> ids = Stream.of(Integer.valueOf(0), Integer.valueOf(1));
 		Fetch fetch = new Fetch();
-		Iterable<Entity> entities = Arrays.asList(mock(Entity.class), mock(Entity.class));
+		Stream<Entity> entities = Stream.of(mock(Entity.class), mock(Entity.class));
 		when(decoratedRepository.findAll(ids, fetch)).thenReturn(entities);
 		repositorySecurityDecorator.findAll(ids, fetch);
 	}
@@ -354,8 +355,8 @@ public class RepositorySecurityDecoratorTest
 
 		Entity entity0 = mock(Entity.class);
 		Query query = mock(Query.class);
-		when(decoratedRepository.findAllAsStream(query)).thenReturn(Stream.of(entity0));
-		Stream<Entity> entities = repositorySecurityDecorator.findAllAsStream(query);
+		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = repositorySecurityDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
 
@@ -368,8 +369,8 @@ public class RepositorySecurityDecoratorTest
 
 		Entity entity0 = mock(Entity.class);
 		Query query = mock(Query.class);
-		when(decoratedRepository.findAllAsStream(query)).thenReturn(Stream.of(entity0));
-		Stream<Entity> entities = repositorySecurityDecorator.findAllAsStream(query);
+		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = repositorySecurityDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
 }

@@ -7,6 +7,7 @@ import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -18,8 +19,6 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.google.common.collect.Lists;
 
 /**
  * Handle a bit of lagacy, handle query like 'SELECT FROM Category WHERE observableFeature_Identifier=xxx' Resolve xref
@@ -53,8 +52,8 @@ public class QueryResolver
 				{
 					if (r.getField().endsWith("_Identifier"))
 					{
-						String entityName = StringUtils.capitalize(r.getField().substring(0,
-								r.getField().length() - "_Identifier".length()));
+						String entityName = StringUtils
+								.capitalize(r.getField().substring(0, r.getField().length() - "_Identifier".length()));
 						r.setField(entityName);
 
 						Object value = dataService.findOne(entityName, new QueryImpl().eq("Identifier", r.getValue()));
@@ -63,7 +62,8 @@ public class QueryResolver
 					else
 					{
 						FieldTypeEnum dataType = attr.getDataType().getEnumType();
-						if ((dataType == XREF || dataType == MREF || dataType == CATEGORICAL || dataType == CATEGORICAL_MREF))
+						if ((dataType == XREF || dataType == MREF || dataType == CATEGORICAL
+								|| dataType == CATEGORICAL_MREF))
 						{
 							// Find referencing entity if a ref attribute is given and not the ref entity itself
 							if (r.getOperator() == Operator.IN)
@@ -72,19 +72,18 @@ public class QueryResolver
 								Iterator<?> it = iterable.iterator();
 								if (it.hasNext() && !(it.next() instanceof Entity))
 								{
-									Iterable<?> values = dataService.findAll(attr.getRefEntity().getName(),
-											new QueryImpl().in(attr.getRefEntity().getLabelAttribute().getName(),
-													iterable));
+									List<?> values = dataService
+											.findAll(attr.getRefEntity().getName(), new QueryImpl()
+													.in(attr.getRefEntity().getLabelAttribute().getName(), iterable))
+											.collect(Collectors.toList());
 
-									r.setValue(Lists.newArrayList(values));
+									r.setValue(values);
 								}
 							}
 							else if (!(r.getValue() instanceof Entity))
 							{
-								Object value = dataService.findOne(
-										attr.getRefEntity().getName(),
-										new QueryImpl().eq(attr.getRefEntity().getLabelAttribute().getName(),
-												r.getValue()));
+								Object value = dataService.findOne(attr.getRefEntity().getName(), new QueryImpl()
+										.eq(attr.getRefEntity().getLabelAttribute().getName(), r.getValue()));
 
 								r.setValue(value);
 							}

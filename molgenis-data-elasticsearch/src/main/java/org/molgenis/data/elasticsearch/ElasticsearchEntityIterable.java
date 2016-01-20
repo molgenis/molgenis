@@ -1,7 +1,6 @@
 package org.molgenis.data.elasticsearch;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
 import static org.elasticsearch.index.query.FilterBuilders.queryFilter;
 import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
 import static org.elasticsearch.index.query.QueryBuilders.indicesQuery;
@@ -13,7 +12,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -128,7 +127,7 @@ class ElasticsearchEntityIterable extends BatchingQueryResult implements EntityC
 			if (ElasticsearchRepositoryCollection.NAME.equals(entityMeta.getBackend()))
 			{
 				// create entities from the source documents
-				entities = stream(searchHits.spliterator(), false).map(
+				entities = StreamSupport.stream(searchHits.spliterator(), false).map(
 						searchHit -> elasticsearchEntityFactory.create(entityMeta, searchHit.getSource(), q.getFetch()))
 						.collect(Collectors.toList());
 			}
@@ -157,12 +156,6 @@ class ElasticsearchEntityIterable extends BatchingQueryResult implements EntityC
 		return !ElasticsearchRepositoryCollection.NAME.equals(entityMeta.getBackend());
 	}
 
-	@Override
-	public Stream<Entity> asStream()
-	{
-		return stream(this.spliterator(), false);
-	}
-
 	private Iterable<Entity> createEntityReferences(SearchHits searchHits)
 	{
 		// create entity references for the search result document ids
@@ -172,7 +165,7 @@ class ElasticsearchEntityIterable extends BatchingQueryResult implements EntityC
 			public Iterator<Object> iterator()
 			{
 				// convert id value to required id data type (Elasticsearch ids are always string)
-				return stream(searchHits.spliterator(), false).map(SearchHit::getId)
+				return StreamSupport.stream(searchHits.spliterator(), false).map(SearchHit::getId)
 						.map(idString -> convert(idString, entityMeta.getIdAttribute())).collect(Collectors.toList())
 						.iterator();
 			}

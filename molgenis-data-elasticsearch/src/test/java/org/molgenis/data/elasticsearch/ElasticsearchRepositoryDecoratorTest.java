@@ -33,8 +33,6 @@ import org.molgenis.data.support.AggregateQueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Iterables;
-
 public class ElasticsearchRepositoryDecoratorTest
 {
 	private ElasticsearchRepositoryDecorator elasticsearchRepositoryDecorator;
@@ -76,16 +74,6 @@ public class ElasticsearchRepositoryDecoratorTest
 		ArgumentCaptor<Entity> argument = ArgumentCaptor.forClass(Entity.class);
 		verify(elasticSearchService).index(argument.capture(), eq(repositoryEntityMetaData), eq(IndexingMode.ADD));
 
-	}
-
-	@Test
-	public void addIterableextendsEntity()
-	{
-		List<Entity> entities = Arrays.asList(mock(Entity.class), mock(Entity.class));
-		elasticsearchRepositoryDecorator.add(entities);
-		verify(decoratedRepo).add(entities);
-		verify(elasticSearchService).index(Matchers.<Iterable<Entity>> any(), eq(repositoryEntityMetaData),
-				eq(IndexingMode.ADD));
 	}
 
 	@Test
@@ -160,15 +148,6 @@ public class ElasticsearchRepositoryDecoratorTest
 	}
 
 	@Test
-	public void deleteIterableextendsEntity()
-	{
-		List<Entity> entities = Arrays.asList(mock(Entity.class), mock(Entity.class));
-		elasticsearchRepositoryDecorator.delete(entities);
-		verify(decoratedRepo).delete(entities);
-		verify(elasticSearchService).delete(Matchers.<Iterable<Entity>> any(), eq(repositoryEntityMetaData));
-	}
-
-	@Test
 	public void deleteStream()
 	{
 		List<Entity> entities = new ArrayList<Entity>();
@@ -198,54 +177,6 @@ public class ElasticsearchRepositoryDecoratorTest
 		ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
 		verify(elasticSearchService).deleteById(argument.capture(), eq(repositoryEntityMetaData));
 		assertEquals(argument.getValue(), entityName + id.toString());
-	}
-
-	@Test
-	public void deleteByIdIterableObject()
-	{
-		List<Object> ids = Arrays.asList(mock(Object.class), mock(Object.class));
-		elasticsearchRepositoryDecorator.deleteById(ids);
-		verify(decoratedRepo).deleteById(ids);
-		verify(elasticSearchService).deleteById(Matchers.<Iterable<String>> any(), eq(repositoryEntityMetaData));
-	}
-
-	@Test
-	public void findAllQuery()
-	{
-		Query q = mock(Query.class);
-		List<Entity> entities = Arrays.<Entity> asList(mock(Entity.class), mock(Entity.class));
-		when(elasticSearchService.search(q, repositoryEntityMetaData)).thenReturn(entities);
-		elasticsearchRepositoryDecorator.findAll(q);
-		verify(elasticSearchService).search(q, repositoryEntityMetaData);
-	}
-
-	@Test
-	public void findAllQuery_noResults()
-	{
-		Query q = mock(Query.class);
-		List<Entity> entities = Collections.emptyList();
-		when(elasticSearchService.search(q, repositoryEntityMetaData)).thenReturn(entities);
-		assertEquals(Iterables.size(elasticsearchRepositoryDecorator.findAll(q)), 0);
-	}
-
-	@Test
-	public void findAllIterableObject()
-	{
-		List<Object> ids = Arrays.asList(mock(Object.class), mock(Object.class));
-		elasticsearchRepositoryDecorator.findAll(ids);
-		verify(decoratedRepo).findAll(ids);
-	}
-
-	@Test
-	public void findAllIterableObjectFetch()
-	{
-		List<Object> ids = Arrays.asList(mock(Object.class), mock(Object.class));
-		Fetch fetch = new Fetch();
-		Iterable<Entity> entities = Arrays.asList(mock(Entity.class), mock(Entity.class));
-		when(decoratedRepo.findAll(ids, fetch)).thenReturn(entities);
-		assertEquals(elasticsearchRepositoryDecorator.findAll(ids, fetch), entities);
-		verify(decoratedRepo, times(1)).findAll(ids, fetch);
-		verifyNoMoreInteractions(decoratedRepo);
 	}
 
 	@Test
@@ -339,16 +270,8 @@ public class ElasticsearchRepositoryDecoratorTest
 		assertEquals(argument.getValue().get(idAttrName), entityName + id);
 	}
 
-	@Test
-	public void updateIterableextendsEntity()
-	{
-		List<Entity> entities = Arrays.asList(mock(Entity.class), mock(Entity.class));
-		elasticsearchRepositoryDecorator.update(entities);
-		verify(decoratedRepo).update(entities);
-		verify(elasticSearchService).index(Matchers.<Iterable<Entity>> any(), eq(repositoryEntityMetaData),
-				eq(IndexingMode.UPDATE));
-	}
-
+	@SuppressWarnings(
+	{ "unchecked", "rawtypes" })
 	@Test
 	public void updateStream()
 	{
@@ -358,12 +281,21 @@ public class ElasticsearchRepositoryDecoratorTest
 			entities.add(mock(Entity.class));
 		}
 		elasticsearchRepositoryDecorator.update(entities.stream());
-		verify(decoratedRepo, times(1)).update(entities.subList(0, 1000));
-		verify(decoratedRepo, times(1)).update(entities.subList(1000, 1100));
-		verify(elasticSearchService, times(1)).index(entities.subList(0, 1000), repositoryEntityMetaData,
-				IndexingMode.UPDATE);
-		verify(elasticSearchService, times(1)).index(entities.subList(1000, 1100), repositoryEntityMetaData,
-				IndexingMode.UPDATE);
+
+		ArgumentCaptor<Stream<Entity>> decoratedRepoCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(decoratedRepo, times(2)).update(decoratedRepoCaptor.capture());
+		List<Stream<Entity>> decoratedRepoValues = decoratedRepoCaptor.getAllValues();
+		assertEquals(decoratedRepoValues.size(), 2);
+		assertEquals(decoratedRepoValues.get(0).collect(Collectors.toList()), entities.subList(0, 1000));
+		assertEquals(decoratedRepoValues.get(1).collect(Collectors.toList()), entities.subList(1000, 1100));
+
+		ArgumentCaptor<Stream<Entity>> elasticSearchServiceCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(elasticSearchService, times(2)).index(elasticSearchServiceCaptor.capture(), eq(repositoryEntityMetaData),
+				eq(IndexingMode.UPDATE));
+		List<Stream<Entity>> elasticSearchServiceValues = elasticSearchServiceCaptor.getAllValues();
+		assertEquals(elasticSearchServiceValues.size(), 2);
+		assertEquals(elasticSearchServiceValues.get(0).collect(Collectors.toList()), entities.subList(0, 1000));
+		assertEquals(elasticSearchServiceValues.get(1).collect(Collectors.toList()), entities.subList(1000, 1100));
 	}
 
 	@Test

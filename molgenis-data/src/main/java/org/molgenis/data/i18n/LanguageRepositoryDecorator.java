@@ -82,15 +82,9 @@ public class LanguageRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
 		return decorated.findAll(q);
-	}
-
-	@Override
-	public Stream<Entity> findAllAsStream(Query q)
-	{
-		return decorated.findAllAsStream(q);
 	}
 
 	@Override
@@ -112,21 +106,9 @@ public class LanguageRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		return decorated.findAll(ids);
-	}
-
-	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		return decorated.findAll(ids);
-	}
-
-	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
-	{
-		return decorated.findAll(ids, fetch);
 	}
 
 	@Override
@@ -145,12 +127,6 @@ public class LanguageRepositoryDecorator implements Repository
 	public void update(Entity entity)
 	{
 		decorated.update(entity);
-	}
-
-	@Override
-	public void update(Iterable<? extends Entity> records)
-	{
-		decorated.update(records);
 	}
 
 	@Override
@@ -213,12 +189,6 @@ public class LanguageRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void delete(Iterable<? extends Entity> entities)
-	{
-		entities.forEach(this::delete);
-	}
-
-	@Override
 	public void delete(Stream<? extends Entity> entities)
 	{
 		entities.forEach(this::delete);
@@ -232,7 +202,7 @@ public class LanguageRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
 		ids.forEach(this::deleteById);
 	}
@@ -240,7 +210,7 @@ public class LanguageRepositoryDecorator implements Repository
 	@Override
 	public void deleteAll()
 	{
-		delete(this);
+		delete(this.stream());
 	}
 
 	@Override
@@ -286,19 +256,6 @@ public class LanguageRepositoryDecorator implements Repository
 			dataService.getMeta().getDefaultBackend().addAttribute(I18nStringMetaData.ENTITY_NAME,
 					I18nStringMetaData.INSTANCE.getAttribute(languageCode));
 		}
-	}
-
-	@Override
-	public Integer add(Iterable<? extends Entity> entities)
-	{
-		int count = 0;
-		for (Entity e : entities)
-		{
-			add(e);
-			count++;
-		}
-
-		return count;
 	}
 
 	@Override

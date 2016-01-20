@@ -13,7 +13,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.auth.MolgenisUser;
@@ -73,7 +76,8 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public PermissionManagerServiceImpl pluginPermissionManagerServiceImpl()
 		{
-			return new PermissionManagerServiceImpl(dataService(), molgenisPluginRegistry(), grantedAuthoritiesMapper());
+			return new PermissionManagerServiceImpl(dataService(), molgenisPluginRegistry(),
+					grantedAuthoritiesMapper());
 		}
 
 		@Bean
@@ -161,15 +165,25 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		webRequest = mock(WebRequest.class);
 		when(webRequest.getParameter("entityIds")).thenReturn("entity1,entity2");
 		when(dataService.findOne(MolgenisGroup.ENTITY_NAME, "ID", MolgenisGroup.class)).thenReturn(group1);
-		when(
-				dataService.findAll(GroupAuthority.ENTITY_NAME,
-						new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, group1), GroupAuthority.class)).thenReturn(
-				authorities);
-		when(
-				dataService.findAll(GroupAuthority.ENTITY_NAME, new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, "ID"),
-						GroupAuthority.class)).thenReturn(authorities);
-		List<String> names = Arrays.asList("entity1,entity2,entity3,entity4,entity5".split(","));
-		when(dataService.getEntityNames()).thenReturn(names);
+		when(dataService.findAll(GroupAuthority.ENTITY_NAME, new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, group1),
+				GroupAuthority.class)).thenAnswer(new Answer<Stream<GroupAuthority>>()
+				{
+					@Override
+					public Stream<GroupAuthority> answer(InvocationOnMock invocation) throws Throwable
+					{
+						return Stream.of(authority1, authority2, authority3, authority4);
+					}
+				});
+		when(dataService.findAll(GroupAuthority.ENTITY_NAME, new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, "ID"),
+				GroupAuthority.class)).thenAnswer(new Answer<Stream<GroupAuthority>>()
+				{
+					@Override
+					public Stream<GroupAuthority> answer(InvocationOnMock invocation) throws Throwable
+					{
+						return Stream.of(authority1, authority2, authority3, authority4);
+					}
+				});
+		when(dataService.getEntityNames()).thenReturn(Stream.of("entity1", "entity2", "entity3", "entity4", "entity5"));
 
 		authentication = mock(Authentication.class);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -180,13 +194,11 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		userDetails = mock(UserDetails.class);
 		when(userDetails.getUsername()).thenReturn("username");
 		when(userDetails.getPassword()).thenReturn("encoded-password");
-		when((Collection<GrantedAuthority>) userDetails.getAuthorities()).thenReturn(
-				Arrays.<GrantedAuthority> asList(grantedAuthority1, grantedAuthority2, grantedAuthority3,
-						grantedAuthority4));
+		when((Collection<GrantedAuthority>) userDetails.getAuthorities()).thenReturn(Arrays
+				.<GrantedAuthority> asList(grantedAuthority1, grantedAuthority2, grantedAuthority3, grantedAuthority4));
 		when(authentication.getPrincipal()).thenReturn(userDetails);
-		when((Collection<GrantedAuthority>) authentication.getAuthorities()).thenReturn(
-				Arrays.<GrantedAuthority> asList(grantedAuthority1, grantedAuthority2, grantedAuthority3,
-						grantedAuthority4));
+		when((Collection<GrantedAuthority>) authentication.getAuthorities()).thenReturn(Arrays
+				.<GrantedAuthority> asList(grantedAuthority1, grantedAuthority2, grantedAuthority3, grantedAuthority4));
 	}
 
 	@Test
@@ -215,10 +227,10 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 
 		webRequest = mock(WebRequest.class);
 		when(webRequest.getParameter("entityIds")).thenReturn("entity3,entity4");
-		when(webRequest.getParameter("radio-entity3")).thenReturn(
-				org.molgenis.security.core.Permission.COUNT.toString());
-		when(webRequest.getParameter("radio-entity4")).thenReturn(
-				org.molgenis.security.core.Permission.WRITE.toString());
+		when(webRequest.getParameter("radio-entity3"))
+				.thenReturn(org.molgenis.security.core.Permission.COUNT.toString());
+		when(webRequest.getParameter("radio-entity4"))
+				.thenReturn(org.molgenis.security.core.Permission.WRITE.toString());
 
 		GroupAuthority authority = new GroupAuthority();
 		authority.setMolgenisGroup(dataService.findOne(MolgenisGroup.ENTITY_NAME, "ID", MolgenisGroup.class));
@@ -239,10 +251,10 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 
 		webRequest = mock(WebRequest.class);
 		when(webRequest.getParameter("entityIds")).thenReturn("entity3,entity5");
-		when(webRequest.getParameter("radio-entity3")).thenReturn(
-				org.molgenis.security.core.Permission.COUNT.toString());
-		when(webRequest.getParameter("radio-entity5")).thenReturn(
-				org.molgenis.security.core.Permission.WRITE.toString());
+		when(webRequest.getParameter("radio-entity3"))
+				.thenReturn(org.molgenis.security.core.Permission.COUNT.toString());
+		when(webRequest.getParameter("radio-entity5"))
+				.thenReturn(org.molgenis.security.core.Permission.WRITE.toString());
 		controller.addGroupEntityClassPermissions("ID", webRequest);
 
 	}
@@ -256,10 +268,10 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 
 		webRequest = mock(WebRequest.class);
 		when(webRequest.getParameter("entityIds")).thenReturn("entity3,entity5");
-		when(webRequest.getParameter("radio-entity3")).thenReturn(
-				org.molgenis.security.core.Permission.COUNT.toString());
-		when(webRequest.getParameter("radio-entity5")).thenReturn(
-				org.molgenis.security.core.Permission.WRITE.toString());
+		when(webRequest.getParameter("radio-entity3"))
+				.thenReturn(org.molgenis.security.core.Permission.COUNT.toString());
+		when(webRequest.getParameter("radio-entity5"))
+				.thenReturn(org.molgenis.security.core.Permission.WRITE.toString());
 
 		GroupAuthority authority = new GroupAuthority();
 		authority.setMolgenisGroup(dataService.findOne(MolgenisGroup.ENTITY_NAME, "ID", MolgenisGroup.class));

@@ -1,5 +1,6 @@
 package org.molgenis.data.annotator.tabix;
 
+import static java.util.stream.Collectors.toList;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.vcf.VcfRepository.CHROM;
 import static org.molgenis.data.vcf.VcfRepository.POS;
@@ -8,8 +9,8 @@ import static org.testng.Assert.assertEquals;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.stream.Stream;
 
-import org.elasticsearch.common.collect.Lists;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.molgenis.data.Entity;
@@ -51,10 +52,10 @@ public class TabixVcfRepositoryTest
 	{
 		Mockito.when(tabixReader.query("13:12-12")).thenReturn(null);
 
-		Iterable<Entity> actual = tabixVcfRepository
+		Stream<Entity> actual = tabixVcfRepository
 				.findAll(tabixVcfRepository.query().eq(CHROM, "13").and().eq(POS, 12));
 
-		assertEquals(Collections.emptyList(), Lists.newArrayList(actual));
+		assertEquals(Collections.emptyList(), actual.collect(toList()));
 	}
 
 	@Test
@@ -64,7 +65,7 @@ public class TabixVcfRepositoryTest
 		Mockito.when(iterator.next()).thenReturn("13\t11\tid1\tA\tC\t12\t.\t.\t.", "13\t12\tid2\tA\tC\t12\t.\t.\t.",
 				"13\t12\tid3\tA\tG\t12\t.\t.\t.", "13\t13\tid4\tA\tC\t12\t.\t.\t.", null);
 
-		Iterable<Entity> actual = tabixVcfRepository
+		Stream<Entity> actual = tabixVcfRepository
 				.findAll(tabixVcfRepository.query().eq(CHROM, "13").and().eq(POS, 12));
 
 		Entity e1 = new MapEntity(entityMetaData);
@@ -86,6 +87,6 @@ public class TabixVcfRepositoryTest
 		e2.set("QUAL", "12");
 		e2.set("ID", "id3");
 		e2.set("INTERNAL_ID", "ld2wCadyeITy89CrL2TnWg");
-		assertEquals(Lists.newArrayList(actual), Arrays.asList(e1, e2));
+		assertEquals(actual.collect(toList()), Arrays.asList(e1, e2));
 	}
 }

@@ -85,8 +85,8 @@ public class Omx2EmxConverter
 			Repository categoryRepo = omxRepositoryCollection.getRepository(OMX_TABS.CATEGORY.toString());
 			for (Entity category : categoryRepo)
 			{
-				String observableFeatureIdentifier = category.getString(CATEGORY_COLUMNS.OBSERVABLEFEATURE_IDENTIFIER
-						.toString());
+				String observableFeatureIdentifier = category
+						.getString(CATEGORY_COLUMNS.OBSERVABLEFEATURE_IDENTIFIER.toString());
 				if (!observableFeatureIdentifiers.contains(observableFeatureIdentifier))
 				{
 					observableFeatureIdentifiers.add(observableFeatureIdentifier);
@@ -127,7 +127,7 @@ public class Omx2EmxConverter
 			Writable writable = writableFactory.createWritable(getFullEntityName("Individual"),
 					Arrays.asList("Identifier", "Name", "Description"));
 			Repository individualRepo = omxRepositoryCollection.getRepository(OMX_TABS.INDIVIDUAL.toString());
-			writable.add(individualRepo);
+			writable.add(individualRepo.stream());
 		}
 
 		// Panels
@@ -136,7 +136,7 @@ public class Omx2EmxConverter
 			Writable writable = writableFactory.createWritable(getFullEntityName("Panel"),
 					Arrays.asList("Identifier", "Name", "NumberOfIndividuals"));
 			Repository panelRepo = omxRepositoryCollection.getRepository(OMX_TABS.PANEL.toString());
-			writable.add(panelRepo);
+			writable.add(panelRepo.stream());
 		}
 
 		for (String entityName : omxRepositoryCollection.getEntityNames())
@@ -247,8 +247,8 @@ public class Omx2EmxConverter
 
 				for (Entity category : categoryRepo)
 				{
-					observableFeatureIdentifiers.add(category.getString(CATEGORY_COLUMNS.OBSERVABLEFEATURE_IDENTIFIER
-							.toString()));
+					observableFeatureIdentifiers
+							.add(category.getString(CATEGORY_COLUMNS.OBSERVABLEFEATURE_IDENTIFIER.toString()));
 				}
 
 				for (String observableFeatureIdentifier : observableFeatureIdentifiers)
@@ -359,8 +359,8 @@ public class Omx2EmxConverter
 			// Compound attributes
 			for (Entity protocol : getProtocols().values())
 			{
-				List<String> subprotocolIdentifiers = protocol.getList(PROTOCOL_COLUMNS.SUBPROTOCOLS_IDENTIFIER
-						.toString());
+				List<String> subprotocolIdentifiers = protocol
+						.getList(PROTOCOL_COLUMNS.SUBPROTOCOLS_IDENTIFIER.toString());
 				if (subprotocolIdentifiers != null)
 				{
 					for (String subprotocolIdentifier : subprotocolIdentifiers)
@@ -479,8 +479,8 @@ public class Omx2EmxConverter
 
 				for (Entity category : categoryRepo)
 				{
-					observableFeatureIdentifiers.add(category.getString(CATEGORY_COLUMNS.OBSERVABLEFEATURE_IDENTIFIER
-							.toString()));
+					observableFeatureIdentifiers
+							.add(category.getString(CATEGORY_COLUMNS.OBSERVABLEFEATURE_IDENTIFIER.toString()));
 				}
 
 				for (String observableFeatureIdentifier : observableFeatureIdentifiers)

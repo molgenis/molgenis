@@ -27,8 +27,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Lists;
-
 public class OwnedEntityRepositoryDecoratorTest
 {
 	private EntityMetaData entityMeta;
@@ -139,35 +137,6 @@ public class OwnedEntityRepositoryDecoratorTest
 		List<Entity> entityList = captor.getValue().collect(Collectors.toList());
 		assertEquals(entityList, Arrays.asList(entity0));
 		verify(entityList.get(0)).set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, "username");
-	}
-
-	@Test
-	public void findAllIterableFetchExtendsOwned()
-	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-		when(entityMeta.getExtends()).thenReturn(new OwnedEntityMetaData());
-
-		Iterable<Object> ids = Arrays.<Object> asList(Integer.valueOf(0), Integer.valueOf(1));
-		Fetch fetch = new Fetch();
-		Entity myEntity = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("username").getMock();
-		Entity notMyEntity = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("notme").getMock();
-		Iterable<Entity> entities = Arrays.asList(myEntity, notMyEntity);
-		when(decoratedRepository.findAll(ids, fetch)).thenReturn(entities);
-		assertEquals(Arrays.asList(myEntity), Lists.newArrayList(ownedEntityRepositoryDecorator.findAll(ids, fetch)));
-		verify(decoratedRepository, times(1)).findAll(ids, fetch);
-	}
-
-	@Test
-	public void findAllIterableFetchNotExtendsOwned()
-	{
-		Iterable<Object> ids = Arrays.<Object> asList(Integer.valueOf(0), Integer.valueOf(1));
-		Fetch fetch = new Fetch();
-		Iterable<Entity> entities = Arrays.asList(mock(Entity.class), mock(Entity.class));
-		when(decoratedRepository.findAll(ids, fetch)).thenReturn(entities);
-		assertEquals(entities, ownedEntityRepositoryDecorator.findAll(ids, fetch));
-		verify(decoratedRepository, times(1)).findAll(ids, fetch);
 	}
 
 	@Test
@@ -319,8 +288,8 @@ public class OwnedEntityRepositoryDecoratorTest
 	{
 		Entity entity0 = mock(Entity.class);
 		Query query = mock(Query.class);
-		when(decoratedRepository.findAllAsStream(query)).thenReturn(Stream.of(entity0));
-		Stream<Entity> entities = ownedEntityRepositoryDecorator.findAllAsStream(query);
+		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = ownedEntityRepositoryDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
 
@@ -334,8 +303,8 @@ public class OwnedEntityRepositoryDecoratorTest
 
 		Entity entity0 = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("username").getMock();
 		Query query = mock(Query.class);
-		when(decoratedRepository.findAllAsStream(query)).thenReturn(Stream.of(entity0));
-		Stream<Entity> entities = ownedEntityRepositoryDecorator.findAllAsStream(query);
+		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = ownedEntityRepositoryDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 		verify(query, times(1)).eq(OwnedEntityMetaData.ATTR_OWNER_USERNAME, "username");
 	}

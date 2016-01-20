@@ -10,7 +10,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.Aggregations;
@@ -380,16 +380,13 @@ public class AggregateResponseParser
 		{
 			// Get entities for ids
 			// Use Iterables.transform to work around List<String> to Iterable<Object> cast error
-			List<Object> idLabelsWithoutNull = idLabels.stream().filter(idLabel -> idLabel != null)
-					.collect(Collectors.toList());
-			Iterable<Entity> entities = dataService.findAll(entityMetaData.getName(), idLabelsWithoutNull);
+			Stream<Object> idLabelsWithoutNull = idLabels.stream().filter(idLabel -> idLabel != null);
 
 			// Map entity ids to labels
 			Map<String, Entity> idToLabelMap = new HashMap<>();
-			for (Entity entity : entities)
-			{
+			dataService.findAll(entityMetaData.getName(), idLabelsWithoutNull).forEach(entity -> {
 				idToLabelMap.put(entity.getIdValue().toString(), entity);
-			}
+			});
 
 			for (int i = 0; i < nrLabels; ++i)
 			{
