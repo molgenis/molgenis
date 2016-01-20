@@ -146,7 +146,7 @@
                                 <resources>
                                     <resource>
                                         <directory>target/generated-resources</directory>
-                                        <filtering>false</filtering>
+                                        <filtering>true</filtering>
                                     </resource>
                                 </resources>
                             </configuration>

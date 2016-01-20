@@ -64,27 +64,12 @@ public class RuntimeProperty  extends org.molgenis.data.support.AbstractEntity i
 
     public void set(org.molgenis.data.Entity entity, boolean strict)
     {
-        //set Id
-        // query formal name, else lowercase name
         if(entity.getString("id") != null) this.setId(entity.getString("id"));
-        else if(entity.getString("id") != null) this.setId(entity.getString("id"));
-        else if(strict) this.setId(entity.getString("id")); // setting null is not an option due to function overloading
-        if( entity.getString("runtimeproperty_id") != null) this.setId(entity.getString("runtimeproperty_id"));
-        else if( entity.getString("RuntimeProperty_id") != null) this.setId(entity.getString("RuntimeProperty_id"));
-        //set Name
-        // query formal name, else lowercase name
-        if(entity.getString("name") != null) this.setName(entity.getString("name"));
-        else if(entity.getString("Name") != null) this.setName(entity.getString("Name"));
-        else if(strict) this.setName(entity.getString("name")); // setting null is not an option due to function overloading
-        if( entity.getString("runtimeproperty_name") != null) this.setName(entity.getString("runtimeproperty_name"));
-        else if( entity.getString("RuntimeProperty_Name") != null) this.setName(entity.getString("RuntimeProperty_Name"));
-        //set Value
-        // query formal name, else lowercase name
-        if(entity.getString("value") != null) this.setValue(entity.getString("value"));
-        else if(entity.getString("Value") != null) this.setValue(entity.getString("Value"));
-        else if(strict) this.setValue(entity.getString("value")); // setting null is not an option due to function overloading
-        if( entity.getString("runtimeproperty_value") != null) this.setValue(entity.getString("runtimeproperty_value"));
-        else if( entity.getString("RuntimeProperty_Value") != null) this.setValue(entity.getString("RuntimeProperty_Value"));
+        if( entity.getString("RuntimeProperty_id") != null) this.setId(entity.getString("RuntimeProperty_id"));
+        if(entity.getString("Name") != null) this.setName(entity.getString("Name"));
+        if( entity.getString("RuntimeProperty_Name") != null) this.setName(entity.getString("RuntimeProperty_Name"));
+        if(entity.getString("Value") != null) this.setValue(entity.getString("Value"));
+        if( entity.getString("RuntimeProperty_Value") != null) this.setValue(entity.getString("RuntimeProperty_Value"));
     }
 
     @Override
@@ -125,15 +110,15 @@ public class RuntimeProperty  extends org.molgenis.data.support.AbstractEntity i
     @Override
     public void set(String attributeName, Object value)
     {
-        if("id".equalsIgnoreCase(attributeName)) {
+        if("id".equals(attributeName)) {
             this.setId((String)value);
             return;
         }
-        if("Name".equalsIgnoreCase(attributeName)) {
+        if("Name".equals(attributeName)) {
             this.setName((String)value);
             return;
         }
-        if("Value".equalsIgnoreCase(attributeName)) {
+        if("Value".equals(attributeName)) {
             this.setValue((String)value);
             return;
         }

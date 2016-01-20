@@ -127,15 +127,15 @@ public class UserAuthority extends org.molgenis.data.support.AbstractEntity impl
     @Override
     public void set(String attributeName, Object value)
     {
-        if("role".equalsIgnoreCase(attributeName)) {
+        if("role".equals(attributeName)) {
             this.setRole((String)value);
             return;
         }
-        if("id".equalsIgnoreCase(attributeName)) {
+        if("id".equals(attributeName)) {
             this.setId((String)value);
             return;
         }
-        if("molgenisUser".equalsIgnoreCase(attributeName)) {
+        if("molgenisUser".equals(attributeName)) {
             org.molgenis.auth.MolgenisUser e = new org.molgenis.auth.MolgenisUser();
             e.set((Entity)value);
             this.setMolgenisUser(e);
