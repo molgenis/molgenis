@@ -186,6 +186,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void deleteEntityMeta(String entityName)
 	{
+		validatePermission(entityName, Permission.WRITEMETA);
+
 		transactionTemplate.execute((TransactionStatus status) -> {
 			EntityMetaData emd = getEntityMetaData(entityName);
 			if ((emd != null) && !emd.isAbstract())
@@ -225,6 +227,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void delete(List<EntityMetaData> entities)
 	{
+		entities.forEach(emd -> validatePermission(emd.getName(), Permission.WRITEMETA));
+
 		reverse(DependencyResolver.resolve(Sets.newHashSet(entities))).stream().map(EntityMetaData::getName)
 				.forEach(this::deleteEntityMeta);
 	}
@@ -236,6 +240,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void deleteAttribute(String entityName, String attributeName)
 	{
+		validatePermission(entityName, Permission.WRITEMETA);
+
 		// Update AttributeMetaDataRepository
 		entityMetaDataRepository.removeAttribute(entityName, attributeName);
 		EntityMetaData emd = getEntityMetaData(entityName);
