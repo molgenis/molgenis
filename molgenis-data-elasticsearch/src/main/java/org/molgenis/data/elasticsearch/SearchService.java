@@ -70,7 +70,7 @@ public interface SearchService
 
 	void deleteById(String id, EntityMetaData entityMetaData);
 
-	void deleteById(Iterable<String> ids, EntityMetaData entityMetaData);
+	void deleteById(Stream<String> ids, EntityMetaData entityMetaData);
 
 	void delete(Iterable<? extends Entity> entities, EntityMetaData entityMetaData);
 

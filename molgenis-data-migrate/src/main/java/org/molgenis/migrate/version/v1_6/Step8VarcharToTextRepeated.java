@@ -2,6 +2,7 @@ package org.molgenis.migrate.version.v1_6;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
@@ -66,8 +67,8 @@ public class Step8VarcharToTextRepeated extends MolgenisUpgrade
 			@Override
 			protected MysqlRepository createMysqlRepository()
 			{
-				return new MysqlRepository(dataService, mySqlEntityFactory, dataSource, new AsyncJdbcTemplate(
-						new JdbcTemplate(dataSource)));
+				return new MysqlRepository(dataService, mySqlEntityFactory, dataSource,
+						new AsyncJdbcTemplate(new JdbcTemplate(dataSource)));
 			}
 
 			@Override
@@ -81,7 +82,7 @@ public class Step8VarcharToTextRepeated extends MolgenisUpgrade
 		RunAsSystemProxy.runAsSystem(() -> metaData.setDefaultBackend(undecoratedMySQL));
 
 		// find all entities with backend = MySQL
-		Iterable<Entity> entities = dataService.findAll("entities");
+		Stream<Entity> entities = dataService.findAll("entities");
 		entities.forEach(entity -> {
 			if (entity.get("backend").equals("MySQL"))
 			{
@@ -98,7 +99,8 @@ public class Step8VarcharToTextRepeated extends MolgenisUpgrade
 						{
 							// mysql keys cannot be text so leave those columns untouched
 							if (!(amd.isIdAtrribute() || fieldType instanceof CategoricalMrefField
-									|| fieldType instanceof CategoricalField || fieldType instanceof MrefField || fieldType instanceof XrefField))
+									|| fieldType instanceof CategoricalField || fieldType instanceof MrefField
+									|| fieldType instanceof XrefField))
 							{
 								if (amd.isUnique())
 								{

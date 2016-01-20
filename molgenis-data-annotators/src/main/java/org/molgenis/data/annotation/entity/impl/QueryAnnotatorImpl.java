@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -90,7 +91,14 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 		}
 		else
 		{
-			annotatationSourceEntities = dataService.findAll(sourceRepositoryName, q);
+			annotatationSourceEntities = new Iterable<Entity>()
+			{
+				@Override
+				public Iterator<Entity> iterator()
+				{
+					return dataService.findAll(sourceRepositoryName, q).iterator();
+				}
+			};
 		}
 		DefaultEntityMetaData meta = new DefaultEntityMetaData(entity.getEntityMetaData());
 		info.getOutputAttributes().forEach(meta::addAttributeMetaData);

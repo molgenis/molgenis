@@ -9,6 +9,7 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 import org.mockito.Mockito;
 import org.molgenis.data.DataService;
@@ -26,6 +27,8 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
+
+import com.google.common.collect.Lists;
 
 @ContextConfiguration(classes = ResourcesTest.Config.class)
 public class ResourcesTest extends AbstractTestNGSpringContextTests
@@ -122,16 +125,16 @@ public class ResourcesTest extends AbstractTestNGSpringContextTests
 		Exception ex = new RuntimeException();
 		when(resource.findAll(q)).thenThrow(ex);
 		when(resource.isAvailable()).thenReturn(false);
-		when(dataService.findAll("resourceName", q)).thenReturn(Arrays.asList(e1));
-		assertEquals(resources.findAll("resourceName", q), Arrays.asList(e1));
+		when(dataService.findAll("resourceName", q)).thenReturn(Stream.of(e1));
+		assertEquals(Lists.newArrayList(resources.findAll("resourceName", q)), Arrays.asList(e1));
 	}
 
 	@Test
 	public void ifResourceDoesNotExistThenQueryIsDelegated()
 	{
 		Query q = QueryImpl.EQ("id", "5");
-		when(dataService.findAll("blah", q)).thenReturn(Arrays.asList(e1));
-		assertEquals(resources.findAll("blah", q), Arrays.asList(e1));
+		when(dataService.findAll("blah", q)).thenReturn(Stream.of(e1));
+		assertEquals(Lists.newArrayList(resources.findAll("blah", q)), Arrays.asList(e1));
 	}
 
 	public static class Config

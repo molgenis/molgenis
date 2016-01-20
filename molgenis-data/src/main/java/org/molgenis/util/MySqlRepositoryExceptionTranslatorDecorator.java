@@ -67,15 +67,9 @@ public class MySqlRepositoryExceptionTranslatorDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
 		return decoratedRepo.findAll(q);
-	}
-
-	@Override
-	public Stream<Entity> findAllAsStream(Query q)
-	{
-		return decoratedRepo.findAllAsStream(q);
 	}
 
 	@Override
@@ -97,21 +91,9 @@ public class MySqlRepositoryExceptionTranslatorDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		return decoratedRepo.findAll(ids);
-	}
-
-	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		return decoratedRepo.findAll(ids);
-	}
-
-	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
-	{
-		return decoratedRepo.findAll(ids, fetch);
 	}
 
 	@Override
@@ -135,14 +117,6 @@ public class MySqlRepositoryExceptionTranslatorDecorator implements Repository
 	}
 
 	@Override
-	public void update(Iterable<? extends Entity> records)
-	{
-		SQLExceptionTranslatorTemplate.tryCatchSQLException(() -> {
-			decoratedRepo.update(records);
-		});
-	}
-
-	@Override
 	public void update(Stream<? extends Entity> entities)
 	{
 		SQLExceptionTranslatorTemplate.tryCatchSQLException(() -> {
@@ -154,12 +128,6 @@ public class MySqlRepositoryExceptionTranslatorDecorator implements Repository
 	public void delete(Entity entity)
 	{
 		decoratedRepo.delete(entity);
-	}
-
-	@Override
-	public void delete(Iterable<? extends Entity> entities)
-	{
-		decoratedRepo.delete(entities);
 	}
 
 	@Override
@@ -175,7 +143,7 @@ public class MySqlRepositoryExceptionTranslatorDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
 		decoratedRepo.deleteById(ids);
 	}
@@ -192,19 +160,6 @@ public class MySqlRepositoryExceptionTranslatorDecorator implements Repository
 		SQLExceptionTranslatorTemplate.tryCatchSQLException(() -> {
 			decoratedRepo.add(entity);
 		});
-	}
-
-	@Override
-	public Integer add(Iterable<? extends Entity> entities)
-	{
-		AtomicInteger result = new AtomicInteger();
-
-		SQLExceptionTranslatorTemplate.tryCatchSQLException(() -> {
-			Integer count = decoratedRepo.add(entities);
-			if (count != null) result.set(count);
-		});
-
-		return result.get();
 	}
 
 	@Override

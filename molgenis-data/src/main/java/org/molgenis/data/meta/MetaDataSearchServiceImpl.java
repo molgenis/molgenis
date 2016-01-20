@@ -45,19 +45,18 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 		{
 			// Search in packages
 			Query q = new QueryImpl().search(searchTerm);
-			for (Entity packageEntity : dataService.findAll(PackageMetaData.ENTITY_NAME, q))
-			{
+			// for (Entity packageEntity : dataService.findAllAsIterable(PackageMetaData.ENTITY_NAME, q))
+			dataService.findAll(PackageMetaData.ENTITY_NAME, q).forEach(packageEntity -> {
 				Package p = metaDataService.getPackage(packageEntity.getString(PackageMetaData.FULL_NAME));
 				if ((p != null) && (p.getParent() == null))
 				{
 					String matchDesc = "Matched: package '" + p.getName() + "'";
 					results.add(new PackageSearchResultItem(p, matchDesc));
 				}
-			}
+			});
 
 			// Search in entities
-			for (Entity entityMetaData : dataService.findAll(EntityMetaDataMetaData.ENTITY_NAME, q))
-			{
+			dataService.findAll(EntityMetaDataMetaData.ENTITY_NAME, q).forEach(entityMetaData -> {
 				Package p = getRootPackage(entityMetaData);
 				if (p != null)
 				{
@@ -66,7 +65,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 					PackageSearchResultItem item = new PackageSearchResultItem(p.getRootPackage(), matchDesc);
 					if ((p != null) && !results.contains(item)) results.add(item);
 				}
-			}
+			});
 
 			// Search in attributes no longer needed since the entities contain the attribute documents.
 			// Change this if the searching for tags becomes needed and/or the results need to reflect which attribute

@@ -73,8 +73,7 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 	{
 		dataService.getEntityNames();
 		List<String> geneticRepositories = new ArrayList<String>();
-		for (String name : dataService.getEntityNames())
-		{
+		dataService.getEntityNames().forEach(name -> {
 			if (dataService.getEntityMetaData(name).getAttribute(CHROM.getName()) != null
 					&& dataService.getEntityMetaData(name).getAttribute(POS.getName()) != null
 					&& dataService.getEntityMetaData(name).getAttribute(REF.getName()) != null
@@ -82,7 +81,7 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 			{
 				geneticRepositories.add(name);
 			}
-		}
+		});
 
 		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(geneticRepositories,
 				new Function<String, EntityMetaData>()

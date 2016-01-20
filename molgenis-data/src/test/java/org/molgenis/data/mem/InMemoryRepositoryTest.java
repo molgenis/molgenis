@@ -15,8 +15,6 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -102,25 +100,6 @@ public class InMemoryRepositoryTest
 	}
 
 	@Test
-	public void findAll() throws IOException
-	{
-		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("entity");
-		entityMetaData.addAttribute("id").setIdAttribute(true);
-		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityMetaData);
-		try
-		{
-			Entity entity = new MapEntity(entityMetaData);
-			entity.set("id", "0");
-			inMemoryRepository.add(entity);
-			assertEquals(inMemoryRepository.findAll(new QueryImpl()), Arrays.asList(entity));
-		}
-		finally
-		{
-			inMemoryRepository.close();
-		}
-	}
-
-	@Test
 	public void findOneObjectFetch() throws IOException
 	{
 		String idAttrName = "id";
@@ -155,57 +134,6 @@ public class InMemoryRepositoryTest
 			Object id = Integer.valueOf(0);
 			Fetch fetch = new Fetch();
 			assertNull(inMemoryRepository.findOne(id, fetch));
-		}
-		finally
-		{
-			inMemoryRepository.close();
-		}
-	}
-
-	@Test
-	public void findAllIterable() throws IOException
-	{
-		String idAttrName = "id";
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(idAttrName).getMock();
-		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
-		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityMeta);
-		try
-		{
-			Object id0 = Integer.valueOf(0);
-			Entity entity0 = when(mock(Entity.class).get(idAttrName)).thenReturn(id0).getMock();
-			Object id1 = Integer.valueOf(1);
-			Entity entity1 = when(mock(Entity.class).get(idAttrName)).thenReturn(id1).getMock();
-			inMemoryRepository.add(entity0);
-			inMemoryRepository.add(entity1);
-			Iterable<Entity> entities = inMemoryRepository.findAll(Arrays.asList(id0, id1));
-			assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, entity1));
-		}
-		finally
-		{
-			inMemoryRepository.close();
-		}
-	}
-
-	@Test
-	public void findAllIterableFetch() throws IOException
-	{
-		String idAttrName = "id";
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(idAttrName).getMock();
-		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
-		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityMeta);
-		try
-		{
-			Object id0 = Integer.valueOf(0);
-			Entity entity0 = when(mock(Entity.class).get(idAttrName)).thenReturn(id0).getMock();
-			Object id1 = Integer.valueOf(1);
-			Entity entity1 = when(mock(Entity.class).get(idAttrName)).thenReturn(id1).getMock();
-			inMemoryRepository.add(entity0);
-			inMemoryRepository.add(entity1);
-			Fetch fetch = new Fetch();
-			Iterable<Entity> entities = inMemoryRepository.findAll(Arrays.asList(id0, id1), fetch);
-			assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, entity1));
 		}
 		finally
 		{
@@ -280,7 +208,7 @@ public class InMemoryRepositoryTest
 			Entity entity1 = when(mock(Entity.class).get(idAttrName)).thenReturn(id1).getMock();
 			inMemoryRepository.add(entity0);
 			inMemoryRepository.add(entity1);
-			List<Entity> entities = inMemoryRepository.findAllAsStream(new QueryImpl()).collect(Collectors.toList());
+			List<Entity> entities = inMemoryRepository.findAll(new QueryImpl()).collect(Collectors.toList());
 			assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, entity1));
 		}
 		finally
@@ -296,7 +224,7 @@ public class InMemoryRepositoryTest
 		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityMeta);
 		try
 		{
-			inMemoryRepository.findAllAsStream(new QueryImpl().eq("attr", "val")).collect(Collectors.toList());
+			inMemoryRepository.findAll(new QueryImpl().eq("attr", "val")).collect(Collectors.toList());
 		}
 		finally
 		{

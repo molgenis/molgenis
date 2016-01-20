@@ -1,13 +1,15 @@
 package org.molgenis.data.mysql;
 
+import static java.util.stream.Collectors.toList;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MysqlTestConfig;
@@ -64,15 +66,15 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		}
 
 		assertEquals(Iterables.size(repo), count);
-		assertEquals(Iterables.size(repo.findAll(new QueryImpl().ge("intAttr", 999))), 1100);
-		assertEquals(Iterables.size(repo.findAll(new QueryImpl().eq("intAttr", 999))), 1);
-		assertEquals(Iterables.size(repo.findAll(new QueryImpl().eq("intAttr", -1))), 0);
-		assertEquals(Iterables.size(repo.findAll(new QueryImpl().le("intAttr", count))), count);
+		assertEquals(repo.findAll(new QueryImpl().ge("intAttr", 999)).collect(toList()).size(), 1100);
+		assertEquals(repo.findAll(new QueryImpl().eq("intAttr", 999)).collect(toList()).size(), 1);
+		assertEquals(repo.findAll(new QueryImpl().eq("intAttr", -1)).collect(toList()).size(), 0);
+		assertEquals(repo.findAll(new QueryImpl().le("intAttr", count)).collect(toList()).size(), count);
 
-		Iterable<Entity> it = repo.findAll(new QueryImpl().setOffset(10).setPageSize(20));
-		assertEquals(Iterables.size(it), 20);
+		List<Entity> pagedEntities = repo.findAll(new QueryImpl().setOffset(10).setPageSize(20)).collect(toList());
+		assertEquals(pagedEntities.size(), 20);
 		i = 10;
-		for (Entity e : it)
+		for (Entity e : pagedEntities)
 		{
 			assertEquals(e.getInt("intAttr"), Integer.valueOf(i++));
 		}
@@ -104,7 +106,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		entity0.set("strAttr", "newstr0");
 		Entity entity1 = entities.get(1);
 		entity1.set("strAttr", "newstr1");
-		repo.update(Arrays.asList(entity0, entity1));
+		repo.update(Stream.of(entity0, entity1));
 		assertNull(repo.findOne(new QueryImpl().eq("strAttr", "str0")));
 		assertNull(repo.findOne(new QueryImpl().eq("strAttr", "str1")));
 		assertNotNull(repo.findOne(new QueryImpl().eq("strAttr", "newstr0")));
@@ -112,7 +114,6 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		repo.deleteAll(); // cleanup
 	}
 
-	@SuppressWarnings("resource")
 	@Test
 	public void addStreamDeleteStreamFindAll()
 	{
@@ -135,7 +136,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 			}
 		}
 		repo.add(entities.stream());
-		repo.delete(entitiesToDelete);
+		repo.delete(entitiesToDelete.stream());
 
 		int i = 100;
 		for (Entity e : repo)
@@ -144,15 +145,15 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		}
 
 		assertEquals(Iterables.size(repo), count - 100);
-		assertEquals(Iterables.size(repo.findAll(new QueryImpl().ge("intAttr", 999))), 1100);
-		assertEquals(Iterables.size(repo.findAll(new QueryImpl().eq("intAttr", 999))), 1);
-		assertEquals(Iterables.size(repo.findAll(new QueryImpl().eq("intAttr", -1))), 0);
-		assertEquals(Iterables.size(repo.findAll(new QueryImpl().le("intAttr", count))), count - 100);
+		assertEquals(repo.findAll(new QueryImpl().ge("intAttr", 999)).collect(toList()).size(), 1100);
+		assertEquals(repo.findAll(new QueryImpl().eq("intAttr", 999)).collect(toList()).size(), 1);
+		assertEquals(repo.findAll(new QueryImpl().eq("intAttr", -1)).collect(toList()).size(), 0);
+		assertEquals(repo.findAll(new QueryImpl().le("intAttr", count)).collect(toList()).size(), count - 100);
 
-		Iterable<Entity> it = repo.findAll(new QueryImpl().setOffset(10).setPageSize(20));
-		assertEquals(Iterables.size(it), 20);
+		List<Entity> pagedEntities = repo.findAll(new QueryImpl().setOffset(10).setPageSize(20)).collect(toList());
+		assertEquals(pagedEntities.size(), 20);
 		i = 10 + 100;
-		for (Entity e : it)
+		for (Entity e : pagedEntities)
 		{
 			assertEquals(e.getInt("intAttr"), Integer.valueOf(i++));
 		}
@@ -182,15 +183,15 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		}
 
 		assertEquals(Iterables.size(repo), count);
-		assertEquals(Iterables.size(repo.findAll(new QueryImpl().ge("intAttr", 999))), 1100);
-		assertEquals(Iterables.size(repo.findAll(new QueryImpl().eq("intAttr", 999))), 1);
-		assertEquals(Iterables.size(repo.findAll(new QueryImpl().eq("intAttr", -1))), 0);
-		assertEquals(Iterables.size(repo.findAll(new QueryImpl().le("intAttr", count))), count);
+		assertEquals(repo.findAll(new QueryImpl().ge("intAttr", 999)).collect(toList()).size(), 1100);
+		assertEquals(repo.findAll(new QueryImpl().eq("intAttr", 999)).collect(toList()).size(), 1);
+		assertEquals(repo.findAll(new QueryImpl().eq("intAttr", -1)).collect(toList()).size(), 0);
+		assertEquals(repo.findAll(new QueryImpl().le("intAttr", count)).collect(toList()).size(), count);
 
-		Iterable<Entity> it = repo.findAll(new QueryImpl().setOffset(10).setPageSize(20));
-		assertEquals(Iterables.size(it), 20);
+		List<Entity> pagedEntities = repo.findAll(new QueryImpl().setOffset(10).setPageSize(20)).collect(toList());
+		assertEquals(pagedEntities.size(), 20);
 		i = 10;
-		for (Entity e : it)
+		for (Entity e : pagedEntities)
 		{
 			assertEquals(e.getInt("intAttr"), Integer.valueOf(i++));
 		}
@@ -297,7 +298,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 			}
 		};
 		long startTime = System.currentTimeMillis();
-		repo.add(iterable);
+		repo.add(StreamSupport.stream(iterable.spliterator(), false));
 		long stopTime = System.currentTimeMillis();
 		long elapsedTime = stopTime - startTime;
 
@@ -312,7 +313,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(SIZE, count(repo, new QueryImpl()));
 
 		// delete one
-		for (Entity e : repo.findAll(new QueryImpl().lt("age", 5)))
+		for (Entity e : repo.findAll(new QueryImpl().lt("age", 5)).collect(toList()))
 		{
 			repo.delete(e);
 			break;
@@ -333,7 +334,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 	{
 		int count = 0;
 		for (@SuppressWarnings("unused")
-		Entity e : repo.findAll(query))
+		Entity e : repo.findAll(query).collect(toList()))
 		{
 			count++;
 		}
@@ -367,18 +368,14 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		testRepository.add(entity1); // add in reverse order, so we can check if returned in the correct order
 		testRepository.add(entity0);
 
-		Iterable<Entity> entities = testRepository.findAll(new Iterable<Object>()
-		{
-			@Override
-			public Iterator<Object> iterator()
-			{
-				return Arrays.<Object> asList(exampleId0, "missing", exampleId1, "nope").iterator();
-			}
-		});
+		List<Entity> entities = testRepository.findAll(Stream.of(exampleId0, "missing", exampleId1, "nope"))
+				.collect(toList());
 
-		assertEquals(Iterables.size(entities), 2);
+		assertEquals(entities.size(), 2);
 		Iterator<Entity> it = entities.iterator();
 		assertEquals(it.next().getIdValue(), exampleId0);
 		assertEquals(it.next().getIdValue(), exampleId1);
+
+		testRepository.deleteAll(); // cleanup
 	}
 }

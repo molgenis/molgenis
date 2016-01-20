@@ -1,5 +1,9 @@
 package org.molgenis.ui;
 
+import static java.util.stream.Collectors.toList;
+
+import java.util.stream.Stream;
+
 import com.google.common.collect.Lists;
 
 import freemarker.template.DefaultObjectWrapper;
@@ -23,6 +27,10 @@ public class MolgenisFreemarkerObjectWrapper extends DefaultObjectWrapper
 			// If a method returning an Iterable in some cases returns a List and in other cases a e.g. FluentIterable
 			// then it is unclear whether <#list iterable> or <#list iterable.iterator()> should be used.
 			obj = Lists.newArrayList(((Iterable<?>) obj));
+		}
+		else if (obj instanceof Stream<?>)
+		{
+			obj = ((Stream<?>) obj).collect(toList());
 		}
 		return super.handleUnknownType(obj);
 	}

@@ -119,8 +119,8 @@ public class LanguageRepositoryDecoratorTest
 	{
 		Entity entity0 = mock(Entity.class);
 		Query query = mock(Query.class);
-		when(decoratedRepo.findAllAsStream(query)).thenReturn(Stream.of(entity0));
-		Stream<Entity> entities = languageRepositoryDecorator.findAllAsStream(query);
+		when(decoratedRepo.findAll(query)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = languageRepositoryDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
 }

@@ -42,8 +42,7 @@ public class AddPluginSettingsPermissionsMigrator implements ApplicationListener
 		if (molgenisVersionService.getMolgenisVersionFromServerProperties() == 15)
 		{
 			LOG.info("Creating UserAuthority and GroupAuthority instances for plugin settings entities ...");
-			for (UserAuthority userAuthority : dataService.findAll(UserAuthority.ENTITY_NAME, UserAuthority.class))
-			{
+			dataService.findAll(UserAuthority.ENTITY_NAME, UserAuthority.class).forEach(userAuthority -> {
 				String role = userAuthority.getRole();
 
 				if (role.startsWith(AUTHORITY_PLUGIN_PREFIX))
@@ -82,9 +81,8 @@ public class AddPluginSettingsPermissionsMigrator implements ApplicationListener
 						}
 					}
 				}
-			}
-			for (GroupAuthority groupAuthority : dataService.findAll(GroupAuthority.ENTITY_NAME, GroupAuthority.class))
-			{
+			});
+			dataService.findAll(GroupAuthority.ENTITY_NAME, GroupAuthority.class).forEach(groupAuthority -> {
 				String groupRole = groupAuthority.getRole();
 
 				if (groupRole.startsWith(AUTHORITY_PLUGIN_PREFIX))
@@ -122,8 +120,7 @@ public class AddPluginSettingsPermissionsMigrator implements ApplicationListener
 						}
 					}
 				}
-
-			}
+			});
 			LOG.info("Created UserAuthority and GroupAuthority instances for plugin settings entities");
 		}
 		return this;
