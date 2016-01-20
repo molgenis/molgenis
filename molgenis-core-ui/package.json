@@ -61,6 +61,23 @@
     "url-loader": "^0.5.7",
     "webpack": "^1.9.11",
     "webpack-dev-middleware": "^1.2.0",
-    "webpack-hot-middleware": "^2.2.0"
+    "webpack-hot-middleware": "^2.2.0",
+    "babel-jest": "*",
+    "jest-cli": "*"
+  },
+  "jest": {
+    "scriptPreprocessor": "<rootDir>/node_modules/babel-jest",
+    "unmockedModulePathPatterns": [
+      "<rootDir>/node_modules/react",
+      "<rootDir>/node_modules/react-dom",
+      "<rootDir>/node_modules/react-addons-test-utils",
+      "<rootDir>/node_modules/fbjs"
+    ]
+  },
+  "babel": {
+    "presets": [
+      "react",
+      "es2015"
+    ]
   }
 }
