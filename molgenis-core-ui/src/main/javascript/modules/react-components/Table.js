@@ -631,7 +631,7 @@ import {
 					});
 				}
 
-				var nestedTable = Table({
+				var nestedTable = TableFactory({
 					entity: this.props.attr.refEntity.name,
 					query : {
 						'q' : [ {
@@ -1027,4 +1027,5 @@ import {
 	});
 	var EntityInspectBtnFactory = React.createFactory(EntityInspectBtn);
 
-export default React.createFactory(Table);
+const TableFactory = React.createFactory(Table);
+export default TableFactory;
