@@ -14,269 +14,214 @@ public class ElasticsearchDataServiceTest extends AbstractDataServiceTest
 	{
 	}
 
-	@Override
 	@Test
-	public void testAddIterable()
+	@Override
+	public void testAdd()
 	{
-		super.testAddIterable();
+		super.testAdd();
 	}
 
-	@Override
 	@Test
-	public void testAddStream()
-	{
-		super.testAddStream();
-	}
-
 	@Override
-	@Test
 	public void testEntityListener()
 	{
 		super.testEntityListener();
 	}
 
-	@Override
 	@Test
+	@Override
 	public void testCount()
 	{
 		super.testCount();
 	}
 
-	@Override
 	@Test
+	@Override
 	public void testDelete()
 	{
 		super.testDelete();
 	}
 
-	@Override
 	@Test
+	@Override
 	public void testDeleteById()
 	{
 		super.testDeleteById();
 	}
 
-	@Override
 	@Test
-	public void testDeleteIterable()
-	{
-		super.testDeleteIterable();
-	}
-
 	@Override
-	@Test
 	public void testDeleteStream()
 	{
 		super.testDeleteStream();
 	}
 
-	@Override
 	@Test
+	@Override
 	public void testDeleteAll()
 	{
 		super.testDeleteAll();
 	}
 
-	@Override
 	@Test
+	@Override
 	public void testFindAll()
 	{
 		super.testFindAll();
 	}
 
-	@Override
 	@Test
+	@Override
 	public void testFindAllTyped()
 	{
 		super.testFindAllTyped();
 	}
 
-	@Override
 	@Test
-	public void testFindAllStream()
+	@Override
+	public void testFindAllByIds()
 	{
-		super.testFindAllStream();
+		super.testFindAllByIds();
 	}
 
-	@Override
 	@Test
-	public void testFindAllTypedStream()
+	@Override
+	public void testFindAllByIdsTyped()
 	{
-		super.testFindAllTypedStream();
+		super.testFindAllByIdsTyped();
 	}
 
-	@Override
 	@Test
-	public void testFindAllIterableTyped()
-	{
-		super.testFindAllIterableTyped();
-	}
-
 	@Override
-	@Test
-	public void testFindAllIterable()
-	{
-		super.testFindAllIterable();
-	}
-
-	@Override
-	@Test
-	public void testFindAllIterableFetch()
-	{
-		super.testFindAllIterableFetch();
-	}
-
-	@Override
-	@Test
 	public void testFindAllStreamFetch()
 	{
 		super.testFindAllStreamFetch();
 	}
 
-	@Override
 	@Test
-	public void testFindAllTypedFetchStream()
+	@Override
+	public void testFindQuery()
 	{
-		super.testFindAllTypedFetchStream();
+		super.testFindQuery();
 	}
 
-	@Override
 	@Test
-	public void testFindAllAsStream()
+	@Override
+	public void testFindQueryTyped()
 	{
-		super.testFindAllAsStream();
+		super.testFindQueryTyped();
 	}
 
-	@Override
 	@Test
-	public void testFindAllAsStreamTyped()
-	{
-		super.testFindAllAsStreamTyped();
-	}
-
 	@Override
-	@Test
-	public void testFindAsStreamQuery()
-	{
-		super.testFindAsStreamQuery();
-	}
-
-	@Override
-	@Test
-	public void testFindAsStreamQueryTyped()
-	{
-		super.testFindAsStreamQueryTyped();
-	}
-
-	@Override
-	@Test
 	public void testFindOne()
 	{
 		super.testFindOne();
 	}
 
-	@Override
 	@Test
+	@Override
 	public void testFindOneTyped()
 	{
 		super.testFindOneTyped();
 	}
 
-	@Override
 	@Test
+	@Override
 	public void testFindOneFetch()
 	{
 		super.testFindOneFetch();
 	}
 
-	@Override
 	@Test
+	@Override
 	public void testFindOneFetchTyped()
 	{
 		super.testFindOneFetchTyped();
 	}
 
-	@Override
 	@Test
+	@Override
 	public void testFindOneQuery()
 	{
 		super.testFindOneQuery();
 	}
 
-	@Override
 	@Test
+	@Override
 	public void testFindOneQueryTyped()
 	{
 		super.testFindOneQueryTyped();
 	}
 
-	@Override
 	@Test
+	@Override
 	public void testGetCapabilities()
 	{
 		super.testGetCapabilities();
 	}
 
-	@Override
 	@Test
+	@Override
 	public void testGetEntityMetaData()
 	{
 		super.testGetEntityMetaData();
 	}
 
-	@Override
 	@Test
+	@Override
 	public void testGetEntityNames()
 	{
 		super.testGetEntityNames();
 	}
 
-	@Override
 	@Test
+	@Override
 	public void testGetMeta()
 	{
 		super.testGetMeta();
 	}
 
-	@Override
 	@Test
+	@Override
 	public void testGetRepository()
 	{
 		super.testGetRepository();
 	}
 
-	@Override
 	@Test
+	@Override
 	public void testHasRepository()
 	{
 		super.testHasRepository();
 	}
 
-	@Override
 	@Test
+	@Override
 	public void testIterator()
 	{
 		super.testIterator();
 	}
 
-	@Override
 	@Test
+	@Override
 	public void testQuery()
 	{
 		super.testQuery();
 	}
 
-	@Override
 	@Test
+	@Override
 	public void testUpdate()
 	{
 		super.testUpdate();
 	}
 
-	@Override
 	@Test
+	@Override
 	public void testUpdateStream()
 	{
 		super.testUpdateStream();
 	}
+
 }

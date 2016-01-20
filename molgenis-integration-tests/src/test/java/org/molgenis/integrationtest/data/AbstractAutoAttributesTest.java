@@ -3,12 +3,13 @@ package org.molgenis.integrationtest.data;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
-
-import com.google.common.collect.Iterables;
 
 public abstract class AbstractAutoAttributesTest extends AbstractDataIntegrationTest
 {
@@ -23,10 +24,10 @@ public abstract class AbstractAutoAttributesTest extends AbstractDataIntegration
 		Entity entity = new DefaultEntity(entityMetaData, dataService);
 		dataService.add(entityMetaData.getName(), entity);
 
-		Iterable<Entity> entities = dataService.findAll(entityMetaData.getName());
-		assertNotNull(entities);
-		assertEquals(Iterables.size(entities), 1);
-		entity = entities.iterator().next();
+		Supplier<Stream<Entity>> entities = () -> dataService.findAll(entityMetaData.getName());
+		assertNotNull(entities.get());
+		assertEquals(entities.get().count(), 1);
+		entity = entities.get().iterator().next();
 		assertNotNull(entity.get("identifier"));
 		assertNotNull(entity.getIdValue());
 		assertEquals(entity.get("identifier"), entity.getIdValue());
