@@ -7,13 +7,12 @@ import java.util.List;
 import java.util.ListResourceBundle;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Lists;
 
 /**
  * ResourceBundle Control that gets it content from the i18nstrings repository
@@ -39,7 +38,8 @@ public class MolgenisResourceBundleControl extends ResourceBundle.Control
 
 		// Only handle languages that are present in the languages repository
 		if (runAsSystem(() -> dataService.query(LanguageMetaData.ENTITY_NAME).eq(LanguageMetaData.CODE, languageCode)
-				.count()) == 0) return null;
+				.count()) == 0)
+			return null;
 
 		return new MolgenisResourceBundle(dataService, languageCode);
 	}
@@ -58,8 +58,8 @@ public class MolgenisResourceBundleControl extends ResourceBundle.Control
 		@Override
 		protected Object[][] getContents()
 		{
-			List<Entity> entities = runAsSystem(() -> Lists.newArrayList(dataService
-					.findAll(I18nStringMetaData.ENTITY_NAME)));
+			List<Entity> entities = runAsSystem(
+					() -> dataService.findAll(I18nStringMetaData.ENTITY_NAME).collect(Collectors.toList()));
 
 			Object[][] contents = new Object[entities.size()][2];
 

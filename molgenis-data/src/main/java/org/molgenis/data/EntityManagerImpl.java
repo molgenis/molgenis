@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.molgenis.data.support.LazyEntity;
 import org.molgenis.data.support.PartialEntity;
@@ -62,14 +63,21 @@ public class EntityManagerImpl implements EntityManager
 		return entities.iterator().next();
 	}
 
-	@Override
-	public Iterable<Entity> resolveReferences(EntityMetaData entityMeta, Iterable<Entity> entities, Fetch fetch)
+	private Iterable<Entity> resolveReferences(EntityMetaData entityMeta, Iterable<Entity> entities, Fetch fetch)
 	{
 		// resolve lazy entity collections without references
 		if (entities instanceof EntityCollection && ((EntityCollection) entities).isLazy())
 		{
 			// TODO remove cast after updating DataService/Repository interfaces to return EntityCollections
-			return dataService.findAll(entityMeta.getName(), new EntityIdIterable(entities), fetch);
+			return new Iterable<Entity>()
+			{
+				@Override
+				public Iterator<Entity> iterator()
+				{
+					return dataService.findAll(entityMeta.getName(), new EntityIdIterable(entities).stream(), fetch)
+							.iterator();
+				}
+			};
 		}
 
 		// no fetch exists that described what to resolve
@@ -200,9 +208,9 @@ public class EntityManagerImpl implements EntityManager
 			Fetch subFetch = createSubFetch(fetch, attrs);
 
 			// retrieve referenced entities
-			Iterable<Entity> refEntities = dataService.findAll(refEntityName, entry.getValue(), subFetch);
+			Stream<Entity> refEntities = dataService.findAll(refEntityName, entry.getValue().stream(), subFetch);
 
-			Map<Object, Entity> refEntitiesIdMap = stream(refEntities.spliterator(), false)
+			Map<Object, Entity> refEntitiesIdMap = refEntities
 					.collect(Collectors.toMap(Entity::getIdValue, Function.identity()));
 
 			for (AttributeMetaData attr : attrs)
@@ -348,7 +356,12 @@ public class EntityManagerImpl implements EntityManager
 		@Override
 		public Iterator<Object> iterator()
 		{
-			return stream(entities.spliterator(), false).map(Entity::getIdValue).iterator();
+			return stream().iterator();
+		}
+
+		public Stream<Object> stream()
+		{
+			return StreamSupport.stream(entities.spliterator(), false).map(Entity::getIdValue);
 		}
 	}
 

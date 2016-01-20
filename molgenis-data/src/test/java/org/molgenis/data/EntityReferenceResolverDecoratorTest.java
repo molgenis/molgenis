@@ -52,16 +52,6 @@ public class EntityReferenceResolverDecoratorTest
 	}
 
 	@Test
-	public void addIterableextendsEntity()
-	{
-		@SuppressWarnings("unchecked")
-		Iterable<Entity> entities = mock(Iterable.class);
-		entityReferenceResolverDecorator.add(entities);
-		verify(decoratedRepo, times(1)).add(entities);
-		verifyZeroInteractions(entityManager);
-	}
-
-	@Test
 	public void addStream()
 	{
 		Stream<Entity> entities = Stream.empty();
@@ -129,20 +119,10 @@ public class EntityReferenceResolverDecoratorTest
 	}
 
 	@Test
-	public void deleteIterableextendsEntity()
-	{
-		@SuppressWarnings("unchecked")
-		Iterable<Entity> entities = mock(Iterable.class);
-		entityReferenceResolverDecorator.delete(entities);
-		verify(decoratedRepo, times(1)).delete(entities);
-		verifyZeroInteractions(entityManager);
-	}
-
-	@Test
 	public void deleteStream()
 	{
 		@SuppressWarnings("unchecked")
-		Iterable<Entity> entities = mock(Iterable.class);
+		Stream<Entity> entities = mock(Stream.class);
 		entityReferenceResolverDecorator.delete(entities);
 		verify(decoratedRepo, times(1)).delete(entities);
 		verifyZeroInteractions(entityManager);
@@ -184,32 +164,6 @@ public class EntityReferenceResolverDecoratorTest
 	}
 
 	@Test
-	public void findAllQueryFetch()
-	{
-		Fetch fetch = new Fetch();
-		Query q = mock(Query.class);
-		when(q.getFetch()).thenReturn(fetch);
-		@SuppressWarnings("unchecked")
-		Iterable<Entity> entities = mock(Iterable.class);
-		when(decoratedRepo.findAll(q)).thenReturn(entities);
-		entityReferenceResolverDecorator.findAll(q);
-		verify(decoratedRepo, times(1)).findAll(q);
-		verify(entityManager).resolveReferences(entityMeta, entities, fetch);
-	}
-
-	@Test
-	public void findAllQueryNoFetch()
-	{
-		Query q = mock(Query.class);
-		@SuppressWarnings("unchecked")
-		Iterable<Entity> entities = mock(Iterable.class);
-		when(decoratedRepo.findAll(q)).thenReturn(entities);
-		entityReferenceResolverDecorator.findAll(q);
-		verify(decoratedRepo, times(1)).findAll(q);
-		verify(entityManager).resolveReferences(entityMeta, entities, null);
-	}
-
-	@Test
 	public void findAllAsStreamFetch()
 	{
 		Entity entity0 = mock(Entity.class);
@@ -217,9 +171,9 @@ public class EntityReferenceResolverDecoratorTest
 		Fetch fetch = mock(Fetch.class);
 		when(query.getFetch()).thenReturn(fetch);
 		Stream<Entity> entities = Stream.of(entity0);
-		when(decoratedRepo.findAllAsStream(query)).thenReturn(entities);
+		when(decoratedRepo.findAll(query)).thenReturn(entities);
 		when(entityManager.resolveReferences(entityMeta, entities, fetch)).thenReturn(entities);
-		Stream<Entity> expectedEntities = entityReferenceResolverDecorator.findAllAsStream(query);
+		Stream<Entity> expectedEntities = entityReferenceResolverDecorator.findAll(query);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
 
@@ -229,50 +183,10 @@ public class EntityReferenceResolverDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		Query query = mock(Query.class);
 		Stream<Entity> entities = Stream.of(entity0);
-		when(decoratedRepo.findAllAsStream(query)).thenReturn(entities);
+		when(decoratedRepo.findAll(query)).thenReturn(entities);
 		when(entityManager.resolveReferences(entityMeta, entities, null)).thenReturn(entities);
-		Stream<Entity> expectedEntities = entityReferenceResolverDecorator.findAllAsStream(query);
+		Stream<Entity> expectedEntities = entityReferenceResolverDecorator.findAll(query);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0));
-	}
-
-	@Test
-	public void findAllIterableObject()
-	{
-		@SuppressWarnings("unchecked")
-		Iterable<Object> ids = mock(Iterable.class);
-		@SuppressWarnings("unchecked")
-		Iterable<Entity> entities = mock(Iterable.class);
-		when(decoratedRepo.findAll(ids)).thenReturn(entities);
-		entityReferenceResolverDecorator.findAll(ids);
-		verify(decoratedRepo, times(1)).findAll(ids);
-		verify(entityManager).resolveReferences(entityMeta, entities, null);
-	}
-
-	@Test
-	public void findAllIterableObjectFetch()
-	{
-		Fetch fetch = new Fetch();
-		@SuppressWarnings("unchecked")
-		Iterable<Object> ids = mock(Iterable.class);
-		@SuppressWarnings("unchecked")
-		Iterable<Entity> entities = mock(Iterable.class);
-		when(decoratedRepo.findAll(ids, fetch)).thenReturn(entities);
-		entityReferenceResolverDecorator.findAll(ids, fetch);
-		verify(decoratedRepo, times(1)).findAll(ids, fetch);
-		verify(entityManager).resolveReferences(entityMeta, entities, fetch);
-	}
-
-	@Test
-	public void findAllIterableObjectFetchNull()
-	{
-		@SuppressWarnings("unchecked")
-		Iterable<Object> ids = mock(Iterable.class);
-		@SuppressWarnings("unchecked")
-		Iterable<Entity> entities = mock(Iterable.class);
-		when(decoratedRepo.findAll(ids, null)).thenReturn(entities);
-		entityReferenceResolverDecorator.findAll(ids, null);
-		verify(decoratedRepo, times(1)).findAll(ids, null);
-		verify(entityManager).resolveReferences(entityMeta, entities, null);
 	}
 
 	@Test
@@ -411,7 +325,7 @@ public class EntityReferenceResolverDecoratorTest
 	public void iterator()
 	{
 		QueryImpl q = new QueryImpl();
-		Iterable<Entity> entities = Arrays.asList(mock(Entity.class));
+		Stream<Entity> entities = Stream.of(mock(Entity.class));
 		when(decoratedRepo.findAll(q)).thenReturn(entities);
 		when(entityManager.resolveReferences(entityMeta, entities, null)).thenReturn(entities);
 		entityReferenceResolverDecorator.iterator();
@@ -441,16 +355,6 @@ public class EntityReferenceResolverDecoratorTest
 		Entity entity = mock(Entity.class);
 		entityReferenceResolverDecorator.update(entity);
 		verify(decoratedRepo, times(1)).update(entity);
-		verifyZeroInteractions(entityManager);
-	}
-
-	@Test
-	public void updateIterableextendsEntity()
-	{
-		@SuppressWarnings("unchecked")
-		Iterable<Entity> entities = mock(Iterable.class);
-		entityReferenceResolverDecorator.update(entities);
-		verify(decoratedRepo, times(1)).update(entities);
 		verifyZeroInteractions(entityManager);
 	}
 

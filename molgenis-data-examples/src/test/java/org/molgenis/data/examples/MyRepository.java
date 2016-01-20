@@ -42,12 +42,6 @@ public class MyRepository extends AbstractRepository
 	}
 
 	@Override
-	public Integer add(Iterable<? extends Entity> newEntities)
-	{
-		return add(newEntities.iterator());
-	}
-
-	@Override
 	public Integer add(Stream<? extends Entity> newEntities)
 	{
 		return add(newEntities.iterator());

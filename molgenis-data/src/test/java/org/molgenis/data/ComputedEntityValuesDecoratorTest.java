@@ -156,8 +156,8 @@ public class ComputedEntityValuesDecoratorTest
 
 		Entity entity0 = mock(Entity.class);
 		Query query = mock(Query.class);
-		when(decoratedRepo.findAllAsStream(query)).thenReturn(Stream.of(entity0));
-		Stream<Entity> entities = computedEntityValuesDecorator.findAllAsStream(query);
+		when(decoratedRepo.findAll(query)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = computedEntityValuesDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
 
@@ -172,8 +172,8 @@ public class ComputedEntityValuesDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 		Query query = mock(Query.class);
-		when(decoratedRepo.findAllAsStream(query)).thenReturn(Stream.of(entity0));
-		List<Entity> expectedEntities = computedEntityValuesDecorator.findAllAsStream(query)
+		when(decoratedRepo.findAll(query)).thenReturn(Stream.of(entity0));
+		List<Entity> expectedEntities = computedEntityValuesDecorator.findAll(query)
 				.collect(Collectors.toList());
 		assertEquals(expectedEntities.size(), 1);
 		assertEquals(expectedEntities.get(0).getClass(), EntityWithComputedAttributes.class);

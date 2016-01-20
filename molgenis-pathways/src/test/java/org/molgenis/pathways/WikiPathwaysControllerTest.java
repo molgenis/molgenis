@@ -9,6 +9,7 @@ import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Stream;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -101,8 +102,7 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 		String gpml = "<gpml>  "
 				+ "<DataNode TextLabel='TUSC2 / Fus1 , Fusion' GraphId = 'cf7548' Type='GeneProduct' GroupRef='bced7'>"
 				+ "<Graphics CenterX='688.6583271016858' CenterY='681.6145075824545' Width='80.0' Height='20.0' ZOrder='32768' FontSize='10' Valign='Middle' />"
-				+ "<Xref Database='Ensembl' ID='ENSG00000197081' />"
-				+ "</DataNode>"
+				+ "<Xref Database='Ensembl' ID='ENSG00000197081' />" + "</DataNode>"
 				+ "<DataNode TextLabel='IPO4' GraphId='d9af5' Type='GeneProduct' GroupRef='bced7'>"
 				+ "<Graphics CenterX='688.6583271016858' CenterY='701.6145075824545' Width='80.0' Height='20.0' ZOrder='32768' FontSize='10' Valign='Middle' />"
 				+ "<Xref Database='Ensembl' ID='ENSG00000196497' />" + "</DataNode></gpml>";
@@ -114,7 +114,7 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testInit() throws RemoteException
 	{
-		when(dataService.getEntityNames()).thenReturn(Arrays.asList("NonVCF", "VCF"));
+		when(dataService.getEntityNames()).thenReturn(Stream.of("NonVCF", "VCF"));
 		DefaultEntityMetaData nonVcf = new DefaultEntityMetaData("NonVCF");
 		nonVcf.addAttribute("id").setIdAttribute(true);
 
@@ -136,20 +136,17 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testGetColoredPathway() throws ParserConfigurationException, SAXException, IOException,
-			ExecutionException
+	public void testGetColoredPathway()
+			throws ParserConfigurationException, SAXException, IOException, ExecutionException
 	{
 		// {TUSC2=[cf7548], IPO4=[d9af5]}
-		when(serviceMock.getPathwayGPML("WP1234"))
-				.thenReturn(
-						"<gpml>  "
-								+ "<DataNode TextLabel='TUSC2 / Fus1 , Fusion' GraphId = 'cf7548' Type='GeneProduct' GroupRef='bced7'>"
-								+ "<Graphics CenterX='688.6583271016858' CenterY='681.6145075824545' Width='80.0' Height='20.0' ZOrder='32768' FontSize='10' Valign='Middle' />"
-								+ "<Xref Database='Ensembl' ID='ENSG00000197081' />"
-								+ "</DataNode>"
-								+ "<DataNode TextLabel='&amp;quot;IPO4&amp;quot;' GraphId='d9af5' Type='GeneProduct' GroupRef='bced7'>"
-								+ "<Graphics CenterX='688.6583271016858' CenterY='701.6145075824545' Width='80.0' Height='20.0' ZOrder='32768' FontSize='10' Valign='Middle' />"
-								+ "<Xref Database='Ensembl' ID='ENSG00000196497' />" + "</DataNode></gpml>");
+		when(serviceMock.getPathwayGPML("WP1234")).thenReturn("<gpml>  "
+				+ "<DataNode TextLabel='TUSC2 / Fus1 , Fusion' GraphId = 'cf7548' Type='GeneProduct' GroupRef='bced7'>"
+				+ "<Graphics CenterX='688.6583271016858' CenterY='681.6145075824545' Width='80.0' Height='20.0' ZOrder='32768' FontSize='10' Valign='Middle' />"
+				+ "<Xref Database='Ensembl' ID='ENSG00000197081' />" + "</DataNode>"
+				+ "<DataNode TextLabel='&amp;quot;IPO4&amp;quot;' GraphId='d9af5' Type='GeneProduct' GroupRef='bced7'>"
+				+ "<Graphics CenterX='688.6583271016858' CenterY='701.6145075824545' Width='80.0' Height='20.0' ZOrder='32768' FontSize='10' Valign='Middle' />"
+				+ "<Xref Database='Ensembl' ID='ENSG00000196497' />" + "</DataNode></gpml>");
 		Repository vcfRepo = mock(Repository.class);
 		Entity row1 = new MapEntity(vcf);
 		row1.set("EFF", "INTRON(LOW||||1417|TUSC2|protein_coding|CODING|NM_000057.3|7|1)	GT	1|0");
@@ -160,27 +157,23 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 		when(vcfRepo.spliterator()).thenReturn(Arrays.asList(row1, row2, row3).spliterator());
 		when(dataService.getRepository("VCF")).thenReturn(vcfRepo);
 
-		when(
-				serviceMock.getColoredPathwayImage("WP1234",
-						ImmutableMap.<String, Impact> of("cf7548", Impact.LOW, "d9af5", Impact.MODERATE))).thenReturn(
-				"<svg>WP1234</svg>");
+		when(serviceMock.getColoredPathwayImage("WP1234",
+				ImmutableMap.<String, Impact> of("cf7548", Impact.LOW, "d9af5", Impact.MODERATE)))
+						.thenReturn("<svg>WP1234</svg>");
 		assertEquals(controller.getColoredPathway("VCF", "WP1234"), "<svg>WP1234</svg>");
 	}
 
 	@Test
-	public void testGetColoredPathwayNoGraphIds() throws ParserConfigurationException, SAXException, IOException,
-			ExecutionException
+	public void testGetColoredPathwayNoGraphIds()
+			throws ParserConfigurationException, SAXException, IOException, ExecutionException
 	{
-		when(serviceMock.getPathwayGPML("WP1234"))
-				.thenReturn(
-						"<gpml>  "
-								+ "<DataNode TextLabel='TUSC2 / Fus1 , Fusion' Type='GeneProduct' GroupRef='bced7'>"
-								+ "<Graphics CenterX='688.6583271016858' CenterY='681.6145075824545' Width='80.0' Height='20.0' ZOrder='32768' FontSize='10' Valign='Middle' />"
-								+ "<Xref Database='Ensembl' ID='ENSG00000197081' />"
-								+ "</DataNode>"
-								+ "<DataNode TextLabel='IPO4' Type='GeneProduct' GroupRef='bced7'>"
-								+ "<Graphics CenterX='688.6583271016858' CenterY='701.6145075824545' Width='80.0' Height='20.0' ZOrder='32768' FontSize='10' Valign='Middle' />"
-								+ "<Xref Database='Ensembl' ID='ENSG00000196497' />" + "</DataNode></gpml>");
+		when(serviceMock.getPathwayGPML("WP1234")).thenReturn(
+				"<gpml>  " + "<DataNode TextLabel='TUSC2 / Fus1 , Fusion' Type='GeneProduct' GroupRef='bced7'>"
+						+ "<Graphics CenterX='688.6583271016858' CenterY='681.6145075824545' Width='80.0' Height='20.0' ZOrder='32768' FontSize='10' Valign='Middle' />"
+						+ "<Xref Database='Ensembl' ID='ENSG00000197081' />" + "</DataNode>"
+						+ "<DataNode TextLabel='IPO4' Type='GeneProduct' GroupRef='bced7'>"
+						+ "<Graphics CenterX='688.6583271016858' CenterY='701.6145075824545' Width='80.0' Height='20.0' ZOrder='32768' FontSize='10' Valign='Middle' />"
+						+ "<Xref Database='Ensembl' ID='ENSG00000196497' />" + "</DataNode></gpml>");
 		Repository vcfRepo = mock(Repository.class);
 		Entity row1 = new MapEntity(vcf);
 		row1.set("EFF", "INTRON(LOW||||1417|TUSC2|protein_coding|CODING|NM_000057.3|7|1)	GT	1|0");
@@ -204,13 +197,12 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 
 		when(dataService.getRepository("VCF")).thenReturn(vcfRepo);
 
-		when(serviceMock.getPathwaysForGene("TUSC2", "Homo sapiens")).thenReturn(
-				Arrays.asList(Pathway.create("WP1", "Pathway 1"), Pathway.create("WP2", "Pathway 2")));
-		when(serviceMock.getPathwaysForGene("IPO4", "Homo sapiens")).thenReturn(
-				Arrays.asList(Pathway.create("WP3", "Pathway 3"), Pathway.create("WP4", "Pathway 4")));
+		when(serviceMock.getPathwaysForGene("TUSC2", "Homo sapiens"))
+				.thenReturn(Arrays.asList(Pathway.create("WP1", "Pathway 1"), Pathway.create("WP2", "Pathway 2")));
+		when(serviceMock.getPathwaysForGene("IPO4", "Homo sapiens"))
+				.thenReturn(Arrays.asList(Pathway.create("WP3", "Pathway 3"), Pathway.create("WP4", "Pathway 4")));
 
-		assertEquals(
-				controller.getListOfPathwayNamesByGenes("VCF"),
+		assertEquals(controller.getListOfPathwayNamesByGenes("VCF"),
 				Arrays.asList(Pathway.create("WP1", "Pathway 1"), Pathway.create("WP2", "Pathway 2"),
 						Pathway.create("WP3", "Pathway 3"), Pathway.create("WP4", "Pathway 4")));
 	}

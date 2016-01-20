@@ -274,7 +274,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 			MolgenisUser molgenisUser = mock(MolgenisUser.class);
 			when(dataService.findAll(MolgenisUser.ENTITY_NAME,
 					new QueryImpl().eq(MolgenisUser.EMAIL, "admin@molgenis.org")))
-							.thenReturn(Collections.<Entity> singletonList(molgenisUser));
+							.thenReturn(Collections.<Entity> singletonList(molgenisUser).stream());
 
 			return dataService;
 		}

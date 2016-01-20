@@ -9,7 +9,6 @@ import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,6 +22,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -82,13 +82,6 @@ public class RepositoryValidationDecorator implements Repository
 	}
 
 	@Override
-	public void update(Iterable<? extends Entity> entities)
-	{
-		validate(entities, true);
-		decoratedRepository.update(entities);
-	}
-
-	@Override
 	public void update(Stream<? extends Entity> entities)
 	{
 		try (ValidationResource validationResource = new ValidationResource())
@@ -109,13 +102,6 @@ public class RepositoryValidationDecorator implements Repository
 	{
 		validate(Arrays.asList(entity), false);
 		decoratedRepository.add(entity);
-	}
-
-	@Override
-	public Integer add(Iterable<? extends Entity> entities)
-	{
-		validate(entities, false);
-		return decoratedRepository.add(entities);
 	}
 
 	@Override
@@ -183,15 +169,9 @@ public class RepositoryValidationDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
 		return decoratedRepository.findAll(q);
-	}
-
-	@Override
-	public Stream<Entity> findAllAsStream(Query q)
-	{
-		return decoratedRepository.findAllAsStream(q);
 	}
 
 	@Override
@@ -213,33 +193,15 @@ public class RepositoryValidationDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		return decoratedRepository.findAll(ids);
-	}
-
-	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		return decoratedRepository.findAll(ids);
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
-	{
-		return decoratedRepository.findAll(ids, fetch);
-	}
-
-	@Override
 	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
 		return decoratedRepository.findAll(ids, fetch);
-	}
-
-	@Override
-	public void delete(Iterable<? extends Entity> entities)
-	{
-		decoratedRepository.delete(entities);
 	}
 
 	@Override
@@ -255,7 +217,7 @@ public class RepositoryValidationDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
 		decoratedRepository.deleteById(ids);
 	}
@@ -359,8 +321,9 @@ public class RepositoryValidationDecorator implements Repository
 
 	private void initRequiredValueValidation(ValidationResource validationResource)
 	{
-		List<AttributeMetaData> requiredValueAttrs = stream(getEntityMetaData().getAtomicAttributes().spliterator(),
-				false).filter(attr -> !attr.isNillable() && attr.getExpression() == null).collect(Collectors.toList());
+		List<AttributeMetaData> requiredValueAttrs = StreamSupport
+				.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
+				.filter(attr -> !attr.isNillable() && attr.getExpression() == null).collect(Collectors.toList());
 
 		validationResource.setRequiredValueAttrs(requiredValueAttrs);
 	}
@@ -368,7 +331,8 @@ public class RepositoryValidationDecorator implements Repository
 	private void initReferenceValidation(ValidationResource validationResource)
 	{
 		// get reference attrs
-		List<AttributeMetaData> refAttrs = stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
+		List<AttributeMetaData> refAttrs = StreamSupport
+				.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
 				.filter(attr -> (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
 						&& attr.getExpression() == null)
 				.collect(Collectors.toList());
@@ -387,9 +351,9 @@ public class RepositoryValidationDecorator implements Repository
 					refEntitiesIds.put(refEntityName, refEntityIds);
 
 					Query q = new QueryImpl().fetch(new Fetch().field(refEntityMeta.getIdAttribute().getName()));
-					for (Entity refEntity : dataService.findAll(refEntityName, q))
+					for (Iterator<Entity> it = dataService.findAll(refEntityName, q).iterator(); it.hasNext();)
 					{
-						refEntityIds.add(refEntity.getIdValue());
+						refEntityIds.add(it.next().getIdValue());
 					}
 				}
 			});
@@ -403,7 +367,8 @@ public class RepositoryValidationDecorator implements Repository
 	private void initUniqueValidation(ValidationResource validationResource)
 	{
 		// get unique attributes
-		List<AttributeMetaData> uniqueAttrs = stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
+		List<AttributeMetaData> uniqueAttrs = StreamSupport
+				.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
 				.filter(attr -> attr.isUnique() && attr.getExpression() == null).collect(Collectors.toList());
 
 		// get existing values for each attributes
@@ -418,8 +383,7 @@ public class RepositoryValidationDecorator implements Repository
 			});
 
 			Query q = new QueryImpl().fetch(fetch);
-			for (Entity entity : decoratedRepository.findAll(q))
-			{
+			decoratedRepository.findAll(q).forEach(entity -> {
 				uniqueAttrs.forEach(uniqueAttr -> {
 					HugeMap<Object, Object> uniqueAttrValues = uniqueAttrsValues.get(uniqueAttr.getName());
 					Object attrValue = entity.get(uniqueAttr.getName());
@@ -432,17 +396,19 @@ public class RepositoryValidationDecorator implements Repository
 						uniqueAttrValues.put(attrValue, entity.getIdValue());
 					}
 				});
-			}
+			});
 
 			validationResource.setUniqueAttrsValues(uniqueAttrsValues);
 		}
 
 		validationResource.setUniqueAttrs(uniqueAttrs);
+
 	}
 
 	private void initReadonlyValidation(ValidationResource validationResource)
 	{
-		List<AttributeMetaData> readonlyAttrs = stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
+		List<AttributeMetaData> readonlyAttrs = StreamSupport
+				.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
 				.filter(attr -> attr.isReadonly() && attr.getExpression() == null).collect(Collectors.toList());
 
 		validationResource.setReadonlyAttrs(readonlyAttrs);
@@ -939,10 +905,9 @@ public class RepositoryValidationDecorator implements Repository
 
 		try
 		{
-			for (Entity refEntity : dataService.findAll(attr.getRefEntity().getName()))
-			{
+			dataService.findAll(attr.getRefEntity().getName()).forEach(refEntity -> {
 				refEntityIdValues.add(refEntity.getIdValue());
-			}
+			});
 
 			if (attr.getRefEntity().getName().equalsIgnoreCase(getName()))// Self reference
 			{

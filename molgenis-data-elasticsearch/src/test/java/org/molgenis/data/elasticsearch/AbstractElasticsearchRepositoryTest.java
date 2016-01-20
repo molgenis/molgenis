@@ -130,23 +130,6 @@ public class AbstractElasticsearchRepositoryTest
 	}
 
 	@Test
-	public void findAll() throws IOException
-	{
-		try
-		{
-			Iterable<Entity> entities = Arrays.asList(mock(Entity.class));
-			Iterable<Object> ids = Arrays.asList(0);
-			Fetch fetch = new Fetch();
-			when(searchService.get(ids, entityMeta, fetch)).thenReturn(entities);
-			assertEquals(repository.findAll(ids, fetch), entities);
-		}
-		finally
-		{
-			repository.close();
-		}
-	}
-
-	@Test
 	public void findAllStream()
 	{
 		Object id0 = "id0";
@@ -179,7 +162,7 @@ public class AbstractElasticsearchRepositoryTest
 		Entity entity0 = mock(Entity.class);
 		Query query = mock(Query.class);
 		when(searchService.searchAsStream(query, entityMeta)).thenReturn(Stream.of(entity0));
-		Stream<Entity> entities = repository.findAllAsStream(query);
+		Stream<Entity> entities = repository.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
 }

@@ -1,9 +1,6 @@
 package org.molgenis.data.support;
 
-import static java.util.stream.StreamSupport.stream;
-
 import java.util.Iterator;
-import java.util.stream.Stream;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityCollection;
@@ -29,12 +26,6 @@ public class DefaultEntityCollection implements EntityCollection
 	public Iterable<String> getAttributeNames()
 	{
 		return attrNames;
-	}
-
-	@Override
-	public Stream<Entity> asStream()
-	{
-		return stream(entities.spliterator(), false);
 	}
 
 	@Override

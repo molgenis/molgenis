@@ -1,7 +1,6 @@
 package org.molgenis.data;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.DATE;
 import static org.molgenis.MolgenisFieldTypes.DATETIME;
 
@@ -13,11 +12,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-import org.apache.commons.io.IOUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.fieldtypes.StringField;
-import org.molgenis.util.HugeMap;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -50,32 +48,6 @@ public class AutoValueRepositoryDecorator implements Repository
 		}
 
 		decoratedRepository.add(entity);
-	}
-
-	@Override
-	public Integer add(Iterable<? extends Entity> entities)
-	{
-		// auto date
-		generateAutoDateOrDateTime(entities, getEntityMetaData().getAttributes());
-
-		// auto id
-		AttributeMetaData attr = getEntityMetaData().getIdAttribute();
-		if ((attr != null) && attr.isAuto() && (attr.getDataType() instanceof StringField))
-		{
-			HugeMap<Integer, Object> idMap = new HugeMap<>();
-			try
-			{
-				Iterable<? extends Entity> decoratedEntities = new AutoIdEntityIterableDecorator(getEntityMetaData(),
-						entities, idGenerator, idMap);
-				return decoratedRepository.add(decoratedEntities);
-			}
-			finally
-			{
-				IOUtils.closeQuietly(idMap);
-			}
-		}
-
-		return decoratedRepository.add(entities);
 	}
 
 	@Override
@@ -138,15 +110,9 @@ public class AutoValueRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
 		return decoratedRepository.findAll(q);
-	}
-
-	@Override
-	public Stream<Entity> findAllAsStream(Query q)
-	{
-		return decoratedRepository.findAllAsStream(q);
 	}
 
 	@Override
@@ -168,21 +134,9 @@ public class AutoValueRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		return decoratedRepository.findAll(ids);
-	}
-
-	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		return decoratedRepository.findAll(ids);
-	}
-
-	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
-	{
-		return decoratedRepository.findAll(ids, fetch);
 	}
 
 	@Override
@@ -204,12 +158,6 @@ public class AutoValueRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void update(Iterable<? extends Entity> records)
-	{
-		decoratedRepository.update(records);
-	}
-
-	@Override
 	public void update(Stream<? extends Entity> entities)
 	{
 		decoratedRepository.update(entities);
@@ -219,12 +167,6 @@ public class AutoValueRepositoryDecorator implements Repository
 	public void delete(Entity entity)
 	{
 		decoratedRepository.delete(entity);
-	}
-
-	@Override
-	public void delete(Iterable<? extends Entity> entities)
-	{
-		decoratedRepository.delete(entities);
 	}
 
 	@Override
@@ -240,7 +182,7 @@ public class AutoValueRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
 		decoratedRepository.deleteById(ids);
 	}
@@ -339,8 +281,8 @@ public class AutoValueRepositoryDecorator implements Repository
 
 	private List<AttributeMetaData> getAutoAttrs()
 	{
-		return stream(getEntityMetaData().getAtomicAttributes().spliterator(), false).filter(AttributeMetaData::isAuto)
-				.collect(Collectors.toList());
+		return StreamSupport.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
+				.filter(AttributeMetaData::isAuto).collect(Collectors.toList());
 	}
 
 	private Entity initAutoAttrs(Entity entity, List<AttributeMetaData> autoAttrs)

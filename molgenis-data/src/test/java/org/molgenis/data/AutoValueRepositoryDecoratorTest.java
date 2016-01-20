@@ -24,8 +24,6 @@ import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Lists;
-
 public class AutoValueRepositoryDecoratorTest
 {
 	private static final String ATTR_ID = "id";
@@ -61,17 +59,6 @@ public class AutoValueRepositoryDecoratorTest
 	{
 		Entity entity = new MapEntity(entityMetaData);
 		repositoryDecorator.add(entity);
-	}
-
-	@Test
-	public void addEntityIterable()
-	{
-		Entity entity0 = new MapEntity(entityMetaData);
-		Entity entity1 = new MapEntity(entityMetaData);
-		repositoryDecorator.add(Arrays.asList(entity0, entity1));
-
-		validateEntity(entity0);
-		validateEntity(entity1);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -120,19 +107,6 @@ public class AutoValueRepositoryDecoratorTest
 	}
 
 	@Test
-	public void findAllIterableFetch()
-	{
-		Iterable<Object> ids = Arrays.<Object> asList(Integer.valueOf(0), Integer.valueOf(1));
-		Fetch fetch = new Fetch();
-		Entity entity0 = mock(Entity.class);
-		Entity entity1 = mock(Entity.class);
-		Iterable<Entity> entities = Arrays.asList(entity0, entity1);
-		when(decoratedRepository.findAll(ids, fetch)).thenReturn(entities);
-		assertEquals(Arrays.asList(entity0, entity1), Lists.newArrayList(repositoryDecorator.findAll(ids, fetch)));
-		verify(decoratedRepository, times(1)).findAll(ids, fetch);
-	}
-
-	@Test
 	public void findAllStream()
 	{
 		Object id0 = "id0";
@@ -175,8 +149,8 @@ public class AutoValueRepositoryDecoratorTest
 	{
 		Entity entity0 = mock(Entity.class);
 		Query query = mock(Query.class);
-		when(decoratedRepository.findAllAsStream(query)).thenReturn(Stream.of(entity0));
-		Stream<Entity> entities = repositoryDecorator.findAllAsStream(query);
+		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = repositoryDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
 
