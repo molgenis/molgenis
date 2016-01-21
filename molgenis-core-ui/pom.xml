@@ -26,6 +26,16 @@
 						</configuration>
 					</execution>
 					<execution>
+						<id>update package.json version</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>gulp</goal>
+						</goals>
+						<configuration>
+							<arguments>update-version</arguments>
+						</configuration>
+					</execution>
+					<execution>
 						<id>npm install</id>
 						<goals>
 							<goal>npm</goal>
