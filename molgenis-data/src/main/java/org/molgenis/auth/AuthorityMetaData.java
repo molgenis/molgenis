@@ -10,11 +10,9 @@ import static org.molgenis.MolgenisFieldTypes.XREF;
 @Component
 public class AuthorityMetaData extends DefaultEntityMetaData {
 
-    public static final String ROLE = "role";
-
     public AuthorityMetaData() {
         super("authority");
         setAbstract(true);
-        addAttribute(ROLE).setLabel("role").setNillable(true);
+        addAttribute(Authority.ROLE).setLabel("role").setNillable(true);
     }
 }

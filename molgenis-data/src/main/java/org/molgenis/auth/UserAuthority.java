@@ -10,6 +10,7 @@ public class UserAuthority extends org.molgenis.data.support.AbstractEntity impl
     public static final String ENTITY_NAME = "UserAuthority";
     public static final String MOLGENISUSER = "molgenisUser";
     public static final String ROLE = "role";
+    public static final String ID = "id";
 
     String id;
     MolgenisUser molgenisUser;
@@ -44,7 +45,7 @@ public class UserAuthority extends org.molgenis.data.support.AbstractEntity impl
     {
         if (name.equals(ROLE))
             return getRole();
-        if (name.equals("id"))
+        if (name.equals(ID))
             return getId();
         if (name.equals(MOLGENISUSER))
             return getMolgenisUser();
@@ -61,31 +62,10 @@ public class UserAuthority extends org.molgenis.data.support.AbstractEntity impl
     {
         //set Role
         // query formal name, else lowercase name
-        if(entity.getString("role") != null) this.setRole(entity.getString("role"));
-        else if(entity.getString("role") != null) this.setRole(entity.getString("role"));
-        else if(strict) this.setRole(entity.getString("role")); // setting null is not an option due to function overloading
-        if( entity.getString("userauthority_role") != null) this.setRole(entity.getString("userauthority_role"));
-        else if( entity.getString("UserAuthority_role") != null) this.setRole(entity.getString("UserAuthority_role"));
-        //set Id
-        // query formal name, else lowercase name
-        if(entity.getString("id") != null) this.setId(entity.getString("id"));
-        else if(entity.getString("id") != null) this.setId(entity.getString("id"));
-        else if(strict) this.setId(entity.getString("id")); // setting null is not an option due to function overloading
-        if( entity.getString("userauthority_id") != null) this.setId(entity.getString("userauthority_id"));
-        else if( entity.getString("UserAuthority_id") != null) this.setId(entity.getString("UserAuthority_id"));
-        //set MolgenisUser
-        // query formal name, else lowercase name
-        if( entity.getEntity("molgenisUser", org.molgenis.auth.MolgenisUser.class) != null) {
-            this.setMolgenisUser(entity.getEntity("molgenisUser", org.molgenis.auth.MolgenisUser.class));
-        }
-        else if( entity.getEntity("molgenisuser", org.molgenis.auth.MolgenisUser.class) != null) {
-            this.setMolgenisUser(entity.getEntity("molgenisuser", org.molgenis.auth.MolgenisUser.class));
-        }
-        else if( entity.getEntity("UserAuthority_molgenisUser", org.molgenis.auth.MolgenisUser.class) != null) {
-            this.setMolgenisUser(entity.getEntity("UserAuthority_molgenisUser", org.molgenis.auth.MolgenisUser.class));
-        }
-        else if( entity.getEntity("userauthority_molgenisuser", org.molgenis.auth.MolgenisUser.class) != null) {
-            this.setMolgenisUser(entity.getEntity("UserAuthority_molgenisUser", org.molgenis.auth.MolgenisUser.class));
+        if(entity.getString(ROLE) != null) this.setRole(entity.getString(ROLE));
+        if(entity.getString(ID) != null) this.setId(entity.getString(ID));
+        if( entity.getEntity(MOLGENISUSER, org.molgenis.auth.MolgenisUser.class) != null) {
+            this.setMolgenisUser(entity.getEntity(MOLGENISUSER, org.molgenis.auth.MolgenisUser.class));
         }
     }
 
@@ -127,15 +107,15 @@ public class UserAuthority extends org.molgenis.data.support.AbstractEntity impl
     @Override
     public void set(String attributeName, Object value)
     {
-        if("role".equals(attributeName)) {
+        if(ROLE.equals(attributeName)) {
             this.setRole((String)value);
             return;
         }
-        if("id".equals(attributeName)) {
+        if(ID.equals(attributeName)) {
             this.setId((String)value);
             return;
         }
-        if("molgenisUser".equals(attributeName)) {
+        if(MOLGENISUSER.equals(attributeName)) {
             org.molgenis.auth.MolgenisUser e = new org.molgenis.auth.MolgenisUser();
             e.set((Entity)value);
             this.setMolgenisUser(e);

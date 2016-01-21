@@ -8,19 +8,19 @@ import static org.molgenis.MolgenisFieldTypes.BOOL;
 @Component
 public class MolgenisGroupMetaData extends DefaultEntityMetaData
 {
-	public static final String ID = "id";
-	public static final String NAME = "name";
-	public static final String ACTIVE = "active";
+
+	public static final String ENTITY_NAME = "MolgenisGroup";
 
 	public MolgenisGroupMetaData()
 	{
-		super("MolgenisGroup");
+		super(ENTITY_NAME);
 
 		setExtends(new AuthorityMetaData());
-		addAttribute(ID).setAuto(true).setVisible(false).setDescription("").setIdAttribute(true).setNillable(false)
-				.setLabelAttribute(true);
-		addAttribute(NAME).setLabel("Name").setDescription("").setLookupAttribute(true).setNillable(false);
-		addAttribute(ACTIVE).setLabel("Active").setDataType(BOOL).setDefaultValue("true")
+		addAttribute(MolgenisGroup.ID).setAuto(true).setVisible(false).setDescription("").setIdAttribute(true)
+				.setNillable(false).setLabelAttribute(true);
+		addAttribute(MolgenisGroup.NAME).setLabel("Name").setDescription("").setLookupAttribute(true)
+				.setNillable(false);
+		addAttribute(MolgenisGroup.ACTIVE).setLabel("Active").setDataType(BOOL).setDefaultValue("true")
 				.setDescription("Boolean to indicate whether this group is in use.").setAggregateable(true)
 				.setNillable(false);
 	}

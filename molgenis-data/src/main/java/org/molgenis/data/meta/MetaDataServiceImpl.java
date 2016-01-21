@@ -38,6 +38,7 @@ import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
+import org.molgenis.data.system.RepositoryTemplateLoader;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
@@ -323,7 +324,7 @@ public class MetaDataServiceImpl implements MetaDataService
 
 		//is this the right place to do this?
 		if(decoratedRepo.getName().equals(FreemarkerTemplateMetaData.ENTITY_NAME)){
-			freemarkerConfigurer.setPostTemplateLoaders(new RepositoryTemplateLoader(dataService.getRepository(FreemarkerTemplateMetaData.ENTITY_NAME)));
+			freemarkerConfigurer.setPostTemplateLoaders(new RepositoryTemplateLoader(decoratedRepo));
 		}
 
 		dataService.addRepository(decoratedRepo);
@@ -480,14 +481,14 @@ public class MetaDataServiceImpl implements MetaDataService
 		DependencyResolver.resolve(Sets.newHashSet(emds.values())).stream()
 				.filter(emd -> !dataService.hasRepository(emd.getName())).forEach(this::addEntityMeta);
 
-		// Update update manageable backends, JPA throws exception
+		// Update update manageable backends
 		DependencyResolver.resolve(Sets.newHashSet(emds.values())).stream().filter(this::isManageableBackend)
 				.forEach(this::updateEntityMeta);
 	}
 
 	private boolean isManageableBackend(EntityMetaData emd)
 	{
-		// Might work for more than just MySQL backend, but not JPA backend
+		// Might work for more than just MySQL backend
 		return emd.getBackend() == null || "MySql".equals(emd.getBackend());
 	}
 

@@ -14,6 +14,11 @@ public class MolgenisToken extends org.molgenis.data.support.AbstractEntity impl
 
 	public static final String ENTITY_NAME = "MolgenisToken";
 	public static final String TOKEN = "token";
+	public static final String ID = "id";
+	public static final String MOLGENIS_USER = "molgenisUser";
+	public static final String EXPIRATIONDATE = "expirationDate";
+	public static final String CREATIONDATE = "creationDate";
+	public static final String DESCRIPTION = "description";
 
 	String id;
 	MolgenisUser molgenisUser;
@@ -85,12 +90,12 @@ public class MolgenisToken extends org.molgenis.data.support.AbstractEntity impl
 	@Override
 	public Object get(String name)
 	{
-		if (name.equals("id")) return getId();
-		if (name.equals("molgenisUser")) return getMolgenisUser();
+		if (name.equals(ID)) return getId();
+		if (name.equals(MOLGENIS_USER)) return getMolgenisUser();
 		if (name.equals(TOKEN)) return getToken();
-		if (name.equals("expirationdate")) return getExpirationDate();
-		if (name.equals("creationdate")) return getCreationDate();
-		if (name.equals("description")) return getDescription();
+		if (name.equals(EXPIRATIONDATE)) return getExpirationDate();
+		if (name.equals(CREATIONDATE)) return getCreationDate();
+		if (name.equals(DESCRIPTION)) return getDescription();
 		return null;
 	}
 
@@ -104,26 +109,26 @@ public class MolgenisToken extends org.molgenis.data.support.AbstractEntity impl
 	{
 		// set Id
 		// query formal name, else lowercase name
-		if (entity.getString("id") != null) this.setId(entity.getString("id"));
+		if (entity.getString(ID) != null) this.setId(entity.getString(ID));
 		if (entity.getString("MolgenisToken_id") != null) this.setId(entity.getString("MolgenisToken_id"));
-		if (entity.getEntity("molgenisUser", org.molgenis.auth.MolgenisUser.class) != null)
+		if (entity.getEntity(MOLGENIS_USER, org.molgenis.auth.MolgenisUser.class) != null)
 		{
-			this.setMolgenisUser(entity.getEntity("molgenisUser", org.molgenis.auth.MolgenisUser.class));
+			this.setMolgenisUser(entity.getEntity(MOLGENIS_USER, org.molgenis.auth.MolgenisUser.class));
 		}
 		if (entity.getEntity("MolgenisToken_molgenisUser", org.molgenis.auth.MolgenisUser.class) != null)
 		{
 			this.setMolgenisUser(entity.getEntity("MolgenisToken_molgenisUser", org.molgenis.auth.MolgenisUser.class));
 		}
-		if (entity.getString("token") != null) this.setToken(entity.getString("token"));
+		if (entity.getString(TOKEN) != null) this.setToken(entity.getString(TOKEN));
 		if (entity.getString("MolgenisToken_token") != null) this.setToken(entity.getString("MolgenisToken_token"));
-		if (entity.getTimestamp("expirationDate") != null)
-			this.setExpirationDate(entity.getTimestamp("expirationDate"));
+		if (entity.getTimestamp(EXPIRATIONDATE) != null)
+			this.setExpirationDate(entity.getTimestamp(EXPIRATIONDATE));
 		if (entity.getTimestamp("MolgenisToken_expirationDate") != null)
 			this.setExpirationDate(entity.getTimestamp("MolgenisToken_expirationDate"));
-		if (entity.getTimestamp("creationDate") != null) this.setCreationDate(entity.getTimestamp("creationDate"));
+		if (entity.getTimestamp(CREATIONDATE) != null) this.setCreationDate(entity.getTimestamp(CREATIONDATE));
 		if (entity.getTimestamp("MolgenisToken_creationDate") != null)
 			this.setCreationDate(entity.getTimestamp("MolgenisToken_creationDate"));
-		if (entity.getString("description") != null) this.setDescription(entity.getString("description"));
+		if (entity.getString(DESCRIPTION) != null) this.setDescription(entity.getString(DESCRIPTION));
 		if (entity.getString("MolgenisToken_description") != null)
 			this.setDescription(entity.getString("MolgenisToken_description"));
 	}
@@ -174,34 +179,34 @@ public class MolgenisToken extends org.molgenis.data.support.AbstractEntity impl
 	@Override
 	public void set(String attributeName, Object value)
 	{
-		if ("id".equalsIgnoreCase(attributeName))
+		if (ID.equalsIgnoreCase(attributeName))
 		{
 			this.setId((String) value);
 			return;
 		}
-		if ("molgenisUser".equalsIgnoreCase(attributeName))
+		if (MOLGENIS_USER.equalsIgnoreCase(attributeName))
 		{
 			org.molgenis.auth.MolgenisUser e = new org.molgenis.auth.MolgenisUser();
 			e.set((Entity) value);
 			this.setMolgenisUser(e);
 			return;
 		}
-		if ("token".equalsIgnoreCase(attributeName))
+		if (TOKEN.equalsIgnoreCase(attributeName))
 		{
 			this.setToken((String) value);
 			return;
 		}
-		if ("expirationDate".equalsIgnoreCase(attributeName))
+		if (EXPIRATIONDATE.equalsIgnoreCase(attributeName))
 		{
 			this.setExpirationDate((java.util.Date) value);
 			return;
 		}
-		if ("creationDate".equalsIgnoreCase(attributeName))
+		if (CREATIONDATE.equalsIgnoreCase(attributeName))
 		{
 			this.setCreationDate((java.util.Date) value);
 			return;
 		}
-		if ("description".equalsIgnoreCase(attributeName))
+		if (DESCRIPTION.equalsIgnoreCase(attributeName))
 		{
 			this.setDescription((String) value);
 			return;

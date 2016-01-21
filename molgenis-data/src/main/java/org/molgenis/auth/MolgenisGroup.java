@@ -65,16 +65,9 @@ public class MolgenisGroup extends org.molgenis.data.support.AbstractEntity impl
 
 	public void set(org.molgenis.data.Entity entity, boolean strict)
 	{
-		// set Id
-		// query formal name, else lowercase name
-		if (entity.getString("id") != null) this.setId(entity.getString("id")); // setting null is not an option due to
-																				// function overloading
-		if (entity.getString("MolgenisGroup_id") != null) this.setId(entity.getString("MolgenisGroup_id"));
-		if (entity.getString("name") != null) this.setName(entity.getString("name"));
-		if (entity.getString("MolgenisGroup_name") != null) this.setName(entity.getString("MolgenisGroup_name"));
-		if (entity.getBoolean("active") != null) this.setActive(entity.getBoolean("active"));
-		if (entity.getBoolean("MolgenisGroup_active") != null)
-			this.setActive(entity.getBoolean("MolgenisGroup_active"));
+		if (entity.getString(ID) != null) this.setId(entity.getString(ID)); // setting null is not an option due to
+		if (entity.getString(NAME) != null) this.setName(entity.getString(NAME));
+		if (entity.getBoolean(ACTIVE) != null) this.setActive(entity.getBoolean(ACTIVE));
 	}
 
 	@Override
@@ -114,17 +107,17 @@ public class MolgenisGroup extends org.molgenis.data.support.AbstractEntity impl
 	@Override
 	public void set(String attributeName, Object value)
 	{
-		if ("id".equalsIgnoreCase(attributeName))
+		if (ID.equalsIgnoreCase(attributeName))
 		{
 			this.setId((String) value);
 			return;
 		}
-		if ("name".equalsIgnoreCase(attributeName))
+		if (NAME.equalsIgnoreCase(attributeName))
 		{
 			this.setName((String) value);
 			return;
 		}
-		if ("active".equalsIgnoreCase(attributeName))
+		if (ACTIVE.equalsIgnoreCase(attributeName))
 		{
 			this.setActive((Boolean) value);
 			return;

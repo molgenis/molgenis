@@ -12,10 +12,27 @@ public class MolgenisUser extends org.molgenis.data.support.AbstractEntity imple
 	public static final String USERNAME = "username";
 	public static final String SUPERUSER = "superuser";
 	public static final String PASSWORD_ = "password_";
-	public static final String EMAIL = "email";
-	public static final String GOOGLEACCOUNTID = "googleaccountid";
-	public static final String ACTIVATIONCODE = "activationcode";
+	public static final String EMAIL = "Email";
+	public static final String GOOGLEACCOUNTID = "googleAccountId";
+	public static final String ACTIVATIONCODE = "activationCode";
 	public static final String ACTIVE = "active";
+	public static final String CHANGE_PASSWORD = "changePassword";
+	public static final String FIRSTNAME = "FirstName";
+	public static final String MIDDLENAMES = "MiddleNames";
+	public static final String LASTNAME = "LastName";
+	public static final String TITLE = "Title";
+	public static final String AFFILIATION = "Affiliation";
+	public static final String DEPARTMENT = "Department";
+	public static final String ROLE = "Role";
+	public static final String ADDRESS = "Address";
+	public static final String PHONE = "Phone";
+	public static final String TOLLFREEPHONE = "tollFreePhone";
+	public static final String FAX = "Fax";
+	public static final String CITY = "City";
+	public static final String COUNTRY = "Country";
+	public static final String LANGUAGECODE = "languageCode";
+	public static final String ID = "id";
+	public static final String ADDESS = "Addess";
 
 	String id;
 	String username;
@@ -279,28 +296,28 @@ public class MolgenisUser extends org.molgenis.data.support.AbstractEntity imple
 	@Override
 	public Object get(String name)
 	{
-		if (name.equals("id")) return getId();
+		if (name.equals(ID)) return getId();
 		if (name.equals(USERNAME)) return getUsername();
 		if (name.equals(PASSWORD_)) return getPassword();
 		if (name.equals(ACTIVATIONCODE)) return getActivationCode();
 		if (name.equals(ACTIVE)) return isActive();
 		if (name.equals(SUPERUSER)) return isSuperuser();
-		if (name.equals("firstname")) return getFirstName();
-		if (name.equals("middlenames")) return getMiddleNames();
-		if (name.equals("lastname")) return getLastName();
-		if (name.equals("title")) return getTitle();
-		if (name.equals("affiliation")) return getAffiliation();
-		if (name.equals("department")) return getDepartment();
-		if (name.equals("role")) return getRole();
-		if (name.equals("address")) return getAddress();
-		if (name.equals("phone")) return getPhone();
+		if (name.equals(FIRSTNAME)) return getFirstName();
+		if (name.equals(MIDDLENAMES)) return getMiddleNames();
+		if (name.equals(LASTNAME)) return getLastName();
+		if (name.equals(TITLE)) return getTitle();
+		if (name.equals(AFFILIATION)) return getAffiliation();
+		if (name.equals(DEPARTMENT)) return getDepartment();
+		if (name.equals(ROLE)) return getRole();
+		if (name.equals(ADDRESS)) return getAddress();
+		if (name.equals(PHONE)) return getPhone();
 		if (name.equals(EMAIL)) return getEmail();
-		if (name.equals("fax")) return getFax();
-		if (name.equals("tollfreephone")) return getTollFreePhone();
-		if (name.equals("city")) return getCity();
-		if (name.equals("country")) return getCountry();
-		if (name.equals("changepassword")) return isChangePassword();
-		if (name.equals("languagecode")) return getLanguageCode();
+		if (name.equals(FAX)) return getFax();
+		if (name.equals(TOLLFREEPHONE)) return getTollFreePhone();
+		if (name.equals(CITY)) return getCity();
+		if (name.equals(COUNTRY)) return getCountry();
+		if (name.equals(CHANGE_PASSWORD)) return isChangePassword();
+		if (name.equals(LANGUAGECODE)) return getLanguageCode();
 		if (name.equals(GOOGLEACCOUNTID)) return getGoogleAccountId();
 		return null;
 	}
@@ -313,63 +330,63 @@ public class MolgenisUser extends org.molgenis.data.support.AbstractEntity imple
 
 	public void set(org.molgenis.data.Entity entity, boolean strict)
 	{
-		if (entity.getString("id") != null) this.setId(entity.getString("id"));
+		if (entity.getString(ID) != null) this.setId(entity.getString(ID));
 		if (entity.getString("MolgenisUser_id") != null) this.setId(entity.getString("MolgenisUser_id"));
-		if (entity.getString("username") != null) this.setUsername(entity.getString("username"));
+		if (entity.getString(USERNAME) != null) this.setUsername(entity.getString(USERNAME));
 		if (entity.getString("MolgenisUser_username") != null)
 			this.setUsername(entity.getString("MolgenisUser_username"));
-		if (entity.getString("password_") != null) this.setPassword(entity.getString("password_"));
+		if (entity.getString(PASSWORD_) != null) this.setPassword(entity.getString(PASSWORD_));
 		if (entity.getString("MolgenisUser_password_") != null)
 			this.setPassword(entity.getString("MolgenisUser_password_"));
-		if (entity.getString("activationCode") != null) this.setActivationCode(entity.getString("activationCode"));
+		if (entity.getString(ACTIVATIONCODE) != null) this.setActivationCode(entity.getString("activationCode"));
 		if (entity.getString("MolgenisUser_activationCode") != null)
 			this.setActivationCode(entity.getString("MolgenisUser_activationCode"));
-		if (entity.getBoolean("active") != null) this.setActive(entity.getBoolean("active"));
+		if (entity.getBoolean(ACTIVE) != null) this.setActive(entity.getBoolean(ACTIVE));
 		if (entity.getBoolean("MolgenisUser_active") != null) this.setActive(entity.getBoolean("MolgenisUser_active"));
-		if (entity.getBoolean("superuser") != null) this.setSuperuser(entity.getBoolean("superuser"));
+		if (entity.getBoolean(SUPERUSER) != null) this.setSuperuser(entity.getBoolean(SUPERUSER));
 		if (entity.getBoolean("MolgenisUser_superuser") != null)
 			this.setSuperuser(entity.getBoolean("MolgenisUser_superuser"));
-		if (entity.getString("FirstName") != null) this.setFirstName(entity.getString("FirstName"));
+		if (entity.getString(FIRSTNAME) != null) this.setFirstName(entity.getString(FIRSTNAME));
 		if (entity.getString("MolgenisUser_FirstName") != null)
 			this.setFirstName(entity.getString("MolgenisUser_FirstName"));
-		if (entity.getString("MiddleNames") != null) this.setMiddleNames(entity.getString("MiddleNames"));
+		if (entity.getString(MIDDLENAMES) != null) this.setMiddleNames(entity.getString(MIDDLENAMES));
 		if (entity.getString("MolgenisUser_MiddleNames") != null)
 			this.setMiddleNames(entity.getString("MolgenisUser_MiddleNames"));
-		if (entity.getString("LastName") != null) this.setLastName(entity.getString("LastName"));
+		if (entity.getString(LASTNAME) != null) this.setLastName(entity.getString(LASTNAME));
 		if (entity.getString("MolgenisUser_LastName") != null)
 			this.setLastName(entity.getString("MolgenisUser_LastName"));
-		if (entity.getString("Title") != null) this.setTitle(entity.getString("Title"));
+		if (entity.getString(TITLE) != null) this.setTitle(entity.getString(TITLE));
 		if (entity.getString("MolgenisUser_Title") != null) this.setTitle(entity.getString("MolgenisUser_Title"));
-		if (entity.getString("Affiliation") != null) this.setAffiliation(entity.getString("Affiliation"));
+		if (entity.getString(AFFILIATION) != null) this.setAffiliation(entity.getString(AFFILIATION));
 		if (entity.getString("MolgenisUser_Affiliation") != null)
 			this.setAffiliation(entity.getString("MolgenisUser_Affiliation"));
-		if (entity.getString("Department") != null) this.setDepartment(entity.getString("Department"));
+		if (entity.getString(DEPARTMENT) != null) this.setDepartment(entity.getString(DEPARTMENT));
 		if (entity.getString("MolgenisUser_Department") != null)
 			this.setDepartment(entity.getString("MolgenisUser_Department"));
-		if (entity.getString("Role") != null) this.setRole(entity.getString("Role"));
+		if (entity.getString(ROLE) != null) this.setRole(entity.getString("Role"));
 		if (entity.getString("MolgenisUser_Role") != null) this.setRole(entity.getString("MolgenisUser_Role"));
-		if (entity.getString("Address") != null) this.setAddress(entity.getString("Address"));
+		if (entity.getString(ADDESS) != null) this.setAddress(entity.getString(ADDRESS));
 		if (entity.getString("MolgenisUser_Address") != null) this.setAddress(entity.getString("MolgenisUser_Address"));
-		if (entity.getString("Phone") != null) this.setPhone(entity.getString("Phone"));
+		if (entity.getString(PHONE) != null) this.setPhone(entity.getString(PHONE));
 		if (entity.getString("MolgenisUser_Phone") != null) this.setPhone(entity.getString("MolgenisUser_Phone"));
-		if (entity.getString("Email") != null) this.setEmail(entity.getString("Email"));
+		if (entity.getString(EMAIL) != null) this.setEmail(entity.getString(EMAIL));
 		if (entity.getString("MolgenisUser_Email") != null) this.setEmail(entity.getString("MolgenisUser_Email"));
-		if (entity.getString("Fax") != null) this.setFax(entity.getString("Fax"));
+		if (entity.getString(FAX) != null) this.setFax(entity.getString(FAX));
 		if (entity.getString("MolgenisUser_Fax") != null) this.setFax(entity.getString("MolgenisUser_Fax"));
-		if (entity.getString("tollFreePhone") != null) this.setTollFreePhone(entity.getString("tollFreePhone"));
+		if (entity.getString(TOLLFREEPHONE) != null) this.setTollFreePhone(entity.getString(TOLLFREEPHONE));
 		if (entity.getString("MolgenisUser_tollFreePhone") != null)
 			this.setTollFreePhone(entity.getString("MolgenisUser_tollFreePhone"));
-		if (entity.getString("City") != null) this.setCity(entity.getString("City"));
+		if (entity.getString(CITY) != null) this.setCity(entity.getString(CITY));
 		if (entity.getString("MolgenisUser_City") != null) this.setCity(entity.getString("MolgenisUser_City"));
-		if (entity.getString("Country") != null) this.setCountry(entity.getString("Country"));
+		if (entity.getString(COUNTRY) != null) this.setCountry(entity.getString(COUNTRY));
 		if (entity.getString("MolgenisUser_Country") != null) this.setCountry(entity.getString("MolgenisUser_Country"));
-		if (entity.getBoolean("changePassword") != null) this.setChangePassword(entity.getBoolean("changePassword"));
+		if (entity.getBoolean(CHANGE_PASSWORD) != null) this.setChangePassword(entity.getBoolean(CHANGE_PASSWORD));
 		if (entity.getBoolean("MolgenisUser_changePassword") != null)
 			this.setChangePassword(entity.getBoolean("MolgenisUser_changePassword"));
-		if (entity.getString("languageCode") != null) this.setLanguageCode(entity.getString("languageCode"));
+		if (entity.getString(LANGUAGECODE) != null) this.setLanguageCode(entity.getString(LANGUAGECODE));
 		if (entity.getString("MolgenisUser_languageCode") != null)
 			this.setLanguageCode(entity.getString("MolgenisUser_languageCode"));
-		if (entity.getString("googleAccountId") != null) this.setGoogleAccountId(entity.getString("googleAccountId"));
+		if (entity.getString(GOOGLEACCOUNTID) != null) this.setGoogleAccountId(entity.getString(GOOGLEACCOUNTID));
 		if (entity.getString("MolgenisUser_googleAccountId") != null)
 			this.setGoogleAccountId(entity.getString("MolgenisUser_googleAccountId"));
 	}
@@ -431,117 +448,117 @@ public class MolgenisUser extends org.molgenis.data.support.AbstractEntity imple
 	@Override
 	public void set(String attributeName, Object value)
 	{
-		if ("id".equals(attributeName))
+		if (ID.equals(attributeName))
 		{
 			this.setId((String) value);
 			return;
 		}
-		if ("username".equals(attributeName))
+		if (USERNAME.equals(attributeName))
 		{
 			this.setUsername((String) value);
 			return;
 		}
-		if ("password_".equals(attributeName))
+		if (PASSWORD_.equals(attributeName))
 		{
 			this.setPassword((String) value);
 			return;
 		}
-		if ("activationCode".equals(attributeName))
+		if (ACTIVATIONCODE.equals(attributeName))
 		{
 			this.setActivationCode((String) value);
 			return;
 		}
-		if ("active".equals(attributeName))
+		if (ACTIVE.equals(attributeName))
 		{
 			this.setActive((Boolean) value);
 			return;
 		}
-		if ("superuser".equals(attributeName))
+		if (SUPERUSER.equals(attributeName))
 		{
 			this.setSuperuser((Boolean) value);
 			return;
 		}
-		if ("FirstName".equals(attributeName))
+		if (FIRSTNAME.equals(attributeName))
 		{
 			this.setFirstName((String) value);
 			return;
 		}
-		if ("MiddleNames".equals(attributeName))
+		if (MIDDLENAMES.equals(attributeName))
 		{
 			this.setMiddleNames((String) value);
 			return;
 		}
-		if ("LastName".equals(attributeName))
+		if (LASTNAME.equals(attributeName))
 		{
 			this.setLastName((String) value);
 			return;
 		}
-		if ("Title".equals(attributeName))
+		if (TITLE.equals(attributeName))
 		{
 			this.setTitle((String) value);
 			return;
 		}
-		if ("Affiliation".equals(attributeName))
+		if (AFFILIATION.equals(attributeName))
 		{
 			this.setAffiliation((String) value);
 			return;
 		}
-		if ("Department".equals(attributeName))
+		if (DEPARTMENT.equals(attributeName))
 		{
 			this.setDepartment((String) value);
 			return;
 		}
-		if ("Role".equals(attributeName))
+		if (ROLE.equals(attributeName))
 		{
 			this.setRole((String) value);
 			return;
 		}
-		if ("Address".equals(attributeName))
+		if (ADDRESS.equals(attributeName))
 		{
 			this.setAddress((String) value);
 			return;
 		}
-		if ("Phone".equals(attributeName))
+		if (PHONE.equals(attributeName))
 		{
 			this.setPhone((String) value);
 			return;
 		}
-		if ("Email".equals(attributeName))
+		if (EMAIL.equals(attributeName))
 		{
 			this.setEmail((String) value);
 			return;
 		}
-		if ("Fax".equals(attributeName))
+		if (FAX.equals(attributeName))
 		{
 			this.setFax((String) value);
 			return;
 		}
-		if ("tollFreePhone".equals(attributeName))
+		if (TOLLFREEPHONE.equals(attributeName))
 		{
 			this.setTollFreePhone((String) value);
 			return;
 		}
-		if ("City".equals(attributeName))
+		if (CITY.equals(attributeName))
 		{
 			this.setCity((String) value);
 			return;
 		}
-		if ("Country".equals(attributeName))
+		if (COUNTRY.equals(attributeName))
 		{
 			this.setCountry((String) value);
 			return;
 		}
-		if ("changePassword".equals(attributeName))
+		if (CHANGE_PASSWORD.equals(attributeName))
 		{
 			this.setChangePassword((Boolean) value);
 			return;
 		}
-		if ("languageCode".equals(attributeName))
+		if (LANGUAGECODE.equals(attributeName))
 		{
 			this.setLanguageCode((String) value);
 			return;
 		}
-		if ("googleAccountId".equals(attributeName))
+		if (GOOGLEACCOUNTID.equals(attributeName))
 		{
 			this.setGoogleAccountId((String) value);
 			return;

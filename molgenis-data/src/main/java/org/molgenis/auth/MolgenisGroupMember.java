@@ -13,6 +13,7 @@ public class MolgenisGroupMember extends org.molgenis.data.support.AbstractEntit
 	public static final String ENTITY_NAME = "MolgenisGroupMember";
 	public static final String MOLGENISUSER = "molgenisUser";
 	public static final String MOLGENISGROUP = "molgenisGroup";
+	public static final String ID = "id";
 
 	String id;
 	MolgenisUser molgenisUser;
@@ -51,7 +52,7 @@ public class MolgenisGroupMember extends org.molgenis.data.support.AbstractEntit
 	@Override
 	public Object get(String name)
 	{
-		if (name.equals("id")) return getId();
+		if (name.equals(ID)) return getId();
 		if (name.equals(MOLGENISUSER)) return getMolgenisUser();
 		if (name.equals(MOLGENISGROUP)) return getMolgenisGroup();
 		return null;
@@ -65,20 +66,20 @@ public class MolgenisGroupMember extends org.molgenis.data.support.AbstractEntit
 
 	public void set(org.molgenis.data.Entity entity, boolean strict)
 	{
-		if (entity.getString("id") != null) this.setId(entity.getString("id"));
+		if (entity.getString(ID) != null) this.setId(entity.getString(ID));
 		if (entity.getString("MolgenisGroupMember_id") != null) this.setId(entity.getString("MolgenisGroupMember_id"));
-		if (entity.getEntity("molgenisUser", org.molgenis.auth.MolgenisUser.class) != null)
+		if (entity.getEntity(MOLGENISUSER, org.molgenis.auth.MolgenisUser.class) != null)
 		{
-			this.setMolgenisUser(entity.getEntity("molgenisUser", org.molgenis.auth.MolgenisUser.class));
+			this.setMolgenisUser(entity.getEntity(MOLGENISUSER, org.molgenis.auth.MolgenisUser.class));
 		}
 		if (entity.getEntity("MolgenisGroupMember_molgenisUser", org.molgenis.auth.MolgenisUser.class) != null)
 		{
 			this.setMolgenisUser(
 					entity.getEntity("MolgenisGroupMember_molgenisUser", org.molgenis.auth.MolgenisUser.class));
 		}
-		if (entity.getEntity("molgenisGroup", org.molgenis.auth.MolgenisGroup.class) != null)
+		if (entity.getEntity(MOLGENISGROUP, org.molgenis.auth.MolgenisGroup.class) != null)
 		{
-			this.setMolgenisGroup(entity.getEntity("molgenisGroup", org.molgenis.auth.MolgenisGroup.class));
+			this.setMolgenisGroup(entity.getEntity(MOLGENISGROUP, org.molgenis.auth.MolgenisGroup.class));
 		}
 		if (entity.getEntity("MolgenisGroupMember_molgenisGroup", org.molgenis.auth.MolgenisGroup.class) != null)
 		{
@@ -124,19 +125,19 @@ public class MolgenisGroupMember extends org.molgenis.data.support.AbstractEntit
 	@Override
 	public void set(String attributeName, Object value)
 	{
-		if ("id".equals(attributeName))
+		if (ID.equals(attributeName))
 		{
 			this.setId((String) value);
 			return;
 		}
-		if ("molgenisUser".equals(attributeName))
+		if (MOLGENISUSER.equals(attributeName))
 		{
 			org.molgenis.auth.MolgenisUser e = new org.molgenis.auth.MolgenisUser();
 			e.set((Entity) value);
 			this.setMolgenisUser(e);
 			return;
 		}
-		if ("molgenisGroup".equals(attributeName))
+		if (MOLGENISGROUP.equals(attributeName))
 		{
 			org.molgenis.auth.MolgenisGroup e = new org.molgenis.auth.MolgenisGroup();
 			e.set((Entity) value);

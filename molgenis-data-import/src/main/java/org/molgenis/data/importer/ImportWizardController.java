@@ -135,7 +135,7 @@ public class ImportWizardController extends AbstractWizardController
 					if (value != null
 							&& (SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX
 									+ entityClassId.toUpperCase()) || userAccountService.getCurrentUser()
-									.getSuperuser()))
+									.isSuperuser()))
 					{
 						if (value.equalsIgnoreCase(READ.toString()) || value.equalsIgnoreCase(COUNT.toString())
 								|| value.equalsIgnoreCase(WRITE.toString())

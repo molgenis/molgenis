@@ -11,6 +11,7 @@ public class GroupAuthority extends org.molgenis.data.support.AbstractEntity imp
 	public static final String ENTITY_NAME = "GroupAuthority";
 	public static final String MOLGENISGROUP = "molgenisGroup";
 	public static final String ROLE = "role";
+	public static final String ID = "id";
 
 	String id;
 	MolgenisGroup molgenisGroup;
@@ -50,7 +51,7 @@ public class GroupAuthority extends org.molgenis.data.support.AbstractEntity imp
 	public Object get(String name)
 	{
 		if (name.equals(ROLE)) return getRole();
-		if (name.equals("id")) return getId();
+		if (name.equals(ID)) return getId();
 		if (name.equals(MOLGENISGROUP)) return getMolgenisGroup();
 		return null;
 	}
@@ -63,18 +64,11 @@ public class GroupAuthority extends org.molgenis.data.support.AbstractEntity imp
 
 	public void set(org.molgenis.data.Entity entity, boolean strict)
 	{
-		if (entity.getString(ROLE) != null) this.setRole(entity.getString("role"));
-		if (entity.getString("GroupAuthority_role") != null) this.setRole(entity.getString("GroupAuthority_role"));
-		if (entity.getString("id") != null) this.setId(entity.getString("id"));
-		if (entity.getString("GroupAuthority_id") != null) this.setId(entity.getString("GroupAuthority_id"));
+		if (entity.getString(ROLE) != null) this.setRole(entity.getString(ROLE));
+		if (entity.getString(ID) != null) this.setId(entity.getString(ID));
 		if (entity.getEntity(MOLGENISGROUP, org.molgenis.auth.MolgenisGroup.class) != null)
 		{
-			this.setMolgenisGroup(entity.getEntity("molgenisGroup", org.molgenis.auth.MolgenisGroup.class));
-		}
-		else if (entity.getEntity("GroupAuthority_molgenisGroup", org.molgenis.auth.MolgenisGroup.class) != null)
-		{
-			this.setMolgenisGroup(
-					entity.getEntity("GroupAuthority_molgenisGroup", org.molgenis.auth.MolgenisGroup.class));
+			this.setMolgenisGroup(entity.getEntity(MOLGENISGROUP, org.molgenis.auth.MolgenisGroup.class));
 		}
 	}
 
@@ -115,17 +109,17 @@ public class GroupAuthority extends org.molgenis.data.support.AbstractEntity imp
 	@Override
 	public void set(String attributeName, Object value)
 	{
-		if ("role".equals(attributeName))
+		if (ROLE.equals(attributeName))
 		{
 			this.setRole((String) value);
 			return;
 		}
-		if ("id".equals(attributeName))
+		if (ID.equals(attributeName))
 		{
 			this.setId((String) value);
 			return;
 		}
-		if ("molgenisGroup".equals(attributeName))
+		if (MOLGENISGROUP.equals(attributeName))
 		{
 			org.molgenis.auth.MolgenisGroup e = new org.molgenis.auth.MolgenisGroup();
 			e.set((Entity) value);

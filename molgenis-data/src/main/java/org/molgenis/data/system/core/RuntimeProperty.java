@@ -13,8 +13,9 @@ public class RuntimeProperty  extends org.molgenis.data.support.AbstractEntity i
 
     public static final String ENTITY_NAME = "RuntimeProperty";
 
-    public static final String NAME = "name";
-    public static final String VALUE = "value";
+    public static final String NAME = "Name";
+    public static final String VALUE = "Value";
+    public static final String ID = "id";
     String id;
     String name;
     String value;
@@ -47,7 +48,7 @@ public class RuntimeProperty  extends org.molgenis.data.support.AbstractEntity i
     public Object get(String name)
     {
         name = name.toLowerCase();
-        if (name.equals("id"))
+        if (name.equals(ID))
             return getId();
         if (name.equals(NAME))
             return getName();
@@ -64,12 +65,9 @@ public class RuntimeProperty  extends org.molgenis.data.support.AbstractEntity i
 
     public void set(org.molgenis.data.Entity entity, boolean strict)
     {
-        if(entity.getString("id") != null) this.setId(entity.getString("id"));
-        if( entity.getString("RuntimeProperty_id") != null) this.setId(entity.getString("RuntimeProperty_id"));
-        if(entity.getString("Name") != null) this.setName(entity.getString("Name"));
-        if( entity.getString("RuntimeProperty_Name") != null) this.setName(entity.getString("RuntimeProperty_Name"));
-        if(entity.getString("Value") != null) this.setValue(entity.getString("Value"));
-        if( entity.getString("RuntimeProperty_Value") != null) this.setValue(entity.getString("RuntimeProperty_Value"));
+        if(entity.getString(ID) != null) this.setId(entity.getString(ID));
+        if(entity.getString(NAME) != null) this.setName(entity.getString(NAME));
+        if(entity.getString(VALUE) != null) this.setValue(entity.getString(VALUE));
     }
 
     @Override
@@ -110,15 +108,15 @@ public class RuntimeProperty  extends org.molgenis.data.support.AbstractEntity i
     @Override
     public void set(String attributeName, Object value)
     {
-        if("id".equals(attributeName)) {
+        if(ID.equals(attributeName)) {
             this.setId((String)value);
             return;
         }
-        if("Name".equals(attributeName)) {
+        if(NAME.equals(attributeName)) {
             this.setName((String)value);
             return;
         }
-        if("Value".equals(attributeName)) {
+        if(VALUE.equals(attributeName)) {
             this.setValue((String)value);
             return;
         }

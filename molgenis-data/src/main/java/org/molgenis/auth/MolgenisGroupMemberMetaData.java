@@ -7,15 +7,14 @@ import static org.molgenis.MolgenisFieldTypes.XREF;
 
 @Component
 public class MolgenisGroupMemberMetaData extends DefaultEntityMetaData {
-    public static final String ID = "id";
-    public static final String MOLGENISUSER = "molgenisUser";
-    public static final String MOLGENISGROUP = "molgenisGroup";
+
+    public static final String ENTITY_NAME = "MolgenisGroupMember";
 
     public MolgenisGroupMemberMetaData() {
-        super("MolgenisGroupMember");
-        addAttribute(ID).setAuto(true).setVisible(false)
+        super(ENTITY_NAME);
+        addAttribute(MolgenisGroupMember.ID).setAuto(true).setVisible(false)
                 .setDescription("").setIdAttribute(true).setNillable(false).setLabelAttribute(true);
-        addAttribute(MOLGENISUSER).setDataType(XREF).setRefEntity(new MolgenisUserMetaData()).setAggregateable(true).setDescription("").setNillable(false);
-        addAttribute(MOLGENISGROUP).setDataType(XREF).setRefEntity(new MolgenisGroupMetaData()).setAggregateable(true).setDescription("").setNillable(false);
+        addAttribute(MolgenisGroupMember.MOLGENISUSER).setDataType(XREF).setRefEntity(new MolgenisUserMetaData()).setAggregateable(true).setDescription("").setNillable(false);
+        addAttribute(MolgenisGroupMember.MOLGENISGROUP).setDataType(XREF).setRefEntity(new MolgenisGroupMetaData()).setAggregateable(true).setDescription("").setNillable(false);
     }
 }

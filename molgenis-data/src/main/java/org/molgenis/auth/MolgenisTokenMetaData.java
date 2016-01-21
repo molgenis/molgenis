@@ -9,23 +9,26 @@ import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 
 @Component
-public class MolgenisTokenMetaData extends DefaultEntityMetaData {
-    public static final String ID = "id";
-    public static final String MOLGENISUSER = "molgenisUser";
-    public static final String TOKEN = "token";
-    public static final String EXPIRATIONDATE = "expirationDate";
-    public static final String CREATIONDATE = "creationDate";
-    public static final String DESCRIPTION = "description";
+public class MolgenisTokenMetaData extends DefaultEntityMetaData
+{
 
-    public MolgenisTokenMetaData() {
-        super("MolgenisToken");
-        addAttribute(ID).setAuto(true).setVisible(false)
-                .setDescription("").setIdAttribute(true).setNillable(false);
-        addAttribute(MOLGENISUSER).setDataType(XREF).setRefEntity(new MolgenisUserMetaData()).setAggregateable(true).setDescription("").setNillable(false);
-        addAttribute(TOKEN).setLabel("Token").setUnique(true).setDescription("").setLabelAttribute(true).setNillable(false);
-        addAttribute(EXPIRATIONDATE).setDataType(DATETIME).setLabel("Expiration date").setNillable(true).setDescription("When expiration date is null it will never expire");
-        addAttribute(CREATIONDATE).setDataType(DATETIME).setLabel("Creation date").setAuto(true).setReadOnly(true).setDescription("").setNillable(false);
-        addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description").setNillable(true).setDescription("");
+	public static final String ENTITY_NAME = "MolgenisToken";
 
-    }
+	public MolgenisTokenMetaData()
+	{
+		super(ENTITY_NAME);
+		addAttribute(MolgenisToken.ID).setAuto(true).setVisible(false).setDescription("").setIdAttribute(true)
+				.setNillable(false);
+		addAttribute(MolgenisToken.MOLGENIS_USER).setDataType(XREF).setRefEntity(new MolgenisUserMetaData())
+				.setAggregateable(true).setDescription("").setNillable(false);
+		addAttribute(MolgenisToken.TOKEN).setLabel("Token").setUnique(true).setDescription("").setLabelAttribute(true)
+				.setNillable(false);
+		addAttribute(MolgenisToken.EXPIRATIONDATE).setDataType(DATETIME).setLabel("Expiration date").setNillable(true)
+				.setDescription("When expiration date is null it will never expire");
+		addAttribute(MolgenisToken.CREATIONDATE).setDataType(DATETIME).setLabel("Creation date").setAuto(true)
+				.setReadOnly(true).setDescription("").setNillable(false);
+		addAttribute(MolgenisToken.DESCRIPTION).setDataType(TEXT).setLabel("Description").setNillable(true)
+				.setDescription("");
+
+	}
 }
