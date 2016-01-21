@@ -9,6 +9,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.transaction.AsyncTransactionLog;
+import org.molgenis.mysql.embed.EmbeddedMysqlDatabase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -31,6 +32,9 @@ public abstract class AbstractDataIntegrationTest extends AbstractTestNGSpringCo
 
 	@Autowired
 	AsyncTransactionLog asyncTransactionLog;
+
+	@Autowired
+	EmbeddedMysqlDatabase dataSource;
 
 	@BeforeClass
 	public void init()
@@ -68,5 +72,6 @@ public abstract class AbstractDataIntegrationTest extends AbstractTestNGSpringCo
 		{
 			e.printStackTrace();
 		}
+
 	}
 }

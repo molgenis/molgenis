@@ -59,7 +59,7 @@ import com.google.common.io.Files;
 @Import(
 { EmbeddedElasticSearchConfig.class, ElasticsearchEntityFactory.class, TransactionConfig.class,
 		ElasticsearchRepositoryCollection.class, RunAsSystemBeanPostProcessor.class, FileMetaMetaData.class,
-		OwnedEntityMetaData.class, RhinoConfig.class, ExpressionValidator.class })
+		OwnedEntityMetaData.class, RhinoConfig.class, ExpressionValidator.class, LanguageService.class })
 public abstract class AbstractDataApiTestConfig
 {
 	@Autowired
