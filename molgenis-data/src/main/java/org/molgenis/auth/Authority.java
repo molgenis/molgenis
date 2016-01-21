@@ -1,11 +1,11 @@
 package org.molgenis.auth;
 
-public interface Authority extends org.molgenis.data.Entity {
+public interface Authority extends org.molgenis.data.Entity
+{
 
+	String ROLE = "role";
 
-    String ROLE = "role";
+	public String getRole();
 
-    public String getRole();
-
-    public void setRole(String role);
+	public void setRole(String role);
 }

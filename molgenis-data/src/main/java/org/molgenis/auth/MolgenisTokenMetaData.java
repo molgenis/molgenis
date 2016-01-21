@@ -1,12 +1,11 @@
 package org.molgenis.auth;
 
-import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.stereotype.Component;
 
 import static org.molgenis.MolgenisFieldTypes.DATETIME;
-import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
+import static org.molgenis.MolgenisFieldTypes.XREF;
 
 @Component
 public class MolgenisTokenMetaData extends DefaultEntityMetaData

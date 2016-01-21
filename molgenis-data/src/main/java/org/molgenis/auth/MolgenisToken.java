@@ -1,12 +1,12 @@
 package org.molgenis.auth;
 
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import com.google.auto.value.AutoValue;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @AutoValue
 public class MolgenisToken extends org.molgenis.data.support.AbstractEntity implements org.molgenis.data.Entity
@@ -121,8 +121,7 @@ public class MolgenisToken extends org.molgenis.data.support.AbstractEntity impl
 		}
 		if (entity.getString(TOKEN) != null) this.setToken(entity.getString(TOKEN));
 		if (entity.getString("MolgenisToken_token") != null) this.setToken(entity.getString("MolgenisToken_token"));
-		if (entity.getTimestamp(EXPIRATIONDATE) != null)
-			this.setExpirationDate(entity.getTimestamp(EXPIRATIONDATE));
+		if (entity.getTimestamp(EXPIRATIONDATE) != null) this.setExpirationDate(entity.getTimestamp(EXPIRATIONDATE));
 		if (entity.getTimestamp("MolgenisToken_expirationDate") != null)
 			this.setExpirationDate(entity.getTimestamp("MolgenisToken_expirationDate"));
 		if (entity.getTimestamp(CREATIONDATE) != null) this.setCreationDate(entity.getTimestamp(CREATIONDATE));
