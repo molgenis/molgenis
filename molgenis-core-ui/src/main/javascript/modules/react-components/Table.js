@@ -20,6 +20,8 @@ import {
 	isCompoundAttr
 } from "rest-client/AttributeFunctions";
 
+import "./css/Table.css";
+
 	var div = React.DOM.div, table = React.DOM.table, thead = React.DOM.thead, tbody = React.DOM.tbody, tr = React.DOM.tr, th = React.DOM.th, td = React.DOM.td, a = React.DOM.a, span = React.DOM.span, em = React.DOM.em, br = React.DOM.br, label = React.DOM.label;
 
 	var api = new RestClientV2();

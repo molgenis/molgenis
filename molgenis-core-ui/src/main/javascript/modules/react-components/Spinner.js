@@ -12,7 +12,7 @@ import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
 		render: function() {
 			return (
 				div(null,
-					img({src: '/css/select2-spinner.gif', alt: 'Spinner', width: 16, height: 16})
+					img({src: require('./css/wrapper/select2-spinner.gif'), alt: 'Spinner', width: 16, height: 16})
 				)
 			);
 		}

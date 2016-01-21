@@ -1,6 +1,7 @@
 import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
 import GroupMixin from "./mixin/GroupMixin";
 import React from "react";
+import "./css/Checkbox.css";
 
 	/**
 	 * @memberOf component
