@@ -4,7 +4,7 @@
   "description": "Dependencies for the MOLGENIS UI",
   "scripts": {
     "build": "webpack",
-    "test": "webpack -d --config webpack.test.config.js; node ./target/test-classes/js/dist/test.bundle.js > target/tests.tap; cat target/tests.tap"
+    "test": "webpack -d --config webpack.test.config.js; node ./target/test-classes/js/dist/test.bundle.js > target/tests.tap; cat target/tests.tap; jest"
   },
   "repository": {
     "type": "git",

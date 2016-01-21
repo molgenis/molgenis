@@ -51,10 +51,7 @@ var configuration = {
             // babel does a lot of little transforms in the right order, we
             // select these two presets that make it compile jsx -> js and es6 -> js
             loader: 'babel',
-            exclude: [/node_modules/, /src\/main\/javascript\/plugins/],
-            query: {
-                presets: [require.resolve('babel-preset-es2015'), require.resolve('babel-preset-react')]
-            }
+            exclude: [/node_modules/, /src\/main\/javascript\/plugins/]
         }, {
             test: /\.css$/,
             loader: 'style-loader!css-loader'
