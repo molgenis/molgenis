@@ -203,9 +203,8 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	/**
-	 * Compares the attributes of the target repository and the results of the mapping and sees if they're compatible.
-	 * It is possible for the target repository to have more attributes than the mapping, allowing for multiple mapping
-	 * projects writing to one target.
+	 * Compares the attributes of the target repository with the results of the mapping and sees if they're compatible.
+	 * The repository is compatible when all attributes resulting from the mapping can be written to it.
 	 * 
 	 * @param targetRepository
 	 *            the target repository
