@@ -57,7 +57,8 @@ public class OntologyImportService implements ImportService
 
 	@Override
 	@Transactional
-	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction, String defaultPackage)
+	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction,
+			String defaultPackage)
 	{
 		if (databaseAction != DatabaseAction.ADD) throw new IllegalArgumentException("Only ADD is supported");
 
@@ -76,12 +77,11 @@ public class OntologyImportService implements ImportService
 
 					Repository crudRepository = dataService.getRepository(entityNameToImport);
 
-					crudRepository.add(repo);
+					crudRepository.add(repo.stream());
 
 					List<String> entityNames = addedEntities.stream().map(emd -> emd.getName())
 							.collect(Collectors.toList());
-					permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
-							entityNames);
+					permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(), entityNames);
 					int count = 1;
 					for (String entityName : entityNames)
 					{
@@ -118,14 +118,14 @@ public class OntologyImportService implements ImportService
 
 	@Override
 	/**
-	 * Ontology validation 
+	 * Ontology validation
 	 */
 	public EntitiesValidationReport validateImport(File file, RepositoryCollection source)
 	{
 		EntitiesValidationReport report = new EntitiesValidationReportImpl();
 
-		if (source.getRepository(OntologyMetaData.ENTITY_NAME) == null) throw new MolgenisDataException(
-				"Exception Repository [" + OntologyMetaData.ENTITY_NAME + "] is missing");
+		if (source.getRepository(OntologyMetaData.ENTITY_NAME) == null)
+			throw new MolgenisDataException("Exception Repository [" + OntologyMetaData.ENTITY_NAME + "] is missing");
 
 		boolean ontologyExists = false;
 		for (Entity ontologyEntity : source.getRepository(OntologyMetaData.ENTITY_NAME))
@@ -133,8 +133,7 @@ public class OntologyImportService implements ImportService
 			String ontologyIRI = ontologyEntity.getString(OntologyMetaData.ONTOLOGY_IRI);
 			String ontologyName = ontologyEntity.getString(OntologyMetaData.ONTOLOGY_NAME);
 
-			Entity ontologyQueryEntity = dataService.findOne(
-					OntologyMetaData.ENTITY_NAME,
+			Entity ontologyQueryEntity = dataService.findOne(OntologyMetaData.ENTITY_NAME,
 					new QueryImpl().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIRI).or()
 							.eq(OntologyMetaData.ONTOLOGY_NAME, ontologyName));
 			ontologyExists = ontologyQueryEntity != null;

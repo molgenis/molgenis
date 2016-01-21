@@ -1,5 +1,7 @@
 package org.molgenis.data.importer;
 
+import static java.util.stream.Collectors.toList;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -90,8 +92,8 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 					((ImportWizard) wizard).setImportRunId(importRun.getId());
 
 					asyncImportJobs.execute(new ImportJob(importService, SecurityContextHolder.getContext(),
-							repositoryCollection, entityDbAction, importRun.getId(), importRunService, request
-									.getSession(), importWizard.getDefaultEntity()));
+							repositoryCollection, entityDbAction, importRun.getId(), importRunService,
+							request.getSession(), importWizard.getDefaultEntity()));
 				}
 
 			}
@@ -114,7 +116,7 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 		}
 		else
 		{
-			groups = Lists.newArrayList(dataService.findAll(MolgenisGroup.ENTITY_NAME, MolgenisGroup.class));
+			groups = dataService.findAll(MolgenisGroup.ENTITY_NAME, MolgenisGroup.class).collect(toList());
 		}
 
 		((ImportWizard) wizard).setGroups(groups);

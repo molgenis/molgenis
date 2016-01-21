@@ -135,8 +135,8 @@ public class GoNLAnnotatorTest extends AbstractTestNGSpringContextTests
 		assertFalse(results.hasNext());
 
 		Entity expectedEntity = new MapEntity("expected");
-		expectedEntity.set(GoNLAnnotator.GONL_GENOME_AF, null);
-		expectedEntity.set(GoNLAnnotator.GONL_GENOME_GTC, null);
+		expectedEntity.set(GoNLAnnotator.GONL_GENOME_AF, "||0.015136226034308779");
+		expectedEntity.set(GoNLAnnotator.GONL_GENOME_GTC, "||7,11,33");
 
 		assertEquals(resultEntity.get(GoNLAnnotator.GONL_GENOME_AF), expectedEntity.get(GoNLAnnotator.GONL_GENOME_AF));
 		assertEquals(resultEntity.get(GoNLAnnotator.GONL_GENOME_GTC),
@@ -181,8 +181,8 @@ public class GoNLAnnotatorTest extends AbstractTestNGSpringContextTests
 		assertFalse(results.hasNext());
 
 		Entity expectedEntity = new MapEntity("expected");
-		expectedEntity.set(GoNLAnnotator.GONL_GENOME_AF, null);
-		expectedEntity.set(GoNLAnnotator.GONL_GENOME_GTC, null);
+		expectedEntity.set(GoNLAnnotator.GONL_GENOME_AF, "0.9969909729187563||");
+		expectedEntity.set(GoNLAnnotator.GONL_GENOME_GTC, "1,4,496||");
 
 		assertEquals(resultEntity.get(GoNLAnnotator.GONL_GENOME_AF), expectedEntity.get(GoNLAnnotator.GONL_GENOME_AF));
 		assertEquals(resultEntity.get(GoNLAnnotator.GONL_GENOME_GTC),

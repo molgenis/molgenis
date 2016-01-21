@@ -1,6 +1,9 @@
 package org.molgenis.data.mapper.service.impl;
 
 import static java.util.Collections.emptyMap;
+import static java.util.stream.Collectors.toList;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.DATE;
@@ -18,7 +21,10 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import org.mockito.ArgumentMatcher;
 import org.mockito.Matchers;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -197,8 +203,23 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		targetAttributeMetaData.setDataType(MREF).setNillable(false).setRefEntity(refEntityMeta);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
 		attributeMapping.setAlgorithm("$('" + sourceEntityAttrName + "').value()");
-		when(dataService.findAll(refEntityName, Arrays.asList(refEntityId0, refEntityId1)))
-				.thenReturn(Arrays.asList(refEntity0, refEntity1));
+
+		when(dataService.findAll(eq(refEntityName), argThat(new ArgumentMatcher<Stream<Object>>()
+		{
+			@SuppressWarnings("unchecked")
+			@Override
+			public boolean matches(Object argument)
+			{
+				return ((Stream<Object>) argument).collect(toList()).equals(Arrays.asList(refEntityId0, refEntityId1));
+			}
+		}))).thenAnswer(new Answer<Stream<Entity>>()
+		{
+			@Override
+			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
+			{
+				return Stream.of(refEntity0, refEntity1);
+			}
+		});
 
 		// source Entity
 		DefaultEntityMetaData entityMetaDataSource = new DefaultEntityMetaData(sourceEntityName);

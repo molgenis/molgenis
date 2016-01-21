@@ -1,5 +1,6 @@
 package org.molgenis.data.meta;
 
+import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -9,7 +10,9 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.stream.Stream;
 
+import org.mockito.ArgumentCaptor;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.ManageableRepositoryCollection;
@@ -25,6 +28,8 @@ public class AttributeMetaDataRepositoryTest
 		new AttributeMetaDataRepository(null, null);
 	}
 
+	@SuppressWarnings(
+	{ "rawtypes", "unchecked" })
 	@Test
 	public void addAttributeMetaData()
 	{
@@ -38,9 +43,13 @@ public class AttributeMetaDataRepositoryTest
 		when(attr0.getDataType()).thenReturn(STRING);
 		Entity attrEntity0 = attributeMetaDataRepository.add(attr0);
 		assertEquals(attrEntity0.getString(AttributeMetaDataMetaData.NAME), "attr0");
-		verify(repo, times(1)).add(Arrays.asList(attrEntity0));
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(repo, times(1)).add(captor.capture());
+		assertEquals(captor.getValue().collect(toList()), Arrays.asList(attrEntity0));
 	}
 
+	@SuppressWarnings(
+	{ "rawtypes", "unchecked" })
 	@Test
 	public void addIterableAttributeMetaData()
 	{
@@ -63,6 +72,8 @@ public class AttributeMetaDataRepositoryTest
 		assertEquals(attrEntity0.getString(AttributeMetaDataMetaData.NAME), "attr0");
 		Entity attrEntity1 = it.next();
 		assertEquals(attrEntity1.getString(AttributeMetaDataMetaData.NAME), "attr1");
-		verify(repo, times(1)).add(Arrays.asList(attrEntity0, attrEntity1));
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(repo, times(1)).add(captor.capture());
+		assertEquals(captor.getValue().collect(toList()), Arrays.asList(attrEntity0, attrEntity1));
 	}
 }

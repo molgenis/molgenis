@@ -27,17 +27,20 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.core.token.UnknownTokenException;
+import org.molgenis.security.login.MolgenisLoginController;
 import org.molgenis.security.user.MolgenisUserDetailsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
@@ -64,6 +67,8 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 			DataService dataService, MolgenisUserDetailsService molgenisUserDetailsService, AppSettings appSettings)
 	{
 		super(new AntPathRequestMatcher(GOOGLE_AUTHENTICATION_URL, POST.toString()));
+
+		setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler("/login?error"));
 
 		this.googlePublicKeysManager = requireNonNull(googlePublicKeysManager);
 		this.dataService = requireNonNull(dataService);
@@ -157,7 +162,9 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 					user = createMolgenisUser(username, email, givenName, familyName, principal);
 				}
 			}
-
+			if(!user.isActive()){
+				throw new DisabledException(MolgenisLoginController.ERROR_MESSAGE_DISABLED);
+			}
 			// create authentication
 			Collection<? extends GrantedAuthority> authorities = molgenisUserDetailsService.getAuthorities(user);
 			return new UsernamePasswordAuthenticationToken(user.getUsername(), credentials, authorities);
@@ -184,6 +191,8 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 		user.setPassword(UUID.randomUUID().toString());
 		user.setEmail(email);
 		user.setActive(true);
+		user.setSuperuser(false);
+		user.setChangePassword(false);
 		if (givenName != null)
 		{
 			user.setFirstName(givenName);

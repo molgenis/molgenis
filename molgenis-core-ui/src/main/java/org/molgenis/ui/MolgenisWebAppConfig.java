@@ -56,6 +56,7 @@ import org.molgenis.data.support.OwnedEntityMetaData;
 import org.molgenis.data.transaction.TransactionLogRepositoryDecorator;
 import org.molgenis.data.transaction.TransactionLogService;
 import org.molgenis.data.validation.EntityAttributesValidator;
+import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
 import org.molgenis.file.FileStore;
 import org.molgenis.framework.MolgenisUpgradeService;
@@ -121,7 +122,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	@Autowired
 	private AppSettings appSettings;
-	
+
 	@Autowired
 	private AppDbSettings appDbSettings;
 
@@ -155,6 +156,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	@Autowired
 	public EntityAttributesValidator entityAttributesValidator;
+
+	@Autowired
+	public ExpressionValidator expressionValidator;
 
 	@Autowired
 	public LanguageService languageService;
@@ -340,7 +344,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		FreeMarkerViewResolver resolver = new FreeMarkerViewResolver();
 		resolver.setCache(true);
 		resolver.setSuffix(".ftl");
-
+		resolver.setContentType("text/html;charset=UTF-8");
 		return resolver;
 	}
 
@@ -445,8 +449,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		SearchService localSearchService = embeddedElasticSearchServiceFactory.create(localDataService,
 				new ElasticsearchEntityFactory(localEntityManager, sourceToEntityConverter, entityToSourceConverter));
 
-		List<EntityMetaData> metas = DependencyResolver.resolve(Sets.newHashSet(localDataService.getMeta()
-				.getEntityMetaDatas()));
+		List<EntityMetaData> metas = DependencyResolver
+				.resolve(Sets.newHashSet(localDataService.getMeta().getEntityMetaDatas()));
 
 		// Sort repos to the same sequence as the resolves metas
 		List<Repository> repos = Lists.newArrayList(localDataService);
@@ -564,7 +568,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 				// 3. validation decorator
 				decoratedRepository = new RepositoryValidationDecorator(dataService(), decoratedRepository,
-						entityAttributesValidator);
+						entityAttributesValidator, expressionValidator);
 
 				// 2. auto value decorator
 				decoratedRepository = new AutoValueRepositoryDecorator(decoratedRepository, idGenerator);

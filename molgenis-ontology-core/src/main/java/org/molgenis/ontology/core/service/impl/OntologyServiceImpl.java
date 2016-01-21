@@ -1,6 +1,7 @@
 package org.molgenis.ontology.core.service.impl;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,7 @@ public class OntologyServiceImpl implements OntologyService
 	@Override
 	public List<Ontology> getOntologies()
 	{
-		return Lists.newArrayList(ontologyRepository.getOntologies());
+		return ontologyRepository.getOntologies().collect(toList());
 	}
 
 	@Override

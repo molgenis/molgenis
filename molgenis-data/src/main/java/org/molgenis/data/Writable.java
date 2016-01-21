@@ -1,6 +1,7 @@
 package org.molgenis.data;
 
 import java.io.Closeable;
+import java.util.stream.Stream;
 
 /**
  * Repository that can be extended with more entity instances.
@@ -11,7 +12,7 @@ public interface Writable extends Closeable
 	void add(Entity entity);
 
 	/** Stream add multiple entities */
-	Integer add(Iterable<? extends Entity> entities);
+	Integer add(Stream<? extends Entity> entities);
 
 	void flush();
 

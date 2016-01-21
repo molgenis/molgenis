@@ -76,10 +76,9 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 	public List<MappingProject> getAllMappingProjects()
 	{
 		List<MappingProject> results = new ArrayList<>();
-		for (Entity entity : dataService.findAll(MappingProjectRepositoryImpl.META_DATA.getName()))
-		{
+		dataService.findAll(MappingProjectRepositoryImpl.META_DATA.getName()).forEach(entity -> {
 			results.add(toMappingProject(entity));
-		}
+		});
 		return results;
 	}
 
@@ -87,10 +86,9 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 	public List<MappingProject> getMappingProjects(Query q)
 	{
 		List<MappingProject> results = new ArrayList<>();
-		for (Entity entity : dataService.findAll(MappingProjectRepositoryImpl.META_DATA.getName(), q))
-		{
+		dataService.findAll(MappingProjectRepositoryImpl.META_DATA.getName(), q).forEach(entity -> {
 			results.add(toMappingProject(entity));
-		}
+		});
 		return results;
 	}
 
@@ -106,8 +104,8 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 		String identifier = mappingProjectEntity.getString(MappingProjectMetaData.IDENTIFIER);
 		String name = mappingProjectEntity.getString(MappingProjectMetaData.NAME);
 		MolgenisUser owner = molgenisUserService.getUser(mappingProjectEntity.getString(MappingProjectMetaData.OWNER));
-		List<Entity> mappingTargetEntities = Lists.newArrayList(mappingProjectEntity
-				.getEntities(MappingProjectMetaData.MAPPINGTARGETS));
+		List<Entity> mappingTargetEntities = Lists
+				.newArrayList(mappingProjectEntity.getEntities(MappingProjectMetaData.MAPPINGTARGETS));
 		List<MappingTarget> mappingTargets = mappingTargetRepository.toMappingTargets(mappingTargetEntities);
 
 		return new MappingProject(identifier, name, owner, mappingTargets);

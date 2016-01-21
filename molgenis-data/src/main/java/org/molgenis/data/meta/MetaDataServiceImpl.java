@@ -2,6 +2,7 @@ package org.molgenis.data.meta;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.reverse;
+import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -37,7 +38,7 @@ import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
-import org.molgenis.data.system.RepositoryTemplateLoader;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -164,7 +165,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		dataService.addRepository(tagRepo);
 
 		Repository packages = defaultBackend.addEntityMeta(PackageRepository.META_DATA);
-		dataService.addRepository(packages);
+		dataService.addRepository(new MetaDataRepositoryDecorator(packages));
 		packageRepository = new PackageRepository(packages);
 
 		attributeMetaDataRepository = new AttributeMetaDataRepository(defaultBackend, languageService);
@@ -172,8 +173,8 @@ public class MetaDataServiceImpl implements MetaDataService
 				attributeMetaDataRepository, languageService);
 		attributeMetaDataRepository.setEntityMetaDataRepository(entityMetaDataRepository);
 
-		dataService.addRepository(attributeMetaDataRepository.getRepository());
-		dataService.addRepository(entityMetaDataRepository.getRepository());
+		dataService.addRepository(new MetaDataRepositoryDecorator(attributeMetaDataRepository.getRepository()));
+		dataService.addRepository(new MetaDataRepositoryDecorator(entityMetaDataRepository.getRepository()));
 		entityMetaDataRepository.fillEntityMetaDataCache();
 	}
 
@@ -195,6 +196,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void deleteEntityMeta(String entityName)
 	{
+		validatePermission(entityName, Permission.WRITEMETA);
+
 		transactionTemplate.execute((TransactionStatus status) -> {
 			EntityMetaData emd = getEntityMetaData(entityName);
 			if ((emd != null) && !emd.isAbstract())
@@ -234,6 +237,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void delete(List<EntityMetaData> entities)
 	{
+		entities.forEach(emd -> validatePermission(emd.getName(), Permission.WRITEMETA));
+
 		reverse(DependencyResolver.resolve(Sets.newHashSet(entities))).stream().map(EntityMetaData::getName)
 				.forEach(this::deleteEntityMeta);
 	}
@@ -245,6 +250,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void deleteAttribute(String entityName, String attributeName)
 	{
+		validatePermission(entityName, Permission.WRITEMETA);
+
 		// Update AttributeMetaDataRepository
 		entityMetaDataRepository.removeAttribute(entityName, attributeName);
 		EntityMetaData emd = getEntityMetaData(entityName);
@@ -336,6 +343,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void addAttribute(String fullyQualifiedEntityName, AttributeMetaData attr)
 	{
+		validatePermission(fullyQualifiedEntityName, Permission.WRITEMETA);
 		MetaValidationUtils.validateName(attr.getName());
 
 		EntityMetaData emd = entityMetaDataRepository.addAttribute(fullyQualifiedEntityName, attr);
@@ -345,6 +353,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public void addAttributeSync(String fullyQualifiedEntityName, AttributeMetaData attr)
 	{
+		validatePermission(fullyQualifiedEntityName, Permission.WRITEMETA);
 		MetaValidationUtils.validateName(attr.getName());
 
 		EntityMetaData emd = entityMetaDataRepository.addAttribute(fullyQualifiedEntityName, attr);
@@ -490,6 +499,8 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	public void updateEntityMetaBackend(String entityName, String backend)
 	{
+		validatePermission(entityName, Permission.WRITEMETA);
+
 		DefaultEntityMetaData entityMeta = entityMetaDataRepository.get(entityName);
 		if (entityMeta == null) throw new UnknownEntityException("Unknown entity '" + entityName + "'");
 		entityMeta.setBackend(backend);

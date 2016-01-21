@@ -2,6 +2,7 @@ package org.molgenis.data.annotation.resources.impl;
 
 import static java.util.stream.Collectors.toMap;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,12 +61,20 @@ public class ResourcesImpl implements Resources
 				LOG.warn("Resource {} is unavailable, trying dataService instead.", name);
 			}
 		}
-		return dataService.findAll(name, q);
+		return new Iterable<Entity>()
+		{
+			@Override
+			public Iterator<Entity> iterator()
+			{
+				return dataService.findAll(name, q).iterator();
+			}
+		};
 	}
 
+	@Override
 	public Set<String> getResourcesNames()
 	{
 		return resources.keySet();
 	}
-	
+
 }

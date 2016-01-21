@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
@@ -66,7 +67,7 @@ public class MySqlRepositoryExceptionTranslatorDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
 		return decoratedRepo.findAll(q);
 	}
@@ -90,13 +91,13 @@ public class MySqlRepositoryExceptionTranslatorDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
+	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		return decoratedRepo.findAll(ids);
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
 		return decoratedRepo.findAll(ids, fetch);
 	}
@@ -116,10 +117,10 @@ public class MySqlRepositoryExceptionTranslatorDecorator implements Repository
 	}
 
 	@Override
-	public void update(Iterable<? extends Entity> records)
+	public void update(Stream<? extends Entity> entities)
 	{
 		SQLExceptionTranslatorTemplate.tryCatchSQLException(() -> {
-			decoratedRepo.update(records);
+			decoratedRepo.update(entities);
 		});
 	}
 
@@ -130,9 +131,9 @@ public class MySqlRepositoryExceptionTranslatorDecorator implements Repository
 	}
 
 	@Override
-	public void delete(Iterable<? extends Entity> entities)
+	public void delete(Stream<? extends Entity> entities)
 	{
-		decoratedRepo.delete(entities);
+		decoratedRepo.delete(entities); // FIXME why no exception translation here?
 	}
 
 	@Override
@@ -142,7 +143,7 @@ public class MySqlRepositoryExceptionTranslatorDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
 		decoratedRepo.deleteById(ids);
 	}
@@ -162,7 +163,7 @@ public class MySqlRepositoryExceptionTranslatorDecorator implements Repository
 	}
 
 	@Override
-	public Integer add(Iterable<? extends Entity> entities)
+	public Integer add(Stream<? extends Entity> entities)
 	{
 		AtomicInteger result = new AtomicInteger();
 
