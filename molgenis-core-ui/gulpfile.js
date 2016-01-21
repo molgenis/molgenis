@@ -11,11 +11,12 @@ gulp.task('update-version', function (done) {
         filePath: __dirname + "/pom.xml"
     }, function (err, pomResponse) {
         if (err) {
-            console.log("ERROR: " + err);
+            done(err);
         } else {
             writeVersionToPackageJson("package.json", pomResponse.pomObject.project.parent.version);
+            done();
         }
-        done();
+
     });
 });
 
