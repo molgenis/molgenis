@@ -19,7 +19,7 @@
         <link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
         <link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
         <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
- 		<link rel="stylesheet" href="<@resource_href "/css/themes/${app_settings.bootstrapTheme?html}"/>" type="text/css" id="bootstrap-theme">
+ 		<link rel="stylesheet" href="<@resource_href "/css/${app_settings.bootstrapTheme?html}"/>" type="text/css" id="bootstrap-theme">
 
     <#if app_settings.logoTopHref?has_content>
         <link rel="stylesheet" href="<@resource_href "/css/molgenis-top-logo.css"/>" type="text/css">
