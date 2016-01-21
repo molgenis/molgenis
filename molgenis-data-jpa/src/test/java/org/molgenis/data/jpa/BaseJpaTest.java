@@ -11,6 +11,7 @@ import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.molgenis.data.support.QueryResolver;
 import org.molgenis.data.validation.EntityAttributesValidator;
+import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -30,8 +31,9 @@ public class BaseJpaTest
 		dataService = new DataServiceImpl(new NonDecoratingRepositoryDecoratorFactory());
 		fileRepositorySourceFactory.addFileRepositoryCollectionClass(ExcelRepositoryCollection.class,
 				GenericImporterExtensions.getExcel());
-		repo = new RepositoryValidationDecorator(dataService, new JpaRepository(entityManager, new PersonMetaData(),
-				new QueryResolver(dataService)), new EntityAttributesValidator());
+		repo = new RepositoryValidationDecorator(dataService,
+				new JpaRepository(entityManager, new PersonMetaData(), new QueryResolver(dataService)),
+				new EntityAttributesValidator(), new ExpressionValidator());
 		dataService.addRepository(repo);
 		entityManager.getTransaction().begin();
 	}

@@ -26,12 +26,14 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 		this.dataService = dataService;
 	}
 
+	@Override
 	public Double getTermFrequency(String term)
 	{
 		String termFrequency = getAttributeValue(term, TermFrequencyEntityMetaData.FREQUENCY);
 		return StringUtils.isNotEmpty(termFrequency) ? Double.parseDouble(termFrequency) : null;
 	}
 
+	@Override
 	public Integer getTermOccurrence(String term)
 	{
 		String occurrence = getAttributeValue(term, TermFrequencyEntityMetaData.OCCURRENCE);
@@ -63,6 +65,7 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 		return mapEntity;
 	}
 
+	@Override
 	@Async
 	@RunAsSystem
 	public void updateTermFrequency()
@@ -72,8 +75,7 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 
 		List<Entity> entitiesToAdd = new ArrayList<Entity>();
 		// Create new term frequency records
-		for (Entity entity : dataService.findAll(OntologyTermSynonymMetaData.ENTITY_NAME))
-		{
+		dataService.findAll(OntologyTermSynonymMetaData.ENTITY_NAME).forEach(entity -> {
 			String ontologyTermSynonym = entity.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM);
 			PubMedTFEntity pubMedTFEntity = pubMedTermFrequencyService.getTermFrequency(ontologyTermSynonym);
 
@@ -87,15 +89,15 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 
 				if (entitiesToAdd.size() > BATCH_SIZE)
 				{
-					dataService.add(TermFrequencyEntityMetaData.ENTITY_NAME, entitiesToAdd);
+					dataService.add(TermFrequencyEntityMetaData.ENTITY_NAME, entitiesToAdd.stream());
 					entitiesToAdd.clear();
 				}
 			}
-		}
+		});
 
 		if (entitiesToAdd.size() != 0)
 		{
-			dataService.add(TermFrequencyEntityMetaData.ENTITY_NAME, entitiesToAdd);
+			dataService.add(TermFrequencyEntityMetaData.ENTITY_NAME, entitiesToAdd.stream());
 		}
 	}
 }

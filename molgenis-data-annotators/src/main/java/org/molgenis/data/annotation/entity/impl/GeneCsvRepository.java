@@ -1,11 +1,11 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -49,18 +49,18 @@ public class GeneCsvRepository extends AbstractRepository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
-		if (q.getRules().isEmpty()) return getIndex().values();
+		if (q.getRules().isEmpty()) return getIndex().values().stream();
 		if ((q.getRules().size() != 1) || (q.getRules().get(0).getOperator() != Operator.EQUALS)
 				|| !targetAttributeName.equals(q.getRules().get(0).getField()))
 		{
-			throw new MolgenisDataException("The only query allowed on this Repository is '" + targetAttributeName
-					+ " EQUALS'");
+			throw new MolgenisDataException(
+					"The only query allowed on this Repository is '" + targetAttributeName + " EQUALS'");
 		}
 
 		Entity result = getIndex().get(q.getRules().get(0).getValue());
-		return result == null ? Collections.emptySet() : Collections.singleton(result);
+		return result == null ? Stream.empty() : Stream.of(result);
 	}
 
 	private Map<Object, Entity> getIndex()
@@ -69,8 +69,8 @@ public class GeneCsvRepository extends AbstractRepository
 		{
 			forEach(e -> {
 				Object key = e.get(sourceAttributeName);
-				if (key == null) throw new MolgenisDataException("Missing value for attribute [" + sourceAttributeName
-						+ "] in entity [" + e + "]");
+				if (key == null) throw new MolgenisDataException(
+						"Missing value for attribute [" + sourceAttributeName + "] in entity [" + e + "]");
 				index.put(key, e);
 			});
 		}

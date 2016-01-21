@@ -1,5 +1,7 @@
 package org.molgenis.data.mapper.algorithmgenerator.service.impl;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.molgenis.js.magma.JsMagmaScriptRegistrator.SCRIPT_TYPE_JAVASCRIPT_MAGMA;
 import static org.molgenis.script.Script.ENTITY_NAME;
 import static org.molgenis.script.Script.TYPE;
@@ -7,6 +9,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
@@ -38,9 +41,6 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = AlgorithmGeneratorServiceImplTest.Config.class)
 public class AlgorithmGeneratorServiceImplTest extends AbstractTestNGSpringContextTests
@@ -100,7 +100,7 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractTestNGSpringConte
 		when(script.getContent()).thenReturn("$('weight').div($('height').pow(2)).value()");
 
 		when(dataService.findAll(ENTITY_NAME, new QueryImpl().eq(TYPE, SCRIPT_TYPE_JAVASCRIPT_MAGMA), Script.class))
-				.thenReturn(Arrays.asList(script));
+				.thenReturn(Stream.of(script));
 
 		GeneratedAlgorithm generate = algorithmGeneratorService.generate(targetBMIAttribute, sourceAttributes,
 				targetEntityMetaData, sourceEntityMetaData);

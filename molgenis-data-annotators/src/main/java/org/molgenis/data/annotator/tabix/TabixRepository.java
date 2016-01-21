@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
@@ -89,7 +90,7 @@ public class TabixRepository extends AbstractRepository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
 		Object posValue = getFirstEqualsValueFor(positionAttributeName, q);
 		Object chromValue = getFirstEqualsValueFor(chromosomeAttributeName, q);
@@ -102,7 +103,7 @@ public class TabixRepository extends AbstractRepository
 			String chromStringValue = chromValue.toString();
 			result = query(chromStringValue, Long.valueOf(posLongValue));
 		}
-		return result;
+		return result.stream();
 	}
 
 	/**
@@ -122,19 +123,26 @@ public class TabixRepository extends AbstractRepository
 		try
 		{
 			org.molgenis.data.annotator.tabix.TabixReader.Iterator iterator = reader.query(queryString);
-			String line = iterator.next();
-			while (line != null)
+			if (iterator != null)
 			{
-				Entity entity = toEntity(line);
-				if (entity.getLong(positionAttributeName) == pos)
+				String line = iterator.next();
+				while (line != null)
 				{
-					builder.add(entity);
+					Entity entity = toEntity(line);
+					if (entity.getLong(positionAttributeName) == pos)
+					{
+						builder.add(entity);
+					}
+					else
+					{
+						LOG.warn("TabixReader returns entity that does not match the query!");
+					}
+					line = iterator.next();
 				}
-				else
-				{
-					LOG.warn("TabixReader returns entity that does not match the query!");
-				}
-				line = iterator.next();
+			}
+			else
+			{
+				return ImmutableList.of(); // empty list
 			}
 		}
 		catch (IOException e)

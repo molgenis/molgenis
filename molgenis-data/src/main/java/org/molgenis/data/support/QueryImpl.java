@@ -91,11 +91,20 @@ public class QueryImpl implements Query
 		return repository.count(this);
 	}
 
+	// TODO replace with Stream<Entity>
 	@Override
 	public Iterable<Entity> findAll()
 	{
 		if (repository == null) throw new RuntimeException("Query failed: repository not set");
-		return repository.findAll(this);
+		Query thisQuery = this;
+		return new Iterable<Entity>()
+		{
+			@Override
+			public Iterator<Entity> iterator()
+			{
+				return repository.findAll(thisQuery).iterator();
+			}
+		};
 	}
 
 	@Override

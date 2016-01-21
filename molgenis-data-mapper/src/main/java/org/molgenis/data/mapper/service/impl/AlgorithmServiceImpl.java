@@ -1,5 +1,8 @@
 package org.molgenis.data.mapper.service.impl;
 
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -38,8 +41,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
-
-import static java.util.Objects.requireNonNull;
 
 public class AlgorithmServiceImpl implements AlgorithmService
 {
@@ -155,6 +156,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		return convert(value, attributeMapping.getTargetAttributeMetaData());
 	}
 
+	@SuppressWarnings("unchecked")
 	private Object convert(Object value, AttributeMetaData attributeMetaData)
 	{
 		if (value == null)
@@ -190,7 +192,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 					if (mrefIds != null && !mrefIds.isEmpty())
 					{
 						EntityMetaData refEntityMeta = attributeMetaData.getRefEntity();
-						convertedValue = dataService.findAll(refEntityMeta.getName(), mrefIds);
+						convertedValue = dataService.findAll(refEntityMeta.getName(), mrefIds.stream())
+								.collect(toList());
 					}
 					else
 					{

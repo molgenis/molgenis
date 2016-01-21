@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.UserAuthority;
@@ -24,9 +25,6 @@ import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
 
 public class MolgenisUserDecorator implements Repository
 {
@@ -60,41 +58,24 @@ public class MolgenisUserDecorator implements Repository
 	}
 
 	@Override
-	public Integer add(Iterable<? extends Entity> entities)
+	public Integer add(Stream<? extends Entity> entities)
 	{
-		Integer nr = decoratedRepository.add(Iterables.transform(entities, new Function<Entity, Entity>()
-		{
-			@Override
-			public Entity apply(Entity entity)
-			{
-				encodePassword(entity);
-				return entity;
-			}
-		}));
-
-		// id is only guaranteed to be generated at flush time
-		decoratedRepository.flush();
-		addSuperuserAuthorities(entities);
-
-		return nr;
+		entities = entities.map(entity -> {
+			encodePassword(entity);
+			addSuperuserAuthority(entity);
+			return entity;
+		});
+		return decoratedRepository.add(entities);
 	}
 
 	@Override
-	public void update(Iterable<? extends Entity> entities)
+	public void update(Stream<? extends Entity> entities)
 	{
-		decoratedRepository.update(Iterables.transform(entities, new Function<Entity, Entity>()
-		{
-			@Override
-			public Entity apply(Entity entity)
-			{
-				updatePassword(entity);
-				return entity;
-			}
-		}));
-
-		// id is only guaranteed to be generated at flush time
-		decoratedRepository.flush();
-		updateSuperuserAuthorities(entities);
+		entities = entities.map(entity -> {
+			updatePassword(entity);
+			return entity;
+		});
+		decoratedRepository.update(entities);
 	}
 
 	private void updatePassword(Entity entity)
@@ -118,15 +99,6 @@ public class MolgenisUserDecorator implements Repository
 		entity.set(MolgenisUser.PASSWORD_, encodedPassword);
 	}
 
-	private void addSuperuserAuthorities(Iterable<? extends Entity> entities)
-	{
-		// performance improvement: add filtered iterable to repo
-		for (Entity entity : entities)
-		{
-			addSuperuserAuthority(entity);
-		}
-	}
-
 	private void addSuperuserAuthority(Entity entity)
 	{
 		Boolean isSuperuser = entity.getBoolean(MolgenisUser.SUPERUSER);
@@ -140,15 +112,6 @@ public class MolgenisUserDecorator implements Repository
 			userAuthority.setRole(SecurityUtils.AUTHORITY_SU);
 
 			getUserAuthorityRepository().add(userAuthority);
-		}
-	}
-
-	private void updateSuperuserAuthorities(Iterable<? extends Entity> entities)
-	{
-		// performance improvement: add filtered iterable to repo
-		for (Entity entity : entities)
-		{
-			updateSuperuserAuthority(entity);
 		}
 	}
 
@@ -272,7 +235,7 @@ public class MolgenisUserDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
 		return decoratedRepository.findAll(q);
 	}
@@ -296,13 +259,13 @@ public class MolgenisUserDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
+	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		return decoratedRepository.findAll(ids);
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
 		return decoratedRepository.findAll(ids, fetch);
 	}
@@ -314,7 +277,7 @@ public class MolgenisUserDecorator implements Repository
 	}
 
 	@Override
-	public void delete(Iterable<? extends Entity> entities)
+	public void delete(Stream<? extends Entity> entities)
 	{
 		decoratedRepository.delete(entities);
 	}
@@ -326,7 +289,7 @@ public class MolgenisUserDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
 		decoratedRepository.deleteById(ids);
 	}

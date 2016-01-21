@@ -1,11 +1,15 @@
 package org.molgenis.data.support;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static junit.framework.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.mockito.Matchers;
 import org.mockito.Mockito;
@@ -58,39 +62,21 @@ public class AbstractRepositoryTest
 	}
 
 	@Test(expectedExceptions = UnsupportedOperationException.class)
-	public void testFindAllIdsForRepositoryThatDoesntHaveFindAll()
+	public void addStream()
 	{
-		Iterable<Entity> result = abstractRepository.findAll(newArrayList("1", "2", "3"));
-		assertEquals(newArrayList(), newArrayList(result));
+		abstractRepository.add(Stream.empty());
 	}
 
 	@Test(expectedExceptions = UnsupportedOperationException.class)
-	public void testFindAllFetchIdsForRepositoryThatDoesntHaveFindAll()
+	public void deleteStream()
 	{
-		Iterable<Entity> result = abstractRepository.findAll(newArrayList("1", "2", "3"), new Fetch());
-		assertEquals(newArrayList(), newArrayList(result));
+		abstractRepository.delete(Stream.empty());
 	}
 
-	@Test
-	public void testFindAllIdsForRepository()
+	@Test(expectedExceptions = UnsupportedOperationException.class)
+	public void updateStream()
 	{
-		Mockito.doReturn(newArrayList(createEntity("3"), createEntity("1"), createEntity("2"))).when(abstractRepository)
-				.findAll(Matchers.any(Query.class));
-		Iterable<Entity> result = abstractRepository.findAll(newArrayList("1", "2", "3", "1", "2"));
-		assertEquals(newArrayList(createEntity("1"), createEntity("2"), createEntity("3"), createEntity("1"),
-				createEntity("2")), newArrayList(result));
-
-	}
-
-	@Test
-	public void testFindAllFetchIdsForRepository()
-	{
-		Mockito.doReturn(newArrayList(createEntity("3"), createEntity("1"), createEntity("2"))).when(abstractRepository)
-				.findAll(Matchers.any(Query.class));
-		Iterable<Entity> result = abstractRepository.findAll(newArrayList("1", "2", "3", "1", "2"), new Fetch());
-		assertEquals(newArrayList(createEntity("1"), createEntity("2"), createEntity("3"), createEntity("1"),
-				createEntity("2")), newArrayList(result));
-
+		abstractRepository.update(Stream.empty());
 	}
 
 	@Test(expectedExceptions = UnsupportedOperationException.class)
@@ -99,10 +85,34 @@ public class AbstractRepositoryTest
 		abstractRepository.findOne(Integer.valueOf(0), new Fetch());
 	}
 
-	private Entity createEntity(String id)
+	@Test
+	public void findAllStream()
 	{
-		Entity entity = new DefaultEntity(entityMetaData, null);
-		entity.set("id", id);
-		return entity;
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = when(mock(Entity.class).getIdValue()).thenReturn(id0).getMock();
+		Entity entity1 = when(mock(Entity.class).getIdValue()).thenReturn(id1).getMock();
+		Stream<Object> entityIds = Stream.of(id0, id1);
+
+		Mockito.doReturn(Stream.of(entity0, entity1)).when(abstractRepository).findAll(Matchers.any(Query.class));
+
+		Stream<Entity> expectedEntities = abstractRepository.findAll(entityIds);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+	}
+
+	@Test
+	public void findAllStreamFetch()
+	{
+		Fetch fetch = new Fetch();
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = when(mock(Entity.class).getIdValue()).thenReturn(id0).getMock();
+		Entity entity1 = when(mock(Entity.class).getIdValue()).thenReturn(id1).getMock();
+		Stream<Object> entityIds = Stream.of(id0, id1);
+
+		Mockito.doReturn(Stream.of(entity0, entity1)).when(abstractRepository).findAll(Matchers.any(Query.class));
+
+		Stream<Entity> expectedEntities = abstractRepository.findAll(entityIds, fetch);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
 }

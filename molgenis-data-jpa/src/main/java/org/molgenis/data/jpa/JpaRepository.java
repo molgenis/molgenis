@@ -9,6 +9,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -104,12 +106,17 @@ public class JpaRepository extends AbstractRepository
 
 	@Override
 	@Transactional
-	public Integer add(Iterable<? extends Entity> entities)
+	public Integer add(Stream<? extends Entity> entities)
+	{
+		return add(entities.iterator());
+	}
+
+	private Integer add(Iterator<? extends Entity> it)
 	{
 		Integer count = 0;
-		for (Entity e : entities)
+		while (it.hasNext())
 		{
-			add(e);
+			add(it.next());
 			count++;
 		}
 		return count;
@@ -179,7 +186,7 @@ public class JpaRepository extends AbstractRepository
 
 	@Override
 	@Transactional(readOnly = true)
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
 		queryResolver.resolveRefIdentifiers(q.getRules(), getEntityMetaData());
 
@@ -205,15 +212,14 @@ public class JpaRepository extends AbstractRepository
 		{
 			LOG.debug("Fetching JPA [{}] data for query [{}]", getEntityClass().getSimpleName(), q);
 		}
-		return tq.getResultList();
+		return tq.getResultList().stream();
 	}
 
 	@Override
 	@Transactional(readOnly = true)
 	public Entity findOne(Query q)
 	{
-		Iterable<Entity> result = findAll(q);
-		Iterator<Entity> it = result.iterator();
+		Iterator<Entity> it = findAll(q).iterator();
 		if (it.hasNext())
 		{
 			return it.next();
@@ -238,30 +244,30 @@ public class JpaRepository extends AbstractRepository
 
 	@Override
 	@Transactional
-	public void update(Iterable<? extends Entity> entities)
+	public void update(Stream<? extends Entity> entities)
 	{
 		EntityManager em = getEntityManager();
 		int batchSize = 500;
-		int batchCount = 0;
-		for (Entity r : entities)
-		{
+		AtomicInteger batchCount = new AtomicInteger();
+		entities.forEach(r -> {
 			Entity entity = getTypedEntity(r);
 
 			if (LOG.isDebugEnabled())
 				LOG.debug("merging" + getEntityClass().getSimpleName() + " [" + r.getIdValue() + "]");
 			em.merge(entity);
 
-			batchCount++;
-			if (batchCount == batchSize)
+			batchCount.incrementAndGet();
+			if (batchCount.get() == batchSize)
 			{
 				if (LOG.isDebugEnabled()) LOG.debug("flushing entity manager");
 				em.flush();
 
 				if (LOG.isDebugEnabled()) LOG.debug("clearing entity manager");
 				em.clear();
-				batchCount = 0;
+				batchCount.set(0);
 			}
-		}
+		});
+
 		if (LOG.isDebugEnabled()) LOG.debug("flushing entity manager");
 		em.flush();
 	}
@@ -299,18 +305,17 @@ public class JpaRepository extends AbstractRepository
 
 	@Override
 	@Transactional
-	public void delete(Iterable<? extends Entity> entities)
+	public void delete(Stream<? extends Entity> entities)
 	{
 		EntityManager em = getEntityManager();
 
-		for (Entity r : entities)
-		{
+		entities.forEach(r -> {
 			em.remove(findOne(r.getIdValue()));
 			if (LOG.isDebugEnabled())
 			{
 				LOG.debug("removing " + getEntityClass().getSimpleName() + " [" + r.getIdValue() + "]");
 			}
-		}
+		});
 
 		if (LOG.isDebugEnabled()) LOG.debug("flushing entity manager");
 		em.flush();
@@ -320,7 +325,7 @@ public class JpaRepository extends AbstractRepository
 	@Transactional
 	public void deleteAll()
 	{
-		delete(this);
+		delete(this.stream());
 	}
 
 	private void createWhere(Query q, Root<?> from, CriteriaQuery<?> cq, CriteriaBuilder cb)
@@ -520,12 +525,9 @@ public class JpaRepository extends AbstractRepository
 
 	@Override
 	@Transactional
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
-		for (Object id : ids)
-		{
-			deleteById(id);
-		}
+		ids.forEach(this::deleteById);
 	}
 
 	@Override

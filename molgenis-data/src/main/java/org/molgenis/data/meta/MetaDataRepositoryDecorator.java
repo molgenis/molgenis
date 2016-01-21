@@ -1,6 +1,4 @@
-package org.molgenis.data.transaction;
-
-import static java.util.Objects.requireNonNull;
+package org.molgenis.data.meta;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -17,15 +15,19 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 
-public class TransactionLogRepositoryDecorator implements Repository
+/**
+ * Repository decorator for entities, attributes and packages repositories.
+ * 
+ * Removes the WRITABLE and MANAGEABLE capabilities, because the user must not directly edit these repos but use the
+ * MetaDataServices
+ */
+public class MetaDataRepositoryDecorator implements Repository
 {
 	private final Repository decorated;
-	private final TransactionLogService transactionLogService;
 
-	public TransactionLogRepositoryDecorator(Repository decorated, TransactionLogService transactionLogService)
+	public MetaDataRepositoryDecorator(Repository decorated)
 	{
-		this.decorated = requireNonNull(decorated);
-		this.transactionLogService = requireNonNull(transactionLogService);
+		this.decorated = decorated;
 	}
 
 	@Override
@@ -43,7 +45,10 @@ public class TransactionLogRepositoryDecorator implements Repository
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return decorated.getCapabilities();
+		Set<RepositoryCapability> capabilities = decorated.getCapabilities();
+		capabilities.remove(RepositoryCapability.WRITABLE);
+		capabilities.remove(RepositoryCapability.MANAGABLE);
+		return capabilities;
 	}
 
 	@Override
@@ -121,91 +126,54 @@ public class TransactionLogRepositoryDecorator implements Repository
 	@Override
 	public void update(Entity entity)
 	{
-		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
-		{
-			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.UPDATE);
-		}
-
 		decorated.update(entity);
 	}
 
 	@Override
 	public void update(Stream<? extends Entity> entities)
 	{
-		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
-		{
-			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.UPDATE);
-		}
 		decorated.update(entities);
 	}
 
 	@Override
 	public void delete(Entity entity)
 	{
-		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
-		{
-			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
-		}
 		decorated.delete(entity);
 	}
 
 	@Override
 	public void delete(Stream<? extends Entity> entities)
 	{
-		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
-		{
-			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
-		}
 		decorated.delete(entities);
 	}
 
 	@Override
 	public void deleteById(Object id)
 	{
-		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
-		{
-			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
-		}
 		decorated.deleteById(id);
 	}
 
 	@Override
 	public void deleteById(Stream<Object> ids)
 	{
-		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
-		{
-			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
-		}
 		decorated.deleteById(ids);
 	}
 
 	@Override
 	public void deleteAll()
 	{
-		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
-		{
-			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
-		}
 		decorated.deleteAll();
 	}
 
 	@Override
 	public void add(Entity entity)
 	{
-		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
-		{
-			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.ADD);
-		}
 		decorated.add(entity);
 	}
 
 	@Override
 	public Integer add(Stream<? extends Entity> entities)
 	{
-		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
-		{
-			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.ADD);
-		}
 		return decorated.add(entities);
 	}
 
@@ -250,4 +218,5 @@ public class TransactionLogRepositoryDecorator implements Repository
 	{
 		decorated.removeEntityListener(entityListener);
 	}
+
 }
