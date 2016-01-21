@@ -197,7 +197,9 @@ public class MappingServiceImpl implements MappingService
 
 		try
 		{
+			LOG.info("Applying mappings to repository [" + targetMetaData.getName() + "]");
 			applyMappingsToRepositories(mappingTarget, targetRepo);
+			LOG.info("Done applying mappings to repository [" + targetMetaData.getName() + "]");
 			return targetMetaData.getName();
 		}
 		catch (RuntimeException ex)
