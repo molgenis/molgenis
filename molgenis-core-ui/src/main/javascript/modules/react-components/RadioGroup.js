@@ -1,6 +1,8 @@
 import React from "react";
 import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
 import GroupMixin from "./mixin/GroupMixin";
+import "./css/Radio.css";
+
 	/**
 	 * @memberOf component
 	 */

@@ -90,68 +90,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- minify css/js -->
-			<plugin>
-				<groupId>com.samaxes.maven</groupId>
-				<artifactId>minify-maven-plugin</artifactId>
-				<executions>
-				    <execution>
-                        <id>default-minify</id>
-                    </execution>
-                    <execution>
-	                    <id>component-deps-merge</id>
-	                    <goals>
-	                        <goal>minify</goal>
-	                    </goals>
-	                    <configuration>
-	                        <charset>UTF-8</charset>
-	                        <webappSourceDir>${project.basedir}/src/main/resources</webappSourceDir>
-	                        <webappTargetDir>${project.build.directory}/generated-resources</webappTargetDir>
-	                        <cssEngine>YUI</cssEngine>
-	                        <cssSourceDir>css</cssSourceDir>
-	                        <cssSourceFiles>
-	                            <cssSourceFile>bootstrap.min.css</cssSourceFile>
-	                            <cssSourceFile>bootstrap-datetimepicker.min.css</cssSourceFile> <!-- DateTimePicker dependency -->
-	                            <cssSourceFile>jquery-ui-1.9.2.custom.min.css</cssSourceFile> <!-- jQEditRangeSlider dependency -->
-	                            <cssSourceFile>../../../../target/classes/css/select2.css</cssSourceFile> <!-- Select2 dependency, use minified file from default-minify execution -->
-	                            <cssSourceFile>iThing-min.css</cssSourceFile><!-- jQEditRangeSlider dependency -->
-	                        </cssSourceFiles>
-	                        <cssFinalFile>molgenis-bundle.min.css</cssFinalFile>
-	                        <skipMerge>false</skipMerge>
-	                        <skipMinify>true</skipMinify>
-	                        <nosuffix>true</nosuffix>
-	                        <verbose>true</verbose>
-	                    </configuration>
-	                </execution>
-	                <execution>
-                        <id>component-css-merge-minify</id>
-                        <goals>
-                            <goal>minify</goal>
-                        </goals>
-                        <configuration>
-                            <charset>UTF-8</charset>
-                            <webappSourceDir>${project.basedir}/src/main/resources</webappSourceDir>
-                            <webappTargetDir>${project.build.directory}/generated-resources</webappTargetDir>
-                            <cssEngine>YUI</cssEngine>
-                            <cssSourceDir>css</cssSourceDir>
-                            <!-- Specify files one-by-one to preserve order -->
-                            <cssSourceFiles>
-                                <!-- Important: Update molgenis-header.ftl when modifying the list below -->
-                                <cssSourceFile>/component/wrapper/DateTimePicker.css</cssSourceFile>
-                                <cssSourceFile>/component/wrapper/JQRangeSlider.css</cssSourceFile>
-                                <cssSourceFile>/component/Checkbox.css</cssSourceFile>
-                                <cssSourceFile>/component/Radio.css</cssSourceFile>
-                                <cssSourceFile>/component/Table.css</cssSourceFile>
-                            </cssSourceFiles>
-                            <cssFinalFile>molgenis-component.min.css</cssFinalFile>
-                            <skipMerge>false</skipMerge>
-                            <skipMinify>false</skipMinify>
-                            <nosuffix>true</nosuffix>
-                            <verbose>true</verbose>
-                        </configuration>
-                    </execution>	
-	            </executions>
-			</plugin>
 		</plugins>
 	</build>
 	<dependencies>

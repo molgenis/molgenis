@@ -1,5 +1,8 @@
 import React from "react";
 import DeepPureRenderMixin from "../mixin/DeepPureRenderMixin";
+import "../css/wrapper/iThing-min.css";
+import "../css/wrapper/JQRangeSlider.css";
+import "../css/wrapper/jquery-ui-1.9.2.custom.min.css";
 
 	var div = React.DOM.div;
 	

@@ -11,8 +11,11 @@ var configuration = {
             'rest-client': 'modules/rest-client',
             'i18n': 'modules/i18n',
             'jquery-ui': 'plugins/jquery-ui-1.9.2.custom.min',
+            'jquery-ui-css': 'react-components/css/wrapper/jquery-ui-1.9.2.custom.min.css',
             'jq-edit-rangeslider': 'plugins/jQEditRangeSlider-min',
-            'select2': 'plugins/select2-patched'
+            'jq-edit-rangeslider-css': 'react-components/css/wrapper/JQRangeSlider.css',
+            'select2': 'plugins/select2-patched',
+            "select2-css": "react-components/css/wrapper/select2.css"
         }
     },
     // The base directory for resolving the entry option
@@ -23,7 +26,8 @@ var configuration = {
         'rest-client': ['rest-client'],
         'react-components': ['react-components'],
         'vendor-bundle': ["jquery", "bootstrap", "underscore", "jquery-ui", "jquery.cookie",
-            "brace", "moment", "eonasdan-bootstrap-datetimepicker", "jq-edit-rangeslider", "select2", "urijs"]
+            "brace", "moment", "eonasdan-bootstrap-datetimepicker", "eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css", "jq-edit-rangeslider", "jq-edit-rangeslider-css"
+            , "select2", "select2-css", "urijs"]
     },
     output: {
         path: './target/classes/js/dist/',
@@ -67,6 +71,13 @@ var configuration = {
         }, {
             test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
             loader: "url?limit=10000&mimetype=image/svg+xml"
+        }, {
+        	test: /\.png$/,
+        	loader: "url?limit=10000&mimetype=image/png"
+        },
+        {
+        	test: /\.gif$/,
+        	loader: "url?limit=10000&mimetype=image/gif"
         }]
     }
 }

@@ -3,6 +3,7 @@ import DeepPureRenderMixin from "../mixin/DeepPureRenderMixin";
 import $ from "jquery";
 import Button from "../Button";
 import _ from "underscore";
+import "../css/wrapper/select2.css";
 
 	var input = React.DOM.input, span = React.DOM.span, div = React.DOM.div;
 	
