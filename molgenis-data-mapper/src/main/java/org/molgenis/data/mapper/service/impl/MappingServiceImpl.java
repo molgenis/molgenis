@@ -4,8 +4,13 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes;
@@ -14,6 +19,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
@@ -250,29 +256,55 @@ public class MappingServiceImpl implements MappingService
 		targetRepoIds.removeAll(mappedSourceIds);
 		if (!targetRepoIds.isEmpty())
 		{
-			targetRepo.deleteById(targetRepoIds);
+			targetRepo.deleteById(targetRepoIds.stream());
 		}
-
 	}
 
 	private void applyMappingToRepo(EntityMapping sourceMapping, Repository targetRepo, List<String> mappedSourceIds)
 	{
 		EntityMetaData targetMetaData = targetRepo.getEntityMetaData();
 		Repository sourceRepo = dataService.getRepository(sourceMapping.getName());
-		for (Entity sourceEntity : sourceRepo)
+
+		List<MapEntity> mappedEntities = Lists.newArrayList();
+		Iterator<Entity> sourceEntities = sourceRepo.iterator();
+
+		String targetIdField = targetRepo.getEntityMetaData().getIdAttribute().getName();
+		while (sourceEntities.hasNext())
 		{
+			Entity sourceEntity = sourceEntities.next();
 			MapEntity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
 					sourceMapping.getSourceEntityMetaData(), targetRepo);
-
 			mappedSourceIds.add(mappedEntity.getIdValue().toString());
+			mappedEntities.add(mappedEntity);
 
-			if (targetRepo.findOne(mappedEntity.getIdValue()) != null)
+			// add/update in batches of 100
+			if (mappedEntities.size() == 100 || !sourceEntities.hasNext())
 			{
-				targetRepo.update(mappedEntity);
-			}
-			else
-			{
-				targetRepo.add(mappedEntity);
+				Stream<Entity> entityStream = targetRepo
+						.findAll(mappedEntities.stream().map(e -> e.getIdValue().toString()),
+								new Fetch().field(targetIdField))
+						.filter(Objects::nonNull);
+
+				Set<String> idsPresentInTarget = entityStream.map(e -> e.getIdValue().toString())
+						.collect(Collectors.toSet());
+
+				List<Entity> adds = Lists.newArrayList();
+				List<Entity> updates = Lists.newArrayList();
+				for (Entity entity : mappedEntities)
+				{
+					if (idsPresentInTarget.contains(entity.getIdValue().toString()))
+					{
+						updates.add(entity);
+					}
+					else
+					{
+						adds.add(entity);
+					}
+				}
+				targetRepo.add(adds.stream());
+				targetRepo.update(updates.stream());
+
+				mappedEntities = Lists.newArrayList();
 			}
 		}
 	}

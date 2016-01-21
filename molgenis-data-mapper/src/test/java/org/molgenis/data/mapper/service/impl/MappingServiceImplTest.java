@@ -146,6 +146,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("userName", null);
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
+
 	}
 
 	@Test
@@ -319,7 +320,6 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		koetje3.set("source", "Gene");
 
 		assertEquals(created, ImmutableSet.<Entity> of(koetje1, koetje2, koetje3));
-
 		verify(permissionSystemService).giveUserEntityPermissions(SecurityContextHolder.getContext(),
 				Arrays.asList(entityName));
 	}
