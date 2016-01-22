@@ -1,19 +1,19 @@
 package org.molgenis.data.transaction;
 
+import org.springframework.transaction.PlatformTransactionManager;
+
 /**
  * Class representing a transaction in Molgenis.
- * 
- * Wraps the JpaTransaction object because JPA needs a JpaTransaction to work
  */
 public class MolgenisTransaction
 {
 	private String id;
-	private Object jpaTransaction;
+	private Object dataSourceTransaction;
 
-	public MolgenisTransaction(String id, Object jpaTransaction)
+	public MolgenisTransaction(String id, Object dataSourceTransaction)
 	{
 		this.id = id;
-		this.jpaTransaction = jpaTransaction;
+		this.dataSourceTransaction = dataSourceTransaction;
 	}
 
 	public String getId()
@@ -26,9 +26,9 @@ public class MolgenisTransaction
 		this.id = id;
 	}
 
-	public Object getJpaTransaction()
+	public Object getDataSourceTransaction()
 	{
-		return jpaTransaction;
+		return dataSourceTransaction;
 	}
 
 	@Override

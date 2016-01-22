@@ -162,7 +162,7 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 					user = createMolgenisUser(username, email, givenName, familyName, principal);
 				}
 			}
-			if(!user.getActive()){
+			if(!user.isActive()){
 				throw new DisabledException(MolgenisLoginController.ERROR_MESSAGE_DISABLED);
 			}
 			// create authentication
@@ -191,6 +191,8 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 		user.setPassword(UUID.randomUUID().toString());
 		user.setEmail(email);
 		user.setActive(true);
+		user.setSuperuser(false);
+		user.setChangePassword(false);
 		if (givenName != null)
 		{
 			user.setFirstName(givenName);

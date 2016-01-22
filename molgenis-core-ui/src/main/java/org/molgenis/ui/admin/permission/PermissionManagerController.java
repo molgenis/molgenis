@@ -63,7 +63,7 @@ public class PermissionManagerController extends MolgenisPluginController
 					@Override
 					public boolean apply(MolgenisUser molgenisUser)
 					{
-						Boolean superuser = molgenisUser.getSuperuser();
+						Boolean superuser = molgenisUser.isSuperuser();
 						return superuser == null || !superuser;
 					}
 				})));

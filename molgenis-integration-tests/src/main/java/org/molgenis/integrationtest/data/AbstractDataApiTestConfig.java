@@ -106,7 +106,7 @@ public abstract class AbstractDataApiTestConfig
 	@Bean
 	public MolgenisTransactionManager transactionManager()
 	{
-		return new MolgenisTransactionManager(idGenerator());
+		return new MolgenisTransactionManager(idGenerator(), dataSource());
 	}
 
 	@Bean

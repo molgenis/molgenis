@@ -464,10 +464,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@PostConstruct
 	public void initRepositories()
 	{
-		dataService().setMeta(metaDataService());
-
 		addUpgrades();
 		boolean didUpgrade = upgradeService.upgrade();
+		dataService().setMeta(metaDataService());
 		if (didUpgrade)
 		{
 			LOG.info("Reindexing repositories due to MOLGENIS upgrade...");
@@ -484,6 +483,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		{
 			LOG.debug("Elasticsearch index exists, no need to reindex.");
 		}
+
 		runAsSystem(() -> metaDataService().setDefaultBackend(getBackend()));
 	}
 

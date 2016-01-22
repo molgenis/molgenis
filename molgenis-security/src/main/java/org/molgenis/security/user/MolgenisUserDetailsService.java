@@ -55,7 +55,7 @@ public class MolgenisUserDetailsService implements UserDetailsService
 			if (user == null) throw new UsernameNotFoundException("unknown user '" + username + "'");
 
 			Collection<? extends GrantedAuthority> authorities = getAuthorities(user);
-			return new User(user.getUsername(), user.getPassword(), user.getActive(), true, true, true, authorities);
+			return new User(user.getUsername(), user.getPassword(), user.isActive(), true, true, true, authorities);
 		}
 		catch (Throwable e)
 		{
@@ -93,7 +93,7 @@ public class MolgenisUserDetailsService implements UserDetailsService
 		Set<GrantedAuthority> allGrantedAuthorities = new HashSet<GrantedAuthority>();
 		if (grantedAuthorities != null) allGrantedAuthorities.addAll(grantedAuthorities);
 		if (grantedGroupAuthorities != null) allGrantedAuthorities.addAll(grantedGroupAuthorities);
-		if (user.getSuperuser() != null && user.getSuperuser().booleanValue() == true)
+		if (user.isSuperuser() != null && user.isSuperuser().booleanValue() == true)
 		{
 			allGrantedAuthorities.add(new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU));
 		}

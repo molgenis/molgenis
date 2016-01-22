@@ -107,7 +107,7 @@ public class ImportWizardController extends AbstractWizardController
 				allowed = true;
 			}
 		}
-		if (!allowed && !userAccountService.getCurrentUser().getSuperuser())
+		if (!allowed && !userAccountService.getCurrentUser().isSuperuser())
 		{
 			throw new RuntimeException("Current user does not belong to the requested group.");
 		}
@@ -135,7 +135,7 @@ public class ImportWizardController extends AbstractWizardController
 					if (value != null
 							&& (SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX
 									+ entityClassId.toUpperCase()) || userAccountService.getCurrentUser()
-									.getSuperuser()))
+									.isSuperuser()))
 					{
 						if (value.equalsIgnoreCase(READ.toString()) || value.equalsIgnoreCase(COUNT.toString())
 								|| value.equalsIgnoreCase(WRITE.toString())

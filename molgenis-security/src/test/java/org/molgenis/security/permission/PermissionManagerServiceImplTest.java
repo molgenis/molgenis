@@ -308,11 +308,14 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	{
 		List<GroupAuthority> authorities = Arrays.asList(mock(GroupAuthority.class), mock(GroupAuthority.class));
 		pluginPermissionManagerService.replaceGroupEntityClassPermissions(authorities, "1");
-		verify(dataService).delete(GroupAuthority.ENTITY_NAME,
-				Arrays.asList(groupEntity1Authority, groupEntity2Authority));
+
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(dataService).add(eq(GroupAuthority.ENTITY_NAME), captor.capture());
-		assertEquals(captor.getValue().collect(toList()), authorities);
+		verify(dataService).delete(eq(GroupAuthority.ENTITY_NAME), captor.capture());
+		assertEquals(captor.getValue().collect(toList()),Arrays.asList(groupEntity1Authority, groupEntity2Authority));
+
+		ArgumentCaptor<Stream<Entity>> captor2 = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(dataService).add(eq(GroupAuthority.ENTITY_NAME), captor2.capture());
+		assertEquals(captor2.getValue().collect(toList()), authorities);
 	}
 
 	@SuppressWarnings(
@@ -322,9 +325,12 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 	{
 		List<GroupAuthority> authorities = Arrays.asList(mock(GroupAuthority.class), mock(GroupAuthority.class));
 		pluginPermissionManagerService.replaceGroupPluginPermissions(authorities, "1");
-		verify(dataService).delete(GroupAuthority.ENTITY_NAME,
-				Arrays.asList(groupPlugin1Authority, groupPlugin2Authority));
+
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(dataService).delete(eq(GroupAuthority.ENTITY_NAME), captor.capture());
+		assertEquals(captor.getValue().collect(toList()),Arrays.asList(groupPlugin1Authority, groupPlugin2Authority));
+
+		ArgumentCaptor<Stream<Entity>> captor2 = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).add(eq(GroupAuthority.ENTITY_NAME), captor.capture());
 		assertEquals(captor.getValue().collect(toList()), authorities);
 	}
