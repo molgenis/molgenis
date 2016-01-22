@@ -1,5 +1,7 @@
 package org.molgenis.ui;
 
+import org.molgenis.auth.MolgenisUserDecorator;
+import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.AutoValueRepositoryDecorator;
 import org.molgenis.data.ComputedEntityValuesDecorator;
 import org.molgenis.data.DataService;
@@ -48,6 +50,11 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	public Repository createDecoratedRepository(Repository repository)
 	{
 		Repository decoratedRepository = repository;
+
+		if (decoratedRepository.getName().equals(MolgenisUserMetaData.ENTITY_NAME))
+		{
+			decoratedRepository = new MolgenisUserDecorator(decoratedRepository);
+		}
 
 		// 9. Owned decorator
 		if (EntityUtils.doesExtend(decoratedRepository.getEntityMetaData(), OwnedEntityMetaData.ENTITY_NAME))
