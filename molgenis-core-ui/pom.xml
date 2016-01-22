@@ -62,7 +62,7 @@
 	        			<configuration>
 	        				<skip>${webpack.production}</skip>
 							<outputdir>target/classes/js/dist</outputdir>
-							<arguments>-d --config webpack.development.config.js</arguments>
+							<arguments>-d</arguments>
 						</configuration>
 					</execution>
 					<execution>
