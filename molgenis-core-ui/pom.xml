@@ -7,6 +7,7 @@
 	</parent>
 	<artifactId>molgenis-core-ui</artifactId>
 	<packaging>jar</packaging>
+	
 	<build>
 		<plugins>
 			<!-- Bundle the javascript specified in webpack.config.js to target/generated-resources/js/dist -->
@@ -41,17 +42,30 @@
 							<arguments>test</arguments>
 						</configuration>
 					</execution>
-					<execution>
-						<id>webpack build</id>
+        			<execution>
+						<id>webpack development build</id>
 						<goals>
 							<goal>webpack</goal>
                         </goals>
-						<configuration>
+	        			<configuration>
+	        				<skip>${webpack.production}</skip>
 							<outputdir>target/classes/js/dist</outputdir>
+							<arguments>-d</arguments>
 						</configuration>
 					</execution>
-				</executions>
-			</plugin>
+					<execution>
+						<id>webpack production build</id>
+						<goals>
+							<goal>webpack</goal>
+                        </goals>
+	        			<configuration>
+	        				<skip>${webpack.development}</skip>
+							<outputdir>target/classes/js/dist</outputdir>
+							<arguments>-p</arguments>
+						</configuration>
+					</execution>
+    			</executions>
+			</plugin>			
 			<!-- compile XML schemas -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -92,6 +106,7 @@
 			</plugin>
 		</plugins>
 	</build>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.molgenis</groupId>
