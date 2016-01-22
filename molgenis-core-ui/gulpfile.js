@@ -12,24 +12,18 @@ gulp.task('update-version', function (done) {
     }, function (err, pomResponse) {
         if (err) {
             done(err);
+        } else if (!fs.statSync('package.json')) {
+            done('package.json does not exist');
         } else {
             writeVersionToPackageJson("package.json", pomResponse.pomObject.project.parent.version);
             done();
         }
-
     });
 });
 
 function writeVersionToPackageJson(file, version) {
     console.log('Writing pomVersion ' + version + ' to ' + file);
-    var pkg = JSON.parse(getStringContentsOfFile(file));
+    var pkg = JSON.parse(fs.readFileSync(file).toString());
     pkg.version = version;
     fs.writeFile(file, JSON.stringify(pkg, null, 2));
-}
-
-function getStringContentsOfFile(filename) {
-    if (!fs.statSync(filename)) {
-        this.error(filename + ' does not exist');
-    }
-    return fs.readFileSync(filename).toString();
 }
