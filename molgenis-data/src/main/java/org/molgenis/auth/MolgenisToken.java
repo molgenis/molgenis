@@ -11,6 +11,7 @@ import java.util.Set;
 @AutoValue
 public class MolgenisToken extends org.molgenis.data.support.AbstractEntity implements org.molgenis.data.Entity
 {
+	private static final long serialVersionUID = -2596871010814579374L;
 
 	public static final String ENTITY_NAME = "MolgenisToken";
 	public static final String TOKEN = "token";

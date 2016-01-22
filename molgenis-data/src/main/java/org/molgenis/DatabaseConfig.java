@@ -1,12 +1,8 @@
 package org.molgenis;
 
-import java.beans.PropertyVetoException;
-import java.util.Collections;
-
-import javax.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
-
-import org.springframework.beans.factory.FactoryBean;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+import org.molgenis.data.IdGenerator;
+import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -15,10 +11,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.TransactionManagementConfigurer;
 
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-
-import org.molgenis.data.IdGenerator;
-import org.molgenis.data.transaction.MolgenisTransactionManager;
+import javax.sql.DataSource;
+import java.beans.PropertyVetoException;
 /**
  * Database configuration
  */
@@ -26,8 +20,6 @@ import org.molgenis.data.transaction.MolgenisTransactionManager;
 @EnableTransactionManagement(proxyTargetClass = true)
 public class DatabaseConfig implements TransactionManagementConfigurer
 {
-	private static final String DEFAULT_PERSISTENCE_UNIT_NAME = "molgenis";
-
 	@Value("${db_driver:com.mysql.jdbc.Driver}")
 	private String dbDriverClass;
 	@Value("${db_uri:@null}")

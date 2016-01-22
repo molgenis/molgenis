@@ -8,6 +8,8 @@ import java.util.Set;
 
 public class MolgenisUser extends org.molgenis.data.support.AbstractEntity implements org.molgenis.data.Entity
 {
+	private static final long serialVersionUID = 5975610105951567982L;
+
 	public static final String ENTITY_NAME = "molgenisUser";
 	public static final String USERNAME = "username";
 	public static final String SUPERUSER = "superuser";

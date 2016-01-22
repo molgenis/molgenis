@@ -9,6 +9,8 @@ import java.util.Set;
 public class UserAuthority extends org.molgenis.data.support.AbstractEntity
 		implements org.molgenis.data.Entity, org.molgenis.auth.Authority
 {
+	private static final long serialVersionUID = -2301668625608942549L;
+
 	public static final String ENTITY_NAME = "UserAuthority";
 	public static final String MOLGENISUSER = "molgenisUser";
 	public static final String ROLE = "role";

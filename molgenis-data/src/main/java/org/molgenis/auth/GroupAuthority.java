@@ -8,6 +8,8 @@ import java.util.Set;
 
 public class GroupAuthority extends org.molgenis.data.support.AbstractEntity implements Authority
 {
+	private static final long serialVersionUID = -3440011188128914033L;
+
 	public static final String ENTITY_NAME = "GroupAuthority";
 	public static final String MOLGENISGROUP = "molgenisGroup";
 	public static final String ROLE = "role";
