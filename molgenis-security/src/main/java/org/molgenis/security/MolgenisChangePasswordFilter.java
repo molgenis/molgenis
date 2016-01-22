@@ -52,7 +52,7 @@ public class MolgenisChangePasswordFilter extends GenericFilterBean
 				throw new RuntimeException("Unknown username [" + authentication.getName() + "]");
 			}
 
-			if (user.getChangePassword() != null && user.getChangePassword().booleanValue())
+			if (user.isChangePassword() != null && user.isChangePassword().booleanValue())
 			{
 				redirectStrategy.sendRedirect(httpRequest, httpResponse, CHANGE_PASSWORD_URI);
 				return;

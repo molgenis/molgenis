@@ -55,6 +55,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -184,14 +185,14 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 				assertNotEquals(entityMapping.getIdentifier(), clonedEntityMapping.getIdentifier());
 				assertEquals(entityMapping.getLabel(), clonedEntityMapping.getLabel());
 				assertEquals(entityMapping.getName(), clonedEntityMapping.getName());
-				assertEquals(entityMapping.getSourceEntityMetaData().getName(), clonedEntityMapping
-						.getSourceEntityMetaData().getName());
-				assertEquals(entityMapping.getTargetEntityMetaData().getName(), clonedEntityMapping
-						.getTargetEntityMetaData().getName());
+				assertEquals(entityMapping.getSourceEntityMetaData().getName(),
+						clonedEntityMapping.getSourceEntityMetaData().getName());
+				assertEquals(entityMapping.getTargetEntityMetaData().getName(),
+						clonedEntityMapping.getTargetEntityMetaData().getName());
 
 				List<AttributeMapping> attributeMappings = Lists.newArrayList(entityMapping.getAttributeMappings());
-				List<AttributeMapping> clonedAttributeMappings = Lists.newArrayList(clonedEntityMapping
-						.getAttributeMappings());
+				List<AttributeMapping> clonedAttributeMappings = Lists
+						.newArrayList(clonedEntityMapping.getAttributeMappings());
 				assertEquals(attributeMappings.size(), clonedAttributeMappings.size());
 
 				for (int k = 0; k < attributeMappings.size(); ++k)
@@ -201,8 +202,8 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 					assertNotEquals(attributeMapping.getIdentifier(), clonedAttributeMapping.getIdentifier());
 
 					assertEquals(attributeMapping.getAlgorithm(), clonedAttributeMapping.getAlgorithm());
-					assertEquals(attributeMapping.getTargetAttributeMetaData().getName(), clonedAttributeMapping
-							.getTargetAttributeMetaData().getName());
+					assertEquals(attributeMapping.getTargetAttributeMetaData().getName(),
+							clonedAttributeMapping.getTargetAttributeMetaData().getName());
 				}
 			}
 		}
@@ -386,6 +387,12 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		public LanguageService languageService()
 		{
 			return new LanguageService(dataService(), new AppDbSettings());
+		}
+
+		@Bean
+		public FreeMarkerConfigurer freeMarkerConfigurer()
+		{
+			return new FreeMarkerConfigurer();
 		}
 
 		@PostConstruct

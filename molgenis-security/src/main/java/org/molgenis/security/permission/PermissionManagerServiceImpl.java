@@ -193,8 +193,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 			entityAuthority.setMolgenisGroup(molgenisGroup);
 
 		// delete old plugin authorities
-		List<Authority> oldEntityAuthorities = getGroupPermissions(molgenisGroup, authorityPrefix);
-		if (oldEntityAuthorities != null && !oldEntityAuthorities.isEmpty())
+		Stream<Authority> oldEntityAuthorities = getGroupPermissions(molgenisGroup, authorityPrefix).stream();
+		if (oldEntityAuthorities != null)
 			dataService.delete(GroupAuthority.ENTITY_NAME, oldEntityAuthorities);
 
 		// insert new plugin authorities

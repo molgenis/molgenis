@@ -134,26 +134,26 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		group1.setName("TestGroup");
 
 		MapEntity entity1 = new MapEntity("Entity1");
-		entity1.set("groupauthority_role", SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY1");
-		entity1.set("molgenisGroup", group1);
+		entity1.set(GroupAuthority.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY1");
+		entity1.set(GroupAuthority.MOLGENISGROUP, group1);
 		GroupAuthority authority1 = new GroupAuthority();
 		authority1.set(entity1);
 
 		MapEntity entity2 = new MapEntity("Entity2");
-		entity2.set("groupauthority_role", SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY2");
-		entity2.set("molgenisGroup", group1);
+		entity2.set(GroupAuthority.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY2");
+		entity2.set(GroupAuthority.MOLGENISGROUP, group1);
 		GroupAuthority authority2 = new GroupAuthority();
 		authority2.set(entity2);
 
 		MapEntity entity3 = new MapEntity("Entity2");
-		entity3.set("groupauthority_role", SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY3");
-		entity3.set("molgenisGroup", group1);
+		entity3.set(GroupAuthority.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY3");
+		entity3.set(GroupAuthority.MOLGENISGROUP, group1);
 		GroupAuthority authority3 = new GroupAuthority();
 		authority3.set(entity3);
 
 		MapEntity entity4 = new MapEntity("Entity2");
-		entity4.set("groupauthority_role", SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY4");
-		entity4.set("molgenisGroup", group1);
+		entity4.set(GroupAuthority.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY4");
+		entity4.set(GroupAuthority.MOLGENISGROUP, group1);
 		GroupAuthority authority4 = new GroupAuthority();
 		authority4.set(entity4);
 
@@ -222,7 +222,7 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 	public void addGroupEntityClassPermissionsTest()
 	{
 		MolgenisUser user = mock(MolgenisUser.class);
-		when(user.getSuperuser()).thenReturn(false);
+		when(user.isSuperuser()).thenReturn(false);
 		when(userAccountService.getCurrentUser()).thenReturn(user);
 
 		webRequest = mock(WebRequest.class);
@@ -246,7 +246,7 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 	public void addGroupEntityClassPermissionsTestNoPermission()
 	{
 		MolgenisUser user = mock(MolgenisUser.class);
-		when(user.getSuperuser()).thenReturn(false);
+		when(user.isSuperuser()).thenReturn(false);
 		when(userAccountService.getCurrentUser()).thenReturn(user);
 
 		webRequest = mock(WebRequest.class);
@@ -263,7 +263,7 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 	public void addGroupEntityClassPermissionsTestNoPermissionSU()
 	{
 		MolgenisUser user = mock(MolgenisUser.class);
-		when(user.getSuperuser()).thenReturn(true);
+		when(user.isSuperuser()).thenReturn(true);
 		when(userAccountService.getCurrentUser()).thenReturn(user);
 
 		webRequest = mock(WebRequest.class);
