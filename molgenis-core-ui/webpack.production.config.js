@@ -11,11 +11,8 @@ var configuration = {
             'rest-client': 'modules/rest-client',
             'i18n': 'modules/i18n',
             'jquery-ui': 'plugins/jquery-ui-1.9.2.custom.min',
-            'jquery-ui-css': 'react-components/css/wrapper/jquery-ui-1.9.2.custom.min.css',
             'jq-edit-rangeslider': 'plugins/jQEditRangeSlider-min',
-            'jq-edit-rangeslider-css': 'react-components/css/wrapper/JQRangeSlider.css',
-            'select2': 'plugins/select2-patched',
-            "select2-css": "react-components/css/wrapper/select2.css"
+            'select2': 'plugins/select2-patched'
         }
     },
     // The base directory for resolving the entry option
@@ -40,7 +37,16 @@ var configuration = {
         new webpack.PrefetchPlugin('./src/main/javascript/modules/react-components/wrapper/JQRangeSlider.js'),
         new webpack.ProvidePlugin({$: "jquery", jQuery: "jquery"}),
         new webpack.optimize.OccurenceOrderPlugin(),
-        new webpack.NoErrorsPlugin(),
+        new webpack.DefinePlugin({
+        	'process.env': {
+            	'NODE_ENV': 'production'
+            }
+        }),
+        new webpack.optimize.UglifyJsPlugin({
+            compress: {
+                warnings: false
+            }
+        }),
         new webpack.optimize.CommonsChunkPlugin(['vendor-bundle'],
             'molgenis-[name].js')
     ],
