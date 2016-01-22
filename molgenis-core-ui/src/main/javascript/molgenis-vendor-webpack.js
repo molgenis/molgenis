@@ -20,4 +20,4 @@ let mode = 'r';
 let theme = 'eclipse';
 
 require("brace/mode/"+mode);
-require("brace/theme"+theme);
+require("brace/theme/"+theme);
