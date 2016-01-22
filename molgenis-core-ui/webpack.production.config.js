@@ -37,7 +37,16 @@ var configuration = {
         new webpack.PrefetchPlugin('./src/main/javascript/modules/react-components/wrapper/JQRangeSlider.js'),
         new webpack.ProvidePlugin({$: "jquery", jQuery: "jquery"}),
         new webpack.optimize.OccurenceOrderPlugin(),
-        new webpack.NoErrorsPlugin(),
+        new webpack.DefinePlugin({
+        	'process.env': {
+            	'NODE_ENV': '"production"'
+            }
+        }),
+        new webpack.optimize.UglifyJsPlugin({
+            compress: {
+                warnings: false
+            }
+        }),
         new webpack.optimize.CommonsChunkPlugin(['vendor-bundle'],
             'molgenis-[name].js')
     ],

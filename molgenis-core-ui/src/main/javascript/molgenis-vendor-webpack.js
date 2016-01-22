@@ -1,20 +1,22 @@
 import "jquery";
-import "bootstrap";
-import "underscore";
+import "jq-edit-rangeslider";
 import "jquery-ui";
 import "jquery.cookie";
-import "brace";
-import "moment";
-import "eonasdan-bootstrap-datetimepicker";
-import "eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css";
-import "jq-edit-rangeslider";
-import "jq-edit-rangeslider-css";
 import "select2";
-import "select2-css";
-import "urijs";
+import "bootstrap";
+import "eonasdan-bootstrap-datetimepicker";
 import "react";
 import "react/addons"
+import "underscore";
+import "brace";
+import "moment";
+import "urijs";
 import "promise";
+
+import "eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css";
+import "react-components/css/wrapper/select2.css";
+import "react-components/css/wrapper/jquery-ui-1.9.2.custom.min.css";
+import "react-components/css/wrapper/JQRangeSlider.css";
 
 let mode = 'r';
 let theme = 'eclipse';
