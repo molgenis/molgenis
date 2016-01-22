@@ -29,9 +29,7 @@ var configuration = {
         path: './target/classes/js/dist/',
         filename: 'molgenis-[name].js',
         publicPath: '/js/dist/'
-    },
-    // Source map creation strategy
-    devtool: 'cheap-module-eval-source-map',
+    },    
     plugins: [
         new webpack.PrefetchPlugin('react/lib/React'),
         new webpack.PrefetchPlugin('react/lib/ReactWithAddons'),
