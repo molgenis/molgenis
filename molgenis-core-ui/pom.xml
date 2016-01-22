@@ -17,6 +17,7 @@
 				<executions>
 					<execution>
 						<id>install node and npm</id>
+						<phase>validate</phase>
 						<goals>
 							<goal>install-node-and-npm</goal>
 						</goals>
@@ -24,6 +25,13 @@
 							<nodeVersion>v4.2.4</nodeVersion>
 							<npmVersion>2.14.15</npmVersion>
 						</configuration>
+					</execution>
+					<execution>
+						<id>npm install</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>npm</goal>
+						</goals>
 					</execution>
 					<execution>
 						<id>update package.json version</id>
@@ -34,12 +42,6 @@
 						<configuration>
 							<arguments>update-version</arguments>
 						</configuration>
-					</execution>
-					<execution>
-						<id>npm install</id>
-						<goals>
-							<goal>npm</goal>
-						</goals>
 					</execution>
 					<execution>
 						<id>npm test</id>
