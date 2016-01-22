@@ -220,14 +220,14 @@ public class MetaDataServiceImpl implements MetaDataService
 		// User permissions
 		if (dataService.hasRepository("UserAuthority"))
 		{
-			Iterable<Entity> userPermissions = dataService.query("UserAuthority").in("role", authorities).findAll();
+			Stream<Entity> userPermissions = dataService.query("UserAuthority").in("role", authorities).findAll();
 			dataService.delete("UserAuthority", userPermissions);
 		}
 
 		// Group permissions
 		if (dataService.hasRepository("GroupAuthority"))
 		{
-			Iterable<Entity> groupPermissions = dataService.query("GroupAuthority").in("role", authorities).findAll();
+			Stream<Entity> groupPermissions = dataService.query("GroupAuthority").in("role", authorities).findAll();
 			dataService.delete("GroupAuthority", groupPermissions);
 		}
 	}
