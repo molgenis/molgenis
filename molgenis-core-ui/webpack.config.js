@@ -23,11 +23,7 @@ var configuration = {
     entry: {
         'global-ui': ['./src/main/javascript/molgenis-global-ui-webpack'],
         'global': ['./src/main/javascript/molgenis-global-webpack'],
-        'rest-client': ['rest-client'],
-        'react-components': ['react-components'],
-        'vendor-bundle': ["jquery", "bootstrap", "underscore", "jquery-ui", "jquery.cookie",
-            "brace", "moment", "eonasdan-bootstrap-datetimepicker", "eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css", "jq-edit-rangeslider", "jq-edit-rangeslider-css"
-            , "select2", "select2-css", "urijs"]
+        'vendor-bundle': ['./src/main/javascript/molgenis-vendor-webpack']
     },
     output: {
         path: './target/classes/js/dist/',
@@ -37,10 +33,17 @@ var configuration = {
     // Source map creation strategy
     devtool: 'cheap-module-eval-source-map',
     plugins: [
+        new webpack.PrefetchPlugin('react/lib/React'),
+        new webpack.PrefetchPlugin('react/lib/ReactWithAddons'),
+        new webpack.PrefetchPlugin('react/lib/DOMChildrenOperations.js'),
+        new webpack.PrefetchPlugin('react/lib/ReactDOMComponent'),
+        new webpack.PrefetchPlugin('react/lib/ReactReconcileTransaction'),
+        new webpack.PrefetchPlugin('react-components'),
+        new webpack.PrefetchPlugin('./src/main/javascript/modules/react-components/wrapper/JQRangeSlider.js'),
         new webpack.ProvidePlugin({$: "jquery", jQuery: "jquery"}),
         new webpack.optimize.OccurenceOrderPlugin(),
         new webpack.NoErrorsPlugin(),
-        new webpack.optimize.CommonsChunkPlugin(['vendor-bundle', "react-components"],
+        new webpack.optimize.CommonsChunkPlugin(['vendor-bundle'],
             'molgenis-[name].js')
     ],
     resolveLoader: {

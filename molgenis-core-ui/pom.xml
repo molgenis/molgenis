@@ -18,6 +18,7 @@
 				<executions>
 					<execution>
 						<id>install node and npm</id>
+						<phase>validate</phase>
 						<goals>
 							<goal>install-node-and-npm</goal>
 						</goals>
@@ -28,9 +29,20 @@
 					</execution>
 					<execution>
 						<id>npm install</id>
+						<phase>validate</phase>
 						<goals>
 							<goal>npm</goal>
 						</goals>
+					</execution>
+					<execution>
+						<id>update package.json version</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>gulp</goal>
+						</goals>
+						<configuration>
+							<arguments>update-version</arguments>
+						</configuration>
 					</execution>
 					<execution>
 						<id>npm test</id>
