@@ -23,9 +23,7 @@ var configuration = {
     entry: {
         'global-ui': ['./src/main/javascript/molgenis-global-ui-webpack'],
         'global': ['./src/main/javascript/molgenis-global-webpack'],
-        'vendor-bundle': ["jquery", "bootstrap", "underscore", "jquery-ui", "jquery.cookie",
-            "brace", "moment", "eonasdan-bootstrap-datetimepicker", "eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css", "jq-edit-rangeslider", "jq-edit-rangeslider-css"
-            , "select2", "select2-css", "urijs", "react", "react/addons", "promise"]
+        'vendor-bundle': ['./src/main/javascript/molgenis-vendor-webpack']
     },
     output: {
         path: './target/classes/js/dist/',

@@ -2,11 +2,6 @@ import React from "react";
 import DeepPureRenderMixin from "../mixin/DeepPureRenderMixin";
 import ace from "brace";
 
-// Other themes and modes are not included in the bundle 
-// and will be included dynamically by ace from the basePath
-import r from "brace/mode/r";
-import eclipse from "brace/theme/eclipse";
-
 	var div = React.DOM.div, textarea = React.DOM.textarea;
 	
 	ace.config.set("basePath", "/js/ace/src-min-noconflict");
@@ -47,9 +42,11 @@ import eclipse from "brace/theme/eclipse";
 		componentDidMount: function() {
 			var container = this.refs.editor.getDOMNode();
 			var editor = ace.edit(container);
+			require('brace/theme/'+this.props.theme);
 			editor.setTheme('ace/theme/' + this.props.theme);
 			
 			var session = editor.getSession();
+			require('brace/mode/'+this.props.mode);
 			session.setMode('ace/mode/' + this.props.mode);
 			session.setValue(this.state.value);
 			
