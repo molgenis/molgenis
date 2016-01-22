@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
@@ -123,11 +122,6 @@ public abstract class AbstractI18nTest extends AbstractDataIntegrationTest
 
 	protected void createAdminUser()
 	{
-		// TODO move to config and cleanup when JPA is removed
-		MolgenisUserMetaData userMeta = new MolgenisUserMetaData();
-		userMeta.setBackend(null);
-		metaDataService.addEntityMeta(userMeta);
-
 		MolgenisUser admin = new MolgenisUser();
 		admin.setUsername("admin");
 		admin.setActive(true);

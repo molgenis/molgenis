@@ -1,9 +1,6 @@
 package org.molgenis.integrationtest.data;
 
-import java.util.Collections;
-
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.molgenis.data.EntityManager;
@@ -31,31 +28,31 @@ import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.file.FileMetaMetaData;
 import org.molgenis.js.RhinoConfig;
 import org.molgenis.mysql.embed.EmbeddedMysqlDatabaseBuilder;
+import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.runas.RunAsSystemBeanPostProcessor;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.ui.MolgenisRepositoryDecoratorFactory;
-import org.springframework.beans.factory.FactoryBean;
+import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.orm.jpa.JpaDialect;
-import org.springframework.orm.jpa.JpaVendorAdapter;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect;
-import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
-import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 import com.google.common.io.Files;
 
 @EnableTransactionManagement(proxyTargetClass = true)
 @ComponentScan(
-{ "org.molgenis.data.meta", "org.molgenis.data.elasticsearch.index" })
+{ "org.molgenis.data.meta", "org.molgenis.data.elasticsearch.index", "org.molgenis.auth" })
 @Import(
 { EmbeddedElasticSearchConfig.class, ElasticsearchEntityFactory.class, TransactionConfig.class,
 		ElasticsearchRepositoryCollection.class, RunAsSystemBeanPostProcessor.class, FileMetaMetaData.class,
@@ -175,36 +172,28 @@ public abstract class AbstractDataApiTestConfig
 		return pspc;
 	}
 
-	// ************************************************************************
-	// JPA config for MolgenisTransactionManager, remove after JPA is removed
-	// ************************************************************************
 	@Bean
-	public JpaDialect jpaDialect()
+	public FreeMarkerConfigurer freeMarkerConfigurer()
 	{
-		return new EclipseLinkJpaDialect();
+		return new FreeMarkerConfigurer();
 	}
 
 	@Bean
-	public JpaVendorAdapter jpaVendorAdapter()
+	public ConversionService conversionService()
 	{
-		EclipseLinkJpaVendorAdapter eclipseLinkJpaVendorAdapter = new EclipseLinkJpaVendorAdapter();
-		return eclipseLinkJpaVendorAdapter;
+		return new DefaultConversionService();
 	}
 
 	@Bean
-	public FactoryBean<EntityManagerFactory> localEntityManagerFactoryBean()
+	public ApplicationContextProvider applicationContextProvider()
 	{
-		LocalContainerEntityManagerFactoryBean entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean();
-		entityManagerFactoryBean.setPersistenceUnitName("test");
-		entityManagerFactoryBean.setDataSource(dataSource());
-		entityManagerFactoryBean.setJpaDialect(jpaDialect());
-		entityManagerFactoryBean.setJpaVendorAdapter(jpaVendorAdapter());
-		entityManagerFactoryBean.setJpaPropertyMap(Collections.singletonMap("eclipselink.weaving", "false"));
-		return entityManagerFactoryBean;
+		return new ApplicationContextProvider();
 	}
 
-	public PlatformTransactionManager annotationDrivenTransactionManager()
+	@Bean
+	public PasswordEncoder passwordEncoder()
 	{
-		return transactionManager();
+		return new MolgenisPasswordEncoder(new BCryptPasswordEncoder());
 	}
+
 }

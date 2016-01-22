@@ -10,6 +10,8 @@ import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFacto
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.transaction.AsyncTransactionLog;
 import org.molgenis.mysql.embed.EmbeddedMysqlDatabase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -18,6 +20,8 @@ import org.testng.annotations.BeforeClass;
 
 public abstract class AbstractDataIntegrationTest extends AbstractTestNGSpringContextTests
 {
+	protected final Logger logger = LoggerFactory.getLogger(getClass());
+
 	@Autowired
 	DataService dataService;
 
@@ -52,9 +56,9 @@ public abstract class AbstractDataIntegrationTest extends AbstractTestNGSpringCo
 			// Give asyncTransactionLog time to stop gracefully
 			TimeUnit.SECONDS.sleep(1);
 		}
-		catch (InterruptedException e1)
+		catch (InterruptedException e)
 		{
-			e1.printStackTrace();
+			logger.error("InterruptedException sleeping 1 second", e);
 		}
 
 		applicationContext.close();
@@ -64,13 +68,20 @@ public abstract class AbstractDataIntegrationTest extends AbstractTestNGSpringCo
 		{
 			// Stop ES
 			embeddedElasticSearchServiceFactory.close();
+		}
+		catch (IOException e)
+		{
+			logger.error("Error stopping Elasticsearch", e);
+		}
 
+		try
+		{
 			// Delete molgenis home folder
 			FileUtils.deleteDirectory(new File(System.getProperty("molgenis.home")));
 		}
 		catch (IOException e)
 		{
-			e.printStackTrace();
+			logger.error("Error removing molgenis home directory", e);
 		}
 
 	}
