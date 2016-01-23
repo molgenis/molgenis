@@ -1,5 +1,8 @@
 package org.molgenis.data.support;
 
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
+
 import org.molgenis.data.Entity;
 import org.molgenis.data.Writable;
 
@@ -39,14 +42,13 @@ public abstract class AbstractWritable implements Writable
 	}
 
 	@Override
-	public Integer add(Iterable<? extends Entity> entities)
+	public Integer add(Stream<? extends Entity> entities)
 	{
-		Integer count = 0;
-		for (Entity entity : entities)
-		{
+		AtomicInteger count = new AtomicInteger(0);
+		entities.forEach(entity -> {
 			add(entity);
-			count++;
-		}
-		return count;
+			count.incrementAndGet();
+		});
+		return count.get();
 	}
 }

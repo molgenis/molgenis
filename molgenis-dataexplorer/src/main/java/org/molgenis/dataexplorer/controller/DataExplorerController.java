@@ -14,8 +14,10 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -58,8 +60,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
 import com.google.gson.Gson;
 
 import freemarker.core.ParseException;
@@ -125,15 +125,8 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		boolean entityExists = false;
 		boolean hasEntityPermission = false;
-		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(dataService.getEntityNames(),
-				new Function<String, EntityMetaData>()
-				{
-					@Override
-					public EntityMetaData apply(String entityName)
-					{
-						return dataService.getEntityMetaData(entityName);
-					}
-				});
+		List<EntityMetaData> entitiesMeta = dataService.getEntityNames().map(dataService::getEntityMetaData)
+				.collect(Collectors.toList());
 		model.addAttribute("entitiesMeta", entitiesMeta);
 		if (selectedEntityName != null)
 		{
@@ -205,9 +198,12 @@ public class DataExplorerController extends MolgenisPluginController
 
 		// set data explorer permission
 		Permission pluginPermission = null;
-		if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE)) pluginPermission = Permission.WRITE;
-		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.READ)) pluginPermission = Permission.READ;
-		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.COUNT)) pluginPermission = Permission.COUNT;
+		if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE))
+			pluginPermission = Permission.WRITE;
+		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.READ))
+			pluginPermission = Permission.READ;
+		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.COUNT))
+			pluginPermission = Permission.COUNT;
 
 		ModulesConfigResponse modulesConfig = new ModulesConfigResponse();
 		ResourceBundle i18n = languageService.getBundle();
@@ -246,8 +242,8 @@ public class DataExplorerController extends MolgenisPluginController
 						String modEntitiesReportName = dataExplorerSettings.getEntityReport(entityName);
 						if (modEntitiesReportName != null)
 						{
-							modulesConfig.add(new ModuleConfig("entitiesreport", modEntitiesReportName,
-									"report-icon.png"));
+							modulesConfig
+									.add(new ModuleConfig("entitiesreport", modEntitiesReportName, "report-icon.png"));
 						}
 					}
 					break;
@@ -268,8 +264,7 @@ public class DataExplorerController extends MolgenisPluginController
 	private Map<String, String> getGenomeBrowserEntities()
 	{
 		Map<String, String> genomeEntities = new HashMap<String, String>();
-		for (String entityName : dataService.getEntityNames())
-		{
+		dataService.getEntityNames().forEach(entityName -> {
 			EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
 			if (isGenomeBrowserEntity(entityMetaData))
 			{
@@ -280,16 +275,16 @@ public class DataExplorerController extends MolgenisPluginController
 					genomeEntities.put(entityMetaData.getName(), entityMetaData.getLabel());
 				}
 			}
-		}
+		});
 		return genomeEntities;
 	}
 
 	private boolean isGenomeBrowserEntity(EntityMetaData entityMetaData)
 	{
-		AttributeMetaData attributeStartPosition = genomicDataSettings.getAttributeMetadataForAttributeNameArray(
-				GenomicDataSettings.Meta.ATTRS_POS, entityMetaData);
-		AttributeMetaData attributeChromosome = genomicDataSettings.getAttributeMetadataForAttributeNameArray(
-				GenomicDataSettings.Meta.ATTRS_CHROM, entityMetaData);
+		AttributeMetaData attributeStartPosition = genomicDataSettings
+				.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_POS, entityMetaData);
+		AttributeMetaData attributeChromosome = genomicDataSettings
+				.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_CHROM, entityMetaData);
 		return attributeStartPosition != null && attributeChromosome != null;
 	}
 

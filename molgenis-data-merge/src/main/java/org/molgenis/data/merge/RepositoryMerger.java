@@ -121,18 +121,18 @@ public class RepositoryMerger
 				// write to repository after every 1000 entities
 				if (addedEntities.size() == batchSize)
 				{
-					resultRepository.add(addedEntities);
+					resultRepository.add(addedEntities.stream());
 					addedEntities = new ArrayList<Entity>();
 				}
 				if (updatedEntities.size() == batchSize)
 				{
-					resultRepository.update(updatedEntities);
+					resultRepository.update(updatedEntities.stream());
 					updatedEntities = new ArrayList<Entity>();
 				}
 			}
 			// write remaining entities to repository
-			resultRepository.add(addedEntities);
-			resultRepository.update(updatedEntities);
+			resultRepository.add(addedEntities.stream());
+			resultRepository.update(updatedEntities.stream());
 		}
 	}
 
@@ -208,8 +208,8 @@ public class RepositoryMerger
 	/**
 	 * Add a compound attribute for a repository containing all "non-common" attributes
 	 */
-	private void mergeRepositoryMetaData(List<AttributeMetaData> commonAttributes,
-			DefaultEntityMetaData mergedMetaData, Repository repository)
+	private void mergeRepositoryMetaData(List<AttributeMetaData> commonAttributes, DefaultEntityMetaData mergedMetaData,
+			Repository repository)
 	{
 		EntityMetaData originalRepositoryMetaData = repository.getEntityMetaData();
 		DefaultAttributeMetaData repositoryCompoundAttribute = new DefaultAttributeMetaData(repository.getName(),
@@ -243,8 +243,8 @@ public class RepositoryMerger
 	/**
 	 * Recursively add all the attributes in an compound attribute
 	 */
-	private void addCompoundAttributeParts(Repository repository,
-			AttributeMetaData originalRepositoryAttributeMetaData, DefaultAttributeMetaData attributePartMetaData)
+	private void addCompoundAttributeParts(Repository repository, AttributeMetaData originalRepositoryAttributeMetaData,
+			DefaultAttributeMetaData attributePartMetaData)
 	{
 		List<AttributeMetaData> subAttributeParts = new ArrayList<AttributeMetaData>();
 		for (AttributeMetaData originalRepositorySubAttributeMetaData : originalRepositoryAttributeMetaData
@@ -253,8 +253,8 @@ public class RepositoryMerger
 			DefaultAttributeMetaData subAttributePartMetaData = copyAndRename(originalRepositorySubAttributeMetaData,
 					getMergedAttributeName(repository, originalRepositorySubAttributeMetaData.getName()),
 					getMergedAttributeLabel(repository, originalRepositoryAttributeMetaData.getLabel()));
-			subAttributePartMetaData.setLabel(getMergedAttributeLabel(repository,
-					originalRepositorySubAttributeMetaData.getLabel()));
+			subAttributePartMetaData
+					.setLabel(getMergedAttributeLabel(repository, originalRepositorySubAttributeMetaData.getLabel()));
 			if (subAttributePartMetaData.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
 			{
 				addCompoundAttributeParts(repository, originalRepositorySubAttributeMetaData, subAttributePartMetaData);
@@ -296,8 +296,8 @@ public class RepositoryMerger
 
 	private DefaultAttributeMetaData copyAndRename(AttributeMetaData attributeMetaData, String name, String label)
 	{
-		DefaultAttributeMetaData result = new DefaultAttributeMetaData(name, attributeMetaData.getDataType()
-				.getEnumType());
+		DefaultAttributeMetaData result = new DefaultAttributeMetaData(name,
+				attributeMetaData.getDataType().getEnumType());
 		result.setDescription(attributeMetaData.getDescription());
 		result.setNillable(true);// We got a problem if a attr is required in one entitymeta and missing in another
 		result.setReadOnly(false);

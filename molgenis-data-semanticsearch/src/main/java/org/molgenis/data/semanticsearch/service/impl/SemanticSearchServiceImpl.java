@@ -1,5 +1,7 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,7 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryparser.classic.QueryParser;
@@ -46,8 +50,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.google.common.base.Splitter;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Ordering;
-
-import static java.util.Objects.requireNonNull;
 
 import autovalue.shaded.com.google.common.common.collect.Sets;
 
@@ -100,7 +102,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			finalQueryRules.addAll(Arrays.asList(new QueryRule(Operator.AND), disMaxQueryRule));
 		}
 
-		Iterable<Entity> attributeMetaDataEntities = dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME,
+		Stream<Entity> attributeMetaDataEntities = dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME,
 				new QueryImpl(finalQueryRules));
 
 		Map<String, String> collectExpanedQueryMap = semanticSearchServiceHelper.collectExpandedQueryMap(queryTerms,
@@ -108,12 +110,13 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 
 		// Because the explain-API can be computationally expensive we limit the explanation to the top 10 attributes
 		Map<AttributeMetaData, ExplainedAttributeMetaData> explainedAttributes = new LinkedHashMap<>();
-		int count = 0;
-		for (Entity attributeEntity : attributeMetaDataEntities)
+		AtomicInteger count = new AtomicInteger(0);
+		attributeMetaDataEntities.forEach(attributeEntity ->
+		// for (Entity attributeEntity : attributeMetaDataEntities)
 		{
 			AttributeMetaData attribute = sourceEntityMetaData
 					.getAttribute(attributeEntity.getString(AttributeMetaDataMetaData.NAME));
-			if (count < MAX_NUMBER_EXPLAINED_ATTRIBUTES)
+			if (count.get() < MAX_NUMBER_EXPLAINED_ATTRIBUTES)
 			{
 				Set<ExplainedQueryString> explanations = convertAttributeEntityToExplainedAttribute(attributeEntity,
 						sourceEntityMetaData, collectExpanedQueryMap, finalQueryRules);
@@ -128,8 +131,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			{
 				explainedAttributes.put(attribute, ExplainedAttributeMetaData.create(attribute));
 			}
-			count++;
-		}
+			count.incrementAndGet();
+		});
 
 		return explainedAttributes;
 	}

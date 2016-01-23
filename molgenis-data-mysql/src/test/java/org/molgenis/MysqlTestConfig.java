@@ -9,6 +9,7 @@ import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
+import org.molgenis.data.meta.system.FreemarkerTemplateMetaData;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MySqlEntityFactory;
 import org.molgenis.data.mysql.MysqlRepository;
@@ -29,6 +30,7 @@ import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 /**
  * Database configuration
@@ -138,5 +140,11 @@ public class MysqlTestConfig
 	public MolgenisPluginRegistry molgenisPluginRegistry()
 	{
 		return new MolgenisPluginRegistryImpl();
+	}
+
+	@Bean
+	public FreeMarkerConfigurer freeMarkerConfigurer()
+	{
+		return new FreeMarkerConfigurer();
 	}
 }

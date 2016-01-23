@@ -5,7 +5,8 @@ import static org.molgenis.ontology.core.meta.OntologyMetaData.ID;
 import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY_IRI;
 import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY_NAME;
 
-import org.elasticsearch.common.collect.Iterables;
+import java.util.stream.Stream;
+
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
@@ -24,9 +25,9 @@ public class OntologyRepository
 	/**
 	 * Retrieves all {@link Ontology}s.
 	 */
-	public Iterable<Ontology> getOntologies()
+	public Stream<Ontology> getOntologies()
 	{
-		return Iterables.transform(dataService.findAll(ENTITY_NAME), OntologyRepository::toOntology);
+		return dataService.findAll(ENTITY_NAME).map(OntologyRepository::toOntology);
 	}
 
 	/**

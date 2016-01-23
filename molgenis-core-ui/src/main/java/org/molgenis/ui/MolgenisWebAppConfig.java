@@ -16,6 +16,13 @@ import java.util.Properties;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
+import org.molgenis.auth.AuthorityMetaData;
+import org.molgenis.auth.GroupAuthorityMetaData;
+import org.molgenis.auth.MolgenisGroupMemberMetaData;
+import org.molgenis.auth.MolgenisGroupMetaData;
+import org.molgenis.auth.MolgenisUserMetaData;
+import org.molgenis.auth.RuntimePropertyMetaData;
+import org.molgenis.auth.UserAuthorityMetaData;
 import org.molgenis.data.AutoValueRepositoryDecorator;
 import org.molgenis.data.ComputedEntityValuesDecorator;
 import org.molgenis.data.DataService;
@@ -39,6 +46,8 @@ import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
+import org.molgenis.data.meta.system.FreemarkerTemplateMetaData;
+import org.molgenis.data.meta.system.ImportRunMetaData;
 import org.molgenis.data.mysql.MySqlEntityFactory;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.settings.AppSettings;
@@ -475,10 +484,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@PostConstruct
 	public void initRepositories()
 	{
-		dataService().setMeta(metaDataService());
-
 		addUpgrades();
 		boolean didUpgrade = upgradeService.upgrade();
+		dataService().setMeta(metaDataService());
 		if (didUpgrade)
 		{
 			LOG.info("Reindexing repositories due to MOLGENIS upgrade...");
@@ -495,6 +503,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		{
 			LOG.debug("Elasticsearch index exists, no need to reindex.");
 		}
+
 		runAsSystem(() -> metaDataService().setDefaultBackend(getBackend()));
 	}
 

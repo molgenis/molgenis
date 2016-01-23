@@ -38,6 +38,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 /**
  * Database configuration
@@ -184,5 +185,11 @@ public class ImportTestConfig
 	public LanguageService languageService()
 	{
 		return new LanguageService(dataService(), new AppDbSettings());
+	}
+
+	@Bean
+	public FreeMarkerConfigurer freeMarkerConfigurer()
+	{
+		return new FreeMarkerConfigurer();
 	}
 }
