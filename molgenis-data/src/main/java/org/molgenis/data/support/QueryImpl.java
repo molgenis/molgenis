@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
@@ -91,20 +92,11 @@ public class QueryImpl implements Query
 		return repository.count(this);
 	}
 
-	// TODO replace with Stream<Entity>
 	@Override
-	public Iterable<Entity> findAll()
+	public Stream<Entity> findAll()
 	{
 		if (repository == null) throw new RuntimeException("Query failed: repository not set");
-		Query thisQuery = this;
-		return new Iterable<Entity>()
-		{
-			@Override
-			public Iterator<Entity> iterator()
-			{
-				return repository.findAll(thisQuery).iterator();
-			}
-		};
+		return repository.findAll(this);
 	}
 
 	@Override
@@ -117,8 +109,8 @@ public class QueryImpl implements Query
 	@Override
 	public List<QueryRule> getRules()
 	{
-		if (this.rules.size() > 1)
-			throw new MolgenisDataException("Nested query not closed, use unnest() or unnestAll()");
+		if (this.rules.size() > 1) throw new MolgenisDataException(
+				"Nested query not closed, use unnest() or unnestAll()");
 
 		if (this.rules.size() > 0)
 		{
