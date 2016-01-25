@@ -33,15 +33,15 @@
 		<!-- Profiles for setting development and production properties -->
 		<profile>
 			<id>development</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
 			<properties>
 				<webpack.development>true</webpack.development>
 			</properties>
 		</profile>
 		<profile>
 			<id>production</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
 			<properties>
 				<webpack.production>true</webpack.production>
 			</properties>
@@ -51,7 +51,6 @@
         <profile>
             <id>create-delivery</id>
             <properties>
-            	
                 <skip.delivery>false</skip.delivery>
             </properties>
         </profile>
