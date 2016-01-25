@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -51,8 +50,8 @@ public class QuestionnairePluginController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String showView(Model model)
 	{
-		List<Entity> questionnaireMeta = runAsSystem(() -> Lists.newArrayList(QuestionnaireUtils
-				.findQuestionnairesMetaData(dataService)));
+		List<Entity> questionnaireMeta = runAsSystem(() -> QuestionnaireUtils.findQuestionnairesMetaData(dataService)
+				.collect(Collectors.toList()));
 
 		List<Questionnaire> questionnaires = questionnaireMeta
 				.stream()
