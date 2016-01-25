@@ -366,7 +366,7 @@ public class ImportWriter
 	public void rollbackSchemaChanges(EmxImportJob job)
 	{
 		LOG.info("Rolling back changes.");
-		dataService.delete(LanguageMetaData.ENTITY_NAME, job.metaDataChanges.getAddedLanguages());
+		dataService.delete(LanguageMetaData.ENTITY_NAME, job.metaDataChanges.getAddedLanguages().stream());
 		dropAddedEntities(job.metaDataChanges.getAddedEntities());
 		List<String> entities = dropAddedAttributes(job.metaDataChanges.getAddedAttributes());
 
