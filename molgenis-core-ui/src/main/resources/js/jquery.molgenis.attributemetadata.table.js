@@ -17,17 +17,20 @@
 
 		var table = $('<table class="table"></table>');
 		panelBody.append(table);
+		
+		var tbody = $('<tbody></tbody>');
+		table.append(tbody);
 
 		for (var i = 0; i < ATTRIBUTE_KEYS.length; i++) {
 			var key = ATTRIBUTE_KEYS[i];
 			var value = attributeMetadata[key] !== undefined ? attributeMetadata[key] : '';
-			table.append('<tr><th>' + key + '</th><td>' + value + '</td></tr>');
+			tbody.append('<tr><th>' + key + '</th><td>' + value + '</td></tr>');
 		}
 
 		var refEntity = attributeMetadata['refEntity'];
 		if (refEntity && (attributeMetadata.fieldType !== 'COMPOUND')) {
 			restApi.getAsync(refEntity.href, {}, function(entity) {
-				table.append('<tr><th>refEntity</th><td>' + entity.label + '</td></tr>');
+				tbody.append('<tr><th>refEntity</th><td>' + entity.label + '</td></tr>');
 			});
 		}
 
@@ -43,9 +46,13 @@
 				panel.append(panelBody);
 				var table = $('<table class="table"></table>');
 				panelBody.append(table);
+				var tbody = $('<tbody></tbody>');
+				table.append(tbody);
+				var headerRow = $('<tr></tr>');
+				tbody.append(headerRow);
 
 				$.each(refEntityMetadata.attributes, function() {
-					table.append('<th>' + this.label + '</th>');
+					headerRow.append('<th>' + this.label + '</th>');
 				});
 
 				var maxRows = 3;
@@ -54,7 +61,7 @@
 				}, function(data) {
 					$.each(data.items, function(index, item) {
 						var tr = $('<tr></tr>');
-						table.append(tr);
+						tbody.append(tr);
 						$.each(refEntityMetadata.attributes, function(index, attr) {
 							tr.append('<td>' + item[attr.name] + '</td>');
 						});
