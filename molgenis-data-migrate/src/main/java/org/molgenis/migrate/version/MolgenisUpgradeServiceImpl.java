@@ -44,6 +44,10 @@ public class MolgenisUpgradeServiceImpl implements MolgenisUpgradeService
 	@Override
 	public boolean upgrade()
 	{
+		if (versionService.getMolgenisVersionFromServerProperties() < 19)
+		{
+			throw new UnsupportedOperationException("Upgrading from versions below 1.10 (metadataversion 19) is not supported, please update to 1.10 first.");
+		}
 		if (versionService.getMolgenisVersionFromServerProperties() < MolgenisVersionService.CURRENT_VERSION)
 		{
 			LOG.info("MetaData version:{}, current version:{} upgrade needed",

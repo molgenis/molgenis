@@ -168,55 +168,6 @@ public class MolgenisOptions implements Serializable
 	}
 
 	/**
-	 * Initialize options from properties file
-	 * 
-	 * @param propertiesFile
-	 *            the path string to molgenis.properties file
-	 * @throws IOException
-	 * @throws FileNotFoundException
-	 * @throws CmdLineException
-	 */
-	public MolgenisOptions(String propertiesFile) throws FileNotFoundException, IOException, CmdLineException
-	{
-		this.molgenis_properties = propertiesFile;
-		Properties props = new Properties();
-		InputStream is = null;
-		try
-		{
-			// try to load from local files
-			is = new FileInputStream(propertiesFile.trim());
-			props.load(is);
-		}
-		catch (FileNotFoundException e)
-		{
-			InputStream is2 = Thread.currentThread().getContextClassLoader().getResourceAsStream(propertiesFile.trim());
-			try
-			{
-				// try to load from classpath
-				props.load(is2);
-			}
-			catch (Exception e2)
-			{
-				throw new IOException("couldn't find file " + new File(propertiesFile).getAbsolutePath());
-			}
-			finally
-			{
-				IOUtils.closeQuietly(is2);
-			}
-		}
-		finally
-		{
-			IOUtils.closeQuietly(is);
-		}
-
-		CmdLineParser parser = new CmdLineParser(this);
-		parser.parse(props);
-		this.molgenis_properties = propertiesFile;
-
-		LOG.debug("parsed properties file.");
-	}
-
-	/**
 	 * Initialize options from properties object
 	 * 
 	 * @param properties

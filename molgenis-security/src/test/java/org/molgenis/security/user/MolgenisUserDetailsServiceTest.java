@@ -36,10 +36,10 @@ public class MolgenisUserDetailsServiceTest
 	public void setUp()
 	{
 		DataService dataService = mock(DataService.class);
-		MolgenisUser adminUser = when(mock(MolgenisUser.class).getSuperuser()).thenReturn(Boolean.TRUE).getMock();
+		MolgenisUser adminUser = when(mock(MolgenisUser.class).isSuperuser()).thenReturn(Boolean.TRUE).getMock();
 		when(adminUser.getUsername()).thenReturn("admin");
 		when(adminUser.getPassword()).thenReturn("password");
-		MolgenisUser userUser = when(mock(MolgenisUser.class).getSuperuser()).thenReturn(Boolean.FALSE).getMock();
+		MolgenisUser userUser = when(mock(MolgenisUser.class).isSuperuser()).thenReturn(Boolean.FALSE).getMock();
 		when(userUser.getUsername()).thenReturn("user");
 		when(userUser.getPassword()).thenReturn("password");
 		Query qAdmin = new QueryImpl().eq(MolgenisUser.USERNAME, "admin");

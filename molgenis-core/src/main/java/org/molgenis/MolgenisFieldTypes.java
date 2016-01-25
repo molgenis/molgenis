@@ -66,6 +66,7 @@ public class MolgenisFieldTypes
 	public static final FieldType STRING = new StringField();
 	public static final FieldType TEXT = new TextField();
 	public static final FieldType XREF = new XrefField();
+	public static final FieldType ENUM = new EnumField();
 
 	// FIXME Do not add public static final ENUM here, as it holds the enum options so it is different per attribute,
 	// this should be fixed. The options should not be added to the field
@@ -95,6 +96,7 @@ public class MolgenisFieldTypes
 			addType(SCRIPT);
 			addType(TEXT);
 			addType(XREF);
+			addType(ENUM);
 
 			init = true;
 		}

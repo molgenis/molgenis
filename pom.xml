@@ -146,7 +146,7 @@
                                 <resources>
                                     <resource>
                                         <directory>target/generated-resources</directory>
-                                        <filtering>false</filtering>
+                                        <filtering>true</filtering>
                                     </resource>
                                 </resources>
                             </configuration>
@@ -685,7 +685,6 @@
         <module>molgenis-data-googlespreadsheet</module>
         <module>molgenis-data</module>
         <module>molgenis-data-system</module>
-        <module>molgenis-data-jpa</module>
         <module>molgenis-data-merge</module>
         <module>molgenis-data-mysql</module>
         <module>molgenis-data-vcf</module>
