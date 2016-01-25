@@ -33,6 +33,9 @@
 		<!-- Profiles for setting development and production properties -->
 		<profile>
 			<id>development</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
 			<properties>
 				<webpack.development>true</webpack.development>
 			</properties>
