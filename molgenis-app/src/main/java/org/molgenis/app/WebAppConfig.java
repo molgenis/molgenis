@@ -28,7 +28,7 @@ import org.molgenis.migrate.version.v1_13.Step22RemoveDiseaseMatcher;
 import org.molgenis.migrate.version.v1_14.Step23RebuildElasticsearchIndex;
 import org.molgenis.migrate.version.v1_15.Step24UpdateApplicationSettings;
 import org.molgenis.migrate.version.v1_15.Step25LanguagesPermissions;
-import org.molgenis.migrate.version.v1_16.Step27migrateJpaBackend;
+import org.molgenis.migrate.version.v1_16.Step26migrateJpaBackend;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.GsonConfig;
@@ -102,7 +102,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(step23RebuildElasticsearchIndex);
 		upgradeService.addUpgrade(new Step24UpdateApplicationSettings(dataSource, idGenerator));
 		upgradeService.addUpgrade(new Step25LanguagesPermissions(dataService));
-		upgradeService.addUpgrade(new Step27migrateJpaBackend(dataSource, MysqlRepositoryCollection.NAME));
+		upgradeService.addUpgrade(new Step26migrateJpaBackend(dataSource, MysqlRepositoryCollection.NAME));
 	}
 
 	@Override
