@@ -8,6 +8,7 @@ import static org.testng.Assert.assertNull;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -217,6 +218,41 @@ public class InMemoryRepositoryTest
 		}
 	}
 
+	@Test
+	public void findAllAsStreamSingleEqualsQuery() throws IOException
+	{
+		String idAttrName = "id";
+		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(idAttrName).getMock();
+		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
+		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityMeta);
+		try
+		{
+			Object id0 = Integer.valueOf(0);
+			Entity entity0 = when(mock(Entity.class).get("attr")).thenReturn("a").getMock();
+			when(entity0.get("id")).thenReturn(id0);
+			Object id1 = Integer.valueOf(1);
+			Entity entity1 = when(mock(Entity.class).get("attr")).thenReturn("a").getMock();
+			when(entity1.get("id")).thenReturn(id1);
+			Object id2 = Integer.valueOf(2);
+			Entity entity2 = when(mock(Entity.class).get("attr")).thenReturn("b").getMock();
+			when(entity2.get("id")).thenReturn(id2);
+			inMemoryRepository.add(entity0);
+			inMemoryRepository.add(entity1);
+			inMemoryRepository.add(entity2);
+
+			System.out.println(entity0.get(idAttrName));
+
+			List<Entity> entities = inMemoryRepository.findAll(new QueryImpl().eq("attr", "a")).filter(Objects::nonNull)
+					.collect(Collectors.toList());
+			assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, entity1));
+		}
+		finally
+		{
+			inMemoryRepository.close();
+		}
+	}
+
 	@Test(expectedExceptions = UnsupportedOperationException.class)
 	public void findAllAsStreamQueryWithContent() throws IOException
 	{
@@ -224,7 +260,8 @@ public class InMemoryRepositoryTest
 		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityMeta);
 		try
 		{
-			inMemoryRepository.findAll(new QueryImpl().eq("attr", "val")).collect(Collectors.toList());
+			inMemoryRepository.findAll(new QueryImpl().eq("attr", "val").and().eq("attr2", "val"))
+					.collect(Collectors.toList());
 		}
 		finally
 		{
