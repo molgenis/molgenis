@@ -192,9 +192,8 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		// ElasticSearchService, because ElasticSearchService should not be
 		// aware of DataService. E.g. Put EntityMetaData in the SearchRequest
 		// object
-		EntityMetaData entityMetaData = (request.getDocumentType() != null && dataService != null
-				&& dataService.hasRepository(request.getDocumentType()))
-						? dataService.getEntityMetaData(request.getDocumentType()) : null;
+		EntityMetaData entityMetaData = (request.getDocumentType() != null && dataService != null && dataService
+				.hasRepository(request.getDocumentType())) ? dataService.getEntityMetaData(request.getDocumentType()) : null;
 		String documentType = request.getDocumentType() == null ? null : sanitizeMapperType(request.getDocumentType());
 		if (LOG.isTraceEnabled())
 		{
@@ -264,8 +263,8 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 
 			if (!response.isAcknowledged())
 			{
-				throw new ElasticsearchException(
-						"Creation of mapping for documentType [" + entityName + "] failed. Response=" + response);
+				throw new ElasticsearchException("Creation of mapping for documentType [" + entityName
+						+ "] failed. Response=" + response);
 			}
 
 			if (LOG.isDebugEnabled()) LOG.debug("Created Elasticsearch mapping [{}]", jsonBuilder.string());
@@ -366,8 +365,8 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 				SearchResponse countAddSearchResponse = countAddSearchRequestBuilder.get();
 				if (countAddSearchResponse.getFailedShards() > 0)
 				{
-					throw new ElasticsearchException(
-							"Search failed. Returned headers:" + countAddSearchResponse.getHeaders());
+					throw new ElasticsearchException("Search failed. Returned headers:"
+							+ countAddSearchResponse.getHeaders());
 				}
 				long addedCount = countAddSearchResponse.getHits().totalHits();
 
@@ -384,8 +383,8 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 				SearchResponse countDeletedSearchResponse = countDeletedSearchRequestBuilder.get();
 				if (countDeletedSearchResponse.getFailedShards() > 0)
 				{
-					throw new ElasticsearchException(
-							"Search failed. Returned headers:" + countDeletedSearchResponse.getHeaders());
+					throw new ElasticsearchException("Search failed. Returned headers:"
+							+ countDeletedSearchResponse.getHeaders());
 				}
 				long deletedCount = countDeletedSearchResponse.getHits().totalHits();
 
@@ -615,15 +614,18 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	public void delete(Stream<? extends Entity> entities, EntityMetaData entityMetaData)
 	{
 		Stream<Object> entityIds = entities.map(entity -> entity.getIdValue());
-		Iterators.partition(entityIds.iterator(), BATCH_SIZE).forEachRemaining(batchEntityIds -> {
-			if (!canBeDeleted(batchEntityIds, entityMetaData))
-			{
-				throw new MolgenisDataException(
-						"Cannot delete entity because there are other entities referencing it. Delete these first.");
-			}
+		Iterators
+				.partition(entityIds.iterator(), BATCH_SIZE)
+				.forEachRemaining(
+						batchEntityIds -> {
+							if (!canBeDeleted(batchEntityIds, entityMetaData))
+							{
+								throw new MolgenisDataException(
+										"Cannot delete entity because there are other entities referencing it. Delete these first.");
+							}
 
-			deleteById(toElasticsearchIds(batchEntityIds.stream()), entityMetaData);
-		});
+							deleteById(toElasticsearchIds(batchEntityIds.stream()), entityMetaData);
+						});
 	}
 
 	@Override
@@ -735,8 +737,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 				}
 			}
 
-			return response.isExists() ? elasticsearchEntityFactory.create(entityMetaData, response.getSource(), fetch)
-					: null;
+			return response.isExists() ? elasticsearchEntityFactory.create(entityMetaData, response.getSource(), fetch) : null;
 		}
 	}
 
@@ -788,8 +789,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			}
 			else
 			{
-				LOG.trace("Retrieving Elasticsearch [{}] docs with ids [{}] and fetch [{}] ...", type, entityIds,
-						fetch);
+				LOG.trace("Retrieving Elasticsearch [{}] docs with ids [{}] and fetch [{}] ...", type, entityIds, fetch);
 			}
 		}
 
@@ -927,12 +927,9 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		{
 			UuidGenerator uuidg = new UuidGenerator();
 			DefaultEntityMetaData tempEntityMetaData = new DefaultEntityMetaData(uuidg.generateId(), entityMetaData);
-			tempEntityMetaData
-					.setPackage(
-							new PackageImpl("elasticsearch_temporary_entity",
-									"This entity (Original: " + entityMetaData
-											.getName()
-									+ ") is temporary build to make rebuilding of Elasticsearch entities posible."));
+			tempEntityMetaData.setPackage(new PackageImpl("elasticsearch_temporary_entity", "This entity (Original: "
+					+ entityMetaData.getName()
+					+ ") is temporary build to make rebuilding of Elasticsearch entities posible."));
 
 			// Add temporary repository into Elasticsearch
 			Repository tempRepository = dataService.getMeta().addEntityMeta(tempEntityMetaData);
@@ -953,7 +950,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			this.rebuildIndexGeneric(tempEntities, entityMetaData);
 
 			// Remove temporary entity
-			dataService.delete(tempEntityMetaData.getName(), tempEntities);
+			dataService.delete(tempEntityMetaData.getName(), stream(tempEntities.spliterator(), false));
 
 			// Remove temporary repository from Elasticsearch
 			dataService.getMeta().deleteEntityMeta(tempEntityMetaData.getName());
@@ -1028,8 +1025,8 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 
 	private void updateReferences(Entity refEntity, EntityMetaData refEntityMetaData)
 	{
-		for (Pair<EntityMetaData, List<AttributeMetaData>> pair : EntityUtils
-				.getReferencingEntityMetaData(refEntityMetaData, dataService))
+		for (Pair<EntityMetaData, List<AttributeMetaData>> pair : EntityUtils.getReferencingEntityMetaData(
+				refEntityMetaData, dataService))
 		{
 			EntityMetaData entityMetaData = pair.getA();
 
@@ -1043,7 +1040,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 
 			Iterable<Entity> entities = new ElasticsearchEntityIterable(q, entityMetaData, client,
 					elasticsearchEntityFactory, generator, new String[]
-			{ indexName });
+					{ indexName });
 
 			// TODO discuss whether this is still required
 			// Don't use cached ref entities but make new ones
