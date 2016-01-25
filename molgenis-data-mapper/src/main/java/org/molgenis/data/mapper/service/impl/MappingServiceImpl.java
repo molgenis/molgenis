@@ -8,9 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes;
@@ -19,7 +17,6 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Fetch;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
@@ -50,6 +47,8 @@ import com.google.common.collect.Maps;
 public class MappingServiceImpl implements MappingService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MappingServiceImpl.class);
+
+	private static final int BATCH_SIZE = 1000;
 
 	private final DataService dataService;
 
@@ -244,68 +243,34 @@ public class MappingServiceImpl implements MappingService
 
 	private void applyMappingsToRepositories(MappingTarget mappingTarget, Repository targetRepo)
 	{
-		// collect (mapped) ids from all sources to keep track of deleted entities
-		List<Object> targetRepoIds = Lists.newArrayList();
-		List<String> mappedSourceIds = Lists.newArrayList();
-		targetRepo.forEach(entity -> targetRepoIds.add(entity.getIdValue().toString()));
-
 		for (EntityMapping sourceMapping : mappingTarget.getEntityMappings())
 		{
-			applyMappingToRepo(sourceMapping, targetRepo, mappedSourceIds);
-		}
-
-		// remove all entities from the target that weren't present in the source anymore
-		targetRepoIds.removeAll(mappedSourceIds);
-		if (!targetRepoIds.isEmpty())
-		{
-			targetRepo.deleteById(targetRepoIds.stream());
+			applyMappingToRepo(sourceMapping, targetRepo);
 		}
 	}
 
-	private void applyMappingToRepo(EntityMapping sourceMapping, Repository targetRepo, List<String> mappedSourceIds)
+	private void applyMappingToRepo(EntityMapping sourceMapping, Repository targetRepo)
 	{
 		EntityMetaData targetMetaData = targetRepo.getEntityMetaData();
 		Repository sourceRepo = dataService.getRepository(sourceMapping.getName());
 
-		List<MapEntity> mappedEntities = Lists.newArrayList();
-		Iterator<Entity> sourceEntities = sourceRepo.iterator();
+		// delete all target entities from this source
+		List<Entity> deleteEntities = targetRepo.findAll(new QueryImpl().eq("source", sourceRepo.getName()))
+				.filter(Objects::nonNull).collect(Collectors.toList());
+		targetRepo.delete(deleteEntities.stream());
 
-		String targetIdField = targetRepo.getEntityMetaData().getIdAttribute().getName();
+		Iterator<Entity> sourceEntities = sourceRepo.iterator();
+		List<MapEntity> mappedEntities = Lists.newArrayList();
 		while (sourceEntities.hasNext())
 		{
 			Entity sourceEntity = sourceEntities.next();
 			MapEntity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
 					sourceMapping.getSourceEntityMetaData(), targetRepo);
-			mappedSourceIds.add(mappedEntity.getIdValue().toString());
 			mappedEntities.add(mappedEntity);
 
-			// add/update in batches of 100
-			if (mappedEntities.size() == 100 || !sourceEntities.hasNext())
+			if (mappedEntities.size() == BATCH_SIZE || !sourceEntities.hasNext())
 			{
-				Stream<Entity> entityStream = targetRepo
-						.findAll(mappedEntities.stream().map(e -> e.getIdValue().toString()),
-								new Fetch().field(targetIdField))
-						.filter(Objects::nonNull);
-
-				Set<String> idsPresentInTarget = entityStream.map(e -> e.getIdValue().toString())
-						.collect(Collectors.toSet());
-
-				List<Entity> adds = Lists.newArrayList();
-				List<Entity> updates = Lists.newArrayList();
-				for (Entity entity : mappedEntities)
-				{
-					if (idsPresentInTarget.contains(entity.getIdValue().toString()))
-					{
-						updates.add(entity);
-					}
-					else
-					{
-						adds.add(entity);
-					}
-				}
-				targetRepo.add(adds.stream());
-				targetRepo.update(updates.stream());
-
+				targetRepo.add(mappedEntities.stream());
 				mappedEntities = Lists.newArrayList();
 			}
 		}

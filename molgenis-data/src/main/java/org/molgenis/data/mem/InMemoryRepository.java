@@ -15,6 +15,8 @@ import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.QueryImpl;
@@ -81,6 +83,24 @@ public class InMemoryRepository implements Repository
 		}
 		else
 		{
+			// partial implementation: one EQUALS rule
+			if (q.getRules().size() == 1)
+			{
+				QueryRule r = q.getRules().iterator().next();
+				if (r.getOperator() == Operator.EQUALS)
+				{
+					return entities.entrySet().stream().map((e) -> {
+						if (e.getValue().get(r.getField()).equals(r.getValue()))
+						{
+							return e.getValue();
+						}
+						else
+						{
+							return null;
+						}
+					});
+				}
+			}
 			throw new UnsupportedOperationException();
 		}
 	}
