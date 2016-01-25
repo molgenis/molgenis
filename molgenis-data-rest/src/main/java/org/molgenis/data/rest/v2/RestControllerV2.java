@@ -20,11 +20,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -90,15 +92,15 @@ class RestControllerV2
 
 	static UnknownAttributeException createUnknownAttributeException(String entityName, String attributeName)
 	{
-		return new UnknownAttributeException("Operation failed. Unknown attribute: '" + attributeName
-				+ "', of entity: '" + entityName + "'");
+		return new UnknownAttributeException(
+				"Operation failed. Unknown attribute: '" + attributeName + "', of entity: '" + entityName + "'");
 	}
 
 	static MolgenisDataAccessException createMolgenisDataAccessExceptionReadOnlyAttribute(String entityName,
 			String attributeName)
 	{
-		return new MolgenisDataAccessException("Operation failed. Attribute '" + attributeName + "' of entity '"
-				+ entityName + "' is readonly");
+		return new MolgenisDataAccessException(
+				"Operation failed. Attribute '" + attributeName + "' of entity '" + entityName + "' is readonly");
 	}
 
 	static MolgenisDataException createMolgenisDataExceptionUnknownIdentifier(int count)
@@ -134,8 +136,9 @@ class RestControllerV2
 	{
 		if (molgenisVersion == null) throw new IllegalArgumentException("molgenisVersion is null");
 		if (molgenisBuildDate == null) throw new IllegalArgumentException("molgenisBuildDate is null");
-		molgenisBuildDate = molgenisBuildDate.equals("${maven.build.timestamp}") ? new SimpleDateFormat(
-				"yyyy-MM-dd HH:mm").format(new java.util.Date()) + " by Eclipse" : molgenisBuildDate;
+		molgenisBuildDate = molgenisBuildDate.equals("${maven.build.timestamp}")
+				? new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new java.util.Date()) + " by Eclipse"
+				: molgenisBuildDate;
 
 		Map<String, String> result = new HashMap<>();
 		result.put("molgenisVersion", molgenisVersion);
@@ -275,19 +278,17 @@ class RestControllerV2
 			final List<String> ids = new ArrayList<String>();
 
 			// Add all entities
-			this.dataService.add(entityName, entities);
+			this.dataService.add(entityName, entities.stream());
 
-			for (Entity entity : entities)
-			{
+			entities.forEach(entity -> {
 				String id = entity.getIdValue().toString();
 				ids.add(id.toString());
-				responseBody.getResources().add(
-						new AutoValue_ResourcesResponseV2(Href.concatEntityHref(RestControllerV2.BASE_URI, entityName,
-								id)));
-			}
+				responseBody.getResources().add(new AutoValue_ResourcesResponseV2(
+						Href.concatEntityHref(RestControllerV2.BASE_URI, entityName, id)));
+			});
 
-			responseBody.setLocation(Href.concatEntityCollectionHref(RestControllerV2.BASE_URI, entityName, meta
-					.getIdAttribute().getName(), ids));
+			responseBody.setLocation(Href.concatEntityCollectionHref(RestControllerV2.BASE_URI, entityName,
+					meta.getIdAttribute().getName(), ids));
 
 			response.setStatus(HttpServletResponse.SC_CREATED);
 			return responseBody;
@@ -323,8 +324,7 @@ class RestControllerV2
 
 		try
 		{
-			final List<Entity> entities = request.getEntities().stream().map(e -> this.restService.toEntity(meta, e))
-					.collect(Collectors.toList());
+			final Stream<Entity> entities = request.getEntities().stream().map(e -> this.restService.toEntity(meta, e));
 
 			// update all entities
 			this.dataService.update(entityName, entities);
@@ -400,7 +400,7 @@ class RestControllerV2
 			}
 
 			// update all entities
-			this.dataService.update(entityName, updatedEntities);
+			this.dataService.update(entityName, updatedEntities.stream());
 			response.setStatus(HttpServletResponse.SC_OK);
 		}
 		catch (Exception e)
@@ -528,7 +528,14 @@ class RestControllerV2
 			Iterable<Entity> it;
 			if (count > 0)
 			{
-				it = dataService.findAll(entityName, q);
+				it = new Iterable<Entity>()
+				{
+					@Override
+					public Iterator<Entity> iterator()
+					{
+						return dataService.findAll(entityName, q).iterator();
+					}
+				};
 			}
 			else
 			{
@@ -593,8 +600,8 @@ class RestControllerV2
 
 	private void createEntityMetaResponse(EntityMetaData entityMetaData, Fetch fetch, Map<String, Object> responseData)
 	{
-		responseData.put("_meta", new EntityMetaDataResponseV2(entityMetaData, fetch, permissionService, dataService,
-				languageService));
+		responseData.put("_meta",
+				new EntityMetaDataResponseV2(entityMetaData, fetch, permissionService, dataService, languageService));
 	}
 
 	private void createEntityValuesResponse(Entity entity, Fetch fetch, Map<String, Object> responseData)
@@ -663,7 +670,8 @@ class RestControllerV2
 						break;
 					case DATE_TIME:
 						Date dateTimeValue = entity.getDate(attrName);
-						String dateTimeValueStr = dateTimeValue != null ? getDateTimeFormat().format(dateTimeValue) : null;
+						String dateTimeValueStr = dateTimeValue != null ? getDateTimeFormat().format(dateTimeValue)
+								: null;
 						responseData.put(attrName, dateTimeValueStr);
 						break;
 					case DECIMAL:

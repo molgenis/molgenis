@@ -7,8 +7,13 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Stream;
 
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.molgenis.auth.MolgenisGroupMember;
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
@@ -31,10 +36,10 @@ public class MolgenisUserDetailsServiceTest
 	public void setUp()
 	{
 		DataService dataService = mock(DataService.class);
-		MolgenisUser adminUser = when(mock(MolgenisUser.class).getSuperuser()).thenReturn(Boolean.TRUE).getMock();
+		MolgenisUser adminUser = when(mock(MolgenisUser.class).isSuperuser()).thenReturn(Boolean.TRUE).getMock();
 		when(adminUser.getUsername()).thenReturn("admin");
 		when(adminUser.getPassword()).thenReturn("password");
-		MolgenisUser userUser = when(mock(MolgenisUser.class).getSuperuser()).thenReturn(Boolean.FALSE).getMock();
+		MolgenisUser userUser = when(mock(MolgenisUser.class).isSuperuser()).thenReturn(Boolean.FALSE).getMock();
 		when(userUser.getUsername()).thenReturn("user");
 		when(userUser.getPassword()).thenReturn("password");
 		Query qAdmin = new QueryImpl().eq(MolgenisUser.USERNAME, "admin");
@@ -50,6 +55,44 @@ public class MolgenisUserDetailsServiceTest
 				return authorities;
 			}
 		};
+		when(dataService.findAll(UserAuthority.ENTITY_NAME, new QueryImpl().eq(UserAuthority.MOLGENISUSER, userUser),
+				UserAuthority.class)).thenAnswer(new Answer<Stream<UserAuthority>>()
+				{
+					@Override
+					public Stream<UserAuthority> answer(InvocationOnMock invocation) throws Throwable
+					{
+						return Stream.empty();
+					}
+				});
+		when(dataService.findAll(UserAuthority.ENTITY_NAME, new QueryImpl().eq(UserAuthority.MOLGENISUSER, adminUser),
+				UserAuthority.class)).thenAnswer(new Answer<Stream<UserAuthority>>()
+				{
+					@Override
+					public Stream<UserAuthority> answer(InvocationOnMock invocation) throws Throwable
+					{
+						return Stream.empty();
+					}
+				});
+		when(dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, userUser), MolgenisGroupMember.class))
+						.thenAnswer(new Answer<Stream<MolgenisGroupMember>>()
+						{
+							@Override
+							public Stream<MolgenisGroupMember> answer(InvocationOnMock invocation) throws Throwable
+							{
+								return Stream.empty();
+							}
+						});
+		when(dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, adminUser), MolgenisGroupMember.class))
+						.thenAnswer(new Answer<Stream<MolgenisGroupMember>>()
+						{
+							@Override
+							public Stream<MolgenisGroupMember> answer(InvocationOnMock invocation) throws Throwable
+							{
+								return Stream.empty();
+							}
+						});
 		userDetailsService = new MolgenisUserDetailsService(dataService, authoritiesMapper);
 	}
 
@@ -63,8 +106,8 @@ public class MolgenisUserDetailsServiceTest
 	public void loadUserByUsername_SuperUser()
 	{
 		UserDetails user = userDetailsService.loadUserByUsername("admin");
-		Set<String> authorities = Sets.newHashSet(Collections2.transform(user.getAuthorities(),
-				new Function<GrantedAuthority, String>()
+		Set<String> authorities = Sets
+				.newHashSet(Collections2.transform(user.getAuthorities(), new Function<GrantedAuthority, String>()
 				{
 					@Override
 					public String apply(GrantedAuthority authority)
@@ -80,8 +123,8 @@ public class MolgenisUserDetailsServiceTest
 	public void loadUserByUsername_NonSuperUser()
 	{
 		UserDetails user = userDetailsService.loadUserByUsername("user");
-		Set<String> authorities = Sets.newHashSet(Collections2.transform(user.getAuthorities(),
-				new Function<GrantedAuthority, String>()
+		Set<String> authorities = Sets
+				.newHashSet(Collections2.transform(user.getAuthorities(), new Function<GrantedAuthority, String>()
 				{
 					@Override
 					public String apply(GrantedAuthority authority)

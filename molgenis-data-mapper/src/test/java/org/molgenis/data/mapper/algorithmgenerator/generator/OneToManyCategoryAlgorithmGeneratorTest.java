@@ -1,10 +1,14 @@
 package org.molgenis.data.mapper.algorithmgenerator.generator;
 
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -56,8 +60,14 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 		MapEntity targetEntity4 = new MapEntity(ImmutableMap.of("code", 4, "label", "Never + fewer than once a week"));
 		MapEntity targetEntity5 = new MapEntity(ImmutableMap.of("code", 9, "label", "missing"));
 
-		Mockito.when(dataService.findAll(targetRefEntityMetaData.getName()))
-				.thenReturn(Arrays.asList(targetEntity1, targetEntity2, targetEntity3, targetEntity4, targetEntity5));
+		Mockito.when(dataService.findAll(targetRefEntityMetaData.getName())).thenAnswer(new Answer<Stream<Entity>>()
+		{
+			@Override
+			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
+			{
+				return Stream.of(targetEntity1, targetEntity2, targetEntity3, targetEntity4, targetEntity5);
+			}
+		});
 
 		targetEntityMetaData = new DefaultEntityMetaData("target");
 		targetEntityMetaData.addAttributeMetaData(targetAttributeMetaData);
@@ -77,8 +87,15 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 		MapEntity sourceEntity6 = new MapEntity(ImmutableMap.of("code", 6, "label", "4-5 days per week"));
 		MapEntity sourceEntity7 = new MapEntity(ImmutableMap.of("code", 7, "label", "6-7 days per week"));
 
-		Mockito.when(dataService.findAll(sourceRefEntityMetaData.getName())).thenReturn(Arrays.asList(sourceEntity1,
-				sourceEntity2, sourceEntity3, sourceEntity4, sourceEntity5, sourceEntity6, sourceEntity7));
+		Mockito.when(dataService.findAll(sourceRefEntityMetaData.getName())).thenAnswer(new Answer<Stream<Entity>>()
+		{
+			@Override
+			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
+			{
+				return Stream.of(sourceEntity1, sourceEntity2, sourceEntity3, sourceEntity4, sourceEntity5,
+						sourceEntity6, sourceEntity7);
+			}
+		});
 
 		DefaultEntityMetaData sourceRefEntityMetaData1 = createEntityMetaData("Mitchelstown_POTATO_REF");
 
@@ -97,9 +114,15 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 		MapEntity sourceEntity15 = new MapEntity(ImmutableMap.of("code", 8, "label", "4-5 per day"));
 		MapEntity sourceEntity16 = new MapEntity(ImmutableMap.of("code", 9, "label", "6+ per day"));
 
-		Mockito.when(dataService.findAll(sourceRefEntityMetaData1.getName()))
-				.thenReturn(Arrays.asList(sourceEntity8, sourceEntity9, sourceEntity10, sourceEntity11, sourceEntity12,
-						sourceEntity13, sourceEntity14, sourceEntity15, sourceEntity16));
+		Mockito.when(dataService.findAll(sourceRefEntityMetaData1.getName())).thenAnswer(new Answer<Stream<Entity>>()
+		{
+			@Override
+			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
+			{
+				return Stream.of(sourceEntity8, sourceEntity9, sourceEntity10, sourceEntity11, sourceEntity12,
+						sourceEntity13, sourceEntity14, sourceEntity15, sourceEntity16);
+			}
+		});
 
 		DefaultEntityMetaData sourceRefEntityMetaData2 = createEntityMetaData("Mitchelstown_Stroke_REF");
 
@@ -111,8 +134,14 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 		MapEntity sourceEntity18 = new MapEntity(ImmutableMap.of("code", 2, "label", "no"));
 		MapEntity sourceEntity19 = new MapEntity(ImmutableMap.of("code", 9, "label", "missing"));
 
-		Mockito.when(dataService.findAll(sourceRefEntityMetaData2.getName()))
-				.thenReturn(Arrays.asList(sourceEntity17, sourceEntity18, sourceEntity19));
+		Mockito.when(dataService.findAll(sourceRefEntityMetaData2.getName())).thenAnswer(new Answer<Stream<Entity>>()
+		{
+			@Override
+			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
+			{
+				return Stream.of(sourceEntity17, sourceEntity18, sourceEntity19);
+			}
+		});
 
 		sourceEntityMetaData = new DefaultEntityMetaData("source");
 		sourceEntityMetaData.addAllAttributeMetaData(

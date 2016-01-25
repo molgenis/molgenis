@@ -13,7 +13,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.auth.MolgenisUser;
@@ -53,11 +56,8 @@ import org.testng.annotations.Test;
 { Config.class })
 public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 {
-
 	private ImportWizardController controller;
 	private WebRequest webRequest;
-
-	private MolgenisGroup group1;
 
 	@Autowired
 	DataService dataService;
@@ -76,7 +76,8 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public PermissionManagerServiceImpl pluginPermissionManagerServiceImpl()
 		{
-			return new PermissionManagerServiceImpl(dataService(), molgenisPluginRegistry(), grantedAuthoritiesMapper());
+			return new PermissionManagerServiceImpl(dataService(), molgenisPluginRegistry(),
+					grantedAuthoritiesMapper());
 		}
 
 		@Bean
@@ -133,26 +134,26 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		group1.setName("TestGroup");
 
 		MapEntity entity1 = new MapEntity("Entity1");
-		entity1.set("groupauthority_role", SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX + "ENTITY1");
-		entity1.set("molgenisGroup", group1);
+		entity1.set(GroupAuthority.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY1");
+		entity1.set(GroupAuthority.MOLGENISGROUP, group1);
 		GroupAuthority authority1 = new GroupAuthority();
 		authority1.set(entity1);
 
 		MapEntity entity2 = new MapEntity("Entity2");
-		entity2.set("groupauthority_role", SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX + "ENTITY2");
-		entity2.set("molgenisGroup", group1);
+		entity2.set(GroupAuthority.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY2");
+		entity2.set(GroupAuthority.MOLGENISGROUP, group1);
 		GroupAuthority authority2 = new GroupAuthority();
 		authority2.set(entity2);
 
 		MapEntity entity3 = new MapEntity("Entity2");
-		entity3.set("groupauthority_role", SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX + "ENTITY3");
-		entity3.set("molgenisGroup", group1);
+		entity3.set(GroupAuthority.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY3");
+		entity3.set(GroupAuthority.MOLGENISGROUP, group1);
 		GroupAuthority authority3 = new GroupAuthority();
 		authority3.set(entity3);
 
 		MapEntity entity4 = new MapEntity("Entity2");
-		entity4.set("groupauthority_role", SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX + "ENTITY4");
-		entity4.set("molgenisGroup", group1);
+		entity4.set(GroupAuthority.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY4");
+		entity4.set(GroupAuthority.MOLGENISGROUP, group1);
 		GroupAuthority authority4 = new GroupAuthority();
 		authority4.set(entity4);
 
@@ -164,15 +165,25 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		webRequest = mock(WebRequest.class);
 		when(webRequest.getParameter("entityIds")).thenReturn("entity1,entity2");
 		when(dataService.findOne(MolgenisGroup.ENTITY_NAME, "ID", MolgenisGroup.class)).thenReturn(group1);
-		when(
-				dataService.findAll(GroupAuthority.ENTITY_NAME,
-						new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, group1), GroupAuthority.class)).thenReturn(
-				authorities);
-		when(
-				dataService.findAll(GroupAuthority.ENTITY_NAME, new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, "ID"),
-						GroupAuthority.class)).thenReturn(authorities);
-		List<String> names = Arrays.asList("entity1,entity2,entity3,entity4,entity5".split(","));
-		when(dataService.getEntityNames()).thenReturn(names);
+		when(dataService.findAll(GroupAuthority.ENTITY_NAME, new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, group1),
+				GroupAuthority.class)).thenAnswer(new Answer<Stream<GroupAuthority>>()
+				{
+					@Override
+					public Stream<GroupAuthority> answer(InvocationOnMock invocation) throws Throwable
+					{
+						return Stream.of(authority1, authority2, authority3, authority4);
+					}
+				});
+		when(dataService.findAll(GroupAuthority.ENTITY_NAME, new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, "ID"),
+				GroupAuthority.class)).thenAnswer(new Answer<Stream<GroupAuthority>>()
+				{
+					@Override
+					public Stream<GroupAuthority> answer(InvocationOnMock invocation) throws Throwable
+					{
+						return Stream.of(authority1, authority2, authority3, authority4);
+					}
+				});
+		when(dataService.getEntityNames()).thenReturn(Stream.of("entity1", "entity2", "entity3", "entity4", "entity5"));
 
 		authentication = mock(Authentication.class);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -183,13 +194,11 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		userDetails = mock(UserDetails.class);
 		when(userDetails.getUsername()).thenReturn("username");
 		when(userDetails.getPassword()).thenReturn("encoded-password");
-		when((Collection<GrantedAuthority>) userDetails.getAuthorities()).thenReturn(
-				Arrays.<GrantedAuthority> asList(grantedAuthority1, grantedAuthority2, grantedAuthority3,
-						grantedAuthority4));
+		when((Collection<GrantedAuthority>) userDetails.getAuthorities()).thenReturn(Arrays
+				.<GrantedAuthority> asList(grantedAuthority1, grantedAuthority2, grantedAuthority3, grantedAuthority4));
 		when(authentication.getPrincipal()).thenReturn(userDetails);
-		when((Collection<GrantedAuthority>) authentication.getAuthorities()).thenReturn(
-				Arrays.<GrantedAuthority> asList(grantedAuthority1, grantedAuthority2, grantedAuthority3,
-						grantedAuthority4));
+		when((Collection<GrantedAuthority>) authentication.getAuthorities()).thenReturn(Arrays
+				.<GrantedAuthority> asList(grantedAuthority1, grantedAuthority2, grantedAuthority3, grantedAuthority4));
 	}
 
 	@Test
@@ -199,7 +208,7 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		Map<String, List<Permission>> groupPermissions = permissions.getGroupPermissions();
 
 		Permission permission = new Permission();
-		permission.setType("write");
+		permission.setType("writemeta");
 		permission.setGroup("TestGroup");
 		assertEquals(groupPermissions.get("entity1"), Arrays.asList(permission));
 		assertEquals(groupPermissions.get("entity2"), Arrays.asList(permission));
@@ -213,15 +222,15 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 	public void addGroupEntityClassPermissionsTest()
 	{
 		MolgenisUser user = mock(MolgenisUser.class);
-		when(user.getSuperuser()).thenReturn(false);
+		when(user.isSuperuser()).thenReturn(false);
 		when(userAccountService.getCurrentUser()).thenReturn(user);
 
 		webRequest = mock(WebRequest.class);
 		when(webRequest.getParameter("entityIds")).thenReturn("entity3,entity4");
-		when(webRequest.getParameter("radio-entity3")).thenReturn(
-				org.molgenis.security.core.Permission.COUNT.toString());
-		when(webRequest.getParameter("radio-entity4")).thenReturn(
-				org.molgenis.security.core.Permission.WRITE.toString());
+		when(webRequest.getParameter("radio-entity3"))
+				.thenReturn(org.molgenis.security.core.Permission.COUNT.toString());
+		when(webRequest.getParameter("radio-entity4"))
+				.thenReturn(org.molgenis.security.core.Permission.WRITE.toString());
 
 		GroupAuthority authority = new GroupAuthority();
 		authority.setMolgenisGroup(dataService.findOne(MolgenisGroup.ENTITY_NAME, "ID", MolgenisGroup.class));
@@ -237,15 +246,15 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 	public void addGroupEntityClassPermissionsTestNoPermission()
 	{
 		MolgenisUser user = mock(MolgenisUser.class);
-		when(user.getSuperuser()).thenReturn(false);
+		when(user.isSuperuser()).thenReturn(false);
 		when(userAccountService.getCurrentUser()).thenReturn(user);
 
 		webRequest = mock(WebRequest.class);
 		when(webRequest.getParameter("entityIds")).thenReturn("entity3,entity5");
-		when(webRequest.getParameter("radio-entity3")).thenReturn(
-				org.molgenis.security.core.Permission.COUNT.toString());
-		when(webRequest.getParameter("radio-entity5")).thenReturn(
-				org.molgenis.security.core.Permission.WRITE.toString());
+		when(webRequest.getParameter("radio-entity3"))
+				.thenReturn(org.molgenis.security.core.Permission.COUNT.toString());
+		when(webRequest.getParameter("radio-entity5"))
+				.thenReturn(org.molgenis.security.core.Permission.WRITE.toString());
 		controller.addGroupEntityClassPermissions("ID", webRequest);
 
 	}
@@ -254,15 +263,15 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 	public void addGroupEntityClassPermissionsTestNoPermissionSU()
 	{
 		MolgenisUser user = mock(MolgenisUser.class);
-		when(user.getSuperuser()).thenReturn(true);
+		when(user.isSuperuser()).thenReturn(true);
 		when(userAccountService.getCurrentUser()).thenReturn(user);
 
 		webRequest = mock(WebRequest.class);
 		when(webRequest.getParameter("entityIds")).thenReturn("entity3,entity5");
-		when(webRequest.getParameter("radio-entity3")).thenReturn(
-				org.molgenis.security.core.Permission.COUNT.toString());
-		when(webRequest.getParameter("radio-entity5")).thenReturn(
-				org.molgenis.security.core.Permission.WRITE.toString());
+		when(webRequest.getParameter("radio-entity3"))
+				.thenReturn(org.molgenis.security.core.Permission.COUNT.toString());
+		when(webRequest.getParameter("radio-entity5"))
+				.thenReturn(org.molgenis.security.core.Permission.WRITE.toString());
 
 		GroupAuthority authority = new GroupAuthority();
 		authority.setMolgenisGroup(dataService.findOne(MolgenisGroup.ENTITY_NAME, "ID", MolgenisGroup.class));

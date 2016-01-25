@@ -3,6 +3,7 @@ package org.molgenis.charts.data;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -190,19 +191,24 @@ public class ChartDataServiceImpl implements ChartDataService
 	/**
 	 * init a box plot chart
 	 * 
-	 * with:
-	 *  1. box plot series as the boxes
-	 *  2. xy data series as the outliers
-	 *  3. categories names of the different box plots
-	 *  
-	 *  @param boxPlotChart (BoxPlotChart) the chart to be initialized 
-	 *  @param repo (Repository<? extends Entity>) the repository where the data exists 
-	 *  @param entityName (String) the name of the entity to be used
-	 *  @param attributeName (String) the name of the observable value in the entity
-	 *  @param queryRules (List<QueryRule>) the query rules to be used getting the data from the repo
-	 *  @param split (String) the name of observable value where the data needs to split on 
-	 *  @param scaleToCalcOutliers (double) the scale that need to be used calculating the outliers. 
-	 *  	value 1 means that there wil not be any outliers.
+	 * with: 1. box plot series as the boxes 2. xy data series as the outliers 3. categories names of the different box
+	 * plots
+	 * 
+	 * @param boxPlotChart
+	 *            (BoxPlotChart) the chart to be initialized
+	 * @param repo
+	 *            (Repository<? extends Entity>) the repository where the data exists
+	 * @param entityName
+	 *            (String) the name of the entity to be used
+	 * @param attributeName
+	 *            (String) the name of the observable value in the entity
+	 * @param queryRules
+	 *            (List<QueryRule>) the query rules to be used getting the data from the repo
+	 * @param split
+	 *            (String) the name of observable value where the data needs to split on
+	 * @param scaleToCalcOutliers
+	 *            (double) the scale that need to be used calculating the outliers. value 1 means that there wil not be
+	 *            any outliers.
 	 */
 	public BoxPlotChart getBoxPlotChart(String entityName, String attributeName, List<QueryRule> queryRules,
 			String split, double scaleToCalcOutliers)
@@ -342,7 +348,15 @@ public class ChartDataServiceImpl implements ChartDataService
 			q.sort(sort);
 		}
 
-		return repo.findAll(q);
+		return new Iterable<Entity>()
+		{
+
+			@Override
+			public Iterator<Entity> iterator()
+			{
+				return repo.findAll(q).iterator();
+			}
+		};
 	}
 
 	/**
@@ -395,7 +409,15 @@ public class ChartDataServiceImpl implements ChartDataService
 				q.addRule(queryRule);
 			}
 
-			iterable = ((Repository) iterable).findAll(q);
+			final Iterable<Entity> AllEntitiesIterable = iterable;
+			iterable = new Iterable<Entity>()
+			{
+				@Override
+				public Iterator<Entity> iterator()
+				{
+					return ((Repository) AllEntitiesIterable).findAll(q).iterator();
+				}
+			};
 		}
 
 		List<Target> rowTargets = new ArrayList<Target>();
@@ -409,7 +431,8 @@ public class ChartDataServiceImpl implements ChartDataService
 
 		for (Entity entity : iterable)
 		{
-			String rowTargetName = entity.getString(attributeNameYaxis) != null ? entity.getString(attributeNameYaxis) : "";
+			String rowTargetName = entity.getString(attributeNameYaxis) != null ? entity.getString(attributeNameYaxis)
+					: "";
 			rowTargets.add(new Target(rowTargetName));
 
 			List<Number> rowValues = new ArrayList<Number>();

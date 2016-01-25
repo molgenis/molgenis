@@ -8,10 +8,10 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -39,8 +39,8 @@ public class MolgenisResourceBundleControlTest
 	@Test
 	public void newBundleWithUnknownBundleName() throws IllegalAccessException, InstantiationException, IOException
 	{
-		assertNull(molgenisResourceBundleControl.newBundle("bogus", new Locale("en"), "java.class", getClass()
-				.getClassLoader(), true));
+		assertNull(molgenisResourceBundleControl.newBundle("bogus", new Locale("en"), "java.class",
+				getClass().getClassLoader(), true));
 	}
 
 	@Test
@@ -60,7 +60,7 @@ public class MolgenisResourceBundleControlTest
 		entity.set("nl", "testnl");
 
 		when(queryMock.count()).thenReturn(1L);
-		when(dataServiceMock.findAll(I18nStringMetaData.ENTITY_NAME)).thenReturn(Arrays.asList(entity));
+		when(dataServiceMock.findAll(I18nStringMetaData.ENTITY_NAME)).thenReturn(Stream.of(entity));
 
 		ResourceBundle bundle = molgenisResourceBundleControl.newBundle(I18nStringMetaData.ENTITY_NAME,
 				new Locale("nl"), "java.class", getClass().getClassLoader(), true);

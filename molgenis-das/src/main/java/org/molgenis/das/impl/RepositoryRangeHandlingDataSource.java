@@ -6,8 +6,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.servlet.ServletContext;
 
@@ -86,13 +88,15 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 		{
 			maxbins = 1000;
 		}
-		Iterable<Entity> entityIterable = queryDataSet(segmentId, dataSet, maxbins);
+		Stream<Entity> entityIterable = queryDataSet(segmentId, dataSet, maxbins);
 		List<DasFeature> features = new ArrayList<DasFeature>();
 
 		Integer score = 0;
 		Map<String, DasType> patients = new HashMap<String, DasType>();
-		for (Entity entity : entityIterable)
+		for (Iterator<Entity> it = entityIterable.iterator(); it.hasNext();)
 		{
+			Entity entity = it.next();
+
 			DasFeature feature;
 
 			Integer valueStart = null;
@@ -172,8 +176,9 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 					++score;
 				}
 
-				feature = createDasFeature(valueStart, valueStop, entity.getIdValue().toString(), entity.getLabelValue(), valueDescription,
-						valueLink, type, method, dataSet, valuePatient, notes);
+				feature = createDasFeature(valueStart, valueStop, entity.getIdValue().toString(),
+						entity.getLabelValue(), valueDescription, valueLink, type, method, dataSet, valuePatient,
+						notes);
 				features.add(feature);
 			}
 		}
@@ -190,8 +195,9 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 		return attribute;
 	}
 
-	protected Iterable<Entity> queryDataSet(String segmentId, String dataSet, int maxbins)
+	protected Stream<Entity> queryDataSet(String segmentId, String dataSet, int maxbins)
 	{
+
 		String chromosomeAttribute = config.getAttributeNameForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_CHROM,
 				dataService.getEntityMetaData(dataSet));
 		Query q = new QueryImpl().eq(chromosomeAttribute, segmentId);

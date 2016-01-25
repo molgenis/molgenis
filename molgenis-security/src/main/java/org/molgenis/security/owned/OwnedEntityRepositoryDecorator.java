@@ -21,9 +21,6 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.util.EntityUtils;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-
 /**
  * RepositoryDecorator that works on EntityMetaData that extends OwnedEntityMetaData.
  * 
@@ -93,20 +90,13 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
-	{
-		if (mustAddRowLevelSecurity()) addRowLevelSecurity(q);
-		return decoratedRepo.findAll(q);
-	}
-
-	@Override
-	public Stream<Entity> findAllAsStream(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
 		if (mustAddRowLevelSecurity())
 		{
 			addRowLevelSecurity(q);
 		}
-		return decoratedRepo.findAllAsStream(q);
+		return decoratedRepo.findAll(q);
 	}
 
 	@Override
@@ -143,26 +133,6 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		Iterable<Entity> entities = decoratedRepo.findAll(ids);
-		if (mustAddRowLevelSecurity())
-		{
-			entities = Iterables.filter(entities, new Predicate<Entity>()
-			{
-				@Override
-				public boolean apply(Entity e)
-				{
-					return currentUserIsOwner(e);
-				}
-
-			});
-		}
-
-		return entities;
-	}
-
-	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		Stream<Entity> entities = decoratedRepo.findAll(ids);
@@ -170,26 +140,6 @@ public class OwnedEntityRepositoryDecorator implements Repository
 		{
 			entities = entities.filter(this::currentUserIsOwner);
 		}
-		return entities;
-	}
-
-	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
-	{
-		Iterable<Entity> entities = decoratedRepo.findAll(ids, fetch);
-		if (mustAddRowLevelSecurity())
-		{
-			entities = Iterables.filter(entities, new Predicate<Entity>()
-			{
-				@Override
-				public boolean apply(Entity e)
-				{
-					return currentUserIsOwner(e);
-				}
-
-			});
-		}
-
 		return entities;
 	}
 
@@ -220,26 +170,6 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void update(Iterable<? extends Entity> entities)
-	{
-		if (mustAddRowLevelSecurity())
-		{
-			entities = Iterables.filter(entities, new Predicate<Entity>()
-			{
-				@Override
-				public boolean apply(Entity entity)
-				{
-					entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername());
-					return true;
-				}
-
-			});
-		}
-
-		decoratedRepo.update(entities);
-	}
-
-	@Override
 	public void update(Stream<? extends Entity> entities)
 	{
 		if (mustAddRowLevelSecurity())
@@ -259,25 +189,6 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	{
 		if (mustAddRowLevelSecurity() && !currentUserIsOwner(entity)) return;
 		decoratedRepo.delete(entity);
-	}
-
-	@Override
-	public void delete(Iterable<? extends Entity> entities)
-	{
-		if (mustAddRowLevelSecurity())
-		{
-			entities = Iterables.filter(entities, new Predicate<Entity>()
-			{
-				@Override
-				public boolean apply(Entity entity)
-				{
-					return currentUserIsOwner(entity);
-				}
-
-			});
-		}
-
-		decoratedRepo.delete(entities);
 	}
 
 	@Override
@@ -304,7 +215,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
 		if (mustAddRowLevelSecurity())
 		{
@@ -321,7 +232,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	{
 		if (mustAddRowLevelSecurity())
 		{
-			delete(decoratedRepo);
+			delete(decoratedRepo.stream());
 		}
 		else
 		{
@@ -338,26 +249,6 @@ public class OwnedEntityRepositoryDecorator implements Repository
 		}
 
 		decoratedRepo.add(entity);
-	}
-
-	@Override
-	public Integer add(Iterable<? extends Entity> entities)
-	{
-		if (mustAddRowLevelSecurity())
-		{
-			entities = Iterables.filter(entities, new Predicate<Entity>()
-			{
-				@Override
-				public boolean apply(Entity entity)
-				{
-					entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername());
-					return true;
-				}
-
-			});
-		}
-
-		return decoratedRepo.add(entities);
 	}
 
 	@Override

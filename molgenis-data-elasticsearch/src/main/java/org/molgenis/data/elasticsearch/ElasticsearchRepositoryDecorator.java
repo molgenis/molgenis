@@ -55,16 +55,6 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 
 	@Override
 	@Transactional
-	public Integer add(Iterable<? extends Entity> entities)
-	{
-		Integer count = decoratedRepo.add(entities);
-		super.add(entities);
-
-		return count;
-	}
-
-	@Override
-	@Transactional
 	public Integer add(Stream<? extends Entity> entities)
 	{
 		// TODO look into performance improvements
@@ -101,20 +91,12 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 
 	@Override
 	@Transactional
-	public void update(Iterable<? extends Entity> entities)
-	{
-		decoratedRepo.update(entities);
-		super.update(entities);
-	}
-
-	@Override
-	@Transactional
 	public void update(Stream<? extends Entity> entities)
 	{
 		// TODO look into performance improvements
 		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
-			decoratedRepo.update(batch);
-			super.update(batch);
+			decoratedRepo.update(batch.stream());
+			super.update(batch.stream());
 		});
 	}
 
@@ -124,14 +106,6 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	{
 		decoratedRepo.delete(entity);
 		super.delete(entity);
-	}
-
-	@Override
-	@Transactional
-	public void delete(Iterable<? extends Entity> entities)
-	{
-		decoratedRepo.delete(entities);
-		super.delete(entities);
 	}
 
 	@Override
@@ -155,10 +129,13 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 
 	@Override
 	@Transactional
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
-		decoratedRepo.deleteById(ids);
-		super.deleteById(ids);
+		// TODO look into performance improvements
+		Iterators.partition(ids.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
+			decoratedRepo.deleteById(batch);
+			super.deleteById(batch);
+		});
 	}
 
 	@Override
@@ -207,20 +184,6 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 
 	// retrieve entities by id via decorated repository
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		return decoratedRepo.findAll(ids);
-	}
-
-	// retrieve entities by id via decorated repository
-	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
-	{
-		return decoratedRepo.findAll(ids, fetch);
-	}
-
-	// retrieve entities by id via decorated repository
-	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		return decoratedRepo.findAll(ids);
@@ -234,15 +197,9 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
 		return super.findAll(q);
-	}
-
-	@Override
-	public Stream<Entity> findAllAsStream(Query q)
-	{
-		return super.findAllAsStream(q);
 	}
 
 	// retrieve all entities via decorated repository

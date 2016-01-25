@@ -3,6 +3,7 @@ package org.molgenis.data.importer;
 import java.util.Date;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.system.ImportRun;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -600,7 +600,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	}
 
 	@Override
-	public void deleteById(Iterable<String> ids, EntityMetaData entityMetaData)
+	public void deleteById(Stream<String> ids, EntityMetaData entityMetaData)
 	{
 		ids.forEach(id -> deleteById(id, entityMetaData));
 	}
@@ -622,7 +622,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 						"Cannot delete entity because there are other entities referencing it. Delete these first.");
 			}
 
-			deleteById(toElasticsearchIds(batchEntityIds), entityMetaData);
+			deleteById(toElasticsearchIds(batchEntityIds.stream()), entityMetaData);
 		});
 	}
 
@@ -857,7 +857,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	@Override
 	public Stream<Entity> searchAsStream(Query q, EntityMetaData entityMetaData)
 	{
-		return searchInternal(q, entityMetaData).asStream();
+		return searchInternal(q, entityMetaData).stream();
 	}
 
 	private ElasticsearchEntityIterable searchInternal(Query q, EntityMetaData entityMetaData)
@@ -938,10 +938,17 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			Repository tempRepository = dataService.getMeta().addEntityMeta(tempEntityMetaData);
 
 			// Add temporary repository entities into Elasticsearch
-			dataService.add(tempRepository.getName(), entities);
+			dataService.add(tempRepository.getName(), stream(entities.spliterator(), false));
 
 			// Find the temporary saved entities
-			Iterable<? extends Entity> tempEntities = dataService.findAll(tempEntityMetaData.getName());
+			Iterable<? extends Entity> tempEntities = new Iterable<Entity>()
+			{
+				@Override
+				public Iterator<Entity> iterator()
+				{
+					return dataService.findAll(tempEntityMetaData.getName()).iterator();
+				}
+			};
 
 			this.rebuildIndexGeneric(tempEntities, entityMetaData);
 

@@ -12,9 +12,6 @@ import org.molgenis.data.mapper.service.MappingService;
 
 import com.google.common.collect.Lists;
 
-/**
- * Created by charbonb on 14/01/15.
- */
 public class MappingProject
 {
 	private String identifier;

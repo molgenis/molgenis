@@ -1,6 +1,7 @@
 package org.molgenis.data;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Definition of a query
@@ -14,7 +15,7 @@ public interface Query extends Iterable<Entity>
 	 */
 	Long count();
 
-	Iterable<Entity> findAll();
+	Stream<Entity> findAll();
 
 	Entity findOne();
 

@@ -2,7 +2,6 @@ package org.molgenis.data.i18n;
 
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
-import static org.molgenis.util.EntityUtils.asStream;
 
 import java.util.List;
 import java.util.Locale;
@@ -36,7 +35,7 @@ public class LanguageService
 	@RunAsSystem
 	public List<String> getLanguageCodes()
 	{
-		return asStream(dataService.findAll(LanguageMetaData.ENTITY_NAME)).map(e -> e.getString(LanguageMetaData.CODE))
+		return dataService.findAll(LanguageMetaData.ENTITY_NAME).map(e -> e.getString(LanguageMetaData.CODE))
 				.collect(toList());
 	}
 

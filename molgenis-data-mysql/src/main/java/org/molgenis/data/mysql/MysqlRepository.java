@@ -1,6 +1,8 @@
 package org.molgenis.data.mysql;
 
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.RepositoryCapability.MANAGABLE;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
@@ -11,7 +13,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import javax.sql.DataSource;
 
@@ -724,9 +726,9 @@ public class MysqlRepository extends AbstractRepository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
-		return new BatchingQueryResult(BATCH_SIZE, q)
+		BatchingQueryResult batchingQueryResult = new BatchingQueryResult(BATCH_SIZE, q)
 		{
 			@Override
 			protected List<Entity> getBatch(Query batchQuery)
@@ -748,6 +750,7 @@ public class MysqlRepository extends AbstractRepository
 				return jdbcTemplate.query(sql, parameters.toArray(new Object[0]), entityMapper);
 			}
 		};
+		return StreamSupport.stream(batchingQueryResult.spliterator(), false);
 	}
 
 	protected String getWhereSql(Query q, List<Object> parameters, int mrefFilterIndex)
@@ -982,24 +985,7 @@ public class MysqlRepository extends AbstractRepository
 	@Override
 	public void delete(Entity entity)
 	{
-		this.delete(Arrays.asList(new Entity[]
-		{ entity }));
-
-	}
-
-	@Override
-	public void delete(Iterable<? extends Entity> entities)
-	{
-		// todo, split in subbatchs
-		final List<Object> deleteByIdBatch = new ArrayList<Object>();
-
-		this.resetXrefValuesBySelfReference(entities);
-
-		for (Entity e : entities)
-		{
-			deleteByIdBatch.add(e.getIdValue());
-		}
-		this.deleteById(deleteByIdBatch);
+		this.delete(Stream.of(entity));
 	}
 
 	@Override
@@ -1007,8 +993,7 @@ public class MysqlRepository extends AbstractRepository
 	{
 		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
 			resetXrefValuesBySelfReference(batch);
-			// TODO pass stream to deleteById, when deleteById(Stream) exists
-			deleteById(batch.stream().map(Entity::getIdValue).collect(Collectors.toList()));
+			deleteById(batch.stream().map(Entity::getIdValue));
 		});
 	}
 
@@ -1043,10 +1028,10 @@ public class MysqlRepository extends AbstractRepository
 				}
 			}
 		}
-		this.update(updateBatch);
+		this.update(updateBatch.iterator());
 	}
 
-	public String getDeleteSql()
+	String getDeleteSql()
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("DELETE FROM ").append('`').append(getTableName()).append('`').append(" WHERE ").append('`')
@@ -1057,18 +1042,13 @@ public class MysqlRepository extends AbstractRepository
 	@Override
 	public void deleteById(Object id)
 	{
-		this.deleteById(Arrays.asList(new Object[]
-		{ id }));
+		this.deleteById(Stream.of(id));
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
-		final List<Object> idList = new ArrayList<Object>();
-		for (Object id : ids)
-		{
-			idList.add(id);
-		}
+		final List<Object> idList = ids.collect(toList());
 
 		jdbcTemplate.batchUpdate(getDeleteSql(), new BatchPreparedStatementSetter()
 		{
@@ -1089,13 +1069,39 @@ public class MysqlRepository extends AbstractRepository
 	@Override
 	public void deleteAll()
 	{
-		delete(this);
-	}
+		Stream<AttributeMetaData> selfReferencingAttrs = StreamSupport
+				.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
+				.filter(attr -> attr.getDataType() instanceof XrefField);
 
-	@Override
-	public Integer add(Iterable<? extends Entity> entities)
-	{
-		return add(entities.iterator());
+		selfReferencingAttrs.forEach(selfReferencingXrefAttr -> {
+			if (!selfReferencingXrefAttr.isNillable())
+			{
+				// update value with id attribute name (instead of NULL) won't work due to
+				// http://bugs.mysql.com/bug.php?id=7412. For more information read the paragraph "Until InnoDB
+				// implements deferred constraint checking, some things will be impossible, such as deleting a
+				// record that refers to itself using a foreign key." in
+				// http://dev.mysql.com/doc/refman/5.1/en/innodb-foreign-key-constraints.html
+				throw new MolgenisDataException(
+						format("Self-referencing not-null attribute [%s] of entity [%s] cannot be deleted",
+								selfReferencingXrefAttr.getName(), getName()));
+			}
+
+			String updateSql = new StringBuilder().append("UPDATE `").append(getTableName()).append("` SET `")
+					.append(selfReferencingXrefAttr.getName()).append("` = ").append("NULL").toString();
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("Updating nillable self-referencing xref attribute: " + updateSql);
+			}
+			jdbcTemplate.update(updateSql);
+		});
+
+		String deleteSql = new StringBuilder().append("DELETE FROM ").append('`').append(getTableName()).append('`')
+				.toString();
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug(format("Deleting all [%s] entities: %s", getName(), deleteSql));
+		}
+		jdbcTemplate.update(deleteSql);
 	}
 
 	@Override
@@ -1158,7 +1164,7 @@ public class MysqlRepository extends AbstractRepository
 											&& (att.getDataType() instanceof StringField))
 									{
 										throw new MolgenisDataException(
-												"Missing auto id value. Please use the 'AutoIdCrudRepositoryDecorator' to add auto id capabilities.");
+												"Missing auto id value. Please use the 'AutoValueRepositoryDecorator' to add auto id capabilities.");
 									}
 									preparedStatement.setObject(fieldIndex++, null);
 								}
@@ -1210,21 +1216,13 @@ public class MysqlRepository extends AbstractRepository
 	public void add(Entity entity)
 	{
 		if (entity == null) throw new RuntimeException("MysqlRepository.add() failed: entity was null");
-		add(Arrays.asList(new Entity[]
-		{ entity }));
+		add(Stream.of(entity));
 	}
 
 	@Override
 	public void update(Entity entity)
 	{
-		update(Arrays.asList(new Entity[]
-		{ entity }));
-	}
-
-	@Override
-	public void update(Iterable<? extends Entity> entities)
-	{
-		update(entities.iterator());
+		update(Stream.of(entity));
 	}
 
 	@Override
