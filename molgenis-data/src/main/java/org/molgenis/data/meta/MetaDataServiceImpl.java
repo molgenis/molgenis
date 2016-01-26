@@ -15,8 +15,6 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.auth.MolgenisUserDecorator;
-import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -51,11 +49,11 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 /**
  * MetaData service. Administration of the {@link Package}, {@link EntityMetaData} and {@link AttributeMetaData} of the
@@ -222,14 +220,14 @@ public class MetaDataServiceImpl implements MetaDataService
 		// User permissions
 		if (dataService.hasRepository("UserAuthority"))
 		{
-			Iterable<Entity> userPermissions = dataService.query("UserAuthority").in("role", authorities).findAll();
+			Stream<Entity> userPermissions = dataService.query("UserAuthority").in("role", authorities).findAll();
 			dataService.delete("UserAuthority", userPermissions);
 		}
 
 		// Group permissions
 		if (dataService.hasRepository("GroupAuthority"))
 		{
-			Iterable<Entity> groupPermissions = dataService.query("GroupAuthority").in("role", authorities).findAll();
+			Stream<Entity> groupPermissions = dataService.query("GroupAuthority").in("role", authorities).findAll();
 			dataService.delete("GroupAuthority", groupPermissions);
 		}
 	}
@@ -318,12 +316,9 @@ public class MetaDataServiceImpl implements MetaDataService
 		Repository repo = backend.addEntityMeta(getEntityMetaData(emd.getName()));
 		Repository decoratedRepo = decoratorFactory.createDecoratedRepository(repo);
 
-		if(decoratedRepo.getName().equals(MolgenisUserMetaData.ENTITY_NAME)){
-			decoratedRepo = new MolgenisUserDecorator(decoratedRepo);
-		}
-
-		//is this the right place to do this?
-		if(decoratedRepo.getName().equals(FreemarkerTemplateMetaData.ENTITY_NAME)){
+		// is this the right place to do this?
+		if (decoratedRepo.getName().equals(FreemarkerTemplateMetaData.ENTITY_NAME))
+		{
 			freemarkerConfigurer.setPostTemplateLoaders(new RepositoryTemplateLoader(decoratedRepo));
 		}
 
