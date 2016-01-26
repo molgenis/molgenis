@@ -1,7 +1,6 @@
 package org.molgenis.app;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -19,8 +18,6 @@ import org.molgenis.data.mysql.MySqlEntityFactory;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.system.RepositoryTemplateLoader;
-import org.molgenis.data.system.core.FreemarkerTemplate;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.migrate.version.v1_11.Step20RebuildElasticsearchIndex;
 import org.molgenis.migrate.version.v1_11.Step21SetLoggingEventBackend;
@@ -42,7 +39,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -57,7 +53,7 @@ import freemarker.template.TemplateException;
 @EnableTransactionManagement
 @EnableWebMvc
 @EnableAsync
-@ComponentScan(basePackages = "org.molgenis", excludeFilters = @Filter(type = FilterType.ANNOTATION, value = CommandLineOnlyConfiguration.class))
+@ComponentScan(basePackages = "org.molgenis", excludeFilters = @Filter(type = FilterType.ANNOTATION, value = CommandLineOnlyConfiguration.class) )
 @Import(
 { WebAppSecurityConfig.class, DatabaseConfig.class, HttpClientConfig.class, EmbeddedElasticSearchConfig.class,
 		GsonConfig.class })
@@ -102,7 +98,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(step23RebuildElasticsearchIndex);
 		upgradeService.addUpgrade(new Step24UpdateApplicationSettings(dataSource, idGenerator));
 		upgradeService.addUpgrade(new Step25LanguagesPermissions(dataService));
-		upgradeService.addUpgrade(new Step26migrateJpaBackend(dataSource, MysqlRepositoryCollection.NAME));
+		upgradeService.addUpgrade(new Step26migrateJpaBackend(dataSource, MysqlRepositoryCollection.NAME, idGenerator));
 	}
 
 	@Override
@@ -127,8 +123,8 @@ public class WebAppConfig extends MolgenisWebAppConfig
 
 		// metadata repositories get created here.
 		localDataService.getMeta().setDefaultBackend(backend);
-		List<EntityMetaData> metas = DependencyResolver.resolve(Sets.newHashSet(localDataService.getMeta()
-				.getEntityMetaDatas()));
+		List<EntityMetaData> metas = DependencyResolver
+				.resolve(Sets.newHashSet(localDataService.getMeta().getEntityMetaDatas()));
 
 		for (EntityMetaData emd : metas)
 		{
@@ -153,8 +149,8 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Override
 	protected void addFreemarkerVariables(Map<String, Object> freemarkerVariables)
 	{
-		freemarkerVariables.put("dataExplorerLink", new DataExplorerHyperlinkDirective(molgenisPluginRegistry(),
-				dataService));
+		freemarkerVariables.put("dataExplorerLink",
+				new DataExplorerHyperlinkDirective(molgenisPluginRegistry(), dataService));
 	}
 
 	@Override
