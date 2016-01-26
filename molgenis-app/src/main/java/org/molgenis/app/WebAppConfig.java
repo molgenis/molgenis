@@ -18,6 +18,7 @@ import org.molgenis.data.mysql.MySqlEntityFactory;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
+import org.molgenis.data.system.RepositoryTemplateLoader;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.migrate.version.v1_11.Step20RebuildElasticsearchIndex;
 import org.molgenis.migrate.version.v1_11.Step21SetLoggingEventBackend;
@@ -53,7 +54,7 @@ import freemarker.template.TemplateException;
 @EnableTransactionManagement
 @EnableWebMvc
 @EnableAsync
-@ComponentScan(basePackages = "org.molgenis", excludeFilters = @Filter(type = FilterType.ANNOTATION, value = CommandLineOnlyConfiguration.class) )
+@ComponentScan(basePackages = "org.molgenis", excludeFilters = @Filter(type = FilterType.ANNOTATION, value = CommandLineOnlyConfiguration.class))
 @Import(
 { WebAppSecurityConfig.class, DatabaseConfig.class, HttpClientConfig.class, EmbeddedElasticSearchConfig.class,
 		GsonConfig.class })
@@ -123,8 +124,8 @@ public class WebAppConfig extends MolgenisWebAppConfig
 
 		// metadata repositories get created here.
 		localDataService.getMeta().setDefaultBackend(backend);
-		List<EntityMetaData> metas = DependencyResolver
-				.resolve(Sets.newHashSet(localDataService.getMeta().getEntityMetaDatas()));
+		List<EntityMetaData> metas = DependencyResolver.resolve(Sets.newHashSet(localDataService.getMeta()
+				.getEntityMetaDatas()));
 
 		for (EntityMetaData emd : metas)
 		{
@@ -149,14 +150,16 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Override
 	protected void addFreemarkerVariables(Map<String, Object> freemarkerVariables)
 	{
-		freemarkerVariables.put("dataExplorerLink",
-				new DataExplorerHyperlinkDirective(molgenisPluginRegistry(), dataService));
+		freemarkerVariables.put("dataExplorerLink", new DataExplorerHyperlinkDirective(molgenisPluginRegistry(),
+				dataService));
 	}
 
 	@Override
 	public FreeMarkerConfigurer freeMarkerConfigurer() throws IOException, TemplateException
 	{
 		FreeMarkerConfigurer result = super.freeMarkerConfigurer();
+		// Look up unknown templates in the FreemarkerTemplate repository
+		result.setPostTemplateLoaders(new RepositoryTemplateLoader(dataService));
 		return result;
 	}
 }
