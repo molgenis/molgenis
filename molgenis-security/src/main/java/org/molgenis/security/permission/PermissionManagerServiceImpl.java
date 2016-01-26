@@ -144,10 +144,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 		if (molgenisUser == null) throw new RuntimeException("unknown user id [" + userId + "]");
 		List<Authority> userPermissions = getUserPermissions(molgenisUser, authorityPrefix);
 
-		List<MolgenisGroupMember> groupMembers = dataService
-				.findAll(MolgenisGroupMember.ENTITY_NAME,
-						new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser), MolgenisGroupMember.class)
-				.collect(toList());
+		List<MolgenisGroupMember> groupMembers = dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser), MolgenisGroupMember.class).collect(
+				toList());
 
 		if (!groupMembers.isEmpty())
 		{
@@ -194,8 +193,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 		// delete old plugin authorities
 		Stream<Authority> oldEntityAuthorities = getGroupPermissions(molgenisGroup, authorityPrefix).stream();
-		if (oldEntityAuthorities != null)
-			dataService.delete(GroupAuthority.ENTITY_NAME, oldEntityAuthorities);
+		if (oldEntityAuthorities != null) dataService.delete(GroupAuthority.ENTITY_NAME, oldEntityAuthorities);
 
 		// insert new plugin authorities
 		if (!entityAuthorities.isEmpty()) dataService.add(GroupAuthority.ENTITY_NAME, entityAuthorities.stream());
@@ -228,8 +226,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 		// delete old plugin authorities
 		List<? extends Authority> oldEntityAuthorities = getUserPermissions(molgenisUser, authorityType);
-		if (oldEntityAuthorities != null && !oldEntityAuthorities.isEmpty())
-			dataService.delete(UserAuthority.ENTITY_NAME, oldEntityAuthorities);
+		if (oldEntityAuthorities != null && !oldEntityAuthorities.isEmpty()) dataService.delete(
+				UserAuthority.ENTITY_NAME, oldEntityAuthorities.stream());
 
 		// insert new plugin authorities
 		if (!entityAuthorities.isEmpty()) dataService.add(UserAuthority.ENTITY_NAME, entityAuthorities.stream());
