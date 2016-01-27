@@ -1,8 +1,8 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 
-<#assign css=['ui.fancytree.min.css']>
-<#assign js=['jquery.molgenis.tree.js', 'jquery.molgenis.attributemetadata.table.js', 'js/dist/molgenis-catalogue.js']>
+<#assign css=['ui.fancytree.min.css', 'catalogue.css']>
+<#assign js=['jquery.fancytree.min.js', 'jquery.molgenis.tree.js', 'jquery.molgenis.attributemetadata.table.js', 'catalogue.js']>
 
 <@header css js/>
 
