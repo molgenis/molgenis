@@ -11,6 +11,23 @@
 
     <build>
         <plugins>
+        	<plugin>
+        		<groupId>com.github.eirslett</groupId>
+				<artifactId>frontend-maven-plugin</artifactId>
+				<version>0.0.27</version>
+				<executions>
+					<execution>
+						<id>webpack development build</id>
+						<goals>
+							<goal>webpack</goal>
+                        </goals>
+	        			<configuration>
+							<outputdir>target/classes/js/dist</outputdir>
+							<arguments>-d</arguments>
+						</configuration>
+					</execution>
+				</executions>
+        	</plugin>
             <!-- minify css/js -->
             <plugin>
                 <groupId>com.samaxes.maven</groupId>
