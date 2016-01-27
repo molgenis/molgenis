@@ -107,5 +107,4 @@ import React from "react";
 		}
 	});
 
-const FormControlGroupFactory = React.createFactory(FormControlGroup);
-export default FormControlGroupFactory;
+export default React.createFactory(FormControlGroup);

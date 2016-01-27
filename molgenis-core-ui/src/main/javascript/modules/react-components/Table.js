@@ -1029,5 +1029,4 @@ import "./css/Table.css";
 	});
 	var EntityInspectBtnFactory = React.createFactory(EntityInspectBtn);
 
-const TableFactory = React.createFactory(Table);
-export default TableFactory;
+export default React.createFactory(Table);
