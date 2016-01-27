@@ -30,13 +30,11 @@ import org.molgenis.data.i18n.I18nStringMetaData;
 import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.i18n.LanguageRepositoryDecorator;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.system.FreemarkerTemplateMetaData;
 import org.molgenis.data.meta.system.ImportRunMetaData;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
-import org.molgenis.data.system.RepositoryTemplateLoader;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
@@ -49,7 +47,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -80,9 +77,6 @@ public class MetaDataServiceImpl implements MetaDataService
 	{
 		this.dataService = dataService;
 	}
-
-	@Autowired
-	private FreeMarkerConfigurer freemarkerConfigurer;
 
 	@Autowired
 	public void setLanguageService(LanguageService languageService)
@@ -315,12 +309,6 @@ public class MetaDataServiceImpl implements MetaDataService
 
 		Repository repo = backend.addEntityMeta(getEntityMetaData(emd.getName()));
 		Repository decoratedRepo = decoratorFactory.createDecoratedRepository(repo);
-
-		// is this the right place to do this?
-		if (decoratedRepo.getName().equals(FreemarkerTemplateMetaData.ENTITY_NAME))
-		{
-			freemarkerConfigurer.setPostTemplateLoaders(new RepositoryTemplateLoader(decoratedRepo));
-		}
 
 		dataService.addRepository(decoratedRepo);
 
