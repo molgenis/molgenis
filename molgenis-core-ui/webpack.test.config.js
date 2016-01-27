@@ -45,9 +45,9 @@ var configuration = {
             // select these two presets that make it compile jsx -> js and es6 -> js
             loader: 'babel',
             exclude: /node_modules/,
-            query: {
-                presets: [require.resolve('babel-preset-es2015'), require.resolve('babel-preset-react')]
-            }
+            query : {
+				presets : [ 'react', 'es2015' ]
+			}
         }, {
             test: /\.css$/,
             loader: 'null-loader'

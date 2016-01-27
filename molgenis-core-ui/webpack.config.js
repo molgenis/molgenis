@@ -37,7 +37,7 @@ var configuration = {
         new webpack.PrefetchPlugin('./src/main/javascript/modules/react-components/wrapper/JQRangeSlider.js'),
         new webpack.ProvidePlugin({$: "jquery", jQuery: "jquery"}),
         new webpack.optimize.OccurenceOrderPlugin(),
-        new webpack.NoErrorsPlugin(),
+       
         new webpack.optimize.CommonsChunkPlugin(['vendor-bundle'],
             'molgenis-[name].js')
     ],
@@ -53,7 +53,10 @@ var configuration = {
             // babel does a lot of little transforms in the right order, we
             // select these two presets that make it compile jsx -> js and es6 -> js
             loader: 'babel',
-            exclude: [/node_modules/, /src\/main\/javascript\/plugins/]
+            exclude: [/node_modules/, /src\/main\/javascript\/plugins/],
+            query : {
+				presets : [ 'react', 'es2015' ]
+			}
         }, {
             test: /\.css$/,
             loader: 'style-loader!css-loader'
