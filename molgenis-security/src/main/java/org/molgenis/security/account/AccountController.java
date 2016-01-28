@@ -154,8 +154,7 @@ public class AccountController
 			}
 			accountService.createUser(molgenisUser, activationUri);
 
-			String successMessage = appSettings.getSignUpModeration() ? REGISTRATION_SUCCESS_MESSAGE_ADMIN
-					: REGISTRATION_SUCCESS_MESSAGE_USER;
+			String successMessage = appSettings.getSignUpModeration() ? REGISTRATION_SUCCESS_MESSAGE_ADMIN : REGISTRATION_SUCCESS_MESSAGE_USER;
 			captchaService.removeCaptcha();
 			return Collections.singletonMap("message", successMessage);
 		}
@@ -262,6 +261,7 @@ public class AccountController
 		user.setCity(request.getCity());
 		user.setCountry(CountryCodes.get(request.getCountry()));
 		user.setChangePassword(false);
+		user.setSuperuser(false);
 		return user;
 	}
 }

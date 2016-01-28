@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 
-import org.molgenis.data.Repository;
+import org.molgenis.data.DataService;
+import org.molgenis.data.meta.system.FreemarkerTemplateMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.system.core.FreemarkerTemplate;
 import org.slf4j.Logger;
@@ -19,11 +20,11 @@ public class RepositoryTemplateLoader implements TemplateLoader
 {
 	private static final Logger LOG = LoggerFactory.getLogger(RepositoryTemplateLoader.class);
 
-	private final Repository repository;
+	private final DataService dataService;
 
-	public RepositoryTemplateLoader(Repository repository)
+	public RepositoryTemplateLoader(DataService dataService)
 	{
-		this.repository = repository;
+		this.dataService = dataService;
 	}
 
 	@Override
@@ -35,7 +36,9 @@ public class RepositoryTemplateLoader implements TemplateLoader
 	@Override
 	public Object findTemplateSource(String name) throws IOException
 	{
-		FreemarkerTemplate template = (FreemarkerTemplate) repository.findOne(new QueryImpl().eq("Name", name));
+		FreemarkerTemplate template = dataService.findOne(FreemarkerTemplateMetaData.ENTITY_NAME,
+				new QueryImpl().eq("Name", name), FreemarkerTemplate.class);
+
 		if (template == null)
 		{
 			return null;
