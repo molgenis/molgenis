@@ -44,6 +44,7 @@
       		<groupId>mysql</groupId>
       		<artifactId>mysql-connector-mxj</artifactId>
       		<version>5.0.12</version>
+      		<scope>provided</scope>
     	</dependency>
     </dependencies>
 </project>
