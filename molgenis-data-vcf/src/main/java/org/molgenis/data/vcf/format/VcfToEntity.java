@@ -24,6 +24,7 @@ import static org.molgenis.data.vcf.VcfRepository.SAMPLES;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes;
@@ -31,6 +32,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.MetaValidationUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -79,9 +81,14 @@ public class VcfToEntity
 			result.addAttributeMetaData(nameAttributeMetaData);
 			for (VcfMetaFormat meta : formatMetaData)
 			{
+				String name = meta.getId();
+				if(MetaValidationUtils.KEYWORDS.contains(name) || MetaValidationUtils.KEYWORDS.contains(name.toUpperCase())){
+					name = name + "_";
+				}
 				AttributeMetaData attributeMetaData = new DefaultAttributeMetaData(
-						meta.getId().replaceAll("[-.*$&%^()#!@?]", "_"), vcfFieldTypeToMolgenisFieldType(meta))
+						name.replaceAll("[-.*$&%^()#!@?]", "_"), vcfFieldTypeToMolgenisFieldType(meta))
 								.setAggregateable(true).setLabel(meta.getId());
+				
 				result.addAttributeMetaData(attributeMetaData);
 			}
 		}
