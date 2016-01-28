@@ -77,7 +77,7 @@
 					<div class="form-group">
 						<label class="col-md-4 control-label" for="firstname">First name</label>
 						<div class="col-md-5">
-                            <input type="text" class="form-control" name="firstname"<#if user.firstname??> value="${user.firstname?html}"</#if>>
+                            <input type="text" class="form-control" name="firstname"<#if user.firstName??> value="${user.firstName?html}"</#if>>
 						</div>
 					</div>
 					<div class="form-group">
@@ -89,7 +89,7 @@
 					<div class="form-group">
 						<label class="col-md-4 control-label" for="lastname">Last name</label>
 						<div class="col-md-5">
-                            <input type="text" class="form-control" name="lastname"<#if user.lastname??> value="${user.lastname?html}"</#if>>
+                            <input type="text" class="form-control" name="lastname"<#if user.lastName??> value="${user.lastName?html}"</#if>>
 						</div>
 					</div>
 				</div>
