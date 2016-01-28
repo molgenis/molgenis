@@ -819,15 +819,10 @@ public class MappingServiceController extends MolgenisPluginController
 			sourceAttributeLabelAttribute = dataService.getEntityMetaData(source).getLabelAttribute().getName();
 		}
 
-		model.addAttribute("sourceAttributeEntities", new Iterable<Entity>()
-		{
-			@Override
-			public Iterator<Entity> iterator()
-			{
-				return sourceAttributeEntities.iterator();
-			}
-		});
-		model.addAttribute("numberOfSourceAttributes", size(sourceAttributeEntities.iterator()));
+		List<Entity> sourceAttributeEntityList = sourceAttributeEntities.collect(toList());
+
+		model.addAttribute("sourceAttributeEntities", sourceAttributeEntityList);
+		model.addAttribute("numberOfSourceAttributes", sourceAttributeEntityList.size());
 		model.addAttribute("sourceAttributeIdAttribute", sourceAttributeIdAttribute);
 		model.addAttribute("sourceAttributeLabelAttribute", sourceAttributeLabelAttribute);
 
