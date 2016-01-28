@@ -6,11 +6,11 @@
             	<label class="control-label" for="name">Entity name *</label>
             	<input type="text" class="form-control" name="name" required placeholder="Enter entity name"
 					   value="${wizard.file.name
-					   ?keep_before_last(".")
-					   ?js_string[0..*29]
-					   ?replace("\\.|\\*|\\$|\\&|\\%|\\^|\\(|\\)|\\#|\\!|\\@|\\?",'_','r')
-					   ?replace("^[0-9]",'_','r')
-					   }">
+					   ?replace("\\.vcf|\\.vcf\\.gz",'','r') <#-- remove extention -->
+					   ?js_string[0..*21] <#-- maximum length is 30 chars, but we need to take into account that the samples are postfixed "_SAMPLES" -->
+					   ?replace("\\-|\\.|\\*|\\$|\\&|\\%|\\^|\\(|\\)|\\#|\\!|\\@|\\?",'_','r')<#-- remove illegal chars -->
+					   ?replace("^[0-9]",'_','r') <#-- we don't allow entitynames starting with a number -->
+					   }" maxlength="22">
         	</div>
         </div>
     </div>
