@@ -82,13 +82,15 @@ public class VcfToEntity
 			for (VcfMetaFormat meta : formatMetaData)
 			{
 				String name = meta.getId();
-				if(MetaValidationUtils.KEYWORDS.contains(name) || MetaValidationUtils.KEYWORDS.contains(name.toUpperCase())){
+				if (MetaValidationUtils.KEYWORDS.contains(name)
+						|| MetaValidationUtils.KEYWORDS.contains(name.toUpperCase()))
+				{
 					name = name + "_";
 				}
 				AttributeMetaData attributeMetaData = new DefaultAttributeMetaData(
 						name.replaceAll("[-.*$&%^()#!@?]", "_"), vcfFieldTypeToMolgenisFieldType(meta))
 								.setAggregateable(true).setLabel(meta.getId());
-				
+
 				result.addAttributeMetaData(attributeMetaData);
 			}
 		}
@@ -124,7 +126,13 @@ public class VcfToEntity
 					postFix = "_" + entityName;
 				}
 			}
-			DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(info.getId() + postFix,
+			String name = info.getId();
+			if (MetaValidationUtils.KEYWORDS.contains(name)
+					|| MetaValidationUtils.KEYWORDS.contains(name.toUpperCase()))
+			{
+				name = name + "_";
+			}
+			DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(name + postFix,
 					vcfReaderFormatToMolgenisType(info)).setAggregateable(true);
 
 			attributeMetaData.setDescription(StringUtils.isBlank(info.getDescription())
