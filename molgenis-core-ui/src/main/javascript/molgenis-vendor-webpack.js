@@ -17,6 +17,7 @@ import "brace/mode/plain_text";
 import "brace/mode/properties";
 import "brace/mode/text";
 import "brace/mode/xml";
+import "brace/ext/language_tools";
 import "brace/theme/eclipse";
 import "moment";
 import "eonasdan-bootstrap-datetimepicker";
