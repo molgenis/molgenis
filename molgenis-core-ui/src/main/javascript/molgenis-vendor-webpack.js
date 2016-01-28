@@ -5,6 +5,19 @@ import "jquery-ui";
 import "react-components/css/wrapper/jquery-ui-1.9.2.custom.min.css";
 import "jquery.cookie";
 import "brace";
+import "brace/mode/ftl";
+import "brace/mode/html";
+import "brace/mode/javascript";
+import "brace/mode/json";
+import "brace/mode/markdown";
+import "brace/mode/mysql";
+import "brace/mode/python";
+import "brace/mode/r";
+import "brace/mode/plain_text";
+import "brace/mode/properties";
+import "brace/mode/text";
+import "brace/mode/xml";
+import "brace/theme/eclipse";
 import "moment";
 import "eonasdan-bootstrap-datetimepicker";
 import "eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css";
@@ -16,9 +29,3 @@ import "urijs";
 import "react";
 import "react/addons"
 import "promise";
-
-let mode = 'r';
-let theme = 'eclipse';
-
-require("brace/mode/"+mode);
-require("brace/theme/"+theme);

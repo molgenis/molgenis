@@ -4,8 +4,6 @@ import ace from "brace";
 
 	var div = React.DOM.div, textarea = React.DOM.textarea;
 	
-	ace.config.set("basePath", "/js/ace/src-min-noconflict");
-	
 	/**
 	 * React component for code editor Ace (http://ace.c9.io/)
 	 * 
@@ -42,11 +40,9 @@ import ace from "brace";
 		componentDidMount: function() {
 			var container = this.refs.editor.getDOMNode();
 			var editor = ace.edit(container);
-			require('brace/theme/'+this.props.theme);
 			editor.setTheme('ace/theme/' + this.props.theme);
 			
 			var session = editor.getSession();
-			require('brace/mode/'+this.props.mode);
 			session.setMode('ace/mode/' + this.props.mode);
 			session.setValue(this.state.value);
 			
