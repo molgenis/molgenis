@@ -79,8 +79,9 @@ public class VcfToEntity
 			result.addAttributeMetaData(nameAttributeMetaData);
 			for (VcfMetaFormat meta : formatMetaData)
 			{
-				AttributeMetaData attributeMetaData = new DefaultAttributeMetaData(meta.getId(),
-						vcfFieldTypeToMolgenisFieldType(meta)).setAggregateable(true);
+				AttributeMetaData attributeMetaData = new DefaultAttributeMetaData(
+						meta.getId().replaceAll("[-.*$&%^()#!@?]", "_"), vcfFieldTypeToMolgenisFieldType(meta))
+								.setAggregateable(true).setLabel(meta.getId());
 				result.addAttributeMetaData(attributeMetaData);
 			}
 		}
