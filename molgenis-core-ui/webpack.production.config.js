@@ -80,7 +80,8 @@ var configuration = {
         	test: /\.gif$/,
         	loader: "url?limit=10000&mimetype=image/gif"
         }]
-    }
+    },
+    devtool: "source-map"
 }
 
 module.exports = configuration;
