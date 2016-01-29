@@ -53,9 +53,6 @@ public class Step26migrateJpaBackend extends MolgenisUpgrade
 		jdbcTemplate.update("INSERT INTO entities_attributes (`order`, `fullName`, `attributes`) VALUES (?, ?, ?)", 22,
 				"MolgenisUser", languageCode);
 
-		jdbcTemplate.update("INSERT INTO entities_attributes (`order`, `fullName`, `attributes`) VALUES (?, ?, ?)", 22,
-				"MolgenisUser", languageCode);
-
 		jdbcTemplate.update(
 				"UPDATE `attributes` set `description`='This is the hashed password, enter a new plaintext password to update.' WHERE `name`='password_'");
 
