@@ -4,7 +4,7 @@
   "description": "Dependencies for the MOLGENIS UI",
   "scripts": {
     "build": "webpack",
-    "test": "webpack -d --config webpack.test.config.js; node ./target/test-classes/js/dist/test.bundle.js > target/tests.tap; cat target/tests.tap; jest",
+    "test": "webpack -d --config webpack.test.config.js && node ./target/test-classes/js/dist/test.bundle.js > target/tests.tap && cat target/tests.tap && jest",
     "webpack-stats": "webpack --profile --json > target/json.stats"
   },
   "repository": {
@@ -75,6 +75,9 @@
       "<rootDir>/node_modules/react-dom",
       "<rootDir>/node_modules/react-addons-test-utils",
       "<rootDir>/node_modules/fbjs"
+    ],
+    "testPathDirs": [
+      "<rootDir>/src/test/javascript"
     ]
   },
   "babel": {

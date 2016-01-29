@@ -86,3 +86,8 @@ Stats file can be uploaded to http://webpack.github.io/analyse/
 ### Ace
 Including all Ace editor modes takes 4Mb which is overly much.
 If you miss an editor mode, add it to molgenis-vendor-webpack.js
+
+### Gulp, versioning
+We do our versioning in maven, see pom.xml.
+However, npm also wants to know the version number of the modules you define.
+So the gulpfile.js updates the package.json if the version numbers have run out of sync.
