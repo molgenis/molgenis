@@ -25,12 +25,14 @@ var configuration = {
         publicPath: '/js/dist/'
     },    
     plugins: [
-        new webpack.PrefetchPlugin('react/lib/React'),
         new webpack.PrefetchPlugin('react/lib/ReactWithAddons'),
         new webpack.PrefetchPlugin('react/lib/DOMChildrenOperations.js'),
         new webpack.PrefetchPlugin('react/lib/ReactDOMComponent'),
         new webpack.PrefetchPlugin('react/lib/ReactReconcileTransaction'),
+        new webpack.PrefetchPlugin('react/lib/React'),
         new webpack.PrefetchPlugin('react-components'),
+        new webpack.PrefetchPlugin('moment'),
+        new webpack.PrefetchPlugin('promise'),
         new webpack.PrefetchPlugin('./src/main/javascript/modules/react-components/wrapper/JQRangeSlider.js'),
         new webpack.ProvidePlugin({$: "jquery", jQuery: "jquery"}),
         new webpack.optimize.OccurenceOrderPlugin(),

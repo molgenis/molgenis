@@ -81,3 +81,8 @@ Stats file can be created using
     npm run-script webpack-stats
 
 Stats file can be uploaded to http://webpack.github.io/analyse/
+
+
+### Ace
+Including all Ace editor modes takes 4Mb which is overly much.
+If you miss an editor mode, add it to molgenis-vendor-webpack.js

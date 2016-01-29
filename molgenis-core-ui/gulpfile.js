@@ -22,8 +22,10 @@ gulp.task('update-version', function (done) {
 });
 
 function writeVersionToPackageJson(file, version) {
-    console.log('Writing pomVersion ' + version + ' to ' + file);
     var pkg = JSON.parse(fs.readFileSync(file).toString());
-    pkg.version = version;
-    fs.writeFile(file, JSON.stringify(pkg, null, 2));
+    if(pkg.version != version){
+        console.log('Writing pomVersion ' + version + ' to ' + file);
+        pkg.version = version;
+        fs.writeFile(file, JSON.stringify(pkg, null, 2));
+    }
 }
