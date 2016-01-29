@@ -1,2 +1,3 @@
 #!/bin/sh
-./node_modules/.bin/webpack -d --watch
+cd $(dirname $0)
+"./node/node" "./node_modules/.bin/webpack" -d --watch
