@@ -29,17 +29,24 @@
     </scm>
     <developers />
 
-    <profiles>
-        <!-- release profile (default) -->
-        <profile>
-            <id>release</id>
-            <properties>
-                <skip.delivery>true</skip.delivery>
-            </properties>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-        </profile>
+	<profiles>
+		<!-- Profiles for setting development and production properties -->
+		<profile>
+			<id>development</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<webpack.development>true</webpack.development>
+			</properties>
+		</profile>
+		<profile>
+			<id>production</id>
+			<properties>
+				<webpack.production>true</webpack.production>
+			</properties>
+		</profile>
+		
         <!-- create runnable jar -->
         <profile>
             <id>create-delivery</id>
