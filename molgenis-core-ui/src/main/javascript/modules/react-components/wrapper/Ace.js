@@ -4,8 +4,6 @@ import ace from "brace";
 
 	var div = React.DOM.div, textarea = React.DOM.textarea;
 	
-	ace.config.set("basePath", "/js/ace/src-min-noconflict");
-	
 	/**
 	 * React component for code editor Ace (http://ace.c9.io/)
 	 * 
@@ -22,7 +20,9 @@ import ace from "brace";
 			maxLength: React.PropTypes.number,
 			height: React.PropTypes.number,
 			theme: React.PropTypes.string,
-			mode: React.PropTypes.string,
+            mode: React.PropTypes.oneOf(['ftl', 'html', 'javascript', 'json',
+                'markdown', 'markdown', 'mysql', 'python', 'r', 'plain_text',
+                'properties', 'text', 'xml']),
 			value: React.PropTypes.string,
 			onChange: React.PropTypes.func.isRequired,
 		},
@@ -34,7 +34,7 @@ import ace from "brace";
 			};
 		},
 		getInitialState: function() {
-			return {value: this.props.value || ''};
+			return {value: this.props.value};
 		},
 		componentWillReceiveProps : function(nextProps) {
 			this.setState({value: nextProps.value});
@@ -42,11 +42,9 @@ import ace from "brace";
 		componentDidMount: function() {
 			var container = this.refs.editor.getDOMNode();
 			var editor = ace.edit(container);
-			require('brace/theme/'+this.props.theme);
 			editor.setTheme('ace/theme/' + this.props.theme);
 			
 			var session = editor.getSession();
-			require('brace/mode/'+this.props.mode);
 			session.setMode('ace/mode/' + this.props.mode);
 			session.setValue(this.state.value);
 			
