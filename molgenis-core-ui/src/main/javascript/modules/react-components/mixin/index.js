@@ -1,4 +1,7 @@
 /**
+ * This module exposes all the mixin classes.
+ * Mainly used for legacy javascript.
+ * 
  * @module mixin
  */
 

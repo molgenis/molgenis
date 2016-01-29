@@ -1,4 +1,7 @@
 /**
+ * This module exposes all the react components.
+ * Mainly used for legacy javascript.
+ * 
  * @module
  */
 import mixin from './mixin';

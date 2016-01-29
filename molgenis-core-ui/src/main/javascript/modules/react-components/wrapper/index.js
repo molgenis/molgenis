@@ -1,4 +1,7 @@
 /**
+ * This module exposes all the wrapper classes.
+ * Mainly used for legacy javascript.
+ * 
  * @module wrapper
  */
 

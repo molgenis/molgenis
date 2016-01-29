@@ -1,7 +1,6 @@
 package org.molgenis.app;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +19,6 @@ import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.system.RepositoryTemplateLoader;
-import org.molgenis.data.system.core.FreemarkerTemplate;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.migrate.version.v1_11.Step20RebuildElasticsearchIndex;
 import org.molgenis.migrate.version.v1_11.Step21SetLoggingEventBackend;
@@ -42,7 +40,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -102,7 +99,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(step23RebuildElasticsearchIndex);
 		upgradeService.addUpgrade(new Step24UpdateApplicationSettings(dataSource, idGenerator));
 		upgradeService.addUpgrade(new Step25LanguagesPermissions(dataService));
-		upgradeService.addUpgrade(new Step26migrateJpaBackend(dataSource, MysqlRepositoryCollection.NAME));
+		upgradeService.addUpgrade(new Step26migrateJpaBackend(dataSource, MysqlRepositoryCollection.NAME, idGenerator));
 	}
 
 	@Override
@@ -161,6 +158,8 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	public FreeMarkerConfigurer freeMarkerConfigurer() throws IOException, TemplateException
 	{
 		FreeMarkerConfigurer result = super.freeMarkerConfigurer();
+		// Look up unknown templates in the FreemarkerTemplate repository
+		result.setPostTemplateLoaders(new RepositoryTemplateLoader(dataService));
 		return result;
 	}
 }

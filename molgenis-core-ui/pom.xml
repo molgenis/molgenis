@@ -1,4 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+ <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.molgenis</groupId>
@@ -18,7 +18,6 @@
 				<executions>
 					<execution>
 						<id>install node and npm</id>
-						<phase>validate</phase>
 						<goals>
 							<goal>install-node-and-npm</goal>
 						</goals>
@@ -29,20 +28,18 @@
 					</execution>
 					<execution>
 						<id>npm install</id>
-						<phase>validate</phase>
 						<goals>
 							<goal>npm</goal>
 						</goals>
 					</execution>
 					<execution>
 						<id>update package.json version</id>
-						<phase>validate</phase>
 						<goals>
 							<goal>gulp</goal>
 						</goals>
 						<configuration>
 							<arguments>update-version</arguments>
-						</configuration>
+						</configuration> 
 					</execution>
 					<execution>
 						<id>npm test</id>
@@ -55,15 +52,15 @@
 						</configuration>
 					</execution>
         			<execution>
-						<id>webpack development build</id>
+						<id>webpack build</id>
 						<goals>
-							<goal>webpack</goal>
+							<goal>npm</goal>
                         </goals>
-	        			<configuration>
-	        				<skip>${webpack.production}</skip>
-							<outputdir>target/classes/js/dist</outputdir>
-							<arguments>-d</arguments>
-						</configuration>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                        	<skip>${webpack.production}</skip>
+							<arguments>run-script build</arguments>                        
+                        </configuration>
 					</execution>
 					<execution>
 						<id>webpack production build</id>
