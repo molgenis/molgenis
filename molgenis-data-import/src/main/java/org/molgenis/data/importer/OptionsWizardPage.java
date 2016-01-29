@@ -73,6 +73,11 @@ public class OptionsWizardPage extends AbstractWizardPage
 			try
 			{
 				MetaValidationUtils.validateName(userGivenName);
+				if (dataService.hasRepository(userGivenName))
+				{
+					result.addError(new ObjectError("wizard", "An entity with this name already exists."));
+					return null;
+				}
 			}
 			catch (MolgenisDataException e)
 			{
