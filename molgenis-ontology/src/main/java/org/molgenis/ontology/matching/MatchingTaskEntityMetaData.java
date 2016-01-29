@@ -1,5 +1,7 @@
 package org.molgenis.ontology.matching;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -17,7 +19,7 @@ public class MatchingTaskEntityMetaData extends DefaultEntityMetaData
 	private MatchingTaskEntityMetaData()
 	{
 		super(ENTITY_NAME);
-		addAttributeMetaData(new DefaultAttributeMetaData(IDENTIFIER).setIdAttribute(true).setNillable(false));
+		addAttributeMetaData(new DefaultAttributeMetaData(IDENTIFIER), ROLE_ID);
 		addAttributeMetaData(new DefaultAttributeMetaData(DATA_CREATED, FieldTypeEnum.DATE_TIME).setNillable(false));
 		addAttributeMetaData(new DefaultAttributeMetaData(MOLGENIS_USER).setNillable(false));
 		addAttributeMetaData(new DefaultAttributeMetaData(CODE_SYSTEM).setNillable(false));

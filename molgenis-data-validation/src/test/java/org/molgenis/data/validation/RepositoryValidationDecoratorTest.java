@@ -9,6 +9,8 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.XREF;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -2589,8 +2591,7 @@ public class RepositoryValidationDecoratorTest
 	public void checkNillable()
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("test");
-		emd.addAttribute("id").setIdAttribute(true).setDataType(MolgenisFieldTypes.INT).setNillable(false)
-				.setAuto(true);
+		emd.addAttribute("id", ROLE_ID).setDataType(MolgenisFieldTypes.INT).setNillable(false).setAuto(true);
 		emd.addAttribute("notnull").setNillable(false);
 		when(decoratedRepository.getEntityMetaData()).thenReturn(emd);
 
@@ -2607,8 +2608,7 @@ public class RepositoryValidationDecoratorTest
 
 		// With defaultvalue
 		emd = new DefaultEntityMetaData("test");
-		emd.addAttribute("id").setIdAttribute(true).setDataType(MolgenisFieldTypes.INT).setNillable(false)
-				.setAuto(true);
+		emd.addAttribute("id", ROLE_ID).setDataType(MolgenisFieldTypes.INT).setNillable(false).setAuto(true);
 		emd.addAttribute("notnull").setNillable(false).setDefaultValue("");
 		when(decoratedRepository.getEntityMetaData()).thenReturn(emd);
 		violations = repositoryValidationDecoratorWithRealDeps.checkNillable(Arrays.asList(e2));
@@ -2619,9 +2619,9 @@ public class RepositoryValidationDecoratorTest
 	@Test
 	public void checkNillableMref()
 	{
-		DefaultEntityMetaData refEmd = new DefaultEntityMetaData("refEntity");
 		String refIdAttrName = "refId";
-		refEmd.addAttribute(refIdAttrName).setIdAttribute(true);
+		DefaultEntityMetaData refEmd = new DefaultEntityMetaData("refEntity");
+		refEmd.addAttribute(refIdAttrName, ROLE_ID);
 
 		Entity refEntity0 = new MapEntity(refEmd);
 		refEntity0.set(refIdAttrName, "0");
@@ -2655,9 +2655,9 @@ public class RepositoryValidationDecoratorTest
 		e1.set("readonly", "readonly");
 
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("test");
-		emd.addAttribute("id").setIdAttribute(true).setDataType(MolgenisFieldTypes.INT).setReadOnly(true);
+		emd.addAttribute("id", ROLE_ID).setDataType(MolgenisFieldTypes.INT);
+		emd.addAttribute("name", ROLE_LABEL);
 		emd.addAttribute("readonly").setReadOnly(true);
-		emd.setLabelAttribute("name");
 		when(decoratedRepository.getEntityMetaData()).thenReturn(emd);
 
 		when(repositoryValidationDecoratorWithRealDeps.findOne(Integer.valueOf(1))).thenReturn(e1);
@@ -2693,9 +2693,9 @@ public class RepositoryValidationDecoratorTest
 		e1.set("readonly-xref", refEntity);
 
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("test");
-		emd.addAttribute("id").setIdAttribute(true).setDataType(MolgenisFieldTypes.INT).setReadOnly(true);
+		emd.addAttribute("id").setDataType(MolgenisFieldTypes.INT);
+		emd.addAttribute("name", ROLE_LABEL);
 		emd.addAttribute("readonly-xref").setDataType(MolgenisFieldTypes.XREF).setReadOnly(true);
-		emd.setLabelAttribute("name");
 		when(decoratedRepository.getEntityMetaData()).thenReturn(emd);
 
 		when(repositoryValidationDecoratorWithRealDeps.findOne(Integer.valueOf(1))).thenReturn(e1);
@@ -2721,7 +2721,7 @@ public class RepositoryValidationDecoratorTest
 	public void checkUniques()
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("test");
-		emd.addAttribute("id").setIdAttribute(true).setDataType(MolgenisFieldTypes.INT).setNillable(false);
+		emd.addAttribute("id", ROLE_ID).setDataType(MolgenisFieldTypes.INT);
 		emd.addAttribute("unique").setUnique(true);
 		when(decoratedRepository.getEntityMetaData()).thenReturn(emd);
 		when(decoratedRepository.count()).thenReturn(1l, 1l, 1l, 1l, 1l);

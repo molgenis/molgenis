@@ -422,9 +422,10 @@ public class MappingServiceController extends MolgenisPluginController
 			List<String> sourceNames = mappingTarget.getEntityMappings().stream()
 					.map(i -> i.getSourceEntityMetaData().getName()).collect(Collectors.toList());
 
-			for (AttributeMetaData attributeMetaData : mappingTarget.getTarget().getAtomicAttributes())
+			EntityMetaData targetEntityMeta = mappingTarget.getTarget();
+			for (AttributeMetaData attributeMetaData : targetEntityMeta.getAtomicAttributes())
 			{
-				if (attributeMetaData.isIdAtrribute())
+				if (attributeMetaData.equals(targetEntityMeta.getIdAttribute()))
 				{
 					continue;
 				}

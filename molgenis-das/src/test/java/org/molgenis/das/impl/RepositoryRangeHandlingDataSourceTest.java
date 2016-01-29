@@ -2,6 +2,8 @@ package org.molgenis.das.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_CHROM;
 import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_DESCRIPTION;
 import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_IDENTIFIER;
@@ -105,10 +107,10 @@ public class RepositoryRangeHandlingDataSourceTest
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("DAS");
 		emd.addAttributeMetaData(new DefaultAttributeMetaData("STOP"));
 		emd.addAttributeMetaData(new DefaultAttributeMetaData("linkout"));
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("NAME").setLabelAttribute(true));
+		emd.addAttributeMetaData(new DefaultAttributeMetaData("NAME"), ROLE_LABEL);
 		emd.addAttributeMetaData(new DefaultAttributeMetaData("INFO"));
 		emd.addAttributeMetaData(new DefaultAttributeMetaData("POS"));
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("ID").setIdAttribute(true));
+		emd.addAttributeMetaData(new DefaultAttributeMetaData("ID"), ROLE_ID);
 		emd.addAttributeMetaData(new DefaultAttributeMetaData("CHROM"));
 
 		MapEntity entity = new MapEntity(emd);

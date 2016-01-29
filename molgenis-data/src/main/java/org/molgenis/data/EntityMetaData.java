@@ -8,6 +8,11 @@ import java.util.Set;
  */
 public interface EntityMetaData
 {
+	enum AttributeRole
+	{
+		ROLE_ID, ROLE_LABEL, ROLE_LOOKUP
+	}
+
 	/**
 	 * Gets the package.
 	 * 
@@ -123,6 +128,14 @@ public interface EntityMetaData
 	 * Returns attributes that must be searched in case of xref/mref search
 	 */
 	Iterable<AttributeMetaData> getLookupAttributes();
+
+	/**
+	 * Get lookup attribute by name (case insensitive), returns null if not found
+	 * 
+	 * @param attributeName
+	 * @return
+	 */
+	AttributeMetaData getLookupAttribute(String attributeName);
 
 	/**
 	 * Get attribute by name (case insensitive), returns null if not found

@@ -32,10 +32,8 @@ public class AttributeMetaDataResponse
 	private final Boolean nillable;
 	private final Boolean readOnly;
 	private final Object defaultValue;
-	private final Boolean labelAttribute;
 	private final Boolean unique;
 	private final Boolean visible;
-	private Boolean lookupAttribute;
 	private Boolean aggregateable;
 	private Range range;
 	private String expression;
@@ -118,12 +116,14 @@ public class AttributeMetaDataResponse
 			}
 			else
 			{
-				this.refEntity = refEntity != null ? new Href(Href.concatMetaEntityHref(RestController.BASE_URI,
-						refEntity.getName()), String.format("%s/%s", RestController.BASE_URI, refEntity.getName())) : null; // FIXME
-																															// apply
-																															// Href
-																															// escaping
-																															// fix
+				this.refEntity = refEntity != null
+						? new Href(Href.concatMetaEntityHref(RestController.BASE_URI, refEntity.getName()),
+								String.format("%s/%s", RestController.BASE_URI, refEntity.getName()))
+						: null; // FIXME
+								// apply
+								// Href
+								// escaping
+								// fix
 			}
 		}
 		else this.refEntity = null;
@@ -131,8 +131,8 @@ public class AttributeMetaDataResponse
 		if (attributesSet == null || attributesSet.contains("attributes".toLowerCase()))
 		{
 			Iterable<AttributeMetaData> attributeParts = attr.getAttributeParts();
-			this.attributes = attributeParts != null ? Lists.newArrayList(Iterables.transform(attributeParts,
-					new Function<AttributeMetaData, Object>()
+			this.attributes = attributeParts != null
+					? Lists.newArrayList(Iterables.transform(attributeParts, new Function<AttributeMetaData, Object>()
 					{
 
 						@Override
@@ -180,23 +180,11 @@ public class AttributeMetaDataResponse
 		}
 		else this.defaultValue = null;
 
-		if (attributesSet == null || attributesSet.contains("labelAttribute".toLowerCase()))
-		{
-			this.labelAttribute = attr.isLabelAttribute();
-		}
-		else this.labelAttribute = null;
-
 		if (attributesSet == null || attributesSet.contains("unique".toLowerCase()))
 		{
 			this.unique = attr.isUnique();
 		}
 		else this.unique = null;
-
-		if (attributesSet == null || attributesSet.contains("lookupAttribute".toLowerCase()))
-		{
-			this.lookupAttribute = attr.isLookupAttribute();
-		}
-		else this.lookupAttribute = null;
 
 		if (attributesSet == null || attributesSet.contains("aggregateable".toLowerCase()))
 		{
@@ -294,11 +282,6 @@ public class AttributeMetaDataResponse
 		return defaultValue;
 	}
 
-	public boolean isLabelAttribute()
-	{
-		return labelAttribute;
-	}
-
 	public boolean isUnique()
 	{
 		return unique;
@@ -307,11 +290,6 @@ public class AttributeMetaDataResponse
 	public boolean isVisible()
 	{
 		return visible;
-	}
-
-	public Boolean getLookupAttribute()
-	{
-		return lookupAttribute;
 	}
 
 	public Boolean isAggregateable()
@@ -327,11 +305,6 @@ public class AttributeMetaDataResponse
 	public Boolean getReadOnly()
 	{
 		return readOnly;
-	}
-
-	public Boolean getLabelAttribute()
-	{
-		return labelAttribute;
 	}
 
 	public Boolean getUnique()
@@ -363,5 +336,4 @@ public class AttributeMetaDataResponse
 	{
 		return validationExpression;
 	}
-
 }

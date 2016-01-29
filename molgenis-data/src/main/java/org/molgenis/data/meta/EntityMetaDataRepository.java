@@ -78,8 +78,6 @@ class EntityMetaDataRepository
 			String name = entity.getString(SIMPLE_NAME);
 			DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(name);
 			entityMetaData.setAbstract(entity.getBoolean(ABSTRACT));
-			entityMetaData.setIdAttribute(entity.getString(ID_ATTRIBUTE));
-			entityMetaData.setLabelAttribute(entity.getString(LABEL_ATTRIBUTE));
 			entityMetaData.setLabel(entity.getString(LABEL));
 			entityMetaData.setDescription(entity.getString(DESCRIPTION));
 			entityMetaData.setBackend(entity.getString(BACKEND));
@@ -105,9 +103,12 @@ class EntityMetaDataRepository
 			Iterable<Entity> attributeEntities = entity.getEntities(EntityMetaDataMetaData.ATTRIBUTES);
 			if (attributeEntities != null)
 			{
-				stream(attributeEntities.spliterator(), false).map(attributeRepository::toAttributeMetaData).forEach(
-						entityMetaData::addAttributeMetaData);
+				stream(attributeEntities.spliterator(), false).map(attributeRepository::toAttributeMetaData)
+						.forEach(entityMetaData::addAttributeMetaData);
 			}
+
+			entityMetaData.setIdAttribute(entityMetaData.getAttribute(ID_ATTRIBUTE));
+			entityMetaData.setLabelAttribute(entityMetaData.getAttribute(LABEL_ATTRIBUTE));
 		}
 		for (Entity entity : entities)
 		{
@@ -115,14 +116,14 @@ class EntityMetaDataRepository
 			final DefaultEntityMetaData entityMetaData = entityMetaDataCache.get(entity.get(FULL_NAME));
 			if (extendsEntity != null)
 			{
-				final DefaultEntityMetaData extendsEntityMetaData = entityMetaDataCache.get(extendsEntity
-						.get(FULL_NAME));
+				final DefaultEntityMetaData extendsEntityMetaData = entityMetaDataCache
+						.get(extendsEntity.get(FULL_NAME));
 				entityMetaData.setExtends(extendsEntityMetaData);
 			}
 			final Entity packageEntity = entity.getEntity(PACKAGE);
 
-			PackageImpl p = (PackageImpl) packageRepository.getPackage(packageEntity
-					.getString(PackageMetaData.FULL_NAME));
+			PackageImpl p = (PackageImpl) packageRepository
+					.getPackage(packageEntity.getString(PackageMetaData.FULL_NAME));
 			if (null != p)
 			{
 				entityMetaData.setPackage(p);
@@ -193,13 +194,13 @@ class EntityMetaDataRepository
 		AttributeMetaData labelAttribute = entityMetaData.getLabelAttribute();
 		if (labelAttribute != null)
 		{
-			emd.setLabelAttribute(labelAttribute.getName());
+			emd.setLabelAttribute(labelAttribute);
 			entity.set(LABEL_ATTRIBUTE, labelAttribute.getName());
 		}
 		AttributeMetaData idAttribute = entityMetaData.getIdAttribute();
 		if (idAttribute != null)
 		{
-			emd.setIdAttribute(idAttribute.getName());
+			emd.setIdAttribute(idAttribute);
 			entity.set(ID_ATTRIBUTE, idAttribute.getName());
 		}
 		Iterable<AttributeMetaData> attributes = entityMetaData.getOwnAttributes();
@@ -274,8 +275,8 @@ class EntityMetaDataRepository
 	 */
 	public void deleteAll()
 	{
-		List<Entity> entities = Lists.newLinkedList(new DependencyResolver().resolveSelfReferences(repository,
-				META_DATA));
+		List<Entity> entities = Lists
+				.newLinkedList(new DependencyResolver().resolveSelfReferences(repository, META_DATA));
 		Collections.reverse(entities);
 		for (Entity entity : entities)
 		{

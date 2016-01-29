@@ -11,10 +11,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.EXPRESSION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.IDENTIFIER;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.ID_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.LOOKUP_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NILLABLE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.PARTS;
@@ -118,15 +115,12 @@ class AttributeMetaDataRepository
 				attributeMetaDataEntity.set(IDENTIFIER, uuidGenerator.generateId());
 				attributeMetaDataEntity.set(NAME, attr.getName());
 				attributeMetaDataEntity.set(DATA_TYPE, attr.getDataType());
-				attributeMetaDataEntity.set(ID_ATTRIBUTE, attr.isIdAtrribute());
 				attributeMetaDataEntity.set(NILLABLE, attr.isNillable());
 				attributeMetaDataEntity.set(AUTO, attr.isAuto());
 				attributeMetaDataEntity.set(VISIBLE, attr.isVisible());
 				attributeMetaDataEntity.set(LABEL, attr.getLabel());
 				attributeMetaDataEntity.set(DESCRIPTION, attr.getDescription());
 				attributeMetaDataEntity.set(AGGREGATEABLE, attr.isAggregateable());
-				attributeMetaDataEntity.set(LOOKUP_ATTRIBUTE, attr.isLookupAttribute());
-				attributeMetaDataEntity.set(LABEL_ATTRIBUTE, attr.isLabelAttribute());
 				attributeMetaDataEntity.set(READ_ONLY, attr.isReadonly());
 				attributeMetaDataEntity.set(UNIQUE, attr.isUnique());
 				attributeMetaDataEntity.set(EXPRESSION, attr.getExpression());
@@ -220,16 +214,12 @@ class AttributeMetaDataRepository
 		attributeMetaData.setDataType(MolgenisFieldTypes.getType(entity.getString(DATA_TYPE)));
 		attributeMetaData.setNillable(entity.getBoolean(NILLABLE));
 		attributeMetaData.setAuto(entity.getBoolean(AUTO));
-		attributeMetaData.setIdAttribute(entity.getBoolean(ID_ATTRIBUTE));
-		attributeMetaData.setLookupAttribute(entity.getBoolean(LOOKUP_ATTRIBUTE));
 		attributeMetaData.setVisible(entity.getBoolean(VISIBLE));
 		attributeMetaData.setLabel(entity.getString(LABEL));
 		attributeMetaData.setDescription(entity.getString(DESCRIPTION));
 		attributeMetaData
 				.setAggregateable(entity.getBoolean(AGGREGATEABLE) == null ? false : entity.getBoolean(AGGREGATEABLE));
 		attributeMetaData.setEnumOptions(entity.getList(ENUM_OPTIONS));
-		attributeMetaData.setLabelAttribute(
-				entity.getBoolean(LABEL_ATTRIBUTE) == null ? false : entity.getBoolean(LABEL_ATTRIBUTE));
 		attributeMetaData.setReadOnly(entity.getBoolean(READ_ONLY) == null ? false : entity.getBoolean(READ_ONLY));
 		attributeMetaData.setUnique(entity.getBoolean(UNIQUE) == null ? false : entity.getBoolean(UNIQUE));
 		attributeMetaData.setExpression(entity.getString(EXPRESSION));

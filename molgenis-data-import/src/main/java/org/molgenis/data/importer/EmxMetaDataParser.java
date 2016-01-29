@@ -8,10 +8,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.DEFAULT_VALUE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.EXPRESSION;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.ID_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.LOOKUP_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NILLABLE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MAX;
@@ -83,6 +80,9 @@ import com.google.common.collect.Sets;
  */
 public class EmxMetaDataParser implements MetaDataParser
 {
+	private static final String ID_ATTRIBUTE = "idAttribute";
+	private static final String LOOKUP_ATTRIBUTE = "lookupAttribute";
+	private static final String LABEL_ATTRIBUTE = "labelAttribute";
 
 	// Sheet names
 	public static final String ENTITIES = EntityMetaDataMetaData.ENTITY_NAME;

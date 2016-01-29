@@ -1,11 +1,13 @@
 package org.molgenis.auth;
 
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.springframework.stereotype.Component;
-
 import static org.molgenis.MolgenisFieldTypes.DATETIME;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.MolgenisFieldTypes.XREF;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.springframework.stereotype.Component;
 
 @Component
 public class MolgenisTokenMetaData extends DefaultEntityMetaData
@@ -16,11 +18,10 @@ public class MolgenisTokenMetaData extends DefaultEntityMetaData
 	public MolgenisTokenMetaData()
 	{
 		super(ENTITY_NAME);
-		addAttribute(MolgenisToken.ID).setAuto(true).setVisible(false).setDescription("").setIdAttribute(true)
-				.setNillable(false);
+		addAttribute(MolgenisToken.ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");
 		addAttribute(MolgenisToken.MOLGENIS_USER).setDataType(XREF).setRefEntity(new MolgenisUserMetaData())
 				.setAggregateable(true).setDescription("").setNillable(false);
-		addAttribute(MolgenisToken.TOKEN).setLabel("Token").setUnique(true).setDescription("").setLabelAttribute(true)
+		addAttribute(MolgenisToken.TOKEN, ROLE_LABEL).setLabel("Token").setUnique(true).setDescription("")
 				.setNillable(false);
 		addAttribute(MolgenisToken.EXPIRATIONDATE).setDataType(DATETIME).setLabel("Expiration date").setNillable(true)
 				.setDescription("When expiration date is null it will never expire");

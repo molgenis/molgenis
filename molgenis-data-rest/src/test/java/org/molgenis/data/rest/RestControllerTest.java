@@ -140,10 +140,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 				.setEnumOptions(Arrays.asList("enum0, enum1"));
 
 		DefaultAttributeMetaData attrName = new DefaultAttributeMetaData("name", FieldTypeEnum.STRING);
-		attrName.setLookupAttribute(true);
 
 		DefaultAttributeMetaData attrId = new DefaultAttributeMetaData("id", FieldTypeEnum.STRING);
-		attrId.setIdAttribute(true);
 		attrId.setVisible(false);
 
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
@@ -409,7 +407,6 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		attrName.setRefEntity(refMeta);
 
 		DefaultAttributeMetaData attrId = new DefaultAttributeMetaData("id", FieldTypeEnum.INT);
-		attrId.setIdAttribute(true);
 		attrId.setVisible(false);
 
 		when(meta.getAttribute("name")).thenReturn(attrName);

@@ -36,10 +36,8 @@ class AttributeMetaDataResponseV2
 	private final Boolean nillable;
 	private final Boolean readOnly;
 	private final Object defaultValue;
-	private final Boolean labelAttribute;
 	private final Boolean unique;
 	private final Boolean visible;
-	private Boolean lookupAttribute;
 	private Boolean aggregateable;
 	private Range range;
 	private String expression;
@@ -87,8 +85,8 @@ class AttributeMetaDataResponseV2
 			attrParts = filterAttributes(fetch, attrParts);
 
 			// create attribute response
-			this.attributes = Lists.newArrayList(Iterables.transform(attrParts,
-					new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
+			this.attributes = Lists.newArrayList(
+					Iterables.transform(attrParts, new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
 					{
 						@Override
 						public AttributeMetaDataResponseV2 apply(AttributeMetaData attr)
@@ -128,9 +126,7 @@ class AttributeMetaDataResponseV2
 		this.nillable = attr.isNillable();
 		this.readOnly = attr.isReadonly();
 		this.defaultValue = attr.getDefaultValue();
-		this.labelAttribute = attr.isLabelAttribute();
 		this.unique = attr.isUnique();
-		this.lookupAttribute = attr.isLookupAttribute();
 		this.aggregateable = attr.isAggregateable();
 		this.range = attr.getRange();
 		this.visible = attr.isVisible();
@@ -241,11 +237,6 @@ class AttributeMetaDataResponseV2
 		return defaultValue;
 	}
 
-	public boolean isLabelAttribute()
-	{
-		return labelAttribute;
-	}
-
 	public boolean isUnique()
 	{
 		return unique;
@@ -254,11 +245,6 @@ class AttributeMetaDataResponseV2
 	public boolean isVisible()
 	{
 		return visible;
-	}
-
-	public Boolean getLookupAttribute()
-	{
-		return lookupAttribute;
 	}
 
 	public Boolean isAggregateable()
@@ -274,11 +260,6 @@ class AttributeMetaDataResponseV2
 	public Boolean getReadOnly()
 	{
 		return readOnly;
-	}
-
-	public Boolean getLabelAttribute()
-	{
-		return labelAttribute;
 	}
 
 	public Boolean getUnique()

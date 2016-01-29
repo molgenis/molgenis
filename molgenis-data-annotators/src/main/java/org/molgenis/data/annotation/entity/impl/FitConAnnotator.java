@@ -1,5 +1,6 @@
 package org.molgenis.data.annotation.entity.impl;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.annotator.websettings.FitConAnnotatorSettings.Meta.FITCON_LOCATION;
 import static org.molgenis.data.vcf.VcfRepository.ALT_META;
 import static org.molgenis.data.vcf.VcfRepository.CHROM_META;
@@ -60,27 +61,24 @@ public class FitConAnnotator
 
 		attributes.add(dann_score);
 
-		AnnotatorInfo fitconInfo = AnnotatorInfo
-				.create(Status.READY,
-						AnnotatorInfo.Type.EFFECT_PREDICTION,
-						NAME,
-						"Summary: Annotating genetic variants, especially non-coding variants, "
-								+ "for the purpose of identifying pathogenic variants remains a challenge. "
-								+ "Combined annotation-dependent depletion (CADD) is an al- gorithm designed "
-								+ "to annotate both coding and non-coding variants, and has been shown to "
-								+ "outper- form other annotation algorithms. CADD trains a linear kernel support"
-								+ " vector machine (SVM) to dif- ferentiate evolutionarily derived, likely benign,"
-								+ " alleles from simulated, likely deleterious, variants. However, SVMs cannot "
-								+ "capture non-linear relationships among the features, which can limit per- formance. "
-								+ "To address this issue, we have developed FITCON. FITCON uses the same feature set and "
-								+ "training data as CADD to train a deep neural network (DNN). DNNs can capture non-linear"
-								+ " relation- ships among features and are better suited than SVMs for problems with a "
-								+ "large number of samples and features. We exploit Compute Unified Device Architecture-compatible"
-								+ " graphics processing units and deep learning techniques such as dropout and momentum training to"
-								+ " accelerate the DNN train- ing. FITCON achieves about a 19%relative reduction in the error rate and"
-								+ " about a 14%relative increase in the area under the curve (AUC) metric over CADD’s SVMmethodology."
-								+ " All data and source code are available at https://cbcl.ics.uci.edu/ public_data/FITCON/. Contact:",
-						attributes);
+		AnnotatorInfo fitconInfo = AnnotatorInfo.create(Status.READY, AnnotatorInfo.Type.EFFECT_PREDICTION, NAME,
+				"Summary: Annotating genetic variants, especially non-coding variants, "
+						+ "for the purpose of identifying pathogenic variants remains a challenge. "
+						+ "Combined annotation-dependent depletion (CADD) is an al- gorithm designed "
+						+ "to annotate both coding and non-coding variants, and has been shown to "
+						+ "outper- form other annotation algorithms. CADD trains a linear kernel support"
+						+ " vector machine (SVM) to dif- ferentiate evolutionarily derived, likely benign,"
+						+ " alleles from simulated, likely deleterious, variants. However, SVMs cannot "
+						+ "capture non-linear relationships among the features, which can limit per- formance. "
+						+ "To address this issue, we have developed FITCON. FITCON uses the same feature set and "
+						+ "training data as CADD to train a deep neural network (DNN). DNNs can capture non-linear"
+						+ " relation- ships among features and are better suited than SVMs for problems with a "
+						+ "large number of samples and features. We exploit Compute Unified Device Architecture-compatible"
+						+ " graphics processing units and deep learning techniques such as dropout and momentum training to"
+						+ " accelerate the DNN train- ing. FITCON achieves about a 19%relative reduction in the error rate and"
+						+ " about a 14%relative increase in the area under the curve (AUC) metric over CADD’s SVMmethodology."
+						+ " All data and source code are available at https://cbcl.ics.uci.edu/ public_data/FITCON/. Contact:",
+				attributes);
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(FITCON_TABIX_RESOURCE, fitconInfo, new LocusQueryCreator(),
 				new VariantResultFilter(), dataService, resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(FITCON_LOCATION, fitConAnnotatorSettings));
@@ -212,10 +210,11 @@ public class FitConAnnotator
 		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("RawScore"));
 		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("PHRED"));
 
-		repoMetaData.addAttribute("id").setIdAttribute(true).setVisible(false);
+		repoMetaData.addAttribute("id", ROLE_ID).setVisible(false);
 
-		fitConTabixResource = new ResourceImpl(FITCON_TABIX_RESOURCE, new SingleResourceConfig(FITCON_LOCATION,
-				fitConAnnotatorSettings), new TabixRepositoryFactory(repoMetaData));
+		fitConTabixResource = new ResourceImpl(FITCON_TABIX_RESOURCE,
+				new SingleResourceConfig(FITCON_LOCATION, fitConAnnotatorSettings),
+				new TabixRepositoryFactory(repoMetaData));
 
 		return fitConTabixResource;
 	}

@@ -4,6 +4,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.COMPOUND;
 import static org.molgenis.MolgenisFieldTypes.STRING;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -71,7 +73,7 @@ public class DefaultEntityMetaDataTest
 	public void testCopyConstructorPreservesIdAttribute()
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("name");
-		emd.addAttribute("id").setIdAttribute(true);
+		emd.addAttribute("id", ROLE_ID);
 
 		DefaultEntityMetaData emdCopy = new DefaultEntityMetaData(emd);
 		Assert.assertEquals(emdCopy.getIdAttribute().getName(), "id");
@@ -86,7 +88,7 @@ public class DefaultEntityMetaDataTest
 
 		DefaultEntityMetaData entityMeta = new DefaultEntityMetaData("entity");
 		entityMeta.setExtends(extendsEntityMeta);
-		DefaultAttributeMetaData idAttr = entityMeta.addAttribute("id").setIdAttribute(true);
+		DefaultAttributeMetaData idAttr = entityMeta.addAttribute("id", ROLE_ID);
 		assertEquals(entityMeta.getIdAttribute(), idAttr);
 	}
 
@@ -97,8 +99,8 @@ public class DefaultEntityMetaDataTest
 		entityMetaData.setAbstract(true);
 		entityMetaData.setDescription("description");
 		entityMetaData.setLabel("label");
-		entityMetaData.addAttribute("labelAttribute").setDescription("label attribute").setLabelAttribute(true);
-		entityMetaData.addAttribute("id").setDescription("id attribute").setIdAttribute(true);
+		entityMetaData.addAttribute("labelAttribute", ROLE_LABEL).setDescription("label attribute");
+		entityMetaData.addAttribute("id", ROLE_ID).setDescription("id attribute");
 		assertEquals(new DefaultEntityMetaData(entityMetaData), entityMetaData);
 	}
 

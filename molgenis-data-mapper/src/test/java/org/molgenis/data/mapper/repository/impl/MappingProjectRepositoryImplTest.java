@@ -4,6 +4,7 @@ import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.ENTITY_NAME;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.IDENTIFIER;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.MAPPINGTARGETS;
@@ -83,10 +84,9 @@ public class MappingProjectRepositoryImplTest extends AbstractTestNGSpringContex
 		owner.setLastName("de Flap");
 
 		DefaultEntityMetaData target1 = new DefaultEntityMetaData("target1");
-		target1.addAttribute("id").setIdAttribute(true);
-
+		target1.addAttribute("id", ROLE_ID);
 		DefaultEntityMetaData target2 = new DefaultEntityMetaData("target2");
-		target1.addAttribute("id").setIdAttribute(true);
+		target2.addAttribute("id", ROLE_ID);
 
 		mappingProject = new MappingProject("My first mapping project", owner);
 		mappingTarget1 = mappingProject.addTarget(target1);
