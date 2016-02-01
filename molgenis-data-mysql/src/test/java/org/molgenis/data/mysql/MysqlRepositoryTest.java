@@ -1,11 +1,13 @@
 package org.molgenis.data.mysql;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
@@ -31,7 +33,7 @@ import org.testng.annotations.Test;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
-/** Simple test of all apsects of the repository */
+/** Simple test of all aspects of the repository */
 @ContextConfiguration(classes = MysqlTestConfig.class)
 public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 {
@@ -112,6 +114,36 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		assertNotNull(repo.findOne(new QueryImpl().eq("strAttr", "newstr0")));
 		assertNotNull(repo.findOne(new QueryImpl().eq("strAttr", "newstr1")));
 		repo.deleteAll(); // cleanup
+	}
+
+	@Test
+	public void testDeleteAllForXrefs()
+	{
+		DefaultEntityMetaData refMetaData = new DefaultEntityMetaData("RefEntityTable");
+		refMetaData.addAttribute("refAttr").setDataType(MolgenisFieldTypes.STRING).setIdAttribute(true)
+				.setNillable(false);
+
+		DefaultEntityMetaData metaData = new DefaultEntityMetaData("XrefTable");
+		metaData.addAttribute("id").setDataType(MolgenisFieldTypes.INT).setIdAttribute(true).setNillable(false);
+		metaData.addAttribute("xrefAttr").setDataType(MolgenisFieldTypes.XREF).setRefEntity(refMetaData)
+				.setNillable(false);
+
+		Repository refRepo = metaDataRepositories.addEntityMeta(refMetaData);
+		Repository repo = metaDataRepositories.addEntityMeta(metaData);
+
+		List<Entity> refEntityTableEntities = new ArrayList<>();
+		Entity refEntityTableEntity = new MapEntity("refAttr");
+		refEntityTableEntity.set("refAttr", "xref_value_1");
+		refEntityTableEntities.addAll(newArrayList(refEntityTableEntity));
+
+		List<Entity> xrefTableEntities = new ArrayList<>();
+		Entity xrefTableEntity = new MapEntity("xrefAttr");
+		xrefTableEntity.set("id", 1);
+		xrefTableEntity.set("xrefAttr", "xref_value_1");
+		xrefTableEntities.addAll(newArrayList(xrefTableEntity));
+
+		repo.deleteAll(); // cleanup
+		refRepo.deleteAll(); // cleanup
 	}
 
 	@Test
