@@ -1071,7 +1071,8 @@ public class MysqlRepository extends AbstractRepository
 	{
 		Stream<AttributeMetaData> selfReferencingAttrs = StreamSupport
 				.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
-				.filter(attr -> attr.getDataType() instanceof XrefField);
+				.filter(attr -> attr.getDataType() instanceof XrefField
+						&& attr.getRefEntity().getName().equals(getEntityMetaData().getName()));
 
 		selfReferencingAttrs.forEach(selfReferencingXrefAttr -> {
 			if (!selfReferencingXrefAttr.isNillable())
