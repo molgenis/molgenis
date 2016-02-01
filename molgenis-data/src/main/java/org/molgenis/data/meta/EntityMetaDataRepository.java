@@ -1,7 +1,7 @@
 package org.molgenis.data.meta;
 
-import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
@@ -21,15 +21,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -130,15 +131,17 @@ class EntityMetaDataRepository
 			}
 
 			// set id, label and lookup attrs
-			String idAttrName = entity.getString(ID_ATTRIBUTE);
-			if (idAttrName != null)
+			Entity idAttr = entity.getEntity(ID_ATTRIBUTE);
+			if (idAttr != null)
 			{
-				entityMetaData.setIdAttribute(entityMetaData.getAttribute(idAttrName));
+				entityMetaData
+						.setIdAttribute(entityMetaData.getAttribute(idAttr.getString(AttributeMetaDataMetaData.NAME)));
 			}
-			String labelAttrName = entity.getString(LABEL_ATTRIBUTE);
-			if (labelAttrName != null)
+			Entity labelAttr = entity.getEntity(LABEL_ATTRIBUTE);
+			if (labelAttr != null)
 			{
-				entityMetaData.setLabelAttribute(entityMetaData.getAttribute(labelAttrName));
+				entityMetaData.setLabelAttribute(
+						entityMetaData.getAttribute(labelAttr.getString(AttributeMetaDataMetaData.NAME)));
 			}
 			Stream<Entity> lookupAttrs = stream(entity.getEntities(LOOKUP_ATTRIBUTES).spliterator(), false);
 			entityMetaData.setLookupAttributes(lookupAttrs.map(lookupAttrEntity -> {
@@ -207,37 +210,32 @@ class EntityMetaDataRepository
 		}
 		((PackageImpl) packageRepository.getPackage(emd.getPackage().getName())).addEntity(emd);
 		Entity entity = toEntity(emd);
-		AttributeMetaData idAttribute = entityMetaData.getOwnIdAttribute();
-		if (idAttribute != null)
-		{
-			emd.setIdAttribute(idAttribute);
-			entity.set(ID_ATTRIBUTE, idAttribute.getName());
-		}
-		AttributeMetaData labelAttribute = entityMetaData.getOwnLabelAttribute();
-		if (labelAttribute != null)
-		{
-			emd.setLabelAttribute(labelAttribute);
-			entity.set(LABEL_ATTRIBUTE, labelAttribute.getName());
-		}
 		Iterable<AttributeMetaData> attributes = entityMetaData.getOwnAttributes();
 		if (attributes != null)
 		{
-			List<Entity> attrs = Lists.newArrayList(attributeRepository.add(attributes));
-			entity.set(ATTRIBUTES, attrs);
+			Map<String, Entity> attrs = stream(attributeRepository.add(attributes).spliterator(), false)
+					.collect(toMap(attrEntity -> attrEntity.getString(AttributeMetaDataMetaData.NAME),
+							Function.<Entity> identity(), (u, v) -> {
+								throw new IllegalStateException(String.format("Duplicate key %s", u));
+							} , LinkedHashMap::new));
+			entity.set(ATTRIBUTES, attrs.values());
 			emd.addAllAttributeMetaData(attributes);
 
+			AttributeMetaData idAttribute = entityMetaData.getOwnIdAttribute();
+			if (idAttribute != null)
+			{
+				emd.setIdAttribute(idAttribute);
+				entity.set(ID_ATTRIBUTE, attrs.get(idAttribute.getName()));
+			}
+			AttributeMetaData labelAttribute = entityMetaData.getOwnLabelAttribute();
+			if (labelAttribute != null)
+			{
+				emd.setLabelAttribute(labelAttribute);
+				entity.set(LABEL_ATTRIBUTE, attrs.get(labelAttribute.getName()));
+			}
+
 			List<Entity> lookupAttrEntities = stream(entityMetaData.getOwnLookupAttributes().spliterator(), false)
-					.map(lookupAttr -> {
-						for (Entity attr : attrs)
-						{
-							if (attr.getString(AttributeMetaDataMetaData.NAME).equals(lookupAttr.getName()))
-							{
-								return attr;
-							}
-						}
-						throw new MolgenisDataException(
-								format("Lookup attribute [%s] does not exist", lookupAttr.getName()));
-					}).collect(toList());
+					.map(lookupAttr -> attrs.get(lookupAttr.getName())).collect(toList());
 			entity.set(LOOKUP_ATTRIBUTES, lookupAttrEntities);
 		}
 		else
