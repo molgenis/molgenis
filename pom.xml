@@ -30,14 +30,6 @@
     <developers />
 
 	<profiles>
-		<!-- Production profile properties -->
-		<profile>
-			<id>production</id>
-			<properties>
-				<webpack.production>true</webpack.production>
-			</properties>
-		</profile>
-		
         <!-- create runnable jar -->
         <profile>
             <id>create-delivery</id>
