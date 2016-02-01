@@ -125,7 +125,6 @@
 									<goal>webpack</goal>
 		                        </goals>
 			        			<configuration>
-			        				<skip>${webpack.development}</skip>
 									<outputdir>target/classes/js/dist</outputdir>
 									<arguments>-p --config webpack.production.config.js</arguments>
 								</configuration>
