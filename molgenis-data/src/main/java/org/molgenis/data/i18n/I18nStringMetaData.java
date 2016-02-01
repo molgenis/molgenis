@@ -17,7 +17,7 @@ public class I18nStringMetaData extends DefaultEntityMetaData
 	private I18nStringMetaData()
 	{
 		super(ENTITY_NAME);
-		addAttribute(MSGID, ROLE_ID).setNillable(false);
+		addAttribute(MSGID, ROLE_ID);
 		addAttribute(DESCRIPTION).setNillable(true).setDataType(MolgenisFieldTypes.TEXT);
 		addAttribute(EN).setNillable(true).setDataType(MolgenisFieldTypes.TEXT);
 	}

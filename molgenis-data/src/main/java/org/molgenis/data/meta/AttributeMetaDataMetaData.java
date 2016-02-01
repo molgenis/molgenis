@@ -3,7 +3,6 @@ package org.molgenis.data.meta;
 import static org.molgenis.MolgenisFieldTypes.BOOL;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.SCRIPT;
-import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
@@ -17,7 +16,7 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 	public static final String ENTITY_NAME = "attributes";
 	public static final String IDENTIFIER = "identifier";
 	public static final String NAME = "name";
-	public static final String DATA_TYPE = "dataType"; // FIXME enum options
+	public static final String DATA_TYPE = "dataType";
 	public static final String REF_ENTITY = "refEntity";
 	public static final String EXPRESSION = "expression";
 	public static final String NILLABLE = "nillable";
@@ -43,7 +42,7 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 	{
 		super(ENTITY_NAME);
 
-		addAttribute(IDENTIFIER, ROLE_ID).setNillable(false).setDataType(STRING).setVisible(false);
+		addAttribute(IDENTIFIER, ROLE_ID).setVisible(false);
 		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setNillable(false);
 		addAttribute(DATA_TYPE);
 		addAttribute(PARTS).setDataType(MREF).setRefEntity(this);

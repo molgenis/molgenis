@@ -95,13 +95,13 @@ public class EmxMetaDataParserTest extends AbstractTestNGSpringContextTests
 	{
 		MysqlRepository repositoryCity = mock(MysqlRepository.class);
 		DefaultEntityMetaData entityMetaDataCity = new DefaultEntityMetaData("import_city");
-		entityMetaDataCity.addAttribute("name", ROLE_ID).setNillable(false);
+		entityMetaDataCity.addAttribute("name", ROLE_ID);
 		when(dataService.getRepository("import_city")).thenReturn(repositoryCity);
 		when(repositoryCity.getEntityMetaData()).thenReturn(entityMetaDataCity);
 
 		MysqlRepository repositoryPerson = mock(MysqlRepository.class);
 		DefaultEntityMetaData entityMetaDataPerson = new DefaultEntityMetaData("import_person");
-		entityMetaDataPerson.addAttribute("firstName", ROLE_ID).setNillable(false);
+		entityMetaDataPerson.addAttribute("firstName", ROLE_ID);
 		entityMetaDataPerson.addAttribute("lastName");
 		entityMetaDataPerson.addAttribute("height").setDataType(MolgenisFieldTypes.INT);
 		entityMetaDataPerson.addAttribute("active").setDataType(MolgenisFieldTypes.BOOL);

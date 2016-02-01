@@ -53,7 +53,7 @@ public class CGDAnnotatorTest extends AbstractTestNGSpringContextTests
 	public void annotateTestMatch()
 	{
 		DefaultEntityMetaData emdIn = new DefaultEntityMetaData("Test");
-		emdIn.addAttribute(GENE.getAttributeName(), ROLE_ID).setNillable(false);
+		emdIn.addAttribute(GENE.getAttributeName(), ROLE_ID);
 		Entity inputEntity = new MapEntity(emdIn);
 		inputEntity.set(GENE.getAttributeName(), "LEPR");
 
@@ -102,7 +102,7 @@ public class CGDAnnotatorTest extends AbstractTestNGSpringContextTests
 	public void annotateTestNoMatch()
 	{
 		DefaultEntityMetaData emdIn = new DefaultEntityMetaData("Test");
-		emdIn.addAttribute(GENE.getAttributeName(), ROLE_ID).setNillable(false);
+		emdIn.addAttribute(GENE.getAttributeName(), ROLE_ID);
 
 		Entity inputEntity = new MapEntity(emdIn);
 		inputEntity.set(GENE.getAttributeName(), "BOGUS");

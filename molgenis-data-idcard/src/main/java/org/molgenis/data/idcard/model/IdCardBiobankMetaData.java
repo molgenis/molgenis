@@ -50,6 +50,6 @@ public class IdCardBiobankMetaData extends DefaultEntityMetaData
 		addAttribute(IdCardBiobank.COUNTRY).setLabel("Country");
 
 		addAttribute(IdCardBiobank.ORGANIZATION_ID, ROLE_ID).setLabel("OrganizationID").setDataType(INT)
-				.setNillable(false).setVisible(false);
+				.setVisible(false);
 	}
 }

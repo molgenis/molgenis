@@ -15,8 +15,7 @@ public class MolgenisGroupMemberMetaData extends DefaultEntityMetaData
 	public MolgenisGroupMemberMetaData()
 	{
 		super(ENTITY_NAME);
-		addAttribute(MolgenisGroupMember.ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("")
-				.setNillable(false);
+		addAttribute(MolgenisGroupMember.ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");
 		addAttribute(MolgenisGroupMember.MOLGENISUSER).setDataType(XREF).setRefEntity(new MolgenisUserMetaData())
 				.setAggregateable(true).setDescription("").setNillable(false);
 		addAttribute(MolgenisGroupMember.MOLGENISGROUP).setDataType(XREF).setRefEntity(new MolgenisGroupMetaData())

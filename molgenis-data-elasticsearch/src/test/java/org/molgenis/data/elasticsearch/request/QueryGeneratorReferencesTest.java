@@ -106,7 +106,7 @@ public class QueryGeneratorReferencesTest
 				.setRefEntity(refEntityMetaData).setNillable(true);
 
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
-		emd.addAttribute(idAttributeName, ROLE_ID).setUnique(true);
+		emd.addAttribute(idAttributeName, ROLE_ID);
 		emd.addAttribute(stringAttributeName, ROLE_LABEL).setUnique(true);
 		emd.addAttribute(mrefAttributeName).setDataType(MolgenisFieldTypes.MREF).setNillable(true)
 				.setRefEntity(refEntityMetaData);

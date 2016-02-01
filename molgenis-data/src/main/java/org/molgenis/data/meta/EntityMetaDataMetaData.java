@@ -16,10 +16,8 @@ public class EntityMetaDataMetaData extends DefaultEntityMetaData
 	public static final String SIMPLE_NAME = "simpleName";
 	public static final String BACKEND = "backend";
 	public static final String FULL_NAME = "fullName";
-	public static final String ID_ATTRIBUTE = "idAttribute"; // FIXME xref? validation expression to determine
-																// requiredness?
-	public static final String LABEL_ATTRIBUTE = "labelAttribute"; // FIXME xref? validation expression to determine
-																	// requiredness?
+	public static final String ID_ATTRIBUTE = "idAttribute";
+	public static final String LABEL_ATTRIBUTE = "labelAttribute";
 	public static final String LOOKUP_ATTRIBUTES = "lookupAttributes";
 	public static final String ABSTRACT = "abstract";
 	public static final String LABEL = "label";
@@ -34,7 +32,7 @@ public class EntityMetaDataMetaData extends DefaultEntityMetaData
 	private EntityMetaDataMetaData()
 	{
 		super(ENTITY_NAME);
-		addAttribute(FULL_NAME, ROLE_ID).setUnique(true).setNillable(false);
+		addAttribute(FULL_NAME, ROLE_ID).setUnique(true);
 		addAttribute(SIMPLE_NAME, ROLE_LABEL).setNillable(false);
 		addAttribute(BACKEND);
 		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(PackageRepository.META_DATA);

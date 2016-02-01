@@ -23,7 +23,7 @@ public class MysqlRepositoryDatetimeTest extends MysqlRepositoryAbstractDatatype
 	public EntityMetaData createMetaData()
 	{
 		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("DatetimeTest").setLabel("Datetime Test");
-		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(MolgenisFieldTypes.DATETIME).setNillable(false);
+		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(MolgenisFieldTypes.DATETIME);
 		entityMetaData.addAttribute("col2").setDataType(MolgenisFieldTypes.DATETIME);
 		entityMetaData.addAttribute("col3").setDataType(MolgenisFieldTypes.DATETIME).setDefaultValue("01-01-2014");
 		return entityMetaData;

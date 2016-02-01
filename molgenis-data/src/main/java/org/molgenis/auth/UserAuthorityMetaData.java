@@ -16,7 +16,7 @@ public class UserAuthorityMetaData extends DefaultEntityMetaData
 	public UserAuthorityMetaData()
 	{
 		super(ENTITY_NAME);
-		addAttribute(UserAuthority.ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("").setNillable(false);
+		addAttribute(UserAuthority.ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");
 		addAttribute(UserAuthority.MOLGENISUSER).setDataType(XREF).setRefEntity(new MolgenisUserMetaData())
 				.setAggregateable(true).setDescription("").setNillable(false);
 		addAttribute(UserAuthority.ROLE).setDescription("").setNillable(false);

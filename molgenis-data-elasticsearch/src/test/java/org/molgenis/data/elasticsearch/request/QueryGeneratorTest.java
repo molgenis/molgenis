@@ -71,13 +71,13 @@ public class QueryGeneratorTest
 		searchRequestBuilder = mock(SearchRequestBuilder.class);
 
 		DefaultEntityMetaData refEntityMetaData = new DefaultEntityMetaData("ref_entity");
-		refEntityMetaData.addAttribute(idAttributeName, ROLE_ID).setUnique(true);
+		refEntityMetaData.addAttribute(idAttributeName, ROLE_ID);
 		refEntityMetaData.addAttribute(refStringAttributeName, ROLE_LABEL).setUnique(true);
 		refEntityMetaData.addAttribute(refMrefAttributeName).setDataType(MolgenisFieldTypes.MREF).setNillable(true)
 				.setRefEntity(refEntityMetaData);
 
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("entity");
-		entityMetaData.addAttribute(idAttributeName, ROLE_ID).setUnique(true);
+		entityMetaData.addAttribute(idAttributeName, ROLE_ID);
 		entityMetaData.addAttribute(boolAttributeName).setDataType(MolgenisFieldTypes.BOOL);
 		entityMetaData.addAttribute(categoricalAttributeName).setDataType(MolgenisFieldTypes.CATEGORICAL)
 				.setRefEntity(refEntityMetaData);

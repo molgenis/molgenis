@@ -97,7 +97,7 @@ public class MetaValidationUtilsTest
 				.setDataType(MolgenisFieldTypes.STRING));
 		compAttrs.add(new DefaultAttributeMetaData("aCompString2").setDataType(MolgenisFieldTypes.STRING));
 		emd.addAttribute("aComp").setDataType(MolgenisFieldTypes.COMPOUND).setAttributesMetaData(compAttrs);
-		emd.addAttribute("aString", ROLE_ID).setDataType(MolgenisFieldTypes.STRING);
+		emd.addAttribute("aString", ROLE_ID);
 
 		MetaValidationUtils.validateEntityMetaData(emd);
 	}
@@ -111,7 +111,7 @@ public class MetaValidationUtilsTest
 		compAttrs.add(new DefaultAttributeMetaData("aCompString1").setDataType(MolgenisFieldTypes.STRING));
 		compAttrs.add(new DefaultAttributeMetaData("2aCompString").setDataType(MolgenisFieldTypes.STRING));
 		emd.addAttribute("aComp").setDataType(MolgenisFieldTypes.COMPOUND).setAttributesMetaData(compAttrs);
-		emd.addAttribute("aString", ROLE_ID).setDataType(MolgenisFieldTypes.STRING);
+		emd.addAttribute("aString", ROLE_ID);
 
 		MetaValidationUtils.validateEntityMetaData(emd);
 	}
@@ -125,7 +125,7 @@ public class MetaValidationUtilsTest
 		compAttrs.add(new DefaultAttributeMetaData("aCompString1").setDataType(MolgenisFieldTypes.STRING));
 		compAttrs.add(new DefaultAttributeMetaData("aCompString2").setDataType(MolgenisFieldTypes.STRING));
 		emd.addAttribute("a.Comp").setDataType(MolgenisFieldTypes.COMPOUND).setAttributesMetaData(compAttrs);
-		emd.addAttribute("aString", ROLE_ID).setDataType(MolgenisFieldTypes.STRING);
+		emd.addAttribute("aString", ROLE_ID);
 
 		MetaValidationUtils.validateEntityMetaData(emd);
 	}

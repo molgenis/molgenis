@@ -17,7 +17,7 @@ public class MysqlRepositoryIntTest extends MysqlRepositoryAbstractDatatypeTest
 	public EntityMetaData createMetaData()
 	{
 		EditableEntityMetaData varcharMD = new DefaultEntityMetaData("IntegerTest").setLabel("Integer Test");
-		varcharMD.addAttribute("col1", ROLE_ID).setDataType(MolgenisFieldTypes.INT).setNillable(false);
+		varcharMD.addAttribute("col1", ROLE_ID).setDataType(MolgenisFieldTypes.INT);
 		varcharMD.addAttribute("col2").setDataType(MolgenisFieldTypes.INT);
 		varcharMD.addAttribute("col3").setDataType(MolgenisFieldTypes.INT);
 		return varcharMD;

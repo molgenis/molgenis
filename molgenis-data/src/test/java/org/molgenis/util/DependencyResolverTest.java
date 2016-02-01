@@ -48,7 +48,7 @@ public class DependencyResolverTest
 	public void resolveSelfReferences()
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("Person");
-		emd.addAttribute("name", ROLE_ID).setNillable(false);
+		emd.addAttribute("name", ROLE_ID);
 		emd.addAttribute("father").setDataType(MolgenisFieldTypes.XREF).setNillable(true).setRefEntity(emd);
 		emd.addAttribute("mother").setDataType(MolgenisFieldTypes.XREF).setNillable(true).setRefEntity(emd);
 

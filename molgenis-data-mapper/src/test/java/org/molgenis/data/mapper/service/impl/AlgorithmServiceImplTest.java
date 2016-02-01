@@ -191,7 +191,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 
 		// ref entities
 		DefaultEntityMetaData refEntityMeta = new DefaultEntityMetaData(refEntityName);
-		refEntityMeta.addAttribute(refEntityIdAttrName, ROLE_ID).setDataType(STRING);
+		refEntityMeta.addAttribute(refEntityIdAttrName, ROLE_ID);
 		refEntityMeta.addAttribute(refEntityLabelAttrName, ROLE_LABEL).setDataType(STRING);
 
 		Entity refEntity0 = new MapEntity(refEntityMeta);
@@ -250,7 +250,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 
 		// ref entities
 		DefaultEntityMetaData refEntityMeta = new DefaultEntityMetaData(refEntityName);
-		refEntityMeta.addAttribute(refEntityIdAttrName, ROLE_ID).setDataType(STRING);
+		refEntityMeta.addAttribute(refEntityIdAttrName, ROLE_ID);
 		refEntityMeta.addAttribute(refEntityLabelAttrName, ROLE_LABEL).setDataType(STRING);
 
 		// mapping

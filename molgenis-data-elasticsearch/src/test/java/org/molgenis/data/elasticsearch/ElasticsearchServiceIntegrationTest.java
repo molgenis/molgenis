@@ -95,7 +95,7 @@ public class ElasticsearchServiceIntegrationTest
 
 		entityMeta = new DefaultEntityMetaData("entity");
 		entityMeta.setBackend(ElasticsearchRepositoryCollection.NAME);
-		entityMeta.addAttribute(idAttrName, ROLE_ID).setNillable(false).setUnique(true);
+		entityMeta.addAttribute(idAttrName, ROLE_ID);
 		entityMeta.addAttribute(labelAttrName, ROLE_LABEL).setNillable(true);
 		InMemoryRepository entityRepo = new InMemoryRepository(entityMeta);
 		DataServiceImpl dataServiceImpl = new DataServiceImpl();

@@ -32,14 +32,14 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 	public EntityMetaData createMetaData()
 	{
 		DefaultEntityMetaData refEntity = new DefaultEntityMetaData("StringTarget2");
-		refEntity.addAttribute("identifier", ROLE_ID).setNillable(false);
+		refEntity.addAttribute("identifier", ROLE_ID);
 		refEntity.addAttribute("label", ROLE_LABEL);
 
 		DefaultEntityMetaData refEntity2 = new DefaultEntityMetaData("IntTarget2");
-		refEntity2.addAttribute("identifier", ROLE_ID).setDataType(MolgenisFieldTypes.INT).setNillable(false);
+		refEntity2.addAttribute("identifier", ROLE_ID).setDataType(MolgenisFieldTypes.INT);
 
 		EditableEntityMetaData varcharMD = new DefaultEntityMetaData("MrefTest").setLabel("ref Test");
-		varcharMD.addAttribute("identifier", ROLE_ID).setNillable(false);
+		varcharMD.addAttribute("identifier", ROLE_ID);
 		varcharMD.addAttribute("stringRef").setDataType(MolgenisFieldTypes.MREF).setRefEntity(refEntity)
 				.setNillable(false);
 		varcharMD.addAttribute("intRef").setDataType(MolgenisFieldTypes.MREF).setRefEntity(refEntity2)

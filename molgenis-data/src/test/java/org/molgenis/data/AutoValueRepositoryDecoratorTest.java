@@ -43,7 +43,7 @@ public class AutoValueRepositoryDecoratorTest
 	public void setUpBeforeMethod()
 	{
 		entityMetaData = new DefaultEntityMetaData("entity");
-		entityMetaData.addAttribute(ATTR_ID, ROLE_ID).setDataType(MolgenisFieldTypes.STRING);
+		entityMetaData.addAttribute(ATTR_ID, ROLE_ID);
 		entityMetaData.addAttribute(ATTR_DATE_AUTO_DEFAULT).setDataType(MolgenisFieldTypes.DATE);
 		entityMetaData.addAttribute(ATTR_DATE_AUTO_FALSE).setDataType(MolgenisFieldTypes.DATE).setAuto(false);
 		entityMetaData.addAttribute(ATTR_DATE_AUTO_TRUE).setDataType(MolgenisFieldTypes.DATE).setAuto(true);

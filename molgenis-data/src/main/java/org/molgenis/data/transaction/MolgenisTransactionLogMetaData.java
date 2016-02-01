@@ -23,7 +23,7 @@ public class MolgenisTransactionLogMetaData extends DefaultEntityMetaData
 	{
 		super(ENTITY_NAME);
 		setBackend(backend);
-		addAttribute(TRANSACTION_ID, ROLE_ID).setNillable(false);
+		addAttribute(TRANSACTION_ID, ROLE_ID);
 		addAttribute(USER_NAME).setNillable(true);
 		addAttribute(START_TIME).setDataType(MolgenisFieldTypes.DATETIME).setNillable(false);
 		addAttribute(STATUS).setDataType(new EnumField()).setEnumOptions(Status.getOptions()).setNillable(false);

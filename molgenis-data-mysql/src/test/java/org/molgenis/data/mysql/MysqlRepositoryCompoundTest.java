@@ -24,7 +24,7 @@ public class MysqlRepositoryCompoundTest extends MysqlRepositoryAbstractDatatype
 				.setDataType(MolgenisFieldTypes.BOOL);
 
 		EditableEntityMetaData rootMD = new DefaultEntityMetaData("CompoundTest").setLabel("CompoundTest");
-		rootMD.addAttribute("col1", ROLE_ID).setDataType(MolgenisFieldTypes.BOOL).setNillable(false);
+		rootMD.addAttribute("col1", ROLE_ID).setDataType(MolgenisFieldTypes.BOOL);
 		rootMD.addAttribute("compound").setDataType(MolgenisFieldTypes.COMPOUND)
 				.setAttributesMetaData(Arrays.<AttributeMetaData> asList(attributePart));
 		rootMD.addAttribute("col3").setDataType(MolgenisFieldTypes.BOOL);

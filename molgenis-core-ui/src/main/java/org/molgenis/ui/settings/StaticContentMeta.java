@@ -13,7 +13,7 @@ public class StaticContentMeta extends DefaultEntityMetaData
 	{
 		super(StaticContent.ENTITY_NAME, StaticContent.class);
 
-		addAttribute(StaticContent.KEY, ROLE_ID).setNillable(false).setLabel("Key");
+		addAttribute(StaticContent.KEY, ROLE_ID).setLabel("Key");
 		addAttribute(StaticContent.CONTENT).setDataType(TEXT).setLabel("Content");
 	}
 }

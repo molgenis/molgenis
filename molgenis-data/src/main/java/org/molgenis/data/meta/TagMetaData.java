@@ -22,7 +22,7 @@ public class TagMetaData extends DefaultEntityMetaData
 	private TagMetaData()
 	{
 		super(ENTITY_NAME);
-		addAttribute(IDENTIFIER, ROLE_ID).setNillable(false);
+		addAttribute(IDENTIFIER, ROLE_ID);
 		addAttribute(OBJECT_IRI, ROLE_LOOKUP).setDataType(MolgenisFieldTypes.TEXT);
 		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setNillable(false);
 		addAttribute(RELATION_IRI).setNillable(false);

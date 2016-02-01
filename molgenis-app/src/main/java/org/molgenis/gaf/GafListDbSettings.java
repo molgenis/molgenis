@@ -32,7 +32,7 @@ public class GafListDbSettings implements GafListSettings
 		public Meta()
 		{
 			super(ENTITY_NAME);
-			addAttribute(NAME, ROLE_ID).setNillable(false);
+			addAttribute(NAME, ROLE_ID);
 			addAttribute(VALUE).setNillable(false).setDataType(MolgenisFieldTypes.TEXT);
 		}
 	}

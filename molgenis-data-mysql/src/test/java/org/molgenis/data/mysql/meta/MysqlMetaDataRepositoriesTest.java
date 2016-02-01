@@ -59,7 +59,7 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 	public void addAndGetAttributeMetaData()
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("test");
-		emd.addAttribute("id", ROLE_ID).setNillable(false);
+		emd.addAttribute("id", ROLE_ID);
 		metaDataService.addEntityMeta(emd);
 
 		List<String> enumOptions = Arrays.asList("enum1", "enum2");
@@ -97,7 +97,7 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 	public void addAndGetEntityMetaData()
 	{
 		DefaultEntityMetaData test = new DefaultEntityMetaData("testje");
-		test.addAttribute("id", ROLE_ID).setNillable(false);
+		test.addAttribute("id", ROLE_ID);
 		metaDataService.addEntityMeta(test);
 
 		DefaultEntityMetaData extendsTest = new DefaultEntityMetaData("extendstest");
@@ -120,15 +120,15 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 	public void getEntityMetaDatas()
 	{
 		DefaultEntityMetaData test = new DefaultEntityMetaData("test");
-		test.addAttribute("id", ROLE_ID).setNillable(false);
+		test.addAttribute("id", ROLE_ID);
 		metaDataService.addEntityMeta(test);
 
 		DefaultEntityMetaData test1 = new DefaultEntityMetaData("test1");
-		test1.addAttribute("id", ROLE_ID).setNillable(false);
+		test1.addAttribute("id", ROLE_ID);
 		metaDataService.addEntityMeta(test1);
 
 		DefaultEntityMetaData test2 = new DefaultEntityMetaData("test2");
-		test2.addAttribute("id", ROLE_ID).setNillable(false);
+		test2.addAttribute("id", ROLE_ID);
 		metaDataService.addEntityMeta(test2);
 
 		List<EntityMetaData> meta = Lists.newArrayList(metaDataService.getEntityMetaDatas());
@@ -153,15 +153,15 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 		metaDataService.addEntityMeta(test);
 
 		DefaultEntityMetaData test1 = new DefaultEntityMetaData("test1", p1);
-		test1.addAttribute("id", ROLE_ID).setNillable(false);
+		test1.addAttribute("id", ROLE_ID);
 		metaDataService.addEntityMeta(test1);
 
 		DefaultEntityMetaData test2 = new DefaultEntityMetaData("test2", p2);
-		test2.addAttribute("id", ROLE_ID).setNillable(false);
+		test2.addAttribute("id", ROLE_ID);
 		metaDataService.addEntityMeta(test2);
 
 		DefaultEntityMetaData test3 = new DefaultEntityMetaData("test3", p2);
-		test3.addAttribute("id", ROLE_ID).setNillable(false);
+		test3.addAttribute("id", ROLE_ID);
 		metaDataService.addEntityMeta(test3);
 
 		assertEquals(metaDataService.getPackage("p1_p2").getEntityMetaDatas(),

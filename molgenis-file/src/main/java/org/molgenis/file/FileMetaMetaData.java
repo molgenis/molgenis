@@ -17,7 +17,7 @@ public class FileMetaMetaData extends DefaultEntityMetaData
 	{
 		super(FileMeta.ENTITY_NAME, FileMeta.class);
 		setExtends(new OwnedEntityMetaData());
-		addAttribute(FileMeta.ID, ROLE_ID).setDataType(STRING).setNillable(false).setVisible(false).setLabel("Id");
+		addAttribute(FileMeta.ID, ROLE_ID).setVisible(false).setLabel("Id");
 		addAttribute(FileMeta.FILENAME, ROLE_LABEL, ROLE_LOOKUP).setDataType(STRING).setNillable(false)
 				.setLabel("Filename");
 		addAttribute(FileMeta.CONTENT_TYPE, ROLE_LOOKUP).setDataType(STRING).setLabel("Content-type");

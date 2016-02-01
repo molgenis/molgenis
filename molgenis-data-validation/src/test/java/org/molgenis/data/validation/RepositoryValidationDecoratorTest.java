@@ -2591,7 +2591,7 @@ public class RepositoryValidationDecoratorTest
 	public void checkNillable()
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("test");
-		emd.addAttribute("id", ROLE_ID).setDataType(MolgenisFieldTypes.INT).setNillable(false).setAuto(true);
+		emd.addAttribute("id", ROLE_ID).setDataType(MolgenisFieldTypes.INT).setAuto(true);
 		emd.addAttribute("notnull").setNillable(false);
 		when(decoratedRepository.getEntityMetaData()).thenReturn(emd);
 
@@ -2608,7 +2608,7 @@ public class RepositoryValidationDecoratorTest
 
 		// With defaultvalue
 		emd = new DefaultEntityMetaData("test");
-		emd.addAttribute("id", ROLE_ID).setDataType(MolgenisFieldTypes.INT).setNillable(false).setAuto(true);
+		emd.addAttribute("id", ROLE_ID).setDataType(MolgenisFieldTypes.INT).setAuto(true);
 		emd.addAttribute("notnull").setNillable(false).setDefaultValue("");
 		when(decoratedRepository.getEntityMetaData()).thenReturn(emd);
 		violations = repositoryValidationDecoratorWithRealDeps.checkNillable(Arrays.asList(e2));

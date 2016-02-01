@@ -2,7 +2,6 @@ package org.molgenis.data.mysql;
 
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -207,7 +206,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		DefaultEntityMetaData metaData = new DefaultEntityMetaData("MysqlPerson");
 
 		metaData.addAttribute("firstName").setNillable(false);
-		metaData.addAttribute("lastName", ROLE_ID).setNillable(false);
+		metaData.addAttribute("lastName", ROLE_ID);
 
 		// check manually set id (using setIdAttribute)
 
@@ -354,7 +353,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		DefaultAttributeMetaData idAttributeMetaData = new DefaultAttributeMetaData(idAttributeName);
 		idAttributeMetaData.setDataType(MolgenisFieldTypes.STRING);
 		idAttributeMetaData.setNillable(false);
-		entityMetaData.addAttributeMetaData(idAttributeMetaData, ROLE_ID, ROLE_LABEL);
+		entityMetaData.addAttributeMetaData(idAttributeMetaData, ROLE_ID);
 
 		Repository testRepository = coll.addEntityMeta(entityMetaData);
 

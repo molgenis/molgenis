@@ -48,8 +48,8 @@ public class AttributeFilterToFetchConverterTest
 	public void setUpBeforeMethod()
 	{
 		selfRefEntityMetaData = new DefaultEntityMetaData("SelfRefEntity");
-		selfRefEntityMetaData.addAttribute("id", ROLE_ID).setDataType(STRING);
-		selfRefEntityMetaData.addAttribute("label", ROLE_LABEL).setDataType(STRING);
+		selfRefEntityMetaData.addAttribute("id", ROLE_ID);
+		selfRefEntityMetaData.addAttribute("label", ROLE_LABEL);
 		selfRefEntityMetaData.addAttribute("selfRef").setDataType(XREF).setRefEntity(selfRefEntityMetaData);
 
 		xrefEntityMeta = mock(EntityMetaData.class);

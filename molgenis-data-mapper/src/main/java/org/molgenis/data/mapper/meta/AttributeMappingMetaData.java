@@ -1,7 +1,6 @@
 package org.molgenis.data.mapper.meta;
 
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -26,7 +25,7 @@ public class AttributeMappingMetaData extends DefaultEntityMetaData
 	{
 		super(ENTITY_NAME);
 
-		addAttribute(IDENTIFIER, ROLE_ID, ROLE_LABEL).setNillable(false);
+		addAttribute(IDENTIFIER, ROLE_ID);
 		addAttribute(TARGETATTRIBUTEMETADATA).setNillable(false);
 		addAttribute(SOURCEATTRIBUTEMETADATAS);
 		addAttribute(ALGORITHM).setDataType(MolgenisFieldTypes.TEXT);

@@ -16,7 +16,7 @@ public class UserMetaData extends DefaultEntityMetaData
 	private UserMetaData()
 	{
 		super(ENTITY_NAME);
-		addAttribute(USERNAME, ROLE_ID).setNillable(false);
+		addAttribute(USERNAME, ROLE_ID);
 		addAttribute(ACTIVE).setDataType(MolgenisFieldTypes.BOOL);
 	}
 

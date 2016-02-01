@@ -19,7 +19,7 @@ public class FreemarkerTemplateMetaData extends DefaultEntityMetaData
 	{
 		super(ENTITY_NAME);
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false)
-				.setDescription("automatically generated internal id, only for internal use.").setNillable(false);
+				.setDescription("automatically generated internal id, only for internal use.");
 		addAttribute(NAME, ROLE_LABEL).setDescription("Name of the entity").setNillable(false).setUnique(true);
 		addAttribute(VALUE).setDataType(SCRIPT).setNillable(false).setDescription("");
 	}

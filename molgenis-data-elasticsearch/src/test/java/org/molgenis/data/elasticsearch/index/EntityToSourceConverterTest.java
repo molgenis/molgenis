@@ -37,7 +37,7 @@ public class EntityToSourceConverterTest
 		String refLabelAttributeName = "reflabel";
 		String refMrefAttributeName = "refmref";
 		DefaultEntityMetaData refEntityMetaData = new DefaultEntityMetaData(refEntityName);
-		refEntityMetaData.addAttribute(idAttributeName, ROLE_ID).setUnique(true);
+		refEntityMetaData.addAttribute(idAttributeName, ROLE_ID);
 		refEntityMetaData.addAttribute(refLabelAttributeName, ROLE_LABEL).setUnique(true);
 		refEntityMetaData.addAttribute(refMrefAttributeName).setDataType(MolgenisFieldTypes.MREF).setNillable(true)
 				.setRefEntity(refEntityMetaData);
@@ -63,7 +63,7 @@ public class EntityToSourceConverterTest
 		String xrefAttributeName = "xxref";
 
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("entity");
-		entityMetaData.addAttribute(idAttributeName, ROLE_ID).setUnique(true);
+		entityMetaData.addAttribute(idAttributeName, ROLE_ID);
 		entityMetaData.addAttribute(boolAttributeName).setDataType(MolgenisFieldTypes.BOOL);
 		entityMetaData.addAttribute(categoricalAttributeName).setDataType(MolgenisFieldTypes.CATEGORICAL)
 				.setRefEntity(refEntityMetaData);

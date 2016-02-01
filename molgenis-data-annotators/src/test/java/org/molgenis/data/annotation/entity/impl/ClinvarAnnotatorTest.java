@@ -44,7 +44,7 @@ public class ClinvarAnnotatorTest extends AbstractTestNGSpringContextTests
 	public void annotateIterable()
 	{
 		DefaultEntityMetaData sourceMeta = new DefaultEntityMetaData("clinvar");
-		sourceMeta.addAttribute(CHROM, ROLE_ID).setNillable(false);
+		sourceMeta.addAttribute(CHROM, ROLE_ID);
 		sourceMeta.addAttributeMetaData(POS_META);
 		sourceMeta.addAttributeMetaData(REF_META);
 		sourceMeta.addAttributeMetaData(ALT_META);

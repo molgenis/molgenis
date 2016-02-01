@@ -24,7 +24,7 @@ public class LoggingEventMetaData extends DefaultEntityMetaData
 	{
 		super(ENTITY_NAME);
 		setBackend(ElasticsearchRepositoryCollection.NAME);
-		addAttribute(IDENTIFIER, ROLE_ID).setNillable(false).setVisible(false);
+		addAttribute(IDENTIFIER, ROLE_ID).setVisible(false);
 		addAttribute(TIMESTAMP).setDataType(MolgenisFieldTypes.DATETIME);
 		addAttribute(THREAD);
 		addAttribute(LEVEL);

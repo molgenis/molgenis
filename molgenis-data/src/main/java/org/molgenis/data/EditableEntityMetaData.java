@@ -89,7 +89,7 @@ public interface EditableEntityMetaData extends EntityMetaData
 	/**
 	 * Set id attribute
 	 * 
-	 * @param string
+	 * @param attr
 	 */
 	void setIdAttribute(AttributeMetaData attr);
 

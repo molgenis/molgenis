@@ -19,7 +19,7 @@ public class EntityAttributesValidatorTest
 	{
 		EntityAttributesValidator entityAttributesValidator = new EntityAttributesValidator();
 		DefaultEntityMetaData meta = new DefaultEntityMetaData("entity");
-		meta.addAttribute("id", ROLE_ID).setDataType(MolgenisFieldTypes.STRING);
+		meta.addAttribute("id", ROLE_ID);
 		meta.addAttribute("intrangemin").setDataType(MolgenisFieldTypes.INT).setRange(new Range(1l, null));
 
 		DefaultEntity entity = new DefaultEntity(meta, null);
@@ -34,7 +34,7 @@ public class EntityAttributesValidatorTest
 	{
 		EntityAttributesValidator entityAttributesValidator = new EntityAttributesValidator();
 		DefaultEntityMetaData meta = new DefaultEntityMetaData("entity");
-		meta.addAttribute("id", ROLE_ID).setDataType(MolgenisFieldTypes.STRING);
+		meta.addAttribute("id", ROLE_ID);
 		meta.addAttribute("intrangemin").setDataType(MolgenisFieldTypes.INT).setRange(new Range(1l, null));
 
 		DefaultEntity entity = new DefaultEntity(meta, null);
@@ -49,7 +49,7 @@ public class EntityAttributesValidatorTest
 	{
 		EntityAttributesValidator entityAttributesValidator = new EntityAttributesValidator();
 		DefaultEntityMetaData meta = new DefaultEntityMetaData("entity");
-		meta.addAttribute("id", ROLE_ID).setDataType(MolgenisFieldTypes.STRING);
+		meta.addAttribute("id", ROLE_ID);
 		meta.addAttribute("intrangemin").setDataType(MolgenisFieldTypes.INT).setRange(new Range(null, 1l));
 
 		DefaultEntity entity = new DefaultEntity(meta, null);
@@ -64,7 +64,7 @@ public class EntityAttributesValidatorTest
 	{
 		EntityAttributesValidator entityAttributesValidator = new EntityAttributesValidator();
 		DefaultEntityMetaData meta = new DefaultEntityMetaData("entity");
-		meta.addAttribute("id", ROLE_ID).setDataType(MolgenisFieldTypes.STRING);
+		meta.addAttribute("id", ROLE_ID);
 		meta.addAttribute("intrangemin").setDataType(MolgenisFieldTypes.INT).setRange(new Range(null, 1l));
 
 		DefaultEntity entity = new DefaultEntity(meta, null);

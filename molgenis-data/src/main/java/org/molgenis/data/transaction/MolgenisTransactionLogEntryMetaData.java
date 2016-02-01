@@ -22,7 +22,7 @@ public class MolgenisTransactionLogEntryMetaData extends DefaultEntityMetaData
 	{
 		super(ENTITY_NAME);
 		setBackend(backend);
-		addAttribute(ID, ROLE_ID).setAuto(true).setNillable(false).setVisible(false);
+		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
 		addAttribute(MOLGENIS_TRANSACTION_LOG).setDataType(MolgenisFieldTypes.XREF)
 				.setRefEntity(molgenisTransactionLogMetaData);
 		addAttribute(ENTITY).setNillable(false);

@@ -21,7 +21,7 @@ public class MolgenisUserMetaData extends DefaultEntityMetaData
 		setDescription("Anyone who can login");
 
 		addAttribute(MolgenisUser.ID, ROLE_ID).setAuto(true).setVisible(false)
-				.setDescription("automatically generated internal id, only for internal use.").setNillable(false);
+				.setDescription("automatically generated internal id, only for internal use.");
 		addAttribute(MolgenisUser.USERNAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Username").setUnique(true)
 				.setDescription("").setNillable(false);
 		addAttribute(MolgenisUser.PASSWORD_).setLabel("Password")

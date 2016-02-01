@@ -5,7 +5,6 @@ import static org.molgenis.MolgenisFieldTypes.ENUM;
 import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 
 import java.util.Arrays;
 
@@ -29,8 +28,8 @@ public class ImportRunMetaData extends DefaultEntityMetaData
 	public ImportRunMetaData()
 	{
 		super("ImportRun");
-		addAttribute(ID, ROLE_ID, ROLE_LABEL).setAuto(true).setVisible(false)
-				.setDescription("automatically generated internal id, only for internal use.").setNillable(false);
+		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false)
+				.setDescription("automatically generated internal id, only for internal use.");
 		addAttribute(STARTDATE).setDataType(DATETIME).setNillable(false).setDescription("");
 		addAttribute(ENDDATE).setDataType(DATETIME).setNillable(true).setDescription("");
 		addAttribute(USERNAME).setNillable(false).setDescription("");
