@@ -21,7 +21,7 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import autovalue.shaded.com.google.common.common.collect.Lists;
+import com.google.common.collect.Lists;
 
 public class EntityMetaDataRepositoryTest
 {
@@ -80,9 +80,13 @@ public class EntityMetaDataRepositoryTest
 		when(entityMeta.getOwnAttributes()).thenReturn(Arrays.asList(idAttr, labelAttr, lookupAttr0, lookupAttr1));
 
 		Entity idAttrEntity = mock(Entity.class);
+		when(idAttrEntity.getString(AttributeMetaDataMetaData.NAME)).thenReturn(idAttrName);
 		Entity labelAttrEntity = mock(Entity.class);
+		when(labelAttrEntity.getString(AttributeMetaDataMetaData.NAME)).thenReturn(labelAttrName);
 		Entity lookupAttr0Entity = mock(Entity.class);
+		when(lookupAttr0Entity.getString(AttributeMetaDataMetaData.NAME)).thenReturn(lookupAttr0Name);
 		Entity lookupAttr1Entity = mock(Entity.class);
+		when(lookupAttr1Entity.getString(AttributeMetaDataMetaData.NAME)).thenReturn(lookupAttr1Name);
 		when(packageRepository.getPackage(packageName)).thenReturn(package_);
 		when(attributeRepository.add(Arrays.asList(idAttr, labelAttr, lookupAttr0, lookupAttr1)))
 				.thenReturn(Arrays.asList(idAttrEntity, labelAttrEntity, lookupAttr0Entity, lookupAttr1Entity));
@@ -102,8 +106,8 @@ public class EntityMetaDataRepositoryTest
 		Entity capturedEntity = entityCaptor.getValue();
 		assertEquals(capturedEntity.getString(EntityMetaDataMetaData.ID_ATTRIBUTE), idAttrName);
 		assertEquals(capturedEntity.getString(EntityMetaDataMetaData.LABEL_ATTRIBUTE), labelAttrName);
-		assertEquals(capturedEntity.getEntities(EntityMetaDataMetaData.LOOKUP_ATTRIBUTES),
-				Arrays.asList(lookupAttr0, lookupAttr1));
+		assertEquals(Lists.newArrayList(capturedEntity.getEntities(EntityMetaDataMetaData.LOOKUP_ATTRIBUTES)),
+				Arrays.asList(lookupAttr0Entity, lookupAttr1Entity));
 	}
 
 	@Test

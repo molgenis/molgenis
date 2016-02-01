@@ -32,32 +32,35 @@ public class AttributeMetaDataResponse
 	private final Boolean nillable;
 	private final Boolean readOnly;
 	private final Object defaultValue;
+	private final Boolean labelAttribute;
 	private final Boolean unique;
 	private final Boolean visible;
+	private Boolean lookupAttribute;
 	private Boolean aggregateable;
 	private Range range;
 	private String expression;
 	private String visibleExpression;
 	private String validationExpression;
 
-	public AttributeMetaDataResponse(String entityParentName, AttributeMetaData attr,
+	public AttributeMetaDataResponse(String entityParentName, EntityMetaData entityMeta, AttributeMetaData attr,
 			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService)
 	{
-		this(entityParentName, attr, null, null, permissionService, dataService, languageService);
+		this(entityParentName, entityMeta, attr, null, null, permissionService, dataService, languageService);
 	}
 
 	/**
 	 * 
 	 * @param entityParentName
+	 * @param entityMeta
 	 * @param attr
 	 * @param attributesSet
 	 *            set of lowercase attribute names to include in response
 	 * @param attributeExpandsSet
 	 *            set of lowercase attribute names to expand in response
 	 */
-	public AttributeMetaDataResponse(final String entityParentName, AttributeMetaData attr, Set<String> attributesSet,
-			final Map<String, Set<String>> attributeExpandsSet, MolgenisPermissionService permissionService,
-			DataService dataService, LanguageService languageService)
+	public AttributeMetaDataResponse(final String entityParentName, EntityMetaData entityMeta, AttributeMetaData attr,
+			Set<String> attributesSet, final Map<String, Set<String>> attributeExpandsSet,
+			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestController.BASE_URI, entityParentName, attrName);
@@ -142,7 +145,7 @@ public class AttributeMetaDataResponse
 									&& attributeExpandsSet.containsKey("attributes".toLowerCase()))
 							{
 								Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
-								return new AttributeMetaDataResponse(entityParentName, attributeMetaData,
+								return new AttributeMetaDataResponse(entityParentName, entityMeta, attributeMetaData,
 										subAttributesSet, Collections.singletonMap("refEntity".toLowerCase(), null),
 										permissionService, dataService, languageService);
 							}
@@ -180,11 +183,23 @@ public class AttributeMetaDataResponse
 		}
 		else this.defaultValue = null;
 
+		if (attributesSet == null || attributesSet.contains("labelAttribute".toLowerCase()))
+		{
+			this.labelAttribute = attr.equals(entityMeta.getLabelAttribute());
+		}
+		else this.labelAttribute = null;
+
 		if (attributesSet == null || attributesSet.contains("unique".toLowerCase()))
 		{
 			this.unique = attr.isUnique();
 		}
 		else this.unique = null;
+
+		if (attributesSet == null || attributesSet.contains("lookupAttribute".toLowerCase()))
+		{
+			this.lookupAttribute = entityMeta.getLookupAttribute(attr.getName()) != null;
+		}
+		else this.lookupAttribute = null;
 
 		if (attributesSet == null || attributesSet.contains("aggregateable".toLowerCase()))
 		{
@@ -282,6 +297,11 @@ public class AttributeMetaDataResponse
 		return defaultValue;
 	}
 
+	public boolean isLabelAttribute()
+	{
+		return labelAttribute;
+	}
+
 	public boolean isUnique()
 	{
 		return unique;
@@ -290,6 +310,11 @@ public class AttributeMetaDataResponse
 	public boolean isVisible()
 	{
 		return visible;
+	}
+
+	public Boolean getLookupAttribute()
+	{
+		return lookupAttribute;
 	}
 
 	public Boolean isAggregateable()
@@ -305,6 +330,11 @@ public class AttributeMetaDataResponse
 	public Boolean getReadOnly()
 	{
 		return readOnly;
+	}
+
+	public Boolean getLabelAttribute()
+	{
+		return labelAttribute;
 	}
 
 	public Boolean getUnique()
@@ -336,4 +366,5 @@ public class AttributeMetaDataResponse
 	{
 		return validationExpression;
 	}
+
 }

@@ -120,7 +120,7 @@ public class MetaValidationUtils
 			validateName(emd.getSimpleName());
 			validateAttributes(emd.getAttributes());
 
-			if (emd.getIdAttribute().getDefaultValue() != null)
+			if (emd.getIdAttribute() != null && emd.getIdAttribute().getDefaultValue() != null)
 			{
 				throw new MolgenisDataException(
 						"ID attribute " + emd.getIdAttribute().getName() + " cannot have default value");

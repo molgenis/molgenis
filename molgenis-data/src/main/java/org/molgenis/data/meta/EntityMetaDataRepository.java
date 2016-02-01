@@ -1,5 +1,6 @@
 package org.molgenis.data.meta;
 
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NAME;
@@ -28,6 +29,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -217,14 +219,26 @@ class EntityMetaDataRepository
 			emd.setLabelAttribute(labelAttribute);
 			entity.set(LABEL_ATTRIBUTE, labelAttribute.getName());
 		}
-		Iterable<AttributeMetaData> lookupAttributes = entityMetaData.getOwnLookupAttributes();
-		emd.setLookupAttributes(stream(lookupAttributes.spliterator(), false));
-		entity.set(LOOKUP_ATTRIBUTES, stream(lookupAttributes.spliterator(), false).collect(toList()));
 		Iterable<AttributeMetaData> attributes = entityMetaData.getOwnAttributes();
 		if (attributes != null)
 		{
-			entity.set(ATTRIBUTES, Lists.newArrayList(attributeRepository.add(attributes)));
+			List<Entity> attrs = Lists.newArrayList(attributeRepository.add(attributes));
+			entity.set(ATTRIBUTES, attrs);
 			emd.addAllAttributeMetaData(attributes);
+
+			List<Entity> lookupAttrEntities = stream(entityMetaData.getOwnLookupAttributes().spliterator(), false)
+					.map(lookupAttr -> {
+						for (Entity attr : attrs)
+						{
+							if (attr.getString(AttributeMetaDataMetaData.NAME).equals(lookupAttr.getName()))
+							{
+								return attr;
+							}
+						}
+						throw new MolgenisDataException(
+								format("Lookup attribute [%s] does not exist", lookupAttr.getName()));
+					}).collect(toList());
+			entity.set(LOOKUP_ATTRIBUTES, lookupAttrEntities);
 		}
 		else
 		{

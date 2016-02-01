@@ -27,7 +27,7 @@ public class EntityMetaDataMetaData extends DefaultEntityMetaData
 	public static final String DESCRIPTION = "description";
 	public static final String PACKAGE = "package";
 	public static final String TAGS = "tags";
-	public static final String ATTRIBUTES = "attributes"; // FIXME attribute should have xref to entity instead
+	public static final String ATTRIBUTES = "attributes";
 
 	public static final EntityMetaDataMetaData INSTANCE = new EntityMetaDataMetaData();
 

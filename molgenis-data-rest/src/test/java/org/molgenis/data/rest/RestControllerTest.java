@@ -142,7 +142,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		DefaultAttributeMetaData attrName = new DefaultAttributeMetaData("name", FieldTypeEnum.STRING);
 
 		DefaultAttributeMetaData attrId = new DefaultAttributeMetaData("id", FieldTypeEnum.STRING);
-		attrId.setVisible(false);
+		attrId.setVisible(false).setReadOnly(true).setUnique(true).setNillable(false);
 
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 		when(entityMetaData.getAttribute("name")).thenReturn(attrName);
@@ -284,11 +284,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void retrieveEntityMetaExpandAttributes() throws Exception
 	{
 		mockMvc.perform(get(HREF_ENTITY_META).param("expand", "attributes")).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string("{\"href\":\"" + HREF_ENTITY_META
-						+ "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"" + ENTITY_NAME
-						+ "\",\"attributes\":{\"name\":{\"href\":\"" + HREF_ENTITY_META
-						+ "/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"attributes\":[],\"maxLength\":255,\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":true,\"aggregateable\":false},\"id\":{\"href\":\"/api/v1/Person/meta/id\",\"fieldType\":\"STRING\",\"name\":\"id\",\"label\":\"id\",\"attributes\":[],\"maxLength\":255,\"auto\":false,\"nillable\":true,\"readOnly\":true,\"labelAttribute\":false,\"unique\":true,\"visible\":false,\"lookupAttribute\":false,\"aggregateable\":false},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\",\"fieldType\":\"ENUM\",\"name\":\"enum\",\"label\":\"enum\",\"attributes\":[],\"enumOptions\":[\"enum0, enum1\"],\"maxLength\":255,\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"aggregateable\":false}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":false}"));
+				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content().string(
+						"{\"href\":\"/api/v1/Person/meta\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"Person\",\"attributes\":{\"name\":{\"href\":\"/api/v1/Person/meta/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"attributes\":[],\"maxLength\":255,\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"aggregateable\":false},\"id\":{\"href\":\"/api/v1/Person/meta/id\",\"fieldType\":\"STRING\",\"name\":\"id\",\"label\":\"id\",\"attributes\":[],\"maxLength\":255,\"auto\":false,\"nillable\":false,\"readOnly\":true,\"labelAttribute\":false,\"unique\":true,\"visible\":false,\"lookupAttribute\":false,\"aggregateable\":false},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\",\"fieldType\":\"ENUM\",\"name\":\"enum\",\"label\":\"enum\",\"attributes\":[],\"enumOptions\":[\"enum0, enum1\"],\"maxLength\":255,\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"aggregateable\":false}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":false}"));
 	}
 
 	@Test

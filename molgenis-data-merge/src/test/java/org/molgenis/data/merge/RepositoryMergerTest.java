@@ -40,7 +40,7 @@ import com.google.common.collect.Lists;
 @Component
 public class RepositoryMergerTest
 {
-
+	private DefaultAttributeMetaData idAttribute;
 	private AttributeMetaData metaDataa;
 	private AttributeMetaData metaDatab;
 	private Repository repository1;
@@ -78,8 +78,7 @@ public class RepositoryMergerTest
 		entityMetaData2.addAttributeMetaData(metaData2e);
 
 		// merged metadata
-		DefaultAttributeMetaData idAttribute = new DefaultAttributeMetaData("ID",
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
+		idAttribute = new DefaultAttributeMetaData("ID", MolgenisFieldTypes.FieldTypeEnum.STRING);
 		idAttribute.setNillable(false);
 		idAttribute.setVisible(false);
 		entityMetaDataMerged.addAttributeMetaData(idAttribute, ROLE_ID);
@@ -136,8 +135,10 @@ public class RepositoryMergerTest
 		RepositoryMerger repositoryMerger = new RepositoryMerger(dataService);
 
 		// check metaData
-		assertEquals(Lists.newArrayList(entityMetaDataMerged.getAttributes()), Lists.newArrayList(repositoryMerger
-				.mergeMetaData(repositoryList, commonAttributes, metaDataa, "mergedRepo").getAttributes()));
+		assertEquals(
+				Lists.newArrayList(repositoryMerger
+						.mergeMetaData(repositoryList, commonAttributes, idAttribute, "mergedRepo").getAttributes()),
+				Lists.newArrayList(entityMetaDataMerged.getAttributes()));
 	}
 
 	@SuppressWarnings(
