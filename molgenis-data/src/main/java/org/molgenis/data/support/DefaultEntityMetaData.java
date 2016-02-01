@@ -1,6 +1,9 @@
 package org.molgenis.data.support;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.unmodifiableCollection;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
@@ -120,6 +123,12 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 		this.attrChangeListener = new AttributeChangeListenerImpl(this);
 
 		addAllAttributeMetaData(entityMetaData.getOwnAttributes());
+		this.ownIdAttr = entityMetaData.getOwnIdAttribute();
+		this.ownLabelAttr = entityMetaData.getOwnLabelAttribute();
+		this.ownLookupAttrs = stream(entityMetaData.getOwnLookupAttributes().spliterator(), false)
+				.collect(toMap(AttributeMetaData::getName, Function.<AttributeMetaData> identity(), (u, v) -> {
+					throw new IllegalStateException(String.format("Duplicate key %s", u));
+				} , CaseInsensitiveLinkedHashMap::new));
 	}
 
 	@Override
@@ -290,6 +299,33 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	{
 		attr.addChangeListener(attrChangeListener);
 		attributes.put(attr.getName(), attr);
+		if (attrTypes != null)
+		{
+			for (AttributeRole attrType : attrTypes)
+			{
+				switch (attrType)
+				{
+					case ROLE_ID:
+						if (attr instanceof DefaultAttributeMetaData)
+						{
+							DefaultAttributeMetaData editableAttr = (DefaultAttributeMetaData) attr;
+							editableAttr.setReadOnly(true);
+							editableAttr.setUnique(true);
+							editableAttr.setNillable(false);
+						}
+						setIdAttribute(attr);
+						break;
+					case ROLE_LABEL:
+						setLabelAttribute(attr);
+						break;
+					case ROLE_LOOKUP:
+						addLookupAttribute(attr);
+						break;
+					default:
+						throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+				}
+			}
+		}
 		clearCache();
 	}
 
@@ -328,30 +364,7 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	public DefaultAttributeMetaData addAttribute(String name, AttributeRole... attrTypes)
 	{
 		DefaultAttributeMetaData attr = new DefaultAttributeMetaData(name);
-		this.addAttributeMetaData(attr);
-		if (attrTypes != null)
-		{
-			for (AttributeRole attrType : attrTypes)
-			{
-				switch (attrType)
-				{
-					case ROLE_ID:
-						attr.setReadOnly(true);
-						attr.setUnique(true);
-						attr.setNillable(false);
-						setIdAttribute(attr);
-						break;
-					case ROLE_LABEL:
-						setLabelAttribute(attr);
-						break;
-					case ROLE_LOOKUP:
-						addLookupAttribute(attr);
-						break;
-					default:
-						throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
-				}
-			}
-		}
+		this.addAttributeMetaData(attr, attrTypes);
 		return attr;
 	}
 
@@ -368,6 +381,12 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	}
 
 	@Override
+	public AttributeMetaData getOwnIdAttribute()
+	{
+		return ownIdAttr;
+	}
+
+	@Override
 	public void setIdAttribute(AttributeMetaData idAttr)
 	{
 		this.ownIdAttr = requireNonNull(idAttr);
@@ -378,6 +397,12 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	public AttributeMetaData getLabelAttribute()
 	{
 		return getCachedLabelAttr();
+	}
+
+	@Override
+	public AttributeMetaData getOwnLabelAttribute()
+	{
+		return ownLabelAttr;
 	}
 
 	@Override
@@ -402,6 +427,12 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 			lookupAttrs = Iterables.concat(extends_.getLookupAttributes(), lookupAttrs);
 		}
 		return lookupAttrs;
+	}
+
+	@Override
+	public Iterable<AttributeMetaData> getOwnLookupAttributes()
+	{
+		return ownLookupAttrs != null ? unmodifiableCollection(ownLookupAttrs.values()) : emptyList();
 	}
 
 	@Override
@@ -591,7 +622,7 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 						} , CaseInsensitiveLinkedHashMap::new));
 			}
 		}
-		return cachedLookupAttrs;
+		return cachedLookupAttrs != null ? cachedLookupAttrs : emptyMap();
 	}
 
 	private boolean getCachedHasAttrWithExpression()

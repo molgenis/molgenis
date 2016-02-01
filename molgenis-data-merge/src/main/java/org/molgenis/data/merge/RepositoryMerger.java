@@ -175,35 +175,33 @@ public class RepositoryMerger
 	 * Create new EntityMetaData with the common attributes at root level, and all other columns in a compound attribute
 	 * per original repository
 	 */
-	public EntityMetaData mergeMetaData(List<Repository> repositoryList, List<AttributeMetaData> commonAttributes,
-			String outRepositoryName)
+	public EntityMetaData mergeMetaData(List<Repository> repositoryList, List<AttributeMetaData> commonAttrs,
+			AttributeMetaData commonIdAttr, String outRepositoryName)
 	{
 		DefaultEntityMetaData mergedMetaData = new DefaultEntityMetaData(outRepositoryName);
 		mergedMetaData.setBackend(ElasticsearchRepositoryCollection.NAME);
 		mergedMetaData.addAttribute(ID, ROLE_ID).setVisible(false);
 
-		for (AttributeMetaData attributeMetaData : commonAttributes)
+		for (AttributeMetaData commonAttr : commonAttrs)
 		{
-
-			if (attributeMetaData.isIdAtrribute())
+			if (commonAttr.equals(commonIdAttr))
 			{
 				// Ignore hidden id attributes
-				if (attributeMetaData.isVisible())
+				if (commonAttr.isVisible())
 				{
 					// We added a new ID, save old attribute but do not use it as id
-					attributeMetaData = new DefaultAttributeMetaData(attributeMetaData);
-					((DefaultAttributeMetaData) attributeMetaData).setIdAttribute(false);
+					commonAttr = new DefaultAttributeMetaData(commonAttr);
 				}
 			}
 			else
 			{
-				mergedMetaData.addAttributeMetaData(attributeMetaData);
+				mergedMetaData.addAttributeMetaData(commonAttr);
 			}
 		}
 
 		for (Repository repository : repositoryList)
 		{
-			mergeRepositoryMetaData(commonAttributes, mergedMetaData, repository);
+			mergeRepositoryMetaData(commonAttrs, mergedMetaData, repository);
 		}
 		return mergedMetaData;
 	}

@@ -201,7 +201,7 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 		existingEntityMetaData.addAttribute("ID", ROLE_ID);
 
 		DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(entityName);
-		newEntityMetaData.addAttribute("ID", ROLE_ID);
+		newEntityMetaData.addAttribute("ID");
 
 		when(dataServiceImpl.getEntityMetaData(entityName)).thenReturn(existingEntityMetaData);
 		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(dataServiceImpl);

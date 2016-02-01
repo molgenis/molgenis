@@ -136,8 +136,8 @@ public class RepositoryMergerTest
 		RepositoryMerger repositoryMerger = new RepositoryMerger(dataService);
 
 		// check metaData
-		assertEquals(Lists.newArrayList(entityMetaDataMerged.getAttributes()), Lists.newArrayList(
-				repositoryMerger.mergeMetaData(repositoryList, commonAttributes, "mergedRepo").getAttributes()));
+		assertEquals(Lists.newArrayList(entityMetaDataMerged.getAttributes()), Lists.newArrayList(repositoryMerger
+				.mergeMetaData(repositoryList, commonAttributes, metaDataa, "mergedRepo").getAttributes()));
 	}
 
 	@SuppressWarnings(

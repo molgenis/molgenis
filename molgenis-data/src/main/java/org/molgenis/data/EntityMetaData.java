@@ -115,9 +115,24 @@ public interface EntityMetaData
 	AttributeMetaData getIdAttribute();
 
 	/**
+	 * Same as {@link #getIdAttribute()} but returns null if the id attribute is defined in its parent class.
+	 * 
+	 * @return
+	 */
+	AttributeMetaData getOwnIdAttribute();
+
+	/**
 	 * Attribute that is used as unique label. If no label exist, returns getIdAttribute().
 	 */
 	AttributeMetaData getLabelAttribute();
+
+	/**
+	 * Same as {@link #getLabelAttribute()} but returns null if the label does not exist or the label exists in its
+	 * parent class.
+	 * 
+	 * @return
+	 */
+	AttributeMetaData getOwnLabelAttribute();
 
 	/**
 	 * Gets the correct label attribute for the given language, or the default if not found
@@ -128,6 +143,11 @@ public interface EntityMetaData
 	 * Returns attributes that must be searched in case of xref/mref search
 	 */
 	Iterable<AttributeMetaData> getLookupAttributes();
+
+	/**
+	 * Same as {@link #getLookupAttributes()} but does not return lookup attributes in its parent class.
+	 */
+	Iterable<AttributeMetaData> getOwnLookupAttributes();
 
 	/**
 	 * Get lookup attribute by name (case insensitive), returns null if not found

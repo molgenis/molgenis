@@ -1,5 +1,6 @@
 package org.molgenis.data.meta;
 
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
@@ -11,6 +12,7 @@ import static org.molgenis.data.meta.EntityMetaDataMetaData.FULL_NAME;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ID_ATTRIBUTE;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.LABEL;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.LABEL_ATTRIBUTE;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.LOOKUP_ATTRIBUTES;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.SIMPLE_NAME;
 
@@ -20,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -101,23 +104,17 @@ class EntityMetaDataRepository
 		{
 			DefaultEntityMetaData entityMetaData = entityMetaDataCache.get(entity.getString(FULL_NAME));
 			Iterable<Entity> attributeEntities = entity.getEntities(EntityMetaDataMetaData.ATTRIBUTES);
-			if (attributeEntities != null)
-			{
-				stream(attributeEntities.spliterator(), false).map(attributeRepository::toAttributeMetaData)
-						.forEach(entityMetaData::addAttributeMetaData);
-			}
-
-			entityMetaData.setIdAttribute(entityMetaData.getAttribute(ID_ATTRIBUTE));
-			entityMetaData.setLabelAttribute(entityMetaData.getAttribute(LABEL_ATTRIBUTE));
+			stream(attributeEntities.spliterator(), false).map(attributeRepository::toAttributeMetaData)
+					.forEach(entityMetaData::addAttributeMetaData);
 		}
 		for (Entity entity : entities)
 		{
 			final Entity extendsEntity = entity.getEntity(EXTENDS);
-			final DefaultEntityMetaData entityMetaData = entityMetaDataCache.get(entity.get(FULL_NAME));
+			final DefaultEntityMetaData entityMetaData = entityMetaDataCache.get(entity.getString(FULL_NAME));
 			if (extendsEntity != null)
 			{
 				final DefaultEntityMetaData extendsEntityMetaData = entityMetaDataCache
-						.get(extendsEntity.get(FULL_NAME));
+						.get(extendsEntity.getString(FULL_NAME));
 				entityMetaData.setExtends(extendsEntityMetaData);
 			}
 			final Entity packageEntity = entity.getEntity(PACKAGE);
@@ -129,7 +126,24 @@ class EntityMetaDataRepository
 				entityMetaData.setPackage(p);
 				p.addEntity(entityMetaData);
 			}
+
+			// set id, label and lookup attrs
+			String idAttrName = entity.getString(ID_ATTRIBUTE);
+			if (idAttrName != null)
+			{
+				entityMetaData.setIdAttribute(entityMetaData.getAttribute(idAttrName));
+			}
+			String labelAttrName = entity.getString(LABEL_ATTRIBUTE);
+			if (labelAttrName != null)
+			{
+				entityMetaData.setLabelAttribute(entityMetaData.getAttribute(labelAttrName));
+			}
+			Stream<Entity> lookupAttrs = stream(entity.getEntities(LOOKUP_ATTRIBUTES).spliterator(), false);
+			entityMetaData.setLookupAttributes(lookupAttrs.map(lookupAttrEntity -> {
+				return entityMetaData.getAttribute(lookupAttrEntity.getString(AttributeMetaDataMetaData.NAME));
+			}));
 		}
+
 	}
 
 	/**
@@ -191,18 +205,21 @@ class EntityMetaDataRepository
 		}
 		((PackageImpl) packageRepository.getPackage(emd.getPackage().getName())).addEntity(emd);
 		Entity entity = toEntity(emd);
-		AttributeMetaData labelAttribute = entityMetaData.getLabelAttribute();
-		if (labelAttribute != null)
-		{
-			emd.setLabelAttribute(labelAttribute);
-			entity.set(LABEL_ATTRIBUTE, labelAttribute.getName());
-		}
-		AttributeMetaData idAttribute = entityMetaData.getIdAttribute();
+		AttributeMetaData idAttribute = entityMetaData.getOwnIdAttribute();
 		if (idAttribute != null)
 		{
 			emd.setIdAttribute(idAttribute);
 			entity.set(ID_ATTRIBUTE, idAttribute.getName());
 		}
+		AttributeMetaData labelAttribute = entityMetaData.getOwnLabelAttribute();
+		if (labelAttribute != null)
+		{
+			emd.setLabelAttribute(labelAttribute);
+			entity.set(LABEL_ATTRIBUTE, labelAttribute.getName());
+		}
+		Iterable<AttributeMetaData> lookupAttributes = entityMetaData.getOwnLookupAttributes();
+		emd.setLookupAttributes(stream(lookupAttributes.spliterator(), false));
+		entity.set(LOOKUP_ATTRIBUTES, stream(lookupAttributes.spliterator(), false).collect(toList()));
 		Iterable<AttributeMetaData> attributes = entityMetaData.getOwnAttributes();
 		if (attributes != null)
 		{
