@@ -62,17 +62,6 @@
 							<arguments>run-script build</arguments>                        
                         </configuration>
 					</execution>
-					<execution>
-						<id>webpack production build</id>
-						<goals>
-							<goal>webpack</goal>
-                        </goals>
-	        			<configuration>
-	        				<skip>${webpack.development}</skip>
-							<outputdir>target/classes/js/dist</outputdir>
-							<arguments>-p --config webpack.production.config.js</arguments>
-						</configuration>
-					</execution>
     			</executions>
 			</plugin>			
 			<!-- compile XML schemas -->
@@ -116,6 +105,38 @@
 		</plugins>
 	</build>
 	
+	<profiles>
+		<profile>
+			<id>production</id>
+			<properties>
+				<!-- This disables the development build. -->
+				<webpack.production>true</webpack.production>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.github.eirslett</groupId>
+						<artifactId>frontend-maven-plugin</artifactId>
+						<version>0.0.27</version>
+						<executions>
+		        			<execution>
+								<id>webpack production build</id>
+								<goals>
+									<goal>webpack</goal>
+		                        </goals>
+			        			<configuration>
+			        				<skip>${webpack.development}</skip>
+									<outputdir>target/classes/js/dist</outputdir>
+									<arguments>-p --config webpack.production.config.js</arguments>
+								</configuration>
+							</execution>
+		    			</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.molgenis</groupId>
