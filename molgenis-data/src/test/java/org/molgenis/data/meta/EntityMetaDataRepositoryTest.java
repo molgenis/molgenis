@@ -157,8 +157,8 @@ public class EntityMetaDataRepositoryTest
 		when(entity.getString(EntityMetaDataMetaData.SIMPLE_NAME)).thenReturn(simpleEntityName);
 		when(entity.getString(EntityMetaDataMetaData.BACKEND)).thenReturn("backend");
 		when(entity.getString(EntityMetaDataMetaData.FULL_NAME)).thenReturn(entityName);
-		when(entity.getString(EntityMetaDataMetaData.ID_ATTRIBUTE)).thenReturn(idAttrName);
-		when(entity.getString(EntityMetaDataMetaData.LABEL_ATTRIBUTE)).thenReturn("labelAttr");
+		when(entity.getEntity(EntityMetaDataMetaData.ID_ATTRIBUTE)).thenReturn(attrEntityId);
+		when(entity.getEntity(EntityMetaDataMetaData.LABEL_ATTRIBUTE)).thenReturn(attrEntityLabel);
 		when(entity.getEntities(EntityMetaDataMetaData.LOOKUP_ATTRIBUTES))
 				.thenReturn(Arrays.asList(attrEntityLookup0, attrEntityLookup1));
 		when(entity.getBoolean(EntityMetaDataMetaData.ABSTRACT)).thenReturn(Boolean.FALSE);

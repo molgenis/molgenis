@@ -131,15 +131,17 @@ class EntityMetaDataRepository
 			}
 
 			// set id, label and lookup attrs
-			String idAttrName = entity.getString(ID_ATTRIBUTE);
-			if (idAttrName != null)
+			Entity idAttr = entity.getEntity(ID_ATTRIBUTE);
+			if (idAttr != null)
 			{
-				entityMetaData.setIdAttribute(entityMetaData.getAttribute(idAttrName));
+				entityMetaData
+						.setIdAttribute(entityMetaData.getAttribute(idAttr.getString(AttributeMetaDataMetaData.NAME)));
 			}
-			String labelAttrName = entity.getString(LABEL_ATTRIBUTE);
-			if (labelAttrName != null)
+			Entity labelAttr = entity.getEntity(LABEL_ATTRIBUTE);
+			if (labelAttr != null)
 			{
-				entityMetaData.setLabelAttribute(entityMetaData.getAttribute(labelAttrName));
+				entityMetaData.setLabelAttribute(
+						entityMetaData.getAttribute(labelAttr.getString(AttributeMetaDataMetaData.NAME)));
 			}
 			Stream<Entity> lookupAttrs = stream(entity.getEntities(LOOKUP_ATTRIBUTES).spliterator(), false);
 			entityMetaData.setLookupAttributes(lookupAttrs.map(lookupAttrEntity -> {

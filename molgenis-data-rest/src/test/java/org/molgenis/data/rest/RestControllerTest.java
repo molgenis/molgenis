@@ -142,6 +142,9 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		DefaultAttributeMetaData attrName = new DefaultAttributeMetaData("name", FieldTypeEnum.STRING);
 
 		DefaultAttributeMetaData attrId = new DefaultAttributeMetaData("id", FieldTypeEnum.STRING);
+		attrId.setReadOnly(true);
+		attrId.setUnique(true);
+		attrId.setNillable(false);
 		attrId.setVisible(false);
 
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
