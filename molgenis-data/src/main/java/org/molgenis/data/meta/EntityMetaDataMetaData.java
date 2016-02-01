@@ -36,8 +36,8 @@ public class EntityMetaDataMetaData extends DefaultEntityMetaData
 		addAttribute(SIMPLE_NAME, ROLE_LABEL).setNillable(false);
 		addAttribute(BACKEND);
 		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(PackageRepository.META_DATA);
-		addAttribute(ID_ATTRIBUTE);
-		addAttribute(LABEL_ATTRIBUTE);
+		addAttribute(ID_ATTRIBUTE).setDataType(XREF).setRefEntity(AttributeMetaDataMetaData.INSTANCE);
+		addAttribute(LABEL_ATTRIBUTE).setDataType(XREF).setRefEntity(AttributeMetaDataMetaData.INSTANCE);
 		addAttribute(LOOKUP_ATTRIBUTES).setDataType(MREF).setRefEntity(AttributeMetaDataMetaData.INSTANCE);
 		addAttribute(ABSTRACT).setDataType(BOOL);
 		addAttribute(LABEL, ROLE_LOOKUP);

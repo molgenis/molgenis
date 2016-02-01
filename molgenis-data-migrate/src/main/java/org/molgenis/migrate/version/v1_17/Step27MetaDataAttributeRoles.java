@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 
 public class Step27MetaDataAttributeRoles extends MolgenisUpgrade
@@ -87,6 +89,86 @@ public class Step27MetaDataAttributeRoles extends MolgenisUpgrade
 		jdbcTemplate.execute(
 				"ALTER TABLE `attributes` DROP COLUMN `idAttribute`, DROP COLUMN `labelAttribute`, DROP COLUMN `lookupAttribute`");
 
+		// replace idAttribute/labelAttribute attribute names with attribute identifiers
+		sql = "SELECT `fullName`,`identifier`,`name` FROM `entities_attributes` LEFT JOIN `attributes` ON `attributes`.`identifier` = `entities_attributes`.`attributes`";
+		List<Triple<String, String, String>> triples = jdbcTemplate.query(sql,
+				new RowMapper<Triple<String, String, String>>()
+				{
+					@Override
+					public Triple<String, String, String> mapRow(ResultSet rs, int rowNum) throws SQLException
+					{
+						return new Triple<String, String, String>(rs.getString("fullName"), rs.getString("identifier"),
+								rs.getString("name"));
+					}
+				});
+		Map<String, Map<String, String>> entityAttrMap = new HashMap<>();
+		triples.forEach(triple -> {
+			String entityName = triple.getA();
+			Map<String, String> attrMap = entityAttrMap.get(entityName);
+			if (attrMap == null)
+			{
+				attrMap = new HashMap<>();
+				entityAttrMap.put(entityName, attrMap);
+			}
+			attrMap.put(triple.getC(), triple.getB());
+		});
+
+		sql = "SELECT `fullName`,`idAttribute`,`labelAttribute` FROM `entities`";
+		jdbcTemplate.query(sql, new RowCallbackHandler()
+		{
+			@Override
+			public void processRow(ResultSet rs) throws SQLException
+			{
+				String entityName = rs.getString("fullName");
+				String idAttrName = rs.getString("idAttribute");
+				String labelAttrName = rs.getString("labelAttribute");
+				String updateSql = "UPDATE `entities` SET `idAttribute` = ?, `labelAttribute` = ? WHERE `fullName` = ?";
+				jdbcTemplate.update(updateSql, new Object[]
+				{ entityAttrMap.get(entityName).get(idAttrName), entityAttrMap.get(entityName).get(labelAttrName),
+						entityName });
+			}
+		});
+		// convert idAttribute from string to xref
+		jdbcTemplate.execute("ALTER TABLE `entities` MODIFY `idAttribute` varchar(255) DEFAULT NULL");
+		jdbcTemplate.execute("ALTER TABLE `entities` ADD KEY `idAttribute` (`idAttribute`)");
+		jdbcTemplate.execute(
+				"ALTER TABLE `entities` ADD CONSTRAINT `entities_ibfk_3` FOREIGN KEY (`idAttribute`) REFERENCES `attributes` (`identifier`)");
+
+		// convert labelAttribute from string to xref
+		jdbcTemplate.execute("ALTER TABLE `entities` MODIFY `labelAttribute` varchar(255) DEFAULT NULL");
+		jdbcTemplate.execute("ALTER TABLE `entities` ADD KEY `labelAttribute` (`labelAttribute`)");
+		jdbcTemplate.execute(
+				"ALTER TABLE `entities` ADD CONSTRAINT `entities_ibfk_4` FOREIGN KEY (`labelAttribute`) REFERENCES `attributes` (`identifier`)");
+
 		LOG.info("Updated metadata from version 26 to 27");
+	}
+
+	private static class Triple<T1, T2, T3>
+	{
+		private final T1 a;
+		private final T2 b;
+		private final T3 c;
+
+		public Triple(T1 a, T2 b, T3 c)
+		{
+			this.a = a;
+			this.b = b;
+			this.c = c;
+		}
+
+		public T1 getA()
+		{
+			return a;
+		}
+
+		public T2 getB()
+		{
+			return b;
+		}
+
+		public T3 getC()
+		{
+			return c;
+		}
 	}
 }

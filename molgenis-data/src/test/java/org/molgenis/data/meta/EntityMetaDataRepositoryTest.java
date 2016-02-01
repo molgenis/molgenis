@@ -104,8 +104,8 @@ public class EntityMetaDataRepositoryTest
 		verify(entityMetaRepo).add(entityCaptor.capture());
 
 		Entity capturedEntity = entityCaptor.getValue();
-		assertEquals(capturedEntity.getString(EntityMetaDataMetaData.ID_ATTRIBUTE), idAttrName);
-		assertEquals(capturedEntity.getString(EntityMetaDataMetaData.LABEL_ATTRIBUTE), labelAttrName);
+		assertEquals(capturedEntity.getEntity(EntityMetaDataMetaData.ID_ATTRIBUTE), idAttrEntity);
+		assertEquals(capturedEntity.getEntity(EntityMetaDataMetaData.LABEL_ATTRIBUTE), labelAttrEntity);
 		assertEquals(Lists.newArrayList(capturedEntity.getEntities(EntityMetaDataMetaData.LOOKUP_ATTRIBUTES)),
 				Arrays.asList(lookupAttr0Entity, lookupAttr1Entity));
 	}
