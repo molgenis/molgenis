@@ -248,10 +248,10 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 	{
 		// verify that css file exists
 		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-		Resource resource = resolver.getResource("/css/themes/" + bootstrapTheme);
+		Resource resource = resolver.getResource("/css/" + bootstrapTheme);
 		if (!resource.exists())
 		{
-			throw new MolgenisDataException("Bootstrap theme does not exist [/css/themes/" + bootstrapTheme + "]");
+			throw new MolgenisDataException("Bootstrap theme does not exist [/css/" + bootstrapTheme + "]");
 		}
 
 		set(Meta.BOOTSTRAP_THEME, bootstrapTheme);
