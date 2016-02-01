@@ -53,6 +53,10 @@ public class Step26migrateJpaBackend extends MolgenisUpgrade
 		jdbcTemplate.update("INSERT INTO entities_attributes (`order`, `fullName`, `attributes`) VALUES (?, ?, ?)", 22,
 				"MolgenisUser", languageCode);
 
+		//Fix #4397 migration from 1.8.1 to 1.16 fails because of changes in the JPA entities
+		jdbcTemplate.update(
+				"UPDATE `attributes` set `description`='This is the hashed password, enter a new plaintext password to update.' WHERE `name`='password_'");
+
 		LOG.info("update entities with jpa backend, new backend: " + backend);
 		jdbcTemplate.execute("update entities set backend='" + backend + "' where backend = 'JPA'");
 	}
