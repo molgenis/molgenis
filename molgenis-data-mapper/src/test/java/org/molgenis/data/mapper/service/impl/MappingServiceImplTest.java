@@ -5,6 +5,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.DECIMAL;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
@@ -107,15 +108,15 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		when(userService.getUser("Piet")).thenReturn(user);
 
 		hopMetaData = new DefaultEntityMetaData("HopEntity", PackageImpl.defaultPackage);
-		hopMetaData.addAttribute("identifier").setIdAttribute(true);
+		hopMetaData.addAttribute("identifier", ROLE_ID);
 		hopMetaData.addAttribute("height").setDataType(DECIMAL).setNillable(false);
 
 		geneMetaData = new DefaultEntityMetaData("Gene", PackageImpl.defaultPackage);
-		geneMetaData.addAttribute("id").setIdAttribute(true);
+		geneMetaData.addAttribute("id", ROLE_ID);
 		geneMetaData.addAttribute("length").setDataType(DECIMAL).setNillable(false);
 
 		exonMetaData = new DefaultEntityMetaData("Exon", PackageImpl.defaultPackage);
-		exonMetaData.addAttribute("id").setIdAttribute(true);
+		exonMetaData.addAttribute("id", ROLE_ID);
 		exonMetaData.addAttribute("basepairs").setDataType(DECIMAL).setNillable(false);
 
 		if (!dataService.hasRepository("HopEntity"))

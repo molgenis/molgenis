@@ -1,5 +1,6 @@
 package org.molgenis.data.importer;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.I18nUtils.getLanguageCode;
 import static org.molgenis.data.i18n.I18nUtils.isI18n;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.AGGREGATEABLE;
@@ -8,10 +9,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.DEFAULT_VALUE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.EXPRESSION;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.ID_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.LOOKUP_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NILLABLE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MAX;
@@ -83,6 +81,9 @@ import com.google.common.collect.Sets;
  */
 public class EmxMetaDataParser implements MetaDataParser
 {
+	private static final String ID_ATTRIBUTE = "idAttribute";
+	private static final String LOOKUP_ATTRIBUTE = "lookupAttribute";
+	private static final String LABEL_ATTRIBUTE = "labelAttribute";
 
 	// Sheet names
 	public static final String ENTITIES = EntityMetaDataMetaData.ENTITY_NAME;
@@ -195,7 +196,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			}
 		}
 
-		Map<String, Map<String, DefaultAttributeMetaData>> attributesMap = new LinkedHashMap<String, Map<String, DefaultAttributeMetaData>>();
+		Map<String, Map<String, EmxAttribute>> attributesMap = new LinkedHashMap<String, Map<String, EmxAttribute>>();
 
 		// 1st pass: create attribute stubs
 		int i = 1;// Header
@@ -213,13 +214,13 @@ public class EmxMetaDataParser implements MetaDataParser
 			// create attribute
 			DefaultAttributeMetaData attribute = new DefaultAttributeMetaData(attributeName);
 
-			Map<String, DefaultAttributeMetaData> entitiesMap = attributesMap.get(entityName);
+			Map<String, EmxAttribute> entitiesMap = attributesMap.get(entityName);
 			if (entitiesMap == null)
 			{
-				entitiesMap = new LinkedHashMap<String, DefaultAttributeMetaData>();
+				entitiesMap = new LinkedHashMap<>();
 				attributesMap.put(entityName, entitiesMap);
 			}
-			entitiesMap.put(attributeName, attribute);
+			entitiesMap.put(attributeName, new EmxAttribute(attribute));
 		}
 
 		// 2nd pass: set all properties on attribute stubs except for attribute relations
@@ -229,10 +230,11 @@ public class EmxMetaDataParser implements MetaDataParser
 			i++;
 
 			String entityName = attributeEntity.getString(ENTITY);
-			Map<String, DefaultAttributeMetaData> entityMap = attributesMap.get(entityName);
+			Map<String, EmxAttribute> entityMap = attributesMap.get(entityName);
 
 			String attributeName = attributeEntity.getString(NAME);
-			DefaultAttributeMetaData attribute = entityMap.get(attributeName);
+			EmxAttribute emxAttribute = entityMap.get(attributeName);
+			DefaultAttributeMetaData attribute = emxAttribute.getAttr();
 
 			String attributeDataType = attributeEntity.getString(DATA_TYPE);
 			String refEntityName = attributeEntity.getString(REF_ENTITY);
@@ -265,7 +267,7 @@ public class EmxMetaDataParser implements MetaDataParser
 
 			boolean isIdAttr = attributeIdAttribute != null
 					&& (attributeIdAttribute.equalsIgnoreCase("true") || attributeIdAttribute.equalsIgnoreCase(AUTO));
-			attribute.setIdAttribute(isIdAttr);
+			emxAttribute.setIdAttr(isIdAttr);
 
 			if (isIdAttr)
 			{
@@ -322,7 +324,7 @@ public class EmxMetaDataParser implements MetaDataParser
 									+ "): lookupAttribute cannot be of type " + attribute.getDataType());
 				}
 
-				attribute.setLookupAttribute(lookupAttribute);
+				emxAttribute.setLookupAttr(lookupAttribute);
 			}
 
 			if (labelAttribute != null)
@@ -335,7 +337,7 @@ public class EmxMetaDataParser implements MetaDataParser
 									+ "): labelAttribute cannot be of type " + attribute.getDataType());
 				}
 
-				attribute.setLabelAttribute(labelAttribute);
+				emxAttribute.setLabelAttr(labelAttribute);
 			}
 
 			attribute.setLabel(attributeEntity.getString(LABEL));
@@ -454,16 +456,16 @@ public class EmxMetaDataParser implements MetaDataParser
 			i++;
 
 			String entityName = attributeEntity.getString(ENTITY);
-			Map<String, DefaultAttributeMetaData> entityMap = attributesMap.get(entityName);
+			Map<String, EmxAttribute> entityMap = attributesMap.get(entityName);
 
 			String attributeName = attributeEntity.getString(NAME);
-			DefaultAttributeMetaData attribute = entityMap.get(attributeName);
+			DefaultAttributeMetaData attribute = entityMap.get(attributeName).getAttr();
 
 			// register attribute parent-children relations for compound attributes
 			String partOfAttribute = attributeEntity.getString(PART_OF_ATTRIBUTE);
 			if (partOfAttribute != null && !partOfAttribute.isEmpty())
 			{
-				DefaultAttributeMetaData compoundAttribute = entityMap.get(partOfAttribute);
+				DefaultAttributeMetaData compoundAttribute = entityMap.get(partOfAttribute).getAttr();
 
 				if (compoundAttribute == null)
 				{
@@ -494,19 +496,19 @@ public class EmxMetaDataParser implements MetaDataParser
 		}
 
 		// store attributes with entities
-		for (Map.Entry<String, Map<String, DefaultAttributeMetaData>> entry : attributesMap.entrySet())
+		for (Map.Entry<String, Map<String, EmxAttribute>> entry : attributesMap.entrySet())
 		{
 			String entityName = entry.getKey();
-			Map<String, DefaultAttributeMetaData> attributes = entry.getValue();
+			Map<String, EmxAttribute> attributes = entry.getValue();
 
-			List<AttributeMetaData> editableEntityMetaData = new ArrayList<AttributeMetaData>();
+			List<EmxAttribute> editableEntityMetaData = new ArrayList<>();
 			// add root attributes to entity
 			Set<String> entityAttributeNames = rootAttributes.get(entityName);
 			if (entityAttributeNames != null)
 			{
-				for (DefaultAttributeMetaData attribute : attributes.values())
+				for (EmxAttribute attribute : attributes.values())
 				{
-					if (entityAttributeNames.contains(attribute.getName()))
+					if (entityAttributeNames.contains(attribute.getAttr().getName()))
 					{
 						editableEntityMetaData.add(attribute);
 					}
@@ -1017,4 +1019,51 @@ public class EmxMetaDataParser implements MetaDataParser
 		return report;
 	}
 
+	static class EmxAttribute
+	{
+		private final DefaultAttributeMetaData attr;
+		private boolean idAttr;
+		private boolean labelAttr;
+		private boolean lookupAttr;
+
+		public EmxAttribute(DefaultAttributeMetaData attr)
+		{
+			this.attr = requireNonNull(attr);
+		}
+
+		public DefaultAttributeMetaData getAttr()
+		{
+			return attr;
+		}
+
+		public boolean isIdAttr()
+		{
+			return idAttr;
+		}
+
+		public void setIdAttr(boolean idAttr)
+		{
+			this.idAttr = idAttr;
+		}
+
+		public boolean isLabelAttr()
+		{
+			return labelAttr;
+		}
+
+		public void setLabelAttr(boolean labelAttr)
+		{
+			this.labelAttr = labelAttr;
+		}
+
+		public boolean isLookupAttr()
+		{
+			return lookupAttr;
+		}
+
+		public void setLookupAttr(boolean lookupAttr)
+		{
+			this.lookupAttr = lookupAttr;
+		}
+	}
 }

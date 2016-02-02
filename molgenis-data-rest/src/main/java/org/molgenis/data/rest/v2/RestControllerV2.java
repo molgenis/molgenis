@@ -487,7 +487,7 @@ class RestControllerV2
 			throw new RuntimeException("attribute : " + attributeName + " does not exist!");
 		}
 
-		return new AttributeMetaDataResponseV2(entityName, attribute, null, permissionService, dataService,
+		return new AttributeMetaDataResponseV2(entityName, entity, attribute, null, permissionService, dataService,
 				languageService);
 	}
 
@@ -517,9 +517,9 @@ class RestControllerV2
 			}
 			AggregateResult aggs = dataService.aggregate(entityName, aggsQ);
 			AttributeMetaDataResponseV2 xAttrResponse = xAttr != null ? new AttributeMetaDataResponseV2(entityName,
-					xAttr, fetch, permissionService, dataService, languageService) : null;
+					meta, xAttr, fetch, permissionService, dataService, languageService) : null;
 			AttributeMetaDataResponseV2 yAttrResponse = yAttr != null ? new AttributeMetaDataResponseV2(entityName,
-					yAttr, fetch, permissionService, dataService, languageService) : null;
+					meta, yAttr, fetch, permissionService, dataService, languageService) : null;
 			return new EntityAggregatesResponse(aggs, xAttrResponse, yAttrResponse, BASE_URI + '/' + entityName);
 		}
 		else

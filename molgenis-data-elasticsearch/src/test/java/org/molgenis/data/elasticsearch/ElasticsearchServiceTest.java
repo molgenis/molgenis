@@ -1,11 +1,11 @@
 package org.molgenis.data.elasticsearch;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 
@@ -13,17 +13,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.action.bulk.BulkProcessor;
-import org.elasticsearch.action.index.IndexRequestBuilder;
-import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
@@ -46,7 +42,6 @@ import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.AfterClass;
@@ -174,7 +169,7 @@ public class ElasticsearchServiceTest
 		dataService.addRepository(repo);
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("entity");
 		entityMetaData.setBackend(ElasticsearchRepositoryCollection.NAME);
-		entityMetaData.addAttribute(idAttrName).setDataType(MolgenisFieldTypes.INT).setIdAttribute(true);
+		entityMetaData.addAttribute(idAttrName, ROLE_ID).setDataType(MolgenisFieldTypes.INT);
 		Query q = new QueryImpl();
 		Iterable<Entity> searchResults = searchService.search(q, entityMetaData);
 		Iterator<Entity> it = searchResults.iterator();
@@ -183,44 +178,6 @@ public class ElasticsearchServiceTest
 			assertEquals(it.next().getIdValue(), i);
 		}
 		assertFalse(it.hasNext());
-	}
-
-	private MapEntity createEntityAndRegisterSource(final EntityMetaData metaData, final String id)
-	{
-		final String idAttributeName = metaData.getIdAttribute().getName();
-		final String entityName = metaData.getName();
-		MapEntity entity = new MapEntity(idAttributeName);
-		entity.set(idAttributeName, id);
-		Map<String, Object> source = getSource(metaData, entity);
-		whenIndexEntity(client, id, entityName, source);
-		return entity;
-	}
-
-	private Map<String, Object> getSource(EntityMetaData metaData, Entity entity)
-	{
-		final String idAttributeName = metaData.getIdAttribute().getName();
-		final String entityName = metaData.getName();
-		Map<String, Object> source = new HashMap<String, Object>();
-		source.put(idAttributeName, entity.get(idAttributeName));
-		source.put("type", entityName);
-		return source;
-	}
-
-	private DefaultEntityMetaData createEntityMeta(String refEntityName)
-	{
-		DefaultEntityMetaData refEntityMetaData = new DefaultEntityMetaData(refEntityName);
-		refEntityMetaData.addAttribute("id").setIdAttribute(true).setUnique(true);
-		return refEntityMetaData;
-	}
-
-	private void whenIndexEntity(Client client, String id, String entityName, Map<String, Object> source)
-	{
-		IndexRequestBuilder indexRequestBuilder = mock(IndexRequestBuilder.class);
-		when(indexRequestBuilder.setSource(eq(source))).thenReturn(indexRequestBuilder);
-		@SuppressWarnings("unchecked")
-		ListenableActionFuture<IndexResponse> indexResponse = mock(ListenableActionFuture.class);
-		when(indexRequestBuilder.execute()).thenReturn(indexResponse);
-		when(client.prepareIndex(indexName, entityName, id)).thenReturn(indexRequestBuilder);
 	}
 
 	private SearchHits createSearchHits(final SearchHit[] searchHits, final int totalHits)

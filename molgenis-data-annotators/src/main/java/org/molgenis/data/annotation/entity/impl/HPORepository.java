@@ -1,5 +1,7 @@
 package org.molgenis.data.annotation.entity.impl;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -56,9 +58,8 @@ public class HPORepository extends AbstractRepository
 		DefaultEntityMetaData entityMeta = new DefaultEntityMetaData("HPO");
 		entityMeta.addAttribute(HPO_DISEASE_ID_COL_NAME);
 		entityMeta.addAttribute(HPO_GENE_SYMBOL_COL_NAME);
-		entityMeta.addAttribute(HPO_ID_COL_NAME).setIdAttribute(true);
+		entityMeta.addAttribute(HPO_ID_COL_NAME, ROLE_ID);
 		entityMeta.addAttribute(HPO_TERM_COL_NAME);
-
 		return entityMeta;
 	}
 

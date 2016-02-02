@@ -1,5 +1,7 @@
 package org.molgenis.data.i18n;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -15,7 +17,7 @@ public class I18nStringMetaData extends DefaultEntityMetaData
 	private I18nStringMetaData()
 	{
 		super(ENTITY_NAME);
-		addAttribute(MSGID).setNillable(false).setIdAttribute(true);
+		addAttribute(MSGID, ROLE_ID);
 		addAttribute(DESCRIPTION).setNillable(true).setDataType(MolgenisFieldTypes.TEXT);
 		addAttribute(EN).setNillable(true).setDataType(MolgenisFieldTypes.TEXT);
 	}

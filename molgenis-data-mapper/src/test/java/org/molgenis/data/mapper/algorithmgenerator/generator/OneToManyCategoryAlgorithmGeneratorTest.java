@@ -1,5 +1,8 @@
 package org.molgenis.data.mapper.algorithmgenerator.generator;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -43,12 +46,10 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 
 		DefaultEntityMetaData targetRefEntityMetaData = new DefaultEntityMetaData("POTATO_REF");
 		DefaultAttributeMetaData targetCodeAttributeMetaData = new DefaultAttributeMetaData("code", FieldTypeEnum.INT);
-		targetCodeAttributeMetaData.setIdAttribute(true);
 		DefaultAttributeMetaData targetLabelAttributeMetaData = new DefaultAttributeMetaData("label",
 				FieldTypeEnum.STRING);
-		targetLabelAttributeMetaData.setLabelAttribute(true);
-		targetRefEntityMetaData.addAttributeMetaData(targetCodeAttributeMetaData);
-		targetRefEntityMetaData.addAttributeMetaData(targetLabelAttributeMetaData);
+		targetRefEntityMetaData.addAttributeMetaData(targetCodeAttributeMetaData, ROLE_ID);
+		targetRefEntityMetaData.addAttributeMetaData(targetLabelAttributeMetaData, ROLE_LABEL);
 
 		targetAttributeMetaData = new DefaultAttributeMetaData("Current Consumption Frequency of Potatoes",
 				FieldTypeEnum.CATEGORICAL);
@@ -153,12 +154,10 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 		DefaultEntityMetaData sourceRefEntityMetaData = new DefaultEntityMetaData(entityName);
 
 		DefaultAttributeMetaData sourceCodeAttributeMetaData = new DefaultAttributeMetaData("code", FieldTypeEnum.INT);
-		sourceCodeAttributeMetaData.setIdAttribute(true);
 		DefaultAttributeMetaData sourceLabelAttributeMetaData = new DefaultAttributeMetaData("label",
 				FieldTypeEnum.STRING);
-		sourceLabelAttributeMetaData.setLabelAttribute(true);
-		sourceRefEntityMetaData.addAttributeMetaData(sourceCodeAttributeMetaData);
-		sourceRefEntityMetaData.addAttributeMetaData(sourceLabelAttributeMetaData);
+		sourceRefEntityMetaData.addAttributeMetaData(sourceCodeAttributeMetaData, ROLE_ID);
+		sourceRefEntityMetaData.addAttributeMetaData(sourceLabelAttributeMetaData, ROLE_LABEL);
 		return sourceRefEntityMetaData;
 	}
 

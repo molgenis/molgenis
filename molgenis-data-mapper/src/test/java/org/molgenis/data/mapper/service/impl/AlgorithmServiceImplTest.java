@@ -11,6 +11,8 @@ import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.XREF;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
@@ -101,11 +103,12 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testDate() throws ParseException
 	{
+		String idAttrName = "id";
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("LL");
-		entityMetaData.addAttribute("id").setDataType(INT).setIdAttribute(true);
+		entityMetaData.addAttribute(idAttrName, ROLE_ID).setDataType(INT);
 		entityMetaData.addAttribute("dob").setDataType(DATE);
 		Entity source = new MapEntity(entityMetaData);
-		source.set("id", 1);
+		source.set(idAttrName, 1);
 		source.set("dob", new SimpleDateFormat("dd-MM-yyyy").parse("13-05-2015"));
 
 		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("bob");
@@ -119,11 +122,12 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testGetAgeScript() throws ParseException
 	{
+		String idAttrName = "id";
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("LL");
-		entityMetaData.addAttribute("id").setDataType(INT).setIdAttribute(true);
+		entityMetaData.addAttribute(idAttrName, ROLE_ID).setDataType(INT);
 		entityMetaData.addAttribute("dob").setDataType(DATE);
 		Entity source = new MapEntity(entityMetaData);
-		source.set("id", 1);
+		source.set(idAttrName, 1);
 		source.set("dob", new SimpleDateFormat("dd-MM-yyyy").parse("28-08-1973"));
 
 		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("age");
@@ -140,14 +144,14 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	{
 		// xref entities
 		DefaultEntityMetaData entityMetaDataXref = new DefaultEntityMetaData("xrefEntity1");
-		entityMetaDataXref.addAttribute("id").setDataType(INT).setIdAttribute(true);
+		entityMetaDataXref.addAttribute("id", ROLE_ID).setDataType(INT);
 		entityMetaDataXref.addAttribute("field1").setDataType(STRING);
 		Entity xref1a = new MapEntity(entityMetaDataXref);
 		xref1a.set("id", "1");
 		xref1a.set("field1", "Test");
 
 		DefaultEntityMetaData entityMetaDataXref2 = new DefaultEntityMetaData("xrefEntity2");
-		entityMetaDataXref2.addAttribute("id").setDataType(INT).setIdAttribute(true);
+		entityMetaDataXref2.addAttribute("id", ROLE_ID).setDataType(INT);
 		entityMetaDataXref2.addAttribute("field1").setDataType(STRING);
 		Entity xref2a = new MapEntity(entityMetaDataXref2);
 		xref2a.set("id", "2");
@@ -155,7 +159,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 
 		// source Entity
 		DefaultEntityMetaData entityMetaDataSource = new DefaultEntityMetaData("Source");
-		entityMetaDataSource.addAttribute("id").setDataType(INT).setIdAttribute(true);
+		entityMetaDataSource.addAttribute("id", ROLE_ID).setDataType(INT);
 		entityMetaDataSource.addAttribute("xref").setDataType(XREF);
 		Entity source = new MapEntity(entityMetaDataSource);
 		source.set("id", "1");
@@ -187,8 +191,8 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 
 		// ref entities
 		DefaultEntityMetaData refEntityMeta = new DefaultEntityMetaData(refEntityName);
-		refEntityMeta.addAttribute(refEntityIdAttrName).setDataType(STRING).setIdAttribute(true);
-		refEntityMeta.addAttribute(refEntityLabelAttrName).setDataType(STRING).setLabelAttribute(true);
+		refEntityMeta.addAttribute(refEntityIdAttrName, ROLE_ID);
+		refEntityMeta.addAttribute(refEntityLabelAttrName, ROLE_LABEL).setDataType(STRING);
 
 		Entity refEntity0 = new MapEntity(refEntityMeta);
 		refEntity0.set(refEntityIdAttrName, refEntityId0);
@@ -223,7 +227,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 
 		// source Entity
 		DefaultEntityMetaData entityMetaDataSource = new DefaultEntityMetaData(sourceEntityName);
-		entityMetaDataSource.addAttribute(refEntityIdAttrName).setDataType(INT).setIdAttribute(true).setAuto(true);
+		entityMetaDataSource.addAttribute(refEntityIdAttrName, ROLE_ID).setDataType(INT).setAuto(true);
 		entityMetaDataSource.addAttribute(sourceEntityAttrName).setDataType(MREF).setNillable(false)
 				.setRefEntity(refEntityMeta);
 		Entity source = new MapEntity(entityMetaDataSource);
@@ -246,8 +250,8 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 
 		// ref entities
 		DefaultEntityMetaData refEntityMeta = new DefaultEntityMetaData(refEntityName);
-		refEntityMeta.addAttribute(refEntityIdAttrName).setDataType(STRING).setIdAttribute(true);
-		refEntityMeta.addAttribute(refEntityLabelAttrName).setDataType(STRING).setLabelAttribute(true);
+		refEntityMeta.addAttribute(refEntityIdAttrName, ROLE_ID);
+		refEntityMeta.addAttribute(refEntityLabelAttrName, ROLE_LABEL).setDataType(STRING);
 
 		// mapping
 		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData(targetEntityAttrName);
@@ -257,9 +261,10 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 
 		// source Entity
 		DefaultEntityMetaData entityMetaDataSource = new DefaultEntityMetaData(sourceEntityName);
-		entityMetaDataSource.addAttribute(refEntityIdAttrName).setDataType(INT).setIdAttribute(true).setAuto(true);
+		entityMetaDataSource.addAttribute(refEntityIdAttrName, ROLE_ID).setDataType(INT).setAuto(true);
 		entityMetaDataSource.addAttribute(sourceEntityAttrName).setDataType(MREF).setNillable(true)
 				.setRefEntity(refEntityMeta);
+
 		Entity source = new MapEntity(entityMetaDataSource);
 		source.set(sourceEntityAttrName, null);
 

@@ -94,9 +94,11 @@ public class EntityMetaDataResponse
 					if (attributeExpandsSet != null && attributeExpandsSet.containsKey("attributes".toLowerCase()))
 					{
 						Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
-						this.attributes.put(attr.getName(), new AttributeMetaDataResponse(name, attr, subAttributesSet,
-								Collections.singletonMap("refEntity".toLowerCase(), Sets.newHashSet("idattribute")),
-								permissionService, dataService, languageService));
+						this.attributes.put(attr.getName(),
+								new AttributeMetaDataResponse(name, meta, attr, subAttributesSet,
+										Collections.singletonMap("refEntity".toLowerCase(),
+												Sets.newHashSet("idattribute")),
+										permissionService, dataService, languageService));
 					}
 					else
 					{
@@ -125,8 +127,8 @@ public class EntityMetaDataResponse
 		if (attributesSet == null || attributesSet.contains("lookupAttributes".toLowerCase()))
 		{
 			Iterable<AttributeMetaData> lookupAttributes = meta.getLookupAttributes();
-			this.lookupAttributes = lookupAttributes != null ? Lists.newArrayList(Iterables.transform(lookupAttributes,
-					new Function<AttributeMetaData, String>()
+			this.lookupAttributes = lookupAttributes != null
+					? Lists.newArrayList(Iterables.transform(lookupAttributes, new Function<AttributeMetaData, String>()
 					{
 						@Override
 						public String apply(AttributeMetaData attribute)

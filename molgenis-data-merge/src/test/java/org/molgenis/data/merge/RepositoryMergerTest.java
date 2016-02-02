@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
@@ -39,7 +40,7 @@ import com.google.common.collect.Lists;
 @Component
 public class RepositoryMergerTest
 {
-
+	private DefaultAttributeMetaData idAttribute;
 	private AttributeMetaData metaDataa;
 	private AttributeMetaData metaDatab;
 	private Repository repository1;
@@ -67,25 +68,20 @@ public class RepositoryMergerTest
 		DefaultAttributeMetaData metaData1d = new DefaultAttributeMetaData("d");
 		DefaultAttributeMetaData metaData2c = new DefaultAttributeMetaData("c");
 		DefaultAttributeMetaData metaData2e = new DefaultAttributeMetaData("e");
-		entityMetaData1.addAttributeMetaData(metaDataa);
+		entityMetaData1.addAttributeMetaData(metaDataa, ROLE_ID);
 		entityMetaData1.addAttributeMetaData(metaDatab);
 		entityMetaData1.addAttributeMetaData(metaData1c);
 		entityMetaData1.addAttributeMetaData(metaData1d);
-		entityMetaData1.setIdAttribute(metaDataa.getName());
-		entityMetaData2.addAttributeMetaData(metaDataa);
+		entityMetaData2.addAttributeMetaData(metaDataa, ROLE_ID);
 		entityMetaData2.addAttributeMetaData(metaDatab);
 		entityMetaData2.addAttributeMetaData(metaData2c);
 		entityMetaData2.addAttributeMetaData(metaData2e);
-		entityMetaData2.setIdAttribute(metaDataa.getName());
 
 		// merged metadata
-		DefaultAttributeMetaData idAttribute = new DefaultAttributeMetaData("ID",
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
-		idAttribute.setIdAttribute(true);
+		idAttribute = new DefaultAttributeMetaData("ID", MolgenisFieldTypes.FieldTypeEnum.STRING);
 		idAttribute.setNillable(false);
 		idAttribute.setVisible(false);
-		entityMetaDataMerged.addAttributeMetaData(idAttribute);
-		entityMetaDataMerged.setIdAttribute("ID");
+		entityMetaDataMerged.addAttributeMetaData(idAttribute, ROLE_ID);
 
 		DefaultAttributeMetaData metaData1cMerged = new DefaultAttributeMetaData("meta1_c");
 		DefaultAttributeMetaData metaData1dMerged = new DefaultAttributeMetaData("meta1_d");
@@ -139,8 +135,10 @@ public class RepositoryMergerTest
 		RepositoryMerger repositoryMerger = new RepositoryMerger(dataService);
 
 		// check metaData
-		assertEquals(Lists.newArrayList(entityMetaDataMerged.getAttributes()), Lists.newArrayList(
-				repositoryMerger.mergeMetaData(repositoryList, commonAttributes, "mergedRepo").getAttributes()));
+		assertEquals(
+				Lists.newArrayList(repositoryMerger
+						.mergeMetaData(repositoryList, commonAttributes, idAttribute, "mergedRepo").getAttributes()),
+				Lists.newArrayList(entityMetaDataMerged.getAttributes()));
 	}
 
 	@SuppressWarnings(

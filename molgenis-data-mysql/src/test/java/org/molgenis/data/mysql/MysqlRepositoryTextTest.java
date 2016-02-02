@@ -1,5 +1,7 @@
 package org.molgenis.data.mysql;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
@@ -14,8 +16,7 @@ public class MysqlRepositoryTextTest extends MysqlRepositoryAbstractDatatypeTest
 	public EntityMetaData createMetaData()
 	{
 		EditableEntityMetaData varcharMD = new DefaultEntityMetaData("TextTest").setLabel("Text Test");
-		varcharMD.setIdAttribute("identifier");
-		varcharMD.addAttribute("identifier").setDataType(MolgenisFieldTypes.INT).setAuto(true).setNillable(false);
+		varcharMD.addAttribute("identifier", ROLE_ID).setDataType(MolgenisFieldTypes.INT).setAuto(true);
 		varcharMD.addAttribute("col1").setDataType(MolgenisFieldTypes.TEXT).setNillable(false);
 		varcharMD.addAttribute("col2").setDataType(MolgenisFieldTypes.TEXT);
 		varcharMD.addAttribute("col3").setDataType(MolgenisFieldTypes.TEXT).setDefaultValue("lorem ipsum");

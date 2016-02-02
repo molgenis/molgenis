@@ -76,21 +76,6 @@ public interface AttributeMetaData
 	String getDefaultValue();
 
 	/**
-	 * Whether attribute is primary key
-	 */
-	boolean isIdAtrribute();
-
-	/**
-	 * Whether attribute is human readable key
-	 */
-	boolean isLabelAttribute();
-
-	/**
-	 * Wether this attribute must be searched in case of xref/mref search
-	 */
-	boolean isLookupAttribute();
-
-	/**
 	 * When true the attribute is automatically assigned a value when persisted (for example the current date)
 	 */
 	boolean isAuto();

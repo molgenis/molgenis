@@ -1,6 +1,8 @@
 package org.molgenis.data.elasticsearch;
 
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.transaction.MolgenisTransactionManager.TRANSACTION_ID_RESOURCE_NAME;
 import static org.testng.Assert.assertEquals;
 
@@ -93,9 +95,8 @@ public class ElasticsearchServiceIntegrationTest
 
 		entityMeta = new DefaultEntityMetaData("entity");
 		entityMeta.setBackend(ElasticsearchRepositoryCollection.NAME);
-		entityMeta.addAttribute(idAttrName).setIdAttribute(true).setNillable(false).setUnique(true);
-		entityMeta.addAttribute(labelAttrName).setLabelAttribute(true).setNillable(true);
-
+		entityMeta.addAttribute(idAttrName, ROLE_ID);
+		entityMeta.addAttribute(labelAttrName, ROLE_LABEL).setNillable(true);
 		InMemoryRepository entityRepo = new InMemoryRepository(entityMeta);
 		DataServiceImpl dataServiceImpl = new DataServiceImpl();
 		dataServiceImpl.addRepository(entityRepo);

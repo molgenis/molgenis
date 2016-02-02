@@ -1,6 +1,7 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import static org.mockito.Mockito.mock;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
@@ -70,8 +71,7 @@ public class DannAnnotatorTest extends AbstractTestNGSpringContextTests
 		AttributeMetaData attributeMetaDataAlt = new DefaultAttributeMetaData(VcfRepository.ALT,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT);
 
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
-		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom, ROLE_ID);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataRef);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataAlt);
