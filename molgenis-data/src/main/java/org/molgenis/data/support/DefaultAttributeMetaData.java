@@ -9,10 +9,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.DEFAULT_VALUE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.EXPRESSION;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.ID_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.LOOKUP_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NILLABLE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.PARTS;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MAX;
@@ -57,9 +54,6 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private boolean nillable = true;
 	private boolean readOnly = false;
 	private String defaultValue = null;
-	private boolean idAttribute = false;
-	private boolean labelAttribute = false;
-	private boolean lookupAttribute = false; // remove?
 	private EntityMetaData refEntity;
 	private String expression;
 	private String label;// The default label
@@ -108,9 +102,6 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		this.nillable = attributeMetaData.isNillable();
 		this.readOnly = attributeMetaData.isReadonly();
 		this.defaultValue = attributeMetaData.getDefaultValue();
-		this.idAttribute = attributeMetaData.isIdAtrribute();
-		this.labelAttribute = attributeMetaData.isLabelAttribute();
-		this.lookupAttribute = attributeMetaData.isLookupAttribute();
 		EntityMetaData refEntity = attributeMetaData.getRefEntity();
 		this.refEntity = refEntity != null ? new DefaultEntityMetaData(refEntity) : null; // deep copy
 		this.expression = attributeMetaData.getExpression();
@@ -205,11 +196,6 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	@Override
 	public boolean isReadonly()
 	{
-		if (idAttribute)
-		{
-			readOnly = true;
-		}
-
 		return readOnly;
 	}
 
@@ -230,32 +216,6 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	{
 		this.defaultValue = defaultValue;
 		fireChangeEvent(DEFAULT_VALUE);
-		return this;
-	}
-
-	@Override
-	public boolean isIdAtrribute()
-	{
-		return idAttribute;
-	}
-
-	public DefaultAttributeMetaData setIdAttribute(boolean idAttribute)
-	{
-		this.idAttribute = idAttribute;
-		fireChangeEvent(ID_ATTRIBUTE);
-		return this;
-	}
-
-	@Override
-	public boolean isLabelAttribute()
-	{
-		return labelAttribute;
-	}
-
-	public DefaultAttributeMetaData setLabelAttribute(boolean labelAttribute)
-	{
-		this.labelAttribute = labelAttribute;
-		fireChangeEvent(LABEL_ATTRIBUTE);
 		return this;
 	}
 
@@ -288,8 +248,8 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	@Override
 	public Iterable<AttributeMetaData> getAttributeParts()
 	{
-		return this.attributePartsMap != null ? this.attributePartsMap.values() : Collections
-				.<AttributeMetaData> emptyList();
+		return this.attributePartsMap != null ? this.attributePartsMap.values()
+				: Collections.<AttributeMetaData> emptyList();
 	}
 
 	@Override
@@ -371,11 +331,6 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	@Override
 	public boolean isUnique()
 	{
-		if (idAttribute)
-		{
-			unique = true;
-		}
-
 		return unique;
 	}
 
@@ -400,19 +355,6 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	}
 
 	@Override
-	public boolean isLookupAttribute()
-	{
-		return lookupAttribute;
-	}
-
-	public DefaultAttributeMetaData setLookupAttribute(boolean lookupAttribute)
-	{
-		this.lookupAttribute = lookupAttribute;
-		fireChangeEvent(LOOKUP_ATTRIBUTE);
-		return this;
-	}
-
-	@Override
 	public String toString()
 	{
 		String result = "AttributeMetaData(name='" + this.getName() + "'";
@@ -423,9 +365,6 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		result += " nillable='" + nillable + "'";
 		result += " readOnly='" + readOnly + "'";
 		result += " defaultValue='" + defaultValue + "'";
-		result += " idAttribute='" + idAttribute + "'";
-		result += " labelAttribute='" + labelAttribute + "'";
-		result += " lookupAttribute='" + lookupAttribute + "'";
 		result += " expression='" + expression + "'";
 		result += " label='" + label + "'";
 		result += " visible='" + visible + "'";
@@ -538,85 +477,61 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public boolean isSameAs(AttributeMetaData other)
 	{
 		if (this == other) return true;
-		if (other == null)
-			return false;
+		if (other == null) return false;
 
-		if (isAggregateable() != other.isAggregateable())
-			return false;
-		if (isAuto() != other.isAuto())
-			return false;
+		if (isAggregateable() != other.isAggregateable()) return false;
+		if (isAuto() != other.isAuto()) return false;
 		if (getDescription() == null)
 		{
-			if (other.getDescription() != null) {
+			if (other.getDescription() != null)
+			{
 				return false;
 			}
 		}
-		else if (!getDescription().equals(other.getDescription()))
-			return false;
+		else if (!getDescription().equals(other.getDescription())) return false;
 		if (getDataType() == null)
 		{
-			if (other.getDataType() != null)
-				return false;
+			if (other.getDataType() != null) return false;
 		}
 		else
 		{
-			if (getDataType().getEnumType() != other.getDataType().getEnumType())
-				return false;
+			if (getDataType().getEnumType() != other.getDataType().getEnumType()) return false;
 			if (getDataType().getEnumType() == FieldTypeEnum.ENUM)
 			{
 				if (((EnumField) getDataType()).getEnumOptions() == null)
 				{
-					if (((EnumField) other.getDataType()).getEnumOptions() != null)
-						return false;
-					if (!((EnumField) getDataType()).getEnumOptions().equals(
-							((EnumField) other.getDataType()).getEnumOptions()))
+					if (((EnumField) other.getDataType()).getEnumOptions() != null) return false;
+					if (!((EnumField) getDataType()).getEnumOptions()
+							.equals(((EnumField) other.getDataType()).getEnumOptions()))
 						return true;
 				}
 			}
 		}
-		if (isIdAtrribute() != other.isIdAtrribute())
-			return false;
 		if (getLabel() == null)
 		{
-			if (other.getLabel() != null)
-				return false;
+			if (other.getLabel() != null) return false;
 		}
-		else if (!getLabel().equals(other.getLabel()))
-			return false;
-		if (isLabelAttribute() != other.isLabelAttribute())
-			return false;
-		if (isLookupAttribute() != other.isLookupAttribute())
-			return false;
+		else if (!getLabel().equals(other.getLabel())) return false;
 		if (getName() == null)
 		{
-			if (other.getName() != null)
-				return false;
+			if (other.getName() != null) return false;
 		}
-		else if (!getName().equals(other.getName()))
-			return false;
-		if (isNillable() != other.isNillable())
-			return false;
+		else if (!getName().equals(other.getName())) return false;
+		if (isNillable() != other.isNillable()) return false;
 
 		if (getRange() == null)
 		{
-			if (other.getRange() != null)
-				return false;
+			if (other.getRange() != null) return false;
 		}
-		else if (!getRange().equals(other.getRange()))
-			return false;
-		if (isReadonly() != other.isReadonly())
-			return false;
+		else if (!getRange().equals(other.getRange())) return false;
+		if (isReadonly() != other.isReadonly()) return false;
 		if (getRefEntity() == null)
 		{
-			if (other.getRefEntity() != null)
-				return false;
+			if (other.getRefEntity() != null) return false;
 		}
-		else if (!getRefEntity().getName().equals(other.getRefEntity().getName()))
-			return false;
-		if (isUnique() != other.isUnique())
-			return false;
-		if (isVisible() != other.isVisible())
-			return false;
+		else if (!getRefEntity().getName().equals(other.getRefEntity().getName())) return false;
+		if (isUnique() != other.isUnique()) return false;
+		if (isVisible() != other.isVisible()) return false;
 
 		// attributeparts
 		Iterator<AttributeMetaData> attributeParts = getAttributeParts().iterator();

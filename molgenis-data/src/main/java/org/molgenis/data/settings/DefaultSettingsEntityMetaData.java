@@ -1,6 +1,6 @@
 package org.molgenis.data.settings;
 
-import static org.molgenis.MolgenisFieldTypes.STRING;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -30,8 +30,7 @@ public abstract class DefaultSettingsEntityMetaData extends DefaultEntityMetaDat
 		super(id);
 		setExtends(settingsEntityMeta);
 		setPackage(SettingsEntityMeta.PACKAGE_SETTINGS);
-		addAttribute(ATTR_ID).setIdAttribute(true).setDataType(STRING).setNillable(false).setLabel("Id")
-				.setVisible(false);
+		addAttribute(ATTR_ID, ROLE_ID).setLabel("Id").setVisible(false);
 	}
 
 	@RunAsSystem

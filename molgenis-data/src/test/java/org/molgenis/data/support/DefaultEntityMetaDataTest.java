@@ -4,6 +4,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.COMPOUND;
 import static org.molgenis.MolgenisFieldTypes.STRING;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LOOKUP;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -71,7 +74,7 @@ public class DefaultEntityMetaDataTest
 	public void testCopyConstructorPreservesIdAttribute()
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("name");
-		emd.addAttribute("id").setIdAttribute(true);
+		emd.addAttribute("id", ROLE_ID);
 
 		DefaultEntityMetaData emdCopy = new DefaultEntityMetaData(emd);
 		Assert.assertEquals(emdCopy.getIdAttribute().getName(), "id");
@@ -86,7 +89,7 @@ public class DefaultEntityMetaDataTest
 
 		DefaultEntityMetaData entityMeta = new DefaultEntityMetaData("entity");
 		entityMeta.setExtends(extendsEntityMeta);
-		DefaultAttributeMetaData idAttr = entityMeta.addAttribute("id").setIdAttribute(true);
+		DefaultAttributeMetaData idAttr = entityMeta.addAttribute("id", ROLE_ID);
 		assertEquals(entityMeta.getIdAttribute(), idAttr);
 	}
 
@@ -97,8 +100,8 @@ public class DefaultEntityMetaDataTest
 		entityMetaData.setAbstract(true);
 		entityMetaData.setDescription("description");
 		entityMetaData.setLabel("label");
-		entityMetaData.addAttribute("labelAttribute").setDescription("label attribute").setLabelAttribute(true);
-		entityMetaData.addAttribute("id").setDescription("id attribute").setIdAttribute(true);
+		entityMetaData.addAttribute("labelAttribute", ROLE_LABEL).setDescription("label attribute");
+		entityMetaData.addAttribute("id", ROLE_ID).setDescription("id attribute");
 		assertEquals(new DefaultEntityMetaData(entityMetaData), entityMetaData);
 	}
 
@@ -309,6 +312,31 @@ public class DefaultEntityMetaDataTest
 		entityMeta.setExtends(baseEntityMetaData);
 
 		assertEquals(Lists.newArrayList(entityMeta.getOwnAtomicAttributes()), Arrays.asList(attr0));
+	}
+
+	@Test
+	public void addAttributeMetaDataIdAttr()
+	{
+		DefaultEntityMetaData entityMeta = new DefaultEntityMetaData("entity");
+		DefaultAttributeMetaData idAttr = entityMeta.addAttribute("idAttr", ROLE_ID);
+		assertEquals(entityMeta.getIdAttribute(), idAttr);
+	}
+
+	@Test
+	public void addAttributeMetaDataLabelAttr()
+	{
+		DefaultEntityMetaData entityMeta = new DefaultEntityMetaData("entity");
+		DefaultAttributeMetaData labelAttr = entityMeta.addAttribute("labelAttr", ROLE_LABEL);
+		assertEquals(entityMeta.getLabelAttribute(), labelAttr);
+	}
+
+	@Test
+	public void addAttributeMetaDataLookupAttr()
+	{
+		DefaultEntityMetaData entityMeta = new DefaultEntityMetaData("entity");
+		String lookupAttrName = "lookupAttr";
+		DefaultAttributeMetaData lookupAttr = entityMeta.addAttribute(lookupAttrName, ROLE_LOOKUP);
+		assertEquals(entityMeta.getLookupAttribute(lookupAttrName), lookupAttr);
 	}
 
 	private void assertEntityMetaEquals(EntityMetaData actualEntityMeta, EntityMetaData expectedEntityMeta)

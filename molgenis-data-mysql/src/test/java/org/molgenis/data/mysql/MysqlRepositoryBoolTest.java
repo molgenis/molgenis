@@ -1,5 +1,6 @@
 package org.molgenis.data.mysql;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 import org.molgenis.MolgenisFieldTypes;
@@ -17,8 +18,7 @@ public class MysqlRepositoryBoolTest extends MysqlRepositoryAbstractDatatypeTest
 	public EntityMetaData createMetaData()
 	{
 		EditableEntityMetaData varcharMD = new DefaultEntityMetaData("BoolTest").setLabel("Bool Test");
-		varcharMD.setIdAttribute("col1");
-		varcharMD.addAttribute("col1").setDataType(MolgenisFieldTypes.BOOL).setNillable(false);
+		varcharMD.addAttribute("col1", ROLE_ID).setDataType(MolgenisFieldTypes.BOOL);
 		varcharMD.addAttribute("col2").setDataType(MolgenisFieldTypes.BOOL);
 		varcharMD.addAttribute("col3").setDataType(MolgenisFieldTypes.BOOL);
 		return varcharMD;

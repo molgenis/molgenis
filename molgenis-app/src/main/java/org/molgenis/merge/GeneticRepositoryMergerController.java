@@ -73,16 +73,15 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 	{
 		dataService.getEntityNames();
 		List<String> geneticRepositories = new ArrayList<String>();
-		dataService.getEntityNames().forEach(
-				name -> {
-					if (dataService.getEntityMetaData(name).getAttribute(CHROM.getName()) != null
-							&& dataService.getEntityMetaData(name).getAttribute(POS.getName()) != null
-							&& dataService.getEntityMetaData(name).getAttribute(REF.getName()) != null
-							&& dataService.getEntityMetaData(name).getAttribute(ALT.getName()) != null)
-					{
-						geneticRepositories.add(name);
-					}
-				});
+		dataService.getEntityNames().forEach(name -> {
+			if (dataService.getEntityMetaData(name).getAttribute(CHROM.getName()) != null
+					&& dataService.getEntityMetaData(name).getAttribute(POS.getName()) != null
+					&& dataService.getEntityMetaData(name).getAttribute(REF.getName()) != null
+					&& dataService.getEntityMetaData(name).getAttribute(ALT.getName()) != null)
+			{
+				geneticRepositories.add(name);
+			}
+		});
 
 		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(geneticRepositories,
 				new Function<String, EntityMetaData>()
@@ -132,7 +131,7 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 			}
 
 			EntityMetaData mergedEntityMetaData = repositoryMerger.mergeMetaData(geneticRepositories, commonAttributes,
-					resultSet);
+					null, resultSet);
 			Repository mergedRepository = dataService.getMeta().addEntityMeta(mergedEntityMetaData);
 			repositoryMerger.merge(geneticRepositories, commonAttributes, mergedRepository);
 		}

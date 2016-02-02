@@ -1,5 +1,7 @@
 package org.molgenis.data.mysql;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
@@ -15,7 +17,7 @@ public class MysqlRepositoryStringTest extends MysqlRepositoryAbstractDatatypeTe
 	public EntityMetaData createMetaData()
 	{
 		EditableEntityMetaData varcharMD = new DefaultEntityMetaData("VarcharTest").setLabel("Varchar Test");
-		varcharMD.addAttribute("col1").setDataType(MolgenisFieldTypes.STRING).setNillable(false).setIdAttribute(true);
+		varcharMD.addAttribute("col1", ROLE_ID).setDataType(MolgenisFieldTypes.STRING);
 		varcharMD.addAttribute("col2").setDataType(MolgenisFieldTypes.STRING);
 		varcharMD.addAttribute("col3").setDataType(MolgenisFieldTypes.STRING).setDefaultValue("myDefault");
 		return varcharMD;

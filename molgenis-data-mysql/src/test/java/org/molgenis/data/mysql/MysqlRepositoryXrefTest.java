@@ -1,5 +1,8 @@
 package org.molgenis.data.mysql;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EditableEntityMetaData;
@@ -24,16 +27,14 @@ public class MysqlRepositoryXrefTest extends MysqlRepositoryAbstractDatatypeTest
 	public EntityMetaData createMetaData()
 	{
 		DefaultEntityMetaData refEntity = new DefaultEntityMetaData("StringTarget");
-		refEntity.setLabelAttribute("label");
-		refEntity.addAttribute("identifier").setNillable(false).setIdAttribute(true);
-		refEntity.addAttribute("label");
+		refEntity.addAttribute("identifier", ROLE_ID);
+		refEntity.addAttribute("label", ROLE_LABEL);
 
 		DefaultEntityMetaData refEntity2 = new DefaultEntityMetaData("IntTarget");
-		refEntity2.addAttribute("identifier").setDataType(MolgenisFieldTypes.INT).setNillable(false)
-				.setIdAttribute(true);
+		refEntity2.addAttribute("identifier", ROLE_ID).setDataType(MolgenisFieldTypes.INT);
 
 		EditableEntityMetaData xrefEntity = new DefaultEntityMetaData("XrefTest").setLabel("Xref Test");
-		xrefEntity.addAttribute("identifier").setNillable(false).setIdAttribute(true);
+		xrefEntity.addAttribute("identifier", ROLE_ID);
 		xrefEntity.addAttribute("stringRef").setDataType(MolgenisFieldTypes.XREF).setRefEntity(refEntity)
 				.setNillable(false);
 		xrefEntity.addAttribute("intRef").setDataType(MolgenisFieldTypes.XREF).setRefEntity(refEntity2);
@@ -61,10 +62,10 @@ public class MysqlRepositoryXrefTest extends MysqlRepositoryAbstractDatatypeTest
 		// coll.deleteEntityMeta(getMetaData().getAttribute("intRef").getRefEntity().getName());
 
 		// create
-		MysqlRepository stringRepo = (MysqlRepository) dataService.getMeta().addEntityMeta(
-				getMetaData().getAttribute("stringRef").getRefEntity());
-		MysqlRepository intRepo = (MysqlRepository) dataService.getMeta().addEntityMeta(
-				getMetaData().getAttribute("intRef").getRefEntity());
+		MysqlRepository stringRepo = (MysqlRepository) dataService.getMeta()
+				.addEntityMeta(getMetaData().getAttribute("stringRef").getRefEntity());
+		MysqlRepository intRepo = (MysqlRepository) dataService.getMeta()
+				.addEntityMeta(getMetaData().getAttribute("intRef").getRefEntity());
 		MysqlRepository xrefRepo = (MysqlRepository) dataService.getMeta().addEntityMeta(getMetaData());
 
 		Assert.assertEquals(xrefRepo.getCreateSql(), createSql());

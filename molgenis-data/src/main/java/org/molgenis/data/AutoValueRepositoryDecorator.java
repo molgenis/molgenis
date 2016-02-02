@@ -292,7 +292,7 @@ public class AutoValueRepositoryDecorator implements Repository
 			String autoAttrName = autoAttr.getName();
 			if (entity.get(autoAttrName) == null)
 			{
-				if (autoAttr.isIdAtrribute())
+				if (autoAttr.equals(getEntityMetaData().getIdAttribute()))
 				{
 					entity.set(autoAttrName, idGenerator.generateId());
 				}

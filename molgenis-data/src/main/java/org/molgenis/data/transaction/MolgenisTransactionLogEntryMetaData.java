@@ -1,5 +1,7 @@
 package org.molgenis.data.transaction;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,9 +22,9 @@ public class MolgenisTransactionLogEntryMetaData extends DefaultEntityMetaData
 	{
 		super(ENTITY_NAME);
 		setBackend(backend);
-		addAttribute(ID).setIdAttribute(true).setAuto(true).setNillable(false).setVisible(false);
-		addAttribute(MOLGENIS_TRANSACTION_LOG).setDataType(MolgenisFieldTypes.XREF).setRefEntity(
-				molgenisTransactionLogMetaData);
+		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
+		addAttribute(MOLGENIS_TRANSACTION_LOG).setDataType(MolgenisFieldTypes.XREF)
+				.setRefEntity(molgenisTransactionLogMetaData);
 		addAttribute(ENTITY).setNillable(false);
 		addAttribute(TYPE).setDataType(new EnumField()).setEnumOptions(Type.getOptions()).setNillable(false);
 	}
