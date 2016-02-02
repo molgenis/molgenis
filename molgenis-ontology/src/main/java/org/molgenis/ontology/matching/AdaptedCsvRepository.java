@@ -1,5 +1,7 @@
 package org.molgenis.ontology.matching;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
@@ -41,9 +43,7 @@ public class AdaptedCsvRepository extends AbstractRepository
 		}
 
 		DefaultAttributeMetaData idAttribute = new DefaultAttributeMetaData(ALLOWED_IDENTIFIER);
-		idAttribute.setIdAttribute(true);
-		idAttribute.setNillable(false);
-		defaultEntityMetaData.addAttributeMetaData(idAttribute);
+		defaultEntityMetaData.addAttributeMetaData(idAttribute, ROLE_ID);
 
 		return defaultEntityMetaData;
 	}

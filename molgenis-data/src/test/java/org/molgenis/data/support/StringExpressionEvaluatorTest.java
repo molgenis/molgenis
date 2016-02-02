@@ -1,5 +1,6 @@
 package org.molgenis.data.support;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
@@ -23,8 +24,7 @@ public class StringExpressionEvaluatorTest
 	public void createEntity()
 	{
 		emd = new DefaultEntityMetaData("Source");
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("Identifier").setIdAttribute(true).setNillable(false)
-				.setDataType(new IntField()));
+		emd.addAttributeMetaData(new DefaultAttributeMetaData("Identifier").setDataType(new IntField()), ROLE_ID);
 		emd.addAttributeMetaData(new DefaultAttributeMetaData("Int").setDataType(new IntField()));
 		emd.addAttributeMetaData(new DefaultAttributeMetaData("String").setDataType(new StringField()));
 		emd.addAttributeMetaData(new DefaultAttributeMetaData("NonNumericString").setDataType(new StringField()));
@@ -55,8 +55,8 @@ public class StringExpressionEvaluatorTest
 	@Test
 	public void testStringEvaluatorConstructorChecksIfExpressionIsMap()
 	{
-		AttributeMetaData amd = new DefaultAttributeMetaData("#CHROM").setDataType(new StringField()).setExpression(
-				"{}");
+		AttributeMetaData amd = new DefaultAttributeMetaData("#CHROM").setDataType(new StringField())
+				.setExpression("{}");
 		try
 		{
 			new StringExpressionEvaluator(amd, emd);
@@ -71,8 +71,8 @@ public class StringExpressionEvaluatorTest
 	@Test
 	public void testStringEvaluatorConstructorChecksIfAttributeMentionsExistingAttribute()
 	{
-		AttributeMetaData amd = new DefaultAttributeMetaData("#CHROM").setDataType(new StringField()).setExpression(
-				"bogus");
+		AttributeMetaData amd = new DefaultAttributeMetaData("#CHROM").setDataType(new StringField())
+				.setExpression("bogus");
 		try
 		{
 			new StringExpressionEvaluator(amd, emd);
@@ -89,8 +89,8 @@ public class StringExpressionEvaluatorTest
 	@Test
 	public void testStringEvaluatorLookupAttributeAndConvertFromIntToString()
 	{
-		AttributeMetaData amd = new DefaultAttributeMetaData("#CHROM").setDataType(new StringField()).setExpression(
-				"Int");
+		AttributeMetaData amd = new DefaultAttributeMetaData("#CHROM").setDataType(new StringField())
+				.setExpression("Int");
 		assertEquals(new StringExpressionEvaluator(amd, emd).evaluate(entity), "1");
 	}
 
@@ -111,8 +111,8 @@ public class StringExpressionEvaluatorTest
 	@Test
 	public void testStringEvaluatorLookupAttributeAndConvertFromStringToLong()
 	{
-		AttributeMetaData amd = new DefaultAttributeMetaData("#POS").setDataType(new LongField()).setExpression(
-				"String");
+		AttributeMetaData amd = new DefaultAttributeMetaData("#POS").setDataType(new LongField())
+				.setExpression("String");
 		assertEquals(new StringExpressionEvaluator(amd, emd).evaluate(entity), 12L);
 	}
 
@@ -120,8 +120,8 @@ public class StringExpressionEvaluatorTest
 	public void testStringEvaluatorLookupAttributeAndConvertFromNonNumericStringToLongFails()
 	{
 
-		AttributeMetaData amd = new DefaultAttributeMetaData("#POS").setDataType(new LongField()).setExpression(
-				"NonNumericString");
+		AttributeMetaData amd = new DefaultAttributeMetaData("#POS").setDataType(new LongField())
+				.setExpression("NonNumericString");
 		try
 		{
 			assertEquals(new StringExpressionEvaluator(amd, emd).evaluate(entity), 12L);
@@ -129,8 +129,7 @@ public class StringExpressionEvaluatorTest
 		}
 		catch (ConversionFailedException expected)
 		{
-			assertEquals(
-					expected.getMessage(),
+			assertEquals(expected.getMessage(),
 					"Failed to convert from type java.lang.String to type java.lang.Long for value 'Hello World!'; nested exception is java.lang.NumberFormatException: For input string: \"HelloWorld!\"");
 		}
 	}

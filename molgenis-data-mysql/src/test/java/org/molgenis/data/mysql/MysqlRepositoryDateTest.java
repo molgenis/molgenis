@@ -1,5 +1,6 @@
 package org.molgenis.data.mysql;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 import java.text.ParseException;
@@ -22,8 +23,7 @@ public class MysqlRepositoryDateTest extends MysqlRepositoryAbstractDatatypeTest
 	public EntityMetaData createMetaData()
 	{
 		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("DateTest").setLabel("Date Test");
-		entityMetaData.setIdAttribute("col1");
-		entityMetaData.addAttribute("col1").setDataType(MolgenisFieldTypes.DATE).setNillable(false);
+		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(MolgenisFieldTypes.DATE);
 		entityMetaData.addAttribute("col2").setDataType(MolgenisFieldTypes.DATE);
 		entityMetaData.addAttribute("col3").setDataType(MolgenisFieldTypes.DATE);
 		return entityMetaData;

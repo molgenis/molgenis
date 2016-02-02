@@ -1,11 +1,14 @@
 package org.molgenis.auth;
 
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.springframework.stereotype.Component;
-
 import static org.molgenis.MolgenisFieldTypes.BOOL;
 import static org.molgenis.MolgenisFieldTypes.EMAIL;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LOOKUP;
+
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.springframework.stereotype.Component;
 
 @Component
 public class MolgenisUserMetaData extends DefaultEntityMetaData
@@ -17,11 +20,10 @@ public class MolgenisUserMetaData extends DefaultEntityMetaData
 		super(ENTITY_NAME);
 		setDescription("Anyone who can login");
 
-		addAttribute(MolgenisUser.ID).setAuto(true).setVisible(false)
-				.setDescription("automatically generated internal id, only for internal use.").setIdAttribute(true)
-				.setNillable(false);
-		addAttribute(MolgenisUser.USERNAME).setLabel("Username").setLookupAttribute(true).setUnique(true)
-				.setDescription("").setLabelAttribute(true).setNillable(false);
+		addAttribute(MolgenisUser.ID, ROLE_ID).setAuto(true).setVisible(false)
+				.setDescription("automatically generated internal id, only for internal use.");
+		addAttribute(MolgenisUser.USERNAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Username").setUnique(true)
+				.setDescription("").setNillable(false);
 		addAttribute(MolgenisUser.PASSWORD_).setLabel("Password")
 				.setDescription("This is the hashed password, enter a new plaintext password to update.")
 				.setNillable(false);
@@ -34,8 +36,7 @@ public class MolgenisUserMetaData extends DefaultEntityMetaData
 				.setAggregateable(true).setDescription("").setNillable(false);
 		addAttribute(MolgenisUser.FIRSTNAME).setLabel("First name").setNillable(true).setDescription("");
 		addAttribute(MolgenisUser.MIDDLENAMES).setLabel("Middle names").setNillable(true).setDescription("");
-		addAttribute(MolgenisUser.LASTNAME).setLabel("Last name").setLookupAttribute(true).setNillable(true)
-				.setDescription("");
+		addAttribute(MolgenisUser.LASTNAME, ROLE_LOOKUP).setLabel("Last name").setNillable(true).setDescription("");
 		addAttribute(MolgenisUser.TITLE).setLabel("Title").setNillable(true)
 				.setDescription("An academic title, e.g. Prof.dr, PhD");
 		addAttribute(MolgenisUser.AFFILIATION).setLabel("Affiliation").setNillable(true).setDescription("");
@@ -49,7 +50,7 @@ public class MolgenisUserMetaData extends DefaultEntityMetaData
 		addAttribute(MolgenisUser.PHONE)
 				.setDescription("The telephone number of the Contact including the suitable area codes.")
 				.setNillable(true);
-		addAttribute(MolgenisUser.EMAIL).setDescription("The email address of the Contact.").setLookupAttribute(true)
+		addAttribute(MolgenisUser.EMAIL, ROLE_LOOKUP).setDescription("The email address of the Contact.")
 				.setUnique(true).setDataType(EMAIL).setNillable(false);
 		addAttribute(MolgenisUser.FAX).setDescription("The fax number of the Contact.").setNillable(true);
 		addAttribute(MolgenisUser.TOLLFREEPHONE).setLabel("Toll-free phone").setNillable(true)

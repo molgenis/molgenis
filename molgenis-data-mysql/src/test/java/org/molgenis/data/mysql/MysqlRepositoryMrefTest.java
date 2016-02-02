@@ -1,6 +1,8 @@
 package org.molgenis.data.mysql;
 
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.testng.Assert.assertEquals;
 
 import java.util.ArrayList;
@@ -30,16 +32,14 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 	public EntityMetaData createMetaData()
 	{
 		DefaultEntityMetaData refEntity = new DefaultEntityMetaData("StringTarget2");
-		refEntity.setLabelAttribute("label");
-		refEntity.addAttribute("identifier").setNillable(false).setIdAttribute(true);
-		refEntity.addAttribute("label");
+		refEntity.addAttribute("identifier", ROLE_ID);
+		refEntity.addAttribute("label", ROLE_LABEL);
 
 		DefaultEntityMetaData refEntity2 = new DefaultEntityMetaData("IntTarget2");
-		refEntity2.addAttribute("identifier").setDataType(MolgenisFieldTypes.INT).setNillable(false)
-				.setIdAttribute(true);
+		refEntity2.addAttribute("identifier", ROLE_ID).setDataType(MolgenisFieldTypes.INT);
 
 		EditableEntityMetaData varcharMD = new DefaultEntityMetaData("MrefTest").setLabel("ref Test");
-		varcharMD.addAttribute("identifier").setNillable(false).setIdAttribute(true);
+		varcharMD.addAttribute("identifier", ROLE_ID);
 		varcharMD.addAttribute("stringRef").setDataType(MolgenisFieldTypes.MREF).setRefEntity(refEntity)
 				.setNillable(false);
 		varcharMD.addAttribute("intRef").setDataType(MolgenisFieldTypes.MREF).setRefEntity(refEntity2)

@@ -3,6 +3,7 @@ package org.molgenis.data.support;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.COMPOUND;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 import org.molgenis.MolgenisFieldTypes;
@@ -17,12 +18,13 @@ public class AbstractEntityTest
 	@Test
 	public void getLabelValue()
 	{
+		String labelAttrName = "label";
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("entity");
-		entityMetaData.addAttribute("label").setLabelAttribute(true).setDataType(MolgenisFieldTypes.SCRIPT);
+		entityMetaData.addAttribute(labelAttrName, ROLE_ID).setDataType(MolgenisFieldTypes.SCRIPT);
 		AbstractEntity entity = mock(AbstractEntity.class);
 		when(entity.getLabelValue()).thenCallRealMethod();
 		when(entity.getEntityMetaData()).thenReturn(entityMetaData);
-		when(entity.get("label")).thenReturn("label value");
+		when(entity.get(labelAttrName)).thenReturn("label value");
 		assertEquals(entity.getLabelValue(), "label value");
 	}
 

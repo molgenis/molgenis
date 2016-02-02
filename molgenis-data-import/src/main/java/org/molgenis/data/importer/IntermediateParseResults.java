@@ -11,6 +11,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.i18n.I18nStringMetaData;
 import org.molgenis.data.i18n.LanguageMetaData;
+import org.molgenis.data.importer.EmxMetaDataParser.EmxAttribute;
 import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Tag;
@@ -79,14 +80,29 @@ public final class IntermediateParseResults
 		tags.put(identifier, tagEntity);
 	}
 
-	public void addAttributes(String entityName, List<AttributeMetaData> editableEntityMetaData)
+	public void addAttributes(String entityName, List<EmxAttribute> emxAttrs)
 	{
-		EditableEntityMetaData emd = getEntityMetaData(entityName);
-		if (emd == null) emd = addEntityMetaData(entityName);
+		EditableEntityMetaData entityMeta = getEntityMetaData(entityName);
+		if (entityMeta == null) entityMeta = addEntityMetaData(entityName);
 
-		for (AttributeMetaData amd : editableEntityMetaData)
+		for (EmxAttribute emxAttr : emxAttrs)
 		{
-			emd.addAttributeMetaData(amd);
+			AttributeMetaData attr = emxAttr.getAttr();
+			entityMeta.addAttributeMetaData(attr);
+
+			// set attribute roles
+			if (emxAttr.isIdAttr())
+			{
+				entityMeta.setIdAttribute(attr);
+			}
+			if (emxAttr.isLabelAttr())
+			{
+				entityMeta.setLabelAttribute(attr);
+			}
+			if (emxAttr.isLookupAttr())
+			{
+				entityMeta.addLookupAttribute(attr);
+			}
 		}
 	}
 

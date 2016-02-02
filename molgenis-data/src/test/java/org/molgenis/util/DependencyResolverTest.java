@@ -2,6 +2,7 @@ package org.molgenis.util;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -47,7 +48,7 @@ public class DependencyResolverTest
 	public void resolveSelfReferences()
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("Person");
-		emd.addAttribute("name").setIdAttribute(true).setNillable(false);
+		emd.addAttribute("name", ROLE_ID);
 		emd.addAttribute("father").setDataType(MolgenisFieldTypes.XREF).setNillable(true).setRefEntity(emd);
 		emd.addAttribute("mother").setDataType(MolgenisFieldTypes.XREF).setNillable(true).setRefEntity(emd);
 
@@ -82,9 +83,9 @@ public class DependencyResolverTest
 		DataServiceImpl ds = new DataServiceImpl();
 		ds.addRepository(repo);
 
-		Iterable<Entity> entities = Arrays.<Entity> asList(new DefaultEntity(emd, ds, piet), new DefaultEntity(emd, ds,
-				klaas), new DefaultEntity(emd, ds, jan), new DefaultEntity(emd, ds, katrijn), new DefaultEntity(emd,
-				ds, marie));
+		Iterable<Entity> entities = Arrays.<Entity> asList(new DefaultEntity(emd, ds, piet),
+				new DefaultEntity(emd, ds, klaas), new DefaultEntity(emd, ds, jan), new DefaultEntity(emd, ds, katrijn),
+				new DefaultEntity(emd, ds, marie));
 
 		Iterable<Entity> sorted = new DependencyResolver().resolveSelfReferences(entities, emd);
 		List<Entity> sortedList = Lists.newArrayList(sorted);

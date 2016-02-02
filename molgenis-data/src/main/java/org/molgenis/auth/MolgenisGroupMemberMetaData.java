@@ -1,9 +1,10 @@
 package org.molgenis.auth;
 
+import static org.molgenis.MolgenisFieldTypes.XREF;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.stereotype.Component;
-
-import static org.molgenis.MolgenisFieldTypes.XREF;
 
 @Component
 public class MolgenisGroupMemberMetaData extends DefaultEntityMetaData
@@ -14,8 +15,7 @@ public class MolgenisGroupMemberMetaData extends DefaultEntityMetaData
 	public MolgenisGroupMemberMetaData()
 	{
 		super(ENTITY_NAME);
-		addAttribute(MolgenisGroupMember.ID).setAuto(true).setVisible(false).setDescription("").setIdAttribute(true)
-				.setNillable(false).setLabelAttribute(true);
+		addAttribute(MolgenisGroupMember.ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");
 		addAttribute(MolgenisGroupMember.MOLGENISUSER).setDataType(XREF).setRefEntity(new MolgenisUserMetaData())
 				.setAggregateable(true).setDescription("").setNillable(false);
 		addAttribute(MolgenisGroupMember.MOLGENISGROUP).setDataType(XREF).setRefEntity(new MolgenisGroupMetaData())

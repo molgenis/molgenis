@@ -1,5 +1,10 @@
 package org.molgenis.data.mysql;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MysqlTestConfig;
 import org.molgenis.data.DataService;
@@ -17,9 +22,6 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-
 /** Test for Query */
 @ContextConfiguration(classes = MysqlTestConfig.class)
 public class MysqlRepositoryCountTest extends AbstractTestNGSpringContextTests
@@ -36,10 +38,10 @@ public class MysqlRepositoryCountTest extends AbstractTestNGSpringContextTests
 
 		// define model
 		DefaultEntityMetaData countryMD = new DefaultEntityMetaData("query_country");
-		countryMD.addAttribute("code").setNillable(false).setIdAttribute(true); // TODO: make this an enum!
+		countryMD.addAttribute("code", ROLE_ID); // TODO: make this an enum!
 
 		DefaultEntityMetaData personMD = new DefaultEntityMetaData("query_person");
-		personMD.addAttribute("email").setNillable(false).setIdAttribute(true);
+		personMD.addAttribute("email", ROLE_ID);
 		personMD.addAttribute("firstName");
 		personMD.addAttribute("lastName");
 		personMD.addAttribute("birthday").setDataType(MolgenisFieldTypes.DATE);
@@ -114,8 +116,9 @@ public class MysqlRepositoryCountTest extends AbstractTestNGSpringContextTests
 		// date
 		Assert.assertEquals(persons.count(new QueryImpl().eq("birthday", sdf.parse("1950-01-31"))), 1);
 		Assert.assertEquals(persons.count(new QueryImpl().gt("birthday", sdf.parse("1950-01-31"))), 2);
-		Assert.assertEquals(
-				persons.count(new QueryImpl().gt("birthday", sdf.parse("1976-06-07")).or().lt("birthday", sdf.parse("1976-06-07"))), 2);
+		Assert.assertEquals(persons.count(
+				new QueryImpl().gt("birthday", sdf.parse("1976-06-07")).or().lt("birthday", sdf.parse("1976-06-07"))),
+				2);
 
 		// xref
 		Assert.assertEquals(persons.count(new QueryImpl().eq("country", "US")), 2);

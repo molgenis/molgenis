@@ -2,6 +2,8 @@ package org.molgenis.data.annotation.resources.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertSame;
@@ -50,7 +52,7 @@ public class ResourcesTest extends AbstractTestNGSpringContextTests
 	public void beforeSuite()
 	{
 		emd = new DefaultEntityMetaData("resourceName");
-		emd.addAttribute("id").setIdAttribute(true).setLabelAttribute(true);
+		emd.addAttribute("id", ROLE_ID, ROLE_LABEL);
 
 		e1 = new DefaultEntity(emd, dataService);
 		e1.set("id", "5");

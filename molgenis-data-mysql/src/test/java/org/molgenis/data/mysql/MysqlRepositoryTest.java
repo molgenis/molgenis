@@ -1,6 +1,7 @@
 package org.molgenis.data.mysql;
 
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -45,7 +46,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 	public void addStreamFindAll()
 	{
 		DefaultEntityMetaData metaData = new DefaultEntityMetaData("IntValue");
-		metaData.addAttribute("intAttr").setDataType(MolgenisFieldTypes.INT).setIdAttribute(true).setNillable(false);
+		metaData.addAttribute("intAttr", ROLE_ID).setDataType(MolgenisFieldTypes.INT);
 
 		Repository repo = metaDataRepositories.addEntityMeta(metaData);
 
@@ -86,7 +87,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 	public void addStreamUpdateStreamFindAll()
 	{
 		DefaultEntityMetaData metaData = new DefaultEntityMetaData("addStreamUpdateStreamFindAll");
-		metaData.addAttribute("intAttr").setDataType(MolgenisFieldTypes.INT).setIdAttribute(true).setNillable(false);
+		metaData.addAttribute("intAttr", ROLE_ID).setDataType(MolgenisFieldTypes.INT);
 		metaData.addAttribute("strAttr").setNillable(false);
 
 		Repository repo = metaDataRepositories.addEntityMeta(metaData);
@@ -118,7 +119,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 	public void addStreamDeleteStreamFindAll()
 	{
 		DefaultEntityMetaData metaData = new DefaultEntityMetaData("IntValue");
-		metaData.addAttribute("intAttr").setDataType(MolgenisFieldTypes.INT).setIdAttribute(true).setNillable(false);
+		metaData.addAttribute("intAttr", ROLE_ID).setDataType(MolgenisFieldTypes.INT);
 
 		Repository repo = metaDataRepositories.addEntityMeta(metaData);
 
@@ -164,7 +165,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 	public void testFindAll()
 	{
 		DefaultEntityMetaData metaData = new DefaultEntityMetaData("IntValue");
-		metaData.addAttribute("intAttr").setDataType(MolgenisFieldTypes.INT).setIdAttribute(true).setNillable(false);
+		metaData.addAttribute("intAttr", ROLE_ID).setDataType(MolgenisFieldTypes.INT);
 
 		Repository repo = metaDataRepositories.addEntityMeta(metaData);
 
@@ -205,11 +206,10 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		DefaultEntityMetaData metaData = new DefaultEntityMetaData("MysqlPerson");
 
 		metaData.addAttribute("firstName").setNillable(false);
-		metaData.addAttribute("lastName").setNillable(false).setIdAttribute(true);
+		metaData.addAttribute("lastName", ROLE_ID);
 
 		// check manually set id (using setIdAttribute)
 
-		metaData.setIdAttribute("lastName");
 		Assert.assertEquals(metaData.getIdAttribute().getName(), "lastName");
 
 		MysqlRepository repo = (MysqlRepository) metaDataRepositories.addEntityMeta(metaData);
@@ -350,14 +350,10 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("testje");
 
-		entityMetaData.setIdAttribute(idAttributeName);
-		entityMetaData.setLabelAttribute(idAttributeName);
 		DefaultAttributeMetaData idAttributeMetaData = new DefaultAttributeMetaData(idAttributeName);
 		idAttributeMetaData.setDataType(MolgenisFieldTypes.STRING);
-		idAttributeMetaData.setIdAttribute(true);
-		idAttributeMetaData.setLabelAttribute(true);
 		idAttributeMetaData.setNillable(false);
-		entityMetaData.addAttributeMetaData(idAttributeMetaData);
+		entityMetaData.addAttributeMetaData(idAttributeMetaData, ROLE_ID);
 
 		Repository testRepository = coll.addEntityMeta(entityMetaData);
 

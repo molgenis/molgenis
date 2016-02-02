@@ -459,14 +459,14 @@ public class MysqlRepository extends AbstractRepository
 			case CATEGORICAL_MREF:
 			case XREF:
 			case FILE:
-				if (att.isLabelAttribute())
+				if (att.equals(getEntityMetaData().getLabelAttribute()))
 				{
 					throw new MolgenisDataException("Attribute [" + att.getName() + "] of entity [" + getName()
 							+ "] is label attribute and of type [" + att.getDataType()
 							+ "]. Label attributes cannot be of type xref, mref, categorical or compound.");
 				}
 
-				if (att.isLookupAttribute())
+				if (getEntityMetaData().getLookupAttribute(att.getName()) != null)
 				{
 					throw new MolgenisDataException("Attribute [" + att.getName() + "] of entity [" + getName()
 							+ "] is lookup attribute and of type [" + att.getDataType()
@@ -498,7 +498,7 @@ public class MysqlRepository extends AbstractRepository
 			}
 			else
 			{
-				if (att.isIdAtrribute() && att.getDataType() instanceof StringField)
+				if (att.equals(getEntityMetaData().getIdAttribute()) && att.getDataType() instanceof StringField)
 				{
 					// id attributes can not be of type TEXT so we'll change it to VARCHAR
 					sql.append(VARCHAR);
@@ -1161,7 +1161,7 @@ public class MysqlRepository extends AbstractRepository
 
 								if (batch.get(rowIndex).get(att.getName()) == null)
 								{
-									if (att.isIdAtrribute() && att.isAuto()
+									if (att.equals(getEntityMetaData().getIdAttribute()) && att.isAuto()
 											&& (att.getDataType() instanceof StringField))
 									{
 										throw new MolgenisDataException(

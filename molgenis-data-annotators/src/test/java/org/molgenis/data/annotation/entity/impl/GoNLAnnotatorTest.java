@@ -1,6 +1,7 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import static org.mockito.Mockito.mock;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -44,7 +45,7 @@ public class GoNLAnnotatorTest extends AbstractTestNGSpringContextTests
 	public void beforeClass() throws IOException
 	{
 		emd = new DefaultEntityMetaData("gonl");
-		emd.addAttribute(VcfRepository.CHROM).setIdAttribute(true).setNillable(false);
+		emd.addAttribute(VcfRepository.CHROM, ROLE_ID);
 		emd.addAttributeMetaData(VcfRepository.POS_META);
 		emd.addAttributeMetaData(VcfRepository.REF_META);
 		emd.addAttributeMetaData(VcfRepository.ALT_META);

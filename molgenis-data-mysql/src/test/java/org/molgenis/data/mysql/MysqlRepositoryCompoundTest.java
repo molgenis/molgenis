@@ -1,5 +1,6 @@
 package org.molgenis.data.mysql;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -23,8 +24,7 @@ public class MysqlRepositoryCompoundTest extends MysqlRepositoryAbstractDatatype
 				.setDataType(MolgenisFieldTypes.BOOL);
 
 		EditableEntityMetaData rootMD = new DefaultEntityMetaData("CompoundTest").setLabel("CompoundTest");
-		rootMD.setIdAttribute("col1");
-		rootMD.addAttribute("col1").setDataType(MolgenisFieldTypes.BOOL).setNillable(false);
+		rootMD.addAttribute("col1", ROLE_ID).setDataType(MolgenisFieldTypes.BOOL);
 		rootMD.addAttribute("compound").setDataType(MolgenisFieldTypes.COMPOUND)
 				.setAttributesMetaData(Arrays.<AttributeMetaData> asList(attributePart));
 		rootMD.addAttribute("col3").setDataType(MolgenisFieldTypes.BOOL);
