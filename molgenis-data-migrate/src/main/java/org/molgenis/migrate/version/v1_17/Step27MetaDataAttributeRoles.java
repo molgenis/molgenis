@@ -140,6 +140,9 @@ public class Step27MetaDataAttributeRoles extends MolgenisUpgrade
 		jdbcTemplate.execute(
 				"ALTER TABLE `entities` ADD CONSTRAINT `entities_ibfk_4` FOREIGN KEY (`labelAttribute`) REFERENCES `attributes` (`identifier`)");
 
+		jdbcTemplate.execute(
+				"ALTER TABLE `attributes` MODIFY COLUMN `dataType` ENUM('bool', 'categorical', 'categoricalmref', 'compound', 'date', 'datetime', 'decimal', 'email', 'enum', 'file', 'html', 'hyperlink', 'image', 'int', 'long', 'mref', 'script', 'string', 'text', 'xref')");
+
 		LOG.info("Updated metadata from version 26 to 27");
 	}
 
