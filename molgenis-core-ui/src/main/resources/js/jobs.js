@@ -1,4 +1,5 @@
 $(function() {
-	React.render(molgenis.ui.Job({
-	}), $('#barbar')[0]);
+	React.render(molgenis.ui.JobContainer({
+		'username' : 'admin'
+	}), $('#job-container')[0]);
 });

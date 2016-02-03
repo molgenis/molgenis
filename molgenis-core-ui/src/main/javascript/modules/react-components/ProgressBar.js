@@ -7,12 +7,12 @@
  *            The percentage that represents the shown width of the bar
  * @param progressMessage
  *            Message shown within the bar
- * @param stats
+ * @param status
  *            The status of the job, will affect bar color
  * @param active
  *            Wether the bar should be animated or not
  * 
- * @exports ProgressBarClass, ProgressBarFactory
+ * @exports ProgressBarClass, ProgressBar factory
  */
 
 import React from 'react';
@@ -30,13 +30,8 @@ var ProgressBarClass = React.createClass({
 		active: React.PropTypes.bool
 	},
 	render: function() {
-		var extraClassAttr;
-		if(this.props.active) {
-			extraClassAttr = this.props.active ? ' progress-bar-striped active' : '';
-		}
-		
 		return <div className="progress">
-			<div className={'progress-bar progress-bar-' + this.props.status + '' + extraClassAttr} 
+			<div className={'progress-bar progress-bar-' + this.props.status + (this.props.active ? ' progress-bar-striped active' : '')} 
 				role="progressbar" style={{minWidth: '2em', 'width': this.props.progressPct+ '%'}}>
 		    		{this.props.progressMessage}
 		    </div>
@@ -45,5 +40,4 @@ var ProgressBarClass = React.createClass({
 });
 
 export { ProgressBarClass };
-
 export default React.createFactory(ProgressBarClass);

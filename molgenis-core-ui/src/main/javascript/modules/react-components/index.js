@@ -35,7 +35,7 @@ import Spinner from './Spinner';
 import Table from './Table';
 import TextArea from './TextArea';
 import ProgressBar from './ProgressBar';
-import Job from './Job';
+import JobContainer from './jobs/JobContainer';
 
 export default {
 	'mixin' : mixin,
@@ -67,5 +67,5 @@ export default {
 	'Table' : Table,
 	'TextArea' : TextArea,
 	'ProgressBar' : ProgressBar,
-	'Job' : Job
+	'JobContainer' : JobContainer
 };

@@ -7,33 +7,15 @@
 <@header css js/>
 
 <div class="row">
-	<h1>JOBS HERE</h1>
 	<div class="col-md-12">
+	<h2>Job and process overview</h2>
 		<div class="col-md-4">
-			<div id="job-container">
-				<h3>WHEN PENDING</h3>
-				<div class="progress">
-			  		<div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em; width: 100%;">
-			    		Pending Import job...
-			  		</div>
-				</div>
-				<h3>WHEN RUNNING AND KNOWN MAX</h3>
-				<div class="progress">
-			  		<div class="progress-bar progress-bar-striped active " role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em; width: 33%;">
-			    		Importing... 100 / 300
-			  		</div>
-				</div>
-				<h3>WHEN RUNNING AND UNKNOWN MAX</h3>
-				<div class="progress">
-			  		<div class="progress-bar progress-bar-striped active " role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em; width: 100%;">
-			    		Importing... 100
-			  		</div>
-				</div>
-				<div id="barbar"></div>
-			</div>
+			<h3>Latest jobs</h3>
+			<div id="job-container"></div>
 		</div>
 		
-		<div class="col-md-4">
+		<div class="col-md-8">
+			<h3>Job history</h3>
 			<table class="table table-striped">
 				<thead>
 					<th>Job ID</th>
