@@ -303,7 +303,9 @@
 						var attr = attrs[i];
 						if(this._isSelectedAttr(attr, selectedAttrs)) {
 							if(molgenis.isCompoundAttr(attr)) {
-								this._createHeadersRec(attr.attributes, {'*': null}, Headers, path, expanded);
+								// for a selected compound attribute select all child attributes (= the wildcard),
+								// child attributes might be expanded so include the selected attributes as well when recursing
+								this._createHeadersRec(attr.attributes, _.extend({'*': null}, selectedAttrs), Headers, path, expanded);
 							} else {
 								var attrPath = path.concat(attr.name);
 								if(this._isExpandedAttr(attr, selectedAttrs)) {
