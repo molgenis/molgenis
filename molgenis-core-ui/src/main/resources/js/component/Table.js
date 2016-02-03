@@ -659,7 +659,12 @@
 						break;
 					case 'CATEGORICAL':
 					case 'XREF':
-						CellContent = a({href: '#', onClick: this._toggleModal.bind(null, true)}, span(null, value[attr.refEntity.labelAttribute]));
+						if(attr.expression) {
+							// computed refs refer to entities that only exist within the context of entity that refers to them 
+							CellContent = span(null, value[attr.refEntity.labelAttribute]);
+						} else {
+							CellContent = a({href: '#', onClick: this._toggleModal.bind(null, true)}, span(null, value[attr.refEntity.labelAttribute]));
+						}
 						break;
 					case 'FILE':
 						CellContent = (
@@ -680,9 +685,15 @@
 						CellContent = (
 							span(null,
 									_.flatten(_.map(value, function(item, i) {
-										var Anchor = a({href: '#', onClick: this._toggleModal.bind(null, true), key: 'a' + i}, span(null, item[attr.refEntity.labelAttribute]));
+										var Element;
+										if(attr.expression) {
+											// computed refs refer to entities that only exist within the context of entity that refers to them
+											Element = span(null, item[attr.refEntity.labelAttribute]);
+										} else {
+											Element = a({href: '#', onClick: this._toggleModal.bind(null, true), key: 'a' + i}, span(null, item[attr.refEntity.labelAttribute]));
+										}
 										var Seperator = i < value.length - 1 ? span({key: 's' + i}, ',') : null;
-										return [Anchor, Seperator];
+										return [Element, Seperator];
 									}.bind(this)))
 							)
 						);
