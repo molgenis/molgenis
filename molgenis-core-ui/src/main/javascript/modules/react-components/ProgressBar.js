@@ -1,3 +1,20 @@
+/**
+ * This react component renders a progress bar.
+ * 
+ * @module ProgressBar
+ * 
+ * @param progressPct
+ *            The percentage that represents the shown width of the bar
+ * @param progressMessage
+ *            Message shown within the bar
+ * @param stats
+ *            The status of the job, will affect bar color
+ * @param active
+ *            Wether the bar should be animated or not
+ * 
+ * @exports ProgressBarClass, ProgressBarFactory
+ */
+
 import React from 'react';
 import DeepPureRenderMixin from './mixin/DeepPureRenderMixin'; 
 
