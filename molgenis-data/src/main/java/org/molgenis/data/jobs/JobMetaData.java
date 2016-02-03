@@ -1,7 +1,7 @@
 package org.molgenis.data.jobs;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.testng.collections.Lists.newArrayList;
 
 import java.util.List;
 
