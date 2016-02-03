@@ -540,7 +540,7 @@
 		render: function() {
 			var CellContentBlocks;
 			// treat expanded mref differently
-			if(this.props.expanded && _.isArray(this.props.value) && this.props.parentAttr.fieldType === "MREF") {
+			if(this.props.expanded && _.isArray(this.props.value) && (this.props.parentAttr.fieldType === 'MREF' || this.props.parentAttr.fieldType === 'CATEGORICAL_MREF')) {
 				CellContentBlocks = _.flatten(_.map(this.props.value, function(value, i) {
 					if(value !== null && value !== undefined) {
 						var CellContentForValue = this._createTableCellContent(value, 'c' + i);
