@@ -28,7 +28,7 @@ var Job = React.createClass({
 		return <div>
 			<ProgressBarClass 
 				progressPct={this.props.job.progressMax !== undefined ? this._getProgressPct() : 100}
-				progressMessage={this.props.job.progressMessage} 
+				progressMessage={this.props.job.progressInt !== undefined ? this._formatProgressMessage() : this.props.job.progressMessage} 
 				status={this._getCssClass()} 
 				active={this._isActive()} 
 			/>
@@ -55,10 +55,11 @@ var Job = React.createClass({
 	_getProgressPct: function() {
 		let progressInt = this.props.job.progressInt;
 		let progressMax = this.props.job.progressMax;
-		console.log(progressInt, progressMax);
 		let calculatedWidth =  progressInt / progressMax * 100;
-		console.log(calculatedWidth);
 		return calculatedWidth; 
+	},
+	_formatProgressMessage: function() {
+		return this.props.job.progressMessage.replace('%p', this.props.job.progressInt);
 	}
 });
 
