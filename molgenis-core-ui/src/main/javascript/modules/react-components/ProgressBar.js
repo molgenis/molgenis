@@ -13,12 +13,16 @@ var ProgressBarClass = React.createClass({
 		active: React.PropTypes.bool
 	},
 	render: function() {
+		var extraClassAttr;
+		if(this.props.active) {
+			extraClassAttr = this.props.active ? ' progress-bar-striped active' : '';
+		}
+		
 		return <div className="progress">
-			<div className="progress-bar progress-bar-{this.props.status} {this.props.active ? 'active' : ''}" 
-				role="progressbar" 
-					style={{minWidth: '2em', 'width': this.props.progressPct+ '%'}}>
-			    		{this.props.progressMessage}
-			</div>
+			<div className={'progress-bar progress-bar-' + this.props.status + '' + extraClassAttr} 
+				role="progressbar" style={{minWidth: '2em', 'width': this.props.progressPct+ '%'}}>
+		    		{this.props.progressMessage}
+		    </div>
 		</div>
 	}
 });
