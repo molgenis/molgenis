@@ -27,8 +27,10 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.annotators.AnnotationRun;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.GenomicDataSettings;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportException;
 import org.molgenis.dataexplorer.galaxy.GalaxyDataExportRequest;
@@ -175,6 +177,11 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			model.addAttribute("datasetRepository", dataService.getRepository(entityName));
 			model.addAttribute("viewName", dataExplorerSettings.getEntityReport(entityName));
+		}
+		else if (moduleId.equals("annotators"))
+		{
+			boolean running = dataService.count("AnnotationRun",new QueryImpl().eq("target",entityName).and().eq("status","RUNNING"))>0;
+			model.addAttribute("running", running);
 		}
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
 	}

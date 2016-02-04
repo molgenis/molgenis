@@ -1,4 +1,12 @@
 <#include "resource-macros.ftl">
+<#if running>
+<div class="row">
+    <div class="col-md-12">
+        No way, you nver ever annotate an entity that is currently annotated!!!!!!!!!
+    </div>
+</div>
+<#else>
+
 <div class="row">
 	<div class="col-md-12" id="annotator-select-container">
 		<form id="annotate-dataset-form" role="form" class="well">
@@ -77,7 +85,7 @@
         </div>
     </div>
 </div>
-
+</#if>
 
 <script id="annotator-template" type="text/x-handlebars-template">
 	{{#equal this.enabled 'true'}}
@@ -157,7 +165,11 @@
     </div>
 </script>
 
+
 <script>
+
+
+
 	$.when($.ajax("<@resource_href "/js/dataexplorer-annotators.js"/>", {'cache': true}))
 		.then(function() {
 			molgenis.dataexplorer.annotators.getAnnotatorSelectBoxes();

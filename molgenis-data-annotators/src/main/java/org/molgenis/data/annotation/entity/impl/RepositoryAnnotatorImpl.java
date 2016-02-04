@@ -42,7 +42,7 @@ public class RepositoryAnnotatorImpl extends AbstractRepositoryEntityAnnotator
 	}
 
 	@Override
-	protected boolean annotationDataExists()
+	public boolean annotationDataExists()
 	{
 		return entityAnnotator.sourceExists();
 	}

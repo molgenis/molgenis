@@ -314,7 +314,7 @@ public class GeneNetworksAnnotator
 		}
 
 		@Override
-		protected boolean annotationDataExists()
+		public boolean annotationDataExists()
 		{
 			return dataService
 					.hasRepository(pluginSettings.getString(GeneNetworksAnnotatorSettings.Meta.PROJECT_ENTITY));

@@ -477,7 +477,7 @@ public class SnpEffAnnotator
 		}
 
 		@Override
-		protected boolean annotationDataExists()
+		public boolean annotationDataExists()
 		{
 			return getSnpEffPath() != null;
 		}
