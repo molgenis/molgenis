@@ -19,6 +19,7 @@ import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.system.RepositoryTemplateLoader;
+import org.molgenis.data.view.ViewRepositoryCollection;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.migrate.version.v1_11.Step20RebuildElasticsearchIndex;
 import org.molgenis.migrate.version.v1_11.Step21SetLoggingEventBackend;
@@ -72,6 +73,9 @@ public class WebAppConfig extends MolgenisWebAppConfig
 
 	@Autowired
 	private ElasticsearchRepositoryCollection elasticsearchRepositoryCollection;
+
+	@Autowired
+	private ViewRepositoryCollection viewRepositoryCollection;
 
 	@Autowired
 	private EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;

@@ -46,8 +46,8 @@ public class MetaDataRepositoryDecorator implements Repository
 	public Set<RepositoryCapability> getCapabilities()
 	{
 		Set<RepositoryCapability> capabilities = decorated.getCapabilities();
-		capabilities.remove(RepositoryCapability.WRITABLE);
-		capabilities.remove(RepositoryCapability.MANAGABLE);
+		// capabilities.remove(RepositoryCapability.WRITABLE); // TODO JJ enable this
+		// capabilities.remove(RepositoryCapability.MANAGABLE); // TODO JJ enable this
 		return capabilities;
 	}
 
