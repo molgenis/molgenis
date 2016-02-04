@@ -303,7 +303,9 @@
 						var attr = attrs[i];
 						if(this._isSelectedAttr(attr, selectedAttrs)) {
 							if(molgenis.isCompoundAttr(attr)) {
-								this._createHeadersRec(attr.attributes, {'*': null}, Headers, path, expanded);
+								// for a selected compound attribute select all child attributes (= the wildcard),
+								// child attributes might be expanded so include the selected attributes as well when recursing
+								this._createHeadersRec(attr.attributes, _.extend({'*': null}, selectedAttrs), Headers, path, expanded);
 							} else {
 								var attrPath = path.concat(attr.name);
 								if(this._isExpandedAttr(attr, selectedAttrs)) {
@@ -540,7 +542,7 @@
 		render: function() {
 			var CellContentBlocks;
 			// treat expanded mref differently
-			if(this.props.expanded && _.isArray(this.props.value) && this.props.parentAttr.fieldType === "MREF") {
+			if(this.props.expanded && _.isArray(this.props.value) && (this.props.parentAttr.fieldType === 'MREF' || this.props.parentAttr.fieldType === 'CATEGORICAL_MREF')) {
 				CellContentBlocks = _.flatten(_.map(this.props.value, function(value, i) {
 					if(value !== null && value !== undefined) {
 						var CellContentForValue = this._createTableCellContent(value, 'c' + i);
@@ -659,7 +661,12 @@
 						break;
 					case 'CATEGORICAL':
 					case 'XREF':
-						CellContent = a({href: '#', onClick: this._toggleModal.bind(null, true)}, span(null, value[attr.refEntity.labelAttribute]));
+						if(attr.expression) {
+							// computed refs refer to entities that only exist within the context of entity that refers to them 
+							CellContent = span(null, value[attr.refEntity.labelAttribute]);
+						} else {
+							CellContent = a({href: '#', onClick: this._toggleModal.bind(null, true)}, span(null, value[attr.refEntity.labelAttribute]));
+						}
 						break;
 					case 'FILE':
 						CellContent = (
@@ -680,9 +687,15 @@
 						CellContent = (
 							span(null,
 									_.flatten(_.map(value, function(item, i) {
-										var Anchor = a({href: '#', onClick: this._toggleModal.bind(null, true), key: 'a' + i}, span(null, item[attr.refEntity.labelAttribute]));
+										var Element;
+										if(attr.expression) {
+											// computed refs refer to entities that only exist within the context of entity that refers to them
+											Element = span(null, item[attr.refEntity.labelAttribute]);
+										} else {
+											Element = a({href: '#', onClick: this._toggleModal.bind(null, true), key: 'a' + i}, span(null, item[attr.refEntity.labelAttribute]));
+										}
 										var Seperator = i < value.length - 1 ? span({key: 's' + i}, ',') : null;
-										return [Anchor, Seperator];
+										return [Element, Seperator];
 									}.bind(this)))
 							)
 						);
