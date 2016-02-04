@@ -122,17 +122,15 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testIfDeleteFailsForSelfReferencingEntity()
 	{
-		DefaultEntityMetaData metaData = new DefaultEntityMetaData("XrefTable");
+		DefaultEntityMetaData metaData = new DefaultEntityMetaData("SelfRefTable");
 		metaData.addAttribute("id", ROLE_ID).setDataType(MolgenisFieldTypes.STRING).setNillable(false);
 		metaData.addAttribute("xrefAttr").setDataType(MolgenisFieldTypes.XREF).setRefEntity(metaData)
 				.setNillable(false);
 
 		Repository repo = metaDataRepositories.addEntityMeta(metaData);
-		List<Entity> xrefTableEntities = new ArrayList<>();
 		Entity xrefTableEntity = new MapEntity("xrefAttr");
 		xrefTableEntity.set("id", "value_1");
 		xrefTableEntity.set("xrefAttr", "value_1");
-		xrefTableEntities.addAll(newArrayList(xrefTableEntity));
 
 		repo.deleteAll(); // Test delete
 	}
@@ -141,8 +139,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 	public void testDeleteAllForXrefs()
 	{
 		DefaultEntityMetaData refMetaData = new DefaultEntityMetaData("RefEntityTable");
-		refMetaData.addAttribute("refAttr", ROLE_ID).setDataType(MolgenisFieldTypes.STRING)
-				.setNillable(false);
+		refMetaData.addAttribute("refAttr", ROLE_ID).setDataType(MolgenisFieldTypes.STRING).setNillable(false);
 
 		DefaultEntityMetaData metaData = new DefaultEntityMetaData("XrefTable");
 		metaData.addAttribute("id", ROLE_ID).setDataType(MolgenisFieldTypes.INT).setNillable(false);
@@ -152,16 +149,12 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		Repository refRepo = metaDataRepositories.addEntityMeta(refMetaData);
 		Repository repo = metaDataRepositories.addEntityMeta(metaData);
 
-		List<Entity> refEntityTableEntities = new ArrayList<>();
 		Entity refEntityTableEntity = new MapEntity("refAttr");
 		refEntityTableEntity.set("refAttr", "xref_value_1");
-		refEntityTableEntities.addAll(newArrayList(refEntityTableEntity));
 
-		List<Entity> xrefTableEntities = new ArrayList<>();
 		Entity xrefTableEntity = new MapEntity("xrefAttr");
 		xrefTableEntity.set("id", 1);
 		xrefTableEntity.set("xrefAttr", "xref_value_1");
-		xrefTableEntities.addAll(newArrayList(xrefTableEntity));
 
 		// Test delete
 		repo.deleteAll();
