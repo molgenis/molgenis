@@ -53,7 +53,7 @@ public abstract class AbstractMetaDataTest extends AbstractDataIntegrationTest
 		DefaultAttributeMetaData compound2 = new DefaultAttributeMetaData("compoundAttr2",
 				MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
 		DefaultAttributeMetaData intAttr = new DefaultAttributeMetaData("intAttr", MolgenisFieldTypes.FieldTypeEnum.INT);
-		entityMetaData.addAttributeMetaData(intAttr, ROLE_LABEL);
+		entityMetaData.setLabelAttribute(intAttr);
 		compound2.setAttributesMetaData(Arrays.asList(intAttr));
 		compound1.setAttributesMetaData(Arrays.asList(compound2));
 		metaDataService.addEntityMeta(entityMetaData);
