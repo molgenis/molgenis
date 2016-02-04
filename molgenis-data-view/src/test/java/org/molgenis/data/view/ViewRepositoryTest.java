@@ -1,63 +1,83 @@
 package org.molgenis.data.view;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+//import static org.testng.Assert.assertEquals;
+//import static org.testng.Assert.assertFalse;
+//import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertEquals;
 
+import org.mockito.Mockito;
+import org.molgenis.data.DataService;
 import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData.AttributeRole;
+import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
+import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.mem.InMemoryRepository;
+import org.molgenis.data.meta.PackageImpl;
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
-public class ViewRepositoryTest
+@ContextConfiguration(classes = ViewRepositoryTest.Config.class)
+public class ViewRepositoryTest extends AbstractTestNGSpringContextTests
 {
-	EditableEntityMetaData entityMetaA;
-	EditableEntityMetaData entityMetaB;
-	EditableEntityMetaData entityMetaC;
+	@Autowired
+	private DataService dataService;
 
-	Repository repoA;
-	Repository repoB;
-	Repository repoC;
+	@Autowired
+	private SearchService searchService;
+
+	private EditableEntityMetaData entityMetaA;
+	private EditableEntityMetaData entityMetaB;
+	private EditableEntityMetaData entityMetaC;
+
+	private Repository repoA;
+	private Repository repoB;
+	private Repository repoC;
+	private ViewRepository viewRepository;
 
 	@BeforeClass
 	public void setupBeforeClass()
 	{
-		// entity A (original entity)
+		// entity A (master entity)
 		entityMetaA = new DefaultEntityMetaData("entityA");
 		entityMetaA.addAttribute("id", ROLE_ID).setDataType(STRING);
 		entityMetaA.addAttribute("chrom").setDataType(STRING).setNillable(false);
 		entityMetaA.addAttribute("pos").setDataType(STRING).setNillable(false);
 		entityMetaA.addAttribute("A1").setDataType(STRING);
-		entityMetaA.addAttribute("A2").setDataType(STRING);
-		entityMetaA.addAttribute("A3").setDataType(STRING);
 
-		// entity B
+		// entity B (slave entity)
 		entityMetaB = new DefaultEntityMetaData("entityB");
 		entityMetaB.addAttribute("id", ROLE_ID).setDataType(STRING);
 		entityMetaB.addAttribute("chrom").setDataType(STRING).setNillable(false);
 		entityMetaB.addAttribute("pos").setDataType(STRING).setNillable(false);
 		entityMetaB.addAttribute("B1").setDataType(STRING);
-		entityMetaB.addAttribute("B2").setDataType(STRING);
-		entityMetaB.addAttribute("B3").setDataType(STRING);
 
-		// entity C
+		// entity C (slave entity)
 		entityMetaC = new DefaultEntityMetaData("entityC");
 		entityMetaC.addAttribute("id", ROLE_ID).setDataType(STRING);
 		entityMetaC.addAttribute("chrom").setDataType(STRING).setNillable(false);
 		entityMetaC.addAttribute("pos").setDataType(STRING).setNillable(false);
 		entityMetaC.addAttribute("C1").setDataType(STRING);
-		entityMetaC.addAttribute("C2").setDataType(STRING);
-		entityMetaC.addAttribute("C3").setDataType(STRING);
 
 		// make repositories
 		repoA = new InMemoryRepository(entityMetaA);
 		repoB = new InMemoryRepository(entityMetaB);
 		repoC = new InMemoryRepository(entityMetaC);
 
-		// entityA2 joins with entityB2
-		// entityA3 joins with entityB3
 		Entity entityA1 = new MapEntity(entityMetaA);
 		entityA1.set("id", "1");
 		entityA1.set("chrom", "1");
@@ -72,14 +92,14 @@ public class ViewRepositoryTest
 
 		Entity entityA3 = new MapEntity(entityMetaA);
 		entityA3.set("id", "3");
-		entityA3.set("chrom", "2");
+		entityA3.set("chrom", "3");
 		entityA3.set("pos", "75");
 		entityA3.set("A1", "testA3");
 
 		Entity entityB1 = new MapEntity(entityMetaB);
 		entityB1.set("id", "1");
 		entityB1.set("chrom", "1");
-		entityB1.set("pos", "10");
+		entityB1.set("pos", "25");
 		entityB1.set("B1", "testB1");
 
 		Entity entityB2 = new MapEntity(entityMetaB);
@@ -90,9 +110,27 @@ public class ViewRepositoryTest
 
 		Entity entityB3 = new MapEntity(entityMetaB);
 		entityB3.set("id", "3");
-		entityB3.set("chrom", "2");
-		entityB3.set("pos", "85");
+		entityB3.set("chrom", "3");
+		entityB3.set("pos", "75");
 		entityB3.set("B1", "testA3");
+
+		Entity entityC1 = new MapEntity(entityMetaC);
+		entityC1.set("id", "1");
+		entityC1.set("chrom", "1");
+		entityC1.set("pos", "25");
+		entityC1.set("C1", "testB1");
+
+		Entity entityC2 = new MapEntity(entityMetaC);
+		entityC2.set("id", "2");
+		entityC2.set("chrom", "2");
+		entityC2.set("pos", "50");
+		entityC2.set("C2", "testA2");
+
+		Entity entityC3 = new MapEntity(entityMetaC);
+		entityC3.set("id", "3");
+		entityC3.set("chrom", "3");
+		entityC3.set("pos", "75");
+		entityC3.set("C3", "testA3");
 
 		// populate repositories
 		repoA.add(entityA1);
@@ -102,5 +140,65 @@ public class ViewRepositoryTest
 		repoB.add(entityB1);
 		repoB.add(entityB2);
 		repoB.add(entityB3);
+
+		repoC.add(entityC1);
+		repoC.add(entityC2);
+		repoC.add(entityC3);
 	}
+
+	@Test
+	private void getEntityMetaData()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("MY_FIRST_VIEW", PackageImpl.defaultPackage);
+		emd.addAttribute("id", AttributeRole.ROLE_ID, AttributeRole.ROLE_LABEL);
+		emd.setAbstract(false);
+		viewRepository = new ViewRepository(emd, dataService, searchService);
+
+		when(dataService.getEntityMetaData("entityA")).thenReturn(entityMetaA);
+		when(dataService.getEntityMetaData("entityB")).thenReturn(entityMetaB);
+		when(dataService.getEntityMetaData("entityC")).thenReturn(entityMetaC);
+
+		Query queryMock = mock(Query.class);
+		when(dataService.query(EntityViewMetaData.ENTITY_NAME)).thenReturn(queryMock);
+		Entity entityMock = mock(Entity.class);
+		Query queryMock2 = mock(Query.class);
+		when(queryMock.eq(EntityViewMetaData.VIEW_NAME, "MY_FIRST_VIEW")).thenReturn(queryMock2);
+		when(queryMock2.findOne()).thenReturn(entityMock);
+		when(entityMock.getString(EntityViewMetaData.MASTER_ENTITY)).thenReturn("entityA");
+
+		// when(
+		// dataService.query(EntityViewMetaData.ENTITY_NAME)
+		// .eq(EntityViewMetaData.VIEW_NAME, "MY_FIRST_VIEW").findOne()
+		// ).thenReturn("");
+		
+		// when(dataService.query(EntityViewMetaData.ENTITY_NAME)
+		// .eq(EntityViewMetaData.VIEW_NAME, "base_MY_FIRST_VIEW").findAll().map(e -> {
+		// return e.getString(EntityViewMetaData.MASTER_ENTITY);
+		// }).collect(Collectors.toList())).thenReturn(Arrays.asList("entityB", "entityC"));
+
+		assertEquals(viewRepository.getEntityMetaData(), "");
+	}
+
+	@Configuration
+	public static class Config
+	{
+		@Bean
+		public LanguageService languageService()
+		{
+			return new LanguageService(dataService(), Mockito.mock(AppSettings.class));
+		}
+
+		@Bean
+		public DataService dataService()
+		{
+			return mock(DataService.class);
+		}
+
+		@Bean
+		public SearchService searchService()
+		{
+			return mock(SearchService.class);
+		}
+	}
+
 }
