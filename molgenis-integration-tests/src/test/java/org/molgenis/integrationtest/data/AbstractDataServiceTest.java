@@ -153,6 +153,11 @@ public abstract class AbstractDataServiceTest extends AbstractDataIntegrationTes
 		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl()), 0);
 	}
 
+	public void testFindAllEmpty() {
+		Stream<Entity> retrieved = dataService.findAll(ENTITY_NAME);
+		assertEquals(retrieved.count(), 0);
+	}
+	
 	public void testFindAll()
 	{
 		List<Entity> entities = create(5);
