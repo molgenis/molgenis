@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import org.elasticsearch.common.collect.Iterators;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
@@ -251,5 +252,11 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 			}
 		});
 		return capabilities;
+	}
+
+	@Override
+	public Iterable<AttributeMetaData> getQueryableAttributes()
+	{
+		return decoratedRepo.getQueryableAttributes();
 	}
 }

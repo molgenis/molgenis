@@ -7,6 +7,7 @@ import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -14,6 +15,7 @@ import java.util.stream.Stream;
 import org.elasticsearch.common.primitives.Ints;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
@@ -234,6 +236,19 @@ public abstract class AbstractElasticsearchRepository implements Repository
 	public void removeEntityListener(EntityListener entityListener)
 	{
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Iterable<AttributeMetaData> getQueryableAttributes()
+	{
+		if (getCapabilities().contains(RepositoryCapability.QUERYABLE))
+		{
+			return getEntityMetaData().getAtomicAttributes();
+		}
+		else
+		{
+			return Collections.emptyList();
+		}
 	}
 
 	private void createMappings()

@@ -311,4 +311,9 @@ public class LanguageRepositoryDecorator implements Repository
 		decorated.removeEntityListener(entityListener);
 	}
 
+	@Override
+	public Iterable<AttributeMetaData> getQueryableAttributes()
+	{
+		return decorated.getQueryableAttributes();
+	}
 }
