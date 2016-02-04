@@ -710,6 +710,5 @@
         <module>molgenis-questionnaires</module>
 		<module>molgenis-file</module>
 		<module>molgenis-catalogue</module>
-    <module>molgenis-data-view</module>
   </modules>
 </project>
