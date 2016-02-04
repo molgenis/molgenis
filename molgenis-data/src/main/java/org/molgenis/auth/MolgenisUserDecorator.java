@@ -1,7 +1,15 @@
 package org.molgenis.auth;
 
+import static java.util.Objects.requireNonNull;
+
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.stream.Stream;
+
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
@@ -16,13 +24,6 @@ import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.stream.Stream;
-
-import static java.util.Objects.requireNonNull;
 
 public class MolgenisUserDecorator implements Repository
 {
@@ -338,5 +339,11 @@ public class MolgenisUserDecorator implements Repository
 	public void removeEntityListener(EntityListener entityListener)
 	{
 		decoratedRepository.removeEntityListener(entityListener);
+	}
+
+	@Override
+	public Iterable<AttributeMetaData> getQueryableAttributes()
+	{
+		return decoratedRepository.getQueryableAttributes();
 	}
 }

@@ -246,4 +246,10 @@ public class RepositorySecurityDecorator implements Repository
 		validatePermission(decoratedRepository.getName(), Permission.READ);
 		decoratedRepository.removeEntityListener(entityListener);
 	}
+
+	@Override
+	public Iterable<AttributeMetaData> getQueryableAttributes()
+	{
+		return decoratedRepository.getQueryableAttributes();
+	}
 }
