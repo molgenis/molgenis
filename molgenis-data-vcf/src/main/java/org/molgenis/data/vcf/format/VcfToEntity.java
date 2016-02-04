@@ -107,7 +107,7 @@ public class VcfToEntity
 		entityMetaData.addAttributeMetaData(REF_META);
 		entityMetaData.addAttributeMetaData(FILTER_META);
 		entityMetaData.addAttributeMetaData(QUAL_META);
-		entityMetaData.addAttributeMetaData(ID_META, ROLE_ID);
+		entityMetaData.addAttributeMetaData(ID_META);
 		DefaultAttributeMetaData idAttributeMetaData = new DefaultAttributeMetaData(INTERNAL_ID,
 				MolgenisFieldTypes.FieldTypeEnum.STRING);
 		idAttributeMetaData.setVisible(false);
