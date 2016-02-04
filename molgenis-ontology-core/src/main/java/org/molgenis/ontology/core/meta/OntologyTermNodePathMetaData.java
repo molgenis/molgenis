@@ -17,9 +17,10 @@ public class OntologyTermNodePathMetaData extends DefaultEntityMetaData
 	private OntologyTermNodePathMetaData()
 	{
 		super(SIMPLE_NAME, OntologyPackage.getPackageInstance());
-		addAttributeMetaData(new DefaultAttributeMetaData(ID).setIdAttribute(true).setNillable(false).setVisible(false));
-		addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_NODE_PATH, FieldTypeEnum.STRING).setNillable(
-				false).setLabelAttribute(true));
+		addAttributeMetaData(
+				new DefaultAttributeMetaData(ID).setIdAttribute(true).setNillable(false).setVisible(false));
+		addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_NODE_PATH, FieldTypeEnum.TEXT)
+				.setNillable(false).setLabelAttribute(true));
 		addAttributeMetaData(new DefaultAttributeMetaData(ROOT, FieldTypeEnum.BOOL).setNillable(false));
 	}
 }
