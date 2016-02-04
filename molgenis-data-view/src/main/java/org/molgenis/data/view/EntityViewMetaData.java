@@ -22,7 +22,7 @@ public class EntityViewMetaData extends DefaultEntityMetaData
 
 		setDescription("Contains the relationships between the master entity and each joined entity of a view.");
 
-		addAttribute(IDENTIFIER).setIdAttribute(true).setAuto(true).setNillable(false).setDataType(STRING);
+		addAttribute(IDENTIFIER, AttributeRole.ROLE_ID).setAuto(true).setNillable(false).setDataType(STRING);
 		addAttribute(VIEW_NAME).setNillable(false).setDataType(STRING);
 		addAttribute(MASTER_ENTITY).setNillable(false).setDataType(STRING);
 		addAttribute(MASTER_ATTR).setNillable(false).setDataType(STRING);

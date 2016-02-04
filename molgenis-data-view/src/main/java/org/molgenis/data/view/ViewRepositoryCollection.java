@@ -109,12 +109,6 @@ public class ViewRepositoryCollection implements ManageableRepositoryCollection
 	@Override
 	public void deleteAttribute(String entityName, String attributeName)
 	{
-		/**
-		 * TODO VIEW
-		 * 
-		 * Update EntityView; EntityViewAttributes;
-		 */
-
 		EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(entityName);
 		if (entityMetaData == null) throw new UnknownEntityException(String.format("Unknown entity '%s'", entityName));
 
