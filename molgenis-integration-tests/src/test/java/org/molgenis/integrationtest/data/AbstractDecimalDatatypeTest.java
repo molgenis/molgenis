@@ -7,6 +7,7 @@ import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 public class AbstractDecimalDatatypeTest extends AbstractDatatypeTest
 {
@@ -14,7 +15,7 @@ public class AbstractDecimalDatatypeTest extends AbstractDatatypeTest
 	public EntityMetaData createMetaData()
 	{
 		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("DecimalTest");
-		entityMetaData.addAttribute("col1").setDataType(DECIMAL).setIdAttribute(true).setNillable(false);
+		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(DECIMAL).setNillable(false);
 		entityMetaData.addAttribute("col2").setDataType(DECIMAL);
 		entityMetaData.addAttribute("col3").setDataType(DECIMAL);
 

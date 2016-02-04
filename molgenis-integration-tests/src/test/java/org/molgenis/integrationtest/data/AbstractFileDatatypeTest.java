@@ -9,6 +9,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.file.FileMeta;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 public class AbstractFileDatatypeTest extends AbstractDatatypeTest
 {
@@ -16,7 +17,7 @@ public class AbstractFileDatatypeTest extends AbstractDatatypeTest
 	public EntityMetaData createMetaData()
 	{
 		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("FileTest");
-		entityMetaData.addAttribute("identifier").setIdAttribute(true).setNillable(false);
+		entityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false);
 		entityMetaData.addAttribute("file").setDataType(FILE).setRefEntity(FileMeta.META_DATA);
 
 		return entityMetaData;
