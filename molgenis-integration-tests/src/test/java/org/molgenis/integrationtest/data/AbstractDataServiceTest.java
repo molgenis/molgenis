@@ -35,6 +35,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 
 import com.google.common.collect.Iterators;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 public abstract class AbstractDataServiceTest extends AbstractDataIntegrationTest
 {
@@ -48,7 +49,7 @@ public abstract class AbstractDataServiceTest extends AbstractDataIntegrationTes
 	{
 		Package p = new PackageImpl("test");
 		entityMetaData = new DefaultEntityMetaData("TestEntity", p);
-		entityMetaData.addAttribute(ID).setIdAttribute(true).setNillable(false).setAuto(true);
+		entityMetaData.addAttribute(ID, ROLE_ID).setNillable(false).setAuto(true);
 		entityMetaData.addAttribute(ATTR_STR).setNillable(true);
 		metaDataService.addEntityMeta(entityMetaData);
 	}

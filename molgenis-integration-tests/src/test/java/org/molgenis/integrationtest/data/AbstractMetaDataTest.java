@@ -17,6 +17,8 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 
 import com.google.common.collect.Iterables;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 
 public abstract class AbstractMetaDataTest extends AbstractDataIntegrationTest
 {
@@ -45,13 +47,13 @@ public abstract class AbstractMetaDataTest extends AbstractDataIntegrationTest
 
 		// Create EntityMetaData
 		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("TestEntity", testPackage1);
-		entityMetaData.addAttribute("identifier").setIdAttribute(true).setNillable(false);
+		entityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false);
 		DefaultAttributeMetaData compound1 = entityMetaData.addAttribute("compoundAttr1").setDataType(
 				MolgenisFieldTypes.COMPOUND);
 		DefaultAttributeMetaData compound2 = new DefaultAttributeMetaData("compoundAttr2",
 				MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
-		DefaultAttributeMetaData intAttr = new DefaultAttributeMetaData("intAttr", MolgenisFieldTypes.FieldTypeEnum.INT)
-				.setLabelAttribute(true);
+		DefaultAttributeMetaData intAttr = new DefaultAttributeMetaData("intAttr", MolgenisFieldTypes.FieldTypeEnum.INT);
+		entityMetaData.addAttributeMetaData(intAttr, ROLE_LABEL);
 		compound2.setAttributesMetaData(Arrays.asList(intAttr));
 		compound1.setAttributesMetaData(Arrays.asList(compound2));
 		metaDataService.addEntityMeta(entityMetaData);

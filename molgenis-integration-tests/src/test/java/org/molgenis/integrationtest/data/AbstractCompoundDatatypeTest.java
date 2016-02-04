@@ -12,6 +12,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+
 
 public abstract class AbstractCompoundDatatypeTest extends AbstractDatatypeTest
 {
@@ -19,12 +21,12 @@ public abstract class AbstractCompoundDatatypeTest extends AbstractDatatypeTest
 	public EntityMetaData createMetaData()
 	{
 		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("CompoundTest");
-		entityMetaData.addAttribute("col1").setDataType(BOOL).setIdAttribute(true).setNillable(false);
+		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(BOOL).setNillable(false);
 
 		DefaultAttributeMetaData attributePart1 = new DefaultAttributeMetaData("col2").setDataType(BOOL);
 		DefaultAttributeMetaData attributePart2 = new DefaultAttributeMetaData("compound1").setDataType(COMPOUND);
-		attributePart2.setAttributesMetaData(Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData("col3")
-				.setDataType(BOOL)));
+		attributePart2.setAttributesMetaData(
+				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData("col3").setDataType(BOOL)));
 
 		entityMetaData.addAttribute("compound").setDataType(COMPOUND)
 				.setAttributesMetaData(Arrays.<AttributeMetaData> asList(attributePart1, attributePart2));
