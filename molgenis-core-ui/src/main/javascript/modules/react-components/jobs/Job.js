@@ -12,7 +12,7 @@
  */
 
 import React from "react";
-import {ProgressBarClass} from '../ProgressBar';
+import { ProgressBarClass } from '../ProgressBar';
 
 import DeepPureRenderMixin from '../mixin/DeepPureRenderMixin'; 
 
@@ -27,19 +27,20 @@ var Job = React.createClass({
 	render: function() {
 		return <div>
 			<ProgressBarClass 
-				progressPct={this.props.job.progressMax !== undefined ? this._getProgressPct() : 100}
 				progressMessage={this.props.job.progressInt !== undefined ? this._formatProgressMessage() : this.props.job.progressMessage} 
-				status={this._getCssClass()} 
+				progressPct={this.props.job.progressMax !== undefined ? this._getProgressPct() : 100}
+				status={this._getCssClass() || 'primary'} 
 				active={this._isActive()} 
 			/>
 		</div>
 	},
 	_getCssClass: function() {
 		let cssTable = {
-			'Pending': 'info',
-			'Running' : 'primary',
-			'Success' : 'success',
-			'Failed' : 'danger'
+			'PENDING': 'info',
+			'RUNNING' : 'primary',
+			'SUCCESS' : 'success',
+			'FAILED' : 'danger',
+			'CANCELED' : 'warning',
 		}
 		return cssTable[this.props.job.status];
 	},

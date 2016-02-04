@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class JobMetaData extends DefaultEntityMetaData
 {
-	private List<String> jobStatusOptions = newArrayList("Pending", "Running", "Success", "Failed", "Canceled");
+	private List<String> jobStatusOptions = newArrayList("PENDING", "RUNNING", "SUCCESS", "FAILED", "CANCELED");
 
 	public JobMetaData()
 	{
