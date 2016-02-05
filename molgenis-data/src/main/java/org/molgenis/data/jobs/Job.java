@@ -1,5 +1,8 @@
 package org.molgenis.data.jobs;
 
+import java.util.Date;
+
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntity;
@@ -22,59 +25,114 @@ public class Job extends DefaultEntity
 
 	public static final EntityMetaData META_DATA = new JobMetaData();
 
+	public static enum Status
+	{
+		PENDING, RUNNING, SUCCESS, FAILED, CANCELED
+	}
+
 	public Job(DataService dataService)
 	{
 		super(META_DATA, dataService);
 	}
 
-	public static String getIdentifier()
+	public String getIdentifier()
 	{
-		return IDENTIFIER;
+		return getString(IDENTIFIER);
 	}
 
-	public static String getUser()
+	public void setIdentifier(String value)
 	{
-		return USER;
+		set(IDENTIFIER, value);
 	}
 
-	public static String getStatus()
+	public MolgenisUser getUser()
 	{
-		return STATUS;
+		return getEntity(USER, MolgenisUser.class);
 	}
 
-	public static String getType()
+	public void setUser(MolgenisUser value)
 	{
-		return TYPE;
+		set(USER, value);
 	}
 
-	public static String getSubmissionDate()
+	public Status getStatus()
 	{
-		return SUBMISSION_DATE;
+		return Status.valueOf(getString(STATUS));
 	}
 
-	public static String getStartDate()
+	public void setStatus(Status value)
 	{
-		return START_DATE;
+		set(STATUS, value.toString().toUpperCase());
 	}
 
-	public static String getEndDate()
+	public String getType()
 	{
-		return END_DATE;
+		return getString(TYPE);
 	}
 
-	public static String getProgressInt()
+	public void setType(String value)
 	{
-		return PROGRESS_INT;
+		set(TYPE, value);
 	}
 
-	public static String getProgressMessage()
+	public Date getSubmissionDate()
 	{
-		return PROGRESS_MESSAGE;
+		return getUtilDate(SUBMISSION_DATE);
 	}
 
-	public static String getProgressMax()
+	public void setSubmissionDate(Date value)
 	{
-		return PROGRESS_MAX;
+		set(SUBMISSION_DATE, value);
+	}
+
+	public Date getStartDate()
+	{
+		return getUtilDate(START_DATE);
+	}
+
+	public void setStartDate(Date value)
+	{
+		set(START_DATE, value);
+	}
+
+	public Date getEndDate()
+	{
+		return getUtilDate(END_DATE);
+	}
+
+	public void setEndDate(Date value)
+	{
+		set(END_DATE, value);
+	}
+
+	public Integer getProgressInt()
+	{
+		return getInt(PROGRESS_INT);
+	}
+
+	public void setProgressInt(Integer value)
+	{
+		set(PROGRESS_INT, value);
+	}
+
+	public String getProgressMessage()
+	{
+		return getString(PROGRESS_MESSAGE);
+	}
+
+	public void setProgressMessage(String value)
+	{
+		set(PROGRESS_MESSAGE, value);
+	}
+
+	public Integer getProgressMax()
+	{
+		return getInt(PROGRESS_MAX);
+	}
+
+	public void setProgressMax(Integer value)
+	{
+		set(PROGRESS_MAX, value);
 	}
 
 	public static EntityMetaData getMetaData()
