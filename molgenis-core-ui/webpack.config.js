@@ -48,7 +48,7 @@ var configuration = {
 			// select these two presets that make it compile jsx -> js and es6
 			// -> js
 			loader : 'babel',
-			exclude : [ /node_modules/, /src\/main\/javascript\/plugins/]
+			exclude : [ /node_modules/, /src[/\\]main[/\\]javascript[/\\]plugins/]
 		}, {
 			test : /\.css$/,
 			loader : 'style-loader!css-loader'
@@ -72,8 +72,6 @@ var configuration = {
 			loader : "url?limit=10000&mimetype=image/gif"
 		} ]
 	},
-	noParse : [ /moment\/locale\/\*\.js/, /node_modules\/*/, /src\/main\/javascript\/plugins\/*\.js$/ ]
-
 }
 
 module.exports = configuration;

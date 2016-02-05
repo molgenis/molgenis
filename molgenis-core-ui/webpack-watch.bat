@@ -1,3 +1,1 @@
-#!/bin/sh
-## TODO: how does this work in windows?
-./node_modules/.bin/webpack.bat -d --watch
+%~dp0node/node node/node_modules/npm/bin/npm-cli.js run-script watch
