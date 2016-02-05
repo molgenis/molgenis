@@ -167,7 +167,7 @@
                     data: form.serialize(),
                     contentType: 'application/x-www-form-urlencoded',
                     success: function (name) {
-                        //reload
+                        location.reload();
                     }
                 });
             }

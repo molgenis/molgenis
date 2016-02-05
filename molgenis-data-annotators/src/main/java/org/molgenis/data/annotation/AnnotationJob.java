@@ -45,7 +45,9 @@ public class AnnotationJob implements Job
 	@Override
 	public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException
 	{
-		String annotationRunId = UUID.randomUUID().toString();
+		String repositoryName = jobExecutionContext.getMergedJobDataMap().getString(REPOSITORY_NAME);
+		String username = jobExecutionContext.getMergedJobDataMap().getString(USERNAME);
+		String annotationRunId = jobExecutionContext.getMergedJobDataMap().getString(ANNOTATION_RUN);
 		try
 		{
 			long t0 = System.currentTimeMillis();
@@ -53,8 +55,6 @@ public class AnnotationJob implements Job
 
 			List<RepositoryAnnotator> annotators = (List<RepositoryAnnotator>) jobExecutionContext.getMergedJobDataMap()
 					.get(ANNOTATORS);
-			String repositoryName = jobExecutionContext.getMergedJobDataMap().getString(REPOSITORY_NAME);
-			String username = jobExecutionContext.getMergedJobDataMap().getString(USERNAME);
 			Repository repository = dataService.getRepository(repositoryName);
 
 			List<RepositoryAnnotator> availableAnnotators = annotationService.getAllAnnotators().stream()
@@ -66,12 +66,12 @@ public class AnnotationJob implements Job
 
 			while (annotatorQueue.size() != 0)
 			{
-				runSingleAnnotator(crudRepositoryAnnotator, annotatorQueue.poll(), annotationRunId, repository, username);
+				runSingleAnnotator(crudRepositoryAnnotator, annotatorQueue.poll(), annotationRunId, repository,
+						username);
 			}
 
-			annotatorRunService.finishAnnotationRun(annotationRunId, "ALL DONE!");
 			long t = System.currentTimeMillis();
-			LOG.info("Annotations finished in " + (t - t0) + " msec.");
+			annotatorRunService.finishAnnotationRun(annotationRunId, "Annotations finished in " + (t - t0) + " msec.");
 		}
 		catch (Exception e)
 		{
@@ -94,8 +94,7 @@ public class AnnotationJob implements Job
 							+ " annotator (started by \"" + username + "\")");
 					crudRepositoryAnnotator.annotate(annotator, repository);
 					LOG.info("Finished annotating \"" + repository.getName() + "\" with the "
-							+ annotator.getSimpleName() + " annotator (started by \""
-							+ username + "\")");
+							+ annotator.getSimpleName() + " annotator (started by \"" + username + "\")");
 				}
 				catch (IOException e)
 				{

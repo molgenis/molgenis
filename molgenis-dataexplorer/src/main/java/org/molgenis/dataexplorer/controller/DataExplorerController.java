@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -25,11 +26,11 @@ import javax.validation.Valid;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.annotators.AnnotationRun;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.QueryImpl;
@@ -176,8 +177,11 @@ public class DataExplorerController extends MolgenisPluginController
 		}
 		else if (moduleId.equals("annotators"))
 		{
-			boolean running = dataService.count("AnnotationRun",new QueryImpl().eq("target",entityName).and().eq("status","RUNNING"))>0;
-			model.addAttribute("running", running);
+			Entity annotationRun = dataService
+					.findOne("AnnotationRun",
+							new QueryImpl().eq("entityName", entityName).and().eq("status", "RUNNING"));
+			model.addAttribute("annotationRun", annotationRun);
+			model.addAttribute("entityName", entityName);
 		}
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
 	}

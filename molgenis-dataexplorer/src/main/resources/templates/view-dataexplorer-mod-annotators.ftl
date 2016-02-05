@@ -1,12 +1,42 @@
 <#include "resource-macros.ftl">
-<#if running>
+<#if annotationRun??>
 <div class="row">
     <div class="col-md-12">
-        No way, you nver ever annotate an entity that is currently annotated!!!!!!!!!
+        This entity is currently being annotated, details listed below. This page will refresh once the annotators finished.
+    <script>
+        setInterval(
+                function ()
+                {
+                    molgenis.RestClient.prototype.getAsync('/api/v1/AnnotationRun/', {'q' : [ {
+                                'field' : 'id',
+                                'operator' : 'EQUALS',
+                                'value' : '${annotationRun.id}'
+                            } ]},
+                            function(annotateRun) {
+                                var entry = annotateRun.items[0];
+                                var container = $('#annotateRun');
+                                container.html("");
+
+                                if(entry.status==="FINISHED"){
+                                    window.location.replace("?entity=${entityName}");
+                                }
+                                else{
+                                    container.html(entry.message);
+                                }
+                            });
+                }, 2000);
+        </script>
+    </div>
+</div>
+
+<div class="row">
+    <div>
+        <pre>
+            <p id="annotateRun"></p>
+        </pre>
     </div>
 </div>
 <#else>
-
 <div class="row">
 	<div class="col-md-12" id="annotator-select-container">
 		<form id="annotate-dataset-form" role="form" class="well">

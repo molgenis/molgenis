@@ -104,7 +104,7 @@ public class CrudRepositoryAnnotator
 	@RunAsSystem
 	private void processBatch(List<Entity> batch, Repository repository)
 	{
-		repository.update(batch);
+		repository.update(batch.stream());
 	}
 
 	/**

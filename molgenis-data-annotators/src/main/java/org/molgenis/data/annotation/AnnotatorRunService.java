@@ -1,15 +1,13 @@
 package org.molgenis.data.annotation;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.annotators.AnnotationRun;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
-import java.util.Date;
+import java.util.UUID;
 
 @Component
 public class AnnotatorRunService
@@ -28,12 +26,12 @@ public class AnnotatorRunService
 	public AnnotationRun addAnnotationRun(String userName, String[] annotatorNames, String entityName)
 	{
 		AnnotationRun annotationRun = new AnnotationRun();
-		annotationRun.setStartDate(new Date());
+		annotationRun.setId(UUID.randomUUID().toString());
 		annotationRun.setStatus("RUNNING");
-		annotationRun.setUserName(userName);
-		annotationRun.setAnnotatorsSelected(String.join(",", annotatorNames));
-		annotationRun.setTarget(entityName);
-		dataService.add(AnnotationRun.ENTITY_NAME, annotationRun);
+		annotationRun.setUser(userName);
+		annotationRun.setMessage("Starting to annotate entity: "+entityName+" with annotators: " + String.join(",", annotatorNames));
+		annotationRun.setEntity(entityName);
+		dataService.add(AnnotationRunMetadata.ENTITY_NAME, annotationRun);
 
 		return annotationRun;
 	}
@@ -43,13 +41,12 @@ public class AnnotatorRunService
 	{
 		try
 		{
-			AnnotationRun annotationRun = dataService.findOne(AnnotationRun.ENTITY_NAME, annotationRunId, AnnotationRun.class);
+			AnnotationRun annotationRun = dataService.findOne(AnnotationRunMetadata.ENTITY_NAME, annotationRunId, AnnotationRun.class);
 			if (annotationRun != null)
 			{
 				annotationRun.setStatus("FINISHED");
-				annotationRun.setEndDate(new Date());
-				annotationRun.setMessage(message);
-				dataService.update(AnnotationRun.ENTITY_NAME, annotationRun);
+				annotationRun.setMessage(annotationRun.getMessage() +"\n"+ message);
+				dataService.update(AnnotationRunMetadata.ENTITY_NAME, annotationRun);
 			}
 		}
 		catch (Exception e)
@@ -63,13 +60,12 @@ public class AnnotatorRunService
 	{
 		try
 		{
-			AnnotationRun annotationRun = dataService.findOne(AnnotationRun.ENTITY_NAME, annotationRunId, AnnotationRun.class);
+			AnnotationRun annotationRun = dataService.findOne(AnnotationRunMetadata.ENTITY_NAME, annotationRunId, AnnotationRun.class);
 			if (annotationRun != null)
 			{
 				annotationRun.setStatus("FAILED");
-				annotationRun.setEndDate(new Date());
-				annotationRun.setMessage(message);
-				dataService.update(AnnotationRun.ENTITY_NAME, annotationRun);
+				annotationRun.setMessage(annotationRun.getMessage() +"\n"+ message);
+				dataService.update(AnnotationRunMetadata.ENTITY_NAME, annotationRun);
 			}
 		}
 		catch (Exception e)
@@ -83,11 +79,11 @@ public class AnnotatorRunService
 	{
 		try
 		{
-			AnnotationRun annotationRun = dataService.findOne(AnnotationRun.ENTITY_NAME, annotationRunId, AnnotationRun.class);
+			AnnotationRun annotationRun = dataService.findOne(AnnotationRunMetadata.ENTITY_NAME, annotationRunId, AnnotationRun.class);
 			if (annotationRun != null)
 			{
-				annotationRun.setAnnotatorsFinished((!StringUtils.isEmpty(annotationRun.getAnnotatorsFinished())?annotationRun.getAnnotatorsFinished()+",":"")+ annotator);
-				dataService.update(AnnotationRun.ENTITY_NAME, annotationRun);
+				annotationRun.setMessage(annotationRun.getMessage()+"\nFinished annotating with "+annotator);
+				dataService.update(AnnotationRunMetadata.ENTITY_NAME, annotationRun);
 			}
 		}
 		catch (Exception e)
@@ -101,11 +97,11 @@ public class AnnotatorRunService
 	{
 		try
 		{
-			AnnotationRun annotationRun = dataService.findOne(AnnotationRun.ENTITY_NAME, annotationRunId, AnnotationRun.class);
+			AnnotationRun annotationRun = dataService.findOne(AnnotationRunMetadata.ENTITY_NAME, annotationRunId, AnnotationRun.class);
 			if (annotationRun != null)
 			{
-				annotationRun.setAnnotatorsFailed((!StringUtils.isEmpty(annotationRun.getAnnotatorsFailed())?annotationRun.getAnnotatorsFailed()+",":"")+ annotator);
-				dataService.update(AnnotationRun.ENTITY_NAME, annotationRun);
+				annotationRun.setMessage(annotationRun.getMessage()+ "\nFailed annotating with " + annotator);
+				dataService.update(AnnotationRunMetadata.ENTITY_NAME, annotationRun);
 			}
 		}
 		catch (Exception e)
@@ -119,11 +115,11 @@ public class AnnotatorRunService
 	{
 		try
 		{
-			AnnotationRun annotationRun = dataService.findOne(AnnotationRun.ENTITY_NAME, annotationRunId, AnnotationRun.class);
+			AnnotationRun annotationRun = dataService.findOne(AnnotationRunMetadata.ENTITY_NAME, annotationRunId, AnnotationRun.class);
 			if (annotationRun != null)
 			{
-				annotationRun.setAnnotatorsStarted(annotator);
-				dataService.update(AnnotationRun.ENTITY_NAME, annotationRun);
+				annotationRun.setMessage(annotationRun.getMessage()+ "\nStarted annotating with " + annotator);
+				dataService.update(AnnotationRunMetadata.ENTITY_NAME, annotationRun);
 			}
 		}
 		catch (Exception e)
