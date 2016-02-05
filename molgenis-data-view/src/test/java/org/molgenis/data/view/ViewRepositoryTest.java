@@ -9,7 +9,13 @@ import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 //import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertEquals;
 
+import java.util.Arrays;
+import java.util.stream.Stream;
+
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
@@ -21,6 +27,7 @@ import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.mem.InMemoryRepository;
 import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.settings.AppSettings;
+import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -160,23 +167,42 @@ public class ViewRepositoryTest extends AbstractTestNGSpringContextTests
 
 		Query queryMock = mock(Query.class);
 		when(dataService.query(EntityViewMetaData.ENTITY_NAME)).thenReturn(queryMock);
-		Entity entityMock = mock(Entity.class);
 		Query queryMock2 = mock(Query.class);
 		when(queryMock.eq(EntityViewMetaData.VIEW_NAME, "MY_FIRST_VIEW")).thenReturn(queryMock2);
-		when(queryMock2.findOne()).thenReturn(entityMock);
-		when(entityMock.getString(EntityViewMetaData.MASTER_ENTITY)).thenReturn("entityA");
+		Entity entityA = mock(Entity.class);
+		when(queryMock2.findOne()).thenReturn(entityA);
+		when(entityA.getString(EntityViewMetaData.MASTER_ENTITY)).thenReturn("entityA");
 
-		// when(
-		// dataService.query(EntityViewMetaData.ENTITY_NAME)
-		// .eq(EntityViewMetaData.VIEW_NAME, "MY_FIRST_VIEW").findOne()
-		// ).thenReturn("");
-		
-		// when(dataService.query(EntityViewMetaData.ENTITY_NAME)
-		// .eq(EntityViewMetaData.VIEW_NAME, "base_MY_FIRST_VIEW").findAll().map(e -> {
-		// return e.getString(EntityViewMetaData.MASTER_ENTITY);
-		// }).collect(Collectors.toList())).thenReturn(Arrays.asList("entityB", "entityC"));
+		Entity entityB = mock(Entity.class);
+		when(entityB.getString(EntityViewMetaData.JOIN_ENTITY)).thenReturn("entityB");
+		Entity entityC = mock(Entity.class);
+		when(entityC.getString(EntityViewMetaData.JOIN_ENTITY)).thenReturn("entityC");
+		when(queryMock2.findAll()).thenAnswer(new Answer<Stream<Entity>>()
+		{
+			@Override
+			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
+			{
+				return Arrays.asList(entityB, entityC).stream();
+			}
+		});
 
-		assertEquals(viewRepository.getEntityMetaData(), "");
+		DefaultEntityMetaData expectedEntityMetaData = new DefaultEntityMetaData("MY_FIRST_VIEW",
+				PackageImpl.defaultPackage);
+		expectedEntityMetaData.addAttribute("id", AttributeRole.ROLE_ID, AttributeRole.ROLE_LABEL);
+		expectedEntityMetaData.setAbstract(false);
+		DefaultAttributeMetaData entityACompound = new DefaultAttributeMetaData("entityA", FieldTypeEnum.COMPOUND);
+		DefaultAttributeMetaData entityBCompound = new DefaultAttributeMetaData("entityB", FieldTypeEnum.COMPOUND);
+		DefaultAttributeMetaData entityCCompound = new DefaultAttributeMetaData("entityC", FieldTypeEnum.COMPOUND);
+		entityACompound.setAttributesMetaData(entityMetaA.getAttributes());
+		entityBCompound.setAttributesMetaData(entityMetaB.getAttributes());
+		entityCCompound.setAttributesMetaData(entityMetaC.getAttributes());
+		expectedEntityMetaData.addAttributeMetaData(entityACompound, AttributeRole.ROLE_LOOKUP);
+		expectedEntityMetaData.addAttributeMetaData(entityBCompound, AttributeRole.ROLE_LOOKUP);
+		expectedEntityMetaData.addAttributeMetaData(entityCCompound, AttributeRole.ROLE_LOOKUP);
+
+		assertEquals(viewRepository.getEntityMetaData(), expectedEntityMetaData);
+		assertEquals(viewRepository.getEntityMetaData().getAttributes().toString(), expectedEntityMetaData
+				.getAttributes().toString());
 	}
 
 	@Configuration

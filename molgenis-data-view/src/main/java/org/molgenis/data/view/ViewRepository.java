@@ -65,14 +65,22 @@ public class ViewRepository extends AbstractRepository
 		entityMetaDataView.addAttributeMetaData(masterCompoundAttribute,AttributeRole.ROLE_LOOKUP);
 		  
 		// Add slave compounds
-		Set<String> entitySlaveNames = dataService.query(EntityViewMetaData.ENTITY_NAME)
-				.eq(EntityViewMetaData.VIEW_NAME, entityMetaData.getName()).findAll().map(e -> {
+		dataService
+				.query(EntityViewMetaData.ENTITY_NAME)
+				.eq(EntityViewMetaData.VIEW_NAME, entityMetaData.getName())
+				.findAll()
+				.map(e -> {
 					return e.getString(EntityViewMetaData.JOIN_ENTITY);
-				}).collect(Collectors.toSet());
-		entitySlaveNames.spliterator().forEachRemaining(e -> {
-			DefaultAttributeMetaData slaveCompoundAttribute = new DefaultAttributeMetaData(e, FieldTypeEnum.COMPOUND); 
-			slaveCompoundAttribute.setAttributesMetaData(dataService.getEntityMetaData(e).getAttributes()); 
-			entityMetaDataView.addAttributeMetaData(slaveCompoundAttribute, AttributeRole.ROLE_LOOKUP);
+				})
+				.collect(Collectors.toSet())
+				.stream()
+				.forEach(
+						e -> {
+							DefaultAttributeMetaData slaveCompoundAttribute = new DefaultAttributeMetaData(e,
+									FieldTypeEnum.COMPOUND);
+							slaveCompoundAttribute.setAttributesMetaData(dataService.getEntityMetaData(e)
+									.getAttributes());
+							entityMetaDataView.addAttributeMetaData(slaveCompoundAttribute, AttributeRole.ROLE_LOOKUP);
 		});
 
 		return entityMetaDataView;
@@ -87,21 +95,19 @@ public class ViewRepository extends AbstractRepository
 	@Override
 	public Stream<Entity> findAll(Query q)
 	{
-		// String masterEntityName = getMasterEntityName();
-		
 		//Master attributes to join on
-		List<String> joinMasterMatrix = new ArrayList<String>();
+		List<String> masterJoinAttributes = new ArrayList<String>();
 		
 		//join attributes to join on
-		Map<String, List<String>> joinSlaveMatrix = new LinkedHashMap<String, List<String>>();
+		Map<String, List<String>> slaveJoinAttributes = new LinkedHashMap<String, List<String>>();
 				
 		dataService.query(EntityViewMetaData.ENTITY_NAME)
 				.eq(EntityViewMetaData.VIEW_NAME, entityMetaData.getName())
 				.findAll().forEach(e -> {
-							joinMasterMatrix.add(e.getString(EntityViewMetaData.MASTER_ATTR));
-							if (!joinSlaveMatrix.containsKey(e.getString(EntityViewMetaData.JOIN_ENTITY))) joinSlaveMatrix
+							masterJoinAttributes.add(e.getString(EntityViewMetaData.MASTER_ATTR));
+							if (!slaveJoinAttributes.containsKey(e.getString(EntityViewMetaData.JOIN_ENTITY))) slaveJoinAttributes
 									.put(e.getString(EntityViewMetaData.JOIN_ENTITY), new ArrayList<String>());
-							joinSlaveMatrix.get(e.getString(EntityViewMetaData.JOIN_ENTITY)).add(
+							slaveJoinAttributes.get(e.getString(EntityViewMetaData.JOIN_ENTITY)).add(
 									e.getString(EntityViewMetaData.JOIN_ATTR));
 				});
 		
@@ -111,7 +117,7 @@ public class ViewRepository extends AbstractRepository
 		EntityMetaData emd = getEntityMetaData();
 
 		return StreamSupport.stream(allMasterEntityEntities.spliterator(), false).map(e -> {
-			return getViewEntity(e, emd, joinMasterMatrix, joinSlaveMatrix);
+			return getViewEntity(e, emd, masterJoinAttributes, slaveJoinAttributes);
 		});
 	}
 
