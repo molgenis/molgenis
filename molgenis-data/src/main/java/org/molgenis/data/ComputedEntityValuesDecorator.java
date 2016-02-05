@@ -3,7 +3,6 @@ package org.molgenis.data;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -282,13 +281,6 @@ public class ComputedEntityValuesDecorator implements Repository
 	@Override
 	public Iterable<AttributeMetaData> getQueryableAttributes()
 	{
-		if (getCapabilities().contains(RepositoryCapability.QUERYABLE))
-		{
-			return getEntityMetaData().getAtomicAttributes();
-		}
-		else
-		{
-			return Collections.emptyList();
-		}
+		return decoratedRepo.getQueryableAttributes();
 	}
 }

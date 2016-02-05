@@ -28,6 +28,7 @@ public class EntityMetaDataResponse
 	private final String label;
 	private final String description;
 	private final Map<String, Object> attributes;
+	private final List<String> queryableAttributeNames;
 	private final String labelAttribute;
 	private final String idAttribute;
 	private final List<String> lookupAttributes;
@@ -145,6 +146,10 @@ public class EntityMetaDataResponse
 		}
 		else this.isAbstract = null;
 
+		queryableAttributeNames = Lists.newArrayList();
+		dataService.getRepository(meta.getName()).getQueryableAttributes().iterator()
+				.forEachRemaining(attr -> queryableAttributeNames.add(attr.getName()));
+
 		this.writable = permissionService.hasPermissionOnEntity(name, Permission.WRITE)
 				&& dataService.getCapabilities(name).contains(RepositoryCapability.WRITABLE);
 	}
@@ -187,6 +192,11 @@ public class EntityMetaDataResponse
 	public Map<String, Object> getAttributes()
 	{
 		return ImmutableMap.copyOf(attributes);
+	}
+
+	public List<String> getQueryableAttributeNames()
+	{
+		return queryableAttributeNames;
 	}
 
 	public String getLabelAttribute()

@@ -3,7 +3,7 @@
 	
 	var restApi = new molgenis.RestClient();
 	
-	function createChildren(attributes, refEntityDepth, maxDepth, languageCode, doSelect) {
+	function createChildren(attributes, queryableAttributeNames, refEntityDepth, maxDepth, languageCode, doSelect) {
 		var children = [];
 		
 		$.each(attributes, function() {		
@@ -18,9 +18,21 @@
 				}
 				if (isFolder) classes = 'refentitynode';
 			}
+
+			// check if the attribute can be filtered
+			var queryable = false;
+			for (var i = 0; i < queryableAttributeNames.length; i++){
+				if (this.name === queryableAttributeNames[i]){
+					queryable = true;
+					break;
+				}
+			}
 			
-			if (this.refEntity && (refEntityDepth > 0)) {
+			if (!queryable || (this.refEntity && (refEntityDepth > 0))) {
+				this.queryable = false;
 				classes = 'nofilter';
+			}else{
+				this.queryable = true;
 			}
 			
             if(this.visible) {
@@ -148,24 +160,26 @@
 
 				data.result = $.Deferred(function(dfd) {
 					restApi.getAsync(target, {'expand': ['attributes']}, function(entityMetaData) {
-						var children = createChildren(entityMetaData.attributes, node.data.refEntityDepth + increaseDepth, settings.maxRefEntityDepth, entityMetaData.languageCode, function() {
+						var children = createChildren(entityMetaData.attributes, entityMetaData.queryableAttributeNames, node.data.refEntityDepth + increaseDepth, settings.maxRefEntityDepth, entityMetaData.languageCode, function() {
 							return node.selected;
 						});
 						dfd.resolve(children);
 					});
 				});	
 			},
-			'source' : createChildren(settings.entityMetaData.attributes, 0, settings.maxRefEntityDepth, settings.entityMetaData.languageCode, function(attribute) {
+			'source' : createChildren(settings.entityMetaData.attributes, settings.entityMetaData.queryableAttributeNames, 0, settings.maxRefEntityDepth, settings.entityMetaData.languageCode, function(attribute) {
 				return settings.selectedAttributes ? $.inArray(attribute, settings.selectedAttributes) !== -1  : false;
 			}),
 			'click' : function(e, data) {
 				if (data.targetType === 'title' || data.targetType === 'icon') {
 					if (settings.onAttributeClick) {
 						var attr = data.node.data.attribute, node = getRefParentNode(data.node);
-						if (node !== null) {
-							attr.parent = node.data.attribute;
+						if (attr.queryable === true){
+							if (node !== null) {
+								attr.parent = node.data.attribute;
+							}
+							settings.onAttributeClick(attr);
 						}
-						settings.onAttributeClick(attr);
 					}
 				}
 			},
