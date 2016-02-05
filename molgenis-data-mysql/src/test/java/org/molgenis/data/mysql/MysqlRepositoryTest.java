@@ -1,5 +1,6 @@
 package org.molgenis.data.mysql;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
@@ -7,6 +8,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
@@ -15,6 +17,7 @@ import java.util.stream.StreamSupport;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MysqlTestConfig;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.Sort;
@@ -27,12 +30,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
+import org.testng.annotations.ExpectedExceptions;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
-/** Simple test of all apsects of the repository */
+/** Simple test of all aspects of the repository */
 @ContextConfiguration(classes = MysqlTestConfig.class)
 public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 {
@@ -113,6 +117,48 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		assertNotNull(repo.findOne(new QueryImpl().eq("strAttr", "newstr0")));
 		assertNotNull(repo.findOne(new QueryImpl().eq("strAttr", "newstr1")));
 		repo.deleteAll(); // cleanup
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void testIfDeleteFailsForSelfReferencingEntity()
+	{
+		DefaultEntityMetaData metaData = new DefaultEntityMetaData("SelfRefTable");
+		metaData.addAttribute("id", ROLE_ID).setDataType(MolgenisFieldTypes.STRING).setNillable(false);
+		metaData.addAttribute("xrefAttr").setDataType(MolgenisFieldTypes.XREF).setRefEntity(metaData)
+				.setNillable(false);
+
+		Repository repo = metaDataRepositories.addEntityMeta(metaData);
+		Entity xrefTableEntity = new MapEntity("xrefAttr");
+		xrefTableEntity.set("id", "value_1");
+		xrefTableEntity.set("xrefAttr", "value_1");
+
+		repo.deleteAll(); // Test delete
+	}
+
+	@Test
+	public void testDeleteAllForXrefs()
+	{
+		DefaultEntityMetaData refMetaData = new DefaultEntityMetaData("RefEntityTable");
+		refMetaData.addAttribute("refAttr", ROLE_ID).setDataType(MolgenisFieldTypes.STRING).setNillable(false);
+
+		DefaultEntityMetaData metaData = new DefaultEntityMetaData("XrefTable");
+		metaData.addAttribute("id", ROLE_ID).setDataType(MolgenisFieldTypes.INT).setNillable(false);
+		metaData.addAttribute("xrefAttr").setDataType(MolgenisFieldTypes.XREF).setRefEntity(refMetaData)
+				.setNillable(false);
+
+		Repository refRepo = metaDataRepositories.addEntityMeta(refMetaData);
+		Repository repo = metaDataRepositories.addEntityMeta(metaData);
+
+		Entity refEntityTableEntity = new MapEntity("refAttr");
+		refEntityTableEntity.set("refAttr", "xref_value_1");
+
+		Entity xrefTableEntity = new MapEntity("xrefAttr");
+		xrefTableEntity.set("id", 1);
+		xrefTableEntity.set("xrefAttr", "xref_value_1");
+
+		// Test delete
+		repo.deleteAll();
+		refRepo.deleteAll();
 	}
 
 	@Test
