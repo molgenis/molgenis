@@ -11,6 +11,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.rest.Href;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
@@ -37,14 +38,15 @@ class EntityMetaDataResponseV2
 	 * Is this user allowed to add/update/delete entities of this type?
 	 */
 	private final Boolean writable;
+	private String languageCode;
 
 	/**
 	 * @param meta
 	 */
 	public EntityMetaDataResponseV2(EntityMetaData meta, MolgenisPermissionService permissionService,
-			DataService dataService)
+			DataService dataService, LanguageService languageService)
 	{
-		this(meta, null, permissionService, dataService);
+		this(meta, null, permissionService, dataService, languageService);
 	}
 
 	/**
@@ -54,21 +56,21 @@ class EntityMetaDataResponseV2
 	 *            set of lowercase attribute names to include in response
 	 */
 	public EntityMetaDataResponseV2(EntityMetaData meta, Fetch fetch, MolgenisPermissionService permissionService,
-			DataService dataService)
+			DataService dataService, LanguageService languageService)
 	{
 		String name = meta.getName();
 		this.href = Href.concatMetaEntityHrefV2(BASE_URI, name);
 		this.hrefCollection = String.format("%s/%s", BASE_URI, name); // FIXME apply Href escaping fix
 
 		this.name = name;
-		this.description = meta.getDescription();
-		this.label = meta.getLabel();
+		this.description = meta.getDescription(languageService.getCurrentUserLanguageCode());
+		this.label = meta.getLabel(languageService.getCurrentUserLanguageCode());
 
 		// filter attribute parts
 		Iterable<AttributeMetaData> filteredAttrs = filterAttributes(fetch, meta.getAttributes());
 
-		this.attributes = Lists.newArrayList(Iterables.transform(filteredAttrs,
-				new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
+		this.attributes = Lists.newArrayList(
+				Iterables.transform(filteredAttrs, new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
 				{
 					@Override
 					public AttributeMetaDataResponseV2 apply(AttributeMetaData attr)
@@ -87,26 +89,29 @@ class EntityMetaDataResponseV2
 						}
 						else if (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
 						{
-							subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr);
+							subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr,
+									languageCode);
 						}
 						else
 						{
 							subAttrFetch = null;
 						}
-
-						return new AttributeMetaDataResponseV2(name, attr, subAttrFetch, permissionService, dataService);
+						return new AttributeMetaDataResponseV2(name, meta, attr, subAttrFetch, permissionService,
+								dataService, languageService);
 					}
 				}));
 
-		AttributeMetaData labelAttribute = meta.getLabelAttribute();
+		languageCode = languageService.getCurrentUserLanguageCode();
+
+		AttributeMetaData labelAttribute = meta.getLabelAttribute(languageCode);
 		this.labelAttribute = labelAttribute != null ? labelAttribute.getName() : null;
 
 		AttributeMetaData idAttribute = meta.getIdAttribute();
 		this.idAttribute = idAttribute != null ? idAttribute.getName() : null;
 
 		Iterable<AttributeMetaData> lookupAttributes = meta.getLookupAttributes();
-		this.lookupAttributes = lookupAttributes != null ? Lists.newArrayList(Iterables.transform(lookupAttributes,
-				new Function<AttributeMetaData, String>()
+		this.lookupAttributes = lookupAttributes != null
+				? Lists.newArrayList(Iterables.transform(lookupAttributes, new Function<AttributeMetaData, String>()
 				{
 					@Override
 					public String apply(AttributeMetaData attribute)
@@ -175,4 +180,10 @@ class EntityMetaDataResponseV2
 	{
 		return writable;
 	}
+
+	public String getLanguageCode()
+	{
+		return languageCode;
+	}
+
 }

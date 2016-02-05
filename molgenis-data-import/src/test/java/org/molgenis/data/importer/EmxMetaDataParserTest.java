@@ -2,6 +2,7 @@ package org.molgenis.data.importer;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -94,13 +95,13 @@ public class EmxMetaDataParserTest extends AbstractTestNGSpringContextTests
 	{
 		MysqlRepository repositoryCity = mock(MysqlRepository.class);
 		DefaultEntityMetaData entityMetaDataCity = new DefaultEntityMetaData("import_city");
-		entityMetaDataCity.addAttribute("name").setIdAttribute(true).setNillable(false);
+		entityMetaDataCity.addAttribute("name", ROLE_ID);
 		when(dataService.getRepository("import_city")).thenReturn(repositoryCity);
 		when(repositoryCity.getEntityMetaData()).thenReturn(entityMetaDataCity);
 
 		MysqlRepository repositoryPerson = mock(MysqlRepository.class);
 		DefaultEntityMetaData entityMetaDataPerson = new DefaultEntityMetaData("import_person");
-		entityMetaDataPerson.addAttribute("firstName").setIdAttribute(true).setNillable(false);
+		entityMetaDataPerson.addAttribute("firstName", ROLE_ID);
 		entityMetaDataPerson.addAttribute("lastName");
 		entityMetaDataPerson.addAttribute("height").setDataType(MolgenisFieldTypes.INT);
 		entityMetaDataPerson.addAttribute("active").setDataType(MolgenisFieldTypes.BOOL);

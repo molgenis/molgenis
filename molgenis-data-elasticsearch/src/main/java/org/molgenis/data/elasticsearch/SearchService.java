@@ -1,5 +1,7 @@
 package org.molgenis.data.elasticsearch;
 
+import java.util.stream.Stream;
+
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
@@ -36,7 +38,7 @@ public interface SearchService
 	/**
 	 * Refresh index, making all operations performed since the last refresh available for search
 	 */
-	void refresh();
+	void refresh(EntityMetaData entityMeta);
 
 	long count(EntityMetaData entityMetaData);
 
@@ -54,13 +56,32 @@ public interface SearchService
 	 */
 	long index(Iterable<? extends Entity> entities, EntityMetaData entityMetaData, IndexingMode indexingMode);
 
+	/**
+	 * Adds or updated the given entities in the index
+	 * 
+	 * @param entities
+	 * @param entityMetaData
+	 * @param indexingMode
+	 * @return number of indexed entities
+	 */
+	long index(Stream<? extends Entity> entities, EntityMetaData entityMetaData, IndexingMode indexingMode);
+
 	void delete(Entity entity, EntityMetaData entityMetaData);
 
 	void deleteById(String id, EntityMetaData entityMetaData);
 
-	void deleteById(Iterable<String> ids, EntityMetaData entityMetaData);
+	void deleteById(Stream<String> ids, EntityMetaData entityMetaData);
 
 	void delete(Iterable<? extends Entity> entities, EntityMetaData entityMetaData);
+
+	/**
+	 * Deletes entities from index
+	 * 
+	 * @param entities
+	 *            entity stream
+	 * @param entityMetaData
+	 */
+	void delete(Stream<? extends Entity> entities, EntityMetaData entityMetaData);
 
 	/**
 	 * Deletes data and meta data
@@ -93,10 +114,18 @@ public interface SearchService
 	 * 
 	 * @param entityIds
 	 * @param entityMetaData
-	 * @param fetch
 	 * @return entities
 	 */
 	Iterable<Entity> get(Iterable<Object> entityIds, EntityMetaData entityMetaData);
+
+	/**
+	 * Returns entities with given ids
+	 * 
+	 * @param entityIds
+	 * @param entityMetaData
+	 * @return
+	 */
+	Stream<Entity> get(Stream<Object> entityIds, EntityMetaData entityMetaData);
 
 	/**
 	 * Returns entities with given ids and attribute values defined by fetch
@@ -108,8 +137,27 @@ public interface SearchService
 	 */
 	Iterable<Entity> get(Iterable<Object> entityIds, EntityMetaData entityMetaData, Fetch fetch);
 
+	/**
+	 * Returns entities with given ids and attribute values defined by fetch
+	 * 
+	 * @param entityIds
+	 * @param entityMetaData
+	 * @param fetch
+	 * @return entities with attribute values defined by fetch
+	 */
+	Stream<Entity> get(Stream<Object> entityIds, EntityMetaData entityMetaData, Fetch fetch);
+
 	// TODO replace Iterable<Entity> with EntityCollection and add EntityCollection.getTotal()
 	Iterable<Entity> search(Query q, EntityMetaData entityMetaData);
+
+	/**
+	 * TODO replace Stream<Entity> with EntityCollection and add EntityCollection.getTotal()
+	 * 
+	 * @param q
+	 * @param entityMetaData
+	 * @return
+	 */
+	Stream<Entity> searchAsStream(Query q, EntityMetaData entityMetaData);
 
 	AggregateResult aggregate(AggregateQuery aggregateQuery, EntityMetaData entityMetaData);
 

@@ -14,9 +14,10 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Locale;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -27,6 +28,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.annotators.AnnotationRun;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.GenomicDataSettings;
@@ -60,8 +62,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
 import com.google.gson.Gson;
 
 import freemarker.core.ParseException;
@@ -107,6 +107,9 @@ public class DataExplorerController extends MolgenisPluginController
 	@Autowired
 	private Gson gson;
 
+	@Autowired
+	private LanguageService languageService;
+
 	public DataExplorerController()
 	{
 		super(URI);
@@ -124,15 +127,8 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		boolean entityExists = false;
 		boolean hasEntityPermission = false;
-		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(dataService.getEntityNames(),
-				new Function<String, EntityMetaData>()
-				{
-					@Override
-					public EntityMetaData apply(String entityName)
-					{
-						return dataService.getEntityMetaData(entityName);
-					}
-				});
+		List<EntityMetaData> entitiesMeta = dataService.getEntityNames().map(dataService::getEntityMetaData)
+				.collect(Collectors.toList());
 		model.addAttribute("entitiesMeta", entitiesMeta);
 		if (selectedEntityName != null)
 		{
@@ -217,11 +213,7 @@ public class DataExplorerController extends MolgenisPluginController
 			pluginPermission = Permission.COUNT;
 
 		ModulesConfigResponse modulesConfig = new ModulesConfigResponse();
-
-		String i18nLocale = appSettings.getLanguageCode();
-		Locale locale = new Locale(i18nLocale, i18nLocale);
-		ResourceBundle i18n = ResourceBundle.getBundle("i18n", locale);
-
+		ResourceBundle i18n = languageService.getBundle();
 		String aggregatesTitle = i18n.getString("dataexplorer_aggregates_title");
 
 		if (pluginPermission != null)
@@ -279,8 +271,7 @@ public class DataExplorerController extends MolgenisPluginController
 	private Map<String, String> getGenomeBrowserEntities()
 	{
 		Map<String, String> genomeEntities = new HashMap<String, String>();
-		for (String entityName : dataService.getEntityNames())
-		{
+		dataService.getEntityNames().forEach(entityName -> {
 			EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
 			if (isGenomeBrowserEntity(entityMetaData))
 			{
@@ -291,7 +282,7 @@ public class DataExplorerController extends MolgenisPluginController
 					genomeEntities.put(entityMetaData.getName(), entityMetaData.getLabel());
 				}
 			}
-		}
+		});
 		return genomeEntities;
 	}
 

@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,6 +33,7 @@ import org.molgenis.data.Sort;
 import org.molgenis.data.Sort.Direction;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.csv.CsvWriter;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;
 import org.molgenis.data.processor.TrimProcessor;
@@ -97,6 +99,9 @@ public class OntologyServiceController extends MolgenisPluginController
 	@Autowired
 	private MolgenisPermissionService molgenisPermissionService;
 
+	@Autowired
+	private LanguageService languageService;
+
 	public static final String ID = "ontologyservice";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	public static final int INVALID_TOTAL_NUMBER = -1;
@@ -114,9 +119,15 @@ public class OntologyServiceController extends MolgenisPluginController
 		String username = userAccountService.getCurrentUser().getUsername();
 
 		if (uploadProgress.isUserExists(username)) return matchResult(uploadProgress.getCurrentJob(username), model);
-		model.addAttribute("existingTasks", OntologyServiceUtil.getEntityAsMap(dataService.findAll(
-				MatchingTaskEntityMetaData.ENTITY_NAME,
-				new QueryImpl().eq(MatchingTaskEntityMetaData.MOLGENIS_USER, username))));
+		model.addAttribute("existingTasks", OntologyServiceUtil.getEntityAsMap(new Iterable<Entity>()
+		{
+			@Override
+			public Iterator<Entity> iterator()
+			{
+				return dataService.findAll(MatchingTaskEntityMetaData.ENTITY_NAME,
+						new QueryImpl().eq(MatchingTaskEntityMetaData.MOLGENIS_USER, username)).iterator();
+			}
+		}));
 		return "ontology-match-view";
 	}
 
@@ -128,8 +139,8 @@ public class OntologyServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/calculate/{entityName}")
-	public String calculateRoc(@PathVariable String entityName, Model model) throws IOException,
-			MolgenisInvalidFormatException
+	public String calculateRoc(@PathVariable String entityName, Model model)
+			throws IOException, MolgenisInvalidFormatException
 	{
 		model.addAllAttributes(matchQualityRocService.calculateROC(entityName));
 		return init(model);
@@ -174,30 +185,20 @@ public class OntologyServiceController extends MolgenisPluginController
 					new QueryImpl().eq(MatchingTaskEntityMetaData.IDENTIFIER, entityName));
 			model.addAttribute("threshold", entity.get(MatchingTaskEntityMetaData.THRESHOLD));
 			model.addAttribute("ontologyIri", entity.get(MatchingTaskEntityMetaData.CODE_SYSTEM));
-			model.addAttribute(
-					"numberOfMatched",
-					dataService.count(
-							MatchingTaskContentEntityMetaData.ENTITY_NAME,
-							new QueryImpl()
-									.eq(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName)
-									.and()
-									.nest()
-									.eq(MatchingTaskContentEntityMetaData.VALIDATED, true)
-									.or()
+			model.addAttribute("numberOfMatched",
+					dataService.count(MatchingTaskContentEntityMetaData.ENTITY_NAME,
+							new QueryImpl().eq(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName).and().nest()
+									.eq(MatchingTaskContentEntityMetaData.VALIDATED, true).or()
 									.ge(MatchingTaskContentEntityMetaData.SCORE,
-											entity.get(MatchingTaskEntityMetaData.THRESHOLD)).unnest()));
-			model.addAttribute(
-					"numberOfUnmatched",
-					dataService.count(
-							MatchingTaskContentEntityMetaData.ENTITY_NAME,
-							new QueryImpl()
-									.eq(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName)
-									.and()
-									.nest()
-									.eq(MatchingTaskContentEntityMetaData.VALIDATED, false)
-									.and()
+											entity.get(MatchingTaskEntityMetaData.THRESHOLD))
+									.unnest()));
+			model.addAttribute("numberOfUnmatched",
+					dataService.count(MatchingTaskContentEntityMetaData.ENTITY_NAME,
+							new QueryImpl().eq(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName).and().nest()
+									.eq(MatchingTaskContentEntityMetaData.VALIDATED, false).and()
 									.lt(MatchingTaskContentEntityMetaData.SCORE,
-											entity.get(MatchingTaskEntityMetaData.THRESHOLD)).unnest()));
+											entity.get(MatchingTaskEntityMetaData.THRESHOLD))
+									.unnest()));
 		}
 
 		return "ontology-match-view";
@@ -212,8 +213,7 @@ public class OntologyServiceController extends MolgenisPluginController
 		if (dataService.hasRepository(entityName) && !uploadProgress.isUserExists(userName))
 		{
 			// Remove all the matching terms from MatchingTaskContentEntity table
-			Iterable<Entity> iterableMatchingEntities = dataService.findAll(
-					MatchingTaskContentEntityMetaData.ENTITY_NAME,
+			Stream<Entity> iterableMatchingEntities = dataService.findAll(MatchingTaskContentEntityMetaData.ENTITY_NAME,
 					new QueryImpl().eq(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName));
 			dataService.delete(MatchingTaskContentEntityMetaData.ENTITY_NAME, iterableMatchingEntities);
 
@@ -253,33 +253,31 @@ public class OntologyServiceController extends MolgenisPluginController
 		int start = entityPager.getStart();
 		int num = entityPager.getNum();
 
-		for (Entity mappingEntity : dataService.findAll(
-				MatchingTaskContentEntityMetaData.ENTITY_NAME,
-				query.offset(start)
-						.pageSize(num)
-						.sort(new Sort().on(MatchingTaskContentEntityMetaData.VALIDATED, Direction.DESC).on(
-								MatchingTaskContentEntityMetaData.SCORE, Direction.DESC))))
-		{
-			Entity RefEntity = dataService.findOne(
-					entityName,
-					new QueryImpl().eq(AdaptedCsvRepository.ALLOWED_IDENTIFIER,
-							mappingEntity.getString(MatchingTaskContentEntityMetaData.INPUT_TERM)));
-			Map<String, Object> outputEntity = new HashMap<String, Object>();
-			outputEntity.put("inputTerm", OntologyServiceUtil.getEntityAsMap(RefEntity));
-			outputEntity.put("matchedTerm", OntologyServiceUtil.getEntityAsMap(mappingEntity));
-			Object matchedTerm = mappingEntity.get(MatchingTaskContentEntityMetaData.MATCHED_TERM);
-			if (matchedTerm != null)
-			{
-				outputEntity.put("ontologyTerm", OntologyServiceUtil.getEntityAsMap(ontologyService
-						.getOntologyTermEntity(matchedTerm.toString(), ontologyIri)));
-			}
-			entityMaps.add(outputEntity);
-		}
+		dataService
+				.findAll(MatchingTaskContentEntityMetaData.ENTITY_NAME,
+						query.offset(start).pageSize(num)
+								.sort(new Sort().on(MatchingTaskContentEntityMetaData.VALIDATED, Direction.DESC)
+										.on(MatchingTaskContentEntityMetaData.SCORE, Direction.DESC)))
+				.forEach(mappingEntity -> {
+					Entity RefEntity = dataService.findOne(entityName,
+							new QueryImpl().eq(AdaptedCsvRepository.ALLOWED_IDENTIFIER,
+									mappingEntity.getString(MatchingTaskContentEntityMetaData.INPUT_TERM)));
+					Map<String, Object> outputEntity = new HashMap<String, Object>();
+					outputEntity.put("inputTerm", OntologyServiceUtil.getEntityAsMap(RefEntity));
+					outputEntity.put("matchedTerm", OntologyServiceUtil.getEntityAsMap(mappingEntity));
+					Object matchedTerm = mappingEntity.get(MatchingTaskContentEntityMetaData.MATCHED_TERM);
+					if (matchedTerm != null)
+					{
+						outputEntity.put("ontologyTerm", OntologyServiceUtil.getEntityAsMap(
+								ontologyService.getOntologyTermEntity(matchedTerm.toString(), ontologyIri)));
+					}
+					entityMaps.add(outputEntity);
+				});
 
 		uploadProgress.setUserClickMode(userAccountService.getCurrentUser().getUsername(), isMatched);
 		EntityPager pager = new EntityPager(start, num, count, null);
 		return new EntityCollectionResponse(pager, entityMaps, "/match/retrieve", OntologyTermMetaData.INSTANCE,
-				molgenisPermissionService, dataService);
+				molgenisPermissionService, dataService, languageService);
 	}
 
 	@RequestMapping(method = POST, value = "/match")
@@ -290,16 +288,16 @@ public class OntologyServiceController extends MolgenisPluginController
 	{
 		if (StringUtils.isEmpty(ontologyIri) || StringUtils.isEmpty(inputTerms)) return init(model);
 		String sessionId = httpServletRequest.getSession().getId();
-		File uploadFile = fileStore.store(new ByteArrayInputStream(inputTerms.getBytes("UTF8")), sessionId
-				+ "_input.txt");
+		File uploadFile = fileStore.store(new ByteArrayInputStream(inputTerms.getBytes("UTF8")),
+				sessionId + "_input.txt");
 		return startMatchJob(entityName, ontologyIri, uploadFile, model);
 	}
 
 	@RequestMapping(method = POST, value = "/match/upload", headers = "Content-Type=multipart/form-data")
 	public String upload(@RequestParam(value = "taskName", required = true) String entityName,
 			@RequestParam(value = "selectOntologies", required = true) String ontologyIri,
-			@RequestParam(value = "file", required = true) Part file, Model model, HttpServletRequest httpServletRequest)
-			throws Exception
+			@RequestParam(value = "file", required = true) Part file, Model model,
+			HttpServletRequest httpServletRequest) throws Exception
 	{
 		if (StringUtils.isEmpty(ontologyIri) || file == null) return init(model);
 		String sessionId = httpServletRequest.getSession().getId();
@@ -323,8 +321,8 @@ public class OntologyServiceController extends MolgenisPluginController
 			Entity entity = dataService.findOne(entityName,
 					new QueryImpl().eq(MatchingTaskContentEntityMetaData.IDENTIFIER, inputTermIdentifier));
 
-			if (matchingTaskEntity == null || entity == null) return new OntologyServiceResult(
-					"entityName or inputTermIdentifier is invalid!");
+			if (matchingTaskEntity == null || entity == null)
+				return new OntologyServiceResult("entityName or inputTermIdentifier is invalid!");
 
 			return ontologyService.searchEntity(matchingTaskEntity.getString(MatchingTaskEntityMetaData.CODE_SYSTEM),
 					entity);
@@ -352,53 +350,52 @@ public class OntologyServiceController extends MolgenisPluginController
 	@RequestMapping(method = GET, value = "/match/download/{entityName}")
 	public void download(@PathVariable String entityName, HttpServletResponse response, Model model) throws IOException
 	{
-		CsvWriter csvWriter = null;
+		CsvWriter csvWriter = new CsvWriter(response.getOutputStream(), OntologyServiceImpl.DEFAULT_SEPARATOR);
 		try
 		{
 			response.setContentType("text/csv");
 			response.addHeader("Content-Disposition", "attachment; filename=" + getCsvFileName("match-result"));
-			csvWriter = new CsvWriter(response.getOutputStream(), OntologyServiceImpl.DEFAULT_SEPARATOR);
 			List<String> columnHeaders = new ArrayList<String>();
 			for (AttributeMetaData attributeMetaData : dataService.getEntityMetaData(entityName).getAttributes())
 			{
-				if (!attributeMetaData.getName().equalsIgnoreCase(MatchingTaskEntityMetaData.IDENTIFIER)) columnHeaders
-						.add(attributeMetaData.getName());
+				if (!attributeMetaData.getName().equalsIgnoreCase(MatchingTaskEntityMetaData.IDENTIFIER))
+					columnHeaders.add(attributeMetaData.getName());
 			}
-			columnHeaders.addAll(Arrays.asList(OntologyTermMetaData.ONTOLOGY_TERM_NAME,
-					OntologyTermMetaData.ONTOLOGY_TERM_IRI, MatchingTaskContentEntityMetaData.SCORE,
-					MatchingTaskContentEntityMetaData.VALIDATED));
+			columnHeaders.addAll(
+					Arrays.asList(OntologyTermMetaData.ONTOLOGY_TERM_NAME, OntologyTermMetaData.ONTOLOGY_TERM_IRI,
+							MatchingTaskContentEntityMetaData.SCORE, MatchingTaskContentEntityMetaData.VALIDATED));
 			csvWriter.writeAttributeNames(columnHeaders);
 
 			Entity matchingTaskEntity = dataService.findOne(MatchingTaskEntityMetaData.ENTITY_NAME,
 					new QueryImpl().eq(MatchingTaskEntityMetaData.IDENTIFIER, entityName));
 
-			for (Entity mappingEntity : dataService.findAll(MatchingTaskContentEntityMetaData.ENTITY_NAME,
-					new QueryImpl().eq(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName)))
-			{
-				Entity inputEntity = dataService.findOne(
-						entityName,
-						new QueryImpl().eq(MatchingTaskEntityMetaData.IDENTIFIER,
-								mappingEntity.getString(MatchingTaskContentEntityMetaData.INPUT_TERM)));
-				Entity ontologyTermEntity = ontologyService.getOntologyTermEntity(
-						mappingEntity.getString(MatchingTaskContentEntityMetaData.MATCHED_TERM),
-						matchingTaskEntity.getString(MatchingTaskEntityMetaData.CODE_SYSTEM));
-				Entity row = new MapEntity();
-				for (String attributeName : inputEntity.getAttributeNames())
-				{
-					if (!attributeName.equals(MatchingTaskEntityMetaData.IDENTIFIER)) row.set(attributeName,
-							inputEntity.get(attributeName));
-				}
+			dataService
+					.findAll(MatchingTaskContentEntityMetaData.ENTITY_NAME,
+							new QueryImpl().eq(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName))
+					.forEach(mappingEntity -> {
+						Entity inputEntity = dataService.findOne(entityName,
+								new QueryImpl().eq(MatchingTaskEntityMetaData.IDENTIFIER,
+										mappingEntity.getString(MatchingTaskContentEntityMetaData.INPUT_TERM)));
+						Entity ontologyTermEntity = ontologyService.getOntologyTermEntity(
+								mappingEntity.getString(MatchingTaskContentEntityMetaData.MATCHED_TERM),
+								matchingTaskEntity.getString(MatchingTaskEntityMetaData.CODE_SYSTEM));
+						Entity row = new MapEntity();
+						for (String attributeName : inputEntity.getAttributeNames())
+						{
+							if (!attributeName.equals(MatchingTaskEntityMetaData.IDENTIFIER))
+								row.set(attributeName, inputEntity.get(attributeName));
+						}
 
-				row.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME,
-						ontologyTermEntity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME));
-				row.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI,
-						ontologyTermEntity.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI));
-				row.set(MatchingTaskContentEntityMetaData.VALIDATED,
-						mappingEntity.get(MatchingTaskContentEntityMetaData.VALIDATED));
-				row.set(MatchingTaskContentEntityMetaData.SCORE,
-						mappingEntity.get(MatchingTaskContentEntityMetaData.SCORE));
-				csvWriter.add(row);
-			}
+						row.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME,
+								ontologyTermEntity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME));
+						row.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI,
+								ontologyTermEntity.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI));
+						row.set(MatchingTaskContentEntityMetaData.VALIDATED,
+								mappingEntity.get(MatchingTaskContentEntityMetaData.VALIDATED));
+						row.set(MatchingTaskContentEntityMetaData.SCORE,
+								mappingEntity.get(MatchingTaskContentEntityMetaData.SCORE));
+						csvWriter.add(row);
+					});
 		}
 		finally
 		{
@@ -406,26 +403,25 @@ public class OntologyServiceController extends MolgenisPluginController
 		}
 	}
 
-	private String startMatchJob(String entityName, String ontologyIri, File uploadFile, Model model)
-			throws IOException
+	private String startMatchJob(String entityName, String ontologyIri, File uploadFile, Model model) throws IOException
 	{
 		entityName = entityName.replaceAll(ILLEGAL_PATTERN, ILLEGAL_PATTERN_REPLACEMENT).toLowerCase();
 		if (dataService.hasRepository(entityName))
 		{
 			Entity matchingTaskEntity = dataService.findOne(MatchingTaskEntityMetaData.ENTITY_NAME,
 					new QueryImpl().eq(MatchingTaskEntityMetaData.IDENTIFIER, entityName));
-			model.addAttribute(
-					"message",
-					"The task name should be case insensitive, the task name <strong>"
-							+ entityName
+			model.addAttribute("message",
+					"The task name should be case insensitive, the task name <strong>" + entityName
 							+ "</strong> has existed and created by user : "
-							+ (matchingTaskEntity != null ? matchingTaskEntity
-									.get(MatchingTaskEntityMetaData.MOLGENIS_USER) : StringUtils.EMPTY));
+							+ (matchingTaskEntity != null
+									? matchingTaskEntity.get(MatchingTaskEntityMetaData.MOLGENIS_USER)
+									: StringUtils.EMPTY));
 			return init(model);
 		}
-		AdaptedCsvRepository csvRepository = new AdaptedCsvRepository(entityName, new CsvRepository(uploadFile,
-				Arrays.<CellProcessor> asList(new LowerCaseProcessor(), new TrimProcessor()),
-				OntologyServiceImpl.DEFAULT_SEPARATOR));
+		AdaptedCsvRepository csvRepository = new AdaptedCsvRepository(entityName,
+				new CsvRepository(uploadFile,
+						Arrays.<CellProcessor> asList(new LowerCaseProcessor(), new TrimProcessor()),
+						OntologyServiceImpl.DEFAULT_SEPARATOR));
 
 		if (!validateFileHeader(csvRepository))
 		{
@@ -463,7 +459,8 @@ public class OntologyServiceController extends MolgenisPluginController
 		boolean containsName = false;
 		for (AttributeMetaData atomicAttributes : repository.getEntityMetaData().getAtomicAttributes())
 		{
-			if (atomicAttributes.getName().equalsIgnoreCase(OntologyServiceImpl.DEFAULT_MATCHING_NAME_FIELD)) containsName = true;
+			if (atomicAttributes.getName().equalsIgnoreCase(OntologyServiceImpl.DEFAULT_MATCHING_NAME_FIELD))
+				containsName = true;
 		}
 		return containsName;
 	}

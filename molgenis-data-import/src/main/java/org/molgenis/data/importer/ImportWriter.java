@@ -3,7 +3,9 @@ package org.molgenis.data.importer;
 import static com.google.common.base.Predicates.notNull;
 import static com.google.common.collect.FluentIterable.from;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -15,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.io.IOUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -33,6 +36,8 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.i18n.I18nStringMetaData;
+import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Tag;
@@ -51,7 +56,6 @@ import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.DependencyResolver;
@@ -60,6 +64,7 @@ import org.molgenis.util.MolgenisDateFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Function;
@@ -100,22 +105,62 @@ public class ImportWriter
 		this.molgenisPermissionService = molgenisPermissionService;
 	}
 
-	@Transactional
+	// Use transaction isolation level SERIALIZABLE to prevent problems with the async template, to do ddl statements
+	// without influencing on the current transaction
+	@Transactional(isolation = Isolation.SERIALIZABLE)
 	public EntityImportReport doImport(EmxImportJob job)
 	{
-		RunAsSystemProxy.runAsSystem(() -> {
-			importTags(job.source);
-			return null;
-		});
+		// languages first
+		importLanguages(job.report, job.parsedMetaData.getLanguages(), job.dbAction, job.metaDataChanges);
+
+		runAsSystem(() -> importTags(job.source));
 		importPackages(job.parsedMetaData);
 		addEntityMetaData(job.parsedMetaData, job.report, job.metaDataChanges);
 		addEntityPermissions(job.metaDataChanges);
-		RunAsSystemProxy.runAsSystem(() -> {
-			importEntityAndAttributeTags(job.parsedMetaData);
-			return null;
-		});
+		runAsSystem(() -> importEntityAndAttributeTags(job.parsedMetaData));
 		importData(job.report, job.parsedMetaData.getEntities(), job.source, job.dbAction, job.defaultPackage);
+		importI18nStrings(job.report, job.parsedMetaData.getI18nStrings(), job.dbAction);
+
 		return job.report;
+	}
+
+	private void importLanguages(EntityImportReport report, Map<String, Entity> languages, DatabaseAction dbAction,
+			MetaDataChanges metaDataChanges)
+	{
+		if (!languages.isEmpty())
+		{
+			Repository repo = dataService.getRepository(LanguageMetaData.ENTITY_NAME);
+
+			List<Entity> transformed = languages.values().stream()
+					.map(e -> new DefaultEntityImporter(repo.getEntityMetaData(), dataService, e, false))
+					.collect(toList());
+
+			// Find new ones
+			transformed.stream().map(Entity::getIdValue).forEach(id -> {
+				if (repo.findOne(id) == null)
+				{
+					metaDataChanges.addLanguage(languages.get(id));
+				}
+			});
+
+			int count = update(repo, transformed, dbAction);
+			report.addEntityCount(LanguageMetaData.ENTITY_NAME, count);
+		}
+	}
+
+	private void importI18nStrings(EntityImportReport report, Map<String, Entity> i18nStrings, DatabaseAction dbAction)
+	{
+		if (!i18nStrings.isEmpty())
+		{
+			Repository repo = dataService.getRepository(I18nStringMetaData.ENTITY_NAME);
+
+			List<Entity> transformed = i18nStrings.values().stream()
+					.map(e -> new DefaultEntityImporter(I18nStringMetaData.INSTANCE, dataService, e, false))
+					.collect(toList());
+
+			int count = update(repo, transformed, dbAction);
+			report.addEntityCount(I18nStringMetaData.ENTITY_NAME, count);
+		}
 	}
 
 	private void importEntityAndAttributeTags(ParsedMetaData parsedMetaData)
@@ -145,7 +190,9 @@ public class ImportWriter
 		{
 			String name = entityMetaData.getName();
 
-			if (dataService.hasRepository(name))
+			// Languages and i18nstrings are already done
+			if (!name.equalsIgnoreCase(LanguageMetaData.ENTITY_NAME)
+					&& !name.equalsIgnoreCase(I18nStringMetaData.ENTITY_NAME) && dataService.hasRepository(name))
 			{
 				Repository repository = dataService.getRepository(name);
 				Repository fileEntityRepository = source.getRepository(entityMetaData.getName());
@@ -178,7 +225,7 @@ public class ImportWriter
 						entities = new DependencyResolver().resolveSelfReferences(entities, entityMetaData);
 					}
 					int count = update(repository, entities, dbAction);
-					if (selfReferencing)
+					if (selfReferencing && dbAction != DatabaseAction.UPDATE)
 					{
 						// Fix self referenced entities were not imported
 						update(repository, this.keepSelfReferencedEntities(entities), DatabaseAction.UPDATE);
@@ -249,7 +296,8 @@ public class ImportWriter
 		{
 			String name = entityMetaData.getName();
 			if (!EmxMetaDataParser.ENTITIES.equals(name) && !EmxMetaDataParser.ATTRIBUTES.equals(name)
-					&& !EmxMetaDataParser.PACKAGES.equals(name) && !EmxMetaDataParser.TAGS.equals(name))
+					&& !EmxMetaDataParser.PACKAGES.equals(name) && !EmxMetaDataParser.TAGS.equals(name)
+					&& !EmxMetaDataParser.LANGUAGES.equals(name) && !EmxMetaDataParser.I18NSTRINGS.equals(name))
 			{
 				if (dataService.getMeta().getEntityMetaData(entityMetaData.getName()) == null)
 				{
@@ -318,6 +366,7 @@ public class ImportWriter
 	public void rollbackSchemaChanges(EmxImportJob job)
 	{
 		LOG.info("Rolling back changes.");
+		dataService.delete(LanguageMetaData.ENTITY_NAME, job.metaDataChanges.getAddedLanguages().stream());
 		dropAddedEntities(job.metaDataChanges.getAddedEntities());
 		List<String> entities = dropAddedAttributes(job.metaDataChanges.getAddedAttributes());
 
@@ -438,14 +487,14 @@ public class ImportWriter
 					int batchCount = 0;
 					while (it.hasNext())
 					{
-						q.eq(idAttributeName, it.next());
+						Object id = it.next();
+						q.eq(idAttributeName, id);
 						batchCount++;
 						if (batchCount == batchSize || !it.hasNext())
 						{
-							for (Entity existing : repo.findAll(q))
-							{
+							repo.findAll(q).forEach(existing -> {
 								existingIds.add(existing.getIdValue());
-							}
+							});
 							q = new QueryImpl();
 							batchCount = 0;
 						}
@@ -486,10 +535,9 @@ public class ImportWriter
 						throw new MolgenisDataException(msg.toString());
 					}
 
-					count = repo.add(entities);
+					count = repo.add(StreamSupport.stream(entities.spliterator(), false));
 					break;
-
-				case ADD_UPDATE_EXISTING:
+				case ADD_IGNORE_EXISTING:
 					int batchSize = 1000;
 					List<Entity> existingEntities = Lists.newArrayList();
 					List<Entity> newEntities = Lists.newArrayList();
@@ -500,12 +548,40 @@ public class ImportWriter
 						Entity entity = it.next();
 						count++;
 						Object id = idDataType.convert(entity.get(idAttributeName));
+						if (!existingIds.contains(id))
+						{
+							newEntities.add(entity);
+							if (newEntities.size() == batchSize)
+							{
+								repo.add(newEntities.stream());
+								newEntities.clear();
+							}
+						}
+					}
+
+					if (!newEntities.isEmpty())
+					{
+						repo.add(newEntities.stream());
+					}
+
+					break;
+				case ADD_UPDATE_EXISTING:
+					batchSize = 1000;
+					existingEntities = Lists.newArrayList();
+					newEntities = Lists.newArrayList();
+
+					it = entities.iterator();
+					while (it.hasNext())
+					{
+						Entity entity = it.next();
+						count++;
+						Object id = idDataType.convert(entity.get(idAttributeName));
 						if (existingIds.contains(id))
 						{
 							existingEntities.add(entity);
 							if (existingEntities.size() == batchSize)
 							{
-								repo.update(existingEntities);
+								repo.update(existingEntities.stream());
 								existingEntities.clear();
 							}
 						}
@@ -514,7 +590,7 @@ public class ImportWriter
 							newEntities.add(entity);
 							if (newEntities.size() == batchSize)
 							{
-								repo.add(newEntities);
+								repo.add(newEntities.stream());
 								newEntities.clear();
 							}
 						}
@@ -522,19 +598,19 @@ public class ImportWriter
 
 					if (!existingEntities.isEmpty())
 					{
-						repo.update(existingEntities);
+						repo.update(existingEntities.stream());
 					}
 
 					if (!newEntities.isEmpty())
 					{
-						repo.add(newEntities);
+						repo.add(newEntities.stream());
 					}
 					break;
 
 				case UPDATE:
 					int errorCount = 0;
 					StringBuilder msg = new StringBuilder();
-					msg.append("Trying to update not exsisting ").append(repo.getName()).append(" entities:");
+					msg.append("Trying to update non-existing ").append(repo.getName()).append(" entities:");
 
 					for (Entity entity : entities)
 					{
@@ -563,7 +639,7 @@ public class ImportWriter
 						}
 						throw new MolgenisDataException(msg.toString());
 					}
-					repo.update(entities);
+					repo.update(StreamSupport.stream(entities.spliterator(), false));
 					break;
 
 				default:

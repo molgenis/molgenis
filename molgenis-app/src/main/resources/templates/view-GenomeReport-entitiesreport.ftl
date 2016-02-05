@@ -18,7 +18,7 @@ Different style of reporting template, inspired by http://www.biomedcentral.com/
 <#assign excluded_mod_compound_raw = {}>
 <#assign excluded_high_compound_raw = {}>
 
-<#list datasetRepository.iterator() as row>
+<#list datasetRepository as row>
 
     <#assign geneName = row.getString("INFO_ANN")?split("|")[3]>
 

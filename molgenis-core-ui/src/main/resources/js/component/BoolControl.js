@@ -10,7 +10,7 @@
 	 * @memberOf component
 	 */
 	var BoolControl = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin],
+		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.I18nStringsMixin],
 		displayName: 'BoolControl',
 		propTypes: {
 			id: React.PropTypes.string,
@@ -33,8 +33,21 @@
 				required: true
 			};
 		},
+		getInitialState: function() {
+			return {
+				i18nStrings : null //loaded from server
+			};
+    	},
 		render: function() {
-			var options = [{value: 'true', label: 'Yes'}, {value: 'false', label: 'No'}];
+			if(this.state.i18nStrings === null) {
+				return molgenis.ui.Spinner();
+			}
+			
+			var options = [{value: 'true', label: this.state.i18nStrings.form_bool_true}, {value: 'false', label: this.state.i18nStrings.form_bool_false}];
+			if(!this.props.required && !this.props.multiple) {
+				options = options.concat({value: '', label: this.state.i18nStrings.form_bool_missing});
+			}
+			
 			var Element = this.props.multiple ? molgenis.ui.CheckboxGroup : molgenis.ui.RadioGroup;
 			return Element({
 				id: this.props.id,

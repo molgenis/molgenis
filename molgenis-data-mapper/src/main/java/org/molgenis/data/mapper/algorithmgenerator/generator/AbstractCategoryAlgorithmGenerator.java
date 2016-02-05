@@ -8,8 +8,8 @@ import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
 import org.molgenis.data.mapper.algorithmgenerator.categorymapper.CategoryMapperUtil;
@@ -37,16 +37,15 @@ public abstract class AbstractCategoryAlgorithmGenerator implements AlgorithmGen
 		EntityMetaData refEntity = attributeMetaData.getRefEntity();
 		if (refEntity != null)
 		{
-			for (Entity entity : dataService.findAll(refEntity.getName()))
-			{
-				String code = entity.getString(refEntity.getIdAttribute().getName());
-				String label = entity.getString(refEntity.getLabelAttribute().getName());
+			dataService.findAll(refEntity.getName()).forEach(entity -> {
+				String code = DataConverter.toString(entity.get(refEntity.getIdAttribute().getName()));
+				String label = DataConverter.toString(entity.get(refEntity.getLabelAttribute().getName()));
 				Category category = Category.create(code, label, CategoryMapperUtil.convertDescriptionToAmount(label));
 				if (!categories.contains(category))
 				{
 					categories.add(category);
 				}
-			}
+			});
 		}
 		return categories;
 	}

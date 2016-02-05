@@ -1,11 +1,21 @@
 package org.molgenis.data.support;
 
+import static java.lang.String.format;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.unmodifiableCollection;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.molgenis.data.AttributeChangeListener;
@@ -30,23 +40,26 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 
 	private Package package_;
 	private String label;
+	private final Map<String, String> labelByLanguageCode = new HashMap<>();
 	private boolean abstract_;
 	private String description;
+	private final Map<String, String> descriptionByLanguageCode = new HashMap<>();
 	private EntityMetaData extends_;
 	private String backend;
-	private Map<String, AttributeMetaData> attributes;
-	private String idAttrName;
-	private String labelAttrName;
+	private final Map<String, AttributeMetaData> attributes;
+	private AttributeMetaData ownIdAttr;
+	private AttributeMetaData ownLabelAttr;
+	private Map<String, AttributeMetaData> ownLookupAttrs;
 
 	// bookkeeping to improve performance of getters
-	private AttributeChangeListener attrChangeListener;
+	private final AttributeChangeListener attrChangeListener;
 	private PackageChangeListener packageChangeListener;
 	private transient String cachedName;
 	private transient Map<String, AttributeMetaData> cachedAllAttrs;
 	private transient List<AttributeMetaData> cachedAtomicAttrs;
 	private transient AttributeMetaData cachedIdAttr;
 	private transient AttributeMetaData cachedLabelAttr;
-	private transient List<AttributeMetaData> cachedLookupAttrs;
+	private transient Map<String, AttributeMetaData> cachedLookupAttrs;
 	private transient Boolean cachedHasAttrWithExpression;
 
 	public DefaultEntityMetaData(String simpleName)
@@ -90,20 +103,32 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 		this.entityClass = entityMetaData.getEntityClass();
 		setPackage(entityMetaData.getPackage());
 		this.label = entityMetaData.getLabel();
+		for (String languageCode : entityMetaData.getLabelLanguageCodes())
+		{
+			setLabel(languageCode, entityMetaData.getLabel(languageCode));
+		}
+
 		this.abstract_ = entityMetaData.isAbstract();
 		this.description = entityMetaData.getDescription();
+		for (String languageCode : entityMetaData.getDescriptionLanguageCodes())
+		{
+			setDescription(languageCode, entityMetaData.getDescription(languageCode));
+		}
+
 		EntityMetaData extends_ = entityMetaData.getExtends();
 		this.extends_ = extends_ != null ? new DefaultEntityMetaData(extends_) : null;
 		this.backend = entityMetaData.getBackend();
-		AttributeMetaData idAttr = entityMetaData.getIdAttribute();
-		this.idAttrName = idAttr != null ? idAttr.getName() : null;
-		AttributeMetaData labelAttr = entityMetaData.getLabelAttribute();
-		this.labelAttrName = labelAttr != null ? labelAttr.getName() : null;
 		this.attributes = new CaseInsensitiveLinkedHashMap<>();
 
 		this.attrChangeListener = new AttributeChangeListenerImpl(this);
 
 		addAllAttributeMetaData(entityMetaData.getOwnAttributes());
+		this.ownIdAttr = entityMetaData.getOwnIdAttribute();
+		this.ownLabelAttr = entityMetaData.getOwnLabelAttribute();
+		this.ownLookupAttrs = stream(entityMetaData.getOwnLookupAttributes().spliterator(), false)
+				.collect(toMap(AttributeMetaData::getName, Function.<AttributeMetaData> identity(), (u, v) -> {
+					throw new IllegalStateException(String.format("Duplicate key %s", u));
+				} , CaseInsensitiveLinkedHashMap::new));
 	}
 
 	@Override
@@ -263,11 +288,58 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	}
 
 	@Override
-	public void addAttributeMetaData(AttributeMetaData attr)
+	public String getDescription(String languageCode)
+	{
+		String description = descriptionByLanguageCode.get(languageCode);
+		return description != null ? description : getDescription();
+	}
+
+	@Override
+	public void addAttributeMetaData(AttributeMetaData attr, AttributeRole... attrTypes)
 	{
 		attr.addChangeListener(attrChangeListener);
 		attributes.put(attr.getName(), attr);
+		if (attrTypes != null)
+		{
+			for (AttributeRole attrType : attrTypes)
+			{
+				switch (attrType)
+				{
+					case ROLE_ID:
+						if (attr instanceof DefaultAttributeMetaData)
+						{
+							DefaultAttributeMetaData editableAttr = (DefaultAttributeMetaData) attr;
+							editableAttr.setReadOnly(true);
+							editableAttr.setUnique(true);
+							editableAttr.setNillable(false);
+						}
+						setIdAttribute(attr);
+						break;
+					case ROLE_LABEL:
+						setLabelAttribute(attr);
+						break;
+					case ROLE_LOOKUP:
+						addLookupAttribute(attr);
+						break;
+					default:
+						throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+				}
+			}
+		}
 		clearCache();
+	}
+
+	@Override
+	public EditableEntityMetaData setDescription(String languageCode, String description)
+	{
+		this.descriptionByLanguageCode.put(languageCode, description);
+		return this;
+	}
+
+	@Override
+	public Set<String> getDescriptionLanguageCodes()
+	{
+		return Collections.unmodifiableSet(descriptionByLanguageCode.keySet());
 	}
 
 	@Override
@@ -289,11 +361,11 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	}
 
 	@Override
-	public DefaultAttributeMetaData addAttribute(String name)
+	public DefaultAttributeMetaData addAttribute(String name, AttributeRole... attrTypes)
 	{
-		DefaultAttributeMetaData result = new DefaultAttributeMetaData(name);
-		this.addAttributeMetaData(result);
-		return result;
+		DefaultAttributeMetaData attr = new DefaultAttributeMetaData(name);
+		this.addAttributeMetaData(attr, attrTypes);
+		return attr;
 	}
 
 	@Override
@@ -309,13 +381,15 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	}
 
 	@Override
-	public void setIdAttribute(String idAttrName)
+	public AttributeMetaData getOwnIdAttribute()
 	{
-		this.idAttrName = idAttrName;
-		if (this.labelAttrName == null)
-		{
-			this.labelAttrName = idAttrName;
-		}
+		return ownIdAttr;
+	}
+
+	@Override
+	public void setIdAttribute(AttributeMetaData idAttr)
+	{
+		this.ownIdAttr = requireNonNull(idAttr);
 		clearCache();
 	}
 
@@ -326,25 +400,57 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	}
 
 	@Override
-	public void setLabelAttribute(String labelAttrName)
+	public AttributeMetaData getOwnLabelAttribute()
 	{
-		this.labelAttrName = labelAttrName;
-		if (this.labelAttrName == null)
-		{
-			this.labelAttrName = idAttrName;
-		}
+		return ownLabelAttr;
+	}
+
+	@Override
+	public void setLabelAttribute(AttributeMetaData labelAttr)
+	{
+		this.ownLabelAttr = requireNonNull(labelAttr);
 		clearCache();
+	}
+
+	@Override
+	public AttributeMetaData getLookupAttribute(String attrName)
+	{
+		return getCachedLookupAttrs().get(attrName);
 	}
 
 	@Override
 	public Iterable<AttributeMetaData> getLookupAttributes()
 	{
-		Iterable<AttributeMetaData> lookupAttrs = getCachedLookupAttrs();
+		Iterable<AttributeMetaData> lookupAttrs = getCachedLookupAttrs().values();
 		if (extends_ != null)
 		{
 			lookupAttrs = Iterables.concat(extends_.getLookupAttributes(), lookupAttrs);
 		}
 		return lookupAttrs;
+	}
+
+	@Override
+	public Iterable<AttributeMetaData> getOwnLookupAttributes()
+	{
+		return ownLookupAttrs != null ? unmodifiableCollection(ownLookupAttrs.values()) : emptyList();
+	}
+
+	@Override
+	public void addLookupAttribute(AttributeMetaData lookupAttr)
+	{
+		if (this.ownLookupAttrs == null) this.ownLookupAttrs = new CaseInsensitiveLinkedHashMap<>();
+		this.ownLookupAttrs.put(lookupAttr.getName(), lookupAttr);
+		clearCache();
+	}
+
+	@Override
+	public void setLookupAttributes(Stream<AttributeMetaData> lookupAttrs)
+	{
+		this.ownLookupAttrs = lookupAttrs
+				.collect(toMap(AttributeMetaData::getName, Function.<AttributeMetaData> identity(), (u, v) -> {
+					throw new IllegalStateException(String.format("Duplicate key %s", u));
+				} , CaseInsensitiveLinkedHashMap::new));
+		clearCache();
 	}
 
 	@Override
@@ -461,24 +567,13 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	{
 		if (cachedIdAttr == null)
 		{
-			if (idAttrName != null)
+			if (ownIdAttr != null)
 			{
-				cachedIdAttr = getCachedAllAttrs().get(idAttrName);
-				if (cachedIdAttr == null && extends_ != null)
-				{
-					cachedIdAttr = extends_.getAttribute(idAttrName);
-				}
+				cachedIdAttr = ownIdAttr;
 			}
-			else
+			else if (extends_ != null)
 			{
-				// if the entity id attribute name was not set search for the id attribute
-				Stream<AttributeMetaData> stream = getCachedAllAttrs().values().stream();
-				cachedIdAttr = stream.filter(AttributeMetaData::isIdAtrribute).findFirst().orElse(null);
-
-				if (cachedIdAttr == null && extends_ != null)
-				{
-					cachedIdAttr = extends_.getIdAttribute();
-				}
+				cachedIdAttr = extends_.getIdAttribute();
 			}
 
 			if (cachedIdAttr == null && !abstract_)
@@ -494,56 +589,40 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	{
 		if (cachedLabelAttr == null)
 		{
-			if (labelAttrName != null)
+			if (ownLabelAttr != null)
 			{
-				cachedLabelAttr = getCachedAllAttrs().get(labelAttrName);
-				if (cachedLabelAttr == null && extends_ != null)
-				{
-					cachedLabelAttr = extends_.getAttribute(idAttrName);
-				}
+				cachedLabelAttr = ownLabelAttr;
 			}
-			else
+			else if (extends_ != null)
 			{
-				// if the entity label attribute name was not set search for the label attribute
-				Stream<AttributeMetaData> stream = getCachedAllAttrs().values().stream();
-				cachedLabelAttr = stream.filter(AttributeMetaData::isLabelAttribute).findFirst().orElse(null);
+				cachedLabelAttr = extends_.getLabelAttribute();
+			}
 
-				if (cachedLabelAttr == null && extends_ != null)
-				{
-					cachedLabelAttr = extends_.getLabelAttribute();
-				}
-
-				if (cachedLabelAttr == null)
-				{
-					cachedLabelAttr = getCachedIdAttr();
-				}
+			if (cachedLabelAttr == null)
+			{
+				cachedLabelAttr = getCachedIdAttr();
 			}
 		}
 		return cachedLabelAttr;
 	}
 
-	private List<AttributeMetaData> getCachedLookupAttrs()
+	private Map<String, AttributeMetaData> getCachedLookupAttrs()
 	{
 		if (cachedLookupAttrs == null)
 		{
-			cachedLookupAttrs = new ArrayList<>();
-			fillCachedLookupAttrsRec(attributes.values());
+			if (ownLookupAttrs != null)
+			{
+				cachedLookupAttrs = ownLookupAttrs;
+			}
+			else if (extends_ != null)
+			{
+				cachedLookupAttrs = stream(extends_.getLookupAttributes().spliterator(), false)
+						.collect(toMap(AttributeMetaData::getName, Function.<AttributeMetaData> identity(), (u, v) -> {
+							throw new IllegalStateException(String.format("Duplicate key %s", u));
+						} , CaseInsensitiveLinkedHashMap::new));
+			}
 		}
-		return cachedLookupAttrs;
-	}
-
-	private void fillCachedLookupAttrsRec(Iterable<AttributeMetaData> attrs)
-	{
-		attrs.forEach(attr -> {
-			if (attr.isLookupAttribute())
-			{
-				cachedLookupAttrs.add(attr);
-			}
-			if (attr.getDataType().getEnumType() == COMPOUND)
-			{
-				fillCachedLookupAttrsRec(attr.getAttributeParts());
-			}
-		});
+		return cachedLookupAttrs != null ? cachedLookupAttrs : emptyMap();
 	}
 
 	private boolean getCachedHasAttrWithExpression()
@@ -613,5 +692,33 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 		{
 			entityMeta.clearCache();
 		}
+	}
+
+	@Override
+	public AttributeMetaData getLabelAttribute(String languageCode)
+	{
+		AttributeMetaData labelAttr = getLabelAttribute();
+		AttributeMetaData i18nLabelAttr = getCachedAllAttrs().get(labelAttr.getName() + '-' + languageCode);
+		return i18nLabelAttr != null ? i18nLabelAttr : labelAttr;
+	}
+
+	@Override
+	public String getLabel(String languageCode)
+	{
+		String label = labelByLanguageCode.get(languageCode);
+		return label != null ? label : getLabel();
+	}
+
+	@Override
+	public EditableEntityMetaData setLabel(String languageCode, String label)
+	{
+		this.labelByLanguageCode.put(languageCode, label);
+		return this;
+	}
+
+	@Override
+	public Set<String> getLabelLanguageCodes()
+	{
+		return Collections.unmodifiableSet(labelByLanguageCode.keySet());
 	}
 }

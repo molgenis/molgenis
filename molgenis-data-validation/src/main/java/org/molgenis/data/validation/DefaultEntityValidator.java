@@ -67,7 +67,7 @@ public class DefaultEntityValidator implements EntityValidator
 
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
-			if (!attr.isNillable() && !attr.isIdAtrribute() && !attr.isAuto())
+			if (!attr.isNillable() && !attr.equals(meta.getIdAttribute()) && !attr.isAuto())
 			{
 				long rownr = 0;
 				for (Entity entity : entities)
@@ -90,11 +90,13 @@ public class DefaultEntityValidator implements EntityValidator
 	public boolean mustDoNotNullCheck(EntityMetaData entityMetaData, AttributeMetaData attr, Entity entity)
 	{
 		// Do not validate if Questionnaire status is not SUBMITTED
-		if (EntityUtils.doesExtend(entityMetaData, "Questionnaire") && entity.get("status") != "SUBMITTED") return false;
+		if (EntityUtils.doesExtend(entityMetaData, "Questionnaire") && entity.get("status") != "SUBMITTED")
+			return false;
 
 		// Do not validate is visibleExpression resolves to false
 		if (StringUtils.isNotBlank(attr.getVisibleExpression())
-				&& !ValidationUtils.resolveBooleanExpression(attr.getVisibleExpression(), entity, entityMetaData)) return false;
+				&& !ValidationUtils.resolveBooleanExpression(attr.getVisibleExpression(), entity, entityMetaData))
+			return false;
 
 		return true;
 	}
@@ -106,8 +108,8 @@ public class DefaultEntityValidator implements EntityValidator
 
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
-			if (attr.isUnique() && !attr.isIdAtrribute()
-					&& !(attr.isLabelAttribute() && (dbAction == DatabaseAction.ADD_UPDATE_EXISTING)))
+			if (attr.isUnique() && !attr.equals(meta.getIdAttribute())
+					&& !(attr.equals(meta.getLabelAttribute()) && (dbAction == DatabaseAction.ADD_UPDATE_EXISTING)))
 			{
 				// Gather all attribute values
 				List<Object> values = Lists.newArrayList();
@@ -122,8 +124,8 @@ public class DefaultEntityValidator implements EntityValidator
 				{
 					// TODO TBD: should an attribute be globally unique or unique per entity?
 					// For now workaround, identifier.
-					String entityName = attr.getName().equalsIgnoreCase("identifier") ? "Characteristic" : meta
-							.getName();
+					String entityName = attr.getName().equalsIgnoreCase("identifier") ? "Characteristic"
+							: meta.getName();
 
 					long count = dataService.count(entityName, new QueryImpl().in(attr.getName(), values));
 					if (count > 0)
@@ -137,8 +139,8 @@ public class DefaultEntityValidator implements EntityValidator
 							Entity entity = it.next();
 
 							Object value = entity.get(attr.getName());
-							Entity existing = dataService
-									.findOne(entityName, new QueryImpl().eq(attr.getName(), value));
+							Entity existing = dataService.findOne(entityName,
+									new QueryImpl().eq(attr.getName(), value));
 
 							if (existing != null)
 							{
@@ -147,10 +149,10 @@ public class DefaultEntityValidator implements EntityValidator
 								if (((dbAction == null) && !idEquals(entity, existing, meta))
 										|| ((dbAction != null) && (dbAction == DatabaseAction.ADD)))
 								{
-									String message = String
-											.format("The attribute '%s' of entity '%s' with key '%s' must be unique, but the value '%s' already exists.",
-													attr.getName(), meta.getName(),
-													entity.getString(meta.getLabelAttribute().getName()), value);
+									String message = String.format(
+											"The attribute '%s' of entity '%s' with key '%s' must be unique, but the value '%s' already exists.",
+											attr.getName(), meta.getName(),
+											entity.getString(meta.getLabelAttribute().getName()), value);
 									violations.add(new ConstraintViolation(message, value, entity, attr, meta, null));
 								}
 

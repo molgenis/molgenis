@@ -10,6 +10,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Range;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.rest.Href;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
@@ -48,22 +49,24 @@ class AttributeMetaDataResponseV2
 	/**
 	 * 
 	 * @param entityParentName
+	 * @param entityMeta
 	 * @param attr
 	 * @param attrFilter
 	 *            set of lowercase attribute names to include in response
 	 * @param attributeExpandsSet
 	 *            set of lowercase attribute names to expand in response
 	 */
-	public AttributeMetaDataResponseV2(final String entityParentName, AttributeMetaData attr, Fetch fetch,
-			MolgenisPermissionService permissionService, DataService dataService)
+	public AttributeMetaDataResponseV2(final String entityParentName, EntityMetaData entityMeta, AttributeMetaData attr,
+			Fetch fetch, MolgenisPermissionService permissionService, DataService dataService,
+			LanguageService languageService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestControllerV2.BASE_URI, entityParentName, attrName);
 
 		this.fieldType = attr.getDataType().getEnumType();
 		this.name = attrName;
-		this.label = attr.getLabel();
-		this.description = attr.getDescription();
+		this.label = attr.getLabel(languageService.getCurrentUserLanguageCode());
+		this.description = attr.getDescription(languageService.getCurrentUserLanguageCode());
 		this.enumOptions = attr.getEnumOptions();
 		this.maxLength = attr.getDataType().getMaxLength();
 		this.expression = attr.getExpression();
@@ -71,7 +74,8 @@ class AttributeMetaDataResponseV2
 		EntityMetaData refEntity = attr.getRefEntity();
 		if (refEntity != null)
 		{
-			this.refEntity = new EntityMetaDataResponseV2(refEntity, fetch, permissionService, dataService);
+			this.refEntity = new EntityMetaDataResponseV2(refEntity, fetch, permissionService, dataService,
+					languageService);
 		}
 		else
 		{
@@ -85,8 +89,8 @@ class AttributeMetaDataResponseV2
 			attrParts = filterAttributes(fetch, attrParts);
 
 			// create attribute response
-			this.attributes = Lists.newArrayList(Iterables.transform(attrParts,
-					new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
+			this.attributes = Lists.newArrayList(
+					Iterables.transform(attrParts, new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
 					{
 						@Override
 						public AttributeMetaDataResponseV2 apply(AttributeMetaData attr)
@@ -105,14 +109,15 @@ class AttributeMetaDataResponseV2
 							}
 							else if (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
 							{
-								subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr);
+								subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr,
+										languageService.getCurrentUserLanguageCode());
 							}
 							else
 							{
 								subAttrFetch = null;
 							}
-							return new AttributeMetaDataResponseV2(entityParentName, attr, subAttrFetch,
-									permissionService, dataService);
+							return new AttributeMetaDataResponseV2(entityParentName, entityMeta, attr, subAttrFetch,
+									permissionService, dataService, languageService);
 						}
 					}));
 		}
@@ -125,9 +130,9 @@ class AttributeMetaDataResponseV2
 		this.nillable = attr.isNillable();
 		this.readOnly = attr.isReadonly();
 		this.defaultValue = attr.getDefaultValue();
-		this.labelAttribute = attr.isLabelAttribute();
+		this.labelAttribute = attr.equals(entityMeta.getLabelAttribute());
 		this.unique = attr.isUnique();
-		this.lookupAttribute = attr.isLookupAttribute();
+		this.lookupAttribute = entityMeta.getLookupAttribute(attr.getName()) != null;
 		this.aggregateable = attr.isAggregateable();
 		this.range = attr.getRange();
 		this.visible = attr.isVisible();

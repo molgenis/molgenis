@@ -1,5 +1,6 @@
 package org.molgenis.data.mysql.meta;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -58,7 +59,7 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 	public void addAndGetAttributeMetaData()
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("test");
-		emd.addAttribute("id").setIdAttribute(true).setNillable(false);
+		emd.addAttribute("id", ROLE_ID);
 		metaDataService.addEntityMeta(emd);
 
 		List<String> enumOptions = Arrays.asList("enum1", "enum2");
@@ -69,8 +70,8 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 				.setRange(new Range(1l, 5l));
 		metaDataService.addAttribute(emd.getName(), intRangeAttr);
 
-		List<AttributeMetaData> retrieved = Lists.newArrayList(metaDataService.getEntityMetaData(emd.getName())
-				.getAttributes());
+		List<AttributeMetaData> retrieved = Lists
+				.newArrayList(metaDataService.getEntityMetaData(emd.getName()).getAttributes());
 
 		assertNotNull(retrieved);
 		assertEquals(retrieved.size(), 3);
@@ -96,7 +97,7 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 	public void addAndGetEntityMetaData()
 	{
 		DefaultEntityMetaData test = new DefaultEntityMetaData("testje");
-		test.addAttribute("id").setIdAttribute(true).setNillable(false);
+		test.addAttribute("id", ROLE_ID);
 		metaDataService.addEntityMeta(test);
 
 		DefaultEntityMetaData extendsTest = new DefaultEntityMetaData("extendstest");
@@ -119,15 +120,15 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 	public void getEntityMetaDatas()
 	{
 		DefaultEntityMetaData test = new DefaultEntityMetaData("test");
-		test.addAttribute("id").setIdAttribute(true).setNillable(false);
+		test.addAttribute("id", ROLE_ID);
 		metaDataService.addEntityMeta(test);
 
 		DefaultEntityMetaData test1 = new DefaultEntityMetaData("test1");
-		test1.addAttribute("id").setIdAttribute(true).setNillable(false);
+		test1.addAttribute("id", ROLE_ID);
 		metaDataService.addEntityMeta(test1);
 
 		DefaultEntityMetaData test2 = new DefaultEntityMetaData("test2");
-		test2.addAttribute("id").setIdAttribute(true).setNillable(false);
+		test2.addAttribute("id", ROLE_ID);
 		metaDataService.addEntityMeta(test2);
 
 		List<EntityMetaData> meta = Lists.newArrayList(metaDataService.getEntityMetaDatas());
@@ -141,7 +142,6 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void getEntityMetaDatasForPackage()
 	{
-
 		PackageImpl p1 = new PackageImpl("p1", "Package1", null);
 		metaDataService.addPackage(p1);
 
@@ -149,19 +149,19 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 		metaDataService.addPackage(p2);
 
 		DefaultEntityMetaData test = new DefaultEntityMetaData("test");
-		test.addAttribute("id").setIdAttribute(true).setNillable(false);
+		test.addAttribute("id", ROLE_ID);
 		metaDataService.addEntityMeta(test);
 
 		DefaultEntityMetaData test1 = new DefaultEntityMetaData("test1", p1);
-		test1.addAttribute("id").setIdAttribute(true).setNillable(false);
+		test1.addAttribute("id", ROLE_ID);
 		metaDataService.addEntityMeta(test1);
 
 		DefaultEntityMetaData test2 = new DefaultEntityMetaData("test2", p2);
-		test2.addAttribute("id").setIdAttribute(true).setNillable(false);
+		test2.addAttribute("id", ROLE_ID);
 		metaDataService.addEntityMeta(test2);
 
 		DefaultEntityMetaData test3 = new DefaultEntityMetaData("test3", p2);
-		test3.addAttribute("id").setIdAttribute(true).setNillable(false);
+		test3.addAttribute("id", ROLE_ID);
 		metaDataService.addEntityMeta(test3);
 
 		assertEquals(metaDataService.getPackage("p1_p2").getEntityMetaDatas(),

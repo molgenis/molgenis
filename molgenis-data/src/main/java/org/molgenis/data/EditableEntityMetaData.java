@@ -1,5 +1,7 @@
 package org.molgenis.data;
 
+import java.util.stream.Stream;
+
 import org.molgenis.data.support.DefaultAttributeMetaData;
 
 /**
@@ -15,11 +17,29 @@ public interface EditableEntityMetaData extends EntityMetaData
 	EditableEntityMetaData setLabel(String string);
 
 	/**
+	 * Set label for language
+	 * 
+	 * @param languageCode
+	 * @param label
+	 * @return
+	 */
+	EditableEntityMetaData setLabel(String languageCode, String label);
+
+	/**
 	 * Set description
 	 * 
 	 * @param string
 	 */
 	EditableEntityMetaData setDescription(String string);
+
+	/**
+	 * Set description for language
+	 * 
+	 * @param languageCode
+	 * @param description
+	 * @return
+	 */
+	EditableEntityMetaData setDescription(String languageCode, String description);
 
 	/**
 	 * set extends entity metadata
@@ -46,9 +66,11 @@ public interface EditableEntityMetaData extends EntityMetaData
 
 	/**
 	 * 
-	 * @param defaultAttributeMetaData
+	 * @param attributeMetaData
+	 * @param attributeTypes
+	 *            whether this attribute is a id and/or label and/or lookup attribute
 	 */
-	void addAttributeMetaData(AttributeMetaData attributeMetaData);
+	void addAttributeMetaData(AttributeMetaData attributeMetaData, AttributeRole... attributeTypes);
 
 	/**
 	 * Add attributes to this entity
@@ -65,24 +87,40 @@ public interface EditableEntityMetaData extends EntityMetaData
 	void removeAttributeMetaData(AttributeMetaData attributeMetaData);
 
 	/**
-	 * Set id attribute name
+	 * Set id attribute
 	 * 
-	 * @param string
+	 * @param attr
 	 */
-	void setIdAttribute(String idAttrName);
+	void setIdAttribute(AttributeMetaData attr);
 
 	/**
-	 * Set label attribute name
+	 * Set label attribute
 	 * 
-	 * @param string
+	 * @param attr
 	 */
-	void setLabelAttribute(String labelAttrName);
+	void setLabelAttribute(AttributeMetaData attr);
+
+	/**
+	 * Add a lookup attribute
+	 * 
+	 * @param attr
+	 */
+	void addLookupAttribute(AttributeMetaData attr);
+
+	/**
+	 * Set lookup attributes
+	 * 
+	 * @param lookupAttrs
+	 */
+	void setLookupAttributes(Stream<AttributeMetaData> lookupAttrs);
 
 	/**
 	 * add attribute
 	 * 
 	 * @param string
+	 * @param attributeTypes
+	 *            whether this attribute is a id and/or label and/or lookup attribute
 	 * @return
 	 */
-	DefaultAttributeMetaData addAttribute(String string);
+	DefaultAttributeMetaData addAttribute(String string, AttributeRole... attributeTypes);
 }

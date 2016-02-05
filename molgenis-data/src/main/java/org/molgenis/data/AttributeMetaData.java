@@ -1,6 +1,7 @@
 package org.molgenis.data;
 
 import java.util.List;
+import java.util.Set;
 
 import org.molgenis.fieldtypes.FieldType;
 
@@ -15,14 +16,34 @@ public interface AttributeMetaData
 	String getName();
 
 	/**
-	 * Label of the attribute if set else returns name
+	 * Label of the attribute in the default language if set else returns name
 	 */
 	String getLabel();
+
+	/**
+	 * Label of the attribute in the requested language if set else returns name
+	 */
+	String getLabel(String languageCode);
+
+	/**
+	 * Get available label language codes
+	 */
+	Set<String> getLabelLanguageCodes();
 
 	/**
 	 * Description of the attribute
 	 */
 	String getDescription();
+
+	/**
+	 * Description of the attribute in the requested languages
+	 */
+	String getDescription(String languageCode);
+
+	/**
+	 * Get available description language codes
+	 */
+	Set<String> getDescriptionLanguageCodes();
 
 	/**
 	 * DataType of the attribute
@@ -53,21 +74,6 @@ public interface AttributeMetaData
 	 * Default value expression
 	 */
 	String getDefaultValue();
-
-	/**
-	 * Whether attribute is primary key
-	 */
-	boolean isIdAtrribute();
-
-	/**
-	 * Whether attribute is human readable key
-	 */
-	boolean isLabelAttribute();
-
-	/**
-	 * Wether this attribute must be searched in case of xref/mref search
-	 */
-	boolean isLookupAttribute();
 
 	/**
 	 * When true the attribute is automatically assigned a value when persisted (for example the current date)

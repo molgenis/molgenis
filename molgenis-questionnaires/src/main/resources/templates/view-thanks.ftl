@@ -6,7 +6,7 @@
 
 <@header css js/>
 
-<a href="/menu/main/questionnaires" class="btn btn-default btn-md"><span class="glyphicon glyphicon-chevron-left"></span> Back to My questionnaires</a>
+<a href="/menu/main/questionnaires" class="btn btn-default btn-md"><span class="glyphicon glyphicon-chevron-left"></span> ${i18n.questionnaire_thank_you_page_back_button?html}</a>
 
 <div class="row">
 	<div class="col-md-12">

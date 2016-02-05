@@ -1,5 +1,7 @@
 package org.molgenis.data.elasticsearch.util;
 
+import java.util.stream.Stream;
+
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 
@@ -17,16 +19,9 @@ public class ElasticsearchEntityUtils
 		return entityId.toString();
 	}
 
-	public static Iterable<String> toElasticsearchIds(Iterable<Object> entityIds)
+	public static Stream<String> toElasticsearchIds(Stream<Object> entityIds)
 	{
-		return Iterables.transform(entityIds, new Function<Object, String>()
-		{
-			@Override
-			public String apply(Object entityId)
-			{
-				return toElasticsearchId(entityId);
-			}
-		});
+		return entityIds.map(ElasticsearchEntityUtils::toElasticsearchId);
 	}
 
 	public static Object toEntityId(String elasticsearchId)

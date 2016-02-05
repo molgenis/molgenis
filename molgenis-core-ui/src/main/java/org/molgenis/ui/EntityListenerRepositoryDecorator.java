@@ -3,10 +3,9 @@ package org.molgenis.ui;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
@@ -18,10 +17,13 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.SetMultimap;
+
 public class EntityListenerRepositoryDecorator implements Repository
 {
 	private final Repository decoratedRepository;
-	private Map<Object, EntityListener> entityListeners;
+	private SetMultimap<Object, EntityListener> entityListeners;
 
 	public EntityListenerRepositoryDecorator(Repository decoratedRepository)
 	{
@@ -77,7 +79,7 @@ public class EntityListenerRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
 		return decoratedRepository.findAll(q);
 	}
@@ -101,13 +103,13 @@ public class EntityListenerRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
+	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		return decoratedRepository.findAll(ids);
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
 		return decoratedRepository.findAll(ids, fetch);
 	}
@@ -125,30 +127,27 @@ public class EntityListenerRepositoryDecorator implements Repository
 
 		if (entityListeners != null)
 		{
-			EntityListener entityListener = entityListeners.get(entity.getIdValue());
-			if (entityListener != null)
-			{
+			Set<EntityListener> entityEntityListeners = entityListeners.get(entity.getIdValue());
+			entityEntityListeners.forEach(entityListener -> {
 				entityListener.postUpdate(entity);
-			}
+			});
 		}
 	}
 
 	@Override
-	public void update(Iterable<? extends Entity> records)
+	public void update(Stream<? extends Entity> entities)
 	{
-		decoratedRepository.update(records);
-
 		if (entityListeners != null)
 		{
-			for (Entity entity : records)
-			{
-				EntityListener entityListener = entityListeners.get(entity.getIdValue());
-				if (entityListener != null)
-				{
+			entities = entities.filter(entity -> {
+				Set<EntityListener> entityEntityListeners = entityListeners.get(entity.getIdValue());
+				entityEntityListeners.forEach(entityListener -> {
 					entityListener.postUpdate(entity);
-				}
-			}
+				});
+				return true;
+			});
 		}
+		decoratedRepository.update(entities);
 	}
 
 	@Override
@@ -158,7 +157,7 @@ public class EntityListenerRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void delete(Iterable<? extends Entity> entities)
+	public void delete(Stream<? extends Entity> entities)
 	{
 		decoratedRepository.delete(entities);
 	}
@@ -170,7 +169,7 @@ public class EntityListenerRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
 		decoratedRepository.deleteById(ids);
 	}
@@ -188,7 +187,7 @@ public class EntityListenerRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Integer add(Iterable<? extends Entity> entities)
+	public Integer add(Stream<? extends Entity> entities)
 	{
 		return decoratedRepository.add(entities);
 	}
@@ -228,7 +227,7 @@ public class EntityListenerRepositoryDecorator implements Repository
 	{
 		if (entityListeners == null)
 		{
-			entityListeners = new HashMap<>();
+			entityListeners = HashMultimap.<Object, EntityListener> create();
 		}
 		entityListeners.put(entityListener.getEntityId(), entityListener);
 	}
@@ -238,7 +237,7 @@ public class EntityListenerRepositoryDecorator implements Repository
 	{
 		if (entityListeners != null)
 		{
-			entityListeners.remove(entityListener.getEntityId());
+			entityListeners.remove(entityListener.getEntityId(), entityListener);
 		}
 	}
 }

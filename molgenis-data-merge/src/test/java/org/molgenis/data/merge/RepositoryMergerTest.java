@@ -1,15 +1,17 @@
 package org.molgenis.data.merge;
 
+import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -38,7 +40,7 @@ import com.google.common.collect.Lists;
 @Component
 public class RepositoryMergerTest
 {
-
+	private DefaultAttributeMetaData idAttribute;
 	private AttributeMetaData metaDataa;
 	private AttributeMetaData metaDatab;
 	private Repository repository1;
@@ -66,25 +68,20 @@ public class RepositoryMergerTest
 		DefaultAttributeMetaData metaData1d = new DefaultAttributeMetaData("d");
 		DefaultAttributeMetaData metaData2c = new DefaultAttributeMetaData("c");
 		DefaultAttributeMetaData metaData2e = new DefaultAttributeMetaData("e");
-		entityMetaData1.addAttributeMetaData(metaDataa);
+		entityMetaData1.addAttributeMetaData(metaDataa, ROLE_ID);
 		entityMetaData1.addAttributeMetaData(metaDatab);
 		entityMetaData1.addAttributeMetaData(metaData1c);
 		entityMetaData1.addAttributeMetaData(metaData1d);
-		entityMetaData1.setIdAttribute(metaDataa.getName());
-		entityMetaData2.addAttributeMetaData(metaDataa);
+		entityMetaData2.addAttributeMetaData(metaDataa, ROLE_ID);
 		entityMetaData2.addAttributeMetaData(metaDatab);
 		entityMetaData2.addAttributeMetaData(metaData2c);
 		entityMetaData2.addAttributeMetaData(metaData2e);
-		entityMetaData2.setIdAttribute(metaDataa.getName());
 
 		// merged metadata
-		DefaultAttributeMetaData idAttribute = new DefaultAttributeMetaData("ID",
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
-		idAttribute.setIdAttribute(true);
+		idAttribute = new DefaultAttributeMetaData("ID", MolgenisFieldTypes.FieldTypeEnum.STRING);
 		idAttribute.setNillable(false);
 		idAttribute.setVisible(false);
-		entityMetaDataMerged.addAttributeMetaData(idAttribute);
-		entityMetaDataMerged.setIdAttribute("ID");
+		entityMetaDataMerged.addAttributeMetaData(idAttribute, ROLE_ID);
 
 		DefaultAttributeMetaData metaData1cMerged = new DefaultAttributeMetaData("meta1_c");
 		DefaultAttributeMetaData metaData1dMerged = new DefaultAttributeMetaData("meta1_d");
@@ -138,10 +135,14 @@ public class RepositoryMergerTest
 		RepositoryMerger repositoryMerger = new RepositoryMerger(dataService);
 
 		// check metaData
-		assertEquals(Lists.newArrayList(entityMetaDataMerged.getAttributes()), Lists.newArrayList(
-				repositoryMerger.mergeMetaData(repositoryList, commonAttributes, "mergedRepo").getAttributes()));
+		assertEquals(
+				Lists.newArrayList(repositoryMerger
+						.mergeMetaData(repositoryList, commonAttributes, idAttribute, "mergedRepo").getAttributes()),
+				Lists.newArrayList(entityMetaDataMerged.getAttributes()));
 	}
 
+	@SuppressWarnings(
+	{ "unchecked", "rawtypes" })
 	@Test
 	public void mergeTest()
 	{
@@ -186,14 +187,19 @@ public class RepositoryMergerTest
 
 		RepositoryMerger repositoryMerger = new RepositoryMerger(dataService);
 		repositoryMerger.merge(repositoryList, commonAttributes, elasticSearchRepository, 2);
-		ArgumentCaptor<List> argument = ArgumentCaptor.forClass(List.class);
+		ArgumentCaptor<Stream<Entity>> argument = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(elasticSearchRepository, times(2)).add(argument.capture());
-		assertTrue(argument.getAllValues().get(0).size() == 2);
-		assertTrue(argument.getAllValues().get(1).size() == 1);
-		argument = ArgumentCaptor.forClass(List.class);
-		verify(elasticSearchRepository, times(3)).update(argument.capture());
-		assertTrue(argument.getAllValues().get(0).size() == 2);
-		assertTrue(argument.getAllValues().get(1).size() == 2);
-		assertTrue(argument.getAllValues().get(2).size() == 1);
+		List<Entity> list0 = argument.getAllValues().get(0).collect(toList());
+		List<Entity> list1 = argument.getAllValues().get(1).collect(toList());
+		assertEquals(list0.size(), 2);
+		assertEquals(list1.size(), 1);
+		ArgumentCaptor<Stream<Entity>> esArgument = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(elasticSearchRepository, times(3)).update(esArgument.capture());
+		List<Entity> esList0 = esArgument.getAllValues().get(0).collect(toList());
+		List<Entity> esList1 = esArgument.getAllValues().get(1).collect(toList());
+		List<Entity> esList2 = esArgument.getAllValues().get(2).collect(toList());
+		assertEquals(esList0.size(), 2);
+		assertEquals(esList1.size(), 2);
+		assertEquals(esList2.size(), 1);
 	}
 }

@@ -3,6 +3,7 @@ package org.molgenis.data.annotation.entity.impl;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.VcfRepository.ALT;
 import static org.molgenis.data.vcf.VcfRepository.ALT_META;
 import static org.molgenis.data.vcf.VcfRepository.CHROM;
@@ -14,6 +15,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.stream.Stream;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -42,7 +44,7 @@ public class ClinvarAnnotatorTest extends AbstractTestNGSpringContextTests
 	public void annotateIterable()
 	{
 		DefaultEntityMetaData sourceMeta = new DefaultEntityMetaData("clinvar");
-		sourceMeta.addAttribute(CHROM).setIdAttribute(true).setNillable(false);
+		sourceMeta.addAttribute(CHROM, ROLE_ID);
 		sourceMeta.addAttributeMetaData(POS_META);
 		sourceMeta.addAttributeMetaData(REF_META);
 		sourceMeta.addAttributeMetaData(ALT_META);
@@ -248,7 +250,7 @@ public class ClinvarAnnotatorTest extends AbstractTestNGSpringContextTests
 		public DataService dataService()
 		{
 			DataService dataService = mock(DataService.class);
-			when(dataService.findAll(any(String.class), any(Query.class))).thenReturn(Collections.emptyList());
+			when(dataService.findAll(any(String.class), any(Query.class))).thenReturn(Stream.empty());
 			return dataService;
 		}
 

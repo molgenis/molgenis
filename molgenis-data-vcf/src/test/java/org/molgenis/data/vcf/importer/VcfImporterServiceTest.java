@@ -20,11 +20,14 @@ import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Package;
 import org.molgenis.data.Repository;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.mem.InMemoryRepositoryCollection;
 import org.molgenis.data.meta.MetaDataServiceImpl;
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.validation.EntityAttributesValidator;
+import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
 import org.molgenis.data.vcf.VcfRepositoryCollection;
 import org.molgenis.framework.db.EntityImportReport;
@@ -39,6 +42,7 @@ public class VcfImporterServiceTest
 	{
 		DataServiceImpl dataService = new DataServiceImpl();
 		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(dataService);
+		metaDataService.setLanguageService(new LanguageService(dataService, Mockito.mock(AppSettings.class)));
 		metaDataService.setDefaultBackend(new InMemoryRepositoryCollection("ElasticSearch"));
 		dataService.setMeta(metaDataService);
 
@@ -68,6 +72,7 @@ public class VcfImporterServiceTest
 	{
 		DataServiceImpl dataService = new DataServiceImpl();
 		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(dataService);
+		metaDataService.setLanguageService(new LanguageService(dataService, Mockito.mock(AppSettings.class)));
 		metaDataService.setDefaultBackend(new InMemoryRepositoryCollection("ElasticSearch")
 		{
 			// enable data validation
@@ -75,7 +80,8 @@ public class VcfImporterServiceTest
 			public Repository addEntityMeta(EntityMetaData entityMetaData)
 			{
 				Repository repo = super.addEntityMeta(entityMetaData);
-				return new RepositoryValidationDecorator(dataService, repo, new EntityAttributesValidator());
+				return new RepositoryValidationDecorator(dataService, repo, new EntityAttributesValidator(),
+						new ExpressionValidator());
 			}
 		});
 		dataService.setMeta(metaDataService);
@@ -107,8 +113,8 @@ public class VcfImporterServiceTest
 
 		File testdata = new File(FileUtils.getTempDirectory(), "testdata.vcf");
 
-		Mockito.when(fileRepositoryCollectionFactory.createFileRepositoryCollection(testdata))
-				.thenReturn(fileRepositoryCollection);
+		Mockito.when(fileRepositoryCollectionFactory.createFileRepositoryCollection(testdata)).thenReturn(
+				fileRepositoryCollection);
 		Mockito.when(fileRepositoryCollection.getEntityNames()).thenReturn(Collections.singletonList(entityName));
 
 		Repository repo = Mockito.mock(Repository.class);

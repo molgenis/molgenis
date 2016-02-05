@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
 import org.molgenis.framework.db.EntityImportReport;
 
 import com.google.common.collect.ImmutableList;
@@ -20,8 +21,9 @@ import com.google.common.collect.ImmutableMap;
  */
 public class MetaDataChanges
 {
-	private List<String> addedEntities = new ArrayList<String>();
-	private Map<String, Collection<AttributeMetaData>> addedAttributes = new LinkedHashMap<String, Collection<AttributeMetaData>>();
+	private final List<String> addedEntities = new ArrayList<>();
+	private final Map<String, Collection<AttributeMetaData>> addedAttributes = new LinkedHashMap<>();
+	private final List<Entity> addedLanguages = new ArrayList<>();
 
 	public void addEntity(String entity)
 	{
@@ -33,14 +35,24 @@ public class MetaDataChanges
 		addedAttributes.put(entityName, ImmutableList.<AttributeMetaData> copyOf(attributes));
 	}
 
+	public void addLanguage(Entity language)
+	{
+		addedLanguages.add(language);
+	}
+
 	public ImmutableList<String> getAddedEntities()
 	{
-		return ImmutableList.<String> copyOf(addedEntities);
+		return ImmutableList.copyOf(addedEntities);
 	}
 
 	public ImmutableMap<String, Collection<AttributeMetaData>> getAddedAttributes()
 	{
-		return ImmutableMap.<String, Collection<AttributeMetaData>> copyOf(addedAttributes);
+		return ImmutableMap.copyOf(addedAttributes);
+	}
+
+	public ImmutableList<Entity> getAddedLanguages()
+	{
+		return ImmutableList.copyOf(addedLanguages);
 	}
 
 }

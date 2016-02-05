@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.molgenis</groupId>
 		<artifactId>molgenis</artifactId>
-		<version>1.15.0-SNAPSHOT</version>
+		<version>1.17.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-app</artifactId>
 	<packaging>war</packaging>
@@ -53,10 +53,6 @@
 			<resource>
 				<directory>${project.basedir}/src/main/resources</directory>
 				<filtering>true</filtering>
-				<excludes>
-					<exclude>**git.properties</exclude>
-					<exclude>**/model/*.xml</exclude>
-				</excludes>
 			</resource>
 		</resources>
 		<plugins>
@@ -115,11 +111,6 @@
 						<version>${mysql.connector.java.version}</version>
 					</dependency>
 				</dependencies>
-			</plugin>
-			<!-- execute molgenis generator -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
 			</plugin>
 		</plugins>
 		<pluginManagement>
@@ -194,11 +185,6 @@
 					<groupId>org.mortbay.jetty</groupId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-data-jpa</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>

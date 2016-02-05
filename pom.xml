@@ -8,7 +8,7 @@
     </parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>1.15.0-SNAPSHOT</version>
+    <version>1.17.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <!-- More Project Information -->
@@ -54,8 +54,8 @@
         <slf4j.version>1.7.12</slf4j.version>
         <logback.version>1.1.3</logback.version>
         
-        <spring.version>4.1.6.RELEASE</spring.version>
-        <spring.security.version>4.0.1.RELEASE</spring.security.version>
+        <spring.version>4.1.8.RELEASE</spring.version>
+        <spring.security.version>4.0.3.RELEASE</spring.security.version>
         <mysql.connector.java.version>5.1.28</mysql.connector.java.version>
         <hibernate.validator.version>4.2.0.Final</hibernate.validator.version>
         <httpclient.version>4.5.1</httpclient.version>
@@ -146,7 +146,7 @@
                                 <resources>
                                     <resource>
                                         <directory>target/generated-resources</directory>
-                                        <filtering>false</filtering>
+                                        <filtering>true</filtering>
                                     </resource>
                                 </resources>
                             </configuration>
@@ -685,7 +685,6 @@
         <module>molgenis-data-googlespreadsheet</module>
         <module>molgenis-data</module>
         <module>molgenis-data-system</module>
-        <module>molgenis-data-jpa</module>
         <module>molgenis-data-merge</module>
         <module>molgenis-data-mysql</module>
         <module>molgenis-data-vcf</module>

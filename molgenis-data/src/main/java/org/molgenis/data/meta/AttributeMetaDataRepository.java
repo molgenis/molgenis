@@ -11,10 +11,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.EXPRESSION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.IDENTIFIER;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.ID_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.LOOKUP_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NILLABLE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.PARTS;
@@ -37,6 +34,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.UuidGenerator;
@@ -57,15 +55,15 @@ class AttributeMetaDataRepository
 	public static final AttributeMetaDataMetaData META_DATA = AttributeMetaDataMetaData.INSTANCE;
 
 	private final UuidGenerator uuidGenerator;
-
 	private final Repository repository;
-
 	private EntityMetaDataRepository entityMetaDataRepository;
+	private final LanguageService languageService;
 
-	public AttributeMetaDataRepository(ManageableRepositoryCollection collection)
+	public AttributeMetaDataRepository(ManageableRepositoryCollection collection, LanguageService languageService)
 	{
 		this.repository = requireNonNull(collection).addEntityMeta(META_DATA);
 		uuidGenerator = new UuidGenerator();
+		this.languageService = languageService;
 	}
 
 	public void setEntityMetaDataRepository(EntityMetaDataRepository entityMetaDataRepository)
@@ -101,7 +99,7 @@ class AttributeMetaDataRepository
 			{
 				return stream(batches.spliterator(), false).flatMap(batch -> {
 					List<Entity> attrEntities = convertToAttrEntities(attrs);
-					repository.add(attrEntities);
+					repository.add(attrEntities.stream());
 					return attrEntities.stream();
 				}).iterator();
 			}
@@ -117,15 +115,12 @@ class AttributeMetaDataRepository
 				attributeMetaDataEntity.set(IDENTIFIER, uuidGenerator.generateId());
 				attributeMetaDataEntity.set(NAME, attr.getName());
 				attributeMetaDataEntity.set(DATA_TYPE, attr.getDataType());
-				attributeMetaDataEntity.set(ID_ATTRIBUTE, attr.isIdAtrribute());
 				attributeMetaDataEntity.set(NILLABLE, attr.isNillable());
 				attributeMetaDataEntity.set(AUTO, attr.isAuto());
 				attributeMetaDataEntity.set(VISIBLE, attr.isVisible());
 				attributeMetaDataEntity.set(LABEL, attr.getLabel());
 				attributeMetaDataEntity.set(DESCRIPTION, attr.getDescription());
 				attributeMetaDataEntity.set(AGGREGATEABLE, attr.isAggregateable());
-				attributeMetaDataEntity.set(LOOKUP_ATTRIBUTE, attr.isLookupAttribute());
-				attributeMetaDataEntity.set(LABEL_ATTRIBUTE, attr.isLabelAttribute());
 				attributeMetaDataEntity.set(READ_ONLY, attr.isReadonly());
 				attributeMetaDataEntity.set(UNIQUE, attr.isUnique());
 				attributeMetaDataEntity.set(EXPRESSION, attr.getExpression());
@@ -154,9 +149,25 @@ class AttributeMetaDataRepository
 				if (attr.getDataType() instanceof CompoundField)
 				{
 					List<Entity> attrPartsEntities = convertToAttrEntities(attr.getAttributeParts());
-					repository.add(attrPartsEntities);
+					repository.add(attrPartsEntities.stream());
 					attributeMetaDataEntity.set(PARTS, attrPartsEntities);
 				}
+
+				// Language attributes
+				for (String languageCode : attr.getLabelLanguageCodes())
+				{
+					String attributeName = LABEL + '-' + languageCode;
+					String label = attr.getLabel(languageCode);
+					if (label != null) attributeMetaDataEntity.set(attributeName, label);
+				}
+
+				for (String languageCode : attr.getDescriptionLanguageCodes())
+				{
+					String attributeName = DESCRIPTION + '-' + languageCode;
+					String description = attr.getDescription(languageCode);
+					if (description != null) attributeMetaDataEntity.set(attributeName, description);
+				}
+
 				return attributeMetaDataEntity;
 			}
 		};
@@ -203,16 +214,12 @@ class AttributeMetaDataRepository
 		attributeMetaData.setDataType(MolgenisFieldTypes.getType(entity.getString(DATA_TYPE)));
 		attributeMetaData.setNillable(entity.getBoolean(NILLABLE));
 		attributeMetaData.setAuto(entity.getBoolean(AUTO));
-		attributeMetaData.setIdAttribute(entity.getBoolean(ID_ATTRIBUTE));
-		attributeMetaData.setLookupAttribute(entity.getBoolean(LOOKUP_ATTRIBUTE));
 		attributeMetaData.setVisible(entity.getBoolean(VISIBLE));
 		attributeMetaData.setLabel(entity.getString(LABEL));
 		attributeMetaData.setDescription(entity.getString(DESCRIPTION));
 		attributeMetaData
 				.setAggregateable(entity.getBoolean(AGGREGATEABLE) == null ? false : entity.getBoolean(AGGREGATEABLE));
 		attributeMetaData.setEnumOptions(entity.getList(ENUM_OPTIONS));
-		attributeMetaData.setLabelAttribute(
-				entity.getBoolean(LABEL_ATTRIBUTE) == null ? false : entity.getBoolean(LABEL_ATTRIBUTE));
 		attributeMetaData.setReadOnly(entity.getBoolean(READ_ONLY) == null ? false : entity.getBoolean(READ_ONLY));
 		attributeMetaData.setUnique(entity.getBoolean(UNIQUE) == null ? false : entity.getBoolean(UNIQUE));
 		attributeMetaData.setExpression(entity.getString(EXPRESSION));
@@ -237,6 +244,18 @@ class AttributeMetaDataRepository
 		attributeMetaData.setVisibleExpression(entity.getString(VISIBLE_EXPRESSION));
 		attributeMetaData.setValidationExpression(entity.getString(VALIDATION_EXPRESSION));
 		attributeMetaData.setDefaultValue(entity.getString(DEFAULT_VALUE));
+
+		// Language attributes
+		for (String languageCode : languageService.getLanguageCodes())
+		{
+			String attributeName = LABEL + '-' + languageCode;
+			String label = entity.getString(attributeName);
+			if (label != null) attributeMetaData.setLabel(languageCode, label);
+
+			attributeName = DESCRIPTION + '-' + languageCode;
+			String description = entity.getString(attributeName);
+			if (description != null) attributeMetaData.setDescription(languageCode, description);
+		}
 
 		return attributeMetaData;
 	}

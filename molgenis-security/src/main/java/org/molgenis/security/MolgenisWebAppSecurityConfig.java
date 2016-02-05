@@ -4,18 +4,20 @@ import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_CSS;
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_FONTS;
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_IMG;
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_JS;
+import static org.molgenis.security.google.GoogleAuthenticationProcessingFilter.GOOGLE_AUTHENTICATION_URL;
 
 import java.util.List;
 
 import javax.servlet.Filter;
-import javax.sql.DataSource;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.account.AccountController;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.security.google.GoogleAuthenticationProcessingFilter;
 import org.molgenis.security.permission.MolgenisPermissionServiceImpl;
 import org.molgenis.security.session.ApiSessionExpirationFilter;
 import org.molgenis.security.token.DataServiceTokenService;
@@ -58,6 +60,12 @@ import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
+import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
+
 public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurerAdapter
 {
 	private static final String ANONYMOUS_AUTHENTICATION_KEY = "anonymousAuthenticationKey";
@@ -66,18 +74,18 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	private DataService dataService;
 
 	@Autowired
-	private DataSource dataSource;
+	private MolgenisUserService molgenisUserService;
 
 	@Autowired
-	private MolgenisUserService molgenisUserService;
+	private AppSettings appSettings;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception
 	{
 		// do not write cache control headers for static resources
-		RequestMatcher matcher = new NegatedRequestMatcher(new OrRequestMatcher(new AntPathRequestMatcher(PATTERN_CSS),
-				new AntPathRequestMatcher(PATTERN_JS), new AntPathRequestMatcher(PATTERN_IMG),
-				new AntPathRequestMatcher(PATTERN_FONTS)));
+		RequestMatcher matcher = new NegatedRequestMatcher(
+				new OrRequestMatcher(new AntPathRequestMatcher(PATTERN_CSS), new AntPathRequestMatcher(PATTERN_JS),
+						new AntPathRequestMatcher(PATTERN_IMG), new AntPathRequestMatcher(PATTERN_FONTS)));
 
 		DelegatingRequestMatcherHeaderWriter cacheControlHeaderWriter = new DelegatingRequestMatcherHeaderWriter(
 				matcher, new CacheControlHeadersWriter());
@@ -94,6 +102,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 		http.addFilterBefore(tokenAuthenticationFilter(), ApiSessionExpirationFilter.class);
 
+		http.addFilterBefore(googleAuthenticationProcessingFilter(), TokenAuthenticationFilter.class);
+
 		http.addFilterAfter(changePasswordFilter(), SwitchUserFilter.class);
 
 		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry = http
@@ -101,86 +111,58 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		configureUrlAuthorization(expressionInterceptUrlRegistry);
 
 		expressionInterceptUrlRegistry
-				.antMatchers("/login")
-				.permitAll()
 
-				.antMatchers("/logo/**")
-				.permitAll()
+				.antMatchers("/login").permitAll()
 
-				.antMatchers("/molgenis.R")
-				.permitAll()
+				.antMatchers(GOOGLE_AUTHENTICATION_URL).permitAll()
 
-				.antMatchers("/molgenis.py")
-				.permitAll()
+				.antMatchers("/logo/**").permitAll()
 
-				.antMatchers(AccountController.CHANGE_PASSWORD_URI)
-				.authenticated()
+				.antMatchers("/molgenis.R").permitAll()
 
-				.antMatchers("/account/**")
-				.permitAll()
+				.antMatchers(AccountController.CHANGE_PASSWORD_URI).authenticated()
 
-				.antMatchers(PATTERN_CSS)
-				.permitAll()
+				.antMatchers("/account/**").permitAll()
 
-				.antMatchers(PATTERN_IMG)
-				.permitAll()
+				.antMatchers(PATTERN_CSS).permitAll()
 
-				.antMatchers(PATTERN_JS)
-				.permitAll()
+				.antMatchers(PATTERN_IMG).permitAll()
 
-				.antMatchers(PATTERN_FONTS)
-				.permitAll()
+				.antMatchers(PATTERN_JS).permitAll()
 
-				.antMatchers("/html/**")
-				.permitAll()
+				.antMatchers(PATTERN_FONTS).permitAll()
 
-				.antMatchers("/plugin/void/**")
-				.permitAll()
+				.antMatchers("/html/**").permitAll()
 
-				.antMatchers("/api/**")
-				.permitAll()
+				.antMatchers("/plugin/void/**").permitAll()
 
-				.antMatchers("/search")
-				.permitAll()
+				.antMatchers("/api/**").permitAll()
 
-				.antMatchers("/captcha")
-				.permitAll()
+				.antMatchers("/search").permitAll()
 
-				.antMatchers("/dataindexerstatus")
-				.authenticated()
+				.antMatchers("/captcha").permitAll()
 
-				.antMatchers("/permission/**/write/**")
-				.permitAll()
+				.antMatchers("/dataindexerstatus").authenticated()
 
-				.antMatchers("/scripts/**/run")
-				.authenticated()
+				.antMatchers("/permission/**/write/**").permitAll()
 
-				.antMatchers("/files/**")
-				.permitAll()
+				.antMatchers("/scripts/**/run").authenticated()
 
-				.anyRequest()
-				.denyAll()
-				.and()
+				.antMatchers("/files/**").permitAll()
 
-				.httpBasic()
-				.authenticationEntryPoint(authenticationEntryPoint())
-				.and()
+				.anyRequest().denyAll().and()
 
-				.formLogin()
-				.loginPage("/login")
-				.failureUrl("/login?error")
-				.and()
+				.httpBasic().authenticationEntryPoint(authenticationEntryPoint()).and()
 
-				.logout()
-				.deleteCookies("JSESSIONID")
-				.addLogoutHandler(
-						(req, res, auth) -> {
-							if (req.getSession(false) != null
-									&& req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
-							{
-								req.setAttribute("continueWithUnsupportedBrowser", true);
-							}
-						}).logoutSuccessHandler((req, res, auth) -> {
+				.formLogin().loginPage("/login").failureUrl("/login?error").and()
+
+				.logout().deleteCookies("JSESSIONID").addLogoutHandler((req, res, auth) -> {
+					if (req.getSession(false) != null
+							&& req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
+					{
+						req.setAttribute("continueWithUnsupportedBrowser", true);
+					}
+				}).logoutSuccessHandler((req, res, auth) -> {
 					StringBuilder logoutSuccessUrl = new StringBuilder("/");
 					if (req.getAttribute("continueWithUnsupportedBrowser") != null)
 					{
@@ -204,8 +186,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	@Bean
 	public MolgenisAnonymousAuthenticationFilter anonymousAuthFilter()
 	{
-		return new MolgenisAnonymousAuthenticationFilter(ANONYMOUS_AUTHENTICATION_KEY,
-				SecurityUtils.ANONYMOUS_USERNAME, userDetailsService());
+		return new MolgenisAnonymousAuthenticationFilter(ANONYMOUS_AUTHENTICATION_KEY, SecurityUtils.ANONYMOUS_USERNAME,
+				userDetailsService());
 	}
 
 	protected abstract List<GrantedAuthority> createAnonymousUserAuthorities();
@@ -232,6 +214,23 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	public Filter tokenAuthenticationFilter()
 	{
 		return new TokenAuthenticationFilter(tokenAuthenticationProvider());
+	}
+
+	@Bean
+	public GooglePublicKeysManager googlePublicKeysManager()
+	{
+		HttpTransport transport = new NetHttpTransport();
+		JsonFactory jsonFactory = new JacksonFactory();
+		return new GooglePublicKeysManager(transport, jsonFactory);
+	}
+
+	@Bean
+	public Filter googleAuthenticationProcessingFilter() throws Exception
+	{
+		GoogleAuthenticationProcessingFilter googleAuthenticationProcessingFilter = new GoogleAuthenticationProcessingFilter(
+				googlePublicKeysManager(), dataService, (MolgenisUserDetailsService) userDetailsService(), appSettings);
+		googleAuthenticationProcessingFilter.setAuthenticationManager(authenticationManagerBean());
+		return googleAuthenticationProcessingFilter;
 	}
 
 	@Bean

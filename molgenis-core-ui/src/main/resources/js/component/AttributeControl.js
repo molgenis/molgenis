@@ -10,7 +10,7 @@
 	 * @memberOf component
 	 */
 	var AttributeControl = React.createClass({
-		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.AttributeLoaderMixin],
+		mixins: [molgenis.ui.mixin.DeepPureRenderMixin, molgenis.ui.mixin.AttributeLoaderMixin, molgenis.ui.mixin.I18nStringsMixin],
 		displayName: 'AttributeControl',
 		propTypes: {
 			attr: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
@@ -32,11 +32,12 @@
 		},
 		getInitialState: function() {
 			return {
-				attr: null
+				attr: null,
+				i18nStrings: null
 			};
 		},
 		render: function() {
-			if(this.state.attr === null) {
+			if((this.state.attr === null) || (this.state.i18nStrings === null)) {
 				// attribute not available yet
 				return molgenis.ui.Spinner();
 			}
@@ -74,8 +75,13 @@
 						var value = props.value !== undefined ? props.value[attr.refEntity.idAttribute] : undefined;
 						
 						var CategoricalControl = props.multiple === true ? molgenis.ui.CheckboxGroup : molgenis.ui.RadioGroup;
+						var options = this.state.options;
+						if (CategoricalControl === molgenis.ui.RadioGroup && controlProps.required === false) {
+							options = options.concat({value: '', label: this.state.i18nStrings.form_bool_missing});
+						}
+						
 						return CategoricalControl(_.extend({}, controlProps, {
-							options : this.state.options,
+							options : options,
 							layout : props.layout || 'vertical',
 							value : value,
 							onValueChange : function(event) {
@@ -109,13 +115,13 @@
 							}.bind(this)
 						}));
 					case 'DATE':
-						return this._createDateControl(controlProps, false, props.placeholder || 'Date');
+						return this._createDateControl(controlProps, false, props.placeholder || this.state.i18nStrings.form_date_control_placeholder);
 					case 'DATE_TIME':
-						return this._createDateControl(controlProps, true, props.placeholder || 'Date');
+						return this._createDateControl(controlProps, true, props.placeholder || this.state.i18nStrings.form_date_control_placeholder);
 					case 'DECIMAL':
 						return this._createNumberControl(controlProps, 'any');
 					case 'EMAIL':
-						return this._createStringControl(controlProps, 'email', props.placeholder || 'Email');
+						return this._createStringControl(controlProps, 'email', props.placeholder || this.state.i18nStrings.form_email_control_placeholder);
 					case 'ENUM':
 						if(this.state.options === undefined) {
 							// options not yet available
@@ -123,8 +129,13 @@
 						}
 						
 						var EnumControl = props.multiple === true ? molgenis.ui.CheckboxGroup : molgenis.ui.RadioGroup;
+						var options = this.state.options;
+						if (EnumControl === molgenis.ui.RadioGroup && controlProps.required === false) {
+							options = options.concat({value: '', label: this.state.i18nStrings.form_bool_missing});
+						}
+						
 						return EnumControl(_.extend({}, controlProps, {
-							options : this.state.options,
+							options : options,
 							layout : props.layout
 						}));
 					case 'FILE':
@@ -136,14 +147,14 @@
 							maxLength: attr.maxLength
 						}));
 					case 'HYPERLINK':
-						return this._createStringControl(controlProps, 'url', props.placeholder || 'URL');
+						return this._createStringControl(controlProps, 'url', props.placeholder || this.state.i18nStrings.form_url_control_placeholder);
 					case 'INT':
 					case 'LONG':
 						return this._createNumberControl(controlProps, '1');
 					case 'XREF':
-						return this._createEntitySelectBox(controlProps, props.multiple || false, props.placeholder || 'Search for a Value', props.value);
+						return this._createEntitySelectBox(controlProps, props.multiple || false, props.placeholder || this.state.i18nStrings.form_xref_control_placeholder, props.value);
 					case 'MREF':
-						return this._createEntitySelectBox(controlProps, props.multiple || true, props.placeholder || 'Search for Values', props.value);
+						return this._createEntitySelectBox(controlProps, props.multiple || true, props.placeholder || this.state.i18nStrings.form_mref_control_placeholder, props.value);
 					case 'SCRIPT':
 						return molgenis.ui.CodeEditor(_.extend({}, controlProps, {
 							placeholder : this.props.placeholder
@@ -165,7 +176,7 @@
 				return molgenis.ui.Input({
 					type: 'text',
 					disabled: true,
-					placeholder: 'This value is computed automatically',
+					placeholder: this.state.i18nStrings.form_computed_control_placeholder,
 					onValueChange : function() {}
 				});
 			}
@@ -189,7 +200,7 @@
 			var range = this.state.attr.range;
 			var min = range ? range.min : undefined;
 			var max = range ? range.max : undefined;
-			var placeholder = this.props.placeholder || 'Number';
+			var placeholder = this.props.placeholder || this.state.i18nStrings.form_number_control_placeholder;
 
 			return molgenis.ui.Input(_.extend({}, controlProps, {
 				type : 'number',

@@ -99,7 +99,7 @@
 				<td class="td-align-top">
 					<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical" && (categories)?has_content>
 						<#assign refEntityMetaData = attributeMapping.targetAttributeMetaData.refEntity>
-						<#list categories.iterator() as category>
+						<#list categories as category>
 							<#list refEntityMetaData.attributes as attribute>
 								<#assign attributeName = attribute.name>
 								<#if (category[attributeName])??>	

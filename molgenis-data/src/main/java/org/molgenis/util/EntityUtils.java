@@ -2,8 +2,9 @@ package org.molgenis.util;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -41,12 +42,11 @@ public class EntityUtils
 	public static List<Pair<EntityMetaData, List<AttributeMetaData>>> getReferencingEntityMetaData(
 			EntityMetaData entityMetaData, DataService dataService)
 	{
-		List<Pair<EntityMetaData, List<AttributeMetaData>>> referencingEntityMetaData = null;
+		List<Pair<EntityMetaData, List<AttributeMetaData>>> referencingEntityMetaData = new ArrayList<Pair<EntityMetaData, List<AttributeMetaData>>>();
 
 		// get entity types that referencing the given entity (including self)
 		String entityName = entityMetaData.getName();
-		for (String otherEntityName : dataService.getEntityNames())
-		{
+		dataService.getEntityNames().forEach(otherEntityName -> {
 			EntityMetaData otherEntityMetaData = dataService.getEntityMetaData(otherEntityName);
 
 			// get referencing attributes for other entity
@@ -64,15 +64,12 @@ public class EntityUtils
 			// store references
 			if (referencingAttributes != null)
 			{
-				if (referencingEntityMetaData == null) referencingEntityMetaData = new ArrayList<Pair<EntityMetaData, List<AttributeMetaData>>>();
-				referencingEntityMetaData.add(new Pair<EntityMetaData, List<AttributeMetaData>>(otherEntityMetaData,
-						referencingAttributes));
+				referencingEntityMetaData.add(
+						new Pair<EntityMetaData, List<AttributeMetaData>>(otherEntityMetaData, referencingAttributes));
 			}
-		}
+		});
 
-		return referencingEntityMetaData != null ? referencingEntityMetaData : Collections
-				.<Pair<EntityMetaData, List<AttributeMetaData>>> emptyList();
-
+		return referencingEntityMetaData;
 	}
 
 	/**
@@ -96,8 +93,8 @@ public class EntityUtils
 				});
 
 		// compound
-		Iterable<String> compoundAttributes = Iterables.transform(
-				Iterables.filter(entityMetaData.getAttributes(), new Predicate<AttributeMetaData>()
+		Iterable<String> compoundAttributes = Iterables
+				.transform(Iterables.filter(entityMetaData.getAttributes(), new Predicate<AttributeMetaData>()
 				{
 					@Override
 					public boolean apply(AttributeMetaData attributeMetaData)
@@ -144,10 +141,9 @@ public class EntityUtils
 		{
 			// Find arg less constructor
 			ctor = ConstructorUtils.getAccessibleConstructor(entityClass);
-			if (ctor == null) throw new RuntimeException(
-					"No usable constructor found for entity class ["
-							+ entityClass.getName()
-							+ "]. Entity class should have a constructor with dataservice as single arg or a constructor without arguments");
+			if (ctor == null) throw new RuntimeException("No usable constructor found for entity class ["
+					+ entityClass.getName()
+					+ "]. Entity class should have a constructor with dataservice as single arg or a constructor without arguments");
 
 			convertedEntity = BeanUtils.instantiateClass(ctor);
 		}
@@ -174,5 +170,16 @@ public class EntityUtils
 		}
 
 		return false;
+	}
+
+	/**
+	 * Get an Iterable of entities as a stream of entities
+	 * 
+	 * @param entities
+	 * @return
+	 */
+	public static Stream<Entity> asStream(Iterable<Entity> entities)
+	{
+		return StreamSupport.stream(entities.spliterator(), false);
 	}
 }

@@ -25,15 +25,16 @@ public class CsvHttpMessageConverter extends BaseHttpMessageConverter<EntityColl
 	}
 
 	@Override
-	protected void writeInternal(EntityCollection entities, HttpOutputMessage outputMessage) throws IOException,
-			HttpMessageNotWritableException
+	protected void writeInternal(EntityCollection entities, HttpOutputMessage outputMessage)
+			throws IOException, HttpMessageNotWritableException
 	{
-		OutputStreamWriter out = new OutputStreamWriter(outputMessage.getBody(), getCharset(outputMessage.getHeaders()));
+		OutputStreamWriter out = new OutputStreamWriter(outputMessage.getBody(),
+				getCharset(outputMessage.getHeaders()));
 		CsvWriter writer = new CsvWriter(out);
 		try
 		{
 			writer.writeAttributeNames(entities.getAttributeNames());
-			writer.add(entities);
+			writer.add(entities.stream());
 		}
 		finally
 		{

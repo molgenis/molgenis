@@ -59,10 +59,9 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 		when(appSettings.getSignUpModeration()).thenReturn(false);
 
 		MolgenisGroup allUsersGroup = mock(MolgenisGroup.class);
-		when(
-				dataService.findAll(MolgenisGroup.ENTITY_NAME,
-						new QueryImpl().eq(MolgenisGroup.NAME, AccountService.ALL_USER_GROUP), MolgenisGroup.class))
-				.thenReturn(Arrays.asList(allUsersGroup));
+		when(dataService.findAll(MolgenisGroup.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisGroup.NAME, AccountService.ALL_USER_GROUP), MolgenisGroup.class))
+						.thenReturn(Arrays.asList(allUsersGroup).stream());
 		reset(javaMailSender);
 		MimeMessage mimeMessage = mock(MimeMessage.class);
 		when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
@@ -71,16 +70,15 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void activateUser()
 	{
-		when(
-				dataService.findOne(MolgenisUser.ENTITY_NAME,
-						new QueryImpl().eq(MolgenisUser.ACTIVE, false).and().eq(MolgenisUser.ACTIVATIONCODE, "123"),
-						MolgenisUser.class)).thenReturn(new MolgenisUser());
+		when(dataService.findOne(MolgenisUser.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisUser.ACTIVE, false).and().eq(MolgenisUser.ACTIVATIONCODE, "123"),
+				MolgenisUser.class)).thenReturn(new MolgenisUser());
 
 		accountService.activateUser("123");
 
 		ArgumentCaptor<MolgenisUser> argument = ArgumentCaptor.forClass(MolgenisUser.class);
 		verify(dataService).update(eq(MolgenisUser.ENTITY_NAME), argument.capture());
-		assertTrue(argument.getValue().getActive());
+		assertTrue(argument.getValue().isActive());
 		verify(javaMailSender).send(any(SimpleMailMessage.class));
 		// TODO improve test
 	}
@@ -94,10 +92,9 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test(expectedExceptions = MolgenisUserException.class)
 	public void activateUser_alreadyActivated()
 	{
-		when(
-				dataService.findOne(MolgenisUser.ENTITY_NAME,
-						new QueryImpl().eq(MolgenisUser.ACTIVE, false).eq(MolgenisUser.ACTIVATIONCODE, "456"),
-						MolgenisUser.class)).thenReturn(null);
+		when(dataService.findOne(MolgenisUser.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisUser.ACTIVE, false).eq(MolgenisUser.ACTIVATIONCODE, "456"),
+				MolgenisUser.class)).thenReturn(null);
 
 		accountService.activateUser("456");
 	}
@@ -110,7 +107,7 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 		accountService.createUser(molgenisUser, "http://molgenis.org/activate");
 		ArgumentCaptor<MolgenisUser> argument = ArgumentCaptor.forClass(MolgenisUser.class);
 		verify(dataService).add(eq(MolgenisUser.ENTITY_NAME), argument.capture());
-		assertFalse(argument.getValue().getActive());
+		assertFalse(argument.getValue().isActive());
 		verify(javaMailSender).send(any(SimpleMailMessage.class));
 		// TODO improve test
 	}
@@ -121,9 +118,8 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 	{
 		MolgenisUser molgenisUser = mock(MolgenisUser.class);
 		when(molgenisUser.getPassword()).thenReturn("password");
-		when(
-				dataService.findOne(eq(MolgenisUser.ENTITY_NAME), any(Query.class),
-						(Class<Entity>) Matchers.notNull(MolgenisUser.class.getClass()))).thenReturn(molgenisUser);
+		when(dataService.findOne(eq(MolgenisUser.ENTITY_NAME), any(Query.class),
+				(Class<Entity>) Matchers.notNull(MolgenisUser.class.getClass()))).thenReturn(molgenisUser);
 
 		accountService.resetPassword("user@molgenis.org");
 		ArgumentCaptor<MolgenisUser> argument = ArgumentCaptor.forClass(MolgenisUser.class);
@@ -137,10 +133,9 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 	{
 		MolgenisUser molgenisUser = mock(MolgenisUser.class);
 		when(molgenisUser.getPassword()).thenReturn("password");
-		when(
-				dataService.findOne(MolgenisUser.ENTITY_NAME,
-						new QueryImpl().eq(MolgenisUser.EMAIL, "invalid-user@molgenis.org"), MolgenisUser.class))
-				.thenReturn(null);
+		when(dataService.findOne(MolgenisUser.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisUser.EMAIL, "invalid-user@molgenis.org"), MolgenisUser.class))
+						.thenReturn(null);
 
 		accountService.resetPassword("invalid-user@molgenis.org");
 	}
@@ -152,9 +147,8 @@ public class AccountServiceImplTest extends AbstractTestNGSpringContextTests
 		user.setUsername("test");
 		user.setPassword("oldpass");
 
-		when(
-				dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, "test"),
-						MolgenisUser.class)).thenReturn(user);
+		when(dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, "test"),
+				MolgenisUser.class)).thenReturn(user);
 
 		accountService.changePassword("test", "newpass");
 
