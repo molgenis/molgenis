@@ -22,6 +22,7 @@ import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.fieldtypes.EnumField;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 public abstract class AbstractDataValidationTest extends AbstractDataIntegrationTest
 {
@@ -32,11 +33,11 @@ public abstract class AbstractDataValidationTest extends AbstractDataIntegration
 	public void beforeClass()
 	{
 		EditableEntityMetaData refEntityMetaData = new DefaultEntityMetaData("RefEntity");
-		refEntityMetaData.addAttribute("identifier").setIdAttribute(true).setNillable(false).setAuto(true);
+		refEntityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false).setAuto(true);
 		metaDataService.addEntityMeta(refEntityMetaData);
 
 		entityMetaData = new DefaultEntityMetaData("DataValidationTest");
-		entityMetaData.addAttribute("identifier").setIdAttribute(true).setNillable(false).setAuto(true);
+		entityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false).setAuto(true);
 		entityMetaData.addAttribute("intAttr").setDataType(INT);
 		entityMetaData.addAttribute("boolAttr").setDataType(BOOL);
 		entityMetaData.addAttribute("dateAttr").setDataType(DATE);
@@ -124,7 +125,7 @@ public abstract class AbstractDataValidationTest extends AbstractDataIntegration
 	public void testNotNillable()
 	{
 		EditableEntityMetaData entityMetaData1 = new DefaultEntityMetaData("NotNillableTest");
-		entityMetaData1.addAttribute("identifier").setIdAttribute(true).setNillable(false);
+		entityMetaData1.addAttribute("identifier", ROLE_ID).setNillable(false);
 		entityMetaData1.addAttribute("stringAttr").setNillable(false);
 		metaDataService.addEntityMeta(entityMetaData1);
 
