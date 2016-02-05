@@ -56,7 +56,7 @@ var configuration = {
         loaders: [{
             test: /\.jsx?$/,
             loader: 'babel',
-            exclude: [/node_modules/, /src\/main\/javascript\/plugins/]
+            exclude: [/node_modules/, /src[/\\]main[/\\]javascript[/\\]plugins/]
         }, {
             test: /\.css$/,
             loader: 'style-loader!css-loader'
