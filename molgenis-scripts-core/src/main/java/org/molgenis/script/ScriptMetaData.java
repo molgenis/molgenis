@@ -1,5 +1,7 @@
 package org.molgenis.script;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.stereotype.Component;
@@ -10,7 +12,7 @@ public class ScriptMetaData extends DefaultEntityMetaData
 	public ScriptMetaData()
 	{
 		super(Script.ENTITY_NAME, Script.class);
-		addAttribute(Script.NAME).setIdAttribute(true).setNillable(false).setLabel("Name");
+		addAttribute(Script.NAME, ROLE_ID).setNillable(false).setLabel("Name");
 		addAttribute(Script.TYPE).setNillable(false).setLabel("Type").setDataType(MolgenisFieldTypes.XREF)
 				.setRefEntity(ScriptType.META_DATA);
 		addAttribute(Script.CONTENT).setNillable(false).setDataType(MolgenisFieldTypes.SCRIPT).setLabel("Content");

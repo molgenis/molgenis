@@ -7,6 +7,7 @@ import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 public class AbstractComputedAttributesTest extends AbstractDatatypeTest
 {
@@ -14,7 +15,7 @@ public class AbstractComputedAttributesTest extends AbstractDatatypeTest
 	public EntityMetaData createMetaData()
 	{
 		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("CalculatedAttrTest");
-		entityMetaData.addAttribute("identifier").setIdAttribute(true).setNillable(false);
+		entityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false);
 		entityMetaData.addAttribute("intAttr").setDataType(MolgenisFieldTypes.INT);
 		entityMetaData.addAttribute("computedAttr").setDataType(MolgenisFieldTypes.INT).setExpression("intAttr");
 

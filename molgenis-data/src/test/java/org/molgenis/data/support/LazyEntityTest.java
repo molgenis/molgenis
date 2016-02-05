@@ -40,7 +40,6 @@ public class LazyEntityTest
 		when(entityMeta.getName()).thenReturn(ENTITY_NAME);
 		idAttr = mock(AttributeMetaData.class);
 		when(idAttr.getName()).thenReturn(ID_ATTR_NAME);
-		when(idAttr.isIdAtrribute()).thenReturn(true);
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
 		dataService = mock(DataService.class);
 		entity = mock(Entity.class);

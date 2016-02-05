@@ -1,5 +1,8 @@
 package org.molgenis.data.mapper.algorithmgenerator.generator;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -128,12 +131,10 @@ public class OneToOneCategoryAlgorithmGeneratorTest
 	{
 		DefaultEntityMetaData targetRefEntityMetaData = new DefaultEntityMetaData(entityName);
 		DefaultAttributeMetaData targetCodeAttributeMetaData = new DefaultAttributeMetaData("code", FieldTypeEnum.INT);
-		targetCodeAttributeMetaData.setIdAttribute(true);
 		DefaultAttributeMetaData targetLabelAttributeMetaData = new DefaultAttributeMetaData("label",
 				FieldTypeEnum.STRING);
-		targetLabelAttributeMetaData.setLabelAttribute(true);
-		targetRefEntityMetaData.addAttributeMetaData(targetCodeAttributeMetaData);
-		targetRefEntityMetaData.addAttributeMetaData(targetLabelAttributeMetaData);
+		targetRefEntityMetaData.addAttributeMetaData(targetCodeAttributeMetaData, ROLE_ID);
+		targetRefEntityMetaData.addAttributeMetaData(targetLabelAttributeMetaData, ROLE_LABEL);
 		return targetRefEntityMetaData;
 	}
 }

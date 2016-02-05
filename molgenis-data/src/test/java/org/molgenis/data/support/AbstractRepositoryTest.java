@@ -2,6 +2,7 @@ package org.molgenis.data.support;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -30,8 +31,9 @@ public class AbstractRepositoryTest
 	@BeforeTest
 	public void beforeTest()
 	{
+		String idAttrName = "id";
 		entityMetaData = new DefaultEntityMetaData("entity");
-		entityMetaData.addAttribute("id").setIdAttribute(true);
+		entityMetaData.addAttribute(idAttrName, ROLE_ID);
 		abstractRepository = Mockito.spy(new AbstractRepository()
 		{
 

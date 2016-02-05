@@ -25,6 +25,7 @@ import static org.molgenis.MolgenisFieldTypes.SCRIPT;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.MolgenisFieldTypes.XREF;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -139,11 +140,11 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		String refRefAttrId = "id";
 		refRefAttrValue = "value";
 		DefaultEntityMetaData refRefEntityMetaData = new DefaultEntityMetaData(REF_REF_ENTITY_NAME);
-		refRefEntityMetaData.addAttribute(refRefAttrId).setDataType(STRING).setIdAttribute(true);
+		refRefEntityMetaData.addAttribute(refRefAttrId, ROLE_ID).setDataType(STRING);
 		refRefEntityMetaData.addAttribute(refRefAttrValue).setDataType(STRING);
 
 		DefaultEntityMetaData selfRefEntityMetaData = new DefaultEntityMetaData(SELF_REF_ENTITY_NAME);
-		selfRefEntityMetaData.addAttribute("id").setDataType(STRING).setIdAttribute(true);
+		selfRefEntityMetaData.addAttribute("id", ROLE_ID).setDataType(STRING);
 		selfRefEntityMetaData.addAttribute("selfRef").setDataType(XREF).setRefEntity(selfRefEntityMetaData);
 
 		Entity selfRefEntity = new DefaultEntity(selfRefEntityMetaData, dataService);
@@ -154,7 +155,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		refAttrValue = "value";
 		refAttrRef = "ref";
 		DefaultEntityMetaData refEntityMetaData = new DefaultEntityMetaData(REF_ENTITY_NAME);
-		refEntityMetaData.addAttribute(refAttrId).setDataType(STRING).setIdAttribute(true);
+		refEntityMetaData.addAttribute(refAttrId, ROLE_ID).setDataType(STRING);
 		refEntityMetaData.addAttribute(refAttrValue).setDataType(STRING);
 		refEntityMetaData.addAttribute(refAttrRef).setDataType(XREF).setRefEntity(refRefEntityMetaData);
 
@@ -208,7 +209,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(ENTITY_NAME);
 		// required
-		entityMetaData.addAttribute(attrId).setDataType(STRING).setIdAttribute(true);
+		entityMetaData.addAttribute(attrId, ROLE_ID).setDataType(STRING);
 		entityMetaData.addAttribute(attrBool).setDataType(BOOL);
 		entityMetaData.addAttribute(attrCategorical).setDataType(CATEGORICAL).setRefEntity(refEntityMetaData);
 		entityMetaData.addAttribute(attrCategoricalMref).setDataType(CATEGORICAL_MREF).setRefEntity(refEntityMetaData);
@@ -859,8 +860,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "    \"label\": \"entity\",\n" + "    \"attributes\": [\n" + "      {\n"
 			+ "        \"href\": \"/api/v2/entity/meta/id\",\n" + "        \"fieldType\": \"STRING\",\n"
 			+ "        \"name\": \"id\",\n" + "        \"label\": \"id\",\n" + "        \"attributes\": [],\n"
-			+ "        \"maxLength\": 255,\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
-			+ "        \"readOnly\": true,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": true,\n"
+			+ "        \"maxLength\": 255,\n" + "        \"auto\": false,\n" + "        \"nillable\": false,\n"
+			+ "        \"readOnly\": true,\n" + "        \"labelAttribute\": true,\n" + "        \"unique\": true,\n"
 			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
 			+ "        \"aggregateable\": false\n" + "      },\n" + "      {\n"
 			+ "        \"href\": \"/api/v2/entity/meta/bool\",\n" + "        \"fieldType\": \"BOOL\",\n"
@@ -877,8 +878,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
 			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": true,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": false,\n"
+			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
+			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
 			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
 			+ "              \"lookupAttribute\": false,\n" + "              \"aggregateable\": false\n"
 			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
@@ -896,8 +897,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
 			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": true,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": false,\n"
+			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
+			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
 			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
 			+ "              \"lookupAttribute\": false,\n" + "              \"aggregateable\": false\n"
 			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
@@ -1014,8 +1015,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
 			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": true,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": false,\n"
+			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
+			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
 			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
 			+ "              \"lookupAttribute\": false,\n" + "              \"aggregateable\": false\n"
 			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
@@ -1050,8 +1051,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
 			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": true,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": false,\n"
+			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
+			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
 			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
 			+ "              \"lookupAttribute\": false,\n" + "              \"aggregateable\": false\n"
 			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
@@ -1075,8 +1076,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
 			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": true,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": false,\n"
+			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
+			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
 			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
 			+ "              \"lookupAttribute\": false,\n" + "              \"aggregateable\": false\n"
 			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
@@ -1094,8 +1095,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
 			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": true,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": false,\n"
+			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
+			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
 			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
 			+ "              \"lookupAttribute\": false,\n" + "              \"aggregateable\": false\n"
 			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
@@ -1171,8 +1172,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
 			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": true,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": false,\n"
+			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
+			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
 			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
 			+ "              \"lookupAttribute\": false,\n" + "              \"aggregateable\": false\n"
 			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
@@ -1210,8 +1211,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
 			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": true,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": false,\n"
+			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
+			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
 			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
 			+ "              \"lookupAttribute\": false,\n" + "              \"aggregateable\": false\n"
 			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
@@ -1338,8 +1339,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
 			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": true,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": false,\n"
+			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
+			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
 			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
 			+ "              \"lookupAttribute\": false,\n" + "              \"aggregateable\": false\n"
 			+ "            },\n" + "            {\n" + "              \"href\": \"/api/v2/refEntity/meta/value\",\n"
@@ -1385,8 +1386,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "    \"name\": \"entity\",\n" + "    \"label\": \"entity\",\n" + "    \"attributes\": [\n" + "      {\n"
 			+ "        \"href\": \"/api/v2/entity/meta/id\",\n" + "        \"fieldType\": \"STRING\",\n"
 			+ "        \"name\": \"id\",\n" + "        \"label\": \"id\",\n" + "        \"attributes\": [],\n"
-			+ "        \"maxLength\": 255,\n" + "        \"auto\": false,\n" + "        \"nillable\": true,\n"
-			+ "        \"readOnly\": true,\n" + "        \"labelAttribute\": false,\n" + "        \"unique\": true,\n"
+			+ "        \"maxLength\": 255,\n" + "        \"auto\": false,\n" + "        \"nillable\": false,\n"
+			+ "        \"readOnly\": true,\n" + "        \"labelAttribute\": true,\n" + "        \"unique\": true,\n"
 			+ "        \"visible\": true,\n" + "        \"lookupAttribute\": false,\n"
 			+ "        \"aggregateable\": false\n" + "      },\n" + "      {\n"
 			+ "        \"href\": \"/api/v2/entity/meta/bool\",\n" + "        \"fieldType\": \"BOOL\",\n"
@@ -1403,8 +1404,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
 			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": true,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": false,\n"
+			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
+			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
 			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
 			+ "              \"lookupAttribute\": false,\n" + "              \"aggregateable\": false\n"
 			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
@@ -1422,8 +1423,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
 			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": true,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": false,\n"
+			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
+			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
 			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
 			+ "              \"lookupAttribute\": false,\n" + "              \"aggregateable\": false\n"
 			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
@@ -1540,8 +1541,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
 			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": true,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": false,\n"
+			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
+			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
 			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
 			+ "              \"lookupAttribute\": false,\n" + "              \"aggregateable\": false\n"
 			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
@@ -1576,8 +1577,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
 			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": true,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": false,\n"
+			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
+			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
 			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
 			+ "              \"lookupAttribute\": false,\n" + "              \"aggregateable\": false\n"
 			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
@@ -1601,8 +1602,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
 			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": true,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": false,\n"
+			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
+			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
 			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
 			+ "              \"lookupAttribute\": false,\n" + "              \"aggregateable\": false\n"
 			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
@@ -1620,8 +1621,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
 			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": true,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": false,\n"
+			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
+			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
 			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
 			+ "              \"lookupAttribute\": false,\n" + "              \"aggregateable\": false\n"
 			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
@@ -1697,8 +1698,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
 			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": true,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": false,\n"
+			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
+			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
 			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
 			+ "              \"lookupAttribute\": false,\n" + "              \"aggregateable\": false\n"
 			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
@@ -1736,8 +1737,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
 			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": true,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": false,\n"
+			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
+			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
 			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
 			+ "              \"lookupAttribute\": false,\n" + "              \"aggregateable\": false\n"
 			+ "            }\n" + "          ],\n" + "          \"labelAttribute\": \"id\",\n"
@@ -1780,8 +1781,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 			+ "              \"href\": \"/api/v2/refEntity/meta/id\",\n" + "              \"fieldType\": \"STRING\",\n"
 			+ "              \"name\": \"id\",\n" + "              \"label\": \"id\",\n"
 			+ "              \"attributes\": [],\n" + "              \"maxLength\": 255,\n"
-			+ "              \"auto\": false,\n" + "              \"nillable\": true,\n"
-			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": false,\n"
+			+ "              \"auto\": false,\n" + "              \"nillable\": false,\n"
+			+ "              \"readOnly\": true,\n" + "              \"labelAttribute\": true,\n"
 			+ "              \"unique\": true,\n" + "              \"visible\": true,\n"
 			+ "              \"lookupAttribute\": false,\n" + "              \"aggregateable\": false\n"
 			+ "            },\n" + "            {\n" + "              \"href\": \"/api/v2/refEntity/meta/ref\",\n"

@@ -7,6 +7,7 @@ import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 public class AbstractIntDatatypeTest extends AbstractDatatypeTest
 {
@@ -15,7 +16,7 @@ public class AbstractIntDatatypeTest extends AbstractDatatypeTest
 	public EntityMetaData createMetaData()
 	{
 		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("IntegerTest");
-		entityMetaData.addAttribute("col1").setDataType(INT).setIdAttribute(true).setNillable(false);
+		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(INT).setNillable(false);
 		entityMetaData.addAttribute("col2").setDataType(INT);
 		entityMetaData.addAttribute("col3").setDataType(INT);
 

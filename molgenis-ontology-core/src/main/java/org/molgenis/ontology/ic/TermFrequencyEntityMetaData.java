@@ -1,5 +1,7 @@
 package org.molgenis.ontology.ic;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -16,7 +18,7 @@ public class TermFrequencyEntityMetaData extends DefaultEntityMetaData
 	public TermFrequencyEntityMetaData()
 	{
 		super(ENTITY_NAME);
-		addAttributeMetaData(new DefaultAttributeMetaData(ID).setAuto(true).setIdAttribute(true).setNillable(false));
+		addAttributeMetaData(new DefaultAttributeMetaData(ID).setAuto(true), ROLE_ID);
 		addAttributeMetaData(new DefaultAttributeMetaData(TERM).setNillable(false));
 		addAttributeMetaData(new DefaultAttributeMetaData(FREQUENCY, FieldTypeEnum.INT).setNillable(false));
 		addAttributeMetaData(new DefaultAttributeMetaData(OCCURRENCE, FieldTypeEnum.DECIMAL).setNillable(false));
