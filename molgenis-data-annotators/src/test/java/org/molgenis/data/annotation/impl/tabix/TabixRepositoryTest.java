@@ -4,6 +4,7 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DECIMAL;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.VcfRepository.ALT;
 import static org.molgenis.data.vcf.VcfRepository.ALT_META;
 import static org.molgenis.data.vcf.VcfRepository.CHROM;
@@ -44,7 +45,7 @@ public class TabixRepositoryTest
 		repoMetaData.addAttributeMetaData(ALT_META);
 		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("CADD", DECIMAL));
 		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("CADD_SCALED", DECIMAL));
-		repoMetaData.addAttribute("id").setIdAttribute(true).setVisible(false);
+		repoMetaData.addAttribute("id", ROLE_ID).setVisible(false);
 		File file = ResourceUtils.getFile(getClass(), "/cadd_test.vcf.gz");
 		tabixRepository = new TabixRepository(file, repoMetaData);
 	}

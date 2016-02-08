@@ -1,6 +1,9 @@
 package org.molgenis.data.vcf.format;
 
 import static org.elasticsearch.common.base.Preconditions.checkNotNull;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LOOKUP;
 import static org.molgenis.data.vcf.VcfRepository.ALT;
 import static org.molgenis.data.vcf.VcfRepository.ALT_META;
 import static org.molgenis.data.vcf.VcfRepository.CHROM;
@@ -71,14 +74,12 @@ public class VcfToEntity
 			result = new DefaultEntityMetaData(entityName + "_Sample");
 			DefaultAttributeMetaData idAttributeMetaData = new DefaultAttributeMetaData(ID,
 					MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true);
-			idAttributeMetaData.setIdAttribute(true);
 			idAttributeMetaData.setVisible(false);
 
-			result.addAttributeMetaData(idAttributeMetaData);
+			result.addAttributeMetaData(idAttributeMetaData, ROLE_ID);
 			DefaultAttributeMetaData nameAttributeMetaData = new DefaultAttributeMetaData(NAME,
 					MolgenisFieldTypes.FieldTypeEnum.TEXT).setAggregateable(true);
-			nameAttributeMetaData.setLabelAttribute(true).setLookupAttribute(true);
-			result.addAttributeMetaData(nameAttributeMetaData);
+			result.addAttributeMetaData(nameAttributeMetaData, ROLE_LABEL, ROLE_LOOKUP);
 			for (VcfMetaFormat meta : formatMetaData)
 			{
 				String name = meta.getId();
@@ -109,10 +110,8 @@ public class VcfToEntity
 		entityMetaData.addAttributeMetaData(ID_META);
 		DefaultAttributeMetaData idAttributeMetaData = new DefaultAttributeMetaData(INTERNAL_ID,
 				MolgenisFieldTypes.FieldTypeEnum.STRING);
-		idAttributeMetaData.setNillable(false);
-		idAttributeMetaData.setIdAttribute(true);
 		idAttributeMetaData.setVisible(false);
-		entityMetaData.addAttributeMetaData(idAttributeMetaData);
+		entityMetaData.addAttributeMetaData(idAttributeMetaData, ROLE_ID);
 		DefaultAttributeMetaData infoMetaData = new DefaultAttributeMetaData(INFO,
 				MolgenisFieldTypes.FieldTypeEnum.COMPOUND).setNillable(true);
 		List<AttributeMetaData> metadataInfoField = new ArrayList<AttributeMetaData>();
@@ -147,8 +146,6 @@ public class VcfToEntity
 					MolgenisFieldTypes.FieldTypeEnum.MREF).setRefEntity(sampleEntityMetaData).setLabel("SAMPLES");
 			entityMetaData.addAttributeMetaData(samplesAttributeMeta);
 		}
-		entityMetaData.setIdAttribute(INTERNAL_ID);
-		entityMetaData.setLabelAttribute(ID);
 		return entityMetaData;
 	}
 

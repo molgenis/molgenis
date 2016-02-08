@@ -65,6 +65,13 @@ public class ElasticsearchDataServiceTest extends AbstractDataServiceTest
 
 	@Test
 	@Override
+	public void testFindAllEmpty()
+	{
+		super.testFindAllEmpty();
+	}
+
+	@Test
+	@Override
 	public void testFindAll()
 	{
 		super.testFindAll();

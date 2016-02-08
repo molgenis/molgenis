@@ -74,7 +74,8 @@ public class AttributeFilterToFetchConverter
 		{
 			case COMPOUND:
 			{
-				AttributeFilter subAttrFilter = attrFilter != null ? attrFilter.getAttributeFilter(attr) : null;
+				AttributeFilter subAttrFilter = attrFilter != null ? attrFilter.getAttributeFilter(entityMeta, attr)
+						: null;
 				if (subAttrFilter != null && !subAttrFilter.isIncludeAllAttrs())
 				{
 					// include compound attribute parts defined by filter
@@ -109,7 +110,8 @@ public class AttributeFilterToFetchConverter
 			case MREF:
 			case XREF:
 			{
-				AttributeFilter subAttrFilter = attrFilter != null ? attrFilter.getAttributeFilter(attr) : null;
+				AttributeFilter subAttrFilter = attrFilter != null ? attrFilter.getAttributeFilter(entityMeta, attr)
+						: null;
 				Fetch subFetch;
 				if (subAttrFilter != null)
 				{
@@ -123,7 +125,7 @@ public class AttributeFilterToFetchConverter
 				fetch.field(attr.getName(), subFetch);
 				break;
 			}
-			// $CASES-OMITTED$
+				// $CASES-OMITTED$
 			default:
 				fetch.field(attr.getName());
 				break;
@@ -135,8 +137,8 @@ public class AttributeFilterToFetchConverter
 		AttributeMetaData attr = entityMeta.getAttribute(attrName);
 		if (attr == null)
 		{
-			throw new UnknownAttributeException(format("Unknown attribute [%s] of entity [%s]", attrName,
-					entityMeta.getName()));
+			throw new UnknownAttributeException(
+					format("Unknown attribute [%s] of entity [%s]", attrName, entityMeta.getName()));
 		}
 		return attr;
 	}

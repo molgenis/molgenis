@@ -55,6 +55,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.EntityStream;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
@@ -802,6 +803,11 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			}
 		});
 
+		if (request.request().getItems().isEmpty())
+		{
+			return Stream.<Entity> empty();
+		}
+
 		MultiGetResponse response = request.get();
 
 		if (LOG.isDebugEnabled())
@@ -857,7 +863,8 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	@Override
 	public Stream<Entity> searchAsStream(Query q, EntityMetaData entityMetaData)
 	{
-		return searchInternal(q, entityMetaData).stream();
+		ElasticsearchEntityIterable searchInternal = searchInternal(q, entityMetaData);
+		return new EntityStream(searchInternal.stream(), true);
 	}
 
 	private ElasticsearchEntityIterable searchInternal(Query q, EntityMetaData entityMetaData)

@@ -2,7 +2,7 @@ package org.molgenis.data.mapper.meta;
 
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.XREF;
-import static org.molgenis.MolgenisFieldTypes.STRING;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.mapper.repository.impl.MappingTargetRepositoryImpl;
@@ -22,7 +22,7 @@ public class MappingProjectMetaData extends DefaultEntityMetaData
 	{
 		super(ENTITY_NAME);
 
-		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false).setDataType(STRING);
+		addAttribute(IDENTIFIER, ROLE_ID);
 		addAttribute(NAME).setNillable(false);
 		addAttribute(OWNER).setDataType(XREF).setRefEntity(new MolgenisUserMetaData());
 		addAttribute(MAPPINGTARGETS).setDataType(MREF).setRefEntity(MappingTargetRepositoryImpl.META_DATA);

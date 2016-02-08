@@ -478,11 +478,6 @@ public class RepositoryValidationDecorator implements Repository
 				HugeMap<Object, Object> uniqueAttrValues = validationResource.getUniqueAttrsValues()
 						.get(uniqueAttr.getName());
 				Object existingEntityId = uniqueAttrValues.get(attrValue);
-				if (existingEntityId != null)
-				{
-					System.out.println(existingEntityId);
-					System.out.println(entity.getIdValue());
-				}
 				if ((validationMode == ValidationMode.ADD && existingEntityId != null)
 						|| (validationMode == ValidationMode.UPDATE && existingEntityId != null
 								&& !existingEntityId.equals(entity.getIdValue())))

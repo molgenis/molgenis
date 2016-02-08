@@ -1,6 +1,7 @@
 package org.molgenis.util;
 
 import static org.mockito.Mockito.mock;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -28,7 +29,7 @@ public class EntityUtilsTest
 	public void convert()
 	{
 		entityMetaData = new DefaultEntityMetaData("User");
-		entityMetaData.addAttribute("name").setIdAttribute(true).setNillable(false);
+		entityMetaData.addAttribute("name", ROLE_ID);
 
 		DataService dataService = mock(DataService.class);
 
