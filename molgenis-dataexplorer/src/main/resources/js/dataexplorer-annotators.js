@@ -167,7 +167,7 @@
                     data: form.serialize(),
                     contentType: 'application/x-www-form-urlencoded',
                     success: function (name) {
-                        location.reload();
+                        window.location.replace("?mod=annotators&entity="+name);
                     }
                 });
             }

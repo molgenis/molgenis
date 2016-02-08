@@ -35,6 +35,8 @@ public class JobMetaData extends DefaultEntityMetaData
 				.setNillable(true);
 		addAttribute(Job.PROGRESS_MAX).setDataType(MolgenisFieldTypes.INT)
 				.setLabel("Maximum number of entities to be processed").setNillable(true);
+		addAttribute(Job.TARGET).setDataType(MolgenisFieldTypes.STRING)
+				.setLabel("Entities being modified by this job").setNillable(true);
 	}
 
 }

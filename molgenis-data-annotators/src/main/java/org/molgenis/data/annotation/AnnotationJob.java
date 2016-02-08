@@ -3,10 +3,11 @@ package org.molgenis.data.annotation;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.jobs.Job;
 import org.molgenis.data.support.AnnotatorDependencyOrderResolver;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.file.FileStore;
-import org.quartz.Job;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -16,10 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 import java.util.List;
 import java.util.Queue;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class AnnotationJob implements Job
+public class AnnotationJob implements org.quartz.Job
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AnnotationJob.class);
 	public static final String REPOSITORY_NAME = "REPOSITORY_NAME";
@@ -38,8 +38,6 @@ public class AnnotationJob implements Job
 	@Autowired
 	EntityValidator entityValidator;
 	@Autowired
-	AnnotatorRunService annotatorRunService;
-	@Autowired
 	CrudRepositoryAnnotator crudRepositoryAnnotator;
 
 	@Override
@@ -47,7 +45,7 @@ public class AnnotationJob implements Job
 	{
 		String repositoryName = jobExecutionContext.getMergedJobDataMap().getString(REPOSITORY_NAME);
 		String username = jobExecutionContext.getMergedJobDataMap().getString(USERNAME);
-		String annotationRunId = jobExecutionContext.getMergedJobDataMap().getString(ANNOTATION_RUN);
+		Job annotationRun = (Job) jobExecutionContext.getMergedJobDataMap().get(ANNOTATION_RUN);
 		try
 		{
 			long t0 = System.currentTimeMillis();
@@ -60,53 +58,52 @@ public class AnnotationJob implements Job
 			List<RepositoryAnnotator> availableAnnotators = annotationService.getAllAnnotators().stream()
 					.filter(annotator -> annotator.annotationDataExists()).collect(Collectors.toList());
 			AnnotatorDependencyOrderResolver resolver = new AnnotatorDependencyOrderResolver();
-
-			Queue<RepositoryAnnotator> annotatorQueue = resolver
-					.getAnnotatorSelectionDependencyList(availableAnnotators, annotators, repository);
-
-			while (annotatorQueue.size() != 0)
-			{
-				runSingleAnnotator(crudRepositoryAnnotator, annotatorQueue.poll(), annotationRunId, repository,
-						username);
-			}
+			annotate(username, annotationRun, annotators, repository, availableAnnotators, resolver);
 
 			long t = System.currentTimeMillis();
-			annotatorRunService.finishAnnotationRun(annotationRunId, "Annotations finished in " + (t - t0) + " msec.");
+			logAndUpdateProgress(annotationRun, Job.Status.SUCCESS, "Annotations finished in " + (t - t0) + " msec.");
 		}
 		catch (Exception e)
 		{
-			LOG.info("Annotations failed.", e);
-			annotatorRunService.failAnnotationRun(annotationRunId, e.getMessage());
+			logAndUpdateProgress(annotationRun, Job.Status.FAILED, e.getMessage());
 		}
 	}
 
-	private void runSingleAnnotator(CrudRepositoryAnnotator crudRepositoryAnnotator, RepositoryAnnotator annotator,
-			String annotationRunId, Repository repository, String username)
+	private void annotate(String username, Job annotationRun, List<RepositoryAnnotator> annotators,
+			Repository repository, List<RepositoryAnnotator> availableAnnotators,
+			AnnotatorDependencyOrderResolver resolver) throws IOException
 	{
-		try
+		int totalAnnotators;
+		Queue<RepositoryAnnotator> annotatorQueue = resolver.getAnnotatorSelectionDependencyList(availableAnnotators,
+				annotators, repository);
+		totalAnnotators = annotatorQueue.size();
+		while (annotatorQueue.size() != 0)
 		{
-			annotatorRunService.updateAnnotatorStarted(annotationRunId, annotator.getSimpleName());
-			if (annotator != null)
-			{
-				try
-				{
-					LOG.info("Started annotating \"" + repository.getName() + "\" with the " + annotator.getSimpleName()
-							+ " annotator (started by \"" + username + "\")");
-					crudRepositoryAnnotator.annotate(annotator, repository);
-					LOG.info("Finished annotating \"" + repository.getName() + "\" with the "
-							+ annotator.getSimpleName() + " annotator (started by \"" + username + "\")");
-				}
-				catch (IOException e)
-				{
-					annotatorRunService.updateAnnotatorFailed(annotationRunId, annotator.getSimpleName());
-				}
-			}
-			annotatorRunService.updateAnnotatorFinished(annotationRunId, annotator.getSimpleName());
-
+			RepositoryAnnotator annotator = annotatorQueue.poll();
+			String message = "Annotating \"" + repository.getEntityMetaData().getLabel() + "\" with "
+					+ annotator.getSimpleName() + " (annotator " + (totalAnnotators - annotatorQueue.size()) + " of "
+					+ totalAnnotators + ", started by \"" + username + "\")";
+			logAndUpdateProgress(annotationRun, Job.Status.RUNNING, message);
+			runSingleAnnotator(crudRepositoryAnnotator, annotator, repository);
 		}
-		catch (Exception e)
+	}
+
+	private void logAndUpdateProgress(Job annotationRun, Job.Status status, String message)
+	{
+		LOG.info(message);
+		annotationRun.setProgressMessage(message);
+		annotationRun.setStatus(status);
+		RunAsSystemProxy.runAsSystem(() -> {
+			dataService.update(Job.ENTITY_NAME, annotationRun);
+		});
+	}
+
+	private void runSingleAnnotator(CrudRepositoryAnnotator crudRepositoryAnnotator, RepositoryAnnotator annotator,
+			Repository repository) throws IOException
+	{
+		if (annotator != null)
 		{
-			annotatorRunService.updateAnnotatorFailed(annotationRunId, annotator.getSimpleName());
+			crudRepositoryAnnotator.annotate(annotator, repository);
 		}
 	}
 }

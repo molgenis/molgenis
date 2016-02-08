@@ -31,6 +31,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.jobs.Job;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.QueryImpl;
@@ -178,8 +179,8 @@ public class DataExplorerController extends MolgenisPluginController
 		else if (moduleId.equals("annotators"))
 		{
 			Entity annotationRun = dataService
-					.findOne("AnnotationRun",
-							new QueryImpl().eq("entityName", entityName).and().eq("status", "RUNNING"));
+					.findOne(Job.ENTITY_NAME,
+							new QueryImpl().eq(Job.TARGET, entityName).and().eq(Job.STATUS, Job.Status.RUNNING));
 			model.addAttribute("annotationRun", annotationRun);
 			model.addAttribute("entityName", entityName);
 		}

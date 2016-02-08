@@ -7,34 +7,30 @@
         setInterval(
                 function ()
                 {
-                    molgenis.RestClient.prototype.getAsync('/api/v1/AnnotationRun/', {'q' : [ {
-                                'field' : 'id',
+                    molgenis.RestClient.prototype.getAsync('/api/v1/Job/', {'q' : [ {
+                                'field' : 'identifier',
                                 'operator' : 'EQUALS',
-                                'value' : '${annotationRun.id}'
+                                'value' : '${annotationRun.identifier}'
                             } ]},
                             function(annotateRun) {
                                 var entry = annotateRun.items[0];
                                 var container = $('#annotateRun');
                                 container.html("");
 
-                                if(entry.status==="FINISHED"){
+                                if(entry.status!=="RUNNING"){
                                     window.location.replace("?entity=${entityName}");
                                 }
                                 else{
-                                    container.html(entry.message);
+                                    container.html("<p>"+entry.progressMessage+"</p>");
                                 }
                             });
-                }, 2000);
+                }, 1000);
         </script>
     </div>
 </div>
 
 <div class="row">
-    <div>
-        <pre>
-            <p id="annotateRun"></p>
-        </pre>
-    </div>
+    <div id="annotateRun"></div>
 </div>
 <#else>
 <div class="row">

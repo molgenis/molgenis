@@ -2,20 +2,24 @@ package org.molgenis.dataexplorer.controller;
 
 import com.google.common.collect.Lists;
 import com.google.common.io.BaseEncoding;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.AnnotationJob;
-import org.molgenis.data.annotation.AnnotationRun;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.AnnotatorRunService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.jobs.Job;
 import org.molgenis.data.settings.SettingsEntityMeta;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.quartz.JobBuilder;
@@ -30,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,9 +49,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -54,12 +62,6 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.dataexplorer.controller.AnnotatorController.URI;
 
-/**
- * Controller wrapper for the dataexplorer annotator
- * 
- * @author mdehaan
- * 
- */
 @Controller
 @RequestMapping(URI)
 public class AnnotatorController
@@ -75,22 +77,21 @@ public class AnnotatorController
 	private final AnnotationService annotationService;
 	private final UserAccountService userAccountService;
 	private final MolgenisPermissionService molgenisPermissionService;
-	private final AnnotatorRunService annotatorRunService;
 	private final Scheduler scheduler;
+	private final PermissionSystemService permissionSystemService;
 
 	@Autowired
 	public AnnotatorController(DataService dataService, AnnotationService annotationService,
 			UserAccountService userAccountService, MolgenisPermissionService molgenisPermissionService,
-			AnnotatorRunService annotatorRunService, Scheduler scheduler)
+			Scheduler scheduler, PermissionSystemService permissionSystemService)
 	{
 		this.dataService = dataService;
 		this.annotationService = annotationService;
 		this.userAccountService = userAccountService;
 		this.molgenisPermissionService = molgenisPermissionService;
-		this.annotatorRunService = annotatorRunService;
 		this.scheduler = requireNonNull(scheduler);
 		this.triggerNameSalt = UUID.randomUUID().toString();
-
+		this.permissionSystemService = permissionSystemService;
 	}
 
 	/**
@@ -109,7 +110,7 @@ public class AnnotatorController
 	}
 
 	/**
-	 * Annotates a dataset based on selected dataset and selected annotators. Creates a copy of the original dataset if
+	 * Annotates an entity based on selected entity and selected annotators. Creates a copy of the entity dataset if
 	 * option is ticked by the user.
 	 * 
 	 * @param annotatorNames
@@ -125,51 +126,76 @@ public class AnnotatorController
 			@RequestParam("dataset-identifier") String entityName,
 			@RequestParam(value = "createCopy", required = false) boolean createCopy)
 	{
-		/**
-		 * FIXME: reintroduce the ability to copy the existing repo
-		 *
-		 * if (createCopy) LOG.info("Creating a copy of " + sourceRepo.getName() +
-		 * " repository, which will be labelled " + newRepositoryLabel +
-		 * ". A UUID will be generated for the name/identifier");
-		 * 
-		 * if (createCopy) { // Give current user permissions on the created repo
-		 * permissionSystemService.giveUserEntityPermissions(securityContext, Arrays.asList(targetRepo.getName())); } if
-		 * (createCopy) { DefaultEntityMetaData newEntityMetaData = new
-		 * DefaultEntityMetaData(RandomStringUtils.randomAlphabetic(30), entityMetaData); if
-		 * (newEntityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null) {
-		 * newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData); }
-		 * newEntityMetaData.setLabel(newRepositoryLabel);
-		 * 
-		 * return dataService.getMeta().addEntityMeta(newEntityMetaData); } getNewRepositoryLabel(annotators,
-		 * repository.getName() private String getNewRepositoryLabel(List<RepositoryAnnotator> annotators, String
-		 * repositoryName) { String newRepositoryLabel = repositoryName; for (RepositoryAnnotator annotator :
-		 * annotators) { newRepositoryLabel = newRepositoryLabel + "_" + annotator.getSimpleName(); } return
-		 * newRepositoryLabel; }
-		 **/
-
 		Repository repository = dataService.getRepository(entityName);
-		AnnotationRun annotationRun = annotatorRunService
-				.addAnnotationRun(userAccountService.getCurrentUser().getUsername(), annotatorNames, entityName);
+
+		if (createCopy)
+		{
+			String newRepositoryLabel = getNewRepositoryLabel(annotatorNames, entityName);
+			repository = getRepositoryCopy(entityName, repository, newRepositoryLabel);
+			entityName = repository.getEntityMetaData().getSimpleName();
+		}
+
+		Job annotationRun = new Job(dataService);
+		annotationRun.setIdentifier(UUID.randomUUID().toString());
+		annotationRun.setProgressMessage("Started annotation run.");
+		annotationRun.setStatus(Job.Status.RUNNING);
+		annotationRun.setTarget(entityName);
+		annotationRun.setUser(userAccountService.getCurrentUser());
+		annotationRun.setSubmissionDate(new Date());
+		annotationRun.setType("Annotators");
+
+		dataService.add(Job.ENTITY_NAME, annotationRun);
+
 		if (annotatorNames != null && repository != null)
 		{
 			ArrayList<RepositoryAnnotator> annotators = new ArrayList<>();
 			Arrays.asList(annotatorNames).stream()
 					.forEach(a -> annotators.add(annotationService.getAnnotatorByName(a)));
-
 			try
 			{
-				scheduleAnnotatorRun(entityName, annotators, annotationRun.getId());
+				scheduleAnnotatorRun(repository.getEntityMetaData().getSimpleName(), annotators, annotationRun);
 			}
 			catch (SchedulerException e)
 			{
 				e.printStackTrace();
 			}
 		}
-		return annotationRun.getId();
+		return entityName;
 	}
 
-	public TriggerKey scheduleAnnotatorRun(String entityName, List<RepositoryAnnotator> annotators,
-			String annotationRunId) throws SchedulerException
+	private Repository getRepositoryCopy(String entityName, Repository repository, String newRepositoryLabel)
+	{
+		return getRepositoryCopy(entityName, repository, newRepositoryLabel, new QueryImpl());
+	}
+
+	private Repository getRepositoryCopy(String entityName, Repository repository, String newRepositoryLabel,
+			Query query)
+	{
+		LOG.info("Creating a copy of " + entityName + " repository, which will be labelled " + newRepositoryLabel
+				+ ". A UUID will be generated for the name/identifier");
+		DefaultEntityMetaData emd = new DefaultEntityMetaData(RandomStringUtils.randomAlphabetic(30),
+				repository.getEntityMetaData());
+		emd.setLabel(newRepositoryLabel);
+		dataService.getMeta().addEntityMeta(emd);
+		permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
+				Collections.singletonList(emd.getName()));
+		Repository repositoryCopy = dataService.getRepository(emd.getName());
+		repositoryCopy.add(repository.findAll(query));
+		return repositoryCopy;
+	}
+
+	private String getNewRepositoryLabel(
+			@RequestParam(value = "annotatorNames", required = false) String[] annotatorNames,
+			@RequestParam("dataset-identifier") String entityName)
+	{
+		StringJoiner joiner = new StringJoiner("_");
+		Arrays.asList(annotatorNames).forEach(a -> joiner.add(a));
+		String joinedString = joiner.toString();
+		return entityName + "_" + joinedString;
+	}
+
+	public TriggerKey scheduleAnnotatorRun(String entityName, List<RepositoryAnnotator> annotators, Job annotationRun)
+			throws SchedulerException
 	{
 		TriggerKey triggerKey = getIndexRebuildTriggerKeyCurrentUser();
 		if (!scheduler.checkExists(triggerKey))
@@ -178,7 +204,7 @@ public class AnnotatorController
 			jobDataMap.put(AnnotationJob.REPOSITORY_NAME, entityName);
 			jobDataMap.put(AnnotationJob.ANNOTATORS, annotators);
 			jobDataMap.put(AnnotationJob.USERNAME, userAccountService.getCurrentUser().getUsername());
-			jobDataMap.put(AnnotationJob.ANNOTATION_RUN, annotationRunId);
+			jobDataMap.put(AnnotationJob.ANNOTATION_RUN, annotationRun);
 			TriggerBuilder<?> triggerBuilder = TriggerBuilder.newTrigger().withIdentity(triggerKey)
 					.usingJobData(jobDataMap).startNow();
 			scheduleAnnotatorRunJob(triggerBuilder);

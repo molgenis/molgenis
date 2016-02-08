@@ -22,6 +22,7 @@ public class Job extends DefaultEntity
 	public static final String PROGRESS_INT = "progressInt"; // Number of processed entities
 	public static final String PROGRESS_MESSAGE = "progressMessage";
 	public static final String PROGRESS_MAX = "progressMax"; // Max number of entities to process
+	public static final String TARGET = "target";
 
 	public static final EntityMetaData META_DATA = new JobMetaData();
 
@@ -133,6 +134,16 @@ public class Job extends DefaultEntity
 	public void setProgressMax(Integer value)
 	{
 		set(PROGRESS_MAX, value);
+	}
+
+	public String getTarget()
+	{
+		return getString(TARGET);
+	}
+
+	public void setTarget(String value)
+	{
+		set(TARGET, value);
 	}
 
 	public static EntityMetaData getMetaData()
