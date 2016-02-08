@@ -28,7 +28,6 @@ public class EntityMetaDataResponse
 	private final String label;
 	private final String description;
 	private final Map<String, Object> attributes;
-	private final List<String> queryableAttributeNames;
 	private final String labelAttribute;
 	private final String idAttribute;
 	private final List<String> lookupAttributes;
@@ -95,11 +94,14 @@ public class EntityMetaDataResponse
 					if (attributeExpandsSet != null && attributeExpandsSet.containsKey("attributes".toLowerCase()))
 					{
 						Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
+						List<AttributeMetaData> queryableAttributes = Lists.newArrayList(
+								dataService.getRepository(meta.getName()).getQueryableAttributes().iterator());
+
 						this.attributes.put(attr.getName(),
 								new AttributeMetaDataResponse(name, meta, attr, subAttributesSet,
 										Collections.singletonMap("refEntity".toLowerCase(),
 												Sets.newHashSet("idattribute")),
-										permissionService, dataService, languageService));
+										permissionService, dataService, languageService, queryableAttributes));
 					}
 					else
 					{
@@ -146,10 +148,6 @@ public class EntityMetaDataResponse
 		}
 		else this.isAbstract = null;
 
-		queryableAttributeNames = Lists.newArrayList();
-		dataService.getRepository(meta.getName()).getQueryableAttributes().iterator()
-				.forEachRemaining(attr -> queryableAttributeNames.add(attr.getName()));
-
 		this.writable = permissionService.hasPermissionOnEntity(name, Permission.WRITE)
 				&& dataService.getCapabilities(name).contains(RepositoryCapability.WRITABLE);
 	}
@@ -192,11 +190,6 @@ public class EntityMetaDataResponse
 	public Map<String, Object> getAttributes()
 	{
 		return ImmutableMap.copyOf(attributes);
-	}
-
-	public List<String> getQueryableAttributeNames()
-	{
-		return queryableAttributeNames;
 	}
 
 	public String getLabelAttribute()

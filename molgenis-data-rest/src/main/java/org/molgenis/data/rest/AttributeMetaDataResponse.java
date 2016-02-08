@@ -35,6 +35,7 @@ public class AttributeMetaDataResponse
 	private final Boolean labelAttribute;
 	private final Boolean unique;
 	private final Boolean visible;
+	private final Boolean queryable;
 	private Boolean lookupAttribute;
 	private Boolean aggregateable;
 	private Range range;
@@ -43,9 +44,11 @@ public class AttributeMetaDataResponse
 	private String validationExpression;
 
 	public AttributeMetaDataResponse(String entityParentName, EntityMetaData entityMeta, AttributeMetaData attr,
-			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService)
+			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService,
+			List<AttributeMetaData> queryableAttributes)
 	{
-		this(entityParentName, entityMeta, attr, null, null, permissionService, dataService, languageService);
+		this(entityParentName, entityMeta, attr, null, null, permissionService, dataService, languageService,
+				queryableAttributes);
 	}
 
 	/**
@@ -60,7 +63,8 @@ public class AttributeMetaDataResponse
 	 */
 	public AttributeMetaDataResponse(final String entityParentName, EntityMetaData entityMeta, AttributeMetaData attr,
 			Set<String> attributesSet, final Map<String, Set<String>> attributeExpandsSet,
-			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService)
+			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService,
+			List<AttributeMetaData> queryableAttributes)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestController.BASE_URI, entityParentName, attrName);
@@ -107,6 +111,8 @@ public class AttributeMetaDataResponse
 		}
 		else this.expression = null;
 
+		this.queryable = queryableAttributes.contains(attr);
+
 		if (attributesSet == null || attributesSet.contains("refEntity".toLowerCase()))
 		{
 			EntityMetaData refEntity = attr.getRefEntity();
@@ -147,7 +153,7 @@ public class AttributeMetaDataResponse
 								Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
 								return new AttributeMetaDataResponse(entityParentName, entityMeta, attributeMetaData,
 										subAttributesSet, Collections.singletonMap("refEntity".toLowerCase(), null),
-										permissionService, dataService, languageService);
+										permissionService, dataService, languageService, queryableAttributes);
 							}
 							else
 							{

@@ -3,12 +3,12 @@
 	
 	var restApi = new molgenis.RestClient();
 	
-	function createChildren(attributes, queryableAttributeNames, refEntityDepth, maxDepth, languageCode, doSelect) {
+	function createChildren(attributes, refEntityDepth, maxDepth, languageCode, doSelect) {
 		var children = [];
 		
 		$.each(attributes, function() {		
 			
-			var isFolder = false;		
+			var isFolder = false;
 			var classes = null;
 			if (molgenis.isRefAttr(this)) {
 				if (maxDepth >= 0){
@@ -19,25 +19,15 @@
 				if (isFolder) classes = 'refentitynode';
 			}
 
-			// check if the attribute can be filtered
-			var queryable = false;
-			for (var i = 0; i < queryableAttributeNames.length; i++){
-				if (this.name === queryableAttributeNames[i]){
-					queryable = true;
-					break;
+			if (!this.queryable || (this.refEntity && (refEntityDepth > 0))) {
+				if (!molgenis.isCompoundAttr(this)){
+					classes = 'nofilter';
 				}
 			}
 			
-			if (!queryable || (this.refEntity && (refEntityDepth > 0))) {
-				this.queryable = false;
-				classes = 'nofilter';
-			}else{
-				this.queryable = true;
-			}
-			
             if(this.visible) {
-                var isFolder = isFolder || molgenis.isCompoundAttr(this);
-                
+            	isFolder = isFolder || molgenis.isCompoundAttr(this);
+            	
                 children.push({
                 	'key': this.href,
                 	'title': this.label,
@@ -160,14 +150,14 @@
 
 				data.result = $.Deferred(function(dfd) {
 					restApi.getAsync(target, {'expand': ['attributes']}, function(entityMetaData) {
-						var children = createChildren(entityMetaData.attributes, entityMetaData.queryableAttributeNames, node.data.refEntityDepth + increaseDepth, settings.maxRefEntityDepth, entityMetaData.languageCode, function() {
+						var children = createChildren(entityMetaData.attributes, node.data.refEntityDepth + increaseDepth, settings.maxRefEntityDepth, entityMetaData.languageCode, function() {
 							return node.selected;
 						});
 						dfd.resolve(children);
 					});
 				});	
 			},
-			'source' : createChildren(settings.entityMetaData.attributes, settings.entityMetaData.queryableAttributeNames, 0, settings.maxRefEntityDepth, settings.entityMetaData.languageCode, function(attribute) {
+			'source' : createChildren(settings.entityMetaData.attributes, 0, settings.maxRefEntityDepth, settings.entityMetaData.languageCode, function(attribute) {
 				return settings.selectedAttributes ? $.inArray(attribute, settings.selectedAttributes) !== -1  : false;
 			}),
 			'click' : function(e, data) {

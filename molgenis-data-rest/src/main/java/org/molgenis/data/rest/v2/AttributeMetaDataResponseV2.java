@@ -127,7 +127,7 @@ class AttributeMetaDataResponseV2
 			this.attributes = null;
 		}
 
-		this.queryable = queryableAttributes.contains(attr) ? true : false;
+		this.queryable = queryableAttributes.contains(attr);
 
 		this.auto = attr.isAuto();
 		this.nillable = attr.isNillable();
