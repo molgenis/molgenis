@@ -803,6 +803,11 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			}
 		});
 
+		if (request.request().getItems().isEmpty())
+		{
+			return Stream.<Entity> empty();
+		}
+
 		MultiGetResponse response = request.get();
 
 		if (LOG.isDebugEnabled())

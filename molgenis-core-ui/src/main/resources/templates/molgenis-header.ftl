@@ -17,20 +17,7 @@
         <meta name="google-signin-client_id" content="${app_settings.googleAppClientId?html}">
     </#if>
         <link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
-        
-	<#-- Bundle of third party CSS resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
-        <link rel="stylesheet" href="<@resource_href "/css/molgenis-bundle.min.css"/>" type="text/css">
-    
-	<#if environment == "development">
-        <link rel="stylesheet" href="<@resource_href "/css/component/wrapper/DateTimePicker.css"/>" type="text/css">
-        <link rel="stylesheet" href="<@resource_href "/css/component/wrapper/JQRangeSlider.css"/>" type="text/css">
-        <link rel="stylesheet" href="<@resource_href "/css/component/Checkbox.css"/>" type="text/css">
-        <link rel="stylesheet" href="<@resource_href "/css/component/Radio.css"/>" type="text/css">
-        <link rel="stylesheet" href="<@resource_href "/css/component/Table.css"/>" type="text/css">
-    <#else>
-        <link rel="stylesheet" href="<@resource_href "/css/molgenis-component.min.css"/>" type="text/css">
-    </#if>
-        
+        <link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
         <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
  		<link rel="stylesheet" href="<@resource_href "/css/${app_settings.bootstrapTheme?html}"/>" type="text/css" id="bootstrap-theme">
 
@@ -49,8 +36,9 @@
         <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
 		<script src="<@resource_href "/js/es6-promise.min.js"/>"></script>
 		<script src="<@resource_href "/js/promise-done-6.1.0.min.js"/>"></script>
-		<script src="<@resource_href "/js/promise-done-6.1.0.min.js"/>"></script>
-        <script src="<@resource_href "/js/molgenis-bundle.min.js"/>"></script>
+        <script src="<@resource_href "/js/dist/molgenis-vendor-bundle.js"/>"></script>
+		<script src="<@resource_href "/js/dist/molgenis-global.js"/>"></script>
+	    <script src="<@resource_href "/js/dist/molgenis-global-ui.js"/>"></script>
         <script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
         <script src="<@resource_href "/js/handlebars.min.js"/>"></script>
         <script src="<@resource_href "/js/molgenis.js"/>"></script>
@@ -67,51 +55,6 @@
         </script>
         </#if>
         <script src="https://apis.google.com/js/platform.js<#if authenticated?? && authenticated>?onload=onLoad</#if>" async defer></script>
-    </#if>
-    <#if environment == "development">
-        <#-- Important: Update minify-maven-plugin configuration in molgenis-core-ui/pom.xml when modifying the list below -->
-        <script src="<@resource_href "/js/react-with-addons.js"/>"></script>
-        <script src="<@resource_href "/js/component/mixin/I18nStringsMixin.js"/>"></script>
-        <script src="<@resource_href "/js/component/mixin/AttributeLoaderMixin.js"/>"></script>
-        <script src="<@resource_href "/js/component/mixin/DeepPureRenderMixin.js"/>"></script>
-        <script src="<@resource_href "/js/component/mixin/EntityInstanceLoaderMixin.js"/>"></script>
-        <script src="<@resource_href "/js/component/mixin/EntityLoaderMixin.js"/>"></script>
-        <script src="<@resource_href "/js/component/mixin/GroupMixin.js"/>"></script>
-        <script src="<@resource_href "/js/component/mixin/ReactLayeredComponentMixin.js"/>"></script>
-        <script src="<@resource_href "/js/component/wrapper/Ace.js"/>"></script>
-        <script src="<@resource_href "/js/component/wrapper/DateTimePicker.js"/>"></script>
-        <script src="<@resource_href "/js/component/wrapper/JQRangeSlider.js"/>"></script>
-        <script src="<@resource_href "/js/component/wrapper/JQueryForm.js"/>"></script>
-        <script src="<@resource_href "/js/component/wrapper/Select2.js"/>"></script>
-        <script src="<@resource_href "/js/component/AggregateTable.js"/>"></script>
-        <script src="<@resource_href "/js/component/AlertMessage.js"/>"></script>
-        <script src="<@resource_href "/js/component/AttributeControl.js"/>"></script>
-        <script src="<@resource_href "/js/component/BoolControl.js"/>"></script>
-        <script src="<@resource_href "/js/component/Button.js"/>"></script>
-        <script src="<@resource_href "/js/component/CheckboxGroup.js"/>"></script>
-        <script src="<@resource_href "/js/component/CodeEditor.js"/>"></script>
-        <script src="<@resource_href "/js/component/DateControl.js"/>"></script>
-        <script src="<@resource_href "/js/component/Dialog.js"/>"></script>
-        <script src="<@resource_href "/js/component/EntitySelectBox.js"/>"></script>
-        <script src="<@resource_href "/js/component/Form.js"/>"></script>
-        <script src="<@resource_href "/js/component/FormControl.js"/>"></script>
-        <script src="<@resource_href "/js/component/FormControlGroup.js"/>"></script>
-        <script src="<@resource_href "/js/component/Icon.js"/>"></script>
-        <script src="<@resource_href "/js/component/Input.js"/>"></script>
-        <script src="<@resource_href "/js/component/Modal.js"/>"></script>
-        <script src="<@resource_href "/js/component/Pager.js"/>"></script>
-        <script src="<@resource_href "/js/component/Popover.js"/>"></script>
-        <script src="<@resource_href "/js/component/Questionnaire.js"/>"></script>
-        <script src="<@resource_href "/js/component/RadioGroup.js"/>"></script>
-        <script src="<@resource_href "/js/component/RangeSlider.js"/>"></script>
-        <script src="<@resource_href "/js/component/SelectBox.js"/>"></script>
-        <script src="<@resource_href "/js/component/Spinner.js"/>"></script>
-        <script src="<@resource_href "/js/component/Table.js"/>"></script>
-        <script src="<@resource_href "/js/component/TextArea.js"/>"></script>     
-        <script src="<@resource_href "/js/component/LanguageSelectBox.js"/>"></script>     
-    <#else>
-        <script src="<@resource_href "/js/react-with-addons.min.js"/>"></script>
-        <script src="<@resource_href "/js/molgenis-component.min.js"/>"></script>
     </#if>
         
     <!--[if IE 9]>

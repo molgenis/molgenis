@@ -10,13 +10,14 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 public abstract class AbstractAutoAttributesTest extends AbstractDataIntegrationTest
 {
 	public void testIt()
 	{
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("AutoTest");
-		entityMetaData.addAttribute("identifier").setIdAttribute(true).setNillable(false).setAuto(true);
+		entityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false).setAuto(true);
 		entityMetaData.addAttribute("dateAttr").setDataType(MolgenisFieldTypes.DATE).setAuto(true);
 		entityMetaData.addAttribute("datetimeAttr").setDataType(MolgenisFieldTypes.DATETIME).setAuto(true);
 		metaDataService.addEntityMeta(entityMetaData);
