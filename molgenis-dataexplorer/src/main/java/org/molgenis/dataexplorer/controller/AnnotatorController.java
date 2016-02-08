@@ -131,7 +131,9 @@ public class AnnotatorController
 		if (createCopy)
 		{
 			String newRepositoryLabel = getNewRepositoryLabel(annotatorNames, entityName);
-			repository = getRepositoryCopy(entityName, repository, newRepositoryLabel);
+			repository = dataService.copyRepository(repository, RandomStringUtils.randomAlphabetic(30), newRepositoryLabel);
+			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
+					Collections.singletonList(repository.getName()));
 			entityName = repository.getEntityMetaData().getSimpleName();
 		}
 
@@ -163,26 +165,7 @@ public class AnnotatorController
 		return entityName;
 	}
 
-	private Repository getRepositoryCopy(String entityName, Repository repository, String newRepositoryLabel)
-	{
-		return getRepositoryCopy(entityName, repository, newRepositoryLabel, new QueryImpl());
-	}
 
-	private Repository getRepositoryCopy(String entityName, Repository repository, String newRepositoryLabel,
-			Query query)
-	{
-		LOG.info("Creating a copy of " + entityName + " repository, which will be labelled " + newRepositoryLabel
-				+ ". A UUID will be generated for the name/identifier");
-		DefaultEntityMetaData emd = new DefaultEntityMetaData(RandomStringUtils.randomAlphabetic(30),
-				repository.getEntityMetaData());
-		emd.setLabel(newRepositoryLabel);
-		dataService.getMeta().addEntityMeta(emd);
-		permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
-				Collections.singletonList(emd.getName()));
-		Repository repositoryCopy = dataService.getRepository(emd.getName());
-		repositoryCopy.add(repository.findAll(query));
-		return repositoryCopy;
-	}
 
 	private String getNewRepositoryLabel(
 			@RequestParam(value = "annotatorNames", required = false) String[] annotatorNames,
