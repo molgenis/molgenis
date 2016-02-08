@@ -39,6 +39,7 @@ class AttributeMetaDataResponseV2
 	private final Boolean labelAttribute;
 	private final Boolean unique;
 	private final Boolean visible;
+	private final Boolean queryable;
 	private Boolean lookupAttribute;
 	private Boolean aggregateable;
 	private Range range;
@@ -58,7 +59,7 @@ class AttributeMetaDataResponseV2
 	 */
 	public AttributeMetaDataResponseV2(final String entityParentName, EntityMetaData entityMeta, AttributeMetaData attr,
 			Fetch fetch, MolgenisPermissionService permissionService, DataService dataService,
-			LanguageService languageService)
+			LanguageService languageService, List<AttributeMetaData> queryableAttributes)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestControllerV2.BASE_URI, entityParentName, attrName);
@@ -117,7 +118,7 @@ class AttributeMetaDataResponseV2
 								subAttrFetch = null;
 							}
 							return new AttributeMetaDataResponseV2(entityParentName, entityMeta, attr, subAttrFetch,
-									permissionService, dataService, languageService);
+									permissionService, dataService, languageService, queryableAttributes);
 						}
 					}));
 		}
@@ -125,6 +126,8 @@ class AttributeMetaDataResponseV2
 		{
 			this.attributes = null;
 		}
+
+		this.queryable = queryableAttributes.contains(attr);
 
 		this.auto = attr.isAuto();
 		this.nillable = attr.isNillable();
@@ -256,6 +259,11 @@ class AttributeMetaDataResponseV2
 	public boolean isVisible()
 	{
 		return visible;
+	}
+
+	public boolean isQueryable()
+	{
+		return queryable;
 	}
 
 	public Boolean getLookupAttribute()

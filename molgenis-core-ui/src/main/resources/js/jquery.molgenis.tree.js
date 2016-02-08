@@ -8,7 +8,7 @@
 		
 		$.each(attributes, function() {		
 			
-			var isFolder = false;		
+			var isFolder = false;
 			var classes = null;
 			if (molgenis.isRefAttr(this)) {
 				if (maxDepth >= 0){
@@ -18,14 +18,16 @@
 				}
 				if (isFolder) classes = 'refentitynode';
 			}
-			
-			if (this.refEntity && (refEntityDepth > 0)) {
-				classes = 'nofilter';
+
+			if (!this.queryable || (this.refEntity && (refEntityDepth > 0))) {
+				if (!molgenis.isCompoundAttr(this)){
+					classes = 'nofilter';
+				}
 			}
 			
             if(this.visible) {
-                var isFolder = isFolder || molgenis.isCompoundAttr(this);
-                
+            	isFolder = isFolder || molgenis.isCompoundAttr(this);
+            	
                 children.push({
                 	'key': this.href,
                 	'title': this.label,
@@ -162,10 +164,12 @@
 				if (data.targetType === 'title' || data.targetType === 'icon') {
 					if (settings.onAttributeClick) {
 						var attr = data.node.data.attribute, node = getRefParentNode(data.node);
-						if (node !== null) {
-							attr.parent = node.data.attribute;
+						if (attr.queryable === true){
+							if (node !== null) {
+								attr.parent = node.data.attribute;
+							}
+							settings.onAttributeClick(attr);
 						}
-						settings.onAttributeClick(attr);
 					}
 				}
 			},

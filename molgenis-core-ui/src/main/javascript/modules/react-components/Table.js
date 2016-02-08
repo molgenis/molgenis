@@ -102,10 +102,11 @@ import "./css/Table.css";
 			this._refreshData(nextProps, nextState);
 		},
 		render: function() {
+			
 			if(this.state.data === null) {
 				return Spinner(); // entity not available yet
 			}
-
+			
 			var writable = this.state.data.meta.writable;
 
 			var TableHeader = TableHeaderFactory({
@@ -348,7 +349,7 @@ import "./css/Table.css";
 										className: i === attrs.length - 1 && expanded ? 'expanded-right' : undefined,
 										attr: attr,
 										path: path,
-										canSort: path.length === 0, // only allow sorting of top-level attributes
+										canSort: path.length === 0 && attr.queryable === true, // only allow sorting of queryable, top-level attributes
 										sortOrder: this._getSortOrder(attr, path),
 										onSort: this.props.onSort,
 										key: attrPath.join()
