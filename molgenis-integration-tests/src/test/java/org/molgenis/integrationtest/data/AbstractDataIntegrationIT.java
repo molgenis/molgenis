@@ -18,7 +18,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
-public abstract class AbstractDataIntegrationTest extends AbstractTestNGSpringContextTests
+public abstract class AbstractDataIntegrationIT extends AbstractTestNGSpringContextTests
 {
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 

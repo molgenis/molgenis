@@ -13,7 +13,7 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.util.MolgenisDateFormat;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
-public abstract class AbstractDateDatatypeTest extends AbstractDatatypeTest
+public abstract class AbstractDateDatatypeIT extends AbstractDatatypeIT
 {
 	@Override
 	public EntityMetaData createMetaData()

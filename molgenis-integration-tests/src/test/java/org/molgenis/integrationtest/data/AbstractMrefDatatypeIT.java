@@ -18,7 +18,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 
-public class AbstractMrefDatatypeTest extends AbstractDatatypeTest
+public class AbstractMrefDatatypeIT extends AbstractDatatypeIT
 {
 	private DefaultEntityMetaData refEntityMetaData;
 	private DefaultEntityMetaData refEntity2MetaData;

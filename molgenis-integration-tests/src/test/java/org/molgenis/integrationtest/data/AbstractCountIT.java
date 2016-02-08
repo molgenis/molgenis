@@ -16,7 +16,7 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
-public abstract class AbstractCountTest extends AbstractDataIntegrationTest
+public abstract class AbstractCountIT extends AbstractDataIntegrationIT
 {
 	public void testIt() throws ParseException
 	{

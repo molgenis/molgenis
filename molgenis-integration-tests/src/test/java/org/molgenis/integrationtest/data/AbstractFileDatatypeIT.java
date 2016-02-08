@@ -11,7 +11,7 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.file.FileMeta;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
-public class AbstractFileDatatypeTest extends AbstractDatatypeTest
+public class AbstractFileDatatypeIT extends AbstractDatatypeIT
 {
 	@Override
 	public EntityMetaData createMetaData()

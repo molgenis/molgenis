@@ -24,7 +24,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
-public abstract class AbstractDataValidationTest extends AbstractDataIntegrationTest
+public abstract class AbstractDataValidationIT extends AbstractDataIntegrationIT
 {
 	private EditableEntityMetaData entityMetaData;
 	private Entity entity;

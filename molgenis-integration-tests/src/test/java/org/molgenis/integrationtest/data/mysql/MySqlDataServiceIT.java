@@ -1,6 +1,6 @@
 package org.molgenis.integrationtest.data.mysql;
 
-import org.molgenis.integrationtest.data.AbstractDataServiceTest;
+import org.molgenis.integrationtest.data.AbstractDataServiceIT;
 import org.molgenis.integrationtest.data.myqsl.AbstractMySqlTestConfig;
 import org.molgenis.integrationtest.data.mysql.MySqlDataServiceIT.DataServiceMySqlTestConfig;
 import org.springframework.context.annotation.Configuration;
@@ -8,7 +8,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = DataServiceMySqlTestConfig.class)
-public class MySqlDataServiceIT extends AbstractDataServiceTest
+public class MySqlDataServiceIT extends AbstractDataServiceIT
 {
 	@Configuration
 	public static class DataServiceMySqlTestConfig extends AbstractMySqlTestConfig

@@ -1,13 +1,13 @@
 package org.molgenis.integrationtest.data.elasticsearch;
 
-import org.molgenis.integrationtest.data.AbstractDateDatatypeTest;
+import org.molgenis.integrationtest.data.AbstractDateDatatypeIT;
 import org.molgenis.integrationtest.data.elasticsearch.ElasticsearchDateDatatypeIT.DateElasticsearchTestConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = DateElasticsearchTestConfig.class)
-public class ElasticsearchDateDatatypeIT extends AbstractDateDatatypeTest
+public class ElasticsearchDateDatatypeIT extends AbstractDateDatatypeIT
 {
 	@Configuration
 	public static class DateElasticsearchTestConfig extends AbstractElasticsearchTestConfig

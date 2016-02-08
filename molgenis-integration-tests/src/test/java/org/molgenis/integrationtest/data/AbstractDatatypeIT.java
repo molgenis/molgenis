@@ -31,7 +31,7 @@ import org.molgenis.data.support.DefaultEntity;
  * 9. Verify entity is deleted
  * 
  */
-public abstract class AbstractDatatypeTest extends AbstractDataIntegrationTest
+public abstract class AbstractDatatypeIT extends AbstractDataIntegrationIT
 {
 	/** Define a data model to test */
 	public abstract EntityMetaData createMetaData();

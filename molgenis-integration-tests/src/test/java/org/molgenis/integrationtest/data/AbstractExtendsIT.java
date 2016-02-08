@@ -10,7 +10,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
-public class AbstractExtendsTest extends AbstractDatatypeTest
+public class AbstractExtendsIT extends AbstractDatatypeIT
 {
 	@Override
 	public EntityMetaData createMetaData()

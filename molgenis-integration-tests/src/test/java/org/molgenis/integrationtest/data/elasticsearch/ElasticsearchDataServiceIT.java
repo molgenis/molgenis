@@ -1,13 +1,13 @@
 package org.molgenis.integrationtest.data.elasticsearch;
 
-import org.molgenis.integrationtest.data.AbstractDataServiceTest;
+import org.molgenis.integrationtest.data.AbstractDataServiceIT;
 import org.molgenis.integrationtest.data.elasticsearch.ElasticsearchDataServiceIT.DataServiceElasticsearchTestConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = DataServiceElasticsearchTestConfig.class)
-public class ElasticsearchDataServiceIT extends AbstractDataServiceTest
+public class ElasticsearchDataServiceIT extends AbstractDataServiceIT
 {
 	@Configuration
 	public static class DataServiceElasticsearchTestConfig extends AbstractElasticsearchTestConfig

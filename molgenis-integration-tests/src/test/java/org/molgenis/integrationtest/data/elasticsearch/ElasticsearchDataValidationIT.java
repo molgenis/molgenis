@@ -1,13 +1,13 @@
 package org.molgenis.integrationtest.data.elasticsearch;
 
-import org.molgenis.integrationtest.data.AbstractDataValidationTest;
+import org.molgenis.integrationtest.data.AbstractDataValidationIT;
 import org.molgenis.integrationtest.data.elasticsearch.ElasticsearchDataValidationIT.DataValidationElasticsearchTestConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = DataValidationElasticsearchTestConfig.class)
-public class ElasticsearchDataValidationIT extends AbstractDataValidationTest
+public class ElasticsearchDataValidationIT extends AbstractDataValidationIT
 {
 	@Configuration
 	public static class DataValidationElasticsearchTestConfig extends AbstractElasticsearchTestConfig

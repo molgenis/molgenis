@@ -12,7 +12,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
-public class AbstractDatetimeDatatypeTest extends AbstractDatatypeTest
+public class AbstractDatetimeDatatypeIT extends AbstractDatatypeIT
 {
 	private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 

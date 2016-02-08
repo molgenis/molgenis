@@ -13,7 +13,7 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 
-public class AbstractXrefDatatypeTest extends AbstractDatatypeTest
+public class AbstractXrefDatatypeIT extends AbstractDatatypeIT
 {
 	private DefaultEntityMetaData refEntityMetaData;
 	private DefaultEntityMetaData refEntity2MetaData;

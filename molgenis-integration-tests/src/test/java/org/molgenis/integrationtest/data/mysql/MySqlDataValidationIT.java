@@ -1,6 +1,6 @@
 package org.molgenis.integrationtest.data.mysql;
 
-import org.molgenis.integrationtest.data.AbstractDataValidationTest;
+import org.molgenis.integrationtest.data.AbstractDataValidationIT;
 import org.molgenis.integrationtest.data.myqsl.AbstractMySqlTestConfig;
 import org.molgenis.integrationtest.data.mysql.MySqlDataValidationIT.DataValidationMySqlTestConfig;
 import org.springframework.context.annotation.Configuration;
@@ -8,7 +8,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = DataValidationMySqlTestConfig.class)
-public class MySqlDataValidationIT extends AbstractDataValidationTest
+public class MySqlDataValidationIT extends AbstractDataValidationIT
 {
 	@Configuration
 	public static class DataValidationMySqlTestConfig extends AbstractMySqlTestConfig

@@ -12,7 +12,7 @@ import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
-public abstract class AbstractAutoAttributesTest extends AbstractDataIntegrationTest
+public abstract class AbstractAutoAttributesIT extends AbstractDataIntegrationIT
 {
 	public void testIt()
 	{

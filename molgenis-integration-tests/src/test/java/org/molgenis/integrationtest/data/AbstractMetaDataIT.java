@@ -20,7 +20,7 @@ import com.google.common.collect.Iterables;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 
-public abstract class AbstractMetaDataTest extends AbstractDataIntegrationTest
+public abstract class AbstractMetaDataIT extends AbstractDataIntegrationIT
 {
 	public void testIt()
 	{

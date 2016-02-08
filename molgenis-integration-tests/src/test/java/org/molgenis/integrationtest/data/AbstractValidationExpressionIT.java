@@ -10,7 +10,7 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.validation.MolgenisValidationException;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
-public abstract class AbstractValidationExpressionTest extends AbstractDataIntegrationTest
+public abstract class AbstractValidationExpressionIT extends AbstractDataIntegrationIT
 {
 	public void testIt()
 	{

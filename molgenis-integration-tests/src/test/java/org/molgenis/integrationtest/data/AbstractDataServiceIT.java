@@ -37,7 +37,7 @@ import org.testng.annotations.BeforeClass;
 import com.google.common.collect.Iterators;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
-public abstract class AbstractDataServiceTest extends AbstractDataIntegrationTest
+public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 {
 	private static final String ENTITY_NAME = "test_TestEntity";
 	private static final String ID = "id";
