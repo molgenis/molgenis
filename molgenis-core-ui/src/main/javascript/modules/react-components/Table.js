@@ -322,7 +322,7 @@ import "./css/Table.css";
 					if(attrs[i].visible === true) {
 						var attr = attrs[i];
 						if(this._isSelectedAttr(attr, selectedAttrs)) {
-							if(molgenis.isCompoundAttr(attr)) {
+							if(isCompoundAttr(attr)) {
 								// for a selected compound attribute select all child attributes (= the wildcard),
 								// child attributes might be expanded so include the selected attributes as well when recursing
 								this._createHeadersRec(attr.attributes, _.extend({'*': null}, selectedAttrs), Headers, path, expanded);
