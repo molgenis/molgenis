@@ -1,9 +1,11 @@
 package org.molgenis.data.meta.system;
 
+import static org.molgenis.MolgenisFieldTypes.SCRIPT;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.stereotype.Component;
-
-import static org.molgenis.MolgenisFieldTypes.SCRIPT;
 
 @Component
 public class FreemarkerTemplateMetaData extends DefaultEntityMetaData
@@ -16,9 +18,9 @@ public class FreemarkerTemplateMetaData extends DefaultEntityMetaData
 	public FreemarkerTemplateMetaData()
 	{
 		super(ENTITY_NAME);
-		addAttribute(ID).setAuto(true).setVisible(false)
-				.setDescription("automatically generated internal id, only for internal use.").setIdAttribute(true).setNillable(false);
-		addAttribute(NAME).setDescription("Name of the entity").setNillable(false).setLabelAttribute(true).setUnique(true);
+		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false)
+				.setDescription("automatically generated internal id, only for internal use.");
+		addAttribute(NAME, ROLE_LABEL).setDescription("Name of the entity").setNillable(false).setUnique(true);
 		addAttribute(VALUE).setDataType(SCRIPT).setNillable(false).setDescription("");
 	}
 }

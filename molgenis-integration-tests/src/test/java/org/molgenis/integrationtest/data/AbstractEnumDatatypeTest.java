@@ -9,6 +9,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 public class AbstractEnumDatatypeTest extends AbstractDatatypeTest
 {
@@ -19,7 +20,7 @@ public class AbstractEnumDatatypeTest extends AbstractDatatypeTest
 
 		EnumField enumField = new EnumField();
 		enumField.setEnumOptions(Arrays.asList("ONE", "TWO"));
-		entityMetaData.addAttribute("identifier").setDataType(enumField).setIdAttribute(true).setNillable(false);
+		entityMetaData.addAttribute("identifier", ROLE_ID).setDataType(enumField).setNillable(false);
 		entityMetaData.addAttribute("col1").setDataType(enumField);
 
 		return entityMetaData;

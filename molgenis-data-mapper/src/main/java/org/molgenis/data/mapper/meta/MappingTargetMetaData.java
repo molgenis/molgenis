@@ -1,7 +1,7 @@
 package org.molgenis.data.mapper.meta;
 
 import static org.molgenis.MolgenisFieldTypes.MREF;
-import static org.molgenis.MolgenisFieldTypes.STRING;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 import org.molgenis.data.mapper.repository.impl.EntityMappingRepositoryImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -18,7 +18,7 @@ public class MappingTargetMetaData extends DefaultEntityMetaData
 	public MappingTargetMetaData()
 	{
 		super(ENTITY_NAME);
-		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false).setDataType(STRING);
+		addAttribute(IDENTIFIER, ROLE_ID);
 		addAttribute(ENTITYMAPPINGS).setDataType(MREF).setRefEntity(EntityMappingRepositoryImpl.META_DATA);
 		addAttribute(TARGET).setNillable(false);
 	}

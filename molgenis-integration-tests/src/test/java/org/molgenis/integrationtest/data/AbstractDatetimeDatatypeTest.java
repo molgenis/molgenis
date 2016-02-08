@@ -10,6 +10,7 @@ import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 public class AbstractDatetimeDatatypeTest extends AbstractDatatypeTest
 {
@@ -19,7 +20,7 @@ public class AbstractDatetimeDatatypeTest extends AbstractDatatypeTest
 	public EntityMetaData createMetaData()
 	{
 		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("DatetimeTest");
-		entityMetaData.addAttribute("col1").setDataType(DATETIME).setIdAttribute(true).setNillable(false);
+		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(DATETIME).setNillable(false);
 		entityMetaData.addAttribute("col2").setDataType(DATETIME);
 		entityMetaData.addAttribute("col3").setDataType(DATETIME).setDefaultValue("01-01-2014");
 

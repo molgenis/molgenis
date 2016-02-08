@@ -14,6 +14,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 public abstract class AbstractCountTest extends AbstractDataIntegrationTest
 {
@@ -23,10 +24,10 @@ public abstract class AbstractCountTest extends AbstractDataIntegrationTest
 
 		// define model
 		DefaultEntityMetaData countryMD = new DefaultEntityMetaData("query_country");
-		countryMD.addAttribute("code").setNillable(false).setIdAttribute(true); // TODO: make this an enum!
+		countryMD.addAttribute("code", ROLE_ID).setNillable(false); // TODO: make this an enum!
 
 		DefaultEntityMetaData personMD = new DefaultEntityMetaData("query_person");
-		personMD.addAttribute("email").setNillable(false).setIdAttribute(true);
+		personMD.addAttribute("email", ROLE_ID).setNillable(false);
 		personMD.addAttribute("firstName");
 		personMD.addAttribute("lastName");
 		personMD.addAttribute("birthday").setDataType(DATE);

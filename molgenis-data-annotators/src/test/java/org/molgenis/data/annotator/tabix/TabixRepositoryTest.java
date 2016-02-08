@@ -3,6 +3,7 @@ package org.molgenis.data.annotator.tabix;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.VcfRepository.CHROM;
 import static org.molgenis.data.vcf.VcfRepository.CHROM_META;
 import static org.molgenis.data.vcf.VcfRepository.POS;
@@ -39,7 +40,7 @@ public class TabixRepositoryTest
 	{
 		initMocks(this);
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("MyEntity");
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("ID").setAuto(true).setIdAttribute(true));
+		emd.addAttributeMetaData(new DefaultAttributeMetaData("ID").setAuto(true), ROLE_ID);
 		emd.addAllAttributeMetaData(asList(CHROM_META, POS_META));
 		emd.addAttributeMetaData(new DefaultAttributeMetaData("Description").setNillable(false));
 

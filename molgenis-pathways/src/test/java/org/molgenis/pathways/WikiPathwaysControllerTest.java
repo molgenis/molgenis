@@ -2,6 +2,7 @@ package org.molgenis.pathways;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
@@ -82,7 +83,7 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 	public void init()
 	{
 		vcf = new DefaultEntityMetaData("VCF");
-		vcf.addAttribute("id").setIdAttribute(true);
+		vcf.addAttribute("id", ROLE_ID);
 		vcf.addAttribute("EFF");
 	}
 
@@ -116,7 +117,7 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 	{
 		when(dataService.getEntityNames()).thenReturn(Stream.of("NonVCF", "VCF"));
 		DefaultEntityMetaData nonVcf = new DefaultEntityMetaData("NonVCF");
-		nonVcf.addAttribute("id").setIdAttribute(true);
+		nonVcf.addAttribute("id", ROLE_ID);
 
 		when(dataService.getEntityMetaData("NonVCF")).thenReturn(nonVcf);
 		when(dataService.getEntityMetaData("VCF")).thenReturn(vcf);

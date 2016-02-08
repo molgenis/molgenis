@@ -19,6 +19,7 @@ public class MetaValidationUtils
 	public static final int MAX_ATTRIBUTE_LENGTH = 30;
 
 	public static final Set<String> KEYWORDS = Sets.newHashSet();
+
 	static
 	{
 		// we can generate java(script) files with freemarker, so prevent use of reserved words
@@ -90,11 +91,6 @@ public class MetaValidationUtils
 		validateName(amd.getName());
 		if (amd.getDefaultValue() != null)
 		{
-			if (amd.isIdAtrribute())
-			{
-				throw new MolgenisDataException("ID attribute " + amd.getName() + " cannot have default value");
-			}
-
 			if (amd.isUnique())
 			{
 				throw new MolgenisDataException("Unique attribute " + amd.getName() + " cannot have default value");
@@ -108,10 +104,8 @@ public class MetaValidationUtils
 			FieldTypeEnum fieldType = amd.getDataType().getEnumType();
 			if (fieldType == FieldTypeEnum.XREF || fieldType == FieldTypeEnum.MREF)
 			{
-				throw new MolgenisDataException(
-						"Attribute "
-								+ amd.getName()
-								+ " cannot have default value since specifying a default value for XREF and MREF data types is not yet supported.");
+				throw new MolgenisDataException("Attribute " + amd.getName()
+						+ " cannot have default value since specifying a default value for XREF and MREF data types is not yet supported.");
 			}
 		}
 	}
@@ -125,6 +119,12 @@ public class MetaValidationUtils
 		{
 			validateName(emd.getSimpleName());
 			validateAttributes(emd.getAttributes());
+
+			if (emd.getIdAttribute() != null && emd.getIdAttribute().getDefaultValue() != null)
+			{
+				throw new MolgenisDataException(
+						"ID attribute " + emd.getIdAttribute().getName() + " cannot have default value");
+			}
 		}
 		catch (MolgenisDataException e)
 		{

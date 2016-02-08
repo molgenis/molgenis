@@ -1,6 +1,7 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import static org.mockito.Mockito.mock;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -43,7 +44,7 @@ public class ThousandGenomesAnnotatorTest extends AbstractTestNGSpringContextTes
 	public void testAnnotate()
 	{
 		DefaultEntityMetaData emdIn = new DefaultEntityMetaData("test");
-		emdIn.addAttribute(VcfRepository.CHROM).setIdAttribute(true).setNillable(false);
+		emdIn.addAttribute(VcfRepository.CHROM, ROLE_ID);
 		emdIn.addAttributeMetaData(VcfRepository.POS_META);
 		emdIn.addAttributeMetaData(VcfRepository.REF_META);
 		emdIn.addAttributeMetaData(VcfRepository.ALT_META);

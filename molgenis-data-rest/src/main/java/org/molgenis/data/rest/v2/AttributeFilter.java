@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 
 /**
  * An AttributeFilter represents the value of the attrs parameter in a REST query.
@@ -89,39 +90,19 @@ class AttributeFilter implements Iterable<Entry<String, AttributeFilter>>
 		return this;
 	}
 
-	public AttributeFilter getAttributeFilter(AttributeMetaData attr)
+	public AttributeFilter getAttributeFilter(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
-		if (idAttrFilter != null && attr.isIdAtrribute())
+		if (idAttrFilter != null && attr.equals(entityMeta.getIdAttribute()))
 		{
 			return idAttrFilter;
 		}
-		else if (labelAttrFilter != null && attr.isLabelAttribute())
+		else if (labelAttrFilter != null && attr.equals(entityMeta.getLabelAttribute()))
 		{
 			return labelAttrFilter;
 		}
 		else
 		{
 			return attributes.get(normalize(attr.getName()));
-		}
-	}
-
-	public boolean includeAttribute(AttributeMetaData attr)
-	{
-		if (this.includeAllAttrs)
-		{
-			return true;
-		}
-		else if (this.includeIdAttr && attr.isIdAtrribute())
-		{
-			return true;
-		}
-		else if (this.includeLabelAttr && attr.isLabelAttribute())
-		{
-			return true;
-		}
-		else
-		{
-			return attributes.containsKey(normalize(attr.getName()));
 		}
 	}
 

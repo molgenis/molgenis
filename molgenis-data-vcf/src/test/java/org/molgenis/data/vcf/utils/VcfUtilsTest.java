@@ -1,6 +1,7 @@
 package org.molgenis.data.vcf.utils;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.VcfRepository.ALT;
 import static org.molgenis.data.vcf.VcfRepository.ALT_META;
 import static org.molgenis.data.vcf.VcfRepository.CHROM;
@@ -82,11 +83,10 @@ public class VcfUtilsTest
 		 * 1 10050000 test21 G A . PASS AC=21;AN=22;GTC=0,1,10 1 10050001 test22 G A . PASS AC=22;AN=23;GTC=1,2,11 1
 		 * 10050002 test23 G A . PASS AC=23;AN=24;GTC=2,3,12
 		 */
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom, ROLE_ID);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataRef);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataAlt);
-		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
 
 		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataCantAnnotateChrom);
 		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataPos);
@@ -115,11 +115,10 @@ public class VcfUtilsTest
 		INFO.addAttributePart(GTC);
 		metaDataCanAnnotate.addAttributeMetaData(INFO);
 
-		annotatedEntityMetadata.addAttributeMetaData(attributeMetaDataChrom);
+		annotatedEntityMetadata.addAttributeMetaData(attributeMetaDataChrom, ROLE_ID);
 		annotatedEntityMetadata.addAttributeMetaData(attributeMetaDataPos);
 		annotatedEntityMetadata.addAttributeMetaData(attributeMetaDataRef);
 		annotatedEntityMetadata.addAttributeMetaData(attributeMetaDataAlt);
-		annotatedEntityMetadata.setIdAttribute(attributeMetaDataChrom.getName());
 
 		annotatedEntityMetadata.addAttributeMetaData(
 				new DefaultAttributeMetaData(VcfRepository.ID, MolgenisFieldTypes.FieldTypeEnum.STRING));
@@ -177,13 +176,13 @@ public class VcfUtilsTest
 		String sampleIdAttrName = VcfRepository.NAME;
 
 		DefaultEntityMetaData sampleEntityMeta = new DefaultEntityMetaData("vcfSampleEntity");
-		sampleEntityMeta.addAttribute(sampleIdAttrName).setIdAttribute(true);
+		sampleEntityMeta.addAttribute(sampleIdAttrName, ROLE_ID);
 		sampleEntityMeta.addAttribute(formatDpAttrName);
 		sampleEntityMeta.addAttribute(formatEcAttrName);
 		sampleEntityMeta.addAttribute(formatGtAttrName);
 
 		DefaultEntityMetaData entityMeta = new DefaultEntityMetaData("vcfEntity");
-		entityMeta.addAttribute(idAttrName).setIdAttribute(true);
+		entityMeta.addAttribute(idAttrName, ROLE_ID);
 		entityMeta.addAttributeMetaData(CHROM_META);
 		entityMeta.addAttributeMetaData(POS_META);
 		entityMeta.addAttributeMetaData(ID_META);

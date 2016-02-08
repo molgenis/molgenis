@@ -37,7 +37,7 @@ public class ExcelRepositorySourceTest
 	@Test
 	public void getNumberOfSheets()
 	{
-		assertEquals(excelRepositoryCollection.getNumberOfSheets(), 2);
+		assertEquals(excelRepositoryCollection.getNumberOfSheets(), 3);
 	}
 
 	@Test
@@ -45,7 +45,7 @@ public class ExcelRepositorySourceTest
 	{
 		List<String> repositories = Lists.newArrayList(excelRepositoryCollection.getEntityNames());
 		assertNotNull(repositories);
-		assertEquals(repositories.size(), 2);
+		assertEquals(repositories.size(), 3);
 	}
 
 	@Test

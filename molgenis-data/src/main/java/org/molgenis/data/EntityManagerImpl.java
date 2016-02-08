@@ -126,13 +126,12 @@ public class EntityManagerImpl implements EntityManager
 	@Override
 	public Stream<Entity> resolveReferences(EntityMetaData entityMeta, Stream<Entity> entities, Fetch fetch)
 	{
-		// FIXME how to enable this optimization?
-		// // resolve lazy entity collections without references
-		// if (entities instanceof EntityCollection && ((EntityCollection) entities).isLazy())
-		// {
-		// // TODO remove cast after updating DataService/Repository interfaces to return EntityCollections
-		// return dataService.findAll(entityMeta.getName(), new EntityIdIterable(entities), fetch);
-		// }
+		// resolve lazy entity collections without references
+		if (entities instanceof EntityStream && ((EntityStream) entities).isLazy())
+		{
+			// TODO remove cast after updating DataService/Repository interfaces to return EntityStream
+			return dataService.findAll(entityMeta.getName(), entities.map(Entity::getIdValue), fetch);
+		}
 
 		// no fetch exists that described what to resolve
 		if (fetch == null)

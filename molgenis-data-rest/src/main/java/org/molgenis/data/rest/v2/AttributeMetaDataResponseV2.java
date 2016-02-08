@@ -49,14 +49,16 @@ class AttributeMetaDataResponseV2
 	/**
 	 * 
 	 * @param entityParentName
+	 * @param entityMeta
 	 * @param attr
 	 * @param attrFilter
 	 *            set of lowercase attribute names to include in response
 	 * @param attributeExpandsSet
 	 *            set of lowercase attribute names to expand in response
 	 */
-	public AttributeMetaDataResponseV2(final String entityParentName, AttributeMetaData attr, Fetch fetch,
-			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService)
+	public AttributeMetaDataResponseV2(final String entityParentName, EntityMetaData entityMeta, AttributeMetaData attr,
+			Fetch fetch, MolgenisPermissionService permissionService, DataService dataService,
+			LanguageService languageService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestControllerV2.BASE_URI, entityParentName, attrName);
@@ -87,8 +89,8 @@ class AttributeMetaDataResponseV2
 			attrParts = filterAttributes(fetch, attrParts);
 
 			// create attribute response
-			this.attributes = Lists.newArrayList(Iterables.transform(attrParts,
-					new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
+			this.attributes = Lists.newArrayList(
+					Iterables.transform(attrParts, new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
 					{
 						@Override
 						public AttributeMetaDataResponseV2 apply(AttributeMetaData attr)
@@ -114,7 +116,7 @@ class AttributeMetaDataResponseV2
 							{
 								subAttrFetch = null;
 							}
-							return new AttributeMetaDataResponseV2(entityParentName, attr, subAttrFetch,
+							return new AttributeMetaDataResponseV2(entityParentName, entityMeta, attr, subAttrFetch,
 									permissionService, dataService, languageService);
 						}
 					}));
@@ -128,9 +130,9 @@ class AttributeMetaDataResponseV2
 		this.nillable = attr.isNillable();
 		this.readOnly = attr.isReadonly();
 		this.defaultValue = attr.getDefaultValue();
-		this.labelAttribute = attr.isLabelAttribute();
+		this.labelAttribute = attr.equals(entityMeta.getLabelAttribute());
 		this.unique = attr.isUnique();
-		this.lookupAttribute = attr.isLookupAttribute();
+		this.lookupAttribute = entityMeta.getLookupAttribute(attr.getName()) != null;
 		this.aggregateable = attr.isAggregateable();
 		this.range = attr.getRange();
 		this.visible = attr.isVisible();
