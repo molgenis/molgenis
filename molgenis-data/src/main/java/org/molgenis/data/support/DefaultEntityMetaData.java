@@ -306,13 +306,6 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 				switch (attrType)
 				{
 					case ROLE_ID:
-						if (attr instanceof DefaultAttributeMetaData)
-						{
-							DefaultAttributeMetaData editableAttr = (DefaultAttributeMetaData) attr;
-							editableAttr.setReadOnly(true);
-							editableAttr.setUnique(true);
-							editableAttr.setNillable(false);
-						}
 						setIdAttribute(attr);
 						break;
 					case ROLE_LABEL:
@@ -389,6 +382,13 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	@Override
 	public void setIdAttribute(AttributeMetaData idAttr)
 	{
+		if (idAttr instanceof DefaultAttributeMetaData)
+		{
+			DefaultAttributeMetaData editableAttr = (DefaultAttributeMetaData) idAttr;
+			editableAttr.setReadOnly(true);
+			editableAttr.setUnique(true);
+			editableAttr.setNillable(false);
+		}
 		this.ownIdAttr = requireNonNull(idAttr);
 		clearCache();
 	}

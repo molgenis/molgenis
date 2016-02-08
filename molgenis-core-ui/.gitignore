@@ -3,3 +3,5 @@ target/
 test-output/
 .classpath
 .project
+node/
+node_modules/
