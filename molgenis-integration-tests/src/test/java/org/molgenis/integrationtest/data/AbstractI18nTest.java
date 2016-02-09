@@ -1,9 +1,10 @@
 package org.molgenis.integrationtest.data;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertEqualsNoOrder;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +24,7 @@ import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeClass;;
 
 public abstract class AbstractI18nTest extends AbstractDataIntegrationTest
 {
@@ -88,13 +89,13 @@ public abstract class AbstractI18nTest extends AbstractDataIntegrationTest
 		entityMetaData.setDescription("nl", "De omschrijving");
 		entityMetaData.setLabel("en", "The label");
 		entityMetaData.setLabel("nl", "Het label");
-		entityMetaData.addAttribute("id").setNillable(false).setIdAttribute(true);
-		entityMetaData.addAttribute("attr-en").setDescription("en", "The description (en)")
-				.setDescription("nl", "De omschrijving (en)").setLabel("en", "The label (en)")
-				.setLabel("nl", "Het label (en)").setLabelAttribute(true);
-		entityMetaData.addAttribute("attr-nl").setDescription("en", "The description (nl)")
+		entityMetaData.addAttribute("id", ROLE_ID).setNillable(false);
+		entityMetaData.addAttribute("attr-nl", ROLE_LABEL).setDescription("en", "The description (nl)")
 				.setDescription("nl", "De omschrijving (nl)").setLabel("en", "The label (nl)")
-				.setLabel("nl", "Het label (nl)").setLabelAttribute(true);
+				.setLabel("nl", "Het label (nl)");
+		entityMetaData.addAttribute("attr-en").setDescription("en", "The description (en)")
+		.setDescription("nl", "De omschrijving (en)").setLabel("en", "The label (en)")
+		.setLabel("nl", "Het label (en)");
 
 		metaDataService.addEntityMeta(entityMetaData);
 
@@ -109,15 +110,17 @@ public abstract class AbstractI18nTest extends AbstractDataIntegrationTest
 		assertEquals(attr.getLabel(languageCode), "Het label (nl)");
 		assertEqualsNoOrder(attr.getLabelLanguageCodes().toArray(), new String[]
 		{ "en", "nl" });
-		assertTrue(attr.isLabelAttribute());
+		assertEquals(entityMetaData.getLabelAttribute(), attr);
 
+		
 		attr = entityMetaData.getAttribute("attr-en");
+		entityMetaData.setLabelAttribute(attr);
 		assertNotNull(attr);
 		assertEquals(attr.getDescription(languageCode), "De omschrijving (en)");
 		assertEquals(attr.getLabel(languageCode), "Het label (en)");
 		assertEqualsNoOrder(attr.getLabelLanguageCodes().toArray(), new String[]
 		{ "en", "nl" });
-		assertTrue(attr.isLabelAttribute());
+		assertEquals(entityMetaData.getLabelAttribute(), attr);
 	}
 
 	protected void createAdminUser()

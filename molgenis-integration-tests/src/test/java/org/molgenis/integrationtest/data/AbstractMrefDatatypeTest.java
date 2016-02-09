@@ -1,6 +1,8 @@
 package org.molgenis.integrationtest.data;
 
 import static org.molgenis.MolgenisFieldTypes.INT;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -25,17 +27,17 @@ public class AbstractMrefDatatypeTest extends AbstractDatatypeTest
 	public EntityMetaData createMetaData()
 	{
 		refEntityMetaData = new DefaultEntityMetaData("StringTarget");
-		refEntityMetaData.setLabelAttribute("label");
-		refEntityMetaData.addAttribute("identifier").setNillable(false).setIdAttribute(true);
+		refEntityMetaData.addAttribute("label", ROLE_LABEL);
+		refEntityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false);
 		refEntityMetaData.addAttribute("label");
 		metaDataService.addEntityMeta(refEntityMetaData);
 
 		refEntity2MetaData = new DefaultEntityMetaData("IntTarget");
-		refEntity2MetaData.addAttribute("identifier").setDataType(INT).setNillable(false).setIdAttribute(true);
+		refEntity2MetaData.addAttribute("identifier", ROLE_ID).setDataType(INT).setNillable(false);
 		metaDataService.addEntityMeta(refEntity2MetaData);
 
 		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("MrefTest");
-		entityMetaData.addAttribute("identifier").setNillable(false).setIdAttribute(true);
+		entityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false);
 		entityMetaData.addAttribute("stringRef").setDataType(MREF).setRefEntity(refEntityMetaData).setNillable(false);
 		entityMetaData.addAttribute("intRef").setDataType(MREF).setRefEntity(refEntity2MetaData).setNillable(true);
 

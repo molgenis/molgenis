@@ -17,6 +17,7 @@ import java.util.stream.StreamSupport;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MysqlTestConfig;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.Sort;
@@ -29,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
+import org.testng.annotations.ExpectedExceptions;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Iterables;
@@ -117,34 +119,46 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		repo.deleteAll(); // cleanup
 	}
 
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void testIfDeleteFailsForSelfReferencingEntity()
+	{
+		DefaultEntityMetaData metaData = new DefaultEntityMetaData("SelfRefTable");
+		metaData.addAttribute("id", ROLE_ID).setDataType(MolgenisFieldTypes.STRING).setNillable(false);
+		metaData.addAttribute("xrefAttr").setDataType(MolgenisFieldTypes.XREF).setRefEntity(metaData)
+				.setNillable(false);
+
+		Repository repo = metaDataRepositories.addEntityMeta(metaData);
+		Entity xrefTableEntity = new MapEntity("xrefAttr");
+		xrefTableEntity.set("id", "value_1");
+		xrefTableEntity.set("xrefAttr", "value_1");
+
+		repo.deleteAll(); // Test delete
+	}
+
 	@Test
 	public void testDeleteAllForXrefs()
 	{
 		DefaultEntityMetaData refMetaData = new DefaultEntityMetaData("RefEntityTable");
-		refMetaData.addAttribute("refAttr").setDataType(MolgenisFieldTypes.STRING).setIdAttribute(true)
-				.setNillable(false);
+		refMetaData.addAttribute("refAttr", ROLE_ID).setDataType(MolgenisFieldTypes.STRING).setNillable(false);
 
 		DefaultEntityMetaData metaData = new DefaultEntityMetaData("XrefTable");
-		metaData.addAttribute("id").setDataType(MolgenisFieldTypes.INT).setIdAttribute(true).setNillable(false);
+		metaData.addAttribute("id", ROLE_ID).setDataType(MolgenisFieldTypes.INT).setNillable(false);
 		metaData.addAttribute("xrefAttr").setDataType(MolgenisFieldTypes.XREF).setRefEntity(refMetaData)
 				.setNillable(false);
 
 		Repository refRepo = metaDataRepositories.addEntityMeta(refMetaData);
 		Repository repo = metaDataRepositories.addEntityMeta(metaData);
 
-		List<Entity> refEntityTableEntities = new ArrayList<>();
 		Entity refEntityTableEntity = new MapEntity("refAttr");
 		refEntityTableEntity.set("refAttr", "xref_value_1");
-		refEntityTableEntities.addAll(newArrayList(refEntityTableEntity));
 
-		List<Entity> xrefTableEntities = new ArrayList<>();
 		Entity xrefTableEntity = new MapEntity("xrefAttr");
 		xrefTableEntity.set("id", 1);
 		xrefTableEntity.set("xrefAttr", "xref_value_1");
-		xrefTableEntities.addAll(newArrayList(xrefTableEntity));
 
-		repo.deleteAll(); // cleanup
-		refRepo.deleteAll(); // cleanup
+		// Test delete
+		repo.deleteAll();
+		refRepo.deleteAll();
 	}
 
 	@Test
