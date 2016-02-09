@@ -1,4 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+ <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.molgenis</groupId>
@@ -7,8 +7,63 @@
 	</parent>
 	<artifactId>molgenis-core-ui</artifactId>
 	<packaging>jar</packaging>
+	
 	<build>
 		<plugins>
+			<!-- Bundle the javascript specified in webpack.config.js to target/generated-resources/js/dist -->
+			<plugin>
+				<groupId>com.github.eirslett</groupId>
+				<artifactId>frontend-maven-plugin</artifactId>
+				<version>0.0.27</version>
+				<executions>
+					<execution>
+						<id>install node and npm</id>
+						<goals>
+							<goal>install-node-and-npm</goal>
+						</goals>
+						<configuration>
+							<nodeVersion>v4.2.4</nodeVersion>
+							<npmVersion>2.14.15</npmVersion>
+						</configuration>
+					</execution>
+					<execution>
+						<id>npm install</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>update package.json version</id>
+						<goals>
+							<goal>gulp</goal>
+						</goals>
+						<configuration>
+							<arguments>update-version</arguments>
+						</configuration> 
+					</execution>
+					<execution>
+						<id>npm test</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<phase>test</phase>
+						<configuration>
+							<arguments>test</arguments>
+						</configuration>
+					</execution>
+        			<execution>
+						<id>webpack build</id>
+						<goals>
+							<goal>npm</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                        	<skip>${webpack.production}</skip>
+							<arguments>run-script build</arguments>                        
+                        </configuration>
+					</execution>
+    			</executions>
+			</plugin>			
 			<!-- compile XML schemas -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -47,149 +102,40 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- minify css/js -->
-			<plugin>
-				<groupId>com.samaxes.maven</groupId>
-				<artifactId>minify-maven-plugin</artifactId>
-				<executions>
-				    <execution>
-                        <id>default-minify</id>
-                    </execution>
-                    <execution>
-	                    <id>component-deps-merge</id>
-	                    <goals>
-	                        <goal>minify</goal>
-	                    </goals>
-	                    <configuration>
-	                        <charset>UTF-8</charset>
-	                        <webappSourceDir>${project.basedir}/src/main/resources</webappSourceDir>
-	                        <webappTargetDir>${project.build.directory}/generated-resources</webappTargetDir>
-	                        <cssEngine>YUI</cssEngine>
-	                        <cssSourceDir>css</cssSourceDir>
-	                        <cssSourceFiles>
-	                            <cssSourceFile>bootstrap.min.css</cssSourceFile>
-	                            <cssSourceFile>bootstrap-datetimepicker.min.css</cssSourceFile> <!-- DateTimePicker dependency -->
-	                            <cssSourceFile>jquery-ui-1.9.2.custom.min.css</cssSourceFile> <!-- jQEditRangeSlider dependency -->
-	                            <cssSourceFile>../../../../target/classes/css/select2.css</cssSourceFile> <!-- Select2 dependency, use minified file from default-minify execution -->
-	                            <cssSourceFile>iThing-min.css</cssSourceFile><!-- jQEditRangeSlider dependency -->
-	                        </cssSourceFiles>
-	                        <cssFinalFile>molgenis-bundle.min.css</cssFinalFile>
-	                        <jsEngine>CLOSURE</jsEngine>
-	                        <closureLanguage>ECMASCRIPT5_STRICT</closureLanguage>
-	                        <jsSourceDir>js</jsSourceDir>
-	                        <jsSourceFiles>
-	                            <jsSourceFile>jquery-2.1.1.min.js</jsSourceFile>
-	                            <jsSourceFile>bootstrap.min.js</jsSourceFile>
-	                            <jsSourceFile>underscore-min.js</jsSourceFile>
-	                            <jsSourceFile>jquery-ui-1.9.2.custom.min.js</jsSourceFile> <!-- JQRangeSlider dependency -->
-	                            <jsSourceFile>jquery.form.min.js</jsSourceFile> <!-- Form dependency -->
-	                            <jsSourceFile>jquery.cookie-1.4.1.min.js</jsSourceFile>
-	                            <jsSourceFile>ace/src-min-noconflict/ace.js</jsSourceFile> <!-- Ace dependency -->
-	                            <jsSourceFile>moment-with-locales.min.js</jsSourceFile> <!-- DateTimePicker dependency -->
-	                            <jsSourceFile>bootstrap-datetimepicker.min.js</jsSourceFile> <!-- DateTimePicker dependency -->
-	                            <jsSourceFile>jQEditRangeSlider-min.js</jsSourceFile> <!-- JQRangeSlider dependency -->
-	                            <jsSourceFile>../../../../target/classes/js/select2-patched.js</jsSourceFile> <!-- Select2 dependency, use minified file from default-minify execution -->
-	                            <jsSourceFile>URI.js</jsSourceFile>
-	                        </jsSourceFiles>
-	                        <jsFinalFile>molgenis-bundle.min.js</jsFinalFile>
-	                        <skipMerge>false</skipMerge>
-	                        <skipMinify>true</skipMinify>
-	                        <nosuffix>true</nosuffix>
-	                        <verbose>true</verbose>
-	                    </configuration>
-	                </execution>
-	                <execution>
-                        <id>component-css-merge-minify</id>
-                        <goals>
-                            <goal>minify</goal>
-                        </goals>
-                        <configuration>
-                            <charset>UTF-8</charset>
-                            <webappSourceDir>${project.basedir}/src/main/resources</webappSourceDir>
-                            <webappTargetDir>${project.build.directory}/generated-resources</webappTargetDir>
-                            <cssEngine>YUI</cssEngine>
-                            <cssSourceDir>css</cssSourceDir>
-                            <!-- Specify files one-by-one to preserve order -->
-                            <cssSourceFiles>
-                                <!-- Important: Update molgenis-header.ftl when modifying the list below -->
-                                <cssSourceFile>/component/wrapper/DateTimePicker.css</cssSourceFile>
-                                <cssSourceFile>/component/wrapper/JQRangeSlider.css</cssSourceFile>
-                                <cssSourceFile>/component/Checkbox.css</cssSourceFile>
-                                <cssSourceFile>/component/Radio.css</cssSourceFile>
-                                <cssSourceFile>/component/Table.css</cssSourceFile>
-                            </cssSourceFiles>
-                            <cssFinalFile>molgenis-component.min.css</cssFinalFile>
-                            <skipMerge>false</skipMerge>
-                            <skipMinify>false</skipMinify>
-                            <nosuffix>true</nosuffix>
-                            <verbose>true</verbose>
-                        </configuration>
-                    </execution>
-	                <execution>
-	                    <id>component-js-merge-minify</id>
-	                    <goals>
-	                        <goal>minify</goal>
-	                    </goals>
-	                    <configuration>
-	                        <charset>UTF-8</charset>
-	                        <webappSourceDir>${project.basedir}/src/main/resources</webappSourceDir>
-	                        <webappTargetDir>${project.build.directory}/generated-resources</webappTargetDir>
-	                        <jsEngine>CLOSURE</jsEngine>
-	                        <closureLanguage>ECMASCRIPT5_STRICT</closureLanguage>
-	                        <jsSourceDir>js</jsSourceDir>
-	                        <!-- Specify files one-by-one to preserve order -->
-	                        <jsSourceFiles>
-	                            <!-- Important: Update molgenis-header.ftl when modifying the list below -->
-	                            <jsSourceFile>/component/mixin/AttributeLoaderMixin.js</jsSourceFile>
-	                            <jsSourceFile>/component/mixin/DeepPureRenderMixin.js</jsSourceFile>
-	                            <jsSourceFile>/component/mixin/EntityInstanceLoaderMixin.js</jsSourceFile>
-	                            <jsSourceFile>/component/mixin/EntityLoaderMixin.js</jsSourceFile>
-	                            <jsSourceFile>/component/mixin/GroupMixin.js</jsSourceFile>
-	                            <jsSourceFile>/component/mixin/I18nStringsMixin.js</jsSourceFile>
-	                            <jsSourceFile>/component/mixin/ReactLayeredComponentMixin.js</jsSourceFile>
-	                            <jsSourceFile>/component/wrapper/Ace.js</jsSourceFile>
-	                            <jsSourceFile>/component/wrapper/DateTimePicker.js</jsSourceFile>
-	                            <jsSourceFile>/component/wrapper/JQRangeSlider.js</jsSourceFile>
-	                            <jsSourceFile>/component/wrapper/JQueryForm.js</jsSourceFile>
-	                            <jsSourceFile>/component/wrapper/Select2.js</jsSourceFile>
-	                            <jsSourceFile>/component/AggregateTable.js</jsSourceFile>
-	                            <jsSourceFile>/component/AlertMessage.js</jsSourceFile>
-	                            <jsSourceFile>/component/AttributeControl.js</jsSourceFile>
-	                            <jsSourceFile>/component/BoolControl.js</jsSourceFile>
-	                            <jsSourceFile>/component/Button.js</jsSourceFile>
-	                            <jsSourceFile>/component/CheckboxGroup.js</jsSourceFile>
-	                            <jsSourceFile>/component/CodeEditor.js</jsSourceFile>
-	                            <jsSourceFile>/component/DateControl.js</jsSourceFile>
-	                            <jsSourceFile>/component/Dialog.js</jsSourceFile>
-	                            <jsSourceFile>/component/EntitySelectBox.js</jsSourceFile>
-	                            <jsSourceFile>/component/Form.js</jsSourceFile>
-	                            <jsSourceFile>/component/FormControl.js</jsSourceFile>
-	                            <jsSourceFile>/component/FormControlGroup.js</jsSourceFile>
-	                            <jsSourceFile>/component/Icon.js</jsSourceFile>
-	                            <jsSourceFile>/component/Input.js</jsSourceFile>
-	                            <jsSourceFile>/component/LanguageSelectBox.js</jsSourceFile>
-	                            <jsSourceFile>/component/Modal.js</jsSourceFile>
-	                            <jsSourceFile>/component/Pager.js</jsSourceFile>
-	                            <jsSourceFile>/component/Popover.js</jsSourceFile>
-	                            <jsSourceFile>/component/Questionnaire.js</jsSourceFile>
-	                            <jsSourceFile>/component/RadioGroup.js</jsSourceFile>
-	                            <jsSourceFile>/component/RangeSlider.js</jsSourceFile>
-	                            <jsSourceFile>/component/SelectBox.js</jsSourceFile>
-	                            <jsSourceFile>/component/Spinner.js</jsSourceFile>
-	                            <jsSourceFile>/component/Table.js</jsSourceFile>
-	                            <jsSourceFile>/component/TextArea.js</jsSourceFile>
-	                        </jsSourceFiles>
-	                        <jsFinalFile>molgenis-component.min.js</jsFinalFile>
-	                        <skipMerge>false</skipMerge>
-	                        <skipMinify>false</skipMinify>
-	                        <nosuffix>true</nosuffix>
-	                        <verbose>true</verbose>
-	                    </configuration>
-	                </execution>
-	            </executions>
-			</plugin>
 		</plugins>
 	</build>
+	
+	<profiles>
+		<profile>
+			<id>production</id>
+			<properties>
+				<!-- This disables the development build. -->
+				<webpack.production>true</webpack.production>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.github.eirslett</groupId>
+						<artifactId>frontend-maven-plugin</artifactId>
+						<version>0.0.27</version>
+						<executions>
+		        			<execution>
+								<id>webpack production build</id>
+								<goals>
+									<goal>webpack</goal>
+		                        </goals>
+			        			<configuration>
+									<outputdir>target/classes/js/dist</outputdir>
+									<arguments>-p --config webpack.production.config.js</arguments>
+								</configuration>
+							</execution>
+		    			</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.molgenis</groupId>
