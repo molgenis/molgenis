@@ -21,17 +21,17 @@
                                     window.location.replace("?entity=${entityName}");
                                 }
                                 else{
-                                    container.html("<p>"+entry.progressMessage+"</p>");
+                                    container.html(entry.progressMessage);
                                 }
                             });
                 }, 1000);
         </script>
     </div>
+    <div class="col-md-12">
+        <div id="annotateRun"></div>
+    </div>
 </div>
 
-<div class="row">
-    <div id="annotateRun"></div>
-</div>
 <#else>
 <div class="row">
 	<div class="col-md-12" id="annotator-select-container">
