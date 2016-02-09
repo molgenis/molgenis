@@ -709,5 +709,6 @@
         <module>molgenis-questionnaires</module>
 		<module>molgenis-file</module>
 		<module>molgenis-catalogue</module>
+		<module>molgenis-integration-tests</module>
     </modules>
 </project>
