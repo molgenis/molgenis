@@ -12,7 +12,7 @@
 		<link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
 		<link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
 		<link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
-		<script src="<@resource_href "/js/dist/molgenis-react-components.js"/>"></script>
+		<script src="<@resource_href "/js/dist/molgenis-global-ui.js"/>"></script>
 		<script src="<@resource_href "/js/dist/molgenis-vendor-bundle.js"/>"></script>
 		<script src="<@resource_href "/js/dist/molgenis-global.js"/>"></script>
 		<script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
