@@ -49,7 +49,7 @@ import org.testng.annotations.Test;
 public class MappingServiceControllerTest extends AbstractTestNGSpringContextTests
 {
 	@InjectMocks
-	private MappingServiceController controller;
+	private MappingServiceController controller = new MappingServiceController();
 
 	@Mock
 	private MolgenisUserService molgenisUserService;
