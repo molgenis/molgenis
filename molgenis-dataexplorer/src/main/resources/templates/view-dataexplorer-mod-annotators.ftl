@@ -3,36 +3,50 @@
 <div class="row">
     <div class="col-md-12">
         This entity is currently being annotated, details listed below. This page will refresh once the annotators finished.
-    <script>
-        setInterval(
-                function ()
-                {
-                    molgenis.RestClient.prototype.getAsync('/api/v1/Job/', {'q' : [ {
-                                'field' : 'identifier',
-                                'operator' : 'EQUALS',
-                                'value' : '${annotationRun.identifier}'
-                            } ]},
-                            function(annotateRun) {
-                                var entry = annotateRun.items[0];
-                                var container = $('#annotateRun');
-                                container.html("");
-
-                                if(entry.status!=="RUNNING"){
-                                    window.location.replace("?entity=${entityName}");
-                                }
-                                else{
-                                    container.html(entry.progressMessage);
-                                }
-                            });
-                }, 1000);
-        </script>
-    </div>
-    <div class="col-md-12">
-        <div id="annotateRun"></div>
-    </div>
+     </div>
+    	<div class="col-md-12">
+        	<div id="annotateRun"></div>
+    	</div>
+	</div>
 </div>
-
+    <script>
+    	$(function (){
+	    	var progressPct = 100;
+	 		var ProgressBar = React.render(molgenis.ui.ProgressBar({
+	    	 	'progressPct' : progressPct,
+				'progressMessage' : 'Starting annotation run',    
+				'status' : 'primary',
+				'active' : true
+			}), $('#annotateRun')[0]);
+	        setInterval(
+	                function ()
+	                {
+	                    
+	                    molgenis.RestClient.prototype.getAsync('/api/v1/Job/', {'q' : [ {
+	                                'field' : 'identifier',
+	                                'operator' : 'EQUALS',
+	                                'value' : '${annotationRun.identifier}'
+	                            } ]},
+	                            function(annotateRun) {
+	                                var entry = annotateRun.items[0];
+	                                var container = $('#annotateRun');
+	
+	                                if(entry.status!=="RUNNING"){
+	             	                     window.location.replace("?entity=${entityName}");
+	                                }
+	                                else{
+	                                	if(ProgressBar && ProgressBar.isMounted()) {
+			    							ProgressBar.setProps({
+												'progressMessage' : entry.progressMessage
+							            	});
+		                                }
+	                                }
+	                            });
+	                }, 1000);
+    	});
+    </script>
 <#else>
+
 <div class="row">
 	<div class="col-md-12" id="annotator-select-container">
 		<form id="annotate-dataset-form" role="form" class="well">
