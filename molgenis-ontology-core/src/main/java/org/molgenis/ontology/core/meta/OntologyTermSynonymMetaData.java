@@ -16,10 +16,10 @@ public class OntologyTermSynonymMetaData extends DefaultEntityMetaData
 	private OntologyTermSynonymMetaData()
 	{
 		super(SIMPLE_NAME, OntologyPackage.getPackageInstance());
-		addAttributeMetaData(new DefaultAttributeMetaData(ID).setIdAttribute(true).setNillable(false).setVisible(false));
-
+		addAttributeMetaData(
+				new DefaultAttributeMetaData(ID).setIdAttribute(true).setNillable(false).setVisible(false));
 		DefaultAttributeMetaData ontologyTermSynonymAttr = new DefaultAttributeMetaData(ONTOLOGY_TERM_SYNONYM,
-				FieldTypeEnum.STRING).setNillable(false).setLabelAttribute(true);
+				FieldTypeEnum.TEXT).setNillable(false).setLabelAttribute(true);
 		addAttributeMetaData(ontologyTermSynonymAttr);
 	}
 }
