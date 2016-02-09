@@ -46,6 +46,9 @@
         <link rel="stylesheet" href="<@resource_href "/css/${app_settings.cssHref?html}"/>" type="text/css">
     </#if> 
 
+		<#-- Javascript resource for d3, must be imported before jQuery, else it will not work 
+		http://stackoverflow.com/questions/21381097/d3-is-not-defined-referenceerror -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8"></script>
         <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
 		<script src="<@resource_href "/js/es6-promise.min.js"/>"></script>
 		<script src="<@resource_href "/js/promise-done-6.1.0.min.js"/>"></script>
