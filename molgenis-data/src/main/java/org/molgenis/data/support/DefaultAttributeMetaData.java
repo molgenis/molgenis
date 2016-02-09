@@ -61,7 +61,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private boolean visible = true; // remove?
 	private boolean unique = false;
 	private boolean auto = false;
-	private Map<String, AttributeMetaData> attributePartsMap;
+	private Map<String, AttributeMetaData> attributePartsMap = new CaseInsensitiveLinkedHashMap<>();
 	private boolean aggregateable = false;
 	private Range range;
 	private String visibleExpression;
@@ -96,7 +96,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 
 	public DefaultAttributeMetaData(String newName, AttributeMetaData attributeMetaData)
 	{
-		this.name = attributeMetaData.getName();
+		this.name = newName;
 		this.fieldType = attributeMetaData.getDataType();
 		this.description = attributeMetaData.getDescription();
 		this.nillable = attributeMetaData.isNillable();
@@ -105,7 +105,16 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		EntityMetaData refEntity = attributeMetaData.getRefEntity();
 		this.refEntity = refEntity != null ? new DefaultEntityMetaData(refEntity) : null; // deep copy
 		this.expression = attributeMetaData.getExpression();
-		setLabel(attributeMetaData.getLabel());
+
+		if (attributeMetaData.getName().equals(attributeMetaData.getLabel()))
+		{
+			setLabel(newName);
+		}
+		else
+		{
+			setLabel(attributeMetaData.getLabel());
+		}
+
 		this.visible = attributeMetaData.isVisible();
 		this.unique = attributeMetaData.isUnique();
 		this.auto = attributeMetaData.isAuto();
