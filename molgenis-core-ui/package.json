@@ -5,7 +5,7 @@
   "scripts": {
   	"watch" : "webpack -d --watch",
     "build": "webpack -d",
-    "test": "webpack -d --config webpack.test.config.js && node ./target/test-classes/js/dist/test.bundle.js > target/tests.tap && cat target/tests.tap && jest",
+    "test": "webpack -d --config webpack.test.config.js && node ./target/test-classes/js/dist/test.bundle.js > target/tests.tap && cat target/tests.tap",
     "webpack-stats": "webpack --profile --json > target/json.stats"
   },
   "repository": {
@@ -56,7 +56,6 @@
     "file-loader": "^0.8.5",
     "fs": "0.0.2",
     "gulp": "^3.9.0",
-    "jest-cli": "*",
     "node-libs-browser": "^0.5.2",
     "null-loader": "^0.1.1",
     "pom-parser": "^1.1.0",
@@ -68,18 +67,6 @@
     "webpack": "^1.9.11",
     "webpack-dev-middleware": "^1.2.0",
     "webpack-hot-middleware": "^2.2.0"
-  },
-  "jest": {
-    "scriptPreprocessor": "<rootDir>/node_modules/babel-jest",
-    "unmockedModulePathPatterns": [
-      "<rootDir>/node_modules/react",
-      "<rootDir>/node_modules/react-dom",
-      "<rootDir>/node_modules/react-addons-test-utils",
-      "<rootDir>/node_modules/fbjs"
-    ],
-    "testPathDirs": [
-      "<rootDir>/src/test/javascript"
-    ]
   },
   "babel": {
     "presets": [
