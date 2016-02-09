@@ -29,17 +29,7 @@
     </scm>
     <developers/>
 
-    <profiles>
-        <!-- release profile (default) -->
-        <profile>
-            <id>release</id>
-            <properties>
-                <skip.delivery>true</skip.delivery>
-            </properties>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-        </profile>
+	<profiles>
         <!-- create runnable jar -->
         <profile>
             <id>create-delivery</id>
@@ -710,5 +700,6 @@
         <module>molgenis-questionnaires</module>
 		<module>molgenis-file</module>
 		<module>molgenis-catalogue</module>
-  </modules>
+		<module>molgenis-integration-tests</module>
+    </modules>
 </project>

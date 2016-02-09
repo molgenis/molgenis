@@ -329,6 +329,7 @@ public class DefaultEntity implements Entity
 		int result = 1;
 		result = prime * result + ((entityMetaData == null) ? 0 : entityMetaData.hashCode());
 		result = prime * result + ((getIdValue() == null) ? 0 : getIdValue().hashCode());
+		result = prime * result + ((values == null) ? 0 : values.hashCode());
 		return result;
 	}
 
@@ -349,6 +350,7 @@ public class DefaultEntity implements Entity
 		{
 			if (other.getIdValue() != null) return false;
 		}
+		if (hashCode() != other.hashCode()) return false;
 		else if (!getIdValue().equals(other.getIdValue())) return false;
 		return true;
 	}
