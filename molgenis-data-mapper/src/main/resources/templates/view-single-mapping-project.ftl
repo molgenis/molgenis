@@ -6,9 +6,6 @@
 
 <@header css js/>
 
-<script src="<@resource_href "/js/ace/src-min-noconflict/ace.js"/>" type="text/javascript" charset="utf-8"></script>
-<script src="<@resource_href "/js/ace/src-min-noconflict/ext-language_tools.js"/>" type="text/javascript" charset="utf-8"></script>
-
 <div class="row">
 	<div class="col-md-12">
 		<a href="${context_url}" class="btn btn-default btn-xs">
