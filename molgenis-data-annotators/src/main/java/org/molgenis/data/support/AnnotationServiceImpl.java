@@ -29,12 +29,36 @@ import com.google.common.collect.Lists;
  */
 
 @Component
-public class AnnotationServiceImpl implements AnnotationService
+public class AnnotationServiceImpl implements AnnotationService, ApplicationListener<ContextRefreshedEvent>
 {
 	private List<RepositoryAnnotator> annotators = null;
 
 	@Autowired
 	private ApplicationContext applicationContext;
+
+	@Autowired
+	private DataService dataService;
+
+	@Override
+	@RunAsSystem
+	public void onApplicationEvent(ContextRefreshedEvent event)
+	{
+		// check if there are annotators with a status running, this can only occur because of a shutdown of the server
+		// during an annotation run.
+		if (dataService.hasRepository(AnnotationJobMetaData.ENTITY_NAME))
+		{
+			Stream<Entity> runningAnnotations = dataService.findAll(AnnotationJobMetaData.ENTITY_NAME,
+					new QueryImpl().eq(AnnotationJobMetaData.STATUS, AnnotationJobMetaData.Status.RUNNING));
+			runningAnnotations.forEach(entity -> failRunningAnnotation(entity));
+		}
+	}
+
+	private void failRunningAnnotation(Entity entity)
+	{
+		entity.set(AnnotationJobMetaData.STATUS, AnnotationJobMetaData.Status.FAILED);
+		entity.set(AnnotationJobMetaData.PROGRESS_MESSAGE, "Annotation failed because MOLGENIS was restarted.");
+		dataService.update(AnnotationJobMetaData.ENTITY_NAME, entity);
+	}
 
 	@Override
 	public RepositoryAnnotator getAnnotatorByName(String annotatorName)

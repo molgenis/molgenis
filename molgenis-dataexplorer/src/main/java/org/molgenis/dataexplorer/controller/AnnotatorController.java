@@ -67,7 +67,7 @@ import static org.molgenis.dataexplorer.controller.AnnotatorController.URI;
 
 @Controller
 @RequestMapping(URI)
-public class AnnotatorController implements ApplicationListener<ContextRefreshedEvent>
+public class AnnotatorController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AnnotatorController.class);
 
@@ -95,24 +95,6 @@ public class AnnotatorController implements ApplicationListener<ContextRefreshed
 		this.triggerNameSalt = UUID.randomUUID().toString();
 		this.permissionSystemService = permissionSystemService;
 		this.userAccountService = userAccountService;
-	}
-
-	@Override
-	@RunAsSystem
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		// check if there are annotators with a status running, this can only occur because of a shutdown of the server
-		// during an annotation run.
-		Stream<Entity> runningAnnotations = dataService.findAll(AnnotationJobMetaData.ENTITY_NAME,
-				new QueryImpl().eq(AnnotationJobMetaData.STATUS, AnnotationJobMetaData.Status.RUNNING));
-		runningAnnotations.forEach(entity -> failRunningAnnotation(entity));
-	}
-
-	private void failRunningAnnotation(Entity entity)
-	{
-		entity.set(AnnotationJobMetaData.STATUS, AnnotationJobMetaData.Status.FAILED);
-		entity.set(AnnotationJobMetaData.PROGRESS_MESSAGE, "Annotation failed because MOLGENIS was restarted.");
-		dataService.update(AnnotationJobMetaData.ENTITY_NAME, entity);
 	}
 
 	/**
