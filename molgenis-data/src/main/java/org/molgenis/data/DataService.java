@@ -1,10 +1,15 @@
 package org.molgenis.data;
 
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.QueryImpl;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * DataService is a façade that manages data sources Entity names should be unique over all data sources.
@@ -381,4 +386,8 @@ public interface DataService extends Iterable<Repository>
 	 *            entity listener for a entity
 	 */
 	void removeEntityListener(String entityName, EntityListener entityListener);
+
+	Repository copyRepository(Repository repository, String newRepositoryId, String newRepositoryLabel);
+	Repository copyRepository(Repository repository, String newRepositoryId, String newRepositoryLabel, Query query);
+
 }

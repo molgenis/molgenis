@@ -10,7 +10,7 @@
  * @param status
  *            The status of the job, will affect bar color
  * @param active
- *            Wether the bar should be animated or not
+ *            Whether the bar should be animated or not
  * 
  * @exports ProgressBarClass, ProgressBar factory
  */
@@ -20,7 +20,7 @@ import DeepPureRenderMixin from './mixin/DeepPureRenderMixin';
 
 var div = React.DOM.div;
 
-var ProgressBarClass = React.createClass({
+var ProgressBar = React.createClass({
 	mixins: [DeepPureRenderMixin],
 	displayName: 'ProgressBar',
 	propTypes: {
@@ -30,8 +30,8 @@ var ProgressBarClass = React.createClass({
 		active: React.PropTypes.bool
 	},
 	render: function() {
-		return <div className="progress">
-			<div className={'progress-bar progress-bar-' + this.props.status + (this.props.active ? ' progress-bar-striped active' : '')} 
+		return <div className="progress background-lightgrey">
+			<div className={'progress-bar progress-bar-' + this.props.status + (this.props.active ? ' progress-bar-striped active' : '')}
 				role="progressbar" style={{minWidth: '2em', 'width': this.props.progressPct+ '%'}}>
 		    		{this.props.progressMessage}
 		    </div>
@@ -39,5 +39,5 @@ var ProgressBarClass = React.createClass({
 	}
 });
 
-export { ProgressBarClass };
-export default React.createFactory(ProgressBarClass);
+export { ProgressBar };
+export default React.createFactory(ProgressBar);

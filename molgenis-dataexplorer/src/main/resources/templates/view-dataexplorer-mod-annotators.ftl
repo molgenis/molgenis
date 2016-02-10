@@ -1,4 +1,54 @@
 <#include "resource-macros.ftl">
+<#if annotationRun??>
+<div class="row">
+    <div class="col-md-12">
+        This entity is currently being annotated, details listed below. This page will refresh once the annotators finished.
+     </div>
+    	<div class="col-md-12">
+        	<div id="annotateRun"></div>
+    	</div>
+	</div>
+</div>
+    <script>
+    	$(function (){
+	 		var ProgressBar = React.render(molgenis.ui.ProgressBar({
+	    	 	'progressPct' : 0,
+				'progressMessage' : 'Starting annotation run',    
+				'status' : 'info',
+				'active' : false
+			}), $('#annotateRun')[0]);
+	        setInterval(
+	                function ()
+	                {
+	                    molgenis.RestClient.prototype.getAsync('/api/v1/AnnotationJobMetaData/', {'q' : [ {
+	                                'field' : 'identifier',
+	                                'operator' : 'EQUALS',
+	                                'value' : '${annotationRun.identifier}'
+	                            } ]},
+	                            function(annotateRun) {
+	                                var entry = annotateRun.items[0];
+	                                var container = $('#annotateRun');
+	
+	                                if(entry.status!=="RUNNING"){
+	             	                     window.location.replace("?entity=${entityName}");
+	                                }
+	                                else{
+	                                	if(ProgressBar && ProgressBar.isMounted()) {
+                                            var progress = ((entry.progressInt/entry.progressMax)*100)
+                                            console.log(entry.progressMessage);
+                                            console.log(progress);
+			    							ProgressBar.setProps({
+												'progressMessage' : entry.progressMessage,
+                                                'progressPct' : progress
+							            	});
+		                                }
+	                                }
+	                            });
+	                }, 1000);
+    	});
+    </script>
+<#else>
+
 <div class="row">
 	<div class="col-md-12" id="annotator-select-container">
 		<form id="annotate-dataset-form" role="form" class="well">
@@ -77,7 +127,7 @@
         </div>
     </div>
 </div>
-
+</#if>
 
 <script id="annotator-template" type="text/x-handlebars-template">
 	{{#equal this.enabled 'true'}}
@@ -157,7 +207,11 @@
     </div>
 </script>
 
+
 <script>
+
+
+
 	$.when($.ajax("<@resource_href "/js/dataexplorer-annotators.js"/>", {'cache': true}))
 		.then(function() {
 			molgenis.dataexplorer.annotators.getAnnotatorSelectBoxes();
