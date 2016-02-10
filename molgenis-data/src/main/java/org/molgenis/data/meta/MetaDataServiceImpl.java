@@ -451,12 +451,24 @@ public class MetaDataServiceImpl implements MetaDataService
 		// Create repositories from EntityMetaData in EntityMetaData repo
 		for (EntityMetaData emd : entityMetaDataRepository.getMetaDatas())
 		{
-			if (!emd.isAbstract() && !dataService.hasRepository(emd.getName()))
+			if (!emd.isAbstract() && !dataService.hasRepository(emd.getName()) && !"VIEW".equals(emd.getBackend()))
 			{
 				RepositoryCollection col = backends.get(emd.getBackend());
 				if (col == null) throw new MolgenisDataException("Unknown backend [" + emd.getBackend() + "]");
 				Repository repo = col.addEntityMeta(emd);
 				dataService.addRepository(repo);
+			}
+		}
+
+		// VIEWS: Create repositories from EntityMetaData in EntityMetaData repo
+		for (EntityMetaData emd : entityMetaDataRepository.getMetaDatas())
+		{
+			if ("VIEW".equals(emd.getBackend()))
+			{
+				RepositoryCollection col = backends.get(emd.getBackend());
+				if (col == null) throw new MolgenisDataException("Unknown backend [" + emd.getBackend() + "]");
+				Repository repo = col.addEntityMeta(emd);
+				dataService.addRepository(repo); // TODO JJ
 			}
 		}
 
