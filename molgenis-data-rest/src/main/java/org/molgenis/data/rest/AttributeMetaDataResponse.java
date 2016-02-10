@@ -10,6 +10,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Range;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.security.core.MolgenisPermissionService;
 
 import com.google.common.base.Function;
@@ -41,24 +42,25 @@ public class AttributeMetaDataResponse
 	private String visibleExpression;
 	private String validationExpression;
 
-	public AttributeMetaDataResponse(String entityParentName, AttributeMetaData attr,
-			MolgenisPermissionService permissionService, DataService dataService)
+	public AttributeMetaDataResponse(String entityParentName, EntityMetaData entityMeta, AttributeMetaData attr,
+			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService)
 	{
-		this(entityParentName, attr, null, null, permissionService, dataService);
+		this(entityParentName, entityMeta, attr, null, null, permissionService, dataService, languageService);
 	}
 
 	/**
 	 * 
 	 * @param entityParentName
+	 * @param entityMeta
 	 * @param attr
 	 * @param attributesSet
 	 *            set of lowercase attribute names to include in response
 	 * @param attributeExpandsSet
 	 *            set of lowercase attribute names to expand in response
 	 */
-	public AttributeMetaDataResponse(final String entityParentName, AttributeMetaData attr, Set<String> attributesSet,
-			final Map<String, Set<String>> attributeExpandsSet, MolgenisPermissionService permissionService,
-			DataService dataService)
+	public AttributeMetaDataResponse(final String entityParentName, EntityMetaData entityMeta, AttributeMetaData attr,
+			Set<String> attributesSet, final Map<String, Set<String>> attributeExpandsSet,
+			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService)
 	{
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestController.BASE_URI, entityParentName, attrName);
@@ -77,13 +79,13 @@ public class AttributeMetaDataResponse
 
 		if (attributesSet == null || attributesSet.contains("label".toLowerCase()))
 		{
-			this.label = attr.getLabel();
+			this.label = attr.getLabel(languageService.getCurrentUserLanguageCode());
 		}
 		else this.label = null;
 
 		if (attributesSet == null || attributesSet.contains("description".toLowerCase()))
 		{
-			this.description = attr.getDescription();
+			this.description = attr.getDescription(languageService.getCurrentUserLanguageCode());
 		}
 		else this.description = null;
 
@@ -112,16 +114,19 @@ public class AttributeMetaDataResponse
 			{
 				Set<String> subAttributesSet = attributeExpandsSet.get("refEntity".toLowerCase());
 				this.refEntity = refEntity != null ? new EntityMetaDataResponse(refEntity, subAttributesSet,
-						Collections.singletonMap("attributes".toLowerCase(), null), permissionService, dataService) : null;
+						Collections.singletonMap("attributes".toLowerCase(), null), permissionService, dataService,
+						languageService) : null;
 			}
 			else
 			{
-				this.refEntity = refEntity != null ? new Href(Href.concatMetaEntityHref(RestController.BASE_URI,
-						refEntity.getName()), String.format("%s/%s", RestController.BASE_URI, refEntity.getName())) : null; // FIXME
-																															// apply
-																															// Href
-																															// escaping
-																															// fix
+				this.refEntity = refEntity != null
+						? new Href(Href.concatMetaEntityHref(RestController.BASE_URI, refEntity.getName()),
+								String.format("%s/%s", RestController.BASE_URI, refEntity.getName()))
+						: null; // FIXME
+								// apply
+								// Href
+								// escaping
+								// fix
 			}
 		}
 		else this.refEntity = null;
@@ -129,8 +134,8 @@ public class AttributeMetaDataResponse
 		if (attributesSet == null || attributesSet.contains("attributes".toLowerCase()))
 		{
 			Iterable<AttributeMetaData> attributeParts = attr.getAttributeParts();
-			this.attributes = attributeParts != null ? Lists.newArrayList(Iterables.transform(attributeParts,
-					new Function<AttributeMetaData, Object>()
+			this.attributes = attributeParts != null
+					? Lists.newArrayList(Iterables.transform(attributeParts, new Function<AttributeMetaData, Object>()
 					{
 
 						@Override
@@ -140,9 +145,9 @@ public class AttributeMetaDataResponse
 									&& attributeExpandsSet.containsKey("attributes".toLowerCase()))
 							{
 								Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
-								return new AttributeMetaDataResponse(entityParentName, attributeMetaData,
+								return new AttributeMetaDataResponse(entityParentName, entityMeta, attributeMetaData,
 										subAttributesSet, Collections.singletonMap("refEntity".toLowerCase(), null),
-										permissionService, dataService);
+										permissionService, dataService, languageService);
 							}
 							else
 							{
@@ -180,7 +185,7 @@ public class AttributeMetaDataResponse
 
 		if (attributesSet == null || attributesSet.contains("labelAttribute".toLowerCase()))
 		{
-			this.labelAttribute = attr.isLabelAttribute();
+			this.labelAttribute = attr.equals(entityMeta.getLabelAttribute());
 		}
 		else this.labelAttribute = null;
 
@@ -192,7 +197,7 @@ public class AttributeMetaDataResponse
 
 		if (attributesSet == null || attributesSet.contains("lookupAttribute".toLowerCase()))
 		{
-			this.lookupAttribute = attr.isLookupAttribute();
+			this.lookupAttribute = entityMeta.getLookupAttribute(attr.getName()) != null;
 		}
 		else this.lookupAttribute = null;
 

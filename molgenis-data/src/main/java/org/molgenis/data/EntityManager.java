@@ -1,5 +1,7 @@
 package org.molgenis.data;
 
+import java.util.stream.Stream;
+
 /**
  * Entity manager responsible for creating entity references and resolving references of reference attributes.
  */
@@ -45,7 +47,7 @@ public interface EntityManager
 	 * @param fetch
 	 * @return
 	 */
-	Iterable<Entity> resolveReferences(EntityMetaData entityMeta, Iterable<Entity> entities, Fetch fetch);
+	Stream<Entity> resolveReferences(EntityMetaData entityMeta, Stream<Entity> entities, Fetch fetch);
 
 	/**
 	 * Converts entity to entity of the given class

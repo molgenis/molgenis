@@ -2,12 +2,12 @@ package org.molgenis.data.support;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -42,7 +42,7 @@ public class DefaultEntityTest
 		MockitoAnnotations.initMocks(this);
 
 		refEmd = new DefaultEntityMetaData("refEntity");
-		refEmd.addAttributeMetaData(new DefaultAttributeMetaData("id").setIdAttribute(true));
+		refEmd.addAttributeMetaData(new DefaultAttributeMetaData("id"), ROLE_ID);
 
 		refEntity1 = new DefaultEntity(refEmd, dataService);
 		refEntity1.set("id", "test");
@@ -54,7 +54,7 @@ public class DefaultEntityTest
 		when(dataService.findOne("refEntity", "test2")).thenReturn(refEntity2);
 
 		emd = new DefaultEntityMetaData("Entity");
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("id").setIdAttribute(true));
+		emd.addAttributeMetaData(new DefaultAttributeMetaData("id"), ROLE_ID);
 		emd.addAttributeMetaData(new DefaultAttributeMetaData("xdatetime", FieldTypeEnum.DATE_TIME));
 		emd.addAttributeMetaData(new DefaultAttributeMetaData("xref", FieldTypeEnum.XREF).setRefEntity(refEmd));
 		emd.addAttributeMetaData(new DefaultAttributeMetaData("mref", FieldTypeEnum.MREF).setRefEntity(refEmd));
@@ -133,12 +133,13 @@ public class DefaultEntityTest
 	public void getAttributeNames()
 	{
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
+		AttributeMetaData attr1 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr1").getMock();
+		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(attr0, attr1));
 		DataService dataService = mock(DataService.class);
 
 		DefaultEntity entity = new DefaultEntity(entityMeta, dataService);
-		List<String> attrNames = Arrays.asList("attr0", "attr1");
-		when(entityMeta.getAtomicAttributeNames()).thenReturn(attrNames);
-		assertEquals(Lists.newArrayList(entity.getAttributeNames()), attrNames);
+		assertEquals(Lists.newArrayList(entity.getAttributeNames()), Arrays.asList("attr0", "attr1"));
 	}
 
 	@Test

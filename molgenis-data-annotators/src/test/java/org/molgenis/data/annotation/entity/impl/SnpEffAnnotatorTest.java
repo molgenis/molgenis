@@ -2,6 +2,7 @@ package org.molgenis.data.annotation.entity.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
@@ -57,11 +58,10 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 				MolgenisFieldTypes.FieldTypeEnum.STRING);
 		AttributeMetaData attributeMetaDataAlt = new DefaultAttributeMetaData(VcfRepository.ALT,
 				MolgenisFieldTypes.FieldTypeEnum.STRING);
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom, ROLE_ID);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataRef);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataAlt);
-		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
 
 		Entity entity1 = new MapEntity(metaDataCanAnnotate);
 		entity1.set(VcfRepository.CHROM, "1");
@@ -219,8 +219,8 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 			e.printStackTrace();
 		}
 
-		Iterator<Entity> results = snpEffRepositoryAnnotator.annotateRepository(entities, new File(
-				"src/test/resources/test-edgecases.vcf"));
+		Iterator<Entity> results = snpEffRepositoryAnnotator.annotateRepository(entities,
+				new File("src/test/resources/test-edgecases.vcf"));
 		int size = Iterators.size(results);
 		assertEquals(size, 14);
 	}

@@ -279,13 +279,13 @@
                     else{
                         info.setTitle("Chromosome:"+f.segment+" Position:"+ f.min);
                     }
-                }
 
-                var entityReportLink = $('<a href="javascript:void(0)">Show details</a>');
-                entityReportLink.click(function () {
-                	onRowInspect({id:f.id, name:getEntity().name});
-                });
-                info.add("", entityReportLink[0]);
+					var entityReportLink = $('<a href="javascript:void(0)">Show details</a>');
+					entityReportLink.click(function () {
+						onRowInspect({id:f.id, name:getEntity().name});
+					});
+					info.add("", entityReportLink[0]);
+				}
             }
             featureInfoMap[info.tier.dasSource.name + f.id + f.label] = info;
         }
@@ -360,8 +360,16 @@
 	 * @memberOf molgenis.dataexplorer.data
 	 */
 	$(function() {
+		$(document).off('.data');
+		
+		$(document).on('changeModule.data', function(e, mod) {
+			if (mod === 'data') {
+				molgenis.dataexplorer.data.createDataTable();
+			}
+		});	
+		
 		$(document).on('changeAttributeSelection.data', function(e, data) {
-			if(Table) {
+			if(Table && Table.isMounted() && (molgenis.dataexplorer.getSelectedModule() == 'data')) {
 				var tableAttrs = Table.state.attrs;
 				var treeAttrs = data.attributesTree;
 				for(var attr in treeAttrs){
@@ -394,28 +402,30 @@
 					genomeBrowser.setLocation(chr, viewStart, viewEnd);
 				}
 			}
-
-			if(molgenis.dataexplorer.settings["genomebrowser"] !== 'false'){
-				// TODO implement elegant solution for genome browser specific code
-				$.each(data.filters, function() {
-					if(this.getComplexFilterElements && this.getComplexFilterElements()[0]){
-						if(this.attribute === genomebrowserStartAttribute){
-							setLocation(genomeBrowser.chr,
-									parseInt(this.getComplexFilterElements()[0].simpleFilter.fromValue),
-									parseInt(this.getComplexFilterElements()[0].simpleFilter.toValue));
+			
+			if (molgenis.dataexplorer.getSelectedModule() == 'data') {	
+				if(molgenis.dataexplorer.settings["genomebrowser"] !== 'false'){
+					// TODO implement elegant solution for genome browser specific code
+					$.each(data.filters, function() {
+						if(this.getComplexFilterElements && this.getComplexFilterElements()[0]){
+							if(this.attribute === genomebrowserStartAttribute){
+								setLocation(genomeBrowser.chr,
+										parseInt(this.getComplexFilterElements()[0].simpleFilter.fromValue),
+										parseInt(this.getComplexFilterElements()[0].simpleFilter.toValue));
+							}
+							else if(this.attribute === genomebrowserChromosomeAttribute){
+								setLocation(this.getComplexFilterElements()[0].simpleFilter.getValues()[0],
+										genomeBrowser.viewStart,
+										genomeBrowser.viewEnd);
+							}
 						}
-						else if(this.attribute === genomebrowserChromosomeAttribute){
-							setLocation(this.getComplexFilterElements()[0].simpleFilter.getValues()[0],
-									genomeBrowser.viewStart,
-									genomeBrowser.viewEnd);
-						}
-					}
-				});
+					});
+				}
 			}
 		});
 
 		$(document).on('changeQuery.data', function(e, query) {
-			if(Table) {
+			if(Table && Table.isMounted() && (molgenis.dataexplorer.getSelectedModule() == 'data')) {
 				Table.setProps({
 					query : query
 				});

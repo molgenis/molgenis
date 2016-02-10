@@ -1,10 +1,9 @@
 package org.molgenis.data.rest.v2;
 
+import static org.molgenis.data.rest.v2.AttributeMetaDataResponseV2.filterAttributes;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.Queue;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -12,6 +11,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.rest.Href;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
@@ -19,10 +19,8 @@ import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Queues;
 
 class EntityMetaDataResponseV2
 {
@@ -40,14 +38,15 @@ class EntityMetaDataResponseV2
 	 * Is this user allowed to add/update/delete entities of this type?
 	 */
 	private final Boolean writable;
+	private String languageCode;
 
 	/**
 	 * @param meta
 	 */
 	public EntityMetaDataResponseV2(EntityMetaData meta, MolgenisPermissionService permissionService,
-			DataService dataService)
+			DataService dataService, LanguageService languageService)
 	{
-		this(meta, null, permissionService, dataService);
+		this(meta, null, permissionService, dataService, languageService);
 	}
 
 	/**
@@ -57,51 +56,18 @@ class EntityMetaDataResponseV2
 	 *            set of lowercase attribute names to include in response
 	 */
 	public EntityMetaDataResponseV2(EntityMetaData meta, Fetch fetch, MolgenisPermissionService permissionService,
-			DataService dataService)
+			DataService dataService, LanguageService languageService)
 	{
 		String name = meta.getName();
 		this.href = Href.concatMetaEntityHrefV2(BASE_URI, name);
 		this.hrefCollection = String.format("%s/%s", BASE_URI, name); // FIXME apply Href escaping fix
 
 		this.name = name;
-		this.description = meta.getDescription();
-		this.label = meta.getLabel();
+		this.description = meta.getDescription(languageService.getCurrentUserLanguageCode());
+		this.label = meta.getLabel(languageService.getCurrentUserLanguageCode());
 
 		// filter attribute parts
-		Iterable<AttributeMetaData> filteredAttrs = fetch != null
-				? Iterables.filter(meta.getAttributes(), new Predicate<AttributeMetaData>()
-				{
-					@Override
-					public boolean apply(AttributeMetaData attr)
-					{
-						// fetch only contains compound attributes, the REST API meta response contains a tree of
-						// attributes. the algorithm below determines whether or not to include this compound attribute.
-						boolean keep;
-						if (attr.getDataType().getEnumType() == FieldTypeEnum.COMPOUND)
-						{
-							keep = false;
-							Queue<AttributeMetaData> queue = Queues.newConcurrentLinkedQueue(attr.getAttributeParts());
-							for (Iterator<AttributeMetaData> it = queue.iterator(); it.hasNext();)
-							{
-								AttributeMetaData attrPart = it.next();
-								if (attrPart.getDataType().getEnumType() == FieldTypeEnum.COMPOUND)
-								{
-									queue.addAll(Lists.newArrayList(attrPart.getAttributeParts()));
-								}
-								if (fetch.hasField(attrPart))
-								{
-									keep = true;
-									break;
-								}
-							}
-						}
-						else
-						{
-							keep = fetch.hasField(attr.getName());
-						}
-						return keep;
-					}
-				}) : meta.getAttributes();
+		Iterable<AttributeMetaData> filteredAttrs = filterAttributes(fetch, meta.getAttributes());
 
 		this.attributes = Lists.newArrayList(
 				Iterables.transform(filteredAttrs, new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
@@ -112,22 +78,32 @@ class EntityMetaDataResponseV2
 						Fetch subAttrFetch;
 						if (fetch != null)
 						{
-							subAttrFetch = fetch.getFetch(attr);
+							if (attr.getDataType().getEnumType() == FieldTypeEnum.COMPOUND)
+							{
+								subAttrFetch = fetch;
+							}
+							else
+							{
+								subAttrFetch = fetch.getFetch(attr);
+							}
 						}
 						else if (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
 						{
-							subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr);
+							subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr,
+									languageCode);
 						}
 						else
 						{
 							subAttrFetch = null;
 						}
-						return new AttributeMetaDataResponseV2(name, attr, subAttrFetch, permissionService,
-								dataService);
+						return new AttributeMetaDataResponseV2(name, meta, attr, subAttrFetch, permissionService,
+								dataService, languageService);
 					}
 				}));
 
-		AttributeMetaData labelAttribute = meta.getLabelAttribute();
+		languageCode = languageService.getCurrentUserLanguageCode();
+
+		AttributeMetaData labelAttribute = meta.getLabelAttribute(languageCode);
 		this.labelAttribute = labelAttribute != null ? labelAttribute.getName() : null;
 
 		AttributeMetaData idAttribute = meta.getIdAttribute();
@@ -204,4 +180,10 @@ class EntityMetaDataResponseV2
 	{
 		return writable;
 	}
+
+	public String getLanguageCode()
+	{
+		return languageCode;
+	}
+
 }

@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +60,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.Sort;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.DefaultEntityCollection;
@@ -131,11 +133,13 @@ public class RestController
 	private final MolgenisPermissionService molgenisPermissionService;
 	private final MolgenisRSQL molgenisRSQL;
 	private final RestService restService;
+	private final LanguageService languageService;
 
 	@Autowired
 	public RestController(DataService dataService, TokenService tokenService,
 			AuthenticationManager authenticationManager, MolgenisPermissionService molgenisPermissionService,
-			ResourceFingerprintRegistry resourceFingerprintRegistry, MolgenisRSQL molgenisRSQL, RestService restService)
+			ResourceFingerprintRegistry resourceFingerprintRegistry, MolgenisRSQL molgenisRSQL, RestService restService,
+			LanguageService languageService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.tokenService = requireNonNull(tokenService);
@@ -143,6 +147,7 @@ public class RestController
 		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
 		this.molgenisRSQL = requireNonNull(molgenisRSQL);
 		this.restService = requireNonNull(restService);
+		this.languageService = requireNonNull(languageService);
 	}
 
 	/**
@@ -182,7 +187,7 @@ public class RestController
 
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 		return new EntityMetaDataResponse(meta, attributeSet, attributeExpandSet, molgenisPermissionService,
-				dataService);
+				dataService, languageService);
 	}
 
 	/**
@@ -203,7 +208,7 @@ public class RestController
 
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 		return new EntityMetaDataResponse(meta, attributesSet, attributeExpandSet, molgenisPermissionService,
-				dataService);
+				dataService, languageService);
 	}
 
 	/**
@@ -478,12 +483,19 @@ public class RestController
 
 			if (q.getPageSize() > EntityCollectionRequest.MAX_ROWS)
 			{
-				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Num exceeded the maximum of "
-						+ EntityCollectionRequest.MAX_ROWS + " rows");
+				resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+						"Num exceeded the maximum of " + EntityCollectionRequest.MAX_ROWS + " rows");
 				return null;
 			}
 
-			entities = dataService.findAll(entityName, q);
+			entities = new Iterable<Entity>()
+			{
+				@Override
+				public Iterator<Entity> iterator()
+				{
+					return dataService.findAll(entityName, q).iterator();
+				}
+			};
 		}
 		catch (ConversionFailedException | RSQLParserException | UnknownAttributeException | IllegalArgumentException
 				| UnsupportedOperationException | UnknownEntityException e)
@@ -657,14 +669,14 @@ public class RestController
 		AttributeMetaData attr = entityMetaData.getAttribute(attributeName);
 		if (attr == null)
 		{
-			throw new UnknownAttributeException("Attribute '" + attributeName + "' of entity '" + entityName
-					+ "' does not exist");
+			throw new UnknownAttributeException(
+					"Attribute '" + attributeName + "' of entity '" + entityName + "' does not exist");
 		}
 
 		if (attr.isReadonly())
 		{
-			throw new MolgenisDataAccessException("Attribute '" + attributeName + "' of entity '" + entityName
-					+ "' is readonly");
+			throw new MolgenisDataAccessException(
+					"Attribute '" + attributeName + "' of entity '" + entityName + "' is readonly");
 		}
 
 		Object value = this.restService.toEntityValue(attr, paramValue);
@@ -1049,8 +1061,8 @@ public class RestController
 		AttributeMetaData attributeMetaData = meta.getAttribute(attributeName);
 		if (attributeMetaData != null)
 		{
-			return new AttributeMetaDataResponse(entityName, attributeMetaData, attributeSet, attributeExpandSet,
-					molgenisPermissionService, dataService);
+			return new AttributeMetaDataResponse(entityName, meta, attributeMetaData, attributeSet, attributeExpandSet,
+					molgenisPermissionService, dataService, languageService);
 		}
 		else
 		{
@@ -1111,7 +1123,7 @@ public class RestController
 
 				EntityPager pager = new EntityPager(request.getStart(), request.getNum(), (long) count, mrefEntities);
 				return new EntityCollectionResponse(pager, refEntityMaps, attrHref, null, molgenisPermissionService,
-						dataService);
+						dataService, languageService);
 			case CATEGORICAL:
 			case XREF:
 				Map<String, Object> entityXrefAttributeMap = getEntityAsMap((Entity) entity.get(refAttributeName),
@@ -1153,7 +1165,15 @@ public class RestController
 		List<QueryRule> queryRules = request.getQ() == null ? Collections.<QueryRule> emptyList() : request.getQ();
 		Query q = new QueryImpl(queryRules).pageSize(request.getNum()).offset(request.getStart()).sort(sort);
 
-		Iterable<Entity> it = dataService.findAll(entityName, q);
+		Iterable<Entity> it = new Iterable<Entity>()
+		{
+
+			@Override
+			public Iterator<Entity> iterator()
+			{
+				return dataService.findAll(entityName, q).iterator();
+			}
+		};
 		Long count = repository.count(q);
 		EntityPager pager = new EntityPager(request.getStart(), request.getNum(), count, it);
 
@@ -1164,7 +1184,7 @@ public class RestController
 		}
 
 		return new EntityCollectionResponse(pager, entities, BASE_URI + "/" + entityName, meta,
-				molgenisPermissionService, dataService);
+				molgenisPermissionService, dataService, languageService);
 	}
 
 	// Transforms an entity to a Map so it can be transformed to json
@@ -1195,37 +1215,30 @@ public class RestController
 					if (attributeExpandsSet != null && attributeExpandsSet.containsKey(attrName.toLowerCase()))
 					{
 						Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
-						entityMap.put(attrName, new AttributeMetaDataResponse(meta.getName(), attr, subAttributesSet,
-								null, molgenisPermissionService, dataService));
+						entityMap.put(attrName, new AttributeMetaDataResponse(meta.getName(), meta, attr,
+								subAttributesSet, null, molgenisPermissionService, dataService, languageService));
 					}
 					else
 					{
-						entityMap.put(
-								attrName,
-								Collections.singletonMap(
-										"href",
-										Href.concatAttributeHref(RestController.BASE_URI, meta.getName(),
-												entity.getIdValue(), attrName)));
+						entityMap.put(attrName,
+								Collections.singletonMap("href", Href.concatAttributeHref(RestController.BASE_URI,
+										meta.getName(), entity.getIdValue(), attrName)));
 					}
 				}
 				else if (attrType == DATE)
 				{
 					Date date = entity.getDate(attrName);
-					entityMap
-							.put(attrName,
-									date != null ? new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATE)
-											.format(date) : null);
+					entityMap.put(attrName, date != null
+							? new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATE).format(date) : null);
 				}
 				else if (attrType == DATE_TIME)
 				{
 					Date date = entity.getDate(attrName);
-					entityMap
-							.put(attrName,
-									date != null ? new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME)
-											.format(date) : null);
+					entityMap.put(attrName, date != null
+							? new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME).format(date) : null);
 				}
-				else if (attrType != XREF && attrType != CATEGORICAL && attrType != MREF
-						&& attrType != CATEGORICAL_MREF && attrType != FILE)
+				else if (attrType != XREF && attrType != CATEGORICAL && attrType != MREF && attrType != CATEGORICAL_MREF
+						&& attrType != FILE)
 				{
 					entityMap.put(attrName, entity.get(attr.getName()));
 				}
@@ -1260,9 +1273,10 @@ public class RestController
 					EntityPager pager = new EntityPager(0, new EntityCollectionRequest().getNum(),
 							(long) refEntityMaps.size(), mrefEntities);
 
-					EntityCollectionResponse ecr = new EntityCollectionResponse(pager, refEntityMaps,
-							Href.concatAttributeHref(RestController.BASE_URI, meta.getName(), entity.getIdValue(),
-									attrName), null, molgenisPermissionService, dataService);
+					EntityCollectionResponse ecr = new EntityCollectionResponse(pager,
+							refEntityMaps, Href.concatAttributeHref(RestController.BASE_URI, meta.getName(),
+									entity.getIdValue(), attrName),
+							null, molgenisPermissionService, dataService, languageService);
 
 					entityMap.put(attrName, ecr);
 				}
@@ -1292,8 +1306,8 @@ public class RestController
 	 */
 	private Set<String> toAttributeSet(String[] attributes)
 	{
-		return attributes != null && attributes.length > 0 ? Sets.newHashSet(Iterables.transform(
-				Arrays.asList(attributes), new Function<String, String>()
+		return attributes != null && attributes.length > 0
+				? Sets.newHashSet(Iterables.transform(Arrays.asList(attributes), new Function<String, String>()
 				{
 					@Override
 					public String apply(String attribute)

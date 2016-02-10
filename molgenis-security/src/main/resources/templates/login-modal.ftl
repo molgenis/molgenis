@@ -1,4 +1,5 @@
 <#-- Bootstrap login modal -->
+<#assign googleSignIn = app_settings.googleSignIn && app_settings.signUp && !app_settings.signUpModeration>
 <div id="login-modal" class="modal"<#if disableClose?? && disableClose == "true"><#else> tabindex="-1"</#if> aria-labelledby="login-modal-label" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -9,37 +10,52 @@
                 <h4 class="modal-title" id="login-modal-label">Sign in</h4>
             </div>
             <div class="modal-body">
+            <#if googleSignIn>
                 <div class="row">
-                    <div class="col-md-8 col-md-offset-2">
-                        <div class="row">
-                            <#-- login form -->
-                            <form id="login-form" class="form-horizontal" role="form" method="POST" action="/login">
-                                <div class="form-group">
-                                    <label class="col-md-3 control-label" for="loginUsername">Username</label>
-                                    <div class="col-md-9">
-                                        <input id="username-field" type="text" class="form-control" name="username" required>
-                                    </div>
+                    <div class="col-md-5">
+                        <form id="login-google-form" role="form" method="POST" action="/login/google">
+                            <input type="hidden" id="google-id-token" name="id_token" value=""/>
+                            <div class="g-signin2" data-width="200" data-longtitle="true" data-theme="dark" data-onsuccess="onSignIn"></div>
+                        </form>
+                        <script>
+                            function onSignIn(googleUser) {
+                                <#if !(errorMessage??)>
+                                    $('#google-id-token').val(googleUser.getAuthResponse().id_token);
+                                    $('#login-google-form').submit();
+                                </#if>
+                            }
+                        </script>
+                    </div>
+                    <div class="col-md-6" style="border-left: 1px solid #e5e5e5">
+            </#if>
+                        <#-- login form -->
+                        <form id="login-form" role="form" method="POST" action="/login">
+                            <div class="form-group">
+                                <input id="username-field" type="text" placeholder="Username" class="form-control" name="username" required>
+                            </div>
+                            <div class="form-group">
+                                <input id="password-field" type="password" placeholder="Password" class="form-control" name="password" required>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <button id="signin-button" type="submit" class="btn btn-success">Sign in</button>
                                 </div>
-                                <div class="form-group">
-                                    <label class="col-md-3 control-label" for="loginPassword">Password</label>
-                                    <div class="col-md-9">
-                                        <input id="password-field" type="password" class="form-control" name="password" required>
-                                    </div>
+                                <div class="col-md-8">
+                                    <p class="pull-right"><a class="modal-href" href="/account/password/reset" data-target="resetpassword-modal-container"><small>Forgot password?</small></a></p>
                                 </div>
-                                <div class="form-group">
-                                    <div class="col-md-offset-3 col-md-9">
-                                        <button id="signin-button" type="submit" class="btn btn-primary">Sign in</button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
+                            </div>
+                        </form>
+            <#if googleSignIn>
                     </div>
                 </div>
-                <#-- links to other modals -->
-                <#if enable_self_registration == true>
-                    <p><a class="modal-href" href="/account/register" data-target="register-modal-container"><small>Sign up</small></a></p>
-                </#if>
-                <p><a class="modal-href" href="/account/password/reset" data-target="resetpassword-modal-container"><small>Forgot password?</small></a></p>
+            </#if>
+            <#if app_settings.signUp>
+                <div class="row" style="margin-top: 20px;">
+                    <div class="col-md-12 text-center">
+                        <small>Don't have an account? <a class="modal-href" href="/account/register" data-target="register-modal-container">Sign up</a></small>
+                    </div>
+                </div>
+            </#if>
             </div>
         </div>
     </div>

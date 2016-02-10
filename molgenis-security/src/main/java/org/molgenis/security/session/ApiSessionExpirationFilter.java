@@ -7,7 +7,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.login.MolgenisLoginController;
@@ -26,11 +25,10 @@ import org.springframework.web.filter.GenericFilterBean;
 public class ApiSessionExpirationFilter extends GenericFilterBean
 {
 	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
-			ServletException
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+			throws IOException, ServletException
 	{
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
-		HttpServletResponse httpResponse = (HttpServletResponse) response;
 
 		if (!SecurityUtils.currentUserIsAuthenticated() && httpRequest.getRequestURI().startsWith("/api/")
 				&& SecurityUtils.isSessionExpired(httpRequest)
@@ -40,12 +38,8 @@ public class ApiSessionExpirationFilter extends GenericFilterBean
 		{
 			// Signal that the 'session expired' message must be shown in the login form
 			httpRequest.getSession().setAttribute(MolgenisLoginController.SESSION_EXPIRED_SESSION_ATTR, true);
-			httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 		}
-		else
-		{
-			chain.doFilter(request, response);
-		}
+		chain.doFilter(request, response);
 	}
 
 }

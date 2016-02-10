@@ -1,5 +1,7 @@
 package org.molgenis.data.importer;
 
+import static java.util.stream.Collectors.toList;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -12,6 +14,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.system.ImportRun;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
@@ -89,8 +92,8 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 					((ImportWizard) wizard).setImportRunId(importRun.getId());
 
 					asyncImportJobs.execute(new ImportJob(importService, SecurityContextHolder.getContext(),
-							repositoryCollection, entityDbAction, importRun.getId(), importRunService, request
-									.getSession(), importWizard.getDefaultEntity()));
+							repositoryCollection, entityDbAction, importRun.getId(), importRunService,
+							request.getSession(), importWizard.getDefaultEntity()));
 				}
 
 			}
@@ -106,14 +109,14 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 		}
 
 		// Convert to list because it's less impossible use in FreeMarker
-		if (!userAccountService.getCurrentUser().getSuperuser())
+		if (!userAccountService.getCurrentUser().isSuperuser())
 		{
 			String username = SecurityUtils.getCurrentUsername();
 			groups = RunAsSystemProxy.runAsSystem(() -> Lists.newArrayList(userService.getUserGroups(username)));
 		}
 		else
 		{
-			groups = Lists.newArrayList(dataService.findAll(MolgenisGroup.ENTITY_NAME, MolgenisGroup.class));
+			groups = dataService.findAll(MolgenisGroup.ENTITY_NAME, MolgenisGroup.class).collect(toList());
 		}
 
 		((ImportWizard) wizard).setGroups(groups);

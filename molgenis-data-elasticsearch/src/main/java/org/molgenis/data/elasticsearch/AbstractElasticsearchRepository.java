@@ -9,6 +9,7 @@ import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.elasticsearch.common.primitives.Ints;
 import org.molgenis.data.AggregateQuery;
@@ -25,7 +26,6 @@ import org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 
 public abstract class AbstractElasticsearchRepository implements Repository
@@ -66,16 +66,17 @@ public abstract class AbstractElasticsearchRepository implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
-		return elasticSearchService.search(q, getEntityMetaData());
+		return elasticSearchService.searchAsStream(q, getEntityMetaData());
 	}
 
 	@Override
 	public Entity findOne(Query q)
 	{
 		Iterable<Entity> entities = elasticSearchService.search(q, getEntityMetaData());
-		return !Iterables.isEmpty(entities) ? entities.iterator().next() : null;
+		Iterator<Entity> it = entities.iterator();
+		return it.hasNext() ? it.next() : null;
 	}
 
 	@Override
@@ -91,13 +92,13 @@ public abstract class AbstractElasticsearchRepository implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
+	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		return elasticSearchService.get(ids, getEntityMetaData());
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
 		return elasticSearchService.get(ids, getEntityMetaData(), fetch);
 	}
@@ -130,15 +131,15 @@ public abstract class AbstractElasticsearchRepository implements Repository
 	public void add(Entity entity)
 	{
 		elasticSearchService.index(entity, getEntityMetaData(), IndexingMode.ADD);
-		elasticSearchService.refresh();
+		elasticSearchService.refresh(getEntityMetaData());
 	}
 
 	@Override
 	@Transactional
-	public Integer add(Iterable<? extends Entity> entities)
+	public Integer add(Stream<? extends Entity> entities)
 	{
 		long nrIndexedEntities = elasticSearchService.index(entities, getEntityMetaData(), IndexingMode.ADD);
-		elasticSearchService.refresh();
+		elasticSearchService.refresh(getEntityMetaData());
 		return Ints.checkedCast(nrIndexedEntities);
 	}
 
@@ -159,15 +160,15 @@ public abstract class AbstractElasticsearchRepository implements Repository
 	public void update(Entity entity)
 	{
 		elasticSearchService.index(entity, getEntityMetaData(), IndexingMode.UPDATE);
-		elasticSearchService.refresh();
+		elasticSearchService.refresh(getEntityMetaData());
 	}
 
 	@Override
 	@Transactional
-	public void update(Iterable<? extends Entity> entities)
+	public void update(Stream<? extends Entity> entities)
 	{
 		elasticSearchService.index(entities, getEntityMetaData(), IndexingMode.UPDATE);
-		elasticSearchService.refresh();
+		elasticSearchService.refresh(getEntityMetaData());
 	}
 
 	@Override
@@ -175,15 +176,15 @@ public abstract class AbstractElasticsearchRepository implements Repository
 	public void delete(Entity entity)
 	{
 		elasticSearchService.delete(entity, getEntityMetaData());
-		elasticSearchService.refresh();
+		elasticSearchService.refresh(getEntityMetaData());
 	}
 
 	@Override
 	@Transactional
-	public void delete(Iterable<? extends Entity> entities)
+	public void delete(Stream<? extends Entity> entities)
 	{
 		elasticSearchService.delete(entities, getEntityMetaData());
-		elasticSearchService.refresh();
+		elasticSearchService.refresh(getEntityMetaData());
 	}
 
 	@Override
@@ -191,15 +192,15 @@ public abstract class AbstractElasticsearchRepository implements Repository
 	public void deleteById(Object id)
 	{
 		elasticSearchService.deleteById(ElasticsearchEntityUtils.toElasticsearchId(id), getEntityMetaData());
-		elasticSearchService.refresh();
+		elasticSearchService.refresh(getEntityMetaData());
 	}
 
 	@Override
 	@Transactional
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
 		elasticSearchService.deleteById(ElasticsearchEntityUtils.toElasticsearchIds(ids), getEntityMetaData());
-		elasticSearchService.refresh();
+		elasticSearchService.refresh(getEntityMetaData());
 	}
 
 	@Override
@@ -208,7 +209,7 @@ public abstract class AbstractElasticsearchRepository implements Repository
 	{
 		elasticSearchService.delete(getEntityMetaData().getName());
 		createMappings();
-		elasticSearchService.refresh();
+		elasticSearchService.refresh(getEntityMetaData());
 	}
 
 	@Override

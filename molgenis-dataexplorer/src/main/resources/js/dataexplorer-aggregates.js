@@ -97,15 +97,15 @@
 	function updateAggregatesTable(xAttributeName, yAttributeName, distinctAttributeName) {
 		if($('#aggregate-table-container').length > 0) {
 			React.unmountComponentAtNode($('#aggregate-table-container')[0]);
-		}
 		
-		React.render(molgenis.ui.AggregateTable({
-			entity : getEntity().name,
-			x: xAttributeName,
-			y: yAttributeName,
-			distinct: distinctAttributeName,
-			query: getEntityQuery()
-		}), $('#aggregate-table-container')[0]);
+			React.render(molgenis.ui.AggregateTable({
+				entity : getEntity().name,
+				x: xAttributeName,
+				y: yAttributeName,
+				distinct: distinctAttributeName,
+				query: getEntityQuery()
+			}), $('#aggregate-table-container')[0]);
+		}
 	}
 	
 	/**
@@ -143,14 +143,31 @@
 		return molgenis.dataexplorer.getEntityQuery().q;
 	}
 	
-	$(function() {		
+	$(function() {	
+		$(document).off('.aggregates');
+		
 		// bind event handlers with namespace
 		$(document).on('changeAttributeSelection.aggregates', function(e, data) {
-			molgenis.dataexplorer.aggregates.createAggregatesTable();
+			if (molgenis.dataexplorer.getSelectedModule() === 'aggregates') {
+				molgenis.dataexplorer.aggregates.createAggregatesTable();
+			}
 		});
 		
 		$(document).on('changeQuery.aggregates', function(e, entitySearchQuery) {
-			molgenis.dataexplorer.aggregates.updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val(), $('#distinct-aggr-attribute').val());
+			if (molgenis.dataexplorer.getSelectedModule() === 'aggregates') {
+				var xAttribute = $('#x-aggr-attribute').val();
+				var yAttribute = $('#y-aggr-attribute').val();
+				var distinctAttributeName = $('#distinct-aggr-attribute').val();
+				
+				molgenis.dataexplorer.aggregates.updateAggregatesTable(xAttribute, yAttribute, distinctAttributeName);
+			}
 		});
+		
+		$(document).on('changeModule.aggregates', function(e, mod) {
+			if (mod === 'aggregates') {
+				molgenis.dataexplorer.aggregates.createAggregatesTable();
+			}
+		});		
 	});
+	
 })($, window.top.molgenis = window.top.molgenis || {});

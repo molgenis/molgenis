@@ -1,5 +1,7 @@
 package org.molgenis.ontology.sorta;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
@@ -34,8 +36,8 @@ public class SortaModifiableCsvRepository extends AbstractRepository
 		if (entityMetaData == null)
 		{
 			entityMetaData = new DefaultEntityMetaData(entityName, csvRepository.getEntityMetaData());
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ALLOWED_IDENTIFIER).setIdAttribute(true)
-					.setNillable(false));
+			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ALLOWED_IDENTIFIER).setNillable(false),
+					ROLE_ID);
 		}
 		return entityMetaData;
 	}

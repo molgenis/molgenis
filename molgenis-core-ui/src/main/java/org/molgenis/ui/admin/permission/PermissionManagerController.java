@@ -63,7 +63,7 @@ public class PermissionManagerController extends MolgenisPluginController
 					@Override
 					public boolean apply(MolgenisUser molgenisUser)
 					{
-						Boolean superuser = molgenisUser.getSuperuser();
+						Boolean superuser = molgenisUser.isSuperuser();
 						return superuser == null || !superuser;
 					}
 				})));
@@ -111,7 +111,8 @@ public class PermissionManagerController extends MolgenisPluginController
 
 			if (value.equalsIgnoreCase(Permission.READ.toString())
 					|| value.equalsIgnoreCase(Permission.COUNT.toString())
-					|| value.equalsIgnoreCase(Permission.WRITE.toString()))
+					|| value.equalsIgnoreCase(Permission.WRITE.toString())
+					|| value.equalsIgnoreCase(Permission.WRITEMETA.toString()))
 			{
 				GroupAuthority authority = new GroupAuthority();
 				authority.setRole(SecurityUtils.AUTHORITY_PLUGIN_PREFIX + value.toUpperCase() + "_"
@@ -133,7 +134,8 @@ public class PermissionManagerController extends MolgenisPluginController
 			String value = webRequest.getParameter(param);
 			if (value.equalsIgnoreCase(Permission.READ.toString())
 					|| value.equalsIgnoreCase(Permission.COUNT.toString())
-					|| value.equalsIgnoreCase(Permission.WRITE.toString()))
+					|| value.equalsIgnoreCase(Permission.WRITE.toString())
+					|| value.equalsIgnoreCase(Permission.WRITEMETA.toString()))
 			{
 				GroupAuthority authority = new GroupAuthority();
 				authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_"
@@ -155,7 +157,8 @@ public class PermissionManagerController extends MolgenisPluginController
 			String value = webRequest.getParameter(param);
 			if (value.equalsIgnoreCase(Permission.READ.toString())
 					|| value.equalsIgnoreCase(Permission.COUNT.toString())
-					|| value.equalsIgnoreCase(Permission.WRITE.toString()))
+					|| value.equalsIgnoreCase(Permission.WRITE.toString())
+					|| value.equalsIgnoreCase(Permission.WRITEMETA.toString()))
 			{
 				UserAuthority authority = new UserAuthority();
 				authority.setRole(SecurityUtils.AUTHORITY_PLUGIN_PREFIX + value.toUpperCase() + "_"
@@ -177,7 +180,8 @@ public class PermissionManagerController extends MolgenisPluginController
 			String value = webRequest.getParameter(param);
 			if (value.equalsIgnoreCase(Permission.READ.toString())
 					|| value.equalsIgnoreCase(Permission.COUNT.toString())
-					|| value.equalsIgnoreCase(Permission.WRITE.toString()))
+					|| value.equalsIgnoreCase(Permission.WRITE.toString())
+					|| value.equalsIgnoreCase(Permission.WRITEMETA.toString()))
 			{
 				UserAuthority authority = new UserAuthority();
 				authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_"

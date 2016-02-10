@@ -1,6 +1,7 @@
 package org.molgenis.util;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -84,5 +85,19 @@ public class BatchingIterableTest
 		int expectedNrItems = limit == 0 ? ITEMS_LIST.size() - offset : limit;
 		assertEquals(actualNrItems, expectedNrItems,
 				String.format("[offset=%d, limit=%d, batchSize=%d]", offset, limit, batchSize));
+	}
+
+	@Test
+	public void iteratorNoResults()
+	{
+		Iterable<Integer> iterable = new BatchingIterable<Integer>(1000, 0, 10)
+		{
+			@Override
+			protected List<Integer> getBatch(int offset, int batchSize)
+			{
+				return Collections.emptyList();
+			}
+		};
+		assertFalse(iterable.iterator().hasNext());
 	}
 }

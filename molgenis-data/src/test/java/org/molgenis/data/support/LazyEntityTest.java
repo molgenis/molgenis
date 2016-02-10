@@ -40,7 +40,6 @@ public class LazyEntityTest
 		when(entityMeta.getName()).thenReturn(ENTITY_NAME);
 		idAttr = mock(AttributeMetaData.class);
 		when(idAttr.getName()).thenReturn(ID_ATTR_NAME);
-		when(idAttr.isIdAtrribute()).thenReturn(true);
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
 		dataService = mock(DataService.class);
 		entity = mock(Entity.class);
@@ -76,9 +75,10 @@ public class LazyEntityTest
 	public void getAttributeNames()
 	{
 		DefaultEntity entity = new DefaultEntity(entityMeta, dataService);
-		List<String> attrNames = Arrays.asList("attr0", "attr1");
-		when(entityMeta.getAtomicAttributeNames()).thenReturn(attrNames);
-		assertEquals(Lists.newArrayList(entity.getAttributeNames()), attrNames);
+		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
+		AttributeMetaData attr1 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr1").getMock();
+		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(attr0, attr1));
+		assertEquals(Lists.newArrayList(entity.getAttributeNames()), Arrays.asList("attr0", "attr1"));
 	}
 
 	@Test

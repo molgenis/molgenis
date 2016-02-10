@@ -20,10 +20,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -43,6 +46,7 @@ import org.molgenis.data.MolgenisQueryException;
 import org.molgenis.data.Query;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.Href;
 import org.molgenis.data.rest.service.RestService;
@@ -79,6 +83,7 @@ class RestControllerV2
 	private final DataService dataService;
 	private final RestService restService;
 	private final MolgenisPermissionService permissionService;
+	private final LanguageService languageService;
 
 	static UnknownEntityException createUnknownEntityException(String entityName)
 	{
@@ -115,11 +120,12 @@ class RestControllerV2
 
 	@Autowired
 	public RestControllerV2(DataService dataService, MolgenisPermissionService permissionService,
-			RestService restService)
+			RestService restService, LanguageService languageService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.permissionService = requireNonNull(permissionService);
 		this.restService = requireNonNull(restService);
+		this.languageService = requireNonNull(languageService);
 	}
 
 	@Autowired
@@ -156,7 +162,8 @@ class RestControllerV2
 			@RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter)
 	{
 		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
-		Fetch fetch = AttributeFilterToFetchConverter.convert(attributeFilter, entityMeta);
+		Fetch fetch = AttributeFilterToFetchConverter.convert(attributeFilter, entityMeta,
+				languageService.getCurrentUserLanguageCode());
 
 		Entity entity = dataService.findOne(entityName, id, fetch);
 		if (entity == null)
@@ -174,7 +181,8 @@ class RestControllerV2
 			@RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter)
 	{
 		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
-		Fetch fetch = AttributeFilterToFetchConverter.convert(attributeFilter, entityMeta);
+		Fetch fetch = AttributeFilterToFetchConverter.convert(attributeFilter, entityMeta,
+				languageService.getCurrentUserLanguageCode());
 
 		Entity entity = dataService.findOne(entityName, id, fetch);
 		if (entity == null)
@@ -270,15 +278,14 @@ class RestControllerV2
 			final List<String> ids = new ArrayList<String>();
 
 			// Add all entities
-			this.dataService.add(entityName, entities);
+			this.dataService.add(entityName, entities.stream());
 
-			for (Entity entity : entities)
-			{
+			entities.forEach(entity -> {
 				String id = entity.getIdValue().toString();
 				ids.add(id.toString());
 				responseBody.getResources().add(new AutoValue_ResourcesResponseV2(
 						Href.concatEntityHref(RestControllerV2.BASE_URI, entityName, id)));
-			}
+			});
 
 			responseBody.setLocation(Href.concatEntityCollectionHref(RestControllerV2.BASE_URI, entityName,
 					meta.getIdAttribute().getName(), ids));
@@ -317,8 +324,7 @@ class RestControllerV2
 
 		try
 		{
-			final List<Entity> entities = request.getEntities().stream().map(e -> this.restService.toEntity(meta, e))
-					.collect(Collectors.toList());
+			final Stream<Entity> entities = request.getEntities().stream().map(e -> this.restService.toEntity(meta, e));
 
 			// update all entities
 			this.dataService.update(entityName, entities);
@@ -394,7 +400,7 @@ class RestControllerV2
 			}
 
 			// update all entities
-			this.dataService.update(entityName, updatedEntities);
+			this.dataService.update(entityName, updatedEntities.stream());
 			response.setStatus(HttpServletResponse.SC_OK);
 		}
 		catch (Exception e)
@@ -402,6 +408,24 @@ class RestControllerV2
 			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
 			throw e;
 		}
+	}
+
+	/**
+	 * Get the i18n resource strings in the language of the current user
+	 */
+	@RequestMapping(value = "/i18n", method = GET, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Map<String, String> getI18nStrings()
+	{
+		Map<String, String> translations = new HashMap<>();
+
+		ResourceBundle bundle = languageService.getBundle();
+		for (String key : bundle.keySet())
+		{
+			translations.put(key, bundle.getString(key));
+		}
+
+		return translations;
 	}
 
 	/**
@@ -463,7 +487,8 @@ class RestControllerV2
 			throw new RuntimeException("attribute : " + attributeName + " does not exist!");
 		}
 
-		return new AttributeMetaDataResponseV2(entityName, attribute, null, permissionService, dataService);
+		return new AttributeMetaDataResponseV2(entityName, entity, attribute, null, permissionService, dataService,
+				languageService);
 	}
 
 	private EntityCollectionResponseV2 createEntityCollectionResponse(String entityName,
@@ -473,7 +498,8 @@ class RestControllerV2
 
 		Query q = request.getQ() != null ? request.getQ().createQuery(meta) : new QueryImpl();
 		q.pageSize(request.getNum()).offset(request.getStart()).sort(request.getSort());
-		Fetch fetch = AttributeFilterToFetchConverter.convert(request.getAttrs(), meta);
+		Fetch fetch = AttributeFilterToFetchConverter.convert(request.getAttrs(), meta,
+				languageService.getCurrentUserLanguageCode());
 		if (fetch != null)
 		{
 			q.fetch(fetch);
@@ -490,10 +516,10 @@ class RestControllerV2
 				throw new MolgenisQueryException("Aggregate query is missing 'x' or 'y' attribute");
 			}
 			AggregateResult aggs = dataService.aggregate(entityName, aggsQ);
-			AttributeMetaDataResponseV2 xAttrResponse = xAttr != null
-					? new AttributeMetaDataResponseV2(entityName, xAttr, fetch, permissionService, dataService) : null;
-			AttributeMetaDataResponseV2 yAttrResponse = yAttr != null
-					? new AttributeMetaDataResponseV2(entityName, yAttr, fetch, permissionService, dataService) : null;
+			AttributeMetaDataResponseV2 xAttrResponse = xAttr != null ? new AttributeMetaDataResponseV2(entityName,
+					meta, xAttr, fetch, permissionService, dataService, languageService) : null;
+			AttributeMetaDataResponseV2 yAttrResponse = yAttr != null ? new AttributeMetaDataResponseV2(entityName,
+					meta, yAttr, fetch, permissionService, dataService, languageService) : null;
 			return new EntityAggregatesResponse(aggs, xAttrResponse, yAttrResponse, BASE_URI + '/' + entityName);
 		}
 		else
@@ -502,7 +528,14 @@ class RestControllerV2
 			Iterable<Entity> it;
 			if (count > 0)
 			{
-				it = dataService.findAll(entityName, q);
+				it = new Iterable<Entity>()
+				{
+					@Override
+					public Iterator<Entity> iterator()
+					{
+						return dataService.findAll(entityName, q).iterator();
+					}
+				};
 			}
 			else
 			{
@@ -519,14 +552,14 @@ class RestControllerV2
 			}
 
 			UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(getFullURL(httpRequest));
-			
+
 			String prevHref = null;
 			if (pager.getPrevStart() != null)
 			{
 				builder.replaceQueryParam("start", pager.getPrevStart());
 				prevHref = builder.build(false).toUriString();
 			}
-			
+
 			String nextHref = null;
 			if (pager.getNextStart() != null)
 			{
@@ -535,7 +568,7 @@ class RestControllerV2
 			}
 
 			return new EntityCollectionResponseV2(pager, entities, fetch, BASE_URI + '/' + entityName, meta,
-					permissionService, dataService, prevHref, nextHref);
+					permissionService, dataService, languageService, prevHref, nextHref);
 		}
 	}
 
@@ -567,7 +600,8 @@ class RestControllerV2
 
 	private void createEntityMetaResponse(EntityMetaData entityMetaData, Fetch fetch, Map<String, Object> responseData)
 	{
-		responseData.put("_meta", new EntityMetaDataResponseV2(entityMetaData, fetch, permissionService, dataService));
+		responseData.put("_meta",
+				new EntityMetaDataResponseV2(entityMetaData, fetch, permissionService, dataService, languageService));
 	}
 
 	private void createEntityValuesResponse(Entity entity, Fetch fetch, Map<String, Object> responseData)

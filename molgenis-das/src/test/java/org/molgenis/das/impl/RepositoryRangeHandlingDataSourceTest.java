@@ -2,6 +2,8 @@ package org.molgenis.das.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_CHROM;
 import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_DESCRIPTION;
 import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_IDENTIFIER;
@@ -14,13 +16,15 @@ import static org.testng.AssertJUnit.assertEquals;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -103,10 +107,10 @@ public class RepositoryRangeHandlingDataSourceTest
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("DAS");
 		emd.addAttributeMetaData(new DefaultAttributeMetaData("STOP"));
 		emd.addAttributeMetaData(new DefaultAttributeMetaData("linkout"));
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("NAME").setLabelAttribute(true));
+		emd.addAttributeMetaData(new DefaultAttributeMetaData("NAME"), ROLE_LABEL);
 		emd.addAttributeMetaData(new DefaultAttributeMetaData("INFO"));
 		emd.addAttributeMetaData(new DefaultAttributeMetaData("POS"));
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("ID").setIdAttribute(true));
+		emd.addAttributeMetaData(new DefaultAttributeMetaData("ID"), ROLE_ID);
 		emd.addAttributeMetaData(new DefaultAttributeMetaData("CHROM"));
 
 		MapEntity entity = new MapEntity(emd);
@@ -126,7 +130,14 @@ public class RepositoryRangeHandlingDataSourceTest
 		resultList.add(new Hit("", "", map));
 		featureList = new ArrayList<>();
 		featureList.add(dasFeature);
-		when(dataService.findAll("dataset", q)).thenReturn(Arrays.<Entity> asList(entity));
+		when(dataService.findAll("dataset", q)).thenAnswer(new Answer<Stream<Entity>>()
+		{
+			@Override
+			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
+			{
+				return Stream.of(entity);
+			}
+		});
 		when(result.iterator()).thenReturn(resultList.iterator());
 
 		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_CHROM, entity.getEntityMetaData()))

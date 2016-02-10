@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
@@ -26,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -111,9 +111,9 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public synchronized Iterable<String> getEntityNames()
+	public synchronized Stream<String> getEntityNames()
 	{
-		return Iterables.filter(Lists.newArrayList(repositoryNames), entityName -> currentUserHasRole("ROLE_SU",
+		return Lists.newArrayList(repositoryNames).stream().filter(entityName -> currentUserHasRole("ROLE_SU",
 				"ROLE_SYSTEM", "ROLE_ENTITY_COUNT_" + entityName.toUpperCase()));
 	}
 
@@ -130,21 +130,15 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public Iterable<Entity> findAll(String entityName)
+	public Stream<Entity> findAll(String entityName)
 	{
 		return findAll(entityName, new QueryImpl());
 	}
 
 	@Override
-	public Iterable<Entity> findAll(String entityName, Query q)
+	public Stream<Entity> findAll(String entityName, Query q)
 	{
 		return getRepository(entityName).findAll(q);
-	}
-
-	@Override
-	public Iterable<Entity> findAll(String entityName, Iterable<Object> ids)
-	{
-		return getRepository(entityName).findAll(ids);
 	}
 
 	@Override
@@ -168,7 +162,7 @@ public class DataServiceImpl implements DataService
 
 	@Override
 	@Transactional
-	public void add(String entityName, Iterable<? extends Entity> entities)
+	public void add(String entityName, Stream<? extends Entity> entities)
 	{
 		getRepository(entityName).add(entities);
 	}
@@ -182,7 +176,7 @@ public class DataServiceImpl implements DataService
 
 	@Override
 	@Transactional
-	public void update(String entityName, Iterable<? extends Entity> entities)
+	public void update(String entityName, Stream<? extends Entity> entities)
 	{
 		getRepository(entityName).update(entities);
 	}
@@ -196,7 +190,7 @@ public class DataServiceImpl implements DataService
 
 	@Override
 	@Transactional
-	public void delete(String entityName, Iterable<? extends Entity> entities)
+	public void delete(String entityName, Stream<? extends Entity> entities)
 	{
 		getRepository(entityName).delete(entities);
 	}
@@ -231,17 +225,12 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> findAll(String entityName, Query q, Class<E> clazz)
+	public <E extends Entity> Stream<E> findAll(String entityName, Query q, Class<E> clazz)
 	{
-		Iterable<Entity> entities = getRepository(entityName).findAll(q);
-		return new ConvertingIterable<E>(clazz, entities, this);
-	}
-
-	@Override
-	public <E extends Entity> Iterable<E> findAll(String entityName, Iterable<Object> ids, Class<E> clazz)
-	{
-		Iterable<Entity> entities = getRepository(entityName).findAll(ids);
-		return new ConvertingIterable<E>(clazz, entities, this);
+		Stream<Entity> entities = getRepository(entityName).findAll(q);
+		return entities.map(entity -> {
+			return EntityUtils.convert(entity, clazz, this);
+		});
 	}
 
 	@Override
@@ -261,7 +250,7 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> findAll(String entityName, Class<E> clazz)
+	public <E extends Entity> Stream<E> findAll(String entityName, Class<E> clazz)
 	{
 		return findAll(entityName, new QueryImpl(), clazz);
 	}
@@ -291,22 +280,9 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public Iterable<Entity> findAll(String entityName, Iterable<Object> ids, Fetch fetch)
-	{
-		return getRepository(entityName).findAll(ids, fetch);
-	}
-
-	@Override
 	public Entity findOne(String entityName, Object id, Fetch fetch)
 	{
 		return getRepository(entityName).findOne(id, fetch);
-	}
-
-	@Override
-	public <E extends Entity> Iterable<E> findAll(String entityName, Iterable<Object> ids, Fetch fetch, Class<E> clazz)
-	{
-		Iterable<Entity> entities = getRepository(entityName).findAll(ids, fetch);
-		return new ConvertingIterable<E>(clazz, entities, this);
 	}
 
 	@Override
@@ -327,5 +303,35 @@ public class DataServiceImpl implements DataService
 	public void removeEntityListener(String entityName, EntityListener entityListener)
 	{
 		getRepository(entityName).removeEntityListener(entityListener);
+	}
+
+	@Override
+	public Stream<Entity> findAll(String entityName, Stream<Object> ids)
+	{
+		return getRepository(entityName).findAll(ids);
+	}
+
+	@Override
+	public <E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Class<E> clazz)
+	{
+		Stream<Entity> entities = getRepository(entityName).findAll(ids);
+		return entities.map(entity -> {
+			return EntityUtils.convert(entity, clazz, this);
+		});
+	}
+
+	@Override
+	public Stream<Entity> findAll(String entityName, Stream<Object> ids, Fetch fetch)
+	{
+		return getRepository(entityName).findAll(ids, fetch);
+	}
+
+	@Override
+	public <E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Fetch fetch, Class<E> clazz)
+	{
+		Stream<Entity> entities = getRepository(entityName).findAll(ids, fetch);
+		return entities.map(entity -> {
+			return EntityUtils.convert(entity, clazz, this);
+		});
 	}
 }

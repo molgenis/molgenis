@@ -1,11 +1,12 @@
 package org.molgenis.data;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
 
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.molgenis.data.support.EntityWithComputedAttributes;
 
@@ -55,9 +56,9 @@ public class ComputedEntityValuesDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
-		Iterable<Entity> entities = decoratedRepo.findAll(q);
+		Stream<Entity> entities = decoratedRepo.findAll(q);
 		// compute values with attributes with expressions
 		return toComputedValuesEntities(entities);
 	}
@@ -101,17 +102,17 @@ public class ComputedEntityValuesDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
+	public Stream<Entity> findAll(Stream<Object> ids)
 	{
-		Iterable<Entity> entities = decoratedRepo.findAll(ids);
+		Stream<Entity> entities = decoratedRepo.findAll(ids);
 		// compute values with attributes with expressions
 		return toComputedValuesEntities(entities);
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
-		Iterable<Entity> entities = decoratedRepo.findAll(ids, fetch);
+		Stream<Entity> entities = decoratedRepo.findAll(ids, fetch);
 		// compute values with attributes with expressions
 		return toComputedValuesEntities(entities);
 	}
@@ -129,9 +130,9 @@ public class ComputedEntityValuesDecorator implements Repository
 	}
 
 	@Override
-	public void update(Iterable<? extends Entity> records)
+	public void update(Stream<? extends Entity> entities)
 	{
-		decoratedRepo.update(records);
+		decoratedRepo.update(entities);
 	}
 
 	@Override
@@ -141,7 +142,7 @@ public class ComputedEntityValuesDecorator implements Repository
 	}
 
 	@Override
-	public void delete(Iterable<? extends Entity> entities)
+	public void delete(Stream<? extends Entity> entities)
 	{
 		decoratedRepo.delete(entities);
 	}
@@ -153,7 +154,7 @@ public class ComputedEntityValuesDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
 		decoratedRepo.deleteById(ids);
 	}
@@ -171,7 +172,7 @@ public class ComputedEntityValuesDecorator implements Repository
 	}
 
 	@Override
-	public Integer add(Iterable<? extends Entity> entities)
+	public Integer add(Stream<? extends Entity> entities)
 	{
 		return decoratedRepo.add(entities);
 	}
@@ -239,7 +240,7 @@ public class ComputedEntityValuesDecorator implements Repository
 				@Override
 				public Iterator<Entity> iterator()
 				{
-					return stream(entities.spliterator(), false)
+					return StreamSupport.stream(entities.spliterator(), false)
 							.map(entity -> (Entity) new EntityWithComputedAttributes(entity)).iterator();
 				}
 			};
@@ -260,6 +261,20 @@ public class ComputedEntityValuesDecorator implements Repository
 		else
 		{
 			return it;
+		}
+	}
+
+	private Stream<Entity> toComputedValuesEntities(Stream<Entity> entities)
+	{
+		if (getEntityMetaData().hasAttributeWithExpression())
+		{
+			return entities.map(entity -> {
+				return new EntityWithComputedAttributes(entity);
+			});
+		}
+		else
+		{
+			return entities;
 		}
 	}
 }

@@ -54,7 +54,7 @@ public class MatchInputTermBatchService
 
 		// Add the original input dataset to database
 		dataService.getMeta().addEntityMeta(repository.getEntityMetaData());
-		dataService.getRepository(entityName).add(repository);
+		dataService.getRepository(entityName).add(repository.stream());
 		dataService.getRepository(entityName).flush();
 
 		// Add a new entry in MatchingTask table for this new matching job
@@ -71,8 +71,7 @@ public class MatchInputTermBatchService
 		{
 			// Match input terms with code
 			List<Entity> entitiesToAdd = new ArrayList<Entity>();
-			for (Entity entity : dataService.findAll(entityName))
-			{
+			dataService.findAll(entityName).forEach(entity -> {
 				MapEntity matchingTaskContentEntity = new MapEntity();
 				matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.INPUT_TERM, entity.getIdValue());
 				matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.IDENTIFIER,
@@ -98,15 +97,15 @@ public class MatchInputTermBatchService
 				// Add entity in batch
 				if (entitiesToAdd.size() >= ADD_BATCH_SIZE)
 				{
-					dataService.add(MatchingTaskContentEntityMetaData.ENTITY_NAME, entitiesToAdd);
+					dataService.add(MatchingTaskContentEntityMetaData.ENTITY_NAME, entitiesToAdd.stream());
 					entitiesToAdd.clear();
 				}
 				uploadProgress.incrementProgress(userName);
-			}
+			});
 			// Add the rest
 			if (entitiesToAdd.size() != 0)
 			{
-				dataService.add(MatchingTaskContentEntityMetaData.ENTITY_NAME, entitiesToAdd);
+				dataService.add(MatchingTaskContentEntityMetaData.ENTITY_NAME, entitiesToAdd.stream());
 				entitiesToAdd.clear();
 			}
 			dataService.getRepository(MatchingTaskContentEntityMetaData.ENTITY_NAME).flush();

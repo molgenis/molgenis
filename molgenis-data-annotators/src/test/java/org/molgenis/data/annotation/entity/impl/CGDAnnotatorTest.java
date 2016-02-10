@@ -1,6 +1,7 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import static org.mockito.Mockito.mock;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.AGE_GROUP;
 import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.ALLELIC_CONDITIONS;
 import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.COMMENTS;
@@ -52,7 +53,7 @@ public class CGDAnnotatorTest extends AbstractTestNGSpringContextTests
 	public void annotateTestMatch()
 	{
 		DefaultEntityMetaData emdIn = new DefaultEntityMetaData("Test");
-		emdIn.addAttribute(GENE.getAttributeName()).setIdAttribute(true).setNillable(false);
+		emdIn.addAttribute(GENE.getAttributeName(), ROLE_ID);
 		Entity inputEntity = new MapEntity(emdIn);
 		inputEntity.set(GENE.getAttributeName(), "LEPR");
 
@@ -72,9 +73,8 @@ public class CGDAnnotatorTest extends AbstractTestNGSpringContextTests
 		resultMap.put(INTERVENTION_CATEGORIES.getAttributeName(), "Allergy/Immunology/Infectious; Endocrine");
 		resultMap.put(COMMENTS.getAttributeName(),
 				"Standard treatments for obesity, such as gastric surgery, have been described as beneficial");
-		resultMap
-				.put(INTERVENTION_RATIONALE.getAttributeName(),
-						"In addition to endocrine manifestations, individuals may be susceptible to infections (eg, respiratory infections), which, coupled with other manifestations (eg, severe obesity) can have severe sequelae such that prophylaxis and rapid treatment may be beneficial");
+		resultMap.put(INTERVENTION_RATIONALE.getAttributeName(),
+				"In addition to endocrine manifestations, individuals may be susceptible to infections (eg, respiratory infections), which, coupled with other manifestations (eg, severe obesity) can have severe sequelae such that prophylaxis and rapid treatment may be beneficial");
 		resultMap.put(REFERENCES.getAttributeName(), "8666155; 9537324; 17229951; 21306929; 23275530; 23616257");
 		Entity expectedEntity = new MapEntity(resultMap);
 
@@ -94,14 +94,16 @@ public class CGDAnnotatorTest extends AbstractTestNGSpringContextTests
 		assertEquals(resultEntity.get(COMMENTS.getAttributeName()), expectedEntity.get(COMMENTS.getAttributeName()));
 		assertEquals(resultEntity.get(INTERVENTION_RATIONALE.getAttributeName()),
 				expectedEntity.get(INTERVENTION_RATIONALE.getAttributeName()));
-		assertEquals(resultEntity.get(REFERENCES.getAttributeName()), expectedEntity.get(REFERENCES.getAttributeName()));
+		assertEquals(resultEntity.get(REFERENCES.getAttributeName()),
+				expectedEntity.get(REFERENCES.getAttributeName()));
 	}
 
 	@Test
 	public void annotateTestNoMatch()
 	{
 		DefaultEntityMetaData emdIn = new DefaultEntityMetaData("Test");
-		emdIn.addAttribute(GENE.getAttributeName()).setIdAttribute(true).setNillable(false);
+		emdIn.addAttribute(GENE.getAttributeName(), ROLE_ID);
+
 		Entity inputEntity = new MapEntity(emdIn);
 		inputEntity.set(GENE.getAttributeName(), "BOGUS");
 
@@ -130,7 +132,8 @@ public class CGDAnnotatorTest extends AbstractTestNGSpringContextTests
 		assertEquals(resultEntity.get(COMMENTS.getAttributeName()), expectedEntity.get(COMMENTS.getAttributeName()));
 		assertEquals(resultEntity.get(INTERVENTION_RATIONALE.getAttributeName()),
 				expectedEntity.get(INTERVENTION_RATIONALE.getAttributeName()));
-		assertEquals(resultEntity.get(REFERENCES.getAttributeName()), expectedEntity.get(REFERENCES.getAttributeName()));
+		assertEquals(resultEntity.get(REFERENCES.getAttributeName()),
+				expectedEntity.get(REFERENCES.getAttributeName()));
 	}
 
 	public static class Config
@@ -142,8 +145,8 @@ public class CGDAnnotatorTest extends AbstractTestNGSpringContextTests
 		public Entity CGDAnnotatorSettings()
 		{
 			Entity settings = new MapEntity();
-			settings.set(CGDAnnotatorSettings.Meta.CGD_LOCATION, ResourceUtils.getFile(getClass(), "/cgd_example.txt")
-					.getPath());
+			settings.set(CGDAnnotatorSettings.Meta.CGD_LOCATION,
+					ResourceUtils.getFile(getClass(), "/cgd_example.txt").getPath());
 			return settings;
 		}
 

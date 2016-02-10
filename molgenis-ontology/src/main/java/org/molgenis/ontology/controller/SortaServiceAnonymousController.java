@@ -25,7 +25,6 @@ import javax.servlet.http.Part;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.csv.CsvRepository;
@@ -59,9 +58,6 @@ import com.google.common.collect.Iterables;
 @RequestMapping(URI)
 public class SortaServiceAnonymousController extends MolgenisPluginController
 {
-	@Autowired
-	private DataService dataService;
-
 	@Autowired
 	private SortaService sortaService;
 

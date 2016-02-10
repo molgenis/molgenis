@@ -15,9 +15,6 @@
 
 <@header css js/>
 
-<script src="<@resource_href "/js/ace/src-min-noconflict/ace.js"/>" type="text/javascript" charset="utf-8"></script>
-<script src="<@resource_href "/js/ace/src-min-noconflict/ext-language_tools.js"/>" type="text/javascript" charset="utf-8"></script>
-
 <div class="row">
 	<div class="col-md-12">
 		<#-- Hidden fields containing information needed for ajax requests -->
@@ -99,7 +96,7 @@
 				<td class="td-align-top">
 					<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical" && (categories)?has_content>
 						<#assign refEntityMetaData = attributeMapping.targetAttributeMetaData.refEntity>
-						<#list categories.iterator() as category>
+						<#list categories as category>
 							<#list refEntityMetaData.attributes as attribute>
 								<#assign attributeName = attribute.name>
 								<#if (category[attributeName])??>	

@@ -1,7 +1,7 @@
 package org.molgenis.data.meta;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
@@ -13,6 +13,7 @@ import static org.molgenis.data.meta.EntityMetaDataMetaData.FULL_NAME;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ID_ATTRIBUTE;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.LABEL;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.LABEL_ATTRIBUTE;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.LOOKUP_ATTRIBUTES;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.SIMPLE_NAME;
 
@@ -20,19 +21,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.DependencyResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
@@ -49,16 +52,16 @@ class EntityMetaDataRepository
 	private final ManageableRepositoryCollection collection;
 	private final Map<String, DefaultEntityMetaData> entityMetaDataCache = new HashMap<>();
 	private final AttributeMetaDataRepository attributeRepository;
-
-	private static final Logger LOG = LoggerFactory.getLogger(EntityMetaDataRepository.class);
+	private final LanguageService languageService;
 
 	public EntityMetaDataRepository(ManageableRepositoryCollection collection, PackageRepository packageRepository,
-			AttributeMetaDataRepository attributeRepository)
+			AttributeMetaDataRepository attributeRepository, LanguageService languageService)
 	{
 		this.packageRepository = packageRepository;
 		this.attributeRepository = attributeRepository;
 		this.repository = collection.addEntityMeta(META_DATA);
 		this.collection = collection;
+		this.languageService = languageService;
 	}
 
 	Repository getRepository()
@@ -81,11 +84,22 @@ class EntityMetaDataRepository
 			String name = entity.getString(SIMPLE_NAME);
 			DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(name);
 			entityMetaData.setAbstract(entity.getBoolean(ABSTRACT));
-			entityMetaData.setIdAttribute(entity.getString(ID_ATTRIBUTE));
-			entityMetaData.setLabelAttribute(entity.getString(LABEL_ATTRIBUTE));
 			entityMetaData.setLabel(entity.getString(LABEL));
 			entityMetaData.setDescription(entity.getString(DESCRIPTION));
 			entityMetaData.setBackend(entity.getString(BACKEND));
+
+			// Language attributes
+			for (String languageCode : languageService.getLanguageCodes())
+			{
+				String attributeName = DESCRIPTION + '-' + languageCode;
+				String description = entity.getString(attributeName);
+				if (description != null) entityMetaData.setDescription(languageCode, description);
+
+				attributeName = LABEL + '-' + languageCode;
+				String label = entity.getString(attributeName);
+				if (label != null) entityMetaData.setLabel(languageCode, label);
+			}
+
 			entityMetaDataCache.put(entity.getString(FULL_NAME), entityMetaData);
 		}
 		// Only then create the AttributeMetaData objects, so that lookups of refEntity values work.
@@ -93,32 +107,48 @@ class EntityMetaDataRepository
 		{
 			DefaultEntityMetaData entityMetaData = entityMetaDataCache.get(entity.getString(FULL_NAME));
 			Iterable<Entity> attributeEntities = entity.getEntities(EntityMetaDataMetaData.ATTRIBUTES);
-			if (attributeEntities != null)
-			{
-				stream(attributeEntities.spliterator(), false).map(attributeRepository::toAttributeMetaData).forEach(
-						entityMetaData::addAttributeMetaData);
-			}
+			stream(attributeEntities.spliterator(), false).map(attributeRepository::toAttributeMetaData)
+					.forEach(entityMetaData::addAttributeMetaData);
 		}
 		for (Entity entity : entities)
 		{
 			final Entity extendsEntity = entity.getEntity(EXTENDS);
-			final DefaultEntityMetaData entityMetaData = entityMetaDataCache.get(entity.get(FULL_NAME));
+			final DefaultEntityMetaData entityMetaData = entityMetaDataCache.get(entity.getString(FULL_NAME));
 			if (extendsEntity != null)
 			{
-				final DefaultEntityMetaData extendsEntityMetaData = entityMetaDataCache.get(extendsEntity
-						.get(FULL_NAME));
+				final DefaultEntityMetaData extendsEntityMetaData = entityMetaDataCache
+						.get(extendsEntity.getString(FULL_NAME));
 				entityMetaData.setExtends(extendsEntityMetaData);
 			}
 			final Entity packageEntity = entity.getEntity(PACKAGE);
 
-			PackageImpl p = (PackageImpl) packageRepository.getPackage(packageEntity
-					.getString(PackageMetaData.FULL_NAME));
+			PackageImpl p = (PackageImpl) packageRepository
+					.getPackage(packageEntity.getString(PackageMetaData.FULL_NAME));
 			if (null != p)
 			{
 				entityMetaData.setPackage(p);
 				p.addEntity(entityMetaData);
 			}
+
+			// set id, label and lookup attrs
+			Entity idAttr = entity.getEntity(ID_ATTRIBUTE);
+			if (idAttr != null)
+			{
+				entityMetaData
+						.setIdAttribute(entityMetaData.getAttribute(idAttr.getString(AttributeMetaDataMetaData.NAME)));
+			}
+			Entity labelAttr = entity.getEntity(LABEL_ATTRIBUTE);
+			if (labelAttr != null)
+			{
+				entityMetaData.setLabelAttribute(
+						entityMetaData.getAttribute(labelAttr.getString(AttributeMetaDataMetaData.NAME)));
+			}
+			Stream<Entity> lookupAttrs = stream(entity.getEntities(LOOKUP_ATTRIBUTES).spliterator(), false);
+			entityMetaData.setLookupAttributes(lookupAttrs.map(lookupAttrEntity -> {
+				return entityMetaData.getAttribute(lookupAttrEntity.getString(AttributeMetaDataMetaData.NAME));
+			}));
 		}
+
 	}
 
 	/**
@@ -142,12 +172,24 @@ class EntityMetaDataRepository
 	 */
 	public void add(EntityMetaData entityMetaData)
 	{
-		LOG.debug("Adding" + entityMetaData);
 		DefaultEntityMetaData emd = new DefaultEntityMetaData(entityMetaData.getSimpleName());
 		emd.setLabel(entityMetaData.getLabel());
 		emd.setAbstract(entityMetaData.isAbstract());
 		emd.setDescription(entityMetaData.getDescription());
 		emd.setBackend(entityMetaData.getBackend() == null ? collection.getName() : entityMetaData.getBackend());
+
+		// Language attributes
+		for (String languageCode : entityMetaData.getDescriptionLanguageCodes())
+		{
+			String description = entityMetaData.getDescription(languageCode);
+			if (description != null) emd.setDescription(languageCode, description);
+		}
+
+		for (String languageCode : entityMetaData.getLabelLanguageCodes())
+		{
+			String label = entityMetaData.getLabel(languageCode);
+			if (label != null) emd.setLabel(languageCode, label);
+		}
 
 		if (entityMetaData.getExtends() != null)
 		{
@@ -168,29 +210,39 @@ class EntityMetaDataRepository
 		}
 		((PackageImpl) packageRepository.getPackage(emd.getPackage().getName())).addEntity(emd);
 		Entity entity = toEntity(emd);
-		AttributeMetaData labelAttribute = entityMetaData.getLabelAttribute();
-		if (labelAttribute != null)
-		{
-			emd.setLabelAttribute(labelAttribute.getName());
-			entity.set(LABEL_ATTRIBUTE, labelAttribute.getName());
-		}
-		AttributeMetaData idAttribute = entityMetaData.getIdAttribute();
-		if (idAttribute != null)
-		{
-			emd.setIdAttribute(idAttribute.getName());
-			entity.set(ID_ATTRIBUTE, idAttribute.getName());
-		}
-		Iterable<AttributeMetaData> attributes = entityMetaData.getAttributes();
+		Iterable<AttributeMetaData> attributes = entityMetaData.getOwnAttributes();
 		if (attributes != null)
 		{
-			entity.set(ATTRIBUTES,
-					stream(attributes.spliterator(), false).map(attributeRepository::add).collect(toList()));
-			emd.addAllAttributeMetaData(newArrayList(attributes));
+			Map<String, Entity> attrs = stream(attributeRepository.add(attributes).spliterator(), false)
+					.collect(toMap(attrEntity -> attrEntity.getString(AttributeMetaDataMetaData.NAME),
+							Function.<Entity> identity(), (u, v) -> {
+								throw new IllegalStateException(String.format("Duplicate key %s", u));
+							} , LinkedHashMap::new));
+			entity.set(ATTRIBUTES, attrs.values());
+			emd.addAllAttributeMetaData(attributes);
+
+			AttributeMetaData idAttribute = entityMetaData.getOwnIdAttribute();
+			if (idAttribute != null)
+			{
+				emd.setIdAttribute(idAttribute);
+				entity.set(ID_ATTRIBUTE, attrs.get(idAttribute.getName()));
+			}
+			AttributeMetaData labelAttribute = entityMetaData.getOwnLabelAttribute();
+			if (labelAttribute != null)
+			{
+				emd.setLabelAttribute(labelAttribute);
+				entity.set(LABEL_ATTRIBUTE, attrs.get(labelAttribute.getName()));
+			}
+
+			List<Entity> lookupAttrEntities = stream(entityMetaData.getOwnLookupAttributes().spliterator(), false)
+					.map(lookupAttr -> attrs.get(lookupAttr.getName())).collect(toList());
+			entity.set(LOOKUP_ATTRIBUTES, lookupAttrEntities);
 		}
 		else
 		{
 			entity.set(ATTRIBUTES, Collections.emptyList());
 		}
+
 		repository.add(entity);
 	}
 
@@ -217,6 +269,21 @@ class EntityMetaDataRepository
 		{
 			entityMetaDataEntity.set(EXTENDS, getEntity(emd.getExtends().getName()));
 		}
+
+		// Language attributes
+		for (String languageCode : emd.getDescriptionLanguageCodes())
+		{
+			String attributeName = DESCRIPTION + '-' + languageCode;
+			String description = emd.getDescription(languageCode);
+			if (description != null) entityMetaDataEntity.set(attributeName, description);
+		}
+
+		for (String languageCode : emd.getLabelLanguageCodes())
+		{
+			String attributeName = LABEL + '-' + languageCode;
+			String label = emd.getLabel(languageCode);
+			if (label != null) entityMetaDataEntity.set(attributeName, label);
+		}
 		return entityMetaDataEntity;
 	}
 
@@ -237,8 +304,8 @@ class EntityMetaDataRepository
 	 */
 	public void deleteAll()
 	{
-		List<Entity> entities = Lists.newLinkedList(new DependencyResolver().resolveSelfReferences(repository,
-				META_DATA));
+		List<Entity> entities = Lists
+				.newLinkedList(new DependencyResolver().resolveSelfReferences(repository, META_DATA));
 		Collections.reverse(entities);
 		for (Entity entity : entities)
 		{

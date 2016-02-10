@@ -67,51 +67,63 @@ public class MultiAllelicResultFilter implements ResultFilter
 	}
 
 	@Override
-	public com.google.common.base.Optional<Entity> filterResults(Iterable<Entity> results, Entity annotatedEntity)
+	public com.google.common.base.Optional<Entity> filterResults(Iterable<Entity> resourceEntities, Entity sourceEntity)
 	{
 		List<Entity> processedResults = new ArrayList<>();
 
-		for (Entity entity : results)
+		for (Entity resourceEntity : resourceEntities)
 		{
-			if (entity.get(VcfRepository.REF).equals(annotatedEntity.get(VcfRepository.REF)))
+			if (resourceEntity.get(VcfRepository.REF).equals(sourceEntity.get(VcfRepository.REF)))
 			{
-				Map<String, String> alleleValueMap = new HashMap<>();
-				String[] alts = entity.getString(VcfRepository.ALT).split(",");
-
-				for (AttributeMetaData attributeMetaData : attributes)
-				{
-					String[] values = entity.getString(attributeMetaData.getName()).split(",");
-					for (int i = 0; i < alts.length; i++)
-					{
-						alleleValueMap.put(alts[i], values[i]);
-					}
-					StringBuilder newAttributeValue = new StringBuilder();
-					String[] annotatedEntityAltAlleles = annotatedEntity.getString(VcfRepository.ALT).split(",");
-					for (int i = 0; i < annotatedEntityAltAlleles.length; i++)
-					{
-						if (i != 0)
-						{
-							newAttributeValue.append(",");
-						}
-						if (alleleValueMap.get(annotatedEntityAltAlleles[i]) != null)
-						{
-							newAttributeValue.append(alleleValueMap.get(annotatedEntityAltAlleles[i]));
-						}
-						else
-						{
-							// missing allele in source, add a dot
-							newAttributeValue.append(".");
-						}
-					}
-					// add entity only if something was found
-					if (!newAttributeValue.toString().equals("."))
-					{
-						entity.set(attributeMetaData.getName(), newAttributeValue.toString());
-						processedResults.add(entity);
-					}
-				}
+				filter(sourceEntity, processedResults, resourceEntity, "", "");
+			}
+			else if(resourceEntity.getString(VcfRepository.REF).indexOf(sourceEntity.getString(VcfRepository.REF))==0) {
+				String postFix = resourceEntity.getString(VcfRepository.REF).substring(sourceEntity.getString(VcfRepository.REF).length());
+				filter(sourceEntity, processedResults, resourceEntity, postFix, "");
+			}
+			else if(sourceEntity.getString(VcfRepository.REF).indexOf(resourceEntity.getString(VcfRepository.REF))==0) {
+				String postFix = sourceEntity.getString(VcfRepository.REF).substring(resourceEntity.getString(VcfRepository.REF).length());
+				filter(sourceEntity, processedResults, resourceEntity, "", postFix);
 			}
 		}
 		return FluentIterable.from(processedResults).first();
+	}
+
+	private void filter(Entity annotatedEntity, List<Entity> processedResults, Entity entity, String sourcePostfix, String resourcePostfix) {
+		Map<String, String> alleleValueMap = new HashMap<>();
+		String[] alts = entity.getString(VcfRepository.ALT).split(",");
+
+		for (AttributeMetaData attributeMetaData : attributes)
+        {
+            String[] values = entity.getString(attributeMetaData.getName()).split(",");
+            for (int i = 0; i < alts.length; i++)
+            {
+                alleleValueMap.put(alts[i]+resourcePostfix, values[i]);
+            }
+            StringBuilder newAttributeValue = new StringBuilder();
+            String[] annotatedEntityAltAlleles = annotatedEntity.getString(VcfRepository.ALT).split(",");
+            for (int i = 0; i < annotatedEntityAltAlleles.length; i++)
+            {
+                if (i != 0)
+                {
+                    newAttributeValue.append(",");
+                }
+                if (alleleValueMap.get(annotatedEntityAltAlleles[i]+sourcePostfix) != null)
+                {
+                    newAttributeValue.append(alleleValueMap.get(annotatedEntityAltAlleles[i]+sourcePostfix));
+                }
+                else
+                {
+                    // missing allele in source, add a dot
+                    newAttributeValue.append(".");
+                }
+            }
+            // add entity only if something was found
+            if (!newAttributeValue.toString().equals("."))
+            {
+                entity.set(attributeMetaData.getName(), newAttributeValue.toString());
+                processedResults.add(entity);
+            }
+        }
 	}
 }

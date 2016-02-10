@@ -11,6 +11,8 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.molgenis.data.support.DefaultEntity;
 import org.testng.annotations.BeforeMethod;
@@ -103,9 +105,23 @@ public class EntityManagerImplTest
 
 		Entity entity0 = new DefaultEntity(entityMeta, dataService); // do not mock, setters will be called
 		Entity entity1 = new DefaultEntity(entityMeta, dataService); // do not mock, setters will be called
-		Iterable<Entity> entities = Arrays.asList(entity0, entity1);
+		Stream<Entity> entities = Stream.of(entity0, entity1);
 
 		Fetch fetch = null;
 		assertEquals(entities, entityManagerImpl.resolveReferences(entityMeta, entities, fetch));
+	}
+
+	@Test
+	public void resolveReferencesStreamNoFetch()
+	{
+		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		AttributeMetaData labelAttr = mock(AttributeMetaData.class);
+		when(entityMeta.getLabelAttribute()).thenReturn(labelAttr);
+		Entity entity0 = new DefaultEntity(entityMeta, dataService); // do not mock, setters will be called
+		Entity entity1 = new DefaultEntity(entityMeta, dataService); // do not mock, setters will be called
+
+		Fetch fetch = null;
+		Stream<Entity> entities = entityManagerImpl.resolveReferences(entityMeta, Stream.of(entity0, entity1), fetch);
+		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
 }

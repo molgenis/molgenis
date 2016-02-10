@@ -1,5 +1,7 @@
 package org.molgenis.data.annotation;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+
 import java.util.ArrayList;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -46,11 +48,10 @@ public abstract class AnnotatorTestData
 
 	public void setValues()
 	{
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom, ROLE_ID);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataRef);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataAlt);
-		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
 
 		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataCantAnnotateChrom);
 		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataPos);

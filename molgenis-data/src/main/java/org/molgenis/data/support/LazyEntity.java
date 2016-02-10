@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -44,7 +45,7 @@ public class LazyEntity implements Entity
 	@Override
 	public Iterable<String> getAttributeNames()
 	{
-		return getEntityMetaData().getAtomicAttributeNames();
+		return EntityMetaDataUtils.getAttributeNames(entityMetaData.getAtomicAttributes());
 	}
 
 	@Override
@@ -54,7 +55,7 @@ public class LazyEntity implements Entity
 		AttributeMetaData labelAttr = getEntityMetaData().getLabelAttribute();
 		if (idAttr.equals(labelAttr))
 		{
-			return getIdValue().toString();
+			return DataConverter.toString(getIdValue());
 		}
 		else
 		{
@@ -79,7 +80,7 @@ public class LazyEntity implements Entity
 		AttributeMetaData idAttr = entityMetaData.getIdAttribute();
 		if (attributeName.equals(idAttr.getName()))
 		{
-			return (String) getIdValue();
+			return DataConverter.toString(getIdValue());
 		}
 		return getLazyLoadedEntity().getString(attributeName);
 	}
@@ -90,7 +91,7 @@ public class LazyEntity implements Entity
 		AttributeMetaData idAttr = entityMetaData.getIdAttribute();
 		if (attributeName.equals(idAttr.getName()))
 		{
-			return (Integer) getIdValue();
+			return DataConverter.toInt(getIdValue());
 		}
 		return getLazyLoadedEntity().getInt(attributeName);
 	}

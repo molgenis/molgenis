@@ -1,6 +1,6 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=["bootstrap-fileupload.min.css", "ontology-indexer.css", "biobank-connect.css"]>
+<#assign css=["bootstrap.fileupload.min.css", "ontology-indexer.css", "biobank-connect.css"]>
 <#assign js=["bootstrap-fileupload.min.js", "ontology-manager.js"]>
 <@header css js/>
 	<#if removeSuccess??>

@@ -1,5 +1,8 @@
 package org.molgenis.ontology.core.meta;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -20,10 +23,9 @@ public class OntologyTermDynamicAnnotationMetaData extends DefaultEntityMetaData
 	{
 		super(SIMPLE_NAME, OntologyPackage.getPackageInstance());
 
-		addAttributeMetaData(new DefaultAttributeMetaData(ID).setIdAttribute(true).setNillable(false).setVisible(false));
+		addAttributeMetaData(new DefaultAttributeMetaData(ID).setVisible(false), ROLE_ID);
 		addAttributeMetaData(new DefaultAttributeMetaData(NAME, FieldTypeEnum.STRING).setNillable(false));
 		addAttributeMetaData(new DefaultAttributeMetaData(VALUE, FieldTypeEnum.STRING).setNillable(false));
-		addAttributeMetaData(new DefaultAttributeMetaData(LABEL, FieldTypeEnum.STRING).setNillable(false)
-				.setLabelAttribute(true));
+		addAttributeMetaData(new DefaultAttributeMetaData(LABEL, FieldTypeEnum.STRING).setNillable(false), ROLE_LABEL);
 	}
 }

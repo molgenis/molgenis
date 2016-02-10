@@ -2,7 +2,9 @@ package org.molgenis.data.elasticsearch;
 
 import static java.util.Objects.requireNonNull;
 
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.support.QueryImpl;
 
 public class ElasticsearchRepository extends AbstractElasticsearchRepository
 {
@@ -23,8 +25,7 @@ public class ElasticsearchRepository extends AbstractElasticsearchRepository
 	@Override
 	public void rebuildIndex()
 	{
-		// Do nothing
-		// FIXME reindex from source documents (see https://github.com/molgenis/molgenis/issues/3309)
-		// Do not throw UnsupportedOperationException here because reindexing of repos at startup will fail
+		Iterable<Entity> entities = elasticSearchService.search(new QueryImpl(this), getEntityMetaData());
+		elasticSearchService.rebuildIndex(entities, entityMetaData);
 	}
 }

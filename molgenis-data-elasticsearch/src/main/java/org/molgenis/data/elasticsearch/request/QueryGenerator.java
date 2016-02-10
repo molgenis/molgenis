@@ -22,6 +22,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.UnknownAttributeException;
+import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.util.MolgenisDateFormat;
 
@@ -171,72 +172,88 @@ public class QueryGenerator implements QueryPartGenerator
 				// - for binary yes/no searches
 				// - for queries on exact values
 
-				String[] attributePath = parseAttributePath(queryField);
-				AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
-
-				// construct query part
-				FilterBuilder filterBuilder;
-				if (queryValue != null)
+				// Workaround for Elasticsearch Date to String conversion issue
+				if (queryValue instanceof Date)
 				{
-					FieldTypeEnum dataType = attr.getDataType().getEnumType();
-					switch (dataType)
-					{
-						case BOOL:
-						case DATE:
-						case DATE_TIME:
-						case DECIMAL:
-						case INT:
-						case LONG:
-						{
-							filterBuilder = FilterBuilders.termFilter(queryField, queryValue);
-							filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
-							break;
-						}
-						case EMAIL:
-						case ENUM:
-						case HTML:
-						case HYPERLINK:
-						case SCRIPT:
-						case STRING:
-						case TEXT:
-						{
-							filterBuilder = FilterBuilders.termFilter(queryField + '.'
-									+ MappingsBuilder.FIELD_NOT_ANALYZED, queryValue);
-							filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
-							break;
-						}
-						case CATEGORICAL:
-						case CATEGORICAL_MREF:
-						case XREF:
-						case MREF:
-						case FILE:
-						{
-							if (attributePath.length > 1) throw new UnsupportedOperationException(
-									"Can not filter on references deeper than 1.");
+					String[] attributePath = parseAttributePath(queryField);
 
-							// support both entity as entity id as value
-							Object queryIdValue = queryValue instanceof Entity ? ((Entity) queryValue).getIdValue() : queryValue;
+					AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+					queryValue = getESDateQueryValue((Date) queryValue, attr);
+				}
 
-							AttributeMetaData refIdAttr = attr.getRefEntity().getIdAttribute();
-							String indexFieldName = getXRefEqualsInSearchFieldName(refIdAttr, queryField);
-
-							filterBuilder = FilterBuilders.nestedFilter(queryField,
-									FilterBuilders.termFilter(indexFieldName, queryIdValue));
-							break;
-						}
-						case COMPOUND:
-							throw new MolgenisQueryException("Illegal data type [" + dataType + "] for operator ["
-									+ queryOperator + "]");
-						case IMAGE:
-							throw new UnsupportedOperationException("Query with data type [" + dataType
-									+ "] not supported");
-						default:
-							throw new RuntimeException("Unknown data type [" + dataType + "]");
-					}
+				FilterBuilder filterBuilder;
+				if (queryField.equals(ElasticsearchService.CRUD_TYPE_FIELD_NAME))
+				{
+					filterBuilder = FilterBuilders.termFilter(queryField, queryValue);
 				}
 				else
 				{
-					filterBuilder = FilterBuilders.missingFilter("").existence(true).nullValue(true);
+					String[] attributePath = parseAttributePath(queryField);
+					AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+
+					// construct query part
+					if (queryValue != null)
+					{
+						FieldTypeEnum dataType = attr.getDataType().getEnumType();
+						switch (dataType)
+						{
+							case BOOL:
+							case DATE:
+							case DATE_TIME:
+							case DECIMAL:
+							case INT:
+							case LONG:
+							{
+								filterBuilder = FilterBuilders.termFilter(queryField, queryValue);
+								filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
+								break;
+							}
+							case EMAIL:
+							case ENUM:
+							case HTML:
+							case HYPERLINK:
+							case SCRIPT:
+							case STRING:
+							case TEXT:
+							{
+								filterBuilder = FilterBuilders.termFilter(queryField + '.'
+										+ MappingsBuilder.FIELD_NOT_ANALYZED, queryValue);
+								filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
+								break;
+							}
+							case CATEGORICAL:
+							case CATEGORICAL_MREF:
+							case XREF:
+							case MREF:
+							case FILE:
+							{
+								if (attributePath.length > 1) throw new UnsupportedOperationException(
+										"Can not filter on references deeper than 1.");
+
+								// support both entity as entity id as value
+								Object queryIdValue = queryValue instanceof Entity ? ((Entity) queryValue).getIdValue() : queryValue;
+
+								AttributeMetaData refIdAttr = attr.getRefEntity().getIdAttribute();
+								String indexFieldName = getXRefEqualsInSearchFieldName(refIdAttr, queryField);
+
+								filterBuilder = FilterBuilders.nestedFilter(queryField,
+										FilterBuilders.termFilter(indexFieldName, queryIdValue));
+								break;
+							}
+							case COMPOUND:
+								throw new MolgenisQueryException("Illegal data type [" + dataType + "] for operator ["
+										+ queryOperator + "]");
+							case IMAGE:
+								throw new UnsupportedOperationException("Query with data type [" + dataType
+										+ "] not supported");
+							default:
+								throw new RuntimeException("Unknown data type [" + dataType + "]");
+						}
+					}
+					else
+					{
+						filterBuilder = FilterBuilders.missingFilter("").existence(true).nullValue(true);
+					}
 				}
 				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
 				break;

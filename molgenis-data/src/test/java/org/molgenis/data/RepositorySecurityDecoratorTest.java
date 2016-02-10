@@ -1,21 +1,25 @@
 package org.molgenis.data;
 
+import static java.util.stream.Collectors.toList;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.mockito.ArgumentCaptor;
 import org.molgenis.data.settings.AppSettings;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import com.google.common.collect.Lists;
 
 public class RepositorySecurityDecoratorTest
 {
@@ -39,6 +43,40 @@ public class RepositorySecurityDecoratorTest
 	}
 
 	@Test
+	public void addStream()
+	{
+		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
+				"ROLE_ENTITY_WRITE_" + entityName.toUpperCase());
+		authentication.setAuthenticated(false);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Stream<Entity> entities = Stream.empty();
+		when(decoratedRepository.add(entities)).thenReturn(123);
+		assertEquals(repositorySecurityDecorator.add(entities), Integer.valueOf(123));
+	}
+
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	public void addStreamNoPermission()
+	{
+		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
+				"ROLE_ENTITY_READ_" + entityName.toUpperCase());
+		authentication.setAuthenticated(false);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Stream<Entity> entities = Stream.empty();
+		try
+		{
+			repositorySecurityDecorator.add(entities);
+		}
+		catch (MolgenisDataAccessException e)
+		{
+			verify(decoratedRepository, times(1)).getName();
+			verifyNoMoreInteractions(decoratedRepository);
+			throw e;
+		}
+	}
+
+	@Test
 	public void findAllPermission()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
@@ -46,12 +84,157 @@ public class RepositorySecurityDecoratorTest
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		Iterable<Object> ids = Arrays.<Object> asList(Integer.valueOf(0), Integer.valueOf(1));
+		Stream<Object> ids = Stream.of(Integer.valueOf(0), Integer.valueOf(1));
 		Fetch fetch = new Fetch();
-		Iterable<Entity> entities = Arrays.asList(mock(Entity.class), mock(Entity.class));
-		when(decoratedRepository.findAll(ids, fetch)).thenReturn(entities);
-		assertEquals(entities, Lists.newArrayList(repositorySecurityDecorator.findAll(ids, fetch)));
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		Stream<Entity> entities = Stream.of(entity0, entity1);
+		when(decoratedRepository.findAll(ids, fetch)).thenReturn(Stream.of(entity0, entity1));
+		assertEquals(entities.collect(toList()), repositorySecurityDecorator.findAll(ids, fetch).collect(toList()));
 		verify(decoratedRepository, times(1)).findAll(ids, fetch);
+	}
+
+	@Test
+	public void deleteStream()
+	{
+		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
+				"ROLE_ENTITY_WRITE_" + entityName.toUpperCase());
+		authentication.setAuthenticated(false);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Stream<Entity> entities = Stream.empty();
+		repositorySecurityDecorator.delete(entities);
+		verify(decoratedRepository, times(1)).delete(entities);
+	}
+
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	public void deleteStreamNoPermission()
+	{
+		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
+				"ROLE_ENTITY_READ_" + entityName.toUpperCase());
+		authentication.setAuthenticated(false);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Stream<Entity> entities = Stream.empty();
+		try
+		{
+			repositorySecurityDecorator.delete(entities);
+		}
+		catch (MolgenisDataAccessException e)
+		{
+			verify(decoratedRepository, times(1)).getName();
+			verifyNoMoreInteractions(decoratedRepository);
+			throw e;
+		}
+	}
+
+	@SuppressWarnings(
+	{ "unchecked", "rawtypes" })
+	@Test
+	public void updateStream()
+	{
+		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
+				"ROLE_ENTITY_WRITE_" + entityName.toUpperCase());
+		authentication.setAuthenticated(false);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Entity entity0 = mock(Entity.class);
+		Stream<Entity> entities = Stream.of(entity0);
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		doNothing().when(decoratedRepository).update(captor.capture());
+		repositorySecurityDecorator.update(entities);
+		assertEquals(captor.getValue().collect(Collectors.toList()), Arrays.asList(entity0));
+	}
+
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	public void updateStreamNoPermission()
+	{
+		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
+				"ROLE_ENTITY_READ_" + entityName.toUpperCase());
+		authentication.setAuthenticated(false);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Stream<Entity> entities = Stream.empty();
+		try
+		{
+			repositorySecurityDecorator.update(entities);
+		}
+		catch (MolgenisDataAccessException e)
+		{
+			verify(decoratedRepository, times(1)).getName();
+			verifyNoMoreInteractions(decoratedRepository);
+			throw e;
+		}
+	}
+
+	@Test
+	public void findAllStream()
+	{
+		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
+				"ROLE_ENTITY_READ_" + entityName.toUpperCase());
+		authentication.setAuthenticated(false);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		Stream<Object> entityIds = Stream.of(id0, id1);
+		when(decoratedRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
+		Stream<Entity> expectedEntities = repositorySecurityDecorator.findAll(entityIds);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+	}
+
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	public void findAllStreamNoPermission()
+	{
+		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
+		authentication.setAuthenticated(false);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		Stream<Object> entityIds = Stream.of(id0, id1);
+		when(decoratedRepository.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
+		repositorySecurityDecorator.findAll(entityIds);
+	}
+
+	@Test
+	public void findAllStreamFetch()
+	{
+		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
+				"ROLE_ENTITY_READ_" + entityName.toUpperCase());
+		authentication.setAuthenticated(false);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Fetch fetch = new Fetch();
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		Stream<Object> entityIds = Stream.of(id0, id1);
+		when(decoratedRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
+		Stream<Entity> expectedEntities = repositorySecurityDecorator.findAll(entityIds, fetch);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+	}
+
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	public void findAllStreamFetchNoPermission()
+	{
+		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
+		authentication.setAuthenticated(false);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Fetch fetch = new Fetch();
+		Object id0 = "id0";
+		Object id1 = "id1";
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		Stream<Object> entityIds = Stream.of(id0, id1);
+		when(decoratedRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
+		repositorySecurityDecorator.findAll(entityIds, fetch);
 	}
 
 	@Test(expectedExceptions = MolgenisDataAccessException.class)
@@ -61,9 +244,9 @@ public class RepositorySecurityDecoratorTest
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		Iterable<Object> ids = Arrays.<Object> asList(Integer.valueOf(0), Integer.valueOf(1));
+		Stream<Object> ids = Stream.of(Integer.valueOf(0), Integer.valueOf(1));
 		Fetch fetch = new Fetch();
-		Iterable<Entity> entities = Arrays.asList(mock(Entity.class), mock(Entity.class));
+		Stream<Entity> entities = Stream.of(mock(Entity.class), mock(Entity.class));
 		when(decoratedRepository.findAll(ids, fetch)).thenReturn(entities);
 		repositorySecurityDecorator.findAll(ids, fetch);
 	}
@@ -160,5 +343,34 @@ public class RepositorySecurityDecoratorTest
 		RepositorySecurityDecorator repoSecurityDecorator = new RepositorySecurityDecorator(repo,
 				mock(AppSettings.class));
 		repoSecurityDecorator.removeEntityListener(mock(EntityListener.class));
+	}
+
+	@Test
+	public void findAllAsStreamPermission()
+	{
+		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
+				"ROLE_ENTITY_READ_" + entityName.toUpperCase());
+		authentication.setAuthenticated(false);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Entity entity0 = mock(Entity.class);
+		Query query = mock(Query.class);
+		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = repositorySecurityDecorator.findAll(query);
+		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+	}
+
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
+	public void findAllAsStreamNoPermission()
+	{
+		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
+		authentication.setAuthenticated(false);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		Entity entity0 = mock(Entity.class);
+		Query query = mock(Query.class);
+		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = repositorySecurityDecorator.findAll(query);
+		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
 }

@@ -1,13 +1,12 @@
 package org.molgenis.data.mem;
 
-import static java.util.stream.StreamSupport.stream;
-
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
@@ -16,6 +15,8 @@ import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.QueryImpl;
@@ -74,14 +75,32 @@ public class InMemoryRepository implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
 		if (new QueryImpl().equals(q))
 		{
-			return new ArrayList<>(entities.values());
+			return entities.values().stream();
 		}
 		else
 		{
+			// partial implementation: one EQUALS rule
+			if (q.getRules().size() == 1)
+			{
+				QueryRule r = q.getRules().iterator().next();
+				if (r.getOperator() == Operator.EQUALS)
+				{
+					return entities.entrySet().stream().map((e) -> {
+						if (e.getValue().get(r.getField()).equals(r.getValue()))
+						{
+							return e.getValue();
+						}
+						else
+						{
+							return null;
+						}
+					});
+				}
+			}
 			throw new UnsupportedOperationException();
 		}
 	}
@@ -105,22 +124,15 @@ public class InMemoryRepository implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
+	public Stream<Entity> findAll(Stream<Object> ids)
 	{
-		return findAll(ids, null);
+		return ids.map(id -> entities.get(id));
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids, Fetch fetch)
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
-		return new Iterable<Entity>()
-		{
-			@Override
-			public Iterator<Entity> iterator()
-			{
-				return stream(ids.spliterator(), false).map(id -> entities.get(id)).iterator();
-			}
-		};
+		return ids.map(id -> entities.get(id));
 	}
 
 	@Override
@@ -141,9 +153,9 @@ public class InMemoryRepository implements Repository
 	}
 
 	@Override
-	public void update(Iterable<? extends Entity> records)
+	public void update(Stream<? extends Entity> entities)
 	{
-		records.forEach(this::update);
+		entities.forEach(this::update);
 	}
 
 	private Object getId(Entity entity)
@@ -158,7 +170,7 @@ public class InMemoryRepository implements Repository
 	}
 
 	@Override
-	public void delete(Iterable<? extends Entity> entities)
+	public void delete(Stream<? extends Entity> entities)
 	{
 		entities.forEach(this::delete);
 	}
@@ -170,7 +182,7 @@ public class InMemoryRepository implements Repository
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
 		ids.forEach(this::deleteById);
 	}
@@ -197,15 +209,14 @@ public class InMemoryRepository implements Repository
 	}
 
 	@Override
-	public Integer add(Iterable<? extends Entity> entities)
+	public Integer add(Stream<? extends Entity> entities)
 	{
-		int i = 0;
-		for (Entity entity : entities)
-		{
+		AtomicInteger count = new AtomicInteger();
+		entities.forEach(entity -> {
 			add(entity);
-			i++;
-		}
-		return i;
+			count.incrementAndGet();
+		});
+		return count.get();
 	}
 
 	@Override

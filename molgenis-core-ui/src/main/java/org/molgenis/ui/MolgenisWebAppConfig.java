@@ -1,5 +1,6 @@
 package org.molgenis.ui;
 
+import static freemarker.template.Configuration.VERSION_2_3_23;
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_CSS;
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_FONTS;
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_IMG;
@@ -15,18 +16,14 @@ import java.util.Properties;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
-import org.molgenis.data.AutoValueRepositoryDecorator;
-import org.molgenis.data.ComputedEntityValuesDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.EntityReferenceResolverDecorator;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
-import org.molgenis.data.RepositorySecurityDecorator;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
@@ -34,18 +31,16 @@ import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.MySqlEntityFactory;
-import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.OwnedEntityMetaData;
-import org.molgenis.data.transaction.TransactionLogRepositoryDecorator;
 import org.molgenis.data.transaction.TransactionLogService;
 import org.molgenis.data.validation.EntityAttributesValidator;
-import org.molgenis.data.validation.RepositoryValidationDecorator;
+import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.file.FileStore;
 import org.molgenis.framework.MolgenisUpgradeService;
 import org.molgenis.framework.db.WebAppDatabasePopulator;
@@ -57,7 +52,6 @@ import org.molgenis.security.CorsInterceptor;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
-import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
 import org.molgenis.ui.freemarker.LimitMethod;
 import org.molgenis.ui.menu.MenuMolgenisUi;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -65,11 +59,10 @@ import org.molgenis.ui.menu.MenuReaderServiceImpl;
 import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.ui.menumanager.MenuManagerServiceImpl;
 import org.molgenis.ui.security.MolgenisUiPermissionDecorator;
+import org.molgenis.ui.settings.AppDbSettings;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.DependencyResolver;
-import org.molgenis.util.EntityUtils;
 import org.molgenis.util.GsonHttpMessageConverter;
-import org.molgenis.util.MySqlRepositoryExceptionTranslatorDecorator;
 import org.molgenis.util.ResourceFingerprintRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,6 +104,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	private AppSettings appSettings;
 
 	@Autowired
+	private AppDbSettings appDbSettings;
+
+	@Autowired
 	private MolgenisPermissionService molgenisPermissionService;
 
 	@Autowired
@@ -140,6 +136,12 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	@Autowired
 	public EntityAttributesValidator entityAttributesValidator;
+
+	@Autowired
+	public ExpressionValidator expressionValidator;
+
+	@Autowired
+	public LanguageService languageService;
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
@@ -213,7 +215,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public MolgenisInterceptor molgenisInterceptor()
 	{
-		return new MolgenisInterceptor(resourceFingerprintRegistry(), appSettings, environment);
+		return new MolgenisInterceptor(resourceFingerprintRegistry(), appSettings, languageService, environment);
 	}
 
 	@Bean
@@ -322,7 +324,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		FreeMarkerViewResolver resolver = new FreeMarkerViewResolver();
 		resolver.setCache(true);
 		resolver.setSuffix(".ftl");
-
+		resolver.setContentType("text/html;charset=UTF-8");
 		return resolver;
 	}
 
@@ -335,14 +337,20 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public FreeMarkerConfigurer freeMarkerConfigurer() throws IOException, TemplateException
 	{
-		FreeMarkerConfigurer result = new FreeMarkerConfigurer();
+		FreeMarkerConfigurer result = new FreeMarkerConfigurer()
+		{
+			@Override
+			protected void postProcessConfiguration(Configuration config) throws IOException, TemplateException
+			{
+				config.setObjectWrapper(new MolgenisFreemarkerObjectWrapper(VERSION_2_3_23));
+			}
+		};
 		result.setPreferFileSystemAccess(false);
 		result.setTemplateLoaderPath("classpath:/templates/");
 		result.setDefaultEncoding("UTF-8");
 		Properties freemarkerSettings = new Properties();
 		freemarkerSettings.setProperty(Configuration.LOCALIZED_LOOKUP_KEY, Boolean.FALSE.toString());
 		result.setFreemarkerSettings(freemarkerSettings);
-
 		Map<String, Object> freemarkerVariables = Maps.newHashMap();
 		freemarkerVariables.put("limit", new LimitMethod());
 		freemarkerVariables.put("hasPermission", new HasPermissionDirective(molgenisPermissionService));
@@ -408,7 +416,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		DataServiceImpl localDataService = new DataServiceImpl();
 		EntityManager localEntityManager = new EntityManagerImpl(localDataService);
 		MySqlEntityFactory localMySqlEntityFactory = new MySqlEntityFactory(localEntityManager, localDataService);
-		MetaDataService metaDataService = new MetaDataServiceImpl(localDataService);
+
+		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(localDataService);
+		metaDataService.setLanguageService(new LanguageService(localDataService, appDbSettings));
 		localDataService.setMeta(metaDataService);
 
 		addReposToReindex(localDataService, localMySqlEntityFactory);
@@ -419,8 +429,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		SearchService localSearchService = embeddedElasticSearchServiceFactory.create(localDataService,
 				new ElasticsearchEntityFactory(localEntityManager, sourceToEntityConverter, entityToSourceConverter));
 
-		List<EntityMetaData> metas = DependencyResolver
-				.resolve(Sets.newHashSet(localDataService.getMeta().getEntityMetaDatas()));
+		List<EntityMetaData> metas = DependencyResolver.resolve(Sets.newHashSet(localDataService.getMeta()
+				.getEntityMetaDatas()));
 
 		// Sort repos to the same sequence as the resolves metas
 		List<Repository> repos = Lists.newArrayList(localDataService);
@@ -454,10 +464,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@PostConstruct
 	public void initRepositories()
 	{
-		dataService().setMeta(metaDataService());
-
 		addUpgrades();
 		boolean didUpgrade = upgradeService.upgrade();
+		dataService().setMeta(metaDataService());
 		if (didUpgrade)
 		{
 			LOG.info("Reindexing repositories due to MOLGENIS upgrade...");
@@ -474,6 +483,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		{
 			LOG.debug("Elasticsearch index exists, no need to reindex.");
 		}
+
 		runAsSystem(() -> metaDataService().setDefaultBackend(getBackend()));
 	}
 
@@ -509,44 +519,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 			@Override
 			public Repository createDecoratedRepository(Repository repository)
 			{
-				Repository decoratedRepository = repository;
-
-				// 9. Owned decorator
-				if (EntityUtils.doesExtend(decoratedRepository.getEntityMetaData(), OwnedEntityMetaData.ENTITY_NAME))
-				{
-					decoratedRepository = new OwnedEntityRepositoryDecorator(decoratedRepository);
-				}
-
-				// 8. Entity reference resolver decorator
-				decoratedRepository = new EntityReferenceResolverDecorator(decoratedRepository, entityManager());
-
-				// 7. Computed entity values decorator
-				decoratedRepository = new ComputedEntityValuesDecorator(decoratedRepository);
-
-				// 6. Entity listener
-				decoratedRepository = new EntityListenerRepositoryDecorator(decoratedRepository);
-
-				// 5. Transaction log decorator
-				decoratedRepository = new TransactionLogRepositoryDecorator(decoratedRepository, transactionLogService);
-
-				// 4. SQL exception translation decorator
-				String backend = decoratedRepository.getEntityMetaData().getBackend();
-				if (MysqlRepositoryCollection.NAME.equals(backend))
-				{
-					decoratedRepository = new MySqlRepositoryExceptionTranslatorDecorator(decoratedRepository);
-				}
-
-				// 3. validation decorator
-				decoratedRepository = new RepositoryValidationDecorator(dataService(), decoratedRepository,
-						entityAttributesValidator);
-
-				// 2. auto value decorator
-				decoratedRepository = new AutoValueRepositoryDecorator(decoratedRepository, idGenerator);
-
-				// 1. security decorator
-				decoratedRepository = new RepositorySecurityDecorator(decoratedRepository, appSettings);
-
-				return decoratedRepository;
+				return new MolgenisRepositoryDecoratorFactory(entityManager(), transactionLogService,
+						entityAttributesValidator, idGenerator, appSettings, dataService(), expressionValidator)
+						.createDecoratedRepository(repository);
 			}
 		};
 	}

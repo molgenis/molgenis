@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.molgenis</groupId>
 		<artifactId>molgenis</artifactId>
-		<version>1.14.0-SNAPSHOT</version>
+		<version>1.17.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-app</artifactId>
 	<packaging>war</packaging>
@@ -53,10 +53,6 @@
 			<resource>
 				<directory>${project.basedir}/src/main/resources</directory>
 				<filtering>true</filtering>
-				<excludes>
-					<exclude>**git.properties</exclude>
-					<exclude>**/model/*.xml</exclude>
-				</excludes>
 			</resource>
 		</resources>
 		<plugins>
@@ -64,25 +60,6 @@
 			<plugin>
 				<groupId>com.samaxes.maven</groupId>
 				<artifactId>minify-maven-plugin</artifactId>
-			</plugin>
-			<!-- make molgenis server properties available in pom.xml -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>properties-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>initialize</phase>
-						<goals>
-							<goal>read-project-properties</goal>
-						</goals>
-						<configuration>
-							<files>
-								<file>${user.home}/.molgenis/omx/molgenis-server.properties</file>
-							</files>
-							<quiet>true</quiet>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 			<!-- servlet container -->
 			<plugin>
@@ -115,11 +92,6 @@
 						<version>${mysql.connector.java.version}</version>
 					</dependency>
 				</dependencies>
-			</plugin>
-			<!-- execute molgenis generator -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
 			</plugin>
 		</plugins>
 		<pluginManagement>
@@ -194,11 +166,6 @@
 					<groupId>org.mortbay.jetty</groupId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-data-jpa</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>

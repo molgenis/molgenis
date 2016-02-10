@@ -1,5 +1,6 @@
 package org.molgenis.data.mysql;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 import org.molgenis.MolgenisFieldTypes;
@@ -16,8 +17,7 @@ public class MysqlRepositoryDecimalTest extends MysqlRepositoryAbstractDatatypeT
 	public EntityMetaData createMetaData()
 	{
 		EditableEntityMetaData varcharMD = new DefaultEntityMetaData("DecimalTest").setLabel("Decimal Test");
-		varcharMD.setIdAttribute("col1");
-		varcharMD.addAttribute("col1").setDataType(MolgenisFieldTypes.DECIMAL).setNillable(false);
+		varcharMD.addAttribute("col1", ROLE_ID).setDataType(MolgenisFieldTypes.DECIMAL);
 		varcharMD.addAttribute("col2").setDataType(MolgenisFieldTypes.DECIMAL);
 		varcharMD.addAttribute("col3").setDataType(MolgenisFieldTypes.DECIMAL);
 		return varcharMD;

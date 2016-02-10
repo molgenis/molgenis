@@ -1,5 +1,7 @@
 package org.molgenis.data.meta;
 
+import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
+
 import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
@@ -7,6 +9,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.security.core.Permission;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
@@ -62,6 +65,8 @@ public class MetaUtils
 			}
 			else
 			{
+				validatePermission(entityMeta.getName(), Permission.WRITEMETA);
+
 				if (sync) metaDataService.addAttributeSync(entityMeta.getName(), attr);
 				else metaDataService.addAttribute(entityMeta.getName(), attr);
 

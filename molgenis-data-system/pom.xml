@@ -3,49 +3,11 @@
 	<parent>
 		<groupId>org.molgenis</groupId>
 		<artifactId>molgenis</artifactId>
-		<version>1.14.0-SNAPSHOT</version>
+		<version>1.17.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-data-system</artifactId>
 	<packaging>jar</packaging>
 
-	<build>
-		<plugins>
-			<!-- execute molgenis generator -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-			</plugin>
-			<!-- add generated sources -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>add-source</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<source>target/generated-sources/molgenis/java</source>
-							</sources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<!-- exclude files from jar -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<exclude>**/molgenis.properties</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
-	
 	<dependencies>
 		<dependency>
 			<groupId>org.molgenis</groupId>
@@ -59,7 +21,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-data-jpa</artifactId>
+			<artifactId>molgenis-data</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

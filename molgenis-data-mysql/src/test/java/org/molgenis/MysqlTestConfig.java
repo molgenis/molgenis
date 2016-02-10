@@ -3,14 +3,18 @@ package org.molgenis;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
+import org.mockito.Mockito;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityManagerImpl;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
+import org.molgenis.data.meta.system.FreemarkerTemplateMetaData;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MySqlEntityFactory;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
@@ -26,6 +30,7 @@ import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 /**
  * Database configuration
@@ -51,8 +56,14 @@ public class MysqlTestConfig
 		metaDataService().setDefaultBackend(mysqlRepositoryCollection());
 
 		// Login
-		SecurityContextHolder.getContext()
-				.setAuthentication(new TestingAuthenticationToken("admin", "admin", "ROLE_SYSTEM"));
+		SecurityContextHolder.getContext().setAuthentication(
+				new TestingAuthenticationToken("admin", "admin", "ROLE_SYSTEM"));
+	}
+
+	@Bean
+	public LanguageService languageService()
+	{
+		return new LanguageService(dataService(), Mockito.mock(AppSettings.class));
 	}
 
 	@Bean
@@ -129,5 +140,11 @@ public class MysqlTestConfig
 	public MolgenisPluginRegistry molgenisPluginRegistry()
 	{
 		return new MolgenisPluginRegistryImpl();
+	}
+
+	@Bean
+	public FreeMarkerConfigurer freeMarkerConfigurer()
+	{
+		return new FreeMarkerConfigurer();
 	}
 }

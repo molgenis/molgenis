@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -41,12 +42,17 @@ public class MyRepository extends AbstractRepository
 	}
 
 	@Override
-	public Integer add(Iterable<? extends Entity> newEntities)
+	public Integer add(Stream<? extends Entity> newEntities)
+	{
+		return add(newEntities.iterator());
+	}
+
+	private Integer add(Iterator<? extends Entity> it)
 	{
 		int i = 0;
-		for (Entity e : newEntities)
+		while (it.hasNext())
 		{
-			entities.add(e);
+			entities.add(it.next());
 			i++;
 		}
 

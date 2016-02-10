@@ -75,7 +75,7 @@
 					};
 
 					var items = [];
-					items.push('<img id="validation-spinner" src="/css/select2-spinner.gif">&nbsp;');
+					items.push('<img id="validation-spinner" src="/css/validation-spinner.gif">&nbsp;');
 					items.push('<span class="label label-default">Total: <span id="validation-total">?</span></span>&nbsp;');
 					items.push('<span class="label label-success">Success: <span id="validation-success">0</span></span>&nbsp;');
 					items

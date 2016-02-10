@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.molgenis</groupId>
 		<artifactId>molgenis</artifactId>
-		<version>1.14.0-SNAPSHOT</version>
+		<version>1.17.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-security</artifactId>
 	<packaging>jar</packaging>
@@ -15,34 +15,6 @@
 	  </repository>
 	</repositories>
 
-	<build>
-        <plugins>
-        	<!-- execute molgenis generator -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-			</plugin>
-			<!-- add generated sources -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>add-source</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<source>target/generated-sources/molgenis/java</source>
-							</sources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-        </plugins>
-    </build>
-	
 	<dependencies>
 		<dependency>
 			<groupId>org.molgenis</groupId>
@@ -56,7 +28,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-data-jpa</artifactId>
+			<artifactId>molgenis-data</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -86,6 +58,11 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-config</artifactId>
 			<version>${spring.security.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.api-client</groupId>
+			<artifactId>google-api-client</artifactId>
+			<version>1.21.0</version>
 		</dependency>
 	</dependencies>
 </project>

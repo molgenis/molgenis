@@ -50,10 +50,10 @@ public interface MappingService
 	 * @param mappingTarget
 	 *            the MappingTarget whose mappings are applied
 	 * @param newEntityName
-	 *            the name of the new entity to create.
+	 *            the name of the entity to map to
 	 * @return fully qualified name of the generated entity
 	 */
-	String applyMappings(MappingTarget mappingTarget, String newEntityName);
+	String applyMappings(MappingTarget mappingTarget, String entityName);
 
 	/**
 	 * Deletes a {@link MappingProject}

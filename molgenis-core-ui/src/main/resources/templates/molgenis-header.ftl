@@ -4,6 +4,7 @@
 <#include "resource-macros.ftl">
 <#macro header css=[] js=[]>
 <#assign cookieWall = app_settings.googleAnalyticsIpAnonymization == false && (app_settings.googleAnalyticsTrackingId?? || app_settings.googleAnalyticsTrackingIdMolgenis??) || (app_settings.googleAnalyticsTrackingId?? && !app_settings.googleAnalyticsAccountPrivacyFriendly) || (app_settings.googleAnalyticsTrackingIdMolgenis?? && !app_settings.googleAnalyticsAccountPrivacyFriendlyMolgenis)>
+<#assign googleSignIn = app_settings.googleSignIn && app_settings.signUp && !app_settings.signUpModeration>
 <!DOCTYPE html>
 <html>
     <head>
@@ -12,23 +13,13 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta http-equiv="X-UA-Compatible" content="chrome=1">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
-        
-	<#-- Bundle of third party CSS resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
-        <link rel="stylesheet" href="<@resource_href "/css/molgenis-bundle.min.css"/>" type="text/css">
-    
-	<#if environment == "development">
-        <link rel="stylesheet" href="<@resource_href "/css/component/wrapper/DateTimePicker.css"/>" type="text/css">
-        <link rel="stylesheet" href="<@resource_href "/css/component/wrapper/JQRangeSlider.css"/>" type="text/css">
-        <link rel="stylesheet" href="<@resource_href "/css/component/Checkbox.css"/>" type="text/css">
-        <link rel="stylesheet" href="<@resource_href "/css/component/Radio.css"/>" type="text/css">
-        <link rel="stylesheet" href="<@resource_href "/css/component/Table.css"/>" type="text/css">
-    <#else>
-        <link rel="stylesheet" href="<@resource_href "/css/molgenis-component.min.css"/>" type="text/css">
+    <#if googleSignIn>
+        <meta name="google-signin-client_id" content="${app_settings.googleAppClientId?html}">
     </#if>
-        
+        <link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
+        <link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
         <link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
- 		<link rel="stylesheet" href="<@resource_href "/css/themes/${app_settings.bootstrapTheme?html}"/>" type="text/css" id="bootstrap-theme">
+ 		<link rel="stylesheet" href="<@resource_href "/css/${app_settings.bootstrapTheme?html}"/>" type="text/css" id="bootstrap-theme">
 
     <#if app_settings.logoTopHref?has_content>
         <link rel="stylesheet" href="<@resource_href "/css/molgenis-top-logo.css"/>" type="text/css">
@@ -45,54 +36,25 @@
         <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
 		<script src="<@resource_href "/js/es6-promise.min.js"/>"></script>
 		<script src="<@resource_href "/js/promise-done-6.1.0.min.js"/>"></script>
-		<script src="<@resource_href "/js/promise-done-6.1.0.min.js"/>"></script>
-        <script src="<@resource_href "/js/molgenis-bundle.min.js"/>"></script>
+        <script src="<@resource_href "/js/dist/molgenis-vendor-bundle.js"/>"></script>
+		<script src="<@resource_href "/js/dist/molgenis-global.js"/>"></script>
+	    <script src="<@resource_href "/js/dist/molgenis-global-ui.js"/>"></script>
         <script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
         <script src="<@resource_href "/js/handlebars.min.js"/>"></script>
         <script src="<@resource_href "/js/molgenis.js"/>"></script>
         <script src="<@resource_href "/js/molgenis-script-evaluator.js"/>"></script>
-    <#if environment == "development">
-        <#-- Important: Update minify-maven-plugin configuration in molgenis-core-ui/pom.xml when modifying the list below -->
-        <script src="<@resource_href "/js/react-with-addons.js"/>"></script>
-        <script src="<@resource_href "/js/component/mixin/AttributeLoaderMixin.js"/>"></script>
-        <script src="<@resource_href "/js/component/mixin/DeepPureRenderMixin.js"/>"></script>
-        <script src="<@resource_href "/js/component/mixin/EntityInstanceLoaderMixin.js"/>"></script>
-        <script src="<@resource_href "/js/component/mixin/EntityLoaderMixin.js"/>"></script>
-        <script src="<@resource_href "/js/component/mixin/GroupMixin.js"/>"></script>
-        <script src="<@resource_href "/js/component/mixin/ReactLayeredComponentMixin.js"/>"></script>
-        <script src="<@resource_href "/js/component/wrapper/Ace.js"/>"></script>
-        <script src="<@resource_href "/js/component/wrapper/DateTimePicker.js"/>"></script>
-        <script src="<@resource_href "/js/component/wrapper/JQRangeSlider.js"/>"></script>
-        <script src="<@resource_href "/js/component/wrapper/JQueryForm.js"/>"></script>
-        <script src="<@resource_href "/js/component/wrapper/Select2.js"/>"></script>
-        <script src="<@resource_href "/js/component/AggregateTable.js"/>"></script>
-        <script src="<@resource_href "/js/component/AlertMessage.js"/>"></script>
-        <script src="<@resource_href "/js/component/AttributeControl.js"/>"></script>
-        <script src="<@resource_href "/js/component/BoolControl.js"/>"></script>
-        <script src="<@resource_href "/js/component/Button.js"/>"></script>
-        <script src="<@resource_href "/js/component/CheckboxGroup.js"/>"></script>
-        <script src="<@resource_href "/js/component/CodeEditor.js"/>"></script>
-        <script src="<@resource_href "/js/component/DateControl.js"/>"></script>
-        <script src="<@resource_href "/js/component/Dialog.js"/>"></script>
-        <script src="<@resource_href "/js/component/EntitySelectBox.js"/>"></script>
-        <script src="<@resource_href "/js/component/Form.js"/>"></script>
-        <script src="<@resource_href "/js/component/FormControl.js"/>"></script>
-        <script src="<@resource_href "/js/component/FormControlGroup.js"/>"></script>
-        <script src="<@resource_href "/js/component/Icon.js"/>"></script>
-        <script src="<@resource_href "/js/component/Input.js"/>"></script>
-        <script src="<@resource_href "/js/component/Modal.js"/>"></script>
-        <script src="<@resource_href "/js/component/Pager.js"/>"></script>
-        <script src="<@resource_href "/js/component/Popover.js"/>"></script>
-        <script src="<@resource_href "/js/component/Questionnaire.js"/>"></script>
-        <script src="<@resource_href "/js/component/RadioGroup.js"/>"></script>
-        <script src="<@resource_href "/js/component/RangeSlider.js"/>"></script>
-        <script src="<@resource_href "/js/component/SelectBox.js"/>"></script>
-        <script src="<@resource_href "/js/component/Spinner.js"/>"></script>
-        <script src="<@resource_href "/js/component/Table.js"/>"></script>
-        <script src="<@resource_href "/js/component/TextArea.js"/>"></script>     
-    <#else>
-        <script src="<@resource_href "/js/react-with-addons.min.js"/>"></script>
-        <script src="<@resource_href "/js/molgenis-component.min.js"/>"></script>
+    <#if googleSignIn>
+        <#if authenticated?? && authenticated>
+        <#-- Include script tag before platform.js script loading, else onLoad could be called before the onLoad function is available -->
+        <script>
+            function onLoad() {
+                gapi.load('auth2', function() {
+                    gapi.auth2.init();
+                });
+            }
+        </script>
+        </#if>
+        <script src="https://apis.google.com/js/platform.js<#if authenticated?? && authenticated>?onload=onLoad</#if>" async defer></script>
     </#if>
         
     <!--[if IE 9]>
@@ -232,14 +194,30 @@
 				</ul>
 				
 				<#if authenticated?? && authenticated>
-					<form class="navbar-form navbar-right" method="post" action="/logout">
-						<button id="signout-button" type="submit" class="btn btn-primary">Sign out</button>
+					<form id="logout-form" class="navbar-form navbar-right" method="post" action="/logout">
+						<button id="signout-button" type="button" class="btn btn-primary">Sign out</button>
+						<script>
+                            $("#signout-button").click(function() {
+                            <#if googleSignIn>
+                                var auth2 = gapi.auth2.getAuthInstance();
+                                auth2.signOut().then(function () {
+                            </#if>
+                                    $('#logout-form').submit();
+                            <#if googleSignIn>
+                                });
+                            </#if>
+                            });
+						</script>
 					</form>
+					
+					<div id="language-select-box" class="navbar-right"></div>
 				<#else>
 					<form class="navbar-form navbar-right" method="post" action="/login">
-						<a id="open-button" type="btn" class="btn btn-default modal-href" href="/account/login" data-target="login-modal-container-header">Sign in</a>
+                        <a id="open-button" type="btn" class="btn btn-default" data-toggle="modal" data-target="#login-modal">Sign in</a>
 					</form>
 				</#if>
+				
+				
 			</div>
 			<#-- Navbar items end -->
 			

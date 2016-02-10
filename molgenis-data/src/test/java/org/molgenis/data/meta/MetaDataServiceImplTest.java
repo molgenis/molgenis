@@ -2,6 +2,7 @@ package org.molgenis.data.meta;
 
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -16,7 +17,9 @@ import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Package;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.mem.InMemoryRepositoryCollection;
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -70,7 +73,11 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 		personEntity.set(EntityMetaDataMetaData.SIMPLE_NAME, "Person");
 		personEntity.set(EntityMetaDataMetaData.ABSTRACT, true);
 
-		metaDataServiceImpl = new MetaDataServiceImpl(new DataServiceImpl());
+		DataServiceImpl dataService = new DataServiceImpl();
+		metaDataServiceImpl = new MetaDataServiceImpl(dataService);
+
+		AppSettings appSettings = Mockito.mock(AppSettings.class);
+		metaDataServiceImpl.setLanguageService(new LanguageService(dataService, appSettings));
 		metaDataServiceImpl.setDefaultBackend(manageableCrudRepositoryCollection);
 
 		assertEquals(metaDataServiceImpl.getRootPackages(), Arrays.asList(defaultPackage));
@@ -86,7 +93,7 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 		coderMetaData.setDescription("A coder");
 		coderMetaData.setExtends(metaDataServiceImpl.getEntityMetaData("org_molgenis_Person"));
 		coderMetaData.setPackage(defaultPackage);
-		coderMetaData.addAttribute("ID").setIdAttribute(true);
+		coderMetaData.addAttribute("ID", ROLE_ID);
 		coderMetaData.addAttribute("simple");
 		DefaultAttributeMetaData compoundAttribute = new DefaultAttributeMetaData("compound", COMPOUND);
 		coderMetaData.addAttributeMetaData(compoundAttribute);
@@ -101,7 +108,10 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 
 		// reboot
 
-		metaDataServiceImpl = new MetaDataServiceImpl(new DataServiceImpl());
+		DataServiceImpl dataService = new DataServiceImpl();
+		metaDataServiceImpl = new MetaDataServiceImpl(dataService);
+		AppSettings appSettings = Mockito.mock(AppSettings.class);
+		metaDataServiceImpl.setLanguageService(new LanguageService(dataService, appSettings));
 		metaDataServiceImpl.setDefaultBackend(manageableCrudRepositoryCollection);
 		retrieved = metaDataServiceImpl.getEntityMetaData("Coder");
 		assertEquals(retrieved.getIdAttribute().getName(), "ID");
@@ -119,10 +129,10 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 		when(dataServiceImpl.hasRepository(entityName)).thenReturn(Boolean.TRUE);
 
 		DefaultEntityMetaData existingEntityMetaData = new DefaultEntityMetaData(entityName);
-		existingEntityMetaData.addAttribute("ID").setIdAttribute(true);
+		existingEntityMetaData.addAttribute("ID", ROLE_ID);
 
 		DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(entityName);
-		newEntityMetaData.addAttribute("ID").setIdAttribute(true);
+		newEntityMetaData.addAttribute("ID", ROLE_ID);
 
 		when(dataServiceImpl.getEntityMetaData(entityName)).thenReturn(existingEntityMetaData);
 		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(dataServiceImpl);
@@ -142,10 +152,10 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 		when(dataServiceImpl.hasRepository(entityName)).thenReturn(Boolean.TRUE);
 
 		DefaultEntityMetaData existingEntityMetaData = new DefaultEntityMetaData(entityName);
-		existingEntityMetaData.addAttribute("ID").setIdAttribute(true);
+		existingEntityMetaData.addAttribute("ID", ROLE_ID);
 
 		DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(entityName);
-		newEntityMetaData.addAttribute("ID").setIdAttribute(true);
+		newEntityMetaData.addAttribute("ID", ROLE_ID);
 		newEntityMetaData.addAttributeMetaData(new DefaultAttributeMetaData("newAtribute"));
 
 		when(dataServiceImpl.getEntityMetaData(entityName)).thenReturn(existingEntityMetaData);
@@ -165,11 +175,11 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 		when(dataServiceImpl.hasRepository(entityName)).thenReturn(Boolean.TRUE);
 
 		DefaultEntityMetaData existingEntityMetaData = new DefaultEntityMetaData(entityName);
-		existingEntityMetaData.addAttribute("ID").setIdAttribute(true);
+		existingEntityMetaData.addAttribute("ID", ROLE_ID);
 		existingEntityMetaData.addAttributeMetaData(new DefaultAttributeMetaData("existingAttribute"));
 
 		DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(entityName);
-		newEntityMetaData.addAttribute("ID").setIdAttribute(true);
+		newEntityMetaData.addAttribute("ID", ROLE_ID);
 
 		when(dataServiceImpl.getEntityMetaData(entityName)).thenReturn(existingEntityMetaData);
 		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(dataServiceImpl);
@@ -188,10 +198,10 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 		when(dataServiceImpl.hasRepository(entityName)).thenReturn(Boolean.TRUE);
 
 		DefaultEntityMetaData existingEntityMetaData = new DefaultEntityMetaData(entityName);
-		existingEntityMetaData.addAttribute("ID").setIdAttribute(true);
+		existingEntityMetaData.addAttribute("ID", ROLE_ID);
 
 		DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(entityName);
-		newEntityMetaData.addAttribute("ID").setIdAttribute(false);
+		newEntityMetaData.addAttribute("ID");
 
 		when(dataServiceImpl.getEntityMetaData(entityName)).thenReturn(existingEntityMetaData);
 		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(dataServiceImpl);
@@ -208,11 +218,11 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 																						// test
 		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(dataServiceImpl);
 		RepositoryCollection repositoryCollection = Mockito.mock(RepositoryCollection.class);
-		
+
 		when(repositoryCollection.getEntityNames()).thenReturn(Lists.newArrayList("attributes"));
 
 		DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData("attributes");
-		newEntityMetaData.addAttribute("ID").setIdAttribute(false);
+		newEntityMetaData.addAttribute("ID");
 		Repository repo1 = Mockito.mock(Repository.class);
 		when(repositoryCollection.getRepository("attributes")).thenReturn(repo1);
 		when(repo1.getEntityMetaData()).thenReturn(newEntityMetaData);
@@ -230,7 +240,7 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(dataServiceImpl);
 
 		DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData("attributes");
-		newEntityMetaData.addAttribute("ID").setIdAttribute(false);
+		newEntityMetaData.addAttribute("ID");
 
 		List<String> skipEntities = Lists.<String> newArrayList("attributes");
 		String defaultPackage = "base";

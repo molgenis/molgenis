@@ -1,15 +1,37 @@
 package org.molgenis.data.support;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.STRING;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.AGGREGATEABLE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.AUTO;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.DATA_TYPE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.DEFAULT_VALUE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.EXPRESSION;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.NILLABLE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.PARTS;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MAX;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MIN;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.READ_ONLY;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.REF_ENTITY;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.UNIQUE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.VALIDATION_EXPRESSION;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE_EXPRESSION;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeChangeListener;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Range;
@@ -23,18 +45,19 @@ import org.molgenis.util.CaseInsensitiveLinkedHashMap;
  */
 public class DefaultAttributeMetaData implements AttributeMetaData
 {
-	private String name;
-	private FieldType fieldType = MolgenisFieldTypes.STRING;
+	private Map<String, AttributeChangeListener> changeListeners;
+
+	private final String name;
+	private FieldType fieldType;
 	private String description;
+	private final Map<String, String> descriptionByLanguageCode = new HashMap<>();
 	private boolean nillable = true;
 	private boolean readOnly = false;
 	private String defaultValue = null;
-	private boolean idAttribute = false;
-	private boolean labelAttribute = false; // remove?
-	private boolean lookupAttribute = false; // remove?
 	private EntityMetaData refEntity;
 	private String expression;
-	private String label;
+	private String label;// The default label
+	private final Map<String, String> labelByLanguageCode = new HashMap<>();
 	private boolean visible = true; // remove?
 	private boolean unique = false;
 	private boolean auto = false;
@@ -44,23 +67,21 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private String visibleExpression;
 	private String validationExpression;
 
-	public DefaultAttributeMetaData(String name, FieldTypeEnum fieldType)
-	{
-		this.name = requireNonNull(name);
-		this.fieldType = MolgenisFieldTypes.getType(requireNonNull(fieldType).toString().toLowerCase());
-	}
-
 	public DefaultAttributeMetaData(String name)
 	{
-		if (name == null) throw new IllegalArgumentException("Name cannot be null");
-		this.name = requireNonNull(name);
-		this.fieldType = MolgenisFieldTypes.STRING;
+		this(name, STRING);
 	}
 
-	public DefaultAttributeMetaData(String newName, AttributeMetaData attributeMetaData)
+	public DefaultAttributeMetaData(String name, FieldTypeEnum fieldType)
 	{
-		this(attributeMetaData);
-		this.name = newName;
+		this(name, MolgenisFieldTypes.getType(requireNonNull(fieldType).toString().toLowerCase()));
+	}
+
+	private DefaultAttributeMetaData(String name, FieldType fieldType)
+	{
+		this.name = requireNonNull(name);
+		this.label = name;
+		this.fieldType = requireNonNull(fieldType);
 	}
 
 	/**
@@ -70,19 +91,21 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	 */
 	public DefaultAttributeMetaData(AttributeMetaData attributeMetaData)
 	{
+		this(attributeMetaData.getName(), attributeMetaData);
+	}
+
+	public DefaultAttributeMetaData(String newName, AttributeMetaData attributeMetaData)
+	{
 		this.name = attributeMetaData.getName();
 		this.fieldType = attributeMetaData.getDataType();
 		this.description = attributeMetaData.getDescription();
 		this.nillable = attributeMetaData.isNillable();
 		this.readOnly = attributeMetaData.isReadonly();
 		this.defaultValue = attributeMetaData.getDefaultValue();
-		this.idAttribute = attributeMetaData.isIdAtrribute();
-		this.labelAttribute = attributeMetaData.isLabelAttribute();
-		this.lookupAttribute = attributeMetaData.isLookupAttribute();
 		EntityMetaData refEntity = attributeMetaData.getRefEntity();
 		this.refEntity = refEntity != null ? new DefaultEntityMetaData(refEntity) : null; // deep copy
 		this.expression = attributeMetaData.getExpression();
-		this.label = attributeMetaData.getLabel();
+		setLabel(attributeMetaData.getLabel());
 		this.visible = attributeMetaData.isVisible();
 		this.unique = attributeMetaData.isUnique();
 		this.auto = attributeMetaData.isAuto();
@@ -90,6 +113,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		this.range = attributeMetaData.getRange();
 		this.visibleExpression = attributeMetaData.getVisibleExpression();
 		this.validationExpression = attributeMetaData.getValidationExpression();
+		addChangeListeners(attributeMetaData.getChangeListeners());
 
 		// deep copy
 		Iterable<AttributeMetaData> attributeParts = attributeMetaData.getAttributeParts();
@@ -119,7 +143,28 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setDescription(String description)
 	{
 		this.description = description;
+		fireChangeEvent(DESCRIPTION);
 		return this;
+	}
+
+	@Override
+	public String getDescription(String languageCode)
+	{
+		String description = descriptionByLanguageCode.get(languageCode);
+		return description != null ? description : getDescription();
+	}
+
+	public DefaultAttributeMetaData setDescription(String languageCode, String description)
+	{
+		descriptionByLanguageCode.put(languageCode, description);
+		fireChangeEvent(DESCRIPTION + '-' + languageCode);
+		return this;
+	}
+
+	@Override
+	public Set<String> getDescriptionLanguageCodes()
+	{
+		return Collections.unmodifiableSet(descriptionByLanguageCode.keySet());
 	}
 
 	@Override
@@ -131,6 +176,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setDataType(FieldType type)
 	{
 		this.fieldType = type;
+		fireChangeEvent(DATA_TYPE);
 		return this;
 	}
 
@@ -143,23 +189,20 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setNillable(boolean nillable)
 	{
 		this.nillable = nillable;
+		fireChangeEvent(NILLABLE);
 		return this;
 	}
 
 	@Override
 	public boolean isReadonly()
 	{
-		if (idAttribute)
-		{
-			readOnly = true;
-		}
-
 		return readOnly;
 	}
 
 	public DefaultAttributeMetaData setReadOnly(boolean readOnly)
 	{
 		this.readOnly = readOnly;
+		fireChangeEvent(READ_ONLY);
 		return this;
 	}
 
@@ -172,30 +215,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setDefaultValue(String defaultValue)
 	{
 		this.defaultValue = defaultValue;
-		return this;
-	}
-
-	@Override
-	public boolean isIdAtrribute()
-	{
-		return idAttribute;
-	}
-
-	public DefaultAttributeMetaData setIdAttribute(boolean idAttribute)
-	{
-		this.idAttribute = idAttribute;
-		return this;
-	}
-
-	@Override
-	public boolean isLabelAttribute()
-	{
-		return labelAttribute;
-	}
-
-	public DefaultAttributeMetaData setLabelAttribute(boolean labelAttribute)
-	{
-		this.labelAttribute = labelAttribute;
+		fireChangeEvent(DEFAULT_VALUE);
 		return this;
 	}
 
@@ -208,6 +228,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setRefEntity(EntityMetaData refEntity)
 	{
 		this.refEntity = refEntity;
+		fireChangeEvent(REF_ENTITY);
 		return this;
 	}
 
@@ -220,6 +241,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setExpression(String expression)
 	{
 		this.expression = expression;
+		fireChangeEvent(EXPRESSION);
 		return this;
 	}
 
@@ -243,6 +265,8 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 			this.attributePartsMap = new CaseInsensitiveLinkedHashMap<>();
 		}
 		this.attributePartsMap.put(attributePart.getName(), attributePart);
+
+		fireChangeEvent(PARTS);
 	}
 
 	public void setAttributesMetaData(Iterable<AttributeMetaData> attributeParts)
@@ -251,18 +275,44 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		attributeParts.forEach(attrPart -> {
 			attributePartsMap.put(attrPart.getName(), attrPart);
 		});
+		fireChangeEvent(PARTS);
 	}
 
 	@Override
 	public String getLabel()
 	{
-		return label == null ? name : label;
+		return label;
 	}
 
 	public DefaultAttributeMetaData setLabel(String label)
 	{
 		this.label = label;
+		if (this.label == null)
+		{
+			this.label = this.name;
+		}
+		fireChangeEvent(LABEL);
 		return this;
+	}
+
+	public DefaultAttributeMetaData setLabel(String languageCode, String label)
+	{
+		labelByLanguageCode.put(languageCode, label);
+		fireChangeEvent(LABEL + '-' + languageCode);
+		return this;
+	}
+
+	@Override
+	public String getLabel(String languageCode)
+	{
+		String label = labelByLanguageCode.get(languageCode);
+		return label != null ? label : getLabel();
+	}
+
+	@Override
+	public Set<String> getLabelLanguageCodes()
+	{
+		return Collections.unmodifiableSet(labelByLanguageCode.keySet());
 	}
 
 	@Override
@@ -274,23 +324,20 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setVisible(boolean visible)
 	{
 		this.visible = visible;
+		fireChangeEvent(VISIBLE);
 		return this;
 	}
 
 	@Override
 	public boolean isUnique()
 	{
-		if (idAttribute)
-		{
-			unique = true;
-		}
-
 		return unique;
 	}
 
 	public DefaultAttributeMetaData setUnique(boolean unique)
 	{
 		this.unique = unique;
+		fireChangeEvent(UNIQUE);
 		return this;
 	}
 
@@ -303,18 +350,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setAuto(boolean auto)
 	{
 		this.auto = auto;
-		return this;
-	}
-
-	@Override
-	public boolean isLookupAttribute()
-	{
-		return lookupAttribute;
-	}
-
-	public DefaultAttributeMetaData setLookupAttribute(boolean lookupAttribute)
-	{
-		this.lookupAttribute = lookupAttribute;
+		fireChangeEvent(AUTO);
 		return this;
 	}
 
@@ -329,9 +365,6 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		result += " nillable='" + nillable + "'";
 		result += " readOnly='" + readOnly + "'";
 		result += " defaultValue='" + defaultValue + "'";
-		result += " idAttribute='" + idAttribute + "'";
-		result += " labelAttribute='" + labelAttribute + "'";
-		result += " lookupAttribute='" + lookupAttribute + "'";
 		result += " expression='" + expression + "'";
 		result += " label='" + label + "'";
 		result += " visible='" + visible + "'";
@@ -356,6 +389,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setAggregateable(boolean aggregateable)
 	{
 		this.aggregateable = aggregateable;
+		fireChangeEvent(AGGREGATEABLE);
 		return this;
 	}
 
@@ -368,6 +402,8 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setRange(Range range)
 	{
 		this.range = range;
+		fireChangeEvent(RANGE_MIN);
+		fireChangeEvent(RANGE_MAX);
 		return this;
 	}
 
@@ -388,7 +424,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		{
 			((EnumField) fieldType).setEnumOptions(enumOptions);
 		}
-
+		fireChangeEvent(ENUM_OPTIONS);
 		return this;
 	}
 
@@ -401,6 +437,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setVisibleExpression(String visibleExpression)
 	{
 		this.visibleExpression = visibleExpression;
+		fireChangeEvent(VISIBLE_EXPRESSION);
 		return this;
 	}
 
@@ -413,6 +450,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setValidationExpression(String validationExpression)
 	{
 		this.validationExpression = validationExpression;
+		fireChangeEvent(VALIDATION_EXPRESSION);
 		return this;
 	}
 
@@ -445,7 +483,10 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		if (isAuto() != other.isAuto()) return false;
 		if (getDescription() == null)
 		{
-			if (other.getDescription() != null) return false;
+			if (other.getDescription() != null)
+			{
+				return false;
+			}
 		}
 		else if (!getDescription().equals(other.getDescription())) return false;
 		if (getDataType() == null)
@@ -466,14 +507,11 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 				}
 			}
 		}
-		if (isIdAtrribute() != other.isIdAtrribute()) return false;
 		if (getLabel() == null)
 		{
 			if (other.getLabel() != null) return false;
 		}
 		else if (!getLabel().equals(other.getLabel())) return false;
-		if (isLabelAttribute() != other.isLabelAttribute()) return false;
-		if (isLookupAttribute() != other.isLookupAttribute()) return false;
 		if (getName() == null)
 		{
 			if (other.getName() != null) return false;
@@ -530,4 +568,57 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 
 		return true;
 	}
+
+	@Override
+	public Collection<AttributeChangeListener> getChangeListeners()
+	{
+		if (changeListeners != null)
+		{
+			return changeListeners.values();
+		}
+		else
+		{
+			return Collections.emptySet();
+		}
+	}
+
+	@Override
+	public void addChangeListener(AttributeChangeListener changeListener)
+	{
+		if (changeListeners == null)
+		{
+			changeListeners = new HashMap<>();
+		}
+		changeListeners.put(changeListener.getId(), changeListener);
+	}
+
+	@Override
+	public void addChangeListeners(Iterable<AttributeChangeListener> changeListeners)
+	{
+		changeListeners.forEach(this::addChangeListener);
+	}
+
+	@Override
+	public void removeChangeListener(String changeListenerId)
+	{
+		if (changeListeners != null)
+		{
+			changeListeners.remove(changeListenerId);
+		}
+	}
+
+	@Override
+	public void removeChangeListeners()
+	{
+		changeListeners = null;
+	}
+
+	private void fireChangeEvent(String attrName)
+	{
+		if (changeListeners != null)
+		{
+			changeListeners.values().forEach(changeListener -> changeListener.onChange(attrName, this));
+		}
+	}
+
 }
