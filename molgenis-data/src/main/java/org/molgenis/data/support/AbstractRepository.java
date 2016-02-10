@@ -111,8 +111,9 @@ public abstract class AbstractRepository implements Repository
 
 	private Iterable<Entity> findAllBatched(List<Object> ids, Fetch fetch)
 	{
-		Query inQuery = new QueryImpl().in(getEntityMetaData().getIdAttribute().getName(), Sets.newHashSet(ids))
-				.fetch(fetch);
+		String fieldIdAttributeName = getEntityMetaData().getIdAttribute().getName();
+		if(fetch != null) fetch.field(fieldIdAttributeName);
+		Query inQuery = new QueryImpl().in(fieldIdAttributeName, Sets.newHashSet(ids)).fetch(fetch);
 		Map<Object, Entity> indexedEntities = uniqueIndex(findAll(inQuery).iterator(), Entity::getIdValue);
 		return filter(transform(ids, id -> lookup(indexedEntities, id)), notNull());
 	}
