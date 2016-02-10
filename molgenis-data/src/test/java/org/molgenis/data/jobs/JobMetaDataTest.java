@@ -10,23 +10,23 @@ import org.molgenis.data.support.DataServiceImpl;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-public class JobTest
+public class JobMetaDataTest
 {
 	private DataService dataService;
-	private Job job;
+	private JobMetaData jobMetaData;
 
 	@BeforeClass
 	public void beforeClass()
 	{
 		dataService = new DataServiceImpl();
-		job = new Job(dataService);
+		jobMetaData = new JobMetaData(dataService);
 	}
 
 	@Test
 	public void testGetAndSetIdentifier()
 	{
-		job.setIdentifier("AAAABDASDFR");
-		assertEquals(job.getIdentifier(), "AAAABDASDFR");
+		jobMetaData.setIdentifier("AAAABDASDFR");
+		assertEquals(jobMetaData.getIdentifier(), "AAAABDASDFR");
 	}
 
 	@Test
@@ -34,74 +34,68 @@ public class JobTest
 	{
 		MolgenisUser me = new MolgenisUser();
 		me.setUsername("fdlk");
-		job.setUser(me);
-		assertEquals(job.getUser(), me);
+		jobMetaData.setUser(me);
+		assertEquals(jobMetaData.getUser(), me);
 	}
 
 	@Test
 	public void testGetAndSetStatus()
 	{
-		job.setStatus(Job.Status.PENDING);
-		assertEquals(job.getStatus(), Job.Status.PENDING);
+		jobMetaData.setStatus(JobMetaData.Status.PENDING);
+		assertEquals(jobMetaData.getStatus(), JobMetaData.Status.PENDING);
 	}
 
 	@Test
 	public void testGetAndSetType()
 	{
-		job.setType("AnnotatorJob");
-		assertEquals(job.getType(), "AnnotatorJob");
+		jobMetaData.setType("AnnotatorJob");
+		assertEquals(jobMetaData.getType(), "AnnotatorJob");
 	}
 
 	@Test
 	public void testGetAndSetSubmissionDate()
 	{
 		Date date = new Date();
-		job.setSubmissionDate(date);
-		assertEquals(job.getSubmissionDate(), date);
+		jobMetaData.setSubmissionDate(date);
+		assertEquals(jobMetaData.getSubmissionDate(), date);
 	}
 
 	@Test
 	public void testGetAndSetStartDate()
 	{
 		Date date = new Date();
-		job.setStartDate(date);
-		assertEquals(job.getStartDate(), date);
+		jobMetaData.setStartDate(date);
+		assertEquals(jobMetaData.getStartDate(), date);
 	}
 
 	@Test
 	public void testGetAndSetEndDate()
 	{
 		Date date = new Date();
-		job.setEndDate(date);
-		assertEquals(job.getEndDate(), date);
+		jobMetaData.setEndDate(date);
+		assertEquals(jobMetaData.getEndDate(), date);
 	}
 
 	@Test
 	public void testGetAndSetProgressInt()
 	{
-		job.setProgressInt(50);
-		assertEquals(job.getProgressInt(), new Integer(50));
+		jobMetaData.setProgressInt(50);
+		assertEquals(jobMetaData.getProgressInt(), new Integer(50));
 	}
 
 	@Test
 	public void testGetAndSetProgressMessage()
 	{
-		job.setProgressMessage(
+		jobMetaData.setProgressMessage(
 				"Annotating with SnpEff, Exac, CADD, Clinvar, Dann, CGD, Fitcon, GoNL, HPO, and many more.... %p");
-		assertEquals(job.getProgressMessage(),
+		assertEquals(jobMetaData.getProgressMessage(),
 				"Annotating with SnpEff, Exac, CADD, Clinvar, Dann, CGD, Fitcon, GoNL, HPO, and many more.... %p");
 	}
 
 	@Test
 	public void testGetAndSetProgressMax()
 	{
-		job.setProgressMax(1032);
-		assertEquals(job.getProgressMax(), new Integer(1032));
-	}
-
-	@Test
-	public void testGetMetaData()
-	{
-		assertEquals(Job.META_DATA, Job.getMetaData());
+		jobMetaData.setProgressMax(1032);
+		assertEquals(jobMetaData.getProgressMax(), new Integer(1032));
 	}
 }

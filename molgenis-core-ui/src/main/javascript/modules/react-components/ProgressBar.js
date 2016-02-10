@@ -10,7 +10,7 @@
  * @param status
  *            The status of the job, will affect bar color
  * @param active
- *            Wether the bar should be animated or not
+ *            Whether the bar should be animated or not
  * 
  * @exports ProgressBarClass, ProgressBar factory
  */
@@ -30,8 +30,8 @@ var ProgressBar = React.createClass({
 		active: React.PropTypes.bool
 	},
 	render: function() {
-		return <div className="progress">
-			<div className={'progress-bar progress-bar-' + this.props.status + (this.props.active ? ' progress-bar-striped active' : '')} 
+		return <div className="progress background-lightgrey">
+			<div className={'progress-bar progress-bar-' + this.props.status + (this.props.active ? ' progress-bar-striped active' : '')}
 				role="progressbar" style={{minWidth: '2em', 'width': this.props.progressPct+ '%'}}>
 		    		{this.props.progressMessage}
 		    </div>

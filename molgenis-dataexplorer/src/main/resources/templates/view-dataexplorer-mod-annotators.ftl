@@ -11,18 +11,16 @@
 </div>
     <script>
     	$(function (){
-	    	var progressPct = 100;
 	 		var ProgressBar = React.render(molgenis.ui.ProgressBar({
-	    	 	'progressPct' : progressPct,
+	    	 	'progressPct' : 0,
 				'progressMessage' : 'Starting annotation run',    
-				'status' : 'primary',
-				'active' : true
+				'status' : 'info',
+				'active' : false
 			}), $('#annotateRun')[0]);
 	        setInterval(
 	                function ()
 	                {
-	                    
-	                    molgenis.RestClient.prototype.getAsync('/api/v1/Job/', {'q' : [ {
+	                    molgenis.RestClient.prototype.getAsync('/api/v1/AnnotationJobMetaData/', {'q' : [ {
 	                                'field' : 'identifier',
 	                                'operator' : 'EQUALS',
 	                                'value' : '${annotationRun.identifier}'
@@ -36,8 +34,12 @@
 	                                }
 	                                else{
 	                                	if(ProgressBar && ProgressBar.isMounted()) {
+                                            var progress = ((entry.progressInt/entry.progressMax)*100)
+                                            console.log(entry.progressMessage);
+                                            console.log(progress);
 			    							ProgressBar.setProps({
-												'progressMessage' : entry.progressMessage
+												'progressMessage' : entry.progressMessage,
+                                                'progressPct' : progress
 							            	});
 		                                }
 	                                }

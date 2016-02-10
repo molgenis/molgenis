@@ -3,13 +3,22 @@ package org.molgenis.data.support;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.annotation.AnnotationJob;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.meta.AnnotationJobMetaData;
+import org.molgenis.data.jobs.JobMetaData;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;

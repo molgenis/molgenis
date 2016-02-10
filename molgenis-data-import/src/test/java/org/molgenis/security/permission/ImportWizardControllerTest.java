@@ -23,7 +23,7 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.importer.ImportResultsWizardPage;
-import org.molgenis.data.importer.ImporterController;
+import org.molgenis.data.importer.ImportWizardController;
 import org.molgenis.data.importer.OptionsWizardPage;
 import org.molgenis.data.importer.PackageWizardPage;
 import org.molgenis.data.importer.UploadWizardPage;
@@ -56,7 +56,7 @@ import org.testng.annotations.Test;
 { Config.class })
 public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 {
-	private ImporterController controller;
+	private ImportWizardController controller;
 	private WebRequest webRequest;
 
 	@Autowired
@@ -122,7 +122,7 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		ImportResultsWizardPage importResultsWizardPage = mock(ImportResultsWizardPage.class);
 		PackageWizardPage packageWizardPage = mock(PackageWizardPage.class);
 
-		controller = new ImporterController(uploadWizardPage, optionsWizardPage, packageWizardPage,
+		controller = new ImportWizardController(uploadWizardPage, optionsWizardPage, packageWizardPage,
 				validationResultWizardPage, importResultsWizardPage, dataService, grantedAuthoritiesMapper,
 				userAccountService);
 
@@ -134,26 +134,26 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		group1.setName("TestGroup");
 
 		MapEntity entity1 = new MapEntity("Entity1");
-		entity1.set(GroupAuthority.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY1");
-		entity1.set(GroupAuthority.MOLGENISGROUP, group1);
+		entity1.set("groupauthority_role", SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY1");
+		entity1.set("molgenisGroup", group1);
 		GroupAuthority authority1 = new GroupAuthority();
 		authority1.set(entity1);
 
 		MapEntity entity2 = new MapEntity("Entity2");
-		entity2.set(GroupAuthority.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY2");
-		entity2.set(GroupAuthority.MOLGENISGROUP, group1);
+		entity2.set("groupauthority_role", SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY2");
+		entity2.set("molgenisGroup", group1);
 		GroupAuthority authority2 = new GroupAuthority();
 		authority2.set(entity2);
 
 		MapEntity entity3 = new MapEntity("Entity2");
-		entity3.set(GroupAuthority.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY3");
-		entity3.set(GroupAuthority.MOLGENISGROUP, group1);
+		entity3.set("groupauthority_role", SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY3");
+		entity3.set("molgenisGroup", group1);
 		GroupAuthority authority3 = new GroupAuthority();
 		authority3.set(entity3);
 
 		MapEntity entity4 = new MapEntity("Entity2");
-		entity4.set(GroupAuthority.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY4");
-		entity4.set(GroupAuthority.MOLGENISGROUP, group1);
+		entity4.set("groupauthority_role", SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY4");
+		entity4.set("molgenisGroup", group1);
 		GroupAuthority authority4 = new GroupAuthority();
 		authority4.set(entity4);
 

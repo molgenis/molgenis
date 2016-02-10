@@ -1,6 +1,6 @@
 package org.molgenis.data.importer;
 
-import static org.molgenis.data.importer.ImporterController.URI;
+import static org.molgenis.data.importer.ImportWizardController.URI;
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.Permission.NONE;
 import static org.molgenis.security.core.Permission.READ;
@@ -47,7 +47,7 @@ import org.springframework.web.context.request.WebRequest;
 
 @Controller
 @RequestMapping(URI)
-public class ImporterController extends AbstractWizardController
+public class ImportWizardController extends AbstractWizardController
 {
 	public static final String ID = "importwizard";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
@@ -62,10 +62,10 @@ public class ImporterController extends AbstractWizardController
 	private final UserAccountService userAccountService;
 
 	@Autowired
-	public ImporterController(UploadWizardPage uploadWizardPage, OptionsWizardPage optionsWizardPage,
-			PackageWizardPage packageWizardPage, ValidationResultWizardPage validationResultWizardPage,
-			ImportResultsWizardPage importResultsWizardPage, DataService dataService,
-			GrantedAuthoritiesMapper grantedAuthoritiesMapper, UserAccountService userAccountService)
+	public ImportWizardController(UploadWizardPage uploadWizardPage, OptionsWizardPage optionsWizardPage,
+								  PackageWizardPage packageWizardPage, ValidationResultWizardPage validationResultWizardPage,
+								  ImportResultsWizardPage importResultsWizardPage, DataService dataService,
+								  GrantedAuthoritiesMapper grantedAuthoritiesMapper, UserAccountService userAccountService)
 	{
 		super(URI, "importWizard");
 		if (uploadWizardPage == null) throw new IllegalArgumentException("UploadWizardPage is null");
@@ -127,51 +127,56 @@ public class ImporterController extends AbstractWizardController
 	@ResponseStatus(HttpStatus.OK)
 	public void addGroupEntityClassPermissions(@RequestParam String groupId, WebRequest webRequest)
 	{
-		dataService.getEntityNames().forEach(entityClassId -> {
-			GroupAuthority authority = getGroupAuthority(groupId, entityClassId);
-			String param = "radio-" + entityClassId;
-			String value = webRequest.getParameter(param);
-			if (value != null && (SecurityUtils
-					.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + entityClassId.toUpperCase())
-					|| userAccountService.getCurrentUser().isSuperuser()))
-			{
-				if (value.equalsIgnoreCase(READ.toString()) || value.equalsIgnoreCase(COUNT.toString())
-						|| value.equalsIgnoreCase(WRITE.toString()) || value.equalsIgnoreCase(WRITEMETA.toString()))
-				{
-					authority.setMolgenisGroup(
-							dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class));
-					authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_"
-							+ entityClassId.toUpperCase());
-					if (authority.getId() == null)
+		dataService.getEntityNames().forEach(
+				entityClassId -> {
+					GroupAuthority authority = getGroupAuthority(groupId, entityClassId);
+					String param = "radio-" + entityClassId;
+					String value = webRequest.getParameter(param);
+					if (value != null
+							&& (SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX
+							+ entityClassId.toUpperCase()) || userAccountService.getCurrentUser()
+							.isSuperuser()))
 					{
-						authority.setId(UUID.randomUUID().toString());
-						dataService.add(GroupAuthority.ENTITY_NAME, authority);
+						if (value.equalsIgnoreCase(READ.toString()) || value.equalsIgnoreCase(COUNT.toString())
+								|| value.equalsIgnoreCase(WRITE.toString())
+								|| value.equalsIgnoreCase(WRITEMETA.toString()))
+						{
+							authority.setMolgenisGroup(dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId,
+									MolgenisGroup.class));
+							authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_"
+									+ entityClassId.toUpperCase());
+							if (authority.getId() == null)
+							{
+								authority.setId(UUID.randomUUID().toString());
+								dataService.add(GroupAuthority.ENTITY_NAME, authority);
+							}
+							else dataService.update(GroupAuthority.ENTITY_NAME, authority);
+						}
+						else if (value.equalsIgnoreCase(NONE.toString()))
+						{
+							if (authority.getId() != null) dataService.delete(GroupAuthority.ENTITY_NAME,
+									authority.getId());
+						}
+						else
+						{
+							throw new RuntimeException("Unknown value: " + value + " for permission on entity: "
+									+ entityClassId);
+						}
 					}
-					else dataService.update(GroupAuthority.ENTITY_NAME, authority);
-				}
-				else if (value.equalsIgnoreCase(NONE.toString()))
-				{
-					if (authority.getId() != null) dataService.delete(GroupAuthority.ENTITY_NAME, authority.getId());
-				}
-				else
-				{
-					throw new RuntimeException(
-							"Unknown value: " + value + " for permission on entity: " + entityClassId);
-				}
-			}
-			else
-			{
-				if (value != null) throw new MolgenisDataAccessException(
-						"Current user is not allowed to change the permissions for this entity: " + entityClassId);
-			}
-		});
+					else
+					{
+						if (value != null) throw new MolgenisDataAccessException(
+								"Current user is not allowed to change the permissions for this entity: "
+										+ entityClassId);
+					}
+				});
 	}
 
 	private List<Authority> getGroupPermissions(MolgenisGroup molgenisGroup)
 	{
 		return dataService.findAll(GroupAuthority.ENTITY_NAME,
-				new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, molgenisGroup), GroupAuthority.class)
-				.collect(Collectors.toList());
+				new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, molgenisGroup), GroupAuthority.class).collect(
+				Collectors.toList());
 	}
 
 	private Permissions createPermissions(List<? extends Authority> entityAuthorities, List<String> entityIds)

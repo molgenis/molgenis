@@ -6,20 +6,21 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.AnnotationJob;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.jobs.Job;
+import org.molgenis.data.annotation.meta.AnnotationJobMetaData;
 import org.molgenis.data.settings.SettingsEntityMeta;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionSystemService;
+import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.quartz.JobBuilder;
@@ -33,6 +34,8 @@ import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -50,13 +53,13 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
@@ -64,7 +67,7 @@ import static org.molgenis.dataexplorer.controller.AnnotatorController.URI;
 
 @Controller
 @RequestMapping(URI)
-public class AnnotatorController
+public class AnnotatorController implements ApplicationListener<ContextRefreshedEvent>
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AnnotatorController.class);
 
@@ -75,23 +78,41 @@ public class AnnotatorController
 	private final String triggerNameSalt;
 	private final DataService dataService;
 	private final AnnotationService annotationService;
-	private final UserAccountService userAccountService;
 	private final MolgenisPermissionService molgenisPermissionService;
 	private final Scheduler scheduler;
 	private final PermissionSystemService permissionSystemService;
+	private final UserAccountService userAccountService;
 
 	@Autowired
 	public AnnotatorController(DataService dataService, AnnotationService annotationService,
-			UserAccountService userAccountService, MolgenisPermissionService molgenisPermissionService,
-			Scheduler scheduler, PermissionSystemService permissionSystemService)
+			MolgenisPermissionService molgenisPermissionService, Scheduler scheduler,
+			PermissionSystemService permissionSystemService, UserAccountService userAccountService)
 	{
 		this.dataService = dataService;
 		this.annotationService = annotationService;
-		this.userAccountService = userAccountService;
 		this.molgenisPermissionService = molgenisPermissionService;
 		this.scheduler = requireNonNull(scheduler);
 		this.triggerNameSalt = UUID.randomUUID().toString();
 		this.permissionSystemService = permissionSystemService;
+		this.userAccountService = userAccountService;
+	}
+
+	@Override
+	@RunAsSystem
+	public void onApplicationEvent(ContextRefreshedEvent event)
+	{
+		// check if there are annotators with a status running, this can only occur because of a shutdown of the server
+		// during an annotation run.
+		Stream<Entity> runningAnnotations = dataService.findAll(AnnotationJobMetaData.ENTITY_NAME,
+				new QueryImpl().eq(AnnotationJobMetaData.STATUS, AnnotationJobMetaData.Status.RUNNING));
+		runningAnnotations.forEach(entity -> failRunningAnnotation(entity));
+	}
+
+	private void failRunningAnnotation(Entity entity)
+	{
+		entity.set(AnnotationJobMetaData.STATUS, AnnotationJobMetaData.Status.FAILED);
+		entity.set(AnnotationJobMetaData.PROGRESS_MESSAGE, "Annotation failed because MOLGENIS was restarted.");
+		dataService.update(AnnotationJobMetaData.ENTITY_NAME, entity);
 	}
 
 	/**
@@ -131,22 +152,12 @@ public class AnnotatorController
 		if (createCopy)
 		{
 			String newRepositoryLabel = getNewRepositoryLabel(annotatorNames, entityName);
-			repository = dataService.copyRepository(repository, RandomStringUtils.randomAlphabetic(30), newRepositoryLabel);
+			repository = dataService.copyRepository(repository, RandomStringUtils.randomAlphabetic(30),
+					newRepositoryLabel);
 			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 					Collections.singletonList(repository.getName()));
 			entityName = repository.getEntityMetaData().getSimpleName();
 		}
-
-		Job annotationRun = new Job(dataService);
-		annotationRun.setIdentifier(UUID.randomUUID().toString());
-		annotationRun.setProgressMessage("Started annotation run.");
-		annotationRun.setStatus(Job.Status.RUNNING);
-		annotationRun.setTarget(entityName);
-		annotationRun.setUser(userAccountService.getCurrentUser());
-		annotationRun.setSubmissionDate(new Date());
-		annotationRun.setType("Annotators");
-
-		dataService.add(Job.ENTITY_NAME, annotationRun);
 
 		if (annotatorNames != null && repository != null)
 		{
@@ -155,7 +166,7 @@ public class AnnotatorController
 					.forEach(a -> annotators.add(annotationService.getAnnotatorByName(a)));
 			try
 			{
-				scheduleAnnotatorRun(repository.getEntityMetaData().getSimpleName(), annotators, annotationRun);
+				scheduleAnnotatorRun(repository.getEntityMetaData().getSimpleName(), annotators);
 			}
 			catch (SchedulerException e)
 			{
@@ -164,8 +175,6 @@ public class AnnotatorController
 		}
 		return entityName;
 	}
-
-
 
 	private String getNewRepositoryLabel(
 			@RequestParam(value = "annotatorNames", required = false) String[] annotatorNames,
@@ -177,7 +186,7 @@ public class AnnotatorController
 		return entityName + "_" + joinedString;
 	}
 
-	public TriggerKey scheduleAnnotatorRun(String entityName, List<RepositoryAnnotator> annotators, Job annotationRun)
+	public TriggerKey scheduleAnnotatorRun(String entityName, List<RepositoryAnnotator> annotators)
 			throws SchedulerException
 	{
 		TriggerKey triggerKey = getIndexRebuildTriggerKeyCurrentUser();
@@ -187,7 +196,6 @@ public class AnnotatorController
 			jobDataMap.put(AnnotationJob.REPOSITORY_NAME, entityName);
 			jobDataMap.put(AnnotationJob.ANNOTATORS, annotators);
 			jobDataMap.put(AnnotationJob.USERNAME, userAccountService.getCurrentUser().getUsername());
-			jobDataMap.put(AnnotationJob.ANNOTATION_RUN, annotationRun);
 			TriggerBuilder<?> triggerBuilder = TriggerBuilder.newTrigger().withIdentity(triggerKey)
 					.usingJobData(jobDataMap).startNow();
 			scheduleAnnotatorRunJob(triggerBuilder);
