@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -314,6 +315,13 @@ public class DefaultEntity implements Entity
 	public void set(Entity entity)
 	{
 		entityMetaData.getAtomicAttributes().forEach(attr -> set(attr.getName(), entity.get(attr.getName())));
+	}
+
+	public void setOnlyAttributesWithSameMetadata(Entity entity)
+	{
+		StreamSupport.stream(entity.getEntityMetaData().getAtomicAttributes().spliterator(), false).filter(e -> {
+			return e.equals(entityMetaData.getAttribute(e.getName()));
+		}).forEach(attr -> set(attr.getName(), entity.get(attr.getName())));
 	}
 
 	@Override
