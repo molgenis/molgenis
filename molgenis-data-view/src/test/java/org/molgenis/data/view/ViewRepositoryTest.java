@@ -174,19 +174,15 @@ public class ViewRepositoryTest extends AbstractTestNGSpringContextTests
 		expectedEntityMetaData.addAttributeMetaData(entityBCompound, AttributeRole.ROLE_LOOKUP);
 		expectedEntityMetaData.addAttributeMetaData(entityCCompound, AttributeRole.ROLE_LOOKUP);
 
-	}
+		// Mock the metadata
+		when(dataService.getEntityMetaData("entityA")).thenReturn(entityMetaA);
+		when(dataService.getEntityMetaData("entityB")).thenReturn(entityMetaB);
+		when(dataService.getEntityMetaData("entityC")).thenReturn(entityMetaC);
 
-	@Test
-	private void getEntityMetaDataTest()
-	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("MY_FIRST_VIEW", PackageImpl.defaultPackage);
 		emd.addAttribute("id", AttributeRole.ROLE_ID, AttributeRole.ROLE_LABEL);
 		emd.setAbstract(false);
 		viewRepository = new ViewRepository(emd, dataService);
-
-		when(dataService.getEntityMetaData("entityA")).thenReturn(entityMetaA);
-		when(dataService.getEntityMetaData("entityB")).thenReturn(entityMetaB);
-		when(dataService.getEntityMetaData("entityC")).thenReturn(entityMetaC);
 
 		Query queryMock = mock(Query.class);
 		when(dataService.query(EntityViewMetaData.ENTITY_NAME)).thenReturn(queryMock);
@@ -203,6 +199,11 @@ public class ViewRepositoryTest extends AbstractTestNGSpringContextTests
 			}
 		});
 
+	}
+
+	@Test
+	private void getEntityMetaDataTest()
+	{
 		assertEquals(viewRepository.getEntityMetaData(), expectedEntityMetaData);
 		assertEquals(viewRepository.getEntityMetaData().getAttributes().toString(), expectedEntityMetaData
 				.getAttributes().toString());
@@ -278,67 +279,43 @@ public class ViewRepositoryTest extends AbstractTestNGSpringContextTests
 		repoC.add(entityC2);
 		repoC.add(entityC3);
 
-		DefaultEntityMetaData emd = new DefaultEntityMetaData("MY_FIRST_VIEW", PackageImpl.defaultPackage);
-		emd.addAttribute("id", AttributeRole.ROLE_ID, AttributeRole.ROLE_LABEL);
-		emd.setAbstract(false);
-		viewRepository = new ViewRepository(emd, dataService);
-
-		when(dataService.getEntityMetaData("entityA")).thenReturn(entityMetaA);
-		when(dataService.getEntityMetaData("entityB")).thenReturn(entityMetaB);
-		when(dataService.getEntityMetaData("entityC")).thenReturn(entityMetaC);
-
-		Query queryMock = mock(Query.class);
-		when(dataService.query(EntityViewMetaData.ENTITY_NAME)).thenReturn(queryMock);
-		Query queryMock2 = mock(Query.class);
-		when(queryMock.eq(EntityViewMetaData.VIEW_NAME, "MY_FIRST_VIEW")).thenReturn(queryMock2);
-		when(queryMock2.findOne()).thenReturn(entityEvmd1);
-
-		when(queryMock2.findAll()).thenAnswer(new Answer<Stream<Entity>>()
-		{
-			@Override
-			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Arrays.asList(entityEvmd1, entityEvmd2, entityEvmd3, entityEvmd4).stream();
-			}
-		});
-
 		when(dataService.getRepository("entityA")).thenReturn(repoA);
 
 		Query q1 = new QueryImpl();
 		q1.eq("chrom", "1");
 		q1.and();
 		q1.eq("pos", "25");
-		when(dataService.findOne("entityB", q1)).thenReturn(entityB1);
+		when(dataService.findAll("entityB", q1)).thenReturn(Arrays.asList(entityB1).stream());
 		
 		Query q2 = new QueryImpl();
 		q2.eq("chrom", "2");
 		q2.and();
 		q2.eq("pos", "50");
-		when(dataService.findOne("entityB", q2)).thenReturn(entityB2);
+		when(dataService.findAll("entityB", q2)).thenReturn(Arrays.asList(entityB2).stream());
 
 		Query q3 = new QueryImpl();
 		q3.eq("chrom", "3");
 		q3.and();
 		q3.eq("pos", "75");
-		when(dataService.findOne("entityB", q3)).thenReturn(entityB3);
+		when(dataService.findAll("entityB", q3)).thenReturn(Arrays.asList(entityB3).stream());
 		
 		Query q4 = new QueryImpl();
 		q4.eq("chrom", "1");
 		q4.and();
 		q4.eq("pos", "25");
-		when(dataService.findOne("entityC", q4)).thenReturn(entityC1);
+		when(dataService.findAll("entityC", q4)).thenReturn(Arrays.asList(entityC1).stream());
 
 		Query q5 = new QueryImpl();
 		q5.eq("chrom", "2");
 		q5.and();
 		q5.eq("pos", "50");
-		when(dataService.findOne("entityC", q2)).thenReturn(entityC2);
+		when(dataService.findAll("entityC", q2)).thenReturn(Arrays.asList(entityC2).stream());
 
 		Query q6 = new QueryImpl();
 		q6.eq("chrom", "3");
 		q6.and();
 		q6.eq("pos", "75");
-		when(dataService.findOne("entityC", q6)).thenReturn(entityC3);
+		when(dataService.findAll("entityC", q6)).thenReturn(Arrays.asList(entityC3).stream());
 		
 		DefaultEntity expected1 = new DefaultEntity(expectedEntityMetaData, dataService);
 		expected1.set("id", "1");
