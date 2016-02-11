@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -60,7 +61,7 @@ public class ViewRepository extends AbstractRepository
 		String entityMasterName = getMasterEntityName();
 		DefaultAttributeMetaData masterCompoundAttribute = new DefaultAttributeMetaData(entityMasterName, FieldTypeEnum.COMPOUND); 
 		masterCompoundAttribute.setAttributesMetaData(dataService.getEntityMetaData(entityMasterName).getAttributes()); 
-		entityMetaDataView.addAttributeMetaData(masterCompoundAttribute,AttributeRole.ROLE_LOOKUP);
+		entityMetaDataView.addAttributeMetaData(masterCompoundAttribute, AttributeRole.ROLE_LOOKUP);
 		  
 		// Add slave compounds
 		dataService
@@ -80,7 +81,10 @@ public class ViewRepository extends AbstractRepository
 											.stream(dataService.getEntityMetaData(e).getAtomicAttributes()
 													.spliterator(), false)
 									.map(f -> {
-										return new DefaultAttributeMetaData(e + "_" + f.getName(), f);
+												String prefixedAttributeName = prefixSlaveEntityAttributeName(e,
+														f.getName());
+												return new DefaultAttributeMetaData(prefixedAttributeName,
+														prefixedAttributeName, f);
 									}).collect(Collectors.toList()));
 							entityMetaDataView.addAttributeMetaData(slaveCompoundAttribute, AttributeRole.ROLE_LOOKUP);
 		});
@@ -157,11 +161,16 @@ public class ViewRepository extends AbstractRepository
 			{
 				for (String attributeName : slaveEntities.get(0).getAttributeNames())
 				{
-					me.set(entry.getKey() + "_" + attributeName, slaveEntities.get(0).get(attributeName));
+					me.set(prefixSlaveEntityAttributeName(entry.getKey(), attributeName),
+							slaveEntities.get(0).get(attributeName));
 				}
 			}
 		}
 		return me;
+	}
+
+	private String prefixSlaveEntityAttributeName(String entityName, String attributeName){
+		return entityName + "_" + attributeName;
 	}
 
 	private String getMasterEntityName()
@@ -174,6 +183,14 @@ public class ViewRepository extends AbstractRepository
 	@Override
 	public void create()
 	{
-		// Skip this the. The view is virtual.
+		/**
+		 * Skip this method. The view is dynamic and have not real physical copy.
+		 */
+	}
+
+	@Override
+	public Iterable<AttributeMetaData> getQueryableAttributes()
+	{
+		return dataService.getMeta().getEntityMetaData(getMasterEntityName()).getAtomicAttributes();
 	}
 }
