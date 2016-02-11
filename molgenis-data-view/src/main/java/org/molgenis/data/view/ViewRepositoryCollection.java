@@ -40,7 +40,7 @@ public class ViewRepositoryCollection implements ManageableRepositoryCollection
 	@Override
 	public Repository addEntityMeta(EntityMetaData entityMeta)
 	{
-		ViewRepository repo = new ViewRepository(entityMeta, dataService, searchService);
+		ViewRepository repo = new ViewRepository(entityMeta, dataService);
 		if (!searchService.hasMapping(entityMeta)) repo.create();
 		repositories.put(entityMeta.getName(), repo);
 		return repo;

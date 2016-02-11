@@ -91,10 +91,28 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	 */
 	public DefaultAttributeMetaData(AttributeMetaData attributeMetaData)
 	{
-		this(attributeMetaData.getName(), attributeMetaData);
+		this(attributeMetaData.getName(), attributeMetaData.getLabel(), attributeMetaData);
 	}
 
-	public DefaultAttributeMetaData(String newName, AttributeMetaData attributeMetaData)
+	/**
+	 * Copy constructor
+	 * 
+	 * @param name
+	 * @param attributeMetaData
+	 */
+	public DefaultAttributeMetaData(String name, AttributeMetaData attributeMetaData)
+	{
+		this(attributeMetaData.getName(), attributeMetaData.getLabel(), attributeMetaData);
+	}
+
+	/**
+	 * Copy constructor
+	 * 
+	 * @param newName
+	 * @param label
+	 * @param attributeMetaData
+	 */
+	public DefaultAttributeMetaData(String newName, String label, AttributeMetaData attributeMetaData)
 	{
 		this.name = newName;
 		this.fieldType = attributeMetaData.getDataType();
@@ -105,16 +123,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		EntityMetaData refEntity = attributeMetaData.getRefEntity();
 		this.refEntity = refEntity != null ? new DefaultEntityMetaData(refEntity) : null; // deep copy
 		this.expression = attributeMetaData.getExpression();
-
-		if (attributeMetaData.getName().equals(attributeMetaData.getLabel()))
-		{
-			setLabel(newName);
-		}
-		else
-		{
-			setLabel(attributeMetaData.getLabel());
-		}
-
+		setLabel(label);
 		this.visible = attributeMetaData.isVisible();
 		this.unique = attributeMetaData.isUnique();
 		this.auto = attributeMetaData.isAuto();

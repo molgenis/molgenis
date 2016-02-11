@@ -182,7 +182,7 @@ public class ViewRepositoryTest extends AbstractTestNGSpringContextTests
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("MY_FIRST_VIEW", PackageImpl.defaultPackage);
 		emd.addAttribute("id", AttributeRole.ROLE_ID, AttributeRole.ROLE_LABEL);
 		emd.setAbstract(false);
-		viewRepository = new ViewRepository(emd, dataService, searchService);
+		viewRepository = new ViewRepository(emd, dataService);
 
 		when(dataService.getEntityMetaData("entityA")).thenReturn(entityMetaA);
 		when(dataService.getEntityMetaData("entityB")).thenReturn(entityMetaB);
@@ -281,7 +281,7 @@ public class ViewRepositoryTest extends AbstractTestNGSpringContextTests
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("MY_FIRST_VIEW", PackageImpl.defaultPackage);
 		emd.addAttribute("id", AttributeRole.ROLE_ID, AttributeRole.ROLE_LABEL);
 		emd.setAbstract(false);
-		viewRepository = new ViewRepository(emd, dataService, searchService);
+		viewRepository = new ViewRepository(emd, dataService);
 
 		when(dataService.getEntityMetaData("entityA")).thenReturn(entityMetaA);
 		when(dataService.getEntityMetaData("entityB")).thenReturn(entityMetaB);

@@ -75,6 +75,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	private ElasticsearchRepositoryCollection elasticsearchRepositoryCollection;
 
 	@Autowired
+	@Qualifier("ViewRepositoryCollection")
 	private ViewRepositoryCollection viewRepositoryCollection;
 
 	@Autowired
@@ -144,6 +145,10 @@ public class WebAppConfig extends MolgenisWebAppConfig
 				else if (ElasticsearchRepositoryCollection.NAME.equals(emd.getBackend()))
 				{
 					localDataService.addRepository(elasticsearchRepositoryCollection.addEntityMeta(emd));
+				}
+				else if (ViewRepositoryCollection.NAME.equals(emd.getBackend()))
+				{
+					localDataService.addRepository(viewRepositoryCollection.addEntityMeta(emd));
 				}
 				else
 				{
