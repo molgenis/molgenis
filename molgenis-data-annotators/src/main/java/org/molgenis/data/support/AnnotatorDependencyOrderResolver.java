@@ -7,7 +7,6 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,29 +44,29 @@ public class AnnotatorDependencyOrderResolver
 	}
 
 	private void resolveAnnotatorDependencies(RepositoryAnnotator selectedAnnotator,
-			List<RepositoryAnnotator> annotatorList, Queue<RepositoryAnnotator> queue, EntityMetaData entityMetaData)
+			List<RepositoryAnnotator> annotatorList, Queue<RepositoryAnnotator> annotatorQueue, EntityMetaData entityMetaData)
 	{
 		if (!areRequiredAttributesAvailable(Lists.newArrayList(entityMetaData.getAtomicAttributes()),
-				selectedAnnotator.getInputMetaData()))
+				selectedAnnotator.getRequiredAttributes()))
 		{
-			for (AttributeMetaData input : selectedAnnotator.getInputMetaData())
+			for (AttributeMetaData requiredInputAttribute : selectedAnnotator.getRequiredAttributes())
 			{
 				if (!areRequiredAttributesAvailable(Lists.newArrayList(entityMetaData.getAtomicAttributes()),
-						Arrays.asList(input)))
+						Arrays.asList(requiredInputAttribute)))
 				{
 					annotatorList.stream().filter(a -> !a.equals(selectedAnnotator)).collect(Collectors.toList())
-							.forEach(annotator -> resolveAnnotatorDependencies(selectedAnnotator, annotatorList, queue,
-									entityMetaData, input, annotator));
+							.forEach(annotator -> resolveAnnotatorDependencies(selectedAnnotator, annotatorList, annotatorQueue,
+									entityMetaData, requiredInputAttribute, annotator));
 				}
 			}
 		}
 		else
 		{
-			if (!queue.contains(selectedAnnotator)) queue.add(selectedAnnotator);
+			if (!annotatorQueue.contains(selectedAnnotator)) annotatorQueue.add(selectedAnnotator);
 			if (!selectedAnnotator.equals(requestedAnnotator))
-				resolveAnnotatorDependencies(requestedAnnotator, annotatorList, queue, entityMetaData);
+				resolveAnnotatorDependencies(requestedAnnotator, annotatorList, annotatorQueue, entityMetaData);
 		}
-		if (queue.size() == 0)
+		if (annotatorQueue.size() == 0)
 		{
 			throw new UnresolvedAnnotatorDependencyException("unsolved for: " + requestedAnnotator);
 		}
@@ -75,36 +74,36 @@ public class AnnotatorDependencyOrderResolver
 	}
 
 	private void resolveAnnotatorDependencies(RepositoryAnnotator selectedAnnotator,
-			List<RepositoryAnnotator> annotatorList, Queue<RepositoryAnnotator> queue, EntityMetaData entityMetaData,
-			AttributeMetaData input, RepositoryAnnotator annotator)
+			List<RepositoryAnnotator> annotatorList, Queue<RepositoryAnnotator> annotatorQueue, EntityMetaData entityMetaData,
+			AttributeMetaData requiredAttribute, RepositoryAnnotator annotator)
 	{
-		if (isRequiredAttributeAvailable(annotator.getInfo().getOutputAttributes(), input))
+		if (isRequiredAttributeAvailable(annotator.getInfo().getOutputAttributes(), requiredAttribute))
 		{
 			if (areRequiredAttributesAvailable(
-					Lists.newArrayList(entityMetaData.getAtomicAttributes()),annotator.getInputMetaData()))
+					Lists.newArrayList(entityMetaData.getAtomicAttributes()),annotator.getRequiredAttributes()))
 			{
-				if (!queue.contains(selectedAnnotator))
+				if (!annotatorQueue.contains(selectedAnnotator))
 				{
-					queue.add(annotator);
+					annotatorQueue.add(annotator);
 				}
 				annotator.getInfo().getOutputAttributes()
 						.forEach(((DefaultEntityMetaData) entityMetaData)::addAttributeMetaData);
 				annotatorList.remove(annotator);
-				resolveAnnotatorDependencies(requestedAnnotator, annotatorList, queue, entityMetaData);
+				resolveAnnotatorDependencies(requestedAnnotator, annotatorList, annotatorQueue, entityMetaData);
 			}
 			else
 			{
-				resolveAnnotatorDependencies(annotator, annotatorList, queue, entityMetaData);
+				resolveAnnotatorDependencies(annotator, annotatorList, annotatorQueue, entityMetaData);
 			}
 		}
 	}
 
-	private boolean areRequiredAttributesAvailable(List<AttributeMetaData> annotatorOutputs,
-			List<AttributeMetaData> requiredInputs)
+	private boolean areRequiredAttributesAvailable(List<AttributeMetaData> availableAttributes,
+			List<AttributeMetaData> requiredAttributes)
 	{
-		for (AttributeMetaData attr : requiredInputs)
+		for (AttributeMetaData attr : requiredAttributes)
 		{
-			if (!isRequiredAttributeAvailable(annotatorOutputs, attr))
+			if (!isRequiredAttributeAvailable(availableAttributes, attr))
 			{
 				return false;
 			}
@@ -112,18 +111,18 @@ public class AnnotatorDependencyOrderResolver
 		return true;
 	}
 
-	private boolean isRequiredAttributeAvailable(List<AttributeMetaData> annotatorOutputs, AttributeMetaData attr)
+	private boolean isRequiredAttributeAvailable(List<AttributeMetaData> availableAttributes, AttributeMetaData requiredAttribute)
 	{
-		for (AttributeMetaData annotatorAttr : annotatorOutputs)
+		for (AttributeMetaData availableAttribute : availableAttributes)
 		{
-			if (attr.getName().equals(annotatorAttr.getName()))
+			if (requiredAttribute.getName().equals(availableAttribute.getName()))
 			{
-				if (annotatorAttr.getDataType().equals(MolgenisFieldTypes.FieldTypeEnum.TEXT))
+				if (requiredAttribute.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.TEXT))
 				{
-					return attr.getDataType().equals(MolgenisFieldTypes.FieldTypeEnum.TEXT)
-							|| attr.getDataType().equals(MolgenisFieldTypes.FieldTypeEnum.STRING);
+					return requiredAttribute.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.TEXT)
+							|| requiredAttribute.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.STRING);
 				}
-				else return attr.getDataType().equals(annotatorAttr.getDataType());
+				else return requiredAttribute.getDataType().equals(availableAttribute.getDataType());
 			}
 		}
 		return false;
