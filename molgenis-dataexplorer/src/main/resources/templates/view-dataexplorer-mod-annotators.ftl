@@ -34,7 +34,7 @@
 	                                }
 	                                else{
 	                                	if(ProgressBar && ProgressBar.isMounted()) {
-                                            var progress = ((entry.progressInt-1/entry.progressMax)*100)
+                                            var progress = (((entry.progressInt-1)/entry.progressMax)*100)
                                             console.log(entry.progressMessage);
                                             console.log(progress);
 			    							ProgressBar.setProps({
