@@ -14,6 +14,7 @@
 import React from 'react';
 import RestClient from "rest-client/RestClientV2";
 import { Spinner } from '../Spinner'
+import $ from 'jquery';
 
 import Jobs from './Jobs';
 
@@ -40,11 +41,14 @@ var JobContainer = React.createClass({
 		if(this.state.jobs === null) {
 			return <Spinner  />;
 		} else {
-			return <div><Jobs jobs={this.state.jobs} /></div>
+			return <div><Jobs jobs={this.state.jobs}/></div>
 		}
 	},
 	_retrieveJobs: function() {
-		api.get('Job').done((data) => this.setState({jobs: data.items}));
+		var self = this;
+		$.get('/plugin/jobs/latest', function(data) {
+			self.setState({jobs: data})
+		});		
 	}
 });
 

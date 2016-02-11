@@ -14,24 +14,26 @@ import org.springframework.stereotype.Component;
 @Component
 public class JobMetaDataMetaData extends DefaultEntityMetaData
 {
-	private List<String> jobStatusOptions = newArrayList("PENDING", "RUNNING", "SUCCESS", "FAILED", "CANCELED");
+	private final List<String> jobStatusOptions = newArrayList("PENDING", "RUNNING", "SUCCESS", "FAILED", "CANCELED");
 
 	public JobMetaDataMetaData()
 	{
 		super(JobMetaData.ENTITY_NAME, JobMetaData.class);
+		setAbstract(true);
 		addAttribute(JobMetaData.IDENTIFIER, ROLE_ID).setLabel("Job ID").setAuto(true).setNillable(false);
 		addAttribute(JobMetaData.USER).setDataType(MolgenisFieldTypes.XREF).setRefEntity(new MolgenisUserMetaData())
 				.setLabel("Job owner").setNillable(false);
 		addAttribute(JobMetaData.STATUS).setDataType(new EnumField()).setEnumOptions(jobStatusOptions)
 				.setLabel("Job status").setNillable(false);
 		addAttribute(JobMetaData.TYPE).setDataType(MolgenisFieldTypes.STRING).setLabel("Job type").setNillable(false);
-		addAttribute(JobMetaData.SUBMISSION_DATE).setDataType(MolgenisFieldTypes.DATETIME).setLabel("Job submission date")
-				.setNillable(false);
+		addAttribute(JobMetaData.SUBMISSION_DATE).setDataType(MolgenisFieldTypes.DATETIME)
+				.setLabel("Job submission date").setNillable(false);
 		addAttribute(JobMetaData.START_DATE).setDataType(MolgenisFieldTypes.DATETIME).setLabel("Job start date")
 				.setNillable(true);
-		addAttribute(JobMetaData.END_DATE).setDataType(MolgenisFieldTypes.DATETIME).setLabel("Job end date").setNillable(true);
-		addAttribute(JobMetaData.PROGRESS_INT).setDataType(MolgenisFieldTypes.INT).setLabel("Number of entities processed")
+		addAttribute(JobMetaData.END_DATE).setDataType(MolgenisFieldTypes.DATETIME).setLabel("Job end date")
 				.setNillable(true);
+		addAttribute(JobMetaData.PROGRESS_INT).setDataType(MolgenisFieldTypes.INT)
+				.setLabel("Number of entities processed").setNillable(true);
 		addAttribute(JobMetaData.PROGRESS_MESSAGE).setDataType(MolgenisFieldTypes.TEXT).setLabel("Progress message")
 				.setNillable(true);
 		addAttribute(JobMetaData.PROGRESS_MAX).setDataType(MolgenisFieldTypes.INT)

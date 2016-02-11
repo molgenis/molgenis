@@ -23,16 +23,11 @@ var Jobs = React.createClass({
 		jobs : React.PropTypes.array.isRequired
 	},
 	render: function() {
-		return (<div>
-			{this.props.jobs.map(function(job){
-				if(job.endDate === undefined) {
-					return <Job job={job} key={job.identifier} />;					
-				} else {
-					// TODO put these in the job table, they are already done
-					return <Job job={job} key={job.identifier} />;
-				}
+		return <div>
+			{this.props.jobs.map(function(job){	
+				return <Job job={job} key={job.identifier} />;
 			})}
-		</div>);
+		</div>;
 	}	
 });
 

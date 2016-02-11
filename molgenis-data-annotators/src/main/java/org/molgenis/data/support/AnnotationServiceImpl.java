@@ -9,12 +9,10 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.annotation.AnnotationJob;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.meta.AnnotationJobMetaData;
-import org.molgenis.data.jobs.JobMetaData;
-import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
@@ -40,17 +38,19 @@ public class AnnotationServiceImpl implements AnnotationService, ApplicationList
 	private DataService dataService;
 
 	@Override
-	@RunAsSystem
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-		// check if there are annotators with a status running, this can only occur because of a shutdown of the server
-		// during an annotation run.
-		if (dataService.hasRepository(AnnotationJobMetaData.ENTITY_NAME))
-		{
-			Stream<Entity> runningAnnotations = dataService.findAll(AnnotationJobMetaData.ENTITY_NAME,
-					new QueryImpl().eq(AnnotationJobMetaData.STATUS, AnnotationJobMetaData.Status.RUNNING));
-			runningAnnotations.forEach(entity -> failRunningAnnotation(entity));
-		}
+		RunAsSystemProxy.runAsSystem(() -> {
+			// check if there are annotators with a status running, this can only occur because of a shutdown of the
+			// server
+			// during an annotation run.
+				if (dataService.hasRepository(AnnotationJobMetaData.ENTITY_NAME))
+				{
+					Stream<Entity> runningAnnotations = dataService.findAll(AnnotationJobMetaData.ENTITY_NAME,
+							new QueryImpl().eq(AnnotationJobMetaData.STATUS, AnnotationJobMetaData.Status.RUNNING));
+					runningAnnotations.forEach(entity -> failRunningAnnotation(entity));
+				}
+			});
 	}
 
 	private void failRunningAnnotation(Entity entity)
