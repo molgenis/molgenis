@@ -156,7 +156,7 @@ public class PackageImpl implements Package
 	@Override
 	public Entity toEntity()
 	{
-		Entity result = new MapEntity(PackageMetaData.FULL_NAME);
+		Entity result = new MapEntity(PackageMetaData.INSTANCE);
 		result.set(PackageMetaData.FULL_NAME, getName());
 		result.set(PackageMetaData.SIMPLE_NAME, simpleName);
 		result.set(PackageMetaData.DESCRIPTION, description);
