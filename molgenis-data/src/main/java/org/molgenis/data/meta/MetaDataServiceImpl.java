@@ -453,22 +453,16 @@ public class MetaDataServiceImpl implements MetaDataService
 		{
 			if (!emd.isAbstract() && !dataService.hasRepository(emd.getName()) && !"VIEW".equals(emd.getBackend()))
 			{
-				RepositoryCollection col = backends.get(emd.getBackend());
-				if (col == null) throw new MolgenisDataException("Unknown backend [" + emd.getBackend() + "]");
-				Repository repo = col.addEntityMeta(emd);
-				dataService.addRepository(repo);
+				this.addRepository(emd);
 			}
 		}
 
 		// VIEWS: Create repositories from EntityMetaData in EntityMetaData repo
 		for (EntityMetaData emd : entityMetaDataRepository.getMetaDatas())
 		{
-			if ("VIEW".equals(emd.getBackend()))
+			if (!emd.isAbstract() && !dataService.hasRepository(emd.getName()) && "VIEW".equals(emd.getBackend()))
 			{
-				RepositoryCollection col = backends.get(emd.getBackend());
-				if (col == null) throw new MolgenisDataException("Unknown backend [" + emd.getBackend() + "]");
-				Repository repo = col.addEntityMeta(emd);
-				dataService.addRepository(repo); // TODO JJ
+				this.addRepository(emd);
 			}
 		}
 
@@ -479,6 +473,14 @@ public class MetaDataServiceImpl implements MetaDataService
 		// Update update manageable backends
 		DependencyResolver.resolve(Sets.newHashSet(emds.values())).stream().filter(this::isManageableBackend)
 				.forEach(this::updateEntityMeta);
+	}
+
+	private void addRepository(EntityMetaData emd)
+	{
+		RepositoryCollection col = backends.get(emd.getBackend());
+		if (col == null) throw new MolgenisDataException("Unknown backend [" + emd.getBackend() + "]");
+		Repository repo = col.addEntityMeta(emd);
+		dataService.addRepository(repo);
 	}
 
 	private boolean isManageableBackend(EntityMetaData emd)
