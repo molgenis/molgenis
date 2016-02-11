@@ -1,8 +1,8 @@
 package org.molgenis.data.support;
 
 import autovalue.shaded.com.google.common.common.collect.Lists;
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.RepositoryAnnotator;
@@ -19,8 +19,8 @@ public class AnnotatorDependencyOrderResolver
 	private RepositoryAnnotator requestedAnnotator;
 
 	public Queue<RepositoryAnnotator> getAnnotatorSelectionDependencyList(
-			List<RepositoryAnnotator> availableAnnotatorList,
-			List<RepositoryAnnotator> requestedAnnotatorList, Repository repo)
+			List<RepositoryAnnotator> availableAnnotatorList, List<RepositoryAnnotator> requestedAnnotatorList,
+			Repository repo)
 	{
 		Queue<RepositoryAnnotator> sortedList = new LinkedList<>();
 		for (RepositoryAnnotator annotator : requestedAnnotatorList)
@@ -52,8 +52,8 @@ public class AnnotatorDependencyOrderResolver
 		{
 			for (AttributeMetaData input : selectedAnnotator.getInputMetaData())
 			{
-				if (!areRequiredAttributesAvailable(Arrays.asList(input),
-						Lists.newArrayList(entityMetaData.getAtomicAttributes())))
+				if (!areRequiredAttributesAvailable(Lists.newArrayList(entityMetaData.getAtomicAttributes()),
+						Arrays.asList(input)))
 				{
 					annotatorList.stream().filter(a -> !a.equals(selectedAnnotator)).collect(Collectors.toList())
 							.forEach(annotator -> resolveAnnotatorDependencies(selectedAnnotator, annotatorList, queue,
@@ -80,8 +80,8 @@ public class AnnotatorDependencyOrderResolver
 	{
 		if (isRequiredAttributeAvailable(annotator.getInfo().getOutputAttributes(), input))
 		{
-			if (areRequiredAttributesAvailable(Lists.newArrayList(entityMetaData.getAtomicAttributes()),
-					annotator.getInputMetaData()))
+			if (areRequiredAttributesAvailable(
+					Lists.newArrayList(entityMetaData.getAtomicAttributes()),annotator.getInputMetaData()))
 			{
 				if (!queue.contains(selectedAnnotator))
 				{
@@ -116,10 +116,14 @@ public class AnnotatorDependencyOrderResolver
 	{
 		for (AttributeMetaData annotatorAttr : annotatorOutputs)
 		{
-			if (attr.getName().equals(annotatorAttr.getName())
-					&& attr.getDataType().equals(annotatorAttr.getDataType()))
+			if (attr.getName().equals(annotatorAttr.getName()))
 			{
-				return true;
+				if (annotatorAttr.getDataType().equals(MolgenisFieldTypes.FieldTypeEnum.TEXT))
+				{
+					return attr.getDataType().equals(MolgenisFieldTypes.FieldTypeEnum.TEXT)
+							|| attr.getDataType().equals(MolgenisFieldTypes.FieldTypeEnum.STRING);
+				}
+				else return attr.getDataType().equals(annotatorAttr.getDataType());
 			}
 		}
 		return false;
