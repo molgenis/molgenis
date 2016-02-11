@@ -87,8 +87,11 @@ public class AnnotationJob implements org.quartz.Job
 		}
 		catch (Exception e)
 		{
-			logAndUpdateProgress(annotationRun, JobMetaData.Status.FAILED, e.getMessage(),
-					annotationRun.getProgressMax());
+			LOG.error("An error occured during annotation. ",e);
+			if(annotationRun != null) {
+				logAndUpdateProgress(annotationRun, JobMetaData.Status.FAILED, e.getMessage(),
+						annotationRun.getProgressMax());
+			}
 		}
 	}
 
