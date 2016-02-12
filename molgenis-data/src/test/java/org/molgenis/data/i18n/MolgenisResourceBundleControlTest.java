@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -39,8 +40,8 @@ public class MolgenisResourceBundleControlTest
 	@Test
 	public void newBundleWithUnknownBundleName() throws IllegalAccessException, InstantiationException, IOException
 	{
-		assertNull(molgenisResourceBundleControl.newBundle("bogus", new Locale("en"), "java.class",
-				getClass().getClassLoader(), true));
+		assertNull(molgenisResourceBundleControl.newBundle("bogus", new Locale("en"), "java.class", getClass()
+				.getClassLoader(), true));
 	}
 
 	@Test
@@ -59,16 +60,22 @@ public class MolgenisResourceBundleControlTest
 		entity.set("en", "testen");
 		entity.set("nl", "testnl");
 
+		Entity entity1 = new MapEntity();
+		entity1.set(I18nStringMetaData.MSGID, "testmissingnl");
+		entity1.set("en", "testen");
+
 		when(queryMock.count()).thenReturn(1L);
-		when(dataServiceMock.findAll(I18nStringMetaData.ENTITY_NAME)).thenReturn(Stream.of(entity));
+		when(dataServiceMock.findAll(I18nStringMetaData.ENTITY_NAME)).thenReturn(Stream.of(entity, entity1));
 
 		ResourceBundle bundle = molgenisResourceBundleControl.newBundle(I18nStringMetaData.ENTITY_NAME,
 				new Locale("nl"), "java.class", getClass().getClassLoader(), true);
 		assertNotNull(bundle);
 
 		Set<String> keys = bundle.keySet();
-		assertEquals(keys.size(), 1);
-		assertEquals(keys.iterator().next(), "test");
+		assertEquals(keys.size(), 2);
+		assertTrue(keys.contains("test"));
+		assertTrue(keys.contains("testmissingnl"));
 		assertEquals(bundle.getString("test"), "testnl");
+		assertEquals(bundle.getString("testmissingnl"), "testen");// Missing nl -> return en
 	}
 }
