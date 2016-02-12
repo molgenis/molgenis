@@ -119,14 +119,18 @@ public class AnnotationJob implements Job
 		}
 	}
 
-	private void logAndUpdateProgress(AnnotationJobMetaData annotationJobMetaData, JobMetaData.Status status, String message,
-			int progress)
+	private void logAndUpdateProgress(AnnotationJobMetaData annotationJobMetaData, JobMetaData.Status status,
+			String message, int progress)
 	{
 		LOG.info(message);
 		annotationJobMetaData.setProgressMessage(message);
-		annotationJobMetaData.setLog(annotationJobMetaData.getLog() + "\n" +message);
+		annotationJobMetaData.setLog(annotationJobMetaData.getLog() + "\n" + message);
 		annotationJobMetaData.setProgressInt(progress);
 		annotationJobMetaData.setStatus(status);
+		if (status.equals(JobMetaData.Status.SUCCESS) || status.equals(JobMetaData.Status.FAILED))
+		{
+			annotationJobMetaData.setEndDate(new Date());
+		}
 		RunAsSystemProxy.runAsSystem(() -> {
 			dataService.update(AnnotationJobMetaData.ENTITY_NAME, annotationJobMetaData);
 		});

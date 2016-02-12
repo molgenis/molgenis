@@ -19,8 +19,8 @@ public class AnnotationJobMetaDataMetaData extends DefaultEntityMetaData
 		addAttribute(AnnotationJobMetaData.TARGET).setDataType(MolgenisFieldTypes.STRING)
 				.setLabel("Entities being modified by this job").setNillable(true);
 		addAttribute(AnnotationJobMetaData.LOG).setDataType(MolgenisFieldTypes.TEXT)
-				.setLabel("log of the annotation progress").setNillable(true);
+				.setLabel("Log of the annotation progress").setNillable(true);
 		addAttribute(AnnotationJobMetaData.ANNOTATORS).setDataType(MolgenisFieldTypes.STRING)
-				.setLabel("Anntoators ran by this job").setNillable(true);
+				.setLabel("Annotators ran by this job").setNillable(true);
 	}
 }
