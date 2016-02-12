@@ -20,6 +20,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.EntityMetaData.AttributeRole;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.RepositoryCapability;
@@ -59,7 +60,8 @@ public class ViewRepository extends AbstractRepository
 		
 		// Add master compound
 		String entityMasterName = getMasterEntityName();
-		DefaultAttributeMetaData masterCompoundAttribute = new DefaultAttributeMetaData(entityMasterName, FieldTypeEnum.COMPOUND); 
+		DefaultAttributeMetaData masterCompoundAttribute = new DefaultAttributeMetaData("_" + entityMasterName,
+				FieldTypeEnum.COMPOUND);
 		masterCompoundAttribute.setAttributesMetaData(dataService.getEntityMetaData(entityMasterName).getAttributes()); 
 		entityMetaDataView.addAttributeMetaData(masterCompoundAttribute, AttributeRole.ROLE_LOOKUP);
 		  
@@ -133,6 +135,13 @@ public class ViewRepository extends AbstractRepository
 		});
 	}
 
+	@Override
+	public Entity findOne(Object id, Fetch fetch)
+	{
+		if (id == null) return null;
+		return findOne(new QueryImpl().eq(getEntityMetaData().getIdAttribute().getName(), id).fetch(fetch));
+	}
+
 	private Entity getViewEntity(Entity masterEntity, EntityMetaData viewMetaData, List<String> joinMasterMatrix,
 			Map<String, List<String>> joinSlaveMatrix)
 	{
@@ -170,7 +179,7 @@ public class ViewRepository extends AbstractRepository
 	}
 
 	private String prefixSlaveEntityAttributeName(String entityName, String attributeName){
-		return entityName + "_" + attributeName;
+		return entityName + "__" + attributeName;
 	}
 
 	private String getMasterEntityName()
