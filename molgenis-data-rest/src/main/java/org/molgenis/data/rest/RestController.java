@@ -988,7 +988,14 @@ public class RestController
 	public ErrorMessageResponse handleAuthenticationException(AuthenticationException e)
 	{
 		LOG.info("", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+		// workaround for https://github.com/molgenis/molgenis/issues/4441
+		String message = e.getMessage();
+		String messagePrefix = "org.springframework.security.core.userdetails.UsernameNotFoundException: ";
+		if (message.startsWith(messagePrefix))
+		{
+			message = message.substring(messagePrefix.length());
+		}
+		return new ErrorMessageResponse(new ErrorMessage(message));
 	}
 
 	@ExceptionHandler(MolgenisDataAccessException.class)
