@@ -49,24 +49,27 @@
 	 * @memberOf molgenis.dataexplorer.data
 	 */
 	function createDataTable() {
-		Table = React.render(molgenis.ui.Table({
-			entity: getEntity().name,
-			attrs: getAttributesTree(),
-			query: getQuery(),
-			onRowAdd: onDataChange,
-			onRowDelete: onDataChange,
-			onRowEdit: onDataChange,
-			onRowInspect: onRowInspect,
-			onRowClick: (doShowGenomeBrowser() && isGenomeBrowserAttributesSelected()) ? onRowClick : null,
-			onSort: function(e) {
-				tableSort = {
-					'orders' : [ {
-						'attr' : e.attr.name,
-						'direction' : e.order === 'desc' ? 'DESC' : 'ASC'
-					} ]
-				};
-			}
-		}), $('#data-table-container')[0]);
+		$.get('/permission/FreemarkerTemplate/read').done(function(canRead) {
+			Table = React.render(molgenis.ui.Table({
+				entity: getEntity().name,
+				attrs: getAttributesTree(),
+				query: getQuery(),
+				onRowAdd: onDataChange,
+				onRowDelete: onDataChange,
+				onRowEdit: onDataChange,
+				onRowInspect: onRowInspect,
+				onRowClick: (doShowGenomeBrowser() && isGenomeBrowserAttributesSelected()) ? onRowClick : null,
+				enableInspect: canRead,
+				onSort: function(e) {
+					tableSort = {
+						'orders' : [ {
+							'attr' : e.attr.name,
+							'direction' : e.order === 'desc' ? 'DESC' : 'ASC'
+						} ]
+					};
+				}
+			}), $('#data-table-container')[0]);
+		});
 	}
 
 	function onDataChange() {
