@@ -59,17 +59,12 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	public static class Config
 	{
 		@Bean
-		public Client client()
-		{
-			return Mockito.mock(Client.class);
-		}
-
-		@Bean
 		public EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory()
 		{
 
 			EmbeddedElasticSearchServiceFactory result = Mockito.mock(EmbeddedElasticSearchServiceFactory.class);
-			Mockito.when(result.getClient()).thenReturn(client());
+			Client client = Mockito.mock(Client.class);
+			Mockito.when(result.getClient()).thenReturn(client);
 			return result;
 		}
 
@@ -266,7 +261,8 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		DataService dataServiceMock = Mockito.mock(DataService.class);
 		MetaDataService metaDataServiceMock = Mockito.mock(MetaDataService.class);
 		when(dataServiceMock.getMeta()).thenReturn(metaDataServiceMock);
-		when(metaDataServiceMock.getEntityMetaData("existingAttribute")).thenReturn(Mockito.mock(EntityMetaData.class));
+		EntityMetaData emd = Mockito.mock(EntityMetaData.class);
+		when(metaDataServiceMock.getEntityMetaData("existingAttribute")).thenReturn(emd);
 
 		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataServiceMock), new ImportWriter(
 				dataServiceMock, permissionSystemService, tagService, molgenisPermissionService), dataServiceMock);
