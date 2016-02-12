@@ -151,24 +151,6 @@
 		}
 		return 0;
 	};
-
-	/**
-	 * Checks if the user has write permission on a particular entity
-	 */
-	molgenis.hasWritePermission = function(entityName) {
-		var writable = false;
-
-		$.ajax({
-			url : '/permission/' + entityName + "/write",
-			dataType : 'json',
-			async : false,
-			success : function(result) {
-				writable = result;
-			}
-		});
-
-		return writable;
-	};
 }($, window.top.molgenis = window.top.molgenis || {}));
 
 // Add endsWith function to the string class
