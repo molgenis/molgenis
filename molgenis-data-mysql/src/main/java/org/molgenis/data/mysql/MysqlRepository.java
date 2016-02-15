@@ -1111,19 +1111,19 @@ public class MysqlRepository extends AbstractRepository
 		return add(entities.iterator());
 	}
 
-	private Integer add(Iterator<? extends Entity> it)
+	private Integer add(Iterator<? extends Entity> entitiesIterator)
 	{
-		if (it == null) return 0;
+		if (entitiesIterator == null) return 0;
 		AtomicInteger count = new AtomicInteger(0);
 
 		final List<Entity> batch = new ArrayList<Entity>();
 
-		while (it.hasNext())
+		while (entitiesIterator.hasNext())
 		{
-			batch.add(it.next());
+			batch.add(entitiesIterator.next());
 			count.addAndGet(1);
 
-			if ((batch.size() == BATCH_SIZE) || !it.hasNext())
+			if ((batch.size() == BATCH_SIZE) || !entitiesIterator.hasNext())
 			{
 				final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 				final Map<String, List<Map<String, Object>>> mrefs = new HashMap<>();
@@ -1144,11 +1144,12 @@ public class MysqlRepository extends AbstractRepository
 								{
 									for (Entity val : batch.get(rowIndex).getEntities(att.getName()))
 									{
-										Map<String, Object> mref = new HashMap<>();
-										mref.put(idAttribute.getName(), batch.get(rowIndex).get(idAttribute.getName()));
-										mref.put(att.getName(), val.getIdValue());
-
-										mrefs.get(att.getName()).add(mref);
+										if(val != null) {
+											Map<String, Object> mref = new HashMap<>();
+											mref.put(idAttribute.getName(), batch.get(rowIndex).get(idAttribute.getName()));
+											mref.put(att.getName(), val.getIdValue());
+											mrefs.get(att.getName()).add(mref);
+										}
 									}
 								}
 							}
