@@ -4,6 +4,10 @@ import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.File;
+import java.io.IOException;
+
+import org.apache.commons.io.FileUtils;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
@@ -16,19 +20,34 @@ import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.common.io.Files;
 
 public class EmbeddedElasticSearchConfigTest
 {
 	private AnnotationConfigApplicationContext context;
 
+	private File molgenisHomeDir;
+
 	@BeforeMethod
-	public void beforeClass()
+	public void beforeMethod()
 	{
-		System.setProperty("molgenis.home", System.getProperty("java.io.tmpdir"));
+		molgenisHomeDir = Files.createTempDir();
+		molgenisHomeDir.deleteOnExit();
+
+		System.setProperty("molgenis.home", molgenisHomeDir.getAbsolutePath());
 		context = new AnnotationConfigApplicationContext(DataServiceImpl.class, EmbeddedElasticSearchConfig.class,
 				ElasticsearchEntityFactory.class, Config.class);
+	}
+
+	@AfterMethod
+	public void tearDownAfterMethod() throws IOException
+	{
+		context.destroy();
+		FileUtils.deleteDirectory(molgenisHomeDir);
 	}
 
 	@Configuration

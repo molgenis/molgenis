@@ -150,7 +150,8 @@ public class OwnedEntityRepositoryDecoratorTest
 		Object id = Integer.valueOf(0);
 		Fetch fetch = new Fetch();
 		Entity myEntity = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("username").getMock();
-		when(decoratedRepository.findOne(id, fetch)).thenReturn(myEntity);
+		Fetch decoratedFetch = new Fetch().field(ATTR_OWNER_USERNAME);
+		when(decoratedRepository.findOne(id, decoratedFetch)).thenReturn(myEntity);
 		assertEquals(myEntity, ownedEntityRepositoryDecorator.findOne(id, fetch));
 		verify(decoratedRepository, times(1)).findOne(id, fetch);
 	}
@@ -166,7 +167,8 @@ public class OwnedEntityRepositoryDecoratorTest
 		Object id = Integer.valueOf(0);
 		Fetch fetch = new Fetch();
 		Entity myEntity = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("notme").getMock();
-		when(decoratedRepository.findOne(id, fetch)).thenReturn(myEntity);
+		Fetch decoratedFetch = new Fetch().field(ATTR_OWNER_USERNAME);
+		when(decoratedRepository.findOne(id, decoratedFetch)).thenReturn(myEntity);
 		assertNull(ownedEntityRepositoryDecorator.findOne(id, fetch));
 		verify(decoratedRepository, times(1)).findOne(id, fetch);
 	}
@@ -177,7 +179,8 @@ public class OwnedEntityRepositoryDecoratorTest
 		Object id = Integer.valueOf(0);
 		Fetch fetch = new Fetch();
 		Entity entity = mock(Entity.class);
-		when(decoratedRepository.findOne(id, fetch)).thenReturn(entity);
+		Fetch decoratedFetch = new Fetch().field(ATTR_OWNER_USERNAME);
+		when(decoratedRepository.findOne(id, decoratedFetch)).thenReturn(entity);
 		ownedEntityRepositoryDecorator.findOne(id, fetch);
 		verify(decoratedRepository, times(1)).findOne(id, fetch);
 	}
@@ -240,7 +243,8 @@ public class OwnedEntityRepositoryDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
 		Stream<Object> entityIds = Stream.of(id0, id1);
-		when(decoratedRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
+		Fetch decoratedFetch = new Fetch().field(ATTR_OWNER_USERNAME);
+		when(decoratedRepository.findAll(entityIds, decoratedFetch)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = ownedEntityRepositoryDecorator.findAll(entityIds, fetch);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
@@ -259,7 +263,8 @@ public class OwnedEntityRepositoryDecoratorTest
 		Entity entity0 = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("username").getMock();
 		Entity entity1 = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("username").getMock();
 		Stream<Object> entityIds = Stream.of(id0, id1);
-		when(decoratedRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
+		Fetch decoratedFetch = new Fetch().field(ATTR_OWNER_USERNAME);
+		when(decoratedRepository.findAll(entityIds, decoratedFetch)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = ownedEntityRepositoryDecorator.findAll(entityIds, fetch);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
@@ -278,7 +283,8 @@ public class OwnedEntityRepositoryDecoratorTest
 		Entity entity0 = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("notme").getMock();
 		Entity entity1 = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("notme").getMock();
 		Stream<Object> entityIds = Stream.of(id0, id1);
-		when(decoratedRepository.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
+		Fetch decoratedFetch = new Fetch().field(ATTR_OWNER_USERNAME);
+		when(decoratedRepository.findAll(entityIds, decoratedFetch)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = ownedEntityRepositoryDecorator.findAll(entityIds, fetch);
 		assertEquals(expectedEntities.collect(Collectors.toList()), emptyList());
 	}
