@@ -58,4 +58,25 @@ public class ImportServiceFactory
 
 		return importService;
 	}
+
+	public ImportService getImportService(String fileName)
+	{
+		final Map<String, ImportService> importServicesMappedToExtensions = Maps.newHashMap();
+		for (ImportService importService : importServices)
+		{
+				for (String extension : importService.getSupportedFileExtensions())
+				{
+					importServicesMappedToExtensions.put(extension.toLowerCase(), importService);
+				}
+		}
+
+		String extension = FileExtensionUtils.findExtensionFromPossibilities(fileName,
+				importServicesMappedToExtensions.keySet());
+
+		final ImportService importService = importServicesMappedToExtensions.get(extension);
+
+		if (importService == null) throw new MolgenisDataException("Can not import file. No suitable importer found");
+
+		return importService;
+	}
 }

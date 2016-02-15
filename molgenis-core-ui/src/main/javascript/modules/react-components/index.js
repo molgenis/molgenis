@@ -34,6 +34,7 @@ import SelectBox from './SelectBox';
 import Spinner from './Spinner';
 import Table from './Table';
 import TextArea from './TextArea';
+import ProgressBar from './ProgressBar';
 
 export default {
 	'mixin' : mixin,
@@ -63,5 +64,6 @@ export default {
 	'SelectBox' : SelectBox,
 	'Spinner' : Spinner,
 	'Table' : Table,
-	'TextArea' : TextArea
+	'TextArea' : TextArea,
+	'ProgressBar' : ProgressBar
 };
