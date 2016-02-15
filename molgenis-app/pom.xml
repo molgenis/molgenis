@@ -83,6 +83,7 @@
 						</baseResource>
 						<webInfIncludeJarPattern>.*/molgenis-[^/]*\.jar$|.*spring-[^/]*\.jar$
 						</webInfIncludeJarPattern>
+						<allowDuplicateFragmentNames>true</allowDuplicateFragmentNames>
 					</webAppConfig>
 				</configuration>
 				<dependencies>
