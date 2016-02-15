@@ -46,9 +46,11 @@ var JobContainer = React.createClass({
 	},
 	_retrieveJobs: function() {
 		var self = this;
-		$.get('/plugin/jobs/latest', function(data) {
-			self.setState({jobs: data})
-		});		
+		setInterval(function() {
+			$.get('/plugin/jobs/latest', function(data) {
+				self.setState({jobs: data})
+			});
+		}, 1000);
 	}
 });
 

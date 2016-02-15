@@ -71,9 +71,9 @@ public class JobsController extends MolgenisPluginController
 		Date weekAgo = cal.getTime();
 		MolgenisUser currentUser = userAccountService.getCurrentUser();
 
-		stream(dataService.getMeta().getEntityMetaDatas().spliterator(), false).filter(
-				e -> e.getExtends() != null && e.getExtends().getName().equals(jobMetaDataMetaData.getName())).forEach(
-				e -> {
+		stream(dataService.getMeta().getEntityMetaDatas().spliterator(), false)
+				.filter(e -> e.getExtends() != null && e.getExtends().getName().equals(jobMetaDataMetaData.getName()))
+				.forEach(e -> {
 					Query q = dataService.query(e.getName()).ge(JobMetaData.SUBMISSION_DATE, weekAgo);
 					if (!currentUser.isSuperuser())
 					{
@@ -102,6 +102,7 @@ public class JobsController extends MolgenisPluginController
 				.progressMessage(entity.getString(JobMetaData.PROGRESS_MESSAGE))
 				.startDate(entity.getUtilDate(JobMetaData.START_DATE))
 				.status(JobMetaData.Status.valueOf(entity.getString(JobMetaData.STATUS)))
-				.submissionDate(entity.getUtilDate(JobMetaData.SUBMISSION_DATE)).build();
+				.submissionDate(entity.getUtilDate(JobMetaData.SUBMISSION_DATE))
+				.type(entity.getString(JobMetaData.TYPE)).build();
 	}
 }

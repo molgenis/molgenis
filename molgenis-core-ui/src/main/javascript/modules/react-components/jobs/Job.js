@@ -26,6 +26,7 @@ var Job = React.createClass({
 	},
 	render: function() {
 		return <div>
+			<h3>{this.props.job.type}</h3>
 			<ProgressBar 
 				progressMessage={this.props.job.progressInt !== undefined ? this._formatProgressMessage() : this.props.job.progressMessage} 
 				progressPct={this.props.job.progressMax !== undefined ? this._getProgressPct() : 100}

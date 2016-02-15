@@ -30,6 +30,7 @@ public class AnnotationJob implements org.quartz.Job
 	public static final String ANNOTATORS = "ANNOTATORS";
 	public static final String USERNAME = "USERNAME";
 	public static final String ANNOTATION_RUN = "ANNOTATION_RUN";
+	public static final String TYPE = "Annotation Job";
 
 	@Autowired
 	DataService dataService;
@@ -74,7 +75,7 @@ public class AnnotationJob implements org.quartz.Job
 			annotationRun.setTarget(repositoryName);
 			annotationRun.setUser(userAccountService.getCurrentUser());
 			annotationRun.setSubmissionDate(new Date());
-			annotationRun.setType("Annotators");
+			annotationRun.setType(TYPE);
 			RunAsSystemProxy.runAsSystem(() -> {
 				dataService.add(AnnotationJobMetaData.ENTITY_NAME, annotationRun);
 			});

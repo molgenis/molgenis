@@ -13,10 +13,9 @@ public class Job implements Comparable<Job>
 	private Date startDate;
 	private Date endDate;
 	private Date submissionDate;
+	private String type;
 
-	private Job()
-	{
-	}
+	private Job(){}
 
 	public static Builder builder()
 	{
@@ -81,6 +80,12 @@ public class Job implements Comparable<Job>
 			return this;
 		}
 
+		public Builder type(String type)
+		{
+			job.type = type;
+			return this;
+		}
+
 		public Job build()
 		{
 			return job;
@@ -132,6 +137,11 @@ public class Job implements Comparable<Job>
 		return submissionDate;
 	}
 
+	public String getType()
+	{
+		return type;
+	}
+
 	@Override
 	public int hashCode()
 	{
@@ -161,7 +171,7 @@ public class Job implements Comparable<Job>
 	{
 		return "Job [identifier=" + identifier + ", entityName=" + entityName + ", progressMessage=" + progressMessage
 				+ ", status=" + status + ", progressInt=" + progressInt + ", progessMax=" + progessMax + ", startDate="
-				+ startDate + ", endDate=" + endDate + "]";
+				+ startDate + ", endDate=" + endDate + ", submissionDate=" + submissionDate + ", type=" + type + "]";
 	}
 
 	@Override
