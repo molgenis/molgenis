@@ -9,6 +9,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -461,6 +462,15 @@ class RestControllerV2
 	public ErrorMessageResponse handleValidationException(MolgenisValidationException e)
 	{
 		LOG.info("Validation exception occurred.", e);
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+	}
+
+	@ExceptionHandler(MolgenisDataAccessException.class)
+	@ResponseStatus(UNAUTHORIZED)
+	@ResponseBody
+	public ErrorMessageResponse handleMolgenisDataAccessException(MolgenisDataAccessException e)
+	{
+		LOG.debug("Data access exception occurred.", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
