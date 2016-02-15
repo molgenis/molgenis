@@ -10,9 +10,6 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 
 import autovalue.shaded.com.google.common.common.collect.Iterables;
 
-/**
- * Created by charbonb on 11/03/15.
- */
 public class AnnotatorUtils
 {
 	public static DefaultAttributeMetaData getCompoundResultAttribute(RepositoryAnnotator annotator,

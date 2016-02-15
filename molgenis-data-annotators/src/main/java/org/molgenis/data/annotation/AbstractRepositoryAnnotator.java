@@ -18,7 +18,7 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 	@Override
 	public String canAnnotate(EntityMetaData repoMetaData)
 	{
-		Iterable<AttributeMetaData> annotatorAttributes = getInputMetaData();
+		Iterable<AttributeMetaData> annotatorAttributes = getRequiredAttributes();
 		for (AttributeMetaData annotatorAttribute : annotatorAttributes)
 		{
 			// one of the needed attributes not present? we can not annotate
@@ -49,14 +49,6 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 
 		return "true";
 	}
-
-	/**
-	 * Checks if folder and files that were set with a runtime property actually exist, or if a webservice can be
-	 * reached
-	 *
-	 * @return boolean
-	 */
-	protected abstract boolean annotationDataExists();
 
 	@Override
 	@Transactional

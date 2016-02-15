@@ -9,6 +9,7 @@ import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import java.util.Arrays;
 
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.fieldtypes.EnumField;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -33,7 +34,7 @@ public class ImportRunMetaData extends DefaultEntityMetaData
 		addAttribute(STARTDATE).setDataType(DATETIME).setNillable(false).setDescription("");
 		addAttribute(ENDDATE).setDataType(DATETIME).setNillable(true).setDescription("");
 		addAttribute(USERNAME).setNillable(false).setDescription("");
-		addAttribute(STATUS).setDataType(ENUM).setNillable(false)
+		addAttribute(STATUS).setDataType(new EnumField()).setNillable(false)
 				.setEnumOptions(Arrays.asList("RUNNING", "FINISHED", "FAILED")).setDescription("");
 		addAttribute(MESSAGE).setDataType(TEXT).setNillable(true).setDescription("");
 		addAttribute(PROGRESS).setDataType(INT).setNillable(false).setDescription("");
