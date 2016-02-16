@@ -202,7 +202,9 @@ public class SnpEffAnnotator
 
 				List<String> params = Arrays.asList("-Xmx2g", getSnpEffPath(), "hg19", "-noStats", "-noLog", "-lof",
 						"-canon", "-ud", "0", "-spliceSiteSize", "5");
+
 				File outputVcf = jarRunner.runJar(NAME, params, inputVcf);
+
 				// When vcf reader/writer can handle samples and SnpEff annotations just return a VcfRepository (with
 				// inputVcf as input)
 				// iterator here
@@ -239,6 +241,12 @@ public class SnpEffAnnotator
 						catch (IOException e)
 						{
 							throw new UncheckedIOException(e);
+						}
+						catch (NullPointerException e)
+						{
+							throw new MolgenisDataException(
+									"Exception running SnpEff: One of your vcf lines could not be processed by SnpEff",
+									e);
 						}
 
 						return copy;
