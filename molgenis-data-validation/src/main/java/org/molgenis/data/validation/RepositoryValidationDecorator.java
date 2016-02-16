@@ -287,9 +287,15 @@ public class RepositoryValidationDecorator implements Repository
 		return entities.filter(entity -> {
 			validationResource.incrementRow();
 
-			validateEntityValueRequired(entity, validationResource);
-
 			validateEntityValueTypes(entity, validationResource);
+
+			// other validation steps might not be able to handle invalid data types, stop here
+			if (validationResource.hasViolations())
+			{
+				throw new MolgenisValidationException(validationResource.getViolations());
+			}
+
+			validateEntityValueRequired(entity, validationResource);
 
 			validateEntityValueUniqueness(entity, validationResource, validationMode);
 
