@@ -1144,11 +1144,9 @@ public class MysqlRepository extends AbstractRepository
 								{
 									for (Entity val : batch.get(rowIndex).getEntities(att.getName()))
 									{
-										if (val != null)
-										{
+										if(val != null) {
 											Map<String, Object> mref = new HashMap<>();
-											mref.put(idAttribute.getName(),
-													batch.get(rowIndex).get(idAttribute.getName()));
+											mref.put(idAttribute.getName(), batch.get(rowIndex).get(idAttribute.getName()));
 											mref.put(att.getName(), val.getIdValue());
 											mrefs.get(att.getName()).add(mref);
 										}

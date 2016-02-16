@@ -133,14 +133,10 @@ public class EntityToSourceConverter
 						@Override
 						public Object apply(Entity refEntity)
 						{
-							if (refEntity != null)
-							{
-								if (nestRefs)
-								{
+							if(refEntity != null) {
+								if (nestRefs) {
 									return convert(refEntity, refEntityMetaData, false);
-								}
-								else
-								{
+								} else {
 									return convertAttribute(refEntity, refEntityMetaData.getIdAttribute(), false);
 								}
 							}
