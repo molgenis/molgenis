@@ -212,7 +212,7 @@
 <#if annotationRun??>
     <script>
             if ('${annotationRun.status}' === "SUCCESS") {
-                molgenis.createAlert([{'message': 'This entity has already been annotated with: ${annotationRun.annotators}'}], 'info');
+                molgenis.createAlert([{'message': 'This entity has most recently been annotated with: ${annotationRun.annotators}'}], 'info');
             }
             if ('${annotationRun.status}' === "FAILED") {
                 molgenis.createAlert([{'message': 'The last annotation run for this entity has failed'}], 'error');
