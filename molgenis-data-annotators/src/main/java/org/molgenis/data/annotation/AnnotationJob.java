@@ -86,6 +86,16 @@ public class AnnotationJob implements Job
 				dataService.add(AnnotationJobMetaData.ENTITY_NAME, annotationJobMetaData);
 			});
 			annotate(username, annotationJobMetaData, repository, annotatorQueue);
+			// FIXME: This a workaround for:Github #4485 If an annotator finishes within a second the user is not sent
+			// to the dataexplorer data tab
+			try
+			{
+				Thread.sleep(1000);
+			}
+			catch (InterruptedException e)
+			{
+				throw new RuntimeException(e);
+			}
 
 			long t = System.currentTimeMillis();
 			logAndUpdateProgress(annotationJobMetaData, JobMetaData.Status.SUCCESS,
