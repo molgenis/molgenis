@@ -1,36 +1,37 @@
 package org.molgenis.dataexplorer.controller;
 
-import static org.molgenis.dataexplorer.controller.AnnotatorController.URI;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import com.google.common.collect.Lists;
+import com.google.common.io.BaseEncoding;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
+import org.molgenis.data.annotation.AnnotationJob;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.CrudRepositoryAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.settings.SettingsEntityMeta;
-import org.molgenis.data.validation.EntityValidator;
-import org.molgenis.file.FileStore;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.ErrorMessageResponse;
+import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.TriggerBuilder;
+import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,14 +40,23 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.google.common.collect.Lists;
+import javax.servlet.http.HttpServletRequest;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
-/**
- * Controller wrapper for the dataexplorer annotator
- * 
- * @author mdehaan
- * 
- */
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.dataexplorer.controller.AnnotatorController.URI;
+
 @Controller
 @RequestMapping(URI)
 public class AnnotatorController
@@ -54,30 +64,30 @@ public class AnnotatorController
 	private static final Logger LOG = LoggerFactory.getLogger(AnnotatorController.class);
 
 	public static final String URI = "/annotators";
+	private static final String TRIGGER_GROUP = "annotators";
+	private static final String JOB_GROUP = "annotators";
+	private static final String INDEX_REBUILD_JOB_KEY = "annotate";
+	private final String triggerNameSalt;
+	private final DataService dataService;
+	private final AnnotationService annotationService;
+	private final MolgenisPermissionService molgenisPermissionService;
+	private final Scheduler scheduler;
+	private final PermissionSystemService permissionSystemService;
+	private final UserAccountService userAccountService;
 
 	@Autowired
-	DataService dataService;
-
-	@Autowired
-	FileStore fileStore;
-
-	@Autowired
-	SearchService searchService;
-
-	@Autowired
-	AnnotationService annotationService;
-
-	@Autowired
-	EntityValidator entityValidator;
-
-	@Autowired
-	PermissionSystemService permissionSystemService;
-
-	@Autowired
-	UserAccountService userAccountService;
-
-	@Autowired
-	MolgenisPermissionService molgenisPermissionService;
+	public AnnotatorController(DataService dataService, AnnotationService annotationService,
+			MolgenisPermissionService molgenisPermissionService, Scheduler scheduler,
+			PermissionSystemService permissionSystemService, UserAccountService userAccountService)
+	{
+		this.dataService = dataService;
+		this.annotationService = annotationService;
+		this.molgenisPermissionService = molgenisPermissionService;
+		this.scheduler = requireNonNull(scheduler);
+		this.triggerNameSalt = UUID.randomUUID().toString();
+		this.permissionSystemService = permissionSystemService;
+		this.userAccountService = userAccountService;
+	}
 
 	/**
 	 * Gets a map of all available annotators.
@@ -95,7 +105,7 @@ public class AnnotatorController
 	}
 
 	/**
-	 * Annotates a dataset based on selected dataset and selected annotators. Creates a copy of the original dataset if
+	 * Annotates an entity based on selected entity and selected annotators. Creates a copy of the entity dataset if
 	 * option is ticked by the user.
 	 * 
 	 * @param annotatorNames
@@ -106,48 +116,108 @@ public class AnnotatorController
 	 */
 	@RequestMapping(value = "/annotate-data", method = RequestMethod.POST)
 	@ResponseBody
-	@Transactional
-	public String annotateData(@RequestParam(value = "annotatorNames", required = false) String[] annotatorNames,
+	public String annotateData(HttpServletRequest request,
+			@RequestParam(value = "annotatorNames", required = false) String[] annotatorNames,
 			@RequestParam("dataset-identifier") String entityName,
 			@RequestParam(value = "createCopy", required = false) boolean createCopy)
 	{
 		Repository repository = dataService.getRepository(entityName);
+
+		if (createCopy)
+		{
+			String newRepositoryLabel = getNewRepositoryLabel(annotatorNames, entityName);
+			repository = dataService.copyRepository(repository, RandomStringUtils.randomAlphabetic(30),
+					newRepositoryLabel);
+			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
+					Collections.singletonList(repository.getName()));
+			entityName = repository.getEntityMetaData().getSimpleName();
+		}
+
 		if (annotatorNames != null && repository != null)
 		{
-			CrudRepositoryAnnotator crudRepositoryAnnotator = new CrudRepositoryAnnotator(dataService,
-					getNewRepositoryName(annotatorNames, repository.getEntityMetaData().getSimpleName()),
-					permissionSystemService, userAccountService, molgenisPermissionService);
-
-			for (String annotatorName : annotatorNames)
+			ArrayList<RepositoryAnnotator> annotators = new ArrayList<>();
+			Arrays.asList(annotatorNames).stream()
+					.forEach(a -> annotators.add(annotationService.getAnnotatorByName(a)));
+			try
 			{
-				RepositoryAnnotator annotator = annotationService.getAnnotatorByName(annotatorName);
-				if (annotator != null)
-				{
-					// running annotator
-					try
-					{
-						repository = crudRepositoryAnnotator.annotate(annotator, repository, createCopy);
-						entityName = repository.getName();
-						createCopy = false;
-					}
-					catch (IOException e)
-					{
-						throw new RuntimeException(e.getMessage());
-					}
-				}
+				scheduleAnnotatorRun(repository.getEntityMetaData().getSimpleName(), annotators);
+			}
+			catch (SchedulerException e)
+			{
+				e.printStackTrace();
 			}
 		}
 		return entityName;
 	}
 
-	private String getNewRepositoryName(String[] annotatorNames, String repositoryName)
+	private String getNewRepositoryLabel(
+			@RequestParam(value = "annotatorNames", required = false) String[] annotatorNames,
+			@RequestParam("dataset-identifier") String entityName)
 	{
-		String newRepositoryName = repositoryName;
-		for (String annotatorName : annotatorNames)
+		StringJoiner joiner = new StringJoiner("_");
+		Arrays.asList(annotatorNames).forEach(a -> joiner.add(a));
+		String joinedString = joiner.toString();
+		return entityName + "_" + joinedString;
+	}
+
+	public TriggerKey scheduleAnnotatorRun(String entityName, List<RepositoryAnnotator> annotators)
+			throws SchedulerException
+	{
+		TriggerKey triggerKey = getIndexRebuildTriggerKeyCurrentUser();
+		if (!scheduler.checkExists(triggerKey))
 		{
-			newRepositoryName = newRepositoryName + "_" + annotatorName;
+			JobDataMap jobDataMap = new JobDataMap();
+			jobDataMap.put(AnnotationJob.REPOSITORY_NAME, entityName);
+			jobDataMap.put(AnnotationJob.ANNOTATORS, annotators);
+			jobDataMap.put(AnnotationJob.USERNAME, userAccountService.getCurrentUser().getUsername());
+			TriggerBuilder<?> triggerBuilder = TriggerBuilder.newTrigger().withIdentity(triggerKey)
+					.usingJobData(jobDataMap).startNow();
+			scheduleAnnotatorRunJob(triggerBuilder);
 		}
-		return newRepositoryName;
+		else
+		{
+			throw new RuntimeException("Index rebuild already scheduled");
+		}
+		return triggerKey;
+	}
+
+	private JobKey scheduleAnnotatorRunJob(TriggerBuilder<?> triggerBuilder) throws SchedulerException
+	{
+		JobKey jobKey = getIndexRebuildJobKey();
+		JobDetail jobDetail = scheduler.getJobDetail(jobKey);
+		if (jobDetail == null)
+		{
+			jobDetail = JobBuilder.newJob(AnnotationJob.class).withIdentity(jobKey).build();
+			scheduler.scheduleJob(jobDetail, triggerBuilder.build());
+		}
+		else
+		{
+			scheduler.scheduleJob(triggerBuilder.forJob(jobDetail).build());
+		}
+
+		return jobKey;
+	}
+
+	private TriggerKey getIndexRebuildTriggerKeyCurrentUser()
+	{
+		String rawTriggerName = triggerNameSalt + SecurityUtils.getCurrentUsername();
+
+		// use MD5 hash to prevent ids that are too long
+		MessageDigest messageDigest;
+		try
+		{
+			messageDigest = MessageDigest.getInstance("MD5");
+		}
+		catch (NoSuchAlgorithmException e)
+		{
+			throw new RuntimeException(e);
+		}
+		byte[] md5Hash = messageDigest.digest(rawTriggerName.getBytes(UTF_8));
+
+		// convert MD5 hash to string ids that can be safely used in URLs
+		String triggerName = BaseEncoding.base64Url().omitPadding().encode(md5Hash);
+
+		return new TriggerKey(triggerName, TRIGGER_GROUP);
 	}
 
 	/**
@@ -171,8 +241,8 @@ public class AnnotatorController
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("description", annotator.getDescription());
 				map.put("canAnnotate", annotator.canAnnotate(entityMetaData));
-				map.put("inputAttributes", createAttrsResponse(annotator.getInputMetaData()));
-				map.put("inputAttributeTypes", toMap(annotator.getInputMetaData()));
+				map.put("inputAttributes", createAttrsResponse(annotator.getRequiredAttributes()));
+				map.put("inputAttributeTypes", toMap(annotator.getRequiredAttributes()));
 				map.put("outputAttributes", createAttrsResponse(outputAttrs));
 				map.put("outputAttributeTypes", toMap(annotator.getOutputMetaData()));
 
@@ -184,6 +254,11 @@ public class AnnotatorController
 			}
 		}
 		return mapOfAnnotators;
+	}
+
+	private JobKey getIndexRebuildJobKey()
+	{
+		return new JobKey(INDEX_REBUILD_JOB_KEY, JOB_GROUP);
 	}
 
 	private List<Map<String, Object>> createAttrsResponse(List<AttributeMetaData> inputMetaData)
