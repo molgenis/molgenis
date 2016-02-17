@@ -42,7 +42,7 @@ public class MolgenisMenuController
 
 	@Autowired
 	public MolgenisMenuController(MolgenisUi molgenisUi, @Value("${molgenis.version}") String molgenisVersion,
-			@Value("${molgenis.build.date}") String molgenisBuildData) throws ParseException
+			@Value("${molgenis.build.date}") String molgenisBuildData)
 	{
 		if (molgenisUi == null) throw new IllegalArgumentException("molgenisUi is null");
 		if (molgenisVersion == null) throw new IllegalArgumentException("molgenisVersion is null");
