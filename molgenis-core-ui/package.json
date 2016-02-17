@@ -1,9 +1,9 @@
 {
   "name": "MOLGENIS",
-  "version": "1.17.0-SNAPSHOT",
+  "version": "1.18.0-SNAPSHOT",
   "description": "Dependencies for the MOLGENIS UI",
   "scripts": {
-  	"watch" : "webpack -d --watch",
+    "watch": "webpack -d --watch",
     "build": "webpack -d",
     "test": "webpack -d --config webpack.test.config.js && node ./target/test-classes/js/dist/test.bundle.js > target/tests.tap",
     "webpack-stats": "webpack --profile --json > target/json.stats"
