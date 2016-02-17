@@ -739,8 +739,6 @@ import "./css/Table.css";
 							CellContent = span(null, value);
 						}
 						break;
-					case 'IMAGE':
-						throw 'Unsupported data type: ' + attr.fieldType;
 					default:
 						CellContent = span(null, value);
 						break;

@@ -39,8 +39,6 @@
 				return self.createComplexFilter(attribute, filter, wizard, null);
 				break;
 			case 'COMPOUND' :
-			
-			case 'IMAGE':
 				throw 'Unsupported data type: ' + attribute.fieldType;
 			default:
 				throw 'Unknown data type: ' + attribute.fieldType;
@@ -183,7 +181,6 @@
 				});
 				return htmlEscape('(' + array.join(' ' + operator + ' ') + ')');
 			case 'COMPOUND' :
-			case 'IMAGE':
 				throw 'Unsupported data type: ' + filter.attribute.fieldType;
 			default:
 				throw 'Unknown data type: ' + filter.attribute.fieldType;
@@ -551,7 +548,6 @@
 				});
 				break;
 			case 'COMPOUND' :
-			case 'IMAGE':
 				throw 'Unsupported data type: ' + attribute.fieldType;
 			default:
 				throw 'Unknown data type: ' + attribute.fieldType;			
@@ -783,7 +779,6 @@
 							attrOperator = 'SEARCH';
 							break;
 						case 'COMPOUND':
-						case 'IMAGE':
 							throw 'Unsupported data type: ' + attribute.fieldType;
 						default:
 							throw 'Unknown data type: ' + attribute.fieldType;
