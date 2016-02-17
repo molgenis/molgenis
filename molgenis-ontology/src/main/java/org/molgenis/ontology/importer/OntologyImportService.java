@@ -138,7 +138,10 @@ public class OntologyImportService implements ImportService
 							.eq(OntologyMetaData.ONTOLOGY_NAME, ontologyName));
 			ontologyExists = ontologyQueryEntity != null;
 		}
-
+		
+		if(ontologyExists) 
+			throw new MolgenisDataException("The ontology you are trying to import already exists");
+		
 		Iterator<String> it = source.getEntityNames().iterator();
 		while (it.hasNext())
 		{
