@@ -1,5 +1,6 @@
 package org.molgenis.data.annotation.entity.impl;
 
+import static java.io.File.createTempFile;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.TEXT;
@@ -281,7 +282,7 @@ public class SnpEffAnnotator
 		 */
 		private File addVcfMetaDataToOutputVcf(File outputVcf) throws IOException
 		{
-			File snpEffOutputWithMetaData = new File(outputVcf.getPath() + "snpEffOutputWithMetaData.vcf");
+			File snpEffOutputWithMetaData = createTempFile(NAME + "_withMetaData", ".vcf");
 			BufferedReader reader = new BufferedReader(
 					new InputStreamReader(new FileInputStream(outputVcf.getAbsolutePath()), CHARSET));
 
@@ -308,7 +309,7 @@ public class SnpEffAnnotator
 
 		public File getInputVcfTempFile(Iterable<Entity> source) throws IOException
 		{
-			File vcf = File.createTempFile(NAME, ".vcf");
+			File vcf = createTempFile(NAME, ".vcf");
 			try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(vcf), CHARSET)))
 			{
 
