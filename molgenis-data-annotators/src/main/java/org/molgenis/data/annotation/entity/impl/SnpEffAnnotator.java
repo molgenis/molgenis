@@ -335,10 +335,13 @@ public class SnpEffAnnotator
 		// ANN=G|intron_variant|MODIFIER|LOC101926913|LOC101926913|transcript|NR_110185.1|Noncoding|5/5|n.376+9526G>C||||||,G|non_coding_exon_variant|MODIFIER|LINC01124|LINC01124|transcript|NR_027433.1|Noncoding|1/1|n.590G>C||||||;
 		public void parseOutputLineToEntity(Entity snpEffEntity, Entity entity)
 		{
-			String[] annotation = snpEffEntity.getString("ANN").split(Pattern.quote("|"), -1);
-			String lof = "";
-			String nmd = "";
-			
+			String[] annotation = snpEffEntity.getString(SnpEffAnnotator.ANN).split(Pattern.quote("|"), -1);
+			String lof = snpEffEntity.getString(SnpEffAnnotator.LOF);
+			String nmd = snpEffEntity.getString(SnpEffAnnotator.NMD);
+
+			if (lof == null) lof = "";
+			if (nmd == null) nmd = "";
+
 			if (annotation.length >= 15)
 			{
 				entity.set(ANNOTATION, annotation[1]);
@@ -356,8 +359,8 @@ public class SnpEffAnnotator
 				entity.set(PROTEIN_POSITION, annotation[13]);
 				entity.set(DISTANCE_TO_FEATURE, annotation[14]);
 				entity.set(ERRORS, annotation[15]);
-				entity.set(LOF, lof.replace("LOF=", ""));
-				entity.set(NMD, nmd.replace("NMD=", ""));
+				entity.set(LOF, lof);
+				entity.set(NMD, nmd);
 			}
 			else
 			{
