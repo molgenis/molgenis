@@ -9,6 +9,7 @@ import static org.testng.Assert.assertTrue;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.support.AnnotationServiceImpl;
+import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -83,6 +84,12 @@ public class AnnotationServiceImplTest extends AbstractTestNGSpringContextTests
 		public AnnotationService annotationService()
 		{
 			return new AnnotationServiceImpl();
+		}
+
+		@Bean
+		public DataService dataService()
+		{
+			return new DataServiceImpl();
 		}
 	}
 }
