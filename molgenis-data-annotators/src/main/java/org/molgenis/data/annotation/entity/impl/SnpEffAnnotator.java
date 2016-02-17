@@ -227,7 +227,7 @@ public class SnpEffAnnotator
 							}
 							catch (IOException e)
 							{
-								e.printStackTrace();
+								throw new RuntimeException("Unable to close repository stream", e); 
 							}
 						}
 
