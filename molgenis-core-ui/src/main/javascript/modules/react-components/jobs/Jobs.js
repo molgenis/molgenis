@@ -1,6 +1,6 @@
 /**
- * This module receives an array of job objects and renders a Job component for
- * each of the job objects.
+ * This module receives an array of job objects and renders ProgressBar
+ * components for RUNNING jobs and lists jobs with other status in a table.
  * 
  * @module Jobs
  * 

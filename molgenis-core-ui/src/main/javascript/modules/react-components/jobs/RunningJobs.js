@@ -1,5 +1,6 @@
 /**
- * TODO
+ * Renders a ProgressBar component for each job passed down from its parent
+ * component
  * 
  * @module RunningJobs
  * 

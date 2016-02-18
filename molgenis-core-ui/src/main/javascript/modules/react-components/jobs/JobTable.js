@@ -1,5 +1,6 @@
 /**
- * TODO
+ * Renders a Table with information for each job that is passed down from its
+ * parent component
  * 
  * @module JobTable
  * 
