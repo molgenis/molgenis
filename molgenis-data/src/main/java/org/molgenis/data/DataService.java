@@ -1,15 +1,10 @@
 package org.molgenis.data;
 
-import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.QueryImpl;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * DataService is a façade that manages data sources Entity names should be unique over all data sources.
@@ -121,7 +116,7 @@ public interface DataService extends Iterable<Repository>
 	Stream<Entity> findAll(String entityName, Query q);
 
 	/**
-	 * type-safe find entities that match a query
+	 * Type-safe find entities that match a query
 	 * 
 	 * @throws MolgenisDataAccessException
 	 * 
@@ -131,29 +126,33 @@ public interface DataService extends Iterable<Repository>
 	<E extends Entity> Stream<E> findAll(String entityName, Query q, Class<E> clazz);
 
 	/**
-	 * Find entities based on id. Returns empty stream if no matches.
+	 * Find entities that match a stream of ids. Non-existing entities are included as null.
 	 * 
 	 * @throws MolgenisDataAccessException
 	 * 
 	 * @param entityName
 	 *            entity name (case insensitive)
 	 * @param ids
-	 * @return (empty) Stream where the order of entities matches the order of ids, never null
+	 *            entity ids
+	 * @return Stream where the order of entities matches the order of ids, never null
 	 */
 	Stream<Entity> findAll(String entityName, Stream<Object> ids);
 
 	/**
-	 * type-safe find entities that match a stream of ids
+	 * Type-safe find entities that match a stream of ids. Non-existing entities are included as null.
 	 * 
 	 * @throws MolgenisDataAccessException
 	 * 
 	 * @param entityName
 	 *            entity name (case insensitive)
+	 * @return Stream where the order of entities matches the order of ids, never null
 	 */
 	<E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Class<E> clazz);
 
 	/**
-	 * Find entities based on id.
+	 * Find entities that match a stream of ids, with a fetch. Non-existing entities are included as null.
+	 * 
+	 * @throws MolgenisDataAccessException
 	 * 
 	 * @param entityName
 	 *            entity name (case insensitive)
@@ -161,13 +160,14 @@ public interface DataService extends Iterable<Repository>
 	 *            entity ids
 	 * @param fetch
 	 *            fetch defining which attributes to retrieve
-	 * @return (empty) Stream where the order of entities matches the order of ids, never null
-	 * @throws MolgenisDataAccessException
+	 * @return Stream where the order of entities matches the order of ids, never null
 	 */
 	Stream<Entity> findAll(String entityName, Stream<Object> ids, Fetch fetch);
 
 	/**
-	 * Type-safe find entities based on id.
+	 * Type-safe find entities that match a stream of ids, with a fetch. Non-existing entities are included as null.
+	 * 
+	 * @throws MolgenisDataAccessException
 	 * 
 	 * @param entityName
 	 *            entity name (case insensitive)
@@ -177,9 +177,7 @@ public interface DataService extends Iterable<Repository>
 	 *            fetch defining which attributes to retrieve
 	 * @param clazz
 	 *            typed entity class
-	 * @return (empty) Stream of entities of the give type where the order of entities matches the order of ids, never
-	 *         null
-	 * @throws MolgenisDataAccessException
+	 * @return Stream of entities of the give type where the order of entities matches the order of ids, never null
 	 */
 	<E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Fetch fetch, Class<E> clazz);
 
@@ -388,6 +386,7 @@ public interface DataService extends Iterable<Repository>
 	void removeEntityListener(String entityName, EntityListener entityListener);
 
 	Repository copyRepository(Repository repository, String newRepositoryId, String newRepositoryLabel);
+
 	Repository copyRepository(Repository repository, String newRepositoryId, String newRepositoryLabel, Query query);
 
 }

@@ -34,13 +34,6 @@ public interface Repository extends Iterable<Entity>, Closeable
 	long count(Query q);
 
 	/**
-	 * type-safe find entities that match a query
-	 * 
-	 * @return (empty) Stream, never null
-	 */
-	Stream<Entity> findAll(Query q);
-
-	/**
 	 * Find an entity base on a query
 	 * 
 	 * Returns null if not exists.
@@ -50,7 +43,7 @@ public interface Repository extends Iterable<Entity>, Closeable
 	Entity findOne(Query q);
 
 	/**
-	 * type-safe find one entity based on id. Returns null if not exists
+	 * Type-safe find one entity based on id. Returns null if not exists
 	 */
 	Entity findOne(Object id);
 
@@ -67,21 +60,32 @@ public interface Repository extends Iterable<Entity>, Closeable
 	Entity findOne(Object id, Fetch fetch);
 
 	/**
-	 * find entities based on a stream of ids.
+	 * Find entities that match a query. Returns empty stream if no matches.
 	 * 
-	 * @return (empty) Stream where the order of entities matches the order of ids, never null
+	 * @return (empty) Stream, never null
+	 */
+	Stream<Entity> findAll(Query q);
+
+	/**
+	 * Find entities that match a stream of ids. Non-existing entities are included as null.
+	 * 
+	 * @param ids
+	 *            entity ids
+	 * 
+	 * @return Stream where the order of entities matches the order of ids, never null
 	 */
 	Stream<Entity> findAll(Stream<Object> ids);
 
 	/**
-	 * Find entities based on id.
+	 * Find entities that match a stream of ids, with a fetch. Non-existing entities are included as null.
+	 * 
+	 * @throws MolgenisDataAccessException
 	 * 
 	 * @param ids
 	 *            entity ids
 	 * @param fetch
 	 *            fetch defining which attributes to retrieve
-	 * @return (empty) Stream where the order of entities matches the order of ids, never null
-	 * @throws MolgenisDataAccessException
+	 * @return Stream where the order of entities matches the order of ids, never null
 	 */
 	Stream<Entity> findAll(Stream<Object> ids, Fetch fetch);
 
