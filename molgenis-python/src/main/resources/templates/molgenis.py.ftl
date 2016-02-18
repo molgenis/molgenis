@@ -60,14 +60,14 @@ class Session():
         entity -- fully qualified name of the entity
         id -- the value for the idAttribute of the entity
         attributes -- The list of attributes to retrieve
-        expand -- the attribues to expand
+        expand -- the attributes to expand
 
         Examples:
         session.get('Person', 'John')
         '''
         response = self.session.get(self.url + "v1/" + quote_plus(entity) + '/' + quote_plus(id),
                 headers = self._get_token_header(),
-                params={"attributes":attributes, "expand": expand})
+                params={"attributes": attributes, "expand": expand})
         if response.status_code == 200:
             return response.json()
         response.raise_for_status();
@@ -80,7 +80,7 @@ class Session():
         entity -- fully qualified name of the entity
         q -- query in json form, see the MOLGENIS REST API v1 documentation for details
         attributes -- The list of attributes to retrieve
-        expand -- the attribues to expand
+        expand -- the attributes to expand
         num -- the amount of entity rows to retrieve
         start -- the index of the first row to retrieve (zero indexed)
         sortColumn -- the attribute to sort on
