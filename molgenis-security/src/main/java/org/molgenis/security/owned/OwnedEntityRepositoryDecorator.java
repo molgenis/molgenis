@@ -122,6 +122,10 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	@Override
 	public Entity findOne(Object id, Fetch fetch)
 	{
+		if (fetch != null)
+		{
+			fetch.field(OwnedEntityMetaData.ATTR_OWNER_USERNAME);
+		}
 		Entity e = decoratedRepo.findOne(id, fetch);
 
 		if (mustAddRowLevelSecurity())
@@ -146,6 +150,10 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	@Override
 	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
+		if (fetch != null)
+		{
+			fetch.field(OwnedEntityMetaData.ATTR_OWNER_USERNAME);
+		}
 		Stream<Entity> entities = decoratedRepo.findAll(ids, fetch);
 		if (mustAddRowLevelSecurity())
 		{

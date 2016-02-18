@@ -160,6 +160,10 @@ body {
 	height: 0
 }
 
+.background-lightgrey {
+	background: lightgrey;
+}
+
 /* Bootstrap tooltip style - end*/
 
 .popover-content {

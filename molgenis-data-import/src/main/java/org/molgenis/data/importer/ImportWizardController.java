@@ -63,9 +63,9 @@ public class ImportWizardController extends AbstractWizardController
 
 	@Autowired
 	public ImportWizardController(UploadWizardPage uploadWizardPage, OptionsWizardPage optionsWizardPage,
-			PackageWizardPage packageWizardPage, ValidationResultWizardPage validationResultWizardPage,
-			ImportResultsWizardPage importResultsWizardPage, DataService dataService,
-			GrantedAuthoritiesMapper grantedAuthoritiesMapper, UserAccountService userAccountService)
+								  PackageWizardPage packageWizardPage, ValidationResultWizardPage validationResultWizardPage,
+								  ImportResultsWizardPage importResultsWizardPage, DataService dataService,
+								  GrantedAuthoritiesMapper grantedAuthoritiesMapper, UserAccountService userAccountService)
 	{
 		super(URI, "importWizard");
 		if (uploadWizardPage == null) throw new IllegalArgumentException("UploadWizardPage is null");
@@ -134,8 +134,8 @@ public class ImportWizardController extends AbstractWizardController
 					String value = webRequest.getParameter(param);
 					if (value != null
 							&& (SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX
-									+ entityClassId.toUpperCase()) || userAccountService.getCurrentUser()
-									.isSuperuser()))
+							+ entityClassId.toUpperCase()) || userAccountService.getCurrentUser()
+							.isSuperuser()))
 					{
 						if (value.equalsIgnoreCase(READ.toString()) || value.equalsIgnoreCase(COUNT.toString())
 								|| value.equalsIgnoreCase(WRITE.toString())
