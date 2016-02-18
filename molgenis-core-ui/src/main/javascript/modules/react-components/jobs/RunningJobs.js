@@ -1,0 +1,36 @@
+/**
+ * TODO
+ * 
+ * @module RunningJobs
+ * 
+ * @param jobs
+ *            An array of job objects with status RUNNING
+ * 
+ * @exports RunningJobs class
+ */
+import React from 'react';
+import { Job } from './Job';
+
+import DeepPureRenderMixin from '../mixin/DeepPureRenderMixin';
+
+var RunningJobs = React.createClass({
+	mixins: [DeepPureRenderMixin],
+	displayName: 'RunningJobs',
+	propTypes : {
+		jobs : React.PropTypes.array.isRequired
+	},
+	render: function() {
+		const {jobs} = this.props;
+		return <div className="panel panel-primary">
+			<div className="panel-heading">Running Jobs</div>
+			<div className="panel-body">
+				{jobs.map(function(job){	
+					return <Job job={job} key={job.identifier} />;
+				})}
+			</div>
+		</div>;
+	}
+});
+
+export { RunningJobs };
+export default React.createFactory(RunningJobs);

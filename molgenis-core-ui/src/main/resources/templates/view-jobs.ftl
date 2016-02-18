@@ -9,10 +9,7 @@
 <div class="row">
 	<div class="col-md-12">
 		<h2>Job and process overview</h2>
-		<div class="col-md-4">
-			<h3>Latest jobs</h3>
-			<div id="job-container"></div>
-		</div>
+		<div id="job-container"></div>
 	</div>
 </div>
 

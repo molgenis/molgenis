@@ -16,23 +16,22 @@ import { ProgressBar } from '../ProgressBar';
 
 import DeepPureRenderMixin from '../mixin/DeepPureRenderMixin'; 
 
-const div = React.DOM.div;
-
 var Job = React.createClass({
 	mixins: [DeepPureRenderMixin],
 	displayName: 'Job',
 	propTypes: {
-		job: React.PropTypes.object.isRequired
+		job: React.PropTypes.object.isRequired,
 	},
 	render: function() {
 		return <div>
-			<h3>{this.props.job.type}</h3>
+			<p>{this.props.job.type} job
 			<ProgressBar 
 				progressMessage={this.props.job.progressInt !== undefined ? this._formatProgressMessage() : this.props.job.progressMessage} 
 				progressPct={this.props.job.progressMax !== undefined ? this._getProgressPct() : 100}
 				status={this._getCssClass() || 'primary'} 
 				active={this._isActive()} 
 			/>
+			</p>
 		</div>
 	},
 	_getCssClass: function() {
@@ -65,4 +64,5 @@ var Job = React.createClass({
 	}
 });
 
-export default Job;
+export { Job };
+export default React.createFactory(Job);

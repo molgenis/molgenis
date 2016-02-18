@@ -16,12 +16,11 @@ import RestClient from "rest-client/RestClientV2";
 import { Spinner } from '../Spinner'
 import $ from 'jquery';
 
-import Jobs from './Jobs';
+import { Jobs } from './Jobs';
 
 import DeepPureRenderMixin from '../mixin/DeepPureRenderMixin'; 
 
 const api = new RestClient();
-const div = React.DOM.div;
 
 var JobContainer = React.createClass({
 	mixins: [DeepPureRenderMixin],

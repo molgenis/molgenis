@@ -10,11 +10,10 @@
  * @exports Job class
  */
 import React from 'react';
-import Job from './Job';
+import { RunningJobs } from './RunningJobs';
+import { JobTable } from './JobTable';
 
-import DeepPureRenderMixin from '../mixin/DeepPureRenderMixin'; 
-
-const div = React.DOM.div;
+import DeepPureRenderMixin from '../mixin/DeepPureRenderMixin';
 
 var Jobs = React.createClass({
 	mixins: [DeepPureRenderMixin],
@@ -23,12 +22,22 @@ var Jobs = React.createClass({
 		jobs : React.PropTypes.array.isRequired
 	},
 	render: function() {
+		const {jobs} = this.props;	
+		const runningJobs = jobs.filter(job => job.status === 'RUNNING');
+		const finishedJobs = jobs.filter(job => job.status !== 'RUNNING');
+		
 		return <div>
-			{this.props.jobs.map(function(job){	
-				return <Job job={job} key={job.identifier} />;
-			})}
-		</div>;
-	}	
+			<div className="row">
+				<div className="col-md-5">
+					<RunningJobs jobs={runningJobs} />
+				</div>
+				<div className="col-md-7">
+					<JobTable jobs={finishedJobs} />
+				</div>
+			</div>			
+		</div>
+	}
 });
 
-export default Jobs;
+export { Jobs };
+export default React.createFactory(Jobs);
