@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -34,7 +35,11 @@ public class MolgenisResourceBundleControlTest
 		queryMock = mock(Query.class);
 		when(queryMock.eq(any(), any())).thenReturn(queryMock);
 		when(dataServiceMock.query(LanguageMetaData.ENTITY_NAME)).thenReturn(queryMock);
-		molgenisResourceBundleControl = new MolgenisResourceBundleControl(dataServiceMock);
+
+		AppSettings settings = mock(AppSettings.class);
+		when(settings.getLanguageCode()).thenReturn(null);
+
+		molgenisResourceBundleControl = new MolgenisResourceBundleControl(dataServiceMock, settings);
 	}
 
 	@Test
