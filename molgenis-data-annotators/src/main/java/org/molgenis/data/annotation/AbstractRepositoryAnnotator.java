@@ -18,7 +18,7 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 	@Override
 	public String canAnnotate(EntityMetaData repoMetaData)
 	{
-		Iterable<AttributeMetaData> annotatorAttributes = getInputMetaData();
+		Iterable<AttributeMetaData> annotatorAttributes = getRequiredAttributes();
 		for (AttributeMetaData annotatorAttribute : annotatorAttributes)
 		{
 			// one of the needed attributes not present? we can not annotate

@@ -44,7 +44,7 @@ public interface RepositoryAnnotator
 	 * 
 	 * @return inputMetaData;
 	 */
-	List<AttributeMetaData> getInputMetaData();
+	List<AttributeMetaData> getRequiredAttributes();
 
 	/**
 	 * Returns null if the annotator will work for the given metadata, a reason if not so

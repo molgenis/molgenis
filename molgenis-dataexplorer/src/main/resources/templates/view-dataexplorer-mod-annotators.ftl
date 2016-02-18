@@ -1,5 +1,5 @@
 <#include "resource-macros.ftl">
-<#if annotationRun??>
+<#if annotationRun?? && (annotationRun.status == 'RUNNING')>
 <div class="row">
     <div class="col-md-12">
         This entity is currently being annotated, details listed below. This page will refresh once the annotators finished.
@@ -17,35 +17,37 @@
 				'status' : 'info',
 				'active' : false
 			}), $('#annotateRun')[0]);
-	        setInterval(
-	                function ()
-	                {
-	                    molgenis.RestClient.prototype.getAsync('/api/v1/AnnotationJobMetaData/', {'q' : [ {
-	                                'field' : 'identifier',
-	                                'operator' : 'EQUALS',
-	                                'value' : '${annotationRun.identifier}'
-	                            } ]},
-	                            function(annotateRun) {
-	                                var entry = annotateRun.items[0];
-	                                var container = $('#annotateRun');
-	
-	                                if(entry.status!=="RUNNING"){
-	             	                     window.location.replace("?entity=${entityName}");
-	                                }
-	                                else{
-	                                	if(ProgressBar && ProgressBar.isMounted()) {
-                                            var progress = ((entry.progressInt/entry.progressMax)*100)
-                                            console.log(entry.progressMessage);
-                                            console.log(progress);
-			    							ProgressBar.setProps({
-												'progressMessage' : entry.progressMessage,
-                                                'progressPct' : progress
-							            	});
-		                                }
-	                                }
-	                            });
-	                }, 1000);
-    	});
+                setInterval(
+                        function ()
+                        {
+                            molgenis.RestClient.prototype.getAsync('/api/v1/AnnotationJobMetaData/', {'q' : [ {
+                                        'field' : 'identifier',
+                                        'operator' : 'EQUALS',
+                                        'value' : '${annotationRun.identifier}'
+                                    } ]},
+                                    function(annotateRun) {
+                                        var entry = annotateRun.items[0];
+                                        var container = $('#annotateRun');
+                                        if(entry.status==="FAILED"){
+                                            window.location.reload();
+                                        }
+                                        if(entry.status==="SUCCESS"){
+                                             window.location.replace("?entity=${entityName}");
+                                        }
+                                        else{
+                                            if(ProgressBar && ProgressBar.isMounted()) {
+                                                var progress = (((entry.progressInt-1)/entry.progressMax)*100)
+                                                console.log(entry.progressMessage);
+                                                console.log(progress);
+                                                ProgressBar.setProps({
+                                                    'progressMessage' : entry.progressMessage,
+                                                    'progressPct' : progress
+                                                });
+                                            }
+                                        }
+                                    });
+                        }, 1000);
+        });
     </script>
 <#else>
 
@@ -207,11 +209,17 @@
     </div>
 </script>
 
-
+<#if annotationRun??>
+    <script>
+            if ('${annotationRun.status}' === "SUCCESS") {
+                molgenis.createAlert([{'message': 'This entity has most recently been annotated with: ${annotationRun.annotators}'}], 'info');
+            }
+            if ('${annotationRun.status}' === "FAILED") {
+                molgenis.createAlert([{'message': 'The last annotation run for this entity has failed'}], 'error');
+            }
+    </script>
+</#if>
 <script>
-
-
-
 	$.when($.ajax("<@resource_href "/js/dataexplorer-annotators.js"/>", {'cache': true}))
 		.then(function() {
 			molgenis.dataexplorer.annotators.getAnnotatorSelectBoxes();

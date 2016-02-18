@@ -138,4 +138,3 @@ public class JobMetaData extends DefaultEntity
 		set(PROGRESS_MAX, value);
 	}
 }
-

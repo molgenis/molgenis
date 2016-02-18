@@ -32,12 +32,12 @@ public class JobMetaDataMetaData extends DefaultEntityMetaData
 				.setNillable(true);
 		addAttribute(JobMetaData.END_DATE).setDataType(MolgenisFieldTypes.DATETIME).setLabel("Job end date")
 				.setNillable(true);
-		addAttribute(JobMetaData.PROGRESS_INT).setDataType(MolgenisFieldTypes.INT)
-				.setLabel("Number of entities processed").setNillable(true);
+		addAttribute(JobMetaData.PROGRESS_INT).setDataType(MolgenisFieldTypes.INT).setLabel("Progress")
+				.setNillable(true);
+		addAttribute(JobMetaData.PROGRESS_MAX).setDataType(MolgenisFieldTypes.INT).setLabel("Maximum progress")
+				.setNillable(true);
 		addAttribute(JobMetaData.PROGRESS_MESSAGE).setDataType(MolgenisFieldTypes.TEXT).setLabel("Progress message")
 				.setNillable(true);
-		addAttribute(JobMetaData.PROGRESS_MAX).setDataType(MolgenisFieldTypes.INT)
-				.setLabel("Maximum number of entities to be processed").setNillable(true);
 	}
 
 }
