@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.generate;
 import static java.util.stream.Stream.of;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -11,6 +12,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,7 +37,6 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 
 import com.google.common.collect.Iterators;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 {
@@ -153,11 +154,12 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl()), 0);
 	}
 
-	public void testFindAllEmpty() {
+	public void testFindAllEmpty()
+	{
 		Stream<Entity> retrieved = dataService.findAll(ENTITY_NAME);
 		assertEquals(retrieved.count(), 0);
 	}
-	
+
 	public void testFindAll()
 	{
 		List<Entity> entities = create(5);
@@ -179,29 +181,53 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
-		Stream<Object> ids = Stream.concat(entities.stream().map(Entity::getIdValue), of("bogus"));
-		Stream<Entity> retrieved = dataService.findAll(ENTITY_NAME, ids);
-		assertEquals(retrieved.count(), entities.size());
+		Stream<Object> ids = concat(of("bogus"), entities.stream().map(Entity::getIdValue));
+		Supplier<Stream<Entity>> retrieved = () -> dataService.findAll(ENTITY_NAME, ids);
+		assertEquals(retrieved.get().count(), entities.size() + 1);
+
+		Iterator<Entity> entityIterator = retrieved.get().iterator();
+		assertEquals(entityIterator.next(), null);
+		assertEquals(entityIterator.next().getIdValue(), entities.get(0).getIdValue());
 	}
 
 	public void testFindAllByIdsTyped()
 	{
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
+		Stream<Object> ids = concat(of("bogus"), entities.stream().map(Entity::getIdValue));
+		Supplier<Stream<TestEntity>> retrieved = () -> dataService.findAll(ENTITY_NAME, ids, TestEntity.class);
+		assertEquals(retrieved.get().count(), entities.size() + 1);
 
-		Supplier<Stream<TestEntity>> retrieved = () -> dataService.findAll(ENTITY_NAME,
-				Stream.concat(entities.stream().map(Entity::getIdValue), of("bogus")), TestEntity.class);
-		assertEquals(retrieved.get().count(), entities.size());
-		assertEquals(retrieved.get().iterator().next().getId(), entities.get(0).getIdValue());
+		Iterator<TestEntity> entityIterator = retrieved.get().iterator();
+		assertEquals(entityIterator.next(), null);
+		assertEquals(entityIterator.next().getIdValue(), entities.get(0).getIdValue());
 	}
 
-	public void testFindAllStreamFetch()
+	public void testFindAllByIdsFetch()
 	{
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
-		Stream<Object> ids = concat(entities.stream().map(Entity::getIdValue), of("bogus"));
-		Stream<Entity> retrieved = dataService.findAll(ENTITY_NAME, ids, new Fetch().field(ID));
-		assertEquals(retrieved.count(), entities.size());
+		Stream<Object> ids = concat(of("bogus"), entities.stream().map(Entity::getIdValue));
+		Supplier<Stream<Entity>> retrieved = () -> dataService.findAll(ENTITY_NAME, ids, new Fetch().field(ID));
+		assertEquals(retrieved.get().count(), entities.size() + 1);
+
+		Iterator<Entity> entityIterator = retrieved.get().iterator();
+		assertEquals(entityIterator.next(), null);
+		assertEquals(entityIterator.next().getIdValue(), entities.get(0).getIdValue());
+	}
+
+	public void testFindAllByIdsFetchTyped()
+	{
+		List<Entity> entities = create(5);
+		dataService.add(ENTITY_NAME, entities.stream());
+		Stream<Object> ids = concat(of("bogus"), entities.stream().map(Entity::getIdValue));
+		Supplier<Stream<TestEntity>> retrieved = () -> dataService.findAll(ENTITY_NAME, ids, new Fetch().field(ID),
+				TestEntity.class);
+		assertEquals(retrieved.get().count(), entities.size() + 1);
+
+		Iterator<TestEntity> entityIterator = retrieved.get().iterator();
+		assertEquals(entityIterator.next(), null);
+		assertEquals(entityIterator.next().getIdValue(), entities.get(0).getIdValue());
 	}
 
 	public void testFindQuery()
