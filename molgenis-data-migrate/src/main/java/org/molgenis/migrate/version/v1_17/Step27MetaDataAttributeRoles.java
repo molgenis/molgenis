@@ -68,7 +68,7 @@ public class Step27MetaDataAttributeRoles extends MolgenisUpgrade
 
 		// Create entities_lookupattributes table
 		jdbcTemplate.execute(
-				"CREATE TABLE `entities_lookupattributes` (`order` int(11) DEFAULT NULL, `fullName` varchar(255) NOT NULL, `lookupAttributes` varchar(255) NOT NULL, KEY `fullName` (`fullName`), KEY `lookupAttributes` (`lookupAttributes`), CONSTRAINT `entities_lookupattributes_ibfk_1` FOREIGN KEY (`fullName`) REFERENCES `entities` (`fullName`) ON DELETE CASCADE, CONSTRAINT `entities_lookupattributes_ibfk_2` FOREIGN KEY (`lookupAttributes`) REFERENCES `attributes` (`identifier`) ON DELETE CASCADE) ENGINE=InnoDB");
+				"CREATE TABLE `entities_lookupAttributes` (`order` int(11) DEFAULT NULL, `fullName` varchar(255) NOT NULL, `lookupAttributes` varchar(255) NOT NULL, KEY `fullName` (`fullName`), KEY `lookupAttributes` (`lookupAttributes`), CONSTRAINT `entities_lookupAttributes_ibfk_1` FOREIGN KEY (`fullName`) REFERENCES `entities` (`fullName`) ON DELETE CASCADE, CONSTRAINT `entities_lookupAttributes_ibfk_2` FOREIGN KEY (`lookupAttributes`) REFERENCES `attributes` (`identifier`) ON DELETE CASCADE) ENGINE=InnoDB");
 
 		// Fill entities_lookupattributes table with data
 		entityAttrsMap.entrySet().forEach(entry -> {
@@ -77,7 +77,7 @@ public class Step27MetaDataAttributeRoles extends MolgenisUpgrade
 			entry.getValue().forEach(attrName -> {
 				int currentOrder = order.getAndIncrement();
 				jdbcTemplate.update(
-						"INSERT INTO `entities_lookupattributes` (`order`,`fullName`,`lookupAttributes`) VALUES (?, ?, ?)",
+						"INSERT INTO `entities_lookupAttributes` (`order`,`fullName`,`lookupAttributes`) VALUES (?, ?, ?)",
 						new Object[]
 				{ currentOrder, entityName, attrName });
 

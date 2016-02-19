@@ -1,6 +1,7 @@
 package org.molgenis.data.support;
 
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserHasRole;
+import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -207,7 +208,7 @@ public class DataServiceImpl implements DataService
 	public void deleteAll(String entityName)
 	{
 		getRepository(entityName).deleteAll();
-		LOG.info("Deleted all entities of repository [" + entityName + "]");
+		LOG.info("All entities of repository [{}] deleted by user [{}]", entityName, getCurrentUsername());
 	}
 
 	@Override
