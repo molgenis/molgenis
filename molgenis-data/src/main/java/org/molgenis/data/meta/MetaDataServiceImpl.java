@@ -2,6 +2,7 @@ package org.molgenis.data.meta;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.reverse;
+import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
 import java.util.Collection;
@@ -203,8 +204,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		});
 
 		refreshCaches();
-
-		LOG.info("Deleted repository [" + entityName + "]");
+		LOG.info("Repository [{}] deleted by user [{}]", entityName, getCurrentUsername());
 	}
 
 	private void deleteEntityPermissions(String entityName)
