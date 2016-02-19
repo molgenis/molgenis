@@ -7,8 +7,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntity;
 
-import com.google.gson.annotations.Expose;
-
 public class JobMetaData extends DefaultEntity implements Comparable<JobMetaData>
 {
 	private static final long serialVersionUID = -4064249548140446038L;
