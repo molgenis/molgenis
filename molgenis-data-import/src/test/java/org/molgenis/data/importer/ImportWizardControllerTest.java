@@ -393,7 +393,7 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testImportIllagalUpdateModeFile() throws IOException
+	public void testImportIllegalUpdateModeFile() throws IOException
 	{
 		// set up the test
 		HttpServletRequest request = mock(HttpServletRequest.class);
