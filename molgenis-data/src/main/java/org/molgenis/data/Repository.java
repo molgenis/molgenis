@@ -34,6 +34,13 @@ public interface Repository extends Iterable<Entity>, Closeable
 	long count(Query q);
 
 	/**
+	 * Find entities that match a query. Returns empty stream if no matches.
+	 * 
+	 * @return (empty) Stream, never null
+	 */
+	Stream<Entity> findAll(Query q);
+
+	/**
 	 * Find an entity base on a query
 	 * 
 	 * Returns null if not exists.
@@ -58,13 +65,6 @@ public interface Repository extends Iterable<Entity>, Closeable
 	 * @throws MolgenisDataAccessException
 	 */
 	Entity findOne(Object id, Fetch fetch);
-
-	/**
-	 * Find entities that match a query. Returns empty stream if no matches.
-	 * 
-	 * @return (empty) Stream, never null
-	 */
-	Stream<Entity> findAll(Query q);
 
 	/**
 	 * Finds all entities with the given IDs. Returns empty stream if no matches.
