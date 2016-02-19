@@ -34,7 +34,8 @@ var JobContainer = React.createClass({
 		}
 	},
 	componentDidMount: function() {
-		 this.setInterval(this.retrieveJobs, 1000);
+		this.retrieveJobs();
+		this.setInterval(this.retrieveJobs, 1000);
 	},
 	render: function() {
 		if(this.state.jobs === null) {
@@ -47,6 +48,7 @@ var JobContainer = React.createClass({
 		var self = this;
 		console.log('pull from entity');
 		$.get('/plugin/jobs/latest', function(data) {
+			console.log(data);
 			self.setState({jobs: data})
 		}); 
 	}
