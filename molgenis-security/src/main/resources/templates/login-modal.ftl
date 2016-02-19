@@ -10,6 +10,7 @@
                 <h4 class="modal-title" id="login-modal-label">Sign in</h4>
             </div>
             <div class="modal-body">
+            <div id="alert-container"></div>
             <#if googleSignIn>
                 <div class="row">
                     <div class="col-md-5">
@@ -102,7 +103,8 @@
 			$('.modal-header', modal).first().after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
 		});
 		$(document).on('molgenis-passwordresetted', function(e, msg) {
-			$('.modal-header', modal).first().after($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
+			$('#alert-container', modal).empty();
+			$('#alert-container', modal).html($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Success!</strong> ' + msg + '</div>'));
 		});
     });
 </script>
