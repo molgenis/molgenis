@@ -10,7 +10,6 @@
  * 
  * @exports JobContainer factory
  */
-
 import React from 'react';
 import RestClient from "rest-client/RestClientV2";
 import { Spinner } from '../Spinner'
@@ -19,11 +18,12 @@ import $ from 'jquery';
 import { Jobs } from './Jobs';
 
 import DeepPureRenderMixin from '../mixin/DeepPureRenderMixin'; 
+import SetIntervalMixin from '../mixin/SetIntervalMixin';
 
 const api = new RestClient();
 
 var JobContainer = React.createClass({
-	mixins: [DeepPureRenderMixin],
+	mixins: [DeepPureRenderMixin, SetIntervalMixin],
 	displayName: 'JobContainer',
 	propTypes: {
 		username: React.PropTypes.string
@@ -34,8 +34,8 @@ var JobContainer = React.createClass({
 		}
 	},
 	componentDidMount: function() {
-		this._retrieveJobs();
-	}, 
+		 this.setInterval(this.retrieveJobs, 1000);
+	},
 	render: function() {
 		if(this.state.jobs === null) {
 			return <Spinner  />;
@@ -43,13 +43,12 @@ var JobContainer = React.createClass({
 			return <div><Jobs jobs={this.state.jobs}/></div>
 		}
 	},
-	_retrieveJobs: function() {
+	retrieveJobs: function() {
 		var self = this;
-		setInterval(function() {
-			$.get('/plugin/jobs/latest', function(data) {
-				self.setState({jobs: data})
-			});
-		}, 1000);
+		console.log('pull from entity');
+		$.get('/plugin/jobs/latest', function(data) {
+			self.setState({jobs: data})
+		}); 
 	}
 });
 
