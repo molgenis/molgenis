@@ -28,17 +28,7 @@
         <url>https://github.com/molgenis/molgenis</url>
     </scm>
     <developers />
-
-	<profiles>
-        <!-- create runnable jar -->
-        <profile>
-            <id>create-delivery</id>
-            <properties>
-                <skip.delivery>false</skip.delivery>
-            </properties>
-        </profile>
-    </profiles>
-
+    
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <slf4j.version>1.7.12</slf4j.version>
