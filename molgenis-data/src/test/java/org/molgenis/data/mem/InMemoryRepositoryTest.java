@@ -143,7 +143,7 @@ public class InMemoryRepositoryTest
 	}
 
 	@Test
-	public void findAllById() throws IOException
+	public void findAllStream() throws IOException
 	{
 		String idAttrName = "id";
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
@@ -158,9 +158,8 @@ public class InMemoryRepositoryTest
 			Entity entity1 = when(mock(Entity.class).get(idAttrName)).thenReturn(id1).getMock();
 			inMemoryRepository.add(entity0);
 			inMemoryRepository.add(entity1);
-			List<Entity> entities = inMemoryRepository.findAll(Stream.of(id0, "notExists", id1, "notExists2"))
-					.collect(Collectors.toList());
-			assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, null, entity1, null));
+			List<Entity> entities = inMemoryRepository.findAll(Stream.of(id0, id1)).collect(Collectors.toList());
+			assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, entity1));
 		}
 		finally
 		{
@@ -169,7 +168,7 @@ public class InMemoryRepositoryTest
 	}
 
 	@Test
-	public void findAllByIdFetch() throws IOException
+	public void findAllStreamFetch() throws IOException
 	{
 		String idAttrName = "id";
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
@@ -185,9 +184,8 @@ public class InMemoryRepositoryTest
 			inMemoryRepository.add(entity0);
 			inMemoryRepository.add(entity1);
 			Fetch fetch = new Fetch();
-			List<Entity> entities = inMemoryRepository.findAll(Stream.of(id0, "notExists", id1, "notExists2"), fetch)
-					.collect(Collectors.toList());
-			assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, null, entity1, null));
+			List<Entity> entities = inMemoryRepository.findAll(Stream.of(id0, id1), fetch).collect(Collectors.toList());
+			assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, entity1));
 		}
 		finally
 		{
