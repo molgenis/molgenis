@@ -101,16 +101,9 @@ public class MySqlDataServiceIT extends AbstractDataServiceIT
 
 	@Test
 	@Override
-	public void testFindAllByIdsFetch()
+	public void testFindAllStreamFetch()
 	{
-		super.testFindAllByIdsFetch();
-	}
-
-	@Test
-	@Override
-	public void testFindAllByIdsFetchTyped()
-	{
-		super.testFindAllByIdsFetchTyped();
+		super.testFindAllStreamFetch();
 	}
 
 	@Test
