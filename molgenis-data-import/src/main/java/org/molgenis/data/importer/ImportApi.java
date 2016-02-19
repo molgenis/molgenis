@@ -29,8 +29,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -92,7 +92,7 @@ public class ImportApi
 		ImportRun importRun;
 		try
 		{
-			File tmpFile = fileLoctionToStoredRenamedFile(fileLocation, entityName);
+			File tmpFile = fileLocationToStoredRenamedFile(fileLocation, entityName);
 			importRun = importFile(request, tmpFile, action, notify);
 		}
 		catch (Exception e)
@@ -117,8 +117,7 @@ public class ImportApi
 		try
 		{
 			filename = getFilename(file.getOriginalFilename(), entityName);
-			File tmpFile = null;
-			tmpFile = fileStore.store(file.getInputStream(), filename);
+			File tmpFile = fileStore.store(file.getInputStream(), filename);
 			importRun = importFile(request, tmpFile, action, notify);
 		}
 		catch (Exception e)
@@ -131,12 +130,13 @@ public class ImportApi
 				HttpStatus.CREATED);
 	}
 
-	private File fileLoctionToStoredRenamedFile(String fileLocation, String entityName) throws IOException
+	private File fileLocationToStoredRenamedFile(String fileLocation, String entityName) throws IOException
 	{
 		Path path = Paths.get(fileLocation);
-		FileInputStream fileInputStream = new FileInputStream(path.toString());
 		String filename = path.getFileName().toString();
-		return fileStore.store(fileInputStream, getFilename(filename, entityName));
+		URL url = new URL(fileLocation);
+
+		return fileStore.store(url.openStream(), getFilename(filename, entityName));
 	}
 
 	private String getFilename(String originalFileName, String entityName)
@@ -151,7 +151,7 @@ public class ImportApi
 		else
 		{
 			filename = entityName + "." + extension;
-			if (!extension.equals("vcf") || (!extension.equals("vcf.gz")))
+			if (!extension.equals("vcf") && (!extension.equals("vcf.gz")))
 				LOG.warn("Specifing a filename for a non-VCF file has no effect on entity names.");
 		}
 		return filename;
@@ -164,7 +164,8 @@ public class ImportApi
 		DatabaseAction databaseAction = getDatabaseAction(file, action);
 		if (dataService.hasRepository(FilenameUtils.getBaseName(file.getName())))
 		{
-			throw new MolgenisDataException("A repository with name " + file.getName() + " already exists");
+			throw new MolgenisDataException(
+					"A repository with name " + FilenameUtils.getBaseName(file.getName()) + " already exists");
 		}
 		ImportService importService = importServiceFactory.getImportService(file.getName());
 		RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
