@@ -21,33 +21,31 @@ var JobTable = React.createClass({
 	},
 	render: function() {
 		const {jobs} = this.props;
-		return <div>
-			<div className="panel panel-primary">
-				<div className="panel-heading">Finished Jobs</div>
-				<div className="panel-body">
-					<table className="table table-striped">
-						<thead>
-							<th>Status</th>
-							<th>Runtime</th>
-							<th>Type</th>
-							<th>Message</th>
-							<th>Started</th>
-							<th>Finished</th>
-							<th>Link to entity</th>
-						</thead>
-						<tbody>
-						{jobs.map((job) => <tr key={job.identifier}>
-							<td>{job.status}</td>
-							<td>{this._getRunTime(job)}</td>
-							<td>{job.type}</td>
-							<td>{job.progressMessage}</td>
-							<td>{moment(job.startDate).format('llll')}</td>
-							<td>{moment(job.endDate).fromNow()}</td>
-							<td>URL to {job.entityName}</td>
-							</tr>)}
-						</tbody>
-					</table>
-				</div>
+		return 	<div className="panel panel-primary">
+			<div className="panel-heading">Finished Jobs</div>
+			<div className="panel-body">
+				<table className="table table-striped">
+					<thead>
+						<th>Status</th>
+						<th>Runtime</th>
+						<th>Type</th>
+						<th>Message</th>
+						<th>Started</th>
+						<th>Finished</th>
+						<th>Link to entity</th>
+					</thead>
+					<tbody>
+					{jobs.map((job) => <tr key={job.identifier}>
+						<td>{job.status}</td>
+						<td>{this._getRunTime(job)}</td>
+						<td>{job.type}</td>
+						<td>{job.progressMessage}</td>
+						<td>{moment(job.startDate).format('llll')}</td>
+						<td>{moment(job.endDate).fromNow()}</td>
+						<td>URL to {job.entityName}</td>
+						</tr>)}
+					</tbody>
+				</table>
 			</div>
 		</div>
 	},

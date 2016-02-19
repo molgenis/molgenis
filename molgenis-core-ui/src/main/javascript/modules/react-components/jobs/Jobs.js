@@ -26,16 +26,14 @@ var Jobs = React.createClass({
 		const runningJobs = jobs.filter(job => job.status === 'RUNNING');
 		const finishedJobs = jobs.filter(job => job.status !== 'RUNNING');
 		
-		return <div>
-			<div className="row">
-				<div className="col-md-5">
-					<RunningJobs jobs={runningJobs} />
-				</div>
-				<div className="col-md-7">
-					<JobTable jobs={finishedJobs} />
-				</div>
-			</div>			
-		</div>
+		return 	<div className="row">
+			<div className="col-md-5">
+				<RunningJobs jobs={runningJobs} />
+			</div>
+			<div className="col-md-7">
+				<JobTable jobs={finishedJobs} />
+			</div>
+		</div>			
 	}
 });
 
