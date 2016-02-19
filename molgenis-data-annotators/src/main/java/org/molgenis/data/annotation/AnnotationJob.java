@@ -1,6 +1,12 @@
 package org.molgenis.data.annotation;
 
-import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.util.Date;
+import java.util.List;
+import java.util.Queue;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
@@ -19,19 +25,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Queue;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 public class AnnotationJob implements Job
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AnnotationJob.class);
 	public static final String REPOSITORY_NAME = "REPOSITORY_NAME";
 	public static final String ANNOTATORS = "ANNOTATORS";
 	public static final String USERNAME = "USERNAME";
+	public static final String ANNOTATION_RUN = "ANNOTATION_RUN";
+	public static final String TYPE = "Annotation Job";
 
 	@Autowired
 	DataService dataService;

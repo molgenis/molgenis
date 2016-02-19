@@ -7,7 +7,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntity;
 
-public class JobMetaData extends DefaultEntity
+public class JobMetaData extends DefaultEntity implements Comparable<JobMetaData>
 {
 	private static final long serialVersionUID = -4064249548140446038L;
 
@@ -136,5 +136,11 @@ public class JobMetaData extends DefaultEntity
 	public void setProgressMax(Integer value)
 	{
 		set(PROGRESS_MAX, value);
+	}
+	
+	@Override
+	public int compareTo(JobMetaData other)
+	{
+		return other.getSubmissionDate().compareTo(this.getSubmissionDate());
 	}
 }
