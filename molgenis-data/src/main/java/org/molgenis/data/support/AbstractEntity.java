@@ -66,7 +66,6 @@ public abstract class AbstractEntity implements Entity
 				}
 				return null;
 			case COMPOUND:
-			case IMAGE:
 				throw new RuntimeException("invalid label data type " + dataType);
 			default:
 				throw new RuntimeException("unsupported label data type " + dataType);

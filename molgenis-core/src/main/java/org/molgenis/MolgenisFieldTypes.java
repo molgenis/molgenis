@@ -48,7 +48,7 @@ public class MolgenisFieldTypes
 
 	public enum FieldTypeEnum
 	{
-		BOOL, CATEGORICAL, CATEGORICAL_MREF, COMPOUND, DATE, DATE_TIME, DECIMAL, EMAIL, ENUM, FILE, HTML, HYPERLINK, IMAGE, INT, LONG, MREF, SCRIPT, STRING, TEXT, XREF;
+		BOOL, CATEGORICAL, CATEGORICAL_MREF, COMPOUND, DATE, DATE_TIME, DECIMAL, EMAIL, ENUM, FILE, HTML, HYPERLINK, INT, LONG, MREF, SCRIPT, STRING, TEXT, XREF;
 
 		public static List<String> getOptionsLowercase()
 		{
@@ -69,7 +69,6 @@ public class MolgenisFieldTypes
 	public static final FieldType FILE = new FileField();
 	public static final FieldType HTML = new HtmlField();
 	public static final FieldType HYPERLINK = new HyperlinkField();
-	public static final FieldType IMAGE = new ImageField();
 	public static final FieldType INT = new IntField();
 	public static final FieldType LONG = new LongField();
 	public static final FieldType MREF = new MrefField();
@@ -99,7 +98,6 @@ public class MolgenisFieldTypes
 			addType(FILE);
 			addType(HTML);
 			addType(HYPERLINK);
-			addType(IMAGE);
 			addType(INT);
 			addType(LONG);
 			addType(MREF);
