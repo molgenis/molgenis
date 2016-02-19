@@ -67,17 +67,17 @@ public interface Repository extends Iterable<Entity>, Closeable
 	Stream<Entity> findAll(Query q);
 
 	/**
-	 * Find entities that match a stream of ids. Non-existing entities are included as null.
+	 * Finds all entities with the given IDs. Returns empty stream if no matches.
 	 * 
 	 * @param ids
 	 *            entity ids
 	 * 
-	 * @return Stream where the order of entities matches the order of ids, never null
+	 * @return (empty) Stream where the order of entities matches the order of ids, never null
 	 */
 	Stream<Entity> findAll(Stream<Object> ids);
 
 	/**
-	 * Find entities that match a stream of ids, with a fetch. Non-existing entities are included as null.
+	 * Finds all entities with the given IDs, with a fetch. Returns empty stream if no matches.
 	 * 
 	 * @throws MolgenisDataAccessException
 	 * 
@@ -85,7 +85,7 @@ public interface Repository extends Iterable<Entity>, Closeable
 	 *            entity ids
 	 * @param fetch
 	 *            fetch defining which attributes to retrieve
-	 * @return Stream where the order of entities matches the order of ids, never null
+	 * @return (empty) Stream where the order of entities matches the order of ids, never null
 	 */
 	Stream<Entity> findAll(Stream<Object> ids, Fetch fetch);
 

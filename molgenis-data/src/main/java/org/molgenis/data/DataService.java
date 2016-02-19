@@ -126,7 +126,7 @@ public interface DataService extends Iterable<Repository>
 	<E extends Entity> Stream<E> findAll(String entityName, Query q, Class<E> clazz);
 
 	/**
-	 * Find entities that match a stream of ids. Non-existing entities are included as null.
+	 * Finds all entities with the given IDs. Returns empty stream if no matches.
 	 * 
 	 * @throws MolgenisDataAccessException
 	 * 
@@ -134,23 +134,23 @@ public interface DataService extends Iterable<Repository>
 	 *            entity name (case insensitive)
 	 * @param ids
 	 *            entity ids
-	 * @return Stream where the order of entities matches the order of ids, never null
+	 * @return (empty) Stream where the order of entities matches the order of ids, never null
 	 */
 	Stream<Entity> findAll(String entityName, Stream<Object> ids);
 
 	/**
-	 * Type-safe find entities that match a stream of ids. Non-existing entities are included as null.
+	 * Finds all entities with the given IDs, type-safely. Returns empty stream if no matches.
 	 * 
 	 * @throws MolgenisDataAccessException
 	 * 
 	 * @param entityName
 	 *            entity name (case insensitive)
-	 * @return Stream where the order of entities matches the order of ids, never null
+	 * @return (empty) Stream where the order of entities matches the order of ids, never null
 	 */
 	<E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Class<E> clazz);
 
 	/**
-	 * Find entities that match a stream of ids, with a fetch. Non-existing entities are included as null.
+	 * Finds all entities with the given IDs, with a fetch. Returns empty stream if no matches.
 	 * 
 	 * @throws MolgenisDataAccessException
 	 * 
@@ -160,12 +160,12 @@ public interface DataService extends Iterable<Repository>
 	 *            entity ids
 	 * @param fetch
 	 *            fetch defining which attributes to retrieve
-	 * @return Stream where the order of entities matches the order of ids, never null
+	 * @return (empty) Stream where the order of entities matches the order of ids, never null
 	 */
 	Stream<Entity> findAll(String entityName, Stream<Object> ids, Fetch fetch);
 
 	/**
-	 * Type-safe find entities that match a stream of ids, with a fetch. Non-existing entities are included as null.
+	 * Finds all entities with the given IDs, type-safely and with a fetch. Returns empty stream if no matches.
 	 * 
 	 * @throws MolgenisDataAccessException
 	 * 
@@ -177,7 +177,8 @@ public interface DataService extends Iterable<Repository>
 	 *            fetch defining which attributes to retrieve
 	 * @param clazz
 	 *            typed entity class
-	 * @return Stream of entities of the give type where the order of entities matches the order of ids, never null
+	 * @return (empty) Stream of entities of the give type where the order of entities matches the order of ids, never
+	 *         null
 	 */
 	<E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Fetch fetch, Class<E> clazz);
 
