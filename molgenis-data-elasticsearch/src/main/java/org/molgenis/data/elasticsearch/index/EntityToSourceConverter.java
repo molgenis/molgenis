@@ -8,7 +8,6 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.stereotype.Component;
@@ -50,6 +49,12 @@ public class EntityToSourceConverter
 		{
 			String attrName = attributeMetaData.getName();
 			Object value = convertAttribute(entity, attributeMetaData, nestRefs);
+
+			if (value == null)
+			{
+				value = attributeMetaData.getDefaultValue();
+			}
+
 			doc.put(attrName, value);
 		}
 
@@ -133,10 +138,14 @@ public class EntityToSourceConverter
 						@Override
 						public Object apply(Entity refEntity)
 						{
-							if(refEntity != null) {
-								if (nestRefs) {
+							if (refEntity != null)
+							{
+								if (nestRefs)
+								{
 									return convert(refEntity, refEntityMetaData, false);
-								} else {
+								}
+								else
+								{
 									return convertAttribute(refEntity, refEntityMetaData.getIdAttribute(), false);
 								}
 							}
@@ -155,6 +164,7 @@ public class EntityToSourceConverter
 			default:
 				throw new RuntimeException("Unknown data type [" + dataType + "]");
 		}
+
 		return value;
 	}
 
