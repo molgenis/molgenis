@@ -5,14 +5,8 @@ import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LOOKUP;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
-import org.molgenis.file.ingest.FileIngestRepositoryDecorator;
-import org.molgenis.file.ingest.FileIngesterJobScheduler;
-import org.molgenis.ui.RepositoryDecoratorRegistry;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableList;
@@ -33,9 +27,7 @@ public class FileIngestMetaData extends DefaultEntityMetaData
 
 	public static final ImmutableList<String> LOADERS = ImmutableList.of("CSV");
 
-	@Autowired
-	public FileIngestMetaData(RepositoryDecoratorRegistry repositoryDecoratorRegistry,
-			FileIngesterJobScheduler fileIngesterJobScheduler)
+	public FileIngestMetaData()
 	{
 		super(ENTITY_NAME);
 		addAttribute(ID, ROLE_ID).setAuto(true).setNillable(false);
@@ -50,15 +42,6 @@ public class FileIngestMetaData extends DefaultEntityMetaData
 		addAttribute(FAILURE_EMAIL).setDataType(MolgenisFieldTypes.EMAIL).setLabel("Failure email")
 				.setDescription("Leave blank if you don't want to receive emails if the jobs failed.")
 				.setNillable(true);
-
-		repositoryDecoratorRegistry.addFactory(getName(), new RepositoryDecoratorFactory()
-		{
-			@Override
-			public Repository createDecoratedRepository(Repository repository)
-			{
-				return new FileIngestRepositoryDecorator(repository, fileIngesterJobScheduler);
-			}
-		});
 	}
 
 }

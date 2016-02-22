@@ -4,8 +4,11 @@ import static org.quartz.CronScheduleBuilder.cronSchedule;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.validation.ConstraintViolation;
+import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.quartz.CronExpression;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -21,6 +24,8 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Sets;
+
 /**
  * Schedule and unschedule FileIngestJobs
  */
@@ -32,12 +37,14 @@ public class FileIngesterJobScheduler implements ApplicationListener<ContextRefr
 	private static final Logger LOG = LoggerFactory.getLogger(FileIngesterJobScheduler.class);
 	private final Scheduler scheduler;
 	private final DataService dataService;
+	private final FileIngestMetaData fileIngestMetaData;
 
 	@Autowired
-	public FileIngesterJobScheduler(Scheduler scheduler, DataService dataService)
+	public FileIngesterJobScheduler(Scheduler scheduler, DataService dataService, FileIngestMetaData fileIngestMetaData)
 	{
 		this.scheduler = scheduler;
 		this.dataService = dataService;
+		this.fileIngestMetaData = fileIngestMetaData;
 	}
 
 	public synchronized void schedule(Entity fileIngest)
@@ -47,6 +54,13 @@ public class FileIngesterJobScheduler implements ApplicationListener<ContextRefr
 		{
 			String id = fileIngest.getString(FileIngestMetaData.ID);
 			String cronExpression = fileIngest.getString(FileIngestMetaData.CRONEXPRESSION);
+			if (!CronExpression.isValidExpression(cronExpression))
+			{
+				throw new MolgenisValidationException(
+Sets.newHashSet(new ConstraintViolation(
+						"Invalid cronexpression '" + cronExpression + "'",
+						null)));
+			}
 
 			JobDataMap jobDataMap = new JobDataMap();
 			jobDataMap.put(FileIngesterJob.ENTITY_KEY, fileIngest);
@@ -63,7 +77,6 @@ public class FileIngesterJobScheduler implements ApplicationListener<ContextRefr
 				return;
 			}
 
-			// TODO validate cronExpression
 			Trigger trigger = TriggerBuilder.newTrigger().withIdentity(id, TRIGGER_GROUP)
 					.withSchedule(cronSchedule(cronExpression)).build();
 
@@ -77,7 +90,7 @@ public class FileIngesterJobScheduler implements ApplicationListener<ContextRefr
 		}
 	}
 
-	public void unschedule(String fileIngestId)
+	public synchronized void unschedule(String fileIngestId)
 	{
 		try
 		{
