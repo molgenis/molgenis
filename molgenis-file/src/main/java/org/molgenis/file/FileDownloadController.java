@@ -33,10 +33,10 @@ public class FileDownloadController
 		this.dataService = dataService;
 	}
 
-	@RequestMapping(value = "/{fileName:.+}", method = GET)
-	public void getFile(@PathVariable("fileName") String fileName, HttpServletResponse response) throws IOException
+	@RequestMapping(value = "/{id:.+}", method = GET)
+	public void getFile(@PathVariable("id") String id, HttpServletResponse response) throws IOException
 	{
-		FileMeta fileMeta = dataService.findOne(FileMeta.ENTITY_NAME, fileName, FileMeta.class);
+		FileMeta fileMeta = dataService.findOne(FileMeta.ENTITY_NAME, id, FileMeta.class);
 		if (fileMeta == null)
 		{
 			response.setStatus(HttpStatus.NOT_FOUND.value());
@@ -44,7 +44,7 @@ public class FileDownloadController
 		else
 		{
 
-			java.io.File fileStoreFile = fileStore.getFile(fileName);
+			java.io.File fileStoreFile = fileStore.getFile(fileMeta.getFilename());
 
 			// if file meta data exists for this file
 			String outputFilename = fileMeta.getFilename();

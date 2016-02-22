@@ -2,8 +2,8 @@ package org.molgenis.data.validation;
 
 import static java.lang.String.format;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -286,9 +286,9 @@ public class EntityAttributesValidator
 
 		try
 		{
-			new URL(link);
+			new URI(link);
 		}
-		catch (MalformedURLException e)
+		catch (URISyntaxException e)
 		{
 			return createConstraintViolation(entity, attribute, meta, "Not a valid hyperlink.");
 		}
