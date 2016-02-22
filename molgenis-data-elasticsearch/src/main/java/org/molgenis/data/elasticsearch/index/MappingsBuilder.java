@@ -173,8 +173,6 @@ public class MappingsBuilder
 				// disable norms for numeric fields
 				jsonBuilder.field("norms").startObject().field("enabled", false).endObject();
 				break;
-			case IMAGE:
-				throw new MolgenisDataException("Unsupported data type [" + dataType + "]");
 			case INT:
 				jsonBuilder.field("type", "integer");
 				// Fix sorting by using disk-based "fielddata" instead of in-memory "fielddata"

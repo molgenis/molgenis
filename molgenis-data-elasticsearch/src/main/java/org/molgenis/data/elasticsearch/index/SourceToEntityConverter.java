@@ -137,8 +137,6 @@ public class SourceToEntityConverter
 							throw new MolgenisDataException(e);
 						}
 						break;
-					case IMAGE:
-						throw new MolgenisDataException("Unsupported data type for indexing [" + attrType + "]");
 					default:
 						throw new RuntimeException("Unknown data type [" + attrType + "]");
 				}

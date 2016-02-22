@@ -735,8 +735,6 @@ public class ImportWriter
 				case STRING:
 				case TEXT:
 					return getString(attributeName);
-				case IMAGE:
-					throw new MolgenisDataException("Unsupported data type [" + dataType + "]");
 				case INT:
 					return getInt(attributeName);
 				case LONG:

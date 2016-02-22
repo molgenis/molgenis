@@ -98,9 +98,6 @@ public class EntityAttributesValidator
 				case COMPOUND:
 					// no op
 					break;
-				case IMAGE:
-					throw new UnsupportedOperationException(
-							format("Attribute type [%s] not supported", attr.getDataType().getEnumType().toString()));
 				default:
 					break;
 			}

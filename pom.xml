@@ -40,7 +40,7 @@
         <hibernate.validator.version>4.2.0.Final</hibernate.validator.version>
         <httpclient.version>4.5.1</httpclient.version>
         <google.guava.version>16.0.1</google.guava.version>
-        <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm z</maven.build.timestamp.format>
         <molgenis.build.timestamp>${maven.build.timestamp}</molgenis.build.timestamp>
     </properties>
 
