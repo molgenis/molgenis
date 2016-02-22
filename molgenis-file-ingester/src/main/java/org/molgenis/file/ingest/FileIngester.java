@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
 
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
@@ -26,6 +27,9 @@ import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailException;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
 /**
@@ -42,17 +46,19 @@ public class FileIngester
 	private final FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
 	private final DataService dataService;
 	private final FileIngestJobMetaDataMetaData fileIngestJobMetaDataMetaData;
+	private final JavaMailSender mailSender;
 
 	@Autowired
 	public FileIngester(FileStore fileStore, ImportServiceFactory importServiceFactory,
 			FileRepositoryCollectionFactory fileRepositoryCollectionFactory, DataService dataService,
-			FileIngestJobMetaDataMetaData fileIngestJobMetaDataMetaData)
+			FileIngestJobMetaDataMetaData fileIngestJobMetaDataMetaData, JavaMailSender mailSender)
 	{
 		this.fileStore = fileStore;
 		this.importServiceFactory = importServiceFactory;
 		this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
 		this.dataService = dataService;
 		this.fileIngestJobMetaDataMetaData = fileIngestJobMetaDataMetaData;
+		this.mailSender = mailSender;
 	}
 
 	/**
@@ -91,13 +97,34 @@ public class FileIngester
 		}
 		catch (Exception e)
 		{
-			// TODO email
+			LOG.error("Error ingesting url '" + url + "'", e);
+
 			if (jobMeta != null)
 			{
 				logFailure(jobMeta, e);
 			}
 
-			LOG.error("Error ingesting url '" + url + "'", e);
+			String email = fileIngest.getString(FileIngestMetaData.FAILURE_EMAIL);
+			if (StringUtils.isNotBlank(email))
+			{
+				emailFailure(email, url, e);
+			}
+		}
+	}
+
+	private void emailFailure(String email, String url, Exception e)
+	{
+		try
+		{
+			SimpleMailMessage mailMessage = new SimpleMailMessage();
+			mailMessage.setTo(email);
+			mailMessage.setSubject("Molgenis import failed");
+			mailMessage.setText("The scheduled import of url '" + url + "' failed. Error:\n" + e.getMessage());
+			mailSender.send(mailMessage);
+		}
+		catch (MailException mce)
+		{
+			LOG.error("Could not send error email", e);
 		}
 	}
 

@@ -37,14 +37,12 @@ public class FileIngesterJobScheduler implements ApplicationListener<ContextRefr
 	private static final Logger LOG = LoggerFactory.getLogger(FileIngesterJobScheduler.class);
 	private final Scheduler scheduler;
 	private final DataService dataService;
-	private final FileIngestMetaData fileIngestMetaData;
 
 	@Autowired
-	public FileIngesterJobScheduler(Scheduler scheduler, DataService dataService, FileIngestMetaData fileIngestMetaData)
+	public FileIngesterJobScheduler(Scheduler scheduler, DataService dataService)
 	{
 		this.scheduler = scheduler;
 		this.dataService = dataService;
-		this.fileIngestMetaData = fileIngestMetaData;
 	}
 
 	public synchronized void schedule(Entity fileIngest)
