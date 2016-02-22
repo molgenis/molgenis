@@ -423,12 +423,7 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	@Override
 	public Iterable<AttributeMetaData> getLookupAttributes()
 	{
-		Iterable<AttributeMetaData> lookupAttrs = getCachedLookupAttrs().values();
-		if (extends_ != null)
-		{
-			lookupAttrs = Iterables.concat(extends_.getLookupAttributes(), lookupAttrs);
-		}
-		return lookupAttrs;
+		return getCachedLookupAttrs().values();
 	}
 
 	@Override

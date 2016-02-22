@@ -158,7 +158,8 @@ public class InMemoryRepositoryTest
 			Entity entity1 = when(mock(Entity.class).get(idAttrName)).thenReturn(id1).getMock();
 			inMemoryRepository.add(entity0);
 			inMemoryRepository.add(entity1);
-			List<Entity> entities = inMemoryRepository.findAll(Stream.of(id0, id1)).collect(Collectors.toList());
+			List<Entity> entities = inMemoryRepository.findAll(Stream.of(id0, id1, "bogus"))
+					.collect(Collectors.toList());
 			assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, entity1));
 		}
 		finally
@@ -184,7 +185,8 @@ public class InMemoryRepositoryTest
 			inMemoryRepository.add(entity0);
 			inMemoryRepository.add(entity1);
 			Fetch fetch = new Fetch();
-			List<Entity> entities = inMemoryRepository.findAll(Stream.of(id0, id1), fetch).collect(Collectors.toList());
+			List<Entity> entities = inMemoryRepository.findAll(Stream.of(id0, id1, "bogus"), fetch)
+					.collect(Collectors.toList());
 			assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, entity1));
 		}
 		finally

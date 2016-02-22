@@ -152,8 +152,6 @@ public class EntityToSourceConverter
 			}
 			case COMPOUND:
 				throw new RuntimeException("Compound attribute is not an atomic attribute");
-			case IMAGE:
-				throw new MolgenisDataException("Unsupported data type for indexing [" + dataType + "]");
 			default:
 				throw new RuntimeException("Unknown data type [" + dataType + "]");
 		}
@@ -241,8 +239,6 @@ public class EntityToSourceConverter
 			}
 			case COMPOUND:
 				throw new RuntimeException("Compound attribute is not an atomic attribute");
-			case IMAGE:
-				throw new MolgenisDataException("Unsupported data type for indexing [" + dataType + "]");
 			default:
 				throw new RuntimeException("Unknown data type [" + dataType + "]");
 		}

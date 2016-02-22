@@ -440,8 +440,6 @@ public class MysqlRepository extends AbstractRepository
 				break;
 			case HYPERLINK:
 				break;
-			case IMAGE:
-				break;
 			case INT:
 				break;
 			case LONG:

@@ -53,13 +53,34 @@ class Session():
         response.raise_for_status();
         return response;
 
-    def get(self, entity, q=None, attributes=None, num = 100, start = 0, sortColumn= None, sortOrder = None):
+    def getById(self, entity, id, attributes=None, expand=None):
+        '''Retrieves a single entity row from an entity repository.
+
+        Args:
+        entity -- fully qualified name of the entity
+        id -- the value for the idAttribute of the entity
+        attributes -- The list of attributes to retrieve
+        expand -- the attributes to expand
+
+        Examples:
+        session.get('Person', 'John')
+        '''
+        response = self.session.get(self.url + "v1/" + quote_plus(entity) + '/' + quote_plus(id),
+                headers = self._get_token_header(),
+                params={"attributes": attributes, "expand": expand})
+        if response.status_code == 200:
+            return response.json()
+        response.raise_for_status();
+        return response;
+
+    def get(self, entity, q=None, attributes=None, expand=None, num = 100, start = 0, sortColumn= None, sortOrder = None):
         '''Retrieves entity rows from an entity repository.
 
         Args:
         entity -- fully qualified name of the entity
         q -- query in json form, see the MOLGENIS REST API v1 documentation for details
         attributes -- The list of attributes to retrieve
+        expand -- the attributes to expand
         num -- the amount of entity rows to retrieve
         start -- the index of the first row to retrieve (zero indexed)
         sortColumn -- the attribute to sort on
@@ -71,12 +92,12 @@ class Session():
         if q:
             response = self.session.post(self.url + "v1/" + quote_plus(entity),
                 headers = self._get_token_header_with_content_type(),
-                params={"_method":"GET", "attributes":attributes, "num": num, "start": start, "sortColumn":sortColumn, "sortOrder": sortOrder},
-                data=json.dumps({"q":q}))
+                params={ "_method":"GET"},
+                data=json.dumps({"q":q, "attributes":attributes, "expand": expand, "num": num, "start": start, "sortColumn":sortColumn, "sortOrder": sortOrder}))
         else:
             response = self.session.get(self.url + "v1/" + quote_plus(entity),
                 headers = self._get_token_header(),
-                params={"attributes":attributes, "num": num, "start": start, "sortColumn":sortColumn, "sortOrder": sortOrder})
+                params={"attributes":attributes, "expand": expand, "num": num, "start": start, "sortColumn":sortColumn, "sortOrder": sortOrder})
         if response.status_code == 200:
             return response.json()["items"]
         response.raise_for_status();

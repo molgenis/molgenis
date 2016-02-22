@@ -696,8 +696,6 @@ class RestControllerV2
 					case TEXT:
 						responseData.put(attrName, entity.getString(attrName));
 						break;
-					case IMAGE:
-						throw new UnsupportedOperationException("Unsupported data type [" + dataType + "]");
 					case INT:
 						responseData.put(attrName, entity.getInt(attrName));
 						break;

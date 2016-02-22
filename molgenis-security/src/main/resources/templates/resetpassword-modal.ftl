@@ -7,6 +7,7 @@
                 <h4 class="modal-title" id="resetpassword-modal-label">Reset password</h4>
             </div>
             <div class="modal-body">
+            	<div id="error-container"></div>
                 <#-- reset password form -->
                 <form id="resetpassword-form" class="form-horizontal" role="form">
                     <div class="form-group">
@@ -55,7 +56,8 @@
 		        		modal.modal('hide');
 		            },
 		            error: function(xhr) {
-		            	molgenis.createAlert(JSON.parse(xhr.responseText).errors, 'error', $('.modal-body', modal));
+		            	$('#error-container').empty();
+		            	molgenis.createAlert(JSON.parse(xhr.responseText).errors, 'error', $('#error-container', modal));
 		            }
 		        });
 		    }
