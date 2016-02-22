@@ -444,10 +444,6 @@ public class RepositoryValidationDecorator implements Repository
 
 					isValid = true;
 				}
-				else if (nonNillableAttr.getDefaultValue() != null)
-				{
-					isValid = true;
-				}
 
 				if (!isValid)
 				{
