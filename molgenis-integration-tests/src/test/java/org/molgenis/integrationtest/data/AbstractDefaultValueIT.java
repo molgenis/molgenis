@@ -22,6 +22,7 @@ public class AbstractDefaultValueIT extends AbstractDatatypeIT
 		entityMetaData.addAttribute("col3").setDataType(STRING).setNillable(false).setDefaultValue("defaultRequired");
 		entityMetaData.addAttribute("col4").setDataType(STRING).setDefaultValue("default");
 		entityMetaData.addAttribute("col5").setDataType(STRING).setNillable(false).setDefaultValue("defaultRequired");
+		entityMetaData.addAttribute("col6").setDataType(STRING).setDefaultValue("default");
 
 		return entityMetaData;
 	}
@@ -31,6 +32,7 @@ public class AbstractDefaultValueIT extends AbstractDatatypeIT
 	{
 		entity.set("id", "0");
 		entity.set("col1", "col1value");
+		entity.set("col6", "col6value");
 	}
 
 	@Override
@@ -42,6 +44,7 @@ public class AbstractDefaultValueIT extends AbstractDatatypeIT
 		assertEquals(entity.getString("col3"), "defaultRequired");
 		assertEquals(entity.getString("col4"), "default");
 		assertEquals(entity.getString("col5"), "defaultRequired");
+		assertEquals(entity.getString("col6"), "col6value");
 	}
 
 	@Override
@@ -51,6 +54,7 @@ public class AbstractDefaultValueIT extends AbstractDatatypeIT
 		entity.set("col1", "updated_col1value");
 		entity.set("col2", "updated_col2value");
 		entity.set("col3", "updated_col3value");
+		entity.set("col6", null);
 	}
 
 	@Override
@@ -62,6 +66,7 @@ public class AbstractDefaultValueIT extends AbstractDatatypeIT
 		assertEquals(entity.getString("col3"), "updated_col3value");
 		assertEquals(entity.getString("col4"), "default");
 		assertEquals(entity.getString("col5"), "defaultRequired");
+		assertEquals(entity.getString("col6"), "default");
 	}
 
 }
