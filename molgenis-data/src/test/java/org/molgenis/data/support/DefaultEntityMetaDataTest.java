@@ -81,13 +81,14 @@ public class DefaultEntityMetaDataTest
 	}
 
 	@Test
-	public void testCopyConstructorPreservesFullName()
+	public void testCopyConstructorPreservesName()
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("name");
 		emd.setPackage(new PackageImpl("test_package"));
 
 		DefaultEntityMetaData emdCopy = new DefaultEntityMetaData(emd);
 		assertEquals(emdCopy.getName(), "test_package_name");
+		assertEquals(emdCopy.getSimpleName(), "name");
 	}
 
 	// regression test for https://github.com/molgenis/molgenis/issues/3665
