@@ -50,6 +50,14 @@ public class MapEntityTest
 	}
 
 	@Test
+	public void newMapEntityMetaData()
+	{
+		MapEntity mapEntity = new MapEntity(entity.getEntityMetaData());
+
+		assertEquals(mapEntity.get("defaultAttr"), "DEFAULT VALUE");
+	}
+
+	@Test
 	public void newMapEntityOtherMetaData()
 	{
 		MapEntity mapEntity = new MapEntity(entity, entity.getEntityMetaData());

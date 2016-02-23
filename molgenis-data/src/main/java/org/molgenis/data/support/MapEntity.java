@@ -58,6 +58,7 @@ public class MapEntity extends AbstractEntity
 	public MapEntity(EntityMetaData metaData)
 	{
 		this.entityMetaData = metaData;
+		setDefaultValues();
 		this.idAttributeName = entityMetaData.getIdAttribute().getName();
 	}
 
