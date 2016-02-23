@@ -2,6 +2,7 @@ package org.molgenis.file.ingest;
 
 import org.molgenis.data.Entity;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * FileIngester quartz job
  */
+@DisallowConcurrentExecution
 public class FileIngesterJob implements Job
 {
 	public static final String ENTITY_KEY = "entity";
