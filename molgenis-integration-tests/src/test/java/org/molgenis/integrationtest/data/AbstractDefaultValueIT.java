@@ -17,12 +17,10 @@ public class AbstractDefaultValueIT extends AbstractDatatypeIT
 	{
 		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("StringTest");
 		entityMetaData.addAttribute("id", ROLE_ID).setDataType(STRING).setNillable(false);
-		entityMetaData.addAttribute("col1").setDataType(STRING);
-		entityMetaData.addAttribute("col2").setDataType(STRING).setDefaultValue("default");
-		entityMetaData.addAttribute("col3").setDataType(STRING).setNillable(false).setDefaultValue("defaultRequired");
-		entityMetaData.addAttribute("col4").setDataType(STRING).setDefaultValue("default");
-		entityMetaData.addAttribute("col5").setDataType(STRING).setNillable(false).setDefaultValue("defaultRequired");
-		entityMetaData.addAttribute("col6").setDataType(STRING).setDefaultValue("default");
+		entityMetaData.addAttribute("attrNormal");
+		entityMetaData.addAttribute("attrDefault").setDefaultValue("DEFAULT VALUE");
+		entityMetaData.addAttribute("attrDefaultToNull").setDefaultValue("DEFAULT VALUE");
+		entityMetaData.addAttribute("attrNull").setDefaultValue("DEFAULT VALUE");
 
 		return entityMetaData;
 	}
@@ -31,42 +29,41 @@ public class AbstractDefaultValueIT extends AbstractDatatypeIT
 	public void populateTestEntity(Entity entity) throws Exception
 	{
 		entity.set("id", "0");
-		entity.set("col1", "col1value");
-		entity.set("col6", "col6value");
+		entity.set("attrNormal", "inserted value");
+		// attrDefault -> DEFAULT VALUE
+		// attrDefaultNull -> DEFAULT VALUE
+		entity.set("attrNullToDefault", null);
+		entity.set("attrNull", null);
 	}
 
 	@Override
 	public void verifyTestEntityAfterInsert(Entity entity) throws Exception
 	{
 		assertEquals(entity.getString("id"), "0");
-		assertEquals(entity.getString("col1"), "col1value");
-		assertEquals(entity.getString("col2"), "default");
-		assertEquals(entity.getString("col3"), "defaultRequired");
-		assertEquals(entity.getString("col4"), "default");
-		assertEquals(entity.getString("col5"), "defaultRequired");
-		assertEquals(entity.getString("col6"), "col6value");
+		assertEquals(entity.getString("attrNormal"), "inserted value");
+		assertEquals(entity.getString("attrDefault"), "DEFAULT VALUE");
+		assertEquals(entity.getString("attrDefaultToNull"), "DEFAULT VALUE");
+		assertEquals(entity.getString("attrNull"), null);
 	}
 
 	@Override
 	public void updateTestEntity(Entity entity)
 	{
 		entity.set("id", "0");
-		entity.set("col1", "updated_col1value");
-		entity.set("col2", "updated_col2value");
-		entity.set("col3", "updated_col3value");
-		entity.set("col6", null);
+		entity.set("attrNormal", "inserted value 2");
+		// attrDefault -> stays DEFAULT VALUE
+		entity.set("attrDefaultToNull", null);
+		// attrNull -> stays null
 	}
 
 	@Override
 	public void verifyTestEntityAfterUpdate(Entity entity) throws Exception
 	{
 		assertEquals(entity.getString("id"), "0");
-		assertEquals(entity.getString("col1"), "updated_col1value");
-		assertEquals(entity.getString("col2"), "updated_col2value");
-		assertEquals(entity.getString("col3"), "updated_col3value");
-		assertEquals(entity.getString("col4"), "default");
-		assertEquals(entity.getString("col5"), "defaultRequired");
-		assertEquals(entity.getString("col6"), "default");
+		assertEquals(entity.getString("attrNormal"), "inserted value 2");
+		assertEquals(entity.getString("attrDefault"), "DEFAULT VALUE");
+		assertEquals(entity.getString("attrDefaultToNull"), null);
+		assertEquals(entity.getString("attrNull"), null);
 	}
 
 }
