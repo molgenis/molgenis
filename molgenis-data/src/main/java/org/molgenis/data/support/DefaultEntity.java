@@ -53,6 +53,20 @@ public class DefaultEntity implements Entity
 	{
 		this.entityMetaData = entityMetaData;
 		this.dataService = dataService;
+		setDefaultValues();
+	}
+
+	/**
+	 * Sets the default value for each attribute if it is available.
+	 */
+	private void setDefaultValues()
+	{
+		getEntityMetaData().getAtomicAttributes().forEach(attr -> {
+			if (attr.getDefaultValue() != null)
+			{
+				set(attr.getName(), attr.getDefaultValue());
+			}
+		});
 	}
 
 	@Override
