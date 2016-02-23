@@ -28,11 +28,15 @@ public class MapEntity extends AbstractEntity
 
 	public MapEntity(Entity other)
 	{
+		this.entityMetaData = other.getEntityMetaData();
+		setDefaultValues();
 		set(other);
 	}
 
 	public MapEntity(Entity other, EntityMetaData metaData)
 	{
+		this.entityMetaData = metaData;
+		setDefaultValues();
 		set(other, metaData);
 	}
 
@@ -54,12 +58,12 @@ public class MapEntity extends AbstractEntity
 	public MapEntity(EntityMetaData metaData)
 	{
 		this.entityMetaData = metaData;
+		setDefaultValues();
 		this.idAttributeName = entityMetaData.getIdAttribute().getName();
 	}
 
-	public void set(Entity other, EntityMetaData metaData)
+	private void set(Entity other, EntityMetaData metaData)
 	{
-		this.entityMetaData = metaData;
 		this.idAttributeName = entityMetaData.getIdAttribute().getName();
 		List<String> otherAttributes = new ArrayList<>();
 		for (AttributeMetaData attributeMetaData : other.getEntityMetaData().getAtomicAttributes())
