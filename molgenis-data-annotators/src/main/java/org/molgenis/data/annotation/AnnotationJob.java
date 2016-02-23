@@ -1,158 +1,61 @@
 package org.molgenis.data.annotation;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
-import java.util.Queue;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
-import org.molgenis.data.DataService;
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Repository;
-import org.molgenis.data.annotation.meta.AnnotationJobMetaData;
-import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.jobs.JobMetaData;
-import org.molgenis.data.support.AnnotatorDependencyOrderResolver;
-import org.molgenis.data.validation.EntityValidator;
-import org.molgenis.file.FileStore;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
-import org.molgenis.security.user.UserAccountService;
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.molgenis.data.jobs.Job;
+import org.molgenis.data.jobs.Progress;
 
-public class AnnotationJob implements Job
+import com.google.common.collect.Lists;
+
+public class AnnotationJob extends Job
 {
-	private static final Logger LOG = LoggerFactory.getLogger(AnnotationJob.class);
-	public static final String REPOSITORY_NAME = "REPOSITORY_NAME";
-	public static final String ANNOTATORS = "ANNOTATORS";
-	public static final String USERNAME = "USERNAME";
-	public static final String ANNOTATION_RUN = "ANNOTATION_RUN";
-	public static final String TYPE = "Annotation Job";
+	private final CrudRepositoryAnnotator crudRepositoryAnnotator;
+	private final String username;
+	private final List<RepositoryAnnotator> annotators;
+	private final Repository repository;
 
-	@Autowired
-	DataService dataService;
-	@Autowired
-	FileStore fileStore;
-	@Autowired
-	SearchService searchService;
-	@Autowired
-	AnnotationService annotationService;
-	@Autowired
-	EntityValidator entityValidator;
-	@Autowired
-	CrudRepositoryAnnotator crudRepositoryAnnotator;
-	@Autowired
-	UserAccountService userAccountService;
+	public AnnotationJob(CrudRepositoryAnnotator crudRepositoryAnnotator, String username,
+			List<RepositoryAnnotator> annotators, Repository repository, Progress progress)
+	{
+		super(progress);
+
+		this.crudRepositoryAnnotator = requireNonNull(crudRepositoryAnnotator);
+		this.username = requireNonNull(username);
+		this.annotators = requireNonNull(annotators);
+		this.repository = requireNonNull(repository);
+	}
 
 	@Override
-	public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException
+	public void run(Progress progress) throws IOException
 	{
-		String repositoryName = jobExecutionContext.getMergedJobDataMap().getString(REPOSITORY_NAME);
-		String username = jobExecutionContext.getMergedJobDataMap().getString(USERNAME);
-		AnnotationJobMetaData annotationJobMetaData = new AnnotationJobMetaData(dataService);
-		annotationJobMetaData.setIdentifier(UUID.randomUUID().toString());
-
-		try
+		progress.setProgressMax(annotators.size());
+		int i = 0;
+		for (RepositoryAnnotator annotator : annotators)
 		{
-			long t0 = System.currentTimeMillis();
-			LOG.info("Annotations started");
-
-			List<RepositoryAnnotator> annotators = (List<RepositoryAnnotator>) jobExecutionContext.getMergedJobDataMap()
-					.get(ANNOTATORS);
-			Repository repository = dataService.getRepository(repositoryName);
-
-			List<RepositoryAnnotator> availableAnnotators = annotationService.getAllAnnotators().stream()
-					.filter(annotator -> annotator.annotationDataExists()).collect(Collectors.toList());
-			AnnotatorDependencyOrderResolver resolver = new AnnotatorDependencyOrderResolver();
-			Queue<RepositoryAnnotator> annotatorQueue = resolver
-					.getAnnotatorSelectionDependencyList(availableAnnotators, annotators, repository);
-
-			annotationJobMetaData.setAnnotators(StringUtils
-					.join(annotatorQueue.stream().map(a -> a.getSimpleName()).collect(Collectors.toList()), ','));
-			annotationJobMetaData.setProgressMessage("Started annotation run. (started by " + username + ")");
-			annotationJobMetaData.setLog("Started annotation run. (started by " + username + ")");
-			annotationJobMetaData.setProgressMax(annotatorQueue.size());
-			annotationJobMetaData.setStatus(JobMetaData.Status.RUNNING);
-			annotationJobMetaData.setTarget(repositoryName);
-			annotationJobMetaData.setUser(userAccountService.getCurrentUser());
-			annotationJobMetaData.setSubmissionDate(new Date());
-			annotationJobMetaData.setStartDate(new Date());
-			annotationJobMetaData.setType("Annotators");
-			RunAsSystemProxy.runAsSystem(() -> {
-				dataService.add(AnnotationJobMetaData.ENTITY_NAME, annotationJobMetaData);
-			});
-			annotate(username, annotationJobMetaData, repository, annotatorQueue);
-			// FIXME: This a workaround for:Github #4485 If an annotator finishes within a second the user is not sent
-			// to the dataexplorer data tab
-			try
-			{
-				Thread.sleep(1000);
-			}
-			catch (InterruptedException e)
-			{
-				throw new RuntimeException(e);
-			}
-
-			long t = System.currentTimeMillis();
-			logAndUpdateProgress(annotationJobMetaData, JobMetaData.Status.SUCCESS,
-					"Annotations (started by " + username + ") finished in " + (t - t0) + " msec.",
-					annotationJobMetaData.getProgressMax());
-		}
-		catch (Exception e)
-		{
-			LOG.error("An error occured during annotation. ", e);
-			if (annotationJobMetaData != null)
-			{
-				logAndUpdateProgress(annotationJobMetaData, JobMetaData.Status.FAILED, e.getMessage(),
-						annotationJobMetaData.getProgressMax());
-			}
-		}
-	}
-
-	private void annotate(String username, AnnotationJobMetaData annotationJobMetaData, Repository repository,
-			Queue<RepositoryAnnotator> annotatorQueue) throws IOException
-	{
-		int totalAnnotators = annotatorQueue.size();
-		while (annotatorQueue.size() != 0)
-		{
-			RepositoryAnnotator annotator = annotatorQueue.poll();
-			String message = "Annotating \"" + repository.getEntityMetaData().getLabel() + "\" with "
-					+ annotator.getSimpleName() + " (annotator " + (totalAnnotators - annotatorQueue.size()) + " of "
-					+ totalAnnotators + ", started by \"" + username + "\")";
-			logAndUpdateProgress(annotationJobMetaData, JobMetaData.Status.RUNNING, message,
-					(totalAnnotators - annotatorQueue.size()));
-			runSingleAnnotator(crudRepositoryAnnotator, annotator, repository);
-		}
-	}
-
-	private void logAndUpdateProgress(AnnotationJobMetaData annotationJobMetaData, JobMetaData.Status status,
-			String message, int progress)
-	{
-		LOG.info(message);
-		annotationJobMetaData.setProgressMessage(message);
-		annotationJobMetaData.setLog(annotationJobMetaData.getLog() + "\n" + message);
-		annotationJobMetaData.setProgressInt(progress);
-		annotationJobMetaData.setStatus(status);
-		if (status.equals(JobMetaData.Status.SUCCESS) || status.equals(JobMetaData.Status.FAILED))
-		{
-			annotationJobMetaData.setEndDate(new Date());
-		}
-		RunAsSystemProxy.runAsSystem(() -> {
-			dataService.update(AnnotationJobMetaData.ENTITY_NAME, annotationJobMetaData);
-		});
-	}
-
-	private void runSingleAnnotator(CrudRepositoryAnnotator crudRepositoryAnnotator, RepositoryAnnotator annotator,
-			Repository repository) throws IOException
-	{
-		if (annotator != null)
-		{
+			progress.progress(i, getMessage(i, annotator));
 			crudRepositoryAnnotator.annotate(annotator, repository);
+			i++;
 		}
+		progress.progress(annotators.size(), getSuccessMessage());
+	}
+
+	private String getSuccessMessage()
+	{
+		Iterable<String> annotatorNames = (Iterable<String>) Lists.transform(annotators,
+				RepositoryAnnotator::getSimpleName);
+		return String.format("Annotated \"%s\" with %s (started by \"%s\")", repository.getEntityMetaData().getLabel(),
+				StringUtils.join(annotatorNames, ","), username);
+	}
+
+	private String getMessage(int i, RepositoryAnnotator annotator)
+	{
+		return String.format("Annotating \"%s\" with %s (annotator %d of %d, started by \"%s\")",
+				repository.getEntityMetaData().getLabel(), annotator.getSimpleName(), i + 1, annotators.size(),
+				username);
 	}
 }

@@ -18,6 +18,7 @@ public class AnnotationJobMetaData extends JobMetaData
 	public AnnotationJobMetaData(DataService dataService)
 	{
 		super(dataService, META_DATA);
+		setType(ANNOTATORS);
 	}
 
 	public String getTarget()

@@ -30,12 +30,14 @@ public class JobMetaData extends DefaultEntity implements Comparable<JobMetaData
 
 	public JobMetaData(DataService dataService)
 	{
-		super(new JobMetaDataMetaData(), dataService);
+		this(dataService, new JobMetaDataMetaData());
 	}
 
 	public JobMetaData(DataService dataService, EntityMetaData emd)
 	{
 		super(emd, dataService);
+		setSubmissionDate(new Date());
+		setStatus(Status.PENDING);
 	}
 
 	public String getIdentifier()
@@ -56,6 +58,11 @@ public class JobMetaData extends DefaultEntity implements Comparable<JobMetaData
 	public void setUser(MolgenisUser value)
 	{
 		set(USER, value);
+	}
+
+	public void setUser(String username)
+	{
+		set(USER, username);
 	}
 
 	public Status getStatus()
@@ -137,7 +144,7 @@ public class JobMetaData extends DefaultEntity implements Comparable<JobMetaData
 	{
 		set(PROGRESS_MAX, value);
 	}
-	
+
 	@Override
 	public int compareTo(JobMetaData other)
 	{
