@@ -279,12 +279,8 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 	public void parseOutputLineToEntityTest()
 	{
 		Entity entity = new MapEntity();
-		Entity snpEffEntity = new MapEntity();
-		snpEffEntity.set("ANN", "X\t12345\t.\tA\tT\tqual\tfilter\t0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15");
-		snpEffEntity.set("LOF", "(NOC2L|NOC2L|1|1.00)");
-		snpEffEntity.set("NMD", "(BRCA2|BRCA2|3|3.00)");
-
-		snpEffRepositoryAnnotator.parseOutputLineToEntity(snpEffEntity, entity);
+		snpEffRepositoryAnnotator.parseOutputLineToEntity(
+				"X\t12345\t.\tA\tT\tqual\tfilter\t0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15", entity);
 		assertEquals(entity.get(SnpEffAnnotator.ANNOTATION), "1");
 		assertEquals(entity.get(SnpEffAnnotator.PUTATIVE_IMPACT), "2");
 		assertEquals(entity.get(SnpEffAnnotator.GENE_NAME), "3");
@@ -300,8 +296,8 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 		assertEquals(entity.get(SnpEffAnnotator.PROTEIN_POSITION), "13");
 		assertEquals(entity.get(SnpEffAnnotator.DISTANCE_TO_FEATURE), "14");
 		assertEquals(entity.get(SnpEffAnnotator.ERRORS), "15");
-		assertEquals(entity.get(SnpEffAnnotator.LOF), "(NOC2L|NOC2L|1|1.00)");
-		assertEquals(entity.get(SnpEffAnnotator.NMD), "(BRCA2|BRCA2|3|3.00)");
+		assertEquals(entity.get(SnpEffAnnotator.LOF), "");
+		assertEquals(entity.get(SnpEffAnnotator.NMD), "");
 	}
 
 	public static class Config
