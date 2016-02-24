@@ -72,19 +72,6 @@ public abstract class AbstractEntity implements Entity
 		}
 	}
 
-	/**
-	 * Sets the default value for each attribute if it is available.
-	 */
-	protected void setDefaultValues()
-	{
-		getEntityMetaData().getAtomicAttributes().forEach(attr -> {
-			if (attr.getDefaultValue() != null)
-			{
-				set(attr.getName(), attr.getDefaultValue());
-			}
-		});
-	}
-
 	@Override
 	public String getString(String attributeName)
 	{

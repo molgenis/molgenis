@@ -7,6 +7,7 @@ import java.util.Map;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.MetaUtils;
 import org.molgenis.util.CaseInsensitiveLinkedHashMap;
 
 import com.google.common.base.Function;
@@ -29,14 +30,14 @@ public class MapEntity extends AbstractEntity
 	public MapEntity(Entity other)
 	{
 		this.entityMetaData = other.getEntityMetaData();
-		setDefaultValues();
+		MetaUtils.setDefaultValues(this);
 		set(other);
 	}
 
 	public MapEntity(Entity other, EntityMetaData metaData)
 	{
 		this.entityMetaData = metaData;
-		setDefaultValues();
+		MetaUtils.setDefaultValues(this);
 		set(other, metaData);
 	}
 
@@ -58,7 +59,7 @@ public class MapEntity extends AbstractEntity
 	public MapEntity(EntityMetaData metaData)
 	{
 		this.entityMetaData = metaData;
-		setDefaultValues();
+		MetaUtils.setDefaultValues(this);
 		this.idAttributeName = entityMetaData.getIdAttribute().getName();
 	}
 

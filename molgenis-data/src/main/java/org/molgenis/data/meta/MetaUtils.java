@@ -20,8 +20,8 @@ public class MetaUtils
 	public static List<AttributeMetaData> updateEntityMeta(MetaDataService metaDataService, EntityMetaData entityMeta,
 			boolean sync)
 	{
-		String backend = entityMeta.getBackend() != null ? entityMeta.getBackend() : metaDataService
-				.getDefaultBackend().getName();
+		String backend = entityMeta.getBackend() != null ? entityMeta.getBackend()
+				: metaDataService.getDefaultBackend().getName();
 
 		EntityMetaData existingEntityMetaData = metaDataService.getEntityMetaData(entityMeta.getName());
 		if (!existingEntityMetaData.getBackend().equals(backend))
@@ -99,5 +99,21 @@ public class MetaUtils
 				return attribute;
 			}
 		}).toList();
+	}
+
+	/**
+	 * Sets all attributes of an entity to the default values for those attributes, if available.
+	 * 
+	 * @param entity
+	 *            the entity to set the default values for
+	 */
+	public static void setDefaultValues(Entity entity)
+	{
+		entity.getEntityMetaData().getAtomicAttributes().forEach(attr -> {
+			if (attr.getDefaultValue() != null)
+			{
+				entity.set(attr.getName(), attr.getDefaultValue());
+			}
+		});
 	}
 }

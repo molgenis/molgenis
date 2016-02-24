@@ -20,6 +20,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.meta.MetaUtils;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
@@ -53,20 +54,7 @@ public class DefaultEntity implements Entity
 	{
 		this.entityMetaData = entityMetaData;
 		this.dataService = dataService;
-		setDefaultValues();
-	}
-
-	/**
-	 * Sets the default value for each attribute if it is available.
-	 */
-	private void setDefaultValues()
-	{
-		getEntityMetaData().getAtomicAttributes().forEach(attr -> {
-			if (attr.getDefaultValue() != null)
-			{
-				set(attr.getName(), attr.getDefaultValue());
-			}
-		});
+		MetaUtils.setDefaultValues(this);
 	}
 
 	@Override
