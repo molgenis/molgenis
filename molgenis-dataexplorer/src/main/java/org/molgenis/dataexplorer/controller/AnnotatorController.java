@@ -140,7 +140,7 @@ public class AnnotatorController
 					.forEach(a -> annotators.add(annotationService.getAnnotatorByName(a)));
 			try
 			{
-				scheduleAnnotatorRun(repository.getEntityMetaData().getSimpleName(), annotators);
+				scheduleAnnotatorRun(repository.getEntityMetaData().getName(), annotators);
 			}
 			catch (SchedulerException e)
 			{
