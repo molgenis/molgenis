@@ -1,37 +1,20 @@
 package org.molgenis.file.ingest;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Date;
 
-import org.apache.commons.lang3.StringUtils;
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.Package;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
-import org.molgenis.data.jobs.JobMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
-import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.FileRepositoryCollection;
-import org.molgenis.file.FileDownloadController;
-import org.molgenis.file.FileMeta;
-import org.molgenis.file.FileStore;
-import org.molgenis.file.ingest.meta.FileIngestJobMetaDataMetaData;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.molgenis.framework.db.EntityImportReport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.MailException;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
 /**
@@ -43,24 +26,20 @@ import org.springframework.stereotype.Component;
 public class FileIngester
 {
 	private static final Logger LOG = LoggerFactory.getLogger(FileIngester.class);
-	private final FileStore fileStore;
+	private final FileStoreDownload fileStoreDownload;
 	private final ImportServiceFactory importServiceFactory;
 	private final FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
-	private final DataService dataService;
-	private final FileIngestJobMetaDataMetaData fileIngestJobMetaDataMetaData;
-	private final JavaMailSender mailSender;
+	private final FileIngesterLoggerFactory fileIngesterLoggerFactory;
 
 	@Autowired
-	public FileIngester(FileStore fileStore, ImportServiceFactory importServiceFactory,
-			FileRepositoryCollectionFactory fileRepositoryCollectionFactory, DataService dataService,
-			FileIngestJobMetaDataMetaData fileIngestJobMetaDataMetaData, JavaMailSender mailSender)
+	public FileIngester(FileStoreDownload fileStoreDownload, ImportServiceFactory importServiceFactory,
+			FileRepositoryCollectionFactory fileRepositoryCollectionFactory,
+			FileIngesterLoggerFactory fileIngesterLoggerFactory)
 	{
-		this.fileStore = fileStore;
+		this.fileStoreDownload = fileStoreDownload;
 		this.importServiceFactory = importServiceFactory;
 		this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
-		this.dataService = dataService;
-		this.fileIngestJobMetaDataMetaData = fileIngestJobMetaDataMetaData;
-		this.mailSender = mailSender;
+		this.fileIngesterLoggerFactory = fileIngesterLoggerFactory;
 	}
 
 	/**
@@ -72,24 +51,25 @@ public class FileIngester
 	 */
 	public void ingest(Entity fileIngest)
 	{
-		String url = fileIngest.getString(FileIngestMetaData.URL);
-		Entity jobMeta = null;
+		FileIngesterLogger logger = null;
 		try
 		{
-			LOG.info("Ingesting url '{}'", url);
-			jobMeta = createFileIngestJobMetaData(fileIngest);
-
+			Entity entityMetaData = fileIngest.getEntity(FileIngestMetaData.ENTITY_META_DATA);
+			String entityName = entityMetaData.getString(EntityMetaDataMetaData.FULL_NAME);
+			String url = fileIngest.getString(FileIngestMetaData.URL);
 			String loader = fileIngest.getString(FileIngestMetaData.LOADER);
+
 			if (!"CSV".equals(loader))
 			{
 				throw new FileIngestException("Unknown loader '" + loader + "'");
 			}
 
-			Entity entityMetaData = fileIngest.getEntity(FileIngestMetaData.ENTITY_META_DATA);
-			String entityName = entityMetaData.getString(EntityMetaDataMetaData.FULL_NAME);
-			String identifier = jobMeta.getString(JobMetaData.IDENTIFIER);
-			File file = downloadCsvFile(url, entityName, identifier);
-			logDownloadFinished(jobMeta, file, "text/csv");
+			LOG.info("Ingesting url '{}'", url);
+			logger = fileIngesterLoggerFactory.createLogger();
+			String jobMetaDataIdentifier = logger.start(fileIngest);
+
+			File file = fileStoreDownload.downloadFile(url, jobMetaDataIdentifier, entityName + ".csv");
+			logger.downloadFinished(file, "text/csv");
 
 			FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory
 					.createFileRepositoryCollection(file);
@@ -97,105 +77,17 @@ public class FileIngester
 			EntityImportReport report = importService.doImport(repoCollection, DatabaseAction.ADD_UPDATE_EXISTING,
 					Package.DEFAULT_PACKAGE_NAME);
 
-			logSuccess(jobMeta, report, entityName);
 			LOG.info("Ingestion of url '{}' done.", url);
+			logger.success(report);
 		}
 		catch (Exception e)
 		{
-			LOG.error("Error ingesting url '" + url + "'", e);
-
-			if (jobMeta != null)
+			LOG.error("Error ingesting url", e);
+			if (logger != null)
 			{
-				logFailure(jobMeta, e);
-			}
-
-			String email = fileIngest.getString(FileIngestMetaData.FAILURE_EMAIL);
-			if (StringUtils.isNotBlank(email))
-			{
-				emailFailure(email, url, e);
+				logger.failure(e);
 			}
 		}
 	}
 
-	private void emailFailure(String email, String url, Exception e)
-	{
-		try
-		{
-			SimpleMailMessage mailMessage = new SimpleMailMessage();
-			mailMessage.setTo(email);
-			mailMessage.setSubject("Molgenis import failed");
-			mailMessage.setText("The scheduled import of url '" + url + "' failed. Error:\n" + e.getMessage());
-			mailSender.send(mailMessage);
-		}
-		catch (MailException mce)
-		{
-			LOG.error("Could not send error email", e);
-		}
-	}
-
-	private void logFailure(Entity jobMetaData, Exception e)
-	{
-		jobMetaData.set(JobMetaData.STATUS, "FAILED");
-		jobMetaData.set(JobMetaData.PROGRESS_MESSAGE, "Import failed. Errormessage:" + e.getMessage());
-		jobMetaData.set(JobMetaData.END_DATE, new Date());
-		dataService.update(fileIngestJobMetaDataMetaData.getName(), jobMetaData);
-	}
-
-	private void logSuccess(Entity jobMetaData, EntityImportReport report, String entityName)
-	{
-		Integer count = report.getNrImportedEntitiesMap().get(entityName);
-		count = count != null ? count : 0;
-		jobMetaData.set(JobMetaData.STATUS, "SUCCESS");
-		jobMetaData.set(JobMetaData.PROGRESS_MESSAGE,
-				String.format("Successfully imported %d %s entities.", count, entityName));
-		jobMetaData.set(JobMetaData.END_DATE, new Date());
-		dataService.update(fileIngestJobMetaDataMetaData.getName(), jobMetaData);
-	}
-
-	private void logDownloadFinished(Entity jobMetaData, File file, String contentType)
-	{
-		String id = jobMetaData.getString(JobMetaData.IDENTIFIER);
-
-		FileMeta fileMeta = new FileMeta(dataService);
-		fileMeta.setId(id);
-		fileMeta.setContentType(contentType);
-		fileMeta.setSize(file.length());
-		fileMeta.setFilename(id + '/' + file.getName());
-		fileMeta.setUrl(FileDownloadController.URI + '/' + id);
-		dataService.add(FileMeta.ENTITY_NAME, fileMeta);
-		
-		jobMetaData.set(FileIngestJobMetaDataMetaData.FILE, fileMeta);
-		jobMetaData.set(JobMetaData.PROGRESS_MESSAGE, "Importing...");
-		dataService.update(fileIngestJobMetaDataMetaData.getName(), jobMetaData);
-	}
-
-	private Entity createFileIngestJobMetaData(Entity fileIngest)
-	{
-		Entity entity = new DefaultEntity(fileIngestJobMetaDataMetaData, dataService);
-		entity.set(JobMetaData.PROGRESS_MESSAGE,
-				"Downloading file from '" + fileIngest.getString(FileIngestMetaData.URL) + "'");
-		entity.set(JobMetaData.START_DATE, new Date());
-		entity.set(JobMetaData.SUBMISSION_DATE, new Date());
-		entity.set(JobMetaData.STATUS, "RUNNING");
-		entity.set(JobMetaData.TYPE, "FileIngesterJob");
-		entity.set(JobMetaData.USER, dataService.query(MolgenisUser.ENTITY_NAME).eq(MolgenisUser.USERNAME, "admin")
-				.findOne());// TODO system user?
-		entity.set(FileIngestJobMetaDataMetaData.FILE_INGEST, fileIngest);
-
-		dataService.add(fileIngestJobMetaDataMetaData.getName(), entity);
-
-		return entity;
-	}
-
-	private File downloadCsvFile(String url, String entityName, String folderName) throws MalformedURLException,
-			IOException
-	{
-		InputStream in = new URL(url).openStream();
-		File folder = new File(fileStore.getStorageDir(), folderName);
-		folder.mkdir();
-
-		String filename = folderName + '/' + entityName + ".csv";
-
-		return fileStore.store(in, filename);
-	}
 }
