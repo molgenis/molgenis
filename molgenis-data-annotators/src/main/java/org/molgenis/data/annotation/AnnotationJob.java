@@ -18,6 +18,9 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.Date;
@@ -32,6 +35,7 @@ public class AnnotationJob implements Job
 	public static final String REPOSITORY_NAME = "REPOSITORY_NAME";
 	public static final String ANNOTATORS = "ANNOTATORS";
 	public static final String USERNAME = "USERNAME";
+	public static final String CONTEXT = "CONTEXT";
 
 	@Autowired
 	DataService dataService;
@@ -51,6 +55,9 @@ public class AnnotationJob implements Job
 	@Override
 	public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException
 	{
+		SecurityContext securityContext = (SecurityContext) jobExecutionContext.getMergedJobDataMap().get(CONTEXT);
+		SecurityContextHolder.setContext(securityContext);
+
 		String repositoryName = jobExecutionContext.getMergedJobDataMap().getString(REPOSITORY_NAME);
 		String username = jobExecutionContext.getMergedJobDataMap().getString(USERNAME);
 		AnnotationJobMetaData annotationJobMetaData = new AnnotationJobMetaData(dataService);
