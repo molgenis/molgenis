@@ -558,6 +558,30 @@ function($, molgenis, settingsXhr) {
 			});
 		});
 		
+		$('#copy-data-btn').on('click', function(){
+			bootbox.prompt({
+				title: "Please enter a new entity name.<ul><li>Use max 30 characters.<li>Only letters (a-z, A-Z), digits (0-9), underscores (_) and hashes (#) are allowed.</li></ul>",
+				value: selectedEntityMetaData.name + '_',
+				callback: function(result){
+					if(result !== null){
+						   $.ajax({
+							    headers: { 
+							        'Accept': 'application/json',
+							        'Content-Type': 'application/json' 
+							    },
+							    'type': 'POST',
+							    'url': '/api/v2/copy/' + selectedEntityMetaData.name,
+							    'data': JSON.stringify({'newEntityName': result}),
+							    'dataType': 'json',
+							    'success': function(newEntityName){
+									document.location.href = '/menu/main/dataexplorer?entity=' + newEntityName;
+								}
+							    });
+					}
+				} 
+			});
+		});
+		
 		$('#delete-data-metadata-btn').on('click', function(){
 			bootbox.confirm("Are you sure you want to delete all data and metadata for this entity?", function(confirmed){
 				if(confirmed){
