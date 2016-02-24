@@ -37,6 +37,21 @@ public class MapEntity extends AbstractEntity
 		set(other, metaData);
 	}
 
+	public MapEntity(String idAttributeName)
+	{
+		this.idAttributeName = idAttributeName;
+	}
+
+	public MapEntity(Map<String, Object> values)
+	{
+		this.values = values;
+	}
+
+	public MapEntity(String attributeName, Object value)
+	{
+		values.put(attributeName, value);
+	}
+
 	public MapEntity(EntityMetaData metaData)
 	{
 		this.entityMetaData = metaData;
@@ -44,8 +59,9 @@ public class MapEntity extends AbstractEntity
 		this.idAttributeName = entityMetaData.getIdAttribute().getName();
 	}
 
-	private void set(Entity other, EntityMetaData metaData)
+	public void set(Entity other, EntityMetaData metaData)
 	{
+		this.entityMetaData = metaData;
 		this.idAttributeName = entityMetaData.getIdAttribute().getName();
 		List<String> otherAttributes = new ArrayList<>();
 		for (AttributeMetaData attributeMetaData : other.getEntityMetaData().getAtomicAttributes())
