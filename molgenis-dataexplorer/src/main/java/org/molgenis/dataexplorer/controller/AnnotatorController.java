@@ -170,6 +170,7 @@ public class AnnotatorController
 			jobDataMap.put(AnnotationJob.REPOSITORY_NAME, entityName);
 			jobDataMap.put(AnnotationJob.ANNOTATORS, annotators);
 			jobDataMap.put(AnnotationJob.USERNAME, userAccountService.getCurrentUser().getUsername());
+			jobDataMap.put(AnnotationJob.CONTEXT, SecurityContextHolder.getContext());
 			TriggerBuilder<?> triggerBuilder = TriggerBuilder.newTrigger().withIdentity(triggerKey)
 					.usingJobData(jobDataMap).startNow();
 			scheduleAnnotatorRunJob(triggerBuilder);
