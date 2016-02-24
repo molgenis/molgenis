@@ -16,13 +16,15 @@ class FileIngestPlugin extends Component {
     		<div className='ingest-table'>
     			<Table entity='FileIngest' 
     					attrs={{name: null, url: null, entityMetaData: null, cronexpression: null, active: null}} 
+    					defaultSelectFirstRow={true}
+    					selectedRow={this.state.selectedFileIngest}
     					onRowClick={this.onFileIngestSelect}/>
     		</div>
     		{fileIngest === null ? '' :
     			<div>
     				<legend>
-    					Import jobs for '{fileIngest.name}' 
-    					<span> (Target: <a href={'/menu/main/dataexplorer?entity=' + fileIngest.entityMetaData} >{fileIngest.entityMetaData}</a>)</span>
+    					'{fileIngest.name}' import jobs
+    					<span> (Target: <a href={'/menu/main/dataexplorer?entity=' + fileIngest.entityMetaData.fullName} >{fileIngest.entityMetaData.simpleName}</a>)</span>
     				</legend>
     				<div className='ingest-table'>
     					<Table entity='FileIngestJobMetaData' 

@@ -17,6 +17,7 @@ import org.molgenis.data.Package;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.jobs.JobMetaData;
+import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.file.FileDownloadController;
@@ -24,6 +25,7 @@ import org.molgenis.file.FileMeta;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.ingest.meta.FileIngestJobMetaDataMetaData;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
+import org.molgenis.framework.db.EntityImportReport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,16 +85,19 @@ public class FileIngester
 				throw new FileIngestException("Unknown loader '" + loader + "'");
 			}
 
-			String entityName = fileIngest.getString(FileIngestMetaData.ENTITY_META_DATA);
-			File file = downloadCsvFile(url, entityName, jobMeta.getString(JobMetaData.IDENTIFIER));
+			Entity entityMetaData = fileIngest.getEntity(FileIngestMetaData.ENTITY_META_DATA);
+			String entityName = entityMetaData.getString(EntityMetaDataMetaData.FULL_NAME);
+			String identifier = jobMeta.getString(JobMetaData.IDENTIFIER);
+			File file = downloadCsvFile(url, entityName, identifier);
 			logDownloadFinished(jobMeta, file, "text/csv");
 
 			FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory
 					.createFileRepositoryCollection(file);
 			ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-			importService.doImport(repoCollection, DatabaseAction.ADD_UPDATE_EXISTING, Package.DEFAULT_PACKAGE_NAME);
+			EntityImportReport report = importService.doImport(repoCollection, DatabaseAction.ADD_UPDATE_EXISTING,
+					Package.DEFAULT_PACKAGE_NAME);
 
-			logSuccess(jobMeta);
+			logSuccess(jobMeta, report, entityName);
 			LOG.info("Ingestion of url '{}' done.", url);
 		}
 		catch (Exception e)
@@ -136,10 +141,13 @@ public class FileIngester
 		dataService.update(fileIngestJobMetaDataMetaData.getName(), jobMetaData);
 	}
 
-	private void logSuccess(Entity jobMetaData)
+	private void logSuccess(Entity jobMetaData, EntityImportReport report, String entityName)
 	{
+		Integer count = report.getNrImportedEntitiesMap().get(entityName);
+		count = count != null ? count : 0;
 		jobMetaData.set(JobMetaData.STATUS, "SUCCESS");
-		jobMetaData.set(JobMetaData.PROGRESS_MESSAGE, "Import successfully completed.");
+		jobMetaData.set(JobMetaData.PROGRESS_MESSAGE,
+				String.format("Successfully imported %d %s entities.", count, entityName));
 		jobMetaData.set(JobMetaData.END_DATE, new Date());
 		dataService.update(fileIngestJobMetaDataMetaData.getName(), jobMetaData);
 	}

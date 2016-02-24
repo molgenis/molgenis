@@ -63,7 +63,9 @@ import "./css/Table.css";
 			enableEdit: React.PropTypes.bool,
 			enableDelete: React.PropTypes.bool,
 			enableInspect: React.PropTypes.bool,
-			onSort: React.PropTypes.func
+			onSort: React.PropTypes.func,
+			defaultSelectFirstRow: React.PropTypes.bool,
+			selectedRow: React.PropTypes.object
 		},
 		getInitialState: function() {
 			return {
@@ -87,7 +89,10 @@ import "./css/Table.css";
 				enableDelete: true,
 				enableInspect: true,
 				onRowClick : null,
-				onSort : function() {}
+				onBeforeShow: null,
+				onSort : function() {},
+				defaultSelectFirstRow: false,
+				selectedRow: null
 			};
 		},
 		componentDidMount: function() {
@@ -131,7 +136,8 @@ import "./css/Table.css";
 				onEdit: this._handleEdit,
 				onDelete: this._handleDelete,
 				onRowInspect: this.props.onRowInspect,
-				onRowClick : this.props.onRowClick
+				onRowClick : this.props.onRowClick,
+				selectedRow: this.props.selectedRow
 			});
 
 			var className = 'table table-striped table-condensed table-bordered molgenis-table';
@@ -209,6 +215,9 @@ import "./css/Table.css";
 			api.get(props.entity, opts).done(function(data) {
 				var newState = _.extend({}, state, {data: data});
 				if (this.isMounted()) {
+					if (this.props.onRowClick !== null && this.props.defaultSelectFirstRow === true  && this.props.selectedRow === null && data && data.items && data.items.length > 0) {
+						this.props.onRowClick(data.items[0]);
+					}
 					this.setState(newState);
 				}
 			}.bind(this));
@@ -439,14 +448,16 @@ import "./css/Table.css";
 			onEdit: React.PropTypes.func,
 			onDelete: React.PropTypes.func,
 			onRowInspect: React.PropTypes.func,
-			onRowClick : React.PropTypes.func
+			onRowClick : React.PropTypes.func,
+			selectedRow: React.PropTypes.object
 		},
 		getDefaultProps: function() {
 			return {
 				onEdit: function() {},
 				onDelete: function() {},
 				onRowInspect: function() {},
-				onRowClick : function() {}
+				onRowClick : function() {},
+				selectedRow: null
 			};
 		},
 		render: function() {
@@ -456,13 +467,13 @@ import "./css/Table.css";
 		},
 		_createRows: function(entity) {
 			var Rows = [];
-
 			for(var i = 0; i < this.props.data.items.length; ++i) {
 				var item = this.props.data.items[i];
 
 				Rows.push(tr({
 					key : '' + i,
-					onClick : this.props.onRowClick !== null ? this.props.onRowClick.bind(null, item):null
+					className: this.props.selectedRow && this.props.selectedRow.id === item.id ? 'info' : '',
+					onClick : this.props.onRowClick !== null ? this.props.onRowClick.bind(null, item) : null
 				}, this._createCols(item, entity)));
 			}
 			return Rows;
