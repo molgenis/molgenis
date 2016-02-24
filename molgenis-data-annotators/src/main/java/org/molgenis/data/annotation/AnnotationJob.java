@@ -53,6 +53,7 @@ public class AnnotationJob implements Job
 	UserAccountService userAccountService;
 
 	@Override
+	@Transactional
 	public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException
 	{
 		SecurityContext securityContext = (SecurityContext) jobExecutionContext.getMergedJobDataMap().get(CONTEXT);
@@ -89,9 +90,13 @@ public class AnnotationJob implements Job
 			annotationJobMetaData.setSubmissionDate(new Date());
 			annotationJobMetaData.setStartDate(new Date());
 			annotationJobMetaData.setType("Annotators");
-			RunAsSystemProxy.runAsSystem(() -> {
-				dataService.add(AnnotationJobMetaData.ENTITY_NAME, annotationJobMetaData);
-			});
+			Runnable task = () -> {
+				RunAsSystemProxy.runAsSystem(() -> {
+					dataService.add(AnnotationJobMetaData.ENTITY_NAME, annotationJobMetaData);
+				});
+			};
+			new Thread(task).start();
+
 			annotate(username, annotationJobMetaData, repository, annotatorQueue);
 			// FIXME: This a workaround for:Github #4485 If an annotator finishes within a second the user is not sent
 			// to the dataexplorer data tab
@@ -148,9 +153,13 @@ public class AnnotationJob implements Job
 		{
 			annotationJobMetaData.setEndDate(new Date());
 		}
-		RunAsSystemProxy.runAsSystem(() -> {
-			dataService.update(AnnotationJobMetaData.ENTITY_NAME, annotationJobMetaData);
-		});
+
+		Runnable task = () -> {
+			RunAsSystemProxy.runAsSystem(() -> {
+				dataService.update(AnnotationJobMetaData.ENTITY_NAME, annotationJobMetaData);
+			});
+		};
+		new Thread(task).start();
 	}
 
 	private void runSingleAnnotator(CrudRepositoryAnnotator crudRepositoryAnnotator, RepositoryAnnotator annotator,
