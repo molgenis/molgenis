@@ -109,11 +109,15 @@ public class MetaUtils
 	 */
 	public static void setDefaultValues(Entity entity)
 	{
-		entity.getEntityMetaData().getAtomicAttributes().forEach(attr -> {
-			if (attr.getDefaultValue() != null)
-			{
-				entity.set(attr.getName(), attr.getDefaultValue());
-			}
-		});
+		// some entity implementations may not have meta data (for example MapEntity)
+		if (entity.getEntityMetaData() != null)
+		{
+			entity.getEntityMetaData().getAtomicAttributes().forEach(attr -> {
+				if (attr.getDefaultValue() != null)
+				{
+					entity.set(attr.getName(), attr.getDefaultValue());
+				}
+			});
+		}
 	}
 }
