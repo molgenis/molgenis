@@ -1,6 +1,5 @@
 package org.molgenis.data.annotation;
 
-import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
@@ -95,7 +94,9 @@ public class AnnotationJob implements Job
 					dataService.add(AnnotationJobMetaData.ENTITY_NAME, annotationJobMetaData);
 				});
 			};
-			new Thread(task).start();
+			Thread thread = new Thread(task);
+			thread.start();
+			thread.join();// otherwise the update of the JobMeta "overtakes" the creation
 
 			annotate(username, annotationJobMetaData, repository, annotatorQueue);
 			// FIXME: This a workaround for:Github #4485 If an annotator finishes within a second the user is not sent
@@ -119,14 +120,21 @@ public class AnnotationJob implements Job
 			LOG.error("An error occured during annotation. ", e);
 			if (annotationJobMetaData != null)
 			{
-				logAndUpdateProgress(annotationJobMetaData, JobMetaData.Status.FAILED, e.getMessage(),
-						annotationJobMetaData.getProgressMax());
+				try
+				{
+					logAndUpdateProgress(annotationJobMetaData, JobMetaData.Status.FAILED, e.getMessage(),
+							annotationJobMetaData.getProgressMax());
+				}
+				catch (InterruptedException ex)
+				{
+					throw new RuntimeException(ex);
+				}
 			}
 		}
 	}
 
 	private void annotate(String username, AnnotationJobMetaData annotationJobMetaData, Repository repository,
-			Queue<RepositoryAnnotator> annotatorQueue) throws IOException
+			Queue<RepositoryAnnotator> annotatorQueue) throws IOException, InterruptedException
 	{
 		int totalAnnotators = annotatorQueue.size();
 		while (annotatorQueue.size() != 0)
@@ -142,7 +150,7 @@ public class AnnotationJob implements Job
 	}
 
 	private void logAndUpdateProgress(AnnotationJobMetaData annotationJobMetaData, JobMetaData.Status status,
-			String message, int progress)
+			String message, int progress) throws InterruptedException
 	{
 		LOG.info(message);
 		annotationJobMetaData.setProgressMessage(message);
@@ -159,7 +167,9 @@ public class AnnotationJob implements Job
 				dataService.update(AnnotationJobMetaData.ENTITY_NAME, annotationJobMetaData);
 			});
 		};
-		new Thread(task).start();
+		Thread thread = new Thread(task);
+		thread.start();
+		thread.join();
 	}
 
 	private void runSingleAnnotator(CrudRepositoryAnnotator crudRepositoryAnnotator, RepositoryAnnotator annotator,
