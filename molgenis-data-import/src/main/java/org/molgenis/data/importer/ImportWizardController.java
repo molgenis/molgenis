@@ -69,6 +69,7 @@ import static org.molgenis.security.core.Permission.NONE;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.Permission.WRITE;
 import static org.molgenis.security.core.Permission.WRITEMETA;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @Controller
 @RequestMapping(URI)
@@ -120,7 +121,7 @@ public class ImportWizardController extends AbstractWizardController
 		this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
 		this.importRunService = importRunService;
 		this.dataService = dataService;
-		this.asyncImportJobs = Executors.newCachedThreadPool();
+		this.asyncImportJobs = Executors.newSingleThreadExecutor();
 	}
 
 	public ImportWizardController(UploadWizardPage uploadWizardPage, OptionsWizardPage optionsWizardPage,
@@ -433,13 +434,12 @@ public class ImportWizardController extends AbstractWizardController
 		RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
 				.createFileRepositoryCollection(file);
 
-		synchronized (this)
-		{
+
 			importRun = importRunService.addImportRun(SecurityUtils.getCurrentUsername(), Boolean.TRUE.equals(notify));
 			asyncImportJobs.execute(new ImportJob(importService, SecurityContextHolder.getContext(),
 					repositoryCollection, databaseAction, importRun.getId(), importRunService, request.getSession(),
 					Package.DEFAULT_PACKAGE_NAME));
-		}
+
 
 		return importRun;
 	}
