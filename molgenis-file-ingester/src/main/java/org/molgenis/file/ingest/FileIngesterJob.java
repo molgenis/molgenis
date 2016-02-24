@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * FileIngester quartz job
+ * 
+ * It prevents concurrent execution of jobs with the same JobKey
  */
 @DisallowConcurrentExecution
 public class FileIngesterJob implements Job
