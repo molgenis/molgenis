@@ -7,8 +7,8 @@ import java.util.Map;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.meta.MetaUtils;
 import org.molgenis.util.CaseInsensitiveLinkedHashMap;
+import org.molgenis.util.EntityUtils;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -23,43 +23,24 @@ public class MapEntity extends AbstractEntity
 	private Map<String, Object> values = new CaseInsensitiveLinkedHashMap<Object>();
 	private String idAttributeName = null;
 
-	public MapEntity()
-	{
-	}
-
 	public MapEntity(Entity other)
 	{
 		this.entityMetaData = other.getEntityMetaData();
-		MetaUtils.setDefaultValues(this);
+		EntityUtils.setDefaultValues(this);
 		set(other);
 	}
 
 	public MapEntity(Entity other, EntityMetaData metaData)
 	{
 		this.entityMetaData = metaData;
-		MetaUtils.setDefaultValues(this);
+		EntityUtils.setDefaultValues(this);
 		set(other, metaData);
-	}
-
-	public MapEntity(String idAttributeName)
-	{
-		this.idAttributeName = idAttributeName;
-	}
-
-	public MapEntity(Map<String, Object> values)
-	{
-		this.values = values;
-	}
-
-	public MapEntity(String attributeName, Object value)
-	{
-		values.put(attributeName, value);
 	}
 
 	public MapEntity(EntityMetaData metaData)
 	{
 		this.entityMetaData = metaData;
-		MetaUtils.setDefaultValues(this);
+		EntityUtils.setDefaultValues(this);
 		this.idAttributeName = entityMetaData.getIdAttribute().getName();
 	}
 

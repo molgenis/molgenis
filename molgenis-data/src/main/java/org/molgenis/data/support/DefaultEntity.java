@@ -20,11 +20,11 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.meta.MetaUtils;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.util.CaseInsensitiveLinkedHashMap;
+import org.molgenis.util.EntityUtils;
 import org.molgenis.util.MolgenisDateFormat;
 
 public class DefaultEntity implements Entity
@@ -54,7 +54,7 @@ public class DefaultEntity implements Entity
 	{
 		this.entityMetaData = entityMetaData;
 		this.dataService = dataService;
-		MetaUtils.setDefaultValues(this);
+		EntityUtils.setDefaultValues(this);
 	}
 
 	@Override

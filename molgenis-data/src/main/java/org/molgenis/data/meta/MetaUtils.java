@@ -100,24 +100,4 @@ public class MetaUtils
 			}
 		}).toList();
 	}
-
-	/**
-	 * Sets all attributes of an entity to the default values for those attributes, if available.
-	 * 
-	 * @param entity
-	 *            the entity to set the default values for
-	 */
-	public static void setDefaultValues(Entity entity)
-	{
-		// some entity implementations may not have meta data (for example MapEntity)
-		if (entity.getEntityMetaData() != null)
-		{
-			entity.getEntityMetaData().getAtomicAttributes().forEach(attr -> {
-				if (attr.getDefaultValue() != null)
-				{
-					entity.set(attr.getName(), attr.getDefaultValue());
-				}
-			});
-		}
-	}
 }

@@ -17,6 +17,7 @@ import org.molgenis.data.support.AbstractEntity;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.util.CloseableIterator;
+import org.molgenis.util.EntityUtils;
 import org.springframework.util.FileCopyUtils;
 import org.testng.annotations.Test;
 
@@ -84,6 +85,7 @@ public class TypedCsvRepositoryTest
 		public TestEntity(Integer index, String col1, String col2)
 		{
 			super();
+			EntityUtils.setDefaultValues(this);
 			this.index = index;
 			this.col1 = col1;
 			this.col2 = col2;
