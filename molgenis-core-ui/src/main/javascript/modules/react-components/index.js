@@ -36,6 +36,7 @@ import Table from './Table';
 import TextArea from './TextArea';
 import ProgressBar from './ProgressBar';
 import JobContainer from './jobs/JobContainer';
+import JobsContainer from './jobs/JobsContainer';
 
 export default {
 	'mixin' : mixin,
@@ -67,5 +68,6 @@ export default {
 	'Table' : Table,
 	'TextArea' : TextArea,
 	'ProgressBar' : ProgressBar,
-	'JobContainer' : JobContainer
+	'JobContainer' : JobContainer,
+	'JobsContainer' : JobsContainer
 };
