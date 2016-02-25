@@ -1,22 +1,23 @@
 package org.molgenis.file.ingest;
 
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.TriggerBuilder.newTrigger;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.quartz.CronExpression;
-import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
-import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,49 +46,96 @@ public class FileIngesterJobScheduler implements ApplicationListener<ContextRefr
 		this.dataService = dataService;
 	}
 
-	public synchronized void schedule(Entity fileIngest)
+	/**
+	 * Execute FileIngest job immediately
+	 * 
+	 * @param fileIngestId
+	 */
+	public synchronized void runNow(String fileIngestId)
 	{
-		String name = fileIngest.getString(FileIngestMetaData.NAME);
+		Entity fileIngest = dataService.findOne(FileIngestMetaData.ENTITY_NAME, fileIngestId);
+		if (fileIngest == null)
+		{
+			throw new UnknownEntityException("Unknown FileIngest entity id '" + fileIngestId + "'");
+		}
+
 		try
 		{
-			String id = fileIngest.getString(FileIngestMetaData.ID);
-			String cronExpression = fileIngest.getString(FileIngestMetaData.CRONEXPRESSION);
-			if (!CronExpression.isValidExpression(cronExpression))
+			JobKey jobKey = new JobKey(fileIngestId, JOB_GROUP);
+			if (scheduler.checkExists(jobKey))
 			{
-				throw new MolgenisValidationException(
-Sets.newHashSet(new ConstraintViolation(
-						"Invalid cronexpression '" + cronExpression + "'",
-						null)));
+				// Run job now
+				scheduler.triggerJob(jobKey);
 			}
+			else
+			{
+				// Schedule with 'now' trigger
+				Trigger trigger = newTrigger().withIdentity(fileIngestId, TRIGGER_GROUP).startNow().build();
+				schedule(fileIngest, trigger);
+			}
+		}
+		catch (SchedulerException e)
+		{
+			LOG.error("Error runNow FileIngesterJob", e);
+			throw new FileIngestException("Error job runNow", e);
+		}
+	}
 
-			JobDataMap jobDataMap = new JobDataMap();
-			jobDataMap.put(FileIngesterJob.ENTITY_KEY, fileIngest);
-			JobDetail job = JobBuilder.newJob(FileIngesterJob.class).withIdentity(id, JOB_GROUP)
-					.usingJobData(jobDataMap).build();
+	/**
+	 * Schedule a FileIngest job with a cron expression defined in the entity.
+	 * 
+	 * Reschedules job if the job already exists.
+	 * 
+	 * If active is false, it unschedules the job
+	 * 
+	 * @param fileIngest
+	 */
+	public synchronized void schedule(Entity fileIngest)
+	{
+		String id = fileIngest.getString(FileIngestMetaData.ID);
+		String cronExpression = fileIngest.getString(FileIngestMetaData.CRONEXPRESSION);
+		String name = fileIngest.getString(FileIngestMetaData.NAME);
 
-			if (scheduler.checkExists(job.getKey()))
+		// Validate cron expression
+		if (!CronExpression.isValidExpression(cronExpression))
+		{
+			throw new MolgenisValidationException(Sets.newHashSet(new ConstraintViolation("Invalid cronexpression '"
+					+ cronExpression + "'", null)));
+		}
+
+		try
+		{
+			// If already scheduled, remove it from the scheduler
+			if (scheduler.checkExists(new JobKey(id, JOB_GROUP)))
 			{
 				unschedule(id);
 			}
 
+			// If not active, do not schedule it
 			if (!fileIngest.getBoolean(FileIngestMetaData.ACTIVE))
 			{
 				return;
 			}
 
-			Trigger trigger = TriggerBuilder.newTrigger().withIdentity(id, TRIGGER_GROUP)
-					.withSchedule(cronSchedule(cronExpression)).build();
+			// Schedule with 'cron' trigger
+			Trigger trigger = newTrigger().withIdentity(id, TRIGGER_GROUP).withSchedule(cronSchedule(cronExpression))
+				.build();
+			schedule(fileIngest, trigger);
 
-			scheduler.scheduleJob(job, trigger);
-			LOG.info("Scheduled FileIngesterJob '{}' with cronexpression '{}'", name, cronExpression);
+			LOG.info("Scheduled FileIngesterJob '{}' with trigger '{}'", name, trigger);
 		}
 		catch (SchedulerException e)
 		{
-			LOG.error("Error scheduling FileIngesterJob '" + name + "'", e);
-			throw new FileIngestException("Error scheduling job", e);
+			LOG.error("Error schedule job", e);
+			throw new FileIngestException("Error schedule job", e);
 		}
 	}
 
+	/**
+	 * Remove a job from the scheduler
+	 * 
+	 * @param fileIngestId
+	 */
 	public synchronized void unschedule(String fileIngestId)
 	{
 		try
@@ -104,7 +152,17 @@ Sets.newHashSet(new ConstraintViolation(
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-		RunAsSystemProxy.runAsSystem(() -> dataService.findAll(FileIngestMetaData.ENTITY_NAME).forEach(this::schedule));
+		// Schedule all FileIngest jobs
+		runAsSystem(() -> dataService.findAll(FileIngestMetaData.ENTITY_NAME).forEach(this::schedule));
 	}
 
+	private void schedule(Entity fileIngest, Trigger trigger) throws SchedulerException
+	{
+		String id = fileIngest.getString(FileIngestMetaData.ID);
+		JobDataMap jobDataMap = new JobDataMap();
+		jobDataMap.put(FileIngesterJob.ENTITY_KEY, fileIngest);
+		JobDetail job = newJob(FileIngesterJob.class).withIdentity(id, JOB_GROUP).usingJobData(jobDataMap).build();
+
+		scheduler.scheduleJob(job, trigger);
+	}
 }

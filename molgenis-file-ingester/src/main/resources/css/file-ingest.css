@@ -2,6 +2,6 @@
 	margin: 20px;
 }
 
-legend span, legend a {
-	font-size: 75%;	
+legend button {
+	margin-left: 10px;
 }
