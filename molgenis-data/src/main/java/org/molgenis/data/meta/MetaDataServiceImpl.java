@@ -472,7 +472,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	private boolean isManageableBackend(EntityMetaData emd)
 	{
 		// Might work for more than just MySQL backend
-		return emd.getBackend() == null || "MySql".equals(emd.getBackend());
+		return emd.getBackend() == null || "MySql".equals(emd.getBackend()) || "ElasticSearch".equals(emd.getBackend());
 	}
 
 	@Override

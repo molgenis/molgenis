@@ -24,6 +24,7 @@ import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.util.CaseInsensitiveLinkedHashMap;
+import org.molgenis.util.EntityUtils;
 import org.molgenis.util.MolgenisDateFormat;
 
 public class DefaultEntity implements Entity
@@ -53,6 +54,7 @@ public class DefaultEntity implements Entity
 	{
 		this.entityMetaData = entityMetaData;
 		this.dataService = dataService;
+		EntityUtils.setDefaultValues(this);
 	}
 
 	@Override

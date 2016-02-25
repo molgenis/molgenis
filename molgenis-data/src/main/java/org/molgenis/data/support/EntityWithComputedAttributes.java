@@ -28,6 +28,8 @@ public class EntityWithComputedAttributes extends AbstractEntity
 				expressionEvaluators.put(amd.getName(), ExpressionEvaluatorFactory.createExpressionEvaluator(amd, emd));
 			}
 		}
+
+		// don't set default values, the decorated entity will already have set those
 	}
 
 	private final Entity entity;

@@ -94,7 +94,7 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	 */
 	public DefaultEntityMetaData(EntityMetaData entityMetaData)
 	{
-		this(entityMetaData.getName(), entityMetaData);
+		this(entityMetaData.getSimpleName(), entityMetaData);
 	}
 
 	public DefaultEntityMetaData(String simpleName, EntityMetaData entityMetaData)

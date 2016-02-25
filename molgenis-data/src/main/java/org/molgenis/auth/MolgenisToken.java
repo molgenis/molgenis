@@ -1,12 +1,14 @@
 package org.molgenis.auth;
 
-import com.google.auto.value.AutoValue;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
+
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.util.EntityUtils;
+
+import com.google.auto.value.AutoValue;
 
 @AutoValue
 public class MolgenisToken extends org.molgenis.data.support.AbstractEntity implements org.molgenis.data.Entity
@@ -27,6 +29,11 @@ public class MolgenisToken extends org.molgenis.data.support.AbstractEntity impl
 	Date expirationDate;
 	Date creationDate;
 	String description;
+
+	public MolgenisToken()
+	{
+		EntityUtils.setDefaultValues(this);
+	}
 
 	public String getId()
 	{

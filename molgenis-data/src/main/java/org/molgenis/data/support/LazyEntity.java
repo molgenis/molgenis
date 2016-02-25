@@ -28,6 +28,8 @@ public class LazyEntity implements Entity
 		this.entityMetaData = requireNonNull(entityMetaData);
 		this.dataService = requireNonNull(dataService);
 		this.id = requireNonNull(id);
+
+		// don't set default values, the lazy loaded entity will already have set those
 	}
 
 	@Override
