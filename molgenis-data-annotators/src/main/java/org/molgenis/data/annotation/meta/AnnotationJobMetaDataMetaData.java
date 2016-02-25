@@ -22,5 +22,9 @@ public class AnnotationJobMetaDataMetaData extends DefaultEntityMetaData
 				.setLabel("Log of the annotation progress").setNillable(true);
 		addAttribute(AnnotationJobMetaData.ANNOTATORS).setDataType(MolgenisFieldTypes.STRING)
 				.setLabel("Annotators ran by this job").setNillable(true);
+		addAttribute(AnnotationJobMetaData.FAILED_ANNOTATORS).setDataType(MolgenisFieldTypes.STRING)
+				.setLabel("Annotators ran that failed for this job").setNillable(true);
+		addAttribute(AnnotationJobMetaData.COMPLETED_ANNOTATORS).setDataType(MolgenisFieldTypes.STRING)
+				.setLabel("Annotators ran succesful by this job").setNillable(true);
 	}
 }
