@@ -28,7 +28,7 @@
                 </div>
                 <div class="col-md-4">
                     <div id="dataset-select-container" class="pull-right">
-                        <select class="form-control btn btn-default" id="dataset-select" data-placeholder="Choose an Entity">
+                        <select class="form-control" id="dataset-select" data-placeholder="Choose an Entity">
                                 <option value=""></option><#-- Required for placeholder to work with select2 -->
                         <#if entitiesMeta?has_content>
                             <#list entitiesMeta as entityMeta>
@@ -37,7 +37,7 @@
                         </#if>
                         </select>
                     </div>
-                    <button id="copy-data-btn" type="button" class="btn btn-default pull-right">
+                    <button id="copy-data-btn" type="button" class="btn btn-default pull-right hidden">
 						<span class="glyphicon glyphicon-duplicate" aria-hidden="true"></span>
 					</button>
                 </div>
