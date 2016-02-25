@@ -12,6 +12,7 @@
 import React from 'react';
 import DeepPureRenderMixin from '../mixin/DeepPureRenderMixin'; 
 import moment from 'moment';
+import twix from 'twix';
 
 var JobTable = React.createClass({
 	mixins: [DeepPureRenderMixin],
@@ -30,18 +31,16 @@ var JobTable = React.createClass({
 						<th>Runtime</th>
 						<th>Type</th>
 						<th>Message</th>
-						<th>Started</th>
-						<th>Finished</th>
+						<th>When</th>
 						<th>Link to entity</th>
 					</thead>
 					<tbody>
 					{jobs.map((job) => <tr key={job.identifier}>
 						<td>{job.status}</td>
-						<td>{this._getRunTime(job)}</td>
+						<td>{this._getTwix(job).length('seconds')}s</td>
 						<td>{job.type}</td>
 						<td>{job.progressMessage}</td>
-						<td>{moment(job.startDate).format('llll')}</td>
-						<td>{moment(job.endDate).fromNow()}</td>
+						<td>{this._getTwix(job).format()}</td>
 						<td>{job.resultUrl && <a href={job.resultUrl}>Go to result</a>}</td>
 						</tr>)}
 					</tbody>
@@ -49,10 +48,10 @@ var JobTable = React.createClass({
 			</div>
 		</div>
 	},
-	_getRunTime: function(job) {
+	_getTwix: function(job) {
 		let startDate = moment(job.startDate);
 		let endDate = moment(job.endDate);
-		return endDate.from(startDate, true);
+		return startDate.twix(endDate);
 	}
 });
 

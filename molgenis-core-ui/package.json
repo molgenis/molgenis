@@ -33,10 +33,11 @@
     "jquery-validation": "1.14.0",
     "jquery.cookie": "^1.4.1",
     "jquery.fancytree": "2.14.0",
-    "moment": "2.9.0",
+    "moment": "2.11.2",
     "promise": "^6.1.0",
     "react": "0.13.3",
     "svg-pan-zoom": "3.2.6",
+    "twix": "^0.9.0",
     "typedarray": "0.0.6",
     "underscore": "1.8.2",
     "urijs": "1.17.0"
@@ -75,10 +76,19 @@
       "es2015"
     ],
     "plugins": [
-    	["babel-plugin-module-alias", [
-      		{ "src": "./src/main/javascript/modules/react-components", "expose": "react-components" },
-      		{ "src": "./src/main/javascript/modules/rest-client", "expose": "rest-client" }
-    	]]
-  	]
+      [
+        "babel-plugin-module-alias",
+        [
+          {
+            "src": "./src/main/javascript/modules/react-components",
+            "expose": "react-components"
+          },
+          {
+            "src": "./src/main/javascript/modules/rest-client",
+            "expose": "rest-client"
+          }
+        ]
+      ]
+    ]
   }
 }
