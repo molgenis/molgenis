@@ -13,10 +13,7 @@ import React from 'react';
 import { RunningJobs } from './RunningJobs';
 import { JobTable } from './JobTable';
 
-import DeepPureRenderMixin from '../mixin/DeepPureRenderMixin';
-
 var Jobs = React.createClass({
-	mixins: [DeepPureRenderMixin],
 	displayName: 'Jobs',
 	propTypes : {
 		jobs : React.PropTypes.array.isRequired

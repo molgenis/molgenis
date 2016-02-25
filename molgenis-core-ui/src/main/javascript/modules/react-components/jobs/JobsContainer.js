@@ -17,11 +17,10 @@ import $ from 'jquery';
 
 import { Jobs } from './Jobs';
 
-import DeepPureRenderMixin from '../mixin/DeepPureRenderMixin'; 
 import SetIntervalMixin from '../mixin/SetIntervalMixin';
 
 var JobsContainer = React.createClass({
-	mixins: [DeepPureRenderMixin, SetIntervalMixin],
+	mixins: [SetIntervalMixin],
 	displayName: 'JobsContainer',
 	propTypes: {
 		username: React.PropTypes.string
@@ -45,7 +44,6 @@ var JobsContainer = React.createClass({
 	retrieveJobs: function() {
 		var self = this;
 		$.get('/plugin/jobs/latest', function(data) {
-			console.log(data);
 			self.setState({jobs: data})
 		}); 
 	}
