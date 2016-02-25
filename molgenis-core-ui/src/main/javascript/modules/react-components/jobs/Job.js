@@ -23,14 +23,16 @@ var Job = React.createClass({
 		job: React.PropTypes.object.isRequired,
 	},
 	render: function() {
+		const {job} = this.props;
 		return <div>
-			<p>{this.props.job.type} job
+			<p>{job.type} job
 			<ProgressBar 
-				progressMessage={this.props.job.progressInt !== undefined ? this._formatProgressMessage() : this.props.job.progressMessage} 
-				progressPct={this.props.job.progressMax !== undefined ? this._getProgressPct() : 100}
+				progressMessage={job.progressInt !== undefined ? this._formatProgressMessage() : job.progressMessage}
+				progressPct={job.progressMax !== undefined ? this._getProgressPct() : 100}
 				status={this._getCssClass() || 'primary'} 
 				active={this._isActive()} 
 			/>
+			{job.resultUrl && <a href={job.resultUrl}>Go to result</a>}
 			</p>
 		</div>
 	},

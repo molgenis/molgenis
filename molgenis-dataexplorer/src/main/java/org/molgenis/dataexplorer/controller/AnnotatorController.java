@@ -145,6 +145,7 @@ public class AnnotatorController
 		annotationJobMetaData.setUser(userAccountService.getCurrentUser());
 		annotationJobMetaData.setTarget(entityName);
 		annotationJobMetaData.setAnnotators(String.join(",", annotatorNames));
+		annotationJobMetaData.setResultUrl("/menu/main/dataexplorer?entity="+entityName);
 		AnnotationJob job = annotationJobFactory.createJob(annotationJobMetaData);
 		taskExecutor.submit(job);
 		return annotationJobMetaData.getIdentifier();

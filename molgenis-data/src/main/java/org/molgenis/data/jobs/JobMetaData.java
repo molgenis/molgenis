@@ -22,6 +22,8 @@ public class JobMetaData extends DefaultEntity implements Comparable<JobMetaData
 	public static final String PROGRESS_INT = "progressInt"; // Number of processed entities
 	public static final String PROGRESS_MESSAGE = "progressMessage";
 	public static final String PROGRESS_MAX = "progressMax"; // Max number of entities to process
+	public static final String LOG = "log";
+	public static final String RESULT_URL = "resultUrl";
 
 	public static enum Status
 	{
@@ -143,6 +145,26 @@ public class JobMetaData extends DefaultEntity implements Comparable<JobMetaData
 	public void setProgressMax(Integer value)
 	{
 		set(PROGRESS_MAX, value);
+	}
+	
+	public String getLog()
+	{
+		return getString(LOG);
+	}
+
+	public void setLog(String value)
+	{
+		set(LOG, value);
+	}
+	
+	public String getResultUrl()
+	{
+		return getString(LOG);
+	}
+
+	public void setResultUrl(String value)
+	{
+		set(RESULT_URL, value);
 	}
 
 	@Override

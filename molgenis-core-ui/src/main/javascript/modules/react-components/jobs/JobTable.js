@@ -42,7 +42,7 @@ var JobTable = React.createClass({
 						<td>{job.progressMessage}</td>
 						<td>{moment(job.startDate).format('llll')}</td>
 						<td>{moment(job.endDate).fromNow()}</td>
-						<td>URL to {job.entityName}</td>
+						<td>{job.resultUrl && <a href={job.resultUrl}>Go to result</a>}</td>
 						</tr>)}
 					</tbody>
 				</table>

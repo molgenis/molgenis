@@ -10,7 +10,6 @@ public class AnnotationJobMetaData extends JobMetaData
 
 	public static final String ENTITY_NAME = "AnnotationJobMetaData";
 	public static final String TARGET = "target";
-	public static final String LOG = "log";
 	public static final String ANNOTATORS = "annotators";
 
 	public static final EntityMetaData META_DATA = new AnnotationJobMetaDataMetaData();
@@ -29,16 +28,6 @@ public class AnnotationJobMetaData extends JobMetaData
 	public void setTarget(String value)
 	{
 		set(TARGET, value);
-	}
-
-	public String getLog()
-	{
-		return getString(LOG);
-	}
-
-	public void setLog(String value)
-	{
-		set(LOG, value);
 	}
 
 	public String getAnnotators()
