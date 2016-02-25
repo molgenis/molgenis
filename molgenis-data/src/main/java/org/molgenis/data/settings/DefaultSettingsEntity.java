@@ -9,7 +9,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
-import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -29,7 +28,8 @@ public abstract class DefaultSettingsEntity implements Entity
 	public DefaultSettingsEntity(String entityId)
 	{
 		this.entityName = SettingsEntityMeta.PACKAGE_NAME + '_' + entityId;
-		EntityUtils.setDefaultValues(this);
+
+		// do not set default values, this is done at context refresh in DefaultSettingsEntityMetaData
 	}
 
 	@Override
