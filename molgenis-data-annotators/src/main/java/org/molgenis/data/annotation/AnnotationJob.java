@@ -1,7 +1,6 @@
 package org.molgenis.data.annotation;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.tools.ant.taskdefs.SQLExec;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.meta.AnnotationJobMetaData;
@@ -20,12 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.jta.TransactionFactory;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
 import java.util.Date;
@@ -60,92 +53,83 @@ public class AnnotationJob implements Job
 	@Override
 	public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException
 	{
-		TransactionTemplate template = new TransactionTemplate();
-		template.execute(new TransactionCallbackWithoutResult()
+		SecurityContext securityContext = (SecurityContext) jobExecutionContext.getMergedJobDataMap().get(CONTEXT);
+		SecurityContextHolder.setContext(securityContext);
+
+		String repositoryName = jobExecutionContext.getMergedJobDataMap().getString(REPOSITORY_NAME);
+		String username = jobExecutionContext.getMergedJobDataMap().getString(USERNAME);
+		AnnotationJobMetaData annotationJobMetaData = new AnnotationJobMetaData(dataService);
+		annotationJobMetaData.setIdentifier(UUID.randomUUID().toString());
+
+		try
 		{
-			@Override
-			public void doInTransactionWithoutResult(TransactionStatus transactionStatus)
+			long t0 = System.currentTimeMillis();
+			LOG.info("Annotations started");
+
+			List<RepositoryAnnotator> annotators = (List<RepositoryAnnotator>) jobExecutionContext.getMergedJobDataMap()
+					.get(ANNOTATORS);
+			Repository repository = dataService.getRepository(repositoryName);
+
+			List<RepositoryAnnotator> availableAnnotators = annotationService.getAllAnnotators().stream()
+					.filter(annotator -> annotator.annotationDataExists()).collect(Collectors.toList());
+			AnnotatorDependencyOrderResolver resolver = new AnnotatorDependencyOrderResolver();
+			Queue<RepositoryAnnotator> annotatorQueue = resolver
+					.getAnnotatorSelectionDependencyList(availableAnnotators, annotators, repository);
+
+			annotationJobMetaData.setAnnotators(StringUtils
+					.join(annotatorQueue.stream().map(a -> a.getSimpleName()).collect(Collectors.toList()), ','));
+			annotationJobMetaData.setProgressMessage("Started annotation run. (started by " + username + ")");
+			annotationJobMetaData.setLog("Started annotation run. (started by " + username + ")");
+			annotationJobMetaData.setProgressMax(annotatorQueue.size());
+			annotationJobMetaData.setStatus(JobMetaData.Status.RUNNING);
+			annotationJobMetaData.setTarget(repositoryName);
+			annotationJobMetaData.setUser(userAccountService.getCurrentUser());
+			annotationJobMetaData.setSubmissionDate(new Date());
+			annotationJobMetaData.setStartDate(new Date());
+			annotationJobMetaData.setType("Annotators");
+			Runnable task = () -> {
+				RunAsSystemProxy.runAsSystem(() -> {
+					dataService.add(AnnotationJobMetaData.ENTITY_NAME, annotationJobMetaData);
+				});
+			};
+			Thread thread = new Thread(task);
+			thread.start();
+			thread.join();// otherwise the update of the JobMeta "overtakes" the creation
+
+			annotate(username, annotationJobMetaData, repository, annotatorQueue);
+			// FIXME: This a workaround for:Github #4485 If an annotator finishes within a second the user is
+			// not sent
+			// to the dataexplorer data tab
+			try
 			{
-				SecurityContext securityContext = (SecurityContext) jobExecutionContext.getMergedJobDataMap()
-						.get(CONTEXT);
-				SecurityContextHolder.setContext(securityContext);
+				Thread.sleep(1000);
+			}
+			catch (InterruptedException e)
+			{
+				throw new RuntimeException(e);
+			}
 
-				String repositoryName = jobExecutionContext.getMergedJobDataMap().getString(REPOSITORY_NAME);
-				String username = jobExecutionContext.getMergedJobDataMap().getString(USERNAME);
-				AnnotationJobMetaData annotationJobMetaData = new AnnotationJobMetaData(dataService);
-				annotationJobMetaData.setIdentifier(UUID.randomUUID().toString());
-
+			long t = System.currentTimeMillis();
+			logAndUpdateProgress(annotationJobMetaData, JobMetaData.Status.SUCCESS,
+					"Annotations (started by " + username + ") finished in " + (t - t0) + " msec.",
+					annotationJobMetaData.getProgressMax(), "", "", true);
+		}
+		catch (Exception e)
+		{
+			LOG.error("An error occured during annotation. ", e);
+			if (annotationJobMetaData != null)
+			{
 				try
 				{
-					long t0 = System.currentTimeMillis();
-					LOG.info("Annotations started");
-
-					List<RepositoryAnnotator> annotators = (List<RepositoryAnnotator>) jobExecutionContext
-							.getMergedJobDataMap().get(ANNOTATORS);
-					Repository repository = dataService.getRepository(repositoryName);
-
-					List<RepositoryAnnotator> availableAnnotators = annotationService.getAllAnnotators().stream()
-							.filter(annotator -> annotator.annotationDataExists()).collect(Collectors.toList());
-					AnnotatorDependencyOrderResolver resolver = new AnnotatorDependencyOrderResolver();
-					Queue<RepositoryAnnotator> annotatorQueue = resolver
-							.getAnnotatorSelectionDependencyList(availableAnnotators, annotators, repository);
-
-					annotationJobMetaData.setAnnotators(StringUtils.join(
-							annotatorQueue.stream().map(a -> a.getSimpleName()).collect(Collectors.toList()), ','));
-					annotationJobMetaData.setProgressMessage("Started annotation run. (started by " + username + ")");
-					annotationJobMetaData.setLog("Started annotation run. (started by " + username + ")");
-					annotationJobMetaData.setProgressMax(annotatorQueue.size());
-					annotationJobMetaData.setStatus(JobMetaData.Status.RUNNING);
-					annotationJobMetaData.setTarget(repositoryName);
-					annotationJobMetaData.setUser(userAccountService.getCurrentUser());
-					annotationJobMetaData.setSubmissionDate(new Date());
-					annotationJobMetaData.setStartDate(new Date());
-					annotationJobMetaData.setType("Annotators");
-					Runnable task = () -> {
-						RunAsSystemProxy.runAsSystem(() -> {
-							dataService.add(AnnotationJobMetaData.ENTITY_NAME, annotationJobMetaData);
-						});
-					};
-					Thread thread = new Thread(task);
-					thread.start();
-					thread.join();// otherwise the update of the JobMeta "overtakes" the creation
-
-					annotate(username, annotationJobMetaData, repository, annotatorQueue);
-					// FIXME: This a workaround for:Github #4485 If an annotator finishes within a second the user is
-					// not sent
-					// to the dataexplorer data tab
-					try
-					{
-						Thread.sleep(1000);
-					}
-					catch (InterruptedException e)
-					{
-						throw new RuntimeException(e);
-					}
-
-					long t = System.currentTimeMillis();
-					logAndUpdateProgress(annotationJobMetaData, JobMetaData.Status.SUCCESS,
-							"Annotations (started by " + username + ") finished in " + (t - t0) + " msec.",
-							annotationJobMetaData.getProgressMax());
+					logAndUpdateProgress(annotationJobMetaData, JobMetaData.Status.FAILED, e.getMessage(),
+							annotationJobMetaData.getProgressMax(), "", "", true);
 				}
-				catch (Exception e)
+				catch (InterruptedException ex)
 				{
-					LOG.error("An error occured during annotation. ", e);
-					if (annotationJobMetaData != null)
-					{
-						try
-						{
-							logAndUpdateProgress(annotationJobMetaData, JobMetaData.Status.FAILED, e.getMessage(),
-									annotationJobMetaData.getProgressMax());
-						}
-						catch (InterruptedException ex)
-						{
-							throw new RuntimeException(ex);
-						}
-					}
+					throw new RuntimeException(ex);
 				}
 			}
-		});
+		}
 	}
 
 	private void annotate(String username, AnnotationJobMetaData annotationJobMetaData, Repository repository,
@@ -156,25 +140,44 @@ public class AnnotationJob implements Job
 		while (annotatorQueue.size() != 0)
 		{
 			RepositoryAnnotator annotator = annotatorQueue.poll();
-			if (annotator.getSimpleName().equals("clinvar")) throw new RuntimeException("HAHA");
 			String message = "Annotating \"" + repository.getEntityMetaData().getLabel() + "\" with "
 					+ annotator.getSimpleName() + " (annotator " + (totalAnnotators - annotatorQueue.size()) + " of "
 					+ totalAnnotators + ", started by \"" + username + "\")";
 			logAndUpdateProgress(annotationJobMetaData, JobMetaData.Status.RUNNING, message,
-					(totalAnnotators - annotatorQueue.size()));
-			runSingleAnnotator(crudRepositoryAnnotator, annotator, repository);
+					(totalAnnotators - annotatorQueue.size()), "", "", false);
+			try
+			{
+				runSingleAnnotator(crudRepositoryAnnotator, annotator, repository);
+				logAndUpdateProgress(annotationJobMetaData, JobMetaData.Status.RUNNING, message,
+						(totalAnnotators - annotatorQueue.size()), annotator.getSimpleName(), "", false);
+			}
+			catch (Exception e)
+			{
+				// Log annotator specific failure + update status of the run to "failed", but continue with other
+				// annotators
+				logAndUpdateProgress(annotationJobMetaData, JobMetaData.Status.FAILED, message,
+						(totalAnnotators - annotatorQueue.size()), "", annotator.getSimpleName(), false);
+			}
 		}
 	}
 
 	private void logAndUpdateProgress(AnnotationJobMetaData annotationJobMetaData, JobMetaData.Status status,
-			String message, int progress) throws InterruptedException
+			String message, int progress, String completedAnnotator, String failedAnnotator, boolean completed)
+					throws InterruptedException
 	{
 		LOG.info(message);
 		annotationJobMetaData.setProgressMessage(message);
 		annotationJobMetaData.setLog(annotationJobMetaData.getLog() + "\n" + message);
 		annotationJobMetaData.setProgressInt(progress);
-		annotationJobMetaData.setStatus(status);
-		if (status.equals(JobMetaData.Status.SUCCESS) || status.equals(JobMetaData.Status.FAILED))
+		if (!annotationJobMetaData.getStatus().equals(JobMetaData.Status.FAILED)) // a failed job cannot be "unfailed"
+			annotationJobMetaData.setStatus(status);
+		if (StringUtils.isNotEmpty(failedAnnotator)) annotationJobMetaData
+				.setFailedAnnotators((StringUtils.isNotEmpty(annotationJobMetaData.getFailedAnnotators())
+						? (annotationJobMetaData.getFailedAnnotators() + ",") : "") + failedAnnotator);
+		if (StringUtils.isNotEmpty(completedAnnotator)) annotationJobMetaData
+				.setCompletedAnnotators((StringUtils.isNotEmpty(annotationJobMetaData.getCompletedAnnotators())
+						? (annotationJobMetaData.getCompletedAnnotators() + ",") : "") + completedAnnotator);
+		if (completed)
 		{
 			annotationJobMetaData.setEndDate(new Date());
 		}
