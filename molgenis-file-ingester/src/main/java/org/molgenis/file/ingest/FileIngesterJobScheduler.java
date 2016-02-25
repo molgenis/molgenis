@@ -33,8 +33,8 @@ import com.google.common.collect.Sets;
 @Component
 public class FileIngesterJobScheduler implements ApplicationListener<ContextRefreshedEvent>
 {
-	private static final String TRIGGER_GROUP = "fileingest";
-	private static final String JOB_GROUP = "fileingest";
+	public static final String TRIGGER_GROUP = "fileingest";
+	public static final String JOB_GROUP = "fileingest";
 	private static final Logger LOG = LoggerFactory.getLogger(FileIngesterJobScheduler.class);
 	private final Scheduler scheduler;
 	private final DataService dataService;
