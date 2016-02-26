@@ -166,10 +166,4 @@ public class JobMetaData extends DefaultEntity implements Comparable<JobMetaData
 	{
 		set(RESULT_URL, value);
 	}
-
-	@Override
-	public int compareTo(JobMetaData other)
-	{
-		return other.getSubmissionDate().compareTo(this.getSubmissionDate());
-	}
 }

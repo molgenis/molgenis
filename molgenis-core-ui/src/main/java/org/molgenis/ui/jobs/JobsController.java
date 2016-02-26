@@ -1,18 +1,21 @@
 package org.molgenis.ui.jobs;
 
-import static java.util.Collections.sort;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.data.jobs.JobMetaData.SUBMISSION_DATE;
 import static org.molgenis.ui.jobs.JobsController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.jobs.JobMetaData;
 import org.molgenis.data.jobs.JobMetaDataMetaData;
@@ -61,9 +64,9 @@ public class JobsController extends MolgenisPluginController
 
 	@RequestMapping(method = GET, value = "/latest", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public List<JobMetaData> findLastJobs()
+	public List<Entity> findLastJobs()
 	{
-		final List<JobMetaData> jobs = new ArrayList<>();
+		final List<Entity> jobs = new ArrayList<>();
 
 		Calendar cal = Calendar.getInstance();
 		cal.add(Calendar.DATE, -7);
@@ -78,10 +81,17 @@ public class JobsController extends MolgenisPluginController
 					{
 						q.and().eq(JobMetaData.USER, currentUser);
 					}
-					dataService.findAll(e.getName(), q, JobMetaData.class).forEach(jobs::add);
+					dataService.findAll(e.getName(), q).forEach(jobs::add);
 				});
 
-		sort(jobs);
+		Collections.sort(jobs, new Comparator<Entity>()
+		{
+			@Override
+			public int compare(Entity job1, Entity job2)
+			{
+				return job2.getUtilDate(SUBMISSION_DATE).compareTo(job1.getUtilDate(SUBMISSION_DATE));
+			}
+		});
 		if (jobs.size() > MAX_JOBS_TO_RETURN)
 		{
 			return jobs.subList(0, MAX_JOBS_TO_RETURN);
