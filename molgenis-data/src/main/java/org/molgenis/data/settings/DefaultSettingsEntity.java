@@ -3,6 +3,7 @@ package org.molgenis.data.settings;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -224,22 +225,22 @@ public abstract class DefaultSettingsEntity implements Entity
 				Entity entity = dataService.findOne(entityName, id);
 
 				// refresh cache on settings update
-				dataService.addEntityListener(entityName, new EntityListener()
-				{
-					@Override
-					public void postUpdate(Entity entity)
+					dataService.addEntityListener(entityName, new EntityListener()
 					{
-						cachedEntity = entity;
-					}
+						@Override
+						public void postUpdate(Entity entity)
+						{
+							cachedEntity = entity;
+						}
 
-					@Override
-					public Object getEntityId()
-					{
-						return id;
-					}
+						@Override
+						public Object getEntityId()
+						{
+							return id;
+						}
+					});
+					return entity;
 				});
-				return entity;
-			});
 
 		}
 		return cachedEntity;
@@ -249,9 +250,10 @@ public abstract class DefaultSettingsEntity implements Entity
 	{
 		RunAsSystemProxy.runAsSystem(() -> {
 			dataService.update(entityName, entity);
+			ResourceBundle.clearCache();
 
 			// cache refresh is handled via entity listener
-			return null;
-		});
+				return null;
+			});
 	}
 }
