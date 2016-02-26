@@ -19,6 +19,8 @@ public class ImportRun extends org.molgenis.data.support.AbstractEntity implemen
 
 	private static final java.util.List<org.molgenis.util.ValueLabel> status_options;
 
+	private static final java.util.List<org.molgenis.util.ValueLabel> notify_options;
+
 	private String id;
 	private Date startDate;
 	private Date endDate;
@@ -27,7 +29,9 @@ public class ImportRun extends org.molgenis.data.support.AbstractEntity implemen
 	private String message;
 	private int progress;
 	private String importedEntities;
+	private boolean notify;
 	private String status_label;
+	private String notify_label;
 
 	static
 	{
@@ -35,6 +39,13 @@ public class ImportRun extends org.molgenis.data.support.AbstractEntity implemen
 		status_options.add(new org.molgenis.util.ValueLabel("RUNNING", "RUNNING"));
 		status_options.add(new org.molgenis.util.ValueLabel("FINISHED", "FINISHED"));
 		status_options.add(new org.molgenis.util.ValueLabel("FAILED", "FAILED"));
+	}
+
+	static
+	{
+		notify_options = new java.util.ArrayList<org.molgenis.util.ValueLabel>();
+		notify_options.add(new org.molgenis.util.ValueLabel("API", "API"));
+		notify_options.add(new org.molgenis.util.ValueLabel("UI", "UI"));
 	}
 
 	public ImportRun()
@@ -127,12 +138,27 @@ public class ImportRun extends org.molgenis.data.support.AbstractEntity implemen
 		return this.status_label;
 	}
 
+	public boolean getNotify()
+	{
+		return notify;
+	}
+
+	public void setNotify(boolean notify)
+	{
+		this.notify = notify;
+	}
+
 	/**
 	 * Status is enum. This method returns all available enum options.
 	 */
 	public java.util.List<org.molgenis.util.ValueLabel> getStatusOptions()
 	{
 		return status_options;
+	}
+
+	public java.util.List<org.molgenis.util.ValueLabel> getnotifyOptions()
+	{
+		return notify_options;
 	}
 
 	@Override
@@ -147,6 +173,7 @@ public class ImportRun extends org.molgenis.data.support.AbstractEntity implemen
 		if (name.equals("message")) return getMessage();
 		if (name.equals("progress")) return getProgress();
 		if (name.equals("importedEntities")) return getImportedEntities();
+		if (name.equals("notify")) return getNotify();
 		return null;
 	}
 
@@ -177,6 +204,8 @@ public class ImportRun extends org.molgenis.data.support.AbstractEntity implemen
 			this.setImportedEntities(entity.getString("importedEntities"));
 		if (entity.getString("ImportRun_importedEntities") != null)
 			this.setImportedEntities(entity.getString("ImportRun_importedEntities"));
+		if (entity.getBoolean("notify") != null) this.setNotify(entity.getBoolean("notify"));
+		if (entity.getString("ImportRun_notify") != null) this.setNotify(entity.getBoolean("ImportRun_notify"));
 	}
 
 	@Override
@@ -200,6 +229,7 @@ public class ImportRun extends org.molgenis.data.support.AbstractEntity implemen
 		sb.append("message='" + getMessage() + "' ");
 		sb.append("progress='" + getProgress() + "' ");
 		sb.append("importedEntities='" + getImportedEntities() + "'");
+		sb.append("notify='" + getNotify() + "'");
 		sb.append(");");
 		return sb.toString();
 	}
@@ -265,6 +295,12 @@ public class ImportRun extends org.molgenis.data.support.AbstractEntity implemen
 			this.setImportedEntities((String) value);
 			return;
 		}
+		if ("notify".equalsIgnoreCase(attributeName))
+		{
+			this.setNotify((Boolean) value);
+			return;
+		}
+
 	}
 
 	@Override
