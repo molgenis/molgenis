@@ -12,6 +12,8 @@ public class AnnotationJobMetaData extends JobMetaData
 	public static final String TARGET = "target";
 	public static final String LOG = "log";
 	public static final String ANNOTATORS = "annotators";
+	public static final String FAILED_ANNOTATORS = "failed_annotators";
+	public static final String COMPLETED_ANNOTATORS = "completed_annotators";
 
 	public static final EntityMetaData META_DATA = new AnnotationJobMetaDataMetaData();
 
@@ -48,5 +50,25 @@ public class AnnotationJobMetaData extends JobMetaData
 	public void setAnnotators(String value)
 	{
 		set(ANNOTATORS, value);
+	}
+
+	public String getFailedAnnotators()
+	{
+		return getString(FAILED_ANNOTATORS);
+	}
+
+	public void setFailedAnnotators(String value)
+	{
+		set(FAILED_ANNOTATORS, value);
+	}
+
+	public String getCompletedAnnotators()
+	{
+		return getString(COMPLETED_ANNOTATORS);
+	}
+
+	public void setCompletedAnnotators(String value)
+	{
+		set(COMPLETED_ANNOTATORS, value);
 	}
 }
