@@ -32,7 +32,6 @@ public class ProgressImpl implements Progress
 
 	public ProgressImpl(JobExecution jobMetaData, DataService dataService)
 	{
-		LOG.info("constructor id={}", jobMetaData.getIdentifier());
 		this.jobMetaData = jobMetaData;
 		this.dataService = dataService;
 		this.executionLogger = (ch.qos.logback.classic.Logger) LoggerFactory
