@@ -37,6 +37,12 @@ public class EntityListenerRepositoryDecorator implements Repository
 	}
 
 	@Override
+	public Stream<Entity> stream(Fetch fetch)
+	{
+		return decoratedRepository.stream(fetch);
+	}
+
+	@Override
 	public void close() throws IOException
 	{
 		decoratedRepository.close();

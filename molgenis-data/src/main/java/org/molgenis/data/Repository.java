@@ -18,6 +18,15 @@ public interface Repository extends Iterable<Entity>, Closeable
 		return StreamSupport.stream(spliterator(), false);
 	}
 
+	/**
+	 * Streams the {@link Entity}s
+	 * 
+	 * @param fetch
+	 *            fetch defining which attributes to retrieve
+	 * @return Stream of all entities
+	 */
+	Stream<Entity> stream(Fetch fetch);
+
 	Set<RepositoryCapability> getCapabilities();
 
 	String getName();
