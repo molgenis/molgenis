@@ -563,7 +563,16 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			if (response.isExists())
 			{
 				// Copy to temp transaction index and mark as deleted
-				Entity entity = dataService.findOne(entityMetaData.getName(), id);
+				Map<String, Object> source = response.getSource();
+				Entity entity;
+				if (source != null)
+				{
+					entity = elasticsearchEntityFactory.create(entityMetaData, source, null);
+				}
+				else
+				{
+					entity = dataService.findOne(entityMetaData.getName(), id);
+				}
 				index(transactionId, Collections.singleton(entity).iterator(), entityMetaData, CrudType.DELETE, false);
 			}
 			else
