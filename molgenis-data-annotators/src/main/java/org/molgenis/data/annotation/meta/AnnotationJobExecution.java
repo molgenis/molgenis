@@ -2,19 +2,19 @@ package org.molgenis.data.annotation.meta;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.jobs.JobMetaData;
+import org.molgenis.data.jobs.JobExecution;
 
-public class AnnotationJobMetaData extends JobMetaData
+public class AnnotationJobExecution extends JobExecution
 {
 	private static final long serialVersionUID = -4064249548140446038L;
 
-	public static final String ENTITY_NAME = "AnnotationJobMetaData";
+	public static final String ENTITY_NAME = "AnnotationJobExecution";
 	public static final String TARGET = "target";
 	public static final String ANNOTATORS = "annotators";
 
-	public static final EntityMetaData META_DATA = new AnnotationJobMetaDataMetaData();
+	public static final EntityMetaData META_DATA = new AnnotationJobExecutionMetaData();
 
-	public AnnotationJobMetaData(DataService dataService)
+	public AnnotationJobExecution(DataService dataService)
 	{
 		super(dataService, META_DATA);
 		setType(ANNOTATORS);

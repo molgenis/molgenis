@@ -2,7 +2,7 @@ package org.molgenis.ui.jobs;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.jobs.JobMetaData.SUBMISSION_DATE;
+import static org.molgenis.data.jobs.JobExecution.SUBMISSION_DATE;
 import static org.molgenis.ui.jobs.JobsController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
@@ -17,8 +17,8 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.jobs.JobMetaData;
-import org.molgenis.data.jobs.JobMetaDataMetaData;
+import org.molgenis.data.jobs.JobExecution;
+import org.molgenis.data.jobs.JobExecutionMetaData;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +38,11 @@ public class JobsController extends MolgenisPluginController
 
 	private UserAccountService userAccountService;
 	private DataService dataService;
-	private JobMetaDataMetaData jobMetaDataMetaData;
+	private JobExecutionMetaData jobMetaDataMetaData;
 
 	@Autowired
 	public JobsController(UserAccountService userAccountService, DataService dataService,
-			JobMetaDataMetaData jobMetaDataMetaData)
+			JobExecutionMetaData jobMetaDataMetaData)
 	{
 		super(URI);
 		this.userAccountService = requireNonNull(userAccountService);
@@ -76,10 +76,10 @@ public class JobsController extends MolgenisPluginController
 		stream(dataService.getMeta().getEntityMetaDatas().spliterator(), false)
 				.filter(e -> e.getExtends() != null && e.getExtends().getName().equals(jobMetaDataMetaData.getName()))
 				.forEach(e -> {
-					Query q = dataService.query(e.getName()).ge(JobMetaData.SUBMISSION_DATE, weekAgo);
+					Query q = dataService.query(e.getName()).ge(JobExecution.SUBMISSION_DATE, weekAgo);
 					if (!currentUser.isSuperuser())
 					{
-						q.and().eq(JobMetaData.USER, currentUser);
+						q.and().eq(JobExecution.USER, currentUser);
 					}
 					dataService.findAll(e.getName(), q).forEach(jobs::add);
 				});

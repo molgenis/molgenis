@@ -7,11 +7,14 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntity;
 
-public class JobMetaData extends DefaultEntity implements Comparable<JobMetaData>
+/**
+ * Superclass that represents a job execution.
+ */
+public class JobExecution extends DefaultEntity
 {
 	private static final long serialVersionUID = -4064249548140446038L;
 
-	public static final String ENTITY_NAME = "JobMetaData";
+	public static final String ENTITY_NAME = "JobExecution";
 	public static final String IDENTIFIER = "identifier"; // Job ID
 	public static final String USER = "user"; // Owner of the job
 	public static final String STATUS = "status"; // Job status like running or failed
@@ -30,12 +33,12 @@ public class JobMetaData extends DefaultEntity implements Comparable<JobMetaData
 		PENDING, RUNNING, SUCCESS, FAILED, CANCELED
 	}
 
-	public JobMetaData(DataService dataService)
+	public JobExecution(DataService dataService)
 	{
-		this(dataService, new JobMetaDataMetaData());
+		this(dataService, new JobExecutionMetaData());
 	}
 
-	public JobMetaData(DataService dataService, EntityMetaData emd)
+	public JobExecution(DataService dataService, EntityMetaData emd)
 	{
 		super(emd, dataService);
 		setSubmissionDate(new Date());

@@ -1,9 +1,9 @@
 package org.molgenis.data.jobs;
 
-import static org.molgenis.data.jobs.JobMetaData.Status.CANCELED;
-import static org.molgenis.data.jobs.JobMetaData.Status.FAILED;
-import static org.molgenis.data.jobs.JobMetaData.Status.RUNNING;
-import static org.molgenis.data.jobs.JobMetaData.Status.SUCCESS;
+import static org.molgenis.data.jobs.JobExecution.Status.CANCELED;
+import static org.molgenis.data.jobs.JobExecution.Status.FAILED;
+import static org.molgenis.data.jobs.JobExecution.Status.RUNNING;
+import static org.molgenis.data.jobs.JobExecution.Status.SUCCESS;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.util.Date;
@@ -13,15 +13,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Tracks progress and stores it in a {@link JobMetaData} entity. The entity may be a subclass of {@link JobMetaData}.
+ * Tracks progress and stores it in a {@link JobExecution} entity. The entity may be a subclass of {@link JobExecution}.
  */
 public class ProgressImpl implements Progress
 {
-	private final JobMetaData jobMetaData;
+	private final JobExecution jobMetaData;
 	private final DataService dataService;
 	private final static Logger LOG = LoggerFactory.getLogger(ProgressImpl.class);
 
-	public ProgressImpl(JobMetaData jobMetaData, DataService dataService)
+	public ProgressImpl(JobExecution jobMetaData, DataService dataService)
 	{
 		this.jobMetaData = jobMetaData;
 		this.dataService = dataService;

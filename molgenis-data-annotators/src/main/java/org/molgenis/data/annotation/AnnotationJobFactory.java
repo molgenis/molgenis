@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
-import org.molgenis.data.annotation.meta.AnnotationJobMetaData;
+import org.molgenis.data.annotation.meta.AnnotationJobExecution;
 import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.data.support.AnnotatorDependencyOrderResolver;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Lists;
 
 /**
- * Creates AnnotationJob based on its {@link AnnotationJobMetaData}. Is a bean so that it can use {@link Autowired}
+ * Creates AnnotationJob based on its {@link AnnotationJobExecution}. Is a bean so that it can use {@link Autowired}
  * services needed to rehydrate the primitive data types. Runs at execution time.
  */
 @Component
@@ -31,9 +31,9 @@ public class AnnotationJobFactory
 	@Autowired
 	private AnnotationService annotationService;
 
-	public AnnotationJob createJob(AnnotationJobMetaData metaData)
+	public AnnotationJob createJob(AnnotationJobExecution metaData)
 	{
-		dataService.add(AnnotationJobMetaData.ENTITY_NAME, metaData);
+		dataService.add(AnnotationJobExecution.ENTITY_NAME, metaData);
 		String annotatorNames = metaData.getAnnotators();
 		String target = metaData.getTarget();
 		String username = metaData.getUser().getUsername();

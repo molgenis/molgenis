@@ -7,7 +7,7 @@ import java.util.Date;
 
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
-import org.molgenis.data.jobs.JobMetaData;
+import org.molgenis.data.jobs.JobExecution;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.util.EntitySerializer;
 import org.molgenis.util.MolgenisDateFormat;
@@ -20,13 +20,13 @@ import com.google.gson.GsonBuilder;
 public class EntitySerializerTest
 {
 	private DataService dataService;
-	private JobMetaData jobMetaData;
+	private JobExecution jobMetaData;
 
 	@BeforeClass
 	public void beforeClass()
 	{
 		dataService = new DataServiceImpl();
-		jobMetaData = new JobMetaData(dataService);
+		jobMetaData = new JobExecution(dataService);
 	}
 
 	@Test
@@ -41,14 +41,14 @@ public class EntitySerializerTest
 		jobMetaData.setIdentifier("AAAABDASDFR");
 		me.setUsername("fdlk");
 		jobMetaData.setUser(me);
-		jobMetaData.setStatus(JobMetaData.Status.PENDING);
+		jobMetaData.setStatus(JobExecution.Status.PENDING);
 		jobMetaData.setType("AnnotatorJob");
 		jobMetaData.setSubmissionDate(date);
 		jobMetaData.setStartDate(date);
 		jobMetaData.setProgressInt(50);
 		jobMetaData.setProgressMax(1032);
 
-		Gson gson = new GsonBuilder().registerTypeAdapter(JobMetaData.class, new EntitySerializer())
+		Gson gson = new GsonBuilder().registerTypeAdapter(JobExecution.class, new EntitySerializer())
 				.setDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME)
 				.registerTypeAdapter(MolgenisUser.class, new EntitySerializer()).create();
 		assertEquals(gson.toJson(jobMetaData),

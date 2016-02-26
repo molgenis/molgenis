@@ -23,7 +23,7 @@ import org.molgenis.data.annotation.AnnotationJob;
 import org.molgenis.data.annotation.AnnotationJobFactory;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.meta.AnnotationJobMetaData;
+import org.molgenis.data.annotation.meta.AnnotationJobExecution;
 import org.molgenis.data.settings.SettingsEntityMeta;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
@@ -141,14 +141,14 @@ public class AnnotatorController
 
 	public String scheduleAnnotatorRun(String entityName, String[] annotatorNames)
 	{
-		AnnotationJobMetaData annotationJobMetaData = new AnnotationJobMetaData(dataService);
-		annotationJobMetaData.setUser(userAccountService.getCurrentUser());
-		annotationJobMetaData.setTarget(entityName);
-		annotationJobMetaData.setAnnotators(String.join(",", annotatorNames));
-		annotationJobMetaData.setResultUrl("/menu/main/dataexplorer?entity="+entityName);
-		AnnotationJob job = annotationJobFactory.createJob(annotationJobMetaData);
+		AnnotationJobExecution annotationJobExecution = new AnnotationJobExecution(dataService);
+		annotationJobExecution.setUser(userAccountService.getCurrentUser());
+		annotationJobExecution.setTarget(entityName);
+		annotationJobExecution.setAnnotators(String.join(",", annotatorNames));
+		annotationJobExecution.setResultUrl("/menu/main/dataexplorer?entity="+entityName);
+		AnnotationJob job = annotationJobFactory.createJob(annotationJobExecution);
 		taskExecutor.submit(job);
-		return annotationJobMetaData.getIdentifier();
+		return annotationJobExecution.getIdentifier();
 	}
 
 	/**
