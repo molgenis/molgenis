@@ -192,11 +192,15 @@ public class EntityUtils
 	 */
 	public static void setDefaultValues(Entity entity)
 	{
-		entity.getEntityMetaData().getAtomicAttributes().forEach(attr -> {
-			if (attr.getDefaultValue() != null)
-			{
-				entity.set(attr.getName(), DataConverter.convert(attr.getDefaultValue(), attr));
-			}
-		});
+		// null check to protect against entities without meta data (see issue #4547)
+		if (entity.getEntityMetaData() != null)
+		{
+			entity.getEntityMetaData().getAtomicAttributes().forEach(attr -> {
+				if (attr.getDefaultValue() != null)
+				{
+					entity.set(attr.getName(), DataConverter.convert(attr.getDefaultValue(), attr));
+				}
+			});
+		}
 	}
 }
