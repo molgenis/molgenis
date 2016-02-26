@@ -21,9 +21,10 @@ var Job = React.createClass({
 	displayName: 'Job',
 	propTypes: {
 		job: React.PropTypes.object.isRequired,
+		onClick: React.PropTypes.func
 	},
 	render: function() {
-		const {job} = this.props;
+		const {job, onClick} = this.props;
 		return <div>
 			<p>{job.type} job
 			<ProgressBar 
@@ -32,6 +33,7 @@ var Job = React.createClass({
 				status={this._getCssClass() || 'primary'} 
 				active={this._isActive()} 
 			/>
+			{onClick && <a onClick={this.props.onClick}>Show details</a>}&nbsp;
 			{job.resultUrl && <a href={job.resultUrl}>Go to result</a>}
 			</p>
 		</div>

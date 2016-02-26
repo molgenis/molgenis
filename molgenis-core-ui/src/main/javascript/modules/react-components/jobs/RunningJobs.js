@@ -18,15 +18,18 @@ var RunningJobs = React.createClass({
 	mixins: [DeepPureRenderMixin],
 	displayName: 'RunningJobs',
 	propTypes : {
-		jobs : React.PropTypes.array.isRequired
+		jobs : React.PropTypes.array.isRequired,
+		onSelect: React.PropTypes.func
 	},
 	render: function() {
-		const {jobs} = this.props;
+		const {jobs, onSelect} = this.props;
 		return <div className="panel panel-primary">
 			<div className="panel-heading">Running Jobs</div>
 			<div className="panel-body">
 				{jobs.map(function(job){	
-					return <Job job={job} key={job.identifier} />;
+					return <Job job={job}
+								key={job.identifier}
+								onClick={() => onSelect(job.identifier)} />;
 				})}
 			</div>
 		</div>;

@@ -43,17 +43,22 @@ import ace from "brace";
 			var container = this.refs.editor.getDOMNode();
 			var editor = ace.edit(container);
 			editor.setTheme('ace/theme/' + this.props.theme);
-			
+
 			var session = editor.getSession();
 			session.setMode('ace/mode/' + this.props.mode);
-			session.setValue(this.state.value);
-			
+            if(this.props.tail){
+                session.setValue(this.state.value, 1);
+                editor.scrollToRow(session.getLength() - 1)
+            } else {
+                session.setValue(this.state.value, -1);
+            }
+
 			session.on('change', function() {
 				var value = session.getValue();
 				this.setState({value: value});
 				this.props.onChange(value);
 			}.bind(this));
-			
+
 			this._updateAce();
 		},
 		componentWillUnmount: function() {
@@ -79,17 +84,21 @@ import ace from "brace";
 		},
 		componentDidUpdate: function() {
 			if (this.isMounted()) {
-				this._updateAce();	
+				this._updateAce();
 			}
 		},
 		_updateAce: function() {
 			var container = this.refs.editor.getDOMNode();
-			var editor = ace.edit(container);	
+			var editor = ace.edit(container);
 			editor.setReadOnly(this.props.readOnly === true || this.props.disabled === true);
 			if(editor.getValue() !== this.state.value) {
 				// I THINK this always means the value got updated programmatically so we can safely update the editor's value
-				editor.setValue(this.state.value, 0);
-				editor.clearSelection();
+                if(this.props.tail){
+                    session.setValue(this.state.value, 1);
+                    editor.scrollToRow(session.getLength() - 1)
+                } else {
+                    session.setValue(this.state.value, -1);
+                }
 			}
 		},
 		_handleChange: function(value) {
@@ -102,4 +111,5 @@ import ace from "brace";
 		}
 	});
 
+export {Ace}
 export default React.createFactory(Ace);

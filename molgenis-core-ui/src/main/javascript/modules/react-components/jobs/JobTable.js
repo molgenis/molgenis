@@ -17,7 +17,8 @@ import 'moment-duration-format';
 var JobTable = React.createClass({
 	displayName: 'JobTable',
 	propTypes: {
-		jobs: React.PropTypes.array.isRequired
+		jobs: React.PropTypes.array.isRequired,
+		onSelect: React.PropTypes.func
 	},
 	render: function() {
 		const {jobs} = this.props;
@@ -26,6 +27,7 @@ var JobTable = React.createClass({
 			<div className="panel-body">
 				<table className="table table-striped">
 					<thead>
+						<th></th>
 						<th>Status</th>
 						<th>When</th>
 						<th>Duration</th>
@@ -34,7 +36,10 @@ var JobTable = React.createClass({
 						<th>Result</th>
 					</thead>
 					<tbody>
-					{jobs.map((job) => <tr key={job.identifier}>
+					{jobs.map((job, index) => <tr key={job.identifier}>
+						<td><button className="btn btn-xs btn-info" onClick={() => this.props.onSelect(job.identifier)}>
+							<span className="glyphicon glyphicon-search" aria-hidden="true"></span>
+						</button></td>
 						<td>{job.status}</td>
 						<td>{this._getTwix(job)}</td>
 						<td>{this._getDuration(job)}</td>
