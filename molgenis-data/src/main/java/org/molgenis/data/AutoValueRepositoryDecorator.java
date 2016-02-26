@@ -287,7 +287,9 @@ public class AutoValueRepositoryDecorator implements Repository
 
 	private Entity initAutoAttrs(Entity entity, List<AttributeMetaData> autoAttrs)
 	{
-		autoAttrs.forEach(autoAttr -> {
+		for (AttributeMetaData autoAttr : autoAttrs)
+		{
+			// autoAttrs.forEach(autoAttr -> {
 			// set auto values unless a value already exists
 			String autoAttrName = autoAttr.getName();
 			if (entity.get(autoAttrName) == null)
@@ -305,7 +307,8 @@ public class AutoValueRepositoryDecorator implements Repository
 					throw new RuntimeException("Invalid auto attribute: " + autoAttr.toString());
 				}
 			}
-		});
+			// });
+		}
 		return entity;
 	}
 }
