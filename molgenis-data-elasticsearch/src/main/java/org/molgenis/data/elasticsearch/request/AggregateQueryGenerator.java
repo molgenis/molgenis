@@ -246,7 +246,6 @@ public class AggregateQueryGenerator
 				// use id attribute of nested field
 				return attrName + '.' + getAggregateFieldName(attr.getRefEntity().getIdAttribute());
 			case COMPOUND:
-			case IMAGE:
 				throw new UnsupportedOperationException();
 			default:
 				throw new RuntimeException("Unknown data type [" + dataType + "]");

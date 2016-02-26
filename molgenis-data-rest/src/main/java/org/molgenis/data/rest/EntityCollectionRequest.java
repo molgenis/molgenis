@@ -18,8 +18,9 @@ public class EntityCollectionRequest
 
 	@Min(0)
 	private int start = 0;
+
 	@Min(0)
-	@Max(MAX_ROWS)
+	@Max(value = MAX_ROWS, message = "No more than {value} rows can be requested")
 	private int num = DEFAULT_ROW_COUNT;
 
 	public int getStart()
