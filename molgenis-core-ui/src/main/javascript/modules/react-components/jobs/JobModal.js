@@ -30,7 +30,7 @@ var JobModal = React.createClass({
     },
     render: function () {
         const {job} = this.props;
-        return <div className="modal fade" tabindex="-1" role="dialog">
+        return <div className="modal fade" tabIndex="-1" role="dialog">
                 <div className="modal-dialog  modal-lg">
                     <div className="modal-content">
                         <div className="modal-header">

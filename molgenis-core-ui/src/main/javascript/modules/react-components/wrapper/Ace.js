@@ -90,6 +90,7 @@ import ace from "brace";
 		_updateAce: function() {
 			var container = this.refs.editor.getDOMNode();
 			var editor = ace.edit(container);
+			var session = editor.getSession();
 			editor.setReadOnly(this.props.readOnly === true || this.props.disabled === true);
 			if(editor.getValue() !== this.state.value) {
 				// I THINK this always means the value got updated programmatically so we can safely update the editor's value
