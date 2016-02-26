@@ -24,27 +24,27 @@
                                         'field' : 'identifier',
                                         'operator' : 'EQUALS',
                                         'value' : '${annotationRun.identifier}'
-                                    } ]},
-                                    function(annotateRun) {
-                                        var entry = annotateRun.items[0];
-                                        var container = $('#annotateRun');
-                                        if(entry.status==="FAILED"){
-                                            window.location.reload();
-                                        }
-                                        if(entry.status==="SUCCESS"){
-                                             window.location.replace("?entity=${entityName}");
-                                        }
-                                        else{
-                                            if(ProgressBar && ProgressBar.isMounted()) {
-                                                var progress = (((entry.progressInt-1)/entry.progressMax)*100)
-                                                console.log(entry.progressMessage);
-                                                console.log(progress);
-                                                ProgressBar.setProps({
-                                                    'progressMessage' : entry.progressMessage,
-                                                    'progressPct' : progress
-                                                });
+                                        } ]},
+                                        function(annotateRun) {
+                                            var entry = annotateRun.items[0];
+                                            var container = $('#annotateRun');
+                                            if(entry.status==="SUCCESS"){//success? refresh page to show datatable for annotated entity
+                                                window.location.replace("?entity=${entityName}");
                                             }
-                                        }
+                                            else{
+                                                if(ProgressBar && ProgressBar.isMounted()) {
+                                                     var progress = (((entry.progressInt-1)/entry.progressMax)*100)
+                                                    ProgressBar.setProps({
+                                                        'progressMessage' : entry.progressMessage,
+                                                        'progressPct' : progress
+                                                    });
+                                                }
+                                                if(entry.progressInt === entry.progressMax){
+                                                    if (entry.status === "FAILED") {//failed? refresh page to show interface instead of progressbar
+                                                        window.location.replace("?mod=annotators&entity=${entityName}");
+                                                    }
+                                                }
+                                            }
                                     });
                         }, 1000);
         });
@@ -212,10 +212,10 @@
 <#if annotationRun??>
     <script>
             if ('${annotationRun.status}' === "SUCCESS") {
-                molgenis.createAlert([{'message': 'This entity has most recently been annotated with: ${annotationRun.annotators}'}], 'info');
+                molgenis.createAlert([{'message': 'This entity has most recently been annotated with:[ ${annotationRun.completed_annotators?if_exists}]'}], 'info');
             }
             if ('${annotationRun.status}' === "FAILED") {
-                molgenis.createAlert([{'message': 'The last annotation run for this entity has failed'}], 'error');
+                molgenis.createAlert([{'message': 'The last annotation run for this entity has failed, failed annotator(s):[${annotationRun.failed_annotators?if_exists}] \n succesfully completed annotators:[${annotationRun.completed_annotators?if_exists}]'}], 'error');
             }
     </script>
 </#if>

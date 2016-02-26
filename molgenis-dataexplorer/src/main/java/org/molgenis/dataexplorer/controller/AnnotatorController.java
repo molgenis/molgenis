@@ -140,7 +140,7 @@ public class AnnotatorController
 					.forEach(a -> annotators.add(annotationService.getAnnotatorByName(a)));
 			try
 			{
-				scheduleAnnotatorRun(repository.getEntityMetaData().getSimpleName(), annotators);
+				scheduleAnnotatorRun(repository.getEntityMetaData().getName(), annotators);
 			}
 			catch (SchedulerException e)
 			{
@@ -170,6 +170,7 @@ public class AnnotatorController
 			jobDataMap.put(AnnotationJob.REPOSITORY_NAME, entityName);
 			jobDataMap.put(AnnotationJob.ANNOTATORS, annotators);
 			jobDataMap.put(AnnotationJob.USERNAME, userAccountService.getCurrentUser().getUsername());
+			jobDataMap.put(AnnotationJob.CONTEXT, SecurityContextHolder.getContext());
 			TriggerBuilder<?> triggerBuilder = TriggerBuilder.newTrigger().withIdentity(triggerKey)
 					.usingJobData(jobDataMap).startNow();
 			scheduleAnnotatorRunJob(triggerBuilder);
