@@ -1,5 +1,12 @@
 package org.molgenis.auth;
 
+import static java.util.Objects.requireNonNull;
+
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.stream.Stream;
+
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.DataService;
@@ -16,13 +23,6 @@ import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.stream.Stream;
-
-import static java.util.Objects.requireNonNull;
 
 public class MolgenisUserDecorator implements Repository
 {
@@ -194,6 +194,12 @@ public class MolgenisUserDecorator implements Repository
 	public Iterator<Entity> iterator()
 	{
 		return decoratedRepository.iterator();
+	}
+
+	@Override
+	public Stream<Entity> stream(Fetch fetch)
+	{
+		return decoratedRepository.stream(fetch);
 	}
 
 	@Override

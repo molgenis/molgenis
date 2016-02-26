@@ -86,6 +86,14 @@ public class ComputedEntityValuesDecorator implements Repository
 	}
 
 	@Override
+	public Stream<Entity> stream(Fetch fetch)
+	{
+		Stream<Entity> entities = decoratedRepo.stream(fetch);
+		// compute values with attributes with expressions
+		return toComputedValuesEntities(entities);
+	}
+
+	@Override
 	public Entity findOne(Object id)
 	{
 		Entity entity = decoratedRepo.findOne(id);

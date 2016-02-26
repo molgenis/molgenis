@@ -106,7 +106,15 @@ public abstract class AbstractElasticsearchRepository implements Repository
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		return findAll(new QueryImpl()).iterator();
+		Query q = new QueryImpl();
+		return elasticSearchService.searchAsStream(q, getEntityMetaData()).iterator();
+	}
+
+	@Override
+	public Stream<Entity> stream(Fetch fetch)
+	{
+		Query q = new QueryImpl().fetch(fetch);
+		return elasticSearchService.searchAsStream(q, getEntityMetaData());
 	}
 
 	@Override
