@@ -90,6 +90,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -422,7 +424,7 @@ public class RestController
 	 * 
 	 * start: the index of the first row, default 0
 	 * 
-	 * num: the number of results to return, default 100, max 100000
+	 * num: the number of results to return, default 100, max 10000
 	 * 
 	 * 
 	 * Example: /api/v1/csv/person?q=firstName==Piet&attributes=firstName,lastName&start=10&num=100
@@ -948,6 +950,22 @@ public class RestController
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	@ResponseStatus(BAD_REQUEST)
+	@ResponseBody
+	public ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e)
+	{
+		LOG.debug("", e);
+
+		List<ErrorMessage> messages = Lists.newArrayList();
+		for (ObjectError error : e.getBindingResult().getAllErrors())
+		{
+			messages.add(new ErrorMessage(error.getDefaultMessage()));
+		}
+
+		return new ErrorMessageResponse(messages);
+	}
+
 	@ExceptionHandler(MolgenisValidationException.class)
 	@ResponseStatus(BAD_REQUEST)
 	@ResponseBody
@@ -988,7 +1006,14 @@ public class RestController
 	public ErrorMessageResponse handleAuthenticationException(AuthenticationException e)
 	{
 		LOG.info("", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+		// workaround for https://github.com/molgenis/molgenis/issues/4441
+		String message = e.getMessage();
+		String messagePrefix = "org.springframework.security.core.userdetails.UsernameNotFoundException: ";
+		if (message.startsWith(messagePrefix))
+		{
+			message = message.substring(messagePrefix.length());
+		}
+		return new ErrorMessageResponse(new ErrorMessage(message));
 	}
 
 	@ExceptionHandler(MolgenisDataAccessException.class)

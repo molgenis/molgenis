@@ -180,7 +180,6 @@ import EntitySelectBox from "./EntitySelectBox";
 							maxLength: attr.maxLength
 						}));
 					case 'COMPOUND' :
-					case 'IMAGE':
 						throw 'Unsupported data type: ' + attr.fieldType;
 					default:
 						throw 'Unknown data type: ' + attr.fieldType;

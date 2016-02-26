@@ -459,7 +459,7 @@ public class SnpEffAnnotator
 		}
 
 		@Override
-		public List<AttributeMetaData> getInputMetaData()
+		public List<AttributeMetaData> getRequiredAttributes()
 		{
 			List<AttributeMetaData> attributes = new ArrayList<>();
 			attributes.add(VcfRepository.CHROM_META);
@@ -477,7 +477,7 @@ public class SnpEffAnnotator
 		}
 
 		@Override
-		protected boolean annotationDataExists()
+		public boolean annotationDataExists()
 		{
 			return getSnpEffPath() != null;
 		}

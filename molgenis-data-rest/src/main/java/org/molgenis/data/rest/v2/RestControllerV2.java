@@ -9,6 +9,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -464,6 +465,15 @@ class RestControllerV2
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
+	@ExceptionHandler(MolgenisDataAccessException.class)
+	@ResponseStatus(UNAUTHORIZED)
+	@ResponseBody
+	public ErrorMessageResponse handleMolgenisDataAccessException(MolgenisDataAccessException e)
+	{
+		LOG.debug("Data access exception occurred.", e);
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+	}
+
 	@ExceptionHandler(RuntimeException.class)
 	@ResponseStatus(INTERNAL_SERVER_ERROR)
 	@ResponseBody
@@ -686,8 +696,6 @@ class RestControllerV2
 					case TEXT:
 						responseData.put(attrName, entity.getString(attrName));
 						break;
-					case IMAGE:
-						throw new UnsupportedOperationException("Unsupported data type [" + dataType + "]");
 					case INT:
 						responseData.put(attrName, entity.getInt(attrName));
 						break;

@@ -30,7 +30,7 @@ public class RepositoryAnnotatorImpl extends AbstractRepositoryEntityAnnotator
 	}
 
 	@Override
-	public List<AttributeMetaData> getInputMetaData()
+	public List<AttributeMetaData> getRequiredAttributes()
 	{
 		return entityAnnotator.getRequiredAttributes();
 	}
@@ -42,7 +42,7 @@ public class RepositoryAnnotatorImpl extends AbstractRepositoryEntityAnnotator
 	}
 
 	@Override
-	protected boolean annotationDataExists()
+	public boolean annotationDataExists()
 	{
 		return entityAnnotator.sourceExists();
 	}
