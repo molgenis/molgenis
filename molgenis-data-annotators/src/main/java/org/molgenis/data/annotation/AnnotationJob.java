@@ -87,18 +87,11 @@ public class AnnotationJob implements Job
 			annotationJobMetaData.setSubmissionDate(new Date());
 			annotationJobMetaData.setStartDate(new Date());
 			annotationJobMetaData.setType("Annotators");
-			Runnable task = () -> {
-				RunAsSystemProxy.runAsSystem(() -> {
-					dataService.add(AnnotationJobMetaData.ENTITY_NAME, annotationJobMetaData);
-				});
-			};
-			Thread thread = new Thread(task);
-			thread.start();
-			thread.join();// otherwise the update of the JobMeta "overtakes" the creation
-
+			RunAsSystemProxy.runAsSystem(() -> {
+				dataService.add(AnnotationJobMetaData.ENTITY_NAME, annotationJobMetaData);
+			});
 			annotate(username, annotationJobMetaData, repository, annotatorQueue);
-			// FIXME: This a workaround for:Github #4485 If an annotator finishes within a second the user is
-			// not sent
+			// FIXME: This a workaround for:Github #4485 If an annotator finishes within a second the user is not sent
 			// to the dataexplorer data tab
 			try
 			{
@@ -181,15 +174,9 @@ public class AnnotationJob implements Job
 		{
 			annotationJobMetaData.setEndDate(new Date());
 		}
-
-		Runnable task = () -> {
-			RunAsSystemProxy.runAsSystem(() -> {
-				dataService.update(AnnotationJobMetaData.ENTITY_NAME, annotationJobMetaData);
-			});
-		};
-		Thread thread = new Thread(task);
-		thread.start();
-		thread.join();
+		RunAsSystemProxy.runAsSystem(() -> {
+			dataService.update(AnnotationJobMetaData.ENTITY_NAME, annotationJobMetaData);
+		});
 	}
 
 	private void runSingleAnnotator(CrudRepositoryAnnotator crudRepositoryAnnotator, RepositoryAnnotator annotator,
