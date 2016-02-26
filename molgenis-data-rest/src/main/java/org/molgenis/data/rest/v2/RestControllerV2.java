@@ -99,9 +99,9 @@ class RestControllerV2
 		return new UnknownEntityException("Operation failed. Unknown entity: '" + entityName + "'");
 	}
 
-	static MolgenisDataAccessException createNoWritePermissionOnEntityException(String entityName)
+	static MolgenisDataAccessException createNoReadPermissionOnEntityException(String entityName)
 	{
-		return new MolgenisDataAccessException("No write permission on entity " + entityName);
+		return new MolgenisDataAccessException("No read permission on entity " + entityName);
 	}
 
 	static MolgenisDataException createNoWriteCapabilitiesOnEntityException(String entityName)
@@ -352,9 +352,8 @@ class RestControllerV2
 		Repository repositoryToCopy = dataService.getRepository(entityName);
 
 		// Permission
-		boolean writablePermission = permissionService.hasPermissionOnEntity(repositoryToCopy.getName(),
-				Permission.WRITE);
-		if (!writablePermission) throw createNoWritePermissionOnEntityException(entityName);
+		boolean readPermission = permissionService.hasPermissionOnEntity(repositoryToCopy.getName(), Permission.READ);
+		if (!readPermission) throw createNoReadPermissionOnEntityException(entityName);
 
 		// Capabilities
 		boolean writableCapabilities = dataService.getCapabilities(repositoryToCopy.getName()).contains(
@@ -362,7 +361,7 @@ class RestControllerV2
 		if (!writableCapabilities) throw createNoWriteCapabilitiesOnEntityException(entityName);
 
 		// Copy
-		Repository repository = dataService.copyRepository(repositoryToCopy, request.getNewEntityName(),
+		Repository repository = dataService.copyRepositoryRunAsSystem(repositoryToCopy, request.getNewEntityName(),
 				request.getNewEntityName());
 		permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 				Collections.singletonList(repository.getName()));

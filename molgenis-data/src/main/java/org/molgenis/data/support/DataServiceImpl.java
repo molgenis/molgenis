@@ -23,6 +23,7 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -339,6 +340,13 @@ public class DataServiceImpl implements DataService
 
 	@Override
 	public Repository copyRepository(Repository repository, String newRepositoryId, String newRepositoryLabel)
+	{
+		return copyRepository(repository, newRepositoryId, newRepositoryLabel, new QueryImpl());
+	}
+
+	@Override
+	@RunAsSystem
+	public Repository copyRepositoryRunAsSystem(Repository repository, String newRepositoryId, String newRepositoryLabel)
 	{
 		return copyRepository(repository, newRepositoryId, newRepositoryLabel, new QueryImpl());
 	}

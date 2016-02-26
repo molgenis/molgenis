@@ -526,20 +526,20 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testCopyEntityNoWritePermissions() throws Exception
+	public void testCopyEntityNoReadPermissions() throws Exception
 	{
 		Repository repositoryToCopy = mock(Repository.class);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
 		// Override mock
-		when(molgenisPermissionService.hasPermissionOnEntity("entity", Permission.WRITE)).thenReturn(false);
+		when(molgenisPermissionService.hasPermissionOnEntity("entity", Permission.READ)).thenReturn(false);
 
 		String content = "{newEntityName: 'newEntity'}";
 		ResultActions resultActions = mockMvc
 				.perform(post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
 				.andExpect(status().isUnauthorized()).andExpect(content().contentType(APPLICATION_JSON));
 
-		this.assertEqualsErrorMessage(resultActions, "No write permission on entity entity");
+		this.assertEqualsErrorMessage(resultActions, "No read permission on entity entity");
 		verify(dataService, never()).copyRepository(repositoryToCopy, "newEntity", "newEntity");
 	}
 
@@ -570,7 +570,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		when(dataService.hasRepository("newEntity")).thenReturn(false);
 		when(dataService.getRepository("entity")).thenReturn(repositoryToCopy);
 		when(repositoryToCopy.getName()).thenReturn("entity");
-		when(molgenisPermissionService.hasPermissionOnEntity("entity", Permission.WRITE)).thenReturn(true);
+		when(molgenisPermissionService.hasPermissionOnEntity("entity", Permission.READ)).thenReturn(true);
 		Set<RepositoryCapability> capabilities = Sets.newHashSet(RepositoryCapability.WRITABLE);
 		when(dataService.getCapabilities("entity")).thenReturn(capabilities);
 
