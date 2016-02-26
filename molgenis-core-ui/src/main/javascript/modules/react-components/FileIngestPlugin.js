@@ -56,7 +56,10 @@ class FileIngestPlugin extends Component {
     }
     
     onExecute(e) {
-    	$.get('/plugin/fileingest/run/' + e.id).done(e => window.molgenis.createAlert([{message: 'New job scheduled'}], 'success'))
+    	$.get('/plugin/fileingest/run/' + e.id).done(e => { 
+    		window.molgenis.createAlert([{message: 'New job scheduled'}], 'success')
+    		setTimeout(() => this.refresh(), 2000)
+    	})
     }
 }
 
