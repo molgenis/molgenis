@@ -112,7 +112,7 @@ public abstract class AbstractRepository implements Repository
 	private Iterable<Entity> findAllBatched(List<Object> ids, Fetch fetch)
 	{
 		String fieldIdAttributeName = getEntityMetaData().getIdAttribute().getName();
-		if(fetch != null) fetch.field(fieldIdAttributeName);
+		if (fetch != null) fetch.field(fieldIdAttributeName);
 		Query inQuery = new QueryImpl().in(fieldIdAttributeName, Sets.newHashSet(ids)).fetch(fetch);
 		Map<Object, Entity> indexedEntities = uniqueIndex(findAll(inQuery).iterator(), Entity::getIdValue);
 		return filter(transform(ids, id -> lookup(indexedEntities, id)), notNull());
@@ -126,6 +126,13 @@ public abstract class AbstractRepository implements Repository
 			LOG.warn("Lookup: Couldn't find {} for id {}.", getName(), id);
 		}
 		return result;
+	}
+
+	@Override
+	public Stream<Entity> stream(Fetch fetch)
+	{
+		// default action: ignore fetch
+		return stream();
 	}
 
 	@Override

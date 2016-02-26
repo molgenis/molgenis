@@ -123,4 +123,12 @@ public class LanguageRepositoryDecoratorTest
 		Stream<Entity> entities = languageRepositoryDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
+
+	@Test
+	public void streamFetch()
+	{
+		Fetch fetch = new Fetch();
+		languageRepositoryDecorator.stream(fetch);
+		verify(decoratedRepo, times(1)).stream(fetch);
+	}
 }

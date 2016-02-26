@@ -37,6 +37,12 @@ public class I18nStringDecorator implements Repository
 	}
 
 	@Override
+	public Stream<Entity> stream(Fetch fetch)
+	{
+		return decorated.stream(fetch);
+	}
+
+	@Override
 	public void close() throws IOException
 	{
 		decorated.close();
@@ -229,5 +235,4 @@ public class I18nStringDecorator implements Repository
 	{
 		decorated.removeEntityListener(entityListener);
 	}
-
 }

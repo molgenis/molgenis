@@ -314,4 +314,38 @@ public class OwnedEntityRepositoryDecoratorTest
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 		verify(query, times(1)).eq(OwnedEntityMetaData.ATTR_OWNER_USERNAME, "username");
 	}
+
+	@Test
+	public void streamFetchExtendsOwned()
+	{
+		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
+		authentication.setAuthenticated(false);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(entityMeta.getExtends()).thenReturn(new OwnedEntityMetaData());
+
+		Fetch fetch = new Fetch();
+		Entity entity0 = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("username").getMock();
+		Entity entity1 = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("username").getMock();
+		Fetch decoratedFetch = new Fetch().field(ATTR_OWNER_USERNAME);
+		when(decoratedRepository.stream(decoratedFetch)).thenReturn(Stream.of(entity0, entity1));
+		Stream<Entity> expectedEntities = ownedEntityRepositoryDecorator.stream(fetch);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+	}
+
+	@Test
+	public void streamFetchExtendsOwnedBySomeoneElse()
+	{
+		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
+		authentication.setAuthenticated(false);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(entityMeta.getExtends()).thenReturn(new OwnedEntityMetaData());
+
+		Fetch fetch = new Fetch();
+		Entity entity0 = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("notme").getMock();
+		Entity entity1 = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("notme").getMock();
+		Fetch decoratedFetch = new Fetch().field(ATTR_OWNER_USERNAME);
+		when(decoratedRepository.stream(decoratedFetch)).thenReturn(Stream.of(entity0, entity1));
+		Stream<Entity> expectedEntities = ownedEntityRepositoryDecorator.stream(fetch);
+		assertEquals(expectedEntities.collect(Collectors.toList()), emptyList());
+	}
 }

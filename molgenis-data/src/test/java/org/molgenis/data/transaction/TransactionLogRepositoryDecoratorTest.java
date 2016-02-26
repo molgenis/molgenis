@@ -156,4 +156,12 @@ public class TransactionLogRepositoryDecoratorTest
 		Stream<Entity> entities = transactionLogRepositoryDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
+
+	@Test
+	public void streamFetch()
+	{
+		Fetch fetch = new Fetch();
+		transactionLogRepositoryDecorator.stream(fetch);
+		verify(decoratedRepo, times(1)).stream(fetch);
+	}
 }
