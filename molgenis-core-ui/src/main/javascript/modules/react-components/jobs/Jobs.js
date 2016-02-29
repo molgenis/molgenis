@@ -33,15 +33,18 @@ var Jobs = React.createClass({
             {runningJobs.length > 0 && <div className="row">
                 <div className="col-md-12">
                     <RunningJobs jobs={runningJobs}
-                        onSelect={(id) => this.setState({selectedJobID:id})}/>
+                                 onSelect={(id) => this.setState({selectedJobID:id})}/>
                 </div>
             </div>}
-            <div className="row">
+            {finishedJobs.length > 0 && <div className="row">
                 <div className="col-md-12">
                     <JobTable jobs={finishedJobs}
                               onSelect={(id) => this.setState({selectedJobID:id})}/>
                 </div>
-            </div>
+            </div>}
+            {jobs.length === 0 && <div className="row">
+                <div className="col-md-12"><p>No jobs found.</p></div>
+            </div>}
             {selectedJob && <JobModal job={selectedJob}
                                       onClose={() => this.setState({selectedJobID: null})}/>}
         </div>
