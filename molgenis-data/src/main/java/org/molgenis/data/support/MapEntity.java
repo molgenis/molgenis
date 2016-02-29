@@ -7,7 +7,7 @@ import java.util.Map;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.util.CaseInsensitiveLinkedHashMap;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -19,7 +19,7 @@ public class MapEntity extends AbstractEntity
 {
 	private static final long serialVersionUID = -8283375007931769373L;
 	private EntityMetaData entityMetaData;
-	private Map<String, Object> values = new CaseInsensitiveLinkedHashMap<Object>();
+	private Map<String, Object> values = new LinkedCaseInsensitiveMap<>();
 	private String idAttributeName = null;
 
 	public MapEntity()

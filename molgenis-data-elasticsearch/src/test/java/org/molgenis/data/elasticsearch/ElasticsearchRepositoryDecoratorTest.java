@@ -331,4 +331,12 @@ public class ElasticsearchRepositoryDecoratorTest
 		Stream<Entity> expectedEntities = elasticsearchRepositoryDecorator.findAll(entityIds, fetch);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
+
+	@Test
+	public void streamFetch()
+	{
+		Fetch fetch = new Fetch();
+		elasticsearchRepositoryDecorator.stream(fetch);
+		verify(decoratedRepo, times(1)).stream(fetch);
+	}
 }

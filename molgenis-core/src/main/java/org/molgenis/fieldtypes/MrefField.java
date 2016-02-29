@@ -1,10 +1,15 @@
 package org.molgenis.fieldtypes;
 
+import static java.util.stream.Collectors.toList;
+
 import java.text.ParseException;
+import java.util.stream.Stream;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.model.elements.Field;
+
+import com.google.common.collect.Lists;
 
 /**
  * Many to many reference.
@@ -126,6 +131,14 @@ public class MrefField extends FieldType
 	@Override
 	public Object convert(Object value)
 	{
+		if (value instanceof Iterable<?>)
+		{
+			value = Lists.newArrayList((Iterable<?>) value);
+		}
+		else if (value instanceof Stream<?>)
+		{
+			value = ((Stream<?>) value).collect(toList());
+		}
 		return value;
 	}
 
