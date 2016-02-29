@@ -177,7 +177,7 @@ public class DataExplorerController extends MolgenisPluginController
 		else if (moduleId.equals("annotators"))
 		{
 			Entity annotationRun = dataService.findOne(AnnotationJobExecution.ENTITY_NAME,
-					new QueryImpl().eq(AnnotationJobExecution.TARGET, entityName)
+					new QueryImpl().eq(AnnotationJobExecution.TARGET_NAME, entityName)
 							.sort(new Sort(AnnotationJobExecution.START_DATE, Sort.Direction.DESC)));
 			model.addAttribute("annotationRun", annotationRun);
 			model.addAttribute("entityName", entityName);

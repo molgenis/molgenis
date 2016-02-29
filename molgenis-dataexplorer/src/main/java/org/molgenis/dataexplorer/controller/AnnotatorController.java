@@ -2,18 +2,14 @@ package org.molgenis.dataexplorer.controller;
 
 import static org.molgenis.dataexplorer.controller.AnnotatorController.URI;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -34,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -56,7 +51,6 @@ public class AnnotatorController
 	private final DataService dataService;
 	private final AnnotationService annotationService;
 	private final MolgenisPermissionService molgenisPermissionService;
-	private final PermissionSystemService permissionSystemService;
 	private final UserAccountService userAccountService;
 	private final AnnotationJobFactory annotationJobFactory;
 	private final ExecutorService taskExecutor;
@@ -70,7 +64,6 @@ public class AnnotatorController
 		this.dataService = dataService;
 		this.annotationService = annotationService;
 		this.molgenisPermissionService = molgenisPermissionService;
-		this.permissionSystemService = permissionSystemService;
 		this.userAccountService = userAccountService;
 		this.annotationJobFactory = annotationJobFactory;
 		this.taskExecutor = taskExecutor;
@@ -105,47 +98,23 @@ public class AnnotatorController
 	@ResponseBody
 	public String annotateData(HttpServletRequest request,
 			@RequestParam(value = "annotatorNames", required = false) String[] annotatorNames,
-			@RequestParam("dataset-identifier") String entityName,
-			@RequestParam(value = "createCopy", required = false) boolean createCopy)
-	{
-		Repository repository = dataService.getRepository(entityName);
-
-		if (createCopy)
-		{
-			String newRepositoryLabel = getNewRepositoryLabel(annotatorNames, entityName);
-			repository = dataService.copyRepository(repository, RandomStringUtils.randomAlphabetic(30),
-					newRepositoryLabel);
-			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
-					Collections.singletonList(repository.getName()));
-			//TODO: the simple name is not unique, how can this work?
-			entityName = repository.getEntityMetaData().getSimpleName();
-		}
-
-		if (annotatorNames != null && repository != null)
-		{
-			String jobExecutionMetaDataId = scheduleAnnotatorRun(repository.getEntityMetaData().getSimpleName(), annotatorNames);
-			// TODO: shouldn't this go somewhere?
-		}
-		return entityName;
-	}
-
-	private String getNewRepositoryLabel(
-			@RequestParam(value = "annotatorNames", required = false) String[] annotatorNames,
 			@RequestParam("dataset-identifier") String entityName)
 	{
-		StringJoiner joiner = new StringJoiner("_");
-		Arrays.asList(annotatorNames).forEach(a -> joiner.add(a));
-		String joinedString = joiner.toString();
-		return entityName + "_" + joinedString;
+		Repository repository = dataService.getRepository(entityName);
+		if (annotatorNames != null && repository != null)
+		{
+			scheduleAnnotatorRun(repository.getEntityMetaData().getName(), annotatorNames);
+		}
+		return entityName;
 	}
 
 	public String scheduleAnnotatorRun(String entityName, String[] annotatorNames)
 	{
 		AnnotationJobExecution annotationJobExecution = new AnnotationJobExecution(dataService);
 		annotationJobExecution.setUser(userAccountService.getCurrentUser());
-		annotationJobExecution.setTarget(entityName);
+		annotationJobExecution.setTargetName(entityName);
 		annotationJobExecution.setAnnotators(String.join(",", annotatorNames));
-		annotationJobExecution.setResultUrl("/menu/main/dataexplorer?entity="+entityName);
+		annotationJobExecution.setResultUrl("/menu/main/dataexplorer?entity=" + entityName);
 		AnnotationJob job = annotationJobFactory.createJob(annotationJobExecution);
 		taskExecutor.submit(job);
 		return annotationJobExecution.getIdentifier();

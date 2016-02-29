@@ -35,7 +35,7 @@ public class AnnotationJobFactory
 	{
 		dataService.add(AnnotationJobExecution.ENTITY_NAME, metaData);
 		String annotatorNames = metaData.getAnnotators();
-		String target = metaData.getTarget();
+		String targetName = metaData.getTargetName();
 		String username = metaData.getUser().getUsername();
 
 		Repository repository = dataService.getRepository(target);

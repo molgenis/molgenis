@@ -9,7 +9,7 @@ public class AnnotationJobExecution extends JobExecution
 	private static final long serialVersionUID = -4064249548140446038L;
 
 	public static final String ENTITY_NAME = "AnnotationJobExecution";
-	public static final String TARGET = "target";
+	public static final String TARGET_NAME = "targetName";
 	public static final String ANNOTATORS = "annotators";
 
 	public static final EntityMetaData META_DATA = new AnnotationJobExecutionMetaData();
@@ -20,16 +20,16 @@ public class AnnotationJobExecution extends JobExecution
 		setType(ANNOTATORS);
 	}
 
-	public String getTarget()
+	public String getTargetName()
 	{
-		return getString(TARGET);
+		return getString(TARGET_NAME);
 	}
 
-	public void setTarget(String value)
+	public void setTargetName(String value)
 	{
-		set(TARGET, value);
+		set(TARGET_NAME, value);
 	}
-
+	
 	public String getAnnotators()
 	{
 		return getString(ANNOTATORS);

@@ -12,10 +12,9 @@ public class AnnotationJobExecutionMetaData extends DefaultEntityMetaData
 	{
 		super(AnnotationJobExecution.ENTITY_NAME, AnnotationJobExecution.class);
 		setExtends(new JobExecutionMetaData());
-
-		addAttribute(AnnotationJobExecution.TARGET).setDataType(MolgenisFieldTypes.STRING)
-				.setLabel("Entities being modified by this job").setNillable(true);
+		addAttribute(AnnotationJobExecution.TARGET_NAME).setDataType(MolgenisFieldTypes.STRING).setLabel("target name")
+				.setDescription("Fully qualified name of the entity that is being annotated.").setNillable(false);
 		addAttribute(AnnotationJobExecution.ANNOTATORS).setDataType(MolgenisFieldTypes.STRING)
-				.setLabel("Annotators run by this job").setNillable(true);
+				.setLabel("Annotators run by this job").setNillable(false);
 	}
 }
