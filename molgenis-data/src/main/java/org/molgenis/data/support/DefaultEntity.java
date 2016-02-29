@@ -23,14 +23,14 @@ import org.molgenis.data.UnknownEntityException;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
-import org.molgenis.util.CaseInsensitiveLinkedHashMap;
 import org.molgenis.util.MolgenisDateFormat;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 public class DefaultEntity implements Entity
 {
 	private static final long serialVersionUID = 1L;
 
-	private final Map<String, Object> values = new CaseInsensitiveLinkedHashMap<Object>();
+	private final Map<String, Object> values = new LinkedCaseInsensitiveMap<>();
 	private final EntityMetaData entityMetaData;
 	private transient final DataService dataService;
 
