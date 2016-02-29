@@ -4,7 +4,6 @@ import static org.molgenis.data.jobs.JobExecution.Status.CANCELED;
 import static org.molgenis.data.jobs.JobExecution.Status.FAILED;
 import static org.molgenis.data.jobs.JobExecution.Status.RUNNING;
 import static org.molgenis.data.jobs.JobExecution.Status.SUCCESS;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.util.Date;
 
@@ -12,7 +11,6 @@ import org.joda.time.Duration;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
-import org.molgenis.data.DataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,32 +22,30 @@ import ch.qos.logback.classic.LoggerContext;
  */
 public class ProgressImpl implements Progress
 {
-	private final JobExecution jobMetaData;
-	private final DataService dataService;
+	private final JobExecution jobExecution;
 	private ch.qos.logback.classic.Logger executionLogger;
 	private final static Logger LOG = LoggerFactory.getLogger(ProgressImpl.class);
-	private EntityLogAppender appender;
+	private final EntityLogAppender appender;
+	private final JobExecutionUpdater updater;
 
-	public ProgressImpl(JobExecution jobMetaData, DataService dataService)
+	public ProgressImpl(JobExecution jobExecution, JobExecutionUpdater updater)
 	{
-		this.jobMetaData = jobMetaData;
-		this.dataService = dataService;
+		this.jobExecution = jobExecution;
 		this.executionLogger = (ch.qos.logback.classic.Logger) LoggerFactory
-				.getLogger("Job Execution[" + jobMetaData.getIdentifier() + "]");
+				.getLogger("Job Execution[" + jobExecution.getIdentifier() + "]");
 		executionLogger.setLevel(Level.ALL);
-
+		this.updater = updater;
 		LoggerContext loggerContext = executionLogger.getLoggerContext();
-		appender = new EntityLogAppender(jobMetaData, loggerContext);
+		appender = new EntityLogAppender(jobExecution, loggerContext);
 		appender.start();
 		appender.setContext(loggerContext);
 		executionLogger.addAppender(appender);
+		
 	}
 
 	private void update()
 	{
-		runAsSystem(() -> {
-			dataService.update(jobMetaData.getEntityMetaData().getName(), jobMetaData);
-		});
+		updater.update(jobExecution);
 	}
 
 	@Override
@@ -57,16 +53,16 @@ public class ProgressImpl implements Progress
 	{
 		executionLogger.info("start ()");
 		LOG.info("start()");
-		jobMetaData.setStartDate(new Date());
-		jobMetaData.setStatus(RUNNING);
+		jobExecution.setStartDate(new Date());
+		jobExecution.setStatus(RUNNING);
 		update();
 	}
 
 	@Override
 	public void progress(int progress, String message)
 	{
-		jobMetaData.setProgressInt(progress);
-		jobMetaData.setProgressMessage(message);
+		jobExecution.setProgressInt(progress);
+		jobExecution.setProgressMessage(message);
 		executionLogger.info("progress ({}, {})", progress, message);
 		update();
 	}
@@ -74,9 +70,9 @@ public class ProgressImpl implements Progress
 	@Override
 	public void success()
 	{
-		jobMetaData.setEndDate(new Date());
-		jobMetaData.setStatus(SUCCESS);
-		jobMetaData.setProgressInt(jobMetaData.getProgressMax());
+		jobExecution.setEndDate(new Date());
+		jobExecution.setStatus(SUCCESS);
+		jobExecution.setProgressInt(jobExecution.getProgressMax());
 		Duration yourDuration = Duration.millis(timeRunning());
 		Period period = yourDuration.toPeriod();
 		PeriodFormatter periodFormatter = new PeriodFormatterBuilder().printZeroAlways().minimumPrintedDigits(2)
@@ -94,8 +90,8 @@ public class ProgressImpl implements Progress
 	public void failed(Exception ex)
 	{
 		executionLogger.error("Failed", ex);
-		jobMetaData.setEndDate(new Date());
-		jobMetaData.setStatus(FAILED);
+		jobExecution.setEndDate(new Date());
+		jobExecution.setStatus(FAILED);
 		appender.stop();
 		update();
 	}
@@ -104,8 +100,8 @@ public class ProgressImpl implements Progress
 	public void canceled()
 	{
 		executionLogger.warn("Canceled");
-		jobMetaData.setEndDate(new Date());
-		jobMetaData.setStatus(CANCELED);
+		jobExecution.setEndDate(new Date());
+		jobExecution.setStatus(CANCELED);
 		appender.stop();
 		update();
 	}
@@ -113,7 +109,7 @@ public class ProgressImpl implements Progress
 	@Override
 	public Long timeRunning()
 	{
-		Date startDate = jobMetaData.getStartDate();
+		Date startDate = jobExecution.getStartDate();
 		if (startDate == null)
 		{
 			return null;
@@ -124,7 +120,7 @@ public class ProgressImpl implements Progress
 	@Override
 	public void setProgressMax(int max)
 	{
-		jobMetaData.setProgressMax(max);
+		jobExecution.setProgressMax(max);
 		update();
 	}
 
@@ -132,7 +128,7 @@ public class ProgressImpl implements Progress
 	public void status(String message)
 	{
 		executionLogger.info(message);
-		jobMetaData.setProgressMessage(message);
+		jobExecution.setProgressMessage(message);
 		update();
 	}
 

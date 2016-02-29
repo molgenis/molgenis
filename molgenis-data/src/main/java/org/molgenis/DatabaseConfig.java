@@ -2,6 +2,8 @@ package org.molgenis;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.molgenis.data.IdGenerator;
+import org.molgenis.data.jobs.JobExecutionUpdater;
+import org.molgenis.data.jobs.JobExecutionUpdaterImpl;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -65,10 +67,16 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 	{
 		return new MolgenisTransactionManager(idGenerator, dataSource());
 	}
-	
+
 	@Override
 	public PlatformTransactionManager annotationDrivenTransactionManager()
 	{
 		return transactionManager();
+	}
+
+	@Bean
+	public JobExecutionUpdater jobExecutionUpdater()
+	{
+		return new JobExecutionUpdaterImpl();
 	}
 }

@@ -8,6 +8,8 @@ import java.util.List;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.meta.AnnotationJobExecution;
+import org.molgenis.data.jobs.JobExecutionUpdater;
+import org.molgenis.data.jobs.JobExecutionUpdaterImpl;
 import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.data.support.AnnotatorDependencyOrderResolver;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -48,6 +50,9 @@ public class AnnotationJobFactory
 	@Autowired
 	private UserDetailsService userDetailsService;
 
+	@Autowired
+	private JobExecutionUpdater jobExecutionUpdater;
+
 	@RunAsSystem
 	public AnnotationJob createJob(AnnotationJobExecution metaData)
 	{
@@ -69,6 +74,6 @@ public class AnnotationJobFactory
 		List<RepositoryAnnotator> annotators = Lists.newArrayList(
 				resolver.getAnnotatorSelectionDependencyList(availableAnnotators, requestedAnnotators, repository));
 		return new AnnotationJob(crudRepositoryAnnotator, username, annotators, repository,
-				new ProgressImpl(metaData, dataService), runAsAuthentication, new TransactionTemplate(transactionManager));
+				new ProgressImpl(metaData, jobExecutionUpdater), runAsAuthentication, new TransactionTemplate(transactionManager));
 	}
 }

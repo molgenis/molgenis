@@ -2,7 +2,6 @@ package org.molgenis.data.jobs;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.molgenis.data.support.DataServiceImpl;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -12,16 +11,16 @@ public class ProgressImplTest
 {
 	private ProgressImpl progress;
 	@Mock
-	private DataServiceImpl dataService;
+	private JobExecutionUpdater updater;
 	private JobExecution jobExecution;
 
 	@BeforeClass
 	public void beforeClass()
 	{
 		MockitoAnnotations.initMocks(this);
-		jobExecution = new JobExecution(dataService);
+		jobExecution = new JobExecution(null);
 		jobExecution.setIdentifier("ABCDE");
-		progress = new ProgressImpl(jobExecution, dataService);
+		progress = new ProgressImpl(jobExecution, updater);
 	}
 
 	@Test
