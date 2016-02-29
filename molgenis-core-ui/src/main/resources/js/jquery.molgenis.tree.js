@@ -67,8 +67,8 @@
 		items.push('<div class="row">');
 		items.push('<div class="col-md-12">');
 		items.push('<div class="molgenis-tree-controls">');
-		items.push('<a href="#" id="tree-deselect-all-btn" class="btn btn-link pull-right">Deselect all</a>');
-		items.push('<a href="#" id="tree-select-all-btn" class="btn btn-link pull-right">Select all</a>');
+		items.push('<a href="#" class="btn btn-link pull-right tree-deselect-all-btn">Deselect all</a>');
+		items.push('<a href="#" class="btn btn-link pull-right tree-select-all-btn">Select all</a>');
 		items.push('</div>');
 		items.push('</div>');
 		items.push('</div>');
@@ -193,7 +193,7 @@
 			return null;
 		}
 		
-		$('#tree-select-all-btn', container).click(function(e) {
+		$('.tree-select-all-btn', container).click(function(e) {
 			e.preventDefault();
 			
 			var fn = settings.onAttributesSelect; // store handler
@@ -214,7 +214,7 @@
 				settings.onAttributesSelect(selects);
 		});
 		
-		$('#tree-deselect-all-btn', container).click(function(e) {
+		$('.tree-deselect-all-btn', container).click(function(e) {
 			e.preventDefault();
 			
 			var fn = settings.onAttributesSelect; // store handler

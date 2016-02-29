@@ -122,7 +122,7 @@
 		};
 		tree.fancytree(treeConfig);
 
-		$('#tree-select-all-btn', container).click(function(e) {
+		$('.tree-select-all-btn', container).click(function(e) {
 			e.preventDefault();
 
 			var fn = settings.onAttributesSelect; // store handler
@@ -146,7 +146,7 @@
 				settings.onAttributesSelect(selects);
 		});
 
-		$('#tree-deselect-all-btn', container).click(function(e) {
+		$('.tree-deselect-all-btn', container).click(function(e) {
 			e.preventDefault();
 
 			var fn = settings.onAttributesSelect; // store handler
