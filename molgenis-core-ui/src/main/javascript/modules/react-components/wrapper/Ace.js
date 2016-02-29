@@ -56,7 +56,9 @@ import ace from "brace";
 			session.on('change', function() {
 				var value = session.getValue();
 				this.setState({value: value});
-				this.props.onChange(value);
+				if(this.props.onChange){
+					this.props.onChange(value);
+				}
 			}.bind(this));
 
 			this._updateAce();
