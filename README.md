@@ -19,10 +19,11 @@ As a non-profit organisation we are using the Highsoft software 'highstock versi
 
 Important! The Highsoft software product is not free for commercial use. For Highsoft products and pricing go to: http://shop.highsoft.com/
 
-To turn-off/deactivate this functionality you can set the RuntimeProperty “plugin.dataexplorer.mod.charts” to false:
-    1. You can find the RuntimeProperty via the menu Entities -> RuntimeProperty.
-    2. Search for the RuntimeProperty "plugin.dataexplorer.mod.charts" and update to false.
-    3. If it does not exists:
-        a. Create a new RuntimeProperty
-        b. Name -> plugin.dataexplorer.mod.charts
-        c. Value -> false
+To turn-off/deactivate this functionality you can set the RuntimeProperty “plugin.dataexplorer.mod.charts” to false:  
+ 1. You can find the RuntimeProperty via the menu Entities -> RuntimeProperty.
+ 2. Search for the RuntimeProperty "plugin.dataexplorer.mod.charts" and update to false.
+ 3. If it does not exists:   
+        a. Create a new RuntimeProperty   
+        b. Name -> plugin.dataexplorer.mod.charts   
+        c. Value -> false   
+
