@@ -9,6 +9,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Repository;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.Progress;
+import org.springframework.security.core.Authentication;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import com.google.common.collect.Lists;
 
@@ -20,9 +22,10 @@ public class AnnotationJob extends Job
 	private final Repository repository;
 
 	public AnnotationJob(CrudRepositoryAnnotator crudRepositoryAnnotator, String username,
-			List<RepositoryAnnotator> annotators, Repository repository, Progress progress)
+			List<RepositoryAnnotator> annotators, Repository repository, Progress progress,
+			Authentication userAuthentication, TransactionTemplate transactionTemplate)
 	{
-		super(progress);
+		super(progress, transactionTemplate, userAuthentication);
 
 		this.crudRepositoryAnnotator = requireNonNull(crudRepositoryAnnotator);
 		this.username = requireNonNull(username);

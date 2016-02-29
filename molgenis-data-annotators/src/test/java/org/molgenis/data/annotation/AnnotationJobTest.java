@@ -12,6 +12,9 @@ import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.mem.InMemoryRepository;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.vcf.VcfRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -33,6 +36,11 @@ public class AnnotationJobTest
 	private Progress progress;
 	private DefaultEntityMetaData emd = new DefaultEntityMetaData("repo");
 
+	private Authentication authentication;
+
+	@Mock
+	private PlatformTransactionManager transactionManager;
+
 	@BeforeMethod
 	public void beforeMethod()
 	{
@@ -42,10 +50,11 @@ public class AnnotationJobTest
 		emd.addAttributeMetaData(VcfRepository.POS_META);
 		emd.addAttribute("description");
 		emd.setLabel("My repo");
+		authentication = null;
 
 		repository = new InMemoryRepository(emd);
 		annotationJob = new AnnotationJob(crudRepositoryAnnotator, username, ImmutableList.of(exac, cadd), repository,
-				progress);
+				progress, authentication, new TransactionTemplate(transactionManager));
 	}
 
 	@Test

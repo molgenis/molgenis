@@ -10,8 +10,17 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.meta.AnnotationJobExecution;
 import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.data.support.AnnotatorDependencyOrderResolver;
+import org.molgenis.security.core.runas.RunAsSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.intercept.RunAsUserToken;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import com.google.common.collect.Lists;
 
@@ -22,6 +31,8 @@ import com.google.common.collect.Lists;
 @Component
 public class AnnotationJobFactory
 {
+	private static final Logger LOG = LoggerFactory.getLogger(AnnotationJobFactory.class);
+
 	@Autowired
 	CrudRepositoryAnnotator crudRepositoryAnnotator;
 
@@ -31,6 +42,13 @@ public class AnnotationJobFactory
 	@Autowired
 	private AnnotationService annotationService;
 
+	@Autowired
+	private PlatformTransactionManager transactionManager;
+
+	@Autowired
+	private UserDetailsService userDetailsService;
+
+	@RunAsSystem
 	public AnnotationJob createJob(AnnotationJobExecution metaData)
 	{
 		dataService.add(AnnotationJobExecution.ENTITY_NAME, metaData);
@@ -38,7 +56,11 @@ public class AnnotationJobFactory
 		String targetName = metaData.getTargetName();
 		String username = metaData.getUser().getUsername();
 
-		Repository repository = dataService.getRepository(target);
+		// create an authentication to run as the user that is listed as the owner of the job
+		RunAsUserToken runAsAuthentication = new RunAsUserToken("Job Execution", username, null,
+				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
+
+		Repository repository = dataService.getRepository(targetName);
 		List<RepositoryAnnotator> availableAnnotators = annotationService.getAllAnnotators().stream()
 				.filter(RepositoryAnnotator::annotationDataExists).collect(toList());
 		List<RepositoryAnnotator> requestedAnnotators = Arrays.stream(annotatorNames.split(","))
@@ -47,6 +69,6 @@ public class AnnotationJobFactory
 		List<RepositoryAnnotator> annotators = Lists.newArrayList(
 				resolver.getAnnotatorSelectionDependencyList(availableAnnotators, requestedAnnotators, repository));
 		return new AnnotationJob(crudRepositoryAnnotator, username, annotators, repository,
-				new ProgressImpl(metaData, dataService));
+				new ProgressImpl(metaData, dataService), runAsAuthentication, new TransactionTemplate(transactionManager));
 	}
 }
