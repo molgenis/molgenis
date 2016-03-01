@@ -511,6 +511,12 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@Bean
+	public RepositoryDecoratorRegistry repositoryDecoratorRegistry()
+	{
+		return new RepositoryDecoratorRegistry();
+	}
+
+	@Bean
 	public RepositoryDecoratorFactory repositoryDecoratorFactory()
 	{
 		// Moving this inner class to a separate class results in a FatalBeanException on application startup
@@ -520,8 +526,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 			public Repository createDecoratedRepository(Repository repository)
 			{
 				return new MolgenisRepositoryDecoratorFactory(entityManager(), transactionLogService,
-						entityAttributesValidator, idGenerator, appSettings, dataService(), expressionValidator)
-						.createDecoratedRepository(repository);
+						entityAttributesValidator, idGenerator, appSettings, dataService(), expressionValidator,
+						repositoryDecoratorRegistry()).createDecoratedRepository(repository);
 			}
 		};
 	}

@@ -510,8 +510,11 @@ import FormControl from "./FormControl";
 			}
 			this.props.onSubmitSuccess(e);
 		},
-		_handleSubmitError: function() {
+		_handleSubmitError: function(e) {
 			var message = this.props.mode === 'create' ? 'could not be created.' : 'changes could not be saved.';
+			if (e.responseJSON && e.responseJSON.errors && e.responseJSON.errors.length > 0 && e.responseJSON.errors[0].message) {
+				message += ' ' +  e.responseJSON.errors[0].message;
+			} 
 			this.setState({
 				submitMsg: {type: 'danger', message: this.state.entity.label + ' ' + message}
 			});
