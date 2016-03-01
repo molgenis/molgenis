@@ -15,7 +15,6 @@ import React from "react";
 import { ProgressBar } from '../ProgressBar';
 
 import DeepPureRenderMixin from '../mixin/DeepPureRenderMixin';
-import ScrollToBottomMixin from '../mixin/ScrollToBottomMixin';
 import {Ace} from '../wrapper/Ace';
 const {textarea} = React.DOM;
 
