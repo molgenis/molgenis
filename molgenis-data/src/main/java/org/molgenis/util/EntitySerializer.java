@@ -1,5 +1,8 @@
 package org.molgenis.util;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.transform;
+
 import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.List;
@@ -39,14 +42,13 @@ public class EntitySerializer implements JsonSerializer<Entity>
 					case CATEGORICAL:
 					case XREF:
 					case FILE:
-						// TODO: or just refuse it for now?
 						Entity refEntity = entity.getEntity(attributeName);
-						result.add(attributeName, context.serialize(refEntity));
+						result.add(attributeName, context.serialize(refEntity.getLabelValue()));
 						break;
 					case CATEGORICAL_MREF:
 					case MREF:
-						List<Entity> refEntities = Lists.newArrayList(entity.getEntities(attributeName));
-						result.add(attributeName, context.serialize(refEntities));
+						List<Entity> refEntities = newArrayList(entity.getEntities(attributeName));
+						result.add(attributeName, context.serialize(transform(refEntities, Entity::getLabelValue)));
 						break;
 					case DATE:
 					case DATE_TIME:
