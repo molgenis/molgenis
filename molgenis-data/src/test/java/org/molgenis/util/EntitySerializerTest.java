@@ -38,6 +38,7 @@ public class EntitySerializerTest
 		jobExecution.setEndDate(date);
 		jobExecution.setIdentifier("AAAABDASDFR");
 		me.setUsername("fdlk");
+	    me.setId("AAAAA");
 		jobExecution.setUser(me);
 		jobExecution.setStatus(JobExecution.Status.PENDING);
 		jobExecution.setType("AnnotatorJob");
