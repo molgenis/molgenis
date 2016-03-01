@@ -33,8 +33,8 @@ var Job = React.createClass({
 				status={this._getCssClass() || 'primary'} 
 				active={this._isActive()} 
 			/>
-			{onClick && <a onClick={this.props.onClick}>Show details</a>}&nbsp;
-			{job.resultUrl && <a href={job.resultUrl}>Go to result</a>}
+			{onClick && <a onClick={this.props.onClick}>Show details</a>}
+			{job.resultUrl && <span>&nbsp;<a href={job.resultUrl}>Go to result</a></span>}
 			</p>
 		</div>
 	},
