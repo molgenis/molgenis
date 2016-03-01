@@ -37,12 +37,9 @@ var JobDetails = React.createClass({
                                                   mode='text'
                                                   tail/> :
                                 <p className="form-control-static">{
-                                    key === 'user' ?
-                                    job[key].username :
-                                        (typeof job[key] === 'object' ?
-                                            JSON.stringify(job[key]) :
-                                            job[key])
-                                }</p>}
+                                    typeof job[key] === 'object' ?
+                                        job[key]['__labelValue'] :
+                                        job[key]}</p>}
                         </div>
                     </div>)}
             </form>
