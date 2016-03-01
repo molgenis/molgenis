@@ -241,4 +241,10 @@ public class FileIngestRepositoryDecorator implements Repository
 		decorated.removeEntityListener(entityListener);
 	}
 
+	@Override
+	public Stream<Entity> stream(Fetch fetch)
+	{
+		return decorated.stream(fetch);
+	}
+
 }
