@@ -1,6 +1,10 @@
 import React from "react";
 import DeepPureRenderMixin from "../mixin/DeepPureRenderMixin";
-import ace from "brace";
+try {
+	var ace = require('brace'); // fails server-side
+} catch (exception){
+	ace = React.DOM.textarea
+}
 
 	var div = React.DOM.div, textarea = React.DOM.textarea;
 	
