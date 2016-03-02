@@ -104,8 +104,8 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Transactional
 	public void delete(Entity entity)
 	{
+		super.delete(entity); // first delete from index, because the index might request deleted entities
 		decoratedRepo.delete(entity);
-		super.delete(entity);
 	}
 
 	@Override
@@ -114,8 +114,8 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	{
 		// TODO look into performance improvements
 		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
+			super.delete(batch.stream()); // first delete from index, because the index might request deleted entities
 			decoratedRepo.delete(batch.stream());
-			super.delete(batch.stream());
 		});
 	}
 
@@ -123,8 +123,8 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Transactional
 	public void deleteById(Object id)
 	{
+		super.deleteById(id); // first delete from index, because the index might request deleted entities
 		decoratedRepo.deleteById(id);
-		super.deleteById(id);
 	}
 
 	@Override
@@ -133,8 +133,8 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	{
 		// TODO look into performance improvements
 		Iterators.partition(ids.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
+			super.deleteById(batch); // first delete from index, because the index might request deleted entities
 			decoratedRepo.deleteById(batch);
-			super.deleteById(batch);
 		});
 	}
 
@@ -142,8 +142,8 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Transactional
 	public void deleteAll()
 	{
+		super.deleteAll(); // first delete from index, because the index might request deleted entities
 		decoratedRepo.deleteAll();
-		super.deleteAll();
 	}
 
 	// retrieve entity by id via decorated repository
