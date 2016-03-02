@@ -569,7 +569,7 @@ function($, molgenis, settingsXhr) {
 		
 		$('#copy-data-btn').on('click', function(){
 			bootbox.prompt({
-				title: "<h4>Duplicate entity [" + selectedEntityMetaData.label + "]<h4/>" +
+				title: "<h4>Copy entity [" + selectedEntityMetaData.label + "]<h4/>" +
 					"<div class=\"small\">Please enter a new entity name." +
 					"<ul>" +
 					"<li>Use max 30 characters." +
