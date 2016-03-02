@@ -27,6 +27,15 @@
 						</configuration>
 					</execution>
 					<execution>
+						<id>npm prune</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<configuration>
+							<arguments>prune</arguments>
+						</configuration>
+					</execution>
+					<execution>
 						<id>npm install</id>
 						<goals>
 							<goal>npm</goal>
