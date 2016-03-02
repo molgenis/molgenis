@@ -70,6 +70,6 @@ export default {
 	'TextArea' : TextArea,
 	'ProgressBar' : ProgressBar,
 	'JobContainer' : JobContainer,
-	'JobsContainer' : JobsContainer
+	'JobsContainer' : JobsContainer,
 	'FileIngestPlugin' : FileIngestPlugin
 };
