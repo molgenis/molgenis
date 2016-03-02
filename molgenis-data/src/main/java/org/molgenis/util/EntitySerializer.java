@@ -1,17 +1,13 @@
 package org.molgenis.util;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.transform;
-
 import java.lang.reflect.Type;
 import java.util.Date;
-import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
@@ -23,6 +19,15 @@ import com.google.gson.JsonSerializer;
  */
 public class EntitySerializer implements JsonSerializer<Entity>
 {
+	private JsonElement serializeReference(Entity entity, JsonSerializationContext context)
+	{
+		JsonObject result = new JsonObject();
+		result.addProperty("__entityName", entity.getEntityMetaData().getName());
+		result.add("__idValue", context.serialize(entity.getIdValue()));
+		result.addProperty("__labelValue", entity.getLabelValue());
+		return result;
+	}
+
 	@Override
 	public JsonElement serialize(Entity entity, Type type, JsonSerializationContext context)
 	{
@@ -43,12 +48,13 @@ public class EntitySerializer implements JsonSerializer<Entity>
 					case XREF:
 					case FILE:
 						Entity refEntity = entity.getEntity(attributeName);
-						result.add(attributeName, context.serialize(refEntity.getLabelValue()));
+						result.add(attributeName, serializeReference(refEntity, context));
 						break;
 					case CATEGORICAL_MREF:
 					case MREF:
-						List<Entity> refEntities = newArrayList(entity.getEntities(attributeName));
-						result.add(attributeName, context.serialize(transform(refEntities, Entity::getLabelValue)));
+						JsonArray jsonArray = new JsonArray();
+						entity.getEntities(attributeName).forEach(e -> jsonArray.add(serializeReference(e, context)));
+						result.add(attributeName, jsonArray);
 						break;
 					case DATE:
 					case DATE_TIME:

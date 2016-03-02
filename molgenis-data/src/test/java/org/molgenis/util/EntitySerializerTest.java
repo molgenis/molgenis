@@ -40,6 +40,7 @@ public class EntitySerializerTest
 		jobMetaData.setEndDate(date);
 		jobMetaData.setIdentifier("AAAABDASDFR");
 		me.setUsername("fdlk");
+		me.setId("AAAAA");
 		jobMetaData.setUser(me);
 		jobMetaData.setStatus(JobMetaData.Status.PENDING);
 		jobMetaData.setType("AnnotatorJob");
@@ -52,6 +53,6 @@ public class EntitySerializerTest
 				.setDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME)
 				.registerTypeAdapter(MolgenisUser.class, new EntitySerializer()).create();
 		assertEquals(gson.toJson(jobMetaData),
-				"{\"__entityName\":\"JobMetaData\",\"identifier\":\"AAAABDASDFR\",\"user\":\"fdlk\",\"status\":\"PENDING\",\"type\":\"AnnotatorJob\",\"submissionDate\":\"2016-02-19T13:33:09+0100\",\"startDate\":\"2016-02-19T13:33:09+0100\",\"endDate\":\"2016-02-19T13:33:09+0100\",\"progressInt\":50,\"progressMax\":1032,\"progressMessage\":\"Annotating with SnpEff, Exac, CADD, Clinvar, Dann, CGD, Fitcon, GoNL, HPO, and many more.... %p\"}");
+				"{\"__entityName\":\"JobMetaData\",\"identifier\":\"AAAABDASDFR\",\"user\":{\"__entityName\":\"MolgenisUser\",\"__idValue\":\"AAAAA\",\"__labelValue\":\"fdlk\"},\"status\":\"PENDING\",\"type\":\"AnnotatorJob\",\"submissionDate\":\"2016-02-19T13:33:09+0100\",\"startDate\":\"2016-02-19T13:33:09+0100\",\"endDate\":\"2016-02-19T13:33:09+0100\",\"progressInt\":50,\"progressMax\":1032,\"progressMessage\":\"Annotating with SnpEff, Exac, CADD, Clinvar, Dann, CGD, Fitcon, GoNL, HPO, and many more.... %p\"}");
 	}
 }
