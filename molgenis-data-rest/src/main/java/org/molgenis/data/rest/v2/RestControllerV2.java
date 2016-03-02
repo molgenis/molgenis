@@ -59,6 +59,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
@@ -361,7 +362,7 @@ class RestControllerV2
 		if (!writableCapabilities) throw createNoWriteCapabilitiesOnEntityException(entityName);
 
 		// Copy
-		Repository repository = dataService.copyRepositoryRunAsSystem(repositoryToCopy, request.getNewEntityName(),
+		Repository repository = this.copyRepositoryRunAsSystem(repositoryToCopy, request.getNewEntityName(),
 				request.getNewEntityName());
 		permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 				Collections.singletonList(repository.getName()));
@@ -369,6 +370,13 @@ class RestControllerV2
 		response.setStatus(HttpServletResponse.SC_CREATED);
 
 		return repository.getName();
+	}
+
+	@RunAsSystem
+	private Repository copyRepositoryRunAsSystem(Repository repository, String newRepositoryId,
+			String newRepositoryLabel)
+	{
+		return dataService.copyRepository(repository, newRepositoryId, newRepositoryLabel);
 	}
 
 	/**

@@ -477,7 +477,6 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		verify(dataService).add(eq(ENTITY_NAME), any(Stream.class));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testCopyEntity() throws Exception
 	{
@@ -491,10 +490,9 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		mockMvc.perform(mockHttpServletRequestBuilder).andExpect(status().isCreated())
 				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content().string(responseBody));
 
-		verify(dataService).copyRepositoryRunAsSystem(repositoryToCopy, "newEntity", "newEntity");
+		verify(dataService).copyRepository(repositoryToCopy, "newEntity", "newEntity");
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testCopyEntityUnknownEntity() throws Exception
 	{
@@ -507,10 +505,9 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 				.andExpect(status().isInternalServerError()).andExpect(content().contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions, "Operation failed. Unknown entity: 'unknown'");
-		verify(dataService, never()).copyRepositoryRunAsSystem(repositoryToCopy, "unknown", "unknown");
+		verify(dataService, never()).copyRepository(repositoryToCopy, "unknown", "unknown");
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testCopyEntityDuplicateEntity() throws Exception
 	{
@@ -523,10 +520,9 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 				.andExpect(status().isBadRequest()).andExpect(content().contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions, "Operation failed. Duplicate entity: 'entity'");
-		verify(dataService, never()).copyRepositoryRunAsSystem(repositoryToCopy, "entity", "entity");
+		verify(dataService, never()).copyRepository(repositoryToCopy, "entity", "entity");
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testCopyEntityNoReadPermissions() throws Exception
 	{
@@ -542,10 +538,9 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 				.andExpect(status().isUnauthorized()).andExpect(content().contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions, "No read permission on entity entity");
-		verify(dataService, never()).copyRepositoryRunAsSystem(repositoryToCopy, "newEntity", "newEntity");
+		verify(dataService, never()).copyRepository(repositoryToCopy, "newEntity", "newEntity");
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testCopyEntityNoWriteCapabilities() throws Exception
 	{
@@ -563,7 +558,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 				.andExpect(status().isBadRequest()).andExpect(content().contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions, "No write capabilities for entity entity");
-		verify(dataService, never()).copyRepositoryRunAsSystem(repositoryToCopy, "newEntity", "newEntity");
+		verify(dataService, never()).copyRepository(repositoryToCopy, "newEntity", "newEntity");
 	}
 
 	private void mocksForCopyEntitySucces(Repository repositoryToCopy)
@@ -578,7 +573,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 
 		Repository repository = mock(Repository.class);
 		when(repository.getName()).thenReturn("newEntity");
-		when(dataService.copyRepositoryRunAsSystem(repositoryToCopy, "newEntity", "newEntity")).thenReturn(repository);
+		when(dataService.copyRepository(repositoryToCopy, "newEntity", "newEntity")).thenReturn(repository);
 
 		doNothing().when(permissionSystemService).giveUserEntityPermissions(any(SecurityContext.class),
 				Collections.singletonList(any(String.class)));

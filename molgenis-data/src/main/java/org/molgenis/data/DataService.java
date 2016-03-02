@@ -414,7 +414,4 @@ public interface DataService extends Iterable<Repository>
 	Repository copyRepository(Repository repository, String newRepositoryId, String newRepositoryLabel);
 
 	Repository copyRepository(Repository repository, String newRepositoryId, String newRepositoryLabel, Query query);
-
-	Repository copyRepositoryRunAsSystem(Repository repository, String newRepositoryId, String newRepositoryLabel);
-
 }
