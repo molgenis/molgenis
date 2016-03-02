@@ -11,13 +11,10 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.annotation.AnnotationJob;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.meta.AnnotationJobMetaData;
-import org.molgenis.data.jobs.JobMetaData;
-import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.data.annotation.meta.AnnotationJobExecution;
+import org.molgenis.data.jobs.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
@@ -48,10 +45,10 @@ public class AnnotationServiceImpl implements AnnotationService, ApplicationList
 		runAsSystem(() -> {
 			// check if there are annotators with a status running, this can only occur because of a shutdown of the
 			// server during an annotation run.
-			if (dataService.hasRepository(AnnotationJobMetaData.ENTITY_NAME))
+			if (dataService.hasRepository(AnnotationJobExecution.ENTITY_NAME))
 			{
-				Stream<Entity> runningAnnotations = dataService.findAll(AnnotationJobMetaData.ENTITY_NAME,
-						new QueryImpl().eq(AnnotationJobMetaData.STATUS, AnnotationJobMetaData.Status.RUNNING));
+				Stream<Entity> runningAnnotations = dataService.findAll(AnnotationJobExecution.ENTITY_NAME,
+						new QueryImpl().eq(AnnotationJobExecution.STATUS, JobExecution.Status.RUNNING));
 				runningAnnotations.forEach(entity -> failRunningAnnotation(entity));
 			}
 		});
@@ -59,9 +56,9 @@ public class AnnotationServiceImpl implements AnnotationService, ApplicationList
 
 	private void failRunningAnnotation(Entity entity)
 	{
-		entity.set(AnnotationJobMetaData.STATUS, AnnotationJobMetaData.Status.FAILED);
-		entity.set(AnnotationJobMetaData.PROGRESS_MESSAGE, "Annotation failed because MOLGENIS was restarted.");
-		dataService.update(AnnotationJobMetaData.ENTITY_NAME, entity);
+		entity.set(AnnotationJobExecution.STATUS, JobExecution.Status.FAILED);
+		entity.set(AnnotationJobExecution.PROGRESS_MESSAGE, "Annotation failed because MOLGENIS was restarted.");
+		dataService.update(AnnotationJobExecution.ENTITY_NAME, entity);
 	}
 
 	@Override

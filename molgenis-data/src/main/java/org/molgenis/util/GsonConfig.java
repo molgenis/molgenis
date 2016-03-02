@@ -1,6 +1,11 @@
 package org.molgenis.util;
 
+
+import org.molgenis.data.Entity;
 import org.molgenis.gson.AutoValueTypeAdapterFactory;
+import org.molgenis.util.GsonFactoryBean;
+import org.molgenis.util.GsonHttpMessageConverter;
+import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +29,7 @@ public class GsonConfig
 				&& (environment.equals("development") || environment.equals("test"));
 
 		GsonFactoryBean gsonFactoryBean = new GsonFactoryBean();
+		gsonFactoryBean.registerTypeHierarchyAdapter(Entity.class, new EntitySerializer());
 		gsonFactoryBean.setDateFormatPattern(MolgenisDateFormat.DATEFORMAT_DATETIME);
 		gsonFactoryBean.setDisableHtmlEscaping(true);
 		gsonFactoryBean.setPrettyPrinting(prettyPrinting);
