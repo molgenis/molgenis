@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.jobs.JobMetaData;
+import org.molgenis.data.jobs.JobExecution;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.file.FileDownloadController;
@@ -51,26 +51,26 @@ public class FileIngesterLoggerImpl implements FileIngesterLogger
 		downloadUrl = fileIngest.getString(FileIngestMetaData.URL);
 
 		fileIngestJobMetaData = new DefaultEntity(fileIngestJobMetaDataMetaData, dataService);
-		fileIngestJobMetaData.set(JobMetaData.PROGRESS_MESSAGE,
+		fileIngestJobMetaData.set(JobExecution.PROGRESS_MESSAGE,
 				"Downloading file from '" + fileIngest.getString(FileIngestMetaData.URL) + "'");
-		fileIngestJobMetaData.set(JobMetaData.START_DATE, new Date());
-		fileIngestJobMetaData.set(JobMetaData.SUBMISSION_DATE, new Date());
-		fileIngestJobMetaData.set(JobMetaData.STATUS, "RUNNING");
-		fileIngestJobMetaData.set(JobMetaData.TYPE, "FileIngesterJob");
-		fileIngestJobMetaData.set(JobMetaData.USER,
+		fileIngestJobMetaData.set(JobExecution.START_DATE, new Date());
+		fileIngestJobMetaData.set(JobExecution.SUBMISSION_DATE, new Date());
+		fileIngestJobMetaData.set(JobExecution.STATUS, "RUNNING");
+		fileIngestJobMetaData.set(JobExecution.TYPE, "FileIngesterJob");
+		fileIngestJobMetaData.set(JobExecution.USER,
 				dataService.query(MolgenisUser.ENTITY_NAME).eq(MolgenisUser.USERNAME, "admin").findOne());// TODO system
 																											// user?
 		fileIngestJobMetaData.set(FileIngestJobMetaDataMetaData.FILE_INGEST, fileIngest);
 
 		dataService.add(fileIngestJobMetaDataMetaData.getName(), fileIngestJobMetaData);
-		
-		return fileIngestJobMetaData.getString(JobMetaData.IDENTIFIER);
+
+		return fileIngestJobMetaData.getString(JobExecution.IDENTIFIER);
 	}
 
 	@Override
 	public synchronized void downloadFinished(File file, String contentType)
 	{
-		String id = fileIngestJobMetaData.getString(JobMetaData.IDENTIFIER);
+		String id = fileIngestJobMetaData.getString(JobExecution.IDENTIFIER);
 
 		FileMeta fileMeta = new FileMeta(dataService);
 		fileMeta.setId(id);
@@ -81,7 +81,7 @@ public class FileIngesterLoggerImpl implements FileIngesterLogger
 		dataService.add(FileMeta.ENTITY_NAME, fileMeta);
 
 		fileIngestJobMetaData.set(FileIngestJobMetaDataMetaData.FILE, fileMeta);
-		fileIngestJobMetaData.set(JobMetaData.PROGRESS_MESSAGE, "Importing...");
+		fileIngestJobMetaData.set(JobExecution.PROGRESS_MESSAGE, "Importing...");
 		dataService.update(fileIngestJobMetaDataMetaData.getName(), fileIngestJobMetaData);
 	}
 
@@ -90,10 +90,10 @@ public class FileIngesterLoggerImpl implements FileIngesterLogger
 	{
 		Integer count = report.getNrImportedEntitiesMap().get(entityName);
 		count = count != null ? count : 0;
-		fileIngestJobMetaData.set(JobMetaData.STATUS, "SUCCESS");
-		fileIngestJobMetaData.set(JobMetaData.PROGRESS_MESSAGE,
+		fileIngestJobMetaData.set(JobExecution.STATUS, "SUCCESS");
+		fileIngestJobMetaData.set(JobExecution.PROGRESS_MESSAGE,
 				String.format("Successfully imported %d %s entities.", count, entityName));
-		fileIngestJobMetaData.set(JobMetaData.END_DATE, new Date());
+		fileIngestJobMetaData.set(JobExecution.END_DATE, new Date());
 		dataService.update(fileIngestJobMetaDataMetaData.getName(), fileIngestJobMetaData);
 	}
 
@@ -102,9 +102,9 @@ public class FileIngesterLoggerImpl implements FileIngesterLogger
 	{
 		try
 		{
-			fileIngestJobMetaData.set(JobMetaData.STATUS, "FAILED");
-			fileIngestJobMetaData.set(JobMetaData.PROGRESS_MESSAGE, "Import failed. Errormessage:" + e.getMessage());
-			fileIngestJobMetaData.set(JobMetaData.END_DATE, new Date());
+			fileIngestJobMetaData.set(JobExecution.STATUS, "FAILED");
+			fileIngestJobMetaData.set(JobExecution.PROGRESS_MESSAGE, "Import failed. Errormessage:" + e.getMessage());
+			fileIngestJobMetaData.set(JobExecution.END_DATE, new Date());
 			dataService.update(fileIngestJobMetaDataMetaData.getName(), fileIngestJobMetaData);
 		}
 		finally

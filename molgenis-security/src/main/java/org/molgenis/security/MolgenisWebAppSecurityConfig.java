@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyAuthoritiesMapper;
+import org.springframework.security.access.intercept.RunAsImplAuthenticationProvider;
 import org.springframework.security.access.vote.RoleHierarchyVoter;
 import org.springframework.security.access.vote.RoleVoter;
 import org.springframework.security.authentication.AnonymousAuthenticationProvider;
@@ -99,6 +100,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 		http.addFilterBefore(apiSessionExpirationFilter(), MolgenisAnonymousAuthenticationFilter.class);
 		http.authenticationProvider(tokenAuthenticationProvider());
+		
+		http.authenticationProvider(runAsAuthenticationProvider());
 
 		http.addFilterBefore(tokenAuthenticationFilter(), ApiSessionExpirationFilter.class);
 
@@ -178,6 +181,14 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 				.and()
 
 				.csrf().disable();
+	}
+
+	@Bean
+	public AuthenticationProvider runAsAuthenticationProvider()
+	{
+		RunAsImplAuthenticationProvider provider = new RunAsImplAuthenticationProvider();
+		provider.setKey("Job Execution");
+		return provider;
 	}
 
 	protected abstract void configureUrlAuthorization(

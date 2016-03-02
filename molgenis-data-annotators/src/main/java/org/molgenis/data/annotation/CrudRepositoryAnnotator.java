@@ -52,7 +52,6 @@ public class CrudRepositoryAnnotator
 	 * @param repository
 	 */
 	@Transactional
-	@RunAsSystem
 	public Repository annotate(RepositoryAnnotator annotator, Repository repository)
 			throws IOException
 	{
@@ -101,7 +100,6 @@ public class CrudRepositoryAnnotator
 		return repository;
 	}
 
-	@RunAsSystem
 	private void processBatch(List<Entity> batch, Repository repository)
 	{
 		repository.update(batch.stream());
