@@ -366,6 +366,8 @@ class RestControllerV2
 		permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 				Collections.singletonList(repository.getName()));
 
+		response.addHeader("Location",
+				Href.concatMetaEntityHrefV2(RestControllerV2.BASE_URI, request.getNewEntityName()));
 		response.setStatus(HttpServletResponse.SC_CREATED);
 
 		return repository.getName();

@@ -488,7 +488,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		MockHttpServletRequestBuilder mockHttpServletRequestBuilder = post(HREF_COPY_ENTITY).content(content)
 				.contentType(APPLICATION_JSON);
 		mockMvc.perform(mockHttpServletRequestBuilder).andExpect(status().isCreated())
-				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content().string(responseBody));
+				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content().string(responseBody))
+				.andExpect(header().string("Location", "/api/v2/newEntity"));
 
 		verify(dataService).copyRepository(repositoryToCopy, "newEntity", "newEntity");
 	}
