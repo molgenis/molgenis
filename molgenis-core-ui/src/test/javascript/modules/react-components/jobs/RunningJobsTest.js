@@ -15,12 +15,12 @@ test('Test if the RunningJobs component renders job progressbars correctly', ass
         '<div class="panel-body">' +
         '<div><p>TEST job job' +
         '<div class="progress background-lightgrey"><div class="progress-bar progress-bar-success" role="progressbar" style="min-width:2em;width:100%;">Test (started by Tape)</div></div>' +
-        '<a>Show details</a></p></div>' +
+        '<div class="btn-group" role="group"><button type="button" class="btn btn-default">Show details</button></div></p></div>' +
         '<div><p>TEST job job' +
         '<div class="progress background-lightgrey"><div class="progress-bar progress-bar-primary progress-bar-striped active" role="progressbar" style="min-width:2em;width:100%;">Test (started by Tape)</div></div>' +
-        '<a>Show details</a></p></div>' +
+        '<div class="btn-group" role="group"><button type="button" class="btn btn-default">Show details</button></div></p></div>' +
         '<div><p>TEST job job<div class="progress background-lightgrey"><div class="progress-bar progress-bar-danger" role="progressbar" style="min-width:2em;width:100%;">Test (started by Tape)</div></div>' +
-        '<a>Show details</a></p></div>' +
+        '<div class="btn-group" role="group"><button type="button" class="btn btn-default">Show details</button></div></p></div>' +
         '</div></div>',
         'RunningJobs component rendered progressbars for each job correctly');
 
