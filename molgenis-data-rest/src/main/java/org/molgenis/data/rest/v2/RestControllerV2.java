@@ -56,7 +56,6 @@ import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.Href;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -533,38 +532,12 @@ class RestControllerV2
 				error -> new ErrorMessage(error.getDefaultMessage())));
 	}
 
-	@ExceptionHandler(MolgenisValidationException.class)
+	@ExceptionHandler(MolgenisDataException.class)
 	@ResponseStatus(BAD_REQUEST)
 	@ResponseBody
-	public ErrorMessageResponse handleValidationException(MolgenisValidationException e)
+	public ErrorMessageResponse handleMolgenisDataException(MolgenisDataException e)
 	{
-		LOG.info("Validation exception occurred.", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
-	@ExceptionHandler(MolgenisRepositoryCapabilitiesException.class)
-	@ResponseStatus(BAD_REQUEST)
-	@ResponseBody
-	public ErrorMessageResponse handleMolgenisRepositoryCapabilitiesException(MolgenisRepositoryCapabilitiesException e)
-	{
-		LOG.info("Molgenis repository capabilities exception occurred.", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
-	@ExceptionHandler(DuplicateEntityException.class)
-	@ResponseStatus(BAD_REQUEST)
-	@ResponseBody
-	public ErrorMessageResponse handleDuplicateEntityException(DuplicateEntityException e)
-	{
-		LOG.info("Duplicate entity exception occurred.", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
-	}
-
-	@ResponseStatus(BAD_REQUEST)
-	@ResponseBody
-	public ErrorMessageResponse handleUnknownEntityException(UnknownEntityException e)
-	{
-		LOG.info("Unknown entity exception occurred.", e);
+		LOG.info("Operation failed.", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 

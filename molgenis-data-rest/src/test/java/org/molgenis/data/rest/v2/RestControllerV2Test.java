@@ -502,7 +502,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		String content = "{newEntityName: 'newEntity'}";
 		ResultActions resultActions = mockMvc
 				.perform(post("/api/v2/copy/unknown").content(content).contentType(APPLICATION_JSON))
-				.andExpect(status().isInternalServerError()).andExpect(content().contentType(APPLICATION_JSON));
+				.andExpect(status().isBadRequest()).andExpect(content().contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions, "Operation failed. Unknown entity: 'unknown'");
 		verify(dataService, never()).copyRepository(repositoryToCopy, "unknown", "unknown");
@@ -630,7 +630,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		String content = "{entities:[{id:'p1', name:'Example data'}]}";
 		ResultActions resultActions = mockMvc
 				.perform(post(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
-				.andExpect(status().isInternalServerError()).andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(status().isBadRequest()).andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(header().doesNotExist("Location"));
 
 		this.assertEqualsErrorMessage(resultActions, e.getMessage());
@@ -657,7 +657,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		String content = "{entities:[{id:'p1', name:'Example data'}]}";
 		ResultActions resultActions = mockMvc
 				.perform(put(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON))
-				.andExpect(status().isInternalServerError()).andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(status().isBadRequest()).andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(header().doesNotExist("Location"));
 
 		this.assertEqualsErrorMessage(resultActions, e.getMessage());
