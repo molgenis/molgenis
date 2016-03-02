@@ -2,6 +2,7 @@ package org.molgenis.file.ingest;
 
 import javax.annotation.PostConstruct;
 
+import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
@@ -18,6 +19,9 @@ public class FileIngesterConfig
 	@Autowired
 	FileIngesterJobScheduler fileIngesterJobScheduler;
 
+	@Autowired
+	DataService dataService;
+
 	@PostConstruct
 	public void init()
 	{
@@ -27,7 +31,7 @@ public class FileIngesterConfig
 			@Override
 			public Repository createDecoratedRepository(Repository repository)
 			{
-				return new FileIngestRepositoryDecorator(repository, fileIngesterJobScheduler);
+				return new FileIngestRepositoryDecorator(repository, fileIngesterJobScheduler, dataService);
 			}
 		});
 	}

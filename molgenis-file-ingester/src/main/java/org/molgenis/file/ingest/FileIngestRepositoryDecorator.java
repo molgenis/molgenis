@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
@@ -14,17 +15,21 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.file.ingest.meta.FileIngestJobMetaDataMetaData;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 
 public class FileIngestRepositoryDecorator implements Repository
 {
 	private final Repository decorated;
 	private final FileIngesterJobScheduler scheduler;
+	private final DataService dataService;
 
-	public FileIngestRepositoryDecorator(Repository decorated, FileIngesterJobScheduler scheduler)
+	public FileIngestRepositoryDecorator(Repository decorated, FileIngesterJobScheduler scheduler,
+			DataService dataService)
 	{
 		this.decorated = decorated;
 		this.scheduler = scheduler;
+		this.dataService = dataService;
 	}
 
 	@Override
@@ -133,18 +138,28 @@ public class FileIngestRepositoryDecorator implements Repository
 		}));
 	}
 
+	private void removeJobExecutions(String entityId)
+	{
+		Query query = dataService.query(FileIngestJobMetaDataMetaData.ENTITY_NAME).eq(FileIngestJobMetaDataMetaData.FILE_INGEST, entityId);
+		dataService.delete(FileIngestJobMetaDataMetaData.ENTITY_NAME, dataService.findAll(FileIngestJobMetaDataMetaData.ENTITY_NAME, query));
+	}
+
 	@Override
 	public void delete(Entity entity)
 	{
+		String entityId = entity.getString(FileIngestMetaData.ID);
+		scheduler.unschedule(entityId);
+		removeJobExecutions(entityId);
 		decorated.delete(entity);
-		scheduler.unschedule(entity.getString(FileIngestMetaData.ID));
 	}
 
 	@Override
 	public void delete(Stream<? extends Entity> entities)
 	{
 		decorated.delete(entities.filter(e -> {
-			scheduler.unschedule(e.getString(FileIngestMetaData.ID));
+			String entityId = e.getString(FileIngestMetaData.ID);
+			scheduler.unschedule(entityId);
+			removeJobExecutions(entityId);
 			return true;
 		}));
 	}
@@ -152,12 +167,13 @@ public class FileIngestRepositoryDecorator implements Repository
 	@Override
 	public void deleteById(Object id)
 	{
-		decorated.deleteById(id);
-
 		if (id instanceof String)
 		{
-			scheduler.unschedule((String) id);
+			String entityId = (String) id;
+			scheduler.unschedule(entityId);
+			removeJobExecutions(entityId);
 		}
+		decorated.deleteById(id);
 	}
 
 	@Override
@@ -166,7 +182,9 @@ public class FileIngestRepositoryDecorator implements Repository
 		decorated.deleteById(ids.filter(id -> {
 			if (id instanceof String)
 			{
-				scheduler.unschedule((String) id);
+				String entityId = (String) id;
+				scheduler.unschedule(entityId);
+				removeJobExecutions(entityId);
 			}
 			return true;
 		}));
@@ -177,9 +195,10 @@ public class FileIngestRepositoryDecorator implements Repository
 	{
 		for (Entity e : this)
 		{
-			scheduler.unschedule(e.getString(FileIngestMetaData.ID));
+			String entityId = e.getString(FileIngestMetaData.ID);
+			scheduler.unschedule(entityId);
+			removeJobExecutions(entityId);
 		}
-
 		decorated.deleteAll();
 	}
 

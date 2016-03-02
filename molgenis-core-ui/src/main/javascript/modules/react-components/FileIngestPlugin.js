@@ -7,8 +7,10 @@ class FileIngestPlugin extends Component {
 	constructor(props) {
         super(props)
         this.state = {selectedFileIngest: null}
+		this.refresh = this.refresh.bind(this)
         this.onFileIngestSelect = this.onFileIngestSelect.bind(this)
         this.onExecute = this.onExecute.bind(this)
+		this.onFileIngestDelete = this.onFileIngestDelete.bind(this)
     }
 	
     render() {
@@ -23,7 +25,8 @@ class FileIngestPlugin extends Component {
     					selectedRow={this.state.selectedFileIngest}
     					onRowClick={this.onFileIngestSelect}
     					enableExecute={true}
-    					onExecute={this.onExecute} />
+    					onExecute={this.onExecute}
+						onRowDelete={this.onFileIngestDelete}/>
     		</div>
     		{fileIngest === null ? '' :
     			<div>
@@ -44,7 +47,7 @@ class FileIngestPlugin extends Component {
     }
     
     componentDidMount() {
-    	setInterval(() => this.refresh(), 20000)
+    	setInterval(this.refresh, 20000)
     }
     
     refresh() {
@@ -56,11 +59,17 @@ class FileIngestPlugin extends Component {
     }
     
     onExecute(e) {
-    	$.get('/plugin/fileingest/run/' + e.id).done(e => { 
+    	$.post('/plugin/fileingest/run/' + e.id).done(e => {
     		window.molgenis.createAlert([{message: 'New job scheduled'}], 'success')
-    		setTimeout(() => this.refresh(), 2000)
+    		setTimeout(this.refresh, 2000)
     	})
     }
+
+	onFileIngestDelete() {
+		window.molgenis.createAlert([{message: 'Job deleted'}], 'success')
+		this.setState({'selectedFileIngest': null});
+		this.refresh()
+	}
 }
 
 export default React.createFactory(FileIngestPlugin)

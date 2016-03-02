@@ -2,6 +2,7 @@ package org.molgenis.file.ingest;
 
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ public class FileIngesterPluginController extends MolgenisPluginController
 		return "view-file-ingest";
 	}
 
-	@RequestMapping(value = "/run/{fileIngestId}", method = GET)
+	@RequestMapping(value = "/run/{fileIngestId}", method = POST)
 	@ResponseStatus(NO_CONTENT)
 	public void runNow(@PathVariable("fileIngestId") String fileIngestId)
 	{
