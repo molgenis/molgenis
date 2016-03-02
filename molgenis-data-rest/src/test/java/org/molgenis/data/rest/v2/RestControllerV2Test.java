@@ -87,6 +87,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.testng.Assert;
@@ -485,11 +486,12 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 
 		String content = "{newEntityName: 'newEntity'}";
 		String responseBody = "\"newEntity\"";
-		mockMvc.perform(post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
-				.andExpect(status().isCreated()).andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string(responseBody));
+		MockHttpServletRequestBuilder mockHttpServletRequestBuilder = post(HREF_COPY_ENTITY).content(content)
+				.contentType(APPLICATION_JSON);
+		mockMvc.perform(mockHttpServletRequestBuilder).andExpect(status().isCreated())
+				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content().string(responseBody));
 
-		verify(dataService).copyRepository(repositoryToCopy, "newEntity", "newEntity");
+		verify(dataService).copyRepositoryRunAsSystem(repositoryToCopy, "newEntity", "newEntity");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -505,7 +507,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 				.andExpect(status().isInternalServerError()).andExpect(content().contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions, "Operation failed. Unknown entity: 'unknown'");
-		verify(dataService, never()).copyRepository(repositoryToCopy, "unknown", "unknown");
+		verify(dataService, never()).copyRepositoryRunAsSystem(repositoryToCopy, "unknown", "unknown");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -521,7 +523,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 				.andExpect(status().isBadRequest()).andExpect(content().contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions, "Operation failed. Duplicate entity: 'entity'");
-		verify(dataService, never()).copyRepository(repositoryToCopy, "entity", "entity");
+		verify(dataService, never()).copyRepositoryRunAsSystem(repositoryToCopy, "entity", "entity");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -540,7 +542,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 				.andExpect(status().isUnauthorized()).andExpect(content().contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions, "No read permission on entity entity");
-		verify(dataService, never()).copyRepository(repositoryToCopy, "newEntity", "newEntity");
+		verify(dataService, never()).copyRepositoryRunAsSystem(repositoryToCopy, "newEntity", "newEntity");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -561,7 +563,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 				.andExpect(status().isBadRequest()).andExpect(content().contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions, "No write capabilities for entity entity");
-		verify(dataService, never()).copyRepository(repositoryToCopy, "newEntity", "newEntity");
+		verify(dataService, never()).copyRepositoryRunAsSystem(repositoryToCopy, "newEntity", "newEntity");
 	}
 
 	private void mocksForCopyEntitySucces(Repository repositoryToCopy)
@@ -576,7 +578,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 
 		Repository repository = mock(Repository.class);
 		when(repository.getName()).thenReturn("newEntity");
-		when(dataService.copyRepository(repositoryToCopy, "newEntity", "newEntity")).thenReturn(repository);
+		when(dataService.copyRepositoryRunAsSystem(repositoryToCopy, "newEntity", "newEntity")).thenReturn(repository);
 
 		doNothing().when(permissionSystemService).giveUserEntityPermissions(any(SecurityContext.class),
 				Collections.singletonList(any(String.class)));
