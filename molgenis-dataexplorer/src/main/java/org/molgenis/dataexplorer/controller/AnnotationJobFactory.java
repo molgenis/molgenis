@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation;
+package org.molgenis.dataexplorer.controller;
 
 import static java.util.stream.Collectors.toList;
 
@@ -7,6 +7,9 @@ import java.util.List;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
+import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.CrudRepositoryAnnotator;
+import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.meta.AnnotationJobExecution;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;

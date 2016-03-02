@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation;
+package org.molgenis.dataexplorer;
 
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
@@ -8,10 +8,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.Repository;
+import org.molgenis.data.annotation.CrudRepositoryAnnotator;
+import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.mem.InMemoryRepository;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.dataexplorer.controller.AnnotationJob;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;

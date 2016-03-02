@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation;
+package org.molgenis.dataexplorer.controller;
 
 import static java.util.Objects.requireNonNull;
 
@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Repository;
+import org.molgenis.data.annotation.CrudRepositoryAnnotator;
+import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.Progress;
 import org.springframework.security.core.Authentication;
