@@ -4,11 +4,11 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.jobs.JobExecution;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
+import org.molgenis.file.ingest.meta.FileIngestJobExecution;
 import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -44,15 +44,15 @@ public class FileIngestJobFactory
 	}
 
 	@RunAsSystem
-	public FileIngestJob createJob(JobExecution metaData)
+	public FileIngestJob createJob(FileIngestJobExecution fileIngestJobExecution)
 	{
-		dataService.add(FileIngestJobExecutionMetaData.ENTITY_NAME, metaData);
-		String username = metaData.getUser().getUsername();
-		Progress progress = new ProgressImpl(metaData, jobExecutionUpdater, mailSender);
+		dataService.add(FileIngestJobExecutionMetaData.ENTITY_NAME, fileIngestJobExecution);
+		String username = fileIngestJobExecution.getUser().getUsername();
+		Progress progress = new ProgressImpl(fileIngestJobExecution, jobExecutionUpdater, mailSender);
 		TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
 		RunAsUserToken runAsAuthentication = new RunAsUserToken("Job Execution", username, null,
 				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
-		Entity fileIngestEntity = metaData.getEntity(FileIngestJobExecutionMetaData.FILE_INGEST, JobExecution.class);
+		Entity fileIngestEntity = fileIngestJobExecution.getFileIngest();
 		Entity targetEntityEntity = fileIngestEntity.getEntity(FileIngestMetaData.ENTITY_META_DATA);
 		String targetEntityName = targetEntityEntity.getString(EntityMetaDataMetaData.FULL_NAME);
 		String url = fileIngestEntity.getString(FileIngestMetaData.URL);
@@ -60,6 +60,6 @@ public class FileIngestJobFactory
 		String failureEmail = fileIngestEntity.getString(FileIngestMetaData.FAILURE_EMAIL);
 
 		return new FileIngestJob(progress, transactionTemplate, runAsAuthentication, fileIngester, targetEntityName,
-				url, loader, failureEmail, fileIngestEntity);
+				url, loader, failureEmail, fileIngestJobExecution.getIdentifier());
 	}
 }

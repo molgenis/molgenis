@@ -16,7 +16,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import com.google.common.collect.Lists;
 
-public class AnnotationJob extends Job
+public class AnnotationJob extends Job<Void>
 {
 	private final CrudRepositoryAnnotator crudRepositoryAnnotator;
 	private final String username;
@@ -36,7 +36,7 @@ public class AnnotationJob extends Job
 	}
 
 	@Override
-	public void run(Progress progress) throws IOException
+	public Void call(Progress progress) throws IOException
 	{
 		progress.setProgressMax(annotators.size());
 		int i = 0;
@@ -47,6 +47,7 @@ public class AnnotationJob extends Job
 			i++;
 		}
 		progress.progress(annotators.size(), getSuccessMessage());
+		return null;
 	}
 
 	private String getSuccessMessage()

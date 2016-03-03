@@ -1,5 +1,7 @@
 package org.molgenis.data.jobs;
 
+import java.util.concurrent.Callable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -13,7 +15,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 /**
  * Superclass for molgenis jobs that keeps track of their progress.
  */
-public abstract class Job implements Runnable
+public abstract class Job<Result> implements Callable<Result>
 {
 	private static final Logger LOG = LoggerFactory.getLogger(Job.class);
 	private final Progress progress;
@@ -27,14 +29,14 @@ public abstract class Job implements Runnable
 		this.authentication = authentication;
 	}
 
-	private void runWithAuthentication() throws Exception
+	private Result runWithAuthentication() throws Exception
 	{
 		SecurityContext originalContext = SecurityContextHolder.getContext();
 		try
 		{
 			SecurityContextHolder.setContext(SecurityContextHolder.createEmptyContext());
 			SecurityContextHolder.getContext().setAuthentication(authentication);
-			run(progress);
+			return call(progress);
 		}
 		finally
 		{
@@ -43,39 +45,47 @@ public abstract class Job implements Runnable
 	}
 
 	@Override
-	public void run()
+	public Result call()
 	{
 		progress.start();
 		try
 		{
-			transactionTemplate.execute(new TransactionCallback<Void>()
+			Result result = transactionTemplate.execute(new TransactionCallback<Result>()
 			{
 				@Override
-				public Void doInTransaction(TransactionStatus status)
+				public Result doInTransaction(TransactionStatus status)
 				{
 					try
 					{
-						runWithAuthentication();
+						return runWithAuthentication();
 					}
 					catch (Exception e)
 					{
 						throw new JobExecutionException(e);
 					}
-					return null;
 				}
 			});
 			progress.success();
+			return result;
 		}
 		catch (JobExecutionException ex)
 		{
 			Exception cause = (Exception) ex.getCause();
 			LOG.warn("Error executing job", cause);
 			progress.failed(cause);
+			throw ex;
 		}
 		catch (TransactionException te)
 		{
 			LOG.error("Error rolling back transaction for failed job execution", te);
 			progress.failed(te);
+			throw te;
+		}
+		catch (Exception other)
+		{
+			LOG.error("Error logging job success", other);
+			progress.failed(other);
+			throw other;
 		}
 	};
 
@@ -85,5 +95,5 @@ public abstract class Job implements Runnable
 	 * @param progress
 	 * @throws Exception
 	 */
-	public abstract void run(Progress progress) throws Exception;
+	public abstract Result call(Progress progress) throws Exception;
 }

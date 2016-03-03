@@ -21,7 +21,8 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 
 /**
- * Tracks progress and stores it in a {@link JobExecution} entity. The entity may be a subclass of {@link JobExecution}.
+ * Tracks progress and stores it in a {@link JobExecution} entity.
+ * The entity may be a subclass of {@link JobExecution}.
  */
 public class ProgressImpl implements Progress
 {

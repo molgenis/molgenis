@@ -75,7 +75,7 @@ public class FileIngesterTest
 		when(importServiceMock.doImport(fileRepositoryCollectionMock, DatabaseAction.ADD_UPDATE_EXISTING,
 				Package.DEFAULT_PACKAGE_NAME)).thenReturn(report);
 
-		fileIngester.ingest(entityName, url, "CSV", identifier, progress, "a@b.com,x@y.com", fileIngest);
+		fileIngester.ingest(entityName, url, "CSV", identifier, progress, "a@b.com,x@y.com");
 
 	}
 
@@ -85,6 +85,6 @@ public class FileIngesterTest
 		Exception e = new RuntimeException();
 		when(fileStoreDownloadMock.downloadFile(url, identifier, entityName + ".csv")).thenThrow(e);
 
-		fileIngester.ingest(entityName, url, "CSV", identifier, progress, "a@b.com,x@y.com", fileIngest);
+		fileIngester.ingest(entityName, url, "CSV", identifier, progress, "a@b.com,x@y.com");
 	}
 }

@@ -6,7 +6,6 @@ import java.io.File;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.Entity;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.Package;
 import org.molgenis.data.importer.ImportService;
@@ -15,7 +14,6 @@ import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.FileMeta;
-import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.molgenis.framework.db.EntityImportReport;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,8 +49,8 @@ public class FileIngester
 	 * 
 	 * @param fileIngest
 	 */
-	public void ingest(String entityName, String url, String loader, String jobExecutionID, Progress progress,
-			String failureEmail, Entity fileIngestJobExecution)
+	public FileMeta ingest(String entityName, String url, String loader, String jobExecutionID, Progress progress,
+			String failureEmail)
 	{
 		if (!"CSV".equals(loader))
 		{
@@ -60,10 +58,8 @@ public class FileIngester
 		}
 
 		progress.setProgressMax(2);
-		progress.progress(0, "Ingesting url '" + url + "'");
+		progress.progress(0, "Downloading url '" + url + "'");
 		File file = fileStoreDownload.downloadFile(url, jobExecutionID, entityName + ".csv");
-		storeFileMeta(jobExecutionID, dataService, file, fileIngestJobExecution);
-
 		progress.progress(1, "Importing...");
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
@@ -74,9 +70,11 @@ public class FileIngester
 		Integer count = report.getNrImportedEntitiesMap().get(entityName);
 		count = count != null ? count : 0;
 		progress.progress(2, "Successfully imported " + count + " " + entityName + " entities.");
+		FileMeta fileMeta = createFileMeta(jobExecutionID, dataService, file);
+		return fileMeta;
 	}
 
-	private void storeFileMeta(String jobExecutionID, DataService dataService, File file, Entity fileIngestJobExecution)
+	private FileMeta createFileMeta(String jobExecutionID, DataService dataService, File file)
 	{
 		FileMeta fileMeta = new FileMeta(dataService);
 		fileMeta.setId(jobExecutionID);
@@ -84,8 +82,6 @@ public class FileIngester
 		fileMeta.setSize(file.length());
 		fileMeta.setFilename(jobExecutionID + '/' + file.getName());
 		fileMeta.setUrl(FileDownloadController.URI + '/' + jobExecutionID);
-		dataService.add(FileMeta.ENTITY_NAME, fileMeta);
-		// set xref to uploaded file in job execution entity
-		fileIngestJobExecution.set(FileIngestJobExecutionMetaData.FILE, fileMeta);
+		return fileMeta;
 	}
 }

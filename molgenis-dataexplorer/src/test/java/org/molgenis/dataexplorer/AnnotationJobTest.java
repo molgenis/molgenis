@@ -66,11 +66,11 @@ public class AnnotationJobTest
 		Mockito.when(exac.getSimpleName()).thenReturn("exac");
 		Mockito.when(cadd.getSimpleName()).thenReturn("cadd");
 
-		annotationJob.run();
-		
+		annotationJob.call();
+
 		Mockito.verify(crudRepositoryAnnotator).annotate(exac, repository);
 		Mockito.verify(crudRepositoryAnnotator).annotate(cadd, repository);
-		
+
 		Mockito.verify(progress).start();
 		Mockito.verify(progress).setProgressMax(2);
 		Mockito.verify(progress).progress(0,
@@ -79,7 +79,7 @@ public class AnnotationJobTest
 				"Annotating \"My repo\" with cadd (annotator 2 of 2, started by \"fdlk\")");
 		Mockito.verify(progress).success();
 	}
-	
+
 	@Test
 	public void testFirstAnnotatorFails() throws IOException
 	{
@@ -88,8 +88,8 @@ public class AnnotationJobTest
 
 		IOException exception = new IOException("error");
 		Mockito.when(crudRepositoryAnnotator.annotate(exac, repository)).thenThrow(exception);
-		annotationJob.run();
-		
+		annotationJob.call();
+
 		Mockito.verify(progress).start();
 		Mockito.verify(progress).setProgressMax(2);
 		Mockito.verify(progress).progress(0,
