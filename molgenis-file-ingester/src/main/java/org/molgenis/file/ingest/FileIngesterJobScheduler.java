@@ -10,6 +10,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.file.ingest.execution.FileIngestException;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.quartz.CronExpression;
 import org.quartz.JobDataMap;
@@ -160,8 +161,8 @@ public class FileIngesterJobScheduler implements ApplicationListener<ContextRefr
 	{
 		String id = fileIngest.getString(FileIngestMetaData.ID);
 		JobDataMap jobDataMap = new JobDataMap();
-		jobDataMap.put(FileIngesterJob.ENTITY_KEY, fileIngest);
-		JobDetail job = newJob(FileIngesterJob.class).withIdentity(id, JOB_GROUP).usingJobData(jobDataMap).build();
+		jobDataMap.put(FileIngesterQuartzJob.ENTITY_KEY, fileIngest);
+		JobDetail job = newJob(FileIngesterQuartzJob.class).withIdentity(id, JOB_GROUP).usingJobData(jobDataMap).build();
 
 		scheduler.scheduleJob(job, trigger);
 	}

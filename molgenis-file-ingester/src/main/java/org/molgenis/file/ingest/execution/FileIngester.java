@@ -1,4 +1,4 @@
-package org.molgenis.file.ingest;
+package org.molgenis.file.ingest.execution;
 
 import java.io.File;
 

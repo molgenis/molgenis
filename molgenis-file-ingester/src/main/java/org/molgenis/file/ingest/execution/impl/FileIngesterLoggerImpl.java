@@ -1,4 +1,4 @@
-package org.molgenis.file.ingest.impl;
+package org.molgenis.file.ingest.execution.impl;
 
 import java.io.File;
 import java.util.Date;
@@ -12,8 +12,8 @@ import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.FileMeta;
-import org.molgenis.file.ingest.FileIngesterLogger;
-import org.molgenis.file.ingest.meta.FileIngestJobMetaDataMetaData;
+import org.molgenis.file.ingest.execution.FileIngesterLogger;
+import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.molgenis.framework.db.EntityImportReport;
 import org.slf4j.Logger;
@@ -27,18 +27,15 @@ public class FileIngesterLoggerImpl implements FileIngesterLogger
 	private static final Logger LOG = LoggerFactory.getLogger(FileIngesterLoggerImpl.class);
 
 	private final DataService dataService;
-	private final FileIngestJobMetaDataMetaData fileIngestJobMetaDataMetaData;
 	private final JavaMailSender mailSender;
 	private Entity fileIngestJobMetaData;
 	private String entityName;
 	private String failureEmail;
 	private String downloadUrl;
 
-	public FileIngesterLoggerImpl(DataService dataService, FileIngestJobMetaDataMetaData fileIngestJobMetaDataMetaData,
-			JavaMailSender mailSender)
+	public FileIngesterLoggerImpl(DataService dataService, JavaMailSender mailSender)
 	{
 		this.dataService = dataService;
-		this.fileIngestJobMetaDataMetaData = fileIngestJobMetaDataMetaData;
 		this.mailSender = mailSender;
 	}
 
@@ -50,7 +47,7 @@ public class FileIngesterLoggerImpl implements FileIngesterLogger
 		failureEmail = fileIngest.getString(FileIngestMetaData.FAILURE_EMAIL);
 		downloadUrl = fileIngest.getString(FileIngestMetaData.URL);
 
-		fileIngestJobMetaData = new DefaultEntity(fileIngestJobMetaDataMetaData, dataService);
+		fileIngestJobMetaData = new DefaultEntity(new FileIngestJobExecutionMetaData(), dataService);
 		fileIngestJobMetaData.set(JobExecution.PROGRESS_MESSAGE,
 				"Downloading file from '" + fileIngest.getString(FileIngestMetaData.URL) + "'");
 		fileIngestJobMetaData.set(JobExecution.START_DATE, new Date());
@@ -60,9 +57,9 @@ public class FileIngesterLoggerImpl implements FileIngesterLogger
 		fileIngestJobMetaData.set(JobExecution.USER,
 				dataService.query(MolgenisUser.ENTITY_NAME).eq(MolgenisUser.USERNAME, "admin").findOne());// TODO system
 																											// user?
-		fileIngestJobMetaData.set(FileIngestJobMetaDataMetaData.FILE_INGEST, fileIngest);
+		fileIngestJobMetaData.set(FileIngestJobExecutionMetaData.FILE_INGEST, fileIngest);
 
-		dataService.add(fileIngestJobMetaDataMetaData.getName(), fileIngestJobMetaData);
+		dataService.add(FileIngestJobExecutionMetaData.ENTITY_NAME, fileIngestJobMetaData);
 
 		return fileIngestJobMetaData.getString(JobExecution.IDENTIFIER);
 	}
@@ -80,9 +77,9 @@ public class FileIngesterLoggerImpl implements FileIngesterLogger
 		fileMeta.setUrl(FileDownloadController.URI + '/' + id);
 		dataService.add(FileMeta.ENTITY_NAME, fileMeta);
 
-		fileIngestJobMetaData.set(FileIngestJobMetaDataMetaData.FILE, fileMeta);
+		fileIngestJobMetaData.set(FileIngestJobExecutionMetaData.FILE, fileMeta);
 		fileIngestJobMetaData.set(JobExecution.PROGRESS_MESSAGE, "Importing...");
-		dataService.update(fileIngestJobMetaDataMetaData.getName(), fileIngestJobMetaData);
+		dataService.update(FileIngestJobExecutionMetaData.ENTITY_NAME, fileIngestJobMetaData);
 	}
 
 	@Override
@@ -94,7 +91,7 @@ public class FileIngesterLoggerImpl implements FileIngesterLogger
 		fileIngestJobMetaData.set(JobExecution.PROGRESS_MESSAGE,
 				String.format("Successfully imported %d %s entities.", count, entityName));
 		fileIngestJobMetaData.set(JobExecution.END_DATE, new Date());
-		dataService.update(fileIngestJobMetaDataMetaData.getName(), fileIngestJobMetaData);
+		dataService.update(FileIngestJobExecutionMetaData.ENTITY_NAME, fileIngestJobMetaData);
 	}
 
 	@Override
@@ -105,7 +102,7 @@ public class FileIngesterLoggerImpl implements FileIngesterLogger
 			fileIngestJobMetaData.set(JobExecution.STATUS, "FAILED");
 			fileIngestJobMetaData.set(JobExecution.PROGRESS_MESSAGE, "Import failed. Errormessage:" + e.getMessage());
 			fileIngestJobMetaData.set(JobExecution.END_DATE, new Date());
-			dataService.update(fileIngestJobMetaDataMetaData.getName(), fileIngestJobMetaData);
+			dataService.update(FileIngestJobExecutionMetaData.ENTITY_NAME, fileIngestJobMetaData);
 		}
 		finally
 		{

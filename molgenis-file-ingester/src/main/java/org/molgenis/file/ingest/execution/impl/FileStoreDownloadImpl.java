@@ -1,4 +1,4 @@
-package org.molgenis.file.ingest.impl;
+package org.molgenis.file.ingest.execution.impl;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,7 +7,7 @@ import java.io.UncheckedIOException;
 import java.net.URL;
 
 import org.molgenis.file.FileStore;
-import org.molgenis.file.ingest.FileStoreDownload;
+import org.molgenis.file.ingest.execution.FileStoreDownload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
