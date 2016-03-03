@@ -2,6 +2,7 @@ package org.molgenis.dataexplorer.controller;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.dataexplorer.controller.AnnotatorController.URI;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
