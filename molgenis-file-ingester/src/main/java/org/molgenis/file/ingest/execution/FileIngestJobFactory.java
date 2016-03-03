@@ -54,7 +54,7 @@ public class FileIngestJobFactory
 				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
 		Entity fileIngestEntity = metaData.getEntity(FileIngestJobExecutionMetaData.FILE_INGEST, JobExecution.class);
 		Entity targetEntityEntity = fileIngestEntity.getEntity(FileIngestMetaData.ENTITY_META_DATA);
-		String targetEntityName = targetEntityEntity.getString(EntityMetaDataMetaData.ENTITY_NAME);
+		String targetEntityName = targetEntityEntity.getString(EntityMetaDataMetaData.FULL_NAME);
 		String url = fileIngestEntity.getString(FileIngestMetaData.URL);
 		String loader = fileIngestEntity.getString(FileIngestMetaData.LOADER);
 		String failureEmail = fileIngestEntity.getString(FileIngestMetaData.FAILURE_EMAIL);

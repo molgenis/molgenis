@@ -43,6 +43,11 @@ public class FileIngesterQuartzJob implements Job
 	public void execute(JobExecutionContext context) throws JobExecutionException
 	{
 		Entity fileIngestEntity = (Entity) context.getMergedJobDataMap().get(ENTITY_KEY);
+		RunAsSystemProxy.runAsSystem(() -> run(fileIngestEntity));
+	}
+
+	private void run(Entity fileIngestEntity)
+	{
 		JobExecution fileIngestJobExecution = new JobExecution(dataService, new FileIngestJobExecutionMetaData());
 		fileIngestJobExecution.set(JobExecution.TYPE, "FileIngesterJob");
 		fileIngestJobExecution.set(JobExecution.USER,
