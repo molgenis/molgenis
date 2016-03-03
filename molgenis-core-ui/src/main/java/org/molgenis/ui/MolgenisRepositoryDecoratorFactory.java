@@ -32,10 +32,12 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final AppSettings appSettings;
 	private final DataService dataService;
 	private final ExpressionValidator expressionValidator;
+	private final RepositoryDecoratorRegistry repositoryDecoratorRegistry;
 
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager, TransactionLogService transactionLogService,
 			EntityAttributesValidator entityAttributesValidator, IdGenerator idGenerator, AppSettings appSettings,
-			DataService dataService, ExpressionValidator expressionValidator)
+			DataService dataService, ExpressionValidator expressionValidator,
+			RepositoryDecoratorRegistry repositoryDecoratorRegistry)
 	{
 		this.entityManager = entityManager;
 		this.transactionLogService = transactionLogService;
@@ -44,12 +46,13 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.appSettings = appSettings;
 		this.dataService = dataService;
 		this.expressionValidator = expressionValidator;
+		this.repositoryDecoratorRegistry = repositoryDecoratorRegistry;
 	}
 
 	@Override
 	public Repository createDecoratedRepository(Repository repository)
 	{
-		Repository decoratedRepository = repository;
+		Repository decoratedRepository = repositoryDecoratorRegistry.decorate(repository);
 
 		if (decoratedRepository.getName().equals(MolgenisUserMetaData.ENTITY_NAME))
 		{
