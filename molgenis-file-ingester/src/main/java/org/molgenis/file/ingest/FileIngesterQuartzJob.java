@@ -6,6 +6,7 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.jobs.JobExecution;
+import org.molgenis.data.jobs.JobExecutionMetaData;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.file.ingest.execution.FileIngestJob;
 import org.molgenis.file.ingest.execution.FileIngestJobFactory;
@@ -47,6 +48,8 @@ public class FileIngesterQuartzJob implements Job
 		fileIngestJobExecution.set(JobExecution.USER,
 				dataService.query(MolgenisUser.ENTITY_NAME).eq(MolgenisUser.USERNAME, "admin").findOne());// TODO system
 		fileIngestJobExecution.set(FileIngestJobExecutionMetaData.FILE_INGEST, fileIngestEntity);
+		fileIngestJobExecution.set(JobExecution.FAILURE_EMAIL,
+				fileIngestEntity.getString(FileIngestMetaData.FAILURE_EMAIL));
 		FileIngestJob job = fileIngestJobFactory.createJob(fileIngestJobExecution);
 		job.run();
 	}

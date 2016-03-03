@@ -20,7 +20,6 @@ import org.molgenis.file.ingest.execution.FileIngester;
 import org.molgenis.file.ingest.execution.FileStoreDownload;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.molgenis.framework.db.EntityImportReport;
-import org.springframework.mail.MailSender;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -43,9 +42,6 @@ public class FileIngesterTest
 	private Entity fileIngest;
 
 	private DataService dataService;
-
-	private MailSender mailSender;
-
 	private Progress progress;
 
 	@BeforeMethod
@@ -57,11 +53,10 @@ public class FileIngesterTest
 		importServiceFactoryMock = mock(ImportServiceFactory.class);
 		importServiceMock = mock(ImportService.class);
 		dataService = mock(DataService.class);
-		mailSender = mock(MailSender.class);
 		progress = mock(Progress.class);
 
 		fileIngester = new FileIngester(fileStoreDownloadMock, importServiceFactoryMock,
-				fileRepositoryCollectionFactoryMock, dataService, mailSender);
+				fileRepositoryCollectionFactoryMock, dataService);
 
 		entityMetaData = new MapEntity(EntityMetaDataMetaData.FULL_NAME, entityName);
 		fileIngest = new MapEntity();

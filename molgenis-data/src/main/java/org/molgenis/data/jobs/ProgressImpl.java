@@ -13,6 +13,9 @@ import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.mail.MailException;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.SimpleMailMessage;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
@@ -27,20 +30,21 @@ public class ProgressImpl implements Progress
 	private final static Logger LOG = LoggerFactory.getLogger(ProgressImpl.class);
 	private final EntityLogAppender appender;
 	private final JobExecutionUpdater updater;
+	private final MailSender mailSender;
 
-	public ProgressImpl(JobExecution jobExecution, JobExecutionUpdater updater)
+	public ProgressImpl(JobExecution jobExecution, JobExecutionUpdater updater, MailSender mailSender)
 	{
 		this.jobExecution = jobExecution;
 		this.executionLogger = (ch.qos.logback.classic.Logger) LoggerFactory
 				.getLogger("Job Execution[" + jobExecution.getIdentifier() + "]");
 		executionLogger.setLevel(Level.ALL);
+		this.mailSender = mailSender;
 		this.updater = updater;
 		LoggerContext loggerContext = executionLogger.getLoggerContext();
 		appender = new EntityLogAppender(jobExecution, loggerContext);
 		appender.start();
 		appender.setContext(loggerContext);
 		executionLogger.addAppender(appender);
-		
 	}
 
 	private void update()
@@ -83,7 +87,20 @@ public class ProgressImpl implements Progress
 		String timeSpent = periodFormatter.print(period);
 		executionLogger.info("Execution successful. Time spent: {}", timeSpent);
 		appender.stop();
+		sendEmail(jobExecution.getSuccessEmail(), jobExecution.getType() + " job succeeded.", jobExecution.getLog());
 		update();
+	}
+
+	private void sendEmail(String[] to, String subject, String text) throws MailException
+	{
+		if (to.length > 0)
+		{
+			SimpleMailMessage mailMessage = new SimpleMailMessage();
+			mailMessage.setTo(to);
+			mailMessage.setSubject(subject);
+			mailMessage.setText(text);
+			mailSender.send(mailMessage);
+		}
 	}
 
 	@Override
@@ -93,6 +110,7 @@ public class ProgressImpl implements Progress
 		jobExecution.setEndDate(new Date());
 		jobExecution.setStatus(FAILED);
 		appender.stop();
+		sendEmail(jobExecution.getFailureEmail(), jobExecution.getType() + " job failed.", jobExecution.getLog());
 		update();
 	}
 
@@ -103,6 +121,7 @@ public class ProgressImpl implements Progress
 		jobExecution.setEndDate(new Date());
 		jobExecution.setStatus(CANCELED);
 		appender.stop();
+		sendEmail(jobExecution.getFailureEmail(), jobExecution.getType() + " job failed.", jobExecution.getLog());
 		update();
 	}
 

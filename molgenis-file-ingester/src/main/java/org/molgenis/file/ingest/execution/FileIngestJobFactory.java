@@ -13,6 +13,7 @@ import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailSender;
 import org.springframework.security.access.intercept.RunAsUserToken;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
@@ -27,17 +28,19 @@ public class FileIngestJobFactory
 	private final JobExecutionUpdater jobExecutionUpdater;
 	private final PlatformTransactionManager transactionManager;
 	private final FileIngester fileIngester;
+	private final MailSender mailSender;
 
 	@Autowired
 	public FileIngestJobFactory(DataService dataService, UserDetailsService userDetailsService,
 			JobExecutionUpdater jobExecutionUpdater, PlatformTransactionManager transactionManager,
-			FileIngester fileIngester)
+			FileIngester fileIngester, MailSender mailSender)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.userDetailsService = requireNonNull(userDetailsService);
 		this.jobExecutionUpdater = requireNonNull(jobExecutionUpdater);
 		this.transactionManager = requireNonNull(transactionManager);
 		this.fileIngester = requireNonNull(fileIngester);
+		this.mailSender = requireNonNull(mailSender);
 	}
 
 	@RunAsSystem
@@ -45,7 +48,7 @@ public class FileIngestJobFactory
 	{
 		dataService.add(FileIngestJobExecutionMetaData.ENTITY_NAME, metaData);
 		String username = metaData.getUser().getUsername();
-		Progress progress = new ProgressImpl(metaData, jobExecutionUpdater);
+		Progress progress = new ProgressImpl(metaData, jobExecutionUpdater, mailSender);
 		TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
 		RunAsUserToken runAsAuthentication = new RunAsUserToken("Job Execution", username, null,
 				userDetailsService.loadUserByUsername(username).getAuthorities(), null);

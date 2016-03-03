@@ -18,6 +18,7 @@ import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailSender;
 import org.springframework.security.access.intercept.RunAsUserToken;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
@@ -53,6 +54,9 @@ public class AnnotationJobFactory
 	@Autowired
 	private JobExecutionUpdater jobExecutionUpdater;
 
+	@Autowired
+	private MailSender mailSender;
+
 	@RunAsSystem
 	public AnnotationJob createJob(AnnotationJobExecution metaData)
 	{
@@ -74,6 +78,7 @@ public class AnnotationJobFactory
 		List<RepositoryAnnotator> annotators = Lists.newArrayList(
 				resolver.getAnnotatorSelectionDependencyList(availableAnnotators, requestedAnnotators, repository));
 		return new AnnotationJob(crudRepositoryAnnotator, username, annotators, repository,
-				new ProgressImpl(metaData, jobExecutionUpdater), runAsAuthentication, new TransactionTemplate(transactionManager));
+				new ProgressImpl(metaData, jobExecutionUpdater, mailSender), runAsAuthentication,
+				new TransactionTemplate(transactionManager));
 	}
 }
