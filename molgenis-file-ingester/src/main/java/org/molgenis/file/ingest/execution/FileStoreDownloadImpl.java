@@ -1,4 +1,4 @@
-package org.molgenis.file.ingest.execution.impl;
+package org.molgenis.file.ingest.execution;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,10 +7,12 @@ import java.io.UncheckedIOException;
 import java.net.URL;
 
 import org.molgenis.file.FileStore;
-import org.molgenis.file.ingest.execution.FileStoreDownload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * Downloads a file from a URL to the {@link FileStore}
+ */
 @Component
 public class FileStoreDownloadImpl implements FileStoreDownload
 {

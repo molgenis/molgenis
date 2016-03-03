@@ -6,6 +6,7 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
 
 /**
  * Superclass that represents a job execution.

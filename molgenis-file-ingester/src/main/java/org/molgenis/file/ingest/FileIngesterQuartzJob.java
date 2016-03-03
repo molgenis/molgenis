@@ -1,7 +1,17 @@
 package org.molgenis.file.ingest;
 
+import java.util.Date;
+
+import org.molgenis.auth.MolgenisUser;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.jobs.JobExecution;
+import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.file.ingest.execution.FileIngestJob;
+import org.molgenis.file.ingest.execution.FileIngestJobFactory;
 import org.molgenis.file.ingest.execution.FileIngester;
+import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
+import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
@@ -22,10 +32,22 @@ public class FileIngesterQuartzJob implements Job
 	@Autowired
 	FileIngester fileIngester;
 
+	@Autowired
+	FileIngestJobFactory fileIngestJobFactory;
+
+	@Autowired
+	DataService dataService;
+
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException
 	{
-		Entity entity = (Entity) context.getMergedJobDataMap().get(ENTITY_KEY);
-		RunAsSystemProxy.runAsSystem(() -> fileIngester.ingest(entity));
+		Entity fileIngestEntity = (Entity) context.getMergedJobDataMap().get(ENTITY_KEY);
+		JobExecution fileIngestJobExecution = new JobExecution(dataService, new FileIngestJobExecutionMetaData());
+		fileIngestJobExecution.set(JobExecution.TYPE, "FileIngesterJob");
+		fileIngestJobExecution.set(JobExecution.USER,
+				dataService.query(MolgenisUser.ENTITY_NAME).eq(MolgenisUser.USERNAME, "admin").findOne());// TODO system
+		fileIngestJobExecution.set(FileIngestJobExecutionMetaData.FILE_INGEST, fileIngestEntity);
+		FileIngestJob job = fileIngestJobFactory.createJob(fileIngestJobExecution);
+		job.run();
 	}
 }
