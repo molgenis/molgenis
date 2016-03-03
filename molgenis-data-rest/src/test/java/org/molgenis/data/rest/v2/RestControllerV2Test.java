@@ -50,6 +50,7 @@ import java.util.stream.Stream;
 import org.mockito.Matchers;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
@@ -566,7 +567,17 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	{
 		when(dataService.hasRepository("entity")).thenReturn(true);
 		when(dataService.hasRepository("newEntity")).thenReturn(false);
+		when(dataService.hasRepository("base_newEntity")).thenReturn(false);
+		when(dataService.hasRepository("base_entity")).thenReturn(true);
 		when(dataService.getRepository("entity")).thenReturn(repositoryToCopy);
+
+		// Return package name
+		EntityMetaData entityMetaData = mock(EntityMetaData.class);
+		when(repositoryToCopy.getEntityMetaData()).thenReturn(entityMetaData);
+		org.molgenis.data.Package package_ = mock(org.molgenis.data.Package.class);
+		when(entityMetaData.getPackage()).thenReturn(package_);
+		when(package_.getName()).thenReturn("base");
+
 		when(repositoryToCopy.getName()).thenReturn("entity");
 		when(molgenisPermissionService.hasPermissionOnEntity("entity", Permission.READ)).thenReturn(true);
 		Set<RepositoryCapability> capabilities = Sets.newHashSet(RepositoryCapability.WRITABLE);

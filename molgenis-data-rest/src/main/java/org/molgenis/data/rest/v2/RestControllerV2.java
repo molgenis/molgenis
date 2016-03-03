@@ -52,6 +52,7 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.MetaValidationUtils;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.Href;
 import org.molgenis.data.rest.service.RestService;
@@ -345,11 +346,15 @@ class RestControllerV2
 		// No repo
 		if (!dataService.hasRepository(entityName)) throw createUnknownEntityException(entityName);
 
-		// Does the entity already exists
-		if (dataService.hasRepository(request.getNewEntityName())) throw createDuplicateEntityException(request
-				.getNewEntityName());
-
 		Repository repositoryToCopy = dataService.getRepository(entityName);
+
+		// Check if the entity already exists
+		String newFullName = repositoryToCopy.getEntityMetaData().getPackage().getName() + "_"
+				+ request.getNewEntityName();
+		if (dataService.hasRepository(newFullName)) throw createDuplicateEntityException(request.getNewEntityName());
+
+		// Validate the new name
+		MetaValidationUtils.validateName(request.getNewEntityName());
 
 		// Permission
 		boolean readPermission = permissionService.hasPermissionOnEntity(repositoryToCopy.getName(), Permission.READ);
@@ -366,8 +371,7 @@ class RestControllerV2
 		permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 				Collections.singletonList(repository.getName()));
 
-		response.addHeader("Location",
-				Href.concatMetaEntityHrefV2(RestControllerV2.BASE_URI, request.getNewEntityName()));
+		response.addHeader("Location", Href.concatMetaEntityHrefV2(RestControllerV2.BASE_URI, repository.getName()));
 		response.setStatus(HttpServletResponse.SC_CREATED);
 
 		return repository.getName();
