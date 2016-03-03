@@ -36,6 +36,6 @@ public class FileIngesterJobTest {
 
 		when(contextMock.getMergedJobDataMap()).thenReturn(jobDataMap);
 		fileIngesterJob.execute(contextMock);
-		verify(fileIngesterMock).ingest(e);
+		verify(fileIngesterMock).ingest(null, null, null, null, null, null, e);
 	}
 }

@@ -1,30 +1,31 @@
 package org.molgenis.file.ingest;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
 
+import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.Package;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
+import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.file.ingest.execution.FileIngester;
-import org.molgenis.file.ingest.execution.FileIngesterLogger;
-import org.molgenis.file.ingest.execution.FileIngesterLoggerFactory;
 import org.molgenis.file.ingest.execution.FileStoreDownload;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.molgenis.framework.db.EntityImportReport;
+import org.springframework.mail.MailSender;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class FileIngesterTest {
+public class FileIngesterTest
+{
 	private FileIngester fileIngester;
 
 	private FileStoreDownload fileStoreDownloadMock;
@@ -32,8 +33,6 @@ public class FileIngesterTest {
 	private ImportService importServiceMock;
 	private FileRepositoryCollectionFactory fileRepositoryCollectionFactoryMock;
 	private FileRepositoryCollection fileRepositoryCollectionMock;
-	private FileIngesterLoggerFactory fileIngesterLoggerFactoryMock;
-	private FileIngesterLogger fileIngesterLoggerMock;
 
 	private final String entityName = "test";
 	private final String url = "http://www.test.nl/test";
@@ -43,6 +42,12 @@ public class FileIngesterTest {
 	private Entity entityMetaData;
 	private Entity fileIngest;
 
+	private DataService dataService;
+
+	private MailSender mailSender;
+
+	private Progress progress;
+
 	@BeforeMethod
 	public void setUp()
 	{
@@ -51,11 +56,12 @@ public class FileIngesterTest {
 		fileRepositoryCollectionMock = mock(FileRepositoryCollection.class);
 		importServiceFactoryMock = mock(ImportServiceFactory.class);
 		importServiceMock = mock(ImportService.class);
-		fileIngesterLoggerFactoryMock = mock(FileIngesterLoggerFactory.class);
-		fileIngesterLoggerMock = mock(FileIngesterLogger.class);
+		dataService = mock(DataService.class);
+		mailSender = mock(MailSender.class);
+		progress = mock(Progress.class);
 
 		fileIngester = new FileIngester(fileStoreDownloadMock, importServiceFactoryMock,
-				fileRepositoryCollectionFactoryMock, fileIngesterLoggerFactoryMock);
+				fileRepositoryCollectionFactoryMock, dataService, mailSender);
 
 		entityMetaData = new MapEntity(EntityMetaDataMetaData.FULL_NAME, entityName);
 		fileIngest = new MapEntity();
@@ -67,32 +73,23 @@ public class FileIngesterTest {
 	@Test
 	public void ingest()
 	{
-		when(fileIngesterLoggerFactoryMock.createLogger()).thenReturn(fileIngesterLoggerMock);
-		when(fileIngesterLoggerMock.start(fileIngest)).thenReturn(identifier);
 		when(fileStoreDownloadMock.downloadFile(url, identifier, entityName + ".csv")).thenReturn(f);
-		when(fileRepositoryCollectionFactoryMock.createFileRepositoryCollection(f)).thenReturn(
-				fileRepositoryCollectionMock);
+		when(fileRepositoryCollectionFactoryMock.createFileRepositoryCollection(f))
+				.thenReturn(fileRepositoryCollectionMock);
 		when(importServiceFactoryMock.getImportService(f, fileRepositoryCollectionMock)).thenReturn(importServiceMock);
-		when(
-				importServiceMock.doImport(fileRepositoryCollectionMock, DatabaseAction.ADD_UPDATE_EXISTING,
-						Package.DEFAULT_PACKAGE_NAME)).thenReturn(report);
+		when(importServiceMock.doImport(fileRepositoryCollectionMock, DatabaseAction.ADD_UPDATE_EXISTING,
+				Package.DEFAULT_PACKAGE_NAME)).thenReturn(report);
 
-		fileIngester.ingest(fileIngest);
+		fileIngester.ingest(entityName, url, "CSV", identifier, progress, "a@b.com,x@y.com", fileIngest);
 
-		verify(fileIngesterLoggerMock).downloadFinished(f, "text/csv");
-		verify(fileIngesterLoggerMock).success(report);
 	}
 
-	@Test
+	@Test(expectedExceptions = RuntimeException.class)
 	public void ingestError()
 	{
 		Exception e = new RuntimeException();
-		when(fileIngesterLoggerFactoryMock.createLogger()).thenReturn(fileIngesterLoggerMock);
-		when(fileIngesterLoggerMock.start(fileIngest)).thenReturn(identifier);
 		when(fileStoreDownloadMock.downloadFile(url, identifier, entityName + ".csv")).thenThrow(e);
 
-		fileIngester.ingest(fileIngest);
-
-		verify(fileIngesterLoggerMock).failure(e);
+		fileIngester.ingest(entityName, url, "CSV", identifier, progress, "a@b.com,x@y.com", fileIngest);
 	}
 }
