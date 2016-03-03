@@ -8,7 +8,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +29,6 @@ import org.molgenis.data.annotation.meta.AnnotationJobExecution;
 import org.molgenis.data.settings.SettingsEntityMeta;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
@@ -113,7 +111,6 @@ public class AnnotatorController
 	 * 
 	 * @param annotatorNames
 	 * @param entityName
-	 * @param createCopy
 	 * @return repositoryName
 	 * 
 	 */
