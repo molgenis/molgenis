@@ -6,7 +6,7 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
+import org.springframework.util.StringUtils;
 
 /**
  * Superclass that represents a job execution.
@@ -28,6 +28,8 @@ public class JobExecution extends DefaultEntity
 	public static final String PROGRESS_MAX = "progressMax"; // Max number of entities to process
 	public static final String LOG = "log";
 	public static final String RESULT_URL = "resultUrl";
+	public static final String SUCCESS_EMAIL = "successEmail";
+	public static final String FAILURE_EMAIL = "failureEmail";
 
 	public static enum Status
 	{
@@ -150,7 +152,7 @@ public class JobExecution extends DefaultEntity
 	{
 		set(PROGRESS_MAX, value);
 	}
-	
+
 	public String getLog()
 	{
 		return getString(LOG);
@@ -160,7 +162,7 @@ public class JobExecution extends DefaultEntity
 	{
 		set(LOG, value);
 	}
-	
+
 	public String getResultUrl()
 	{
 		return getString(LOG);
@@ -169,5 +171,37 @@ public class JobExecution extends DefaultEntity
 	public void setResultUrl(String value)
 	{
 		set(RESULT_URL, value);
+	}
+
+	public String[] getSuccessEmail()
+	{
+		String email = getString(SUCCESS_EMAIL);
+		if (StringUtils.isEmpty(email))
+		{
+			return new String[]
+			{};
+		}
+		return email.split(",");
+	}
+
+	public String[] getFailureEmail()
+	{
+		String email = getString(FAILURE_EMAIL);
+		if (StringUtils.isEmpty(email))
+		{
+			return new String[]
+			{};
+		}
+		return email.split(",");
+	}
+
+	public void setSuccessEmail(String successEmail)
+	{
+		set(SUCCESS_EMAIL, successEmail);
+	}
+
+	public void setFailureEmail(String failureEmail)
+	{
+		set(FAILURE_EMAIL, failureEmail);
 	}
 }

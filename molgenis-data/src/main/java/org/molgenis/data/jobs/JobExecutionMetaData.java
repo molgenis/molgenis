@@ -41,6 +41,12 @@ public class JobExecutionMetaData extends DefaultEntityMetaData
 		addAttribute(JobExecution.LOG).setDataType(MolgenisFieldTypes.TEXT).setLabel("Log").setNillable(true);
 		addAttribute(JobExecution.RESULT_URL).setDataType(MolgenisFieldTypes.HYPERLINK).setLabel("Result URL")
 				.setNillable(true);
+		addAttribute(JobExecution.FAILURE_EMAIL).setDataType(MolgenisFieldTypes.STRING).setLabel("Failure email")
+				.setDescription("Comma-separated email addresses to send email to if execution fails or is canceled")
+				.setNillable(true);
+		addAttribute(JobExecution.SUCCESS_EMAIL).setDataType(MolgenisFieldTypes.STRING).setLabel("Success email")
+				.setDescription("Comma-separated email addresses to send email to if execution succeeds")
+				.setNillable(true);
 	}
 
 }
