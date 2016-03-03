@@ -1,15 +1,16 @@
 package org.molgenis.data.meta;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.reverse;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -386,7 +387,10 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Transactional
 	public void recreateMetaDataRepositories()
 	{
-		delete(newArrayList(getEntityMetaDatas()));
+		List<EntityMetaData> metas = getDefaultBackend().getRepository(EntityMetaDataMetaData.ENTITY_NAME).stream()
+				.map(e -> getEntityMetaData(e.getString(EntityMetaDataMetaData.FULL_NAME)))
+				.collect(Collectors.toList());
+		delete(metas);
 
 		attributeMetaDataRepository.deleteAll();
 		entityMetaDataRepository.deleteAll();
@@ -461,12 +465,18 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 
 		// Discover static EntityMetaData
-		DependencyResolver.resolve(Sets.newHashSet(emds.values())).stream()
-				.filter(emd -> !dataService.hasRepository(emd.getName())).forEach(this::addEntityMeta);
+		Set<EntityMetaData> staticEmd = new HashSet<>(emds.values());
+		Set<EntityMetaData> allEmd = new HashSet<>(getEntityMetaDatas());
+		allEmd.addAll(staticEmd);
+
+		// Use all EntityMetaData for dependency resolving
+		List<EntityMetaData> resolved = DependencyResolver.resolve(allEmd);
+		resolved.retainAll(staticEmd);// Only keep the static EntityMetaData
+
+		resolved.stream().filter(emd -> !dataService.hasRepository(emd.getName())).forEach(this::addEntityMeta);
 
 		// Update update manageable backends
-		DependencyResolver.resolve(Sets.newHashSet(emds.values())).stream().filter(this::isManageableBackend)
-				.forEach(this::updateEntityMeta);
+		resolved.stream().filter(this::isManageableBackend).forEach(this::updateEntityMeta);
 	}
 
 	private boolean isManageableBackend(EntityMetaData emd)

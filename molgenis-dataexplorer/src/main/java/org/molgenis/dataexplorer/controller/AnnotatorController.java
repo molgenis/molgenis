@@ -2,7 +2,6 @@ package org.molgenis.dataexplorer.controller;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.dataexplorer.controller.AnnotatorController.URI;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -28,7 +27,6 @@ import org.molgenis.data.settings.SettingsEntityMeta;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.quartz.JobBuilder;
@@ -70,20 +68,18 @@ public class AnnotatorController
 	private final AnnotationService annotationService;
 	private final MolgenisPermissionService molgenisPermissionService;
 	private final Scheduler scheduler;
-	private final PermissionSystemService permissionSystemService;
 	private final UserAccountService userAccountService;
 
 	@Autowired
 	public AnnotatorController(DataService dataService, AnnotationService annotationService,
 			MolgenisPermissionService molgenisPermissionService, Scheduler scheduler,
-			PermissionSystemService permissionSystemService, UserAccountService userAccountService)
+			UserAccountService userAccountService)
 	{
 		this.dataService = dataService;
 		this.annotationService = annotationService;
 		this.molgenisPermissionService = molgenisPermissionService;
 		this.scheduler = requireNonNull(scheduler);
 		this.triggerNameSalt = UUID.randomUUID().toString();
-		this.permissionSystemService = permissionSystemService;
 		this.userAccountService = userAccountService;
 	}
 

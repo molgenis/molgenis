@@ -32,7 +32,10 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
+import org.molgenis.data.i18n.I18nStringMetaData;
+import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.system.ImportRunMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.DependencyResolver;
@@ -77,6 +80,27 @@ class EntityMetaDataRepository
 	void fillEntityMetaDataCache()
 	{
 		List<Entity> entities = new ArrayList<>();
+		entities.add(toEntity(I18nStringMetaData.INSTANCE));
+		entityMetaDataCache.put(I18nStringMetaData.INSTANCE.getName(), I18nStringMetaData.INSTANCE);
+
+		entities.add(toEntity(LanguageMetaData.INSTANCE));
+		entityMetaDataCache.put(LanguageMetaData.INSTANCE.getName(), LanguageMetaData.INSTANCE);
+
+		entities.add(toEntity(PackageMetaData.INSTANCE));
+		entityMetaDataCache.put(PackageMetaData.INSTANCE.getName(), PackageMetaData.INSTANCE);
+
+		entities.add(toEntity(TagMetaData.INSTANCE));
+		entityMetaDataCache.put(TagMetaData.INSTANCE.getName(), TagMetaData.INSTANCE);
+
+		entities.add(toEntity(EntityMetaDataMetaData.INSTANCE));
+		entityMetaDataCache.put(EntityMetaDataMetaData.INSTANCE.getName(), EntityMetaDataMetaData.INSTANCE);
+
+		entities.add(toEntity(AttributeMetaDataMetaData.INSTANCE));
+		entityMetaDataCache.put(AttributeMetaDataMetaData.INSTANCE.getName(), AttributeMetaDataMetaData.INSTANCE);
+
+		entities.add(toEntity(ImportRunMetaData.INSTANCE));
+		entityMetaDataCache.put(ImportRunMetaData.INSTANCE.getName(), ImportRunMetaData.INSTANCE);
+
 		// Fill the cache with EntityMetaData objects
 		for (Entity entity : repository)
 		{
@@ -122,12 +146,15 @@ class EntityMetaDataRepository
 			}
 			final Entity packageEntity = entity.getEntity(PACKAGE);
 
-			PackageImpl p = (PackageImpl) packageRepository
-					.getPackage(packageEntity.getString(PackageMetaData.FULL_NAME));
-			if (null != p)
+			if (packageEntity != null)
 			{
-				entityMetaData.setPackage(p);
-				p.addEntity(entityMetaData);
+				PackageImpl p = (PackageImpl) packageRepository
+					.getPackage(packageEntity.getString(PackageMetaData.FULL_NAME));
+				if (null != p)
+				{
+					entityMetaData.setPackage(p);
+					p.addEntity(entityMetaData);
+				}
 			}
 
 			// set id, label and lookup attrs
