@@ -22,6 +22,9 @@ public class AnnotationJob extends Job<Void>
 	private final String username;
 	private final List<RepositoryAnnotator> annotators;
 	private final Repository repository;
+	List<String> successfulAnnotators = Lists.newArrayList();
+	List<String> failedAnnotators = Lists.newArrayList();
+	Exception firstException = null;
 
 	public AnnotationJob(CrudRepositoryAnnotator crudRepositoryAnnotator, String username,
 			List<RepositoryAnnotator> annotators, Repository repository, Progress progress,
@@ -40,22 +43,38 @@ public class AnnotationJob extends Job<Void>
 	{
 		progress.setProgressMax(annotators.size());
 		int i = 0;
+
 		for (RepositoryAnnotator annotator : annotators)
 		{
 			progress.progress(i, getMessage(i, annotator));
-			crudRepositoryAnnotator.annotate(annotator, repository);
+			try
+			{
+				crudRepositoryAnnotator.annotate(annotator, repository);
+				successfulAnnotators.add(annotator.getSimpleName());
+			}
+			catch (Exception ex)
+			{
+				if (firstException == null)
+				{
+					firstException = ex;
+				}
+				failedAnnotators.add(annotator.getSimpleName());
+			}
 			i++;
 		}
-		progress.progress(annotators.size(), getSuccessMessage());
+		progress.progress(annotators.size(), getMessage());
+		if (firstException != null)
+		{
+			progress.status("Failed annotators: " + StringUtils.join(failedAnnotators, ","));
+			progress.failed(firstException);
+		}
 		return null;
 	}
 
-	private String getSuccessMessage()
+	private String getMessage()
 	{
-		Iterable<String> annotatorNames = (Iterable<String>) Lists.transform(annotators,
-				RepositoryAnnotator::getSimpleName);
 		return String.format("Annotated \"%s\" with %s (started by \"%s\")", repository.getEntityMetaData().getLabel(),
-				StringUtils.join(annotatorNames, ","), username);
+				StringUtils.join(successfulAnnotators, ","), username);
 	}
 
 	private String getMessage(int i, RepositoryAnnotator annotator)
