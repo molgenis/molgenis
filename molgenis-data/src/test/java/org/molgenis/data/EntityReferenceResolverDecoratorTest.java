@@ -227,6 +227,22 @@ public class EntityReferenceResolverDecoratorTest
 	}
 
 	@Test
+	public void streamFetch()
+	{
+		Fetch fetch = new Fetch();
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		Entity entity0WithRefs = mock(Entity.class);
+		Entity entity1WithRefs = mock(Entity.class);
+		Stream<Entity> entities = Stream.of(entity0, entity1);
+		when(decoratedRepo.stream(fetch)).thenReturn(entities);
+		when(entityManager.resolveReferences(entityMeta, entities, fetch))
+				.thenReturn(Stream.of(entity0WithRefs, entity1WithRefs));
+		Stream<Entity> expectedEntities = entityReferenceResolverDecorator.stream(fetch);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0WithRefs, entity1WithRefs));
+	}
+
+	@Test
 	public void findOneQueryFetchEntity()
 	{
 		Fetch fetch = new Fetch();

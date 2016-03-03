@@ -1,8 +1,11 @@
 package org.molgenis.util;
 
+import static com.google.common.collect.Maps.newHashMap;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -25,6 +28,8 @@ public class GsonFactoryBean implements FactoryBean<Gson>, InitializingBean
 	private String dateFormatPattern = MolgenisDateFormat.DATEFORMAT_DATETIME;
 
 	private List<TypeAdapterFactory> typeAdapterFactoryList;
+
+	private Map<Class<?>, Object> typeAdapterHierarchyFactoryMap;
 
 	private Gson gson;
 
@@ -86,6 +91,12 @@ public class GsonFactoryBean implements FactoryBean<Gson>, InitializingBean
 		typeAdapterFactoryList.add(typeAdapterFactory);
 	}
 
+	public void registerTypeHierarchyAdapter(Class<?> clazz, Object typeAdapter)
+	{
+		if (typeAdapterHierarchyFactoryMap == null) typeAdapterHierarchyFactoryMap = newHashMap();
+		typeAdapterHierarchyFactoryMap.put(clazz, typeAdapter);
+	}
+
 	@Override
 	public void afterPropertiesSet()
 	{
@@ -109,6 +120,10 @@ public class GsonFactoryBean implements FactoryBean<Gson>, InitializingBean
 		if (this.typeAdapterFactoryList != null)
 		{
 			typeAdapterFactoryList.forEach(builder::registerTypeAdapterFactory);
+		}
+		if (this.typeAdapterHierarchyFactoryMap != null)
+		{
+			typeAdapterHierarchyFactoryMap.forEach(builder::registerTypeHierarchyAdapter);
 		}
 		this.gson = builder.create();
 	}

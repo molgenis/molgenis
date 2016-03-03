@@ -72,7 +72,6 @@ import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.transaction.MolgenisTransactionListener;
@@ -564,8 +563,16 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			if (response.isExists())
 			{
 				// Copy to temp transaction index and mark as deleted
-				Entity entity = new MapEntity(entityMetaData);
-				entity.set(entityMetaData.getIdAttribute().getName(), id);
+				Map<String, Object> source = response.getSource();
+				Entity entity;
+				if (source != null)
+				{
+					entity = elasticsearchEntityFactory.create(entityMetaData, source, null);
+				}
+				else
+				{
+					entity = dataService.findOne(entityMetaData.getName(), id);
+				}
 				index(transactionId, Collections.singleton(entity).iterator(), entityMetaData, CrudType.DELETE, false);
 			}
 			else
@@ -934,12 +941,9 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		{
 			UuidGenerator uuidg = new UuidGenerator();
 			DefaultEntityMetaData tempEntityMetaData = new DefaultEntityMetaData(uuidg.generateId(), entityMetaData);
-			tempEntityMetaData
-					.setPackage(
-							new PackageImpl("elasticsearch_temporary_entity",
-									"This entity (Original: " + entityMetaData
-											.getName()
-									+ ") is temporary build to make rebuilding of Elasticsearch entities posible."));
+			tempEntityMetaData.setPackage(new PackageImpl("elasticsearch_temporary_entity",
+					"This entity (Original: " + entityMetaData.getName()
+							+ ") is temporary build to make rebuilding of Elasticsearch entities posible."));
 
 			// Add temporary repository into Elasticsearch
 			Repository tempRepository = dataService.getMeta().addEntityMeta(tempEntityMetaData);
@@ -1050,7 +1054,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 
 			Iterable<Entity> entities = new ElasticsearchEntityIterable(q, entityMetaData, client,
 					elasticsearchEntityFactory, generator, new String[]
-			{ indexName });
+					{ indexName });
 
 			// TODO discuss whether this is still required
 			// Don't use cached ref entities but make new ones

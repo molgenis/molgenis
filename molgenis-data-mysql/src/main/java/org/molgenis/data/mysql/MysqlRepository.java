@@ -595,7 +595,19 @@ public class MysqlRepository extends AbstractRepository
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		return findAll(new QueryImpl()).iterator();
+		Query q = new QueryImpl();
+		return findAllBatching(q).iterator();
+	}
+
+	@Override
+	public Stream<Entity> stream(Fetch fetch)
+	{
+		Query q = new QueryImpl();
+		if (fetch != null)
+		{
+			q.fetch(fetch);
+		}
+		return StreamSupport.stream(findAllBatching(q).spliterator(), false);
 	}
 
 	protected String getInsertSql()
@@ -763,6 +775,11 @@ public class MysqlRepository extends AbstractRepository
 	@Override
 	public Stream<Entity> findAll(Query q)
 	{
+		return StreamSupport.stream(findAllBatching(q).spliterator(), false);
+	}
+
+	private BatchingQueryResult findAllBatching(Query q)
+	{
 		BatchingQueryResult batchingQueryResult = new BatchingQueryResult(BATCH_SIZE, q)
 		{
 			@Override
@@ -785,7 +802,7 @@ public class MysqlRepository extends AbstractRepository
 				return jdbcTemplate.query(sql, parameters.toArray(new Object[0]), entityMapper);
 			}
 		};
-		return StreamSupport.stream(batchingQueryResult.spliterator(), false);
+		return batchingQueryResult;
 	}
 
 	protected String getWhereSql(Query q, List<Object> parameters, int mrefFilterIndex)

@@ -251,4 +251,12 @@ public class EntityListenerRepositoryDecoratorTest
 		Stream<Entity> entities = entityListenerRepositoryDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
+
+	@Test
+	public void streamFetch()
+	{
+		Fetch fetch = new Fetch();
+		entityListenerRepositoryDecorator.stream(fetch);
+		verify(decoratedRepository, times(1)).stream(fetch);
+	}
 }

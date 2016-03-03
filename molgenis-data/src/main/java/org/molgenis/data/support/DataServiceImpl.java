@@ -276,6 +276,21 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
+	public Stream<Entity> stream(String entityName, Fetch fetch)
+	{
+		return getRepository(entityName).stream(fetch);
+	}
+
+	@Override
+	public <E extends Entity> Stream<E> stream(String entityName, Fetch fetch, Class<E> clazz)
+	{
+		Stream<Entity> entities = getRepository(entityName).stream(fetch);
+		return entities.map(entity -> {
+			return EntityUtils.convert(entity, clazz, this);
+		});
+	}
+
+	@Override
 	public Set<RepositoryCapability> getCapabilities(String repositoryName)
 	{
 		return getRepository(repositoryName).getCapabilities();

@@ -33,7 +33,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.util.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -281,7 +280,7 @@ public class DataServiceImplTest
 	@Test
 	public void copyRepository()
 	{
-		//setup everything
+		// setup everything
 		Query query = new QueryImpl();
 		AttributeMetaData attr1 = new DefaultAttributeMetaData("attr1", MolgenisFieldTypes.FieldTypeEnum.STRING);
 		AttributeMetaData attr2 = new DefaultAttributeMetaData("attr2", MolgenisFieldTypes.FieldTypeEnum.STRING);
@@ -302,15 +301,37 @@ public class DataServiceImplTest
 		when(repo2.getEntityMetaData()).thenReturn(emd2);
 		when(metaDataService.addEntityMeta(emd2)).thenReturn(repo2);
 
-		//The actual method call
+		// The actual method call
 		Repository copy = dataService.copyRepository(repo1, "Entity2", "testCopyLabel");
 
-		//The test
+		// The test
 		verify(metaDataService).addEntityMeta(copy.getEntityMetaData());
+		@SuppressWarnings(
+		{ "unchecked", "rawtypes" })
 		ArgumentCaptor<Stream<Entity>> argument = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(repo2, times(1)).add(argument.capture());
 		List<Entity> list = argument.getAllValues().get(0).collect(toList());
 		assertEquals(list, Arrays.asList(entity0, entity1));
 	}
 
+	@Test
+	public void streamStringFetch()
+	{
+		Entity entity0 = mock(Entity.class);
+		Fetch fetch = new Fetch();
+		when(repo1.stream(fetch)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = dataService.stream("Entity1", fetch);
+		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+	}
+
+	@Test
+	public void streamStringFetchClass()
+	{
+		Entity entity0 = mock(Entity.class);
+		Class<Entity> clazz = Entity.class;
+		Fetch fetch = new Fetch();
+		when(repo1.stream(fetch)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = dataService.stream("Entity1", fetch, clazz);
+		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+	}
 }

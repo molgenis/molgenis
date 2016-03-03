@@ -46,6 +46,36 @@ public class EntityImportReport implements Serializable
 	}
 
 	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((newEntities == null) ? 0 : newEntities.hashCode());
+		result = prime * result + ((nrImportedEntitiesMap == null) ? 0 : nrImportedEntitiesMap.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		EntityImportReport other = (EntityImportReport) obj;
+		if (newEntities == null)
+		{
+			if (other.newEntities != null) return false;
+		}
+		else if (!newEntities.equals(other.newEntities)) return false;
+		if (nrImportedEntitiesMap == null)
+		{
+			if (other.nrImportedEntitiesMap != null) return false;
+		}
+		else if (!nrImportedEntitiesMap.equals(other.nrImportedEntitiesMap)) return false;
+		return true;
+	}
+
+	@Override
 	public String toString()
 	{
 		StringBuilder sb = new StringBuilder();
@@ -58,5 +88,4 @@ public class EntityImportReport implements Serializable
 
 		return sb.toString();
 	}
-
 }
