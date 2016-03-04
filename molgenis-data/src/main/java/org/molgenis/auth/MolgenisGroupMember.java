@@ -1,11 +1,13 @@
 package org.molgenis.auth;
 
-import com.google.auto.value.AutoValue;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-
 import java.util.LinkedHashSet;
 import java.util.Set;
+
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.util.EntityUtils;
+
+import com.google.auto.value.AutoValue;
 
 @AutoValue
 public class MolgenisGroupMember extends org.molgenis.data.support.AbstractEntity implements org.molgenis.data.Entity
@@ -20,6 +22,11 @@ public class MolgenisGroupMember extends org.molgenis.data.support.AbstractEntit
 	String id;
 	MolgenisUser molgenisUser;
 	MolgenisGroup molgenisGroup;
+
+	public MolgenisGroupMember()
+	{
+		EntityUtils.setDefaultValues(this);
+	}
 
 	public String getId()
 	{

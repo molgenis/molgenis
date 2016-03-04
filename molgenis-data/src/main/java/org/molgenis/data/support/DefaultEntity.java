@@ -23,6 +23,7 @@ import org.molgenis.data.UnknownEntityException;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
+import org.molgenis.util.EntityUtils;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
@@ -53,6 +54,7 @@ public class DefaultEntity implements Entity
 	{
 		this.entityMetaData = entityMetaData;
 		this.dataService = dataService;
+		EntityUtils.setDefaultValues(this);
 	}
 
 	@Override

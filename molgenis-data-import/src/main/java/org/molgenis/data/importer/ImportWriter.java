@@ -59,6 +59,7 @@ import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.DependencyResolver;
+import org.molgenis.util.EntityUtils;
 import org.molgenis.util.HugeSet;
 import org.molgenis.util.MolgenisDateFormat;
 import org.slf4j.Logger;
@@ -678,6 +679,7 @@ public class ImportWriter
 			this.dataService = requireNonNull(dataService);
 			this.entity = requireNonNull(entity);
 			this.selfReferencing = selfReferencing;
+			EntityUtils.setDefaultValues(this);
 		}
 
 		@Override
