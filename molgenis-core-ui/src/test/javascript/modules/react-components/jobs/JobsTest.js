@@ -15,7 +15,7 @@ test('Test if the Jobs component renders running, success and failed jobs correc
         '<div class="panel-heading">Running Jobs</div>' +
         '<div class="panel-body"><div>' +
         '<p>TEST job job<div>Test (started by Tape)' +
-        '<div class="progress background-lightgrey"><div class="progress-bar progress-bar-primary progress-bar-striped active" role="progressbar" style="min-width:2em;width:100%;"></div></div></div>' +
+        '<div class="progress background-lightgrey"><div class="progress-bar progress-bar-primary progress-bar-striped active" role="progressbar" style="min-width:2em;width:20%;">100/500</div></div></div>' +
         '<div class="btn-group" role="group">' +
         '<button type="button" class="btn btn-default">Show details</button>' +
         '</div>' +
