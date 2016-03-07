@@ -17,7 +17,7 @@ test('Testing ProgressBar component', (t) => {
 		t.test('Assert the progress bar equals what we expect', (t) => {
 			 t.plan(1);
 			 t.equal(result.toString(), 
-			 '<div class="progress background-lightgrey"><div class="progress-bar progress-bar-primary progress-bar-striped active" role="progressbar" style="min-width:2em;width:100%;">testing the progress bar</div></div>',
+			 '<div>testing the progress bar<div class="progress background-lightgrey"><div class="progress-bar progress-bar-primary progress-bar-striped active" role="progressbar" style="min-width:2em;width:100%;"></div></div></div>',
 			 'Progress bar is rendered with same attributes as given in the props');
 		});	
 	});
