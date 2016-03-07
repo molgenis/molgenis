@@ -2,7 +2,6 @@ package org.molgenis.auth;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.util.EntityUtils;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -61,11 +60,6 @@ public class MolgenisUser extends org.molgenis.data.support.AbstractEntity imple
 	String languageCode;
 	String googleAccountId;
 
-	public MolgenisUser()
-	{
-		EntityUtils.setDefaultValues(this);
-	}
-	
 	public static String getEntityName()
 	{
 		return ENTITY_NAME;

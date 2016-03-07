@@ -59,7 +59,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -290,19 +289,11 @@ public class MysqlRepository extends AbstractRepository
 			}
 			else if (!attributeMetaData.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
 			{
-				if (attributeMetaData.getDefaultValue() != null)
-				{
-					addColumnInsertDefaultValue(attributeMetaData);
-				}
-				else
-				{
-					execute(getAlterTableAddColumnSql(attributeMetaData), async);
-				}
+				execute(getAlterSql(attributeMetaData), async);
 			}
 
 			if (attributeMetaData.getDataType() instanceof XrefField)
 			{
-				// add a foreign key to the newly added column
 				execute(getCreateFKeySql(attributeMetaData), async);
 			}
 
@@ -331,34 +322,6 @@ public class MysqlRepository extends AbstractRepository
 			LOG.error("Exception updating MysqlRepository.", e);
 			throw new MolgenisDataException(e);
 		}
-	}
-
-	/**
-	 * Adds a column and inserts the default values for that column.
-	 */
-	@Transactional
-	private void addColumnInsertDefaultValue(AttributeMetaData attributeMetaData) throws MolgenisModelException
-	{
-		String addColumnSql = getAlterTableAddColumnSql(attributeMetaData);
-		String insertDefaultValuesSql = getSetDefaultValuesSql(attributeMetaData);
-
-		execute(addColumnSql, false);
-		jdbcTemplate.update(insertDefaultValuesSql, new Object[]
-		{ attributeMetaData.getDefaultValue() });
-	}
-
-	/**
-	 * Sets all records in a column to the default value. Used after adding an attribute that has a default value.
-	 */
-	private String getSetDefaultValuesSql(AttributeMetaData attributeMetaData)
-	{
-		requireNonNull(attributeMetaData.getDefaultValue());
-
-		StringBuilder sql = new StringBuilder();
-		sql.append("UPDATE ").append('`').append(getTableName()).append('`').append(" SET ").append('`')
-				.append(attributeMetaData.getName()).append('`').append(" = ").append('?');
-		sql.append(";");
-		return sql.toString();
 	}
 
 	/**
@@ -562,7 +525,7 @@ public class MysqlRepository extends AbstractRepository
 		}
 	}
 
-	public String getAlterTableAddColumnSql(AttributeMetaData attributeMetaData) throws MolgenisModelException
+	public String getAlterSql(AttributeMetaData attributeMetaData) throws MolgenisModelException
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("ALTER TABLE ").append('`').append(getTableName()).append('`').append(" ADD ");
@@ -1472,7 +1435,7 @@ public class MysqlRepository extends AbstractRepository
 			String sql;
 			try
 			{
-				sql = getAlterTableAddColumnSql(metaData.getAttribute(attributeName));
+				sql = getAlterSql(metaData.getAttribute(attributeName));
 			}
 			catch (MolgenisModelException e)
 			{
