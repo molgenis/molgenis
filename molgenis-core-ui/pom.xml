@@ -135,7 +135,7 @@
 		                        </goals>
 			        			<configuration>
 									<outputdir>target/classes/js/dist</outputdir>
-									<arguments>-p --config webpack.production.config.js</arguments>
+									<arguments>-p --config webpack.production.config.js --display-error-details</arguments>
 								</configuration>
 							</execution>
 		    			</executions>
