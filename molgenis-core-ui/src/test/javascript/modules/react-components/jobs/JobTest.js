@@ -12,7 +12,7 @@ test('Test if the Job component renders a succeeded job correctly', assert => {
     }));
 
     assert.equals(tree.toString(),
-        '<div><p>TEST job job<div class="progress background-lightgrey"><div class="progress-bar progress-bar-success" role="progressbar" style="min-width:2em;width:100%;">Test (started by Tape)</div></div><div class="btn-group" role="group"></div></p></div>',
+        '<div><p>TEST job job<div>Test (started by Tape)<div class="progress background-lightgrey"><div class="progress-bar progress-bar-success" role="progressbar" style="min-width:2em;width:100%;"></div></div></div><div class="btn-group" role="group"></div></p></div>',
         'Job component rendered a succeeded job correctly');
 
     assert.end();
@@ -24,7 +24,7 @@ test('Test if the Job component renders a running job correctly', assert => {
     }));
 
     assert.equals(tree.toString(),
-        '<div><p>TEST job job<div class="progress background-lightgrey"><div class="progress-bar progress-bar-primary progress-bar-striped active" role="progressbar" style="min-width:2em;width:100%;">Test (started by Tape)</div></div><div class="btn-group" role="group"></div></p></div>',
+        '<div><p>TEST job job<div>Test (started by Tape)<div class="progress background-lightgrey"><div class="progress-bar progress-bar-primary progress-bar-striped active" role="progressbar" style="min-width:2em;width:100%;"></div></div></div><div class="btn-group" role="group"></div></p></div>',
         'Job component rendered a running job correctly');
 
     assert.end();
@@ -36,7 +36,7 @@ test('Test if the Job component renders a failed job correctly', assert => {
     }));
 
     assert.equals(tree.toString(),
-        '<div><p>TEST job job<div class="progress background-lightgrey"><div class="progress-bar progress-bar-danger" role="progressbar" style="min-width:2em;width:100%;">Test (started by Tape)</div></div><div class="btn-group" role="group"></div></p></div>',
+        '<div><p>TEST job job<div>Test (started by Tape)<div class="progress background-lightgrey"><div class="progress-bar progress-bar-danger" role="progressbar" style="min-width:2em;width:100%;"></div></div></div><div class="btn-group" role="group"></div></p></div>',
         'Job component rendered a failed job correctly');
 
     assert.end();

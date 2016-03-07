@@ -5,9 +5,16 @@ import java.sql.Timestamp;
 import java.util.List;
 
 /**
- * Entity is a data record which can contain a hash of attribute values. Attribute names are unique. Synonyms are
- * ‘tuple’, ‘record’, ‘row’, ‘hashmap’. Optionally Entity can provide a unique ‘id’ for updates. Optionally Entity can
- * provide a human readable label for lookups
+ * Entity is a data record which can contain a hash of attribute values.
+ * 
+ * Attribute names are unique.
+ * 
+ * Synonyms are ‘tuple’, ‘record’, ‘row’, ‘hashmap’.
+ * 
+ * Optionally Entity can provide a unique ‘id’ for updates. Optionally Entity can provide a human readable label for
+ * lookups.
+ * 
+ * At creation, an entity must first set default values for all attributes that have a default value specified.
  */
 public interface Entity extends Serializable
 {
@@ -112,4 +119,5 @@ public interface Entity extends Serializable
 	 * Copy attribute values from another entity
 	 */
 	void set(Entity values);
+
 }
