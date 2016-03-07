@@ -2,7 +2,6 @@ package org.molgenis.data.settings;
 
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -44,20 +43,6 @@ public abstract class DefaultSettingsEntityMetaData extends DefaultEntityMetaDat
 		return SettingsEntityMeta.PACKAGE_SETTINGS.getName() + '_' + id;
 	}
 
-	private Entity getDefaultSettings()
-	{
-		MapEntity mapEntity = new MapEntity(this);
-		for (AttributeMetaData attr : this.getAtomicAttributes())
-		{
-			String defaultValue = attr.getDefaultValue();
-			if (defaultValue != null)
-			{
-				mapEntity.set(attr.getName(), defaultValue);
-			}
-		}
-		return mapEntity;
-	}
-
 	@Transactional
 	@RunAsSystem
 	@Override
@@ -66,7 +51,8 @@ public abstract class DefaultSettingsEntityMetaData extends DefaultEntityMetaDat
 		Entity settingsEntity = getSettings();
 		if (settingsEntity == null)
 		{
-			Entity defaultSettingsEntity = getDefaultSettings();
+			// map entity sets default values
+			Entity defaultSettingsEntity = new MapEntity(this);
 			defaultSettingsEntity.set(ATTR_ID, getSimpleName());
 			dataService.add(getName(), defaultSettingsEntity);
 		}

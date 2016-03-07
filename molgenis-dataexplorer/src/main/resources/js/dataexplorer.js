@@ -296,6 +296,15 @@ function($, molgenis, settingsXhr) {
      * @memberOf molgenis.dataexplorer
      */
 	function render() {
+		// Check if the copy button should be shown or not
+		$.get(molgenis.getContextUrl() + '/copy?entity=' + state.entity).done(function(data) {
+			if(data === true){
+				$("#copy-data-btn").removeClass('hidden');
+			}else{
+				$("#copy-data-btn").addClass('hidden');
+			}
+		});
+		
 		// get entity meta data and update header and tree
 		var entityMetaDataRequest = restApi.getAsync('/api/v1/' + state.entity + '/meta', {expand: ['attributes']}, function(entityMetaData) {
 			selectedEntityMetaData = entityMetaData;
@@ -555,6 +564,36 @@ function($, molgenis, settingsXhr) {
 						document.location.href = '/menu/main/dataexplorer?entity=' + selectedEntityMetaData.name;
 					});
 				}
+			});
+		});
+		
+		$('#copy-data-btn').on('click', function(){
+			bootbox.prompt({
+				title: "<h4>Copy entity [" + selectedEntityMetaData.label + "]<h4/>" +
+					"<div class=\"small\">Please enter a new entity name." +
+					"<ul>" +
+					"<li>Use max 30 characters." +
+					"<li>Only letters (a-z, A-Z), digits (0-9), underscores (_) and hashes (#) are allowed.</li>" +
+					"</ul>" +
+					"<br/>By pushing the ok button you will create an new entity with copied data.</div>",
+				value: selectedEntityMetaData.label + '_',
+				callback: function(result){
+					if(result !== null){
+						   $.ajax({
+							    headers: { 
+							        'Accept': 'application/json',
+							        'Content-Type': 'application/json' 
+							    },
+							    'type': 'POST',
+							    'url': '/api/v2/copy/' + selectedEntityMetaData.name,
+							    'data': JSON.stringify({'newEntityName': result}),
+							    'dataType': 'json',
+							    'success': function(newEntityName){
+									document.location.href = '/menu/main/dataexplorer?entity=' + newEntityName;
+								}
+							    });
+					}
+				} 
 			});
 		});
 		

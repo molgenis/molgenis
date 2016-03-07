@@ -21,6 +21,7 @@
             <plugin id="news" name="News" url="news"/>
             <plugin id="references" name="References" url="references"/>
             <plugin id="scripts" name="Scripts" url="scripts" />
+            <plugin id="fileingest" name="Automatic imports" url="fileingest" />
 	    </menu>
         <menu label="Admin" name="admin">
 	        <plugin id="usermanager" name="User Manager" url="usermanager"/>

@@ -22,11 +22,11 @@
 	<div class="col-md-12">
         <div id="entity-class" class="well well-sm">
             <div class="row">
-                <div class="col-md-8">
+                <div class="col-md-7">
                     <h3 id="entity-class-name"></h3>
                     <span id="entity-class-description"></span>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <div id="dataset-select-container" class="pull-right">
                         <select class="form-control" id="dataset-select" data-placeholder="Choose an Entity">
                                 <option value=""></option><#-- Required for placeholder to work with select2 -->
@@ -37,20 +37,21 @@
                         </#if>
                         </select>
                     </div>
+                    <button id="copy-data-btn" type="button" class="btn btn-default pull-right hidden">
+						<span class="glyphicon glyphicon-duplicate" aria-hidden="true"></span>
+					</button>
                 </div>
                 <#if isAdmin?has_content && isAdmin>
-		            <div class="row">
-		            	<div class="col-md-1">
-		            		<div class="dropdown">
-                                <button class="btn btn-danger dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
-                                    Delete <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#" id="delete-data-btn">Data</a></li>
-                                    <li role="presentation"><a role="menuitem" tabindex="-1" href="#" id="delete-data-metadata-btn">Data and meta data</a></li>
-                                </ul>
-                            </div>
-		            	</div>
+	            	<div class="col-md-1">
+	            		<div class="dropdown">
+                            <button class="btn btn-danger dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+                                Delete <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" id="delete-data-btn">Data</a></li>
+                                <li role="presentation"><a role="menuitem" tabindex="-1" href="#" id="delete-data-metadata-btn">Data and meta data</a></li>
+                            </ul>
+                        </div>
 		            </div>
             	</#if>
             </div>
