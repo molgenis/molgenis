@@ -29,8 +29,6 @@ public abstract class DefaultSettingsEntity implements Entity
 	public DefaultSettingsEntity(String entityId)
 	{
 		this.entityName = SettingsEntityMeta.PACKAGE_NAME + '_' + entityId;
-
-		// do not set default values, this is done at context refresh in DefaultSettingsEntityMetaData
 	}
 
 	@Override
