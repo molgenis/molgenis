@@ -1,11 +1,10 @@
 package org.molgenis.auth;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.util.EntityUtils;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class UserAuthority extends org.molgenis.data.support.AbstractEntity
 		implements org.molgenis.data.Entity, org.molgenis.auth.Authority
@@ -20,11 +19,6 @@ public class UserAuthority extends org.molgenis.data.support.AbstractEntity
 	String id;
 	MolgenisUser molgenisUser;
 	String role;
-
-	public UserAuthority()
-	{
-		EntityUtils.setDefaultValues(this);
-	}
 
 	public String getId()
 	{

@@ -20,8 +20,8 @@ public class MetaUtils
 	public static List<AttributeMetaData> updateEntityMeta(MetaDataService metaDataService, EntityMetaData entityMeta,
 			boolean sync)
 	{
-		String backend = entityMeta.getBackend() != null ? entityMeta.getBackend()
-				: metaDataService.getDefaultBackend().getName();
+		String backend = entityMeta.getBackend() != null ? entityMeta.getBackend() : metaDataService
+				.getDefaultBackend().getName();
 
 		EntityMetaData existingEntityMetaData = metaDataService.getEntityMetaData(entityMeta.getName());
 		if (!existingEntityMetaData.getBackend().equals(backend))

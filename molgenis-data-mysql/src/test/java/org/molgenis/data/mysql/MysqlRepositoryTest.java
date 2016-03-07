@@ -1,15 +1,14 @@
 package org.molgenis.data.mysql;
 
-import static com.google.common.collect.Iterables.size;
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.MolgenisFieldTypes.INT;
-import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
@@ -18,7 +17,6 @@ import java.util.stream.StreamSupport;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MysqlTestConfig;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
@@ -32,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
+import org.testng.annotations.ExpectedExceptions;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Iterables;
@@ -420,75 +419,5 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		assertEquals(it.next().getIdValue(), exampleId1);
 
 		testRepository.deleteAll(); // cleanup
-	}
-
-	@Test
-	public void testAddAttribute()
-	{
-		DefaultEntityMetaData metaData = new DefaultEntityMetaData("addAttribute");
-		metaData.addAttribute("idAttr", ROLE_ID).setDataType(INT);
-
-		Repository repo = metaDataRepositories.addEntityMeta(metaData);
-
-		// add first entity
-		MapEntity entity0 = new MapEntity();
-		entity0.set("idAttr", 0);
-		repo.add(entity0);
-
-		// add attribute
-		DefaultAttributeMetaData damd = new DefaultAttributeMetaData("newAttr").setDataType(STRING);
-		coll.addAttribute("addAttribute", damd);
-
-		assertEquals(size(repo.getEntityMetaData().getAtomicAttributes()), 2);
-
-		// add second entity
-		MapEntity entity1 = new MapEntity();
-		entity1.set("idAttr", 1);
-		entity1.set("newAttr", "foundIt");
-		repo.add(entity1);
-
-		Stream<Entity> entities = repo.findAll(new QueryImpl().eq("newAttr", "foundIt"));
-		assertEquals(entities.count(), 1);
-	}
-
-	@Test
-	public void testAddAttributeDefaultValue()
-	{
-		DefaultEntityMetaData metaData = new DefaultEntityMetaData("addAttributeDefaultValue");
-		metaData.addAttribute("idAttr", ROLE_ID).setDataType(INT);
-
-		Repository repo = metaDataRepositories.addEntityMeta(metaData);
-
-		// add first entity
-		MapEntity entity0 = new MapEntity(metaData);
-		entity0.set("idAttr", 0);
-		repo.add(entity0);
-
-		// add attribute
-		DefaultAttributeMetaData damd = new DefaultAttributeMetaData("newAttr").setDataType(STRING)
-				.setDefaultValue("DEFAULT VALUE");
-		coll.addAttribute("addAttributeDefaultValue", damd);
-
-		EntityMetaData newMetaData = repo.getEntityMetaData();
-
-		// add second entity that doesn't set newAttr
-		MapEntity entity1 = new MapEntity(newMetaData);
-		entity1.set("idAttr", 1);
-		repo.add(entity1);
-
-		// add third entity that does set newAttr
-		MapEntity entity2 = new MapEntity(newMetaData);
-		entity2.set("idAttr", 2);
-		entity2.set("newAttr", "set");
-		repo.add(entity2);
-
-		Entity result0 = repo.findOne(0);
-		assertEquals(result0.get("newAttr"), "DEFAULT VALUE");
-
-		Entity result1 = repo.findOne(1);
-		assertEquals(result1.get("newAttr"), "DEFAULT VALUE");
-
-		Entity result2 = repo.findOne(2);
-		assertEquals(result2.get("newAttr"), "set");
 	}
 }

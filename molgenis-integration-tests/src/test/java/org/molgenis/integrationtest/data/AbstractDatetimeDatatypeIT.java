@@ -1,8 +1,8 @@
 package org.molgenis.integrationtest.data;
 
 import static org.molgenis.MolgenisFieldTypes.DATETIME;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 import java.text.SimpleDateFormat;
 
@@ -10,6 +10,7 @@ import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 public class AbstractDatetimeDatatypeIT extends AbstractDatatypeIT
 {
@@ -21,8 +22,7 @@ public class AbstractDatetimeDatatypeIT extends AbstractDatatypeIT
 		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("DatetimeTest");
 		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(DATETIME).setNillable(false);
 		entityMetaData.addAttribute("col2").setDataType(DATETIME);
-		entityMetaData.addAttribute("col3").setDataType(DATETIME);// .setDefaultValue("2010-09-29T18:46:19UCT"); (see
-																	// issue #4554)
+		entityMetaData.addAttribute("col3").setDataType(DATETIME).setDefaultValue("01-01-2014");
 
 		return entityMetaData;
 	}
@@ -41,7 +41,9 @@ public class AbstractDatetimeDatatypeIT extends AbstractDatatypeIT
 	{
 		assertEquals(entity.getUtilDate("col1"), sdf.parse("2012-03-13 23:59:33"));
 		assertEquals(entity.getUtilDate("col2"), sdf.parse("2013-02-09 13:12:11"));
-		// assertEquals(entity.getUtilDate("col3"), sdf.parse("2010-09-29 18:46:19")); (see issue #4554)
+		assertNull(entity.get("col3")); // default value should NOT be set by the repository, for then the user
+										// cannot
+										// override it to be NULL in a form.
 	}
 
 	@Override

@@ -28,8 +28,6 @@ public class PartialEntity implements Entity
 		this.decoratedEntity = requireNonNull(decoratedEntity);
 		this.fetch = requireNonNull(fetch);
 		this.entityManager = requireNonNull(entityManager);
-
-		// don't set default values, the decorated entity will already have set those
 	}
 
 	@Override
