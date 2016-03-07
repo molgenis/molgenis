@@ -2,18 +2,15 @@ package org.molgenis.data.elasticsearch;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -106,18 +103,6 @@ public class ElasticsearchRepositoryCollection implements ManageableRepositoryCo
 
 		entityMetaData.addAttributeMetaData(attribute);
 		searchService.createMappings(entityMetaData);
-
-		// set all values of the new attribute to the default if available
-		if (attribute.getDefaultValue() != null)
-		{
-			Repository repository = repositories.get(entityMetaData.getName());
-			Stream<Entity> entities = repository.findAll(new QueryImpl());
-			entities = entities.map(entity -> {
-				entity.set(attribute.getName(), attribute.getDefaultValue());
-				return entity;
-			});
-			repository.update(entities);
-		}
 	}
 
 	@Override
@@ -126,11 +111,11 @@ public class ElasticsearchRepositoryCollection implements ManageableRepositoryCo
 		EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(entityName);
 		if (entityMetaData == null) throw new UnknownEntityException(String.format("Unknown entity '%s'", entityName));
 
-		DefaultEntityMetaData defaultEntityMetaData = new DefaultEntityMetaData(
-				dataService.getMeta().getEntityMetaData(entityName));
+		DefaultEntityMetaData defaultEntityMetaData = new DefaultEntityMetaData(dataService.getMeta()
+				.getEntityMetaData(entityName));
 		AttributeMetaData attr = entityMetaData.getAttribute(attributeName);
-		if (attr == null) throw new UnknownAttributeException(
-				String.format("Unknown attribute '%s' of entity '%s'", attributeName, entityName));
+		if (attr == null) throw new UnknownAttributeException(String.format("Unknown attribute '%s' of entity '%s'",
+				attributeName, entityName));
 
 		defaultEntityMetaData.removeAttributeMetaData(attr);
 		searchService.createMappings(entityMetaData);

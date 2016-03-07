@@ -18,8 +18,6 @@ import org.molgenis.data.support.DefaultEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import autovalue.shaded.com.google.common.common.collect.Lists;
-
 public class EntityManagerImplTest
 {
 	private DataService dataService;
@@ -104,7 +102,6 @@ public class EntityManagerImplTest
 	public void resolveReferencesNoFetch()
 	{
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		when(entityMeta.getAtomicAttributes()).thenReturn(Lists.newArrayList());
 
 		Entity entity0 = new DefaultEntity(entityMeta, dataService); // do not mock, setters will be called
 		Entity entity1 = new DefaultEntity(entityMeta, dataService); // do not mock, setters will be called
@@ -118,8 +115,6 @@ public class EntityManagerImplTest
 	public void resolveReferencesStreamNoFetch()
 	{
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		when(entityMeta.getAtomicAttributes()).thenReturn(Lists.newArrayList());
-
 		AttributeMetaData labelAttr = mock(AttributeMetaData.class);
 		when(entityMeta.getLabelAttribute()).thenReturn(labelAttr);
 		Entity entity0 = new DefaultEntity(entityMeta, dataService); // do not mock, setters will be called

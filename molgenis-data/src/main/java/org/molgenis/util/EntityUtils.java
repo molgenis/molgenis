@@ -9,7 +9,6 @@ import java.util.stream.StreamSupport;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -182,25 +181,5 @@ public class EntityUtils
 	public static Stream<Entity> asStream(Iterable<Entity> entities)
 	{
 		return StreamSupport.stream(entities.spliterator(), false);
-	}
-
-	/**
-	 * Sets all attributes of an entity to the default values for those attributes, if available.
-	 * 
-	 * @param entity
-	 *            the entity to set the default values for
-	 */
-	public static void setDefaultValues(Entity entity)
-	{
-		// null check to protect against entities without meta data (see issue #4547)
-		if (entity.getEntityMetaData() != null)
-		{
-			entity.getEntityMetaData().getAtomicAttributes().forEach(attr -> {
-				if (attr.getDefaultValue() != null)
-				{
-					entity.set(attr.getName(), DataConverter.convert(attr.getDefaultValue(), attr));
-				}
-			});
-		}
 	}
 }
