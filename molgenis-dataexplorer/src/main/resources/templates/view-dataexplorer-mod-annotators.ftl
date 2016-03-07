@@ -2,7 +2,7 @@
 <#if annotationRun?? && (annotationRun.status == 'RUNNING')>
 <div class="row">
     <div class="col-md-12">
-        This entity is currently being annotated, details listed below. This page will refresh once the annotators finished.
+        This entity is currently being annotated, details listed below.
      </div>
     	<div class="col-md-12">
         	<div id="annotateRun"></div>
@@ -11,42 +11,9 @@
 </div>
     <script>
     	$(function (){
-	 		var ProgressBar = React.render(molgenis.ui.ProgressBar({
-	    	 	'progressPct' : 0,
-				'progressMessage' : 'Starting annotation run',    
-				'status' : 'info',
-				'active' : false
+	 		var ProgressBar = React.render(molgenis.ui.JobContainer({
+	    	 	'jobHref' : '/api/v1/AnnotationJobExecution/${annotationRun.identifier}'
 			}), $('#annotateRun')[0]);
-                setInterval(
-                        function ()
-                        {
-                            molgenis.RestClient.prototype.getAsync('/api/v1/AnnotationJobMetaData/', {'q' : [ {
-                                        'field' : 'identifier',
-                                        'operator' : 'EQUALS',
-                                        'value' : '${annotationRun.identifier}'
-                                    } ]},
-                                    function(annotateRun) {
-                                        var entry = annotateRun.items[0];
-                                        var container = $('#annotateRun');
-                                        if(entry.status==="FAILED"){
-                                            window.location.reload();
-                                        }
-                                        if(entry.status==="SUCCESS"){
-                                             window.location.replace("?entity=${entityName}");
-                                        }
-                                        else{
-                                            if(ProgressBar && ProgressBar.isMounted()) {
-                                                var progress = (((entry.progressInt-1)/entry.progressMax)*100)
-                                                console.log(entry.progressMessage);
-                                                console.log(progress);
-                                                ProgressBar.setProps({
-                                                    'progressMessage' : entry.progressMessage,
-                                                    'progressPct' : progress
-                                                });
-                                            }
-                                        }
-                                    });
-                        }, 1000);
         });
     </script>
 <#else>
