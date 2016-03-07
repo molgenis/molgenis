@@ -134,6 +134,12 @@ public class RepositoryValidationDecorator implements Repository
 	}
 
 	@Override
+	public Stream<Entity> stream(Fetch fetch)
+	{
+		return decoratedRepository.stream(fetch);
+	}
+
+	@Override
 	public void close() throws IOException
 	{
 		decoratedRepository.close();
@@ -368,6 +374,8 @@ public class RepositoryValidationDecorator implements Repository
 			validationResource.setRefEntitiesIds(refEntitiesIds);
 		}
 
+		validationResource.setSelfReferencing(refAttrs.stream()
+				.anyMatch(refAttr -> refAttr.getRefEntity().getName().equals(getEntityMetaData().getName())));
 		validationResource.setRefAttrs(refAttrs);
 	}
 
@@ -542,7 +550,12 @@ public class RepositoryValidationDecorator implements Repository
 						validationResource.addViolation(constraintViolation);
 					}
 				}
-				validationResource.addRefEntityId(getName(), refEntity.getIdValue());
+			}
+
+			// only do if self reference
+			if (validationResource.isSelfReferencing())
+			{
+				validationResource.addRefEntityId(getName(), entity.getIdValue());
 			}
 		});
 	}
@@ -605,6 +618,7 @@ public class RepositoryValidationDecorator implements Repository
 		private List<AttributeMetaData> uniqueAttrs;
 		private Map<String, HugeMap<Object, Object>> uniqueAttrsValues;
 		private List<AttributeMetaData> readonlyAttrs;
+		private boolean selfReferencing;
 		private Set<ConstraintViolation> violations;
 
 		public ValidationResource()
@@ -690,6 +704,16 @@ public class RepositoryValidationDecorator implements Repository
 		public void setReadonlyAttrs(List<AttributeMetaData> readonlyAttrs)
 		{
 			this.readonlyAttrs = readonlyAttrs;
+		}
+
+		public void setSelfReferencing(boolean selfReferencing)
+		{
+			this.selfReferencing = selfReferencing;
+		}
+
+		public boolean isSelfReferencing()
+		{
+			return selfReferencing;
 		}
 
 		public boolean hasViolations()

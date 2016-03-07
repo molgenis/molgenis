@@ -2,7 +2,9 @@ package org.molgenis.data.support;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -11,6 +13,7 @@ import java.util.Iterator;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -145,14 +148,38 @@ public class DefaultEntityTest
 	@Test
 	public void setStringObject()
 	{
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		AttributeMetaData labelAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("label").getMock();
-		when(entityMeta.getLabelAttribute()).thenReturn(labelAttr);
+		DefaultEntityMetaData entityMeta = new DefaultEntityMetaData("test");
+		entityMeta.addAttribute("label", ROLE_LABEL);
+		Entity refEntity = mock(Entity.class);
+		when(refEntity.getEntityMetaData()).thenReturn(mock(EntityMetaData.class));
+		entityMeta.addAttribute("attr").setDataType(MolgenisFieldTypes.XREF)
+				.setRefEntity(refEntity.getEntityMetaData());
+
 		DataService dataService = mock(DataService.class);
 
-		Entity refEntity = mock(Entity.class);
 		DefaultEntity entity = new DefaultEntity(entityMeta, dataService);
 		entity.set("attr", refEntity);
 		assertEquals(entity.getEntity("attr"), refEntity);
+	}
+
+	@Test
+	public void testDefaultValue()
+	{
+		DefaultEntityMetaData entityMeta = new DefaultEntityMetaData("test");
+		entityMeta.addAttribute("id", ROLE_ID);
+		entityMeta.addAttribute("attr0").setDataType(STRING);
+		entityMeta.addAttribute("attr1").setDataType(STRING).setDefaultValue("DEFAULT VALUE");
+
+		DataService dataService = mock(DataService.class);
+
+		DefaultEntity entity = new DefaultEntity(entityMeta, dataService);
+		assertEquals(entity.get("attr0"), null);
+		assertEquals(entity.get("attr1"), "DEFAULT VALUE");
+
+		entity.set("attr0", "test");
+		entity.set("attr1", "test");
+
+		assertEquals(entity.get("attr0"), "test");
+		assertEquals(entity.get("attr1"), "test");
 	}
 }

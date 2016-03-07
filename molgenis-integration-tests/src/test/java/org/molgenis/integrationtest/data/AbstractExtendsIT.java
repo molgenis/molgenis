@@ -1,14 +1,13 @@
 package org.molgenis.integrationtest.data;
 
 import static org.molgenis.MolgenisFieldTypes.BOOL;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 public class AbstractExtendsIT extends AbstractDatatypeIT
 {
@@ -19,8 +18,8 @@ public class AbstractExtendsIT extends AbstractDatatypeIT
 		superclass2.addAttribute("col1", ROLE_ID).setDataType(BOOL).setNillable(false);
 		metaDataService.addEntityMeta(superclass2);
 
-		EditableEntityMetaData superclass = new DefaultEntityMetaData("super1").setExtends(superclass2).setAbstract(
-				true);
+		EditableEntityMetaData superclass = new DefaultEntityMetaData("super1").setExtends(superclass2)
+				.setAbstract(true);
 		superclass.addAttribute("col2").setDataType(BOOL);
 		metaDataService.addEntityMeta(superclass);
 
@@ -43,7 +42,7 @@ public class AbstractExtendsIT extends AbstractDatatypeIT
 	{
 		assertEquals(entity.get("col1"), false);
 		assertEquals(entity.get("col2"), true);
-		assertNull(entity.get("col3"));
+		assertEquals(entity.get("col3"), true);
 	}
 
 	@Override
@@ -57,7 +56,7 @@ public class AbstractExtendsIT extends AbstractDatatypeIT
 	{
 		assertEquals(entity.get("col1"), false);
 		assertEquals(entity.get("col2"), false);
-		assertNull(entity.get("col3"));
+		assertEquals(entity.get("col3"), true);
 	}
 
 }

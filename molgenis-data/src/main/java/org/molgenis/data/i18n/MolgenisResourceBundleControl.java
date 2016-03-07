@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.settings.AppSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,10 +22,12 @@ public class MolgenisResourceBundleControl extends ResourceBundle.Control
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MolgenisResourceBundleControl.class);
 	private final DataService dataService;
+	private final AppSettings appSettings;
 
-	public MolgenisResourceBundleControl(DataService dataService)
+	public MolgenisResourceBundleControl(DataService dataService, AppSettings appSettings)
 	{
 		this.dataService = dataService;
+		this.appSettings = appSettings;
 	}
 
 	@Override
@@ -38,31 +41,40 @@ public class MolgenisResourceBundleControl extends ResourceBundle.Control
 
 		// Only handle languages that are present in the languages repository
 		if (runAsSystem(() -> dataService.query(LanguageMetaData.ENTITY_NAME).eq(LanguageMetaData.CODE, languageCode)
-				.count()) == 0)
-			return null;
+				.count()) == 0) return null;
 
-		return new MolgenisResourceBundle(dataService, languageCode);
+		return new MolgenisResourceBundle(dataService, languageCode, appSettings);
 	}
 
 	protected static class MolgenisResourceBundle extends ListResourceBundle
 	{
 		private final DataService dataService;
 		private final String languageCode;
+		private final AppSettings appSettings;
+		private String appLanguageCode;
 
-		public MolgenisResourceBundle(DataService dataService, String languageCode)
+		public MolgenisResourceBundle(DataService dataService, String languageCode, AppSettings appSettings)
 		{
 			this.dataService = dataService;
 			this.languageCode = languageCode;
+			this.appSettings = appSettings;
 		}
 
 		@Override
 		protected Object[][] getContents()
 		{
-			List<Entity> entities = runAsSystem(
-					() -> dataService.findAll(I18nStringMetaData.ENTITY_NAME).collect(Collectors.toList()));
+			List<Entity> entities = runAsSystem(() -> dataService.findAll(I18nStringMetaData.ENTITY_NAME).collect(
+					Collectors.toList()));
+
+			appLanguageCode = appSettings.getLanguageCode();
+
+			boolean exists = (appLanguageCode != null) && runAsSystem(() -> {
+				return (dataService.findOne(LanguageMetaData.ENTITY_NAME, appLanguageCode) != null);
+			});
+
+			if (!exists) appLanguageCode = null;
 
 			Object[][] contents = new Object[entities.size()][2];
-
 			int i = 0;
 			for (Entity entity : entities)
 			{
@@ -70,9 +82,24 @@ public class MolgenisResourceBundleControl extends ResourceBundle.Control
 				String msg = entity.getString(languageCode);
 				if (msg == null)
 				{
-					// Missing translation for this language
+					// Missing translation for this language, return in app language
 					LOG.warn("Missing '{}' msg for language '{}'", msgid, languageCode);
-					msg = "#" + msgid + "#";
+
+					if (appLanguageCode != null)
+					{
+						msg = entity.getString(appLanguageCode);
+					}
+
+					// Also missing in app language, use default
+					if (msg == null)
+					{
+						msg = entity.getString(LanguageService.FALLBACK_LANGUAGE);
+					}
+
+					if (msg == null)
+					{
+						msg = "#" + msgid + "#";
+					}
 				}
 
 				contents[i++] = new Object[]

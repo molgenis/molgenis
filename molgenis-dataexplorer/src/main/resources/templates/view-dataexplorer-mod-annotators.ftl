@@ -99,9 +99,6 @@
         	<div class="row">
         		<div class="col-md-12">
                     <div class="form-group">
-        			    <input type="checkbox" name="createCopy"> Copy before annotating
-                    </div>
-                    <div class="form-group">
                         <input type="hidden" value="" id="dataset-identifier" name="dataset-identifier">
                         <button id="annotate-dataset-button" class="btn btn-default">Annotate</button>
                     </div>

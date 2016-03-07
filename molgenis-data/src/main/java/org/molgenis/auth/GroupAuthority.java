@@ -1,10 +1,11 @@
 package org.molgenis.auth;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-
 import java.util.LinkedHashSet;
 import java.util.Set;
+
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.util.EntityUtils;
 
 public class GroupAuthority extends org.molgenis.data.support.AbstractEntity implements Authority
 {
@@ -18,6 +19,11 @@ public class GroupAuthority extends org.molgenis.data.support.AbstractEntity imp
 	String id;
 	MolgenisGroup molgenisGroup;
 	String role;
+
+	public GroupAuthority()
+	{
+		EntityUtils.setDefaultValues(this);
+	}
 
 	public String getId()
 	{

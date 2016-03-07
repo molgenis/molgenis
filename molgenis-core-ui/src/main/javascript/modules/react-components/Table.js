@@ -59,11 +59,15 @@ import "./css/Table.css";
 			onRowDelete: React.PropTypes.func,
 			onRowInspect: React.PropTypes.func,
 			onRowClick : React.PropTypes.func,
+			onExecute: React.PropTypes.func,
 			enableAdd: React.PropTypes.bool,
 			enableEdit: React.PropTypes.bool,
 			enableDelete: React.PropTypes.bool,
 			enableInspect: React.PropTypes.bool,
-			onSort: React.PropTypes.func
+			enableExecute: React.PropTypes.bool,
+			onSort: React.PropTypes.func,
+			defaultSelectFirstRow: React.PropTypes.bool,
+			selectedRow: React.PropTypes.object
 		},
 		getInitialState: function() {
 			return {
@@ -86,8 +90,12 @@ import "./css/Table.css";
 				enableEdit: true,
 				enableDelete: true,
 				enableInspect: true,
+				enableExecute: false,
 				onRowClick : null,
-				onSort : function() {}
+				onExecute: null,
+				onSort : function() {},
+				defaultSelectFirstRow: false,
+				selectedRow: null
 			};
 		},
 		componentDidMount: function() {
@@ -116,10 +124,12 @@ import "./css/Table.css";
 				enableEdit: writable && this.props.enableEdit === true,
 				enableDelete: writable && this.props.enableDelete === true,
 				enableInspect: this.props.enableInspect === true && this.props.onRowInspect !== null,
+				enableExecute: this.props.enableExecute === true && this.props.onExecute != null,
 				onSort : this._handleSort,
 				onExpand : this._handleExpand,
 				onCollapse : this._handleCollapse,
-				onCreate: this._handleCreate
+				onCreate: this._handleCreate,
+				onExecute: this.props.onExecute
 			});
 
 			var TableBody = TableBodyFactory({
@@ -128,10 +138,13 @@ import "./css/Table.css";
 				enableEdit: writable && this.props.enableEdit === true,
 				enableDelete: writable && this.props.enableDelete === true,
 				enableInspect: this.props.enableInspect === true && this.props.onRowInspect !== null,
+				enableExecute: this.props.enableExecute === true && this.props.onExecute != null,
 				onEdit: this._handleEdit,
 				onDelete: this._handleDelete,
 				onRowInspect: this.props.onRowInspect,
-				onRowClick : this.props.onRowClick
+				onRowClick : this.props.onRowClick,
+				onExecute: this.props.onExecute,
+				selectedRow: this.props.selectedRow
 			});
 
 			var className = 'table table-striped table-condensed table-bordered molgenis-table';
@@ -209,6 +222,9 @@ import "./css/Table.css";
 			api.get(props.entity, opts).done(function(data) {
 				var newState = _.extend({}, state, {data: data});
 				if (this.isMounted()) {
+					if (this.props.onRowClick !== null && this.props.defaultSelectFirstRow === true  && this.props.selectedRow === null && data && data.items && data.items.length > 0) {
+						this.props.onRowClick(data.items[0]);
+					}
 					this.setState(newState);
 				}
 			}.bind(this));
@@ -287,7 +303,8 @@ import "./css/Table.css";
 			enableAdd: React.PropTypes.bool,
 			enableEdit: React.PropTypes.bool,
 			enableDelete: React.PropTypes.bool,
-			enableInspect: React.PropTypes.bool
+			enableInspect: React.PropTypes.bool,
+			enableExecute: React.PropTypes.bool
 		},
 		render: function() {
 			return thead(null,
@@ -312,6 +329,9 @@ import "./css/Table.css";
 			}
 			if(this.props.enableInspect) {
 				Headers.push(th({className: 'compact', key: 'inspect'}));
+			}
+			if(this.props.enableExecute) {
+				Headers.push(th({className: 'compact', key: 'execute'}));
 			}
 			this._createHeadersRec(this.props.entity.attributes, attrs, Headers, [], false);
 			return Headers;
@@ -436,17 +456,22 @@ import "./css/Table.css";
 			enableEdit: React.PropTypes.bool,
 			enableDelete: React.PropTypes.bool,
 			enableInspect: React.PropTypes.bool,
+			enableExecute: React.PropTypes.bool,
 			onEdit: React.PropTypes.func,
 			onDelete: React.PropTypes.func,
 			onRowInspect: React.PropTypes.func,
-			onRowClick : React.PropTypes.func
+			onRowClick : React.PropTypes.func,
+			onExecute: React.PropTypes.func,
+			selectedRow: React.PropTypes.object
 		},
 		getDefaultProps: function() {
 			return {
 				onEdit: function() {},
 				onDelete: function() {},
 				onRowInspect: function() {},
-				onRowClick : function() {}
+				onRowClick : function() {},
+				onExecute: function() {},
+				selectedRow: null
 			};
 		},
 		render: function() {
@@ -456,13 +481,13 @@ import "./css/Table.css";
 		},
 		_createRows: function(entity) {
 			var Rows = [];
-
 			for(var i = 0; i < this.props.data.items.length; ++i) {
 				var item = this.props.data.items[i];
 
 				Rows.push(tr({
 					key : '' + i,
-					onClick : this.props.onRowClick !== null ? this.props.onRowClick.bind(null, item):null
+					className: this.props.selectedRow && this.props.selectedRow.id === item.id ? 'info' : '',
+					onClick : this.props.onRowClick !== null ? this.props.onRowClick.bind(null, item) : null
 				}, this._createCols(item, entity)));
 			}
 			return Rows;
@@ -492,6 +517,14 @@ import "./css/Table.css";
 					onInspect: this.props.onRowInspect
 				});
 				Cols.push(td({className: 'compact', key: 'inspect'}, EntityInspectBtn));
+			}
+			if(this.props.enableExecute === true && this.props.onExecute !== null) {
+				var EntityExecuteBtn = EntityExecuteBtnFactory({
+					name: entity.name,
+					id : item[entity.idAttribute],
+					onExecute: this.props.onExecute
+				});
+				Cols.push(td({className: 'compact', key: 'execute'}, EntityExecuteBtn));
 			}
 			this._createColsRec(item, entity, entity.attributes, this.props.attrs, Cols, [], false, undefined);
 			return Cols;
@@ -1039,6 +1072,41 @@ import "./css/Table.css";
 		}
 	});
 	var EntityInspectBtnFactory = React.createFactory(EntityInspectBtn);
+	
+	/**
+	 * @memberOf component
+	 */
+	var EntityExecuteBtn = React.createClass({
+		mixins: [DeepPureRenderMixin],
+		displayName: 'EntityExecuteBtn',
+		propTypes: {
+			name: React.PropTypes.string.isRequired,
+			id: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.number]).isRequired,
+			onExecute: React.PropTypes.func
+		},
+		getDefaultProps: function() {
+	    	return {
+	    		onExecute: function() {}
+	    	};
+	    },
+		render: function() {
+			return Button({
+				icon: 'flash',
+				style: 'danger',
+				title: 'Execute now',
+				size: 'xsmall',
+				onClick : this._handleClick
+			});
+		},
+		_handleClick: function() {
+			this.props.onExecute({
+				name : this.props.name,
+				id : this.props.id
+			});
+		}
+	});
+	var EntityExecuteBtnFactory = React.createFactory(EntityExecuteBtn);
 
+export { Table };
 const TableFactory = React.createFactory(Table);
 export default TableFactory;

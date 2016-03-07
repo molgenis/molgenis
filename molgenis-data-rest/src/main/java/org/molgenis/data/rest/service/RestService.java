@@ -8,6 +8,7 @@ import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -88,6 +89,13 @@ public class RestService
 		if ((paramValue == null) && (attr.getDataType() instanceof BoolField) && !attr.isNillable())
 		{
 			value = false;
+		}
+
+		// Treat null lists as empty lists
+		if (paramValue == null
+				&& (attr.getDataType().getEnumType() == MREF || attr.getDataType().getEnumType() == CATEGORICAL_MREF))
+		{
+			value = Collections.emptyList();
 		}
 
 		if (paramValue != null)

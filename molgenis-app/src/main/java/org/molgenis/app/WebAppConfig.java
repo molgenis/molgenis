@@ -131,7 +131,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 
 		for (EntityMetaData emd : metas)
 		{
-			if (!emd.isAbstract())
+			if (!emd.isAbstract() && !localDataService.hasRepository(emd.getName()))
 			{
 				if (MysqlRepositoryCollection.NAME.equals(emd.getBackend()))
 				{

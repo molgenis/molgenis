@@ -58,6 +58,12 @@ public class InMemoryRepository implements Repository
 	}
 
 	@Override
+	public Stream<Entity> stream(Fetch fetch)
+	{
+		return entities.values().stream();
+	}
+
+	@Override
 	public void close() throws IOException
 	{
 
