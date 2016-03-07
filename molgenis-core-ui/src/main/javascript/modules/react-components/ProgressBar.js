@@ -30,11 +30,12 @@ var ProgressBar = React.createClass({
 		active: React.PropTypes.bool
 	},
 	render: function() {
-		return <div className="progress background-lightgrey">
-			<div className={'progress-bar progress-bar-' + this.props.status + (this.props.active ? ' progress-bar-striped active' : '')}
-				role="progressbar" style={{minWidth: '2em', 'width': this.props.progressPct+ '%'}}>
-		    		{this.props.progressMessage}
-		    </div>
+		return <div>{this.props.progressMessage}
+			<div className="progress background-lightgrey">
+				<div className={'progress-bar progress-bar-' + this.props.status + (this.props.active ? ' progress-bar-striped active' : '')}
+					role="progressbar" style={{minWidth: '2em', 'width': this.props.progressPct+ '%'}}>
+				</div>
+			</div>
 		</div>
 	}
 });
