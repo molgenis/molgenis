@@ -11,6 +11,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.file.ingest.meta.FileIngest;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
@@ -37,9 +38,10 @@ public class FileIngesterJobSchedulerTest {
 	public void runNow() throws SchedulerException
 	{
 		String id = "id";
-		Entity fileIngest = new MapEntity(FileIngestMetaData.ID, id);
+		FileIngest fileIngest = new FileIngest(null);
+		fileIngest.set(FileIngestMetaData.ID, id);
 		
-		when(dataServiceMock.findOne(FileIngestMetaData.ENTITY_NAME, id)).thenReturn(fileIngest);
+		when(dataServiceMock.findOne(FileIngestMetaData.ENTITY_NAME, id, FileIngest.class)).thenReturn(fileIngest);
 		when(schedulerMock.checkExists(new JobKey(id, FileIngesterJobScheduler.JOB_GROUP))).thenReturn(false);
 		
 		fileIngesterJobScheduler.runNow(id);
@@ -59,9 +61,10 @@ public class FileIngesterJobSchedulerTest {
 	public void runNowExists() throws SchedulerException
 	{
 		String id = "id";
-		Entity fileIngest = new MapEntity(FileIngestMetaData.ID, id);
+		FileIngest fileIngest = new FileIngest(null);
+		fileIngest.set(FileIngestMetaData.ID, id);
 
-		when(dataServiceMock.findOne(FileIngestMetaData.ENTITY_NAME, id)).thenReturn(fileIngest);
+		when(dataServiceMock.findOne(FileIngestMetaData.ENTITY_NAME, id, FileIngest.class)).thenReturn(fileIngest);
 		when(schedulerMock.checkExists(new JobKey(id, FileIngesterJobScheduler.JOB_GROUP))).thenReturn(true);
 
 		fileIngesterJobScheduler.runNow(id);
@@ -73,7 +76,7 @@ public class FileIngesterJobSchedulerTest {
 	public void schedule() throws SchedulerException
 	{
 		String id = "id";
-		Entity fileIngest = new MapEntity();
+		FileIngest fileIngest = new FileIngest(null);
 		fileIngest.set(FileIngestMetaData.ID, id);
 		fileIngest.set(FileIngestMetaData.CRONEXPRESSION, "	0/20 * * * * ?");
 		fileIngest.set(FileIngestMetaData.NAME, "name");
@@ -120,7 +123,7 @@ public class FileIngesterJobSchedulerTest {
 	public void scheduleExisting() throws SchedulerException
 	{
 		String id = "id";
-		Entity fileIngest = new MapEntity();
+		FileIngest fileIngest = new FileIngest(null);
 		fileIngest.set(FileIngestMetaData.ID, id);
 		fileIngest.set(FileIngestMetaData.CRONEXPRESSION, "	0/20 * * * * ?");
 		fileIngest.set(FileIngestMetaData.NAME, "name");

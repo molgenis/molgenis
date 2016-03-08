@@ -7,7 +7,7 @@ import java.util.Set;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.system.ImportRunMetaData;
-import org.molgenis.util.EntityUtils;
+
 
 public class ImportRun extends org.molgenis.data.support.AbstractEntity implements org.molgenis.data.Entity
 {
@@ -16,7 +16,6 @@ public class ImportRun extends org.molgenis.data.support.AbstractEntity implemen
 	public static final String ENTITY_NAME = "ImportRun";
 
 	private static final java.util.List<org.molgenis.util.ValueLabel> status_options;
-
 	private static final java.util.List<org.molgenis.util.ValueLabel> notify_options;
 
 	private String id;
@@ -43,11 +42,6 @@ public class ImportRun extends org.molgenis.data.support.AbstractEntity implemen
 		notify_options = new java.util.ArrayList<org.molgenis.util.ValueLabel>();
 		notify_options.add(new org.molgenis.util.ValueLabel("API", "API"));
 		notify_options.add(new org.molgenis.util.ValueLabel("UI", "UI"));
-	}
-
-	public ImportRun()
-	{
-		EntityUtils.setDefaultValues(this);
 	}
 
 	public String getId()
@@ -203,6 +197,7 @@ public class ImportRun extends org.molgenis.data.support.AbstractEntity implemen
 			this.setImportedEntities(entity.getString("ImportRun_importedEntities"));
 		if (entity.getBoolean("notify") != null) this.setNotify(entity.getBoolean("notify"));
 		if (entity.getString("ImportRun_notify") != null) this.setNotify(entity.getBoolean("ImportRun_notify"));
+
 	}
 
 	@Override
@@ -297,7 +292,6 @@ public class ImportRun extends org.molgenis.data.support.AbstractEntity implemen
 			this.setNotify((Boolean) value);
 			return;
 		}
-
 	}
 
 

@@ -12,6 +12,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.testng.Assert;
 
 /** Test for MolgenisFieldTypes.DATETIME */
 public class MysqlRepositoryDatetimeTest extends MysqlRepositoryAbstractDatatypeTest
@@ -24,8 +25,7 @@ public class MysqlRepositoryDatetimeTest extends MysqlRepositoryAbstractDatatype
 		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("DatetimeTest").setLabel("Datetime Test");
 		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(MolgenisFieldTypes.DATETIME);
 		entityMetaData.addAttribute("col2").setDataType(MolgenisFieldTypes.DATETIME);
-		entityMetaData.addAttribute("col3").setDataType(MolgenisFieldTypes.DATETIME)
-				.setDefaultValue("2010-09-29T18:46:19CEST");
+		entityMetaData.addAttribute("col3").setDataType(MolgenisFieldTypes.DATETIME).setDefaultValue("01-01-2014");
 		return entityMetaData;
 	}
 
@@ -51,6 +51,7 @@ public class MysqlRepositoryDatetimeTest extends MysqlRepositoryAbstractDatatype
 	{
 		assertEquals(e.getUtilDate("col1"), sdf.parse("2012-03-13 23:59:33"));
 		assertEquals(e.getUtilDate("col2"), sdf.parse("2013-02-09 13:12:11"));
-		assertEquals(e.getUtilDate("col3"), sdf.parse("2010-09-29 18:46:19"));
+		Assert.assertNull(e.get("col3")); // default value should NOT be set by the repository, for then the user cannot
+											// override it to be NULL in a form.
 	}
 }

@@ -1,6 +1,5 @@
 package org.molgenis.integrationtest.data;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -11,21 +10,18 @@ import java.util.Iterator;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EditableEntityMetaData;
-import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
 import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.QueryImpl;
 
 import com.google.common.collect.Iterables;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 
 public abstract class AbstractMetaDataIT extends AbstractDataIntegrationIT
 {
-	private static final String ENTITY_FULL_NAME = "test_test1_TestEntity";
-
 	public void testIt()
 	{
 		SecuritySupport.login();
@@ -52,20 +48,19 @@ public abstract class AbstractMetaDataIT extends AbstractDataIntegrationIT
 		// Create EntityMetaData
 		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("TestEntity", testPackage1);
 		entityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false);
-		DefaultAttributeMetaData compound1 = entityMetaData.addAttribute("compoundAttr1")
-				.setDataType(MolgenisFieldTypes.COMPOUND);
+		DefaultAttributeMetaData compound1 = entityMetaData.addAttribute("compoundAttr1").setDataType(
+				MolgenisFieldTypes.COMPOUND);
 		DefaultAttributeMetaData compound2 = new DefaultAttributeMetaData("compoundAttr2",
 				MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
-		DefaultAttributeMetaData intAttr = new DefaultAttributeMetaData("intAttr",
-				MolgenisFieldTypes.FieldTypeEnum.INT);
+		DefaultAttributeMetaData intAttr = new DefaultAttributeMetaData("intAttr", MolgenisFieldTypes.FieldTypeEnum.INT);
 		entityMetaData.setLabelAttribute(intAttr);
 		compound2.setAttributesMetaData(Arrays.asList(intAttr));
 		compound1.setAttributesMetaData(Arrays.asList(compound2));
 		metaDataService.addEntityMeta(entityMetaData);
 
-		EntityMetaData retrievedEntityMetaData = metaDataService.getEntityMetaData(ENTITY_FULL_NAME);
+		EntityMetaData retrievedEntityMetaData = metaDataService.getEntityMetaData("test_test1_TestEntity");
 		assertNotNull(retrievedEntityMetaData);
-		assertEquals(retrievedEntityMetaData.getName(), ENTITY_FULL_NAME);
+		assertEquals(retrievedEntityMetaData.getName(), "test_test1_TestEntity");
 		assertNotNull(retrievedEntityMetaData.getIdAttribute());
 		assertEquals(retrievedEntityMetaData.getIdAttribute().getName(), "identifier");
 		assertNotNull(retrievedEntityMetaData.getLabelAttribute());
@@ -92,27 +87,10 @@ public abstract class AbstractMetaDataIT extends AbstractDataIntegrationIT
 		assertEquals(attrs.next().getName(), "intAttr");
 
 		// Add attribute
-		metaDataService.addAttribute(ENTITY_FULL_NAME, new DefaultAttributeMetaData("strAttr"));
-		retrievedEntityMetaData = metaDataService.getEntityMetaData(ENTITY_FULL_NAME);
+		metaDataService.addAttribute("test_test1_TestEntity", new DefaultAttributeMetaData("strAttr"));
+		retrievedEntityMetaData = metaDataService.getEntityMetaData("test_test1_TestEntity");
 		assertNotNull(retrievedEntityMetaData.getAttribute("strAttr"));
 		assertEquals(Iterables.size(retrievedEntityMetaData.getAtomicAttributes()), 3);
-
-		// Add attribute test default values
-		DefaultEntity testEntity = new DefaultEntity(retrievedEntityMetaData, dataService);
-		testEntity.set("identifier", "0");
-		testEntity.set("intAttr", 0);
-		testEntity.set("strAttr", "test");
-		dataService.add(ENTITY_FULL_NAME, testEntity);
-
-		DefaultAttributeMetaData attrStrDefault = new DefaultAttributeMetaData("strAttr_default");
-		attrStrDefault.setDefaultValue("DEFAULT VALUE");
-		metaDataService.addAttribute(ENTITY_FULL_NAME, attrStrDefault);
-		retrievedEntityMetaData = metaDataService.getEntityMetaData(ENTITY_FULL_NAME);
-		assertEquals(retrievedEntityMetaData.getAttribute("strAttr_default").getDefaultValue(), "DEFAULT VALUE");
-		assertEquals(Iterables.size(retrievedEntityMetaData.getAtomicAttributes()), 4);
-
-		Entity retreivedTestEntity = dataService.findOne(ENTITY_FULL_NAME, new QueryImpl());
-		assertEquals(retreivedTestEntity.get("strAttr_default"), "DEFAULT VALUE");
 
 		// TODO, fails -> fix deleteAttribute
 		// Delete attribute

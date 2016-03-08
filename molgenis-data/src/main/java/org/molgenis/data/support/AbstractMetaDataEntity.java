@@ -4,7 +4,6 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.util.EntityUtils;
 
 public abstract class AbstractMetaDataEntity extends AbstractEntity
 {
@@ -15,7 +14,6 @@ public abstract class AbstractMetaDataEntity extends AbstractEntity
 	{
 		if (metaData == null) throw new IllegalArgumentException("EntityMetaData cannot be null");
 		this.metaData = metaData;
-		EntityUtils.setDefaultValues(this);
 	}
 
 	@Override
@@ -36,8 +34,8 @@ public abstract class AbstractMetaDataEntity extends AbstractEntity
 		Object id = get(idAttribute.getName());
 		if (!id.getClass().isAssignableFrom(Integer.class))
 		{
-			throw new MolgenisDataException(
-					"Id attribute should be of type Integer but is of type [" + id.getClass() + "]");
+			throw new MolgenisDataException("Id attribute should be of type Integer but is of type [" + id.getClass()
+					+ "]");
 		}
 
 		return id;

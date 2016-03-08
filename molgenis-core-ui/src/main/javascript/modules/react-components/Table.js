@@ -1091,8 +1091,8 @@ import "./css/Table.css";
 	    },
 		render: function() {
 			return Button({
-				icon: 'flash',
-				style: 'danger',
+				icon: 'play',
+				style: 'success',
 				title: 'Execute now',
 				size: 'xsmall',
 				onClick : this._handleClick
