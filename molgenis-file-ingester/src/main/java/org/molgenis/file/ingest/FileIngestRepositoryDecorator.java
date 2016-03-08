@@ -15,7 +15,7 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.file.ingest.meta.FileIngestJobMetaDataMetaData;
+import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 
 public class FileIngestRepositoryDecorator implements Repository
@@ -140,8 +140,8 @@ public class FileIngestRepositoryDecorator implements Repository
 
 	private void removeJobExecutions(String entityId)
 	{
-		Query query = dataService.query(FileIngestJobMetaDataMetaData.ENTITY_NAME).eq(FileIngestJobMetaDataMetaData.FILE_INGEST, entityId);
-		dataService.delete(FileIngestJobMetaDataMetaData.ENTITY_NAME, dataService.findAll(FileIngestJobMetaDataMetaData.ENTITY_NAME, query));
+		Query query = dataService.query(FileIngestJobExecutionMetaData.ENTITY_NAME).eq(FileIngestJobExecutionMetaData.FILE_INGEST, entityId);
+		dataService.delete(FileIngestJobExecutionMetaData.ENTITY_NAME, dataService.findAll(FileIngestJobExecutionMetaData.ENTITY_NAME, query));
 	}
 
 	@Override

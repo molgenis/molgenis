@@ -36,7 +36,7 @@ class FileIngestPlugin extends Component {
     				</legend>
     				
     				<div className='ingest-table'>
-    					<Table entity='FileIngestJobMetaData' 
+    					<Table entity='FileIngestJobExecution'
     							enableAdd={false}
     							sort={{attr: {name: 'startDate'}, order: 'desc', path: []}}
     							attrs={{status:null, startDate: null, endDate: null, progressMessage: null, file: null}}

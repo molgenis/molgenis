@@ -8,6 +8,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
+import org.molgenis.fieldtypes.StringField;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableList;
@@ -39,7 +40,8 @@ public class FileIngestMetaData extends DefaultEntityMetaData
 				.setNillable(false);
 		addAttribute(ENTITY_META_DATA).setDataType(MolgenisFieldTypes.XREF)
 				.setRefEntity(EntityMetaDataMetaData.INSTANCE).setLabel("Target EntityMetaData").setNillable(false);
-		addAttribute(CRONEXPRESSION).setLabel("Cronexpression").setNillable(false);
+		addAttribute(CRONEXPRESSION).setLabel("Cronexpression").setNillable(false)
+				.setValidationExpression("$('" + CRONEXPRESSION + "').matches(" + StringField.CRON_REGEX + ").value()");
 		addAttribute(ACTIVE).setDataType(MolgenisFieldTypes.BOOL).setLabel("Active").setNillable(false);
 		addAttribute(FAILURE_EMAIL).setDataType(MolgenisFieldTypes.EMAIL).setLabel("Failure email")
 				.setDescription("Leave blank if you don't want to receive emails if the jobs failed.")

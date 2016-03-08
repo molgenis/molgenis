@@ -12,6 +12,7 @@ import EntityLoaderMixin from './EntityLoaderMixin';
 import GroupMixin from './GroupMixin';
 import I18nStringsMixin from './I18nStringsMixin';
 import ReactLayeredComponentMixin from './ReactLayeredComponentMixin';
+import SetIntervalMixin from './SetIntervalMixin';
 
 var mixin = {
 	'AttributeLoaderMixin' : AttributeLoaderMixin,
@@ -20,7 +21,8 @@ var mixin = {
 	'EntityLoaderMixin' : EntityLoaderMixin,
 	'GroupMixin' : GroupMixin,
 	'I18nStringsMixin' : I18nStringsMixin,
-	'ReactLayeredComponentMixin' : ReactLayeredComponentMixin
+	'ReactLayeredComponentMixin' : ReactLayeredComponentMixin,
+	'SetIntervalMixin' : SetIntervalMixin
 }
 
 export default mixin;

@@ -10,6 +10,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.file.ingest.execution.FileIngestException;
+import org.molgenis.file.ingest.meta.FileIngest;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.quartz.CronExpression;
 import org.quartz.JobDataMap;
@@ -53,7 +55,7 @@ public class FileIngesterJobScheduler implements ApplicationListener<ContextRefr
 	 */
 	public synchronized void runNow(String fileIngestId)
 	{
-		Entity fileIngest = dataService.findOne(FileIngestMetaData.ENTITY_NAME, fileIngestId);
+		FileIngest fileIngest = dataService.findOne(FileIngestMetaData.ENTITY_NAME, fileIngestId, FileIngest.class);
 		if (fileIngest == null)
 		{
 			throw new UnknownEntityException("Unknown FileIngest entity id '" + fileIngestId + "'");
@@ -71,7 +73,7 @@ public class FileIngesterJobScheduler implements ApplicationListener<ContextRefr
 			{
 				// Schedule with 'now' trigger
 				Trigger trigger = newTrigger().withIdentity(fileIngestId, TRIGGER_GROUP).startNow().build();
-				schedule(fileIngest, trigger);
+				schedule(fileIngestId, trigger);
 			}
 		}
 		catch (SchedulerException e)
@@ -99,8 +101,8 @@ public class FileIngesterJobScheduler implements ApplicationListener<ContextRefr
 		// Validate cron expression
 		if (!CronExpression.isValidExpression(cronExpression))
 		{
-			throw new MolgenisValidationException(Sets.newHashSet(new ConstraintViolation("Invalid cronexpression '"
-					+ cronExpression + "'", null)));
+			throw new MolgenisValidationException(
+					Sets.newHashSet(new ConstraintViolation("Invalid cronexpression '" + cronExpression + "'", null)));
 		}
 
 		try
@@ -119,8 +121,8 @@ public class FileIngesterJobScheduler implements ApplicationListener<ContextRefr
 
 			// Schedule with 'cron' trigger
 			Trigger trigger = newTrigger().withIdentity(id, TRIGGER_GROUP).withSchedule(cronSchedule(cronExpression))
-				.build();
-			schedule(fileIngest, trigger);
+					.build();
+			schedule(fileIngest.getIdValue().toString(), trigger);
 
 			LOG.info("Scheduled FileIngesterJob '{}' with trigger '{}'", name, trigger);
 		}
@@ -153,15 +155,16 @@ public class FileIngesterJobScheduler implements ApplicationListener<ContextRefr
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
 		// Schedule all FileIngest jobs
-		runAsSystem(() -> dataService.findAll(FileIngestMetaData.ENTITY_NAME).forEach(this::schedule));
+		runAsSystem(
+				() -> dataService.findAll(FileIngestMetaData.ENTITY_NAME, FileIngest.class).forEach(this::schedule));
 	}
 
-	private void schedule(Entity fileIngest, Trigger trigger) throws SchedulerException
+	private void schedule(String id, Trigger trigger) throws SchedulerException
 	{
-		String id = fileIngest.getString(FileIngestMetaData.ID);
 		JobDataMap jobDataMap = new JobDataMap();
-		jobDataMap.put(FileIngesterJob.ENTITY_KEY, fileIngest);
-		JobDetail job = newJob(FileIngesterJob.class).withIdentity(id, JOB_GROUP).usingJobData(jobDataMap).build();
+		jobDataMap.put(FileIngesterQuartzJob.ENTITY_KEY, id);
+		JobDetail job = newJob(FileIngesterQuartzJob.class).withIdentity(id, JOB_GROUP).usingJobData(jobDataMap)
+				.build();
 
 		scheduler.scheduleJob(job, trigger);
 	}
