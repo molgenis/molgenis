@@ -8,6 +8,7 @@ import static org.molgenis.MolgenisFieldTypes.STRING;
 import org.molgenis.data.idcard.indexer.IdCardIndexerController;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
+import org.molgenis.fieldtypes.StringField;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -25,9 +26,6 @@ public class IdCardIndexerDbSettings extends DefaultSettingsEntity implements Id
 	@Component
 	private static class Meta extends DefaultSettingsEntityMetaData
 	{
-		// http://stackoverflow.com/a/21558119
-		private static final String CRON_REGEX = "/^\\s*($|#|\\w+\\s*=|(\\?|\\*|(?:[0-5]?\\d)(?:(?:-|\\/|\\,)(?:[0-5]?\\d))?(?:,(?:[0-5]?\\d)(?:(?:-|\\/|\\,)(?:[0-5]?\\d))?)*)\\s+(\\?|\\*|(?:[0-5]?\\d)(?:(?:-|\\/|\\,)(?:[0-5]?\\d))?(?:,(?:[0-5]?\\d)(?:(?:-|\\/|\\,)(?:[0-5]?\\d))?)*)\\s+(\\?|\\*|(?:[01]?\\d|2[0-3])(?:(?:-|\\/|\\,)(?:[01]?\\d|2[0-3]))?(?:,(?:[01]?\\d|2[0-3])(?:(?:-|\\/|\\,)(?:[01]?\\d|2[0-3]))?)*)\\s+(\\?|\\*|(?:0?[1-9]|[12]\\d|3[01])(?:(?:-|\\/|\\,)(?:0?[1-9]|[12]\\d|3[01]))?(?:,(?:0?[1-9]|[12]\\d|3[01])(?:(?:-|\\/|\\,)(?:0?[1-9]|[12]\\d|3[01]))?)*)\\s+(\\?|\\*|(?:[1-9]|1[012])(?:(?:-|\\/|\\,)(?:[1-9]|1[012]))?(?:L|W)?(?:,(?:[1-9]|1[012])(?:(?:-|\\/|\\,)(?:[1-9]|1[012]))?(?:L|W)?)*|\\?|\\*|(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)(?:(?:-)(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))?(?:,(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)(?:(?:-)(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))?)*)\\s+(\\?|\\*|(?:[0-6])(?:(?:-|\\/|\\,|#)(?:[0-6]))?(?:L)?(?:,(?:[0-6])(?:(?:-|\\/|\\,|#)(?:[0-6]))?(?:L)?)*|\\?|\\*|(?:MON|TUE|WED|THU|FRI|SAT|SUN)(?:(?:-)(?:MON|TUE|WED|THU|FRI|SAT|SUN))?(?:,(?:MON|TUE|WED|THU|FRI|SAT|SUN)(?:(?:-)(?:MON|TUE|WED|THU|FRI|SAT|SUN))?)*)(|\\s)+(\\?|\\*|(?:|\\d{4})(?:(?:-|\\/|\\,)(?:|\\d{4}))?(?:,(?:|\\d{4})(?:(?:-|\\/|\\,)(?:|\\d{4}))?)*))$/";
-
 		private static final String API_BASE_URI = "apiBaseUri";
 		private static final String API_TIMEOUT = "apiTimeout";
 		private static final String BIOBANK_RESOURCE = "biobankResource";
@@ -73,7 +71,7 @@ public class IdCardIndexerDbSettings extends DefaultSettingsEntity implements Id
 					.setDefaultValue(DEFAULT_BIOBANK_INDEXING_FREQUENCY).setNillable(false)
 					.setVisibleExpression("$('" + BIOBANK_INDEXING_ENABLED + "').eq(true).value()")
 					.setValidationExpression(
-							"$('" + BIOBANK_INDEXING_FREQUENCY + "').matches(" + CRON_REGEX + ").value()");
+							"$('" + BIOBANK_INDEXING_FREQUENCY + "').matches(" + StringField.CRON_REGEX + ").value()");
 			addAttribute(NOTIFICATION_EMAIL).setDataType(EMAIL).setLabel("Notification email")
 					.setDescription("email address used for index failure notifications")
 					.setDefaultValue(DEFAULT_NOTIFICATION_EMAIL);

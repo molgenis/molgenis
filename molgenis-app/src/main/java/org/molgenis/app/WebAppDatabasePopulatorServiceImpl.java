@@ -11,8 +11,8 @@ import org.molgenis.auth.RuntimePropertyMetaData;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.auth.UserAuthorityMetaData;
 import org.molgenis.data.DataService;
-import org.molgenis.data.jobs.JobMetaData;
-import org.molgenis.data.jobs.JobMetaDataMetaData;
+import org.molgenis.data.jobs.JobExecution;
+import org.molgenis.data.jobs.JobExecutionMetaData;
 import org.molgenis.data.meta.system.FreemarkerTemplateMetaData;
 import org.molgenis.data.meta.system.ImportRunMetaData;
 import org.molgenis.data.support.QueryImpl;
@@ -57,7 +57,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		dataService.getMeta().addEntityMeta(new MolgenisGroupMetaData());
 		dataService.getMeta().addEntityMeta(new MolgenisGroupMemberMetaData());
 		dataService.getMeta().addEntityMeta(new ImportRunMetaData());
-		dataService.getMeta().addEntityMeta(new JobMetaDataMetaData());
+		dataService.getMeta().addEntityMeta(new JobExecutionMetaData());
 
 		molgenisSecurityWebAppDatabasePopulatorService.populateDatabase(this.dataService, HomeController.ID);
 

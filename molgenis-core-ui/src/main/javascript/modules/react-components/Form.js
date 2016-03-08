@@ -386,7 +386,16 @@ import FormControl from "./FormControl";
         	
         	api.update(this.state.entityInstance.href + '/' + attr.name, val, {}, false);
 	    },
-		_handleValueChange: function(e) {
+	    _handleValueChange: function(e) {
+	    	var self = this;
+	    	if (!self.valueChangeTimers) self.valueChangeTimers = [];
+	    	
+	    	if (self.valueChangeTimers[e.attr]) {
+	    		clearTimeout(self.valueChangeTimers[e.attr]);
+	    	}
+	    	self.valueChangeTimers[e.attr] = setTimeout(function(){self._doHandleValueChange(e)}, 300);
+	    },
+		_doHandleValueChange: function(e) {
 			var attribute = this.state.entity.allAttributes[e.attr];
 			if (attribute === undefined) return;//compound
 			
@@ -437,6 +446,8 @@ import FormControl from "./FormControl";
 		                	break;
 	                }
                 }
+				
+				clearTimeout(this.valueChangeTimers[e.attr]);
 			}.bind(this));
 		},
 		submit: function(e) {
