@@ -604,6 +604,9 @@ import FormControl from "./FormControl";
 	                    errorMessage = 'Please enter a value lower than or equal to ' + attr.range.max + '.';
 	                }
 	            }
+	            else if(type === 'DECIMAL' && !nullOrUndefinedValue && !$.isNumeric(value)) {
+	                errorMessage = 'Please enter a valid number.';
+	            }
 	            else if(attr.unique === true && !nullOrUndefinedValue) { // value uniqueness constraint
 	            	
 	                // determine query value
