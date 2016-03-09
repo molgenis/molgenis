@@ -22,6 +22,7 @@ import org.molgenis.data.mapper.data.request.AddTagRequest;
 import org.molgenis.data.mapper.data.request.AutoTagRequest;
 import org.molgenis.data.mapper.data.request.GetOntologyTermRequest;
 import org.molgenis.data.mapper.data.request.RemoveTagRequest;
+import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.semantic.Hit;
 import org.molgenis.data.semanticsearch.semantic.OntologyTag;
@@ -90,7 +91,8 @@ public class TagWizardController extends MolgenisPluginController
 	@RequestMapping
 	public String viewTagWizard(@RequestParam(required = false, value = "selectedTarget") String target, Model model)
 	{
-		List<String> entityNames = dataService.getEntityNames().collect(toList());
+		List<String> entityNames = dataService.findAll(EntityMetaDataMetaData.ENTITY_NAME)
+				.map(e -> e.getString(EntityMetaDataMetaData.FULL_NAME)).collect(toList());
 
 		if (StringUtils.isEmpty(target))
 		{

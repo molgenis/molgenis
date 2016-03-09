@@ -10,6 +10,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.CrudRepositoryAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.jobs.Job;
+import org.molgenis.data.jobs.JobExecutionException;
 import org.molgenis.data.jobs.Progress;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -65,12 +66,13 @@ public class AnnotationJob extends Job<Void>
 		progress.progress(annotators.size(), getMessage());
 		if (firstException != null)
 		{
-			progress.status("Failed annotators: " + StringUtils.join(failedAnnotators, ","));
-			progress.failed(firstException);
+			progress.status("Failed annotators: " + StringUtils.join(failedAnnotators, ",") + ". Succesful annotators: "
+					+ StringUtils.join(successfulAnnotators, ","));
+			throw new JobExecutionException(firstException);
 		}
 		try
 		{
-			//TODO: Workaround to make sure that the progress bar gets loaded
+			// TODO: Workaround to make sure that the progress bar gets loaded
 			Thread.sleep(1000);
 		}
 		catch (InterruptedException e)

@@ -1,17 +1,17 @@
 package org.molgenis.data.system;
 
-import com.google.auto.value.AutoValue;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.meta.system.ImportRunMetaData;
-
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-@AutoValue
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.meta.system.ImportRunMetaData;
+
+
 public class ImportRun extends org.molgenis.data.support.AbstractEntity implements org.molgenis.data.Entity
 {
+	private static final long serialVersionUID = -1301848877377607791L;
 
 	public static final String ENTITY_NAME = "ImportRun";
 
@@ -28,7 +28,6 @@ public class ImportRun extends org.molgenis.data.support.AbstractEntity implemen
 	private String importedEntities;
 	private boolean notify;
 	private String status_label;
-	private String notify_label;
 
 	static
 	{
@@ -295,20 +294,76 @@ public class ImportRun extends org.molgenis.data.support.AbstractEntity implemen
 		}
 	}
 
+
+
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((endDate == null) ? 0 : endDate.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((importedEntities == null) ? 0 : importedEntities.hashCode());
+		result = prime * result + ((message == null) ? 0 : message.hashCode());
+		result = prime * result + (notify ? 1231 : 1237);
+		result = prime * result + progress;
+		result = prime * result + ((startDate == null) ? 0 : startDate.hashCode());
+		result = prime * result + ((status == null) ? 0 : status.hashCode());
+		result = prime * result + ((status_label == null) ? 0 : status_label.hashCode());
+		result = prime * result + ((userName == null) ? 0 : userName.hashCode());
+		return result;
+	}
+
 	@Override
 	public boolean equals(Object obj)
 	{
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
+		ImportRun other = (ImportRun) obj;
+		if (endDate == null)
+		{
+			if (other.endDate != null) return false;
+		}
+		else if (!endDate.equals(other.endDate)) return false;
+		if (id == null)
+		{
+			if (other.id != null) return false;
+		}
+		else if (!id.equals(other.id)) return false;
+		if (importedEntities == null)
+		{
+			if (other.importedEntities != null) return false;
+		}
+		else if (!importedEntities.equals(other.importedEntities)) return false;
+		if (message == null)
+		{
+			if (other.message != null) return false;
+		}
+		else if (!message.equals(other.message)) return false;
+		if (notify != other.notify) return false;
+		if (progress != other.progress) return false;
+		if (startDate == null)
+		{
+			if (other.startDate != null) return false;
+		}
+		else if (!startDate.equals(other.startDate)) return false;
+		if (status == null)
+		{
+			if (other.status != null) return false;
+		}
+		else if (!status.equals(other.status)) return false;
+		if (status_label == null)
+		{
+			if (other.status_label != null) return false;
+		}
+		else if (!status_label.equals(other.status_label)) return false;
+		if (userName == null)
+		{
+			if (other.userName != null) return false;
+		}
+		else if (!userName.equals(other.userName)) return false;
 		return true;
-	}
-
-	@Override
-	public int hashCode()
-	{
-		int result = 1;
-		return result;
 	}
 
 	@Override
