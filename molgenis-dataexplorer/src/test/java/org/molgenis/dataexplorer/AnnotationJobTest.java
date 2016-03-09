@@ -10,6 +10,7 @@ import org.mockito.MockitoAnnotations;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.CrudRepositoryAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.jobs.JobExecutionException;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.mem.InMemoryRepository;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -80,7 +81,7 @@ public class AnnotationJobTest
 		Mockito.verify(progress).success();
 	}
 
-	@Test
+	@Test(expectedExceptions = JobExecutionException.class)
 	public void testFirstAnnotatorFails() throws IOException
 	{
 		Mockito.when(exac.getSimpleName()).thenReturn("exac");
@@ -89,13 +90,5 @@ public class AnnotationJobTest
 		IOException exception = new IOException("error");
 		Mockito.when(crudRepositoryAnnotator.annotate(exac, repository)).thenThrow(exception);
 		annotationJob.call();
-
-		Mockito.verify(progress).start();
-		Mockito.verify(progress).setProgressMax(2);
-		Mockito.verify(progress).progress(0,
-				"Annotating \"My repo\" with exac (annotator 1 of 2, started by \"fdlk\")");
-		Mockito.verify(progress).progress(1,
-				"Annotating \"My repo\" with cadd (annotator 2 of 2, started by \"fdlk\")");
-		Mockito.verify(progress).failed(exception);
 	}
 }
