@@ -109,6 +109,10 @@ public class DecimalField extends FieldType
 		if (value == null) return null;
 		else if (value instanceof Double) return value;
 		else if (value instanceof String || value instanceof Integer) return Double.parseDouble(value.toString());
+		else if (value instanceof BigDecimal)
+		{
+			return ((BigDecimal) value).doubleValue();
+		}
 		throw new RuntimeException("DecimalField.convert(" + value + ") failed");
 	}
 }
