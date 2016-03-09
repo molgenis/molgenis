@@ -58,16 +58,6 @@
 		}
 	}
 
-	function getLookupAttributeNames(entityMetaData) {
-		var attributeNames = [];
-		$.each(entityMetaData.attributes, function(attrName, attr) {
-			if (attr.lookupAttribute === true) {
-				attributeNames.push(attr.name);
-			}
-		});
-		return attributeNames;
-	}
-	
 	function getUniqueAttributeNames(entityMetaData) {
 		var attributeNames = [];
 		$.each(entityMetaData.attributes, function(attrName, attr) {
@@ -117,7 +107,7 @@
 
 	function createSelect2($container, attributeMetaData, options) {
 		var refEntityMetaData = restApi.get(attributeMetaData.refEntity.href, {expand: ['attributes']});
-		var lookupAttrNames = getLookupAttributeNames(refEntityMetaData);
+		var lookupAttrNames = refEntityMetaData.lookupAttributes;
 		var uniqueAttrNames = getUniqueAttributeNames(refEntityMetaData);
 		var width = options.width ? options.width : 'resolve';
 		var $hiddenInput = $(':input[type=hidden]',$container)
