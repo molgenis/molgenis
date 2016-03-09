@@ -2,7 +2,6 @@ package org.molgenis.dataexplorer.controller;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -39,7 +38,7 @@ public class AnnotationJob extends Job<Void>
 	}
 
 	@Override
-	public Void call(Progress progress) throws IOException
+	public Void call(Progress progress) throws Exception
 	{
 		progress.setProgressMax(annotators.size());
 		int i = 0;
@@ -66,7 +65,7 @@ public class AnnotationJob extends Job<Void>
 		if (firstException != null)
 		{
 			progress.status("Failed annotators: " + StringUtils.join(failedAnnotators, ","));
-			progress.failed(firstException);
+			throw firstException;
 		}
 		return null;
 	}
