@@ -585,6 +585,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 
 		Repository repository = mock(Repository.class);
 		when(repository.getName()).thenReturn("newEntity");
+		when(dataService.getRepository("base_newEntity")).thenReturn(repository);
 		when(dataService.copyRepository(repositoryToCopy, "newEntity", "newEntity")).thenReturn(repository);
 
 		doNothing().when(permissionSystemService).giveUserEntityPermissions(any(SecurityContext.class),
