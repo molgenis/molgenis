@@ -1,6 +1,8 @@
 package org.molgenis.dataexplorer;
 
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 import java.io.IOException;
 
@@ -81,7 +83,7 @@ public class AnnotationJobTest
 		Mockito.verify(progress).success();
 	}
 
-	@Test(expectedExceptions = JobExecutionException.class)
+	@Test
 	public void testFirstAnnotatorFails() throws IOException
 	{
 		Mockito.when(exac.getSimpleName()).thenReturn("exac");
@@ -89,6 +91,23 @@ public class AnnotationJobTest
 
 		IOException exception = new IOException("error");
 		Mockito.when(crudRepositoryAnnotator.annotate(exac, repository)).thenThrow(exception);
-		annotationJob.call();
+		try
+		{
+			annotationJob.call();
+			fail("Should throw exception");
+		}
+		catch (JobExecutionException actual)
+		{
+			assertEquals(actual.getCause(), exception);
+		}
+
+		Mockito.verify(progress).start();
+		Mockito.verify(progress).setProgressMax(2);
+		Mockito.verify(progress).progress(0,
+				"Annotating \"My repo\" with exac (annotator 1 of 2, started by \"fdlk\")");
+		Mockito.verify(progress).progress(1,
+				"Annotating \"My repo\" with cadd (annotator 2 of 2, started by \"fdlk\")");
+		Mockito.verify(progress).status("Failed annotators: exac. Successful annotators: cadd");
+		Mockito.verify(progress).failed(exception);
 	}
 }

@@ -2,7 +2,6 @@ package org.molgenis.dataexplorer.controller;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -10,7 +9,6 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.CrudRepositoryAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.jobs.Job;
-import org.molgenis.data.jobs.JobExecutionException;
 import org.molgenis.data.jobs.Progress;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -40,7 +38,7 @@ public class AnnotationJob extends Job<Void>
 	}
 
 	@Override
-	public Void call(Progress progress) throws IOException
+	public Void call(Progress progress) throws Exception
 	{
 		progress.setProgressMax(annotators.size());
 		int i = 0;
@@ -64,12 +62,6 @@ public class AnnotationJob extends Job<Void>
 			i++;
 		}
 		progress.progress(annotators.size(), getMessage());
-		if (firstException != null)
-		{
-			progress.status("Failed annotators: " + StringUtils.join(failedAnnotators, ",") + ". Succesful annotators: "
-					+ StringUtils.join(successfulAnnotators, ","));
-			throw new JobExecutionException(firstException);
-		}
 		try
 		{
 			// TODO: Workaround to make sure that the progress bar gets loaded
@@ -77,6 +69,12 @@ public class AnnotationJob extends Job<Void>
 		}
 		catch (InterruptedException e)
 		{
+		}
+		if (firstException != null)
+		{
+			progress.status("Failed annotators: " + StringUtils.join(failedAnnotators, ",") + ". Successful annotators: "
+					+ StringUtils.join(successfulAnnotators, ","));
+			throw firstException;
 		}
 		return null;
 	}
