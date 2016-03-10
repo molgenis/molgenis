@@ -4,13 +4,8 @@
 <#include "ontology-match-new-task.ftl">
 <#include "ontology-match-list-tasks.ftl">
 <#include "ontology-match-roc-modal.ftl">
-<<<<<<< HEAD
-<#assign css=["bootstrap-fileupload.min.css", "ui.fancytree.min.css", "ontology-service.css", "biobank-connect.css"]>
-<#assign js=["bootstrap-fileupload.min.js", "jquery.fancytree.min.js", "common-component.js", "ontology-tree-view.js", "ontology.tree.plugin.js", "jquery.bootstrap.pager.js", "ontology-service-result.js", "simple_statistics.js"]>
-=======
 <#assign css=["bootstrap.fileupload.min.css", "ui.fancytree.min.css", "ontology-service.css", "biobank-connect.css"]>
 <#assign js=["bootstrap-fileupload.min.js", "jquery.fancytree.min.js", "common-component.js", "ontology-tree-view.js", "ontology.tree.plugin.js", "ontology-service-result.js", "jquery.bootstrap.pager.js", "simple_statistics.js"]>
->>>>>>> 4d1886aae65812ad5f86a15e43f651975953727f
 <@header css js/>
 <form id="ontology-match" class="form-horizontal" enctype="multipart/form-data">
 	<div class="row">
