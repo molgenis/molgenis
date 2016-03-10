@@ -67,6 +67,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -562,6 +563,15 @@ class RestControllerV2
 	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
 		LOG.error("Runtime exception occurred.", e);
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+	}
+
+	@ExceptionHandler(ConversionFailedException.class)
+	@ResponseStatus(BAD_REQUEST)
+	@ResponseBody
+	public ErrorMessageResponse handleConversionFailedException(ConversionFailedException e)
+	{
+		LOG.info("ConversionFailedException occurred", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
