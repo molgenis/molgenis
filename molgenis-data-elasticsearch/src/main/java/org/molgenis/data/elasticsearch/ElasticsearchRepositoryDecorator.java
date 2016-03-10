@@ -204,15 +204,19 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 		List<QueryRule> queryRules = q.getRules();
 		if (queryRules != null && queryRules.isEmpty())
 		{
-			Fetch fetch = q.getFetch();
-			if (fetch != null)
+			if (q.getOffset() == 0 && q.getPageSize() == 0 && q.getSort() == null)
 			{
-				return decoratedRepo.stream(fetch);
+				Fetch fetch = q.getFetch();
+				if (fetch != null)
+				{
+					return decoratedRepo.stream(fetch);
+				}
+				else
+				{
+					return decoratedRepo.stream();
+				}
 			}
-			else
-			{
-				return decoratedRepo.stream();
-			}
+			return decoratedRepo.findAll(q);
 		}
 		return super.findAll(q);
 	}

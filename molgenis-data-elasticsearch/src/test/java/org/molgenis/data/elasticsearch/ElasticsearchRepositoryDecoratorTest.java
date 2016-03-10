@@ -2,6 +2,7 @@ package org.molgenis.data.elasticsearch;
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -28,8 +29,10 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
+import org.molgenis.data.Sort;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.support.AggregateQueryImpl;
+import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -316,6 +319,74 @@ public class ElasticsearchRepositoryDecoratorTest
 		when(decoratedRepo.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = elasticsearchRepositoryDecorator.findAll(entityIds);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+	}
+
+	@Test
+	public void findAllStreamQuery1()
+	{
+		QueryImpl q = new QueryImpl();
+		elasticsearchRepositoryDecorator.findAll(q);
+		verify(decoratedRepo).stream();
+	}
+
+	@Test
+	public void findAllStreamQuery2()
+	{
+		QueryImpl q = new QueryImpl();
+		Fetch fetch = mock(Fetch.class);
+		q.setFetch(fetch);
+		elasticsearchRepositoryDecorator.findAll(q);
+		verify(decoratedRepo).stream(fetch);
+	}
+
+	@Test
+	public void findAllStreamQuery3()
+	{
+		QueryImpl q = new QueryImpl();
+		Fetch fetch = mock(Fetch.class);
+		q.setFetch(fetch);
+		q.setOffset(1);
+		elasticsearchRepositoryDecorator.findAll(q);
+		verify(decoratedRepo).findAll(q);
+	}
+
+	@Test
+	public void findAllStreamQuery4()
+	{
+		QueryImpl q = new QueryImpl();
+		Fetch fetch = mock(Fetch.class);
+		q.setFetch(fetch);
+		q.setOffset(0);
+		q.setPageSize(20);
+		elasticsearchRepositoryDecorator.findAll(q);
+		verify(decoratedRepo).findAll(q);
+	}
+
+	@Test
+	public void findAllStreamQuery5()
+	{
+		QueryImpl q = new QueryImpl();
+		Fetch fetch = mock(Fetch.class);
+		q.setFetch(fetch);
+		q.setSort(mock(Sort.class));
+		elasticsearchRepositoryDecorator.findAll(q);
+		verify(decoratedRepo).findAll(q);
+	}
+
+	@Test
+	public void findAllStreamQuery6()
+	{
+		QueryImpl q = new QueryImpl();
+		Fetch fetch = mock(Fetch.class);
+		q.setFetch(fetch);
+		q.setOffset(1);
+		q.setPageSize(20);
+		q.setSort(mock(Sort.class));
+		q.not();
+		elasticsearchRepositoryDecorator.findAll(q);
+		verify(decoratedRepo, never()).stream();
+		verify(decoratedRepo, never()).stream(fetch);
+		verify(decoratedRepo, never()).findAll(q);
 	}
 
 	@Test
