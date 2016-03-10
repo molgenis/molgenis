@@ -56,10 +56,11 @@ import org.molgenis.data.meta.MetaValidationUtils;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.Href;
 import org.molgenis.data.rest.service.RestService;
+import org.molgenis.data.support.EntityMetaDataUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
@@ -67,6 +68,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -346,28 +348,31 @@ class RestControllerV2
 		// No repo
 		if (!dataService.hasRepository(entityName)) throw createUnknownEntityException(entityName);
 
-		Repository repositoryToCopy = dataService.getRepository(entityName);
+		Repository repositoryToCopyFrom = dataService.getRepository(entityName);
 
 		// Check if the entity already exists
-		String newFullName = repositoryToCopy.getEntityMetaData().getPackage().getName() + "_"
-				+ request.getNewEntityName();
-		if (dataService.hasRepository(newFullName)) throw createDuplicateEntityException(request.getNewEntityName());
+		String newFullName = EntityMetaDataUtils.buildFullName(repositoryToCopyFrom.getEntityMetaData().getPackage(),
+				request.getNewEntityName());
+		if (dataService.hasRepository(newFullName)) throw createDuplicateEntityException(newFullName);
 
 		// Validate the new name
 		MetaValidationUtils.validateName(request.getNewEntityName());
 
 		// Permission
-		boolean readPermission = permissionService.hasPermissionOnEntity(repositoryToCopy.getName(), Permission.READ);
+		boolean readPermission = permissionService.hasPermissionOnEntity(repositoryToCopyFrom.getName(),
+				Permission.READ);
 		if (!readPermission) throw createNoReadPermissionOnEntityException(entityName);
 
 		// Capabilities
-		boolean writableCapabilities = dataService.getCapabilities(repositoryToCopy.getName()).contains(
+		boolean writableCapabilities = dataService.getCapabilities(repositoryToCopyFrom.getName()).contains(
 				RepositoryCapability.WRITABLE);
 		if (!writableCapabilities) throw createNoWriteCapabilitiesOnEntityException(entityName);
 
 		// Copy
-		Repository repository = this.copyRepositoryRunAsSystem(repositoryToCopy, request.getNewEntityName(),
-				request.getNewEntityName());
+		this.copyRepositoryRunAsSystem(repositoryToCopyFrom, request.getNewEntityName(), request.getNewEntityName());
+
+		// Retrieve new repo
+		Repository repository = dataService.getRepository(newFullName);
 		permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 				Collections.singletonList(repository.getName()));
 
@@ -377,11 +382,11 @@ class RestControllerV2
 		return repository.getName();
 	}
 
-	@RunAsSystem
-	private Repository copyRepositoryRunAsSystem(Repository repository, String newRepositoryId,
+	private void copyRepositoryRunAsSystem(Repository repositoryToCopyFrom, String newRepositoryId,
 			String newRepositoryLabel)
 	{
-		return dataService.copyRepository(repository, newRepositoryId, newRepositoryLabel);
+		RunAsSystemProxy.runAsSystem(() -> dataService.copyRepository(repositoryToCopyFrom, newRepositoryId,
+				newRepositoryLabel));
 	}
 
 	/**
@@ -562,6 +567,15 @@ class RestControllerV2
 	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
 		LOG.error("Runtime exception occurred.", e);
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+	}
+
+	@ExceptionHandler(ConversionFailedException.class)
+	@ResponseStatus(BAD_REQUEST)
+	@ResponseBody
+	public ErrorMessageResponse handleConversionFailedException(ConversionFailedException e)
+	{
+		LOG.info("ConversionFailedException occurred", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 

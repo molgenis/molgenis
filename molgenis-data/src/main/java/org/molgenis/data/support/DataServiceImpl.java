@@ -367,7 +367,19 @@ public class DataServiceImpl implements DataService
 		DefaultEntityMetaData emd = new DefaultEntityMetaData(newRepositoryId, repository.getEntityMetaData());
 		emd.setLabel(newRepositoryLabel);
 		Repository repositoryCopy = metaDataService.addEntityMeta(emd);
-		repositoryCopy.add(repository.findAll(query));
-		return repositoryCopy;
+		try
+		{
+
+			repositoryCopy.add(repository.findAll(query));
+			return repositoryCopy;
+		}
+		catch (RuntimeException e)
+		{
+			if (repositoryCopy != null)
+			{
+				metaDataService.deleteEntityMeta(emd.getName());
+			}
+			throw e;
+		}
 	}
 }

@@ -21,6 +21,7 @@ import org.molgenis.dataexplorer.controller.AnnotationJob;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
