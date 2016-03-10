@@ -9,6 +9,7 @@ import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import org.apache.commons.io.IOUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -47,6 +47,7 @@ import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.EntityMetaDataUtils;
 import org.molgenis.data.support.LazyEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.IntField;
 import org.molgenis.fieldtypes.MrefField;
@@ -535,7 +536,7 @@ public class ImportWriter
 						throw new MolgenisDataException(msg.toString());
 					}
 
-					count = repo.add(StreamSupport.stream(entities.spliterator(), false));
+					count = repo.add(stream(entities.spliterator(), false));
 					break;
 				case ADD_IGNORE_EXISTING:
 					int batchSize = 1000;
@@ -567,8 +568,10 @@ public class ImportWriter
 					break;
 				case ADD_UPDATE_EXISTING:
 					batchSize = 1000;
-					existingEntities = Lists.newArrayList();
-					newEntities = Lists.newArrayList();
+					existingEntities = new ArrayList<Entity>(batchSize);
+					List<Integer> existingEntitiesRowIndex = new ArrayList<Integer>(batchSize);
+					newEntities = new ArrayList<Entity>(batchSize);
+					List<Integer> newEntitiesRowIndex = new ArrayList<Integer>(batchSize);
 
 					it = entities.iterator();
 					while (it.hasNext())
@@ -578,35 +581,33 @@ public class ImportWriter
 						Object id = idDataType.convert(entity.get(idAttributeName));
 						if (existingIds.contains(id))
 						{
+							existingEntitiesRowIndex.add(count);
 							existingEntities.add(entity);
 							if (existingEntities.size() == batchSize)
 							{
-								repo.update(existingEntities.stream());
-								existingEntities.clear();
+								updateInRepo(repo, existingEntities, existingEntitiesRowIndex);
 							}
 						}
 						else
 						{
+							newEntitiesRowIndex.add(count);
 							newEntities.add(entity);
 							if (newEntities.size() == batchSize)
 							{
-								repo.add(newEntities.stream());
-								newEntities.clear();
+								insertIntoRepo(repo, newEntities, newEntitiesRowIndex);
 							}
 						}
 					}
 
 					if (!existingEntities.isEmpty())
 					{
-						repo.update(existingEntities.stream());
+						updateInRepo(repo, existingEntities, existingEntitiesRowIndex);
 					}
-
 					if (!newEntities.isEmpty())
 					{
-						repo.add(newEntities.stream());
+						insertIntoRepo(repo, newEntities, newEntitiesRowIndex);
 					}
 					break;
-
 				case UPDATE:
 					int errorCount = 0;
 					StringBuilder msg = new StringBuilder();
@@ -639,7 +640,7 @@ public class ImportWriter
 						}
 						throw new MolgenisDataException(msg.toString());
 					}
-					repo.update(StreamSupport.stream(entities.spliterator(), false));
+					repo.update(stream(entities.spliterator(), false));
 					break;
 
 				default:
@@ -654,6 +655,36 @@ public class ImportWriter
 			IOUtils.closeQuietly(existingIds);
 			IOUtils.closeQuietly(ids);
 		}
+	}
+
+	private void updateInRepo(Repository repo, List<Entity> existingEntities, List<Integer> existingEntitiesRowIndex)
+	{
+		try
+		{
+			repo.update(existingEntities.stream());
+		}
+		catch (MolgenisValidationException mve)
+		{
+			mve.renumberViolationRowIndices(existingEntitiesRowIndex);
+			throw mve;
+		}
+		existingEntities.clear();
+		existingEntitiesRowIndex.clear();
+	}
+
+	private void insertIntoRepo(Repository repo, List<Entity> newEntities, List<Integer> newEntitiesRowIndex)
+	{
+		try
+		{
+			repo.add(newEntities.stream());
+		}
+		catch (MolgenisValidationException mve)
+		{
+			mve.renumberViolationRowIndices(newEntitiesRowIndex);
+			throw mve;
+		}
+		newEntities.clear();
+		newEntitiesRowIndex.clear();
 	}
 
 	/**
