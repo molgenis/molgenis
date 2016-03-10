@@ -173,9 +173,46 @@ public class ComputedEntityValuesDecoratorTest
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 		Query query = mock(Query.class);
 		when(decoratedRepo.findAll(query)).thenReturn(Stream.of(entity0));
-		List<Entity> expectedEntities = computedEntityValuesDecorator.findAll(query)
-				.collect(Collectors.toList());
+		List<Entity> expectedEntities = computedEntityValuesDecorator.findAll(query).collect(Collectors.toList());
 		assertEquals(expectedEntities.size(), 1);
 		assertEquals(expectedEntities.get(0).getClass(), EntityWithComputedAttributes.class);
+	}
+
+	@Test
+	public void streamFetchNoComputedAttrs()
+	{
+		Fetch fetch = new Fetch();
+		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		when(entityMeta.hasAttributeWithExpression()).thenReturn(false);
+		when(entityMeta.getAtomicAttributes()).thenReturn(emptyList());
+		when(decoratedRepo.getEntityMetaData()).thenReturn(entityMeta);
+
+		Entity entity0 = mock(Entity.class);
+		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
+		Entity entity1 = mock(Entity.class);
+		when(entity1.getEntityMetaData()).thenReturn(entityMeta);
+		when(decoratedRepo.stream(fetch)).thenReturn(Stream.of(entity0, entity1));
+		Stream<Entity> expectedEntities = computedEntityValuesDecorator.stream(fetch);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+	}
+
+	@Test
+	public void streamFetchComputedAttrs()
+	{
+		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		when(entityMeta.hasAttributeWithExpression()).thenReturn(true);
+		when(entityMeta.getAtomicAttributes()).thenReturn(emptyList());
+		when(decoratedRepo.getEntityMetaData()).thenReturn(entityMeta);
+
+		Fetch fetch = new Fetch();
+		Entity entity0 = mock(Entity.class);
+		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
+		Entity entity1 = mock(Entity.class);
+		when(entity1.getEntityMetaData()).thenReturn(entityMeta);
+		when(decoratedRepo.stream(fetch)).thenReturn(Stream.of(entity0, entity1));
+		List<Entity> expectedEntities = computedEntityValuesDecorator.stream(fetch).collect(Collectors.toList());
+		assertEquals(expectedEntities.size(), 2);
+		assertEquals(expectedEntities.get(0).getClass(), EntityWithComputedAttributes.class);
+		assertEquals(expectedEntities.get(1).getClass(), EntityWithComputedAttributes.class);
 	}
 }

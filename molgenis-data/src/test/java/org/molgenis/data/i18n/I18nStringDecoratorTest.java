@@ -96,4 +96,12 @@ public class I18nStringDecoratorTest
 		Stream<Entity> entities = i18nStringDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
+
+	@Test
+	public void streamFetch()
+	{
+		Fetch fetch = new Fetch();
+		i18nStringDecorator.stream(fetch);
+		verify(decoratedRepo, times(1)).stream(fetch);
+	}
 }

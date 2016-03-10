@@ -347,7 +347,6 @@ function createInput(attr, attrs, val, lbl) {
 	case 'XREF':
 		return createBasicInput('hidden', attrs, val).addClass('form-control');
 	case 'FILE':
-	case 'IMAGE':
 		throw 'Unsupported data type: ' + dataType;
 	default:
 		throw 'Unknown data type: ' + dataType;

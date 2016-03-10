@@ -46,6 +46,21 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	}
 
 	@Override
+	public Stream<Entity> stream(Fetch fetch)
+	{
+		if (fetch != null)
+		{
+			fetch.field(OwnedEntityMetaData.ATTR_OWNER_USERNAME);
+		}
+		Stream<Entity> entities = decoratedRepo.stream(fetch);
+		if (mustAddRowLevelSecurity())
+		{
+			entities = entities.filter(this::currentUserIsOwner);
+		}
+		return entities;
+	}
+
+	@Override
 	public void close() throws IOException
 	{
 		decoratedRepo.close();

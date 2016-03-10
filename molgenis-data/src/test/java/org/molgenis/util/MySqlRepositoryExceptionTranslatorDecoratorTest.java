@@ -170,4 +170,12 @@ public class MySqlRepositoryExceptionTranslatorDecoratorTest
 		Stream<Entity> entities = decorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
+
+	@Test
+	public void streamFetch()
+	{
+		Fetch fetch = new Fetch();
+		decorator.stream(fetch);
+		verify(decoratedRepo, times(1)).stream(fetch);
+	}
 }

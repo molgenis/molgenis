@@ -32,6 +32,7 @@ import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.runas.RunAsSystemBeanPostProcessor;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.ui.MolgenisRepositoryDecoratorFactory;
+import org.molgenis.ui.RepositoryDecoratorRegistry;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -137,6 +138,12 @@ public abstract class AbstractDataApiTestConfig
 	}
 
 	@Bean
+	public RepositoryDecoratorRegistry repositoryDecoratorRegistry()
+	{
+		return new RepositoryDecoratorRegistry();
+	}
+
+	@Bean
 	public RepositoryDecoratorFactory repositoryDecoratorFactory()
 	{
 		return new RepositoryDecoratorFactory()
@@ -145,8 +152,8 @@ public abstract class AbstractDataApiTestConfig
 			public Repository createDecoratedRepository(Repository repository)
 			{
 				return new MolgenisRepositoryDecoratorFactory(entityManager(), transactionLogService,
-						entityAttributesValidator(), idGenerator(), appSettings(), dataService(), expressionValidator)
-						.createDecoratedRepository(repository);
+						entityAttributesValidator(), idGenerator(), appSettings(), dataService(), expressionValidator,
+						repositoryDecoratorRegistry()).createDecoratedRepository(repository);
 			}
 		};
 	}

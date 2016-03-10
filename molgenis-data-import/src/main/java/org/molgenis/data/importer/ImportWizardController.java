@@ -1,29 +1,22 @@
 package org.molgenis.data.importer;
 
-import static org.molgenis.data.importer.ImportWizardController.URI;
-import static org.molgenis.security.core.Permission.COUNT;
-import static org.molgenis.security.core.Permission.NONE;
-import static org.molgenis.security.core.Permission.READ;
-import static org.molgenis.security.core.Permission.WRITE;
-import static org.molgenis.security.core.Permission.WRITEMETA;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import org.apache.commons.io.FilenameUtils;
 import org.molgenis.auth.Authority;
 import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.data.DataService;
+import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Package;
+import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.meta.MetaValidationUtils;
+import org.molgenis.data.rest.Href;
+import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.system.ImportRun;
+import org.molgenis.file.FileStore;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.Permission;
 import org.molgenis.security.permission.Permissions;
@@ -31,11 +24,16 @@ import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.wizard.AbstractWizardController;
 import org.molgenis.ui.wizard.Wizard;
+import org.molgenis.util.FileExtensionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,6 +42,34 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.molgenis.data.importer.ImportWizardController.URI;
+import static org.molgenis.security.core.Permission.COUNT;
+import static org.molgenis.security.core.Permission.NONE;
+import static org.molgenis.security.core.Permission.READ;
+import static org.molgenis.security.core.Permission.WRITE;
+import static org.molgenis.security.core.Permission.WRITEMETA;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @Controller
 @RequestMapping(URI)
@@ -57,20 +83,30 @@ public class ImportWizardController extends AbstractWizardController
 	private final ValidationResultWizardPage validationResultWizardPage;
 	private final ImportResultsWizardPage importResultsWizardPage;
 	private final PackageWizardPage packageWizardPage;
-	private final DataService dataService;
 	private final GrantedAuthoritiesMapper grantedAuthoritiesMapper;
 	private final UserAccountService userAccountService;
 
+	private ImportServiceFactory importServiceFactory;
+	private FileStore fileStore;
+	private FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
+	private ImportRunService importRunService;
+	private ExecutorService asyncImportJobs;
+	private DataService dataService;
+	private static final Logger LOG = LoggerFactory.getLogger(ImportWizardController.class);
+
 	@Autowired
 	public ImportWizardController(UploadWizardPage uploadWizardPage, OptionsWizardPage optionsWizardPage,
-								  PackageWizardPage packageWizardPage, ValidationResultWizardPage validationResultWizardPage,
-								  ImportResultsWizardPage importResultsWizardPage, DataService dataService,
-								  GrantedAuthoritiesMapper grantedAuthoritiesMapper, UserAccountService userAccountService)
+			PackageWizardPage packageWizardPage, ValidationResultWizardPage validationResultWizardPage,
+			ImportResultsWizardPage importResultsWizardPage, DataService dataService,
+			GrantedAuthoritiesMapper grantedAuthoritiesMapper, UserAccountService userAccountService,
+			ImportServiceFactory importServiceFactory, FileStore fileStore,
+			FileRepositoryCollectionFactory fileRepositoryCollectionFactory, ImportRunService importRunService)
 	{
 		super(URI, "importWizard");
 		if (uploadWizardPage == null) throw new IllegalArgumentException("UploadWizardPage is null");
 		if (optionsWizardPage == null) throw new IllegalArgumentException("OptionsWizardPage is null");
-		if (validationResultWizardPage == null) throw new IllegalArgumentException("ValidationResultWizardPage is null");
+		if (validationResultWizardPage == null)
+			throw new IllegalArgumentException("ValidationResultWizardPage is null");
 		if (importResultsWizardPage == null) throw new IllegalArgumentException("ImportResultsWizardPage is null");
 		this.uploadWizardPage = uploadWizardPage;
 		this.optionsWizardPage = optionsWizardPage;
@@ -80,6 +116,42 @@ public class ImportWizardController extends AbstractWizardController
 		this.userAccountService = userAccountService;
 		this.dataService = dataService;
 		this.grantedAuthoritiesMapper = grantedAuthoritiesMapper;
+		this.importServiceFactory = importServiceFactory;
+		this.fileStore = fileStore;
+		this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
+		this.importRunService = importRunService;
+		this.dataService = dataService;
+		this.asyncImportJobs = Executors.newSingleThreadExecutor();
+	}
+
+	public ImportWizardController(UploadWizardPage uploadWizardPage, OptionsWizardPage optionsWizardPage,
+			PackageWizardPage packageWizardPage, ValidationResultWizardPage validationResultWizardPage,
+			ImportResultsWizardPage importResultsWizardPage, DataService dataService,
+			GrantedAuthoritiesMapper grantedAuthoritiesMapper, UserAccountService userAccountService,
+			ImportServiceFactory importServiceFactory, FileStore fileStore,
+			FileRepositoryCollectionFactory fileRepositoryCollectionFactory, ImportRunService importRunService,
+			ExecutorService executorService)
+	{
+		super(URI, "importWizard");
+		if (uploadWizardPage == null) throw new IllegalArgumentException("UploadWizardPage is null");
+		if (optionsWizardPage == null) throw new IllegalArgumentException("OptionsWizardPage is null");
+		if (validationResultWizardPage == null)
+			throw new IllegalArgumentException("ValidationResultWizardPage is null");
+		if (importResultsWizardPage == null) throw new IllegalArgumentException("ImportResultsWizardPage is null");
+		this.uploadWizardPage = uploadWizardPage;
+		this.optionsWizardPage = optionsWizardPage;
+		this.validationResultWizardPage = validationResultWizardPage;
+		this.importResultsWizardPage = importResultsWizardPage;
+		this.packageWizardPage = packageWizardPage;
+		this.userAccountService = userAccountService;
+		this.dataService = dataService;
+		this.grantedAuthoritiesMapper = grantedAuthoritiesMapper;
+		this.importServiceFactory = importServiceFactory;
+		this.fileStore = fileStore;
+		this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
+		this.importRunService = importRunService;
+		this.dataService = dataService;
+		this.asyncImportJobs = executorService;
 	}
 
 	@Override
@@ -127,56 +199,51 @@ public class ImportWizardController extends AbstractWizardController
 	@ResponseStatus(HttpStatus.OK)
 	public void addGroupEntityClassPermissions(@RequestParam String groupId, WebRequest webRequest)
 	{
-		dataService.getEntityNames().forEach(
-				entityClassId -> {
-					GroupAuthority authority = getGroupAuthority(groupId, entityClassId);
-					String param = "radio-" + entityClassId;
-					String value = webRequest.getParameter(param);
-					if (value != null
-							&& (SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX
-							+ entityClassId.toUpperCase()) || userAccountService.getCurrentUser()
-							.isSuperuser()))
+		dataService.getEntityNames().forEach(entityClassId -> {
+			GroupAuthority authority = getGroupAuthority(groupId, entityClassId);
+			String param = "radio-" + entityClassId;
+			String value = webRequest.getParameter(param);
+			if (value != null && (SecurityUtils
+					.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + entityClassId.toUpperCase())
+					|| userAccountService.getCurrentUser().isSuperuser()))
+			{
+				if (value.equalsIgnoreCase(READ.toString()) || value.equalsIgnoreCase(COUNT.toString())
+						|| value.equalsIgnoreCase(WRITE.toString()) || value.equalsIgnoreCase(WRITEMETA.toString()))
+				{
+					authority.setMolgenisGroup(
+							dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class));
+					authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_"
+							+ entityClassId.toUpperCase());
+					if (authority.getId() == null)
 					{
-						if (value.equalsIgnoreCase(READ.toString()) || value.equalsIgnoreCase(COUNT.toString())
-								|| value.equalsIgnoreCase(WRITE.toString())
-								|| value.equalsIgnoreCase(WRITEMETA.toString()))
-						{
-							authority.setMolgenisGroup(dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId,
-									MolgenisGroup.class));
-							authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_"
-									+ entityClassId.toUpperCase());
-							if (authority.getId() == null)
-							{
-								authority.setId(UUID.randomUUID().toString());
-								dataService.add(GroupAuthority.ENTITY_NAME, authority);
-							}
-							else dataService.update(GroupAuthority.ENTITY_NAME, authority);
-						}
-						else if (value.equalsIgnoreCase(NONE.toString()))
-						{
-							if (authority.getId() != null) dataService.delete(GroupAuthority.ENTITY_NAME,
-									authority.getId());
-						}
-						else
-						{
-							throw new RuntimeException("Unknown value: " + value + " for permission on entity: "
-									+ entityClassId);
-						}
+						authority.setId(UUID.randomUUID().toString());
+						dataService.add(GroupAuthority.ENTITY_NAME, authority);
 					}
-					else
-					{
-						if (value != null) throw new MolgenisDataAccessException(
-								"Current user is not allowed to change the permissions for this entity: "
-										+ entityClassId);
-					}
-				});
+					else dataService.update(GroupAuthority.ENTITY_NAME, authority);
+				}
+				else if (value.equalsIgnoreCase(NONE.toString()))
+				{
+					if (authority.getId() != null) dataService.delete(GroupAuthority.ENTITY_NAME, authority.getId());
+				}
+				else
+				{
+					throw new RuntimeException(
+							"Unknown value: " + value + " for permission on entity: " + entityClassId);
+				}
+			}
+			else
+			{
+				if (value != null) throw new MolgenisDataAccessException(
+						"Current user is not allowed to change the permissions for this entity: " + entityClassId);
+			}
+		});
 	}
 
 	private List<Authority> getGroupPermissions(MolgenisGroup molgenisGroup)
 	{
 		return dataService.findAll(GroupAuthority.ENTITY_NAME,
-				new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, molgenisGroup), GroupAuthority.class).collect(
-				Collectors.toList());
+				new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, molgenisGroup), GroupAuthority.class)
+				.collect(Collectors.toList());
 	}
 
 	private Permissions createPermissions(List<? extends Authority> entityAuthorities, List<String> entityIds)
@@ -276,5 +343,135 @@ public class ImportWizardController extends AbstractWizardController
 	{
 		role = role.substring(SecurityUtils.AUTHORITY_ENTITY_PREFIX.length());
 		return role.substring(0, role.indexOf('_')).toLowerCase();
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/importByUrl")
+	@ResponseBody
+	public ResponseEntity<String> importFileByUrl(HttpServletRequest request, @RequestParam("url") String url,
+			@RequestParam(value = "entityName", required = false) String entityName,
+			@RequestParam(value = "action", required = false) String action,
+			@RequestParam(value = "notify", required = false) Boolean notify) throws IOException
+	{
+		ImportRun importRun;
+		try
+		{
+			File tmpFile = fileLocationToStoredRenamedFile(url, entityName);
+			importRun = importFile(request, tmpFile, action, notify);
+		}
+		catch (Exception e)
+		{
+			LOG.error(e.getMessage());
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<>(
+				Href.concatEntityHref("/api/v2", importRun.getEntityMetaData().getName(), importRun.getIdValue()),
+				HttpStatus.CREATED);
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/importFile")
+	public ResponseEntity<String> importFile(HttpServletRequest request,
+			@RequestParam(value = "file", required = true) MultipartFile file,
+			@RequestParam(value = "entityName", required = false) String entityName,
+			@RequestParam(value = "action", required = false) String action,
+			@RequestParam(value = "notify", required = false) Boolean notify) throws IOException
+	{
+		ImportRun importRun;
+		String filename;
+		try
+		{
+			filename = getFilename(file.getOriginalFilename(), entityName);
+			File tmpFile = fileStore.store(file.getInputStream(), filename);
+			importRun = importFile(request, tmpFile, action, notify);
+		}
+		catch (Exception e)
+		{
+			LOG.error(e.getMessage());
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		}
+		return new ResponseEntity<>(
+				Href.concatEntityHref("/api/v2", importRun.getEntityMetaData().getName(), importRun.getIdValue()),
+				HttpStatus.CREATED);
+	}
+
+	private File fileLocationToStoredRenamedFile(String fileLocation, String entityName) throws IOException
+	{
+		Path path = Paths.get(fileLocation);
+		String filename = path.getFileName().toString();
+		URL url = new URL(fileLocation);
+
+		return fileStore.store(url.openStream(), getFilename(filename, entityName));
+	}
+
+	private String getFilename(String originalFileName, String entityName)
+	{
+		String filename;
+		String extension = FileExtensionUtils.findExtensionFromPossibilities(originalFileName,
+				GenericImporterExtensions.getAll());
+		if (entityName == null)
+		{
+			filename = originalFileName;
+		}
+		else
+		{
+			filename = entityName + "." + extension;
+			if (!extension.equals("vcf") && (!extension.equals("vcf.gz")))
+				LOG.warn("Specifing a filename for a non-VCF file has no effect on entity names.");
+		}
+		return filename;
+	}
+
+	private ImportRun importFile(HttpServletRequest request, File file, String action, Boolean notify)
+	{
+		// no action specified? default is ADD just like the importerPlugin
+		ImportRun importRun;
+		DatabaseAction databaseAction = getDatabaseAction(file, action);
+		if (dataService.hasRepository(FilenameUtils.getBaseName(file.getName())))
+		{
+			throw new MolgenisDataException(
+					"A repository with name " + FilenameUtils.getBaseName(file.getName()) + " already exists");
+		}
+		ImportService importService = importServiceFactory.getImportService(file.getName());
+		RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
+				.createFileRepositoryCollection(file);
+
+
+			importRun = importRunService.addImportRun(SecurityUtils.getCurrentUsername(), Boolean.TRUE.equals(notify));
+			asyncImportJobs.execute(new ImportJob(importService, SecurityContextHolder.getContext(),
+					repositoryCollection, databaseAction, importRun.getId(), importRunService, request.getSession(),
+					Package.DEFAULT_PACKAGE_NAME));
+
+
+		return importRun;
+	}
+
+	private DatabaseAction getDatabaseAction(File file, String action)
+	{
+		DatabaseAction databaseAction = DatabaseAction.ADD;
+		if (action != null)
+		{
+			try
+			{
+				databaseAction = DatabaseAction.valueOf(action.toUpperCase());
+			}
+			catch (IllegalArgumentException e)
+			{
+				throw new IllegalArgumentException("Invalid action:[" + action.toUpperCase() + "] valid values: "
+						+ (Arrays.toString(DatabaseAction.values())));
+			}
+		}
+
+		String extension = FileExtensionUtils.findExtensionFromPossibilities(file.getName(),
+				GenericImporterExtensions.getAll());
+
+		if (extension.equals("vcf") || extension.equals("vcf.gz"))
+		{
+			MetaValidationUtils.validateName(file.getName().replace("." + extension, ""));
+			if (!DatabaseAction.ADD.equals(databaseAction))
+			{
+				throw new IllegalArgumentException(
+						"Update mode " + databaseAction + " is not supported, only ADD is supported for VCF");
+			}
+		}
+		return databaseAction;
 	}
 }

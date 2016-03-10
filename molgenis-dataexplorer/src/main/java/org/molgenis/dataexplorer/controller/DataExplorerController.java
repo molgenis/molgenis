@@ -9,9 +9,8 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.Sort;
-import org.molgenis.data.annotation.meta.AnnotationJobMetaData;
+import org.molgenis.data.annotation.meta.AnnotationJobExecution;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.jobs.JobMetaData;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.QueryImpl;
@@ -82,6 +81,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 	static final String ATTR_GALAXY_URL = "galaxyUrl";
 	static final String ATTR_GALAXY_API_KEY = "galaxyApiKey";
+	public static final String MOD_ANNOTATORS = "annotators";
+	public static final String MOD_ENTITIESREPORT = "entitiesreport";
+	public static final String MOD_DATA = "data";
 
 	@Autowired
 	private AppSettings appSettings;
@@ -134,7 +136,6 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			entityExists = dataService.hasRepository(selectedEntityName);
 			hasEntityPermission = molgenisPermissionService.hasPermissionOnEntity(selectedEntityName, Permission.COUNT);
-
 		}
 
 		if (!(entityExists && hasEntityPermission))
@@ -164,25 +165,42 @@ public class DataExplorerController extends MolgenisPluginController
 	public String getModule(@PathVariable("moduleId") String moduleId, @RequestParam("entity") String entityName,
 			Model model)
 	{
-		if (moduleId.equals("data"))
+		if (moduleId.equals(MOD_DATA))
 		{
 			model.addAttribute("genomicDataSettings", genomicDataSettings);
 			model.addAttribute("genomeEntities", getGenomeBrowserEntities());
 		}
-		else if (moduleId.equals("entitiesreport"))
+		else if (moduleId.equals(MOD_ENTITIESREPORT))
 		{
 			model.addAttribute("datasetRepository", dataService.getRepository(entityName));
 			model.addAttribute("viewName", dataExplorerSettings.getEntityReport(entityName));
 		}
-		else if (moduleId.equals("annotators"))
+		else if (moduleId.equals(MOD_ANNOTATORS))
 		{
-			Entity annotationRun = dataService.findOne(AnnotationJobMetaData.ENTITY_NAME,
-					new QueryImpl().eq(AnnotationJobMetaData.TARGET, entityName)
-							.sort(new Sort(AnnotationJobMetaData.START_DATE, Sort.Direction.DESC)));
+			// throw exception rather than disable the tab, users can act on the message. Hiding the tab is less
+			// self-explanatory
+			if (!molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITEMETA))
+			{
+				throw new MolgenisDataAccessException("No " + Permission.WRITEMETA + " permission on entity ["
+						+ entityName + "], this permission is necessary run the annotators.");
+			}
+			Entity annotationRun = dataService.findOne(AnnotationJobExecution.ENTITY_NAME,
+					new QueryImpl().eq(AnnotationJobExecution.TARGET_NAME, entityName)
+							.sort(new Sort(AnnotationJobExecution.START_DATE, Sort.Direction.DESC)));
 			model.addAttribute("annotationRun", annotationRun);
 			model.addAttribute("entityName", entityName);
 		}
+
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
+	}
+
+	@RequestMapping(value = "/copy", method = GET)
+	@ResponseBody
+	public boolean showCopy(@RequestParam("entity") String entityName)
+	{
+		boolean showCopy = molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.READ)
+				&& dataService.getCapabilities(entityName).contains(RepositoryCapability.WRITABLE);
+		return showCopy;
 	}
 
 	/**

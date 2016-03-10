@@ -1,15 +1,14 @@
 package org.molgenis.data.support;
 
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserHasRole;
+import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.DataService;
@@ -27,7 +26,6 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
@@ -210,6 +208,7 @@ public class DataServiceImpl implements DataService
 	public void deleteAll(String entityName)
 	{
 		getRepository(entityName).deleteAll();
+		LOG.info("All entities of repository [{}] deleted by user [{}]", entityName, getCurrentUsername());
 	}
 
 	@Override
@@ -274,6 +273,21 @@ public class DataServiceImpl implements DataService
 	public synchronized Iterator<Repository> iterator()
 	{
 		return Lists.newArrayList(repositories.values()).iterator();
+	}
+
+	@Override
+	public Stream<Entity> stream(String entityName, Fetch fetch)
+	{
+		return getRepository(entityName).stream(fetch);
+	}
+
+	@Override
+	public <E extends Entity> Stream<E> stream(String entityName, Fetch fetch, Class<E> clazz)
+	{
+		Stream<Entity> entities = getRepository(entityName).stream(fetch);
+		return entities.map(entity -> {
+			return EntityUtils.convert(entity, clazz, this);
+		});
 	}
 
 	@Override
@@ -346,12 +360,11 @@ public class DataServiceImpl implements DataService
 
 	@Override
 	public Repository copyRepository(Repository repository, String newRepositoryId, String newRepositoryLabel,
-										 Query query)
+			Query query)
 	{
 		LOG.info("Creating a copy of " + repository.getName() + " repository, with ID: " + newRepositoryId
-				+ ", and label: "+newRepositoryLabel);
-		DefaultEntityMetaData emd = new DefaultEntityMetaData(newRepositoryId,
-				repository.getEntityMetaData());
+				+ ", and label: " + newRepositoryLabel);
+		DefaultEntityMetaData emd = new DefaultEntityMetaData(newRepositoryId, repository.getEntityMetaData());
 		emd.setLabel(newRepositoryLabel);
 		Repository repositoryCopy = metaDataService.addEntityMeta(emd);
 		repositoryCopy.add(repository.findAll(query));

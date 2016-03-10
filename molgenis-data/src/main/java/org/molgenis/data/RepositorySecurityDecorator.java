@@ -34,6 +34,13 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
+	public Stream<Entity> stream(Fetch fetch)
+	{
+		validatePermission(decoratedRepository.getName(), Permission.READ);
+		return decoratedRepository.stream(fetch);
+	}
+
+	@Override
 	public void close() throws IOException
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);

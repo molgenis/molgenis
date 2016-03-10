@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
@@ -54,6 +55,12 @@ public class InMemoryRepository implements Repository
 	public Iterator<Entity> iterator()
 	{
 		return entities.values().iterator();
+	}
+
+	@Override
+	public Stream<Entity> stream(Fetch fetch)
+	{
+		return entities.values().stream();
 	}
 
 	@Override
@@ -126,13 +133,13 @@ public class InMemoryRepository implements Repository
 	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
-		return ids.map(id -> entities.get(id));
+		return ids.map(id -> entities.get(id)).filter(Objects::nonNull);
 	}
 
 	@Override
 	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
-		return ids.map(id -> entities.get(id));
+		return ids.map(id -> entities.get(id)).filter(Objects::nonNull);
 	}
 
 	@Override

@@ -158,7 +158,8 @@ public class InMemoryRepositoryTest
 			Entity entity1 = when(mock(Entity.class).get(idAttrName)).thenReturn(id1).getMock();
 			inMemoryRepository.add(entity0);
 			inMemoryRepository.add(entity1);
-			List<Entity> entities = inMemoryRepository.findAll(Stream.of(id0, id1)).collect(Collectors.toList());
+			List<Entity> entities = inMemoryRepository.findAll(Stream.of(id0, id1, "bogus"))
+					.collect(Collectors.toList());
 			assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, entity1));
 		}
 		finally
@@ -184,7 +185,8 @@ public class InMemoryRepositoryTest
 			inMemoryRepository.add(entity0);
 			inMemoryRepository.add(entity1);
 			Fetch fetch = new Fetch();
-			List<Entity> entities = inMemoryRepository.findAll(Stream.of(id0, id1), fetch).collect(Collectors.toList());
+			List<Entity> entities = inMemoryRepository.findAll(Stream.of(id0, id1, "bogus"), fetch)
+					.collect(Collectors.toList());
 			assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, entity1));
 		}
 		finally
@@ -262,6 +264,32 @@ public class InMemoryRepositoryTest
 		{
 			inMemoryRepository.findAll(new QueryImpl().eq("attr", "val").and().eq("attr2", "val"))
 					.collect(Collectors.toList());
+		}
+		finally
+		{
+			inMemoryRepository.close();
+		}
+	}
+
+	@Test
+	public void streamFetch() throws IOException
+	{
+		String idAttrName = "id";
+		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(idAttrName).getMock();
+		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
+		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityMeta);
+		try
+		{
+			Object id0 = Integer.valueOf(0);
+			Entity entity0 = when(mock(Entity.class).get(idAttrName)).thenReturn(id0).getMock();
+			Object id1 = Integer.valueOf(1);
+			Entity entity1 = when(mock(Entity.class).get(idAttrName)).thenReturn(id1).getMock();
+			inMemoryRepository.add(entity0);
+			inMemoryRepository.add(entity1);
+			Fetch fetch = new Fetch();
+			List<Entity> entities = inMemoryRepository.stream(fetch).collect(Collectors.toList());
+			assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, entity1));
 		}
 		finally
 		{

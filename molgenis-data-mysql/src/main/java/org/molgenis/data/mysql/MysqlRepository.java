@@ -346,6 +346,14 @@ public class MysqlRepository extends AbstractRepository
 
 	protected String getMrefCreateSql(AttributeMetaData att) throws MolgenisModelException
 	{
+		// FIXME Temporary fix for #4623 - remove when switching to generated package/entity/attribut names
+		String foreignKeyConstraint = getTableName() + "_" + att.getName();
+		if ((foreignKeyConstraint.length() + "_ibfk_x".length()) > 63)
+		{
+			throw new MolgenisModelException("The combination of entity and attribute name [" + foreignKeyConstraint
+					+ "] is too long to be used as a foreign key constraint by MySQL. Please make sure the combined names are no longer than 56 characters by choosing shorter names.");
+		}
+
 		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 		StringBuilder sql = new StringBuilder();
 
@@ -439,8 +447,6 @@ public class MysqlRepository extends AbstractRepository
 			case HTML:
 				break;
 			case HYPERLINK:
-				break;
-			case IMAGE:
 				break;
 			case INT:
 				break;
@@ -560,7 +566,19 @@ public class MysqlRepository extends AbstractRepository
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		return findAll(new QueryImpl()).iterator();
+		Query q = new QueryImpl();
+		return findAllBatching(q).iterator();
+	}
+
+	@Override
+	public Stream<Entity> stream(Fetch fetch)
+	{
+		Query q = new QueryImpl();
+		if (fetch != null)
+		{
+			q.fetch(fetch);
+		}
+		return StreamSupport.stream(findAllBatching(q).spliterator(), false);
 	}
 
 	protected String getInsertSql()
@@ -728,6 +746,11 @@ public class MysqlRepository extends AbstractRepository
 	@Override
 	public Stream<Entity> findAll(Query q)
 	{
+		return StreamSupport.stream(findAllBatching(q).spliterator(), false);
+	}
+
+	private BatchingQueryResult findAllBatching(Query q)
+	{
 		BatchingQueryResult batchingQueryResult = new BatchingQueryResult(BATCH_SIZE, q)
 		{
 			@Override
@@ -750,7 +773,7 @@ public class MysqlRepository extends AbstractRepository
 				return jdbcTemplate.query(sql, parameters.toArray(new Object[0]), entityMapper);
 			}
 		};
-		return StreamSupport.stream(batchingQueryResult.spliterator(), false);
+		return batchingQueryResult;
 	}
 
 	protected String getWhereSql(Query q, List<Object> parameters, int mrefFilterIndex)
@@ -1144,9 +1167,11 @@ public class MysqlRepository extends AbstractRepository
 								{
 									for (Entity val : batch.get(rowIndex).getEntities(att.getName()))
 									{
-										if(val != null) {
+										if (val != null)
+										{
 											Map<String, Object> mref = new HashMap<>();
-											mref.put(idAttribute.getName(), batch.get(rowIndex).get(idAttribute.getName()));
+											mref.put(idAttribute.getName(),
+													batch.get(rowIndex).get(idAttribute.getName()));
 											mref.put(att.getName(), val.getIdValue());
 											mrefs.get(att.getName()).add(mref);
 										}

@@ -4560,4 +4560,12 @@ public class RepositoryValidationDecoratorTest
 		Stream<Entity> entities = repositoryValidationDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
+
+	@Test
+	public void streamFetch()
+	{
+		Fetch fetch = new Fetch();
+		repositoryValidationDecorator.stream(fetch);
+		verify(decoratedRepo, times(1)).stream(fetch);
+	}
 }

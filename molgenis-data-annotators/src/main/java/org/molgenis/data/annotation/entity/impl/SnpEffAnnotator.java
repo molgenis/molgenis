@@ -296,59 +296,62 @@ public class SnpEffAnnotator
 		// ANN=G|intron_variant|MODIFIER|LOC101926913|LOC101926913|transcript|NR_110185.1|Noncoding|5/5|n.376+9526G>C||||||,G|non_coding_exon_variant|MODIFIER|LINC01124|LINC01124|transcript|NR_027433.1|Noncoding|1/1|n.590G>C||||||;
 		public void parseOutputLineToEntity(String line, Entity entity)
 		{
-			String lof = "";
-			String nmd = "";
-			String[] fields = line.split("\t");
-			String[] ann_field = fields[7].split(";");
-			String[] annotation = ann_field[0].split(Pattern.quote("|"), -1);
+			if (line != null)
+			{
+				String lof = "";
+				String nmd = "";
+				String[] fields = line.split("\t");
+				String[] ann_field = fields[7].split(";");
+				String[] annotation = ann_field[0].split(Pattern.quote("|"), -1);
 
-			if (ann_field.length > 1)
-			{
-				if (ann_field[1].startsWith("LOF="))
+				if (ann_field.length > 1)
 				{
-					lof = ann_field[1];
+					if (ann_field[1].startsWith("LOF="))
+					{
+						lof = ann_field[1];
+					}
+					else if (ann_field[1].startsWith("NMD="))
+					{
+						nmd = ann_field[1];
+					}
 				}
-				else if (ann_field[1].startsWith("NMD="))
+				if (ann_field.length > 2)
 				{
-					nmd = ann_field[1];
+					if (ann_field[2].startsWith("LOF="))
+					{
+						lof = ann_field[2];
+					}
+					else if (ann_field[2].startsWith("NMD="))
+					{
+						nmd = ann_field[2];
+					}
 				}
-			}
-			if (ann_field.length > 2)
-			{
-				if (ann_field[2].startsWith("LOF="))
+				if (annotation.length >= 15)
 				{
-					lof = ann_field[2];
+					entity.set(ANNOTATION, annotation[1]);
+					entity.set(PUTATIVE_IMPACT, annotation[2]);
+					entity.set(GENE_NAME, annotation[3]);
+					entity.set(GENE_ID, annotation[4]);
+					entity.set(FEATURE_TYPE, annotation[5]);
+					entity.set(FEATURE_ID, annotation[6]);
+					entity.set(TRANSCRIPT_BIOTYPE, annotation[7]);
+					entity.set(RANK_TOTAL, annotation[8]);
+					entity.set(HGVS_C, annotation[9]);
+					entity.set(HGVS_P, annotation[10]);
+					entity.set(C_DNA_POSITION, annotation[11]);
+					entity.set(CDS_POSITION, annotation[12]);
+					entity.set(PROTEIN_POSITION, annotation[13]);
+					entity.set(DISTANCE_TO_FEATURE, annotation[14]);
+					entity.set(ERRORS, annotation[15]);
+					entity.set(LOF, lof.replace("LOF=", ""));
+					entity.set(NMD, nmd.replace("NMD=", ""));
 				}
-				else if (ann_field[2].startsWith("NMD="))
+				else
 				{
-					nmd = ann_field[2];
+					LOG.info("No results for CHROM:{} POS:{} REF:{} ALT:{} ", entity.getString(VcfRepository.CHROM),
+							entity.getString(VcfRepository.POS), entity.getString(VcfRepository.REF),
+							entity.getString(VcfRepository.ALT));
 				}
-			}
-			if (annotation.length >= 15)
-			{
-				entity.set(ANNOTATION, annotation[1]);
-				entity.set(PUTATIVE_IMPACT, annotation[2]);
-				entity.set(GENE_NAME, annotation[3]);
-				entity.set(GENE_ID, annotation[4]);
-				entity.set(FEATURE_TYPE, annotation[5]);
-				entity.set(FEATURE_ID, annotation[6]);
-				entity.set(TRANSCRIPT_BIOTYPE, annotation[7]);
-				entity.set(RANK_TOTAL, annotation[8]);
-				entity.set(HGVS_C, annotation[9]);
-				entity.set(HGVS_P, annotation[10]);
-				entity.set(C_DNA_POSITION, annotation[11]);
-				entity.set(CDS_POSITION, annotation[12]);
-				entity.set(PROTEIN_POSITION, annotation[13]);
-				entity.set(DISTANCE_TO_FEATURE, annotation[14]);
-				entity.set(ERRORS, annotation[15]);
-				entity.set(LOF, lof.replace("LOF=", ""));
-				entity.set(NMD, nmd.replace("NMD=", ""));
-			}
-			else
-			{
-				LOG.info("No results for CHROM:{} POS:{} REF:{} ALT:{} ", entity.getString(VcfRepository.CHROM),
-						entity.getString(VcfRepository.POS), entity.getString(VcfRepository.REF),
-						entity.getString(VcfRepository.ALT));
 			}
 		}
 

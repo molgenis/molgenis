@@ -154,6 +154,14 @@ public class AutoValueRepositoryDecoratorTest
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
 
+	@Test
+	public void streamFetch()
+	{
+		Fetch fetch = new Fetch();
+		repositoryDecorator.stream(fetch);
+		verify(decoratedRepository, times(1)).stream(fetch);
+	}
+
 	private void validateEntity(Entity entity)
 	{
 		assertNull(entity.getDate(ATTR_DATE_AUTO_DEFAULT));
