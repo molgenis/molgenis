@@ -505,8 +505,9 @@ public class SortaServiceController extends MolgenisPluginController
 
 	private boolean validateEmptyFileHeader(Repository repository)
 	{
-		return StreamSupport.stream(repository.getEntityMetaData().getAttributes().spliterator(), false)
-				.map(AttributeMetaData::getName).anyMatch(StringUtils::isEmpty);
+		boolean evaluation = StreamSupport.stream(repository.getEntityMetaData().getAttributes().spliterator(), false)
+				.map(AttributeMetaData::getName).anyMatch(StringUtils::isNotBlank);
+		return evaluation;
 	}
 
 	private boolean validateInputFileContent(Repository repository)
