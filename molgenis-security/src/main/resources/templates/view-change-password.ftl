@@ -21,11 +21,11 @@
   					rules: {
   						password1: {
   							required: true,
-  							minlength: 5
+  							minlength: ${min_password_length?js_string}
   						},
   						password2: {
   							required: true,
-  							minlength: 5,
+  							minlength: ${min_password_length?js_string},
   							equalTo: '#password1'
   						}
   					},
