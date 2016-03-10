@@ -567,8 +567,6 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	{
 		when(dataService.hasRepository("entity")).thenReturn(true);
 		when(dataService.hasRepository("newEntity")).thenReturn(false);
-		when(dataService.hasRepository("base_newEntity")).thenReturn(false);
-		when(dataService.hasRepository("base_entity")).thenReturn(true);
 		when(dataService.getRepository("entity")).thenReturn(repositoryToCopy);
 
 		// Return package name
@@ -585,6 +583,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 
 		Repository repository = mock(Repository.class);
 		when(repository.getName()).thenReturn("newEntity");
+		when(dataService.getRepository("newEntity")).thenReturn(repository);
 		when(dataService.copyRepository(repositoryToCopy, "newEntity", "newEntity")).thenReturn(repository);
 
 		doNothing().when(permissionSystemService).giveUserEntityPermissions(any(SecurityContext.class),

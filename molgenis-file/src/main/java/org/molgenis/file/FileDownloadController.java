@@ -3,6 +3,7 @@ package org.molgenis.file;
 import static org.molgenis.file.FileDownloadController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,8 +44,16 @@ public class FileDownloadController
 		}
 		else
 		{
-
-			java.io.File fileStoreFile = fileStore.getFile(fileMeta.getFilename());
+			// Not so nice but keep to serve old legacy files
+			File fileStoreFile = fileStore.getFile(fileMeta.getFilename());
+			if (!fileStoreFile.exists())
+			{
+				fileStoreFile = fileStore.getFile(id);
+			}
+			if (!fileStoreFile.exists())
+			{
+				response.setStatus(HttpStatus.NOT_FOUND.value());
+			}
 
 			// if file meta data exists for this file
 			String outputFilename = fileMeta.getFilename();

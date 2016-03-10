@@ -62,9 +62,18 @@ public class AnnotationJob extends Job<Void>
 			i++;
 		}
 		progress.progress(annotators.size(), getMessage());
+		try
+		{
+			// TODO: Workaround to make sure that the progress bar gets loaded
+			Thread.sleep(1000);
+		}
+		catch (InterruptedException e)
+		{
+		}
 		if (firstException != null)
 		{
-			progress.status("Failed annotators: " + StringUtils.join(failedAnnotators, ","));
+			progress.status("Failed annotators: " + StringUtils.join(failedAnnotators, ",") + ". Successful annotators: "
+					+ StringUtils.join(successfulAnnotators, ","));
 			throw firstException;
 		}
 		return null;

@@ -498,18 +498,7 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	{
 		if (cachedName == null)
 		{
-			if (package_ != null && !Package.DEFAULT_PACKAGE_NAME.equals(package_.getName()))
-			{
-				StringBuilder sb = new StringBuilder();
-				sb.append(package_.getName());
-				sb.append(Package.PACKAGE_SEPARATOR);
-				sb.append(simpleName);
-				cachedName = sb.toString();
-			}
-			else
-			{
-				cachedName = simpleName;
-			}
+			cachedName = EntityMetaDataUtils.buildFullName(package_, simpleName);
 		}
 		return cachedName;
 	}
