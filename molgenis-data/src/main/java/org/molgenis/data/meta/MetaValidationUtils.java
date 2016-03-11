@@ -112,12 +112,12 @@ public class MetaValidationUtils
 		}
 		if (amd.getDataType().equals(MREF))
 		{
-			// if ((emd.getName() + "_" + amd.getName()).equals(amd.getRefEntity().getName()))
-			// {
-			// throw new MolgenisDataException("The name of mref attribute [" + amd.getName()
-			// + "] is invalid because its full name will collide with the referenced entity ["
-			// + amd.getRefEntity().getName() + "] ");
-			// }
+			if ((emd.getName() + "_" + amd.getName()).equals(amd.getRefEntity().getName()))
+			{
+				throw new MolgenisDataException("The name of mref attribute [" + amd.getName()
+						+ "] is invalid because its full name will collide with the referenced entity ["
+						+ amd.getRefEntity().getName() + "] ");
+			}
 		}
 	}
 
