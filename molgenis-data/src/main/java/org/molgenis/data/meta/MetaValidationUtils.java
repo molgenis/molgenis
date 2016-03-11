@@ -1,5 +1,7 @@
 package org.molgenis.data.meta;
 
+import static org.molgenis.MolgenisFieldTypes.MREF;
+
 import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -74,19 +76,19 @@ public class MetaValidationUtils
 	/**
 	 * Recursively traverses attributes and validates the names.
 	 */
-	private static void validateAttributes(Iterable<AttributeMetaData> amds)
+	private static void validateAttributes(Iterable<AttributeMetaData> amds, EntityMetaData emd)
 	{
 		for (AttributeMetaData amd : amds)
 		{
-			validateAttribute(amd);
+			validateAttribute(amd, emd);
 			if (amd.getDataType() instanceof CompoundField)
 			{
-				validateAttributes(amd.getAttributeParts());
+				validateAttributes(amd.getAttributeParts(), emd);
 			}
 		}
 	}
 
-	protected static void validateAttribute(AttributeMetaData amd)
+	protected static void validateAttribute(AttributeMetaData amd, EntityMetaData emd)
 	{
 		validateName(amd.getName());
 		if (amd.getDefaultValue() != null)
@@ -108,6 +110,15 @@ public class MetaValidationUtils
 						+ " cannot have default value since specifying a default value for XREF and MREF data types is not yet supported.");
 			}
 		}
+		if (amd.getDataType().equals(MREF))
+		{
+			if ((emd.getName() + "_" + amd.getName()).equals(amd.getRefEntity().getName()))
+			{
+				throw new MolgenisDataException("The name of mref attribute [" + amd.getName()
+						+ "] is invalid because its full name will collide with the referenced entity ["
+						+ amd.getRefEntity().getName() + "] ");
+			}
+		}
 	}
 
 	/**
@@ -118,7 +129,7 @@ public class MetaValidationUtils
 		try
 		{
 			validateName(emd.getSimpleName());
-			validateAttributes(emd.getAttributes());
+			validateAttributes(emd.getAttributes(), emd);
 
 			if (emd.getIdAttribute() != null && emd.getIdAttribute().getDefaultValue() != null)
 			{
