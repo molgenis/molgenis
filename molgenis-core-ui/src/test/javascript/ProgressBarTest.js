@@ -12,15 +12,15 @@ test('Test if the ProgressBar component renders a running, failed and success pr
 	
 	// Assert the content of the component is what we expected
 	assert.equal(result1.toString(), 
-	'<div>testing the progress bar running<div class="progress background-lightgrey"><div class="progress-bar progress-bar-primary progress-bar-striped active" role="progressbar" style="min-width:2em;width:60%;"></div></div></div>',
+	'<div class="progress background-lightgrey"><div class="progress-bar progress-bar-primary progress-bar-striped active" role="progressbar" style="min-width:2em;width:60%;">testing the progress bar running</div></div>',
 	'Progress bar is rendered as an active progressbar');
 	
 	assert.equal(result2.toString(), 
-	'<div>testing the progress bar failed<div class="progress background-lightgrey"><div class="progress-bar progress-bar-warning" role="progressbar" style="min-width:2em;width:20%;"></div></div></div>',
+	'<div class="progress background-lightgrey"><div class="progress-bar progress-bar-warning" role="progressbar" style="min-width:2em;width:20%;">testing the progress bar failed</div></div>',
 	'Progress bar is rendered as a failed progressbar');
 	
 	assert.equal(result3.toString(), 
-	'<div>testing the progress bar suceeded<div class="progress background-lightgrey"><div class="progress-bar progress-bar-success" role="progressbar" style="min-width:2em;width:100%;"></div></div></div>',
+	'<div class="progress background-lightgrey"><div class="progress-bar progress-bar-success" role="progressbar" style="min-width:2em;width:100%;">testing the progress bar suceeded</div></div>',
 	'Progress bar is rendered as a success progressbar');
 	
 	assert.end();		

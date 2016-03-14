@@ -1,5 +1,32 @@
 package org.molgenis.data.importer;
 
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.stream.Stream;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
@@ -26,6 +53,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailSender;
 import org.springframework.security.core.Authentication;
@@ -41,31 +69,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.stream.Stream;
-
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 /**
  * Created by charbonb on 17/03/15.
@@ -331,7 +334,7 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 
 
 	@Test
-	public void testImportFile() throws IOException
+	public void testImportFile() throws IOException, URISyntaxException
 	{
 		// set up the test
 		HttpServletRequest request = mock(HttpServletRequest.class);
@@ -362,7 +365,7 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testImportUpdateFile() throws IOException
+	public void testImportUpdateFile() throws IOException, URISyntaxException
 	{
 		// set up the test
 		HttpServletRequest request = mock(HttpServletRequest.class);
@@ -387,13 +390,14 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		// the actual test
 		ResponseEntity<String> response = controller.importFile(request, multipartFile, null, "update", null);
 		assertEquals(response.getStatusCode(), HttpStatus.CREATED);
+		assertEquals(response.getHeaders().getContentType(), MediaType.TEXT_PLAIN);
 
 		ArgumentCaptor<ImportJob> captor = ArgumentCaptor.forClass(ImportJob.class);
 		verify(executorService, times(1)).execute(captor.capture());
 	}
 
 	@Test
-	public void testImportIllegalUpdateModeFile() throws IOException
+	public void testImportIllegalUpdateModeFile() throws IOException, URISyntaxException
 	{
 		// set up the test
 		HttpServletRequest request = mock(HttpServletRequest.class);
@@ -418,13 +422,14 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		// the actual test
 		ResponseEntity<String> response = controller.importFile(request, multipartFile, null, "addsss", null);
 		assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+		assertEquals(response.getHeaders().getContentType(), MediaType.TEXT_PLAIN);
 
 		ArgumentCaptor<ImportJob> captor = ArgumentCaptor.forClass(ImportJob.class);
 		verify(executorService, times(0)).execute(captor.capture());
 	}
 
 	@Test
-	public void testImportVCFFile() throws IOException
+	public void testImportVCFFile() throws IOException, URISyntaxException
 	{
 		// set up the test
 		HttpServletRequest request = mock(HttpServletRequest.class);
@@ -449,13 +454,14 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		// the actual test
 		ResponseEntity<String> response = controller.importFile(request, multipartFile, null, "add", null);
 		assertEquals(response.getStatusCode(), HttpStatus.CREATED);
+		assertEquals(response.getHeaders().getContentType(), MediaType.TEXT_PLAIN);
 
 		ArgumentCaptor<ImportJob> captor = ArgumentCaptor.forClass(ImportJob.class);
 		verify(executorService, times(1)).execute(captor.capture());
 	}
 
 	@Test
-	public void testImportVCFFileNameSpecified() throws IOException
+	public void testImportVCFFileNameSpecified() throws IOException, URISyntaxException
 	{
 		// set up the test
 		HttpServletRequest request = mock(HttpServletRequest.class);
@@ -480,13 +486,14 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		// the actual test
 		ResponseEntity<String> response = controller.importFile(request, multipartFile, "newName", "add", null);
 		assertEquals(response.getStatusCode(), HttpStatus.CREATED);
+		assertEquals(response.getHeaders().getContentType(), MediaType.TEXT_PLAIN);
 
 		ArgumentCaptor<ImportJob> captor = ArgumentCaptor.forClass(ImportJob.class);
 		verify(executorService, times(1)).execute(captor.capture());
 	}
 
 	@Test
-	public void testImportUpdateVCF() throws IOException
+	public void testImportUpdateVCF() throws IOException, URISyntaxException
 	{
 		// set up the test
 		HttpServletRequest request = mock(HttpServletRequest.class);
@@ -511,13 +518,14 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		// the actual test
 		ResponseEntity<String> response = controller.importFile(request, multipartFile, null, "update", null);
 		assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+		assertEquals(response.getHeaders().getContentType(), MediaType.TEXT_PLAIN);
 
 		ArgumentCaptor<ImportJob> captor = ArgumentCaptor.forClass(ImportJob.class);
 		verify(executorService, times(0)).execute(captor.capture());
 	}
 
 	@Test
-	public void testImportUpdateVCFGZ() throws IOException
+	public void testImportUpdateVCFGZ() throws IOException, URISyntaxException
 	{
 		// set up the test
 		HttpServletRequest request = mock(HttpServletRequest.class);
@@ -542,13 +550,14 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		// the actual test
 		ResponseEntity<String> response = controller.importFile(request, multipartFile, null, "update", null);
 		assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+		assertEquals(response.getHeaders().getContentType(), MediaType.TEXT_PLAIN);
 
 		ArgumentCaptor<ImportJob> captor = ArgumentCaptor.forClass(ImportJob.class);
 		verify(executorService, times(0)).execute(captor.capture());
 	}
 
 	@Test
-	public void testImportAddVCFGZ() throws IOException
+	public void testImportAddVCFGZ() throws IOException, URISyntaxException
 	{
 		// set up the test
 		HttpServletRequest request = mock(HttpServletRequest.class);
@@ -573,6 +582,7 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		// the actual test
 		ResponseEntity<String> response = controller.importFile(request, multipartFile, null, "add", null);
 		assertEquals(response.getStatusCode(), HttpStatus.CREATED);
+		assertEquals(response.getHeaders().getContentType(), MediaType.TEXT_PLAIN);
 
 		ArgumentCaptor<ImportJob> captor = ArgumentCaptor.forClass(ImportJob.class);
 		verify(executorService, times(1)).execute(captor.capture());

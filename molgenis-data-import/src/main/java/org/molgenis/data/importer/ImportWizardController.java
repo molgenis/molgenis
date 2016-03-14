@@ -1,5 +1,34 @@
 package org.molgenis.data.importer;
 
+import static org.molgenis.data.importer.ImportWizardController.URI;
+import static org.molgenis.security.core.Permission.COUNT;
+import static org.molgenis.security.core.Permission.NONE;
+import static org.molgenis.security.core.Permission.READ;
+import static org.molgenis.security.core.Permission.WRITE;
+import static org.molgenis.security.core.Permission.WRITEMETA;
+import static org.springframework.http.MediaType.TEXT_PLAIN;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.io.FilenameUtils;
 import org.molgenis.auth.Authority;
 import org.molgenis.auth.GroupAuthority;
@@ -43,33 +72,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.molgenis.data.importer.ImportWizardController.URI;
-import static org.molgenis.security.core.Permission.COUNT;
-import static org.molgenis.security.core.Permission.NONE;
-import static org.molgenis.security.core.Permission.READ;
-import static org.molgenis.security.core.Permission.WRITE;
-import static org.molgenis.security.core.Permission.WRITEMETA;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @Controller
 @RequestMapping(URI)
@@ -350,7 +352,7 @@ public class ImportWizardController extends AbstractWizardController
 	public ResponseEntity<String> importFileByUrl(HttpServletRequest request, @RequestParam("url") String url,
 			@RequestParam(value = "entityName", required = false) String entityName,
 			@RequestParam(value = "action", required = false) String action,
-			@RequestParam(value = "notify", required = false) Boolean notify) throws IOException
+			@RequestParam(value = "notify", required = false) Boolean notify) throws IOException, URISyntaxException
 	{
 		ImportRun importRun;
 		try
@@ -361,11 +363,9 @@ public class ImportWizardController extends AbstractWizardController
 		catch (Exception e)
 		{
 			LOG.error(e.getMessage());
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+			return ResponseEntity.badRequest().contentType(TEXT_PLAIN).body(e.getMessage());
 		}
-		return new ResponseEntity<>(
-				Href.concatEntityHref("/api/v2", importRun.getEntityMetaData().getName(), importRun.getIdValue()),
-				HttpStatus.CREATED);
+		return createCreatedResponseEntity(importRun);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/importFile")
@@ -373,7 +373,7 @@ public class ImportWizardController extends AbstractWizardController
 			@RequestParam(value = "file", required = true) MultipartFile file,
 			@RequestParam(value = "entityName", required = false) String entityName,
 			@RequestParam(value = "action", required = false) String action,
-			@RequestParam(value = "notify", required = false) Boolean notify) throws IOException
+			@RequestParam(value = "notify", required = false) Boolean notify) throws IOException, URISyntaxException
 	{
 		ImportRun importRun;
 		String filename;
@@ -386,11 +386,15 @@ public class ImportWizardController extends AbstractWizardController
 		catch (Exception e)
 		{
 			LOG.error(e.getMessage());
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+			return ResponseEntity.badRequest().contentType(TEXT_PLAIN).body(e.getMessage());
 		}
-		return new ResponseEntity<>(
-				Href.concatEntityHref("/api/v2", importRun.getEntityMetaData().getName(), importRun.getIdValue()),
-				HttpStatus.CREATED);
+		return createCreatedResponseEntity(importRun);
+	}
+
+	private ResponseEntity<String> createCreatedResponseEntity(ImportRun importRun) throws URISyntaxException
+	{
+		String href = Href.concatEntityHref("/api/v2", importRun.getEntityMetaData().getName(), importRun.getIdValue());
+		return ResponseEntity.created(new java.net.URI(href)).contentType(TEXT_PLAIN).body(href);
 	}
 
 	private File fileLocationToStoredRenamedFile(String fileLocation, String entityName) throws IOException
@@ -434,12 +438,10 @@ public class ImportWizardController extends AbstractWizardController
 		RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
 				.createFileRepositoryCollection(file);
 
-
-			importRun = importRunService.addImportRun(SecurityUtils.getCurrentUsername(), Boolean.TRUE.equals(notify));
-			asyncImportJobs.execute(new ImportJob(importService, SecurityContextHolder.getContext(),
-					repositoryCollection, databaseAction, importRun.getId(), importRunService, request.getSession(),
-					Package.DEFAULT_PACKAGE_NAME));
-
+		importRun = importRunService.addImportRun(SecurityUtils.getCurrentUsername(), Boolean.TRUE.equals(notify));
+		asyncImportJobs.execute(
+				new ImportJob(importService, SecurityContextHolder.getContext(), repositoryCollection, databaseAction,
+						importRun.getId(), importRunService, request.getSession(), Package.DEFAULT_PACKAGE_NAME));
 
 		return importRun;
 	}

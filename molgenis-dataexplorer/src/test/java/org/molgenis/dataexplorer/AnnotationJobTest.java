@@ -108,6 +108,7 @@ public class AnnotationJobTest
 				"Annotating \"My repo\" with exac (annotator 1 of 2, started by \"fdlk\")");
 		Mockito.verify(progress).progress(1,
 				"Annotating \"My repo\" with cadd (annotator 2 of 2, started by \"fdlk\")");
+		Mockito.verify(progress).status("Failed annotators: exac. Successful annotators: cadd");
 		Mockito.verify(progress).failed(exception);
 	}
 }
