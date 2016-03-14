@@ -96,9 +96,11 @@ public class AccountController
 	}
 
 	@RequestMapping(value = CHANGE_PASSWORD_RELATIVE_URI, method = RequestMethod.GET)
-	public String getChangePasswordForm()
+	public ModelAndView getChangePasswordForm()
 	{
-		return "view-change-password";
+		ModelAndView model = new ModelAndView("view-change-password");
+				model.addObject("min_password_length", MIN_PASSWORD_LENGTH);
+		return model;
 	}
 
 	@RequestMapping(value = CHANGE_PASSWORD_RELATIVE_URI, method = RequestMethod.POST)

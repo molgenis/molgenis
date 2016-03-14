@@ -18,6 +18,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.OwnedEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.util.EntityUtils;
 
@@ -187,7 +188,8 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	@Override
 	public void update(Entity entity)
 	{
-		if (mustAddRowLevelSecurity())
+		if (isOwnedEntityMetaData()
+				&& (mustAddRowLevelSecurity() || entity.get(OwnedEntityMetaData.ATTR_OWNER_USERNAME) == null))
 			entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername());
 		decoratedRepo.update(entity);
 	}
@@ -195,12 +197,16 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	@Override
 	public void update(Stream<? extends Entity> entities)
 	{
-		if (mustAddRowLevelSecurity())
+		if (isOwnedEntityMetaData())
 		{
-			entities = entities.filter(entity -> {
-				// do not allow owner value changes
-				entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername());
-				return true;
+			boolean mustAddRowLevelSecurity = mustAddRowLevelSecurity();
+			String currentUsername = SecurityUtils.getCurrentUsername();
+			entities = entities.map(entity -> {
+				if (mustAddRowLevelSecurity || entity.get(OwnedEntityMetaData.ATTR_OWNER_USERNAME) == null)
+				{
+					entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, currentUsername);
+				}
+				return entity;
 			});
 		}
 
@@ -266,7 +272,8 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	@Override
 	public void add(Entity entity)
 	{
-		if (mustAddRowLevelSecurity())
+		if (isOwnedEntityMetaData()
+				&& (mustAddRowLevelSecurity() || entity.get(OwnedEntityMetaData.ATTR_OWNER_USERNAME) == null))
 		{
 			entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername());
 		}
@@ -277,10 +284,15 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	@Override
 	public Integer add(Stream<? extends Entity> entities)
 	{
-		if (mustAddRowLevelSecurity())
+		if (isOwnedEntityMetaData())
 		{
+			boolean mustAddRowLevelSecurity = mustAddRowLevelSecurity();
+			String currentUsername = SecurityUtils.getCurrentUsername();
 			entities = entities.map(entity -> {
-				entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername());
+				if (mustAddRowLevelSecurity || entity.get(OwnedEntityMetaData.ATTR_OWNER_USERNAME) == null)
+				{
+					entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, currentUsername);
+				}
 				return entity;
 			});
 		}
@@ -302,7 +314,13 @@ public class OwnedEntityRepositoryDecorator implements Repository
 
 	private boolean mustAddRowLevelSecurity()
 	{
-		if (SecurityUtils.currentUserIsSu()) return false;
+		if (SecurityUtils.currentUserIsSu() || SecurityUtils.currentUserHasRole(SystemSecurityToken.ROLE_SYSTEM))
+			return false;
+		return isOwnedEntityMetaData();
+	}
+
+	private boolean isOwnedEntityMetaData()
+	{
 		return EntityUtils.doesExtend(getEntityMetaData(), OwnedEntityMetaData.ENTITY_NAME);
 	}
 
@@ -353,6 +371,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 
 	private boolean currentUserIsOwner(Entity entity)
 	{
+		if (null == entity) return false;
 		return SecurityUtils.getCurrentUsername().equals(getOwnerUserName(entity));
 	}
 }
