@@ -583,7 +583,7 @@ public class QueryGenerator implements QueryPartGenerator
 						case SCRIPT:
 						case STRING:
 						case TEXT:
-							queryBuilder = QueryBuilders.queryString(queryField + ":(" + queryValue + ")");
+							queryBuilder = QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")");
 							break;
 						case MREF:
 						case XREF:
@@ -593,7 +593,7 @@ public class QueryGenerator implements QueryPartGenerator
 							queryField = attr.getName() + "." + attr.getRefEntity().getLabelAttribute().getName();
 							queryBuilder = QueryBuilders
 									.nestedQuery(attr.getName(),
-											QueryBuilders.queryString(queryField + ":(" + queryValue + ")"))
+											QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")"))
 									.scoreMode("max");
 							break;
 						case BOOL:
@@ -635,14 +635,16 @@ public class QueryGenerator implements QueryPartGenerator
 						case STRING:
 						case TEXT:
 							queryField = queryField + ".ngram";
-							queryBuilder = QueryBuilders.queryString(queryField + ":(" + queryValue + ")");
+							queryBuilder = QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")");
 							break;
 						case MREF:
 						case XREF:
 							queryField = attr.getName() + "." + attr.getRefEntity().getLabelAttribute().getName()
 									+ ".ngram";
-							queryBuilder = QueryBuilders.nestedQuery(attr.getName(),
-									QueryBuilders.queryString(queryField + ":(" + queryValue + ")")).scoreMode("max");
+							queryBuilder = QueryBuilders
+									.nestedQuery(attr.getName(),
+											QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")"))
+									.scoreMode("max");
 							break;
 						default:
 							throw new RuntimeException("Unknown data type [" + dataType + "]");

@@ -1,4 +1,4 @@
-package org.molgenis.ontology.sorta;
+package org.molgenis.ontology.sorta.request;
 
 import java.util.List;
 import java.util.Map;

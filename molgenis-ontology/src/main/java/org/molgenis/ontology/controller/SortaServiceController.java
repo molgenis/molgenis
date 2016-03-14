@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -26,6 +27,7 @@ import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -36,12 +38,10 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.Sort;
 import org.molgenis.data.Sort.Direction;
-import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.processor.CellProcessor;
-import org.molgenis.data.processor.LowerCaseProcessor;
-import org.molgenis.data.processor.TrimProcessor;
+import org.molgenis.data.jobs.JobExecution;
+import org.molgenis.data.meta.MetaValidationUtils;
 import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.support.MapEntity;
@@ -49,16 +49,18 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
+import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.ontology.request.OntologyServiceRequest;
 import org.molgenis.ontology.roc.MatchQualityRocService;
-import org.molgenis.ontology.sorta.MatchInputTermBatchService;
-import org.molgenis.ontology.sorta.MatchingTaskContentEntityMetaData;
-import org.molgenis.ontology.sorta.MatchingTaskEntityMetaData;
-import org.molgenis.ontology.sorta.SortaModifiableCsvRepository;
-import org.molgenis.ontology.sorta.SortaService;
-import org.molgenis.ontology.sorta.SortaServiceImpl;
-import org.molgenis.ontology.sorta.SortaServiceResponse;
-import org.molgenis.ontology.sorta.UploadProgress;
+import org.molgenis.ontology.sorta.job.SortaJobExecution;
+import org.molgenis.ontology.sorta.job.SortaJobFactory;
+import org.molgenis.ontology.sorta.job.SortaJobImpl;
+import org.molgenis.ontology.sorta.meta.MatchingTaskContentEntityMetaData;
+import org.molgenis.ontology.sorta.meta.MatchingTaskEntityMetaData;
+import org.molgenis.ontology.sorta.repo.SortaCsvRepository;
+import org.molgenis.ontology.sorta.request.SortaServiceResponse;
+import org.molgenis.ontology.sorta.service.SortaService;
+import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
 import org.molgenis.ontology.utils.SortaServiceUtil;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.user.UserAccountService;
@@ -78,70 +80,71 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.collect.ImmutableMap;
 
+import static java.util.Objects.requireNonNull;
+
 @Controller
 @RequestMapping(URI)
 public class SortaServiceController extends MolgenisPluginController
 {
-	@Autowired
-	private UserAccountService userAccountService;
-
-	@Autowired
-	private DataService dataService;
-
-	@Autowired
-	private SortaService sortaService;
-
-	@Autowired
-	private MatchInputTermBatchService matchInputTermBatchService;
-
-	@Autowired
-	private UploadProgress uploadProgress;
-
-	@Autowired
-	private MatchQualityRocService matchQualityRocService;
-
-	@Autowired
-	private FileStore fileStore;
-
-	@Autowired
-	private MolgenisPermissionService molgenisPermissionService;
+	private final OntologyService ontologyService;
+	private final SortaService sortaService;
+	private final MatchQualityRocService matchQualityRocService;
+	private final DataService dataService;
+	private final UserAccountService userAccountService;
+	private final SortaJobFactory sortaMatchJobFactory;
+	private final ExecutorService taskExecutor;
+	private final FileStore fileStore;
+	private final MolgenisPermissionService molgenisPermissionService;
+	private final LanguageService languageService;
 
 	public static final String VIEW_NAME = "ontology-match-view";
-	@Autowired
-	private LanguageService languageService;
-
 	public static final String ID = "ontologyservice";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	private static final String ILLEGAL_PATTERN = "[^0-9a-zA-Z_]";
 	private static final String ILLEGAL_PATTERN_REPLACEMENT = "_";
+	private static final String SORTA_MATCH_JOB_TYPE = "SORTA";
+	private static final double DEFAULT_THRESHOLD = 100.0;
 
-	public SortaServiceController()
+	@Autowired
+	public SortaServiceController(OntologyService ontologyService, SortaService sortaService,
+			MatchQualityRocService matchQualityRocService, SortaJobFactory sortaMatchJobFactory,
+			ExecutorService taskExecutor, UserAccountService userAccountService, FileStore fileStore,
+			MolgenisPermissionService molgenisPermissionService, DataService dataService,
+			LanguageService languageService)
 	{
 		super(URI);
+		this.ontologyService = requireNonNull(ontologyService);
+		this.sortaService = requireNonNull(sortaService);
+		this.matchQualityRocService = requireNonNull(matchQualityRocService);
+		this.sortaMatchJobFactory = requireNonNull(sortaMatchJobFactory);
+		this.taskExecutor = requireNonNull(taskExecutor);
+		this.userAccountService = requireNonNull(userAccountService);
+		this.fileStore = requireNonNull(fileStore);
+		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
+		this.dataService = requireNonNull(dataService);
+		this.languageService = requireNonNull(languageService);
 	}
 
 	@RequestMapping(method = GET)
 	public String init(Model model)
 	{
-		String username = userAccountService.getCurrentUser().getUsername();
-
-		if (uploadProgress.isUserExists(username)) return matchResult(uploadProgress.getCurrentJob(username), model);
-		model.addAttribute("existingTasks", SortaServiceUtil.getEntityAsMap(new Iterable<Entity>()
+		model.addAttribute("existingTasks", new Iterable<Entity>()
 		{
 			@Override
 			public Iterator<Entity> iterator()
 			{
-				return dataService.findAll(MatchingTaskEntityMetaData.ENTITY_NAME,
-						new QueryImpl().eq(MatchingTaskEntityMetaData.MOLGENIS_USER, username)).iterator();
+				return dataService.findAll(SortaJobExecution.ENTITY_NAME,
+						QueryImpl.EQ(SortaJobExecution.USER, userAccountService.getCurrentUser())).iterator();
 			}
-		}));
+		});
+
 		return VIEW_NAME;
 	}
 
 	@RequestMapping(method = GET, value = "/newtask")
 	public String matchTask(Model model)
 	{
-		model.addAttribute("ontologies", SortaServiceUtil.getEntityAsMap(sortaService.getAllOntologyEntities()));
+		model.addAttribute("ontologies", ontologyService.getOntologies());
 		return VIEW_NAME;
 	}
 
@@ -178,23 +181,15 @@ public class SortaServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = GET, value = "/result/{entityName}")
-	public String matchResult(@PathVariable("entityName") String entityName, Model model)
+	public String matchResult(@PathVariable("entityName") String targetEntityName, Model model)
 	{
-		String userName = userAccountService.getCurrentUser().getUsername();
-		model.addAttribute("isRunning", uploadProgress.isUserExists(userName));
-		model.addAttribute("progress", uploadProgress.getPercentage(userName));
-		model.addAttribute("isMatched", uploadProgress.getUserClickMode(userName));
-		model.addAttribute("entityName", entityName);
+		Entity entity = dataService.findOne(MatchingTaskEntityMetaData.ENTITY_NAME,
+				new QueryImpl().eq(MatchingTaskEntityMetaData.IDENTIFIER, targetEntityName));
+		model.addAttribute("threshold", entity.get(MatchingTaskEntityMetaData.THRESHOLD));
+		model.addAttribute("ontologyIri", entity.get(MatchingTaskEntityMetaData.CODE_SYSTEM));
+		model.addAttribute("numberOfMatched", countMatchedEntities(targetEntityName, true));
+		model.addAttribute("numberOfUnmatched", countMatchedEntities(targetEntityName, false));
 
-		if (dataService.hasRepository(entityName) && !uploadProgress.isUserExists(userName))
-		{
-			Entity entity = dataService.findOne(MatchingTaskEntityMetaData.ENTITY_NAME,
-					new QueryImpl().eq(MatchingTaskEntityMetaData.IDENTIFIER, entityName));
-			model.addAttribute("threshold", entity.get(MatchingTaskEntityMetaData.THRESHOLD));
-			model.addAttribute("ontologyIri", entity.get(MatchingTaskEntityMetaData.CODE_SYSTEM));
-			model.addAttribute("numberOfMatched", countMatchedEntities(entityName, true));
-			model.addAttribute("numberOfUnmatched", countMatchedEntities(entityName, false));
-		}
 		return VIEW_NAME;
 	}
 
@@ -206,13 +201,11 @@ public class SortaServiceController extends MolgenisPluginController
 				countMatchedEntities(entityName, false));
 	}
 
-	@RequestMapping(method = POST, value = "/delete")
+	@RequestMapping(method = GET, value = "/delete/{entityName}")
 	@ResponseStatus(value = HttpStatus.OK)
-	public void deleteResult(@RequestBody String entityName)
+	public String deleteResult(@PathVariable("entityName") String entityName, Model model)
 	{
-		String userName = userAccountService.getCurrentUser().getUsername();
-
-		if (dataService.hasRepository(entityName) && !uploadProgress.isUserExists(userName))
+		if (dataService.hasRepository(entityName))
 		{
 			// Remove all the matching terms from MatchingTaskContentEntity table
 			Stream<Entity> iterableMatchingEntities = dataService.findAll(MatchingTaskContentEntityMetaData.ENTITY_NAME,
@@ -225,11 +218,18 @@ public class SortaServiceController extends MolgenisPluginController
 			dataService.delete(MatchingTaskEntityMetaData.ENTITY_NAME, matchingSummaryEntity);
 
 			// Drop the table that contains the information for raw data (input terms)
-			dataService.deleteAll(entityName);
 			dataService.getMeta().deleteEntityMeta(entityName);
 
 			dataService.getRepository(MatchingTaskEntityMetaData.ENTITY_NAME).flush();
+
+			Entity jobEntity = dataService.findOne(SortaJobExecution.ENTITY_NAME,
+					QueryImpl.EQ(SortaJobExecution.USER, userAccountService.getCurrentUser()).and()
+							.eq(SortaJobExecution.TARGET_ENTITY, entityName));
+			dataService.delete(SortaJobExecution.ENTITY_NAME, jobEntity);
+
+			dataService.getRepository(SortaJobExecution.ENTITY_NAME).flush();
 		}
+		return init(model);
 	}
 
 	@RequestMapping(method = POST, value = "/match/retrieve")
@@ -277,28 +277,25 @@ public class SortaServiceController extends MolgenisPluginController
 		int start = entityPager.getStart();
 		int num = entityPager.getNum();
 
-		dataService
-				.findAll(MatchingTaskContentEntityMetaData.ENTITY_NAME,
-						query.offset(start).pageSize(num)
-								.sort(new Sort().on(MatchingTaskContentEntityMetaData.VALIDATED, Direction.DESC)
-										.on(MatchingTaskContentEntityMetaData.SCORE, Direction.DESC)))
-				.forEach(mappingEntity -> {
-					Entity RefEntity = dataService.findOne(entityName,
-							new QueryImpl().eq(SortaModifiableCsvRepository.ALLOWED_IDENTIFIER,
-									mappingEntity.getString(MatchingTaskContentEntityMetaData.INPUT_TERM)));
-					Map<String, Object> outputEntity = new HashMap<String, Object>();
-					outputEntity.put("inputTerm", SortaServiceUtil.getEntityAsMap(RefEntity));
-					outputEntity.put("matchedTerm", SortaServiceUtil.getEntityAsMap(mappingEntity));
-					Object matchedTerm = mappingEntity.get(MatchingTaskContentEntityMetaData.MATCHED_TERM);
-					if (matchedTerm != null)
-					{
-						outputEntity.put("ontologyTerm", SortaServiceUtil.getEntityAsMap(
-								sortaService.getOntologyTermEntity(matchedTerm.toString(), ontologyIri)));
-					}
-					entityMaps.add(outputEntity);
-				});
+		Stream<Entity> findAll = dataService.findAll(MatchingTaskContentEntityMetaData.ENTITY_NAME,
+				query.offset(start).pageSize(num)
+						.sort(new Sort().on(MatchingTaskContentEntityMetaData.VALIDATED, Direction.DESC)
+								.on(MatchingTaskContentEntityMetaData.SCORE, Direction.DESC)));
+		findAll.forEach(mappingEntity -> {
+			Entity RefEntity = dataService.findOne(entityName, new QueryImpl().eq(SortaCsvRepository.ALLOWED_IDENTIFIER,
+					mappingEntity.getString(MatchingTaskContentEntityMetaData.INPUT_TERM)));
+			Map<String, Object> outputEntity = new HashMap<String, Object>();
+			outputEntity.put("inputTerm", SortaServiceUtil.getEntityAsMap(RefEntity));
+			outputEntity.put("matchedTerm", SortaServiceUtil.getEntityAsMap(mappingEntity));
+			Object matchedTerm = mappingEntity.get(MatchingTaskContentEntityMetaData.MATCHED_TERM);
+			if (matchedTerm != null)
+			{
+				outputEntity.put("ontologyTerm", SortaServiceUtil
+						.getEntityAsMap(sortaService.getOntologyTermEntity(matchedTerm.toString(), ontologyIri)));
+			}
+			entityMaps.add(outputEntity);
+		});
 
-		uploadProgress.setUserClickMode(userAccountService.getCurrentUser().getUsername(), isMatched);
 		EntityPager pager = new EntityPager(start, num, count, null);
 		return new EntityCollectionResponse(pager, entityMaps, "/match/retrieve", OntologyTermMetaData.INSTANCE,
 				molgenisPermissionService, dataService, languageService);
@@ -423,49 +420,81 @@ public class SortaServiceController extends MolgenisPluginController
 		}
 	}
 
-	private String startMatchJob(String entityName, String ontologyIri, File uploadFile, Model model) throws IOException
+	private String startMatchJob(String targetEntityName, String ontologyIri, File uploadedFile, Model model)
+			throws IOException
 	{
-		entityName = entityName.replaceAll(ILLEGAL_PATTERN, ILLEGAL_PATTERN_REPLACEMENT).toLowerCase();
-		if (dataService.hasRepository(entityName))
+		targetEntityName = targetEntityName.replaceAll(ILLEGAL_PATTERN, ILLEGAL_PATTERN_REPLACEMENT).toLowerCase();
+
+		MetaValidationUtils.validateName(targetEntityName);
+
+		if (dataService.hasRepository(targetEntityName))
 		{
 			Entity matchingTaskEntity = dataService.findOne(MatchingTaskEntityMetaData.ENTITY_NAME,
-					new QueryImpl().eq(MatchingTaskEntityMetaData.IDENTIFIER, entityName));
+					new QueryImpl().eq(MatchingTaskEntityMetaData.IDENTIFIER, targetEntityName));
 			model.addAttribute("message",
-					"The task name should be case insensitive, the task name <strong>" + entityName
+					"The task name should be case insensitive, the task name <strong>" + targetEntityName
 							+ "</strong> has existed and created by user : "
 							+ (matchingTaskEntity != null
 									? matchingTaskEntity.get(MatchingTaskEntityMetaData.MOLGENIS_USER)
 									: StringUtils.EMPTY));
 			return init(model);
 		}
-		SortaModifiableCsvRepository csvRepository = new SortaModifiableCsvRepository(entityName,
-				new CsvRepository(uploadFile,
-						Arrays.<CellProcessor> asList(new LowerCaseProcessor(), new TrimProcessor()),
-						SortaServiceImpl.DEFAULT_SEPARATOR));
+		SortaCsvRepository repository = new SortaCsvRepository(targetEntityName, uploadedFile);
 
-		if (!validateFileHeader(csvRepository))
+		if (!validateFileHeader(repository))
 		{
 			model.addAttribute("message", "The Name header is missing!");
 			return matchTask(model);
 		}
 
-		if (!validateEmptyFileHeader(csvRepository))
+		if (!validateEmptyFileHeader(repository))
 		{
 			model.addAttribute("message", "The empty header is not allowed!");
 			return matchTask(model);
 		}
 
-		if (!validateInputFileContent(csvRepository))
+		if (!validateInputFileContent(repository))
 		{
 			model.addAttribute("message", "The content of input is empty!");
 			return matchTask(model);
 		}
 
-		uploadProgress.registerUser(userAccountService.getCurrentUser().getUsername(), entityName);
-		matchInputTermBatchService.process(SecurityContextHolder.getContext(), userAccountService.getCurrentUser(),
-				ontologyIri, csvRepository);
+		JobExecution jobExecution = createJobExecution(repository, ontologyIri);
+		MolgenisUser currentUser = userAccountService.getCurrentUser();
+		SortaJobImpl sortaMatchJob = sortaMatchJobFactory.create(ontologyIri, repository.getName(), currentUser,
+				jobExecution, SecurityContextHolder.getContext());
+		taskExecutor.submit(sortaMatchJob);
 
-		return matchResult(entityName, model);
+		return init(model);
+	}
+
+	private JobExecution createJobExecution(Repository repository, String ontologyIri)
+	{
+		// Add the original input dataset to database
+		dataService.getMeta().addEntityMeta(repository.getEntityMetaData());
+		dataService.getRepository(repository.getName()).add(repository.stream());
+		dataService.getRepository(repository.getName()).flush();
+
+		// Add a new entry in MatchingTask table for this new matching job
+		MapEntity mapEntity = new MapEntity();
+		mapEntity.set(MatchingTaskEntityMetaData.IDENTIFIER, repository.getName());
+		mapEntity.set(MatchingTaskEntityMetaData.DATA_CREATED, new Date());
+		mapEntity.set(MatchingTaskEntityMetaData.CODE_SYSTEM, ontologyIri);
+		mapEntity.set(MatchingTaskEntityMetaData.MOLGENIS_USER, userAccountService.getCurrentUser().getUsername());
+		mapEntity.set(MatchingTaskEntityMetaData.THRESHOLD, DEFAULT_THRESHOLD);
+		dataService.add(MatchingTaskEntityMetaData.ENTITY_NAME, mapEntity);
+		dataService.getRepository(MatchingTaskEntityMetaData.ENTITY_NAME).flush();
+
+		// Create a Sorta Job Execution
+		SortaJobExecution jobExecution = new SortaJobExecution(dataService);
+		jobExecution.setUser(userAccountService.getCurrentUser());
+		jobExecution.setType(SORTA_MATCH_JOB_TYPE);
+		jobExecution.setResultUrl("/menu/main/ontologyservice/result/" + repository.getName());
+		jobExecution.setDeleteUrl("/menu/main/ontologyservice/delete/" + repository.getName());
+		jobExecution.setTargetEntityName(repository.getName());
+		jobExecution.setOntologyIri(ontologyIri);
+		dataService.add(SortaJobExecution.ENTITY_NAME, jobExecution);
+		return jobExecution;
 	}
 
 	private long countMatchedEntities(String entityName, boolean isMatched)

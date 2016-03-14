@@ -1,4 +1,4 @@
-package org.molgenis.ontology.sorta;
+package org.molgenis.ontology.sorta.meta;
 
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 

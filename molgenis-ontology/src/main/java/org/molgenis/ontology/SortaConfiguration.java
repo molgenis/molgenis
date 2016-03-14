@@ -11,12 +11,10 @@ import org.molgenis.ontology.ic.TermFrequencyEntityMetaData;
 import org.molgenis.ontology.ic.TermFrequencyService;
 import org.molgenis.ontology.roc.InformationContentService;
 import org.molgenis.ontology.roc.MatchQualityRocService;
-import org.molgenis.ontology.sorta.MatchInputTermBatchService;
-import org.molgenis.ontology.sorta.MatchingTaskContentEntityMetaData;
-import org.molgenis.ontology.sorta.MatchingTaskEntityMetaData;
-import org.molgenis.ontology.sorta.SortaService;
-import org.molgenis.ontology.sorta.SortaServiceImpl;
-import org.molgenis.ontology.sorta.UploadProgress;
+import org.molgenis.ontology.sorta.meta.MatchingTaskContentEntityMetaData;
+import org.molgenis.ontology.sorta.meta.MatchingTaskEntityMetaData;
+import org.molgenis.ontology.sorta.service.SortaService;
+import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -86,18 +84,6 @@ public class SortaConfiguration
 	public SortaService sortaService()
 	{
 		return new SortaServiceImpl(dataService, informationContentService());
-	}
-
-	@Bean
-	public MatchInputTermBatchService processInputTermService()
-	{
-		return new MatchInputTermBatchService(dataService, uploadProgress(), sortaService());
-	}
-
-	@Bean
-	public UploadProgress uploadProgress()
-	{
-		return new UploadProgress();
 	}
 
 	@Bean

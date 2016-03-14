@@ -1,9 +1,12 @@
-package org.molgenis.ontology.sorta;
+package org.molgenis.ontology.sorta.repo;
 
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
+import java.io.File;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -12,21 +15,27 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.csv.CsvRepository;
+import org.molgenis.data.processor.CellProcessor;
+import org.molgenis.data.processor.LowerCaseProcessor;
+import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
 
-public class SortaModifiableCsvRepository extends AbstractRepository
+public class SortaCsvRepository extends AbstractRepository
 {
 	private DefaultEntityMetaData entityMetaData = null;
 	private final CsvRepository csvRepository;
 	private final String entityName;
-	public static final String ALLOWED_IDENTIFIER = "Identifier";
+	public final static String ALLOWED_IDENTIFIER = "Identifier";
+	private final static List<CellProcessor> CELL_PROCESSORS = Arrays.asList(new LowerCaseProcessor(),
+			new TrimProcessor());
 
-	public SortaModifiableCsvRepository(String entityName, CsvRepository csvRepository)
+	public SortaCsvRepository(String entityName, File uploadedFile)
 	{
-		this.csvRepository = csvRepository;
+		this.csvRepository = new CsvRepository(uploadedFile, CELL_PROCESSORS, SortaServiceImpl.DEFAULT_SEPARATOR);
 		this.entityName = entityName;
 	}
 
