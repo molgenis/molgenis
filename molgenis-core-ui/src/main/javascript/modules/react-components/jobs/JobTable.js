@@ -33,7 +33,10 @@ var JobTable = React.createClass({
 						<th>Duration</th>
 						<th>Type</th>
 						<th>Message</th>
+						<th>Job target</th>
+						<th>Ontology Url</th>
 						<th>Result</th>
+						<th>Delete</th>
 					</thead>
 					<tbody>
 					{jobs.map((job, index) => <tr key={job.identifier}>
@@ -45,7 +48,10 @@ var JobTable = React.createClass({
 						<td>{this._getDuration(job)}</td>
 						<td>{job.type}</td>
 						<td>{job.progressMessage}</td>
+						<td>{job.targetEntity}</td>
+						<td>{job.ontologyIri}</td>
 						<td>{job.resultUrl && <a href={job.resultUrl}>Go to result</a>}</td>
+						<td>{job.deleteUrl && <a href={job.deleteUrl}>Delete the result</a>}</td>
 						</tr>)}
 					</tbody>
 				</table>
