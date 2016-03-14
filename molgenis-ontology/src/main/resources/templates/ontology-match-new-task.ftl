@@ -13,13 +13,12 @@
 				<center><strong>Please select ontologies for annotation</strong></center><br>
 				<select name="selectOntologies" class="form-control">
 				  <#list ontologies as ontology>
-				  	<option value="${ontology.ontologyIRI?html}" <#if (ontology_index == 0) >selected</#if>><a href="${ontology.ontologyIRI?html}" target="_blank">${ontology.ontologyName?html}</a></option>
+				  	<option value="${ontology.IRI?html}" <#if (ontology_index == 0) >selected</#if>><a href="${ontology.IRI?html}" target="_blank">${ontology.name?html}</a></option>
 				  </#list>
 				</select>
 			<#else>
 				<center>
 					<span>There are no ontologies avaiable!</span>
-					<a href="${context_url?replace("ontologyservice","ontologyindexer")?html}" target="_blank">Please upload new ontologies!</a>
 				</center>
 			</#if>
 			</div>

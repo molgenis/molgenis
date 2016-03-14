@@ -1,4 +1,4 @@
-package org.molgenis.ontology.sorta;
+package org.molgenis.ontology.sorta.service;
 
 import org.molgenis.data.Entity;
 

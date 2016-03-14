@@ -2,23 +2,7 @@
 <div class="row">
 	<div class="col-md-offset-2 col-md-8">
 		<div class="row" style="min-height:300px;">
-			<#if existingTasks?? & (existingTasks?size > 0)>
-			<div class="col-md-12">
-				<br><span class="font-size-medium-center">There are ${existingTasks?size?html} existing matching tasks available, you can retrieve them by clicking <strong>Retrieve</strong> button</span><br>
-				<table class="table">
-					<tr><th>Name</th><th>Date created</th><th>Code system</th><th>Roc</th><th>Retrieve</th><th>Delete</th></tr>
-					<#list existingTasks as task>
-					<tr><td>${task.Identifier?html}</td><td>${task.Date_created?date}, ${task.Date_created?time}</td><td>${task.Code_system?html}</td>
-						<td><a type="button" class="btn btn-warning" href="${context_url}/calculate/${task.Identifier?html}">Plot</a></td>
-						<td><button type="button" class="btn btn-default retrieve-button-class">Retrieve</button></td>
-						<td><button type="button" class="btn btn-danger remove-button-class">Delete</button></td>
-					</tr>
-					</#list>
-				</table>
-			</div>
-			<#else>
-				<center>There are no existing matching jobs available! Please start a new one!</center>
-			</#if>
+		<div id="job-container"></div>
 		</div>
 		<div class="row" style="min-height:100px;">
 			<div class="col-md-12">
@@ -29,6 +13,10 @@
 </div>
 <script>
 	$(document).ready(function(){
+		React.render(molgenis.ui.JobsContainer({
+			'username' : 'admin'
+		}), $('#job-container')[0]);
+		
 		$('#new-task-button').click(function(){
 			$('#ontology-match').attr({
 				'action' : molgenis.getContextUrl() + '/newtask',

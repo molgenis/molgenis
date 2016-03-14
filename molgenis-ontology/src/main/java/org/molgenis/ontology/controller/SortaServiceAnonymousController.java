@@ -27,18 +27,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.csv.CsvWriter;
-import org.molgenis.data.processor.CellProcessor;
-import org.molgenis.data.processor.LowerCaseProcessor;
-import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.file.FileStore;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
-import org.molgenis.ontology.sorta.MatchingTaskEntityMetaData;
-import org.molgenis.ontology.sorta.SortaModifiableCsvRepository;
-import org.molgenis.ontology.sorta.SortaService;
-import org.molgenis.ontology.sorta.SortaServiceImpl;
+import org.molgenis.ontology.sorta.meta.MatchingTaskEntityMetaData;
+import org.molgenis.ontology.sorta.repo.SortaCsvRepository;
+import org.molgenis.ontology.sorta.service.SortaService;
+import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
 import org.molgenis.ontology.utils.SortaServiceUtil;
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,10 +115,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 		if (filePath != null && ontologyIriObject != null)
 		{
 			File uploadFile = new File(filePath.toString());
-			SortaModifiableCsvRepository csvRepository = new SortaModifiableCsvRepository(uploadFile.getName(),
-					new CsvRepository(uploadFile,
-							Arrays.<CellProcessor> asList(new LowerCaseProcessor(), new TrimProcessor()),
-							SortaServiceImpl.DEFAULT_SEPARATOR));
+			SortaCsvRepository csvRepository = new SortaCsvRepository(uploadFile.getName(), uploadFile);
 
 			if (validateUserInputHeader(csvRepository) && validateUserInputContent(csvRepository))
 			{
@@ -152,10 +145,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 
 				String ontologyIri = ontologyIriObject.toString();
 				File uploadFile = new File(filePath.toString());
-				SortaModifiableCsvRepository csvRepository = new SortaModifiableCsvRepository(uploadFile.getName(),
-						new CsvRepository(uploadFile,
-								Arrays.<CellProcessor> asList(new LowerCaseProcessor(), new TrimProcessor()),
-								SortaServiceImpl.DEFAULT_SEPARATOR));
+				SortaCsvRepository csvRepository = new SortaCsvRepository(uploadFile.getName(), uploadFile);
 
 				List<String> columnHeaders = createDownloadTableHeaders(csvRepository);
 				csvWriter = new CsvWriter(response.getOutputStream(), SortaServiceImpl.DEFAULT_SEPARATOR);
@@ -202,7 +192,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 		}
 	}
 
-	private List<String> createDownloadTableHeaders(SortaModifiableCsvRepository csvRepository)
+	private List<String> createDownloadTableHeaders(SortaCsvRepository csvRepository)
 	{
 		List<String> inputAttributeNames = FluentIterable.from(csvRepository.getEntityMetaData().getAtomicAttributes())
 				.transform(new Function<AttributeMetaData, String>()
@@ -238,10 +228,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 	private void validateSortaInput(String ontologyIri, File uploadFile, HttpServletRequest httpServletRequest,
 			Model model)
 	{
-		SortaModifiableCsvRepository csvRepository = new SortaModifiableCsvRepository(uploadFile.getName(),
-				new CsvRepository(uploadFile,
-						Arrays.<CellProcessor> asList(new LowerCaseProcessor(), new TrimProcessor()),
-						SortaServiceImpl.DEFAULT_SEPARATOR));
+		SortaCsvRepository csvRepository = new SortaCsvRepository(uploadFile.getName(), uploadFile);
 
 		HttpSession session = httpServletRequest.getSession();
 		session.setAttribute("filePath", uploadFile.getAbsoluteFile());
@@ -276,7 +263,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 		});
 	}
 
-	private boolean validateUserInputContent(SortaModifiableCsvRepository csvRepository)
+	private boolean validateUserInputContent(SortaCsvRepository csvRepository)
 	{
 		Iterator<Entity> iterator = csvRepository.iterator();
 		return iterator.hasNext();

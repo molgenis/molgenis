@@ -21,6 +21,8 @@ import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
 import org.molgenis.ontology.roc.InformationContentService;
+import org.molgenis.ontology.sorta.service.SortaService;
+import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

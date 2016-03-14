@@ -1,37 +1,6 @@
 <#macro ontologyMatchResult>
 	<div class="row">
 		<div class="col-md-12">
-			<#if isRunning?? && isRunning>
-			<div class="row">
-				<div class="col-md-12">
-					<br><br><br>
-					<center>
-						The data is being processed now, please be patient...
-					</center>
-					<br><br>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-md-offset-2 col-md-8">
-					<div class="progress">
-						<div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width:${progress}%;">
-							<span class="sr-only">${progress?html}% Complete</span>
-						</div>
-					</div>
-					<br><br>
-				</div>
-			</div>
-			<script type="text/javascript">
-				$(document).ready(function(){
-					setTimeout(function(){
-						$('#ontology-match').attr({
-							'action' : molgenis.getContextUrl() + '/result/${entityName?html}',
-							'method' : 'GET'
-						}).submit();
-					}, 3000);
-				});
-			</script>
-			<#elseif entityName?? & numberOfMatched?? & numberOfMatched??>
 			<div class="row" style="margin-bottom:15px;">
 				<div class="col-md-offset-3 col-md-6">
 					<div class="row">
@@ -68,16 +37,6 @@
 					});
 				});
 			</script>
-			<#else>
-				<div class="row">
-					<div class="col-md-12">
-						<br><br><br>
-						<center>
-							The job name is invalid!
-						</center>
-					</div>		
-				</div>
-			</#if>
 		</div>
 	</div>
 </#macro>
