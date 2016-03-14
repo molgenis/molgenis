@@ -188,7 +188,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	@Override
 	public void update(Entity entity)
 	{
-		if (mustAddRowLevelSecurity())
+		if (mustAddRowLevelSecurity() || entity.get(OwnedEntityMetaData.ATTR_OWNER_USERNAME) == null)
 			entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername());
 		decoratedRepo.update(entity);
 	}
@@ -196,12 +196,15 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	@Override
 	public void update(Stream<? extends Entity> entities)
 	{
-		if (mustAddRowLevelSecurity())
-		{
-			entities = entities.filter(entity -> {
-				// do not allow owner value changes
-				entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername());
-				return true;
+		if(isOwnedEntityMetaData()){
+			boolean mustAddRowLevelSecurity = mustAddRowLevelSecurity();
+			String currentUsername = SecurityUtils.getCurrentUsername();
+			entities = entities.map(entity -> {
+				if (mustAddRowLevelSecurity || entity.get(OwnedEntityMetaData.ATTR_OWNER_USERNAME) == null)
+				{
+					entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, currentUsername);
+				}
+				return entity;
 			});
 		}
 
@@ -267,7 +270,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	@Override
 	public void add(Entity entity)
 	{
-		if (mustAddRowLevelSecurity())
+		if (mustAddRowLevelSecurity() || entity.get(OwnedEntityMetaData.ATTR_OWNER_USERNAME) == null)
 		{
 			entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername());
 		}
@@ -278,10 +281,14 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	@Override
 	public Integer add(Stream<? extends Entity> entities)
 	{
-		if (mustAddRowLevelSecurity())
-		{
+		if(isOwnedEntityMetaData()){
+			boolean mustAddRowLevelSecurity = mustAddRowLevelSecurity();
+			String currentUsername = SecurityUtils.getCurrentUsername();
 			entities = entities.map(entity -> {
-				entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername());
+				if (mustAddRowLevelSecurity || entity.get(OwnedEntityMetaData.ATTR_OWNER_USERNAME) == null)
+				{
+					entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, currentUsername);
+				}
 				return entity;
 			});
 		}
@@ -304,6 +311,11 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	private boolean mustAddRowLevelSecurity()
 	{
 		if (SecurityUtils.currentUserIsSu() || SecurityUtils.currentUserHasRole(SystemSecurityToken.ROLE_SYSTEM)) return false;
+		return isOwnedEntityMetaData();
+	}
+
+	private boolean isOwnedEntityMetaData()
+	{
 		return EntityUtils.doesExtend(getEntityMetaData(), OwnedEntityMetaData.ENTITY_NAME);
 	}
 
