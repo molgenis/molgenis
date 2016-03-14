@@ -1,8 +1,8 @@
-package org.molgenis.ontology.request;
+package org.molgenis.ontology.sorta.request;
 
 import org.molgenis.data.rest.EntityPager;
 
-public class OntologyServiceRequest
+public class SortaServiceRequest
 {
 	private final String entityName;
 	private final String ontologyIri;
@@ -10,7 +10,7 @@ public class OntologyServiceRequest
 	private final boolean matched;
 	private final EntityPager entityPager;
 
-	public OntologyServiceRequest(String entityName, String ontologyIri, String filterQuery, boolean matched,
+	public SortaServiceRequest(String entityName, String ontologyIri, String filterQuery, boolean matched,
 			EntityPager entityPager)
 	{
 		this.entityName = entityName;

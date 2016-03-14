@@ -17,6 +17,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
+import org.molgenis.data.semanticsearch.string.Stemmer;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
@@ -26,7 +27,6 @@ import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
 import org.molgenis.ontology.roc.InformationContentService;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.tartarus.snowball.ext.PorterStemmer;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
@@ -51,7 +51,8 @@ public class SortaServiceImpl implements SortaService
 	public static final String SCORE = "Score";
 	public static final String COMBINED_SCORE = "Combined_Score";
 
-	private final PorterStemmer stemmer = new PorterStemmer();
+	// private final PorterStemmer stemmer = new PorterStemmer();
+	Stemmer stemmer = new Stemmer();
 	private final DataService dataService;
 	private final InformationContentService informationContentService;
 
@@ -399,13 +400,11 @@ public class SortaServiceImpl implements SortaService
 		StringBuilder stringBuilder = new StringBuilder();
 		Set<String> uniqueTerms = Sets.newHashSet(queryString.toLowerCase().trim().split(NON_WORD_SEPARATOR));
 		uniqueTerms.removeAll(NGramDistanceAlgorithm.STOPWORDSLIST);
-		for (String term : uniqueTerms)
+		for (String word : uniqueTerms)
 		{
-			if (StringUtils.isNotEmpty(term.trim()) && !(ELASTICSEARCH_RESERVED_WORDS.contains(term)))
+			if (StringUtils.isNotEmpty(word.trim()) && !(ELASTICSEARCH_RESERVED_WORDS.contains(word)))
 			{
-				stemmer.setCurrent(removeIllegalCharWithEmptyString(term));
-				stemmer.stem();
-				String afterStem = stemmer.getCurrent();
+				String afterStem = stemmer.stem(removeIllegalCharWithEmptyString(word));
 				if (StringUtils.isNotEmpty(afterStem))
 				{
 					stringBuilder.append(afterStem).append(SINGLE_WHITESPACE);

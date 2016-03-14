@@ -13,9 +13,13 @@ public class SortaJobExecution extends JobExecution
 	public final static String DELETE_URL = "deleteUrl";
 	public final static String TARGET_ENTITY = "targetEntity";
 
+	private static final String SORTA_MATCH_JOB_TYPE = "SORTA";
+
 	public SortaJobExecution(DataService dataService)
 	{
 		super(dataService, SortaJobExecutionMetaData.INSTANCE);
+
+		setType(SORTA_MATCH_JOB_TYPE);
 	}
 
 	public void setTargetEntityName(String targetEntityName)

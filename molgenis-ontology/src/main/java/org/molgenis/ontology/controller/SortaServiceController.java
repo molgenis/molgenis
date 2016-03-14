@@ -50,7 +50,6 @@ import org.molgenis.file.FileStore;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.core.service.OntologyService;
-import org.molgenis.ontology.request.OntologyServiceRequest;
 import org.molgenis.ontology.roc.MatchQualityRocService;
 import org.molgenis.ontology.sorta.job.SortaJobExecution;
 import org.molgenis.ontology.sorta.job.SortaJobFactory;
@@ -58,6 +57,7 @@ import org.molgenis.ontology.sorta.job.SortaJobImpl;
 import org.molgenis.ontology.sorta.meta.MatchingTaskContentEntityMetaData;
 import org.molgenis.ontology.sorta.meta.MatchingTaskEntityMetaData;
 import org.molgenis.ontology.sorta.repo.SortaCsvRepository;
+import org.molgenis.ontology.sorta.request.SortaServiceRequest;
 import org.molgenis.ontology.sorta.request.SortaServiceResponse;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
@@ -69,6 +69,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -102,7 +103,6 @@ public class SortaServiceController extends MolgenisPluginController
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	private static final String ILLEGAL_PATTERN = "[^0-9a-zA-Z_]";
 	private static final String ILLEGAL_PATTERN_REPLACEMENT = "_";
-	private static final String SORTA_MATCH_JOB_TYPE = "SORTA";
 	private static final double DEFAULT_THRESHOLD = 100.0;
 
 	@Autowired
@@ -201,7 +201,7 @@ public class SortaServiceController extends MolgenisPluginController
 				countMatchedEntities(entityName, false));
 	}
 
-	@RequestMapping(method = GET, value = "/delete/{entityName}")
+	@RequestMapping(method = POST, value = "/delete/{entityName}")
 	@ResponseStatus(value = HttpStatus.OK)
 	public String deleteResult(@PathVariable("entityName") String entityName, Model model)
 	{
@@ -234,7 +234,7 @@ public class SortaServiceController extends MolgenisPluginController
 
 	@RequestMapping(method = POST, value = "/match/retrieve")
 	@ResponseBody
-	public EntityCollectionResponse matchResult(@RequestBody OntologyServiceRequest ontologyServiceRequest,
+	public EntityCollectionResponse matchResult(@RequestBody SortaServiceRequest ontologyServiceRequest,
 			HttpServletRequest httpServletRequest)
 	{
 		List<Map<String, Object>> entityMaps = new ArrayList<Map<String, Object>>();
@@ -468,6 +468,7 @@ public class SortaServiceController extends MolgenisPluginController
 		return init(model);
 	}
 
+	@Transactional
 	private JobExecution createJobExecution(Repository repository, String ontologyIri)
 	{
 		// Add the original input dataset to database
@@ -488,7 +489,6 @@ public class SortaServiceController extends MolgenisPluginController
 		// Create a Sorta Job Execution
 		SortaJobExecution jobExecution = new SortaJobExecution(dataService);
 		jobExecution.setUser(userAccountService.getCurrentUser());
-		jobExecution.setType(SORTA_MATCH_JOB_TYPE);
 		jobExecution.setResultUrl("/menu/main/ontologyservice/result/" + repository.getName());
 		jobExecution.setDeleteUrl("/menu/main/ontologyservice/delete/" + repository.getName());
 		jobExecution.setTargetEntityName(repository.getName());

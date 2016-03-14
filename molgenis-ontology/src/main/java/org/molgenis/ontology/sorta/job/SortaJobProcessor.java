@@ -33,7 +33,7 @@ import static java.util.Objects.requireNonNull;
 public class SortaJobProcessor
 {
 	private static final int ADD_BATCH_SIZE = 1000;
-	private static final int PROGRESS_UPDATE_BATCH_SIZE = 10;
+	private static final int PROGRESS_UPDATE_BATCH_SIZE = 50;
 
 	private final String ontologyIri;
 	private final String entityName;
@@ -100,7 +100,7 @@ public class SortaJobProcessor
 			counter.incrementAndGet();
 
 			// Update the progress only when the progress proceeds the threshold
-			if (counter.get() / PROGRESS_UPDATE_BATCH_SIZE == 0)
+			if (counter.get() % PROGRESS_UPDATE_BATCH_SIZE == 0)
 			{
 				progress.progress(counter.get(), StringUtils.EMPTY);
 			}
