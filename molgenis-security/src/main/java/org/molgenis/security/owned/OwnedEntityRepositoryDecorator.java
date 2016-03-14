@@ -188,7 +188,8 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	@Override
 	public void update(Entity entity)
 	{
-		if (mustAddRowLevelSecurity() || entity.get(OwnedEntityMetaData.ATTR_OWNER_USERNAME) == null)
+		if (isOwnedEntityMetaData()
+				&& (mustAddRowLevelSecurity() || entity.get(OwnedEntityMetaData.ATTR_OWNER_USERNAME) == null))
 			entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername());
 		decoratedRepo.update(entity);
 	}
@@ -196,7 +197,8 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	@Override
 	public void update(Stream<? extends Entity> entities)
 	{
-		if(isOwnedEntityMetaData()){
+		if (isOwnedEntityMetaData())
+		{
 			boolean mustAddRowLevelSecurity = mustAddRowLevelSecurity();
 			String currentUsername = SecurityUtils.getCurrentUsername();
 			entities = entities.map(entity -> {
@@ -270,7 +272,8 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	@Override
 	public void add(Entity entity)
 	{
-		if (mustAddRowLevelSecurity() || entity.get(OwnedEntityMetaData.ATTR_OWNER_USERNAME) == null)
+		if (isOwnedEntityMetaData()
+				&& (mustAddRowLevelSecurity() || entity.get(OwnedEntityMetaData.ATTR_OWNER_USERNAME) == null))
 		{
 			entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername());
 		}
@@ -281,7 +284,8 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	@Override
 	public Integer add(Stream<? extends Entity> entities)
 	{
-		if(isOwnedEntityMetaData()){
+		if (isOwnedEntityMetaData())
+		{
 			boolean mustAddRowLevelSecurity = mustAddRowLevelSecurity();
 			String currentUsername = SecurityUtils.getCurrentUsername();
 			entities = entities.map(entity -> {
@@ -310,7 +314,8 @@ public class OwnedEntityRepositoryDecorator implements Repository
 
 	private boolean mustAddRowLevelSecurity()
 	{
-		if (SecurityUtils.currentUserIsSu() || SecurityUtils.currentUserHasRole(SystemSecurityToken.ROLE_SYSTEM)) return false;
+		if (SecurityUtils.currentUserIsSu() || SecurityUtils.currentUserHasRole(SystemSecurityToken.ROLE_SYSTEM))
+			return false;
 		return isOwnedEntityMetaData();
 	}
 
