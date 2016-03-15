@@ -31,12 +31,14 @@ import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.file.FileStore;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
+import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.ontology.sorta.meta.MatchingTaskEntityMetaData;
 import org.molgenis.ontology.sorta.repo.SortaCsvRepository;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
 import org.molgenis.ontology.utils.SortaServiceUtil;
 import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -58,6 +60,12 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 	private SortaService sortaService;
 
 	@Autowired
+	private OntologyService ontologyService;
+
+	@Autowired
+	private MenuReaderService menuReaderService;
+
+	@Autowired
 	private FileStore fileStore;
 
 	public static final String VIEW_NAME = "ontology-match-annonymous-view";
@@ -72,7 +80,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 	@RequestMapping(method = GET)
 	public String init(Model model)
 	{
-		model.addAttribute("ontologies", SortaServiceUtil.getEntityAsMap(sortaService.getAllOntologyEntities()));
+		model.addAttribute("ontologies", ontologyService.getOntologies());
 		return VIEW_NAME;
 	}
 
@@ -81,7 +89,6 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 			@RequestParam(value = "inputTerms", required = true) String inputTerms,
 			HttpServletRequest httpServletRequest, Model model) throws UnsupportedEncodingException, IOException
 	{
-
 		String fileName = httpServletRequest.getSession().getId() + "_input.txt";
 		File uploadFile = fileStore.store(new ByteArrayInputStream(inputTerms.getBytes("UTF8")), fileName);
 
