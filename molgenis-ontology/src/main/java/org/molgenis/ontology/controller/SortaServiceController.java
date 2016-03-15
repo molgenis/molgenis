@@ -68,6 +68,7 @@ import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -105,6 +106,7 @@ public class SortaServiceController extends MolgenisPluginController
 	private final FileStore fileStore;
 	private final MolgenisPermissionService molgenisPermissionService;
 	private final LanguageService languageService;
+	private final MenuReaderService menuReaderService;
 
 	public static final String VIEW_NAME = "ontology-match-view";
 	public static final String ID = "ontologyservice";
@@ -118,7 +120,7 @@ public class SortaServiceController extends MolgenisPluginController
 			MatchQualityRocService matchQualityRocService, SortaJobFactory sortaMatchJobFactory,
 			ExecutorService taskExecutor, UserAccountService userAccountService, FileStore fileStore,
 			MolgenisPermissionService molgenisPermissionService, DataService dataService,
-			LanguageService languageService)
+			LanguageService languageService, MenuReaderService menuReaderService)
 	{
 		super(URI);
 		this.ontologyService = requireNonNull(ontologyService);
@@ -131,6 +133,7 @@ public class SortaServiceController extends MolgenisPluginController
 		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
 		this.dataService = requireNonNull(dataService);
 		this.languageService = requireNonNull(languageService);
+		this.menuReaderService = requireNonNull(menuReaderService);
 	}
 
 	@RequestMapping(method = GET)
@@ -211,43 +214,47 @@ public class SortaServiceController extends MolgenisPluginController
 	@ResponseStatus(value = HttpStatus.OK)
 	public String deleteResult(@PathVariable("entityName") String entityName, Model model)
 	{
-		if (dataService.hasRepository(entityName))
+		// Remove all the matching terms from MatchingTaskContentEntity table
+		if (dataService.count(MatchingTaskContentEntityMetaData.ENTITY_NAME,
+				new QueryImpl().eq(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName)) > 0)
 		{
-			// Remove all the matching terms from MatchingTaskContentEntity table
 			Stream<Entity> iterableMatchingEntities = dataService.findAll(MatchingTaskContentEntityMetaData.ENTITY_NAME,
 					new QueryImpl().eq(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName));
 			dataService.delete(MatchingTaskContentEntityMetaData.ENTITY_NAME, iterableMatchingEntities);
+		}
 
-			// Remove the matching task meta information from MatchingTaskEntity table
-			Entity matchingSummaryEntity = dataService.findOne(MatchingTaskEntityMetaData.ENTITY_NAME,
-					new QueryImpl().eq(MatchingTaskEntityMetaData.IDENTIFIER, entityName));
+		// Remove the matching task meta information from MatchingTaskEntity table
+		Entity matchingSummaryEntity = dataService.findOne(MatchingTaskEntityMetaData.ENTITY_NAME,
+				new QueryImpl().eq(MatchingTaskEntityMetaData.IDENTIFIER, entityName));
+		if (matchingSummaryEntity != null)
+		{
 			dataService.delete(MatchingTaskEntityMetaData.ENTITY_NAME, matchingSummaryEntity);
-
 			dataService.getRepository(MatchingTaskEntityMetaData.ENTITY_NAME).flush();
+		}
 
-			Entity jobEntity = dataService.findOne(SortaJobExecution.ENTITY_NAME,
-					QueryImpl.EQ(SortaJobExecution.USER, userAccountService.getCurrentUser()).and()
-							.eq(SortaJobExecution.TARGET_ENTITY, entityName));
+		Entity jobEntity = dataService.findOne(SortaJobExecution.ENTITY_NAME,
+				QueryImpl.EQ(SortaJobExecution.USER, userAccountService.getCurrentUser()).and()
+						.eq(SortaJobExecution.TARGET_ENTITY, entityName));
+		// Drop the job record from the SortaJobExecuation Entity. It's not possible to delete a record from the
+		// SortaJobExecution as a regular user because the user doesn't have the permission to read the table
+		// MolgenisUser to which the column molgenisUser in SortaJobExecution refers
+		if (jobEntity != null)
+		{
+			RunAsSystemProxy.runAsSystem(() -> {
+				dataService.delete(SortaJobExecution.ENTITY_NAME, jobEntity);
+				dataService.getRepository(SortaJobExecution.ENTITY_NAME).flush();
+			});
+		}
 
-			// Drop the job record from the SortaJobExecuation Entity. It's not possible to delete a record from the
-			// SortaJobExecution as a regular user because the user doesn't have the permission to read the table
-			// MolgenisUser to which the column molgenisUser in SortaJobExecution refers
-			if (jobEntity != null)
-			{
-				RunAsSystemProxy.runAsSystem(() -> {
-					dataService.delete(SortaJobExecution.ENTITY_NAME, jobEntity);
-					dataService.getRepository(SortaJobExecution.ENTITY_NAME).flush();
-				});
-			}
-			// Drop the table that contains the information for raw data (input terms). It's not possible to delete the
-			// EntityMetaData as a regular user because the ueser doesn't have the permission to change the entities and
-			// attributes tables
-			if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITEMETA))
-			{
-				RunAsSystemProxy.runAsSystem(() -> {
-					dataService.getMeta().deleteEntityMeta(entityName);
-				});
-			}
+		// Drop the table that contains the information for raw data (input terms). It's not possible to delete the
+		// EntityMetaData as a regular user because the ueser doesn't have the permission to change the entities and
+		// attributes tables
+		if (dataService.hasRepository(entityName)
+				&& molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITEMETA))
+		{
+			RunAsSystemProxy.runAsSystem(() -> {
+				dataService.getMeta().deleteEntityMeta(entityName);
+			});
 		}
 		return init(model);
 	}
@@ -484,7 +491,7 @@ public class SortaServiceController extends MolgenisPluginController
 				SecurityContextHolder.getContext());
 		taskExecutor.submit(sortaMatchJob);
 
-		return init(model);
+		return "redirect:" + getSortaServiceMenuUrl();
 	}
 
 	private List<Entity> getJobsForCurrentUser()
@@ -600,4 +607,8 @@ public class SortaServiceController extends MolgenisPluginController
 		return repository.iterator().hasNext();
 	}
 
+	private String getSortaServiceMenuUrl()
+	{
+		return menuReaderService.getMenu().findMenuItemPath(ID);
+	}
 }
