@@ -45,6 +45,7 @@ public class SortaCsvRepository extends AbstractRepository
 		if (entityMetaData == null)
 		{
 			entityMetaData = new DefaultEntityMetaData(entityName, csvRepository.getEntityMetaData());
+			entityMetaData.setLabel(entityName);
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ALLOWED_IDENTIFIER).setNillable(false),
 					ROLE_ID);
 		}

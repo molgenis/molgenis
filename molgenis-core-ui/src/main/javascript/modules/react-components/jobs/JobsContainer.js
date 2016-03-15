@@ -52,7 +52,7 @@ var JobsContainer = React.createClass({
     },
     retrieveJobs: function () {
         var self = this;
-        $.get('/plugin/jobs/latest', function (data) {
+        $.get('/plugin/ontologyservice/jobs', function (data) {
             self._getNewlyFinishedJobs(data).forEach((job) => {
                 const notification = {
                     title: 'Job finished',

@@ -4,18 +4,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.tartarus.snowball.SnowballProgram;
 import org.tartarus.snowball.ext.PorterStemmer;
 
 public class Stemmer
 {
 	private final static String ILLEGAL_REGEX_PATTERN = "[^a-zA-Z0-9 ]";
-	private final SnowballProgram porterStemmer;
-
-	public Stemmer()
-	{
-		porterStemmer = new PorterStemmer();
-	}
 
 	/**
 	 * Remove illegal characters from the string and stem each single word
@@ -42,8 +35,9 @@ public class Stemmer
 		return stringBuilder.toString();
 	}
 
-	public synchronized String stem(String word)
+	public String stem(String word)
 	{
+		PorterStemmer porterStemmer = new PorterStemmer();
 		porterStemmer.setCurrent(word);
 		porterStemmer.stem();
 		return porterStemmer.getCurrent();

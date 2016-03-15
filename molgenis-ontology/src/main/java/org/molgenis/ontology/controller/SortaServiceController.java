@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -28,6 +27,7 @@ import javax.servlet.http.Part;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -63,13 +63,21 @@ import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
 import org.molgenis.ontology.utils.SortaServiceUtil;
 import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.MolgenisPluginController;
+import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -80,6 +88,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
 import static java.util.Objects.requireNonNull;
 
@@ -97,6 +106,7 @@ public class SortaServiceController extends MolgenisPluginController
 	private final FileStore fileStore;
 	private final MolgenisPermissionService molgenisPermissionService;
 	private final LanguageService languageService;
+	private final MenuReaderService menuReaderService;
 
 	public static final String VIEW_NAME = "ontology-match-view";
 	public static final String ID = "ontologyservice";
@@ -110,7 +120,7 @@ public class SortaServiceController extends MolgenisPluginController
 			MatchQualityRocService matchQualityRocService, SortaJobFactory sortaMatchJobFactory,
 			ExecutorService taskExecutor, UserAccountService userAccountService, FileStore fileStore,
 			MolgenisPermissionService molgenisPermissionService, DataService dataService,
-			LanguageService languageService)
+			LanguageService languageService, MenuReaderService menuReaderService)
 	{
 		super(URI);
 		this.ontologyService = requireNonNull(ontologyService);
@@ -123,22 +133,21 @@ public class SortaServiceController extends MolgenisPluginController
 		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
 		this.dataService = requireNonNull(dataService);
 		this.languageService = requireNonNull(languageService);
+		this.menuReaderService = requireNonNull(menuReaderService);
 	}
 
 	@RequestMapping(method = GET)
 	public String init(Model model)
 	{
-		model.addAttribute("existingTasks", new Iterable<Entity>()
-		{
-			@Override
-			public Iterator<Entity> iterator()
-			{
-				return dataService.findAll(SortaJobExecution.ENTITY_NAME,
-						QueryImpl.EQ(SortaJobExecution.USER, userAccountService.getCurrentUser())).iterator();
-			}
-		});
-
+		model.addAttribute("existingTasks", getJobsForCurrentUser());
 		return VIEW_NAME;
+	}
+
+	@RequestMapping(method = GET, value = "/jobs")
+	@ResponseBody
+	public List<Entity> getJobs(Model model)
+	{
+		return getJobsForCurrentUser();
 	}
 
 	@RequestMapping(method = GET, value = "/newtask")
@@ -205,29 +214,47 @@ public class SortaServiceController extends MolgenisPluginController
 	@ResponseStatus(value = HttpStatus.OK)
 	public String deleteResult(@PathVariable("entityName") String entityName, Model model)
 	{
-		if (dataService.hasRepository(entityName))
+		// Remove all the matching terms from MatchingTaskContentEntity table
+		if (dataService.count(MatchingTaskContentEntityMetaData.ENTITY_NAME,
+				new QueryImpl().eq(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName)) > 0)
 		{
-			// Remove all the matching terms from MatchingTaskContentEntity table
 			Stream<Entity> iterableMatchingEntities = dataService.findAll(MatchingTaskContentEntityMetaData.ENTITY_NAME,
 					new QueryImpl().eq(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName));
 			dataService.delete(MatchingTaskContentEntityMetaData.ENTITY_NAME, iterableMatchingEntities);
+		}
 
-			// Remove the matching task meta information from MatchingTaskEntity table
-			Entity matchingSummaryEntity = dataService.findOne(MatchingTaskEntityMetaData.ENTITY_NAME,
-					new QueryImpl().eq(MatchingTaskEntityMetaData.IDENTIFIER, entityName));
+		// Remove the matching task meta information from MatchingTaskEntity table
+		Entity matchingSummaryEntity = dataService.findOne(MatchingTaskEntityMetaData.ENTITY_NAME,
+				new QueryImpl().eq(MatchingTaskEntityMetaData.IDENTIFIER, entityName));
+		if (matchingSummaryEntity != null)
+		{
 			dataService.delete(MatchingTaskEntityMetaData.ENTITY_NAME, matchingSummaryEntity);
-
-			// Drop the table that contains the information for raw data (input terms)
-			dataService.getMeta().deleteEntityMeta(entityName);
-
 			dataService.getRepository(MatchingTaskEntityMetaData.ENTITY_NAME).flush();
+		}
 
-			Entity jobEntity = dataService.findOne(SortaJobExecution.ENTITY_NAME,
-					QueryImpl.EQ(SortaJobExecution.USER, userAccountService.getCurrentUser()).and()
-							.eq(SortaJobExecution.TARGET_ENTITY, entityName));
-			dataService.delete(SortaJobExecution.ENTITY_NAME, jobEntity);
+		Entity jobEntity = dataService.findOne(SortaJobExecution.ENTITY_NAME,
+				QueryImpl.EQ(SortaJobExecution.USER, userAccountService.getCurrentUser()).and()
+						.eq(SortaJobExecution.TARGET_ENTITY, entityName));
+		// Drop the job record from the SortaJobExecuation Entity. It's not possible to delete a record from the
+		// SortaJobExecution as a regular user because the user doesn't have the permission to read the table
+		// MolgenisUser to which the column molgenisUser in SortaJobExecution refers
+		if (jobEntity != null)
+		{
+			RunAsSystemProxy.runAsSystem(() -> {
+				dataService.delete(SortaJobExecution.ENTITY_NAME, jobEntity);
+				dataService.getRepository(SortaJobExecution.ENTITY_NAME).flush();
+			});
+		}
 
-			dataService.getRepository(SortaJobExecution.ENTITY_NAME).flush();
+		// Drop the table that contains the information for raw data (input terms). It's not possible to delete the
+		// EntityMetaData as a regular user because the ueser doesn't have the permission to change the entities and
+		// attributes tables
+		if (dataService.hasRepository(entityName)
+				&& molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITEMETA))
+		{
+			RunAsSystemProxy.runAsSystem(() -> {
+				dataService.getMeta().deleteEntityMeta(entityName);
+			});
 		}
 		return init(model);
 	}
@@ -459,23 +486,31 @@ public class SortaServiceController extends MolgenisPluginController
 			return matchTask(model);
 		}
 
-		JobExecution jobExecution = createJobExecution(repository, ontologyIri);
-		MolgenisUser currentUser = userAccountService.getCurrentUser();
-		SortaJobImpl sortaMatchJob = sortaMatchJobFactory.create(ontologyIri, repository.getName(), currentUser,
-				jobExecution, SecurityContextHolder.getContext());
+		JobExecution jobExecution = createJobExecution(repository, ontologyIri, SecurityContextHolder.getContext());
+		SortaJobImpl sortaMatchJob = sortaMatchJobFactory.create(ontologyIri, repository.getName(), jobExecution,
+				SecurityContextHolder.getContext());
 		taskExecutor.submit(sortaMatchJob);
 
-		return init(model);
+		return "redirect:" + getSortaServiceMenuUrl();
 	}
 
-	@Transactional
-	private JobExecution createJobExecution(Repository repository, String ontologyIri)
+	private List<Entity> getJobsForCurrentUser()
 	{
-		// Add the original input dataset to database
-		dataService.getMeta().addEntityMeta(repository.getEntityMetaData());
-		dataService.getRepository(repository.getName()).add(repository.stream());
-		dataService.getRepository(repository.getName()).flush();
+		final List<Entity> jobs = new ArrayList<>();
+		MolgenisUser currentUser = userAccountService.getCurrentUser();
+		Query query = QueryImpl.EQ(SortaJobExecution.USER, currentUser);
+		query.sort().on(SortaJobExecution.START_DATE, Direction.ASC);
+		RunAsSystemProxy.runAsSystem(() -> {
+			dataService.findAll(SortaJobExecution.ENTITY_NAME, query).forEach(job -> {
+				job.set(SortaJobExecution.USER, currentUser);
+				jobs.add(job);
+			});
+		});
+		return jobs;
+	}
 
+	private JobExecution createJobExecution(Repository repository, String ontologyIri, SecurityContext securityContext)
+	{
 		// Add a new entry in MatchingTask table for this new matching job
 		MapEntity mapEntity = new MapEntity();
 		mapEntity.set(MatchingTaskEntityMetaData.IDENTIFIER, repository.getName());
@@ -483,8 +518,6 @@ public class SortaServiceController extends MolgenisPluginController
 		mapEntity.set(MatchingTaskEntityMetaData.CODE_SYSTEM, ontologyIri);
 		mapEntity.set(MatchingTaskEntityMetaData.MOLGENIS_USER, userAccountService.getCurrentUser().getUsername());
 		mapEntity.set(MatchingTaskEntityMetaData.THRESHOLD, DEFAULT_THRESHOLD);
-		dataService.add(MatchingTaskEntityMetaData.ENTITY_NAME, mapEntity);
-		dataService.getRepository(MatchingTaskEntityMetaData.ENTITY_NAME).flush();
 
 		// Create a Sorta Job Execution
 		SortaJobExecution jobExecution = new SortaJobExecution(dataService);
@@ -493,7 +526,37 @@ public class SortaServiceController extends MolgenisPluginController
 		jobExecution.setDeleteUrl("/menu/main/ontologyservice/delete/" + repository.getName());
 		jobExecution.setTargetEntityName(repository.getName());
 		jobExecution.setOntologyIri(ontologyIri);
-		dataService.add(SortaJobExecution.ENTITY_NAME, jobExecution);
+
+		MolgenisUser molgenisUser = userAccountService.getCurrentUser();
+
+		RunAsSystemProxy.runAsSystem(() -> {
+			// Add the original input dataset to database
+			dataService.getMeta().addEntityMeta(repository.getEntityMetaData());
+			dataService.getRepository(repository.getName()).add(repository.stream());
+			dataService.getRepository(repository.getName()).flush();
+			dataService.add(MatchingTaskEntityMetaData.ENTITY_NAME, mapEntity);
+			dataService.getRepository(MatchingTaskEntityMetaData.ENTITY_NAME).flush();
+			dataService.add(SortaJobExecution.ENTITY_NAME, jobExecution);
+
+			// FIXME : temporary work around to assign write permissions to the
+			// users who create the entities.
+			Authentication auth = securityContext.getAuthentication();
+			List<GrantedAuthority> roles = Lists.newArrayList(auth.getAuthorities());
+			for (Permission permiossion : Permission.values())
+			{
+				UserAuthority userAuthority = new UserAuthority();
+				userAuthority.setMolgenisUser(molgenisUser);
+				String role = SecurityUtils.AUTHORITY_ENTITY_PREFIX + permiossion.toString() + "_"
+						+ repository.getName().toUpperCase();
+				userAuthority.setRole(role);
+				roles.add(new SimpleGrantedAuthority(role));
+				dataService.add(UserAuthority.ENTITY_NAME, userAuthority);
+				dataService.getRepository(UserAuthority.ENTITY_NAME).flush();
+			}
+			auth = new UsernamePasswordAuthenticationToken(auth.getPrincipal(), null, roles);
+			securityContext.setAuthentication(auth);
+		});
+
 		return jobExecution;
 	}
 
@@ -542,5 +605,10 @@ public class SortaServiceController extends MolgenisPluginController
 	private boolean validateInputFileContent(Repository repository)
 	{
 		return repository.iterator().hasNext();
+	}
+
+	private String getSortaServiceMenuUrl()
+	{
+		return menuReaderService.getMenu().findMenuItemPath(ID);
 	}
 }

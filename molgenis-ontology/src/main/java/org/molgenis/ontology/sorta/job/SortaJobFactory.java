@@ -1,7 +1,7 @@
 package org.molgenis.ontology.sorta.job;
 
-import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.jobs.JobExecution;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
@@ -30,18 +30,21 @@ public class SortaJobFactory
 	private JobExecutionUpdater jobExecutionUpdater;
 
 	@Autowired
+	private IdGenerator idGenerator;
+
+	@Autowired
 	private MailSender mailSender;
 
 	@RunAsSystem
-	public SortaJobImpl create(String ontologyIri, String entityName, MolgenisUser molgenisUser,
-			JobExecution jobExecution, SecurityContext securityContext)
+	public SortaJobImpl create(String ontologyIri, String entityName, JobExecution jobExecution,
+			SecurityContext securityContext)
 	{
 		TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
 
 		ProgressImpl progress = new ProgressImpl(jobExecution, jobExecutionUpdater, mailSender);
 
-		SortaJobProcessor matchInputTermBatchService = new SortaJobProcessor(ontologyIri, entityName, molgenisUser,
-				progress, dataService, sortaService, securityContext);
+		SortaJobProcessor matchInputTermBatchService = new SortaJobProcessor(ontologyIri, entityName, progress,
+				dataService, sortaService, idGenerator);
 
 		return new SortaJobImpl(matchInputTermBatchService, securityContext, progress, transactionTemplate);
 	}
