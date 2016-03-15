@@ -143,12 +143,15 @@ public class VcfUtils
 		String additionalInfoFields = "";
 		for (AttributeMetaData attribute : attributes)
 		{
+
 			if ((attribute.getDataType().equals(MREF) || attribute.getDataType().equals(XREF))
-					&& !VCF_ATTRIBUTE_NAMES.contains(attribute.getName()))
+					&& !VCF_ATTRIBUTE_NAMES.contains(attribute.getName()) && !attribute.getName().equals(SAMPLES))
 			{
-				// We are dealing with non standard Xref and Mref attributes added by e.g. the SnpEff annotator
+				// We are dealing with non standard Xref and Mref attributes added by e.g. the SnpEff annotator,
+				// which is NOT the SAMPLE_ENTITIES attribute
 				additionalInfoFields = parseNonStandardMrefFieldsToInfoField(vcfEntity.getEntities(attribute.getName()),
 						attribute, additionalInfoFields);
+
 			}
 			else if (VCF_ATTRIBUTE_NAMES.contains(attribute.getName()))
 			{

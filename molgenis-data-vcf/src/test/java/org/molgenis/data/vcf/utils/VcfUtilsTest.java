@@ -87,14 +87,8 @@ public class VcfUtilsTest
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
-		/*
-		 * 1 10050000 test21 G A . PASS AC=21;AN=22;GTC=0,1,10 1 10050001 test22 G A . PASS AC=22;AN=23;GTC=1,2,11 1
-		 * 10050002 test23 G A . PASS AC=23;AN=24;GTC=2,3,12
-		 */
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom, ROLE_ID);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataRef);
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataAlt);
 
 		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataCantAnnotateChrom);
 		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataPos);
@@ -109,6 +103,8 @@ public class VcfUtilsTest
 
 		metaDataCanAnnotate.addAttributeMetaData(
 				new DefaultAttributeMetaData(VcfRepository.ID, MolgenisFieldTypes.FieldTypeEnum.STRING));
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataRef);
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataAlt);
 		metaDataCanAnnotate.addAttributeMetaData(
 				new DefaultAttributeMetaData(VcfRepository.QUAL, MolgenisFieldTypes.FieldTypeEnum.STRING));
 		metaDataCanAnnotate.addAttributeMetaData(
@@ -125,11 +121,11 @@ public class VcfUtilsTest
 
 		annotatedEntityMetadata.addAttributeMetaData(attributeMetaDataChrom, ROLE_ID);
 		annotatedEntityMetadata.addAttributeMetaData(attributeMetaDataPos);
+		annotatedEntityMetadata.addAttributeMetaData(
+				new DefaultAttributeMetaData(VcfRepository.ID, MolgenisFieldTypes.FieldTypeEnum.STRING));
 		annotatedEntityMetadata.addAttributeMetaData(attributeMetaDataRef);
 		annotatedEntityMetadata.addAttributeMetaData(attributeMetaDataAlt);
 
-		annotatedEntityMetadata.addAttributeMetaData(
-				new DefaultAttributeMetaData(VcfRepository.ID, MolgenisFieldTypes.FieldTypeEnum.STRING));
 		annotatedEntityMetadata.addAttributeMetaData(
 				new DefaultAttributeMetaData(VcfRepository.QUAL, MolgenisFieldTypes.FieldTypeEnum.STRING));
 		annotatedEntityMetadata.addAttributeMetaData(
@@ -260,8 +256,8 @@ public class VcfUtilsTest
 				outputVCFWriter.newLine();
 			}
 			outputVCFWriter.close();
-			assertTrue(FileUtils.contentEqualsIgnoreEOL(inputVcfFile, outputVCFFile, "UTF8"));
 
+			assertTrue(FileUtils.contentEqualsIgnoreEOL(inputVcfFile, outputVCFFile, "UTF8"));
 		}
 		finally
 		{
