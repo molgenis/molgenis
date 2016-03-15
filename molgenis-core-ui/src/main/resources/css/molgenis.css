@@ -177,7 +177,7 @@ body {
 }
 
 /* Change threshold for collapsing the menu, default is 768px*/
-@media (max-width: 768px) {
+@media (max-width: 1127px) {
     .navbar-toggle {
         display: block;
     }
