@@ -164,12 +164,12 @@ public class GoNLAnnotator
 					if (!Iterables.all(alleleMatches, Predicates.isNull()))
 					{
 						afs = alleleMatches.stream()
-								.map(gonl -> gonl == null ? ""
+								.map(gonl -> gonl == null ? "."
 										: Double.toString(gonl.getDouble(INFO_AC) / gonl.getDouble(INFO_AN)))
-								.collect(Collectors.joining("|"));
-
-						gtcs = alleleMatches.stream().map(gonl -> gonl == null ? "" : gonl.getString(INFO_GTC))
-								.collect(Collectors.joining("|"));
+								.collect(Collectors.joining(","));
+						//update GTC field to separate allele combinations by pipe instead of comma, since we use comma to separate alt allele info
+						gtcs = alleleMatches.stream().map(gonl -> gonl == null ? "." : gonl.getString(INFO_GTC).replace(",", "|"))
+								.collect(Collectors.joining(","));
 					}
 
 				}
