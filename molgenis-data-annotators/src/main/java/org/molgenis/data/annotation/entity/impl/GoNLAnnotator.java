@@ -142,11 +142,11 @@ public class GoNLAnnotator
 								.substring(inputEntity.getString(VcfRepository.REF).length()).length();
 						//bugfix: matching A/G to ACT/A results in postFixInputLength=2, correctly updating ref from ACT to A,
 						//but then tries to substring the alt allele A to length -1 (1 minus 2) which is not allowed.
-						//added a check to prevent this: alt.length() > postFixInputLength ? trim the alt : don't touch alt.
+						//added a check to prevent this: alt.length() > postFixInputLength ? trim the alt : change to 'n/a' because we cannot use this alt.
 						resourceEntity.set(VcfRepository.REF, resourceEntity.getString(VcfRepository.REF).substring(0,
 								(resourceEntity.getString(VcfRepository.REF).length() - postFixInputLength)));
 						String newAltString = Arrays.asList(resourceEntity.getString(ALT).split(",")).stream()
-								.map(alt -> alt.length() > postFixInputLength ? alt.substring(0, (alt.length() - postFixInputLength)) : alt)
+								.map(alt -> alt.length() > postFixInputLength ? alt.substring(0, (alt.length() - postFixInputLength)) : "n/a")
 								.collect(Collectors.joining(","));
 						resourceEntity.set(VcfRepository.ALT, newAltString);
 						refMatches.add(resourceEntity);
