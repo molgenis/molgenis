@@ -1,0 +1,35 @@
+#Image source, put in https://www.websequencediagrams.com
+
+title Quartz Job
+
+Quartz->QuartzJob: execute()
+activate QuartzJob
+
+QuartzJob -> *JobExecution: create()
+QuartzJob -> JobExecution: setUser(user)
+note over JobExecution: etc... set all\njob execution\nattributes
+
+activate JobExecution
+JobExecution --> QuartzJob:
+deactivate JobExecution
+
+QuartzJob -> JobFactory: createJob(jobExecution)
+activate JobFactory
+
+JobFactory -> *Job: create()
+
+JobFactory --> QuartzJob:
+deactivate JobFactory
+
+QuartzJob -> Job: call()
+activate Job
+
+note over Job: Ordinary job execution here,\nprogress and status get\nupdated in jobExecution.
+
+Job --> QuartzJob: result
+deactivate Job
+
+note over QuartzJob: optionally store result
+
+QuartzJob --> Quartz:
+deactivate QuartzJob

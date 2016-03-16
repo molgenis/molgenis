@@ -91,12 +91,34 @@ The execution of scheduled jobs is not that different from executing an ordinary
 Create the `JobExecution` entity instance at execution time, one for each execution of
 the scheduled job and feed it to the Job factory.
 
-### Quartz
-If you use quartz, your `QuartzJob`'s fields will get `@Autowired` by Spring so you can autowire
-a reference to your Job factory bean to create your `Job` instance.
+### Quartz Jobs
+If you use quartz to schedule a job, you implement the `QuartzJob` interface and schedule
+its class to be run.
 
-The `QuartzJob`'s `execute` method will already be run on a separate thread so you can
+#### Quartz Job details
+Job-specific data can be stored in the `JobDataMap` which is passed to quartz when you schedule the job.
+
+But since we have repositories to store information, you can also create a repository or settings
+object to store the details for the scheduled job. As a benefit the details of that entity can
+be updated in the settings editor.
+
+If there's more than one instance of the job scheduled, you can store its ID in the JobDataMap when you schedule it.
+
+#### Quartz job execution
+
+The `QuartzJob`'s fields will get `@Autowired` by the molgenis `AutowiringSpringBeanJobFactory`.
+So you can autowire a field in your `QuartzJob` to contain your Job factory bean.
+
+![quartz job sequence diagram](quartz-job.png)
+
+Upon execution of the QuartzJob, instantiate a `JobExecution` entity.
+Send it to the (autowired) Job factory to create a molgenis `Job` instance.
+
+The `QuartzJob`'s `execute` method will already be run on a separate thread so you can then
 call the `call` method of your `Job` instance synchronously.
 
-### Example
-Take a look at the FileIngesterQuartzJob for an example.
+#### Example of an existing Quartz job
+Take a look at the `FileIngesterQuartzJob` class for an example.
+
+Take a look at the `FileIngestRepositoryDecorator` that decorates the `FileIngest` repository
+to reschedule the `FileIngesterQuartzJob` when its entities get updated or deleted.
