@@ -65,6 +65,11 @@ public class VcfUtilsTest
 	public DefaultEntityMetaData metaDataCanAnnotate = new DefaultEntityMetaData("test");
 	public DefaultEntityMetaData metaDataCantAnnotate = new DefaultEntityMetaData("test");
 
+	public DefaultEntityMetaData geneMeta = new DefaultEntityMetaData("GENES");
+	DefaultEntityMetaData effectMeta = new DefaultEntityMetaData("EFFECT");
+	DefaultEntityMetaData vcfMeta = new DefaultEntityMetaData("vcfMeta");
+	DefaultEntityMetaData sampleEntityMeta = new DefaultEntityMetaData("vcfSampleEntity");
+
 	public AttributeMetaData attributeMetaDataChrom = new DefaultAttributeMetaData(CHROM,
 			MolgenisFieldTypes.FieldTypeEnum.STRING);
 	public AttributeMetaData attributeMetaDataPos = new DefaultAttributeMetaData(POS,
@@ -166,6 +171,17 @@ public class VcfUtilsTest
 		entities.add(entity1);
 		entities.add(entity2);
 		entities.add(entity3);
+
+		geneMeta.addAttribute("id", ROLE_ID).setDataType(STRING).setDescription("GENE Identifier (HGNC symbol)");
+		effectMeta.addAttribute("id", ROLE_ID).setDataType(STRING).setDescription("effect identifier");
+		effectMeta.addAttribute(ALT).setDataType(STRING).setDescription("Alternative allele");
+		effectMeta.addAttribute("ALT_GENE").setDataType(STRING).setDescription("Alternative allele and gene");
+		effectMeta.addAttribute("GENE").setDataType(XREF).setRefEntity(geneMeta)
+				.setDescription("Gene identifier (HGNC symbol)");
+		effectMeta.addAttribute("EFFECT").setDataType(STRING).setDescription("Level of effect on the gene");
+		effectMeta.addAttribute("TYPE").setDataType(STRING).setDescription("Type of mutation");
+
+		getVcfMetaData();
 	}
 
 	// regression test for https://github.com/molgenis/molgenis/issues/3643
@@ -304,61 +320,166 @@ public class VcfUtilsTest
 	@Test
 	public void vcfWriteMrefTest() throws IOException, MolgenisInvalidFormatException
 	{
-		DefaultEntityMetaData geneMeta = new DefaultEntityMetaData("GENES");
-		geneMeta.addAttribute("id", ROLE_ID).setDataType(STRING).setDescription("GENE Identifier (HGNC symbol)");
 
-		Entity geneEntity1 = new MapEntity(geneMeta);
-		geneEntity1.set("id", "BRCA1");
+		List<AttributeMetaData> attributes = newArrayList();
+		vcfMeta.getAttributes().forEach(attribute -> attributes.add(attribute));
+		effectMeta.getAttributes().forEach(attribute -> attributes.add(attribute));
+		geneMeta.getAttributes().forEach(attribute -> attributes.add(attribute));
+		sampleEntityMeta.getAttributes().forEach(attribute -> attributes.add(attribute));
 
-		Entity geneEntity2 = new MapEntity(geneMeta);
-		geneEntity2.set("id", "BRCA2");
+		List<Entity> vcfEntities = getVcfEntities();
 
-		List<Entity> geneEntities = Arrays.asList(geneEntity1, geneEntity2);
+		final File actualOutputFile = File.createTempFile("output", ".vcf");
+		try
+		{
+			BufferedWriter actualOutputFileWriter = new BufferedWriter(
+					new OutputStreamWriter(new FileOutputStream(actualOutputFile), UTF_8));
 
-		DefaultEntityMetaData effectMeta = new DefaultEntityMetaData("EFFECT");
-		effectMeta.addAttribute("id", ROLE_ID).setDataType(STRING).setDescription("effect identifier");
-		effectMeta.addAttribute(ALT).setDataType(STRING).setDescription("Alternative allele");
-		effectMeta.addAttribute("ALT_GENE").setDataType(STRING).setDescription("Alternative allele and gene");
-		effectMeta.addAttribute("GENE").setDataType(XREF).setRefEntity(geneMeta)
-				.setDescription("Gene identifier (HGNC symbol)");
-		effectMeta.addAttribute("EFFECT").setDataType(STRING).setDescription("Level of effect on the gene");
-		effectMeta.addAttribute("TYPE").setDataType(STRING).setDescription("Type of mutation");
+			File inputVcfFile = new File(ResourceUtils.getFile(getClass(), "/testMrefVcfWriter_input.vcf").getPath());
+			File expectedVcfFile = new File(
+					ResourceUtils.getFile(getClass(), "/testMrefVcfWriter_expected_output.vcf").getPath());
 
-		Entity effectEntity1 = new MapEntity(effectMeta);
-		effectEntity1.set("id", "eff1");
-		effectEntity1.set(ALT, "C");
-		effectEntity1.set("ALT_GENE", "C_BRCA1");
-		effectEntity1.set("GENE", geneEntity1);
-		effectEntity1.set("EFFECT", "HIGH");
-		effectEntity1.set("TYPE", "STOP_GAIN");
+			checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, actualOutputFileWriter, attributes);
 
-		Entity effectEntity2 = new MapEntity(effectMeta);
-		effectEntity2.set("id", "eff2");
-		effectEntity2.set(ALT, "T");
-		effectEntity2.set("ALT_GENE", "T_BRCA1");
-		effectEntity2.set("GENE", geneEntity1);
-		effectEntity2.set("EFFECT", "MEDIUM");
-		effectEntity2.set("TYPE", "NON_SYNONYMOUS");
+			for (Entity entity : vcfEntities)
+			{
+				MapEntity mapEntity = new MapEntity(entity, vcfMeta);
+				VcfUtils.writeToVcf(mapEntity, actualOutputFileWriter);
+				actualOutputFileWriter.newLine();
+			}
+			actualOutputFileWriter.close();
 
-		Entity effectEntity3 = new MapEntity(effectMeta);
-		effectEntity3.set("id", "eff3");
-		effectEntity3.set(ALT, "C");
-		effectEntity3.set("ALT_GENE", "C_BRCA2");
-		effectEntity3.set("GENE", geneEntity2);
-		effectEntity3.set("EFFECT", "LOW");
-		effectEntity3.set("TYPE", "SYNONYMOUS");
+			assertTrue(FileUtils.contentEqualsIgnoreEOL(expectedVcfFile, actualOutputFile, "UTF8"));
+		}
+		finally
+		{
+			boolean outputVCFFileIsDeleted = actualOutputFile.delete();
+			LOG.info("Result test file named: " + actualOutputFile.getName() + " is "
+					+ (outputVCFFileIsDeleted ? "" : "not ") + "deleted");
+		}
+	}
 
-		Entity effectEntity4 = new MapEntity(effectMeta);
-		effectEntity4.set("id", "eff4");
-		effectEntity4.set(ALT, "T");
-		effectEntity4.set("ALT_GENE", "T_BRCA2");
-		effectEntity4.set("GENE", geneEntity2);
-		effectEntity4.set("EFFECT", "LOW");
-		effectEntity4.set("TYPE", "MISSENSE");
+	private List<Entity> getVcfEntities()
+	{
+		Entity sampleEntity1 = new MapEntity(sampleEntityMeta);
+		sampleEntity1.set(VcfRepository.NAME, "0");
+		sampleEntity1.set(VcfRepository.FORMAT_GT, "0/1");
 
-		List<Entity> effectEntities = Arrays.asList(effectEntity1, effectEntity2, effectEntity3, effectEntity4);
+		Entity sampleEntity2 = new MapEntity(sampleEntityMeta);
+		sampleEntity2.set(VcfRepository.NAME, "0");
+		sampleEntity2.set(VcfRepository.FORMAT_GT, "1/0");
 
-		DefaultEntityMetaData vcfMeta = new DefaultEntityMetaData("vcfMeta");
+		// 1 48554748 . T A,G 100 PASS AC=0;AN=6;GTC=1,0,10 GT 0|1
+		Entity vcfEntity1 = new MapEntity(vcfMeta);
+		vcfEntity1.set(CHROM, "1");
+		vcfEntity1.set(POS, "48554748");
+		vcfEntity1.set(ID, ".");
+		vcfEntity1.set(REF, "T");
+		vcfEntity1.set(ALT, "A,G");
+		vcfEntity1.set(QUAL, "100");
+		vcfEntity1.set(FILTER, "PASS");
+		vcfEntity1.set("AC", "0");
+		vcfEntity1.set("AN", "6");
+		vcfEntity1.set("GTC", "0,1,10");
+		vcfEntity1.set("EFFECT", getEffectEntities(Arrays.asList("A", "G")));
+		vcfEntity1.set("GENES", getGeneEnttities(Arrays.asList("A", "G")));
+		vcfEntity1.set(SAMPLES, Arrays.asList(sampleEntity1));
+
+		// 7 50356137 . T A,C 100 PASS AC=0;AN=6;GTC=1,0,10 GT 1|0
+		Entity vcfEntity2 = new MapEntity(vcfMeta);
+		vcfEntity2.set(CHROM, "7");
+		vcfEntity2.set(POS, "50356137");
+		vcfEntity2.set(ID, ".");
+		vcfEntity2.set(REF, "T");
+		vcfEntity2.set(ALT, "A,C");
+		vcfEntity2.set(QUAL, "100");
+		vcfEntity2.set(FILTER, "PASS");
+		vcfEntity2.set("AC", "0");
+		vcfEntity2.set("AN", "6");
+		vcfEntity2.set("GTC", "1,0,10");
+		vcfEntity2.set("EFFECT", getEffectEntities(Arrays.asList("A", "C")));
+		vcfEntity2.set("GENES", getGeneEnttities(Arrays.asList("A", "C")));
+		vcfEntity2.set(SAMPLES, Arrays.asList(sampleEntity2));
+
+		// 17 57281092 . A G,T 100 PASS AC=0;AN=6;GTC=10,1,0 GT 0|1
+		Entity vcfEntity3 = new MapEntity(vcfMeta);
+		vcfEntity3.set(CHROM, "17");
+		vcfEntity3.set(POS, "57281092");
+		vcfEntity3.set(ID, ".");
+		vcfEntity3.set(REF, "A");
+		vcfEntity3.set(ALT, "G,T");
+		vcfEntity3.set(QUAL, "100");
+		vcfEntity3.set(FILTER, "PASS");
+		vcfEntity3.set("AC", "0");
+		vcfEntity3.set("AN", "6");
+		vcfEntity3.set("GTC", "10,1,0");
+		vcfEntity3.set("EFFECT", getEffectEntities(Arrays.asList("G", "T")));
+		vcfEntity3.set("GENES", getGeneEnttities(Arrays.asList("G", "T")));
+		vcfEntity3.set(SAMPLES, Arrays.asList(sampleEntity1));
+
+		// X 48536966 . T A,C,G 100 PASS AC=0;AN=6;GTC=0,10,1 GT 0|1
+		Entity vcfEntity4 = new MapEntity(vcfMeta);
+		vcfEntity4.set(CHROM, "X");
+		vcfEntity4.set(POS, "48536966");
+		vcfEntity4.set(ID, ".");
+		vcfEntity4.set(REF, "T");
+		vcfEntity4.set(ALT, "A,C,G");
+		vcfEntity4.set(QUAL, "100");
+		vcfEntity4.set(FILTER, "PASS");
+		vcfEntity4.set("AC", "0");
+		vcfEntity4.set("AN", "6");
+		vcfEntity4.set("GTC", "0,10,1");
+		vcfEntity4.set("EFFECT", getEffectEntities(Arrays.asList("A", "C", "G")));
+		vcfEntity4.set("GENES", getGeneEnttities(Arrays.asList("A", "C", "G")));
+		vcfEntity4.set(SAMPLES, Arrays.asList(sampleEntity1));
+
+		return newArrayList(vcfEntity1, vcfEntity2, vcfEntity3, vcfEntity4);
+	}
+
+	private Object getGeneEnttities(List<String> altAlleles)
+	{
+		List<Entity> geneEntities = newArrayList();
+		for (int i = 0; i < altAlleles.size(); i++)
+		{
+			Entity geneEntity = new MapEntity(geneMeta);
+			geneEntity.set("id", "BRCA" + (i + 1));
+			geneEntities.add(geneEntity);
+		}
+		return geneEntities;
+	}
+
+	private List<Entity> getEffectEntities(List<String> altAlleles)
+	{
+		List<Entity> effectEntities = newArrayList();
+		for (int i = 0; i < altAlleles.size(); i++)
+		{
+			Entity effectEntity = new MapEntity(effectMeta);
+			String altAllele = altAlleles.get(i);
+			effectEntity.set("id", "eff" + (i + 1));
+			effectEntity.set(ALT, altAllele);
+			effectEntity.set("ALT_GENE", altAllele + "_BRCA" + (i + 1));
+			effectEntity.set("GENE", getGeneEnttities(altAlleles));
+			effectEntity.set("EFFECT", "HIGH");
+			effectEntity.set("TYPE", "STOP_GAIN");
+
+			effectEntities.add(effectEntity);
+		}
+
+		return effectEntities;
+	}
+
+	private DefaultEntityMetaData getVcfMetaData()
+	{
+		String formatDpAttrName = "DP";
+		String formatEcAttrName = "EC";
+		String formatGtAttrName = VcfRepository.FORMAT_GT;
+		String sampleIdAttrName = VcfRepository.NAME;
+
+		sampleEntityMeta.addAttribute(sampleIdAttrName, ROLE_ID);
+		sampleEntityMeta.addAttribute(formatDpAttrName);
+		sampleEntityMeta.addAttribute(formatEcAttrName);
+		sampleEntityMeta.addAttribute(formatGtAttrName);
+
 		vcfMeta.addAttribute(CHROM, ROLE_ID).setDataType(STRING);
 		vcfMeta.addAttribute(POS).setDataType(LONG);
 		vcfMeta.addAttribute(ID).setDataType(STRING);
@@ -380,54 +501,8 @@ public class VcfUtilsTest
 		vcfMeta.addAttribute("EFFECT").setDataType(MREF).setRefEntity(effectMeta)
 				.setDescription("Reference to a list of effects causes by mutations");
 		vcfMeta.addAttribute("GENES").setDataType(MREF).setRefEntity(geneMeta).setDescription("Reference to genes");
+		vcfMeta.addAttribute(SAMPLES).setDataType(MolgenisFieldTypes.MREF).setRefEntity(sampleEntityMeta);
 
-		Entity vcfEntity = new MapEntity(vcfMeta);
-		vcfEntity.set(CHROM, "1");
-		vcfEntity.set(POS, "100");
-		vcfEntity.set(ID, ".");
-		vcfEntity.set(REF, "A");
-		vcfEntity.set(ALT, "C,T");
-		vcfEntity.set(FILTER, ".");
-		vcfEntity.set(QUAL, ".");
-		vcfEntity.set("AC", "21");
-		vcfEntity.set("AN", "22");
-		vcfEntity.set("GTC", "0,1,10");
-		vcfEntity.set("EFFECT", effectEntities);
-		vcfEntity.set("GENES", geneEntities);
-
-		List<Entity> vcfEntities = newArrayList(vcfEntity);
-
-		List<AttributeMetaData> attributes = newArrayList();
-		vcfMeta.getAttributes().forEach(attribute -> attributes.add(attribute));
-		effectMeta.getAttributes().forEach(attribute -> attributes.add(attribute));
-		geneMeta.getAttributes().forEach(attribute -> attributes.add(attribute));
-
-		final File actualOutputFile = File.createTempFile("output", ".vcf");
-		try
-		{
-			BufferedWriter actualOutputFileWriter = new BufferedWriter(
-					new OutputStreamWriter(new FileOutputStream(actualOutputFile), UTF_8));
-
-			File inputVcfFile = new File(ResourceUtils.getFile(getClass(), "/testMrefVcfWriter_input.vcf").getPath());
-			File expectedVcfFile = new File(
-					ResourceUtils.getFile(getClass(), "/testMrefVcfWriter_expected_output.vcf").getPath());
-
-			checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, actualOutputFileWriter, attributes);
-
-			for (Entity entity : vcfEntities)
-			{
-				MapEntity mapEntity = new MapEntity(entity, vcfMeta);
-				VcfUtils.writeToVcf(mapEntity, actualOutputFileWriter);
-				actualOutputFileWriter.newLine();
-			}
-			actualOutputFileWriter.close();
-			assertTrue(FileUtils.contentEqualsIgnoreEOL(expectedVcfFile, actualOutputFile, "UTF8"));
-		}
-		finally
-		{
-			boolean outputVCFFileIsDeleted = actualOutputFile.delete();
-			LOG.info("Result test file named: " + actualOutputFile.getName() + " is "
-					+ (outputVCFFileIsDeleted ? "" : "not ") + "deleted");
-		}
+		return vcfMeta;
 	}
 }
