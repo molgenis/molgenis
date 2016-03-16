@@ -3,7 +3,6 @@ package org.molgenis.data.annotation.entity.impl;
 import static org.elasticsearch.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.mock;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Iterator;

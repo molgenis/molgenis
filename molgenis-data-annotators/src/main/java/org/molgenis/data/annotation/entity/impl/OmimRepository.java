@@ -63,9 +63,9 @@ public class OmimRepository extends AbstractRepository
 	public EntityMetaData getEntityMetaData()
 	{
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(OmimAnnotator.NAME);
-		entityMetaData.addAttribute(OMIM_AUTO_ID_COL_NAME, ROLE_ID).setVisible(false);
+		entityMetaData.addAttribute(OMIM_GENE_SYMBOLS_COL_NAME, ROLE_ID);
 		entityMetaData.addAttribute(OMIM_PHENOTYPE_COL_NAME);
-		entityMetaData.addAttribute(OMIM_MIM_NUMBER_COL_NAME, ROLE_ID);
+		entityMetaData.addAttribute(OMIM_MIM_NUMBER_COL_NAME);
 		entityMetaData.addAttribute(OMIM_CYTO_LOCATION_COL_NAME);
 		return entityMetaData;
 	}
@@ -148,15 +148,11 @@ public class OmimRepository extends AbstractRepository
 					values = csvReader.readNext();
 				}
 
-				int counter = 1;
 				for (String geneSymbol : omimEntriesByGeneSymbol.keySet())
 				{
 					Entity entity = new MapEntity(getEntityMetaData());
-					entity.set(OMIM_AUTO_ID_COL_NAME, counter);
-					counter++;
-
-					entity.set(OMIM_PHENOTYPE_COL_NAME, omimEntriesByGeneSymbol.get(geneSymbol).get(0));
 					entity.set(OMIM_GENE_SYMBOLS_COL_NAME, geneSymbol);
+					entity.set(OMIM_PHENOTYPE_COL_NAME, omimEntriesByGeneSymbol.get(geneSymbol).get(0));
 					entity.set(OMIM_MIM_NUMBER_COL_NAME, omimEntriesByGeneSymbol.get(geneSymbol).get(1));
 					entity.set(OMIM_CYTO_LOCATION_COL_NAME, omimEntriesByGeneSymbol.get(geneSymbol).get(2));
 
