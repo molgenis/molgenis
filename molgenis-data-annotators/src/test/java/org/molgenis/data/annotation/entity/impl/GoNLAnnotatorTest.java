@@ -373,6 +373,32 @@ public class GoNLAnnotatorTest extends AbstractTestNGSpringContextTests
 		assertEquals(resultEntity.get(GoNLAnnotator.GONL_GENOME_GTC),
 				expectedEntity.get(GoNLAnnotator.GONL_GENOME_GTC));
 	}
+	
+	/**
+	 * Test for bugfix where alt allele in resource was trimmed too much causing index out of bounds.
+	 */
+	@Test
+	public void testAnnotate15()
+	{
+		Entity entity14 = new MapEntity(emd);
+		entity14.set(VcfRepository.CHROM, "1");
+		entity14.set(VcfRepository.POS, 28227207);
+		entity14.set(VcfRepository.REF, "A");
+		entity14.set(VcfRepository.ALT, "G");
+
+		Iterator<Entity> results = annotator.annotate(Collections.singletonList(entity14));
+		assertTrue(results.hasNext());
+		Entity resultEntity = results.next();
+		assertFalse(results.hasNext());
+
+		Entity expectedEntity = new MapEntity("expected");
+		expectedEntity.set(GoNLAnnotator.GONL_GENOME_AF, null);
+		expectedEntity.set(GoNLAnnotator.GONL_GENOME_GTC, null);
+
+		assertEquals(resultEntity.get(GoNLAnnotator.GONL_GENOME_AF), expectedEntity.get(GoNLAnnotator.GONL_GENOME_AF));
+		assertEquals(resultEntity.get(GoNLAnnotator.GONL_GENOME_GTC),
+				expectedEntity.get(GoNLAnnotator.GONL_GENOME_GTC));
+	}
 
 	public static class Config
 	{
