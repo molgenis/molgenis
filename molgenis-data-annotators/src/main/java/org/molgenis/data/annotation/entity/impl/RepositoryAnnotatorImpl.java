@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.elasticsearch.common.collect.Lists;
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AbstractRepositoryEntityAnnotator;
 import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;

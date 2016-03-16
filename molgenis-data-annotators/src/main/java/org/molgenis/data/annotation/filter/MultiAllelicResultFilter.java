@@ -60,6 +60,11 @@ public class MultiAllelicResultFilter implements ResultFilter
 		this.attributes = attributes;
 	}
 
+	public MultiAllelicResultFilter()
+	{
+		this.attributes = null;
+	}
+
 	@Override
 	public Collection<AttributeMetaData> getRequiredAttributes()
 	{

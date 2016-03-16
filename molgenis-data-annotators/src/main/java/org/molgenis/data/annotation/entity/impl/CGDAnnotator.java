@@ -92,12 +92,16 @@ public class CGDAnnotator
 	public enum CGDAttributeName
 	{
 		GENE("#GENE", SnpEffAnnotator.GENE_NAME), REFERENCES("REFERENCES", "REFS"), INTERVENTION_RATIONALE(
-				"INTERVENTION/RATIONALE", "INTERVENTION_RATIONALE"), COMMENTS("COMMENTS", "COMMENTS"), INTERVENTION_CATEGORIES(
-				"INTERVENTION CATEGORIES", "INTERVENTION_CATEGORIES"), MANIFESTATION_CATEGORIES(
-				"MANIFESTATION CATEGORIES", "MANIFESTATION_CATEGORIES"), ALLELIC_CONDITIONS("ALLELIC CONDITIONS",
-				"ALLELIC_CONDITIONS"), ENTREZ_GENE_ID("ENTREZ GENE ID", "ENTREZ_GENE_ID"), HGNC_ID("HGNC ID", "HGNC_ID"), CONDITION(
-				"CONDITION", CONDITION_LABEL), AGE_GROUP("AGE GROUP", AGE_GROUP_LABEL), INHERITANCE("INHERITANCE",
-				INHERITANCE_LABEL), GENERALIZED_INHERITANCE("", GENERALIZED_INHERITANCE_LABEL);
+				"INTERVENTION/RATIONALE",
+				"INTERVENTION_RATIONALE"), COMMENTS("COMMENTS", "COMMENTS"), INTERVENTION_CATEGORIES(
+						"INTERVENTION CATEGORIES", "INTERVENTION_CATEGORIES"), MANIFESTATION_CATEGORIES(
+								"MANIFESTATION CATEGORIES", "MANIFESTATION_CATEGORIES"), ALLELIC_CONDITIONS(
+										"ALLELIC CONDITIONS", "ALLELIC_CONDITIONS"), ENTREZ_GENE_ID("ENTREZ GENE ID",
+												"ENTREZ_GENE_ID"), HGNC_ID("HGNC ID", "HGNC_ID"), CONDITION("CONDITION",
+														CONDITION_LABEL), AGE_GROUP("AGE GROUP",
+																AGE_GROUP_LABEL), INHERITANCE("INHERITANCE",
+																		INHERITANCE_LABEL), GENERALIZED_INHERITANCE("",
+																				GENERALIZED_INHERITANCE_LABEL);
 
 		private final String cgdName;// Column name as defined in CGD file
 		private final String attributeName;// Output attribute name
@@ -139,8 +143,8 @@ public class CGDAnnotator
 	public RepositoryAnnotator cgd()
 	{
 		AnnotatorInfo info = getAnnotatorInfo();
-		QueryCreator queryCreator = new AttributeEqualsQueryCreator(new DefaultAttributeMetaData(
-				GENE.getAttributeName()));
+		QueryCreator queryCreator = new AttributeEqualsQueryCreator(
+				new DefaultAttributeMetaData(GENE.getAttributeName()));
 		ResultFilter resultFilter = new FirstResultFilter();
 
 		EntityAnnotator entityAnnotator = new CGDEntityAnnotator(CGD_RESOURCE, info, queryCreator, resultFilter,
@@ -165,7 +169,8 @@ public class CGDAnnotator
 
 	private AnnotatorInfo getAnnotatorInfo()
 	{
-		return AnnotatorInfo.create(Status.READY, Type.PHENOTYPE_ASSOCIATION, "CGD", "Clinical Genomics Database",
+		return AnnotatorInfo.create(Status.READY, Type.PHENOTYPE_ASSOCIATION, "CGD",
+				"Clinical Genomics Database.\nPlease note that if SnpEff was used to annotate in order to add the gene symbols to the variants, than this annotator should be used on the result entity rather than the variant entity itself.\"",
 				getOutputAttributes());
 	}
 

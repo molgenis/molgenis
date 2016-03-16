@@ -1,6 +1,7 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import autovalue.shaded.com.google.common.common.collect.Iterables;
+import org.apache.commons.lang.StringUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -21,6 +22,8 @@ import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotator.websettings.VariantClassificationAnnotatorSettings;
 import org.molgenis.data.importer.EmxMetaDataParser;
 import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.vcf.VcfRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,7 +31,11 @@ import org.springframework.context.annotation.Configuration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Configuration
 public class VariantClassificationAnnotator
@@ -36,6 +43,7 @@ public class VariantClassificationAnnotator
 	public static final double MAF_THRESHOLD = 0.00474;
 	public static final int CADD_MINIMUM_THRESHOLD = 5;
 	public static final int CADD_MAXIMUM_THRESHOLD = 25;
+	public static final String VARIANT_ENTITY = "Variant";
 
 	public enum Category
 	{
@@ -79,8 +87,10 @@ public class VariantClassificationAnnotator
 		attributes.add(confidence);
 		attributes.add(reason);
 
+		String description = "Please note that this annotator processes the results from a SnpEff annotation\nTherefor it should be used on the result entity rather than the variant entity itself.\nThe corresponding variant entity should also be annotated with CADD and EXaC";
+
 		AnnotatorInfo classificationInfo = AnnotatorInfo.create(AnnotatorInfo.Status.READY,
-				AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE, NAME, "", attributes);
+				AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE, NAME, description, attributes);
 		EntityAnnotator entityAnnotator = new QueryAnnotatorImpl(RESOURCE, classificationInfo,
 				new GeneNameQueryCreator(), dataService, resources, (annotationSourceFileName) -> {
 					variantClassificationAnnotatorSettings.set(NAME, "");
@@ -90,8 +100,19 @@ public class VariantClassificationAnnotator
 			public List<AttributeMetaData> getRequiredAttributes()
 			{
 				List<AttributeMetaData> requiredAttributes = new ArrayList<>();
-				requiredAttributes.addAll(Arrays.asList(ExacAnnotator.EXAC_AF_ATTR, SnpEffAnnotator.GENE_NAME_ATTR,
-						SnpEffAnnotator.IMPACT_ATTR, CaddAnnotator.CADD_SCALED_ATTR));
+				DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(VARIANT_ENTITY);
+				List<AttributeMetaData> refAttributesList = Arrays.asList(CaddAnnotator.CADD_SCALED_ATTR,
+						ExacAnnotator.EXAC_AF_ATTR, VcfRepository.ALT_META);
+				entityMetaData.addAllAttributeMetaData(refAttributesList);
+				AttributeMetaData refAttr = new DefaultAttributeMetaData(VARIANT_ENTITY,
+						MolgenisFieldTypes.FieldTypeEnum.XREF)
+								.setRefEntity(entityMetaData)
+								.setDescription("This annotator needs a references entities containing: "
+										+ StreamSupport.stream(refAttributesList.spliterator(), false)
+												.map(AttributeMetaData::getName).collect(Collectors.joining(", ")));
+
+				requiredAttributes.addAll(Arrays.asList(SnpEffAnnotator.GENE_NAME_ATTR, SnpEffAnnotator.IMPACT_ATTR,
+						refAttr, VcfRepository.ALT_META));
 				return requiredAttributes;
 			}
 
@@ -99,13 +120,34 @@ public class VariantClassificationAnnotator
 			protected void processQueryResults(Entity inputEntity, Iterable<Entity> annotationSourceEntities,
 					Entity resultEntity)
 			{
+				String alt = inputEntity.getString(VcfRepository.ALT);
+				if (alt.contains(","))
+				{
+					throw new MolgenisDataException(
+							"The variant predication annotator only accepts single allele Effect entities.");
+				}
 				int sourceEntitiesSize = Iterables.size(annotationSourceEntities);
+
+				Entity variantEntity = inputEntity.getEntity(VARIANT_ENTITY);
+
+				Map<String, Double> caddMap = toMap(variantEntity.getString(VcfRepository.ALT),
+						variantEntity.getString(CaddAnnotator.CADD_SCALED));
+				Map<String, Double> exacMap = toMap(variantEntity.getString(VcfRepository.ALT),
+						variantEntity.getString(ExacAnnotator.EXAC_AF));
+
+				Impact impact = Impact.valueOf(inputEntity.getString(SnpEffAnnotator.PUTATIVE_IMPACT));
+				Double exacMAF = exacMap.get(alt);
+				Double caddScaled = caddMap.get(alt);
+				String gene = inputEntity.getString(SnpEffAnnotator.GENE_NAME);
 
 				if (sourceEntitiesSize == 1)
 				{
 					Entity annotationSourceEntity = annotationSourceEntities.iterator().next();
-					// FIXME: multiallelic
-					Judgment judgment = classifyVariant(inputEntity, annotationSourceEntity);
+
+					Category category = Category.valueOf(annotationSourceEntity.getString(CATEGORY));
+
+					Judgment judgment = classifyVariant(impact, caddScaled, exacMAF, category, gene,
+							annotationSourceEntity);
 					resultEntity.set(CLASSIFICATION, judgment.getClassification().toString());
 					resultEntity.set(CONFIDENCE, judgment.getConfidence().toString());
 					resultEntity.set(REASON, judgment.getReason());
@@ -113,8 +155,7 @@ public class VariantClassificationAnnotator
 				else if (sourceEntitiesSize == 0)
 				{
 					// if we have no data for this gene, immediately fall back to the naive method
-					// FIXME: multiallelic
-					Judgment judgment = genomewideClassifyVariant(inputEntity);
+					Judgment judgment = genomewideClassifyVariant(impact, caddScaled, exacMAF, gene);
 					resultEntity.set(CLASSIFICATION, judgment.getClassification().toString());
 					resultEntity.set(CONFIDENCE, judgment.getConfidence().toString());
 					resultEntity.set(REASON, judgment.getReason());
@@ -143,27 +184,23 @@ public class VariantClassificationAnnotator
 		return variantClassificationResource;
 	}
 
-	private Judgment classifyVariant(Entity inputEntity, Entity annotationSourceEntity)
+	private Judgment classifyVariant(Impact impact, Double caddScaled, Double exacMAF, Category category, String gene,
+			Entity annotationSourceEntity)
 	{
-		Double minorAlleleFrequency = inputEntity.getDouble(ExacAnnotator.EXAC_AF) != null
-				? inputEntity.getDouble(ExacAnnotator.EXAC_AF) : 0;
-		Impact impact = Impact.valueOf(inputEntity.getString(SnpEffAnnotator.PUTATIVE_IMPACT));
-		Double CADDscore = inputEntity.getDouble(CaddAnnotator.CADD_SCALED);
-		Category category = Category.valueOf(annotationSourceEntity.getString(CATEGORY));
 
 		Double pathoMAFThreshold = annotationSourceEntity.getDouble(PATHOMAFTHRESHOLD);
 		Double meanPathogenicCADDScore = annotationSourceEntity.getDouble(MEANPATHOGENICCADDSCORE);
 		Double spec95thPerCADDThreshold = annotationSourceEntity.getDouble(SPEC95THPERCADDTHRESHOLD);
 
 		// MAF based classification, calibrated
-		if (minorAlleleFrequency > pathoMAFThreshold)
+		if (exacMAF > pathoMAFThreshold)
 		{
-			return new Judgment(Classification.Benign, Method.calibrated, "Variant MAF of " + minorAlleleFrequency
+			return new Judgment(Classification.Benign, Method.calibrated, "Variant MAF of " + exacMAF
 					+ " is greater than the pathogenic 95th percentile MAF of " + pathoMAFThreshold + ".");
 		}
 
-		String mafReason = "the variant MAF of " + minorAlleleFrequency
-				+ " is lesser than the pathogenic 95th percentile MAF of " + pathoMAFThreshold + ".";
+		String mafReason = "the variant MAF of " + exacMAF + " is lesser than the pathogenic 95th percentile MAF of "
+				+ pathoMAFThreshold + ".";
 
 		// Impact based classification, calibrated
 		if (impact != null)
@@ -196,56 +233,80 @@ public class VariantClassificationAnnotator
 		}
 
 		// CADD score based classification, calibrated
-		if (CADDscore != null)
+		if (caddScaled != null)
 		{
 			if ((category.equals(Category.C1) || category.equals(Category.C2)))
 			{
-				if (CADDscore > meanPathogenicCADDScore)
+				if (caddScaled > meanPathogenicCADDScore)
 				{
 					return new Judgment(Judgment.Classification.Pathogn, Method.calibrated,
-							"Variant CADD score of " + CADDscore + " is greater than the mean pathogenic score of "
+							"Variant CADD score of " + caddScaled + " is greater than the mean pathogenic score of "
 									+ meanPathogenicCADDScore
 									+ " in a gene for which CADD scores are informative. Also, " + mafReason);
 				}
-				else if (CADDscore < meanPathogenicCADDScore)
+				else if (caddScaled < meanPathogenicCADDScore)
 				{
 					return new Judgment(Judgment.Classification.Benign, Method.calibrated,
-							"Variant CADD score of " + CADDscore + " is lesser than the mean population score of "
+							"Variant CADD score of " + caddScaled + " is lesser than the mean population score of "
 									+ meanPathogenicCADDScore
 									+ " in a gene for which CADD scores are informative, although " + mafReason);
 				}
 			}
 			else if ((category.equals(Category.C3) || category.equals(Category.C4) || category.equals(Category.C5)))
 			{
-				if (CADDscore > spec95thPerCADDThreshold)
+				if (caddScaled > spec95thPerCADDThreshold)
 				{
 					return new Judgment(Judgment.Classification.Pathogn, Method.calibrated,
-							"Variant CADD score of " + CADDscore + " is greater than the 95% specificity threhold of "
+							"Variant CADD score of " + caddScaled + " is greater than the 95% specificity threhold of "
 									+ spec95thPerCADDThreshold + " for this gene. Also, " + mafReason);
 				}
-				else if (CADDscore < spec95thPerCADDThreshold)
+				else if (caddScaled < spec95thPerCADDThreshold)
 				{
 					return new Judgment(Judgment.Classification.Benign, Method.calibrated,
-							"Variant CADD score of " + CADDscore + " is lesser than the 95% sensitivity threhold of "
+							"Variant CADD score of " + caddScaled + " is lesser than the 95% sensitivity threhold of "
 									+ spec95thPerCADDThreshold + " for this gene, although " + mafReason);
 				}
 			}
 		}
 
 		// if everything so far has failed, we can still fall back to the naive method
-		return genomewideClassifyVariant(inputEntity);
+		return genomewideClassifyVariant(impact, caddScaled, exacMAF, gene);
 	}
 
-	public Judgment genomewideClassifyVariant(Entity entity)
+	private Map<String, Double> toMap(String alternatives, String annotations)
+	{
+		if (annotations == null) annotations = "";
+		String[] altArray = alternatives.split(",");
+		String[] annotationsArray = annotations.split(",");
+
+		Map<String, Double> result = new HashMap<>();
+		if (altArray.length == annotationsArray.length)
+		{
+			for (int i = 0; i < altArray.length; i++)
+			{
+				result.put(altArray[i], Double.parseDouble(annotationsArray[i]));
+			}
+		}
+		else if (StringUtils.isEmpty(annotations))
+		{
+			for (int i = 0; i < altArray.length; i++)
+			{
+				result.put(altArray[i], null);
+			}
+		}
+		else
+		{
+			throw new MolgenisDataException(VcfRepository.ALT + " differs in length from the provided annotations.");
+		}
+		return result;
+	}
+
+	public Judgment genomewideClassifyVariant(Impact impact, Double caddScaled, Double exacMAF, String gene)
 	{
 
-		Double minorAlleleFrequency = entity.getDouble(ExacAnnotator.EXAC_AF) != null
-				? entity.getDouble(ExacAnnotator.EXAC_AF) : 0;
-		Impact impact = Impact.valueOf(entity.getString(SnpEffAnnotator.PUTATIVE_IMPACT));
-		Double CADDscore = entity.getDouble(CaddAnnotator.CADD_SCALED);
-		String gene = entity.getString(SnpEffAnnotator.GENE_NAME);
+		exacMAF = exacMAF != null ? exacMAF : 0;
 
-		if (minorAlleleFrequency != null && minorAlleleFrequency > MAF_THRESHOLD)
+		if (exacMAF != null && exacMAF > MAF_THRESHOLD)
 		{
 			return new Judgment(Judgment.Classification.Benign, Method.genomewide, "MAF > " + MAF_THRESHOLD);
 		}
@@ -255,12 +316,12 @@ public class VariantClassificationAnnotator
 		}
 		else
 		{
-			if (CADDscore != null && CADDscore > CADD_MAXIMUM_THRESHOLD)
+			if (caddScaled != null && caddScaled > CADD_MAXIMUM_THRESHOLD)
 			{
 				return new Judgment(Judgment.Classification.Pathogn, Method.genomewide,
 						"CADDscore > " + CADD_MAXIMUM_THRESHOLD);
 			}
-			else if (CADDscore != null && CADDscore < CADD_MINIMUM_THRESHOLD)
+			else if (caddScaled != null && caddScaled < CADD_MINIMUM_THRESHOLD)
 			{
 				return new Judgment(Judgment.Classification.Benign, Method.genomewide,
 						"CADDscore < " + CADD_MINIMUM_THRESHOLD);
@@ -269,9 +330,9 @@ public class VariantClassificationAnnotator
 			{
 				return new Judgment(Judgment.Classification.VOUS, Method.genomewide,
 						"Unable to classify variant as benign or pathogenic. The combination of " + impact
-								+ " impact, a CADD score " + (CADDscore != null ? CADDscore : "[missing]")
-								+ " and MAF of " + (minorAlleleFrequency != null ? minorAlleleFrequency : "[missing]")
-								+ " in " + gene + " is inconclusive.");
+								+ " impact, a CADD score " + (caddScaled != null ? caddScaled : "[missing]")
+								+ " and MAF of " + (exacMAF != null ? exacMAF : "[missing]") + " in " + gene
+								+ " is inconclusive.");
 			}
 		}
 	}
