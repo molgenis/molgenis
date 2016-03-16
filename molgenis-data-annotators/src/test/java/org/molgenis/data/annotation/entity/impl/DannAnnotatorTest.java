@@ -141,7 +141,7 @@ public class DannAnnotatorTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testThreeOccurencesOneMatchEntity1()
 	{
-		this.testMatch(input1, 0.16461391399220135);
+		this.testMatch(input1, "0.16461391399220135");
 	}
 
 	@Test
@@ -160,7 +160,7 @@ public class DannAnnotatorTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testThreeOccurencesOneMatchEntity4()
 	{
-		this.testMatch(input4, 0.38108629377072734);
+		this.testMatch(input4, "0.38108629377072734");
 	}
 
 	private void testMatch(List<Entity> inputToAnnotate, Object dannScore)

@@ -126,8 +126,8 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 		List<Entity> expectedList = new ArrayList<Entity>();
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
 
-		resultMap.put(CaddAnnotator.CADD_ABS, -0.03);
-		resultMap.put(CaddAnnotator.CADD_SCALED, 2.003);
+		resultMap.put(CaddAnnotator.CADD_ABS, "-0.03");
+		resultMap.put(CaddAnnotator.CADD_SCALED, "2.003");
 
 		Entity expectedEntity = new MapEntity(resultMap);
 		expectedList.add(expectedEntity);
@@ -161,8 +161,8 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 		List<Entity> expectedList = new ArrayList<Entity>();
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
 
-		resultMap.put(CaddAnnotator.CADD_ABS, 0.5);
-		resultMap.put(CaddAnnotator.CADD_SCALED, 14.5);
+		resultMap.put(CaddAnnotator.CADD_ABS, "0.5");
+		resultMap.put(CaddAnnotator.CADD_SCALED, "14.5");
 
 		Entity expectedEntity = new MapEntity(resultMap);
 		expectedList.add(expectedEntity);
