@@ -54,10 +54,10 @@ public class MultiAllelicResultFilter implements ResultFilter
 {
 
 	private List<AttributeMetaData> attributes;
-
-	public MultiAllelicResultFilter(List<AttributeMetaData> attributes)
+	
+	public MultiAllelicResultFilter(List<AttributeMetaData> alleleSpecificAttributes)
 	{
-		this.attributes = attributes;
+		this.attributes = alleleSpecificAttributes;
 	}
 
 	@Override
@@ -77,6 +77,7 @@ public class MultiAllelicResultFilter implements ResultFilter
 			{
 				filter(sourceEntity, processedResults, resourceEntity, "", "");
 			}
+			//FIXME: needs same fix as GoNL annotator??
 			else if(resourceEntity.getString(VcfRepository.REF).indexOf(sourceEntity.getString(VcfRepository.REF))==0) {
 				String postFix = resourceEntity.getString(VcfRepository.REF).substring(sourceEntity.getString(VcfRepository.REF).length());
 				filter(sourceEntity, processedResults, resourceEntity, postFix, "");

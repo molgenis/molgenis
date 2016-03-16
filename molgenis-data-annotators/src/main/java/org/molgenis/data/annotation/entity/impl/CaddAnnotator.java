@@ -18,7 +18,7 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
-import org.molgenis.data.annotation.filter.VariantResultFilter;
+import org.molgenis.data.annotation.filter.MultiAllelicResultFilter;
 import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.query.LocusQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
@@ -93,7 +93,7 @@ public class CaddAnnotator
 						+ "causal variation in both research and clinical settings. (source: http://cadd.gs.washington.edu/info)",
 				attributes);
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(CADD_TABIX_RESOURCE, caddInfo, new LocusQueryCreator(),
-				new VariantResultFilter(), dataService, resources,
+				new MultiAllelicResultFilter(attributes), dataService, resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(CaddAnnotatorSettings.Meta.CADD_LOCATION,
 						caddAnnotatorSettings));
 
