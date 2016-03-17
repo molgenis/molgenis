@@ -42,9 +42,9 @@ public class OmimAnnotator
 	public static final String NAME = "OMIM";
 	public static final char SEPARATOR = '\t';
 
-	private static final String PHENOTYPE = "OMIM_Phenotypes";
-	private static final String MIM_NUMBER = "OMIM_MIM_Numbers";
-	private static final String CYTO_LOCATIONS = "OMIM_Cyto_Locations";
+	public static final String PHENOTYPE = "OMIM_Phenotypes";
+	public static final String MIM_NUMBER = "OMIM_MIM_Numbers";
+	public static final String CYTO_LOCATIONS = "OMIM_Cyto_Locations";
 
 	public static String OMIM_RESOURCE = "OMIMResource";
 
