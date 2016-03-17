@@ -35,9 +35,8 @@ import Spinner from './Spinner';
 import Table from './Table';
 import TextArea from './TextArea';
 import ProgressBar from './ProgressBar';
-import JobContainer from './jobs/JobContainer';
-import JobsContainer from './jobs/JobsContainer';
 import FileIngestPlugin from './FileIngestPlugin';
+import jobs from './jobs';
 
 export default {
 	'mixin' : mixin,
@@ -69,7 +68,6 @@ export default {
 	'Table' : Table,
 	'TextArea' : TextArea,
 	'ProgressBar' : ProgressBar,
-	'JobContainer' : JobContainer,
-	'JobsContainer' : JobsContainer,
+	'jobs': jobs,
 	'FileIngestPlugin' : FileIngestPlugin
 };

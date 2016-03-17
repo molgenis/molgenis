@@ -1,6 +1,6 @@
 <#macro listTasks>
 <div class="row">
-	<div class="col-md-offset-2 col-md-8">
+	<div class="col-md-offset-1 col-md-10">
 		<div class="row" style="min-height:300px;">
 		<div id="job-container"></div>
 		</div>
@@ -13,10 +13,22 @@
 </div>
 <script>
 	$(document).ready(function(){
-		React.render(molgenis.ui.JobsContainer({
-			'username' : 'admin'
-		}), $('#job-container')[0]);
+		var customColumns = [{th:'Job target', td: function(job){
+			return job.targetEntity
+		}}, {th:'Ontology url', td: function(job){
+			return job.ontologyIri
+		}}, {th: 'Delete', td: function(job){
+			return job.deleteUrl && molgenis.ui.jobs.DeleteBtn({
+				url: job.deleteUrl
+			})
+		}}];
 		
+		React.render(molgenis.ui.jobs.JobsContainer({
+			'url' : '/plugin/ontologyservice/jobs',
+		}, molgenis.ui.jobs.Jobs({}, 
+				molgenis.ui.jobs.JobTable({customColumns: customColumns}))), 
+		$('#job-container')[0]); 
+	
 		$('#new-task-button').click(function(){
 			$('#ontology-match').attr({
 				'action' : molgenis.getContextUrl() + '/newtask',

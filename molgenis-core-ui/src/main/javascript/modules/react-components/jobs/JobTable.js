@@ -24,40 +24,33 @@ var JobTable = React.createClass({
 	displayName: 'JobTable',
 	propTypes: {
 		jobs: React.PropTypes.array.isRequired,
-		onSelect: React.PropTypes.func
+		onSelect: React.PropTypes.func,
+		customColumns: React.PropTypes.array
 	},
 	render: function() {
-		const {jobs} = this.props;
+		const {jobs, customColumns} = this.props;
 		return 	<div className="panel panel-primary">
 			<div className="panel-heading">Finished Jobs</div>
-			<div className="panel-body">
+			<div className="panel-body" style={{'overflow-x': 'auto'}}>
 				<table className="table table-striped">
 					<thead>
 						<th></th>
 						<th>Status</th>
 						<th>When</th>
 						<th>Duration</th>
-						<th>Type</th>
-						<th>Message</th>
-						<th>Job target</th>
-						<th>Ontology Url</th>
+						{customColumns && customColumns.map(cc => <th>{cc.th}</th>)}
 						<th>Result</th>
-						<th>Delete</th>
 					</thead>
 					<tbody>
 					{jobs.map((job, index) => <tr key={job.identifier}>
-						<td><button className="btn btn-xs btn-info" onClick={() => this.props.onSelect(job.identifier)}>
+						<td className="compact"><button className="btn btn-xs btn-info" onClick={(e) => {e.preventDefault(); this.props.onSelect(job.identifier)}}>
 							<span className="glyphicon glyphicon-search" aria-hidden="true"></span>
 						</button></td>
 						<td>{job.status}</td>
 						<td>{this._getTwix(job)}</td>
 						<td>{this._getDuration(job)}</td>
-						<td>{job.type}</td>
-						<td>{job.progressMessage}</td>
-						<td>{job.targetEntity}</td>
-						<td>{job.ontologyIri}</td>
+						{customColumns && customColumns.map(cc => <td>{cc.td(job)}</td>)}
 						<td>{job.resultUrl && <a href={job.resultUrl}>Go to result</a>}</td>
-						<td>{job.deleteUrl && <EntityDeleteBtn url={job.deleteUrl}/>}</td>
 						</tr>)}
 					</tbody>
 				</table>
@@ -130,5 +123,5 @@ var EntityDeleteBtn = React.createClass({
 	},
 });
 
-export { JobTable };
+export { JobTable, EntityDeleteBtn };
 export default React.createFactory(JobTable);
