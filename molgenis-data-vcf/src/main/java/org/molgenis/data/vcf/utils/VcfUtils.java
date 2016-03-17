@@ -1,6 +1,7 @@
 package org.molgenis.data.vcf.utils;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.collect.Lists.newArrayList;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.molgenis.data.vcf.VcfRepository.ALT;
@@ -35,12 +36,16 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.datastructures.Sample;
 import org.molgenis.data.vcf.datastructures.Trio;
+import org.molgenis.util.HugeMap;
 import org.molgenis.vcf.meta.VcfMetaInfo;
 
 import com.google.common.io.BaseEncoding;
@@ -120,6 +125,42 @@ public class VcfUtils
 		{
 			addSampleEntitiesToVcf(sampleEntities, writer);
 		}
+	}
+
+	public static Iterator<Entity> reverseXrefMrefRelation(Iterator<Entity> annotatedRecords,
+			VcfRepository vcfRepository)
+	{
+		List<Entity> listy = newArrayList(annotatedRecords);
+
+		EntityMetaData annotatedRecordEMD = listy.get(0).getEntityMetaData();
+		DefaultEntityMetaData outputEMD = new DefaultEntityMetaData(vcfRepository.getEntityMetaData());
+		DefaultAttributeMetaData effectAttribute = new DefaultAttributeMetaData("EFFECT");
+		effectAttribute.setDataType(MolgenisFieldTypes.MREF).setRefEntity(annotatedRecordEMD);
+		outputEMD.addAttributeMetaData(effectAttribute);
+
+		HugeMap<String, Entity> outputEntities = new HugeMap<>();
+		while (annotatedRecords.hasNext())
+		{
+			Entity annotated = annotatedRecords.next();
+			Entity source = annotated.getEntity("VARIANT");
+
+			String id = source.getIdValue().toString();
+			if (outputEntities.containsKey(id))
+			{
+				Entity outputEntity = outputEntities.get(id);
+				Iterable<Entity> effects = outputEntity.getEntities("EFFECT");
+				outputEntity.set("EFFECT", newArrayList(effects, source));
+			}
+			else
+			{
+				Entity outputEntity = new MapEntity(outputEMD);
+				outputEntity.set(source);
+				outputEntity.set("EFFECT", newArrayList(source));
+				outputEntities.put(id, outputEntity);
+			}
+		}
+
+		return null;
 	}
 
 	public static boolean checkPreviouslyAnnotatedAndAddMetadata(File inputVcfFile, BufferedWriter outputVCFWriter,

@@ -2,6 +2,7 @@ package org.molgenis.data.annotation.cmd;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
+import static org.molgenis.data.vcf.utils.VcfUtils.reverseXrefMrefRelation;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -263,13 +264,17 @@ public class CmdLineAnnotator
 			}
 
 			Iterator<Entity> annotatedRecords = annotator.annotate(vcfRepo);
-			while (annotatedRecords.hasNext())
+
+			Iterator<Entity> newRecords = reverseXrefMrefRelation(annotatedRecords, vcfRepo);
+
+			while (newRecords.hasNext())
 			{
 				Entity annotatedRecord = annotatedRecords.next();
 				VcfUtils.writeToVcf(annotatedRecord, attributesToInclude, outputVCFWriter);
 				outputVCFWriter.newLine();
 			}
 		}
+
 		finally
 		{
 			outputVCFWriter.close();

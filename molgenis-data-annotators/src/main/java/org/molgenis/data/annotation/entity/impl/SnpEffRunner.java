@@ -15,6 +15,7 @@ import static org.molgenis.data.support.VcfEffectsMetaData.GENE_ID;
 import static org.molgenis.data.support.VcfEffectsMetaData.GENE_NAME;
 import static org.molgenis.data.support.VcfEffectsMetaData.HGVS_C;
 import static org.molgenis.data.support.VcfEffectsMetaData.HGVS_P;
+import static org.molgenis.data.support.VcfEffectsMetaData.ID;
 import static org.molgenis.data.support.VcfEffectsMetaData.PROTEIN_POSITION;
 import static org.molgenis.data.support.VcfEffectsMetaData.PUTATIVE_IMPACT;
 import static org.molgenis.data.support.VcfEffectsMetaData.RANK_TOTAL;
@@ -39,12 +40,15 @@ import java.util.stream.Stream;
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.snpEff.SnpEffResultIterator;
 import org.molgenis.data.annotation.utils.JarRunner;
+import org.molgenis.data.annotation.utils.JarRunnerImpl;
 import org.molgenis.data.annotator.websettings.SnpEffAnnotatorSettings;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.support.VcfEffectsMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
@@ -53,7 +57,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.beust.jcommander.internal.Lists;
+import com.google.common.collect.Lists;
 
 @Component
 public class SnpEffRunner
@@ -63,6 +67,7 @@ public class SnpEffRunner
 	private JarRunner jarRunner;
 	private SnpEffAnnotatorSettings snpEffAnnotatorSettings;
 	private String snpEffPath;
+	private IdGenerator idGenerator;
 
 	private static final String CHARSET = "UTF-8";
 
@@ -77,10 +82,11 @@ public class SnpEffRunner
 	}
 
 	@Autowired
-	public SnpEffRunner(JarRunner jarRunner, SnpEffAnnotatorSettings snpEffAnnotatorSettings)
+	public SnpEffRunner(SnpEffAnnotatorSettings snpEffAnnotatorSettings, UuidGenerator idGenerator)
 	{
-		this.jarRunner = jarRunner;
+		this.jarRunner = new JarRunnerImpl();
 		this.snpEffAnnotatorSettings = snpEffAnnotatorSettings;
+		this.idGenerator = idGenerator;
 	}
 
 	public Stream<Entity> getSnpEffects(Iterable<Entity> source)
@@ -93,7 +99,6 @@ public class SnpEffRunner
 		catch (IOException e)
 		{
 			throw new MolgenisDataException("Exception making temporary VCF file", e);
-
 		}
 		return getSnpEffects(source, inputVcf);
 	}
@@ -152,17 +157,16 @@ public class SnpEffRunner
 	private List<Entity> getSnpEffectsFromSnpEffEntity(Entity sourceEntity, Entity snpEffEntity,
 			DefaultEntityMetaData effectsEMD)
 	{
-		String[] annotations = snpEffEntity.getString(SnpEffAnnotator.ANN).split(Pattern.quote(","), -1);
+		String[] annotations = snpEffEntity.getString(SnpEffRunner.ANN).split(Pattern.quote(","), -1);
 
-		// LOF and NMD fields can't be associated with a single allele-gene combination so we log them instead of
-		// including them
-		String lof = snpEffEntity.getString(SnpEffAnnotator.LOF);
-		String nmd = snpEffEntity.getString(SnpEffAnnotator.NMD);
+		// LOF and NMD fields can't be associated with a single allele-gene combination so we log them instead
+		String lof = snpEffEntity.getString(SnpEffRunner.LOF);
+		String nmd = snpEffEntity.getString(SnpEffRunner.NMD);
 		if (lof != null || nmd != null)
 		{
 			LOG.info("LOF / NMD found for CHROM:{} POS:{} ANN:{} LOF:{} NMD:{} ",
 					snpEffEntity.getString(VcfRepository.CHROM), snpEffEntity.getString(VcfRepository.POS),
-					snpEffEntity.getString(SnpEffAnnotator.ANN), lof, nmd);
+					snpEffEntity.getString(SnpEffRunner.ANN), lof, nmd);
 		}
 
 		List<Entity> effects = Lists.newArrayList();
@@ -174,6 +178,7 @@ public class SnpEffRunner
 
 			if (fields.length >= 15)
 			{
+				effect.set(ID, idGenerator.generateId());
 				effect.set(ALT, fields[0]);
 				effect.set(GENE, fields[4]);
 				effect.set(VARIANT, sourceEntity);
@@ -277,7 +282,7 @@ public class SnpEffRunner
 	 * 
 	 * @return the path to the SnpEff JAR, or nul
 	 */
-	private String getSnpEffPath()
+	public String getSnpEffPath()
 	{
 		if ((snpEffAnnotatorSettings != null) && (snpEffPath == null))
 		{

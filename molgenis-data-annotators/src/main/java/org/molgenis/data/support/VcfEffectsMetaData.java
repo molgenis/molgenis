@@ -29,7 +29,7 @@ public class VcfEffectsMetaData extends DefaultEntityMetaData
 	public static final String DISTANCE_TO_FEATURE = "Distance_to_feature";
 	public static final String ERRORS = "Errors";
 
-	public VcfEffectsMetaData(String entityName, Package package_, EntityMetaData variantEMD)
+	public VcfEffectsMetaData(String entityName, Package package_, EntityMetaData sourceEMD)
 	{
 		super(entityName, package_);
 
@@ -37,7 +37,7 @@ public class VcfEffectsMetaData extends DefaultEntityMetaData
 		addAttribute(ALT).setNillable(false);
 		addAttribute(GENE).setNillable(false);
 
-		addAttribute(VARIANT).setNillable(false).setDataType(MolgenisFieldTypes.XREF).setRefEntity(variantEMD);
+		addAttribute(VARIANT).setNillable(false).setDataType(MolgenisFieldTypes.XREF).setRefEntity(sourceEMD);
 
 		addAttribute(ANNOTATION);
 		addAttribute(PUTATIVE_IMPACT);
