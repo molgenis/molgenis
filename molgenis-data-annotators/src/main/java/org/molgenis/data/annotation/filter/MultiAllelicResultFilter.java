@@ -77,11 +77,12 @@ public class MultiAllelicResultFilter implements ResultFilter
 			{
 				filter(sourceEntity, processedResults, resourceEntity, "", "");
 			}
-			//FIXME: needs same fix as GoNL annotator??
+			//example: ref AGG, input A, substring AGG from index 1, so GG is the postfix to use to match against this reference
 			else if(resourceEntity.getString(VcfRepository.REF).indexOf(sourceEntity.getString(VcfRepository.REF))==0) {
 				String postFix = resourceEntity.getString(VcfRepository.REF).substring(sourceEntity.getString(VcfRepository.REF).length());
 				filter(sourceEntity, processedResults, resourceEntity, postFix, "");
 			}
+			//example: ref T, input TC, substring TC from index 1, so C is the postfix to use to match against this input
 			else if(sourceEntity.getString(VcfRepository.REF).indexOf(resourceEntity.getString(VcfRepository.REF))==0) {
 				String postFix = sourceEntity.getString(VcfRepository.REF).substring(resourceEntity.getString(VcfRepository.REF).length());
 				filter(sourceEntity, processedResults, resourceEntity, "", postFix);
