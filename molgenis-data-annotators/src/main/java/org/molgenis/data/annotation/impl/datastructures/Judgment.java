@@ -3,7 +3,7 @@ package org.molgenis.data.annotation.impl.datastructures;
 public class Judgment
 {
     public enum Classification{
-        Benign, Pathogn, VOUS
+        Benign, Pathognic, VOUS
     }
 
     public enum Method{

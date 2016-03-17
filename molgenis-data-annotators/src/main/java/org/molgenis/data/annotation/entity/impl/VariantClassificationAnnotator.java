@@ -20,7 +20,7 @@ import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.InMemoryRepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotator.websettings.VariantClassificationAnnotatorSettings;
-import org.molgenis.data.importer.EmxMetaDataParser;
+import org.molgenis.data.importer.EmxFileOnlyMetaDataParser;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.vcf.VcfRepository;
@@ -40,16 +40,6 @@ import java.util.stream.StreamSupport;
 @Configuration
 public class VariantClassificationAnnotator
 {
-	public static final double MAF_THRESHOLD = 0.00474;
-	public static final int CADD_MINIMUM_THRESHOLD = 5;
-	public static final int CADD_MAXIMUM_THRESHOLD = 25;
-	public static final String VARIANT_ENTITY = "Variant";
-
-	public enum Category
-	{
-		N1, N2, T1, T2, I1, I2, I3, C1, C2, C3, C4, C5
-	}
-
 	public static final String NAME = "GavinAnnotator";
 	public static final String RESOURCE = "variantClassification";
 	public static final String RESOURCE_ENTITY_NAME = "ccgg";
@@ -62,6 +52,17 @@ public class VariantClassificationAnnotator
 	public static final String CLASSIFICATION = "Classification";
 	public static final String CONFIDENCE = "Confidence";
 	public static final String REASON = "Reason";
+	public static final String VARIANT_ENTITY = "Variant";
+
+	public static final int CADD_MAXIMUM_THRESHOLD = 25;
+	public static final int CADD_MINIMUM_THRESHOLD = 5;
+	public static final double MAF_THRESHOLD = 0.00474;
+
+	public enum Category
+	{
+		N1, N2, T1, T2, I1, I2, I3, C1, C2, C3, C4, C5
+
+	}
 
 	@Autowired
 	private Entity variantClassificationAnnotatorSettings;
@@ -107,7 +108,7 @@ public class VariantClassificationAnnotator
 				AttributeMetaData refAttr = new DefaultAttributeMetaData(VARIANT_ENTITY,
 						MolgenisFieldTypes.FieldTypeEnum.XREF)
 								.setRefEntity(entityMetaData)
-								.setDescription("This annotator needs a references entities containing: "
+								.setDescription("This annotator needs a references to an entity containing: "
 										+ StreamSupport.stream(refAttributesList.spliterator(), false)
 												.map(AttributeMetaData::getName).collect(Collectors.joining(", ")));
 
@@ -124,7 +125,7 @@ public class VariantClassificationAnnotator
 				if (alt.contains(","))
 				{
 					throw new MolgenisDataException(
-							"The variant predication annotator only accepts single allele Effect entities.");
+							"The variant prediction annotator only accepts single allele entities.");
 				}
 				int sourceEntitiesSize = Iterables.size(annotationSourceEntities);
 
@@ -178,7 +179,7 @@ public class VariantClassificationAnnotator
 		Resource variantClassificationResource = new EmxResourceImpl(RESOURCE,
 				new SingleResourceConfig(VariantClassificationAnnotatorSettings.Meta.VARIANT_FILE_LOCATION,
 						variantClassificationAnnotatorSettings),
-				new InMemoryRepositoryFactory(RESOURCE_ENTITY_NAME, new EmxMetaDataParser(dataService)),
+				new InMemoryRepositoryFactory(RESOURCE_ENTITY_NAME, new EmxFileOnlyMetaDataParser()),
 				RESOURCE_ENTITY_NAME, Collections.EMPTY_LIST);
 
 		return variantClassificationResource;
@@ -207,20 +208,20 @@ public class VariantClassificationAnnotator
 		{
 			if (category.equals(Category.I1) && impact.equals(Impact.HIGH))
 			{
-				return new Judgment(Judgment.Classification.Pathogn, Method.calibrated,
+				return new Judgment(Judgment.Classification.Pathognic, Method.calibrated,
 						"Variant is of high impact, while there are no known high impact variants in the population. Also, "
 								+ mafReason);
 			}
 			else if (category.equals(Category.I2) && (impact.equals(Impact.MODERATE) || impact.equals(Impact.HIGH)))
 			{
-				return new Judgment(Judgment.Classification.Pathogn, Method.calibrated,
+				return new Judgment(Judgment.Classification.Pathognic, Method.calibrated,
 						"Variant is of high/moderate impact, while there are no known high/moderate impact variants in the population. Also, "
 								+ mafReason);
 			}
 			else if (category.equals(Category.I3)
 					&& (impact.equals(Impact.LOW) || impact.equals(Impact.MODERATE) || impact.equals(Impact.HIGH)))
 			{
-				return new Judgment(Judgment.Classification.Pathogn, Method.calibrated,
+				return new Judgment(Judgment.Classification.Pathognic, Method.calibrated,
 						"Variant is of high/moderate/low impact, while there are no known high/moderate/low impact variants in the population. Also, "
 								+ mafReason);
 			}
@@ -239,7 +240,7 @@ public class VariantClassificationAnnotator
 			{
 				if (caddScaled > meanPathogenicCADDScore)
 				{
-					return new Judgment(Judgment.Classification.Pathogn, Method.calibrated,
+					return new Judgment(Judgment.Classification.Pathognic, Method.calibrated,
 							"Variant CADD score of " + caddScaled + " is greater than the mean pathogenic score of "
 									+ meanPathogenicCADDScore
 									+ " in a gene for which CADD scores are informative. Also, " + mafReason);
@@ -256,7 +257,7 @@ public class VariantClassificationAnnotator
 			{
 				if (caddScaled > spec95thPerCADDThreshold)
 				{
-					return new Judgment(Judgment.Classification.Pathogn, Method.calibrated,
+					return new Judgment(Judgment.Classification.Pathognic, Method.calibrated,
 							"Variant CADD score of " + caddScaled + " is greater than the 95% specificity threhold of "
 									+ spec95thPerCADDThreshold + " for this gene. Also, " + mafReason);
 				}
@@ -318,7 +319,7 @@ public class VariantClassificationAnnotator
 		{
 			if (caddScaled != null && caddScaled > CADD_MAXIMUM_THRESHOLD)
 			{
-				return new Judgment(Judgment.Classification.Pathogn, Method.genomewide,
+				return new Judgment(Judgment.Classification.Pathognic, Method.genomewide,
 						"CADDscore > " + CADD_MAXIMUM_THRESHOLD);
 			}
 			else if (caddScaled != null && caddScaled < CADD_MINIMUM_THRESHOLD)
