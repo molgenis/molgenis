@@ -40,7 +40,7 @@ public class OmimRepository extends AbstractRepository
 {
 	public static final String OMIM_AUTO_ID_COL_NAME = "ID";
 	public static final String OMIM_PHENOTYPE_COL_NAME = "Phenotype";
-	public static final String OMIM_GENE_SYMBOLS_COL_NAME = "GeneSymbols";
+	public static final String OMIM_GENE_SYMBOLS_COL_NAME = "Gene_Name";
 	public static final String OMIM_MIM_NUMBER_COL_NAME = "MIMNumber";
 	public static final String OMIM_CYTO_LOCATION_COL_NAME = "CytoLocation";
 
@@ -118,6 +118,7 @@ public class OmimRepository extends AbstractRepository
 			try (CSVReader csvReader = new CSVReader(new InputStreamReader(new FileInputStream(file), forName("UTF-8")),
 					SEPARATOR, DEFAULT_QUOTE_CHARACTER, 1))
 			{
+
 				String[] values = csvReader.readNext();
 				while (values != null)
 				{
@@ -171,7 +172,6 @@ public class OmimRepository extends AbstractRepository
 				throw new UncheckedIOException(e);
 			}
 		}
-
 		return entitiesByGeneSymbol;
 	}
 }
