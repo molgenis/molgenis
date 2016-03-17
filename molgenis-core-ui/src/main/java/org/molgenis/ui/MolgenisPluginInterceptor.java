@@ -1,6 +1,6 @@
 package org.molgenis.ui;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_AUTHENTICATED;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_MOLGENIS_UI;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGIN_ID;
@@ -31,8 +31,8 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 	@Autowired
 	public MolgenisPluginInterceptor(MolgenisUi molgenisUi, MolgenisPermissionService permissionService)
 	{
-		this.molgenisUi = checkNotNull(molgenisUi);
-		this.permissionService = checkNotNull(permissionService);
+		this.molgenisUi = requireNonNull(molgenisUi);
+		this.permissionService = requireNonNull(permissionService);
 	}
 
 	@Override

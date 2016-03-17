@@ -1,7 +1,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 
-<@header js=['tinymce/tinymce.min.js', 'select2-patched.js', 'thankyoutext.js'] css=['select2.css'] />
+<@header js=['tinymce/tinymce.min.js', 'thankyoutext.js'] />
 
 <h1>Edit thank you text</h1>
 

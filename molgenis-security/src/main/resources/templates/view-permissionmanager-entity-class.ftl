@@ -22,6 +22,7 @@
     							  			<thead>
     							  				<tr>
     							  					<th>Entity Class</th>
+    							  					<th>Edit metadata</th>
     							  					<th>Edit</th>
     							  					<th>View</th>
     							  					<th>Count</th>
@@ -56,10 +57,11 @@
     							  			<thead>
     							  				<tr>
     							  					<th>Entity Class</th>
+    							  					<th>Edit metadata</th>
     							  					<th>Edit</th>
     							  					<th>View</th>
     							  					<th>Count</th>
-    							  					<th>None</th>
+													<th>None</th>
     							  				</tr>
     							  			</thead>
     							  			<tbody>

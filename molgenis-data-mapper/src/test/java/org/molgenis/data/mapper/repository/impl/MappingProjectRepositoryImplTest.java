@@ -4,6 +4,7 @@ import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.ENTITY_NAME;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.IDENTIFIER;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.MAPPINGTARGETS;
@@ -15,6 +16,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.fail;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.mockito.Mockito;
 import org.molgenis.auth.MolgenisUser;
@@ -82,10 +84,9 @@ public class MappingProjectRepositoryImplTest extends AbstractTestNGSpringContex
 		owner.setLastName("de Flap");
 
 		DefaultEntityMetaData target1 = new DefaultEntityMetaData("target1");
-		target1.addAttribute("id").setIdAttribute(true);
-
+		target1.addAttribute("id", ROLE_ID);
 		DefaultEntityMetaData target2 = new DefaultEntityMetaData("target2");
-		target1.addAttribute("id").setIdAttribute(true);
+		target2.addAttribute("id", ROLE_ID);
 
 		mappingProject = new MappingProject("My first mapping project", owner);
 		mappingTarget1 = mappingProject.addTarget(target1);
@@ -146,10 +147,10 @@ public class MappingProjectRepositoryImplTest extends AbstractTestNGSpringContex
 	{
 		Query q = new QueryImpl();
 		q.eq(OWNER, "flup");
-		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(asList(mappingProjectEntity));
+		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Stream.of(mappingProjectEntity));
 		when(userService.getUser("flup")).thenReturn(owner);
-		when(mappingTargetRepository.toMappingTargets(mappingTargetEntities)).thenReturn(
-				asList(mappingTarget1, mappingTarget2));
+		when(mappingTargetRepository.toMappingTargets(mappingTargetEntities))
+				.thenReturn(asList(mappingTarget1, mappingTarget2));
 		List<MappingProject> result = mappingProjectRepositoryImpl.getMappingProjects(q);
 		mappingProject.setIdentifier("mappingProjectID");
 		assertEquals(result, asList(mappingProject));
@@ -160,10 +161,10 @@ public class MappingProjectRepositoryImplTest extends AbstractTestNGSpringContex
 	{
 		Query q = new QueryImpl();
 		q.eq(OWNER, "flup");
-		when(dataService.findAll(ENTITY_NAME)).thenReturn(asList(mappingProjectEntity));
+		when(dataService.findAll(ENTITY_NAME)).thenReturn(Stream.of(mappingProjectEntity));
 		when(userService.getUser("flup")).thenReturn(owner);
-		when(mappingTargetRepository.toMappingTargets(mappingTargetEntities)).thenReturn(
-				asList(mappingTarget1, mappingTarget2));
+		when(mappingTargetRepository.toMappingTargets(mappingTargetEntities))
+				.thenReturn(asList(mappingTarget1, mappingTarget2));
 		List<MappingProject> result = mappingProjectRepositoryImpl.getAllMappingProjects();
 		mappingProject.setIdentifier("mappingProjectID");
 		assertEquals(result, asList(mappingProject));

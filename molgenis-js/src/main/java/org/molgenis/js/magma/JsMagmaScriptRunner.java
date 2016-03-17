@@ -1,6 +1,6 @@
 package org.molgenis.js.magma;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
 
@@ -20,7 +20,7 @@ public class JsMagmaScriptRunner implements ScriptRunner
 	@Autowired
 	public JsMagmaScriptRunner(JsMagmaScriptExecutor jsMagmaScriptExecutor)
 	{
-		this.jsScriptExecutor = checkNotNull(jsMagmaScriptExecutor);
+		this.jsScriptExecutor = requireNonNull(jsMagmaScriptExecutor);
 	}
 
 	@Override

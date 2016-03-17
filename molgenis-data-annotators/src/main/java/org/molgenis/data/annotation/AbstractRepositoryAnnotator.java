@@ -2,6 +2,7 @@ package org.molgenis.data.annotation;
 
 import java.util.Iterator;
 
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -17,7 +18,7 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 	@Override
 	public String canAnnotate(EntityMetaData repoMetaData)
 	{
-		Iterable<AttributeMetaData> annotatorAttributes = getInputMetaData();
+		Iterable<AttributeMetaData> annotatorAttributes = getRequiredAttributes();
 		for (AttributeMetaData annotatorAttribute : annotatorAttributes)
 		{
 			// one of the needed attributes not present? we can not annotate
@@ -30,7 +31,13 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 			if (!repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType()
 					.equals(annotatorAttribute.getDataType()))
 			{
-				return "a required attribute has the wrong datatype";
+				// allow type string when required attribute is text (for backward compatibility)
+				if (!(repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType()
+						.equals(MolgenisFieldTypes.STRING) && annotatorAttribute.getDataType().equals(
+						MolgenisFieldTypes.TEXT)))
+				{
+					return "a required attribute has the wrong datatype";
+				}
 			}
 
 			// Are the runtime property files not available, or is a webservice down? we can not annotate
@@ -42,14 +49,6 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 
 		return "true";
 	}
-
-	/**
-	 * Checks if folder and files that were set with a runtime property actually exist, or if a webservice can be
-	 * reached
-	 *
-	 * @return boolean
-	 */
-	protected abstract boolean annotationDataExists();
 
 	@Override
 	@Transactional

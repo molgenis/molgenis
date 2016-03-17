@@ -1,6 +1,6 @@
 package org.molgenis.migrate.version;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +28,7 @@ public class MolgenisUpgradeServiceImpl implements MolgenisUpgradeService
 	@Autowired
 	public MolgenisUpgradeServiceImpl(MolgenisVersionService versionService)
 	{
-		this.versionService = checkNotNull(versionService);
+		this.versionService = requireNonNull(versionService);
 	}
 
 	public void addUpgrade(MolgenisUpgrade upgrade)
@@ -44,6 +44,10 @@ public class MolgenisUpgradeServiceImpl implements MolgenisUpgradeService
 	@Override
 	public boolean upgrade()
 	{
+		if (versionService.getMolgenisVersionFromServerProperties() < 19)
+		{
+			throw new UnsupportedOperationException("Upgrading from versions below 1.10 (metadataversion 19) is not supported, please update to 1.10 first.");
+		}
 		if (versionService.getMolgenisVersionFromServerProperties() < MolgenisVersionService.CURRENT_VERSION)
 		{
 			LOG.info("MetaData version:{}, current version:{} upgrade needed",

@@ -1,6 +1,6 @@
 package org.molgenis.security.account;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -41,17 +41,17 @@ public class AccountServiceImpl implements AccountService
 	public AccountServiceImpl(DataService dataService, JavaMailSender mailSender,
 			MolgenisUserService molgenisUserService, AppSettings appSettings)
 	{
-		this.dataService = checkNotNull(dataService);
-		this.mailSender = checkNotNull(mailSender);
-		this.molgenisUserService = checkNotNull(molgenisUserService);
-		this.appSettings = checkNotNull(appSettings);
+		this.dataService = requireNonNull(dataService);
+		this.mailSender = requireNonNull(mailSender);
+		this.molgenisUserService = requireNonNull(molgenisUserService);
+		this.appSettings = requireNonNull(appSettings);
 	}
 
 	@Override
 	@RunAsSystem
 	@Transactional
-	public void createUser(MolgenisUser molgenisUser, String baseActivationUri) throws UsernameAlreadyExistsException,
-			EmailAlreadyExistsException
+	public void createUser(MolgenisUser molgenisUser, String baseActivationUri)
+			throws UsernameAlreadyExistsException, EmailAlreadyExistsException
 	{
 		// Check if username already exists
 		if (molgenisUserService.getUser(molgenisUser.getUsername()) != null)
@@ -71,8 +71,8 @@ public class AccountServiceImpl implements AccountService
 		if (appSettings.getSignUpModeration())
 		{
 			activationEmailAddresses = molgenisUserService.getSuEmailAddresses();
-			if (activationEmailAddresses == null || activationEmailAddresses.isEmpty()) throw new MolgenisDataException(
-					"Administrator account is missing required email address");
+			if (activationEmailAddresses == null || activationEmailAddresses.isEmpty())
+				throw new MolgenisDataException("Administrator account is missing required email address");
 		}
 		else
 		{

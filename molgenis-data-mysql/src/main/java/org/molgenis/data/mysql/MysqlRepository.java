@@ -1,7 +1,10 @@
 package org.molgenis.data.mysql;
 
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.RepositoryCapability.MANAGABLE;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
-import static org.molgenis.data.RepositoryCapability.UPDATEABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
 import java.sql.Connection;
@@ -10,8 +13,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -19,9 +20,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import javax.sql.DataSource;
 
+import org.elasticsearch.common.collect.Iterators;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -29,7 +33,7 @@ import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Manageable;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisReferencedEntityException;
 import org.molgenis.data.Query;
@@ -39,12 +43,9 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.Sort;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.BatchingQueryResult;
-import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
-import org.molgenis.fieldtypes.IntField;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.TextField;
@@ -63,7 +64,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-public class MysqlRepository extends AbstractRepository implements Manageable
+public class MysqlRepository extends AbstractRepository
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MysqlRepository.class);
 	public static final int BATCH_SIZE = 1000;
@@ -71,6 +72,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	private final JdbcTemplate jdbcTemplate;
 	private final AsyncJdbcTemplate asyncJdbcTemplate;
 	private final DataService dataService;
+	private final MySqlEntityFactory mySqlEntityFactory;
 	private final DataSource dataSource;
 	private static final String VARCHAR = "VARCHAR(255)";
 
@@ -83,12 +85,14 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	 *            {@link AsyncJdbcTemplate} to use to execute DDL statements in an isolated transaction on the Mysql
 	 *            database
 	 */
-	public MysqlRepository(DataService dataService, DataSource dataSource, AsyncJdbcTemplate asyncJdbcTemplate)
+	public MysqlRepository(DataService dataService, MySqlEntityFactory mySqlEntityFactory, DataSource dataSource,
+			AsyncJdbcTemplate asyncJdbcTemplate)
 	{
-		this.dataService = dataService;
-		this.dataSource = dataSource;
+		this.dataService = requireNonNull(dataService);
+		this.mySqlEntityFactory = requireNonNull(mySqlEntityFactory);
+		this.dataSource = requireNonNull(dataSource);
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
-		this.asyncJdbcTemplate = asyncJdbcTemplate;
+		this.asyncJdbcTemplate = requireNonNull(asyncJdbcTemplate);
 	}
 
 	public void setMetaData(EntityMetaData metaData)
@@ -180,7 +184,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	{
 		if (tableExists())
 		{
-			LOG.debug("Table for entity " + getName() + " already exists. Skipping creation");
+			LOG.debug("Table for entity {} already exists. Skipping creation", getName());
 			return;
 		}
 		try
@@ -342,11 +346,19 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 	protected String getMrefCreateSql(AttributeMetaData att) throws MolgenisModelException
 	{
+		// FIXME Temporary fix for #4623 - remove when switching to generated package/entity/attribut names
+		String foreignKeyConstraint = getTableName() + "_" + att.getName();
+		if ((foreignKeyConstraint.length() + "_ibfk_x".length()) > 63)
+		{
+			throw new MolgenisModelException("The combination of entity and attribute name [" + foreignKeyConstraint
+					+ "] is too long to be used as a foreign key constraint by MySQL. Please make sure the combined names are no longer than 56 characters by choosing shorter names.");
+		}
+
 		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 		StringBuilder sql = new StringBuilder();
 
 		// mysql keys cannot have TEXT value, so change it to VARCHAR when needed
-		String idAttrMysqlType = (idAttribute.getDataType().getEnumType().equals(FieldTypeEnum.STRING) ? VARCHAR
+		String idAttrMysqlType = (idAttribute.getDataType() instanceof StringField ? VARCHAR
 				: idAttribute.getDataType().getMysqlType());
 
 		String refAttrMysqlType = (att.getRefEntity().getIdAttribute().getDataType() instanceof StringField ? VARCHAR
@@ -404,9 +416,9 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		// close
 		sql.append(") ENGINE=InnoDB;");
 
-		if (LOG.isDebugEnabled())
+		if (LOG.isTraceEnabled())
 		{
-			LOG.debug("sql: " + sql);
+			LOG.trace("sql: " + sql);
 		}
 
 		return sql.toString();
@@ -436,8 +448,6 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				break;
 			case HYPERLINK:
 				break;
-			case IMAGE:
-				break;
 			case INT:
 				break;
 			case LONG:
@@ -455,14 +465,14 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			case CATEGORICAL_MREF:
 			case XREF:
 			case FILE:
-				if (att.isLabelAttribute())
+				if (att.equals(getEntityMetaData().getLabelAttribute()))
 				{
 					throw new MolgenisDataException("Attribute [" + att.getName() + "] of entity [" + getName()
 							+ "] is label attribute and of type [" + att.getDataType()
 							+ "]. Label attributes cannot be of type xref, mref, categorical or compound.");
 				}
 
-				if (att.isLookupAttribute())
+				if (getEntityMetaData().getLookupAttribute(att.getName()) != null)
 				{
 					throw new MolgenisDataException("Attribute [" + att.getName() + "] of entity [" + getName()
 							+ "] is lookup attribute and of type [" + att.getDataType()
@@ -494,7 +504,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			}
 			else
 			{
-				if (att.isIdAtrribute() && att.getDataType() instanceof StringField)
+				if (att.equals(getEntityMetaData().getIdAttribute()) && att.getDataType() instanceof StringField)
 				{
 					// id attributes can not be of type TEXT so we'll change it to VARCHAR
 					sql.append(VARCHAR);
@@ -556,7 +566,19 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		return findAll(new QueryImpl()).iterator();
+		Query q = new QueryImpl();
+		return findAllBatching(q).iterator();
+	}
+
+	@Override
+	public Stream<Entity> stream(Fetch fetch)
+	{
+		Query q = new QueryImpl();
+		if (fetch != null)
+		{
+			q.fetch(fetch);
+		}
+		return StreamSupport.stream(findAllBatching(q).spliterator(), false);
 	}
 
 	protected String getInsertSql()
@@ -623,12 +645,6 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 			@Override
 			public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
 			{
-
-				if (LOG.isDebugEnabled())
-				{
-					LOG.debug("mref: " + mrefs.get(i).get(idAttribute.getName()) + ", "
-							+ mrefs.get(i).get(att.getName()));
-				}
 				preparedStatement.setInt(1, i);
 
 				preparedStatement.setObject(2, mrefs.get(i).get(idAttribute.getName()));
@@ -673,10 +689,10 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
+	public Entity findOne(Object id, Fetch fetch)
 	{
-		if (ids == null) return Collections.emptyList();
-		return findAll(new QueryImpl().in(getEntityMetaData().getIdAttribute().getName(), ids));
+		if (id == null) return null;
+		return findOne(new QueryImpl().eq(getEntityMetaData().getIdAttribute().getName(), id).fetch(fetch));
 	}
 
 	protected String getSelectSql(Query q, List<Object> parameters)
@@ -686,24 +702,28 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		int count = 0;
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 		{
-			if (att.getExpression() == null)
+			if (q.getFetch() == null || q.getFetch().hasField(att.getName()))
 			{
-				if (count > 0) select.append(", ");
+				if (att.getExpression() == null)
+				{
+					if (count > 0) select.append(", ");
 
-				// TODO needed when autoids are used to join
-				if (att.getDataType() instanceof MrefField)
-				{
-					select.append("GROUP_CONCAT(DISTINCT(").append('`').append(att.getName()).append('`').append('.')
-							.append('`').append(att.getName()).append('`').append(") ORDER BY `").append(att.getName())
-							.append("`.`order`) AS ").append('`').append(att.getName()).append('`');
+					// TODO needed when autoids are used to join
+					if (att.getDataType() instanceof MrefField)
+					{
+						select.append("GROUP_CONCAT(DISTINCT(").append('`').append(att.getName()).append('`')
+								.append('.').append('`').append(att.getName()).append('`').append(") ORDER BY `")
+								.append(att.getName()).append("`.`order`) AS ").append('`').append(att.getName())
+								.append('`');
+					}
+					else
+					{
+						select.append("this.").append('`').append(att.getName()).append('`');
+						if (group.length() > 0) group.append(", this.").append('`').append(att.getName()).append('`');
+						else group.append("this.").append('`').append(att.getName()).append('`');
+					}
+					count++;
 				}
-				else
-				{
-					select.append("this.").append('`').append(att.getName()).append('`');
-					if (group.length() > 0) group.append(", this.").append('`').append(att.getName()).append('`');
-					else group.append("this.").append('`').append(att.getName()).append('`');
-				}
-				count++;
 			}
 		}
 
@@ -724,35 +744,36 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
-		if ((q.getOffset() != 0) || (q.getPageSize() != 0))
-		{
-			return findAllNoBatching(q);
-		}
-
-		return new BatchingQueryResult(BATCH_SIZE, q)
-		{
-			@Override
-			protected Iterable<Entity> getBatch(Query batchQuery)
-			{
-				return findAllNoBatching(batchQuery);
-			}
-		};
+		return StreamSupport.stream(findAllBatching(q).spliterator(), false);
 	}
 
-	private Iterable<Entity> findAllNoBatching(Query q)
+	private BatchingQueryResult findAllBatching(Query q)
 	{
-		List<Object> parameters = Lists.newArrayList();
-		String sql = getSelectSql(q, parameters);
-
-		if (LOG.isDebugEnabled())
+		BatchingQueryResult batchingQueryResult = new BatchingQueryResult(BATCH_SIZE, q)
 		{
-			LOG.debug("query: " + q);
-			LOG.debug("sql: " + sql + ",parameters:" + parameters);
-		}
+			@Override
+			protected List<Entity> getBatch(Query batchQuery)
+			{
+				if (LOG.isDebugEnabled())
+				{
+					LOG.debug("Fetching MySQL [{}] data for query [{}]", getName(), batchQuery);
+				}
 
-		return jdbcTemplate.query(sql, parameters.toArray(new Object[0]), new EntityMapper(getEntityMetaData()));
+				List<Object> parameters = Lists.newArrayList();
+				String sql = getSelectSql(batchQuery, parameters);
+				if (LOG.isTraceEnabled())
+				{
+					LOG.trace("sql: {}, parameters: {}", sql, parameters);
+				}
+
+				RowMapper<Entity> entityMapper = mySqlEntityFactory.createRowMapper(getEntityMetaData(),
+						batchQuery.getFetch(), jdbcTemplate, getTableName());
+				return jdbcTemplate.query(sql, parameters.toArray(new Object[0]), entityMapper);
+			}
+		};
+		return batchingQueryResult;
 	}
 
 	protected String getWhereSql(Query q, List<Object> parameters, int mrefFilterIndex)
@@ -987,24 +1008,16 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	@Override
 	public void delete(Entity entity)
 	{
-		this.delete(Arrays.asList(new Entity[]
-		{ entity }));
-
+		this.delete(Stream.of(entity));
 	}
 
 	@Override
-	public void delete(Iterable<? extends Entity> entities)
+	public void delete(Stream<? extends Entity> entities)
 	{
-		// todo, split in subbatchs
-		final List<Object> deleteByIdBatch = new ArrayList<Object>();
-
-		this.resetXrefValuesBySelfReference(entities);
-
-		for (Entity e : entities)
-		{
-			deleteByIdBatch.add(e.getIdValue());
-		}
-		this.deleteById(deleteByIdBatch);
+		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
+			resetXrefValuesBySelfReference(batch);
+			deleteById(batch.stream().map(Entity::getIdValue));
+		});
 	}
 
 	/**
@@ -1015,7 +1028,7 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	private void resetXrefValuesBySelfReference(Iterable<? extends Entity> entities)
 	{
 		List<String> xrefAttributesWithSelfReference = new ArrayList<String>();
-		for (AttributeMetaData attributeMetaData : getEntityMetaData().getAttributes())
+		for (AttributeMetaData attributeMetaData : getEntityMetaData().getAttributes()) // FIXME bug: getAtomicAttrs
 		{
 			if (attributeMetaData.getDataType().getEnumType().equals(FieldTypeEnum.XREF)
 					&& getEntityMetaData().getName().equals(attributeMetaData.getRefEntity().getName()))
@@ -1038,10 +1051,10 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				}
 			}
 		}
-		this.update(updateBatch);
+		this.update(updateBatch.iterator());
 	}
 
-	public String getDeleteSql()
+	String getDeleteSql()
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("DELETE FROM ").append('`').append(getTableName()).append('`').append(" WHERE ").append('`')
@@ -1052,18 +1065,13 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	@Override
 	public void deleteById(Object id)
 	{
-		this.deleteById(Arrays.asList(new Object[]
-		{ id }));
+		this.deleteById(Stream.of(id));
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
-		final List<Object> idList = new ArrayList<Object>();
-		for (Object id : ids)
-		{
-			idList.add(id);
-		}
+		final List<Object> idList = ids.collect(toList());
 
 		jdbcTemplate.batchUpdate(getDeleteSql(), new BatchPreparedStatementSetter()
 		{
@@ -1084,24 +1092,61 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	@Override
 	public void deleteAll()
 	{
-		delete(this);
+		Stream<AttributeMetaData> selfReferencingAttrs = StreamSupport
+				.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
+				.filter(attr -> attr.getDataType() instanceof XrefField
+						&& attr.getRefEntity().getName().equals(getEntityMetaData().getName()));
+
+		selfReferencingAttrs.forEach(selfReferencingXrefAttr -> {
+			if (!selfReferencingXrefAttr.isNillable())
+			{
+				// update value with id attribute name (instead of NULL) won't work due to
+				// http://bugs.mysql.com/bug.php?id=7412. For more information read the paragraph "Until InnoDB
+				// implements deferred constraint checking, some things will be impossible, such as deleting a
+				// record that refers to itself using a foreign key." in
+				// http://dev.mysql.com/doc/refman/5.1/en/innodb-foreign-key-constraints.html
+				throw new MolgenisDataException(
+						format("Self-referencing not-null attribute [%s] of entity [%s] cannot be deleted",
+								selfReferencingXrefAttr.getName(), getName()));
+			}
+
+			String updateSql = new StringBuilder().append("UPDATE `").append(getTableName()).append("` SET `")
+					.append(selfReferencingXrefAttr.getName()).append("` = ").append("NULL").toString();
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("Updating nillable self-referencing xref attribute: " + updateSql);
+			}
+			jdbcTemplate.update(updateSql);
+		});
+
+		String deleteSql = new StringBuilder().append("DELETE FROM ").append('`').append(getTableName()).append('`')
+				.toString();
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug(format("Deleting all [%s] entities: %s", getName(), deleteSql));
+		}
+		jdbcTemplate.update(deleteSql);
 	}
 
 	@Override
-	public Integer add(Iterable<? extends Entity> entities)
+	public Integer add(Stream<? extends Entity> entities)
 	{
-		if (entities == null) return 0;
+		return add(entities.iterator());
+	}
+
+	private Integer add(Iterator<? extends Entity> entitiesIterator)
+	{
+		if (entitiesIterator == null) return 0;
 		AtomicInteger count = new AtomicInteger(0);
 
 		final List<Entity> batch = new ArrayList<Entity>();
 
-		Iterator<? extends Entity> it = entities.iterator();
-		while (it.hasNext())
+		while (entitiesIterator.hasNext())
 		{
-			batch.add(it.next());
+			batch.add(entitiesIterator.next());
 			count.addAndGet(1);
 
-			if ((batch.size() == BATCH_SIZE) || !it.hasNext())
+			if ((batch.size() == BATCH_SIZE) || !entitiesIterator.hasNext())
 			{
 				final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 				final Map<String, List<Map<String, Object>>> mrefs = new HashMap<>();
@@ -1122,11 +1167,14 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 								{
 									for (Entity val : batch.get(rowIndex).getEntities(att.getName()))
 									{
-										Map<String, Object> mref = new HashMap<>();
-										mref.put(idAttribute.getName(), batch.get(rowIndex).get(idAttribute.getName()));
-										mref.put(att.getName(), val.getIdValue());
-
-										mrefs.get(att.getName()).add(mref);
+										if (val != null)
+										{
+											Map<String, Object> mref = new HashMap<>();
+											mref.put(idAttribute.getName(),
+													batch.get(rowIndex).get(idAttribute.getName()));
+											mref.put(att.getName(), val.getIdValue());
+											mrefs.get(att.getName()).add(mref);
+										}
 									}
 								}
 							}
@@ -1139,11 +1187,11 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 
 								if (batch.get(rowIndex).get(att.getName()) == null)
 								{
-									if (att.isIdAtrribute() && att.isAuto()
+									if (att.equals(getEntityMetaData().getIdAttribute()) && att.isAuto()
 											&& (att.getDataType() instanceof StringField))
 									{
 										throw new MolgenisDataException(
-												"Missing auto id value. Please use the 'AutoIdCrudRepositoryDecorator' to add auto id capabilities.");
+												"Missing auto id value. Please use the 'AutoValueRepositoryDecorator' to add auto id capabilities.");
 									}
 									preparedStatement.setObject(fieldIndex++, null);
 								}
@@ -1195,25 +1243,28 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	public void add(Entity entity)
 	{
 		if (entity == null) throw new RuntimeException("MysqlRepository.add() failed: entity was null");
-		add(Arrays.asList(new Entity[]
-		{ entity }));
+		add(Stream.of(entity));
 	}
 
 	@Override
 	public void update(Entity entity)
 	{
-		update(Arrays.asList(new Entity[]
-		{ entity }));
+		update(Stream.of(entity));
 	}
 
 	@Override
-	public void update(Iterable<? extends Entity> entities)
+	public void update(Stream<? extends Entity> entities)
+	{
+		update(entities.iterator());
+	}
+
+	private void update(Iterator<? extends Entity> entities)
 	{
 		// TODO, split in subbatches
 		final List<Entity> batch = new ArrayList<Entity>();
-		if (entities != null) for (Entity e : entities)
+		if (entities != null) while (entities.hasNext())
 		{
-			batch.add(e);
+			batch.add(entities.next());
 		}
 		final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 		final List<Object> ids = new ArrayList<Object>();
@@ -1312,93 +1363,6 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 				removeMrefs(ids, att);
 				addMrefs(mrefs.get(att.getName()), att);
 			}
-		}
-
-	}
-
-	private class EntityMapper implements RowMapper<Entity>
-	{
-		private static final int GROUP_CONCAT_MAX_LEN = 1024;
-		private final EntityMetaData entityMetaData;
-
-		private EntityMapper(EntityMetaData entityMetaData)
-		{
-			this.entityMetaData = entityMetaData;
-		}
-
-		@Override
-		public Entity mapRow(ResultSet resultSet, int i) throws SQLException
-		{
-			Entity e = new DefaultEntity(entityMetaData, dataService);
-
-			for (AttributeMetaData att : entityMetaData.getAtomicAttributes())
-			{
-				if (att.getExpression() != null)
-				{
-					continue;
-				}
-				if (att.getDataType() instanceof MrefField)
-				{
-					// TODO: convert to typed lists (or arrays?)
-					String mrefIds = resultSet.getString(att.getName());
-					if (mrefIds != null)
-					{
-						if (att.getRefEntity().getIdAttribute().getDataType() instanceof IntField)
-						{
-							if (mrefIds.length() >= GROUP_CONCAT_MAX_LEN)
-							{
-								// this list is just as long as it's allowed to be so it probably got truncated.
-								// Retrieve the IDs explicitly in a separate query.
-								e.set(att.getName(),
-										jdbcTemplate.queryForList(getMrefSelectSql(e, att), Integer.class));
-							}
-							else
-							{
-								e.set(att.getName(), DataConverter.toIntList(mrefIds));
-							}
-						}
-						else
-						{
-							if (mrefIds.length() >= GROUP_CONCAT_MAX_LEN)
-							{
-								// this list is just as long as it's allowed to be so it probably got truncated.
-								// Retrieve the IDs explicitly in a separate query.
-								e.set(att.getName(), jdbcTemplate.queryForList(getMrefSelectSql(e, att), Object.class));
-							}
-							else
-							{
-								e.set(att.getName(), DataConverter.toObjectList(mrefIds));
-							}
-						}
-					}
-				}
-				else if (att.getDataType() instanceof XrefField)
-				{
-					e.set(att.getName(), att.getRefEntity().getIdAttribute().getDataType()
-							.convert(resultSet.getObject(att.getName())));
-				}
-				else
-				{
-					e.set(att.getName(), att.getDataType().convert(resultSet.getObject(att.getName())));
-				}
-			}
-			for (AttributeMetaData att : entityMetaData.getAtomicAttributes())
-			{
-				if (att.getExpression() != null)
-				{
-					// at least one attribute is computed
-					return new EntityWithComputedAttributes(e);
-				}
-			}
-			return e;
-
-		}
-
-		private String getMrefSelectSql(Entity e, AttributeMetaData att)
-		{
-			return String.format("SELECT `%s` FROM `%s_%1$s` WHERE `%s` = '%s' ORDER BY `order`", att.getName(),
-					getTableName(), entityMetaData.getIdAttribute().getName().toLowerCase(),
-					e.get(entityMetaData.getIdAttribute().getName()));
 		}
 	}
 
@@ -1508,18 +1472,23 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return Sets.newHashSet(WRITABLE, UPDATEABLE);
+		return Sets.newHashSet(WRITABLE, MANAGABLE);
 	}
 
 	@Override
 	public long count(Query q)
 	{
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Fetching MySQL [{}] data for query [{}]", getName(), q);
+		}
+
 		List<Object> parameters = Lists.newArrayList();
 		String sql = getCountSql(q, parameters);
 
-		if (LOG.isDebugEnabled())
+		if (LOG.isTraceEnabled())
 		{
-			LOG.debug("sql: " + sql + ",parameters:" + parameters);
+			LOG.trace("sql: {}, parameters: {}", sql, parameters);
 		}
 
 		return jdbcTemplate.queryForObject(sql, parameters.toArray(new Object[0]), Long.class);
@@ -1535,15 +1504,20 @@ public class MysqlRepository extends AbstractRepository implements Manageable
 		getMrefQueryFields(q.getRules(), mrefQueryFields);
 
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
-			if (att.getDataType() instanceof MrefField)
+		{
+			if (q.getFetch() == null || q.getFetch().hasField(att.getName()))
 			{
-				from.append(" LEFT JOIN ").append('`').append(getTableName()).append('_').append(att.getName())
-						.append('`').append(" AS ").append('`').append(att.getName()).append('`').append(" ON (this.")
-						.append('`').append(idAttribute.getName()).append('`').append(" = ").append('`')
-						.append(att.getName()).append('`').append('.').append('`').append(idAttribute.getName())
-						.append('`').append(')');
+				if (att.getDataType() instanceof MrefField)
+				{
+					from.append(" LEFT JOIN ").append('`').append(getTableName()).append('_').append(att.getName())
+							.append('`').append(" AS ").append('`').append(att.getName()).append('`')
+							.append(" ON (this.").append('`').append(idAttribute.getName()).append('`').append(" = ")
+							.append('`').append(att.getName()).append('`').append('.').append('`')
+							.append(idAttribute.getName()).append('`').append(')');
 
+				}
 			}
+		}
 
 		for (int i = 0; i < mrefQueryFields.size(); i++)
 		{

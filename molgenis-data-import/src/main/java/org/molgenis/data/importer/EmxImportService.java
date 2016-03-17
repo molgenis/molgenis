@@ -1,12 +1,17 @@
 package org.molgenis.data.importer;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
@@ -31,12 +36,10 @@ public class EmxImportService implements ImportService
 	@Autowired
 	public EmxImportService(MetaDataParser parser, ImportWriter writer, DataService dataService)
 	{
-		if (parser == null) throw new IllegalArgumentException("parser is null");
-		if (writer == null) throw new IllegalArgumentException("writer is null");
 		LOG.debug("EmxImportService created");
-		this.parser = parser;
-		this.writer = writer;
-		this.dataService = dataService;
+		this.parser = requireNonNull(parser);
+		this.writer = requireNonNull(writer);
+		this.dataService = requireNonNull(dataService);
 	}
 
 	@Override
@@ -48,6 +51,8 @@ public class EmxImportService implements ImportService
 			for (String entityName : source.getEntityNames())
 			{
 				if (entityName.equalsIgnoreCase(EmxMetaDataParser.ATTRIBUTES)) return true;
+				if (entityName.equalsIgnoreCase(EmxMetaDataParser.LANGUAGES)) return true;
+				if (entityName.equalsIgnoreCase(EmxMetaDataParser.I18NSTRINGS)) return true;
 				if (dataService.getMeta().getEntityMetaData(entityName) != null) return true;
 			}
 		}
@@ -82,17 +87,15 @@ public class EmxImportService implements ImportService
 			LOG.error("Error handling EmxImportJob", e);
 			try
 			{
+				// TODO rollback of languages
 				writer.rollbackSchemaChanges(job);
+				dataService.getMeta().refreshCaches();
 			}
 			catch (Exception ignore)
 			{
 				LOG.error("Error rolling back schema changes", ignore);
 			}
 			throw e;
-		}
-		finally
-		{
-			dataService.getMeta().refreshCaches();
 		}
 	}
 
@@ -124,5 +127,15 @@ public class EmxImportService implements ImportService
 	public Set<String> getSupportedFileExtensions()
 	{
 		return GenericImporterExtensions.getEMX();
+	}
+
+	@Override
+	public LinkedHashMap<String, Boolean> integrationTestMetaData(MetaDataService metaDataService,
+			RepositoryCollection repositoryCollection, String defaultPackage)
+	{
+		List<String> skipEntities = Arrays.asList(EmxMetaDataParser.ATTRIBUTES, EmxMetaDataParser.PACKAGES,
+				EmxMetaDataParser.ENTITIES, EmxMetaDataParser.TAGS);
+		ParsedMetaData parsedMetaData = parser.parse(repositoryCollection, defaultPackage);
+		return metaDataService.integrationTestMetaData(parsedMetaData.getEntityMap(), skipEntities, defaultPackage);
 	}
 }

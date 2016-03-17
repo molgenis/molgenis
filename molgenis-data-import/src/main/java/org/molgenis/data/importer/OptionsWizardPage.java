@@ -56,14 +56,8 @@ public class OptionsWizardPage extends AbstractWizardPage
 	@Override
 	public String handleRequest(HttpServletRequest request, BindingResult result, Wizard wizard)
 	{
-		if (!(wizard instanceof ImportWizard))
-		{
-			throw new RuntimeException("Wizard must be of type '" + ImportWizard.class.getSimpleName()
-					+ "' instead of '" + wizard.getClass().getSimpleName() + "'");
-		}
-
+		ImportWizardUtil.validateImportWizard(wizard);
 		ImportWizard importWizard = (ImportWizard) wizard;
-
 		String entityImportOption = request.getParameter("entity_option");
 		importWizard.setEntityImportOption(entityImportOption);
 
@@ -79,37 +73,28 @@ public class OptionsWizardPage extends AbstractWizardPage
 			try
 			{
 				MetaValidationUtils.validateName(userGivenName);
+				if (dataService.hasRepository(userGivenName))
+				{
+					result.addError(new ObjectError("wizard", "An entity with this name already exists."));
+					return null;
+				}
 			}
 			catch (MolgenisDataException e)
 			{
-				result.addError(new ObjectError("wizard", e.getMessage()));
+				ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
 				return null;
 			}
 
 			File tmpFile = importWizard.getFile();
-			try
-			{
-				String fileName = tmpFile.getName();
+			String fileName = tmpFile.getName();
 
-				// FIXME: can this be done a bit cleaner?
-				String extension = FileExtensionUtils
-						.findExtensionFromPossibilities(fileName, fileRepositoryCollectionFactory
-								.createFileRepositoryCollection(tmpFile).getFileNameExtensions());
+			// FIXME: can this be done a bit cleaner?
+			String extension = FileExtensionUtils.findExtensionFromPossibilities(fileName,
+					fileRepositoryCollectionFactory.createFileRepositoryCollection(tmpFile).getFileNameExtensions());
 
-				File file = new File(tmpFile.getParent(), userGivenName + "." + extension);
-				FileCopyUtils.copy(tmpFile, file);
-
-				importWizard.setFile(file);
-			}
-			catch (IOException e)
-			{
-				result.addError(new ObjectError("wizard", "Error importing file: " + e.getMessage()));
-				LOG.error("Exception importing file", e);
-			}
-			finally
-			{
-				tmpFile.delete();
-			}
+			File file = new File(tmpFile.getParent(), userGivenName + "." + extension);
+			tmpFile.renameTo(file);
+			importWizard.setFile(file);
 		}
 
 		try
@@ -118,8 +103,7 @@ public class OptionsWizardPage extends AbstractWizardPage
 		}
 		catch (Exception e)
 		{
-			result.addError(new ObjectError("wizard", "Error validating import file: " + e.getMessage()));
-			LOG.error("Exception validating import file", e);
+			ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
 		}
 
 		return null;
@@ -167,7 +151,8 @@ public class OptionsWizardPage extends AbstractWizardPage
 		}
 		else
 		{
-			wizard.setValidationMessage("File did not pass validation see results below. Please resolve the errors and try again.");
+			wizard.setValidationMessage(
+					"File did not pass validation see results below. Please resolve the errors and try again.");
 		}
 
 		return msg;

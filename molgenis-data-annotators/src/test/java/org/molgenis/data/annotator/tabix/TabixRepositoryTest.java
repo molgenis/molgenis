@@ -1,7 +1,9 @@
 package org.molgenis.data.annotator.tabix;
 
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.VcfRepository.CHROM;
 import static org.molgenis.data.vcf.VcfRepository.CHROM_META;
 import static org.molgenis.data.vcf.VcfRepository.POS;
@@ -11,8 +13,8 @@ import static org.testng.Assert.assertEquals;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.stream.Stream;
 
-import org.elasticsearch.common.collect.Lists;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.molgenis.data.Entity;
@@ -38,7 +40,7 @@ public class TabixRepositoryTest
 	{
 		initMocks(this);
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("MyEntity");
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("ID").setAuto(true).setIdAttribute(true));
+		emd.addAttributeMetaData(new DefaultAttributeMetaData("ID").setAuto(true), ROLE_ID);
 		emd.addAllAttributeMetaData(asList(CHROM_META, POS_META));
 		emd.addAttributeMetaData(new DefaultAttributeMetaData("Description").setNillable(false));
 
@@ -51,9 +53,9 @@ public class TabixRepositoryTest
 	{
 		Mockito.when(tabixReader.query("13:12-12")).thenReturn(null);
 
-		Iterable<Entity> actual = tabixRepository.findAll(tabixRepository.query().eq(CHROM, "13").and().eq(POS, 12));
+		Stream<Entity> actual = tabixRepository.findAll(tabixRepository.query().eq(CHROM, "13").and().eq(POS, 12));
 
-		assertEquals(Collections.emptyList(), Lists.newArrayList(actual));
+		assertEquals(Collections.emptyList(), actual.collect(toList()));
 	}
 
 	@Test
@@ -63,7 +65,7 @@ public class TabixRepositoryTest
 		Mockito.when(iterator.next()).thenReturn("id1\t13\t11\tnope", "id2\t13\t12\tyup", "id3\t13\t12\tyup",
 				"id3\t13\t13\tnope", null);
 
-		Iterable<Entity> actual = tabixRepository.findAll(tabixRepository.query().eq(CHROM, "13").and().eq(POS, 12));
+		Stream<Entity> actual = tabixRepository.findAll(tabixRepository.query().eq(CHROM, "13").and().eq(POS, 12));
 
 		Entity e1 = new MapEntity(entityMetaData);
 		e1.set("ID", "id2");
@@ -76,6 +78,6 @@ public class TabixRepositoryTest
 		e2.set("#CHROM", "13");
 		e2.set("POS", 12l);
 		e2.set("Description", "yup");
-		assertEquals(Lists.newArrayList(actual), Arrays.asList(e1, e2));
+		assertEquals(actual.collect(toList()), Arrays.asList(e1, e2));
 	}
 }

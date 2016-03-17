@@ -1,21 +1,29 @@
 package org.molgenis.data;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Stream;
 
+import org.molgenis.data.settings.AppSettings;
+import org.molgenis.data.support.AggregateAnonymizerImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.Permission;
 
 public class RepositorySecurityDecorator implements Repository
 {
 	private final Repository decoratedRepository;
+	private final AppSettings appSettings;
+	private final AggregateAnonymizer aggregateAnonymizer;
 
-	public RepositorySecurityDecorator(Repository decoratedRepository)
+	public RepositorySecurityDecorator(Repository decoratedRepository, AppSettings appSettings)
 	{
-		this.decoratedRepository = decoratedRepository;
+		this.decoratedRepository = requireNonNull(decoratedRepository);
+		this.appSettings = requireNonNull(appSettings);
+		this.aggregateAnonymizer = new AggregateAnonymizerImpl();
 	}
 
 	@Override
@@ -23,6 +31,13 @@ public class RepositorySecurityDecorator implements Repository
 	{
 		validatePermission(decoratedRepository.getName(), Permission.READ);
 		return decoratedRepository.iterator();
+	}
+
+	@Override
+	public Stream<Entity> stream(Fetch fetch)
+	{
+		validatePermission(decoratedRepository.getName(), Permission.READ);
+		return decoratedRepository.stream(fetch);
 	}
 
 	@Override
@@ -58,7 +73,7 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.READ);
 		return decoratedRepository.findAll(q);
@@ -79,10 +94,24 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
+	public Entity findOne(Object id, Fetch fetch)
+	{
+		validatePermission(decoratedRepository.getName(), Permission.READ);
+		return decoratedRepository.findOne(id, fetch);
+	}
+
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.READ);
 		return decoratedRepository.findAll(ids);
+	}
+
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
+	{
+		validatePermission(decoratedRepository.getName(), Permission.READ);
+		return decoratedRepository.findAll(ids, fetch);
 	}
 
 	@Override
@@ -100,10 +129,10 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
-	public void update(Iterable<? extends Entity> records)
+	public void update(Stream<? extends Entity> entities)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
-		decoratedRepository.update(records);
+		decoratedRepository.update(entities);
 	}
 
 	@Override
@@ -114,7 +143,7 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
-	public void delete(Iterable<? extends Entity> entities)
+	public void delete(Stream<? extends Entity> entities)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.delete(entities);
@@ -128,7 +157,7 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.deleteById(ids);
@@ -149,7 +178,7 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
-	public Integer add(Iterable<? extends Entity> entities)
+	public Integer add(Stream<? extends Entity> entities)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		return decoratedRepository.add(entities);
@@ -173,7 +202,15 @@ public class RepositorySecurityDecorator implements Repository
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.COUNT);
-		return decoratedRepository.aggregate(aggregateQuery);
+
+		Integer threshold = appSettings.getAggregateThreshold();
+
+		AggregateResult result = decoratedRepository.aggregate(aggregateQuery);
+		if (threshold != null && threshold > 0)
+		{
+			result = aggregateAnonymizer.anonymize(result, threshold);
+		}
+		return result;
 	}
 
 	@Override
@@ -182,4 +219,38 @@ public class RepositorySecurityDecorator implements Repository
 		return decoratedRepository.getCapabilities();
 	}
 
+	@Override
+	public void rebuildIndex()
+	{
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
+		decoratedRepository.rebuildIndex();
+	}
+
+	@Override
+	public void create()
+	{
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
+		decoratedRepository.create();
+	}
+
+	@Override
+	public void drop()
+	{
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
+		decoratedRepository.drop();
+	}
+
+	@Override
+	public void addEntityListener(EntityListener entityListener)
+	{
+		validatePermission(decoratedRepository.getName(), Permission.READ);
+		decoratedRepository.addEntityListener(entityListener);
+	}
+
+	@Override
+	public void removeEntityListener(EntityListener entityListener)
+	{
+		validatePermission(decoratedRepository.getName(), Permission.READ);
+		decoratedRepository.removeEntityListener(entityListener);
+	}
 }

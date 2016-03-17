@@ -1,15 +1,19 @@
 package org.molgenis.data.rest.v2;
 
-import static org.molgenis.data.rest.v2.RestControllerV2.createDefaultRefAttributeFilter;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
 
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Range;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.rest.Href;
-import org.molgenis.data.rest.RestController;
+import org.molgenis.fieldtypes.MrefField;
+import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.security.core.MolgenisPermissionService;
 
 import com.google.common.base.Function;
@@ -45,22 +49,24 @@ class AttributeMetaDataResponseV2
 	/**
 	 * 
 	 * @param entityParentName
+	 * @param entityMeta
 	 * @param attr
 	 * @param attrFilter
 	 *            set of lowercase attribute names to include in response
 	 * @param attributeExpandsSet
 	 *            set of lowercase attribute names to expand in response
 	 */
-	public AttributeMetaDataResponseV2(final String entityParentName, AttributeMetaData attr,
-			AttributeFilter attrFilter, MolgenisPermissionService permissionService)
+	public AttributeMetaDataResponseV2(final String entityParentName, EntityMetaData entityMeta, AttributeMetaData attr,
+			Fetch fetch, MolgenisPermissionService permissionService, DataService dataService,
+			LanguageService languageService)
 	{
 		String attrName = attr.getName();
-		this.href = Href.concatMetaAttributeHref(RestController.BASE_URI, entityParentName, attrName);
+		this.href = Href.concatMetaAttributeHref(RestControllerV2.BASE_URI, entityParentName, attrName);
 
 		this.fieldType = attr.getDataType().getEnumType();
 		this.name = attrName;
-		this.label = attr.getLabel();
-		this.description = attr.getDescription();
+		this.label = attr.getLabel(languageService.getCurrentUserLanguageCode());
+		this.description = attr.getDescription(languageService.getCurrentUserLanguageCode());
 		this.enumOptions = attr.getEnumOptions();
 		this.maxLength = attr.getDataType().getMaxLength();
 		this.expression = attr.getExpression();
@@ -68,15 +74,8 @@ class AttributeMetaDataResponseV2
 		EntityMetaData refEntity = attr.getRefEntity();
 		if (refEntity != null)
 		{
-			if (attrFilter != null)
-			{
-				this.refEntity = new EntityMetaDataResponseV2(refEntity, attrFilter, permissionService);
-			}
-			else
-			{
-				this.refEntity = new EntityMetaDataResponseV2(refEntity, createDefaultRefAttributeFilter(attr),
-						permissionService);
-			}
+			this.refEntity = new EntityMetaDataResponseV2(refEntity, fetch, permissionService, dataService,
+					languageService);
 		}
 		else
 		{
@@ -87,36 +86,38 @@ class AttributeMetaDataResponseV2
 		if (attrParts != null)
 		{
 			// filter attribute parts
-			if (attrFilter != null)
-			{
-				attrParts = Iterables.filter(attrParts, new Predicate<AttributeMetaData>()
-				{
-					@Override
-					public boolean apply(AttributeMetaData attr)
-					{
-						return attrFilter.includeAttribute(attr);
-					}
-				});
-			}
+			attrParts = filterAttributes(fetch, attrParts);
 
 			// create attribute response
-			this.attributes = Lists.newArrayList(Iterables.transform(attrParts,
-					new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
+			this.attributes = Lists.newArrayList(
+					Iterables.transform(attrParts, new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
 					{
 						@Override
 						public AttributeMetaDataResponseV2 apply(AttributeMetaData attr)
 						{
-							AttributeFilter subAttrFilter;
-							if (attrFilter != null)
+							Fetch subAttrFetch;
+							if (fetch != null)
 							{
-								subAttrFilter = attrFilter.getAttributeFilter(attr);
+								if (attr.getDataType().getEnumType() == FieldTypeEnum.COMPOUND)
+								{
+									subAttrFetch = fetch;
+								}
+								else
+								{
+									subAttrFetch = fetch.getFetch(attr);
+								}
+							}
+							else if (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
+							{
+								subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr,
+										languageService.getCurrentUserLanguageCode());
 							}
 							else
 							{
-								subAttrFilter = null;
+								subAttrFetch = null;
 							}
-							return new AttributeMetaDataResponseV2(entityParentName, attr, subAttrFilter,
-									permissionService);
+							return new AttributeMetaDataResponseV2(entityParentName, entityMeta, attr, subAttrFetch,
+									permissionService, dataService, languageService);
 						}
 					}));
 		}
@@ -129,14 +130,52 @@ class AttributeMetaDataResponseV2
 		this.nillable = attr.isNillable();
 		this.readOnly = attr.isReadonly();
 		this.defaultValue = attr.getDefaultValue();
-		this.labelAttribute = attr.isLabelAttribute();
+		this.labelAttribute = attr.equals(entityMeta.getLabelAttribute());
 		this.unique = attr.isUnique();
-		this.lookupAttribute = attr.isLookupAttribute();
+		this.lookupAttribute = entityMeta.getLookupAttribute(attr.getName()) != null;
 		this.aggregateable = attr.isAggregateable();
 		this.range = attr.getRange();
 		this.visible = attr.isVisible();
 		this.visibleExpression = attr.getVisibleExpression();
 		this.validationExpression = attr.getValidationExpression();
+	}
+
+	public static Iterable<AttributeMetaData> filterAttributes(Fetch fetch, Iterable<AttributeMetaData> attrs)
+	{
+		if (fetch != null)
+		{
+			return Iterables.filter(attrs, new Predicate<AttributeMetaData>()
+			{
+				@Override
+				public boolean apply(AttributeMetaData attr)
+				{
+					return filterAttributeRec(fetch, attr);
+				}
+			});
+		}
+		else
+		{
+			return attrs;
+		}
+	}
+
+	public static boolean filterAttributeRec(Fetch fetch, AttributeMetaData attr)
+	{
+		if (attr.getDataType().getEnumType() == COMPOUND)
+		{
+			for (AttributeMetaData attrPart : attr.getAttributeParts())
+			{
+				if (filterAttributeRec(fetch, attrPart))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		else
+		{
+			return fetch.hasField(attr);
+		}
 	}
 
 	public String getHref()

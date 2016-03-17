@@ -19,7 +19,7 @@ public class FitConAnnotatorSettings extends DefaultSettingsEntity
 	@Component
 	public static class Meta extends DefaultSettingsEntityMetaData
 	{
-		public static final String FITCON_LOCATION = "fitconnLocation";
+		public static final String FITCON_LOCATION = "fitconLocation";
 
 		public Meta()
 		{

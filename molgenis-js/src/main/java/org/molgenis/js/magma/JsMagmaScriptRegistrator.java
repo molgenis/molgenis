@@ -1,6 +1,6 @@
 package org.molgenis.js.magma;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import org.molgenis.script.ScriptRunnerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +23,8 @@ public class JsMagmaScriptRegistrator implements ApplicationListener<ContextRefr
 	@Autowired
 	public JsMagmaScriptRegistrator(ScriptRunnerFactory scriptRunnerFactory, JsMagmaScriptRunner jsMagmaScriptRunner)
 	{
-		this.scriptRunnerFactory = checkNotNull(scriptRunnerFactory);
-		this.jsMagmaScriptRunner = checkNotNull(jsMagmaScriptRunner);
+		this.scriptRunnerFactory = requireNonNull(scriptRunnerFactory);
+		this.jsMagmaScriptRunner = requireNonNull(jsMagmaScriptRunner);
 	}
 
 	@Override

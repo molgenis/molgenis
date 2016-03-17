@@ -1,5 +1,6 @@
 package org.molgenis.data.validation;
 
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,7 +12,7 @@ import com.google.common.collect.Collections2;
 public class MolgenisValidationException extends MolgenisDataException
 {
 	private static final long serialVersionUID = 1L;
-	private final Set<ConstraintViolation> violations;
+	private Set<ConstraintViolation> violations;
 
 	public MolgenisValidationException(Set<ConstraintViolation> violations)
 	{
@@ -39,4 +40,13 @@ public class MolgenisValidationException extends MolgenisDataException
 		}), '.');
 	}
 
+	/**
+	 * renumber the violation row indices with the actual row numbers
+	 * 
+	 * @param actualIndices
+	 */
+	public void renumberViolationRowIndices(List<Integer> actualIndices)
+	{
+		violations.stream().forEach(v -> v.renumberRowIndex(actualIndices));
+	}
 }

@@ -45,9 +45,9 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 	public static final DefaultAttributeMetaData POS = new DefaultAttributeMetaData("POS",
 			MolgenisFieldTypes.FieldTypeEnum.LONG);
 	public static final DefaultAttributeMetaData REF = new DefaultAttributeMetaData("REF",
-			MolgenisFieldTypes.FieldTypeEnum.STRING);
+			MolgenisFieldTypes.FieldTypeEnum.TEXT);
 	public static final DefaultAttributeMetaData ALT = new DefaultAttributeMetaData("ALT",
-			MolgenisFieldTypes.FieldTypeEnum.STRING);
+			MolgenisFieldTypes.FieldTypeEnum.TEXT);
 
 	private final ArrayList<AttributeMetaData> commonAttributes;
 	private final RepositoryMerger repositoryMerger;
@@ -73,8 +73,7 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 	{
 		dataService.getEntityNames();
 		List<String> geneticRepositories = new ArrayList<String>();
-		for (String name : dataService.getEntityNames())
-		{
+		dataService.getEntityNames().forEach(name -> {
 			if (dataService.getEntityMetaData(name).getAttribute(CHROM.getName()) != null
 					&& dataService.getEntityMetaData(name).getAttribute(POS.getName()) != null
 					&& dataService.getEntityMetaData(name).getAttribute(REF.getName()) != null
@@ -82,7 +81,7 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 			{
 				geneticRepositories.add(name);
 			}
-		}
+		});
 
 		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(geneticRepositories,
 				new Function<String, EntityMetaData>()
@@ -132,7 +131,7 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 			}
 
 			EntityMetaData mergedEntityMetaData = repositoryMerger.mergeMetaData(geneticRepositories, commonAttributes,
-					resultSet);
+					null, resultSet);
 			Repository mergedRepository = dataService.getMeta().addEntityMeta(mergedEntityMetaData);
 			repositoryMerger.merge(geneticRepositories, commonAttributes, mergedRepository);
 		}

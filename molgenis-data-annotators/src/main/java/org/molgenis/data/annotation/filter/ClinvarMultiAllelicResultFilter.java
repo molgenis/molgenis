@@ -39,10 +39,6 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 				String[] alts = entity.getString(VcfRepository.ALT).split(",");
 				String[] clnSigs = entity.getString("CLNSIG").split(",");
 				String[] clnAll = entity.getString("CLNALLE").split(",");
-				System.out.println("alts: " + Lists.newArrayList(alts));
-				System.out.println("clnsigs: " + Lists.newArrayList(clnSigs));
-				System.out.println("clnals: " + Lists.newArrayList(clnAll));
-				System.out.println("source: " + annotatedEntity);
 				StringBuilder newClnlallAttributeValue = new StringBuilder();
 				StringBuilder newClnlsigAttributeValue = new StringBuilder();
 				String[] annotatedEntityAltAlleles = annotatedEntity.getString(VcfRepository.ALT).split(",");

@@ -1,5 +1,7 @@
 package org.molgenis.data.meta;
 
+import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
+
 import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
@@ -7,6 +9,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.security.core.Permission;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
@@ -17,7 +20,18 @@ public class MetaUtils
 	public static List<AttributeMetaData> updateEntityMeta(MetaDataService metaDataService, EntityMetaData entityMeta,
 			boolean sync)
 	{
+		String backend = entityMeta.getBackend() != null ? entityMeta.getBackend() : metaDataService
+				.getDefaultBackend().getName();
+
 		EntityMetaData existingEntityMetaData = metaDataService.getEntityMetaData(entityMeta.getName());
+		if (!existingEntityMetaData.getBackend().equals(backend))
+		{
+			throw new MolgenisDataException(
+					"Changing the backend of an entity is not supported. You tried to change the backend of entity '"
+							+ entityMeta.getName() + "' from '" + existingEntityMetaData.getBackend() + "' to '"
+							+ backend + "'");
+		}
+
 		List<AttributeMetaData> addedAttributes = Lists.newArrayList();
 
 		for (AttributeMetaData attr : existingEntityMetaData.getAttributes())
@@ -51,6 +65,8 @@ public class MetaUtils
 			}
 			else
 			{
+				validatePermission(entityMeta.getName(), Permission.WRITEMETA);
+
 				if (sync) metaDataService.addAttributeSync(entityMeta.getName(), attr);
 				else metaDataService.addAttribute(entityMeta.getName(), attr);
 
@@ -73,6 +89,7 @@ public class MetaUtils
 	{
 		return FluentIterable.from(attributeMetaDataEntities).transform(new Function<Entity, AttributeMetaData>()
 		{
+			@Override
 			public AttributeMetaData apply(Entity attributeMetaDataEntity)
 			{
 				String attributeName = attributeMetaDataEntity.getString(AttributeMetaDataMetaData.NAME);

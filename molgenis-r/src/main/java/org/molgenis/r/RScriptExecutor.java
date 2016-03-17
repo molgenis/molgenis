@@ -1,6 +1,6 @@
 package org.molgenis.r;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +30,7 @@ public class RScriptExecutor
 	public RScriptExecutor(@Value("${r_script_executable:/usr/bin/Rscript}") String rScriptExecutable,
 			@Value("${r_libs:@null}") String rLibs)
 	{
-		this.rScriptExecutable = checkNotNull(rScriptExecutable);
+		this.rScriptExecutable = requireNonNull(rScriptExecutable);
 		if (rLibs == null)
 		{
 			this.rLibs = System.getProperty("user.home") + File.separator + "r-packages";

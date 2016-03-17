@@ -1,6 +1,6 @@
 package org.molgenis.js;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import org.molgenis.script.ScriptRunnerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +23,8 @@ public class JsScriptRegistrator implements ApplicationListener<ContextRefreshed
 	@Autowired
 	public JsScriptRegistrator(ScriptRunnerFactory scriptRunnerFactory, JsScriptRunner jsScriptRunner)
 	{
-		this.scriptRunnerFactory = checkNotNull(scriptRunnerFactory);
-		this.jsScriptRunner = checkNotNull(jsScriptRunner);
+		this.scriptRunnerFactory = requireNonNull(scriptRunnerFactory);
+		this.jsScriptRunner = requireNonNull(jsScriptRunner);
 	}
 
 	@Override

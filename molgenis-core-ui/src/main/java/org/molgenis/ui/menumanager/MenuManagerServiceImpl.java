@@ -1,6 +1,6 @@
 package org.molgenis.ui.menumanager;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,9 +40,9 @@ public class MenuManagerServiceImpl implements MenuManagerService, ApplicationLi
 	public MenuManagerServiceImpl(MenuReaderService menuReaderService, AppSettings appSettings,
 			MolgenisPluginRegistry molgenisPluginRegistry)
 	{
-		this.menuReaderService = checkNotNull(menuReaderService);
-		this.appSettings = checkNotNull(appSettings);
-		this.molgenisPluginRegistry = checkNotNull(molgenisPluginRegistry);
+		this.menuReaderService = requireNonNull(menuReaderService);
+		this.appSettings = requireNonNull(appSettings);
+		this.molgenisPluginRegistry = requireNonNull(molgenisPluginRegistry);
 	}
 
 	@Override

@@ -1,7 +1,10 @@
 package org.molgenis.ontology.importer;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -18,6 +21,7 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.importer.EntitiesValidationReportImpl;
 import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
@@ -46,19 +50,15 @@ public class OntologyImportService implements ImportService
 	public OntologyImportService(FileRepositoryCollectionFactory fileRepositoryCollectionFactory,
 			DataService dataService, SearchService searchService, PermissionSystemService permissionSystemService)
 	{
-		if (fileRepositoryCollectionFactory == null) throw new IllegalArgumentException(
-				"fileRepositoryCollectionFactory is null");
-		if (dataService == null) throw new IllegalArgumentException("dataservice is null");
-		if (searchService == null) throw new IllegalArgumentException("seachservice is null");
-		if (permissionSystemService == null) throw new IllegalArgumentException("permissionSystemService is null");
-		this.dataService = dataService;
-		this.searchService = searchService;
-		this.permissionSystemService = permissionSystemService;
+		this.dataService = requireNonNull(dataService);
+		this.searchService = requireNonNull(searchService);
+		this.permissionSystemService = requireNonNull(permissionSystemService);
 	}
 
 	@Override
 	@Transactional
-	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction, String defaultPackage)
+	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction,
+			String defaultPackage)
 	{
 		if (databaseAction != DatabaseAction.ADD) throw new IllegalArgumentException("Only ADD is supported");
 
@@ -77,12 +77,11 @@ public class OntologyImportService implements ImportService
 
 					Repository crudRepository = dataService.getRepository(entityNameToImport);
 
-					crudRepository.add(repo);
+					crudRepository.add(repo.stream());
 
 					List<String> entityNames = addedEntities.stream().map(emd -> emd.getName())
 							.collect(Collectors.toList());
-					permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
-							entityNames);
+					permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(), entityNames);
 					int count = 1;
 					for (String entityName : entityNames)
 					{
@@ -119,14 +118,14 @@ public class OntologyImportService implements ImportService
 
 	@Override
 	/**
-	 * Ontology validation 
+	 * Ontology validation
 	 */
 	public EntitiesValidationReport validateImport(File file, RepositoryCollection source)
 	{
 		EntitiesValidationReport report = new EntitiesValidationReportImpl();
 
-		if (source.getRepository(OntologyMetaData.ENTITY_NAME) == null) throw new MolgenisDataException(
-				"Exception Repository [" + OntologyMetaData.ENTITY_NAME + "] is missing");
+		if (source.getRepository(OntologyMetaData.ENTITY_NAME) == null)
+			throw new MolgenisDataException("Exception Repository [" + OntologyMetaData.ENTITY_NAME + "] is missing");
 
 		boolean ontologyExists = false;
 		for (Entity ontologyEntity : source.getRepository(OntologyMetaData.ENTITY_NAME))
@@ -134,13 +133,15 @@ public class OntologyImportService implements ImportService
 			String ontologyIRI = ontologyEntity.getString(OntologyMetaData.ONTOLOGY_IRI);
 			String ontologyName = ontologyEntity.getString(OntologyMetaData.ONTOLOGY_NAME);
 
-			Entity ontologyQueryEntity = dataService.findOne(
-					OntologyMetaData.ENTITY_NAME,
+			Entity ontologyQueryEntity = dataService.findOne(OntologyMetaData.ENTITY_NAME,
 					new QueryImpl().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIRI).or()
 							.eq(OntologyMetaData.ONTOLOGY_NAME, ontologyName));
 			ontologyExists = ontologyQueryEntity != null;
 		}
-
+		
+		if(ontologyExists) 
+			throw new MolgenisDataException("The ontology you are trying to import already exists");
+		
 		Iterator<String> it = source.getEntityNames().iterator();
 		while (it.hasNext())
 		{
@@ -186,5 +187,12 @@ public class OntologyImportService implements ImportService
 	public Set<String> getSupportedFileExtensions()
 	{
 		return GenericImporterExtensions.getOntology();
+	}
+
+	@Override
+	public LinkedHashMap<String, Boolean> integrationTestMetaData(MetaDataService metaDataService,
+			RepositoryCollection repositoryCollection, String defaultPackage)
+	{
+		return metaDataService.integrationTestMetaData(repositoryCollection);
 	}
 }

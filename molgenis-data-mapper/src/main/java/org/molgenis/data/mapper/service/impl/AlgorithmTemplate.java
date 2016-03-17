@@ -1,6 +1,6 @@
 package org.molgenis.data.mapper.service.impl;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
 
@@ -22,8 +22,8 @@ public class AlgorithmTemplate
 
 	public AlgorithmTemplate(Script script, Map<String, String> model)
 	{
-		this.script = checkNotNull(script);
-		this.model = checkNotNull(model);
+		this.script = requireNonNull(script);
+		this.model = requireNonNull(model);
 	}
 
 	public String render()

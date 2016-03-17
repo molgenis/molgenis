@@ -1,12 +1,3 @@
-/**
- * File: invengine_generate/meta/Field.java <br>
- * Copyright: Inventory 2000-2006, GBIC 2005, all rights reserved <br>
- * Changelog:
- * <ul>
- * <li>2005-12-06; 1.0.0; RA Scheltema; Creation.
- * <li> 2006-01-11; 1.0.0; RA Scheltema; Added documentation.
- * </ul>
- */
 package org.molgenis.model.elements;
 
 import java.io.Serializable;
@@ -24,7 +15,6 @@ import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.XrefField;
-import org.molgenis.generators.GeneratorHelper;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.util.SimpleTree;
 import org.molgenis.util.Tree;
@@ -445,17 +435,11 @@ public class Field implements Serializable
 	}
 
 	// enum access methods
-	/**
-     * 
-     */
 	public void setEnumOptions(Vector<String> options)
 	{
 		this.enum_options = options;
 	}
 
-	/**
-     * 
-     */
 	public Vector<String> getEnumOptions() throws MolgenisModelException
 	{
 		if (!(this.type instanceof EnumField))
@@ -478,12 +462,6 @@ public class Field implements Serializable
 	 */
 	public void setVarCharLength(int length) // throws Exception
 	{
-		// if (this.type != Type.VARCHAR)
-		// {
-		// / throw new Exception("Field is not a VARCHAR, so length cannot be
-		// set.");
-		// }
-
 		this.varchar_length = length;
 	}
 
@@ -520,7 +498,7 @@ public class Field implements Serializable
 	 *            The entity this field references.
 	 * @param field
 	 *            The field of the entity this field references.
-	 * @param label
+	 * @param labels
 	 *            The label of this xref.
 	 * @throws Exception
 	 *             When this field is not of type Type.XREF_SINGLE or Type.XREF_MULTIPLE
@@ -634,7 +612,7 @@ public class Field implements Serializable
 		List<String> labels = new ArrayList<String>();
 		for (String label : this.getXrefLabelNames())
 		{
-			labels.add(getName() + "_" + GeneratorHelper.getJavaName(label, useJavaNames));
+			labels.add(getName() + "_" + getJavaName(label, useJavaNames));
 		}
 
 		SimpleTree<SimpleTree<?>> root = new SimpleTree<SimpleTree<?>>(getName(), null);
@@ -648,7 +626,7 @@ public class Field implements Serializable
 	 * 
 	 * @param labels
 	 *            to be matched
-	 * @param path
+	 * @param parent
 	 *            so far in the tree to allow for recursion
 	 * @return tree of paths matching labels.
 	 * @throws MolgenisModelException
@@ -663,7 +641,7 @@ public class Field implements Serializable
 	 * 
 	 * @param labels
 	 *            to be matched
-	 * @param path
+	 * @param parent
 	 *            so far in the tree to allow for recursion
 	 * @return tree of paths matching labels.
 	 * @throws MolgenisModelException
@@ -673,7 +651,7 @@ public class Field implements Serializable
 	{
 		for (Field f : this.getXrefEntity().getAllFields())
 		{
-			String name = parent.getName() + "_" + GeneratorHelper.getJavaName(f.getName(), useJavaNames);
+			String name = parent.getName() + "_" + getJavaName(f.getName(), useJavaNames);
 			if (!(f.getType() instanceof XrefField) && !(f.getType() instanceof MrefField))
 			{
 				if (labels.contains(name))
@@ -747,25 +725,12 @@ public class Field implements Serializable
 						result.add(value.get(value.size() - 1));
 					}
 				}
-
-				// e.g., Sample.experiment, is an xref itself, can be cascade of
-				// xrefs actually
-				// Field xrefField = new
-				// Field(this.getEntity().getModel().findField(
-				// this.getXrefEntity().getName() + "." + label.split("_")[0]));
-				// xrefField.setXrefLabelNames(Arrays.asList(new String[]
-				// { label.split("_")[1] }));
-
-				// result.add(xrefField);
-
-				// System.out.println(result.get(result.size()-1));
 			} // local name
 			else
 			{
 				Field target = this.getEntity().getModel().findField(this.getXrefEntity().getName() + "." + label);
 				result.add(new Field(target));
 			}
-			// System.out.println(result);
 		}
 		return result;
 	}
@@ -803,12 +768,6 @@ public class Field implements Serializable
 	 */
 	public String getMrefName()
 	{
-		// if (this.type != Type.XREF_MULTIPLE)
-		// {
-		// throw new Exception("Field is not a XREF with relation MULTIPLE, so
-		// xref-linktable cannot be retrieved.");
-		// }
-
 		return this.mref_name;
 	}
 
@@ -823,12 +782,6 @@ public class Field implements Serializable
 	 */
 	public void setMrefName(String linktable)
 	{
-		// if (this.type != Type.XREF_MULTIPLE)
-		// {
-		// throw new Exception("Field is not a XREF with relation MULTIPLE, so
-		// xref-linktable cannot be set.");
-		// }
-
 		this.mref_name = linktable;
 	}
 
@@ -852,18 +805,11 @@ public class Field implements Serializable
 		this.mref_remoteid = mref_remoteid;
 	}
 
-	//
-	/**
-     * 
-     */
 	public void setUserData(Object obj)
 	{
 		user_data = obj;
 	}
 
-	/**
-     * 
-     */
 	public Object getUserData()
 	{
 		return user_data;
@@ -920,7 +866,7 @@ public class Field implements Serializable
 		}
 		if (type instanceof XrefField || type instanceof MrefField)
 		{
-			str += ", xref_label=" + new GeneratorHelper(null).toCsv(this.xref_labels);
+			str += ", xref_label=" + toCsv(this.xref_labels);
 		}
 
 		// settings
@@ -1149,10 +1095,7 @@ public class Field implements Serializable
 		}
 
 		Map<String, List<Field>> result = new LinkedHashMap<String, List<Field>>();
-		for (Unique key : getXrefEntity().getAllKeys()) // get all except
-														// primary key
-		// if (!key.equals(getXrefEntity().getAllKeys().firstElement()))
-		// {
+		for (Unique key : getXrefEntity().getAllKeys())
 		{
 			for (Field f : key.getFields())
 			{
@@ -1168,31 +1111,6 @@ public class Field implements Serializable
 						String label = f.getName() + "_" + pair.getKey();
 						result.put(label, path);
 
-						// if
-						// (!f.getEntity().getName().equals(getXrefEntity().getName()))
-						// {
-						//
-						// System.out.println("PATH FOR " +
-						// this.getEntity().getName() + "." + this.getName()
-						// + "=" + this.getName() + "_" + label + " " + "field="
-						// + f.getEntity().getName()
-						// + " " + getXrefEntity().getName());
-						// System.out.print(this.getEntity().getName() + "." +
-						// this.getName());
-						// for (Field pathField : path)
-						// {
-						// System.out
-						// .print("->" + pathField.getEntity().getName() + "." +
-						// pathField.getName());
-						// }
-						// System.out.println();
-						// }
-						//
-						// else
-						// {
-						result.put(label, path);
-						// }
-
 					}
 				}
 				else
@@ -1201,7 +1119,6 @@ public class Field implements Serializable
 					path.add(f);
 					result.put(f.getName(), path);
 				}
-				// }
 			}
 		}
 
@@ -1278,4 +1195,52 @@ public class Field implements Serializable
 
 		return false;
 	}
+
+		/**
+		 * Convert a list of string to comma separated values.
+		 *
+		 * @param elements
+		 * @return csv
+		 */
+		public String toCsv(List<String> elements)
+		{
+			StringBuilder strBuilder = new StringBuilder();
+
+			if (elements != null)
+			{
+				for (String str : elements)
+					strBuilder.append('\'').append(str).append('\'').append(',');
+				if (!elements.isEmpty()) strBuilder.deleteCharAt(strBuilder.length() - 1);
+			}
+
+			return strBuilder.toString();
+		}
+
+	/**
+	 * Convert string with first character to uppercase.
+	 *
+	 * @param string
+	 * @return string with first character in uppercase.
+	 */
+	public static String firstToUpper(String string)
+	{
+		if (string == null) return " NULL ";
+		if (string.length() > 0) return string.substring(0, 1).toUpperCase() + string.substring(1);
+		else return " ERROR[STRING EMPTY] ";
+	}
+
+		private  String getJavaName(String name, boolean doFirstToUpper)
+		{
+			if (name == null) return " NULL ";
+
+			String[] split = name.split("_");
+			StringBuilder strBuilder = new StringBuilder();
+			for (int i = 0; i < split.length; i++)
+			{
+				if (i > 0) strBuilder.append('_');
+				if (!split[i].isEmpty()) strBuilder.append(doFirstToUpper ? firstToUpper(split[i]) : split[i]);
+			}
+
+			return strBuilder.toString();
+		}
 }

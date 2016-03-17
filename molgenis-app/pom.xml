@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.molgenis</groupId>
 		<artifactId>molgenis</artifactId>
-		<version>1.10.0-SNAPSHOT</version>
+		<version>1.19.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-app</artifactId>
 	<packaging>war</packaging>
@@ -53,41 +53,45 @@
 			<resource>
 				<directory>${project.basedir}/src/main/resources</directory>
 				<filtering>true</filtering>
-				<excludes>
-					<exclude>**git.properties</exclude>
-					<exclude>**/model/*.xml</exclude>
-				</excludes>
 			</resource>
 		</resources>
 		<plugins>
-            <!-- minify resources -->
-            <plugin>
-                <groupId>com.samaxes.maven</groupId>
-                <artifactId>minify-maven-plugin</artifactId>
-            </plugin>
-			<!-- make molgenis server properties available in pom.xml -->
+			<!-- minify resources -->
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>properties-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>initialize</phase>
-						<goals>
-							<goal>read-project-properties</goal>
-						</goals>
-						<configuration>
-							<files>
-								<file>${user.home}/.molgenis/omx/molgenis-server.properties</file>
-							</files>
-							<quiet>true</quiet>
-						</configuration>
-					</execution>
-				</executions>
+				<groupId>com.samaxes.maven</groupId>
+				<artifactId>minify-maven-plugin</artifactId>
 			</plugin>
-			<!-- execute molgenis generator -->
+			<!-- servlet container -->
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<version>9.2.6.v20141205</version>
+				<configuration>
+					<stopPort>8079</stopPort>
+					<stopKey>jetty-stop</stopKey>
+					<reload>manual</reload>
+					<systemProperties>
+						<systemProperty>
+							<name>molgenis.home</name>
+							<value>${user.home}${file.separator}.molgenis${file.separator}omx</value>
+						</systemProperty>
+					</systemProperties>
+					<webAppConfig>
+						<contextPath>/</contextPath>
+						<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
+							<resourcesAsCSV>${basedir}/src/main/resources</resourcesAsCSV>
+						</baseResource>
+						<webInfIncludeJarPattern>.*/molgenis-[^/]*\.jar$|.*spring-[^/]*\.jar$
+						</webInfIncludeJarPattern>
+					</webAppConfig>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>mysql</groupId>
+						<artifactId>mysql-connector-java</artifactId>
+						<version>${mysql.connector.java.version}</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 		</plugins>
 		<pluginManagement>
@@ -100,7 +104,7 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>org.molgenis</groupId>
@@ -154,11 +158,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-disease-matcher</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-googlespreadsheet</artifactId>
 			<version>${project.version}</version>
 			<exclusions>
@@ -170,14 +169,9 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-data-jpa</artifactId>
+			<artifactId>molgenis-python</artifactId>
 			<version>${project.version}</version>
-		</dependency>		
-		<dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-python</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-r</artifactId>
@@ -198,49 +192,54 @@
 			<artifactId>molgenis-data-rest</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-merge</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-vcf</artifactId>
-            <version>${project.version}</version>
-            <exclusions>
-            	<exclusion>
-            		<artifactId>log4j</artifactId>
-            		<groupId>log4j</groupId>
-            	</exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-mapper</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-         <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-import</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-        	<groupId>org.molgenis</groupId>
-        	<artifactId>molgenis-data-mysql</artifactId>
-        	<version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-elasticsearch</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-merge</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-vcf</artifactId>
+			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>log4j</artifactId>
+					<groupId>log4j</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-mapper</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-import</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-mysql</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-elasticsearch</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-idcard</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-aop</artifactId>
 		</dependency>
 		<dependency>
-		    <groupId>org.springframework</groupId>
-		    <artifactId>spring-context-support</artifactId>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -278,19 +277,24 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-questionnaires</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-catalogue</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-scripts</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-questionnaires</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-catalogue</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-scripts</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-file-ingester</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 </project>

@@ -1,6 +1,6 @@
 package org.molgenis.ui.style;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -15,14 +15,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class StyleServiceImpl implements StyleService
 {
-	private static final String LOCAL_CSS_BOOTSTRAP_THEME_LOCATION = "css/themes/bootstrap-*.min.css";
+	private static final String LOCAL_CSS_BOOTSTRAP_THEME_LOCATION = "classpath*:css/bootstrap-*.min.css";
 
 	private final AppSettings appSettings;
 
 	@Autowired
 	public StyleServiceImpl(AppSettings appSettings)
 	{
-		this.appSettings = checkNotNull(appSettings);
+		this.appSettings = requireNonNull(appSettings);
 	}
 
 	@Override

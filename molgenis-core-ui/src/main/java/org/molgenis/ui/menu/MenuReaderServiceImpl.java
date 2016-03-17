@@ -1,11 +1,10 @@
 package org.molgenis.ui.menu;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.GsonBuilder;
 
@@ -16,11 +15,10 @@ public class MenuReaderServiceImpl implements MenuReaderService
 	@Autowired
 	public MenuReaderServiceImpl(AppSettings appSettings)
 	{
-		this.appSettings = checkNotNull(appSettings);
+		this.appSettings = requireNonNull(appSettings);
 	}
 
 	@Override
-	@Transactional(readOnly = true)
 	@RunAsSystem
 	public Menu getMenu()
 	{

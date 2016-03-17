@@ -44,13 +44,9 @@ public class UploadWizardPage extends AbstractWizardPage
 	@Override
 	public String handleRequest(HttpServletRequest request, BindingResult result, Wizard wizard)
 	{
-		if (!(wizard instanceof ImportWizard))
-		{
-			throw new RuntimeException("Wizard must be of type '" + ImportWizard.class.getSimpleName()
-					+ "' instead of '" + wizard.getClass().getSimpleName() + "'");
-		}
-
+		ImportWizardUtil.validateImportWizard(wizard);
 		ImportWizard importWizard = (ImportWizard) wizard;
+		String entityImportOption = request.getParameter("entity_option");
 
 		try
 		{
@@ -67,11 +63,12 @@ public class UploadWizardPage extends AbstractWizardPage
 			}
 			else
 			{
+				importWizard.setFile(file);
+
 				RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
 						.createFileRepositoryCollection(file);
 				ImportService importService = importServiceFactory.getImportService(file, repositoryCollection);
 
-				importWizard.setFile(file);
 				importWizard.setSupportedDatabaseActions(importService.getSupportedDatabaseActions());
 				importWizard.setMustChangeEntityName(importService.getMustChangeEntityName());
 			}
@@ -79,8 +76,7 @@ public class UploadWizardPage extends AbstractWizardPage
 		}
 		catch (Exception e)
 		{
-			result.addError(new ObjectError("wizard", "Error uploading file: " + e.getMessage()));
-			LOG.error("Exception uploading file", e);
+			ImportWizardUtil.handleException(e, importWizard, result, LOG, entityImportOption);
 		}
 
 		return null;

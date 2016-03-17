@@ -1,17 +1,15 @@
 package org.molgenis.ui;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_APP_SETTINGS;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_ENVIRONMENT;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_I18N;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_RESOURCE_FINGERPRINT_REGISTRY;
 
-import java.util.Locale;
-import java.util.ResourceBundle;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.util.ResourceFingerprintRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,14 +25,16 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter
 	private final ResourceFingerprintRegistry resourceFingerprintRegistry;
 	private final AppSettings appSettings;
 	private final String environment;
+	private final LanguageService languageService;
 
 	@Autowired
 	public MolgenisInterceptor(ResourceFingerprintRegistry resourceFingerprintRegistry, AppSettings appSettings,
-			@Value("${environment}") String environment)
+			LanguageService languageService, @Value("${environment}") String environment)
 	{
-		this.resourceFingerprintRegistry = checkNotNull(resourceFingerprintRegistry);
-		this.appSettings = checkNotNull(appSettings);
-		this.environment = checkNotNull(environment);
+		this.resourceFingerprintRegistry = requireNonNull(resourceFingerprintRegistry);
+		this.appSettings = requireNonNull(appSettings);
+		this.languageService = requireNonNull(languageService);
+		this.environment = requireNonNull(environment);
 	}
 
 	@Override
@@ -43,15 +43,10 @@ public class MolgenisInterceptor extends HandlerInterceptorAdapter
 	{
 		if (modelAndView != null)
 		{
-			// retrieve resource bundle for the configured language
-			String languageCode = appSettings.getLanguageCode();
-			Locale locale = new Locale(languageCode, languageCode);
-			ResourceBundle i18n = ResourceBundle.getBundle("i18n", locale);
-
 			modelAndView.addObject(KEY_RESOURCE_FINGERPRINT_REGISTRY, resourceFingerprintRegistry);
 			modelAndView.addObject(KEY_ENVIRONMENT, environment);
 			modelAndView.addObject(KEY_APP_SETTINGS, appSettings);
-			modelAndView.addObject(KEY_I18N, i18n);
+			modelAndView.addObject(KEY_I18N, languageService.getBundle());
 		}
 	}
 }

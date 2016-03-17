@@ -1,6 +1,6 @@
 package org.molgenis.ui;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 
@@ -20,8 +20,8 @@ public class XmlMolgenisUi implements MolgenisUi
 	public XmlMolgenisUi(XmlMolgenisUiLoader xmlMolgenisUiLoader, MolgenisPermissionService molgenisPermissionService)
 			throws IOException
 	{
-		this.molgenisUi = checkNotNull(xmlMolgenisUiLoader).load();
-		this.molgenisPermissionService = checkNotNull(molgenisPermissionService);
+		this.molgenisUi = requireNonNull(xmlMolgenisUiLoader).load();
+		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
 	}
 
 	@Override

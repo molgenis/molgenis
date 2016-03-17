@@ -1,15 +1,13 @@
 package org.molgenis.security.login;
 
-import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.login.MolgenisLoginControllerTest.Config;
+import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
-import org.molgenis.util.ResourceFingerprintRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,11 +21,15 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @WebAppConfiguration
-@ContextConfiguration(classes = Config.class)
+@ContextConfiguration(classes =
+{ Config.class, GsonConfig.class })
 public class MolgenisLoginControllerTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
 	private MolgenisLoginController molgenisLoginController;
+
+	@Autowired
+	private GsonHttpMessageConverter gsonHttpMessageConverter;
 
 	private MockMvc mockMvc;
 
@@ -35,7 +37,7 @@ public class MolgenisLoginControllerTest extends AbstractTestNGSpringContextTest
 	public void setUp()
 	{
 		mockMvc = MockMvcBuilders.standaloneSetup(molgenisLoginController)
-				.setMessageConverters(new GsonHttpMessageConverter()).build();
+				.setMessageConverters(gsonHttpMessageConverter).build();
 	}
 
 	@Test
@@ -57,19 +59,7 @@ public class MolgenisLoginControllerTest extends AbstractTestNGSpringContextTest
 		@Bean
 		public MolgenisLoginController molgenisLoginController()
 		{
-			return new MolgenisLoginController(resourceFingerprintRegistry(), appSettings());
-		}
-
-		@Bean
-		public ResourceFingerprintRegistry resourceFingerprintRegistry()
-		{
-			return mock(ResourceFingerprintRegistry.class);
-		}
-
-		@Bean
-		public AppSettings appSettings()
-		{
-			return mock(AppSettings.class);
+			return new MolgenisLoginController();
 		}
 	}
 }

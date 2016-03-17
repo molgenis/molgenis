@@ -1,6 +1,6 @@
 package org.molgenis.security.account;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.account.AccountController.URI;
 import static org.molgenis.security.user.UserAccountService.MIN_PASSWORD_LENGTH;
 
@@ -68,18 +68,16 @@ public class AccountController
 	public AccountController(AccountService accountService, CaptchaService captchaService,
 			RedirectStrategy redirectStrategy, AppSettings appSettings)
 	{
-		this.accountService = checkNotNull(accountService);
-		this.captchaService = checkNotNull(captchaService);
-		this.redirectStrategy = checkNotNull(redirectStrategy);
-		this.appSettings = checkNotNull(appSettings);
+		this.accountService = requireNonNull(accountService);
+		this.captchaService = requireNonNull(captchaService);
+		this.redirectStrategy = requireNonNull(redirectStrategy);
+		this.appSettings = requireNonNull(appSettings);
 	}
 
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
-	public ModelAndView getLoginForm()
+	public String getLoginForm()
 	{
-		ModelAndView model = new ModelAndView("login-modal");
-		model.addObject("enable_self_registration", appSettings.getSignUp());
-		return model;
+		return "login-modal";
 	}
 
 	@RequestMapping(value = "/register", method = RequestMethod.GET)
@@ -98,9 +96,11 @@ public class AccountController
 	}
 
 	@RequestMapping(value = CHANGE_PASSWORD_RELATIVE_URI, method = RequestMethod.GET)
-	public String getChangePasswordForm()
+	public ModelAndView getChangePasswordForm()
 	{
-		return "view-change-password";
+		ModelAndView model = new ModelAndView("view-change-password");
+				model.addObject("min_password_length", MIN_PASSWORD_LENGTH);
+		return model;
 	}
 
 	@RequestMapping(value = CHANGE_PASSWORD_RELATIVE_URI, method = RequestMethod.POST)
@@ -263,6 +263,7 @@ public class AccountController
 		user.setCity(request.getCity());
 		user.setCountry(CountryCodes.get(request.getCountry()));
 		user.setChangePassword(false);
+		user.setSuperuser(false);
 		return user;
 	}
 }

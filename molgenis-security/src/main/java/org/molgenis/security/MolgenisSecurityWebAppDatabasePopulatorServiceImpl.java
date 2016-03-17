@@ -5,6 +5,7 @@ import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.DataService;
+import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.security.account.AccountService;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -13,8 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
-		implements MolgenisSecurityWebAppDatabasePopulatorService
+public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl implements
+		MolgenisSecurityWebAppDatabasePopulatorService
 {
 	private static final String USERNAME_ADMIN = "admin";
 
@@ -78,10 +79,17 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
 		// allow all users to update their profile
 		GroupAuthority usersGroupUserAccountAuthority = new GroupAuthority();
 		usersGroupUserAccountAuthority.setMolgenisGroup(allUsersGroup);
-		usersGroupUserAccountAuthority
-				.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + "useraccount".toUpperCase()); // FIXME do not
-																										// hardcode
+		usersGroupUserAccountAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX
+				+ "useraccount".toUpperCase()); // FIXME do not
+												// hardcode
 		dataService.add(GroupAuthority.ENTITY_NAME, usersGroupUserAccountAuthority);
+
+		// allow all users to read the app languages
+		GroupAuthority usersGroupLanguagesAuthority = new GroupAuthority();
+		usersGroupLanguagesAuthority.setMolgenisGroup(allUsersGroup);
+		usersGroupLanguagesAuthority.setRole(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX
+				+ LanguageMetaData.ENTITY_NAME.toUpperCase());
+		dataService.add(GroupAuthority.ENTITY_NAME, usersGroupLanguagesAuthority);
 	}
 
 	@Override

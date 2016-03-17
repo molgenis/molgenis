@@ -13,10 +13,12 @@ import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
+import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -41,8 +43,8 @@ public class ExcelEntityTest
 		colNamesMap = new LinkedHashMap<String, Integer>();
 		colNamesMap.put("attr1", 0);
 
-		excelEntity = new ExcelEntity(row, colNamesMap, cellProcessors, new DefaultEntityMetaData("Entity1",
-				ExcelEntity.class));
+		excelEntity = new ExcelEntity(row, colNamesMap, cellProcessors,
+				new DefaultEntityMetaData("Entity1", ExcelEntity.class));
 	}
 
 	@Test
@@ -104,9 +106,22 @@ public class ExcelEntityTest
 		excelEntity.get("attr1");
 	}
 
-	@Test(expectedExceptions = UnsupportedOperationException.class)
+	@Test
 	public void set()
 	{
 		excelEntity.set("attr1", "test");
+		assertEquals(excelEntity.get("attr1"), "test");
+	}
+
+	@Test
+	public void setEntity()
+	{
+		Entity entity = new MapEntity();
+		entity.set("attr1", "test1");
+		entity.set("attr2", "test2");
+
+		excelEntity.set(entity);
+		assertEquals(excelEntity.get("attr1"), "test1");
+		assertNull(excelEntity.get("attr2"));
 	}
 }

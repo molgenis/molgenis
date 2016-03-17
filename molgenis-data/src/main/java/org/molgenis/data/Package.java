@@ -10,6 +10,7 @@ import org.molgenis.data.semantic.Tag;
 public interface Package
 {
 	public static final String DEFAULT_PACKAGE_NAME = "base";
+	public static final String SYSTEM_PACKAGE_NAME = "molgenissystem";
 	public static final String PACKAGE_SEPARATOR = "_";
 
 	/**
@@ -74,4 +75,18 @@ public interface Package
 	 * @return
 	 */
 	Iterable<Tag<Package, LabeledResource, LabeledResource>> getTags();
+
+	/**
+	 * Add listener that gets fired when a package property changes
+	 * 
+	 * @param changeListener
+	 */
+	void addChangeListener(PackageChangeListener changeListener);
+
+	/**
+	 * Remove package property change listener
+	 * 
+	 * @param packageListenerId
+	 */
+	void removeChangeListener(String packageListenerId);
 }

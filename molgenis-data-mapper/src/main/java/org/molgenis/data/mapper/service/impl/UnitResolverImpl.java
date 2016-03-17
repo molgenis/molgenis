@@ -1,6 +1,6 @@
 package org.molgenis.data.mapper.service.impl;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -26,9 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import utils.UnitHelper;
-
 import com.google.common.collect.Sets;
+
+import utils.UnitHelper;
 
 public class UnitResolverImpl implements UnitResolver
 {
@@ -41,7 +41,7 @@ public class UnitResolverImpl implements UnitResolver
 	@Autowired
 	public UnitResolverImpl(OntologyService ontologyService)
 	{
-		this.ontologyService = checkNotNull(ontologyService);
+		this.ontologyService = requireNonNull(ontologyService);
 	}
 
 	@Override
@@ -69,8 +69,8 @@ public class UnitResolverImpl implements UnitResolver
 			if (isUnitEmpty(unit))
 			{
 				// Option 2: Search unit ontology for a match
-				OntologyTerm unitOntologyTerm = resolveUnitOntologyTerm(tokens.stream()
-						.map(this::convertNumberToOntologyTermStyle).collect(Collectors.toSet()));
+				OntologyTerm unitOntologyTerm = resolveUnitOntologyTerm(
+						tokens.stream().map(this::convertNumberToOntologyTermStyle).collect(Collectors.toSet()));
 
 				if (unitOntologyTerm != null)
 				{
@@ -161,15 +161,11 @@ public class UnitResolverImpl implements UnitResolver
 		Set<String> tokens = new HashSet<>();
 		if (terms != null && terms.length > 0)
 		{
-			Sets.newHashSet(terms)
-					.stream()
-					.filter(StringUtils::isNotBlank)
-					.map(StringUtils::lowerCase)
+			Sets.newHashSet(terms).stream().filter(StringUtils::isNotBlank).map(StringUtils::lowerCase)
 					.map(this::replaceIllegalChars)
-					.forEach(
-							term -> tokens.addAll(Sets.newHashSet(term.split("\\s+")).stream()
-									.filter(this::notPureNumberExpression).map(UnitHelper::numberToSuperscript)
-									.collect(Collectors.toSet())));
+					.forEach(term -> tokens
+							.addAll(Sets.newHashSet(term.split("\\s+")).stream().filter(this::notPureNumberExpression)
+									.map(UnitHelper::numberToSuperscript).collect(Collectors.toSet())));
 
 			tokens.removeAll(NGramDistanceAlgorithm.STOPWORDSLIST);
 		}

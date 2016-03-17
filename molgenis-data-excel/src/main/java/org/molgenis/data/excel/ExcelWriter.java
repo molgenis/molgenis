@@ -7,14 +7,18 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.WritableFactory;
 import org.molgenis.data.processor.CellProcessor;
+import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
+import org.molgenis.data.support.DefaultAttributeMetaData;
 
 /**
  * Creates new Excel sheets
@@ -60,10 +64,11 @@ public class ExcelWriter implements WritableFactory
 	}
 
 	@Override
-	public ExcelSheetWriter createWritable(String entityName, List<String> attributeNames)
+	public ExcelSheetWriter createWritable(String entityName, Iterable<AttributeMetaData> attributes,
+			AttributeWriteMode attributeWriteMode)
 	{
 		Sheet poiSheet = workbook.createSheet(entityName);
-		return new ExcelSheetWriter(poiSheet, attributeNames, cellProcessors);
+		return new ExcelSheetWriter(poiSheet, attributes, attributeWriteMode, cellProcessors);
 	}
 
 	@Override
@@ -78,6 +83,15 @@ public class ExcelWriter implements WritableFactory
 			throw new MolgenisDataException("Exception writing to excel file", e);
 		}
 		os.close();
+	}
+
+	@Override
+	public ExcelSheetWriter createWritable(String entityName, List<String> attributeNames)
+	{
+		List<AttributeMetaData> attributes = attributeNames != null ? attributeNames.stream()
+				.<AttributeMetaData> map(attr -> new DefaultAttributeMetaData(attr)).collect(Collectors.toList()) : null;
+
+		return createWritable(entityName, attributes, AttributeWriteMode.ATTRIBUTE_NAMES);
 	}
 
 }

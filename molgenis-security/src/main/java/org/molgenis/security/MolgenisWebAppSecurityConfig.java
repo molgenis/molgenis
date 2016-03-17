@@ -4,19 +4,22 @@ import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_CSS;
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_FONTS;
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_IMG;
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_JS;
+import static org.molgenis.security.google.GoogleAuthenticationProcessingFilter.GOOGLE_AUTHENTICATION_URL;
 
 import java.util.List;
 
 import javax.servlet.Filter;
-import javax.sql.DataSource;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.account.AccountController;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.security.google.GoogleAuthenticationProcessingFilter;
 import org.molgenis.security.permission.MolgenisPermissionServiceImpl;
+import org.molgenis.security.session.ApiSessionExpirationFilter;
 import org.molgenis.security.token.DataServiceTokenService;
 import org.molgenis.security.token.TokenAuthenticationFilter;
 import org.molgenis.security.token.TokenAuthenticationProvider;
@@ -28,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyAuthoritiesMapper;
+import org.springframework.security.access.intercept.RunAsImplAuthenticationProvider;
 import org.springframework.security.access.vote.RoleHierarchyVoter;
 import org.springframework.security.access.vote.RoleVoter;
 import org.springframework.security.authentication.AnonymousAuthenticationProvider;
@@ -57,6 +61,12 @@ import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
+import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
+
 public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurerAdapter
 {
 	private static final String ANONYMOUS_AUTHENTICATION_KEY = "anonymousAuthenticationKey";
@@ -65,10 +75,10 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	private DataService dataService;
 
 	@Autowired
-	private DataSource dataSource;
+	private MolgenisUserService molgenisUserService;
 
 	@Autowired
-	private MolgenisUserService molgenisUserService;
+	private AppSettings appSettings;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception
@@ -88,8 +98,14 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		http.addFilterBefore(anonymousAuthFilter(), AnonymousAuthenticationFilter.class);
 		http.authenticationProvider(anonymousAuthenticationProvider());
 
-		http.addFilterBefore(tokenAuthenticationFilter(), MolgenisAnonymousAuthenticationFilter.class);
+		http.addFilterBefore(apiSessionExpirationFilter(), MolgenisAnonymousAuthenticationFilter.class);
 		http.authenticationProvider(tokenAuthenticationProvider());
+		
+		http.authenticationProvider(runAsAuthenticationProvider());
+
+		http.addFilterBefore(tokenAuthenticationFilter(), ApiSessionExpirationFilter.class);
+
+		http.addFilterBefore(googleAuthenticationProcessingFilter(), TokenAuthenticationFilter.class);
 
 		http.addFilterAfter(changePasswordFilter(), SwitchUserFilter.class);
 
@@ -97,67 +113,82 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 				.authorizeRequests();
 		configureUrlAuthorization(expressionInterceptUrlRegistry);
 
-		expressionInterceptUrlRegistry.antMatchers("/login").permitAll()
+		expressionInterceptUrlRegistry
 
-		.antMatchers("/logo/**").permitAll()
+				.antMatchers("/login").permitAll()
 
-		.antMatchers("/molgenis.R").permitAll()
+				.antMatchers(GOOGLE_AUTHENTICATION_URL).permitAll()
 
-		.antMatchers(AccountController.CHANGE_PASSWORD_URI).authenticated()
+				.antMatchers("/logo/**").permitAll()
 
-		.antMatchers("/account/**").permitAll()
+				.antMatchers("/molgenis.R").permitAll()
 
-		.antMatchers(PATTERN_CSS).permitAll()
+				.antMatchers(AccountController.CHANGE_PASSWORD_URI).authenticated()
 
-		.antMatchers(PATTERN_IMG).permitAll()
+				.antMatchers("/account/**").permitAll()
 
-		.antMatchers(PATTERN_JS).permitAll()
+				.antMatchers(PATTERN_CSS).permitAll()
 
-		.antMatchers(PATTERN_FONTS).permitAll()
+				.antMatchers(PATTERN_IMG).permitAll()
 
-		.antMatchers("/html/**").permitAll()
+				.antMatchers(PATTERN_JS).permitAll()
 
-		.antMatchers("/plugin/void/**").permitAll()
+				.antMatchers(PATTERN_FONTS).permitAll()
 
-		.antMatchers("/api/**").permitAll()
+				.antMatchers("/html/**").permitAll()
 
-		.antMatchers("/search").permitAll()
+				.antMatchers("/plugin/void/**").permitAll()
 
-		.antMatchers("/captcha").permitAll()
+				.antMatchers("/api/**").permitAll()
 
-		.antMatchers("/dataindexerstatus").authenticated()
+				.antMatchers("/search").permitAll()
 
-		.antMatchers("/permission/**/write/**").permitAll()
+				.antMatchers("/captcha").permitAll()
 
-		.antMatchers("/scripts/**/run").authenticated()
+				.antMatchers("/dataindexerstatus").authenticated()
 
-		.antMatchers("/files/**").permitAll()
+				.antMatchers("/permission/**/read/**").permitAll()
 
-		.anyRequest().denyAll().and()
+				.antMatchers("/permission/**/write/**").permitAll()
 
-		.httpBasic().authenticationEntryPoint(authenticationEntryPoint()).and()
+				.antMatchers("/scripts/**/run").authenticated()
 
-		.formLogin().loginPage("/login").failureUrl("/login?error").and()
+				.antMatchers("/files/**").permitAll()
 
-		.logout().addLogoutHandler((req, res, auth) -> {
-			if (req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
-			{
-				req.setAttribute("continueWithUnsupportedBrowser", true);
-			}
-		}).logoutSuccessHandler((req, res, auth) -> {
-			StringBuilder logoutSuccessUrl = new StringBuilder("/");
-			if (req.getAttribute("continueWithUnsupportedBrowser") != null)
-			{
-				logoutSuccessUrl.append("?continueWithUnsupportedBrowser=true");
-			}
-			SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
-			logoutSuccessHandler.setDefaultTargetUrl(logoutSuccessUrl.toString());
-			logoutSuccessHandler.onLogoutSuccess(req, res, auth);
-		})
+				.anyRequest().denyAll().and()
 
-		.and()
+				.httpBasic().authenticationEntryPoint(authenticationEntryPoint()).and()
 
-		.csrf().disable();
+				.formLogin().loginPage("/login").failureUrl("/login?error").and()
+
+				.logout().deleteCookies("JSESSIONID").addLogoutHandler((req, res, auth) -> {
+					if (req.getSession(false) != null
+							&& req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
+					{
+						req.setAttribute("continueWithUnsupportedBrowser", true);
+					}
+				}).logoutSuccessHandler((req, res, auth) -> {
+					StringBuilder logoutSuccessUrl = new StringBuilder("/");
+					if (req.getAttribute("continueWithUnsupportedBrowser") != null)
+					{
+						logoutSuccessUrl.append("?continueWithUnsupportedBrowser=true");
+					}
+					SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
+					logoutSuccessHandler.setDefaultTargetUrl(logoutSuccessUrl.toString());
+					logoutSuccessHandler.onLogoutSuccess(req, res, auth);
+				})
+
+				.and()
+
+				.csrf().disable();
+	}
+
+	@Bean
+	public AuthenticationProvider runAsAuthenticationProvider()
+	{
+		RunAsImplAuthenticationProvider provider = new RunAsImplAuthenticationProvider();
+		provider.setKey("Job Execution");
+		return provider;
 	}
 
 	protected abstract void configureUrlAuthorization(
@@ -196,6 +227,23 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	public Filter tokenAuthenticationFilter()
 	{
 		return new TokenAuthenticationFilter(tokenAuthenticationProvider());
+	}
+
+	@Bean
+	public GooglePublicKeysManager googlePublicKeysManager()
+	{
+		HttpTransport transport = new NetHttpTransport();
+		JsonFactory jsonFactory = new JacksonFactory();
+		return new GooglePublicKeysManager(transport, jsonFactory);
+	}
+
+	@Bean
+	public Filter googleAuthenticationProcessingFilter() throws Exception
+	{
+		GoogleAuthenticationProcessingFilter googleAuthenticationProcessingFilter = new GoogleAuthenticationProcessingFilter(
+				googlePublicKeysManager(), dataService, (MolgenisUserDetailsService) userDetailsService(), appSettings);
+		googleAuthenticationProcessingFilter.setAuthenticationManager(authenticationManagerBean());
+		return googleAuthenticationProcessingFilter;
 	}
 
 	@Bean
@@ -289,5 +337,11 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	public LoginUrlAuthenticationEntryPoint authenticationEntryPoint()
 	{
 		return new AjaxAwareLoginUrlAuthenticationEntryPoint("/login");
+	}
+
+	@Bean
+	public ApiSessionExpirationFilter apiSessionExpirationFilter()
+	{
+		return new ApiSessionExpirationFilter();
 	}
 }

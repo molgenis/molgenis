@@ -1,13 +1,18 @@
 package org.molgenis.data.transaction;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
@@ -19,14 +24,20 @@ public class TransactionLogRepositoryDecorator implements Repository
 
 	public TransactionLogRepositoryDecorator(Repository decorated, TransactionLogService transactionLogService)
 	{
-		this.decorated = decorated;
-		this.transactionLogService = transactionLogService;
+		this.decorated = requireNonNull(decorated);
+		this.transactionLogService = requireNonNull(transactionLogService);
 	}
 
 	@Override
 	public Iterator<Entity> iterator()
 	{
 		return decorated.iterator();
+	}
+
+	@Override
+	public Stream<Entity> stream(Fetch fetch)
+	{
+		return decorated.stream(fetch);
 	}
 
 	@Override
@@ -72,7 +83,7 @@ public class TransactionLogRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
 		return decorated.findAll(q);
 	}
@@ -90,9 +101,21 @@ public class TransactionLogRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
+	public Entity findOne(Object id, Fetch fetch)
+	{
+		return decorated.findOne(id, fetch);
+	}
+
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		return decorated.findAll(ids);
+	}
+
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
+	{
+		return decorated.findAll(ids, fetch);
 	}
 
 	@Override
@@ -106,22 +129,20 @@ public class TransactionLogRepositoryDecorator implements Repository
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
 		{
-			transactionLogService.checkLocks(getName(), MolgenisTransactionLogEntryMetaData.Type.UPDATE);
-			transactionLogService.logAndLock(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.UPDATE);
+			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.UPDATE);
 		}
 
 		decorated.update(entity);
 	}
 
 	@Override
-	public void update(Iterable<? extends Entity> records)
+	public void update(Stream<? extends Entity> entities)
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
 		{
-			transactionLogService.checkLocks(getName(), MolgenisTransactionLogEntryMetaData.Type.UPDATE);
-			transactionLogService.logAndLock(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.UPDATE);
+			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.UPDATE);
 		}
-		decorated.update(records);
+		decorated.update(entities);
 	}
 
 	@Override
@@ -129,19 +150,17 @@ public class TransactionLogRepositoryDecorator implements Repository
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
 		{
-			transactionLogService.checkLocks(getName(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
-			transactionLogService.logAndLock(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
+			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
 		}
 		decorated.delete(entity);
 	}
 
 	@Override
-	public void delete(Iterable<? extends Entity> entities)
+	public void delete(Stream<? extends Entity> entities)
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
 		{
-			transactionLogService.checkLocks(getName(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
-			transactionLogService.logAndLock(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
+			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
 		}
 		decorated.delete(entities);
 	}
@@ -151,19 +170,17 @@ public class TransactionLogRepositoryDecorator implements Repository
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
 		{
-			transactionLogService.checkLocks(getName(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
-			transactionLogService.logAndLock(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
+			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
 		}
 		decorated.deleteById(id);
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
 		{
-			transactionLogService.checkLocks(getName(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
-			transactionLogService.logAndLock(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
+			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
 		}
 		decorated.deleteById(ids);
 	}
@@ -173,8 +190,7 @@ public class TransactionLogRepositoryDecorator implements Repository
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
 		{
-			transactionLogService.checkLocks(getName(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
-			transactionLogService.logAndLock(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
+			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
 		}
 		decorated.deleteAll();
 	}
@@ -184,19 +200,17 @@ public class TransactionLogRepositoryDecorator implements Repository
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
 		{
-			transactionLogService.checkLocks(getName(), MolgenisTransactionLogEntryMetaData.Type.ADD);
-			transactionLogService.logAndLock(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.ADD);
+			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.ADD);
 		}
 		decorated.add(entity);
 	}
 
 	@Override
-	public Integer add(Iterable<? extends Entity> entities)
+	public Integer add(Stream<? extends Entity> entities)
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
 		{
-			transactionLogService.checkLocks(getName(), MolgenisTransactionLogEntryMetaData.Type.ADD);
-			transactionLogService.logAndLock(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.ADD);
+			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.ADD);
 		}
 		return decorated.add(entities);
 	}
@@ -213,4 +227,33 @@ public class TransactionLogRepositoryDecorator implements Repository
 		decorated.clearCache();
 	}
 
+	@Override
+	public void create()
+	{
+		decorated.create();
+	}
+
+	@Override
+	public void drop()
+	{
+		decorated.drop();
+	}
+
+	@Override
+	public void rebuildIndex()
+	{
+		decorated.rebuildIndex();
+	}
+
+	@Override
+	public void addEntityListener(EntityListener entityListener)
+	{
+		decorated.addEntityListener(entityListener);
+	}
+
+	@Override
+	public void removeEntityListener(EntityListener entityListener)
+	{
+		decorated.removeEntityListener(entityListener);
+	}
 }

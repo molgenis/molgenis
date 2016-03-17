@@ -1,11 +1,13 @@
 package org.molgenis.data.support;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
 
 import java.util.Arrays;
 import java.util.List;
 
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
@@ -57,11 +59,66 @@ public class QueryImplTest
 		QueryRule expectedRule1a = new QueryRule("field2", Operator.EQUALS, "value2");
 		QueryRule expectedRule1b1 = new QueryRule("field3", Operator.EQUALS, "value3");
 		QueryRule expectedRule1b2 = new QueryRule("field4", Operator.EQUALS, "value4");
-		QueryRule expectedRule1b = new QueryRule(Arrays.asList(expectedRule1b1, new QueryRule(Operator.OR),
-				expectedRule1b2));
-		QueryRule expectedRule2 = new QueryRule(Arrays.asList(expectedRule1a, new QueryRule(Operator.AND),
-				expectedRule1b));
+		QueryRule expectedRule1b = new QueryRule(
+				Arrays.asList(expectedRule1b1, new QueryRule(Operator.OR), expectedRule1b2));
+		QueryRule expectedRule2 = new QueryRule(
+				Arrays.asList(expectedRule1a, new QueryRule(Operator.AND), expectedRule1b));
 		assertEquals(q.getRules(), Arrays.asList(expectedRule1, new QueryRule(Operator.OR), expectedRule2));
+	}
+
+	@Test
+	public void setFetch()
+	{
+		Fetch fetch = new Fetch();
+		QueryImpl q = new QueryImpl();
+		q.setFetch(fetch);
+		assertEquals(fetch, q.getFetch());
+	}
+
+	@Test
+	public void fetch()
+	{
+		Fetch fetch = new QueryImpl().fetch();
+		assertFalse(fetch.iterator().hasNext());
+	}
+
+	@Test
+	public void fetchFetch()
+	{
+		Fetch fetch = new Fetch().field("field0");
+		assertEquals(fetch, new QueryImpl().fetch(fetch).getFetch());
+	}
+
+	@Test
+	public void equalsFetch()
+	{
+		QueryImpl q1 = new QueryImpl();
+		q1.fetch().field("field0");
+
+		QueryImpl q2 = new QueryImpl();
+		q2.fetch().field("field0");
+		assertEquals(q1, q2);
+	}
+
+	@Test
+	public void equalsFetchFalse()
+	{
+		QueryImpl q1 = new QueryImpl();
+		q1.fetch().field("field0");
+
+		QueryImpl q2 = new QueryImpl();
+		q2.fetch().field("field1");
+		assertEquals(q1, q2);
+	}
+
+	@Test
+	public void queryImplQueryFetch()
+	{
+		Query q1 = new QueryImpl();
+		q1.fetch().field("field0");
+
+		QueryImpl q2 = new QueryImpl(q1);
+		assertEquals(q1.getFetch(), q2.getFetch());
 	}
 
 	@Test

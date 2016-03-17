@@ -28,7 +28,7 @@
 	                        </tr>
 	                    </thead>
 	                    <tbody>
-	                        <#list entitiesMeta.iterator() as entityMeta>
+	                        <#list entitiesMeta as entityMeta>
 	                            <tr>
 	                                <td><#if entityMeta.label?has_content>${entityMeta.label?html}<#else>${entityMeta.name?html}</#if></td>
 	                                <td><input type="checkbox" name="datasets" value="${entityMeta.name?html}" checked></td>

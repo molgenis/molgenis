@@ -1,6 +1,6 @@
 package org.molgenis.ui.controller;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,10 +59,10 @@ public class FeedbackController extends AbstractStaticContentController
 			CaptchaService captchaService, JavaMailSender mailSender)
 	{
 		super(ID, URI);
-		this.molgenisUserService = checkNotNull(molgenisUserService);
-		this.appSettings = checkNotNull(appSettings);
-		this.captchaService = checkNotNull(captchaService);
-		this.mailSender = checkNotNull(mailSender);
+		this.molgenisUserService = requireNonNull(molgenisUserService);
+		this.appSettings = requireNonNull(appSettings);
+		this.captchaService = requireNonNull(captchaService);
+		this.mailSender = requireNonNull(mailSender);
 	}
 
 	/**

@@ -17,7 +17,7 @@
 						<#if targetAttribute.nillable>
 							<option <#if !categoryMapping.defaultValue?? >selected </#if> value="use-null-value"><em>None</em></option>
 						</#if>
-						<#list targetAttributeEntities.iterator() as targetEntity>
+						<#list targetAttributeEntities as targetEntity>
 							<option value="${targetEntity.getString(targetAttributeIdAttribute)?html}" 
 								<#if categoryMapping.defaultValue??>
 									<#if categoryMapping.defaultValue?string == targetEntity.getString(targetAttributeIdAttribute)>selected </#if>
@@ -42,7 +42,7 @@
 				</thead>
 				<tbody>
 				<#assign count = 0 />
-				<#list sourceAttributeEntities.iterator() as sourceEntity>
+				<#list sourceAttributeEntities as sourceEntity>
 					<#assign id = sourceEntity.getString(sourceAttributeIdAttribute)>
 					<tr id="${id?html}">
 						<td>${sourceEntity.get(sourceAttributeLabelAttribute)?html}</td>
@@ -57,7 +57,7 @@
 								<#-- if the key exists but the value doesn't, the value is null -->
 								<option value="use-null-value"<#if categoryMapping.map?keys?seq_contains(id) && !categoryMapping.map[id]?? > selected </#if>><em>None</em></option>
 							</#if>	
-							<#list targetAttributeEntities.iterator() as targetEntity>
+							<#list targetAttributeEntities as targetEntity>
 								<option <#if categoryMapping.map[id]?? >
 									<#if categoryMapping.map[id]=targetEntity.getString(targetAttributeIdAttribute)>selected </#if>
 									</#if>
@@ -81,7 +81,7 @@
 								<#if targetAttribute.nillable>
 									<option<#if !categoryMapping.nullValueUndefined && !categoryMapping.nullValue??> selected </#if> value="use-null-value"><em>None<em></option>
 								</#if>
-								<#list targetAttributeEntities.iterator() as targetEntity>
+								<#list targetAttributeEntities as targetEntity>
 									<option<#if categoryMapping.nullValue??>
 									<#if categoryMapping.nullValue=targetEntity.getString(targetAttributeIdAttribute)> selected </#if>
 									</#if> value="${targetEntity.get(targetAttributeIdAttribute)?html}">${targetEntity.get(targetAttributeLabelAttribute)?html}</option> 

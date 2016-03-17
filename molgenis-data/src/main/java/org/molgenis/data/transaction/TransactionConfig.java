@@ -27,12 +27,6 @@ public class TransactionConfig
 	}
 
 	@Bean
-	public LockMetaData lockMetaData()
-	{
-		return new LockMetaData(molgenisTransactionLogMetaData(), transactionLogBackend);
-	}
-
-	@Bean
 	public MolgenisTransactionLogEntryMetaData molgenisTransactionLogEntryMetaData()
 	{
 		return new MolgenisTransactionLogEntryMetaData(molgenisTransactionLogMetaData(), transactionLogBackend);
@@ -48,7 +42,7 @@ public class TransactionConfig
 	public TransactionLogService transactionLogService()
 	{
 		return new TransactionLogService(dataService, molgenisTransactionLogMetaData(),
-				molgenisTransactionLogEntryMetaData(), lockMetaData(), asyncTransactionLog());
+				molgenisTransactionLogEntryMetaData(), asyncTransactionLog());
 	}
 
 	@PostConstruct

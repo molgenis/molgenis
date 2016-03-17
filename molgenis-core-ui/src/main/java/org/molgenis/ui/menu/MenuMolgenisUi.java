@@ -1,6 +1,6 @@
 package org.molgenis.ui.menu;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import org.molgenis.ui.MolgenisUi;
 import org.molgenis.ui.MolgenisUiMenu;
@@ -13,7 +13,7 @@ public class MenuMolgenisUi implements MolgenisUi
 	@Autowired
 	public MenuMolgenisUi(MenuReaderService menuReaderService)
 	{
-		this.menuReaderService = checkNotNull(menuReaderService);
+		this.menuReaderService = requireNonNull(menuReaderService);
 	}
 
 	@Override

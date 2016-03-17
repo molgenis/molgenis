@@ -1,7 +1,7 @@
 package org.molgenis.data.validation;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -84,6 +84,18 @@ public class EntityAttributesValidator
 				case STRING:
 					violation = checkText(entity, attr, meta, MolgenisFieldTypes.STRING);
 					break;
+				case CATEGORICAL:
+				case XREF:
+					violation = checkXref(entity, attr, meta);
+					break;
+				case CATEGORICAL_MREF:
+				case FILE:
+				case MREF:
+					violation = checkMref(entity, attr, meta);
+					break;
+				case COMPOUND:
+					// no op
+					break;
 				default:
 					break;
 			}
@@ -95,6 +107,58 @@ public class EntityAttributesValidator
 		}
 
 		return violations;
+	}
+
+	private ConstraintViolation checkMref(Entity entity, AttributeMetaData attr, EntityMetaData meta)
+	{
+		Iterable<Entity> refEntities;
+		try
+		{
+			refEntities = entity.getEntities(attr.getName());
+		}
+		catch (Exception e)
+		{
+			return createConstraintViolation(entity, attr, meta, "Not a valid entity, expected an entity list.");
+		}
+		if (refEntities == null)
+		{
+			return createConstraintViolation(entity, attr, meta, "Not a valid entity, expected an entity list.");
+		}
+		for (Entity refEntity : refEntities)
+		{
+			if (refEntity == null)
+			{
+				return createConstraintViolation(entity, attr, meta, "Not a valid entity, null is not allowed");
+			}
+			if (!refEntity.getEntityMetaData().equals(attr.getRefEntity()))
+			{
+				return createConstraintViolation(entity, attr, meta, "Not a valid entity type.");
+			}
+		}
+		return null;
+	}
+
+	private ConstraintViolation checkXref(Entity entity, AttributeMetaData attr, EntityMetaData meta)
+	{
+		Entity refEntity;
+		try
+		{
+			refEntity = entity.getEntity(attr.getName());
+		}
+		catch (Exception e)
+		{
+			return createConstraintViolation(entity, attr, meta, "Not a valid entity.");
+		}
+
+		if (refEntity == null)
+		{
+			return null;
+		}
+		if (!refEntity.getEntityMetaData().equals(attr.getRefEntity()))
+		{
+			return createConstraintViolation(entity, attr, meta, "Not a valid entity type.");
+		}
+		return null;
 	}
 
 	private Set<ConstraintViolation> checkValidationExpressions(Entity entity, EntityMetaData meta)
@@ -217,9 +281,9 @@ public class EntityAttributesValidator
 
 		try
 		{
-			new URL(link);
+			new URI(link);
 		}
-		catch (MalformedURLException e)
+		catch (URISyntaxException e)
 		{
 			return createConstraintViolation(entity, attribute, meta, "Not a valid hyperlink.");
 		}
@@ -262,9 +326,8 @@ public class EntityAttributesValidator
 	{
 		Range range = attribute.getRange();
 		Long value = entity.getLong(attribute.getName());
-		if ((value != null)
-				&& ((range.getMin() != null && value < range.getMin()) || (range.getMax() != null && value > range
-						.getMax())))
+		if ((value != null) && ((range.getMin() != null && value < range.getMin())
+				|| (range.getMax() != null && value > range.getMax())))
 		{
 			return createConstraintViolation(entity, attribute, meta);
 		}
@@ -315,8 +378,8 @@ public class EntityAttributesValidator
 	private ConstraintViolation createConstraintViolation(Entity entity, AttributeMetaData attribute,
 			EntityMetaData meta)
 	{
-		String message = String.format("Invalid %s value '%s' for attribute '%s' of entity '%s'.", attribute
-				.getDataType().getEnumType().toString().toLowerCase(), entity.getString(attribute.getName()),
+		String message = String.format("Invalid %s value '%s' for attribute '%s' of entity '%s'.",
+				attribute.getDataType().getEnumType().toString().toLowerCase(), entity.getString(attribute.getName()),
 				attribute.getLabel(), meta.getName());
 
 		Range range = attribute.getRange();
@@ -331,17 +394,18 @@ public class EntityAttributesValidator
 			message += String.format("Value must be less than or equal to %d characters", maxLength);
 		}
 
-		return new ConstraintViolation(message, entity.getString(attribute.getName()), entity, attribute, meta, 0);
+		return new ConstraintViolation(message, entity.getString(attribute.getName()), entity, attribute, meta, null);
 	}
 
 	private ConstraintViolation createConstraintViolation(Entity entity, AttributeMetaData attribute,
 			EntityMetaData meta, String message)
 	{
-		String fullMessage = String.format("Invalid %s value '%s' for attribute '%s' of entity '%s'.", attribute
-				.getDataType().getEnumType().toString().toLowerCase(), entity.getString(attribute.getName()),
+		String fullMessage = String.format("Invalid %s value '%s' for attribute '%s' of entity '%s'.",
+				attribute.getDataType().getEnumType().toString().toLowerCase(), entity.getString(attribute.getName()),
 				attribute.getLabel(), meta.getName());
 		fullMessage += " " + message;
 
-		return new ConstraintViolation(fullMessage, entity.getString(attribute.getName()), entity, attribute, meta, 0);
+		return new ConstraintViolation(fullMessage, entity.getString(attribute.getName()), entity, attribute, meta,
+				null);
 	}
 }

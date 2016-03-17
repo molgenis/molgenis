@@ -3,6 +3,7 @@ package org.molgenis.data.support;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -23,7 +24,7 @@ public class BatchingQueryResultTest
 			int batchCount = 0;
 
 			@Override
-			protected Iterable<Entity> getBatch(Query q)
+			protected List<Entity> getBatch(Query q)
 			{
 				assertEquals(q.getOffset(), batchCount * batchSize);
 				assertEquals(q.getPageSize(), batchSize);

@@ -7,9 +7,8 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.ElasticSearchService;
+import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
 
 /**
@@ -85,7 +84,7 @@ public class MappingsBuilder
 
 		jsonBuilder.startObject("properties");
 
-		jsonBuilder.startObject(ElasticSearchService.CRUD_TYPE_FIELD_NAME);
+		jsonBuilder.startObject(ElasticsearchService.CRUD_TYPE_FIELD_NAME);
 		jsonBuilder.field("type", "string").field("index", "not_analyzed");
 		jsonBuilder.endObject();
 
@@ -173,10 +172,10 @@ public class MappingsBuilder
 				// disable norms for numeric fields
 				jsonBuilder.field("norms").startObject().field("enabled", false).endObject();
 				break;
-			case IMAGE:
-				throw new MolgenisDataException("Unsupported data type [" + dataType + "]");
 			case INT:
 				jsonBuilder.field("type", "integer");
+				// Fix sorting by using disk-based "fielddata" instead of in-memory "fielddata"
+				jsonBuilder.field("doc_values", true);
 				// disable norms for numeric fields
 				jsonBuilder.field("norms").startObject().field("enabled", false).endObject();
 				break;

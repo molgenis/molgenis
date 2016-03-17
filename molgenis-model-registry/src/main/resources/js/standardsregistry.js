@@ -185,6 +185,7 @@
 		$(document).on('click', '.details-btn', function() {
 			var id = $(this).closest('.package').data('id');
 			showPackageDetails(id);
+			return false;
 		});
 		
 		$(document).on('click', '#search-results-back-btn', function(){

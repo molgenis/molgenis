@@ -1,7 +1,10 @@
 package org.molgenis.data.annotation.entity.impl;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -17,8 +20,6 @@ import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-
-import com.google.common.base.Preconditions;
 
 /**
  * Base class for any {@link EntityAnnotator} that uses a {@link QueryCreator} to query the {@link DataService} or
@@ -44,7 +45,7 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 		this.sourceRepositoryName = sourceRepositoryName;
 		this.dataService = dataService;
 		this.resources = resources;
-		this.queryCreator = Preconditions.checkNotNull(queryCreator);
+		this.queryCreator = requireNonNull(queryCreator);
 		this.info = info;
 		this.cmdLineAnnotatorSettingsConfigurer = cmdLineAnnotatorSettingsConfigurer;
 	}
@@ -90,7 +91,14 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 		}
 		else
 		{
-			annotatationSourceEntities = dataService.findAll(sourceRepositoryName, q);
+			annotatationSourceEntities = new Iterable<Entity>()
+			{
+				@Override
+				public Iterator<Entity> iterator()
+				{
+					return dataService.findAll(sourceRepositoryName, q).iterator();
+				}
+			};
 		}
 		DefaultEntityMetaData meta = new DefaultEntityMetaData(entity.getEntityMetaData());
 		info.getOutputAttributes().forEach(meta::addAttributeMetaData);

@@ -1,36 +1,17 @@
 package org.molgenis.dataexplorer.controller;
 
-import static org.molgenis.dataexplorer.controller.DataExplorerController.ATTR_GALAXY_API_KEY;
-import static org.molgenis.dataexplorer.controller.DataExplorerController.ATTR_GALAXY_URL;
-import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URLDecoder;
-import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.AggregateResult;
+import com.google.gson.Gson;
+import freemarker.core.ParseException;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.Sort;
+import org.molgenis.data.annotation.meta.AnnotationJobExecution;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
@@ -45,7 +26,6 @@ import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
-import org.molgenis.util.GsonHttpMessageConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,10 +43,27 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
-import freemarker.core.ParseException;
+import static org.molgenis.dataexplorer.controller.DataExplorerController.ATTR_GALAXY_API_KEY;
+import static org.molgenis.dataexplorer.controller.DataExplorerController.ATTR_GALAXY_URL;
+import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
  * Controller class for the data explorer.
@@ -84,6 +81,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 	static final String ATTR_GALAXY_URL = "galaxyUrl";
 	static final String ATTR_GALAXY_API_KEY = "galaxyApiKey";
+	public static final String MOD_ANNOTATORS = "annotators";
+	public static final String MOD_ENTITIESREPORT = "entitiesreport";
+	public static final String MOD_DATA = "data";
 
 	@Autowired
 	private AppSettings appSettings;
@@ -106,6 +106,12 @@ public class DataExplorerController extends MolgenisPluginController
 	@Autowired
 	MenuManagerService menuManager;
 
+	@Autowired
+	private Gson gson;
+
+	@Autowired
+	private LanguageService languageService;
+
 	public DataExplorerController()
 	{
 		super(URI);
@@ -123,21 +129,13 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		boolean entityExists = false;
 		boolean hasEntityPermission = false;
-		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(dataService.getEntityNames(),
-				new Function<String, EntityMetaData>()
-				{
-					@Override
-					public EntityMetaData apply(String entityName)
-					{
-						return dataService.getEntityMetaData(entityName);
-					}
-				});
+		List<EntityMetaData> entitiesMeta = dataService.getEntityNames().map(dataService::getEntityMetaData)
+				.collect(Collectors.toList());
 		model.addAttribute("entitiesMeta", entitiesMeta);
 		if (selectedEntityName != null)
 		{
 			entityExists = dataService.hasRepository(selectedEntityName);
 			hasEntityPermission = molgenisPermissionService.hasPermissionOnEntity(selectedEntityName, Permission.COUNT);
-
 		}
 
 		if (!(entityExists && hasEntityPermission))
@@ -167,23 +165,42 @@ public class DataExplorerController extends MolgenisPluginController
 	public String getModule(@PathVariable("moduleId") String moduleId, @RequestParam("entity") String entityName,
 			Model model)
 	{
-		if (moduleId.equals("data"))
+		if (moduleId.equals(MOD_DATA))
 		{
 			model.addAttribute("genomicDataSettings", genomicDataSettings);
 			model.addAttribute("genomeEntities", getGenomeBrowserEntities());
 		}
-		else if (moduleId.equals("diseasematcher"))
-		{
-			// TODO replace disease matcher table with react table and remove attrs from model
-			model.addAttribute("tableEditable", false);
-			model.addAttribute("rowClickable", false);
-		}
-		else if (moduleId.equals("entitiesreport"))
+		else if (moduleId.equals(MOD_ENTITIESREPORT))
 		{
 			model.addAttribute("datasetRepository", dataService.getRepository(entityName));
 			model.addAttribute("viewName", dataExplorerSettings.getEntityReport(entityName));
 		}
+		else if (moduleId.equals(MOD_ANNOTATORS))
+		{
+			// throw exception rather than disable the tab, users can act on the message. Hiding the tab is less
+			// self-explanatory
+			if (!molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITEMETA))
+			{
+				throw new MolgenisDataAccessException("No " + Permission.WRITEMETA + " permission on entity ["
+						+ entityName + "], this permission is necessary run the annotators.");
+			}
+			Entity annotationRun = dataService.findOne(AnnotationJobExecution.ENTITY_NAME,
+					new QueryImpl().eq(AnnotationJobExecution.TARGET_NAME, entityName)
+							.sort(new Sort(AnnotationJobExecution.START_DATE, Sort.Direction.DESC)));
+			model.addAttribute("annotationRun", annotationRun);
+			model.addAttribute("entityName", entityName);
+		}
+
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
+	}
+
+	@RequestMapping(value = "/copy", method = GET)
+	@ResponseBody
+	public boolean showCopy(@RequestParam("entity") String entityName)
+	{
+		boolean showCopy = molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.READ)
+				&& dataService.getCapabilities(entityName).contains(RepositoryCapability.WRITABLE);
+		return showCopy;
 	}
 
 	/**
@@ -200,7 +217,6 @@ public class DataExplorerController extends MolgenisPluginController
 		boolean modAnnotators = dataExplorerSettings.getModAnnotators();
 		boolean modCharts = dataExplorerSettings.getModCharts();
 		boolean modData = dataExplorerSettings.getModData();
-		boolean modDiseaseMatcher = dataExplorerSettings.getModDiseaseMatcher();
 		boolean modReports = dataExplorerSettings.getModReports();
 
 		if (modAggregates)
@@ -218,11 +234,7 @@ public class DataExplorerController extends MolgenisPluginController
 			pluginPermission = Permission.COUNT;
 
 		ModulesConfigResponse modulesConfig = new ModulesConfigResponse();
-
-		String i18nLocale = appSettings.getLanguageCode();
-		Locale locale = new Locale(i18nLocale, i18nLocale);
-		ResourceBundle i18n = ResourceBundle.getBundle("i18n", locale);
-
+		ResourceBundle i18n = languageService.getBundle();
 		String aggregatesTitle = i18n.getString("dataexplorer_aggregates_title");
 
 		if (pluginPermission != null)
@@ -253,11 +265,6 @@ public class DataExplorerController extends MolgenisPluginController
 					{
 						modulesConfig.add(new ModuleConfig("annotators", "Annotators", "annotator-icon.png"));
 					}
-					if (modDiseaseMatcher)
-					{
-						modulesConfig
-								.add(new ModuleConfig("diseasematcher", "Disease Matcher", "diseasematcher-icon.png"));
-					}
 					if (modReports)
 					{
 						String modEntitiesReportName = dataExplorerSettings.getEntityReport(entityName);
@@ -285,8 +292,7 @@ public class DataExplorerController extends MolgenisPluginController
 	private Map<String, String> getGenomeBrowserEntities()
 	{
 		Map<String, String> genomeEntities = new HashMap<String, String>();
-		for (String entityName : dataService.getEntityNames())
-		{
+		dataService.getEntityNames().forEach(entityName -> {
 			EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
 			if (isGenomeBrowserEntity(entityMetaData))
 			{
@@ -297,7 +303,7 @@ public class DataExplorerController extends MolgenisPluginController
 					genomeEntities.put(entityMetaData.getName(), entityMetaData.getLabel());
 				}
 			}
-		}
+		});
 		return genomeEntities;
 	}
 
@@ -320,7 +326,7 @@ public class DataExplorerController extends MolgenisPluginController
 		// http://stackoverflow.com/a/9970672
 		dataRequestStr = URLDecoder.decode(dataRequestStr, "UTF-8");
 		LOG.info("Download request: [" + dataRequestStr + "]");
-		DataRequest dataRequest = new GsonHttpMessageConverter().getGson().fromJson(dataRequestStr, DataRequest.class);
+		DataRequest dataRequest = gson.fromJson(dataRequestStr, DataRequest.class);
 
 		String fileName = "";
 		ServletOutputStream outputStream = null;
@@ -378,107 +384,6 @@ public class DataExplorerController extends MolgenisPluginController
 		// store url and api key in session for subsequent galaxy export requests
 		model.addAttribute(ATTR_GALAXY_URL, galaxyUrl);
 		model.addAttribute(ATTR_GALAXY_API_KEY, galaxyApiKey);
-	}
-
-	@RequestMapping(value = "/aggregate", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-	@ResponseBody
-	public AggregateResult aggregate(@Valid @RequestBody AggregateRequest request)
-	{
-		String entityName = request.getEntityName();
-		String xAttributeName = request.getXAxisAttributeName();
-		String yAttributeName = request.getYAxisAttributeName();
-		String distinctAttributeName = getDistinctAttributeName(request);
-
-		if (StringUtils.isBlank(xAttributeName) && StringUtils.isBlank(yAttributeName))
-		{
-			throw new InputValidationException("Missing aggregate attribute");
-		}
-
-		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
-
-		AttributeMetaData xAttributeMeta = null;
-		if (StringUtils.isNotBlank(xAttributeName))
-		{
-			xAttributeMeta = entityMeta.getAttribute(xAttributeName);
-			if (xAttributeMeta == null)
-			{
-				throw new InputValidationException("Unknown attribute '" + xAttributeName + "'");
-			}
-
-			if (!xAttributeMeta.isAggregateable())
-			{
-				throw new InputValidationException("Attribute '" + xAttributeName + "' is not aggregateable");
-			}
-		}
-
-		AttributeMetaData yAttributeMeta = null;
-		if (StringUtils.isNotBlank(yAttributeName))
-		{
-			yAttributeMeta = entityMeta.getAttribute(yAttributeName);
-			if (yAttributeMeta == null)
-			{
-				throw new InputValidationException("Unknow attribute '" + yAttributeName + "'");
-			}
-
-			if (!yAttributeMeta.isAggregateable())
-			{
-				throw new InputValidationException("Attribute '" + yAttributeName + "' is not aggregateable");
-			}
-		}
-		AttributeMetaData distinctAttributeMeta = null;
-		if (StringUtils.isNotBlank(distinctAttributeName))
-		{
-			distinctAttributeMeta = entityMeta.getAttribute(distinctAttributeName);
-			if (distinctAttributeName == null)
-			{
-				throw new InputValidationException("Unknow attribute '" + distinctAttributeName + "'");
-			}
-		}
-
-		AggregateQueryImpl aggregateQuery = new AggregateQueryImpl().attrX(xAttributeMeta).attrY(yAttributeMeta)
-				.attrDistinct(distinctAttributeMeta).query(new QueryImpl(request.getQ()));
-		return dataService.aggregate(entityName, aggregateQuery);
-	}
-
-	/**
-	 * Retrieves the distinct attribute from the request, overriding it if the runtime property is set.
-	 * 
-	 * @param request
-	 *            the {@link AggregateRequest}
-	 * @return the name of the distinct attribute
-	 */
-	private String getDistinctAttributeName(AggregateRequest request)
-	{
-		String distinctAttributeName = request.getDistinctAttributeName();
-
-		// check if an override for attr name exists
-		String overrideDistinctAttributeName;
-
-		Map<String, String> distinctAttrOverrides = dataExplorerSettings.getAggregatesDistinctOverrides();
-		if (distinctAttrOverrides != null)
-		{
-			overrideDistinctAttributeName = distinctAttrOverrides.get(request.getEntityName());
-		}
-		else
-		{
-			overrideDistinctAttributeName = null;
-		}
-
-		if (overrideDistinctAttributeName != null)
-		{
-			if (distinctAttributeName != null)
-			{
-				LOG.info("[mod-aggregate] Overriding distinct attribute from request! Request specifies "
-						+ distinctAttributeName + ", data explorer setting specifies " + overrideDistinctAttributeName);
-			}
-			else
-			{
-				LOG.debug("[mod-aggregate] Using distinct attribute " + overrideDistinctAttributeName
-						+ " from data explorer setting");
-			}
-			return overrideDistinctAttributeName;
-		}
-		return distinctAttributeName;
 	}
 
 	/**

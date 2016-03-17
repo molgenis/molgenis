@@ -1,5 +1,7 @@
 package org.molgenis.data.examples;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.support.DefaultEntityMetaData;
 
@@ -14,7 +16,7 @@ public class UserMetaData extends DefaultEntityMetaData
 	private UserMetaData()
 	{
 		super(ENTITY_NAME);
-		addAttribute(USERNAME).setIdAttribute(true).setNillable(false);
+		addAttribute(USERNAME, ROLE_ID);
 		addAttribute(ACTIVE).setDataType(MolgenisFieldTypes.BOOL);
 	}
 

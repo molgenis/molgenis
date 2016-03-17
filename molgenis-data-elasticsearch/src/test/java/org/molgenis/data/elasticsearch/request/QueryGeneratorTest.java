@@ -2,6 +2,8 @@ package org.molgenis.data.elasticsearch.request;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator.DEFAULT_ANALYZER;
 import static org.testng.Assert.assertEquals;
 
@@ -18,6 +20,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisQueryException;
@@ -68,13 +71,13 @@ public class QueryGeneratorTest
 		searchRequestBuilder = mock(SearchRequestBuilder.class);
 
 		DefaultEntityMetaData refEntityMetaData = new DefaultEntityMetaData("ref_entity");
-		refEntityMetaData.addAttribute(idAttributeName).setIdAttribute(true).setUnique(true);
-		refEntityMetaData.addAttribute(refStringAttributeName).setLabelAttribute(true).setUnique(true);
+		refEntityMetaData.addAttribute(idAttributeName, ROLE_ID);
+		refEntityMetaData.addAttribute(refStringAttributeName, ROLE_LABEL).setUnique(true);
 		refEntityMetaData.addAttribute(refMrefAttributeName).setDataType(MolgenisFieldTypes.MREF).setNillable(true)
 				.setRefEntity(refEntityMetaData);
 
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("entity");
-		entityMetaData.addAttribute(idAttributeName).setIdAttribute(true).setUnique(true);
+		entityMetaData.addAttribute(idAttributeName, ROLE_ID);
 		entityMetaData.addAttribute(boolAttributeName).setDataType(MolgenisFieldTypes.BOOL);
 		entityMetaData.addAttribute(categoricalAttributeName).setDataType(MolgenisFieldTypes.CATEGORICAL)
 				.setRefEntity(refEntityMetaData);
@@ -82,9 +85,7 @@ public class QueryGeneratorTest
 				.setDataType(MolgenisFieldTypes.STRING);
 		DefaultAttributeMetaData compoundPart1Attribute = new DefaultAttributeMetaData(compoundPart1AttributeName)
 				.setDataType(MolgenisFieldTypes.STRING);
-		entityMetaData
-				.addAttribute(compoundAttributeName)
-				.setDataType(MolgenisFieldTypes.COMPOUND)
+		entityMetaData.addAttribute(compoundAttributeName).setDataType(MolgenisFieldTypes.COMPOUND)
 				.setAttributesMetaData(
 						Arrays.<AttributeMetaData> asList(compoundPart0Attribute, compoundPart1Attribute));
 		entityMetaData.addAttribute(dateAttributeName).setDataType(MolgenisFieldTypes.DATE);
@@ -116,34 +117,35 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(stringAttributeName).gt(value));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(stringAttributeName).gt(value));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
 	@Test
 	public void generateOneQueryRuleGreaterDate() throws ParseException
 	{
-		Date value = MolgenisDateFormat.getDateFormat().parse("2015-01-22");
+		String date = "2015-01-22";
+		Date value = MolgenisDateFormat.getDateFormat().parse(date);
 		Query q = new QueryImpl().gt(dateAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(dateAttributeName).gt(value.toString()));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(dateAttributeName).gt(date));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
 	@Test
 	public void generateOneQueryRuleGreaterDateTime() throws ParseException
 	{
-		Date value = MolgenisDateFormat.getDateFormat().parse("2015-05-22T11:12:13+0500");
+		Date value = MolgenisDateFormat.getDateTimeFormat().parse("2015-05-22T11:12:13+0500");
 		Query q = new QueryImpl().gt(dateTimeAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(dateTimeAttributeName).gt(value.toString()));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(dateTimeAttributeName).gt(DataConverter.toString(value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -155,8 +157,8 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(decimalAttributeName).gt(value));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(decimalAttributeName).gt(value));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -168,8 +170,8 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(intAttributeName).gt(value));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(intAttributeName).gt(value));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -181,8 +183,8 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(longAttributeName).gt(value));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(longAttributeName).gt(value));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -194,34 +196,35 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(stringAttributeName).gte(value));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(stringAttributeName).gte(value));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
 	@Test
 	public void generateOneQueryRuleGreaterEqualDate() throws ParseException
 	{
-		Date value = MolgenisDateFormat.getDateFormat().parse("2015-05-22");
+		String date = "2015-05-22";
+		Date value = MolgenisDateFormat.getDateFormat().parse(date);
 		Query q = new QueryImpl().ge(dateAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(dateAttributeName).gte(value.toString()));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(dateAttributeName).gte(date));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
 	@Test
 	public void generateOneQueryRuleGreaterEqualDateTime() throws ParseException
 	{
-		Date value = MolgenisDateFormat.getDateFormat().parse("2015-05-22T11:12:13+0500");
+		Date value = MolgenisDateFormat.getDateTimeFormat().parse("2015-05-22T11:12:13+0500");
 		Query q = new QueryImpl().ge(dateTimeAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(dateTimeAttributeName).gte(value.toString()));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(dateTimeAttributeName).gte(DataConverter.toString(value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -233,8 +236,8 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(decimalAttributeName).gte(value));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(decimalAttributeName).gte(value));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -246,8 +249,8 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(intAttributeName).gte(value));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(intAttributeName).gte(value));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -259,8 +262,8 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(longAttributeName).gte(value));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(longAttributeName).gte(value));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -272,34 +275,35 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(stringAttributeName).lte(value));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(stringAttributeName).lte(value));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
 	@Test
 	public void generateOneQueryRuleLesserEqualDate() throws ParseException
 	{
-		Date value = MolgenisDateFormat.getDateFormat().parse("2015-05-22");
+		String date = "2015-05-22";
+		Date value = MolgenisDateFormat.getDateFormat().parse(date);
 		Query q = new QueryImpl().le(dateAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(dateAttributeName).lte(value.toString()));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(dateAttributeName).lte(date));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
 	@Test
 	public void generateOneQueryRuleLesserEqualDateTime() throws ParseException
 	{
-		Date value = MolgenisDateFormat.getDateFormat().parse("2015-05-22T11:12:13+0500");
+		Date value = MolgenisDateFormat.getDateTimeFormat().parse("2015-05-22T11:12:13+0500");
 		Query q = new QueryImpl().le(dateTimeAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(dateTimeAttributeName).lte(value.toString()));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(dateTimeAttributeName).lte(DataConverter.toString(value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -311,8 +315,8 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(decimalAttributeName).lte(value));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(decimalAttributeName).lte(value));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -324,8 +328,8 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(intAttributeName).lte(value));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(intAttributeName).lte(value));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -337,8 +341,8 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(longAttributeName).lte(value));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(longAttributeName).lte(value));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -350,8 +354,8 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(stringAttributeName).lt(value));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(stringAttributeName).lt(value));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -365,7 +369,7 @@ public class QueryGeneratorTest
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
 				FilterBuilders.inFilter(boolAttributeName, new Object[]
-				{ Boolean.TRUE, Boolean.FALSE }));
+		{ Boolean.TRUE, Boolean.FALSE }));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -377,13 +381,11 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(
-				QueryBuilders.matchAllQuery(),
-				FilterBuilders.nestedFilter(
-						categoricalAttributeName,
-						FilterBuilders.inFilter(categoricalAttributeName + '.' + idAttributeName + '.'
-								+ MappingsBuilder.FIELD_NOT_ANALYZED, new Object[]
-						{ "id0", "id1", "id2" })));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.nestedFilter(categoricalAttributeName, FilterBuilders.inFilter(
+						categoricalAttributeName + '.' + idAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED,
+						new Object[]
+		{ "id0", "id1", "id2" })));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -402,13 +404,11 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(
-				QueryBuilders.matchAllQuery(),
-				FilterBuilders.nestedFilter(
-						categoricalAttributeName,
-						FilterBuilders.inFilter(categoricalAttributeName + '.' + idAttributeName + '.'
-								+ MappingsBuilder.FIELD_NOT_ANALYZED, new Object[]
-						{ "id0", "id1", "id2" })));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.nestedFilter(categoricalAttributeName, FilterBuilders.inFilter(
+						categoricalAttributeName + '.' + idAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED,
+						new Object[]
+		{ "id0", "id1", "id2" })));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -424,7 +424,7 @@ public class QueryGeneratorTest
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
 				FilterBuilders.inFilter(dateAttributeName, new Object[]
-				{ date1, date2 }));
+		{ date1, date2 }));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -440,7 +440,7 @@ public class QueryGeneratorTest
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
 				FilterBuilders.inFilter(dateTimeAttributeName, new Object[]
-				{ date1, date2 }));
+		{ date1, date2 }));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -456,7 +456,7 @@ public class QueryGeneratorTest
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
 				FilterBuilders.inFilter(decimalAttributeName, new Object[]
-				{ double1, double2 }));
+		{ double1, double2 }));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -472,7 +472,7 @@ public class QueryGeneratorTest
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
 				FilterBuilders.inFilter(emailAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, new Object[]
-				{ value1, value2 }));
+		{ value1, value2 }));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -488,7 +488,7 @@ public class QueryGeneratorTest
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
 				FilterBuilders.inFilter(enumAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, new Object[]
-				{ value1, value2 }));
+		{ value1, value2 }));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -504,7 +504,7 @@ public class QueryGeneratorTest
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
 				FilterBuilders.inFilter(htmlAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, new Object[]
-				{ value1, value2 }));
+		{ value1, value2 }));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -520,7 +520,7 @@ public class QueryGeneratorTest
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
 				FilterBuilders.inFilter(hyperlinkAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, new Object[]
-				{ value1, value2 }));
+		{ value1, value2 }));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -536,7 +536,7 @@ public class QueryGeneratorTest
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
 				FilterBuilders.inFilter(intAttributeName, new Object[]
-				{ value1, value2 }));
+		{ value1, value2 }));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -552,7 +552,7 @@ public class QueryGeneratorTest
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
 				FilterBuilders.inFilter(longAttributeName, new Object[]
-				{ value1, value2 }));
+		{ value1, value2 }));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -571,13 +571,12 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(
-				QueryBuilders.matchAllQuery(),
-				FilterBuilders.nestedFilter(
-						mrefAttributeName,
-						FilterBuilders.inFilter(mrefAttributeName + '.' + idAttributeName + '.'
-								+ MappingsBuilder.FIELD_NOT_ANALYZED, new Object[]
-						{ "id0", "id1", "id2" })));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.nestedFilter(mrefAttributeName,
+						FilterBuilders.inFilter(
+								mrefAttributeName + '.' + idAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED,
+								new Object[]
+		{ "id0", "id1", "id2" })));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -589,13 +588,12 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(
-				QueryBuilders.matchAllQuery(),
-				FilterBuilders.nestedFilter(
-						mrefAttributeName,
-						FilterBuilders.inFilter(mrefAttributeName + '.' + idAttributeName + '.'
-								+ MappingsBuilder.FIELD_NOT_ANALYZED, new Object[]
-						{ "id0", "id1", "id2" })));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.nestedFilter(mrefAttributeName,
+						FilterBuilders.inFilter(
+								mrefAttributeName + '.' + idAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED,
+								new Object[]
+		{ "id0", "id1", "id2" })));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -611,7 +609,7 @@ public class QueryGeneratorTest
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
 				FilterBuilders.inFilter(scriptAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, new Object[]
-				{ value1, value2 }));
+		{ value1, value2 }));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -627,7 +625,7 @@ public class QueryGeneratorTest
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
 				FilterBuilders.inFilter(stringAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, new Object[]
-				{ value1, value2 }));
+		{ value1, value2 }));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -643,7 +641,7 @@ public class QueryGeneratorTest
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
 				FilterBuilders.inFilter(textAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, new Object[]
-				{ value1, value2 }));
+		{ value1, value2 }));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -655,13 +653,12 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(
-				QueryBuilders.matchAllQuery(),
-				FilterBuilders.nestedFilter(
-						xrefAttributeName,
-						FilterBuilders.inFilter(xrefAttributeName + '.' + idAttributeName + '.'
-								+ MappingsBuilder.FIELD_NOT_ANALYZED, new Object[]
-						{ "id0", "id1", "id2" })));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.nestedFilter(xrefAttributeName,
+						FilterBuilders.inFilter(
+								xrefAttributeName + '.' + idAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED,
+								new Object[]
+		{ "id0", "id1", "id2" })));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -680,39 +677,39 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(
-				QueryBuilders.matchAllQuery(),
-				FilterBuilders.nestedFilter(
-						xrefAttributeName,
-						FilterBuilders.inFilter(xrefAttributeName + '.' + idAttributeName + '.'
-								+ MappingsBuilder.FIELD_NOT_ANALYZED, new Object[]
-						{ "id0", "id1", "id2" })));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.nestedFilter(xrefAttributeName,
+						FilterBuilders.inFilter(
+								xrefAttributeName + '.' + idAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED,
+								new Object[]
+		{ "id0", "id1", "id2" })));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
 	@Test
 	public void generateOneQueryRuleLesserDate() throws ParseException
 	{
-		Date value = MolgenisDateFormat.getDateFormat().parse("2015-05-22");
+		String date = "2015-05-22";
+		Date value = MolgenisDateFormat.getDateFormat().parse(date);
 		Query q = new QueryImpl().lt(dateAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(dateAttributeName).lt(value.toString()));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(dateAttributeName).lt(date));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
 	@Test
 	public void generateOneQueryRuleLesserDateTime() throws ParseException
 	{
-		Date value = MolgenisDateFormat.getDateFormat().parse("2015-05-22T11:12:13+0500");
+		Date value = MolgenisDateFormat.getDateTimeFormat().parse("2015-05-22T11:12:13+0500");
 		Query q = new QueryImpl().lt(dateTimeAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(dateTimeAttributeName).lt(value.toString()));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(dateTimeAttributeName).lt(DataConverter.toString(value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -724,8 +721,8 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(decimalAttributeName).lt(value));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(decimalAttributeName).lt(value));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -737,8 +734,8 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(intAttributeName).lt(value));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(intAttributeName).lt(value));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -750,8 +747,8 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(longAttributeName).lt(value));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(longAttributeName).lt(value));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -787,9 +784,9 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.matchQuery(
-				compoundPart0AttributeName + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, value).analyzer(
-				DEFAULT_ANALYZER);
+		QueryBuilder expectedQuery = QueryBuilders
+				.matchQuery(compoundPart0AttributeName + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, value)
+				.analyzer(DEFAULT_ANALYZER);
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -825,8 +822,9 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.matchQuery(
-				emailAttributeName + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, value).analyzer(DEFAULT_ANALYZER);
+		QueryBuilder expectedQuery = QueryBuilders
+				.matchQuery(emailAttributeName + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, value)
+				.analyzer(DEFAULT_ANALYZER);
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -838,8 +836,9 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.matchQuery(
-				enumAttributeName + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, value).analyzer(DEFAULT_ANALYZER);
+		QueryBuilder expectedQuery = QueryBuilders
+				.matchQuery(enumAttributeName + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, value)
+				.analyzer(DEFAULT_ANALYZER);
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -859,8 +858,9 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.matchQuery(
-				hyperlinkAttributeName + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, value).analyzer(DEFAULT_ANALYZER);
+		QueryBuilder expectedQuery = QueryBuilders
+				.matchQuery(hyperlinkAttributeName + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, value)
+				.analyzer(DEFAULT_ANALYZER);
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -904,8 +904,9 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.matchQuery(
-				stringAttributeName + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, value).analyzer(DEFAULT_ANALYZER);
+		QueryBuilder expectedQuery = QueryBuilders
+				.matchQuery(stringAttributeName + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, value)
+				.analyzer(DEFAULT_ANALYZER);
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -948,12 +949,9 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(
-				QueryBuilders.matchAllQuery(),
-				FilterBuilders.nestedFilter(
-						categoricalAttributeName,
-						FilterBuilders.termFilter(categoricalAttributeName + ".xid."
-								+ MappingsBuilder.FIELD_NOT_ANALYZED, value)));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.nestedFilter(categoricalAttributeName, FilterBuilders
+						.termFilter(categoricalAttributeName + ".xid." + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -973,9 +971,8 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders
-				.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders.termFilter(compoundPart0AttributeName
-						+ '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
+				.termFilter(compoundPart0AttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -988,20 +985,20 @@ public class QueryGeneratorTest
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
-				FilterBuilders.termFilter(dateAttributeName, value));
+				FilterBuilders.termFilter(dateAttributeName, "2015-01-15"));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
 	@Test
 	public void generateOneQueryRuleEqualsDateTime() throws ParseException
 	{
-		Date value = MolgenisDateFormat.getDateFormat().parse("2015-05-22T11:12:13+0500");
+		Date value = MolgenisDateFormat.getDateTimeFormat().parse("2015-05-22T11:12:13+0500");
 		Query q = new QueryImpl().eq(dateTimeAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
-				FilterBuilders.termFilter(dateTimeAttributeName, value));
+				FilterBuilders.termFilter(dateTimeAttributeName, MolgenisDateFormat.getDateTimeFormat().format(value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1151,10 +1148,9 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(
-				QueryBuilders.matchAllQuery(),
-				FilterBuilders.nestedFilter(xrefAttributeName, FilterBuilders.termFilter(xrefAttributeName + ".xid."
-						+ MappingsBuilder.FIELD_NOT_ANALYZED, value)));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.nestedFilter(xrefAttributeName, FilterBuilders
+						.termFilter(xrefAttributeName + ".xid." + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1166,9 +1162,8 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(
-				QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
-						FilterBuilders.termFilter(boolAttributeName, value)));
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(QueryBuilders
+				.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders.termFilter(boolAttributeName, value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1182,13 +1177,13 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(
-				QueryBuilders.filteredQuery(
-						QueryBuilders.matchAllQuery(),
-						FilterBuilders.nestedFilter(
-								categoricalAttributeName,
-								FilterBuilders.termFilter(categoricalAttributeName + ".xid."
-										+ MappingsBuilder.FIELD_NOT_ANALYZED, value))));
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery()
+				.mustNot(
+						QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+								FilterBuilders.nestedFilter(categoricalAttributeName,
+										FilterBuilders.termFilter(
+												categoricalAttributeName + ".xid." + MappingsBuilder.FIELD_NOT_ANALYZED,
+												value))));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1208,9 +1203,9 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(
-				QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders.termFilter(
-						compoundPart0AttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery()
+				.mustNot(QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
+						.termFilter(compoundPart0AttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1222,23 +1217,23 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(
-				QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
-						FilterBuilders.termFilter(dateAttributeName, value)));
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(QueryBuilders.filteredQuery(
+				QueryBuilders.matchAllQuery(),
+				FilterBuilders.termFilter(dateAttributeName, MolgenisDateFormat.getDateFormat().format(value))));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
 	@Test
 	public void generateOneQueryRuleNotEqualsDateTime() throws ParseException
 	{
-		Date value = MolgenisDateFormat.getDateFormat().parse("2015-05-22T11:12:13+0500");
+		Date value = MolgenisDateFormat.getDateTimeFormat().parse("2015-05-22T11:12:13+0500");
 		Query q = new QueryImpl().not().eq(dateTimeAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(
-				QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
-						FilterBuilders.termFilter(dateTimeAttributeName, value)));
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery()
+				.mustNot(QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
+						.termFilter(dateTimeAttributeName, MolgenisDateFormat.getDateTimeFormat().format(value))));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1250,9 +1245,8 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(
-				QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
-						FilterBuilders.termFilter(dateTimeAttributeName, value)));
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(QueryBuilders
+				.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders.termFilter(dateTimeAttributeName, value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1264,10 +1258,9 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.boolQuery()
-				.mustNot(
-						QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders.termFilter(
-								emailAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(QueryBuilders.filteredQuery(
+				QueryBuilders.matchAllQuery(),
+				FilterBuilders.termFilter(emailAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1279,10 +1272,9 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.boolQuery()
-				.mustNot(
-						QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders.termFilter(
-								enumAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(QueryBuilders.filteredQuery(
+				QueryBuilders.matchAllQuery(),
+				FilterBuilders.termFilter(enumAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1294,10 +1286,9 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.boolQuery()
-				.mustNot(
-						QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders.termFilter(
-								htmlAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(QueryBuilders.filteredQuery(
+				QueryBuilders.matchAllQuery(),
+				FilterBuilders.termFilter(htmlAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1309,9 +1300,9 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(
-				QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders.termFilter(
-						hyperlinkAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(QueryBuilders.filteredQuery(
+				QueryBuilders.matchAllQuery(),
+				FilterBuilders.termFilter(hyperlinkAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1323,9 +1314,8 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(
-				QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
-						FilterBuilders.termFilter(intAttributeName, value)));
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(QueryBuilders
+				.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders.termFilter(intAttributeName, value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1337,9 +1327,8 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(
-				QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
-						FilterBuilders.termFilter(longAttributeName, value)));
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(QueryBuilders
+				.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders.termFilter(longAttributeName, value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1357,9 +1346,9 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(
-				QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders.termFilter(
-						scriptAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(QueryBuilders.filteredQuery(
+				QueryBuilders.matchAllQuery(),
+				FilterBuilders.termFilter(scriptAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1371,9 +1360,9 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(
-				QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders.termFilter(
-						stringAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(QueryBuilders.filteredQuery(
+				QueryBuilders.matchAllQuery(),
+				FilterBuilders.termFilter(stringAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1385,10 +1374,9 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.boolQuery()
-				.mustNot(
-						QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders.termFilter(
-								textAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(QueryBuilders.filteredQuery(
+				QueryBuilders.matchAllQuery(),
+				FilterBuilders.termFilter(textAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1402,13 +1390,9 @@ public class QueryGeneratorTest
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
-		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(
-				QueryBuilders.filteredQuery(
-						QueryBuilders.matchAllQuery(),
-						FilterBuilders.nestedFilter(
-								xrefAttributeName,
-								FilterBuilders.termFilter(xrefAttributeName + ".xid."
-										+ MappingsBuilder.FIELD_NOT_ANALYZED, value))));
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(QueryBuilders.filteredQuery(
+				QueryBuilders.matchAllQuery(), FilterBuilders.nestedFilter(xrefAttributeName, FilterBuilders
+						.termFilter(xrefAttributeName + ".xid." + MappingsBuilder.FIELD_NOT_ANALYZED, value))));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1422,8 +1406,8 @@ public class QueryGeneratorTest
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(intAttributeName).gte(3).lte(9));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(intAttributeName).gte(3).lte(9));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 
@@ -1437,8 +1421,8 @@ public class QueryGeneratorTest
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
 
-		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-				.rangeFilter(longAttributeName).gte(3).lte(9));
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.rangeFilter(longAttributeName).gte(3).lte(9));
 		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
 	}
 

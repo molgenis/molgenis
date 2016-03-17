@@ -1,6 +1,7 @@
 package org.molgenis.ontology.core.service.impl;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,14 +23,14 @@ public class OntologyServiceImpl implements OntologyService
 	@Autowired
 	public OntologyServiceImpl(OntologyRepository ontologyRepository, OntologyTermRepository ontologyTermRepository)
 	{
-		this.ontologyRepository = checkNotNull(ontologyRepository);
-		this.ontologyTermRepository = checkNotNull(ontologyTermRepository);
+		this.ontologyRepository = requireNonNull(ontologyRepository);
+		this.ontologyTermRepository = requireNonNull(ontologyTermRepository);
 	}
 
 	@Override
 	public List<Ontology> getOntologies()
 	{
-		return Lists.newArrayList(ontologyRepository.getOntologies());
+		return ontologyRepository.getOntologies().collect(toList());
 	}
 
 	@Override

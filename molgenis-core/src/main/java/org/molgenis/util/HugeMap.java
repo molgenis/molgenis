@@ -14,44 +14,50 @@ import org.mapdb.DBMaker;
 
 public class HugeMap<K, V> implements Map<K, V>, Closeable
 {
-	private static final int THRESHOLD = 10000;
+	protected static final int THRESHOLD = 10000;
 	private DB mapDB;
-	private Map<K, V> map = new HashMap<>();
+	private Map<K, V> map;
+	private final Map<K, V> hashMap = new HashMap<>();
 
 	@Override
 	public int size()
 	{
+		if (map == null) return hashMap.size();
 		return map.size();
 	}
 
 	@Override
 	public boolean isEmpty()
 	{
+		if (map == null) return hashMap.isEmpty();
 		return map.isEmpty();
 	}
 
 	@Override
 	public boolean containsKey(Object key)
 	{
+		if (map == null) return hashMap.containsKey(key);
 		return map.containsKey(key);
 	}
 
 	@Override
 	public boolean containsValue(Object value)
 	{
+		if (map == null) return hashMap.containsValue(value);
 		return map.containsValue(value);
 	}
 
 	@Override
 	public V get(Object key)
 	{
+		if (map == null) return hashMap.get(key);
 		return map.get(key);
 	}
 
 	@Override
 	public V put(K key, V value)
 	{
-		if (map.size() == THRESHOLD)
+		if (hashMap.size() == THRESHOLD)
 		{
 			File dbFile;
 			try
@@ -63,10 +69,15 @@ public class HugeMap<K, V> implements Map<K, V>, Closeable
 				throw new UncheckedIOException(e);
 			}
 
-			Map<K, V> temp = new HashMap<>(map);
 			mapDB = DBMaker.newFileDB(dbFile).deleteFilesAfterClose().transactionDisable().make();
 			map = mapDB.createHashMap("map").make();
-			map.putAll(temp);
+			map.putAll(hashMap);
+			hashMap.clear();
+		}
+
+		if (map == null)
+		{
+			return hashMap.put(key, value);
 		}
 
 		return map.put(key, value);
@@ -75,36 +86,47 @@ public class HugeMap<K, V> implements Map<K, V>, Closeable
 	@Override
 	public V remove(Object key)
 	{
+		if (map == null) return hashMap.remove(key);
 		return map.remove(key);
 	}
 
 	@Override
 	public void putAll(Map<? extends K, ? extends V> m)
 	{
-		map.putAll(m);
+		m.forEach((k, v) -> put(k, v));
 	}
 
 	@Override
 	public void clear()
 	{
-		map.clear();
+		if (map == null)
+		{
+			hashMap.clear();
+		}
+		else
+		{
+			map.clear();
+		}
 	}
 
 	@Override
 	public Set<K> keySet()
 	{
+		if (map == null) return hashMap.keySet();
 		return map.keySet();
 	}
 
 	@Override
 	public Collection<V> values()
 	{
+		if (map == null) return hashMap.values();
 		return map.values();
 	}
 
 	@Override
 	public Set<java.util.Map.Entry<K, V>> entrySet()
 	{
+		if (map == null) return hashMap.entrySet();
 		return map.entrySet();
 	}
 
@@ -115,12 +137,6 @@ public class HugeMap<K, V> implements Map<K, V>, Closeable
 		{
 			mapDB.close();
 		}
-	}
-
-	@Override
-	public String toString()
-	{
-		return new HashMap<K, V>(this.map).toString();
 	}
 
 }

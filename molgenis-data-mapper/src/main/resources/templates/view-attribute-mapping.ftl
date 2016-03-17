@@ -15,9 +15,6 @@
 
 <@header css js/>
 
-<script src="<@resource_href "/js/ace/src-min-noconflict/ace.js"/>" type="text/javascript" charset="utf-8"></script>
-<script src="<@resource_href "/js/ace/src-min-noconflict/ext-language_tools.js"/>" type="text/javascript" charset="utf-8"></script>
-
 <div class="row">
 	<div class="col-md-12">
 		<#-- Hidden fields containing information needed for ajax requests -->
@@ -26,7 +23,7 @@
 		<input id="source" type="hidden" name="source" value="${entityMapping.sourceEntityMetaData.name?html}"/>
 		<input id="targetAttribute" type="hidden" name="targetAttribute" value="${attributeMapping.targetAttributeMetaData.name?html}"/>
 		<input id="targetAttributeType" type="hidden" name="targetAttributeType" value="${attributeMapping.targetAttributeMetaData.dataType?html}"/>
-		<input id="sourceAttributeSize" type="hidden" value="${entityMapping.sourceEntityMetaData.attributes?size?html}"/>
+		<input id="sourceAttributeSize" type="hidden" value="${sourceAttributesSize?html}"/>
 		<input id="dataExplorerUri" type="hidden" value="${dataExplorerUri?html}"/>
 	</div>
 </div>
@@ -99,10 +96,12 @@
 				<td class="td-align-top">
 					<#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical" && (categories)?has_content>
 						<#assign refEntityMetaData = attributeMapping.targetAttributeMetaData.refEntity>
-						<#list categories.iterator() as category>
+						<#list categories as category>
 							<#list refEntityMetaData.attributes as attribute>
 								<#assign attributeName = attribute.name>
-									${category[attributeName]} <#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+								<#if (category[attributeName])??>	
+									 ${category[attributeName]?string}<#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+								</#if>
 							</#list>
 							</br>
 						</#list>
@@ -131,7 +130,7 @@
 					<form>
 						<div class="form-group">
 				  			<div class="input-group">
-								<input id="attribute-search-field" type="text" class="form-control" placeholder="Search all ${entityMapping.sourceEntityMetaData.attributes?size?html} attributes from ${entityMapping.sourceEntityMetaData.name?html}">
+								<input id="attribute-search-field" type="text" class="form-control" placeholder="Search all ${sourceAttributesSize?html} attributes from ${entityMapping.sourceEntityMetaData.name?html}">
 								<span class="input-group-btn">
 									<button id="attribute-search-field-button" type="button" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
 								</span>
