@@ -34,15 +34,12 @@ public class AnnotatorImpl extends QueryAnnotatorImpl implements EntityAnnotator
 	@Override
 	protected void processQueryResults(Entity entity, Iterable<Entity> annotationSourceEntities, Entity resultEntity)
 	{
-		if (resultFilter != null)
+		Optional<Entity> filteredResult = resultFilter.filterResults(annotationSourceEntities, entity);
+		if (filteredResult.isPresent())
 		{
-			Optional<Entity> filteredResult = resultFilter.filterResults(annotationSourceEntities, entity);
-			if (filteredResult.isPresent())
+			for (AttributeMetaData attr : getInfo().getOutputAttributes())
 			{
-				for (AttributeMetaData attr : getInfo().getOutputAttributes())
-				{
-					resultEntity.set(attr.getName(), getResourceAttributeValue(attr, filteredResult.get()));
-				}
+				resultEntity.set(attr.getName(), getResourceAttributeValue(attr, filteredResult.get()));
 			}
 		}
 	}
