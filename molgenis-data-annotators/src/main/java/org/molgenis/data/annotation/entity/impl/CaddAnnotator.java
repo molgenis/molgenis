@@ -93,7 +93,7 @@ public class CaddAnnotator
 						+ "causal variation in both research and clinical settings. (source: http://cadd.gs.washington.edu/info)",
 				attributes);
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(CADD_TABIX_RESOURCE, caddInfo, new LocusQueryCreator(),
-				new MultiAllelicResultFilter(attributes), dataService, resources,
+				new MultiAllelicResultFilter(attributes, true), dataService, resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(CaddAnnotatorSettings.Meta.CADD_LOCATION,
 						caddAnnotatorSettings));
 
