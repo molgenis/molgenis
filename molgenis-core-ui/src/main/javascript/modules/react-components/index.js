@@ -4,6 +4,8 @@
  * 
  * @module
  */
+import React from 'react'
+
 import mixin from './mixin';
 import wrapper from './wrapper';
 
@@ -33,6 +35,7 @@ import RangeSlider from './RangeSlider';
 import SelectBox from './SelectBox';
 import Spinner from './Spinner';
 import Table from './Table';
+import ConfirmClick from './ConfirmClick';
 import TextArea from './TextArea';
 import ProgressBar from './ProgressBar';
 import FileIngestPlugin from './FileIngestPlugin';
@@ -69,5 +72,6 @@ export default {
 	'TextArea' : TextArea,
 	'ProgressBar' : ProgressBar,
 	'jobs': jobs,
-	'FileIngestPlugin' : FileIngestPlugin
+	'FileIngestPlugin' : FileIngestPlugin,
+	'ConfirmClick': ConfirmClick
 };
