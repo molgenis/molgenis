@@ -84,7 +84,10 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query>
 		String symbol = node.getOperator().getSymbol();
 		List<String> values = node.getArguments();
 		switch (symbol)
-		{
+		{	case "=notlike=":
+				String notLikeValue = values.get(0);
+				q.not().like(attrName, notLikeValue);
+				break;
 			case "=q=":
 				String searchValue = values.get(0);
 				if (attrName.equals("*"))
