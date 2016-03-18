@@ -86,7 +86,9 @@ public class TabixRepositoryTest
 						newEntity("1", 100, "C", "A", 2.102, 43.2), newEntity("2", 200, "A", "T", 2.0, 3.012),
 						newEntity("2", 200, "A", "G", -2.30, 20.2), newEntity("3", 300, "G", "A", 0.2, 23.1),
 						newEntity("3", 300, "G", "T", -2.4, 0.123), newEntity("3", 300, "G", "X", -0.002, 2.3),
-						newEntity("3", 300, "G", "C", 0.5, 14.5)));
+						newEntity("3", 300, "G", "C", 0.5, 14.5), newEntity("3", 300, "GC", "A", 1.2, 24.1),
+						newEntity("3", 300, "GC", "T", -3.4, 1.123), newEntity("3", 300, "C", "GX", -1.002, 3.3),
+						newEntity("3", 300, "C", "GC", 1.5, 15.5)));
 	}
 
 	private Entity newEntity(String chrom, long pos, String ref, String alt, double cadd, double caddScaled)
