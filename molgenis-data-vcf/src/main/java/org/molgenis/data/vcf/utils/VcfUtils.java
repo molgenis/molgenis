@@ -1,6 +1,8 @@
 package org.molgenis.data.vcf.utils;
 
+import static com.google.common.base.Joiner.on;
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.collect.Iterables.transform;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.molgenis.data.vcf.VcfRepository.ALT;
@@ -286,7 +288,6 @@ public class VcfUtils
 			// print INFO lines for stuff to be annotated
 			if (!annotatedBefore)
 			{
-
 				for (AttributeMetaData infoAttributeMetaData : getAtomicAttributesFromList(infoFields))
 				{
 					if (attributesToInclude.isEmpty() || attributesToInclude.contains(infoAttributeMetaData.getName()))
@@ -489,9 +490,11 @@ public class VcfUtils
 
 	private static String attributeMetaDataToInfoField(AttributeMetaData infoAttributeMetaData)
 	{
+		String attributeName = infoAttributeMetaData.getName();
+
 		StringBuilder sb = new StringBuilder();
 		sb.append("##INFO=<ID=");
-		sb.append(infoAttributeMetaData.getName());
+		sb.append(attributeName);
 		sb.append(",Number=.");// FIXME: once we support list of primitives we can calculate based on combination of
 								// type and nillable
 		sb.append(",Type=");
@@ -501,8 +504,21 @@ public class VcfUtils
 		// double-quotes. Double-quote character can be escaped with backslash \ and backslash as \\."
 		if (StringUtils.isBlank(infoAttributeMetaData.getDescription()))
 		{
-			((DefaultAttributeMetaData) infoAttributeMetaData)
-					.setDescription(VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION);
+			if ((infoAttributeMetaData.getDataType().equals(MREF) || infoAttributeMetaData.getDataType().equals(XREF))
+					&& !attributeName.equals(SAMPLES))
+			{
+				String description = attributeName + " annotations: '";
+				description = description
+						+ on(" | ").join(transform(infoAttributeMetaData.getRefEntity().getAtomicAttributes(),
+								AttributeMetaData::getName));
+				description = description + "'";
+				((DefaultAttributeMetaData) infoAttributeMetaData).setDescription(description);
+			}
+			else
+			{
+				((DefaultAttributeMetaData) infoAttributeMetaData)
+						.setDescription(VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION);
+			}
 		}
 		sb.append(
 				infoAttributeMetaData.getDescription().replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " "));

@@ -35,20 +35,9 @@
 ##INFO=<ID=AC,Number=.,Type=String,Description="Description not provided">
 ##INFO=<ID=AN,Number=.,Type=String,Description="Description not provided">
 ##INFO=<ID=GTC,Number=.,Type=String,Description="Description not provided">
-##INFO=<ID=EFFECT,Number=.,Type=String,Description="Reference to a list of effects causes by mutations">
-##INFO=<ID=GENES,Number=.,Type=String,Description="Reference to genes">
+##INFO=<ID=EFFECT,Number=.,Type=String,Description="EFFECT annotations: 'id | ALT | ALT_GENE | GENE | EFFECT | TYPE'">
+##INFO=<ID=GENES,Number=.,Type=String,Description="GENES annotations: 'id'">
 ##INFO=<ID=SAMPLES_ENTITIES,Number=.,Type=String,Description="Description not provided">
-##INFO=<ID=id,Number=.,Type=String,Description="effect identifier">
-##INFO=<ID=ALT,Number=.,Type=String,Description="Alternative allele">
-##INFO=<ID=ALT_GENE,Number=.,Type=String,Description="Alternative allele and gene">
-##INFO=<ID=GENE,Number=.,Type=String,Description="Gene identifier (HGNC symbol)">
-##INFO=<ID=EFFECT,Number=.,Type=String,Description="Level of effect on the gene">
-##INFO=<ID=TYPE,Number=.,Type=String,Description="Type of mutation">
-##INFO=<ID=id,Number=.,Type=String,Description="GENE Identifier (HGNC symbol)">
-##INFO=<ID=NAME,Number=.,Type=String,Description="Description not provided">
-##INFO=<ID=DP,Number=.,Type=String,Description="Description not provided">
-##INFO=<ID=EC,Number=.,Type=String,Description="Description not provided">
-##INFO=<ID=GT,Number=.,Type=String,Description="Description not provided">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	7767853
 1	48554748	.	T	A,G	.	100	AC=0;AN=6;GTC=0,1,10;EFFECT=eff1|A|A_BRCA1|BRCA1|HIGH|STOP_GAIN,eff2|G|G_BRCA2|BRCA1|HIGH|STOP_GAIN;GENES=BRCA1,BRCA2;	GT:DP:EC	0/1:.:.
 7	50356137	.	T	A,C	.	100	AC=0;AN=6;GTC=1,0,10;EFFECT=eff1|A|A_BRCA1|BRCA1|HIGH|STOP_GAIN,eff2|C|C_BRCA2|BRCA1|HIGH|STOP_GAIN;GENES=BRCA1,BRCA2;	GT:DP:EC	1/0:.:.
