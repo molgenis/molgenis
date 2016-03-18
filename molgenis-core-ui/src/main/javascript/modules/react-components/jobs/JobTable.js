@@ -13,12 +13,7 @@ import React from 'react';
 import moment from 'moment';
 import twix from 'twix';
 import 'moment-duration-format';
-
-import Button from '../Button';
-import Dialog from "../Dialog";
-
-import DeepPureRenderMixin from '../mixin/DeepPureRenderMixin';
-import ReactLayeredComponentMixin from '../mixin/ReactLayeredComponentMixin';
+import {Button} from '../Button';
 
 var JobTable = React.createClass({
 	displayName: 'JobTable',
@@ -31,7 +26,7 @@ var JobTable = React.createClass({
 		const {jobs, customColumns} = this.props;
 		return 	<div className="panel panel-primary">
 			<div className="panel-heading">Finished Jobs</div>
-			<div className="panel-body" style={{'overflow-x': 'auto'}}>
+			<div className="panel-body" style={{overflowX: 'auto'}}>
 				<table className="table table-striped">
 					<thead>
 						<th></th>
@@ -43,9 +38,8 @@ var JobTable = React.createClass({
 					</thead>
 					<tbody>
 					{jobs.map((job, index) => <tr key={job.identifier}>
-						<td className="compact"><button className="btn btn-xs btn-info" onClick={(e) => {e.preventDefault(); this.props.onSelect(job.identifier)}}>
-							<span className="glyphicon glyphicon-search" aria-hidden="true"></span>
-						</button></td>
+						<td><Button icon="search" style="info" size="xsmall"
+									onClick={() => this.props.onSelect(job.identifier)}/></td>
 						<td>{this._renderStatus(job.status)}</td>
 						<td>{this._getTwix(job)}</td>
 						<td>{this._getDuration(job)}</td>
@@ -83,59 +77,5 @@ var JobTable = React.createClass({
 	}
 });
 
-/**
- * @memberOf component
- */
-var EntityDeleteBtn = React.createClass({
-	mixins: [DeepPureRenderMixin, ReactLayeredComponentMixin],
-	displayName: 'EntityDeleteBtn',
-	propTypes: {
-		url: React.PropTypes.string.isRequired
-	},
-	getInitialState: function() {
-		return {
-			dialog : false
-		};
-    },
-    getDefaultProps: function() {
-    	return {
-    		onDelete: function() {}
-    	};
-    },
-	render: function() {
-		return Button({
-			icon: 'trash',
-			title: 'Delete row',
-			style: 'danger',
-			size: 'xsmall',
-			onClick : this._handleDelete
-		});
-	},
-	renderLayer: function() {
-		return this.state.dialog ? Dialog({
-			type: 'confirm',
-			message : 'Are you sure you want to delete this row?',
-			onCancel : this._handleDeleteCancel,
-			onConfirm : this._handleDeleteConfirm
-		}) : null;
-	},
-	_handleDelete: function() {
-		this.setState({
-			dialog : true
-		});
-	},
-	_handleDeleteCancel: function() {
-		this.setState({
-			dialog : false
-		});
-	},
-	_handleDeleteConfirm: function() {
-		this.setState({
-			dialog : false
-		});
-		$.post(this.props.url);
-	},
-});
-
-export { JobTable, EntityDeleteBtn };
+export { JobTable };
 export default React.createFactory(JobTable);

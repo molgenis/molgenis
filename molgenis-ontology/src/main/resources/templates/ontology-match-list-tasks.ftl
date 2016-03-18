@@ -18,13 +18,22 @@
 		}}, {th:'Ontology url', td: function(job){
 			return job.ontologyIri
 		}}, {th: 'Delete', td: function(job){
-			return job.deleteUrl && molgenis.ui.jobs.DeleteBtn({
-				url: job.deleteUrl
-			})
+			return job.deleteUrl && molgenis.ui.ConfirmClick({
+				confirmMessage: 'Are you sure you want to delete this SORTA task?',
+				onClick: function() {
+					$.post(job.deleteUrl).done(
+						function() { molgenis.createAlert([{message:'Task successfully deleted.'}], 'success'); }
+					);
+				}
+			}, molgenis.ui.Button({
+					icon: 'trash',
+					size: 'xsmall',
+					style: 'danger'})
+			)
 		}}];
 		
 		React.render(molgenis.ui.jobs.JobsContainer({
-			'url' : '/plugin/ontologyservice/jobs',
+			url: '/plugin/ontologyservice/jobs'
 		}, molgenis.ui.jobs.Jobs({}, 
 				molgenis.ui.jobs.JobTable({customColumns: customColumns}))), 
 		$('#job-container')[0]); 
@@ -41,22 +50,6 @@
 					'action' : molgenis.getContextUrl() + '/result/' + $(this).parents('tr:eq(0)').children('td:eq(0)').html(),
 					'method' : 'GET'
 				}).submit();
-			});
-		});
-		$.each($('.remove-button-class'), function(index, button){
-			$(button).click(function(){
-				var deleteButton = $('<button type="button" class="btn btn-primary">Confirm</button>').click(function(){
-					var ontologyService = new molgenis.OntologyService();
-					var entityName = $(button).parents('tr:eq(0)').children('td:eq(0)').html();					
-					ontologyService.deleteMatchingTask(entityName, function(){
-						location.reload();
-					})
-				});
-				var modal = molgenis.createModalCallback('Delete task', {
-					'body' : $('<div />').append('Are you sure you want to delete this task?'),
-					'footer' : deleteButton
-				});
-				modal.modal('show');
 			});
 		});
 	});
