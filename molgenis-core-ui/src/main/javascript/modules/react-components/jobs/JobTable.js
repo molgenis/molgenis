@@ -46,7 +46,7 @@ var JobTable = React.createClass({
 						<td className="compact"><button className="btn btn-xs btn-info" onClick={(e) => {e.preventDefault(); this.props.onSelect(job.identifier)}}>
 							<span className="glyphicon glyphicon-search" aria-hidden="true"></span>
 						</button></td>
-						<td>{job.status}</td>
+						<td>{this._renderStatus(job.status)}</td>
 						<td>{this._getTwix(job)}</td>
 						<td>{this._getDuration(job)}</td>
 						{customColumns && customColumns.map(cc => <td>{cc.td(job)}</td>)}
@@ -56,6 +56,20 @@ var JobTable = React.createClass({
 				</table>
 			</div>
 		</div>
+	},
+	_renderStatus: function(status){
+		switch(status) {
+			case 'FAILED':
+				return <span className="label label-warning">Failed</span>
+			case 'SUCCESS':
+				return <span className="label label-success">Success</span>
+			case 'PENDING':
+				return <span className="label label-primary">Pending</span>
+			case 'CANCELED':
+				return <span className="label label-default">Canceled</span>
+			case 'RUNNING':
+				return <span className="label label-info">Running</span>
+		}
 	},
 	_getTwix: function(job) {
 		const startDate = moment(job.startDate);
