@@ -40,7 +40,6 @@ import java.util.stream.Stream;
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.snpEff.SnpEffResultIterator;
 import org.molgenis.data.annotation.utils.JarRunner;
@@ -65,9 +64,7 @@ public class SnpEffRunner
 	private static final Logger LOG = LoggerFactory.getLogger(SnpEffAnnotator.class);
 
 	private JarRunner jarRunner;
-	private SnpEffAnnotatorSettings snpEffAnnotatorSettings;
 	private String snpEffPath;
-	private IdGenerator idGenerator;
 
 	private static final String CHARSET = "UTF-8";
 
@@ -82,11 +79,14 @@ public class SnpEffRunner
 	}
 
 	@Autowired
-	public SnpEffRunner(SnpEffAnnotatorSettings snpEffAnnotatorSettings, UuidGenerator idGenerator)
+	private SnpEffAnnotatorSettings snpEffAnnotatorSettings;
+
+	@Autowired
+	private UuidGenerator idGenerator;
+
+	public SnpEffRunner()
 	{
 		this.jarRunner = new JarRunnerImpl();
-		this.snpEffAnnotatorSettings = snpEffAnnotatorSettings;
-		this.idGenerator = idGenerator;
 	}
 
 	public Stream<Entity> getSnpEffects(Iterable<Entity> source)

@@ -2,7 +2,6 @@ package org.molgenis.data.annotation.cmd;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
-import static org.molgenis.data.vcf.utils.VcfUtils.reverseXrefMrefRelation;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -16,6 +15,7 @@ import java.util.stream.Collectors;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.annotation.AbstractExternalRepositoryAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -265,14 +265,18 @@ public class CmdLineAnnotator
 
 			Iterator<Entity> annotatedRecords = annotator.annotate(vcfRepo);
 
-			Iterator<Entity> newRecords = reverseXrefMrefRelation(annotatedRecords, vcfRepo);
+			if (annotator instanceof AbstractExternalRepositoryAnnotator)
+			{
+				annotatedRecords = VcfUtils.reverseXrefMrefRelation(annotatedRecords);
+			}
 
-			while (newRecords.hasNext())
+			while (annotatedRecords.hasNext())
 			{
 				Entity annotatedRecord = annotatedRecords.next();
 				VcfUtils.writeToVcf(annotatedRecord, attributesToInclude, outputVCFWriter);
 				outputVCFWriter.newLine();
 			}
+
 		}
 
 		finally

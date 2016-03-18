@@ -36,6 +36,8 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
+import org.molgenis.data.annotator.websettings.SnpEffAnnotatorSettings;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.VcfEffectsMetaData;
 import org.molgenis.data.vcf.VcfRepository;
@@ -259,9 +261,8 @@ public class SnpEffAnnotator
 		@Override
 		public CmdLineAnnotatorSettingsConfigurer getCmdLineAnnotatorSettingsConfigurer()
 		{
-			throw new UnsupportedOperationException();
-			// return new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(
-			// SnpEffAnnotatorSettings.Meta.SNPEFF_JAR_LOCATION, snpEffAnnotatorSettings);
+			return new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(
+					SnpEffAnnotatorSettings.Meta.SNPEFF_JAR_LOCATION, snpEffAnnotatorSettings);
 		}
 	}
 

@@ -1,7 +1,6 @@
 package org.molgenis.data.vcf.utils;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.google.common.collect.Lists.newArrayList;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.molgenis.data.vcf.VcfRepository.ALT;
@@ -45,10 +44,13 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.datastructures.Sample;
 import org.molgenis.data.vcf.datastructures.Trio;
-import org.molgenis.util.HugeMap;
 import org.molgenis.vcf.meta.VcfMetaInfo;
 
+import com.google.common.collect.Iterators;
+import com.google.common.collect.PeekingIterator;
 import com.google.common.io.BaseEncoding;
+
+import autovalue.shaded.com.google.common.common.collect.Lists;
 
 public class VcfUtils
 {
@@ -127,40 +129,62 @@ public class VcfUtils
 		}
 	}
 
-	public static Iterator<Entity> reverseXrefMrefRelation(Iterator<Entity> annotatedRecords,
-			VcfRepository vcfRepository)
+	public static Iterator<Entity> reverseXrefMrefRelation(Iterator<Entity> annotatedRecords)
 	{
-		List<Entity> listy = newArrayList(annotatedRecords);
-
-		EntityMetaData annotatedRecordEMD = listy.get(0).getEntityMetaData();
-		DefaultEntityMetaData outputEMD = new DefaultEntityMetaData(vcfRepository.getEntityMetaData());
-		DefaultAttributeMetaData effectAttribute = new DefaultAttributeMetaData("EFFECT");
-		effectAttribute.setDataType(MolgenisFieldTypes.MREF).setRefEntity(annotatedRecordEMD);
-		outputEMD.addAttributeMetaData(effectAttribute);
-
-		HugeMap<String, Entity> outputEntities = new HugeMap<>();
-		while (annotatedRecords.hasNext())
+		return new Iterator<Entity>()
 		{
-			Entity annotated = annotatedRecords.next();
-			Entity source = annotated.getEntity("VARIANT");
+			PeekingIterator<Entity> effects = Iterators.peekingIterator(annotatedRecords);
 
-			String id = source.getIdValue().toString();
-			if (outputEntities.containsKey(id))
-			{
-				Entity outputEntity = outputEntities.get(id);
-				Iterable<Entity> effects = outputEntity.getEntities("EFFECT");
-				outputEntity.set("EFFECT", newArrayList(effects, source));
-			}
-			else
-			{
-				Entity outputEntity = new MapEntity(outputEMD);
-				outputEntity.set(source);
-				outputEntity.set("EFFECT", newArrayList(source));
-				outputEntities.put(id, outputEntity);
-			}
-		}
+			DefaultEntityMetaData resultEMD;
 
-		return null;
+			private EntityMetaData getResultEMD(EntityMetaData effectsEMD, EntityMetaData variantEMD)
+			{
+				if (resultEMD == null)
+				{
+					resultEMD = new DefaultEntityMetaData(variantEMD);
+					resultEMD.addAttribute("EFFECT").setDataType(MREF).setRefEntity(effectsEMD);
+				}
+				return resultEMD;
+			}
+
+			@Override
+			public boolean hasNext()
+			{
+				return effects.hasNext() ? true : false;
+			}
+
+			@Override
+			public Entity next()
+			{
+				Entity variant = null;
+				String peekedId;
+				List<Entity> effectsForVariant = Lists.newArrayList();
+				while (effects.hasNext())
+				{
+					peekedId = effects.peek().getEntity("VARIANT").getIdValue().toString();
+					if (variant == null || variant.getIdValue().toString() == peekedId)
+					{
+						Entity effect = effects.next();
+						variant = effect.getEntity("VARIANT");
+						effectsForVariant.add(effect);
+					}
+					else
+					{
+						Entity newVariant = new MapEntity(getResultEMD(effectsForVariant.get(0).getEntityMetaData(),
+								variant.getEntityMetaData()));
+						newVariant.set(variant);
+						newVariant.set("EFFECT", effectsForVariant);
+						effectsForVariant = Lists.newArrayList();
+						return newVariant;
+					}
+				}
+				Entity newVariant = new MapEntity(
+						getResultEMD(effectsForVariant.get(0).getEntityMetaData(), variant.getEntityMetaData()));
+				newVariant.set(variant);
+				newVariant.set("EFFECT", effectsForVariant);
+				return newVariant;
+			}
+		};
 	}
 
 	public static boolean checkPreviouslyAnnotatedAndAddMetadata(File inputVcfFile, BufferedWriter outputVCFWriter,
