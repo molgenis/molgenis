@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
@@ -15,21 +16,19 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
+import org.molgenis.data.semanticsearch.string.Stemmer;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.tartarus.snowball.ext.PorterStemmer;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.UncheckedExecutionException;
+
+import static java.util.Objects.requireNonNull;
 
 public class InformationContentService
 {
@@ -66,10 +65,13 @@ public class InformationContentService
 						QueryRule queryRule = new QueryRule(Arrays.asList(new QueryRule(
 								OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, key.getWord())));
 						queryRule.setOperator(Operator.DIS_MAX);
-						long wordCount = dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl(queryRule));
+						QueryRule finalQuery = new QueryRule(Arrays.asList(
+								new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
+								new QueryRule(Operator.AND), queryRule));
+						long wordCount = dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl(finalQuery));
 						Long total = CACHED_TOTAL_WORD_COUNT.get(ontologyIri);
-						BigDecimal idfValue = new BigDecimal(total == null ? 0 : (1 + Math.log((double) total
-								/ (wordCount + 1))));
+						BigDecimal idfValue = new BigDecimal(
+								total == null ? 0 : (1 + Math.log((double) total / (wordCount + 1))));
 						return idfValue.doubleValue();
 					}
 					return (double) 0;
@@ -81,14 +83,13 @@ public class InformationContentService
 	@Autowired
 	public InformationContentService(DataService dataService)
 	{
-		if (dataService == null) throw new IllegalArgumentException("DataService is null!");
-		this.dataService = dataService;
+		this.dataService = requireNonNull(dataService);
 	}
 
 	public Map<String, Double> redistributedNGramScore(String queryString, String ontologyIri)
 	{
 		Map<String, Double> wordIDFMap = createWordIDF(queryString, ontologyIri);
-		Map<String, Double> wordWeightedSimilarity = new HashMap<String, Double>();
+		Map<String, Double> wordWeightedSimilarity = new HashMap<>();
 
 		if (wordIDFMap.size() > 0)
 		{
@@ -129,7 +130,7 @@ public class InformationContentService
 
 	Map<String, Double> createWordIDF(String queryString, String ontologyIri)
 	{
-		Map<String, Double> wordFreqMap = new HashMap<String, Double>();
+		Map<String, Double> wordFreqMap = new HashMap<>();
 		Set<String> wordsInQueryString = createStemmedWordSet(queryString);
 		wordsInQueryString.stream().forEach(word -> {
 			Double wordIDF = null;
@@ -152,31 +153,10 @@ public class InformationContentService
 
 	public Set<String> createStemmedWordSet(String queryString)
 	{
-		PorterStemmer stemmer = new PorterStemmer();
-		Set<String> uniqueTerms = FluentIterable
-				.from(Sets.newHashSet(queryString.toLowerCase().trim().split(NON_WORD_SEPARATOR)))
-				.filter(new Predicate<String>()
-				{
-					public boolean apply(String termBeforeStem)
-					{
-						return !Iterables.contains(NGramDistanceAlgorithm.STOPWORDSLIST, termBeforeStem);
-					}
-				}).transform(new Function<String, String>()
-				{
-					public String apply(String term)
-					{
-						stemmer.setCurrent(term);
-						stemmer.stem();
-						return stemmer.getCurrent();
-					}
-				}).filter(new Predicate<String>()
-				{
-					public boolean apply(String termAfterStem)
-					{
-						return StringUtils.isNotEmpty(termAfterStem);
-					}
-				}).toSet();
-
-		return uniqueTerms;
+		Stemmer stemmer = new Stemmer();
+		Set<String> uniqueTerms = Sets.newHashSet(queryString.toLowerCase().trim().split(NON_WORD_SEPARATOR)).stream()
+				.filter(term -> !NGramDistanceAlgorithm.STOPWORDSLIST.contains(term)).map(stemmer::stem)
+				.filter(StringUtils::isNotBlank).collect(Collectors.toSet());
+		return Sets.newHashSet(uniqueTerms);
 	}
 }
