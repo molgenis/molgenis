@@ -27,7 +27,6 @@ import static org.molgenis.data.vcf.VcfRepository.SAMPLES;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes;
@@ -256,6 +255,7 @@ public class VcfToEntity
 
 	public Entity toEntity(VcfRecord vcfRecord)
 	{
+		if (vcfRecord.toString() == null) return new MapEntity(entityMetaData);
 		Entity entity = new MapEntity(entityMetaData);
 		entity.set(CHROM, vcfRecord.getChromosome());
 		entity.set(ALT, StringUtils.join(Lists.transform(vcfRecord.getAlternateAlleles(), Allele::toString), ','));

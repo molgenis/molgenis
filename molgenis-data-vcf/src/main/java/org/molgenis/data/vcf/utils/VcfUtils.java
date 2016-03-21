@@ -273,17 +273,20 @@ public class VcfUtils
 			Iterable<AttributeMetaData> refAttributes)
 	{
 		boolean secondValuePresent = false;
+		AttributeMetaData idAttr = entity.getEntityMetaData().getIdAttribute();
 		for (AttributeMetaData refAttribute : refAttributes)
 		{
 			if (refAttribute.getDataType().equals(XREF) || refAttribute.getDataType().equals(MREF))
 			{
-				if (secondValuePresent) additionalInfoFields = additionalInfoFields + PIPE_SEPARATOR;
-				additionalInfoFields = additionalInfoFields + entity.getEntity(refAttribute.getName()).getIdValue();
+				// do nothing?
 			}
 			else
 			{
-				if (secondValuePresent) additionalInfoFields = additionalInfoFields + PIPE_SEPARATOR;
-				additionalInfoFields = additionalInfoFields + entity.get(refAttribute.getName());
+				if (refAttribute != idAttr)
+				{
+					if (secondValuePresent) additionalInfoFields = additionalInfoFields + PIPE_SEPARATOR;
+					additionalInfoFields = additionalInfoFields + entity.get(refAttribute.getName());
+				}
 			}
 			secondValuePresent = true;
 		}
