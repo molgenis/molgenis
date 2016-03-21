@@ -27,7 +27,6 @@ import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AbstractExternalRepositoryAnnotator;
@@ -82,32 +81,24 @@ public class SnpEffAnnotator
 	@Autowired
 	private Entity snpEffAnnotatorSettings;
 
-	@Autowired
-	private DataService dataService;
-
 	@Bean
 	public RepositoryAnnotator snpEff()
 	{
-		return new SnpEffRepositoryAnnotator(snpEffRunner, snpEffAnnotatorSettings, dataService);
+		return new SnpEffRepositoryAnnotator(snpEffRunner, snpEffAnnotatorSettings);
 	}
 
 	public static class SnpEffRepositoryAnnotator extends AbstractExternalRepositoryAnnotator
 	{
-		private static final String CHARSET = "UTF-8";
-		private String snpEffPath;
 		private final AnnotatorInfo info = AnnotatorInfo.create(Status.READY, Type.EFFECT_PREDICTION, NAME,
 				"Genetic variant annotation and effect prediction toolbox. It annotates and predicts the effects of variants on genes (such as amino acid changes). ",
 				getOutputMetaData());
 		private SnpEffRunner snpEffRunner;
 		private Entity snpEffAnnotatorSettings;
-		private DataService dataService;
 
-		public SnpEffRepositoryAnnotator(SnpEffRunner snpEffRunner, Entity snpEffAnnotatorSettings,
-				DataService dataService)
+		public SnpEffRepositoryAnnotator(SnpEffRunner snpEffRunner, Entity snpEffAnnotatorSettings)
 		{
 			this.snpEffRunner = snpEffRunner;
 			this.snpEffAnnotatorSettings = snpEffAnnotatorSettings;
-			this.dataService = dataService;
 		}
 
 		@Override

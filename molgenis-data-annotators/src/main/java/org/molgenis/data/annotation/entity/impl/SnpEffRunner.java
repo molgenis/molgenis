@@ -33,11 +33,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
@@ -56,6 +56,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 @Component
@@ -79,7 +80,7 @@ public class SnpEffRunner
 	}
 
 	@Autowired
-	private SnpEffAnnotatorSettings snpEffAnnotatorSettings;
+	private Entity snpEffAnnotatorSettings;
 
 	@Autowired
 	private UuidGenerator idGenerator;
@@ -108,9 +109,9 @@ public class SnpEffRunner
 	{
 		try
 		{
-			EntityMetaData sourceEMD = source.iterator().next().getEntityMetaData();
-
 			if (Iterables.isEmpty(source)) return Stream.empty();
+
+			EntityMetaData sourceEMD = source.iterator().next().getEntityMetaData();
 
 			List<String> params = Arrays.asList("-Xmx2g", getSnpEffPath(), "hg19", "-noStats", "-noLog", "-lof",
 					"-canon", "-ud", "0", "-spliceSiteSize", "5");
@@ -258,9 +259,11 @@ public class SnpEffRunner
 		File vcf = createTempFile(NAME, ".vcf");
 		try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(vcf), CHARSET)))
 		{
+			Iterator<Entity> it = source.iterator();
 
-			for (Entity entity : source)
+			while (it.hasNext())
 			{
+				Entity entity = it.next();
 				StringBuilder builder = new StringBuilder();
 				builder.append(entity.getString(VcfRepository.CHROM));
 				builder.append("\t");
@@ -269,7 +272,12 @@ public class SnpEffRunner
 				builder.append(entity.getString(VcfRepository.REF));
 				builder.append("\t");
 				builder.append(entity.getString(VcfRepository.ALT));
-				builder.append("\n");
+
+				if (it.hasNext())
+				{
+					builder.append("\n");
+				}
+
 				bw.write(builder.toString());
 			}
 		}
