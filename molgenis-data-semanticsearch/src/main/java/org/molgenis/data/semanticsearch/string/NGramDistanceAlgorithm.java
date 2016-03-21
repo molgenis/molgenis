@@ -61,8 +61,6 @@ public class NGramDistanceAlgorithm
 				"you'd", "you'll", "you're", "you've", "your", "yours", "yourself", "yourselves", "many", ")", "(");
 	}
 
-	private static Stemmer CUSTOM_STEMMER = new Stemmer();
-
 	public static double stringMatching(String queryOne, String queryTwo)
 	{
 		double similarityScore = calculateScore(createNGrams(queryOne.toLowerCase().trim(), true),
@@ -87,10 +85,9 @@ public class NGramDistanceAlgorithm
 
 	public static Map<String, Integer> createNGrams(String inputQuery, boolean removeStopWords)
 	{
-		List<String> wordsInString = Lists.newArrayList(CUSTOM_STEMMER.replaceIllegalCharacter(inputQuery).split(" "));
+		List<String> wordsInString = Lists.newArrayList(Stemmer.replaceIllegalCharacter(inputQuery).split(" "));
 		if (removeStopWords) wordsInString.removeAll(STOPWORDSLIST);
-		List<String> stemmedWordsInString = wordsInString.stream().map(CUSTOM_STEMMER::stem)
-				.collect(Collectors.toList());
+		List<String> stemmedWordsInString = wordsInString.stream().map(Stemmer::stem).collect(Collectors.toList());
 		Map<String, Integer> tokens = new HashMap<String, Integer>();
 		// Padding the string
 		for (String singleWord : stemmedWordsInString)

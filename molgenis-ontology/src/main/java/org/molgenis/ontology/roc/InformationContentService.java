@@ -153,9 +153,8 @@ public class InformationContentService
 
 	public Set<String> createStemmedWordSet(String queryString)
 	{
-		Stemmer stemmer = new Stemmer();
 		Set<String> uniqueTerms = Sets.newHashSet(queryString.toLowerCase().trim().split(NON_WORD_SEPARATOR)).stream()
-				.filter(term -> !NGramDistanceAlgorithm.STOPWORDSLIST.contains(term)).map(stemmer::stem)
+				.filter(term -> !NGramDistanceAlgorithm.STOPWORDSLIST.contains(term)).map(Stemmer::stem)
 				.filter(StringUtils::isNotBlank).collect(Collectors.toSet());
 		return Sets.newHashSet(uniqueTerms);
 	}

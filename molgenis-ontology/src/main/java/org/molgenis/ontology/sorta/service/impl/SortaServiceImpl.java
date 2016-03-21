@@ -32,6 +32,8 @@ import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
 
+import static java.util.Objects.requireNonNull;
+
 public class SortaServiceImpl implements SortaService
 {
 	private static final Set<String> ELASTICSEARCH_RESERVED_WORDS = Sets.newHashSet("or", "and", "if");
@@ -51,18 +53,14 @@ public class SortaServiceImpl implements SortaService
 	public static final String SCORE = "Score";
 	public static final String COMBINED_SCORE = "Combined_Score";
 
-	// private final PorterStemmer stemmer = new PorterStemmer();
-	Stemmer stemmer = new Stemmer();
 	private final DataService dataService;
 	private final InformationContentService informationContentService;
 
 	@Autowired
 	public SortaServiceImpl(DataService dataService, InformationContentService informationContentService)
 	{
-		if (dataService == null) throw new IllegalArgumentException("DataService is null");
-		if (informationContentService == null) throw new IllegalArgumentException("InformationContentService is null");
-		this.dataService = dataService;
-		this.informationContentService = informationContentService;
+		this.dataService = requireNonNull(dataService);
+		this.informationContentService = requireNonNull(informationContentService);
 	}
 
 	@Override
@@ -404,7 +402,7 @@ public class SortaServiceImpl implements SortaService
 		{
 			if (StringUtils.isNotEmpty(word.trim()) && !(ELASTICSEARCH_RESERVED_WORDS.contains(word)))
 			{
-				String afterStem = stemmer.stem(removeIllegalCharWithEmptyString(word));
+				String afterStem = Stemmer.stem(removeIllegalCharWithEmptyString(word));
 				if (StringUtils.isNotEmpty(afterStem))
 				{
 					stringBuilder.append(afterStem).append(SINGLE_WHITESPACE);
