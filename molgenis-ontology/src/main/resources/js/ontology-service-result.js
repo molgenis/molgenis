@@ -243,7 +243,7 @@
 		var hoverover = $('<div>Adjusted score ?</div>').css({'cursor':'pointer'}).popover({
 			'title' : 'Explanation',
 			'content' : '<p style="color:black;font-weight:normal;">Adjusted scores are derived from the original scores (<strong>lexical similarity</strong>) combined with the weight of the words (<strong>inverse document frequency</strong>)</p>',
-			'placement' : 'top',
+			'placement' : 'auto',
 			'trigger' : 'hover',
 			'html' : true
 		});

@@ -41,28 +41,32 @@ public class InformationContentServiceTest
 
 		MapEntity ontologyEntity = new MapEntity(ImmutableMap.of(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
 
-		Mockito.when(
-				dataService.findOne(OntologyMetaData.ENTITY_NAME,
-						new QueryImpl().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri))).thenReturn(ontologyEntity);
+		Mockito.when(dataService.findOne(OntologyMetaData.ENTITY_NAME,
+				new QueryImpl().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri))).thenReturn(ontologyEntity);
 
-		Mockito.when(
-				dataService.count(OntologyTermMetaData.ENTITY_NAME,
-						new QueryImpl().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity))).thenReturn((long) 100);
+		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME,
+				new QueryImpl().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity))).thenReturn((long) 100);
 
-		QueryRule queryRule = new QueryRule(Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-				Operator.FUZZY_MATCH, "hear")));
+		QueryRule queryRule = new QueryRule(
+				Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, "hear")));
 		queryRule.setOperator(Operator.DIS_MAX);
-		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl(queryRule))).thenReturn(
-				(long) 30);
+		QueryRule finalQuery = new QueryRule(
+				Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
+						new QueryRule(Operator.AND), queryRule));
+		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl(finalQuery)))
+				.thenReturn((long) 30);
 
-		QueryRule queryRule2 = new QueryRule(Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-				Operator.FUZZY_MATCH, "impair")));
+		QueryRule queryRule2 = new QueryRule(Arrays
+				.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, "impair")));
 		queryRule2.setOperator(Operator.DIS_MAX);
-		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl(queryRule2))).thenReturn(
-				(long) 10);
+		QueryRule finalQuery2 = new QueryRule(
+				Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
+						new QueryRule(Operator.AND), queryRule2));
+		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl(finalQuery2)))
+				.thenReturn((long) 10);
 
-		Map<String, Double> expectedWordIDF = informationContentService
-				.createWordIDF("hearing impairment", ontologyIri);
+		Map<String, Double> expectedWordIDF = informationContentService.createWordIDF("hearing impairment",
+				ontologyIri);
 
 		Assert.assertEquals(expectedWordIDF.get("hear").intValue(), 2);
 		Assert.assertEquals(expectedWordIDF.get("impair").intValue(), 3);
@@ -75,28 +79,32 @@ public class InformationContentServiceTest
 
 		MapEntity ontologyEntity = new MapEntity(ImmutableMap.of(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
 
-		Mockito.when(
-				dataService.findOne(OntologyMetaData.ENTITY_NAME,
-						new QueryImpl().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri))).thenReturn(ontologyEntity);
+		Mockito.when(dataService.findOne(OntologyMetaData.ENTITY_NAME,
+				new QueryImpl().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri))).thenReturn(ontologyEntity);
 
-		Mockito.when(
-				dataService.count(OntologyTermMetaData.ENTITY_NAME,
-						new QueryImpl().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity))).thenReturn((long) 100);
+		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME,
+				new QueryImpl().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity))).thenReturn((long) 100);
 
-		QueryRule queryRule = new QueryRule(Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-				Operator.FUZZY_MATCH, "hear")));
+		QueryRule queryRule = new QueryRule(
+				Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, "hear")));
 		queryRule.setOperator(Operator.DIS_MAX);
-		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl(queryRule))).thenReturn(
-				(long) 30);
+		QueryRule finalQuery = new QueryRule(
+				Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
+						new QueryRule(Operator.AND), queryRule));
+		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl(finalQuery)))
+				.thenReturn((long) 30);
 
-		QueryRule queryRule2 = new QueryRule(Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-				Operator.FUZZY_MATCH, "impair")));
+		QueryRule queryRule2 = new QueryRule(Arrays
+				.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, "impair")));
 		queryRule2.setOperator(Operator.DIS_MAX);
-		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl(queryRule2))).thenReturn(
-				(long) 10);
+		QueryRule finalQuery2 = new QueryRule(
+				Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
+						new QueryRule(Operator.AND), queryRule2));
+		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl(finalQuery2)))
+				.thenReturn((long) 10);
 
-		Map<String, Double> redistributedNGramScore = informationContentService.redistributedNGramScore(
-				"hearing impairment", ontologyIri);
+		Map<String, Double> redistributedNGramScore = informationContentService
+				.redistributedNGramScore("hearing impairment", ontologyIri);
 		Assert.assertEquals(redistributedNGramScore.get("hear").intValue(), -7);
 		Assert.assertEquals(redistributedNGramScore.get("impair").intValue(), 7);
 	}

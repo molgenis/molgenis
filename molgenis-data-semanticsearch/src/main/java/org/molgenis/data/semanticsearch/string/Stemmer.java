@@ -16,7 +16,7 @@ public class Stemmer
 	 * @param phrase
 	 * @return a string that consists of stemmed words
 	 */
-	public String cleanStemPhrase(String phrase)
+	public static String cleanStemPhrase(String phrase)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 		for (String word : replaceIllegalCharacter(phrase).split(" "))
@@ -35,7 +35,7 @@ public class Stemmer
 		return stringBuilder.toString();
 	}
 
-	public String stem(String word)
+	public static String stem(String word)
 	{
 		PorterStemmer porterStemmer = new PorterStemmer();
 		porterStemmer.setCurrent(word);
@@ -43,12 +43,12 @@ public class Stemmer
 		return porterStemmer.getCurrent();
 	}
 
-	public String stemAndJoin(Set<String> terms)
+	public static String stemAndJoin(Set<String> terms)
 	{
-		return terms.stream().map(this::stem).collect(Collectors.joining(" "));
+		return terms.stream().map(Stemmer::stem).collect(Collectors.joining(" "));
 	}
 
-	public String replaceIllegalCharacter(String string)
+	public static String replaceIllegalCharacter(String string)
 	{
 		return string.replaceAll(ILLEGAL_REGEX_PATTERN, " ").replaceAll(" +", " ").trim().toLowerCase();
 	}
