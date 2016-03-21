@@ -323,9 +323,6 @@ public class VcfUtilsTest
 
 		List<AttributeMetaData> attributes = newArrayList();
 		vcfMeta.getAttributes().forEach(attribute -> attributes.add(attribute));
-		effectMeta.getAttributes().forEach(attribute -> attributes.add(attribute));
-		geneMeta.getAttributes().forEach(attribute -> attributes.add(attribute));
-		sampleEntityMeta.getAttributes().forEach(attribute -> attributes.add(attribute));
 
 		List<Entity> vcfEntities = getVcfEntities();
 
@@ -498,9 +495,8 @@ public class VcfUtilsTest
 		INFO.addAttributePart(GTC);
 
 		vcfMeta.addAttributeMetaData(INFO);
-		vcfMeta.addAttribute("EFFECT").setDataType(MREF).setRefEntity(effectMeta)
-				.setDescription("Reference to a list of effects causes by mutations");
-		vcfMeta.addAttribute("GENES").setDataType(MREF).setRefEntity(geneMeta).setDescription("Reference to genes");
+		vcfMeta.addAttribute("EFFECT").setDataType(MREF).setRefEntity(effectMeta);
+		vcfMeta.addAttribute("GENES").setDataType(MREF).setRefEntity(geneMeta);
 		vcfMeta.addAttribute(SAMPLES).setDataType(MolgenisFieldTypes.MREF).setRefEntity(sampleEntityMeta);
 
 		return vcfMeta;
