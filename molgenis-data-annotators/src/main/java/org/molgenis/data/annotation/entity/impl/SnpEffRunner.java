@@ -56,8 +56,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
+import com.google.common.collect.PeekingIterator;
 
 @Component
 public class SnpEffRunner
@@ -92,26 +93,27 @@ public class SnpEffRunner
 
 	public Stream<Entity> getSnpEffects(Iterable<Entity> source)
 	{
-		File inputVcf = null;
 		try
 		{
-			inputVcf = getInputVcfFile(source);
+			File inputVcf = getInputVcfFile(source.iterator());
+			return getSnpEffects(source.iterator(), inputVcf);
 		}
 		catch (IOException e)
 		{
 			throw new MolgenisDataException("Exception making temporary VCF file", e);
 		}
-		return getSnpEffects(source, inputVcf);
 	}
 
 	@SuppressWarnings("resource")
-	public Stream<Entity> getSnpEffects(Iterable<Entity> source, final File inputVcf)
+	private Stream<Entity> getSnpEffects(Iterator<Entity> source, final File inputVcf)
 	{
 		try
 		{
-			if (Iterables.isEmpty(source)) return Stream.empty();
+			if (!source.hasNext()) return Stream.empty();
 
-			EntityMetaData sourceEMD = source.iterator().next().getEntityMetaData();
+			// get meta data by peeking at the first entity (work-around for issue #4701)
+			PeekingIterator<Entity> peekingIterator = Iterators.peekingIterator(source);
+			EntityMetaData sourceEMD = peekingIterator.peek().getEntityMetaData();
 
 			List<String> params = Arrays.asList("-Xmx2g", getSnpEffPath(), "hg19", "-noStats", "-noLog", "-lof",
 					"-canon", "-ud", "0", "-spliceSiteSize", "5");
@@ -127,8 +129,7 @@ public class SnpEffRunner
 					sourceEMD.getPackage(), sourceEMD);
 
 			List<Entity> effectsEntities = Lists.newArrayList();
-			for (Entity sourceEntity : source)
-			{
+			peekingIterator.forEachRemaining(sourceEntity -> {
 				String chromosome = sourceEntity.getString(VcfRepository.CHROM);
 				Long position = sourceEntity.getLong(VcfRepository.POS);
 
@@ -140,7 +141,7 @@ public class SnpEffRunner
 						effectsEntities.addAll(getSnpEffectsFromSnpEffEntity(sourceEntity, snpEffEntity, effectsEMD));
 					}
 				}
-			}
+			});
 
 			return effectsEntities.stream();
 		}
@@ -254,13 +255,11 @@ public class SnpEffRunner
 	 *            the Entities to convert to VCF
 	 * @return a VCF file
 	 */
-	public File getInputVcfFile(Iterable<Entity> source) throws IOException
+	public File getInputVcfFile(Iterator<Entity> it) throws IOException
 	{
 		File vcf = createTempFile(NAME, ".vcf");
 		try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(vcf), CHARSET)))
 		{
-			Iterator<Entity> it = source.iterator();
-
 			while (it.hasNext())
 			{
 				Entity entity = it.next();

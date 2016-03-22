@@ -255,7 +255,6 @@ public class VcfToEntity
 
 	public Entity toEntity(VcfRecord vcfRecord)
 	{
-		if (vcfRecord.toString() == null) return new MapEntity(entityMetaData);
 		Entity entity = new MapEntity(entityMetaData);
 		entity.set(CHROM, vcfRecord.getChromosome());
 		entity.set(ALT, StringUtils.join(Lists.transform(vcfRecord.getAlternateAlleles(), Allele::toString), ','));
