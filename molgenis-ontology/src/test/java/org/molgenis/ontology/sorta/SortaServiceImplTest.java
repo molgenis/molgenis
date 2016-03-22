@@ -2,6 +2,7 @@ package org.molgenis.ontology.sorta;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.COMBINED_SCORE;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -245,12 +246,11 @@ public class SortaServiceImplTest
 
 		assertEquals(iterator_test1.hasNext(), true);
 		Entity firstMatch_test1 = iterator_test1.next();
-		assertEquals(firstMatch_test1.getDouble(SortaServiceImpl.COMBINED_SCORE).intValue(), 100);
+		assertEquals(firstMatch_test1.getDouble(COMBINED_SCORE).intValue(), 100);
 
 		assertEquals(iterator_test1.hasNext(), true);
 		Entity secondMatch_test1 = iterator_test1.next();
-		assertEquals(secondMatch_test1.getDouble(SortaServiceImpl.COMBINED_SCORE).intValue(),
-				new Double(85).intValue());
+		assertEquals(secondMatch_test1.getDouble(COMBINED_SCORE).intValue(), new Double(85).intValue());
 
 		assertEquals(iterator_test1.hasNext(), false);
 
@@ -260,7 +260,7 @@ public class SortaServiceImplTest
 
 		assertEquals(iterator_test2.hasNext(), true);
 		Entity firstMatch_test2 = iterator_test2.next();
-		assertEquals(firstMatch_test2.getDouble(SortaServiceImpl.COMBINED_SCORE).intValue(), 100);
+		assertEquals(firstMatch_test2.getDouble(COMBINED_SCORE).intValue(), 100);
 
 		assertEquals(iterator_test2.hasNext(), false);
 
@@ -271,7 +271,7 @@ public class SortaServiceImplTest
 
 		assertEquals(iterator_test3.hasNext(), true);
 		Entity firstMatch_test3 = iterator_test3.next();
-		assertEquals(firstMatch_test3.getDouble(SortaServiceImpl.COMBINED_SCORE).intValue(), 100);
+		assertEquals(firstMatch_test3.getDouble(COMBINED_SCORE).intValue(), 100);
 
 		assertEquals(iterator_test3.hasNext(), false);
 	}

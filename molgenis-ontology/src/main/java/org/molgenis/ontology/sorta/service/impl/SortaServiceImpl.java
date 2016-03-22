@@ -1,5 +1,8 @@
 package org.molgenis.ontology.sorta.service.impl;
 
+import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.COMBINED_SCORE;
+import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.SCORE;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,8 +55,6 @@ public class SortaServiceImpl implements SortaService
 	public static final String DEFAULT_MATCHING_NAME_FIELD = "Name";
 	public static final String DEFAULT_MATCHING_SYNONYM_PREFIX_FIELD = "Synonym";
 	public static final String DEFAULT_MATCHING_IDENTIFIER = "Identifier";
-	public static final String SCORE = "Score";
-	public static final String COMBINED_SCORE = "Combined_Score";
 
 	private final DataService dataService;
 	private final InformationContentService informationContentService;

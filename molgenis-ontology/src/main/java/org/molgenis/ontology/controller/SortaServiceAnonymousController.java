@@ -1,6 +1,8 @@
 package org.molgenis.ontology.controller;
 
 import static org.molgenis.ontology.controller.SortaServiceAnonymousController.URI;
+import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.COMBINED_SCORE;
+import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.SCORE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -38,7 +40,6 @@ import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
 import org.molgenis.ontology.utils.SortaServiceUtil;
 import org.molgenis.ui.MolgenisPluginController;
-import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -61,9 +62,6 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 
 	@Autowired
 	private OntologyService ontologyService;
-
-	@Autowired
-	private MenuReaderService menuReaderService;
 
 	@Autowired
 	private FileStore fileStore;
@@ -180,11 +178,9 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 						mapEntity.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI,
 								ontologyTermEntity.getString(OntologyTermMetaData.ONTOLOGY_TERM_IRI));
 
-						mapEntity.set(SortaServiceImpl.SCORE,
-								df.format(ontologyTermEntity.getDouble(SortaServiceImpl.SCORE)));
+						mapEntity.set(SCORE, df.format(ontologyTermEntity.getDouble(SCORE)));
 
-						mapEntity.set(SortaServiceImpl.COMBINED_SCORE,
-								df.format(ontologyTermEntity.getDouble(SortaServiceImpl.COMBINED_SCORE)));
+						mapEntity.set(COMBINED_SCORE, df.format(ontologyTermEntity.getDouble(COMBINED_SCORE)));
 
 						csvWriter.add(mapEntity);
 
@@ -213,7 +209,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 
 		List<String> columnHeaders = new ArrayList<String>(inputAttributeNames);
 		columnHeaders.addAll(Arrays.asList(OntologyTermMetaData.ONTOLOGY_TERM_NAME,
-				OntologyTermMetaData.ONTOLOGY_TERM_IRI, SortaServiceImpl.SCORE, SortaServiceImpl.COMBINED_SCORE));
+				OntologyTermMetaData.ONTOLOGY_TERM_IRI, SCORE, COMBINED_SCORE));
 		return columnHeaders;
 	}
 

@@ -1,5 +1,7 @@
 package org.molgenis.ontology.sorta.job;
 
+import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.SCORE;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -15,7 +17,6 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.sorta.meta.MatchingTaskContentEntityMetaData;
 import org.molgenis.ontology.sorta.service.SortaService;
-import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 
 import static java.util.Objects.requireNonNull;
@@ -69,7 +70,7 @@ public class SortaJobProcessor
 					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.MATCHED_TERM,
 							firstMatchedOntologyTerm.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI));
 					matchingTaskContentEntity.set(MatchingTaskContentEntityMetaData.SCORE,
-							firstMatchedOntologyTerm.get(SortaServiceImpl.SCORE));
+							firstMatchedOntologyTerm.get(SCORE));
 				}
 				else
 				{
