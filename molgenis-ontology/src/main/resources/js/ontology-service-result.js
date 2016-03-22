@@ -352,7 +352,12 @@
 					'html' : true
 				});
 			}
-			ontologyTermTd.append('<div>Name : <a href="' + ontologyTerm.ontologyTermIRI + '" target="_blank">' + ontologyTerm.ontologyTermName + '</a></div>').append(synonymDiv);
+			//check if the ontologyTermIRI is a valid link
+			if(ontologyTerm.ontologyTermIRI.startsWith('http')){
+				ontologyTermTd.append('<div>Name : <a href="' + ontologyTerm.ontologyTermIRI + '" target="_blank">' + ontologyTerm.ontologyTermName + '</a></div>').append(synonymDiv);
+			}else{
+				ontologyTermTd.append('<div>Name : ' + ontologyTerm.ontologyTermName + '</div>').append(synonymDiv);
+			}
 			var annotationMap = {};
 			$.each(ontologyTerm.ontologyTermDynamicAnnotation, function(i, annotation){
 				if(!annotationMap[annotation.name]){
