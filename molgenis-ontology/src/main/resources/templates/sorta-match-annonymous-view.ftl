@@ -1,6 +1,6 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#include "ontology-match-new-task.ftl">
+<#include "sorta-match-new-task.ftl">
 <#assign css=["bootstrap.fileupload.min.css", "ontology-service.css", "biobank-connect.css"]>
 <#assign js=["bootstrap-fileupload.min.js", "sorta-result-anonymous.js"]>
 <@header css js/>
