@@ -277,11 +277,13 @@ public class VcfUtils
 		AttributeMetaData idAttribute = entity.getEntityMetaData().getIdAttribute();
 		for (AttributeMetaData refAttribute : refAttributes)
 		{
-			if (!refAttribute.isSameAs(idAttribute))
+			if (!refAttribute.isSameAs(idAttribute) && !refAttribute.getDataType().equals(MREF)
+					&& !refAttribute.getDataType().equals(XREF))
 			{
 				if (secondValuePresent) additionalInfoFields = additionalInfoFields + PIPE_SEPARATOR;
 				additionalInfoFields = additionalInfoFields + entity.get(refAttribute.getName());
 				secondValuePresent = true;
+
 			}
 		}
 		return additionalInfoFields;
