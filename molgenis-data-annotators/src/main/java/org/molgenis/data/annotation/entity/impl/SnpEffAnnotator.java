@@ -1,55 +1,50 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import static java.io.File.createTempFile;
-import static java.util.stream.Collectors.toList;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.TEXT;
+import static org.molgenis.data.annotation.entity.impl.SnpEffRunner.LOF;
+import static org.molgenis.data.annotation.entity.impl.SnpEffRunner.NMD;
+import static org.molgenis.data.support.VcfEffectsMetaData.ANNOTATION;
+import static org.molgenis.data.support.VcfEffectsMetaData.CDS_POSITION;
+import static org.molgenis.data.support.VcfEffectsMetaData.C_DNA_POSITION;
+import static org.molgenis.data.support.VcfEffectsMetaData.DISTANCE_TO_FEATURE;
+import static org.molgenis.data.support.VcfEffectsMetaData.ERRORS;
+import static org.molgenis.data.support.VcfEffectsMetaData.FEATURE_ID;
+import static org.molgenis.data.support.VcfEffectsMetaData.FEATURE_TYPE;
+import static org.molgenis.data.support.VcfEffectsMetaData.GENE_ID;
+import static org.molgenis.data.support.VcfEffectsMetaData.GENE_NAME;
+import static org.molgenis.data.support.VcfEffectsMetaData.HGVS_C;
+import static org.molgenis.data.support.VcfEffectsMetaData.HGVS_P;
+import static org.molgenis.data.support.VcfEffectsMetaData.PROTEIN_POSITION;
+import static org.molgenis.data.support.VcfEffectsMetaData.PUTATIVE_IMPACT;
+import static org.molgenis.data.support.VcfEffectsMetaData.RANK_TOTAL;
+import static org.molgenis.data.support.VcfEffectsMetaData.TRANSCRIPT_BIOTYPE;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.UncheckedIOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.annotation.AbstractRepositoryAnnotator;
+import org.molgenis.data.annotation.AbstractExternalRepositoryAnnotator;
 import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
-import org.molgenis.data.annotation.snpEff.SnpEffResultIterator;
-import org.molgenis.data.annotation.utils.JarRunner;
-import org.molgenis.data.annotation.utils.JarRunnerImpl;
 import org.molgenis.data.annotator.websettings.SnpEffAnnotatorSettings;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.VcfEffectsMetaData;
 import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import com.google.common.collect.Iterators;
 
 /**
  * SnpEff annotator
@@ -75,32 +70,13 @@ public class SnpEffAnnotator
 	private static final Logger LOG = LoggerFactory.getLogger(SnpEffAnnotator.class);
 	public static final String NAME = "snpEff";
 
-	public static final String ANNOTATION = "Annotation";
-	public static final String PUTATIVE_IMPACT = "Putative_impact";
-	public static final String GENE_NAME = "Gene_Name";
-	public static final String GENE_ID = "Gene_ID";
-	public static final String FEATURE_TYPE = "Feature_type";
-	public static final String FEATURE_ID = "Feature_ID";
-	public static final String TRANSCRIPT_BIOTYPE = "Transcript_biotype";
-	public static final String RANK_TOTAL = "Rank_total";
-	public static final String HGVS_C = "HGVS_c";
-	public static final String HGVS_P = "HGVS_p";
-	public static final String C_DNA_POSITION = "cDNA_position";
-	public static final String CDS_POSITION = "CDS_position";
-	public static final String PROTEIN_POSITION = "Protein_position";
-	public static final String DISTANCE_TO_FEATURE = "Distance_to_feature";
-	public static final String ERRORS = "Errors";
-	public static final String LOF = "LOF";
-	public static final String NMD = "NMD";
-	public static final String ANN = "ANN";
-
 	public enum Impact
 	{
 		MODIFIER, LOW, MODERATE, HIGH
 	}
 
 	@Autowired
-	private JarRunner jarRunner;
+	private SnpEffRunner snpEffRunner;
 
 	@Autowired
 	private Entity snpEffAnnotatorSettings;
@@ -108,70 +84,21 @@ public class SnpEffAnnotator
 	@Bean
 	public RepositoryAnnotator snpEff()
 	{
-		return new SnpEffRepositoryAnnotator(snpEffAnnotatorSettings, jarRunner);
+		return new SnpEffRepositoryAnnotator(snpEffRunner, snpEffAnnotatorSettings);
 	}
 
-	@Bean
-	JarRunner jarRunner()
+	public static class SnpEffRepositoryAnnotator extends AbstractExternalRepositoryAnnotator
 	{
-		return new JarRunnerImpl();
-	}
-
-	/**
-	 * Helper function to get gene name from entity
-	 *
-	 * @param entity
-	 * @return
-	 */
-	public static String getGeneNameFromEntity(Entity entity)
-	{
-		String geneSymbol = null;
-		if (entity.getString(GENE_NAME) != null)
-		{
-			geneSymbol = entity.getString(GENE_NAME);
-		}
-		if (geneSymbol == null)
-		{
-			String annField = entity.getString("ANN");
-			if (annField != null)
-			{
-				// if the entity is annotated with the snpEff annotator the split is already done
-				String[] split = annField.split("\\|", -1);
-				// TODO: ask Joeri to explain this line
-				if (split.length > 10)
-				{
-					// 3 is 'gene name'
-					// TODO check if it should not be index 4 -> 'gene id'
-					if (split[3].length() != 0)
-					{
-						geneSymbol = split[3];
-					}
-					else
-					{
-						// will happen a lot for whole genome sequencing data
-						LOG.info("No gene symbol in ANN field for " + entity.toString());
-					}
-
-				}
-			}
-		}
-		return geneSymbol;
-	}
-
-	public static class SnpEffRepositoryAnnotator extends AbstractRepositoryAnnotator
-	{
-		private static final String CHARSET = "UTF-8";
-		private String snpEffPath;
-		private final Entity pluginSettings;
 		private final AnnotatorInfo info = AnnotatorInfo.create(Status.READY, Type.EFFECT_PREDICTION, NAME,
 				"Genetic variant annotation and effect prediction toolbox. It annotates and predicts the effects of variants on genes (such as amino acid changes). ",
 				getOutputMetaData());
-		private final JarRunner jarRunner;
+		private SnpEffRunner snpEffRunner;
+		private Entity snpEffAnnotatorSettings;
 
-		public SnpEffRepositoryAnnotator(Entity pluginSettings, JarRunner jarRunner)
+		public SnpEffRepositoryAnnotator(SnpEffRunner snpEffRunner, Entity snpEffAnnotatorSettings)
 		{
-			this.pluginSettings = pluginSettings;
-			this.jarRunner = jarRunner;
+			this.snpEffRunner = snpEffRunner;
+			this.snpEffAnnotatorSettings = snpEffAnnotatorSettings;
 		}
 
 		@Override
@@ -183,198 +110,19 @@ public class SnpEffAnnotator
 		@Override
 		public Iterator<Entity> annotate(Iterable<Entity> source)
 		{
-			File inputVcf = null;
-			try
-			{
-				inputVcf = getInputVcfTempFile(source);
-			}
-			catch (IOException e)
-			{
-				throw new MolgenisDataException("Exception running SnpEff", e);
-
-			}
-			return annotateRepository(source, inputVcf);
-		}
-
-		public Iterator<Entity> annotateRepository(Iterable<Entity> source, final File inputVcf)
-		{
-			try
-			{
-				Iterator<Entity> sourceIterator = source.iterator();
-				if (!sourceIterator.hasNext()) return Iterators.emptyIterator();
-
-				List<String> params = Arrays.asList("-Xmx2g", getSnpEffPath(), "hg19", "-noStats", "-noLog", "-lof",
-						"-canon", "-ud", "0", "-spliceSiteSize", "5");
-
-				File outputVcf = jarRunner.runJar(NAME, params, inputVcf);
-
-				File snpEffOutputWithMetaData = addVcfMetaDataToOutputVcf(outputVcf);
-				VcfRepository repo = new VcfRepository(snpEffOutputWithMetaData,
-						"SNPEFF_OUTPUT_VCF_" + inputVcf.getName());
-
-				SnpEffResultIterator snpEffResultIterator = new SnpEffResultIterator(repo.iterator());
-
-				return new Iterator<Entity>()
-				{
-					@Override
-					public boolean hasNext()
-					{
-						boolean next = sourceIterator.hasNext();
-						if (!next)
-						{
-							try
-							{
-								repo.close();
-							}
-							catch (IOException e)
-							{
-								throw new RuntimeException("Unable to close repository stream", e);
-							}
-						}
-
-						return next;
-					}
-
-					@Override
-					public Entity next()
-					{
-						Entity entity = sourceIterator.next();
-						DefaultEntityMetaData meta = new DefaultEntityMetaData(entity.getEntityMetaData());
-						info.getOutputAttributes().forEach(meta::addAttributeMetaData);
-						Entity copy = new MapEntity(entity, meta);
-
-						String chromosome = entity.getString(VcfRepository.CHROM);
-						Long position = entity.getLong(VcfRepository.POS);
-						if (chromosome != null && position != null)
-						{
-							Entity snpEffEntity = snpEffResultIterator.get(chromosome, position);
-							if (snpEffEntity != null)
-							{
-								parseOutputLineToEntity(snpEffEntity, copy);
-							}
-
-							return copy;
-						}
-						else
-						{
-							return entity;
-						}
-					}
-				};
-			}
-			catch (IOException e)
-			{
-				throw new UncheckedIOException(e);
-			}
-			catch (InterruptedException e)
-			{
-				throw new MolgenisDataException("Exception running SnpEff", e);
-			}
-		}
-
-		/**
-		 * Takes the VCF produced by SnpEff, adds metadata, and returns a file that can be used to create a
-		 * VcfRepository
-		 * 
-		 * @param outputVcf
-		 * @return
-		 * @throws IOException
-		 */
-		private File addVcfMetaDataToOutputVcf(File outputVcf) throws IOException
-		{
-			File snpEffOutputWithMetaData = createTempFile(NAME + "_withMetaData", ".vcf");
-			BufferedReader reader = new BufferedReader(
-					new InputStreamReader(new FileInputStream(outputVcf.getAbsolutePath()), CHARSET));
-
-			List<String> lines = reader.lines().filter(line -> !line.startsWith("##SnpEff")).collect(toList());
-			reader.close();
-
-			FileWriter writer = new FileWriter(snpEffOutputWithMetaData);
-			boolean metaDone = false;
-			for (String line : lines)
-			{
-				if (!line.startsWith(VcfRepository.PREFIX) && metaDone == false)
-				{
-					writer.write(VcfRepository.CHROM + "\t" + VcfRepository.POS + "\t" + VcfRepository.ID + "\t"
-							+ VcfRepository.REF + "\t" + VcfRepository.ALT + "\t" + VcfRepository.QUAL + "\t"
-							+ VcfRepository.FILTER + "\t" + VcfRepository.INFO + "\n");
-					metaDone = true;
-				}
-				writer.write(line + "\n");
-			}
-			writer.close();
-
-			return snpEffOutputWithMetaData;
-		}
-
-		public File getInputVcfTempFile(Iterable<Entity> source) throws IOException
-		{
-			File vcf = createTempFile(NAME, ".vcf");
-			try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(vcf), CHARSET)))
-			{
-
-				for (Entity entity : source)
-				{
-					StringBuilder builder = new StringBuilder();
-					builder.append(entity.getString(VcfRepository.CHROM));
-					builder.append("\t");
-					builder.append(entity.getString(VcfRepository.POS));
-					builder.append("\t.\t");
-					builder.append(entity.getString(VcfRepository.REF));
-					builder.append("\t");
-					builder.append(entity.getString(VcfRepository.ALT));
-					builder.append("\n");
-					bw.write(builder.toString());
-				}
-			}
-
-			return vcf;
-		}
-
-		// FIXME: can be multiple? even when using canonical!
-		// e.g.
-		// ANN=G|intron_variant|MODIFIER|LOC101926913|LOC101926913|transcript|NR_110185.1|Noncoding|5/5|n.376+9526G>C||||||,G|non_coding_exon_variant|MODIFIER|LINC01124|LINC01124|transcript|NR_027433.1|Noncoding|1/1|n.590G>C||||||;
-		public void parseOutputLineToEntity(Entity snpEffEntity, Entity entity)
-		{
-			String[] annotation = snpEffEntity.getString(SnpEffAnnotator.ANN).split(Pattern.quote("|"), -1);
-			String lof = snpEffEntity.getString(SnpEffAnnotator.LOF);
-			String nmd = snpEffEntity.getString(SnpEffAnnotator.NMD);
-
-			if (lof == null) lof = "";
-			if (nmd == null) nmd = "";
-
-			if (annotation.length >= 15)
-			{
-				entity.set(ANNOTATION, annotation[1]);
-				entity.set(PUTATIVE_IMPACT, annotation[2]);
-				entity.set(GENE_NAME, annotation[3]);
-				entity.set(GENE_ID, annotation[4]);
-				entity.set(FEATURE_TYPE, annotation[5]);
-				entity.set(FEATURE_ID, annotation[6]);
-				entity.set(TRANSCRIPT_BIOTYPE, annotation[7]);
-				entity.set(RANK_TOTAL, annotation[8]);
-				entity.set(HGVS_C, annotation[9]);
-				entity.set(HGVS_P, annotation[10]);
-				entity.set(C_DNA_POSITION, annotation[11]);
-				entity.set(CDS_POSITION, annotation[12]);
-				entity.set(PROTEIN_POSITION, annotation[13]);
-				entity.set(DISTANCE_TO_FEATURE, annotation[14]);
-				entity.set(ERRORS, annotation[15]);
-				entity.set(LOF, lof);
-				entity.set(NMD, nmd);
-			}
-			else
-			{
-				LOG.info("No results for CHROM:{} POS:{} REF:{} ALT:{} ", entity.getString(VcfRepository.CHROM),
-						entity.getString(VcfRepository.POS), entity.getString(VcfRepository.REF),
-						entity.getString(VcfRepository.ALT));
-			}
+			return snpEffRunner.getSnpEffects(source).iterator();
 		}
 
 		@Override
 		public String canAnnotate(EntityMetaData repoMetaData)
 		{
 			return super.canAnnotate(repoMetaData);
+		}
+
+		@Override
+		public EntityMetaData getOutputMetaData(EntityMetaData sourceEMD)
+		{
+			return new VcfEffectsMetaData(sourceEMD.getSimpleName() + "_EFFECTS", sourceEMD.getPackage(), sourceEMD);
 		}
 
 		@Override
@@ -498,39 +246,14 @@ public class SnpEffAnnotator
 		@Override
 		public boolean annotationDataExists()
 		{
-			return getSnpEffPath() != null;
-		}
-
-		private String getSnpEffPath()
-		{
-			if ((pluginSettings != null) && (snpEffPath == null))
-			{
-				snpEffPath = RunAsSystemProxy
-						.runAsSystem(() -> pluginSettings.getString(SnpEffAnnotatorSettings.Meta.SNPEFF_JAR_LOCATION));
-
-				if (snpEffPath != null)
-				{
-					File snpEffFile = new File(snpEffPath);
-					if (snpEffFile.exists() && snpEffFile.isFile())
-					{
-						LOG.info("SnpEff found at: " + snpEffFile.getAbsolutePath());
-					}
-					else
-					{
-						LOG.debug("SnpEff not found at: " + snpEffFile.getAbsolutePath());
-						snpEffPath = null;
-					}
-				}
-			}
-
-			return snpEffPath;
+			return snpEffRunner.getSnpEffPath() != null;
 		}
 
 		@Override
 		public CmdLineAnnotatorSettingsConfigurer getCmdLineAnnotatorSettingsConfigurer()
 		{
 			return new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(
-					SnpEffAnnotatorSettings.Meta.SNPEFF_JAR_LOCATION, pluginSettings);
+					SnpEffAnnotatorSettings.Meta.SNPEFF_JAR_LOCATION, snpEffAnnotatorSettings);
 		}
 	}
 

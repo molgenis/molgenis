@@ -3,51 +3,60 @@
 // import static org.mockito.Mockito.mock;
 // import static org.mockito.Mockito.when;
 // import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+// import static org.molgenis.data.support.VcfEffectsMetaData.ANNOTATION;
+// import static org.molgenis.data.support.VcfEffectsMetaData.CDS_POSITION;
+// import static org.molgenis.data.support.VcfEffectsMetaData.C_DNA_POSITION;
+// import static org.molgenis.data.support.VcfEffectsMetaData.DISTANCE_TO_FEATURE;
+// import static org.molgenis.data.support.VcfEffectsMetaData.ERRORS;
+// import static org.molgenis.data.support.VcfEffectsMetaData.FEATURE_ID;
+// import static org.molgenis.data.support.VcfEffectsMetaData.FEATURE_TYPE;
+// import static org.molgenis.data.support.VcfEffectsMetaData.GENE_ID;
+// import static org.molgenis.data.support.VcfEffectsMetaData.GENE_NAME;
+// import static org.molgenis.data.support.VcfEffectsMetaData.HGVS_C;
+// import static org.molgenis.data.support.VcfEffectsMetaData.HGVS_P;
+// import static org.molgenis.data.support.VcfEffectsMetaData.PROTEIN_POSITION;
+// import static org.molgenis.data.support.VcfEffectsMetaData.PUTATIVE_IMPACT;
+// import static org.molgenis.data.support.VcfEffectsMetaData.RANK_TOTAL;
+// import static org.molgenis.data.support.VcfEffectsMetaData.TRANSCRIPT_BIOTYPE;
 // import static org.testng.Assert.assertEquals;
-// import static org.testng.Assert.fail;
 //
-// import java.io.BufferedReader;
 // import java.io.File;
-// import java.io.FileReader;
 // import java.io.IOException;
 // import java.util.ArrayList;
 // import java.util.Arrays;
 // import java.util.Collections;
-// import java.util.Iterator;
 // import java.util.List;
+// import java.util.stream.Collectors;
+// import java.util.stream.Stream;
 //
 // import org.molgenis.MolgenisFieldTypes;
 // import org.molgenis.data.AttributeMetaData;
-// import org.molgenis.data.DataService;
 // import org.molgenis.data.Entity;
 // import org.molgenis.data.annotation.utils.JarRunner;
+// import org.molgenis.data.annotator.websettings.SnpEffAnnotatorSettings;
 // import org.molgenis.data.support.DefaultAttributeMetaData;
 // import org.molgenis.data.support.DefaultEntityMetaData;
 // import org.molgenis.data.support.MapEntity;
+// import org.molgenis.data.support.VcfEffectsMetaData;
 // import org.molgenis.data.vcf.VcfRepository;
-// import org.springframework.context.annotation.Bean;
-// import org.springframework.test.context.ContextConfiguration;
-// import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 // import org.testng.annotations.BeforeMethod;
 // import org.testng.annotations.Test;
 //
-// import com.google.common.collect.Iterators;
-//
-// @ContextConfiguration(classes =
-// { SnpEffAnnotatorTest.Config.class, SnpEffAnnotator.class })
-// public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
+// public class SnpEffRunnerTest
 // {
 // private final ArrayList<Entity> entities = new ArrayList<>();;
 // private DefaultEntityMetaData metaDataCanAnnotate;
-// private SnpEffAnnotator.SnpEffRepositoryAnnotator snpEffRepositoryAnnotator;
+// private SnpEffRunner snpEffRunner;
 // private JarRunner jarRunner;
+// private VcfEffectsMetaData effectsEMD;
 //
 // @BeforeMethod
 // public void beforeMethod() throws IOException
 // {
-// SnpEffRunner runner = mock(SnpEffRunner.class);
+// jarRunner = mock(JarRunner.class);
+// SnpEffAnnotatorSettings settings = mock(SnpEffAnnotatorSettings.class);
 //
-// snpEffRepositoryAnnotator = new SnpEffAnnotator.SnpEffRepositoryAnnotator(runner, new MapEntity());
+// snpEffRunner = new SnpEffRunner(jarRunner, settings);
 //
 // metaDataCanAnnotate = new DefaultEntityMetaData("test");
 // AttributeMetaData attributeMetaDataChrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
@@ -161,47 +170,8 @@
 // entities.add(entity12);
 // entities.add(entity13);
 // entities.add(entity14);
-// }
 //
-// @Test
-// public void getInputTempFileTest()
-// {
-// BufferedReader br = null;
-// try
-// {
-// File file = snpEffRepositoryAnnotator.getInputVcfTempFile(entities);
-// br = new BufferedReader(new FileReader(file.getAbsolutePath()));
-//
-// assertEquals(br.readLine(), "1 13380 . C G");
-// assertEquals(br.readLine(), "1 13980 . T C");
-// assertEquals(br.readLine(), "1 78383467 . G A");
-// assertEquals(br.readLine(), "1 231094050 . GAA G,GAAA,GA");
-// assertEquals(br.readLine(), "2 171570151 . C T");
-// assertEquals(br.readLine(), "4 69964234 . CT CTT,CTTT,C");
-// assertEquals(br.readLine(), "15 66641732 . G A,C,T");
-// assertEquals(br.readLine(), "21 46924425 . CGGCCCCCCA C");
-// assertEquals(br.readLine(), "X 79943569 . T C");
-// assertEquals(br.readLine(), "2 191904021 . G T");
-// assertEquals(br.readLine(), "3 53219680 . G C");
-// assertEquals(br.readLine(), "2 219142023 . G A");
-// assertEquals(br.readLine(), "1 1115548 . G A");
-// assertEquals(br.readLine(), "21 45650009 . T TG, A, G");
-// }
-// catch (Exception e)
-// {
-// fail();
-// }
-// finally
-// {
-// try
-// {
-// br.close();
-// }
-// catch (IOException e)
-// {
-// e.printStackTrace();
-// }
-// }
+// effectsEMD = new VcfEffectsMetaData("test_EFFECTS", null, metaDataCanAnnotate);
 // }
 //
 // @Test
@@ -219,16 +189,15 @@
 // e.printStackTrace();
 // }
 //
-// Iterator<Entity> results = snpEffRepositoryAnnotator.annotateRepository(entities,
+// Stream<Entity> results = snpEffRunner.getSnpEffects(entities,
 // new File("src/test/resources/test-edgecases.vcf"));
-// int size = Iterators.size(results);
-// assertEquals(size, 14);
+// int size = results.collect(Collectors.toList()).size();
+// assertEquals(size, 24);
 // }
 //
 // @Test
-// public void annotateTest()
+// public void getSnpEffectsTest()
 // {
-//
 // try
 // {
 // List<String> params = Arrays.asList("-Xmx2g", null, "hg19", "-noStats", "-noLog", "-lof", "-canon", "-ud",
@@ -240,83 +209,39 @@
 // {
 // e.printStackTrace();
 // }
-// Iterator<Entity> results = snpEffRepositoryAnnotator.annotateRepository(
-// Collections.singletonList(entities.get(0)), new File("src/test/resources/test-snpeff.vcf"));
+// Stream<Entity> results = snpEffRunner.getSnpEffects(Collections.singletonList(entities.get(0)),
+// new File("src/test/resources/test-snpeff.vcf"));
 //
-// while (results.hasNext())
+// results.forEach(result -> {
+// Entity expected = new MapEntity(effectsEMD);
+//
+// // copy id from result because it's auto generated
+// expected.set(VcfEffectsMetaData.ID, result.getIdValue());
+// expected.set(VcfEffectsMetaData.ALT, result.get(VcfEffectsMetaData.ALT));
+// expected.set(VcfEffectsMetaData.GENE, "DDX11L1");
+// expected.set(VcfEffectsMetaData.VARIANT, entities.get(0));
+//
+// expected.set(ANNOTATION, "non_coding_exon_variant");
+// expected.set(PUTATIVE_IMPACT, "MODIFIER");
+// expected.set(GENE_NAME, "DDX11L1");
+// expected.set(GENE_ID, "DDX11L1");
+// expected.set(FEATURE_TYPE, "transcript");
+// expected.set(FEATURE_ID, "NR_046018.2");
+// expected.set(TRANSCRIPT_BIOTYPE, "Noncoding");
+// expected.set(RANK_TOTAL, "3/3");
+// expected.set(HGVS_C, "n.623C>G");
+// expected.set(HGVS_P, "");
+// expected.set(C_DNA_POSITION, "");
+// expected.set(CDS_POSITION, "");
+// expected.set(PROTEIN_POSITION, "");
+// expected.set(DISTANCE_TO_FEATURE, "");
+// expected.set(ERRORS, "");
+//
+// for (AttributeMetaData attributeMetaData : effectsEMD.getAtomicAttributes())
 // {
-// Entity result = results.next();
-// Entity expected = new MapEntity(metaDataCanAnnotate);
-//
-// expected.set(SnpEffAnnotator.ANNOTATION, "non_coding_exon_variant");
-// expected.set(SnpEffAnnotator.PUTATIVE_IMPACT, "MODIFIER");
-// expected.set(SnpEffAnnotator.GENE_NAME, "DDX11L1");
-// expected.set(SnpEffAnnotator.GENE_ID, "DDX11L1");
-// expected.set(SnpEffAnnotator.FEATURE_TYPE, "transcript");
-// expected.set(SnpEffAnnotator.FEATURE_ID, "NR_046018.2");
-// expected.set(SnpEffAnnotator.TRANSCRIPT_BIOTYPE, "Noncoding");
-// expected.set(SnpEffAnnotator.RANK_TOTAL, "3/3");
-// expected.set(SnpEffAnnotator.HGVS_C, "n.623C>G");
-// expected.set(SnpEffAnnotator.HGVS_P, "");
-// expected.set(SnpEffAnnotator.C_DNA_POSITION, "");
-// expected.set(SnpEffAnnotator.CDS_POSITION, "");
-// expected.set(SnpEffAnnotator.PROTEIN_POSITION, "");
-// expected.set(SnpEffAnnotator.DISTANCE_TO_FEATURE, "");
-// expected.set(SnpEffAnnotator.ERRORS, "");
-// expected.set(SnpEffAnnotator.LOF, "");
-// expected.set(SnpEffAnnotator.NMD, "");
-//
-// for (AttributeMetaData attributeMetaData : snpEffRepositoryAnnotator.getOutputMetaData().get(0)
-// .getAttributeParts())
-// {
+// System.out.println(attributeMetaData.getName());
 // assertEquals(result.get(attributeMetaData.getName()), expected.get(attributeMetaData.getName()));
 // }
-// }
-//
-// }
-//
-// @Test
-// public void parseOutputLineToEntityTest()
-// {
-// Entity entity = new MapEntity();
-// Entity snpEffEntity = new MapEntity();
-// snpEffEntity.set("ANN", "X\t12345\t.\tA\tT\tqual\tfilter\t0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15");
-// snpEffEntity.set("LOF", "(NOC2L|NOC2L|1|1.00)");
-// snpEffEntity.set("NMD", "(BRCA2|BRCA2|3|3.00)");
-//
-// snpEffRepositoryAnnotator.parseOutputLineToEntity(snpEffEntity, entity);
-// assertEquals(entity.get(SnpEffAnnotator.ANNOTATION), "1");
-// assertEquals(entity.get(SnpEffAnnotator.PUTATIVE_IMPACT), "2");
-// assertEquals(entity.get(SnpEffAnnotator.GENE_NAME), "3");
-// assertEquals(entity.get(SnpEffAnnotator.GENE_ID), "4");
-// assertEquals(entity.get(SnpEffAnnotator.FEATURE_TYPE), "5");
-// assertEquals(entity.get(SnpEffAnnotator.FEATURE_ID), "6");
-// assertEquals(entity.get(SnpEffAnnotator.TRANSCRIPT_BIOTYPE), "7");
-// assertEquals(entity.get(SnpEffAnnotator.RANK_TOTAL), "8");
-// assertEquals(entity.get(SnpEffAnnotator.HGVS_C), "9");
-// assertEquals(entity.get(SnpEffAnnotator.HGVS_P), "10");
-// assertEquals(entity.get(SnpEffAnnotator.C_DNA_POSITION), "11");
-// assertEquals(entity.get(SnpEffAnnotator.CDS_POSITION), "12");
-// assertEquals(entity.get(SnpEffAnnotator.PROTEIN_POSITION), "13");
-// assertEquals(entity.get(SnpEffAnnotator.DISTANCE_TO_FEATURE), "14");
-// assertEquals(entity.get(SnpEffAnnotator.ERRORS), "15");
-// assertEquals(entity.get(SnpEffAnnotator.LOF), "(NOC2L|NOC2L|1|1.00)");
-// assertEquals(entity.get(SnpEffAnnotator.NMD), "(BRCA2|BRCA2|3|3.00)");
-// }
-//
-// public static class Config
-// {
-// @Bean
-// public Entity snpEffAnnotatorSettings()
-// {
-// return new MapEntity();
-// }
-//
-// @Bean
-// public DataService dataService()
-// {
-// return mock(DataService.class);
-// }
-//
+// });
 // }
 // }

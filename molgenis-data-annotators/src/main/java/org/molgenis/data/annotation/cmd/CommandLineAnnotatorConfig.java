@@ -17,6 +17,7 @@ import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -87,6 +88,12 @@ public class CommandLineAnnotatorConfig
 	public Entity caddAnnotatorSettings()
 	{
 		return new MapEntity();
+	}
+
+	@Bean
+	public UuidGenerator uuidGenerator()
+	{
+		return new UuidGenerator();
 	}
 
 	@Bean
@@ -161,7 +168,8 @@ public class CommandLineAnnotatorConfig
 	 * @param configuredAnnotators
 	 * @return
 	 */
-	static HashMap<String, RepositoryAnnotator> getFreshAnnotators(Map<String, RepositoryAnnotator> configuredAnnotators)
+	static HashMap<String, RepositoryAnnotator> getFreshAnnotators(
+			Map<String, RepositoryAnnotator> configuredAnnotators)
 	{
 		HashMap<String, RepositoryAnnotator> configuredFreshAnnotators = new HashMap<String, RepositoryAnnotator>();
 		for (String annotator : configuredAnnotators.keySet())
