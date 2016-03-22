@@ -38,28 +38,38 @@ import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.DuplicateEntityException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisQueryException;
+import org.molgenis.data.MolgenisRepositoryCapabilitiesException;
 import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.MetaValidationUtils;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.Href;
 import org.molgenis.data.rest.service.RestService;
+import org.molgenis.data.support.EntityMetaDataUtils;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -84,6 +94,7 @@ class RestControllerV2
 	private final DataService dataService;
 	private final RestService restService;
 	private final MolgenisPermissionService permissionService;
+	private final PermissionSystemService permissionSystemService;
 	private final LanguageService languageService;
 
 	static UnknownEntityException createUnknownEntityException(String entityName)
@@ -91,17 +102,32 @@ class RestControllerV2
 		return new UnknownEntityException("Operation failed. Unknown entity: '" + entityName + "'");
 	}
 
+	static MolgenisDataAccessException createNoReadPermissionOnEntityException(String entityName)
+	{
+		return new MolgenisDataAccessException("No read permission on entity " + entityName);
+	}
+
+	static MolgenisDataException createNoWriteCapabilitiesOnEntityException(String entityName)
+	{
+		return new MolgenisRepositoryCapabilitiesException("No write capabilities for entity " + entityName);
+	}
+
+	static DuplicateEntityException createDuplicateEntityException(String entityName)
+	{
+		return new DuplicateEntityException("Operation failed. Duplicate entity: '" + entityName + "'");
+	}
+
 	static UnknownAttributeException createUnknownAttributeException(String entityName, String attributeName)
 	{
-		return new UnknownAttributeException(
-				"Operation failed. Unknown attribute: '" + attributeName + "', of entity: '" + entityName + "'");
+		return new UnknownAttributeException("Operation failed. Unknown attribute: '" + attributeName
+				+ "', of entity: '" + entityName + "'");
 	}
 
 	static MolgenisDataAccessException createMolgenisDataAccessExceptionReadOnlyAttribute(String entityName,
 			String attributeName)
 	{
-		return new MolgenisDataAccessException(
-				"Operation failed. Attribute '" + attributeName + "' of entity '" + entityName + "' is readonly");
+		return new MolgenisDataAccessException("Operation failed. Attribute '" + attributeName + "' of entity '"
+				+ entityName + "' is readonly");
 	}
 
 	static MolgenisDataException createMolgenisDataExceptionUnknownIdentifier(int count)
@@ -121,12 +147,13 @@ class RestControllerV2
 
 	@Autowired
 	public RestControllerV2(DataService dataService, MolgenisPermissionService permissionService,
-			RestService restService, LanguageService languageService)
+			RestService restService, LanguageService languageService, PermissionSystemService permissionSystemService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.permissionService = requireNonNull(permissionService);
 		this.restService = requireNonNull(restService);
 		this.languageService = requireNonNull(languageService);
+		this.permissionSystemService = requireNonNull(permissionSystemService);
 	}
 
 	@Autowired
@@ -137,9 +164,8 @@ class RestControllerV2
 	{
 		if (molgenisVersion == null) throw new IllegalArgumentException("molgenisVersion is null");
 		if (molgenisBuildDate == null) throw new IllegalArgumentException("molgenisBuildDate is null");
-		molgenisBuildDate = molgenisBuildDate.equals("${maven.build.timestamp}")
-				? new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new java.util.Date()) + " by Eclipse"
-				: molgenisBuildDate;
+		molgenisBuildDate = molgenisBuildDate.equals("${maven.build.timestamp}") ? new SimpleDateFormat(
+				"yyyy-MM-dd HH:mm").format(new java.util.Date()) + " by Eclipse" : molgenisBuildDate;
 
 		Map<String, String> result = new HashMap<>();
 		result.put("molgenisVersion", molgenisVersion);
@@ -284,12 +310,13 @@ class RestControllerV2
 			entities.forEach(entity -> {
 				String id = entity.getIdValue().toString();
 				ids.add(id.toString());
-				responseBody.getResources().add(new AutoValue_ResourcesResponseV2(
-						Href.concatEntityHref(RestControllerV2.BASE_URI, entityName, id)));
+				responseBody.getResources().add(
+						new AutoValue_ResourcesResponseV2(Href.concatEntityHref(RestControllerV2.BASE_URI, entityName,
+								id)));
 			});
 
-			responseBody.setLocation(Href.concatEntityCollectionHref(RestControllerV2.BASE_URI, entityName,
-					meta.getIdAttribute().getName(), ids));
+			responseBody.setLocation(Href.concatEntityCollectionHref(RestControllerV2.BASE_URI, entityName, meta
+					.getIdAttribute().getName(), ids));
 
 			response.setStatus(HttpServletResponse.SC_CREATED);
 			return responseBody;
@@ -299,7 +326,67 @@ class RestControllerV2
 			response.setStatus(HttpServletResponse.SC_NO_CONTENT);
 			throw e;
 		}
+	}
 
+	/**
+	 * Copy an entity.
+	 * 
+	 * @param entityName
+	 *            name of the entity that will be copied.
+	 * @param request
+	 *            CopyEntityRequestV2
+	 * @param response
+	 *            HttpServletResponse
+	 * @return String name of the new entity
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "copy/{entityName}", method = POST, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public String copyEntity(@PathVariable("entityName") String entityName,
+			@RequestBody @Valid CopyEntityRequestV2 request, HttpServletResponse response) throws Exception
+	{
+		// No repo
+		if (!dataService.hasRepository(entityName)) throw createUnknownEntityException(entityName);
+
+		Repository repositoryToCopyFrom = dataService.getRepository(entityName);
+
+		// Check if the entity already exists
+		String newFullName = EntityMetaDataUtils.buildFullName(repositoryToCopyFrom.getEntityMetaData().getPackage(),
+				request.getNewEntityName());
+		if (dataService.hasRepository(newFullName)) throw createDuplicateEntityException(newFullName);
+
+		// Validate the new name
+		MetaValidationUtils.validateName(request.getNewEntityName());
+
+		// Permission
+		boolean readPermission = permissionService.hasPermissionOnEntity(repositoryToCopyFrom.getName(),
+				Permission.READ);
+		if (!readPermission) throw createNoReadPermissionOnEntityException(entityName);
+
+		// Capabilities
+		boolean writableCapabilities = dataService.getCapabilities(repositoryToCopyFrom.getName()).contains(
+				RepositoryCapability.WRITABLE);
+		if (!writableCapabilities) throw createNoWriteCapabilitiesOnEntityException(entityName);
+
+		// Copy
+		this.copyRepositoryRunAsSystem(repositoryToCopyFrom, request.getNewEntityName(), request.getNewEntityName());
+
+		// Retrieve new repo
+		Repository repository = dataService.getRepository(newFullName);
+		permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
+				Collections.singletonList(repository.getName()));
+
+		response.addHeader("Location", Href.concatMetaEntityHrefV2(RestControllerV2.BASE_URI, repository.getName()));
+		response.setStatus(HttpServletResponse.SC_CREATED);
+
+		return repository.getName();
+	}
+
+	private void copyRepositoryRunAsSystem(Repository repositoryToCopyFrom, String newRepositoryId,
+			String newRepositoryLabel)
+	{
+		RunAsSystemProxy.runAsSystem(() -> dataService.copyRepository(repositoryToCopyFrom, newRepositoryId,
+				newRepositoryLabel));
 	}
 
 	/**
@@ -456,12 +543,12 @@ class RestControllerV2
 				error -> new ErrorMessage(error.getDefaultMessage())));
 	}
 
-	@ExceptionHandler(MolgenisValidationException.class)
+	@ExceptionHandler(MolgenisDataException.class)
 	@ResponseStatus(BAD_REQUEST)
 	@ResponseBody
-	public ErrorMessageResponse handleValidationException(MolgenisValidationException e)
+	public ErrorMessageResponse handleMolgenisDataException(MolgenisDataException e)
 	{
-		LOG.info("Validation exception occurred.", e);
+		LOG.info("Operation failed.", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -480,6 +567,15 @@ class RestControllerV2
 	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
 		LOG.error("Runtime exception occurred.", e);
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+	}
+
+	@ExceptionHandler(ConversionFailedException.class)
+	@ResponseStatus(BAD_REQUEST)
+	@ResponseBody
+	public ErrorMessageResponse handleConversionFailedException(ConversionFailedException e)
+	{
+		LOG.info("ConversionFailedException occurred", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
@@ -610,8 +706,8 @@ class RestControllerV2
 
 	private void createEntityMetaResponse(EntityMetaData entityMetaData, Fetch fetch, Map<String, Object> responseData)
 	{
-		responseData.put("_meta",
-				new EntityMetaDataResponseV2(entityMetaData, fetch, permissionService, dataService, languageService));
+		responseData.put("_meta", new EntityMetaDataResponseV2(entityMetaData, fetch, permissionService, dataService,
+				languageService));
 	}
 
 	private void createEntityValuesResponse(Entity entity, Fetch fetch, Map<String, Object> responseData)
@@ -680,8 +776,7 @@ class RestControllerV2
 						break;
 					case DATE_TIME:
 						Date dateTimeValue = entity.getDate(attrName);
-						String dateTimeValueStr = dateTimeValue != null ? getDateTimeFormat().format(dateTimeValue)
-								: null;
+						String dateTimeValueStr = dateTimeValue != null ? getDateTimeFormat().format(dateTimeValue) : null;
 						responseData.put(attrName, dateTimeValueStr);
 						break;
 					case DECIMAL:

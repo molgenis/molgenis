@@ -386,7 +386,16 @@ import FormControl from "./FormControl";
         	
         	api.update(this.state.entityInstance.href + '/' + attr.name, val, {}, false);
 	    },
-		_handleValueChange: function(e) {
+	    _handleValueChange: function(e) {
+	    	var self = this;
+	    	if (!self.valueChangeTimers) self.valueChangeTimers = [];
+	    	
+	    	if (self.valueChangeTimers[e.attr]) {
+	    		clearTimeout(self.valueChangeTimers[e.attr]);
+	    	}
+	    	self.valueChangeTimers[e.attr] = setTimeout(function(){self._doHandleValueChange(e)}, 300);
+	    },
+		_doHandleValueChange: function(e) {
 			var attribute = this.state.entity.allAttributes[e.attr];
 			if (attribute === undefined) return;//compound
 			
@@ -437,6 +446,8 @@ import FormControl from "./FormControl";
 		                	break;
 	                }
                 }
+				
+				clearTimeout(this.valueChangeTimers[e.attr]);
 			}.bind(this));
 		},
 		submit: function(e) {
@@ -510,8 +521,11 @@ import FormControl from "./FormControl";
 			}
 			this.props.onSubmitSuccess(e);
 		},
-		_handleSubmitError: function() {
+		_handleSubmitError: function(e) {
 			var message = this.props.mode === 'create' ? 'could not be created.' : 'changes could not be saved.';
+			if (e.responseJSON && e.responseJSON.errors && e.responseJSON.errors.length > 0 && e.responseJSON.errors[0].message) {
+				message += ' ' +  e.responseJSON.errors[0].message;
+			} 
 			this.setState({
 				submitMsg: {type: 'danger', message: this.state.entity.label + ' ' + message}
 			});
@@ -589,6 +603,9 @@ import FormControl from "./FormControl";
 	                else if(attr.range.max !== undefined) {
 	                    errorMessage = 'Please enter a value lower than or equal to ' + attr.range.max + '.';
 	                }
+	            }
+	            else if(type === 'DECIMAL' && !nullOrUndefinedValue && !$.isNumeric(value)) {
+	                errorMessage = 'Please enter a valid number.';
 	            }
 	            else if(attr.unique === true && !nullOrUndefinedValue) { // value uniqueness constraint
 	            	

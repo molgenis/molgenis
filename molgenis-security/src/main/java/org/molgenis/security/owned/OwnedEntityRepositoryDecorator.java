@@ -18,6 +18,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.OwnedEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.util.EntityUtils;
 
@@ -302,7 +303,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 
 	private boolean mustAddRowLevelSecurity()
 	{
-		if (SecurityUtils.currentUserIsSu()) return false;
+		if (SecurityUtils.currentUserIsSu() || SecurityUtils.currentUserHasRole(SystemSecurityToken.ROLE_SYSTEM)) return false;
 		return EntityUtils.doesExtend(getEntityMetaData(), OwnedEntityMetaData.ENTITY_NAME);
 	}
 
@@ -353,6 +354,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 
 	private boolean currentUserIsOwner(Entity entity)
 	{
+		if (null == entity) return false;
 		return SecurityUtils.getCurrentUsername().equals(getOwnerUserName(entity));
 	}
 }

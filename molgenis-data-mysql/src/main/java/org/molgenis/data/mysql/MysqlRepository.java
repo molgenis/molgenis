@@ -346,6 +346,14 @@ public class MysqlRepository extends AbstractRepository
 
 	protected String getMrefCreateSql(AttributeMetaData att) throws MolgenisModelException
 	{
+		// FIXME Temporary fix for #4623 - remove when switching to generated package/entity/attribut names
+		String foreignKeyConstraint = getTableName() + "_" + att.getName();
+		if ((foreignKeyConstraint.length() + "_ibfk_x".length()) > 63)
+		{
+			throw new MolgenisModelException("The combination of entity and attribute name [" + foreignKeyConstraint
+					+ "] is too long to be used as a foreign key constraint by MySQL. Please make sure the combined names are no longer than 56 characters by choosing shorter names.");
+		}
+
 		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 		StringBuilder sql = new StringBuilder();
 
