@@ -172,7 +172,8 @@ public class VcfUtilsTest
 		entities.add(entity2);
 		entities.add(entity3);
 
-		geneMeta.addAttribute("id", ROLE_ID).setDataType(STRING).setDescription("GENE Identifier (HGNC symbol)");
+		geneMeta.addAttribute("id", ROLE_ID).setDataType(STRING).setDescription("Random generated ID");
+		geneMeta.addAttribute("Gene").setDataType(STRING).setDescription("HGNC symbol");
 		effectMeta.addAttribute("id", ROLE_ID).setDataType(STRING).setDescription("effect identifier");
 		effectMeta.addAttribute(ALT).setDataType(STRING).setDescription("Alternative allele");
 		effectMeta.addAttribute("ALT_GENE").setDataType(STRING).setDescription("Alternative allele and gene");
@@ -345,7 +346,7 @@ public class VcfUtilsTest
 				actualOutputFileWriter.newLine();
 			}
 			actualOutputFileWriter.close();
-
+			
 			assertTrue(FileUtils.contentEqualsIgnoreEOL(expectedVcfFile, actualOutputFile, "UTF8"));
 		}
 		finally
@@ -439,7 +440,8 @@ public class VcfUtilsTest
 		for (int i = 0; i < altAlleles.size(); i++)
 		{
 			Entity geneEntity = new MapEntity(geneMeta);
-			geneEntity.set("id", "BRCA" + (i + 1));
+			geneEntity.set("id", i);
+			geneEntity.set("Gene", "BRCA" + (i + 1));
 			geneEntities.add(geneEntity);
 		}
 		return geneEntities;
