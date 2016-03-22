@@ -37,15 +37,22 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.datastructures.Sample;
 import org.molgenis.data.vcf.datastructures.Trio;
 import org.molgenis.vcf.meta.VcfMetaInfo;
 
+import com.google.common.collect.Iterators;
+import com.google.common.collect.PeekingIterator;
 import com.google.common.io.BaseEncoding;
+
+import autovalue.shaded.com.google.common.common.collect.Lists;
 
 public class VcfUtils
 {
@@ -122,6 +129,64 @@ public class VcfUtils
 		{
 			addSampleEntitiesToVcf(sampleEntities, writer);
 		}
+	}
+
+	public static Iterator<Entity> reverseXrefMrefRelation(Iterator<Entity> annotatedRecords)
+	{
+		return new Iterator<Entity>()
+		{
+			PeekingIterator<Entity> effects = Iterators.peekingIterator(annotatedRecords);
+
+			DefaultEntityMetaData resultEMD;
+
+			private EntityMetaData getResultEMD(EntityMetaData effectsEMD, EntityMetaData variantEMD)
+			{
+				if (resultEMD == null)
+				{
+					resultEMD = new DefaultEntityMetaData(variantEMD);
+					resultEMD.addAttribute("EFFECT").setDataType(MREF).setRefEntity(effectsEMD);
+				}
+				return resultEMD;
+			}
+
+			@Override
+			public boolean hasNext()
+			{
+				return effects.hasNext() ? true : false;
+			}
+
+			@Override
+			public Entity next()
+			{
+				Entity variant = null;
+				String peekedId;
+				List<Entity> effectsForVariant = Lists.newArrayList();
+				while (effects.hasNext())
+				{
+					peekedId = effects.peek().getEntity("VARIANT").getIdValue().toString();
+					if (variant == null || variant.getIdValue().toString() == peekedId)
+					{
+						Entity effect = effects.next();
+						variant = effect.getEntity("VARIANT");
+						effectsForVariant.add(effect);
+					}
+					else
+					{
+						Entity newVariant = new MapEntity(getResultEMD(effectsForVariant.get(0).getEntityMetaData(),
+								variant.getEntityMetaData()));
+						newVariant.set(variant);
+						newVariant.set("EFFECT", effectsForVariant);
+						effectsForVariant = Lists.newArrayList();
+						return newVariant;
+					}
+				}
+				Entity newVariant = new MapEntity(
+						getResultEMD(effectsForVariant.get(0).getEntityMetaData(), variant.getEntityMetaData()));
+				newVariant.set(variant);
+				newVariant.set("EFFECT", effectsForVariant);
+				return newVariant;
+			}
+		};
 	}
 
 	public static boolean checkPreviouslyAnnotatedAndAddMetadata(File inputVcfFile, BufferedWriter outputVCFWriter,

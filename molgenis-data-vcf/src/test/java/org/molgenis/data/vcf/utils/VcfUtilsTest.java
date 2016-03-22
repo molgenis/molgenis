@@ -24,6 +24,7 @@ import static org.molgenis.data.vcf.VcfRepository.REF;
 import static org.molgenis.data.vcf.VcfRepository.REF_META;
 import static org.molgenis.data.vcf.VcfRepository.SAMPLES;
 import static org.molgenis.data.vcf.utils.VcfUtils.checkPreviouslyAnnotatedAndAddMetadata;
+import static org.molgenis.data.vcf.utils.VcfUtils.reverseXrefMrefRelation;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -36,6 +37,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -55,6 +57,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
+
+import autovalue.shaded.com.google.common.common.collect.Iterators;
 
 @Test
 public class VcfUtilsTest
@@ -244,6 +248,67 @@ public class VcfUtilsTest
 			writer.close();
 		}
 		assertEquals(strWriter.toString(), "1	565286	rs1578391	C	T	.	flt	.	GT:DP:EC	1/1:5:5");
+	}
+
+	@Test
+
+	public void reverseXrefMrefRelationTest() throws IOException
+
+	{
+		DefaultEntityMetaData variantEntityMetaData = new DefaultEntityMetaData("VARIANT");
+		variantEntityMetaData.addAttribute("ID", ROLE_ID);
+		variantEntityMetaData.addAttribute("ALL_OTHER_VCF_STUFF");
+
+		Entity variantEntity1 = new MapEntity(variantEntityMetaData);
+		variantEntity1.set("ID", "variant1");
+		variantEntity1.set("ALL_OTHER_VCF_STUFF", "chrom pos ref alt");
+
+		Entity variantEntity2 = new MapEntity(variantEntityMetaData);
+		variantEntity2.set("ID", "variant2");
+		variantEntity2.set("ALL_OTHER_VCF_STUFF", "chrom pos ref alt");
+
+		DefaultEntityMetaData annotatedEntityMetaData = new DefaultEntityMetaData("EFFECT");
+		annotatedEntityMetaData.addAttribute("ID", ROLE_ID);
+		annotatedEntityMetaData.addAttribute("EFFECT").setDataType(STRING);
+		annotatedEntityMetaData.addAttribute("TYPE").setDataType(STRING);
+		annotatedEntityMetaData.addAttribute("VARIANT").setDataType(XREF).setRefEntity(variantEntityMetaData);
+
+		Entity effectEntity1 = new MapEntity(annotatedEntityMetaData);
+		effectEntity1.set("ID", 1);
+		effectEntity1.set("EFFECT", "HIGH");
+		effectEntity1.set("TYPE", "MISSENSE");
+		effectEntity1.set("VARIANT", variantEntity1);
+
+		Entity effectEntity2 = new MapEntity(annotatedEntityMetaData);
+		effectEntity2.set("ID", 2);
+		effectEntity2.set("EFFECT", "LOW");
+		effectEntity2.set("TYPE", "SYNONYMOUS");
+		effectEntity2.set("VARIANT", variantEntity2);
+
+		Entity effectEntity3 = new MapEntity(annotatedEntityMetaData);
+		effectEntity3.set("ID", 3);
+		effectEntity3.set("EFFECT", "LOW");
+		effectEntity3.set("TYPE", "SYNONYMOUS");
+		effectEntity3.set("VARIANT", variantEntity2);
+
+		DefaultEntityMetaData expectedEntityMetaData = new DefaultEntityMetaData(variantEntityMetaData);
+		expectedEntityMetaData.addAttribute("EFFECT").setDataType(MREF);
+
+		Entity expectedEntity1 = new MapEntity(expectedEntityMetaData);
+		expectedEntity1.set(variantEntity1);
+		expectedEntity1.set("EFFECT", newArrayList(effectEntity1));
+
+		Entity expectedEntity2 = new MapEntity(expectedEntityMetaData);
+		expectedEntity2.set(variantEntity2);
+		expectedEntity2.set("EFFECT", newArrayList(effectEntity2, effectEntity3));
+
+		Iterator<Entity> effectRecords = newArrayList(effectEntity1, effectEntity2, effectEntity3).iterator();
+		Iterator<Entity> expectedEntities = newArrayList(expectedEntity1, expectedEntity2).iterator();
+
+		Iterator<Entity> resultIterator = reverseXrefMrefRelation(effectRecords);
+
+		assertTrue(Arrays.equals(Iterators.toArray(resultIterator, Entity.class),
+				Iterators.toArray(expectedEntities, Entity.class)));
 	}
 
 	@Test
