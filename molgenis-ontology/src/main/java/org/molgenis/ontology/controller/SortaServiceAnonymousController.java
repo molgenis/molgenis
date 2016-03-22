@@ -66,7 +66,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 	@Autowired
 	private FileStore fileStore;
 
-	public static final String VIEW_NAME = "ontology-match-annonymous-view";
+	public static final String VIEW_NAME = "sorta-match-annonymous-view";
 	public static final String ID = "sorta_anonymous";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 

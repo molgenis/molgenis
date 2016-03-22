@@ -33,7 +33,7 @@
 		}}];
 		
 		React.render(molgenis.ui.jobs.JobsContainer({
-			url: '/plugin/ontologyservice/jobs'
+			url: '/plugin/sortaservice/jobs'
 		}, molgenis.ui.jobs.Jobs({}, 
 				molgenis.ui.jobs.JobTable({customColumns: customColumns}))), 
 		$('#job-container')[0]); 

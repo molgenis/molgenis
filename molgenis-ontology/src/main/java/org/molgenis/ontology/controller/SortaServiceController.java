@@ -1,6 +1,13 @@
 package org.molgenis.ontology.controller;
 
+import static org.molgenis.data.QueryRule.Operator.AND;
+import static org.molgenis.data.QueryRule.Operator.EQUALS;
+import static org.molgenis.data.QueryRule.Operator.GREATER_EQUAL;
+import static org.molgenis.data.QueryRule.Operator.LESS;
+import static org.molgenis.data.QueryRule.Operator.OR;
 import static org.molgenis.ontology.controller.SortaServiceController.URI;
+import static org.molgenis.ontology.sorta.meta.MatchingTaskContentEntityMetaData.SCORE;
+import static org.molgenis.ontology.sorta.meta.MatchingTaskContentEntityMetaData.VALIDATED;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -108,8 +115,8 @@ public class SortaServiceController extends MolgenisPluginController
 	private final LanguageService languageService;
 	private final MenuReaderService menuReaderService;
 
-	public static final String VIEW_NAME = "ontology-match-view";
-	public static final String ID = "ontologyservice";
+	public static final String VIEW_NAME = "sorta-match-view";
+	public static final String ID = "sortaservice";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	private static final String ILLEGAL_PATTERN = "[^0-9a-zA-Z_]";
 	private static final String ILLEGAL_PATTERN_REPLACEMENT = "_";
@@ -261,24 +268,22 @@ public class SortaServiceController extends MolgenisPluginController
 
 	@RequestMapping(method = POST, value = "/match/retrieve")
 	@ResponseBody
-	public EntityCollectionResponse matchResult(@RequestBody SortaServiceRequest ontologyServiceRequest,
+	public EntityCollectionResponse matchResult(@RequestBody SortaServiceRequest sortaServiceRequest,
 			HttpServletRequest httpServletRequest)
 	{
 		List<Map<String, Object>> entityMaps = new ArrayList<Map<String, Object>>();
-		String entityName = ontologyServiceRequest.getEntityName();
-		String filterQuery = ontologyServiceRequest.getFilterQuery();
-		String ontologyIri = ontologyServiceRequest.getOntologyIri();
-		EntityPager entityPager = ontologyServiceRequest.getEntityPager();
-		boolean isMatched = ontologyServiceRequest.isMatched();
+		String entityName = sortaServiceRequest.getEntityName();
+		String filterQuery = sortaServiceRequest.getFilterQuery();
+		String ontologyIri = sortaServiceRequest.getOntologyIri();
+		EntityPager entityPager = sortaServiceRequest.getEntityPager();
+		boolean isMatched = sortaServiceRequest.isMatched();
 		Entity entity = dataService.findOne(MatchingTaskEntityMetaData.ENTITY_NAME,
 				new QueryImpl().eq(MatchingTaskEntityMetaData.IDENTIFIER, entityName));
 		Double threshold = Double.parseDouble(entity.get(MatchingTaskEntityMetaData.THRESHOLD).toString());
 
 		QueryRule queryRuleInputEntities = new QueryRule(
-				Arrays.asList(new QueryRule(MatchingTaskContentEntityMetaData.VALIDATED, Operator.EQUALS, isMatched),
-						new QueryRule(isMatched ? Operator.OR : Operator.AND),
-						new QueryRule(MatchingTaskContentEntityMetaData.SCORE,
-								isMatched ? Operator.GREATER_EQUAL : Operator.LESS, threshold)));
+				Arrays.asList(new QueryRule(VALIDATED, EQUALS, isMatched), new QueryRule(isMatched ? OR : AND),
+						new QueryRule(SCORE, isMatched ? GREATER_EQUAL : LESS, threshold)));
 
 		QueryRule queryRuleMatchingTask = new QueryRule(MatchingTaskContentEntityMetaData.REF_ENTITY, Operator.EQUALS,
 				entityName);
@@ -522,8 +527,8 @@ public class SortaServiceController extends MolgenisPluginController
 		// Create a Sorta Job Execution
 		SortaJobExecution jobExecution = new SortaJobExecution(dataService);
 		jobExecution.setUser(userAccountService.getCurrentUser());
-		jobExecution.setResultUrl("/menu/main/ontologyservice/result/" + repository.getName());
-		jobExecution.setDeleteUrl("/menu/main/ontologyservice/delete/" + repository.getName());
+		jobExecution.setResultUrl(getSortaServiceMenuUrl() + "/result/" + repository.getName());
+		jobExecution.setDeleteUrl(getSortaServiceMenuUrl() + "/delete/" + repository.getName());
 		jobExecution.setTargetEntityName(repository.getName());
 		jobExecution.setOntologyIri(ontologyIri);
 
