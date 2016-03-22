@@ -1,7 +1,29 @@
 package org.molgenis.dataexplorer.controller;
 
-import com.google.gson.Gson;
-import freemarker.core.ParseException;
+import static com.google.common.collect.Maps.newHashMap;
+import static org.molgenis.dataexplorer.controller.DataExplorerController.ATTR_GALAXY_API_KEY;
+import static org.molgenis.dataexplorer.controller.DataExplorerController.ATTR_GALAXY_URL;
+import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -11,7 +33,6 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.Sort;
 import org.molgenis.data.annotation.meta.AnnotationJobExecution;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
@@ -43,27 +64,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URLDecoder;
-import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
+import com.google.gson.Gson;
 
-import static org.molgenis.dataexplorer.controller.DataExplorerController.ATTR_GALAXY_API_KEY;
-import static org.molgenis.dataexplorer.controller.DataExplorerController.ATTR_GALAXY_URL;
-import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import freemarker.core.ParseException;
 
 /**
  * Controller class for the data explorer.
@@ -84,9 +87,6 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String MOD_ANNOTATORS = "annotators";
 	public static final String MOD_ENTITIESREPORT = "entitiesreport";
 	public static final String MOD_DATA = "data";
-
-	@Autowired
-	private AppSettings appSettings;
 
 	@Autowired
 	private DataExplorerSettings dataExplorerSettings;
@@ -129,8 +129,16 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		boolean entityExists = false;
 		boolean hasEntityPermission = false;
+
 		List<EntityMetaData> entitiesMeta = dataService.getEntityNames().map(dataService::getEntityMetaData)
 				.collect(Collectors.toList());
+		Map<String, Long> entityCounts = newHashMap();
+		for (EntityMetaData entityMetaData : entitiesMeta)
+		{
+			String entityName = entityMetaData.getName();
+			entityCounts.put(entityName, dataService.count(entityName, new QueryImpl()));
+		}
+		model.addAttribute("entityCounts", entityCounts);
 		model.addAttribute("entitiesMeta", entitiesMeta);
 		if (selectedEntityName != null)
 		{
