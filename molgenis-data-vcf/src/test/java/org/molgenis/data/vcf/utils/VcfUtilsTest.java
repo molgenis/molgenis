@@ -6,7 +6,6 @@ import static org.molgenis.MolgenisFieldTypes.COMPOUND;
 import static org.molgenis.MolgenisFieldTypes.LONG;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.VcfRepository.ALT;
 import static org.molgenis.data.vcf.VcfRepository.ALT_META;
@@ -176,12 +175,12 @@ public class VcfUtilsTest
 		entities.add(entity2);
 		entities.add(entity3);
 
-		geneMeta.addAttribute("id", ROLE_ID).setDataType(STRING).setDescription("GENE Identifier (HGNC symbol)");
+		geneMeta.addAttribute("id", ROLE_ID).setDataType(STRING).setDescription("Random generated ID");
+		geneMeta.addAttribute("Gene").setDataType(STRING).setDescription("HGNC symbol");
 		effectMeta.addAttribute("id", ROLE_ID).setDataType(STRING).setDescription("effect identifier");
 		effectMeta.addAttribute(ALT).setDataType(STRING).setDescription("Alternative allele");
 		effectMeta.addAttribute("ALT_GENE").setDataType(STRING).setDescription("Alternative allele and gene");
-		effectMeta.addAttribute("GENE").setDataType(XREF).setRefEntity(geneMeta)
-				.setDescription("Gene identifier (HGNC symbol)");
+		effectMeta.addAttribute("GENE").setDataType(STRING).setDescription("Gene identifier (HGNC symbol)");
 		effectMeta.addAttribute("EFFECT").setDataType(STRING).setDescription("Level of effect on the gene");
 		effectMeta.addAttribute("TYPE").setDataType(STRING).setDescription("Type of mutation");
 
@@ -410,7 +409,6 @@ public class VcfUtilsTest
 				actualOutputFileWriter.newLine();
 			}
 			actualOutputFileWriter.close();
-
 			assertTrue(FileUtils.contentEqualsIgnoreEOL(expectedVcfFile, actualOutputFile, "UTF8"));
 		}
 		finally
@@ -504,7 +502,8 @@ public class VcfUtilsTest
 		for (int i = 0; i < altAlleles.size(); i++)
 		{
 			Entity geneEntity = new MapEntity(geneMeta);
-			geneEntity.set("id", "BRCA" + (i + 1));
+			geneEntity.set("id", i);
+			geneEntity.set("Gene", "BRCA" + (i + 1));
 			geneEntities.add(geneEntity);
 		}
 		return geneEntities;
@@ -515,12 +514,13 @@ public class VcfUtilsTest
 		List<Entity> effectEntities = newArrayList();
 		for (int i = 0; i < altAlleles.size(); i++)
 		{
+			String gene = "BRCA" + (i + 1);
 			Entity effectEntity = new MapEntity(effectMeta);
 			String altAllele = altAlleles.get(i);
 			effectEntity.set("id", "eff" + (i + 1));
 			effectEntity.set(ALT, altAllele);
-			effectEntity.set("ALT_GENE", altAllele + "_BRCA" + (i + 1));
-			effectEntity.set("GENE", getGeneEnttities(altAlleles));
+			effectEntity.set("ALT_GENE", altAllele + "_" + gene);
+			effectEntity.set("GENE", gene);
 			effectEntity.set("EFFECT", "HIGH");
 			effectEntity.set("TYPE", "STOP_GAIN");
 
