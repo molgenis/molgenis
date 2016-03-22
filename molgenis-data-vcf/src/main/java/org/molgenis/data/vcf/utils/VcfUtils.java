@@ -214,16 +214,8 @@ public class VcfUtils
 		{
 			if (!refAttribute.isSameAs(idAttribute))
 			{
-				if (refAttribute.getDataType().equals(XREF) || refAttribute.getDataType().equals(MREF))
-				{
-					if (secondValuePresent) additionalInfoFields = additionalInfoFields + PIPE_SEPARATOR;
-					additionalInfoFields = additionalInfoFields + entity.getEntity(refAttribute.getName()).getIdValue();
-				}
-				else
-				{
-					if (secondValuePresent) additionalInfoFields = additionalInfoFields + PIPE_SEPARATOR;
-					additionalInfoFields = additionalInfoFields + entity.get(refAttribute.getName());
-				}
+				if (secondValuePresent) additionalInfoFields = additionalInfoFields + PIPE_SEPARATOR;
+				additionalInfoFields = additionalInfoFields + entity.get(refAttribute.getName());
 				secondValuePresent = true;
 			}
 		}
