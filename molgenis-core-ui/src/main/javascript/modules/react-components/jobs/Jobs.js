@@ -12,20 +12,19 @@
 import React from 'react';
 import { RunningJobs } from './RunningJobs';
 import { JobTable } from './JobTable';
-import { JobModal } from './JobModal';
+import { Modal } from '../Modal';
+import { JobDetails } from './JobDetails';
 
 var Jobs = React.createClass({
     displayName: 'Jobs',
     propTypes: {
-        jobs: React.PropTypes.array.isRequired
-    },
-    getInitialState: function () {
-        return {selectedJobID: null};
+        jobs: React.PropTypes.array.isRequired,
+        onSelect: React.PropTypes.func.isRequired,
+        selectedJobId: React.PropTypes.string
     },
     render: function () {
-        const {jobs} = this.props;
-        const {selectedJobID} = this.state;
-        let selectedJob = jobs.find((job)=> job.identifier === selectedJobID);
+        const {jobs, onSelect, selectedJobId} = this.props;
+        const selectedJob = jobs.find((job)=> job.identifier === selectedJobId);
         const runningJobs = jobs.filter(job => job.status === 'RUNNING');
         const finishedJobs = jobs.filter(job => job.status !== 'RUNNING');
 
@@ -33,20 +32,25 @@ var Jobs = React.createClass({
             {runningJobs.length > 0 && <div className="row">
                 <div className="col-md-12">
                     <RunningJobs jobs={runningJobs}
-                                 onSelect={(id) => this.setState({selectedJobID:id})}/>
+                                 onSelect={onSelect}/>
                 </div>
             </div>}
             {finishedJobs.length > 0 && <div className="row">
                 <div className="col-md-12">
-                    <JobTable jobs={finishedJobs}
-                              onSelect={(id) => this.setState({selectedJobID:id})}/>
+                    {React.cloneElement(this.props.children,{
+                        jobs: finishedJobs,
+                        onSelect: onSelect
+                    })}
                 </div>
             </div>}
             {jobs.length === 0 && <div className="row">
                 <div className="col-md-12"><p>No jobs found.</p></div>
             </div>}
-            {selectedJob && <JobModal job={selectedJob}
-                                      onClose={() => this.setState({selectedJobID: null})}/>}
+            {selectedJob && <Modal onHide={() => onSelect(null)}
+                                   title="Job details" show={true} size={"large"}
+                                   footer={true}>
+                <JobDetails job={selectedJob}/>
+            </Modal>}
         </div>
     }
 });
