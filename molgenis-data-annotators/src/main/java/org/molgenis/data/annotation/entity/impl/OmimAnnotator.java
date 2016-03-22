@@ -46,7 +46,7 @@ public class OmimAnnotator
 	public static final String MIM_NUMBER = "OMIM_MIM_Numbers";
 	public static final String CYTO_LOCATIONS = "OMIM_Cyto_Locations";
 
-	public static String OMIM_RESOURCE = "OMIMResource";
+	public static final String OMIM_RESOURCE = "OMIMResource";
 
 	@Autowired
 	private Entity omimAnnotatorSettings;
