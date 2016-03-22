@@ -1,10 +1,7 @@
 package org.molgenis.data.semanticsearch.string;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -38,8 +35,6 @@ import com.google.common.collect.Lists;
 public class NGramDistanceAlgorithm
 {
 	private static int N_GRAMS = 2;
-	private static DecimalFormat DECIMAL_FORMATTER = new DecimalFormat("##.###",
-			new DecimalFormatSymbols(Locale.ENGLISH));
 	public static final Set<String> STOPWORDSLIST;
 
 	static
@@ -148,7 +143,7 @@ public class NGramDistanceAlgorithm
 			}
 		}
 
-		return Double.parseDouble(DECIMAL_FORMATTER.format(2.0 * numMatchedToken / totalToken * 100));
+		return 2.0 * numMatchedToken / totalToken * 100;
 	}
 
 	private static int getTotalNumTokens(Map<String, Integer> inputStringTokens)

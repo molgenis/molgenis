@@ -25,6 +25,8 @@ import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
 import org.molgenis.ontology.roc.InformationContentService;
+import org.molgenis.ontology.sorta.bean.OntologyTermHitEntity;
+import org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -246,7 +248,8 @@ public class SortaServiceImpl implements SortaService
 				}
 			}
 		}
-		MapEntity mapEntity = new MapEntity(matchedEntity);
+		OntologyTermHitEntity mapEntity = new OntologyTermHitEntity(matchedEntity,
+				OntologyTermHitEntityMetaData.INSTANCE);
 		mapEntity.set(SCORE, maxNgramScore);
 		mapEntity.set(COMBINED_SCORE, maxNgramIDFScore);
 		return mapEntity;
@@ -263,7 +266,8 @@ public class SortaServiceImpl implements SortaService
 	 */
 	private Entity calculateNGromOTAnnotations(Entity inputEntity, Entity ontologyTermEntity)
 	{
-		MapEntity mapEntity = new MapEntity(ontologyTermEntity);
+		OntologyTermHitEntity mapEntity = new OntologyTermHitEntity(ontologyTermEntity,
+				OntologyTermHitEntityMetaData.INSTANCE);
 		for (Entity annotationEntity : ontologyTermEntity
 				.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION))
 		{
