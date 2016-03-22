@@ -2,6 +2,7 @@ package org.molgenis.data.annotation.entity.impl;
 
 import static java.io.File.createTempFile;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.BOOL;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.TEXT;
 
@@ -42,6 +43,7 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.VcfRepositoryCollection;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,6 +95,11 @@ public class SnpEffAnnotator
 	public static final String LOF = "LOF";
 	public static final String NMD = "NMD";
 	public static final String ANN = "ANN";
+
+	public static final DefaultAttributeMetaData GENE_NAME_ATTR = new DefaultAttributeMetaData(GENE_NAME, BOOL).setDescription(
+			"Common gene name (HGNC). Optional: use closest gene when the variant is “intergenic”(source:http://snpeff.sourceforge.net)");
+	public static final DefaultAttributeMetaData IMPACT_ATTR = new DefaultAttributeMetaData(PUTATIVE_IMPACT, STRING).setDescription(
+			" A simple estimation of putative impact / deleteriousness : {HIGH, MODERATE, LOW, MODIFIER}(source:http://snpeff.sourceforge.net)");
 
 	public enum Impact
 	{
@@ -309,7 +316,7 @@ public class SnpEffAnnotator
 
 		public File getInputVcfTempFile(Iterable<Entity> source) throws IOException
 		{
-			File vcf = createTempFile(NAME, ".vcf");
+			File vcf = createTempFile(NAME, "."+ VcfRepositoryCollection.EXTENSION_VCF);
 			try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(vcf), CHARSET)))
 			{
 
@@ -382,22 +389,16 @@ public class SnpEffAnnotator
 		{
 			List<AttributeMetaData> attributes = new ArrayList<>();
 
-			DefaultAttributeMetaData annotation = new DefaultAttributeMetaData(ANNOTATION, STRING);
+			DefaultAttributeMetaData annotation = new DefaultAttributeMetaData(ANNOTATION, BOOL);
 			annotation.setDescription(
 					"Annotated using Sequence Ontology terms. Multiple effects can be concatenated using ‘&’ (source:http://snpeff.sourceforge.net)");
 			attributes.add(annotation);
 
-			DefaultAttributeMetaData putative_impact = new DefaultAttributeMetaData(PUTATIVE_IMPACT, STRING);
-			putative_impact.setDescription(
-					" A simple estimation of putative impact / deleteriousness : {HIGH, MODERATE, LOW, MODIFIER}(source:http://snpeff.sourceforge.net)");
-			attributes.add(putative_impact);
+			attributes.add(IMPACT_ATTR);
 
-			DefaultAttributeMetaData gene_name = new DefaultAttributeMetaData(GENE_NAME, STRING);
-			gene_name.setDescription(
-					"Common gene name (HGNC). Optional: use closest gene when the variant is “intergenic”(source:http://snpeff.sourceforge.net)");
-			attributes.add(gene_name);
+			attributes.add(GENE_NAME_ATTR);
 
-			DefaultAttributeMetaData gene_id = new DefaultAttributeMetaData(GENE_ID, STRING);
+			DefaultAttributeMetaData gene_id = new DefaultAttributeMetaData(GENE_ID, BOOL);
 			gene_id.setDescription("Gene ID");
 			attributes.add(gene_id);
 

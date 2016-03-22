@@ -16,8 +16,8 @@ import com.google.common.collect.ImmutableSet;
 public class VcfRepositoryCollection extends FileRepositoryCollection
 {
 	public static final String NAME = "VCF";
-	private static final String EXTENSION_VCF = "vcf";
-	private static final String EXTENSION_VCF_GZ = "vcf.gz";
+	public static final String EXTENSION_VCF = "vcf";
+	public static final String EXTENSION_VCF_GZ = "vcf.gz";
 	static final Set<String> EXTENSIONS = ImmutableSet.of(EXTENSION_VCF, EXTENSION_VCF_GZ);
 
 	private final File file;
