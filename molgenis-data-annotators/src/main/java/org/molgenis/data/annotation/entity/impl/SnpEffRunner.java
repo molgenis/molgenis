@@ -34,9 +34,9 @@ import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -91,7 +91,7 @@ public class SnpEffRunner
 		this.jarRunner = new JarRunnerImpl();
 	}
 
-	public Stream<Entity> getSnpEffects(Iterable<Entity> source)
+	public Iterator<Entity> getSnpEffects(Iterable<Entity> source)
 	{
 		try
 		{
@@ -105,11 +105,11 @@ public class SnpEffRunner
 	}
 
 	@SuppressWarnings("resource")
-	private Stream<Entity> getSnpEffects(Iterator<Entity> source, final File inputVcf)
+	private Iterator<Entity> getSnpEffects(Iterator<Entity> source, final File inputVcf)
 	{
 		try
 		{
-			if (!source.hasNext()) return Stream.empty();
+			if (!source.hasNext()) return Iterators.emptyIterator();
 
 			// get meta data by peeking at the first entity (work-around for issue #4701)
 			PeekingIterator<Entity> peekingIterator = Iterators.peekingIterator(source);
@@ -128,22 +128,52 @@ public class SnpEffRunner
 			DefaultEntityMetaData effectsEMD = new VcfEffectsMetaData(sourceEMD.getSimpleName() + "_EFFECTS",
 					sourceEMD.getPackage(), sourceEMD);
 
-			List<Entity> effectsEntities = Lists.newArrayList();
-			peekingIterator.forEachRemaining(sourceEntity -> {
-				String chromosome = sourceEntity.getString(VcfRepository.CHROM);
-				Long position = sourceEntity.getLong(VcfRepository.POS);
+			return new Iterator<Entity>()
+			{
+				Iterator<Entity> sourceEntities = peekingIterator;
+				SnpEffResultIterator resultEntities = snpEffResultIterator;
+				LinkedList<Entity> effects = Lists.newLinkedList();
 
-				if (chromosome != null && position != null)
+				@Override
+				public boolean hasNext()
 				{
-					Entity snpEffEntity = snpEffResultIterator.get(chromosome, position);
-					if (snpEffEntity != null)
+					if (sourceEntities.hasNext() || !effects.isEmpty())
 					{
-						effectsEntities.addAll(getSnpEffectsFromSnpEffEntity(sourceEntity, snpEffEntity, effectsEMD));
+						return true;
+					}
+					else
+					{
+						return false;
 					}
 				}
-			});
 
-			return effectsEntities.stream();
+				@Override
+				public Entity next()
+				{
+					if (effects.isEmpty())
+					{
+						// go to next source entity and get effects
+						Entity sourceEntity = sourceEntities.next();
+						String chromosome = sourceEntity.getString(VcfRepository.CHROM);
+						Long position = sourceEntity.getLong(VcfRepository.POS);
+
+						if (chromosome != null && position != null) // TODO could this happen?
+						{
+							Entity snpEffEntity = resultEntities.get(chromosome, position);
+							if (snpEffEntity != null)
+							{
+								effects.addAll(getSnpEffectsFromSnpEffEntity(sourceEntity, snpEffEntity, effectsEMD));
+							}
+							else
+							{
+								effects.add(getEmptyEffectsEntity(sourceEntity, effectsEMD));
+							}
+						}
+					}
+					return effects.removeFirst();
+				}
+
+			};
 		}
 		catch (IOException e)
 		{
@@ -153,6 +183,15 @@ public class SnpEffRunner
 		{
 			throw new MolgenisDataException("Exception running SnpEff", e);
 		}
+	}
+
+	private Entity getEmptyEffectsEntity(Entity sourceEntity, EntityMetaData effectsEMD)
+	{
+		MapEntity effect = new MapEntity(effectsEMD);
+		effect.set(ID, idGenerator.generateId());
+		effect.set(VARIANT, sourceEntity);
+
+		return effect;
 	}
 
 	// ANN=G|intron_variant|MODIFIER|LOC101926913|LOC101926913|transcript|NR_110185.1|Noncoding|5/5|n.376+9526G>C||||||,G|non_coding_exon_variant|MODIFIER|LINC01124|LINC01124|transcript|NR_027433.1|Noncoding|1/1|n.590G>C||||||;

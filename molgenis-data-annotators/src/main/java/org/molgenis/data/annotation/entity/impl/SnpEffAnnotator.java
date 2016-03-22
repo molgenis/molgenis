@@ -110,7 +110,7 @@ public class SnpEffAnnotator
 		@Override
 		public Iterator<Entity> annotate(Iterable<Entity> source)
 		{
-			return snpEffRunner.getSnpEffects(source).iterator();
+			return snpEffRunner.getSnpEffects(source);
 		}
 
 		@Override

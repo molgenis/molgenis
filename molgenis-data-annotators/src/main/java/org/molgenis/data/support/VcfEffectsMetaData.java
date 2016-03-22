@@ -34,8 +34,9 @@ public class VcfEffectsMetaData extends DefaultEntityMetaData
 		super(entityName, package_);
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
-		addAttribute(ALT).setNillable(false);
-		addAttribute(GENE).setNillable(false);
+
+		addAttribute(ALT);
+		addAttribute(GENE);
 
 		addAttribute(VARIANT).setNillable(false).setDataType(MolgenisFieldTypes.XREF).setRefEntity(sourceEMD);
 
