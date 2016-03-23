@@ -1,7 +1,9 @@
 package org.molgenis.data.annotation.cmd;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
+import static org.molgenis.MolgenisFieldTypes.MREF;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -249,8 +251,30 @@ public class CmdLineAnnotator
 						.forEach((attr) -> attributesToInclude.add(attr.getName()));
 			}
 
-			VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter,
-					annotator.getOutputMetaData(), attributesToInclude);
+			// If the annotator e.g. SnpEff creates an external repository, collect the output metadata into an mref entity
+			// This allows for the header to be written as 'EFFECT annotations: <ouput_attributes> | <ouput_attributes>'
+			List<AttributeMetaData> outputMetaData = newArrayList();
+			if (annotator instanceof AbstractExternalRepositoryAnnotator)
+			{
+				DefaultEntityMetaData effectRefEntity = new DefaultEntityMetaData(
+						annotator.getSimpleName() + "_EFFECTS");
+				for (AttributeMetaData outputAttribute : annotator.getOutputMetaData())
+				{
+					effectRefEntity.addAttributeMetaData(outputAttribute);
+				}
+				// EFFECT harcoded for SnpEff
+				// TODO When other AbstractExternalRepositoryAnnotator are created, solve this nicely
+				DefaultAttributeMetaData effect = new DefaultAttributeMetaData("EFFECT");
+				effect.setDataType(MREF).setRefEntity(effectRefEntity);
+				outputMetaData.add(effect);
+			}
+			else
+			{
+				outputMetaData = annotator.getOutputMetaData();
+			}
+
+			VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, outputMetaData,
+					attributesToInclude);
 			System.out.println("Now starting to process the data.");
 
 			DefaultEntityMetaData emd = (DefaultEntityMetaData) vcfRepo.getEntityMetaData();
