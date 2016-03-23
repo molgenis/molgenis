@@ -122,7 +122,7 @@ public class SnpEffAnnotator
 		@Override
 		public EntityMetaData getOutputMetaData(EntityMetaData sourceEMD)
 		{
-			return new VcfEffectsMetaData(sourceEMD.getSimpleName() + "_EFFECTS", sourceEMD.getPackage(), sourceEMD);
+			return new VcfEffectsMetaData(sourceEMD);
 		}
 
 		@Override

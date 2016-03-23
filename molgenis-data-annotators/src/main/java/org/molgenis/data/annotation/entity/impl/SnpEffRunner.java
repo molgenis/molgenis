@@ -125,8 +125,7 @@ public class SnpEffRunner
 
 			SnpEffResultIterator snpEffResultIterator = new SnpEffResultIterator(repo.iterator());
 
-			DefaultEntityMetaData effectsEMD = new VcfEffectsMetaData(sourceEMD.getSimpleName() + "_EFFECTS",
-					sourceEMD.getPackage(), sourceEMD);
+			DefaultEntityMetaData effectsEMD = new VcfEffectsMetaData(sourceEMD);
 
 			return new Iterator<Entity>()
 			{

@@ -4,10 +4,11 @@ import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Package;
 
 public class VcfEffectsMetaData extends DefaultEntityMetaData
 {
+	public static final String ENTITY_NAME_SUFFIX = "_EFFECTS";
+
 	public static final String ID = "id";
 	public static final String ALT = "ALT";
 	public static final String GENE = "Gene_Name";
@@ -29,15 +30,16 @@ public class VcfEffectsMetaData extends DefaultEntityMetaData
 	public static final String DISTANCE_TO_FEATURE = "Distance_to_feature";
 	public static final String ERRORS = "Errors";
 
-	public VcfEffectsMetaData(String entityName, Package package_, EntityMetaData sourceEMD)
+	public VcfEffectsMetaData(EntityMetaData sourceEMD)
 	{
-		super(entityName, package_);
+		super(sourceEMD.getSimpleName() + ENTITY_NAME_SUFFIX, sourceEMD.getPackage());
+
+		setBackend(sourceEMD.getBackend());
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
 
 		addAttribute(ALT);
 		addAttribute(GENE);
-
 		addAttribute(VARIANT).setNillable(false).setDataType(MolgenisFieldTypes.XREF).setRefEntity(sourceEMD);
 
 		addAttribute(ANNOTATION);
