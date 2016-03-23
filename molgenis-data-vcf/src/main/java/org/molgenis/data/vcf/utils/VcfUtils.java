@@ -222,32 +222,32 @@ public class VcfUtils
 		}
 		for (AttributeMetaData attribute : attributes)
 		{
-			if (!VCF_ATTRIBUTE_NAMES.contains(attribute.getName()))
+			String attributeName = attribute.getName();
+			if ((attribute.getDataType().equals(MREF) || attribute.getDataType().equals(XREF))
+					&& !VCF_ATTRIBUTE_NAMES.contains(attributeName) && !attributeName.equals(SAMPLES))
 			{
-				if ((attribute.getDataType().equals(MREF) || attribute.getDataType().equals(XREF))
-						&& !attribute.getName().equals(SAMPLES))
+				// If the MREF field is empty, no effects were found, so we do not add an EFFECT field to this entity
+				if (vcfEntity.get(attributeName) != null)
 				{
 					// We are dealing with non standard Xref and Mref attributes
 					// added by e.g. the SnpEff annotator,
 					// which is NOT the SAMPLE_ENTITIES attribute
-					additionalInfoFields = parseNonStandardMrefFieldsToInfoField(
-							vcfEntity.getEntities(attribute.getName()), attribute, additionalInfoFields);
-
+					additionalInfoFields = parseNonStandardRefFieldsToInfoField(vcfEntity.getEntities(attributeName),
+							attribute, additionalInfoFields);
 				}
 			}
-
 		}
 		return additionalInfoFields;
 	}
 
 	/**
-	 * Take non standard fields added by annotators like SnpEff, and parse there values into VCF info field format
+	 * Create a INFO field annotation and add values
 	 * 
 	 * @param refEntities
 	 * @param attribute
 	 * @param additionalInfoFields
 	 */
-	private static String parseNonStandardMrefFieldsToInfoField(Iterable<Entity> refEntities,
+	private static String parseNonStandardRefFieldsToInfoField(Iterable<Entity> refEntities,
 			AttributeMetaData attribute, String additionalInfoFields)
 	{
 		boolean secondValuePresent = false;
@@ -272,6 +272,14 @@ public class VcfUtils
 		return additionalInfoFields;
 	}
 
+	/**
+	 * Add the values of each EFFECT entity to the info field
+	 * 
+	 * @param additionalInfoFields
+	 * @param entity
+	 * @param refAttributes
+	 * @return
+	 */
 	private static String addEntityValuesToAdditionalInfoField(String additionalInfoFields, Entity entity,
 			Iterable<AttributeMetaData> refAttributes)
 	{
@@ -279,11 +287,13 @@ public class VcfUtils
 		AttributeMetaData idAttribute = entity.getEntityMetaData().getIdAttribute();
 		for (AttributeMetaData refAttribute : refAttributes)
 		{
-			if (!refAttribute.isSameAs(idAttribute))
+			if (!refAttribute.isSameAs(idAttribute) && !refAttribute.getDataType().equals(MREF)
+					&& !refAttribute.getDataType().equals(XREF))
 			{
 				if (secondValuePresent) additionalInfoFields = additionalInfoFields + PIPE_SEPARATOR;
 				additionalInfoFields = additionalInfoFields + entity.get(refAttribute.getName());
 				secondValuePresent = true;
+
 			}
 		}
 		return additionalInfoFields;

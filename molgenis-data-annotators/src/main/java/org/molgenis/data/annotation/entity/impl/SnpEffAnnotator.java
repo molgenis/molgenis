@@ -90,7 +90,11 @@ public class SnpEffAnnotator
 	public static class SnpEffRepositoryAnnotator extends AbstractExternalRepositoryAnnotator
 	{
 		private final AnnotatorInfo info = AnnotatorInfo.create(Status.READY, Type.EFFECT_PREDICTION, NAME,
-				"Genetic variant annotation and effect prediction toolbox. It annotates and predicts the effects of variants on genes (such as amino acid changes). ",
+				"Genetic variant annotation and effect prediction toolbox. "
+						+ "It annotates and predicts the effects of variants on genes (such as amino acid changes). "
+						+ "This annotator creates a new table with SnpEff output to be able to store mutli-allelic and multigenic results. "
+						+ "Results are NOT added to your existing dataset. "
+						+ "SnpEff results can found in the <your_dataset_name>_EFFECTS. ",
 				getOutputMetaData());
 		private SnpEffRunner snpEffRunner;
 		private Entity snpEffAnnotatorSettings;
