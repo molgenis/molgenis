@@ -12,6 +12,7 @@ import org.molgenis.data.annotator.websettings.VariantClassificationAnnotatorSet
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.VcfEffectsMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +60,7 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 						+ StreamSupport.stream(refAttributesList.spliterator(), false)
 						.map(AttributeMetaData::getName).collect(Collectors.joining(", ")));
 
-		emd.addAllAttributeMetaData(Arrays.asList(SnpEffAnnotator.GENE_NAME_ATTR, SnpEffAnnotator.IMPACT_ATTR,
+		emd.addAllAttributeMetaData(Arrays.asList(VcfEffectsMetaData.GENE_NAME_ATTR, VcfEffectsMetaData.IMPACT_ATTR,
 				refAttr, VcfRepository.ALT_META));
 
 		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData("Identifier"), ROLE_ID);
@@ -78,7 +79,7 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 
 		Entity effect_entity = new MapEntity(emd);
 		effect_entity.set(VcfRepository.ALT, "A");
-		effect_entity.set(SnpEffAnnotator.PUTATIVE_IMPACT, "HIGH");
+		effect_entity.set(VcfEffectsMetaData.PUTATIVE_IMPACT, "HIGH");
 		effect_entity.set(VariantClassificationAnnotator.VARIANT_ENTITY, variant_entity);
 
 		Iterator<Entity> results = annotator.annotate(Collections.singletonList(effect_entity));
@@ -108,7 +109,7 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 
 		Entity effect_entity = new MapEntity(emd);
 		effect_entity.set(VcfRepository.ALT, "A");
-		effect_entity.set(SnpEffAnnotator.PUTATIVE_IMPACT, "HIGH");
+		effect_entity.set(VcfEffectsMetaData.PUTATIVE_IMPACT, "HIGH");
 		effect_entity.set(VariantClassificationAnnotator.VARIANT_ENTITY, variant_entity);
 
 		Iterator<Entity> results = annotator.annotate(Collections.singletonList(effect_entity));
@@ -138,7 +139,7 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 
 		Entity effect_entity = new MapEntity(emd);
 		effect_entity.set(VcfRepository.ALT, "A");
-		effect_entity.set(SnpEffAnnotator.PUTATIVE_IMPACT, "HIGH");
+		effect_entity.set(VcfEffectsMetaData.PUTATIVE_IMPACT, "HIGH");
 		effect_entity.set(VariantClassificationAnnotator.VARIANT_ENTITY, variant_entity);
 
 		Iterator<Entity> results = annotator.annotate(Collections.singletonList(effect_entity));
@@ -168,8 +169,8 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 
 		Entity effect_entity = new MapEntity(emd);
 		effect_entity.set(VcfRepository.ALT, "A");
-		effect_entity.set(SnpEffAnnotator.PUTATIVE_IMPACT, "HIGH");
-		effect_entity.set(SnpEffAnnotator.GENE_NAME, "TFR2");
+		effect_entity.set(VcfEffectsMetaData.PUTATIVE_IMPACT, "HIGH");
+		effect_entity.set(VcfEffectsMetaData.GENE_NAME, "TFR2");
 		effect_entity.set(VariantClassificationAnnotator.VARIANT_ENTITY, variant_entity);
 
 		Iterator<Entity> results = annotator.annotate(Collections.singletonList(effect_entity));
@@ -198,8 +199,8 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 
 		Entity effect_entity = new MapEntity(emd);
 		effect_entity.set(VcfRepository.ALT, "T");
-		effect_entity.set(SnpEffAnnotator.PUTATIVE_IMPACT, "HIGH");
-		effect_entity.set(SnpEffAnnotator.GENE_NAME, "TFR2");
+		effect_entity.set(VcfEffectsMetaData.PUTATIVE_IMPACT, "HIGH");
+		effect_entity.set(VcfEffectsMetaData.GENE_NAME, "TFR2");
 		effect_entity.set(VariantClassificationAnnotator.VARIANT_ENTITY, variant_entity);
 
 		Iterator<Entity> results = annotator.annotate(Collections.singletonList(effect_entity));

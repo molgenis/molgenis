@@ -1,37 +1,9 @@
 package org.molgenis.data.vcf.utils;
 
-import static com.google.common.base.Joiner.on;
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.google.common.collect.Iterables.transform;
-import static org.molgenis.MolgenisFieldTypes.MREF;
-import static org.molgenis.MolgenisFieldTypes.XREF;
-import static org.molgenis.data.vcf.VcfRepository.ALT;
-import static org.molgenis.data.vcf.VcfRepository.CHROM;
-import static org.molgenis.data.vcf.VcfRepository.FILTER;
-import static org.molgenis.data.vcf.VcfRepository.FORMAT_GT;
-import static org.molgenis.data.vcf.VcfRepository.ID;
-import static org.molgenis.data.vcf.VcfRepository.INFO;
-import static org.molgenis.data.vcf.VcfRepository.NAME;
-import static org.molgenis.data.vcf.VcfRepository.POS;
-import static org.molgenis.data.vcf.VcfRepository.QUAL;
-import static org.molgenis.data.vcf.VcfRepository.REF;
-import static org.molgenis.data.vcf.VcfRepository.SAMPLES;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Scanner;
-
+import autovalue.shaded.com.google.common.common.collect.Lists;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.PeekingIterator;
+import com.google.common.io.BaseEncoding;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -48,11 +20,40 @@ import org.molgenis.data.vcf.datastructures.Sample;
 import org.molgenis.data.vcf.datastructures.Trio;
 import org.molgenis.vcf.meta.VcfMetaInfo;
 
-import com.google.common.collect.Iterators;
-import com.google.common.collect.PeekingIterator;
-import com.google.common.io.BaseEncoding;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import autovalue.shaded.com.google.common.common.collect.Lists;
+import static com.google.common.base.Joiner.on;
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.collect.Iterables.transform;
+import static org.molgenis.MolgenisFieldTypes.MREF;
+import static org.molgenis.MolgenisFieldTypes.XREF;
+import static org.molgenis.data.vcf.VcfRepository.ALT;
+import static org.molgenis.data.vcf.VcfRepository.CHROM;
+import static org.molgenis.data.vcf.VcfRepository.FILTER;
+import static org.molgenis.data.vcf.VcfRepository.FORMAT_GT;
+import static org.molgenis.data.vcf.VcfRepository.ID;
+import static org.molgenis.data.vcf.VcfRepository.INFO;
+import static org.molgenis.data.vcf.VcfRepository.NAME;
+import static org.molgenis.data.vcf.VcfRepository.POS;
+import static org.molgenis.data.vcf.VcfRepository.QUAL;
+import static org.molgenis.data.vcf.VcfRepository.REF;
+import static org.molgenis.data.vcf.VcfRepository.SAMPLES;
 
 public class VcfUtils
 {
@@ -176,7 +177,6 @@ public class VcfUtils
 								variant.getEntityMetaData()));
 						newVariant.set(variant);
 						newVariant.set("EFFECT", effectsForVariant);
-						effectsForVariant = Lists.newArrayList();
 						return newVariant;
 					}
 				}
@@ -208,32 +208,39 @@ public class VcfUtils
 	{
 		Iterable<AttributeMetaData> attributes = vcfEntity.getEntityMetaData().getAttributes();
 		String additionalInfoFields = "";
+
+		for (String attribute : VCF_ATTRIBUTE_NAMES)
+		{
+			String value = vcfEntity.getString(attribute);
+			if (value != null && !value.isEmpty())
+			{
+				writer.write(value);
+			}
+			else
+			{
+				writer.write('.');
+			}
+			writer.write('\t');
+		}
 		for (AttributeMetaData attribute : attributes)
 		{
-
-			if ((attribute.getDataType().equals(MREF) || attribute.getDataType().equals(XREF))
-					&& !VCF_ATTRIBUTE_NAMES.contains(attribute.getName()) && !attribute.getName().equals(SAMPLES))
+			if (!VCF_ATTRIBUTE_NAMES.contains(attribute.getName()))
 			{
-				// We are dealing with non standard Xref and Mref attributes
-				// added by e.g. the SnpEff annotator,
-				// which is NOT the SAMPLE_ENTITIES attribute
-				additionalInfoFields = parseNonStandardMrefFieldsToInfoField(vcfEntity.getEntities(attribute.getName()),
-						attribute, additionalInfoFields);
+				if ((attribute.getDataType().equals(MREF) || attribute.getDataType().equals(XREF))
+						&& !attribute.getName().equals(SAMPLES))
+				{
+					// We are dealing with non standard Xref and Mref attributes
+					// added by e.g. the SnpEff annotator,
+					// which is NOT the SAMPLE_ENTITIES attribute
+					additionalInfoFields = parseNonStandardMrefFieldsToInfoField(
+							vcfEntity.getEntities(attribute.getName()), attribute, additionalInfoFields);
 
-			}
-			else if (VCF_ATTRIBUTE_NAMES.contains(attribute.getName()))
-			{
-				String value = vcfEntity.getString(attribute.getName());
-				if (value != null && !value.isEmpty())
-				{
-					writer.write(value);
 				}
-				else
-				{
-					writer.write('.');
+				else{
+
 				}
-				writer.write('\t');
 			}
+
 		}
 		return additionalInfoFields;
 	}
@@ -249,19 +256,19 @@ public class VcfUtils
 			AttributeMetaData attribute, String additionalInfoFields)
 	{
 		boolean secondValuePresent = false;
-		for (Entity entity : refEntities)
+		for (Entity refEntity : refEntities)
 		{
-			Iterable<AttributeMetaData> refAttributes = entity.getEntityMetaData().getAttributes();
+			Iterable<AttributeMetaData> refAttributes = refEntity.getEntityMetaData().getAttributes();
 			if (!secondValuePresent)
 			{
 				additionalInfoFields = additionalInfoFields + attribute.getName() + "=";
-				additionalInfoFields = addEntityValuesToAdditionalInfoField(additionalInfoFields, entity,
+				additionalInfoFields = addEntityValuesToAdditionalInfoField(additionalInfoFields, refEntity,
 						refAttributes);
 			}
 			else
 			{
 				additionalInfoFields = additionalInfoFields + ",";
-				additionalInfoFields = addEntityValuesToAdditionalInfoField(additionalInfoFields, entity,
+				additionalInfoFields = addEntityValuesToAdditionalInfoField(additionalInfoFields, refEntity,
 						refAttributes);
 			}
 			secondValuePresent = true;
@@ -270,17 +277,17 @@ public class VcfUtils
 		return additionalInfoFields;
 	}
 
-	private static String addEntityValuesToAdditionalInfoField(String additionalInfoFields, Entity entity,
+	private static String addEntityValuesToAdditionalInfoField(String additionalInfoFields, Entity refEntity,
 			Iterable<AttributeMetaData> refAttributes)
 	{
 		boolean secondValuePresent = false;
-		AttributeMetaData idAttribute = entity.getEntityMetaData().getIdAttribute();
+		AttributeMetaData idAttribute = refEntity.getEntityMetaData().getIdAttribute();
 		for (AttributeMetaData refAttribute : refAttributes)
 		{
-			if (!refAttribute.isSameAs(idAttribute))
+			if (!refAttribute.isSameAs(idAttribute) && (refAttribute.getDataType() != XREF))
 			{
 				if (secondValuePresent) additionalInfoFields = additionalInfoFields + PIPE_SEPARATOR;
-				additionalInfoFields = additionalInfoFields + entity.get(refAttribute.getName());
+				additionalInfoFields = additionalInfoFields + refEntity.get(refAttribute.getName());
 				secondValuePresent = true;
 			}
 		}
@@ -706,6 +713,94 @@ public class VcfUtils
 		}
 
 		inputVcfFileScanner.close();
+		return result;
+	}
+
+	public static List<Entity> parse(EntityMetaData entityMetaData, String attributeName, Stream<Entity> inputStream)
+	{
+		return parse(entityMetaData, attributeName, inputStream, Collections.emptyList());
+	}
+
+	public static List<Entity> parse(EntityMetaData entityMetaData, String attributeName, Stream<Entity> inputStream,
+			List<AttributeMetaData> annotatorAttributes)
+	{
+		AttributeMetaData attributeToParse = entityMetaData.getAttribute(attributeName);
+		HashMap<String, Map<Integer, AttributeMetaData>> metadataMap = parseDescription(
+				attributeToParse.getDescription(), annotatorAttributes);
+
+		String entityName = metadataMap.keySet().iterator().next();
+		DefaultEntityMetaData xrefMetaData = new DefaultEntityMetaData(entityName);
+		xrefMetaData.addAttributeMetaData(new DefaultAttributeMetaData("identifier").setAuto(true).setVisible(false),
+				EntityMetaData.AttributeRole.ROLE_ID);
+		xrefMetaData.addAllAttributeMetaData(
+				com.google.common.collect.Lists.newArrayList(metadataMap.get(entityName).values()));
+		xrefMetaData.addAttributeMetaData(
+				new DefaultAttributeMetaData(entityMetaData.getSimpleName(), MolgenisFieldTypes.FieldTypeEnum.MREF));
+		List<Entity> results = new ArrayList<>();
+		for (Entity inputEntity : inputStream.collect(Collectors.toList()))
+		{
+			results.addAll(parseValue(xrefMetaData, metadataMap.get(entityName),
+					inputEntity.getString(attributeToParse.getName()), inputEntity));
+		}
+		return results;
+	}
+
+	private static HashMap<String, Map<Integer, AttributeMetaData>> parseDescription(String description,
+			List<AttributeMetaData> annotatorAttributes)
+	{
+		String[] step1 = description.split(":");
+		String entityName = org.apache.commons.lang.StringUtils.deleteWhitespace(step1[0]);
+		String[] attributeStrings = step1[1].split("\\|");
+		Map<Integer, AttributeMetaData> attributeMap = new HashMap<>();
+		Map<String, AttributeMetaData> annotatorAttributeMap = attributesToMap(annotatorAttributes);
+		for (int i = 0; i < attributeStrings.length; i++)
+		{
+			String attribute = attributeStrings[i];
+			MolgenisFieldTypes.FieldTypeEnum type = annotatorAttributeMap.containsKey(attribute)
+					? annotatorAttributeMap.get(attribute).getDataType().getEnumType()
+					: MolgenisFieldTypes.FieldTypeEnum.STRING;
+			AttributeMetaData attr = new DefaultAttributeMetaData(
+					org.apache.commons.lang.StringUtils.deleteWhitespace(attribute), type).setLabel(attribute);
+			attributeMap.put(i, attr);
+		}
+
+		HashMap<String, Map<Integer, AttributeMetaData>> result = new HashMap<>();
+		result.put(entityName, attributeMap);
+		return result;
+	}
+
+	private static Map<String, AttributeMetaData> attributesToMap(List<AttributeMetaData> attributeMetaDataList)
+	{
+		Map<String, AttributeMetaData> attributeMap = new HashMap<>();
+		for (AttributeMetaData attributeMetaData : attributeMetaDataList)
+		{
+			attributeMap.put(attributeMetaData.getName(), attributeMetaData);
+		}
+		return attributeMap;
+
+	}
+
+	private static List<Entity> parseValue(EntityMetaData metadata, Map<Integer, AttributeMetaData> attributesMap,
+			String value, Entity originalEntity)
+	{
+		List<Entity> result = new ArrayList<>();
+		String[] valuesPerEntity = value.split(",");
+
+		for (Integer i = 0; i < valuesPerEntity.length; i++)
+		{
+			String[] values = valuesPerEntity[i].split("\\|");
+
+			MapEntity singleResult = new MapEntity(metadata);
+			for (Integer j = 0; j < values.length; j++)
+			{
+				String attributeName = attributesMap.get(j).getName();
+				String attributeValue = values[j];
+				singleResult.set(attributeName, attributeValue);
+				singleResult.set(originalEntity.getEntityMetaData().getSimpleName(), originalEntity);
+
+			}
+			result.add(singleResult);
+		}
 		return result;
 	}
 

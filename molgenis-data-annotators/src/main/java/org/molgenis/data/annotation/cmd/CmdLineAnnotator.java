@@ -1,18 +1,14 @@
 package org.molgenis.data.annotation.cmd;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Arrays.asList;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.ConsoleAppender;
+import joptsimple.OptionException;
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AbstractExternalRepositoryAnnotator;
@@ -28,15 +24,18 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.env.JOptCommandLinePropertySource;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.ConsoleAppender;
-import joptsimple.OptionException;
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Arrays.asList;
 
 /**
  * 
@@ -223,7 +222,7 @@ public class CmdLineAnnotator
 
 		BufferedWriter outputVCFWriter = new BufferedWriter(
 				new OutputStreamWriter(new FileOutputStream(outputVCFFile), UTF_8));
-		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
+		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, inputVcfFile.getName());
 
 		try
 		{
@@ -262,8 +261,16 @@ public class CmdLineAnnotator
 					infoAttribute.addAttributePart(atomicAttribute);
 				}
 			}
-
-			Iterator<Entity> annotatedRecords = annotator.annotate(vcfRepo);
+			Iterable<Entity> entitiesToAnnotate;
+			if (annotator instanceof EffectsAnnotator)
+			{
+				entitiesToAnnotate = VcfUtils.parse(vcfRepo.getEntityMetaData(), "EFFECT", vcfRepo.stream());
+			}
+			else
+			{
+				entitiesToAnnotate = vcfRepo;
+			}
+			Iterator<Entity> annotatedRecords = annotator.annotate(entitiesToAnnotate);
 
 			if (annotator instanceof AbstractExternalRepositoryAnnotator)
 			{
@@ -343,4 +350,5 @@ public class CmdLineAnnotator
 		molgenisLogger.setLevel(Level.INFO);
 		molgenisLogger.setAdditive(false);
 	}
+
 }

@@ -8,6 +8,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.cmd.EffectsAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.impl.SnpEffAnnotator.Impact;
@@ -23,6 +24,7 @@ import org.molgenis.data.annotator.websettings.VariantClassificationAnnotatorSet
 import org.molgenis.data.importer.EmxFileOnlyMetaDataParser;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.VcfEffectsMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -74,7 +76,7 @@ public class VariantClassificationAnnotator
 	private Resources resources;
 
 	@Bean
-	public RepositoryAnnotator variantClassification()
+	public EffectsAnnotator variantClassification()
 	{
 		List<AttributeMetaData> attributes = new ArrayList<>();
 		DefaultAttributeMetaData classification = new DefaultAttributeMetaData(CLASSIFICATION,
@@ -112,7 +114,7 @@ public class VariantClassificationAnnotator
 										+ StreamSupport.stream(refAttributesList.spliterator(), false)
 												.map(AttributeMetaData::getName).collect(Collectors.joining(", ")));
 
-				requiredAttributes.addAll(Arrays.asList(SnpEffAnnotator.GENE_NAME_ATTR, SnpEffAnnotator.IMPACT_ATTR,
+				requiredAttributes.addAll(Arrays.asList(VcfEffectsMetaData.GENE_NAME_ATTR, VcfEffectsMetaData.IMPACT_ATTR,
 						refAttr, VcfRepository.ALT_META));
 				return requiredAttributes;
 			}
@@ -136,10 +138,10 @@ public class VariantClassificationAnnotator
 				Map<String, Double> exacMap = toMap(variantEntity.getString(VcfRepository.ALT),
 						variantEntity.getString(ExacAnnotator.EXAC_AF));
 
-				Impact impact = Impact.valueOf(inputEntity.getString(SnpEffAnnotator.PUTATIVE_IMPACT));
+				Impact impact = Impact.valueOf(inputEntity.getString(VcfEffectsMetaData.PUTATIVE_IMPACT));
 				Double exacMAF = exacMap.get(alt);
 				Double caddScaled = caddMap.get(alt);
-				String gene = inputEntity.getString(SnpEffAnnotator.GENE_NAME);
+				String gene = inputEntity.getString(VcfEffectsMetaData.GENE_NAME);
 
 				if (sourceEntitiesSize == 1)
 				{
@@ -170,7 +172,7 @@ public class VariantClassificationAnnotator
 				}
 			}
 		};
-		return new RepositoryAnnotatorImpl(entityAnnotator);
+		return new EffectsAnnotator(entityAnnotator);
 	}
 
 	@Bean

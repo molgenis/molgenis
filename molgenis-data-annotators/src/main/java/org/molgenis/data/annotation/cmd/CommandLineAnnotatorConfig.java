@@ -151,6 +151,12 @@ public class CommandLineAnnotatorConfig
 	}
 
 	@Bean
+	public Entity variantClassificationAnnotatorSettings()
+	{
+		return new MapEntity();
+	}
+
+	@Bean
 	DataService dataService()
 	{
 		return new DataServiceImpl();

@@ -1,7 +1,10 @@
 package org.molgenis.data.annotation.cmd;
 
-/**
- * Created by charbonb on 22/03/16.
- */
-public interface EffectsAnnotator {
+import org.molgenis.data.annotation.entity.EntityAnnotator;
+import org.molgenis.data.annotation.entity.impl.RepositoryAnnotatorImpl;
+
+public class EffectsAnnotator extends RepositoryAnnotatorImpl {
+    public EffectsAnnotator(EntityAnnotator entityAnnotator) {
+        super(entityAnnotator);
+    }
 }
