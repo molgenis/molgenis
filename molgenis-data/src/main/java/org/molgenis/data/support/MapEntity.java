@@ -1,16 +1,15 @@
 package org.molgenis.data.support;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Simple Entity implementation based on a Map
@@ -121,7 +120,7 @@ public class MapEntity extends AbstractEntity
 	{
 		if (entityMetaData != null)
 		{
-			return Iterables.transform(entityMetaData.getAttributes(), new Function<AttributeMetaData, String>()
+			return Iterables.transform(entityMetaData.getAtomicAttributes(), new Function<AttributeMetaData, String>()
 			{
 				@Override
 				public String apply(AttributeMetaData input)
