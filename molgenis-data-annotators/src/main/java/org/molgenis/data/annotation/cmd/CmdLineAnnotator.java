@@ -225,7 +225,7 @@ public class CmdLineAnnotator
 
 		BufferedWriter outputVCFWriter = new BufferedWriter(
 				new OutputStreamWriter(new FileOutputStream(outputVCFFile), UTF_8));
-		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
+		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, inputVcfFile.getName());
 
 		try
 		{
@@ -251,7 +251,8 @@ public class CmdLineAnnotator
 						.forEach((attr) -> attributesToInclude.add(attr.getName()));
 			}
 
-			// If the annotator e.g. SnpEff creates an external repository, collect the output metadata into an mref entity
+			// If the annotator e.g. SnpEff creates an external repository, collect the output metadata into an mref
+			// entity
 			// This allows for the header to be written as 'EFFECT annotations: <ouput_attributes> | <ouput_attributes>'
 			List<AttributeMetaData> outputMetaData = newArrayList();
 			if (annotator instanceof AbstractExternalRepositoryAnnotator)

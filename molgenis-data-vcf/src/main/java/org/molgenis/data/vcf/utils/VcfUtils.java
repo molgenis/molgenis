@@ -1,37 +1,9 @@
 package org.molgenis.data.vcf.utils;
 
-import static com.google.common.base.Joiner.on;
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.google.common.collect.Iterables.transform;
-import static org.molgenis.MolgenisFieldTypes.MREF;
-import static org.molgenis.MolgenisFieldTypes.XREF;
-import static org.molgenis.data.vcf.VcfRepository.ALT;
-import static org.molgenis.data.vcf.VcfRepository.CHROM;
-import static org.molgenis.data.vcf.VcfRepository.FILTER;
-import static org.molgenis.data.vcf.VcfRepository.FORMAT_GT;
-import static org.molgenis.data.vcf.VcfRepository.ID;
-import static org.molgenis.data.vcf.VcfRepository.INFO;
-import static org.molgenis.data.vcf.VcfRepository.NAME;
-import static org.molgenis.data.vcf.VcfRepository.POS;
-import static org.molgenis.data.vcf.VcfRepository.QUAL;
-import static org.molgenis.data.vcf.VcfRepository.REF;
-import static org.molgenis.data.vcf.VcfRepository.SAMPLES;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Scanner;
-
+import autovalue.shaded.com.google.common.common.collect.Lists;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.PeekingIterator;
+import com.google.common.io.BaseEncoding;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -48,11 +20,37 @@ import org.molgenis.data.vcf.datastructures.Sample;
 import org.molgenis.data.vcf.datastructures.Trio;
 import org.molgenis.vcf.meta.VcfMetaInfo;
 
-import com.google.common.collect.Iterators;
-import com.google.common.collect.PeekingIterator;
-import com.google.common.io.BaseEncoding;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Scanner;
 
-import autovalue.shaded.com.google.common.common.collect.Lists;
+import static com.google.common.base.Joiner.on;
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.common.collect.Iterables.transform;
+import static org.molgenis.MolgenisFieldTypes.MREF;
+import static org.molgenis.MolgenisFieldTypes.XREF;
+import static org.molgenis.data.vcf.VcfRepository.ALT;
+import static org.molgenis.data.vcf.VcfRepository.CHROM;
+import static org.molgenis.data.vcf.VcfRepository.FILTER;
+import static org.molgenis.data.vcf.VcfRepository.FORMAT_GT;
+import static org.molgenis.data.vcf.VcfRepository.ID;
+import static org.molgenis.data.vcf.VcfRepository.INFO;
+import static org.molgenis.data.vcf.VcfRepository.NAME;
+import static org.molgenis.data.vcf.VcfRepository.POS;
+import static org.molgenis.data.vcf.VcfRepository.QUAL;
+import static org.molgenis.data.vcf.VcfRepository.REF;
+import static org.molgenis.data.vcf.VcfRepository.SAMPLES;
 
 public class VcfUtils
 {
@@ -208,6 +206,20 @@ public class VcfUtils
 	{
 		Iterable<AttributeMetaData> attributes = vcfEntity.getEntityMetaData().getAttributes();
 		String additionalInfoFields = "";
+
+		for (String attribute : VCF_ATTRIBUTE_NAMES)
+		{
+			String value = vcfEntity.getString(attribute);
+			if (value != null && !value.isEmpty())
+			{
+				writer.write(value);
+			}
+			else
+			{
+				writer.write('.');
+			}
+			writer.write('\t');
+		}
 		for (AttributeMetaData attribute : attributes)
 		{
 			String attributeName = attribute.getName();
@@ -223,19 +235,6 @@ public class VcfUtils
 					additionalInfoFields = parseNonStandardRefFieldsToInfoField(vcfEntity.getEntities(attributeName),
 							attribute, additionalInfoFields);
 				}
-			}
-			else if (VCF_ATTRIBUTE_NAMES.contains(attributeName))
-			{
-				String value = vcfEntity.getString(attributeName);
-				if (value != null && !value.isEmpty())
-				{
-					writer.write(value);
-				}
-				else
-				{
-					writer.write('.');
-				}
-				writer.write('\t');
 			}
 		}
 		return additionalInfoFields;
