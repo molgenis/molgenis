@@ -157,7 +157,7 @@ public class SnpEffRunner
 						String chromosome = sourceEntity.getString(VcfRepository.CHROM);
 						Long position = sourceEntity.getLong(VcfRepository.POS);
 
-						if (chromosome != null && position != null) // TODO could this happen?
+						if (chromosome != null && position != null)
 						{
 							Entity snpEffEntity = resultEntities.get(chromosome, position);
 							if (snpEffEntity != null)
@@ -168,6 +168,10 @@ public class SnpEffRunner
 							{
 								effects.add(getEmptyEffectsEntity(sourceEntity, effectsEMD));
 							}
+						}
+						else
+						{
+							effects.add(getEmptyEffectsEntity(sourceEntity, effectsEMD));
 						}
 					}
 					return effects.removeFirst();
