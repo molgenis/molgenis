@@ -152,7 +152,41 @@ public class VcfUtils
 			@Override
 			public boolean hasNext()
 			{
-				return effects.hasNext() ? true : false;
+				return effects.hasNext();
+			}
+
+			private Entity newVariant(Entity variant, List<Entity> effectsForVariant)
+			{
+				EntityMetaData effectEMD = effectsForVariant.get(0).getEntityMetaData();
+				Entity newVariant = new MapEntity(getResultEMD(effectEMD, variant.getEntityMetaData()));
+				newVariant.set(variant);
+
+				if (effectsForVariant.size() > 1)
+				{
+					newVariant.set("EFFECT", effectsForVariant);
+				}
+				else
+				{
+					// is this an empty effect entity?
+					Entity entity = effectsForVariant.get(0);
+					boolean isEmpty = true;
+					for (AttributeMetaData attr : effectEMD.getAtomicAttributes())
+					{
+						if (attr.getName().equals("id") || attr.getName().equals("VARIANT"))
+						{
+							continue;
+						}
+						else if (entity.get(attr.getName()) != null)
+						{
+							isEmpty = false;
+							break;
+						}
+					}
+
+					if (!isEmpty) newVariant.set("EFFECT", effectsForVariant);
+				}
+
+				return newVariant;
 			}
 
 			@Override
@@ -172,19 +206,12 @@ public class VcfUtils
 					}
 					else
 					{
-						Entity newVariant = new MapEntity(getResultEMD(effectsForVariant.get(0).getEntityMetaData(),
-								variant.getEntityMetaData()));
-						newVariant.set(variant);
-						newVariant.set("EFFECT", effectsForVariant);
+						Entity newVariant = newVariant(variant, effectsForVariant);
 						effectsForVariant = Lists.newArrayList();
 						return newVariant;
 					}
 				}
-				Entity newVariant = new MapEntity(
-						getResultEMD(effectsForVariant.get(0).getEntityMetaData(), variant.getEntityMetaData()));
-				newVariant.set(variant);
-				newVariant.set("EFFECT", effectsForVariant);
-				return newVariant;
+				return newVariant(variant, effectsForVariant);
 			}
 		};
 	}

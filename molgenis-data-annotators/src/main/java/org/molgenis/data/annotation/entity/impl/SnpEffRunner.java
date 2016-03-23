@@ -223,10 +223,10 @@ public class SnpEffRunner
 			if (fields.length >= 15)
 			{
 				effect.set(ID, idGenerator.generateId());
-				effect.set(ALT, fields[0]);
-				effect.set(GENE, fields[4]);
 				effect.set(VARIANT, sourceEntity);
 
+				effect.set(ALT, fields[0]);
+				effect.set(GENE, fields[4]);
 				effect.set(ANNOTATION, fields[1]);
 				effect.set(PUTATIVE_IMPACT, fields[2]);
 				effect.set(GENE_NAME, fields[3]);
