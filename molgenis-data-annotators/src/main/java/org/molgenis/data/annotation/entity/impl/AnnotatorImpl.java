@@ -42,6 +42,13 @@ public class AnnotatorImpl extends QueryAnnotatorImpl implements EntityAnnotator
 				resultEntity.set(attr.getName(), getResourceAttributeValue(attr, filteredResult.get()));
 			}
 		}
+		else
+		{
+			for (AttributeMetaData attr : getInfo().getOutputAttributes())
+			{
+				resultEntity.set(attr.getName(), null);
+			}
+		}
 	}
 
 	/**

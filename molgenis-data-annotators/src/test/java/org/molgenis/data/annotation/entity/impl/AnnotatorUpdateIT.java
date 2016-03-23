@@ -2,6 +2,7 @@ package org.molgenis.data.annotation.entity.impl;
 
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,7 +10,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.vcf.VcfRepository;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -18,6 +18,9 @@ import org.testng.annotations.Test;
 public class AnnotatorUpdateIT
 {
 	/**
+	 * 
+	 * TODO: also test GoNL because it has custom QueryAnnotatorImpl !
+	 * 
 	 * Input:
 	 * 22	25599848	.	C	T,TA	.	.	CADD=1.0,2.0;CADD_SCALED=3.0,4.0;
 	 * 22	25599849	.	G	AT	.	.	CADD=5.0;CADD_SCALED=6.0;
@@ -62,9 +65,25 @@ public class AnnotatorUpdateIT
 
 				Entity entity = it.next();
 				System.out.println(entity.toString());
-			
-				//TODO
 
+				assertEquals(entity.get(CaddAnnotator.CADD_ABS).toString(), "6.956883,.");
+				assertEquals(entity.get(CaddAnnotator.CADD_SCALED).toString(), "33.0,.");
+				
+				entity = it.next();
+				assertEquals(entity.get(CaddAnnotator.CADD_ABS), null);
+				assertEquals(entity.get(CaddAnnotator.CADD_SCALED), null);
+				
+				entity = it.next();
+				assertEquals(entity.get(CaddAnnotator.CADD_ABS).toString(), ".,2.984226");
+				assertEquals(entity.get(CaddAnnotator.CADD_SCALED).toString(), ".,22.2");
+				
+				entity = it.next();
+				assertEquals(entity.get(CaddAnnotator.CADD_ABS).toString(), "-0.283077,.");
+				assertEquals(entity.get(CaddAnnotator.CADD_SCALED).toString(), "0.725,.");
+				
+				entity = it.next();
+				assertEquals(entity.get(CaddAnnotator.CADD_ABS).toString(), "3.177096");
+				assertEquals(entity.get(CaddAnnotator.CADD_SCALED).toString(), "22.7");
 			}
 		}
 	}
