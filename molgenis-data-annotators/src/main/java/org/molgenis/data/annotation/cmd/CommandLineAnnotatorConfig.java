@@ -142,6 +142,12 @@ public class CommandLineAnnotatorConfig
 	{
 		return new MapEntity();
 	}
+	
+	@Bean
+	public Entity omimAnnotatorSettings()
+	{
+		return new MapEntity();
+	}
 
 	@Bean
 	DataService dataService()
