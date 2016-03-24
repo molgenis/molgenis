@@ -516,6 +516,16 @@ public class SnpEffAnnotator
 			return new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(
 					SnpEffAnnotatorSettings.Meta.SNPEFF_JAR_LOCATION, pluginSettings);
 		}
+
+		/**
+		 * SnpEff annotator does not update
+		 * TODO - or does it?
+		 */
+		@Override
+		public Iterator<Entity> annotate(Iterable<Entity> source, boolean updateMode)
+		{
+			return this.annotate(source, false);
+		}
 	}
 
 }

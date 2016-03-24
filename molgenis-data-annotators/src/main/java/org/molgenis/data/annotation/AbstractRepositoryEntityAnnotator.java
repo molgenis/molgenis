@@ -15,6 +15,14 @@ public abstract class AbstractRepositoryEntityAnnotator extends AbstractReposito
 	@RunAsSystem
 	public Iterator<Entity> annotate(final Iterable<Entity> sourceIterable)
 	{
+		return annotate(sourceIterable, false);
+	}
+	
+	@Override
+	@Transactional
+	@RunAsSystem
+	public Iterator<Entity> annotate(final Iterable<Entity> sourceIterable, boolean updateMode)
+	{
 		Iterator<Entity> source = sourceIterable.iterator();
 		return new Iterator<Entity>()
 		{

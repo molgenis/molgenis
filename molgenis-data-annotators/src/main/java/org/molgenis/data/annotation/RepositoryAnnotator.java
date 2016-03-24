@@ -20,6 +20,9 @@ public interface RepositoryAnnotator
 
 	// add entityAnnotator
 	Iterator<Entity> annotate(Iterable<Entity> source);
+	
+	// add entityAnnotator, choose if you want to refresh or update existing annotations
+	Iterator<Entity> annotate(Iterable<Entity> source, boolean updateMode);
 
 	/**
 	 * Checks if folder and files that were set with a runtime property actually exist, or if a webservice can be

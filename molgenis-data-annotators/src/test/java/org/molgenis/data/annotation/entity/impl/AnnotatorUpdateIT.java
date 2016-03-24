@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.vcf.VcfRepository;
@@ -59,31 +60,59 @@ public class AnnotatorUpdateIT
 				RepositoryAnnotator caddAnnotator = annotators.get("cadd");
 				caddAnnotator.getCmdLineAnnotatorSettingsConfigurer().addSettings("src/test/resources/cadd/AnnotatorUpdateIT_CADD_ESP6500SI_7lines.tsv.gz");
 
-				Iterator<Entity> it = caddAnnotator.annotate(repo);
-				assertNotNull(it);
-				assertTrue(it.hasNext());
+				//first without updating
+				Iterator<Entity> noUpdateIt = caddAnnotator.annotate(repo, false);
+				assertNotNull(noUpdateIt);
+				assertTrue(noUpdateIt.hasNext());
 
-				Entity entity = it.next();
-				System.out.println(entity.toString());
-
+				Entity entity = noUpdateIt.next();
 				assertEquals(entity.get(CaddAnnotator.CADD_ABS).toString(), "6.956883,.");
 				assertEquals(entity.get(CaddAnnotator.CADD_SCALED).toString(), "33.0,.");
 				
-				entity = it.next();
+				entity = noUpdateIt.next();
 				assertEquals(entity.get(CaddAnnotator.CADD_ABS), null);
 				assertEquals(entity.get(CaddAnnotator.CADD_SCALED), null);
 				
-				entity = it.next();
+				entity = noUpdateIt.next();
 				assertEquals(entity.get(CaddAnnotator.CADD_ABS).toString(), ".,2.984226");
 				assertEquals(entity.get(CaddAnnotator.CADD_SCALED).toString(), ".,22.2");
 				
-				entity = it.next();
+				entity = noUpdateIt.next();
 				assertEquals(entity.get(CaddAnnotator.CADD_ABS).toString(), "-0.283077,.");
 				assertEquals(entity.get(CaddAnnotator.CADD_SCALED).toString(), "0.725,.");
 				
-				entity = it.next();
+				entity = noUpdateIt.next();
 				assertEquals(entity.get(CaddAnnotator.CADD_ABS).toString(), "3.177096");
 				assertEquals(entity.get(CaddAnnotator.CADD_SCALED).toString(), "22.7");
+				
+				// and now with updating
+				RepositoryAnnotator caddAnnotatorUpdating = annotators.get("cadd");
+				caddAnnotatorUpdating.getCmdLineAnnotatorSettingsConfigurer().addSettings("src/test/resources/cadd/AnnotatorUpdateIT_CADD_ESP6500SI_7lines.tsv.gz");
+				
+				Iterator<Entity> updateIt = caddAnnotatorUpdating.annotate(repo, true);
+				assertNotNull(updateIt);
+				assertTrue(updateIt.hasNext());
+
+				entity = updateIt.next();
+				assertEquals(entity.get(CaddAnnotator.CADD_ABS).toString(), "6.956883,2.0");
+				assertEquals(entity.get(CaddAnnotator.CADD_SCALED).toString(), "33.0,4.0");
+				
+				entity = noUpdateIt.next();
+				assertEquals(entity.get(CaddAnnotator.CADD_ABS), "5.0");
+				assertEquals(entity.get(CaddAnnotator.CADD_SCALED), "6.0");
+				
+				entity = noUpdateIt.next();
+				assertEquals(entity.get(CaddAnnotator.CADD_ABS), ".,2.984226");
+				assertEquals(entity.get(CaddAnnotator.CADD_SCALED), ".,22.2");
+				
+				entity = noUpdateIt.next();
+				assertEquals(entity.get(CaddAnnotator.CADD_ABS), "-0.283077,7.0");
+				assertEquals(entity.get(CaddAnnotator.CADD_SCALED), "0.725,8.0");
+				
+				entity = noUpdateIt.next();
+				assertEquals(entity.get(CaddAnnotator.CADD_ABS), "3.177096");
+				assertEquals(entity.get(CaddAnnotator.CADD_SCALED), "22.7");
+				
 			}
 		}
 	}
