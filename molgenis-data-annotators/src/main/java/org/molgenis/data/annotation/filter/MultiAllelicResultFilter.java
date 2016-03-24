@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,7 +56,7 @@ public class MultiAllelicResultFilter implements ResultFilter
 {
 
 	private List<AttributeMetaData> attributes;
-	boolean mergeMultilineResourceResults;
+	private boolean mergeMultilineResourceResults;
 	
 	public MultiAllelicResultFilter(List<AttributeMetaData> alleleSpecificAttributes, boolean mergeMultilineResourceResults)
 	{
@@ -174,7 +175,7 @@ public class MultiAllelicResultFilter implements ResultFilter
 		String pos = null;
 		
 		//collect entities to be merged by ref
-		HashMap<String, List<Entity>> refToMergedEntity = new HashMap<String, List<Entity>>();
+		LinkedHashMap<String, List<Entity>> refToMergedEntity = new LinkedHashMap<String, List<Entity>>();
 		
 		for (Entity resourceEntity : resourceEntities)
 		{
@@ -215,23 +216,24 @@ public class MultiAllelicResultFilter implements ResultFilter
 		{
 			boolean first = true;
 			Entity mergeWithMe = null;
-			for(Entity e : refToMergedEntity.get(refKey))
+			for(Entity entityToBeMerged : refToMergedEntity.get(refKey))
 			{
 				if(first)
 				{
-					mergeWithMe = e;
+					//merge all following entities with the first one
+					mergeWithMe = entityToBeMerged;
 					first = false;
 				}
 				else
 				{
-					//add-on alleles
-					mergeWithMe.set(VcfRepository.ALT, mergeWithMe.get(VcfRepository.ALT).toString() + "," + e.get(VcfRepository.ALT).toString());
+					//concatenate alleles
+					mergeWithMe.set(VcfRepository.ALT, mergeWithMe.get(VcfRepository.ALT).toString() + "," + entityToBeMerged.get(VcfRepository.ALT).toString());
 					
-					//add-on all allele specific attributes
+					//concatenate allele specific attributes
 					for(AttributeMetaData alleleSpecificAttributes : attributes)
 					{
 						String attrName = alleleSpecificAttributes.getName();	
-						mergeWithMe.set(attrName, mergeWithMe.get(attrName).toString() + "," + e.get(attrName).toString());
+						mergeWithMe.set(attrName, mergeWithMe.get(attrName).toString() + "," + entityToBeMerged.get(attrName).toString());
 					}
 				}
 			}
