@@ -219,7 +219,7 @@ public class SortaServiceImpl implements SortaService
 
 		Stream<Entity> lexicalMatchedOntologyTermEntities = dataService
 				.findAll(OntologyTermMetaData.ENTITY_NAME, new QueryImpl(finalQueryRules).pageSize(pageSize))
-				.map(matchedEntity -> addLexicalScoreToMatchedEntity(inputEntity, matchedEntity, ontologyIri));
+				.map(ontologyTerm -> addLexicalScoreToMatchedEntity(inputEntity, ontologyTerm, ontologyIri));
 
 		lexicalMatchedOntologyTermEntities.forEach(matchedEntity -> {
 			if (!relevantEntities.contains(matchedEntity))
@@ -229,7 +229,7 @@ public class SortaServiceImpl implements SortaService
 		});
 	}
 
-	Entity addLexicalScoreToMatchedEntity(Entity inputEntity, Entity matchedEntity, String ontologyIri)
+	Entity addLexicalScoreToMatchedEntity(Entity inputEntity, Entity ontologyTerm, String ontologyIri)
 	{
 		double maxNgramScore = 0;
 		double maxNgramIDFScore = 0;
@@ -238,7 +238,8 @@ public class SortaServiceImpl implements SortaService
 			String queryString = inputEntity.getString(inputAttrName);
 			if (StringUtils.isNotEmpty(queryString) && isAttrNameValidForLexicalMatch(inputAttrName))
 			{
-				Entity topMatchedSynonymEntity = calculateNGramOTSynonyms(ontologyIri, queryString, matchedEntity);
+				Entity topMatchedSynonymEntity = findSynonymWithHighestNgramScore(ontologyIri, queryString,
+						ontologyTerm);
 				if (maxNgramScore < topMatchedSynonymEntity.getDouble(SCORE))
 				{
 					maxNgramScore = topMatchedSynonymEntity.getDouble(SCORE);
@@ -249,7 +250,7 @@ public class SortaServiceImpl implements SortaService
 				}
 			}
 		}
-		OntologyTermHitEntity mapEntity = new OntologyTermHitEntity(matchedEntity,
+		OntologyTermHitEntity mapEntity = new OntologyTermHitEntity(ontologyTerm,
 				OntologyTermHitEntityMetaData.INSTANCE);
 		mapEntity.set(SCORE, maxNgramScore);
 		mapEntity.set(COMBINED_SCORE, maxNgramIDFScore);
@@ -296,7 +297,7 @@ public class SortaServiceImpl implements SortaService
 	 * @param ontologyTermEntity
 	 * @return
 	 */
-	private Entity calculateNGramOTSynonyms(String ontologyIri, String queryString, Entity ontologyTermEntity)
+	private Entity findSynonymWithHighestNgramScore(String ontologyIri, String queryString, Entity ontologyTermEntity)
 	{
 		Iterable<Entity> entities = ontologyTermEntity.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM);
 		if (Iterables.size(entities) > 0)

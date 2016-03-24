@@ -4,7 +4,7 @@
 	var restApi = new molgenis.RestClient();
 	var ontologyServiceRequest = null;
 	var result_container = null;
-	var reserved_identifier_field = 'Identifier';
+	var reserved_identifier_field = 'identifier';
 	var NO_MATCH_INFO = 'N/A';
 	var itermsPerPage = 5;
 	
@@ -48,7 +48,7 @@
 		
 		$('#sorta-download-button').click(function(){
 			$(this).parents('form:eq(0)').attr({
-				'action' : molgenis.getContextUrl() + '/match/download/' + ontologyServiceRequest.entityName,
+				'action' : molgenis.getContextUrl() + '/match/download/' + ontologyServiceRequest.sortaJobExecutionId,
 				'method' : 'GET'
 			}).submit();
 		});
@@ -66,7 +66,7 @@
 		function getMatchResultCount(callback){
 			$.ajax({
 				type : 'GET',
-				url : molgenis.getContextUrl() + '/count/' + ontologyServiceRequest.entityName,
+				url : molgenis.getContextUrl() + '/count/' + ontologyServiceRequest.sortaJobExecutionId,
 				contentType : 'application/json',
 				success : function(data) {
 					if(callback !== null && typeof callback === 'function'){
@@ -158,12 +158,12 @@
 		});
 	};
 	
-	molgenis.OntologyService.prototype.deleteMatchingTask = function(entityName, callback){
+	molgenis.OntologyService.prototype.deleteMatchingTask = function(sortaJobExecutionId, callback){
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + '/delete',
 			async : false,
-			data : JSON.stringify(entityName),
+			data : JSON.stringify(sortaJobExecutionId),
 			contentType : 'application/json',
 			success : function() {
 				if(callback) callback();
@@ -175,31 +175,31 @@
 		var row = $('<tr />');
 		row.append(gatherInputInfoHelper(responseData.inputTerm));
 		row.append(gatherOntologyInfoHelper(responseData.inputTerm, responseData.ontologyTerm));
-		$('<td />').append(responseData.matchedTerm.Score ? responseData.matchedTerm.Score.toFixed(2) + '%' : NO_MATCH_INFO).appendTo(row);
+		$('<td />').append(responseData.matchedTerm.score ? responseData.matchedTerm.score.toFixed(2) + '%' : NO_MATCH_INFO).appendTo(row);
 		if(matched){
-			$('<td />').append('<span class="glyphicon ' + (responseData.matchedTerm.Validated ? 'glyphicon-ok' : 'glyphicon-remove') + '"></span>').appendTo(row);
-			$('<td />').append(responseData.matchedTerm.Validated ? '<button type="button" class="btn btn-default"><span class="glyphicon glyphicon-trash"</span></button>':'').appendTo(row);
+			$('<td />').append('<span class="glyphicon ' + (responseData.matchedTerm.validated ? 'glyphicon-ok' : 'glyphicon-remove') + '"></span>').appendTo(row);
+			$('<td />').append(responseData.matchedTerm.validated ? '<button type="button" class="btn btn-default"><span class="glyphicon glyphicon-trash"</span></button>':'').appendTo(row);
 			row.find('button:eq(0)').click(function(){
-				matchEntity(responseData.inputTerm.Identifier, ontologyServiceRequest.entityName, function(data){
+				matchEntity(responseData.inputTerm.Identifier, ontologyServiceRequest.sortaJobExecutionId, function(data){
 					var updatedMappedEntity = {};
 					$.map(responseData.matchedTerm, function(val, key){
-						if(key !== 'Identifier') updatedMappedEntity[key] = val;
-						if(key === 'Validated') updatedMappedEntity[key] = false;
+						if(key !== 'identifier') updatedMappedEntity[key] = val;
+						if(key === 'validated') updatedMappedEntity[key] = false;
 					});
 					if(data.ontologyTerms && data.ontologyTerms.length > 0){
 						var ontologyTerm = data.ontologyTerms[0];
-						updatedMappedEntity['Score'] = ontologyTerm.Score;
-						updatedMappedEntity['Match_term'] = ontologyTerm.ontologyTermIRI;
+						updatedMappedEntity['score'] = ontologyTerm.Score;
+						updatedMappedEntity['matchTerm'] = ontologyTerm.ontologyTermIRI;
 					}else{
-						updatedMappedEntity['Score'] = 0;
-						updatedMappedEntity['Match_term'] = null;
+						updatedMappedEntity['score'] = 0;
+						updatedMappedEntity['matchTerm'] = null;
 					}
-					restApi.update('/api/v1/MatchingTaskContent/' + responseData.matchedTerm.Identifier, updatedMappedEntity, createCallBackFunction(), true);
+					restApi.update('/api/v1/'+ontologyServiceRequest.sortaJobExecutionId+'/' + responseData.matchedTerm.identifier, updatedMappedEntity, createCallBackFunction(), true);
 				});
 			});
 		}else{
 			var button = $('<button class="btn btn-default" type="button">Match</button>').click(function(){
-				matchEntity(responseData.inputTerm.Identifier, ontologyServiceRequest.entityName, function(data){
+				matchEntity(responseData.inputTerm.Identifier, ontologyServiceRequest.sortaJobExecutionId, function(data){
 					createTableForCandidateMappings(responseData.inputTerm, data, row, page);
 				})
 			});
@@ -209,7 +209,10 @@
 	}
 	
 	function createTableForCandidateMappings(inputEntity, data, row, page){
-		
+		if( data.message ){
+			console.log('Error fetching candidate mappings', data.message);
+			throw data.message;
+		}
 		var container = $('<div class="row"></div>').css({'margin-bottom':'20px'});
 		//Hide existing table
 		row.parents('table:eq(0)').hide();
@@ -224,16 +227,16 @@
 		//Add a unknownButton for users to choose 'Unknown' for the input term
 		var unknownButton = $('<button type="button" class="btn btn-danger">No match</button>').
 			css({'margin-bottom':'10px','margin-right':'10px','float':'right'}).click(function(){
-			getMappingEntity(inputEntity.Identifier, ontologyServiceRequest.entityName, function(data){
+			getMappingEntity(inputEntity.identifier, ontologyServiceRequest.sortaJobExecutionId, function(data){
 				if(data.items.length > 0){
 					var mappedEntity = data.items[0];
-					var href = '/api/v1/MatchingTaskContent/' + mappedEntity.Identifier;
+					var href = '/api/v1/'+ontologyServiceRequest.sortaJobExecutionId+'/' + mappedEntity.identifier;
 					var updatedMappedEntity = {};
 					$.map(mappedEntity, function(val, key){
-						if(key !== 'Identifier') updatedMappedEntity[key] = val;
-						if(key === 'Validated') updatedMappedEntity[key] = true;
-						if(key === 'Score') updatedMappedEntity[key] = 0;
-						if(key === 'Match_term') updatedMappedEntity[key] = null;
+						if(key !== 'identifier') updatedMappedEntity[key] = val;
+						if(key === 'validated') updatedMappedEntity[key] = true;
+						if(key === 'score') updatedMappedEntity[key] = 0;
+						if(key === 'matchTerm') updatedMappedEntity[key] = null;
 					});
 					restApi.update(href, updatedMappedEntity, createCallBackFunction(), true);
 				}
@@ -269,16 +272,16 @@
 				row.append('<td><button type="button" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span></button></td>');
 				row.data('ontologyTerm', ontologyTerm);
 				row.find('button:eq(0)').click(function(){
-					getMappingEntity(inputEntity.Identifier, ontologyServiceRequest.entityName, function(data){
+					getMappingEntity(inputEntity.Identifier, ontologyServiceRequest.sortaJobExecutionId, function(data){
 						if(data.items.length > 0){
 							var mappedEntity = data.items[0];
-							var href = '/api/v1/MatchingTaskContent/' + mappedEntity.Identifier;
+							var href = '/api/v1/'+ontologyServiceRequest.sortaJobExecutionId+'/' + mappedEntity.identifier;
 							var updatedMappedEntity = {};
 							$.map(mappedEntity, function(val, key){
-								if(key === 'Validated') updatedMappedEntity[key] = true;
-								else if(key === 'Match_term') updatedMappedEntity['Match_term'] = row.data('ontologyTerm').ontologyTermIRI;
-								else if(key === 'Score') updatedMappedEntity['Score'] = row.data('ontologyTerm').Score;
-								else if(key !== 'Identifier') updatedMappedEntity[key] = val;
+								if(key === 'validated') updatedMappedEntity[key] = true;
+								else if(key === 'matchTerm') updatedMappedEntity.matchTerm = row.data('ontologyTerm').ontologyTermIRI;
+								else if(key === 'score') updatedMappedEntity.score = row.data('ontologyTerm').score;
+								else if(key !== 'identifier') updatedMappedEntity[key] = val;
 							});
 							restApi.update(href, updatedMappedEntity, createCallBackFunction(), true);
 						}
@@ -296,30 +299,27 @@
 		return {'success' : function(){ molgenis.OntologyService.prototype.renderPage();}, 'error' : function(){molgenis.OntologyService.prototype.renderPage();}};
 	}
 	
-	function getMappingEntity(inputTermIdentifier, entityName, callback){
-		var mappedEntity = restApi.getAsync('/api/v1/MatchingTaskContent/', {
+	function getMappingEntity(inputTermIdentifier, sortaJobExecutionId, callback){
+		var mappedEntity = restApi.getAsync('/api/v1/'+sortaJobExecutionId, {
 			'q' : [{
-				'field' : 'Input_term',
+				'field' : 'inputTerm',
 				'operator' : 'EQUALS',
 				'value' : inputTermIdentifier
-			},{'operator' : 'AND'},{
-				'field' : 'Ref_entity',
-				'operator' : 'EQUALS',
-				'value' : entityName
 			}]
 		}, function(data){
 			if(callback) callback(data);
 		});
 	}
 	
-	function matchEntity(inputTermIdentifier, entityName, callback){
+	function matchEntity(inputTermIdentifier, sortaJobExecutionId, callback){
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + '/match/entity',
 			async : false,
-			data : JSON.stringify({'Identifier' : inputTermIdentifier, 'entityName' : entityName}),
+			data : JSON.stringify({'identifier' : inputTermIdentifier, 'sortaJobExecutionId' : sortaJobExecutionId}),
 			contentType : 'application/json',
 			success : function(data) {
+				if(data.message) throw data.message;
 				if(callback) callback(data);
 			}
 		});
@@ -329,7 +329,7 @@
 		var inputTermTd = $('<td />');
 		if(inputTerm){
 			$.map(inputTerm ? inputTerm : {}, function(val, key){
-				if(key !== reserved_identifier_field) inputTermTd.append('<div>' + key + ' : ' + val + '</div>');
+				if(key.toLowerCase() !== reserved_identifier_field.toLowerCase()) inputTermTd.append('<div>' + key + ' : ' + val + '</div>');
 			});
 		}
 		return inputTermTd;

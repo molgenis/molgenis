@@ -4,25 +4,25 @@ import org.molgenis.data.rest.EntityPager;
 
 public class SortaServiceRequest
 {
-	private final String entityName;
+	private final String sortaJobExecutionId;
 	private final String ontologyIri;
 	private final String filterQuery;
 	private final boolean matched;
 	private final EntityPager entityPager;
 
-	public SortaServiceRequest(String entityName, String ontologyIri, String filterQuery, boolean matched,
+	public SortaServiceRequest(String sortaJobExecutionId, String ontologyIri, String filterQuery, boolean matched,
 			EntityPager entityPager)
 	{
-		this.entityName = entityName;
+		this.sortaJobExecutionId = sortaJobExecutionId;
 		this.ontologyIri = ontologyIri;
 		this.matched = matched;
 		this.entityPager = entityPager;
 		this.filterQuery = filterQuery;
 	}
 
-	public String getEntityName()
+	public String getSortaJobExecutionId()
 	{
-		return entityName;
+		return sortaJobExecutionId;
 	}
 
 	public boolean isMatched()

@@ -29,14 +29,23 @@ public class SortaCsvRepository extends AbstractRepository
 	private DefaultEntityMetaData entityMetaData = null;
 	private final CsvRepository csvRepository;
 	private final String entityName;
+	private final String entityLabel;
 	public final static String ALLOWED_IDENTIFIER = "Identifier";
-	private final static List<CellProcessor> CELL_PROCESSORS = Arrays.asList(new LowerCaseProcessor(),
+	private final static List<CellProcessor> LOWERCASE_AND_TRIM = Arrays.asList(new LowerCaseProcessor(),
 			new TrimProcessor());
 
-	public SortaCsvRepository(String entityName, File uploadedFile)
+	public SortaCsvRepository(File file)
 	{
-		this.csvRepository = new CsvRepository(uploadedFile, CELL_PROCESSORS, SortaServiceImpl.DEFAULT_SEPARATOR);
+		this.csvRepository = new CsvRepository(file, LOWERCASE_AND_TRIM, SortaServiceImpl.DEFAULT_SEPARATOR);
+		this.entityName = file.getName();
+		this.entityLabel = file.getName();
+	}
+	
+	public SortaCsvRepository(String entityName, String entityLabel, File uploadedFile)
+	{
+		this.csvRepository = new CsvRepository(uploadedFile, LOWERCASE_AND_TRIM, SortaServiceImpl.DEFAULT_SEPARATOR);
 		this.entityName = entityName;
+		this.entityLabel = entityLabel;
 	}
 
 	@Override
@@ -45,7 +54,7 @@ public class SortaCsvRepository extends AbstractRepository
 		if (entityMetaData == null)
 		{
 			entityMetaData = new DefaultEntityMetaData(entityName, csvRepository.getEntityMetaData());
-			entityMetaData.setLabel(entityName);
+			entityMetaData.setLabel(entityLabel);
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ALLOWED_IDENTIFIER).setNillable(false),
 					ROLE_ID);
 		}
