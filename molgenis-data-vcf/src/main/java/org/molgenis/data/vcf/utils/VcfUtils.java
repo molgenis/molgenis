@@ -1,5 +1,40 @@
 package org.molgenis.data.vcf.utils;
 
+import autovalue.shaded.com.google.common.common.collect.Lists;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.PeekingIterator;
+import com.google.common.io.BaseEncoding;
+import org.apache.commons.lang3.StringUtils;
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.MolgenisInvalidFormatException;
+import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.datastructures.Sample;
+import org.molgenis.data.vcf.datastructures.Trio;
+import org.molgenis.vcf.meta.VcfMetaInfo;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Scanner;
+
 import static com.google.common.base.Joiner.on;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Iterables.transform;
@@ -17,43 +52,6 @@ import static org.molgenis.data.vcf.VcfRepository.QUAL;
 import static org.molgenis.data.vcf.VcfRepository.REF;
 import static org.molgenis.data.vcf.VcfRepository.SAMPLES;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Scanner;
-
-import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.MolgenisInvalidFormatException;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.data.vcf.datastructures.Sample;
-import org.molgenis.data.vcf.datastructures.Trio;
-import org.molgenis.vcf.meta.VcfMetaInfo;
-
-import com.google.common.collect.Iterators;
-import com.google.common.collect.PeekingIterator;
-import com.google.common.io.BaseEncoding;
-
-import autovalue.shaded.com.google.common.common.collect.Lists;
-
 public class VcfUtils
 {
 
@@ -64,28 +62,21 @@ public class VcfUtils
 	private static final String PIPE_SEPARATOR = "|";
 
 	/**
-	 * Creates an internal molgenis id from a vcf entity
+	 * Creates a internal molgenis id from a vcf entity
 	 * 
 	 * @param vcfEntity
 	 * @return the id
 	 */
 	public static String createId(Entity vcfEntity)
 	{
-		return createId(StringUtils.strip(vcfEntity.get(CHROM).toString()),
-				StringUtils.strip(vcfEntity.get(POS).toString()), StringUtils.strip(vcfEntity.get(REF).toString()),
-				StringUtils.strip(vcfEntity.get(ALT).toString()));
-	}
-
-	public static String createId(String chrom, String pos, String ref, String alt)
-	{
 		StringBuilder strBuilder = new StringBuilder();
-		strBuilder.append(chrom);
+		strBuilder.append(StringUtils.strip(vcfEntity.get(CHROM).toString()));
 		strBuilder.append("_");
-		strBuilder.append(pos);
+		strBuilder.append(StringUtils.strip(vcfEntity.get(POS).toString()));
 		strBuilder.append("_");
-		strBuilder.append(ref);
+		strBuilder.append(StringUtils.strip(vcfEntity.get(REF).toString()));
 		strBuilder.append("_");
-		strBuilder.append(alt);
+		strBuilder.append(StringUtils.strip(vcfEntity.get(ALT).toString()));
 		String idStr = strBuilder.toString();
 
 		// use MD5 hash to prevent ids that are too long

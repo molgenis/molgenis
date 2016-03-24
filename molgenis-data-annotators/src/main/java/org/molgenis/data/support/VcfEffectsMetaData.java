@@ -36,7 +36,7 @@ public class VcfEffectsMetaData extends DefaultEntityMetaData
 
 		setBackend(sourceEMD.getBackend());
 
-		addAttribute(ID, ROLE_ID).setVisible(false);
+		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
 
 		addAttribute(ALT);
 		addAttribute(GENE);
