@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -174,7 +175,7 @@ public class MultiAllelicResultFilter implements ResultFilter
 		String pos = null;
 		
 		//collect entities to be merged by ref
-		HashMap<String, List<Entity>> refToMergedEntity = new HashMap<String, List<Entity>>();
+		LinkedHashMap<String, List<Entity>> refToMergedEntity = new LinkedHashMap<String, List<Entity>>();
 		
 		for (Entity resourceEntity : resourceEntities)
 		{
