@@ -1,11 +1,14 @@
 package org.molgenis.data.annotation;
 
+import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
@@ -21,11 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class CrudRepositoryAnnotator
 {
-	private enum RepositoryAction
-	{
-		ADD, UPDATE, UPSERT
-	}
-
 	private static final int BATCH_SIZE = 1000;
 
 	private final DataService dataService;
@@ -70,18 +68,21 @@ public class CrudRepositoryAnnotator
 				AbstractExternalRepositoryAnnotator externalAnnotator = (AbstractExternalRepositoryAnnotator) annotator;
 				EntityMetaData targetMetaData = externalAnnotator.getOutputMetaData(entityMetaData);
 
-				if (dataService.getMeta().getEntityMetaData(targetMetaData.getName()) == null)
+				Repository targetRepository;
+				if (!dataService.hasRepository(targetMetaData.getName()))
 				{
-					// add new entities to new repo
-					Repository externalRepository = dataService.getMeta().addEntityMeta(targetMetaData);
-
-					crudRepository = iterateOverEntitiesAndAnnotate(repository, externalRepository, externalAnnotator,
-							RepositoryAction.ADD);
+					// add new repo
+					targetRepository = dataService.getMeta().addEntityMeta(targetMetaData);
+					crudRepository = iterateOverEntitiesAndAnnotate(repository, targetRepository, externalAnnotator,
+							DatabaseAction.ADD);
 				}
 				else
 				{
-					// upsert entities to existing repo
-					crudRepository = null;
+					// update repo
+					targetRepository = dataService.getRepository(targetMetaData.getName());
+
+					crudRepository = iterateOverEntitiesAndAnnotate(repository, targetRepository, externalAnnotator,
+							DatabaseAction.ADD_UPDATE_EXISTING);
 				}
 
 			}
@@ -94,7 +95,7 @@ public class CrudRepositoryAnnotator
 				RunAsSystemProxy.runAsSystem(
 						() -> addAnnotatorMetadataToRepositories(entityMetaData, compoundAttributeMetaData));
 				crudRepository = iterateOverEntitiesAndAnnotate(repository, repository, annotator,
-						RepositoryAction.UPDATE);
+						DatabaseAction.UPDATE);
 			}
 
 			return crudRepository;
@@ -109,30 +110,50 @@ public class CrudRepositoryAnnotator
 	 * Iterates over all the entities within a repository and annotates.
 	 */
 	private Repository iterateOverEntitiesAndAnnotate(Repository sourceRepository, Repository targetRepository,
-			RepositoryAnnotator annotator, RepositoryAction action)
+			RepositoryAnnotator annotator, DatabaseAction action)
 	{
 		Iterator<Entity> it = annotator.annotate(sourceRepository);
 
-		List<Entity> batch = new ArrayList<>();
-		while (it.hasNext())
+		if (action.equals(ADD_UPDATE_EXISTING))
 		{
-			batch.add(it.next());
-			if (batch.size() == BATCH_SIZE)
+			// upserts can't be handled in batches
+			String targetRepositoryName = targetRepository.getName();
+			while (it.hasNext())
 			{
-				processBatch(batch, targetRepository, action);
-				batch.clear();
+				Entity annotatedEntity = it.next();
+				if (dataService.findOne(targetRepositoryName, annotatedEntity.getIdValue()) == null)
+				{
+					dataService.add(targetRepositoryName, annotatedEntity);
+				}
+				else
+				{
+					dataService.update(targetRepositoryName, annotatedEntity);
+				}
 			}
 		}
-
-		if (!batch.isEmpty())
+		else
 		{
-			processBatch(batch, targetRepository, action);
+			List<Entity> batch = new ArrayList<>();
+			while (it.hasNext())
+			{
+				batch.add(it.next());
+				if (batch.size() == BATCH_SIZE)
+				{
+					processBatch(batch, targetRepository, action);
+					batch.clear();
+				}
+			}
+
+			if (!batch.isEmpty())
+			{
+				processBatch(batch, targetRepository, action);
+			}
 		}
 
 		return targetRepository;
 	}
 
-	private void processBatch(List<Entity> batch, Repository repository, RepositoryAction action)
+	private void processBatch(List<Entity> batch, Repository repository, DatabaseAction action)
 	{
 		switch (action)
 		{
@@ -141,10 +162,9 @@ public class CrudRepositoryAnnotator
 				break;
 			case ADD:
 				repository.add(batch.stream());
-			case UPSERT:
-				// upsertBatch(batch);
-			default:
 				break;
+			default:
+				throw new UnsupportedOperationException();
 		}
 
 	}

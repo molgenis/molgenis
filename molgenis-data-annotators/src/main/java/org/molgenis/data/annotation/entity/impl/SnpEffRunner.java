@@ -21,6 +21,9 @@ import static org.molgenis.data.support.VcfEffectsMetaData.PUTATIVE_IMPACT;
 import static org.molgenis.data.support.VcfEffectsMetaData.RANK_TOTAL;
 import static org.molgenis.data.support.VcfEffectsMetaData.TRANSCRIPT_BIOTYPE;
 import static org.molgenis.data.support.VcfEffectsMetaData.VARIANT;
+import static org.molgenis.data.vcf.VcfRepository.CHROM;
+import static org.molgenis.data.vcf.VcfRepository.POS;
+import static org.molgenis.data.vcf.VcfRepository.REF;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -38,6 +41,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
@@ -47,9 +51,9 @@ import org.molgenis.data.annotation.utils.JarRunnerImpl;
 import org.molgenis.data.annotator.websettings.SnpEffAnnotatorSettings;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.support.VcfEffectsMetaData;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,9 +86,6 @@ public class SnpEffRunner
 
 	@Autowired
 	private Entity snpEffAnnotatorSettings;
-
-	@Autowired
-	private UuidGenerator idGenerator;
 
 	public SnpEffRunner()
 	{
@@ -119,7 +120,6 @@ public class SnpEffRunner
 					"-canon", "-ud", "0", "-spliceSiteSize", "5");
 			File outputVcf = jarRunner.runJar(NAME, params, inputVcf);
 
-			// TODO always output to "snpEff"? won't this overwrite when you do parallel annotations?
 			File snpEffOutputWithMetaData = addVcfMetaDataToOutputVcf(outputVcf);
 			VcfRepository repo = new VcfRepository(snpEffOutputWithMetaData, "SNPEFF_OUTPUT_VCF_" + inputVcf.getName());
 
@@ -191,7 +191,7 @@ public class SnpEffRunner
 	private Entity getEmptyEffectsEntity(Entity sourceEntity, EntityMetaData effectsEMD)
 	{
 		MapEntity effect = new MapEntity(effectsEMD);
-		effect.set(ID, idGenerator.generateId());
+		effect.set(ID, VcfUtils.createId(sourceEntity));
 		effect.set(VARIANT, sourceEntity);
 
 		return effect;
@@ -222,7 +222,11 @@ public class SnpEffRunner
 
 			if (fields.length >= 15)
 			{
-				effect.set(ID, idGenerator.generateId());
+				String id = VcfUtils.createId(StringUtils.strip(sourceEntity.get(CHROM).toString()),
+						StringUtils.strip(sourceEntity.get(POS).toString()),
+						StringUtils.strip(sourceEntity.get(REF).toString()), fields[0]);
+
+				effect.set(ID, id + "_" + fields[4]);
 				effect.set(VARIANT, sourceEntity);
 
 				effect.set(ALT, fields[0]);
