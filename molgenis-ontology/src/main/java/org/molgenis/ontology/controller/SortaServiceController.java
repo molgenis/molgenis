@@ -1,5 +1,6 @@
 package org.molgenis.ontology.controller;
 
+import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -159,12 +160,11 @@ public class SortaServiceController extends MolgenisPluginController
 		model.addAttribute("existingTasks", getJobsForCurrentUser());
 		return MATCH_VIEW_NAME;
 	}
-	
+
 	private SortaJobExecution findSortaJobExecution(String sortaJobExecutionId)
 	{
 		return dataService.findOne(SortaJobExecution.ENTITY_NAME, sortaJobExecutionId, SortaJobExecution.class);
 	}
-
 
 	@RequestMapping(method = GET, value = "/jobs")
 	@ResponseBody
@@ -398,7 +398,8 @@ public class SortaServiceController extends MolgenisPluginController
 			return new SortaServiceResponse(inputEntity,
 					sortaService.findOntologyTermEntities(sortaJobExecution.getOntologyIri(), inputEntity));
 		}
-		return new SortaServiceResponse("Please check that sortaJobExecutionId and identifier keys exist in input and have nonempty value!");
+		return new SortaServiceResponse(
+				"Please check that sortaJobExecutionId and identifier keys exist in input and have nonempty value!");
 	}
 
 	@RequestMapping(method = POST, value = "/search")
@@ -418,7 +419,8 @@ public class SortaServiceController extends MolgenisPluginController
 			return new SortaServiceResponse(inputEntity,
 					sortaService.findOntologyTermEntities(ontologyIri, inputEntity));
 		}
-		return new SortaServiceResponse("Please check that queryString and ontologyIRI keys exist in input and have nonempty value!");
+		return new SortaServiceResponse(
+				"Please check that queryString and ontologyIRI keys exist in input and have nonempty value!");
 	}
 
 	private MapEntity toDownloadRow(SortaJobExecution sortaJobExecution, Entity resultEntity)
@@ -446,7 +448,6 @@ public class SortaServiceController extends MolgenisPluginController
 		return row;
 	}
 
-	
 	@RequestMapping(method = GET, value = "/match/download/{sortaJobExecutionId}")
 	public void download(@PathVariable String sortaJobExecutionId, HttpServletResponse response, Model model)
 			throws IOException
@@ -480,38 +481,38 @@ public class SortaServiceController extends MolgenisPluginController
 		}
 	}
 
-	private String startMatchJob(String jobName, String ontologyIri, Model model,
-			HttpServletRequest httpServletRequest, InputStream inputStream) throws IOException
+	private String startMatchJob(String jobName, String ontologyIri, Model model, HttpServletRequest httpServletRequest,
+			InputStream inputStream) throws IOException
 	{
 		String sessionId = httpServletRequest.getSession().getId();
 		File uploadFile = fileStore.store(inputStream, sessionId + "_input.csv");
 		String inputRepositoryName = idGenerator.generateId();
 		SortaCsvRepository inputRepository = new SortaCsvRepository(inputRepositoryName, jobName + " input",
 				uploadFile);
-		
+
 		if (!validateFileHeader(inputRepository))
 		{
 			model.addAttribute("message", "The Name header is missing!");
 			return matchTask(model);
 		}
-		
+
 		if (!validateEmptyFileHeader(inputRepository))
 		{
 			model.addAttribute("message", "The empty header is not allowed!");
 			return matchTask(model);
 		}
-		
+
 		if (!validateInputFileContent(inputRepository))
 		{
 			model.addAttribute("message", "The content of input is empty!");
 			return matchTask(model);
 		}
-		
+
 		SortaJobExecution jobExecution = createJobExecution(inputRepository, jobName, ontologyIri,
 				SecurityContextHolder.getContext());
 		SortaJobImpl sortaMatchJob = sortaMatchJobFactory.create(jobExecution, SecurityContextHolder.getContext());
 		taskExecutor.submit(sortaMatchJob);
-		
+
 		return "redirect:" + getSortaServiceMenuUrl();
 	}
 
@@ -590,12 +591,11 @@ public class SortaServiceController extends MolgenisPluginController
 	private long countMatchedEntities(SortaJobExecution sortaJobExecution, boolean isMatched)
 	{
 		double threshold = sortaJobExecution.getThreshold();
-		QueryRule validatedRule = new QueryRule(MatchingTaskContentEntityMetaData.VALIDATED, Operator.EQUALS,
-				isMatched);
+		QueryRule validatedRule = new QueryRule(MatchingTaskContentEntityMetaData.VALIDATED, EQUALS, isMatched);
 		QueryRule thresholdRule = new QueryRule(MatchingTaskContentEntityMetaData.SCORE,
-				isMatched ? Operator.GREATER_EQUAL : Operator.LESS, threshold);
+				isMatched ? GREATER_EQUAL : LESS, threshold);
 		QueryRule combinedRule = new QueryRule(
-				Arrays.asList(validatedRule, new QueryRule(isMatched ? Operator.OR : Operator.AND), thresholdRule));
+				asList(validatedRule, new QueryRule(isMatched ? OR : AND), thresholdRule));
 
 		return dataService.count(sortaJobExecution.getResultEntityName(), new QueryImpl(combinedRule));
 	}
