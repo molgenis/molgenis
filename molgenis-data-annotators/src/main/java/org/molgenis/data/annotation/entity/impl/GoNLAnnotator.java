@@ -112,10 +112,14 @@ public class GoNLAnnotator
 				List<Entity> refMatches = Lists.newArrayList();
 				for (Entity resourceEntity : annotationSourceEntities)
 				{
+					//situation example: input A, GoNL A
 					if (resourceEntity.get(VcfRepository.REF).equals(inputEntity.get(VcfRepository.REF)))
 					{
 						refMatches.add(resourceEntity);
 					}
+					//situation example: input ATC/TTC, GoNL A/T
+					//we then match on A (leaving TC), lengthen the GoNL ref to A+TC, and alt to T+TC
+					//now it has a match to ATC/TTC (as it should, but was not obvious due to notation)
 					else if (inputEntity.getString(VcfRepository.REF)
 							.indexOf(resourceEntity.getString(VcfRepository.REF)) == 0)
 					{
@@ -128,15 +132,21 @@ public class GoNLAnnotator
 						resourceEntity.set(VcfRepository.ALT, newAltString);
 						refMatches.add(resourceEntity);
 					}
+					//situation example: input T/G, GoNL TCT/GCT
+					//we then match on T (leaving CT), and shorten the GoNL ref to T (-CT), and alt to G (-CT)
+					//now it has a match to T/G (as it should, but was not obvious due to notation)
 					else if (resourceEntity.getString(VcfRepository.REF)
 							.indexOf(inputEntity.getString(VcfRepository.REF)) == 0)
 					{
 						int postFixInputLength = resourceEntity.getString(VcfRepository.REF)
 								.substring(inputEntity.getString(VcfRepository.REF).length()).length();
+						//bugfix: matching A/G to ACT/A results in postFixInputLength=2, correctly updating ref from ACT to A,
+						//but then tries to substring the alt allele A to length -1 (1 minus 2) which is not allowed.
+						//added a check to prevent this: alt.length() > postFixInputLength ? trim the alt : change to 'n/a' because we cannot use this alt.
 						resourceEntity.set(VcfRepository.REF, resourceEntity.getString(VcfRepository.REF).substring(0,
 								(resourceEntity.getString(VcfRepository.REF).length() - postFixInputLength)));
 						String newAltString = Arrays.asList(resourceEntity.getString(ALT).split(",")).stream()
-								.map(alt -> alt.substring(0, (alt.length() - postFixInputLength)))
+								.map(alt -> alt.length() > postFixInputLength ? alt.substring(0, (alt.length() - postFixInputLength)) : "n/a")
 								.collect(Collectors.joining(","));
 						resourceEntity.set(VcfRepository.ALT, newAltString);
 						refMatches.add(resourceEntity);
@@ -154,12 +164,12 @@ public class GoNLAnnotator
 					if (!Iterables.all(alleleMatches, Predicates.isNull()))
 					{
 						afs = alleleMatches.stream()
-								.map(gonl -> gonl == null ? ""
+								.map(gonl -> gonl == null ? "."
 										: Double.toString(gonl.getDouble(INFO_AC) / gonl.getDouble(INFO_AN)))
-								.collect(Collectors.joining("|"));
-
-						gtcs = alleleMatches.stream().map(gonl -> gonl == null ? "" : gonl.getString(INFO_GTC))
-								.collect(Collectors.joining("|"));
+								.collect(Collectors.joining(","));
+						//update GTC field to separate allele combinations by pipe instead of comma, since we use comma to separate alt allele info
+						gtcs = alleleMatches.stream().map(gonl -> gonl == null ? "." : gonl.getString(INFO_GTC).replace(",", "|"))
+								.collect(Collectors.joining(","));
 					}
 
 				}
