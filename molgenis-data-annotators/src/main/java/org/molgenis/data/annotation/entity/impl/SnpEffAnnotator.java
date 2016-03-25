@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AbstractExternalRepositoryAnnotator;
@@ -37,6 +38,7 @@ import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotator.websettings.SnpEffAnnotatorSettings;
+import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.VcfEffectsMetaData;
 import org.molgenis.data.vcf.VcfRepository;
@@ -81,10 +83,13 @@ public class SnpEffAnnotator
 	@Autowired
 	private Entity snpEffAnnotatorSettings;
 
+	@Autowired
+	private DataServiceImpl dataService;
+
 	@Bean
 	public RepositoryAnnotator snpEff()
 	{
-		return new SnpEffRepositoryAnnotator(snpEffRunner, snpEffAnnotatorSettings);
+		return new SnpEffRepositoryAnnotator(snpEffRunner, snpEffAnnotatorSettings, dataService);
 	}
 
 	public static class SnpEffRepositoryAnnotator extends AbstractExternalRepositoryAnnotator
@@ -98,11 +103,14 @@ public class SnpEffAnnotator
 				getOutputMetaData());
 		private SnpEffRunner snpEffRunner;
 		private Entity snpEffAnnotatorSettings;
+		private DataService dataService;
 
-		public SnpEffRepositoryAnnotator(SnpEffRunner snpEffRunner, Entity snpEffAnnotatorSettings)
+		public SnpEffRepositoryAnnotator(SnpEffRunner snpEffRunner, Entity snpEffAnnotatorSettings,
+				DataService dataService)
 		{
 			this.snpEffRunner = snpEffRunner;
 			this.snpEffAnnotatorSettings = snpEffAnnotatorSettings;
+			this.dataService = dataService;
 		}
 
 		@Override
@@ -120,7 +128,14 @@ public class SnpEffAnnotator
 		@Override
 		public String canAnnotate(EntityMetaData repoMetaData)
 		{
-			return super.canAnnotate(repoMetaData);
+			if (dataService.hasRepository(repoMetaData.getName() + VcfEffectsMetaData.ENTITY_NAME_SUFFIX))
+			{
+				return "already annotated with SnpEff";
+			}
+			else
+			{
+				return super.canAnnotate(repoMetaData);
+			}
 		}
 
 		@Override
