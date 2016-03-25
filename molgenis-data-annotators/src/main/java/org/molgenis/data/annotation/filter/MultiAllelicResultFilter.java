@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.entity.ResultFilter;
 import org.molgenis.data.vcf.VcfRepository;
 
@@ -54,10 +56,18 @@ public class MultiAllelicResultFilter implements ResultFilter
 {
 
 	private List<AttributeMetaData> attributes;
-
-	public MultiAllelicResultFilter(List<AttributeMetaData> attributes)
+	private boolean mergeMultilineResourceResults;
+	
+	public MultiAllelicResultFilter(List<AttributeMetaData> alleleSpecificAttributes, boolean mergeMultilineResourceResults)
 	{
-		this.attributes = attributes;
+		this.attributes = alleleSpecificAttributes;
+		this.mergeMultilineResourceResults = mergeMultilineResourceResults;
+	}
+	
+	public MultiAllelicResultFilter(List<AttributeMetaData> alleleSpecificAttributes)
+	{
+		this.attributes = alleleSpecificAttributes;
+		this.mergeMultilineResourceResults = false;
 	}
 
 	@Override
@@ -70,6 +80,11 @@ public class MultiAllelicResultFilter implements ResultFilter
 	public com.google.common.base.Optional<Entity> filterResults(Iterable<Entity> resourceEntities, Entity sourceEntity)
 	{
 		List<Entity> processedResults = new ArrayList<>();
+		
+		if(mergeMultilineResourceResults)
+		{
+			resourceEntities = merge(resourceEntities);
+		}
 
 		for (Entity resourceEntity : resourceEntities)
 		{
@@ -77,10 +92,12 @@ public class MultiAllelicResultFilter implements ResultFilter
 			{
 				filter(sourceEntity, processedResults, resourceEntity, "", "");
 			}
+			//example: ref AGG, input A, substring AGG from index 1, so GG is the postfix to use to match against this reference
 			else if(resourceEntity.getString(VcfRepository.REF).indexOf(sourceEntity.getString(VcfRepository.REF))==0) {
 				String postFix = resourceEntity.getString(VcfRepository.REF).substring(sourceEntity.getString(VcfRepository.REF).length());
 				filter(sourceEntity, processedResults, resourceEntity, postFix, "");
 			}
+			//example: ref T, input TC, substring TC from index 1, so C is the postfix to use to match against this input
 			else if(sourceEntity.getString(VcfRepository.REF).indexOf(resourceEntity.getString(VcfRepository.REF))==0) {
 				String postFix = sourceEntity.getString(VcfRepository.REF).substring(resourceEntity.getString(VcfRepository.REF).length());
 				filter(sourceEntity, processedResults, resourceEntity, "", postFix);
@@ -92,7 +109,6 @@ public class MultiAllelicResultFilter implements ResultFilter
 	private void filter(Entity annotatedEntity, List<Entity> processedResults, Entity entity, String sourcePostfix, String resourcePostfix) {
 		Map<String, String> alleleValueMap = new HashMap<>();
 		String[] alts = entity.getString(VcfRepository.ALT).split(",");
-
 		for (AttributeMetaData attributeMetaData : attributes)
         {
             String[] values = entity.getString(attributeMetaData.getName()).split(",");
@@ -118,12 +134,111 @@ public class MultiAllelicResultFilter implements ResultFilter
                     newAttributeValue.append(".");
                 }
             }
-            // add entity only if something was found
-            if (!newAttributeValue.toString().equals("."))
+            // add entity only if something was found, so no '.' or any multiple of '.,' (e.g. ".,.,.")
+            if (!newAttributeValue.toString().matches("[\\.,]+"))
             {
                 entity.set(attributeMetaData.getName(), newAttributeValue.toString());
                 processedResults.add(entity);
             }
         }
+	}
+	
+	/**
+	 * Combine ALT information per reference allele (in VCF there is only 1
+	 * reference by letting ALT vary, but that might not always be the case)
+	 * 
+	 * So we want to support this hypothetical example:
+	 * 3	300	G	A	0.2|23.1
+	 * 3	300	G	T	-2.4|0.123
+	 * 3	300	G	X	-0.002|2.3
+	 * 3	300	G	C	0.5|14.5
+	 * 3	300	GC	A	0.2|23.1
+	 * 3	300	GC	T	-2.4|0.123
+	 * 3	300	C	GX	-0.002|2.3
+	 * 3	300	C	GC	0.5|14.5
+	 * 
+	 * and it should become:
+	 * 
+	 * 3	300	G	A,T,X,C	0.2|23.1,-2.4|0.123,-0.002|2.3,0.5|14.5
+	 * 3	300	GC	A,T	0.2|23.1,-2.4|0.123
+	 * 3	300	C	GX,GC	-0.002|2.3,0.5|14.5
+	 * 
+	 * so that the multi-allelic filter can then find back the appropriate values as if it were a multi-allelic VCF line
+	 * 
+	 */
+	public Iterable<Entity> merge(Iterable<Entity> resourceEntities)
+	{
+		ArrayList<Entity> resourceEntitiesMerged = new ArrayList<Entity>();
+		
+		//we expect and CHROM, POS to match across the multi-line output. if not, we error.
+		String chrom = null;
+		String pos = null;
+		
+		//collect entities to be merged by ref
+		LinkedHashMap<String, List<Entity>> refToMergedEntity = new LinkedHashMap<String, List<Entity>>();
+		
+		for (Entity resourceEntity : resourceEntities)
+		{
+			//assign only first time (when null)
+			if(chrom == null)
+			{
+				chrom = resourceEntity.getString(VcfRepository.CHROM);
+				if(chrom == null)
+				{
+					throw new MolgenisDataException("null chromosome not allowed here");
+				}
+				pos = resourceEntity.getString(VcfRepository.POS);
+			}
+			
+			//verify if all results have the same chrom & pos
+			String thisChrom = resourceEntity.getString(VcfRepository.CHROM);
+			String thisPos = resourceEntity.getString(VcfRepository.POS);
+			
+			//at least chrom and pos have to be the same, ref may be different
+			if(!chrom.equals(thisChrom) || !pos.equals(thisPos))
+			{
+				throw new MolgenisDataException("mismatch in chrom/pos! " + chrom +" vs " + thisChrom + ", " + pos + " vs " + thisPos);
+			}
+			
+			String thisRef = resourceEntity.getString(VcfRepository.REF);
+
+			//add to map by ref, so we get [ref -> entities to be merged into one]
+			List<Entity> myList = refToMergedEntity.get(thisRef);
+			if(myList == null) {
+			  myList = new ArrayList<>();
+			  refToMergedEntity.put(thisRef, myList);
+			}
+			myList.add(resourceEntity);
+		}
+		
+		//now iterate over map with refs and merge entities per ref
+		for(String refKey : refToMergedEntity.keySet())
+		{
+			boolean first = true;
+			Entity mergeWithMe = null;
+			for(Entity entityToBeMerged : refToMergedEntity.get(refKey))
+			{
+				if(first)
+				{
+					//merge all following entities with the first one
+					mergeWithMe = entityToBeMerged;
+					first = false;
+				}
+				else
+				{
+					//concatenate alleles
+					mergeWithMe.set(VcfRepository.ALT, mergeWithMe.get(VcfRepository.ALT).toString() + "," + entityToBeMerged.get(VcfRepository.ALT).toString());
+					
+					//concatenate allele specific attributes
+					for(AttributeMetaData alleleSpecificAttributes : attributes)
+					{
+						String attrName = alleleSpecificAttributes.getName();	
+						mergeWithMe.set(attrName, mergeWithMe.get(attrName).toString() + "," + entityToBeMerged.get(attrName).toString());
+					}
+				}
+			}
+			resourceEntitiesMerged.add(mergeWithMe);
+		}
+		return resourceEntitiesMerged;
 	}
 }

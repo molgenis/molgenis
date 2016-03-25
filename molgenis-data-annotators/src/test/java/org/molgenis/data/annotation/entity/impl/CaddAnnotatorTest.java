@@ -49,13 +49,19 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 	public ArrayList<Entity> input1;
 	public ArrayList<Entity> input2;
 	public ArrayList<Entity> input3;
+	public ArrayList<Entity> input4;
+	public ArrayList<Entity> input5;
+	public ArrayList<Entity> input6;
+	public ArrayList<Entity> input7;
 	public static Entity entity;
 	public static Entity entity1;
 	public static Entity entity2;
 	public static Entity entity3;
-
-	public ArrayList<Entity> entities;
-
+	public static Entity entity4;
+	public static Entity entity5;
+	public static Entity entity6;
+	public static Entity entity7;
+	
 	public void setValues()
 	{
 		AttributeMetaData attributeMetaDataChrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
@@ -83,9 +89,10 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 		entity1 = new MapEntity(metaDataCanAnnotate);
 		entity2 = new MapEntity(metaDataCanAnnotate);
 		entity3 = new MapEntity(metaDataCanAnnotate);
-
-		entities = new ArrayList<>();
-		entities.add(entity);
+		entity4 = new MapEntity(metaDataCanAnnotate);
+		entity5 = new MapEntity(metaDataCanAnnotate);
+		entity6 = new MapEntity(metaDataCanAnnotate);
+		entity7 = new MapEntity(metaDataCanAnnotate);
 	}
 
 	@BeforeClass
@@ -95,7 +102,11 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 		input1 = new ArrayList<>();
 		input2 = new ArrayList<>();
 		input3 = new ArrayList<>();
-
+		input4 = new ArrayList<>();
+		input5 = new ArrayList<>();
+		input6 = new ArrayList<>();
+		input7 = new ArrayList<>();
+		
 		setValues();
 
 		entity1.set(VcfRepository.CHROM, "1");
@@ -118,6 +129,34 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 		entity3.set(VcfRepository.ALT, "C");
 
 		input3.add(entity3);
+		
+		entity4.set(VcfRepository.CHROM, "3");
+		entity4.set(VcfRepository.POS, new Long(300));
+		entity4.set(VcfRepository.REF, "G");
+		entity4.set(VcfRepository.ALT, "T,A,C");
+
+		input4.add(entity4);
+		
+		entity5.set(VcfRepository.CHROM, "3");
+		entity5.set(VcfRepository.POS, new Long(300));
+		entity5.set(VcfRepository.REF, "GC");
+		entity5.set(VcfRepository.ALT, "T,A");
+
+		input5.add(entity5);
+		
+		entity6.set(VcfRepository.CHROM, "3");
+		entity6.set(VcfRepository.POS, new Long(300));
+		entity6.set(VcfRepository.REF, "C");
+		entity6.set(VcfRepository.ALT, "GX,GC");
+
+		input6.add(entity6);
+		
+		entity7.set(VcfRepository.CHROM, "3");
+		entity7.set(VcfRepository.POS, new Long(300));
+		entity7.set(VcfRepository.REF, "C");
+		entity7.set(VcfRepository.ALT, "GC");
+
+		input7.add(entity7);
 	}
 
 	@Test
@@ -126,8 +165,8 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 		List<Entity> expectedList = new ArrayList<Entity>();
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
 
-		resultMap.put(CaddAnnotator.CADD_ABS, -0.03);
-		resultMap.put(CaddAnnotator.CADD_SCALED, 2.003);
+		resultMap.put(CaddAnnotator.CADD_ABS, "-0.03");
+		resultMap.put(CaddAnnotator.CADD_SCALED, "2.003");
 
 		Entity expectedEntity = new MapEntity(resultMap);
 		expectedList.add(expectedEntity);
@@ -161,13 +200,89 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 		List<Entity> expectedList = new ArrayList<Entity>();
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
 
-		resultMap.put(CaddAnnotator.CADD_ABS, 0.5);
-		resultMap.put(CaddAnnotator.CADD_SCALED, 14.5);
+		resultMap.put(CaddAnnotator.CADD_ABS, "0.5");
+		resultMap.put(CaddAnnotator.CADD_SCALED, "14.5");
 
 		Entity expectedEntity = new MapEntity(resultMap);
 		expectedList.add(expectedEntity);
 
 		Iterator<Entity> results = annotator.annotate(input3);
+		Entity resultEntity = results.next();
+
+		assertEquals(resultEntity.get(CaddAnnotator.CADD_ABS), expectedEntity.get(CaddAnnotator.CADD_ABS));
+		assertEquals(resultEntity.get(CaddAnnotator.CADD_SCALED), expectedEntity.get(CaddAnnotator.CADD_SCALED));
+	}
+	
+	@Test
+	public void testFiveMultiAllelic()
+	{
+		List<Entity> expectedList = new ArrayList<Entity>();
+		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+
+		resultMap.put(CaddAnnotator.CADD_ABS, "-2.4,0.2,0.5");
+		resultMap.put(CaddAnnotator.CADD_SCALED, "0.123,23.1,14.5");
+
+		Entity expectedEntity = new MapEntity(resultMap);
+		expectedList.add(expectedEntity);
+
+		Iterator<Entity> results = annotator.annotate(input4);
+		Entity resultEntity = results.next();
+
+		assertEquals(resultEntity.get(CaddAnnotator.CADD_ABS), expectedEntity.get(CaddAnnotator.CADD_ABS));
+		assertEquals(resultEntity.get(CaddAnnotator.CADD_SCALED), expectedEntity.get(CaddAnnotator.CADD_SCALED));
+	}
+	
+	@Test
+	public void testSixMultiAllelicDel()
+	{
+		List<Entity> expectedList = new ArrayList<Entity>();
+		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+
+		resultMap.put(CaddAnnotator.CADD_ABS, "-3.4,1.2");
+		resultMap.put(CaddAnnotator.CADD_SCALED, "1.123,24.1");
+
+		Entity expectedEntity = new MapEntity(resultMap);
+		expectedList.add(expectedEntity);
+
+		Iterator<Entity> results = annotator.annotate(input5);
+		Entity resultEntity = results.next();
+
+		assertEquals(resultEntity.get(CaddAnnotator.CADD_ABS), expectedEntity.get(CaddAnnotator.CADD_ABS));
+		assertEquals(resultEntity.get(CaddAnnotator.CADD_SCALED), expectedEntity.get(CaddAnnotator.CADD_SCALED));
+	}
+	
+	@Test
+	public void testSevenMultiAllelicIns()
+	{
+		List<Entity> expectedList = new ArrayList<Entity>();
+		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+
+		resultMap.put(CaddAnnotator.CADD_ABS, "-1.002,1.5");
+		resultMap.put(CaddAnnotator.CADD_SCALED, "3.3,15.5");
+
+		Entity expectedEntity = new MapEntity(resultMap);
+		expectedList.add(expectedEntity);
+
+		Iterator<Entity> results = annotator.annotate(input6);
+		Entity resultEntity = results.next();
+
+		assertEquals(resultEntity.get(CaddAnnotator.CADD_ABS), expectedEntity.get(CaddAnnotator.CADD_ABS));
+		assertEquals(resultEntity.get(CaddAnnotator.CADD_SCALED), expectedEntity.get(CaddAnnotator.CADD_SCALED));
+	}
+	
+	@Test
+	public void testEightSingleAllelicIns()
+	{
+		List<Entity> expectedList = new ArrayList<Entity>();
+		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+
+		resultMap.put(CaddAnnotator.CADD_ABS, "1.5");
+		resultMap.put(CaddAnnotator.CADD_SCALED, "15.5");
+
+		Entity expectedEntity = new MapEntity(resultMap);
+		expectedList.add(expectedEntity);
+
+		Iterator<Entity> results = annotator.annotate(input7);
 		Entity resultEntity = results.next();
 
 		assertEquals(resultEntity.get(CaddAnnotator.CADD_ABS), expectedEntity.get(CaddAnnotator.CADD_ABS));
