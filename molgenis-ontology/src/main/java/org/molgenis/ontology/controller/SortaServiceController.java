@@ -43,11 +43,11 @@ import javax.servlet.http.Part;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Query;
@@ -72,6 +72,7 @@ import org.molgenis.ontology.sorta.job.SortaJobExecution;
 import org.molgenis.ontology.sorta.job.SortaJobFactory;
 import org.molgenis.ontology.sorta.job.SortaJobImpl;
 import org.molgenis.ontology.sorta.meta.MatchingTaskContentEntityMetaData;
+import org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData;
 import org.molgenis.ontology.sorta.repo.SortaCsvRepository;
 import org.molgenis.ontology.sorta.request.SortaServiceRequest;
 import org.molgenis.ontology.sorta.request.SortaServiceResponse;
@@ -81,7 +82,6 @@ import org.molgenis.ontology.utils.SortaServiceUtil;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
-import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.MolgenisPluginController;
@@ -90,10 +90,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -107,7 +103,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 
 @Controller
 @RequestMapping(URI)
@@ -167,7 +162,11 @@ public class SortaServiceController extends MolgenisPluginController
 
 	private SortaJobExecution findSortaJobExecution(String sortaJobExecutionId)
 	{
-		return dataService.findOne(SortaJobExecution.ENTITY_NAME, sortaJobExecutionId, SortaJobExecution.class);
+		Fetch fetch = new Fetch();
+		SortaJobExecutionMetaData.INSTANCE.getAtomicAttributes().forEach(attr -> fetch.field(attr.getName()));
+		SortaJobExecution result = RunAsSystemProxy.runAsSystem(() -> dataService.findOne(SortaJobExecution.ENTITY_NAME,
+				sortaJobExecutionId, fetch, SortaJobExecution.class));
+		return result;
 	}
 
 	@RequestMapping(method = GET, value = "/jobs")
@@ -533,7 +532,7 @@ public class SortaServiceController extends MolgenisPluginController
 				jobs.add(job);
 			});
 		});
-		//TODO: most recent job first
+		// TODO: most recent job first
 		return jobs;
 	}
 
