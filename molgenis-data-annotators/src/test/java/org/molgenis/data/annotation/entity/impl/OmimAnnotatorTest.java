@@ -7,7 +7,7 @@ import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.CYTO_LOCATIONS;
 import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.MIM_NUMBER;
 import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.PHENOTYPE;
-import static org.molgenis.data.annotation.entity.impl.SnpEffAnnotator.GENE_NAME;
+import static org.molgenis.data.support.VcfEffectsMetaData.GENE_NAME;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
@@ -53,7 +53,7 @@ public class OmimAnnotatorTest extends AbstractTestNGSpringContextTests
 		List<Entity> entitiesToAnnotate = newArrayList();
 
 		DefaultEntityMetaData inputEntityMetaData = new DefaultEntityMetaData("Test");
-		inputEntityMetaData.addAttribute(SnpEffAnnotator.GENE_NAME, ROLE_ID);
+		inputEntityMetaData.addAttribute(GENE_NAME, ROLE_ID);
 
 		Entity inputEntity = new MapEntity(inputEntityMetaData);
 		inputEntity.set(GENE_NAME, "CYP17A1");
