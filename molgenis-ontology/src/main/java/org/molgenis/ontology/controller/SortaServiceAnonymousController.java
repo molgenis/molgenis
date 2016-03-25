@@ -28,7 +28,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.MapEntity;
@@ -66,10 +65,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 	@Autowired
 	private FileStore fileStore;
 	
-	@Autowired
-	private IdGenerator idGenerator;
-
-	public static final String VIEW_NAME = "sorta-match-annonymous-view";
+	public static final String VIEW_NAME = "sorta-match-anonymous-view";
 	public static final String ID = "sorta_anonymous";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
