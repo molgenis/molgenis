@@ -2,7 +2,7 @@ package org.molgenis.data.annotation;
 
 import org.molgenis.data.EntityMetaData;
 
-public interface RefEntityAnnotator
+public abstract class AbstractRefEntityAnnotator extends AbstractRepositoryAnnotator
 {
 	/**
 	 * Annotators that add a new repository need the source meta data to construct the new repository's meta data.
@@ -11,5 +11,5 @@ public interface RefEntityAnnotator
 	 *            the meta data of the source repository
 	 * @return the meta data of the new repository
 	 */
-	public EntityMetaData getOutputMetaData(EntityMetaData sourceEMD);
+	public abstract EntityMetaData getOutputMetaData(EntityMetaData sourceEMD);
 }

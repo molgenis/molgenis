@@ -60,9 +60,9 @@ public class CrudRepositoryAnnotator
 			EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(repository.getName());
 
 			Repository crudRepository;
-			if (annotator instanceof AbstractExternalRepositoryAnnotator)
+			if (annotator instanceof AbstractRefEntityAnnotator)
 			{
-				AbstractExternalRepositoryAnnotator externalAnnotator = (AbstractExternalRepositoryAnnotator) annotator;
+				AbstractRefEntityAnnotator externalAnnotator = (AbstractRefEntityAnnotator) annotator;
 				EntityMetaData targetMetaData = externalAnnotator.getOutputMetaData(entityMetaData);
 
 				if (!dataService.hasRepository(targetMetaData.getName()))
