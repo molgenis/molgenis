@@ -82,6 +82,7 @@ import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -124,6 +125,7 @@ public class SortaServiceController extends MolgenisPluginController
 	private final LanguageService languageService;
 	private final MenuReaderService menuReaderService;
 	private final IdGenerator idGenerator;
+	private final PermissionSystemService permissionSystemService;
 
 	public static final String MATCH_VIEW_NAME = "sorta-match-view";
 	public static final String ID = "sortaservice";
@@ -137,7 +139,8 @@ public class SortaServiceController extends MolgenisPluginController
 			MatchQualityRocService matchQualityRocService, SortaJobFactory sortaMatchJobFactory,
 			ExecutorService taskExecutor, UserAccountService userAccountService, FileStore fileStore,
 			MolgenisPermissionService molgenisPermissionService, DataService dataService,
-			LanguageService languageService, MenuReaderService menuReaderService, IdGenerator idGenerator)
+			LanguageService languageService, MenuReaderService menuReaderService, IdGenerator idGenerator,
+			PermissionSystemService permissionSystemService)
 	{
 		super(URI);
 		this.ontologyService = requireNonNull(ontologyService);
@@ -151,7 +154,8 @@ public class SortaServiceController extends MolgenisPluginController
 		this.dataService = requireNonNull(dataService);
 		this.languageService = requireNonNull(languageService);
 		this.menuReaderService = requireNonNull(menuReaderService);
-		this.idGenerator = idGenerator;
+		this.idGenerator = requireNonNull(idGenerator);
+		this.permissionSystemService = requireNonNull(permissionSystemService);
 	}
 
 	@RequestMapping(method = GET)
@@ -510,7 +514,7 @@ public class SortaServiceController extends MolgenisPluginController
 
 		SortaJobExecution jobExecution = createJobExecution(inputRepository, jobName, ontologyIri,
 				SecurityContextHolder.getContext());
-		SortaJobImpl sortaMatchJob = sortaMatchJobFactory.create(jobExecution, SecurityContextHolder.getContext());
+		SortaJobImpl sortaMatchJob = sortaMatchJobFactory.create(jobExecution);
 		taskExecutor.submit(sortaMatchJob);
 
 		return "redirect:" + getSortaServiceMenuUrl();
@@ -529,63 +533,50 @@ public class SortaServiceController extends MolgenisPluginController
 				jobs.add(job);
 			});
 		});
+		//TODO: most recent job first
 		return jobs;
 	}
 
-	private SortaJobExecution createJobExecution(Repository inputRepository, String jobName, String ontologyIri,
+	private SortaJobExecution createJobExecution(Repository inputData, String jobName, String ontologyIri,
 			SecurityContext securityContext)
 	{
 		String resultEntityName = idGenerator.generateId();
 
-		// Create a Sorta Job Execution
 		SortaJobExecution sortaJobExecution = new SortaJobExecution(dataService);
 		sortaJobExecution.setIdentifier(resultEntityName);
 		sortaJobExecution.setUser(userAccountService.getCurrentUser());
-		sortaJobExecution.setSourceEntityName(inputRepository.getName());
-		sortaJobExecution.setResultUrl(getSortaServiceMenuUrl() + "/result/" + resultEntityName);
+		sortaJobExecution.setSourceEntityName(inputData.getName());
 		sortaJobExecution.setDeleteUrl(getSortaServiceMenuUrl() + "/delete/" + resultEntityName);
 		sortaJobExecution.setResultEntityName(resultEntityName);
 		sortaJobExecution.setThreshold(DEFAULT_THRESHOLD);
 		sortaJobExecution.setOntologyIri(ontologyIri);
 
-		MolgenisUser molgenisUser = userAccountService.getCurrentUser();
-
 		RunAsSystemProxy.runAsSystem(() -> {
-			// Add the original input dataset to database
-			dataService.getMeta().addEntityMeta(inputRepository.getEntityMetaData());
-			dataService.getRepository(inputRepository.getName()).add(inputRepository.stream());
-
-			// Create empty result repository
-			DefaultEntityMetaData resultEntityMetaData = new DefaultEntityMetaData(resultEntityName,
-					MatchingTaskContentEntityMetaData.INSTANCE);
-			resultEntityMetaData.setAbstract(false);
-			resultEntityMetaData.setLabel(jobName + " output");
-			dataService.getMeta().addEntityMeta(resultEntityMetaData);
-
-			// Add job execution entity
+			createInputRepository(inputData);
+			createEmptyResultRepository(jobName, resultEntityName);
 			dataService.add(SortaJobExecution.ENTITY_NAME, sortaJobExecution);
-
-			// FIXME : temporary work around to assign write permissions to the
-			// users who create the entities.
-			Authentication auth = securityContext.getAuthentication();
-			List<GrantedAuthority> roles = Lists.newArrayList(auth.getAuthorities());
-			for (Permission permission : Permission.values())
-			{
-				UserAuthority userAuthority = new UserAuthority();
-				userAuthority.setMolgenisUser(molgenisUser);
-				String role = SecurityUtils.AUTHORITY_ENTITY_PREFIX + permission.toString() + "_"
-						+ inputRepository.getName().toUpperCase();
-				userAuthority.setRole(role);
-				roles.add(new SimpleGrantedAuthority(role));
-				dataService.add(UserAuthority.ENTITY_NAME, userAuthority);
-				dataService.getRepository(UserAuthority.ENTITY_NAME).flush();
-			}
-			auth = new UsernamePasswordAuthenticationToken(auth.getPrincipal(), null, roles);
-			// TODO: what arcane trickery is this?
-			securityContext.setAuthentication(auth);
 		});
 
+		permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
+				Arrays.asList(inputData.getName(), resultEntityName));
+
 		return sortaJobExecution;
+	}
+
+	private void createEmptyResultRepository(String jobName, String resultEntityName)
+	{
+		DefaultEntityMetaData resultEntityMetaData = new DefaultEntityMetaData(resultEntityName,
+				MatchingTaskContentEntityMetaData.INSTANCE);
+		resultEntityMetaData.setAbstract(false);
+		resultEntityMetaData.setLabel(jobName + " output");
+		dataService.getMeta().addEntityMeta(resultEntityMetaData);
+	}
+
+	private void createInputRepository(Repository inputRepository)
+	{
+		// Add the original input dataset to database
+		dataService.getMeta().addEntityMeta(inputRepository.getEntityMetaData());
+		dataService.getRepository(inputRepository.getName()).add(inputRepository.stream());
 	}
 
 	private long countMatchedEntities(SortaJobExecution sortaJobExecution, boolean isMatched)
