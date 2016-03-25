@@ -21,6 +21,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -414,6 +415,8 @@ public class SortaServiceController extends MolgenisPluginController
 
 	private MapEntity toDownloadRow(SortaJobExecution sortaJobExecution, Entity resultEntity)
 	{
+		NumberFormat format = NumberFormat.getNumberInstance();
+		format.setMaximumFractionDigits(2);
 		String inputTermId = resultEntity.getString(MatchingTaskContentEntityMetaData.INPUT_TERM);
 		// TODO: make an xref and fetch it in one go!
 		Entity inputEntity = dataService.findOne(sortaJobExecution.getSourceEntityName(), inputTermId);
@@ -422,11 +425,16 @@ public class SortaServiceController extends MolgenisPluginController
 				sortaJobExecution.getOntologyIri());
 		MapEntity row = new MapEntity(inputEntity);
 		row.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME,
-				ontologyTermEntity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME));
-		row.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ontologyTermEntity.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI));
+				ontologyTermEntity.getString(OntologyTermMetaData.ONTOLOGY_TERM_NAME));
+		row.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI,
+				ontologyTermEntity.getString(OntologyTermMetaData.ONTOLOGY_TERM_IRI));
 		row.set(MatchingTaskContentEntityMetaData.VALIDATED,
-				resultEntity.get(MatchingTaskContentEntityMetaData.VALIDATED));
-		row.set(MatchingTaskContentEntityMetaData.SCORE, resultEntity.get(MatchingTaskContentEntityMetaData.SCORE));
+				resultEntity.getBoolean(MatchingTaskContentEntityMetaData.VALIDATED));
+		Double score = resultEntity.getDouble(MatchingTaskContentEntityMetaData.SCORE);
+		if (score != null)
+		{
+			row.set(MatchingTaskContentEntityMetaData.SCORE, format.format(score));
+		}
 		return row;
 	}
 
@@ -443,9 +451,9 @@ public class SortaServiceController extends MolgenisPluginController
 			response.setContentType("text/csv");
 			response.addHeader("Content-Disposition", "attachment; filename=" + generateCsvFileName("match-result"));
 			List<String> columnHeaders = new ArrayList<String>();
-			
-			EntityMetaData resultMetaData = dataService.getEntityMetaData(sortaJobExecution.getResultEntityName());
-			for (AttributeMetaData attributeMetaData : resultMetaData.getAttributes())
+
+			EntityMetaData sourceMetaData = dataService.getEntityMetaData(sortaJobExecution.getSourceEntityName());
+			for (AttributeMetaData attributeMetaData : sourceMetaData.getAttributes())
 			{
 				if (!attributeMetaData.getName().equalsIgnoreCase(SortaCsvRepository.ALLOWED_IDENTIFIER))
 					columnHeaders.add(attributeMetaData.getName());
