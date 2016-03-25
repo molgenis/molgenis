@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
@@ -21,11 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class CrudRepositoryAnnotator
 {
-	private enum RepositoryAction
-	{
-		ADD, UPDATE, UPSERT
-	}
-
 	private static final int BATCH_SIZE = 1000;
 
 	private final DataService dataService;
@@ -61,7 +57,6 @@ public class CrudRepositoryAnnotator
 		}
 		try
 		{
-
 			EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(repository.getName());
 
 			Repository crudRepository;
@@ -70,20 +65,19 @@ public class CrudRepositoryAnnotator
 				AbstractExternalRepositoryAnnotator externalAnnotator = (AbstractExternalRepositoryAnnotator) annotator;
 				EntityMetaData targetMetaData = externalAnnotator.getOutputMetaData(entityMetaData);
 
-				if (dataService.getMeta().getEntityMetaData(targetMetaData.getName()) == null)
+				if (!dataService.hasRepository(targetMetaData.getName()))
 				{
 					// add new entities to new repo
 					Repository externalRepository = dataService.getMeta().addEntityMeta(targetMetaData);
 
 					crudRepository = iterateOverEntitiesAndAnnotate(repository, externalRepository, externalAnnotator,
-							RepositoryAction.ADD);
+							DatabaseAction.ADD);
 				}
 				else
 				{
-					// upsert entities to existing repo
-					crudRepository = null;
+					throw new UnsupportedOperationException(
+							"This entity has already been annotated with " + annotator.getSimpleName());
 				}
-
 			}
 			else
 			{
@@ -94,7 +88,7 @@ public class CrudRepositoryAnnotator
 				RunAsSystemProxy.runAsSystem(
 						() -> addAnnotatorMetadataToRepositories(entityMetaData, compoundAttributeMetaData));
 				crudRepository = iterateOverEntitiesAndAnnotate(repository, repository, annotator,
-						RepositoryAction.UPDATE);
+						DatabaseAction.UPDATE);
 			}
 
 			return crudRepository;
@@ -109,7 +103,7 @@ public class CrudRepositoryAnnotator
 	 * Iterates over all the entities within a repository and annotates.
 	 */
 	private Repository iterateOverEntitiesAndAnnotate(Repository sourceRepository, Repository targetRepository,
-			RepositoryAnnotator annotator, RepositoryAction action)
+			RepositoryAnnotator annotator, DatabaseAction action)
 	{
 		Iterator<Entity> it = annotator.annotate(sourceRepository);
 
@@ -132,7 +126,7 @@ public class CrudRepositoryAnnotator
 		return targetRepository;
 	}
 
-	private void processBatch(List<Entity> batch, Repository repository, RepositoryAction action)
+	private void processBatch(List<Entity> batch, Repository repository, DatabaseAction action)
 	{
 		switch (action)
 		{
@@ -141,10 +135,9 @@ public class CrudRepositoryAnnotator
 				break;
 			case ADD:
 				repository.add(batch.stream());
-			case UPSERT:
-				// upsertBatch(batch);
-			default:
 				break;
+			default:
+				throw new UnsupportedOperationException();
 		}
 
 	}
