@@ -30,8 +30,9 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.annotation.AbstractExternalRepositoryAnnotator;
+import org.molgenis.data.annotation.AbstractRepositoryAnnotator;
 import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
+import org.molgenis.data.annotation.RefEntityAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
@@ -92,7 +93,7 @@ public class SnpEffAnnotator
 		return new SnpEffRepositoryAnnotator(snpEffRunner, snpEffAnnotatorSettings, dataService);
 	}
 
-	public static class SnpEffRepositoryAnnotator extends AbstractExternalRepositoryAnnotator
+	public static class SnpEffRepositoryAnnotator extends AbstractRepositoryAnnotator implements RefEntityAnnotator
 	{
 		private final AnnotatorInfo info = AnnotatorInfo.create(Status.READY, Type.EFFECT_PREDICTION, NAME,
 				"Genetic variant annotation and effect prediction toolbox. "
