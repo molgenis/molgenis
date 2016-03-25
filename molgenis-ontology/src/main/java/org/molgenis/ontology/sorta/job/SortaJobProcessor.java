@@ -14,10 +14,12 @@ import org.molgenis.data.IdGenerator;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.ontology.controller.SortaServiceController;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.sorta.meta.MatchingTaskContentEntityMetaData;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.ui.menu.MenuReaderService;
 
 public class SortaJobProcessor
 {
@@ -32,9 +34,11 @@ public class SortaJobProcessor
 	private final SortaService sortaService;
 	private final IdGenerator idGenerator;
 	private final AtomicInteger counter;
+	private final MenuReaderService menuReaderService;
 
 	public SortaJobProcessor(String ontologyIri, String inputRepositoryName, String resultRepositoryName,
-			Progress progress, DataService dataService, SortaService sortaService, IdGenerator idGenerator)
+			Progress progress, DataService dataService, SortaService sortaService, IdGenerator idGenerator,
+			MenuReaderService menuReaderService)
 	{
 		this.ontologyIri = requireNonNull(ontologyIri);
 		this.inputRepositoryName = requireNonNull(inputRepositoryName);
@@ -44,6 +48,7 @@ public class SortaJobProcessor
 		this.sortaService = requireNonNull(sortaService);
 		this.idGenerator = requireNonNull(idGenerator);
 		this.counter = new AtomicInteger(0);
+		this.menuReaderService = requireNonNull(menuReaderService);
 	}
 
 	public void process()
@@ -98,6 +103,8 @@ public class SortaJobProcessor
 				dataService.add(resultRepositoryName, entitiesToAdd.stream());
 			}
 			progress.progress(counter.get(), "Processed " + counter + " input terms.");
+			progress.setResultUrl(menuReaderService.getMenu().findMenuItemPath(SortaServiceController.ID) + "/result/"
+					+ resultRepositoryName);
 		});
 	}
 }
