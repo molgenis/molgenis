@@ -255,32 +255,40 @@ public class SortaServiceController extends MolgenisPluginController
 			if (currentUser.isSuperuser()
 					|| sortaJobExecution.getUser().getUsername().equals(currentUser.getUsername()))
 			{
-				// Remove result repository
-				String resultEntityName = sortaJobExecution.getResultEntityName();
-				dataService.getMeta().deleteEntityMeta(resultEntityName);
-
-				// Remove SortaJobExecution. It's not possible to delete a record from the
-				// SortaJobExecution as a regular user because the user doesn't have the permission to read the table
-				// MolgenisUser to which the column molgenisUser in SortaJobExecution refers
-
 				RunAsSystemProxy.runAsSystem(() -> {
 					dataService.delete(SortaJobExecution.ENTITY_NAME, sortaJobExecution.getIdentifier());
-					dataService.getRepository(SortaJobExecution.ENTITY_NAME).flush();
 				});
-
-				// Drop the table that contains the information for raw data (input terms). It's not possible to delete
-				// the
-				// EntityMetaData as a regular user because the user doesn't have the permission to change the entities
-				// and
-				// attributes tables
-				if (dataService.hasRepository(resultEntityName)
-						&& molgenisPermissionService.hasPermissionOnEntity(resultEntityName, Permission.WRITEMETA))
-				{
-					RunAsSystemProxy.runAsSystem(() -> dataService.getMeta().deleteEntityMeta(resultEntityName));
-				}
+				tryDeleteRepository(sortaJobExecution.getResultEntityName());
+				tryDeleteRepository(sortaJobExecution.getSourceEntityName());
 			}
 		}
 		return init(model);
+	}
+
+	private void tryDeleteRepository(String entityName)
+	{
+		if (dataService.hasRepository(entityName)
+				&& molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITEMETA))
+		{
+			RunAsSystemProxy.runAsSystem(() -> deleteRepository(entityName));
+		}
+		else
+		{
+			LOG.info("Unable to delete repository {}", entityName);
+		}
+	}
+
+	private void deleteRepository(String entityName)
+	{
+		try
+		{
+			dataService.getMeta().deleteEntityMeta(entityName);
+			LOG.info("Deleted repository {}", entityName);
+		}
+		catch (Exception ex)
+		{
+			LOG.error("Failed to delete existing writable repository {}", entityName);
+		}
 	}
 
 	@RequestMapping(method = POST, value = "/match/retrieve")
