@@ -7,7 +7,9 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.ontology.core.model.OntologyPackage;
+import org.springframework.stereotype.Component;
 
+@Component
 public class OntologyTermSynonymMetaData extends DefaultEntityMetaData
 {
 	public final static String ID = "id";
@@ -20,9 +22,8 @@ public class OntologyTermSynonymMetaData extends DefaultEntityMetaData
 	{
 		super(SIMPLE_NAME, OntologyPackage.getPackageInstance());
 		addAttributeMetaData(new DefaultAttributeMetaData(ID).setVisible(false), ROLE_ID);
-
 		DefaultAttributeMetaData ontologyTermSynonymAttr = new DefaultAttributeMetaData(ONTOLOGY_TERM_SYNONYM,
-				FieldTypeEnum.STRING).setNillable(false);
+				FieldTypeEnum.TEXT).setNillable(false);
 		addAttributeMetaData(ontologyTermSynonymAttr, ROLE_LABEL);
 	}
 }

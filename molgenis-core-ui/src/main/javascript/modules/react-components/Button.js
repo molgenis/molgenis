@@ -92,5 +92,7 @@ import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
 			}
 		}
 	});
-	
+
+export { Button }
+
 export default React.createFactory(Button);

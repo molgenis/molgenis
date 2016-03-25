@@ -111,7 +111,7 @@ public class MappingsBuilder
 
 	private static void createAttributeMappingContents(AttributeMetaData attr, boolean enableNorms,
 			boolean createAllIndex, boolean nestRefs, boolean enableNgramAnalyzer, XContentBuilder jsonBuilder)
-			throws IOException
+					throws IOException
 	{
 		FieldTypeEnum dataType = attr.getDataType().getEnumType();
 		switch (dataType)
@@ -142,7 +142,7 @@ public class MappingsBuilder
 				else
 				{
 					createAttributeMappingContents(refEntity.getLabelAttribute(), enableNorms, createAllIndex, false,
-							false, jsonBuilder);
+							enableNgramAnalyzer, jsonBuilder);
 				}
 				break;
 			case COMPOUND:
@@ -188,6 +188,7 @@ public class MappingsBuilder
 			case ENUM:
 			case HYPERLINK:
 			case STRING:
+			case TEXT:
 				// enable/disable norms based on given value
 				jsonBuilder.field("type", "string");
 				jsonBuilder.field("norms").startObject().field("enabled", enableNorms).endObject();
@@ -206,7 +207,6 @@ public class MappingsBuilder
 				break;
 			case HTML:
 			case SCRIPT:
-			case TEXT:
 				// enable/disable norms based on given value
 				jsonBuilder.field("type", "string");
 				jsonBuilder.field("norms").startObject().field("enabled", enableNorms).endObject();

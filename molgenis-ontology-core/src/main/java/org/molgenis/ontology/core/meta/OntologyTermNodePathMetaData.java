@@ -7,7 +7,9 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.ontology.core.model.OntologyPackage;
+import org.springframework.stereotype.Component;
 
+@Component
 public class OntologyTermNodePathMetaData extends DefaultEntityMetaData
 {
 	public final static String ID = "id";
@@ -22,7 +24,7 @@ public class OntologyTermNodePathMetaData extends DefaultEntityMetaData
 		super(SIMPLE_NAME, OntologyPackage.getPackageInstance());
 		addAttributeMetaData(new DefaultAttributeMetaData(ID).setVisible(false), ROLE_ID);
 		addAttributeMetaData(
-				new DefaultAttributeMetaData(ONTOLOGY_TERM_NODE_PATH, FieldTypeEnum.STRING).setNillable(false),
+				new DefaultAttributeMetaData(ONTOLOGY_TERM_NODE_PATH, FieldTypeEnum.TEXT).setNillable(false),
 				ROLE_LABEL);
 		addAttributeMetaData(new DefaultAttributeMetaData(ROOT, FieldTypeEnum.BOOL).setNillable(false));
 	}
