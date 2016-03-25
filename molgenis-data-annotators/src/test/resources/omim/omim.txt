@@ -1,0 +1,15 @@
+#Phenotype	GeneSymbols	MIMNumber	CytoLocation
+17,20-lyase deficiency, isolated, 202110 (3)	CYP17A1, CYP17, P450C17	609300	10q24.32
+17-alpha-hydroxylase/17,20-lyase deficiency, 202110 (3)	CYP17A1, CYP17, P450C17	609300	10q24.32
+17-beta-hydroxysteroid dehydrogenase X deficiency, 300438 (3)	HSD17B10, HADH2, ERAB, MRXS10	300256	Xp11.22
+2-aminoadipic 2-oxoadipic aciduria, 204750 (3)	DHTKD1, KIAA1630, AMOXAD, CMT2Q	614984	10p14
+{Systemic lupus erythematosus, susceptibility to}, 152700 (3)	FCGR2B, CD32	604590	1q23.3
+{Systemic lupus erythematosus, susceptibility to}, 152700 (3)	TREX1, AGS1, CRV, HERNS	606609	3p21.31
+{Systemic lupus erythematous, association with susceptibility to, 6}, 609939 (3)	ITGAM, CR3A, CD11B, MAC1A, SLEB6	120980	16p11.2
+{T-cell acute lymphoblastic leukemia} (3)	MYB	189990	6q23.3
+{TSC2 angiomyolipomas, renal, modifier of}, 613254 (3)	IFNG, IFG, IFI	147570	12q15
+{Thromboembolism, susceptibility to}, 188050 (3)	MTHFR	607093	1p36.22
+{Thrombophilia, susceptibility to, due to factor V Leiden}, 188055 (3)	F5, THPH2, RPRGL1	612309	1q24.2
+{Thyroid cancer, monmedullary, 1}, 188550 (3)	NKX2-1, TITF1, NKX2A, TTF1, NMTC1	600635	14q13.3
+{Thyroid cancer, nonmedullary, 2}, 188470 (3)	SRGAP1, KIAA1304, NMTC2	606523	12q14.2
+{Thyroid cancer, nonmedullary, 4}, 616534 (3)	FOXE1, FKHL15, TITF2, TTF2, NMTC4	602617	9q22.33
