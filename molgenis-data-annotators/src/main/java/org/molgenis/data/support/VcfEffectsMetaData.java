@@ -1,15 +1,14 @@
 package org.molgenis.data.support;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.BOOL;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Package;
 
 public class VcfEffectsMetaData extends DefaultEntityMetaData
 {
+	public static final String ENTITY_NAME_SUFFIX = "_EFFECTS";
+
 	public static final String ID = "id";
 	public static final String ALT = "ALT";
 	public static final String GENE = "Gene_Name";
@@ -31,20 +30,16 @@ public class VcfEffectsMetaData extends DefaultEntityMetaData
 	public static final String DISTANCE_TO_FEATURE = "Distance_to_feature";
 	public static final String ERRORS = "Errors";
 
-	public static final DefaultAttributeMetaData GENE_NAME_ATTR = new DefaultAttributeMetaData(GENE_NAME, BOOL).setDescription(
-			"Common gene name (HGNC). Optional: use closest gene when the variant is “intergenic”(source:http://snpeff.sourceforge.net)");
-	public static final DefaultAttributeMetaData IMPACT_ATTR = new DefaultAttributeMetaData(PUTATIVE_IMPACT, STRING).setDescription(
-			" A simple estimation of putative impact / deleteriousness : {HIGH, MODERATE, LOW, MODIFIER}(source:http://snpeff.sourceforge.net)");
-
-
-	public VcfEffectsMetaData(String entityName, Package package_, EntityMetaData sourceEMD)
+	public VcfEffectsMetaData(EntityMetaData sourceEMD)
 	{
-		super(entityName, package_);
+		super(sourceEMD.getSimpleName() + ENTITY_NAME_SUFFIX, sourceEMD.getPackage());
+
+		setBackend(sourceEMD.getBackend());
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
-		addAttribute(ALT).setNillable(false);
-		addAttribute(GENE).setNillable(false);
 
+		addAttribute(ALT);
+		addAttribute(GENE);
 		addAttribute(VARIANT).setNillable(false).setDataType(MolgenisFieldTypes.XREF).setRefEntity(sourceEMD);
 
 		addAttribute(ANNOTATION);

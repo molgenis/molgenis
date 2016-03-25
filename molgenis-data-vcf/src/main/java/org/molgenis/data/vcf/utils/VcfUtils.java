@@ -153,7 +153,41 @@ public class VcfUtils
 			@Override
 			public boolean hasNext()
 			{
-				return effects.hasNext() ? true : false;
+				return effects.hasNext();
+			}
+
+			private Entity newVariant(Entity variant, List<Entity> effectsForVariant)
+			{
+				EntityMetaData effectEMD = effectsForVariant.get(0).getEntityMetaData();
+				Entity newVariant = new MapEntity(getResultEMD(effectEMD, variant.getEntityMetaData()));
+				newVariant.set(variant);
+
+				if (effectsForVariant.size() > 1)
+				{
+					newVariant.set("EFFECT", effectsForVariant);
+				}
+				else
+				{
+					// is this an empty effect entity?
+					Entity entity = effectsForVariant.get(0);
+					boolean isEmpty = true;
+					for (AttributeMetaData attr : effectEMD.getAtomicAttributes())
+					{
+						if (attr.getName().equals("id") || attr.getName().equals("VARIANT"))
+						{
+							continue;
+						}
+						else if (entity.get(attr.getName()) != null)
+						{
+							isEmpty = false;
+							break;
+						}
+					}
+
+					if (!isEmpty) newVariant.set("EFFECT", effectsForVariant);
+				}
+
+				return newVariant;
 			}
 
 			@Override
@@ -173,18 +207,12 @@ public class VcfUtils
 					}
 					else
 					{
-						Entity newVariant = new MapEntity(getResultEMD(effectsForVariant.get(0).getEntityMetaData(),
-								variant.getEntityMetaData()));
-						newVariant.set(variant);
-						newVariant.set("EFFECT", effectsForVariant);
+						Entity newVariant = newVariant(variant, effectsForVariant);
+						effectsForVariant = Lists.newArrayList();
 						return newVariant;
 					}
 				}
-				Entity newVariant = new MapEntity(
-						getResultEMD(effectsForVariant.get(0).getEntityMetaData(), variant.getEntityMetaData()));
-				newVariant.set(variant);
-				newVariant.set("EFFECT", effectsForVariant);
-				return newVariant;
+				return newVariant(variant, effectsForVariant);
 			}
 		};
 	}
@@ -224,20 +252,18 @@ public class VcfUtils
 		}
 		for (AttributeMetaData attribute : attributes)
 		{
-			if (!VCF_ATTRIBUTE_NAMES.contains(attribute.getName()))
+			String attributeName = attribute.getName();
+			if ((attribute.getDataType().equals(MREF) || attribute.getDataType().equals(XREF))
+					&& !VCF_ATTRIBUTE_NAMES.contains(attributeName) && !attributeName.equals(SAMPLES))
 			{
-				if ((attribute.getDataType().equals(MREF) || attribute.getDataType().equals(XREF))
-						&& !attribute.getName().equals(SAMPLES))
+				// If the MREF field is empty, no effects were found, so we do not add an EFFECT field to this entity
+				if (vcfEntity.get(attributeName) != null)
 				{
 					// We are dealing with non standard Xref and Mref attributes
 					// added by e.g. the SnpEff annotator,
 					// which is NOT the SAMPLE_ENTITIES attribute
-					additionalInfoFields = parseNonStandardMrefFieldsToInfoField(
-							vcfEntity.getEntities(attribute.getName()), attribute, additionalInfoFields);
-
-				}
-				else{
-
+					additionalInfoFields = parseNonStandardRefFieldsToInfoField(vcfEntity.getEntities(attributeName),
+							attribute, additionalInfoFields);
 				}
 			}
 
@@ -246,13 +272,13 @@ public class VcfUtils
 	}
 
 	/**
-	 * Take non standard fields added by annotators like SnpEff, and parse there values into VCF info field format
+	 * Create a INFO field annotation and add values
 	 * 
 	 * @param refEntities
 	 * @param attribute
 	 * @param additionalInfoFields
 	 */
-	private static String parseNonStandardMrefFieldsToInfoField(Iterable<Entity> refEntities,
+	private static String parseNonStandardRefFieldsToInfoField(Iterable<Entity> refEntities,
 			AttributeMetaData attribute, String additionalInfoFields)
 	{
 		boolean secondValuePresent = false;
@@ -277,7 +303,15 @@ public class VcfUtils
 		return additionalInfoFields;
 	}
 
-	private static String addEntityValuesToAdditionalInfoField(String additionalInfoFields, Entity refEntity,
+	/**
+	 * Add the values of each EFFECT entity to the info field
+	 *
+	 * @param additionalInfoFields
+	 * @param entity
+	 * @param refAttributes
+	 * @return
+	 */
+	private static String addEntityValuesToAdditionalInfoField(String additionalInfoFields, Entity entity,
 			Iterable<AttributeMetaData> refAttributes)
 	{
 		boolean secondValuePresent = false;
@@ -285,10 +319,13 @@ public class VcfUtils
 		for (AttributeMetaData refAttribute : refAttributes)
 		{
 			if (!refAttribute.isSameAs(idAttribute) && (refAttribute.getDataType() != XREF))
+			if (!refAttribute.isSameAs(idAttribute) && !refAttribute.getDataType().equals(MREF)
+					&& !refAttribute.getDataType().equals(XREF))
 			{
 				if (secondValuePresent) additionalInfoFields = additionalInfoFields + PIPE_SEPARATOR;
 				additionalInfoFields = additionalInfoFields + refEntity.get(refAttribute.getName());
 				secondValuePresent = true;
+
 			}
 		}
 		return additionalInfoFields;

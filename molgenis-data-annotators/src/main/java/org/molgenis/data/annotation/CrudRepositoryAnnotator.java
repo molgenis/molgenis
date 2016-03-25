@@ -163,30 +163,8 @@ public class CrudRepositoryAnnotator
 		{
 			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(entityMetaData);
 			newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
-
-			// traverseCompound(compoundAttributeMetaData);
-
 			dataService.getMeta().updateSync(newEntityMetaData);
 		}
 	}
-
-	// private void traverseCompound(AttributeMetaData compound)
-	// {
-	// for (AttributeMetaData attr : compound.getAttributeParts())
-	// {
-	// if (attr.getDataType().equals(COMPOUND))
-	// {
-	// traverseCompound(attr);
-	// }
-	// else if (attr.getDataType().equals(MolgenisFieldTypes.CATEGORICAL)
-	// || attr.getDataType().equals(MolgenisFieldTypes.CATEGORICAL_MREF)
-	// || attr.getDataType().equals(MolgenisFieldTypes.MREF)
-	// || attr.getDataType().equals(MolgenisFieldTypes.XREF))
-	// {
-	//
-	// }
-	//
-	// }
-	// }
 
 }

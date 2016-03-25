@@ -7,6 +7,7 @@ import static org.molgenis.MolgenisFieldTypes.LONG;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.molgenis.MolgenisFieldTypes.STRING;
+import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.VcfRepository.ALT;
 import static org.molgenis.data.vcf.VcfRepository.ALT_META;
@@ -494,7 +495,23 @@ public class VcfUtilsTest
 		vcfEntity4.set("GENES", getGeneEnttities(Arrays.asList("A", "C", "G")));
 		vcfEntity4.set(SAMPLES, Arrays.asList(sampleEntity1));
 
-		return newArrayList(vcfEntity1, vcfEntity2, vcfEntity3, vcfEntity4);
+		// X 56032934 . G T,C,A 100 PASS AC=0;AN=3;GTC=1,2,3 GT 1|1
+		Entity vcfEntity5 = new MapEntity(vcfMeta);
+		vcfEntity5.set(CHROM, "X");
+		vcfEntity5.set(POS, "56032934");
+		vcfEntity5.set(ID, ".");
+		vcfEntity5.set(REF, "G");
+		vcfEntity5.set(ALT, "T,C,A");
+		vcfEntity5.set(QUAL, "100");
+		vcfEntity5.set(FILTER, "PASS");
+		vcfEntity5.set("AC", "0");
+		vcfEntity5.set("AN", "3");
+		vcfEntity5.set("GTC", "1,2,3");
+		vcfEntity5.set("EFFECT", null);
+		vcfEntity5.set("GENES", getGeneEnttities(Arrays.asList("T", "C", "A")));
+		vcfEntity5.set(SAMPLES, Arrays.asList(sampleEntity1));
+
+		return newArrayList(vcfEntity1, vcfEntity2, vcfEntity3, vcfEntity4, vcfEntity5);
 	}
 
 	private Object getGeneEnttities(List<String> altAlleles)
