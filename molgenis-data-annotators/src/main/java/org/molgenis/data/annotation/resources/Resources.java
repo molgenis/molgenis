@@ -26,11 +26,5 @@ public interface Resources
 	 */
 	Iterable<Entity> findAll(String name, Query q);
 
-	/**
-	 * Indicates if a specific Resource is currently available.
-	 * 
-	 * @param name
-	 *            the name of the {@link Resource}
-	 */
 	Set<String> getResourcesNames();
 }

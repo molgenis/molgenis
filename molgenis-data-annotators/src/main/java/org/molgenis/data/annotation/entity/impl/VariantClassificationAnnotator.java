@@ -7,7 +7,6 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.cmd.EffectsAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
@@ -34,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -78,7 +78,7 @@ public class VariantClassificationAnnotator
 	@Bean
 	public EffectsAnnotator variantClassification()
 	{
-		List<AttributeMetaData> attributes = new ArrayList<>();
+		LinkedList<AttributeMetaData> attributes = new LinkedList<>();
 		DefaultAttributeMetaData classification = new DefaultAttributeMetaData(CLASSIFICATION,
 				MolgenisFieldTypes.FieldTypeEnum.STRING).setDescription(CLASSIFICATION).setLabel(CLASSIFICATION);
 		DefaultAttributeMetaData confidence = new DefaultAttributeMetaData(CONFIDENCE,
@@ -96,7 +96,9 @@ public class VariantClassificationAnnotator
 				AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE, NAME, description, attributes);
 		EntityAnnotator entityAnnotator = new QueryAnnotatorImpl(RESOURCE, classificationInfo,
 				new GeneNameQueryCreator(), dataService, resources, (annotationSourceFileName) -> {
-					variantClassificationAnnotatorSettings.set(NAME, "");
+					variantClassificationAnnotatorSettings.set(
+							VariantClassificationAnnotatorSettings.Meta.VARIANT_FILE_LOCATION,
+							annotationSourceFileName);
 				})
 		{
 			@Override
@@ -114,8 +116,8 @@ public class VariantClassificationAnnotator
 										+ StreamSupport.stream(refAttributesList.spliterator(), false)
 												.map(AttributeMetaData::getName).collect(Collectors.joining(", ")));
 
-				requiredAttributes.addAll(Arrays.asList(VcfEffectsMetaData.GENE_NAME_ATTR, VcfEffectsMetaData.IMPACT_ATTR,
-						refAttr, VcfRepository.ALT_META));
+				requiredAttributes.addAll(Arrays.asList(VcfEffectsMetaData.GENE_NAME_ATTR,
+						VcfEffectsMetaData.IMPACT_ATTR, refAttr, VcfRepository.ALT_META));
 				return requiredAttributes;
 			}
 
@@ -123,7 +125,7 @@ public class VariantClassificationAnnotator
 			protected void processQueryResults(Entity inputEntity, Iterable<Entity> annotationSourceEntities,
 					Entity resultEntity)
 			{
-				String alt = inputEntity.getString(VcfRepository.ALT);
+				String alt = inputEntity.getString(VcfEffectsMetaData.ANNOTATION);
 				if (alt.contains(","))
 				{
 					throw new MolgenisDataException(
@@ -142,6 +144,10 @@ public class VariantClassificationAnnotator
 				Double exacMAF = exacMap.get(alt);
 				Double caddScaled = caddMap.get(alt);
 				String gene = inputEntity.getString(VcfEffectsMetaData.GENE_NAME);
+				if (exacMAF == null)
+				{
+					exacMAF = 0.0;
+				}
 
 				if (sourceEntitiesSize == 1)
 				{
@@ -171,6 +177,7 @@ public class VariantClassificationAnnotator
 					throw new MolgenisDataException(message);
 				}
 			}
+
 		};
 		return new EffectsAnnotator(entityAnnotator);
 	}
@@ -287,7 +294,12 @@ public class VariantClassificationAnnotator
 		{
 			for (int i = 0; i < altArray.length; i++)
 			{
-				result.put(altArray[i], Double.parseDouble(annotationsArray[i]));
+				Double value = null;
+				if (StringUtils.isNotEmpty(annotationsArray[i]))
+				{
+					value = Double.parseDouble(annotationsArray[i]);
+				}
+				result.put(altArray[i], value);
 			}
 		}
 		else if (StringUtils.isEmpty(annotations))

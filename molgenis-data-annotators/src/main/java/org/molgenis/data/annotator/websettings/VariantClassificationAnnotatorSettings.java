@@ -1,6 +1,5 @@
 package org.molgenis.data.annotator.websettings;
 
-import org.molgenis.data.annotation.entity.impl.CaddAnnotator;
 import org.molgenis.data.annotation.entity.impl.VariantClassificationAnnotator;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.settings.DefaultSettingsEntity;

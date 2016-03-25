@@ -23,6 +23,7 @@ import static org.molgenis.data.support.VcfEffectsMetaData.TRANSCRIPT_BIOTYPE;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
@@ -45,6 +46,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.w3c.dom.Attr;
 
 /**
  * SnpEff annotator
@@ -127,6 +129,11 @@ public class SnpEffAnnotator
 		public EntityMetaData getOutputMetaData(EntityMetaData sourceEMD)
 		{
 			return new VcfEffectsMetaData(sourceEMD);
+		}
+
+		@Override
+		public LinkedList<AttributeMetaData> getOrderedAttributeList(EntityMetaData sourceEMD) {
+			return VcfEffectsMetaData.getOrderedAttributeList(sourceEMD);
 		}
 
 		@Override

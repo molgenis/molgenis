@@ -7,7 +7,6 @@ import static org.molgenis.MolgenisFieldTypes.LONG;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.VcfRepository.ALT;
 import static org.molgenis.data.vcf.VcfRepository.ALT_META;
@@ -25,7 +24,6 @@ import static org.molgenis.data.vcf.VcfRepository.QUAL_META;
 import static org.molgenis.data.vcf.VcfRepository.REF;
 import static org.molgenis.data.vcf.VcfRepository.REF_META;
 import static org.molgenis.data.vcf.VcfRepository.SAMPLES;
-import static org.molgenis.data.vcf.utils.VcfUtils.checkPreviouslyAnnotatedAndAddMetadata;
 import static org.molgenis.data.vcf.utils.VcfUtils.reverseXrefMrefRelation;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -330,7 +328,7 @@ public class VcfUtilsTest
 
 			File inputVcfFile = new File(ResourceUtils.getFile(getClass(), "/testWriter.vcf").getPath());
 
-			VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, Collections.emptyList());
+			VcfUtils.writeVcfHeader(inputVcfFile, outputVCFWriter, Collections.emptyList());
 
 			for (Entity entity : entities)
 			{
@@ -363,7 +361,7 @@ public class VcfUtilsTest
 			File inputVcfFile = new File(ResourceUtils.getFile(getClass(), "/testWriter.vcf").getPath());
 			File resultVCFWriter = new File(ResourceUtils.getFile(getClass(), "/result_vcfWriter.vcf").getPath());
 
-			VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter,
+			VcfUtils.writeVcfHeader(inputVcfFile, outputVCFWriter,
 					Lists.newArrayList(annotatedEntityMetadata.getAttributes()));
 
 			for (Entity entity : entities)
@@ -402,7 +400,7 @@ public class VcfUtilsTest
 			File expectedVcfFile = new File(
 					ResourceUtils.getFile(getClass(), "/testMrefVcfWriter_expected_output.vcf").getPath());
 
-			checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, actualOutputFileWriter, attributes);
+			//writeVcfHeader(inputVcfFile, actualOutputFileWriter, attributes);
 
 			for (Entity entity : vcfEntities)
 			{

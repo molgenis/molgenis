@@ -74,6 +74,9 @@ public class VcfRepository extends AbstractRepository
 					.setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
 	public static final AttributeMetaData ID_META = new DefaultAttributeMetaData(ID,
 			MolgenisFieldTypes.FieldTypeEnum.STRING).setNillable(true).setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
+	public static final AttributeMetaData INFO_META = new DefaultAttributeMetaData(INFO,
+			MolgenisFieldTypes.FieldTypeEnum.COMPOUND).setNillable(true);
+
 
 	private final String entityName;
 	protected Supplier<VcfToEntity> vcfToEntitySupplier;

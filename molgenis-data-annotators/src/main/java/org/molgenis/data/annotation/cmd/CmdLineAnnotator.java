@@ -1,20 +1,14 @@
 package org.molgenis.data.annotation.cmd;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Arrays.asList;
-import static org.molgenis.MolgenisFieldTypes.MREF;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.ConsoleAppender;
+import joptsimple.OptionException;
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AbstractExternalRepositoryAnnotator;
@@ -35,13 +29,16 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
+import static org.molgenis.MolgenisFieldTypes.MREF;
 
 /**
  * 
@@ -258,7 +255,7 @@ public class CmdLineAnnotator
 			// entity
 			// This allows for the header to be written as 'EFFECT annotations: <ouput_attributes> | <ouput_attributes>'
 			List<AttributeMetaData> outputMetaData = newArrayList();
-			if (annotator instanceof AbstractExternalRepositoryAnnotator)
+			if (annotator instanceof AbstractExternalRepositoryAnnotator || annotator instanceof EffectsAnnotator)
 			{
 				DefaultEntityMetaData effectRefEntity = new DefaultEntityMetaData(
 						annotator.getSimpleName() + "_EFFECTS");
@@ -277,7 +274,7 @@ public class CmdLineAnnotator
 				outputMetaData = annotator.getOutputMetaData();
 			}
 
-			VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, outputMetaData,
+			LinkedList<String> orderedAddedAttributes = VcfUtils.writeVcfHeader(inputVcfFile, outputVCFWriter, outputMetaData,
 					attributesToInclude);
 			System.out.println("Now starting to process the data.");
 
@@ -301,7 +298,7 @@ public class CmdLineAnnotator
 			}
 			Iterator<Entity> annotatedRecords = annotator.annotate(entitiesToAnnotate);
 
-			if (annotator instanceof AbstractExternalRepositoryAnnotator)
+			if (annotator instanceof AbstractExternalRepositoryAnnotator || annotator instanceof EffectsAnnotator)
 			{
 				annotatedRecords = VcfUtils.reverseXrefMrefRelation(annotatedRecords);
 			}
@@ -309,7 +306,7 @@ public class CmdLineAnnotator
 			while (annotatedRecords.hasNext())
 			{
 				Entity annotatedRecord = annotatedRecords.next();
-				VcfUtils.writeToVcf(annotatedRecord, attributesToInclude, outputVCFWriter);
+				VcfUtils.writeToVcf(annotatedRecord, attributesToInclude, outputVCFWriter, orderedAddedAttributes);
 				outputVCFWriter.newLine();
 			}
 
