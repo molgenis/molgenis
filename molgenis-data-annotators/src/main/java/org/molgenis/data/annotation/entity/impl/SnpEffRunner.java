@@ -40,14 +40,13 @@ import java.util.regex.Pattern;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.snpEff.SnpEffResultIterator;
 import org.molgenis.data.annotation.utils.JarRunner;
-import org.molgenis.data.annotation.utils.JarRunnerImpl;
 import org.molgenis.data.annotator.websettings.SnpEffAnnotatorSettings;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.support.VcfEffectsMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
@@ -65,7 +64,6 @@ public class SnpEffRunner
 {
 	private static final Logger LOG = LoggerFactory.getLogger(SnpEffAnnotator.class);
 
-	private JarRunner jarRunner;
 	private String snpEffPath;
 
 	private static final String CHARSET = "UTF-8";
@@ -80,15 +78,16 @@ public class SnpEffRunner
 		MODIFIER, LOW, MODERATE, HIGH
 	}
 
-	@Autowired
-	private Entity snpEffAnnotatorSettings;
+	private final JarRunner jarRunner;
+	private final Entity snpEffAnnotatorSettings;
+	private final IdGenerator idGenerator;
 
 	@Autowired
-	private UuidGenerator idGenerator;
-
-	public SnpEffRunner()
+	public SnpEffRunner(JarRunner jarRunner, Entity snpEffAnnotatorSettings, IdGenerator idGenerator)
 	{
-		this.jarRunner = new JarRunnerImpl();
+		this.jarRunner = jarRunner;
+		this.snpEffAnnotatorSettings = snpEffAnnotatorSettings;
+		this.idGenerator = idGenerator;
 	}
 
 	public Iterator<Entity> getSnpEffects(Iterable<Entity> source)
@@ -105,7 +104,7 @@ public class SnpEffRunner
 	}
 
 	@SuppressWarnings("resource")
-	private Iterator<Entity> getSnpEffects(Iterator<Entity> source, final File inputVcf)
+	public Iterator<Entity> getSnpEffects(Iterator<Entity> source, final File inputVcf)
 	{
 		try
 		{
@@ -119,7 +118,6 @@ public class SnpEffRunner
 					"-canon", "-ud", "0", "-spliceSiteSize", "5");
 			File outputVcf = jarRunner.runJar(NAME, params, inputVcf);
 
-			// TODO always output to "snpEff"? won't this overwrite when you do parallel annotations?
 			File snpEffOutputWithMetaData = addVcfMetaDataToOutputVcf(outputVcf);
 			VcfRepository repo = new VcfRepository(snpEffOutputWithMetaData, "SNPEFF_OUTPUT_VCF_" + inputVcf.getName());
 
