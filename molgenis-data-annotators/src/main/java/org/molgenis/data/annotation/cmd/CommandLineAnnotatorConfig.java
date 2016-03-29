@@ -12,6 +12,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.utils.JarRunnerImpl;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.support.AnnotationServiceImpl;
@@ -97,6 +98,12 @@ public class CommandLineAnnotatorConfig
 	}
 
 	@Bean
+	public JarRunnerImpl jarRunner()
+	{
+		return new JarRunnerImpl();
+	}
+
+	@Bean
 	public Entity snpEffAnnotatorSettings()
 	{
 		return new MapEntity();
@@ -149,7 +156,7 @@ public class CommandLineAnnotatorConfig
 	{
 		return new MapEntity();
 	}
-	
+
 	@Bean
 	public Entity omimAnnotatorSettings()
 	{

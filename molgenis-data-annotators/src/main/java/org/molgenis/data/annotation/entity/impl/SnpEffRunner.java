@@ -34,20 +34,19 @@ import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.snpEff.SnpEffResultIterator;
 import org.molgenis.data.annotation.utils.JarRunner;
-import org.molgenis.data.annotation.utils.JarRunnerImpl;
 import org.molgenis.data.annotator.websettings.SnpEffAnnotatorSettings;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.support.VcfEffectsMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
@@ -65,7 +64,6 @@ public class SnpEffRunner
 {
 	private static final Logger LOG = LoggerFactory.getLogger(SnpEffAnnotator.class);
 
-	private JarRunner jarRunner;
 	private String snpEffPath;
 
 	private static final String CHARSET = "UTF-8";
@@ -80,18 +78,19 @@ public class SnpEffRunner
 		MODIFIER, LOW, MODERATE, HIGH
 	}
 
-	@Autowired
-	private Entity snpEffAnnotatorSettings;
+	private final JarRunner jarRunner;
+	private final Entity snpEffAnnotatorSettings;
+	private final IdGenerator idGenerator;
 
 	@Autowired
-	private UuidGenerator idGenerator;
-
-	public SnpEffRunner()
+	public SnpEffRunner(JarRunner jarRunner, Entity snpEffAnnotatorSettings, IdGenerator idGenerator)
 	{
-		this.jarRunner = new JarRunnerImpl();
+		this.jarRunner = jarRunner;
+		this.snpEffAnnotatorSettings = snpEffAnnotatorSettings;
+		this.idGenerator = idGenerator;
 	}
 
-	public Stream<Entity> getSnpEffects(Iterable<Entity> source)
+	public Iterator<Entity> getSnpEffects(Iterable<Entity> source)
 	{
 		try
 		{
@@ -105,11 +104,11 @@ public class SnpEffRunner
 	}
 
 	@SuppressWarnings("resource")
-	private Stream<Entity> getSnpEffects(Iterator<Entity> source, final File inputVcf)
+	public Iterator<Entity> getSnpEffects(Iterator<Entity> source, final File inputVcf)
 	{
 		try
 		{
-			if (!source.hasNext()) return Stream.empty();
+			if (!source.hasNext()) return Iterators.emptyIterator();
 
 			// get meta data by peeking at the first entity (work-around for issue #4701)
 			PeekingIterator<Entity> peekingIterator = Iterators.peekingIterator(source);
@@ -119,31 +118,63 @@ public class SnpEffRunner
 					"-canon", "-ud", "0", "-spliceSiteSize", "5");
 			File outputVcf = jarRunner.runJar(NAME, params, inputVcf);
 
-			// TODO always output to "snpEff"? won't this overwrite when you do parallel annotations?
 			File snpEffOutputWithMetaData = addVcfMetaDataToOutputVcf(outputVcf);
 			VcfRepository repo = new VcfRepository(snpEffOutputWithMetaData, "SNPEFF_OUTPUT_VCF_" + inputVcf.getName());
 
 			SnpEffResultIterator snpEffResultIterator = new SnpEffResultIterator(repo.iterator());
 
-			DefaultEntityMetaData effectsEMD = new VcfEffectsMetaData(sourceEMD.getSimpleName() + "_EFFECTS",
-					sourceEMD.getPackage(), sourceEMD);
+			DefaultEntityMetaData effectsEMD = new VcfEffectsMetaData(sourceEMD);
 
-			List<Entity> effectsEntities = Lists.newArrayList();
-			peekingIterator.forEachRemaining(sourceEntity -> {
-				String chromosome = sourceEntity.getString(VcfRepository.CHROM);
-				Long position = sourceEntity.getLong(VcfRepository.POS);
+			return new Iterator<Entity>()
+			{
+				Iterator<Entity> sourceEntities = peekingIterator;
+				SnpEffResultIterator resultEntities = snpEffResultIterator;
+				LinkedList<Entity> effects = Lists.newLinkedList();
 
-				if (chromosome != null && position != null)
+				@Override
+				public boolean hasNext()
 				{
-					Entity snpEffEntity = snpEffResultIterator.get(chromosome, position);
-					if (snpEffEntity != null)
+					if (sourceEntities.hasNext() || !effects.isEmpty())
 					{
-						effectsEntities.addAll(getSnpEffectsFromSnpEffEntity(sourceEntity, snpEffEntity, effectsEMD));
+						return true;
+					}
+					else
+					{
+						return false;
 					}
 				}
-			});
 
-			return effectsEntities.stream();
+				@Override
+				public Entity next()
+				{
+					if (effects.isEmpty())
+					{
+						// go to next source entity and get effects
+						Entity sourceEntity = sourceEntities.next();
+						String chromosome = sourceEntity.getString(VcfRepository.CHROM);
+						Long position = sourceEntity.getLong(VcfRepository.POS);
+
+						if (chromosome != null && position != null)
+						{
+							Entity snpEffEntity = resultEntities.get(chromosome, position);
+							if (snpEffEntity != null)
+							{
+								effects.addAll(getSnpEffectsFromSnpEffEntity(sourceEntity, snpEffEntity, effectsEMD));
+							}
+							else
+							{
+								effects.add(getEmptyEffectsEntity(sourceEntity, effectsEMD));
+							}
+						}
+						else
+						{
+							effects.add(getEmptyEffectsEntity(sourceEntity, effectsEMD));
+						}
+					}
+					return effects.removeFirst();
+				}
+
+			};
 		}
 		catch (IOException e)
 		{
@@ -153,6 +184,15 @@ public class SnpEffRunner
 		{
 			throw new MolgenisDataException("Exception running SnpEff", e);
 		}
+	}
+
+	private Entity getEmptyEffectsEntity(Entity sourceEntity, EntityMetaData effectsEMD)
+	{
+		MapEntity effect = new MapEntity(effectsEMD);
+		effect.set(ID, idGenerator.generateId());
+		effect.set(VARIANT, sourceEntity);
+
+		return effect;
 	}
 
 	// ANN=G|intron_variant|MODIFIER|LOC101926913|LOC101926913|transcript|NR_110185.1|Noncoding|5/5|n.376+9526G>C||||||,G|non_coding_exon_variant|MODIFIER|LINC01124|LINC01124|transcript|NR_027433.1|Noncoding|1/1|n.590G>C||||||;
@@ -181,10 +221,10 @@ public class SnpEffRunner
 			if (fields.length >= 15)
 			{
 				effect.set(ID, idGenerator.generateId());
-				effect.set(ALT, fields[0]);
-				effect.set(GENE, fields[4]);
 				effect.set(VARIANT, sourceEntity);
 
+				effect.set(ALT, fields[0]);
+				effect.set(GENE, fields[4]);
 				effect.set(ANNOTATION, fields[1]);
 				effect.set(PUTATIVE_IMPACT, fields[2]);
 				effect.set(GENE_NAME, fields[3]);
