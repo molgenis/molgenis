@@ -1,13 +1,19 @@
 package org.molgenis.data.annotation.entity.impl;
 
+import static org.mockito.Mockito.mock;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
-import org.elasticsearch.common.collect.Lists;
+import org.apache.lucene.document.StringField;
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.filter.MultiAllelicResultFilter;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -18,6 +24,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 
 public class MultiAllelicResultFilterTest
 {
@@ -304,5 +311,125 @@ public class MultiAllelicResultFilterTest
 		Optional<Entity> result = filter.filterResults(Collections.singletonList(resultEntity10), entity10);
 		assertEquals(Lists.newArrayList(result.asSet()).get(0).getString("annotation"), "19");
 
+	}
+	
+	/*
+	 * entity list:
+	 * 3	300	G	A	0.2|23.1
+	 * 3	300	G	T	-2.4|0.123
+	 * 3	300	G	X	-0.002|2.3
+	 * 3	300	G	C	0.5|14.5
+	 * 3	300	GC	A	0.2|23.1
+	 * 3	300	GC	T	-2.4|0.123
+	 * 3	300	C	GX	-0.002|2.3
+	 * 3	300	C	GC	0.5|14.5
+	 * 
+	 * should become:
+	 * 3	300	G	A,T,X,C	0.2|23.1,-2.4|0.123,-0.002|2.3,0.5|14.5
+	 * 3	300	GC	A,T	0.2|23.1,-2.4|0.123
+	 * 3	300	C	GX,GC	-0.002|2.3,0.5|14.5
+	 */
+	@Test
+	public void testMultiLineMerge()
+	{
+		
+		String customAttrb = "MyAnnotation";
+		DefaultEntityMetaData multiLineTestEMD = new DefaultEntityMetaData("entity");
+
+		multiLineTestEMD.addAttributeMetaData(VcfRepository.CHROM_META);
+		multiLineTestEMD.addAttributeMetaData(VcfRepository.POS_META);
+		multiLineTestEMD.addAttributeMetaData(VcfRepository.ID_META, ROLE_ID);
+		multiLineTestEMD.addAttributeMetaData(VcfRepository.REF_META);
+		multiLineTestEMD.addAttributeMetaData(VcfRepository.ALT_META);
+		multiLineTestEMD.addAttribute(customAttrb).setDataType(MolgenisFieldTypes.STRING);
+			
+		Entity multiLineEntity1 = new MapEntity(multiLineTestEMD);
+		multiLineEntity1.set(VcfRepository.CHROM, "3");
+		multiLineEntity1.set(VcfRepository.POS, 300);
+		multiLineEntity1.set(VcfRepository.REF, "G");
+		multiLineEntity1.set(VcfRepository.ALT, "A");
+		multiLineEntity1.set(customAttrb, "0.2|23.1");
+		
+		Entity multiLineEntity2 = new MapEntity(multiLineTestEMD);
+		multiLineEntity2.set(VcfRepository.CHROM, "3");
+		multiLineEntity2.set(VcfRepository.POS, 300);
+		multiLineEntity2.set(VcfRepository.REF, "G");
+		multiLineEntity2.set(VcfRepository.ALT, "T");
+		multiLineEntity2.set(customAttrb, "-2.4|0.123");
+		
+		Entity multiLineEntity3 = new MapEntity(multiLineTestEMD);
+		multiLineEntity3.set(VcfRepository.CHROM, "3");
+		multiLineEntity3.set(VcfRepository.POS, 300);
+		multiLineEntity3.set(VcfRepository.REF, "G");
+		multiLineEntity3.set(VcfRepository.ALT, "X");
+		multiLineEntity3.set(customAttrb, "-0.002|2.3");
+		
+		Entity multiLineEntity4 = new MapEntity(multiLineTestEMD);
+		multiLineEntity4.set(VcfRepository.CHROM, "3");
+		multiLineEntity4.set(VcfRepository.POS, 300);
+		multiLineEntity4.set(VcfRepository.REF, "G");
+		multiLineEntity4.set(VcfRepository.ALT, "C");
+		multiLineEntity4.set(customAttrb, "0.5|14.5");
+		
+		Entity multiLineEntity5 = new MapEntity(multiLineTestEMD);
+		multiLineEntity5.set(VcfRepository.CHROM, "3");
+		multiLineEntity5.set(VcfRepository.POS, 300);
+		multiLineEntity5.set(VcfRepository.REF, "GC");
+		multiLineEntity5.set(VcfRepository.ALT, "A");
+		multiLineEntity5.set("MyAnnotation", "0.2|23.1");
+		
+		Entity multiLineEntity6 = new MapEntity(multiLineTestEMD);
+		multiLineEntity6.set(VcfRepository.CHROM, "3");
+		multiLineEntity6.set(VcfRepository.POS, 300);
+		multiLineEntity6.set(VcfRepository.REF, "GC");
+		multiLineEntity6.set(VcfRepository.ALT, "T");
+		multiLineEntity6.set(customAttrb, "-2.4|0.123");
+		
+		Entity multiLineEntity7 = new MapEntity(multiLineTestEMD);
+		multiLineEntity7.set(VcfRepository.CHROM, "3");
+		multiLineEntity7.set(VcfRepository.POS, 300);
+		multiLineEntity7.set(VcfRepository.REF, "C");
+		multiLineEntity7.set(VcfRepository.ALT, "GX");
+		multiLineEntity7.set(customAttrb, "-0.002|2.3");
+		
+		Entity multiLineEntity8 = new MapEntity(multiLineTestEMD);
+		multiLineEntity8.set(VcfRepository.CHROM, "3");
+		multiLineEntity8.set(VcfRepository.POS, 300);
+		multiLineEntity8.set(VcfRepository.REF, "C");
+		multiLineEntity8.set(VcfRepository.ALT, "GC");
+		multiLineEntity8.set(customAttrb, "0.5|14.5");
+		
+		
+		Entity expectedResultEntity1 = new MapEntity(multiLineTestEMD);
+		expectedResultEntity1.set(VcfRepository.CHROM, "3");
+		expectedResultEntity1.set(VcfRepository.POS, 300);
+		expectedResultEntity1.set(VcfRepository.REF, "G");
+		expectedResultEntity1.set(VcfRepository.ALT, "A,T,X,C");
+		expectedResultEntity1.set(customAttrb, "0.2|23.1,-2.4|0.123,-0.002|2.3,0.5|14.5");
+		
+		Entity expectedResultEntity2 = new MapEntity(multiLineTestEMD);
+		expectedResultEntity2.set(VcfRepository.CHROM, "3");
+		expectedResultEntity2.set(VcfRepository.POS, 300);
+		expectedResultEntity2.set(VcfRepository.REF, "GC");
+		expectedResultEntity2.set(VcfRepository.ALT, "A,T");
+		expectedResultEntity2.set(customAttrb, "0.2|23.1,-2.4|0.123");
+		
+		Entity expectedResultEntity3 = new MapEntity(multiLineTestEMD);
+		expectedResultEntity3.set(VcfRepository.CHROM, "3");
+		expectedResultEntity3.set(VcfRepository.POS, 300);
+		expectedResultEntity3.set(VcfRepository.REF, "C");
+		expectedResultEntity3.set(VcfRepository.ALT, "GX,GC");
+		expectedResultEntity3.set(customAttrb, "-0.002|2.3,0.5|14.5");
+		
+		
+		Iterable<Entity> multiLineInput = Arrays.asList(multiLineEntity1, multiLineEntity2, multiLineEntity3, multiLineEntity4, multiLineEntity5, multiLineEntity6, multiLineEntity7, multiLineEntity8);
+		
+		MultiAllelicResultFilter marf = new MultiAllelicResultFilter(Lists.newArrayList((multiLineTestEMD.getAttribute(customAttrb))));
+		
+		Iterable<Entity> expectedResult = Arrays.asList(expectedResultEntity1, expectedResultEntity2, expectedResultEntity3);
+		
+		Iterable<Entity> actualResult = marf.merge(multiLineInput);
+	
+		assertEquals(actualResult, expectedResult);
 	}
 }

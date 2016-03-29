@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.AbstractExternalRepositoryAnnotator;
+import org.molgenis.data.annotation.AbstractRefEntityAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -255,7 +255,7 @@ public class CmdLineAnnotator
 			// entity
 			// This allows for the header to be written as 'EFFECT annotations: <ouput_attributes> | <ouput_attributes>'
 			List<AttributeMetaData> outputMetaData = newArrayList();
-			if (annotator instanceof AbstractExternalRepositoryAnnotator)
+			if (annotator instanceof AbstractRefEntityAnnotator)
 			{
 				DefaultEntityMetaData effectRefEntity = new DefaultEntityMetaData(
 						annotator.getSimpleName() + "_EFFECTS");
@@ -290,7 +290,7 @@ public class CmdLineAnnotator
 
 			Iterator<Entity> annotatedRecords = annotator.annotate(vcfRepo);
 
-			if (annotator instanceof AbstractExternalRepositoryAnnotator)
+			if (annotator instanceof AbstractRefEntityAnnotator)
 			{
 				annotatedRecords = VcfUtils.reverseXrefMrefRelation(annotatedRecords);
 			}
