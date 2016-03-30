@@ -15,6 +15,7 @@ import static org.molgenis.ontology.sorta.meta.MatchingTaskContentEntityMetaData
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentEntityMetaData.MATCHED_TERM;
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentEntityMetaData.SCORE;
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentEntityMetaData.VALIDATED;
+import static org.molgenis.ontology.utils.SortaServiceUtil.getEntityAsMap;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -42,6 +43,7 @@ import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -55,11 +57,11 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.Sort;
-import org.molgenis.data.Sort.Direction;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
+import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -338,11 +340,9 @@ public class SortaServiceController extends MolgenisPluginController
 		Stream<Entity> findAll = dataService.findAll(sortaJobExecution.getResultEntityName(),
 				query.offset(start).pageSize(num).sort(new Sort().on(VALIDATED, DESC).on(SCORE, DESC)));
 		findAll.forEach(mappingEntity -> {
-			Entity RefEntity = dataService.findOne(sortaJobExecution.getSourceEntityName(),
-					mappingEntity.getString(INPUT_TERM));
 			Map<String, Object> outputEntity = new HashMap<String, Object>();
-			outputEntity.put("inputTerm", SortaServiceUtil.getEntityAsMap(RefEntity));
-			outputEntity.put("matchedTerm", SortaServiceUtil.getEntityAsMap(mappingEntity));
+			outputEntity.put("inputTerm", getEntityAsMap(mappingEntity.getEntity(MatchingTaskContentEntityMetaData.INPUT_TERM)));
+			outputEntity.put("matchedTerm", getEntityAsMap(mappingEntity));
 			Object matchedTerm = mappingEntity.get(MATCHED_TERM);
 			if (matchedTerm != null)
 			{
@@ -430,9 +430,7 @@ public class SortaServiceController extends MolgenisPluginController
 	{
 		NumberFormat format = NumberFormat.getNumberInstance();
 		format.setMaximumFractionDigits(2);
-		String inputTermId = resultEntity.getString(MatchingTaskContentEntityMetaData.INPUT_TERM);
-		// TODO: make an xref and fetch it in one go!
-		Entity inputEntity = dataService.findOne(sortaJobExecution.getSourceEntityName(), inputTermId);
+		Entity inputEntity = resultEntity.getEntity(MatchingTaskContentEntityMetaData.INPUT_TERM);
 		Entity ontologyTermEntity = sortaService.getOntologyTermEntity(
 				resultEntity.getString(MatchingTaskContentEntityMetaData.MATCHED_TERM),
 				sortaJobExecution.getOntologyIri());
@@ -551,7 +549,7 @@ public class SortaServiceController extends MolgenisPluginController
 
 		RunAsSystemProxy.runAsSystem(() -> {
 			createInputRepository(inputData);
-			createEmptyResultRepository(jobName, resultEntityName);
+			createEmptyResultRepository(jobName, resultEntityName, inputData.getEntityMetaData());
 			dataService.add(SortaJobExecution.ENTITY_NAME, sortaJobExecution);
 		});
 
@@ -561,11 +559,13 @@ public class SortaServiceController extends MolgenisPluginController
 		return sortaJobExecution;
 	}
 
-	private void createEmptyResultRepository(String jobName, String resultEntityName)
+	private void createEmptyResultRepository(String jobName, String resultEntityName, EntityMetaData sourceMetaData)
 	{
 		DefaultEntityMetaData resultEntityMetaData = new DefaultEntityMetaData(resultEntityName,
 				MatchingTaskContentEntityMetaData.INSTANCE);
 		resultEntityMetaData.setAbstract(false);
+		resultEntityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(INPUT_TERM, FieldTypeEnum.XREF)
+				.setRefEntity(sourceMetaData).setDescription("Reference to the input term").setNillable(false));
 		resultEntityMetaData.setLabel(jobName + " output");
 		dataService.getMeta().addEntityMeta(resultEntityMetaData);
 	}

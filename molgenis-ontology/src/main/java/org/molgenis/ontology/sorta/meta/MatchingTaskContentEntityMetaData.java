@@ -24,8 +24,6 @@ public class MatchingTaskContentEntityMetaData extends DefaultEntityMetaData
 		super(ENTITY_NAME);
 		setAbstract(true);
 		addAttributeMetaData(new DefaultAttributeMetaData(IDENTIFIER), ROLE_ID);
-		addAttributeMetaData(new DefaultAttributeMetaData(INPUT_TERM).setDescription("Identifier of the input term")
-				.setNillable(false));
 		addAttributeMetaData(
 				new DefaultAttributeMetaData(MATCHED_TERM).setDescription("Matched ontology term").setNillable(true));
 		addAttributeMetaData(new DefaultAttributeMetaData(SCORE, FieldTypeEnum.DECIMAL)

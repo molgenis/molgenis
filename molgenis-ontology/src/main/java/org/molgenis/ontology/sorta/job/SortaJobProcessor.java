@@ -63,7 +63,7 @@ public class SortaJobProcessor
 			List<Entity> entitiesToAdd = newArrayList();
 			dataService.findAll(inputRepositoryName).forEach(inputRow -> {
 				MapEntity resultEntity = new MapEntity();
-				resultEntity.set(MatchingTaskContentEntityMetaData.INPUT_TERM, inputRow.getIdValue());
+				resultEntity.set(MatchingTaskContentEntityMetaData.INPUT_TERM, inputRow);
 				resultEntity.set(MatchingTaskContentEntityMetaData.IDENTIFIER, idGenerator.generateId());
 				resultEntity.set(MatchingTaskContentEntityMetaData.VALIDATED, false);
 				entitiesToAdd.add(resultEntity);

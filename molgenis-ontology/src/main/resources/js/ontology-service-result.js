@@ -185,6 +185,7 @@
 					$.map(responseData.matchedTerm, function(val, key){
 						if(key !== 'identifier') updatedMappedEntity[key] = val;
 						if(key === 'validated') updatedMappedEntity[key] = false;
+						if(key === 'inputTerm') updatedMappedEntity[key] = val.Identifier;
 					});
 					if(data.ontologyTerms && data.ontologyTerms.length > 0){
 						var ontologyTerm = data.ontologyTerms[0];
@@ -235,6 +236,10 @@
 					$.map(mappedEntity, function(val, key){
 						if(key !== 'identifier') updatedMappedEntity[key] = val;
 						if(key === 'validated') updatedMappedEntity[key] = true;
+						if(key === 'inputTerm'){
+							console.log('inputTerm', val)
+							updatedMappedEntity[key] = val.Identifier;
+						}
 						if(key === 'score') updatedMappedEntity[key] = 0;
 						if(key === 'matchTerm') updatedMappedEntity[key] = null;
 					});
@@ -279,6 +284,7 @@
 							var updatedMappedEntity = {};
 							$.map(mappedEntity, function(val, key){
 								if(key === 'validated') updatedMappedEntity[key] = true;
+								else if(key === 'inputTerm') updatedMappedEntity[key] = val.Identifier;
 								else if(key === 'matchTerm') updatedMappedEntity.matchTerm = row.data('ontologyTerm').ontologyTermIRI;
 								else if(key === 'score') updatedMappedEntity.score = row.data('ontologyTerm').score;
 								else if(key !== 'identifier') updatedMappedEntity[key] = val;
@@ -305,7 +311,8 @@
 				'field' : 'inputTerm',
 				'operator' : 'EQUALS',
 				'value' : inputTermIdentifier
-			}]
+			}],
+            'expand': ['inputTerm']
 		}, function(data){
 			if(callback) callback(data);
 		});

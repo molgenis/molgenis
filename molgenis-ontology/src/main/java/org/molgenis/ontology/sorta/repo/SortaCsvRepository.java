@@ -1,5 +1,6 @@
 package org.molgenis.ontology.sorta.repo;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 import java.io.File;
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.lang3.StringUtils;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.RepositoryCapability;
@@ -40,7 +41,7 @@ public class SortaCsvRepository extends AbstractRepository
 		this.entityName = file.getName();
 		this.entityLabel = file.getName();
 	}
-	
+
 	public SortaCsvRepository(String entityName, String entityLabel, File uploadedFile)
 	{
 		this.csvRepository = new CsvRepository(uploadedFile, LOWERCASE_AND_TRIM, SortaServiceImpl.DEFAULT_SEPARATOR);
@@ -57,6 +58,11 @@ public class SortaCsvRepository extends AbstractRepository
 			entityMetaData.setLabel(entityLabel);
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ALLOWED_IDENTIFIER).setNillable(false),
 					ROLE_ID);
+			AttributeMetaData nameAttribute = entityMetaData.getAttribute(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD);
+			if (nameAttribute != null)
+			{
+				entityMetaData.setLabelAttribute(nameAttribute);
+			}
 		}
 		return entityMetaData;
 	}
@@ -78,7 +84,7 @@ public class SortaCsvRepository extends AbstractRepository
 			public Entity next()
 			{
 				Entity entity = iterator.next();
-				if (StringUtils.isEmpty(entity.getString(ALLOWED_IDENTIFIER)))
+				if (isEmpty(entity.getString(ALLOWED_IDENTIFIER)))
 				{
 					entity = new MapEntity(entity);
 					entity.set(ALLOWED_IDENTIFIER, count.incrementAndGet());
