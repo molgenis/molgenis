@@ -4,7 +4,10 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-            <#if disableClose?? && disableClose == "true"><#else>
+            <#if disableClose?? && disableClose == "true">
+            	<#-- Display close button after login failure, because of the missing fallback page (/login) -->
+                <button type="button" class="close" onclick="location.href='/'"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+			<#else>
                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
             </#if>
                 <h4 class="modal-title" id="login-modal-label">Sign in</h4>

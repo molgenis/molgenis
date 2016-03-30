@@ -24,7 +24,7 @@ import static org.molgenis.data.vcf.VcfRepository.QUAL_META;
 import static org.molgenis.data.vcf.VcfRepository.REF;
 import static org.molgenis.data.vcf.VcfRepository.REF_META;
 import static org.molgenis.data.vcf.VcfRepository.SAMPLES;
-import static org.molgenis.data.vcf.utils.VcfUtils.reverseXrefMrefRelation;
+import static org.molgenis.data.vcf.utils.VcfWriterUtils.reverseXrefMrefRelation;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -61,9 +61,9 @@ import com.google.common.collect.Lists;
 import autovalue.shaded.com.google.common.common.collect.Iterators;
 
 @Test
-public class VcfUtilsTest
+public class VcfWriterUtilsTest
 {
-	private static final Logger LOG = LoggerFactory.getLogger(VcfUtilsTest.class);
+	private static final Logger LOG = LoggerFactory.getLogger(VcfWriterUtilsTest.class);
 	private final DefaultEntityMetaData annotatedEntityMetadata = new DefaultEntityMetaData("test");
 	public DefaultEntityMetaData metaDataCanAnnotate = new DefaultEntityMetaData("test");
 	public DefaultEntityMetaData metaDataCantAnnotate = new DefaultEntityMetaData("test");
@@ -241,7 +241,7 @@ public class VcfUtilsTest
 		BufferedWriter writer = new BufferedWriter(strWriter);
 		try
 		{
-			VcfUtils.writeToVcf(vcfEntity, writer);
+			VcfWriterUtils.writeToVcf(vcfEntity, writer);
 		}
 		finally
 		{
@@ -314,7 +314,7 @@ public class VcfUtilsTest
 	@Test
 	public void createId()
 	{
-		assertEquals(VcfUtils.createId(entity1), "yCiiynjHRAtJPcdn7jFDGA");
+		assertEquals(VcfWriterUtils.createId(entity1), "yCiiynjHRAtJPcdn7jFDGA");
 	}
 
 	@Test
@@ -328,11 +328,11 @@ public class VcfUtilsTest
 
 			File inputVcfFile = new File(ResourceUtils.getFile(getClass(), "/testWriter.vcf").getPath());
 
-			VcfUtils.writeVcfHeader(inputVcfFile, outputVCFWriter, Collections.emptyList());
+			VcfWriterUtils.writeVcfHeader(inputVcfFile, outputVCFWriter, Collections.emptyList());
 
 			for (Entity entity : entities)
 			{
-				VcfUtils.writeToVcf(entity, outputVCFWriter);
+				VcfWriterUtils.writeToVcf(entity, outputVCFWriter);
 				outputVCFWriter.newLine();
 			}
 			outputVCFWriter.close();
@@ -361,13 +361,13 @@ public class VcfUtilsTest
 			File inputVcfFile = new File(ResourceUtils.getFile(getClass(), "/testWriter.vcf").getPath());
 			File resultVCFWriter = new File(ResourceUtils.getFile(getClass(), "/result_vcfWriter.vcf").getPath());
 
-			VcfUtils.writeVcfHeader(inputVcfFile, outputVCFWriter,
+			VcfWriterUtils.writeVcfHeader(inputVcfFile, outputVCFWriter,
 					Lists.newArrayList(annotatedEntityMetadata.getAttributes()));
 
 			for (Entity entity : entities)
 			{
 				MapEntity mapEntity = new MapEntity(entity, annotatedEntityMetadata);
-				VcfUtils.writeToVcf(mapEntity, outputVCFWriter);
+				VcfWriterUtils.writeToVcf(mapEntity, outputVCFWriter);
 				outputVCFWriter.newLine();
 			}
 			outputVCFWriter.close();
@@ -405,7 +405,7 @@ public class VcfUtilsTest
 			for (Entity entity : vcfEntities)
 			{
 				MapEntity mapEntity = new MapEntity(entity, vcfMeta);
-				VcfUtils.writeToVcf(mapEntity, actualOutputFileWriter);
+				VcfWriterUtils.writeToVcf(mapEntity, actualOutputFileWriter);
 				actualOutputFileWriter.newLine();
 			}
 			actualOutputFileWriter.close();

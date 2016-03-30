@@ -16,7 +16,7 @@ public enum GenericImporterExtensions
 	OBO_ZIP("obo.zip"), OWL_ZIP("owl.zip"),
 
 	// VCF
-	VCF("vcf"), VCF_GZ("vcf.gz");
+	VCF("vcf"), VCF_GZ("vcf.gz"), VCF_ZIP("vcf.zip");
 
 	private String name;
 
@@ -48,7 +48,7 @@ public enum GenericImporterExtensions
 
 	public static Set<String> getVCF()
 	{
-		return ImmutableSet.of(VCF.toString(), VCF_GZ.toString());
+		return ImmutableSet.of(VCF.toString(), VCF_GZ.toString(), VCF_ZIP.toString());
 	}
 
 	public static Set<String> getJPA()
@@ -64,6 +64,6 @@ public enum GenericImporterExtensions
 	public static Set<String> getAll()
 	{
 		return ImmutableSet.of(CSV.toString(), TXT.toString(), TSV.toString(), ZIP.toString(), XLS.toString(),
-				XLSX.toString(), OBO_ZIP.toString(), OWL_ZIP.toString(), VCF.toString(), VCF_GZ.toString());
+				XLSX.toString(), OBO_ZIP.toString(), OWL_ZIP.toString(), VCF.toString(), VCF_GZ.toString(), VCF_ZIP.toString());
 	}
 }

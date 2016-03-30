@@ -9,7 +9,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Enumeration;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.vcf.VcfReader;
@@ -41,6 +44,13 @@ public class VcfReaderFactoryImpl implements VcfReaderFactory
 			if (file.getName().endsWith(".gz"))
 			{
 				inputStream = new GZIPInputStream(inputStream);
+			} 
+			else if (file.getName().endsWith(".zip"))
+			{
+				   ZipFile zipFile = new ZipFile(file.getPath());
+				   Enumeration<? extends ZipEntry> e = zipFile.entries();
+				   ZipEntry entry = (ZipEntry) e.nextElement(); // your only file
+				   inputStream = zipFile.getInputStream(entry);
 			}
 			VcfReader reader = new VcfReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
 			// register reader so close() can close all readers

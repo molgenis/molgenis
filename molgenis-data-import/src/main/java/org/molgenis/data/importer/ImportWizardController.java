@@ -418,7 +418,7 @@ public class ImportWizardController extends AbstractWizardController
 		else
 		{
 			filename = entityName + "." + extension;
-			if (!extension.equals("vcf") && (!extension.equals("vcf.gz")))
+			if (!extension.equals("vcf") && (!extension.equals("vcf.gz")&&(!extension.equals("vcf.zip"))))
 				LOG.warn("Specifing a filename for a non-VCF file has no effect on entity names.");
 		}
 		return filename;
@@ -465,7 +465,7 @@ public class ImportWizardController extends AbstractWizardController
 		String extension = FileExtensionUtils.findExtensionFromPossibilities(file.getName(),
 				GenericImporterExtensions.getAll());
 
-		if (extension.equals("vcf") || extension.equals("vcf.gz"))
+		if (extension.equals("vcf") || extension.equals("vcf.gz") || extension.equals("vcf.zip"))
 		{
 			MetaValidationUtils.validateName(file.getName().replace("." + extension, ""));
 			if (!DatabaseAction.ADD.equals(databaseAction))
