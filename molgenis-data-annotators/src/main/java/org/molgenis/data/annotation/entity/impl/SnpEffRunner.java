@@ -118,6 +118,7 @@ public class SnpEffRunner
 					"-canon", "-ud", "0", "-spliceSiteSize", "5");
 			File outputVcf = jarRunner.runJar(NAME, params, inputVcf);
 
+			// TODO always output to "snpEff"? won't this overwrite when you do parallel annotations?
 			File snpEffOutputWithMetaData = addVcfMetaDataToOutputVcf(outputVcf);
 			VcfRepository repo = new VcfRepository(snpEffOutputWithMetaData, "SNPEFF_OUTPUT_VCF_" + inputVcf.getName());
 
