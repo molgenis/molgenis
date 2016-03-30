@@ -44,7 +44,7 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.support.VcfEffectsMetaData;
 import org.molgenis.data.vcf.VcfRepository;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Iterators;
@@ -66,7 +66,7 @@ public class SnpEffRunnerTest
 	@Mock
 	private Entity snpEffAnnotatorSettings;
 
-	@BeforeMethod
+	@BeforeClass
 	public void beforeMethod() throws IOException
 	{
 		jarRunner = mock(JarRunnerImpl.class);
