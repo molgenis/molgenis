@@ -11,7 +11,9 @@ public class SortaJobExecution extends JobExecution
 	public final static String ENTITY_NAME = "SortaJobExecution";
 	public final static String ONTOLOGY_IRI = "ontologyIri";
 	public final static String DELETE_URL = "deleteUrl";
-	public final static String TARGET_ENTITY = "targetEntity";
+	public final static String SOURCE_ENTITY = "sourceEntity";
+	public final static String RESULT_ENTITY = "resultEntity";
+	public final static String THRESHOLD = "Threshold";
 
 	private static final String SORTA_MATCH_JOB_TYPE = "SORTA";
 
@@ -22,9 +24,24 @@ public class SortaJobExecution extends JobExecution
 		setType(SORTA_MATCH_JOB_TYPE);
 	}
 
-	public void setTargetEntityName(String targetEntityName)
+	public String getResultEntityName()
 	{
-		set(TARGET_ENTITY, targetEntityName);
+		return getString(RESULT_ENTITY);
+	}
+	
+	public void setResultEntityName(String resultEntityName)
+	{
+		set(RESULT_ENTITY, resultEntityName);
+	}
+	
+	public String getSourceEntityName()
+	{
+		return getString(SOURCE_ENTITY);
+	}
+	
+	public void setSourceEntityName(String sourceEntityName)
+	{
+		set(SOURCE_ENTITY, sourceEntityName);
 	}
 
 	public String getDeleteUrl()
@@ -37,11 +54,6 @@ public class SortaJobExecution extends JobExecution
 		set(DELETE_URL, deleteUrl);
 	}
 
-	public String getTargetEntityName()
-	{
-		return getString(TARGET_ENTITY);
-	}
-
 	public void setOntologyIri(String ontologyIri)
 	{
 		set(ONTOLOGY_IRI, ontologyIri);
@@ -50,5 +62,15 @@ public class SortaJobExecution extends JobExecution
 	public String getOntologyIri()
 	{
 		return getString(ONTOLOGY_IRI);
+	}
+	
+	public void setThreshold(double threshold)
+	{
+		set(THRESHOLD, threshold);
+	}
+	
+	public double getThreshold()
+	{
+		return getDouble(THRESHOLD).doubleValue();
 	}
 }

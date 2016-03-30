@@ -21,7 +21,7 @@
 				$(document).ready(function(){
 								
 					var request = {
-						'entityName' : '${entityName?js_string}',
+						'sortaJobExecutionId' : '${sortaJobExecutionId?js_string}',
 						'ontologyIri' : '${ontologyIri?js_string}',
 						'matched' : <#if isMatched?? && isMatched>true<#else>false</#if>					
 					};
@@ -31,7 +31,7 @@
 					
 					$('#update-threshold-button').click(function(){
 						$(this).parents('form:eq(0)').attr({
-							'action' : molgenis.getContextUrl() + '/threshold/${entityName?html}',
+							'action' : molgenis.getContextUrl() + '/threshold/${sortaJobExecutionId?html}',
 							'method' : 'POST'
 						}).submit();
 					});

@@ -1,5 +1,9 @@
 package org.molgenis.ontology.roc;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.molgenis.ontology.sorta.meta.MatchingTaskContentEntityMetaData.SCORE;
+import static org.molgenis.ontology.sorta.meta.MatchingTaskContentEntityMetaData.VALIDATED;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -13,11 +17,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisInvalidFormatException;
-import org.molgenis.data.Query;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.excel.ExcelSheetWriter;
 import org.molgenis.data.excel.ExcelWriter;
@@ -26,8 +28,8 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
+import org.molgenis.ontology.sorta.job.SortaJobExecution;
 import org.molgenis.ontology.sorta.meta.MatchingTaskContentEntityMetaData;
-import org.molgenis.ontology.sorta.meta.MatchingTaskEntityMetaData;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
 import org.molgenis.ontology.utils.SortaServiceUtil;
@@ -57,31 +59,28 @@ public class MatchQualityRocService
 		this.ontologyService = ontologyService;
 	}
 
-	public Map<String, Object> calculateROC(String matchingTaskIdentifier)
+	public Map<String, Object> calculateROC(String sortaJobExecutionId)
 			throws IOException, MolgenisInvalidFormatException
 	{
 		Map<String, Object> data = new HashMap<String, Object>();
-		if (StringUtils.isNotEmpty(matchingTaskIdentifier))
+		if (isNotEmpty(sortaJobExecutionId))
 		{
 			File file = fileStore.getFile(createFileName());
-			Entity matchingTask = dataService.findOne(MatchingTaskEntityMetaData.ENTITY_NAME,
-					new QueryImpl().eq(MatchingTaskEntityMetaData.IDENTIFIER, matchingTaskIdentifier));
+			SortaJobExecution sortaJobExecution = dataService.findOne(SortaJobExecution.ENTITY_NAME,
+					sortaJobExecutionId, SortaJobExecution.class);
 
-			if (matchingTask != null)
+			if (sortaJobExecution != null)
 			{
-				String entityName = matchingTask.getString(MatchingTaskEntityMetaData.IDENTIFIER);
-				String codeSystem = matchingTask.getString(MatchingTaskEntityMetaData.CODE_SYSTEM);
-				double threshold = matchingTask.getDouble(MatchingTaskEntityMetaData.THRESHOLD);
+				String sourceEntityName = sortaJobExecution.getSourceEntityName();
+				String resultEntityName = sortaJobExecution.getResultEntityName();
+				String codeSystem = sortaJobExecution.getOntologyIri();
+				double threshold = sortaJobExecution.getThreshold();
 
-				long totalNumberOfTerms = dataService.count(MatchingTaskContentEntityMetaData.ENTITY_NAME,
-						new QueryImpl().eq(MatchingTaskContentEntityMetaData.REF_ENTITY, matchingTaskIdentifier));
+				long totalNumberOfTerms = dataService.count(sortaJobExecution.getResultEntityName(), new QueryImpl());
 
 				// Get all validated matches
-				Query q = new QueryImpl().eq(MatchingTaskContentEntityMetaData.REF_ENTITY, entityName).and().nest()
-						.eq(MatchingTaskContentEntityMetaData.VALIDATED, true).or()
-						.ge(MatchingTaskContentEntityMetaData.SCORE, threshold).unnest();
-				Stream<Entity> validatedMatchEntities = dataService
-						.findAll(MatchingTaskContentEntityMetaData.ENTITY_NAME, q);
+				Stream<Entity> validatedMatchEntities = dataService.findAll(resultEntityName,
+						new QueryImpl().eq(VALIDATED, true).or().ge(SCORE, threshold));
 
 				List<Entity> resultEntities = new ArrayList<Entity>();
 				validatedMatchEntities.forEach(validatedMatchEntity -> {
@@ -90,7 +89,7 @@ public class MatchQualityRocService
 					boolean manualMatchExists = matchedCodeIdentifier != null && !matchedCodeIdentifier.equals("NULL");
 
 					Iterable<Entity> ontologyTermEntities = ontologyService.findOntologyTermEntities(codeSystem,
-							getInputTerm(validatedMatchEntity, entityName));
+							getInputTerm(validatedMatchEntity, sourceEntityName));
 
 					long totalNumber = Iterables.size(ontologyTermEntities);
 					int rank = 0;
@@ -118,15 +117,15 @@ public class MatchQualityRocService
 				});
 
 				ExcelWriter excelWriter = new ExcelWriter(file, FileFormat.XLS);
-				createRocExcelSheet(resultEntities, entityName, excelWriter);
+				createRocExcelSheet(resultEntities, sourceEntityName, excelWriter);
 				excelWriter.close();
 
 				ExcelRepositoryCollection excelRepositoryCollection = new ExcelRepositoryCollection(file);
 
-				data.put("entityName", matchingTaskIdentifier);
+				data.put("sortaJobExecutionId", resultEntityName);
 				data.put("rocfilePath", file.getAbsolutePath());
 				data.put("totalNumber", totalNumberOfTerms);
-				data.put("validatedNumber", dataService.count(MatchingTaskContentEntityMetaData.ENTITY_NAME, q));
+				data.put("validatedNumber", resultEntities.size());
 				data.put("rocEntities", SortaServiceUtil.getEntityAsMap(excelRepositoryCollection.getSheet(0)));
 			}
 		}

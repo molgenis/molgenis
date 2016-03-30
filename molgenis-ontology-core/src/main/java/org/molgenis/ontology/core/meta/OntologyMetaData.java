@@ -7,7 +7,9 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.ontology.core.model.OntologyPackage;
+import org.springframework.stereotype.Component;
 
+@Component
 public class OntologyMetaData extends DefaultEntityMetaData
 {
 	public final static String ID = "id";

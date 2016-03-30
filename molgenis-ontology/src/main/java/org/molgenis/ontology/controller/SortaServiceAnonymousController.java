@@ -34,7 +34,6 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.file.FileStore;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.core.service.OntologyService;
-import org.molgenis.ontology.sorta.meta.MatchingTaskEntityMetaData;
 import org.molgenis.ontology.sorta.repo.SortaCsvRepository;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
@@ -65,8 +64,8 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 
 	@Autowired
 	private FileStore fileStore;
-
-	public static final String VIEW_NAME = "sorta-match-annonymous-view";
+	
+	public static final String VIEW_NAME = "sorta-match-anonymous-view";
 	public static final String ID = "sorta_anonymous";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
@@ -120,7 +119,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 		if (filePath != null && ontologyIriObject != null)
 		{
 			File uploadFile = new File(filePath.toString());
-			SortaCsvRepository csvRepository = new SortaCsvRepository(uploadFile.getName(), uploadFile);
+			SortaCsvRepository csvRepository = new SortaCsvRepository(uploadFile.getName(), uploadFile.getName(), uploadFile);
 
 			if (validateUserInputHeader(csvRepository) && validateUserInputContent(csvRepository))
 			{
@@ -150,7 +149,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 
 				String ontologyIri = ontologyIriObject.toString();
 				File uploadFile = new File(filePath.toString());
-				SortaCsvRepository csvRepository = new SortaCsvRepository(uploadFile.getName(), uploadFile);
+				SortaCsvRepository csvRepository = new SortaCsvRepository(uploadFile);
 
 				List<String> columnHeaders = createDownloadTableHeaders(csvRepository);
 				csvWriter = new CsvWriter(response.getOutputStream(), SortaServiceImpl.DEFAULT_SEPARATOR);
@@ -204,7 +203,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 					{
 						return attributeMetaData.getName();
 					}
-				}).filter(attrName -> !StringUtils.equalsIgnoreCase(attrName, MatchingTaskEntityMetaData.IDENTIFIER))
+				}).filter(attrName -> !StringUtils.equalsIgnoreCase(attrName, SortaCsvRepository.ALLOWED_IDENTIFIER))
 				.toList();
 
 		List<String> columnHeaders = new ArrayList<String>(inputAttributeNames);
@@ -231,7 +230,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 	private void validateSortaInput(String ontologyIri, File uploadFile, HttpServletRequest httpServletRequest,
 			Model model)
 	{
-		SortaCsvRepository csvRepository = new SortaCsvRepository(uploadFile.getName(), uploadFile);
+		SortaCsvRepository csvRepository = new SortaCsvRepository(uploadFile);
 
 		HttpSession session = httpServletRequest.getSession();
 		session.setAttribute("filePath", uploadFile.getAbsoluteFile());
