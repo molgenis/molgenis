@@ -97,19 +97,19 @@ public class AnnotatorUpdateIT
 				assertEquals(entity.get(CaddAnnotator.CADD_ABS).toString(), "6.956883,2.0");
 				assertEquals(entity.get(CaddAnnotator.CADD_SCALED).toString(), "33.0,4.0");
 				
-				entity = noUpdateIt.next();
+				entity = updateIt.next();
 				assertEquals(entity.get(CaddAnnotator.CADD_ABS), "5.0");
 				assertEquals(entity.get(CaddAnnotator.CADD_SCALED), "6.0");
 				
-				entity = noUpdateIt.next();
+				entity = updateIt.next();
 				assertEquals(entity.get(CaddAnnotator.CADD_ABS), ".,2.984226");
 				assertEquals(entity.get(CaddAnnotator.CADD_SCALED), ".,22.2");
 				
-				entity = noUpdateIt.next();
+				entity = updateIt.next();
 				assertEquals(entity.get(CaddAnnotator.CADD_ABS), "-0.283077,7.0");
 				assertEquals(entity.get(CaddAnnotator.CADD_SCALED), "0.725,8.0");
 				
-				entity = noUpdateIt.next();
+				entity = updateIt.next();
 				assertEquals(entity.get(CaddAnnotator.CADD_ABS), "3.177096");
 				assertEquals(entity.get(CaddAnnotator.CADD_SCALED), "22.7");
 				
