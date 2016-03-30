@@ -524,7 +524,11 @@ public class SnpEffAnnotator
 		@Override
 		public Iterator<Entity> annotate(Iterable<Entity> source, boolean updateMode)
 		{
-			return this.annotate(source, false);
+			if(updateMode == true)
+			{
+				throw new MolgenisDataException("This annotator/filter does not support updating of values");
+			}
+			return this.annotate(source);
 		}
 	}
 
