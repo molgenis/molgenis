@@ -75,12 +75,6 @@ public class MultiAllelicResultFilter implements ResultFilter
 	{
 		return Arrays.asList(VcfRepository.REF_META, VcfRepository.ALT_META);
 	}
-	
-	@Override
-	public com.google.common.base.Optional<Entity> filterResults(Iterable<Entity> resourceEntities, Entity sourceEntity)
-	{
-		return filterResults(resourceEntities, sourceEntity, false);
-	}
 
 	@Override
 	public com.google.common.base.Optional<Entity> filterResults(Iterable<Entity> resourceEntities, Entity sourceEntity, boolean updateMode)

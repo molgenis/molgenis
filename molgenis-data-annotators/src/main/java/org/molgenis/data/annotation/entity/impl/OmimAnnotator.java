@@ -105,12 +105,6 @@ public class OmimAnnotator
 		{
 			return Collections.emptyList();
 		}
-
-		@Override
-		public Optional<Entity> filterResults(Iterable<Entity> results, Entity annotatedEntity)
-		{
-			return filterResults(results, annotatedEntity, false);
-		}
 		
 		@Override
 		public Optional<Entity> filterResults(Iterable<Entity> results, Entity annotatedEntity, boolean updateMode)

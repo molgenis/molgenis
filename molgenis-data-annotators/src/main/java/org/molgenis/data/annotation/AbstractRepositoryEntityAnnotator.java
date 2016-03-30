@@ -15,6 +15,7 @@ public abstract class AbstractRepositoryEntityAnnotator extends AbstractReposito
 	@RunAsSystem
 	public Iterator<Entity> annotate(final Iterable<Entity> sourceIterable)
 	{
+		//default update mode is false
 		return annotate(sourceIterable, false);
 	}
 	
@@ -48,7 +49,7 @@ public abstract class AbstractRepositoryEntityAnnotator extends AbstractReposito
 						try
 						{
 							sourceEntity = source.next();
-							results = annotateEntity(sourceEntity);
+							results = annotateEntity(sourceEntity, updateMode);
 						}
 						catch (IOException e)
 						{
@@ -82,7 +83,7 @@ public abstract class AbstractRepositoryEntityAnnotator extends AbstractReposito
 			}
 		};
 	}
-
-	public abstract List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException;
+	
+	public abstract List<Entity> annotateEntity(Entity entity, boolean updateMode) throws IOException, InterruptedException;
 
 }

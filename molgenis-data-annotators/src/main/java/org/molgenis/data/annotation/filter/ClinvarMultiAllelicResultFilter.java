@@ -25,12 +25,6 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 	{
 		return Arrays.asList(VcfRepository.REF_META, VcfRepository.ALT_META);
 	}
-	
-	@Override
-	public Optional<Entity> filterResults(Iterable<Entity> results, Entity annotatedEntity)
-	{
-		return filterResults(results, annotatedEntity, false);
-	}
 
 	@Override
 	public Optional<Entity> filterResults(Iterable<Entity> results, Entity annotatedEntity, boolean updateMode)
