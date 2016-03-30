@@ -11,13 +11,14 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.AbstractExternalRepositoryAnnotator;
+import org.molgenis.data.annotation.RefEntityAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.utils.VcfUtils;
+import org.molgenis.data.vcf.utils.VcfWriterUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -29,7 +30,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,6 +48,7 @@ import static org.molgenis.MolgenisFieldTypes.MREF;
  */
 public class CmdLineAnnotator
 {
+	public static final String EFFECT = "EFFECT";
 	@Autowired
 	private ApplicationContext applicationContext;
 
@@ -245,17 +246,13 @@ public class CmdLineAnnotator
 					}
 				}
 				if (stop) return;
-
-				// Include the original attributes
-				vcfRepo.getEntityMetaData().getAtomicAttributes()
-						.forEach((attr) -> attributesToInclude.add(attr.getName()));
 			}
 
 			// If the annotator e.g. SnpEff creates an external repository, collect the output metadata into an mref
 			// entity
 			// This allows for the header to be written as 'EFFECT annotations: <ouput_attributes> | <ouput_attributes>'
 			List<AttributeMetaData> outputMetaData = newArrayList();
-			if (annotator instanceof AbstractExternalRepositoryAnnotator || annotator instanceof EffectsAnnotator)
+			if (annotator instanceof RefEntityAnnotator || annotator instanceof EffectsAnnotator)
 			{
 				DefaultEntityMetaData effectRefEntity = new DefaultEntityMetaData(
 						annotator.getSimpleName() + "_EFFECTS");
@@ -263,9 +260,7 @@ public class CmdLineAnnotator
 				{
 					effectRefEntity.addAttributeMetaData(outputAttribute);
 				}
-				// EFFECT harcoded for SnpEff
-				// TODO When other AbstractExternalRepositoryAnnotator are created, solve this nicely
-				DefaultAttributeMetaData effect = new DefaultAttributeMetaData("EFFECT");
+				DefaultAttributeMetaData effect = new DefaultAttributeMetaData(EFFECT);
 				effect.setDataType(MREF).setRefEntity(effectRefEntity);
 				outputMetaData.add(effect);
 			}
@@ -274,8 +269,7 @@ public class CmdLineAnnotator
 				outputMetaData = annotator.getOutputMetaData();
 			}
 
-			LinkedList<String> orderedAddedAttributes = VcfUtils.writeVcfHeader(inputVcfFile, outputVCFWriter, outputMetaData,
-					attributesToInclude);
+			VcfWriterUtils.writeVcfHeader(inputVcfFile, outputVCFWriter, VcfUtils.getAtomicAttributesFromList(outputMetaData), attributesToInclude);
 			System.out.println("Now starting to process the data.");
 
 			DefaultEntityMetaData emd = (DefaultEntityMetaData) vcfRepo.getEntityMetaData();
@@ -290,7 +284,7 @@ public class CmdLineAnnotator
 			Iterable<Entity> entitiesToAnnotate;
 			if (annotator instanceof EffectsAnnotator)
 			{
-				entitiesToAnnotate = VcfUtils.parse(vcfRepo.getEntityMetaData(), "EFFECT", vcfRepo.stream());
+				entitiesToAnnotate = VcfUtils.parseData(vcfRepo.getEntityMetaData(), EFFECT, vcfRepo.stream());
 			}
 			else
 			{
@@ -298,7 +292,7 @@ public class CmdLineAnnotator
 			}
 			Iterator<Entity> annotatedRecords = annotator.annotate(entitiesToAnnotate);
 
-			if (annotator instanceof AbstractExternalRepositoryAnnotator || annotator instanceof EffectsAnnotator)
+			if (annotator instanceof RefEntityAnnotator || annotator instanceof EffectsAnnotator)
 			{
 				annotatedRecords = VcfUtils.reverseXrefMrefRelation(annotatedRecords);
 			}
@@ -306,7 +300,7 @@ public class CmdLineAnnotator
 			while (annotatedRecords.hasNext())
 			{
 				Entity annotatedRecord = annotatedRecords.next();
-				VcfUtils.writeToVcf(annotatedRecord, attributesToInclude, outputVCFWriter, orderedAddedAttributes);
+				VcfWriterUtils.writeToVcf(annotatedRecord, VcfUtils.getAtomicAttributesFromList(outputMetaData), attributesToInclude, outputVCFWriter);
 				outputVCFWriter.newLine();
 			}
 

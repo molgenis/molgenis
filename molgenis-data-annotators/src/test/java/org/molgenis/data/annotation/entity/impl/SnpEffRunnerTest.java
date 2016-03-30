@@ -3,21 +3,21 @@ package org.molgenis.data.annotation.entity.impl;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.support.VcfEffectsMetaData.ANNOTATION;
-import static org.molgenis.data.support.VcfEffectsMetaData.CDS_POSITION;
-import static org.molgenis.data.support.VcfEffectsMetaData.C_DNA_POSITION;
-import static org.molgenis.data.support.VcfEffectsMetaData.DISTANCE_TO_FEATURE;
-import static org.molgenis.data.support.VcfEffectsMetaData.ERRORS;
-import static org.molgenis.data.support.VcfEffectsMetaData.FEATURE_ID;
-import static org.molgenis.data.support.VcfEffectsMetaData.FEATURE_TYPE;
-import static org.molgenis.data.support.VcfEffectsMetaData.GENE_ID;
-import static org.molgenis.data.support.VcfEffectsMetaData.GENE_NAME;
-import static org.molgenis.data.support.VcfEffectsMetaData.HGVS_C;
-import static org.molgenis.data.support.VcfEffectsMetaData.HGVS_P;
-import static org.molgenis.data.support.VcfEffectsMetaData.PROTEIN_POSITION;
-import static org.molgenis.data.support.VcfEffectsMetaData.PUTATIVE_IMPACT;
-import static org.molgenis.data.support.VcfEffectsMetaData.RANK_TOTAL;
-import static org.molgenis.data.support.VcfEffectsMetaData.TRANSCRIPT_BIOTYPE;
+import static org.molgenis.data.support.EffectsMetaData.ANNOTATION;
+import static org.molgenis.data.support.EffectsMetaData.CDS_POSITION;
+import static org.molgenis.data.support.EffectsMetaData.C_DNA_POSITION;
+import static org.molgenis.data.support.EffectsMetaData.DISTANCE_TO_FEATURE;
+import static org.molgenis.data.support.EffectsMetaData.ERRORS;
+import static org.molgenis.data.support.EffectsMetaData.FEATURE_ID;
+import static org.molgenis.data.support.EffectsMetaData.FEATURE_TYPE;
+import static org.molgenis.data.support.EffectsMetaData.GENE_ID;
+import static org.molgenis.data.support.EffectsMetaData.GENE_NAME;
+import static org.molgenis.data.support.EffectsMetaData.HGVS_C;
+import static org.molgenis.data.support.EffectsMetaData.HGVS_P;
+import static org.molgenis.data.support.EffectsMetaData.PROTEIN_POSITION;
+import static org.molgenis.data.support.EffectsMetaData.PUTATIVE_IMPACT;
+import static org.molgenis.data.support.EffectsMetaData.RANK_TOTAL;
+import static org.molgenis.data.support.EffectsMetaData.TRANSCRIPT_BIOTYPE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
@@ -43,7 +43,7 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.UuidGenerator;
-import org.molgenis.data.support.VcfEffectsMetaData;
+import org.molgenis.data.support.EffectsMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -55,7 +55,7 @@ public class SnpEffRunnerTest
 	private final ArrayList<Entity> entities = new ArrayList<>();;
 	private DefaultEntityMetaData metaDataCanAnnotate;
 
-	private VcfEffectsMetaData effectsEMD;
+	private DefaultEntityMetaData effectsEMD;
 
 	@InjectMocks
 	private SnpEffRunner snpEffRunner;
@@ -188,7 +188,7 @@ public class SnpEffRunnerTest
 		entities.add(entity13);
 		entities.add(entity14);
 
-		effectsEMD = new VcfEffectsMetaData(metaDataCanAnnotate);
+		effectsEMD = new DefaultEntityMetaData(metaDataCanAnnotate);
 	}
 
 	@Test
@@ -232,10 +232,10 @@ public class SnpEffRunnerTest
 			Entity expected = new MapEntity(effectsEMD);
 
 			// copy id from result because it's auto generated
-			expected.set(VcfEffectsMetaData.ID, result.getIdValue());
-			expected.set(VcfEffectsMetaData.ALT, result.get(VcfEffectsMetaData.ALT));
-			expected.set(VcfEffectsMetaData.GENE, "DDX11L1");
-			expected.set(VcfEffectsMetaData.VARIANT, entities.get(0));
+			expected.set(EffectsMetaData.ID, result.getIdValue());
+			expected.set(EffectsMetaData.ALT, result.get(EffectsMetaData.ALT));
+			expected.set(EffectsMetaData.GENE_NAME, "DDX11L1");
+			expected.set(EffectsMetaData.VARIANT, entities.get(0));
 
 			expected.set(ANNOTATION, "non_coding_exon_variant");
 			expected.set(PUTATIVE_IMPACT, "MODIFIER");

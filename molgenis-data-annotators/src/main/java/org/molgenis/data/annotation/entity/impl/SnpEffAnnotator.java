@@ -1,16 +1,12 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.annotation.AbstractRefEntityAnnotator;
+import org.molgenis.data.annotation.AbstractRepositoryAnnotator;
 import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
+import org.molgenis.data.annotation.RefEntityAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
@@ -18,14 +14,17 @@ import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotator.websettings.SnpEffAnnotatorSettings;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.VcfEffectsMetaData;
+import org.molgenis.data.support.EffectsMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.w3c.dom.Attr;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * SnpEff annotator
@@ -71,15 +70,16 @@ public class SnpEffAnnotator
 		return new SnpEffRepositoryAnnotator(snpEffRunner, snpEffAnnotatorSettings, dataService);
 	}
 
-	public static class SnpEffRepositoryAnnotator extends AbstractRefEntityAnnotator
+	public static class SnpEffRepositoryAnnotator extends AbstractRepositoryAnnotator implements RefEntityAnnotator
 	{
+		private EffectsMetaData effectsMetaData = new EffectsMetaData();
 		private final AnnotatorInfo info = AnnotatorInfo.create(Status.READY, Type.EFFECT_PREDICTION, NAME,
 				"Genetic variant annotation and effect prediction toolbox. "
 						+ "It annotates and predicts the effects of variants on genes (such as amino acid changes). "
 						+ "This annotator creates a new table with SnpEff output to be able to store mutli-allelic and multigenic results. "
 						+ "Results are NOT added to your existing dataset. "
 						+ "SnpEff results can found in the <your_dataset_name>_EFFECTS. ",
-				getOutputMetaData());
+				effectsMetaData.getOrderedAttributes());
 		private SnpEffRunner snpEffRunner;
 		private Entity snpEffAnnotatorSettings;
 		private DataService dataService;
@@ -107,7 +107,7 @@ public class SnpEffAnnotator
 		@Override
 		public String canAnnotate(EntityMetaData repoMetaData)
 		{
-			if (dataService.hasRepository(repoMetaData.getName() + VcfEffectsMetaData.ENTITY_NAME_SUFFIX))
+			if (dataService.hasRepository(repoMetaData.getName() + snpEffRunner.ENTITY_NAME_SUFFIX))
 			{
 				return "already annotated with SnpEff";
 			}
@@ -120,18 +120,13 @@ public class SnpEffAnnotator
 		@Override
 		public EntityMetaData getOutputMetaData(EntityMetaData sourceEMD)
 		{
-			return new VcfEffectsMetaData(sourceEMD);
-		}
-
-		@Override
-		public LinkedList<AttributeMetaData> getOrderedAttributeList(EntityMetaData sourceEMD) {
-			return VcfEffectsMetaData.getOrderedAttributeList(sourceEMD);
+			return snpEffRunner.getOutputMetaData(sourceEMD);
 		}
 
 		@Override
 		public List<AttributeMetaData> getOutputMetaData()
 		{
-			return VcfEffectsMetaData.createAttributes();
+			return effectsMetaData.getOrderedAttributes();
 		}
 
 		@Override

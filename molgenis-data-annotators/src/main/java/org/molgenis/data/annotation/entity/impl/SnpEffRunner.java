@@ -2,25 +2,24 @@ package org.molgenis.data.annotation.entity.impl;
 
 import static java.io.File.createTempFile;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.support.VcfEffectsMetaData.ALT;
-import static org.molgenis.data.support.VcfEffectsMetaData.ANNOTATION;
-import static org.molgenis.data.support.VcfEffectsMetaData.CDS_POSITION;
-import static org.molgenis.data.support.VcfEffectsMetaData.C_DNA_POSITION;
-import static org.molgenis.data.support.VcfEffectsMetaData.DISTANCE_TO_FEATURE;
-import static org.molgenis.data.support.VcfEffectsMetaData.ERRORS;
-import static org.molgenis.data.support.VcfEffectsMetaData.FEATURE_ID;
-import static org.molgenis.data.support.VcfEffectsMetaData.FEATURE_TYPE;
-import static org.molgenis.data.support.VcfEffectsMetaData.GENE;
-import static org.molgenis.data.support.VcfEffectsMetaData.GENE_ID;
-import static org.molgenis.data.support.VcfEffectsMetaData.GENE_NAME;
-import static org.molgenis.data.support.VcfEffectsMetaData.HGVS_C;
-import static org.molgenis.data.support.VcfEffectsMetaData.HGVS_P;
-import static org.molgenis.data.support.VcfEffectsMetaData.ID;
-import static org.molgenis.data.support.VcfEffectsMetaData.PROTEIN_POSITION;
-import static org.molgenis.data.support.VcfEffectsMetaData.PUTATIVE_IMPACT;
-import static org.molgenis.data.support.VcfEffectsMetaData.RANK_TOTAL;
-import static org.molgenis.data.support.VcfEffectsMetaData.TRANSCRIPT_BIOTYPE;
-import static org.molgenis.data.support.VcfEffectsMetaData.VARIANT;
+import static org.molgenis.data.support.EffectsMetaData.ALT;
+import static org.molgenis.data.support.EffectsMetaData.ANNOTATION;
+import static org.molgenis.data.support.EffectsMetaData.CDS_POSITION;
+import static org.molgenis.data.support.EffectsMetaData.C_DNA_POSITION;
+import static org.molgenis.data.support.EffectsMetaData.DISTANCE_TO_FEATURE;
+import static org.molgenis.data.support.EffectsMetaData.ERRORS;
+import static org.molgenis.data.support.EffectsMetaData.FEATURE_ID;
+import static org.molgenis.data.support.EffectsMetaData.FEATURE_TYPE;
+import static org.molgenis.data.support.EffectsMetaData.GENE_ID;
+import static org.molgenis.data.support.EffectsMetaData.GENE_NAME;
+import static org.molgenis.data.support.EffectsMetaData.HGVS_C;
+import static org.molgenis.data.support.EffectsMetaData.HGVS_P;
+import static org.molgenis.data.support.EffectsMetaData.ID;
+import static org.molgenis.data.support.EffectsMetaData.PROTEIN_POSITION;
+import static org.molgenis.data.support.EffectsMetaData.PUTATIVE_IMPACT;
+import static org.molgenis.data.support.EffectsMetaData.RANK_TOTAL;
+import static org.molgenis.data.support.EffectsMetaData.TRANSCRIPT_BIOTYPE;
+import static org.molgenis.data.support.EffectsMetaData.VARIANT;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -38,6 +37,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IdGenerator;
@@ -47,7 +48,7 @@ import org.molgenis.data.annotation.utils.JarRunner;
 import org.molgenis.data.annotator.websettings.SnpEffAnnotatorSettings;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.support.VcfEffectsMetaData;
+import org.molgenis.data.support.EffectsMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
@@ -67,11 +68,14 @@ public class SnpEffRunner
 	private String snpEffPath;
 
 	private static final String CHARSET = "UTF-8";
+	public static final String ENTITY_NAME_SUFFIX = "_EFFECTS";
 
 	public static final String NAME = "snpEff";
 	public static final String LOF = "LOF";
 	public static final String NMD = "NMD";
 	public static final String ANN = "ANN";
+
+	private EffectsMetaData effectsMetaData = new EffectsMetaData();
 
 	public enum Impact
 	{
@@ -123,7 +127,6 @@ public class SnpEffRunner
 
 			SnpEffResultIterator snpEffResultIterator = new SnpEffResultIterator(repo.iterator());
 
-			DefaultEntityMetaData effectsEMD = new VcfEffectsMetaData(sourceEMD);
 
 			return new Iterator<Entity>()
 			{
@@ -159,16 +162,16 @@ public class SnpEffRunner
 							Entity snpEffEntity = resultEntities.get(chromosome, position);
 							if (snpEffEntity != null)
 							{
-								effects.addAll(getSnpEffectsFromSnpEffEntity(sourceEntity, snpEffEntity, effectsEMD));
+								effects.addAll(getSnpEffectsFromSnpEffEntity(sourceEntity, snpEffEntity, getOutputMetaData(sourceEMD)));
 							}
 							else
 							{
-								effects.add(getEmptyEffectsEntity(sourceEntity, effectsEMD));
+								effects.add(getEmptyEffectsEntity(sourceEntity, getOutputMetaData(sourceEMD)));
 							}
 						}
 						else
 						{
-							effects.add(getEmptyEffectsEntity(sourceEntity, effectsEMD));
+							effects.add(getEmptyEffectsEntity(sourceEntity, getOutputMetaData(sourceEMD)));
 						}
 					}
 					return effects.removeFirst();
@@ -197,7 +200,7 @@ public class SnpEffRunner
 
 	// ANN=G|intron_variant|MODIFIER|LOC101926913|LOC101926913|transcript|NR_110185.1|Noncoding|5/5|n.376+9526G>C||||||,G|non_coding_exon_variant|MODIFIER|LINC01124|LINC01124|transcript|NR_027433.1|Noncoding|1/1|n.590G>C||||||;
 	private List<Entity> getSnpEffectsFromSnpEffEntity(Entity sourceEntity, Entity snpEffEntity,
-			DefaultEntityMetaData effectsEMD)
+			EntityMetaData effectsEMD)
 	{
 		String[] annotations = snpEffEntity.getString(SnpEffRunner.ANN).split(Pattern.quote(","), -1);
 
@@ -224,7 +227,7 @@ public class SnpEffRunner
 				effect.set(VARIANT, sourceEntity);
 
 				effect.set(ALT, fields[0]);
-				effect.set(GENE, fields[4]);
+				effect.set(GENE_NAME, fields[4]);
 				effect.set(ANNOTATION, fields[1]);
 				effect.set(PUTATIVE_IMPACT, fields[2]);
 				effect.set(GENE_NAME, fields[3]);
@@ -295,14 +298,14 @@ public class SnpEffRunner
 	 *            the Entities to convert to VCF
 	 * @return a VCF file
 	 */
-	public File getInputVcfFile(Iterator<Entity> it) throws IOException
+	public File getInputVcfFile(Iterator<Entity> source) throws IOException
 	{
 		File vcf = createTempFile(NAME, ".vcf");
 		try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(vcf), CHARSET)))
 		{
-			while (it.hasNext())
+			while (source.hasNext())
 			{
-				Entity entity = it.next();
+				Entity entity = source.next();
 				StringBuilder builder = new StringBuilder();
 				builder.append(entity.getString(VcfRepository.CHROM));
 				builder.append("\t");
@@ -312,7 +315,7 @@ public class SnpEffRunner
 				builder.append("\t");
 				builder.append(entity.getString(VcfRepository.ALT));
 
-				if (it.hasNext())
+				if (source.hasNext())
 				{
 					builder.append("\n");
 				}
@@ -352,5 +355,20 @@ public class SnpEffRunner
 		}
 
 		return snpEffPath;
+	}
+
+	public EntityMetaData getOutputMetaData(EntityMetaData sourceEMD)
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData(sourceEMD.getSimpleName() + ENTITY_NAME_SUFFIX,
+				sourceEMD.getPackage());
+		emd.setBackend(sourceEMD.getBackend());
+		emd.addAttribute(EffectsMetaData.ID, EntityMetaData.AttributeRole.ROLE_ID).setAuto(true).setVisible(false);
+		for (AttributeMetaData attr : effectsMetaData.getOrderedAttributes())
+		{
+			emd.addAttributeMetaData(attr);
+		}
+		emd.addAttribute(EffectsMetaData.VARIANT).setNillable(false).setDataType(MolgenisFieldTypes.XREF)
+				.setRefEntity(sourceEMD);
+		return emd;
 	}
 }

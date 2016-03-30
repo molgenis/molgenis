@@ -10,13 +10,10 @@ import org.molgenis.data.annotation.meta.AnnotatorEntityMetaData;
 
 public class EffectsMetaData implements AnnotatorEntityMetaData
 {
-	public static final String ENTITY_NAME_SUFFIX = "_EFFECTS";
-
 	public static final String ID = "id";
-	public static final String ALT = "ALT";
-	public static final String GENE = "Gene_Name";
 	public static final String VARIANT = "VARIANT";
 
+	public static final String ALT = "Alt_Allele";
 	public static final String ANNOTATION = "Annotation";
 	public static final String PUTATIVE_IMPACT = "Putative_impact";
 	public static final String GENE_NAME = "Gene_Name";
@@ -33,8 +30,10 @@ public class EffectsMetaData implements AnnotatorEntityMetaData
 	public static final String DISTANCE_TO_FEATURE = "Distance_to_feature";
 	public static final String ERRORS = "Errors";
 
+	public static final DefaultAttributeMetaData ALT_ATTR = new DefaultAttributeMetaData(ALT, TEXT).setDescription(
+			"The alternative allele on which this EFFECT applies");
 	public static final DefaultAttributeMetaData PUTATIVE_IMPACT_ATTR = new DefaultAttributeMetaData(PUTATIVE_IMPACT, STRING).setDescription(
-			" A simple estimation of putative impact / deleteriousness : {HIGH, MODERATE, LOW, MODIFIER}(source:http://snpeff.sourceforge.net)");
+			"A simple estimation of putative impact / deleteriousness : {HIGH, MODERATE, LOW, MODIFIER}(source:http://snpeff.sourceforge.net)");
 	public static final DefaultAttributeMetaData GENE_NAME_ATTR = new DefaultAttributeMetaData(GENE_NAME, STRING).setDescription(
 			"Common gene name (HGNC). Optional: use closest gene when the variant is “intergenic”(source:http://snpeff.sourceforge.net)");
 	public static final DefaultAttributeMetaData GENE_ID_ATTR = new DefaultAttributeMetaData(GENE_ID, STRING).setDescription("Gene ID");
@@ -61,15 +60,14 @@ public class EffectsMetaData implements AnnotatorEntityMetaData
 			"Add errors, warnings oErrors, Warnings or Information messages: Add errors, warnings or r informative message that can affect annotation accuracy. It can be added using either ‘codes’ (as shown in column 1, e.g. W1) or ‘message types’ (as shown in column 2, e.g. WARNING_REF_DOES_NOT_MATCH_GENOME). All these errors, warnings or information messages messages are optional.(source:http://snpeff.sourceforge.net)");
 	public static final DefaultAttributeMetaData ANNOTATION_ATTR = new DefaultAttributeMetaData(ANNOTATION, STRING).setDescription(
 			"Annotated using Sequence Ontology terms. Multiple effects can be concatenated using ‘&’ (source:http://snpeff.sourceforge.net)");
-	private LinkedList<AttributeMetaData> attributes;
-
 
 	public LinkedList<AttributeMetaData> getOrderedAttributes()
 	{
-		attributes = new LinkedList<>();
+		LinkedList<AttributeMetaData> attributes = new LinkedList<>();
+		attributes.add(ALT_ATTR);
+		attributes.add(GENE_NAME_ATTR);
 		attributes.add(ANNOTATION_ATTR);
 		attributes.add(PUTATIVE_IMPACT_ATTR);
-		attributes.add(GENE_NAME_ATTR);
 		attributes.add(GENE_ID_ATTR);
 		attributes.add(FEATURE_TYPE_ATTR);
 		attributes.add(FEATURE_ID_ATTR);
@@ -82,5 +80,7 @@ public class EffectsMetaData implements AnnotatorEntityMetaData
 		attributes.add(PROTEIN_POSITION_ATTR);
 		attributes.add(DISTANCE_TO_FEATURE_ATTR);
 		attributes.add(ERRORS_ATTR);
+
+		return attributes;
 	}
 }

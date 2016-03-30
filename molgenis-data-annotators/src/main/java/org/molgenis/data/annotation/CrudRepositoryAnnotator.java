@@ -1,10 +1,5 @@
 package org.molgenis.data.annotation;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
@@ -18,6 +13,11 @@ import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 @Component
 public class CrudRepositoryAnnotator
@@ -60,10 +60,11 @@ public class CrudRepositoryAnnotator
 			EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(repository.getName());
 
 			Repository crudRepository;
-			if (annotator instanceof AbstractRefEntityAnnotator)
+			if (annotator instanceof RefEntityAnnotator)
 			{
-				AbstractRefEntityAnnotator externalAnnotator = (AbstractRefEntityAnnotator) annotator;
-				EntityMetaData targetMetaData = externalAnnotator.getOutputMetaData(entityMetaData);
+				RepositoryAnnotator externalAnnotator = annotator;
+				EntityMetaData targetMetaData = ((RefEntityAnnotator) externalAnnotator)
+						.getOutputMetaData(entityMetaData);
 
 				if (!dataService.hasRepository(targetMetaData.getName()))
 				{

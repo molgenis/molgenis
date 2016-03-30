@@ -50,7 +50,7 @@ import org.molgenis.data.annotation.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.VcfEffectsMetaData;
+import org.molgenis.data.support.EffectsMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -92,7 +92,7 @@ public class CGDAnnotator
 
 	public enum CGDAttributeName
 	{
-		GENE("#GENE", VcfEffectsMetaData.GENE_NAME), REFERENCES("REFERENCES", "REFS"), INTERVENTION_RATIONALE(
+		GENE("#GENE", EffectsMetaData.GENE_NAME), REFERENCES("REFERENCES", "REFS"), INTERVENTION_RATIONALE(
 				"INTERVENTION/RATIONALE", "INTERVENTION_RATIONALE"), COMMENTS("COMMENTS", "COMMENTS"), INTERVENTION_CATEGORIES(
 				"INTERVENTION CATEGORIES", "INTERVENTION_CATEGORIES"), MANIFESTATION_CATEGORIES(
 				"MANIFESTATION CATEGORIES", "MANIFESTATION_CATEGORIES"), ALLELIC_CONDITIONS("ALLELIC CONDITIONS",

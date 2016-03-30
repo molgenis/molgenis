@@ -158,6 +158,12 @@ public class CommandLineAnnotatorConfig
 	}
 
 	@Bean
+	public Entity variantClassificationAnnotatorSettings()
+	{
+		return new MapEntity();
+	}
+
+	@Bean
 	public Entity omimAnnotatorSettings()
 	{
 		return new MapEntity();

@@ -24,7 +24,7 @@ import static org.molgenis.data.vcf.VcfRepository.QUAL_META;
 import static org.molgenis.data.vcf.VcfRepository.REF;
 import static org.molgenis.data.vcf.VcfRepository.REF_META;
 import static org.molgenis.data.vcf.VcfRepository.SAMPLES;
-import static org.molgenis.data.vcf.utils.VcfWriterUtils.reverseXrefMrefRelation;
+import static org.molgenis.data.vcf.utils.VcfUtils.reverseXrefMrefRelation;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -241,7 +241,7 @@ public class VcfWriterUtilsTest
 		BufferedWriter writer = new BufferedWriter(strWriter);
 		try
 		{
-			VcfWriterUtils.writeToVcf(vcfEntity, writer);
+			//VcfWriterUtils.writeToVcf(vcfEntity, outputMetaData, attributesToInclude, writer);
 		}
 		finally
 		{
@@ -314,7 +314,7 @@ public class VcfWriterUtilsTest
 	@Test
 	public void createId()
 	{
-		assertEquals(VcfWriterUtils.createId(entity1), "yCiiynjHRAtJPcdn7jFDGA");
+		assertEquals(VcfUtils.createId(entity1), "yCiiynjHRAtJPcdn7jFDGA");
 	}
 
 	@Test
@@ -332,7 +332,7 @@ public class VcfWriterUtilsTest
 
 			for (Entity entity : entities)
 			{
-				VcfWriterUtils.writeToVcf(entity, outputVCFWriter);
+				//VcfWriterUtils.writeToVcf(entity, outputMetaData, attributesToInclude, outputVCFWriter);
 				outputVCFWriter.newLine();
 			}
 			outputVCFWriter.close();
@@ -367,7 +367,7 @@ public class VcfWriterUtilsTest
 			for (Entity entity : entities)
 			{
 				MapEntity mapEntity = new MapEntity(entity, annotatedEntityMetadata);
-				VcfWriterUtils.writeToVcf(mapEntity, outputVCFWriter);
+				//VcfWriterUtils.writeToVcf(mapEntity, outputMetaData, attributesToInclude, outputVCFWriter);
 				outputVCFWriter.newLine();
 			}
 			outputVCFWriter.close();
@@ -405,7 +405,7 @@ public class VcfWriterUtilsTest
 			for (Entity entity : vcfEntities)
 			{
 				MapEntity mapEntity = new MapEntity(entity, vcfMeta);
-				VcfWriterUtils.writeToVcf(mapEntity, actualOutputFileWriter);
+				//VcfWriterUtils.writeToVcf(mapEntity, outputMetaData, attributesToInclude, actualOutputFileWriter);
 				actualOutputFileWriter.newLine();
 			}
 			actualOutputFileWriter.close();

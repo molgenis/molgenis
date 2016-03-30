@@ -23,7 +23,7 @@ import org.molgenis.data.annotator.websettings.VariantClassificationAnnotatorSet
 import org.molgenis.data.importer.EmxFileOnlyMetaDataParser;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.VcfEffectsMetaData;
+import org.molgenis.data.support.EffectsMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -116,8 +116,8 @@ public class VariantClassificationAnnotator
 										+ StreamSupport.stream(refAttributesList.spliterator(), false)
 												.map(AttributeMetaData::getName).collect(Collectors.joining(", ")));
 
-				requiredAttributes.addAll(Arrays.asList(VcfEffectsMetaData.GENE_NAME_ATTR,
-						VcfEffectsMetaData.IMPACT_ATTR, refAttr, VcfRepository.ALT_META));
+				requiredAttributes.addAll(Arrays.asList(EffectsMetaData.GENE_NAME_ATTR,
+						EffectsMetaData.PUTATIVE_IMPACT_ATTR, refAttr, VcfRepository.ALT_META));
 				return requiredAttributes;
 			}
 
@@ -125,7 +125,7 @@ public class VariantClassificationAnnotator
 			protected void processQueryResults(Entity inputEntity, Iterable<Entity> annotationSourceEntities,
 					Entity resultEntity)
 			{
-				String alt = inputEntity.getString(VcfEffectsMetaData.ANNOTATION);
+				String alt = inputEntity.getString(EffectsMetaData.ANNOTATION);
 				if (alt.contains(","))
 				{
 					throw new MolgenisDataException(
@@ -140,10 +140,10 @@ public class VariantClassificationAnnotator
 				Map<String, Double> exacMap = toMap(variantEntity.getString(VcfRepository.ALT),
 						variantEntity.getString(ExacAnnotator.EXAC_AF));
 
-				Impact impact = Impact.valueOf(inputEntity.getString(VcfEffectsMetaData.PUTATIVE_IMPACT));
+				Impact impact = Impact.valueOf(inputEntity.getString(EffectsMetaData.PUTATIVE_IMPACT));
 				Double exacMAF = exacMap.get(alt);
 				Double caddScaled = caddMap.get(alt);
-				String gene = inputEntity.getString(VcfEffectsMetaData.GENE_NAME);
+				String gene = inputEntity.getString(EffectsMetaData.GENE_NAME);
 				if (exacMAF == null)
 				{
 					exacMAF = 0.0;

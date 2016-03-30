@@ -7,7 +7,7 @@ import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.CYTO_LOCATIONS;
 import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.MIM_NUMBER;
 import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.PHENOTYPE;
-import static org.molgenis.data.support.VcfEffectsMetaData.GENE_NAME;
+import static org.molgenis.data.support.EffectsMetaData.GENE_NAME;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
