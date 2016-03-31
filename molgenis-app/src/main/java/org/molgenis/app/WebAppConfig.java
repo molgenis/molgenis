@@ -28,6 +28,7 @@ import org.molgenis.migrate.version.v1_15.Step24UpdateApplicationSettings;
 import org.molgenis.migrate.version.v1_15.Step25LanguagesPermissions;
 import org.molgenis.migrate.version.v1_16.Step26migrateJpaBackend;
 import org.molgenis.migrate.version.v1_17.Step27MetaDataAttributeRoles;
+import org.molgenis.migrate.version.v1_19.Step28MigrateSorta;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.GsonConfig;
@@ -102,6 +103,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step25LanguagesPermissions(dataService));
 		upgradeService.addUpgrade(new Step26migrateJpaBackend(dataSource, MysqlRepositoryCollection.NAME, idGenerator));
 		upgradeService.addUpgrade(new Step27MetaDataAttributeRoles(dataSource));
+		upgradeService.addUpgrade(new Step28MigrateSorta(dataSource));
 	}
 
 	@Override

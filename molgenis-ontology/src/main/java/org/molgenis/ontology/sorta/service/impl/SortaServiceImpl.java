@@ -1,5 +1,13 @@
 package org.molgenis.ontology.sorta.service.impl;
 
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.QueryRule.Operator.AND;
+import static org.molgenis.data.QueryRule.Operator.DIS_MAX;
+import static org.molgenis.data.QueryRule.Operator.EQUALS;
+import static org.molgenis.data.QueryRule.Operator.FUZZY_MATCH;
+import static org.molgenis.data.QueryRule.Operator.FUZZY_MATCH_NGRAM;
+import static org.molgenis.data.QueryRule.Operator.IN;
+import static org.molgenis.data.QueryRule.Operator.OR;
 import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.COMBINED_SCORE;
 import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.SCORE;
 
@@ -18,7 +26,6 @@ import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
-import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.data.semanticsearch.string.Stemmer;
 import org.molgenis.data.support.MapEntity;
@@ -36,8 +43,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
-
-import static java.util.Objects.requireNonNull;
 
 public class SortaServiceImpl implements SortaService
 {
@@ -129,23 +134,23 @@ public class SortaServiceImpl implements SortaService
 					if (StringUtils.isNotEmpty(stemmedQueryString))
 					{
 						rulesForOntologyTermFields.add(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-								Operator.FUZZY_MATCH, fuzzyMatchQuerySyntax(stemmedQueryString)));
+								FUZZY_MATCH, fuzzyMatchQuerySyntax(stemmedQueryString)));
 
 						rulesForOntologyTermFieldsNGram.add(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-								Operator.FUZZY_MATCH_NGRAM, stemmedQueryString));
+								FUZZY_MATCH_NGRAM, stemmedQueryString));
 					}
 				}
 				else
 				{
 					QueryRule queryAnnotationName = new QueryRule(OntologyTermDynamicAnnotationMetaData.NAME,
-							Operator.EQUALS, attributeName);
+							EQUALS, attributeName);
 					QueryRule queryAnnotationValue = new QueryRule(OntologyTermDynamicAnnotationMetaData.VALUE,
-							Operator.EQUALS, inputEntity.getString(attributeName));
+							EQUALS, inputEntity.getString(attributeName));
 
 					// ((name=OMIM Operator.AND value=124325) Operator.OR (name=HPO Operator.AND value=hp12435))
-					if (rulesForOtherFields.size() > 0) rulesForOtherFields.add(new QueryRule(Operator.OR));
+					if (rulesForOtherFields.size() > 0) rulesForOtherFields.add(new QueryRule(OR));
 					rulesForOtherFields.add(new QueryRule(
-							Arrays.asList(queryAnnotationName, new QueryRule(Operator.AND), queryAnnotationValue)));
+							Arrays.asList(queryAnnotationName, new QueryRule(AND), queryAnnotationValue)));
 				}
 			}
 		}
@@ -192,9 +197,9 @@ public class SortaServiceImpl implements SortaService
 		if (ontologyTermAnnotationEntities.size() > 0)
 		{
 			List<QueryRule> rules = Arrays.asList(
-					new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
-					new QueryRule(Operator.AND), new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
-							Operator.IN, ontologyTermAnnotationEntities));
+					new QueryRule(OntologyTermMetaData.ONTOLOGY, EQUALS, ontologyEntity),
+					new QueryRule(AND), new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
+							IN, ontologyTermAnnotationEntities));
 
 			Stream<Entity> ontologyTermEntities = dataService.findAll(OntologyTermMetaData.ENTITY_NAME,
 					new QueryImpl(rules).pageSize(Integer.MAX_VALUE));
@@ -211,11 +216,11 @@ public class SortaServiceImpl implements SortaService
 			List<QueryRule> rulesForOntologyTermFields, List<Entity> relevantEntities)
 	{
 		QueryRule disMaxQueryRule = new QueryRule(rulesForOntologyTermFields);
-		disMaxQueryRule.setOperator(Operator.DIS_MAX);
+		disMaxQueryRule.setOperator(DIS_MAX);
 
 		List<QueryRule> finalQueryRules = Arrays.asList(
-				new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
-				new QueryRule(Operator.AND), disMaxQueryRule);
+				new QueryRule(OntologyTermMetaData.ONTOLOGY, EQUALS, ontologyEntity),
+				new QueryRule(AND), disMaxQueryRule);
 
 		Stream<Entity> lexicalMatchedOntologyTermEntities = dataService
 				.findAll(OntologyTermMetaData.ENTITY_NAME, new QueryImpl(finalQueryRules).pageSize(pageSize))
