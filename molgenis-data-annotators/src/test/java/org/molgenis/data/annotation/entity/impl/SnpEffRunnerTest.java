@@ -781,7 +781,7 @@ public class SnpEffRunnerTest
 			e.printStackTrace();
 		}
 
-		List<Entity> results = newArrayList(snpEffRunner.getSnpEffects(expectedSingleAlleleEffectEntities.iterator(),
+		List<Entity> results = newArrayList(snpEffRunner.getSnpEffects(singleAlleleEntities.iterator(),
 				new File("src/test/resources/test-snpeff.vcf")));
 
 		// Set id to null to prevent matching auto generated identifiers
