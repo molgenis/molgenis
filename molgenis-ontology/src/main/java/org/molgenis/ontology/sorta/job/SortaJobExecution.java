@@ -10,6 +10,7 @@ public class SortaJobExecution extends JobExecution
 
 	public final static String ENTITY_NAME = "SortaJobExecution";
 	public final static String ONTOLOGY_IRI = "ontologyIri";
+	public final static String NAME = "name";
 	public final static String DELETE_URL = "deleteUrl";
 	public final static String SOURCE_ENTITY = "sourceEntity";
 	public final static String RESULT_ENTITY = "resultEntity";
@@ -22,6 +23,16 @@ public class SortaJobExecution extends JobExecution
 		super(dataService, SortaJobExecutionMetaData.INSTANCE);
 
 		setType(SORTA_MATCH_JOB_TYPE);
+	}
+	
+	public String getName()
+	{
+		return getString(NAME);
+	}
+	
+	public void setName(String name)
+	{
+		set(NAME, name);
 	}
 
 	public String getResultEntityName()

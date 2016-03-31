@@ -540,6 +540,7 @@ public class SortaServiceController extends MolgenisPluginController
 
 		SortaJobExecution sortaJobExecution = new SortaJobExecution(dataService);
 		sortaJobExecution.setIdentifier(resultEntityName);
+		sortaJobExecution.setName(jobName);
 		sortaJobExecution.setUser(userAccountService.getCurrentUser());
 		sortaJobExecution.setSourceEntityName(inputData.getName());
 		sortaJobExecution.setDeleteUrl(getSortaServiceMenuUrl() + "/delete/" + resultEntityName);
