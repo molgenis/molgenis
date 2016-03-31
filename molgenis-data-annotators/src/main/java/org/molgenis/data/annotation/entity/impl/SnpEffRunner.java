@@ -327,7 +327,7 @@ public class SnpEffRunner
 	/**
 	 * Gets the path to the SnpEff JAR. Returns null when the path is not found or snpEffAnnotatorSettings is null.
 	 * 
-	 * @return the path to the SnpEff JAR, or nul
+	 * @return the path to the SnpEff JAR, or null
 	 */
 	public String getSnpEffPath()
 	{
