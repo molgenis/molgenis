@@ -189,9 +189,16 @@ public class SortaServiceController extends MolgenisPluginController
 			SortaJobExecution sortaJobExecution = findSortaJobExecution(sortaJobExecutionId);
 			try
 			{
-				Double thresholdValue = Double.parseDouble(threshold);
-				sortaJobExecution.setThreshold(thresholdValue);
-				dataService.update(SortaJobExecution.ENTITY_NAME, sortaJobExecution);
+				MolgenisUser currentUser = userAccountService.getCurrentUser();
+				if (currentUser.isSuperuser()
+						|| sortaJobExecution.getUser().getUsername().equals(currentUser.getUsername()))
+				{
+					RunAsSystemProxy.runAsSystem(() -> {
+						Double thresholdValue = Double.parseDouble(threshold);
+						sortaJobExecution.setThreshold(thresholdValue);
+						dataService.update(SortaJobExecution.ENTITY_NAME, sortaJobExecution);
+					});
+				}
 			}
 			catch (NumberFormatException e)
 			{
