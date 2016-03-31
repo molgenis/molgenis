@@ -13,8 +13,8 @@
 </div>
 <script>
 	$(document).ready(function(){
-		var customColumns = [{th:'Job target', td: function(job){
-			return job.targetEntity
+		var customColumns = [{th:'Job name', td: function(job){
+			return job.name
 		}}, {th:'Ontology url', td: function(job){
 			return job.ontologyIri
 		}}, {th: 'Delete', td: function(job){
