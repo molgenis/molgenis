@@ -377,73 +377,64 @@ public class VcfUtils
 	 * @return
 	 * @throws FileNotFoundException
 	 */
-	public static HashMap<String, Trio> getPedigree(File inputVcfFile) throws FileNotFoundException
+	public static HashMap<String, Trio> getPedigree(Scanner inputVcfFileScanner) throws FileNotFoundException
 	{
 		HashMap<String, Trio> result = new HashMap<String, Trio>();
 
-		Scanner inputVcfFileScanner = new Scanner(inputVcfFile, "UTF-8");
-		String line = inputVcfFileScanner.nextLine();
-
-		// if first line does not start with ##, we don't trust this file as VCF
-		if (line.startsWith(VcfRepository.PREFIX))
+		while (inputVcfFileScanner.hasNextLine())
 		{
-			while (inputVcfFileScanner.hasNextLine())
+			String line = inputVcfFileScanner.nextLine();
+			
+			//quit when we don't see header lines anymore
+			if (!line.startsWith(VcfRepository.PREFIX))
 			{
-				// detect pedigree line
-				// expecting: ##PEDIGREE=<Child=100400,Mother=100402,Father=100401>
-				if (line.startsWith("##PEDIGREE"))
+				break;
+			}
+			
+			// detect pedigree line
+			// expecting e.g. ##PEDIGREE=<Child=100400,Mother=100402,Father=100401>
+			if (line.startsWith("##PEDIGREE"))
+			{
+				System.out.println("Pedigree data line: " + line);
+				String childID = null;
+				String motherID = null;
+				String fatherID = null;
+
+				String lineStripped = line.replace("##PEDIGREE=<", "").replace(">", "");
+				String[] lineSplit = lineStripped.split(",", -1);
+				for (String element : lineSplit)
 				{
-					System.out.println("Pedigree data line: " + line);
-					String childID = null;
-					String motherID = null;
-					String fatherID = null;
-
-					String lineStripped = line.replace("##PEDIGREE=<", "").replace(">", "");
-					String[] lineSplit = lineStripped.split(",", -1);
-					for (String element : lineSplit)
+					if (element.startsWith("Child"))
 					{
-						if (element.startsWith("Child"))
-						{
-							childID = element.replace("Child=", "");
-						}
-						else if (element.startsWith("Mother"))
-						{
-							motherID = element.replace("Mother=", "");
-						}
-						else if (element.startsWith("Father"))
-						{
-							fatherID = element.replace("Father=", "");
-						}
-						else
-						{
-							inputVcfFileScanner.close();
-							throw new MolgenisDataException(
-									"Expected Child, Mother or Father, but found: " + element + " in line " + line);
-						}
+						childID = element.replace("Child=", "");
 					}
-
-					if (childID != null && motherID != null && fatherID != null)
+					else if (element.startsWith("Mother"))
 					{
-						// good
-						result.put(childID, new Trio(new Sample(childID), new Sample(motherID), new Sample(fatherID)));
+						motherID = element.replace("Mother=", "");
+					}
+					else if (element.startsWith("Father"))
+					{
+						fatherID = element.replace("Father=", "");
 					}
 					else
 					{
-						inputVcfFileScanner.close();
-						throw new MolgenisDataException("Missing Child, Mother or Father ID in line " + line);
+						throw new MolgenisDataException(
+								"Expected Child, Mother or Father, but found: " + element + " in line " + line);
 					}
 				}
 
-				line = inputVcfFileScanner.nextLine();
-				if (!line.startsWith(VcfRepository.PREFIX))
+				if (childID != null && motherID != null && fatherID != null)
 				{
-					break;
+					// good
+					result.put(childID, new Trio(new Sample(childID), new Sample(motherID), new Sample(fatherID)));
 				}
-			}
+				else
+				{
+					throw new MolgenisDataException("Missing Child, Mother or Father ID in line " + line);
+				}
+			}		
 		}
-
-		inputVcfFileScanner.close();
 		return result;
 	}
-
+	
 }
