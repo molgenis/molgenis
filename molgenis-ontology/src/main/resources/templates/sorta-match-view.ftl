@@ -18,9 +18,6 @@
 			</div>
 			<#if existingTasks??>
 				<@listTasks />
-				<#if rocfilePath??>
-					<@ShowROCModal />
-				</#if>
 			<#else>
 			<div class="row">
 				<div class="col-md-offset-2 col-md-2">
