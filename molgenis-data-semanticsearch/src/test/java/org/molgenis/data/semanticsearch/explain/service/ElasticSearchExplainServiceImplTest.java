@@ -15,8 +15,6 @@ import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.ImmutableMap;
-
 public class ElasticSearchExplainServiceImplTest
 {
 	private ElasticSearchExplainService elasticSearchExplainService;
@@ -94,11 +92,11 @@ public class ElasticSearchExplainServiceImplTest
 		expanedQueryMap.put("drug", "medication");
 		expanedQueryMap.put("pill", "medication");
 
-		assertEquals(explainServiceHelper.findMatchQueries("high blood", expanedQueryMap).toString(),
-				ImmutableMap.of("high blood pressure", 73.333).toString());
+		Map<String, Double> findMatchQueries = explainServiceHelper.findMatchQueries("high blood", expanedQueryMap);
+		assertEquals(findMatchQueries.get("high blood pressure"), 73.333, 0.001);
 
-		assertEquals(explainServiceHelper.findMatchQueries("medication", expanedQueryMap).toString(),
-				ImmutableMap.of("medication", 100.0).toString());
+		Map<String, Double> findMatchQueries2 = explainServiceHelper.findMatchQueries("medication", expanedQueryMap);
+		assertEquals(findMatchQueries2.get("medication"), 100.0, 0.001);
 	}
 
 	@Test
@@ -124,8 +122,8 @@ public class ElasticSearchExplainServiceImplTest
 		expanedQueryMap.put("drug", "medication");
 		expanedQueryMap.put("pill", "medication");
 
-		Set<ExplainedQueryString> reverseSearchQueryStrings = elasticSearchExplainService.findQueriesFromExplanation(
-				expanedQueryMap, explanation_1);
+		Set<ExplainedQueryString> reverseSearchQueryStrings = elasticSearchExplainService
+				.findQueriesFromExplanation(expanedQueryMap, explanation_1);
 
 		Iterator<ExplainedQueryString> iterator = reverseSearchQueryStrings.iterator();
 

@@ -23,7 +23,7 @@ public class RScriptRegistrator implements ApplicationListener<ContextRefreshedE
 	@Override
 	public int getOrder()
 	{
-		return Ordered.LOWEST_PRECEDENCE - 100;
+		return Ordered.LOWEST_PRECEDENCE;
 	}
 
 	@Override

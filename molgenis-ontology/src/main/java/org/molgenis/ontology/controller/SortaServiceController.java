@@ -1,7 +1,6 @@
 package org.molgenis.ontology.controller;
 
 import static java.util.Arrays.asList;
-import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.molgenis.data.QueryRule.Operator.AND;
@@ -51,7 +50,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.IdGenerator;
-import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
@@ -69,7 +67,6 @@ import org.molgenis.file.FileStore;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.core.service.OntologyService;
-import org.molgenis.ontology.roc.MatchQualityRocService;
 import org.molgenis.ontology.sorta.job.SortaJobExecution;
 import org.molgenis.ontology.sorta.job.SortaJobFactory;
 import org.molgenis.ontology.sorta.job.SortaJobImpl;
@@ -99,12 +96,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.collect.ImmutableMap;
+
+import static java.util.Objects.requireNonNull;
 
 @Controller
 @RequestMapping(URI)
@@ -112,7 +110,6 @@ public class SortaServiceController extends MolgenisPluginController
 {
 	private final OntologyService ontologyService;
 	private final SortaService sortaService;
-	private final MatchQualityRocService matchQualityRocService;
 	private final DataService dataService;
 	private final UserAccountService userAccountService;
 	private final SortaJobFactory sortaMatchJobFactory;
@@ -133,16 +130,14 @@ public class SortaServiceController extends MolgenisPluginController
 
 	@Autowired
 	public SortaServiceController(OntologyService ontologyService, SortaService sortaService,
-			MatchQualityRocService matchQualityRocService, SortaJobFactory sortaMatchJobFactory,
-			ExecutorService taskExecutor, UserAccountService userAccountService, FileStore fileStore,
-			MolgenisPermissionService molgenisPermissionService, DataService dataService,
+			SortaJobFactory sortaMatchJobFactory, ExecutorService taskExecutor, UserAccountService userAccountService,
+			FileStore fileStore, MolgenisPermissionService molgenisPermissionService, DataService dataService,
 			LanguageService languageService, MenuReaderService menuReaderService, IdGenerator idGenerator,
 			PermissionSystemService permissionSystemService)
 	{
 		super(URI);
 		this.ontologyService = requireNonNull(ontologyService);
 		this.sortaService = requireNonNull(sortaService);
-		this.matchQualityRocService = requireNonNull(matchQualityRocService);
 		this.sortaMatchJobFactory = requireNonNull(sortaMatchJobFactory);
 		this.taskExecutor = requireNonNull(taskExecutor);
 		this.userAccountService = requireNonNull(userAccountService);
@@ -183,14 +178,6 @@ public class SortaServiceController extends MolgenisPluginController
 	{
 		model.addAttribute("ontologies", ontologyService.getOntologies());
 		return MATCH_VIEW_NAME;
-	}
-
-	@RequestMapping(method = RequestMethod.GET, value = "/calculate/{sortaJobExecutionId}")
-	public String calculateRoc(@PathVariable String sortaJobExecutionId, Model model)
-			throws IOException, MolgenisInvalidFormatException
-	{
-		model.addAllAttributes(matchQualityRocService.calculateROC(sortaJobExecutionId));
-		return init(model);
 	}
 
 	@RequestMapping(method = POST, value = "/threshold/{sortaJobExecutionId}")
@@ -341,7 +328,8 @@ public class SortaServiceController extends MolgenisPluginController
 				query.offset(start).pageSize(num).sort(new Sort().on(VALIDATED, DESC).on(SCORE, DESC)));
 		findAll.forEach(mappingEntity -> {
 			Map<String, Object> outputEntity = new HashMap<String, Object>();
-			outputEntity.put("inputTerm", getEntityAsMap(mappingEntity.getEntity(MatchingTaskContentEntityMetaData.INPUT_TERM)));
+			outputEntity.put("inputTerm",
+					getEntityAsMap(mappingEntity.getEntity(MatchingTaskContentEntityMetaData.INPUT_TERM)));
 			outputEntity.put("matchedTerm", getEntityAsMap(mappingEntity));
 			Object matchedTerm = mappingEntity.get(MATCHED_TERM);
 			if (matchedTerm != null)
