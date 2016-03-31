@@ -45,6 +45,7 @@ public class Step28MigrateSorta extends MolgenisUpgrade
 		updateDataType("Ontology_OntologyTermNodePath", "nodePath", "text");
 		updateDataType("Ontology_OntologyTermSynonym", "ontologyTermSynonym", "text");
 		removeRepository("MatchingTaskContent");
+		removeRepository("MatchingTask");
 		LOG.info("Done.");
 	}
 
