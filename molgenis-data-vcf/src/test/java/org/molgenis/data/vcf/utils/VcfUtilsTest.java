@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Scanner;
 
 import org.apache.commons.io.FileUtils;
 import org.molgenis.MolgenisFieldTypes;
@@ -18,6 +20,8 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.datastructures.Sample;
+import org.molgenis.data.vcf.datastructures.Trio;
 import org.molgenis.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -209,4 +213,23 @@ public class VcfUtilsTest
 		}
 	}
 
+	@Test
+	public void vcfPedigreeReaderTest() throws IOException, MolgenisInvalidFormatException
+	{
+		String testHeader = "##PEDIGREE=<Child=27991,Mother=27992,Father=27993>\n"
+				+ "##PEDIGREE=<Child=27939,Mother=27940,Father=27941>\n"
+				+ "##PEDIGREE=<Child=30982,Mother=30983,Father=30984>";
+		
+		Scanner scanner = new Scanner(testHeader);
+		
+		HashMap<String, Trio> actualPedigree = VcfUtils.getPedigree(scanner);
+		
+		HashMap<String, Trio> expectedPedigree = new HashMap<String, Trio>();
+		expectedPedigree.put("27991", new Trio(new Sample("27991"), new Sample("27992"), new Sample("27993")));
+		expectedPedigree.put("27939", new Trio(new Sample("27939"), new Sample("27940"), new Sample("27941")));
+		expectedPedigree.put("30982", new Trio(new Sample("30982"), new Sample("30983"), new Sample("30984")));
+		
+		assertEquals(actualPedigree, expectedPedigree);
+		
+	}
 }
