@@ -26,10 +26,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
@@ -64,7 +64,7 @@ public class SnpEffRunnerTest
 	private final ArrayList<Entity> entities = new ArrayList<>();;
 	private DefaultEntityMetaData metaDataCanAnnotate;
 
-	private DefaultEntityMetaData effectsEMD;
+	private EntityMetaData effectsEMD;
 
 	@InjectMocks
 	private SnpEffRunner snpEffRunner;
@@ -98,6 +98,9 @@ public class SnpEffRunnerTest
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataRef);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataAlt);
 
+		//FIXME this is an awfully bad idea
+		effectsEMD = snpEffRunner.getOutputMetaData(metaDataCanAnnotate);
+
 		Entity singleAlleleEntity1 = new MapEntity(metaDataCanAnnotate);
 		singleAlleleEntity1.set(VcfRepository.CHROM, "1");
 		singleAlleleEntity1.set(VcfRepository.POS, 13380);
@@ -105,10 +108,10 @@ public class SnpEffRunnerTest
 		singleAlleleEntity1.set(VcfRepository.ALT, "G");
 
 		Entity expectedSingleAllele1 = new MapEntity(effectsEMD);
-		expectedSingleAllele1.set(VcfEffectsMetaData.ID, null);
-		expectedSingleAllele1.set(VcfEffectsMetaData.ALT, "G");
-		expectedSingleAllele1.set(VcfEffectsMetaData.GENE, "DDX11L1");
-		expectedSingleAllele1.set(VcfEffectsMetaData.VARIANT, singleAlleleEntity1);
+		expectedSingleAllele1.set(EffectsMetaData.ID, null);
+		expectedSingleAllele1.set(EffectsMetaData.ALT, "G");
+		expectedSingleAllele1.set(EffectsMetaData.GENE_NAME, "DDX11L1");
+		expectedSingleAllele1.set(EffectsMetaData.VARIANT, singleAlleleEntity1);
 		expectedSingleAllele1.set(ANNOTATION, "non_coding_exon_variant");
 		expectedSingleAllele1.set(PUTATIVE_IMPACT, "MODIFIER");
 		expectedSingleAllele1.set(GENE_NAME, "DDX11L1");
@@ -132,10 +135,10 @@ public class SnpEffRunnerTest
 		singleAlleleEntity2.set(VcfRepository.ALT, "C");
 
 		Entity expectedSingleAllele2 = new MapEntity(effectsEMD);
-		expectedSingleAllele2.set(VcfEffectsMetaData.ID, null);
-		expectedSingleAllele2.set(VcfEffectsMetaData.ALT, "C");
-		expectedSingleAllele2.set(VcfEffectsMetaData.GENE, "DDX11L1");
-		expectedSingleAllele2.set(VcfEffectsMetaData.VARIANT, singleAlleleEntity2);
+		expectedSingleAllele2.set(EffectsMetaData.ID, null);
+		expectedSingleAllele2.set(EffectsMetaData.ALT, "C");
+		expectedSingleAllele2.set(EffectsMetaData.GENE_NAME, "DDX11L1");
+		expectedSingleAllele2.set(EffectsMetaData.VARIANT, singleAlleleEntity2);
 		expectedSingleAllele2.set(ANNOTATION, "non_coding_exon_variant");
 		expectedSingleAllele2.set(PUTATIVE_IMPACT, "MODIFIER");
 		expectedSingleAllele2.set(GENE_NAME, "DDX11L1");
@@ -159,10 +162,10 @@ public class SnpEffRunnerTest
 		singleAlleleEntity3.set(VcfRepository.ALT, "A");
 
 		Entity expectedSingleAllele3 = new MapEntity(effectsEMD);
-		expectedSingleAllele3.set(VcfEffectsMetaData.ID, null);
-		expectedSingleAllele3.set(VcfEffectsMetaData.ALT, "A");
-		expectedSingleAllele3.set(VcfEffectsMetaData.GENE, "NEXN");
-		expectedSingleAllele3.set(VcfEffectsMetaData.VARIANT, singleAlleleEntity3);
+		expectedSingleAllele3.set(EffectsMetaData.ID, null);
+		expectedSingleAllele3.set(EffectsMetaData.ALT, "A");
+		expectedSingleAllele3.set(EffectsMetaData.GENE_NAME, "NEXN");
+		expectedSingleAllele3.set(EffectsMetaData.VARIANT, singleAlleleEntity3);
 		expectedSingleAllele3.set(ANNOTATION, "intron_variant");
 		expectedSingleAllele3.set(PUTATIVE_IMPACT, "MODIFIER");
 		expectedSingleAllele3.set(GENE_NAME, "NEXN");
@@ -186,10 +189,10 @@ public class SnpEffRunnerTest
 		singleAlleleEntity4.set(VcfRepository.ALT, "C");
 
 		Entity expectedSingleAllele4 = new MapEntity(effectsEMD);
-		expectedSingleAllele4.set(VcfEffectsMetaData.ID, null);
-		expectedSingleAllele4.set(VcfEffectsMetaData.ALT, "C");
-		expectedSingleAllele4.set(VcfEffectsMetaData.GENE, "COL18A1");
-		expectedSingleAllele4.set(VcfEffectsMetaData.VARIANT, singleAlleleEntity4);
+		expectedSingleAllele4.set(EffectsMetaData.ID, null);
+		expectedSingleAllele4.set(EffectsMetaData.ALT, "C");
+		expectedSingleAllele4.set(EffectsMetaData.GENE_NAME, "COL18A1");
+		expectedSingleAllele4.set(EffectsMetaData.VARIANT, singleAlleleEntity4);
 		expectedSingleAllele4.set(ANNOTATION,
 				"frameshift_variant&splice_acceptor_variant&splice_donor_variant&splice_region_variant&splice_region_variant&splice_region_variant&intron_variant");
 		expectedSingleAllele4.set(PUTATIVE_IMPACT, "HIGH");
@@ -214,10 +217,10 @@ public class SnpEffRunnerTest
 		singleAlleleEntity5.set(VcfRepository.ALT, "C");
 
 		Entity expectedSingleAllele5 = new MapEntity(effectsEMD);
-		expectedSingleAllele5.set(VcfEffectsMetaData.ID, null);
-		expectedSingleAllele5.set(VcfEffectsMetaData.ALT, "C");
-		expectedSingleAllele5.set(VcfEffectsMetaData.GENE, "BRWD3");
-		expectedSingleAllele5.set(VcfEffectsMetaData.VARIANT, singleAlleleEntity5);
+		expectedSingleAllele5.set(EffectsMetaData.ID, null);
+		expectedSingleAllele5.set(EffectsMetaData.ALT, "C");
+		expectedSingleAllele5.set(EffectsMetaData.GENE_NAME, "BRWD3");
+		expectedSingleAllele5.set(EffectsMetaData.VARIANT, singleAlleleEntity5);
 		expectedSingleAllele5.set(ANNOTATION, "missense_variant&splice_region_variant");
 		expectedSingleAllele5.set(PUTATIVE_IMPACT, "MODERATE");
 		expectedSingleAllele5.set(GENE_NAME, "BRWD3");
@@ -241,10 +244,10 @@ public class SnpEffRunnerTest
 		singleAlleleEntity6.set(VcfRepository.ALT, "T");
 
 		Entity expectedSingleAllele6 = new MapEntity(effectsEMD);
-		expectedSingleAllele6.set(VcfEffectsMetaData.ID, null);
-		expectedSingleAllele6.set(VcfEffectsMetaData.ALT, "T");
-		expectedSingleAllele6.set(VcfEffectsMetaData.GENE, "STAT4");
-		expectedSingleAllele6.set(VcfEffectsMetaData.VARIANT, singleAlleleEntity6);
+		expectedSingleAllele6.set(EffectsMetaData.ID, null);
+		expectedSingleAllele6.set(EffectsMetaData.ALT, "T");
+		expectedSingleAllele6.set(EffectsMetaData.GENE_NAME, "STAT4");
+		expectedSingleAllele6.set(EffectsMetaData.VARIANT, singleAlleleEntity6);
 		expectedSingleAllele6.set(ANNOTATION, "splice_region_variant&synonymous_variant");
 		expectedSingleAllele6.set(PUTATIVE_IMPACT, "LOW");
 		expectedSingleAllele6.set(GENE_NAME, "STAT4");
@@ -268,10 +271,10 @@ public class SnpEffRunnerTest
 		singleAlleleEntity7.set(VcfRepository.ALT, "C");
 
 		Entity expectedSingleAllele7 = new MapEntity(effectsEMD);
-		expectedSingleAllele7.set(VcfEffectsMetaData.ID, null);
-		expectedSingleAllele7.set(VcfEffectsMetaData.ALT, "C");
-		expectedSingleAllele7.set(VcfEffectsMetaData.GENE, "PRKCD");
-		expectedSingleAllele7.set(VcfEffectsMetaData.VARIANT, singleAlleleEntity7);
+		expectedSingleAllele7.set(EffectsMetaData.ID, null);
+		expectedSingleAllele7.set(EffectsMetaData.ALT, "C");
+		expectedSingleAllele7.set(EffectsMetaData.GENE_NAME, "PRKCD");
+		expectedSingleAllele7.set(EffectsMetaData.VARIANT, singleAlleleEntity7);
 		expectedSingleAllele7.set(ANNOTATION, "missense_variant");
 		expectedSingleAllele7.set(PUTATIVE_IMPACT, "MODERATE");
 		expectedSingleAllele7.set(GENE_NAME, "PRKCD");
@@ -295,10 +298,10 @@ public class SnpEffRunnerTest
 		singleAlleleEntity8.set(VcfRepository.ALT, "A");
 
 		Entity expectedSingleAllele8 = new MapEntity(effectsEMD);
-		expectedSingleAllele8.set(VcfEffectsMetaData.ID, null);
-		expectedSingleAllele8.set(VcfEffectsMetaData.ALT, "A");
-		expectedSingleAllele8.set(VcfEffectsMetaData.GENE, "TTLL10");
-		expectedSingleAllele8.set(VcfEffectsMetaData.VARIANT, singleAlleleEntity8);
+		expectedSingleAllele8.set(EffectsMetaData.ID, null);
+		expectedSingleAllele8.set(EffectsMetaData.ALT, "A");
+		expectedSingleAllele8.set(EffectsMetaData.GENE_NAME, "TTLL10");
+		expectedSingleAllele8.set(EffectsMetaData.VARIANT, singleAlleleEntity8);
 		expectedSingleAllele8.set(ANNOTATION, "missense_variant");
 		expectedSingleAllele8.set(PUTATIVE_IMPACT, "MODERATE");
 		expectedSingleAllele8.set(GENE_NAME, "TTLL10");
@@ -329,10 +332,10 @@ public class SnpEffRunnerTest
 		multiAlleleEntity1.set(VcfRepository.ALT, "G,GAAA,GA");
 
 		Entity expectedMultiAllele1 = new MapEntity(effectsEMD);
-		expectedMultiAllele1.set(VcfEffectsMetaData.ID, null);
-		expectedMultiAllele1.set(VcfEffectsMetaData.ALT, "G");
-		expectedMultiAllele1.set(VcfEffectsMetaData.GENE, "TTC13");
-		expectedMultiAllele1.set(VcfEffectsMetaData.VARIANT, multiAlleleEntity1);
+		expectedMultiAllele1.set(EffectsMetaData.ID, null);
+		expectedMultiAllele1.set(EffectsMetaData.ALT, "G");
+		expectedMultiAllele1.set(EffectsMetaData.GENE_NAME, "TTC13");
+		expectedMultiAllele1.set(EffectsMetaData.VARIANT, multiAlleleEntity1);
 		expectedMultiAllele1.set(ANNOTATION, "splice_region_variant&intron_variant");
 		expectedMultiAllele1.set(PUTATIVE_IMPACT, "LOW");
 		expectedMultiAllele1.set(GENE_NAME, "TTC13");
@@ -350,10 +353,10 @@ public class SnpEffRunnerTest
 		expectedMultiAllele1.set(ERRORS, "");
 
 		Entity expectedMultiAllele2 = new MapEntity(effectsEMD);
-		expectedMultiAllele2.set(VcfEffectsMetaData.ID, null);
-		expectedMultiAllele2.set(VcfEffectsMetaData.ALT, "GA");
-		expectedMultiAllele2.set(VcfEffectsMetaData.GENE, "TTC13");
-		expectedMultiAllele2.set(VcfEffectsMetaData.VARIANT, multiAlleleEntity1);
+		expectedMultiAllele2.set(EffectsMetaData.ID, null);
+		expectedMultiAllele2.set(EffectsMetaData.ALT, "GA");
+		expectedMultiAllele2.set(EffectsMetaData.GENE_NAME, "TTC13");
+		expectedMultiAllele2.set(EffectsMetaData.VARIANT, multiAlleleEntity1);
 		expectedMultiAllele2.set(ANNOTATION, "splice_region_variant&intron_variant");
 		expectedMultiAllele2.set(PUTATIVE_IMPACT, "LOW");
 		expectedMultiAllele2.set(GENE_NAME, "TTC13");
@@ -371,10 +374,10 @@ public class SnpEffRunnerTest
 		expectedMultiAllele2.set(ERRORS, "");
 
 		Entity expectedMultiAllele3 = new MapEntity(effectsEMD);
-		expectedMultiAllele3.set(VcfEffectsMetaData.ID, null);
-		expectedMultiAllele3.set(VcfEffectsMetaData.ALT, "GAAA");
-		expectedMultiAllele3.set(VcfEffectsMetaData.GENE, "TTC13");
-		expectedMultiAllele3.set(VcfEffectsMetaData.VARIANT, multiAlleleEntity1);
+		expectedMultiAllele3.set(EffectsMetaData.ID, null);
+		expectedMultiAllele3.set(EffectsMetaData.ALT, "GAAA");
+		expectedMultiAllele3.set(EffectsMetaData.GENE_NAME, "TTC13");
+		expectedMultiAllele3.set(EffectsMetaData.VARIANT, multiAlleleEntity1);
 		expectedMultiAllele3.set(ANNOTATION, "splice_region_variant&intron_variant");
 		expectedMultiAllele3.set(PUTATIVE_IMPACT, "LOW");
 		expectedMultiAllele3.set(GENE_NAME, "TTC13");
@@ -398,10 +401,10 @@ public class SnpEffRunnerTest
 		multiAlleleEntity2.set(VcfRepository.ALT, "CTT,CTTT,C");
 
 		Entity expectedMultiAllele4 = new MapEntity(effectsEMD);
-		expectedMultiAllele4.set(VcfEffectsMetaData.ID, null);
-		expectedMultiAllele4.set(VcfEffectsMetaData.ALT, "C");
-		expectedMultiAllele4.set(VcfEffectsMetaData.GENE, "UGT2B7");
-		expectedMultiAllele4.set(VcfEffectsMetaData.VARIANT, multiAlleleEntity2);
+		expectedMultiAllele4.set(EffectsMetaData.ID, null);
+		expectedMultiAllele4.set(EffectsMetaData.ALT, "C");
+		expectedMultiAllele4.set(EffectsMetaData.GENE_NAME, "UGT2B7");
+		expectedMultiAllele4.set(EffectsMetaData.VARIANT, multiAlleleEntity2);
 		expectedMultiAllele4.set(ANNOTATION, "intron_variant");
 		expectedMultiAllele4.set(PUTATIVE_IMPACT, "MODIFIER");
 		expectedMultiAllele4.set(GENE_NAME, "UGT2B7");
@@ -419,10 +422,10 @@ public class SnpEffRunnerTest
 		expectedMultiAllele4.set(ERRORS, "");
 
 		Entity expectedMultiAllele5 = new MapEntity(effectsEMD);
-		expectedMultiAllele5.set(VcfEffectsMetaData.ID, null);
-		expectedMultiAllele5.set(VcfEffectsMetaData.ALT, "CTT");
-		expectedMultiAllele5.set(VcfEffectsMetaData.GENE, "UGT2B7");
-		expectedMultiAllele5.set(VcfEffectsMetaData.VARIANT, multiAlleleEntity2);
+		expectedMultiAllele5.set(EffectsMetaData.ID, null);
+		expectedMultiAllele5.set(EffectsMetaData.ALT, "CTT");
+		expectedMultiAllele5.set(EffectsMetaData.GENE_NAME, "UGT2B7");
+		expectedMultiAllele5.set(EffectsMetaData.VARIANT, multiAlleleEntity2);
 		expectedMultiAllele5.set(ANNOTATION, "intron_variant");
 		expectedMultiAllele5.set(PUTATIVE_IMPACT, "MODIFIER");
 		expectedMultiAllele5.set(GENE_NAME, "UGT2B7");
@@ -440,10 +443,10 @@ public class SnpEffRunnerTest
 		expectedMultiAllele5.set(ERRORS, "");
 
 		Entity expectedMultiAllele6 = new MapEntity(effectsEMD);
-		expectedMultiAllele6.set(VcfEffectsMetaData.ID, null);
-		expectedMultiAllele6.set(VcfEffectsMetaData.ALT, "CTTT");
-		expectedMultiAllele6.set(VcfEffectsMetaData.GENE, "UGT2B7");
-		expectedMultiAllele6.set(VcfEffectsMetaData.VARIANT, multiAlleleEntity2);
+		expectedMultiAllele6.set(EffectsMetaData.ID, null);
+		expectedMultiAllele6.set(EffectsMetaData.ALT, "CTTT");
+		expectedMultiAllele6.set(EffectsMetaData.GENE_NAME, "UGT2B7");
+		expectedMultiAllele6.set(EffectsMetaData.VARIANT, multiAlleleEntity2);
 		expectedMultiAllele6.set(ANNOTATION, "intron_variant");
 		expectedMultiAllele6.set(PUTATIVE_IMPACT, "MODIFIER");
 		expectedMultiAllele6.set(GENE_NAME, "UGT2B7");
@@ -467,10 +470,10 @@ public class SnpEffRunnerTest
 		multiAlleleEntity3.set(VcfRepository.ALT, "A,C,T");
 
 		Entity expectedMultiAllele7 = new MapEntity(effectsEMD);
-		expectedMultiAllele7.set(VcfEffectsMetaData.ID, null);
-		expectedMultiAllele7.set(VcfEffectsMetaData.ALT, "A");
-		expectedMultiAllele7.set(VcfEffectsMetaData.GENE, "TIPIN");
-		expectedMultiAllele7.set(VcfEffectsMetaData.VARIANT, multiAlleleEntity3);
+		expectedMultiAllele7.set(EffectsMetaData.ID, null);
+		expectedMultiAllele7.set(EffectsMetaData.ALT, "A");
+		expectedMultiAllele7.set(EffectsMetaData.GENE_NAME, "TIPIN");
+		expectedMultiAllele7.set(EffectsMetaData.VARIANT, multiAlleleEntity3);
 		expectedMultiAllele7.set(ANNOTATION, "missense_variant");
 		expectedMultiAllele7.set(PUTATIVE_IMPACT, "MODERATE");
 		expectedMultiAllele7.set(GENE_NAME, "TIPIN");
@@ -488,10 +491,10 @@ public class SnpEffRunnerTest
 		expectedMultiAllele7.set(ERRORS, "");
 
 		Entity expectedMultiAllele8 = new MapEntity(effectsEMD);
-		expectedMultiAllele8.set(VcfEffectsMetaData.ID, null);
-		expectedMultiAllele8.set(VcfEffectsMetaData.ALT, "C");
-		expectedMultiAllele8.set(VcfEffectsMetaData.GENE, "TIPIN");
-		expectedMultiAllele8.set(VcfEffectsMetaData.VARIANT, multiAlleleEntity3);
+		expectedMultiAllele8.set(EffectsMetaData.ID, null);
+		expectedMultiAllele8.set(EffectsMetaData.ALT, "C");
+		expectedMultiAllele8.set(EffectsMetaData.GENE_NAME, "TIPIN");
+		expectedMultiAllele8.set(EffectsMetaData.VARIANT, multiAlleleEntity3);
 		expectedMultiAllele8.set(ANNOTATION, "missense_variant");
 		expectedMultiAllele8.set(PUTATIVE_IMPACT, "MODERATE");
 		expectedMultiAllele8.set(GENE_NAME, "TIPIN");
@@ -509,10 +512,10 @@ public class SnpEffRunnerTest
 		expectedMultiAllele8.set(ERRORS, "");
 
 		Entity expectedMultiAllele9 = new MapEntity(effectsEMD);
-		expectedMultiAllele9.set(VcfEffectsMetaData.ID, null);
-		expectedMultiAllele9.set(VcfEffectsMetaData.ALT, "T");
-		expectedMultiAllele9.set(VcfEffectsMetaData.GENE, "TIPIN");
-		expectedMultiAllele9.set(VcfEffectsMetaData.VARIANT, multiAlleleEntity3);
+		expectedMultiAllele9.set(EffectsMetaData.ID, null);
+		expectedMultiAllele9.set(EffectsMetaData.ALT, "T");
+		expectedMultiAllele9.set(EffectsMetaData.GENE_NAME, "TIPIN");
+		expectedMultiAllele9.set(EffectsMetaData.VARIANT, multiAlleleEntity3);
 		expectedMultiAllele9.set(ANNOTATION, "missense_variant");
 		expectedMultiAllele9.set(PUTATIVE_IMPACT, "MODERATE");
 		expectedMultiAllele9.set(GENE_NAME, "TIPIN");
@@ -536,10 +539,10 @@ public class SnpEffRunnerTest
 		multiAlleleEntity4.set(VcfRepository.ALT, "TG, A, G");
 
 		Entity expectedMultiAllele10 = new MapEntity(effectsEMD);
-		expectedMultiAllele10.set(VcfEffectsMetaData.ID, null);
-		expectedMultiAllele10.set(VcfEffectsMetaData.ALT, "A");
-		expectedMultiAllele10.set(VcfEffectsMetaData.GENE, "ICOSLG");
-		expectedMultiAllele10.set(VcfEffectsMetaData.VARIANT, multiAlleleEntity4);
+		expectedMultiAllele10.set(EffectsMetaData.ID, null);
+		expectedMultiAllele10.set(EffectsMetaData.ALT, "A");
+		expectedMultiAllele10.set(EffectsMetaData.GENE_NAME, "ICOSLG");
+		expectedMultiAllele10.set(EffectsMetaData.VARIANT, multiAlleleEntity4);
 		expectedMultiAllele10.set(ANNOTATION, "intron_variant");
 		expectedMultiAllele10.set(PUTATIVE_IMPACT, "MODIFIER");
 		expectedMultiAllele10.set(GENE_NAME, "ICOSLG");
@@ -557,10 +560,10 @@ public class SnpEffRunnerTest
 		expectedMultiAllele10.set(ERRORS, "");
 
 		Entity expectedMultiAllele11 = new MapEntity(effectsEMD);
-		expectedMultiAllele11.set(VcfEffectsMetaData.ID, null);
-		expectedMultiAllele11.set(VcfEffectsMetaData.ALT, "G");
-		expectedMultiAllele11.set(VcfEffectsMetaData.GENE, "ICOSLG");
-		expectedMultiAllele11.set(VcfEffectsMetaData.VARIANT, multiAlleleEntity4);
+		expectedMultiAllele11.set(EffectsMetaData.ID, null);
+		expectedMultiAllele11.set(EffectsMetaData.ALT, "G");
+		expectedMultiAllele11.set(EffectsMetaData.GENE_NAME, "ICOSLG");
+		expectedMultiAllele11.set(EffectsMetaData.VARIANT, multiAlleleEntity4);
 		expectedMultiAllele11.set(ANNOTATION, "intron_variant");
 		expectedMultiAllele11.set(PUTATIVE_IMPACT, "MODIFIER");
 		expectedMultiAllele11.set(GENE_NAME, "ICOSLG");
@@ -578,10 +581,10 @@ public class SnpEffRunnerTest
 		expectedMultiAllele11.set(ERRORS, "");
 
 		Entity expectedMultiAllele12 = new MapEntity(effectsEMD);
-		expectedMultiAllele12.set(VcfEffectsMetaData.ID, null);
-		expectedMultiAllele12.set(VcfEffectsMetaData.ALT, "TG");
-		expectedMultiAllele12.set(VcfEffectsMetaData.GENE, "ICOSLG");
-		expectedMultiAllele12.set(VcfEffectsMetaData.VARIANT, multiAlleleEntity4);
+		expectedMultiAllele12.set(EffectsMetaData.ID, null);
+		expectedMultiAllele12.set(EffectsMetaData.ALT, "TG");
+		expectedMultiAllele12.set(EffectsMetaData.GENE_NAME, "ICOSLG");
+		expectedMultiAllele12.set(EffectsMetaData.VARIANT, multiAlleleEntity4);
 		expectedMultiAllele12.set(ANNOTATION, "intron_variant");
 		expectedMultiAllele12.set(PUTATIVE_IMPACT, "MODIFIER");
 		expectedMultiAllele12.set(GENE_NAME, "ICOSLG");
@@ -612,10 +615,10 @@ public class SnpEffRunnerTest
 		multiGeneEntity1.set(VcfRepository.ALT, "T");
 
 		Entity expectedMultiGene1 = new MapEntity(effectsEMD);
-		expectedMultiGene1.set(VcfEffectsMetaData.ID, null);
-		expectedMultiGene1.set(VcfEffectsMetaData.ALT, "T");
-		expectedMultiGene1.set(VcfEffectsMetaData.GENE, "LOC101926913");
-		expectedMultiGene1.set(VcfEffectsMetaData.VARIANT, multiGeneEntity1);
+		expectedMultiGene1.set(EffectsMetaData.ID, null);
+		expectedMultiGene1.set(EffectsMetaData.ALT, "T");
+		expectedMultiGene1.set(EffectsMetaData.GENE_NAME, "LOC101926913");
+		expectedMultiGene1.set(EffectsMetaData.VARIANT, multiGeneEntity1);
 		expectedMultiGene1.set(ANNOTATION, "intron_variant");
 		expectedMultiGene1.set(PUTATIVE_IMPACT, "MODIFIER");
 		expectedMultiGene1.set(GENE_NAME, "LOC101926913");
@@ -633,10 +636,10 @@ public class SnpEffRunnerTest
 		expectedMultiGene1.set(ERRORS, "");
 
 		Entity expectedMultiGene2 = new MapEntity(effectsEMD);
-		expectedMultiGene2.set(VcfEffectsMetaData.ID, null);
-		expectedMultiGene2.set(VcfEffectsMetaData.ALT, "T");
-		expectedMultiGene2.set(VcfEffectsMetaData.GENE, "LINC01124");
-		expectedMultiGene2.set(VcfEffectsMetaData.VARIANT, multiGeneEntity1);
+		expectedMultiGene2.set(EffectsMetaData.ID, null);
+		expectedMultiGene2.set(EffectsMetaData.ALT, "T");
+		expectedMultiGene2.set(EffectsMetaData.GENE_NAME, "LINC01124");
+		expectedMultiGene2.set(EffectsMetaData.VARIANT, multiGeneEntity1);
 		expectedMultiGene2.set(ANNOTATION, "non_coding_exon_variant");
 		expectedMultiGene2.set(PUTATIVE_IMPACT, "MODIFIER");
 		expectedMultiGene2.set(GENE_NAME, "LINC01124");
@@ -660,10 +663,10 @@ public class SnpEffRunnerTest
 		multiGeneEntity2.set(VcfRepository.ALT, "A");
 
 		Entity expectedMultiGene3 = new MapEntity(effectsEMD);
-		expectedMultiGene3.set(VcfEffectsMetaData.ID, null);
-		expectedMultiGene3.set(VcfEffectsMetaData.ALT, "A");
-		expectedMultiGene3.set(VcfEffectsMetaData.GENE, "PNKD");
-		expectedMultiGene3.set(VcfEffectsMetaData.VARIANT, multiGeneEntity2);
+		expectedMultiGene3.set(EffectsMetaData.ID, null);
+		expectedMultiGene3.set(EffectsMetaData.ALT, "A");
+		expectedMultiGene3.set(EffectsMetaData.GENE_NAME, "PNKD");
+		expectedMultiGene3.set(EffectsMetaData.VARIANT, multiGeneEntity2);
 		expectedMultiGene3.set(ANNOTATION, "intron_variant");
 		expectedMultiGene3.set(PUTATIVE_IMPACT, "MODIFIER");
 		expectedMultiGene3.set(GENE_NAME, "PNKD");
@@ -681,10 +684,10 @@ public class SnpEffRunnerTest
 		expectedMultiGene3.set(ERRORS, "");
 
 		Entity expectedMultiGene4 = new MapEntity(effectsEMD);
-		expectedMultiGene4.set(VcfEffectsMetaData.ID, null);
-		expectedMultiGene4.set(VcfEffectsMetaData.ALT, "A");
-		expectedMultiGene4.set(VcfEffectsMetaData.GENE, "TMBIM1");
-		expectedMultiGene4.set(VcfEffectsMetaData.VARIANT, multiGeneEntity2);
+		expectedMultiGene4.set(EffectsMetaData.ID, null);
+		expectedMultiGene4.set(EffectsMetaData.ALT, "A");
+		expectedMultiGene4.set(EffectsMetaData.GENE_NAME, "TMBIM1");
+		expectedMultiGene4.set(EffectsMetaData.VARIANT, multiGeneEntity2);
 		expectedMultiGene4.set(ANNOTATION, "intron_variant");
 		expectedMultiGene4.set(PUTATIVE_IMPACT, "MODIFIER");
 		expectedMultiGene4.set(GENE_NAME, "TMBIM1");
