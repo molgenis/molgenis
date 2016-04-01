@@ -6,9 +6,11 @@ import org.mockito.Mock;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.annotation.utils.JarRunner;
 import org.molgenis.data.annotation.utils.JarRunnerImpl;
+import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.EffectsMetaData;
@@ -299,6 +301,19 @@ public class SnpEffRunnerTest
 				e.printStackTrace();
 			}
 		}
+	}
+
+	@Test
+	public void testGetOutputMetaData()
+	{
+		DefaultEntityMetaData sourceEMD = new DefaultEntityMetaData("source");
+		sourceEMD.setPackage(new PackageImpl("package"));
+		sourceEMD.setBackend("TestBackend");
+
+		EntityMetaData outputEMD = snpEffRunner.getOutputMetaData(sourceEMD);
+
+		assertEquals(outputEMD.getBackend(), "TestBackend");
+		assertEquals(outputEMD.getName(), "package_source_EFFECTS");
 	}
 
 }

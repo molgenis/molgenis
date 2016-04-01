@@ -79,7 +79,7 @@ public class VcfUtils
 		return id;
 	}
 
-	static String getIdFromInfoField(String line)
+	public static String getIdFromInfoField(String line)
 	{
 		int idStartIndex = line.indexOf("ID=") + 3;
 		int idEndIndex = line.indexOf(",");
@@ -91,6 +91,7 @@ public class VcfUtils
 		List<AttributeMetaData> result = new ArrayList<>();
 		for (AttributeMetaData attributeMetaData : outputAttrs)
 		{
+			// TODO: test
 			if (attributeMetaData.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
 			{
 				result.addAll(getAtomicAttributesFromList(attributeMetaData.getAttributeParts()));
@@ -107,14 +108,14 @@ public class VcfUtils
 	{
 		Map<String, AttributeMetaData> attributeMap = new LinkedHashMap<>();
 		List<AttributeMetaData> attributes = getAtomicAttributesFromList(outputAttrs);
-		for (AttributeMetaData attr : attributes)
+		for (AttributeMetaData attributeMetaData : attributes)
 		{
-			attributeMap.put(attr.getName(), attr);
+			attributeMap.put(attributeMetaData.getName(), attributeMetaData);
 		}
 		return attributeMap;
 	}
 
-	static String toVcfDataType(MolgenisFieldTypes.FieldTypeEnum dataType)
+	public static String toVcfDataType(MolgenisFieldTypes.FieldTypeEnum dataType)
 	{
 		switch (dataType)
 		{
@@ -140,100 +141,9 @@ public class VcfUtils
 				return VcfMetaInfo.Type.STRING.toString();
 			case COMPOUND:
 			case FILE:
-				throw new RuntimeException("invalid vcf data type " + dataType);
 			default:
 				throw new RuntimeException("unsupported vcf data type " + dataType);
 		}
-	}
-
-	static Map<String, AttributeMetaData> attributesToMap(List<AttributeMetaData> attributeMetaDataList)
-	{
-		Map<String, AttributeMetaData> attributeMap = new HashMap<>();
-		for (AttributeMetaData attributeMetaData : attributeMetaDataList)
-		{
-			attributeMap.put(attributeMetaData.getName(), attributeMetaData);
-		}
-		return attributeMap;
-
-	}
-
-	/**
-	 *
-	 * Get pedigree data from VCF Now only support child, father, mother No fancy data structure either Output:
-	 * result.put(childID, Arrays.asList(new String[]{motherID, fatherID}));
-	 *
-	 * @param inputVcfFile
-	 * @return
-	 * @throws FileNotFoundException
-	 */
-	public static HashMap<String, Trio> getPedigree(File inputVcfFile) throws FileNotFoundException
-	{
-		HashMap<String, Trio> result = new HashMap<String, Trio>();
-
-		Scanner inputVcfFileScanner = new Scanner(inputVcfFile, "UTF-8");
-		String line = inputVcfFileScanner.nextLine();
-
-		// if first line does not start with ##, we don't trust this file as VCF
-		if (line.startsWith(VcfRepository.PREFIX))
-		{
-			while (inputVcfFileScanner.hasNextLine())
-			{
-				// detect pedigree line
-				// expecting:
-				// ##PEDIGREE=<Child=100400,Mother=100402,Father=100401>
-				if (line.startsWith("##PEDIGREE"))
-				{
-					System.out.println("Pedigree data line: " + line);
-					String childID = null;
-					String motherID = null;
-					String fatherID = null;
-
-					String lineStripped = line.replace("##PEDIGREE=<", "").replace(">", "");
-					String[] lineSplit = lineStripped.split(",", -1);
-					for (String element : lineSplit)
-					{
-						if (element.startsWith("Child"))
-						{
-							childID = element.replace("Child=", "");
-						}
-						else if (element.startsWith("Mother"))
-						{
-							motherID = element.replace("Mother=", "");
-						}
-						else if (element.startsWith("Father"))
-						{
-							fatherID = element.replace("Father=", "");
-						}
-						else
-						{
-							inputVcfFileScanner.close();
-							throw new MolgenisDataException(
-									"Expected Child, Mother or Father, but found: " + element + " in line " + line);
-						}
-					}
-
-					if (childID != null && motherID != null && fatherID != null)
-					{
-						// good
-						result.put(childID, new Trio(new Sample(childID), new Sample(motherID), new Sample(fatherID)));
-					}
-					else
-					{
-						inputVcfFileScanner.close();
-						throw new MolgenisDataException("Missing Child, Mother or Father ID in line " + line);
-					}
-				}
-
-				line = inputVcfFileScanner.nextLine();
-				if (!line.startsWith(VcfRepository.PREFIX))
-				{
-					break;
-				}
-			}
-		}
-
-		inputVcfFileScanner.close();
-		return result;
 	}
 
 	public static Iterator<Entity> reverseXrefMrefRelation(Iterator<Entity> annotatedRecords)
@@ -284,7 +194,8 @@ public class VcfUtils
 					boolean isEmpty = true;
 					for (AttributeMetaData attr : effectEMD.getAtomicAttributes())
 					{
-						if (attr.getName().equals("id") || attr.getName().equals(VcfWriterUtils.VARIANT))
+						if (attr.getName().equals(effectEMD.getIdAttribute().getName())
+								|| attr.getName().equals(VcfWriterUtils.VARIANT))
 						{
 							continue;
 						}
@@ -309,7 +220,7 @@ public class VcfUtils
 				while (effects.hasNext())
 				{
 					peekedId = effects.peek().getEntity(VcfWriterUtils.VARIANT).getIdValue().toString();
-					if (variant == null || variant.getIdValue().toString() == peekedId)
+					if (variant == null || variant.getIdValue().toString().equals(peekedId))
 					{
 						Entity effect = effects.next();
 						variant = effect.getEntity(VcfWriterUtils.VARIANT);
@@ -326,19 +237,38 @@ public class VcfUtils
 		};
 	}
 
-	public static List<Entity> parseData(EntityMetaData entityMetaData, String attributeName,
+	//TODO: test
+	public static List<Entity> createEntityStructureForVcf(EntityMetaData entityMetaData, String attributeName,
 			Stream<Entity> inputStream)
 	{
-		return parseData(entityMetaData, attributeName, inputStream, Collections.emptyList());
+		return createEntityStructureForVcf(entityMetaData, attributeName, inputStream, Collections.emptyList());
 	}
 
-	public static List<Entity> parseData(EntityMetaData entityMetaData, String attributeName,
+	//TODO: test
+	public static List<Entity> createEntityStructureForVcf(EntityMetaData entityMetaData, String attributeName,
 			Stream<Entity> inputStream, List<AttributeMetaData> annotatorAttributes)
 	{
 		AttributeMetaData attributeToParse = entityMetaData.getAttribute(attributeName);
 		HashMap<String, Map<Integer, AttributeMetaData>> metadataMap = parseDescription(
 				attributeToParse.getDescription(), annotatorAttributes);
+		DefaultEntityMetaData xrefMetaData = getXrefEntityMetaData(metadataMap);
 
+		List<Entity> results = new ArrayList<>();
+		for (Entity inputEntity : inputStream.collect(Collectors.toList()))
+		{
+			DefaultEntityMetaData newEntityMetadata = removeRefFieldFromInfoMetadata(attributeToParse, inputEntity);
+			Entity originalEntity = new MapEntity(inputEntity, newEntityMetadata);
+
+			results.addAll(parseValue(xrefMetaData, metadataMap.get(xrefMetaData.getName()),
+					inputEntity.getString(attributeToParse.getName()), originalEntity));
+		}
+		return results;
+	}
+
+	private static DefaultEntityMetaData getXrefEntityMetaData(
+			HashMap<String, Map<Integer, AttributeMetaData>> metadataMap)
+	{
+		// FIXME: this does not seem the ideal way to get the name right?
 		String entityName = metadataMap.keySet().iterator().next();
 		DefaultEntityMetaData xrefMetaData = new DefaultEntityMetaData(entityName);
 		xrefMetaData.addAttributeMetaData(new DefaultAttributeMetaData("identifier").setAuto(true).setVisible(false),
@@ -347,16 +277,7 @@ public class VcfUtils
 				com.google.common.collect.Lists.newArrayList(metadataMap.get(entityName).values()));
 		xrefMetaData
 				.addAttributeMetaData(new DefaultAttributeMetaData("Variant", MolgenisFieldTypes.FieldTypeEnum.MREF));
-		List<Entity> results = new ArrayList<>();
-		for (Entity inputEntity : inputStream.collect(Collectors.toList()))
-		{
-			DefaultEntityMetaData newEntityMetadata = removeRefFieldFromInfoMetadata(attributeToParse, inputEntity);
-			Entity originalEntity = new MapEntity(inputEntity, newEntityMetadata);
-
-			results.addAll(parseValue(xrefMetaData, metadataMap.get(entityName),
-					inputEntity.getString(attributeToParse.getName()), originalEntity));
-		}
-		return results;
+		return xrefMetaData;
 	}
 
 	private static DefaultEntityMetaData removeRefFieldFromInfoMetadata(AttributeMetaData attributeToParse,
@@ -381,7 +302,7 @@ public class VcfUtils
 
 		String[] attributeStrings = value.split("\\|");
 		Map<Integer, AttributeMetaData> attributeMap = new HashMap<>();
-		Map<String, AttributeMetaData> annotatorAttributeMap = attributesToMap(annotatorAttributes);
+		Map<String, AttributeMetaData> annotatorAttributeMap = getAttributesMapFromList(annotatorAttributes);
 		for (int i = 0; i < attributeStrings.length; i++)
 		{
 			String attribute = attributeStrings[i];
@@ -419,6 +340,84 @@ public class VcfUtils
 			}
 			result.add(singleResult);
 		}
+		return result;
+	}
+
+	/**
+	 *
+	 * Get pedigree data from VCF Now only support child, father, mother No fancy data structure either Output:
+	 * result.put(childID, Arrays.asList(new String[]{motherID, fatherID}));
+	 *
+	 * @param inputVcfFile
+	 * @return
+	 * @throws FileNotFoundException
+	 */
+	public static HashMap<String, Trio> getPedigree(File inputVcfFile) throws FileNotFoundException
+	{
+		HashMap<String, Trio> result = new HashMap<>();
+
+		Scanner inputVcfFileScanner = new Scanner(inputVcfFile, "UTF-8");
+		String line = inputVcfFileScanner.nextLine();
+
+		// if first line does not start with ##, we don't trust this file as VCF
+		if (line.startsWith(VcfRepository.PREFIX))
+		{
+			while (inputVcfFileScanner.hasNextLine())
+			{
+				// detect pedigree line
+				// expecting:
+				// ##PEDIGREE=<Child=100400,Mother=100402,Father=100401>
+				if (line.startsWith("##PEDIGREE"))
+				{
+					System.out.println("Pedigree data line: " + line);
+					String childID = null;
+					String motherID = null;
+					String fatherID = null;
+
+					String lineStripped = line.replace("##PEDIGREE=<", "").replace(">", "");
+					String[] lineSplit = lineStripped.split(",", -1);
+					for (String element : lineSplit)
+					{
+						if (element.startsWith("Child"))
+						{
+							childID = element.replace("Child=", "");
+						}
+						else if (element.startsWith("Mother"))
+						{
+							motherID = element.replace("Mother=", "");
+						}
+						else if (element.startsWith("Father"))
+						{
+							fatherID = element.replace("Father=", "");
+						}
+						else
+						{
+							inputVcfFileScanner.close();
+							throw new MolgenisDataException(
+									"Expected Child, Mother or Father, but found: " + element + " in line " + line);
+						}
+					}
+
+					if (childID != null && motherID != null && fatherID != null)
+					{
+						result.put(childID, new Trio(new Sample(childID), new Sample(motherID), new Sample(fatherID)));
+					}
+					else
+					{
+						inputVcfFileScanner.close();
+						throw new MolgenisDataException("Missing Child, Mother or Father ID in line " + line);
+					}
+				}
+
+				line = inputVcfFileScanner.nextLine();
+				if (!line.startsWith(VcfRepository.PREFIX))
+				{
+					break;
+				}
+			}
+		}
+
+		inputVcfFileScanner.close();
 		return result;
 	}
 }

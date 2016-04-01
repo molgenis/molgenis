@@ -236,12 +236,19 @@ public class CmdLineAnnotator
 				List<String> outputAttributeNames = VcfUtils.getAtomicAttributesFromList(annotator.getOutputMetaData())
 						.stream().map((attr) -> attr.getName()).collect(Collectors.toList());
 
+				List<String> inputAttributeNames = VcfUtils.getAtomicAttributesFromList(vcfRepo.getEntityMetaData().getAtomicAttributes())
+						.stream().map((attr) -> attr.getName()).collect(Collectors.toList());
+
 				boolean stop = false;
 				for (Object attrName : attributesToInclude)
 				{
 					if (!outputAttributeNames.contains(attrName))
 					{
 						System.out.println("Unknown output attribute '" + attrName + "'");
+						stop = true;
+					}
+					else if(inputAttributeNames.contains(attrName)){
+						System.out.println("The output attribute '" + attrName + "' is present in the inputfile, but is deselected in the current run, this is not supported");
 						stop = true;
 					}
 				}
@@ -285,7 +292,7 @@ public class CmdLineAnnotator
 			Iterable<Entity> entitiesToAnnotate;
 			if (annotator instanceof EffectsAnnotator)
 			{
-				entitiesToAnnotate = VcfUtils.parseData(vcfRepo.getEntityMetaData(), EFFECT, vcfRepo.stream());
+				entitiesToAnnotate = VcfUtils.createEntityStructureForVcf(vcfRepo.getEntityMetaData(), EFFECT, vcfRepo.stream());
 			}
 			else
 			{

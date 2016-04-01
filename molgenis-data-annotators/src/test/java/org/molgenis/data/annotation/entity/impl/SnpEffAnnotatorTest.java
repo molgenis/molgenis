@@ -41,17 +41,4 @@ public class SnpEffAnnotatorTest
 		when(dataService.hasRepository("source_EFFECTS")).thenReturn(true);
 		assertEquals(annotator.canAnnotate(sourceEMD), "already annotated with SnpEff");
 	}
-
-	@Test
-	public void testGetOutputMetaData()
-	{
-		DefaultEntityMetaData sourceEMD = new DefaultEntityMetaData("source");
-		sourceEMD.setPackage(new PackageImpl("package"));
-		sourceEMD.setBackend("TestBackend");
-
-		EntityMetaData outputEMD = annotator.getOutputMetaData(sourceEMD);
-
-		assertEquals(outputEMD.getBackend(), "TestBackend");
-		assertEquals(outputEMD.getName(), "package_source_EFFECTS");
-	}
 }
