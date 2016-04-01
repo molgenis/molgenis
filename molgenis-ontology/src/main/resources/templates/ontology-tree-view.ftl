@@ -1,7 +1,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=["bootstrap.fileupload.min.css", "ui.fancytree.min.css", "biobank-connect.css"]>
-<#assign js=["bootstrap-fileupload.min.js", "jquery.fancytree.min.js", "common-component.js", "ontology.tree.plugin.js", "ontology-tree-view.js"]>
+<#assign css=["jasny-bootstrap.min.css", "ui.fancytree.min.css", "biobank-connect.css"]>
+<#assign js=["jasny-bootstrap.min.js", "jquery.fancytree.min.js", "common-component.js", "ontology.tree.plugin.js", "ontology-tree-view.js"]>
 <@header css js/>
 <form class="form-horizontal" enctype="multipart/form-data">
 	<div class="row">

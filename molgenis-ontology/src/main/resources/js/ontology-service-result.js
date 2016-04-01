@@ -286,7 +286,7 @@
 								if(key === 'validated') updatedMappedEntity[key] = true;
 								else if(key === 'inputTerm') updatedMappedEntity[key] = val.Identifier;
 								else if(key === 'matchTerm') updatedMappedEntity.matchTerm = row.data('ontologyTerm').ontologyTermIRI;
-								else if(key === 'score') updatedMappedEntity.score = row.data('ontologyTerm').score;
+								else if(key === 'score') updatedMappedEntity.score = row.data('ontologyTerm').Score;
 								else if(key !== 'identifier') updatedMappedEntity[key] = val;
 							});
 							restApi.update(href, updatedMappedEntity, createCallBackFunction(), true);
@@ -306,7 +306,7 @@
 	}
 	
 	function getMappingEntity(inputTermIdentifier, sortaJobExecutionId, callback){
-		var mappedEntity = restApi.getAsync('/api/v1/'+sortaJobExecutionId, {
+		restApi.getAsync('/api/v1/'+sortaJobExecutionId, {
 			'q' : [{
 				'field' : 'inputTerm',
 				'operator' : 'EQUALS',
