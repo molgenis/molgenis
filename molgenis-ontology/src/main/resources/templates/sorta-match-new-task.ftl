@@ -27,19 +27,19 @@
 </div>
 <div class="row">
 	<div class="col-md-offset-2 col-md-8">
-		<div class="fileupload fileupload-new" data-provides="fileupload">
+		<div class="fileinput fileinput-new" data-provides="fileinput">
 			<div class="group-append">
 				<div class="uneditable-input">
-					<i class="icon-file fileupload-exists"></i>
-					<span class="fileupload-preview"></span>
+					<i class="icon-file fileinput-exists"></i>
+					<span class="fileinput-preview"></span>
 				</div>
 				<span class="btn btn-file btn-info">
-					<span class="fileupload-new">Select file</span>
+					<span class="fileinput-new">Select file</span>
 					
-					<span class="fileupload-exists">Change</span>
+					<span class="fileinput-exists">Change</span>
 					<input type="file" id="file" name="file" required/>
 				</span>
-				<a href="#" class="btn btn-danger fileupload-exists" data-dismiss="fileupload">Remove</a>
+				<a href="#" class="btn btn-danger fileinput-exists" data-dismiss="fileinput">Remove</a>
 				<button id="upload-button" type="button" class="btn btn-primary">Upload</button>
 			</div>
 		</div>
