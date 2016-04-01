@@ -335,8 +335,7 @@ public class SortaServiceController extends MolgenisPluginController
 				query.offset(start).pageSize(num).sort(new Sort().on(VALIDATED, DESC).on(SCORE, DESC)));
 		findAll.forEach(mappingEntity -> {
 			Map<String, Object> outputEntity = new HashMap<String, Object>();
-			outputEntity.put("inputTerm",
-					getEntityAsMap(mappingEntity.getEntity(MatchingTaskContentEntityMetaData.INPUT_TERM)));
+			outputEntity.put("inputTerm", getEntityAsMap(mappingEntity.getEntity(INPUT_TERM)));
 			outputEntity.put("matchedTerm", getEntityAsMap(mappingEntity));
 			Object matchedTerm = mappingEntity.get(MATCHED_TERM);
 			if (matchedTerm != null)

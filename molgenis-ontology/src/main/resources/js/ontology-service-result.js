@@ -228,10 +228,10 @@
 		//Add a unknownButton for users to choose 'Unknown' for the input term
 		var unknownButton = $('<button type="button" class="btn btn-danger">No match</button>').
 			css({'margin-bottom':'10px','margin-right':'10px','float':'right'}).click(function(){
-			getMappingEntity(inputEntity.identifier, ontologyServiceRequest.sortaJobExecutionId, function(data){
+			getMappingEntity(inputEntity.Identifier, ontologyServiceRequest.sortaJobExecutionId, function(data){
 				if(data.items.length > 0){
 					var mappedEntity = data.items[0];
-					var href = '/api/v1/'+ontologyServiceRequest.sortaJobExecutionId+'/' + mappedEntity.identifier;
+					var href = '/api/v1/' + ontologyServiceRequest.sortaJobExecutionId + '/' + mappedEntity.identifier;
 					var updatedMappedEntity = {};
 					$.map(mappedEntity, function(val, key){
 						if(key !== 'identifier') updatedMappedEntity[key] = val;
