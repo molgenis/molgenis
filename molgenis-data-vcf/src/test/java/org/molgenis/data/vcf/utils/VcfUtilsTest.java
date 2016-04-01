@@ -5,11 +5,13 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.vcf.meta.VcfMetaInfo;
+import org.molgenis.data.vcf.datastructures.Sample;
+import org.molgenis.data.vcf.datastructures.Trio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeMethod;
@@ -18,9 +20,10 @@ import org.testng.annotations.Test;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Scanner;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -337,4 +340,24 @@ public class VcfUtilsTest {
         VcfUtils.createEntityStructureForVcf(new DefaultEntityMetaData(""),"", Stream.of(new MapEntity("")));
         //TODO what to test
     }
+
+	@Test
+	public void vcfPedigreeReaderTest() throws IOException, MolgenisInvalidFormatException
+	{
+		String testHeader = "##PEDIGREE=<Child=27991,Mother=27992,Father=27993>\n"
+				+ "##PEDIGREE=<Child=27939,Mother=27940,Father=27941>\n"
+				+ "##PEDIGREE=<Child=30982,Mother=30983,Father=30984>";
+		
+		Scanner scanner = new Scanner(testHeader);
+		
+		HashMap<String, Trio> actualPedigree = VcfUtils.getPedigree(scanner);
+		
+		HashMap<String, Trio> expectedPedigree = new HashMap<String, Trio>();
+		expectedPedigree.put("27991", new Trio(new Sample("27991"), new Sample("27992"), new Sample("27993")));
+		expectedPedigree.put("27939", new Trio(new Sample("27939"), new Sample("27940"), new Sample("27941")));
+		expectedPedigree.put("30982", new Trio(new Sample("30982"), new Sample("30983"), new Sample("30984")));
+		
+		assertEquals(actualPedigree, expectedPedigree);
+		
+	}
 }
