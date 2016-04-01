@@ -269,7 +269,8 @@ public class CmdLineAnnotator
 				outputMetaData = annotator.getOutputMetaData();
 			}
 
-			VcfWriterUtils.writeVcfHeader(inputVcfFile, outputVCFWriter, VcfUtils.getAtomicAttributesFromList(outputMetaData), attributesToInclude);
+			VcfWriterUtils.writeVcfHeader(inputVcfFile, outputVCFWriter,
+					VcfUtils.getAtomicAttributesFromList(outputMetaData), attributesToInclude);
 			System.out.println("Now starting to process the data.");
 
 			DefaultEntityMetaData emd = (DefaultEntityMetaData) vcfRepo.getEntityMetaData();
@@ -300,7 +301,8 @@ public class CmdLineAnnotator
 			while (annotatedRecords.hasNext())
 			{
 				Entity annotatedRecord = annotatedRecords.next();
-				VcfWriterUtils.writeToVcf(annotatedRecord, VcfUtils.getAtomicAttributesFromList(outputMetaData), attributesToInclude, outputVCFWriter);
+				VcfWriterUtils.writeToVcf(annotatedRecord, VcfUtils.getAtomicAttributesFromList(outputMetaData),
+						attributesToInclude, outputVCFWriter);
 				outputVCFWriter.newLine();
 			}
 

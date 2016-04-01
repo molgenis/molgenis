@@ -125,7 +125,7 @@ public class VariantClassificationAnnotator
 			protected void processQueryResults(Entity inputEntity, Iterable<Entity> annotationSourceEntities,
 					Entity resultEntity)
 			{
-				String alt = inputEntity.getString(EffectsMetaData.ANNOTATION);
+				String alt = inputEntity.getString(EffectsMetaData.ALT);
 				if (alt.contains(","))
 				{
 					throw new MolgenisDataException(

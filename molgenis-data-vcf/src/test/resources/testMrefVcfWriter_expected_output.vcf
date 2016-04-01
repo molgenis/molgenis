@@ -1,5 +1,7 @@
 ##fileformat=VCFv4.1
 ##FILTER=<ID=PASS,Description="All filters passed">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##source_20150914.1=vcf-subset(r940) -c 7767853 ALL.chr7.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz
 ##INFO=<ID=CIEND,Number=2,Type=Integer,Description="Confidence interval around END for imprecise variants">
 ##INFO=<ID=CIPOS,Number=2,Type=Integer,Description="Confidence interval around POS for imprecise variants">
 ##INFO=<ID=CS,Number=1,Type=String,Description="Source call set.">
@@ -13,7 +15,6 @@
 ##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
 ##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
 ##INFO=<ID=TSD,Number=1,Type=String,Description="Precise Target Site Duplication for bases, if unknown, value will be NULL">
-##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
 ##INFO=<ID=AC,Number=A,Type=Integer,Description="Total number of alternate alleles in called genotypes">
 ##INFO=<ID=AF,Number=A,Type=Float,Description="Estimated allele frequency in the range (0,1)">
 ##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of samples with data">
@@ -25,7 +26,6 @@
 ##INFO=<ID=SAS_AF,Number=A,Type=Float,Description="Allele frequency in the SAS populations calculated from AC and AN, in the range (0,1)">
 ##INFO=<ID=DP,Number=1,Type=Integer,Description="Total read depth">
 ##INFO=<ID=AA,Number=1,Type=String,Description="Ancestral Allele. Format: AA|REF|ALT|IndelType. AA: Ancestral allele, REF:Reference Allele, ALT:Alternate Allele, IndelType:Type of Indel (REF, ALT and IndelType are only defined for indels)">
-##source_20150914.1=vcf-subset(r940) -c 7767853 ALL.chr7.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz
 ##INFO=<ID=#CHROM,Number=.,Type=String,Description="Description not provided">
 ##INFO=<ID=POS,Number=.,Type=Float,Description="Description not provided">
 ##INFO=<ID=ID,Number=.,Type=String,Description="Description not provided">

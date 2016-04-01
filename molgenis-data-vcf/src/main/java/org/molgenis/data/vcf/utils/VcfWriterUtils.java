@@ -329,7 +329,7 @@ public class VcfWriterUtils
 
 	/**
 	 * Parses the info field from a MOLGENIS entity and writes it into VCF INFO column format
-	 * 
+	 *
 	 * @param vcfEntity
 	 * @param writer
 	 * @param annotatorAttributes
@@ -386,7 +386,7 @@ public class VcfWriterUtils
 
 	/**
 	 * Adds sample entities to a vcf
-	 * 
+	 *
 	 * @param sampleEntities
 	 * @param writer
 	 * @throws IOException
@@ -522,8 +522,8 @@ public class VcfWriterUtils
 				{
 					description = currentInfoField.replace("'\">", SPACE_PIPE_SEPERATOR);
 				}
-				description = description + (refAttributesToString(atomicAttributes, attributesToInclude)
-						.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " "));
+				description = description + (refAttributesToString(atomicAttributes, attributesToInclude).replace("\\", "\\\\")
+						.replace("\"", "\\\"").replace("\n", " "));
 
 				description = description + "'";
 				((DefaultAttributeMetaData) infoAttributeMetaData).setDescription(description);

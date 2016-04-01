@@ -1,5 +1,33 @@
 package org.molgenis.data.annotation.entity.impl;
 
+import com.google.common.collect.Iterators;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.IdGenerator;
+import org.molgenis.data.annotation.utils.JarRunner;
+import org.molgenis.data.annotation.utils.JarRunnerImpl;
+import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.EffectsMetaData;
+import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.UuidGenerator;
+import org.molgenis.data.vcf.VcfRepository;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
@@ -20,35 +48,6 @@ import static org.molgenis.data.support.EffectsMetaData.RANK_TOTAL;
 import static org.molgenis.data.support.EffectsMetaData.TRANSCRIPT_BIOTYPE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.IdGenerator;
-import org.molgenis.data.annotation.utils.JarRunner;
-import org.molgenis.data.annotation.utils.JarRunnerImpl;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.support.UuidGenerator;
-import org.molgenis.data.support.EffectsMetaData;
-import org.molgenis.data.vcf.VcfRepository;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import com.google.common.collect.Iterators;
 
 public class SnpEffRunnerTest
 {

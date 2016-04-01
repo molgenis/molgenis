@@ -78,7 +78,7 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 		variant_entity.set(ExacAnnotator.EXAC_AF,"2,3");
 
 		Entity effect_entity = new MapEntity(emd);
-		effect_entity.set(VcfRepository.ALT, "A");
+		effect_entity.set(EffectsMetaData.ALT, "A");
 		effect_entity.set(EffectsMetaData.PUTATIVE_IMPACT, "HIGH");
 		effect_entity.set(VariantClassificationAnnotator.VARIANT_ENTITY, variant_entity);
 
@@ -108,7 +108,7 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 		variant_entity.set(ExacAnnotator.EXAC_AF,"0.00001,0.00001");
 
 		Entity effect_entity = new MapEntity(emd);
-		effect_entity.set(VcfRepository.ALT, "A");
+		effect_entity.set(EffectsMetaData.ALT, "A");
 		effect_entity.set(EffectsMetaData.PUTATIVE_IMPACT, "HIGH");
 		effect_entity.set(VariantClassificationAnnotator.VARIANT_ENTITY, variant_entity);
 
@@ -138,7 +138,7 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 		variant_entity.set(ExacAnnotator.EXAC_AF,"0.00001,0.00001");
 
 		Entity effect_entity = new MapEntity(emd);
-		effect_entity.set(VcfRepository.ALT, "A");
+		effect_entity.set(EffectsMetaData.ALT, "A");
 		effect_entity.set(EffectsMetaData.PUTATIVE_IMPACT, "HIGH");
 		effect_entity.set(VariantClassificationAnnotator.VARIANT_ENTITY, variant_entity);
 
@@ -168,7 +168,7 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 		variant_entity.set(ExacAnnotator.EXAC_AF,"0.00001,0.00001");
 
 		Entity effect_entity = new MapEntity(emd);
-		effect_entity.set(VcfRepository.ALT, "A");
+		effect_entity.set(EffectsMetaData.ALT, "A");
 		effect_entity.set(EffectsMetaData.PUTATIVE_IMPACT, "HIGH");
 		effect_entity.set(EffectsMetaData.GENE_NAME, "TFR2");
 		effect_entity.set(VariantClassificationAnnotator.VARIANT_ENTITY, variant_entity);
@@ -198,7 +198,7 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 		variant_entity.set(ExacAnnotator.EXAC_AF,"0.00001,0.00001");
 
 		Entity effect_entity = new MapEntity(emd);
-		effect_entity.set(VcfRepository.ALT, "T");
+		effect_entity.set(EffectsMetaData.ALT, "T");
 		effect_entity.set(EffectsMetaData.PUTATIVE_IMPACT, "HIGH");
 		effect_entity.set(EffectsMetaData.GENE_NAME, "TFR2");
 		effect_entity.set(VariantClassificationAnnotator.VARIANT_ENTITY, variant_entity);
