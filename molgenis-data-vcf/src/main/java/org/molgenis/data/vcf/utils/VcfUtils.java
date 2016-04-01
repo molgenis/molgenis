@@ -90,7 +90,6 @@ public class VcfUtils
 		List<AttributeMetaData> result = new ArrayList<>();
 		for (AttributeMetaData attributeMetaData : outputAttrs)
 		{
-			// TODO: test
 			if (attributeMetaData.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
 			{
 				result.addAll(getAtomicAttributesFromList(attributeMetaData.getAttributeParts()));
@@ -236,21 +235,23 @@ public class VcfUtils
 		};
 	}
 
-	//TODO: test
 	public static List<Entity> createEntityStructureForVcf(EntityMetaData entityMetaData, String attributeName,
 			Stream<Entity> inputStream)
 	{
 		return createEntityStructureForVcf(entityMetaData, attributeName, inputStream, Collections.emptyList());
 	}
 
-	//TODO: test
 	public static List<Entity> createEntityStructureForVcf(EntityMetaData entityMetaData, String attributeName,
 			Stream<Entity> inputStream, List<AttributeMetaData> annotatorAttributes)
 	{
 		AttributeMetaData attributeToParse = entityMetaData.getAttribute(attributeName);
-		HashMap<String, Map<Integer, AttributeMetaData>> metadataMap = parseDescription(
-				attributeToParse.getDescription(), annotatorAttributes);
-		DefaultEntityMetaData xrefMetaData = getXrefEntityMetaData(metadataMap);
+		String description = attributeToParse.getDescription();
+		String[] step1 = description.split(":");
+		String entityName = org.apache.commons.lang.StringUtils.deleteWhitespace(step1[0]);
+		String value = step1[1].replaceAll("^\\s'|'$", "");
+
+		Map<Integer, AttributeMetaData> metadataMap = parseDescription(value, annotatorAttributes);
+		DefaultEntityMetaData xrefMetaData = getXrefEntityMetaData(metadataMap, entityName);
 
 		List<Entity> results = new ArrayList<>();
 		for (Entity inputEntity : inputStream.collect(Collectors.toList()))
@@ -258,22 +259,20 @@ public class VcfUtils
 			DefaultEntityMetaData newEntityMetadata = removeRefFieldFromInfoMetadata(attributeToParse, inputEntity);
 			Entity originalEntity = new MapEntity(inputEntity, newEntityMetadata);
 
-			results.addAll(parseValue(xrefMetaData, metadataMap.get(xrefMetaData.getName()),
+			results.addAll(parseValue(xrefMetaData, metadataMap,
 					inputEntity.getString(attributeToParse.getName()), originalEntity));
 		}
 		return results;
 	}
 
 	private static DefaultEntityMetaData getXrefEntityMetaData(
-			HashMap<String, Map<Integer, AttributeMetaData>> metadataMap)
+			Map<Integer, AttributeMetaData> metadataMap, String entityName)
 	{
-		// FIXME: this does not seem the ideal way to get the name right?
-		String entityName = metadataMap.keySet().iterator().next();
 		DefaultEntityMetaData xrefMetaData = new DefaultEntityMetaData(entityName);
 		xrefMetaData.addAttributeMetaData(new DefaultAttributeMetaData("identifier").setAuto(true).setVisible(false),
 				EntityMetaData.AttributeRole.ROLE_ID);
 		xrefMetaData.addAllAttributeMetaData(
-				com.google.common.collect.Lists.newArrayList(metadataMap.get(entityName).values()));
+				com.google.common.collect.Lists.newArrayList(metadataMap.values()));
 		xrefMetaData
 				.addAttributeMetaData(new DefaultAttributeMetaData("Variant", MolgenisFieldTypes.FieldTypeEnum.MREF));
 		return xrefMetaData;
@@ -292,12 +291,10 @@ public class VcfUtils
 		return newMeta;
 	}
 
-	private static HashMap<String, Map<Integer, AttributeMetaData>> parseDescription(String description,
+	private static Map<Integer, AttributeMetaData> parseDescription(String description,
 			List<AttributeMetaData> annotatorAttributes)
 	{
-		String[] step1 = description.split(":");
-		String entityName = org.apache.commons.lang.StringUtils.deleteWhitespace(step1[0]);
-		String value = step1[1].replaceAll("^\\s'|'$", "");
+		String value = description.replaceAll("^\\s'|'$", "");
 
 		String[] attributeStrings = value.split("\\|");
 		Map<Integer, AttributeMetaData> attributeMap = new HashMap<>();
@@ -312,10 +309,7 @@ public class VcfUtils
 					org.apache.commons.lang.StringUtils.deleteWhitespace(attribute), type).setLabel(attribute);
 			attributeMap.put(i, attr);
 		}
-
-		HashMap<String, Map<Integer, AttributeMetaData>> result = new HashMap<>();
-		result.put(entityName, attributeMap);
-		return result;
+		return attributeMap;
 	}
 
 	private static List<Entity> parseValue(EntityMetaData metadata, Map<Integer, AttributeMetaData> attributesMap,
@@ -359,7 +353,7 @@ public class VcfUtils
 		{
 			String line = inputVcfFileScanner.nextLine();
 
-			//quit when we don't see header lines anymore
+			// quit when we don't see header lines anymore
 			if (!line.startsWith(VcfRepository.PREFIX))
 			{
 				break;

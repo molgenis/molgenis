@@ -8,7 +8,7 @@ import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.entity.impl.SnpEffAnnotator.SnpEffRepositoryAnnotator;
-import org.molgenis.data.meta.PackageImpl;
+import org.molgenis.data.annotation.snpEff.SnpEffRunner;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.testng.annotations.BeforeMethod;

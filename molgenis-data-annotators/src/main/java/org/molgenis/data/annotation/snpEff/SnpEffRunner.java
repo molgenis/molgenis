@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.entity.impl;
+package org.molgenis.data.annotation.snpEff;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
@@ -9,7 +9,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.annotation.snpEff.SnpEffResultIterator;
+import org.molgenis.data.annotation.entity.impl.SnpEffAnnotator;
 import org.molgenis.data.annotation.utils.JarRunner;
 import org.molgenis.data.annotator.websettings.SnpEffAnnotatorSettings;
 import org.molgenis.data.support.DefaultEntityMetaData;

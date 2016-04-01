@@ -36,7 +36,6 @@ import static org.molgenis.data.vcf.VcfRepository.FILTER;
 import static org.molgenis.data.vcf.VcfRepository.FORMAT_GT;
 import static org.molgenis.data.vcf.VcfRepository.ID;
 import static org.molgenis.data.vcf.VcfRepository.INFO;
-import static org.molgenis.data.vcf.VcfRepository.NAME;
 import static org.molgenis.data.vcf.VcfRepository.POS;
 import static org.molgenis.data.vcf.VcfRepository.QUAL;
 import static org.molgenis.data.vcf.VcfRepository.REF;
@@ -388,11 +387,15 @@ public class VcfWriterUtils
 	private static void addSampleEntitiesToVcf(Iterable<Entity> sampleEntities, BufferedWriter writer)
 			throws IOException
 	{
+		boolean first = true;
 		for (Entity sample : sampleEntities)
 		{
 			writer.append('\t');
-			writeFormatString(writer, sample);
+			if(first) {
+				writeFormatString(writer, sample);
+			}
 			writeSampleData(writer, sample);
+			first = false;
 		}
 	}
 

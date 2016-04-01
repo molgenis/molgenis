@@ -12,6 +12,7 @@ import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
+import org.molgenis.data.annotation.snpEff.SnpEffRunner;
 import org.molgenis.data.annotator.websettings.SnpEffAnnotatorSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.EffectsMetaData;

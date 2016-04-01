@@ -8,6 +8,8 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IdGenerator;
+import org.molgenis.data.Package;
+import org.molgenis.data.annotation.snpEff.SnpEffRunner;
 import org.molgenis.data.annotation.utils.JarRunner;
 import org.molgenis.data.annotation.utils.JarRunnerImpl;
 import org.molgenis.data.meta.PackageImpl;
@@ -64,7 +66,7 @@ public class SnpEffRunnerTest
 	private final ArrayList<Entity> entities = new ArrayList<>();;
 	private DefaultEntityMetaData metaDataCanAnnotate;
 
-	private EntityMetaData effectsEMD;
+	private DefaultEntityMetaData effectsEMD;
 
 	@InjectMocks
 	private SnpEffRunner snpEffRunner;
@@ -98,8 +100,26 @@ public class SnpEffRunnerTest
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataRef);
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataAlt);
 
-		//FIXME this is an awfully bad idea
-		effectsEMD = snpEffRunner.getOutputMetaData(metaDataCanAnnotate);
+		effectsEMD = new DefaultEntityMetaData("test_EFFECTS");
+
+		effectsEMD.addAttribute(EffectsMetaData.ID, EntityMetaData.AttributeRole.ROLE_ID).setAuto(true).setVisible(false);
+		effectsEMD.addAttributeMetaData(EffectsMetaData.ALT_ATTR);
+		effectsEMD.addAttributeMetaData(EffectsMetaData.GENE_NAME_ATTR);
+		effectsEMD.addAttributeMetaData(EffectsMetaData.ANNOTATION_ATTR);
+		effectsEMD.addAttributeMetaData(EffectsMetaData.PUTATIVE_IMPACT_ATTR);
+		effectsEMD.addAttributeMetaData(EffectsMetaData.GENE_ID_ATTR);
+		effectsEMD.addAttributeMetaData(EffectsMetaData.FEATURE_TYPE_ATTR);
+		effectsEMD.addAttributeMetaData(EffectsMetaData.FEATURE_ID_ATTR);
+		effectsEMD.addAttributeMetaData(EffectsMetaData.TRANSCRIPT_BIOTYPE_ATTR);
+		effectsEMD.addAttributeMetaData(EffectsMetaData.RANK_TOTAL_ATTR);
+		effectsEMD.addAttributeMetaData(EffectsMetaData.HGVS_C_ATTR);
+		effectsEMD.addAttributeMetaData(EffectsMetaData.HGVS_P_ATTR);
+		effectsEMD.addAttributeMetaData(EffectsMetaData.C_DNA_POSITION_ATTR);
+		effectsEMD.addAttributeMetaData(EffectsMetaData.CDS_POSITION_ATTR);
+		effectsEMD.addAttributeMetaData(EffectsMetaData.PROTEIN_POSITION_ATTR);
+		effectsEMD.addAttributeMetaData(EffectsMetaData.DISTANCE_TO_FEATURE_ATTR);
+		effectsEMD.addAttributeMetaData(EffectsMetaData.ERRORS_ATTR);
+
 
 		Entity singleAlleleEntity1 = new MapEntity(metaDataCanAnnotate);
 		singleAlleleEntity1.set(VcfRepository.CHROM, "1");
