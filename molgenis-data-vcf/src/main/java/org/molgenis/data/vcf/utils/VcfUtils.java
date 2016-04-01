@@ -18,7 +18,6 @@ import org.molgenis.data.vcf.datastructures.Sample;
 import org.molgenis.data.vcf.datastructures.Trio;
 import org.molgenis.vcf.meta.VcfMetaInfo;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
@@ -348,7 +347,7 @@ public class VcfUtils
 	 * Get pedigree data from VCF Now only support child, father, mother No fancy data structure either Output:
 	 * result.put(childID, Arrays.asList(new String[]{motherID, fatherID}));
 	 *
-	 * @param inputVcfFile
+	 * @param inputVcfFileScanner
 	 * @return
 	 * @throws FileNotFoundException
 	 */

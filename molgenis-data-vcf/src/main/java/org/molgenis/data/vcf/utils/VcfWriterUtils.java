@@ -503,6 +503,8 @@ public class VcfWriterUtils
 			{
 				sb.append(VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION);
 			}
+		}else{
+			sb.append(infoAttributeMetaData.getDescription());
 		}
 		sb.append("\">");
 		return sb.toString();
