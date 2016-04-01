@@ -58,7 +58,7 @@ var UploadContainer = React.createClass({
 			error: function(jqXHR, textStatus, errorThrown) {
 				React.render(AlertMessage({
 					'type' : 'danger',
-					'message' : 'Something went wrong during your file upload' + errorThrown,
+					'message' : 'Something went wrong during your file upload: ' + jqXHR.responseText,
 					'onDismiss' : function(){}
 				}), $('#instant-import-alert')[0]);
 			}
