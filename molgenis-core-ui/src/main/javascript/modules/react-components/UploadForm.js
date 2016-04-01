@@ -35,7 +35,7 @@ var UploadForm = React.createClass({
 				{this.state.showNameField &&	
 				<div className='form-group'>	
 					<label htmlFor='file-name-input-field'>Name</label>
-					<Input id='file-name-input-field' type='string' onValueChange={this._setFileName} required={true} />
+					<Input id='file-name-input-field' type='string' onValueChange={this._setFileName} required={true} value={this.state.fileName}/>
 				</div>
 				}
 				<div className='form-group'>
@@ -53,6 +53,18 @@ var UploadForm = React.createClass({
 	_setFile: function(event) {
 		var file = event.target.files[0];
 		var showNameField = file.name.indexOf('vcf') > 0;
+		if(showNameField) {
+			var fileName = file.name;
+			// Remove extension
+			fileName = fileName.replace(/\.vcf|\.vcf\.gz/, '');
+			// Maximum length is 30 chars, but we need to take into account that the samples are post fixed "_SAMPLES"
+			fileName = fileName.substring(0, 21);
+			// Remove illegal chars
+			fileName = fileName.replace(/\-|\.|\*|\$|\&|\%|\^|\(|\)|\#|\!|\@|\?/g,'_');
+			// Don't allow entitynames starting with a number
+			fileName = fileName.replace(/^[0-9]/g,'_');
+			this.setState({fileName});
+		}
 		this.setState({file, showNameField});
 	},
 	_setFileName: function(fileName) {
