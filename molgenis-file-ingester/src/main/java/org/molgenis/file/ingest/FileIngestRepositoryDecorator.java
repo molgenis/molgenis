@@ -270,7 +270,6 @@ public class FileIngestRepositoryDecorator implements Repository
 	@Override
 	public Iterable<AttributeMetaData> getQueryableAttributes()
 	{
-		// TODO implement
-		return null;
+		return decorated.getQueryableAttributes();
 	}
 }
