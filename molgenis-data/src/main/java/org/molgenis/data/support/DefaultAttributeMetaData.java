@@ -61,7 +61,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private boolean visible = true; // remove?
 	private boolean unique = false;
 	private boolean auto = false;
-	private Map<String, AttributeMetaData> attributePartsMap = new CaseInsensitiveLinkedHashMap<>();
+	private Map<String, AttributeMetaData> attributePartsMap = new LinkedCaseInsensitiveMap<>();
 	private boolean aggregateable = false;
 	private Range range;
 	private String visibleExpression;
