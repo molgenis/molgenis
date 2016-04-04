@@ -19,7 +19,7 @@ import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.InMemoryRepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
-import org.molgenis.data.annotator.websettings.VariantClassificationAnnotatorSettings;
+import org.molgenis.data.annotator.websettings.GavinSettings;
 import org.molgenis.data.importer.EmxFileOnlyMetaDataParser;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -40,10 +40,10 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Configuration
-public class VariantClassificationAnnotator
+public class GavinAnnotator
 {
 	public static final String NAME = "GavinAnnotator";
-	public static final String RESOURCE = "variantClassification";
+	public static final String RESOURCE = "gavin";
 	public static final String RESOURCE_ENTITY_NAME = "ccgg";
 
 	public static final String PATHOMAFTHRESHOLD = "PathoMAFThreshold";
@@ -67,7 +67,7 @@ public class VariantClassificationAnnotator
 	}
 
 	@Autowired
-	private Entity variantClassificationAnnotatorSettings;
+	private Entity gavinAnnotatorSettings;
 
 	@Autowired
 	private DataService dataService;
@@ -76,7 +76,7 @@ public class VariantClassificationAnnotator
 	private Resources resources;
 
 	@Bean
-	public EffectsAnnotator variantClassification()
+	public EffectsAnnotator gavin()
 	{
 		LinkedList<AttributeMetaData> attributes = new LinkedList<>();
 		DefaultAttributeMetaData classification = new DefaultAttributeMetaData(CLASSIFICATION,
@@ -92,13 +92,11 @@ public class VariantClassificationAnnotator
 
 		String description = "Please note that this annotator processes the results from a SnpEff annotation\nTherefor it should be used on the result entity rather than the variant entity itself.\nThe corresponding variant entity should also be annotated with CADD and EXaC";
 
-		AnnotatorInfo classificationInfo = AnnotatorInfo.create(AnnotatorInfo.Status.READY,
+		AnnotatorInfo gavinInfo = AnnotatorInfo.create(AnnotatorInfo.Status.READY,
 				AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE, NAME, description, attributes);
-		EntityAnnotator entityAnnotator = new QueryAnnotatorImpl(RESOURCE, classificationInfo,
-				new GeneNameQueryCreator(), dataService, resources, (annotationSourceFileName) -> {
-					variantClassificationAnnotatorSettings.set(
-							VariantClassificationAnnotatorSettings.Meta.VARIANT_FILE_LOCATION,
-							annotationSourceFileName);
+		EntityAnnotator entityAnnotator = new QueryAnnotatorImpl(RESOURCE, gavinInfo, new GeneNameQueryCreator(),
+				dataService, resources, (annotationSourceFileName) -> {
+					gavinAnnotatorSettings.set(GavinSettings.Meta.VARIANT_FILE_LOCATION, annotationSourceFileName);
 				})
 		{
 			@Override
@@ -129,7 +127,7 @@ public class VariantClassificationAnnotator
 				if (alt.contains(","))
 				{
 					throw new MolgenisDataException(
-							"The variant prediction annotator only accepts single allele entities.");
+							"The gavin annotator only accepts single allele input ('effect entities').");
 				}
 				int sourceEntitiesSize = Iterables.size(annotationSourceEntities);
 
@@ -183,15 +181,14 @@ public class VariantClassificationAnnotator
 	}
 
 	@Bean
-	Resource variantClassificationResource()
+	Resource GavinResource()
 	{
-		Resource variantClassificationResource = new EmxResourceImpl(RESOURCE,
-				new SingleResourceConfig(VariantClassificationAnnotatorSettings.Meta.VARIANT_FILE_LOCATION,
-						variantClassificationAnnotatorSettings),
+		Resource gavinResource = new EmxResourceImpl(RESOURCE,
+				new SingleResourceConfig(GavinSettings.Meta.VARIANT_FILE_LOCATION, gavinAnnotatorSettings),
 				new InMemoryRepositoryFactory(RESOURCE_ENTITY_NAME, new EmxFileOnlyMetaDataParser()),
 				RESOURCE_ENTITY_NAME, Collections.EMPTY_LIST);
 
-		return variantClassificationResource;
+		return gavinResource;
 	}
 
 	private Judgment classifyVariant(Impact impact, Double caddScaled, Double exacMAF, Category category, String gene,

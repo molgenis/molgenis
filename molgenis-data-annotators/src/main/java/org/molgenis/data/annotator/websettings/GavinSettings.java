@@ -1,18 +1,18 @@
 package org.molgenis.data.annotator.websettings;
 
-import org.molgenis.data.annotation.entity.impl.VariantClassificationAnnotator;
+import org.molgenis.data.annotation.entity.impl.GavinAnnotator;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
 import org.springframework.stereotype.Component;
 
 @Component
-public class VariantClassificationAnnotatorSettings extends DefaultSettingsEntity
+public class GavinSettings extends DefaultSettingsEntity
 {
 	private static final long serialVersionUID = 1L;
-	private static final String ID = VariantClassificationAnnotator.NAME;
+	private static final String ID = GavinAnnotator.NAME;
 
-	public VariantClassificationAnnotatorSettings()
+	public GavinSettings()
 	{
 		super(ID);
 	}
@@ -25,7 +25,7 @@ public class VariantClassificationAnnotatorSettings extends DefaultSettingsEntit
 		public Meta()
 		{
 			super(ID);
-			setLabel(VariantClassificationAnnotator.NAME + " annotator settings");
+			setLabel(GavinAnnotator.NAME + " annotator settings");
 
 			String defaultLocation = AnnotatorUtils.getAnnotatorResourceDir() + "/variant/variantinterpretation_emx.xlsx";
 			addAttribute(VARIANT_FILE_LOCATION).setLabel("Variant classification file location").setDefaultValue(defaultLocation);
