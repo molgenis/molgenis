@@ -38,6 +38,8 @@ import ProgressBar from './ProgressBar';
 import JobContainer from './jobs/JobContainer';
 import JobsContainer from './jobs/JobsContainer';
 import FileIngestPlugin from './FileIngestPlugin';
+import UploadContainer from './UploadContainer';
+import UploadForm from './UploadForm';
 
 export default {
 	'mixin' : mixin,
@@ -71,5 +73,7 @@ export default {
 	'ProgressBar' : ProgressBar,
 	'JobContainer' : JobContainer,
 	'JobsContainer' : JobsContainer,
-	'FileIngestPlugin' : FileIngestPlugin
+	'FileIngestPlugin' : FileIngestPlugin,
+	'UploadContainer' : UploadContainer,
+	'UploadForm' : UploadForm
 };
