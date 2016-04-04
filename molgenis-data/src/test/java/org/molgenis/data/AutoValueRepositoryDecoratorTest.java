@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.MolgenisFieldTypes;
@@ -38,12 +39,13 @@ public class AutoValueRepositoryDecoratorTest
 	private DefaultEntityMetaData entityMetaData;
 	private Repository decoratedRepository;
 	private AutoValueRepositoryDecorator repositoryDecorator;
+	private IdGenerator idGenerator;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
 		entityMetaData = new DefaultEntityMetaData("entity");
-		entityMetaData.addAttribute(ATTR_ID, ROLE_ID);
+		entityMetaData.addAttribute(ATTR_ID, ROLE_ID).setAuto(true);
 		entityMetaData.addAttribute(ATTR_DATE_AUTO_DEFAULT).setDataType(MolgenisFieldTypes.DATE);
 		entityMetaData.addAttribute(ATTR_DATE_AUTO_FALSE).setDataType(MolgenisFieldTypes.DATE).setAuto(false);
 		entityMetaData.addAttribute(ATTR_DATE_AUTO_TRUE).setDataType(MolgenisFieldTypes.DATE).setAuto(true);
@@ -51,7 +53,9 @@ public class AutoValueRepositoryDecoratorTest
 		entityMetaData.addAttribute(ATTR_DATETIME_AUTO_FALSE).setDataType(MolgenisFieldTypes.DATETIME).setAuto(false);
 		entityMetaData.addAttribute(ATTR_DATETIME_AUTO_TRUE).setDataType(MolgenisFieldTypes.DATETIME).setAuto(true);
 		decoratedRepository = when(mock(Repository.class).getEntityMetaData()).thenReturn(entityMetaData).getMock();
-		repositoryDecorator = new AutoValueRepositoryDecorator(decoratedRepository, mock(IdGenerator.class));
+		idGenerator = mock(IdGenerator.class);
+		Mockito.when(idGenerator.generateId()).thenReturn("ID1").thenReturn("ID2");
+		repositoryDecorator = new AutoValueRepositoryDecorator(decoratedRepository, idGenerator);
 	}
 
 	@Test
@@ -60,6 +64,29 @@ public class AutoValueRepositoryDecoratorTest
 		Entity entity = new MapEntity(entityMetaData);
 		repositoryDecorator.add(entity);
 	}
+	
+	@Test
+	public void addEntityFillsInAutoIdValue()
+	{
+		Entity entity = new MapEntity(entityMetaData);
+		repositoryDecorator.add(entity);
+		ArgumentCaptor<Entity> captor = ArgumentCaptor.forClass(Entity.class);
+		verify(decoratedRepository).add(captor.capture());
+		Entity autoValueEntity = captor.getValue();
+		assertEquals(autoValueEntity.getIdValue(), "ID1");
+	}
+	
+	@Test
+	public void addEntityDoesntOverrideFilledInIdValue()
+	{
+		Entity entity = new MapEntity(entityMetaData);
+		entity.set(ATTR_ID, "My ID");
+		repositoryDecorator.add(entity);
+		ArgumentCaptor<Entity> captor = ArgumentCaptor.forClass(Entity.class);
+		verify(decoratedRepository).add(captor.capture());
+		Entity autoValueEntity = captor.getValue();
+		assertEquals(autoValueEntity.getIdValue(), "My ID");
+	}
 
 	@SuppressWarnings("unchecked")
 	@Test
@@ -67,7 +94,9 @@ public class AutoValueRepositoryDecoratorTest
 	{
 		Entity entity0 = new MapEntity(entityMetaData);
 		Entity entity1 = new MapEntity(entityMetaData);
-		Stream<Entity> entities = Stream.of(entity0, entity1);
+		entity1.set(ATTR_ID, "My ID");
+		Entity entity2 = new MapEntity(entityMetaData);
+		Stream<Entity> entities = Stream.of(entity0, entity1, entity2);
 
 		when(decoratedRepository.add(any(Stream.class))).thenAnswer(new Answer<Integer>()
 		{
@@ -79,10 +108,14 @@ public class AutoValueRepositoryDecoratorTest
 				return entityList.size();
 			}
 		});
-		assertEquals(repositoryDecorator.add(entities), Integer.valueOf(2));
+		assertEquals(repositoryDecorator.add(entities), Integer.valueOf(3));
 
 		validateEntity(entity0);
+		assertEquals(entity0.getIdValue(), "ID1");
 		validateEntity(entity1);
+		assertEquals(entity1.getIdValue(), "My ID");
+		validateEntity(entity2);
+		assertEquals(entity2.getIdValue(), "ID2");
 	}
 
 	@Test
@@ -164,6 +197,7 @@ public class AutoValueRepositoryDecoratorTest
 
 	private void validateEntity(Entity entity)
 	{
+		assertNotNull(entity.getIdValue());
 		assertNull(entity.getDate(ATTR_DATE_AUTO_DEFAULT));
 		assertNull(entity.getDate(ATTR_DATE_AUTO_FALSE));
 		assertNotNull(entity.getDate(ATTR_DATE_AUTO_TRUE));
