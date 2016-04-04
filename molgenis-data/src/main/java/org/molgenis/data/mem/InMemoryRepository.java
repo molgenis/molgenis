@@ -1,6 +1,7 @@
 package org.molgenis.data.mem;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
@@ -281,5 +283,18 @@ public class InMemoryRepository implements Repository
 	public void removeEntityListener(EntityListener entityListener)
 	{
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Iterable<AttributeMetaData> getQueryableAttributes()
+	{
+		if (getCapabilities().contains(RepositoryCapability.QUERYABLE))
+		{
+			return getEntityMetaData().getAtomicAttributes();
+		}
+		else
+		{
+			return Collections.emptyList();
+		}
 	}
 }

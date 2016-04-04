@@ -95,11 +95,14 @@ public class EntityMetaDataResponse
 					if (attributeExpandsSet != null && attributeExpandsSet.containsKey("attributes".toLowerCase()))
 					{
 						Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
+						List<AttributeMetaData> queryableAttributes = Lists.newArrayList(
+								dataService.getRepository(meta.getName()).getQueryableAttributes().iterator());
+
 						this.attributes.put(attr.getName(),
 								new AttributeMetaDataResponse(name, meta, attr, subAttributesSet,
 										Collections.singletonMap("refEntity".toLowerCase(),
 												Sets.newHashSet("idattribute")),
-										permissionService, dataService, languageService));
+										permissionService, dataService, languageService, queryableAttributes));
 					}
 					else
 					{

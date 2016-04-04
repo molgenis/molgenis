@@ -69,6 +69,9 @@ class EntityMetaDataResponseV2
 		// filter attribute parts
 		Iterable<AttributeMetaData> filteredAttrs = filterAttributes(fetch, meta.getAttributes());
 
+		List<AttributeMetaData> queryableAttributes = Lists
+				.newArrayList(dataService.getRepository(meta.getName()).getQueryableAttributes().iterator());
+
 		this.attributes = Lists.newArrayList(
 				Iterables.transform(filteredAttrs, new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
 				{
@@ -97,7 +100,7 @@ class EntityMetaDataResponseV2
 							subAttrFetch = null;
 						}
 						return new AttributeMetaDataResponseV2(name, meta, attr, subAttrFetch, permissionService,
-								dataService, languageService);
+								dataService, languageService, queryableAttributes);
 					}
 				}));
 

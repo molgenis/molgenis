@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -314,6 +315,13 @@ public class DefaultEntity implements Entity
 		entityMetaData.getAtomicAttributes().forEach(attr -> set(attr.getName(), entity.get(attr.getName())));
 	}
 
+	public void setOnlyAttributesWithSameMetadata(Entity entity)
+	{
+		StreamSupport.stream(entity.getEntityMetaData().getAtomicAttributes().spliterator(), false).filter(e -> {
+			return e.equals(entityMetaData.getAttribute(e.getName()));
+		}).forEach(attr -> set(attr.getName(), entity.get(attr.getName())));
+	}
+
 	@Override
 	public String toString()
 	{
@@ -327,6 +335,7 @@ public class DefaultEntity implements Entity
 		int result = 1;
 		result = prime * result + ((entityMetaData == null) ? 0 : entityMetaData.hashCode());
 		result = prime * result + ((getIdValue() == null) ? 0 : getIdValue().hashCode());
+		result = prime * result + ((values == null) ? 0 : values.hashCode());
 		return result;
 	}
 
@@ -347,6 +356,7 @@ public class DefaultEntity implements Entity
 		{
 			if (other.getIdValue() != null) return false;
 		}
+		if (hashCode() != other.hashCode()) return false;
 		else if (!getIdValue().equals(other.getIdValue())) return false;
 		return true;
 	}

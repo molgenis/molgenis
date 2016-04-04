@@ -318,4 +318,10 @@ public class AutoValueRepositoryDecorator implements Repository
 		}
 		return entity;
 	}
+
+	@Override
+	public Iterable<AttributeMetaData> getQueryableAttributes()
+	{
+		return decoratedRepository.getQueryableAttributes();
+	}
 }

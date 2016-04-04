@@ -180,4 +180,9 @@ public interface Repository extends Iterable<Entity>, Closeable
 	 *            entity listener for a entity
 	 */
 	void removeEntityListener(EntityListener entityListener);
+
+	/**
+	 * @return iterable of attributes that can be queried or empty iterable when repository is not queryable
+	 */
+	Iterable<AttributeMetaData> getQueryableAttributes();
 }

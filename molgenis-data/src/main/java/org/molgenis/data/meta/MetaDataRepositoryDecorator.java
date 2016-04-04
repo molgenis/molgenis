@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
@@ -52,8 +53,8 @@ public class MetaDataRepositoryDecorator implements Repository
 	public Set<RepositoryCapability> getCapabilities()
 	{
 		Set<RepositoryCapability> capabilities = decorated.getCapabilities();
-		capabilities.remove(RepositoryCapability.WRITABLE);
-		capabilities.remove(RepositoryCapability.MANAGABLE);
+		// capabilities.remove(RepositoryCapability.WRITABLE); // TODO JJ enable this
+		// capabilities.remove(RepositoryCapability.MANAGABLE); // TODO JJ enable this
 		return capabilities;
 	}
 
@@ -223,5 +224,11 @@ public class MetaDataRepositoryDecorator implements Repository
 	public void removeEntityListener(EntityListener entityListener)
 	{
 		decorated.removeEntityListener(entityListener);
+	}
+
+	@Override
+	public Iterable<AttributeMetaData> getQueryableAttributes()
+	{
+		return decorated.getQueryableAttributes();
 	}
 }

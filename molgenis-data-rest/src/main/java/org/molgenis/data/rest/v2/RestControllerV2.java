@@ -81,6 +81,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.google.api.client.util.Lists;
+
 @Controller
 @RequestMapping(BASE_URI)
 class RestControllerV2
@@ -594,7 +596,12 @@ class RestControllerV2
 		}
 
 		return new AttributeMetaDataResponseV2(entityName, entity, attribute, null, permissionService, dataService,
-				languageService);
+				languageService, getQueryableAttributes(entityName));
+	}
+
+	private List<AttributeMetaData> getQueryableAttributes(String entityName)
+	{
+		return Lists.newArrayList(dataService.getRepository(entityName).getQueryableAttributes().iterator());
 	}
 
 	private EntityCollectionResponseV2 createEntityCollectionResponse(String entityName,
@@ -622,10 +629,14 @@ class RestControllerV2
 				throw new MolgenisQueryException("Aggregate query is missing 'x' or 'y' attribute");
 			}
 			AggregateResult aggs = dataService.aggregate(entityName, aggsQ);
-			AttributeMetaDataResponseV2 xAttrResponse = xAttr != null ? new AttributeMetaDataResponseV2(entityName,
-					meta, xAttr, fetch, permissionService, dataService, languageService) : null;
-			AttributeMetaDataResponseV2 yAttrResponse = yAttr != null ? new AttributeMetaDataResponseV2(entityName,
-					meta, yAttr, fetch, permissionService, dataService, languageService) : null;
+			AttributeMetaDataResponseV2 xAttrResponse = xAttr != null
+					? new AttributeMetaDataResponseV2(entityName, meta, xAttr, fetch, permissionService, dataService,
+							languageService, getQueryableAttributes(entityName))
+					: null;
+			AttributeMetaDataResponseV2 yAttrResponse = yAttr != null
+					? new AttributeMetaDataResponseV2(entityName, meta, yAttr, fetch, permissionService, dataService,
+							languageService, getQueryableAttributes(entityName))
+					: null;
 			return new EntityAggregatesResponse(aggs, xAttrResponse, yAttrResponse, BASE_URI + '/' + entityName);
 		}
 		else

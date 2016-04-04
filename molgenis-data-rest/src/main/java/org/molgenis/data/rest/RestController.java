@@ -1084,10 +1084,14 @@ public class RestController
 	{
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 		AttributeMetaData attributeMetaData = meta.getAttribute(attributeName);
+
+		List<AttributeMetaData> queryableAttributes = Lists
+				.newArrayList(dataService.getRepository(meta.getName()).getQueryableAttributes().iterator());
+
 		if (attributeMetaData != null)
 		{
 			return new AttributeMetaDataResponse(entityName, meta, attributeMetaData, attributeSet, attributeExpandSet,
-					molgenisPermissionService, dataService, languageService);
+					molgenisPermissionService, dataService, languageService, queryableAttributes);
 		}
 		else
 		{
@@ -1223,6 +1227,9 @@ public class RestController
 		Map<String, Object> entityMap = new LinkedHashMap<String, Object>();
 		entityMap.put("href", Href.concatEntityHref(RestController.BASE_URI, meta.getName(), entity.getIdValue()));
 
+		List<AttributeMetaData> queryableAttributes = Lists
+				.newArrayList(dataService.getRepository(meta.getName()).getQueryableAttributes().iterator());
+
 		// TODO system fields
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
@@ -1240,8 +1247,9 @@ public class RestController
 					if (attributeExpandsSet != null && attributeExpandsSet.containsKey(attrName.toLowerCase()))
 					{
 						Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
-						entityMap.put(attrName, new AttributeMetaDataResponse(meta.getName(), meta, attr,
-								subAttributesSet, null, molgenisPermissionService, dataService, languageService));
+						entityMap.put(attrName,
+								new AttributeMetaDataResponse(meta.getName(), meta, attr, subAttributesSet, null,
+										molgenisPermissionService, dataService, languageService, queryableAttributes));
 					}
 					else
 					{

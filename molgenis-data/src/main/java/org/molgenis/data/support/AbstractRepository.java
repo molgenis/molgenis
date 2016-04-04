@@ -6,6 +6,7 @@ import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Maps.uniqueIndex;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -14,11 +15,13 @@ import java.util.stream.StreamSupport;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
@@ -236,5 +239,18 @@ public abstract class AbstractRepository implements Repository
 	public void removeEntityListener(EntityListener entityListener)
 	{
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public Iterable<AttributeMetaData> getQueryableAttributes()
+	{
+		if (getCapabilities().contains(RepositoryCapability.QUERYABLE))
+		{
+			return getEntityMetaData().getAtomicAttributes();
+		}
+		else
+		{
+			return Collections.emptyList();
+		}
 	}
 }

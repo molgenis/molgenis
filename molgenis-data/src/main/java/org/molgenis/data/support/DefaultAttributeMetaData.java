@@ -61,7 +61,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private boolean visible = true; // remove?
 	private boolean unique = false;
 	private boolean auto = false;
-	private Map<String, AttributeMetaData> attributePartsMap;
+	private Map<String, AttributeMetaData> attributePartsMap = new CaseInsensitiveLinkedHashMap<>();
 	private boolean aggregateable = false;
 	private Range range;
 	private String visibleExpression;
@@ -91,12 +91,30 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	 */
 	public DefaultAttributeMetaData(AttributeMetaData attributeMetaData)
 	{
-		this(attributeMetaData.getName(), attributeMetaData);
+		this(attributeMetaData.getName(), attributeMetaData.getLabel(), attributeMetaData);
 	}
 
-	public DefaultAttributeMetaData(String newName, AttributeMetaData attributeMetaData)
+	/**
+	 * Copy constructor
+	 * 
+	 * @param name
+	 * @param attributeMetaData
+	 */
+	public DefaultAttributeMetaData(String name, AttributeMetaData attributeMetaData)
 	{
-		this.name = attributeMetaData.getName();
+		this(attributeMetaData.getName(), attributeMetaData.getLabel(), attributeMetaData);
+	}
+
+	/**
+	 * Copy constructor
+	 * 
+	 * @param newName
+	 * @param label
+	 * @param attributeMetaData
+	 */
+	public DefaultAttributeMetaData(String newName, String label, AttributeMetaData attributeMetaData)
+	{
+		this.name = newName;
 		this.fieldType = attributeMetaData.getDataType();
 		this.description = attributeMetaData.getDescription();
 		this.nillable = attributeMetaData.isNillable();
@@ -105,7 +123,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		EntityMetaData refEntity = attributeMetaData.getRefEntity();
 		this.refEntity = refEntity != null ? new DefaultEntityMetaData(refEntity) : null; // deep copy
 		this.expression = attributeMetaData.getExpression();
-		setLabel(attributeMetaData.getLabel());
+		setLabel(label);
 		this.visible = attributeMetaData.isVisible();
 		this.unique = attributeMetaData.isUnique();
 		this.auto = attributeMetaData.isAuto();

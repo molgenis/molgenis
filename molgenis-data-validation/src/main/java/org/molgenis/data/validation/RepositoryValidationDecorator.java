@@ -278,6 +278,12 @@ public class RepositoryValidationDecorator implements Repository
 		decoratedRepository.removeEntityListener(entityListener);
 	}
 
+	@Override
+	public Iterable<AttributeMetaData> getQueryableAttributes()
+	{
+		return decoratedRepository.getQueryableAttributes();
+	}
+
 	private Stream<? extends Entity> validate(Stream<? extends Entity> entities, ValidationResource validationResource,
 			ValidationMode validationMode)
 	{

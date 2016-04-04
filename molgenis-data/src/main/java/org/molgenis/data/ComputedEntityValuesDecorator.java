@@ -285,4 +285,10 @@ public class ComputedEntityValuesDecorator implements Repository
 			return entities;
 		}
 	}
+
+	@Override
+	public Iterable<AttributeMetaData> getQueryableAttributes()
+	{
+		return decoratedRepo.getQueryableAttributes();
+	}
 }

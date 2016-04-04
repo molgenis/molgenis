@@ -34,7 +34,10 @@ public class MetaDataRepositoryDecoratorTest
 	public void getCapabilities()
 	{
 		when(repo.getCapabilities()).thenReturn(Sets.newHashSet(INDEXABLE, QUERYABLE, WRITABLE, MANAGABLE));
+
 		assertEquals(decorator.getCapabilities(), Sets.newHashSet(INDEXABLE, QUERYABLE));
+		Repository decorator = new MetaDataRepositoryDecorator(repo);
+		// Activate me FIXME assertEquals(decorator.getCapabilities(), Sets.newHashSet(INDEXABLE, QUERYABLE));
 		IOUtils.closeQuietly(decorator);
 	}
 

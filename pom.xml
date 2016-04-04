@@ -27,7 +27,17 @@
         <connection>scm:git:git://github.com/molgenis/molgenis.git</connection>
         <url>https://github.com/molgenis/molgenis</url>
     </scm>
-    <developers />
+    <developers/>
+
+	<profiles>
+        <!-- create runnable jar -->
+        <profile>
+            <id>create-delivery</id>
+            <properties>
+                <skip.delivery>false</skip.delivery>
+            </properties>
+        </profile>
+    </profiles>
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -72,7 +82,7 @@
                         <source>1.8</source>
                         <target>1.8</target>
                         <compilerArguments>
-                            <Xlint />
+                            <Xlint/>
                         </compilerArguments>
                     </configuration>
                 </plugin>
@@ -190,12 +200,12 @@
                             <configuration>
                                 <tasks>
                                     <path id="generate-classpath">
-                                        <path refid="maven.compile.classpath" />
-                                        <pathelement path="${project.basedir}/src/main/resources" />
+                                        <path refid="maven.compile.classpath"/>
+                                        <pathelement path="${project.basedir}/src/main/resources"/>
                                     </path>
                                     <java classname="org.molgenis.Molgenis" classpathref="generate-classpath" failonerror="true">
-                                        <arg value="molgenis.properties" />
-                                        <arg value="${project.build.directory}/generated-sources/molgenis" />
+                                        <arg value="molgenis.properties"/>
+                                        <arg value="${project.build.directory}/generated-sources/molgenis"/>
                                     </java>
                                 </tasks>
                             </configuration>
@@ -209,13 +219,13 @@
                             <configuration>
                                 <tasks>
                                     <path id="generate-classpath">
-                                        <path refid="maven.compile.classpath" />
-                                        <pathelement path="${project.basedir}/src/main/resources" />
+                                        <path refid="maven.compile.classpath"/>
+                                        <pathelement path="${project.basedir}/src/main/resources"/>
                                     </path>
                                     <java classname="org.molgenis.Molgenis" classpathref="generate-classpath" failonerror="true">
-                                        <arg value="molgenis.properties" />
-                                        <arg value="${project.build.directory}/generated-test-sources/molgenis" />
-                                        <arg value="--generatetests" />
+                                        <arg value="molgenis.properties"/>
+                                        <arg value="${project.build.directory}/generated-test-sources/molgenis"/>
+                                        <arg value="--generatetests"/>
                                     </java>
                                 </tasks>
                             </configuration>
@@ -345,7 +355,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore />
+                                        <ignore/>
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -358,7 +368,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore />
+                                        <ignore/>
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -371,7 +381,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore />
+                                        <ignore/>
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -384,7 +394,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore />
+                                        <ignore/>
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -397,7 +407,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore />
+                                        <ignore/>
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -410,7 +420,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore />
+                                        <ignore/>
                                     </action>
                                 </pluginExecution>
                             </pluginExecutions>
@@ -670,6 +680,7 @@
         <module>molgenis-data-vcf</module>
         <module>molgenis-data-rest</module>
         <module>molgenis-data-elasticsearch</module>
+        <module>molgenis-data-view</module>
         <module>molgenis-data-semanticsearch</module>
         <module>molgenis-data-validation</module>
         <module>molgenis-data-idcard</module>

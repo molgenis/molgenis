@@ -228,6 +228,12 @@ public class EntityReferenceResolverDecorator implements Repository
 		decoratedRepo.removeEntityListener(entityListener);
 	}
 
+	@Override
+	public Iterable<AttributeMetaData> getQueryableAttributes()
+	{
+		return decoratedRepo.getQueryableAttributes();
+	}
+
 	private Entity resolveEntityReferences(Entity entity)
 	{
 		return entityManager.resolveReferences(getEntityMetaData(), entity, null);
