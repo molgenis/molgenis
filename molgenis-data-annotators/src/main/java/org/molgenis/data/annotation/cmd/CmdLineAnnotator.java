@@ -13,6 +13,24 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.EffectsAnnotator;
 import org.molgenis.data.annotation.RefEntityAnnotator;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Arrays.asList;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -224,7 +242,13 @@ public class CmdLineAnnotator
 	{
 		List<String> attributesToInclude = options.nonOptionArguments().stream().map(Object::toString)
 				.collect(Collectors.toList());
+		annotate(annotator, inputVcfFile, outputVCFFile, attributesToInclude, options.has("validate"));
+	}
 
+	public void annotate(RepositoryAnnotator annotator, File inputVcfFile, File outputVCFFile,
+			List<String> attributesToInclude, boolean validate)
+					throws FileNotFoundException, IOException, MolgenisInvalidFormatException
+	{
 		BufferedWriter outputVCFWriter = new BufferedWriter(
 				new OutputStreamWriter(new FileOutputStream(outputVCFFile), UTF_8));
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, inputVcfFile.getName());
@@ -322,7 +346,7 @@ public class CmdLineAnnotator
 
 			vcfRepo.close();
 		}
-		if (options.has("validate"))
+		if (validate)
 		{
 			System.out.println("Validating produced VCF file...");
 			System.out.println(vcfValidator.validateVCF(outputVCFFile));
