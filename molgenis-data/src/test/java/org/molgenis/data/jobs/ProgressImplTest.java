@@ -1,5 +1,7 @@
 package org.molgenis.data.jobs;
 
+import static org.testng.Assert.assertTrue;
+
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -8,8 +10,6 @@ import org.springframework.mail.SimpleMailMessage;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import junit.framework.Assert;
 
 public class ProgressImplTest
 {
@@ -42,9 +42,9 @@ public class ProgressImplTest
 		progress.status("Working....");
 		progress.success();
 		System.out.println(jobExecution.getLog());
-		Assert.assertTrue(jobExecution.getLog().contains("INFO  - start ()\n"));
-		Assert.assertTrue(jobExecution.getLog().contains("INFO  - Working....\n"));
-		Assert.assertTrue(jobExecution.getLog().contains("INFO  - Execution successful. Time spent: "));
+		assertTrue(jobExecution.getLog().contains("INFO  - start ()" + System.lineSeparator()));
+		assertTrue(jobExecution.getLog().contains("INFO  - Working...." + System.lineSeparator()));
+		assertTrue(jobExecution.getLog().contains("INFO  - Execution successful. Time spent: "));
 	}
 
 	@Test
@@ -55,9 +55,9 @@ public class ProgressImplTest
 		progress.status("Working....");
 		progress.success();
 		System.out.println(jobExecution.getLog());
-		Assert.assertTrue(jobExecution.getLog().contains("INFO  - start ()\n"));
-		Assert.assertTrue(jobExecution.getLog().contains("INFO  - Working....\n"));
-		Assert.assertTrue(jobExecution.getLog().contains("INFO  - Execution successful. Time spent: "));
+		assertTrue(jobExecution.getLog().contains("INFO  - start ()" + System.lineSeparator()));
+		assertTrue(jobExecution.getLog().contains("INFO  - Working...." + System.lineSeparator()));
+		assertTrue(jobExecution.getLog().contains("INFO  - Execution successful. Time spent: "));
 
 		SimpleMailMessage mail = new SimpleMailMessage();
 		mail.setTo(new String[]
@@ -76,10 +76,10 @@ public class ProgressImplTest
 		Exception ex = new IllegalArgumentException("blah");
 		progress.failed(ex);
 		System.out.println(jobExecution.getLog());
-		Assert.assertTrue(jobExecution.getLog().contains("INFO  - start ()\n"));
-		Assert.assertTrue(jobExecution.getLog().contains("INFO  - Working....\n"));
-		Assert.assertTrue(jobExecution.getLog().contains("ERROR - Failed"));
-		Assert.assertTrue(jobExecution.getLog().contains(ex.getMessage()));
+		assertTrue(jobExecution.getLog().contains("INFO  - start ()" + System.lineSeparator()));
+		assertTrue(jobExecution.getLog().contains("INFO  - Working...." + System.lineSeparator()));
+		assertTrue(jobExecution.getLog().contains("ERROR - Failed"));
+		assertTrue(jobExecution.getLog().contains(ex.getMessage()));
 
 		SimpleMailMessage mail = new SimpleMailMessage();
 		mail.setTo(new String[]
