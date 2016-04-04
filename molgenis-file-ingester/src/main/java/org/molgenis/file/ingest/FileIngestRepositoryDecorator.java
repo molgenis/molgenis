@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
@@ -266,4 +267,10 @@ public class FileIngestRepositoryDecorator implements Repository
 		return decorated.stream(fetch);
 	}
 
+	@Override
+	public Iterable<AttributeMetaData> getQueryableAttributes()
+	{
+		// TODO implement
+		return null;
+	}
 }
