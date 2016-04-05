@@ -250,7 +250,44 @@ public class QueryGenerator implements QueryPartGenerator
 					}
 					else
 					{
-						filterBuilder = FilterBuilders.missingFilter("").existence(true).nullValue(true);
+						FieldTypeEnum dataType = attr.getDataType().getEnumType();
+						switch (dataType)
+						{
+							case BOOL:
+							case DATE:
+							case DATE_TIME:
+							case DECIMAL:
+							case EMAIL:
+							case ENUM:
+							case HTML:
+							case HYPERLINK:
+							case INT:
+							case LONG:
+							case SCRIPT:
+							case STRING:
+							case TEXT:
+								filterBuilder = FilterBuilders.missingFilter(queryField).existence(true)
+										.nullValue(true);
+								break;
+							case CATEGORICAL:
+							case CATEGORICAL_MREF:
+							case FILE:
+							case MREF:
+							case XREF:
+								AttributeMetaData refIdAttr = attr.getRefEntity().getIdAttribute();
+								String indexFieldName = getXRefEqualsInSearchFieldName(refIdAttr, queryField);
+
+								// see https://github.com/elastic/elasticsearch/issues/3495
+								filterBuilder = FilterBuilders.notFilter(FilterBuilders.nestedFilter(queryField,
+										FilterBuilders.existsFilter(indexFieldName)));
+								break;
+							case COMPOUND:
+								throw new MolgenisQueryException(
+										"Illegal data type [" + dataType + "] for operator [" + queryOperator + "]");
+							default:
+								throw new RuntimeException("Unknown data type [" + dataType + "]");
+
+						}
 					}
 				}
 				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
