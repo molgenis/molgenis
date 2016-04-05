@@ -85,7 +85,6 @@ public class ExacAnnotator
 						+ "disease-specific and population genetic studies. ",
 				outputMetaData);
 
-		// TODO: properly test multiAllelicFresultFilter
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator();
 		MultiAllelicResultFilter multiAllelicResultFilter = new MultiAllelicResultFilter(resourceMetaData);
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(EXAC_TABIX_RESOURCE, exacInfo, locusQueryCreator,

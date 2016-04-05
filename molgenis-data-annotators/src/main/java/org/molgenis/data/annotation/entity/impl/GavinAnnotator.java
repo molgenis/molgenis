@@ -318,11 +318,11 @@ public class GavinAnnotator
 
 		exacMAF = exacMAF != null ? exacMAF : 0;
 
-		if (exacMAF != null && exacMAF > MAF_THRESHOLD)
+		if (exacMAF > MAF_THRESHOLD)
 		{
 			return new Judgment(Judgment.Classification.Benign, Method.genomewide, "MAF > " + MAF_THRESHOLD);
 		}
-		if (impact.equals(Impact.MODIFIER))
+		if (Impact.MODIFIER.equals(impact))
 		{
 			return new Judgment(Judgment.Classification.Benign, Method.genomewide, "Impact is MODIFIER");
 		}
@@ -343,7 +343,7 @@ public class GavinAnnotator
 				return new Judgment(Judgment.Classification.VOUS, Method.genomewide,
 						"Unable to classify variant as benign or pathogenic. The combination of " + impact
 								+ " impact, a CADD score " + (caddScaled != null ? caddScaled : "[missing]")
-								+ " and MAF of " + (exacMAF != null ? exacMAF : "[missing]") + " in " + gene
+								+ " and MAF of exacMAF in " + gene
 								+ " is inconclusive.");
 			}
 		}

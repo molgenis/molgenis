@@ -33,7 +33,7 @@ public interface RepositoryAnnotator
 	Iterator<Entity> annotate(Iterator<Entity> source);
 
 	/**
-	 * TODO returns an entityMetaData containing the attributes the annotator will add
+	 * returns an list of attributeMetadata containing the attributes the annotator will add
 	 * 
 	 * @return ouputMetadata
 	 */
