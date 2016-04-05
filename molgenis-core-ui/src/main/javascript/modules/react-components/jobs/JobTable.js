@@ -13,44 +13,57 @@ import React from 'react';
 import moment from 'moment';
 import twix from 'twix';
 import 'moment-duration-format';
+import {Button} from '../Button';
 
 var JobTable = React.createClass({
 	displayName: 'JobTable',
 	propTypes: {
 		jobs: React.PropTypes.array.isRequired,
-		onSelect: React.PropTypes.func
+		onSelect: React.PropTypes.func,
+		customColumns: React.PropTypes.array
 	},
 	render: function() {
-		const {jobs} = this.props;
+		const {jobs, customColumns} = this.props;
 		return 	<div className="panel panel-primary">
 			<div className="panel-heading">Finished Jobs</div>
-			<div className="panel-body">
+			<div className="panel-body" style={{overflowX: 'auto'}}>
 				<table className="table table-striped">
 					<thead>
 						<th></th>
 						<th>Status</th>
 						<th>When</th>
 						<th>Duration</th>
-						<th>Type</th>
-						<th>Message</th>
+						{customColumns && customColumns.map(cc => <th>{cc.th}</th>)}
 						<th>Result</th>
 					</thead>
 					<tbody>
 					{jobs.map((job, index) => <tr key={job.identifier}>
-						<td><button className="btn btn-xs btn-info" onClick={() => this.props.onSelect(job.identifier)}>
-							<span className="glyphicon glyphicon-search" aria-hidden="true"></span>
-						</button></td>
-						<td>{job.status}</td>
+						<td><Button icon="search" style="info" size="xsmall"
+									onClick={() => this.props.onSelect(job.identifier)}/></td>
+						<td>{this._renderStatus(job.status)}</td>
 						<td>{this._getTwix(job)}</td>
 						<td>{this._getDuration(job)}</td>
-						<td>{job.type}</td>
-						<td>{job.progressMessage}</td>
+						{customColumns && customColumns.map(cc => <td>{cc.td(job)}</td>)}
 						<td>{job.resultUrl && <a href={job.resultUrl}>Go to result</a>}</td>
 						</tr>)}
 					</tbody>
 				</table>
 			</div>
 		</div>
+	},
+	_renderStatus: function(status){
+		switch(status) {
+			case 'FAILED':
+				return <span className="label label-warning">Failed</span>
+			case 'SUCCESS':
+				return <span className="label label-success">Success</span>
+			case 'PENDING':
+				return <span className="label label-primary">Pending</span>
+			case 'CANCELED':
+				return <span className="label label-default">Canceled</span>
+			case 'RUNNING':
+				return <span className="label label-info">Running</span>
+		}
 	},
 	_getTwix: function(job) {
 		const startDate = moment(job.startDate);

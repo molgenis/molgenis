@@ -1,7 +1,5 @@
 package org.molgenis.ontology.importer;
 
-import static java.util.Objects.requireNonNull;
-
 import java.io.File;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -24,7 +22,6 @@ import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.file.FileStore;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
@@ -36,15 +33,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 
+import static java.util.Objects.requireNonNull;
+
 @Service
 public class OntologyImportService implements ImportService
 {
 	private final DataService dataService;
 	private final SearchService searchService;
 	private final PermissionSystemService permissionSystemService;
-
-	@Autowired
-	private FileStore fileStore;
 
 	@Autowired
 	public OntologyImportService(FileRepositoryCollectionFactory fileRepositoryCollectionFactory,
@@ -138,10 +134,9 @@ public class OntologyImportService implements ImportService
 							.eq(OntologyMetaData.ONTOLOGY_NAME, ontologyName));
 			ontologyExists = ontologyQueryEntity != null;
 		}
-		
-		if(ontologyExists) 
-			throw new MolgenisDataException("The ontology you are trying to import already exists");
-		
+
+		if (ontologyExists) throw new MolgenisDataException("The ontology you are trying to import already exists");
+
 		Iterator<String> it = source.getEntityNames().iterator();
 		while (it.hasNext())
 		{
