@@ -27,7 +27,6 @@ import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.file.FileMetaMetaData;
 import org.molgenis.js.RhinoConfig;
-import org.molgenis.mysql.embed.EmbeddedMysqlDatabaseBuilder;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.runas.RunAsSystemBeanPostProcessor;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -161,7 +160,9 @@ public abstract class AbstractDataApiTestConfig
 	@Bean(destroyMethod = "shutdown")
 	public DataSource dataSource()
 	{
-		return new EmbeddedMysqlDatabaseBuilder().build();
+		// FIXME
+		throw new RuntimeException("FIXME");
+		// return new EmbeddedMysqlDatabaseBuilder().build();
 	}
 
 	@Bean

@@ -19,23 +19,18 @@ import javax.sql.DataSource;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityManagerImpl;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
-import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
-import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
-import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
-import org.molgenis.data.mysql.MySqlEntityFactory;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.transaction.TransactionLogService;
@@ -61,7 +56,6 @@ import org.molgenis.ui.menumanager.MenuManagerServiceImpl;
 import org.molgenis.ui.security.MolgenisUiPermissionDecorator;
 import org.molgenis.ui.settings.AppDbSettings;
 import org.molgenis.util.ApplicationContextProvider;
-import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.ResourceFingerprintRegistry;
 import org.slf4j.Logger;
@@ -89,9 +83,7 @@ import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -407,41 +399,42 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	protected abstract ManageableRepositoryCollection getBackend();
 
-	protected abstract void addReposToReindex(DataServiceImpl localDataService,
-			MySqlEntityFactory localMySqlEntityFactory);
+	// protected abstract void addReposToReindex(DataServiceImpl localDataService,
+	// MySqlEntityFactory localMySqlEntityFactory);
 
 	protected void reindex()
 	{
-		// Create local dataservice and metadataservice
-		DataServiceImpl localDataService = new DataServiceImpl();
-		EntityManager localEntityManager = new EntityManagerImpl(localDataService);
-		MySqlEntityFactory localMySqlEntityFactory = new MySqlEntityFactory(localEntityManager, localDataService);
-
-		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(localDataService);
-		metaDataService.setLanguageService(new LanguageService(localDataService, appDbSettings));
-		localDataService.setMeta(metaDataService);
-
-		addReposToReindex(localDataService, localMySqlEntityFactory);
-
-		SourceToEntityConverter sourceToEntityConverter = new SourceToEntityConverter(localDataService,
-				localEntityManager);
-		EntityToSourceConverter entityToSourceConverter = new EntityToSourceConverter();
-		SearchService localSearchService = embeddedElasticSearchServiceFactory.create(localDataService,
-				new ElasticsearchEntityFactory(localEntityManager, sourceToEntityConverter, entityToSourceConverter));
-
-		List<EntityMetaData> metas = DependencyResolver.resolve(Sets.newHashSet(localDataService.getMeta()
-				.getEntityMetaDatas()));
-
-		// Sort repos to the same sequence as the resolves metas
-		List<Repository> repos = Lists.newArrayList(localDataService);
-		repos.sort((r1, r2) -> Integer.compare(metas.indexOf(r1.getEntityMetaData()),
-				metas.indexOf(r2.getEntityMetaData())));
-
-		repos.forEach(repo -> {
-			localSearchService.rebuildIndex(repo, repo.getEntityMetaData());
-		});
-
-		localSearchService.optimizeIndex();
+		// FIXME reindexing should not depend on MySQL
+		// // Create local dataservice and metadataservice
+		// DataServiceImpl localDataService = new DataServiceImpl();
+		// EntityManager localEntityManager = new EntityManagerImpl(localDataService);
+		// MySqlEntityFactory localMySqlEntityFactory = new MySqlEntityFactory(localEntityManager, localDataService);
+		//
+		// MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(localDataService);
+		// metaDataService.setLanguageService(new LanguageService(localDataService, appDbSettings));
+		// localDataService.setMeta(metaDataService);
+		//
+		// addReposToReindex(localDataService, localMySqlEntityFactory);
+		//
+		// SourceToEntityConverter sourceToEntityConverter = new SourceToEntityConverter(localDataService,
+		// localEntityManager);
+		// EntityToSourceConverter entityToSourceConverter = new EntityToSourceConverter();
+		// SearchService localSearchService = embeddedElasticSearchServiceFactory.create(localDataService,
+		// new ElasticsearchEntityFactory(localEntityManager, sourceToEntityConverter, entityToSourceConverter));
+		//
+		// List<EntityMetaData> metas = DependencyResolver.resolve(Sets.newHashSet(localDataService.getMeta()
+		// .getEntityMetaDatas()));
+		//
+		// // Sort repos to the same sequence as the resolves metas
+		// List<Repository> repos = Lists.newArrayList(localDataService);
+		// repos.sort((r1, r2) -> Integer.compare(metas.indexOf(r1.getEntityMetaData()),
+		// metas.indexOf(r2.getEntityMetaData())));
+		//
+		// repos.forEach(repo -> {
+		// localSearchService.rebuildIndex(repo, repo.getEntityMetaData());
+		// });
+		//
+		// localSearchService.optimizeIndex();
 	}
 
 	@PostConstruct

@@ -11,7 +11,6 @@ import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.RepositorySecurityDecorator;
-import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.OwnedEntityMetaData;
 import org.molgenis.data.transaction.TransactionLogRepositoryDecorator;
@@ -21,7 +20,6 @@ import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
 import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
 import org.molgenis.util.EntityUtils;
-import org.molgenis.util.MySqlRepositoryExceptionTranslatorDecorator;
 
 public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFactory
 {
@@ -59,30 +57,23 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			decoratedRepository = new MolgenisUserDecorator(decoratedRepository);
 		}
 
-		// 9. Owned decorator
+		// 8. Owned decorator
 		if (EntityUtils.doesExtend(decoratedRepository.getEntityMetaData(), OwnedEntityMetaData.ENTITY_NAME))
 		{
 			decoratedRepository = new OwnedEntityRepositoryDecorator(decoratedRepository);
 		}
 
-		// 8. Entity reference resolver decorator
+		// 7. Entity reference resolver decorator
 		decoratedRepository = new EntityReferenceResolverDecorator(decoratedRepository, entityManager);
 
-		// 7. Computed entity values decorator
+		// 6. Computed entity values decorator
 		decoratedRepository = new ComputedEntityValuesDecorator(decoratedRepository);
 
-		// 6. Entity listener
+		// 5. Entity listener
 		decoratedRepository = new EntityListenerRepositoryDecorator(decoratedRepository);
 
-		// 5. Transaction log decorator
+		// 4. Transaction log decorator
 		decoratedRepository = new TransactionLogRepositoryDecorator(decoratedRepository, transactionLogService);
-
-		// 4. SQL exception translation decorator
-		String backend = decoratedRepository.getEntityMetaData().getBackend();
-		if (MysqlRepositoryCollection.NAME.equals(backend))
-		{
-			decoratedRepository = new MySqlRepositoryExceptionTranslatorDecorator(decoratedRepository);
-		}
 
 		// 3. validation decorator
 		decoratedRepository = new RepositoryValidationDecorator(dataService, decoratedRepository,
