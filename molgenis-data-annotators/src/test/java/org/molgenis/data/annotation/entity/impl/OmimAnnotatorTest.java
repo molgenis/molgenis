@@ -5,8 +5,8 @@ import static org.apache.commons.lang.StringUtils.join;
 import static org.mockito.Mockito.mock;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.CYTO_LOCATIONS;
-import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.CAUSAL_IDENTIFIER;
+import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.OMIM_CYTO_LOCATIONS;
+import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.OMIM_CAUSAL_IDENTIFIER;
 import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.OMIM_DISORDER;
 import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.OMIM_ENTRY;
 import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.OMIM_TYPE;
@@ -68,8 +68,8 @@ public class OmimAnnotatorTest extends AbstractTestNGSpringContextTests
 		DefaultEntityMetaData expectedEntityMetaData = new DefaultEntityMetaData("Test");
 		expectedEntityMetaData.addAttribute(GENE_NAME, ROLE_ID);
 		expectedEntityMetaData.addAttribute(OMIM_DISORDER).setDataType(TEXT);
-		expectedEntityMetaData.addAttribute(CAUSAL_IDENTIFIER).setDataType(TEXT);
-		expectedEntityMetaData.addAttribute(CYTO_LOCATIONS).setDataType(TEXT);
+		expectedEntityMetaData.addAttribute(OMIM_CAUSAL_IDENTIFIER).setDataType(TEXT);
+		expectedEntityMetaData.addAttribute(OMIM_CYTO_LOCATIONS).setDataType(TEXT);
 		expectedEntityMetaData.addAttribute(OMIM_ENTRY).setDataType(TEXT);
 		expectedEntityMetaData.addAttribute(OMIM_TYPE).setDataType(TEXT);
 
@@ -77,8 +77,8 @@ public class OmimAnnotatorTest extends AbstractTestNGSpringContextTests
 		expectedEntity.set(GENE_NAME, "CYP17A1");
 		expectedEntity.set(OMIM_DISORDER, join(
 				newArrayList("17,20-lyase deficiency, isolated", "17-alpha-hydroxylase/17,20-lyase deficiency"), ","));
-		expectedEntity.set(CAUSAL_IDENTIFIER, join(newArrayList("609300", "609300"), ","));
-		expectedEntity.set(CYTO_LOCATIONS, join(newArrayList("10q24.32", "10q24.32"), ","));
+		expectedEntity.set(OMIM_CAUSAL_IDENTIFIER, join(newArrayList("609300", "609300"), ","));
+		expectedEntity.set(OMIM_CYTO_LOCATIONS, join(newArrayList("10q24.32", "10q24.32"), ","));
 		expectedEntity.set(OMIM_ENTRY, join(newArrayList("202110", "202110"), ","));
 		expectedEntity.set(OMIM_TYPE, join(newArrayList("3", "3"), ","));
 

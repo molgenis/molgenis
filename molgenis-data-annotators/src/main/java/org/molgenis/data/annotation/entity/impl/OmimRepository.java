@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
@@ -171,27 +170,19 @@ public class OmimRepository extends AbstractRepository
 		entities.add(entity);
 	}
 
-	/**
+	/*
 	 * Get and parse OMIM entries.
 	 * 
-	 * Do not store entries without OMIM identifier... e.g. this one: Leukemia, acute myelogenous (3)|KRAS, KRAS2,
+	 * Do not store entries without an OMIM identifier... e.g. this one: Leukemia, acute myelogenous (3)|KRAS, KRAS2,
 	 * RASK2, NS, CFC2|190070|12p12.1
 	 * 
 	 * But do store this one: Leukemia, acute myelogenous, 601626 (3)|GMPS|600358|3q25.31
-	 * 
-	 * becomes: OMIMTerm{id=601626, name='Leukemia, acute myelogenous', type=3, causedBy=600358, cytoLoc='3q25.31',
-	 * hgncIds=[GMPS]}
-	 * 
-	 * @return
-	 * @throws IOException
 	 */
 	private void addLineToMap(Map<String, List<List<String>>> omimEntriesByGeneSymbol, String[] values)
 	{
 		// trim mapping method field, example: (3)
 		String entry = values[0];
 		entry = entry.substring(0, entry.length() - 3);
-
-		// trim trailing whitespace
 		entry = entry.trim();
 
 		// last six characters should be OMIM id
