@@ -343,7 +343,7 @@ public class GavinAnnotator
 				return new Judgment(Judgment.Classification.VOUS, Method.genomewide,
 						"Unable to classify variant as benign or pathogenic. The combination of " + impact
 								+ " impact, a CADD score " + (caddScaled != null ? caddScaled : "[missing]")
-								+ " and MAF of exacMAF in " + gene
+								+ " and MAF of " + exacMAF + " in " + gene
 								+ " is inconclusive.");
 			}
 		}
