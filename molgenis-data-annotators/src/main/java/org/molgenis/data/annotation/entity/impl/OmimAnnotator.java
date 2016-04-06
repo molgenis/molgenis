@@ -42,9 +42,11 @@ public class OmimAnnotator
 	public static final String NAME = "OMIM";
 	public static final char SEPARATOR = '\t';
 
-	public static final String PHENOTYPE = "OMIM_Phenotypes";
-	public static final String MIM_NUMBER = "OMIM_MIM_Numbers";
-	public static final String CYTO_LOCATIONS = "OMIM_Cyto_Locations";
+	public static final String OMIM_DISORDER = "OMIM_Disorders";
+	public static final String OMIM_CAUSAL_IDENTIFIER = "OMIM_MIM_Numbers";
+	public static final String OMIM_CYTO_LOCATIONS = "OMIM_Cyto_Locations";
+	public static final String OMIM_ENTRY = "OMIM_Entry";
+	public static final String OMIM_TYPE = "OMIM_Type";
 
 	public static final String OMIM_RESOURCE = "OMIMResource";
 
@@ -61,14 +63,27 @@ public class OmimAnnotator
 	public RepositoryAnnotator omim()
 	{
 		List<AttributeMetaData> outputAttributes = new ArrayList<>();
-		DefaultAttributeMetaData omim_phenotype = new DefaultAttributeMetaData(PHENOTYPE, TEXT)
-				.setDescription("OMIM phenotype").setLabel("OMIM Phenotype");
-		DefaultAttributeMetaData omim_mim_number = new DefaultAttributeMetaData(MIM_NUMBER, TEXT)
-				.setDescription("Number that represents the MIM database identifier").setLabel("OMIM MIM Number");
-		DefaultAttributeMetaData omim_cyto_location = new DefaultAttributeMetaData(CYTO_LOCATIONS, TEXT)
-				.setDescription("Cytogenic location associated with an OMIM phenotype").setLabel("OMIM Cyto Location");
+		DefaultAttributeMetaData omim_phenotype = new DefaultAttributeMetaData(OMIM_DISORDER, TEXT)
+				.setDescription("OMIM phenotype").setLabel("OMIM_Disorders");
+		DefaultAttributeMetaData omim_mim_number = new DefaultAttributeMetaData(OMIM_CAUSAL_IDENTIFIER, TEXT)
+				.setDescription("Number that represents the MIM database identifier for the Locus / Gene")
+				.setLabel("OMIM_Causal_ID");
+		DefaultAttributeMetaData omim_cyto_location = new DefaultAttributeMetaData(OMIM_CYTO_LOCATIONS, TEXT)
+				.setDescription("Cytogenic location associated with an OMIM phenotype")
+				.setLabel("OMIM_Cytogenic_Location");
+		DefaultAttributeMetaData omim_entry = new DefaultAttributeMetaData(OMIM_ENTRY, TEXT)
+				.setDescription("Number that represents the MIM database identifier for the phenotype")
+				.setLabel("OMIM_Entry");
+		DefaultAttributeMetaData omim_type = new DefaultAttributeMetaData(OMIM_TYPE, TEXT)
+				.setDescription("Phenotype Mapping key: 1 - the disorder is placed on the map based on its "
+						+ "association witha gene, but the underlying defect is not known. 2 - the disorder "
+						+ "has been placed on the map by linkage or other statistical method; no mutation has "
+						+ "been found. 3 - the molecular basis for the disorder is known; a mutation has been "
+						+ "found in the gene. 4 - a contiguous gene deletion or duplication syndrome, multiple "
+						+ "genes are deleted or duplicated causing the phenotype.")
+				.setLabel("OMIM_Type");
 
-		outputAttributes.addAll(asList(omim_phenotype, omim_mim_number, omim_cyto_location));
+		outputAttributes.addAll(asList(omim_phenotype, omim_mim_number, omim_cyto_location, omim_entry, omim_type));
 
 		AnnotatorInfo omimInfo = AnnotatorInfo.create(Status.READY, AnnotatorInfo.Type.PHENOTYPE_ASSOCIATION, NAME,
 				"OMIM is a comprehensive, authoritative compendium of human genes and genetic phenotypes that is "
@@ -111,12 +126,16 @@ public class OmimAnnotator
 			Optional<Entity> firstResult = FluentIterable.from(results).first();
 			return firstResult.transform(e -> {
 				Entity result = new MapEntity();
-				result.set(PHENOTYPE, e.get(OmimRepository.OMIM_PHENOTYPE_COL_NAME));
-				result.set(MIM_NUMBER, e.get(OmimRepository.OMIM_MIM_NUMBER_COL_NAME));
-				result.set(CYTO_LOCATIONS, e.get(OmimRepository.OMIM_CYTO_LOCATION_COL_NAME));
+				result.set(OMIM_DISORDER, e.get(OmimRepository.OMIM_PHENOTYPE_COL_NAME));
+				result.set(OMIM_CAUSAL_IDENTIFIER, e.get(OmimRepository.OMIM_MIM_NUMBER_COL_NAME));
+				result.set(OMIM_CYTO_LOCATIONS, e.get(OmimRepository.OMIM_CYTO_LOCATION_COL_NAME));
+				result.set(OMIM_TYPE, e.get(OmimRepository.OMIM_TYPE_COL_NAME).toString());
+				result.set(OMIM_ENTRY, e.get(OmimRepository.OMIM_ENTRY_COL_NAME).toString());
+
 				return result;
 			});
 
 		}
 	}
+
 }
