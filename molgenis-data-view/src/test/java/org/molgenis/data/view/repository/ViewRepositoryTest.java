@@ -1,4 +1,4 @@
-package org.molgenis.data.view;
+package org.molgenis.data.view.repository;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -34,6 +34,7 @@ import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.view.meta.EntityViewMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,21 +50,17 @@ public class ViewRepositoryTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
 	private DataService dataService;
-
-	@Autowired
-	private SearchService searchService;
+	private ViewRepository viewRepository;
+	private DefaultEntityMetaData expectedEntityMetaData;
 
 	private EditableEntityMetaData entityMetaA;
 	private EditableEntityMetaData entityMetaB;
 	private EditableEntityMetaData entityMetaC;
 
-	private DefaultEntityMetaData expectedEntityMetaData;
-
 	private Repository repoA;
 	private Repository repoB;
 	private Repository repoC;
 	private Repository repoEvmd;
-	private ViewRepository viewRepository;
 
 	private Entity entityEvmd1;
 	private Entity entityEvmd2;
@@ -205,10 +202,10 @@ public class ViewRepositoryTest extends AbstractTestNGSpringContextTests
 	private void getEntityMetaDataTest()
 	{
 		assertEquals(viewRepository.getEntityMetaData(), expectedEntityMetaData);
-		assertEquals(viewRepository.getEntityMetaData().getAttributes().toString(), expectedEntityMetaData
-				.getAttributes().toString());
+		assertEquals(viewRepository.getEntityMetaData().getAttributes().toString(),
+				expectedEntityMetaData.getAttributes().toString());
 	}
-	
+
 	@Test
 	private void findAllTest()
 	{
@@ -286,7 +283,7 @@ public class ViewRepositoryTest extends AbstractTestNGSpringContextTests
 		q1.and();
 		q1.eq("pos", "25");
 		when(dataService.findAll("entityB", q1)).thenReturn(Arrays.asList(entityB1).stream());
-		
+
 		Query q2 = new QueryImpl();
 		q2.eq("chrom", "2");
 		q2.and();
@@ -298,7 +295,7 @@ public class ViewRepositoryTest extends AbstractTestNGSpringContextTests
 		q3.and();
 		q3.eq("pos", "75");
 		when(dataService.findAll("entityB", q3)).thenReturn(Arrays.asList(entityB3).stream());
-		
+
 		Query q4 = new QueryImpl();
 		q4.eq("chrom", "1");
 		q4.and();
@@ -316,7 +313,7 @@ public class ViewRepositoryTest extends AbstractTestNGSpringContextTests
 		q6.and();
 		q6.eq("pos", "75");
 		when(dataService.findAll("entityC", q6)).thenReturn(Arrays.asList(entityC3).stream());
-		
+
 		DefaultEntity expected1 = new DefaultEntity(expectedEntityMetaData, dataService);
 		expected1.set("id", "1");
 		expected1.set("chrom", "1");
@@ -330,7 +327,7 @@ public class ViewRepositoryTest extends AbstractTestNGSpringContextTests
 		expected1.set("entityC_chrom", "1");
 		expected1.set("entityC_pos", "25");
 		expected1.set("entityC_C", "testC1");
-		
+
 		DefaultEntity expected2 = new DefaultEntity(expectedEntityMetaData, dataService);
 		expected2.set("id", "2");
 		expected2.set("chrom", "2");
@@ -358,32 +355,19 @@ public class ViewRepositoryTest extends AbstractTestNGSpringContextTests
 		expected3.set("entityC_chrom", "3");
 		expected3.set("entityC_pos", "75");
 		expected3.set("entityC_C", "testC3");
-		
+
 		List<Entity> expected = Lists.newArrayList(expected1, expected2, expected3);
 		List<Entity> actual = viewRepository.findAll(new QueryImpl()).collect(Collectors.toList());
 		assertEquals(actual, expected);
 	}
-	
 
 	@Configuration
 	public static class Config
 	{
 		@Bean
-		public LanguageService languageService()
-		{
-			return new LanguageService(dataService(), Mockito.mock(AppSettings.class));
-		}
-
-		@Bean
 		public DataService dataService()
 		{
 			return mock(DataService.class);
-		}
-
-		@Bean
-		public SearchService searchService()
-		{
-			return mock(SearchService.class);
 		}
 	}
 

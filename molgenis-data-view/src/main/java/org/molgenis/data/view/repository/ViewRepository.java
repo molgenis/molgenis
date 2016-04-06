@@ -1,4 +1,4 @@
-package org.molgenis.data.view;
+package org.molgenis.data.view.repository;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
@@ -29,6 +29,7 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.view.meta.EntityViewMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,4 +1,4 @@
-package org.molgenis.data.view;
+package org.molgenis.data.view.meta;
 
 import static org.molgenis.MolgenisFieldTypes.STRING;
 

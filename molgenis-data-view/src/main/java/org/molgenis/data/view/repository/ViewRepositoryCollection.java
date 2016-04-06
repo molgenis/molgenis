@@ -1,4 +1,4 @@
-package org.molgenis.data.view;
+package org.molgenis.data.view.repository;
 
 import static java.util.Objects.requireNonNull;
 
