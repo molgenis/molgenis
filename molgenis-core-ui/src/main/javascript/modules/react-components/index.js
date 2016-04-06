@@ -1,6 +1,6 @@
 /**
- * This module exposes all the react components.
- * Mainly used for legacy javascript.
+ * This module exposes all the react components. Mainly used for legacy
+ * javascript.
  * 
  * @module
  */
@@ -38,6 +38,7 @@ import ProgressBar from './ProgressBar';
 import JobContainer from './jobs/JobContainer';
 import JobsContainer from './jobs/JobsContainer';
 import FileIngestPlugin from './FileIngestPlugin';
+import EntityViewContainer from './entity-views/EntityViewContainer'
 
 export default {
 	'mixin' : mixin,
@@ -71,5 +72,6 @@ export default {
 	'ProgressBar' : ProgressBar,
 	'JobContainer' : JobContainer,
 	'JobsContainer' : JobsContainer,
-	'FileIngestPlugin' : FileIngestPlugin
+	'FileIngestPlugin' : FileIngestPlugin,
+	'EntityViewContainer' : EntityViewContainer
 };

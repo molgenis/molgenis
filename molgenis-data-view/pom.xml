@@ -25,7 +25,12 @@
 			<artifactId>molgenis-data</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		        <dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-core-ui</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+        <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-elasticsearch</artifactId>
             <version>${project.version}</version>

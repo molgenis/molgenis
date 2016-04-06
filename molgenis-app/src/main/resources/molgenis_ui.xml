@@ -32,6 +32,7 @@
         	<plugin id="indexmanager" name="Index manager" url="indexmanager"/>
         	<plugin id="logmanager" name="Log manager" url="logmanager"/>
         	<plugin id="settingsmanager" name="Settings" url="settingsmanager"/>
+        	<plugin id="configureview" name="Entity view configuration" url="configureview" />
 		</menu>
 		<menu label="About" name="background">
             <plugin id="feedback" name="Feedback" url="feedback"/>

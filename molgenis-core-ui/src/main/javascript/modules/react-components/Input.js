@@ -190,5 +190,6 @@ import React from "react";
 			}
 		}
 	});
-	
+
+export { Input };
 export default React.createFactory(Input);
