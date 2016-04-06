@@ -3,7 +3,6 @@ package org.molgenis.data.postgresql;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.RepositoryCapability.MANAGABLE;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
@@ -71,13 +70,17 @@ import com.google.common.collect.Sets;
 public class PostgreSqlRepository extends AbstractRepository
 {
 	private static final Logger LOG = LoggerFactory.getLogger(PostgreSqlRepository.class);
-	public static final int BATCH_SIZE = 1000;
-	private EntityMetaData metaData;
-	private final JdbcTemplate jdbcTemplate;
+
+	private static final int BATCH_SIZE = 1000;
+	private static final String VARCHAR = "VARCHAR(255)";
+	private static final String JUNCTION_TABLE_ORDER_ATTR_NAME = "order";
+
 	private final DataService dataService;
 	private final PostgreSqlEntityFactory postgreSqlEntityFactory;
 	private final DataSource dataSource;
-	private static final String VARCHAR = "VARCHAR(255)";
+	private final JdbcTemplate jdbcTemplate;
+
+	private EntityMetaData metaData;
 
 	/**
 	 * Creates a new PostgreSqlRepository.
@@ -123,7 +126,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return Sets.newHashSet(WRITABLE, MANAGABLE);
+		return Sets.newHashSet(WRITABLE, MANAGABLE, QUERYABLE);
 	}
 
 	@Override
@@ -215,21 +218,21 @@ public class PostgreSqlRepository extends AbstractRepository
 	@Override
 	public void deleteById(Stream<Object> ids)
 	{
-		final List<Object> idList = ids.collect(toList());
-
-		jdbcTemplate.batchUpdate(getDeleteSql(), new BatchPreparedStatementSetter()
-		{
-			@Override
-			public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
+		Iterators.partition(ids.iterator(), BATCH_SIZE).forEachRemaining(idsBatch -> {
+			jdbcTemplate.batchUpdate(getDeleteSql(), new BatchPreparedStatementSetter()
 			{
-				preparedStatement.setObject(1, idList.get(i));
-			}
+				@Override
+				public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
+				{
+					preparedStatement.setObject(1, idsBatch.get(i));
+				}
 
-			@Override
-			public int getBatchSize()
-			{
-				return idList.size();
-			}
+				@Override
+				public int getBatchSize()
+				{
+					return idsBatch.size();
+				}
+			});
 		});
 	}
 
@@ -294,7 +297,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		}
 		try
 		{
-			jdbcTemplate.execute(getCreateSql());
+			jdbcTemplate.execute(getCreateTableSql());
 			LOG.debug("Created table [{}]", getTableName());
 
 			for (AttributeMetaData attr : getEntityMetaData().getAtomicAttributes())
@@ -309,7 +312,7 @@ public class PostgreSqlRepository extends AbstractRepository
 
 				if (attr.getDataType() instanceof MrefField)
 				{
-					jdbcTemplate.execute(getMrefCreateSql(attr));
+					jdbcTemplate.execute(getCreateJunctionTableSql(attr));
 					LOG.debug("Created junction table [{}]", getJunctionTableName(attr));
 				}
 				else if (attr.getDataType() instanceof XrefField)
@@ -350,7 +353,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		{
 			if (att.getDataType() instanceof MrefField)
 			{
-				DataAccessException e = tryExecute(getDropSql(getJunctionTableName(att)));
+				DataAccessException e = tryExecute(getDropTableSql(getJunctionTableName(att)));
 				remembered = remembered != null ? remembered : e;
 			}
 		}
@@ -375,7 +378,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		}
 		else
 		{
-			DataAccessException e = tryExecute(getDropSql());
+			DataAccessException e = tryExecute(getDropTableSql());
 			remembered = remembered != null ? remembered : e;
 		}
 
@@ -422,6 +425,14 @@ public class PostgreSqlRepository extends AbstractRepository
 		addAttributeInternal(attributeMetaData, true, false);
 	}
 
+	static String getSelectMrefSql(EntityMetaData entityMeta, AttributeMetaData att)
+	{
+		return new StringBuilder().append("SELECT ").append(getColumnName(att)).append(" FROM ")
+				.append(getJunctionTableName(entityMeta, att)).append(" WHERE ")
+				.append(getColumnName(entityMeta.getIdAttribute())).append(" = ?").append(" ORDER BY ")
+				.append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).toString();
+	}
+
 	/**
 	 * Adds an attribute to the repository.
 	 *
@@ -444,11 +455,11 @@ public class PostgreSqlRepository extends AbstractRepository
 			}
 			if (attributeMetaData.getDataType() instanceof MrefField)
 			{
-				execute(getMrefCreateSql(attributeMetaData), async);
+				execute(getCreateJunctionTableSql(attributeMetaData), async);
 			}
 			else if (!attributeMetaData.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
 			{
-				execute(getAlterSql(attributeMetaData), async);
+				execute(getAddColumnSql(attributeMetaData), async);
 			}
 
 			if (attributeMetaData.getDataType() instanceof XrefField)
@@ -543,7 +554,7 @@ public class PostgreSqlRepository extends AbstractRepository
 				}
 
 				RowMapper<Entity> entityMapper = postgreSqlEntityFactory.createRowMapper(getEntityMetaData(),
-						batchQuery.getFetch(), jdbcTemplate, getTableName());
+						batchQuery.getFetch(), jdbcTemplate);
 				return jdbcTemplate.query(sql, parameters.toArray(new Object[0]), entityMapper);
 			}
 		};
@@ -739,7 +750,7 @@ public class PostgreSqlRepository extends AbstractRepository
 								for (Entity val : vals)
 								{
 									Map<String, Object> mref = new HashMap<>();
-									mref.put("sequence_num", i++);
+									mref.put(JUNCTION_TABLE_ORDER_ATTR_NAME, i++);
 									mref.put(idAttribute.getName(), idValue);
 									mref.put(att.getName(), val.get(att.getRefEntity().getIdAttribute().getName()));
 									mrefs.get(att.getName()).add(mref);
@@ -813,7 +824,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		}
 	}
 
-	public boolean tableExists()
+	private boolean tableExists()
 	{
 		Connection conn = null;
 		try
@@ -838,72 +849,6 @@ public class PostgreSqlRepository extends AbstractRepository
 				e2.printStackTrace();
 			}
 		}
-	}
-
-	private boolean columnExists(String column)
-	{
-		Connection conn = null;
-		try
-		{
-			conn = dataSource.getConnection();
-			DatabaseMetaData dbm = conn.getMetaData();
-			ResultSet columns = dbm.getColumns(null, null, getName(), column);
-			return columns.next();
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e);
-		}
-		finally
-		{
-			try
-			{
-				conn.close();
-			}
-			catch (Exception e2)
-			{
-				e2.printStackTrace();
-			}
-		}
-	}
-
-	/**
-	 * Adds an attribute to the table for this entity. Looks up the type of the attribute in {@link #metaData}.
-	 *
-	 * @param attributeName
-	 *            name of the attribute to add
-	 */
-	public void addAttributeToTable(String attributeName)
-	{
-		if (!columnExists(attributeName))
-		{
-			String sql;
-			try
-			{
-				sql = getAlterSql(metaData.getAttribute(attributeName));
-			}
-			catch (MolgenisModelException e)
-			{
-				throw new RuntimeException(e);
-			}
-
-			jdbcTemplate.execute(sql);
-		}
-	}
-
-	/**
-	 * Creates the table for this repository if it does not already exist.
-	 *
-	 * @return boolean indicating if the table was created
-	 */
-	public boolean createTableIfNotExists()
-	{
-		if (!tableExists())
-		{
-			create();
-			return true;
-		}
-		return false;
 	}
 
 	private void removeMrefs(final List<Object> ids, final AttributeMetaData att)
@@ -1098,40 +1043,6 @@ public class PostgreSqlRepository extends AbstractRepository
 				.append(getUniqueKeyName(att)).append(" UNIQUE (").append(getColumnName(att)).append(")").toString();
 	}
 
-	private String getMrefCreateSql(AttributeMetaData att) throws MolgenisModelException
-	{
-		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
-		StringBuilder sql = new StringBuilder();
-
-		// FIXME is this also the case for postgresql?
-		// mysql keys cannot have TEXT value, so change it to VARCHAR when needed
-		String idAttrMysqlType = (idAttribute.getDataType() instanceof StringField ? VARCHAR
-				: idAttribute.getDataType().getMysqlType());
-
-		String refAttrMysqlType = (att.getRefEntity().getIdAttribute().getDataType() instanceof StringField ? VARCHAR
-				: att.getRefEntity().getIdAttribute().getDataType().getMysqlType());
-
-		sql.append(" CREATE TABLE IF NOT EXISTS ").append(getJunctionTableName(att)).append(" (sequence_num INT,")
-				.append(getColumnName(idAttribute)).append(' ').append(idAttrMysqlType).append(" NOT NULL, ")
-				.append(getColumnName(att)).append(' ').append(refAttrMysqlType).append(" NOT NULL, FOREIGN KEY (")
-				.append(getColumnName(idAttribute)).append(") REFERENCES ").append(getTableName()).append('(')
-				.append(getColumnName(idAttribute)).append(") ON DELETE CASCADE");
-
-		// FIXME
-		// If the refEntity is not of type MySQL do not add a foreign key to it
-		// String refEntityBackend = dataService.getMeta().getBackend(att.getRefEntity()).getName();
-		// if (refEntityBackend.equalsIgnoreCase(PostgreSqlRepositoryCollection.NAME))
-		// {
-		sql.append(", FOREIGN KEY (").append(getColumnName(att)).append(") REFERENCES ")
-				.append(getTableName(att.getRefEntity())).append('(')
-				.append(getColumnName(att.getRefEntity().getIdAttribute())).append(") ON DELETE CASCADE");
-		// }
-
-		sql.append(");");
-
-		return sql.toString();
-	}
-
 	private void getMrefQueryFields(List<QueryRule> rules, List<String> fields)
 	{
 		for (QueryRule rule : rules)
@@ -1152,12 +1063,11 @@ public class PostgreSqlRepository extends AbstractRepository
 		}
 	}
 
-	private String getAlterSql(AttributeMetaData attributeMetaData) throws MolgenisModelException
+	private String getAddColumnSql(AttributeMetaData attributeMetaData) throws MolgenisModelException
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("ALTER TABLE ").append(getTableName()).append(" ADD ");
 		getAttributeSql(sql, attributeMetaData);
-		sql.append(";");
 		return sql.toString();
 	}
 
@@ -1201,7 +1111,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		}
 	}
 
-	private String getCreateSql() throws MolgenisModelException
+	private String getCreateTableSql() throws MolgenisModelException
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE IF NOT EXISTS ").append(getTableName()).append('(');
@@ -1229,7 +1139,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		sql.append("PRIMARY KEY (").append(getColumnName(getEntityMetaData().getIdAttribute())).append(')');
 
 		// close
-		sql.append(");");
+		sql.append(')');
 
 		if (LOG.isTraceEnabled())
 		{
@@ -1239,14 +1149,49 @@ public class PostgreSqlRepository extends AbstractRepository
 		return sql.toString();
 	}
 
-	private String getDropSql()
+	private String getCreateJunctionTableSql(AttributeMetaData att) throws MolgenisModelException
 	{
-		return getDropSql(getTableName());
+		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
+		StringBuilder sql = new StringBuilder();
+
+		// FIXME is this also the case for postgresql?
+		// mysql keys cannot have TEXT value, so change it to VARCHAR when needed
+		String idAttrMysqlType = (idAttribute.getDataType() instanceof StringField ? VARCHAR
+				: idAttribute.getDataType().getMysqlType());
+
+		String refAttrMysqlType = (att.getRefEntity().getIdAttribute().getDataType() instanceof StringField ? VARCHAR
+				: att.getRefEntity().getIdAttribute().getDataType().getMysqlType());
+
+		sql.append(" CREATE TABLE IF NOT EXISTS ").append(getJunctionTableName(att)).append(" (")
+				.append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append(" INT,")
+				.append(getColumnName(idAttribute)).append(' ').append(idAttrMysqlType).append(" NOT NULL, ")
+				.append(getColumnName(att)).append(' ').append(refAttrMysqlType).append(" NOT NULL, FOREIGN KEY (")
+				.append(getColumnName(idAttribute)).append(") REFERENCES ").append(getTableName()).append('(')
+				.append(getColumnName(idAttribute)).append(") ON DELETE CASCADE");
+
+		// FIXME
+		// If the refEntity is not of type MySQL do not add a foreign key to it
+		// String refEntityBackend = dataService.getMeta().getBackend(att.getRefEntity()).getName();
+		// if (refEntityBackend.equalsIgnoreCase(PostgreSqlRepositoryCollection.NAME))
+		// {
+		sql.append(", FOREIGN KEY (").append(getColumnName(att)).append(") REFERENCES ")
+				.append(getTableName(att.getRefEntity())).append('(')
+				.append(getColumnName(att.getRefEntity().getIdAttribute())).append(") ON DELETE CASCADE");
+		// }
+
+		sql.append(')');
+
+		return sql.toString();
 	}
 
-	private String getDropSql(String tableName)
+	private String getDropTableSql()
 	{
-		return "DROP TABLE IF EXISTS " + tableName;
+		return getDropTableSql(getTableName());
+	}
+
+	private String getDropTableSql(String tableName)
+	{
+		return new StringBuilder("DROP TABLE IF EXISTS ").append(tableName).toString();
 	}
 
 	@SuppressWarnings("unused")
@@ -1257,7 +1202,8 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	private String getDropColumnSql(String attrName)
 	{
-		return String.format("ALTER TABLE %s DROP COLUMN %s", getTableName(), getColumnName(attrName));
+		return new StringBuilder().append("ALTER TABLE ").append(getTableName()).append(" DROP COLUMN ")
+				.append(getColumnName(attrName)).toString();
 	}
 
 	private String getInsertSql()
@@ -1288,9 +1234,9 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	private String getInsertMrefSql(AttributeMetaData attr, AttributeMetaData idAttr)
 	{
-		return new StringBuilder().append("INSERT INTO ").append(getJunctionTableName(attr))
-				.append(" (\"sequence_num\",").append(getColumnName(idAttr)).append(',').append(getColumnName(attr))
-				.append(") VALUES (?,?,?)").toString();
+		return new StringBuilder().append("INSERT INTO ").append(getJunctionTableName(attr)).append(" (")
+				.append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append(',').append(getColumnName(idAttr))
+				.append(',').append(getColumnName(attr)).append(") VALUES (?,?,?)").toString();
 	}
 
 	private String getDeleteAllSql()
@@ -1673,7 +1619,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		return getJunctionTableName(getEntityMetaData(), attr);
 	}
 
-	private String getJunctionTableName(EntityMetaData emd, AttributeMetaData attr)
+	private static String getJunctionTableName(EntityMetaData emd, AttributeMetaData attr)
 	{
 		return new StringBuilder().append("\"").append(emd.getName()).append('_').append(attr.getName()).append("\"")
 				.toString();

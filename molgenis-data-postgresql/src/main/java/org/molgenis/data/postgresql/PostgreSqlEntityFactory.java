@@ -39,10 +39,9 @@ public class PostgreSqlEntityFactory
 		this.dataService = requireNonNull(dataService);
 	}
 
-	public RowMapper<Entity> createRowMapper(EntityMetaData entityMeta, Fetch fetch, JdbcTemplate jdbcTemplate,
-			String tableName)
+	public RowMapper<Entity> createRowMapper(EntityMetaData entityMeta, Fetch fetch, JdbcTemplate jdbcTemplate)
 	{
-		return new EntityMapper(entityMeta, fetch, jdbcTemplate, tableName);
+		return new EntityMapper(entityMeta, fetch, jdbcTemplate);
 	}
 
 	private class EntityMapper implements RowMapper<Entity>
@@ -51,14 +50,12 @@ public class PostgreSqlEntityFactory
 		private final EntityMetaData entityMetaData;
 		private final Fetch fetch;
 		private final JdbcTemplate jdbcTemplate;
-		private final String tableName;
 
-		private EntityMapper(EntityMetaData entityMetaData, Fetch fetch, JdbcTemplate jdbcTemplate, String tableName)
+		private EntityMapper(EntityMetaData entityMetaData, Fetch fetch, JdbcTemplate jdbcTemplate)
 		{
 			this.entityMetaData = requireNonNull(entityMetaData);
 			this.fetch = fetch; // can be null
 			this.jdbcTemplate = requireNonNull(jdbcTemplate);
-			this.tableName = requireNonNull(tableName);
 		}
 
 		@Override
@@ -90,13 +87,14 @@ public class PostgreSqlEntityFactory
 								{
 									// this list is just as long as it's allowed to be so it probably got truncated.
 									// Retrieve the IDs explicitly in a separate query.
-									String mrefSelectSql = getMrefSelectSql(e, att);
+									String mrefSelectSql = PostgreSqlRepository.getSelectMrefSql(entityMetaData, att);
 									if (LOG.isDebugEnabled())
 									{
 										LOG.debug("Fetching MySQL [{}] data for SQL [{}]", refEntityMeta.getName(),
 												mrefSelectSql);
 									}
-									mrefIntegerIds = jdbcTemplate.queryForList(mrefSelectSql, Integer.class);
+									mrefIntegerIds = jdbcTemplate.queryForList(mrefSelectSql, new Object[]
+									{ e.get(entityMetaData.getIdAttribute().getName()) }, Integer.class);
 								}
 								else
 								{
@@ -114,13 +112,14 @@ public class PostgreSqlEntityFactory
 								{
 									// this list is just as long as it's allowed to be so it probably got truncated.
 									// Retrieve the IDs explicitly in a separate query.
-									String mrefSelectSql = getMrefSelectSql(e, att);
+									String mrefSelectSql = PostgreSqlRepository.getSelectMrefSql(entityMetaData, att);
 									if (LOG.isDebugEnabled())
 									{
 										LOG.debug("Fetching MySQL [{}] data for SQL [{}]", refEntityMeta.getName(),
 												mrefSelectSql);
 									}
-									mrefObjectIds = jdbcTemplate.queryForList(mrefSelectSql, Object.class);
+									mrefObjectIds = jdbcTemplate.queryForList(mrefSelectSql, new Object[]
+									{ e.get(entityMetaData.getIdAttribute().getName()) }, Object.class);
 								}
 								else
 								{
@@ -159,11 +158,5 @@ public class PostgreSqlEntityFactory
 			}
 		}
 
-		private String getMrefSelectSql(Entity e, AttributeMetaData att)
-		{
-			return String.format("SELECT \"%s\" FROM \"%s_%1$s\" WHERE \"%s\" = \"%s\" ORDER BY \"order\"",
-					att.getName(), tableName, entityMetaData.getIdAttribute().getName().toLowerCase(),
-					e.get(entityMetaData.getIdAttribute().getName()));
-		}
 	}
 }
