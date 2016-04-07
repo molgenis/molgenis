@@ -34,7 +34,7 @@ import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.view.meta.EntityViewMetaData;
+import org.molgenis.data.view.meta.ViewMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -91,7 +91,7 @@ public class ViewRepositoryTest extends AbstractTestNGSpringContextTests
 		entityMetaC.addAttribute("pos").setDataType(STRING).setNillable(false);
 		entityMetaC.addAttribute("C").setDataType(STRING);
 
-		EntityViewMetaData evmd = new EntityViewMetaData();
+		ViewMetaData evmd = new ViewMetaData();
 
 		// make repositories
 		repoA = new InMemoryRepository(entityMetaA);
@@ -101,38 +101,38 @@ public class ViewRepositoryTest extends AbstractTestNGSpringContextTests
 
 		entityEvmd1 = new MapEntity(evmd);
 		entityEvmd1.set("id", "1");
-		entityEvmd1.set(EntityViewMetaData.VIEW_NAME, "MY_FIRST_VIEW");
-		entityEvmd1.set(EntityViewMetaData.MASTER_ENTITY, "entityA");
-		entityEvmd1.set(EntityViewMetaData.MASTER_ATTR, "chrom");
-		entityEvmd1.set(EntityViewMetaData.JOIN_ENTITY, "entityB");
-		entityEvmd1.set(EntityViewMetaData.JOIN_ATTR, "chrom");
+		entityEvmd1.set(ViewMetaData.NAME, "MY_FIRST_VIEW");
+		entityEvmd1.set(ViewMetaData.MASTER_ENTITY, "entityA");
+		entityEvmd1.set(ViewMetaData.MASTER_ATTR, "chrom");
+		entityEvmd1.set(ViewMetaData.JOIN_ENTITY, "entityB");
+		entityEvmd1.set(ViewMetaData.JOIN_ATTR, "chrom");
 		repoEvmd.add(entityEvmd1);
 
 		entityEvmd2 = new MapEntity(evmd);
 		entityEvmd2.set("id", "2");
-		entityEvmd2.set(EntityViewMetaData.VIEW_NAME, "MY_FIRST_VIEW");
-		entityEvmd2.set(EntityViewMetaData.MASTER_ENTITY, "entityA");
-		entityEvmd2.set(EntityViewMetaData.MASTER_ATTR, "pos");
-		entityEvmd2.set(EntityViewMetaData.JOIN_ENTITY, "entityB");
-		entityEvmd2.set(EntityViewMetaData.JOIN_ATTR, "pos");
+		entityEvmd2.set(ViewMetaData.VIEW_NAME, "MY_FIRST_VIEW");
+		entityEvmd2.set(ViewMetaData.MASTER_ENTITY, "entityA");
+		entityEvmd2.set(ViewMetaData.MASTER_ATTR, "pos");
+		entityEvmd2.set(ViewMetaData.JOIN_ENTITY, "entityB");
+		entityEvmd2.set(ViewMetaData.JOIN_ATTR, "pos");
 		repoEvmd.add(entityEvmd2);
 
 		entityEvmd3 = new MapEntity(evmd);
 		entityEvmd3.set("id", "3");
-		entityEvmd3.set(EntityViewMetaData.VIEW_NAME, "MY_FIRST_VIEW");
-		entityEvmd3.set(EntityViewMetaData.MASTER_ENTITY, "entityA");
-		entityEvmd3.set(EntityViewMetaData.MASTER_ATTR, "chrom");
-		entityEvmd3.set(EntityViewMetaData.JOIN_ENTITY, "entityC");
-		entityEvmd3.set(EntityViewMetaData.JOIN_ATTR, "chrom");
+		entityEvmd3.set(ViewMetaData.VIEW_NAME, "MY_FIRST_VIEW");
+		entityEvmd3.set(ViewMetaData.MASTER_ENTITY, "entityA");
+		entityEvmd3.set(ViewMetaData.MASTER_ATTR, "chrom");
+		entityEvmd3.set(ViewMetaData.JOIN_ENTITY, "entityC");
+		entityEvmd3.set(ViewMetaData.JOIN_ATTR, "chrom");
 		repoEvmd.add(entityEvmd3);
 
 		entityEvmd4 = new MapEntity(evmd);
 		entityEvmd4.set("id", "4");
-		entityEvmd4.set(EntityViewMetaData.VIEW_NAME, "MY_FIRST_VIEW");
-		entityEvmd4.set(EntityViewMetaData.MASTER_ENTITY, "entityA");
-		entityEvmd4.set(EntityViewMetaData.MASTER_ATTR, "pos");
-		entityEvmd4.set(EntityViewMetaData.JOIN_ENTITY, "entityC");
-		entityEvmd4.set(EntityViewMetaData.JOIN_ATTR, "pos");
+		entityEvmd4.set(ViewMetaData.VIEW_NAME, "MY_FIRST_VIEW");
+		entityEvmd4.set(ViewMetaData.MASTER_ENTITY, "entityA");
+		entityEvmd4.set(ViewMetaData.MASTER_ATTR, "pos");
+		entityEvmd4.set(ViewMetaData.JOIN_ENTITY, "entityC");
+		entityEvmd4.set(ViewMetaData.JOIN_ATTR, "pos");
 		repoEvmd.add(entityEvmd4);
 
 		// entity A (master entity)
@@ -182,9 +182,9 @@ public class ViewRepositoryTest extends AbstractTestNGSpringContextTests
 		viewRepository = new ViewRepository(emd, dataService);
 
 		Query queryMock = mock(Query.class);
-		when(dataService.query(EntityViewMetaData.ENTITY_NAME)).thenReturn(queryMock);
+		when(dataService.query(ViewMetaData.ENTITY_NAME)).thenReturn(queryMock);
 		Query queryMock2 = mock(Query.class);
-		when(queryMock.eq(EntityViewMetaData.VIEW_NAME, "MY_FIRST_VIEW")).thenReturn(queryMock2);
+		when(queryMock.eq(ViewMetaData.VIEW_NAME, "MY_FIRST_VIEW")).thenReturn(queryMock2);
 		when(queryMock2.findOne()).thenReturn(entityEvmd1);
 
 		when(queryMock2.findAll()).thenAnswer(new Answer<Stream<Entity>>()
