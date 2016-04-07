@@ -3,7 +3,9 @@ package org.molgenis.data.annotation.entity.impl;
 import static au.com.bytecode.opencsv.CSVParser.DEFAULT_QUOTE_CHARACTER;
 import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
 import static java.nio.charset.Charset.forName;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
+import static org.apache.commons.lang3.StringUtils.join;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.SEPARATOR;
 
@@ -43,6 +45,8 @@ public class OmimRepository extends AbstractRepository
 	public static final String OMIM_GENE_SYMBOLS_COL_NAME = "Gene_Name";
 	public static final String OMIM_MIM_NUMBER_COL_NAME = "MIMNumber";
 	public static final String OMIM_CYTO_LOCATION_COL_NAME = "CytoLocation";
+	public static final String OMIM_ENTRY_COL_NAME = "OmimEntry";
+	public static final String OMIM_TYPE_COL_NAME = "OmimType";
 
 	private Map<String, List<Entity>> entitiesByGeneSymbol;
 
@@ -67,6 +71,8 @@ public class OmimRepository extends AbstractRepository
 		entityMetaData.addAttribute(OMIM_PHENOTYPE_COL_NAME);
 		entityMetaData.addAttribute(OMIM_MIM_NUMBER_COL_NAME);
 		entityMetaData.addAttribute(OMIM_CYTO_LOCATION_COL_NAME);
+		entityMetaData.addAttribute(OMIM_ENTRY_COL_NAME);
+		entityMetaData.addAttribute(OMIM_TYPE_COL_NAME);
 		return entityMetaData;
 	}
 
@@ -122,50 +128,14 @@ public class OmimRepository extends AbstractRepository
 				String[] values = csvReader.readNext();
 				while (values != null)
 				{
-					String geneSymbols = values[1];
-					String phenotype = values[0];
-					String mim_number = values[2];
-					String cyto_location = values[3];
-
-					String[] separateGeneSymbols = geneSymbols.split(", ");
-
-					for (String geneSymbol : separateGeneSymbols)
-					{
-						if (omimEntriesByGeneSymbol.containsKey(geneSymbol))
-						{
-							omimEntriesByGeneSymbol.get(geneSymbol).get(0).add(phenotype); // first list is phenoype
-							omimEntriesByGeneSymbol.get(geneSymbol).get(1).add(mim_number); // second is mim number
-							omimEntriesByGeneSymbol.get(geneSymbol).get(2).add(cyto_location); // third is cyto location
-						}
-						else
-						{
-							LinkedList<List<String>> mapList = new LinkedList<>();
-							mapList.add(newArrayList(phenotype));
-							mapList.add(newArrayList(mim_number));
-							mapList.add(newArrayList(cyto_location));
-							omimEntriesByGeneSymbol.put(geneSymbol, mapList);
-						}
-					}
+					addLineToMap(omimEntriesByGeneSymbol, values);
 					values = csvReader.readNext();
 				}
 
 				for (String geneSymbol : omimEntriesByGeneSymbol.keySet())
 				{
-					Entity entity = new MapEntity(getEntityMetaData());
-					entity.set(OMIM_GENE_SYMBOLS_COL_NAME, geneSymbol);
-					entity.set(OMIM_PHENOTYPE_COL_NAME, omimEntriesByGeneSymbol.get(geneSymbol).get(0));
-					entity.set(OMIM_MIM_NUMBER_COL_NAME, omimEntriesByGeneSymbol.get(geneSymbol).get(1));
-					entity.set(OMIM_CYTO_LOCATION_COL_NAME, omimEntriesByGeneSymbol.get(geneSymbol).get(2));
-
-					List<Entity> entities = entitiesByGeneSymbol.get(geneSymbol);
-					if (entities == null)
-					{
-						entities = new ArrayList<>();
-						entitiesByGeneSymbol.put(geneSymbol, entities);
-					}
-					entities.add(entity);
+					addEntityToGeneEntityList(omimEntriesByGeneSymbol, geneSymbol);
 				}
-
 			}
 			catch (IOException e)
 			{
@@ -173,5 +143,80 @@ public class OmimRepository extends AbstractRepository
 			}
 		}
 		return entitiesByGeneSymbol;
+	}
+
+	/**
+	 * Uses the map containing the parsed OMIM map to create a list of {@link Entity}
+	 * 
+	 * @param omimEntriesByGeneSymbol
+	 * @param geneSymbol
+	 */
+	private void addEntityToGeneEntityList(Map<String, List<List<String>>> omimEntriesByGeneSymbol, String geneSymbol)
+	{
+		Entity entity = new MapEntity(getEntityMetaData());
+		entity.set(OMIM_GENE_SYMBOLS_COL_NAME, geneSymbol);
+		entity.set(OMIM_PHENOTYPE_COL_NAME, join(omimEntriesByGeneSymbol.get(geneSymbol).get(0), ","));
+		entity.set(OMIM_MIM_NUMBER_COL_NAME, join(omimEntriesByGeneSymbol.get(geneSymbol).get(1), ","));
+		entity.set(OMIM_CYTO_LOCATION_COL_NAME, join(omimEntriesByGeneSymbol.get(geneSymbol).get(2), ","));
+		entity.set(OMIM_TYPE_COL_NAME, join(omimEntriesByGeneSymbol.get(geneSymbol).get(3), ","));
+		entity.set(OMIM_ENTRY_COL_NAME, join(omimEntriesByGeneSymbol.get(geneSymbol).get(4), ","));
+
+		List<Entity> entities = entitiesByGeneSymbol.get(geneSymbol);
+		if (entities == null)
+		{
+			entities = new ArrayList<>();
+			entitiesByGeneSymbol.put(geneSymbol, entities);
+		}
+		entities.add(entity);
+	}
+
+	/*
+	 * Get and parse OMIM entries.
+	 * 
+	 * Do not store entries without an OMIM identifier... e.g. this one: Leukemia, acute myelogenous (3)|KRAS, KRAS2,
+	 * RASK2, NS, CFC2|190070|12p12.1
+	 * 
+	 * But do store this one: Leukemia, acute myelogenous, 601626 (3)|GMPS|600358|3q25.31
+	 */
+	private void addLineToMap(Map<String, List<List<String>>> omimEntriesByGeneSymbol, String[] values)
+	{
+		// trim mapping method field, example: (3)
+		String entry = values[0];
+		entry = entry.substring(0, entry.length() - 3);
+		entry = entry.trim();
+
+		// last six characters should be OMIM id
+		entry = entry.substring(entry.length() - 6);
+		if (entry.matches("[0-9]+"))
+		{
+			String disorder = values[0].substring(0, values[0].length() - 12);
+			List<String> genes = asList(values[1].split(", "));
+			String causalIdentifier = values[2];
+			String cytogenicLocation = values[3];
+			String type = values[0].substring(values[0].length() - 2, values[0].length() - 1);
+			String omimEntry = entry;
+
+			for (String geneSymbol : genes)
+			{
+				if (omimEntriesByGeneSymbol.containsKey(geneSymbol))
+				{
+					omimEntriesByGeneSymbol.get(geneSymbol).get(0).add(disorder); // first list is phenoype
+					omimEntriesByGeneSymbol.get(geneSymbol).get(1).add(causalIdentifier); // second is mim number
+					omimEntriesByGeneSymbol.get(geneSymbol).get(2).add(cytogenicLocation); // third is cyto location
+					omimEntriesByGeneSymbol.get(geneSymbol).get(3).add(type); // fourth is type of syndrome
+					omimEntriesByGeneSymbol.get(geneSymbol).get(4).add(omimEntry); // fifth is omim entry location
+				}
+				else
+				{
+					LinkedList<List<String>> mapList = new LinkedList<>();
+					mapList.add(newArrayList(disorder));
+					mapList.add(newArrayList(causalIdentifier));
+					mapList.add(newArrayList(cytogenicLocation));
+					mapList.add(newArrayList(type));
+					mapList.add(newArrayList(omimEntry));
+					omimEntriesByGeneSymbol.put(geneSymbol, mapList);
+				}
+			}
+		}
 	}
 }
