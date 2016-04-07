@@ -345,6 +345,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		}
 	}
 
+	// TODO move to repository collection
 	@Override
 	public void drop()
 	{
@@ -522,6 +523,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	 * @param async
 	 *            indication if the string should be executed on a different thread or not
 	 */
+	@Deprecated
 	private void execute(String sql, boolean async)
 	{
 		if (async)
@@ -626,11 +628,13 @@ public class PostgreSqlRepository extends AbstractRepository
 								if (mrefs.get(att.getName()) == null) mrefs.put(att.getName(), new ArrayList<>());
 								if (batch.get(rowIndex).get(att.getName()) != null)
 								{
+									AtomicInteger seqNr = new AtomicInteger();
 									for (Entity val : batch.get(rowIndex).getEntities(att.getName()))
 									{
 										if (val != null)
 										{
 											Map<String, Object> mref = new HashMap<>();
+											mref.put(JUNCTION_TABLE_ORDER_ATTR_NAME, seqNr.getAndIncrement());
 											mref.put(idAttribute.getName(),
 													batch.get(rowIndex).get(idAttribute.getName()));
 											mref.put(att.getName(), val.getIdValue());
@@ -746,11 +750,11 @@ public class PostgreSqlRepository extends AbstractRepository
 							List<Entity> vals = Lists.newArrayList(e.getEntities(att.getName()));
 							if (vals != null)
 							{
-								int i = 0;
+								AtomicInteger seqNr = new AtomicInteger();
 								for (Entity val : vals)
 								{
 									Map<String, Object> mref = new HashMap<>();
-									mref.put(JUNCTION_TABLE_ORDER_ATTR_NAME, i++);
+									mref.put(JUNCTION_TABLE_ORDER_ATTR_NAME, seqNr.getAndIncrement());
 									mref.put(idAttribute.getName(), idValue);
 									mref.put(att.getName(), val.get(att.getRefEntity().getIdAttribute().getName()));
 									mrefs.get(att.getName()).add(mref);
@@ -886,11 +890,13 @@ public class PostgreSqlRepository extends AbstractRepository
 			@Override
 			public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
 			{
-				preparedStatement.setInt(1, i);
+				Map<String, Object> mref = mrefs.get(i);
 
-				preparedStatement.setObject(2, mrefs.get(i).get(idAttribute.getName()));
+				preparedStatement.setInt(1, (int) mref.get(JUNCTION_TABLE_ORDER_ATTR_NAME));
 
-				Object value = mrefs.get(i).get(att.getName());
+				preparedStatement.setObject(2, mref.get(idAttribute.getName()));
+
+				Object value = mref.get(att.getName());
 				if (value instanceof Entity)
 				{
 					preparedStatement.setObject(3, refEntityIdAttribute.getDataType()
@@ -1179,6 +1185,10 @@ public class PostgreSqlRepository extends AbstractRepository
 				.append(getColumnName(att.getRefEntity().getIdAttribute())).append(") ON DELETE CASCADE");
 		// }
 
+		sql.append(", UNIQUE (").append(getColumnName(att)).append(',').append(getColumnName(idAttribute)).append(')');
+		sql.append(", UNIQUE (").append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append(',')
+				.append(getColumnName(idAttribute)).append(')');
+
 		sql.append(')');
 
 		return sql.toString();
@@ -1268,15 +1278,12 @@ public class PostgreSqlRepository extends AbstractRepository
 				{
 					if (count > 0) select.append(", ");
 
-					// TODO needed when autoids are used to join
 					if (att.getDataType() instanceof MrefField)
 					{
-						// select.append("string_agg(").append(att.getName()).append('.').append(att.getName())
-						// .append(", ',' ORDER BY ").append(att.getName()).append(".sequence_num) AS ")
-						// .append(att.getName());
-						select.append("string_agg(distinct(").append(getColumnName(att)).append('.')
-								.append(getColumnName(att)).append(")::character varying, ','").append(") AS ")
-								.append(getColumnName(att));
+						// TODO retrieve mref values in seperate queries to allow specifying limit and offset
+						select.append("array_agg(distinct array[").append(getColumnName(att)).append('.')
+								.append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append("::text,")
+								.append(getColumnName(att)).append("::text]) AS ").append(getColumnName(att));
 					}
 					else
 					{
@@ -1295,7 +1302,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		String where = getWhereSql(q, parameters, 0);
 		if (where.length() > 0) result.append(" WHERE ").append(where);
 		// group by
-		if (select.indexOf("string_agg") != -1 && group.length() > 0) result.append(" GROUP BY ").append(group);
+		if (select.indexOf("array_agg") != -1 && group.length() > 0) result.append(" GROUP BY ").append(group);
 		// order by
 		result.append(' ').append(getSortSql(q));
 		// limit

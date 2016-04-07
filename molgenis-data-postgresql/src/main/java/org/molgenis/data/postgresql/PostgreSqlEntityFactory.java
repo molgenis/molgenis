@@ -1,20 +1,18 @@
 package org.molgenis.data.postgresql;
 
+import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.fieldtypes.IntField;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
 import org.slf4j.Logger;
@@ -75,61 +73,24 @@ public class PostgreSqlEntityFactory
 
 					if (att.getDataType() instanceof MrefField)
 					{
+						// ResultSet contains a two dimensional array for MREF attribute values:
+						// [[<order_nr_as_string>,<mref_id_as_string>],[<order_nr_as_string>,<mref_id_as_string>], ...]
+						// In case there are no MREF attribute values the ResulSet is:
+						// [[null,null]]
 						EntityMetaData refEntityMeta = att.getRefEntity();
-						String mrefIds = resultSet.getString(att.getName());
-						if (mrefIds != null)
+						String[][] mrefIdsAndOrder = (String[][]) resultSet.getArray(att.getName()).getArray();
+						if (mrefIdsAndOrder.length > 0 && mrefIdsAndOrder[0][0] != null)
 						{
-							Iterable<Entity> mrefEntities;
-							if (refEntityMeta.getIdAttribute().getDataType() instanceof IntField)
+							Object[] mrefIds = new Object[mrefIdsAndOrder.length];
+							for (String[] mrefIdAndOrder : mrefIdsAndOrder)
 							{
-								List<Integer> mrefIntegerIds;
-								if (mrefIds.length() >= GROUP_CONCAT_MAX_LEN)
-								{
-									// this list is just as long as it's allowed to be so it probably got truncated.
-									// Retrieve the IDs explicitly in a separate query.
-									String mrefSelectSql = PostgreSqlRepository.getSelectMrefSql(entityMetaData, att);
-									if (LOG.isDebugEnabled())
-									{
-										LOG.debug("Fetching MySQL [{}] data for SQL [{}]", refEntityMeta.getName(),
-												mrefSelectSql);
-									}
-									mrefIntegerIds = jdbcTemplate.queryForList(mrefSelectSql, new Object[]
-									{ e.get(entityMetaData.getIdAttribute().getName()) }, Integer.class);
-								}
-								else
-								{
-									mrefIntegerIds = DataConverter.toIntList(mrefIds);
-								}
-
-								// convert ids to (lazy) entities
-								mrefEntities = entityManager.getReferences(refEntityMeta, mrefIntegerIds);
-
+								Integer seqNr = Integer.valueOf(mrefIdAndOrder[0]);
+								Object mrefId = refEntityMeta.getIdAttribute().getDataType().convert(mrefIdAndOrder[1]);
+								mrefIds[seqNr] = mrefId;
 							}
-							else
-							{
-								List<Object> mrefObjectIds;
-								if (mrefIds.length() >= GROUP_CONCAT_MAX_LEN)
-								{
-									// this list is just as long as it's allowed to be so it probably got truncated.
-									// Retrieve the IDs explicitly in a separate query.
-									String mrefSelectSql = PostgreSqlRepository.getSelectMrefSql(entityMetaData, att);
-									if (LOG.isDebugEnabled())
-									{
-										LOG.debug("Fetching MySQL [{}] data for SQL [{}]", refEntityMeta.getName(),
-												mrefSelectSql);
-									}
-									mrefObjectIds = jdbcTemplate.queryForList(mrefSelectSql, new Object[]
-									{ e.get(entityMetaData.getIdAttribute().getName()) }, Object.class);
-								}
-								else
-								{
-									mrefObjectIds = DataConverter.toObjectList(mrefIds);
-								}
 
-								// convert ids to (lazy) entities
-								mrefEntities = entityManager.getReferences(refEntityMeta, mrefObjectIds);
-							}
-							e.set(att.getName(), mrefEntities);
+							// convert ids to (lazy) entities
+							e.set(att.getName(), entityManager.getReferences(refEntityMeta, asList(mrefIds)));
 						}
 					}
 					else if (att.getDataType() instanceof XrefField)
