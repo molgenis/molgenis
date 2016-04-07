@@ -1005,11 +1005,6 @@ public class PostgreSqlRepository extends AbstractRepository
 						att.getEnumOptions().stream().map(enumOption -> "'" + enumOption + "'").collect(joining(",")))
 						.append("))");
 			}
-			// int + auto = auto_increment
-			if (att.getDataType().equals(MolgenisFieldTypes.INT) && att.isAuto())
-			{
-				sql.append(" AUTO_INCREMENT");
-			}
 		}
 	}
 
