@@ -72,7 +72,6 @@ public class PostgreSqlRepository extends AbstractRepository
 	private static final Logger LOG = LoggerFactory.getLogger(PostgreSqlRepository.class);
 
 	private static final int BATCH_SIZE = 1000;
-	private static final String VARCHAR = "VARCHAR(255)";
 	private static final String JUNCTION_TABLE_ORDER_ATTR_NAME = "order";
 
 	private final DataService dataService;
@@ -987,34 +986,13 @@ public class PostgreSqlRepository extends AbstractRepository
 			// xref adopt type of the identifier of referenced entity
 			if (att.getDataType() instanceof XrefField)
 			{
-				// mysql keys can not be of type TEXT, so don't adopt the field type of a referenced entity when it is
-				// of fieldtype STRING
-				if (att.getRefEntity().getIdAttribute().getDataType() instanceof StringField)
-				{
-					sql.append(VARCHAR);
-				}
-				else
-				{
-					sql.append(att.getRefEntity().getIdAttribute().getDataType().getMysqlType());
-				}
+				sql.append(att.getRefEntity().getIdAttribute().getDataType().getPostgreSqlType());
 			}
 			else
 			{
-				if (att.equals(getEntityMetaData().getIdAttribute()) && att.getDataType() instanceof StringField)
-				{
-					// id attributes can not be of type TEXT so we'll change it to VARCHAR
-					sql.append(VARCHAR);
-				}
-				else if (att.isUnique() && att.getDataType() instanceof StringField)
-				{
-					// mysql TEXT fields cannot be UNIQUE, so use VARCHAR instead
-					sql.append(VARCHAR);
-				}
-				else
-				{
-					sql.append(getDataTypeSql(att));
-				}
+				sql.append(att.getDataType().getPostgreSqlType());
 			}
+			// TODO remove Questionnaire entity hack
 			// not null
 			if (!att.isNillable() && !EntityUtils.doesExtend(metaData, "Questionnaire")
 					&& (att.getVisibleExpression() == null))
@@ -1077,46 +1055,6 @@ public class PostgreSqlRepository extends AbstractRepository
 		return sql.toString();
 	}
 
-	private String getDataTypeSql(AttributeMetaData attr)
-	{
-		FieldTypeEnum attrType = attr.getDataType().getEnumType();
-		switch (attrType)
-		{
-			case BOOL:
-				return "boolean";
-			case CATEGORICAL:
-			case XREF:
-			case FILE:
-				return "varchar(255)";
-			case DATE:
-				return "date";
-			case DATE_TIME:
-				return "timestamp";
-			case DECIMAL:
-				return "decimal";
-			case EMAIL:
-			case HTML:
-			case HYPERLINK:
-			case SCRIPT:
-			case STRING:
-			case TEXT:
-			case ENUM:
-				return "text";
-			// case ENUM:
-			// return getEnumTypeName(attr);
-			case INT:
-				return "integer";
-			case LONG:
-				return "bigint";
-			case CATEGORICAL_MREF:
-			case COMPOUND:
-			case MREF:
-				throw new RuntimeException(format("No data type exists for attribute type [%s]", attrType));
-			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", attrType));
-		}
-	}
-
 	private String getCreateTableSql() throws MolgenisModelException
 	{
 		StringBuilder sql = new StringBuilder();
@@ -1157,23 +1095,16 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	private String getCreateJunctionTableSql(AttributeMetaData att) throws MolgenisModelException
 	{
-		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
+		AttributeMetaData idAttr = getEntityMetaData().getIdAttribute();
 		StringBuilder sql = new StringBuilder();
 
-		// FIXME is this also the case for postgresql?
-		// mysql keys cannot have TEXT value, so change it to VARCHAR when needed
-		String idAttrMysqlType = (idAttribute.getDataType() instanceof StringField ? VARCHAR
-				: idAttribute.getDataType().getMysqlType());
-
-		String refAttrMysqlType = (att.getRefEntity().getIdAttribute().getDataType() instanceof StringField ? VARCHAR
-				: att.getRefEntity().getIdAttribute().getDataType().getMysqlType());
-
 		sql.append(" CREATE TABLE IF NOT EXISTS ").append(getJunctionTableName(att)).append(" (")
-				.append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append(" INT,")
-				.append(getColumnName(idAttribute)).append(' ').append(idAttrMysqlType).append(" NOT NULL, ")
-				.append(getColumnName(att)).append(' ').append(refAttrMysqlType).append(" NOT NULL, FOREIGN KEY (")
-				.append(getColumnName(idAttribute)).append(") REFERENCES ").append(getTableName()).append('(')
-				.append(getColumnName(idAttribute)).append(") ON DELETE CASCADE");
+				.append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append(" INT,").append(getColumnName(idAttr))
+				.append(' ').append(idAttr.getDataType().getPostgreSqlType()).append(" NOT NULL, ")
+				.append(getColumnName(att)).append(' ')
+				.append(att.getRefEntity().getIdAttribute().getDataType().getPostgreSqlType())
+				.append(" NOT NULL, FOREIGN KEY (").append(getColumnName(idAttr)).append(") REFERENCES ")
+				.append(getTableName()).append('(').append(getColumnName(idAttr)).append(") ON DELETE CASCADE");
 
 		// FIXME
 		// If the refEntity is not of type MySQL do not add a foreign key to it
@@ -1185,9 +1116,9 @@ public class PostgreSqlRepository extends AbstractRepository
 				.append(getColumnName(att.getRefEntity().getIdAttribute())).append(") ON DELETE CASCADE");
 		// }
 
-		sql.append(", UNIQUE (").append(getColumnName(att)).append(',').append(getColumnName(idAttribute)).append(')');
+		sql.append(", UNIQUE (").append(getColumnName(att)).append(',').append(getColumnName(idAttr)).append(')');
 		sql.append(", UNIQUE (").append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append(',')
-				.append(getColumnName(idAttribute)).append(')');
+				.append(getColumnName(idAttr)).append(')');
 
 		sql.append(')');
 
