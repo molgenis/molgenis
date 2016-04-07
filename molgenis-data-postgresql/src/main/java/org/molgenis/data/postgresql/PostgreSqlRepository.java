@@ -571,7 +571,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	private void resetXrefValuesBySelfReference(Iterable<? extends Entity> entities)
 	{
 		List<String> xrefAttributesWithSelfReference = new ArrayList<String>();
-		for (AttributeMetaData attributeMetaData : getEntityMetaData().getAttributes()) // FIXME bug: getAtomicAttrs
+		for (AttributeMetaData attributeMetaData : getEntityMetaData().getAtomicAttributes())
 		{
 			if (attributeMetaData.getDataType().getEnumType().equals(FieldTypeEnum.XREF)
 					&& getEntityMetaData().getName().equals(attributeMetaData.getRefEntity().getName()))
