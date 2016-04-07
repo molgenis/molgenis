@@ -13,17 +13,22 @@ var EntityViewModal = React.createClass({
 		entitySelectOnValueChange: React.PropTypes.func
 	},
 	render: function() {
-		return <Modal isOpen={this.props.isOpen} onRequestHide={this.props.hideModal}>
+		var { isOpen, hideModal, viewName, inputOnValueChange, entitySelectOnValueChange, saveEntityView} = this.props;
+		return <Modal isOpen={isOpen} onRequestHide={hideModal}>
 			<div className='modal-header'>
-				<ModalClose onClick={this.props.hideModal}/>
+				<ModalClose onClick={hideModal} />
 				<h4 className='modal-title'>Modal title</h4>
 			</div>
 			<div className='modal-body'>
-				<EntityViewForm viewName={this.props.viewName} inputOnValueChange={this.props.inputOnValueChange} entitySelectOnValueChange={this.props.entitySelectOnValueChange} />
+				<EntityViewForm 
+					viewName={viewName} 
+					inputOnValueChange={inputOnValueChange} 
+					entitySelectOnValueChange={entitySelectOnValueChange} 
+				/>
 			</div>
 		  	<div className='modal-footer'>
-		  		<button className='btn btn-default' onClick={this.props.hideModal}>Close</button>
-		  		<button className='btn btn-primary' onClick={this.props.saveEntityView}>Save changes</button>
+		  		<button className='btn btn-default' onClick={hideModal}>Cancel</button>
+		  		<button className='btn btn-primary' onClick={saveEntityView}>Save</button>
 		  	</div>
 	</Modal>	
 	}

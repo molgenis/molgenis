@@ -1,8 +1,6 @@
 package org.molgenis.data.view.controller;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static org.molgenis.data.view.controller.ViewConfigurationController.URI;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.util.List;
@@ -13,8 +11,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.view.meta.EntityViewMetaData;
-import org.molgenis.data.view.response.EntityViewCollectionResponse;
+import org.molgenis.data.view.meta.ViewMetaData;
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -55,68 +52,29 @@ public class ViewConfigurationController extends MolgenisPluginController
 
 	@RequestMapping(value = "/add-entity-view", method = POST)
 	@ResponseBody
-	public String addEntityView(@RequestParam(value = "viewName") String viewName,
+	public void addEntityView(@RequestParam(value = "viewName") String viewName,
 			@RequestParam(value = "masterEntityName") String masterEntityName)
 	{
-		Entity newViewEntity = new MapEntity(new EntityViewMetaData());
-		newViewEntity.set(EntityViewMetaData.VIEW_NAME, viewName);
-		newViewEntity.set(EntityViewMetaData.MASTER_ENTITY, masterEntityName);
-		dataService.add(EntityViewMetaData.ENTITY_NAME, newViewEntity);
-
-		// Can I get the ID of this entity?
-		String id = newViewEntity.getIdValue().toString();
-
-		return id;
+		Entity newViewEntity = new MapEntity(new ViewMetaData());
+		newViewEntity.set(ViewMetaData.NAME, viewName);
+		newViewEntity.set(ViewMetaData.MASTER_ENTITY, masterEntityName);
+		dataService.add(ViewMetaData.ENTITY_NAME, newViewEntity);
 	}
 
-	/**
-	 * parses the {@link EntityView} table into a {@link List} of {@link EntityViewCollectionResponse} with View Names,
-	 * Master Entity names, and a list of Joined Entity names
-	 * 
-	 * @param masterEntityName
-	 * @return a {@link List} of {@link EntityViewCollectionResponse}
-	 */
-	@RequestMapping(value = "/get-entity-views", method = GET)
+	@RequestMapping(value = "/get-view-rows", method = POST)
 	@ResponseBody
-	public List<EntityViewCollectionResponse> getEntityViews()
+	public List<Entity> getViewRows(@RequestParam(value = "viewName") String viewName)
 	{
-		List<EntityViewCollectionResponse> entityViewCollectionResponses = newArrayList();
-		List<String> joinedEntities = newArrayList();
-		List<Entity> entityViewEntities = dataService.findAll(EntityViewMetaData.ENTITY_NAME)
+		return dataService
+				.findAll(ViewMetaData.ENTITY_NAME, new QueryImpl().eq(ViewMetaData.NAME, viewName))
 				.collect(Collectors.toList());
-
-		String currentViewName = null;
-		for (Entity entity : entityViewEntities)
-		{
-			String viewName = entity.getString(EntityViewMetaData.VIEW_NAME);
-			String masterEntityName = entity.getString(EntityViewMetaData.MASTER_ENTITY);
-
-			if (currentViewName == null)
-			{
-				currentViewName = viewName;
-			}
-
-			if (viewName.equals(currentViewName))
-			{
-				joinedEntities.add(entity.getString(EntityViewMetaData.JOIN_ENTITY));
-			}
-			else
-			{
-				entityViewCollectionResponses.add(new EntityViewCollectionResponse(idGenerator.generateId(), viewName,
-						masterEntityName, joinedEntities));
-				joinedEntities = newArrayList();
-				currentViewName = viewName;
-			}
-		}
-
-		return entityViewCollectionResponses;
 	}
 
 	@RequestMapping(value = "/delete-entity-view", method = POST)
 	@ResponseBody
 	public void deleteEntityView(@RequestParam(value = "viewName") String viewName)
 	{
-		dataService.delete(EntityViewMetaData.ENTITY_NAME, dataService.findAll(EntityViewMetaData.ENTITY_NAME,
-				new QueryImpl().eq(EntityViewMetaData.VIEW_NAME, viewName)));
+		dataService.delete(ViewMetaData.ENTITY_NAME, dataService.findAll(ViewMetaData.ENTITY_NAME,
+				new QueryImpl().eq(ViewMetaData.NAME, viewName)));
 	}
 }

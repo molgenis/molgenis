@@ -4,7 +4,7 @@ import { EntityViewsTableRow } from './EntityViewsTableRow';
 var EntityViewsTable = React.createClass({
 	displayName: 'EntityViewsTable',
 	propTypes: {
-		tableContent: React.PropTypes.array.isRequired,
+		tableContent: React.PropTypes.object,
 		entityEditFunction: React.PropTypes.func,
 		entityDeleteFunction: React.PropTypes.func
 	},
@@ -24,7 +24,7 @@ var EntityViewsTable = React.createClass({
 				<th>Joined entities</th>
 			</thead>
 			<tbody>
-			{self.props.tableContent.map(function(row){	
+			{self.props.tableContent.items.map(function(row){	
 				return <EntityViewsTableRow 
 					row={row} 
 					key={row.identifier} 

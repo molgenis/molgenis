@@ -6,18 +6,20 @@ var EntityViewsTableRow = React.createClass({
 	propTypes: {
 		row: React.PropTypes.object.isRequired,
 		onEditClick: React.PropTypes.func.isRequired,
-		onDeleteClick: React.PropTypes.func.isRequired,
+		onDeleteClick: React.PropTypes.func.isRequired
 	},
 	render: function() {
-		var {row, onDeleteClick, onEditClick} = this.props;
+		var { row, onEditClick, onDeleteClick } = this.props;
 		return <tr>
 			<td>
-				<Button type='button'  size='xsmall' onClick={onDeleteClick(row)} icon='trash' style='danger' />
-				<Button type='button'  size='xsmall' onClick={onEditClick(row)} icon='pencil' style='default' />
+				<Button type='button'  size='xsmall' onClick={onDeleteClick.bind(null, row)} icon='trash' style='danger' />
+				<Button type='button'  size='xsmall' onClick={onEditClick.bind(null, row)} icon='pencil' style='default' />
 			</td>
-			<td>{row.viewName}</td>
-			<td>{row.masterEntityName}</td>
-			<td>{row.joinedEntityNames}</td>
+			<td>{row.name}</td>
+			<td>{row.masterEntity}</td>
+			<td>{row.joinedEntities.map(function(joinedEntity) {
+				
+			})}</td>
 		</tr>
 	}
 });

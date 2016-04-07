@@ -1,32 +1,29 @@
 package org.molgenis.data.view.meta;
 
+import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.stereotype.Component;
 
 @Component
-public class EntityViewMetaData extends DefaultEntityMetaData
+public class ViewMetaData extends DefaultEntityMetaData
 {
-	public static final String ENTITY_NAME = "EntityView";
-	public static final String IDENTIFIER = "id";
-	public static final String VIEW_NAME = "viewName";
-	public static final String MASTER_ENTITY = "master_entity";
-	public static final String MASTER_ATTR = "master_attr";
-	public static final String JOIN_ENTITY = "join_entity";
-	public static final String JOIN_ATTR = "join_attr";
+	public static final String ENTITY_NAME = "View";
+	public static final String IDENTIFIER = "identifier";
+	public static final String NAME = "name";
+	public static final String MASTER_ENTITY = "masterEntity";
+	public static final String JOINED_ENTITIES = "joinedEntities";
 
-	public EntityViewMetaData()
+	public ViewMetaData()
 	{
 		super(ENTITY_NAME);
 
 		setDescription("Contains the relationships between the master entity and each joined entity of a view.");
 
 		addAttribute(IDENTIFIER, AttributeRole.ROLE_ID).setAuto(true).setNillable(false).setDataType(STRING);
-		addAttribute(VIEW_NAME).setNillable(false).setDataType(STRING).isUnique();
+		addAttribute(NAME).setNillable(false).setDataType(STRING).isUnique();
 		addAttribute(MASTER_ENTITY).setNillable(false).setDataType(STRING);
-		addAttribute(MASTER_ATTR).setNillable(true).setDataType(STRING);
-		addAttribute(JOIN_ENTITY).setNillable(true).setDataType(STRING);
-		addAttribute(JOIN_ATTR).setNillable(true).setDataType(STRING);
+		addAttribute(JOINED_ENTITIES).setNillable(true).setDataType(MREF).setRefEntity(new JoinedEntityMetaData());
 	}
 }
