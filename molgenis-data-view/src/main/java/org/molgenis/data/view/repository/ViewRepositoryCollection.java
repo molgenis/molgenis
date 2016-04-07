@@ -1,5 +1,6 @@
 package org.molgenis.data.view.repository;
 
+import static com.google.common.collect.Maps.newLinkedHashMap;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Iterator;
@@ -28,7 +29,7 @@ public class ViewRepositoryCollection implements ManageableRepositoryCollection
 	public static final String NAME = "VIEW";
 	private final SearchService searchService;
 	private final DataService dataService;
-	private final Map<String, ViewRepository> repositories = Maps.newLinkedHashMap();
+	private final Map<String, ViewRepository> repositories = newLinkedHashMap();
 
 	@Autowired
 	public ViewRepositoryCollection(SearchService searchService, DataService dataService)
