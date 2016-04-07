@@ -46,6 +46,19 @@ public class XrefField extends FieldType
 	}
 
 	@Override
+	public String getPostgreSqlType()
+	{
+		try
+		{
+			return getFieldType(f.getXrefField()).getPostgreSqlType();
+		}
+		catch (MolgenisModelException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
 	public String getOracleType() throws MolgenisModelException
 	{
 		return getFieldType(f.getXrefField()).getOracleType();

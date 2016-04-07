@@ -37,6 +37,12 @@ public class LongField extends FieldType
 	}
 
 	@Override
+	public String getPostgreSqlType()
+	{
+		return "bigint"; // alias: int8
+	}
+
+	@Override
 	public String getOracleType() throws MolgenisModelException
 	{
 		return "NUMBER (19,0)";

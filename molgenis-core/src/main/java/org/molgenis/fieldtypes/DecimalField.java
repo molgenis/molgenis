@@ -38,6 +38,12 @@ public class DecimalField extends FieldType
 	}
 
 	@Override
+	public String getPostgreSqlType()
+	{
+		return "double precision"; // alias: float8
+	}
+
+	@Override
 	public String getOracleType() throws MolgenisModelException
 	{
 		return "NUMBER";

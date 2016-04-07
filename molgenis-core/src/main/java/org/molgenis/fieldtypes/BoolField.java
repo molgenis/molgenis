@@ -33,6 +33,12 @@ public class BoolField extends FieldType
 	}
 
 	@Override
+	public String getPostgreSqlType()
+	{
+		return "boolean";
+	}
+
+	@Override
 	public String getOracleType() throws MolgenisModelException
 	{
 		return "CHAR";
@@ -96,7 +102,7 @@ public class BoolField extends FieldType
 	public Object convert(Object value)
 	{
 		if (value == null) return null;
-		if (value instanceof Boolean) return (Boolean) value;
+		if (value instanceof Boolean) return value;
 		if (value instanceof String) return Boolean.parseBoolean(value.toString());
 		if (value instanceof Integer) return (Integer) value > 0;
 		throw new RuntimeException("BoolField.convert(" + value + ") failed");

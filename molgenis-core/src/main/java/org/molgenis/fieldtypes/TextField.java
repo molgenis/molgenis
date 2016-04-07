@@ -30,6 +30,12 @@ public class TextField extends FieldType
 	}
 
 	@Override
+	public String getPostgreSqlType()
+	{
+		return "text";
+	}
+
+	@Override
 	public String getOracleType()
 	{
 		return "VARCHAR";

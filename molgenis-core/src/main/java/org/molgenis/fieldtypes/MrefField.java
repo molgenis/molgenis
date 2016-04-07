@@ -67,6 +67,12 @@ public class MrefField extends FieldType
 	}
 
 	@Override
+	public String getPostgreSqlType()
+	{
+		throw new UnsupportedOperationException("No PostgreSQL data type exists for 'mref' field type");
+	}
+
+	@Override
 	public String getOracleType() throws MolgenisModelException
 	{
 		// FIXME this function should be never called???

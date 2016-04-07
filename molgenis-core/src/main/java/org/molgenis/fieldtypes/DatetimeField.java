@@ -42,6 +42,12 @@ public class DatetimeField extends FieldType
 	}
 
 	@Override
+	public String getPostgreSqlType()
+	{
+		return "timestamp";
+	}
+
+	@Override
 	public String getOracleType() throws MolgenisModelException
 	{
 		return "DATE";
