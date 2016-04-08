@@ -21,7 +21,7 @@ public interface EntityAnnotator extends Annotator
 	 *            the entity to annotate
 	 * @return {@link Iterable} for the annotated data
 	 */
-	Iterable<Entity> annotateEntity(Entity sourceEntity);
+	Iterable<Entity> annotateEntity(Entity sourceEntity, boolean updateMode);
 
 	/**
 	 * @return the {@link List<AttributeMetaData>} that must be present in the source entity.

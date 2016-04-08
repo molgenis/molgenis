@@ -17,6 +17,7 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
@@ -35,7 +36,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.base.Predicates;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 
 @Configuration
@@ -105,8 +105,13 @@ public class GoNLAnnotator
 
 			@Override
 			protected void processQueryResults(Entity inputEntity, Iterable<Entity> annotationSourceEntities,
-					Entity resultEntity)
+					Entity resultEntity, boolean updateMode)
 			{
+				if(updateMode == true)
+				{
+					throw new MolgenisDataException("This annotator/filter does not support updating of values");
+				}
+				
 				String afs = null;
 				String gtcs = null;
 				List<Entity> refMatches = Lists.newArrayList();

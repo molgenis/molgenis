@@ -516,6 +516,20 @@ public class SnpEffAnnotator
 			return new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(
 					SnpEffAnnotatorSettings.Meta.SNPEFF_JAR_LOCATION, pluginSettings);
 		}
+
+		/**
+		 * SnpEff annotator does not update
+		 * TODO - or does it?
+		 */
+		@Override
+		public Iterator<Entity> annotate(Iterable<Entity> source, boolean updateMode)
+		{
+			if(updateMode == true)
+			{
+				throw new MolgenisDataException("This annotator/filter does not support updating of values");
+			}
+			return this.annotate(source);
+		}
 	}
 
 }

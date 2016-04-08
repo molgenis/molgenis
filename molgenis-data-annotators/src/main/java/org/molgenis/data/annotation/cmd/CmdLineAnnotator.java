@@ -7,6 +7,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -199,6 +200,8 @@ public class CmdLineAnnotator
 		parser.acceptsAll(asList("h", "help"), "Prints this help text");
 		parser.acceptsAll(asList("r", "replace"),
 				"Enables output file override, replacing a file with the same name as the argument for the -o option");
+		parser.acceptsAll(asList("u", "update-annotations"),
+				"Enables add/updating of annotations, i.e. CADD scores from a different source, by reusing existing annotations when no match was found.");
 
 		return parser;
 	}
@@ -262,6 +265,8 @@ public class CmdLineAnnotator
 				}
 			}
 
+			System.out.println("update = " + options.has("u"));
+			
 			Iterator<Entity> annotatedRecords = annotator.annotate(vcfRepo);
 			while (annotatedRecords.hasNext())
 			{

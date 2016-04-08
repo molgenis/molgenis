@@ -5,6 +5,7 @@ import java.util.Collections;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.entity.ResultFilter;
 
 import com.google.common.base.Optional;
@@ -21,11 +22,14 @@ public class FirstResultFilter implements ResultFilter
 	{
 		return Collections.emptyList();
 	}
-
+	
 	@Override
-	public Optional<Entity> filterResults(Iterable<Entity> results, Entity annotatedEntity)
+	public Optional<Entity> filterResults(Iterable<Entity> results, Entity annotatedEntity, boolean updateMode)
 	{
+		if(updateMode == true)
+		{
+			throw new MolgenisDataException("This annotator/filter does not support updating of values");
+		}
 		return FluentIterable.from(results).first();
 	}
-
 }

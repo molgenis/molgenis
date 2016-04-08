@@ -14,6 +14,7 @@ import java.util.List;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
@@ -119,10 +120,15 @@ public class OmimAnnotator
 		{
 			return Collections.emptyList();
 		}
-
+		
 		@Override
-		public Optional<Entity> filterResults(Iterable<Entity> results, Entity annotatedEntity)
+		public Optional<Entity> filterResults(Iterable<Entity> results, Entity annotatedEntity, boolean updateMode)
 		{
+			if(updateMode == true)
+			{
+				throw new MolgenisDataException("This annotator/filter does not support updating of values");
+			}
+			
 			Optional<Entity> firstResult = FluentIterable.from(results).first();
 			return firstResult.transform(e -> {
 				Entity result = new MapEntity();

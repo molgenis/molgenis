@@ -81,7 +81,7 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 	}
 
 	@Override
-	public List<Entity> annotateEntity(Entity entity)
+	public List<Entity> annotateEntity(Entity entity, boolean updateMode)
 	{
 		Query q = queryCreator.createQuery(entity);
 		Iterable<Entity> annotatationSourceEntities;
@@ -103,7 +103,7 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 		DefaultEntityMetaData meta = new DefaultEntityMetaData(entity.getEntityMetaData());
 		info.getOutputAttributes().forEach(meta::addAttributeMetaData);
 		Entity resultEntity = new MapEntity(entity, meta);
-		processQueryResults(entity, annotatationSourceEntities, resultEntity);
+		processQueryResults(entity, annotatationSourceEntities, resultEntity, updateMode);
 		return Collections.singletonList(resultEntity);
 	}
 
@@ -124,6 +124,6 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 	 *            the result entity to write the annotation attributes to
 	 */
 	protected abstract void processQueryResults(Entity inputEntity, Iterable<Entity> annotationSourceEntities,
-			Entity resultEntity);
+			Entity resultEntity, boolean updateMode);
 
 }
