@@ -67,10 +67,14 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+/**
+ * Repository that persists entities in a PostgreSQL database
+ */
 public class PostgreSqlRepository extends AbstractRepository
 {
 	private static final Logger LOG = LoggerFactory.getLogger(PostgreSqlRepository.class);
 
+	/** JDBC batch operation size */
 	private static final int BATCH_SIZE = 1000;
 	private static final String JUNCTION_TABLE_ORDER_ATTR_NAME = "order";
 
@@ -163,21 +167,30 @@ public class PostgreSqlRepository extends AbstractRepository
 	public Entity findOne(Query q)
 	{
 		Iterator<Entity> iterator = findAll(q).iterator();
-		if (iterator.hasNext()) return iterator.next();
+		if (iterator.hasNext())
+		{
+			return iterator.next();
+		}
 		return null;
 	}
 
 	@Override
 	public Entity findOne(Object id)
 	{
-		if (id == null) return null;
+		if (id == null)
+		{
+			return null;
+		}
 		return findOne(new QueryImpl().eq(getEntityMetaData().getIdAttribute().getName(), id));
 	}
 
 	@Override
 	public Entity findOne(Object id, Fetch fetch)
 	{
-		if (id == null) return null;
+		if (id == null)
+		{
+			return null;
+		}
 		return findOne(new QueryImpl().eq(getEntityMetaData().getIdAttribute().getName(), id).fetch(fetch));
 	}
 
@@ -275,7 +288,10 @@ public class PostgreSqlRepository extends AbstractRepository
 	@Override
 	public void add(Entity entity)
 	{
-		if (entity == null) throw new RuntimeException("PostgreSqlRepository.add() failed: entity was null");
+		if (entity == null)
+		{
+			throw new RuntimeException("PostgreSqlRepository.add() failed: entity was null");
+		}
 		add(Stream.of(entity));
 	}
 
@@ -299,6 +315,7 @@ public class PostgreSqlRepository extends AbstractRepository
 			jdbcTemplate.execute(getCreateTableSql());
 			LOG.debug("Created table [{}]", getTableName());
 
+			String idAttrName = getEntityMetaData().getIdAttribute().getName();
 			for (AttributeMetaData attr : getEntityMetaData().getAtomicAttributes())
 			{
 				if (attr.getExpression() != null)
@@ -323,8 +340,7 @@ public class PostgreSqlRepository extends AbstractRepository
 					// }
 				}
 
-				// text can't be unique, so don't add unique constraint when type is string
-				if (attr.isUnique() && !(attr.getDataType() instanceof StringField))
+				if (attr.isUnique() && !attr.getName().equals(idAttrName))
 				{
 					jdbcTemplate.execute(getUniqueSql(attr));
 				}
@@ -455,22 +471,22 @@ public class PostgreSqlRepository extends AbstractRepository
 			}
 			if (attributeMetaData.getDataType() instanceof MrefField)
 			{
-				execute(getCreateJunctionTableSql(attributeMetaData), async);
+				jdbcTemplate.execute(getCreateJunctionTableSql(attributeMetaData));
 			}
 			else if (!attributeMetaData.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
 			{
-				execute(getAddColumnSql(attributeMetaData), async);
+				jdbcTemplate.execute(getAddColumnSql(attributeMetaData));
 			}
 
 			if (attributeMetaData.getDataType() instanceof XrefField)
 			{
-				execute(getCreateFKeySql(attributeMetaData), async);
+				jdbcTemplate.execute(getCreateFKeySql(attributeMetaData));
 			}
 
-			// TEXT cannot be UNIQUE, don't add constraint when field type is string
-			if (attributeMetaData.isUnique() && !(attributeMetaData.getDataType() instanceof StringField))
+			String idAttrName = getEntityMetaData().getIdAttribute().getName();
+			if (attributeMetaData.isUnique() && !attributeMetaData.getName().equals(idAttrName))
 			{
-				execute(getUniqueSql(attributeMetaData), async);
+				jdbcTemplate.execute(getUniqueSql(attributeMetaData));
 			}
 
 			if (attributeMetaData.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
@@ -511,27 +527,6 @@ public class PostgreSqlRepository extends AbstractRepository
 		catch (DataAccessException caught)
 		{
 			return caught;
-		}
-	}
-
-	/**
-	 * Executes a SQL string.
-	 *
-	 * @param sql
-	 *            the String to execute
-	 * @param async
-	 *            indication if the string should be executed on a different thread or not
-	 */
-	@Deprecated
-	private void execute(String sql, boolean async)
-	{
-		if (async)
-		{
-			jdbcTemplate.execute(sql);
-		}
-		else
-		{
-			jdbcTemplate.execute(sql);
 		}
 	}
 
@@ -598,7 +593,10 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	private Integer add(Iterator<? extends Entity> entitiesIterator)
 	{
-		if (entitiesIterator == null) return 0;
+		if (entitiesIterator == null)
+		{
+			return 0;
+		}
 		AtomicInteger count = new AtomicInteger(0);
 
 		final List<Entity> batch = new ArrayList<Entity>();
@@ -624,7 +622,10 @@ public class PostgreSqlRepository extends AbstractRepository
 							// create the mref records
 							if (att.getDataType() instanceof MrefField)
 							{
-								if (mrefs.get(att.getName()) == null) mrefs.put(att.getName(), new ArrayList<>());
+								if (mrefs.get(att.getName()) == null)
+								{
+									mrefs.put(att.getName(), new ArrayList<>());
+								}
 								if (batch.get(rowIndex).get(att.getName()) != null)
 								{
 									AtomicInteger seqNr = new AtomicInteger();
@@ -743,7 +744,10 @@ public class PostgreSqlRepository extends AbstractRepository
 					// create the mref records
 					if (att.getDataType() instanceof MrefField)
 					{
-						if (mrefs.get(att.getName()) == null) mrefs.put(att.getName(), new ArrayList<>());
+						if (mrefs.get(att.getName()) == null)
+						{
+							mrefs.put(att.getName(), new ArrayList<>());
+						}
 						if (e.get(att.getName()) != null)
 						{
 							List<Entity> vals = Lists.newArrayList(e.getEntities(att.getName()));
@@ -834,7 +838,8 @@ public class PostgreSqlRepository extends AbstractRepository
 		{
 			conn = dataSource.getConnection();
 			DatabaseMetaData dbm = conn.getMetaData();
-			ResultSet tables = dbm.getTables(null, null, getTableName(), null);
+			// DatabaseMetaData.getTables() requires table name without double quotes
+			ResultSet tables = dbm.getTables(null, null, getTableName(false), null);
 			return tables.next();
 		}
 		catch (Exception e)
@@ -1066,14 +1071,22 @@ public class PostgreSqlRepository extends AbstractRepository
 		// primary key is first attribute unless otherwise indicated
 		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 
-		if (idAttribute == null) throw new MolgenisDataException("Missing idAttribute for entity [" + getName() + "]");
+		if (idAttribute == null)
+		{
+			throw new MolgenisDataException("Missing idAttribute for entity [" + getName() + "]");
+		}
 
 		if (idAttribute.getDataType() instanceof XrefField || idAttribute.getDataType() instanceof MrefField)
+		{
 			throw new RuntimeException(
 					"primary key(" + getTableName() + "." + getColumnName(idAttribute) + ") cannot be XREF or MREF");
+		}
 
-		if (idAttribute.isNillable() == true) throw new RuntimeException(
-				"idAttribute (" + getTableName() + "." + getColumnName(idAttribute) + ") should not be nillable");
+		if (idAttribute.isNillable() == true)
+		{
+			throw new RuntimeException(
+					"idAttribute (" + getTableName() + "." + getColumnName(idAttribute) + ") should not be nillable");
+		}
 
 		sql.append("PRIMARY KEY (").append(getColumnName(getEntityMetaData().getIdAttribute())).append(')');
 
@@ -1202,7 +1215,10 @@ public class PostgreSqlRepository extends AbstractRepository
 			{
 				if (att.getExpression() == null)
 				{
-					if (count > 0) select.append(", ");
+					if (count > 0)
+					{
+						select.append(", ");
+					}
 
 					if (att.getDataType() instanceof MrefField)
 					{
@@ -1214,8 +1230,14 @@ public class PostgreSqlRepository extends AbstractRepository
 					else
 					{
 						select.append("this.").append(getColumnName(att));
-						if (group.length() > 0) group.append(", this.").append(getColumnName(att));
-						else group.append("this.").append(getColumnName(att));
+						if (group.length() > 0)
+						{
+							group.append(", this.").append(getColumnName(att));
+						}
+						else
+						{
+							group.append("this.").append(getColumnName(att));
+						}
 					}
 					count++;
 				}
@@ -1226,14 +1248,26 @@ public class PostgreSqlRepository extends AbstractRepository
 		StringBuilder result = new StringBuilder().append(select).append(getFromSql(q));
 		// where
 		String where = getWhereSql(q, parameters, 0);
-		if (where.length() > 0) result.append(" WHERE ").append(where);
+		if (where.length() > 0)
+		{
+			result.append(" WHERE ").append(where);
+		}
 		// group by
-		if (select.indexOf("array_agg") != -1 && group.length() > 0) result.append(" GROUP BY ").append(group);
+		if (select.indexOf("array_agg") != -1 && group.length() > 0)
+		{
+			result.append(" GROUP BY ").append(group);
+		}
 		// order by
 		result.append(' ').append(getSortSql(q));
 		// limit
-		if (q.getPageSize() > 0) result.append(" LIMIT ").append(q.getPageSize());
-		if (q.getOffset() > 0) result.append(" OFFSET ").append(q.getOffset());
+		if (q.getPageSize() > 0)
+		{
+			result.append(" LIMIT ").append(q.getPageSize());
+		}
+		if (q.getOffset() > 0)
+		{
+			result.append(" OFFSET ").append(q.getOffset());
+		}
 
 		return result.toString().trim();
 	}
@@ -1312,7 +1346,10 @@ public class PostgreSqlRepository extends AbstractRepository
 
 						}
 					}
-					if (search.length() > 0) result.append('(').append(search.substring(4)).append(')');
+					if (search.length() > 0)
+					{
+						result.append('(').append(search.substring(4)).append(')');
+					}
 					break;
 				case AND:
 					result.append(" AND ");
@@ -1366,16 +1403,27 @@ public class PostgreSqlRepository extends AbstractRepository
 					}
 
 					if (attr.getDataType() instanceof MrefField)
+					{
 						result.append(getFilterColumnName(attr)).append(mrefFilterIndex);
-					else result.append("this");
+					}
+					else
+					{
+						result.append("this");
+					}
 
 					result.append(".").append(getColumnName(r.getField())).append(" IN (").append(in).append(')');
 					break;
 				default:
 					// comparable values...
 					FieldType type = attr.getDataType();
-					if (type instanceof MrefField) predicate.append(getFilterColumnName(attr)).append(mrefFilterIndex);
-					else predicate.append("this");
+					if (type instanceof MrefField)
+					{
+						predicate.append(getFilterColumnName(attr)).append(mrefFilterIndex);
+					}
+					else
+					{
+						predicate.append("this");
+					}
 
 					predicate.append(".").append(getColumnName(r.getField()));
 
@@ -1409,7 +1457,9 @@ public class PostgreSqlRepository extends AbstractRepository
 
 					if (result.length() > 0 && !result.toString().endsWith(" OR ")
 							&& !result.toString().endsWith(" AND "))
+					{
 						result.append(" AND ");
+					}
 					result.append(predicate);
 			}
 		}
@@ -1425,8 +1475,14 @@ public class PostgreSqlRepository extends AbstractRepository
 			for (Sort.Order o : q.getSort())
 			{
 				AttributeMetaData att = getEntityMetaData().getAttribute(o.getAttr());
-				if (att.getDataType() instanceof MrefField) sortSql.append(", ").append(getColumnName(att));
-				else sortSql.append(", ").append(getColumnName(att));
+				if (att.getDataType() instanceof MrefField)
+				{
+					sortSql.append(", ").append(getColumnName(att));
+				}
+				else
+				{
+					sortSql.append(", ").append(getColumnName(att));
+				}
 				if (o.getDirection().equals(Sort.Direction.DESC))
 				{
 					sortSql.append(" DESC");
@@ -1437,7 +1493,10 @@ public class PostgreSqlRepository extends AbstractRepository
 				}
 			}
 
-			if (sortSql.length() > 0) sortSql = new StringBuilder("ORDER BY ").append(sortSql.substring(2));
+			if (sortSql.length() > 0)
+			{
+				sortSql = new StringBuilder("ORDER BY ").append(sortSql.substring(2));
+			}
 		}
 		return sortSql.toString();
 	}
@@ -1529,8 +1588,11 @@ public class PostgreSqlRepository extends AbstractRepository
 			String from = getFromSql(q);
 
 			// TODO do not DISTINCT if no joining took place
-			if (where.length() > 0) return new StringBuilder("SELECT COUNT(DISTINCT this.").append(idAttribute)
-					.append(')').append(from).append(" WHERE ").append(where).toString();
+			if (where.length() > 0)
+			{
+				return new StringBuilder("SELECT COUNT(DISTINCT this.").append(idAttribute).append(')').append(from)
+						.append(" WHERE ").append(where).toString();
+			}
 
 			return new StringBuilder("SELECT COUNT(DISTINCT this.").append(idAttribute).append(')').append(from)
 					.toString();
@@ -1542,9 +1604,29 @@ public class PostgreSqlRepository extends AbstractRepository
 		return getTableName(getEntityMetaData());
 	}
 
+	private String getTableName(boolean quoteSystemIdentifiers)
+	{
+		return getTableName(getEntityMetaData(), quoteSystemIdentifiers);
+	}
+
 	private String getTableName(EntityMetaData emd)
 	{
-		return new StringBuilder().append("\"").append(emd.getName()).append("\"").toString();
+		return getTableName(emd, true);
+	}
+
+	private String getTableName(EntityMetaData emd, boolean quoteSystemIdentifiers)
+	{
+		StringBuilder strBuilder = new StringBuilder();
+		if (quoteSystemIdentifiers)
+		{
+			strBuilder.append("\"");
+		}
+		strBuilder.append(emd.getName());
+		if (quoteSystemIdentifiers)
+		{
+			strBuilder.append("\"");
+		}
+		return strBuilder.toString();
 	}
 
 	private String getJunctionTableName(AttributeMetaData attr)
