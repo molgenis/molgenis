@@ -191,6 +191,16 @@ public class GavinAnnotator
 		return gavinResource;
 	}
 
+	/**
+	 *
+	 * @param impact
+	 * @param caddScaled
+	 * @param exacMAF
+	 * @param category
+	 * @param gene
+	 * @param annotationSourceEntity
+     * @return
+     */
 	private Judgment classifyVariant(Impact impact, Double caddScaled, Double exacMAF, Category category, String gene,
 			Entity annotationSourceEntity)
 	{
@@ -313,6 +323,14 @@ public class GavinAnnotator
 		return result;
 	}
 
+	/**
+	 *
+	 * @param impact
+	 * @param caddScaled
+	 * @param exacMAF
+	 * @param gene
+     * @return
+     */
 	public Judgment genomewideClassifyVariant(Impact impact, Double caddScaled, Double exacMAF, String gene)
 	{
 

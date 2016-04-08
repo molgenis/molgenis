@@ -38,6 +38,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static com.google.common.collect.Iterators.peekingIterator;
 import static java.io.File.createTempFile;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.support.EffectsMetaData.ALT;
@@ -114,8 +115,8 @@ public class SnpEffRunner
 			if (!source.hasNext()) return Iterators.emptyIterator();
 
 			// get meta data by peeking at the first entity (work-around for issue #4701)
-			PeekingIterator<Entity> peekingIterator = Iterators.peekingIterator(source);
-			EntityMetaData sourceEMD = peekingIterator.peek().getEntityMetaData();
+			PeekingIterator<Entity> peekingSourceIterator = Iterators.peekingIterator(source);
+			EntityMetaData sourceEMD = peekingSourceIterator.peek().getEntityMetaData();
 
 			List<String> params = Arrays.asList("-Xmx2g", getSnpEffPath(), "hg19", "-noStats", "-noLog", "-lof",
 					"-canon", "-ud", "0", "-spliceSiteSize", "5");
@@ -124,18 +125,16 @@ public class SnpEffRunner
 			File snpEffOutputWithMetaData = addVcfMetaDataToOutputVcf(outputVcf);
 			VcfRepository repo = new VcfRepository(snpEffOutputWithMetaData, "SNPEFF_OUTPUT_VCF_" + inputVcf.getName());
 
-			SnpEffResultIterator snpEffResultIterator = new SnpEffResultIterator(repo.iterator());
+			PeekingIterator snpEffResultIterator = peekingIterator(repo.iterator());
 
 			return new Iterator<Entity>()
 			{
-				Iterator<Entity> sourceEntities = peekingIterator;
-				SnpEffResultIterator resultEntities = snpEffResultIterator;
 				LinkedList<Entity> effects = Lists.newLinkedList();
 
 				@Override
 				public boolean hasNext()
 				{
-					return (sourceEntities.hasNext() || !effects.isEmpty());
+					return (peekingSourceIterator.hasNext() || !effects.isEmpty());
 				}
 
 				@Override
@@ -144,13 +143,13 @@ public class SnpEffRunner
 					if (effects.isEmpty())
 					{
 						// go to next source entity and get effects
-						Entity sourceEntity = sourceEntities.next();
+						Entity sourceEntity = peekingSourceIterator.next();
 						String chromosome = sourceEntity.getString(VcfRepository.CHROM);
 						Long position = sourceEntity.getLong(VcfRepository.POS);
 
 						if (chromosome != null && position != null)
 						{
-							Entity snpEffEntity = resultEntities.get(chromosome, position);
+							Entity snpEffEntity = getSnpEffEntity(snpEffResultIterator,chromosome, position);
 							if (snpEffEntity != null)
 							{
 								effects.addAll(getSnpEffectsFromSnpEffEntity(sourceEntity, snpEffEntity,
@@ -179,6 +178,32 @@ public class SnpEffRunner
 		{
 			throw new MolgenisDataException("Exception running SnpEff", e);
 		}
+	}
+
+	/**
+	 * Returns the next entity containing SnpEff annotations if its Chrom and Pos match. This implementation works
+	 * because SnpEff always returns output in the same order as the input
+	 *
+	 *
+	 * @param snpEffResultIterator
+	 * @param chrom
+	 * @param pos
+	 *
+	 * @return {@link Entity}
+	 */
+	public Entity getSnpEffEntity(PeekingIterator<Entity> snpEffResultIterator, String chrom, long pos)
+	{
+		if (snpEffResultIterator.hasNext())
+		{
+			Entity entityCandidate = snpEffResultIterator.peek();
+			if (chrom.equals(entityCandidate.getString(VcfRepository.CHROM))
+					&& pos == entityCandidate.getLong(VcfRepository.POS))
+			{
+				snpEffResultIterator.next();
+				return entityCandidate;
+			}
+		}
+		return null;
 	}
 
 	private Entity getEmptyEffectsEntity(Entity sourceEntity, EntityMetaData effectsEMD)
@@ -349,6 +374,11 @@ public class SnpEffRunner
 		return snpEffPath;
 	}
 
+	/**
+	 *
+	 * @param sourceEMD
+	 * @return
+     */
 	public EntityMetaData getOutputMetaData(EntityMetaData sourceEMD)
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData(sourceEMD.getSimpleName() + ENTITY_NAME_SUFFIX,

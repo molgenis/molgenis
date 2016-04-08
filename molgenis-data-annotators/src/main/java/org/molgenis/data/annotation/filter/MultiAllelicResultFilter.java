@@ -220,7 +220,13 @@ public class MultiAllelicResultFilter implements ResultFilter
 			myList.add(resourceEntity);
 		}
 
-		// now iterate over map with refs and merge entities per ref
+		mergeEntitiesPerRef(resourceEntitiesMerged, refToMergedEntity);
+		return resourceEntitiesMerged;
+	}
+
+	private void mergeEntitiesPerRef(ArrayList<Entity> resourceEntitiesMerged,
+			LinkedHashMap<String, List<Entity>> refToMergedEntity)
+	{
 		for (String refKey : refToMergedEntity.keySet())
 		{
 			boolean first = true;
@@ -250,6 +256,5 @@ public class MultiAllelicResultFilter implements ResultFilter
 			}
 			resourceEntitiesMerged.add(mergeWithMe);
 		}
-		return resourceEntitiesMerged;
 	}
 }

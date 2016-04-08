@@ -45,12 +45,12 @@ public class VcfWriterUtils
 {
 	public static final String VARIANT = "VARIANT";
 	public static final String EFFECT = "EFFECT";
-	public static final String ANNOTATION_FIELD_SEPARATOR = ";";
+	public static final char ANNOTATION_FIELD_SEPARATOR = ';';
 	public static final String SPACE_PIPE_SEPERATOR = " | ";
 
 	private static final LinkedList<String> VCF_ATTRIBUTE_NAMES = new LinkedList<>(Arrays.asList(new String[]
 	{ CHROM, POS, ID, REF, ALT, QUAL, FILTER }));
-	private static final String PIPE_SEPARATOR = "|";
+	private static final char PIPE_SEPARATOR = '|';
 
 	/**
 	 * Convert an vcfEntity to a VCF line Only output attributes that are in the attributesToInclude list, or all if

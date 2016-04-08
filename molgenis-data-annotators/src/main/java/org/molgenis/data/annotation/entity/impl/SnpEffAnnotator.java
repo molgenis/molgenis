@@ -17,8 +17,6 @@ import org.molgenis.data.annotator.websettings.SnpEffAnnotatorSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.EffectsMetaData;
 import org.molgenis.data.vcf.VcfRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -48,7 +46,6 @@ import java.util.List;
 @Configuration
 public class SnpEffAnnotator
 {
-	private static final Logger LOG = LoggerFactory.getLogger(SnpEffAnnotator.class);
 	public static final String NAME = "snpEff";
 
 	public enum Impact

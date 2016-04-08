@@ -246,6 +246,12 @@ public class VcfUtils
 	{
 		AttributeMetaData attributeToParse = entityMetaData.getAttribute(attributeName);
 		String description = attributeToParse.getDescription();
+		if (description.indexOf(':') == -1)
+		{
+			throw new RuntimeException(
+					"Unable to create entitystructure, missing semicolon in description of [" + attributeName + "]");
+		}
+
 		String[] step1 = description.split(":");
 		String entityName = org.apache.commons.lang.StringUtils.deleteWhitespace(step1[0]);
 		String value = step1[1].replaceAll("^\\s'|'$", "");
@@ -259,20 +265,19 @@ public class VcfUtils
 			DefaultEntityMetaData newEntityMetadata = removeRefFieldFromInfoMetadata(attributeToParse, inputEntity);
 			Entity originalEntity = new MapEntity(inputEntity, newEntityMetadata);
 
-			results.addAll(parseValue(xrefMetaData, metadataMap,
-					inputEntity.getString(attributeToParse.getName()), originalEntity));
+			results.addAll(parseValue(xrefMetaData, metadataMap, inputEntity.getString(attributeToParse.getName()),
+					originalEntity));
 		}
 		return results;
 	}
 
-	private static DefaultEntityMetaData getXrefEntityMetaData(
-			Map<Integer, AttributeMetaData> metadataMap, String entityName)
+	private static DefaultEntityMetaData getXrefEntityMetaData(Map<Integer, AttributeMetaData> metadataMap,
+			String entityName)
 	{
 		DefaultEntityMetaData xrefMetaData = new DefaultEntityMetaData(entityName);
 		xrefMetaData.addAttributeMetaData(new DefaultAttributeMetaData("identifier").setAuto(true).setVisible(false),
 				EntityMetaData.AttributeRole.ROLE_ID);
-		xrefMetaData.addAllAttributeMetaData(
-				com.google.common.collect.Lists.newArrayList(metadataMap.values()));
+		xrefMetaData.addAllAttributeMetaData(com.google.common.collect.Lists.newArrayList(metadataMap.values()));
 		xrefMetaData
 				.addAttributeMetaData(new DefaultAttributeMetaData("Variant", MolgenisFieldTypes.FieldTypeEnum.MREF));
 		return xrefMetaData;
