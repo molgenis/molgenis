@@ -81,7 +81,7 @@ public class VcfUtils
 	public static String getIdFromInfoField(String line)
 	{
 		int idStartIndex = line.indexOf("ID=") + 3;
-		int idEndIndex = line.indexOf(",");
+		int idEndIndex = line.indexOf(',');
 		return line.substring(idStartIndex, idEndIndex);
 	}
 

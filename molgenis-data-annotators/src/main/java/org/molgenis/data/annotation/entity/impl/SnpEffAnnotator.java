@@ -105,7 +105,7 @@ public class SnpEffAnnotator
 		@Override
 		public String canAnnotate(EntityMetaData repoMetaData)
 		{
-			if (dataService.hasRepository(repoMetaData.getName() + snpEffRunner.ENTITY_NAME_SUFFIX))
+			if (dataService.hasRepository(repoMetaData.getName() + SnpEffRunner.ENTITY_NAME_SUFFIX))
 			{
 				return "already annotated with SnpEff";
 			}
