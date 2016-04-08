@@ -152,6 +152,8 @@ public interface Repository extends Iterable<Entity>, Closeable
 
 	/**
 	 * Create a new repository backend (e.g., create a table in a database; add a sheet to Excel)
+	 * 
+	 * TODO move to RepositoryCollection
 	 */
 	public void create();
 
@@ -162,6 +164,8 @@ public interface Repository extends Iterable<Entity>, Closeable
 
 	/**
 	 * Rebuild current index
+	 * 
+	 * TODO move to RepositoryCollection
 	 */
 	public void rebuildIndex();
 

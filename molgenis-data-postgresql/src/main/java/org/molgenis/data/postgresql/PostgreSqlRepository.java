@@ -301,7 +301,6 @@ public class PostgreSqlRepository extends AbstractRepository
 		return add(entities.iterator());
 	}
 
-	// TODO move to repository collection
 	@Override
 	public void create()
 	{
@@ -333,8 +332,9 @@ public class PostgreSqlRepository extends AbstractRepository
 				}
 				else if (attr.getDataType() instanceof XrefField)
 				{
+					// FIXME cross-repository-collection references
 					// String backend = dataService.getMeta().getBackend(attr.getRefEntity()).getName();
-					// if (backend.equalsIgnoreCase(PostgreSqlRepositoryCollection.NAME)) // FIXME
+					// if (backend.equalsIgnoreCase(PostgreSqlRepositoryCollection.NAME))
 					// {
 					jdbcTemplate.execute(getCreateFKeySql(attr));
 					// }
@@ -360,7 +360,6 @@ public class PostgreSqlRepository extends AbstractRepository
 		}
 	}
 
-	// TODO move to repository collection
 	@Override
 	public void drop()
 	{
@@ -387,10 +386,9 @@ public class PostgreSqlRepository extends AbstractRepository
 			List<String> entityNames = Lists.newArrayList();
 			nonSelfReferencingEntities.forEach(pair -> entityNames.add(pair.getA().getName()));
 
-			StringBuilder msg = new StringBuilder("Cannot delete entity '").append(getEntityMetaData().getName())
-					.append("' because it is referenced by the following entities: ").append(entityNames.toString());
-
-			throw new MolgenisReferencedEntityException(msg.toString());
+			throw new MolgenisReferencedEntityException(
+					format("Cannot delete entity '%s' because it is referenced by the following entities: %s",
+							getEntityMetaData().getName(), entityNames.toString()));
 		}
 		else
 		{
@@ -714,7 +712,7 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	private void update(Iterator<? extends Entity> entities)
 	{
-		// TODO, split in subbatches
+		// TODO batch updating just like add and delete
 		final List<Entity> batch = new ArrayList<Entity>();
 		if (entities != null) while (entities.hasNext())
 		{
@@ -967,22 +965,21 @@ public class PostgreSqlRepository extends AbstractRepository
 			case FILE:
 				if (att.equals(getEntityMetaData().getLabelAttribute()))
 				{
-					throw new MolgenisDataException("Attribute [" + att.getName() + "] of entity [" + getName()
-							+ "] is label attribute and of type [" + att.getDataType()
-							+ "]. Label attributes cannot be of type xref, mref, categorical or compound.");
+					throw new MolgenisDataException(
+							format("Attribute [%s] of entity [%s] is label attribute and of type [%s]. Label attributes cannot be of type xref, mref, categorical or compound.",
+									att.getName(), getName(), att.getDataType().getEnumType().toString()));
 				}
 
 				if (getEntityMetaData().getLookupAttribute(att.getName()) != null)
 				{
-					throw new MolgenisDataException("Attribute [" + att.getName() + "] of entity [" + getName()
-							+ "] is lookup attribute and of type [" + att.getDataType()
-							+ "]. Lookup attributes cannot be of type xref, mref, categorical or compound.");
+					throw new MolgenisDataException(
+							format("Attribute [%s] of entity [%s] is lookup attribute and of type [%s]. Lookup attributes cannot be of type xref, mref, categorical or compound.",
+									att.getName(), getName(), att.getDataType().getEnumType().toString()));
 				}
 
 				break;
 			default:
-				throw new RuntimeException("Unknown datatype [" + att.getDataType().getEnumType() + "]");
-
+				throw new RuntimeException(format("Unknown datatype [%s]", att.getDataType().getEnumType().toString()));
 		}
 
 		if (!(att.getDataType() instanceof MrefField))
@@ -1079,18 +1076,16 @@ public class PostgreSqlRepository extends AbstractRepository
 		if (idAttribute.getDataType() instanceof XrefField || idAttribute.getDataType() instanceof MrefField)
 		{
 			throw new RuntimeException(
-					"primary key(" + getTableName() + "." + getColumnName(idAttribute) + ") cannot be XREF or MREF");
+					format("primary key(%s.%s) cannot be XREF or MREF", getTableName(), getColumnName(idAttribute)));
 		}
 
 		if (idAttribute.isNillable() == true)
 		{
 			throw new RuntimeException(
-					"idAttribute (" + getTableName() + "." + getColumnName(idAttribute) + ") should not be nillable");
+					format("idAttribute (%s.%s) should not be nillable", getTableName(), getColumnName(idAttribute)));
 		}
 
 		sql.append("PRIMARY KEY (").append(getColumnName(getEntityMetaData().getIdAttribute())).append(')');
-
-		// close
 		sql.append(')');
 
 		if (LOG.isTraceEnabled())
@@ -1114,7 +1109,7 @@ public class PostgreSqlRepository extends AbstractRepository
 				.append(" NOT NULL, FOREIGN KEY (").append(getColumnName(idAttr)).append(") REFERENCES ")
 				.append(getTableName()).append('(').append(getColumnName(idAttr)).append(") ON DELETE CASCADE");
 
-		// FIXME
+		// FIXME cross-repository-collection references
 		// If the refEntity is not of type MySQL do not add a foreign key to it
 		// String refEntityBackend = dataService.getMeta().getBackend(att.getRefEntity()).getName();
 		// if (refEntityBackend.equalsIgnoreCase(PostgreSqlRepositoryCollection.NAME))
@@ -1283,7 +1278,7 @@ public class PostgreSqlRepository extends AbstractRepository
 				attr = getEntityMetaData().getAttribute(r.getField());
 				if (attr == null)
 				{
-					throw new MolgenisDataException("Unknown attribute [" + r.getField() + "]");
+					throw new MolgenisDataException(format("Unknown attribute [%s]", r.getField()));
 				}
 				if (attr.getDataType() instanceof MrefField)
 				{
@@ -1333,7 +1328,7 @@ public class PostgreSqlRepository extends AbstractRepository
 						}
 						else if (att.getDataType() instanceof MrefField)
 						{
-							// FIXME required for postgres?
+							// TODO check if casting is required for postgres
 							search.append(" OR CAST(").append(getColumnName(att)).append(".").append(getColumnName(att))
 									.append(" as CHAR) LIKE ?");
 							parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
@@ -1341,9 +1336,9 @@ public class PostgreSqlRepository extends AbstractRepository
 						}
 						else
 						{
+							// TODO check if casting is required for postgres
 							search.append(" OR CAST(this.").append(getColumnName(att)).append(" as CHAR) LIKE ?");
 							parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
-
 						}
 					}
 					if (search.length() > 0)
@@ -1445,7 +1440,7 @@ public class PostgreSqlRepository extends AbstractRepository
 							predicate.append(" <=");
 							break;
 						default:
-							throw new MolgenisDataException("cannot solve query rule:  " + r);
+							throw new MolgenisDataException(format("cannot solve query rule:  %s", r.toString()));
 					}
 					predicate.append(" ? ");
 					Object convertedVal = attr.getDataType().convert(r.getValue());
