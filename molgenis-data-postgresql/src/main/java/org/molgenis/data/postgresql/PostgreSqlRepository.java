@@ -1024,7 +1024,14 @@ public class PostgreSqlRepository extends AbstractRepository
 				.append(getUniqueKeyName(att)).append(" UNIQUE (").append(getColumnName(att)).append(")").toString();
 	}
 
-	private void getMrefQueryFields(List<QueryRule> rules, List<String> fields)
+	private List<AttributeMetaData> getMrefQueryAttrs(Query q)
+	{
+		List<AttributeMetaData> mrefAttrsInQuery = new ArrayList<>();
+		getMrefQueryFieldsRec(q.getRules(), mrefAttrsInQuery);
+		return mrefAttrsInQuery;
+	}
+
+	private void getMrefQueryFieldsRec(List<QueryRule> rules, List<AttributeMetaData> mrefAttrsInQuery)
 	{
 		for (QueryRule rule : rules)
 		{
@@ -1033,13 +1040,13 @@ public class PostgreSqlRepository extends AbstractRepository
 				AttributeMetaData attr = this.getEntityMetaData().getAttribute(rule.getField());
 				if (attr != null && attr.getDataType() instanceof MrefField)
 				{
-					fields.add(rule.getField());
+					mrefAttrsInQuery.add(attr);
 				}
 			}
 
 			if (rule.getNestedRules() != null && !rule.getNestedRules().isEmpty())
 			{
-				getMrefQueryFields(rule.getNestedRules(), fields);
+				getMrefQueryFieldsRec(rule.getNestedRules(), mrefAttrsInQuery);
 			}
 		}
 	}
@@ -1070,7 +1077,7 @@ public class PostgreSqlRepository extends AbstractRepository
 
 		if (idAttribute == null)
 		{
-			throw new MolgenisDataException("Missing idAttribute for entity [" + getName() + "]");
+			throw new MolgenisDataException(format("Missing idAttribute for entity [%s]", getName()));
 		}
 
 		if (idAttribute.getDataType() instanceof XrefField || idAttribute.getDataType() instanceof MrefField)
@@ -1220,7 +1227,8 @@ public class PostgreSqlRepository extends AbstractRepository
 						// TODO retrieve mref values in seperate queries to allow specifying limit and offset
 						select.append("array_agg(distinct array[").append(getColumnName(att)).append('.')
 								.append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append("::text,")
-								.append(getColumnName(att)).append("::text]) AS ").append(getColumnName(att));
+								.append(getColumnName(att)).append('.').append(getColumnName(att))
+								.append("::text]) AS ").append(getColumnName(att));
 					}
 					else
 					{
@@ -1399,7 +1407,7 @@ public class PostgreSqlRepository extends AbstractRepository
 
 					if (attr.getDataType() instanceof MrefField)
 					{
-						result.append(getFilterColumnName(attr)).append(mrefFilterIndex);
+						result.append(getFilterColumnName(attr, mrefFilterIndex));
 					}
 					else
 					{
@@ -1413,7 +1421,7 @@ public class PostgreSqlRepository extends AbstractRepository
 					FieldType type = attr.getDataType();
 					if (type instanceof MrefField)
 					{
-						predicate.append(getFilterColumnName(attr)).append(mrefFilterIndex);
+						predicate.append(getFilterColumnName(attr, mrefFilterIndex));
 					}
 					else
 					{
@@ -1531,12 +1539,9 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	private String getFromSql(Query q)
 	{
-		StringBuilder from = new StringBuilder();
-		from.append(" FROM ").append(getTableName()).append(" AS this");
+		StringBuilder from = new StringBuilder().append(" FROM ").append(getTableName()).append(" AS this");
 
 		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
-		List<String> mrefQueryFields = Lists.newArrayList();
-		getMrefQueryFields(q.getRules(), mrefQueryFields);
 
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 		{
@@ -1548,50 +1553,79 @@ public class PostgreSqlRepository extends AbstractRepository
 							.append(getColumnName(att)).append(" ON (this.").append(getColumnName(idAttribute))
 							.append(" = ").append(getColumnName(att)).append('.').append(getColumnName(idAttribute))
 							.append(')');
-
 				}
 			}
 		}
 
-		for (int i = 0; i < mrefQueryFields.size(); i++)
+		List<AttributeMetaData> mrefAttrsInQuery = getMrefQueryAttrs(q);
+		for (int i = 0; i < mrefAttrsInQuery.size(); i++)
 		{
 			// extra join so we can filter on the mrefs
-			AttributeMetaData att = getEntityMetaData().getAttribute(mrefQueryFields.get(i));
+			AttributeMetaData mrefAttr = mrefAttrsInQuery.get(i);
 
-			from.append(" LEFT JOIN ").append(getJunctionTableName(att)).append(" AS ").append(getFilterColumnName(att))
-					.append(i + 1).append(" ON (this.").append(getColumnName(idAttribute)).append(" = ")
-					.append(getFilterColumnName(att)).append(i + 1).append(".").append(getColumnName(idAttribute))
-					.append(')');
+			from.append(" LEFT JOIN ").append(getJunctionTableName(mrefAttr)).append(" AS ")
+					.append(getFilterColumnName(mrefAttr, i + 1)).append(" ON (this.")
+					.append(getColumnName(idAttribute)).append(" = ").append(getFilterColumnName(mrefAttr, i + 1))
+					.append('.').append(getColumnName(idAttribute)).append(')');
 		}
 
 		return from.toString();
 	}
 
+	private String getFromCountSql(Query q, List<AttributeMetaData> mrefAttrsInQuery)
+	{
+		StringBuilder from = new StringBuilder().append(" FROM ").append(getTableName()).append(" AS this");
+
+		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
+
+		for (int i = 0; i < mrefAttrsInQuery.size(); i++)
+		{
+			// extra join so we can filter on the mrefs
+			AttributeMetaData mrefAttr = mrefAttrsInQuery.get(i);
+
+			from.append(" LEFT JOIN ").append(getJunctionTableName(mrefAttr)).append(" AS ")
+					.append(getColumnName(mrefAttr)).append(" ON (this.").append(getColumnName(idAttribute))
+					.append(" = ").append(getColumnName(mrefAttr)).append('.').append(getColumnName(idAttribute))
+					.append(')');
+
+			from.append(" LEFT JOIN ").append(getJunctionTableName(mrefAttr)).append(" AS ")
+					.append(getFilterColumnName(mrefAttr, i + 1)).append(" ON (this.")
+					.append(getColumnName(idAttribute)).append(" = ").append(getFilterColumnName(mrefAttr, i + 1))
+					.append('.').append(getColumnName(idAttribute)).append(')');
+		}
+
+		return from.toString();
+	}
+
+	// FIXME both queries ignore offset/pageSize
 	private String getCountSql(Query q, List<Object> parameters)
 	{
+		StringBuilder sqlBuilder = new StringBuilder("SELECT COUNT");
 		String idAttribute = getColumnName(getEntityMetaData().getIdAttribute());
 
-		// both queries ignore offset/pageSize
 		List<QueryRule> queryRules = q.getRules();
 		if (queryRules == null || queryRules.isEmpty())
 		{
-			return new StringBuilder("SELECT COUNT(*) FROM ").append(getTableName()).toString();
+			sqlBuilder.append("(*) FROM ").append(getTableName());
 		}
 		else
 		{
-			String where = getWhereSql(q, parameters, 0);
-			String from = getFromSql(q);
-
-			// TODO do not DISTINCT if no joining took place
-			if (where.length() > 0)
+			List<AttributeMetaData> mrefAttrsInQuery = getMrefQueryAttrs(q);
+			if (!mrefAttrsInQuery.isEmpty())
 			{
-				return new StringBuilder("SELECT COUNT(DISTINCT this.").append(idAttribute).append(')').append(from)
-						.append(" WHERE ").append(where).toString();
+				// distinct count in case query contains one or more rules refering to MREF attributes.
+				sqlBuilder.append("(DISTINCT this.").append(idAttribute).append(')');
+			}
+			else
+			{
+				sqlBuilder.append("(*)");
 			}
 
-			return new StringBuilder("SELECT COUNT(DISTINCT this.").append(idAttribute).append(')').append(from)
-					.toString();
+			String from = getFromCountSql(q, mrefAttrsInQuery);
+			String where = getWhereSql(q, parameters, 0);
+			sqlBuilder.append(from).append(" WHERE ").append(where);
 		}
+		return sqlBuilder.toString();
 	}
 
 	private String getTableName()
@@ -1645,9 +1679,10 @@ public class PostgreSqlRepository extends AbstractRepository
 		return new StringBuilder().append("\"").append(attrName).append("\"").toString();
 	}
 
-	private static String getFilterColumnName(AttributeMetaData attr)
+	private static String getFilterColumnName(AttributeMetaData attr, int filterIndex)
 	{
-		return new StringBuilder().append("\"").append(attr.getName()).append("_filter\"").toString();
+		return new StringBuilder().append("\"").append(attr.getName()).append("_filter").append(filterIndex)
+				.append("\"").toString();
 	}
 
 	private String getUniqueKeyName(AttributeMetaData attr)
