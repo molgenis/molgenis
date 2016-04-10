@@ -18,13 +18,13 @@ import org.molgenis.fieldtypes.XrefField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PostgreSqlEntityFactory
 {
+	@SuppressWarnings("unused")
 	private static final Logger LOG = LoggerFactory.getLogger(PostgreSqlEntityFactory.class);
 
 	private final EntityManager entityManager;
@@ -37,23 +37,20 @@ public class PostgreSqlEntityFactory
 		this.dataService = requireNonNull(dataService);
 	}
 
-	public RowMapper<Entity> createRowMapper(EntityMetaData entityMeta, Fetch fetch, JdbcTemplate jdbcTemplate)
+	public RowMapper<Entity> createRowMapper(EntityMetaData entityMeta, Fetch fetch)
 	{
-		return new EntityMapper(entityMeta, fetch, jdbcTemplate);
+		return new EntityMapper(entityMeta, fetch);
 	}
 
 	private class EntityMapper implements RowMapper<Entity>
 	{
-		private static final int GROUP_CONCAT_MAX_LEN = 1024;
 		private final EntityMetaData entityMetaData;
 		private final Fetch fetch;
-		private final JdbcTemplate jdbcTemplate;
 
-		private EntityMapper(EntityMetaData entityMetaData, Fetch fetch, JdbcTemplate jdbcTemplate)
+		private EntityMapper(EntityMetaData entityMetaData, Fetch fetch)
 		{
 			this.entityMetaData = requireNonNull(entityMetaData);
 			this.fetch = fetch; // can be null
-			this.jdbcTemplate = requireNonNull(jdbcTemplate);
 		}
 
 		@Override
@@ -118,6 +115,5 @@ public class PostgreSqlEntityFactory
 				return e;
 			}
 		}
-
 	}
 }
