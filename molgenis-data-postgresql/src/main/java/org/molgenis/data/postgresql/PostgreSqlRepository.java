@@ -234,7 +234,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		Iterators.partition(ids.iterator(), BATCH_SIZE).forEachRemaining(idsBatch -> {
 			if (LOG.isDebugEnabled())
 			{
-				LOG.debug("Deleting [{}] [{}] entities", idsBatch.size(), getName());
+				LOG.debug("Deleting {} [{}] entities", idsBatch.size(), getName());
 			}
 			jdbcTemplate.batchUpdate(getDeleteSql(), new BatchPreparedStatementSetter()
 			{
@@ -635,218 +635,79 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	private Integer add(Iterator<? extends Entity> entitiesIterator)
 	{
-		if (entitiesIterator == null)
-		{
-			return 0;
-		}
-		AtomicInteger count = new AtomicInteger(0);
+		AtomicInteger count = new AtomicInteger();
 
-		final List<Entity> batch = new ArrayList<Entity>();
+		final AttributeMetaData idAttr = getEntityMetaData().getIdAttribute();
+		Iterators.partition(entitiesIterator, BATCH_SIZE).forEachRemaining(entitiesBatch -> {
+			final Map<String, List<Map<String, Object>>> mrefs = new HashMap<>();
 
-		while (entitiesIterator.hasNext())
-		{
-			batch.add(entitiesIterator.next());
-			count.addAndGet(1);
-
-			if ((batch.size() == BATCH_SIZE) || !entitiesIterator.hasNext())
+			if (LOG.isDebugEnabled())
 			{
-				final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
-				final Map<String, List<Map<String, Object>>> mrefs = new HashMap<>();
-
-				if (LOG.isDebugEnabled())
-				{
-					LOG.debug("Adding entities for entity [{}]", getName());
-				}
-				jdbcTemplate.batchUpdate(getInsertSql(), new BatchPreparedStatementSetter()
-				{
-					@Override
-					public void setValues(PreparedStatement preparedStatement, int rowIndex) throws SQLException
-					{
-						int fieldIndex = 1;
-						for (AttributeMetaData attr : getEntityMetaData().getAtomicAttributes())
-						{
-							// create the mref records
-							if (attr.getDataType() instanceof MrefField)
-							{
-								if (mrefs.get(attr.getName()) == null)
-								{
-									mrefs.put(attr.getName(), new ArrayList<>());
-								}
-								if (batch.get(rowIndex).get(attr.getName()) != null)
-								{
-									AtomicInteger seqNr = new AtomicInteger();
-									for (Entity val : batch.get(rowIndex).getEntities(attr.getName()))
-									{
-										if (val != null)
-										{
-											Map<String, Object> mref = new HashMap<>();
-											mref.put(JUNCTION_TABLE_ORDER_ATTR_NAME, seqNr.getAndIncrement());
-											mref.put(idAttribute.getName(),
-													batch.get(rowIndex).get(idAttribute.getName()));
-											mref.put(attr.getName(), val.getIdValue());
-											mrefs.get(attr.getName()).add(mref);
-										}
-									}
-								}
-							}
-							else
-							{
-								if (attr.getExpression() != null)
-								{
-									continue;
-								}
-
-								if (batch.get(rowIndex).get(attr.getName()) == null)
-								{
-									if (attr.equals(getEntityMetaData().getIdAttribute()) && attr.isAuto()
-											&& (attr.getDataType() instanceof StringField))
-									{
-										throw new MolgenisDataException(
-												"Missing auto id value. Please use the 'AutoValueRepositoryDecorator' to add auto id capabilities.");
-									}
-									preparedStatement.setObject(fieldIndex++, null);
-								}
-								else if (attr.getDataType() instanceof XrefField)
-								{
-									Object value = batch.get(rowIndex).get(attr.getName());
-									if (value instanceof Entity)
-									{
-										value = ((Entity) value).get(attr.getRefEntity().getIdAttribute().getName());
-									}
-
-									preparedStatement.setObject(fieldIndex++,
-											attr.getRefEntity().getIdAttribute().getDataType().convert(value));
-								}
-								else
-								{
-									Object value = attr.getDataType().convert(batch.get(rowIndex).get(attr.getName()));
-									if (attr.getDataType() instanceof DateField)
-									{
-										value = new java.sql.Date(((java.util.Date) value).getTime());
-									}
-									else if (attr.getDataType() instanceof DatetimeField)
-									{
-										value = new java.sql.Timestamp(((java.util.Date) value).getTime());
-									}
-									preparedStatement.setObject(fieldIndex++, value);
-								}
-							}
-						}
-					}
-
-					@Override
-					public int getBatchSize()
-					{
-						return batch.size();
-					}
-				});
-
-				// add mrefs as well
-				for (AttributeMetaData attr : getEntityMetaData().getAtomicAttributes())
-				{
-					if (attr.getDataType() instanceof MrefField)
-					{
-						addMrefs(mrefs.get(attr.getName()), attr);
-					}
-				}
-
-				LOG.debug("Added {} entities.", count.get(), getTableName());
-				batch.clear();
+				LOG.debug("Adding {} [{}] entities", entitiesBatch.size(), getName());
 			}
-		}
-
-		return count.get();
-	}
-
-	private void update(Iterator<? extends Entity> entities)
-	{
-		// TODO batch updating just like add and delete
-		final List<Entity> batch = new ArrayList<Entity>();
-		if (entities != null) while (entities.hasNext())
-		{
-			batch.add(entities.next());
-		}
-		final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
-		final List<Object> ids = new ArrayList<Object>();
-		final Map<String, List<Map<String, Object>>> mrefs = new HashMap<>();
-
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("Updating entities for entity [{}]", getName());
-		}
-		jdbcTemplate.batchUpdate(getUpdateSql(), new BatchPreparedStatementSetter()
-		{
-			@Override
-			public void setValues(PreparedStatement preparedStatement, int rowIndex) throws SQLException
+			jdbcTemplate.batchUpdate(getInsertSql(), new BatchPreparedStatementSetter()
 			{
-				Entity e = batch.get(rowIndex);
-
-				if (LOG.isDebugEnabled())
+				@Override
+				public void setValues(PreparedStatement preparedStatement, int rowIndex) throws SQLException
 				{
-					LOG.debug("updating: {}", e);
-				}
-
-				Object idValue = idAttribute.getDataType().convert(e.get(idAttribute.getName()));
-				ids.add(idValue);
-				int fieldIndex = 1;
-				for (AttributeMetaData attr : getEntityMetaData().getAtomicAttributes())
-				{
-					// create the mref records
-					if (attr.getDataType() instanceof MrefField)
+					int fieldIndex = 1;
+					for (AttributeMetaData attr : getEntityMetaData().getAtomicAttributes())
 					{
-						if (mrefs.get(attr.getName()) == null)
+						// create the mref records
+						if (attr.getDataType() instanceof MrefField)
 						{
-							mrefs.put(attr.getName(), new ArrayList<>());
-						}
-						if (e.get(attr.getName()) != null)
-						{
-							List<Entity> vals = Lists.newArrayList(e.getEntities(attr.getName()));
-							if (vals != null)
+							if (mrefs.get(attr.getName()) == null)
+							{
+								mrefs.put(attr.getName(), new ArrayList<>());
+							}
+							if (entitiesBatch.get(rowIndex).get(attr.getName()) != null)
 							{
 								AtomicInteger seqNr = new AtomicInteger();
-								for (Entity val : vals)
+								for (Entity val : entitiesBatch.get(rowIndex).getEntities(attr.getName()))
 								{
-									Map<String, Object> mref = new HashMap<>();
-									mref.put(JUNCTION_TABLE_ORDER_ATTR_NAME, seqNr.getAndIncrement());
-									mref.put(idAttribute.getName(), idValue);
-									mref.put(attr.getName(), val.get(attr.getRefEntity().getIdAttribute().getName()));
-									mrefs.get(attr.getName()).add(mref);
+									if (val != null)
+									{
+										Map<String, Object> mref = new HashMap<>();
+										mref.put(JUNCTION_TABLE_ORDER_ATTR_NAME, seqNr.getAndIncrement());
+										mref.put(idAttr.getName(), entitiesBatch.get(rowIndex).get(idAttr.getName()));
+										mref.put(attr.getName(), val.getIdValue());
+										mrefs.get(attr.getName()).add(mref);
+									}
 								}
 							}
-						}
-					}
-					else
-					{
-						if (attr.getExpression() != null)
-						{
-							// computed attributes are not persisted
-							continue;
-						}
-						if (e.get(attr.getName()) == null)
-						{
-							// repository should not fill in default value, the form should
-							preparedStatement.setObject(fieldIndex++, null);
 						}
 						else
 						{
-							if (attr.getDataType() instanceof XrefField)
+							if (attr.getExpression() != null)
 							{
-								Object value = e.get(attr.getName());
+								continue;
+							}
+
+							if (entitiesBatch.get(rowIndex).get(attr.getName()) == null)
+							{
+								if (attr.equals(getEntityMetaData().getIdAttribute()) && attr.isAuto()
+										&& (attr.getDataType() instanceof StringField))
+								{
+									throw new MolgenisDataException(
+											"Missing auto id value. Please use the 'AutoValueRepositoryDecorator' to add auto id capabilities.");
+								}
+								preparedStatement.setObject(fieldIndex++, null);
+							}
+							else if (attr.getDataType() instanceof XrefField)
+							{
+								Object value = entitiesBatch.get(rowIndex).get(attr.getName());
 								if (value instanceof Entity)
 								{
-									preparedStatement.setObject(fieldIndex++,
-											attr.getRefEntity().getIdAttribute().getDataType().convert(((Entity) value)
-													.get(attr.getRefEntity().getIdAttribute().getName())));
+									value = ((Entity) value).get(attr.getRefEntity().getIdAttribute().getName());
 								}
-								else
-								{
-									preparedStatement.setObject(fieldIndex++,
-											attr.getRefEntity().getIdAttribute().getDataType().convert(value));
-								}
+
+								preparedStatement.setObject(fieldIndex++,
+										attr.getRefEntity().getIdAttribute().getDataType().convert(value));
 							}
 							else
 							{
-								Object value = attr.getDataType().convert(e.get(attr.getName()));
+								Object value = attr.getDataType()
+										.convert(entitiesBatch.get(rowIndex).get(attr.getName()));
 								if (attr.getDataType() instanceof DateField)
 								{
 									value = new java.sql.Date(((java.util.Date) value).getTime());
@@ -860,25 +721,143 @@ public class PostgreSqlRepository extends AbstractRepository
 						}
 					}
 				}
-				preparedStatement.setObject(fieldIndex++, idValue);
+
+				@Override
+				public int getBatchSize()
+				{
+					return entitiesBatch.size();
+				}
+			});
+
+			// add mrefs as well
+			for (AttributeMetaData attr : getEntityMetaData().getAtomicAttributes())
+			{
+				if (attr.getDataType() instanceof MrefField)
+				{
+					addMrefs(mrefs.get(attr.getName()), attr);
+				}
 			}
 
-			@Override
-			public int getBatchSize()
-			{
-				return batch.size();
-			}
+			count.addAndGet(entitiesBatch.size());
 		});
 
-		// update mrefs
-		for (AttributeMetaData attr : getEntityMetaData().getAtomicAttributes())
-		{
-			if (attr.getDataType() instanceof MrefField)
+		return count.get();
+	}
+
+	private void update(Iterator<? extends Entity> entities)
+	{
+		final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
+		Iterators.partition(entities, BATCH_SIZE).forEachRemaining(batchEntities -> {
+			final List<Object> ids = new ArrayList<Object>();
+			final Map<String, List<Map<String, Object>>> mrefs = new HashMap<>();
+
+			if (LOG.isDebugEnabled())
 			{
-				removeMrefs(ids, attr);
-				addMrefs(mrefs.get(attr.getName()), attr);
+				LOG.debug("Updating {} [{}] entities", batchEntities.size(), getName());
 			}
-		}
+			jdbcTemplate.batchUpdate(getUpdateSql(), new BatchPreparedStatementSetter()
+			{
+				@Override
+				public void setValues(PreparedStatement preparedStatement, int rowIndex) throws SQLException
+				{
+					Entity e = batchEntities.get(rowIndex);
+
+					Object idValue = idAttribute.getDataType().convert(e.get(idAttribute.getName()));
+					ids.add(idValue);
+					int fieldIndex = 1;
+					for (AttributeMetaData attr : getEntityMetaData().getAtomicAttributes())
+					{
+						// create the mref records
+						if (attr.getDataType() instanceof MrefField)
+						{
+							if (mrefs.get(attr.getName()) == null)
+							{
+								mrefs.put(attr.getName(), new ArrayList<>());
+							}
+							if (e.get(attr.getName()) != null)
+							{
+								List<Entity> vals = Lists.newArrayList(e.getEntities(attr.getName()));
+								if (vals != null)
+								{
+									AtomicInteger seqNr = new AtomicInteger();
+									for (Entity val : vals)
+									{
+										Map<String, Object> mref = new HashMap<>();
+										mref.put(JUNCTION_TABLE_ORDER_ATTR_NAME, seqNr.getAndIncrement());
+										mref.put(idAttribute.getName(), idValue);
+										mref.put(attr.getName(),
+												val.get(attr.getRefEntity().getIdAttribute().getName()));
+										mrefs.get(attr.getName()).add(mref);
+									}
+								}
+							}
+						}
+						else
+						{
+							if (attr.getExpression() != null)
+							{
+								// computed attributes are not persisted
+								continue;
+							}
+							if (e.get(attr.getName()) == null)
+							{
+								// repository should not fill in default value, the form should
+								preparedStatement.setObject(fieldIndex++, null);
+							}
+							else
+							{
+								if (attr.getDataType() instanceof XrefField)
+								{
+									Object value = e.get(attr.getName());
+									if (value instanceof Entity)
+									{
+										preparedStatement.setObject(fieldIndex++,
+												attr.getRefEntity().getIdAttribute().getDataType()
+														.convert(((Entity) value)
+																.get(attr.getRefEntity().getIdAttribute().getName())));
+									}
+									else
+									{
+										preparedStatement.setObject(fieldIndex++,
+												attr.getRefEntity().getIdAttribute().getDataType().convert(value));
+									}
+								}
+								else
+								{
+									Object value = attr.getDataType().convert(e.get(attr.getName()));
+									if (attr.getDataType() instanceof DateField)
+									{
+										value = new java.sql.Date(((java.util.Date) value).getTime());
+									}
+									else if (attr.getDataType() instanceof DatetimeField)
+									{
+										value = new java.sql.Timestamp(((java.util.Date) value).getTime());
+									}
+									preparedStatement.setObject(fieldIndex++, value);
+								}
+							}
+						}
+					}
+					preparedStatement.setObject(fieldIndex++, idValue);
+				}
+
+				@Override
+				public int getBatchSize()
+				{
+					return batchEntities.size();
+				}
+			});
+
+			// update mrefs
+			for (AttributeMetaData attr : getEntityMetaData().getAtomicAttributes())
+			{
+				if (attr.getDataType() instanceof MrefField)
+				{
+					removeMrefs(ids, attr);
+					addMrefs(mrefs.get(attr.getName()), attr);
+				}
+			}
+		});
 	}
 
 	private boolean tableExists()
