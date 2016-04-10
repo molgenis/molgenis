@@ -144,7 +144,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	{
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Counting MySQL [{}] rows for query [{}]", getName(), q);
+			LOG.debug("Counting [{}] rows for query [{}]", getName(), q);
 		}
 
 		List<Object> parameters = Lists.newArrayList();
@@ -232,6 +232,10 @@ public class PostgreSqlRepository extends AbstractRepository
 	public void deleteById(Stream<Object> ids)
 	{
 		Iterators.partition(ids.iterator(), BATCH_SIZE).forEachRemaining(idsBatch -> {
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("Deleting [{}] [{}] entities", idsBatch.size(), getName());
+			}
 			jdbcTemplate.batchUpdate(getDeleteSql(), new BatchPreparedStatementSetter()
 			{
 				@Override
@@ -260,6 +264,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		selfReferencingAttrs.forEach(selfReferencingXrefAttr -> {
 			if (!selfReferencingXrefAttr.isNillable())
 			{
+				// FIXME required for PostgreSQL?
 				// update value with id attribute name (instead of NULL) won't work due to
 				// http://bugs.mysql.com/bug.php?id=7412. For more information read the paragraph "Until InnoDB
 				// implements deferred constraint checking, some things will be impossible, such as deleting a
@@ -281,7 +286,11 @@ public class PostgreSqlRepository extends AbstractRepository
 		String deleteSql = getDeleteAllSql();
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Deleting all [{}] entities: {}", getName(), deleteSql);
+			LOG.debug("Deleting all [{}] entities", getName());
+		}
+		if (LOG.isTraceEnabled())
+		{
+			LOG.trace("SQL: {}", deleteSql);
 		}
 		jdbcTemplate.update(deleteSql);
 	}
@@ -312,8 +321,11 @@ public class PostgreSqlRepository extends AbstractRepository
 		}
 		try
 		{
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("Creating table for entity [{}]", getName());
+			}
 			jdbcTemplate.execute(getCreateTableSql());
-			LOG.debug("Created table [{}]", getTableName());
 
 			String idAttrName = getEntityMetaData().getIdAttribute().getName();
 			for (AttributeMetaData attr : getEntityMetaData().getAtomicAttributes())
@@ -328,17 +340,28 @@ public class PostgreSqlRepository extends AbstractRepository
 
 				if (attr.getDataType() instanceof MrefField)
 				{
+					if (LOG.isDebugEnabled())
+					{
+						LOG.debug("Creating junction table for entity [{}] attribute [{}]", getName(), attr.getName());
+					}
 					jdbcTemplate.execute(getCreateJunctionTableSql(attr));
-					LOG.debug("Created junction table [{}]", getJunctionTableName(attr));
 				}
 				else if (attr.getDataType() instanceof XrefField
 						&& attr.getRefEntity().getBackend().equals(PostgreSqlRepositoryCollection.NAME))
 				{
+					if (LOG.isDebugEnabled())
+					{
+						LOG.debug("Creating foreign key for entity [{}] attribute [{}]", getName(), attr.getName());
+					}
 					jdbcTemplate.execute(getCreateFKeySql(attr));
 				}
 
 				if (attr.isUnique() && !attr.getName().equals(idAttrName))
 				{
+					if (LOG.isDebugEnabled())
+					{
+						LOG.debug("Creating unique key for entity [{}] attribute [{}]", getName(), attr.getName());
+					}
 					jdbcTemplate.execute(getUniqueSql(attr));
 				}
 			}
@@ -399,12 +422,16 @@ public class PostgreSqlRepository extends AbstractRepository
 		}
 	}
 
-	void dropAttribute(String attributeName)
+	void dropAttribute(String attrName)
 	{
-		jdbcTemplate.execute(getDropColumnSql(attributeName));
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Dropping column for entity [{}] attribute [{}]", getName(), attrName);
+		}
+		jdbcTemplate.execute(getDropColumnSql(attrName));
 
 		DefaultEntityMetaData demd = new DefaultEntityMetaData(metaData);
-		demd.removeAttributeMetaData(demd.getAttribute(attributeName));
+		demd.removeAttributeMetaData(demd.getAttribute(attrName));
 		setMetaData(demd);
 	}
 
@@ -466,22 +493,38 @@ public class PostgreSqlRepository extends AbstractRepository
 			}
 			if (attr.getDataType() instanceof MrefField)
 			{
+				if (LOG.isDebugEnabled())
+				{
+					LOG.debug("Creating junction table for entity [{}] attribute [{}]", getName(), attr.getName());
+				}
 				jdbcTemplate.execute(getCreateJunctionTableSql(attr));
 			}
 			else if (!attr.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
 			{
+				if (LOG.isDebugEnabled())
+				{
+					LOG.debug("Creating column for entity [{}] attribute [{}]", getName(), attr.getName());
+				}
 				jdbcTemplate.execute(getAddColumnSql(attr));
 			}
 
 			if (attr.getDataType() instanceof XrefField
 					&& attr.getRefEntity().getBackend().equals(PostgreSqlRepositoryCollection.NAME))
 			{
+				if (LOG.isDebugEnabled())
+				{
+					LOG.debug("Creating foreign key for entity [{}] attribute [{}]", getName(), attr.getName());
+				}
 				jdbcTemplate.execute(getCreateFKeySql(attr));
 			}
 
 			String idAttrName = getEntityMetaData().getIdAttribute().getName();
 			if (attr.isUnique() && !attr.getName().equals(idAttrName))
 			{
+				if (LOG.isDebugEnabled())
+				{
+					LOG.debug("Creating unique key for entity [{}] attribute [{}]", getName(), attr.getName());
+				}
 				jdbcTemplate.execute(getUniqueSql(attr));
 			}
 
@@ -517,6 +560,10 @@ public class PostgreSqlRepository extends AbstractRepository
 	{
 		try
 		{
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("Removing table or junction table for entity [{}]", getName());
+			}
 			jdbcTemplate.execute(sql);
 			return null;
 		}
@@ -533,20 +580,19 @@ public class PostgreSqlRepository extends AbstractRepository
 			@Override
 			protected List<Entity> getBatch(Query batchQuery)
 			{
-				if (LOG.isDebugEnabled())
-				{
-					LOG.debug("Fetching MySQL [{}] data for query [{}]", getName(), batchQuery);
-				}
-
 				List<Object> parameters = Lists.newArrayList();
 				String sql = getSelectSql(batchQuery, parameters);
+				RowMapper<Entity> entityMapper = postgreSqlEntityFactory.createRowMapper(getEntityMetaData(),
+						batchQuery.getFetch());
+
+				if (LOG.isDebugEnabled())
+				{
+					LOG.debug("Fetching [{}] data for query [{}]", getName(), batchQuery);
+				}
 				if (LOG.isTraceEnabled())
 				{
-					LOG.trace("sql: {}, parameters: {}", sql, parameters);
+					LOG.trace("SQL: {}, parameters: {}", sql, parameters);
 				}
-
-				RowMapper<Entity> entityMapper = postgreSqlEntityFactory.createRowMapper(getEntityMetaData(),
-						batchQuery.getFetch(), jdbcTemplate);
 				return jdbcTemplate.query(sql, parameters.toArray(new Object[0]), entityMapper);
 			}
 		};
@@ -607,6 +653,10 @@ public class PostgreSqlRepository extends AbstractRepository
 				final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 				final Map<String, List<Map<String, Object>>> mrefs = new HashMap<>();
 
+				if (LOG.isDebugEnabled())
+				{
+					LOG.debug("Adding entities for entity [{}]", getName());
+				}
 				jdbcTemplate.batchUpdate(getInsertSql(), new BatchPreparedStatementSetter()
 				{
 					@Override
@@ -720,6 +770,10 @@ public class PostgreSqlRepository extends AbstractRepository
 		final List<Object> ids = new ArrayList<Object>();
 		final Map<String, List<Map<String, Object>>> mrefs = new HashMap<>();
 
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Updating entities for entity [{}]", getName());
+		}
 		jdbcTemplate.batchUpdate(getUpdateSql(), new BatchPreparedStatementSetter()
 		{
 			@Override
@@ -861,6 +915,10 @@ public class PostgreSqlRepository extends AbstractRepository
 		StringBuilder mrefSql = new StringBuilder();
 		mrefSql.append(getDeleteSql(getJunctionTableName(attr), idAttribute));
 
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Removing junction table entries for entity [{}] attribute [{}]", getName(), attr.getName());
+		}
 		jdbcTemplate.batchUpdate(mrefSql.toString(), new BatchPreparedStatementSetter()
 		{
 			@Override
@@ -885,6 +943,10 @@ public class PostgreSqlRepository extends AbstractRepository
 		StringBuilder mrefSql = new StringBuilder();
 		mrefSql.append(getInsertMrefSql(attr, idAttribute));
 
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Adding junction table entries for entity [{}] attribute [{}]", getName(), attr.getName());
+		}
 		jdbcTemplate.batchUpdate(mrefSql.toString(), new BatchPreparedStatementSetter()
 		{
 			@Override
