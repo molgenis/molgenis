@@ -13,6 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -272,7 +273,7 @@ public class PostgreSqlRepository extends AbstractRepository
 			String updateSql = getUpdateColumnToNullSql(selfReferencingXrefAttr);
 			if (LOG.isDebugEnabled())
 			{
-				LOG.debug("Updating nillable self-referencing xref attribute: " + updateSql);
+				LOG.debug("Updating nillable self-referencing xref attribute: {}", updateSql);
 			}
 			jdbcTemplate.update(updateSql);
 		});
@@ -280,7 +281,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		String deleteSql = getDeleteAllSql();
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug(format("Deleting all [%s] entities: %s", getName(), deleteSql));
+			LOG.debug("Deleting all [{}] entities: {}", getName(), deleteSql);
 		}
 		jdbcTemplate.update(deleteSql);
 	}
@@ -699,7 +700,7 @@ public class PostgreSqlRepository extends AbstractRepository
 					}
 				}
 
-				LOG.debug("Added " + count.get() + " " + getTableName() + " entities.");
+				LOG.debug("Added {} entities.", count.get(), getTableName());
 				batch.clear();
 			}
 		}
@@ -728,7 +729,7 @@ public class PostgreSqlRepository extends AbstractRepository
 
 				if (LOG.isDebugEnabled())
 				{
-					LOG.debug("updating: " + e);
+					LOG.debug("updating: {}", e);
 				}
 
 				Object idValue = idAttribute.getDataType().convert(e.get(idAttribute.getName()));
@@ -976,7 +977,8 @@ public class PostgreSqlRepository extends AbstractRepository
 
 				break;
 			default:
-				throw new RuntimeException(format("Unknown datatype [%s]", attr.getDataType().getEnumType().toString()));
+				throw new RuntimeException(
+						format("Unknown datatype [%s]", attr.getDataType().getEnumType().toString()));
 		}
 
 		if (!(attr.getDataType() instanceof MrefField))
@@ -1010,8 +1012,8 @@ public class PostgreSqlRepository extends AbstractRepository
 	private String getCreateFKeySql(AttributeMetaData attr)
 	{
 		return new StringBuilder().append("ALTER TABLE ").append(getTableName()).append(" ADD FOREIGN KEY (")
-				.append(getColumnName(attr)).append(") REFERENCES ").append(getTableName(attr.getRefEntity())).append('(')
-				.append(getColumnName(attr.getRefEntity().getIdAttribute())).append(")").toString();
+				.append(getColumnName(attr)).append(") REFERENCES ").append(getTableName(attr.getRefEntity()))
+				.append('(').append(getColumnName(attr.getRefEntity().getIdAttribute())).append(")").toString();
 	}
 
 	private String getUniqueSql(AttributeMetaData attr)
@@ -1094,7 +1096,7 @@ public class PostgreSqlRepository extends AbstractRepository
 
 		if (LOG.isTraceEnabled())
 		{
-			LOG.trace("sql: " + sql);
+			LOG.trace("sql: {}", sql);
 		}
 
 		return sql.toString();
@@ -1293,10 +1295,13 @@ public class PostgreSqlRepository extends AbstractRepository
 			{
 				case SEARCH:
 					StringBuilder search = new StringBuilder();
-					for (AttributeMetaData searchAttr : getEntityMetaData().getAtomicAttributes())
+					Iterable<AttributeMetaData> searchAttrs = attr != null ? Collections.singletonList(attr)
+							: getEntityMetaData().getAtomicAttributes();
+					for (AttributeMetaData searchAttr : searchAttrs)
 					{
 						// TODO: other data types???
-						if (searchAttr.getDataType() instanceof StringField || searchAttr.getDataType() instanceof TextField)
+						if (searchAttr.getDataType() instanceof StringField
+								|| searchAttr.getDataType() instanceof TextField)
 						{
 							search.append(" OR this.").append(getColumnName(searchAttr)).append(" LIKE ?");
 							parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
@@ -1307,7 +1312,8 @@ public class PostgreSqlRepository extends AbstractRepository
 							Repository repo = dataService.getRepository(searchAttr.getRefEntity().getName());
 							if (repo.getCapabilities().contains(QUERYABLE))
 							{
-								Query refQ = new QueryImpl().like(searchAttr.getRefEntity().getLabelAttribute().getName(),
+								Query refQ = new QueryImpl().like(
+										searchAttr.getRefEntity().getLabelAttribute().getName(),
 										r.getValue().toString());
 								Iterator<Entity> it = repo.findAll(refQ).iterator();
 								if (it.hasNext())
@@ -1317,8 +1323,8 @@ public class PostgreSqlRepository extends AbstractRepository
 									{
 										Entity ref = it.next();
 										search.append("?");
-										parameters.add(searchAttr.getDataType()
-												.convert(ref.get(searchAttr.getRefEntity().getIdAttribute().getName())));
+										parameters.add(searchAttr.getDataType().convert(
+												ref.get(searchAttr.getRefEntity().getIdAttribute().getName())));
 										if (it.hasNext())
 										{
 											search.append(",");
@@ -1331,15 +1337,16 @@ public class PostgreSqlRepository extends AbstractRepository
 						else if (searchAttr.getDataType() instanceof MrefField)
 						{
 							// TODO check if casting is required for postgres
-							search.append(" OR CAST(").append(getColumnName(searchAttr)).append(".").append(getColumnName(searchAttr))
-									.append(" as CHAR) LIKE ?");
+							search.append(" OR CAST(").append(getColumnName(searchAttr)).append(".")
+									.append(getColumnName(searchAttr)).append(" as CHAR) LIKE ?");
 							parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
 
 						}
 						else
 						{
 							// TODO check if casting is required for postgres
-							search.append(" OR CAST(this.").append(getColumnName(searchAttr)).append(" as CHAR) LIKE ?");
+							search.append(" OR CAST(this.").append(getColumnName(searchAttr))
+									.append(" as CHAR) LIKE ?");
 							parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
 						}
 					}
