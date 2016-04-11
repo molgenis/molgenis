@@ -69,6 +69,9 @@ import com.google.common.collect.Sets;
 
 /**
  * Repository that persists entities in a PostgreSQL database
+ * <ul>
+ * <li>Attributes with expression are not persisted</li>
+ * </ul>
  */
 public class PostgreSqlRepository extends AbstractRepository
 {
@@ -1013,31 +1016,18 @@ public class PostgreSqlRepository extends AbstractRepository
 		switch (attr.getDataType().getEnumType())
 		{
 			case BOOL:
-				break;
 			case DATE:
-				break;
 			case DATE_TIME:
-				break;
 			case DECIMAL:
-				break;
 			case EMAIL:
-				break;
 			case ENUM:
-				break;
 			case HTML:
-				break;
 			case HYPERLINK:
-				break;
 			case INT:
-				break;
 			case LONG:
-				break;
 			case SCRIPT:
-				break;
 			case STRING:
-				break;
 			case TEXT:
-				break;
 			case COMPOUND:
 				break;
 			case MREF:
@@ -1062,7 +1052,7 @@ public class PostgreSqlRepository extends AbstractRepository
 				break;
 			default:
 				throw new RuntimeException(
-						format("Unknown datatype [%s]", attr.getDataType().getEnumType().toString()));
+						format("Unknown data type [%s]", attr.getDataType().getEnumType().toString()));
 		}
 
 		if (!(attr.getDataType() instanceof MrefField))
@@ -1369,15 +1359,15 @@ public class PostgreSqlRepository extends AbstractRepository
 					result.append(" OR ");
 					break;
 				case LIKE:
-
 					if (attr.getDataType() instanceof StringField || attr.getDataType() instanceof TextField)
 					{
-						result.append(" this.").append(getColumnName(attr)).append(" LIKE ?");
+						result.append(" this.").append(getColumnName(attr));
 					}
 					else
 					{
-						result.append(" CAST(this.").append(getColumnName(attr)).append(" as CHAR) LIKE ?");
+						result.append(" CAST(this.").append(getColumnName(attr)).append(" as CHAR)");
 					}
+					result.append(" LIKE ?");
 					parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
 					break;
 				case IN:
@@ -1420,15 +1410,17 @@ public class PostgreSqlRepository extends AbstractRepository
 					result.append('.').append(getColumnName(r.getField())).append(" IN (").append(in).append(')');
 					break;
 				case NOT:
-					throw new RuntimeException("TODO implement");
+					result.append(" NOT ");
+					break;
 				case RANGE:
-					throw new RuntimeException("TODO implement");
+					// TODO implement RANGE query operator
+					throw new UnsupportedOperationException(format(
+							"Query operator [%s] not supported by PostgreSQL repository", r.getOperator().toString()));
 				case EQUALS:
 				case GREATER:
 				case GREATER_EQUAL:
 				case LESS:
 				case LESS_EQUAL:
-					// comparable values...
 					FieldType type = attr.getDataType();
 					if (type instanceof MrefField)
 					{
@@ -1439,7 +1431,29 @@ public class PostgreSqlRepository extends AbstractRepository
 						predicate.append("this");
 					}
 
-					predicate.append('.').append(getColumnName(r.getField())).append(" = ? ");
+					predicate.append('.').append(getColumnName(r.getField()));
+					switch (r.getOperator())
+					{
+						case EQUALS:
+							predicate.append(" =");
+							break;
+						case GREATER:
+							predicate.append(" >");
+							break;
+						case GREATER_EQUAL:
+							predicate.append(" >=");
+							break;
+						case LESS:
+							predicate.append(" <");
+							break;
+						case LESS_EQUAL:
+							predicate.append(" <=");
+							break;
+						// $CASES-OMITTED$
+						default:
+							throw new RuntimeException(format("Unexpected query operator [%s]", r.getOperator()));
+					}
+					predicate.append(" ? ");
 
 					Object convertedVal = attr.getDataType().convert(r.getValue());
 					if (convertedVal instanceof Entity)
