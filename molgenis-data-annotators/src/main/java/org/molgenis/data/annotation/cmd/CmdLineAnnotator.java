@@ -11,6 +11,7 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.annotation.EffectsAnnotator;
 import org.molgenis.data.annotation.RefEntityAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;

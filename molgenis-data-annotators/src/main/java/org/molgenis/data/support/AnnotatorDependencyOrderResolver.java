@@ -6,7 +6,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.cmd.EffectsAnnotator;
+import org.molgenis.data.annotation.EffectsAnnotator;
 
 import java.util.Arrays;
 import java.util.LinkedList;

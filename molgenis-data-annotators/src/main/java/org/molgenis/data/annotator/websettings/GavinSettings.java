@@ -1,6 +1,6 @@
 package org.molgenis.data.annotator.websettings;
 
-import org.molgenis.data.annotation.entity.impl.GavinAnnotator;
+import org.molgenis.data.annotation.entity.impl.gavin.GavinAnnotator;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityMetaData;

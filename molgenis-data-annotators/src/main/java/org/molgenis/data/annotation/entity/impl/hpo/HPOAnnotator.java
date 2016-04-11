@@ -1,7 +1,7 @@
-package org.molgenis.data.annotation.entity.impl;
+package org.molgenis.data.annotation.entity.impl.hpo;
 
-import static org.molgenis.data.annotation.entity.impl.HPORepository.HPO_ID_COL_NAME;
-import static org.molgenis.data.annotation.entity.impl.HPORepository.HPO_TERM_COL_NAME;
+import static org.molgenis.data.annotation.entity.impl.hpo.HPORepository.HPO_ID_COL_NAME;
+import static org.molgenis.data.annotation.entity.impl.hpo.HPORepository.HPO_TERM_COL_NAME;
 import static org.molgenis.data.annotator.websettings.HPOAnnotatorSettings.Meta.HPO_LOCATION;
 
 import java.io.File;
@@ -23,7 +23,9 @@ import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.ResultFilter;
-import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
+import org.molgenis.data.annotation.entity.impl.AnnotatorImpl;
+import org.molgenis.data.annotation.entity.impl.RepositoryAnnotatorImpl;
+import org.molgenis.data.annotation.cmd.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.query.GeneNameQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;

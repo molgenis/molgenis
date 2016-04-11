@@ -152,7 +152,7 @@ public class VcfUtils
 
 			DefaultEntityMetaData resultEMD;
 
-			private EntityMetaData getResultEMD(EntityMetaData effectsEMD, EntityMetaData variantEMD)
+			private EntityMetaData getResultEntityMetaData(EntityMetaData effectsEMD, EntityMetaData variantEMD)
 			{
 				if (resultEMD == null)
 				{
@@ -168,17 +168,10 @@ public class VcfUtils
 				return effects.hasNext();
 			}
 
-			private Entity newVariant(Entity variant, List<Entity> effectsForVariant)
-			{
-				Entity newVariant = createEntityStructure(variant, effectsForVariant);
-
-				return newVariant;
-			}
-
 			private Entity createEntityStructure(Entity variant, List<Entity> effectsForVariant)
 			{
 				EntityMetaData effectEMD = effectsForVariant.get(0).getEntityMetaData();
-				Entity newVariant = new MapEntity(getResultEMD(effectEMD, variant.getEntityMetaData()));
+				Entity newVariant = new MapEntity(getResultEntityMetaData(effectEMD, variant.getEntityMetaData()));
 				newVariant.set(variant);
 
 				if (effectsForVariant.size() > 1)
@@ -226,11 +219,10 @@ public class VcfUtils
 					}
 					else
 					{
-						Entity newVariant = newVariant(variant, effectsForVariant);
-						return newVariant;
+						return createEntityStructure(variant, effectsForVariant);
 					}
 				}
-				return newVariant(variant, effectsForVariant);
+				return createEntityStructure(variant, effectsForVariant);
 			}
 		};
 	}

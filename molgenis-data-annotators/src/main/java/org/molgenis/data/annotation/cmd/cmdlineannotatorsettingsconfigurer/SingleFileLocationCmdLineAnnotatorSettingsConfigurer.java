@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer;
+package org.molgenis.data.annotation.cmd.cmdlineannotatorsettingsconfigurer;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;

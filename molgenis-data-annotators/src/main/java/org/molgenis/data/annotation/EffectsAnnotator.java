@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.cmd;
+package org.molgenis.data.annotation;
 
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.impl.RepositoryAnnotatorImpl;

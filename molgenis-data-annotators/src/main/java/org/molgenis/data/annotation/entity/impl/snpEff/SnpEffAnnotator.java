@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.entity.impl;
+package org.molgenis.data.annotation.entity.impl.snpEff;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -11,8 +11,7 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
-import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
-import org.molgenis.data.annotation.snpEff.SnpEffRunner;
+import org.molgenis.data.annotation.cmd.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotator.websettings.SnpEffAnnotatorSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.EffectsMetaData;
@@ -47,11 +46,6 @@ import java.util.List;
 public class SnpEffAnnotator
 {
 	public static final String NAME = "snpEff";
-
-	public enum Impact
-	{
-		MODIFIER, LOW, MODERATE, HIGH
-	}
 
 	@Autowired
 	private SnpEffRunner snpEffRunner;

@@ -1,5 +1,8 @@
-package org.molgenis.data.annotation.impl.datastructures;
+package org.molgenis.data.annotation.entity.impl.gavin;
 
+/**
+ * Judgment result of the gavin method
+ */
 public class Judgment
 {
 	public enum Classification
@@ -18,7 +21,6 @@ public class Judgment
 
 	public Judgment(Classification classification, Method method, String reason)
 	{
-		super();
 		this.reason = reason;
 		this.classification = classification;
 		this.method = method;

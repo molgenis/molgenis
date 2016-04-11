@@ -6,6 +6,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.entity.impl.gavin.GavinAnnotator;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotator.websettings.GavinSettings;
