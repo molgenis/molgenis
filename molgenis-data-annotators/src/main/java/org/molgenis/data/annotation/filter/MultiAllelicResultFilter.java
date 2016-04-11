@@ -83,6 +83,12 @@ public class MultiAllelicResultFilter implements ResultFilter
 	{
 		List<Entity> processedResults = new ArrayList<>();
 
+		String sourceRef = sourceEntity.getString(REF);
+		if (sourceRef == null)
+		{
+			return Optional.absent();
+		}
+
 		if (mergeMultilineResourceResults)
 		{
 			resourceEntities = merge(resourceEntities);
