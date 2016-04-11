@@ -1,9 +1,10 @@
 package org.molgenis;
 
-import com.mchange.v2.c3p0.ComboPooledDataSource;
+import java.beans.PropertyVetoException;
+
+import javax.sql.DataSource;
+
 import org.molgenis.data.IdGenerator;
-import org.molgenis.data.jobs.JobExecutionUpdater;
-import org.molgenis.data.jobs.JobExecutionUpdaterImpl;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,8 +14,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.TransactionManagementConfigurer;
 
-import javax.sql.DataSource;
-import java.beans.PropertyVetoException;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 /**
  * Database configuration
  */
@@ -72,11 +72,5 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 	public PlatformTransactionManager annotationDrivenTransactionManager()
 	{
 		return transactionManager();
-	}
-
-	@Bean
-	public JobExecutionUpdater jobExecutionUpdater()
-	{
-		return new JobExecutionUpdaterImpl();
 	}
 }
