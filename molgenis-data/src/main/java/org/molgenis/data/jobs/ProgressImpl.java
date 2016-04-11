@@ -152,4 +152,10 @@ public class ProgressImpl implements Progress
 		update();
 	}
 
+	@Override
+	public void setResultUrl(String string)
+	{
+		jobExecution.setResultUrl(string);
+	}
+
 }

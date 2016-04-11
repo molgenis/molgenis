@@ -17,4 +17,6 @@ public interface Progress
 	void success();
 	
 	Long timeRunning();
+
+	void setResultUrl(String string);
 }

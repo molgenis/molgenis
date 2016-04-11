@@ -42,7 +42,8 @@ public class AutoValueRepositoryDecorator implements Repository
 
 		// auto id
 		AttributeMetaData idAttr = getEntityMetaData().getIdAttribute();
-		if ((idAttr != null) && idAttr.isAuto() && (idAttr.getDataType() instanceof StringField))
+		if (idAttr != null && idAttr.isAuto() && entity.getIdValue() == null
+				&& (idAttr.getDataType() instanceof StringField))
 		{
 			entity.set(idAttr.getName(), idGenerator.generateId());
 		}
