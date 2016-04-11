@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @Configuration
 public class PostgreSqlConfiguration
@@ -30,14 +31,20 @@ public class PostgreSqlConfiguration
 	@Scope("prototype")
 	public PostgreSqlRepository postgreSqlRepository()
 	{
-		return new PostgreSqlRepository(dataService, postgreSqlEntityFactory, dataSource);
+		return new PostgreSqlRepository(dataService, postgreSqlEntityFactory, jdbcTemplate());
+	}
+
+	@Bean
+	public JdbcTemplate jdbcTemplate()
+	{
+		return new JdbcTemplate(dataSource);
 	}
 
 	@Bean(name =
 	{ "PostgreSqlRepositoryCollection" })
 	public ManageableRepositoryCollection postgreSqlRepositoryCollection()
 	{
-		PostgreSqlRepositoryCollection postgreSqlRepositoryCollection = new PostgreSqlRepositoryCollection()
+		PostgreSqlRepositoryCollection postgreSqlRepositoryCollection = new PostgreSqlRepositoryCollection(dataSource)
 		{
 			@Override
 			protected PostgreSqlRepository createPostgreSqlRepository()
@@ -51,7 +58,6 @@ public class PostgreSqlConfiguration
 				throw new UnsupportedOperationException();
 			}
 		};
-
 		return new IndexedManageableRepositoryCollectionDecorator(searchService, postgreSqlRepositoryCollection);
 	}
 }
