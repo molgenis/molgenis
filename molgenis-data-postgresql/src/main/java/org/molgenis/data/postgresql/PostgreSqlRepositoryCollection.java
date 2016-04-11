@@ -1,14 +1,22 @@
 package org.molgenis.data.postgresql;
 
+import static java.util.Objects.requireNonNull;
+
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import javax.sql.DataSource;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
@@ -16,7 +24,16 @@ import com.google.common.collect.Iterators;
 public abstract class PostgreSqlRepositoryCollection implements ManageableRepositoryCollection
 {
 	public static final String NAME = "PostgreSQL";
+
+	private final DataSource dataSource;
+
 	private final Map<String, PostgreSqlRepository> repositories = new LinkedHashMap<>();
+
+	@Autowired
+	public PostgreSqlRepositoryCollection(DataSource dataSource)
+	{
+		this.dataSource = requireNonNull(dataSource);
+	}
 
 	@Override
 	public String getName()
@@ -29,7 +46,10 @@ public abstract class PostgreSqlRepositoryCollection implements ManageableReposi
 	{
 		PostgreSqlRepository repository = createPostgreSqlRepository();
 		repository.setMetaData(entityMeta);
-		repository.create();
+		if (!isTableExists(entityMeta))
+		{
+			repository.create();
+		}
 		repositories.put(entityMeta.getName(), repository);
 
 		return repository;
@@ -108,4 +128,35 @@ public abstract class PostgreSqlRepositoryCollection implements ManageableReposi
 	 * Return a spring managed prototype bean
 	 */
 	protected abstract PostgreSqlRepository createPostgreSqlRepository();
+
+	private boolean isTableExists(EntityMetaData entityMeta)
+	{
+		Connection conn = null;
+		try
+		{
+			conn = dataSource.getConnection();
+			DatabaseMetaData dbm = conn.getMetaData();
+			// DatabaseMetaData.getTables() requires table name without double quotes, only search TABLE table type to
+			// avoid matches with system tables
+			ResultSet tables = dbm.getTables(null, null, PostgreSqlRepository.getTableName(entityMeta, false),
+					new String[]
+					{ "TABLE" });
+			return tables.next();
+		}
+		catch (Exception e)
+		{
+			throw new RuntimeException(e);
+		}
+		finally
+		{
+			try
+			{
+				conn.close();
+			}
+			catch (Exception e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+	}
 }

@@ -8,10 +8,7 @@ import static org.molgenis.data.RepositoryCapability.MANAGABLE;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,8 +19,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
-import javax.sql.DataSource;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
@@ -80,18 +75,16 @@ public class PostgreSqlRepository extends AbstractRepository
 	// TODO remove dataservice dependency
 	private final DataService dataService;
 	private final PostgreSqlEntityFactory postgreSqlEntityFactory;
-	private final DataSource dataSource;
 	private final JdbcTemplate jdbcTemplate;
 
 	private EntityMetaData metaData;
 
 	public PostgreSqlRepository(DataService dataService, PostgreSqlEntityFactory postgreSqlEntityFactory,
-			DataSource dataSource)
+			JdbcTemplate jdbcTemplate)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.postgreSqlEntityFactory = requireNonNull(postgreSqlEntityFactory);
-		this.dataSource = requireNonNull(dataSource);
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
+		this.jdbcTemplate = requireNonNull(jdbcTemplate);
 	}
 
 	public void setMetaData(EntityMetaData metaData)
@@ -287,76 +280,61 @@ public class PostgreSqlRepository extends AbstractRepository
 	@Override
 	public void create()
 	{
-		if (tableExists())
+		String createTableSql = getSqlCreateTable();
+		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Table for entity {} already exists. Skipping creation", getName());
-			return;
-		}
-		try
-		{
-			String createTableSql = getSqlCreateTable();
-			if (LOG.isDebugEnabled())
+			LOG.debug("Creating table for entity [{}]", getName());
+			if (LOG.isTraceEnabled())
 			{
-				LOG.debug("Creating table for entity [{}]", getName());
-				if (LOG.isTraceEnabled())
-				{
-					LOG.trace("SQL: {}", createTableSql);
-				}
+				LOG.trace("SQL: {}", createTableSql);
 			}
-			jdbcTemplate.execute(createTableSql);
+		}
+		jdbcTemplate.execute(createTableSql);
 
-			String idAttrName = getEntityMetaData().getIdAttribute().getName();
-			getPersistedAttributes().forEach(attr -> {
-				// add mref tables
-				if (attr.getDataType() instanceof MrefField)
+		String idAttrName = getEntityMetaData().getIdAttribute().getName();
+		getPersistedAttributes().forEach(attr -> {
+			// add mref tables
+			if (attr.getDataType() instanceof MrefField)
+			{
+				String createJunctionTableSql = getSqlCreateJunctionTable(attr);
+				if (LOG.isDebugEnabled())
 				{
-					String createJunctionTableSql = getSqlCreateJunctionTable(attr);
-					if (LOG.isDebugEnabled())
+					LOG.debug("Creating junction table for entity [{}] attribute [{}]", getName(), attr.getName());
+					if (LOG.isTraceEnabled())
 					{
-						LOG.debug("Creating junction table for entity [{}] attribute [{}]", getName(), attr.getName());
-						if (LOG.isTraceEnabled())
-						{
-							LOG.trace("SQL: {}", createJunctionTableSql);
-						}
+						LOG.trace("SQL: {}", createJunctionTableSql);
 					}
-					jdbcTemplate.execute(createJunctionTableSql);
 				}
-				else if (attr.getDataType() instanceof XrefField && persistedInPostgreSql(attr.getRefEntity()))
+				jdbcTemplate.execute(createJunctionTableSql);
+			}
+			else if (attr.getDataType() instanceof XrefField && persistedInPostgreSql(attr.getRefEntity()))
+			{
+				String createForeignKeySql = getSqlCreateForeignKey(attr);
+				if (LOG.isDebugEnabled())
 				{
-					if (LOG.isDebugEnabled())
+					LOG.debug("Creating foreign key for entity [{}] attribute [{}]", getName(), attr.getName());
+					if (LOG.isTraceEnabled())
 					{
-						LOG.debug("Creating foreign key for entity [{}] attribute [{}]", getName(), attr.getName());
+						LOG.trace("SQL: {}", createForeignKeySql);
 					}
-					jdbcTemplate.execute(getSqlCreateForeignKey(attr));
 				}
+				jdbcTemplate.execute(createForeignKeySql);
+			}
 
-				if (attr.isUnique() && !attr.getName().equals(idAttrName))
+			if (attr.isUnique() && !attr.getName().equals(idAttrName))
+			{
+				String createUniqueSql = getSqlCreateUniqueKey(attr);
+				if (LOG.isDebugEnabled())
 				{
-					String createUniqueSql = getSqlCreateUniqueKey(attr);
-					if (LOG.isDebugEnabled())
+					LOG.debug("Creating unique key for entity [{}] attribute [{}]", getName(), attr.getName());
+					if (LOG.isTraceEnabled())
 					{
-						LOG.debug("Creating unique key for entity [{}] attribute [{}]", getName(), attr.getName());
-						if (LOG.isTraceEnabled())
-						{
-							LOG.trace("SQL: {}", createUniqueSql);
-						}
+						LOG.trace("SQL: {}", createUniqueSql);
 					}
-					jdbcTemplate.execute(createUniqueSql);
 				}
-			});
-		}
-		catch (Exception e)
-		{
-			LOG.error("Exception creating PostgreSqlRepository.", e);
-			try
-			{
-				drop();
+				jdbcTemplate.execute(createUniqueSql);
 			}
-			catch (Exception ignored)
-			{
-			}
-			throw new MolgenisDataException(e);
-		}
+		});
 	}
 
 	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
@@ -790,36 +768,6 @@ public class PostgreSqlRepository extends AbstractRepository
 				}
 			}
 		});
-	}
-
-	private boolean tableExists()
-	{
-		Connection conn = null;
-		try
-		{
-			conn = dataSource.getConnection();
-			DatabaseMetaData dbm = conn.getMetaData();
-			// DatabaseMetaData.getTables() requires table name without double quotes, only search TABLE table type to
-			// avoid matches with system tables
-			ResultSet tables = dbm.getTables(null, null, getTableName(false), new String[]
-			{ "TABLE" });
-			return tables.next();
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e);
-		}
-		finally
-		{
-			try
-			{
-				conn.close();
-			}
-			catch (Exception e)
-			{
-				throw new RuntimeException(e);
-			}
-		}
 	}
 
 	private void removeMrefs(final List<Object> ids, final AttributeMetaData attr)
@@ -1525,17 +1473,12 @@ public class PostgreSqlRepository extends AbstractRepository
 		return getTableName(getEntityMetaData());
 	}
 
-	private String getTableName(boolean quoteSystemIdentifiers)
-	{
-		return getTableName(getEntityMetaData(), quoteSystemIdentifiers);
-	}
-
 	private static String getTableName(EntityMetaData emd)
 	{
 		return getTableName(emd, true);
 	}
 
-	private static String getTableName(EntityMetaData emd, boolean quoteSystemIdentifiers)
+	static String getTableName(EntityMetaData emd, boolean quoteSystemIdentifiers)
 	{
 		StringBuilder strBuilder = new StringBuilder();
 		if (quoteSystemIdentifiers)
