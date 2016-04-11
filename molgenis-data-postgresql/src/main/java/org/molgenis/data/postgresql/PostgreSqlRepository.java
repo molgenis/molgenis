@@ -14,7 +14,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -39,7 +38,6 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisReferencedEntityException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
-import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.Sort;
 import org.molgenis.data.support.AbstractRepository;
@@ -62,6 +60,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
@@ -193,39 +192,45 @@ public class PostgreSqlRepository extends AbstractRepository
 		return findOne(new QueryImpl().eq(getEntityMetaData().getIdAttribute().getName(), id).fetch(fetch));
 	}
 
+	@Transactional
 	@Override
 	public void update(Entity entity)
 	{
 		update(Stream.of(entity));
 	}
 
+	@Transactional
 	@Override
 	public void update(Stream<? extends Entity> entities)
 	{
 		update(entities.iterator());
 	}
 
+	@Transactional
 	@Override
 	public void delete(Entity entity)
 	{
 		this.delete(Stream.of(entity));
 	}
 
+	@Transactional
 	@Override
 	public void delete(Stream<? extends Entity> entities)
 	{
-		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
-			resetXrefValuesBySelfReference(batch);
-			deleteById(batch.stream().map(Entity::getIdValue));
+		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(entitiesBatch -> {
+			resetXrefValuesBySelfReference(entitiesBatch);
+			deleteById(entitiesBatch.stream().map(Entity::getIdValue));
 		});
 	}
 
+	@Transactional
 	@Override
 	public void deleteById(Object id)
 	{
 		this.deleteById(Stream.of(id));
 	}
 
+	@Transactional
 	@Override
 	public void deleteById(Stream<Object> ids)
 	{
@@ -256,51 +261,23 @@ public class PostgreSqlRepository extends AbstractRepository
 		});
 	}
 
+	@Transactional
 	@Override
 	public void deleteAll()
 	{
-		Stream<AttributeMetaData> selfReferencingAttrs = getPersistedAttributes()
-				.filter(attr -> attr.getDataType() instanceof XrefField
-						&& attr.getRefEntity().getName().equals(getEntityMetaData().getName()));
-
-		selfReferencingAttrs.forEach(selfReferencingXrefAttr -> {
-			if (!selfReferencingXrefAttr.isNillable())
-			{
-				// FIXME not required for PostgreSQL
-				// update value with id attribute name (instead of NULL) won't work due to
-				// http://bugs.mysql.com/bug.php?id=7412. For more information read the paragraph "Until InnoDB
-				// implements deferred constraint checking, some things will be impossible, such as deleting a
-				// record that refers to itself using a foreign key." in
-				// http://dev.mysql.com/doc/refman/5.1/en/innodb-foreign-key-constraints.html
-				throw new MolgenisDataException(
-						format("Self-referencing not-null attribute [%s] of entity [%s] cannot be deleted",
-								selfReferencingXrefAttr.getName(), getName()));
-			}
-
-			String updateSql = getSqlUpdateColumnToNull(selfReferencingXrefAttr);
-			if (LOG.isDebugEnabled())
-			{
-				LOG.debug("Updating nillable self-referencing xref attribute: {}", updateSql);
-				if (LOG.isTraceEnabled())
-				{
-					LOG.trace("SQL: {}", updateSql);
-				}
-			}
-			jdbcTemplate.update(updateSql);
-		});
-
-		String deleteSql = getSqlDeleteAll();
+		String deleteAllSql = getSqlDeleteAll();
 		if (LOG.isDebugEnabled())
 		{
 			LOG.debug("Deleting all [{}] entities", getName());
 			if (LOG.isTraceEnabled())
 			{
-				LOG.trace("SQL: {}", deleteSql);
+				LOG.trace("SQL: {}", deleteAllSql);
 			}
 		}
-		jdbcTemplate.update(deleteSql);
+		jdbcTemplate.update(deleteAllSql);
 	}
 
+	@Transactional
 	@Override
 	public void add(Entity entity)
 	{
@@ -311,12 +288,14 @@ public class PostgreSqlRepository extends AbstractRepository
 		add(Stream.of(entity));
 	}
 
+	@Transactional
 	@Override
 	public Integer add(Stream<? extends Entity> entities)
 	{
 		return add(entities.iterator());
 	}
 
+	@Transactional
 	@Override
 	public void create()
 	{
@@ -354,8 +333,7 @@ public class PostgreSqlRepository extends AbstractRepository
 					}
 					jdbcTemplate.execute(createJunctionTableSql);
 				}
-				else if (attr.getDataType() instanceof XrefField
-						&& attr.getRefEntity().getBackend().equals(PostgreSqlRepositoryCollection.NAME))
+				else if (attr.getDataType() instanceof XrefField && persistedInPostgreSql(attr.getRefEntity()))
 				{
 					if (LOG.isDebugEnabled())
 					{
@@ -393,6 +371,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		}
 	}
 
+	@Transactional
 	@Override
 	public void drop()
 	{
@@ -435,6 +414,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		}
 	}
 
+	@Transactional
 	void dropAttribute(String attrName)
 	{
 		String dropColumnSql = getSqlDropColumn(attrName);
@@ -459,6 +439,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	 * @param attr
 	 *            the {@link AttributeMetaData} to add
 	 */
+	@Transactional
 	void addAttribute(AttributeMetaData attr)
 	{
 		addAttributeRec(attr, true);
@@ -552,8 +533,7 @@ public class PostgreSqlRepository extends AbstractRepository
 				jdbcTemplate.execute(addColumnSql);
 			}
 
-			if (attr.getDataType() instanceof XrefField
-					&& attr.getRefEntity().getBackend().equals(PostgreSqlRepositoryCollection.NAME))
+			if (attr.getDataType() instanceof XrefField && persistedInPostgreSql(attr.getRefEntity()))
 			{
 				String createForeignKeySql = getSqlCreateForeignKey(attr);
 				if (LOG.isDebugEnabled())
@@ -690,7 +670,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		this.update(updateBatch.iterator());
 	}
 
-	private Integer add(Iterator<? extends Entity> entitiesIterator)
+	private Integer add(Iterator<? extends Entity> entities)
 	{
 		AtomicInteger count = new AtomicInteger();
 
@@ -702,7 +682,7 @@ public class PostgreSqlRepository extends AbstractRepository
 				.filter(attr -> attr.getDataType() instanceof MrefField).collect(toList());
 		final String insertSql = getSqlInsert();
 
-		Iterators.partition(entitiesIterator, BATCH_SIZE).forEachRemaining(entitiesBatch -> {
+		Iterators.partition(entities, BATCH_SIZE).forEachRemaining(entitiesBatch -> {
 			final Map<String, List<Map<String, Object>>> mrefs = new HashMap<>();
 
 			if (LOG.isDebugEnabled())
@@ -813,13 +793,13 @@ public class PostgreSqlRepository extends AbstractRepository
 				.filter(attr -> attr.getDataType() instanceof MrefField).collect(toList());
 		final String updateSql = getSqlUpdate();
 
-		Iterators.partition(entities, BATCH_SIZE).forEachRemaining(batchEntities -> {
+		Iterators.partition(entities, BATCH_SIZE).forEachRemaining(entitiesBatch -> {
 			final List<Object> ids = new ArrayList<Object>();
 			final Map<String, List<Map<String, Object>>> mrefs = new HashMap<>();
 
 			if (LOG.isDebugEnabled())
 			{
-				LOG.debug("Updating {} [{}] entities", batchEntities.size(), getName());
+				LOG.debug("Updating {} [{}] entities", entitiesBatch.size(), getName());
 				if (LOG.isTraceEnabled())
 				{
 					LOG.trace("SQL: {}", updateSql);
@@ -830,7 +810,7 @@ public class PostgreSqlRepository extends AbstractRepository
 				@Override
 				public void setValues(PreparedStatement preparedStatement, int rowIndex) throws SQLException
 				{
-					Entity entity = batchEntities.get(rowIndex);
+					Entity entity = entitiesBatch.get(rowIndex);
 
 					Object idValue = idAttribute.getDataType().convert(entity.get(idAttribute.getName()));
 					ids.add(idValue);
@@ -905,7 +885,7 @@ public class PostgreSqlRepository extends AbstractRepository
 				@Override
 				public int getBatchSize()
 				{
-					return batchEntities.size();
+					return entitiesBatch.size();
 				}
 			});
 
@@ -1211,7 +1191,7 @@ public class PostgreSqlRepository extends AbstractRepository
 				.append(" NOT NULL, FOREIGN KEY (").append(getColumnName(idAttr)).append(") REFERENCES ")
 				.append(getTableName()).append('(').append(getColumnName(idAttr)).append(") ON DELETE CASCADE");
 
-		if (attr.getRefEntity().getBackend().equals(PostgreSqlRepositoryCollection.NAME))
+		if (persistedInPostgreSql(attr.getRefEntity()))
 		{
 			sql.append(", FOREIGN KEY (").append(getColumnName(attr)).append(") REFERENCES ")
 					.append(getTableName(attr.getRefEntity())).append('(')
@@ -1378,75 +1358,12 @@ public class PostgreSqlRepository extends AbstractRepository
 			StringBuilder predicate = new StringBuilder();
 			switch (r.getOperator())
 			{
-				case SEARCH:
-					StringBuilder search = new StringBuilder();
-					Iterable<AttributeMetaData> searchAttrs = attr != null ? Collections.singletonList(attr)
-							: getPersistedAttributes().collect(toList());
-					for (AttributeMetaData searchAttr : searchAttrs)
-					{
-						// TODO: other data types???
-						if (searchAttr.getDataType() instanceof StringField
-								|| searchAttr.getDataType() instanceof TextField)
-						{
-							search.append(" OR this.").append(getColumnName(searchAttr)).append(" LIKE ?");
-							parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
-						}
-						else if (searchAttr.getDataType() instanceof XrefField)
-						{
-
-							Repository repo = dataService.getRepository(searchAttr.getRefEntity().getName());
-							if (repo.getCapabilities().contains(QUERYABLE))
-							{
-								Query refQ = new QueryImpl().like(
-										searchAttr.getRefEntity().getLabelAttribute().getName(),
-										r.getValue().toString());
-								Iterator<Entity> it = repo.findAll(refQ).iterator();
-								if (it.hasNext())
-								{
-									search.append(" OR this.").append(getColumnName(searchAttr)).append(" IN (");
-									while (it.hasNext())
-									{
-										Entity ref = it.next();
-										search.append("?");
-										parameters.add(searchAttr.getDataType().convert(
-												ref.get(searchAttr.getRefEntity().getIdAttribute().getName())));
-										if (it.hasNext())
-										{
-											search.append(",");
-										}
-									}
-									search.append(")");
-								}
-							}
-						}
-						else if (searchAttr.getDataType() instanceof MrefField)
-						{
-							// TODO check if casting is required for postgres
-							search.append(" OR CAST(").append(getColumnName(searchAttr)).append(".")
-									.append(getColumnName(searchAttr)).append(" as CHAR) LIKE ?");
-							parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
-
-						}
-						else
-						{
-							// TODO check if casting is required for postgres
-							search.append(" OR CAST(this.").append(getColumnName(searchAttr))
-									.append(" as CHAR) LIKE ?");
-							parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
-						}
-					}
-					if (search.length() > 0)
-					{
-						result.append('(').append(search.substring(4)).append(')');
-					}
-					break;
 				case AND:
 					result.append(" AND ");
 					break;
 				case NESTED:
-					result.append("(");
-					result.append(getSqlWhere(new QueryImpl(r.getNestedRules()), parameters, mrefFilterIndex));
-					result.append(")");
+					QueryImpl nestedQ = new QueryImpl(r.getNestedRules());
+					result.append('(').append(getSqlWhere(nestedQ, parameters, mrefFilterIndex)).append(')');
 					break;
 				case OR:
 					result.append(" OR ");
@@ -1500,9 +1417,17 @@ public class PostgreSqlRepository extends AbstractRepository
 						result.append("this");
 					}
 
-					result.append(".").append(getColumnName(r.getField())).append(" IN (").append(in).append(')');
+					result.append('.').append(getColumnName(r.getField())).append(" IN (").append(in).append(')');
 					break;
-				default:
+				case NOT:
+					throw new RuntimeException("TODO implement");
+				case RANGE:
+					throw new RuntimeException("TODO implement");
+				case EQUALS:
+				case GREATER:
+				case GREATER_EQUAL:
+				case LESS:
+				case LESS_EQUAL:
 					// comparable values...
 					FieldType type = attr.getDataType();
 					if (type instanceof MrefField)
@@ -1514,29 +1439,8 @@ public class PostgreSqlRepository extends AbstractRepository
 						predicate.append("this");
 					}
 
-					predicate.append(".").append(getColumnName(r.getField()));
+					predicate.append('.').append(getColumnName(r.getField())).append(" = ? ");
 
-					switch (r.getOperator())
-					{
-						case EQUALS:
-							predicate.append(" =");
-							break;
-						case GREATER:
-							predicate.append(" >");
-							break;
-						case LESS:
-							predicate.append(" <");
-							break;
-						case GREATER_EQUAL:
-							predicate.append(" >=");
-							break;
-						case LESS_EQUAL:
-							predicate.append(" <=");
-							break;
-						default:
-							throw new MolgenisDataException(format("cannot solve query rule:  %s", r.toString()));
-					}
-					predicate.append(" ? ");
 					Object convertedVal = attr.getDataType().convert(r.getValue());
 					if (convertedVal instanceof Entity)
 					{
@@ -1550,6 +1454,17 @@ public class PostgreSqlRepository extends AbstractRepository
 						result.append(" AND ");
 					}
 					result.append(predicate);
+					break;
+				case DIS_MAX:
+				case FUZZY_MATCH:
+				case FUZZY_MATCH_NGRAM:
+				case SEARCH:
+				case SHOULD:
+					// PostgreSQL does not support semantic searching and sorting matching rows on relevance.
+					throw new UnsupportedOperationException(format(
+							"Query operator [%s] not supported by PostgreSQL repository", r.getOperator().toString()));
+				default:
+					throw new RuntimeException(format("Unknown query operator [%s]", r.getOperator().toString()));
 			}
 		}
 
@@ -1606,12 +1521,6 @@ public class PostgreSqlRepository extends AbstractRepository
 		}
 		sql.append(" WHERE ").append(getColumnName(idAttribute)).append("= ?");
 		return sql.toString();
-	}
-
-	private String getSqlUpdateColumnToNull(AttributeMetaData attr)
-	{
-		return new StringBuilder().append("UPDATE ").append(getTableName()).append(" SET ").append(getColumnName(attr))
-				.append(" = ").append("NULL").toString();
 	}
 
 	private String getSqlFrom(Query q)
@@ -1773,5 +1682,15 @@ public class PostgreSqlRepository extends AbstractRepository
 	{
 		return new StringBuilder().append("\"").append(emd.getName()).append('_').append(attr.getName()).append("_key")
 				.append("\"").toString();
+	}
+
+	private boolean persistedInPostgreSql(EntityMetaData entityMeta)
+	{
+		String backend = entityMeta.getBackend();
+		if (backend == null)
+		{
+			backend = dataService.getMeta().getDefaultBackend().getName();
+		}
+		return backend.equals(PostgreSqlRepositoryCollection.NAME);
 	}
 }
