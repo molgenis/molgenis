@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -34,7 +33,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.MolgenisReferencedEntityException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.RepositoryCapability;
@@ -52,10 +50,8 @@ import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.TextField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.util.EntityUtils;
-import org.molgenis.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -81,6 +77,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	private static final int BATCH_SIZE = 1000;
 	private static final String JUNCTION_TABLE_ORDER_ATTR_NAME = "order";
 
+	// TODO remove dataservice dependency
 	private final DataService dataService;
 	private final PostgreSqlEntityFactory postgreSqlEntityFactory;
 	private final DataSource dataSource;
@@ -88,15 +85,6 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	private EntityMetaData metaData;
 
-	/**
-	 * Creates a new PostgreSqlRepository.
-	 *
-	 * @param dataSource
-	 *            the datasource to use to execute statements on the PostgreSQL database
-	 * @param jdbcTemplate
-	 *            {@link AsyncJdbcTemplate} to use to execute DDL statements in an isolated transaction on the
-	 *            PostgreSQL database
-	 */
 	public PostgreSqlRepository(DataService dataService, PostgreSqlEntityFactory postgreSqlEntityFactory,
 			DataSource dataSource)
 	{
@@ -375,43 +363,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	@Override
 	public void drop()
 	{
-		DataAccessException remembered = null;
-		for (AttributeMetaData attr : getPersistedAttributes().collect(toList()))
-		{
-			if (attr.getDataType() instanceof MrefField)
-			{
-				DataAccessException e = tryExecute(getSqlDropTable(getJunctionTableName(attr)));
-				remembered = remembered != null ? remembered : e;
-			}
-		}
-
-		// Deleting entites that are referenced won't work due to failing key constraints
-		// Find out if the entity is referenced and if it is, report those entities
-		List<Pair<EntityMetaData, List<AttributeMetaData>>> referencingEntities = EntityUtils
-				.getReferencingEntityMetaData(getEntityMetaData(), dataService);
-		List<Pair<EntityMetaData, List<AttributeMetaData>>> nonSelfReferencingEntities = referencingEntities.stream()
-				.filter(ref -> !getEntityMetaData().getName().equals(referencingEntities.get(0).getA().getName()))
-				.collect(Collectors.toList());
-
-		if (!nonSelfReferencingEntities.isEmpty())
-		{
-			List<String> entityNames = Lists.newArrayList();
-			nonSelfReferencingEntities.forEach(pair -> entityNames.add(pair.getA().getName()));
-
-			throw new MolgenisReferencedEntityException(
-					format("Cannot delete entity '%s' because it is referenced by the following entities: %s",
-							getEntityMetaData().getName(), entityNames.toString()));
-		}
-		else
-		{
-			DataAccessException e = tryExecute(getSqlDropTable());
-			remembered = remembered != null ? remembered : e;
-		}
-
-		if (remembered != null)
-		{
-			throw remembered;
-		}
+		jdbcTemplate.execute(getSqlDropTable());
 	}
 
 	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
@@ -580,34 +532,6 @@ public class PostgreSqlRepository extends AbstractRepository
 		{
 			LOG.error("Exception updating PostgreSqlRepository.", e);
 			throw new MolgenisDataException(e);
-		}
-	}
-
-	/**
-	 * Tries to execute a piece of SQL.
-	 *
-	 * @param sql
-	 *            the SQL to execute
-	 * @return Exception if one was caught, or null if all went well
-	 */
-	private DataAccessException tryExecute(String sql)
-	{
-		try
-		{
-			if (LOG.isDebugEnabled())
-			{
-				LOG.debug("Removing table or junction table for entity [{}]", getName());
-				if (LOG.isTraceEnabled())
-				{
-					LOG.trace("SQL: {}", sql);
-				}
-			}
-			jdbcTemplate.execute(sql);
-			return null;
-		}
-		catch (DataAccessException caught)
-		{
-			return caught;
 		}
 	}
 
@@ -875,7 +799,8 @@ public class PostgreSqlRepository extends AbstractRepository
 		{
 			conn = dataSource.getConnection();
 			DatabaseMetaData dbm = conn.getMetaData();
-			// DatabaseMetaData.getTables() requires table name without double quotes
+			// DatabaseMetaData.getTables() requires table name without double quotes, only search TABLE table type to
+			// avoid matches with system tables
 			ResultSet tables = dbm.getTables(null, null, getTableName(false), new String[]
 			{ "TABLE" });
 			return tables.next();
@@ -890,9 +815,9 @@ public class PostgreSqlRepository extends AbstractRepository
 			{
 				conn.close();
 			}
-			catch (Exception e2)
+			catch (Exception e)
 			{
-				e2.printStackTrace();
+				throw new RuntimeException(e);
 			}
 		}
 	}
@@ -1100,7 +1025,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	private String getSqlCreateTable()
 	{
 		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE TABLE IF NOT EXISTS ").append(getTableName()).append('(');
+		sql.append("CREATE TABLE ").append(getTableName()).append('(');
 
 		getPersistedAttributesNonMref().forEach(attr -> {
 			getSqlAttribute(sql, attr);
@@ -1169,7 +1094,7 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	private String getSqlDropTable(String tableName)
 	{
-		return new StringBuilder("DROP TABLE IF EXISTS ").append(tableName).toString();
+		return new StringBuilder("DROP TABLE ").append(tableName).toString();
 	}
 
 	@SuppressWarnings("unused")
@@ -1668,6 +1593,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		String backend = entityMeta.getBackend();
 		if (backend == null)
 		{
+			// TODO remove this check after getBackend always returns the backend
 			backend = dataService.getMeta().getDefaultBackend().getName();
 		}
 		return backend.equals(PostgreSqlRepositoryCollection.NAME);
