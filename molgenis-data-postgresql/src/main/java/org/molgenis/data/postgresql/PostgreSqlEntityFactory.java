@@ -22,7 +22,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
 @Component
-class PostgreSqlEntityFactory
+public class PostgreSqlEntityFactory
 {
 	@SuppressWarnings("unused")
 	private static final Logger LOG = LoggerFactory.getLogger(PostgreSqlEntityFactory.class);

@@ -28,7 +28,9 @@ public class PostgreSqlConfiguration
 	@Bean
 	public JdbcTemplate jdbcTemplate()
 	{
-		return new JdbcTemplate(dataSource);
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+		jdbcTemplate.setExceptionTranslator(new PostgreSqlExceptionTranslator(dataSource));
+		return jdbcTemplate;
 	}
 
 	@Bean(name =
