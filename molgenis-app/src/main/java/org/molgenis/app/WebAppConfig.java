@@ -59,7 +59,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 
 	@Autowired
 	@Qualifier("PostgreSqlRepositoryCollection")
-	private ManageableRepositoryCollection mysqlRepositoryCollection;
+	private ManageableRepositoryCollection postgreSqlRepositoryCollection;
 
 	@Autowired
 	private ElasticsearchRepositoryCollection elasticsearchRepositoryCollection;
@@ -79,7 +79,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Override
 	public ManageableRepositoryCollection getBackend()
 	{
-		return mysqlRepositoryCollection;
+		return postgreSqlRepositoryCollection;
 	}
 
 	@Override

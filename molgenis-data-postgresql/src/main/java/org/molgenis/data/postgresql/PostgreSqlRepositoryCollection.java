@@ -1,6 +1,7 @@
 package org.molgenis.data.postgresql;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getTableName;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -138,9 +139,8 @@ public abstract class PostgreSqlRepositoryCollection implements ManageableReposi
 			DatabaseMetaData dbm = conn.getMetaData();
 			// DatabaseMetaData.getTables() requires table name without double quotes, only search TABLE table type to
 			// avoid matches with system tables
-			ResultSet tables = dbm.getTables(null, null, PostgreSqlRepository.getTableName(entityMeta, false),
-					new String[]
-					{ "TABLE" });
+			ResultSet tables = dbm.getTables(null, null, getTableName(entityMeta, false), new String[]
+			{ "TABLE" });
 			return tables.next();
 		}
 		catch (Exception e)
