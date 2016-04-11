@@ -101,7 +101,7 @@ public abstract class PostgreSqlRepositoryCollection implements ManageableReposi
 		{
 			throw new UnknownEntityException(String.format("Unknown entity '%s'", entityName));
 		}
-		repo.addAttributeSync(attribute);
+		repo.addAttribute(attribute);
 	}
 
 	/**
