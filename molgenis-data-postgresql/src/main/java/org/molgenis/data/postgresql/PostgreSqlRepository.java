@@ -27,7 +27,6 @@ import java.util.stream.StreamSupport;
 import javax.sql.DataSource;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
@@ -60,7 +59,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
@@ -71,6 +69,8 @@ import com.google.common.collect.Sets;
  * Repository that persists entities in a PostgreSQL database
  * <ul>
  * <li>Attributes with expression are not persisted</li>
+ * <li>Cross-backend attribute references are supported</li>
+ * <li>Query operators DIS_MAX, FUZZY_MATCH, FUZZY_MATCH_NGRAM, SEARCH, SHOULD are not supported</li>
  * </ul>
  */
 public class PostgreSqlRepository extends AbstractRepository
@@ -195,45 +195,42 @@ public class PostgreSqlRepository extends AbstractRepository
 		return findOne(new QueryImpl().eq(getEntityMetaData().getIdAttribute().getName(), id).fetch(fetch));
 	}
 
-	@Transactional
+	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
 	public void update(Entity entity)
 	{
 		update(Stream.of(entity));
 	}
 
-	@Transactional
+	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
 	public void update(Stream<? extends Entity> entities)
 	{
 		update(entities.iterator());
 	}
 
-	@Transactional
+	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
 	public void delete(Entity entity)
 	{
 		this.delete(Stream.of(entity));
 	}
 
-	@Transactional
+	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
 	public void delete(Stream<? extends Entity> entities)
 	{
-		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(entitiesBatch -> {
-			resetXrefValuesBySelfReference(entitiesBatch);
-			deleteById(entitiesBatch.stream().map(Entity::getIdValue));
-		});
+		deleteById(entities.map(Entity::getIdValue));
 	}
 
-	@Transactional
+	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
 	public void deleteById(Object id)
 	{
 		this.deleteById(Stream.of(id));
 	}
 
-	@Transactional
+	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
 	public void deleteById(Stream<Object> ids)
 	{
@@ -264,7 +261,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		});
 	}
 
-	@Transactional
+	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
 	public void deleteAll()
 	{
@@ -280,7 +277,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		jdbcTemplate.update(deleteAllSql);
 	}
 
-	@Transactional
+	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
 	public void add(Entity entity)
 	{
@@ -291,14 +288,14 @@ public class PostgreSqlRepository extends AbstractRepository
 		add(Stream.of(entity));
 	}
 
-	@Transactional
+	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
 	public Integer add(Stream<? extends Entity> entities)
 	{
 		return add(entities.iterator());
 	}
 
-	@Transactional
+	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
 	public void create()
 	{
@@ -374,7 +371,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		}
 	}
 
-	@Transactional
+	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
 	public void drop()
 	{
@@ -417,7 +414,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		}
 	}
 
-	@Transactional
+	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	void dropAttribute(String attrName)
 	{
 		String dropColumnSql = getSqlDropColumn(attrName);
@@ -442,7 +439,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	 * @param attr
 	 *            the {@link AttributeMetaData} to add
 	 */
-	@Transactional
+	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	void addAttribute(AttributeMetaData attr)
 	{
 		addAttributeRec(attr, true);
@@ -638,39 +635,6 @@ public class PostgreSqlRepository extends AbstractRepository
 			}
 		};
 		return batchingQueryResult;
-	}
-
-	/**
-	 * Use before a delete action of a entity with XREF data type where the entity and refEntity are the same entities.
-	 *
-	 * @param entities
-	 */
-	private void resetXrefValuesBySelfReference(Iterable<? extends Entity> entities)
-	{
-		List<String> xrefAttributesWithSelfReference = new ArrayList<String>();
-		getPersistedAttributes().forEach(attr -> {
-			if (attr.getDataType().getEnumType().equals(FieldTypeEnum.XREF)
-					&& getEntityMetaData().getName().equals(attr.getRefEntity().getName()))
-			{
-				xrefAttributesWithSelfReference.add(attr.getName());
-			}
-		});
-
-		final List<Entity> updateBatch = new ArrayList<Entity>();
-		for (Entity e : entities)
-		{
-			for (String attributeName : xrefAttributesWithSelfReference)
-			{
-				Entity en = e.getEntity(attributeName);
-				if (null != en)
-				{
-					en.set(attributeName, null);
-					updateBatch.add(en);
-					break;
-				}
-			}
-		}
-		this.update(updateBatch.iterator());
 	}
 
 	private Integer add(Iterator<? extends Entity> entities)
@@ -912,7 +876,8 @@ public class PostgreSqlRepository extends AbstractRepository
 			conn = dataSource.getConnection();
 			DatabaseMetaData dbm = conn.getMetaData();
 			// DatabaseMetaData.getTables() requires table name without double quotes
-			ResultSet tables = dbm.getTables(null, null, getTableName(false), null);
+			ResultSet tables = dbm.getTables(null, null, getTableName(false), new String[]
+			{ "TABLE" });
 			return tables.next();
 		}
 		catch (Exception e)
