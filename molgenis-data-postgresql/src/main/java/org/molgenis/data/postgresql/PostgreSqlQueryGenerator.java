@@ -370,7 +370,7 @@ class PostgreSqlQueryGenerator
 			}
 			if (attr.getDataType() instanceof EnumField)
 			{
-				sql.append(" CHECK (" + getColumnName(attr) + " IN (").append(
+				sql.append(" CHECK (").append(getColumnName(attr)).append(" IN (").append(
 						attr.getEnumOptions().stream().map(enumOption -> "'" + enumOption + "'").collect(joining(",")))
 						.append("))");
 			}
