@@ -151,15 +151,16 @@ public class VcfUtils
 			PeekingIterator<Entity> effects = Iterators.peekingIterator(annotatedRecords);
 
 			DefaultEntityMetaData resultEMD;
+			EntityMetaData effectsEMD;
 
-			private EntityMetaData getResultEntityMetaData(EntityMetaData effectsEMD, EntityMetaData variantEMD)
+			private void createResultEntityMetaData(Entity effect, EntityMetaData variantEMD)
 			{
-				if (resultEMD == null)
+				if (resultEMD == null || effectsEMD == null)
 				{
+					effectsEMD = effect.getEntityMetaData();
 					resultEMD = new DefaultEntityMetaData(variantEMD);
 					resultEMD.addAttribute(VcfWriterUtils.EFFECT).setDataType(MREF).setRefEntity(effectsEMD);
 				}
-				return resultEMD;
 			}
 
 			@Override
@@ -170,9 +171,8 @@ public class VcfUtils
 
 			private Entity createEntityStructure(Entity variant, List<Entity> effectsForVariant)
 			{
-				EntityMetaData effectEMD = effectsForVariant.get(0).getEntityMetaData();
-				Entity newVariant = new MapEntity(getResultEntityMetaData(effectEMD, variant.getEntityMetaData()));
-				newVariant.set(variant);
+				createResultEntityMetaData(effectsForVariant.get(0), variant.getEntityMetaData());
+				Entity newVariant = new MapEntity(variant, resultEMD);
 
 				if (effectsForVariant.size() > 1)
 				{
@@ -183,9 +183,9 @@ public class VcfUtils
 					// is this an empty effect entity?
 					Entity entity = effectsForVariant.get(0);
 					boolean isEmpty = true;
-					for (AttributeMetaData attr : effectEMD.getAtomicAttributes())
+					for (AttributeMetaData attr : effectsEMD.getAtomicAttributes())
 					{
-						if (attr.getName().equals(effectEMD.getIdAttribute().getName())
+						if (attr.getName().equals(effectsEMD.getIdAttribute().getName())
 								|| attr.getName().equals(VcfWriterUtils.VARIANT))
 						{
 							continue;
