@@ -292,7 +292,6 @@ public class RepositoryValidationDecorator implements Repository
 		// prepare validation
 		initValidation(validationResource, validationMode);
 
-		// FIXME cross-backend refs
 		boolean validateRequired = !getCapabilities().contains(VALIDATE_NOTNULL_CONTRAINT);
 		boolean validateReferences = !getCapabilities().contains(VALIDATE_REFERENCE_CONSTRAINT);
 		boolean validateUniqueness = !getCapabilities().contains(VALIDATE_UNIQUE_CONSTRAINT);
@@ -363,7 +362,6 @@ public class RepositoryValidationDecorator implements Repository
 
 	private void initReferenceValidation(ValidationResource validationResource)
 	{
-		// FIXME exclude cross-repo-collection entities
 		if (!getCapabilities().contains(VALIDATE_REFERENCE_CONSTRAINT))
 		{
 			// get reference attrs

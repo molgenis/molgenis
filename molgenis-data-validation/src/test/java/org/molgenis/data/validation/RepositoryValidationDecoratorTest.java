@@ -12,6 +12,7 @@ import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -25,6 +26,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.MolgenisTransactionLogMetaData;
 import org.testng.annotations.BeforeMethod;
@@ -233,7 +235,38 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
 
 		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(refEntity0);
+		when(entity0.get(attrXrefName)).thenReturn(null); // valid, because entity does not require validation
+		when(entity0.get(attrNillableXrefName)).thenReturn(null);
+		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
+		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
+		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
+		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
+
+		// actual tests
+		repositoryValidationDecorator.add(entity0);
+		verify(decoratedRepo, times(1)).add(entity0);
+	}
+
+	@Test
+	public void addEntityDoesNotRequireValidationDueToRepoCapabilities()
+	{
+		when(decoratedRepo.getCapabilities())
+				.thenReturn(new HashSet<>(Arrays.asList(RepositoryCapability.VALIDATE_NOTNULL_CONTRAINT)));
+
+		// entities
+		Entity entity0 = mock(Entity.class);
+		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(entity0.getIdValue()).thenReturn("id0");
+		when(entity0.getEntity(attrXrefName)).thenReturn(null); // valid, because entity is validated by decorated repo
+		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
+		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
+		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
+		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
+		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
+
+		when(entity0.get(attrIdName)).thenReturn("id0");
+		when(entity0.get(attrXrefName)).thenReturn(null); // valid, because entity is validated by decorated repo
 		when(entity0.get(attrNillableXrefName)).thenReturn(null);
 		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
 		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
