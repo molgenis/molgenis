@@ -25,5 +25,20 @@ public enum RepositoryCapability
 	/**
 	 * Repository index can be rebuilt
 	 */
-	INDEXABLE
+	INDEXABLE,
+
+	/**
+	 * Repository can validate references to entities persisted in other repositories in the same repository collection.
+	 */
+	VALIDATE_REFERENCE_CONSTRAINT,
+
+	/**
+	 * Repository can validate unique values for attributes
+	 */
+	VALIDATE_UNIQUE_CONSTRAINT,
+
+	/**
+	 * Repository can validate if values are not-null for attributes
+	 */
+	VALIDATE_NOTNULL_CONTRAINT,
 }

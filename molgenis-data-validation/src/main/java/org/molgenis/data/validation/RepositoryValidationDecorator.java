@@ -9,6 +9,9 @@ import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.RepositoryCapability.VALIDATE_NOTNULL_CONTRAINT;
+import static org.molgenis.data.RepositoryCapability.VALIDATE_REFERENCE_CONSTRAINT;
+import static org.molgenis.data.RepositoryCapability.VALIDATE_UNIQUE_CONSTRAINT;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -289,6 +292,11 @@ public class RepositoryValidationDecorator implements Repository
 		// prepare validation
 		initValidation(validationResource, validationMode);
 
+		// FIXME cross-backend refs
+		boolean validateRequired = !getCapabilities().contains(VALIDATE_NOTNULL_CONTRAINT);
+		boolean validateReferences = !getCapabilities().contains(VALIDATE_REFERENCE_CONSTRAINT);
+		boolean validateUniqueness = !getCapabilities().contains(VALIDATE_UNIQUE_CONSTRAINT);
+
 		// add validation operation to stream
 		return entities.filter(entity -> {
 			validationResource.incrementRow();
@@ -301,11 +309,20 @@ public class RepositoryValidationDecorator implements Repository
 				throw new MolgenisValidationException(validationResource.getViolations());
 			}
 
-			validateEntityValueRequired(entity, validationResource);
+			if (validateRequired)
+			{
+				validateEntityValueRequired(entity, validationResource);
+			}
 
-			validateEntityValueUniqueness(entity, validationResource, validationMode);
+			if (validateUniqueness)
+			{
+				validateEntityValueUniqueness(entity, validationResource, validationMode);
+			}
 
-			validateEntityValueReferences(entity, validationResource);
+			if (validateReferences)
+			{
+				validateEntityValueReferences(entity, validationResource);
+			}
 
 			if (validationMode == ValidationMode.UPDATE)
 			{
@@ -334,90 +351,99 @@ public class RepositoryValidationDecorator implements Repository
 
 	private void initRequiredValueValidation(ValidationResource validationResource)
 	{
-		List<AttributeMetaData> requiredValueAttrs = StreamSupport
-				.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
-				.filter(attr -> !attr.isNillable() && attr.getExpression() == null).collect(Collectors.toList());
+		if (!getCapabilities().contains(VALIDATE_NOTNULL_CONTRAINT))
+		{
+			List<AttributeMetaData> requiredValueAttrs = StreamSupport
+					.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
+					.filter(attr -> !attr.isNillable() && attr.getExpression() == null).collect(Collectors.toList());
 
-		validationResource.setRequiredValueAttrs(requiredValueAttrs);
+			validationResource.setRequiredValueAttrs(requiredValueAttrs);
+		}
 	}
 
 	private void initReferenceValidation(ValidationResource validationResource)
 	{
-		// get reference attrs
-		List<AttributeMetaData> refAttrs = StreamSupport
-				.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
-				.filter(attr -> (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
-						&& attr.getExpression() == null)
-				.collect(Collectors.toList());
-
-		// get referenced entity ids
-		if (!refAttrs.isEmpty())
+		// FIXME exclude cross-repo-collection entities
+		if (!getCapabilities().contains(VALIDATE_REFERENCE_CONSTRAINT))
 		{
-			Map<String, HugeSet<Object>> refEntitiesIds = new HashMap<>();
-			refAttrs.forEach(refAttr -> {
-				EntityMetaData refEntityMeta = refAttr.getRefEntity();
-				String refEntityName = refEntityMeta.getName();
-				HugeSet<Object> refEntityIds = refEntitiesIds.get(refEntityName);
-				if (refEntityIds == null)
-				{
-					refEntityIds = new HugeSet<>();
-					refEntitiesIds.put(refEntityName, refEntityIds);
+			// get reference attrs
+			List<AttributeMetaData> refAttrs = StreamSupport
+					.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
+					.filter(attr -> (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
+							&& attr.getExpression() == null)
+					.collect(Collectors.toList());
 
-					Query q = new QueryImpl().fetch(new Fetch().field(refEntityMeta.getIdAttribute().getName()));
-					for (Iterator<Entity> it = dataService.findAll(refEntityName, q).iterator(); it.hasNext();)
+			// get referenced entity ids
+			if (!refAttrs.isEmpty())
+			{
+				Map<String, HugeSet<Object>> refEntitiesIds = new HashMap<>();
+				refAttrs.forEach(refAttr -> {
+					EntityMetaData refEntityMeta = refAttr.getRefEntity();
+					String refEntityName = refEntityMeta.getName();
+					HugeSet<Object> refEntityIds = refEntitiesIds.get(refEntityName);
+					if (refEntityIds == null)
 					{
-						refEntityIds.add(it.next().getIdValue());
+						refEntityIds = new HugeSet<>();
+						refEntitiesIds.put(refEntityName, refEntityIds);
+
+						Query q = new QueryImpl().fetch(new Fetch().field(refEntityMeta.getIdAttribute().getName()));
+						for (Iterator<Entity> it = dataService.findAll(refEntityName, q).iterator(); it.hasNext();)
+						{
+							refEntityIds.add(it.next().getIdValue());
+						}
 					}
-				}
-			});
+				});
 
-			validationResource.setRefEntitiesIds(refEntitiesIds);
+				validationResource.setRefEntitiesIds(refEntitiesIds);
+			}
+
+			validationResource.setSelfReferencing(refAttrs.stream()
+					.anyMatch(refAttr -> refAttr.getRefEntity().getName().equals(getEntityMetaData().getName())));
+			validationResource.setRefAttrs(refAttrs);
 		}
-
-		validationResource.setSelfReferencing(refAttrs.stream()
-				.anyMatch(refAttr -> refAttr.getRefEntity().getName().equals(getEntityMetaData().getName())));
-		validationResource.setRefAttrs(refAttrs);
 	}
 
 	private void initUniqueValidation(ValidationResource validationResource)
 	{
-		// get unique attributes
-		List<AttributeMetaData> uniqueAttrs = StreamSupport
-				.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
-				.filter(attr -> attr.isUnique() && attr.getExpression() == null).collect(Collectors.toList());
-
-		// get existing values for each attributes
-		if (!uniqueAttrs.isEmpty())
+		if (!getCapabilities().contains(VALIDATE_UNIQUE_CONSTRAINT))
 		{
-			Map<String, HugeMap<Object, Object>> uniqueAttrsValues = new HashMap<>();
+			// get unique attributes
+			List<AttributeMetaData> uniqueAttrs = StreamSupport
+					.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
+					.filter(attr -> attr.isUnique() && attr.getExpression() == null).collect(Collectors.toList());
 
-			Fetch fetch = new Fetch();
-			uniqueAttrs.forEach(uniqueAttr -> {
-				uniqueAttrsValues.put(uniqueAttr.getName(), new HugeMap<>());
-				fetch.field(uniqueAttr.getName());
-			});
+			// get existing values for each attributes
+			if (!uniqueAttrs.isEmpty())
+			{
+				Map<String, HugeMap<Object, Object>> uniqueAttrsValues = new HashMap<>();
 
-			Query q = new QueryImpl().fetch(fetch);
-			decoratedRepository.findAll(q).forEach(entity -> {
+				Fetch fetch = new Fetch();
 				uniqueAttrs.forEach(uniqueAttr -> {
-					HugeMap<Object, Object> uniqueAttrValues = uniqueAttrsValues.get(uniqueAttr.getName());
-					Object attrValue = entity.get(uniqueAttr.getName());
-					if (attrValue != null)
-					{
-						if (uniqueAttr.getDataType() instanceof XrefField)
-						{
-							attrValue = ((Entity) attrValue).getIdValue();
-						}
-						uniqueAttrValues.put(attrValue, entity.getIdValue());
-					}
+					uniqueAttrsValues.put(uniqueAttr.getName(), new HugeMap<>());
+					fetch.field(uniqueAttr.getName());
 				});
-			});
 
-			validationResource.setUniqueAttrsValues(uniqueAttrsValues);
+				Query q = new QueryImpl().fetch(fetch);
+				decoratedRepository.findAll(q).forEach(entity -> {
+					uniqueAttrs.forEach(uniqueAttr -> {
+						HugeMap<Object, Object> uniqueAttrValues = uniqueAttrsValues.get(uniqueAttr.getName());
+						Object attrValue = entity.get(uniqueAttr.getName());
+						if (attrValue != null)
+						{
+							if (uniqueAttr.getDataType() instanceof XrefField)
+							{
+								attrValue = ((Entity) attrValue).getIdValue();
+							}
+							uniqueAttrValues.put(attrValue, entity.getIdValue());
+						}
+					});
+				});
+
+				validationResource.setUniqueAttrsValues(uniqueAttrsValues);
+			}
+
+			validationResource.setUniqueAttrs(uniqueAttrs);
 		}
-
-		validationResource.setUniqueAttrs(uniqueAttrs);
-
 	}
 
 	private void initReadonlyValidation(ValidationResource validationResource)
