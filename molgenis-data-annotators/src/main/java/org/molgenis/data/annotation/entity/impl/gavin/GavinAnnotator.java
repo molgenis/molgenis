@@ -20,7 +20,7 @@ import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.InMemoryRepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
-import org.molgenis.data.annotator.websettings.GavinSettings;
+import org.molgenis.data.annotator.websettings.GavinAnnotatorSettings;
 import org.molgenis.data.importer.EmxFileOnlyMetaDataParser;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -75,7 +75,7 @@ public class GavinAnnotator
 	Resource GavinResource()
 	{
 		Resource gavinResource = new EmxResourceImpl(RESOURCE,
-				new SingleResourceConfig(GavinSettings.Meta.VARIANT_FILE_LOCATION, gavinAnnotatorSettings),
+				new SingleResourceConfig(GavinAnnotatorSettings.Meta.VARIANT_FILE_LOCATION, gavinAnnotatorSettings),
 				new InMemoryRepositoryFactory(RESOURCE_ENTITY_NAME, new EmxFileOnlyMetaDataParser()),
 				RESOURCE_ENTITY_NAME, Collections.EMPTY_LIST);
 
@@ -103,7 +103,7 @@ public class GavinAnnotator
 				AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE, NAME, description, attributes);
 		EntityAnnotator entityAnnotator = new QueryAnnotatorImpl(RESOURCE, gavinInfo, new GeneNameQueryCreator(),
 				dataService, resources, (annotationSourceFileName) -> {
-					gavinAnnotatorSettings.set(GavinSettings.Meta.VARIANT_FILE_LOCATION, annotationSourceFileName);
+					gavinAnnotatorSettings.set(GavinAnnotatorSettings.Meta.VARIANT_FILE_LOCATION, annotationSourceFileName);
 				})
 		{
 			@Override

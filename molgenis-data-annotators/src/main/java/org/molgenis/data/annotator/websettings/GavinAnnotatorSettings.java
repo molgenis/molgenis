@@ -7,12 +7,12 @@ import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
 import org.springframework.stereotype.Component;
 
 @Component
-public class GavinSettings extends DefaultSettingsEntity
+public class GavinAnnotatorSettings extends DefaultSettingsEntity
 {
 	private static final long serialVersionUID = 1L;
 	private static final String ID = GavinAnnotator.NAME;
 
-	public GavinSettings()
+	public GavinAnnotatorSettings()
 	{
 		super(ID);
 	}

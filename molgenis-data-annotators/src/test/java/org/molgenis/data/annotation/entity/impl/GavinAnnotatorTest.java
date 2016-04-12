@@ -9,7 +9,7 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.impl.gavin.GavinAnnotator;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
-import org.molgenis.data.annotator.websettings.GavinSettings;
+import org.molgenis.data.annotator.websettings.GavinAnnotatorSettings;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -229,7 +229,7 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 		{
 			Entity settings = new MapEntity();
 
-			settings.set(GavinSettings.Meta.VARIANT_FILE_LOCATION,
+			settings.set(GavinAnnotatorSettings.Meta.VARIANT_FILE_LOCATION,
 					ResourceUtils.getFile(getClass(), "/gavin/variantinterpretation_emx.xlsx").getPath());
 
 			return settings;
