@@ -42,7 +42,7 @@ import java.util.stream.StreamSupport;
 @Configuration
 public class GavinAnnotator
 {
-	public static final String NAME = "GavinAnnotator";
+	public static final String NAME = "Gavin";
 	public static final String RESOURCE = "gavin";
 	public static final String RESOURCE_ENTITY_NAME = "ccgg";
 	private static final String CATEGORY = "Category";

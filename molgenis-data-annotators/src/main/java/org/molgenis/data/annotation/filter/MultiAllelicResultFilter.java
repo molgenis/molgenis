@@ -1,11 +1,15 @@
 package org.molgenis.data.annotation.filter;
 
-import static com.google.common.collect.FluentIterable.from;
-import static java.util.Arrays.asList;
-import static org.molgenis.data.vcf.VcfRepository.ALT;
-import static org.molgenis.data.vcf.VcfRepository.ALT_META;
-import static org.molgenis.data.vcf.VcfRepository.REF;
-import static org.molgenis.data.vcf.VcfRepository.REF_META;
+import com.google.common.base.Optional;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.PeekingIterator;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.annotation.entity.ResultFilter;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,17 +17,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.annotation.entity.ResultFilter;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.PeekingIterator;
+import static com.google.common.collect.FluentIterable.from;
+import static java.util.Arrays.asList;
+import static org.molgenis.data.vcf.VcfRepository.ALT;
+import static org.molgenis.data.vcf.VcfRepository.ALT_META;
+import static org.molgenis.data.vcf.VcfRepository.REF;
+import static org.molgenis.data.vcf.VcfRepository.REF_META;
 
 /**
  * 
@@ -171,21 +170,13 @@ public class MultiAllelicResultFilter implements ResultFilter
 	 * Combine ALT information per reference allele (in VCF there is only 1 reference by letting ALT vary, but that
 	 * might not always be the case)
 	 * 
-	 * So we want to support this hypothetical example:
-	 * 3	300	G	A	0.2|23.1
-	 * 3	300	G	T	-2.4|0.123
-	 * 3	300	G	X	-0.002|2.3
-	 * 3	300	G	C	0.5|14.5
-	 * 3	300	GC	A	0.2|23.1
-	 * 3	300	GC	T	-2.4|0.123
-	 * 3	300	C	GX	-0.002|2.3
-	 * 3	300	C	GC	0.5|14.5
+	 * So we want to support this hypothetical example: 3 300 G A 0.2|23.1 3 300 G T -2.4|0.123 3 300 G X -0.002|2.3 3
+	 * 300 G C 0.5|14.5 3 300 GC A 0.2|23.1 3 300 GC T -2.4|0.123 3 300 C GX -0.002|2.3 3 300 C GC 0.5|14.5
 	 * 
 	 * and it should become:
 	 * 
-	 * 3	300	G	A,T,X,C	0.2|23.1,-2.4|0.123,-0.002|2.3,0.5|14.5
-	 * 3	300	GC	A,T	0.2|23.1,-2.4|0.123
-	 * 3	300	C	GX,GC	-0.002|2.3,0.5|14.5
+	 * 3 300 G A,T,X,C 0.2|23.1,-2.4|0.123,-0.002|2.3,0.5|14.5 3 300 GC A,T 0.2|23.1,-2.4|0.123 3 300 C GX,GC
+	 * -0.002|2.3,0.5|14.5
 	 * 
 	 * so that the multi-allelic filter can then find back the appropriate values as if it were a multi-allelic VCF line
 	 * 
@@ -205,7 +196,7 @@ public class MultiAllelicResultFilter implements ResultFilter
 		// collect entities to be merged by ref
 		Multimap<String, Entity> refToMergedEntity = LinkedListMultimap.create();
 
-		while(resourceEntitiesIterator.hasNext())
+		while (resourceEntitiesIterator.hasNext())
 		{
 			Entity resourceEntity = resourceEntitiesIterator.next();
 			// verify if all results have the same chrom & pos
@@ -237,8 +228,7 @@ public class MultiAllelicResultFilter implements ResultFilter
 				else
 				{
 					// concatenate alleles
-					mergeWithMe.set(ALT,
-							mergeWithMe.get(ALT).toString() + "," + entityToBeMerged.get(ALT).toString());
+					mergeWithMe.set(ALT, mergeWithMe.get(ALT).toString() + "," + entityToBeMerged.get(ALT).toString());
 
 					// concatenate allele specific attributes
 					for (AttributeMetaData alleleSpecificAttributes : attributes)
