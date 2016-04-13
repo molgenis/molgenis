@@ -1,5 +1,6 @@
 package org.molgenis.data.annotation.utils;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +64,7 @@ public class AnnotatorUtils
 	public static Map<String, Double> toAlleleMap(String alternatives, String annotations)
 	{
 		if (annotations == null) annotations = "";
+		if(alternatives==null) return Collections.emptyMap();
 		String[] altArray = alternatives.split(",");
 		String[] annotationsArray = annotations.split(",");
 

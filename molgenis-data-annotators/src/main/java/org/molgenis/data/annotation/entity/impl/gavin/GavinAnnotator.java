@@ -45,10 +45,6 @@ public class GavinAnnotator
 	public static final String NAME = "GavinAnnotator";
 	public static final String RESOURCE = "gavin";
 	public static final String RESOURCE_ENTITY_NAME = "ccgg";
-
-	public static final String PATHOMAFTHRESHOLD = "PathoMAFThreshold";
-	public static final String MEANPATHOGENICCADDSCORE = "MeanPathogenicCADDScore";
-	public static final String SPEC95THPERCADDTHRESHOLD = "Spec95thPerCADDThreshold";
 	private static final String CATEGORY = "Category";
 
 	public static final String CLASSIFICATION = "Classification";
@@ -122,7 +118,7 @@ public class GavinAnnotator
 												.map(AttributeMetaData::getName).collect(Collectors.joining(", ")));
 
 				requiredAttributes.addAll(Arrays.asList(EffectsMetaData.GENE_NAME_ATTR,
-						EffectsMetaData.PUTATIVE_IMPACT_ATTR, refAttr, VcfRepository.ALT_META));
+						EffectsMetaData.PUTATIVE_IMPACT_ATTR, refAttr, EffectsMetaData.ALT_ATTR));
 				return requiredAttributes;
 			}
 
@@ -131,6 +127,12 @@ public class GavinAnnotator
 					Entity resultEntity)
 			{
 				String alt = inputEntity.getString(EffectsMetaData.ALT);
+				if(alt == null){
+					resultEntity.set(CLASSIFICATION, "");
+					resultEntity.set(CONFIDENCE, "");
+					resultEntity.set(REASON, "Missing ALT allele no judgment could be determined.");
+					return;
+				}
 				if (alt.contains(","))
 				{
 					throw new MolgenisDataException(
