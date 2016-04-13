@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.entity.impl;
+package org.molgenis.data.annotation.entity.impl.omim;
 
 import static au.com.bytecode.opencsv.CSVParser.DEFAULT_QUOTE_CHARACTER;
 import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
@@ -7,7 +7,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.SEPARATOR;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -122,7 +121,7 @@ public class OmimRepository extends AbstractRepository
 			entitiesByGeneSymbol = new LinkedHashMap<>();
 
 			try (CSVReader csvReader = new CSVReader(new InputStreamReader(new FileInputStream(file), forName("UTF-8")),
-					SEPARATOR, DEFAULT_QUOTE_CHARACTER, 1))
+					OmimAnnotator.SEPARATOR, DEFAULT_QUOTE_CHARACTER, 1))
 			{
 
 				String[] values = csvReader.readNext();

@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.entity.impl;
+package org.molgenis.data.annotation.entity.impl.hpo;
 
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 

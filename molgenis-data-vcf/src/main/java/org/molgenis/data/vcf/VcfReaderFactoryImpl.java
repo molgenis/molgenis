@@ -1,6 +1,11 @@
 package org.molgenis.data.vcf;
 
-import static java.util.Objects.requireNonNull;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.vcf.VcfReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,19 +13,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.util.List;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.vcf.VcfReader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
+import static java.util.Objects.requireNonNull;
 
 public class VcfReaderFactoryImpl implements VcfReaderFactory
 {
