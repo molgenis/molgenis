@@ -32,6 +32,10 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 	protected DataAccessException doTranslate(String task, String sql, SQLException ex)
 	{
 		DataAccessException dataAccessException = super.doTranslate(task, sql, ex);
+		if (dataAccessException == null)
+		{
+			return doTranslate(ex);
+		}
 		return doTranslate(dataAccessException);
 	}
 
@@ -44,6 +48,40 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 		}
 
 		PSQLException pSqlException = (PSQLException) cause;
+		MolgenisDataException molgenisDataException = doTranslate(pSqlException);
+		if (molgenisDataException == null)
+		{
+			molgenisDataException = new MolgenisDataException(dataAccessException);
+		}
+		return molgenisDataException;
+	}
+
+	private MolgenisDataException doTranslate(SQLException sqlException)
+	{
+		if (!(sqlException instanceof PSQLException))
+		{
+			throw new RuntimeException(
+					format("Unexpected exception class [%s]", sqlException.getClass().getSimpleName()));
+		}
+
+		PSQLException pSqlException = (PSQLException) sqlException;
+		MolgenisDataException molgenisDataException = doTranslate(pSqlException);
+		if (molgenisDataException == null)
+		{
+			molgenisDataException = new MolgenisDataException(sqlException);
+		}
+		return molgenisDataException;
+	}
+
+	private MolgenisDataException doTranslate(PSQLException sqlException)
+	{
+		if (!(sqlException instanceof PSQLException))
+		{
+			throw new RuntimeException(
+					format("Unexpected exception class [%s]", sqlException.getClass().getSimpleName()));
+		}
+
+		PSQLException pSqlException = sqlException;
 		switch (pSqlException.getSQLState())
 		{
 			case "23502": // not_null_violation
@@ -53,10 +91,8 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 			case "23505": // unique_violation
 				return translateUniqueKeyViolation(pSqlException);
 			default:
-				break;
+				return null;
 		}
-
-		return new MolgenisDataException(dataAccessException);
 	}
 
 	/**

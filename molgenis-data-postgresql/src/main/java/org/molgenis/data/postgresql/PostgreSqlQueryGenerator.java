@@ -132,6 +132,11 @@ class PostgreSqlQueryGenerator
 		return sql.toString();
 	}
 
+	public static String getSqlDropJunctionTable(EntityMetaData entityMeta, AttributeMetaData attr)
+	{
+		return getSqlDropTable(getJunctionTableName(entityMeta, attr));
+	}
+
 	public static String getSqlDropTable(EntityMetaData entityMeta)
 	{
 		return getSqlDropTable(getTableName(entityMeta));
