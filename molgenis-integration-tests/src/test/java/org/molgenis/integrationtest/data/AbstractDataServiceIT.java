@@ -279,7 +279,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		Set<RepositoryCapability> capabilities = dataService.getCapabilities(ENTITY_NAME);
 		assertNotNull(capabilities);
-		assertEquals(capabilities.size(), 5);
+		assertTrue(capabilities.containsAll(getExpectedCapabilities()));
 	}
 
 	public void testGetEntityMetaData()
@@ -398,6 +398,8 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl()), count);
 	}
+
+	public abstract List<RepositoryCapability> getExpectedCapabilities();
 
 	public static class TestEntity extends MapEntity
 	{

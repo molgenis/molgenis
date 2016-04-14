@@ -1,8 +1,8 @@
-package org.molgenis.integrationtest.data.elasticsearch;
+package org.molgenis.integrationtest.data.postgresql;
 
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.integrationtest.data.AbstractDataServiceIT;
-import org.molgenis.integrationtest.data.elasticsearch.ElasticsearchDataServiceIT.DataServiceElasticsearchTestConfig;
+import org.molgenis.integrationtest.data.postgresql.PostgreSqlDataServiceIT.DataServicePostgreSqlTestConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
@@ -10,11 +10,11 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.List;
 
-@ContextConfiguration(classes = DataServiceElasticsearchTestConfig.class)
-public class ElasticsearchDataServiceIT extends AbstractDataServiceIT
+@ContextConfiguration(classes = DataServicePostgreSqlTestConfig.class)
+public class PostgreSqlDataServiceIT extends AbstractDataServiceIT
 {
 	@Configuration
-	public static class DataServiceElasticsearchTestConfig extends AbstractElasticsearchTestConfig
+	public static class DataServicePostgreSqlTestConfig extends AbstractPostgreSqlTestConfig
 	{
 	}
 
@@ -237,7 +237,6 @@ public class ElasticsearchDataServiceIT extends AbstractDataServiceIT
 
 	@Override
 	public List<RepositoryCapability> getExpectedCapabilities(){
-		return Arrays.asList(RepositoryCapability.AGGREGATEABLE,RepositoryCapability.INDEXABLE,RepositoryCapability.MANAGABLE,RepositoryCapability.QUERYABLE,RepositoryCapability.WRITABLE);
+		return Arrays.asList(RepositoryCapability.MANAGABLE,RepositoryCapability.QUERYABLE,RepositoryCapability.WRITABLE);
 	}
-
 }

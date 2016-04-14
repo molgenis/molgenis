@@ -2,6 +2,10 @@ package org.molgenis.integrationtest.data;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
@@ -31,14 +35,7 @@ public abstract class AbstractDataIntegrationIT extends AbstractTestNGSpringCont
 	ConfigurableApplicationContext applicationContext;
 
 	@Autowired
-	EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
-
-	@Autowired
 	AsyncTransactionLog asyncTransactionLog;
-
-	// FIXME
-	// @Autowired
-	// EmbeddedMysqlDatabase dataSource;
 
 	@BeforeClass
 	public void init()
@@ -63,16 +60,6 @@ public abstract class AbstractDataIntegrationIT extends AbstractTestNGSpringCont
 
 		applicationContext.close();
 		SecuritySupport.logout();
-
-		try
-		{
-			// Stop ES
-			embeddedElasticSearchServiceFactory.close();
-		}
-		catch (IOException e)
-		{
-			logger.error("Error stopping Elasticsearch", e);
-		}
 
 		try
 		{
