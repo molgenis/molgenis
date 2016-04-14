@@ -42,7 +42,7 @@ import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.QueryCreator;
 import org.molgenis.data.annotation.entity.ResultFilter;
 import org.molgenis.data.annotation.filter.FirstResultFilter;
-import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
+import org.molgenis.data.annotation.cmd.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.query.AttributeEqualsQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
@@ -50,6 +50,7 @@ import org.molgenis.data.annotation.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.EffectsMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -91,7 +92,7 @@ public class CGDAnnotator
 
 	public enum CGDAttributeName
 	{
-		GENE("#GENE", SnpEffAnnotator.GENE_NAME), REFERENCES("REFERENCES", "REFS"), INTERVENTION_RATIONALE(
+		GENE("#GENE", EffectsMetaData.GENE_NAME), REFERENCES("REFERENCES", "REFS"), INTERVENTION_RATIONALE(
 				"INTERVENTION/RATIONALE", "INTERVENTION_RATIONALE"), COMMENTS("COMMENTS", "COMMENTS"), INTERVENTION_CATEGORIES(
 				"INTERVENTION CATEGORIES", "INTERVENTION_CATEGORIES"), MANIFESTATION_CATEGORIES(
 				"MANIFESTATION CATEGORIES", "MANIFESTATION_CATEGORIES"), ALLELIC_CONDITIONS("ALLELIC CONDITIONS",
@@ -101,7 +102,6 @@ public class CGDAnnotator
 
 		private final String cgdName;// Column name as defined in CGD file
 		private final String attributeName;// Output attribute name
-
 		// Mapping from attribute name to cgd name
 		private static Map<String, String> mappings = new HashMap<String, String>();
 

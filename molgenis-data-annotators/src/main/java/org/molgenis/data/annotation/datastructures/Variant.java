@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.impl.datastructures;
+package org.molgenis.data.annotation.datastructures;
 
 /**
  * Created by jvelde on 1/30/14.

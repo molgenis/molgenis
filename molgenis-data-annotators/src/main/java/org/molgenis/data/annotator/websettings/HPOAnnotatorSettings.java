@@ -1,6 +1,6 @@
 package org.molgenis.data.annotator.websettings;
 
-import org.molgenis.data.annotation.entity.impl.HPOAnnotator;
+import org.molgenis.data.annotation.entity.impl.hpo.HPOAnnotator;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
 import org.springframework.stereotype.Component;
