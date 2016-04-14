@@ -6,7 +6,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.RepositoryCapability.MANAGABLE;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
-import static org.molgenis.data.RepositoryCapability.VALIDATE_NOTNULL_CONTRAINT;
+import static org.molgenis.data.RepositoryCapability.VALIDATE_NOTNULL_CONSTRAINT;
 import static org.molgenis.data.RepositoryCapability.VALIDATE_REFERENCE_CONSTRAINT;
 import static org.molgenis.data.RepositoryCapability.VALIDATE_UNIQUE_CONSTRAINT;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
@@ -88,7 +88,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	/** Repository capabilities */
 	private static final Set<RepositoryCapability> REPO_CAPABILITIES = unmodifiableSet(
 			new HashSet<>(asList(WRITABLE, MANAGABLE, QUERYABLE, VALIDATE_REFERENCE_CONSTRAINT,
-					VALIDATE_UNIQUE_CONSTRAINT, VALIDATE_NOTNULL_CONTRAINT)));
+					VALIDATE_UNIQUE_CONSTRAINT, VALIDATE_NOTNULL_CONSTRAINT)));
 
 	private final PostgreSqlEntityFactory postgreSqlEntityFactory;
 	private final JdbcTemplate jdbcTemplate;

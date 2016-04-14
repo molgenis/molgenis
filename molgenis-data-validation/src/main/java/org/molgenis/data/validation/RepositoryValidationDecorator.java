@@ -9,7 +9,7 @@ import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.RepositoryCapability.VALIDATE_NOTNULL_CONTRAINT;
+import static org.molgenis.data.RepositoryCapability.VALIDATE_NOTNULL_CONSTRAINT;
 import static org.molgenis.data.RepositoryCapability.VALIDATE_REFERENCE_CONSTRAINT;
 import static org.molgenis.data.RepositoryCapability.VALIDATE_UNIQUE_CONSTRAINT;
 
@@ -292,7 +292,7 @@ public class RepositoryValidationDecorator implements Repository
 		// prepare validation
 		initValidation(validationResource, validationMode);
 
-		boolean validateRequired = !getCapabilities().contains(VALIDATE_NOTNULL_CONTRAINT);
+		boolean validateRequired = !getCapabilities().contains(VALIDATE_NOTNULL_CONSTRAINT);
 		boolean validateReferences = !getCapabilities().contains(VALIDATE_REFERENCE_CONSTRAINT);
 		boolean validateUniqueness = !getCapabilities().contains(VALIDATE_UNIQUE_CONSTRAINT);
 
@@ -350,7 +350,7 @@ public class RepositoryValidationDecorator implements Repository
 
 	private void initRequiredValueValidation(ValidationResource validationResource)
 	{
-		if (!getCapabilities().contains(VALIDATE_NOTNULL_CONTRAINT))
+		if (!getCapabilities().contains(VALIDATE_NOTNULL_CONSTRAINT))
 		{
 			List<AttributeMetaData> requiredValueAttrs = StreamSupport
 					.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)

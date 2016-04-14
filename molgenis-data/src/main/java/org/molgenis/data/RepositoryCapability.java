@@ -40,5 +40,5 @@ public enum RepositoryCapability
 	/**
 	 * Repository can validate if values are not-null for attributes
 	 */
-	VALIDATE_NOTNULL_CONTRAINT,
+	VALIDATE_NOTNULL_CONSTRAINT,
 }

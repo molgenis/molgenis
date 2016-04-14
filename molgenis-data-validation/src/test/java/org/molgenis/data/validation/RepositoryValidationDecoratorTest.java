@@ -251,7 +251,7 @@ public class RepositoryValidationDecoratorTest
 	public void addEntityDoesNotRequireValidationDueToRepoCapabilities()
 	{
 		when(decoratedRepo.getCapabilities())
-				.thenReturn(new HashSet<>(Arrays.asList(RepositoryCapability.VALIDATE_NOTNULL_CONTRAINT)));
+				.thenReturn(new HashSet<>(Arrays.asList(RepositoryCapability.VALIDATE_NOTNULL_CONSTRAINT)));
 
 		// entities
 		Entity entity0 = mock(Entity.class);
