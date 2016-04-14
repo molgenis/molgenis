@@ -48,6 +48,8 @@ import org.molgenis.util.EntityUtils;
 import org.molgenis.util.HugeMap;
 import org.molgenis.util.HugeSet;
 
+import autovalue.shaded.com.google.common.common.base.Objects;
+
 public class RepositoryValidationDecorator implements Repository
 {
 	private static List<String> ENTITIES_THAT_DO_NOT_NEED_VALIDATION = Arrays
@@ -293,7 +295,6 @@ public class RepositoryValidationDecorator implements Repository
 		initValidation(validationResource, validationMode);
 
 		boolean validateRequired = !getCapabilities().contains(VALIDATE_NOTNULL_CONSTRAINT);
-		boolean validateReferences = !getCapabilities().contains(VALIDATE_REFERENCE_CONSTRAINT);
 		boolean validateUniqueness = !getCapabilities().contains(VALIDATE_UNIQUE_CONSTRAINT);
 
 		// add validation operation to stream
@@ -318,10 +319,7 @@ public class RepositoryValidationDecorator implements Repository
 				validateEntityValueUniqueness(entity, validationResource, validationMode);
 			}
 
-			if (validateReferences)
-			{
-				validateEntityValueReferences(entity, validationResource);
-			}
+			validateEntityValueReferences(entity, validationResource);
 
 			if (validationMode == ValidationMode.UPDATE)
 			{
@@ -362,43 +360,55 @@ public class RepositoryValidationDecorator implements Repository
 
 	private void initReferenceValidation(ValidationResource validationResource)
 	{
+		// get reference attrs
+		List<AttributeMetaData> refAttrs;
 		if (!getCapabilities().contains(VALIDATE_REFERENCE_CONSTRAINT))
 		{
 			// get reference attrs
-			List<AttributeMetaData> refAttrs = StreamSupport
-					.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
+			refAttrs = StreamSupport.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
 					.filter(attr -> (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
 							&& attr.getExpression() == null)
 					.collect(Collectors.toList());
-
-			// get referenced entity ids
-			if (!refAttrs.isEmpty())
-			{
-				Map<String, HugeSet<Object>> refEntitiesIds = new HashMap<>();
-				refAttrs.forEach(refAttr -> {
-					EntityMetaData refEntityMeta = refAttr.getRefEntity();
-					String refEntityName = refEntityMeta.getName();
-					HugeSet<Object> refEntityIds = refEntitiesIds.get(refEntityName);
-					if (refEntityIds == null)
-					{
-						refEntityIds = new HugeSet<>();
-						refEntitiesIds.put(refEntityName, refEntityIds);
-
-						Query q = new QueryImpl().fetch(new Fetch().field(refEntityMeta.getIdAttribute().getName()));
-						for (Iterator<Entity> it = dataService.findAll(refEntityName, q).iterator(); it.hasNext();)
-						{
-							refEntityIds.add(it.next().getIdValue());
-						}
-					}
-				});
-
-				validationResource.setRefEntitiesIds(refEntitiesIds);
-			}
-
-			validationResource.setSelfReferencing(refAttrs.stream()
-					.anyMatch(refAttr -> refAttr.getRefEntity().getName().equals(getEntityMetaData().getName())));
-			validationResource.setRefAttrs(refAttrs);
 		}
+		else
+		{
+			// validate cross-repository collection reference constraints. the decorated repository takes care of
+			// validating other reference constraints
+			String backend = getEntityMetaData().getBackend();
+			refAttrs = StreamSupport.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
+					.filter(attr -> (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
+							&& attr.getExpression() == null
+							&& !Objects.equal(attr.getRefEntity().getBackend(), backend))
+					.collect(Collectors.toList());
+		}
+
+		// get referenced entity ids
+		if (!refAttrs.isEmpty())
+		{
+			Map<String, HugeSet<Object>> refEntitiesIds = new HashMap<>();
+			refAttrs.forEach(refAttr -> {
+				EntityMetaData refEntityMeta = refAttr.getRefEntity();
+				String refEntityName = refEntityMeta.getName();
+				HugeSet<Object> refEntityIds = refEntitiesIds.get(refEntityName);
+				if (refEntityIds == null)
+				{
+					refEntityIds = new HugeSet<>();
+					refEntitiesIds.put(refEntityName, refEntityIds);
+
+					Query q = new QueryImpl().fetch(new Fetch().field(refEntityMeta.getIdAttribute().getName()));
+					for (Iterator<Entity> it = dataService.findAll(refEntityName, q).iterator(); it.hasNext();)
+					{
+						refEntityIds.add(it.next().getIdValue());
+					}
+				}
+			});
+
+			validationResource.setRefEntitiesIds(refEntitiesIds);
+		}
+
+		validationResource.setSelfReferencing(refAttrs.stream()
+				.anyMatch(refAttr -> refAttr.getRefEntity().getName().equals(getEntityMetaData().getName())));
+		validationResource.setRefAttrs(refAttrs);
 	}
 
 	private void initUniqueValidation(ValidationResource validationResource)
