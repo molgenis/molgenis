@@ -11,6 +11,7 @@ import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getTableName;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.isPersistedInPostgreSql;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -30,8 +31,6 @@ import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.TextField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.util.EntityUtils;
-
-import com.google.common.collect.Iterables;
 
 /**
  * Utility class that generates the SQL used by {@link PostgreSqlRepository} and {@link PostgreSqlRepositoryCollection}
@@ -433,31 +432,40 @@ class PostgreSqlQueryGenerator
 					parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
 					break;
 				case IN:
-					StringBuilder in = new StringBuilder();
-					List<Object> values = new ArrayList<Object>();
-					if (r.getValue() == null)
+					Object inValue = r.getValue();
+					if (inValue == null)
 					{
 						throw new MolgenisDataException("Missing value for IN query");
 					}
-					else if (!(r.getValue() instanceof Iterable<?>))
+					if (!(inValue instanceof Iterable<?>))
 					{
-						for (String str : r.getValue().toString().split(","))
-							values.add(str);
-					}
-					else
-					{
-						Iterables.addAll(values, (Iterable<?>) r.getValue());
+						throw new MolgenisDataException(format("IN value is of type [%s] instead of [Iterable]",
+								inValue.getClass().getSimpleName()));
 					}
 
-					for (int i = 0; i < values.size(); i++)
+					StringBuilder in = new StringBuilder();
+
+					@SuppressWarnings("unchecked")
+					Iterable<Object> inValueIterable = (Iterable<Object>) inValue;
+					for (Iterator<Object> it = inValueIterable.iterator(); it.hasNext();)
 					{
-						if (i > 0)
+						Object inValueItem = it.next();
+
+						in.append('?');
+						if (it.hasNext())
 						{
-							in.append(",");
+							in.append(',');
 						}
 
-						in.append("?");
-						parameters.add(attr.getDataType().convert(values.get(i)));
+						if (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
+						{
+							// According to Query documentation value can be an entity or an entity id
+							if (inValueItem instanceof Entity)
+							{
+								inValueItem = ((Entity) inValueItem).getIdValue();
+							}
+						}
+						parameters.add(attr.getDataType().convert(inValueItem));
 					}
 
 					if (attr.getDataType() instanceof MrefField)
