@@ -19,6 +19,7 @@ import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlCreate
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDelete;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDeleteAll;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropColumn;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropJunctionTable;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropTable;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlInsert;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlInsertMref;
@@ -27,6 +28,7 @@ import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlUpdate
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.JUNCTION_TABLE_ORDER_ATTR_NAME;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getJunctionTableName;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributes;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributesMref;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.isPersistedInPostgreSql;
 
 import java.sql.PreparedStatement;
@@ -356,7 +358,29 @@ public class PostgreSqlRepository extends AbstractRepository
 	@Override
 	public void drop()
 	{
-		jdbcTemplate.execute(getSqlDropTable(getEntityMetaData()));
+		getPersistedAttributesMref(getEntityMetaData()).forEach(mrefAttr -> {
+			String sqlDropJunctionTable = getSqlDropJunctionTable(getEntityMetaData(), mrefAttr);
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("Dropping junction table for entity [{}] attribute [{}]", getName(), mrefAttr.getName());
+				if (LOG.isTraceEnabled())
+				{
+					LOG.trace("SQL: {}", sqlDropJunctionTable);
+				}
+			}
+			jdbcTemplate.execute(sqlDropJunctionTable);
+		});
+
+		String sqlDropTable = getSqlDropTable(getEntityMetaData());
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Dropping table for entity [{}]", getName());
+			if (LOG.isTraceEnabled())
+			{
+				LOG.trace("SQL: {}", sqlDropTable);
+			}
+		}
+		jdbcTemplate.execute(sqlDropTable);
 	}
 
 	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
