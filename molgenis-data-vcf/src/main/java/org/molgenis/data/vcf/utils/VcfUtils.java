@@ -1,55 +1,50 @@
 package org.molgenis.data.vcf.utils;
 
-import static org.molgenis.data.vcf.VcfRepository.ALT;
-import static org.molgenis.data.vcf.VcfRepository.CHROM;
-import static org.molgenis.data.vcf.VcfRepository.FILTER;
-import static org.molgenis.data.vcf.VcfRepository.FORMAT_GT;
-import static org.molgenis.data.vcf.VcfRepository.ID;
-import static org.molgenis.data.vcf.VcfRepository.INFO;
-import static org.molgenis.data.vcf.VcfRepository.NAME;
-import static org.molgenis.data.vcf.VcfRepository.POS;
-import static org.molgenis.data.vcf.VcfRepository.QUAL;
-import static org.molgenis.data.vcf.VcfRepository.REF;
-import static org.molgenis.data.vcf.VcfRepository.SAMPLES;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Scanner;
-
+import autovalue.shaded.com.google.common.common.collect.Lists;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.PeekingIterator;
+import com.google.common.io.BaseEncoding;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.datastructures.Sample;
 import org.molgenis.data.vcf.datastructures.Trio;
 import org.molgenis.vcf.meta.VcfMetaInfo;
 
-import com.google.common.io.BaseEncoding;
+import java.io.FileNotFoundException;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import static org.molgenis.MolgenisFieldTypes.MREF;
+import static org.molgenis.data.vcf.VcfRepository.ALT;
+import static org.molgenis.data.vcf.VcfRepository.CHROM;
+import static org.molgenis.data.vcf.VcfRepository.POS;
+import static org.molgenis.data.vcf.VcfRepository.REF;
 
 public class VcfUtils
 {
-	private static List<String> VCF_ATTRIBUTE_NAMES = Arrays.asList(new String[]
-	{ CHROM, POS, ID, REF, ALT, QUAL, FILTER });
-
 	/**
 	 * Creates a internal molgenis id from a vcf entity
-	 * 
+	 *
 	 * @param vcfEntity
 	 * @return the id
 	 */
@@ -83,265 +78,11 @@ public class VcfUtils
 		return id;
 	}
 
-	public static void writeToVcf(Entity vcfEntity, BufferedWriter writer) throws MolgenisDataException, IOException
+	public static String getIdFromInfoField(String line)
 	{
-		writeToVcf(vcfEntity, Collections.emptyList(), writer);
-	}
-
-	/**
-	 * Convert an vcfEntity to a VCF line Only output attributes that are in the attributesToInclude list, or all if
-	 * attributesToInclude is empty
-	 * 
-	 * @param vcfEntity
-	 * @param attributesToInclude
-	 * @return
-	 * @throws IOException
-	 * @throws Exception
-	 */
-	public static void writeToVcf(Entity vcfEntity, List<String> attributesToInclude, BufferedWriter writer)
-			throws MolgenisDataException, IOException
-	{
-		// fixed attributes: chrom pos id ref alt qual filter
-		for (String vcfAttribute : VCF_ATTRIBUTE_NAMES)
-		{
-			String value = vcfEntity.getString(vcfAttribute);
-			if (value != null && !value.isEmpty())
-			{
-				writer.write(value);
-			}
-			else
-			{
-				writer.write('.');
-			}
-			writer.write('\t');
-		}
-
-		boolean hasInfoFields = false;
-		// flexible 'info' field, one column with potentially many data items
-		for (AttributeMetaData attributeMetaData : vcfEntity.getEntityMetaData().getAttribute(INFO).getAttributeParts())
-		{
-			String infoAttrName = attributeMetaData.getName();
-			if (attributesToInclude.isEmpty() || attributesToInclude.contains(infoAttrName))
-			{
-				if (attributeMetaData.getDataType().getEnumType() == FieldTypeEnum.BOOL)
-				{
-					Boolean infoAttrBoolValue = vcfEntity.getBoolean(infoAttrName);
-					if (infoAttrBoolValue != null && infoAttrBoolValue.booleanValue() == true)
-					{
-						writer.append(infoAttrName);
-						writer.append(';');
-						hasInfoFields = true;
-					}
-				}
-				else
-				{
-					String infoAttrStringValue = vcfEntity.getString(infoAttrName);
-					if (infoAttrStringValue != null)
-					{
-						writer.append(infoAttrName);
-						writer.append('=');
-						writer.append(infoAttrStringValue);
-						writer.append(';');
-						hasInfoFields = true;
-					}
-				}
-			}
-		}
-		if (!hasInfoFields)
-		{
-			writer.append('.');
-		}
-
-		// if we have SAMPLE data, add to output VCF
-		Iterable<Entity> sampleEntities = vcfEntity.getEntities(SAMPLES);
-		if (sampleEntities != null)
-		{
-			boolean firstSample = true;
-			for (Iterator<Entity> it = sampleEntities.iterator(); it.hasNext();)
-			{
-				if (firstSample)
-				{
-					writer.append('\t');
-				}
-
-				Entity sample = it.next();
-
-				StringBuilder formatColumn = new StringBuilder();
-				StringBuilder sampleColumn = new StringBuilder();
-
-				// write GT first if available
-				if (sample.getEntityMetaData().getAttribute(FORMAT_GT) != null)
-				{
-					if (firstSample)
-					{
-						formatColumn.append(FORMAT_GT);
-						formatColumn.append(':');
-					}
-					String sampleAttrValue = sample.getString(FORMAT_GT);
-					if (sampleAttrValue != null)
-					{
-						sampleColumn.append(sampleAttrValue);
-						sampleColumn.append(':');
-					}
-					else
-					{
-						sampleColumn.append(".:");
-					}
-				}
-
-				for (AttributeMetaData sampleAttr : sample.getEntityMetaData().getAttributes())
-				{
-					String sampleAttribute = sampleAttr.getName();
-					if (!sampleAttribute.equals(FORMAT_GT))
-					{
-						// leave out autogenerated ID and NAME columns since this will greatly bloat the output file for
-						// many samples
-						// FIXME: chance to clash with existing ID and NAME columns in FORMAT ?? what happens then?
-						if (!sampleAttribute.equals(ID) && !sampleAttribute.equals(NAME))
-						{
-							String sampleAttrValue = sample.getString(sampleAttribute);
-							if (sampleAttrValue != null)
-							{
-								sampleColumn.append(sampleAttrValue);
-								sampleColumn.append(':');
-							}
-							else
-							{
-								sampleColumn.append(".:");
-							}
-
-							// get FORMAT fields, but only for the first time
-							if (firstSample)
-							{
-								formatColumn.append(sampleAttribute);
-								formatColumn.append(':');
-							}
-
-						}
-					}
-				}
-
-				// add FORMAT data but only first time
-				if (firstSample && formatColumn.length() > 0) // FIXME: do we expect this??
-				{
-					formatColumn.deleteCharAt(formatColumn.length() - 1); // delete trailing ':'
-					writer.write(formatColumn.toString());
-					writer.write('\t');
-					firstSample = false;
-				}
-				else if (firstSample)
-				{
-					throw new MolgenisDataException(
-							"Weird situation: we are at sample 1 and want to print FORMAT info but there seems to be none?");
-				}
-
-				// now add SAMPLE data
-				sampleColumn.deleteCharAt(sampleColumn.length() - 1);// delete trailing ':'
-				writer.write(sampleColumn.toString());
-
-				if (it.hasNext())
-				{
-					writer.write('\t');
-				}
-			}
-		}
-	}
-
-	public static boolean checkPreviouslyAnnotatedAndAddMetadata(File inputVcfFile, BufferedWriter outputVCFWriter,
-			List<AttributeMetaData> infoFields) throws MolgenisInvalidFormatException, IOException
-	{
-		return checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter, infoFields,
-				Collections.emptyList());
-	}
-
-	/**
-	 * Checks for previous annotations
-	 * 
-	 * @param inputVcfFile
-	 * @param outputVCFWriter
-	 * @param infoFields
-	 * @param attributesToInclude
-	 *            , the AttributeMetaData to write to the VCF file, if empty writes all attributes
-	 * @return
-	 * @throws MolgenisInvalidFormatException
-	 * @throws IOException
-	 */
-	public static boolean checkPreviouslyAnnotatedAndAddMetadata(File inputVcfFile, BufferedWriter outputVCFWriter,
-			List<AttributeMetaData> infoFields, List<String> attributesToInclude)
-					throws MolgenisInvalidFormatException, IOException
-	{
-		String checkAnnotatedBeforeValue = attributesToInclude.isEmpty()
-				? (infoFields.isEmpty() ? null : infoFields.get(0).getName()) : attributesToInclude.get(0);
-		boolean annotatedBefore = false;
-
-		System.out.println("Detecting VCF column header...");
-
-		Scanner inputVcfFileScanner = new Scanner(inputVcfFile, "UTF-8");
-		String line = inputVcfFileScanner.nextLine();
-
-		// if first line does not start with ##, we don't trust this file as VCF
-		if (line.startsWith(VcfRepository.PREFIX))
-		{
-			while (inputVcfFileScanner.hasNextLine())
-			{
-				// detect existing annotations of the same info field
-				if ((checkAnnotatedBeforeValue != null) && line.contains("##INFO=<ID=" + checkAnnotatedBeforeValue)
-						&& !annotatedBefore)
-				{
-					System.out.println("\nThis file has already been annotated with '" + checkAnnotatedBeforeValue
-							+ "' data before it seems. Skipping any further annotation of variants that already contain this field.");
-					annotatedBefore = true;
-				}
-
-				// read and print to output until we find the header
-				outputVCFWriter.write(line);
-				outputVCFWriter.newLine();
-				line = inputVcfFileScanner.nextLine();
-				if (!line.startsWith(VcfRepository.PREFIX))
-				{
-					break;
-				}
-				System.out.print(".");
-			}
-			System.out.println("\nHeader line found:\n" + line);
-
-			// check the header line
-			if (!line.startsWith(CHROM))
-			{
-				outputVCFWriter.close();
-				inputVcfFileScanner.close();
-				throw new MolgenisInvalidFormatException(
-						"Header does not start with #CHROM, are you sure it is a VCF file?");
-			}
-
-			// print INFO lines for stuff to be annotated
-			if (!annotatedBefore)
-			{
-
-				for (AttributeMetaData infoAttributeMetaData : getAtomicAttributesFromList(infoFields))
-				{
-					if (attributesToInclude.isEmpty() || attributesToInclude.contains(infoAttributeMetaData.getName()))
-					{
-						outputVCFWriter.write(attributeMetaDataToInfoField(infoAttributeMetaData));
-						outputVCFWriter.newLine();
-					}
-				}
-			}
-
-			// print header
-			outputVCFWriter.write(line);
-			outputVCFWriter.newLine();
-		}
-		else
-		{
-			outputVCFWriter.close();
-			inputVcfFileScanner.close();
-			throw new MolgenisInvalidFormatException(
-					"Did not find ## on the first line, are you sure it is a VCF file?");
-		}
-
-		inputVcfFileScanner.close();
-		return annotatedBefore;
+		int idStartIndex = line.indexOf("ID=") + 3;
+		int idEndIndex = line.indexOf(',');
+		return line.substring(idStartIndex, idEndIndex);
 	}
 
 	public static List<AttributeMetaData> getAtomicAttributesFromList(Iterable<AttributeMetaData> outputAttrs)
@@ -361,30 +102,18 @@ public class VcfUtils
 		return result;
 	}
 
-	private static String attributeMetaDataToInfoField(AttributeMetaData infoAttributeMetaData)
+	public static Map<String, AttributeMetaData> getAttributesMapFromList(Iterable<AttributeMetaData> outputAttrs)
 	{
-		StringBuilder sb = new StringBuilder();
-		sb.append("##INFO=<ID=");
-		sb.append(infoAttributeMetaData.getName());
-		sb.append(",Number=.");// FIXME: once we support list of primitives we can calculate based on combination of
-								// type and nillable
-		sb.append(",Type=");
-		sb.append(toVcfDataType(infoAttributeMetaData.getDataType().getEnumType()));
-		sb.append(",Description=\"");
-		// http://samtools.github.io/hts-specs/VCFv4.1.pdf --> "The Description value must be surrounded by
-		// double-quotes. Double-quote character can be escaped with backslash \ and backslash as \\."
-		if (StringUtils.isBlank(infoAttributeMetaData.getDescription()))
+		Map<String, AttributeMetaData> attributeMap = new LinkedHashMap<>();
+		List<AttributeMetaData> attributes = getAtomicAttributesFromList(outputAttrs);
+		for (AttributeMetaData attributeMetaData : attributes)
 		{
-			((DefaultAttributeMetaData) infoAttributeMetaData)
-					.setDescription(VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION);
+			attributeMap.put(attributeMetaData.getName(), attributeMetaData);
 		}
-		sb.append(
-				infoAttributeMetaData.getDescription().replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " "));
-		sb.append("\">");
-		return sb.toString();
+		return attributeMap;
 	}
 
-	private static String toVcfDataType(MolgenisFieldTypes.FieldTypeEnum dataType)
+	public static String toVcfDataType(MolgenisFieldTypes.FieldTypeEnum dataType)
 	{
 		switch (dataType)
 		{
@@ -410,10 +139,198 @@ public class VcfUtils
 				return VcfMetaInfo.Type.STRING.toString();
 			case COMPOUND:
 			case FILE:
-				throw new RuntimeException("invalid vcf data type " + dataType);
 			default:
 				throw new RuntimeException("unsupported vcf data type " + dataType);
 		}
+	}
+
+	public static Iterator<Entity> reverseXrefMrefRelation(Iterator<Entity> annotatedRecords)
+	{
+		return new Iterator<Entity>()
+		{
+			PeekingIterator<Entity> effects = Iterators.peekingIterator(annotatedRecords);
+
+			DefaultEntityMetaData resultEMD;
+			EntityMetaData effectsEMD;
+
+			private void createResultEntityMetaData(Entity effect, EntityMetaData variantEMD)
+			{
+				if (resultEMD == null || effectsEMD == null)
+				{
+					effectsEMD = effect.getEntityMetaData();
+					resultEMD = new DefaultEntityMetaData(variantEMD);
+					resultEMD.addAttribute(VcfWriterUtils.EFFECT).setDataType(MREF).setRefEntity(effectsEMD);
+				}
+			}
+
+			@Override
+			public boolean hasNext()
+			{
+				return effects.hasNext();
+			}
+
+			private Entity createEntityStructure(Entity variant, List<Entity> effectsForVariant)
+			{
+				createResultEntityMetaData(effectsForVariant.get(0), variant.getEntityMetaData());
+				Entity newVariant = new MapEntity(variant, resultEMD);
+
+				if (effectsForVariant.size() > 1)
+				{
+					newVariant.set(VcfWriterUtils.EFFECT, effectsForVariant);
+				}
+				else
+				{
+					// is this an empty effect entity?
+					Entity entity = effectsForVariant.get(0);
+					boolean isEmpty = true;
+					for (AttributeMetaData attr : effectsEMD.getAtomicAttributes())
+					{
+						if (attr.getName().equals(effectsEMD.getIdAttribute().getName())
+								|| attr.getName().equals(VcfWriterUtils.VARIANT))
+						{
+							continue;
+						}
+						else if (entity.get(attr.getName()) != null)
+						{
+							isEmpty = false;
+							break;
+						}
+					}
+
+					if (!isEmpty) newVariant.set(VcfWriterUtils.EFFECT, effectsForVariant);
+				}
+				return newVariant;
+			}
+
+			@Override
+			public Entity next()
+			{
+				Entity variant = null;
+				String peekedId;
+				List<Entity> effectsForVariant = Lists.newArrayList();
+				while (effects.hasNext())
+				{
+					peekedId = effects.peek().getEntity(VcfWriterUtils.VARIANT).getIdValue().toString();
+					if (variant == null || variant.getIdValue().toString().equals(peekedId))
+					{
+						Entity effect = effects.next();
+						variant = effect.getEntity(VcfWriterUtils.VARIANT);
+						effectsForVariant.add(effect);
+					}
+					else
+					{
+						return createEntityStructure(variant, effectsForVariant);
+					}
+				}
+				return createEntityStructure(variant, effectsForVariant);
+			}
+		};
+	}
+
+	public static List<Entity> createEntityStructureForVcf(EntityMetaData entityMetaData, String attributeName,
+			Stream<Entity> inputStream)
+	{
+		return createEntityStructureForVcf(entityMetaData, attributeName, inputStream, Collections.emptyList());
+	}
+
+	public static List<Entity> createEntityStructureForVcf(EntityMetaData entityMetaData, String attributeName,
+			Stream<Entity> inputStream, List<AttributeMetaData> annotatorAttributes)
+	{
+		AttributeMetaData attributeToParse = entityMetaData.getAttribute(attributeName);
+		String description = attributeToParse.getDescription();
+		if (description.indexOf(':') == -1)
+		{
+			throw new RuntimeException(
+					"Unable to create entitystructure, missing semicolon in description of [" + attributeName + "]");
+		}
+
+		String[] step1 = description.split(":");
+		String entityName = org.apache.commons.lang.StringUtils.deleteWhitespace(step1[0]);
+		String value = step1[1].replaceAll("^\\s'|'$", "");
+
+		Map<Integer, AttributeMetaData> metadataMap = parseDescription(value, annotatorAttributes);
+		DefaultEntityMetaData xrefMetaData = getXrefEntityMetaData(metadataMap, entityName);
+
+		List<Entity> results = new ArrayList<>();
+		for (Entity inputEntity : inputStream.collect(Collectors.toList()))
+		{
+			DefaultEntityMetaData newEntityMetadata = removeRefFieldFromInfoMetadata(attributeToParse, inputEntity);
+			Entity originalEntity = new MapEntity(inputEntity, newEntityMetadata);
+
+			results.addAll(parseValue(xrefMetaData, metadataMap, inputEntity.getString(attributeToParse.getName()),
+					originalEntity));
+		}
+		return results;
+	}
+
+	private static DefaultEntityMetaData getXrefEntityMetaData(Map<Integer, AttributeMetaData> metadataMap,
+			String entityName)
+	{
+		DefaultEntityMetaData xrefMetaData = new DefaultEntityMetaData(entityName);
+		xrefMetaData.addAttributeMetaData(new DefaultAttributeMetaData("identifier").setAuto(true).setVisible(false),
+				EntityMetaData.AttributeRole.ROLE_ID);
+		xrefMetaData.addAllAttributeMetaData(com.google.common.collect.Lists.newArrayList(metadataMap.values()));
+		xrefMetaData
+				.addAttributeMetaData(new DefaultAttributeMetaData("Variant", MolgenisFieldTypes.FieldTypeEnum.MREF));
+		return xrefMetaData;
+	}
+
+	private static DefaultEntityMetaData removeRefFieldFromInfoMetadata(AttributeMetaData attributeToParse,
+			Entity inputEntity)
+	{
+		DefaultEntityMetaData newMeta = (DefaultEntityMetaData) inputEntity.getEntityMetaData();
+		DefaultAttributeMetaData newInfoMetadata = (DefaultAttributeMetaData) newMeta.getAttribute(VcfRepository.INFO);
+		newInfoMetadata.setAttributesMetaData(StreamSupport
+				.stream(newMeta.getAttribute(VcfRepository.INFO).getAttributeParts().spliterator(), false)
+				.filter(attr -> !attr.getName().equals(attributeToParse.getName())).collect(Collectors.toList()));
+		newMeta.removeAttributeMetaData(VcfRepository.INFO_META);
+		newMeta.addAttributeMetaData(newInfoMetadata);
+		return newMeta;
+	}
+
+	private static Map<Integer, AttributeMetaData> parseDescription(String description,
+			List<AttributeMetaData> annotatorAttributes)
+	{
+		String value = description.replaceAll("^\\s'|'$", "");
+
+		String[] attributeStrings = value.split("\\|");
+		Map<Integer, AttributeMetaData> attributeMap = new HashMap<>();
+		Map<String, AttributeMetaData> annotatorAttributeMap = getAttributesMapFromList(annotatorAttributes);
+		for (int i = 0; i < attributeStrings.length; i++)
+		{
+			String attribute = attributeStrings[i];
+			MolgenisFieldTypes.FieldTypeEnum type = annotatorAttributeMap.containsKey(attribute)
+					? annotatorAttributeMap.get(attribute).getDataType().getEnumType()
+					: MolgenisFieldTypes.FieldTypeEnum.STRING;
+			AttributeMetaData attr = new DefaultAttributeMetaData(
+					org.apache.commons.lang.StringUtils.deleteWhitespace(attribute), type).setLabel(attribute);
+			attributeMap.put(i, attr);
+		}
+		return attributeMap;
+	}
+
+	private static List<Entity> parseValue(EntityMetaData metadata, Map<Integer, AttributeMetaData> attributesMap,
+			String value, Entity originalEntity)
+	{
+		List<Entity> result = new ArrayList<>();
+		String[] valuesPerEntity = value.split(",");
+
+		for (Integer i = 0; i < valuesPerEntity.length; i++)
+		{
+			String[] values = valuesPerEntity[i].split("\\|");
+
+			MapEntity singleResult = new MapEntity(metadata);
+			for (Integer j = 0; j < values.length; j++)
+			{
+				String attributeName = attributesMap.get(j).getName().replaceAll("^\'|\'$", "");
+				String attributeValue = values[j];
+				singleResult.set(attributeName, attributeValue);
+				singleResult.set("Variant", originalEntity);
+
+			}
+			result.add(singleResult);
+		}
+		return result;
 	}
 
 	/**
@@ -421,76 +338,67 @@ public class VcfUtils
 	 * Get pedigree data from VCF Now only support child, father, mother No fancy data structure either Output:
 	 * result.put(childID, Arrays.asList(new String[]{motherID, fatherID}));
 	 *
-	 * @param inputVcfFile
+	 * @param inputVcfFileScanner
 	 * @return
 	 * @throws FileNotFoundException
 	 */
-	public static HashMap<String, Trio> getPedigree(File inputVcfFile) throws FileNotFoundException
+	public static HashMap<String, Trio> getPedigree(Scanner inputVcfFileScanner) throws FileNotFoundException
 	{
-		HashMap<String, Trio> result = new HashMap<String, Trio>();
+		HashMap<String, Trio> result = new HashMap<>();
 
-		Scanner inputVcfFileScanner = new Scanner(inputVcfFile, "UTF-8");
-		String line = inputVcfFileScanner.nextLine();
-
-		// if first line does not start with ##, we don't trust this file as VCF
-		if (line.startsWith(VcfRepository.PREFIX))
+		while (inputVcfFileScanner.hasNextLine())
 		{
-			while (inputVcfFileScanner.hasNextLine())
+			String line = inputVcfFileScanner.nextLine();
+
+			// quit when we don't see header lines anymore
+			if (!line.startsWith(VcfRepository.PREFIX))
 			{
-				// detect pedigree line
-				// expecting: ##PEDIGREE=<Child=100400,Mother=100402,Father=100401>
-				if (line.startsWith("##PEDIGREE"))
+				break;
+			}
+
+			// detect pedigree line
+			// expecting e.g. ##PEDIGREE=<Child=100400,Mother=100402,Father=100401>
+			if (line.startsWith("##PEDIGREE"))
+			{
+				System.out.println("Pedigree data line: " + line);
+				String childID = null;
+				String motherID = null;
+				String fatherID = null;
+
+				String lineStripped = line.replace("##PEDIGREE=<", "").replace(">", "");
+				String[] lineSplit = lineStripped.split(",", -1);
+				for (String element : lineSplit)
 				{
-					System.out.println("Pedigree data line: " + line);
-					String childID = null;
-					String motherID = null;
-					String fatherID = null;
-
-					String lineStripped = line.replace("##PEDIGREE=<", "").replace(">", "");
-					String[] lineSplit = lineStripped.split(",", -1);
-					for (String element : lineSplit)
+					if (element.startsWith("Child"))
 					{
-						if (element.startsWith("Child"))
-						{
-							childID = element.replace("Child=", "");
-						}
-						else if (element.startsWith("Mother"))
-						{
-							motherID = element.replace("Mother=", "");
-						}
-						else if (element.startsWith("Father"))
-						{
-							fatherID = element.replace("Father=", "");
-						}
-						else
-						{
-							inputVcfFileScanner.close();
-							throw new MolgenisDataException(
-									"Expected Child, Mother or Father, but found: " + element + " in line " + line);
-						}
+						childID = element.replace("Child=", "");
 					}
-
-					if (childID != null && motherID != null && fatherID != null)
+					else if (element.startsWith("Mother"))
 					{
-						// good
-						result.put(childID, new Trio(new Sample(childID), new Sample(motherID), new Sample(fatherID)));
+						motherID = element.replace("Mother=", "");
+					}
+					else if (element.startsWith("Father"))
+					{
+						fatherID = element.replace("Father=", "");
 					}
 					else
 					{
-						inputVcfFileScanner.close();
-						throw new MolgenisDataException("Missing Child, Mother or Father ID in line " + line);
+						throw new MolgenisDataException(
+								"Expected Child, Mother or Father, but found: " + element + " in line " + line);
 					}
 				}
 
-				line = inputVcfFileScanner.nextLine();
-				if (!line.startsWith(VcfRepository.PREFIX))
+				if (childID != null && motherID != null && fatherID != null)
 				{
-					break;
+					// good
+					result.put(childID, new Trio(new Sample(childID), new Sample(motherID), new Sample(fatherID)));
+				}
+				else
+				{
+					throw new MolgenisDataException("Missing Child, Mother or Father ID in line " + line);
 				}
 			}
 		}
-
-		inputVcfFileScanner.close();
 		return result;
 	}
 

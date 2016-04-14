@@ -691,5 +691,6 @@
 		<module>molgenis-catalogue</module>
 		<module>molgenis-file-ingester</module>
 		<module>molgenis-integration-tests</module>
+		<module>molgenis-jobs</module>
     </modules>
 </project>

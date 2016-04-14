@@ -105,7 +105,7 @@ public class InMemoryRepository implements Repository
 						{
 							return null;
 						}
-					});
+					}).filter(Objects::nonNull);
 				}
 			}
 			throw new UnsupportedOperationException();
