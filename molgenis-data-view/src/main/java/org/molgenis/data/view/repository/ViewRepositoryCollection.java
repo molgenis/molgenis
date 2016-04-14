@@ -20,8 +20,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
-import com.google.common.collect.Maps;
-
 
 @Component("ViewRepositoryCollection")
 public class ViewRepositoryCollection implements ManageableRepositoryCollection
@@ -38,13 +36,17 @@ public class ViewRepositoryCollection implements ManageableRepositoryCollection
 		this.searchService = requireNonNull(searchService);
 	}
 
+	public Repository addViewRepository(String name)
+	{
+		ViewRepository viewRepository = new ViewRepository(name, dataService);
+		repositories.put(name, viewRepository);
+		return viewRepository;
+	}
+
 	@Override
 	public Repository addEntityMeta(EntityMetaData entityMeta)
 	{
-		ViewRepository repo = new ViewRepository(entityMeta, dataService);
-		if (!searchService.hasMapping(entityMeta)) repo.create();
-		repositories.put(entityMeta.getName(), repo);
-		return repo;
+		throw new UnsupportedOperationException("Add by name instead!");
 	}
 
 	@Override
@@ -113,11 +115,11 @@ public class ViewRepositoryCollection implements ManageableRepositoryCollection
 		EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(entityName);
 		if (entityMetaData == null) throw new UnknownEntityException(String.format("Unknown entity '%s'", entityName));
 
-		DefaultEntityMetaData defaultEntityMetaData = new DefaultEntityMetaData(dataService.getMeta()
-				.getEntityMetaData(entityName));
+		DefaultEntityMetaData defaultEntityMetaData = new DefaultEntityMetaData(
+				dataService.getMeta().getEntityMetaData(entityName));
 		AttributeMetaData attr = entityMetaData.getAttribute(attributeName);
-		if (attr == null) throw new UnknownAttributeException(String.format("Unknown attribute '%s' of entity '%s'",
-				attributeName, entityName));
+		if (attr == null) throw new UnknownAttributeException(
+				String.format("Unknown attribute '%s' of entity '%s'", attributeName, entityName));
 
 		defaultEntityMetaData.removeAttributeMetaData(attr);
 		searchService.createMappings(entityMetaData);

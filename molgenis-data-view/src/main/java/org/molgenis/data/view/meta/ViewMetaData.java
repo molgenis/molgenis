@@ -13,7 +13,7 @@ public class ViewMetaData extends DefaultEntityMetaData
 	public static final String IDENTIFIER = "identifier";
 	public static final String NAME = "name";
 	public static final String MASTER_ENTITY = "masterEntity";
-	public static final String JOINED_ENTITIES = "joinedEntities";
+	public static final String SLAVE_ENTITIES = "slaveEntities";
 
 	public ViewMetaData()
 	{
@@ -24,6 +24,6 @@ public class ViewMetaData extends DefaultEntityMetaData
 		addAttribute(IDENTIFIER, AttributeRole.ROLE_ID).setAuto(true).setNillable(false).setDataType(STRING);
 		addAttribute(NAME).setNillable(false).setDataType(STRING).isUnique();
 		addAttribute(MASTER_ENTITY).setNillable(false).setDataType(STRING);
-		addAttribute(JOINED_ENTITIES).setNillable(true).setDataType(MREF).setRefEntity(new JoinedEntityMetaData());
+		addAttribute(SLAVE_ENTITIES).setNillable(true).setDataType(MREF).setRefEntity(new SlaveEntityMetaData());
 	}
 }

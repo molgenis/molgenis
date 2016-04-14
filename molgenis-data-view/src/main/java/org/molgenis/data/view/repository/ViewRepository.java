@@ -1,15 +1,11 @@
 package org.molgenis.data.view.repository;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.newLinkedHashMap;
-import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,32 +18,30 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.EntityMetaData.AttributeRole;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.view.meta.JoinedAttributeMetaData;
-import org.molgenis.data.view.meta.JoinedEntityMetaData;
+import org.molgenis.data.view.meta.SlaveEntityMetaData;
 import org.molgenis.data.view.meta.ViewMetaData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
 public class ViewRepository extends AbstractRepository
 {
-	private static final Logger LOG = LoggerFactory.getLogger(ViewRepository.class);
-	private final EntityMetaData entityMetaData;
 	private final DataService dataService;
 	public static final int BATCH_SIZE = 1000;
 
-	public ViewRepository(EntityMetaData entityMetaData, DataService dataService)
+	private final String name;
+
+	public ViewRepository(String name, DataService dataService)
 	{
-		this.entityMetaData = requireNonNull(entityMetaData);
+		this.name = requireNonNull(name);
 		this.dataService = requireNonNull(dataService);
 	}
 
@@ -60,34 +54,43 @@ public class ViewRepository extends AbstractRepository
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		DefaultEntityMetaData entityMetaDataView = new DefaultEntityMetaData(entityMetaData);
-
 		String masterEntityName = getMasterEntityName();
 
+		AttributeMetaData masterIdAttribute = dataService.getEntityMetaData(masterEntityName).getIdAttribute();
+		AttributeMetaData masterLabelAttribute = dataService.getEntityMetaData(masterEntityName).getLabelAttribute();
+
+		DefaultEntityMetaData viewMetaData = new DefaultEntityMetaData(name);
+		viewMetaData.setBackend("VIEW");
+		viewMetaData.setPackage(PackageImpl.defaultPackage);
+		viewMetaData.setIdAttribute(masterIdAttribute);
+		viewMetaData.setLabelAttribute(masterLabelAttribute);
+		viewMetaData.setDescription("A view on the following dataset " + masterEntityName);
+		viewMetaData.setLabel(name);
+
 		// Add master compound
-		String entityMasterName = masterEntityName;
-		DefaultAttributeMetaData masterCompoundAttribute = new DefaultAttributeMetaData("_" + entityMasterName,
+		DefaultAttributeMetaData masterCompoundAttribute = new DefaultAttributeMetaData(masterEntityName,
 				FieldTypeEnum.COMPOUND);
-		masterCompoundAttribute.setAttributesMetaData(dataService.getEntityMetaData(entityMasterName).getAttributes());
-		entityMetaDataView.addAttributeMetaData(masterCompoundAttribute, AttributeRole.ROLE_LOOKUP);
+		masterCompoundAttribute.setAttributesMetaData(dataService.getEntityMetaData(masterEntityName).getAttributes());
+		viewMetaData.addAttributeMetaData(masterCompoundAttribute, AttributeRole.ROLE_LOOKUP);
 
 		// Add slave compounds
-		Entity view = dataService.query(ViewMetaData.ENTITY_NAME).eq(ViewMetaData.NAME, entityMetaData.getName())
-				.findOne();
-		List<String> joinedEntities = newArrayList();
-		view.getEntities(ViewMetaData.JOINED_ENTITIES)
-				.forEach(joinedEntity -> joinedEntities.add(joinedEntity.getString(JoinedEntityMetaData.JOIN_ENTITY)));
-		joinedEntities.stream().forEach(joinedEntityName -> {
-			DefaultAttributeMetaData slaveCompoundAttribute = new DefaultAttributeMetaData(joinedEntityName, FieldTypeEnum.COMPOUND);
+		Entity view = dataService.query(ViewMetaData.ENTITY_NAME).eq(ViewMetaData.NAME, name).findOne();
+		List<String> slaveEntities = newArrayList();
+		view.getEntities(ViewMetaData.SLAVE_ENTITIES)
+				.forEach(slaveEntity -> slaveEntities.add(slaveEntity.getString(SlaveEntityMetaData.SLAVE_ENTITY)));
+		slaveEntities.stream().forEach(joinedEntityName -> {
+			DefaultAttributeMetaData slaveCompoundAttribute = new DefaultAttributeMetaData(joinedEntityName,
+					FieldTypeEnum.COMPOUND);
 			slaveCompoundAttribute.setAttributesMetaData(StreamSupport
-					.stream(dataService.getEntityMetaData(joinedEntityName).getAtomicAttributes().spliterator(), false).map(f -> {
+					.stream(dataService.getEntityMetaData(joinedEntityName).getAtomicAttributes().spliterator(), false)
+					.map(f -> {
 				String prefixedAttributeName = prefixSlaveEntityAttributeName(joinedEntityName, f.getName());
 				return new DefaultAttributeMetaData(prefixedAttributeName, prefixedAttributeName, f);
 			}).collect(Collectors.toList()));
-			entityMetaDataView.addAttributeMetaData(slaveCompoundAttribute, AttributeRole.ROLE_LOOKUP);
+			viewMetaData.addAttributeMetaData(slaveCompoundAttribute, AttributeRole.ROLE_LOOKUP);
 		});
 
-		return entityMetaDataView;
+		return viewMetaData;
 	}
 
 	@Override
@@ -103,45 +106,57 @@ public class ViewRepository extends AbstractRepository
 	}
 
 	@Override
+	// TODO Make this streaming
 	public Stream<Entity> findAll(Query q)
 	{
-		// Master attributes to join on
-		Set<String> masterJoinAttributesSet = newHashSet();
-		List<String> masterJoinAttributesList = newArrayList();
-		// join attributes to join on
-		Map<String, List<String>> slaveJoinAttributes = newLinkedHashMap();
+		Entity view = dataService.query(ViewMetaData.ENTITY_NAME).eq(ViewMetaData.NAME, name).findOne();
 
-		Entity view = dataService.query(ViewMetaData.ENTITY_NAME).eq(ViewMetaData.NAME, entityMetaData.getName())
-				.findOne();
+		List<Entity> masterEntityEntities = dataService.getRepository(view.getString(ViewMetaData.MASTER_ENTITY))
+				.findAll(q).collect(Collectors.toList());
 
-		for (Entity joinedEntity : view.getEntities(ViewMetaData.JOINED_ENTITIES))
+		List<Entity> viewEntityEntities = newArrayList();
+		for (Entity masterEntity : masterEntityEntities)
 		{
-			for (Entity joinedAttribute : joinedEntity.getEntities(JoinedEntityMetaData.JOINED_ATTRIBUTES))
+			DefaultEntity viewEntity = new DefaultEntity(getEntityMetaData(), dataService);
+
+			viewEntity.setOnlyAttributesWithSameMetadata(masterEntity);
+
+			for (Entity slaveEntity : view.getEntities(ViewMetaData.SLAVE_ENTITIES))
 			{
-				masterJoinAttributesSet.add(joinedAttribute.getString(JoinedAttributeMetaData.MASTER_ATTRIBUTE));
+				String slaveEntityName = slaveEntity.getString(SlaveEntityMetaData.SLAVE_ENTITY);
+
+				Query viewQuery = new QueryImpl();
+				int counter = 0;
+
+				for (Entity joinedAttributeEntity : slaveEntity.getEntities(SlaveEntityMetaData.JOINED_ATTRIBUTES))
+				{
+					if (counter != 0) viewQuery.and();
+
+					viewQuery.eq(joinedAttributeEntity.getString(JoinedAttributeMetaData.JOIN_ATTRIBUTE), masterEntity
+							.get(joinedAttributeEntity.getString(JoinedAttributeMetaData.MASTER_ATTRIBUTE)));
+					counter++;
+				}
+				Entity matchingEntity = dataService.findOne(slaveEntityName, viewQuery);
+
+				// getAttributeNames returns null values....
+				// List<String> attributeNames = newArrayList(matchingEntity.getAttributeNames());
+				// attributeNames.removeAll(Collections.singleton(null));
+
+				// TODO Do not add the joinAttributes, this is data duplication and messy
+				if (matchingEntity != null)
+				{
+					for (String attributeName : matchingEntity.getAttributeNames())
+					{
+						viewEntity.set(prefixSlaveEntityAttributeName(slaveEntityName, attributeName),
+								matchingEntity.get(attributeName));
+					}
+				}
 			}
-		}
-		masterJoinAttributesList.addAll(masterJoinAttributesSet);
-		for (Entity joinedEntity : view.getEntities(ViewMetaData.JOINED_ENTITIES))
-		{
-			List<String> joinedAttributeList = newArrayList();
-			for (Entity joinedAttribute : joinedEntity.getEntities(JoinedEntityMetaData.JOINED_ATTRIBUTES))
-			{
-				joinedAttributeList.add(joinedAttribute.getString(JoinedAttributeMetaData.JOIN_ATTRIBUTE));
-			}
-			slaveJoinAttributes.put(joinedEntity.getString(JoinedEntityMetaData.JOIN_ENTITY), joinedAttributeList);
+
+			viewEntityEntities.add(viewEntity);
 		}
 
-		Stream<Entity> allMasterEntityEntities = dataService.getRepository(view.getString(ViewMetaData.MASTER_ENTITY))
-				.findAll(q);
-
-		EntityMetaData entityMetaData = getEntityMetaData();
-		Stream<Entity> entities = StreamSupport.stream(allMasterEntityEntities.spliterator(), false).map(entity -> {
-			return getViewEntity(view, entityMetaData, masterJoinAttributesList, slaveJoinAttributes);
-		});
-
-		return entities;
-
+		return viewEntityEntities.stream();
 	}
 
 	@Override
@@ -165,50 +180,15 @@ public class ViewRepository extends AbstractRepository
 		return dataService.getMeta().getEntityMetaData(getMasterEntityName()).getAtomicAttributes();
 	}
 
-	private Entity getViewEntity(Entity masterEntity, EntityMetaData viewMetaData, List<String> joinMasterMatrix,
-			Map<String, List<String>> joinSlaveMatrix)
-	{
-		DefaultEntity me = new DefaultEntity(viewMetaData, dataService);
-		me.setOnlyAttributesWithSameMetadata(masterEntity);
-
-		for (Entry<String, List<String>> entry : joinSlaveMatrix.entrySet())
-		{
-			Query q = new QueryImpl();
-			for (int i = 0; i < joinMasterMatrix.size(); i++)
-			{
-				if (i != 0) q.and();
-				q.eq(entry.getValue().get(i), masterEntity.get(joinMasterMatrix.get(i)));
-			}
-
-			List<Entity> slaveEntities = dataService.findAll(entry.getKey(), q).collect(Collectors.toList());
-
-			if (slaveEntities.size() > 1)
-			{
-				throw new MolgenisDataException("For the query: " + q + " in entity name: " + entry.getKey() + " where "
-						+ slaveEntities.size() + " results found. The VIEW backend supports only one or zero result");
-			}
-
-			if (slaveEntities.size() == 1)
-			{
-				for (String attributeName : slaveEntities.get(0).getAttributeNames())
-				{
-					me.set(prefixSlaveEntityAttributeName(entry.getKey(), attributeName),
-							slaveEntities.get(0).get(attributeName));
-				}
-			}
-		}
-		return me;
-	}
-
 	private String getMasterEntityName()
 	{
-		String masterEntityName = dataService.query(ViewMetaData.ENTITY_NAME)
-				.eq(ViewMetaData.NAME, entityMetaData.getName()).findOne().getString(ViewMetaData.MASTER_ENTITY);
+		String masterEntityName = dataService.query(ViewMetaData.ENTITY_NAME).eq(ViewMetaData.NAME, name).findOne()
+				.getString(ViewMetaData.MASTER_ENTITY);
 		return masterEntityName;
 	}
 
 	private String prefixSlaveEntityAttributeName(String entityName, String attributeName)
 	{
-		return entityName + "__" + attributeName;
+		return entityName + "_" + attributeName;
 	}
 }
