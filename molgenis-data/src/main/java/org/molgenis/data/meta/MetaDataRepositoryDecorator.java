@@ -1,6 +1,7 @@
 package org.molgenis.data.meta;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -51,7 +52,7 @@ public class MetaDataRepositoryDecorator implements Repository
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		Set<RepositoryCapability> capabilities = decorated.getCapabilities();
+		Set<RepositoryCapability> capabilities = new HashSet<>(decorated.getCapabilities());
 		capabilities.remove(RepositoryCapability.WRITABLE);
 		capabilities.remove(RepositoryCapability.MANAGABLE);
 		return capabilities;
