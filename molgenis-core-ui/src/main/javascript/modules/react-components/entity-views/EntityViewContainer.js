@@ -2,59 +2,28 @@ import React from 'react';
 import RestClientV2 from '../../rest-client/RestClientV2';
 import $ from 'jquery';
 
-import { Button } from '../Button';
-import { EntityViewModal } from './EntityViewModal'; 
-import { EntityViewContent } from './EntityViewContent';
+import { Button } from '../Button'; 
+import { EntityViewsTable } from './EntityViewsTable';
+import { NewViewModal } from './NewViewModal';
+import { Spinner } from '../Spinner';
 
 var api = new RestClientV2();
 
-/**
- * EntityViewContainer
- * 
- * Props:
- *  - tableContentUrl 
- *  	Url from which the table content should be retrieved. Now hardcoded call to the ViewConfigurationController
- * 
- * Renders:
- *  - Button 
- *  	To add new EntityViews
- *  - EntityViewContent 
- *  	Content component containing Tables
- *  - EntityViewModal 
- *  	Activated when pressing the Button
- *  
- * State:
- *  - tableContent 
- *  	Set by retrieving all the EntityViews from the server
- *  - isOpen 
- *  	Boolean deciding if the modal should be open
- *  - viewName 
- *  	The viewName filled in in the modal form, submitted to the server when creating a new EntityView
- *  - masterEntityName 
- *  	The name of the selected entity in the modal form, submitted to the server when creating a new EntityView
- *  - refresh 
- *  	Boolean deciding if the server should be called again to refresh the list of EntityViews e.g. on creation or delete
- *  - tableMode
- *  	Which table should be shown, EntityView table or AttributeMapping table
- *  - viewToEdit
- *  	Which EntityView the attributeMappingTable should be loaded for
- *  - masterEntityToEdit
- *  	Which MasterEntity the attributeMappingTable should be loaded for
- */
 var EntityViewContainer = React.createClass({
 	displayName: 'EntityViewContainer',
-	propTypes: {
-		tableContentUrl: React.PropTypes.string.isRequired
-	},
+	propTypes: {},
 	getInitialState: function() {
 		return {
-			tableContent : null,
-			viewName: null,
-			masterEntityName: null,
+			views: null,
+			selectedViewName: null,
+			selectedMasterEntity: null,
+			selectedSlaveEntity: null,
+			selectedMasterAttribute: null,
+			selectedSlaveAttribute: null,
+			selectedMasterAttributes: null,
+			selectedSlaveAttributes: null,
 			refresh: true,
 			isOpen: false,
-			rowToEdit: null,
-			tableMode: 'ENTITY_VIEW_TABLE'
 		}
 	},
 	render: function() {
@@ -62,49 +31,32 @@ var EntityViewContainer = React.createClass({
 		this.state.refresh ? this._retrieveEntityViews() : null;
 		return <div className='row'>
 			<div className='col-md-6'>
-				{this.state.tableMode === 'ENTITY_VIEW_TABLE' ? 
-					<div>
-						<div>
-							<h1>Entity View configuration</h1>
-						</div>
-						<div>
-							<p>View, add, edit, and delete EntityViews</p>
-						</div> 
-						<div>
-							<Button 
-								id='add-new-view-btn' 
-								icon='plus' 
-								text='Add Entity view' 
-								onClick={this._openModal} 
-								style='primary'
-								type='button'
-							/>
-						</div>
-						<div>
-							<hr></hr>
-						</div>
-					</div>
-				: null}
+				<h1>Entity View configuration</h1>
+				<p>View, add, edit, and delete EntityViews</p>
+				<Button id='add-new-view-btn' icon='plus' text='Add Entity view' onClick={this._openModal} style='primary' type='button' />
+				{this.state.views === null ? <Spinner /> 
+					: <EntityViewsTable views={this.state.views} deleteEntityView={this._deleteEntityView} />
+				}
 				
-				<EntityViewContent 
-					tableContent={this.state.tableContent}
-					entityEditFunction={this._editEntityView}
-					entityDeleteFunction={this._deleteEntityView}
-					tableMode={this.state.tableMode}
-					setTableMode={this._setTableMode}
-					rowToEdit={this.state.rowToEdit}
-				/>
-				
-				<EntityViewModal 
+				<NewViewModal 
 					isOpen={this.state.isOpen}
 					hideModal={this._hideModal}
-					saveEntityView={this._saveEntityView}
-					viewName={this.state.viewName}
-					inputOnValueChange={this._setViewName}
-					entitySelectOnValueChange={this._setMasterEntityName}
+					saveNewView={this._saveNewView}
+					selectedViewName={this.state.selectedViewName}
+					selectedMasterEntity={this.state.selectedMasterEntity}
+					selectedSlaveEntity={this.state.selectedSlaveEntity}
+					selectedMasterAttribute={this.state.selectedMasterAttribute}
+					selectedSlaveAttribute={this.state.selectedSlaveAttribute}
+					selectedMasterAttributes={this.state.selectedMasterAttributes}
+					selectedSlaveAttributes={this.state.selectedSlaveAttributes}
+					viewNameSelect={this._viewNameSelect}
+					masterEntitySelect={this._masterEntitySelect}
+					slaveEntitySelect={this._slaveEntitySelect}
+					masterAttributeSelect={this._masterAttributeSelect}
+					slaveAttributeSelect={this._slaveAttributeSelect} 
 				/>
-		  </div>
-	  </div>
+			</div>
+		</div>
 	},
 	_retrieveEntityViews: function() {
 		var self = this;
@@ -115,68 +67,96 @@ var EntityViewContainer = React.createClass({
 				'identifier': false,
 				'name': false,
 				'masterEntity': false,
-				'joinedEntities': {
+				'slaveEntities': {
 					'*': false,
 					'joinedAttributes': '*'
 				}
 			}
 		};
 		api.get('View', options).done(function(data) {
-			self.setState({tableContent: data, refresh:false});
+			self.setState({views: data.items, refresh:false});
 		});
 	},
-	_saveEntityView: function() {
+	_saveNewView: function() {
 		var self = this;
 		$.ajax({
-		     type: 'POST',
-		     url: molgenis.getContextUrl() + '/add-entity-view',
-		     data: { 
-		    	 viewName: self.state.viewName, 
-		    	 masterEntityName: self.state.masterEntityName 
-	    	 },
-		     success: function(data) {
-		    	 self.setState({
-		    		 isOpen:false, 
-		    		 refresh:true, 
-		    		 viewName:null, 
-		    		 masterEntityName:null
-	    		 });
-		     }
-		})
-	},
-	_editEntityView: function(row) {
-		this.setState({rowToEdit: row, tableMode: 'ATTRIBUTE_MAPPING_TABLE'});
+			url: molgenis.getContextUrl() + '/save-new-view',
+			method: 'POST',
+			data: {
+				'viewName': this.state.selectedViewName,
+				'masterEntity' : this.state.selectedMasterEntity.value.fullName,
+				'slaveEntity' : this.state.selectedSlaveEntity.value.fullName,
+				'masterAttribute' : this.state.selectedMasterAttribute,
+				'slaveAttribute' : this.state.selectedSlaveAttribute
+			},
+			success: function() {
+				self.setState({
+					selectedViewName: null,
+					selectedMasterEntity: null, 
+					selectedSlaveEntity: null,
+					selectedMasterAttribute: null,
+					selectedSlaveAttribute: null,
+					isOpen: false,
+					refresh: true
+				});				
+			}
+		});	
 	},
 	_deleteEntityView: function(row) {
-		var self = this;
-		$.ajax({
-		     type: 'POST',
-		     url: molgenis.getContextUrl() + '/delete-entity-view',
-		     data: { 
-		    	 viewName: row.name 
-	    	 },
-		     success: function() {
-		    	 self.setState({refresh:true});
-		     }
-		})
-	},
-	_setTableMode: function(tableMode) {
-		this.setState({tableMode: tableMode});
+		var viewDelete = confirm("Are you sure you want to delete this View?");
+		if(viewDelete) {
+			var self = this;
+			$.ajax({
+			     type: 'POST',
+			     url: molgenis.getContextUrl() + '/delete-view',
+			     data: { 
+			    	 viewName: row.name 
+		    	 },
+			     success: function() {
+			    	 self.setState({refresh:true});
+			     }
+			})
+		}
 	},
 	_openModal: function() {
 		this.setState({isOpen: true});
 	},	 
 	_hideModal: function() {
-		this.setState({isOpen: false});
+		this.setState({
+			selectedViewName: null,
+			selectedMasterEntity: null, 
+			selectedSlaveEntity: null,
+			selectedMasterAttribute: null,
+			selectedSlaveAttribute: null,
+			isOpen: false
+		});
 	},
-	_setViewName: function(viewName) {
-		this.setState({viewName: viewName.value});		
+	_viewNameSelect: function(input) {
+		this.setState({selectedViewName: input.value});
 	},
-	_setMasterEntityName: function(masterEntityName) {
-		this.setState({masterEntityName: masterEntityName.value.simpleName});
+	_masterEntitySelect: function(selectedEntity) {
+		if(selectedEntity.value != null) {
+			var selectedMasterEntity = selectedEntity;
+			var selectedMasterAttributes = selectedEntity.value.attributes.items;
+			this.setState({selectedMasterEntity, selectedMasterAttributes});
+		} else {
+			this.setState({selectedMasterEntity: null, selectedMasterAttributes: null});
+		}
 	},
-	_activateView: function(row) {
-		// TODO call the /activate-entity-view url to reindex the entities to make the entity view visible in the dataExplorer
+	_slaveEntitySelect: function(selectedEntity) {
+		if(selectedEntity.value != null) {
+			var selectedSlaveEntity = selectedEntity;
+			var selectedSlaveAttributes = selectedEntity.value.attributes.items;
+			this.setState({selectedSlaveEntity, selectedSlaveAttributes});
+		} else {
+			this.setState({selectedSlaveEntity : null, selectedSlaveAttributes: null});
+		}
+	},
+	_masterAttributeSelect: function(selectedAttribute) {
+		this.setState({selectedMasterAttribute: selectedAttribute.target.value})
+	},
+	_slaveAttributeSelect: function(selectedAttribute) {
+		this.setState({selectedSlaveAttribute: selectedAttribute.target.value})
 	}
 });
 

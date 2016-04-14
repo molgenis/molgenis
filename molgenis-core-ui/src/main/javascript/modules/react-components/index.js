@@ -38,7 +38,7 @@ import ProgressBar from './ProgressBar';
 import JobContainer from './jobs/JobContainer';
 import JobsContainer from './jobs/JobsContainer';
 import FileIngestPlugin from './FileIngestPlugin';
-import EntityViewContainer from './entity-views/EntityViewContainer'
+import EntityViewContainer from './entity-views/EntityViewContainer';
 
 export default {
 	'mixin' : mixin,
