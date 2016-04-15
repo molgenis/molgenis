@@ -50,7 +50,7 @@ public class ConstraintViolation
 	 */
 	public void renumberRowIndex(List<Integer> indices)
 	{
-		this.rownr = new Long(indices.get(toIntExact(this.rownr - 1)));
+		this.rownr = this.rownr != null ? new Long(indices.get(toIntExact(this.rownr - 1))) : null;
 	}
 
 	public String getMessage()

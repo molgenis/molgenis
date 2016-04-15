@@ -1,9 +1,14 @@
 package org.molgenis.data.postgresql;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.RepositoryCapability.MANAGABLE;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
+import static org.molgenis.data.RepositoryCapability.VALIDATE_NOTNULL_CONSTRAINT;
+import static org.molgenis.data.RepositoryCapability.VALIDATE_REFERENCE_CONSTRAINT;
+import static org.molgenis.data.RepositoryCapability.VALIDATE_UNIQUE_CONSTRAINT;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlAddColumn;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlCount;
@@ -30,6 +35,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +70,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 /**
  * Repository that persists entities in a PostgreSQL database
@@ -80,6 +85,10 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	/** JDBC batch operation size */
 	private static final int BATCH_SIZE = 1000;
+	/** Repository capabilities */
+	private static final Set<RepositoryCapability> REPO_CAPABILITIES = unmodifiableSet(
+			new HashSet<>(asList(WRITABLE, MANAGABLE, QUERYABLE, VALIDATE_REFERENCE_CONSTRAINT,
+					VALIDATE_UNIQUE_CONSTRAINT, VALIDATE_NOTNULL_CONSTRAINT)));
 
 	private final PostgreSqlEntityFactory postgreSqlEntityFactory;
 	private final JdbcTemplate jdbcTemplate;
@@ -120,7 +129,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return Sets.newHashSet(WRITABLE, MANAGABLE, QUERYABLE);
+		return REPO_CAPABILITIES;
 	}
 
 	@Override

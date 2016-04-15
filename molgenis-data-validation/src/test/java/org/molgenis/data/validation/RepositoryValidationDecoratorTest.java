@@ -12,6 +12,7 @@ import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -25,6 +26,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.MolgenisTransactionLogMetaData;
 import org.testng.annotations.BeforeMethod;
@@ -233,7 +235,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
 
 		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(refEntity0);
+		when(entity0.get(attrXrefName)).thenReturn(null); // valid, because entity does not require validation
 		when(entity0.get(attrNillableXrefName)).thenReturn(null);
 		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
 		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
@@ -243,6 +245,87 @@ public class RepositoryValidationDecoratorTest
 		// actual tests
 		repositoryValidationDecorator.add(entity0);
 		verify(decoratedRepo, times(1)).add(entity0);
+	}
+
+	@Test
+	public void addEntityDoesNotRequireValidationDueToRepoCapabilities()
+	{
+		when(decoratedRepo.getCapabilities())
+				.thenReturn(new HashSet<>(Arrays.asList(RepositoryCapability.VALIDATE_NOTNULL_CONSTRAINT)));
+
+		// entities
+		Entity entity0 = mock(Entity.class);
+		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(entity0.getIdValue()).thenReturn("id0");
+		when(entity0.getEntity(attrXrefName)).thenReturn(null); // valid, because entity is validated by decorated repo
+		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
+		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
+		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
+		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
+		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
+
+		when(entity0.get(attrIdName)).thenReturn("id0");
+		when(entity0.get(attrXrefName)).thenReturn(null); // valid, because entity is validated by decorated repo
+		when(entity0.get(attrNillableXrefName)).thenReturn(null);
+		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
+		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
+		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
+		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
+
+		// actual tests
+		repositoryValidationDecorator.add(entity0);
+		verify(decoratedRepo, times(1)).add(entity0);
+	}
+
+	@Test
+	public void addEntityCrossRepositoryCollectionReference()
+	{
+		when(decoratedRepo.getCapabilities())
+				.thenReturn(new HashSet<>(Arrays.asList(RepositoryCapability.VALIDATE_REFERENCE_CONSTRAINT)));
+		// references need to be validated because they are stored in another repository collection
+		when(entityMeta.getBackend()).thenReturn("thisBackend");
+		when(refEntityMeta.getBackend()).thenReturn("otherBackend");
+
+		String refEntityDoesNotExistId = "id1";
+		Entity refEntityDoesNotExist = mock(Entity.class);
+		when(refEntityDoesNotExist.getEntityMetaData()).thenReturn(refEntityMeta);
+		when(refEntityDoesNotExist.getIdValue()).thenReturn(refEntityDoesNotExistId);
+		when(refEntityDoesNotExist.get(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
+		when(refEntityDoesNotExist.getString(refAttrIdName)).thenReturn(refEntityDoesNotExistId);
+
+		// entities
+		Entity entity0 = mock(Entity.class);
+		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(entity0.getIdValue()).thenReturn("id0");
+		when(entity0.getEntity(attrXrefName)).thenReturn(refEntityDoesNotExist); // validation error
+		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
+		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
+		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
+		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
+		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
+
+		when(entity0.get(attrIdName)).thenReturn("id0");
+		when(entity0.get(attrXrefName)).thenReturn(refEntity0);
+		when(entity0.get(attrNillableXrefName)).thenReturn(null);
+		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
+		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
+		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
+		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
+
+		// actual tests
+		try
+		{
+			repositoryValidationDecorator.add(entity0);
+			throw new RuntimeException("Expected MolgenisValidationException instead of no exception");
+		}
+		catch (MolgenisValidationException e)
+		{
+			verify(entityAttributesValidator, times(1)).validate(entity0, entityMeta);
+			assertEquals(e.getMessage(),
+					"Unknown xref value 'id1' for attribute 'xrefAttr' of entity 'entity'. (entity 1)");
+		}
 	}
 
 	@Test

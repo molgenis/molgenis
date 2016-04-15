@@ -113,7 +113,7 @@ public class DecimalField extends FieldType
 	public Object convert(Object value)
 	{
 		if (value == null) return null;
-		else if (value instanceof Double) return value;
+		else if (value instanceof Number) return ((Number) value).doubleValue();
 		else if (value instanceof String || value instanceof Integer) return Double.parseDouble(value.toString());
 		else if (value instanceof BigDecimal)
 		{
