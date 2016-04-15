@@ -138,10 +138,6 @@ public class ViewRepository extends AbstractRepository
 				}
 				Entity matchingEntity = dataService.findOne(slaveEntityName, viewQuery);
 
-				// getAttributeNames returns null values....
-				// List<String> attributeNames = newArrayList(matchingEntity.getAttributeNames());
-				// attributeNames.removeAll(Collections.singleton(null));
-
 				// TODO Do not add the joinAttributes, this is data duplication and messy
 				if (matchingEntity != null)
 				{
