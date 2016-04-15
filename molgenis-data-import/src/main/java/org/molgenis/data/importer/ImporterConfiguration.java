@@ -1,7 +1,6 @@
 package org.molgenis.data.importer;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.mysql.EmxImportServiceRegistrator;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -43,7 +42,7 @@ public class ImporterConfiguration
 	}
 
 	@Bean
-	public EmxImportServiceRegistrator mysqlRepositoryRegistrator()
+	public EmxImportServiceRegistrator emxImportServiceRegistrator()
 	{
 		return new EmxImportServiceRegistrator(importServiceFactory, emxImportService());
 	}

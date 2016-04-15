@@ -47,6 +47,12 @@ public class CompoundField extends FieldType
 	}
 
 	@Override
+	public String getPostgreSqlType()
+	{
+		throw new UnsupportedOperationException("No PostgreSQL data type exists for 'compound' field type");
+	}
+
+	@Override
 	public String getOracleType() throws MolgenisModelException
 	{
 		return getFieldType(f.getXrefField()).getOracleType();

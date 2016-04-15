@@ -37,6 +37,12 @@ public class IntField extends FieldType
 	}
 
 	@Override
+	public String getPostgreSqlType()
+	{
+		return "integer"; // alias: int, int4
+	}
+
+	@Override
 	public String getOracleType() throws MolgenisModelException
 	{
 		return "NUMBER (10,0)";

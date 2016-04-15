@@ -39,6 +39,12 @@ public class StringField extends FieldType
 	}
 
 	@Override
+	public String getPostgreSqlType()
+	{
+		return "character varying(255)"; // alias: varchar(255)
+	}
+
+	@Override
 	public String getOracleType() throws MolgenisModelException
 	{
 		return "VARCHAR2(" + f.getVarCharLength() + ")";

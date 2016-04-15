@@ -73,11 +73,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-data-mysql</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-elasticsearch</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -86,11 +81,5 @@
 			<artifactId>molgenis-file</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		 <dependency>
-      		<groupId>mysql</groupId>
-      		<artifactId>mysql-connector-mxj</artifactId>
-      		<version>5.0.12</version>
-      		<scope>test</scope>
-    	</dependency>
 	</dependencies>
 </project>

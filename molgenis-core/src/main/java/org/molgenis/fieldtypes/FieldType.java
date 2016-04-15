@@ -112,6 +112,13 @@ public abstract class FieldType implements Serializable
 	abstract public String getMysqlType() throws MolgenisModelException;
 
 	/**
+	 * Returns the PostgreSQL data type name for this field type
+	 * 
+	 * @return PostgreSQL data type name
+	 */
+	public abstract String getPostgreSqlType();
+
+	/**
 	 * Produce valid XSD type
 	 */
 	abstract public String getXsdType() throws MolgenisModelException;

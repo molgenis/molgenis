@@ -85,7 +85,7 @@ public interface Query extends Iterable<Entity>
 	 * 
 	 * @param field
 	 * @param values
-	 *            ids or entities
+	 *            ids
 	 * @return
 	 */
 	Query in(String field, Iterable<?> values);

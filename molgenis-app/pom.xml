@@ -85,13 +85,6 @@
 						</webInfIncludeJarPattern>
 					</webAppConfig>
 				</configuration>
-				<dependencies>
-					<dependency>
-						<groupId>mysql</groupId>
-						<artifactId>mysql-connector-java</artifactId>
-						<version>${mysql.connector.java.version}</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 		</plugins>
 		<pluginManagement>
@@ -216,11 +209,6 @@
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-import</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-data-mysql</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
