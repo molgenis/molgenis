@@ -1,5 +1,6 @@
 package org.molgenis.data.view.repository;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.STRING;
@@ -14,7 +15,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -24,16 +24,15 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData.AttributeRole;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.mem.InMemoryRepository;
 import org.molgenis.data.meta.PackageImpl;
-import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.view.meta.JoinedAttributeMetaData;
+import org.molgenis.data.view.meta.SlaveEntityMetaData;
 import org.molgenis.data.view.meta.ViewMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -42,8 +41,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import autovalue.shaded.com.google.common.common.collect.Lists;
 
 @ContextConfiguration(classes = ViewRepositoryTest.Config.class)
 public class ViewRepositoryTest extends AbstractTestNGSpringContextTests
@@ -60,12 +57,18 @@ public class ViewRepositoryTest extends AbstractTestNGSpringContextTests
 	private Repository repoA;
 	private Repository repoB;
 	private Repository repoC;
-	private Repository repoEvmd;
+	private Repository viewMetaDataRepo;
 
-	private Entity entityEvmd1;
-	private Entity entityEvmd2;
-	private Entity entityEvmd3;
-	private Entity entityEvmd4;
+	private Entity joinedAttributeEntity1;
+	private Entity joinedAttributeEntity2;
+
+	private Entity joinedEntityEntity1;
+	private Entity joinedEntityEntity2;
+
+	private Entity viewMetaDataEntity;
+	private Entity viewMetaDataEntity2;
+	private Entity viewMetaDataEntity3;
+	private Entity viewMetaDataEntity4;
 
 	@BeforeClass
 	public void setupBeforeClass()
@@ -76,6 +79,7 @@ public class ViewRepositoryTest extends AbstractTestNGSpringContextTests
 		entityMetaA.addAttribute("chrom").setDataType(STRING).setNillable(false);
 		entityMetaA.addAttribute("pos").setDataType(STRING).setNillable(false);
 		entityMetaA.addAttribute("A").setDataType(STRING);
+		repoA = new InMemoryRepository(entityMetaA);
 
 		// entity B (slave entity)
 		entityMetaB = new DefaultEntityMetaData("entityB");
@@ -83,6 +87,7 @@ public class ViewRepositoryTest extends AbstractTestNGSpringContextTests
 		entityMetaB.addAttribute("chrom").setDataType(STRING).setNillable(false);
 		entityMetaB.addAttribute("pos").setDataType(STRING).setNillable(false);
 		entityMetaB.addAttribute("B").setDataType(STRING);
+		repoB = new InMemoryRepository(entityMetaB);
 
 		// entity C (slave entity)
 		entityMetaC = new DefaultEntityMetaData("entityC");
@@ -90,50 +95,43 @@ public class ViewRepositoryTest extends AbstractTestNGSpringContextTests
 		entityMetaC.addAttribute("chrom").setDataType(STRING).setNillable(false);
 		entityMetaC.addAttribute("pos").setDataType(STRING).setNillable(false);
 		entityMetaC.addAttribute("C").setDataType(STRING);
+		repoC = new InMemoryRepository(entityMetaC);
 
-		ViewMetaData evmd = new ViewMetaData();
+		ViewMetaData viewMetaData = new ViewMetaData();
+		SlaveEntityMetaData joinedEntityMetaData = new SlaveEntityMetaData();
+		JoinedAttributeMetaData joinedAttributeMetaData = new JoinedAttributeMetaData();
 
 		// make repositories
-		repoA = new InMemoryRepository(entityMetaA);
-		repoB = new InMemoryRepository(entityMetaB);
-		repoC = new InMemoryRepository(entityMetaC);
-		repoEvmd = new InMemoryRepository(evmd);
+		viewMetaDataRepo = new InMemoryRepository(viewMetaData);
 
-		entityEvmd1 = new MapEntity(evmd);
-		entityEvmd1.set("id", "1");
-		entityEvmd1.set(ViewMetaData.NAME, "MY_FIRST_VIEW");
-		entityEvmd1.set(ViewMetaData.MASTER_ENTITY, "entityA");
-		entityEvmd1.set(ViewMetaData.MASTER_ATTR, "chrom");
-		entityEvmd1.set(ViewMetaData.JOIN_ENTITY, "entityB");
-		entityEvmd1.set(ViewMetaData.JOIN_ATTR, "chrom");
-		repoEvmd.add(entityEvmd1);
+		joinedAttributeEntity1 = new MapEntity(joinedAttributeMetaData);
+		joinedAttributeEntity1.set(JoinedAttributeMetaData.IDENTIFIER, "1");
+		joinedAttributeEntity1.set(JoinedAttributeMetaData.MASTER_ATTRIBUTE, "chrom");
+		joinedAttributeEntity1.set(JoinedAttributeMetaData.JOIN_ATTRIBUTE, "chrom");
 
-		entityEvmd2 = new MapEntity(evmd);
-		entityEvmd2.set("id", "2");
-		entityEvmd2.set(ViewMetaData.VIEW_NAME, "MY_FIRST_VIEW");
-		entityEvmd2.set(ViewMetaData.MASTER_ENTITY, "entityA");
-		entityEvmd2.set(ViewMetaData.MASTER_ATTR, "pos");
-		entityEvmd2.set(ViewMetaData.JOIN_ENTITY, "entityB");
-		entityEvmd2.set(ViewMetaData.JOIN_ATTR, "pos");
-		repoEvmd.add(entityEvmd2);
+		joinedAttributeEntity2 = new MapEntity(joinedAttributeMetaData);
+		joinedAttributeEntity2.set(JoinedAttributeMetaData.IDENTIFIER, "2");
+		joinedAttributeEntity2.set(JoinedAttributeMetaData.MASTER_ATTRIBUTE, "pos");
+		joinedAttributeEntity2.set(JoinedAttributeMetaData.JOIN_ATTRIBUTE, "pos");
 
-		entityEvmd3 = new MapEntity(evmd);
-		entityEvmd3.set("id", "3");
-		entityEvmd3.set(ViewMetaData.VIEW_NAME, "MY_FIRST_VIEW");
-		entityEvmd3.set(ViewMetaData.MASTER_ENTITY, "entityA");
-		entityEvmd3.set(ViewMetaData.MASTER_ATTR, "chrom");
-		entityEvmd3.set(ViewMetaData.JOIN_ENTITY, "entityC");
-		entityEvmd3.set(ViewMetaData.JOIN_ATTR, "chrom");
-		repoEvmd.add(entityEvmd3);
+		joinedEntityEntity1 = new MapEntity(joinedEntityMetaData);
+		joinedEntityEntity1.set(SlaveEntityMetaData.IDENTIFIER, "1");
+		joinedEntityEntity1.set(SlaveEntityMetaData.SLAVE_ENTITY, "entityB");
+		joinedEntityEntity1.set(SlaveEntityMetaData.JOINED_ATTRIBUTES,
+				newArrayList(joinedAttributeEntity1, joinedAttributeEntity2));
 
-		entityEvmd4 = new MapEntity(evmd);
-		entityEvmd4.set("id", "4");
-		entityEvmd4.set(ViewMetaData.VIEW_NAME, "MY_FIRST_VIEW");
-		entityEvmd4.set(ViewMetaData.MASTER_ENTITY, "entityA");
-		entityEvmd4.set(ViewMetaData.MASTER_ATTR, "pos");
-		entityEvmd4.set(ViewMetaData.JOIN_ENTITY, "entityC");
-		entityEvmd4.set(ViewMetaData.JOIN_ATTR, "pos");
-		repoEvmd.add(entityEvmd4);
+		joinedEntityEntity2 = new MapEntity(joinedEntityMetaData);
+		joinedEntityEntity2.set(SlaveEntityMetaData.IDENTIFIER, "2");
+		joinedEntityEntity2.set(SlaveEntityMetaData.SLAVE_ENTITY, "entityC");
+		joinedEntityEntity2.set(SlaveEntityMetaData.JOINED_ATTRIBUTES,
+				newArrayList(joinedAttributeEntity1, joinedAttributeEntity2));
+
+		viewMetaDataEntity = new MapEntity(viewMetaData);
+		viewMetaDataEntity.set(ViewMetaData.IDENTIFIER, "1");
+		viewMetaDataEntity.set(ViewMetaData.NAME, "MY_FIRST_VIEW");
+		viewMetaDataEntity.set(ViewMetaData.MASTER_ENTITY, "entityA");
+		viewMetaDataEntity.set(ViewMetaData.SLAVE_ENTITIES, newArrayList(joinedEntityEntity1, joinedEntityEntity2));
+		viewMetaDataRepo.add(viewMetaDataEntity);
 
 		// entity A (master entity)
 		DefaultEntityMetaData expectedEntityMetaA = new DefaultEntityMetaData("entityA");
@@ -179,23 +177,23 @@ public class ViewRepositoryTest extends AbstractTestNGSpringContextTests
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("MY_FIRST_VIEW", PackageImpl.defaultPackage);
 		emd.addAttribute("id", AttributeRole.ROLE_ID, AttributeRole.ROLE_LABEL);
 		emd.setAbstract(false);
-		viewRepository = new ViewRepository(emd, dataService);
+		viewRepository = new ViewRepository(emd.getName(), dataService);
 
 		Query queryMock = mock(Query.class);
 		when(dataService.query(ViewMetaData.ENTITY_NAME)).thenReturn(queryMock);
 		Query queryMock2 = mock(Query.class);
-		when(queryMock.eq(ViewMetaData.VIEW_NAME, "MY_FIRST_VIEW")).thenReturn(queryMock2);
-		when(queryMock2.findOne()).thenReturn(entityEvmd1);
+		when(queryMock.eq(ViewMetaData.NAME, "MY_FIRST_VIEW")).thenReturn(queryMock2);
+		when(queryMock2.findOne()).thenReturn(viewMetaDataEntity);
 
 		when(queryMock2.findAll()).thenAnswer(new Answer<Stream<Entity>>()
 		{
 			@Override
 			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
 			{
-				return Arrays.asList(entityEvmd1, entityEvmd2, entityEvmd3, entityEvmd4).stream();
+				return Arrays.asList(viewMetaDataEntity, viewMetaDataEntity2, viewMetaDataEntity3, viewMetaDataEntity4)
+						.stream();
 			}
 		});
-
 	}
 
 	@Test
@@ -277,42 +275,29 @@ public class ViewRepositoryTest extends AbstractTestNGSpringContextTests
 		repoC.add(entityC3);
 
 		when(dataService.getRepository("entityA")).thenReturn(repoA);
+		when(dataService.getRepository("EntityB")).thenReturn(repoB);
+		when(dataService.getRepository("entityC")).thenReturn(repoC);
 
 		Query q1 = new QueryImpl();
 		q1.eq("chrom", "1");
 		q1.and();
 		q1.eq("pos", "25");
-		when(dataService.findAll("entityB", q1)).thenReturn(Arrays.asList(entityB1).stream());
+		when(dataService.findOne("entityB", q1)).thenReturn(entityB1);
+		when(dataService.findOne("entityC", q1)).thenReturn(entityC1);
 
 		Query q2 = new QueryImpl();
 		q2.eq("chrom", "2");
 		q2.and();
 		q2.eq("pos", "50");
-		when(dataService.findAll("entityB", q2)).thenReturn(Arrays.asList(entityB2).stream());
+		when(dataService.findOne("entityB", q2)).thenReturn(entityB2);
+		when(dataService.findOne("entityC", q2)).thenReturn(entityC2);
 
 		Query q3 = new QueryImpl();
 		q3.eq("chrom", "3");
 		q3.and();
 		q3.eq("pos", "75");
-		when(dataService.findAll("entityB", q3)).thenReturn(Arrays.asList(entityB3).stream());
-
-		Query q4 = new QueryImpl();
-		q4.eq("chrom", "1");
-		q4.and();
-		q4.eq("pos", "25");
-		when(dataService.findAll("entityC", q4)).thenReturn(Arrays.asList(entityC1).stream());
-
-		Query q5 = new QueryImpl();
-		q5.eq("chrom", "2");
-		q5.and();
-		q5.eq("pos", "50");
-		when(dataService.findAll("entityC", q2)).thenReturn(Arrays.asList(entityC2).stream());
-
-		Query q6 = new QueryImpl();
-		q6.eq("chrom", "3");
-		q6.and();
-		q6.eq("pos", "75");
-		when(dataService.findAll("entityC", q6)).thenReturn(Arrays.asList(entityC3).stream());
+		when(dataService.findOne("entityB", q3)).thenReturn(entityB3);
+		when(dataService.findOne("entityC", q3)).thenReturn(entityC3);
 
 		DefaultEntity expected1 = new DefaultEntity(expectedEntityMetaData, dataService);
 		expected1.set("id", "1");
@@ -356,7 +341,7 @@ public class ViewRepositoryTest extends AbstractTestNGSpringContextTests
 		expected3.set("entityC_pos", "75");
 		expected3.set("entityC_C", "testC3");
 
-		List<Entity> expected = Lists.newArrayList(expected1, expected2, expected3);
+		List<Entity> expected = newArrayList(expected1, expected2, expected3);
 		List<Entity> actual = viewRepository.findAll(new QueryImpl()).collect(Collectors.toList());
 		assertEquals(actual, expected);
 	}
