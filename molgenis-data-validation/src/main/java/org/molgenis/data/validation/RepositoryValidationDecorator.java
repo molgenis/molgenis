@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -47,8 +48,6 @@ import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.util.EntityUtils;
 import org.molgenis.util.HugeMap;
 import org.molgenis.util.HugeSet;
-
-import autovalue.shaded.com.google.common.common.base.Objects;
 
 public class RepositoryValidationDecorator implements Repository<Entity>
 {
@@ -378,7 +377,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 			refAttrs = StreamSupport.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
 					.filter(attr -> (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
 							&& attr.getExpression() == null
-							&& !Objects.equal(attr.getRefEntity().getBackend(), backend))
+							&& !Objects.equals(attr.getRefEntity().getBackend(), backend))
 					.collect(Collectors.toList());
 		}
 
