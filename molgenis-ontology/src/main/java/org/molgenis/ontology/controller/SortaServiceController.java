@@ -254,7 +254,7 @@ public class SortaServiceController extends MolgenisPluginController
 					|| sortaJobExecution.getUser().getUsername().equals(currentUser.getUsername()))
 			{
 				RunAsSystemProxy.runAsSystem(() -> {
-					dataService.delete(SortaJobExecution.ENTITY_NAME, sortaJobExecution.getIdentifier());
+					dataService.deleteById(SortaJobExecution.ENTITY_NAME, sortaJobExecution.getIdentifier());
 				});
 				tryDeleteRepository(sortaJobExecution.getResultEntityName());
 				tryDeleteRepository(sortaJobExecution.getSourceEntityName());
@@ -272,7 +272,7 @@ public class SortaServiceController extends MolgenisPluginController
 		}
 		else
 		{
-			LOG.info("Unable to delete repository {}", entityName);
+			LOG.info("Unable to deleteById repository {}", entityName);
 		}
 	}
 
@@ -285,7 +285,7 @@ public class SortaServiceController extends MolgenisPluginController
 		}
 		catch (Exception ex)
 		{
-			LOG.error("Failed to delete existing writable repository {}", entityName);
+			LOG.error("Failed to deleteById existing writable repository {}", entityName);
 		}
 	}
 
@@ -536,7 +536,7 @@ public class SortaServiceController extends MolgenisPluginController
 		sortaJobExecution.setName(jobName);
 		sortaJobExecution.setUser(userAccountService.getCurrentUser());
 		sortaJobExecution.setSourceEntityName(inputData.getName());
-		sortaJobExecution.setDeleteUrl(getSortaServiceMenuUrl() + "/delete/" + resultEntityName);
+		sortaJobExecution.setDeleteUrl(getSortaServiceMenuUrl() + "/deleteById/" + resultEntityName);
 		sortaJobExecution.setResultEntityName(resultEntityName);
 		sortaJobExecution.setThreshold(DEFAULT_THRESHOLD);
 		sortaJobExecution.setOntologyIri(ontologyIri);

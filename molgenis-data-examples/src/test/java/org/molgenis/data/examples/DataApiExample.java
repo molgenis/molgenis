@@ -50,7 +50,7 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 				.forEach(System.out::println);
 
 		// Delete one
-		dataService.delete(UserMetaData.ENTITY_NAME, "Piet");
+		dataService.deleteById(UserMetaData.ENTITY_NAME, "Piet");
 		printUsers();
 
 		// Discover capabilities of repo

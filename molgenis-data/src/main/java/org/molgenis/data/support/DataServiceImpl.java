@@ -198,7 +198,7 @@ public class DataServiceImpl implements DataService
 
 	@Override
 	@Transactional
-	public void delete(String entityName, Object id)
+	public void deleteById(String entityName, Object id)
 	{
 		getRepository(entityName).deleteById(id);
 	}

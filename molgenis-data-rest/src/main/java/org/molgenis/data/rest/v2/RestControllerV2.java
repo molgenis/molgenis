@@ -224,7 +224,7 @@ class RestControllerV2
 	@ResponseStatus(NO_CONTENT)
 	public void deleteEntity(@PathVariable("entityName") String entityName, @PathVariable("id") Object id)
 	{
-		dataService.delete(entityName, id);
+		dataService.deleteById(entityName, id);
 	}
 
 	/**

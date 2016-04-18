@@ -113,7 +113,7 @@ import cz.jirutka.rsql.parser.RSQLParserException;
 /**
  * Rest endpoint for the DataService
  * 
- * Query, create, update and delete entities.
+ * Query, create, update and deleteById entities.
  * 
  * If a repository isn't capable of doing the requested operation an error is thrown.
  * 
@@ -771,7 +771,7 @@ public class RestController
 	{
 		Object typedId = dataService.getRepository(entityName).getEntityMetaData().getIdAttribute().getDataType()
 				.convert(id);
-		dataService.delete(entityName, typedId);
+		dataService.deleteById(entityName, typedId);
 	}
 
 	/**

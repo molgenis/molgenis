@@ -129,7 +129,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		dataService.add(ENTITY_NAME, entity);
 		assertPresent(entity);
 
-		dataService.delete(ENTITY_NAME, entity.getIdValue());
+		dataService.deleteById(ENTITY_NAME, entity.getIdValue());
 		assertNull(dataService.findOneById(ENTITY_NAME, entity.getIdValue()));
 	}
 

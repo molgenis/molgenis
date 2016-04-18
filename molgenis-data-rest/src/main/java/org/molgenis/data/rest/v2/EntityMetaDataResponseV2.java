@@ -35,7 +35,7 @@ class EntityMetaDataResponseV2
 	private final List<String> lookupAttributes;
 	private final Boolean isAbstract;
 	/**
-	 * Is this user allowed to add/update/delete entities of this type?
+	 * Is this user allowed to add/update/deleteById entities of this type?
 	 */
 	private final Boolean writable;
 	private String languageCode;

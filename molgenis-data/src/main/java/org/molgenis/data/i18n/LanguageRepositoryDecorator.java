@@ -148,7 +148,7 @@ public class LanguageRepositoryDecorator implements Repository
 		if (languageCode.equalsIgnoreCase(LanguageService.FALLBACK_LANGUAGE))
 		{
 			throw new MolgenisDataException(
-					"It is not possible to delete '" + languageCode + "'. This is the default language.");
+					"It is not possible to deleteById '" + languageCode + "'. This is the default language.");
 		}
 
 		decorated.delete(entity);

@@ -370,7 +370,7 @@ public interface DataService extends Iterable<Repository>
 	 *            entity name (case insensitive)
 	 * @param id
 	 */
-	void delete(String entityName, Object id);
+	void deleteById(String entityName, Object id);
 
 	/**
 	 * Deletes all entities

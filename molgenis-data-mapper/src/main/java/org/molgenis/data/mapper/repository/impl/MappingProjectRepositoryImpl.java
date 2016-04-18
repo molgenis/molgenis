@@ -137,6 +137,6 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 	@Override
 	public void delete(String mappingProjectId)
 	{
-		dataService.delete(MappingProjectRepositoryImpl.META_DATA.getName(), mappingProjectId);
+		dataService.deleteById(MappingProjectRepositoryImpl.META_DATA.getName(), mappingProjectId);
 	}
 }

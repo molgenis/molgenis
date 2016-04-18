@@ -225,7 +225,7 @@ public class ImportWizardController extends AbstractWizardController
 				}
 				else if (value.equalsIgnoreCase(NONE.toString()))
 				{
-					if (authority.getId() != null) dataService.delete(GroupAuthority.ENTITY_NAME, authority.getId());
+					if (authority.getId() != null) dataService.deleteById(GroupAuthority.ENTITY_NAME, authority.getId());
 				}
 				else
 				{

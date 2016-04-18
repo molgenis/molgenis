@@ -254,7 +254,7 @@ public class MappingServiceImpl implements MappingService
 		EntityMetaData targetMetaData = targetRepo.getEntityMetaData();
 		Repository sourceRepo = dataService.getRepository(sourceMapping.getName());
 
-		// delete all target entities from this source
+		// deleteById all target entities from this source
 		List<Entity> deleteEntities = targetRepo.findAll(new QueryImpl().eq("source", sourceRepo.getName()))
 				.filter(Objects::nonNull).collect(Collectors.toList());
 		targetRepo.delete(deleteEntities.stream());

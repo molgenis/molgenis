@@ -139,7 +139,7 @@ public class MappingProjectRepositoryImplTest extends AbstractTestNGSpringContex
 	public void testDelete()
 	{
 		mappingProjectRepositoryImpl.delete("abc");
-		verify(dataService).delete(ENTITY_NAME, "abc");
+		verify(dataService).deleteById(ENTITY_NAME, "abc");
 	}
 
 	@Test

@@ -185,14 +185,14 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void deleteDelete() throws Exception
 	{
 		mockMvc.perform(delete(HREF_ENTITY_ID)).andExpect(status().isNoContent());
-		verify(dataService).delete(ENTITY_NAME, ENTITY_ID);
+		verify(dataService).deleteById(ENTITY_NAME, ENTITY_ID);
 	}
 
 	@Test
 	public void deletePost() throws Exception
 	{
 		mockMvc.perform(post(HREF_ENTITY_ID).param("_method", "DELETE")).andExpect(status().isNoContent());
-		verify(dataService).delete(ENTITY_NAME, ENTITY_ID);
+		verify(dataService).deleteById(ENTITY_NAME, ENTITY_ID);
 	}
 
 	@Test

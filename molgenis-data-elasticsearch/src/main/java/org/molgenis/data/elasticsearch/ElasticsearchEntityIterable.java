@@ -92,7 +92,7 @@ class ElasticsearchEntityIterable extends BatchingQueryResult implements EntityC
 			// Exclude the updated records from the first index
 			QueryBuilder excludeUpdatesQuery = indicesQuery(boolQuery().mustNot(findUpdatesQuery), indexNames[0]);
 
-			// NOTE: deletes cannot be handled by ES in this way, so if you do a delete then the entity will
+			// NOTE: deletes cannot be handled by ES in this way, so if you do a deleteById then the entity will
 			// still be returned. Only after the commit of the transaction the queries won't return the
 			// entity anymore
 
