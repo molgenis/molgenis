@@ -33,8 +33,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-//import org.molgenis.auth.UserAuthorityRepository;
-
 public class MolgenisUserDecoratorTest
 {
 	private Repository decoratedRepository;
