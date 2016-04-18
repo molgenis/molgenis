@@ -3,7 +3,7 @@ import DeepPureRenderMixin from "./mixin/DeepPureRenderMixin";
 import $ from "jquery";
 
 	var div = React.DOM.div, button = React.DOM.button, span = React.DOM.span, h4 = React.DOM.h4;
-	
+
 	/**
      * @memberOf component
      */
@@ -14,7 +14,8 @@ import $ from "jquery";
         	title: React.PropTypes.string.isRequired,
         	size: React.PropTypes.oneOf(['small', 'medium', 'large']),
         	show: React.PropTypes.bool,
-        	onHide: React.PropTypes.func
+        	onHide: React.PropTypes.func,
+			footer: React.PropTypes.bool
         },
         getDefaultProps: function() {
         	return {
@@ -42,7 +43,7 @@ import $ from "jquery";
     			'modal-sm': this.props.size == 'small',
     			'modal-lg': this.props.size == 'large'
     		});
-    		var id = 'modal-title-' + new Date().getTime(); 
+    		var id = 'modal-title-' + new Date().getTime();
     		return (
 				div({className: 'modal', tabIndex: -1, role: 'dialog', 'aria-labelledby': id, ref: 'modal'},
 					div({className: modalDialogClasses},
@@ -57,7 +58,11 @@ import $ from "jquery";
 							),
 							div({className: 'modal-body'},
 								this.props.show ? this.props.children : null
-							)
+							),
+							this.props.footer && <div className="modal-footer">
+								<button type="button" className="btn btn-primary"
+										data-dismiss="modal">Close</button>
+							</div>
 						)
 					)
 				)
@@ -78,4 +83,5 @@ import $ from "jquery";
     	}
     });
 
+export { Modal };
 export default React.createFactory(Modal);

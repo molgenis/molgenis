@@ -5,7 +5,9 @@ import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.springframework.stereotype.Component;
 
+@Component
 public class TermFrequencyEntityMetaData extends DefaultEntityMetaData
 {
 	public final static String ENTITY_NAME = "TermFrequency";

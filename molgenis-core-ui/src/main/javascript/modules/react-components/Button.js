@@ -93,5 +93,5 @@ var Button = React.createClass({
 	}
 });
 	
-export { Button };	
+export { Button };
 export default React.createFactory(Button);

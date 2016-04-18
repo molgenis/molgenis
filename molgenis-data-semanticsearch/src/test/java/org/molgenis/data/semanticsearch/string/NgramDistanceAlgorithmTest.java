@@ -7,6 +7,17 @@ import org.testng.annotations.Test;
 public class NgramDistanceAlgorithmTest
 {
 	@Test
+	public void calculateScore()
+	{
+		assertEquals(NGramDistanceAlgorithm.stringMatching("hypertensive", "hypertensive"), 100.0);
+
+		assertEquals(NGramDistanceAlgorithm.stringMatching("hypertensive disorder", "hypertensive order"), 72.727,
+				0.001);
+
+		assertEquals(NGramDistanceAlgorithm.stringMatching("hypertensive", "diabetes"), 0.0);
+	}
+
+	@Test
 	public void createNGrams()
 	{
 		assertEquals(NGramDistanceAlgorithm.createNGrams("hypertensions", true).toString(),

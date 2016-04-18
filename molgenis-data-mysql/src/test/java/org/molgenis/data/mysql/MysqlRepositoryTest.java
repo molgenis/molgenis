@@ -1,21 +1,27 @@
 package org.molgenis.data.mysql;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
+import static org.mockito.Mockito.mock;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.RepositoryCapability.MANAGABLE;
+import static org.molgenis.data.RepositoryCapability.QUERYABLE;
+import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import javax.sql.DataSource;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MysqlTestConfig;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
@@ -30,11 +36,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
-import org.testng.annotations.ExpectedExceptions;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /** Simple test of all aspects of the repository */
 @ContextConfiguration(classes = MysqlTestConfig.class)
@@ -419,5 +425,25 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		assertEquals(it.next().getIdValue(), exampleId1);
 
 		testRepository.deleteAll(); // cleanup
+	}
+
+	// https://github.com/molgenis/molgenis/issues/4729
+	@Test
+	public void getCapabilities() throws IOException
+	{
+		DataService dataService = mock(DataService.class);
+		MySqlEntityFactory mySqlEntityFactory = mock(MySqlEntityFactory.class);
+		DataSource dataSource = mock(DataSource.class);
+		AsyncJdbcTemplate asyncJdbcTemplate = mock(AsyncJdbcTemplate.class);
+		MysqlRepository mysqlRepository = new MysqlRepository(dataService, mySqlEntityFactory, dataSource,
+				asyncJdbcTemplate);
+		try
+		{
+			assertEquals(mysqlRepository.getCapabilities(), Sets.newHashSet(WRITABLE, MANAGABLE, QUERYABLE));
+		}
+		finally
+		{
+			mysqlRepository.close();
+		}
 	}
 }

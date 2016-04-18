@@ -33,7 +33,7 @@ public interface RepositoryAnnotator
 	Iterator<Entity> annotate(Iterator<Entity> source);
 
 	/**
-	 * returns an entityMetaData containing the attributes the annotator will add
+	 * returns an list of attributeMetadata containing the attributes the annotator will add
 	 * 
 	 * @return ouputMetadata
 	 */
@@ -69,6 +69,5 @@ public interface RepositoryAnnotator
 	{
 		return getInfo() == null ? "no description" : getInfo().getDescription();
 	}
-
 
 }

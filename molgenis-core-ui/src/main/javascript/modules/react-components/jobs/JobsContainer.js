@@ -1,12 +1,15 @@
 /**
- * The JobsContainer retrieves jobs from the server and renders them using the
- * Jobs component. Shows a spinner while fetching.
+ * The JobsContainer retrieves jobs from the server and feeds it to its
+ * child component to render, typically a Jobs component.
+ * Shows a spinner while fetching.
+ * Shows a notification when a job that was previously running finishes.
  *
  * @module JobsContainer
  *
- * @param username
- *            The username of the one viewing the jobs. Jobs can be filtered
- *            based on this username
+ * @param url
+ *            String representation of the URL where the jobs can be retrieved
+ * @param interval
+ *            Timeout in milliseconds between retrieval of the jobs, default 1000
  *
  * @exports JobsContainer factory
  */
@@ -23,25 +26,34 @@ var JobsContainer = React.createClass({
     mixins: [SetIntervalMixin],
     displayName: 'JobsContainer',
     propTypes: {
-        username: React.PropTypes.string
+        url: React.PropTypes.string,
+        interval: React.PropTypes.number
     },
     _notificationSystem: null,
     getInitialState: function () {
         return {
-            jobs: null
+            jobs: null,
+            selectedJobId: null
         }
     },
     componentDidMount: function () {
         this.retrieveJobs();
-        this.setInterval(this.retrieveJobs, 1000);
+        this.setInterval(this.retrieveJobs, this.props.interval || 1000);
         this._notificationSystem = this.refs.notificationSystem;
     },
     render: function () {
         return <div>
             <NotificationSystem ref="notificationSystem"/>
             {this.state.jobs === null ? <Spinner/> :
-                <Jobs jobs={this.state.jobs}/>}
+                React.cloneElement(this.props.children, {
+                    jobs: this.state.jobs,
+                    onSelect: this._onJobSelect,
+                    selectedJobId: this.state.selectedJobId
+                })}
         </div>
+    },
+    _onJobSelect: function(selectedJobId) {
+        this.setState({selectedJobId: selectedJobId})
     },
     _getNewlyFinishedJobs: function (jobs) {
         if (!this.state.jobs) {
@@ -52,7 +64,7 @@ var JobsContainer = React.createClass({
     },
     retrieveJobs: function () {
         var self = this;
-        $.get('/plugin/jobs/latest', function (data) {
+        $.get(this.props.url, function (data) {
             self._getNewlyFinishedJobs(data).forEach((job) => {
                 const notification = {
                     title: 'Job finished',
