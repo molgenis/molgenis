@@ -99,7 +99,7 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractTestNGSpringConte
 		when(script.getParameters()).thenReturn(Arrays.asList(heightParameter, weightParameter));
 		when(script.getContent()).thenReturn("$('weight').div($('height').pow(2)).value()");
 
-		when(dataService.findAll(ENTITY_NAME, new QueryImpl().eq(TYPE, SCRIPT_TYPE_JAVASCRIPT_MAGMA), Script.class))
+		when(dataService.findAll(ENTITY_NAME, new QueryImpl<Script>().eq(TYPE, SCRIPT_TYPE_JAVASCRIPT_MAGMA), Script.class))
 				.thenReturn(Stream.of(script));
 
 		GeneratedAlgorithm generate = algorithmGeneratorService.generate(targetBMIAttribute, sourceAttributes,

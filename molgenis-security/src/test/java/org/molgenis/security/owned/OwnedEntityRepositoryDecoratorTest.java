@@ -30,7 +30,7 @@ import org.testng.annotations.Test;
 public class OwnedEntityRepositoryDecoratorTest
 {
 	private EntityMetaData entityMeta;
-	private Repository decoratedRepository;
+	private Repository<Entity> decoratedRepository;
 	private OwnedEntityRepositoryDecorator ownedEntityRepositoryDecorator;
 
 	@BeforeMethod
@@ -293,7 +293,7 @@ public class OwnedEntityRepositoryDecoratorTest
 	public void findAllAsStreamNotExtendsOwned()
 	{
 		Entity entity0 = mock(Entity.class);
-		Query query = mock(Query.class);
+		Query<Entity> query = mock(Query.class);
 		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = ownedEntityRepositoryDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
@@ -308,7 +308,7 @@ public class OwnedEntityRepositoryDecoratorTest
 		when(entityMeta.getExtends()).thenReturn(new OwnedEntityMetaData());
 
 		Entity entity0 = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("username").getMock();
-		Query query = mock(Query.class);
+		Query<Entity> query = mock(Query.class);
 		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = ownedEntityRepositoryDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));

@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.AnnotationService;
@@ -97,7 +98,7 @@ public class AnnotatorController
 			@RequestParam(value = "annotatorNames", required = false) String[] annotatorNames,
 			@RequestParam("dataset-identifier") String entityName)
 	{
-		Repository repository = dataService.getRepository(entityName);
+		Repository<Entity> repository = dataService.getRepository(entityName);
 		if (annotatorNames != null && repository != null)
 		{
 			scheduleAnnotatorRun(repository.getEntityMetaData().getName(), annotatorNames);

@@ -2,7 +2,7 @@ package org.molgenis.data;
 
 public interface AggregateQuery
 {
-	public Query getQuery();
+	public Query<Entity> getQuery();
 
 	public AttributeMetaData getAttributeX();
 

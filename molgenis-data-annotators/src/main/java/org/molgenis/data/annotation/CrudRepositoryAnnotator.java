@@ -1,5 +1,10 @@
 package org.molgenis.data.annotation;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -12,11 +17,6 @@ import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 @Component
 public class CrudRepositoryAnnotator
@@ -35,7 +35,7 @@ public class CrudRepositoryAnnotator
 	 * @param annotators
 	 * @param repo
 	 */
-	public void annotate(List<RepositoryAnnotator> annotators, Repository repo) throws IOException
+	public void annotate(List<RepositoryAnnotator> annotators, Repository<Entity> repo) throws IOException
 	{
 		for (RepositoryAnnotator annotator : annotators)
 		{
@@ -48,7 +48,7 @@ public class CrudRepositoryAnnotator
 	 * @param repository
 	 */
 	@Transactional
-	public Repository annotate(RepositoryAnnotator annotator, Repository repository) throws IOException
+	public Repository<Entity> annotate(RepositoryAnnotator annotator, Repository<Entity> repository) throws IOException
 	{
 		if (!repository.getCapabilities().contains(RepositoryCapability.WRITABLE))
 		{
@@ -63,7 +63,7 @@ public class CrudRepositoryAnnotator
 			RunAsSystemProxy
 					.runAsSystem(() -> addAnnotatorMetadataToRepositories(entityMetaData, compoundAttributeMetaData));
 
-			Repository crudRepository = iterateOverEntitiesAndAnnotate(repository, annotator);
+			Repository<Entity> crudRepository = iterateOverEntitiesAndAnnotate(repository, annotator);
 			return crudRepository;
 		}
 		catch (Exception e)
@@ -75,7 +75,7 @@ public class CrudRepositoryAnnotator
 	/**
 	 * Iterates over all the entities within a repository and annotates.
 	 */
-	private Repository iterateOverEntitiesAndAnnotate(Repository repository, RepositoryAnnotator annotator)
+	private Repository<Entity> iterateOverEntitiesAndAnnotate(Repository<Entity> repository, RepositoryAnnotator annotator)
 	{
 		Iterator<Entity> it = annotator.annotate(repository);
 
@@ -98,7 +98,7 @@ public class CrudRepositoryAnnotator
 		return repository;
 	}
 
-	private void processBatch(List<Entity> batch, Repository repository)
+	private void processBatch(List<Entity> batch, Repository<Entity> repository)
 	{
 		repository.update(batch.stream());
 	}

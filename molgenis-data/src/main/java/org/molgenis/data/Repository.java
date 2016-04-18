@@ -8,12 +8,12 @@ import java.util.stream.StreamSupport;
 /**
  * Repository gives access to a collection of Entity. Synonyms: EntityReader, EntitySource, EntityCollection
  */
-public interface Repository extends Iterable<Entity>, Closeable
+public interface Repository<E extends Entity> extends Iterable<E>, Closeable
 {
 	/**
 	 * Streams the {@link Entity}s
 	 */
-	default Stream<Entity> stream()
+	default Stream<E> stream()
 	{
 		return StreamSupport.stream(spliterator(), false);
 	}
@@ -25,7 +25,7 @@ public interface Repository extends Iterable<Entity>, Closeable
 	 *            fetch defining which attributes to retrieve
 	 * @return Stream of all entities
 	 */
-	Stream<Entity> stream(Fetch fetch);
+	Stream<E> stream(Fetch fetch);
 
 	Set<RepositoryCapability> getCapabilities();
 
@@ -35,19 +35,21 @@ public interface Repository extends Iterable<Entity>, Closeable
 
 	long count();
 
-	Query query();
+	Query<E> query();
 
 	/**
 	 * return number of entities matched by query
-	 **/
-	long count(Query q);
+	 *
+	 * @param q*/
+	long count(Query<E> q);
 
 	/**
 	 * Find entities that match a query. Returns empty stream if no matches.
 	 * 
 	 * @return (empty) Stream, never null
+	 * @param q
 	 */
-	Stream<Entity> findAll(Query q);
+	Stream<E> findAll(Query<E> q);
 
 	/**
 	 * Find an entity base on a query
@@ -55,13 +57,14 @@ public interface Repository extends Iterable<Entity>, Closeable
 	 * Returns null if not exists.
 	 * 
 	 * Returns first result if multiple found
+	 * @param q
 	 */
-	Entity findOne(Query q);
+	E findOne(Query<E> q);
 
 	/**
 	 * Type-safe find one entity based on id. Returns null if not exists
 	 */
-	Entity findOneById(Object id);
+	E findOneById(Object id);
 
 	/**
 	 * Find one entity based on id.
@@ -73,17 +76,17 @@ public interface Repository extends Iterable<Entity>, Closeable
 	 * @return entity or null
 	 * @throws MolgenisDataAccessException
 	 */
-	Entity findOneById(Object id, Fetch fetch);
+	E findOneById(Object id, Fetch fetch);
 
 	/**
 	 * Finds all entities with the given IDs. Returns empty stream if no matches.
 	 * 
 	 * @param ids
 	 *            entity ids
-	 * 
+	 *
 	 * @return (empty) Stream where the order of entities matches the order of ids, never null
 	 */
-	Stream<Entity> findAll(Stream<Object> ids);
+	Stream<E> findAll(Stream<Object> ids);
 
 	/**
 	 * Finds all entities with the given IDs, with a fetch. Returns empty stream if no matches.
@@ -96,7 +99,7 @@ public interface Repository extends Iterable<Entity>, Closeable
 	 *            fetch defining which attributes to retrieve
 	 * @return (empty) Stream where the order of entities matches the order of ids, never null
 	 */
-	Stream<Entity> findAll(Stream<Object> ids, Fetch fetch);
+	Stream<E> findAll(Stream<Object> ids, Fetch fetch);
 
 	/**
 	 * 
@@ -106,25 +109,25 @@ public interface Repository extends Iterable<Entity>, Closeable
 	AggregateResult aggregate(AggregateQuery aggregateQuery);
 
 	/* Update one entity */
-	void update(Entity entity);
+	void update(E entity);
 
 	/**
 	 * Updates the given entities
-	 * 
+	 *
 	 * @param entities
 	 */
-	void update(Stream<? extends Entity> entities);
+	void update(Stream<E> entities);
 
 	/* Delete one entity */
-	void delete(Entity entity);
+	void delete(E entity);
 
 	/**
 	 * Delete entities from repository
-	 * 
+	 *
 	 * @param entities
 	 *            entity stream
 	 */
-	void delete(Stream<? extends Entity> entities);
+	void delete(Stream<E> entities);
 
 	/* Delete one entity based on id */
 	void deleteById(Object id);
@@ -135,8 +138,9 @@ public interface Repository extends Iterable<Entity>, Closeable
 	/* Delete all entities */
 	void deleteAll();
 
-	/** Add one entity */
-	void add(Entity entity);
+	/** Add one entity
+	 * @param entity*/
+	void add(E entity);
 
 	/**
 	 * Add entities to repisotory
@@ -144,7 +148,7 @@ public interface Repository extends Iterable<Entity>, Closeable
 	 * @param entities
 	 * @return number of added entities
 	 */
-	Integer add(Stream<? extends Entity> entities);
+	Integer add(Stream<E> entities);
 
 	void flush();
 
@@ -155,19 +159,19 @@ public interface Repository extends Iterable<Entity>, Closeable
 	 * 
 	 * TODO move to RepositoryCollection
 	 */
-	public void create();
+	void create();
 
 	/**
 	 * Drop a repository backend (e.g. drop a table in a database; remove a sheet from Excel)
 	 */
-	public void drop();
+	void drop();
 
 	/**
 	 * Rebuild current index
 	 * 
 	 * TODO move to RepositoryCollection
 	 */
-	public void rebuildIndex();
+	void rebuildIndex();
 
 	/**
 	 * Adds an entity listener for a entity that listens to entity changes

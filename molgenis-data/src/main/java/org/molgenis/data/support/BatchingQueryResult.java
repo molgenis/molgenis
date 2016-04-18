@@ -11,23 +11,23 @@ import org.molgenis.util.BatchingIterable;
  * 
  * It changes the query's offset and pageSize of each batch.
  */
-public abstract class BatchingQueryResult extends BatchingIterable<Entity>
+public abstract class BatchingQueryResult<E extends Entity> extends BatchingIterable<E>
 {
-	private final Query query;
+	private final Query<E> query;
 
-	public BatchingQueryResult(int batchSize, Query query)
+	public BatchingQueryResult(int batchSize, Query<E> query)
 	{
 		super(batchSize, query.getOffset(), query.getPageSize());
 		this.query = query;
 	}
 
 	@Override
-	protected List<Entity> getBatch(int offset, int batchSize)
+	protected List<E> getBatch(int offset, int batchSize)
 	{
-		Query batchQuery;
+		Query<E> batchQuery;
 		if (offset != query.getOffset() || batchSize != query.getPageSize())
 		{
-			batchQuery = new QueryImpl(query).setOffset(offset).setPageSize(batchSize);
+			batchQuery = new QueryImpl<>(query).setOffset(offset).setPageSize(batchSize);
 		}
 		else
 		{
@@ -36,6 +36,6 @@ public abstract class BatchingQueryResult extends BatchingIterable<Entity>
 		return getBatch(batchQuery);
 	}
 
-	protected abstract List<Entity> getBatch(Query q);
+	protected abstract List<E> getBatch(Query<E> q);
 
 }

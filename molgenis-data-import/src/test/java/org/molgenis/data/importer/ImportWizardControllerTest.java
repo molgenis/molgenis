@@ -208,7 +208,7 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 		webRequest = mock(WebRequest.class);
 		when(webRequest.getParameter("entityIds")).thenReturn("entity1,entity2");
 		when(dataService.findOneById(MolgenisGroup.ENTITY_NAME, "ID", MolgenisGroup.class)).thenReturn(group1);
-		when(dataService.findAll(GroupAuthority.ENTITY_NAME, new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, group1),
+		when(dataService.findAll(GroupAuthority.ENTITY_NAME, new QueryImpl<GroupAuthority>().eq(GroupAuthority.MOLGENISGROUP, group1),
 				GroupAuthority.class)).thenAnswer(new Answer<Stream<GroupAuthority>>()
 				{
 					@Override
@@ -217,7 +217,7 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 						return Stream.of(authority1, authority2, authority3, authority4);
 					}
 				});
-		when(dataService.findAll(GroupAuthority.ENTITY_NAME, new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, "ID"),
+		when(dataService.findAll(GroupAuthority.ENTITY_NAME, new QueryImpl<GroupAuthority>().eq(GroupAuthority.MOLGENISGROUP, "ID"),
 				GroupAuthority.class)).thenAnswer(new Answer<Stream<GroupAuthority>>()
 				{
 					@Override

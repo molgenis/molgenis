@@ -1,5 +1,6 @@
 package org.molgenis.data.support;
 
+import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
 
@@ -11,7 +12,7 @@ import org.molgenis.data.RepositoryDecoratorFactory;
 public class NonDecoratingRepositoryDecoratorFactory implements RepositoryDecoratorFactory
 {
 	@Override
-	public Repository createDecoratedRepository(Repository repository)
+	public Repository<Entity> createDecoratedRepository(Repository<Entity> repository)
 	{
 		return repository;
 	}

@@ -9,12 +9,12 @@ import java.util.stream.Stream;
 
 import org.molgenis.data.support.QueryImpl;
 
-public class EntityReferenceResolverDecorator implements Repository
+public class EntityReferenceResolverDecorator implements Repository<Entity>
 {
-	private final Repository decoratedRepo;
+	private final Repository<Entity> decoratedRepo;
 	private final EntityManager entityManager;
 
-	public EntityReferenceResolverDecorator(Repository decoratedRepo, EntityManager entityManager)
+	public EntityReferenceResolverDecorator(Repository<Entity> decoratedRepo, EntityManager entityManager)
 	{
 		this.decoratedRepo = requireNonNull(decoratedRepo);
 		this.entityManager = requireNonNull(entityManager);
@@ -45,20 +45,20 @@ public class EntityReferenceResolverDecorator implements Repository
 	}
 
 	@Override
-	public Query query()
+	public Query<Entity> query()
 	{
 		return decoratedRepo.query();
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		return decoratedRepo.count(q);
 	}
 
 	// Resolve entity references based on given fetch
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		Stream<Entity> entities = decoratedRepo.findAll(q);
 		return resolveEntityReferences(entities, q.getFetch());
@@ -72,7 +72,7 @@ public class EntityReferenceResolverDecorator implements Repository
 
 	// Resolve entity references based on given fetch
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		Entity entity = decoratedRepo.findOne(q);
 		return entity != null ? resolveEntityReferences(entity, q.getFetch()) : null;
@@ -82,7 +82,7 @@ public class EntityReferenceResolverDecorator implements Repository
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		Stream<Entity> entities = decoratedRepo.findAll(new QueryImpl());
+		Stream<Entity> entities = decoratedRepo.findAll(new QueryImpl<Entity>());
 		return resolveEntityReferences(entities).iterator();
 	}
 
@@ -139,7 +139,7 @@ public class EntityReferenceResolverDecorator implements Repository
 	}
 
 	@Override
-	public void update(Stream<? extends Entity> entities)
+	public void update(Stream<Entity> entities)
 	{
 		decoratedRepo.update(entities);
 	}
@@ -151,7 +151,7 @@ public class EntityReferenceResolverDecorator implements Repository
 	}
 
 	@Override
-	public void delete(Stream<? extends Entity> entities)
+	public void delete(Stream<Entity> entities)
 	{
 		decoratedRepo.delete(entities);
 	}
@@ -181,7 +181,7 @@ public class EntityReferenceResolverDecorator implements Repository
 	}
 
 	@Override
-	public Integer add(Stream<? extends Entity> entities)
+	public Integer add(Stream<Entity> entities)
 	{
 		return decoratedRepo.add(entities);
 	}

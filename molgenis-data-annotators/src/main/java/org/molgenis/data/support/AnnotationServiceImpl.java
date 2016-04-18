@@ -48,7 +48,7 @@ public class AnnotationServiceImpl implements AnnotationService, ApplicationList
 			if (dataService.hasRepository(AnnotationJobExecution.ENTITY_NAME))
 			{
 				Stream<Entity> runningAnnotations = dataService.findAll(AnnotationJobExecution.ENTITY_NAME,
-						new QueryImpl().eq(AnnotationJobExecution.STATUS, JobExecution.Status.RUNNING));
+						new QueryImpl<Entity>().eq(AnnotationJobExecution.STATUS, JobExecution.Status.RUNNING));
 				runningAnnotations.forEach(entity -> failRunningAnnotation(entity));
 			}
 		});

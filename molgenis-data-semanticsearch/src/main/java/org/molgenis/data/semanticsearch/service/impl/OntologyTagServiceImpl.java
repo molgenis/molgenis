@@ -122,7 +122,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	public Iterable<Tag<Package, OntologyTerm, Ontology>> getTagsForPackage(Package p)
 	{
 		Entity packageEntity = dataService.findOne(PackageMetaData.ENTITY_NAME,
-				new QueryImpl().eq(PackageMetaData.FULL_NAME, p.getName()));
+				new QueryImpl<Entity>().eq(PackageMetaData.FULL_NAME, p.getName()));
 
 		if (packageEntity == null)
 		{

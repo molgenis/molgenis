@@ -36,7 +36,7 @@ public class Validator
 		RepositoryCollection excelReaderReferenceFile = new ExcelRepositoryCollection(new File(excelFile1),
 				new TrimProcessor());
 
-		Repository excelSheetReaderReferenceFile = excelReaderReferenceFile.getRepository("dataset_celiac_sprue");
+		Repository<Entity> excelSheetReaderReferenceFile = excelReaderReferenceFile.getRepository("dataset_celiac_sprue");
 		try
 		{
 			excelfile.readFile(excelSheetReaderReferenceFile, IDENTIFIER, IDENTIFIER2);
@@ -47,7 +47,7 @@ public class Validator
 		}
 
 		ValidationFile csvFile = new ValidationFile();
-		Repository csvReaderFileToCompare = new CsvRepository(new File(file2), "", null);
+		Repository<Entity> csvReaderFileToCompare = new CsvRepository(new File(file2), "", null);
 
 		csvFile.readFile(csvReaderFileToCompare, IDENTIFIER, IDENTIFIER2);
 		boolean noUniqueColums = false;

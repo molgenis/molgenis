@@ -129,7 +129,7 @@ public class ElasticsearchServiceTest
 		when(searchRequestBuilder.execute()).thenReturn(value1, value2);
 		when(client.prepareSearch(indexName)).thenReturn(searchRequestBuilder);
 
-		Repository repo = when(mock(Repository.class).getName()).thenReturn("entity").getMock();
+		Repository<Entity> repo = when(mock(Repository.class).getName()).thenReturn("entity").getMock();
 		List<Object> idsBatch0 = new ArrayList<>();
 		for (int i = 0; i < batchSize; ++i)
 		{
@@ -170,7 +170,7 @@ public class ElasticsearchServiceTest
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("entity");
 		entityMetaData.setBackend(ElasticsearchRepositoryCollection.NAME);
 		entityMetaData.addAttribute(idAttrName, ROLE_ID).setDataType(MolgenisFieldTypes.INT);
-		Query q = new QueryImpl();
+		Query<Entity> q = new QueryImpl<>();
 		Iterable<Entity> searchResults = searchService.search(q, entityMetaData);
 		Iterator<Entity> it = searchResults.iterator();
 		for (int i = 1; i <= totalSize; ++i)

@@ -3,6 +3,7 @@ package org.molgenis.script;
 import java.util.Map;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ public class ScriptRunnerFactory
 	{
 		scriptRunners.put(type, scriptExecutor);
 
-		if (dataService.count(ScriptType.ENTITY_NAME, new QueryImpl().eq(ScriptType.NAME, type)) == 0)
+		if (dataService.count(ScriptType.ENTITY_NAME, new QueryImpl<Entity>().eq(ScriptType.NAME, type)) == 0)
 		{
 			LOG.info("Registering Script type {}.", type);
 			dataService.add(ScriptType.ENTITY_NAME, new ScriptType(type, dataService));

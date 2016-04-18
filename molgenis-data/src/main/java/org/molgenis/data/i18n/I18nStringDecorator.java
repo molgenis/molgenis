@@ -21,11 +21,11 @@ import org.molgenis.data.RepositoryCapability;
  * 
  * Clears the ResourceBundle cache after an update
  */
-public class I18nStringDecorator implements Repository
+public class I18nStringDecorator implements Repository<Entity>
 {
-	private final Repository decorated;
+	private final Repository<Entity> decorated;
 
-	public I18nStringDecorator(Repository decorated)
+	public I18nStringDecorator(Repository<Entity> decorated)
 	{
 		this.decorated = decorated;
 	}
@@ -73,25 +73,25 @@ public class I18nStringDecorator implements Repository
 	}
 
 	@Override
-	public Query query()
+	public Query<Entity> query()
 	{
 		return decorated.query();
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		return decorated.count(q);
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		return decorated.findAll(q);
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		return decorated.findOne(q);
 	}
@@ -134,7 +134,7 @@ public class I18nStringDecorator implements Repository
 	}
 
 	@Override
-	public void update(Stream<? extends Entity> records)
+	public void update(Stream<Entity> records)
 	{
 		decorated.update(records);
 		ResourceBundle.clearCache();
@@ -148,7 +148,7 @@ public class I18nStringDecorator implements Repository
 	}
 
 	@Override
-	public void delete(Stream<? extends Entity> entities)
+	public void delete(Stream<Entity> entities)
 	{
 		decorated.delete(entities);
 		ResourceBundle.clearCache();
@@ -183,7 +183,7 @@ public class I18nStringDecorator implements Repository
 	}
 
 	@Override
-	public Integer add(Stream<? extends Entity> entities)
+	public Integer add(Stream<Entity> entities)
 	{
 		Integer result = decorated.add(entities);
 		ResourceBundle.clearCache();

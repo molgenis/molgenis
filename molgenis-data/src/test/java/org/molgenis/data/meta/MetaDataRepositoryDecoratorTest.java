@@ -11,6 +11,7 @@ import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import static org.testng.Assert.assertEquals;
 
 import org.apache.commons.io.IOUtils;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
 import org.testng.annotations.BeforeMethod;
@@ -20,8 +21,8 @@ import com.google.common.collect.Sets;
 
 public class MetaDataRepositoryDecoratorTest
 {
-	private Repository repo;
-	private Repository decorator;
+	private Repository<Entity> repo;
+	private Repository<Entity> decorator;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()

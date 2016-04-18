@@ -33,10 +33,10 @@ public class DependencyResolver
 	 * @param repos
 	 * @return
 	 */
-	public static List<Repository> resolve(Iterable<Repository> repos)
+	public static List<Repository<Entity>> resolve(Iterable<Repository<Entity>> repos)
 	{
-		Map<String, Repository> repoByName = new HashMap<>();
-		for (Repository repo : repos)
+		Map<String, Repository<Entity>> repoByName = new HashMap<>();
+		for (Repository<Entity> repo : repos)
 		{
 			repoByName.put(repo.getEntityMetaData().getName(), repo);
 		}

@@ -37,7 +37,7 @@ public class QueryGenerator implements QueryPartGenerator
 	public static final String ATTRIBUTE_SEPARATOR = ".";
 
 	@Override
-	public void generate(SearchRequestBuilder searchRequestBuilder, Query query, EntityMetaData entityMetaData)
+	public void generate(SearchRequestBuilder searchRequestBuilder, Query<Entity> query, EntityMetaData entityMetaData)
 	{
 		List<QueryRule> queryRules = query.getRules();
 		if (queryRules == null || queryRules.isEmpty()) return;

@@ -3,6 +3,7 @@ package org.molgenis.ui;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
 
@@ -15,7 +16,7 @@ public class RepositoryDecoratorRegistry
 		factories.put(entityName, factory);
 	}
 
-	public synchronized Repository decorate(Repository repository)
+	public synchronized Repository<Entity> decorate(Repository<Entity> repository)
 	{
 		RepositoryDecoratorFactory factory = factories.get(repository.getName());
 		if (factory != null)

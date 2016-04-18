@@ -46,11 +46,11 @@ public class OntologyScriptInitializerImpl implements OntologyScriptInitializer
 		Resource resource = new ClassPathResource("roc-curve.R");
 		if (resource.exists())
 		{
-			long count = dataService.count(Script.ENTITY_NAME, new QueryImpl().eq(Script.NAME, ROC_CURVE_SCRIPT_NAME));
+			long count = dataService.count(Script.ENTITY_NAME, new QueryImpl<Entity>().eq(Script.NAME, ROC_CURVE_SCRIPT_NAME));
 			if (count == 0)
 			{
 				Entity scriptType = dataService.findOne(ScriptType.ENTITY_NAME,
-						new QueryImpl().eq(ScriptType.NAME, "R"));
+						new QueryImpl<Entity>().eq(ScriptType.NAME, "R"));
 
 				if (scriptType == null) throw new UnknownEntityException("ScriptType R does not exist!");
 
@@ -67,14 +67,14 @@ public class OntologyScriptInitializerImpl implements OntologyScriptInitializer
 				}
 
 				if (dataService.count(ScriptParameter.ENTITY_NAME,
-						new QueryImpl().eq(ScriptParameter.NAME, ROC_CURVE_SCRIPT_PARAMETER)) == 0)
+						new QueryImpl<Entity>().eq(ScriptParameter.NAME, ROC_CURVE_SCRIPT_PARAMETER)) == 0)
 				{
 					dataService.add(ScriptParameter.ENTITY_NAME,
 							new MapEntity(ImmutableMap.of(ScriptParameter.NAME, ROC_CURVE_SCRIPT_PARAMETER)));
 				}
 
 				Entity scriptParameterEntity = dataService.findOne(ScriptParameter.ENTITY_NAME,
-						new QueryImpl().eq(ScriptParameter.NAME, ROC_CURVE_SCRIPT_PARAMETER));
+						new QueryImpl<Entity>().eq(ScriptParameter.NAME, ROC_CURVE_SCRIPT_PARAMETER));
 
 				MapEntity scriptEntity = new MapEntity();
 				scriptEntity.set(Script.NAME, ROC_CURVE_SCRIPT_NAME);

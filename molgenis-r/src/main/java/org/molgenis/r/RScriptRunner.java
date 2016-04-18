@@ -42,8 +42,7 @@ public class RScriptRunner implements ScriptRunner
 	/**
 	 * Run an R script as freemarker template
 	 * 
-	 * @param scriptName
-	 * @param template
+	 * @param templateName
 	 * @param parameters
 	 * @throws IOException
 	 * @throws TemplateException
@@ -59,7 +58,7 @@ public class RScriptRunner implements ScriptRunner
 	 * Run an R script as freemarker template
 	 * 
 	 * @param scriptName
-	 * @param template
+	 * @param templateName
 	 * @param parameters
 	 * @throws IOException
 	 * @throws TemplateException

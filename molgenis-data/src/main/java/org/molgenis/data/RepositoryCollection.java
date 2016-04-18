@@ -6,7 +6,7 @@ import java.util.stream.StreamSupport;
 /**
  * Repository collection
  */
-public interface RepositoryCollection extends Iterable<Repository>
+public interface RepositoryCollection extends Iterable<Repository<Entity>>
 {
 	/**
 	 * @return the name of this backend
@@ -16,7 +16,7 @@ public interface RepositoryCollection extends Iterable<Repository>
 	/**
 	 * Streams the {@link Repository}s
 	 */
-	default Stream<Repository> stream()
+	default Stream<Repository<Entity>> stream()
 	{
 		return StreamSupport.stream(spliterator(), false);
 	}
@@ -24,7 +24,7 @@ public interface RepositoryCollection extends Iterable<Repository>
 	/**
 	 * Create and add a new CrudRepository for an EntityMetaData
 	 */
-	Repository addEntityMeta(EntityMetaData entityMeta);
+	Repository<Entity> addEntityMeta(EntityMetaData entityMeta);
 
 	/**
 	 * Get names of all the entities in this source
@@ -36,7 +36,7 @@ public interface RepositoryCollection extends Iterable<Repository>
 	 * 
 	 * @throws UnknownEntityException
 	 */
-	Repository getRepository(String name);
+	Repository<Entity> getRepository(String name);
 
 	/**
 	 * Check if a repository exists by entity name

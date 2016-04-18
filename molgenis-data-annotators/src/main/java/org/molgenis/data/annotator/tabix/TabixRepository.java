@@ -90,7 +90,7 @@ public class TabixRepository extends AbstractRepository
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		Object posValue = getFirstEqualsValueFor(positionAttributeName, q);
 		Object chromValue = getFirstEqualsValueFor(chromosomeAttributeName, q);
@@ -164,7 +164,7 @@ public class TabixRepository extends AbstractRepository
 		return builder.build();
 	}
 
-	private static Object getFirstEqualsValueFor(String attributeName, Query q)
+	private static Object getFirstEqualsValueFor(String attributeName, Query<Entity> q)
 	{
 		return q.getRules().stream().filter(rule -> attributeName.equals(rule.getField())).findFirst().get().getValue();
 	}

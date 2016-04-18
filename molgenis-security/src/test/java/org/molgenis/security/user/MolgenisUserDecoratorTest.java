@@ -35,8 +35,8 @@ import org.testng.annotations.Test;
 
 public class MolgenisUserDecoratorTest
 {
-	private Repository decoratedRepository;
-	private Repository userAuthorityRepository;
+	private Repository<Entity> decoratedRepository;
+	private Repository<Entity> userAuthorityRepository;
 	private MolgenisUserDecorator molgenisUserDecorator;
 	private PasswordEncoder passwordEncoder;
 
@@ -175,7 +175,7 @@ public class MolgenisUserDecoratorTest
 	public void findAllAsStream()
 	{
 		Entity entity0 = mock(Entity.class);
-		Query query = mock(Query.class);
+		Query<Entity> query = mock(Query.class);
 		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = molgenisUserDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
