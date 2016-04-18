@@ -17,13 +17,12 @@ public interface ViewService
 			String masterAttributeId, String slaveAttributeId);
 
 	/**
-	 * Get the View Entity from the View Table based on the viewName and masterEntityName
+	 * Get the View Entity from the View Table with a viewName
 	 * 
 	 * @param viewName
-	 * @param masterEntityName
 	 * @return a viewEntity
 	 */
-	public Entity getViewEntity(String viewName, String masterEntityName);
+	public Entity getViewEntity(String viewName);
 
 	/**
 	 * Get the Slave Entity from the Slave Entity Table based on the slaveEntityName

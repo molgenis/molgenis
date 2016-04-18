@@ -1,6 +1,12 @@
 package org.molgenis.data.view.service;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.molgenis.data.view.meta.JoinedAttributeMetaData.JOIN_ATTRIBUTE;
+import static org.molgenis.data.view.meta.JoinedAttributeMetaData.MASTER_ATTRIBUTE;
+import static org.molgenis.data.view.meta.SlaveEntityMetaData.JOINED_ATTRIBUTES;
+import static org.molgenis.data.view.meta.ViewMetaData.MASTER_ENTITY;
+import static org.molgenis.data.view.meta.ViewMetaData.NAME;
+import static org.molgenis.data.view.meta.ViewMetaData.SLAVE_ENTITIES;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.util.List;
@@ -43,7 +49,7 @@ public class ViewServiceImpl implements ViewService, ApplicationListener<Context
 
 	private void registerViews()
 	{
-		dataService.findAll(ViewMetaData.ENTITY_NAME).map(viewEntity -> viewEntity.getString(ViewMetaData.NAME))
+		dataService.findAll(ViewMetaData.ENTITY_NAME).map(viewEntity -> viewEntity.getString(NAME))
 				.forEach(this::registerRepository);
 	}
 
@@ -54,11 +60,9 @@ public class ViewServiceImpl implements ViewService, ApplicationListener<Context
 	}
 
 	@Override
-	public Entity getViewEntity(String viewName, String masterEntityName)
+	public Entity getViewEntity(String viewName)
 	{
-		Entity viewEntity = dataService.findOne(ViewMetaData.ENTITY_NAME,
-				new QueryImpl().eq(ViewMetaData.NAME, viewName).and().eq(ViewMetaData.MASTER_ENTITY, masterEntityName));
-		return viewEntity;
+		return dataService.findOne(ViewMetaData.ENTITY_NAME, new QueryImpl().eq(NAME, viewName));
 	}
 
 	@Override
@@ -73,13 +77,15 @@ public class ViewServiceImpl implements ViewService, ApplicationListener<Context
 	public void createNewView(String viewName, String masterEntityName, String slaveEntityName,
 			String masterAttributeId, String slaveAttributeId)
 	{
-		Entity newAttributeMapping = createNewAttributeMappingEntity(masterAttributeId, slaveAttributeId);
+		Entity newAttributeMapping1 = createNewAttributeMappingEntity(masterAttributeId, slaveAttributeId);
+		dataService.add(JoinedAttributeMetaData.ENTITY_NAME, newAttributeMapping1);
+		Entity newAttributeMapping = newAttributeMapping1;
 		Entity slaveEntity = createNewSlaveEntity(slaveEntityName, newAttributeMapping);
 
 		Entity newViewEntity = new MapEntity(new ViewMetaData());
-		newViewEntity.set(ViewMetaData.NAME, viewName);
-		newViewEntity.set(ViewMetaData.MASTER_ENTITY, masterEntityName);
-		newViewEntity.set(ViewMetaData.SLAVE_ENTITIES, newArrayList(slaveEntity));
+		newViewEntity.set(NAME, viewName);
+		newViewEntity.set(MASTER_ENTITY, masterEntityName);
+		newViewEntity.set(SLAVE_ENTITIES, newArrayList(slaveEntity));
 		dataService.add(ViewMetaData.ENTITY_NAME, newViewEntity);
 
 		registerRepository(viewName);
@@ -89,15 +95,17 @@ public class ViewServiceImpl implements ViewService, ApplicationListener<Context
 	public void addNewSlaveEntityToExistingView(Entity viewEntity, String slaveEntityName, String masterAttributeId,
 			String slaveAttributeId)
 	{
-		Entity newAttributeMapping = createNewAttributeMappingEntity(masterAttributeId, slaveAttributeId);
+		Entity newAttributeMapping1 = createNewAttributeMappingEntity(masterAttributeId, slaveAttributeId);
+		dataService.add(JoinedAttributeMetaData.ENTITY_NAME, newAttributeMapping1);
+		Entity newAttributeMapping = newAttributeMapping1;
 		Entity slaveEntity = createNewSlaveEntity(slaveEntityName, newAttributeMapping);
 
 		DefaultEntity newViewEntity = new DefaultEntity(viewEntity.getEntityMetaData(), dataService, viewEntity);
-		List<Entity> slaveEntities = newArrayList(viewEntity.getEntities(ViewMetaData.SLAVE_ENTITIES));
+		List<Entity> slaveEntities = newArrayList(viewEntity.getEntities(SLAVE_ENTITIES));
 		slaveEntities.add(slaveEntity);
 
 		newViewEntity.set(ViewMetaData.SLAVE_ENTITIES, slaveEntities);
-		update(ViewMetaData.ENTITY_NAME, newViewEntity);
+		dataService.update(ViewMetaData.ENTITY_NAME, newViewEntity);
 	}
 
 	@Override
@@ -106,27 +114,37 @@ public class ViewServiceImpl implements ViewService, ApplicationListener<Context
 	{
 		Entity existingSlaveEntity = getSlaveEntity(slaveEntityName);
 		Entity newAttributeMapping = createNewAttributeMappingEntity(masterAttributeId, slaveAttributeId);
-
+		// TODO: why create a new one??
 		DefaultEntity newSlaveEntity = new DefaultEntity(new SlaveEntityMetaData(), dataService, existingSlaveEntity);
 		List<Entity> attributeMappingList = newArrayList(
 				existingSlaveEntity.getEntities(SlaveEntityMetaData.JOINED_ATTRIBUTES));
+		if (attributeMappingList.stream().anyMatch(existingMapping -> matches(existingMapping, newAttributeMapping)))
+		{
+			throw new IllegalArgumentException("Mapping already exists!");
+		}
 		attributeMappingList.add(newAttributeMapping);
-		newSlaveEntity.set(SlaveEntityMetaData.JOINED_ATTRIBUTES, attributeMappingList);
-		update(SlaveEntityMetaData.ENTITY_NAME, newSlaveEntity);
+		dataService.add(JoinedAttributeMetaData.ENTITY_NAME, newAttributeMapping);
+		newSlaveEntity.set(JOINED_ATTRIBUTES, attributeMappingList);
+		dataService.update(SlaveEntityMetaData.ENTITY_NAME, newSlaveEntity);
+	}
+
+	private boolean matches(Entity attributeMappingEntity, Entity newAttributeMappingEntity)
+	{
+		return attributeMappingEntity.getString(MASTER_ATTRIBUTE)
+				.equals(newAttributeMappingEntity.getString(MASTER_ATTRIBUTE))
+				&& attributeMappingEntity.getString(JOIN_ATTRIBUTE)
+						.equals(newAttributeMappingEntity.getString(JOIN_ATTRIBUTE));
 	}
 
 	private Entity createNewAttributeMappingEntity(String masterAttributeId, String slaveAttributeId)
 	{
 		Entity masterAttribute = dataService.findOne(AttributeMetaDataMetaData.ENTITY_NAME, masterAttributeId);
 		Entity slaveAttribute = dataService.findOne(AttributeMetaDataMetaData.ENTITY_NAME, slaveAttributeId);
-
 		Entity newAttributeMapping = new MapEntity(new JoinedAttributeMetaData());
 		newAttributeMapping.set(JoinedAttributeMetaData.MASTER_ATTRIBUTE,
 				masterAttribute.get(AttributeMetaDataMetaData.NAME));
-
 		newAttributeMapping.set(JoinedAttributeMetaData.JOIN_ATTRIBUTE,
 				slaveAttribute.get(AttributeMetaDataMetaData.NAME));
-		add(JoinedAttributeMetaData.ENTITY_NAME, newAttributeMapping);
 		return newAttributeMapping;
 	}
 
@@ -135,18 +153,8 @@ public class ViewServiceImpl implements ViewService, ApplicationListener<Context
 		Entity slaveEntity = new MapEntity(new SlaveEntityMetaData());
 		slaveEntity.set(SlaveEntityMetaData.SLAVE_ENTITY, slaveEntityName);
 		slaveEntity.set(SlaveEntityMetaData.JOINED_ATTRIBUTES, newArrayList(newAttributeMapping));
-		add(SlaveEntityMetaData.ENTITY_NAME, slaveEntity);
+		dataService.add(SlaveEntityMetaData.ENTITY_NAME, slaveEntity);
 		return slaveEntity;
-	}
-
-	private void add(String entityName, Entity entity)
-	{
-		dataService.add(entityName, entity);
-	}
-
-	private void update(String entityName, Entity entity)
-	{
-		dataService.update(entityName, entity);
 	}
 
 }
