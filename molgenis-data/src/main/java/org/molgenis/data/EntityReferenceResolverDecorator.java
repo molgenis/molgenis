@@ -96,17 +96,17 @@ public class EntityReferenceResolverDecorator implements Repository
 
 	// Resolve entity references
 	@Override
-	public Entity findOne(Object id)
+	public Entity findOneById(Object id)
 	{
-		Entity entity = decoratedRepo.findOne(id);
+		Entity entity = decoratedRepo.findOneById(id);
 		return entity != null ? resolveEntityReferences(entity) : null;
 	}
 
 	// Resolve entity references based on given fetch
 	@Override
-	public Entity findOne(Object id, Fetch fetch)
+	public Entity findOneById(Object id, Fetch fetch)
 	{
-		Entity entity = decoratedRepo.findOne(id, fetch);
+		Entity entity = decoratedRepo.findOneById(id, fetch);
 		return entity != null ? resolveEntityReferences(entity, fetch) : null;
 	}
 

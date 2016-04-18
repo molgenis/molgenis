@@ -207,9 +207,9 @@ public class ElasticsearchRepositoryDecoratorTest
 		when(q.getFetch()).thenReturn(fetch);
 
 		Entity entity = mock(Entity.class);
-		when(decoratedRepo.findOne(id, fetch)).thenReturn(entity);
+		when(decoratedRepo.findOneById(id, fetch)).thenReturn(entity);
 		assertEquals(elasticsearchRepositoryDecorator.findOne(q), entity);
-		verify(decoratedRepo, times(1)).findOne(id, fetch);
+		verify(decoratedRepo, times(1)).findOneById(id, fetch);
 	}
 
 	@Test
@@ -225,8 +225,8 @@ public class ElasticsearchRepositoryDecoratorTest
 	public void findOneObject()
 	{
 		Object id = mock(Object.class);
-		elasticsearchRepositoryDecorator.findOne(id);
-		verify(decoratedRepo).findOne(id);
+		elasticsearchRepositoryDecorator.findOneById(id);
+		verify(decoratedRepo).findOneById(id);
 	}
 
 	@Test
@@ -236,9 +236,9 @@ public class ElasticsearchRepositoryDecoratorTest
 		Fetch fetch = new Fetch();
 
 		Entity entity = mock(Entity.class);
-		when(decoratedRepo.findOne(id, fetch)).thenReturn(entity);
-		assertEquals(elasticsearchRepositoryDecorator.findOne(id, fetch), entity);
-		verify(decoratedRepo, times(1)).findOne(id, fetch);
+		when(decoratedRepo.findOneById(id, fetch)).thenReturn(entity);
+		assertEquals(elasticsearchRepositoryDecorator.findOneById(id, fetch), entity);
+		verify(decoratedRepo, times(1)).findOneById(id, fetch);
 		verifyNoMoreInteractions(decoratedRepo);
 	}
 

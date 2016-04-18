@@ -138,7 +138,7 @@ public class ImportWriter
 
 			// Find new ones
 			transformed.stream().map(Entity::getIdValue).forEach(id -> {
-				if (repo.findOne(id) == null)
+				if (repo.findOneById(id) == null)
 				{
 					metaDataChanges.addLanguage(languages.get(id));
 				}

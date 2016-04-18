@@ -61,7 +61,7 @@ public interface Repository extends Iterable<Entity>, Closeable
 	/**
 	 * Type-safe find one entity based on id. Returns null if not exists
 	 */
-	Entity findOne(Object id);
+	Entity findOneById(Object id);
 
 	/**
 	 * Find one entity based on id.
@@ -73,7 +73,7 @@ public interface Repository extends Iterable<Entity>, Closeable
 	 * @return entity or null
 	 * @throws MolgenisDataAccessException
 	 */
-	Entity findOne(Object id, Fetch fetch);
+	Entity findOneById(Object id, Fetch fetch);
 
 	/**
 	 * Finds all entities with the given IDs. Returns empty stream if no matches.

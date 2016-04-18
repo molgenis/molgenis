@@ -145,7 +145,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public Entity findOneById(String entityName, Object id)
 	{
-		return getRepository(entityName).findOne(id);
+		return getRepository(entityName).findOneById(id);
 	}
 
 	@Override
@@ -238,7 +238,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public <E extends Entity> E findOneById(String entityName, Object id, Class<E> clazz)
 	{
-		Entity entity = getRepository(entityName).findOne(id);
+		Entity entity = getRepository(entityName).findOneById(id);
 		if (entity == null) return null;
 		return EntityUtils.convert(entity, clazz, this);
 	}
@@ -299,13 +299,13 @@ public class DataServiceImpl implements DataService
 	@Override
 	public Entity findOneById(String entityName, Object id, Fetch fetch)
 	{
-		return getRepository(entityName).findOne(id, fetch);
+		return getRepository(entityName).findOneById(id, fetch);
 	}
 
 	@Override
 	public <E extends Entity> E findOneById(String entityName, Object id, Fetch fetch, Class<E> clazz)
 	{
-		Entity entity = getRepository(entityName).findOne(id, fetch);
+		Entity entity = getRepository(entityName).findOneById(id, fetch);
 		if (entity == null) return null;
 		return EntityUtils.convert(entity, clazz, this);
 	}

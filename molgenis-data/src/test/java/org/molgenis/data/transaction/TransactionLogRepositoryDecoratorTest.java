@@ -115,9 +115,9 @@ public class TransactionLogRepositoryDecoratorTest
 		Object id = Integer.valueOf(0);
 		Fetch fetch = new Fetch();
 		Entity entity = mock(Entity.class);
-		when(decoratedRepo.findOne(id, fetch)).thenReturn(entity);
-		assertEquals(entity, transactionLogRepositoryDecorator.findOne(id, fetch));
-		verify(decoratedRepo, times(1)).findOne(id, fetch);
+		when(decoratedRepo.findOneById(id, fetch)).thenReturn(entity);
+		assertEquals(entity, transactionLogRepositoryDecorator.findOneById(id, fetch));
+		verify(decoratedRepo, times(1)).findOneById(id, fetch);
 	}
 
 	@Test

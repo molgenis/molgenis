@@ -279,8 +279,8 @@ public class EntityReferenceResolverDecoratorTest
 	public void findOneObject()
 	{
 		Object id = mock(Object.class);
-		entityReferenceResolverDecorator.findOne(id);
-		verify(decoratedRepo, times(1)).findOne(id);
+		entityReferenceResolverDecorator.findOneById(id);
+		verify(decoratedRepo, times(1)).findOneById(id);
 		verifyZeroInteractions(entityManager);
 	}
 
@@ -290,9 +290,9 @@ public class EntityReferenceResolverDecoratorTest
 		Object id = Integer.valueOf(1);
 		Fetch fetch = new Fetch();
 		Entity entity = mock(Entity.class);
-		when(decoratedRepo.findOne(id, fetch)).thenReturn(entity);
-		entityReferenceResolverDecorator.findOne(id, fetch);
-		verify(decoratedRepo, times(1)).findOne(id, fetch);
+		when(decoratedRepo.findOneById(id, fetch)).thenReturn(entity);
+		entityReferenceResolverDecorator.findOneById(id, fetch);
+		verify(decoratedRepo, times(1)).findOneById(id, fetch);
 		verify(entityManager).resolveReferences(entityMeta, entity, fetch);
 	}
 
@@ -300,8 +300,8 @@ public class EntityReferenceResolverDecoratorTest
 	public void findOneObjectFetchNull()
 	{
 		Object id = Integer.valueOf(1);
-		entityReferenceResolverDecorator.findOne(id, null);
-		verify(decoratedRepo, times(1)).findOne(id, null);
+		entityReferenceResolverDecorator.findOneById(id, null);
+		verify(decoratedRepo, times(1)).findOneById(id, null);
 		verifyZeroInteractions(entityManager);
 	}
 

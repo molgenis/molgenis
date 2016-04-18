@@ -79,7 +79,7 @@ public class MolgenisUserDecorator implements Repository
 	private void updatePassword(Entity entity)
 	{
 		MolgenisUser currentUser = new MolgenisUser();
-		currentUser.set(findOne(entity.getIdValue()));
+		currentUser.set(findOneById(entity.getIdValue()));
 
 		String currentPassword = currentUser.getPassword();
 		String password = entity.getString(MolgenisUser.PASSWORD_);
@@ -103,7 +103,7 @@ public class MolgenisUserDecorator implements Repository
 		if (isSuperuser != null && isSuperuser == true)
 		{
 			MolgenisUser molgenisUser = new MolgenisUser();
-			molgenisUser.set(findOne(entity.getIdValue()));
+			molgenisUser.set(findOneById(entity.getIdValue()));
 
 			UserAuthority userAuthority = new UserAuthority();
 			userAuthority.setMolgenisUser(molgenisUser);
@@ -116,7 +116,7 @@ public class MolgenisUserDecorator implements Repository
 	private void updateSuperuserAuthority(Entity entity)
 	{
 		MolgenisUser molgenisUser = new MolgenisUser();
-		molgenisUser.set(findOne(entity.getIdValue()));
+		molgenisUser.set(findOneById(entity.getIdValue()));
 
 		Repository userAuthorityRepository = getUserAuthorityRepository();
 		Entity suAuthorityEntity = userAuthorityRepository.findOne(new QueryImpl()
@@ -251,15 +251,15 @@ public class MolgenisUserDecorator implements Repository
 	}
 
 	@Override
-	public Entity findOne(Object id)
+	public Entity findOneById(Object id)
 	{
-		return decoratedRepository.findOne(id);
+		return decoratedRepository.findOneById(id);
 	}
 
 	@Override
-	public Entity findOne(Object id, Fetch fetch)
+	public Entity findOneById(Object id, Fetch fetch)
 	{
-		return decoratedRepository.findOne(id, fetch);
+		return decoratedRepository.findOneById(id, fetch);
 	}
 
 	@Override

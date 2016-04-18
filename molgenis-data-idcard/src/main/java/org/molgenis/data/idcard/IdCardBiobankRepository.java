@@ -94,7 +94,7 @@ public class IdCardBiobankRepository extends AbstractRepository
 	}
 
 	@Override
-	public Entity findOne(Object id)
+	public Entity findOneById(Object id)
 	{
 		try
 		{
@@ -107,9 +107,9 @@ public class IdCardBiobankRepository extends AbstractRepository
 	}
 
 	@Override
-	public Entity findOne(Object id, Fetch fetch)
+	public Entity findOneById(Object id, Fetch fetch)
 	{
-		return findOne(id);
+		return findOneById(id);
 	}
 
 	@Override

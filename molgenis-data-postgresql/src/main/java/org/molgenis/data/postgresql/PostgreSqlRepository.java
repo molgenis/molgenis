@@ -174,7 +174,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	}
 
 	@Override
-	public Entity findOne(Object id)
+	public Entity findOneById(Object id)
 	{
 		if (id == null)
 		{
@@ -184,7 +184,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	}
 
 	@Override
-	public Entity findOne(Object id, Fetch fetch)
+	public Entity findOneById(Object id, Fetch fetch)
 	{
 		if (id == null)
 		{

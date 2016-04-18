@@ -193,15 +193,15 @@ public class RepositoryValidationDecorator implements Repository
 	}
 
 	@Override
-	public Entity findOne(Object id)
+	public Entity findOneById(Object id)
 	{
-		return decoratedRepository.findOne(id);
+		return decoratedRepository.findOneById(id);
 	}
 
 	@Override
-	public Entity findOne(Object id, Fetch fetch)
+	public Entity findOneById(Object id, Fetch fetch)
 	{
-		return decoratedRepository.findOne(id, fetch);
+		return decoratedRepository.findOneById(id, fetch);
 	}
 
 	@Override
@@ -597,7 +597,7 @@ public class RepositoryValidationDecorator implements Repository
 	@SuppressWarnings("unchecked")
 	private void validateEntityValueReadOnly(Entity entity, ValidationResource validationResource)
 	{
-		Entity entityToUpdate = findOne(entity.getIdValue());
+		Entity entityToUpdate = findOneById(entity.getIdValue());
 		validationResource.getReadonlyAttrs().forEach(readonlyAttr -> {
 			Object value = entity.get(readonlyAttr.getName());
 			Object existingValue = entityToUpdate.get(readonlyAttr.getName());

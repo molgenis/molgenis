@@ -129,15 +129,15 @@ public class AutoValueRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Entity findOne(Object id)
+	public Entity findOneById(Object id)
 	{
-		return decoratedRepository.findOne(id);
+		return decoratedRepository.findOneById(id);
 	}
 
 	@Override
-	public Entity findOne(Object id, Fetch fetch)
+	public Entity findOneById(Object id, Fetch fetch)
 	{
-		return decoratedRepository.findOne(id, fetch);
+		return decoratedRepository.findOneById(id, fetch);
 	}
 
 	@Override

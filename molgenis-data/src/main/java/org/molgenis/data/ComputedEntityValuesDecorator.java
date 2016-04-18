@@ -94,17 +94,17 @@ public class ComputedEntityValuesDecorator implements Repository
 	}
 
 	@Override
-	public Entity findOne(Object id)
+	public Entity findOneById(Object id)
 	{
-		Entity entity = decoratedRepo.findOne(id);
+		Entity entity = decoratedRepo.findOneById(id);
 		// compute values with attributes with expressions
 		return entity != null ? toComputedValuesEntity(entity) : null;
 	}
 
 	@Override
-	public Entity findOne(Object id, Fetch fetch)
+	public Entity findOneById(Object id, Fetch fetch)
 	{
-		Entity entity = decoratedRepo.findOne(id, fetch);
+		Entity entity = decoratedRepo.findOneById(id, fetch);
 		// compute values with attributes with expressions
 		return entity != null ? toComputedValuesEntity(entity) : null;
 	}
