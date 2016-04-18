@@ -387,7 +387,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		MappingProject project = createMappingProjectWithMappings(entityName);
 
 		// update an entity in the source
-		Entity geneEntity = dataService.findOne(geneMetaData.getName(), "2");
+		Entity geneEntity = dataService.findOneById(geneMetaData.getName(), "2");
 		geneEntity.set("length", 5.678);
 		dataService.update(geneMetaData.getName(), geneEntity);
 

@@ -192,7 +192,7 @@ class RestControllerV2
 		Fetch fetch = AttributeFilterToFetchConverter.convert(attributeFilter, entityMeta,
 				languageService.getCurrentUserLanguageCode());
 
-		Entity entity = dataService.findOne(entityName, id, fetch);
+		Entity entity = dataService.findOneById(entityName, id, fetch);
 		if (entity == null)
 		{
 			throw new UnknownEntityException(entityName + " [" + id + "] not found");
@@ -211,7 +211,7 @@ class RestControllerV2
 		Fetch fetch = AttributeFilterToFetchConverter.convert(attributeFilter, entityMeta,
 				languageService.getCurrentUserLanguageCode());
 
-		Entity entity = dataService.findOne(entityName, id, fetch);
+		Entity entity = dataService.findOneById(entityName, id, fetch);
 		if (entity == null)
 		{
 			throw new UnknownEntityException(entityName + " [" + id + "] not found");
@@ -475,7 +475,7 @@ class RestControllerV2
 			{
 				String id = checkForEntityId(entity, count);
 
-				Entity originalEntity = dataService.findOne(entityName, id);
+				Entity originalEntity = dataService.findOneById(entityName, id);
 				if (originalEntity == null)
 				{
 					throw createUnknownEntityExceptionNotValidId(id);

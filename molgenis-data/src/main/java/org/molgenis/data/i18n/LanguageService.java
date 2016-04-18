@@ -73,7 +73,7 @@ public class LanguageService
 				{
 					languageCode = user.getString("languageCode");
 					if ((languageCode != null)
-							&& (dataService.findOne(LanguageMetaData.ENTITY_NAME, languageCode) == null))
+							&& (dataService.findOneById(LanguageMetaData.ENTITY_NAME, languageCode) == null))
 					{
 						languageCode = null;
 					}
@@ -84,7 +84,7 @@ public class LanguageService
 			{
 				// Use app default
 				languageCode = appSettings.getLanguageCode();
-				if ((languageCode == null) || (dataService.findOne(LanguageMetaData.ENTITY_NAME, languageCode) == null))
+				if ((languageCode == null) || (dataService.findOneById(LanguageMetaData.ENTITY_NAME, languageCode) == null))
 				{
 					languageCode = FALLBACK_LANGUAGE;
 				}

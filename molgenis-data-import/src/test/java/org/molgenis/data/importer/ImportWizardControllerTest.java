@@ -207,7 +207,7 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 
 		webRequest = mock(WebRequest.class);
 		when(webRequest.getParameter("entityIds")).thenReturn("entity1,entity2");
-		when(dataService.findOne(MolgenisGroup.ENTITY_NAME, "ID", MolgenisGroup.class)).thenReturn(group1);
+		when(dataService.findOneById(MolgenisGroup.ENTITY_NAME, "ID", MolgenisGroup.class)).thenReturn(group1);
 		when(dataService.findAll(GroupAuthority.ENTITY_NAME, new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, group1),
 				GroupAuthority.class)).thenAnswer(new Answer<Stream<GroupAuthority>>()
 				{
@@ -281,7 +281,7 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 				.thenReturn(org.molgenis.security.core.Permission.WRITE.toString());
 
 		GroupAuthority authority = new GroupAuthority();
-		authority.setMolgenisGroup(dataService.findOne(MolgenisGroup.ENTITY_NAME, "ID", MolgenisGroup.class));
+		authority.setMolgenisGroup(dataService.findOneById(MolgenisGroup.ENTITY_NAME, "ID", MolgenisGroup.class));
 		authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX
 				+ org.molgenis.security.core.Permission.COUNT.toString().toUpperCase() + "_" + "entity3".toUpperCase());
 
@@ -322,7 +322,7 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 				.thenReturn(org.molgenis.security.core.Permission.WRITE.toString());
 
 		GroupAuthority authority = new GroupAuthority();
-		authority.setMolgenisGroup(dataService.findOne(MolgenisGroup.ENTITY_NAME, "ID", MolgenisGroup.class));
+		authority.setMolgenisGroup(dataService.findOneById(MolgenisGroup.ENTITY_NAME, "ID", MolgenisGroup.class));
 		authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX
 				+ org.molgenis.security.core.Permission.COUNT.toString().toUpperCase() + "_" + "entity3".toUpperCase());
 

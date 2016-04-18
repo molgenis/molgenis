@@ -120,7 +120,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 		attributeEntity.set(AttributeMetaDataMetaData.NAME, "Chr");
 		Entity entityMetaDataEntity = new MapEntity(EntityMetaDataMetaData.INSTANCE);
 		entityMetaDataEntity.set(EntityMetaDataMetaData.ATTRIBUTES, Collections.singleton(attributeEntity));
-		when(dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME, "org.molgenis.SNP")).thenReturn(
+		when(dataService.findOneById(EntityMetaDataMetaData.ENTITY_NAME, "org.molgenis.SNP")).thenReturn(
 				entityMetaDataEntity);
 
 		Ontology edamOntology = Ontology.create("EDAM", "http://edamontology.org", "The EDAM ontology.");
@@ -188,7 +188,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 
 		Entity entityMetaDataEntity = new MapEntity(EntityMetaDataMetaData.INSTANCE);
 		entityMetaDataEntity.set(EntityMetaDataMetaData.ATTRIBUTES, Collections.singleton(attributeEntity));
-		when(dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME, "org.molgenis.SNP")).thenReturn(
+		when(dataService.findOneById(EntityMetaDataMetaData.ENTITY_NAME, "org.molgenis.SNP")).thenReturn(
 				entityMetaDataEntity);
 		when(
 				tagRepository.getTagEntity("http://edamontology.org/data_0987", "Chromosome name", instanceOf,
@@ -216,7 +216,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 		attributeEntity.set(AttributeMetaDataMetaData.NAME, "Chr");
 		Entity entityMetaDataEntity = new MapEntity(EntityMetaDataMetaData.INSTANCE);
 		entityMetaDataEntity.set(EntityMetaDataMetaData.ATTRIBUTES, Collections.singleton(attributeEntity));
-		when(dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME, "org.molgenis.SNP")).thenReturn(
+		when(dataService.findOneById(EntityMetaDataMetaData.ENTITY_NAME, "org.molgenis.SNP")).thenReturn(
 				entityMetaDataEntity);
 
 		Tag<AttributeMetaData, OntologyTerm, Ontology> geneAnnotationTag = new TagImpl<AttributeMetaData, OntologyTerm, Ontology>(
@@ -267,7 +267,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 		when(entityMetaDataEntity.getEntities(ATTRIBUTES)).thenReturn(Arrays.asList(att));
 		when(att.getString(AttributeMetaDataMetaData.NAME)).thenReturn("Chr");
 
-		when(dataService.findOne(ENTITY_NAME, "test")).thenReturn(entityMetaDataEntity);
+		when(dataService.findOneById(ENTITY_NAME, "test")).thenReturn(entityMetaDataEntity);
 		ontologyTagService.removeAllTagsFromEntity("test");
 
 		verify(dataService).update(EntityMetaDataMetaData.ENTITY_NAME, entityMetaDataEntity);
@@ -294,7 +294,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 
 		Entity entityMetaDataEntity = new MapEntity(EntityMetaDataMetaData.INSTANCE);
 		entityMetaDataEntity.set(EntityMetaDataMetaData.ATTRIBUTES, Collections.singleton(attributeEntity));
-		when(dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME, "org.molgenis.SNP")).thenReturn(
+		when(dataService.findOneById(EntityMetaDataMetaData.ENTITY_NAME, "org.molgenis.SNP")).thenReturn(
 				entityMetaDataEntity);
 		when(
 				tagRepository.getTagEntity("http://edamontology.org/data_0987", "Chromosome name", instanceOf,

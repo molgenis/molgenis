@@ -35,7 +35,7 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 		printUsers();
 
 		// Find Klaas
-		User klaas = dataService.findOne(UserMetaData.ENTITY_NAME, "Klaas", User.class);
+		User klaas = dataService.findOneById(UserMetaData.ENTITY_NAME, "Klaas", User.class);
 		System.out.println(klaas);
 
 		// Make klaas active
@@ -102,7 +102,7 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 		// Update entity
 		amsterdam.set("country", "Netherlands");
 		dataService.update("City", amsterdam);
-		Entity entity = dataService.findOne("City", "Amsterdam");
+		Entity entity = dataService.findOneById("City", "Amsterdam");
 		System.out.println(entity.get("name") + ": " + entity.get("country"));
 	}
 

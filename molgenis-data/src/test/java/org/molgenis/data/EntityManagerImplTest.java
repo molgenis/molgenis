@@ -49,13 +49,13 @@ public class EntityManagerImplTest
 		String label = "label";
 		Integer id = Integer.valueOf(0);
 		Entity entity = when(mock(Entity.class).getLabelValue()).thenReturn(label).getMock();
-		when(dataService.findOne(entityName, id)).thenReturn(entity);
+		when(dataService.findOneById(entityName, id)).thenReturn(entity);
 
 		Entity entityReference = entityManagerImpl.getReference(entityMeta, id);
 		assertEquals(entityReference.getIdValue(), id);
 		verifyNoMoreInteractions(dataService);
 		assertEquals(label, entityReference.getLabelValue());
-		verify(dataService, times(1)).findOne(entityName, id);
+		verify(dataService, times(1)).findOneById(entityName, id);
 	}
 
 	@Test
@@ -71,12 +71,12 @@ public class EntityManagerImplTest
 		String label0 = "label0";
 		Integer id0 = Integer.valueOf(0);
 		Entity entity0 = when(mock(Entity.class).getLabelValue()).thenReturn(label0).getMock();
-		when(dataService.findOne(entityName, id0)).thenReturn(entity0);
+		when(dataService.findOneById(entityName, id0)).thenReturn(entity0);
 
 		String label1 = "label1";
 		Integer id1 = Integer.valueOf(1);
 		Entity entity1 = when(mock(Entity.class).getLabelValue()).thenReturn(label1).getMock();
-		when(dataService.findOne(entityName, id1)).thenReturn(entity1);
+		when(dataService.findOneById(entityName, id1)).thenReturn(entity1);
 
 		Iterable<Entity> entityReferences = entityManagerImpl.getReferences(entityMeta, Arrays.asList(id0, id1));
 		Iterator<Entity> it = entityReferences.iterator();
@@ -86,14 +86,14 @@ public class EntityManagerImplTest
 		assertEquals(entityReference0.getIdValue(), id0);
 		verifyNoMoreInteractions(dataService);
 		assertEquals(entityReference0.getLabelValue(), label0);
-		verify(dataService, times(1)).findOne(entityName, id0);
+		verify(dataService, times(1)).findOneById(entityName, id0);
 
 		assertTrue(it.hasNext());
 		Entity entityReference1 = it.next();
 		assertEquals(entityReference1.getIdValue(), id1);
 		verifyNoMoreInteractions(dataService);
 		assertEquals(entityReference1.getLabelValue(), label1);
-		verify(dataService, times(1)).findOne(entityName, id1);
+		verify(dataService, times(1)).findOneById(entityName, id1);
 
 		assertFalse(it.hasNext());
 	}

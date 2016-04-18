@@ -571,7 +571,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 				}
 				else
 				{
-					entity = dataService.findOne(entityMetaData.getName(), id);
+					entity = dataService.findOneById(entityMetaData.getName(), id);
 				}
 				index(transactionId, Collections.singleton(entity).iterator(), entityMetaData, CrudType.DELETE, false);
 			}

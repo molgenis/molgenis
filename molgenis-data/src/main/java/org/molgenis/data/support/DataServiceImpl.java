@@ -143,7 +143,7 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public Entity findOne(String entityName, Object id)
+	public Entity findOneById(String entityName, Object id)
 	{
 		return getRepository(entityName).findOne(id);
 	}
@@ -236,7 +236,7 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public <E extends Entity> E findOne(String entityName, Object id, Class<E> clazz)
+	public <E extends Entity> E findOneById(String entityName, Object id, Class<E> clazz)
 	{
 		Entity entity = getRepository(entityName).findOne(id);
 		if (entity == null) return null;
@@ -297,13 +297,13 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public Entity findOne(String entityName, Object id, Fetch fetch)
+	public Entity findOneById(String entityName, Object id, Fetch fetch)
 	{
 		return getRepository(entityName).findOne(id, fetch);
 	}
 
 	@Override
-	public <E extends Entity> E findOne(String entityName, Object id, Fetch fetch, Class<E> clazz)
+	public <E extends Entity> E findOneById(String entityName, Object id, Fetch fetch, Class<E> clazz)
 	{
 		Entity entity = getRepository(entityName).findOne(id, fetch);
 		if (entity == null) return null;

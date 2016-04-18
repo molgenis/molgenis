@@ -88,7 +88,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@Transactional(readOnly = true)
 	public Permissions getGroupPluginPermissions(String groupId)
 	{
-		MolgenisGroup molgenisGroup = dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class);
+		MolgenisGroup molgenisGroup = dataService.findOneById(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class);
 		if (molgenisGroup == null) throw new RuntimeException("unknown group id [" + groupId + "]");
 
 		List<Authority> groupPermissions = getGroupPermissions(molgenisGroup);
@@ -102,7 +102,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@Transactional(readOnly = true)
 	public Permissions getGroupEntityClassPermissions(String groupId)
 	{
-		MolgenisGroup molgenisGroup = dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class);
+		MolgenisGroup molgenisGroup = dataService.findOneById(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class);
 		if (molgenisGroup == null) throw new RuntimeException("unknown group id [" + groupId + "]");
 		List<Authority> groupPermissions = getGroupPermissions(molgenisGroup);
 		Permissions permissions = createPermissions(groupPermissions, SecurityUtils.AUTHORITY_ENTITY_PREFIX);
@@ -140,7 +140,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 	private List<? extends Authority> getUserPermissions(String userId, String authorityPrefix)
 	{
-		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME, userId, MolgenisUser.class);
+		MolgenisUser molgenisUser = dataService.findOneById(MolgenisUser.ENTITY_NAME, userId, MolgenisUser.class);
 		if (molgenisUser == null) throw new RuntimeException("unknown user id [" + userId + "]");
 		List<Authority> userPermissions = getUserPermissions(molgenisUser, authorityPrefix);
 
@@ -184,7 +184,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 	private void replaceGroupPermissions(List<GroupAuthority> entityAuthorities, String groupId, String authorityPrefix)
 	{
-		MolgenisGroup molgenisGroup = dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class);
+		MolgenisGroup molgenisGroup = dataService.findOneById(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class);
 		if (molgenisGroup == null) throw new RuntimeException("unknown group id [" + groupId + "]");
 
 		// inject user
@@ -217,7 +217,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 	private void replaceUserPermissions(List<UserAuthority> entityAuthorities, String userId, String authorityType)
 	{
-		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME, userId, MolgenisUser.class);
+		MolgenisUser molgenisUser = dataService.findOneById(MolgenisUser.ENTITY_NAME, userId, MolgenisUser.class);
 		if (molgenisUser == null) throw new RuntimeException("unknown user id [" + userId + "]");
 
 		// inject user

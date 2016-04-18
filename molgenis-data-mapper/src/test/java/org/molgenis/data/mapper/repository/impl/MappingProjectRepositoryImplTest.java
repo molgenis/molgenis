@@ -174,7 +174,7 @@ public class MappingProjectRepositoryImplTest extends AbstractTestNGSpringContex
 	public void testUpdateUnknown()
 	{
 		mappingProject.setIdentifier("mappingProjectID");
-		when(dataService.findOne(ENTITY_NAME, "mappingProjectID")).thenReturn(null);
+		when(dataService.findOneById(ENTITY_NAME, "mappingProjectID")).thenReturn(null);
 		try
 		{
 			mappingProjectRepositoryImpl.update(mappingProject);

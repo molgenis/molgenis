@@ -64,7 +64,7 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 	@Override
 	public MappingProject getMappingProject(String identifier)
 	{
-		Entity mappingProjectEntity = dataService.findOne(MappingProjectRepositoryImpl.META_DATA.getName(), identifier);
+		Entity mappingProjectEntity = dataService.findOneById(MappingProjectRepositoryImpl.META_DATA.getName(), identifier);
 		if (mappingProjectEntity == null)
 		{
 			return null;

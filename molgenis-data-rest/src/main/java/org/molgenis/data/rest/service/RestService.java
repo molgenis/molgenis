@@ -129,7 +129,7 @@ public class RestService
 
 			if (attr.getDataType().getEnumType() == XREF || attr.getDataType().getEnumType() == CATEGORICAL)
 			{
-				value = dataService.findOne(attr.getRefEntity().getName(), paramValue);
+				value = dataService.findOneById(attr.getRefEntity().getName(), paramValue);
 				if (value == null)
 				{
 					throw new IllegalArgumentException(

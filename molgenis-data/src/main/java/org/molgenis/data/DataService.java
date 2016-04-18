@@ -217,7 +217,7 @@ public interface DataService extends Iterable<Repository>
 	 * @param entityName
 	 *            entity name (case insensitive)
 	 */
-	Entity findOne(String entityName, Object id);
+	Entity findOneById(String entityName, Object id);
 
 	/**
 	 * 
@@ -229,7 +229,7 @@ public interface DataService extends Iterable<Repository>
 	 * @param clazz
 	 * @return
 	 */
-	<E extends Entity> E findOne(String entityName, Object id, Class<E> clazz);
+	<E extends Entity> E findOneById(String entityName, Object id, Class<E> clazz);
 
 	/**
 	 * Find one entity based on id. Returns null if not exists
@@ -254,7 +254,7 @@ public interface DataService extends Iterable<Repository>
 	 * @return entity or null
 	 * @throws MolgenisDataAccessException
 	 */
-	Entity findOne(String entityName, Object id, Fetch fetch);
+	Entity findOneById(String entityName, Object id, Fetch fetch);
 
 	/**
 	 * Type-safe find one entity based on id.
@@ -270,7 +270,7 @@ public interface DataService extends Iterable<Repository>
 	 * @return entity of the given type or null
 	 * @throws MolgenisDataAccessException
 	 */
-	<E extends Entity> E findOne(String entityName, Object id, Fetch fetch, Class<E> clazz);
+	<E extends Entity> E findOneById(String entityName, Object id, Fetch fetch, Class<E> clazz);
 
 	/**
 	 * Find one entity based on id. Returns null if not exists
