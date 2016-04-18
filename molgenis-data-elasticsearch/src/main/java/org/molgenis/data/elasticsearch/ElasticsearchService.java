@@ -542,7 +542,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		if (!canBeDeleted(Arrays.asList(id), entityMetaData))
 		{
 			throw new MolgenisDataException(
-					"Cannot deleteAll entity because there are other entities referencing it. Delete these first.");
+					"Cannot delete entity because there are other entities referencing it. Delete these first.");
 		}
 
 		String transactionId = getCurrentTransactionId();
@@ -552,7 +552,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		}
 		else
 		{
-			// Check if deleteAll from main index or if it is deleteAll from entity
+			// Check if delete from main index or if it is delete from entity
 			// that is not committed yet and is in the
 			// temp index
 			String type = sanitizeMapperType(entityMetaData.getName());
@@ -628,7 +628,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			if (!canBeDeleted(batchEntityIds, entityMetaData))
 			{
 				throw new MolgenisDataException(
-						"Cannot deleteAll entity because there are other entities referencing it. Delete these first.");
+						"Cannot delete entity because there are other entities referencing it. Delete these first.");
 			}
 
 			deleteById(toElasticsearchIds(batchEntityIds.stream()), entityMetaData);

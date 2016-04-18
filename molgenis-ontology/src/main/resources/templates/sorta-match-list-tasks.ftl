@@ -19,7 +19,7 @@
 			return job.ontologyIri
 		}}, {th: 'Delete', td: function(job){
 			return job.deleteUrl && molgenis.ui.ConfirmClick({
-				confirmMessage: 'Are you sure you want to deleteAll this SORTA task?',
+				confirmMessage: 'Are you sure you want to delete this SORTA task?',
 				onClick: function() {
 					$.post(job.deleteUrl).done(
 						function() { molgenis.createAlert([{message:'Task successfully deleted.'}], 'success'); }

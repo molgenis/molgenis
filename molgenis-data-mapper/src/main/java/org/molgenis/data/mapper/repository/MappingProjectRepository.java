@@ -48,7 +48,7 @@ public interface MappingProjectRepository
 	 * Delete a mapping project.
 	 * 
 	 * @param mappingProjectId
-	 *            id of the {@link MappingProject} to deleteAll
+	 *            id of the {@link MappingProject} to delete
 	 */
 	public abstract void delete(String mappingProjectId);
 

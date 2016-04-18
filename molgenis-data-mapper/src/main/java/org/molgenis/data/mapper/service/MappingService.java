@@ -59,7 +59,7 @@ public interface MappingService
 	 * Deletes a {@link MappingProject}
 	 * 
 	 * @param mappingProjectId
-	 *            id of the {@link MappingProject} to deleteAll
+	 *            id of the {@link MappingProject} to delete
 	 */
 	void deleteMappingProject(String mappingProjectId);
 

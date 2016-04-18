@@ -25,7 +25,7 @@ import org.molgenis.util.EntityUtils;
 /**
  * RepositoryDecorator that works on EntityMetaData that extends OwnedEntityMetaData.
  * 
- * Ensures that when an Entity is created the owner is set to the current user, users can only view, update, deleteAll
+ * Ensures that when an Entity is created the owner is set to the current user, users can only view, update, delete
  * their own entities.
  * 
  * Admins are not effected.

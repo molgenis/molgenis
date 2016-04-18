@@ -69,7 +69,7 @@ public class InMemoryRepositoryTest
 		Stream<Entity> entities = Stream.of(entity0, entity1);
 		inMemoryRepository.add(entities);
 
-		// deleteAll one
+		// delete one
 		inMemoryRepository.delete(Stream.of(entity0));
 
 		// get all
