@@ -118,6 +118,13 @@ public class PostgreSqlDataServiceIT extends AbstractDataServiceIT
 
 	@Test
 	@Override
+	public void testFindQueryLimit2_Offset2_sortOnInt()
+	{
+		super.testFindQueryLimit2_Offset2_sortOnInt();
+	}
+
+	@Test
+	@Override
 	public void testFindQueryTyped()
 	{
 		super.testFindQueryTyped();
@@ -236,7 +243,9 @@ public class PostgreSqlDataServiceIT extends AbstractDataServiceIT
 	}
 
 	@Override
-	public List<RepositoryCapability> getExpectedCapabilities(){
-		return Arrays.asList(RepositoryCapability.MANAGABLE,RepositoryCapability.QUERYABLE,RepositoryCapability.WRITABLE);
+	public List<RepositoryCapability> getExpectedCapabilities()
+	{
+		return Arrays.asList(RepositoryCapability.MANAGABLE, RepositoryCapability.QUERYABLE,
+				RepositoryCapability.WRITABLE);
 	}
 }

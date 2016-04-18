@@ -73,7 +73,7 @@ public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestCo
 			Connection conn = getConnection();
 
 			Statement statement = conn.createStatement();
-			statement.executeUpdate("DROP database if exists \"molgenisIntegrationTest\"");
+			statement.executeUpdate("DROP DATABASE IF EXISTS \"molgenisIntegrationTest\"");
 			statement.executeUpdate("CREATE DATABASE \"molgenisIntegrationTest\"");
 
 			conn.close();
@@ -84,7 +84,8 @@ public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestCo
 		}
 	}
 
-	private Connection getConnection() throws IOException, SQLException {
+	private Connection getConnection() throws IOException, SQLException
+	{
 		Properties properties = new Properties();
 		File file = ResourceUtils.getFile(getClass(), "/postgresql/molgenis.properties");
 		properties.load(new FileInputStream(file));
@@ -92,9 +93,9 @@ public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestCo
 		String db_uri = properties.getProperty("db_uri");
 		int slashIndex = db_uri.lastIndexOf('/');
 
-		//remove the, not yet created, database from the connection url
-		return DriverManager.getConnection(db_uri.substring(0, slashIndex+1),
-                properties.getProperty("db_user"), properties.getProperty("db_password"));
+		// remove the, not yet created, database from the connection url
+		return DriverManager.getConnection(db_uri.substring(0, slashIndex + 1), properties.getProperty("db_user"),
+				properties.getProperty("db_password"));
 	}
 
 	@PostConstruct
