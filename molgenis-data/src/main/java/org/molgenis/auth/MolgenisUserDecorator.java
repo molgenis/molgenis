@@ -293,9 +293,9 @@ public class MolgenisUserDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
-		decoratedRepository.deleteById(ids);
+		decoratedRepository.deleteAll(ids);
 	}
 
 	@Override

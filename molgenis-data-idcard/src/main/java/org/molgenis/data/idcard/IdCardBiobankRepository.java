@@ -140,7 +140,7 @@ public class IdCardBiobankRepository extends AbstractRepository
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
 		throw new UnsupportedOperationException(
 				String.format("Repository [%s] is not %s", getName(), WRITABLE.toString()));

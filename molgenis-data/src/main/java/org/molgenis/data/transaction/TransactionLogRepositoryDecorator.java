@@ -176,13 +176,13 @@ public class TransactionLogRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
 		{
 			transactionLogService.log(getEntityMetaData(), MolgenisTransactionLogEntryMetaData.Type.DELETE);
 		}
-		decorated.deleteById(ids);
+		decorated.deleteAll(ids);
 	}
 
 	@Override

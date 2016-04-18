@@ -417,7 +417,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 	}
 
 	/**
-	 * Removing an entity in the source and applying the mapping again should also deleteById this entity in the target.
+	 * Removing an entity in the source and applying the mapping again should also deleteAll this entity in the target.
 	 */
 	@Test
 	public void testDelete()
@@ -428,10 +428,10 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		// make project and apply mappings once
 		MappingProject project = createMappingProjectWithTwoSourcesWithMappings(entityName);
 
-		// deleteById an entity from the source
+		// deleteAll an entity from the source
 		dataService.deleteById(geneMetaData.getName(), "2");
 
-		// apply mapping again, this should not deleteById entities mapped from source 2
+		// apply mapping again, this should not deleteAll entities mapped from source 2
 		mappingService.applyMappings(project.getMappingTarget("HopEntity"), entityName);
 
 		Repository actual = dataService.getRepository(entityName);

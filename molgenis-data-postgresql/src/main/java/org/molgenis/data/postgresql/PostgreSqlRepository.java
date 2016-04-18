@@ -218,19 +218,19 @@ public class PostgreSqlRepository extends AbstractRepository
 	@Override
 	public void delete(Stream<? extends Entity> entities)
 	{
-		deleteById(entities.map(Entity::getIdValue));
+		deleteAll(entities.map(Entity::getIdValue));
 	}
 
 	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
 	public void deleteById(Object id)
 	{
-		this.deleteById(Stream.of(id));
+		this.deleteAll(Stream.of(id));
 	}
 
 	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
 		Iterators.partition(ids.iterator(), BATCH_SIZE).forEachRemaining(idsBatch -> {
 			String sql = getSqlDelete(getEntityMetaData());

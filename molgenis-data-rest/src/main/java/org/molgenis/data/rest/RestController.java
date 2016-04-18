@@ -113,7 +113,7 @@ import cz.jirutka.rsql.parser.RSQLParserException;
 /**
  * Rest endpoint for the DataService
  * 
- * Query, create, update and deleteById entities.
+ * Query, create, update and deleteAll entities.
  * 
  * If a repository isn't capable of doing the requested operation an error is thrown.
  * 

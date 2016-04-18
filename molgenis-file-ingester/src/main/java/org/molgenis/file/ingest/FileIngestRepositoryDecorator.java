@@ -177,9 +177,9 @@ public class FileIngestRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
-		decorated.deleteById(ids.filter(id -> {
+		decorated.deleteAll(ids.filter(id -> {
 			if (id instanceof String)
 			{
 				String entityId = (String) id;

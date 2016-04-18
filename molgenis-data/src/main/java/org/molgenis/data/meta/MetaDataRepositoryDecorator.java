@@ -161,9 +161,9 @@ public class MetaDataRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
-		decorated.deleteById(ids);
+		decorated.deleteAll(ids);
 	}
 
 	@Override

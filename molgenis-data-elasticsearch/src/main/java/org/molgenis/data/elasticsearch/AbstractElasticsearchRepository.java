@@ -205,7 +205,7 @@ public abstract class AbstractElasticsearchRepository implements Repository
 
 	@Override
 	@Transactional
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
 		elasticSearchService.deleteById(ElasticsearchEntityUtils.toElasticsearchIds(ids), getEntityMetaData());
 		elasticSearchService.refresh(getEntityMetaData());

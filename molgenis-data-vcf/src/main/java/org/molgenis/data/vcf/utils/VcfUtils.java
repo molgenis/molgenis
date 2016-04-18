@@ -224,7 +224,7 @@ public class VcfUtils
 				// add FORMAT data but only first time
 				if (firstSample && formatColumn.length() > 0) // FIXME: do we expect this??
 				{
-					formatColumn.deleteCharAt(formatColumn.length() - 1); // deleteById trailing ':'
+					formatColumn.deleteCharAt(formatColumn.length() - 1); // deleteAll trailing ':'
 					writer.write(formatColumn.toString());
 					writer.write('\t');
 					firstSample = false;
@@ -236,7 +236,7 @@ public class VcfUtils
 				}
 
 				// now add SAMPLE data
-				sampleColumn.deleteCharAt(sampleColumn.length() - 1);// deleteById trailing ':'
+				sampleColumn.deleteCharAt(sampleColumn.length() - 1);// deleteAll trailing ':'
 				writer.write(sampleColumn.toString());
 
 				if (it.hasNext())

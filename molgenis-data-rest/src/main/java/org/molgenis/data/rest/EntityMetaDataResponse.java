@@ -35,7 +35,7 @@ public class EntityMetaDataResponse
 	private String languageCode;
 
 	/**
-	 * Is this user allowed to add/update/deleteById entities of this type and has the repo the capability?
+	 * Is this user allowed to add/update/deleteAll entities of this type and has the repo the capability?
 	 */
 	private final Boolean writable;
 

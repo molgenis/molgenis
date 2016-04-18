@@ -63,7 +63,7 @@ public class TransactionLogService implements MolgenisTransactionListener
 	}
 
 	/**
-	 * Log and create locks for an add/update/deleteById operation on a Repository
+	 * Log and create locks for an add/update/deleteAll operation on a Repository
 	 * 
 	 * @param entityMetaData
 	 * @param type

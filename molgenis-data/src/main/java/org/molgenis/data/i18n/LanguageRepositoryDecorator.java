@@ -148,7 +148,7 @@ public class LanguageRepositoryDecorator implements Repository
 		if (languageCode.equalsIgnoreCase(LanguageService.FALLBACK_LANGUAGE))
 		{
 			throw new MolgenisDataException(
-					"It is not possible to deleteById '" + languageCode + "'. This is the default language.");
+					"It is not possible to deleteAll '" + languageCode + "'. This is the default language.");
 		}
 
 		decorated.delete(entity);
@@ -208,7 +208,7 @@ public class LanguageRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
 		ids.forEach(this::deleteById);
 	}

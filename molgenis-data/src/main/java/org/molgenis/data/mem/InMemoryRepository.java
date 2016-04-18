@@ -189,7 +189,7 @@ public class InMemoryRepository implements Repository
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
 		ids.forEach(this::deleteById);
 	}

@@ -157,10 +157,10 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
-		decoratedRepository.deleteById(ids);
+		decoratedRepository.deleteAll(ids);
 	}
 
 	@Override

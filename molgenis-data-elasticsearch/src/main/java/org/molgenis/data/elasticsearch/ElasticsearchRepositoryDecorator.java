@@ -106,7 +106,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Transactional
 	public void delete(Entity entity)
 	{
-		super.delete(entity); // first deleteById from index, because the index might request deleted entities
+		super.delete(entity); // first deleteAll from index, because the index might request deleted entities
 		decoratedRepo.delete(entity);
 	}
 
@@ -116,7 +116,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	{
 		// TODO look into performance improvements
 		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
-			super.delete(batch.stream()); // first deleteById from index, because the index might request deleted entities
+			super.delete(batch.stream()); // first deleteAll from index, because the index might request deleted entities
 			decoratedRepo.delete(batch.stream());
 		});
 	}
@@ -125,17 +125,17 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Transactional
 	public void deleteById(Object id)
 	{
-		super.deleteById(id); // first deleteById from index, because the index might request deleted entities
+		super.deleteById(id); // first deleteAll from index, because the index might request deleted entities
 		decoratedRepo.deleteById(id);
 	}
 
 	@Override
 	@Transactional
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
 		// TODO look into performance improvements
 		Iterators.partition(ids.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
-			super.deleteById(batch); // first deleteById from index, because the index might request deleted entities
+			super.deleteById(batch); // first deleteAll from index, because the index might request deleted entities
 			decoratedRepo.deleteById(batch);
 		});
 	}
@@ -144,7 +144,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Transactional
 	public void deleteAll()
 	{
-		super.deleteAll(); // first deleteById from index, because the index might request deleted entities
+		super.deleteAll(); // first deleteAll from index, because the index might request deleted entities
 		decoratedRepo.deleteAll();
 	}
 

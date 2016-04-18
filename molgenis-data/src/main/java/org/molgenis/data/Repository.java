@@ -129,8 +129,8 @@ public interface Repository extends Iterable<Entity>, Closeable
 	/* Delete one entity based on id */
 	void deleteById(Object id);
 
-	/* Streaming deleteById based on multiple ids */
-	void deleteById(Stream<Object> ids);
+	/* Streaming deleteAll based on multiple ids */
+	void deleteAll(Stream<Object> ids);
 
 	/* Delete all entities */
 	void deleteAll();

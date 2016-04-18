@@ -25,7 +25,7 @@ import org.molgenis.util.EntityUtils;
 /**
  * RepositoryDecorator that works on EntityMetaData that extends OwnedEntityMetaData.
  * 
- * Ensures that when an Entity is created the owner is set to the current user, users can only view, update, deleteById
+ * Ensures that when an Entity is created the owner is set to the current user, users can only view, update, deleteAll
  * their own entities.
  * 
  * Admins are not effected.
@@ -244,7 +244,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
 		if (mustAddRowLevelSecurity())
 		{
@@ -252,7 +252,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 		}
 		else
 		{
-			decoratedRepo.deleteById(ids);
+			decoratedRepo.deleteAll(ids);
 		}
 	}
 

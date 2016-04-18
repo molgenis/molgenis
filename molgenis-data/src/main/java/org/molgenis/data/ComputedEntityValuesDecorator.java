@@ -162,9 +162,9 @@ public class ComputedEntityValuesDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
-		decoratedRepo.deleteById(ids);
+		decoratedRepo.deleteAll(ids);
 	}
 
 	@Override

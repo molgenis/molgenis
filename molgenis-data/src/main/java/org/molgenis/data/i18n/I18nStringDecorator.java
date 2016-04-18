@@ -162,9 +162,9 @@ public class I18nStringDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
-		decorated.deleteById(ids);
+		decorated.deleteAll(ids);
 		ResourceBundle.clearCache();
 	}
 
