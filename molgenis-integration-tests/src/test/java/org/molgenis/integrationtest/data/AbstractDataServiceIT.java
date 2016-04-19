@@ -183,7 +183,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		assertPresent(entity);
 
 		dataService.delete(ENTITY_NAME, entity);
-		assertNull(dataService.findOne(ENTITY_NAME, entity.getIdValue()));
+		assertNull(dataService.findOneById(ENTITY_NAME, entity.getIdValue()));
 	}
 
 	public void testDeleteById()
@@ -192,8 +192,8 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		dataService.add(ENTITY_NAME, entity);
 		assertPresent(entity);
 
-		dataService.delete(ENTITY_NAME, entity.getIdValue());
-		assertNull(dataService.findOne(ENTITY_NAME, entity.getIdValue()));
+		dataService.deleteById(ENTITY_NAME, entity.getIdValue());
+		assertNull(dataService.findOneById(ENTITY_NAME, entity.getIdValue()));
 	}
 
 	public void testDeleteStream()
@@ -284,8 +284,8 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		dataService.add(ENTITY_NAME, createTestEntities().stream());
 		Supplier<Stream<Entity>> found = () -> dataService.findAll(ENTITY_NAME,
 				new QueryImpl().pageSize(2).offset(2).sort(new Sort(ATTR_INT)));
-		assertEquals(found.get().count(), 1);
-		assertTrue(found.get().collect(Collectors.toList()).containsAll(null));
+		assertEquals(found.get().count(), 2);
+		assertTrue(found.get().collect(Collectors.toList()).containsAll(Arrays.asList(entity1,entity10)));
 	}
 
 	public void testFindQueryTyped()
@@ -302,14 +302,14 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(1);
 		dataService.add(ENTITY_NAME, entities.stream());
-		assertNotNull(dataService.findOne(ENTITY_NAME, entities.get(0).getIdValue()));
+		assertNotNull(dataService.findOneById(ENTITY_NAME, entities.get(0).getIdValue()));
 	}
 
 	public void testFindOneTyped()
 	{
 		List<Entity> entities = create(1);
 		dataService.add(ENTITY_NAME, entities.stream());
-		TestEntity testEntity = dataService.findOne(ENTITY_NAME, entities.get(0).getIdValue(), TestEntity.class);
+		TestEntity testEntity = dataService.findOneById(ENTITY_NAME, entities.get(0).getIdValue(), TestEntity.class);
 		assertNotNull(testEntity);
 		assertEquals(testEntity.getId(), entities.get(0).getIdValue());
 	}
@@ -318,14 +318,14 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(1);
 		dataService.add(ENTITY_NAME, entities.stream());
-		assertNotNull(dataService.findOne(ENTITY_NAME, entities.get(0).getIdValue(), new Fetch().field(ATTR_ID)));
+		assertNotNull(dataService.findOneById(ENTITY_NAME, entities.get(0).getIdValue(), new Fetch().field(ATTR_ID)));
 	}
 
 	public void testFindOneFetchTyped()
 	{
 		List<Entity> entities = create(1);
 		dataService.add(ENTITY_NAME, entities.stream());
-		TestEntity testEntity = dataService.findOne(ENTITY_NAME, entities.get(0).getIdValue(),
+		TestEntity testEntity = dataService.findOneById(ENTITY_NAME, entities.get(0).getIdValue(),
 				new Fetch().field(ATTR_ID), TestEntity.class);
 		assertNotNull(testEntity);
 		assertEquals(testEntity.getId(), entities.get(0).getIdValue());
@@ -422,13 +422,13 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		Entity entity = create(1).get(0);
 		dataService.add(ENTITY_NAME, entity);
-		entity = dataService.findOne(ENTITY_NAME, entity.getIdValue());
+		entity = dataService.findOneById(ENTITY_NAME, entity.getIdValue());
 		assertNotNull(entity);
 		assertNull(entity.get(ATTR_STRING));
 
 		entity.set(ATTR_STRING, "qwerty");
 		dataService.update(ENTITY_NAME, entity);
-		entity = dataService.findOne(ENTITY_NAME, entity.getIdValue());
+		entity = dataService.findOneById(ENTITY_NAME, entity.getIdValue());
 		assertNotNull(entity.get(ATTR_STRING));
 		assertEquals(entity.get(ATTR_STRING), "qwerty");
 	}
@@ -437,13 +437,13 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		Entity entity = create(1).get(0);
 		dataService.add(ENTITY_NAME, entity);
-		entity = dataService.findOne(ENTITY_NAME, entity.getIdValue());
+		entity = dataService.findOneById(ENTITY_NAME, entity.getIdValue());
 		assertNotNull(entity);
 		assertNull(entity.get(ATTR_STRING));
 
 		entity.set(ATTR_STRING, "qwerty");
 		dataService.update(ENTITY_NAME, of(entity));
-		entity = dataService.findOne(ENTITY_NAME, entity.getIdValue());
+		entity = dataService.findOneById(ENTITY_NAME, entity.getIdValue());
 		assertNotNull(entity.get(ATTR_STRING));
 		assertEquals(entity.get(ATTR_STRING), "qwerty");
 	}
@@ -657,7 +657,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		entity10.set(ATTR_SCRIPT, "/bin/blaat/script.sh");
 		entity10.set(ATTR_XREF, "1");
 		entity10.set(ATTR_MREF, "1");
-		entities.addAll(Arrays.asList(entity1, entity2, entity3, entity4, entity4, entity5, entity6, entity7, entity8,
+		entities.addAll(Arrays.asList(entity1, entity2, entity3, entity4, entity5, entity6, entity7, entity8,
 				entity9, entity10));
 		return entities;
 	}
@@ -669,7 +669,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 
 	private void assertPresent(Entity entity)
 	{
-		assertNotNull(dataService.findOne(entityMetaData.getName(), entity.getIdValue()));
+		assertNotNull(dataService.findOneById(entityMetaData.getName(), entity.getIdValue()));
 	}
 
 	private void assertCount(int count)
