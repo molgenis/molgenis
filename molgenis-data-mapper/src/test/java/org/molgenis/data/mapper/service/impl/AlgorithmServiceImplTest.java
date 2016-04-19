@@ -170,7 +170,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		targetAttributeMetaData.setRefEntity(entityMetaDataXref);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
 		attributeMapping.setAlgorithm("$('xref').map({'1':'2', '2':'1'}).value();");
-		when(dataService.findOne("xrefEntity1", "1")).thenReturn(xref1a);
+		when(dataService.findOneById("xrefEntity1", "1")).thenReturn(xref1a);
 		Entity result = (Entity) algorithmService.apply(attributeMapping, source, entityMetaDataSource);
 		assertEquals(result.get("field1"), xref2a.get("field2"));
 	}

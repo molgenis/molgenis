@@ -1,6 +1,7 @@
 package org.molgenis.ontology.controller;
 
 import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.molgenis.data.QueryRule.Operator.AND;
@@ -102,8 +103,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.collect.ImmutableMap;
 
-import static java.util.Objects.requireNonNull;
-
 @Controller
 @RequestMapping(URI)
 public class SortaServiceController extends MolgenisPluginController
@@ -161,7 +160,7 @@ public class SortaServiceController extends MolgenisPluginController
 	{
 		Fetch fetch = new Fetch();
 		SortaJobExecutionMetaData.INSTANCE.getAtomicAttributes().forEach(attr -> fetch.field(attr.getName()));
-		SortaJobExecution result = RunAsSystemProxy.runAsSystem(() -> dataService.findOne(SortaJobExecution.ENTITY_NAME,
+		SortaJobExecution result = RunAsSystemProxy.runAsSystem(() -> dataService.findOneById(SortaJobExecution.ENTITY_NAME,
 				sortaJobExecutionId, fetch, SortaJobExecution.class));
 		return result;
 	}
@@ -255,7 +254,7 @@ public class SortaServiceController extends MolgenisPluginController
 					|| sortaJobExecution.getUser().getUsername().equals(currentUser.getUsername()))
 			{
 				RunAsSystemProxy.runAsSystem(() -> {
-					dataService.delete(SortaJobExecution.ENTITY_NAME, sortaJobExecution.getIdentifier());
+					dataService.deleteById(SortaJobExecution.ENTITY_NAME, sortaJobExecution.getIdentifier());
 				});
 				tryDeleteRepository(sortaJobExecution.getResultEntityName());
 				tryDeleteRepository(sortaJobExecution.getSourceEntityName());
@@ -388,7 +387,7 @@ public class SortaServiceController extends MolgenisPluginController
 			if (sortaJobExecution == null) return new SortaServiceResponse("sortaJobExecutionId is invalid!");
 
 			String inputTermIdentifier = request.get(MatchingTaskContentEntityMetaData.IDENTIFIER).toString();
-			Entity inputEntity = dataService.findOne(sortaJobExecution.getSourceEntityName(), inputTermIdentifier);
+			Entity inputEntity = dataService.findOneById(sortaJobExecution.getSourceEntityName(), inputTermIdentifier);
 
 			if (inputEntity == null) return new SortaServiceResponse("inputTerm identifier is invalid!");
 

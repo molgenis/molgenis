@@ -139,7 +139,7 @@ public class MappingProjectRepositoryImplTest extends AbstractTestNGSpringContex
 	public void testDelete()
 	{
 		mappingProjectRepositoryImpl.delete("abc");
-		verify(dataService).delete(ENTITY_NAME, "abc");
+		verify(dataService).deleteById(ENTITY_NAME, "abc");
 	}
 
 	@Test
@@ -174,7 +174,7 @@ public class MappingProjectRepositoryImplTest extends AbstractTestNGSpringContex
 	public void testUpdateUnknown()
 	{
 		mappingProject.setIdentifier("mappingProjectID");
-		when(dataService.findOne(ENTITY_NAME, "mappingProjectID")).thenReturn(null);
+		when(dataService.findOneById(ENTITY_NAME, "mappingProjectID")).thenReturn(null);
 		try
 		{
 			mappingProjectRepositoryImpl.update(mappingProject);

@@ -87,17 +87,17 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
-	public Entity findOne(Object id)
+	public Entity findOneById(Object id)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.READ);
-		return decoratedRepository.findOne(id);
+		return decoratedRepository.findOneById(id);
 	}
 
 	@Override
-	public Entity findOne(Object id, Fetch fetch)
+	public Entity findOneById(Object id, Fetch fetch)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.READ);
-		return decoratedRepository.findOne(id, fetch);
+		return decoratedRepository.findOneById(id, fetch);
 	}
 
 	@Override
@@ -157,10 +157,10 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
-		decoratedRepository.deleteById(ids);
+		decoratedRepository.deleteAll(ids);
 	}
 
 	@Override

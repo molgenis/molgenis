@@ -50,8 +50,8 @@ public class DefaultEntityTest
 		refEntity2 = new DefaultEntity(refEmd, dataService);
 		refEntity2.set("id", "test2");
 
-		when(dataService.findOne("refEntity", "test")).thenReturn(refEntity1);
-		when(dataService.findOne("refEntity", "test2")).thenReturn(refEntity2);
+		when(dataService.findOneById("refEntity", "test")).thenReturn(refEntity1);
+		when(dataService.findOneById("refEntity", "test2")).thenReturn(refEntity2);
 
 		emd = new DefaultEntityMetaData("Entity");
 		emd.addAttributeMetaData(new DefaultAttributeMetaData("id"), ROLE_ID);

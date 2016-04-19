@@ -36,7 +36,7 @@ public class StaticContentServiceImpl implements StaticContentService
 	{
 		try
 		{
-			StaticContent staticContent = dataService.findOne(StaticContent.ENTITY_NAME, key, StaticContent.class);
+			StaticContent staticContent = dataService.findOneById(StaticContent.ENTITY_NAME, key, StaticContent.class);
 			if (staticContent == null)
 			{
 				staticContent = new StaticContent(key, dataService);
@@ -66,7 +66,7 @@ public class StaticContentServiceImpl implements StaticContentService
 	public String getContent(String key)
 	{
 		StaticContent staticContent = RunAsSystemProxy.runAsSystem(() -> {
-			return dataService.findOne(StaticContent.ENTITY_NAME, key, StaticContent.class);
+			return dataService.findOneById(StaticContent.ENTITY_NAME, key, StaticContent.class);
 		});
 		return staticContent != null ? staticContent.getContent() : null;
 	}

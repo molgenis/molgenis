@@ -74,7 +74,7 @@ public class TransactionLogService implements MolgenisTransactionListener
 		if (transactionId != null)
 		{
 			runAsSystem(() -> {
-				Entity log = dataService.findOne(MolgenisTransactionLogMetaData.ENTITY_NAME, transactionId);
+				Entity log = dataService.findOneById(MolgenisTransactionLogMetaData.ENTITY_NAME, transactionId);
 				if (log != null)
 				{
 					Entity logEntry = new DefaultEntity(molgenisTransactionLogEntryMetaData, dataService);
@@ -91,7 +91,7 @@ public class TransactionLogService implements MolgenisTransactionListener
 	private synchronized void finishTransaction(String transactionId, MolgenisTransactionLogMetaData.Status status)
 	{
 		RunAsSystemProxy.runAsSystem(() -> {
-			Entity log = dataService.findOne(MolgenisTransactionLogMetaData.ENTITY_NAME, transactionId);
+			Entity log = dataService.findOneById(MolgenisTransactionLogMetaData.ENTITY_NAME, transactionId);
 			log.set(MolgenisTransactionLogMetaData.END_TIME, new Date());
 			log.set(MolgenisTransactionLogMetaData.STATUS, status.name());
 

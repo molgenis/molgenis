@@ -130,9 +130,9 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		String molgenisUserName1 = "user1";
 		MolgenisUser molgenisUser1 = when(mock(MolgenisUser.class).getId()).thenReturn(molgenisUserId1).getMock();
 		when(molgenisUser1.getUsername()).thenReturn(molgenisUserName1);
-		when(dataService.findOne(MolgenisUser.ENTITY_NAME, molgenisUserId0, MolgenisUser.class))
+		when(dataService.findOneById(MolgenisUser.ENTITY_NAME, molgenisUserId0, MolgenisUser.class))
 				.thenReturn(molgenisUser0);
-		when(dataService.findOne(MolgenisUser.ENTITY_NAME, molgenisUserId1, MolgenisUser.class))
+		when(dataService.findOneById(MolgenisUser.ENTITY_NAME, molgenisUserId1, MolgenisUser.class))
 				.thenReturn(molgenisUser1);
 		when(dataService.findAll(MolgenisUser.ENTITY_NAME, MolgenisUser.class))
 				.thenReturn(Stream.of(molgenisUser0, molgenisUser1));
@@ -203,7 +203,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		molgenisGroupMemberTwo.setMolgenisGroup(group21);
 		molgenisGroupMemberTwo.setMolgenisUser(user1);
 
-		when(dataService.findOne(MolgenisUser.ENTITY_NAME, "1", MolgenisUser.class)).thenReturn(user1);
+		when(dataService.findOneById(MolgenisUser.ENTITY_NAME, "1", MolgenisUser.class)).thenReturn(user1);
 		when(dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, user1), MolgenisGroupMember.class))
 						.thenReturn(Stream.of(molgenisGroupMemberOne, molgenisGroupMemberTwo));
@@ -236,8 +236,8 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(molgenisGroupMember.getMolgenisUser()).thenReturn(user1);
 		when(molgenisGroupMember.getMolgenisGroup()).thenReturn(group22);
 
-		when(dataService.findOne(MolgenisUser.ENTITY_NAME, "1", MolgenisUser.class)).thenReturn(user1);
-		when(dataService.findOne(MolgenisGroup.ENTITY_NAME, "22", MolgenisGroup.class)).thenReturn(group22);
+		when(dataService.findOneById(MolgenisUser.ENTITY_NAME, "1", MolgenisUser.class)).thenReturn(user1);
+		when(dataService.findOneById(MolgenisGroup.ENTITY_NAME, "22", MolgenisGroup.class)).thenReturn(group22);
 
 		when(dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, user1), MolgenisGroupMember.class))
@@ -286,7 +286,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(molgenisGroupMember.getMolgenisUser()).thenReturn(user1);
 		when(molgenisGroupMember.getMolgenisGroup()).thenReturn(group22);
 
-		when(dataService.findOne(MolgenisUser.ENTITY_NAME, "1", MolgenisUser.class)).thenReturn(user1);
+		when(dataService.findOneById(MolgenisUser.ENTITY_NAME, "1", MolgenisUser.class)).thenReturn(user1);
 
 		when(dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, user1), MolgenisGroupMember.class))
@@ -323,8 +323,8 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(molgenisGroupMember.getMolgenisUser()).thenReturn(user1);
 		when(molgenisGroupMember.getMolgenisGroup()).thenReturn(group22);
 
-		when(dataService.findOne(MolgenisUser.ENTITY_NAME, "1", MolgenisUser.class)).thenReturn(user1);
-		when(dataService.findOne(MolgenisGroup.ENTITY_NAME, "22", MolgenisGroup.class)).thenReturn(group22);
+		when(dataService.findOneById(MolgenisUser.ENTITY_NAME, "1", MolgenisUser.class)).thenReturn(user1);
+		when(dataService.findOneById(MolgenisGroup.ENTITY_NAME, "22", MolgenisGroup.class)).thenReturn(group22);
 
 		Query q = new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, user1).and()
 				.eq(MolgenisGroupMember.MOLGENISGROUP, group22);

@@ -1,6 +1,7 @@
 package org.molgenis.data.meta;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -51,7 +52,7 @@ public class MetaDataRepositoryDecorator implements Repository
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		Set<RepositoryCapability> capabilities = decorated.getCapabilities();
+		Set<RepositoryCapability> capabilities = new HashSet<>(decorated.getCapabilities());
 		capabilities.remove(RepositoryCapability.WRITABLE);
 		capabilities.remove(RepositoryCapability.MANAGABLE);
 		return capabilities;
@@ -100,15 +101,15 @@ public class MetaDataRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Entity findOne(Object id)
+	public Entity findOneById(Object id)
 	{
-		return decorated.findOne(id);
+		return decorated.findOneById(id);
 	}
 
 	@Override
-	public Entity findOne(Object id, Fetch fetch)
+	public Entity findOneById(Object id, Fetch fetch)
 	{
-		return decorated.findOne(id, fetch);
+		return decorated.findOneById(id, fetch);
 	}
 
 	@Override
@@ -160,9 +161,9 @@ public class MetaDataRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
-		decorated.deleteById(ids);
+		decorated.deleteAll(ids);
 	}
 
 	@Override

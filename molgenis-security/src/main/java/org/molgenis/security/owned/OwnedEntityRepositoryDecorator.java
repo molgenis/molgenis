@@ -123,9 +123,9 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Entity findOne(Object id)
+	public Entity findOneById(Object id)
 	{
-		Entity e = decoratedRepo.findOne(id);
+		Entity e = decoratedRepo.findOneById(id);
 
 		if (mustAddRowLevelSecurity())
 		{
@@ -136,13 +136,13 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Entity findOne(Object id, Fetch fetch)
+	public Entity findOneById(Object id, Fetch fetch)
 	{
 		if (fetch != null)
 		{
 			fetch.field(OwnedEntityMetaData.ATTR_OWNER_USERNAME);
 		}
-		Entity e = decoratedRepo.findOne(id, fetch);
+		Entity e = decoratedRepo.findOneById(id, fetch);
 
 		if (mustAddRowLevelSecurity())
 		{
@@ -236,7 +236,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	{
 		if (mustAddRowLevelSecurity())
 		{
-			Entity entity = findOne(id);
+			Entity entity = findOneById(id);
 			if ((entity != null) && !currentUserIsOwner(entity)) return;
 		}
 
@@ -244,7 +244,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
 		if (mustAddRowLevelSecurity())
 		{
@@ -252,7 +252,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 		}
 		else
 		{
-			decoratedRepo.deleteById(ids);
+			decoratedRepo.deleteAll(ids);
 		}
 	}
 

@@ -136,7 +136,7 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 			DataService dataService = mock(DataService.class);
 			StaticContent staticContent = when(mock(StaticContent.class).getContent())
 					.thenReturn("<p>Welcome to Molgenis!</p>").getMock();
-			when(dataService.findOne(StaticContent.ENTITY_NAME, "home", StaticContent.class)).thenReturn(staticContent);
+			when(dataService.findOneById(StaticContent.ENTITY_NAME, "home", StaticContent.class)).thenReturn(staticContent);
 			return dataService;
 		}
 

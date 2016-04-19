@@ -387,7 +387,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		MappingProject project = createMappingProjectWithMappings(entityName);
 
 		// update an entity in the source
-		Entity geneEntity = dataService.findOne(geneMetaData.getName(), "2");
+		Entity geneEntity = dataService.findOneById(geneMetaData.getName(), "2");
 		geneEntity.set("length", 5.678);
 		dataService.update(geneMetaData.getName(), geneEntity);
 
@@ -429,7 +429,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		MappingProject project = createMappingProjectWithTwoSourcesWithMappings(entityName);
 
 		// delete an entity from the source
-		dataService.delete(geneMetaData.getName(), "2");
+		dataService.deleteById(geneMetaData.getName(), "2");
 
 		// apply mapping again, this should not delete entities mapped from source 2
 		mappingService.applyMappings(project.getMappingTarget("HopEntity"), entityName);

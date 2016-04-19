@@ -75,10 +75,10 @@ public class DependencyResolverTest
 
 		Repository repo = mock(Repository.class);
 		when(repo.getName()).thenReturn("Person");
-		when(repo.findOne("Piet")).thenReturn(piet);
-		when(repo.findOne("Jan")).thenReturn(jan);
-		when(repo.findOne("Marie")).thenReturn(marie);
-		when(repo.findOne("Katrijn")).thenReturn(katrijn);
+		when(repo.findOneById("Piet")).thenReturn(piet);
+		when(repo.findOneById("Jan")).thenReturn(jan);
+		when(repo.findOneById("Marie")).thenReturn(marie);
+		when(repo.findOneById("Katrijn")).thenReturn(katrijn);
 
 		DataServiceImpl ds = new DataServiceImpl();
 		ds.addRepository(repo);

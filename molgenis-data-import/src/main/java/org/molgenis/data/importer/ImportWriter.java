@@ -138,7 +138,7 @@ public class ImportWriter
 
 			// Find new ones
 			transformed.stream().map(Entity::getIdValue).forEach(id -> {
-				if (repo.findOne(id) == null)
+				if (repo.findOneById(id) == null)
 				{
 					metaDataChanges.addLanguage(languages.get(id));
 				}
@@ -345,7 +345,7 @@ public class ImportWriter
 			for (Entity tag : tagRepo)
 			{
 				Entity transformed = new DefaultEntity(TagMetaData.INSTANCE, dataService, tag);
-				Entity existingTag = dataService.findOne(TagMetaData.ENTITY_NAME,
+				Entity existingTag = dataService.findOneById(TagMetaData.ENTITY_NAME,
 						tag.getString(TagMetaData.IDENTIFIER));
 
 				if (existingTag == null)
@@ -936,7 +936,7 @@ public class ImportWriter
 			Entity refEntity;
 			if (selfReferencing)
 			{
-				refEntity = dataService.findOne(attribute.getRefEntity().getName(), value);
+				refEntity = dataService.findOneById(attribute.getRefEntity().getName(), value);
 				if (refEntity == null) throw new UnknownEntityException(attribute.getRefEntity().getName() + " with "
 						+ attribute.getRefEntity().getIdAttribute().getName() + " [" + value + "] does not exist");
 			}
@@ -1013,7 +1013,7 @@ public class ImportWriter
 			if (selfReferencing)
 			{
 				return from(ids).transform(dataType::convert).transform(
-						convertedId -> (dataService.findOne(attribute.getRefEntity().getName(), convertedId)));
+						convertedId -> (dataService.findOneById(attribute.getRefEntity().getName(), convertedId)));
 			}
 			else
 			{

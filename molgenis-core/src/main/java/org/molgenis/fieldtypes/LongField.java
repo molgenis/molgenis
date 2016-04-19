@@ -112,7 +112,7 @@ public class LongField extends FieldType
 	public Object convert(Object value)
 	{
 		if (value == null) return null;
-		if (value instanceof Long) return value;
+		if (value instanceof Number) return ((Number) value).longValue();
 		if (value instanceof String) return Long.parseLong(value.toString());
 		throw new RuntimeException("LongField.convert(" + value + ") failed");
 	}

@@ -57,7 +57,7 @@ public class GafListDbSettings implements GafListSettings
 
 	private String getValue(String name)
 	{
-		Entity entity = dataService.findOne(Meta.ENTITY_NAME, name);
+		Entity entity = dataService.findOneById(Meta.ENTITY_NAME, name);
 		return entity != null ? entity.getString(Meta.VALUE) : null;
 	}
 }
