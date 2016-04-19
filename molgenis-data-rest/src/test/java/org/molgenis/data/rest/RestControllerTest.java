@@ -128,7 +128,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(dataService.getEntityNames()).thenReturn(Stream.of(ENTITY_NAME));
 		when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
 
-		when(dataService.findOne(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
+		when(dataService.findOneById(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
 
 		Query q = new QueryImpl().eq("name", "Piet").pageSize(10).offset(5);
 		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Stream.of(entity));
@@ -185,14 +185,14 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void deleteDelete() throws Exception
 	{
 		mockMvc.perform(delete(HREF_ENTITY_ID)).andExpect(status().isNoContent());
-		verify(dataService).delete(ENTITY_NAME, ENTITY_ID);
+		verify(dataService).deleteById(ENTITY_NAME, ENTITY_ID);
 	}
 
 	@Test
 	public void deletePost() throws Exception
 	{
 		mockMvc.perform(post(HREF_ENTITY_ID).param("_method", "DELETE")).andExpect(status().isNoContent());
-		verify(dataService).delete(ENTITY_NAME, ENTITY_ID);
+		verify(dataService).deleteById(ENTITY_NAME, ENTITY_ID);
 	}
 
 	@Test
@@ -374,7 +374,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieveEntityAttributeUnknownEntity() throws Exception
 	{
-		when(dataService.findOne(ENTITY_NAME, ENTITY_ID)).thenReturn(null);
+		when(dataService.findOneById(ENTITY_NAME, ENTITY_ID)).thenReturn(null);
 		mockMvc.perform(get(HREF_ENTITY_ID + "/name")).andExpect(status().isNotFound());
 	}
 
@@ -394,7 +394,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		entity.set("id", ENTITY_ID);
 		entity.set("name", entityXref);
 
-		when(dataService.findOne(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
+		when(dataService.findOneById(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
 
 		DefaultAttributeMetaData attrName = new DefaultAttributeMetaData("name", FieldTypeEnum.XREF);
 		EntityMetaData meta = mock(EntityMetaData.class);
@@ -459,7 +459,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void updateInternalRepoExistingIsNull() throws Exception
 	{
-		when(dataService.findOne(ENTITY_NAME, ENTITY_ID)).thenReturn(null);
+		when(dataService.findOneById(ENTITY_NAME, ENTITY_ID)).thenReturn(null);
 
 		mockMvc.perform(put(HREF_ENTITY_ID).content("{name:Klaas}").contentType(APPLICATION_JSON))
 				.andExpect(status().isNotFound());
@@ -523,7 +523,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void molgenisDataAccessException() throws Exception
 	{
-		when(dataService.findOne(ENTITY_NAME, ENTITY_ID)).thenThrow(new MolgenisDataAccessException());
+		when(dataService.findOneById(ENTITY_NAME, ENTITY_ID)).thenThrow(new MolgenisDataAccessException());
 		mockMvc.perform(get(HREF_ENTITY_ID)).andExpect(status().isUnauthorized());
 	}
 

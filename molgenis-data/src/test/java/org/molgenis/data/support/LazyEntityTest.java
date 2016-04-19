@@ -43,7 +43,7 @@ public class LazyEntityTest
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
 		dataService = mock(DataService.class);
 		entity = mock(Entity.class);
-		when(dataService.findOne(ENTITY_NAME, id)).thenReturn(entity);
+		when(dataService.findOneById(ENTITY_NAME, id)).thenReturn(entity);
 		id = Integer.valueOf(1);
 		lazyEntity = new LazyEntity(entityMeta, dataService, id);
 	}
@@ -62,7 +62,7 @@ public class LazyEntityTest
 		when(entity.get(attrName)).thenReturn(value);
 		assertEquals(value, lazyEntity.get(attrName));
 		assertEquals(value, lazyEntity.get(attrName));
-		verify(dataService, times(1)).findOne(ENTITY_NAME, id);
+		verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
 	}
 
 	@Test
@@ -89,7 +89,7 @@ public class LazyEntityTest
 		when(entity.getBoolean(attrName)).thenReturn(value);
 		assertEquals(value, lazyEntity.getBoolean(attrName));
 		assertEquals(value, lazyEntity.getBoolean(attrName));
-		verify(dataService, times(1)).findOne(ENTITY_NAME, id);
+		verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
 	}
 
 	@Test
@@ -100,7 +100,7 @@ public class LazyEntityTest
 		when(entity.getDate(attrName)).thenReturn(value);
 		assertEquals(value, lazyEntity.getDate(attrName));
 		assertEquals(value, lazyEntity.getDate(attrName));
-		verify(dataService, times(1)).findOne(ENTITY_NAME, id);
+		verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
 	}
 
 	@Test
@@ -111,7 +111,7 @@ public class LazyEntityTest
 		when(entity.getDouble(attrName)).thenReturn(value);
 		assertEquals(value, lazyEntity.getDouble(attrName));
 		assertEquals(value, lazyEntity.getDouble(attrName));
-		verify(dataService, times(1)).findOne(ENTITY_NAME, id);
+		verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
 	}
 
 	@Test
@@ -123,7 +123,7 @@ public class LazyEntityTest
 		when(entity.getEntities(attrName)).thenReturn(entities);
 		assertEquals(entities, lazyEntity.getEntities(attrName));
 		assertEquals(entities, lazyEntity.getEntities(attrName));
-		verify(dataService, times(1)).findOne(ENTITY_NAME, id);
+		verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
 	}
 
 	@Test
@@ -135,7 +135,7 @@ public class LazyEntityTest
 		when(entity.getEntities(attrName, Entity.class)).thenReturn(entities);
 		assertEquals(entities, lazyEntity.getEntities(attrName, Entity.class));
 		assertEquals(entities, lazyEntity.getEntities(attrName, Entity.class));
-		verify(dataService, times(1)).findOne(ENTITY_NAME, id);
+		verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
 	}
 
 	@Test
@@ -146,7 +146,7 @@ public class LazyEntityTest
 		when(entity.getEntity(attrName)).thenReturn(value);
 		assertEquals(value, lazyEntity.getEntity(attrName));
 		assertEquals(value, lazyEntity.getEntity(attrName));
-		verify(dataService, times(1)).findOne(ENTITY_NAME, id);
+		verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
 	}
 
 	@Test
@@ -157,7 +157,7 @@ public class LazyEntityTest
 		when(entity.getEntity(attrName, Entity.class)).thenReturn(value);
 		assertEquals(value, lazyEntity.getEntity(attrName, Entity.class));
 		assertEquals(value, lazyEntity.getEntity(attrName, Entity.class));
-		verify(dataService, times(1)).findOne(ENTITY_NAME, id);
+		verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
 	}
 
 	@Test
@@ -180,7 +180,7 @@ public class LazyEntityTest
 		when(entity.getInt(attrName)).thenReturn(value);
 		assertEquals(value, lazyEntity.getInt(attrName));
 		assertEquals(value, lazyEntity.getInt(attrName));
-		verify(dataService, times(1)).findOne(ENTITY_NAME, id);
+		verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
 	}
 
 	@Test
@@ -198,7 +198,7 @@ public class LazyEntityTest
 		when(entity.getIntList(attrName)).thenReturn(value);
 		assertEquals(value, lazyEntity.getIntList(attrName));
 		assertEquals(value, lazyEntity.getIntList(attrName));
-		verify(dataService, times(1)).findOne(ENTITY_NAME, id);
+		verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
 	}
 
 	@Test
@@ -208,7 +208,7 @@ public class LazyEntityTest
 		when(entity.getLabelValue()).thenReturn(value);
 		assertEquals(value, lazyEntity.getLabelValue());
 		assertEquals(value, lazyEntity.getLabelValue());
-		verify(dataService, times(1)).findOne(ENTITY_NAME, id);
+		verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
 	}
 
 	@Test
@@ -228,7 +228,7 @@ public class LazyEntityTest
 		when(entity.getList(attrName)).thenReturn(value);
 		assertEquals(value, lazyEntity.getList(attrName));
 		assertEquals(value, lazyEntity.getList(attrName));
-		verify(dataService, times(1)).findOne(ENTITY_NAME, id);
+		verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
 	}
 
 	@Test
@@ -239,7 +239,7 @@ public class LazyEntityTest
 		when(entity.getLong(attrName)).thenReturn(value);
 		assertEquals(value, lazyEntity.getLong(attrName));
 		assertEquals(value, lazyEntity.getLong(attrName));
-		verify(dataService, times(1)).findOne(ENTITY_NAME, id);
+		verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
 	}
 
 	@Test
@@ -250,14 +250,14 @@ public class LazyEntityTest
 		when(entity.getString(attrName)).thenReturn(value);
 		assertEquals(value, lazyEntity.getString(attrName));
 		assertEquals(value, lazyEntity.getString(attrName));
-		verify(dataService, times(1)).findOne(ENTITY_NAME, id);
+		verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
 	}
 
 	@Test
 	public void getStringIdAttr()
 	{
 		String strId = "1";
-		when(dataService.findOne(ENTITY_NAME, strId)).thenReturn(entity);
+		when(dataService.findOneById(ENTITY_NAME, strId)).thenReturn(entity);
 		lazyEntity = new LazyEntity(entityMeta, dataService, strId);
 		assertEquals(strId, lazyEntity.getString(ID_ATTR_NAME));
 	}
@@ -270,7 +270,7 @@ public class LazyEntityTest
 		when(entity.getTimestamp(attrName)).thenReturn(value);
 		assertEquals(value, lazyEntity.getTimestamp(attrName));
 		assertEquals(value, lazyEntity.getTimestamp(attrName));
-		verify(dataService, times(1)).findOne(ENTITY_NAME, id);
+		verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
 	}
 
 	@Test
@@ -281,7 +281,7 @@ public class LazyEntityTest
 		when(entity.getUtilDate(attrName)).thenReturn(value);
 		assertEquals(value, lazyEntity.getUtilDate(attrName));
 		assertEquals(value, lazyEntity.getUtilDate(attrName));
-		verify(dataService, times(1)).findOne(ENTITY_NAME, id);
+		verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
 	}
 
 	@Test
@@ -291,7 +291,7 @@ public class LazyEntityTest
 		Object value = mock(Object.class);
 		lazyEntity.set(attrName, value);
 		lazyEntity.set(attrName, value);
-		verify(dataService, times(1)).findOne(ENTITY_NAME, id);
+		verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
 		verify(entity, times(2)).set(attrName, value);
 	}
 
@@ -301,7 +301,7 @@ public class LazyEntityTest
 		Entity value = mock(Entity.class);
 		lazyEntity.set(value);
 		lazyEntity.set(value);
-		verify(dataService, times(1)).findOne(ENTITY_NAME, id);
+		verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
 		verify(entity, times(2)).set(value);
 	}
 }

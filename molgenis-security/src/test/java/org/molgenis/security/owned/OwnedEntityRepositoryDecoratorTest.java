@@ -151,9 +151,9 @@ public class OwnedEntityRepositoryDecoratorTest
 		Fetch fetch = new Fetch();
 		Entity myEntity = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("username").getMock();
 		Fetch decoratedFetch = new Fetch().field(ATTR_OWNER_USERNAME);
-		when(decoratedRepository.findOne(id, decoratedFetch)).thenReturn(myEntity);
-		assertEquals(myEntity, ownedEntityRepositoryDecorator.findOne(id, fetch));
-		verify(decoratedRepository, times(1)).findOne(id, fetch);
+		when(decoratedRepository.findOneById(id, decoratedFetch)).thenReturn(myEntity);
+		assertEquals(myEntity, ownedEntityRepositoryDecorator.findOneById(id, fetch));
+		verify(decoratedRepository, times(1)).findOneById(id, fetch);
 	}
 
 	@Test
@@ -168,9 +168,9 @@ public class OwnedEntityRepositoryDecoratorTest
 		Fetch fetch = new Fetch();
 		Entity myEntity = when(mock(Entity.class).getString(ATTR_OWNER_USERNAME)).thenReturn("notme").getMock();
 		Fetch decoratedFetch = new Fetch().field(ATTR_OWNER_USERNAME);
-		when(decoratedRepository.findOne(id, decoratedFetch)).thenReturn(myEntity);
-		assertNull(ownedEntityRepositoryDecorator.findOne(id, fetch));
-		verify(decoratedRepository, times(1)).findOne(id, fetch);
+		when(decoratedRepository.findOneById(id, decoratedFetch)).thenReturn(myEntity);
+		assertNull(ownedEntityRepositoryDecorator.findOneById(id, fetch));
+		verify(decoratedRepository, times(1)).findOneById(id, fetch);
 	}
 
 	@Test
@@ -180,9 +180,9 @@ public class OwnedEntityRepositoryDecoratorTest
 		Fetch fetch = new Fetch();
 		Entity entity = mock(Entity.class);
 		Fetch decoratedFetch = new Fetch().field(ATTR_OWNER_USERNAME);
-		when(decoratedRepository.findOne(id, decoratedFetch)).thenReturn(entity);
-		ownedEntityRepositoryDecorator.findOne(id, fetch);
-		verify(decoratedRepository, times(1)).findOne(id, fetch);
+		when(decoratedRepository.findOneById(id, decoratedFetch)).thenReturn(entity);
+		ownedEntityRepositoryDecorator.findOneById(id, fetch);
+		verify(decoratedRepository, times(1)).findOneById(id, fetch);
 	}
 
 	@Test

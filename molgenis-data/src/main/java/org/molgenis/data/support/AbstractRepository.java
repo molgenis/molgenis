@@ -80,13 +80,13 @@ public abstract class AbstractRepository implements Repository
 	}
 
 	@Override
-	public Entity findOne(Object id)
+	public Entity findOneById(Object id)
 	{
-		return findOne(id, null);
+		return findOneById(id, null);
 	}
 
 	@Override
-	public Entity findOne(Object id, Fetch fetch)
+	public Entity findOneById(Object id, Fetch fetch)
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -172,7 +172,7 @@ public abstract class AbstractRepository implements Repository
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
 		throw new UnsupportedOperationException();
 	}

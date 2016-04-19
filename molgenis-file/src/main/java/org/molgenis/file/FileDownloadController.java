@@ -37,7 +37,7 @@ public class FileDownloadController
 	@RequestMapping(value = "/{id:.+}", method = GET)
 	public void getFile(@PathVariable("id") String id, HttpServletResponse response) throws IOException
 	{
-		FileMeta fileMeta = dataService.findOne(FileMeta.ENTITY_NAME, id, FileMeta.class);
+		FileMeta fileMeta = dataService.findOneById(FileMeta.ENTITY_NAME, id, FileMeta.class);
 		if (fileMeta == null)
 		{
 			response.setStatus(HttpStatus.NOT_FOUND.value());

@@ -182,7 +182,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 					break;
 				case XREF:
 				case CATEGORICAL:
-					convertedValue = dataService.findOne(attributeMetaData.getRefEntity().getName(),
+					convertedValue = dataService.findOneById(attributeMetaData.getRefEntity().getName(),
 							Context.toString(value));
 					break;
 				case MREF:

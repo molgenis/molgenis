@@ -222,7 +222,7 @@ public abstract class DefaultSettingsEntity implements Entity
 		{
 			String id = getEntityMetaData().getSimpleName();
 			cachedEntity = RunAsSystemProxy.runAsSystem(() -> {
-				Entity entity = dataService.findOne(entityName, id);
+				Entity entity = dataService.findOneById(entityName, id);
 
 				// refresh cache on settings update
 					dataService.addEntityListener(entityName, new EntityListener()

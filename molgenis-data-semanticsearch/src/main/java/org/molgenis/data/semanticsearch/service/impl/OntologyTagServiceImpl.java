@@ -258,7 +258,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	private void updateEntityMetaDataEntityWithNewAttributeEntity(String entity, String attribute,
 			Entity attributeEntity)
 	{
-		Entity entityEntity = dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME, entity);
+		Entity entityEntity = dataService.findOneById(EntityMetaDataMetaData.ENTITY_NAME, entity);
 		Iterable<Entity> attributes = entityEntity.getEntities(ATTRIBUTES);
 		entityEntity.set(ATTRIBUTES, Iterables.transform(attributes,
 				att -> att.getString(AttributeMetaDataMetaData.NAME).equals(attribute) ? attributeEntity : att));
@@ -274,7 +274,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	@RunAsSystem
 	private Entity findAttributeEntity(String entityName, String attributeName)
 	{
-		Entity entityMetaDataEntity = dataService.findOne(ENTITY_NAME, entityName);
+		Entity entityMetaDataEntity = dataService.findOneById(ENTITY_NAME, entityName);
 		Optional<Entity> result = stream(entityMetaDataEntity.getEntities(ATTRIBUTES).spliterator(), false).filter(
 				att -> attributeName.equals(att.getString(AttributeMetaDataMetaData.NAME))).findFirst();
 

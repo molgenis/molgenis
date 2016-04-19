@@ -188,7 +188,7 @@ public class ImportWizardController extends AbstractWizardController
 		String entitiesString = webRequest.getParameter("entityIds");
 		List<String> entities = Arrays.asList(entitiesString.split(","));
 
-		MolgenisGroup molgenisGroup = dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class);
+		MolgenisGroup molgenisGroup = dataService.findOneById(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class);
 		if (molgenisGroup == null) throw new RuntimeException("unknown group id [" + groupId + "]");
 		List<Authority> groupPermissions = getGroupPermissions(molgenisGroup);
 		Permissions permissions = createPermissions(groupPermissions, entities);
@@ -213,7 +213,7 @@ public class ImportWizardController extends AbstractWizardController
 						|| value.equalsIgnoreCase(WRITE.toString()) || value.equalsIgnoreCase(WRITEMETA.toString()))
 				{
 					authority.setMolgenisGroup(
-							dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class));
+							dataService.findOneById(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class));
 					authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_"
 							+ entityClassId.toUpperCase());
 					if (authority.getId() == null)
@@ -225,7 +225,7 @@ public class ImportWizardController extends AbstractWizardController
 				}
 				else if (value.equalsIgnoreCase(NONE.toString()))
 				{
-					if (authority.getId() != null) dataService.delete(GroupAuthority.ENTITY_NAME, authority.getId());
+					if (authority.getId() != null) dataService.deleteById(GroupAuthority.ENTITY_NAME, authority.getId());
 				}
 				else
 				{

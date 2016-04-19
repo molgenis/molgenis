@@ -317,7 +317,7 @@ class EntityMetaDataRepository
 
 	public void delete(String entityName)
 	{
-		Entity entity = getRepository().findOne(entityName);
+		Entity entity = getRepository().findOneById(entityName);
 		if (entity != null)
 		{
 			repository.deleteById(entityName);
