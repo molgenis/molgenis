@@ -65,7 +65,7 @@ public class AbstractElasticsearchRepositoryTest
 		Stream<Entity> entities = Stream.empty();
 		repository.delete(entities);
 		verify(searchService, times(1)).delete(entities, entityMeta);
-		verify(searchService, times(1)).refresh(entityMeta);
+		verify(searchService, times(1)).refresh();
 	}
 
 	@SuppressWarnings(
@@ -79,7 +79,7 @@ public class AbstractElasticsearchRepositoryTest
 		when(searchService.index(captor.capture(), eq(entityMeta), eq(IndexingMode.UPDATE))).thenReturn(1l);
 		repository.update(entities);
 		assertEquals(captor.getValue().collect(Collectors.toList()), Arrays.asList(entity0));
-		verify(searchService, times(1)).refresh(entityMeta);
+		verify(searchService, times(1)).refresh();
 	}
 
 	@Test

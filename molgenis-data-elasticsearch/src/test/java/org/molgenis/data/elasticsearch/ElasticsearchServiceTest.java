@@ -34,7 +34,6 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityManagerImpl;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.ElasticsearchService.BulkProcessorFactory;
@@ -77,7 +76,7 @@ public class ElasticsearchServiceTest
 		when(bulkProcessor.awaitClose(any(Long.class), any(TimeUnit.class))).thenReturn(true);
 		when(bulkProcessorFactory.create(client)).thenReturn(bulkProcessor);
 		ElasticsearchService.setBulkProcessorFactory(bulkProcessorFactory);
-		doNothing().when(searchService).refresh(any(EntityMetaData.class));
+		doNothing().when(searchService).refresh();
 	}
 
 	@BeforeClass
