@@ -3,6 +3,7 @@ package org.molgenis.gavin.controller;
 import static java.io.File.separator;
 import static java.net.URLConnection.guessContentTypeFromName;
 import static org.molgenis.gavin.controller.GavinController.URI;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -28,7 +29,9 @@ import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -109,8 +112,9 @@ public class GavinController
 		return inputFile;
 	}
 
-	@RequestMapping(value = "/result/{jobIdentifier}", method = GET)
-	public void result(HttpServletResponse response, @PathVariable(value = "jobIdentifier") String jobIdentifier)
+	@RequestMapping(value = "/result/{jobIdentifier}", method = GET, produces = APPLICATION_OCTET_STREAM_VALUE)
+	@ResponseBody
+	public FileSystemResource result(HttpServletResponse response, @PathVariable(value = "jobIdentifier") String jobIdentifier)
 			throws IOException
 	{
 		File file = fileStore.getFile("gavin" + separator + jobIdentifier + separator + "gavin-result.vcf");
@@ -118,12 +122,8 @@ public class GavinController
 		{
 			throw new MolgenisDataException("Sorry, " + file.getName() + " does not exist for job " + jobIdentifier);
 		}
-		String mimeType = guessContentTypeFromName(file.getName());
-		if (mimeType == null) mimeType = "application/octet-stream";
-
-		response.setContentType(mimeType);
 		response.setHeader("Content-Disposition", String.format("inline; filename=\"" + file.getName() + "\""));
-		response.setContentLength((int) file.length());
+		return new FileSystemResource(file);
 	}
 
 	@ExceptionHandler(IllegalArgumentException.class)
