@@ -2,10 +2,6 @@ package org.molgenis.integrationtest.data;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
@@ -34,15 +30,12 @@ public abstract class AbstractDataIntegrationIT extends AbstractTestNGSpringCont
 	ConfigurableApplicationContext applicationContext;
 
 	@Autowired
-<<<<<<< HEAD
+
 	EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
 
 	// FIXME
 	// @Autowired
 	// EmbeddedMysqlDatabase dataSource;
-=======
-	AsyncTransactionLog asyncTransactionLog;
->>>>>>> effe2b8c2c4c460cd60d6bddcbf9161cf5072d0d
 
 	@BeforeClass
 	public void init()
