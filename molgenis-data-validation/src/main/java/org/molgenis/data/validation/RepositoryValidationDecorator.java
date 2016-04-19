@@ -15,7 +15,6 @@ import static org.molgenis.data.RepositoryCapability.VALIDATE_UNIQUE_CONSTRAINT;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -41,8 +40,6 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.transaction.MolgenisTransactionLogEntryMetaData;
-import org.molgenis.data.transaction.MolgenisTransactionLogMetaData;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.util.EntityUtils;
@@ -51,9 +48,6 @@ import org.molgenis.util.HugeSet;
 
 public class RepositoryValidationDecorator implements Repository
 {
-	private static List<String> ENTITIES_THAT_DO_NOT_NEED_VALIDATION = Arrays
-			.asList(MolgenisTransactionLogMetaData.ENTITY_NAME, MolgenisTransactionLogEntryMetaData.ENTITY_NAME);
-
 	private enum ValidationMode
 	{
 		ADD, UPDATE
@@ -285,11 +279,6 @@ public class RepositoryValidationDecorator implements Repository
 	private Stream<? extends Entity> validate(Stream<? extends Entity> entities, ValidationResource validationResource,
 			ValidationMode validationMode)
 	{
-		if (ENTITIES_THAT_DO_NOT_NEED_VALIDATION.contains(getName()))
-		{
-			return entities;
-		}
-
 		// prepare validation
 		initValidation(validationResource, validationMode);
 

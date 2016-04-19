@@ -13,8 +13,6 @@ import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.RepositorySecurityDecorator;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.OwnedEntityMetaData;
-import org.molgenis.data.transaction.TransactionLogRepositoryDecorator;
-import org.molgenis.data.transaction.TransactionLogService;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
@@ -24,7 +22,6 @@ import org.molgenis.util.EntityUtils;
 public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFactory
 {
 	private final EntityManager entityManager;
-	private final TransactionLogService transactionLogService;
 	private final EntityAttributesValidator entityAttributesValidator;
 	private final IdGenerator idGenerator;
 	private final AppSettings appSettings;
@@ -32,13 +29,12 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final ExpressionValidator expressionValidator;
 	private final RepositoryDecoratorRegistry repositoryDecoratorRegistry;
 
-	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager, TransactionLogService transactionLogService,
+	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
 			EntityAttributesValidator entityAttributesValidator, IdGenerator idGenerator, AppSettings appSettings,
 			DataService dataService, ExpressionValidator expressionValidator,
 			RepositoryDecoratorRegistry repositoryDecoratorRegistry)
 	{
 		this.entityManager = entityManager;
-		this.transactionLogService = transactionLogService;
 		this.entityAttributesValidator = entityAttributesValidator;
 		this.idGenerator = idGenerator;
 		this.appSettings = appSettings;
@@ -57,23 +53,20 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			decoratedRepository = new MolgenisUserDecorator(decoratedRepository);
 		}
 
-		// 8. Owned decorator
+		// 7. Owned decorator
 		if (EntityUtils.doesExtend(decoratedRepository.getEntityMetaData(), OwnedEntityMetaData.ENTITY_NAME))
 		{
 			decoratedRepository = new OwnedEntityRepositoryDecorator(decoratedRepository);
 		}
 
-		// 7. Entity reference resolver decorator
+		// 6. Entity reference resolver decorator
 		decoratedRepository = new EntityReferenceResolverDecorator(decoratedRepository, entityManager);
 
-		// 6. Computed entity values decorator
+		// 5. Computed entity values decorator
 		decoratedRepository = new ComputedEntityValuesDecorator(decoratedRepository);
 
-		// 5. Entity listener
+		// 4. Entity listener
 		decoratedRepository = new EntityListenerRepositoryDecorator(decoratedRepository);
-
-		// 4. Transaction log decorator
-		decoratedRepository = new TransactionLogRepositoryDecorator(decoratedRepository, transactionLogService);
 
 		// 3. validation decorator
 		decoratedRepository = new RepositoryValidationDecorator(dataService, decoratedRepository,

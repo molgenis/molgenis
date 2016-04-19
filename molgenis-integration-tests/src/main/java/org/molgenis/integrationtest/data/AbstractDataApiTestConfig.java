@@ -21,8 +21,6 @@ import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.OwnedEntityMetaData;
 import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
-import org.molgenis.data.transaction.TransactionConfig;
-import org.molgenis.data.transaction.TransactionLogService;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.file.FileMetaMetaData;
@@ -54,16 +52,13 @@ import com.google.common.io.Files;
 @ComponentScan(
 { "org.molgenis.data.meta", "org.molgenis.data.elasticsearch.index", "org.molgenis.auth" })
 @Import(
-{ EmbeddedElasticSearchConfig.class, ElasticsearchEntityFactory.class, TransactionConfig.class,
-		ElasticsearchRepositoryCollection.class, RunAsSystemBeanPostProcessor.class, FileMetaMetaData.class,
-		OwnedEntityMetaData.class, RhinoConfig.class, ExpressionValidator.class, LanguageService.class })
+{ EmbeddedElasticSearchConfig.class, ElasticsearchEntityFactory.class, ElasticsearchRepositoryCollection.class,
+		RunAsSystemBeanPostProcessor.class, FileMetaMetaData.class, OwnedEntityMetaData.class, RhinoConfig.class,
+		ExpressionValidator.class, LanguageService.class })
 public abstract class AbstractDataApiTestConfig
 {
 	@Autowired
 	protected SearchService searchService;
-
-	@Autowired
-	private TransactionLogService transactionLogService;
 
 	@Autowired
 	public ExpressionValidator expressionValidator;
@@ -150,9 +145,9 @@ public abstract class AbstractDataApiTestConfig
 			@Override
 			public Repository createDecoratedRepository(Repository repository)
 			{
-				return new MolgenisRepositoryDecoratorFactory(entityManager(), transactionLogService,
-						entityAttributesValidator(), idGenerator(), appSettings(), dataService(), expressionValidator,
-						repositoryDecoratorRegistry()).createDecoratedRepository(repository);
+				return new MolgenisRepositoryDecoratorFactory(entityManager(), entityAttributesValidator(),
+						idGenerator(), appSettings(), dataService(), expressionValidator, repositoryDecoratorRegistry())
+								.createDecoratedRepository(repository);
 			}
 		};
 	}
