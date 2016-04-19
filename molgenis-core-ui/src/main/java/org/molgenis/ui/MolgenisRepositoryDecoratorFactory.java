@@ -15,6 +15,8 @@ import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.OwnedEntityMetaData;
 import org.molgenis.data.transaction.TransactionLogRepositoryDecorator;
 import org.molgenis.data.transaction.TransactionLogService;
+import org.molgenis.data.transaction.index.IndexTransactionLogRepositoryDecorator;
+import org.molgenis.data.transaction.index.IndexTransactionLogService;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
@@ -25,6 +27,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 {
 	private final EntityManager entityManager;
 	private final TransactionLogService transactionLogService;
+	private final IndexTransactionLogService indexTansactionLogService;
 	private final EntityAttributesValidator entityAttributesValidator;
 	private final IdGenerator idGenerator;
 	private final AppSettings appSettings;
@@ -35,7 +38,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager, TransactionLogService transactionLogService,
 			EntityAttributesValidator entityAttributesValidator, IdGenerator idGenerator, AppSettings appSettings,
 			DataService dataService, ExpressionValidator expressionValidator,
-			RepositoryDecoratorRegistry repositoryDecoratorRegistry)
+			RepositoryDecoratorRegistry repositoryDecoratorRegistry,
+			IndexTransactionLogService indexTansactionLogService)
 	{
 		this.entityManager = entityManager;
 		this.transactionLogService = transactionLogService;
@@ -45,6 +49,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.dataService = dataService;
 		this.expressionValidator = expressionValidator;
 		this.repositoryDecoratorRegistry = repositoryDecoratorRegistry;
+		this.indexTansactionLogService = indexTansactionLogService;
 	}
 
 	@Override
@@ -74,6 +79,9 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 
 		// 4. Transaction log decorator
 		decoratedRepository = new TransactionLogRepositoryDecorator(decoratedRepository, transactionLogService);
+
+		// 4. Index Transaction log decorator
+		decoratedRepository = new IndexTransactionLogRepositoryDecorator(decoratedRepository, indexTansactionLogService);
 
 		// 3. validation decorator
 		decoratedRepository = new RepositoryValidationDecorator(dataService, decoratedRepository,

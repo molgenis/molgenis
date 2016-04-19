@@ -34,6 +34,7 @@ import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.transaction.TransactionLogService;
+import org.molgenis.data.transaction.index.IndexTransactionLogService;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.file.FileStore;
@@ -119,6 +120,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	@Autowired
 	public TransactionLogService transactionLogService;
+
+	@Autowired
+	public IndexTransactionLogService indexTransactionLogService;
 
 	@Autowired
 	public IdGenerator idGenerator;
@@ -520,7 +524,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 			{
 				return new MolgenisRepositoryDecoratorFactory(entityManager(), transactionLogService,
 						entityAttributesValidator, idGenerator, appSettings, dataService(), expressionValidator,
-						repositoryDecoratorRegistry()).createDecoratedRepository(repository);
+						repositoryDecoratorRegistry(), indexTransactionLogService)
+						.createDecoratedRepository(repository);
 			}
 		};
 	}
