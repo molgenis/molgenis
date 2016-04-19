@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.google.common.base.Optional;
+
 @Controller
 @RequestMapping(URI)
 public class ViewConfigurationController extends MolgenisPluginController
@@ -82,15 +84,16 @@ public class ViewConfigurationController extends MolgenisPluginController
 			{
 				throw new IllegalArgumentException("View already exists with different master entity!");
 			}
-			Entity slaveEntity = viewService.getSlaveEntity(slaveEntityName);
-			if (slaveEntity == null)
+			Optional<Entity> slaveEntity = viewService.getSlaveEntity(viewName, slaveEntityName);
+			if (!slaveEntity.isPresent())
 			{
 				viewService.addNewSlaveEntityToExistingView(viewEntity, slaveEntityName, masterAttributeId,
 						slaveAttributeId);
 			}
 			else
 			{
-				viewService.addNewAttributeMappingToExistingSlave(slaveEntityName, masterAttributeId, slaveAttributeId);
+				viewService.addNewAttributeMappingToExistingSlave(viewName, slaveEntityName, masterAttributeId,
+						slaveAttributeId);
 			}
 		}
 	}

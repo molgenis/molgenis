@@ -1,9 +1,11 @@
 package org.molgenis.data.view.service;
 
+import static com.google.common.collect.Iterables.tryFind;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.molgenis.data.view.meta.JoinedAttributeMetaData.JOIN_ATTRIBUTE;
 import static org.molgenis.data.view.meta.JoinedAttributeMetaData.MASTER_ATTRIBUTE;
 import static org.molgenis.data.view.meta.SlaveEntityMetaData.JOINED_ATTRIBUTES;
+import static org.molgenis.data.view.meta.SlaveEntityMetaData.SLAVE_ENTITY;
 import static org.molgenis.data.view.meta.ViewMetaData.MASTER_ENTITY;
 import static org.molgenis.data.view.meta.ViewMetaData.NAME;
 import static org.molgenis.data.view.meta.ViewMetaData.SLAVE_ENTITIES;
@@ -11,7 +13,10 @@ import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.util.List;
 
+import org.elasticsearch.cluster.metadata.MetaDataService;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.support.DataServiceImpl;
@@ -21,6 +26,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.view.meta.JoinedAttributeMetaData;
 import org.molgenis.data.view.meta.SlaveEntityMetaData;
 import org.molgenis.data.view.meta.ViewMetaData;
+import org.molgenis.data.view.repository.ViewRepository;
 import org.molgenis.data.view.repository.ViewRepositoryCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +34,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
+
+import com.google.common.base.Optional;
 
 @Component
 public class ViewServiceImpl implements ViewService, ApplicationListener<ContextRefreshedEvent>
@@ -47,6 +55,19 @@ public class ViewServiceImpl implements ViewService, ApplicationListener<Context
 		runAsSystem(this::registerViews);
 	}
 
+	/**
+	 * Bootstrapping.
+	 * 
+	 * Adds {@link ViewRepository}s to the {@link ViewRepositoryCollection} and registers them with the
+	 * {@link DataService}.
+	 * 
+	 * The {@link DataServiceImpl#addRepository(Repository)} method used is not present in the {@link DataService}
+	 * interface. It's supposed to only be used by the {@link MetaDataService}. But the views are special cause their
+	 * {@link EntityMetaData} is dynamic. It changes if its master or one of its slave {@link EntityMetaData} changes.
+	 * 
+	 * There's no way yet to listen for such updates or to have computed {@link EntityMetaData} so we bypass the
+	 * {@link MetaDataService} altogether.
+	 */
 	private void registerViews()
 	{
 		dataService.findAll(ViewMetaData.ENTITY_NAME).map(viewEntity -> viewEntity.getString(NAME))
@@ -66,11 +87,11 @@ public class ViewServiceImpl implements ViewService, ApplicationListener<Context
 	}
 
 	@Override
-	public Entity getSlaveEntity(String slaveEntityName)
+	public Optional<Entity> getSlaveEntity(String viewName, String slaveEntityName)
 	{
-		Entity slaveEntity = dataService.findOne(SlaveEntityMetaData.ENTITY_NAME,
-				new QueryImpl().eq(SlaveEntityMetaData.SLAVE_ENTITY, slaveEntityName));
-		return slaveEntity;
+		Entity viewEntity = getViewEntity(viewName);
+		Iterable<Entity> slaveEntities = viewEntity.getEntities(SLAVE_ENTITIES);
+		return tryFind(slaveEntities, e -> e.getString(SLAVE_ENTITY).equals(slaveEntityName));
 	}
 
 	@Override
@@ -95,24 +116,20 @@ public class ViewServiceImpl implements ViewService, ApplicationListener<Context
 	public void addNewSlaveEntityToExistingView(Entity viewEntity, String slaveEntityName, String masterAttributeId,
 			String slaveAttributeId)
 	{
-		Entity newAttributeMapping1 = createNewAttributeMappingEntity(masterAttributeId, slaveAttributeId);
-		dataService.add(JoinedAttributeMetaData.ENTITY_NAME, newAttributeMapping1);
-		Entity newAttributeMapping = newAttributeMapping1;
+		Entity newAttributeMapping = createNewAttributeMappingEntity(masterAttributeId, slaveAttributeId);
+		dataService.add(JoinedAttributeMetaData.ENTITY_NAME, newAttributeMapping);
 		Entity slaveEntity = createNewSlaveEntity(slaveEntityName, newAttributeMapping);
-
-		DefaultEntity newViewEntity = new DefaultEntity(viewEntity.getEntityMetaData(), dataService, viewEntity);
 		List<Entity> slaveEntities = newArrayList(viewEntity.getEntities(SLAVE_ENTITIES));
 		slaveEntities.add(slaveEntity);
-
-		newViewEntity.set(ViewMetaData.SLAVE_ENTITIES, slaveEntities);
-		dataService.update(ViewMetaData.ENTITY_NAME, newViewEntity);
+		viewEntity.set(ViewMetaData.SLAVE_ENTITIES, slaveEntities);
+		dataService.update(ViewMetaData.ENTITY_NAME, viewEntity);
 	}
 
 	@Override
-	public void addNewAttributeMappingToExistingSlave(String slaveEntityName, String masterAttributeId,
+	public void addNewAttributeMappingToExistingSlave(String viewName, String slaveEntityName, String masterAttributeId,
 			String slaveAttributeId)
 	{
-		Entity existingSlaveEntity = getSlaveEntity(slaveEntityName);
+		Entity existingSlaveEntity = getSlaveEntity(viewName, slaveEntityName).get();
 		Entity newAttributeMapping = createNewAttributeMappingEntity(masterAttributeId, slaveAttributeId);
 		// TODO: why create a new one??
 		DefaultEntity newSlaveEntity = new DefaultEntity(new SlaveEntityMetaData(), dataService, existingSlaveEntity);
@@ -151,8 +168,8 @@ public class ViewServiceImpl implements ViewService, ApplicationListener<Context
 	private Entity createNewSlaveEntity(String slaveEntityName, Entity newAttributeMapping)
 	{
 		Entity slaveEntity = new MapEntity(new SlaveEntityMetaData());
-		slaveEntity.set(SlaveEntityMetaData.SLAVE_ENTITY, slaveEntityName);
-		slaveEntity.set(SlaveEntityMetaData.JOINED_ATTRIBUTES, newArrayList(newAttributeMapping));
+		slaveEntity.set(SLAVE_ENTITY, slaveEntityName);
+		slaveEntity.set(JOINED_ATTRIBUTES, newArrayList(newAttributeMapping));
 		dataService.add(SlaveEntityMetaData.ENTITY_NAME, slaveEntity);
 		return slaveEntity;
 	}

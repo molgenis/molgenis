@@ -2,6 +2,8 @@ package org.molgenis.data.view.service;
 
 import org.molgenis.data.Entity;
 
+import com.google.common.base.Optional;
+
 public interface ViewService
 {
 	/**
@@ -27,10 +29,13 @@ public interface ViewService
 	/**
 	 * Get the Slave Entity from the Slave Entity Table based on the slaveEntityName
 	 * 
+	 * @param viewName
+	 *            name of the view that the entity should be a slave entity of
 	 * @param slaveEntityName
-	 * @return a slaveEntity
+	 *            name of the slave entity
+	 * @return Optional<Entity>, present if the slave entity exists
 	 */
-	public Entity getSlaveEntity(String slaveEntityName);
+	public Optional<Entity> getSlaveEntity(String viewName, String slaveEntityName);
 
 	/**
 	 * When the view exists, but the slave does not, add the slave entity to the existing view
@@ -44,12 +49,17 @@ public interface ViewService
 			String slaveAttributeId);
 
 	/**
-	 * When the view and slave exist, add the attribute mapping to the existing slave
+	 * If the view and slave exist, adds the attribute mapping to the existing slave.
 	 * 
+	 * @param viewName
+	 *            the name of the view to update
 	 * @param slaveEntityName
+	 *            the name of the slave entity to update
 	 * @param masterAttributeId
+	 *            ID of the attribute in the master entity
 	 * @param slaveAttributeId
+	 *            ID of the attribute in the slave entity
 	 */
-	public void addNewAttributeMappingToExistingSlave(String slaveEntityName, String masterAttributeId,
+	public void addNewAttributeMappingToExistingSlave(String viewName, String slaveEntityName, String masterAttributeId,
 			String slaveAttributeId);
 }
