@@ -37,8 +37,8 @@ var EntityViewContainer = React.createClass({
 				{this.state.views === null ? <Spinner /> 
 					: <EntityViewsTable views={this.state.views} deleteEntityView={this._deleteEntityView} />
 				}
-				
-				<NewViewModal 
+
+				{this.state.isOpen && <NewViewModal
 					isOpen={this.state.isOpen}
 					hideModal={this._hideModal}
 					saveNewView={this._saveNewView}
@@ -54,7 +54,7 @@ var EntityViewContainer = React.createClass({
 					slaveEntitySelect={this._slaveEntitySelect}
 					masterAttributeSelect={this._masterAttributeSelect}
 					slaveAttributeSelect={this._slaveAttributeSelect} 
-				/>
+				/>}
 			</div>
 		</div>
 	},
