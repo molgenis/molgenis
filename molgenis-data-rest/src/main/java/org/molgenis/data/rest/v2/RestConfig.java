@@ -55,7 +55,9 @@ public class RestConfig extends WebMvcConfigurerAdapter
 	{
 		Set<ComparisonOperator> operators = RSQLOperators.defaultOperators();
 		operators.add(new ComparisonOperator("=q=", false));
+		operators.add(new ComparisonOperator("=notlike=", false));
 		operators.add(new ComparisonOperator("=rng=", true));
+		operators.add(new ComparisonOperator("=like=", false));
 		return new RSQLParser(operators);
 	}
 }

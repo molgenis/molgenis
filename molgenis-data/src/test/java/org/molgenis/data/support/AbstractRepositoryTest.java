@@ -117,4 +117,6 @@ public class AbstractRepositoryTest
 		Stream<Entity> expectedEntities = abstractRepository.findAll(entityIds, fetch);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
+
+	// Note: streamFetch cannot be tested because mocking default methods is not supported by Mockito
 }

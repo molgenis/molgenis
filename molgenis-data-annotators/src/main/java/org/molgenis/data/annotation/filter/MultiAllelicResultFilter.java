@@ -1,18 +1,28 @@
 package org.molgenis.data.annotation.filter;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.PeekingIterator;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.annotation.entity.ResultFilter;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.entity.ResultFilter;
-import org.molgenis.data.vcf.VcfRepository;
-
-import com.google.common.collect.FluentIterable;
+import static com.google.common.collect.FluentIterable.from;
+import static java.util.Arrays.asList;
+import static org.molgenis.data.vcf.VcfRepository.ALT;
+import static org.molgenis.data.vcf.VcfRepository.ALT_META;
+import static org.molgenis.data.vcf.VcfRepository.REF;
+import static org.molgenis.data.vcf.VcfRepository.REF_META;
 
 /**
  * 
@@ -52,78 +62,185 @@ import com.google.common.collect.FluentIterable;
  */
 public class MultiAllelicResultFilter implements ResultFilter
 {
+	private final List<AttributeMetaData> attributes;
+	private final boolean mergeMultilineResourceResults;
 
-	private List<AttributeMetaData> attributes;
-
-	public MultiAllelicResultFilter(List<AttributeMetaData> attributes)
+	public MultiAllelicResultFilter(List<AttributeMetaData> alleleSpecificAttributes,
+			boolean mergeMultilineResourceResults)
 	{
-		this.attributes = attributes;
+		this.attributes = alleleSpecificAttributes;
+		this.mergeMultilineResourceResults = mergeMultilineResourceResults;
+	}
+
+	public MultiAllelicResultFilter(List<AttributeMetaData> alleleSpecificAttributes)
+	{
+		this.attributes = alleleSpecificAttributes;
+		this.mergeMultilineResourceResults = false;
 	}
 
 	@Override
 	public Collection<AttributeMetaData> getRequiredAttributes()
 	{
-		return Arrays.asList(VcfRepository.REF_META, VcfRepository.ALT_META);
+		return asList(REF_META, ALT_META);
 	}
 
 	@Override
-	public com.google.common.base.Optional<Entity> filterResults(Iterable<Entity> resourceEntities, Entity sourceEntity)
+	public Optional<Entity> filterResults(Iterable<Entity> resourceEntities, Entity sourceEntity)
 	{
 		List<Entity> processedResults = new ArrayList<>();
 
+		String sourceRef = sourceEntity.getString(REF);
+		if (sourceRef == null)
+		{
+			return Optional.absent();
+		}
+
+		if (mergeMultilineResourceResults)
+		{
+			resourceEntities = merge(resourceEntities);
+		}
+
 		for (Entity resourceEntity : resourceEntities)
 		{
-			if (resourceEntity.get(VcfRepository.REF).equals(sourceEntity.get(VcfRepository.REF)))
+			String resourceRef = resourceEntity.getString(REF);
+
+			if (resourceRef.equals(sourceRef))
 			{
-				filter(sourceEntity, processedResults, resourceEntity, "", "");
+				processedResults.addAll(filter(sourceEntity, resourceEntity, "", ""));
 			}
-			else if(resourceEntity.getString(VcfRepository.REF).indexOf(sourceEntity.getString(VcfRepository.REF))==0) {
-				String postFix = resourceEntity.getString(VcfRepository.REF).substring(sourceEntity.getString(VcfRepository.REF).length());
-				filter(sourceEntity, processedResults, resourceEntity, postFix, "");
+			// example: ref AGG, input A, substring AGG from index 1, so GG is the postfix to use to match against this
+			// reference
+			else if (resourceRef.startsWith(sourceRef))
+			{
+				String postFix = resourceRef.substring(sourceRef.length());
+				processedResults.addAll(filter(sourceEntity, resourceEntity, postFix, ""));
 			}
-			else if(sourceEntity.getString(VcfRepository.REF).indexOf(resourceEntity.getString(VcfRepository.REF))==0) {
-				String postFix = sourceEntity.getString(VcfRepository.REF).substring(resourceEntity.getString(VcfRepository.REF).length());
-				filter(sourceEntity, processedResults, resourceEntity, "", postFix);
+			// example: ref T, input TC, substring TC from index 1, so C is the postfix to use to match against this
+			// input
+			else if (sourceRef.startsWith(resourceRef))
+			{
+				String postFix = sourceRef.substring(resourceRef.length());
+				processedResults.addAll(filter(sourceEntity, resourceEntity, "", postFix));
 			}
 		}
-		return FluentIterable.from(processedResults).first();
+		return from(processedResults).first();
 	}
 
-	private void filter(Entity annotatedEntity, List<Entity> processedResults, Entity entity, String sourcePostfix, String resourcePostfix) {
+	private List<Entity> filter(Entity annotatedEntity, Entity entity, String sourcePostfix, String resourcePostfix)
+	{
+		List<Entity> result = Lists.newArrayList();
 		Map<String, String> alleleValueMap = new HashMap<>();
-		String[] alts = entity.getString(VcfRepository.ALT).split(",");
-
+		String[] alts = entity.getString(ALT).split(",");
 		for (AttributeMetaData attributeMetaData : attributes)
-        {
-            String[] values = entity.getString(attributeMetaData.getName()).split(",");
-            for (int i = 0; i < alts.length; i++)
-            {
-                alleleValueMap.put(alts[i]+resourcePostfix, values[i]);
-            }
-            StringBuilder newAttributeValue = new StringBuilder();
-            String[] annotatedEntityAltAlleles = annotatedEntity.getString(VcfRepository.ALT).split(",");
-            for (int i = 0; i < annotatedEntityAltAlleles.length; i++)
-            {
-                if (i != 0)
-                {
-                    newAttributeValue.append(",");
-                }
-                if (alleleValueMap.get(annotatedEntityAltAlleles[i]+sourcePostfix) != null)
-                {
-                    newAttributeValue.append(alleleValueMap.get(annotatedEntityAltAlleles[i]+sourcePostfix));
-                }
-                else
-                {
-                    // missing allele in source, add a dot
-                    newAttributeValue.append(".");
-                }
-            }
-            // add entity only if something was found
-            if (!newAttributeValue.toString().equals("."))
-            {
-                entity.set(attributeMetaData.getName(), newAttributeValue.toString());
-                processedResults.add(entity);
-            }
-        }
+		{
+			String[] values = entity.getString(attributeMetaData.getName()).split(",");
+			for (int i = 0; i < alts.length; i++)
+			{
+				alleleValueMap.put(alts[i] + resourcePostfix, values[i]);
+			}
+			StringBuilder newAttributeValue = new StringBuilder();
+			String[] annotatedEntityAltAlleles = annotatedEntity.getString(ALT).split(",");
+			for (int i = 0; i < annotatedEntityAltAlleles.length; i++)
+			{
+				if (i != 0)
+				{
+					newAttributeValue.append(",");
+				}
+				if (alleleValueMap.get(annotatedEntityAltAlleles[i] + sourcePostfix) != null)
+				{
+					newAttributeValue.append(alleleValueMap.get(annotatedEntityAltAlleles[i] + sourcePostfix));
+				}
+				else
+				{
+					// missing allele in source, add a dot
+					newAttributeValue.append(".");
+				}
+			}
+			// add entity only if something was found, so no '.' or any multiple of '.,' (e.g. ".,.,.")
+			if (!newAttributeValue.toString().matches("[\\.,]+"))
+			{
+				entity.set(attributeMetaData.getName(), newAttributeValue.toString());
+				result.add(entity);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Combine ALT information per reference allele (in VCF there is only 1 reference by letting ALT vary, but that
+	 * might not always be the case)
+	 * 
+	 * So we want to support this hypothetical example: 3 300 G A 0.2|23.1 3 300 G T -2.4|0.123 3 300 G X -0.002|2.3 3
+	 * 300 G C 0.5|14.5 3 300 GC A 0.2|23.1 3 300 GC T -2.4|0.123 3 300 C GX -0.002|2.3 3 300 C GC 0.5|14.5
+	 * 
+	 * and it should become:
+	 * 
+	 * 3 300 G A,T,X,C 0.2|23.1,-2.4|0.123,-0.002|2.3,0.5|14.5 3 300 GC A,T 0.2|23.1,-2.4|0.123 3 300 C GX,GC
+	 * -0.002|2.3,0.5|14.5
+	 * 
+	 * so that the multi-allelic filter can then find back the appropriate values as if it were a multi-allelic VCF line
+	 * 
+	 */
+	public Iterable<Entity> merge(Iterable<Entity> resourceEntities)
+	{
+		ArrayList<Entity> resourceEntitiesMerged = new ArrayList<Entity>();
+
+		PeekingIterator<Entity> resourceEntitiesIterator = Iterators.peekingIterator(resourceEntities.iterator());
+
+		if (!resourceEntitiesIterator.hasNext())
+		{
+			return resourceEntitiesMerged;
+		}
+		Location location = Location.create(resourceEntitiesIterator.peek());
+
+		// collect entities to be merged by ref
+		Multimap<String, Entity> refToMergedEntity = LinkedListMultimap.create();
+
+		while (resourceEntitiesIterator.hasNext())
+		{
+			Entity resourceEntity = resourceEntitiesIterator.next();
+			// verify if all results have the same chrom & pos
+			Location thisLoc = Location.create(resourceEntity);
+
+			// at least chrom and pos have to be the same, ref may be different
+			if (!location.equals(thisLoc))
+			{
+				throw new MolgenisDataException("Mismatch in location! " + location + " vs " + thisLoc);
+			}
+
+			// add to map by ref, so we get [ref -> entities to be merged into one]
+			refToMergedEntity.put(resourceEntity.getString(REF), resourceEntity);
+		}
+
+		// now iterate over map with refs and merge entities per ref
+		for (String refKey : refToMergedEntity.keySet())
+		{
+			boolean first = true;
+			Entity mergeWithMe = null;
+			for (Entity entityToBeMerged : refToMergedEntity.get(refKey))
+			{
+				if (first)
+				{
+					// merge all following entities with the first one
+					mergeWithMe = entityToBeMerged;
+					first = false;
+				}
+				else
+				{
+					// concatenate alleles
+					mergeWithMe.set(ALT, mergeWithMe.get(ALT).toString() + "," + entityToBeMerged.get(ALT).toString());
+
+					// concatenate allele specific attributes
+					for (AttributeMetaData alleleSpecificAttributes : attributes)
+					{
+						String attrName = alleleSpecificAttributes.getName();
+						mergeWithMe.set(attrName,
+								mergeWithMe.get(attrName).toString() + "," + entityToBeMerged.get(attrName).toString());
+					}
+				}
+			}
+			resourceEntitiesMerged.add(mergeWithMe);
+		}
+		return resourceEntitiesMerged;
 	}
 }

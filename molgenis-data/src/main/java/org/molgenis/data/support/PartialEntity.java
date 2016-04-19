@@ -70,85 +70,184 @@ public class PartialEntity implements Entity
 	@Override
 	public String getString(String attributeName)
 	{
-		return decoratedEntity.getString(attributeName);
+		if (fetch.hasField(attributeName))
+		{
+			return decoratedEntity.getString(attributeName);
+		}
+		else
+		{
+			return entityManager.getReference(getEntityMetaData(), getIdValue()).getString(attributeName);
+		}
 	}
 
 	@Override
 	public Integer getInt(String attributeName)
 	{
-		return decoratedEntity.getInt(attributeName);
+		if (fetch.hasField(attributeName))
+		{
+
+			return decoratedEntity.getInt(attributeName);
+		}
+		else
+		{
+			return entityManager.getReference(getEntityMetaData(), getIdValue()).getInt(attributeName);
+		}
 	}
 
 	@Override
 	public Long getLong(String attributeName)
 	{
-		return decoratedEntity.getLong(attributeName);
+		if (fetch.hasField(attributeName))
+		{
+			return decoratedEntity.getLong(attributeName);
+		}
+		else
+		{
+			return entityManager.getReference(getEntityMetaData(), getIdValue()).getLong(attributeName);
+		}
 	}
 
 	@Override
 	public Boolean getBoolean(String attributeName)
 	{
-		return decoratedEntity.getBoolean(attributeName);
+		if (fetch.hasField(attributeName))
+		{
+			return decoratedEntity.getBoolean(attributeName);
+		}
+		else
+		{
+			return entityManager.getReference(getEntityMetaData(), getIdValue()).getBoolean(attributeName);
+		}
 	}
 
 	@Override
 	public Double getDouble(String attributeName)
 	{
-		return decoratedEntity.getDouble(attributeName);
+		if (fetch.hasField(attributeName))
+		{
+			return decoratedEntity.getDouble(attributeName);
+		}
+		else
+		{
+			return entityManager.getReference(getEntityMetaData(), getIdValue()).getDouble(attributeName);
+		}
 	}
 
 	@Override
 	public Date getDate(String attributeName)
 	{
-		return decoratedEntity.getDate(attributeName);
+		if (fetch.hasField(attributeName))
+		{
+			return decoratedEntity.getDate(attributeName);
+		}
+		else
+		{
+			return entityManager.getReference(getEntityMetaData(), getIdValue()).getDate(attributeName);
+		}
 	}
 
 	@Override
 	public java.util.Date getUtilDate(String attributeName)
 	{
-		return decoratedEntity.getUtilDate(attributeName);
+		if (fetch.hasField(attributeName))
+		{
+			return decoratedEntity.getUtilDate(attributeName);
+		}
+		else
+		{
+			return entityManager.getReference(getEntityMetaData(), getIdValue()).getUtilDate(attributeName);
+		}
 	}
 
 	@Override
 	public Timestamp getTimestamp(String attributeName)
 	{
-		return decoratedEntity.getTimestamp(attributeName);
+		if (fetch.hasField(attributeName))
+		{
+			return decoratedEntity.getTimestamp(attributeName);
+		}
+		else
+		{
+			return entityManager.getReference(getEntityMetaData(), getIdValue()).getTimestamp(attributeName);
+		}
 	}
 
 	@Override
 	public Entity getEntity(String attributeName)
 	{
-		return decoratedEntity.getEntity(attributeName);
+		if (fetch.hasField(attributeName))
+		{
+			return decoratedEntity.getEntity(attributeName);
+		}
+		else
+		{
+			return entityManager.getReference(getEntityMetaData(), getIdValue()).getEntity(attributeName);
+		}
 	}
 
 	@Override
 	public <E extends Entity> E getEntity(String attributeName, Class<E> clazz)
 	{
-		return decoratedEntity.getEntity(attributeName, clazz);
+		if (fetch.hasField(attributeName))
+		{
+			return decoratedEntity.getEntity(attributeName, clazz);
+		}
+		else
+		{
+			return entityManager.getReference(getEntityMetaData(), getIdValue()).getEntity(attributeName, clazz);
+		}
 	}
 
 	@Override
 	public Iterable<Entity> getEntities(String attributeName)
 	{
-		return decoratedEntity.getEntities(attributeName);
+		if (fetch.hasField(attributeName))
+		{
+			return decoratedEntity.getEntities(attributeName);
+		}
+		else
+		{
+			return entityManager.getReference(getEntityMetaData(), getIdValue()).getEntities(attributeName);
+		}
 	}
 
 	@Override
 	public <E extends Entity> Iterable<E> getEntities(String attributeName, Class<E> clazz)
 	{
-		return decoratedEntity.getEntities(attributeName, clazz);
+		if (fetch.hasField(attributeName))
+		{
+			return decoratedEntity.getEntities(attributeName, clazz);
+		}
+		else
+		{
+			return entityManager.getReference(getEntityMetaData(), getIdValue()).getEntities(attributeName, clazz);
+		}
 	}
 
 	@Override
 	public List<String> getList(String attributeName)
 	{
-		return decoratedEntity.getList(attributeName);
+		if (fetch.hasField(attributeName))
+		{
+			return decoratedEntity.getList(attributeName);
+		}
+		else
+		{
+			return entityManager.getReference(getEntityMetaData(), getIdValue()).getList(attributeName);
+		}
 	}
 
 	@Override
 	public List<Integer> getIntList(String attributeName)
 	{
-		return decoratedEntity.getIntList(attributeName);
+		if (fetch.hasField(attributeName))
+		{
+			return decoratedEntity.getIntList(attributeName);
+		}
+		else
+		{
+			return entityManager.getReference(getEntityMetaData(), getIdValue()).getIntList(attributeName);
+		}
 	}
 
 	@Override

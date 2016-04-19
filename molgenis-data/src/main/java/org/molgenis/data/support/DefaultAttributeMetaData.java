@@ -37,7 +37,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Range;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
-import org.molgenis.util.CaseInsensitiveLinkedHashMap;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
  * Default implementation of the AttributeMetaData interface
@@ -61,7 +61,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private boolean visible = true; // remove?
 	private boolean unique = false;
 	private boolean auto = false;
-	private Map<String, AttributeMetaData> attributePartsMap = new CaseInsensitiveLinkedHashMap<>();
+	private Map<String, AttributeMetaData> attributePartsMap = new LinkedCaseInsensitiveMap<>();
 	private boolean aggregateable = false;
 	private Range range;
 	private String visibleExpression;
@@ -137,7 +137,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		Iterable<AttributeMetaData> attributeParts = attributeMetaData.getAttributeParts();
 		if (attributeParts != null)
 		{
-			Map<String, AttributeMetaData> attributePartsMap = new CaseInsensitiveLinkedHashMap<>();
+			Map<String, AttributeMetaData> attributePartsMap = new LinkedCaseInsensitiveMap<>();
 			for (AttributeMetaData attributePart : attributeParts)
 			{
 				attributePartsMap.put(attributePart.getName(), new DefaultAttributeMetaData(attributePart));
@@ -280,7 +280,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	{
 		if (this.attributePartsMap == null)
 		{
-			this.attributePartsMap = new CaseInsensitiveLinkedHashMap<>();
+			this.attributePartsMap = new LinkedCaseInsensitiveMap<>();
 		}
 		this.attributePartsMap.put(attributePart.getName(), attributePart);
 
@@ -289,7 +289,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 
 	public void setAttributesMetaData(Iterable<AttributeMetaData> attributeParts)
 	{
-		this.attributePartsMap = new CaseInsensitiveLinkedHashMap<>();
+		this.attributePartsMap = new LinkedCaseInsensitiveMap<>();
 		attributeParts.forEach(attrPart -> {
 			attributePartsMap.put(attrPart.getName(), attrPart);
 		});

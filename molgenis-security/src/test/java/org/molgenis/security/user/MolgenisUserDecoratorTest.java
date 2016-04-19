@@ -133,7 +133,7 @@ public class MolgenisUserDecoratorTest
 		molgenisUserDecorator.add(entity);
 		verify(passwordEncoder).encode(password);
 		verify(decoratedRepository).add(entity);
-		//verify(userAuthorityRepository, times(1)).add(any(UserAuthority.class));
+		// verify(userAuthorityRepository, times(1)).add(any(UserAuthority.class));
 	}
 
 	@Test
@@ -180,5 +180,13 @@ public class MolgenisUserDecoratorTest
 		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = molgenisUserDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+	}
+
+	@Test
+	public void streamFetch()
+	{
+		Fetch fetch = new Fetch();
+		molgenisUserDecorator.stream(fetch);
+		verify(decoratedRepository, times(1)).stream(fetch);
 	}
 }

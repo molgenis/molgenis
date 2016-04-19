@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.molgenis</groupId>
 		<artifactId>molgenis</artifactId>
-		<version>1.17.0-SNAPSHOT</version>
+		<version>1.20.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-app</artifactId>
 	<packaging>war</packaging>
@@ -199,6 +199,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-jobs</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-vcf</artifactId>
 			<version>${project.version}</version>
 			<exclusions>
@@ -294,6 +299,11 @@
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-scripts</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-file-ingester</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

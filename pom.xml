@@ -8,7 +8,7 @@
     </parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>1.17.0-SNAPSHOT</version>
+    <version>1.20.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <!-- More Project Information -->
@@ -38,7 +38,7 @@
             </properties>
         </profile>
     </profiles>
-
+    
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <slf4j.version>1.7.12</slf4j.version>
@@ -50,7 +50,7 @@
         <hibernate.validator.version>4.2.0.Final</hibernate.validator.version>
         <httpclient.version>4.5.1</httpclient.version>
         <google.guava.version>16.0.1</google.guava.version>
-        <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm z</maven.build.timestamp.format>
         <molgenis.build.timestamp>${maven.build.timestamp}</molgenis.build.timestamp>
     </properties>
 
@@ -700,6 +700,8 @@
         <module>molgenis-questionnaires</module>
 		<module>molgenis-file</module>
 		<module>molgenis-catalogue</module>
+		<module>molgenis-file-ingester</module>
 		<module>molgenis-integration-tests</module>
+		<module>molgenis-jobs</module>
     </modules>
 </project>

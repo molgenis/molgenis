@@ -45,7 +45,7 @@ public class LanguageService
 	public ResourceBundle getBundle(String languageCode)
 	{
 		return ResourceBundle.getBundle(I18nStringMetaData.ENTITY_NAME, new Locale(languageCode),
-				new MolgenisResourceBundleControl(dataService));
+				new MolgenisResourceBundleControl(dataService, appSettings));
 	}
 
 	/**

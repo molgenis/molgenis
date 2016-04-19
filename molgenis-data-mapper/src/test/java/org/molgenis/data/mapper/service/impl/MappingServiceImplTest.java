@@ -20,6 +20,7 @@ import javax.annotation.PostConstruct;
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.ManageableRepositoryCollection;
@@ -597,6 +598,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 
 			ManageableRepositoryCollection manageableRepositoryCollection = manageableRepositoryCollection();
 			metaDataService.setDefaultBackend(manageableRepositoryCollection);
+			metaDataService.addEntityMeta(new MolgenisUserMetaData());
 			metaDataService.addEntityMeta(AttributeMappingRepositoryImpl.META_DATA);
 			metaDataService.addEntityMeta(EntityMappingRepositoryImpl.META_DATA);
 			metaDataService.addEntityMeta(MappingTargetRepositoryImpl.META_DATA);

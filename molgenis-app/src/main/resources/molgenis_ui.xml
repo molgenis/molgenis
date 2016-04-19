@@ -7,6 +7,7 @@
 		<plugin id="catalogue" name="Catalogue" url="catalogue"/>
 		<menu label="Data Integration" name="dataintegration">
 			<plugin id="mappingservice" name="Mapping Service" url="mappingservice"/>
+			<plugin id="sortaservice" name="SORTA" url="sortaservice"/>
 			<plugin id="tagwizard" name="Tag Wizard" url="tagwizard"/>
 		</menu>
         <menu label="Plugins" name="plugins">
@@ -21,6 +22,8 @@
             <plugin id="news" name="News" url="news"/>
             <plugin id="references" name="References" url="references"/>
             <plugin id="scripts" name="Scripts" url="scripts" />
+            <plugin id="jobs" name="Jobs" url="jobs" />
+            <plugin id="fileingest" name="Automatic imports" url="fileingest" />
 	    </menu>
         <menu label="Admin" name="admin">
 	        <plugin id="usermanager" name="User Manager" url="usermanager"/>
@@ -30,6 +33,7 @@
         	<plugin id="indexmanager" name="Index manager" url="indexmanager"/>
         	<plugin id="logmanager" name="Log manager" url="logmanager"/>
         	<plugin id="settingsmanager" name="Settings" url="settingsmanager"/>
+        	<plugin id="configureview" name="Entity view configuration" url="configureview" />
 		</menu>
 		<menu label="About" name="background">
             <plugin id="feedback" name="Feedback" url="feedback"/>

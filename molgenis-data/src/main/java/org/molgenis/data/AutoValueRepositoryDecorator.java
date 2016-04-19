@@ -42,7 +42,8 @@ public class AutoValueRepositoryDecorator implements Repository
 
 		// auto id
 		AttributeMetaData idAttr = getEntityMetaData().getIdAttribute();
-		if ((idAttr != null) && idAttr.isAuto() && (idAttr.getDataType() instanceof StringField))
+		if (idAttr != null && idAttr.isAuto() && entity.getIdValue() == null
+				&& (idAttr.getDataType() instanceof StringField))
 		{
 			entity.set(idAttr.getName(), idGenerator.generateId());
 		}
@@ -65,6 +66,12 @@ public class AutoValueRepositoryDecorator implements Repository
 	public Iterator<Entity> iterator()
 	{
 		return decoratedRepository.iterator();
+	}
+
+	@Override
+	public Stream<Entity> stream(Fetch fetch)
+	{
+		return decoratedRepository.stream(fetch);
 	}
 
 	@Override
@@ -287,7 +294,9 @@ public class AutoValueRepositoryDecorator implements Repository
 
 	private Entity initAutoAttrs(Entity entity, List<AttributeMetaData> autoAttrs)
 	{
-		autoAttrs.forEach(autoAttr -> {
+		for (AttributeMetaData autoAttr : autoAttrs)
+		{
+			// autoAttrs.forEach(autoAttr -> {
 			// set auto values unless a value already exists
 			String autoAttrName = autoAttr.getName();
 			if (entity.get(autoAttrName) == null)
@@ -305,7 +314,8 @@ public class AutoValueRepositoryDecorator implements Repository
 					throw new RuntimeException("Invalid auto attribute: " + autoAttr.toString());
 				}
 			}
-		});
+			// });
+		}
 		return entity;
 	}
 

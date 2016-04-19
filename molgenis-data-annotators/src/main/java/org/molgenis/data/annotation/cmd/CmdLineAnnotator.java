@@ -1,7 +1,30 @@
 package org.molgenis.data.annotation.cmd;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Arrays.asList;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.ConsoleAppender;
+import joptsimple.OptionException;
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.annotation.EffectsAnnotator;
+import org.molgenis.data.annotation.RefEntityAnnotator;
+import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.utils.VcfUtils;
+import org.molgenis.data.vcf.utils.VcfWriterUtils;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.core.env.JOptCommandLinePropertySource;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -13,29 +36,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.entity.AnnotatorInfo;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.data.vcf.utils.VcfUtils;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.core.env.JOptCommandLinePropertySource;
-
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.ConsoleAppender;
-import joptsimple.OptionException;
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
+import static com.google.common.collect.Lists.newArrayList;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Arrays.asList;
+import static org.molgenis.MolgenisFieldTypes.MREF;
 
 /**
  * 
@@ -45,6 +49,7 @@ import joptsimple.OptionSet;
  */
 public class CmdLineAnnotator
 {
+	public static final String EFFECT = "EFFECT";
 	@Autowired
 	private ApplicationContext applicationContext;
 
@@ -222,7 +227,7 @@ public class CmdLineAnnotator
 
 		BufferedWriter outputVCFWriter = new BufferedWriter(
 				new OutputStreamWriter(new FileOutputStream(outputVCFFile), UTF_8));
-		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
+		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, inputVcfFile.getName());
 
 		try
 		{
@@ -230,6 +235,9 @@ public class CmdLineAnnotator
 			{
 				// Check attribute names
 				List<String> outputAttributeNames = VcfUtils.getAtomicAttributesFromList(annotator.getOutputMetaData())
+						.stream().map((attr) -> attr.getName()).collect(Collectors.toList());
+
+				List<String> inputAttributeNames = VcfUtils.getAtomicAttributesFromList(vcfRepo.getEntityMetaData().getAtomicAttributes())
 						.stream().map((attr) -> attr.getName()).collect(Collectors.toList());
 
 				boolean stop = false;
@@ -240,16 +248,37 @@ public class CmdLineAnnotator
 						System.out.println("Unknown output attribute '" + attrName + "'");
 						stop = true;
 					}
+					else if(inputAttributeNames.contains(attrName)){
+						System.out.println("The output attribute '" + attrName + "' is present in the inputfile, but is deselected in the current run, this is not supported");
+						stop = true;
+					}
 				}
 				if (stop) return;
-
-				// Include the original attributes
-				vcfRepo.getEntityMetaData().getAtomicAttributes()
-						.forEach((attr) -> attributesToInclude.add(attr.getName()));
 			}
 
-			VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter,
-					annotator.getOutputMetaData(), attributesToInclude);
+			// If the annotator e.g. SnpEff creates an external repository, collect the output metadata into an mref
+			// entity
+			// This allows for the header to be written as 'EFFECT annotations: <ouput_attributes> | <ouput_attributes>'
+			List<AttributeMetaData> outputMetaData = newArrayList();
+			if (annotator instanceof RefEntityAnnotator || annotator instanceof EffectsAnnotator)
+			{
+				DefaultEntityMetaData effectRefEntity = new DefaultEntityMetaData(
+						annotator.getSimpleName() + "_EFFECTS");
+				for (AttributeMetaData outputAttribute : annotator.getOutputMetaData())
+				{
+					effectRefEntity.addAttributeMetaData(outputAttribute);
+				}
+				DefaultAttributeMetaData effect = new DefaultAttributeMetaData(EFFECT);
+				effect.setDataType(MREF).setRefEntity(effectRefEntity);
+				outputMetaData.add(effect);
+			}
+			else
+			{
+				outputMetaData = annotator.getOutputMetaData();
+			}
+
+			VcfWriterUtils.writeVcfHeader(inputVcfFile, outputVCFWriter,
+					VcfUtils.getAtomicAttributesFromList(outputMetaData), attributesToInclude);
 			System.out.println("Now starting to process the data.");
 
 			DefaultEntityMetaData emd = (DefaultEntityMetaData) vcfRepo.getEntityMetaData();
@@ -261,15 +290,32 @@ public class CmdLineAnnotator
 					infoAttribute.addAttributePart(atomicAttribute);
 				}
 			}
+			Iterable<Entity> entitiesToAnnotate;
+			if (annotator instanceof EffectsAnnotator)
+			{
+				entitiesToAnnotate = VcfUtils.createEntityStructureForVcf(vcfRepo.getEntityMetaData(), EFFECT, vcfRepo.stream());
+			}
+			else
+			{
+				entitiesToAnnotate = vcfRepo;
+			}
+			Iterator<Entity> annotatedRecords = annotator.annotate(entitiesToAnnotate);
 
-			Iterator<Entity> annotatedRecords = annotator.annotate(vcfRepo);
+			if (annotator instanceof RefEntityAnnotator || annotator instanceof EffectsAnnotator)
+			{
+				annotatedRecords = VcfUtils.reverseXrefMrefRelation(annotatedRecords);
+			}
+
 			while (annotatedRecords.hasNext())
 			{
 				Entity annotatedRecord = annotatedRecords.next();
-				VcfUtils.writeToVcf(annotatedRecord, attributesToInclude, outputVCFWriter);
+				VcfWriterUtils.writeToVcf(annotatedRecord, VcfUtils.getAtomicAttributesFromList(outputMetaData),
+						attributesToInclude, outputVCFWriter);
 				outputVCFWriter.newLine();
 			}
+
 		}
+
 		finally
 		{
 			outputVCFWriter.close();
@@ -334,4 +380,5 @@ public class CmdLineAnnotator
 		molgenisLogger.setLevel(Level.INFO);
 		molgenisLogger.setAdditive(false);
 	}
+
 }

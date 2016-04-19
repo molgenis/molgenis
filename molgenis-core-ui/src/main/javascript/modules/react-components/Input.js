@@ -122,9 +122,6 @@ import React from "react";
 				}
 			}
 		},
-		componentDidUpdate: function() {
-			this._focus();
-		},
 		_handleChange: function(event) {
 			var value = event.target.value;
 			var newState;
@@ -193,5 +190,6 @@ import React from "react";
 			}
 		}
 	});
-	
+
+export { Input };
 export default React.createFactory(Input);

@@ -20,6 +20,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
+import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -164,5 +165,17 @@ public class AbstractElasticsearchRepositoryTest
 		when(searchService.searchAsStream(query, entityMeta)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = repository.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+	}
+
+	@Test
+	public void streamFetch()
+	{
+		Fetch fetch = new Fetch();
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		when(searchService.searchAsStream(new QueryImpl().fetch(fetch), entityMeta))
+				.thenReturn(Stream.of(entity0, entity1));
+		Stream<Entity> expectedEntities = repository.stream(fetch);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
 }

@@ -8,6 +8,7 @@ import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +23,7 @@ import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.fieldtypes.BoolField;
+import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.FileMeta;
 import org.molgenis.file.FileStore;
@@ -90,6 +92,13 @@ public class RestService
 			value = false;
 		}
 
+		// Treat null lists as empty lists
+		if (paramValue == null
+				&& (attr.getDataType().getEnumType() == MREF || attr.getDataType().getEnumType() == CATEGORICAL_MREF))
+		{
+			value = Collections.emptyList();
+		}
+
 		if (paramValue != null)
 		{
 			if (attr.getDataType().getEnumType() == FieldTypeEnum.FILE)
@@ -132,8 +141,9 @@ public class RestService
 				List<Object> ids = DataConverter.toObjectList(paramValue);
 				if ((ids != null) && !ids.isEmpty())
 				{
-					List<Entity> mrefList = dataService.findAll(attr.getRefEntity().getName(), ids.stream())
-							.collect(toList());
+					FieldType refIdAttrDataType = attr.getRefEntity().getIdAttribute().getDataType();
+					List<Entity> mrefList = dataService.findAll(attr.getRefEntity().getName(),
+							ids.stream().map(id -> refIdAttrDataType.convert(id))).collect(toList());
 					if (mrefList.size() != ids.size())
 					{
 						throw new IllegalArgumentException("Could not find all referencing ids for  " + attr.getName());

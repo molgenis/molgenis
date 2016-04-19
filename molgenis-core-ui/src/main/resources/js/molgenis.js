@@ -151,24 +151,6 @@
 		}
 		return 0;
 	};
-
-	/**
-	 * Checks if the user has write permission on a particular entity
-	 */
-	molgenis.hasWritePermission = function(entityName) {
-		var writable = false;
-
-		$.ajax({
-			url : '/permission/' + entityName + "/write",
-			dataType : 'json',
-			async : false,
-			success : function(result) {
-				writable = result;
-			}
-		});
-
-		return writable;
-	};
 }($, window.top.molgenis = window.top.molgenis || {}));
 
 // Add endsWith function to the string class
@@ -365,7 +347,6 @@ function createInput(attr, attrs, val, lbl) {
 	case 'XREF':
 		return createBasicInput('hidden', attrs, val).addClass('form-control');
 	case 'FILE':
-	case 'IMAGE':
 		throw 'Unsupported data type: ' + dataType;
 	default:
 		throw 'Unknown data type: ' + dataType;

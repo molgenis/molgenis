@@ -9,7 +9,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractMetaDataEntity;
-import org.molgenis.util.CaseInsensitiveLinkedHashMap;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
  * Entity implementation for Excel.
@@ -49,7 +49,7 @@ public class ExcelEntity extends AbstractMetaDataEntity
 	{
 		if (cachedValueMap == null)
 		{
-			cachedValueMap = new CaseInsensitiveLinkedHashMap<>();
+			cachedValueMap = new LinkedCaseInsensitiveMap<>();
 		}
 
 		Object value;
@@ -87,7 +87,7 @@ public class ExcelEntity extends AbstractMetaDataEntity
 	{
 		if (cachedValueMap == null)
 		{
-			cachedValueMap = new CaseInsensitiveLinkedHashMap<>();
+			cachedValueMap = new LinkedCaseInsensitiveMap<>();
 		}
 		cachedValueMap.put(attributeName, value);
 	}

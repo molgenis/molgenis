@@ -88,6 +88,14 @@ public class EntityReferenceResolverDecorator implements Repository
 
 	// Resolve entity references
 	@Override
+	public Stream<Entity> stream(Fetch fetch)
+	{
+		Stream<Entity> entities = decoratedRepo.stream(fetch);
+		return resolveEntityReferences(entities, fetch);
+	}
+
+	// Resolve entity references
+	@Override
 	public Entity findOne(Object id)
 	{
 		Entity entity = decoratedRepo.findOne(id);

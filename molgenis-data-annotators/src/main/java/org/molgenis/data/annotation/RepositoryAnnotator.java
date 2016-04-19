@@ -21,11 +21,19 @@ public interface RepositoryAnnotator
 	// add entityAnnotator
 	Iterator<Entity> annotate(Iterable<Entity> source);
 
+	/**
+	 * Checks if folder and files that were set with a runtime property actually exist, or if a webservice can be
+	 * reached
+	 *
+	 * @return boolean
+	 */
+	boolean annotationDataExists();
+
 	// alternative constructor that allows seamless chaining
 	Iterator<Entity> annotate(Iterator<Entity> source);
 
 	/**
-	 * returns an entityMetaData containing the attributes the annotator will add
+	 * returns an list of attributeMetadata containing the attributes the annotator will add
 	 * 
 	 * @return ouputMetadata
 	 */
@@ -36,7 +44,7 @@ public interface RepositoryAnnotator
 	 * 
 	 * @return inputMetaData;
 	 */
-	List<AttributeMetaData> getInputMetaData();
+	List<AttributeMetaData> getRequiredAttributes();
 
 	/**
 	 * Returns null if the annotator will work for the given metadata, a reason if not so

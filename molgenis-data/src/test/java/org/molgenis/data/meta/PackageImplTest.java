@@ -4,13 +4,23 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.PackageChangeListener;
 import org.testng.annotations.Test;
 
 public class PackageImplTest
 {
+	@Test
+	public void toEntity()
+	{
+		PackageImpl package_ = new PackageImpl("package");
+		Entity packageEntity = package_.toEntity();
+		assertEquals(packageEntity.getEntityMetaData(), PackageMetaData.INSTANCE);
+	}
+
 	@Test
 	public void addChangeListenerAddEntity()
 	{

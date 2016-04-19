@@ -84,6 +84,9 @@
 				<thead>
 					<tr>
 						<th>Name</th>
+						<@hasPermission entityName='scriptparameter' permission="WRITE">
+						<th class="edit-icon-holder"></th>
+						</@hasPermission>
 					<tr>
 				</thead>
 				
@@ -92,6 +95,11 @@
 						<#list parameters as parameter>
 							<tr>
 								<td class="name">${parameter.name!?html}</td>
+								<@hasPermission entityName='scriptparameter' permission="WRITE">
+								<td>
+									<a href="#" class="delete-script-parameter-btn"><img src="/img/delete.png"></a>
+								</td>
+								</@hasPermission>
 							</tr>
 						</#list>
 					</#if>

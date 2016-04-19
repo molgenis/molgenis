@@ -90,6 +90,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -138,8 +140,8 @@ public class RestController
 	@Autowired
 	public RestController(DataService dataService, TokenService tokenService,
 			AuthenticationManager authenticationManager, MolgenisPermissionService molgenisPermissionService,
-			ResourceFingerprintRegistry resourceFingerprintRegistry, MolgenisRSQL molgenisRSQL, RestService restService,
-			LanguageService languageService)
+			ResourceFingerprintRegistry resourceFingerprintRegistry, MolgenisRSQL molgenisRSQL,
+			RestService restService, LanguageService languageService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.tokenService = requireNonNull(tokenService);
@@ -422,7 +424,7 @@ public class RestController
 	 * 
 	 * start: the index of the first row, default 0
 	 * 
-	 * num: the number of results to return, default 100, max 100000
+	 * num: the number of results to return, default 100, max 10000
 	 * 
 	 * 
 	 * Example: /api/v1/csv/person?q=firstName==Piet&attributes=firstName,lastName&start=10&num=100
@@ -483,8 +485,8 @@ public class RestController
 
 			if (q.getPageSize() > EntityCollectionRequest.MAX_ROWS)
 			{
-				resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-						"Num exceeded the maximum of " + EntityCollectionRequest.MAX_ROWS + " rows");
+				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Num exceeded the maximum of "
+						+ EntityCollectionRequest.MAX_ROWS + " rows");
 				return null;
 			}
 
@@ -669,14 +671,14 @@ public class RestController
 		AttributeMetaData attr = entityMetaData.getAttribute(attributeName);
 		if (attr == null)
 		{
-			throw new UnknownAttributeException(
-					"Attribute '" + attributeName + "' of entity '" + entityName + "' does not exist");
+			throw new UnknownAttributeException("Attribute '" + attributeName + "' of entity '" + entityName
+					+ "' does not exist");
 		}
 
 		if (attr.isReadonly())
 		{
-			throw new MolgenisDataAccessException(
-					"Attribute '" + attributeName + "' of entity '" + entityName + "' is readonly");
+			throw new MolgenisDataAccessException("Attribute '" + attributeName + "' of entity '" + entityName
+					+ "' is readonly");
 		}
 
 		Object value = this.restService.toEntityValue(attr, paramValue);
@@ -948,6 +950,22 @@ public class RestController
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	@ResponseStatus(BAD_REQUEST)
+	@ResponseBody
+	public ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e)
+	{
+		LOG.debug("", e);
+
+		List<ErrorMessage> messages = Lists.newArrayList();
+		for (ObjectError error : e.getBindingResult().getAllErrors())
+		{
+			messages.add(new ErrorMessage(error.getDefaultMessage()));
+		}
+
+		return new ErrorMessageResponse(messages);
+	}
+
 	@ExceptionHandler(MolgenisValidationException.class)
 	@ResponseStatus(BAD_REQUEST)
 	@ResponseBody
@@ -988,7 +1006,14 @@ public class RestController
 	public ErrorMessageResponse handleAuthenticationException(AuthenticationException e)
 	{
 		LOG.info("", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+		// workaround for https://github.com/molgenis/molgenis/issues/4441
+		String message = e.getMessage();
+		String messagePrefix = "org.springframework.security.core.userdetails.UsernameNotFoundException: ";
+		if (message.startsWith(messagePrefix))
+		{
+			message = message.substring(messagePrefix.length());
+		}
+		return new ErrorMessageResponse(new ErrorMessage(message));
 	}
 
 	@ExceptionHandler(MolgenisDataAccessException.class)
@@ -1228,25 +1253,32 @@ public class RestController
 					}
 					else
 					{
-						entityMap.put(attrName,
-								Collections.singletonMap("href", Href.concatAttributeHref(RestController.BASE_URI,
-										meta.getName(), entity.getIdValue(), attrName)));
+						entityMap.put(
+								attrName,
+								Collections.singletonMap(
+										"href",
+										Href.concatAttributeHref(RestController.BASE_URI, meta.getName(),
+												entity.getIdValue(), attrName)));
 					}
 				}
 				else if (attrType == DATE)
 				{
 					Date date = entity.getDate(attrName);
-					entityMap.put(attrName, date != null
-							? new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATE).format(date) : null);
+					entityMap
+							.put(attrName,
+									date != null ? new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATE)
+											.format(date) : null);
 				}
 				else if (attrType == DATE_TIME)
 				{
 					Date date = entity.getDate(attrName);
-					entityMap.put(attrName, date != null
-							? new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME).format(date) : null);
+					entityMap
+							.put(attrName,
+									date != null ? new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME)
+											.format(date) : null);
 				}
-				else if (attrType != XREF && attrType != CATEGORICAL && attrType != MREF && attrType != CATEGORICAL_MREF
-						&& attrType != FILE)
+				else if (attrType != XREF && attrType != CATEGORICAL && attrType != MREF
+						&& attrType != CATEGORICAL_MREF && attrType != FILE)
 				{
 					entityMap.put(attrName, entity.get(attr.getName()));
 				}
@@ -1281,10 +1313,9 @@ public class RestController
 					EntityPager pager = new EntityPager(0, new EntityCollectionRequest().getNum(),
 							(long) refEntityMaps.size(), mrefEntities);
 
-					EntityCollectionResponse ecr = new EntityCollectionResponse(pager,
-							refEntityMaps, Href.concatAttributeHref(RestController.BASE_URI, meta.getName(),
-									entity.getIdValue(), attrName),
-							null, molgenisPermissionService, dataService, languageService);
+					EntityCollectionResponse ecr = new EntityCollectionResponse(pager, refEntityMaps,
+							Href.concatAttributeHref(RestController.BASE_URI, meta.getName(), entity.getIdValue(),
+									attrName), null, molgenisPermissionService, dataService, languageService);
 
 					entityMap.put(attrName, ecr);
 				}
@@ -1314,8 +1345,8 @@ public class RestController
 	 */
 	private Set<String> toAttributeSet(String[] attributes)
 	{
-		return attributes != null && attributes.length > 0
-				? Sets.newHashSet(Iterables.transform(Arrays.asList(attributes), new Function<String, String>()
+		return attributes != null && attributes.length > 0 ? Sets.newHashSet(Iterables.transform(
+				Arrays.asList(attributes), new Function<String, String>()
 				{
 					@Override
 					public String apply(String attribute)

@@ -132,7 +132,7 @@ import EntitySelectBox from "./EntitySelectBox";
 					case 'DATE_TIME':
 						return this._createDateControl(controlProps, true, props.placeholder || this.state.i18nStrings.form_date_control_placeholder);
 					case 'DECIMAL':
-						return this._createNumberControl(controlProps, 'any');
+						return this._createStringControl(controlProps, 'text', props.placeholder || '');
 					case 'EMAIL':
 						return this._createStringControl(controlProps, 'email', props.placeholder || this.state.i18nStrings.form_email_control_placeholder);
 					case 'ENUM':
@@ -180,7 +180,6 @@ import EntitySelectBox from "./EntitySelectBox";
 							maxLength: attr.maxLength
 						}));
 					case 'COMPOUND' :
-					case 'IMAGE':
 						throw 'Unsupported data type: ' + attr.fieldType;
 					default:
 						throw 'Unknown data type: ' + attr.fieldType;

@@ -1,15 +1,16 @@
 package org.molgenis.data.meta.system;
 
-import static org.molgenis.MolgenisFieldTypes.DATETIME;
-import static org.molgenis.MolgenisFieldTypes.ENUM;
-import static org.molgenis.MolgenisFieldTypes.INT;
-import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.fieldtypes.EnumField;
+import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.springframework.stereotype.Component;
+import static org.molgenis.MolgenisFieldTypes.BOOL;
+import static org.molgenis.MolgenisFieldTypes.DATETIME;
+import static org.molgenis.MolgenisFieldTypes.INT;
+import static org.molgenis.MolgenisFieldTypes.TEXT;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 @Component
 public class ImportRunMetaData extends DefaultEntityMetaData
@@ -22,6 +23,7 @@ public class ImportRunMetaData extends DefaultEntityMetaData
 	public static final String MESSAGE = "message";
 	public static final String PROGRESS = "progress";
 	public static final String IMPORTEDENTITIES = "importedEntities";
+	public static final String NOTIFY = "notify";
 
 	public static final ImportRunMetaData INSTANCE = new ImportRunMetaData();
 
@@ -33,10 +35,12 @@ public class ImportRunMetaData extends DefaultEntityMetaData
 		addAttribute(STARTDATE).setDataType(DATETIME).setNillable(false).setDescription("");
 		addAttribute(ENDDATE).setDataType(DATETIME).setNillable(true).setDescription("");
 		addAttribute(USERNAME).setNillable(false).setDescription("");
-		addAttribute(STATUS).setDataType(ENUM).setNillable(false)
+		addAttribute(STATUS).setDataType(new EnumField()).setNillable(false)
 				.setEnumOptions(Arrays.asList("RUNNING", "FINISHED", "FAILED")).setDescription("");
 		addAttribute(MESSAGE).setDataType(TEXT).setNillable(true).setDescription("");
 		addAttribute(PROGRESS).setDataType(INT).setNillable(false).setDescription("");
 		addAttribute(IMPORTEDENTITIES).setDataType(TEXT).setNillable(true).setDescription("");
+		addAttribute(NOTIFY).setDataType(BOOL).setNillable(true)
+				.setDescription("Boolean to indicate whether or not to send an email on job completion");
 	}
 }

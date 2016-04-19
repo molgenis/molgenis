@@ -6,7 +6,9 @@ import static org.testng.Assert.assertTrue;
 import java.util.Arrays;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.entity.impl.HPOAnnotator.HPOResultFilter;
+import org.molgenis.data.annotation.entity.impl.hpo.HPOAnnotator;
+import org.molgenis.data.annotation.entity.impl.hpo.HPOAnnotator.HPOResultFilter;
+import org.molgenis.data.annotation.entity.impl.hpo.HPORepository;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.Test;
 

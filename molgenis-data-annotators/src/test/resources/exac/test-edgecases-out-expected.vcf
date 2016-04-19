@@ -7,6 +7,12 @@
 ##contig=<ID=3>
 ##contig=<ID=21>
 ##contig=<ID=X>
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=AD,Number=.,Type=Integer,Description="aa">
+##FORMAT=<ID=.,Number=.,Type=String,Description="No format data!">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="aa">
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="aa">
+##FORMAT=<ID=PL,Number=.,Type=Integer,Description="aa">
 ##INFO=<ID=AC,Number=1,Type=Integer,Description="aa">
 ##INFO=<ID=AF,Number=1,Type=Float,Description="aa">
 ##INFO=<ID=AN,Number=1,Type=Integer,Description="aa">
@@ -20,12 +26,6 @@
 ##INFO=<ID=QD,Number=1,Type=Float,Description="aa">
 ##INFO=<ID=SOR,Number=1,Type=Float,Description="aa">
 ##INFO=<ID=DESCR,Number=1,Type=String,Description="Description of this variant">
-##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
-##FORMAT=<ID=AD,Number=.,Type=Integer,Description="aa">
-##FORMAT=<ID=.,Number=.,Type=String,Description="No format data!">
-##FORMAT=<ID=DP,Number=1,Type=Integer,Description="aa">
-##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="aa">
-##FORMAT=<ID=PL,Number=.,Type=Integer,Description="aa">
 ##INFO=<ID=EXAC_AF,Number=.,Type=String,Description="The ExAC allele frequency">
 ##INFO=<ID=EXAC_AC_HOM,Number=.,Type=String,Description="The ExAC homozygous alternative genotype count">
 ##INFO=<ID=EXAC_AC_HET,Number=.,Type=String,Description="The ExAC heterozygous genotype count">

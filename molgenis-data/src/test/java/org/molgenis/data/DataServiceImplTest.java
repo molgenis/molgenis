@@ -1,5 +1,6 @@
 package org.molgenis.data;
 
+import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -18,7 +19,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.DataServiceImpl;
+import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -27,6 +34,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -268,6 +276,105 @@ public class DataServiceImplTest
 		Query query = mock(Query.class);
 		when(repo1.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = dataService.findAll("Entity1", query, clazz);
+		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+	}
+
+	@Test
+	public void copyRepository()
+	{
+		// setup everything
+		Query query = new QueryImpl();
+		AttributeMetaData attr1 = new DefaultAttributeMetaData("attr1", MolgenisFieldTypes.FieldTypeEnum.STRING);
+		AttributeMetaData attr2 = new DefaultAttributeMetaData("attr2", MolgenisFieldTypes.FieldTypeEnum.STRING);
+
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		EntityMetaData emd = mock(EntityMetaData.class);
+		MetaDataService metaDataService = mock(MetaDataService.class);
+
+		when(repo1.findAll(query)).thenReturn(Stream.of(entity0, entity1));
+		when(repo1.getEntityMetaData()).thenReturn(emd);
+		when(emd.getOwnAttributes()).thenReturn(Arrays.asList(attr1, attr2));
+		when(emd.getOwnLookupAttributes()).thenReturn(Arrays.asList(attr1, attr2));
+
+		dataService.setMeta(metaDataService);
+
+		EntityMetaData emd2 = new DefaultEntityMetaData("Entity2", emd);
+		when(repo2.getEntityMetaData()).thenReturn(emd2);
+		when(metaDataService.addEntityMeta(emd2)).thenReturn(repo2);
+
+		// The actual method call
+		Repository copy = dataService.copyRepository(repo1, "Entity2", "testCopyLabel");
+
+		// The test
+		verify(metaDataService).addEntityMeta(copy.getEntityMetaData());
+		@SuppressWarnings(
+		{ "unchecked", "rawtypes" })
+		ArgumentCaptor<Stream<Entity>> argument = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(repo2, times(1)).add(argument.capture());
+		List<Entity> list = argument.getAllValues().get(0).collect(toList());
+		assertEquals(list, Arrays.asList(entity0, entity1));
+	}
+
+	@Test
+	public void copyRepositoryException()
+	{
+		// setup everything
+		Query query = new QueryImpl();
+		AttributeMetaData attr1 = new DefaultAttributeMetaData("attr1", MolgenisFieldTypes.FieldTypeEnum.STRING);
+		AttributeMetaData attr2 = new DefaultAttributeMetaData("attr2", MolgenisFieldTypes.FieldTypeEnum.STRING);
+
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		EntityMetaData emd = mock(EntityMetaData.class);
+		MetaDataService metaDataService = mock(MetaDataService.class);
+
+		when(repo1.findAll(query)).thenReturn(Stream.of(entity0, entity1));
+		when(repo1.getEntityMetaData()).thenReturn(emd);
+		when(emd.getOwnAttributes()).thenReturn(Arrays.asList(attr1, attr2));
+		when(emd.getOwnLookupAttributes()).thenReturn(Arrays.asList(attr1, attr2));
+
+		dataService.setMeta(metaDataService);
+
+		EntityMetaData emd2 = new DefaultEntityMetaData("Entity2", emd);
+		when(repo2.getEntityMetaData()).thenReturn(emd2);
+		when(metaDataService.addEntityMeta(emd2)).thenReturn(repo2);
+
+		Mockito.doThrow(new MolgenisDataException("Stuk")).when(repo2).add(Mockito.any(Stream.class));
+
+		// The actual method call
+		try
+		{
+			dataService.copyRepository(repo1, "Entity2", "testCopyLabel");
+			Assert.fail("Should rethrow exception thrown when adding entities to copied repository");
+		}
+		catch (MolgenisDataException expected)
+		{
+			// verify that the copy got created
+			verify(metaDataService).addEntityMeta(emd2);
+			// verity that the copy got deleted again
+			verify(metaDataService).deleteEntityMeta("Entity2");
+		}
+	}
+
+	@Test
+	public void streamStringFetch()
+	{
+		Entity entity0 = mock(Entity.class);
+		Fetch fetch = new Fetch();
+		when(repo1.stream(fetch)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = dataService.stream("Entity1", fetch);
+		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+	}
+
+	@Test
+	public void streamStringFetchClass()
+	{
+		Entity entity0 = mock(Entity.class);
+		Class<Entity> clazz = Entity.class;
+		Fetch fetch = new Fetch();
+		when(repo1.stream(fetch)).thenReturn(Stream.of(entity0));
+		Stream<Entity> entities = dataService.stream("Entity1", fetch, clazz);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
 }

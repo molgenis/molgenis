@@ -1,6 +1,7 @@
 package org.molgenis.data.support;
 
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserHasRole;
+import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -207,6 +208,7 @@ public class DataServiceImpl implements DataService
 	public void deleteAll(String entityName)
 	{
 		getRepository(entityName).deleteAll();
+		LOG.info("All entities of repository [{}] deleted by user [{}]", entityName, getCurrentUsername());
 	}
 
 	@Override
@@ -274,6 +276,21 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
+	public Stream<Entity> stream(String entityName, Fetch fetch)
+	{
+		return getRepository(entityName).stream(fetch);
+	}
+
+	@Override
+	public <E extends Entity> Stream<E> stream(String entityName, Fetch fetch, Class<E> clazz)
+	{
+		Stream<Entity> entities = getRepository(entityName).stream(fetch);
+		return entities.map(entity -> {
+			return EntityUtils.convert(entity, clazz, this);
+		});
+	}
+
+	@Override
 	public Set<RepositoryCapability> getCapabilities(String repositoryName)
 	{
 		return getRepository(repositoryName).getCapabilities();
@@ -333,5 +350,36 @@ public class DataServiceImpl implements DataService
 		return entities.map(entity -> {
 			return EntityUtils.convert(entity, clazz, this);
 		});
+	}
+
+	@Override
+	public Repository copyRepository(Repository repository, String newRepositoryId, String newRepositoryLabel)
+	{
+		return copyRepository(repository, newRepositoryId, newRepositoryLabel, new QueryImpl());
+	}
+
+	@Override
+	public Repository copyRepository(Repository repository, String newRepositoryId, String newRepositoryLabel,
+			Query query)
+	{
+		LOG.info("Creating a copy of " + repository.getName() + " repository, with ID: " + newRepositoryId
+				+ ", and label: " + newRepositoryLabel);
+		DefaultEntityMetaData emd = new DefaultEntityMetaData(newRepositoryId, repository.getEntityMetaData());
+		emd.setLabel(newRepositoryLabel);
+		Repository repositoryCopy = metaDataService.addEntityMeta(emd);
+		try
+		{
+
+			repositoryCopy.add(repository.findAll(query));
+			return repositoryCopy;
+		}
+		catch (RuntimeException e)
+		{
+			if (repositoryCopy != null)
+			{
+				metaDataService.deleteEntityMeta(emd.getName());
+			}
+			throw e;
+		}
 	}
 }

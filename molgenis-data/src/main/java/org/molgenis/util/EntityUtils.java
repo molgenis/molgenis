@@ -47,26 +47,32 @@ public class EntityUtils
 		// get entity types that referencing the given entity (including self)
 		String entityName = entityMetaData.getName();
 		dataService.getEntityNames().forEach(otherEntityName -> {
-			EntityMetaData otherEntityMetaData = dataService.getEntityMetaData(otherEntityName);
-
-			// get referencing attributes for other entity
-			List<AttributeMetaData> referencingAttributes = null;
-			for (AttributeMetaData attributeMetaData : otherEntityMetaData.getAtomicAttributes())
+			try
 			{
-				EntityMetaData refEntityMetaData = attributeMetaData.getRefEntity();
-				if (refEntityMetaData != null && refEntityMetaData.getName().equals(entityName))
+				EntityMetaData otherEntityMetaData = dataService.getEntityMetaData(otherEntityName);
+
+				// get referencing attributes for other entity
+				List<AttributeMetaData> referencingAttributes = null;
+				for (AttributeMetaData attributeMetaData : otherEntityMetaData.getAtomicAttributes())
 				{
-					if (referencingAttributes == null) referencingAttributes = new ArrayList<AttributeMetaData>();
-					referencingAttributes.add(attributeMetaData);
+					EntityMetaData refEntityMetaData = attributeMetaData.getRefEntity();
+					if (refEntityMetaData != null && refEntityMetaData.getName().equals(entityName))
+					{
+						if (referencingAttributes == null) referencingAttributes = new ArrayList<AttributeMetaData>();
+						referencingAttributes.add(attributeMetaData);
+					}
+				}
+
+				// store references
+				if (referencingAttributes != null)
+				{
+					referencingEntityMetaData.add(new Pair<EntityMetaData, List<AttributeMetaData>>(otherEntityMetaData,
+							referencingAttributes));
 				}
 			}
-
-			// store references
-			if (referencingAttributes != null)
+			catch (Exception skip)
 			{
-				referencingEntityMetaData.add(
-						new Pair<EntityMetaData, List<AttributeMetaData>>(otherEntityMetaData, referencingAttributes));
-			}
+			} // the views are a hack!
 		});
 
 		return referencingEntityMetaData;

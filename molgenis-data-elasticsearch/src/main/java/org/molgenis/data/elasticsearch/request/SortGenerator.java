@@ -82,7 +82,6 @@ public class SortGenerator implements QueryPartGenerator
 				sortField = new StringBuilder(attr.getName()).append('.').append(refSortField).toString();
 				break;
 			case COMPOUND:
-			case IMAGE:
 				throw new UnsupportedOperationException();
 			default:
 				throw new RuntimeException("Unknown data type [" + dataType + "]");

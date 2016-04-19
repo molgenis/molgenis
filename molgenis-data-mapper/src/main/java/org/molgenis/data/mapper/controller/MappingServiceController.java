@@ -1,6 +1,5 @@
 package org.molgenis.data.mapper.controller;
 
-import static com.google.common.collect.Iterators.size;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.mapper.controller.MappingServiceController.URI;
 import static org.molgenis.data.mapper.mapping.model.CategoryMapping.create;

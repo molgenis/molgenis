@@ -133,7 +133,7 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 
 		List<EntityMetaData> meta = Lists.newArrayList(metaDataService.getEntityMetaDatas());
 		assertNotNull(meta);
-		assertEquals(meta.size(), 3);
+		assertEquals(meta.size(), 10);// 7 system entities see fillEntityMetaDataCache
 		assertTrue(meta.contains(test));
 		assertTrue(meta.contains(test1));
 		assertTrue(meta.contains(test2));

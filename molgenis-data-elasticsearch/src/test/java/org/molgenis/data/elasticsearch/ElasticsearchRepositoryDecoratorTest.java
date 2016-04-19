@@ -2,6 +2,7 @@ package org.molgenis.data.elasticsearch;
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -28,8 +29,11 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.Sort;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.support.AggregateQueryImpl;
+import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -54,6 +58,7 @@ public class ElasticsearchRepositoryDecoratorTest
 		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(idAttrName).getMock();
 		when(repositoryEntityMetaData.getIdAttribute()).thenReturn(idAttr);
 		when(decoratedRepo.getEntityMetaData()).thenReturn(repositoryEntityMetaData);
+		when(decoratedRepo.getCapabilities()).thenReturn(Collections.singleton(RepositoryCapability.QUERYABLE));
 		elasticsearchRepositoryDecorator = new ElasticsearchRepositoryDecorator(decoratedRepo, elasticSearchService);
 	}
 
@@ -319,6 +324,74 @@ public class ElasticsearchRepositoryDecoratorTest
 	}
 
 	@Test
+	public void findAllStreamQueryNoFetch()
+	{
+		QueryImpl q = new QueryImpl();
+		elasticsearchRepositoryDecorator.findAll(q);
+		verify(decoratedRepo).stream();
+	}
+
+	@Test
+	public void findAllStreamQueryEmptyFetch()
+	{
+		QueryImpl q = new QueryImpl();
+		Fetch fetch = mock(Fetch.class);
+		q.setFetch(fetch);
+		elasticsearchRepositoryDecorator.findAll(q);
+		verify(decoratedRepo).stream(fetch);
+	}
+
+	@Test
+	public void findAllStreamQueryFetchWithOffset()
+	{
+		QueryImpl q = new QueryImpl();
+		Fetch fetch = mock(Fetch.class);
+		q.setFetch(fetch);
+		q.setOffset(1);
+		elasticsearchRepositoryDecorator.findAll(q);
+		verify(decoratedRepo).findAll(q);
+	}
+
+	@Test
+	public void findAllStreamQueryFetchWithOffsetAndPageSize()
+	{
+		QueryImpl q = new QueryImpl();
+		Fetch fetch = mock(Fetch.class);
+		q.setFetch(fetch);
+		q.setOffset(0);
+		q.setPageSize(20);
+		elasticsearchRepositoryDecorator.findAll(q);
+		verify(decoratedRepo).findAll(q);
+	}
+
+	@Test
+	public void findAllStreamQueryFetchWithSort()
+	{
+		QueryImpl q = new QueryImpl();
+		Fetch fetch = mock(Fetch.class);
+		q.setFetch(fetch);
+		q.setSort(mock(Sort.class));
+		elasticsearchRepositoryDecorator.findAll(q);
+		verify(decoratedRepo).findAll(q);
+	}
+
+	@Test
+	public void findAllStreamQueryFetchWithOffsetAndPageSizeAndSort()
+	{
+		QueryImpl q = new QueryImpl();
+		Fetch fetch = mock(Fetch.class);
+		q.setFetch(fetch);
+		q.setOffset(1);
+		q.setPageSize(20);
+		q.setSort(mock(Sort.class));
+		q.not();
+		elasticsearchRepositoryDecorator.findAll(q);
+		verify(decoratedRepo, never()).stream();
+		verify(decoratedRepo, never()).stream(fetch);
+		verify(decoratedRepo, never()).findAll(q);
+	}
+
+	@Test
 	public void findAllStreamFetch()
 	{
 		Fetch fetch = new Fetch();
@@ -330,5 +403,33 @@ public class ElasticsearchRepositoryDecoratorTest
 		when(decoratedRepo.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = elasticsearchRepositoryDecorator.findAll(entityIds, fetch);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+	}
+
+	@Test
+	public void findAllStreamInQueryQueryableRepo()
+	{
+		QueryImpl q = new QueryImpl();
+		q.in("field", Arrays.asList("id0", "id1"));
+		elasticsearchRepositoryDecorator.findAll(q);
+		verify(decoratedRepo, times(1)).findAll(q);
+	}
+
+	@Test
+	public void findAllStreamInQueryNonQueryableRepo()
+	{
+		when(decoratedRepo.getCapabilities()).thenReturn(Collections.emptySet());
+
+		QueryImpl q = new QueryImpl();
+		q.in("field", Arrays.asList("id0", "id1"));
+		elasticsearchRepositoryDecorator.findAll(q);
+		verify(decoratedRepo, never()).findAll(q);
+	}
+
+	@Test
+	public void streamFetch()
+	{
+		Fetch fetch = new Fetch();
+		elasticsearchRepositoryDecorator.stream(fetch);
+		verify(decoratedRepo, times(1)).stream(fetch);
 	}
 }

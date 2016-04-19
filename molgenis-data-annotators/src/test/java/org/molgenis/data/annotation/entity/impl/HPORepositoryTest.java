@@ -3,6 +3,7 @@ package org.molgenis.data.annotation.entity.impl;
 import java.io.File;
 import java.io.IOException;
 
+import org.molgenis.data.annotation.entity.impl.hpo.HPORepository;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;

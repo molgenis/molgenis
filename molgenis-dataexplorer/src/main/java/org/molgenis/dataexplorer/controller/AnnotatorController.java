@@ -2,11 +2,13 @@ package org.molgenis.dataexplorer.controller;
 
 import static org.molgenis.dataexplorer.controller.AnnotatorController.URI;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
@@ -14,12 +16,9 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.CrudRepositoryAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.annotation.meta.AnnotationJobExecution;
 import org.molgenis.data.settings.SettingsEntityMeta;
-import org.molgenis.data.validation.EntityValidator;
-import org.molgenis.file.FileStore;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -30,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,12 +39,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.collect.Lists;
 
-/**
- * Controller wrapper for the dataexplorer annotator
- * 
- * @author mdehaan
- * 
- */
 @Controller
 @RequestMapping(URI)
 public class AnnotatorController
@@ -54,30 +46,26 @@ public class AnnotatorController
 	private static final Logger LOG = LoggerFactory.getLogger(AnnotatorController.class);
 
 	public static final String URI = "/annotators";
+	private final DataService dataService;
+	private final AnnotationService annotationService;
+	private final MolgenisPermissionService molgenisPermissionService;
+	private final UserAccountService userAccountService;
+	private final AnnotationJobFactory annotationJobFactory;
+	private final ExecutorService taskExecutor;
 
 	@Autowired
-	DataService dataService;
-
-	@Autowired
-	FileStore fileStore;
-
-	@Autowired
-	SearchService searchService;
-
-	@Autowired
-	AnnotationService annotationService;
-
-	@Autowired
-	EntityValidator entityValidator;
-
-	@Autowired
-	PermissionSystemService permissionSystemService;
-
-	@Autowired
-	UserAccountService userAccountService;
-
-	@Autowired
-	MolgenisPermissionService molgenisPermissionService;
+	public AnnotatorController(DataService dataService, AnnotationService annotationService,
+			MolgenisPermissionService molgenisPermissionService, PermissionSystemService permissionSystemService,
+			UserAccountService userAccountService, AnnotationJobFactory annotationJobFactory,
+			ExecutorService taskExecutor)
+	{
+		this.dataService = dataService;
+		this.annotationService = annotationService;
+		this.molgenisPermissionService = molgenisPermissionService;
+		this.userAccountService = userAccountService;
+		this.annotationJobFactory = annotationJobFactory;
+		this.taskExecutor = taskExecutor;
+	}
 
 	/**
 	 * Gets a map of all available annotators.
@@ -95,59 +83,38 @@ public class AnnotatorController
 	}
 
 	/**
-	 * Annotates a dataset based on selected dataset and selected annotators. Creates a copy of the original dataset if
+	 * Annotates an entity based on selected entity and selected annotators. Creates a copy of the entity dataset if
 	 * option is ticked by the user.
 	 * 
 	 * @param annotatorNames
 	 * @param entityName
-	 * @param createCopy
 	 * @return repositoryName
 	 * 
 	 */
 	@RequestMapping(value = "/annotate-data", method = RequestMethod.POST)
 	@ResponseBody
-	@Transactional
-	public String annotateData(@RequestParam(value = "annotatorNames", required = false) String[] annotatorNames,
-			@RequestParam("dataset-identifier") String entityName,
-			@RequestParam(value = "createCopy", required = false) boolean createCopy)
+	public String annotateData(HttpServletRequest request,
+			@RequestParam(value = "annotatorNames", required = false) String[] annotatorNames,
+			@RequestParam("dataset-identifier") String entityName)
 	{
 		Repository repository = dataService.getRepository(entityName);
 		if (annotatorNames != null && repository != null)
 		{
-			CrudRepositoryAnnotator crudRepositoryAnnotator = new CrudRepositoryAnnotator(dataService,
-					getNewRepositoryName(annotatorNames, repository.getEntityMetaData().getSimpleName()),
-					permissionSystemService, userAccountService, molgenisPermissionService);
-
-			for (String annotatorName : annotatorNames)
-			{
-				RepositoryAnnotator annotator = annotationService.getAnnotatorByName(annotatorName);
-				if (annotator != null)
-				{
-					// running annotator
-					try
-					{
-						repository = crudRepositoryAnnotator.annotate(annotator, repository, createCopy);
-						entityName = repository.getName();
-						createCopy = false;
-					}
-					catch (IOException e)
-					{
-						throw new RuntimeException(e.getMessage());
-					}
-				}
-			}
+			scheduleAnnotatorRun(repository.getEntityMetaData().getName(), annotatorNames);
 		}
 		return entityName;
 	}
 
-	private String getNewRepositoryName(String[] annotatorNames, String repositoryName)
+	public String scheduleAnnotatorRun(String entityName, String[] annotatorNames)
 	{
-		String newRepositoryName = repositoryName;
-		for (String annotatorName : annotatorNames)
-		{
-			newRepositoryName = newRepositoryName + "_" + annotatorName;
-		}
-		return newRepositoryName;
+		AnnotationJobExecution annotationJobExecution = new AnnotationJobExecution(dataService);
+		annotationJobExecution.setUser(userAccountService.getCurrentUser());
+		annotationJobExecution.setTargetName(entityName);
+		annotationJobExecution.setAnnotators(String.join(",", annotatorNames));
+		annotationJobExecution.setResultUrl("/menu/main/dataexplorer?entity=" + entityName);
+		AnnotationJob job = annotationJobFactory.createJob(annotationJobExecution);
+		taskExecutor.submit(job);
+		return annotationJobExecution.getIdentifier();
 	}
 
 	/**
@@ -171,8 +138,8 @@ public class AnnotatorController
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("description", annotator.getDescription());
 				map.put("canAnnotate", annotator.canAnnotate(entityMetaData));
-				map.put("inputAttributes", createAttrsResponse(annotator.getInputMetaData()));
-				map.put("inputAttributeTypes", toMap(annotator.getInputMetaData()));
+				map.put("inputAttributes", createAttrsResponse(annotator.getRequiredAttributes()));
+				map.put("inputAttributeTypes", toMap(annotator.getRequiredAttributes()));
 				map.put("outputAttributes", createAttrsResponse(outputAttrs));
 				map.put("outputAttributeTypes", toMap(annotator.getOutputMetaData()));
 

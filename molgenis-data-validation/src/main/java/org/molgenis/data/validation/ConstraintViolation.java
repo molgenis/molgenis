@@ -1,5 +1,9 @@
 package org.molgenis.data.validation;
 
+import static java.lang.Math.toIntExact;
+
+import java.util.List;
+
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -36,6 +40,17 @@ public class ConstraintViolation
 		this.violatedAttribute = violatedAttribute;
 		this.entityMetaData = entityMetaData;
 		this.rownr = rownr;
+	}
+
+	/**
+	 * Renumber the violation row number from a list of actual row numbers The list of indices is 0-indexed and the
+	 * rownnr are 1-indexed
+	 * 
+	 * @param indices
+	 */
+	public void renumberRowIndex(List<Integer> indices)
+	{
+		this.rownr = new Long(indices.get(toIntExact(this.rownr - 1)));
 	}
 
 	public String getMessage()
