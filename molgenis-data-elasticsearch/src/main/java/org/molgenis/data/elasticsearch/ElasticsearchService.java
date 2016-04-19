@@ -135,7 +135,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	 * @param client
 	 * @param indexName
 	 * @param dataService
-	 * @param entityToSourceConverter
+	 * @param elasticsearchEntityFactory
 	 * @param createIndexIfNotExists
 	 */
 	ElasticsearchService(Client client, String indexName, DataService dataService,
