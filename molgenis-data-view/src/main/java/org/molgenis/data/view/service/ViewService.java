@@ -62,4 +62,6 @@ public interface ViewService
 	 */
 	void addNewAttributeMappingToExistingSlave(String viewName, String slaveEntityName, String masterAttributeId,
 			String slaveAttributeId);
+
+	void deleteView(String viewName);
 }

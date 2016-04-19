@@ -17,6 +17,8 @@ import org.elasticsearch.cluster.metadata.MetaDataService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.support.DataServiceImpl;
@@ -83,7 +85,17 @@ public class ViewServiceImpl implements ViewService, ApplicationListener<Context
 	@Override
 	public Entity getViewEntity(String viewName)
 	{
-		return dataService.findOne(ViewMetaData.ENTITY_NAME, new QueryImpl().eq(NAME, viewName));
+		Query query = new QueryImpl().eq(NAME, viewName);
+		Fetch fetch = query.fetch();
+		fetch.field(ViewMetaData.IDENTIFIER);
+		fetch.field(ViewMetaData.MASTER_ENTITY);
+		fetch.field(ViewMetaData.NAME);
+		Fetch slaveFetch = new Fetch();
+		slaveFetch.field(SlaveEntityMetaData.IDENTIFIER);
+		slaveFetch.field(SlaveEntityMetaData.SLAVE_ENTITY);
+		slaveFetch.field(SlaveEntityMetaData.JOINED_ATTRIBUTES);
+		fetch.field(ViewMetaData.SLAVE_ENTITIES, slaveFetch);
+		return dataService.findOne(ViewMetaData.ENTITY_NAME, query);
 	}
 
 	@Override
@@ -172,6 +184,37 @@ public class ViewServiceImpl implements ViewService, ApplicationListener<Context
 		slaveEntity.set(JOINED_ATTRIBUTES, newArrayList(newAttributeMapping));
 		dataService.add(SlaveEntityMetaData.ENTITY_NAME, slaveEntity);
 		return slaveEntity;
+	}
+
+	@Override
+	public void deleteView(String viewName)
+	{
+		dataService.removeRepository(viewName);
+		Entity view = getViewEntity(viewName);
+		
+		// manual fetch :)
+		for (Entity slave : view.getEntities(SLAVE_ENTITIES))
+		{
+			slave.getEntities(JOINED_ATTRIBUTES);
+		}
+		
+		dataService.delete(ViewMetaData.ENTITY_NAME, view);
+		try
+		{
+			for (Entity slave : view.getEntities(SLAVE_ENTITIES))
+			{
+				dataService.delete(SlaveEntityMetaData.ENTITY_NAME, slave);
+				for (Entity joinedAttribute : slave.getEntities(JOINED_ATTRIBUTES))
+				{
+					dataService.delete(JoinedAttributeMetaData.ENTITY_NAME, joinedAttribute);
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			LOG.warn("Failed to clean up the view details", ex);
+		}
+		
 	}
 
 }

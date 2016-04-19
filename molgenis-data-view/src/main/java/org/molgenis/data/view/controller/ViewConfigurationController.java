@@ -60,9 +60,7 @@ public class ViewConfigurationController extends MolgenisPluginController
 	@ResponseBody
 	public void deleteEntityView(@RequestParam(value = "viewName") String viewName)
 	{
-		// TODO Delete SlaveEntity and JoinedAttributes belonging to this view as well (cascading)
-		dataService.delete(ViewMetaData.ENTITY_NAME,
-				dataService.findOne(ViewMetaData.ENTITY_NAME, new QueryImpl().eq(ViewMetaData.NAME, viewName)));
+		viewService.deleteView(viewName);
 	}
 
 	@RequestMapping(value = "/save-new-view", method = POST)
