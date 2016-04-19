@@ -188,7 +188,7 @@ public class IndexTransactionLogRepositoryDecorator implements Repository
 	@Override
 	public Integer add(Stream<? extends Entity> entities)
 	{
-		indexTransactionLogService.log(getEntityMetaData(), CudType.UPDATE, DataType.DATA, null);
+		indexTransactionLogService.log(getEntityMetaData(), CudType.ADD, DataType.DATA, null);
 		return decorated.add(entities);
 	}
 
@@ -219,6 +219,7 @@ public class IndexTransactionLogRepositoryDecorator implements Repository
 	@Override
 	public void rebuildIndex()
 	{
+		indexTransactionLogService.log(getEntityMetaData(), CudType.UPDATE, DataType.METADATA, null);
 		decorated.rebuildIndex();
 	}
 
