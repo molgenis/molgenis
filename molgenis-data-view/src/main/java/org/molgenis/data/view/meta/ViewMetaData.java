@@ -3,6 +3,7 @@ package org.molgenis.data.view.meta;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,7 @@ public class ViewMetaData extends DefaultEntityMetaData
 	public static final String NAME = "name";
 	public static final String MASTER_ENTITY = "masterEntity";
 	public static final String SLAVE_ENTITIES = "slaveEntities";
+	public static final EntityMetaData INSTANCE = new ViewMetaData();
 
 	public ViewMetaData()
 	{

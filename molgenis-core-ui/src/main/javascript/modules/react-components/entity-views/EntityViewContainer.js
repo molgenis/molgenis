@@ -37,8 +37,8 @@ var EntityViewContainer = React.createClass({
 				{this.state.views === null ? <Spinner /> 
 					: <EntityViewsTable views={this.state.views} deleteEntityView={this._deleteEntityView} />
 				}
-				
-				<NewViewModal 
+
+				{this.state.isOpen && <NewViewModal
 					isOpen={this.state.isOpen}
 					hideModal={this._hideModal}
 					saveNewView={this._saveNewView}
@@ -54,7 +54,7 @@ var EntityViewContainer = React.createClass({
 					slaveEntitySelect={this._slaveEntitySelect}
 					masterAttributeSelect={this._masterAttributeSelect}
 					slaveAttributeSelect={this._slaveAttributeSelect} 
-				/>
+				/>}
 			</div>
 		</div>
 	},
@@ -88,19 +88,18 @@ var EntityViewContainer = React.createClass({
 				'slaveEntity' : this.state.selectedSlaveEntity.value.fullName,
 				'masterAttribute' : this.state.selectedMasterAttribute,
 				'slaveAttribute' : this.state.selectedSlaveAttribute
-			},
-			success: function() {
-				self.setState({
-					selectedViewName: null,
-					selectedMasterEntity: null, 
-					selectedSlaveEntity: null,
-					selectedMasterAttribute: null,
-					selectedSlaveAttribute: null,
-					isOpen: false,
-					refresh: true
-				});				
 			}
-		});	
+		}).always(function() {
+			self.setState({
+				selectedViewName: null,
+				selectedMasterEntity: null,
+				selectedSlaveEntity: null,
+				selectedMasterAttribute: null,
+				selectedSlaveAttribute: null,
+				isOpen: false,
+				refresh: true
+			});
+		});
 	},
 	_deleteEntityView: function(row) {
 		var viewDelete = confirm("Are you sure you want to delete this View?");

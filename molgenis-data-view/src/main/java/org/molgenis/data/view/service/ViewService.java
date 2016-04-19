@@ -2,6 +2,8 @@ package org.molgenis.data.view.service;
 
 import org.molgenis.data.Entity;
 
+import com.google.common.base.Optional;
+
 public interface ViewService
 {
 	/**
@@ -13,25 +15,27 @@ public interface ViewService
 	 * @param masterAttributeId
 	 * @param slaveAttributeId
 	 */
-	public void createNewView(String viewName, String masterEntityName, String slaveEntityName,
+	void createNewView(String viewName, String masterEntityName, String slaveEntityName,
 			String masterAttributeId, String slaveAttributeId);
 
 	/**
-	 * Get the View Entity from the View Table based on the viewName and masterEntityName
+	 * Get the View Entity from the View Table with a viewName
 	 * 
 	 * @param viewName
-	 * @param masterEntityName
 	 * @return a viewEntity
 	 */
-	public Entity getViewEntity(String viewName, String masterEntityName);
+	Entity getViewEntity(String viewName);
 
 	/**
 	 * Get the Slave Entity from the Slave Entity Table based on the slaveEntityName
 	 * 
+	 * @param viewName
+	 *            name of the view that the entity should be a slave entity of
 	 * @param slaveEntityName
-	 * @return a slaveEntity
+	 *            name of the slave entity
+	 * @return Optional<Entity>, present if the slave entity exists
 	 */
-	public Entity getSlaveEntity(String slaveEntityName);
+	Optional<Entity> getSlaveEntity(String viewName, String slaveEntityName);
 
 	/**
 	 * When the view exists, but the slave does not, add the slave entity to the existing view
@@ -41,16 +45,23 @@ public interface ViewService
 	 * @param masterAttributeId
 	 * @param slaveAttributeId
 	 */
-	public void addNewSlaveEntityToExistingView(Entity viewEntity, String slaveEntityName, String masterAttributeId,
+	void addNewSlaveEntityToExistingView(Entity viewEntity, String slaveEntityName, String masterAttributeId,
 			String slaveAttributeId);
 
 	/**
-	 * When the view and slave exist, add the attribute mapping to the existing slave
+	 * If the view and slave exist, adds the attribute mapping to the existing slave.
 	 * 
+	 * @param viewName
+	 *            the name of the view to update
 	 * @param slaveEntityName
+	 *            the name of the slave entity to update
 	 * @param masterAttributeId
+	 *            ID of the attribute in the master entity
 	 * @param slaveAttributeId
+	 *            ID of the attribute in the slave entity
 	 */
-	public void addNewAttributeMappingToExistingSlave(String slaveEntityName, String masterAttributeId,
+	void addNewAttributeMappingToExistingSlave(String viewName, String slaveEntityName, String masterAttributeId,
 			String slaveAttributeId);
+
+	void deleteView(String viewName);
 }
