@@ -1,4 +1,5 @@
-package org.molgenis.dataexplorer.gavin;
+package org.molgenis.gavin.job;
+
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;

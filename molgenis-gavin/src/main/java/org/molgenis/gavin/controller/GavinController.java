@@ -1,0 +1,110 @@
+package org.molgenis.gavin.controller;
+
+import static java.io.File.separator;
+import static java.net.URLConnection.guessContentTypeFromName;
+import static org.molgenis.gavin.controller.GavinController.URI;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.concurrent.ExecutorService;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.molgenis.data.DataService;
+import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.file.FileStore;
+import org.molgenis.gavin.job.GavinJob;
+import org.molgenis.gavin.job.GavinJobExecution;
+import org.molgenis.gavin.job.GavinJobFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+
+@Controller
+@RequestMapping(URI)
+public class GavinController
+{
+	public static final String URI = "/gavin";
+
+	@Autowired
+	DataService dataService;
+
+	@Autowired
+	ExecutorService executorService;
+
+	@Autowired
+	GavinJobFactory gavinJobFactory;
+
+	@Autowired
+	FileStore fileStore;
+
+	@RequestMapping(value = "/annotate-file", method = POST)
+	@ResponseBody
+	public String annotateFile(HttpServletRequest request, @RequestParam(value = "file") MultipartFile inputFile)
+			throws IOException, URISyntaxException
+	{
+		GavinJobExecution gavinJobExecution = new GavinJobExecution(dataService);
+		String fileName = "gavin/" + gavinJobExecution.getIdentifier() + "/input.vcf";
+		fileStore.store(inputFile.getInputStream(), fileName);
+
+		GavinJob gavinJob = gavinJobFactory.createJob(gavinJobExecution);
+		executorService.submit(gavinJob);
+
+		return "api/v2/JobExecution/" + gavinJobExecution.getIdentifier();
+	}
+
+	@RequestMapping(value = "/annotate-text-input", method = POST)
+	@ResponseBody
+	public String annotateTextInput(HttpServletRequest request, @RequestParam(value = "text") String text)
+			throws IOException
+	{
+		GavinJobExecution gavinJobExecution = new GavinJobExecution(dataService);
+		String fileName = "gavin/" + gavinJobExecution.getIdentifier() + "/input.vcf";
+
+		File inputFile = writeInputTextToFile(text, fileName);
+		fileStore.store(new FileInputStream(inputFile), fileName);
+
+		GavinJob gavinJob = gavinJobFactory.createJob(gavinJobExecution);
+		executorService.submit(gavinJob);
+
+		return "api/v2/JobExecution/" + gavinJobExecution.getIdentifier();
+	}
+
+	private File writeInputTextToFile(String text, String fileName) throws IOException
+	{
+		File inputFile = new File(fileName);
+		BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(inputFile));
+		bufferedWriter.write(text);
+		bufferedWriter.close();
+		return inputFile;
+	}
+
+	@RequestMapping(value = "/result/{jobIdentifier}", method = GET)
+	public void result(HttpServletResponse response, @PathVariable(value = "jobIdentifier") String jobIdentifier)
+			throws IOException
+	{
+		File file = new File("gavin" + separator + jobIdentifier + separator + "gavin-result.vcf");
+		if (!file.exists())
+		{
+			throw new MolgenisDataException("Sorry, " + file.getName() + " does not exist for job " + jobIdentifier);
+		}
+		String mimeType = guessContentTypeFromName(file.getName());
+		if (mimeType == null) mimeType = "application/octet-stream";
+
+		response.setContentType(mimeType);
+		response.setHeader("Content-Disposition", String.format("inline; filename=\"" + file.getName() + "\""));
+		response.setContentLength((int) file.length());
+	}
+}

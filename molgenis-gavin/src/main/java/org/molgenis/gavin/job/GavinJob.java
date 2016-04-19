@@ -1,4 +1,4 @@
-package org.molgenis.dataexplorer.gavin;
+package org.molgenis.gavin.job;
 
 import static java.io.File.separator;
 import static java.util.Collections.emptyList;
@@ -10,6 +10,7 @@ import org.molgenis.data.annotation.cmd.CmdLineAnnotator;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.file.FileStore;
+import org.molgenis.gavin.controller.GavinController;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -70,7 +71,7 @@ public class GavinJob extends Job<Void>
 
 		progress.progress(4, "Result is ready for download.");
 		progress.setResultUrl(
-				menuReaderService.getMenu().findMenuItemPath(GavinController.ID) + "/result/" + jobIdentifier);
+				menuReaderService.getMenu().findMenuItemPath(GavinController.URI) + "/result/" + jobIdentifier);
 
 		return null;
 	}

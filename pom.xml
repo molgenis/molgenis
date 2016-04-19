@@ -692,5 +692,6 @@
 		<module>molgenis-file-ingester</module>
 		<module>molgenis-integration-tests</module>
 		<module>molgenis-jobs</module>
+		<module>molgenis-gavin</module>
     </modules>
 </project>
