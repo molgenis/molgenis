@@ -8,6 +8,7 @@ import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -24,7 +25,6 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils;
 import org.molgenis.data.support.QueryImpl;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Sets;
 
@@ -34,8 +34,7 @@ public abstract class AbstractElasticsearchRepository implements Repository
 
 	public AbstractElasticsearchRepository(SearchService elasticSearchService)
 	{
-		if (elasticSearchService == null) throw new IllegalArgumentException("elasticSearchService is null");
-		this.elasticSearchService = elasticSearchService;
+		this.elasticSearchService = Objects.requireNonNull(elasticSearchService, "elasticSearchService is null");
 	}
 
 	@Override
@@ -139,15 +138,14 @@ public abstract class AbstractElasticsearchRepository implements Repository
 	public void add(Entity entity)
 	{
 		elasticSearchService.index(entity, getEntityMetaData(), IndexingMode.ADD);
-		elasticSearchService.refresh(getEntityMetaData());
+		elasticSearchService.refresh();
 	}
 
 	@Override
-	@Transactional
 	public Integer add(Stream<? extends Entity> entities)
 	{
 		long nrIndexedEntities = elasticSearchService.index(entities, getEntityMetaData(), IndexingMode.ADD);
-		elasticSearchService.refresh(getEntityMetaData());
+		elasticSearchService.refresh();
 		return Ints.checkedCast(nrIndexedEntities);
 	}
 
@@ -164,60 +162,53 @@ public abstract class AbstractElasticsearchRepository implements Repository
 	}
 
 	@Override
-	@Transactional
 	public void update(Entity entity)
 	{
 		elasticSearchService.index(entity, getEntityMetaData(), IndexingMode.UPDATE);
-		elasticSearchService.refresh(getEntityMetaData());
+		elasticSearchService.refresh();
 	}
 
 	@Override
-	@Transactional
 	public void update(Stream<? extends Entity> entities)
 	{
 		elasticSearchService.index(entities, getEntityMetaData(), IndexingMode.UPDATE);
-		elasticSearchService.refresh(getEntityMetaData());
+		elasticSearchService.refresh();
 	}
 
 	@Override
-	@Transactional
 	public void delete(Entity entity)
 	{
 		elasticSearchService.delete(entity, getEntityMetaData());
-		elasticSearchService.refresh(getEntityMetaData());
+		elasticSearchService.refresh();
 	}
 
 	@Override
-	@Transactional
 	public void delete(Stream<? extends Entity> entities)
 	{
 		elasticSearchService.delete(entities, getEntityMetaData());
-		elasticSearchService.refresh(getEntityMetaData());
+		elasticSearchService.refresh();
 	}
 
 	@Override
-	@Transactional
 	public void deleteById(Object id)
 	{
 		elasticSearchService.deleteById(ElasticsearchEntityUtils.toElasticsearchId(id), getEntityMetaData());
-		elasticSearchService.refresh(getEntityMetaData());
+		elasticSearchService.refresh();
 	}
 
 	@Override
-	@Transactional
 	public void deleteById(Stream<Object> ids)
 	{
 		elasticSearchService.deleteById(ElasticsearchEntityUtils.toElasticsearchIds(ids), getEntityMetaData());
-		elasticSearchService.refresh(getEntityMetaData());
+		elasticSearchService.refresh();
 	}
 
 	@Override
-	@Transactional
 	public void deleteAll()
 	{
 		elasticSearchService.delete(getEntityMetaData().getName());
 		createMappings();
-		elasticSearchService.refresh(getEntityMetaData());
+		elasticSearchService.refresh();
 	}
 
 	@Override
