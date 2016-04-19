@@ -1,11 +1,9 @@
 package org.molgenis.gavin.job;
 
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.annotation.CrudRepositoryAnnotator;
 import org.molgenis.data.annotation.EffectsAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.meta.AnnotationJobExecution;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.file.FileStore;
@@ -39,8 +37,9 @@ public class GavinJobFactory
 	@Autowired
 	private MailSender mailSender;
 
-	@Autowired FileStore fileStore;
-	
+	@Autowired
+	FileStore fileStore;
+
 	@Autowired
 	private RepositoryAnnotator cadd;
 
@@ -56,15 +55,15 @@ public class GavinJobFactory
 	@RunAsSystem
 	public GavinJob createJob(GavinJobExecution metaData)
 	{
-		dataService.add(AnnotationJobExecution.ENTITY_NAME, metaData);
+		dataService.add(GavinJobExecution.ENTITY_NAME, metaData);
 		String username = metaData.getUser().getUsername();
 
 		// create an authentication to run as the user that is listed as the owner of the job
 		RunAsUserToken runAsAuthentication = new RunAsUserToken("Job Execution", username, null,
 				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
-		
+
 		return new GavinJob(new ProgressImpl(metaData, jobExecutionUpdater, mailSender),
-				new TransactionTemplate(transactionManager), runAsAuthentication, metaData.getIdentifier(), fileStore, null,
-				cadd, exac, snpEff, gavin);
+				new TransactionTemplate(transactionManager), runAsAuthentication, metaData.getIdentifier(), fileStore,
+				null, cadd, exac, snpEff, gavin);
 	}
 }

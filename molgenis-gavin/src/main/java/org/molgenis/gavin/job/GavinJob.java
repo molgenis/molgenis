@@ -53,6 +53,7 @@ public class GavinJob extends Job<Void>
 	@Override
 	public Void call(Progress progress) throws Exception
 	{
+		progress.setProgressMax(4);
 		File inputFile = fileStore.getFile("gavin" + separator + jobIdentifier + separator + "input.vcf");
 		CmdLineAnnotator cmdLineAnnotator = new CmdLineAnnotator();
 
@@ -70,8 +71,7 @@ public class GavinJob extends Job<Void>
 		cmdLineAnnotator.annotate(gavin, snpeffOutputFile, gavinOutputFile, emptyList(), false);
 
 		progress.progress(4, "Result is ready for download.");
-		progress.setResultUrl(
-				menuReaderService.getMenu().findMenuItemPath(GavinController.URI) + "/result/" + jobIdentifier);
+		progress.setResultUrl("/gavin/result/" + jobIdentifier);
 
 		return null;
 	}

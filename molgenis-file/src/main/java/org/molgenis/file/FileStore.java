@@ -1,5 +1,7 @@
 package org.molgenis.file;
 
+import static java.io.File.separator;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -17,9 +19,14 @@ public class FileStore
 		this.storageDir = storageDir;
 	}
 
+	public boolean createDirectory(String dirName) throws IOException
+	{
+		return new File(storageDir + separator + dirName).mkdir();
+	}
+
 	public File store(InputStream is, String fileName) throws IOException
 	{
-		File file = new File(storageDir + '/' + fileName);
+		File file = new File(storageDir + separator + fileName);
 		FileOutputStream fos = new FileOutputStream(file);
 		try
 		{
@@ -36,12 +43,12 @@ public class FileStore
 
 	public File getFile(String fileName)
 	{
-		return new File(storageDir + '/' + fileName);
+		return new File(storageDir + separator + fileName);
 	}
 
 	public boolean delete(String fileName)
 	{
-		File file = new File(storageDir + '/' + fileName);
+		File file = new File(storageDir + separator + fileName);
 		return file.delete();
 	}
 

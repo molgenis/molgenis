@@ -75,7 +75,7 @@ export default {
 	'ProgressBar' : ProgressBar,
 	'jobs': jobs,
 	'FileIngestPlugin' : FileIngestPlugin,
-	'ConfirmClick': ConfirmClick
+	'ConfirmClick': ConfirmClick,
 	'UploadContainer' : UploadContainer,
 	'UploadForm' : UploadForm
 };
