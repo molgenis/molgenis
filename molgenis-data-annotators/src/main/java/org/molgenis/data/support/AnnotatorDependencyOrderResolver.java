@@ -6,6 +6,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.EffectsAnnotator;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -24,7 +25,12 @@ public class AnnotatorDependencyOrderResolver
 		Queue<RepositoryAnnotator> sortedList = new LinkedList<>();
 		for (RepositoryAnnotator annotator : requestedAnnotatorList)
 		{
-			if (!sortedList.contains(annotator))
+			if (annotator instanceof EffectsAnnotator)
+			{
+				// FIXME: implement correct dependency resolving for Effect annotator
+				sortedList.add(annotator);
+			}
+			else if (!sortedList.contains(annotator))
 			{
 				requestedAnnotator = annotator;
 				sortedList = getSingleAnnotatorDependencyList(annotator, availableAnnotatorList, sortedList,
@@ -44,7 +50,8 @@ public class AnnotatorDependencyOrderResolver
 	}
 
 	private void resolveAnnotatorDependencies(RepositoryAnnotator selectedAnnotator,
-			List<RepositoryAnnotator> annotatorList, Queue<RepositoryAnnotator> annotatorQueue, EntityMetaData entityMetaData)
+			List<RepositoryAnnotator> annotatorList, Queue<RepositoryAnnotator> annotatorQueue,
+			EntityMetaData entityMetaData)
 	{
 		if (!areRequiredAttributesAvailable(Lists.newArrayList(entityMetaData.getAtomicAttributes()),
 				selectedAnnotator.getRequiredAttributes()))
@@ -55,8 +62,8 @@ public class AnnotatorDependencyOrderResolver
 						Arrays.asList(requiredInputAttribute)))
 				{
 					annotatorList.stream().filter(a -> !a.equals(selectedAnnotator)).collect(Collectors.toList())
-							.forEach(annotator -> resolveAnnotatorDependencies(selectedAnnotator, annotatorList, annotatorQueue,
-									entityMetaData, requiredInputAttribute, annotator));
+							.forEach(annotator -> resolveAnnotatorDependencies(selectedAnnotator, annotatorList,
+									annotatorQueue, entityMetaData, requiredInputAttribute, annotator));
 				}
 			}
 		}
@@ -68,19 +75,20 @@ public class AnnotatorDependencyOrderResolver
 		}
 		if (annotatorQueue.size() == 0)
 		{
+			// FIXME: what to do for ref entity annotator.
 			throw new UnresolvedAnnotatorDependencyException("unsolved for: " + requestedAnnotator);
 		}
 
 	}
 
 	private void resolveAnnotatorDependencies(RepositoryAnnotator selectedAnnotator,
-			List<RepositoryAnnotator> annotatorList, Queue<RepositoryAnnotator> annotatorQueue, EntityMetaData entityMetaData,
-			AttributeMetaData requiredAttribute, RepositoryAnnotator annotator)
+			List<RepositoryAnnotator> annotatorList, Queue<RepositoryAnnotator> annotatorQueue,
+			EntityMetaData entityMetaData, AttributeMetaData requiredAttribute, RepositoryAnnotator annotator)
 	{
 		if (isRequiredAttributeAvailable(annotator.getInfo().getOutputAttributes(), requiredAttribute))
 		{
-			if (areRequiredAttributesAvailable(
-					Lists.newArrayList(entityMetaData.getAtomicAttributes()),annotator.getRequiredAttributes()))
+			if (areRequiredAttributesAvailable(Lists.newArrayList(entityMetaData.getAtomicAttributes()),
+					annotator.getRequiredAttributes()))
 			{
 				if (!annotatorQueue.contains(selectedAnnotator))
 				{
@@ -111,7 +119,8 @@ public class AnnotatorDependencyOrderResolver
 		return true;
 	}
 
-	private boolean isRequiredAttributeAvailable(List<AttributeMetaData> availableAttributes, AttributeMetaData requiredAttribute)
+	private boolean isRequiredAttributeAvailable(List<AttributeMetaData> availableAttributes,
+			AttributeMetaData requiredAttribute)
 	{
 		for (AttributeMetaData availableAttribute : availableAttributes)
 		{
@@ -120,7 +129,8 @@ public class AnnotatorDependencyOrderResolver
 				if (requiredAttribute.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.TEXT))
 				{
 					return requiredAttribute.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.TEXT)
-							|| requiredAttribute.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.STRING);
+							|| requiredAttribute.getDataType().getEnumType()
+									.equals(MolgenisFieldTypes.FieldTypeEnum.STRING);
 				}
 				else return requiredAttribute.getDataType().equals(availableAttribute.getDataType());
 			}

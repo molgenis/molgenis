@@ -6,7 +6,7 @@ import java.util.Collection;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.annotation.impl.datastructures.Locus;
+import org.molgenis.data.annotation.datastructures.Locus;
 import org.molgenis.data.annotation.entity.QueryCreator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.vcf.VcfRepository;

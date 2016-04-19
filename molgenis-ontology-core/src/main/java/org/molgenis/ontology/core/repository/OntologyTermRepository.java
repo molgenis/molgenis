@@ -1,6 +1,5 @@
 package org.molgenis.ontology.core.repository;
 
-import static java.util.Objects.requireNonNull;
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ENTITY_NAME;
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY;
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_IRI;
@@ -33,6 +32,8 @@ import org.molgenis.ontology.core.model.OntologyTerm;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.FluentIterable;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Maps {@link OntologyTermMetaData} {@link Entity} <-> {@link OntologyTerm}

@@ -16,7 +16,6 @@ import { ProgressBar } from '../ProgressBar';
 
 import DeepPureRenderMixin from '../mixin/DeepPureRenderMixin';
 import {Ace} from '../wrapper/Ace';
-const {textarea} = React.DOM;
 
 var JobDetails = React.createClass({
     mixins: [DeepPureRenderMixin],

@@ -41,10 +41,8 @@ public class ExplainServiceHelperTest
 		assertEquals(
 				explainServiceHelper.getMatchedWord("weight(label:blood in 20697) [PerFieldSimilarity], result of:"),
 				"blood");
-		assertEquals(
-				explainServiceHelper
-						.getMatchedWord("weight(label:blood^0.5 in 20697) [PerFieldSimilarity], result of:"),
-				"blood");
+		assertEquals(explainServiceHelper
+				.getMatchedWord("weight(label:blood^0.5 in 20697) [PerFieldSimilarity], result of:"), "blood");
 	}
 
 	@Test
@@ -80,7 +78,7 @@ public class ExplainServiceHelperTest
 		expanedQueryMap.put("drug", "medication");
 		expanedQueryMap.put("pill", "medication");
 
-		assertEquals(explainServiceHelper.findMatchQueries("blood high", expanedQueryMap).toString(),
-				"{high blood pressure=73.333}");
+		Map<String, Double> findMatchQueries = explainServiceHelper.findMatchQueries("blood high", expanedQueryMap);
+		assertEquals(findMatchQueries.get("high blood pressure"), 73.333, 0.001);
 	}
 }

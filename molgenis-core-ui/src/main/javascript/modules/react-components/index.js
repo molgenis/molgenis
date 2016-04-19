@@ -4,6 +4,8 @@
  * 
  * @module
  */
+import React from 'react'
+
 import mixin from './mixin';
 import wrapper from './wrapper';
 
@@ -33,11 +35,11 @@ import RangeSlider from './RangeSlider';
 import SelectBox from './SelectBox';
 import Spinner from './Spinner';
 import Table from './Table';
+import ConfirmClick from './ConfirmClick';
 import TextArea from './TextArea';
 import ProgressBar from './ProgressBar';
-import JobContainer from './jobs/JobContainer';
-import JobsContainer from './jobs/JobsContainer';
 import FileIngestPlugin from './FileIngestPlugin';
+import jobs from './jobs';
 import EntityViewContainer from './entity-views/EntityViewContainer';
 
 export default {
@@ -70,8 +72,8 @@ export default {
 	'Table' : Table,
 	'TextArea' : TextArea,
 	'ProgressBar' : ProgressBar,
-	'JobContainer' : JobContainer,
-	'JobsContainer' : JobsContainer,
+	'jobs': jobs,
 	'FileIngestPlugin' : FileIngestPlugin,
+	'ConfirmClick': ConfirmClick,
 	'EntityViewContainer' : EntityViewContainer
 };

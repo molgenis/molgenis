@@ -1,5 +1,31 @@
 package org.molgenis.data.vcf.format;
 
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.MetaValidationUtils;
+import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.utils.VcfUtils;
+import org.molgenis.genotype.Allele;
+import org.molgenis.genotype.GenotypeDataException;
+import org.molgenis.vcf.VcfInfo;
+import org.molgenis.vcf.VcfRecord;
+import org.molgenis.vcf.VcfSample;
+import org.molgenis.vcf.meta.VcfMeta;
+import org.molgenis.vcf.meta.VcfMetaFormat;
+import org.molgenis.vcf.meta.VcfMetaInfo;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import static org.elasticsearch.common.base.Preconditions.checkNotNull;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
@@ -23,34 +49,6 @@ import static org.molgenis.data.vcf.VcfRepository.QUAL_META;
 import static org.molgenis.data.vcf.VcfRepository.REF;
 import static org.molgenis.data.vcf.VcfRepository.REF_META;
 import static org.molgenis.data.vcf.VcfRepository.SAMPLES;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
-
-import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.meta.MetaValidationUtils;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.data.vcf.utils.VcfUtils;
-import org.molgenis.genotype.Allele;
-import org.molgenis.genotype.GenotypeDataException;
-import org.molgenis.vcf.VcfInfo;
-import org.molgenis.vcf.VcfRecord;
-import org.molgenis.vcf.VcfSample;
-import org.molgenis.vcf.meta.VcfMeta;
-import org.molgenis.vcf.meta.VcfMetaFormat;
-import org.molgenis.vcf.meta.VcfMetaInfo;
-
-import com.google.common.collect.Lists;
 
 public class VcfToEntity
 {

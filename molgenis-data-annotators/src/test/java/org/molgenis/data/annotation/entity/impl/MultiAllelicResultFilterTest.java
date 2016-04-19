@@ -1,19 +1,14 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import static org.mockito.Mockito.mock;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
-import org.apache.lucene.document.StringField;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.filter.MultiAllelicResultFilter;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -38,6 +33,9 @@ public class MultiAllelicResultFilterTest
 	private MapEntity entity8;
 	private MapEntity entity9;
 	private MapEntity entity10;
+	private MapEntity entityNoRef;
+	private MapEntity entityMismatchChrom;
+	private MapEntity entityMismatchPos;
 	private MapEntity resultEntity1;
 	private MapEntity resultEntity2;
 	private MapEntity resultEntity3;
@@ -93,25 +91,41 @@ public class MultiAllelicResultFilterTest
 		entity7.set(VcfRepository.POS, 100);
 		entity7.set(VcfRepository.REF, "TTCCTCC");
 		entity7.set(VcfRepository.ALT, "TTCC");
-		entity7.set(VcfRepository.ID, "entity3");
+		entity7.set(VcfRepository.ID, "entity7");
 		entity8 = new MapEntity(emd);
 		entity8.set(VcfRepository.CHROM, "1");
 		entity8.set(VcfRepository.POS, 100);
 		entity8.set(VcfRepository.REF, "TTCCTCCTCC");
 		entity8.set(VcfRepository.ALT, "TTCCTCC");
-		entity8.set(VcfRepository.ID, "entity3");
+		entity8.set(VcfRepository.ID, "entity8");
 		entity9 = new MapEntity(emd);
 		entity9.set(VcfRepository.CHROM, "1");
 		entity9.set(VcfRepository.POS, 100);
 		entity9.set(VcfRepository.REF, "GA");
 		entity9.set(VcfRepository.ALT, "G");
-		entity9.set(VcfRepository.ID, "entity3");
+		entity9.set(VcfRepository.ID, "entity9");
 		entity10 = new MapEntity(emd);
 		entity10.set(VcfRepository.CHROM, "1");
 		entity10.set(VcfRepository.POS, 100);
 		entity10.set(VcfRepository.REF, "GAA");
 		entity10.set(VcfRepository.ALT, "GA");
-		entity10.set(VcfRepository.ID, "entity3");
+		entity10.set(VcfRepository.ID, "entity10");
+		entityNoRef = new MapEntity(emd);
+		entityNoRef.set(VcfRepository.CHROM, "1");
+		entityNoRef.set(VcfRepository.POS, 100);
+		entityNoRef.set(VcfRepository.ID, "entityNoRef");
+		entityMismatchChrom = new MapEntity(emd);
+		entityMismatchChrom.set(VcfRepository.CHROM, "2");
+		entityMismatchChrom.set(VcfRepository.POS, 100);
+		entityMismatchChrom.set(VcfRepository.REF, "A");
+		entityMismatchChrom.set(VcfRepository.ALT, "C");
+		entityMismatchChrom.set(VcfRepository.ID, "entityMismatchChrom");
+		entityMismatchPos = new MapEntity(emd);
+		entityMismatchPos.set(VcfRepository.CHROM, "1");
+		entityMismatchPos.set(VcfRepository.POS, 101);
+		entityMismatchPos.set(VcfRepository.REF, "A");
+		entityMismatchPos.set(VcfRepository.ALT, "C");
+		entityMismatchPos.set(VcfRepository.ID, "entityMismatchPos");
 
 		resultEntity1 = new MapEntity(resultEmd);
 		resultEntity1.set(VcfRepository.CHROM, "1");
@@ -167,7 +181,7 @@ public class MultiAllelicResultFilterTest
 		resultEntity7.set(VcfRepository.REF, "TTCCTCCTCC");
 		resultEntity7.set(VcfRepository.ALT, "TTGGTCC,TTCCTCC");
 		resultEntity7.set("annotation", "12,13");
-		resultEntity7.set(VcfRepository.ID, "resultEntity3");
+		resultEntity7.set(VcfRepository.ID, "resultEntity7");
 
 		resultEntity8 = new MapEntity(resultEmd);
 		resultEntity8.set(VcfRepository.CHROM, "1");
@@ -175,7 +189,7 @@ public class MultiAllelicResultFilterTest
 		resultEntity8.set(VcfRepository.REF, "TTCCTCC");
 		resultEntity8.set(VcfRepository.ALT, "TTGGT,TTCC");
 		resultEntity8.set("annotation", "14,15");
-		resultEntity8.set(VcfRepository.ID, "resultEntity3");
+		resultEntity8.set(VcfRepository.ID, "resultEntity8");
 
 		resultEntity9 = new MapEntity(resultEmd);
 		resultEntity9.set(VcfRepository.CHROM, "1");
@@ -183,7 +197,7 @@ public class MultiAllelicResultFilterTest
 		resultEntity9.set(VcfRepository.REF, "GAA");
 		resultEntity9.set(VcfRepository.ALT, "GA,G");
 		resultEntity9.set("annotation", "16,17");
-		resultEntity9.set(VcfRepository.ID, "resultEntity3");
+		resultEntity9.set(VcfRepository.ID, "resultEntity9");
 
 		resultEntity10 = new MapEntity(resultEmd);
 		resultEntity10.set(VcfRepository.CHROM, "1");
@@ -191,7 +205,7 @@ public class MultiAllelicResultFilterTest
 		resultEntity10.set(VcfRepository.REF, "GA");
 		resultEntity10.set(VcfRepository.ALT, "GC,G");
 		resultEntity10.set("annotation", "18,19");
-		resultEntity10.set(VcfRepository.ID, "resultEntity3");
+		resultEntity10.set(VcfRepository.ID, "resultEntity10");
 
 	}
 
@@ -312,7 +326,50 @@ public class MultiAllelicResultFilterTest
 		assertEquals(Lists.newArrayList(result.asSet()).get(0).getString("annotation"), "19");
 
 	}
+
+	@Test
+	public void filterResultsSourceHasNoRef()
+	{
+		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(Collections
+				.singletonList(new DefaultAttributeMetaData("annotation", MolgenisFieldTypes.FieldTypeEnum.STRING)));
+		Optional<Entity> result = filter.filterResults(Collections.singletonList(resultEntity10), entityNoRef);
+		assertEquals(result, Optional.absent());
+	}
+
+	@Test
+	public void filterResultsMergeMultilineMismatchChrom()
+	{
+		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(Collections.singletonList(
+				new DefaultAttributeMetaData("annotation", MolgenisFieldTypes.FieldTypeEnum.STRING)), true);
+		try
+		{
+			filter.filterResults(Arrays.asList(resultEntity10, entityMismatchChrom), entity10);
+			Assert.fail("Should throw exception for mismatching chromosomes");
+		}
+		catch (MolgenisDataException actual)
+		{
+			assertEquals(actual.getMessage(),
+					"Mismatch in location! Location{chrom=1, pos=100} vs Location{chrom=2, pos=100}");
+		}
+	}
 	
+	@Test
+	public void filterResultsMergeMultilineMismatchPos()
+	{
+		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(Collections.singletonList(
+				new DefaultAttributeMetaData("annotation", MolgenisFieldTypes.FieldTypeEnum.STRING)), true);
+		try
+		{
+			filter.filterResults(Arrays.asList(entityMismatchPos, resultEntity10), entity10);
+			Assert.fail("Should throw exception for mismatching positions");
+		}
+		catch (MolgenisDataException actual)
+		{
+			assertEquals(actual.getMessage(),
+					"Mismatch in location! Location{chrom=1, pos=101} vs Location{chrom=1, pos=100}");
+		}
+	}
+
 	/*
 	 * entity list:
 	 * 3	300	G	A	0.2|23.1
@@ -420,14 +477,16 @@ public class MultiAllelicResultFilterTest
 		expectedResultEntity3.set(VcfRepository.REF, "C");
 		expectedResultEntity3.set(VcfRepository.ALT, "GX,GC");
 		expectedResultEntity3.set(customAttrb, "-0.002|2.3,0.5|14.5");
-		
-		
-		Iterable<Entity> multiLineInput = Arrays.asList(multiLineEntity1, multiLineEntity2, multiLineEntity3, multiLineEntity4, multiLineEntity5, multiLineEntity6, multiLineEntity7, multiLineEntity8);
-		
-		MultiAllelicResultFilter marf = new MultiAllelicResultFilter(Lists.newArrayList((multiLineTestEMD.getAttribute(customAttrb))));
-		
-		Iterable<Entity> expectedResult = Arrays.asList(expectedResultEntity1, expectedResultEntity2, expectedResultEntity3);
-		
+
+		Iterable<Entity> multiLineInput = Arrays.asList(multiLineEntity1, multiLineEntity2, multiLineEntity3,
+				multiLineEntity4, multiLineEntity5, multiLineEntity6, multiLineEntity7, multiLineEntity8);
+
+		MultiAllelicResultFilter marf = new MultiAllelicResultFilter(
+				Lists.newArrayList((multiLineTestEMD.getAttribute(customAttrb))));
+
+		Iterable<Entity> expectedResult = Arrays.asList(expectedResultEntity1, expectedResultEntity2,
+				expectedResultEntity3);
+
 		Iterable<Entity> actualResult = marf.merge(multiLineInput);
 	
 		assertEquals(actualResult, expectedResult);

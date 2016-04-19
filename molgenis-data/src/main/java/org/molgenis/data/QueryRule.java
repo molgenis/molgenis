@@ -164,7 +164,12 @@ public class QueryRule
 		/**
 		 * Fuzzy match operator
 		 */
-		FUZZY_MATCH("FUZZY_MATCH");
+		FUZZY_MATCH("FUZZY_MATCH"),
+
+		/**
+		 * Fuzzy match operator
+		 */
+		FUZZY_MATCH_NGRAM("FUZZY_MATCH_NGRAM");
 
 		private String label;
 
