@@ -39,11 +39,13 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 		public static final String GENERAL = "general_";
 		public static final String GENERAL_SEARCHBOX = "searchbox";
 		public static final String GENERAL_ITEM_SELECT_PANEL = "item_select_panel";
+		public static final String GENERAL_FILTER_WIZARD_BUTTON = "filter_wizard_button";
 		public static final String GENERAL_LAUNCH_WIZARD = "launch_wizard";
 		public static final String GENERAL_HEADER_ABBREVIATE = "header_abbreviate";
 
 		private static final boolean DEFAULT_GENERAL_SEARCHBOX = true;
 		private static final boolean DEFAULT_GENERAL_ITEM_SELECT_PANEL = true;
+		private static final boolean DEFAULT_GENERAL_FILTER_WIZARD_BUTTON = true;
 		private static final boolean DEFAULT_GENERAL_LAUNCH_WIZARD = false;
 		private static final int DEFAULT_GENERAL_HEADER_ABBREVIATE = 180;
 
@@ -112,6 +114,10 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 					.setDataType(BOOL).setNillable(false)
 					.setDefaultValue(String.valueOf(DEFAULT_GENERAL_ITEM_SELECT_PANEL))
 					.setLabel("Show data item selection");
+			AttributeMetaData generalFilterWizardButtonAttr = new DefaultAttributeMetaData(GENERAL_FILTER_WIZARD_BUTTON)
+					.setDataType(BOOL).setNillable(false)
+					.setDefaultValue(String.valueOf(DEFAULT_GENERAL_FILTER_WIZARD_BUTTON))
+					.setLabel("Show filter wizard button");
 			AttributeMetaData generalLaunchWizardAttr = new DefaultAttributeMetaData(GENERAL_LAUNCH_WIZARD)
 					.setDataType(BOOL).setNillable(false).setDefaultValue(String.valueOf(DEFAULT_GENERAL_LAUNCH_WIZARD))
 					.setLabel("Launch data item filter wizard");
@@ -121,6 +127,7 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 					.setLabel("Entity description abbreviation length");
 			generalAttr.addAttributePart(generalSearchboxAttr);
 			generalAttr.addAttributePart(generalAttrSelectAttr);
+			generalAttr.addAttributePart(generalFilterWizardButtonAttr);
 			generalAttr.addAttributePart(generalLaunchWizardAttr);
 			generalAttr.addAttributePart(generalHeaderAbbreviateAttr);
 		}
@@ -336,6 +343,17 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 	public void setItemSelection(boolean itemSelection)
 	{
 		set(Meta.GENERAL_ITEM_SELECT_PANEL, itemSelection);
+	}
+
+	public boolean getFilterWizardButton()
+	{
+		Boolean value = getBoolean(Meta.GENERAL_FILTER_WIZARD_BUTTON);
+		return value != null ? value : false;
+	}
+
+	public void setFilterWizardButton(boolean itemSelection)
+	{
+		set(Meta.GENERAL_FILTER_WIZARD_BUTTON, itemSelection);
 	}
 
 	public boolean getLaunchWizard()

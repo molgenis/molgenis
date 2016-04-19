@@ -90,7 +90,8 @@
                                     <div id="feature-filters"></div>    
                                 </div>
                             </div>
-                            <div class="row">
+                            
+                            <div class="row"<#if plugin_settings.filter_wizard_button == false> style="display:none"</#if>>
                                 <div class="col-md-12">
                                     <a href="#" id="filter-wizard-btn" class="btn btn-default btn-xs pull-right"><img src="<@resource_href "/img/filter-bw.png"/>"> ${i18n.dataexplorer_wizard_button?html}</a>
                                 </div>
