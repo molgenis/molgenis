@@ -15,7 +15,7 @@ public interface ViewService
 	 * @param masterAttributeId
 	 * @param slaveAttributeId
 	 */
-	public void createNewView(String viewName, String masterEntityName, String slaveEntityName,
+	void createNewView(String viewName, String masterEntityName, String slaveEntityName,
 			String masterAttributeId, String slaveAttributeId);
 
 	/**
@@ -24,7 +24,7 @@ public interface ViewService
 	 * @param viewName
 	 * @return a viewEntity
 	 */
-	public Entity getViewEntity(String viewName);
+	Entity getViewEntity(String viewName);
 
 	/**
 	 * Get the Slave Entity from the Slave Entity Table based on the slaveEntityName
@@ -35,7 +35,7 @@ public interface ViewService
 	 *            name of the slave entity
 	 * @return Optional<Entity>, present if the slave entity exists
 	 */
-	public Optional<Entity> getSlaveEntity(String viewName, String slaveEntityName);
+	Optional<Entity> getSlaveEntity(String viewName, String slaveEntityName);
 
 	/**
 	 * When the view exists, but the slave does not, add the slave entity to the existing view
@@ -45,7 +45,7 @@ public interface ViewService
 	 * @param masterAttributeId
 	 * @param slaveAttributeId
 	 */
-	public void addNewSlaveEntityToExistingView(Entity viewEntity, String slaveEntityName, String masterAttributeId,
+	void addNewSlaveEntityToExistingView(Entity viewEntity, String slaveEntityName, String masterAttributeId,
 			String slaveAttributeId);
 
 	/**
@@ -60,6 +60,6 @@ public interface ViewService
 	 * @param slaveAttributeId
 	 *            ID of the attribute in the slave entity
 	 */
-	public void addNewAttributeMappingToExistingSlave(String viewName, String slaveEntityName, String masterAttributeId,
+	void addNewAttributeMappingToExistingSlave(String viewName, String slaveEntityName, String masterAttributeId,
 			String slaveAttributeId);
 }
