@@ -36,6 +36,7 @@ import java.util.Properties;
 public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestConfig
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractPostgreSqlTestConfig.class);
+	public static final String INTEGRATION_DATABASE = "molgenis_integration_test";
 
 	@Autowired
 	DataService dataService;
@@ -73,8 +74,8 @@ public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestCo
 			Connection conn = getConnection();
 
 			Statement statement = conn.createStatement();
-			statement.executeUpdate("DROP DATABASE IF EXISTS \"molgenisIntegrationTest\"");
-			statement.executeUpdate("CREATE DATABASE \"molgenisIntegrationTest\"");
+			statement.executeUpdate("DROP DATABASE IF EXISTS \"" + INTEGRATION_DATABASE + "\"");
+			statement.executeUpdate("CREATE DATABASE \"" + INTEGRATION_DATABASE + "\"");
 
 			conn.close();
 		}
@@ -113,7 +114,7 @@ public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestCo
 
 			Connection conn = getConnection();
 			Statement statement = conn.createStatement();
-			statement.executeUpdate("DROP database if exists \"molgenisIntegrationTest\"");
+			statement.executeUpdate("DROP database if exists \"" + INTEGRATION_DATABASE + "\"");
 			conn.close();
 		}
 		catch (Exception e)
