@@ -1,5 +1,6 @@
 package org.molgenis.data.elasticsearch;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.RepositoryCapability.AGGREGATEABLE;
 import static org.molgenis.data.RepositoryCapability.INDEXABLE;
 import static org.molgenis.data.RepositoryCapability.MANAGABLE;
@@ -8,7 +9,6 @@ import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -34,7 +34,7 @@ public abstract class AbstractElasticsearchRepository implements Repository
 
 	public AbstractElasticsearchRepository(SearchService elasticSearchService)
 	{
-		this.elasticSearchService = Objects.requireNonNull(elasticSearchService, "elasticSearchService is null");
+		this.elasticSearchService = requireNonNull(elasticSearchService, "elasticSearchService is null");
 	}
 
 	@Override

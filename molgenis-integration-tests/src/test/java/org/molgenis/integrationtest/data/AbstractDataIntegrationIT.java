@@ -8,7 +8,6 @@ import org.apache.commons.io.FileUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.meta.MetaDataServiceImpl;
-import org.molgenis.data.transaction.AsyncTransactionLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,9 +32,6 @@ public abstract class AbstractDataIntegrationIT extends AbstractTestNGSpringCont
 	@Autowired
 	EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
 
-	@Autowired
-	AsyncTransactionLog asyncTransactionLog;
-
 	// FIXME
 	// @Autowired
 	// EmbeddedMysqlDatabase dataSource;
@@ -49,8 +45,6 @@ public abstract class AbstractDataIntegrationIT extends AbstractTestNGSpringCont
 	@AfterClass
 	public void cleanUp()
 	{
-		asyncTransactionLog.stop();
-
 		try
 		{
 			// Give asyncTransactionLog time to stop gracefully
