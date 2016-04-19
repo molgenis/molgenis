@@ -1,6 +1,7 @@
 package org.molgenis.ontology.sorta.service.impl;
 
-import static java.util.Objects.requireNonNull;
+import static com.google.common.collect.ImmutableMap.of;
+import static org.apache.commons.lang3.StringUtils.join;
 import static org.molgenis.data.QueryRule.Operator.AND;
 import static org.molgenis.data.QueryRule.Operator.DIS_MAX;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
@@ -8,6 +9,7 @@ import static org.molgenis.data.QueryRule.Operator.FUZZY_MATCH;
 import static org.molgenis.data.QueryRule.Operator.FUZZY_MATCH_NGRAM;
 import static org.molgenis.data.QueryRule.Operator.IN;
 import static org.molgenis.data.QueryRule.Operator.OR;
+import static org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm.STOPWORDSLIST;
 import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.COMBINED_SCORE;
 import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.SCORE;
 
@@ -43,6 +45,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Sets;
+
+import static java.util.Objects.requireNonNull;
 
 public class SortaServiceImpl implements SortaService
 {
@@ -101,8 +105,7 @@ public class SortaServiceImpl implements SortaService
 	@Override
 	public Iterable<Entity> findOntologyTermEntities(String ontologyUrl, String queryString)
 	{
-		Entity entity = new MapEntity(
-				Collections.singletonMap(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD, queryString));
+		Entity entity = new MapEntity(of(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD, queryString));
 		return findOntologyTermEntities(ontologyUrl, entity);
 	}
 
@@ -142,10 +145,10 @@ public class SortaServiceImpl implements SortaService
 				}
 				else
 				{
-					QueryRule queryAnnotationName = new QueryRule(OntologyTermDynamicAnnotationMetaData.NAME,
-							EQUALS, attributeName);
-					QueryRule queryAnnotationValue = new QueryRule(OntologyTermDynamicAnnotationMetaData.VALUE,
-							EQUALS, inputEntity.getString(attributeName));
+					QueryRule queryAnnotationName = new QueryRule(OntologyTermDynamicAnnotationMetaData.NAME, EQUALS,
+							attributeName);
+					QueryRule queryAnnotationValue = new QueryRule(OntologyTermDynamicAnnotationMetaData.VALUE, EQUALS,
+							inputEntity.getString(attributeName));
 
 					// ((name=OMIM Operator.AND value=124325) Operator.OR (name=HPO Operator.AND value=hp12435))
 					if (rulesForOtherFields.size() > 0) rulesForOtherFields.add(new QueryRule(OR));
@@ -196,10 +199,9 @@ public class SortaServiceImpl implements SortaService
 
 		if (ontologyTermAnnotationEntities.size() > 0)
 		{
-			List<QueryRule> rules = Arrays.asList(
-					new QueryRule(OntologyTermMetaData.ONTOLOGY, EQUALS, ontologyEntity),
-					new QueryRule(AND), new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
-							IN, ontologyTermAnnotationEntities));
+			List<QueryRule> rules = Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY, EQUALS, ontologyEntity),
+					new QueryRule(AND), new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION, IN,
+							ontologyTermAnnotationEntities));
 
 			Stream<Entity> ontologyTermEntities = dataService.findAll(OntologyTermMetaData.ENTITY_NAME,
 					new QueryImpl(rules).pageSize(Integer.MAX_VALUE));
@@ -219,8 +221,8 @@ public class SortaServiceImpl implements SortaService
 		disMaxQueryRule.setOperator(DIS_MAX);
 
 		List<QueryRule> finalQueryRules = Arrays.asList(
-				new QueryRule(OntologyTermMetaData.ONTOLOGY, EQUALS, ontologyEntity),
-				new QueryRule(AND), disMaxQueryRule);
+				new QueryRule(OntologyTermMetaData.ONTOLOGY, EQUALS, ontologyEntity), new QueryRule(AND),
+				disMaxQueryRule);
 
 		Stream<Entity> lexicalMatchedOntologyTermEntities = dataService
 				.findAll(OntologyTermMetaData.ENTITY_NAME, new QueryImpl(finalQueryRules).pageSize(pageSize))
@@ -406,31 +408,17 @@ public class SortaServiceImpl implements SortaService
 
 	private String stemQuery(String queryString)
 	{
-		StringBuilder stringBuilder = new StringBuilder();
-		Set<String> uniqueTerms = Sets.newHashSet(queryString.toLowerCase().trim().split(NON_WORD_SEPARATOR));
-		uniqueTerms.removeAll(NGramDistanceAlgorithm.STOPWORDSLIST);
-		for (String word : uniqueTerms)
-		{
-			if (StringUtils.isNotEmpty(word.trim()) && !(ELASTICSEARCH_RESERVED_WORDS.contains(word)))
-			{
-				String afterStem = Stemmer.stem(removeIllegalCharWithEmptyString(word));
-				if (StringUtils.isNotEmpty(afterStem))
-				{
-					stringBuilder.append(afterStem).append(SINGLE_WHITESPACE);
-				}
-			}
-		}
-		return stringBuilder.toString().trim();
+		Set<String> collect = Stream.of(queryString.toLowerCase().trim().split(NON_WORD_SEPARATOR))
+				.filter(w -> !STOPWORDSLIST.contains(w) && !ELASTICSEARCH_RESERVED_WORDS.contains(w)).map(Stemmer::stem)
+				.filter(StringUtils::isNotBlank).map(w -> w + SINGLE_WHITESPACE).collect(Collectors.toSet());
+		return join(collect, SINGLE_WHITESPACE);
 	}
 
 	private String fuzzyMatchQuerySyntax(String queryString)
 	{
-		StringBuilder stringBuilder = new StringBuilder();
-		for (String word : queryString.split(SINGLE_WHITESPACE))
-		{
-			stringBuilder.append(word).append(FUZZY_MATCH_SIMILARITY).append(SINGLE_WHITESPACE);
-		}
-		return stringBuilder.toString().trim();
+		List<String> collect = Stream.of(queryString.split(SINGLE_WHITESPACE)).map(w -> w + FUZZY_MATCH_SIMILARITY)
+				.collect(Collectors.toList());
+		return join(collect, SINGLE_WHITESPACE);
 	}
 
 	public String removeIllegalCharWithSingleWhiteSpace(String string)
