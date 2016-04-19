@@ -100,15 +100,15 @@ public class LanguageRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Entity findOne(Object id)
+	public Entity findOneById(Object id)
 	{
-		return decorated.findOne(id);
+		return decorated.findOneById(id);
 	}
 
 	@Override
-	public Entity findOne(Object id, Fetch fetch)
+	public Entity findOneById(Object id, Fetch fetch)
 	{
-		return decorated.findOne(id, fetch);
+		return decorated.findOneById(id, fetch);
 	}
 
 	@Override
@@ -203,12 +203,12 @@ public class LanguageRepositoryDecorator implements Repository
 	@Override
 	public void deleteById(Object id)
 	{
-		Entity entity = findOne(id);
+		Entity entity = findOneById(id);
 		if (entity != null) delete(entity);
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
 		ids.forEach(this::deleteById);
 	}

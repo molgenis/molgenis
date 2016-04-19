@@ -262,9 +262,9 @@ public class RepositorySecurityDecoratorTest
 		Object id = Integer.valueOf(0);
 		Fetch fetch = new Fetch();
 		Entity entity = mock(Entity.class);
-		when(decoratedRepository.findOne(id, fetch)).thenReturn(entity);
-		assertEquals(entity, decoratedRepository.findOne(id, fetch));
-		verify(decoratedRepository, times(1)).findOne(id, fetch);
+		when(decoratedRepository.findOneById(id, fetch)).thenReturn(entity);
+		assertEquals(entity, decoratedRepository.findOneById(id, fetch));
+		verify(decoratedRepository, times(1)).findOneById(id, fetch);
 	}
 
 	@Test(expectedExceptions = MolgenisDataAccessException.class)
@@ -277,8 +277,8 @@ public class RepositorySecurityDecoratorTest
 		Object id = Integer.valueOf(0);
 		Fetch fetch = new Fetch();
 		Entity entity = mock(Entity.class);
-		when(decoratedRepository.findOne(id, fetch)).thenReturn(entity);
-		repositorySecurityDecorator.findOne(id, fetch);
+		when(decoratedRepository.findOneById(id, fetch)).thenReturn(entity);
+		repositorySecurityDecorator.findOneById(id, fetch);
 	}
 
 	@Test

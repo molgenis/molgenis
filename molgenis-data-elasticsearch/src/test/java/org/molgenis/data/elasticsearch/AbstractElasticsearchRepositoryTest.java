@@ -91,7 +91,7 @@ public class AbstractElasticsearchRepositoryTest
 			Object id = Integer.valueOf(0);
 			Fetch fetch = new Fetch();
 			when(searchService.get(id, entityMeta, fetch)).thenReturn(entity);
-			assertEquals(repository.findOne(id, fetch), entity);
+			assertEquals(repository.findOneById(id, fetch), entity);
 		}
 		finally
 		{

@@ -101,15 +101,15 @@ public class MetaDataRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Entity findOne(Object id)
+	public Entity findOneById(Object id)
 	{
-		return decorated.findOne(id);
+		return decorated.findOneById(id);
 	}
 
 	@Override
-	public Entity findOne(Object id, Fetch fetch)
+	public Entity findOneById(Object id, Fetch fetch)
 	{
-		return decorated.findOne(id, fetch);
+		return decorated.findOneById(id, fetch);
 	}
 
 	@Override
@@ -161,9 +161,9 @@ public class MetaDataRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
-		decorated.deleteById(ids);
+		decorated.deleteAll(ids);
 	}
 
 	@Override

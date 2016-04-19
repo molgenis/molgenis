@@ -1,5 +1,7 @@
 package org.molgenis.data.importer;
 
+import java.util.Date;
+
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.system.ImportRun;
@@ -12,8 +14,6 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Component;
-
-import java.util.Date;
 
 @Component
 public class ImportRunService
@@ -49,7 +49,7 @@ public class ImportRunService
 	@RunAsSystem
 	public void finishImportRun(String importRunId, String message, String importedEntities)
 	{
-		ImportRun importRun = dataService.findOne(ImportRun.ENTITY_NAME, importRunId, ImportRun.class);
+		ImportRun importRun = dataService.findOneById(ImportRun.ENTITY_NAME, importRunId, ImportRun.class);
 		try
 		{
 			if (importRun != null)
@@ -99,7 +99,7 @@ public class ImportRunService
 	@RunAsSystem
 	public void failImportRun(String importRunId, String message)
 	{
-		ImportRun importRun = dataService.findOne(ImportRun.ENTITY_NAME, importRunId, ImportRun.class);
+		ImportRun importRun = dataService.findOneById(ImportRun.ENTITY_NAME, importRunId, ImportRun.class);
 		try
 		{
 			if (importRun != null)

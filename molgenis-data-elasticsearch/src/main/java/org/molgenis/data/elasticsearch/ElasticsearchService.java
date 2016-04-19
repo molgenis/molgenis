@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.exists.types.TypesExistsResponse;
@@ -122,7 +123,7 @@ public class ElasticsearchService implements SearchService
 	 * @param client
 	 * @param indexName
 	 * @param dataService
-	 * @param entityToSourceConverter
+	 * @param elasticsearchEntityFactory
 	 * @param createIndexIfNotExists
 	 */
 	ElasticsearchService(Client client, String indexName, DataService dataService,
@@ -760,7 +761,7 @@ public class ElasticsearchService implements SearchService
 			this.rebuildIndexGeneric(tempEntities, entityMetaData);
 
 			// Remove temporary entity
-			dataService.delete(tempEntityMetaData.getName(), tempEntities);
+			dataService.delete(tempEntityMetaData.getName(), StreamSupport.stream(tempEntities.spliterator(), false));
 
 			// Remove temporary repository from Elasticsearch
 			dataService.getMeta().deleteEntityMeta(tempEntityMetaData.getName());

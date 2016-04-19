@@ -272,7 +272,7 @@ public class RestController
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		Entity entity = dataService.findOne(entityName, id);
+		Entity entity = dataService.findOneById(entityName, id);
 
 		if (entity == null)
 		{
@@ -299,7 +299,7 @@ public class RestController
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
 
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		Entity entity = dataService.findOne(entityName, id);
+		Entity entity = dataService.findOneById(entityName, id);
 
 		if (entity == null)
 		{
@@ -661,7 +661,7 @@ public class RestController
 			@PathVariable("attributeName") String attributeName, @PathVariable("id") Object id,
 			@RequestBody Object paramValue)
 	{
-		Entity entity = dataService.findOne(entityName, id);
+		Entity entity = dataService.findOneById(entityName, id);
 		if (entity == null)
 		{
 			throw new UnknownEntityException("Entity of type " + entityName + " with id " + id + " not found");
@@ -771,7 +771,7 @@ public class RestController
 	{
 		Object typedId = dataService.getRepository(entityName).getEntityMetaData().getIdAttribute().getDataType()
 				.convert(id);
-		dataService.delete(entityName, typedId);
+		dataService.deleteById(entityName, typedId);
 	}
 
 	/**
@@ -1051,7 +1051,7 @@ public class RestController
 			throw new IllegalArgumentException(entityName + " does not have an id attribute");
 		}
 
-		Entity existing = dataService.findOne(entityName, id);
+		Entity existing = dataService.findOneById(entityName, id);
 		if (existing == null)
 		{
 			throw new UnknownEntityException("Entity of type " + entityName + " with id " + id + " not found");
@@ -1108,7 +1108,7 @@ public class RestController
 		}
 
 		// Get the entity
-		Entity entity = dataService.findOne(entityName, id);
+		Entity entity = dataService.findOneById(entityName, id);
 		if (entity == null)
 		{
 			throw new UnknownEntityException(entityName + " " + id + " not found");

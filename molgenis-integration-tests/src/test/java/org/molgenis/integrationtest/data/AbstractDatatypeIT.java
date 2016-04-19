@@ -112,7 +112,7 @@ public abstract class AbstractDatatypeIT extends AbstractDataIntegrationIT
 
 	private Entity retrieve(Entity entity)
 	{
-		return dataService.findOne(entity.getEntityMetaData().getName(), entity.getIdValue());
+		return dataService.findOneById(entity.getEntityMetaData().getName(), entity.getIdValue());
 	}
 
 	protected void delete(Entity entity)
@@ -122,7 +122,7 @@ public abstract class AbstractDatatypeIT extends AbstractDataIntegrationIT
 
 	protected void verifyEntityDeleted(Entity entity)
 	{
-		assertNull(dataService.findOne(entity.getEntityMetaData().getName(), entity.getIdValue()), "Entity with id '"
+		assertNull(dataService.findOneById(entity.getEntityMetaData().getName(), entity.getIdValue()), "Entity with id '"
 				+ entity.getIdValue() + "' of type '" + entity.getEntityMetaData().getName() + "' is not deleted.");
 	}
 

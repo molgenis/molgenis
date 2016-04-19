@@ -79,13 +79,13 @@ public abstract class AbstractElasticsearchRepository implements Repository
 	}
 
 	@Override
-	public Entity findOne(Object id)
+	public Entity findOneById(Object id)
 	{
 		return elasticSearchService.get(id, getEntityMetaData());
 	}
 
 	@Override
-	public Entity findOne(Object id, Fetch fetch)
+	public Entity findOneById(Object id, Fetch fetch)
 	{
 		return elasticSearchService.get(id, getEntityMetaData(), fetch);
 	}
@@ -197,7 +197,7 @@ public abstract class AbstractElasticsearchRepository implements Repository
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
 		elasticSearchService.deleteById(ElasticsearchEntityUtils.toElasticsearchIds(ids), getEntityMetaData());
 		elasticSearchService.refresh();

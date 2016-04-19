@@ -114,7 +114,7 @@ public class InMemoryRepositoryTest
 			Entity entity = when(mock(Entity.class).get(idAttrName)).thenReturn(id).getMock();
 			inMemoryRepository.add(entity);
 			Fetch fetch = new Fetch();
-			assertEquals(inMemoryRepository.findOne(id, fetch), entity);
+			assertEquals(inMemoryRepository.findOneById(id, fetch), entity);
 		}
 		finally
 		{
@@ -134,7 +134,7 @@ public class InMemoryRepositoryTest
 		{
 			Object id = Integer.valueOf(0);
 			Fetch fetch = new Fetch();
-			assertNull(inMemoryRepository.findOne(id, fetch));
+			assertNull(inMemoryRepository.findOneById(id, fetch));
 		}
 		finally
 		{

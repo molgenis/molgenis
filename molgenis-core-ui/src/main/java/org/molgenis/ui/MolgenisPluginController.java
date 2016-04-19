@@ -76,7 +76,7 @@ public abstract class MolgenisPluginController
 
 	private Entity getPluginSettings(String entityName)
 	{
-		return dataService.hasRepository(entityName) ? dataService.findOne(entityName, getId()) : null;
+		return dataService.hasRepository(entityName) ? dataService.findOneById(entityName, getId()) : null;
 	}
 
 	@PostConstruct

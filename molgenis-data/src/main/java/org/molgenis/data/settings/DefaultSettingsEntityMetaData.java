@@ -36,7 +36,7 @@ public abstract class DefaultSettingsEntityMetaData extends DefaultEntityMetaDat
 	@RunAsSystem
 	public Entity getSettings()
 	{
-		return dataService.findOne(getName(), getSimpleName());
+		return dataService.findOneById(getName(), getSimpleName());
 	}
 
 	public static String getSettingsEntityName(String id)

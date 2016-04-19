@@ -19,8 +19,6 @@ import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.OwnedEntityMetaData;
-import org.molgenis.data.support.UuidGenerator;
-import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.file.FileMetaMetaData;
@@ -35,12 +33,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -63,17 +57,27 @@ public abstract class AbstractDataApiTestConfig
 	@Autowired
 	public ExpressionValidator expressionValidator;
 
+	@Autowired
+	public DataSource dataSource;
+
+	@Autowired
+	public IdGenerator idGenerator;
+
 	protected AbstractDataApiTestConfig()
 	{
 		System.setProperty("molgenis.home", Files.createTempDir().getAbsolutePath());
+		setUp();
 	}
 
 	@PostConstruct
 	public void init()
 	{
+		SecuritySupport.login();
 		dataService().setMeta(metaDataService());
 		metaDataService().setDefaultBackend(getBackend());
 	}
+
+	protected abstract void setUp();
 
 	protected abstract ManageableRepositoryCollection getBackend();
 
@@ -87,18 +91,6 @@ public abstract class AbstractDataApiTestConfig
 	public LanguageService languageService()
 	{
 		return new LanguageService(dataService(), appSettings());
-	}
-
-	@Bean
-	public IdGenerator idGenerator()
-	{
-		return new UuidGenerator();
-	}
-
-	@Bean
-	public MolgenisTransactionManager transactionManager()
-	{
-		return new MolgenisTransactionManager(idGenerator(), dataSource());
 	}
 
 	@Bean
@@ -145,34 +137,11 @@ public abstract class AbstractDataApiTestConfig
 			@Override
 			public Repository createDecoratedRepository(Repository repository)
 			{
-				return new MolgenisRepositoryDecoratorFactory(entityManager(), entityAttributesValidator(),
-						idGenerator(), appSettings(), dataService(), expressionValidator, repositoryDecoratorRegistry())
+				return new MolgenisRepositoryDecoratorFactory(entityManager(), entityAttributesValidator(), idGenerator,
+						appSettings(), dataService(), expressionValidator, repositoryDecoratorRegistry())
 								.createDecoratedRepository(repository);
 			}
 		};
-	}
-
-	@Bean(destroyMethod = "shutdown")
-	public DataSource dataSource()
-	{
-		// FIXME
-		throw new RuntimeException("FIXME");
-		// return new EmbeddedMysqlDatabaseBuilder().build();
-	}
-
-	@Bean
-	public static PropertySourcesPlaceholderConfigurer properties()
-	{
-		PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
-		Resource[] resources = new Resource[]
-		{ new FileSystemResource(System.getProperty("molgenis.home") + "/molgenis-server.properties"),
-				new ClassPathResource("/molgenis.properties") };
-		pspc.setLocations(resources);
-		pspc.setFileEncoding("UTF-8");
-		pspc.setIgnoreUnresolvablePlaceholders(true);
-		pspc.setIgnoreResourceNotFound(true);
-		pspc.setNullValue("@null");
-		return pspc;
 	}
 
 	@Bean

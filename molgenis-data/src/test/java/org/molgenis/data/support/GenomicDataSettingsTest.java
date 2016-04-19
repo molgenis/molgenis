@@ -1,5 +1,9 @@
 package org.molgenis.data.support;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -10,10 +14,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes =
 { GenomicDataSettings.class, GenomicDataSettingsTest.Config.class })
@@ -38,7 +38,7 @@ public class GenomicDataSettingsTest extends AbstractTestNGSpringContextTests
 		entity.set("chromosome", "chromosome,#CHROM,CHROM");
 
 		when(dataService.getEntityMetaData("settings_genomicdata")).thenReturn(emd);
-		when(dataService.findOne("settings_genomicdata", "settings_genomicdata")).thenReturn(entity);
+		when(dataService.findOneById("settings_genomicdata", "settings_genomicdata")).thenReturn(entity);
 
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("entity");
 		DefaultAttributeMetaData posAttributeMetaData = new DefaultAttributeMetaData("POS");

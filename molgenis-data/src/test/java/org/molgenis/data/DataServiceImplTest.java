@@ -152,9 +152,9 @@ public class DataServiceImplTest
 		Object id = Integer.valueOf(0);
 		Fetch fetch = new Fetch();
 		Entity entity = mock(Entity.class);
-		when(repo1.findOne(id, fetch)).thenReturn(entity);
-		assertEquals(dataService.findOne("Entity1", id, fetch), entity);
-		verify(repo1, times(1)).findOne(id, fetch);
+		when(repo1.findOneById(id, fetch)).thenReturn(entity);
+		assertEquals(dataService.findOneById("Entity1", id, fetch), entity);
+		verify(repo1, times(1)).findOneById(id, fetch);
 	}
 
 	@Test
@@ -162,9 +162,9 @@ public class DataServiceImplTest
 	{
 		Object id = Integer.valueOf(0);
 		Fetch fetch = new Fetch();
-		when(repo1.findOne(id, fetch)).thenReturn(null);
-		assertNull(dataService.findOne("Entity1", id, fetch));
-		verify(repo1, times(1)).findOne(id, fetch);
+		when(repo1.findOneById(id, fetch)).thenReturn(null);
+		assertNull(dataService.findOneById("Entity1", id, fetch));
+		verify(repo1, times(1)).findOneById(id, fetch);
 	}
 
 	@Test
@@ -174,10 +174,10 @@ public class DataServiceImplTest
 		Fetch fetch = new Fetch();
 		Class<Entity> clazz = Entity.class;
 		Entity entity = mock(Entity.class);
-		when(repo1.findOne(id, fetch)).thenReturn(entity);
+		when(repo1.findOneById(id, fetch)).thenReturn(entity);
 		// how to check return value? converting iterable can't be mocked.
-		dataService.findOne("Entity1", id, fetch, clazz);
-		verify(repo1, times(1)).findOne(id, fetch);
+		dataService.findOneById("Entity1", id, fetch, clazz);
+		verify(repo1, times(1)).findOneById(id, fetch);
 	}
 
 	@Test
@@ -186,9 +186,9 @@ public class DataServiceImplTest
 		Object id = Integer.valueOf(0);
 		Fetch fetch = new Fetch();
 		Class<Entity> clazz = Entity.class;
-		when(repo1.findOne(id, fetch)).thenReturn(null);
-		assertNull(dataService.findOne("Entity1", id, fetch, clazz));
-		verify(repo1, times(1)).findOne(id, fetch);
+		when(repo1.findOneById(id, fetch)).thenReturn(null);
+		assertNull(dataService.findOneById("Entity1", id, fetch, clazz));
+		verify(repo1, times(1)).findOneById(id, fetch);
 	}
 
 	@Test

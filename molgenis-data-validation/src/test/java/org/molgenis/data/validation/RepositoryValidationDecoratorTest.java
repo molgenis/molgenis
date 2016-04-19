@@ -2710,7 +2710,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 		when(entity0.get(attrReadonlyStringName)).thenReturn("str0");
 
-		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+		when(decoratedRepo.findOneById("id0")).thenReturn(entity0);
 
 		Entity updatedEntity0 = mock(Entity.class);
 		when(updatedEntity0.getEntityMetaData()).thenReturn(entityMeta);
@@ -2782,7 +2782,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 		when(entity0.get(attrReadonlyXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+		when(decoratedRepo.findOneById("id0")).thenReturn(entity0);
 
 		Entity updatedEntity0 = mock(Entity.class);
 		when(updatedEntity0.getEntityMetaData()).thenReturn(entityMeta);
@@ -2845,7 +2845,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 		when(entity0.get(attrReadonlyXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+		when(decoratedRepo.findOneById("id0")).thenReturn(entity0);
 
 		Entity updatedEntity0 = mock(Entity.class);
 		when(updatedEntity0.getEntityMetaData()).thenReturn(entityMeta);
@@ -2917,7 +2917,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 		when(entity0.get(attrReadonlyMrefName)).thenReturn(Arrays.asList(refEntity0));
 
-		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+		when(decoratedRepo.findOneById("id0")).thenReturn(entity0);
 
 		Entity updatedEntity0 = mock(Entity.class);
 		when(updatedEntity0.getEntityMetaData()).thenReturn(entityMeta);
@@ -2983,7 +2983,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 		when(entity0.get(attrReadonlyMrefName)).thenReturn(Arrays.asList(refEntity0));
 
-		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+		when(decoratedRepo.findOneById("id0")).thenReturn(entity0);
 
 		Entity updatedEntity0 = mock(Entity.class);
 		when(updatedEntity0.getEntityMetaData()).thenReturn(entityMeta);
@@ -4093,7 +4093,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 		when(entity0.get(attrReadonlyStringName)).thenReturn("str0");
 
-		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+		when(decoratedRepo.findOneById("id0")).thenReturn(entity0);
 
 		Entity updatedEntity0 = mock(Entity.class);
 		when(updatedEntity0.getEntityMetaData()).thenReturn(entityMeta);
@@ -4174,7 +4174,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 		when(entity0.get(attrReadonlyXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+		when(decoratedRepo.findOneById("id0")).thenReturn(entity0);
 
 		Entity updatedEntity0 = mock(Entity.class);
 		when(updatedEntity0.getEntityMetaData()).thenReturn(entityMeta);
@@ -4246,7 +4246,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 		when(entity0.get(attrReadonlyXrefName)).thenReturn(refEntity0);
 
-		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+		when(decoratedRepo.findOneById("id0")).thenReturn(entity0);
 
 		Entity updatedEntity0 = mock(Entity.class);
 		when(updatedEntity0.getEntityMetaData()).thenReturn(entityMeta);
@@ -4327,7 +4327,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 		when(entity0.get(attrReadonlyMrefName)).thenReturn(Arrays.asList(refEntity0));
 
-		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+		when(decoratedRepo.findOneById("id0")).thenReturn(entity0);
 
 		Entity updatedEntity0 = mock(Entity.class);
 		when(updatedEntity0.getEntityMetaData()).thenReturn(entityMeta);
@@ -4401,7 +4401,7 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 		when(entity0.get(attrReadonlyMrefName)).thenReturn(Arrays.asList(refEntity0));
 
-		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+		when(decoratedRepo.findOneById("id0")).thenReturn(entity0);
 
 		Entity updatedEntity0 = mock(Entity.class);
 		when(updatedEntity0.getEntityMetaData()).thenReturn(entityMeta);
@@ -4490,9 +4490,9 @@ public class RepositoryValidationDecoratorTest
 		Object id = Integer.valueOf(0);
 		Fetch fetch = new Fetch();
 		Entity entity = mock(Entity.class);
-		when(decoratedRepository.findOne(id, fetch)).thenReturn(entity);
-		assertEquals(entity, myRepositoryValidationDecorator.findOne(id, fetch));
-		verify(decoratedRepository, times(1)).findOne(id, fetch);
+		when(decoratedRepository.findOneById(id, fetch)).thenReturn(entity);
+		assertEquals(entity, myRepositoryValidationDecorator.findOneById(id, fetch));
+		verify(decoratedRepository, times(1)).findOneById(id, fetch);
 	}
 
 	@Test

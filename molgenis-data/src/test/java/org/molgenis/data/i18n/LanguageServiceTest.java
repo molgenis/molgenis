@@ -37,7 +37,7 @@ public class LanguageServiceTest
 	{
 		SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("test", "test"));
 		when(queryMock.findOne()).thenReturn(new MapEntity("languageCode", "nl"));
-		when(dataServiceMock.findOne(LanguageMetaData.ENTITY_NAME, "nl")).thenReturn(new MapEntity("nl", "Nederlands"));
+		when(dataServiceMock.findOneById(LanguageMetaData.ENTITY_NAME, "nl")).thenReturn(new MapEntity("nl", "Nederlands"));
 		assertEquals(languageService.getCurrentUserLanguageCode(), "nl");
 	}
 
@@ -47,7 +47,7 @@ public class LanguageServiceTest
 		SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("test", "test"));
 		when(queryMock.findOne()).thenReturn(new MapEntity());
 		when(appSettingsMock.getLanguageCode()).thenReturn("de");
-		when(dataServiceMock.findOne(LanguageMetaData.ENTITY_NAME, "de")).thenReturn(new MapEntity("nl", "Nederlands"));
+		when(dataServiceMock.findOneById(LanguageMetaData.ENTITY_NAME, "de")).thenReturn(new MapEntity("nl", "Nederlands"));
 		assertEquals(languageService.getCurrentUserLanguageCode(), "de");
 	}
 }
