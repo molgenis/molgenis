@@ -1,19 +1,11 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import static java.util.Arrays.asList;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.TEXT;
-import static org.molgenis.data.annotator.websettings.OmimAnnotatorSettings.Meta.OMIM_LOCATION;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
@@ -33,8 +25,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.FluentIterable;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import static java.util.Arrays.asList;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.TEXT;
+import static org.molgenis.data.annotator.websettings.OmimAnnotatorSettings.Meta.OMIM_LOCATION;
 
 @Configuration
 public class OmimAnnotator
@@ -106,8 +106,12 @@ public class OmimAnnotator
 		}
 
 		@Override
-		public Optional<Entity> filterResults(Iterable<Entity> results, Entity annotatedEntity)
+		public Optional<Entity> filterResults(Iterable<Entity> results, Entity annotatedEntity, boolean updateMode)
 		{
+			if (updateMode == true)
+			{
+				throw new MolgenisDataException("This annotator/filter does not support updating of values");
+			}
 			Optional<Entity> firstResult = FluentIterable.from(results).first();
 			return firstResult.transform(e -> {
 				Entity result = new MapEntity();

@@ -1,10 +1,9 @@
 package org.molgenis.data.annotation.entity;
 
-import org.molgenis.data.Entity;
-
 import com.google.common.base.Optional;
+import org.molgenis.data.Entity;
 
 public interface ResultFilter extends EntityProcessor
 {
-	Optional<Entity> filterResults(Iterable<Entity> results, Entity annotatedEntity);
+	Optional<Entity> filterResults(Iterable<Entity> results, Entity annotatedEntity, boolean updateMode);
 }

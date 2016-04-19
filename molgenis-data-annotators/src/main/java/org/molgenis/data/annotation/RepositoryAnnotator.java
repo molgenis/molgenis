@@ -1,12 +1,12 @@
 package org.molgenis.data.annotation;
 
-import java.util.Iterator;
-import java.util.List;
-
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
+
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * interface for annotators. annotators take an iterator and return an iterator with some information added or updated
@@ -20,6 +20,9 @@ public interface RepositoryAnnotator
 
 	// add entityAnnotator
 	Iterator<Entity> annotate(Iterable<Entity> source);
+
+	// add entityAnnotator, choose if you want to refresh or update existing annotations
+	Iterator<Entity> annotate(Iterable<Entity> source, boolean updateMode);
 
 	/**
 	 * Checks if folder and files that were set with a runtime property actually exist, or if a webservice can be
@@ -69,6 +72,5 @@ public interface RepositoryAnnotator
 	{
 		return getInfo() == null ? "no description" : getInfo().getDescription();
 	}
-
 
 }
