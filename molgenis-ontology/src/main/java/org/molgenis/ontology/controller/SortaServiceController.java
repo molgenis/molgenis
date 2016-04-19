@@ -66,6 +66,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
+import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.ontology.sorta.job.SortaJobExecution;
 import org.molgenis.ontology.sorta.job.SortaJobFactory;
@@ -77,7 +78,6 @@ import org.molgenis.ontology.sorta.request.SortaServiceRequest;
 import org.molgenis.ontology.sorta.request.SortaServiceResponse;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
-import org.molgenis.ontology.utils.SortaServiceUtil;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
@@ -298,7 +298,6 @@ public class SortaServiceController extends MolgenisPluginController
 		List<Map<String, Object>> entityMaps = new ArrayList<Map<String, Object>>();
 		String sortaJobExecutionId = sortaServiceRequest.getSortaJobExecutionId();
 		String filterQuery = sortaServiceRequest.getFilterQuery();
-		String ontologyIri = sortaServiceRequest.getOntologyIri();
 		EntityPager entityPager = sortaServiceRequest.getEntityPager();
 		SortaJobExecution sortaJobExecution = findSortaJobExecution(sortaJobExecutionId);
 		String resultEntityName = sortaJobExecution.getResultEntityName();
@@ -337,11 +336,10 @@ public class SortaServiceController extends MolgenisPluginController
 			Map<String, Object> outputEntity = new HashMap<String, Object>();
 			outputEntity.put("inputTerm", getEntityAsMap(mappingEntity.getEntity(INPUT_TERM)));
 			outputEntity.put("matchedTerm", getEntityAsMap(mappingEntity));
-			Object matchedTerm = mappingEntity.get(MATCHED_TERM);
-			if (matchedTerm != null)
+			String ontologyTermIri = mappingEntity.getString(MATCHED_TERM);
+			if (StringUtils.isNotBlank(ontologyTermIri))
 			{
-				outputEntity.put("ontologyTerm", SortaServiceUtil
-						.getEntityAsMap(sortaService.getOntologyTermEntity(matchedTerm.toString(), ontologyIri)));
+				outputEntity.put("ontologyTerm", ontologyService.getOntologyTerm(ontologyTermIri));
 			}
 			entityMaps.add(outputEntity);
 		});
@@ -425,14 +423,14 @@ public class SortaServiceController extends MolgenisPluginController
 		NumberFormat format = NumberFormat.getNumberInstance();
 		format.setMaximumFractionDigits(2);
 		Entity inputEntity = resultEntity.getEntity(MatchingTaskContentEntityMetaData.INPUT_TERM);
-		Entity ontologyTermEntity = sortaService.getOntologyTermEntity(
-				resultEntity.getString(MatchingTaskContentEntityMetaData.MATCHED_TERM),
-				sortaJobExecution.getOntologyIri());
 		MapEntity row = new MapEntity(inputEntity);
-		row.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME,
-				ontologyTermEntity.getString(OntologyTermMetaData.ONTOLOGY_TERM_NAME));
-		row.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI,
-				ontologyTermEntity.getString(OntologyTermMetaData.ONTOLOGY_TERM_IRI));
+		String matchedOntologyTermIri = resultEntity.getString(MatchingTaskContentEntityMetaData.MATCHED_TERM);
+		if (StringUtils.isNotBlank(matchedOntologyTermIri))
+		{
+			OntologyTerm ontologyTerm = ontologyService.getOntologyTerm(matchedOntologyTermIri);
+			row.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME, ontologyTerm.getLabel());
+			row.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ontologyTerm.getIRI());
+		}
 		row.set(MatchingTaskContentEntityMetaData.VALIDATED,
 				resultEntity.getBoolean(MatchingTaskContentEntityMetaData.VALIDATED));
 		Double score = resultEntity.getDouble(MatchingTaskContentEntityMetaData.SCORE);

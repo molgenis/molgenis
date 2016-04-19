@@ -2,7 +2,6 @@
 	"use strict";
 	
 	var restApi = new molgenis.RestClient();
-	var standardModal = new molgenis.StandardModal();
 	var TREE_LABEL = "label";
 	var ROOT = "root";
 	var LAST = "isLast";

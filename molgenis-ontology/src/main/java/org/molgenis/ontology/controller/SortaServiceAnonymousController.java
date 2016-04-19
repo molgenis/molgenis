@@ -1,5 +1,6 @@
 package org.molgenis.ontology.controller;
 
+import static com.google.common.collect.ImmutableMap.of;
 import static org.molgenis.ontology.controller.SortaServiceAnonymousController.URI;
 import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.COMBINED_SCORE;
 import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.SCORE;
@@ -34,6 +35,7 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.file.FileStore;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.core.service.OntologyService;
+import org.molgenis.ontology.sorta.bean.SortaHit;
 import org.molgenis.ontology.sorta.repo.SortaCsvRepository;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
@@ -49,7 +51,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 
 @Controller
@@ -64,7 +65,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 
 	@Autowired
 	private FileStore fileStore;
-	
+
 	public static final String VIEW_NAME = "sorta-match-anonymous-view";
 	public static final String ID = "sorta_anonymous";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
@@ -119,7 +120,8 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 		if (filePath != null && ontologyIriObject != null)
 		{
 			File uploadFile = new File(filePath.toString());
-			SortaCsvRepository csvRepository = new SortaCsvRepository(uploadFile.getName(), uploadFile.getName(), uploadFile);
+			SortaCsvRepository csvRepository = new SortaCsvRepository(uploadFile.getName(), uploadFile.getName(),
+					uploadFile);
 
 			if (validateUserInputHeader(csvRepository) && validateUserInputContent(csvRepository))
 			{
@@ -158,28 +160,21 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 				for (Entity inputEntity : csvRepository)
 				{
 					int count = 0;
-					for (Entity ontologyTermEntity : sortaService.findOntologyTermEntities(ontologyIri, inputEntity))
+					for (SortaHit sortaHit : sortaService.findOntologyTermEntities(ontologyIri, inputEntity))
 					{
 						MapEntity mapEntity = new MapEntity();
 						if (count == 0)
 						{
 							mapEntity = new MapEntity(inputEntity);
 						}
-
 						if (count >= 20)
 						{
 							break;
 						}
-
-						mapEntity.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME,
-								ontologyTermEntity.getString(OntologyTermMetaData.ONTOLOGY_TERM_NAME));
-
-						mapEntity.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI,
-								ontologyTermEntity.getString(OntologyTermMetaData.ONTOLOGY_TERM_IRI));
-
-						mapEntity.set(SCORE, df.format(ontologyTermEntity.getDouble(SCORE)));
-
-						mapEntity.set(COMBINED_SCORE, df.format(ontologyTermEntity.getDouble(COMBINED_SCORE)));
+						mapEntity.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME, sortaHit.getOntologyTerm().getLabel());
+						mapEntity.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI, sortaHit.getOntologyTerm().getIRI());
+						mapEntity.set(SCORE, df.format(sortaHit.getScore()));
+						mapEntity.set(COMBINED_SCORE, df.format(sortaHit.getWeightedScore()));
 
 						csvWriter.add(mapEntity);
 
@@ -218,11 +213,8 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 		{
 			public Map<String, Object> apply(Entity inputEntity)
 			{
-				Iterable<Entity> findOntologyTermEntities = sortaService.findOntologyTermEntities(ontologyIri,
-						inputEntity);
-
-				return ImmutableMap.of("inputTerm", SortaServiceUtil.getEntityAsMap(inputEntity), "ontologyTerm",
-						SortaServiceUtil.getEntityAsMap(findOntologyTermEntities));
+				List<SortaHit> sortaHits = sortaService.findOntologyTermEntities(ontologyIri, inputEntity);
+				return of("inputTerm", SortaServiceUtil.getEntityAsMap(inputEntity), "sortaHits", sortaHits);
 			}
 		}).toList();
 	}

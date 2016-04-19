@@ -1,6 +1,7 @@
 package org.molgenis.ontology;
 
 import org.molgenis.data.DataService;
+import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.ontology.ic.OntologyTermFrequencyServiceImpl;
 import org.molgenis.ontology.ic.TermFrequencyService;
 import org.molgenis.ontology.roc.InformationContentService;
@@ -16,6 +17,9 @@ public class SortaConfiguration
 	@Autowired
 	private DataService dataService;
 
+	@Autowired
+	private OntologyService ontologyService;
+
 	@Bean
 	public TermFrequencyService termFrequencyService()
 	{
@@ -25,7 +29,7 @@ public class SortaConfiguration
 	@Bean
 	public SortaService sortaService()
 	{
-		return new SortaServiceImpl(dataService, informationContentService());
+		return new SortaServiceImpl(dataService, ontologyService, informationContentService());
 	}
 
 	@Bean

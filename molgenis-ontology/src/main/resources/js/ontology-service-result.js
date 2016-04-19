@@ -187,10 +187,10 @@
 						if(key === 'validated') updatedMappedEntity[key] = false;
 						if(key === 'inputTerm') updatedMappedEntity[key] = val.Identifier;
 					});
-					if(data.ontologyTerms && data.ontologyTerms.length > 0){
-						var ontologyTerm = data.ontologyTerms[0];
-						updatedMappedEntity['score'] = ontologyTerm.Score;
-						updatedMappedEntity['matchTerm'] = ontologyTerm.ontologyTermIRI;
+					if(data.sortaHits && data.sortaHits.length > 0){
+						var sortaHit = data.sortaHits[0];
+						updatedMappedEntity['score'] = sortaHit.score;
+						updatedMappedEntity['matchTerm'] = sortaHit.ontologyTerm.IRI;
 					}else{
 						updatedMappedEntity['score'] = 0;
 						updatedMappedEntity['matchTerm'] = null;
@@ -265,28 +265,29 @@
 		$('<th />').append('Select').appendTo(header);
 		
 		var hintInformation;
-		if(data.ontologyTerms && data.ontologyTerms.length > 0){
+		if(data.sortaHits && data.sortaHits.length > 0){
 			hintInformation = $('<center><p style="font-size:15px;">The candidate ontology terms are sorted based on similarity score, please select one of them by clicking <span class="glyphicon glyphicon-ok"></span> button</p></center>');
-			$.each(data.ontologyTerms, function(index, ontologyTerm){
+			$.each(data.sortaHits, function(index, sortaHit){
 				if(index >= 20) return;
 				var row = $('<tr />').appendTo(table);
 				row.append(index == 0 ? gatherInputInfoHelper(inputEntity) : '<td></td>');
-				row.append(gatherOntologyInfoHelper(inputEntity, ontologyTerm));
-				row.append('<td>' + ontologyTerm.Score.toFixed(2) + '%</td>');
-				row.append('<td>' + ontologyTerm.Combined_Score.toFixed(2) + '%</td>');
+				row.append(gatherOntologyInfoHelper(inputEntity, sortaHit.ontologyTerm));
+				row.append('<td>' + sortaHit.score.toFixed(2) + '%</td>');
+				row.append('<td>' + sortaHit.weightedScore.toFixed(2) + '%</td>');
 				row.append('<td><button type="button" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span></button></td>');
-				row.data('ontologyTerm', ontologyTerm);
+				row.data('sortaHit', sortaHit);
 				row.find('button:eq(0)').click(function(){
 					getMappingEntity(inputEntity.Identifier, ontologyServiceRequest.sortaJobExecutionId, function(data){
 						if(data.items.length > 0){
 							var mappedEntity = data.items[0];
 							var href = '/api/v1/'+ontologyServiceRequest.sortaJobExecutionId+'/' + mappedEntity.identifier;
 							var updatedMappedEntity = {};
+							var sortaHit = row.data('sortaHit');
 							$.map(mappedEntity, function(val, key){
 								if(key === 'validated') updatedMappedEntity[key] = true;
 								else if(key === 'inputTerm') updatedMappedEntity[key] = val.Identifier;
-								else if(key === 'matchTerm') updatedMappedEntity.matchTerm = row.data('ontologyTerm').ontologyTermIRI;
-								else if(key === 'score') updatedMappedEntity.score = row.data('ontologyTerm').Score;
+								else if(key === 'matchTerm') updatedMappedEntity.matchTerm = sortaHit.ontologyTerm.IRI;
+								else if(key === 'score') updatedMappedEntity.score = sortaHit.score;
 								else if(key !== 'identifier') updatedMappedEntity[key] = val;
 							});
 							restApi.update(href, updatedMappedEntity, createCallBackFunction(), true);
@@ -346,7 +347,7 @@
 		var ontologyTermTd = $('<td />');
 		if(inputEntity && ontologyTerm){
 			var synonymDiv = $('<div>Synonym : </div>');
-			var synonyms = getOntologyTermSynonyms(ontologyTerm);
+			var synonyms = ontologyTerm.synonyms;
 			if(synonyms.length == 0){
 				synonymDiv.append(NO_MATCH_INFO);
 			}else if(synonyms.length == 1){
@@ -360,13 +361,13 @@
 				});
 			}
 			//check if the ontologyTermIRI is a valid link
-			if(ontologyTerm.ontologyTermIRI.startsWith('http')){
-				ontologyTermTd.append('<div>Name : <a href="' + ontologyTerm.ontologyTermIRI + '" target="_blank">' + ontologyTerm.ontologyTermName + '</a></div>').append(synonymDiv);
+			if(ontologyTerm.IRI.startsWith('http')){
+				ontologyTermTd.append('<div>Name : <a href="' + ontologyTerm.IRI + '" target="_blank">' + ontologyTerm.label + '</a></div>').append(synonymDiv);
 			}else{
-				ontologyTermTd.append('<div>Name : ' + ontologyTerm.ontologyTermName + '</div>').append(synonymDiv);
+				ontologyTermTd.append('<div>Name : ' + ontologyTerm.label + '</div>').append(synonymDiv);
 			}
 			var annotationMap = {};
-			$.each(ontologyTerm.ontologyTermDynamicAnnotation, function(i, annotation){
+			$.each(ontologyTerm.annotations, function(i, annotation){
 				if(!annotationMap[annotation.name]){
 					annotationMap[annotation.name] = [];
 				}
@@ -381,18 +382,6 @@
 			ontologyTermTd.append(NO_MATCH_INFO);
 		}
 		return ontologyTermTd;
-	}
-	
-	function getOntologyTermSynonyms(ontologyTerm){
-		var synonyms = [];
-		if(ontologyTerm.ontologyTermSynonym.length > 0){
-			$.each(ontologyTerm.ontologyTermSynonym, function(index, ontologyTermSynonymEntity){
-				if(ontologyTerm.ontologyTermName !== ontologyTermSynonymEntity.ontologyTermSynonym && $.inArray(ontologyTermSynonymEntity.ontologyTermSynonym, synonyms) === -1){
-					synonyms.push(ontologyTermSynonymEntity.ontologyTermSynonym);
-				}
-			});
-		}
-		return synonyms;
 	}
 	
 }($, window.top.molgenis = window.top.molgenis || {}));

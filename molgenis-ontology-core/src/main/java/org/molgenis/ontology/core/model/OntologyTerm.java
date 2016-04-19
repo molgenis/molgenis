@@ -2,9 +2,10 @@ package org.molgenis.ontology.core.model;
 
 import static com.google.common.collect.ImmutableList.copyOf;
 import static java.util.Arrays.stream;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.apache.commons.lang.StringUtils.join;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -26,24 +27,28 @@ public abstract class OntologyTerm
 
 	public abstract List<String> getSynonyms();
 
+	@Nullable
+	public abstract List<OntologyTermAnnotation> getAnnotations();
+
 	public static OntologyTerm create(String iri, String label)
 	{
-		return new AutoValue_OntologyTerm(iri, label, null, Collections.singletonList(label));
+		return new AutoValue_OntologyTerm(iri, label, null, singletonList(label), emptyList());
 	}
 
 	public static OntologyTerm create(String iri, String label, List<String> synonyms)
 	{
-		return new AutoValue_OntologyTerm(iri, label, null, copyOf(synonyms));
+		return new AutoValue_OntologyTerm(iri, label, null, copyOf(synonyms), emptyList());
 	}
 
 	public static OntologyTerm create(String iri, String label, String description)
 	{
-		return new AutoValue_OntologyTerm(iri, label, description, Collections.singletonList((description)));
+		return new AutoValue_OntologyTerm(iri, label, description, singletonList(description), emptyList());
 	}
 
-	public static OntologyTerm create(String iri, String label, String description, List<String> synonyms)
+	public static OntologyTerm create(String iri, String label, String description, List<String> synonyms,
+			List<OntologyTermAnnotation> annotations)
 	{
-		return new AutoValue_OntologyTerm(iri, label, description, copyOf(synonyms));
+		return new AutoValue_OntologyTerm(iri, label, description, copyOf(synonyms), copyOf(annotations));
 	}
 
 	/**

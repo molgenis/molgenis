@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.Entity;
+import org.molgenis.ontology.sorta.bean.SortaHit;
 import org.molgenis.ontology.utils.SortaServiceUtil;
 
 /**
@@ -16,7 +17,7 @@ public class SortaServiceResponse
 {
 	private String message;
 	private Map<String, Object> inputData;
-	private List<Map<String, Object>> ontologyTerms;
+	private List<SortaHit> sortaHits;
 	private long totalHitCount;
 
 	public SortaServiceResponse(String message)
@@ -24,16 +25,11 @@ public class SortaServiceResponse
 		this.message = message;
 	}
 
-	public SortaServiceResponse(Entity inputData, Iterable<? extends Entity> ontologyTerms)
+	public SortaServiceResponse(Entity inputData, List<SortaHit> sortaHits)
 	{
-		this(SortaServiceUtil.getEntityAsMap(inputData), SortaServiceUtil.getEntityAsMap(ontologyTerms));
-	}
-
-	public SortaServiceResponse(Map<String, Object> inputData, List<Map<String, Object>> ontologyTerms)
-	{
-		this.inputData = inputData;
-		this.ontologyTerms = ontologyTerms;
-		this.totalHitCount = ontologyTerms.size();
+		this.inputData = SortaServiceUtil.getEntityAsMap(inputData);
+		this.sortaHits = sortaHits;
+		this.totalHitCount = sortaHits.size();
 	}
 
 	public Map<String, Object> getInputData()
@@ -51,8 +47,8 @@ public class SortaServiceResponse
 		return message;
 	}
 
-	public List<Map<String, Object>> getOntologyTerms()
+	public List<SortaHit> getSortaHits()
 	{
-		return ontologyTerms;
+		return sortaHits;
 	}
 }
