@@ -2,6 +2,7 @@ package org.molgenis.data.support;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 
 public class AggregateQueryImpl implements AggregateQuery
@@ -9,13 +10,13 @@ public class AggregateQueryImpl implements AggregateQuery
 	private AttributeMetaData attrX;
 	private AttributeMetaData attrY;
 	private AttributeMetaData attrDistinct;
-	private Query q;
+	private Query<Entity> q;
 
 	public AggregateQueryImpl()
 	{
 	}
 
-	public AggregateQueryImpl(AttributeMetaData attrX, AttributeMetaData attrY, AttributeMetaData attrDistinct, Query q)
+	public AggregateQueryImpl(AttributeMetaData attrX, AttributeMetaData attrY, AttributeMetaData attrDistinct, Query<Entity> q)
 	{
 		this.attrX = attrX;
 		this.attrY = attrY;
@@ -41,7 +42,7 @@ public class AggregateQueryImpl implements AggregateQuery
 		return this;
 	}
 
-	public AggregateQueryImpl query(Query q)
+	public AggregateQueryImpl query(Query<Entity> q)
 	{
 		this.q = q;
 		return this;
@@ -62,13 +63,13 @@ public class AggregateQueryImpl implements AggregateQuery
 		this.attrDistinct = attrDistinct;
 	}
 
-	public void setQuery(Query q)
+	public void setQuery(Query<Entity> q)
 	{
 		this.q = q;
 	}
 
 	@Override
-	public Query getQuery()
+	public Query<Entity> getQuery()
 	{
 		return q;
 	}

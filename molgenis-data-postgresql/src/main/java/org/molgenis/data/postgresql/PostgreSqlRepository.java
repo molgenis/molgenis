@@ -110,7 +110,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	@Transactional(readOnly = true)
 	public Iterator<Entity> iterator()
 	{
-		Query q = new QueryImpl();
+		Query<Entity> q = new QueryImpl<Entity>();
 		return findAllBatching(q).iterator();
 	}
 
@@ -118,7 +118,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	@Transactional(readOnly = true)
 	public Stream<Entity> stream(Fetch fetch)
 	{
-		Query q = new QueryImpl();
+		Query<Entity> q = new QueryImpl<Entity>();
 		if (fetch != null)
 		{
 			q.fetch(fetch);
@@ -139,7 +139,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		List<Object> parameters = Lists.newArrayList();
 		String sql = getSqlCount(getEntityMetaData(), q, parameters);
@@ -157,13 +157,13 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	@Override
 	@Transactional(readOnly = true)
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		return StreamSupport.stream(findAllBatching(q).spliterator(), false);
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		Iterator<Entity> iterator = findAll(q).iterator();
 		if (iterator.hasNext())
@@ -174,23 +174,23 @@ public class PostgreSqlRepository extends AbstractRepository
 	}
 
 	@Override
-	public Entity findOne(Object id)
+	public Entity findOneById(Object id)
 	{
 		if (id == null)
 		{
 			return null;
 		}
-		return findOne(new QueryImpl().eq(getEntityMetaData().getIdAttribute().getName(), id));
+		return findOne(new QueryImpl<Entity>().eq(getEntityMetaData().getIdAttribute().getName(), id));
 	}
 
 	@Override
-	public Entity findOne(Object id, Fetch fetch)
+	public Entity findOneById(Object id, Fetch fetch)
 	{
 		if (id == null)
 		{
 			return null;
 		}
-		return findOne(new QueryImpl().eq(getEntityMetaData().getIdAttribute().getName(), id).fetch(fetch));
+		return findOne(new QueryImpl<Entity>().eq(getEntityMetaData().getIdAttribute().getName(), id).fetch(fetch));
 	}
 
 	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
@@ -202,7 +202,7 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
-	public void update(Stream<? extends Entity> entities)
+	public void update(Stream<Entity> entities)
 	{
 		updateBatching(entities.iterator());
 	}
@@ -216,21 +216,21 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
-	public void delete(Stream<? extends Entity> entities)
+	public void delete(Stream<Entity> entities)
 	{
-		deleteById(entities.map(Entity::getIdValue));
+		deleteAll(entities.map(Entity::getIdValue));
 	}
 
 	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
 	public void deleteById(Object id)
 	{
-		this.deleteById(Stream.of(id));
+		this.deleteAll(Stream.of(id));
 	}
 
 	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
 		Iterators.partition(ids.iterator(), BATCH_SIZE).forEachRemaining(idsBatch -> {
 			String sql = getSqlDelete(getEntityMetaData());
@@ -288,7 +288,7 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
-	public Integer add(Stream<? extends Entity> entities)
+	public Integer add(Stream<Entity> entities)
 	{
 		return addBatching(entities.iterator());
 	}
@@ -423,8 +423,6 @@ public class PostgreSqlRepository extends AbstractRepository
 	 * @param addToEntityMetaData
 	 *            boolean indicating if the repository's {@link EntityMetaData} should be updated as well. This should
 	 *            not happen for parts of a compound attribute.
-	 * @param async
-	 *            boolean indicating if the alter table statement should be executed in a different thread or not.
 	 */
 	private void addAttributeRec(AttributeMetaData attr, boolean addToEntityMetaData)
 	{
@@ -512,12 +510,12 @@ public class PostgreSqlRepository extends AbstractRepository
 		}
 	}
 
-	private BatchingQueryResult findAllBatching(Query q)
+	private BatchingQueryResult<Entity> findAllBatching(Query<Entity> q)
 	{
-		BatchingQueryResult batchingQueryResult = new BatchingQueryResult(BATCH_SIZE, q)
+		BatchingQueryResult<Entity> batchingQueryResult = new BatchingQueryResult<Entity>(BATCH_SIZE, q)
 		{
 			@Override
-			protected List<Entity> getBatch(Query batchQuery)
+			protected List<Entity> getBatch(Query<Entity> batchQuery)
 			{
 				List<Object> parameters = new ArrayList<>();
 				String sql = getSqlSelect(getEntityMetaData(), batchQuery, parameters);

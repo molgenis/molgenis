@@ -103,12 +103,12 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 
 		when(
 				dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
-						new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, user2), MolgenisGroupMember.class))
+						new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMember.MOLGENISUSER, user2), MolgenisGroupMember.class))
 				.thenReturn(Stream.of(molgenisGroupMember1));
 
 		when(
 				dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
-						new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, user1), MolgenisGroupMember.class))
+						new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMember.MOLGENISUSER, user1), MolgenisGroupMember.class))
 				.thenReturn(Stream.of(molgenisGroupMember1));
 
 		groupPlugin1Authority = mock(GroupAuthority.class);
@@ -141,29 +141,29 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 
 		when(dataService.findAll(MolgenisUser.ENTITY_NAME, MolgenisUser.class)).thenReturn(Stream.of(user1));
 
-		when(dataService.findOne(MolgenisGroup.ENTITY_NAME, group1Id, MolgenisGroup.class)).thenReturn(group1);
-		when(dataService.findOne(MolgenisUser.ENTITY_NAME, user1Id, MolgenisUser.class)).thenReturn(user1);
-		when(dataService.findOne(MolgenisUser.ENTITY_NAME, user2Id, MolgenisUser.class)).thenReturn(user2);
-		when(dataService.findOne(MolgenisUser.ENTITY_NAME, user3Id, MolgenisUser.class)).thenReturn(user3);
+		when(dataService.findOneById(MolgenisGroup.ENTITY_NAME, group1Id, MolgenisGroup.class)).thenReturn(group1);
+		when(dataService.findOneById(MolgenisUser.ENTITY_NAME, user1Id, MolgenisUser.class)).thenReturn(user1);
+		when(dataService.findOneById(MolgenisUser.ENTITY_NAME, user2Id, MolgenisUser.class)).thenReturn(user2);
+		when(dataService.findOneById(MolgenisUser.ENTITY_NAME, user3Id, MolgenisUser.class)).thenReturn(user3);
 
 		when(
 				dataService.findAll(GroupAuthority.ENTITY_NAME,
-						new QueryImpl().in(GroupAuthority.MOLGENISGROUP, Arrays.<Entity> asList(group1)),
+						new QueryImpl<GroupAuthority>().in(GroupAuthority.MOLGENISGROUP, Arrays.<Entity> asList(group1)),
 						GroupAuthority.class)).thenReturn(
 				Stream.of(groupPlugin1Authority, groupPlugin2Authority, groupEntity1Authority, groupEntity2Authority));
 
 		when(
 				dataService.findAll(UserAuthority.ENTITY_NAME,
-						new QueryImpl().in(UserAuthority.MOLGENISUSER, Arrays.<Entity> asList(user1)),
+						new QueryImpl<UserAuthority>().in(UserAuthority.MOLGENISUSER, Arrays.<Entity> asList(user1)),
 						UserAuthority.class)).thenReturn(
 				Stream.of(userPlugin2Authority, userPlugin3Authority, userEntity2Authority, userEntity3Authority));
 
 		when(
-				dataService.findAll(UserAuthority.ENTITY_NAME, new QueryImpl().eq(UserAuthority.MOLGENISUSER, user1),
+				dataService.findAll(UserAuthority.ENTITY_NAME, new QueryImpl<UserAuthority>().eq(UserAuthority.MOLGENISUSER, user1),
 						UserAuthority.class)).thenReturn(
 				Stream.of(userPlugin2Authority, userPlugin3Authority, userEntity2Authority, userEntity3Authority));
 		when(
-				dataService.findAll(UserAuthority.ENTITY_NAME, new QueryImpl().eq(UserAuthority.MOLGENISUSER, user2),
+				dataService.findAll(UserAuthority.ENTITY_NAME, new QueryImpl<UserAuthority>().eq(UserAuthority.MOLGENISUSER, user2),
 						UserAuthority.class)).thenReturn(
 				Stream.of(userPlugin2Authority, userPlugin3Authority, userEntity2Authority, userEntity3Authority));
 

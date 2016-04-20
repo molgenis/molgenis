@@ -15,12 +15,12 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.fieldtypes.XrefField;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class DependencyResolver
 {
@@ -33,10 +33,10 @@ public class DependencyResolver
 	 * @param repos
 	 * @return
 	 */
-	public static List<Repository> resolve(Iterable<Repository> repos)
+	public static List<Repository<Entity>> resolve(Iterable<Repository<Entity>> repos)
 	{
-		Map<String, Repository> repoByName = new HashMap<>();
-		for (Repository repo : repos)
+		Map<String, Repository<Entity>> repoByName = new HashMap<>();
+		for (Repository<Entity> repo : repos)
 		{
 			repoByName.put(repo.getEntityMetaData().getName(), repo);
 		}
@@ -212,7 +212,7 @@ public class DependencyResolver
 						else
 						{
 							Entity refEntity = dataService.getRepository(
-									emd.getAttribute(attr.getName()).getRefEntity().getName()).findOne(refId);
+									emd.getAttribute(attr.getName()).getRefEntity().getName()).findOneById(refId);
 							if (refEntity == null)
 							{
 								throw new UnknownEntityException(attr.getRefEntity().getName() + " with "

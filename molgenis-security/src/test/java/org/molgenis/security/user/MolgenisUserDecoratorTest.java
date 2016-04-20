@@ -20,7 +20,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserDecorator;
-//import org.molgenis.auth.UserAuthorityRepository;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -36,8 +35,8 @@ import org.testng.annotations.Test;
 
 public class MolgenisUserDecoratorTest
 {
-	private Repository decoratedRepository;
-	private Repository userAuthorityRepository;
+	private Repository<Entity> decoratedRepository;
+	private Repository<Entity> userAuthorityRepository;
 	private MolgenisUserDecorator molgenisUserDecorator;
 	private PasswordEncoder passwordEncoder;
 
@@ -128,7 +127,7 @@ public class MolgenisUserDecoratorTest
 		entity.set("id", 1);
 		entity.set(MolgenisUser.PASSWORD_, password);
 		entity.set(MolgenisUser.SUPERUSER, true);
-		when(decoratedRepository.findOne(1)).thenReturn(entity);
+		when(decoratedRepository.findOneById(1)).thenReturn(entity);
 
 		molgenisUserDecorator.add(entity);
 		verify(passwordEncoder).encode(password);
@@ -141,8 +140,8 @@ public class MolgenisUserDecoratorTest
 	{
 		Object id = Integer.valueOf(0);
 		Fetch fetch = new Fetch();
-		molgenisUserDecorator.findOne(id, fetch);
-		verify(decoratedRepository, times(1)).findOne(id, fetch);
+		molgenisUserDecorator.findOneById(id, fetch);
+		verify(decoratedRepository, times(1)).findOneById(id, fetch);
 	}
 
 	@Test
@@ -176,7 +175,7 @@ public class MolgenisUserDecoratorTest
 	public void findAllAsStream()
 	{
 		Entity entity0 = mock(Entity.class);
-		Query query = mock(Query.class);
+		Query<Entity> query = mock(Query.class);
 		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = molgenisUserDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));

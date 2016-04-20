@@ -25,7 +25,7 @@ import org.testng.annotations.Test;
 public class MolgenisResourceBundleControlTest
 {
 	private DataService dataServiceMock;
-	private Query queryMock;
+	private Query<Entity> queryMock;
 	private MolgenisResourceBundleControl molgenisResourceBundleControl;
 
 	@BeforeMethod

@@ -75,26 +75,26 @@ public class IdCardBiobankRepository extends AbstractRepository
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		return elasticsearchService.count(q, getEntityMetaData());
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		return elasticsearchService.searchAsStream(q, getEntityMetaData());
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		Iterator<Entity> it = findAll(q).iterator();
 		return it.hasNext() ? it.next() : null;
 	}
 
 	@Override
-	public Entity findOne(Object id)
+	public Entity findOneById(Object id)
 	{
 		try
 		{
@@ -107,9 +107,9 @@ public class IdCardBiobankRepository extends AbstractRepository
 	}
 
 	@Override
-	public Entity findOne(Object id, Fetch fetch)
+	public Entity findOneById(Object id, Fetch fetch)
 	{
-		return findOne(id);
+		return findOneById(id);
 	}
 
 	@Override
@@ -140,7 +140,7 @@ public class IdCardBiobankRepository extends AbstractRepository
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
 		throw new UnsupportedOperationException(
 				String.format("Repository [%s] is not %s", getName(), WRITABLE.toString()));

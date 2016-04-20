@@ -57,9 +57,8 @@ public class FileIngesterQuartzJob implements Job
 
 	private void run(Object fileIngestId)
 	{
-		FileIngest fileIngest = dataService.findOne(FileIngestMetaData.ENTITY_NAME, fileIngestId, FileIngest.class);
-		MolgenisUser admin = dataService.findOne(MolgenisUser.ENTITY_NAME,
-				dataService.query(MolgenisUser.ENTITY_NAME).eq(MolgenisUser.USERNAME, "admin"), MolgenisUser.class);
+		FileIngest fileIngest = dataService.findOneById(FileIngestMetaData.ENTITY_NAME, fileIngestId, FileIngest.class);
+		MolgenisUser admin = dataService.query(MolgenisUser.ENTITY_NAME, MolgenisUser.class).eq(MolgenisUser.USERNAME, "admin").findOne();
 		FileIngestJobExecution jobExecution = new FileIngestJobExecution(dataService);
 		jobExecution.setUser(admin);// TODO system
 		jobExecution.setFileIngest(fileIngest);

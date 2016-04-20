@@ -59,12 +59,12 @@ public class FileIngesterQuartzJobTest
 		Entity targetEntity = new DefaultEntity(EntityMetaDataMetaData.INSTANCE, dataServiceMock);
 		targetEntity.set(EntityMetaDataMetaData.FULL_NAME, "org_molgenis_test_TypeTest");
 		fileIngest.set(FileIngestMetaData.ENTITY_META_DATA, targetEntity);
-		when(dataServiceMock.findOne(FileIngestMetaData.ENTITY_NAME, "abcde", FileIngest.class)).thenReturn(fileIngest);
+		when(dataServiceMock.findOneById(FileIngestMetaData.ENTITY_NAME, "abcde", FileIngest.class)).thenReturn(fileIngest);
 		
-		Query queryMock = Mockito.mock(Query.class);
+		Query<MolgenisUser> queryMock = Mockito.mock(Query.class);
 		MolgenisUser admin = new MolgenisUser();
 		admin.setUsername("admin");
-		when(dataServiceMock.query(MolgenisUser.ENTITY_NAME)).thenReturn(queryMock);
+		when(dataServiceMock.query(MolgenisUser.ENTITY_NAME, MolgenisUser.class)).thenReturn(queryMock);
 		when(queryMock.eq(MolgenisUser.USERNAME, "admin")).thenReturn(queryMock);
 		when(queryMock.findOne()).thenReturn(admin);
 

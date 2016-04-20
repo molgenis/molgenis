@@ -61,7 +61,7 @@ public class TabixVcfRepository extends VcfRepository
 	 *            the query to search in
 	 * @return the value from the first matching query rule
 	 */
-	private static Object getFirstEqualsValueFor(String attributeName, Query q)
+	private static Object getFirstEqualsValueFor(String attributeName, Query<Entity> q)
 	{
 		return q.getRules().stream()
 				.filter(rule -> attributeName.equals(rule.getField()) && rule.getOperator() == Operator.EQUALS)
@@ -69,7 +69,7 @@ public class TabixVcfRepository extends VcfRepository
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		Object posValue = getFirstEqualsValueFor(VcfRepository.POS, q);
 		Object chromValue = getFirstEqualsValueFor(VcfRepository.CHROM, q);

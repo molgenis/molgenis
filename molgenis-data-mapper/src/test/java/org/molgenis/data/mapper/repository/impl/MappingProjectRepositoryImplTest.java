@@ -139,13 +139,13 @@ public class MappingProjectRepositoryImplTest extends AbstractTestNGSpringContex
 	public void testDelete()
 	{
 		mappingProjectRepositoryImpl.delete("abc");
-		verify(dataService).delete(ENTITY_NAME, "abc");
+		verify(dataService).deleteById(ENTITY_NAME, "abc");
 	}
 
 	@Test
 	public void testQuery()
 	{
-		Query q = new QueryImpl();
+		Query<Entity> q = new QueryImpl<>();
 		q.eq(OWNER, "flup");
 		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Stream.of(mappingProjectEntity));
 		when(userService.getUser("flup")).thenReturn(owner);
@@ -159,7 +159,7 @@ public class MappingProjectRepositoryImplTest extends AbstractTestNGSpringContex
 	@Test
 	public void testFindAll()
 	{
-		Query q = new QueryImpl();
+		Query<Entity> q = new QueryImpl<Entity>();
 		q.eq(OWNER, "flup");
 		when(dataService.findAll(ENTITY_NAME)).thenReturn(Stream.of(mappingProjectEntity));
 		when(userService.getUser("flup")).thenReturn(owner);
@@ -174,7 +174,7 @@ public class MappingProjectRepositoryImplTest extends AbstractTestNGSpringContex
 	public void testUpdateUnknown()
 	{
 		mappingProject.setIdentifier("mappingProjectID");
-		when(dataService.findOne(ENTITY_NAME, "mappingProjectID")).thenReturn(null);
+		when(dataService.findOneById(ENTITY_NAME, "mappingProjectID")).thenReturn(null);
 		try
 		{
 			mappingProjectRepositoryImpl.update(mappingProject);

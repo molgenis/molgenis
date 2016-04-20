@@ -41,9 +41,9 @@ import org.testng.annotations.Test;
 public class DataServiceImplTest
 {
 	private final List<String> entityNames = Arrays.asList("Entity1", "Entity2", "Entity3");
-	private Repository repo1;
-	private Repository repo2;
-	private Repository repoToRemove;
+	private Repository<Entity> repo1;
+	private Repository<Entity> repo2;
+	private Repository<Entity> repoToRemove;
 	private DataServiceImpl dataService;
 
 	@BeforeMethod
@@ -152,9 +152,9 @@ public class DataServiceImplTest
 		Object id = Integer.valueOf(0);
 		Fetch fetch = new Fetch();
 		Entity entity = mock(Entity.class);
-		when(repo1.findOne(id, fetch)).thenReturn(entity);
-		assertEquals(dataService.findOne("Entity1", id, fetch), entity);
-		verify(repo1, times(1)).findOne(id, fetch);
+		when(repo1.findOneById(id, fetch)).thenReturn(entity);
+		assertEquals(dataService.findOneById("Entity1", id, fetch), entity);
+		verify(repo1, times(1)).findOneById(id, fetch);
 	}
 
 	@Test
@@ -162,9 +162,9 @@ public class DataServiceImplTest
 	{
 		Object id = Integer.valueOf(0);
 		Fetch fetch = new Fetch();
-		when(repo1.findOne(id, fetch)).thenReturn(null);
-		assertNull(dataService.findOne("Entity1", id, fetch));
-		verify(repo1, times(1)).findOne(id, fetch);
+		when(repo1.findOneById(id, fetch)).thenReturn(null);
+		assertNull(dataService.findOneById("Entity1", id, fetch));
+		verify(repo1, times(1)).findOneById(id, fetch);
 	}
 
 	@Test
@@ -174,10 +174,10 @@ public class DataServiceImplTest
 		Fetch fetch = new Fetch();
 		Class<Entity> clazz = Entity.class;
 		Entity entity = mock(Entity.class);
-		when(repo1.findOne(id, fetch)).thenReturn(entity);
+		when(repo1.findOneById(id, fetch)).thenReturn(entity);
 		// how to check return value? converting iterable can't be mocked.
-		dataService.findOne("Entity1", id, fetch, clazz);
-		verify(repo1, times(1)).findOne(id, fetch);
+		dataService.findOneById("Entity1", id, fetch, clazz);
+		verify(repo1, times(1)).findOneById(id, fetch);
 	}
 
 	@Test
@@ -186,9 +186,9 @@ public class DataServiceImplTest
 		Object id = Integer.valueOf(0);
 		Fetch fetch = new Fetch();
 		Class<Entity> clazz = Entity.class;
-		when(repo1.findOne(id, fetch)).thenReturn(null);
-		assertNull(dataService.findOne("Entity1", id, fetch, clazz));
-		verify(repo1, times(1)).findOne(id, fetch);
+		when(repo1.findOneById(id, fetch)).thenReturn(null);
+		assertNull(dataService.findOneById("Entity1", id, fetch, clazz));
+		verify(repo1, times(1)).findOneById(id, fetch);
 	}
 
 	@Test
@@ -243,7 +243,7 @@ public class DataServiceImplTest
 	public void findAllStreamString()
 	{
 		Entity entity0 = mock(Entity.class);
-		when(repo1.findAll(new QueryImpl())).thenReturn(Stream.of(entity0));
+		when(repo1.findAll(new QueryImpl<Entity>())).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = dataService.findAll("Entity1");
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
@@ -253,7 +253,7 @@ public class DataServiceImplTest
 	{
 		Class<Entity> clazz = Entity.class;
 		Entity entity0 = mock(Entity.class);
-		when(repo1.findAll(new QueryImpl())).thenReturn(Stream.of(entity0));
+		when(repo1.findAll(new QueryImpl<Entity>())).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = dataService.findAll("Entity1", clazz);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
@@ -262,7 +262,7 @@ public class DataServiceImplTest
 	public void findAllStreamStringQuery()
 	{
 		Entity entity0 = mock(Entity.class);
-		Query query = mock(Query.class);
+		Query<Entity> query = mock(Query.class);
 		when(repo1.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = dataService.findAll("Entity1", query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
@@ -273,7 +273,7 @@ public class DataServiceImplTest
 	{
 		Class<Entity> clazz = Entity.class;
 		Entity entity0 = mock(Entity.class);
-		Query query = mock(Query.class);
+		Query<Entity> query = mock(Query.class);
 		when(repo1.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = dataService.findAll("Entity1", query, clazz);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
@@ -283,7 +283,7 @@ public class DataServiceImplTest
 	public void copyRepository()
 	{
 		// setup everything
-		Query query = new QueryImpl();
+		Query<Entity> query = new QueryImpl<Entity>();
 		AttributeMetaData attr1 = new DefaultAttributeMetaData("attr1", MolgenisFieldTypes.FieldTypeEnum.STRING);
 		AttributeMetaData attr2 = new DefaultAttributeMetaData("attr2", MolgenisFieldTypes.FieldTypeEnum.STRING);
 
@@ -304,7 +304,7 @@ public class DataServiceImplTest
 		when(metaDataService.addEntityMeta(emd2)).thenReturn(repo2);
 
 		// The actual method call
-		Repository copy = dataService.copyRepository(repo1, "Entity2", "testCopyLabel");
+		Repository<Entity> copy = dataService.copyRepository(repo1, "Entity2", "testCopyLabel");
 
 		// The test
 		verify(metaDataService).addEntityMeta(copy.getEntityMetaData());
@@ -320,7 +320,7 @@ public class DataServiceImplTest
 	public void copyRepositoryException()
 	{
 		// setup everything
-		Query query = new QueryImpl();
+		Query<Entity> query = new QueryImpl<Entity>();
 		AttributeMetaData attr1 = new DefaultAttributeMetaData("attr1", MolgenisFieldTypes.FieldTypeEnum.STRING);
 		AttributeMetaData attr2 = new DefaultAttributeMetaData("attr2", MolgenisFieldTypes.FieldTypeEnum.STRING);
 

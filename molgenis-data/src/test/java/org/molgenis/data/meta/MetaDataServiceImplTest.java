@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.mockito.Mockito;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Package;
@@ -223,7 +224,7 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 
 		DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData("attributes");
 		newEntityMetaData.addAttribute("ID");
-		Repository repo1 = Mockito.mock(Repository.class);
+		Repository<Entity> repo1 = Mockito.mock(Repository.class);
 		when(repositoryCollection.getRepository("attributes")).thenReturn(repo1);
 		when(repo1.getEntityMetaData()).thenReturn(newEntityMetaData);
 

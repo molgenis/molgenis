@@ -25,7 +25,7 @@ public class RepositorySecurityDecoratorTest
 {
 	private String entityName;
 	private EntityMetaData entityMeta;
-	private Repository decoratedRepository;
+	private Repository<Entity> decoratedRepository;
 	private AppSettings appSettings;
 	private RepositorySecurityDecorator repositorySecurityDecorator;
 
@@ -262,9 +262,9 @@ public class RepositorySecurityDecoratorTest
 		Object id = Integer.valueOf(0);
 		Fetch fetch = new Fetch();
 		Entity entity = mock(Entity.class);
-		when(decoratedRepository.findOne(id, fetch)).thenReturn(entity);
-		assertEquals(entity, decoratedRepository.findOne(id, fetch));
-		verify(decoratedRepository, times(1)).findOne(id, fetch);
+		when(decoratedRepository.findOneById(id, fetch)).thenReturn(entity);
+		assertEquals(entity, decoratedRepository.findOneById(id, fetch));
+		verify(decoratedRepository, times(1)).findOneById(id, fetch);
 	}
 
 	@Test(expectedExceptions = MolgenisDataAccessException.class)
@@ -277,8 +277,8 @@ public class RepositorySecurityDecoratorTest
 		Object id = Integer.valueOf(0);
 		Fetch fetch = new Fetch();
 		Entity entity = mock(Entity.class);
-		when(decoratedRepository.findOne(id, fetch)).thenReturn(entity);
-		repositorySecurityDecorator.findOne(id, fetch);
+		when(decoratedRepository.findOneById(id, fetch)).thenReturn(entity);
+		repositorySecurityDecorator.findOneById(id, fetch);
 	}
 
 	@Test
@@ -289,7 +289,7 @@ public class RepositorySecurityDecoratorTest
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		Repository repo = when(mock(Repository.class).getName()).thenReturn("myentity").getMock();
+		Repository<Entity> repo = when(mock(Repository.class).getName()).thenReturn("myentity").getMock();
 
 		@SuppressWarnings("resource")
 		RepositorySecurityDecorator repoSecurityDecorator = new RepositorySecurityDecorator(repo,
@@ -305,7 +305,7 @@ public class RepositorySecurityDecoratorTest
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		Repository repo = when(mock(Repository.class).getName()).thenReturn("myentity").getMock();
+		Repository<Entity> repo = when(mock(Repository.class).getName()).thenReturn("myentity").getMock();
 
 		@SuppressWarnings("resource")
 		RepositorySecurityDecorator repoSecurityDecorator = new RepositorySecurityDecorator(repo,
@@ -321,7 +321,7 @@ public class RepositorySecurityDecoratorTest
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		Repository repo = when(mock(Repository.class).getName()).thenReturn("yourentity").getMock();
+		Repository<Entity> repo = when(mock(Repository.class).getName()).thenReturn("yourentity").getMock();
 
 		@SuppressWarnings("resource")
 		RepositorySecurityDecorator repoSecurityDecorator = new RepositorySecurityDecorator(repo,
@@ -337,7 +337,7 @@ public class RepositorySecurityDecoratorTest
 		authentication.setAuthenticated(false);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		Repository repo = when(mock(Repository.class).getName()).thenReturn("yourentity").getMock();
+		Repository<Entity> repo = when(mock(Repository.class).getName()).thenReturn("yourentity").getMock();
 
 		@SuppressWarnings("resource")
 		RepositorySecurityDecorator repoSecurityDecorator = new RepositorySecurityDecorator(repo,
@@ -354,7 +354,7 @@ public class RepositorySecurityDecoratorTest
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		Entity entity0 = mock(Entity.class);
-		Query query = mock(Query.class);
+		Query<Entity> query = mock(Query.class);
 		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = repositorySecurityDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
@@ -368,7 +368,7 @@ public class RepositorySecurityDecoratorTest
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		Entity entity0 = mock(Entity.class);
-		Query query = mock(Query.class);
+		Query<Entity> query = mock(Query.class);
 		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = repositorySecurityDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));

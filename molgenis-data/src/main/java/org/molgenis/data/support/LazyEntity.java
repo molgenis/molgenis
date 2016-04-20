@@ -184,7 +184,7 @@ public class LazyEntity implements Entity
 	{
 		if (entity == null)
 		{
-			entity = dataService.findOne(getEntityMetaData().getName(), id);
+			entity = dataService.findOneById(getEntityMetaData().getName(), id);
 			if (entity == null)
 			{
 				throw new UnknownEntityException("entity [" + getEntityMetaData().getName() + "] with "

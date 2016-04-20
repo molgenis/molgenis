@@ -29,7 +29,7 @@ import com.google.common.collect.Sets;
 /**
  * Base class for repositories. Subclasses can override supported methods
  */
-public abstract class AbstractRepository implements Repository
+public abstract class AbstractRepository implements Repository<Entity>
 {
 	private static final int FIND_ALL_BATCH_SIZE = 1000;
 
@@ -45,15 +45,15 @@ public abstract class AbstractRepository implements Repository
 	}
 
 	@Override
-	public Query query()
+	public Query<Entity> query()
 	{
-		return new QueryImpl(this);
+		return new QueryImpl<Entity>(this);
 	}
 
 	@Override
 	public long count()
 	{
-		return count(new QueryImpl());
+		return count(new QueryImpl<Entity>());
 	}
 
 	@Override
@@ -62,31 +62,31 @@ public abstract class AbstractRepository implements Repository
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Entity findOne(Object id)
+	public Entity findOneById(Object id)
 	{
-		return findOne(id, null);
+		return findOneById(id, null);
 	}
 
 	@Override
-	public Entity findOne(Object id, Fetch fetch)
+	public Entity findOneById(Object id, Fetch fetch)
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -113,7 +113,7 @@ public abstract class AbstractRepository implements Repository
 	{
 		String fieldIdAttributeName = getEntityMetaData().getIdAttribute().getName();
 		if (fetch != null) fetch.field(fieldIdAttributeName);
-		Query inQuery = new QueryImpl().in(fieldIdAttributeName, Sets.newHashSet(ids)).fetch(fetch);
+		Query<Entity> inQuery = new QueryImpl<>().in(fieldIdAttributeName, Sets.newHashSet(ids)).fetch(fetch);
 		Map<Object, Entity> indexedEntities = uniqueIndex(findAll(inQuery).iterator(), Entity::getIdValue);
 		return filter(transform(ids, id -> lookup(indexedEntities, id)), notNull());
 	}
@@ -148,7 +148,7 @@ public abstract class AbstractRepository implements Repository
 	}
 
 	@Override
-	public void update(Stream<? extends Entity> entities)
+	public void update(Stream<Entity> entities)
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -160,7 +160,7 @@ public abstract class AbstractRepository implements Repository
 	}
 
 	@Override
-	public void delete(Stream<? extends Entity> entities)
+	public void delete(Stream<Entity> entities)
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -172,7 +172,7 @@ public abstract class AbstractRepository implements Repository
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -190,7 +190,7 @@ public abstract class AbstractRepository implements Repository
 	}
 
 	@Override
-	public Integer add(Stream<? extends Entity> entities)
+	public Integer add(Stream<Entity> entities)
 	{
 		throw new UnsupportedOperationException();
 	}

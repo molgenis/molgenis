@@ -48,13 +48,13 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	private final IdGenerator idGenerator = new UuidGenerator();
 
 	// repositories
-	private final Repository ontologyRepository = new InMemoryRepository(OntologyMetaData.INSTANCE);
-	private final Repository nodePathRepository = new InMemoryRepository(OntologyTermNodePathMetaData.INSTANCE);
-	private final Repository ontologyTermRepository = new InMemoryRepository(OntologyTermMetaData.INSTANCE);
-	private final Repository annotationRepository = new InMemoryRepository(
+	private final Repository<Entity> ontologyRepository = new InMemoryRepository(OntologyMetaData.INSTANCE);
+	private final Repository<Entity> nodePathRepository = new InMemoryRepository(OntologyTermNodePathMetaData.INSTANCE);
+	private final Repository<Entity> ontologyTermRepository = new InMemoryRepository(OntologyTermMetaData.INSTANCE);
+	private final Repository<Entity> annotationRepository = new InMemoryRepository(
 			OntologyTermDynamicAnnotationMetaData.INSTANCE);
-	private final Repository synonymRepository = new InMemoryRepository(OntologyTermSynonymMetaData.INSTANCE);
-	private Map<String, Repository> repositories = ImmutableMap.of(OntologyTermDynamicAnnotationMetaData.ENTITY_NAME,
+	private final Repository<Entity> synonymRepository = new InMemoryRepository(OntologyTermSynonymMetaData.INSTANCE);
+	private Map<String, Repository<Entity>> repositories = ImmutableMap.of(OntologyTermDynamicAnnotationMetaData.ENTITY_NAME,
 			annotationRepository, OntologyTermSynonymMetaData.ENTITY_NAME, synonymRepository,
 			OntologyTermNodePathMetaData.ENTITY_NAME, nodePathRepository, OntologyMetaData.ENTITY_NAME,
 			ontologyRepository, OntologyTermMetaData.ENTITY_NAME, ontologyTermRepository);
@@ -290,19 +290,19 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public Repository addEntityMeta(EntityMetaData entityMeta)
+	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Iterator<Repository> iterator()
+	public Iterator<Repository<Entity>> iterator()
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Repository getRepository(String name)
+	public Repository<Entity> getRepository(String name)
 	{
 		if (!repositories.containsKey(name)) throw new MolgenisDataException("Unknown entity name [" + name + "]");
 		return repositories.get(name);

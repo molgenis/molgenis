@@ -12,6 +12,7 @@ public class ElasticsearchEnumDatatypeIT extends AbstractEnumDatatypeIT
 	@Configuration
 	public static class EnumElasticsearchTestConfig extends AbstractElasticsearchTestConfig
 	{
+
 	}
 
 	@Override

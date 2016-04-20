@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
@@ -31,7 +32,7 @@ public class SourceFilteringGeneratorTest
 	public void generateNoElasticsearchBackend()
 	{
 		when(entityMeta.getBackend()).thenReturn("notElasticsearch");
-		Query q = new QueryImpl().fetch(new Fetch().field("field0"));
+		Query<Entity> q = new QueryImpl<>().fetch(new Fetch().field("field0"));
 		new SourceFilteringGenerator().generate(searchRequestBuilder, q, entityMeta);
 		verifyNoMoreInteractions(searchRequestBuilder);
 	}
@@ -40,7 +41,7 @@ public class SourceFilteringGeneratorTest
 	public void generateElasticsearchBackendNoFetch()
 	{
 		when(entityMeta.getBackend()).thenReturn("notElasticsearch");
-		Query q = new QueryImpl();
+		Query<Entity> q = new QueryImpl<>();
 		new SourceFilteringGenerator().generate(searchRequestBuilder, q, entityMeta);
 		verifyNoMoreInteractions(searchRequestBuilder);
 	}
@@ -51,7 +52,7 @@ public class SourceFilteringGeneratorTest
 		when(entityMeta.getBackend()).thenReturn(ElasticsearchRepositoryCollection.NAME);
 		String attr0Name = "attr0";
 		String attr1Name = "attr1";
-		Query q = new QueryImpl().fetch(new Fetch().field(attr0Name).field(attr1Name));
+		Query<Entity> q = new QueryImpl<>().fetch(new Fetch().field(attr0Name).field(attr1Name));
 		new SourceFilteringGenerator().generate(searchRequestBuilder, q, entityMeta);
 		verify(searchRequestBuilder, times(1)).setFetchSource(new String[]
 		{ attr0Name, attr1Name }, null);
@@ -64,7 +65,7 @@ public class SourceFilteringGeneratorTest
 		String attr1Name = "attr1";
 		String refAttr0Name = "refAttr0";
 		when(entityMeta.getBackend()).thenReturn(ElasticsearchRepositoryCollection.NAME);
-		Query q = new QueryImpl().fetch(new Fetch().field(attr0Name).field(attr1Name, new Fetch().field(refAttr0Name)));
+		Query<Entity> q = new QueryImpl<>().fetch(new Fetch().field(attr0Name).field(attr1Name, new Fetch().field(refAttr0Name)));
 		new SourceFilteringGenerator().generate(searchRequestBuilder, q, entityMeta);
 		verify(searchRequestBuilder, times(1)).setFetchSource(new String[]
 		{ attr0Name, attr1Name + '.' + refAttr0Name }, null);
@@ -78,7 +79,7 @@ public class SourceFilteringGeneratorTest
 		String refAttr0Name = "refAttr0";
 		String refRefAttr0Name = "refRefAttr0";
 		when(entityMeta.getBackend()).thenReturn(ElasticsearchRepositoryCollection.NAME);
-		Query q = new QueryImpl().fetch(new Fetch().field(attr0Name).field(attr1Name,
+		Query<Entity> q = new QueryImpl<>().fetch(new Fetch().field(attr0Name).field(attr1Name,
 				new Fetch().field(refAttr0Name, new Fetch().field(refRefAttr0Name))));
 		new SourceFilteringGenerator().generate(searchRequestBuilder, q, entityMeta);
 

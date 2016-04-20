@@ -11,12 +11,12 @@ import org.molgenis.data.meta.MetaDataService;
  * 
  * Main entry point for the DataApi
  */
-public interface DataService extends Iterable<Repository>
+public interface DataService extends Iterable<Repository<Entity>>
 {
 	/**
 	 * Streams the {@link Repository}s
 	 */
-	default Stream<Repository> stream()
+	default Stream<Repository<Entity>> stream()
 	{
 		return StreamSupport.stream(spliterator(), false);
 	}
@@ -83,7 +83,17 @@ public interface DataService extends Iterable<Repository>
 	 * @param entityName
 	 *            entity name (case insensitive)
 	 */
-	Repository getRepository(String entityName);
+	Repository<Entity> getRepository(String entityName);
+
+	/**
+	 * Returns a {@link Repository} for the given entity of the given type.
+	 *
+	 * @param entityName  entity name
+	 * @param entityClass entity class
+	 * @param <E>         entity type
+	 * @return typed entity {@link Repository}
+	 */
+	<E extends Entity> Repository<E> getRepository(String entityName, Class<E> entityClass);
 
 	/**
 	 * Returns the meta data for the given entity
@@ -104,7 +114,7 @@ public interface DataService extends Iterable<Repository>
 	 * @param entityName
 	 *            entity name (case insensitive)
 	 */
-	long count(String entityName, Query q);
+	long count(String entityName, Query<Entity> q);
 
 	/**
 	 * Find all entities of the given type. Returns empty Stream if no matches.
@@ -134,21 +144,20 @@ public interface DataService extends Iterable<Repository>
 	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
 	 * 
 	 * @throws MolgenisDataAccessException
-	 * 
+	 *
 	 * @param entityName
 	 *            entity name (case insensitive)
 	 */
-	Stream<Entity> findAll(String entityName, Query q);
+	Stream<Entity> findAll(String entityName, Query<Entity> q);
 
 	/**
 	 * Type-safe find entities that match a query
 	 * 
 	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
+	 *@param entityName
+	 * @param q
 	 */
-	<E extends Entity> Stream<E> findAll(String entityName, Query q, Class<E> clazz);
+	<E extends Entity> Stream<E> findAll(String entityName, Query<E> q, Class<E> clazz);
 
 	/**
 	 * Finds all entities with the given IDs. Returns empty stream if no matches.
@@ -217,7 +226,7 @@ public interface DataService extends Iterable<Repository>
 	 * @param entityName
 	 *            entity name (case insensitive)
 	 */
-	Entity findOne(String entityName, Object id);
+	Entity findOneById(String entityName, Object id);
 
 	/**
 	 * 
@@ -229,7 +238,7 @@ public interface DataService extends Iterable<Repository>
 	 * @param clazz
 	 * @return
 	 */
-	<E extends Entity> E findOne(String entityName, Object id, Class<E> clazz);
+	<E extends Entity> E findOneById(String entityName, Object id, Class<E> clazz);
 
 	/**
 	 * Find one entity based on id. Returns null if not exists
@@ -254,7 +263,7 @@ public interface DataService extends Iterable<Repository>
 	 * @return entity or null
 	 * @throws MolgenisDataAccessException
 	 */
-	Entity findOne(String entityName, Object id, Fetch fetch);
+	Entity findOneById(String entityName, Object id, Fetch fetch);
 
 	/**
 	 * Type-safe find one entity based on id.
@@ -270,7 +279,7 @@ public interface DataService extends Iterable<Repository>
 	 * @return entity of the given type or null
 	 * @throws MolgenisDataAccessException
 	 */
-	<E extends Entity> E findOne(String entityName, Object id, Fetch fetch, Class<E> clazz);
+	<E extends Entity> E findOneById(String entityName, Object id, Fetch fetch, Class<E> clazz);
 
 	/**
 	 * Find one entity based on id. Returns null if not exists
@@ -282,17 +291,16 @@ public interface DataService extends Iterable<Repository>
 	 * @param entityName
 	 *            entity name (case insensitive)
 	 */
-	Entity findOne(String entityName, Query q);
+	Entity findOne(String entityName, Query<Entity> q);
 
 	/**
 	 * type-save find an entity by it's id
 	 * 
 	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
+	 *@param entityName
+	 * @param q
 	 */
-	<E extends Entity> E findOne(String entityName, Query q, Class<E> clazz);
+	<E extends Entity> E findOne(String entityName, Query<E> q, Class<E> clazz);
 
 	/**
 	 * Adds an entity to it's repository
@@ -309,13 +317,11 @@ public interface DataService extends Iterable<Repository>
 
 	/**
 	 * Adds entities to it's repository
-	 *
-	 * @param entityName
+	 *  @param entityName
 	 *            entity name (case insensitive)
 	 * @param entities
-	 *            entity stream
 	 */
-	void add(String entityName, Stream<? extends Entity> entities);
+	<E extends Entity> void add(String entityName, Stream<E> entities);
 
 	/**
 	 * Updates an entity
@@ -331,13 +337,11 @@ public interface DataService extends Iterable<Repository>
 
 	/**
 	 * Updates entities
-	 * 
-	 * @param entityName
+	 *  @param entityName
 	 *            entity name (case insensitive)
 	 * @param entities
-	 *            entity stream
 	 */
-	void update(String entityName, Stream<? extends Entity> entities);
+	<E extends Entity> void update(String entityName, Stream<E> entities);
 
 	/**
 	 * Deletes an entity
@@ -353,13 +357,11 @@ public interface DataService extends Iterable<Repository>
 
 	/**
 	 * Delete entities from it's repository
-	 *
-	 * @param entityName
+	 *  @param entityName
 	 *            entity name (case insensitive)
 	 * @param entities
-	 *            entity stream
 	 */
-	void delete(String entityName, Stream<? extends Entity> entities);
+	<E extends Entity> void delete(String entityName, Stream<E> entities);
 
 	/**
 	 * Deletes an entity by it's id
@@ -370,7 +372,7 @@ public interface DataService extends Iterable<Repository>
 	 *            entity name (case insensitive)
 	 * @param id
 	 */
-	void delete(String entityName, Object id);
+	void deleteById(String entityName, Object id);
 
 	/**
 	 * Deletes all entities
@@ -380,7 +382,23 @@ public interface DataService extends Iterable<Repository>
 	 */
 	void deleteAll(String entityName);
 
-	Query query(String entityName);
+	/**
+	 * Returns an untyped query
+	 *
+	 * @param entityName entity name
+	 * @return an untyped query
+	 */
+	Query<Entity> query(String entityName);
+
+	/**
+	 * Returns a typed query
+	 *
+	 * @param entityName  entity name
+	 * @param entityClass entity class
+	 * @param <E>         entity type
+	 * @return a typed query
+	 */
+	<E extends Entity> Query<E> query(String entityName, Class<E> entityClass);
 
 	/**
 	 * Creates counts off all possible combinations of xAttr and yAttr attributes of an entity
@@ -411,7 +429,7 @@ public interface DataService extends Iterable<Repository>
 	 */
 	void removeEntityListener(String entityName, EntityListener entityListener);
 
-	Repository copyRepository(Repository repository, String newRepositoryId, String newRepositoryLabel);
+	Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId, String newRepositoryLabel);
 
-	Repository copyRepository(Repository repository, String newRepositoryId, String newRepositoryLabel, Query query);
+	Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId, String newRepositoryLabel, Query<Entity> query);
 }

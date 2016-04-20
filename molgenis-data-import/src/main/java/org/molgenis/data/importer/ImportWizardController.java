@@ -188,7 +188,7 @@ public class ImportWizardController extends AbstractWizardController
 		String entitiesString = webRequest.getParameter("entityIds");
 		List<String> entities = Arrays.asList(entitiesString.split(","));
 
-		MolgenisGroup molgenisGroup = dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class);
+		MolgenisGroup molgenisGroup = dataService.findOneById(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class);
 		if (molgenisGroup == null) throw new RuntimeException("unknown group id [" + groupId + "]");
 		List<Authority> groupPermissions = getGroupPermissions(molgenisGroup);
 		Permissions permissions = createPermissions(groupPermissions, entities);
@@ -213,7 +213,7 @@ public class ImportWizardController extends AbstractWizardController
 						|| value.equalsIgnoreCase(WRITE.toString()) || value.equalsIgnoreCase(WRITEMETA.toString()))
 				{
 					authority.setMolgenisGroup(
-							dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class));
+							dataService.findOneById(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class));
 					authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_"
 							+ entityClassId.toUpperCase());
 					if (authority.getId() == null)
@@ -225,7 +225,7 @@ public class ImportWizardController extends AbstractWizardController
 				}
 				else if (value.equalsIgnoreCase(NONE.toString()))
 				{
-					if (authority.getId() != null) dataService.delete(GroupAuthority.ENTITY_NAME, authority.getId());
+					if (authority.getId() != null) dataService.deleteById(GroupAuthority.ENTITY_NAME, authority.getId());
 				}
 				else
 				{
@@ -244,7 +244,7 @@ public class ImportWizardController extends AbstractWizardController
 	private List<Authority> getGroupPermissions(MolgenisGroup molgenisGroup)
 	{
 		return dataService.findAll(GroupAuthority.ENTITY_NAME,
-				new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, molgenisGroup), GroupAuthority.class)
+				new QueryImpl<GroupAuthority>().eq(GroupAuthority.MOLGENISGROUP, molgenisGroup), GroupAuthority.class)
 				.collect(Collectors.toList());
 	}
 
@@ -308,7 +308,7 @@ public class ImportWizardController extends AbstractWizardController
 	{
 		GroupAuthority authority = new GroupAuthority();
 		Stream<GroupAuthority> stream = dataService.findAll(GroupAuthority.ENTITY_NAME,
-				new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, groupId), GroupAuthority.class);
+				new QueryImpl<GroupAuthority>().eq(GroupAuthority.MOLGENISGROUP, groupId), GroupAuthority.class);
 		for (Iterator<GroupAuthority> it = stream.iterator(); it.hasNext();)
 		{
 			GroupAuthority groupAuthority = it.next();

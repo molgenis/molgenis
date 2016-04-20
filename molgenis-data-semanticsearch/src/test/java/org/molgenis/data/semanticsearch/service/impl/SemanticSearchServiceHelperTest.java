@@ -163,7 +163,7 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		Entity entityMetaDataEntity = mock(DefaultEntity.class);
 
 		when(dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME,
-				new QueryImpl().eq(EntityMetaDataMetaData.FULL_NAME, sourceEntityMetaData.getName())))
+				new QueryImpl<Entity>().eq(EntityMetaDataMetaData.FULL_NAME, sourceEntityMetaData.getName())))
 						.thenReturn(entityMetaDataEntity);
 
 		Entity attributeEntity1 = new MapEntity();

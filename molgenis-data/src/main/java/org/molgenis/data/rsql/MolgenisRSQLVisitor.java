@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisQueryException;
 import org.molgenis.data.Query;
@@ -25,9 +26,9 @@ import cz.jirutka.rsql.parser.ast.OrNode;
  * 
  * @see https://github.com/jirutka/rsql-parser
  */
-public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query>
+public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>>
 {
-	private final QueryImpl q = new QueryImpl();
+	private final QueryImpl<Entity> q = new QueryImpl<Entity>();
 	private final EntityMetaData entityMetaData;
 
 	public MolgenisRSQLVisitor(EntityMetaData entityMetaData)
@@ -36,7 +37,7 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query>
 	}
 
 	@Override
-	public Query visit(AndNode node)
+	public Query<Entity> visit(AndNode node)
 	{
 		q.nest(); // TODO only nest if more than one child
 
@@ -57,7 +58,7 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query>
 	}
 
 	@Override
-	public Query visit(OrNode node)
+	public Query<Entity> visit(OrNode node)
 	{
 		q.nest(); // TODO only nest if more than one child
 
@@ -78,7 +79,7 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query>
 	}
 
 	@Override
-	public Query visit(ComparisonNode node)
+	public Query<Entity> visit(ComparisonNode node)
 	{
 		String attrName = node.getSelector();
 		String symbol = node.getOperator().getSymbol();

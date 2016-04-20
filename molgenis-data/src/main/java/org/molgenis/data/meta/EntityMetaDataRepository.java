@@ -50,7 +50,7 @@ import com.google.common.collect.Lists;
 class EntityMetaDataRepository
 {
 	public static final EntityMetaDataMetaData META_DATA = EntityMetaDataMetaData.INSTANCE;
-	private final Repository repository;
+	private final Repository<Entity> repository;
 	private final PackageRepository packageRepository;
 	private final ManageableRepositoryCollection collection;
 	private final Map<String, DefaultEntityMetaData> entityMetaDataCache = new HashMap<>();
@@ -67,7 +67,7 @@ class EntityMetaDataRepository
 		this.languageService = languageService;
 	}
 
-	Repository getRepository()
+	Repository<Entity> getRepository()
 	{
 		return repository;
 	}
@@ -317,7 +317,7 @@ class EntityMetaDataRepository
 
 	public void delete(String entityName)
 	{
-		Entity entity = getRepository().findOne(entityName);
+		Entity entity = getRepository().findOneById(entityName);
 		if (entity != null)
 		{
 			repository.deleteById(entityName);

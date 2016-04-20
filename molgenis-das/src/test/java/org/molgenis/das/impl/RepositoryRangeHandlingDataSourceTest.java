@@ -101,7 +101,7 @@ public class RepositoryRangeHandlingDataSourceTest
 				DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE, notes, linkout,
 				dasTarget, new ArrayList<String>(), null);
 
-		Query q = new QueryImpl().eq("CHROM", "1");
+		Query<Entity> q = new QueryImpl<Entity>().eq("CHROM", "1");
 		q.pageSize(100);
 		SearchResult result = mock(SearchResult.class);
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("DAS");
@@ -130,10 +130,10 @@ public class RepositoryRangeHandlingDataSourceTest
 		resultList.add(new Hit("", "", map));
 		featureList = new ArrayList<>();
 		featureList.add(dasFeature);
-		when(dataService.findAll("dataset", q)).thenAnswer(new Answer<Stream<Entity>>()
+		when(dataService.findAll("dataset", q)).thenAnswer(new Answer<Stream<MapEntity>>()
 		{
 			@Override
-			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
+			public Stream<MapEntity> answer(InvocationOnMock invocation) throws Throwable
 			{
 				return Stream.of(entity);
 			}

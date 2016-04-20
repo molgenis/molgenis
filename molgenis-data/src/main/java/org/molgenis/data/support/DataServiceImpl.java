@@ -39,7 +39,7 @@ public class DataServiceImpl implements DataService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(DataServiceImpl.class);
 
-	private final ConcurrentMap<String, Repository> repositories;
+	private final ConcurrentMap<String, Repository<Entity>> repositories;
 	private final Set<String> repositoryNames;
 	private MetaDataService metaDataService;
 	private final RepositoryDecoratorFactory repositoryDecoratorFactory;
@@ -71,7 +71,7 @@ public class DataServiceImpl implements DataService
 		this.metaDataService = metaDataService;
 	}
 
-	public synchronized void addRepository(Repository newRepository)
+	public synchronized void addRepository(Repository<Entity> newRepository)
 	{
 		String repositoryName = newRepository.getName();
 		if (repositories.containsKey(repositoryName.toLowerCase()))
@@ -81,7 +81,7 @@ public class DataServiceImpl implements DataService
 		if (LOG.isDebugEnabled()) LOG.debug("Adding repository [" + repositoryName + "]");
 		repositoryNames.add(repositoryName);
 
-		Repository decoratedRepo = repositoryDecoratorFactory.createDecoratedRepository(newRepository);
+		Repository<Entity> decoratedRepo = repositoryDecoratorFactory.createDecoratedRepository(newRepository);
 		repositories.put(repositoryName.toLowerCase(), decoratedRepo);
 	}
 
@@ -107,7 +107,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public EntityMetaData getEntityMetaData(String entityName)
 	{
-		Repository repository = getRepository(entityName);
+		Repository<Entity> repository = getRepository(entityName);
 		return repository.getEntityMetaData();
 	}
 
@@ -125,7 +125,7 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public long count(String entityName, Query q)
+	public long count(String entityName, Query<Entity> q)
 	{
 		return getRepository(entityName).count(q);
 	}
@@ -133,23 +133,23 @@ public class DataServiceImpl implements DataService
 	@Override
 	public Stream<Entity> findAll(String entityName)
 	{
-		return findAll(entityName, new QueryImpl());
+		return findAll(entityName, query(entityName));
 	}
 
 	@Override
-	public Stream<Entity> findAll(String entityName, Query q)
+	public Stream<Entity> findAll(String entityName, Query<Entity> q)
 	{
 		return getRepository(entityName).findAll(q);
 	}
 
 	@Override
-	public Entity findOne(String entityName, Object id)
+	public Entity findOneById(String entityName, Object id)
 	{
-		return getRepository(entityName).findOne(id);
+		return getRepository(entityName).findOneById(id);
 	}
 
 	@Override
-	public Entity findOne(String entityName, Query q)
+	public Entity findOne(String entityName, Query<Entity> q)
 	{
 		return getRepository(entityName).findOne(q);
 	}
@@ -163,9 +163,10 @@ public class DataServiceImpl implements DataService
 
 	@Override
 	@Transactional
-	public void add(String entityName, Stream<? extends Entity> entities)
+	@SuppressWarnings("unchecked")
+	public <E extends Entity> void add(String entityName, Stream<E> entities)
 	{
-		getRepository(entityName).add(entities);
+		getRepository(entityName).add((Stream<Entity>) entities);
 	}
 
 	@Override
@@ -177,9 +178,10 @@ public class DataServiceImpl implements DataService
 
 	@Override
 	@Transactional
-	public void update(String entityName, Stream<? extends Entity> entities)
+	@SuppressWarnings("unchecked")
+	public <E extends Entity> void update(String entityName, Stream<E> entities)
 	{
-		getRepository(entityName).update(entities);
+		getRepository(entityName).update((Stream<Entity>) entities);
 	}
 
 	@Override
@@ -191,14 +193,15 @@ public class DataServiceImpl implements DataService
 
 	@Override
 	@Transactional
-	public void delete(String entityName, Stream<? extends Entity> entities)
+	@SuppressWarnings("unchecked")
+	public <E extends Entity> void delete(String entityName, Stream<E> entities)
 	{
-		getRepository(entityName).delete(entities);
+		getRepository(entityName).delete((Stream<Entity>) entities);
 	}
 
 	@Override
 	@Transactional
-	public void delete(String entityName, Object id)
+	public void deleteById(String entityName, Object id)
 	{
 		getRepository(entityName).deleteById(id);
 	}
@@ -212,41 +215,49 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public Repository getRepository(String entityName)
+	public Repository<Entity> getRepository(String entityName)
 	{
-		Repository repository = repositories.get(entityName.toLowerCase());
+		Repository<Entity> repository = repositories.get(entityName.toLowerCase());
 		if (repository == null) throw new UnknownEntityException("Unknown entity [" + entityName + "]");
 
 		return repository;
 	}
 
-	@Override
-	public Query query(String entityName)
+	@SuppressWarnings("unchecked")
+	public <E extends Entity> Repository<E> getRepository(String entityName, Class<E> entityClass)
 	{
-		return new QueryImpl(getRepository(entityName));
+		Repository<Entity> untypedRepo = getRepository(entityName);
+		return new TypedRepositoryDecorator<>(untypedRepo, entityClass);
 	}
 
 	@Override
-	public <E extends Entity> Stream<E> findAll(String entityName, Query q, Class<E> clazz)
+	public Query<Entity> query(String entityName)
 	{
-		Stream<Entity> entities = getRepository(entityName).findAll(q);
-		return entities.map(entity -> {
-			return EntityUtils.convert(entity, clazz, this);
-		});
+		return new QueryImpl<>(getRepository(entityName));
 	}
 
 	@Override
-	public <E extends Entity> E findOne(String entityName, Object id, Class<E> clazz)
+	public <E extends Entity> Query<E> query(String entityName, Class<E> entityClass)
 	{
-		Entity entity = getRepository(entityName).findOne(id);
-		if (entity == null) return null;
-		return EntityUtils.convert(entity, clazz, this);
+		return new QueryImpl<>(getRepository(entityName, entityClass));
 	}
 
 	@Override
-	public <E extends Entity> E findOne(String entityName, Query q, Class<E> clazz)
+	public <E extends Entity> Stream<E> findAll(String entityName, Query<E> q, Class<E> clazz)
 	{
-		Entity entity = getRepository(entityName).findOne(q);
+		return getRepository(entityName, clazz).findAll(q);
+	}
+
+	@Override
+	public <E extends Entity> E findOneById(String entityName, Object id, Class<E> clazz)
+	{
+		return getRepository(entityName, clazz).findOneById(id);
+	}
+
+	@Override
+	public <E extends Entity> E findOne(String entityName, Query<E> q, Class<E> clazz)
+	{
+		Entity entity = getRepository(entityName, clazz).findOne(q);
 		if (entity == null) return null;
 		return EntityUtils.convert(entity, clazz, this);
 	}
@@ -254,7 +265,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public <E extends Entity> Stream<E> findAll(String entityName, Class<E> clazz)
 	{
-		return findAll(entityName, new QueryImpl(), clazz);
+		return findAll(entityName, query(entityName, clazz), clazz);
 	}
 
 	@Override
@@ -270,7 +281,7 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public synchronized Iterator<Repository> iterator()
+	public synchronized Iterator<Repository<Entity>> iterator()
 	{
 		return Lists.newArrayList(repositories.values()).iterator();
 	}
@@ -297,15 +308,15 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public Entity findOne(String entityName, Object id, Fetch fetch)
+	public Entity findOneById(String entityName, Object id, Fetch fetch)
 	{
-		return getRepository(entityName).findOne(id, fetch);
+		return getRepository(entityName).findOneById(id, fetch);
 	}
 
 	@Override
-	public <E extends Entity> E findOne(String entityName, Object id, Fetch fetch, Class<E> clazz)
+	public <E extends Entity> E findOneById(String entityName, Object id, Fetch fetch, Class<E> clazz)
 	{
-		Entity entity = getRepository(entityName).findOne(id, fetch);
+		Entity entity = getRepository(entityName).findOneById(id, fetch);
 		if (entity == null) return null;
 		return EntityUtils.convert(entity, clazz, this);
 	}
@@ -353,20 +364,20 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public Repository copyRepository(Repository repository, String newRepositoryId, String newRepositoryLabel)
+	public Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId, String newRepositoryLabel)
 	{
-		return copyRepository(repository, newRepositoryId, newRepositoryLabel, new QueryImpl());
+		return copyRepository(repository, newRepositoryId, newRepositoryLabel, new QueryImpl<Entity>());
 	}
 
 	@Override
-	public Repository copyRepository(Repository repository, String newRepositoryId, String newRepositoryLabel,
-			Query query)
+	public Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId, String newRepositoryLabel,
+			Query<Entity> query)
 	{
 		LOG.info("Creating a copy of " + repository.getName() + " repository, with ID: " + newRepositoryId
 				+ ", and label: " + newRepositoryLabel);
 		DefaultEntityMetaData emd = new DefaultEntityMetaData(newRepositoryId, repository.getEntityMetaData());
 		emd.setLabel(newRepositoryLabel);
-		Repository repositoryCopy = metaDataService.addEntityMeta(emd);
+		Repository<Entity> repositoryCopy = metaDataService.addEntityMeta(emd);
 		try
 		{
 

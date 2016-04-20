@@ -125,10 +125,10 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	private void bootstrapMetaRepos()
 	{
-		Repository languageRepo = defaultBackend.addEntityMeta(LanguageMetaData.INSTANCE);
+		Repository<Entity> languageRepo = defaultBackend.addEntityMeta(LanguageMetaData.INSTANCE);
 		dataService.addRepository(new LanguageRepositoryDecorator(languageRepo, dataService));
 
-		Repository i18StringsRepo = defaultBackend.addEntityMeta(I18nStringMetaData.INSTANCE);
+		Repository<Entity> i18StringsRepo = defaultBackend.addEntityMeta(I18nStringMetaData.INSTANCE);
 		dataService.addRepository(new I18nStringDecorator(i18StringsRepo));
 
 		Supplier<Stream<String>> languageCodes = () -> languageService.getLanguageCodes().stream();
@@ -154,10 +154,10 @@ public class MetaDataServiceImpl implements MetaDataService
 		// Add language attributes to I18nStringMetaData
 		languageCodes.get().forEach(I18nStringMetaData.INSTANCE::addLanguage);
 
-		Repository tagRepo = defaultBackend.addEntityMeta(TagMetaData.INSTANCE);
+		Repository<Entity> tagRepo = defaultBackend.addEntityMeta(TagMetaData.INSTANCE);
 		dataService.addRepository(tagRepo);
 
-		Repository packages = defaultBackend.addEntityMeta(PackageRepository.META_DATA);
+		Repository<Entity> packages = defaultBackend.addEntityMeta(PackageRepository.META_DATA);
 		dataService.addRepository(new MetaDataRepositoryDecorator(packages));
 		packageRepository = new PackageRepository(packages);
 
@@ -273,7 +273,7 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	@Transactional
 	@Override
-	public synchronized Repository add(EntityMetaData emd, RepositoryDecoratorFactory decoratorFactory)
+	public synchronized Repository<Entity> add(EntityMetaData emd, RepositoryDecoratorFactory decoratorFactory)
 	{
 		MetaValidationUtils.validateEntityMetaData(emd);
 		RepositoryCollection backend = getBackend(emd);
@@ -284,10 +284,10 @@ public class MetaDataServiceImpl implements MetaDataService
 
 			if (!dataService.hasRepository(emd.getName()))
 			{
-				Repository repo = backend.getRepository(emd.getName());
+				Repository<Entity> repo = backend.getRepository(emd.getName());
 				if (repo == null) throw new UnknownEntityException(
 						String.format("Unknown entity '%s' for backend '%s'", emd.getName(), backend.getName()));
-				Repository decoratedRepo = decoratorFactory.createDecoratedRepository(repo);
+				Repository<Entity> decoratedRepo = decoratorFactory.createDecoratedRepository(repo);
 				dataService.addRepository(decoratedRepo);
 			}
 
@@ -308,8 +308,8 @@ public class MetaDataServiceImpl implements MetaDataService
 		addToEntityMetaDataRepository(emd);
 		if (emd.isAbstract()) return null;
 
-		Repository repo = backend.addEntityMeta(getEntityMetaData(emd.getName()));
-		Repository decoratedRepo = decoratorFactory.createDecoratedRepository(repo);
+		Repository<Entity> repo = backend.addEntityMeta(getEntityMetaData(emd.getName()));
+		Repository<Entity> decoratedRepo = decoratorFactory.createDecoratedRepository(repo);
 
 		dataService.addRepository(decoratedRepo);
 
@@ -319,7 +319,7 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	@Transactional
 	@Override
-	public Repository addEntityMeta(EntityMetaData emd)
+	public Repository<Entity> addEntityMeta(EntityMetaData emd)
 	{
 		return add(emd, new NonDecoratingRepositoryDecoratorFactory());
 	}
@@ -459,7 +459,7 @@ public class MetaDataServiceImpl implements MetaDataService
 			{
 				RepositoryCollection col = backends.get(emd.getBackend());
 				if (col == null) throw new MolgenisDataException("Unknown backend [" + emd.getBackend() + "]");
-				Repository repo = col.addEntityMeta(emd);
+				Repository<Entity> repo = col.addEntityMeta(emd);
 				dataService.addRepository(repo);
 			}
 		}

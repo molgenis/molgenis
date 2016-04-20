@@ -83,7 +83,7 @@ public class RepositoryTemplateLoaderTest extends AbstractTestNGSpringContextTes
 	public void loadAndRead() throws IOException
 	{
 		when(
-				dataService.findOne(FreemarkerTemplateMetaData.ENTITY_NAME, new QueryImpl().eq("Name", "template1"),
+				dataService.findOne(FreemarkerTemplateMetaData.ENTITY_NAME, new QueryImpl<FreemarkerTemplate>().eq("Name", "template1"),
 						FreemarkerTemplate.class)).thenReturn(template1);
 		Object source = repositoryTemplateLoader.findTemplateSource("template1");
 		assertNotNull(source);
@@ -95,7 +95,7 @@ public class RepositoryTemplateLoaderTest extends AbstractTestNGSpringContextTes
 	public void lastModifiedEqualsMinusOne() throws IOException
 	{
 		when(
-				dataService.findOne(FreemarkerTemplateMetaData.ENTITY_NAME, new QueryImpl().eq("Name", "template1"),
+				dataService.findOne(FreemarkerTemplateMetaData.ENTITY_NAME, new QueryImpl<FreemarkerTemplate>().eq("Name", "template1"),
 						FreemarkerTemplate.class)).thenReturn(template1);
 		Object source = repositoryTemplateLoader.findTemplateSource("template1");
 		assertTrue(repositoryTemplateLoader.getLastModified(source) == -1);
@@ -105,7 +105,7 @@ public class RepositoryTemplateLoaderTest extends AbstractTestNGSpringContextTes
 	public void newSourceReturnedWhenContentChanges() throws IOException
 	{
 		when(
-				dataService.findOne(FreemarkerTemplateMetaData.ENTITY_NAME, new QueryImpl().eq("Name", "template1"),
+				dataService.findOne(FreemarkerTemplateMetaData.ENTITY_NAME, new QueryImpl<FreemarkerTemplate>().eq("Name", "template1"),
 						FreemarkerTemplate.class)).thenReturn(template1, template1Modified);
 		Object source = repositoryTemplateLoader.findTemplateSource("template1");
 		assertTrue(IOUtils.contentEquals(repositoryTemplateLoader.getReader(source, null),
@@ -120,10 +120,10 @@ public class RepositoryTemplateLoaderTest extends AbstractTestNGSpringContextTes
 	public void sourceBelongsToContentAndCanBeReadMultipleTimes() throws IOException
 	{
 		when(
-				dataService.findOne(FreemarkerTemplateMetaData.ENTITY_NAME, new QueryImpl().eq("Name", "template1"),
+				dataService.findOne(FreemarkerTemplateMetaData.ENTITY_NAME, new QueryImpl<FreemarkerTemplate>().eq("Name", "template1"),
 						FreemarkerTemplate.class)).thenReturn(template1);
 		when(
-				dataService.findOne(FreemarkerTemplateMetaData.ENTITY_NAME, new QueryImpl().eq("Name", "template2"),
+				dataService.findOne(FreemarkerTemplateMetaData.ENTITY_NAME, new QueryImpl<FreemarkerTemplate>().eq("Name", "template2"),
 						FreemarkerTemplate.class)).thenReturn(template2);
 
 		Object source1 = repositoryTemplateLoader.findTemplateSource("template1");

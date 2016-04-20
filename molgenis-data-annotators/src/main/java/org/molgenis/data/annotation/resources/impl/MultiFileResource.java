@@ -51,7 +51,7 @@ public class MultiFileResource implements Resource {
         }
     }
 
-    private static Object getFirstEqualsValueFor(String attributeName, Query q) {
+    private static Object getFirstEqualsValueFor(String attributeName, Query<Entity> q) {
         return q.getRules()
                 .stream()
                 .filter(rule -> attributeName.equals(rule.getField())
@@ -79,7 +79,7 @@ public class MultiFileResource implements Resource {
     }
 
     @Override
-    public Iterable<Entity> findAll(Query q) {
+    public Iterable<Entity> findAll(Query<Entity> q) {
         // initialize after autowiring is complete and resources is empty
         isAvailable();
         Object chromValue = getFirstEqualsValueFor(VcfRepository.CHROM, q);

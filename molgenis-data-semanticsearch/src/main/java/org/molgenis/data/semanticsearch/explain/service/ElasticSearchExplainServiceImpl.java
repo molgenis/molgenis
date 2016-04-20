@@ -13,6 +13,7 @@ import org.elasticsearch.action.explain.ExplainRequestBuilder;
 import org.elasticsearch.action.explain.ExplainResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilder;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.request.QueryGenerator;
@@ -37,7 +38,7 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 		this.client = client;
 	}
 
-	public Explanation explain(Query q, EntityMetaData entityMetaData, String documentId)
+	public Explanation explain(Query<Entity> q, EntityMetaData entityMetaData, String documentId)
 	{
 		String type = sanitizeMapperType(entityMetaData.getName());
 		ExplainRequestBuilder explainRequestBuilder = new ExplainRequestBuilder(client, DEFAULT_INDEX_NAME, type,

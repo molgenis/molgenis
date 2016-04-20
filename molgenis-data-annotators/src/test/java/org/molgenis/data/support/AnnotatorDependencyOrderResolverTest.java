@@ -1,21 +1,22 @@
 package org.molgenis.data.support;
 
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Repository;
-import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.entity.AnnotatorInfo;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Queue;
 
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
+import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class AnnotatorDependencyOrderResolverTest
 {
@@ -27,7 +28,7 @@ public class AnnotatorDependencyOrderResolverTest
 	private AnnotatorDependencyOrderResolver resolver = new AnnotatorDependencyOrderResolver();
 
 	@Mock
-	Repository repo;
+	Repository<Entity> repo;
 
 	@BeforeMethod
 	public void beforeMethod()

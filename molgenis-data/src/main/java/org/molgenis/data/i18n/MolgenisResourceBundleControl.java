@@ -69,7 +69,7 @@ public class MolgenisResourceBundleControl extends ResourceBundle.Control
 			appLanguageCode = appSettings.getLanguageCode();
 
 			boolean exists = (appLanguageCode != null) && runAsSystem(() -> {
-				return (dataService.findOne(LanguageMetaData.ENTITY_NAME, appLanguageCode) != null);
+				return (dataService.findOneById(LanguageMetaData.ENTITY_NAME, appLanguageCode) != null);
 			});
 
 			if (!exists) appLanguageCode = null;

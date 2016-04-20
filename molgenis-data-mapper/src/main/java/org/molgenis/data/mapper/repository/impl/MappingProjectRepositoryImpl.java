@@ -64,7 +64,7 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 	@Override
 	public MappingProject getMappingProject(String identifier)
 	{
-		Entity mappingProjectEntity = dataService.findOne(MappingProjectRepositoryImpl.META_DATA.getName(), identifier);
+		Entity mappingProjectEntity = dataService.findOneById(MappingProjectRepositoryImpl.META_DATA.getName(), identifier);
 		if (mappingProjectEntity == null)
 		{
 			return null;
@@ -83,7 +83,7 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 	}
 
 	@Override
-	public List<MappingProject> getMappingProjects(Query q)
+	public List<MappingProject> getMappingProjects(Query<Entity> q)
 	{
 		List<MappingProject> results = new ArrayList<>();
 		dataService.findAll(MappingProjectRepositoryImpl.META_DATA.getName(), q).forEach(entity -> {
@@ -137,6 +137,6 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 	@Override
 	public void delete(String mappingProjectId)
 	{
-		dataService.delete(MappingProjectRepositoryImpl.META_DATA.getName(), mappingProjectId);
+		dataService.deleteById(MappingProjectRepositoryImpl.META_DATA.getName(), mappingProjectId);
 	}
 }

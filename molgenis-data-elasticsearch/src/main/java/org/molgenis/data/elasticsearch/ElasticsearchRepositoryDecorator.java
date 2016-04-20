@@ -33,9 +33,9 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 {
 	private static final int BATCH_SIZE = 1000;
 
-	private final Repository decoratedRepo;
+	private final Repository<Entity> decoratedRepo;
 
-	public ElasticsearchRepositoryDecorator(Repository decoratedRepo, SearchService elasticSearchService)
+	public ElasticsearchRepositoryDecorator(Repository<Entity> decoratedRepo, SearchService elasticSearchService)
 	{
 		super(elasticSearchService);
 		this.decoratedRepo = requireNonNull(decoratedRepo);
@@ -57,7 +57,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 
 	@Override
 	@Transactional
-	public Integer add(Stream<? extends Entity> entities)
+	public Integer add(Stream<Entity> entities)
 	{
 		// TODO look into performance improvements
 		AtomicInteger count = new AtomicInteger();
@@ -93,7 +93,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 
 	@Override
 	@Transactional
-	public void update(Stream<? extends Entity> entities)
+	public void update(Stream<Entity> entities)
 	{
 		// TODO look into performance improvements
 		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
@@ -112,7 +112,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 
 	@Override
 	@Transactional
-	public void delete(Stream<? extends Entity> entities)
+	public void delete(Stream<Entity> entities)
 	{
 		// TODO look into performance improvements
 		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
@@ -131,7 +131,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 
 	@Override
 	@Transactional
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
 		// TODO look into performance improvements
 		Iterators.partition(ids.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
@@ -150,20 +150,20 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 
 	// retrieve entity by id via decorated repository
 	@Override
-	public Entity findOne(Object id)
+	public Entity findOneById(Object id)
 	{
-		return decoratedRepo.findOne(id);
+		return decoratedRepo.findOneById(id);
 	}
 
 	// retrieve entity by id via decorated repository
 	@Override
-	public Entity findOne(Object id, Fetch fetch)
+	public Entity findOneById(Object id, Fetch fetch)
 	{
-		return decoratedRepo.findOne(id, fetch);
+		return decoratedRepo.findOneById(id, fetch);
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		// optimization:
 		// retrieve entity by id via decorated repository in case query is of the form: <id attribute> EQUALS <id>
@@ -176,7 +176,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 				String idAttrName = getEntityMetaData().getIdAttribute().getName();
 				if (queryRule.getField().equals(idAttrName))
 				{
-					return decoratedRepo.findOne(queryRule.getValue(), q.getFetch());
+					return decoratedRepo.findOneById(queryRule.getValue(), q.getFetch());
 				}
 			}
 		}
@@ -199,7 +199,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		// optimization:
 		// retrieve entities via decorated repository in case query contains no query rules

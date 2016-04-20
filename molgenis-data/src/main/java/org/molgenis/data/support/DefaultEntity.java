@@ -242,7 +242,7 @@ public class DefaultEntity implements Entity
 		}
 
 		value = dataType.convert(value);
-		Entity refEntity = dataService.findOne(attribute.getRefEntity().getName(), value);
+		Entity refEntity = dataService.findOneById(attribute.getRefEntity().getName(), value);
 		if (refEntity == null) throw new UnknownEntityException(attribute.getRefEntity().getName() + " with "
 				+ attribute.getRefEntity().getIdAttribute().getName() + " [" + value + "] does not exist");
 
@@ -293,7 +293,7 @@ public class DefaultEntity implements Entity
 					.collect(Collectors.toList());
 		}
 		return from(ids).transform(dataType::convert)
-				.transform(convertedId -> (dataService.findOne(attribute.getRefEntity().getName(), convertedId)));
+				.transform(convertedId -> (dataService.findOneById(attribute.getRefEntity().getName(), convertedId)));
 	}
 
 	@Override

@@ -20,7 +20,7 @@ import org.testng.annotations.Test;
 
 public class EntityReferenceResolverDecoratorTest
 {
-	private Repository decoratedRepo;
+	private Repository<Entity> decoratedRepo;
 	private EntityMetaData entityMeta;
 	private EntityManager entityManager;
 	private EntityReferenceResolverDecorator entityReferenceResolverDecorator;
@@ -95,7 +95,7 @@ public class EntityReferenceResolverDecoratorTest
 	@Test
 	public void countQuery()
 	{
-		Query q = mock(Query.class);
+		Query<Entity> q = mock(Query.class);
 		entityReferenceResolverDecorator.count(q);
 		verify(decoratedRepo, times(1)).count(q);
 		verifyZeroInteractions(entityManager);
@@ -167,7 +167,7 @@ public class EntityReferenceResolverDecoratorTest
 	public void findAllAsStreamFetch()
 	{
 		Entity entity0 = mock(Entity.class);
-		Query query = mock(Query.class);
+		Query<Entity> query = mock(Query.class);
 		Fetch fetch = mock(Fetch.class);
 		when(query.getFetch()).thenReturn(fetch);
 		Stream<Entity> entities = Stream.of(entity0);
@@ -181,7 +181,7 @@ public class EntityReferenceResolverDecoratorTest
 	public void findAllAsStreamNoFetch()
 	{
 		Entity entity0 = mock(Entity.class);
-		Query query = mock(Query.class);
+		Query<Entity> query = mock(Query.class);
 		Stream<Entity> entities = Stream.of(entity0);
 		when(decoratedRepo.findAll(query)).thenReturn(entities);
 		when(entityManager.resolveReferences(entityMeta, entities, null)).thenReturn(entities);
@@ -246,7 +246,7 @@ public class EntityReferenceResolverDecoratorTest
 	public void findOneQueryFetchEntity()
 	{
 		Fetch fetch = new Fetch();
-		Query q = mock(Query.class);
+		Query<Entity> q = mock(Query.class);
 		when(q.getFetch()).thenReturn(fetch);
 		Entity entity = mock(Entity.class);
 		when(decoratedRepo.findOne(q)).thenReturn(entity);
@@ -259,7 +259,7 @@ public class EntityReferenceResolverDecoratorTest
 	public void findOneQueryFetchEntityNull()
 	{
 		Fetch fetch = new Fetch();
-		Query q = mock(Query.class);
+		Query<Entity> q = mock(Query.class);
 		when(q.getFetch()).thenReturn(fetch);
 		entityReferenceResolverDecorator.findOne(q);
 		verify(decoratedRepo, times(1)).findOne(q);
@@ -269,7 +269,7 @@ public class EntityReferenceResolverDecoratorTest
 	@Test
 	public void findOneQueryNoFetch()
 	{
-		Query q = mock(Query.class);
+		Query<Entity> q = mock(Query.class);
 		entityReferenceResolverDecorator.findOne(q);
 		verify(decoratedRepo, times(1)).findOne(q);
 		verifyZeroInteractions(entityManager);
@@ -279,8 +279,8 @@ public class EntityReferenceResolverDecoratorTest
 	public void findOneObject()
 	{
 		Object id = mock(Object.class);
-		entityReferenceResolverDecorator.findOne(id);
-		verify(decoratedRepo, times(1)).findOne(id);
+		entityReferenceResolverDecorator.findOneById(id);
+		verify(decoratedRepo, times(1)).findOneById(id);
 		verifyZeroInteractions(entityManager);
 	}
 
@@ -290,9 +290,9 @@ public class EntityReferenceResolverDecoratorTest
 		Object id = Integer.valueOf(1);
 		Fetch fetch = new Fetch();
 		Entity entity = mock(Entity.class);
-		when(decoratedRepo.findOne(id, fetch)).thenReturn(entity);
-		entityReferenceResolverDecorator.findOne(id, fetch);
-		verify(decoratedRepo, times(1)).findOne(id, fetch);
+		when(decoratedRepo.findOneById(id, fetch)).thenReturn(entity);
+		entityReferenceResolverDecorator.findOneById(id, fetch);
+		verify(decoratedRepo, times(1)).findOneById(id, fetch);
 		verify(entityManager).resolveReferences(entityMeta, entity, fetch);
 	}
 
@@ -300,8 +300,8 @@ public class EntityReferenceResolverDecoratorTest
 	public void findOneObjectFetchNull()
 	{
 		Object id = Integer.valueOf(1);
-		entityReferenceResolverDecorator.findOne(id, null);
-		verify(decoratedRepo, times(1)).findOne(id, null);
+		entityReferenceResolverDecorator.findOneById(id, null);
+		verify(decoratedRepo, times(1)).findOneById(id, null);
 		verifyZeroInteractions(entityManager);
 	}
 
@@ -340,7 +340,7 @@ public class EntityReferenceResolverDecoratorTest
 	@Test
 	public void iterator()
 	{
-		QueryImpl q = new QueryImpl();
+		QueryImpl<Entity> q = new QueryImpl<Entity>();
 		Stream<Entity> entities = Stream.of(mock(Entity.class));
 		when(decoratedRepo.findAll(q)).thenReturn(entities);
 		when(entityManager.resolveReferences(entityMeta, entities, null)).thenReturn(entities);

@@ -272,7 +272,7 @@ public class RestController
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		Entity entity = dataService.findOne(entityName, id);
+		Entity entity = dataService.findOneById(entityName, id);
 
 		if (entity == null)
 		{
@@ -299,7 +299,7 @@ public class RestController
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
 
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		Entity entity = dataService.findOne(entityName, id);
+		Entity entity = dataService.findOneById(entityName, id);
 
 		if (entity == null)
 		{
@@ -449,7 +449,7 @@ public class RestController
 		try
 		{
 			meta = dataService.getEntityMetaData(entityName);
-			Query q = new QueryStringParser(meta, molgenisRSQL).parseQueryString(req.getParameterMap());
+			Query<Entity> q = new QueryStringParser(meta, molgenisRSQL).parseQueryString(req.getParameterMap());
 
 			String[] sortAttributeArray = req.getParameterMap().get("sortColumn");
 			if (sortAttributeArray != null && sortAttributeArray.length == 1
@@ -661,7 +661,7 @@ public class RestController
 			@PathVariable("attributeName") String attributeName, @PathVariable("id") Object id,
 			@RequestBody Object paramValue)
 	{
-		Entity entity = dataService.findOne(entityName, id);
+		Entity entity = dataService.findOneById(entityName, id);
 		if (entity == null)
 		{
 			throw new UnknownEntityException("Entity of type " + entityName + " with id " + id + " not found");
@@ -771,7 +771,7 @@ public class RestController
 	{
 		Object typedId = dataService.getRepository(entityName).getEntityMetaData().getIdAttribute().getDataType()
 				.convert(id);
-		dataService.delete(entityName, typedId);
+		dataService.deleteById(entityName, typedId);
 	}
 
 	/**
@@ -793,7 +793,6 @@ public class RestController
 	 * Deletes all entities for the given entity name
 	 * 
 	 * @param entityName
-	 * @param id
 	 */
 	@RequestMapping(value = "/{entityName}", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
@@ -806,7 +805,6 @@ public class RestController
 	 * Deletes all entities for the given entity name but tunnels DELETE through POST
 	 * 
 	 * @param entityName
-	 * @param id
 	 */
 	@RequestMapping(value = "/{entityName}", method = POST, params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
@@ -819,7 +817,6 @@ public class RestController
 	 * Deletes all entities and entity meta data for the given entity name
 	 * 
 	 * @param entityName
-	 * @param id
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
@@ -832,7 +829,6 @@ public class RestController
 	 * Deletes all entities and entity meta data for the given entity name but tunnels DELETE through POST
 	 * 
 	 * @param entityName
-	 * @param id
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = POST, params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
@@ -884,7 +880,7 @@ public class RestController
 		}
 
 		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisUser.USERNAME, authentication.getName()), MolgenisUser.class);
+				new QueryImpl<MolgenisUser>().eq(MolgenisUser.USERNAME, authentication.getName()), MolgenisUser.class);
 
 		// User authenticated, log the user in
 		SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -1051,7 +1047,7 @@ public class RestController
 			throw new IllegalArgumentException(entityName + " does not have an id attribute");
 		}
 
-		Entity existing = dataService.findOne(entityName, id);
+		Entity existing = dataService.findOneById(entityName, id);
 		if (existing == null)
 		{
 			throw new UnknownEntityException("Entity of type " + entityName + " with id " + id + " not found");
@@ -1108,7 +1104,7 @@ public class RestController
 		}
 
 		// Get the entity
-		Entity entity = dataService.findOne(entityName, id);
+		Entity entity = dataService.findOneById(entityName, id);
 		if (entity == null)
 		{
 			throw new UnknownEntityException(entityName + " " + id + " not found");
@@ -1168,7 +1164,7 @@ public class RestController
 			EntityCollectionRequest request, Set<String> attributesSet, Map<String, Set<String>> attributeExpandsSet)
 	{
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		Repository repository = dataService.getRepository(entityName);
+		Repository<Entity> repository = dataService.getRepository(entityName);
 
 		// convert sort
 		Sort sort;
@@ -1188,7 +1184,7 @@ public class RestController
 		}
 
 		List<QueryRule> queryRules = request.getQ() == null ? Collections.<QueryRule> emptyList() : request.getQ();
-		Query q = new QueryImpl(queryRules).pageSize(request.getNum()).offset(request.getStart()).sort(sort);
+		Query<Entity> q = new QueryImpl<>(queryRules).pageSize(request.getNum()).offset(request.getStart()).sort(sort);
 
 		Iterable<Entity> it = new Iterable<Entity>()
 		{

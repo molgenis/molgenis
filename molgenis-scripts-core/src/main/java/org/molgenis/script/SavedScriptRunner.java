@@ -55,7 +55,7 @@ public class SavedScriptRunner
 	 */
 	public ScriptResult runScript(String scriptName, Map<String, Object> parameters)
 	{
-		Script script = dataService.findOne(Script.ENTITY_NAME, new QueryImpl().eq(Script.NAME, scriptName),
+		Script script = dataService.findOne(Script.ENTITY_NAME, new QueryImpl<Script>().eq(Script.NAME, scriptName),
 				Script.class);
 
 		if (script == null)

@@ -280,7 +280,7 @@ public class MappingServiceController extends MolgenisPluginController
 		String algorithm = mappingServiceRequest.getAlgorithm();
 		Long offset = mappingServiceRequest.getOffset();
 		Long num = mappingServiceRequest.getNum();
-		Query query = new QueryImpl().offset(offset.intValue()).pageSize(num.intValue());
+		Query<Entity> query = new QueryImpl<Entity>().offset(offset.intValue()).pageSize(num.intValue());
 		String sourceEntityName = mappingServiceRequest.getSourceEntityName();
 		Iterable<Entity> sourceEntities = new Iterable<Entity>()
 		{
@@ -291,7 +291,7 @@ public class MappingServiceController extends MolgenisPluginController
 			}
 		};
 
-		long total = dataService.count(sourceEntityName, new QueryImpl());
+		long total = dataService.count(sourceEntityName, new QueryImpl<>());
 		long nrSuccess = 0, nrErrors = 0;
 		Map<String, String> errorMessages = new LinkedHashMap<String, String>();
 		for (AlgorithmEvaluation evaluation : algorithmService.applyAlgorithm(targetAttr, algorithm, sourceEntities))
@@ -832,7 +832,7 @@ public class MappingServiceController extends MolgenisPluginController
 		if (sourceAttributeAttributeMetaData.isAggregateable())
 		{
 			AggregateResult aggregate = dataService.aggregate(source,
-					new AggregateQueryImpl().attrX(sourceAttributeAttributeMetaData).query(new QueryImpl()));
+					new AggregateQueryImpl().attrX(sourceAttributeAttributeMetaData).query(new QueryImpl<Entity>()));
 			List<Long> aggregateCounts = new ArrayList<Long>();
 			for (List<Long> count : aggregate.getMatrix())
 			{
@@ -904,7 +904,7 @@ public class MappingServiceController extends MolgenisPluginController
 				.getEntityMetaData(mappingServiceRequest.getTargetEntityName());
 		AttributeMetaData targetAttribute = targetEntityMetaData != null
 				? targetEntityMetaData.getAttribute(mappingServiceRequest.getTargetAttributeName()) : null;
-		Repository sourceRepo = dataService.getRepository(mappingServiceRequest.getSourceEntityName());
+		Repository<Entity> sourceRepo = dataService.getRepository(mappingServiceRequest.getSourceEntityName());
 
 		Iterable<AlgorithmEvaluation> algorithmEvaluations = algorithmService.applyAlgorithm(targetAttribute,
 				mappingServiceRequest.getAlgorithm(), sourceRepo);

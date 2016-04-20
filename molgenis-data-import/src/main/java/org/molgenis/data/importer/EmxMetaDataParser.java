@@ -159,7 +159,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	 *            the {@link Repository} that contains the tags entity
 	 * @return Map mapping tag Identifier to tag {@link Entity}, will be empty if no tags repository was found
 	 */
-	private IntermediateParseResults parseTagsSheet(Repository tagRepository)
+	private IntermediateParseResults parseTagsSheet(Repository<Entity> tagRepository)
 	{
 		IntermediateParseResults result = new IntermediateParseResults();
 		if (tagRepository != null)
@@ -184,7 +184,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	 * @param intermediateResults
 	 *            {@link IntermediateParseResults} with the tags already parsed
 	 */
-	private void parseAttributesSheet(Repository attributesRepo, IntermediateParseResults intermediateResults)
+	private void parseAttributesSheet(Repository<Entity> attributesRepo, IntermediateParseResults intermediateResults)
 	{
 		for (AttributeMetaData attr : attributesRepo.getEntityMetaData().getAtomicAttributes())
 		{
@@ -527,7 +527,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	 * @param intermediateResults
 	 *            {@link IntermediateParseResults} containing the attributes already parsed
 	 */
-	private void parseEntitiesSheet(Repository entitiesRepo, IntermediateParseResults intermediateResults)
+	private void parseEntitiesSheet(Repository<Entity> entitiesRepo, IntermediateParseResults intermediateResults)
 	{
 		if (entitiesRepo != null)
 		{
@@ -665,7 +665,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	 * @param intermediateResults
 	 *            {@link IntermediateParseResults} containing the parsed tag entities
 	 */
-	private void parsePackagesSheet(Repository repo, IntermediateParseResults intermediateResults)
+	private void parsePackagesSheet(Repository<Entity> repo, IntermediateParseResults intermediateResults)
 	{
 		if (repo == null) return;
 
@@ -695,17 +695,17 @@ public class EmxMetaDataParser implements MetaDataParser
 		}
 	}
 
-	private void parseLanguages(Repository repo, IntermediateParseResults intermediateResults)
+	private void parseLanguages(Repository<Entity> repo, IntermediateParseResults intermediateResults)
 	{
 		repo.forEach(intermediateResults::addLanguage);
 	}
 
-	private void parseI18nStrings(Repository repo, IntermediateParseResults intermediateResults)
+	private void parseI18nStrings(Repository<Entity> repo, IntermediateParseResults intermediateResults)
 	{
 		repo.forEach(intermediateResults::addI18nString);
 	}
 
-	private void parsePackageTags(Repository repo, IntermediateParseResults intermediateResults)
+	private void parsePackageTags(Repository<Entity> repo, IntermediateParseResults intermediateResults)
 	{
 		if (repo != null)
 		{
@@ -732,7 +732,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		}
 	}
 
-	private List<Entity> resolvePackages(Repository packageRepo)
+	private List<Entity> resolvePackages(Repository<Entity> packageRepo)
 	{
 		List<Entity> resolved = new ArrayList<>();
 		if ((packageRepo == null) || Iterables.isEmpty(packageRepo)) return resolved;
@@ -791,7 +791,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	 * @param intermediateResults
 	 *            {@link ParsedMetaData} to add the ref entities to
 	 */
-	private void reiterateToMapRefEntity(Repository attributeRepo, IntermediateParseResults intermediateResults)
+	private void reiterateToMapRefEntity(Repository<Entity> attributeRepo, IntermediateParseResults intermediateResults)
 	{
 		int i = 1;
 		for (Entity attribute : attributeRepo)
@@ -981,7 +981,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				report = report.addEntity(sheet, metaDataMap.containsKey(sheet));
 
 				// check the fields
-				Repository s = source.getRepository(sheet);
+				Repository<Entity> s = source.getRepository(sheet);
 				EntityMetaData target = metaDataMap.get(sheet);
 
 				if (target != null)

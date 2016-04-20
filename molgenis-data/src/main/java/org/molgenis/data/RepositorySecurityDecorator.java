@@ -13,13 +13,13 @@ import org.molgenis.data.support.AggregateAnonymizerImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.Permission;
 
-public class RepositorySecurityDecorator implements Repository
+public class RepositorySecurityDecorator implements Repository<Entity>
 {
-	private final Repository decoratedRepository;
+	private final Repository<Entity> decoratedRepository;
 	private final AppSettings appSettings;
 	private final AggregateAnonymizer aggregateAnonymizer;
 
-	public RepositorySecurityDecorator(Repository decoratedRepository, AppSettings appSettings)
+	public RepositorySecurityDecorator(Repository<Entity> decoratedRepository, AppSettings appSettings)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
 		this.appSettings = requireNonNull(appSettings);
@@ -60,44 +60,44 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
-	public Query query()
+	public Query<Entity> query()
 	{
-		return new QueryImpl(this);
+		return new QueryImpl<Entity>(this);
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.COUNT);
 		return decoratedRepository.count(q);
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.READ);
 		return decoratedRepository.findAll(q);
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.READ);
 		return decoratedRepository.findOne(q);
 	}
 
 	@Override
-	public Entity findOne(Object id)
+	public Entity findOneById(Object id)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.READ);
-		return decoratedRepository.findOne(id);
+		return decoratedRepository.findOneById(id);
 	}
 
 	@Override
-	public Entity findOne(Object id, Fetch fetch)
+	public Entity findOneById(Object id, Fetch fetch)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.READ);
-		return decoratedRepository.findOne(id, fetch);
+		return decoratedRepository.findOneById(id, fetch);
 	}
 
 	@Override
@@ -129,7 +129,7 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
-	public void update(Stream<? extends Entity> entities)
+	public void update(Stream<Entity> entities)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.update(entities);
@@ -143,7 +143,7 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
-	public void delete(Stream<? extends Entity> entities)
+	public void delete(Stream<Entity> entities)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.delete(entities);
@@ -157,10 +157,10 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
-		decoratedRepository.deleteById(ids);
+		decoratedRepository.deleteAll(ids);
 	}
 
 	@Override
@@ -178,7 +178,7 @@ public class RepositorySecurityDecorator implements Repository
 	}
 
 	@Override
-	public Integer add(Stream<? extends Entity> entities)
+	public Integer add(Stream<Entity> entities)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		return decoratedRepository.add(entities);

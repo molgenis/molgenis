@@ -42,7 +42,7 @@ public interface SearchService
 
 	long count(EntityMetaData entityMetaData);
 
-	long count(Query q, EntityMetaData entityMetaData);
+	long count(Query<Entity> q, EntityMetaData entityMetaData);
 
 	void index(Entity entity, EntityMetaData entityMetaData, IndexingMode indexingMode);
 
@@ -148,7 +148,7 @@ public interface SearchService
 	Stream<Entity> get(Stream<Object> entityIds, EntityMetaData entityMetaData, Fetch fetch);
 
 	// TODO replace Iterable<Entity> with EntityCollection and add EntityCollection.getTotal()
-	Iterable<Entity> search(Query q, EntityMetaData entityMetaData);
+	Iterable<Entity> search(Query<Entity> q, EntityMetaData entityMetaData);
 
 	/**
 	 * TODO replace Stream<Entity> with EntityCollection and add EntityCollection.getTotal()
@@ -157,7 +157,7 @@ public interface SearchService
 	 * @param entityMetaData
 	 * @return
 	 */
-	Stream<Entity> searchAsStream(Query q, EntityMetaData entityMetaData);
+	Stream<Entity> searchAsStream(Query<Entity> q, EntityMetaData entityMetaData);
 
 	AggregateResult aggregate(AggregateQuery aggregateQuery, EntityMetaData entityMetaData);
 

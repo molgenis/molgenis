@@ -41,7 +41,7 @@ public class ElasticsearchRepositoryDecoratorTest
 {
 	private ElasticsearchRepositoryDecorator elasticsearchRepositoryDecorator;
 	private ElasticsearchService elasticSearchService;
-	private Repository decoratedRepo;
+	private Repository<Entity> decoratedRepo;
 	private EntityMetaData repositoryEntityMetaData;
 	private String entityName;
 	private String idAttrName;
@@ -103,7 +103,7 @@ public class ElasticsearchRepositoryDecoratorTest
 		AttributeMetaData yAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("yAttr").getMock();
 		AttributeMetaData distinctAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("distinctAttr")
 				.getMock();
-		Query q = mock(Query.class);
+		Query<Entity> q = mock(Query.class);
 		AggregateQuery aggregateQuery = new AggregateQueryImpl().attrX(xAttr).attrY(yAttr).attrDistinct(distinctAttr)
 				.query(q);
 
@@ -135,7 +135,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	@Test
 	public void countQuery()
 	{
-		Query q = mock(Query.class);
+		Query<Entity> q = mock(Query.class);
 		elasticsearchRepositoryDecorator.count(q);
 		verify(elasticSearchService).count(q, repositoryEntityMetaData);
 	}
@@ -187,7 +187,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	@Test
 	public void findOneQuery()
 	{
-		Query q = mock(Query.class);
+		Query<Entity> q = mock(Query.class);
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
 		when(elasticSearchService.search(q, repositoryEntityMetaData))
@@ -201,21 +201,21 @@ public class ElasticsearchRepositoryDecoratorTest
 	{
 		Object id = Integer.valueOf(0);
 		Fetch fetch = new Fetch();
-		Query q = mock(Query.class);
+		Query<Entity> q = mock(Query.class);
 		QueryRule queryRule = new QueryRule(idAttrName, Operator.EQUALS, id);
 		when(q.getRules()).thenReturn(Arrays.asList(queryRule));
 		when(q.getFetch()).thenReturn(fetch);
 
 		Entity entity = mock(Entity.class);
-		when(decoratedRepo.findOne(id, fetch)).thenReturn(entity);
+		when(decoratedRepo.findOneById(id, fetch)).thenReturn(entity);
 		assertEquals(elasticsearchRepositoryDecorator.findOne(q), entity);
-		verify(decoratedRepo, times(1)).findOne(id, fetch);
+		verify(decoratedRepo, times(1)).findOneById(id, fetch);
 	}
 
 	@Test
 	public void findOneQuery_noResults()
 	{
-		Query q = mock(Query.class);
+		Query<Entity> q = mock(Query.class);
 		List<Entity> entities = Collections.emptyList();
 		when(elasticSearchService.search(q, repositoryEntityMetaData)).thenReturn(entities);
 		assertNull(elasticsearchRepositoryDecorator.findOne(q));
@@ -225,8 +225,8 @@ public class ElasticsearchRepositoryDecoratorTest
 	public void findOneObject()
 	{
 		Object id = mock(Object.class);
-		elasticsearchRepositoryDecorator.findOne(id);
-		verify(decoratedRepo).findOne(id);
+		elasticsearchRepositoryDecorator.findOneById(id);
+		verify(decoratedRepo).findOneById(id);
 	}
 
 	@Test
@@ -236,9 +236,9 @@ public class ElasticsearchRepositoryDecoratorTest
 		Fetch fetch = new Fetch();
 
 		Entity entity = mock(Entity.class);
-		when(decoratedRepo.findOne(id, fetch)).thenReturn(entity);
-		assertEquals(elasticsearchRepositoryDecorator.findOne(id, fetch), entity);
-		verify(decoratedRepo, times(1)).findOne(id, fetch);
+		when(decoratedRepo.findOneById(id, fetch)).thenReturn(entity);
+		assertEquals(elasticsearchRepositoryDecorator.findOneById(id, fetch), entity);
+		verify(decoratedRepo, times(1)).findOneById(id, fetch);
 		verifyNoMoreInteractions(decoratedRepo);
 	}
 
@@ -326,7 +326,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	@Test
 	public void findAllStreamQueryNoFetch()
 	{
-		QueryImpl q = new QueryImpl();
+		QueryImpl<Entity> q = new QueryImpl<Entity>();
 		elasticsearchRepositoryDecorator.findAll(q);
 		verify(decoratedRepo).stream();
 	}
@@ -334,7 +334,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	@Test
 	public void findAllStreamQueryEmptyFetch()
 	{
-		QueryImpl q = new QueryImpl();
+		QueryImpl<Entity> q = new QueryImpl<Entity>();
 		Fetch fetch = mock(Fetch.class);
 		q.setFetch(fetch);
 		elasticsearchRepositoryDecorator.findAll(q);
@@ -344,7 +344,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	@Test
 	public void findAllStreamQueryFetchWithOffset()
 	{
-		QueryImpl q = new QueryImpl();
+		QueryImpl<Entity> q = new QueryImpl<Entity>();
 		Fetch fetch = mock(Fetch.class);
 		q.setFetch(fetch);
 		q.setOffset(1);
@@ -355,7 +355,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	@Test
 	public void findAllStreamQueryFetchWithOffsetAndPageSize()
 	{
-		QueryImpl q = new QueryImpl();
+		QueryImpl<Entity> q = new QueryImpl<Entity>();
 		Fetch fetch = mock(Fetch.class);
 		q.setFetch(fetch);
 		q.setOffset(0);
@@ -367,7 +367,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	@Test
 	public void findAllStreamQueryFetchWithSort()
 	{
-		QueryImpl q = new QueryImpl();
+		QueryImpl<Entity> q = new QueryImpl<Entity>();
 		Fetch fetch = mock(Fetch.class);
 		q.setFetch(fetch);
 		q.setSort(mock(Sort.class));
@@ -378,7 +378,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	@Test
 	public void findAllStreamQueryFetchWithOffsetAndPageSizeAndSort()
 	{
-		QueryImpl q = new QueryImpl();
+		QueryImpl<Entity> q = new QueryImpl<Entity>();
 		Fetch fetch = mock(Fetch.class);
 		q.setFetch(fetch);
 		q.setOffset(1);
@@ -408,7 +408,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	@Test
 	public void findAllStreamInQueryQueryableRepo()
 	{
-		QueryImpl q = new QueryImpl();
+		QueryImpl<Entity> q = new QueryImpl<Entity>();
 		q.in("field", Arrays.asList("id0", "id1"));
 		elasticsearchRepositoryDecorator.findAll(q);
 		verify(decoratedRepo, times(1)).findAll(q);
@@ -419,7 +419,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	{
 		when(decoratedRepo.getCapabilities()).thenReturn(Collections.emptySet());
 
-		QueryImpl q = new QueryImpl();
+		QueryImpl<Entity> q = new QueryImpl<Entity>();
 		q.in("field", Arrays.asList("id0", "id1"));
 		elasticsearchRepositoryDecorator.findAll(q);
 		verify(decoratedRepo, never()).findAll(q);

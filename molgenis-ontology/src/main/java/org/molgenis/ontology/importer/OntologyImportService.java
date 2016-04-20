@@ -1,5 +1,7 @@
 package org.molgenis.ontology.importer;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -33,8 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 
-import static java.util.Objects.requireNonNull;
-
 @Service
 public class OntologyImportService implements ImportService
 {
@@ -66,12 +66,12 @@ public class OntologyImportService implements ImportService
 			while (it.hasNext())
 			{
 				String entityNameToImport = it.next();
-				Repository repo = source.getRepository(entityNameToImport);
+				Repository<Entity> repo = source.getRepository(entityNameToImport);
 				try
 				{
 					report = new EntityImportReport();
 
-					Repository crudRepository = dataService.getRepository(entityNameToImport);
+					Repository<Entity> crudRepository = dataService.getRepository(entityNameToImport);
 
 					crudRepository.add(repo.stream());
 
@@ -130,7 +130,7 @@ public class OntologyImportService implements ImportService
 			String ontologyName = ontologyEntity.getString(OntologyMetaData.ONTOLOGY_NAME);
 
 			Entity ontologyQueryEntity = dataService.findOne(OntologyMetaData.ENTITY_NAME,
-					new QueryImpl().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIRI).or()
+					new QueryImpl<Entity>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIRI).or()
 							.eq(OntologyMetaData.ONTOLOGY_NAME, ontologyName));
 			ontologyExists = ontologyQueryEntity != null;
 		}

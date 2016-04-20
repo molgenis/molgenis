@@ -41,7 +41,7 @@ public class FileIngesterJobSchedulerTest {
 		FileIngest fileIngest = new FileIngest(null);
 		fileIngest.set(FileIngestMetaData.ID, id);
 		
-		when(dataServiceMock.findOne(FileIngestMetaData.ENTITY_NAME, id, FileIngest.class)).thenReturn(fileIngest);
+		when(dataServiceMock.findOneById(FileIngestMetaData.ENTITY_NAME, id, FileIngest.class)).thenReturn(fileIngest);
 		when(schedulerMock.checkExists(new JobKey(id, FileIngesterJobScheduler.JOB_GROUP))).thenReturn(false);
 		
 		fileIngesterJobScheduler.runNow(id);
@@ -53,7 +53,7 @@ public class FileIngesterJobSchedulerTest {
 	public void runNowUnknownEntity()
 	{
 		String id = "id";
-		when(dataServiceMock.findOne(FileIngestMetaData.ENTITY_NAME, id)).thenReturn(null);
+		when(dataServiceMock.findOneById(FileIngestMetaData.ENTITY_NAME, id)).thenReturn(null);
 		fileIngesterJobScheduler.runNow(id);
 	}
 
@@ -64,7 +64,7 @@ public class FileIngesterJobSchedulerTest {
 		FileIngest fileIngest = new FileIngest(null);
 		fileIngest.set(FileIngestMetaData.ID, id);
 
-		when(dataServiceMock.findOne(FileIngestMetaData.ENTITY_NAME, id, FileIngest.class)).thenReturn(fileIngest);
+		when(dataServiceMock.findOneById(FileIngestMetaData.ENTITY_NAME, id, FileIngest.class)).thenReturn(fileIngest);
 		when(schedulerMock.checkExists(new JobKey(id, FileIngesterJobScheduler.JOB_GROUP))).thenReturn(true);
 
 		fileIngesterJobScheduler.runNow(id);

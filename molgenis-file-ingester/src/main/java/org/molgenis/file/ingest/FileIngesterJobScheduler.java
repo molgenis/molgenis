@@ -55,7 +55,7 @@ public class FileIngesterJobScheduler implements ApplicationListener<ContextRefr
 	 */
 	public synchronized void runNow(String fileIngestId)
 	{
-		FileIngest fileIngest = dataService.findOne(FileIngestMetaData.ENTITY_NAME, fileIngestId, FileIngest.class);
+		FileIngest fileIngest = dataService.findOneById(FileIngestMetaData.ENTITY_NAME, fileIngestId, FileIngest.class);
 		if (fileIngest == null)
 		{
 			throw new UnknownEntityException("Unknown FileIngest entity id '" + fileIngestId + "'");

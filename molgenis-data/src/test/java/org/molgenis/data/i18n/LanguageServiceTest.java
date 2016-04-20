@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.MapEntity;
@@ -19,7 +20,7 @@ public class LanguageServiceTest
 	private LanguageService languageService;
 	private DataService dataServiceMock;
 	private AppSettings appSettingsMock;
-	private Query queryMock;
+	private Query<Entity> queryMock;
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -37,7 +38,7 @@ public class LanguageServiceTest
 	{
 		SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("test", "test"));
 		when(queryMock.findOne()).thenReturn(new MapEntity("languageCode", "nl"));
-		when(dataServiceMock.findOne(LanguageMetaData.ENTITY_NAME, "nl")).thenReturn(new MapEntity("nl", "Nederlands"));
+		when(dataServiceMock.findOneById(LanguageMetaData.ENTITY_NAME, "nl")).thenReturn(new MapEntity("nl", "Nederlands"));
 		assertEquals(languageService.getCurrentUserLanguageCode(), "nl");
 	}
 
@@ -47,7 +48,7 @@ public class LanguageServiceTest
 		SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("test", "test"));
 		when(queryMock.findOne()).thenReturn(new MapEntity());
 		when(appSettingsMock.getLanguageCode()).thenReturn("de");
-		when(dataServiceMock.findOne(LanguageMetaData.ENTITY_NAME, "de")).thenReturn(new MapEntity("nl", "Nederlands"));
+		when(dataServiceMock.findOneById(LanguageMetaData.ENTITY_NAME, "de")).thenReturn(new MapEntity("nl", "Nederlands"));
 		assertEquals(languageService.getCurrentUserLanguageCode(), "de");
 	}
 }

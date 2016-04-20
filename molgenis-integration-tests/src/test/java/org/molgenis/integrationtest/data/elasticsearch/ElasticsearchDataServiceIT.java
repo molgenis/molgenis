@@ -1,5 +1,9 @@
 package org.molgenis.integrationtest.data.elasticsearch;
 
+import java.util.Arrays;
+import java.util.List;
+
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.integrationtest.data.AbstractDataServiceIT;
 import org.molgenis.integrationtest.data.elasticsearch.ElasticsearchDataServiceIT.DataServiceElasticsearchTestConfig;
 import org.springframework.context.annotation.Configuration;
@@ -229,6 +233,11 @@ public class ElasticsearchDataServiceIT extends AbstractDataServiceIT
 	public void testUpdateStream()
 	{
 		super.testUpdateStream();
+	}
+
+	@Override
+	public List<RepositoryCapability> getExpectedCapabilities(){
+		return Arrays.asList(RepositoryCapability.AGGREGATEABLE,RepositoryCapability.INDEXABLE,RepositoryCapability.MANAGABLE,RepositoryCapability.QUERYABLE,RepositoryCapability.WRITABLE);
 	}
 
 }

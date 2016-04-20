@@ -22,12 +22,12 @@ import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 
-public class LanguageRepositoryDecorator implements Repository
+public class LanguageRepositoryDecorator implements Repository<Entity>
 {
-	private final Repository decorated;
+	private final Repository<Entity> decorated;
 	private final DataService dataService;
 
-	public LanguageRepositoryDecorator(Repository decorated, DataService dataService)
+	public LanguageRepositoryDecorator(Repository<Entity> decorated, DataService dataService)
 	{
 		this.decorated = decorated;
 		this.dataService = dataService;
@@ -76,39 +76,39 @@ public class LanguageRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Query query()
+	public Query<Entity> query()
 	{
 		return decorated.query();
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		return decorated.count(q);
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		return decorated.findAll(q);
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		return decorated.findOne(q);
 	}
 
 	@Override
-	public Entity findOne(Object id)
+	public Entity findOneById(Object id)
 	{
-		return decorated.findOne(id);
+		return decorated.findOneById(id);
 	}
 
 	@Override
-	public Entity findOne(Object id, Fetch fetch)
+	public Entity findOneById(Object id, Fetch fetch)
 	{
-		return decorated.findOne(id, fetch);
+		return decorated.findOneById(id, fetch);
 	}
 
 	@Override
@@ -136,7 +136,7 @@ public class LanguageRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void update(Stream<? extends Entity> entities)
+	public void update(Stream<Entity> entities)
 	{
 		decorated.update(entities);
 	}
@@ -195,7 +195,7 @@ public class LanguageRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void delete(Stream<? extends Entity> entities)
+	public void delete(Stream<Entity> entities)
 	{
 		entities.forEach(this::delete);
 	}
@@ -203,12 +203,12 @@ public class LanguageRepositoryDecorator implements Repository
 	@Override
 	public void deleteById(Object id)
 	{
-		Entity entity = findOne(id);
+		Entity entity = findOneById(id);
 		if (entity != null) delete(entity);
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
 		ids.forEach(this::deleteById);
 	}
@@ -265,7 +265,7 @@ public class LanguageRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Integer add(Stream<? extends Entity> entities)
+	public Integer add(Stream<Entity> entities)
 	{
 		AtomicInteger count = new AtomicInteger();
 		entities.forEach(entity -> {

@@ -91,7 +91,7 @@ public class AbstractElasticsearchRepositoryTest
 			Object id = Integer.valueOf(0);
 			Fetch fetch = new Fetch();
 			when(searchService.get(id, entityMeta, fetch)).thenReturn(entity);
-			assertEquals(repository.findOne(id, fetch), entity);
+			assertEquals(repository.findOneById(id, fetch), entity);
 		}
 		finally
 		{
@@ -105,7 +105,7 @@ public class AbstractElasticsearchRepositoryTest
 		try
 		{
 			Entity entity = mock(Entity.class);
-			Query q = mock(Query.class);
+			Query<Entity> q = mock(Query.class);
 			when(searchService.search(q, entityMeta)).thenReturn(Arrays.asList(entity));
 			assertEquals(repository.findOne(q), entity);
 		}
@@ -120,7 +120,7 @@ public class AbstractElasticsearchRepositoryTest
 	{
 		try
 		{
-			Query q = mock(Query.class);
+			Query<Entity> q = mock(Query.class);
 			when(searchService.search(q, entityMeta)).thenReturn(Collections.emptyList());
 			assertNull(repository.findOne(q));
 		}
@@ -161,7 +161,7 @@ public class AbstractElasticsearchRepositoryTest
 	public void findAllAsStream()
 	{
 		Entity entity0 = mock(Entity.class);
-		Query query = mock(Query.class);
+		Query<Entity> query = mock(Query.class);
 		when(searchService.searchAsStream(query, entityMeta)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = repository.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
@@ -173,7 +173,7 @@ public class AbstractElasticsearchRepositoryTest
 		Fetch fetch = new Fetch();
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
-		when(searchService.searchAsStream(new QueryImpl().fetch(fetch), entityMeta))
+		when(searchService.searchAsStream(new QueryImpl<Entity>().fetch(fetch), entityMeta))
 				.thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = repository.stream(fetch);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));

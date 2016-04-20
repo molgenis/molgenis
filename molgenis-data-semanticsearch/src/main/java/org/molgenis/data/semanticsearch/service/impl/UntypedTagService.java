@@ -51,7 +51,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 
 	private Entity findAttributeEntity(EntityMetaData entityMetaData, String attributeName)
 	{
-		Entity entityMetaDataEntity = dataService.findOne(ENTITY_NAME, entityMetaData.getName());
+		Entity entityMetaDataEntity = dataService.findOneById(ENTITY_NAME, entityMetaData.getName());
 		Optional<Entity> result = stream(entityMetaDataEntity.getEntities(ATTRIBUTES).spliterator(), false).filter(
 				att -> attributeName.equals(att.getString(AttributeMetaDataMetaData.NAME))).findFirst();
 		return result.isPresent() ? result.get() : null;
@@ -59,7 +59,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 
 	private Entity findEntity(EntityMetaData emd)
 	{
-		return dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME, emd.getName());
+		return dataService.findOneById(EntityMetaDataMetaData.ENTITY_NAME, emd.getName());
 	}
 
 	@Override
@@ -169,7 +169,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	public Iterable<Tag<Package, LabeledResource, LabeledResource>> getTagsForPackage(Package p)
 	{
 		Entity packageEntity = dataService.findOne(PackageMetaData.ENTITY_NAME,
-				new QueryImpl().eq(PackageMetaData.FULL_NAME, p.getName()));
+				new QueryImpl<Entity>().eq(PackageMetaData.FULL_NAME, p.getName()));
 
 		if (packageEntity == null)
 		{

@@ -47,7 +47,7 @@ public class DataServiceTokenServiceTest
 		molgenisToken.setMolgenisUser(user);
 
 		when(
-				dataService.findOne(MolgenisToken.ENTITY_NAME, new QueryImpl().eq(MolgenisToken.TOKEN, "token"),
+				dataService.findOne(MolgenisToken.ENTITY_NAME, new QueryImpl<MolgenisToken>().eq(MolgenisToken.TOKEN, "token"),
 						MolgenisToken.class)).thenReturn(molgenisToken);
 
 		UserDetails userDetails = new User("admin", "admin", Arrays.asList(new SimpleGrantedAuthority("admin")));
@@ -64,7 +64,7 @@ public class DataServiceTokenServiceTest
 		molgenisToken.setExpirationDate(DateUtils.addDays(new Date(), -1));
 
 		when(
-				dataService.findOne(MolgenisToken.ENTITY_NAME, new QueryImpl().eq(MolgenisToken.TOKEN, "token"),
+				dataService.findOne(MolgenisToken.ENTITY_NAME, new QueryImpl<MolgenisToken>().eq(MolgenisToken.TOKEN, "token"),
 						MolgenisToken.class)).thenReturn(molgenisToken);
 
 		tokenService.findUserByToken("token");
@@ -76,7 +76,7 @@ public class DataServiceTokenServiceTest
 		MolgenisUser user = new MolgenisUser();
 
 		when(
-				dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, "admin"),
+				dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl<MolgenisUser>().eq(MolgenisUser.USERNAME, "admin"),
 						MolgenisUser.class)).thenReturn(user);
 
 		when(tokenGenerator.generateToken()).thenReturn("token");
@@ -94,7 +94,7 @@ public class DataServiceTokenServiceTest
 		molgenisToken.setToken("token");
 
 		when(
-				dataService.findOne(MolgenisToken.ENTITY_NAME, new QueryImpl().eq(MolgenisToken.TOKEN, "token"),
+				dataService.findOne(MolgenisToken.ENTITY_NAME, new QueryImpl<MolgenisToken>().eq(MolgenisToken.TOKEN, "token"),
 						MolgenisToken.class)).thenReturn(molgenisToken);
 
 		tokenService.removeToken("token");

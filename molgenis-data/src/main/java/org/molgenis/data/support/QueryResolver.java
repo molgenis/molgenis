@@ -56,7 +56,7 @@ public class QueryResolver
 								.capitalize(r.getField().substring(0, r.getField().length() - "_Identifier".length()));
 						r.setField(entityName);
 
-						Object value = dataService.findOne(entityName, new QueryImpl().eq("Identifier", r.getValue()));
+						Object value = dataService.findOne(entityName, new QueryImpl<Entity>().eq("Identifier", r.getValue()));
 						r.setValue(value);
 					}
 					else
@@ -73,7 +73,7 @@ public class QueryResolver
 								if (it.hasNext() && !(it.next() instanceof Entity))
 								{
 									List<?> values = dataService
-											.findAll(attr.getRefEntity().getName(), new QueryImpl()
+											.findAll(attr.getRefEntity().getName(), new QueryImpl<Entity>()
 													.in(attr.getRefEntity().getLabelAttribute().getName(), iterable))
 											.collect(Collectors.toList());
 
@@ -82,7 +82,7 @@ public class QueryResolver
 							}
 							else if (!(r.getValue() instanceof Entity))
 							{
-								Object value = dataService.findOne(attr.getRefEntity().getName(), new QueryImpl()
+								Object value = dataService.findOne(attr.getRefEntity().getName(), new QueryImpl<Entity>()
 										.eq(attr.getRefEntity().getLabelAttribute().getName(), r.getValue()));
 
 								r.setValue(value);

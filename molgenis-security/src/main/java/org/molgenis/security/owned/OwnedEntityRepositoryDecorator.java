@@ -30,11 +30,11 @@ import org.molgenis.util.EntityUtils;
  * 
  * Admins are not effected.
  */
-public class OwnedEntityRepositoryDecorator implements Repository
+public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 {
-	private final Repository decoratedRepo;
+	private final Repository<Entity> decoratedRepo;
 
-	public OwnedEntityRepositoryDecorator(Repository decoratedRepo)
+	public OwnedEntityRepositoryDecorator(Repository<Entity> decoratedRepo)
 	{
 		this.decoratedRepo = requireNonNull(decoratedRepo);
 	}
@@ -42,7 +42,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		if (mustAddRowLevelSecurity()) return findAll(new QueryImpl()).iterator();
+		if (mustAddRowLevelSecurity()) return findAll(new QueryImpl<Entity>()).iterator();
 		return decoratedRepo.iterator();
 	}
 
@@ -88,25 +88,25 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	@Override
 	public long count()
 	{
-		if (mustAddRowLevelSecurity()) return count(new QueryImpl());
+		if (mustAddRowLevelSecurity()) return count(new QueryImpl<Entity>());
 		return decoratedRepo.count();
 	}
 
 	@Override
-	public Query query()
+	public Query<Entity> query()
 	{
 		return decoratedRepo.query();
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		if (mustAddRowLevelSecurity()) addRowLevelSecurity(q);
 		return decoratedRepo.count(q);
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		if (mustAddRowLevelSecurity())
 		{
@@ -116,16 +116,16 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		if (mustAddRowLevelSecurity()) addRowLevelSecurity(q);
 		return decoratedRepo.findOne(q);
 	}
 
 	@Override
-	public Entity findOne(Object id)
+	public Entity findOneById(Object id)
 	{
-		Entity e = decoratedRepo.findOne(id);
+		Entity e = decoratedRepo.findOneById(id);
 
 		if (mustAddRowLevelSecurity())
 		{
@@ -136,13 +136,13 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Entity findOne(Object id, Fetch fetch)
+	public Entity findOneById(Object id, Fetch fetch)
 	{
 		if (fetch != null)
 		{
 			fetch.field(OwnedEntityMetaData.ATTR_OWNER_USERNAME);
 		}
-		Entity e = decoratedRepo.findOne(id, fetch);
+		Entity e = decoratedRepo.findOneById(id, fetch);
 
 		if (mustAddRowLevelSecurity())
 		{
@@ -195,7 +195,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void update(Stream<? extends Entity> entities)
+	public void update(Stream<Entity> entities)
 	{
 		if (isOwnedEntityMetaData())
 		{
@@ -221,7 +221,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void delete(Stream<? extends Entity> entities)
+	public void delete(Stream<Entity> entities)
 	{
 		if (mustAddRowLevelSecurity())
 		{
@@ -236,7 +236,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	{
 		if (mustAddRowLevelSecurity())
 		{
-			Entity entity = findOne(id);
+			Entity entity = findOneById(id);
 			if ((entity != null) && !currentUserIsOwner(entity)) return;
 		}
 
@@ -244,7 +244,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
 		if (mustAddRowLevelSecurity())
 		{
@@ -252,7 +252,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 		}
 		else
 		{
-			decoratedRepo.deleteById(ids);
+			decoratedRepo.deleteAll(ids);
 		}
 	}
 
@@ -282,7 +282,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Integer add(Stream<? extends Entity> entities)
+	public Integer add(Stream<Entity> entities)
 	{
 		if (isOwnedEntityMetaData())
 		{
@@ -324,7 +324,7 @@ public class OwnedEntityRepositoryDecorator implements Repository
 		return EntityUtils.doesExtend(getEntityMetaData(), OwnedEntityMetaData.ENTITY_NAME);
 	}
 
-	private void addRowLevelSecurity(Query q)
+	private void addRowLevelSecurity(Query<Entity> q)
 	{
 		String user = SecurityUtils.getCurrentUsername();
 		if (user != null)

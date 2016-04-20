@@ -83,7 +83,7 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 	@Override
 	public List<Entity> annotateEntity(Entity entity)
 	{
-		Query q = queryCreator.createQuery(entity);
+		Query<Entity> q = queryCreator.createQuery(entity);
 		Iterable<Entity> annotatationSourceEntities;
 		if (resources.hasRepository(sourceRepositoryName))
 		{

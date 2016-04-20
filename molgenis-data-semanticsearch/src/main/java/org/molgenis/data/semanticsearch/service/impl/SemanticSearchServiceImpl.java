@@ -103,7 +103,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		}
 
 		Stream<Entity> attributeMetaDataEntities = dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME,
-				new QueryImpl(finalQueryRules));
+				new QueryImpl<>(finalQueryRules));
 
 		Map<String, String> collectExpanedQueryMap = semanticSearchServiceHelper.collectExpandedQueryMap(queryTerms,
 				ontologyTerms);
@@ -254,7 +254,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			throw new MolgenisDataAccessException("The attributeMetaData : " + attributeName
 					+ " does not exsit in EntityMetaData : " + sourceEntityMetaData.getName());
 		}
-		Explanation explanation = elasticSearchExplainService.explain(new QueryImpl(finalQueryRules),
+		Explanation explanation = elasticSearchExplainService.explain(new QueryImpl<Entity>(finalQueryRules),
 				dataService.getEntityMetaData(AttributeMetaDataMetaData.ENTITY_NAME), attributeId);
 
 		Set<ExplainedQueryString> detectedQueryStrings = elasticSearchExplainService
