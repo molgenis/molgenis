@@ -306,9 +306,10 @@ public class CmdLineAnnotator
 				entitiesToAnnotate = vcfRepo;
 			}
 
-			System.out.println("update = " + options.has("u"));
+			boolean update = options.has("u");
+			System.out.println("update = " + update);
 
-			Iterator<Entity> annotatedRecords = annotator.annotate(entitiesToAnnotate);
+			Iterator<Entity> annotatedRecords = annotator.annotate(entitiesToAnnotate, update);
 
 			if (annotator instanceof RefEntityAnnotator || annotator instanceof EffectsAnnotator)
 			{
