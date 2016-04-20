@@ -163,6 +163,7 @@ public class DataServiceImpl implements DataService
 
 	@Override
 	@Transactional
+	@SuppressWarnings("unchecked")
 	public <E extends Entity> void add(String entityName, Stream<E> entities)
 	{
 		getRepository(entityName).add((Stream<Entity>) entities);
@@ -177,6 +178,7 @@ public class DataServiceImpl implements DataService
 
 	@Override
 	@Transactional
+	@SuppressWarnings("unchecked")
 	public <E extends Entity> void update(String entityName, Stream<E> entities)
 	{
 		getRepository(entityName).update((Stream<Entity>) entities);
@@ -191,6 +193,7 @@ public class DataServiceImpl implements DataService
 
 	@Override
 	@Transactional
+	@SuppressWarnings("unchecked")
 	public <E extends Entity> void delete(String entityName, Stream<E> entities)
 	{
 		getRepository(entityName).delete((Stream<Entity>) entities);

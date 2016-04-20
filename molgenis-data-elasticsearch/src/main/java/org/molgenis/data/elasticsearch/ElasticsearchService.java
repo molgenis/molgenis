@@ -134,6 +134,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	 * @param client
 	 * @param indexName
 	 * @param dataService
+	 * @param elasticsearchEntityFactory
 	 * @param createIndexIfNotExists
 	 */
 	ElasticsearchService(Client client, String indexName, DataService dataService,
@@ -353,7 +354,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			if (hasMapping(transactionId, entityMetaData))
 			{
 				// count added entities in transaction index
-				Query<Entity> countAddedQ = q != null ? new QueryImpl<>(q) : new QueryImpl<>();
+				Query countAddedQ = q != null ? new QueryImpl(q) : new QueryImpl();
 				if (countAddedQ.getRules() != null && !countAddedQ.getRules().isEmpty())
 				{
 					countAddedQ.and();

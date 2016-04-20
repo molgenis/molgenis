@@ -6,7 +6,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.molgenis.data.DataService;
-import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.transaction.AsyncTransactionLog;
 import org.slf4j.Logger;
@@ -31,14 +30,7 @@ public abstract class AbstractDataIntegrationIT extends AbstractTestNGSpringCont
 	ConfigurableApplicationContext applicationContext;
 
 	@Autowired
-	EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
-
-	@Autowired
 	AsyncTransactionLog asyncTransactionLog;
-
-	// FIXME
-	// @Autowired
-	// EmbeddedMysqlDatabase dataSource;
 
 	@BeforeClass
 	public void init()
@@ -63,16 +55,6 @@ public abstract class AbstractDataIntegrationIT extends AbstractTestNGSpringCont
 
 		applicationContext.close();
 		SecuritySupport.logout();
-
-		try
-		{
-			// Stop ES
-			embeddedElasticSearchServiceFactory.close();
-		}
-		catch (IOException e)
-		{
-			logger.error("Error stopping Elasticsearch", e);
-		}
 
 		try
 		{

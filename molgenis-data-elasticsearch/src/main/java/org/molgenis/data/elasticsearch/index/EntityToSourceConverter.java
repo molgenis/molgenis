@@ -210,6 +210,7 @@ public class EntityToSourceConverter
 			case CATEGORICAL_MREF:
 			case MREF:
 			{
+				@SuppressWarnings("unchecked")
 				final Iterable<Entity> refEntities = (Iterable<Entity>) inputValue;
 				if (refEntities != null && !Iterables.isEmpty(refEntities))
 				{
