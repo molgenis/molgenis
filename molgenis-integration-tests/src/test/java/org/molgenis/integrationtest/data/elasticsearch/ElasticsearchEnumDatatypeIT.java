@@ -6,12 +6,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
+import javax.sql.DataSource;
+
 @ContextConfiguration(classes = EnumElasticsearchTestConfig.class)
 public class ElasticsearchEnumDatatypeIT extends AbstractEnumDatatypeIT
 {
 	@Configuration
 	public static class EnumElasticsearchTestConfig extends AbstractElasticsearchTestConfig
 	{
+
 	}
 
 	@Override
