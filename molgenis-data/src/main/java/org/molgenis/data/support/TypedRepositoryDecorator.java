@@ -262,6 +262,7 @@ public class TypedRepositoryDecorator<E extends Entity> implements Repository<E>
 		return untypedEntities.map(this::asTypedEntity);
 	}
 
+	@SuppressWarnings("unchecked")
 	private Stream<Entity> asUntypedStream(Stream<E> typedEntities)
 	{
 		return (Stream<Entity>) typedEntities;

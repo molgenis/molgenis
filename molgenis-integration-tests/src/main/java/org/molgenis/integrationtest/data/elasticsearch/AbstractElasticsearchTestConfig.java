@@ -1,5 +1,9 @@
 package org.molgenis.integrationtest.data.elasticsearch;
 
+import java.io.IOException;
+
+import javax.sql.DataSource;
+
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
@@ -17,9 +21,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.testng.annotations.AfterClass;
-
-import javax.sql.DataSource;
-import java.io.IOException;
 
 @Import({EmbeddedElasticSearchConfig.class, ElasticsearchEntityFactory.class, ElasticsearchRepositoryCollection.class})
 public abstract class AbstractElasticsearchTestConfig extends AbstractDataApiTestConfig
