@@ -20,7 +20,7 @@ public class IndexTransactionLogEntryMetaData extends DefaultEntityMetaData
 	public static final String CUD_TYPE = "cud_type";
 	public static final String DATA_TYPE = "data_type";
 
-	IndexTransactionLogEntryMetaData(IndexTransactionLogMetaData indexTransactionLogMetaData, String backend)
+	public IndexTransactionLogEntryMetaData(IndexTransactionLogMetaData indexTransactionLogMetaData, String backend)
 	{
 		super(ENTITY_NAME);
 		setBackend(backend);

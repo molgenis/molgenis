@@ -3,6 +3,9 @@ package org.molgenis.data.transaction;
 import javax.annotation.PostConstruct;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.transaction.index.IndexTransactionLogEntryMetaData;
+import org.molgenis.data.transaction.index.IndexTransactionLogMetaData;
+import org.molgenis.data.transaction.index.IndexTransactionLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -33,6 +36,18 @@ public class TransactionConfig
 	}
 
 	@Bean
+	public IndexTransactionLogMetaData indexTransactionLogMetaData()
+	{
+		return new IndexTransactionLogMetaData(transactionLogBackend);
+	}
+
+	@Bean
+	public IndexTransactionLogEntryMetaData indexTransactionLogEntryMetaData()
+	{
+		return new IndexTransactionLogEntryMetaData(indexTransactionLogMetaData(), transactionLogBackend);
+	}
+
+	@Bean
 	public AsyncTransactionLog asyncTransactionLog()
 	{
 		return new AsyncTransactionLog(dataService);
@@ -43,6 +58,13 @@ public class TransactionConfig
 	{
 		return new TransactionLogService(dataService, molgenisTransactionLogMetaData(),
 				molgenisTransactionLogEntryMetaData(), asyncTransactionLog());
+	}
+
+	@Bean
+	public IndexTransactionLogService indexTransactionLogService()
+	{
+		return new IndexTransactionLogService(dataService, indexTransactionLogMetaData(),
+				indexTransactionLogEntryMetaData());
 	}
 
 	@PostConstruct
