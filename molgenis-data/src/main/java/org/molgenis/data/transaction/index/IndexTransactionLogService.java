@@ -26,29 +26,22 @@ public class IndexTransactionLogService implements MolgenisTransactionListener
 			IndexTransactionLogMetaData.ENTITY_NAME);
 
 	private final DataService dataService;
-	private final IndexTransactionLogMetaData molgenisTransactionLogMetaData;
-	private final IndexTransactionLogEntryMetaData molgenisTransactionLogEntryMetaData;
+	private final IndexTransactionLogMetaData indexTransactionLogMetaData;
+	private final IndexTransactionLogEntryMetaData indexTransactionLogEntryMetaData;
 
-	public IndexTransactionLogService(DataService dataService, IndexTransactionLogMetaData molgenisTransactionLogMetaData,
-			IndexTransactionLogEntryMetaData molgenisTransactionLogEntryMetaData)
+	public IndexTransactionLogService(DataService dataService, IndexTransactionLogMetaData indexTransactionLogMetaData,
+			IndexTransactionLogEntryMetaData indexTransactionLogEntryMetaData)
 	{
 		this.dataService = dataService;
-		this.molgenisTransactionLogMetaData = molgenisTransactionLogMetaData;
-		this.molgenisTransactionLogEntryMetaData = molgenisTransactionLogEntryMetaData;
+		this.indexTransactionLogMetaData = indexTransactionLogMetaData;
+		this.indexTransactionLogEntryMetaData = indexTransactionLogEntryMetaData;
 	}
 
 	@Override
 	public void transactionStarted(String transactionId)
 	{
-		Entity transLog = new DefaultEntity(molgenisTransactionLogMetaData, dataService);
-		transLog.set(IndexTransactionLogMetaData.TRANSACTION_ID, transactionId);
-		transLog.set(IndexTransactionLogMetaData.USER_NAME, SecurityUtils.getCurrentUsername());
-		transLog.set(IndexTransactionLogMetaData.TRANSACTION_STATUS, TransactionStatus.STARTED);
-		transLog.set(IndexTransactionLogMetaData.INDEX_STATUS, IndexStatus.NONE);
-		transLog.set(IndexTransactionLogMetaData.START_TIME, new Date());
-		transLog.set(IndexTransactionLogMetaData.LOG_COUNT, 0);
 		RunAsSystemProxy.runAsSystem(() -> {
-			dataService.add(IndexTransactionLogMetaData.ENTITY_NAME, transLog);
+			dataService.add(IndexTransactionLogMetaData.ENTITY_NAME, this.createLog(transactionId));
 			return null;
 		});
 	}
@@ -82,22 +75,48 @@ public class IndexTransactionLogService implements MolgenisTransactionListener
 					Entity transLog = dataService.findOne(IndexTransactionLogMetaData.ENTITY_NAME, transactionId);
 					if (transLog != null)
 					{
-						int order = transLog.getInt(IndexTransactionLogMetaData.LOG_COUNT).intValue() + 1;
-						transLog.set(IndexTransactionLogMetaData.LOG_COUNT, order);
-						dataService.update(IndexTransactionLogMetaData.ENTITY_NAME, transLog);
+						Entity transLogEntry = this.createLogEntry(transLog, entityMetaData.getName(), cudType,
+								dataType,
+								entityId);
 
-						Entity logEntry = new DefaultEntity(molgenisTransactionLogEntryMetaData, dataService);
-						logEntry.set(IndexTransactionLogEntryMetaData.MOLGENIS_TRANSACTION_LOG, transLog);
-						logEntry.set(IndexTransactionLogEntryMetaData.ENTITY_FULL_NAME, entityMetaData.getName());
-						logEntry.set(IndexTransactionLogEntryMetaData.CUD_TYPE, cudType);
-						logEntry.set(IndexTransactionLogEntryMetaData.DATA_TYPE, dataType);
-						logEntry.set(IndexTransactionLogEntryMetaData.ENTITY_ID, entityId);
-						logEntry.set(IndexTransactionLogEntryMetaData.LOG_ORDER, order);
-						dataService.add(IndexTransactionLogEntryMetaData.ENTITY_NAME, logEntry);
+						dataService.update(IndexTransactionLogMetaData.ENTITY_NAME, transLog);
+						dataService.add(IndexTransactionLogEntryMetaData.ENTITY_NAME, transLogEntry);
 					}
 				});
 			}
 		}
+	}
+
+	private synchronized int increaseCount(Entity transLog)
+	{
+		int count = transLog.getInt(IndexTransactionLogMetaData.LOG_COUNT).intValue() + 1;
+		transLog.set(IndexTransactionLogMetaData.LOG_COUNT, count);
+		return count;
+	}
+
+	public synchronized Entity createLog(String transactionId)
+	{
+		Entity entity = new DefaultEntity(indexTransactionLogMetaData, dataService);
+		entity.set(IndexTransactionLogMetaData.TRANSACTION_ID, transactionId);
+		entity.set(IndexTransactionLogMetaData.USER_NAME, SecurityUtils.getCurrentUsername());
+		entity.set(IndexTransactionLogMetaData.TRANSACTION_STATUS, TransactionStatus.STARTED);
+		entity.set(IndexTransactionLogMetaData.INDEX_STATUS, IndexStatus.NONE);
+		entity.set(IndexTransactionLogMetaData.START_TIME, new Date());
+		entity.set(IndexTransactionLogMetaData.LOG_COUNT, 0);
+		return entity;
+	}
+
+	public synchronized Entity createLogEntry(Entity transLog, String fullName, CudType cudType, DataType dataType,
+			String entityId)
+	{
+		Entity logEntry = new DefaultEntity(this.indexTransactionLogEntryMetaData, this.dataService);
+		logEntry.set(IndexTransactionLogEntryMetaData.MOLGENIS_TRANSACTION_LOG, transLog);
+		logEntry.set(IndexTransactionLogEntryMetaData.ENTITY_FULL_NAME, fullName);
+		logEntry.set(IndexTransactionLogEntryMetaData.CUD_TYPE, cudType);
+		logEntry.set(IndexTransactionLogEntryMetaData.DATA_TYPE, dataType);
+		logEntry.set(IndexTransactionLogEntryMetaData.ENTITY_ID, entityId);
+		logEntry.set(IndexTransactionLogEntryMetaData.LOG_ORDER, this.increaseCount(transLog));
+		return logEntry;
 	}
 
 	private synchronized void finishTransaction(String transactionId, TransactionStatus transactionStatus)
@@ -105,7 +124,7 @@ public class IndexTransactionLogService implements MolgenisTransactionListener
 		RunAsSystemProxy.runAsSystem(() -> {
 			Entity transLog = dataService.findOne(IndexTransactionLogMetaData.ENTITY_NAME, transactionId);
 			transLog.set(IndexTransactionLogMetaData.END_TIME, new Date());
-			transLog.set(IndexTransactionLogMetaData.TRANSACTION_STATUS, TransactionStatus.COMMITED);
+			transLog.set(IndexTransactionLogMetaData.TRANSACTION_STATUS, transactionStatus);
 			dataService.update(IndexTransactionLogMetaData.ENTITY_NAME, transLog);
 			return null;
 		});
