@@ -26,10 +26,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Repository that wraps an existing repository and retrieves count/aggregate information from a Elasticsearch index
- */
-public class ElasticsearchRepositoryDecorator implements Repository
+public class IndexedRepositoryDecorator implements Repository
 {
 	private static final int BATCH_SIZE = 1000;
 
@@ -38,7 +35,7 @@ public class ElasticsearchRepositoryDecorator implements Repository
 
 	private Set<Operator> unsupportedOperators;
 
-	public ElasticsearchRepositoryDecorator(Repository decoratedRepo, SearchService elasticSearchService)
+	public IndexedRepositoryDecorator(Repository decoratedRepo, SearchService elasticSearchService)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepo);
 		this.indexRepository = new ElasticsearchRepository(getEntityMetaData(), elasticSearchService);

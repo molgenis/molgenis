@@ -37,9 +37,9 @@ import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class ElasticsearchRepositoryDecoratorTest
+public class IndexedRepositoryDecoratorTest
 {
-	private ElasticsearchRepositoryDecorator elasticsearchRepositoryDecorator;
+	private IndexedRepositoryDecorator indexedRepositoryDecorator;
 	private ElasticsearchService elasticSearchService;
 	private Repository decoratedRepo;
 	private EntityMetaData repositoryEntityMetaData;
@@ -59,14 +59,14 @@ public class ElasticsearchRepositoryDecoratorTest
 		when(repositoryEntityMetaData.getIdAttribute()).thenReturn(idAttr);
 		when(decoratedRepo.getEntityMetaData()).thenReturn(repositoryEntityMetaData);
 		when(decoratedRepo.getCapabilities()).thenReturn(Collections.singleton(RepositoryCapability.QUERYABLE));
-		elasticsearchRepositoryDecorator = new ElasticsearchRepositoryDecorator(decoratedRepo, elasticSearchService);
+		indexedRepositoryDecorator = new IndexedRepositoryDecorator(decoratedRepo, elasticSearchService);
 	}
 
 	@SuppressWarnings("resource")
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void ElasticSearchRepository()
 	{
-		new ElasticsearchRepositoryDecorator(null, null);
+		new IndexedRepositoryDecorator(null, null);
 	}
 
 	@Test
@@ -74,7 +74,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	{
 		String id = "id0";
 		Entity entity = when(mock(Entity.class).get(idAttrName)).thenReturn(id).getMock();
-		elasticsearchRepositoryDecorator.add(entity);
+		indexedRepositoryDecorator.add(entity);
 		verify(decoratedRepo).add(entity);
 		ArgumentCaptor<Entity> argument = ArgumentCaptor.forClass(Entity.class);
 		verify(elasticSearchService).index(argument.capture(), eq(repositoryEntityMetaData), eq(IndexingMode.ADD));
@@ -89,7 +89,7 @@ public class ElasticsearchRepositoryDecoratorTest
 		{
 			entities.add(mock(Entity.class));
 		}
-		elasticsearchRepositoryDecorator.add(entities.stream());
+		indexedRepositoryDecorator.add(entities.stream());
 		verify(decoratedRepo, times(2)).add(Matchers.<Stream<Entity>> any());
 		verify(elasticSearchService, times(2)).index(Matchers.<Stream<Entity>> any(), eq(repositoryEntityMetaData),
 				eq(IndexingMode.ADD));
@@ -98,7 +98,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	@Test
 	public void aggregate()
 	{
-		when(elasticsearchRepositoryDecorator.getName()).thenReturn("entity");
+		when(indexedRepositoryDecorator.getName()).thenReturn("entity");
 		AttributeMetaData xAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("xAttr").getMock();
 		AttributeMetaData yAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("yAttr").getMock();
 		AttributeMetaData distinctAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("distinctAttr")
@@ -107,28 +107,28 @@ public class ElasticsearchRepositoryDecoratorTest
 		AggregateQuery aggregateQuery = new AggregateQueryImpl().attrX(xAttr).attrY(yAttr).attrDistinct(distinctAttr)
 				.query(q);
 
-		elasticsearchRepositoryDecorator.aggregate(aggregateQuery);
+		indexedRepositoryDecorator.aggregate(aggregateQuery);
 		verify(elasticSearchService).aggregate(aggregateQuery, repositoryEntityMetaData);
 	}
 
 	@Test
 	public void clearCache()
 	{
-		elasticsearchRepositoryDecorator.clearCache();
+		indexedRepositoryDecorator.clearCache();
 		verify(decoratedRepo).clearCache();
 	}
 
 	@Test
 	public void close() throws IOException
 	{
-		elasticsearchRepositoryDecorator.close();
+		indexedRepositoryDecorator.close();
 		verify(decoratedRepo, times(0)).close(); // do not close repository
 	}
 
 	@Test
 	public void count()
 	{
-		elasticsearchRepositoryDecorator.count();
+		indexedRepositoryDecorator.count();
 		verify(elasticSearchService).count(repositoryEntityMetaData);
 	}
 
@@ -136,7 +136,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	public void countQuery()
 	{
 		Query q = mock(Query.class);
-		elasticsearchRepositoryDecorator.count(q);
+		indexedRepositoryDecorator.count(q);
 		verify(elasticSearchService).count(q, repositoryEntityMetaData);
 	}
 
@@ -145,7 +145,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	{
 		String id = "id0";
 		Entity entity = when(mock(Entity.class).get(idAttrName)).thenReturn(id).getMock();
-		elasticsearchRepositoryDecorator.delete(entity);
+		indexedRepositoryDecorator.delete(entity);
 		verify(decoratedRepo).delete(entity);
 		ArgumentCaptor<Entity> argument = ArgumentCaptor.forClass(Entity.class);
 		verify(elasticSearchService).delete(argument.capture(), eq(repositoryEntityMetaData));
@@ -160,7 +160,7 @@ public class ElasticsearchRepositoryDecoratorTest
 		{
 			entities.add(mock(Entity.class));
 		}
-		elasticsearchRepositoryDecorator.delete(entities.stream());
+		indexedRepositoryDecorator.delete(entities.stream());
 		verify(decoratedRepo, times(2)).delete(Matchers.<Stream<Entity>> any());
 		verify(elasticSearchService, times(2)).delete(Matchers.<Stream<Entity>> any(), eq(repositoryEntityMetaData));
 	}
@@ -168,7 +168,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	@Test
 	public void deleteAll()
 	{
-		elasticsearchRepositoryDecorator.deleteAll();
+		indexedRepositoryDecorator.deleteAll();
 		verify(decoratedRepo).deleteAll();
 		verify(elasticSearchService).delete(repositoryEntityMetaData.getName());
 	}
@@ -177,7 +177,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	public void deleteByIdObject()
 	{
 		Object id = "0";
-		elasticsearchRepositoryDecorator.deleteById(id);
+		indexedRepositoryDecorator.deleteById(id);
 		verify(decoratedRepo).deleteById(id);
 		ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
 		verify(elasticSearchService).deleteById(argument.capture(), eq(repositoryEntityMetaData));
@@ -192,7 +192,7 @@ public class ElasticsearchRepositoryDecoratorTest
 		Entity entity1 = mock(Entity.class);
 		when(elasticSearchService.search(q, repositoryEntityMetaData))
 				.thenReturn(Arrays.<Entity> asList(entity0, entity1));
-		elasticsearchRepositoryDecorator.findOne(q);
+		indexedRepositoryDecorator.findOne(q);
 		verify(elasticSearchService).search(q, repositoryEntityMetaData);
 	}
 
@@ -208,7 +208,7 @@ public class ElasticsearchRepositoryDecoratorTest
 
 		Entity entity = mock(Entity.class);
 		when(decoratedRepo.findOneById(id, fetch)).thenReturn(entity);
-		assertEquals(elasticsearchRepositoryDecorator.findOne(q), entity);
+		assertEquals(indexedRepositoryDecorator.findOne(q), entity);
 		verify(decoratedRepo, times(1)).findOneById(id, fetch);
 	}
 
@@ -218,14 +218,14 @@ public class ElasticsearchRepositoryDecoratorTest
 		Query q = mock(Query.class);
 		List<Entity> entities = Collections.emptyList();
 		when(elasticSearchService.search(q, repositoryEntityMetaData)).thenReturn(entities);
-		assertNull(elasticsearchRepositoryDecorator.findOne(q));
+		assertNull(indexedRepositoryDecorator.findOne(q));
 	}
 
 	@Test
 	public void findOneObject()
 	{
 		Object id = mock(Object.class);
-		elasticsearchRepositoryDecorator.findOneById(id);
+		indexedRepositoryDecorator.findOneById(id);
 		verify(decoratedRepo).findOneById(id);
 	}
 
@@ -237,7 +237,7 @@ public class ElasticsearchRepositoryDecoratorTest
 
 		Entity entity = mock(Entity.class);
 		when(decoratedRepo.findOneById(id, fetch)).thenReturn(entity);
-		assertEquals(elasticsearchRepositoryDecorator.findOneById(id, fetch), entity);
+		assertEquals(indexedRepositoryDecorator.findOneById(id, fetch), entity);
 		verify(decoratedRepo, times(1)).findOneById(id, fetch);
 		verifyNoMoreInteractions(decoratedRepo);
 	}
@@ -245,7 +245,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	@Test
 	public void flush()
 	{
-		elasticsearchRepositoryDecorator.flush();
+		indexedRepositoryDecorator.flush();
 		verify(decoratedRepo).flush();
 		verify(elasticSearchService).flush();
 	}
@@ -253,14 +253,14 @@ public class ElasticsearchRepositoryDecoratorTest
 	@Test
 	public void getEntityMetaData()
 	{
-		elasticsearchRepositoryDecorator.getEntityMetaData();
+		indexedRepositoryDecorator.getEntityMetaData();
 		verify(decoratedRepo).getEntityMetaData();
 	}
 
 	@Test
 	public void getName()
 	{
-		assertEquals(elasticsearchRepositoryDecorator.getName(), repositoryEntityMetaData.getName());
+		assertEquals(indexedRepositoryDecorator.getName(), repositoryEntityMetaData.getName());
 	}
 
 	@Test
@@ -268,7 +268,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	{
 		String id = "id0";
 		Entity entity = when(mock(Entity.class).get(idAttrName)).thenReturn(id).getMock();
-		elasticsearchRepositoryDecorator.update(entity);
+		indexedRepositoryDecorator.update(entity);
 		verify(decoratedRepo).update(entity);
 		ArgumentCaptor<Entity> argument = ArgumentCaptor.forClass(Entity.class);
 		verify(elasticSearchService).index(argument.capture(), eq(repositoryEntityMetaData), eq(IndexingMode.UPDATE));
@@ -285,7 +285,7 @@ public class ElasticsearchRepositoryDecoratorTest
 		{
 			entities.add(mock(Entity.class));
 		}
-		elasticsearchRepositoryDecorator.update(entities.stream());
+		indexedRepositoryDecorator.update(entities.stream());
 
 		ArgumentCaptor<Stream<Entity>> decoratedRepoCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(decoratedRepo, times(2)).update(decoratedRepoCaptor.capture());
@@ -306,7 +306,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	@Test
 	public void rebuildIndex()
 	{
-		elasticsearchRepositoryDecorator.rebuildIndex();
+		indexedRepositoryDecorator.rebuildIndex();
 		verify(elasticSearchService).rebuildIndex(decoratedRepo, repositoryEntityMetaData);
 	}
 
@@ -319,7 +319,7 @@ public class ElasticsearchRepositoryDecoratorTest
 		Entity entity1 = mock(Entity.class);
 		Stream<Object> entityIds = Stream.of(id0, id1);
 		when(decoratedRepo.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
-		Stream<Entity> expectedEntities = elasticsearchRepositoryDecorator.findAll(entityIds);
+		Stream<Entity> expectedEntities = indexedRepositoryDecorator.findAll(entityIds);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
 
@@ -327,7 +327,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	public void findAllStreamQueryNoFetch()
 	{
 		QueryImpl q = new QueryImpl();
-		elasticsearchRepositoryDecorator.findAll(q);
+		indexedRepositoryDecorator.findAll(q);
 		verify(decoratedRepo).stream();
 	}
 
@@ -337,7 +337,7 @@ public class ElasticsearchRepositoryDecoratorTest
 		QueryImpl q = new QueryImpl();
 		Fetch fetch = mock(Fetch.class);
 		q.setFetch(fetch);
-		elasticsearchRepositoryDecorator.findAll(q);
+		indexedRepositoryDecorator.findAll(q);
 		verify(decoratedRepo).stream(fetch);
 	}
 
@@ -348,7 +348,7 @@ public class ElasticsearchRepositoryDecoratorTest
 		Fetch fetch = mock(Fetch.class);
 		q.setFetch(fetch);
 		q.setOffset(1);
-		elasticsearchRepositoryDecorator.findAll(q);
+		indexedRepositoryDecorator.findAll(q);
 		verify(decoratedRepo).findAll(q);
 	}
 
@@ -360,7 +360,7 @@ public class ElasticsearchRepositoryDecoratorTest
 		q.setFetch(fetch);
 		q.setOffset(0);
 		q.setPageSize(20);
-		elasticsearchRepositoryDecorator.findAll(q);
+		indexedRepositoryDecorator.findAll(q);
 		verify(decoratedRepo).findAll(q);
 	}
 
@@ -371,7 +371,7 @@ public class ElasticsearchRepositoryDecoratorTest
 		Fetch fetch = mock(Fetch.class);
 		q.setFetch(fetch);
 		q.setSort(mock(Sort.class));
-		elasticsearchRepositoryDecorator.findAll(q);
+		indexedRepositoryDecorator.findAll(q);
 		verify(decoratedRepo).findAll(q);
 	}
 
@@ -385,7 +385,7 @@ public class ElasticsearchRepositoryDecoratorTest
 		q.setPageSize(20);
 		q.setSort(mock(Sort.class));
 		q.not();
-		elasticsearchRepositoryDecorator.findAll(q);
+		indexedRepositoryDecorator.findAll(q);
 		verify(decoratedRepo, never()).stream();
 		verify(decoratedRepo, never()).stream(fetch);
 		verify(decoratedRepo, never()).findAll(q);
@@ -401,7 +401,7 @@ public class ElasticsearchRepositoryDecoratorTest
 		Entity entity1 = mock(Entity.class);
 		Stream<Object> entityIds = Stream.of(id0, id1);
 		when(decoratedRepo.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
-		Stream<Entity> expectedEntities = elasticsearchRepositoryDecorator.findAll(entityIds, fetch);
+		Stream<Entity> expectedEntities = indexedRepositoryDecorator.findAll(entityIds, fetch);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
 
@@ -410,7 +410,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	{
 		QueryImpl q = new QueryImpl();
 		q.in("field", Arrays.asList("id0", "id1"));
-		elasticsearchRepositoryDecorator.findAll(q);
+		indexedRepositoryDecorator.findAll(q);
 		verify(decoratedRepo, times(1)).findAll(q);
 	}
 
@@ -421,7 +421,7 @@ public class ElasticsearchRepositoryDecoratorTest
 
 		QueryImpl q = new QueryImpl();
 		q.in("field", Arrays.asList("id0", "id1"));
-		elasticsearchRepositoryDecorator.findAll(q);
+		indexedRepositoryDecorator.findAll(q);
 		verify(decoratedRepo, never()).findAll(q);
 	}
 
@@ -429,7 +429,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	public void streamFetch()
 	{
 		Fetch fetch = new Fetch();
-		elasticsearchRepositoryDecorator.stream(fetch);
+		indexedRepositoryDecorator.stream(fetch);
 		verify(decoratedRepo, times(1)).stream(fetch);
 	}
 }
