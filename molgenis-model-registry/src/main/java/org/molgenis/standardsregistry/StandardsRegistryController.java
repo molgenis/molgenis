@@ -24,7 +24,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.Package;
 import org.molgenis.data.meta.PackageSearchResultItem;
 import org.molgenis.data.semantic.LabeledResource;
-import org.molgenis.data.semantic.Tag;
+import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -318,7 +318,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 	{
 		List<PackageResponse.Tag> tags = Lists.newArrayList();
 
-		for (Tag<Package, LabeledResource, LabeledResource> tag : tagService.getTagsForPackage(p))
+		for (SemanticTag<Package, LabeledResource, LabeledResource> tag : tagService.getTagsForPackage(p))
 		{
 			tags.add(new PackageResponse.Tag(tag.getObject().getLabel(), tag.getObject().getIri(), tag.getRelation()
 					.toString()));

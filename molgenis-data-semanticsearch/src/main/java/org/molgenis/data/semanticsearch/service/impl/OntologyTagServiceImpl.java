@@ -27,8 +27,7 @@ import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.semantic.Tag;
-import org.molgenis.data.semantic.TagImpl;
+import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.semantic.OntologyTag;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
@@ -81,14 +80,14 @@ public class OntologyTagServiceImpl implements OntologyTagService
 
 	@Override
 	public void removeAttributeTag(EntityMetaData entityMetaData,
-			Tag<AttributeMetaData, OntologyTerm, Ontology> removeTag)
+			SemanticTag<AttributeMetaData, OntologyTerm, Ontology> removeTag)
 	{
 		AttributeMetaData attributeMetaData = removeTag.getSubject();
 		Entity attributeEntity = findAttributeEntity(entityMetaData.getName(), attributeMetaData.getName());
 		List<Entity> tags = new ArrayList<Entity>();
 		for (Entity tagEntity : attributeEntity.getEntities(AttributeMetaDataMetaData.TAGS))
 		{
-			Tag<AttributeMetaData, OntologyTerm, Ontology> tag = asTag(attributeMetaData, tagEntity);
+			SemanticTag<AttributeMetaData, OntologyTerm, Ontology> tag = asTag(attributeMetaData, tagEntity);
 			if (!removeTag.equals(tag))
 			{
 				tags.add(tagEntity);
@@ -112,14 +111,14 @@ public class OntologyTagServiceImpl implements OntologyTagService
 		}
 		for (Entity tagEntity : entity.getEntities(AttributeMetaDataMetaData.TAGS))
 		{
-			Tag<AttributeMetaData, OntologyTerm, Ontology> tag = asTag(attributeMetaData, tagEntity);
+			SemanticTag<AttributeMetaData, OntologyTerm, Ontology> tag = asTag(attributeMetaData, tagEntity);
 			tags.put(tag.getRelation(), tag.getObject());
 		}
 		return tags;
 	}
 
 	@Override
-	public Iterable<Tag<Package, OntologyTerm, Ontology>> getTagsForPackage(Package p)
+	public Iterable<SemanticTag<Package, OntologyTerm, Ontology>> getTagsForPackage(Package p)
 	{
 		Entity packageEntity = dataService.findOne(PackageMetaData.ENTITY_NAME,
 				new QueryImpl<Entity>().eq(PackageMetaData.FULL_NAME, p.getName()));
@@ -129,7 +128,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 			throw new UnknownEntityException("Unknown package [" + p.getName() + "]");
 		}
 
-		List<Tag<Package, OntologyTerm, Ontology>> tags = Lists.newArrayList();
+		List<SemanticTag<Package, OntologyTerm, Ontology>> tags = Lists.newArrayList();
 		for (Entity tagEntity : packageEntity.getEntities(PackageMetaData.TAGS))
 		{
 			tags.add(asTag(p, tagEntity));
@@ -139,7 +138,8 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	}
 
 	@Override
-	public void addAttributeTag(EntityMetaData entityMetaData, Tag<AttributeMetaData, OntologyTerm, Ontology> tag)
+	public void addAttributeTag(EntityMetaData entityMetaData,
+			SemanticTag<AttributeMetaData, OntologyTerm, Ontology> tag)
 	{
 		Entity entity = findAttributeEntity(entityMetaData.getName(), tag.getSubject().getName());
 		List<Entity> tags = new ArrayList<Entity>();
@@ -186,7 +186,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 		return added ? OntologyTag.create(combinedOntologyTerm, relation) : null;
 	}
 
-	public Entity getTagEntity(Tag<?, OntologyTerm, Ontology> tag)
+	public Entity getTagEntity(SemanticTag<?, OntologyTerm, Ontology> tag)
 	{
 		return tagRepository.getTagEntity(tag.getObject().getIRI(), tag.getObject().getLabel(), tag.getRelation(), tag
 				.getCodeSystem().getIRI());
@@ -223,21 +223,21 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	}
 
 	@Override
-	public void addEntityTag(Tag<EntityMetaData, OntologyTerm, Ontology> tag)
+	public void addEntityTag(SemanticTag<EntityMetaData, OntologyTerm, Ontology> tag)
 	{
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void removeEntityTag(Tag<EntityMetaData, OntologyTerm, Ontology> tag)
+	public void removeEntityTag(SemanticTag<EntityMetaData, OntologyTerm, Ontology> tag)
 	{
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public Iterable<Tag<EntityMetaData, LabeledResource, LabeledResource>> getTagsForEntity(
+	public Iterable<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>> getTagsForEntity(
 			EntityMetaData entityMetaData)
 	{
 		// TODO Auto-generated method stub
@@ -286,7 +286,8 @@ public class OntologyTagServiceImpl implements OntologyTagService
 		return result.isPresent() ? result.get() : null;
 	}
 
-	private <SubjectType> TagImpl<SubjectType, OntologyTerm, Ontology> asTag(SubjectType subjectType, Entity tagEntity)
+	private <SubjectType> SemanticTag<SubjectType, OntologyTerm, Ontology> asTag(SubjectType subjectType,
+			Entity tagEntity)
 	{
 		String identifier = tagEntity.getString(TagMetaData.IDENTIFIER);
 		Relation relation = asRelation(tagEntity);
@@ -296,7 +297,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 		{
 			return null;
 		}
-		return new TagImpl<SubjectType, OntologyTerm, Ontology>(identifier, subjectType, relation, ontologyTerm,
+		return new SemanticTag<SubjectType, OntologyTerm, Ontology>(identifier, subjectType, relation, ontologyTerm,
 				ontology);
 	}
 

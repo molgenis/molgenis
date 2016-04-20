@@ -40,7 +40,7 @@ import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.Package;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.LabeledResource;
-import org.molgenis.data.semantic.Tag;
+import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.DefaultEntity;
@@ -166,14 +166,15 @@ public class ImportWriter
 
 	private void importEntityAndAttributeTags(ParsedMetaData parsedMetaData)
 	{
-		for (Tag<EntityMetaData, LabeledResource, LabeledResource> tag : parsedMetaData.getEntityTags())
+		for (SemanticTag<EntityMetaData, LabeledResource, LabeledResource> tag : parsedMetaData.getEntityTags())
 		{
 			tagService.addEntityTag(tag);
 		}
 
 		for (EntityMetaData emd : parsedMetaData.getAttributeTags().keySet())
 		{
-			for (Tag<AttributeMetaData, LabeledResource, LabeledResource> tag : parsedMetaData.getAttributeTags()
+			for (SemanticTag<AttributeMetaData, LabeledResource, LabeledResource> tag : parsedMetaData
+					.getAttributeTags()
 					.get(emd))
 			{
 				tagService.addAttributeTag(emd, tag);

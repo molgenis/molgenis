@@ -54,7 +54,7 @@ import org.molgenis.data.meta.MetaValidationUtils;
 import org.molgenis.data.meta.Package;
 import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.meta.TagMetaData;
-import org.molgenis.data.semantic.TagImpl;
+import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.fieldtypes.CompoundField;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
@@ -439,7 +439,7 @@ public class EmxMetaDataParser implements MetaDataParser
 										+ entityName + "]). Please specify on the " + TAGS + " sheet.");
 					}
 					intermediateResults.addAttributeTag(entityName,
-							TagImpl.<AttributeMetaData> asTag(attribute, tagEntity));
+							SemanticTag.<AttributeMetaData>asTag(attribute, tagEntity));
 				}
 			}
 
@@ -637,19 +637,20 @@ public class EmxMetaDataParser implements MetaDataParser
 					md.setExtends(extendsEntityMeta);
 				}
 
-				if (tagIds != null)
-				{
-					for (String tagId : tagIds)
-					{
-						Entity tagEntity = intermediateResults.getTagEntity(tagId);
-						if (tagEntity == null)
-						{
-							throw new MolgenisDataException("Unknown tag: " + tagId + " for entity [" + entityName
-									+ "]). Please specify on the " + TAGS + " sheet.");
-						}
-						intermediateResults.addEntityTag(TagImpl.<EntityMetaData> asTag(md, tagEntity));
-					}
-				}
+				// FIXME fix tag import
+				//				if (tagIds != null)
+				//				{
+				//					for (String tagId : tagIds)
+				//					{
+				//						Entity tagEntity = intermediateResults.getTagEntity(tagId);
+				//						if (tagEntity == null)
+				//						{
+				//							throw new MolgenisDataException("Unknown tag: " + tagId + " for entity [" + entityName
+				//									+ "]). Please specify on the " + TAGS + " sheet.");
+				//						}
+				//						intermediateResults.addEntityTag(Tag.<EntityMetaData> asTag(md, tagEntity));
+				//					}
+				//				}
 			}
 		}
 	}
@@ -722,7 +723,7 @@ public class EmxMetaDataParser implements MetaDataParser
 						{
 							throw new IllegalArgumentException("Unknown tag '" + tagIdentifier + "'");
 						}
-						//p.addTag(TagImpl.<Package> asTag(p, tagEntity)); // FIXME
+						//p.addTag(Tag.<Package> asTag(p, tagEntity)); // FIXME
 						throw new UnsupportedOperationException();
 					}
 				}

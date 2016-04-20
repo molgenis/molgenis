@@ -1,11 +1,20 @@
 package org.molgenis.data.meta;
 
+import static com.google.common.collect.Iterables.concat;
+import static com.google.common.collect.Iterables.removeAll;
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.PackageMetaData.DESCRIPTION;
+import static org.molgenis.data.meta.PackageMetaData.ENTITY_NAME;
+import static org.molgenis.data.meta.PackageMetaData.FULL_NAME;
+import static org.molgenis.data.meta.PackageMetaData.INSTANCE;
+import static org.molgenis.data.meta.PackageMetaData.PARENT;
+import static org.molgenis.data.meta.PackageMetaData.SIMPLE_NAME;
+import static org.molgenis.data.meta.PackageMetaData.TAGS;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.support.AbstractEntity;
 import org.molgenis.data.support.MapEntity;
@@ -51,10 +60,10 @@ public class Package extends AbstractEntity
 		{
 			fullName = simpleName;
 		}
-		set(PackageMetaData.FULL_NAME, fullName);
-		set(PackageMetaData.SIMPLE_NAME, simpleName);
-		set(PackageMetaData.DESCRIPTION, description);
-		set(PackageMetaData.PARENT, parent);
+		set(FULL_NAME, fullName);
+		set(SIMPLE_NAME, simpleName);
+		set(DESCRIPTION, description);
+		set(PARENT, parent);
 	}
 
 	/**
@@ -72,7 +81,7 @@ public class Package extends AbstractEntity
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return PackageMetaData.INSTANCE;
+		return INSTANCE;
 	}
 
 	@Override
@@ -100,12 +109,12 @@ public class Package extends AbstractEntity
 	 */
 	public String getSimpleName()
 	{
-		return getString(PackageMetaData.SIMPLE_NAME);
+		return getString(SIMPLE_NAME);
 	}
 
 	public Package setSimpleName(String simpleName)
 	{
-		set(PackageMetaData.SIMPLE_NAME, simpleName);
+		set(SIMPLE_NAME, simpleName);
 		return this;
 	}
 
@@ -116,12 +125,12 @@ public class Package extends AbstractEntity
 	 */
 	public Package getParent()
 	{
-		return getEntity(PackageMetaData.PARENT, Package.class);
+		return getEntity(PARENT, Package.class);
 	}
 
 	public Package setParent(Package parentPackage)
 	{
-		set(PackageMetaData.PARENT, parentPackage);
+		set(PARENT, parentPackage);
 		return this;
 	}
 
@@ -132,12 +141,12 @@ public class Package extends AbstractEntity
 	 */
 	public String getName()
 	{
-		return getString(PackageMetaData.FULL_NAME);
+		return getString(FULL_NAME);
 	}
 
 	public Package setName(String fullName)
 	{
-		set(PackageMetaData.FULL_NAME, fullName);
+		set(FULL_NAME, fullName);
 		return this;
 	}
 
@@ -148,13 +157,57 @@ public class Package extends AbstractEntity
 	 */
 	public String getDescription()
 	{
-		return getString(PackageMetaData.DESCRIPTION);
+		return getString(DESCRIPTION);
 	}
 
 	public Package setDescription(String description)
 	{
-		set(PackageMetaData.DESCRIPTION, description);
+		set(DESCRIPTION, description);
 		return this;
+	}
+
+	/**
+	 * Get all tags for this package
+	 *
+	 * @return package tags
+	 */
+	public Iterable<Tag> getTags()
+	{
+		return getEntities(TAGS, Tag.class);
+	}
+
+	/**
+	 * Set tags for this package
+	 *
+	 * @param tags package tags
+	 * @return this package
+	 */
+	public Package setTags(Iterable<Tag> tags)
+	{
+		set(TAGS, tags);
+		return this;
+	}
+
+	/**
+	 * Add a tag for this package
+	 *
+	 * @param tag package tag
+	 */
+	public void addTag(Tag tag)
+	{
+		entity.set(TAGS, concat(getTags(), singletonList(tag)));
+	}
+
+	/**
+	 * Add a tag for this package
+	 *
+	 * @param tag package tag
+	 */
+	public void removeTag(Tag tag)
+	{
+		Iterable<Tag> tags = getTags();
+		removeAll(tags, singletonList(tag));
+		entity.set(TAGS, tag);
 	}
 
 	/**
@@ -180,8 +233,8 @@ public class Package extends AbstractEntity
 	{
 		// TODO use one-to-many relationship for Package.parent
 		DataService dataService = ApplicationContextProvider.getApplicationContext().getBean(DataService.class);
-		Query<Package> query = dataService.query(PackageMetaData.ENTITY_NAME, Package.class)
-				.eq(PackageMetaData.PARENT, this);
+		Query<Package> query = dataService.query(ENTITY_NAME, Package.class)
+				.eq(PARENT, this);
 		return () -> query.findAll().iterator();
 	}
 
@@ -198,17 +251,6 @@ public class Package extends AbstractEntity
 			package_ = package_.getParent();
 		}
 		return package_;
-	}
-
-	/**
-	 * Get all tags for this package
-	 *
-	 * @return package tags
-	 */
-	public Iterable<Tag<Package, LabeledResource, LabeledResource>> getTags()
-	{
-		// FIXME implement
-		throw new UnsupportedOperationException();
 	}
 
 	@Override

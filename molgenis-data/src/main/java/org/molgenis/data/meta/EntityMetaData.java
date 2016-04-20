@@ -1,5 +1,7 @@
 package org.molgenis.data.meta;
 
+import static com.google.common.collect.Iterables.concat;
+import static com.google.common.collect.Iterables.removeAll;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
@@ -18,6 +20,7 @@ import static org.molgenis.data.meta.EntityMetaDataMetaData.LABEL_ATTRIBUTE;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.LOOKUP_ATTRIBUTES;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.SIMPLE_NAME;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.TAGS;
 import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeName;
 
 import java.util.ArrayList;
@@ -25,12 +28,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.support.AbstractEntity;
 import org.molgenis.data.support.MapEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import autovalue.shaded.com.google.common.common.collect.Iterables;
 
 /**
  * EntityMetaData defines the structure and attributes of an Entity. Attributes are unique. Other software components
@@ -366,7 +368,7 @@ public class EntityMetaData extends AbstractEntity
 		EntityMetaData extends_ = getExtends();
 		if (extends_ != null)
 		{
-			lookupAttributes = Iterables.concat(lookupAttributes, extends_.getLookupAttributes());
+			lookupAttributes = concat(lookupAttributes, extends_.getLookupAttributes());
 		}
 		return lookupAttributes;
 	}
@@ -453,7 +455,7 @@ public class EntityMetaData extends AbstractEntity
 		EntityMetaData extends_ = getExtends();
 		if (extends_ != null)
 		{
-			attrs = Iterables.concat(attrs, extends_.getAttributes());
+			attrs = concat(attrs, extends_.getAttributes());
 		}
 		return attrs;
 	}
@@ -473,7 +475,7 @@ public class EntityMetaData extends AbstractEntity
 		EntityMetaData extends_ = getExtends();
 		if (extends_ != null)
 		{
-			atomicAttrs = Iterables.concat(atomicAttrs, extends_.getAtomicAttributes());
+			atomicAttrs = concat(atomicAttrs, extends_.getAtomicAttributes());
 		}
 		return atomicAttrs;
 	}
@@ -491,7 +493,7 @@ public class EntityMetaData extends AbstractEntity
 	public void addAttribute(AttributeMetaData attr, AttributeRole... attrTypes)
 	{
 		Iterable<AttributeMetaData> attrs = entity.getEntities(ATTRIBUTES, AttributeMetaData.class);
-		entity.set(ATTRIBUTES, Iterables.concat(attrs, singletonList(attr)));
+		entity.set(ATTRIBUTES, concat(attrs, singletonList(attr)));
 		if (attrTypes != null)
 		{
 			for (AttributeRole attrType : attrTypes)
@@ -548,7 +550,51 @@ public class EntityMetaData extends AbstractEntity
 	public void addLookupAttribute(AttributeMetaData lookupAttr)
 	{
 		Iterable<AttributeMetaData> lookupAttrs = entity.getEntities(LOOKUP_ATTRIBUTES, AttributeMetaData.class);
-		entity.set(LOOKUP_ATTRIBUTES, Iterables.concat(lookupAttrs, singletonList(lookupAttr)));
+		entity.set(LOOKUP_ATTRIBUTES, concat(lookupAttrs, singletonList(lookupAttr)));
+	}
+
+	/**
+	 * Get all tags for this entity
+	 *
+	 * @return entity tags
+	 */
+	public Iterable<Tag> getTags()
+	{
+		return getEntities(TAGS, Tag.class);
+	}
+
+	/**
+	 * Set tags for this entity
+	 *
+	 * @param tags entity tags
+	 * @return this entity
+	 */
+	public EntityMetaData setTags(Iterable<Tag> tags)
+	{
+		set(TAGS, tags);
+		return this;
+	}
+
+	/**
+	 * Add a tag for this entity
+	 *
+	 * @param tag entity tag
+	 */
+	public void addTag(Tag tag)
+	{
+		entity.set(TAGS, concat(getTags(), singletonList(tag)));
+	}
+
+	/**
+	 * Add a tag for this entity
+	 *
+	 * @param tag entity tag
+	 */
+	public void removeTag(Tag tag)
+	{
+		Iterable<Tag> tags = getTags();
+		removeAll(tags, singletonList(tag));
+		entity.set(TAGS, tag);
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package org.molgenis.data.meta;
 
+import static com.google.common.collect.Iterables.concat;
+import static com.google.common.collect.Iterables.removeAll;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -24,6 +26,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MAX;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MIN;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.READ_ONLY;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.REF_ENTITY;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.TAGS;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.UNIQUE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VALIDATION_EXPRESSION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE;
@@ -36,11 +39,10 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
+import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.support.AbstractEntity;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.fieldtypes.FieldType;
-
-import com.google.common.collect.Iterables;
 
 /**
  * Attribute defines the properties of an entity. Synonyms: feature, column, data item.
@@ -476,7 +478,51 @@ public class AttributeMetaData extends AbstractEntity
 	public void addAttributePart(AttributeMetaData attrPart)
 	{
 		Iterable<AttributeMetaData> attrParts = getEntities(PARTS, AttributeMetaData.class);
-		set(PARTS, Iterables.concat(attrParts, singletonList(attrPart)));
+		set(PARTS, concat(attrParts, singletonList(attrPart)));
+	}
+
+	/**
+	 * Get all tags for this attribute
+	 *
+	 * @return attribute tags
+	 */
+	public Iterable<Tag> getTags()
+	{
+		return getEntities(TAGS, Tag.class);
+	}
+
+	/**
+	 * Set tags for this attribute
+	 *
+	 * @param tags attribute tags
+	 * @return this entity
+	 */
+	public AttributeMetaData setTags(Iterable<Tag> tags)
+	{
+		set(TAGS, tags);
+		return this;
+	}
+
+	/**
+	 * Add a tag for this attribute
+	 *
+	 * @param tag attribute tag
+	 */
+	public void addTag(Tag tag)
+	{
+		entity.set(TAGS, concat(getTags(), singletonList(tag)));
+	}
+
+	/**
+	 * Add a tag for this attribute
+	 *
+	 * @param tag attribute tag
+	 */
+	public void removeTag(Tag tag)
+	{
+		Iterable<Tag> tags = getTags();
+		removeAll(tags, singletonList(tag));
+		entity.set(TAGS, tag);
 	}
 
 	@Override
@@ -488,6 +534,7 @@ public class AttributeMetaData extends AbstractEntity
 		AttributeMetaData that = (AttributeMetaData) o;
 
 		return entity.equals(that.entity);
+
 	}
 
 	@Override

@@ -220,7 +220,7 @@ class PackageRepository
 //			{
 //				for (Entity tagEntity : tags)
 //				{
-//					p.addTag(TagImpl.<Package> asTag(p, tagEntity));
+		//					p.addTag(Tag.<Package> asTag(p, tagEntity));
 //				}
 //			}
 //

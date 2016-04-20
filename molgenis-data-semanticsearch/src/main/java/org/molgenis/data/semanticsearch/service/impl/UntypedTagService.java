@@ -19,8 +19,7 @@ import org.molgenis.data.meta.Package;
 import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.semantic.Tag;
-import org.molgenis.data.semantic.TagImpl;
+import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.QueryImpl;
@@ -64,14 +63,15 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 
 	@Override
 	public void removeAttributeTag(EntityMetaData entityMetaData,
-			Tag<AttributeMetaData, LabeledResource, LabeledResource> removeTag)
+			SemanticTag<AttributeMetaData, LabeledResource, LabeledResource> removeTag)
 	{
 		AttributeMetaData attributeMetaData = removeTag.getSubject();
 		Entity attributeEntity = findAttributeEntity(entityMetaData, attributeMetaData.getName());
 		List<Entity> tags = new ArrayList<Entity>();
 		for (Entity tagEntity : attributeEntity.getEntities(AttributeMetaDataMetaData.TAGS))
 		{
-			Tag<AttributeMetaData, LabeledResource, LabeledResource> tag = TagImpl.asTag(attributeMetaData, tagEntity);
+			SemanticTag<AttributeMetaData, LabeledResource, LabeledResource> tag = SemanticTag
+					.asTag(attributeMetaData, tagEntity);
 			if (!removeTag.equals(tag))
 			{
 				tags.add(tagEntity);
@@ -92,7 +92,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 		Multimap<Relation, LabeledResource> tags = ArrayListMultimap.<Relation, LabeledResource> create();
 		for (Entity tagEntity : entity.getEntities(AttributeMetaDataMetaData.TAGS))
 		{
-			TagImpl<AttributeMetaData, LabeledResource, LabeledResource> tag = TagImpl.asTag(attributeMetaData,
+			SemanticTag<AttributeMetaData, LabeledResource, LabeledResource> tag = SemanticTag.asTag(attributeMetaData,
 					tagEntity);
 			tags.put(tag.getRelation(), tag.getObject());
 		}
@@ -101,10 +101,10 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 
 	@Override
 	@RunAsSystem
-	public Iterable<Tag<EntityMetaData, LabeledResource, LabeledResource>> getTagsForEntity(
+	public Iterable<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>> getTagsForEntity(
 			EntityMetaData entityMetaData)
 	{
-		List<Tag<EntityMetaData, LabeledResource, LabeledResource>> result = new ArrayList<Tag<EntityMetaData, LabeledResource, LabeledResource>>();
+		List<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>> result = new ArrayList<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>>();
 		Entity entity = findEntity(entityMetaData);
 		if (entity == null)
 		{
@@ -114,7 +114,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 		{
 			for (Entity tagEntity : entity.getEntities(EntityMetaDataMetaData.TAGS))
 			{
-				result.add(TagImpl.asTag(entityMetaData, tagEntity));
+				result.add(SemanticTag.asTag(entityMetaData, tagEntity));
 			}
 		}
 		return result;
@@ -122,7 +122,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 
 	@Override
 	public void addAttributeTag(EntityMetaData entityMetaData,
-			Tag<AttributeMetaData, LabeledResource, LabeledResource> tag)
+			SemanticTag<AttributeMetaData, LabeledResource, LabeledResource> tag)
 	{
 		Entity entity = findAttributeEntity(entityMetaData, tag.getSubject().getName());
 		List<Entity> tags = new ArrayList<Entity>();
@@ -136,15 +136,15 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	}
 
 	@Override
-	public void addEntityTag(Tag<EntityMetaData, LabeledResource, LabeledResource> tag)
+	public void addEntityTag(SemanticTag<EntityMetaData, LabeledResource, LabeledResource> tag)
 	{
 		Entity entity = findEntity(tag.getSubject());
 		if (entity == null)
 		{
 			throw new UnknownEntityException("Unknown entity [" + tag.getSubject().getName() + "]");
 		}
-		ImmutableList<Tag<EntityMetaData, LabeledResource, LabeledResource>> existingTags = ImmutableList
-				.<Tag<EntityMetaData, LabeledResource, LabeledResource>> copyOf(getTagsForEntity(tag.getSubject()));
+		ImmutableList<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>> existingTags = ImmutableList.<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>>copyOf(
+				getTagsForEntity(tag.getSubject()));
 		if (existingTags.contains(tag))
 		{
 			LOG.debug("Tag already present");
@@ -158,7 +158,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 		dataService.update(EntityMetaDataMetaData.ENTITY_NAME, entity);
 	}
 
-	public Entity getTagEntity(Tag<?, LabeledResource, LabeledResource> tag)
+	public Entity getTagEntity(SemanticTag<?, LabeledResource, LabeledResource> tag)
 	{
 		return tagRepository.getTagEntity(tag.getObject().getIri(), tag.getObject().getLabel(), tag.getRelation(), tag
 				.getCodeSystem().getIri());
@@ -166,7 +166,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 
 	@Override
 	@RunAsSystem
-	public Iterable<Tag<Package, LabeledResource, LabeledResource>> getTagsForPackage(Package p)
+	public Iterable<SemanticTag<Package, LabeledResource, LabeledResource>> getTagsForPackage(Package p)
 	{
 		Entity packageEntity = dataService.findOne(PackageMetaData.ENTITY_NAME,
 				new QueryImpl<Entity>().eq(PackageMetaData.FULL_NAME, p.getName()));
@@ -176,17 +176,17 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 			throw new UnknownEntityException("Unknown package [" + p.getName() + "]");
 		}
 
-		List<Tag<Package, LabeledResource, LabeledResource>> tags = Lists.newArrayList();
+		List<SemanticTag<Package, LabeledResource, LabeledResource>> tags = Lists.newArrayList();
 		for (Entity tagEntity : packageEntity.getEntities(PackageMetaData.TAGS))
 		{
-			tags.add(TagImpl.asTag(p, tagEntity));
+			tags.add(SemanticTag.asTag(p, tagEntity));
 		}
 
 		return tags;
 	}
 
 	@Override
-	public void removeEntityTag(Tag<EntityMetaData, LabeledResource, LabeledResource> tag)
+	public void removeEntityTag(SemanticTag<EntityMetaData, LabeledResource, LabeledResource> tag)
 	{
 		throw new UnsupportedOperationException("not yet implemented");
 	}

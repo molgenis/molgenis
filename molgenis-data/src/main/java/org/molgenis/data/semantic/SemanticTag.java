@@ -3,7 +3,7 @@ package org.molgenis.data.semantic;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.TagMetaData;
 
-public class TagImpl<SubjectType, ObjectType, CodeSystemType> implements Tag<SubjectType, ObjectType, CodeSystemType>
+public class SemanticTag<SubjectType, ObjectType, CodeSystemType>
 {
 	private final SubjectType subject;
 	private final Relation relation;
@@ -11,7 +11,8 @@ public class TagImpl<SubjectType, ObjectType, CodeSystemType> implements Tag<Sub
 	private final CodeSystemType codeSystem;
 	private final String identifier;
 
-	public static <SubjectType> TagImpl<SubjectType, LabeledResource, LabeledResource> asTag(SubjectType subjectType,
+	public static <SubjectType> SemanticTag<SubjectType, LabeledResource, LabeledResource> asTag(
+			SubjectType subjectType,
 			Entity tagEntity)
 	{
 		String identifier = tagEntity.getString(TagMetaData.IDENTIFIER);
@@ -32,11 +33,11 @@ public class TagImpl<SubjectType, ObjectType, CodeSystemType> implements Tag<Sub
 		LabeledResource objectResource = new LabeledResource(tagEntity.getString(TagMetaData.OBJECT_IRI),
 				tagEntity.getString(TagMetaData.LABEL));
 
-		return new TagImpl<SubjectType, LabeledResource, LabeledResource>(identifier, subjectType, relation,
+		return new SemanticTag<SubjectType, LabeledResource, LabeledResource>(identifier, subjectType, relation,
 				objectResource, codeSystem);
 	}
 
-	public TagImpl(String identifier, SubjectType subject, Relation relation, ObjectType object,
+	public SemanticTag(String identifier, SubjectType subject, Relation relation, ObjectType object,
 			CodeSystemType codeSystem)
 	{
 		this.identifier = identifier;
@@ -46,43 +47,36 @@ public class TagImpl<SubjectType, ObjectType, CodeSystemType> implements Tag<Sub
 		this.codeSystem = codeSystem;
 	}
 
-	@Override
 	public SubjectType getSubject()
 	{
 		return subject;
 	}
 
-	@Override
 	public Relation getRelation()
 	{
 		return relation;
 	}
 
-	@Override
 	public ObjectType getObject()
 	{
 		return object;
 	}
 
-	@Override
 	public CodeSystemType getCodeSystem()
 	{
 		return codeSystem;
 	}
 
-	@Override
 	public String getIdentifier()
 	{
 		return identifier;
 	}
 
-	@Override
 	public String toString()
 	{
 		return relation.getLabel() + " " + getObject();
 	}
 
-	@Override
 	public int hashCode()
 	{
 		final int prime = 31;
@@ -101,7 +95,7 @@ public class TagImpl<SubjectType, ObjectType, CodeSystemType> implements Tag<Sub
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		TagImpl other = (TagImpl) obj;
+		SemanticTag other = (SemanticTag) obj;
 		if (codeSystem == null)
 		{
 			if (other.codeSystem != null) return false;
