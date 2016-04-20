@@ -1,42 +1,5 @@
 package org.molgenis.data.annotation.entity.impl.snpEff;
 
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
-import com.google.common.collect.PeekingIterator;
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.IdGenerator;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.annotation.utils.JarRunner;
-import org.molgenis.data.annotator.websettings.SnpEffAnnotatorSettings;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.EffectsMetaData;
-import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.UncheckedIOException;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.regex.Pattern;
-
 import static com.google.common.collect.Iterators.peekingIterator;
 import static java.io.File.createTempFile;
 import static java.util.stream.Collectors.toList;
@@ -58,6 +21,44 @@ import static org.molgenis.data.support.EffectsMetaData.PUTATIVE_IMPACT;
 import static org.molgenis.data.support.EffectsMetaData.RANK_TOTAL;
 import static org.molgenis.data.support.EffectsMetaData.TRANSCRIPT_BIOTYPE;
 import static org.molgenis.data.support.EffectsMetaData.VARIANT;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.UncheckedIOException;
+import java.io.Writer;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.IdGenerator;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.annotation.utils.JarRunner;
+import org.molgenis.data.annotator.websettings.SnpEffAnnotatorSettings;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.EffectsMetaData;
+import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
+import com.google.common.collect.PeekingIterator;
 
 @Component
 public class SnpEffRunner
@@ -124,7 +125,7 @@ public class SnpEffRunner
 			File snpEffOutputWithMetaData = addVcfMetaDataToOutputVcf(outputVcf);
 			VcfRepository repo = new VcfRepository(snpEffOutputWithMetaData, "SNPEFF_OUTPUT_VCF_" + inputVcf.getName());
 
-			PeekingIterator snpEffResultIterator = peekingIterator(repo.iterator());
+			PeekingIterator<Entity> snpEffResultIterator = peekingIterator(repo.iterator());
 
 			return new Iterator<Entity>()
 			{
@@ -289,7 +290,7 @@ public class SnpEffRunner
 		List<String> lines = reader.lines().filter(line -> !line.startsWith("##SnpEff")).collect(toList());
 		reader.close();
 
-		FileWriter writer = new FileWriter(snpEffOutputWithMetaData);
+		Writer writer = new OutputStreamWriter(new FileOutputStream(snpEffOutputWithMetaData), CHARSET);
 		boolean metaDone = false;
 		for (String line : lines)
 		{

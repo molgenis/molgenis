@@ -704,9 +704,6 @@ public class MysqlRepository extends AbstractRepository
 		{
 			if (q.getFetch() == null || q.getFetch().hasField(att.getName()))
 			{
-				if(att == null){
-					System.out.print("");
-				}
 				if (att.getExpression() == null)
 				{
 					if (count > 0) select.append(", ");
