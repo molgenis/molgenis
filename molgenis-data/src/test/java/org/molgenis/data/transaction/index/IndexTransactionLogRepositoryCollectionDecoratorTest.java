@@ -5,6 +5,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
@@ -18,7 +19,7 @@ public class IndexTransactionLogRepositoryCollectionDecoratorTest
 {
 	private final static String REPOSITORY_NAME = "repo";
 	private ManageableRepositoryCollection decoratedRepositoryCollection;
-	private Repository repository;
+	private Repository<Entity> repository;
 	private EntityMetaData entityMeta;
 	private IndexTransactionLogService indexTransactionLogService;
 	private IndexTransactionLogRepositoryCollectionDecorator indexTransactionLogRepositoryCollectionDecorator;
@@ -27,7 +28,7 @@ public class IndexTransactionLogRepositoryCollectionDecoratorTest
 	public void setUpBeforeMethod()
 	{
 		decoratedRepositoryCollection = mock(ManageableRepositoryCollection.class);
-		repository = mock(Repository.class);
+		Repository<Entity> repository = (Repository<Entity>) mock(Repository.class);
 		when(decoratedRepositoryCollection.getRepository(REPOSITORY_NAME)).thenReturn(repository);
 		entityMeta = mock(EntityMetaData.class);
 		when(repository.getEntityMetaData()).thenReturn(entityMeta);

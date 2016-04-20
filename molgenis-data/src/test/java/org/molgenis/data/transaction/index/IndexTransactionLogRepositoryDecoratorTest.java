@@ -18,7 +18,7 @@ import org.testng.annotations.Test;
 
 public class IndexTransactionLogRepositoryDecoratorTest
 {
-	private Repository decoratedRepo;
+	private Repository<Entity> decoratedRepo;
 	private EntityMetaData entityMeta;
 	private IndexTransactionLogService indexTransactionLogService;
 	private IndexTransactionLogRepositoryDecorator indexTransactionLogRepositoryDecorator;
@@ -87,8 +87,8 @@ public class IndexTransactionLogRepositoryDecoratorTest
 	public void deleteEntityByIdStream()
 	{
 		Stream<Object> ids = Stream.empty();
-		indexTransactionLogRepositoryDecorator.deleteById(ids);
-		verify(decoratedRepo, times(1)).deleteById(ids);
+		indexTransactionLogRepositoryDecorator.deleteAll(ids);
+		verify(decoratedRepo, times(1)).deleteAll(ids);
 		verify(indexTransactionLogService, times(1)).log(entityMeta, CudType.DELETE, DataType.DATA, null);
 	}
 
