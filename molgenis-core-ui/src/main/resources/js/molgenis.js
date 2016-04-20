@@ -489,16 +489,18 @@ $(function() {
 						try {
 							molgenis
 									.createAlert(JSON.parse(xhr.responseText).errors);
-						} catch (e) {
+						} catch (ex) {
 							molgenis
 									.createAlert(
 											[ {
 												'message' : 'An error occurred. Please contact the administrator.'
 											} ], 'error');
+							console.log('An ajax error occurred.', event, xhr, settings, e);
 						}
 					});
 
 	window.onerror = function(msg, url, line) {
+		console.log('An error occurred.', msg, url, line);
 		molgenis.createAlert([ {
 			'message' : 'An error occurred. Please contact the administrator.'
 		}, {
