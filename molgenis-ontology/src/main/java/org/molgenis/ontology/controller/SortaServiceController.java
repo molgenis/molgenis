@@ -45,10 +45,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Query;
@@ -58,10 +56,10 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.Sort;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
@@ -555,10 +553,10 @@ public class SortaServiceController extends MolgenisPluginController
 
 	private void createEmptyResultRepository(String jobName, String resultEntityName, EntityMetaData sourceMetaData)
 	{
-		DefaultEntityMetaData resultEntityMetaData = new DefaultEntityMetaData(resultEntityName,
-				MatchingTaskContentEntityMetaData.INSTANCE);
+		EntityMetaData resultEntityMetaData = EntityMetaData.newInstance(MatchingTaskContentEntityMetaData.INSTANCE);
+		resultEntityMetaData.setName(resultEntityName);
 		resultEntityMetaData.setAbstract(false);
-		resultEntityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(INPUT_TERM, FieldTypeEnum.XREF)
+		resultEntityMetaData.addAttribute(new AttributeMetaData(INPUT_TERM, FieldTypeEnum.XREF)
 				.setRefEntity(sourceMetaData).setDescription("Reference to the input term").setNillable(false));
 		resultEntityMetaData.setLabel(jobName + " output");
 		dataService.getMeta().addEntityMeta(resultEntityMetaData);

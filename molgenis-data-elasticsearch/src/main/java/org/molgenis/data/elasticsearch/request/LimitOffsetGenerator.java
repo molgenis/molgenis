@@ -2,8 +2,8 @@ package org.molgenis.data.elasticsearch.request;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
+import org.molgenis.data.meta.EntityMetaData;
 
 /**
  * Sets the 'from' and 'size' fields of the SearchRequestBuilder object.

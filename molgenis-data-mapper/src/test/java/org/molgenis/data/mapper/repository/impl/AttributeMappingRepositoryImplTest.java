@@ -17,17 +17,16 @@ import java.util.List;
 
 import org.mockito.Mockito;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.mapper.config.MappingConfig;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.ontology.core.config.OntologyConfig;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -55,7 +54,7 @@ public class AttributeMappingRepositoryImplTest extends AbstractTestNGSpringCont
 	@Test
 	public void testGetAttributeMappings()
 	{
-		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("targetAttribute");
+		AttributeMetaData targetAttributeMetaData = new AttributeMetaData("targetAttribute");
 		List<AttributeMetaData> sourceAttributeMetaDatas = new ArrayList<AttributeMetaData>();
 
 		List<AttributeMapping> attributeMappings = new ArrayList<AttributeMapping>();
@@ -71,9 +70,9 @@ public class AttributeMappingRepositoryImplTest extends AbstractTestNGSpringCont
 		List<Entity> attributeMappingEntities = new ArrayList<Entity>();
 		attributeMappingEntities.add(attributeMappingEntity);
 
-		DefaultEntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("source");
-		DefaultEntityMetaData targetEntityMetaData = new DefaultEntityMetaData("target");
-		targetEntityMetaData.addAttributeMetaData(targetAttributeMetaData);
+		EntityMetaData sourceEntityMetaData = new EntityMetaData("source");
+		EntityMetaData targetEntityMetaData = new EntityMetaData("target");
+		targetEntityMetaData.addAttribute(targetAttributeMetaData);
 
 		assertEquals(attributeMappingRepository.getAttributeMappings(attributeMappingEntities, sourceEntityMetaData,
 				targetEntityMetaData), attributeMappings);
@@ -82,7 +81,7 @@ public class AttributeMappingRepositoryImplTest extends AbstractTestNGSpringCont
 	@Test
 	public void testUpdate()
 	{
-		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("targetAttribute");
+		AttributeMetaData targetAttributeMetaData = new AttributeMetaData("targetAttribute");
 		List<AttributeMetaData> sourceAttributeMetaDatas = new ArrayList<AttributeMetaData>();
 
 		targetAttributeMetaData.setDataType(MolgenisFieldTypes.STRING);
@@ -108,7 +107,7 @@ public class AttributeMappingRepositoryImplTest extends AbstractTestNGSpringCont
 	@Test
 	public void testInsert()
 	{
-		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("targetAttribute");
+		AttributeMetaData targetAttributeMetaData = new AttributeMetaData("targetAttribute");
 		List<AttributeMetaData> sourceAttributeMetaDatas = new ArrayList<AttributeMetaData>();
 		targetAttributeMetaData.setDataType(MolgenisFieldTypes.STRING);
 
@@ -137,12 +136,12 @@ public class AttributeMappingRepositoryImplTest extends AbstractTestNGSpringCont
 	{
 		String algorithm = "$('attribute_1').value()$('attribute_2').value()";
 
-		DefaultAttributeMetaData attr1 = new DefaultAttributeMetaData("attribute_1");
-		DefaultAttributeMetaData attr2 = new DefaultAttributeMetaData("attribute_2");
+		AttributeMetaData attr1 = new AttributeMetaData("attribute_1");
+		AttributeMetaData attr2 = new AttributeMetaData("attribute_2");
 
-		DefaultEntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("source");
-		sourceEntityMetaData.addAttributeMetaData(attr1);
-		sourceEntityMetaData.addAttributeMetaData(attr2);
+		EntityMetaData sourceEntityMetaData = new EntityMetaData("source");
+		sourceEntityMetaData.addAttribute(attr1);
+		sourceEntityMetaData.addAttribute(attr2);
 
 		List<AttributeMetaData> sourceAttributeMetaDatas = new ArrayList<AttributeMetaData>();
 		sourceAttributeMetaDatas.add(attr1);

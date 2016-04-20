@@ -1,16 +1,16 @@
 package org.molgenis.ontology.core.meta;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.ontology.core.model.OntologyPackage;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OntologyTermDynamicAnnotationMetaData extends DefaultEntityMetaData
+public class OntologyTermDynamicAnnotationMetaData extends EntityMetaData
 {
 	public final static String ID = "id";
 	public final static String NAME = "name";
@@ -25,9 +25,9 @@ public class OntologyTermDynamicAnnotationMetaData extends DefaultEntityMetaData
 	{
 		super(SIMPLE_NAME, OntologyPackage.getPackageInstance());
 
-		addAttributeMetaData(new DefaultAttributeMetaData(ID).setVisible(false), ROLE_ID);
-		addAttributeMetaData(new DefaultAttributeMetaData(NAME, FieldTypeEnum.STRING).setNillable(false));
-		addAttributeMetaData(new DefaultAttributeMetaData(VALUE, FieldTypeEnum.STRING).setNillable(false));
-		addAttributeMetaData(new DefaultAttributeMetaData(LABEL, FieldTypeEnum.STRING).setNillable(false), ROLE_LABEL);
+		addAttribute(new AttributeMetaData(ID).setVisible(false), ROLE_ID);
+		addAttribute(new AttributeMetaData(NAME, FieldTypeEnum.STRING).setNillable(false));
+		addAttribute(new AttributeMetaData(VALUE, FieldTypeEnum.STRING).setNillable(false));
+		addAttribute(new AttributeMetaData(LABEL, FieldTypeEnum.STRING).setNillable(false), ROLE_LABEL);
 	}
 }

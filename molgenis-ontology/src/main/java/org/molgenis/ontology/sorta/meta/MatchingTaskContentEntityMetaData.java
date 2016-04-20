@@ -1,14 +1,14 @@
 package org.molgenis.ontology.sorta.meta;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MatchingTaskContentEntityMetaData extends DefaultEntityMetaData
+public class MatchingTaskContentEntityMetaData extends EntityMetaData
 {
 	public final static String ENTITY_NAME = "MatchingTaskContent";
 	public final static String IDENTIFIER = "identifier";
@@ -23,12 +23,12 @@ public class MatchingTaskContentEntityMetaData extends DefaultEntityMetaData
 	{
 		super(ENTITY_NAME);
 		setAbstract(true);
-		addAttributeMetaData(new DefaultAttributeMetaData(IDENTIFIER), ROLE_ID);
-		addAttributeMetaData(
-				new DefaultAttributeMetaData(MATCHED_TERM).setDescription("Matched ontology term").setNillable(true));
-		addAttributeMetaData(new DefaultAttributeMetaData(SCORE, FieldTypeEnum.DECIMAL)
+		addAttribute(new AttributeMetaData(IDENTIFIER), ROLE_ID);
+		addAttribute(
+				new AttributeMetaData(MATCHED_TERM).setDescription("Matched ontology term").setNillable(true));
+		addAttribute(new AttributeMetaData(SCORE, FieldTypeEnum.DECIMAL)
 				.setDescription("Score of the match").setNillable(true));
-		addAttributeMetaData(new DefaultAttributeMetaData(VALIDATED, FieldTypeEnum.BOOL)
+		addAttribute(new AttributeMetaData(VALIDATED, FieldTypeEnum.BOOL)
 				.setDescription("Indication if the match was validated").setNillable(false));
 	}
 }

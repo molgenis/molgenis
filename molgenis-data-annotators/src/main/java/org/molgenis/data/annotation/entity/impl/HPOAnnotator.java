@@ -13,7 +13,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -30,7 +29,7 @@ import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
-import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -39,7 +38,7 @@ import org.springframework.context.annotation.Configuration;
 import com.google.common.base.Optional;
 
 /**
- * Typical HPO terms for a gene identifier (already present via SnpEff) Source:
+ * Typical HPO terms for a gene dataType (already present via SnpEff) Source:
  * http://compbio.charite.de/hudson/job/hpo. annotations.monthly/lastStableBuild/artifact/annotation/
  * ALL_SOURCES_TYPICAL_FEATURES_diseases_to_genes_to_phenotypes .txt
  * 
@@ -69,9 +68,9 @@ public class HPOAnnotator
 	public RepositoryAnnotator hpo()
 	{
 		List<AttributeMetaData> attributes = new ArrayList<>();
-		attributes.add(new DefaultAttributeMetaData(HPO_IDS).setDataType(MolgenisFieldTypes.TEXT).setDescription(
+		attributes.add(new AttributeMetaData(HPO_IDS).setDataType(MolgenisFieldTypes.TEXT).setDescription(
 				"HPO identifiers"));
-		attributes.add(new DefaultAttributeMetaData(HPO_TERMS).setDataType(MolgenisFieldTypes.TEXT).setDescription(
+		attributes.add(new AttributeMetaData(HPO_TERMS).setDataType(MolgenisFieldTypes.TEXT).setDescription(
 				"HPO terms"));
 
 		AnnotatorInfo info = AnnotatorInfo

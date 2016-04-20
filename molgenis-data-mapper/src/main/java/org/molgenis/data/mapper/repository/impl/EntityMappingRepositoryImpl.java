@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.mapper.controller.MappingServiceController;
@@ -15,6 +14,7 @@ import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
 import org.molgenis.data.mapper.repository.AttributeMappingRepository;
 import org.molgenis.data.mapper.repository.EntityMappingRepository;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

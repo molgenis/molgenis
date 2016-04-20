@@ -1,7 +1,10 @@
 package org.molgenis.data.vcf.utils;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.LONG;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.VcfRepository.ALT;
 import static org.molgenis.data.vcf.VcfRepository.ALT_META;
 import static org.molgenis.data.vcf.VcfRepository.CHROM;
@@ -33,12 +36,11 @@ import java.util.Collections;
 
 import org.apache.commons.io.FileUtils;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisInvalidFormatException;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.util.ResourceUtils;
@@ -53,20 +55,17 @@ import com.google.common.collect.Lists;
 public class VcfUtilsTest
 {
 	private static final Logger LOG = LoggerFactory.getLogger(VcfUtilsTest.class);
-	private final DefaultEntityMetaData annotatedEntityMetadata = new DefaultEntityMetaData("test");
-	public DefaultEntityMetaData metaDataCanAnnotate = new DefaultEntityMetaData("test");
-	public DefaultEntityMetaData metaDataCantAnnotate = new DefaultEntityMetaData("test");
+	private final EntityMetaData annotatedEntityMetadata = new EntityMetaData("test");
+	public EntityMetaData metaDataCanAnnotate = new EntityMetaData("test");
+	public EntityMetaData metaDataCantAnnotate = new EntityMetaData("test");
 
-	public AttributeMetaData attributeMetaDataChrom = new DefaultAttributeMetaData(CHROM,
-			MolgenisFieldTypes.FieldTypeEnum.STRING);
-	public AttributeMetaData attributeMetaDataPos = new DefaultAttributeMetaData(POS,
-			MolgenisFieldTypes.FieldTypeEnum.LONG);
-	public AttributeMetaData attributeMetaDataRef = new DefaultAttributeMetaData(REF,
-			MolgenisFieldTypes.FieldTypeEnum.STRING);
-	public AttributeMetaData attributeMetaDataAlt = new DefaultAttributeMetaData(ALT,
-			MolgenisFieldTypes.FieldTypeEnum.STRING);
-	public AttributeMetaData attributeMetaDataCantAnnotateChrom = new DefaultAttributeMetaData(CHROM,
-			MolgenisFieldTypes.FieldTypeEnum.LONG);
+	public AttributeMetaData attributeMetaDataChrom = new AttributeMetaData(CHROM,
+			STRING);
+	public AttributeMetaData attributeMetaDataPos = new AttributeMetaData(POS, LONG);
+	public AttributeMetaData attributeMetaDataRef = new AttributeMetaData(REF, STRING);
+	public AttributeMetaData attributeMetaDataAlt = new AttributeMetaData(ALT, STRING);
+	public AttributeMetaData attributeMetaDataCantAnnotateChrom = new AttributeMetaData(CHROM,
+			LONG);
 	public ArrayList<Entity> input = new ArrayList<Entity>();
 	public Entity entity;
 	public Entity entity1;
@@ -83,15 +82,15 @@ public class VcfUtilsTest
 		 * 1 10050000 test21 G A . PASS AC=21;AN=22;GTC=0,1,10 1 10050001 test22 G A . PASS AC=22;AN=23;GTC=1,2,11 1
 		 * 10050002 test23 G A . PASS AC=23;AN=24;GTC=2,3,12
 		 */
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom, ROLE_ID);
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataRef);
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataAlt);
+		metaDataCanAnnotate.addAttribute(attributeMetaDataChrom, ROLE_ID);
+		metaDataCanAnnotate.addAttribute(attributeMetaDataPos);
+		metaDataCanAnnotate.addAttribute(attributeMetaDataRef);
+		metaDataCanAnnotate.addAttribute(attributeMetaDataAlt);
 
-		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataCantAnnotateChrom);
-		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataPos);
-		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataRef);
-		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataAlt);
+		metaDataCantAnnotate.addAttribute(attributeMetaDataCantAnnotateChrom);
+		metaDataCantAnnotate.addAttribute(attributeMetaDataPos);
+		metaDataCantAnnotate.addAttribute(attributeMetaDataRef);
+		metaDataCantAnnotate.addAttribute(attributeMetaDataAlt);
 
 		entity = new MapEntity(metaDataCanAnnotate);
 		entity1 = new MapEntity(metaDataCanAnnotate);
@@ -99,37 +98,36 @@ public class VcfUtilsTest
 		entity3 = new MapEntity(metaDataCanAnnotate);
 		entity4 = new MapEntity(metaDataCanAnnotate);
 
-		metaDataCanAnnotate.addAttributeMetaData(
-				new DefaultAttributeMetaData(VcfRepository.ID, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		metaDataCanAnnotate.addAttributeMetaData(
-				new DefaultAttributeMetaData(VcfRepository.QUAL, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		metaDataCanAnnotate.addAttributeMetaData(
-				new DefaultAttributeMetaData(VcfRepository.FILTER, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		DefaultAttributeMetaData INFO = new DefaultAttributeMetaData(VcfRepository.INFO,
-				MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
-		DefaultAttributeMetaData AC = new DefaultAttributeMetaData("AC", MolgenisFieldTypes.FieldTypeEnum.STRING);
-		DefaultAttributeMetaData AN = new DefaultAttributeMetaData("AN", MolgenisFieldTypes.FieldTypeEnum.STRING);
-		DefaultAttributeMetaData GTC = new DefaultAttributeMetaData("GTC", MolgenisFieldTypes.FieldTypeEnum.STRING);
+		metaDataCanAnnotate.addAttribute(
+				new AttributeMetaData(ID, STRING));
+		metaDataCanAnnotate.addAttribute(
+				new AttributeMetaData(QUAL, STRING));
+		metaDataCanAnnotate.addAttribute(
+				new AttributeMetaData(FILTER, STRING));
+		AttributeMetaData INFO = new AttributeMetaData("INFO", COMPOUND);
+		AttributeMetaData AC = new AttributeMetaData("AC", STRING);
+		AttributeMetaData AN = new AttributeMetaData("AN", STRING);
+		AttributeMetaData GTC = new AttributeMetaData("GTC", STRING);
 		INFO.addAttributePart(AC);
 		INFO.addAttributePart(AN);
 		INFO.addAttributePart(GTC);
-		metaDataCanAnnotate.addAttributeMetaData(INFO);
+		metaDataCanAnnotate.addAttribute(INFO);
 
-		annotatedEntityMetadata.addAttributeMetaData(attributeMetaDataChrom, ROLE_ID);
-		annotatedEntityMetadata.addAttributeMetaData(attributeMetaDataPos);
-		annotatedEntityMetadata.addAttributeMetaData(attributeMetaDataRef);
-		annotatedEntityMetadata.addAttributeMetaData(attributeMetaDataAlt);
+		annotatedEntityMetadata.addAttribute(attributeMetaDataChrom, ROLE_ID);
+		annotatedEntityMetadata.addAttribute(attributeMetaDataPos);
+		annotatedEntityMetadata.addAttribute(attributeMetaDataRef);
+		annotatedEntityMetadata.addAttribute(attributeMetaDataAlt);
 
-		annotatedEntityMetadata.addAttributeMetaData(
-				new DefaultAttributeMetaData(VcfRepository.ID, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		annotatedEntityMetadata.addAttributeMetaData(
-				new DefaultAttributeMetaData(VcfRepository.QUAL, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		annotatedEntityMetadata.addAttributeMetaData(
-				(new DefaultAttributeMetaData(VcfRepository.FILTER, MolgenisFieldTypes.FieldTypeEnum.STRING))
+		annotatedEntityMetadata.addAttribute(
+				new AttributeMetaData(ID, STRING));
+		annotatedEntityMetadata.addAttribute(
+				new AttributeMetaData(QUAL, STRING));
+		annotatedEntityMetadata.addAttribute(
+				(new AttributeMetaData(FILTER, STRING))
 						.setDescription(
 								"Test that description is not: '" + VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION + "'"));
-		INFO.addAttributePart(new DefaultAttributeMetaData("ANNO", MolgenisFieldTypes.FieldTypeEnum.STRING));
-		annotatedEntityMetadata.addAttributeMetaData(INFO);
+		INFO.addAttributePart(new AttributeMetaData("ANNO", STRING));
+		annotatedEntityMetadata.addAttribute(INFO);
 
 		entity1.set(VcfRepository.CHROM, "1");
 		entity1.set(VcfRepository.POS, 10050000);
@@ -175,21 +173,21 @@ public class VcfUtilsTest
 		String idAttrName = "idAttr";
 		String sampleIdAttrName = VcfRepository.NAME;
 
-		DefaultEntityMetaData sampleEntityMeta = new DefaultEntityMetaData("vcfSampleEntity");
+		EntityMetaData sampleEntityMeta = new EntityMetaData("vcfSampleEntity");
 		sampleEntityMeta.addAttribute(sampleIdAttrName, ROLE_ID);
 		sampleEntityMeta.addAttribute(formatDpAttrName);
 		sampleEntityMeta.addAttribute(formatEcAttrName);
 		sampleEntityMeta.addAttribute(formatGtAttrName);
 
-		DefaultEntityMetaData entityMeta = new DefaultEntityMetaData("vcfEntity");
+		EntityMetaData entityMeta = new EntityMetaData("vcfEntity");
 		entityMeta.addAttribute(idAttrName, ROLE_ID);
-		entityMeta.addAttributeMetaData(CHROM_META);
-		entityMeta.addAttributeMetaData(POS_META);
-		entityMeta.addAttributeMetaData(ID_META);
-		entityMeta.addAttributeMetaData(REF_META);
-		entityMeta.addAttributeMetaData(ALT_META);
-		entityMeta.addAttributeMetaData(QUAL_META);
-		entityMeta.addAttributeMetaData(FILTER_META);
+		entityMeta.addAttribute(CHROM_META);
+		entityMeta.addAttribute(POS_META);
+		entityMeta.addAttribute(ID_META);
+		entityMeta.addAttribute(REF_META);
+		entityMeta.addAttribute(ALT_META);
+		entityMeta.addAttribute(QUAL_META);
+		entityMeta.addAttribute(FILTER_META);
 		entityMeta.addAttribute(VcfRepository.INFO).setDataType(MolgenisFieldTypes.COMPOUND);
 		entityMeta.addAttribute(SAMPLES).setDataType(MolgenisFieldTypes.MREF).setRefEntity(sampleEntityMeta);
 

@@ -12,13 +12,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.script.Script;
 import org.molgenis.script.ScriptParameter;
@@ -67,9 +66,9 @@ public class AlgorithmTemplateServiceImplTest extends AbstractTestNGSpringContex
 	{
 		String sourceAttr0Name = "sourceAttr0";
 		String sourceAttr1Name = "sourceAttr1";
-		DefaultEntityMetaData sourceEntityMeta = new DefaultEntityMetaData("source");
-		DefaultAttributeMetaData sourceAttr0 = sourceEntityMeta.addAttribute(sourceAttr0Name);
-		DefaultAttributeMetaData sourceAttr1 = sourceEntityMeta.addAttribute(sourceAttr1Name);
+		EntityMetaData sourceEntityMeta = new EntityMetaData("source");
+		AttributeMetaData sourceAttr0 = sourceEntityMeta.addAttribute(sourceAttr0Name);
+		AttributeMetaData sourceAttr1 = sourceEntityMeta.addAttribute(sourceAttr1Name);
 
 		ExplainedQueryString sourceAttr0Explain = ExplainedQueryString.create("a", "b", param0Name, 1.0);
 		ExplainedQueryString sourceAttr1Explain = ExplainedQueryString.create("a", "b", param1Name, 0.5);

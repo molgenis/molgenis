@@ -4,12 +4,13 @@ import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.molgenis.MolgenisFieldTypes.LONG;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.XREF;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -18,23 +19,23 @@ import com.google.gson.JsonSyntaxException;
 public class MapOfStringsExpressionEvaluatorTest
 {
 	private Entity entity;
-	private DefaultEntityMetaData emd;
-	private DefaultEntityMetaData refEmd;
+	private EntityMetaData emd;
+	private EntityMetaData refEmd;
 
 	@BeforeTest
 	public void createEntity()
 	{
-		emd = new DefaultEntityMetaData("Source");
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("Identifier").setDataType(INT), ROLE_ID);
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("Int").setDataType(INT));
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("String").setDataType(STRING));
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("NonNumericString").setDataType(STRING));
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("Long").setDataType(STRING));
+		emd = new EntityMetaData("Source");
+		emd.addAttribute(new AttributeMetaData("Identifier").setDataType(INT), ROLE_ID);
+		emd.addAttribute(new AttributeMetaData("Int").setDataType(INT));
+		emd.addAttribute(new AttributeMetaData("String").setDataType(STRING));
+		emd.addAttribute(new AttributeMetaData("NonNumericString").setDataType(STRING));
+		emd.addAttribute(new AttributeMetaData("Long").setDataType(STRING));
 
-		refEmd = new DefaultEntityMetaData("RefEntity");
-		refEmd.addAttributeMetaData(new DefaultAttributeMetaData("Identifier"), ROLE_ID);
-		refEmd.addAttributeMetaData(new DefaultAttributeMetaData("Chromosome"));
-		refEmd.addAttributeMetaData(new DefaultAttributeMetaData("Position").setDataType(LONG));
+		refEmd = new EntityMetaData("RefEntity");
+		refEmd.addAttribute(new AttributeMetaData("Identifier"), ROLE_ID);
+		refEmd.addAttribute(new AttributeMetaData("Chromosome"));
+		refEmd.addAttribute(new AttributeMetaData("Position").setDataType(LONG));
 
 		entity = new MapEntity(emd);
 		entity.set("Int", 1);
@@ -46,7 +47,7 @@ public class MapOfStringsExpressionEvaluatorTest
 	@Test
 	public void testMapOfStringsEvaluatorConstructorChecksIfAttributeHasExpression()
 	{
-		AttributeMetaData amd = new DefaultAttributeMetaData("#CHROM").setDataType(STRING);
+		AttributeMetaData amd = new AttributeMetaData("#CHROM").setDataType(STRING);
 		try
 		{
 			new MapOfStringsExpressionEvaluator(amd, emd);
@@ -61,7 +62,7 @@ public class MapOfStringsExpressionEvaluatorTest
 	@Test
 	public void testMapOfStringsEvaluatorConstructorChecksIfAttributeHasRefEntity()
 	{
-		AttributeMetaData amd = new DefaultAttributeMetaData("location").setDataType(XREF).setExpression("{'a':b}");
+		AttributeMetaData amd = new AttributeMetaData("location").setDataType(XREF).setExpression("{'a':b}");
 		try
 		{
 			new MapOfStringsExpressionEvaluator(amd, emd);
@@ -76,7 +77,7 @@ public class MapOfStringsExpressionEvaluatorTest
 	@Test
 	public void testMapOfStringsEvaluatorConstructorChecksIfExpressionIsMap()
 	{
-		AttributeMetaData amd = new DefaultAttributeMetaData("Location").setDataType(XREF).setExpression("hallo")
+		AttributeMetaData amd = new AttributeMetaData("Location").setDataType(XREF).setExpression("hallo")
 				.setRefEntity(refEmd);
 		try
 		{
@@ -92,7 +93,7 @@ public class MapOfStringsExpressionEvaluatorTest
 	@Test
 	public void testMapOfStringsEvaluatorConstructorChecksThatExpressionIsMapOfStrings()
 	{
-		AttributeMetaData amd = new DefaultAttributeMetaData("#CHROM").setDataType(XREF)
+		AttributeMetaData amd = new AttributeMetaData("#CHROM").setDataType(XREF)
 				.setExpression("{'Chromosome':{'hallo1':'bla'}}").setRefEntity(refEmd);
 		try
 		{
@@ -109,7 +110,7 @@ public class MapOfStringsExpressionEvaluatorTest
 	@Test
 	public void testMapOfStringsEvaluatorConstructorChecksIfCalculatedAttributesAllExist()
 	{
-		AttributeMetaData amd = new DefaultAttributeMetaData("#CHROM").setDataType(STRING)
+		AttributeMetaData amd = new AttributeMetaData("#CHROM").setDataType(STRING)
 				.setExpression("{'hallo':String}").setRefEntity(refEmd);
 		try
 		{
@@ -125,7 +126,7 @@ public class MapOfStringsExpressionEvaluatorTest
 	@Test
 	public void testMapOfStringsEvaluatorConstructorChecksIfMentionedAttributesAllExist()
 	{
-		AttributeMetaData amd = new DefaultAttributeMetaData("#CHROM").setDataType(STRING)
+		AttributeMetaData amd = new AttributeMetaData("#CHROM").setDataType(STRING)
 				.setExpression("{'Chromosome':hallo}").setRefEntity(refEmd);
 		try
 		{
@@ -142,7 +143,7 @@ public class MapOfStringsExpressionEvaluatorTest
 	@Test
 	public void testEvaluate()
 	{
-		AttributeMetaData amd = new DefaultAttributeMetaData("#CHROM").setDataType(XREF)
+		AttributeMetaData amd = new AttributeMetaData("#CHROM").setDataType(XREF)
 				.setExpression("{'Chromosome':String, 'Position':Int}").setRefEntity(refEmd);
 		ExpressionEvaluator evaluator = new MapOfStringsExpressionEvaluator(amd, emd);
 		Entity expected = new MapEntity(refEmd);

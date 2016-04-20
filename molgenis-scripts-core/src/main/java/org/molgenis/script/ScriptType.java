@@ -1,7 +1,7 @@
 package org.molgenis.script;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.DefaultEntity;
 
 public class ScriptType extends DefaultEntity

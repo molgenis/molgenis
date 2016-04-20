@@ -14,14 +14,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Package;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
-import org.molgenis.data.meta.PackageImpl;
+import org.molgenis.data.meta.Package;
 import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.Relation;
@@ -29,8 +28,6 @@ import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.semantic.TagImpl;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.semantic.OntologyTag;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.Ontology;
@@ -109,8 +106,8 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testgetTagsForAttribute()
 	{
-		EntityMetaData emd = new DefaultEntityMetaData("org.molgenis.SNP");
-		AttributeMetaData attributeMetaData = new DefaultAttributeMetaData("Chr");
+		EntityMetaData emd = new EntityMetaData("org.molgenis.SNP");
+		AttributeMetaData attributeMetaData = new AttributeMetaData("Chr");
 
 		Relation instanceOf = Relation.valueOf("instanceOf");
 
@@ -173,8 +170,8 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testAddAttributeTag()
 	{
-		EntityMetaData emd = new DefaultEntityMetaData("org.molgenis.SNP");
-		AttributeMetaData attributeMetaData = new DefaultAttributeMetaData("Chr");
+		EntityMetaData emd = new EntityMetaData("org.molgenis.SNP");
+		AttributeMetaData attributeMetaData = new AttributeMetaData("Chr");
 
 		when(ontologyService.getOntology("http://edamontology.org")).thenReturn(EDAM_ONTOLOGY);
 		when(ontologyService.getOntologyTerm("http://edamontology.org/data_0987")).thenReturn(
@@ -207,8 +204,8 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testRemoveAttributeTag()
 	{
-		EntityMetaData emd = new DefaultEntityMetaData("org.molgenis.SNP");
-		AttributeMetaData attributeMetaData = new DefaultAttributeMetaData("Chr");
+		EntityMetaData emd = new EntityMetaData("org.molgenis.SNP");
+		AttributeMetaData attributeMetaData = new AttributeMetaData("Chr");
 
 		MapEntity attributeEntity = new MapEntity();
 		attributeEntity.set(AttributeMetaDataMetaData.TAGS,
@@ -233,7 +230,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testgetTagsForPackage()
 	{
-		Package p = new PackageImpl("test", "desc", null);
+		Package p = new Package("test", "desc", null);
 
 		Entity pack = new MapEntity(PackageMetaData.INSTANCE);
 		pack.set(PackageMetaData.FULL_NAME, "test");
@@ -255,10 +252,10 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 	public void testRemoveAllTagsFromEntity()
 	{
 		// FIXME This does not make sense...
-		DefaultEntityMetaData emd = new DefaultEntityMetaData("test");
-		DefaultAttributeMetaData amd = new DefaultAttributeMetaData("Chr");
+		EntityMetaData emd = new EntityMetaData("test");
+		AttributeMetaData amd = new AttributeMetaData("Chr");
 
-		emd.addAttributeMetaData(amd);
+		emd.addAttribute(amd);
 		when(dataService.getEntityMetaData("test")).thenReturn(emd);
 
 		Entity entityMetaDataEntity = mock(Entity.class);
@@ -279,8 +276,8 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 		Map<String, OntologyTag> attributeTagMap = new HashMap<String, OntologyTag>();
 		Map<AttributeMetaData, OntologyTerm> tags = new HashMap<AttributeMetaData, OntologyTerm>();
 
-		EntityMetaData emd = new DefaultEntityMetaData("org.molgenis.SNP");
-		AttributeMetaData attributeMetaData = new DefaultAttributeMetaData("Chr");
+		EntityMetaData emd = new EntityMetaData("org.molgenis.SNP");
+		AttributeMetaData attributeMetaData = new AttributeMetaData("Chr");
 
 		when(ontologyService.getOntology("http://edamontology.org")).thenReturn(EDAM_ONTOLOGY);
 		when(ontologyService.getOntologyTerm("http://edamontology.org/data_0987")).thenReturn(

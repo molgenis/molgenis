@@ -5,7 +5,7 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.XREF;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -13,12 +13,11 @@ import java.util.Arrays;
 import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Range;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -35,7 +34,7 @@ public class EntityAttributesValidatorTest
 	@Test
 	public void checkRangeMinOnly()
 	{
-		DefaultEntityMetaData meta = new DefaultEntityMetaData("entity");
+		EntityMetaData meta = new EntityMetaData("entity");
 		meta.addAttribute("id", ROLE_ID);
 		meta.addAttribute("intrangemin").setDataType(MolgenisFieldTypes.INT).setRange(new Range(1l, null));
 
@@ -49,7 +48,7 @@ public class EntityAttributesValidatorTest
 	@Test
 	public void checkRangeMinOnlyInvalid()
 	{
-		DefaultEntityMetaData meta = new DefaultEntityMetaData("entity");
+		EntityMetaData meta = new EntityMetaData("entity");
 		meta.addAttribute("id", ROLE_ID);
 		meta.addAttribute("intrangemin").setDataType(MolgenisFieldTypes.INT).setRange(new Range(1l, null));
 
@@ -63,7 +62,7 @@ public class EntityAttributesValidatorTest
 	@Test
 	public void checkRangeMaxOnly()
 	{
-		DefaultEntityMetaData meta = new DefaultEntityMetaData("entity");
+		EntityMetaData meta = new EntityMetaData("entity");
 		meta.addAttribute("id", ROLE_ID);
 		meta.addAttribute("intrangemin").setDataType(MolgenisFieldTypes.INT).setRange(new Range(null, 1l));
 
@@ -77,7 +76,7 @@ public class EntityAttributesValidatorTest
 	@Test
 	public void checkRangeMaxOnlyInvalid()
 	{
-		DefaultEntityMetaData meta = new DefaultEntityMetaData("entity");
+		EntityMetaData meta = new EntityMetaData("entity");
 		meta.addAttribute("id", ROLE_ID);
 		meta.addAttribute("intrangemin").setDataType(MolgenisFieldTypes.INT).setRange(new Range(null, 1l));
 

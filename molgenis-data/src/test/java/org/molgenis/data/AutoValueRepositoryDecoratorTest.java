@@ -6,7 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -21,7 +21,7 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -36,7 +36,7 @@ public class AutoValueRepositoryDecoratorTest
 	private static final String ATTR_DATETIME_AUTO_FALSE = "datetime_auto-false";
 	private static final String ATTR_DATETIME_AUTO_TRUE = "datetime_auto-true";
 
-	private DefaultEntityMetaData entityMetaData;
+	private EntityMetaData entityMetaData;
 	private Repository<Entity> decoratedRepository;
 	private AutoValueRepositoryDecorator repositoryDecorator;
 	private IdGenerator idGenerator;
@@ -44,7 +44,7 @@ public class AutoValueRepositoryDecoratorTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		entityMetaData = new DefaultEntityMetaData("entity");
+		entityMetaData = new EntityMetaData("entity");
 		entityMetaData.addAttribute(ATTR_ID, ROLE_ID).setAuto(true);
 		entityMetaData.addAttribute(ATTR_DATE_AUTO_DEFAULT).setDataType(MolgenisFieldTypes.DATE);
 		entityMetaData.addAttribute(ATTR_DATE_AUTO_FALSE).setDataType(MolgenisFieldTypes.DATE).setAuto(false);

@@ -1,18 +1,18 @@
 package org.molgenis.data.jobs;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.auth.MolgenisUserMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
 import org.springframework.stereotype.Component;
 
 @Component
-public class JobExecutionMetaData extends DefaultEntityMetaData
+public class JobExecutionMetaData extends EntityMetaData
 {
 	private final List<String> jobStatusOptions = newArrayList("PENDING", "RUNNING", "SUCCESS", "FAILED", "CANCELED");
 

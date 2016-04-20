@@ -11,14 +11,15 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.meta.AnnotationJobExecution;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.Package;
 import org.molgenis.data.settings.SettingsEntityMeta;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
@@ -145,7 +146,7 @@ public class AnnotatorController
 				map.put("outputAttributeTypes", toMap(annotator.getOutputMetaData()));
 
 				String settingsEntityName = SettingsEntityMeta.PACKAGE_NAME
-						+ org.molgenis.data.Package.PACKAGE_SEPARATOR + annotator.getInfo().getCode();
+						+ Package.PACKAGE_SEPARATOR + annotator.getInfo().getCode();
 				map.put("showSettingsButton",
 						molgenisPermissionService.hasPermissionOnEntity(settingsEntityName, Permission.WRITE));
 				mapOfAnnotators.put(annotator.getSimpleName(), map);

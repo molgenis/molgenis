@@ -1,11 +1,11 @@
 package org.molgenis.data.examples;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 
-public class UserMetaData extends DefaultEntityMetaData
+public class UserMetaData extends EntityMetaData
 {
 	public static final UserMetaData INSTANCE = new UserMetaData();
 

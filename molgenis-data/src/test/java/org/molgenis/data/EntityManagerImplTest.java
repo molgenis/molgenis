@@ -14,6 +14,8 @@ import java.util.Iterator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.DefaultEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

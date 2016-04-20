@@ -8,9 +8,9 @@ import java.io.InputStream;
 
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
-import org.molgenis.data.Package;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
+import org.molgenis.data.meta.Package;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.file.FileStore;
 import org.slf4j.Logger;

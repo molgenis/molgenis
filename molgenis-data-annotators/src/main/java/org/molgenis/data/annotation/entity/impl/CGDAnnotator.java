@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -49,14 +48,14 @@ import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
-import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
  * Annotator that can add HGNC_ID and ENTREZ_GENE_ID and other attributes to an entity that has a attribute named 'GENE'
- * that must be the HGNC gene name.
+ * that must be the HGNC gene dataType.
  * 
  * It reads this info from a tab separated CGD file. The location of this file is defined by a RuntimeProperty named
  * 'cgd_location'
@@ -99,10 +98,10 @@ public class CGDAnnotator
 				"CONDITION", CONDITION_LABEL), AGE_GROUP("AGE GROUP", AGE_GROUP_LABEL), INHERITANCE("INHERITANCE",
 				INHERITANCE_LABEL), GENERALIZED_INHERITANCE("", GENERALIZED_INHERITANCE_LABEL);
 
-		private final String cgdName;// Column name as defined in CGD file
-		private final String attributeName;// Output attribute name
+		private final String cgdName;// Column dataType as defined in CGD file
+		private final String attributeName;// Output attribute dataType
 
-		// Mapping from attribute name to cgd name
+		// Mapping from attribute dataType to cgd dataType
 		private static Map<String, String> mappings = new HashMap<String, String>();
 
 		private CGDAttributeName(String cgdName, String attributeName)
@@ -139,8 +138,7 @@ public class CGDAnnotator
 	public RepositoryAnnotator cgd()
 	{
 		AnnotatorInfo info = getAnnotatorInfo();
-		QueryCreator queryCreator = new AttributeEqualsQueryCreator(new DefaultAttributeMetaData(
-				GENE.getAttributeName()));
+		QueryCreator queryCreator = new AttributeEqualsQueryCreator(new AttributeMetaData(GENE.getAttributeName()));
 		ResultFilter resultFilter = new FirstResultFilter();
 
 		EntityAnnotator entityAnnotator = new CGDEntityAnnotator(CGD_RESOURCE, info, queryCreator, resultFilter,
@@ -173,19 +171,19 @@ public class CGDAnnotator
 	{
 		List<AttributeMetaData> attributes = new ArrayList<>();
 
-		attributes.add(new DefaultAttributeMetaData(HGNC_ID.getAttributeName(), LONG));
-		attributes.add(new DefaultAttributeMetaData(ENTREZ_GENE_ID.getAttributeName(), TEXT));
-		attributes.add(new DefaultAttributeMetaData(CONDITION.getAttributeName(), TEXT).setLabel(CONDITION_LABEL));
-		attributes.add(new DefaultAttributeMetaData(INHERITANCE.getAttributeName(), TEXT).setLabel(INHERITANCE_LABEL));
-		attributes.add(new DefaultAttributeMetaData(GENERALIZED_INHERITANCE.getAttributeName(), TEXT)
+		attributes.add(new AttributeMetaData(HGNC_ID.getAttributeName(), LONG));
+		attributes.add(new AttributeMetaData(ENTREZ_GENE_ID.getAttributeName(), TEXT));
+		attributes.add(new AttributeMetaData(CONDITION.getAttributeName(), TEXT).setLabel(CONDITION_LABEL));
+		attributes.add(new AttributeMetaData(INHERITANCE.getAttributeName(), TEXT).setLabel(INHERITANCE_LABEL));
+		attributes.add(new AttributeMetaData(GENERALIZED_INHERITANCE.getAttributeName(), TEXT)
 				.setLabel(GENERALIZED_INHERITANCE_LABEL));
-		attributes.add(new DefaultAttributeMetaData(AGE_GROUP.getAttributeName(), TEXT).setLabel(AGE_GROUP_LABEL));
-		attributes.add(new DefaultAttributeMetaData(ALLELIC_CONDITIONS.getAttributeName(), TEXT));
-		attributes.add(new DefaultAttributeMetaData(MANIFESTATION_CATEGORIES.getAttributeName(), TEXT));
-		attributes.add(new DefaultAttributeMetaData(INTERVENTION_CATEGORIES.getAttributeName(), TEXT));
-		attributes.add(new DefaultAttributeMetaData(COMMENTS.getAttributeName(), TEXT));
-		attributes.add(new DefaultAttributeMetaData(INTERVENTION_RATIONALE.getAttributeName(), TEXT));
-		attributes.add(new DefaultAttributeMetaData(REFERENCES.getAttributeName(), TEXT));
+		attributes.add(new AttributeMetaData(AGE_GROUP.getAttributeName(), TEXT).setLabel(AGE_GROUP_LABEL));
+		attributes.add(new AttributeMetaData(ALLELIC_CONDITIONS.getAttributeName(), TEXT));
+		attributes.add(new AttributeMetaData(MANIFESTATION_CATEGORIES.getAttributeName(), TEXT));
+		attributes.add(new AttributeMetaData(INTERVENTION_CATEGORIES.getAttributeName(), TEXT));
+		attributes.add(new AttributeMetaData(COMMENTS.getAttributeName(), TEXT));
+		attributes.add(new AttributeMetaData(INTERVENTION_RATIONALE.getAttributeName(), TEXT));
+		attributes.add(new AttributeMetaData(REFERENCES.getAttributeName(), TEXT));
 
 		return attributes;
 	}

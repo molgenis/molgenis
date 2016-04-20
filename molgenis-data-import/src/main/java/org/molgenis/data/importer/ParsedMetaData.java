@@ -3,10 +3,10 @@ package org.molgenis.data.importer;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Package;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.Package;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Tag;
 
@@ -172,7 +172,7 @@ public final class ParsedMetaData
 	 *            the name of the package
 	 * @return
 	 */
-	public org.molgenis.data.Package getPackage(String name)
+	public Package getPackage(String name)
 	{
 		return getPackages().get(name);
 	}

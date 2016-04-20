@@ -4,13 +4,13 @@ import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.ENTITY_NAME;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.IDENTIFIER;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.MAPPINGTARGETS;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.OWNER;
 import static org.molgenis.data.mapper.repository.impl.MappingProjectRepositoryImpl.META_DATA;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.fail;
@@ -29,7 +29,7 @@ import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.meta.MappingTargetMetaData;
 import org.molgenis.data.mapper.repository.MappingTargetRepository;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.user.MolgenisUserService;
@@ -83,9 +83,9 @@ public class MappingProjectRepositoryImplTest extends AbstractTestNGSpringContex
 		owner.setFirstName("Flup");
 		owner.setLastName("de Flap");
 
-		DefaultEntityMetaData target1 = new DefaultEntityMetaData("target1");
+		EntityMetaData target1 = new EntityMetaData("target1");
 		target1.addAttribute("id", ROLE_ID);
-		DefaultEntityMetaData target2 = new DefaultEntityMetaData("target2");
+		EntityMetaData target2 = new EntityMetaData("target2");
 		target2.addAttribute("id", ROLE_ID);
 
 		mappingProject = new MappingProject("My first mapping project", owner);

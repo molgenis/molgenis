@@ -2,7 +2,7 @@ package org.molgenis.util;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -10,11 +10,10 @@ import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.Test;
 
@@ -27,11 +26,11 @@ public class DependencyResolverTest
 	@Test
 	public void resolve()
 	{
-		DefaultEntityMetaData e1 = new DefaultEntityMetaData("e1");
-		DefaultEntityMetaData e2 = new DefaultEntityMetaData("e2");
-		DefaultEntityMetaData e3 = new DefaultEntityMetaData("e3");
-		DefaultEntityMetaData e4 = new DefaultEntityMetaData("e4");
-		DefaultEntityMetaData e5 = new DefaultEntityMetaData("e5");
+		EntityMetaData e1 = new EntityMetaData("e1");
+		EntityMetaData e2 = new EntityMetaData("e2");
+		EntityMetaData e3 = new EntityMetaData("e3");
+		EntityMetaData e4 = new EntityMetaData("e4");
+		EntityMetaData e5 = new EntityMetaData("e5");
 
 		e1.addAttribute("ref").setDataType(MolgenisFieldTypes.XREF).setRefEntity(e5);
 		e5.setExtends(e3);
@@ -47,7 +46,7 @@ public class DependencyResolverTest
 	@Test
 	public void resolveSelfReferences()
 	{
-		DefaultEntityMetaData emd = new DefaultEntityMetaData("Person");
+		EntityMetaData emd = new EntityMetaData("Person");
 		emd.addAttribute("name", ROLE_ID);
 		emd.addAttribute("father").setDataType(MolgenisFieldTypes.XREF).setNillable(true).setRefEntity(emd);
 		emd.addAttribute("mother").setDataType(MolgenisFieldTypes.XREF).setNillable(true).setRefEntity(emd);

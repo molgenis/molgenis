@@ -19,14 +19,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.mockito.ArgumentCaptor;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.MolgenisTransactionLogMetaData;
 import org.testng.annotations.BeforeMethod;
@@ -2784,7 +2784,7 @@ public class RepositoryValidationDecoratorTest
 		AttributeMetaData readonlyStringAttr = when(mock(AttributeMetaData.class).getName())
 				.thenReturn(attrReadonlyStringName).getMock();
 		when(readonlyStringAttr.getDataType()).thenReturn(STRING);
-		when(readonlyStringAttr.isReadonly()).thenReturn(true);
+		when(readonlyStringAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyStringName)).thenReturn(readonlyStringAttr);
 		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
@@ -2856,7 +2856,7 @@ public class RepositoryValidationDecoratorTest
 				.thenReturn(attrReadonlyXrefName).getMock();
 		when(readonlyXrefAttr.getDataType()).thenReturn(XREF);
 		when(readonlyXrefAttr.getRefEntity()).thenReturn(refEntityMeta);
-		when(readonlyXrefAttr.isReadonly()).thenReturn(true);
+		when(readonlyXrefAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyXrefName)).thenReturn(readonlyXrefAttr);
 		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
@@ -2919,7 +2919,7 @@ public class RepositoryValidationDecoratorTest
 				.thenReturn(attrReadonlyXrefName).getMock();
 		when(readonlyXrefAttr.getDataType()).thenReturn(XREF);
 		when(readonlyXrefAttr.getRefEntity()).thenReturn(refEntityMeta);
-		when(readonlyXrefAttr.isReadonly()).thenReturn(true);
+		when(readonlyXrefAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyXrefName)).thenReturn(readonlyXrefAttr);
 		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
@@ -2991,7 +2991,7 @@ public class RepositoryValidationDecoratorTest
 				.thenReturn(attrReadonlyMrefName).getMock();
 		when(readonlyMrefAttr.getDataType()).thenReturn(MREF);
 		when(readonlyMrefAttr.getRefEntity()).thenReturn(refEntityMeta);
-		when(readonlyMrefAttr.isReadonly()).thenReturn(true);
+		when(readonlyMrefAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyMrefName)).thenReturn(readonlyMrefAttr);
 		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
@@ -3057,7 +3057,7 @@ public class RepositoryValidationDecoratorTest
 				.thenReturn(attrReadonlyMrefName).getMock();
 		when(readonlyMrefAttr.getDataType()).thenReturn(MREF);
 		when(readonlyMrefAttr.getRefEntity()).thenReturn(refEntityMeta);
-		when(readonlyMrefAttr.isReadonly()).thenReturn(true);
+		when(readonlyMrefAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyMrefName)).thenReturn(readonlyMrefAttr);
 		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
@@ -4205,7 +4205,7 @@ public class RepositoryValidationDecoratorTest
 		AttributeMetaData readonlyStringAttr = when(mock(AttributeMetaData.class).getName())
 				.thenReturn(attrReadonlyStringName).getMock();
 		when(readonlyStringAttr.getDataType()).thenReturn(STRING);
-		when(readonlyStringAttr.isReadonly()).thenReturn(true);
+		when(readonlyStringAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyStringName)).thenReturn(readonlyStringAttr);
 		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
@@ -4286,7 +4286,7 @@ public class RepositoryValidationDecoratorTest
 				.thenReturn(attrReadonlyXrefName).getMock();
 		when(readonlyXrefAttr.getDataType()).thenReturn(XREF);
 		when(readonlyXrefAttr.getRefEntity()).thenReturn(refEntityMeta);
-		when(readonlyXrefAttr.isReadonly()).thenReturn(true);
+		when(readonlyXrefAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyXrefName)).thenReturn(readonlyXrefAttr);
 		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
@@ -4358,7 +4358,7 @@ public class RepositoryValidationDecoratorTest
 				.thenReturn(attrReadonlyXrefName).getMock();
 		when(readonlyXrefAttr.getDataType()).thenReturn(XREF);
 		when(readonlyXrefAttr.getRefEntity()).thenReturn(refEntityMeta);
-		when(readonlyXrefAttr.isReadonly()).thenReturn(true);
+		when(readonlyXrefAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyXrefName)).thenReturn(readonlyXrefAttr);
 		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
@@ -4439,7 +4439,7 @@ public class RepositoryValidationDecoratorTest
 				.thenReturn(attrReadonlyMrefName).getMock();
 		when(readonlyMrefAttr.getDataType()).thenReturn(MREF);
 		when(readonlyMrefAttr.getRefEntity()).thenReturn(refEntityMeta);
-		when(readonlyMrefAttr.isReadonly()).thenReturn(true);
+		when(readonlyMrefAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyMrefName)).thenReturn(readonlyMrefAttr);
 		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
@@ -4513,7 +4513,7 @@ public class RepositoryValidationDecoratorTest
 				.thenReturn(attrReadonlyMrefName).getMock();
 		when(readonlyMrefAttr.getDataType()).thenReturn(MREF);
 		when(readonlyMrefAttr.getRefEntity()).thenReturn(refEntityMeta);
-		when(readonlyMrefAttr.isReadonly()).thenReturn(true);
+		when(readonlyMrefAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyMrefName)).thenReturn(readonlyMrefAttr);
 		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,

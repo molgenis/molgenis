@@ -1,5 +1,7 @@
 package org.molgenis.data;
 
+import org.molgenis.data.meta.AttributeMetaData;
+
 /**
  * Listener that when added to a {@link AttributeMetaData} fires when an attribute property changes.
  */

@@ -1,21 +1,21 @@
 package org.molgenis.util;
 
 import static org.mockito.Mockito.mock;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.Test;
 
 public class EntityUtilsTest
 {
-	private static DefaultEntityMetaData entityMetaData;
+	private static EntityMetaData entityMetaData;
 
 	@Test
 	public void isEmpty()
@@ -28,7 +28,7 @@ public class EntityUtilsTest
 	@Test
 	public void convert()
 	{
-		entityMetaData = new DefaultEntityMetaData("User");
+		entityMetaData = new EntityMetaData("User");
 		entityMetaData.addAttribute("name", ROLE_ID);
 
 		DataService dataService = mock(DataService.class);
@@ -48,14 +48,14 @@ public class EntityUtilsTest
 	@Test
 	public void doesExtend()
 	{
-		DefaultEntityMetaData grandfather = new DefaultEntityMetaData("grandfather");
+		EntityMetaData grandfather = new EntityMetaData("grandfather");
 		assertFalse(EntityUtils.doesExtend(grandfather, "grandfather"));
 
-		DefaultEntityMetaData father = new DefaultEntityMetaData("father");
+		EntityMetaData father = new EntityMetaData("father");
 		father.setExtends(grandfather);
 		assertTrue(EntityUtils.doesExtend(father, "grandfather"));
 
-		DefaultEntityMetaData child = new DefaultEntityMetaData("child");
+		EntityMetaData child = new EntityMetaData("child");
 		child.setExtends(father);
 		assertTrue(EntityUtils.doesExtend(child, "grandfather"));
 	}

@@ -1,5 +1,8 @@
 package org.molgenis.data.i18n;
 
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL;
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
@@ -8,19 +11,18 @@ import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
-import org.molgenis.data.support.DefaultAttributeMetaData;
 
 public class LanguageRepositoryDecorator implements Repository<Entity>
 {
@@ -228,33 +230,33 @@ public class LanguageRepositoryDecorator implements Repository<Entity>
 		// Create new label and description attributes for the added language
 		String languageCode = entity.getString(LanguageMetaData.CODE);
 
-		// Atribute label
-		AttributeMetaData attrLabel = new DefaultAttributeMetaData(AttributeMetaDataMetaData.LABEL + '-' + languageCode)
-				.setNillable(true);
+		// Attribute label
+		String attrName = LABEL + '-' + languageCode;
+		AttributeMetaData attrLabel = new AttributeMetaData(attrName).setNillable(true);
 
 		// Add the attribute to the attributes table
 		dataService.getMeta().getDefaultBackend().addAttribute(AttributeMetaDataMetaData.ENTITY_NAME, attrLabel);
 
 		// Update AttributeMetaDataMetaData
-		AttributeMetaDataMetaData.INSTANCE.addAttributeMetaData(attrLabel);
+		AttributeMetaDataMetaData.INSTANCE.addAttribute(attrLabel);
 
 		// Attribute description
-		AttributeMetaData attrDescription = new DefaultAttributeMetaData(
-				AttributeMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true);
+		AttributeMetaData attrDescription = new AttributeMetaData(
+				DESCRIPTION + '-' + languageCode).setNillable(true);
 		dataService.getMeta().getDefaultBackend().addAttribute(AttributeMetaDataMetaData.ENTITY_NAME, attrDescription);
-		AttributeMetaDataMetaData.INSTANCE.addAttributeMetaData(attrDescription);
+		AttributeMetaDataMetaData.INSTANCE.addAttribute(attrDescription);
 
 		// EntityMeta description
-		AttributeMetaData entityDescription = new DefaultAttributeMetaData(
+		AttributeMetaData entityDescription = new AttributeMetaData(
 				EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true);
 		dataService.getMeta().getDefaultBackend().addAttribute(EntityMetaDataMetaData.ENTITY_NAME, entityDescription);
-		EntityMetaDataMetaData.INSTANCE.addAttributeMetaData(entityDescription);
+		EntityMetaDataMetaData.INSTANCE.addAttribute(entityDescription);
 
 		// EntityMeta label
-		AttributeMetaData entityLabel = new DefaultAttributeMetaData(EntityMetaDataMetaData.LABEL + '-' + languageCode)
+		AttributeMetaData entityLabel = new AttributeMetaData(EntityMetaDataMetaData.LABEL + '-' + languageCode)
 				.setNillable(true);
 		dataService.getMeta().getDefaultBackend().addAttribute(EntityMetaDataMetaData.ENTITY_NAME, entityLabel);
-		EntityMetaDataMetaData.INSTANCE.addAttributeMetaData(entityLabel);
+		EntityMetaDataMetaData.INSTANCE.addAttribute(entityLabel);
 
 		// I18nString
 		if (I18nStringMetaData.INSTANCE.addLanguage(languageCode))

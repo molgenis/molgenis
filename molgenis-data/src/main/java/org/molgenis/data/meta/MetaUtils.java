@@ -4,9 +4,7 @@ import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
 import java.util.List;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.security.core.Permission;
@@ -49,7 +47,7 @@ public class MetaUtils
 			AttributeMetaData currentAttribute = existingEntityMetaData.getAttribute(attr.getName());
 			if (currentAttribute != null)
 			{
-				if (!currentAttribute.isSameAs(attr))
+				if (!currentAttribute.equals(attr))
 				{
 					throw new MolgenisDataException(
 							"Changing existing attributes is not currently supported. You tried to alter attribute ["

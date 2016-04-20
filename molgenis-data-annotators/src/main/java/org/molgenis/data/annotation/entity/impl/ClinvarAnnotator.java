@@ -1,12 +1,11 @@
 package org.molgenis.data.annotation.entity.impl;
 
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
 import static org.molgenis.data.annotator.websettings.ClinvarAnnotatorSettings.Meta.CLINVAR_LOCATION;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
@@ -21,7 +20,7 @@ import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.resources.impl.TabixVcfRepositoryFactory;
-import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,12 +51,12 @@ public class ClinvarAnnotator
 	{
 		List<AttributeMetaData> attributes = new ArrayList<>();
 
-		DefaultAttributeMetaData clinvar_clnsig = new DefaultAttributeMetaData(CLINVAR_CLNSIG, FieldTypeEnum.STRING)
+		AttributeMetaData clinvar_clnsig = new AttributeMetaData(CLINVAR_CLNSIG, STRING)
 				.setDescription(
 						"Value representing clinical significant allele 0 means ref 1 means first alt allele etc.")
 				.setLabel(CLINVAR_CLNSIG_LABEL);
 
-		DefaultAttributeMetaData clinvar_clnalle = new DefaultAttributeMetaData(CLINVAR_CLNALLE, FieldTypeEnum.STRING)
+		AttributeMetaData clinvar_clnalle = new AttributeMetaData(CLINVAR_CLNALLE, STRING)
 				.setDescription("Value representing the clinical significanct according to ClinVar").setLabel(
 						CLINVAR_CLNALLE_LABEL);
 

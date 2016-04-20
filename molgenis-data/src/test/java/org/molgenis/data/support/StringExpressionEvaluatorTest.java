@@ -1,11 +1,12 @@
 package org.molgenis.data.support;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.fieldtypes.IntField;
 import org.molgenis.fieldtypes.LongField;
 import org.molgenis.fieldtypes.StringField;
@@ -18,17 +19,17 @@ import com.google.gson.JsonSyntaxException;
 public class StringExpressionEvaluatorTest
 {
 	private Entity entity;
-	private DefaultEntityMetaData emd;
+	private EntityMetaData emd;
 
 	@BeforeTest
 	public void createEntity()
 	{
-		emd = new DefaultEntityMetaData("Source");
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("Identifier").setDataType(new IntField()), ROLE_ID);
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("Int").setDataType(new IntField()));
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("String").setDataType(new StringField()));
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("NonNumericString").setDataType(new StringField()));
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("Long").setDataType(new LongField()));
+		emd = new EntityMetaData("Source");
+		emd.addAttribute(new AttributeMetaData("Identifier").setDataType(new IntField()), ROLE_ID);
+		emd.addAttribute(new AttributeMetaData("Int").setDataType(new IntField()));
+		emd.addAttribute(new AttributeMetaData("String").setDataType(new StringField()));
+		emd.addAttribute(new AttributeMetaData("NonNumericString").setDataType(new StringField()));
+		emd.addAttribute(new AttributeMetaData("Long").setDataType(new LongField()));
 		entity = new MapEntity(emd);
 		entity.set("Int", 1);
 		entity.set("String", "12");
@@ -39,7 +40,7 @@ public class StringExpressionEvaluatorTest
 	@Test
 	public void testStringEvaluatorConstructorChecksIfAttributeHasExpression()
 	{
-		AttributeMetaData amd = new DefaultAttributeMetaData("#CHROM").setDataType(new StringField());
+		AttributeMetaData amd = new AttributeMetaData("#CHROM").setDataType(new StringField());
 		try
 		{
 			new StringExpressionEvaluator(amd, emd);
@@ -55,7 +56,7 @@ public class StringExpressionEvaluatorTest
 	@Test
 	public void testStringEvaluatorConstructorChecksIfExpressionIsMap()
 	{
-		AttributeMetaData amd = new DefaultAttributeMetaData("#CHROM").setDataType(new StringField())
+		AttributeMetaData amd = new AttributeMetaData("#CHROM").setDataType(new StringField())
 				.setExpression("{}");
 		try
 		{
@@ -71,7 +72,7 @@ public class StringExpressionEvaluatorTest
 	@Test
 	public void testStringEvaluatorConstructorChecksIfAttributeMentionsExistingAttribute()
 	{
-		AttributeMetaData amd = new DefaultAttributeMetaData("#CHROM").setDataType(new StringField())
+		AttributeMetaData amd = new AttributeMetaData("#CHROM").setDataType(new StringField())
 				.setExpression("bogus");
 		try
 		{
@@ -89,7 +90,7 @@ public class StringExpressionEvaluatorTest
 	@Test
 	public void testStringEvaluatorLookupAttributeAndConvertFromIntToString()
 	{
-		AttributeMetaData amd = new DefaultAttributeMetaData("#CHROM").setDataType(new StringField())
+		AttributeMetaData amd = new AttributeMetaData("#CHROM").setDataType(new StringField())
 				.setExpression("Int");
 		assertEquals(new StringExpressionEvaluator(amd, emd).evaluate(entity), "1");
 	}
@@ -97,21 +98,21 @@ public class StringExpressionEvaluatorTest
 	@Test
 	public void testStringEvaluatorLookupAttributeAndConvertFromIntToLong()
 	{
-		AttributeMetaData amd = new DefaultAttributeMetaData("#POS").setDataType(new LongField()).setExpression("Int");
+		AttributeMetaData amd = new AttributeMetaData("#POS").setDataType(new LongField()).setExpression("Int");
 		assertEquals(new StringExpressionEvaluator(amd, emd).evaluate(entity), 1L);
 	}
 
 	@Test
 	public void testStringEvaluatorLookupAttributeAndConvertFromLongToInt()
 	{
-		AttributeMetaData amd = new DefaultAttributeMetaData("#POS").setDataType(new IntField()).setExpression("Long");
+		AttributeMetaData amd = new AttributeMetaData("#POS").setDataType(new IntField()).setExpression("Long");
 		assertEquals(new StringExpressionEvaluator(amd, emd).evaluate(entity), 10);
 	}
 
 	@Test
 	public void testStringEvaluatorLookupAttributeAndConvertFromStringToLong()
 	{
-		AttributeMetaData amd = new DefaultAttributeMetaData("#POS").setDataType(new LongField())
+		AttributeMetaData amd = new AttributeMetaData("#POS").setDataType(new LongField())
 				.setExpression("String");
 		assertEquals(new StringExpressionEvaluator(amd, emd).evaluate(entity), 12L);
 	}
@@ -120,7 +121,7 @@ public class StringExpressionEvaluatorTest
 	public void testStringEvaluatorLookupAttributeAndConvertFromNonNumericStringToLongFails()
 	{
 
-		AttributeMetaData amd = new DefaultAttributeMetaData("#POS").setDataType(new LongField())
+		AttributeMetaData amd = new AttributeMetaData("#POS").setDataType(new LongField())
 				.setExpression("NonNumericString");
 		try
 		{

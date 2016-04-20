@@ -23,9 +23,9 @@ import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
 import org.molgenis.data.mapper.repository.EntityMappingRepository;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.MolgenisUserService;
@@ -60,7 +60,7 @@ public class MappingTargetRepositoryImplTest extends AbstractTestNGSpringContext
 
 	private List<Entity> mappingTargetEntities;
 
-	private DefaultEntityMetaData targetEntityMetaData;
+	private EntityMetaData targetEntityMetaData;
 
 	private List<Entity> entityMappingEntities;
 
@@ -75,10 +75,10 @@ public class MappingTargetRepositoryImplTest extends AbstractTestNGSpringContext
 		MockitoAnnotations.initMocks(this);
 
 		// POJOs
-		DefaultEntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("source");
-		targetEntityMetaData = new DefaultEntityMetaData("target");
-		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("targetAttribute");
-		targetEntityMetaData.addAttributeMetaData(targetAttributeMetaData);
+		EntityMetaData sourceEntityMetaData = new EntityMetaData("source");
+		targetEntityMetaData = new EntityMetaData("target");
+		AttributeMetaData targetAttributeMetaData = new AttributeMetaData("targetAttribute");
+		targetEntityMetaData.addAttribute(targetAttributeMetaData);
 		entityMappings = Arrays.asList(new EntityMapping("entityMappingID", sourceEntityMetaData, targetEntityMetaData,
 				emptyList()));
 		mappingTargets = Arrays.asList(new MappingTarget("mappingTargetID", targetEntityMetaData, entityMappings));

@@ -1,15 +1,15 @@
 package org.molgenis.data.transaction;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
 
-public class MolgenisTransactionLogMetaData extends DefaultEntityMetaData
+public class MolgenisTransactionLogMetaData extends EntityMetaData
 {
 	public static final String ENTITY_NAME = "MolgenisTransactionLog";
 

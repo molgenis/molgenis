@@ -3,8 +3,9 @@ package org.molgenis.auth;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 
 public class GroupAuthority extends org.molgenis.data.support.AbstractEntity implements Authority
 {
@@ -147,7 +148,7 @@ public class GroupAuthority extends org.molgenis.data.support.AbstractEntity imp
 	}
 
 	@Override
-	public org.molgenis.data.EntityMetaData getEntityMetaData()
+	public EntityMetaData getEntityMetaData()
 	{
 		return new GroupAuthorityMetaData();
 	}

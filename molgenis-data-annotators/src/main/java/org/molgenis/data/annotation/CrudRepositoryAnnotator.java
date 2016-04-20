@@ -7,12 +7,11 @@ import java.util.List;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -57,7 +56,7 @@ public class CrudRepositoryAnnotator
 		try
 		{
 			EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(repository.getName());
-			DefaultAttributeMetaData compoundAttributeMetaData = AnnotatorUtils.getCompoundResultAttribute(annotator,
+			AttributeMetaData compoundAttributeMetaData = AnnotatorUtils.getCompoundResultAttribute(annotator,
 					entityMetaData);
 
 			RunAsSystemProxy
@@ -110,13 +109,12 @@ public class CrudRepositoryAnnotator
 	 *            {@link EntityMetaData} for the existing repository
 	 * @param compoundAttributeMetaData
 	 */
-	private void addAnnotatorMetadataToRepositories(EntityMetaData entityMetaData,
-			DefaultAttributeMetaData compoundAttributeMetaData)
+	private void addAnnotatorMetadataToRepositories(EntityMetaData entityMetaData, AttributeMetaData compoundAttributeMetaData)
 	{
 		if (entityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
 		{
-			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(entityMetaData);
-			newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
+			EntityMetaData newEntityMetaData = new EntityMetaData(entityMetaData);
+			newEntityMetaData.addAttribute(compoundAttributeMetaData);
 			dataService.getMeta().updateSync(newEntityMetaData);
 		}
 	}

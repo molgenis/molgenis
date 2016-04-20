@@ -3,13 +3,14 @@ package org.molgenis.data.support;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.COMPOUND;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.UnknownAttributeException;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.testng.annotations.Test;
 
 public class AbstractEntityTest
@@ -19,7 +20,7 @@ public class AbstractEntityTest
 	public void getLabelValue()
 	{
 		String labelAttrName = "label";
-		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("entity");
+		EntityMetaData entityMetaData = new EntityMetaData("entity");
 		entityMetaData.addAttribute(labelAttrName, ROLE_ID).setDataType(MolgenisFieldTypes.SCRIPT);
 		AbstractEntity entity = mock(AbstractEntity.class);
 		when(entity.getLabelValue()).thenCallRealMethod();
@@ -32,11 +33,11 @@ public class AbstractEntityTest
 	@Test
 	public void toString_()
 	{
-		final DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("entity");
+		final EntityMetaData entityMetaData = new EntityMetaData("entity");
 		entityMetaData.addAttribute("attr");
-		DefaultAttributeMetaData compoundAttr = entityMetaData.addAttribute("compound").setDataType(COMPOUND);
-		DefaultAttributeMetaData compoundPart1Attr = new DefaultAttributeMetaData("part1");
-		DefaultAttributeMetaData compoundPart2Attr = new DefaultAttributeMetaData("part2");
+		AttributeMetaData compoundAttr = entityMetaData.addAttribute("compound").setDataType(COMPOUND);
+		AttributeMetaData compoundPart1Attr = new AttributeMetaData("part1");
+		AttributeMetaData compoundPart2Attr = new AttributeMetaData("part2");
 		compoundAttr.addAttributePart(compoundPart1Attr);
 		compoundAttr.addAttributePart(compoundPart2Attr);
 

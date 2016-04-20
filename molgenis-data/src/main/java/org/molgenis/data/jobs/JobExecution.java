@@ -4,7 +4,7 @@ import java.util.Date;
 
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.DefaultEntity;
 import org.springframework.util.StringUtils;
 

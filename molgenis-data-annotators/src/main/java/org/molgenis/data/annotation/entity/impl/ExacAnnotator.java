@@ -1,13 +1,14 @@
 package org.molgenis.data.annotation.entity.impl;
 
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DECIMAL;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.INT;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
 import static org.molgenis.data.annotator.websettings.ExacAnnotatorSettings.Meta.EXAC_LOCATION;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
@@ -22,7 +23,7 @@ import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.resources.impl.TabixVcfRepositoryFactory;
-import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -57,24 +58,21 @@ public class ExacAnnotator
 	public RepositoryAnnotator exac()
 	{
 
-		DefaultAttributeMetaData outputAttribute_AF = new DefaultAttributeMetaData(EXAC_AF, FieldTypeEnum.STRING)
+		AttributeMetaData outputAttribute_AF = new AttributeMetaData(EXAC_AF, STRING)
 				.setDescription("The ExAC allele frequency").setLabel(EXAC_AF_LABEL);
-		DefaultAttributeMetaData outputAttribute_AC_HOM = new DefaultAttributeMetaData(EXAC_AC_HOM,
-				FieldTypeEnum.STRING).setDescription("The ExAC homozygous alternative genotype count").setLabel(
+		AttributeMetaData outputAttribute_AC_HOM = new AttributeMetaData(EXAC_AC_HOM, STRING).setDescription("The ExAC homozygous alternative genotype count").setLabel(
 				EXAC_AC_HOM_LABEL);
-		DefaultAttributeMetaData outputAttribute_AC_HET = new DefaultAttributeMetaData(EXAC_AC_HET,
-				FieldTypeEnum.STRING).setDescription("The ExAC heterozygous genotype count")
+		AttributeMetaData outputAttribute_AC_HET = new AttributeMetaData(EXAC_AC_HET, STRING).setDescription("The ExAC heterozygous genotype count")
 				.setLabel(EXAC_AC_HET_LABEL);
 
 		List<AttributeMetaData> outputMetaData = new ArrayList<AttributeMetaData>(
-				Arrays.asList(new DefaultAttributeMetaData[]
-				{ outputAttribute_AF, outputAttribute_AC_HOM, outputAttribute_AC_HET }));
+				Arrays.asList(
+						new AttributeMetaData[] { outputAttribute_AF, outputAttribute_AC_HOM, outputAttribute_AC_HET }));
 
 		List<AttributeMetaData> resourceMetaData = new ArrayList<AttributeMetaData>(
-				Arrays.asList(new DefaultAttributeMetaData[]
-				{ new DefaultAttributeMetaData(EXAC_AF_ResourceAttributeName, FieldTypeEnum.DECIMAL),
-						new DefaultAttributeMetaData(EXAC_AC_HOM_ResourceAttributeName, FieldTypeEnum.INT),
-						new DefaultAttributeMetaData(EXAC_AC_HET_ResourceAttributeName, FieldTypeEnum.INT) }));
+				Arrays.asList(new AttributeMetaData[] { new AttributeMetaData(EXAC_AF_ResourceAttributeName, DECIMAL),
+						new AttributeMetaData(EXAC_AC_HOM_ResourceAttributeName, INT),
+						new AttributeMetaData(EXAC_AC_HET_ResourceAttributeName, INT) }));
 
 		AnnotatorInfo exacInfo = AnnotatorInfo
 				.create(Status.READY,

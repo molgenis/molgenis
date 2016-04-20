@@ -1,12 +1,17 @@
 package org.molgenis.data.support;
 
+import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.StreamSupport.stream;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.data.AttributeMetaData;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import com.google.common.base.Function;
@@ -55,6 +60,68 @@ public class MapEntity extends AbstractEntity
 	{
 		this.entityMetaData = metaData;
 		this.idAttributeName = entityMetaData.getIdAttribute().getName();
+	}
+
+	/**
+	 * Copy-factory
+	 *
+	 * @param entity entity to copy
+	 * @return deep copy of entity
+	 */
+	public static Entity newInstance(Entity entity) {
+		EntityMetaData entityMeta = entity.getEntityMetaData();
+		Entity entityCopy = new MapEntity(entityMeta);
+		// include atomic attributes from the 'extends' hierarchy
+		entityMeta.getAtomicAttributes().forEach(attr -> {
+			Object value;
+			String attrName = attr.getName();
+			FieldTypeEnum attrType = attr.getDataType().getEnumType();
+			switch(attrType) {
+				case BOOL:
+					value = entity.getBoolean(attrName);
+					break;
+				case CATEGORICAL:
+				case FILE:
+				case XREF:
+					Entity refEntity = entity.getEntity(attrName);
+					value = refEntity != null ? newInstance(refEntity) : null;
+					break;
+				case CATEGORICAL_MREF:
+				case MREF:
+					Iterable<Entity> refEntities = entity.getEntities(attrName);
+					// create entity copies now instead of on demand because refEntities could change
+					value = stream(refEntities.spliterator(), false).map(MapEntity::newInstance).collect(toList());
+					break;
+				case COMPOUND:
+					throw new RuntimeException("Compound attribute is not atomic");
+				case DATE:
+				case DATE_TIME:
+					value = entity.getDate(attrName);
+					break;
+				case DECIMAL:
+					value = entity.getDouble(attrName);
+					break;
+				case EMAIL:
+				case ENUM:
+				case HTML:
+				case HYPERLINK:
+				case SCRIPT:
+				case STRING:
+				case TEXT:
+					value = entity.getString(attrName);
+					break;
+				case INT:
+					value = entity.getInt(attrName);
+					break;
+				case LONG:
+					value = entity.getLong(attrName);
+					break;
+				default:
+					throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+			}
+			entityCopy.set(attrName, value);
+		});
+		return entityCopy;
 	}
 
 	public void set(Entity other, EntityMetaData metaData)

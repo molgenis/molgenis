@@ -1,14 +1,14 @@
 package org.molgenis.data.meta.system;
 
 import static org.molgenis.MolgenisFieldTypes.SCRIPT;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FreemarkerTemplateMetaData extends DefaultEntityMetaData
+public class FreemarkerTemplateMetaData extends EntityMetaData
 {
 	public static final String ID = "id";
 	public static final String NAME = "Name";

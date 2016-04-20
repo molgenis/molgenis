@@ -2,35 +2,33 @@ package org.molgenis.integrationtest.data;
 
 import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.molgenis.MolgenisFieldTypes.XREF;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 
 public class AbstractXrefDatatypeIT extends AbstractDatatypeIT
 {
-	private DefaultEntityMetaData refEntityMetaData;
-	private DefaultEntityMetaData refEntity2MetaData;
+	private EntityMetaData refEntityMetaData;
+	private EntityMetaData refEntity2MetaData;
 
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		refEntityMetaData = new DefaultEntityMetaData("StringTarget");
+		refEntityMetaData = new EntityMetaData("StringTarget");
 		refEntityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false);
 		refEntityMetaData.addAttribute("label", ROLE_LABEL);
 		metaDataService.addEntityMeta(refEntityMetaData);
 
-		refEntity2MetaData = new DefaultEntityMetaData("IntTarget");
+		refEntity2MetaData = new EntityMetaData("IntTarget");
 		refEntity2MetaData.addAttribute("identifier", ROLE_ID).setDataType(INT).setNillable(false);
 		metaDataService.addEntityMeta(refEntity2MetaData);
 
-		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("XrefTest");
+		EntityMetaData entityMetaData = new EntityMetaData("XrefTest");
 		entityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false);
 		entityMetaData.addAttribute("stringRef").setDataType(XREF).setRefEntity(refEntityMetaData).setNillable(false);
 		entityMetaData.addAttribute("intRef").setDataType(XREF).setRefEntity(refEntity2MetaData);

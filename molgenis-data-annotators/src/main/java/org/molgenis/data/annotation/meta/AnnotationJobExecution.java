@@ -1,8 +1,8 @@
 package org.molgenis.data.annotation.meta;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.jobs.JobExecution;
+import org.molgenis.data.meta.EntityMetaData;
 
 public class AnnotationJobExecution extends JobExecution
 {

@@ -1,19 +1,19 @@
 package org.molgenis.data.meta.system;
 
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.fieldtypes.EnumField;
-import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
-
 import static org.molgenis.MolgenisFieldTypes.BOOL;
 import static org.molgenis.MolgenisFieldTypes.DATETIME;
 import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+
+import java.util.Arrays;
+
+import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.fieldtypes.EnumField;
+import org.springframework.stereotype.Component;
 
 @Component
-public class ImportRunMetaData extends DefaultEntityMetaData
+public class ImportRunMetaData extends EntityMetaData
 {
 	public static final String ID = "id";
 	public static final String STARTDATE = "startDate";

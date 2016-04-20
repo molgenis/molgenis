@@ -8,10 +8,10 @@ import java.util.stream.StreamSupport;
 
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.springframework.beans.BeanUtils;
 
 import com.google.common.base.Function;

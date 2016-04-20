@@ -4,8 +4,9 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.system.ImportRunMetaData;
 
 
@@ -367,7 +368,7 @@ public class ImportRun extends org.molgenis.data.support.AbstractEntity implemen
 	}
 
 	@Override
-	public org.molgenis.data.EntityMetaData getEntityMetaData()
+	public EntityMetaData getEntityMetaData()
 	{
 		return new ImportRunMetaData();
 	}

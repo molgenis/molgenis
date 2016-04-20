@@ -8,7 +8,7 @@ import java.text.ParseException;
 import java.util.Arrays;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.util.MolgenisDateFormat;
 import org.testng.annotations.Test;
 
@@ -24,14 +24,14 @@ public class DataConverterTest
 	@Test
 	public void convertDate() throws ParseException
 	{
-		AttributeMetaData attr = new DefaultAttributeMetaData("attr").setDataType(MolgenisFieldTypes.DATE);
+		AttributeMetaData attr = new AttributeMetaData("attr").setDataType(MolgenisFieldTypes.DATE);
 		assertEquals(DataConverter.convert("2015-06-04", attr), MolgenisDateFormat.getDateFormat().parse("2015-06-04"));
 	}
 
 	@Test
 	public void convertDateTime() throws ParseException
 	{
-		AttributeMetaData attr = new DefaultAttributeMetaData("attr").setDataType(MolgenisFieldTypes.DATETIME);
+		AttributeMetaData attr = new AttributeMetaData("attr").setDataType(MolgenisFieldTypes.DATETIME);
 		assertEquals(DataConverter.convert("2015-05-22T11:12:13+0500", attr),
 				MolgenisDateFormat.getDateTimeFormat().parse("2015-05-22T11:12:13+0500"));
 	}

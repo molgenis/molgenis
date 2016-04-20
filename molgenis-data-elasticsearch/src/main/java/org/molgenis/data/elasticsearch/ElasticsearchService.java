@@ -52,10 +52,8 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.fetch.source.FetchSourceContext;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.EntityStream;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
@@ -68,11 +66,12 @@ import org.molgenis.data.elasticsearch.response.ResponseParser;
 import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
-import org.molgenis.data.meta.PackageImpl;
+import org.molgenis.data.meta.Package;
 import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.transaction.MolgenisTransactionListener;
@@ -940,8 +939,9 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		if (dataService.getMeta().hasBackend(ElasticsearchRepositoryCollection.NAME))
 		{
 			UuidGenerator uuidg = new UuidGenerator();
-			DefaultEntityMetaData tempEntityMetaData = new DefaultEntityMetaData(uuidg.generateId(), entityMetaData);
-			tempEntityMetaData.setPackage(new PackageImpl("elasticsearch_temporary_entity",
+			EntityMetaData tempEntityMetaData = EntityMetaData.newInstance(entityMetaData);
+			tempEntityMetaData.setName(uuidg.generateId());
+			tempEntityMetaData.setPackage(new Package("elasticsearch_temporary_entity",
 					"This entity (Original: " + entityMetaData.getName()
 							+ ") is temporary build to make rebuilding of Elasticsearch entities posible."));
 

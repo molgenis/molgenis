@@ -1,10 +1,10 @@
 package org.molgenis.data.i18n;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 
-public class LanguageMetaData extends DefaultEntityMetaData
+public class LanguageMetaData extends EntityMetaData
 {
 	public static final LanguageMetaData INSTANCE = new LanguageMetaData();
 	public static final String ENTITY_NAME = "languages";

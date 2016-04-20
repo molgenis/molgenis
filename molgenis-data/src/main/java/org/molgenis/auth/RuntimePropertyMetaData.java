@@ -1,15 +1,15 @@
 package org.molgenis.auth;
 
 import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.system.core.RuntimeProperty;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RuntimePropertyMetaData extends DefaultEntityMetaData
+public class RuntimePropertyMetaData extends EntityMetaData
 {
 
 	public static final String ENTITY_NAME = "RuntimeProperty";

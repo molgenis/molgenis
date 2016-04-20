@@ -14,7 +14,6 @@ import java.util.stream.Stream;
 
 import org.elasticsearch.common.collect.Iterators;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Query;
@@ -22,6 +21,7 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.EntityMetaData;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Sets;

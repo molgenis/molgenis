@@ -10,11 +10,12 @@ import java.util.Queue;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -35,21 +36,21 @@ public class AnnotatorDependencyOrderResolverTest
 	{
 		MockitoAnnotations.initMocks(this);
 
-		AttributeMetaData attra = new DefaultAttributeMetaData("A").setDataType(MolgenisFieldTypes.STRING);
+		AttributeMetaData attra = new AttributeMetaData("A").setDataType(MolgenisFieldTypes.STRING);
 		// to check for matching "STRING" attributes to required "TEXT" attributes
-		AttributeMetaData attra2 = new DefaultAttributeMetaData("A").setDataType(MolgenisFieldTypes.TEXT);
-		AttributeMetaData attrb = new DefaultAttributeMetaData("B").setDataType(MolgenisFieldTypes.STRING);
-		AttributeMetaData attrc = new DefaultAttributeMetaData("C").setDataType(MolgenisFieldTypes.STRING);
-		AttributeMetaData attrd = new DefaultAttributeMetaData("D").setDataType(MolgenisFieldTypes.STRING);
-		AttributeMetaData attre = new DefaultAttributeMetaData("E").setDataType(MolgenisFieldTypes.STRING);
-		AttributeMetaData attrf = new DefaultAttributeMetaData("F").setDataType(MolgenisFieldTypes.STRING);
-		AttributeMetaData attrg = new DefaultAttributeMetaData("G").setDataType(MolgenisFieldTypes.STRING);
-		AttributeMetaData attrh = new DefaultAttributeMetaData("H").setDataType(MolgenisFieldTypes.STRING);
-		AttributeMetaData attri = new DefaultAttributeMetaData("I").setDataType(MolgenisFieldTypes.STRING);
-		AttributeMetaData attrj = new DefaultAttributeMetaData("J").setDataType(MolgenisFieldTypes.STRING);
+		AttributeMetaData attra2 = new AttributeMetaData("A").setDataType(MolgenisFieldTypes.TEXT);
+		AttributeMetaData attrb = new AttributeMetaData("B").setDataType(MolgenisFieldTypes.STRING);
+		AttributeMetaData attrc = new AttributeMetaData("C").setDataType(MolgenisFieldTypes.STRING);
+		AttributeMetaData attrd = new AttributeMetaData("D").setDataType(MolgenisFieldTypes.STRING);
+		AttributeMetaData attre = new AttributeMetaData("E").setDataType(MolgenisFieldTypes.STRING);
+		AttributeMetaData attrf = new AttributeMetaData("F").setDataType(MolgenisFieldTypes.STRING);
+		AttributeMetaData attrg = new AttributeMetaData("G").setDataType(MolgenisFieldTypes.STRING);
+		AttributeMetaData attrh = new AttributeMetaData("H").setDataType(MolgenisFieldTypes.STRING);
+		AttributeMetaData attri = new AttributeMetaData("I").setDataType(MolgenisFieldTypes.STRING);
+		AttributeMetaData attrj = new AttributeMetaData("J").setDataType(MolgenisFieldTypes.STRING);
 
-		DefaultEntityMetaData emd = new DefaultEntityMetaData("test");
-		emd.addAllAttributeMetaData(Arrays.asList(attra, attrb));
+		EntityMetaData emd = new EntityMetaData("test");
+		emd.addAttributes(Arrays.asList(attra, attrb));
 		when(repo.getEntityMetaData()).thenReturn(emd);
 
 		when(annotator1.getInfo()).thenReturn(annotator1info);

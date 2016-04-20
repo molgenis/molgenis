@@ -4,7 +4,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.generate;
 import static java.util.stream.Stream.of;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -18,18 +18,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.Package;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.meta.PackageImpl;
+import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.Package;
 import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.AfterMethod;
@@ -42,13 +39,13 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	private static final String ENTITY_NAME = "test_TestEntity";
 	private static final String ID = "id";
 	private static final String ATTR_STR = "strAttr";
-	private EditableEntityMetaData entityMetaData;
+	private EntityMetaData entityMetaData;
 
 	@BeforeClass
 	public void setUp()
 	{
-		Package p = new PackageImpl("test");
-		entityMetaData = new DefaultEntityMetaData("TestEntity", p);
+		Package p = new Package("test");
+		entityMetaData = new EntityMetaData("TestEntity", p);
 		entityMetaData.addAttribute(ID, ROLE_ID).setNillable(false).setAuto(true);
 		entityMetaData.addAttribute(ATTR_STR).setNillable(true);
 		metaDataService.addEntityMeta(entityMetaData);

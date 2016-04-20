@@ -45,16 +45,15 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.BatchingQueryResult;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.DateField;
 import org.molgenis.fieldtypes.DatetimeField;
@@ -397,8 +396,8 @@ public class PostgreSqlRepository extends AbstractRepository
 		}
 		jdbcTemplate.execute(dropColumnSql);
 
-		DefaultEntityMetaData demd = new DefaultEntityMetaData(metaData);
-		demd.removeAttributeMetaData(demd.getAttribute(attrName));
+		EntityMetaData demd = new EntityMetaData(metaData);
+		demd.removeAttribute(demd.getAttribute(attrName));
 		setMetaData(demd);
 	}
 
@@ -496,10 +495,10 @@ public class PostgreSqlRepository extends AbstractRepository
 					addAttributeRec(attrPart, false);
 				}
 			}
-			DefaultEntityMetaData demd = new DefaultEntityMetaData(metaData);
+			EntityMetaData demd = new EntityMetaData(metaData);
 			if (addToEntityMetaData)
 			{
-				demd.addAttributeMetaData(attr);
+				demd.addAttribute(attr);
 			}
 			setMetaData(demd);
 		}

@@ -3,8 +3,6 @@ package org.molgenis.data.meta;
 import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.fieldtypes.CompoundField;
 import org.molgenis.model.ReservedKeywords;

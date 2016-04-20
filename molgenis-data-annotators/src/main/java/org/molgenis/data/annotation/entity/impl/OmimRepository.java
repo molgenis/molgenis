@@ -6,8 +6,9 @@ import static java.nio.charset.Charset.forName;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static org.apache.commons.lang3.StringUtils.join;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.NAME;
 import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.SEPARATOR;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,13 +26,12 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.AbstractRepository;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 
 import com.google.common.collect.Iterables;
@@ -66,7 +66,7 @@ public class OmimRepository extends AbstractRepository
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(OmimAnnotator.NAME);
+		EntityMetaData entityMetaData = new EntityMetaData(NAME);
 		entityMetaData.addAttribute(OMIM_GENE_SYMBOLS_COL_NAME, ROLE_ID);
 		entityMetaData.addAttribute(OMIM_PHENOTYPE_COL_NAME);
 		entityMetaData.addAttribute(OMIM_MIM_NUMBER_COL_NAME);

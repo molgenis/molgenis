@@ -3,7 +3,7 @@ package org.molgenis.data.annotation.entity.impl;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.VcfRepository.ALT;
 import static org.molgenis.data.vcf.VcfRepository.ALT_META;
 import static org.molgenis.data.vcf.VcfRepository.CHROM;
@@ -24,7 +24,7 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotator.websettings.ClinvarAnnotatorSettings;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,13 +43,13 @@ public class ClinvarAnnotatorTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void annotateIterable()
 	{
-		DefaultEntityMetaData sourceMeta = new DefaultEntityMetaData("clinvar");
+		EntityMetaData sourceMeta = new EntityMetaData("clinvar");
 		sourceMeta.addAttribute(CHROM, ROLE_ID);
-		sourceMeta.addAttributeMetaData(POS_META);
-		sourceMeta.addAttributeMetaData(REF_META);
-		sourceMeta.addAttributeMetaData(ALT_META);
+		sourceMeta.addAttribute(POS_META);
+		sourceMeta.addAttribute(REF_META);
+		sourceMeta.addAttribute(ALT_META);
 
-		DefaultEntityMetaData annotatedSourceMeta = sourceMeta;
+		EntityMetaData annotatedSourceMeta = sourceMeta;
 		annotatedSourceMeta.addAttribute(ClinvarAnnotator.CLINVAR_CLNSIG);
 		annotatedSourceMeta.addAttribute(ClinvarAnnotator.CLINVAR_CLNALLE);
 

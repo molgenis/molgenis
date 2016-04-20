@@ -1,5 +1,7 @@
 package org.molgenis.googlespreadsheet;
 
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -7,15 +9,11 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.AbstractRepository;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 
 import com.google.common.collect.Iterables;
@@ -153,19 +151,17 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 				throw new RuntimeException(e);
 			}
 
-			EditableEntityMetaData editableEntityMetaData = new DefaultEntityMetaData(feed.getTitle().getPlainText(),
-					MapEntity.class);
+			EntityMetaData entityMetaData = new EntityMetaData(feed.getTitle().getPlainText(), MapEntity.class);
 
 			for (CellEntry cellEntry : feed.getEntries())
 			{
 				Cell cell = cellEntry.getCell();
 				if (cell.getRow() == 1)
 				{
-					editableEntityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(cell.getValue(),
-							FieldTypeEnum.STRING));
+					entityMetaData.addAttribute(new AttributeMetaData(cell.getValue(), STRING));
 				}
 			}
-			entityMetaData = editableEntityMetaData;
+			entityMetaData = entityMetaData;
 		}
 
 		return entityMetaData;

@@ -1,13 +1,12 @@
 package org.molgenis.auth;
 
 import static org.molgenis.MolgenisFieldTypes.XREF;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.springframework.stereotype.Component;
-
 @Component
-public class UserAuthorityMetaData extends DefaultEntityMetaData
+public class UserAuthorityMetaData extends EntityMetaData
 {
 
 	public static final String ENTITY_NAME = "UserAuthority";
@@ -18,7 +17,7 @@ public class UserAuthorityMetaData extends DefaultEntityMetaData
 		super(ENTITY_NAME);
 		addAttribute(UserAuthority.ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");
 		addAttribute(UserAuthority.MOLGENISUSER).setDataType(XREF).setRefEntity(new MolgenisUserMetaData())
-				.setAggregateable(true).setDescription("").setNillable(false);
+				.setAggregatable(true).setDescription("").setNillable(false);
 		addAttribute(UserAuthority.ROLE).setDescription("").setNillable(false);
 	}
 }

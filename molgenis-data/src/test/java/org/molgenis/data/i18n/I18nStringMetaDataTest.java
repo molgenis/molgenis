@@ -7,7 +7,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.testng.annotations.Test;
 
 public class I18nStringMetaDataTest

@@ -2,9 +2,9 @@ package org.molgenis.data.elasticsearch.request;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator.DEFAULT_ANALYZER;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.testng.Assert.assertEquals;
 
 import java.text.ParseException;
@@ -19,15 +19,13 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisQueryException;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.util.MolgenisDateFormat;
@@ -76,14 +74,14 @@ public class QueryGeneratorReferencesTest
 	{
 		searchRequestBuilder = mock(SearchRequestBuilder.class);
 
-		DefaultEntityMetaData refEntityMetaData = new DefaultEntityMetaData("ref_entity");
+		EntityMetaData refEntityMetaData = new EntityMetaData("ref_entity");
 		refEntityMetaData.addAttribute(refIdAttributeName, ROLE_ID);
 		refEntityMetaData.addAttribute(refBoolAttributeName).setDataType(MolgenisFieldTypes.BOOL);
 		refEntityMetaData.addAttribute(refCategoricalAttributeName).setDataType(MolgenisFieldTypes.CATEGORICAL)
 				.setRefEntity(refEntityMetaData).setNillable(true);
-		DefaultAttributeMetaData compoundPart0Attribute = new DefaultAttributeMetaData(refCompoundPart0AttributeName)
+		AttributeMetaData compoundPart0Attribute = new AttributeMetaData(refCompoundPart0AttributeName)
 				.setDataType(MolgenisFieldTypes.STRING);
-		DefaultAttributeMetaData compoundPart1Attribute = new DefaultAttributeMetaData(refCompoundPart1AttributeName)
+		AttributeMetaData compoundPart1Attribute = new AttributeMetaData(refCompoundPart1AttributeName)
 				.setDataType(MolgenisFieldTypes.STRING);
 		refEntityMetaData.addAttribute(refCompoundAttributeName).setDataType(MolgenisFieldTypes.COMPOUND)
 				.setAttributesMetaData(
@@ -106,7 +104,7 @@ public class QueryGeneratorReferencesTest
 		refEntityMetaData.addAttribute(refXrefAttributeName).setDataType(MolgenisFieldTypes.XREF)
 				.setRefEntity(refEntityMetaData).setNillable(true);
 
-		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
+		EntityMetaData emd = new EntityMetaData("entity");
 		emd.addAttribute(idAttributeName, ROLE_ID);
 		emd.addAttribute(stringAttributeName, ROLE_LABEL).setUnique(true);
 		emd.addAttribute(mrefAttributeName).setDataType(MolgenisFieldTypes.MREF).setNillable(true)

@@ -4,13 +4,11 @@ import static org.molgenis.MolgenisFieldTypes.BOOL;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.MolgenisFieldTypes.XREF;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LOOKUP;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
 
-import org.molgenis.data.support.DefaultEntityMetaData;
-
-public class EntityMetaDataMetaData extends DefaultEntityMetaData
+public class EntityMetaDataMetaData extends EntityMetaData
 {
 	public static final String ENTITY_NAME = "entities";
 	public static final String SIMPLE_NAME = "simpleName";

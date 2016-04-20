@@ -14,7 +14,6 @@ import org.molgenis.data.AggregateResult;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
@@ -22,6 +21,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
@@ -372,7 +372,8 @@ public class DataServiceImpl implements DataService
 	{
 		LOG.info("Creating a copy of " + repository.getName() + " repository, with ID: " + newRepositoryId
 				+ ", and label: " + newRepositoryLabel);
-		DefaultEntityMetaData emd = new DefaultEntityMetaData(newRepositoryId, repository.getEntityMetaData());
+		EntityMetaData emd = EntityMetaData.newInstance(repository.getEntityMetaData());
+		emd.setName(newRepositoryId);
 		emd.setLabel(newRepositoryLabel);
 		Repository<Entity> repositoryCopy = metaDataService.addEntityMeta(emd);
 		try

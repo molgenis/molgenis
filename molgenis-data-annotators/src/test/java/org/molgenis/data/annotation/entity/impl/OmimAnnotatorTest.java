@@ -4,20 +4,19 @@ import static com.google.common.collect.Lists.newArrayList;
 import static org.apache.commons.lang.StringUtils.join;
 import static org.mockito.Mockito.mock;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.OMIM_CYTO_LOCATIONS;
 import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.OMIM_CAUSAL_IDENTIFIER;
+import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.OMIM_CYTO_LOCATIONS;
 import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.OMIM_DISORDER;
 import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.OMIM_ENTRY;
 import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.OMIM_TYPE;
 import static org.molgenis.data.annotation.entity.impl.SnpEffAnnotator.GENE_NAME;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AnnotationService;
@@ -25,7 +24,7 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotator.websettings.OmimAnnotatorSettings;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +55,7 @@ public class OmimAnnotatorTest extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> entitiesToAnnotate = newArrayList();
 
-		DefaultEntityMetaData inputEntityMetaData = new DefaultEntityMetaData("Test");
+		EntityMetaData inputEntityMetaData = new EntityMetaData("Test");
 		inputEntityMetaData.addAttribute(SnpEffAnnotator.GENE_NAME, ROLE_ID);
 
 		Entity inputEntity = new MapEntity(inputEntityMetaData);
@@ -65,7 +64,7 @@ public class OmimAnnotatorTest extends AbstractTestNGSpringContextTests
 		entitiesToAnnotate.add(inputEntity);
 		Iterator<Entity> results = annotator.annotate(entitiesToAnnotate);
 
-		DefaultEntityMetaData expectedEntityMetaData = new DefaultEntityMetaData("Test");
+		EntityMetaData expectedEntityMetaData = new EntityMetaData("Test");
 		expectedEntityMetaData.addAttribute(GENE_NAME, ROLE_ID);
 		expectedEntityMetaData.addAttribute(OMIM_DISORDER).setDataType(TEXT);
 		expectedEntityMetaData.addAttribute(OMIM_CAUSAL_IDENTIFIER).setDataType(TEXT);

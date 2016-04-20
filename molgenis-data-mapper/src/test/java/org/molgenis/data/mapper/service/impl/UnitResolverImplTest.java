@@ -13,8 +13,7 @@ import java.util.Set;
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.Unit;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
@@ -87,7 +86,7 @@ public class UnitResolverImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void resolveUnitLabelNoUnit()
 	{
-		AttributeMetaData attr = new DefaultAttributeMetaData("attr").setLabel("weight").setDescription(null);
+		AttributeMetaData attr = new AttributeMetaData("attr").setLabel("weight").setDescription(null);
 		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
 		assertNull(unit);
 	}
@@ -95,7 +94,7 @@ public class UnitResolverImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void resolveUnitLabelNoUnitDescriptionNoUnit()
 	{
-		AttributeMetaData attr = new DefaultAttributeMetaData("attr").setLabel("weight").setDescription("weight");
+		AttributeMetaData attr = new AttributeMetaData("attr").setLabel("weight").setDescription("weight");
 		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
 		assertNull(unit);
 	}
@@ -103,7 +102,7 @@ public class UnitResolverImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void resolveUnitLabelWithUnit_directUnitMatch()
 	{
-		AttributeMetaData attr = new DefaultAttributeMetaData("attr").setLabel("weight (kg)").setDescription(null);
+		AttributeMetaData attr = new AttributeMetaData("attr").setLabel("weight (kg)").setDescription(null);
 		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
 		assertEquals(unit, Unit.valueOf("kg"));
 	}
@@ -111,7 +110,7 @@ public class UnitResolverImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void resolveUnitLabelNoUnitDescriptionWithUnit_directUnitMatch()
 	{
-		AttributeMetaData attr = new DefaultAttributeMetaData("attr").setLabel("label").setDescription("height (cm)");
+		AttributeMetaData attr = new AttributeMetaData("attr").setLabel("label").setDescription("height (cm)");
 		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
 		assertEquals(unit, Unit.valueOf("cm"));
 	}
@@ -119,7 +118,7 @@ public class UnitResolverImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void resolveUnitLabelNoUnitDescriptionWithUnit_directUnitMatchRaw_kgm2()
 	{
-		AttributeMetaData attr = new DefaultAttributeMetaData("attr").setLabel("label").setDescription(
+		AttributeMetaData attr = new AttributeMetaData("attr").setLabel("label").setDescription(
 				"area density (kg/m2)");
 		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
 		assertEquals(unit, Unit.valueOf("kg/m²"));
@@ -128,7 +127,7 @@ public class UnitResolverImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void resolveUnitLabelNoUnitDescriptionWithUnit_unitOntologyMatch_kgm2()
 	{
-		AttributeMetaData attr = new DefaultAttributeMetaData("attr").setLabel("label").setDescription(
+		AttributeMetaData attr = new AttributeMetaData("attr").setLabel("label").setDescription(
 				"area density (kg/m^2)");
 		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
 		assertEquals(unit, Unit.valueOf("kg/m²"));
@@ -137,7 +136,7 @@ public class UnitResolverImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void resolveUnitLabelNoUnitDescriptionWithUnit_directUnitMatch_kgm2_2()
 	{
-		AttributeMetaData attr = new DefaultAttributeMetaData("attr").setLabel("label").setDescription(
+		AttributeMetaData attr = new AttributeMetaData("attr").setLabel("label").setDescription(
 				"area density (kg/m²)");
 		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
 		assertEquals(unit, Unit.valueOf("kg/m²"));
@@ -146,7 +145,7 @@ public class UnitResolverImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void resolveUnitLabelWithUnit_unitOntologyMatch()
 	{
-		AttributeMetaData attr = new DefaultAttributeMetaData("attr").setLabel("weight (kilogram)")
+		AttributeMetaData attr = new AttributeMetaData("attr").setLabel("weight (kilogram)")
 				.setDescription(null);
 		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
 		assertEquals(unit, Unit.valueOf("kg"));
@@ -155,7 +154,7 @@ public class UnitResolverImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void resolveUnitLabelNoUnitDescriptionWithUnit_unitOntologyMatch()
 	{
-		AttributeMetaData attr = new DefaultAttributeMetaData("attr").setLabel("label").setDescription(
+		AttributeMetaData attr = new AttributeMetaData("attr").setLabel("label").setDescription(
 				"height (centimeter)");
 		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
 		assertEquals(unit, Unit.valueOf("cm"));

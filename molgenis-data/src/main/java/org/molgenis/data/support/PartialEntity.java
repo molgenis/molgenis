@@ -8,8 +8,8 @@ import java.util.List;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
+import org.molgenis.data.meta.EntityMetaData;
 
 /**
  * Entity with partially loaded attributes based on a fetch. Requesting attributes not included in the fetch are

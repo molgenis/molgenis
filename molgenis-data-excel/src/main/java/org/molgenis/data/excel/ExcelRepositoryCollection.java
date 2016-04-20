@@ -13,15 +13,14 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
-import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.GenericImporterExtensions;
 
@@ -122,7 +121,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	public ExcelSheetWriter createWritable(String entityName, List<String> attributeNames)
 	{
 		List<AttributeMetaData> attributes = attributeNames != null ? attributeNames.stream()
-				.<AttributeMetaData> map(attr -> new DefaultAttributeMetaData(attr)).collect(Collectors.toList()) : null;
+				.<AttributeMetaData> map(attr -> new AttributeMetaData(attr)).collect(Collectors.toList()) : null;
 
 		return createWritable(entityName, attributes, AttributeWriteMode.ATTRIBUTE_NAMES);
 	}

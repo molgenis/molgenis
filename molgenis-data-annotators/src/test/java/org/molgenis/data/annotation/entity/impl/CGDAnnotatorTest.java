@@ -1,7 +1,6 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import static org.mockito.Mockito.mock;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.AGE_GROUP;
 import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.ALLELIC_CONDITIONS;
 import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.COMMENTS;
@@ -14,6 +13,7 @@ import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttribute
 import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.INTERVENTION_RATIONALE;
 import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.MANIFESTATION_CATEGORIES;
 import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.REFERENCES;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -30,7 +30,7 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotator.websettings.CGDAnnotatorSettings;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +52,7 @@ public class CGDAnnotatorTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void annotateTestMatch()
 	{
-		DefaultEntityMetaData emdIn = new DefaultEntityMetaData("Test");
+		EntityMetaData emdIn = new EntityMetaData("Test");
 		emdIn.addAttribute(GENE.getAttributeName(), ROLE_ID);
 		Entity inputEntity = new MapEntity(emdIn);
 		inputEntity.set(GENE.getAttributeName(), "LEPR");
@@ -101,7 +101,7 @@ public class CGDAnnotatorTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void annotateTestNoMatch()
 	{
-		DefaultEntityMetaData emdIn = new DefaultEntityMetaData("Test");
+		EntityMetaData emdIn = new EntityMetaData("Test");
 		emdIn.addAttribute(GENE.getAttributeName(), ROLE_ID);
 
 		Entity inputEntity = new MapEntity(emdIn);

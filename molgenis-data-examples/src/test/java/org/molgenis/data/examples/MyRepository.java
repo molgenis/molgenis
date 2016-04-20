@@ -7,8 +7,8 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.AbstractRepository;
 
 import com.google.common.collect.Sets;

@@ -1,6 +1,6 @@
 package org.molgenis.dataexplorer;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
@@ -16,7 +16,7 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.jobs.JobExecutionException;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.mem.InMemoryRepository;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.dataexplorer.controller.AnnotationJob;
 import org.springframework.security.core.Authentication;
@@ -41,7 +41,7 @@ public class AnnotationJobTest
 	private Repository<Entity> repository;
 	@Mock
 	private Progress progress;
-	private DefaultEntityMetaData emd = new DefaultEntityMetaData("repo");
+	private EntityMetaData emd = new EntityMetaData("repo");
 
 	private Authentication authentication;
 
@@ -53,8 +53,8 @@ public class AnnotationJobTest
 	{
 		MockitoAnnotations.initMocks(this);
 		emd.addAttribute("id", ROLE_ID);
-		emd.addAttributeMetaData(VcfRepository.CHROM_META);
-		emd.addAttributeMetaData(VcfRepository.POS_META);
+		emd.addAttribute(VcfRepository.CHROM_META);
+		emd.addAttribute(VcfRepository.POS_META);
 		emd.addAttribute("description");
 		emd.setLabel("My repo");
 		authentication = null;

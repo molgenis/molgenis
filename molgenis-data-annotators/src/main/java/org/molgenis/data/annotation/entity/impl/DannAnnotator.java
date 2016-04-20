@@ -1,8 +1,8 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DECIMAL;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.annotator.websettings.DannAnnotatorSettings.Meta.DANN_LOCATION;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.VcfRepository.ALT_META;
 import static org.molgenis.data.vcf.VcfRepository.CHROM_META;
 import static org.molgenis.data.vcf.VcfRepository.POS_META;
@@ -11,8 +11,6 @@ import static org.molgenis.data.vcf.VcfRepository.REF_META;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
@@ -27,8 +25,8 @@ import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.resources.impl.TabixRepositoryFactory;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -55,7 +53,7 @@ public class DannAnnotator
 	public RepositoryAnnotator dann()
 	{
 		List<AttributeMetaData> attributes = new ArrayList<>();
-		DefaultAttributeMetaData dann_score = new DefaultAttributeMetaData(DANN_SCORE, FieldTypeEnum.DECIMAL)
+		AttributeMetaData dann_score = new AttributeMetaData(DANN_SCORE, DECIMAL)
 				.setDescription("deleterious score of genetic variants using neural networks.")
 				.setLabel(DANN_SCORE_LABEL);
 
@@ -94,12 +92,12 @@ public class DannAnnotator
 		Resource dannTabixResource = null;
 
 		String idAttrName = "id";
-		DefaultEntityMetaData repoMetaData = new DefaultEntityMetaData(DANN_TABIX_RESOURCE);
-		repoMetaData.addAttributeMetaData(CHROM_META);
-		repoMetaData.addAttributeMetaData(POS_META);
-		repoMetaData.addAttributeMetaData(REF_META);
-		repoMetaData.addAttributeMetaData(ALT_META);
-		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("DANN_SCORE", DECIMAL));
+		EntityMetaData repoMetaData = new EntityMetaData(DANN_TABIX_RESOURCE);
+		repoMetaData.addAttribute(CHROM_META);
+		repoMetaData.addAttribute(POS_META);
+		repoMetaData.addAttribute(REF_META);
+		repoMetaData.addAttribute(ALT_META);
+		repoMetaData.addAttribute(new AttributeMetaData("DANN_SCORE", DECIMAL));
 		repoMetaData.addAttribute(idAttrName, ROLE_ID).setVisible(false);
 
 		dannTabixResource = new ResourceImpl(DANN_TABIX_RESOURCE,

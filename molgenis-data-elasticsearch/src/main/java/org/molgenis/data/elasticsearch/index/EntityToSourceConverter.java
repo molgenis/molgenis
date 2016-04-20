@@ -5,10 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.stereotype.Component;

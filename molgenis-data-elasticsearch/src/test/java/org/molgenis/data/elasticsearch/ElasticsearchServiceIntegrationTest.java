@@ -1,8 +1,8 @@
 package org.molgenis.data.elasticsearch;
 
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.transaction.MolgenisTransactionManager.TRANSACTION_ID_RESOURCE_NAME;
 import static org.testng.Assert.assertEquals;
 
@@ -26,9 +26,9 @@ import org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
 import org.molgenis.data.mem.InMemoryRepository;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.testng.annotations.AfterClass;
@@ -50,7 +50,7 @@ public class ElasticsearchServiceIntegrationTest
 
 	private DataService dataService;
 	private ElasticsearchService elasticsearchService;
-	private DefaultEntityMetaData entityMeta = new DefaultEntityMetaData("entity");
+	private EntityMetaData entityMeta = new EntityMetaData("entity");
 	private String idAttrName = "id";
 	private String labelAttrName = "label";
 
@@ -93,7 +93,7 @@ public class ElasticsearchServiceIntegrationTest
 	{
 		new ElasticsearchIndexCreator(ELASTICSEARCH_CLIENT).createIndexIfNotExists(INDEX);
 
-		entityMeta = new DefaultEntityMetaData("entity");
+		entityMeta = new EntityMetaData("entity");
 		entityMeta.setBackend(ElasticsearchRepositoryCollection.NAME);
 		entityMeta.addAttribute(idAttrName, ROLE_ID);
 		entityMeta.addAttribute(labelAttrName, ROLE_LABEL).setNillable(true);

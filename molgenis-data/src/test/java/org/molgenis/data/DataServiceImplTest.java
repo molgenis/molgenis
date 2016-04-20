@@ -22,10 +22,10 @@ import java.util.stream.Stream;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -284,8 +284,8 @@ public class DataServiceImplTest
 	{
 		// setup everything
 		Query<Entity> query = new QueryImpl<Entity>();
-		AttributeMetaData attr1 = new DefaultAttributeMetaData("attr1", MolgenisFieldTypes.FieldTypeEnum.STRING);
-		AttributeMetaData attr2 = new DefaultAttributeMetaData("attr2", MolgenisFieldTypes.FieldTypeEnum.STRING);
+		AttributeMetaData attr1 = new AttributeMetaData("attr1", MolgenisFieldTypes.FieldTypeEnum.STRING);
+		AttributeMetaData attr2 = new AttributeMetaData("attr2", MolgenisFieldTypes.FieldTypeEnum.STRING);
 
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
@@ -299,7 +299,8 @@ public class DataServiceImplTest
 
 		dataService.setMeta(metaDataService);
 
-		EntityMetaData emd2 = new DefaultEntityMetaData("Entity2", emd);
+		EntityMetaData emd2 = EntityMetaData.newInstance(emd);
+		emd2.setName("Entity2");
 		when(repo2.getEntityMetaData()).thenReturn(emd2);
 		when(metaDataService.addEntityMeta(emd2)).thenReturn(repo2);
 
@@ -321,8 +322,8 @@ public class DataServiceImplTest
 	{
 		// setup everything
 		Query<Entity> query = new QueryImpl<Entity>();
-		AttributeMetaData attr1 = new DefaultAttributeMetaData("attr1", MolgenisFieldTypes.FieldTypeEnum.STRING);
-		AttributeMetaData attr2 = new DefaultAttributeMetaData("attr2", MolgenisFieldTypes.FieldTypeEnum.STRING);
+		AttributeMetaData attr1 = new AttributeMetaData("attr1", MolgenisFieldTypes.FieldTypeEnum.STRING);
+		AttributeMetaData attr2 = new AttributeMetaData("attr2", MolgenisFieldTypes.FieldTypeEnum.STRING);
 
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
@@ -336,7 +337,8 @@ public class DataServiceImplTest
 
 		dataService.setMeta(metaDataService);
 
-		EntityMetaData emd2 = new DefaultEntityMetaData("Entity2", emd);
+		EntityMetaData emd2 = EntityMetaData.newInstance(emd);
+		emd2.setName("Entity2");
 		when(repo2.getEntityMetaData()).thenReturn(emd2);
 		when(metaDataService.addEntityMeta(emd2)).thenReturn(repo2);
 

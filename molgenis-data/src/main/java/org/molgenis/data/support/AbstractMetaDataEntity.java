@@ -1,9 +1,9 @@
 package org.molgenis.data.support;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 
 public abstract class AbstractMetaDataEntity extends AbstractEntity
 {

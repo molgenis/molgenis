@@ -2,6 +2,7 @@ package org.molgenis.data.mapper.algorithmgenerator.generator;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -11,8 +12,8 @@ import java.util.Arrays;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.mapper.service.impl.UnitResolverImpl;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,15 +34,15 @@ public class NumericAlgorithmGeneratorTest extends AbstractTestNGSpringContextTe
 	@Autowired
 	NumericAlgorithmGenerator numericAlgorithmGenerator;
 
-	DefaultEntityMetaData targetEntityMetaData;
+	EntityMetaData targetEntityMetaData;
 
-	DefaultAttributeMetaData targetAttribute;
+	AttributeMetaData targetAttribute;
 
-	DefaultEntityMetaData sourceEntityMetaData;
+	EntityMetaData sourceEntityMetaData;
 
-	DefaultAttributeMetaData sourceAttribute;
+	AttributeMetaData sourceAttribute;
 
-	DefaultAttributeMetaData sourceAttribute1;
+	AttributeMetaData sourceAttribute1;
 
 	@BeforeMethod
 	public void setup()
@@ -49,22 +50,22 @@ public class NumericAlgorithmGeneratorTest extends AbstractTestNGSpringContextTe
 		when(ontologyService.getOntology("http://purl.obolibrary.org/obo/uo.owl"))
 				.thenReturn(Ontology.create("1", "http://purl.obolibrary.org/obo/uo.owl", "unit ontology"));
 
-		targetEntityMetaData = new DefaultEntityMetaData("target");
-		targetAttribute = new DefaultAttributeMetaData("targetHeight");
+		targetEntityMetaData = new EntityMetaData("target");
+		targetAttribute = new AttributeMetaData("targetHeight");
 		targetAttribute.setLabel("height in m");
 		targetAttribute.setDataType(MolgenisFieldTypes.DECIMAL);
-		targetEntityMetaData.addAttributeMetaData(targetAttribute);
+		targetEntityMetaData.addAttribute(targetAttribute);
 
-		sourceEntityMetaData = new DefaultEntityMetaData("source");
-		sourceAttribute = new DefaultAttributeMetaData("sourceHeight");
+		sourceEntityMetaData = new EntityMetaData("source");
+		sourceAttribute = new AttributeMetaData("sourceHeight");
 		sourceAttribute.setDataType(MolgenisFieldTypes.DECIMAL);
 		sourceAttribute.setLabel("body length in cm");
-		sourceEntityMetaData.addAttributeMetaData(sourceAttribute);
+		sourceEntityMetaData.addAttribute(sourceAttribute);
 
-		sourceAttribute1 = new DefaultAttributeMetaData("sourceHeight1");
+		sourceAttribute1 = new AttributeMetaData("sourceHeight1");
 		sourceAttribute1.setDataType(MolgenisFieldTypes.DECIMAL);
 		sourceAttribute1.setLabel("body length in cm second time");
-		sourceEntityMetaData.addAttributeMetaData(sourceAttribute1);
+		sourceEntityMetaData.addAttribute(sourceAttribute1);
 	}
 
 	@Test
@@ -92,8 +93,8 @@ public class NumericAlgorithmGeneratorTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void isSuitable()
 	{
-		DefaultAttributeMetaData stringAttribute = new DefaultAttributeMetaData("source_string",
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
+		AttributeMetaData stringAttribute = new AttributeMetaData("source_string",
+				STRING);
 		assertTrue(numericAlgorithmGenerator.isSuitable(targetAttribute, Arrays.asList(sourceAttribute)));
 		assertFalse(
 				numericAlgorithmGenerator.isSuitable(targetAttribute, Arrays.asList(sourceAttribute, stringAttribute)));

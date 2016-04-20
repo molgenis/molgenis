@@ -4,7 +4,7 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DECIMAL;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.VcfRepository.ALT;
 import static org.molgenis.data.vcf.VcfRepository.ALT_META;
 import static org.molgenis.data.vcf.VcfRepository.CHROM;
@@ -22,8 +22,8 @@ import java.util.Arrays;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.annotator.tabix.TabixRepository;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.util.ResourceUtils;
@@ -33,18 +33,18 @@ import org.testng.annotations.Test;
 public class TabixRepositoryTest
 {
 	private TabixRepository tabixRepository;
-	private DefaultEntityMetaData repoMetaData;
+	private EntityMetaData repoMetaData;
 
 	@BeforeTest
 	public void beforeTest() throws IOException
 	{
-		repoMetaData = new DefaultEntityMetaData("CaddTest");
-		repoMetaData.addAttributeMetaData(CHROM_META);
-		repoMetaData.addAttributeMetaData(POS_META);
-		repoMetaData.addAttributeMetaData(REF_META);
-		repoMetaData.addAttributeMetaData(ALT_META);
-		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("CADD", DECIMAL));
-		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("CADD_SCALED", DECIMAL));
+		repoMetaData = new EntityMetaData("CaddTest");
+		repoMetaData.addAttribute(CHROM_META);
+		repoMetaData.addAttribute(POS_META);
+		repoMetaData.addAttribute(REF_META);
+		repoMetaData.addAttribute(ALT_META);
+		repoMetaData.addAttribute(new AttributeMetaData("CADD", DECIMAL));
+		repoMetaData.addAttribute(new AttributeMetaData("CADD_SCALED", DECIMAL));
 		repoMetaData.addAttribute("id", ROLE_ID).setVisible(false);
 		File file = ResourceUtils.getFile(getClass(), "/cadd_test.vcf.gz");
 		tabixRepository = new TabixRepository(file, repoMetaData);

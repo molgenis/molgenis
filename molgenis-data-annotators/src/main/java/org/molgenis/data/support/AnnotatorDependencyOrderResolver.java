@@ -7,11 +7,11 @@ import java.util.Queue;
 import java.util.stream.Collectors;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 
 import autovalue.shaded.com.google.common.common.collect.Lists;
 
@@ -39,7 +39,7 @@ public class AnnotatorDependencyOrderResolver
 	private Queue<RepositoryAnnotator> getSingleAnnotatorDependencyList(RepositoryAnnotator selectedAnnotator,
 			List<RepositoryAnnotator> annotatorList, Queue<RepositoryAnnotator> queue, EntityMetaData emd)
 	{
-		EntityMetaData entityMetaData = new DefaultEntityMetaData(emd); // create a copy because we do not want to
+		EntityMetaData entityMetaData = new EntityMetaData(emd); // create a copy because we do not want to
 																		// change the actual metadata of the entity
 		resolveAnnotatorDependencies(selectedAnnotator, annotatorList, queue, entityMetaData);
 		return queue;
@@ -89,7 +89,7 @@ public class AnnotatorDependencyOrderResolver
 					annotatorQueue.add(annotator);
 				}
 				annotator.getInfo().getOutputAttributes()
-						.forEach(((DefaultEntityMetaData) entityMetaData)::addAttributeMetaData);
+						.forEach(((EntityMetaData) entityMetaData)::addAttribute);
 				annotatorList.remove(annotator);
 				resolveAnnotatorDependencies(requestedAnnotator, annotatorList, annotatorQueue, entityMetaData);
 			}

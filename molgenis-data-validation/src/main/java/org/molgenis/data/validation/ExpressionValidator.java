@@ -3,7 +3,7 @@ package org.molgenis.data.validation;
 import java.util.List;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.springframework.stereotype.Component;
 
 /**

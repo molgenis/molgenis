@@ -10,11 +10,11 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.convert.DateToStringConverter;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.springframework.beans.BeanUtils;
 
 public abstract class AbstractEntity implements Entity
@@ -157,6 +157,18 @@ public abstract class AbstractEntity implements Entity
 	public List<Integer> getIntList(String attributeName)
 	{
 		return DataConverter.toIntList(get(attributeName));
+	}
+
+	@Override
+	public Object getIdValue()
+	{
+		return get(getEntityMetaData().getIdAttribute().getName());
+	}
+
+	@Override
+	public Iterable<String> getAttributeNames()
+	{
+		return EntityMetaDataUtils.getAttributeNames(getEntityMetaData().getAtomicAttributes());
 	}
 
 	@Override

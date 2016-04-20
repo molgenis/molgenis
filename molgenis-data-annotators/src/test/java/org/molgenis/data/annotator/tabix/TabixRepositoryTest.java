@@ -3,7 +3,7 @@ package org.molgenis.data.annotator.tabix;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.VcfRepository.CHROM;
 import static org.molgenis.data.vcf.VcfRepository.CHROM_META;
 import static org.molgenis.data.vcf.VcfRepository.POS;
@@ -18,10 +18,9 @@ import java.util.stream.Stream;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotator.tabix.TabixReader.Iterator;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -39,10 +38,10 @@ public class TabixRepositoryTest
 	public void beforeTest()
 	{
 		initMocks(this);
-		DefaultEntityMetaData emd = new DefaultEntityMetaData("MyEntity");
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("ID").setAuto(true), ROLE_ID);
-		emd.addAllAttributeMetaData(asList(CHROM_META, POS_META));
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("Description").setNillable(false));
+		EntityMetaData emd = new EntityMetaData("MyEntity");
+		emd.addAttribute(new AttributeMetaData("ID").setAuto(true), ROLE_ID);
+		emd.addAttributes(asList(CHROM_META, POS_META));
+		emd.addAttribute(new AttributeMetaData("Description").setNillable(false));
 
 		entityMetaData = emd;
 		tabixRepository = new TabixRepository(tabixReader, entityMetaData, CHROM, POS);

@@ -13,10 +13,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.entity.ResultFilter;
+import org.molgenis.data.meta.AttributeMetaData;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterators;

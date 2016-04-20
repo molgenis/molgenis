@@ -13,12 +13,11 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.WritableFactory;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
-import org.molgenis.data.support.DefaultAttributeMetaData;
 
 /**
  * Creates new Excel sheets
@@ -89,7 +88,7 @@ public class ExcelWriter implements WritableFactory
 	public ExcelSheetWriter createWritable(String entityName, List<String> attributeNames)
 	{
 		List<AttributeMetaData> attributes = attributeNames != null ? attributeNames.stream()
-				.<AttributeMetaData> map(attr -> new DefaultAttributeMetaData(attr)).collect(Collectors.toList()) : null;
+				.<AttributeMetaData> map(attr -> new AttributeMetaData(attr)).collect(Collectors.toList()) : null;
 
 		return createWritable(entityName, attributes, AttributeWriteMode.ATTRIBUTE_NAMES);
 	}

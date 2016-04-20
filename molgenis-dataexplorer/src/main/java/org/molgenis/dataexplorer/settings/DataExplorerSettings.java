@@ -11,10 +11,9 @@ import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
-import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.springframework.stereotype.Component;
 
@@ -104,18 +103,18 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 		private void addGeneralSettings()
 		{
-			DefaultAttributeMetaData generalAttr = addAttribute(GENERAL).setDataType(COMPOUND).setLabel("General");
-			AttributeMetaData generalSearchboxAttr = new DefaultAttributeMetaData(GENERAL_SEARCHBOX).setDataType(BOOL)
+			AttributeMetaData generalAttr = addAttribute(GENERAL).setDataType(COMPOUND).setLabel("General");
+			AttributeMetaData generalSearchboxAttr = new AttributeMetaData(GENERAL_SEARCHBOX).setDataType(BOOL)
 					.setNillable(false).setDefaultValue(String.valueOf(DEFAULT_GENERAL_SEARCHBOX))
 					.setLabel("Show search box");
-			AttributeMetaData generalAttrSelectAttr = new DefaultAttributeMetaData(GENERAL_ITEM_SELECT_PANEL)
+			AttributeMetaData generalAttrSelectAttr = new AttributeMetaData(GENERAL_ITEM_SELECT_PANEL)
 					.setDataType(BOOL).setNillable(false)
 					.setDefaultValue(String.valueOf(DEFAULT_GENERAL_ITEM_SELECT_PANEL))
 					.setLabel("Show data item selection");
-			AttributeMetaData generalLaunchWizardAttr = new DefaultAttributeMetaData(GENERAL_LAUNCH_WIZARD)
+			AttributeMetaData generalLaunchWizardAttr = new AttributeMetaData(GENERAL_LAUNCH_WIZARD)
 					.setDataType(BOOL).setNillable(false).setDefaultValue(String.valueOf(DEFAULT_GENERAL_LAUNCH_WIZARD))
 					.setLabel("Launch data item filter wizard");
-			AttributeMetaData generalHeaderAbbreviateAttr = new DefaultAttributeMetaData(GENERAL_HEADER_ABBREVIATE)
+			AttributeMetaData generalHeaderAbbreviateAttr = new AttributeMetaData(GENERAL_HEADER_ABBREVIATE)
 					.setDataType(INT).setNillable(false)
 					.setDefaultValue(String.valueOf(DEFAULT_GENERAL_HEADER_ABBREVIATE))
 					.setLabel("Entity description abbreviation length");
@@ -127,18 +126,18 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 		private void addModulesSettings()
 		{
-			AttributeMetaData modAggregatesAttr = new DefaultAttributeMetaData(MOD_AGGREGATES).setDataType(BOOL)
+			AttributeMetaData modAggregatesAttr = new AttributeMetaData(MOD_AGGREGATES).setDataType(BOOL)
 					.setNillable(false).setDefaultValue(String.valueOf(DEFAULT_MOD_AGGREGATES)).setLabel("Aggregates");
-			AttributeMetaData modAnnotatorsAttr = new DefaultAttributeMetaData(MOD_ANNOTATORS).setDataType(BOOL)
+			AttributeMetaData modAnnotatorsAttr = new AttributeMetaData(MOD_ANNOTATORS).setDataType(BOOL)
 					.setNillable(false).setDefaultValue(String.valueOf(DEFAULT_MOD_ANNOTATORS)).setLabel("Annotators");
-			AttributeMetaData modChartsAttr = new DefaultAttributeMetaData(MOD_CHARTS).setDataType(BOOL)
+			AttributeMetaData modChartsAttr = new AttributeMetaData(MOD_CHARTS).setDataType(BOOL)
 					.setNillable(false).setDefaultValue(String.valueOf(DEFAULT_MOD_CHARTS)).setLabel("Charts");
-			AttributeMetaData modDataAttr = new DefaultAttributeMetaData(MOD_DATA).setDataType(BOOL).setNillable(false)
+			AttributeMetaData modDataAttr = new AttributeMetaData(MOD_DATA).setDataType(BOOL).setNillable(false)
 					.setDefaultValue(String.valueOf(DEFAULT_MOD_DATA)).setLabel("Data");
-			AttributeMetaData modReportAttr = new DefaultAttributeMetaData(MOD_REPORTS).setDataType(BOOL)
+			AttributeMetaData modReportAttr = new AttributeMetaData(MOD_REPORTS).setDataType(BOOL)
 					.setNillable(false).setDefaultValue(String.valueOf(DEFAULT_MOD_REPORT)).setLabel("Reports");
 
-			DefaultAttributeMetaData modAttr = addAttribute(MOD).setDataType(COMPOUND).setLabel("Modules");
+			AttributeMetaData modAttr = addAttribute(MOD).setDataType(COMPOUND).setLabel("Modules");
 			modAttr.addAttributePart(modAggregatesAttr);
 			modAttr.addAttributePart(createModAggregatesSettings());
 			modAttr.addAttributePart(modAnnotatorsAttr);
@@ -151,16 +150,16 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 		private AttributeMetaData createModDataSettings()
 		{
-			DefaultAttributeMetaData dataAttr = new DefaultAttributeMetaData(DATA).setDataType(COMPOUND)
+			AttributeMetaData dataAttr = new AttributeMetaData(DATA).setDataType(COMPOUND)
 					.setLabel("Data").setVisibleExpression("$('" + MOD_DATA + "').eq(true).value()");
 
-			AttributeMetaData dataGalaxyExportAttr = new DefaultAttributeMetaData(DATA_GALAXY_EXPORT).setDataType(BOOL)
+			AttributeMetaData dataGalaxyExportAttr = new AttributeMetaData(DATA_GALAXY_EXPORT).setDataType(BOOL)
 					.setNillable(false).setDefaultValue(String.valueOf(DEFAULT_DATA_GALAXY_EXPORT))
 					.setLabel("Galaxy export");
-			AttributeMetaData dataGalaxyUrlAttr = new DefaultAttributeMetaData(DATA_GALAXY_URL).setDataType(HYPERLINK)
+			AttributeMetaData dataGalaxyUrlAttr = new AttributeMetaData(DATA_GALAXY_URL).setDataType(HYPERLINK)
 					.setNillable(true).setLabel("Galaxy URL")
 					.setVisibleExpression("$('" + DATA_GALAXY_EXPORT + "').eq(true).value()");
-			AttributeMetaData dataGalaxyApiKeyAttr = new DefaultAttributeMetaData(DATA_GALAXY_API_KEY).setNillable(true)
+			AttributeMetaData dataGalaxyApiKeyAttr = new AttributeMetaData(DATA_GALAXY_API_KEY).setNillable(true)
 					.setLabel("Galaxy API key")
 					.setVisibleExpression("$('" + DATA_GALAXY_EXPORT + "').eq(true).value()");
 			dataAttr.addAttributePart(dataGalaxyExportAttr);
@@ -168,21 +167,21 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 			dataAttr.addAttributePart(dataGalaxyApiKeyAttr);
 
 			// genome browser
-			DefaultAttributeMetaData genomeBrowserInitAttr = new DefaultAttributeMetaData(GENOMEBROWSER_INIT)
+			AttributeMetaData genomeBrowserInitAttr = new AttributeMetaData(GENOMEBROWSER_INIT)
 					.setDataType(COMPOUND).setLabel("Initialization");
-			AttributeMetaData genomeBrowserInitBrowserLinksAttr = new DefaultAttributeMetaData(
+			AttributeMetaData genomeBrowserInitBrowserLinksAttr = new AttributeMetaData(
 					GENOMEBROWSER_INIT_BROWSER_LINKS).setNillable(false).setDataType(TEXT)
 							.setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_BROWSER_LINKS).setLabel("Browser links");
-			AttributeMetaData genomeBrowserInitCoordSystemAttr = new DefaultAttributeMetaData(
+			AttributeMetaData genomeBrowserInitCoordSystemAttr = new AttributeMetaData(
 					GENOMEBROWSER_INIT_COORD_SYSTEM).setNillable(false).setDataType(TEXT)
 							.setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_COORD_SYSTEM).setLabel("Coordinate system");
-			AttributeMetaData genomeBrowserInitLocationAttr = new DefaultAttributeMetaData(GENOMEBROWSER_INIT_LOCATION)
+			AttributeMetaData genomeBrowserInitLocationAttr = new AttributeMetaData(GENOMEBROWSER_INIT_LOCATION)
 					.setNillable(false).setDataType(TEXT).setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_LOCATION)
 					.setLabel("Location");
-			AttributeMetaData genomeBrowserInitSourcesAttr = new DefaultAttributeMetaData(GENOMEBROWSER_INIT_SOURCES)
+			AttributeMetaData genomeBrowserInitSourcesAttr = new AttributeMetaData(GENOMEBROWSER_INIT_SOURCES)
 					.setNillable(false).setDataType(TEXT).setDefaultValue(DEFAULT_GENOMEBROWSER_INIT_SOURCES)
 					.setLabel("Sources");
-			AttributeMetaData genomeBrowserInitHighlightRegionAttr = new DefaultAttributeMetaData(
+			AttributeMetaData genomeBrowserInitHighlightRegionAttr = new AttributeMetaData(
 					GENOMEBROWSER_INIT_HIGHLIGHT_REGION).setNillable(false).setDataType(BOOL)
 							.setDefaultValue(String.valueOf(DEFAULT_GENOMEBROWSER_INIT_HIGHLIGHT_REGION))
 							.setLabel("Highlight region");
@@ -193,11 +192,11 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 			genomeBrowserInitAttr.addAttributePart(genomeBrowserInitSourcesAttr);
 			genomeBrowserInitAttr.addAttributePart(genomeBrowserInitHighlightRegionAttr);
 
-			DefaultAttributeMetaData dataGenomeBrowserAttr = new DefaultAttributeMetaData(DATA_GENOME_BROWSER)
+			AttributeMetaData dataGenomeBrowserAttr = new AttributeMetaData(DATA_GENOME_BROWSER)
 					.setDataType(BOOL).setNillable(false).setDefaultValue(String.valueOf(DEFAULT_DATA_GENOME_BROWSER))
 					.setLabel("Genome Browser");
 
-			DefaultAttributeMetaData genomeBrowserAttr = new DefaultAttributeMetaData(GENOMEBROWSER)
+			AttributeMetaData genomeBrowserAttr = new AttributeMetaData(GENOMEBROWSER)
 					.setDataType(COMPOUND).setLabel("Genome Browser")
 					.setVisibleExpression("$('" + DATA_GENOME_BROWSER + "').eq(true).value()");
 			genomeBrowserAttr.addAttributePart(genomeBrowserInitAttr);
@@ -210,13 +209,13 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 		private AttributeMetaData createModAggregatesSettings()
 		{
-			DefaultAttributeMetaData aggregatesAttr = new DefaultAttributeMetaData(AGGREGATES).setDataType(COMPOUND)
+			AttributeMetaData aggregatesAttr = new AttributeMetaData(AGGREGATES).setDataType(COMPOUND)
 					.setLabel("Aggregates").setVisibleExpression("$('" + MOD_AGGREGATES + "').eq(true).value()");
-			AttributeMetaData aggregatesDistinctSelectAttr = new DefaultAttributeMetaData(AGGREGATES_DISTINCT_SELECT)
+			AttributeMetaData aggregatesDistinctSelectAttr = new AttributeMetaData(AGGREGATES_DISTINCT_SELECT)
 					.setNillable(false).setDataType(BOOL)
 					.setDefaultValue(String.valueOf(DEFAULT_AGGREGATES_DISTINCT_SELECT))
 					.setLabel("Distinct aggregates");
-			AttributeMetaData aggregatesDistinctOverrideAttr = new DefaultAttributeMetaData(
+			AttributeMetaData aggregatesDistinctOverrideAttr = new AttributeMetaData(
 					AGGREGATES_DISTINCT_OVERRIDES).setDataType(TEXT).setLabel("Distinct attribute overrides")
 							.setDescription("JSON object that maps entity names to attribute names")
 							.setVisibleExpression("$('" + AGGREGATES_DISTINCT_SELECT + "').eq(true).value()");
@@ -227,9 +226,9 @@ public class DataExplorerSettings extends DefaultSettingsEntity
 
 		private AttributeMetaData createModReportSettings()
 		{
-			DefaultAttributeMetaData reportsAttr = new DefaultAttributeMetaData(REPORTS).setDataType(COMPOUND)
+			AttributeMetaData reportsAttr = new AttributeMetaData(REPORTS).setDataType(COMPOUND)
 					.setLabel("Reports").setVisibleExpression("$('" + MOD_REPORTS + "').eq(true).value()");
-			AttributeMetaData reportsEntitiesAttr = new DefaultAttributeMetaData(REPORTS_ENTITIES).setNillable(true)
+			AttributeMetaData reportsEntitiesAttr = new AttributeMetaData(REPORTS_ENTITIES).setNillable(true)
 					.setDataType(TEXT).setLabel("Reports").setDescription(
 							"Comma-seperated report strings (e.g. MyDataSet:myreport,OtherDataSet:otherreport). The report name refers to an existing FreemarkerTemplate entity or file with name view-<report>-entitiesreport.ftl (e.g. view-myreport-entitiesreport.ftl)");
 			reportsAttr.addAttributePart(reportsEntitiesAttr);

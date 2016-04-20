@@ -1,20 +1,18 @@
 package org.molgenis.integrationtest.data;
 
 import static org.molgenis.MolgenisFieldTypes.DECIMAL;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
-import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import org.molgenis.data.meta.EntityMetaData;
 
 public class AbstractDecimalDatatypeIT extends AbstractDatatypeIT
 {
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("DecimalTest");
+		EntityMetaData entityMetaData = new EntityMetaData("DecimalTest");
 		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(DECIMAL).setNillable(false);
 		entityMetaData.addAttribute("col2").setDataType(DECIMAL);
 		entityMetaData.addAttribute("col3").setDataType(DECIMAL);

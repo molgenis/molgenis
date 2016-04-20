@@ -2,8 +2,8 @@ package org.molgenis.data.annotation.resources.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertSame;
@@ -19,8 +19,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -44,14 +44,14 @@ public class ResourcesTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private Resources resources;
 
-	private DefaultEntityMetaData emd;
+	private EntityMetaData emd;
 
 	private Entity e1;
 
 	@BeforeSuite
 	public void beforeSuite()
 	{
-		emd = new DefaultEntityMetaData("resourceName");
+		emd = new EntityMetaData("resourceName");
 		emd.addAttribute("id", ROLE_ID, ROLE_LABEL);
 
 		e1 = new DefaultEntity(emd, dataService);

@@ -17,8 +17,8 @@ import java.util.Iterator;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.processor.CellProcessor;
 import org.springframework.util.FileCopyUtils;
 import org.testng.annotations.BeforeClass;

@@ -13,11 +13,10 @@ import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Sort;
 import org.molgenis.data.Sort.Direction;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -33,7 +32,7 @@ public class SortGeneratorTest
 	{
 		sortGenerator = new SortGenerator();
 		searchRequestBuilder = mock(SearchRequestBuilder.class);
-		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("entity");
+		EntityMetaData entityMetaData = new EntityMetaData("entity");
 		entityMetaData.addAttribute("int").setDataType(MolgenisFieldTypes.INT);
 		entityMetaData.addAttribute("string").setDataType(MolgenisFieldTypes.STRING);
 		this.entityMetaData = entityMetaData;

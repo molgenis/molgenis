@@ -1,20 +1,18 @@
 package org.molgenis.integrationtest.data;
 
 import static org.molgenis.MolgenisFieldTypes.STRING;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
-import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import org.molgenis.data.meta.EntityMetaData;
 
 public class AbstractStringDatatypeIT extends AbstractDatatypeIT
 {
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("StringTest");
+		EntityMetaData entityMetaData = new EntityMetaData("StringTest");
 		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(STRING).setNillable(false);
 		entityMetaData.addAttribute("col2").setDataType(STRING);
 

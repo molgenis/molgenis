@@ -3,6 +3,15 @@ package org.molgenis.gaf;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.ENUM;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.INT;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
+import static org.molgenis.gaf.GAFCol.BARCODE_1;
+import static org.molgenis.gaf.GAFCol.EXTERNAL_SAMPLE_ID;
+import static org.molgenis.gaf.GAFCol.INTERNAL_SAMPLE_ID;
+import static org.molgenis.gaf.GAFCol.LANE;
+import static org.molgenis.gaf.GAFCol.PROJECT;
+import static org.molgenis.gaf.GAFCol.SEQUENCER;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
@@ -10,14 +19,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.file.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,27 +123,25 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 
 		// INTERNAL_SAMPLE_ID
-		DefaultAttributeMetaData internalSampleID = new DefaultAttributeMetaData(GAFCol.INTERNAL_SAMPLE_ID.toString(),
-				FieldTypeEnum.INT);
+		AttributeMetaData internalSampleID = new AttributeMetaData(INTERNAL_SAMPLE_ID.toString(),
+				INT);
 
 		// LANE
-		DefaultAttributeMetaData lane = new DefaultAttributeMetaData(GAFCol.LANE.toString(), FieldTypeEnum.STRING);
+		AttributeMetaData lane = new AttributeMetaData(LANE.toString(), STRING);
 
 		// SEQUENCER
-		DefaultAttributeMetaData sequencer = new DefaultAttributeMetaData(GAFCol.SEQUENCER.toString(),
-				FieldTypeEnum.ENUM);
+		AttributeMetaData sequencer = new AttributeMetaData(SEQUENCER.toString(), ENUM);
 		sequencer.setEnumOptions(Arrays.<String> asList("HWUSI_EAS536", "SN163", "M01785"));
 
 		// EXTERNAL_SAMPLE_ID
-		DefaultAttributeMetaData externalSampleId = new DefaultAttributeMetaData(GAFCol.EXTERNAL_SAMPLE_ID.toString(),
-				FieldTypeEnum.STRING);
+		AttributeMetaData externalSampleId = new AttributeMetaData(EXTERNAL_SAMPLE_ID.toString(),
+				STRING);
 
 		// PROJECT
-		DefaultAttributeMetaData project = new DefaultAttributeMetaData(GAFCol.PROJECT.toString(), FieldTypeEnum.STRING);
+		AttributeMetaData project = new AttributeMetaData(PROJECT.toString(), STRING);
 
 		// BARCODE_1
-		DefaultAttributeMetaData barcode1 = new DefaultAttributeMetaData(GAFCol.BARCODE_1.toString(),
-				FieldTypeEnum.STRING);
+		AttributeMetaData barcode1 = new AttributeMetaData(BARCODE_1.toString(), STRING);
 
 		when(entityMetaData.getAttributes()).thenReturn(
 				Arrays.<AttributeMetaData> asList(internalSampleID, lane, sequencer, externalSampleId, project,

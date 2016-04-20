@@ -7,9 +7,9 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.FileRepositoryCollection;
 
 import com.google.common.collect.ImmutableSet;

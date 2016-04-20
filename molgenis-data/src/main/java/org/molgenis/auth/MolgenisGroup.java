@@ -1,10 +1,11 @@
 package org.molgenis.auth;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-
 import java.util.LinkedHashSet;
 import java.util.Set;
+
+import org.molgenis.data.Entity;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 
 public class MolgenisGroup extends org.molgenis.data.support.AbstractEntity implements org.molgenis.data.Entity
 {
@@ -143,7 +144,7 @@ public class MolgenisGroup extends org.molgenis.data.support.AbstractEntity impl
 	}
 
 	@Override
-	public org.molgenis.data.EntityMetaData getEntityMetaData()
+	public EntityMetaData getEntityMetaData()
 	{
 		return new MolgenisGroupMetaData();
 	}

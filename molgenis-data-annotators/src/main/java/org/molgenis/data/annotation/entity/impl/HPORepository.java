@@ -1,6 +1,6 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,13 +18,12 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.AbstractRepository;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 
 import com.google.common.collect.Iterables;
@@ -55,7 +54,7 @@ public class HPORepository extends AbstractRepository
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		DefaultEntityMetaData entityMeta = new DefaultEntityMetaData("HPO");
+		EntityMetaData entityMeta = new EntityMetaData("HPO");
 		entityMeta.addAttribute(HPO_DISEASE_ID_COL_NAME);
 		entityMeta.addAttribute(HPO_GENE_SYMBOL_COL_NAME);
 		entityMeta.addAttribute(HPO_ID_COL_NAME, ROLE_ID);

@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.mapper.algorithmgenerator.bean.GeneratedAlgorithm;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
@@ -21,10 +20,10 @@ import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.mapper.service.impl.AlgorithmTemplateService;
 import org.molgenis.data.mapper.service.impl.AlgorithmTemplateServiceImpl;
 import org.molgenis.data.mapper.service.impl.UnitResolverImpl;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.service.OntologyService;
@@ -67,23 +66,23 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractTestNGSpringConte
 	@Test
 	public void testGenerateTemplateBasedAlgorithm()
 	{
-		DefaultEntityMetaData targetEntityMetaData = new DefaultEntityMetaData("target");
-		DefaultAttributeMetaData targetBMIAttribute = new DefaultAttributeMetaData("targetHeight");
+		EntityMetaData targetEntityMetaData = new EntityMetaData("target");
+		AttributeMetaData targetBMIAttribute = new AttributeMetaData("targetHeight");
 		targetBMIAttribute.setLabel("BMI kg/m²");
 		targetBMIAttribute.setDataType(MolgenisFieldTypes.DECIMAL);
-		targetEntityMetaData.addAttributeMetaData(targetBMIAttribute);
+		targetEntityMetaData.addAttribute(targetBMIAttribute);
 
-		DefaultEntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("source");
-		DefaultAttributeMetaData heightSourceAttribute = new DefaultAttributeMetaData("sourceHeight");
+		EntityMetaData sourceEntityMetaData = new EntityMetaData("source");
+		AttributeMetaData heightSourceAttribute = new AttributeMetaData("sourceHeight");
 		heightSourceAttribute.setDataType(MolgenisFieldTypes.DECIMAL);
 		heightSourceAttribute.setLabel("body length in cm");
 
-		DefaultAttributeMetaData weightSourceAttribute = new DefaultAttributeMetaData("sourceWeight");
+		AttributeMetaData weightSourceAttribute = new AttributeMetaData("sourceWeight");
 		weightSourceAttribute.setDataType(MolgenisFieldTypes.DECIMAL);
 		weightSourceAttribute.setLabel("weight in kg");
 
-		sourceEntityMetaData.addAttributeMetaData(heightSourceAttribute);
-		sourceEntityMetaData.addAttributeMetaData(weightSourceAttribute);
+		sourceEntityMetaData.addAttribute(heightSourceAttribute);
+		sourceEntityMetaData.addAttribute(weightSourceAttribute);
 
 		Map<AttributeMetaData, ExplainedAttributeMetaData> sourceAttributes = ImmutableMap.of(heightSourceAttribute,
 				ExplainedAttributeMetaData.create(heightSourceAttribute,
@@ -112,17 +111,17 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractTestNGSpringConte
 	@Test
 	public void testConvertUnitsAlgorithm()
 	{
-		DefaultEntityMetaData targetEntityMetaData = new DefaultEntityMetaData("target");
-		DefaultAttributeMetaData targetAttribute = new DefaultAttributeMetaData("targetHeight");
+		EntityMetaData targetEntityMetaData = new EntityMetaData("target");
+		AttributeMetaData targetAttribute = new AttributeMetaData("targetHeight");
 		targetAttribute.setLabel("height in m");
 		targetAttribute.setDataType(MolgenisFieldTypes.DECIMAL);
-		targetEntityMetaData.addAttributeMetaData(targetAttribute);
+		targetEntityMetaData.addAttribute(targetAttribute);
 
-		DefaultEntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("source");
-		DefaultAttributeMetaData sourceAttribute = new DefaultAttributeMetaData("sourceHeight");
+		EntityMetaData sourceEntityMetaData = new EntityMetaData("source");
+		AttributeMetaData sourceAttribute = new AttributeMetaData("sourceHeight");
 		sourceAttribute.setDataType(MolgenisFieldTypes.DECIMAL);
 		sourceAttribute.setLabel("body length in cm");
-		sourceEntityMetaData.addAttributeMetaData(sourceAttribute);
+		sourceEntityMetaData.addAttribute(sourceAttribute);
 
 		String actualAlgorithm = algorithmGeneratorService.generate(targetAttribute,
 				Lists.newArrayList(sourceAttribute), targetEntityMetaData, sourceEntityMetaData);

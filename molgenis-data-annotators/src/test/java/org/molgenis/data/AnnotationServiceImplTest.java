@@ -8,9 +8,9 @@ import static org.testng.Assert.assertTrue;
 
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
@@ -23,7 +23,7 @@ public class AnnotationServiceImplTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
 	private AnnotationServiceImpl annotationService;
-	private final EntityMetaData metaData = new DefaultEntityMetaData("test");
+	private final EntityMetaData metaData = new EntityMetaData("test");
 
 	@Test
 	public void getAllAnnotators()
@@ -51,7 +51,7 @@ public class AnnotationServiceImplTest extends AbstractTestNGSpringContextTests
 
 	public static class Config
 	{
-		private final EntityMetaData metaData = new DefaultEntityMetaData("test");
+		private final EntityMetaData metaData = new EntityMetaData("test");
 
 		@Bean
 		public RepositoryAnnotator annotator1()

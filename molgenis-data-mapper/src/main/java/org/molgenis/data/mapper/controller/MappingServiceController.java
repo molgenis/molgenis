@@ -24,10 +24,8 @@ import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AggregateResult;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
@@ -45,6 +43,8 @@ import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.mapper.service.impl.AlgorithmEvaluation;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
@@ -829,7 +829,7 @@ public class MappingServiceController extends MolgenisPluginController
 		// Check if the selected source attribute is aggregateable
 		AttributeMetaData sourceAttributeAttributeMetaData = dataService.getEntityMetaData(source)
 				.getAttribute(sourceAttribute);
-		if (sourceAttributeAttributeMetaData.isAggregateable())
+		if (sourceAttributeAttributeMetaData.isAggregatable())
 		{
 			AggregateResult aggregate = dataService.aggregate(source,
 					new AggregateQueryImpl().attrX(sourceAttributeAttributeMetaData).query(new QueryImpl<Entity>()));

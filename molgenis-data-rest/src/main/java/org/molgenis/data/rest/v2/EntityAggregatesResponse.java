@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 import org.molgenis.data.AggregateAnonymizer;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AnonymizedAggregateResult;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.AttributeMetaData;
 
 public class EntityAggregatesResponse extends EntityCollectionResponseV2
 {

@@ -7,36 +7,35 @@ import static org.molgenis.MolgenisFieldTypes.DECIMAL;
 import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.XREF;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 import java.util.Arrays;
 
-import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.fieldtypes.EnumField;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 public abstract class AbstractDataValidationIT extends AbstractDataIntegrationIT
 {
-	private EditableEntityMetaData entityMetaData;
+	private EntityMetaData entityMetaData;
 	private Entity entity;
 
 	@BeforeClass
 	public void beforeClass()
 	{
-		EditableEntityMetaData refEntityMetaData = new DefaultEntityMetaData("RefEntity");
+		EntityMetaData refEntityMetaData = new EntityMetaData("RefEntity");
 		refEntityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false).setAuto(true);
 		metaDataService.addEntityMeta(refEntityMetaData);
 
-		entityMetaData = new DefaultEntityMetaData("DataValidationTest");
+		entityMetaData = new EntityMetaData("DataValidationTest");
 		entityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false).setAuto(true);
 		entityMetaData.addAttribute("intAttr").setDataType(INT);
 		entityMetaData.addAttribute("boolAttr").setDataType(BOOL);
@@ -124,7 +123,7 @@ public abstract class AbstractDataValidationIT extends AbstractDataIntegrationIT
 
 	public void testNotNillable()
 	{
-		EditableEntityMetaData entityMetaData1 = new DefaultEntityMetaData("NotNillableTest");
+		EntityMetaData entityMetaData1 = new EntityMetaData("NotNillableTest");
 		entityMetaData1.addAttribute("identifier", ROLE_ID).setNillable(false);
 		entityMetaData1.addAttribute("stringAttr").setNillable(false);
 		metaDataService.addEntityMeta(entityMetaData1);

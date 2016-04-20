@@ -5,7 +5,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.DECIMAL;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
@@ -39,13 +39,13 @@ import org.molgenis.data.mapper.repository.impl.MappingProjectRepositoryImpl;
 import org.molgenis.data.mapper.repository.impl.MappingTargetRepositoryImpl;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.mem.InMemoryRepositoryCollection;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
-import org.molgenis.data.meta.PackageImpl;
+import org.molgenis.data.meta.Package;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -93,11 +93,11 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 
 	private MolgenisUser user;
 
-	private DefaultEntityMetaData hopMetaData;
+	private EntityMetaData hopMetaData;
 
-	private DefaultEntityMetaData geneMetaData;
+	private EntityMetaData geneMetaData;
 
-	private DefaultEntityMetaData exonMetaData;
+	private EntityMetaData exonMetaData;
 
 	private final UuidGenerator uuidGenerator = new UuidGenerator();
 
@@ -108,15 +108,15 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		user.setUsername("Piet");
 		when(userService.getUser("Piet")).thenReturn(user);
 
-		hopMetaData = new DefaultEntityMetaData("HopEntity", PackageImpl.defaultPackage);
+		hopMetaData = new EntityMetaData("HopEntity", Package.defaultPackage);
 		hopMetaData.addAttribute("identifier", ROLE_ID);
 		hopMetaData.addAttribute("height").setDataType(DECIMAL).setNillable(false);
 
-		geneMetaData = new DefaultEntityMetaData("Gene", PackageImpl.defaultPackage);
+		geneMetaData = new EntityMetaData("Gene", Package.defaultPackage);
 		geneMetaData.addAttribute("id", ROLE_ID);
 		geneMetaData.addAttribute("length").setDataType(DECIMAL).setNillable(false);
 
-		exonMetaData = new DefaultEntityMetaData("Exon", PackageImpl.defaultPackage);
+		exonMetaData = new EntityMetaData("Exon", Package.defaultPackage);
 		exonMetaData.addAttribute("id", ROLE_ID);
 		exonMetaData.addAttribute("basepairs").setDataType(DECIMAL).setNillable(false);
 
@@ -304,7 +304,8 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		createMappingProjectWithMappings(entityName);
 
 		Repository<Entity> actual = dataService.getRepository(entityName);
-		DefaultEntityMetaData expectedMetadata = new DefaultEntityMetaData(entityName, hopMetaData);
+		EntityMetaData expectedMetadata = EntityMetaData.newInstance(hopMetaData);
+		expectedMetadata.setName(entityName);
 		expectedMetadata.addAttribute("source");
 		assertEquals(actual.getEntityMetaData(), expectedMetadata);
 		Set<Entity> created = Sets.newHashSet(actual.iterator());
@@ -349,7 +350,8 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		mappingService.applyMappings(project.getMappingTarget("HopEntity"), entityName);
 
 		Repository<Entity> actual = dataService.getRepository(entityName);
-		DefaultEntityMetaData expectedMetadata = new DefaultEntityMetaData(entityName, hopMetaData);
+		EntityMetaData expectedMetadata = EntityMetaData.newInstance(hopMetaData);
+		expectedMetadata.setName(entityName);
 		expectedMetadata.addAttribute("source");
 		assertEquals(actual.getEntityMetaData(), expectedMetadata);
 		Set<Entity> created = Sets.newHashSet(actual.iterator());
@@ -395,7 +397,8 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		mappingService.applyMappings(project.getMappingTarget("HopEntity"), entityName);
 
 		Repository<Entity> actual = dataService.getRepository(entityName);
-		DefaultEntityMetaData expectedMetadata = new DefaultEntityMetaData(entityName, hopMetaData);
+		EntityMetaData expectedMetadata = EntityMetaData.newInstance(hopMetaData);
+		expectedMetadata.setName(entityName);
 		expectedMetadata.addAttribute("source");
 		assertEquals(actual.getEntityMetaData(), expectedMetadata);
 		Set<Entity> created = Sets.newHashSet(actual.iterator());
@@ -435,7 +438,8 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		mappingService.applyMappings(project.getMappingTarget("HopEntity"), entityName);
 
 		Repository<Entity> actual = dataService.getRepository(entityName);
-		DefaultEntityMetaData expectedMetadata = new DefaultEntityMetaData(entityName, hopMetaData);
+		EntityMetaData expectedMetadata = EntityMetaData.newInstance(hopMetaData);
+		expectedMetadata.setName(entityName);
 		expectedMetadata.addAttribute("source");
 		assertEquals(actual.getEntityMetaData(), expectedMetadata);
 		Set<Entity> created = Sets.newHashSet(actual.iterator());

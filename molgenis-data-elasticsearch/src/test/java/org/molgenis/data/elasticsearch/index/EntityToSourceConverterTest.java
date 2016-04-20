@@ -2,8 +2,8 @@ package org.molgenis.data.elasticsearch.index;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.testng.Assert.assertEquals;
 
 import java.text.ParseException;
@@ -14,11 +14,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.util.MolgenisDateFormat;
@@ -36,7 +35,7 @@ public class EntityToSourceConverterTest
 
 		String refLabelAttributeName = "reflabel";
 		String refMrefAttributeName = "refmref";
-		DefaultEntityMetaData refEntityMetaData = new DefaultEntityMetaData(refEntityName);
+		EntityMetaData refEntityMetaData = new EntityMetaData(refEntityName);
 		refEntityMetaData.addAttribute(idAttributeName, ROLE_ID);
 		refEntityMetaData.addAttribute(refLabelAttributeName, ROLE_LABEL).setUnique(true);
 		refEntityMetaData.addAttribute(refMrefAttributeName).setDataType(MolgenisFieldTypes.MREF).setNillable(true)
@@ -62,14 +61,14 @@ public class EntityToSourceConverterTest
 		String textAttributeName = "xtext";
 		String xrefAttributeName = "xxref";
 
-		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("entity");
+		EntityMetaData entityMetaData = new EntityMetaData("entity");
 		entityMetaData.addAttribute(idAttributeName, ROLE_ID);
 		entityMetaData.addAttribute(boolAttributeName).setDataType(MolgenisFieldTypes.BOOL);
 		entityMetaData.addAttribute(categoricalAttributeName).setDataType(MolgenisFieldTypes.CATEGORICAL)
 				.setRefEntity(refEntityMetaData);
-		DefaultAttributeMetaData compoundPart0Attribute = new DefaultAttributeMetaData(compoundPart0AttributeName)
+		AttributeMetaData compoundPart0Attribute = new AttributeMetaData(compoundPart0AttributeName)
 				.setDataType(MolgenisFieldTypes.STRING);
-		DefaultAttributeMetaData compoundPart1Attribute = new DefaultAttributeMetaData(compoundPart1AttributeName)
+		AttributeMetaData compoundPart1Attribute = new AttributeMetaData(compoundPart1AttributeName)
 				.setDataType(MolgenisFieldTypes.STRING);
 		entityMetaData.addAttribute(compoundAttributeName).setDataType(MolgenisFieldTypes.COMPOUND)
 				.setAttributesMetaData(

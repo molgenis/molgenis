@@ -2,17 +2,14 @@ package org.molgenis.integrationtest.data;
 
 import static org.molgenis.MolgenisFieldTypes.BOOL;
 import static org.molgenis.MolgenisFieldTypes.COMPOUND;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 
 
 public abstract class AbstractCompoundDatatypeIT extends AbstractDatatypeIT
@@ -20,13 +17,13 @@ public abstract class AbstractCompoundDatatypeIT extends AbstractDatatypeIT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("CompoundTest");
+		EntityMetaData entityMetaData = new EntityMetaData("CompoundTest");
 		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(BOOL).setNillable(false);
 
-		DefaultAttributeMetaData attributePart1 = new DefaultAttributeMetaData("col2").setDataType(BOOL);
-		DefaultAttributeMetaData attributePart2 = new DefaultAttributeMetaData("compound1").setDataType(COMPOUND);
+		AttributeMetaData attributePart1 = new AttributeMetaData("col2").setDataType(BOOL);
+		AttributeMetaData attributePart2 = new AttributeMetaData("compound1").setDataType(COMPOUND);
 		attributePart2.setAttributesMetaData(
-				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData("col3").setDataType(BOOL)));
+				Arrays.<AttributeMetaData> asList(new AttributeMetaData("col3").setDataType(BOOL)));
 
 		entityMetaData.addAttribute("compound").setDataType(COMPOUND)
 				.setAttributesMetaData(Arrays.<AttributeMetaData> asList(attributePart1, attributePart2));

@@ -1,6 +1,8 @@
 package org.molgenis.data.csv.typed;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.INT;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 import java.io.File;
@@ -10,12 +12,10 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.io.FileUtils;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.AbstractEntity;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.util.CloseableIterator;
 import org.springframework.util.FileCopyUtils;
 import org.testng.annotations.Test;
@@ -29,13 +29,13 @@ public class TypedCsvRepositoryTest
 
 	public TypedCsvRepositoryTest()
 	{
-		DefaultEntityMetaData meta = new DefaultEntityMetaData("Test", TestEntity.class);
+		EntityMetaData meta = new EntityMetaData("Test", TestEntity.class);
 
-		DefaultAttributeMetaData attr = new DefaultAttributeMetaData("index", FieldTypeEnum.INT);
-		meta.addAttributeMetaData(attr, ROLE_ID);
+		AttributeMetaData attr = new AttributeMetaData("index", INT);
+		meta.addAttribute(attr, ROLE_ID);
 
-		meta.addAttributeMetaData(new DefaultAttributeMetaData("col1", FieldTypeEnum.STRING));
-		meta.addAttributeMetaData(new DefaultAttributeMetaData("col2", FieldTypeEnum.STRING));
+		meta.addAttribute(new AttributeMetaData("col1", STRING));
+		meta.addAttribute(new AttributeMetaData("col2", STRING));
 
 		ENTITY_META_DATA = meta;
 	}

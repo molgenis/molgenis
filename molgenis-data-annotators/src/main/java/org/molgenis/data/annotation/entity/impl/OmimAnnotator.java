@@ -11,7 +11,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -27,7 +26,7 @@ import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
-import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -63,18 +62,18 @@ public class OmimAnnotator
 	public RepositoryAnnotator omim()
 	{
 		List<AttributeMetaData> outputAttributes = new ArrayList<>();
-		DefaultAttributeMetaData omim_phenotype = new DefaultAttributeMetaData(OMIM_DISORDER, TEXT)
+		AttributeMetaData omim_phenotype = new AttributeMetaData(OMIM_DISORDER, TEXT)
 				.setDescription("OMIM phenotype").setLabel("OMIM_Disorders");
-		DefaultAttributeMetaData omim_mim_number = new DefaultAttributeMetaData(OMIM_CAUSAL_IDENTIFIER, TEXT)
-				.setDescription("Number that represents the MIM database identifier for the Locus / Gene")
+		AttributeMetaData omim_mim_number = new AttributeMetaData(OMIM_CAUSAL_IDENTIFIER, TEXT)
+				.setDescription("Number that represents the MIM database dataType for the Locus / Gene")
 				.setLabel("OMIM_Causal_ID");
-		DefaultAttributeMetaData omim_cyto_location = new DefaultAttributeMetaData(OMIM_CYTO_LOCATIONS, TEXT)
+		AttributeMetaData omim_cyto_location = new AttributeMetaData(OMIM_CYTO_LOCATIONS, TEXT)
 				.setDescription("Cytogenic location associated with an OMIM phenotype")
 				.setLabel("OMIM_Cytogenic_Location");
-		DefaultAttributeMetaData omim_entry = new DefaultAttributeMetaData(OMIM_ENTRY, TEXT)
-				.setDescription("Number that represents the MIM database identifier for the phenotype")
+		AttributeMetaData omim_entry = new AttributeMetaData(OMIM_ENTRY, TEXT)
+				.setDescription("Number that represents the MIM database dataType for the phenotype")
 				.setLabel("OMIM_Entry");
-		DefaultAttributeMetaData omim_type = new DefaultAttributeMetaData(OMIM_TYPE, TEXT)
+		AttributeMetaData omim_type = new AttributeMetaData(OMIM_TYPE, TEXT)
 				.setDescription("Phenotype Mapping key: 1 - the disorder is placed on the map based on its "
 						+ "association witha gene, but the underlying defect is not known. 2 - the disorder "
 						+ "has been placed on the map by linkage or other statistical method; no mutation has "

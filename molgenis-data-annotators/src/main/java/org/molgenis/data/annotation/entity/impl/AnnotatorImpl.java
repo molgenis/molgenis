@@ -2,7 +2,6 @@ package org.molgenis.data.annotation.entity.impl;
 
 import java.util.List;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
@@ -11,6 +10,7 @@ import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.QueryCreator;
 import org.molgenis.data.annotation.entity.ResultFilter;
 import org.molgenis.data.annotation.resources.Resources;
+import org.molgenis.data.meta.AttributeMetaData;
 
 import com.google.common.base.Optional;
 

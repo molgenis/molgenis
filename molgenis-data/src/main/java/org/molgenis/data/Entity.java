@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.List;
 
+import org.molgenis.data.meta.EntityMetaData;
+
 /**
  * Entity is a data record which can contain a hash of attribute values. Attribute names are unique. Synonyms are
  * ‘tuple’, ‘record’, ‘row’, ‘hashmap’. Optionally Entity can provide a unique ‘id’ for updates. Optionally Entity can

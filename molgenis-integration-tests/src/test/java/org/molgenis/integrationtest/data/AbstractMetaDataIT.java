@@ -1,5 +1,6 @@
 package org.molgenis.integrationtest.data;
 
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -8,17 +9,11 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EditableEntityMetaData;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Package;
-import org.molgenis.data.meta.PackageImpl;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.Package;
 
 import com.google.common.collect.Iterables;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 
 public abstract class AbstractMetaDataIT extends AbstractDataIntegrationIT
 {
@@ -28,14 +23,14 @@ public abstract class AbstractMetaDataIT extends AbstractDataIntegrationIT
 
 		// Create test_test1 package
 
-		PackageImpl testPackage = new PackageImpl("test");
+		Package testPackage = new Package("test");
 		metaDataService.addPackage(testPackage);
 		Package retrievedPackage = metaDataService.getPackage("test");
 		assertNotNull(retrievedPackage);
 		assertNotNull(retrievedPackage.getRootPackage());
 		assertEquals(retrievedPackage.getRootPackage().getName(), "test");
 
-		Package testPackage1 = new PackageImpl("test1", "description", testPackage);
+		Package testPackage1 = new Package("test1", "description", testPackage);
 		metaDataService.addPackage(testPackage1);
 		retrievedPackage = metaDataService.getPackage("test_test1");
 		assertNotNull(retrievedPackage);
@@ -46,13 +41,13 @@ public abstract class AbstractMetaDataIT extends AbstractDataIntegrationIT
 		// assertEquals(retrieved.getRootPackage().getName(), "test");
 
 		// Create EntityMetaData
-		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("TestEntity", testPackage1);
+		EntityMetaData entityMetaData = new EntityMetaData("TestEntity", testPackage1);
 		entityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false);
-		DefaultAttributeMetaData compound1 = entityMetaData.addAttribute("compoundAttr1").setDataType(
+		AttributeMetaData compound1 = entityMetaData.addAttribute("compoundAttr1").setDataType(
 				MolgenisFieldTypes.COMPOUND);
-		DefaultAttributeMetaData compound2 = new DefaultAttributeMetaData("compoundAttr2",
+		AttributeMetaData compound2 = new AttributeMetaData("compoundAttr2",
 				MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
-		DefaultAttributeMetaData intAttr = new DefaultAttributeMetaData("intAttr", MolgenisFieldTypes.FieldTypeEnum.INT);
+		AttributeMetaData intAttr = new AttributeMetaData("intAttr", MolgenisFieldTypes.FieldTypeEnum.INT);
 		entityMetaData.setLabelAttribute(intAttr);
 		compound2.setAttributesMetaData(Arrays.asList(intAttr));
 		compound1.setAttributesMetaData(Arrays.asList(compound2));
@@ -87,7 +82,7 @@ public abstract class AbstractMetaDataIT extends AbstractDataIntegrationIT
 		assertEquals(attrs.next().getName(), "intAttr");
 
 		// Add attribute
-		metaDataService.addAttribute("test_test1_TestEntity", new DefaultAttributeMetaData("strAttr"));
+		metaDataService.addAttribute("test_test1_TestEntity", new AttributeMetaData("strAttr"));
 		retrievedEntityMetaData = metaDataService.getEntityMetaData("test_test1_TestEntity");
 		assertNotNull(retrievedEntityMetaData.getAttribute("strAttr"));
 		assertEquals(Iterables.size(retrievedEntityMetaData.getAtomicAttributes()), 3);

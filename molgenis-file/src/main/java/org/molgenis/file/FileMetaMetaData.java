@@ -2,16 +2,16 @@ package org.molgenis.file;
 
 import static org.molgenis.MolgenisFieldTypes.HYPERLINK;
 import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LOOKUP;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
 
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.OwnedEntityMetaData;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FileMetaMetaData extends DefaultEntityMetaData
+public class FileMetaMetaData extends EntityMetaData
 {
 	public FileMetaMetaData()
 	{

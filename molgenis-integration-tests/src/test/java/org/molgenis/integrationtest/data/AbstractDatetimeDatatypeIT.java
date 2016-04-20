@@ -1,16 +1,14 @@
 package org.molgenis.integrationtest.data;
 
 import static org.molgenis.MolgenisFieldTypes.DATETIME;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
 import java.text.SimpleDateFormat;
 
-import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import org.molgenis.data.meta.EntityMetaData;
 
 public class AbstractDatetimeDatatypeIT extends AbstractDatatypeIT
 {
@@ -19,7 +17,7 @@ public class AbstractDatetimeDatatypeIT extends AbstractDatatypeIT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("DatetimeTest");
+		EntityMetaData entityMetaData = new EntityMetaData("DatetimeTest");
 		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(DATETIME).setNillable(false);
 		entityMetaData.addAttribute("col2").setDataType(DATETIME);
 		entityMetaData.addAttribute("col3").setDataType(DATETIME).setDefaultValue("01-01-2014");

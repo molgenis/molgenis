@@ -1,11 +1,11 @@
 package org.molgenis.gaf;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +23,7 @@ public class GafListDbSettings implements GafListSettings
 	}
 
 	@Component
-	public static class Meta extends DefaultEntityMetaData
+	public static class Meta extends EntityMetaData
 	{
 		private static final String ENTITY_NAME = "GafListSettings";
 		private static final String NAME = "Name";

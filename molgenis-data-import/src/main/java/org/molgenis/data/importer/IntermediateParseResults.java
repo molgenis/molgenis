@@ -5,18 +5,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.i18n.I18nStringMetaData;
 import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.importer.EmxMetaDataParser.EmxAttribute;
-import org.molgenis.data.meta.PackageImpl;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.Package;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.semantic.TagImpl;
-import org.molgenis.data.support.DefaultEntityMetaData;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -33,11 +31,11 @@ public final class IntermediateParseResults
 	/**
 	 * Maps full name to EntityMetaData
 	 */
-	private final Map<String, DefaultEntityMetaData> entities;
+	private final Map<String, EntityMetaData> entities;
 	/**
 	 * Maps full name to PackageImpl (with tags)
 	 */
-	private final Map<String, PackageImpl> packages;
+	private final Map<String, Package> packages;
 	/**
 	 * Contains all Attribute tags
 	 */
@@ -70,7 +68,7 @@ public final class IntermediateParseResults
 		this.i18nStrings = new LinkedHashMap<>();
 	}
 
-	public void addEntityMetaData(DefaultEntityMetaData entityMetaData)
+	public void addEntityMetaData(EntityMetaData entityMetaData)
 	{
 		entities.put(entityMetaData.getName(), entityMetaData);
 	}
@@ -82,13 +80,13 @@ public final class IntermediateParseResults
 
 	public void addAttributes(String entityName, List<EmxAttribute> emxAttrs)
 	{
-		EditableEntityMetaData entityMeta = getEntityMetaData(entityName);
+		EntityMetaData entityMeta = getEntityMetaData(entityName);
 		if (entityMeta == null) entityMeta = addEntityMetaData(entityName);
 
 		for (EmxAttribute emxAttr : emxAttrs)
 		{
 			AttributeMetaData attr = emxAttr.getAttr();
-			entityMeta.addAttributeMetaData(attr);
+			entityMeta.addAttribute(attr);
 
 			// set attribute roles
 			if (emxAttr.isIdAttr())
@@ -106,7 +104,7 @@ public final class IntermediateParseResults
 		}
 	}
 
-	public EditableEntityMetaData addEntityMetaData(String name)
+	public EntityMetaData addEntityMetaData(String name)
 	{
 		String simpleName = name;
 		for (String packageName : packages.keySet())
@@ -117,13 +115,13 @@ public final class IntermediateParseResults
 			}
 		}
 
-		DefaultEntityMetaData emd = new DefaultEntityMetaData(simpleName);
+		EntityMetaData emd = new EntityMetaData(simpleName);
 		entities.put(name, emd);
 
 		return emd;
 	}
 
-	public EditableEntityMetaData getEntityMetaData(String name)
+	public EntityMetaData getEntityMetaData(String name)
 	{
 		return entities.get(name);
 	}
@@ -150,7 +148,7 @@ public final class IntermediateParseResults
 		return entities.containsKey(name);
 	}
 
-	public void addPackage(String name, PackageImpl p)
+	public void addPackage(String name, Package p)
 	{
 		packages.put(name, p);
 	}
@@ -160,12 +158,12 @@ public final class IntermediateParseResults
 		return ImmutableMap.<String, EntityMetaData> copyOf(entities);
 	}
 
-	public ImmutableList<EditableEntityMetaData> getEntities()
+	public ImmutableList<EntityMetaData> getEntities()
 	{
-		return ImmutableList.<EditableEntityMetaData> copyOf(entities.values());
+		return ImmutableList.<EntityMetaData> copyOf(entities.values());
 	}
 
-	public ImmutableMap<String, PackageImpl> getPackages()
+	public ImmutableMap<String, Package> getPackages()
 	{
 		return ImmutableMap.copyOf(packages);
 	}
@@ -265,7 +263,7 @@ public final class IntermediateParseResults
 	 *            the name of the package
 	 * @return
 	 */
-	public PackageImpl getPackage(String name)
+	public Package getPackage(String name)
 	{
 		return getPackages().get(name);
 	}

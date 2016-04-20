@@ -1,7 +1,6 @@
 package org.molgenis.ontology.core.model;
 
-import org.molgenis.data.Package;
-import org.molgenis.data.meta.PackageImpl;
+import org.molgenis.data.meta.Package;
 
 public class OntologyPackage
 {
@@ -10,7 +9,7 @@ public class OntologyPackage
 
 	public static Package getPackageInstance()
 	{
-		if (ontologyPackage == null) ontologyPackage = new PackageImpl(PACKAGE_NAME,
+		if (ontologyPackage == null) ontologyPackage = new Package(PACKAGE_NAME,
 				"This is a pacakge for storing ontology related model", null);
 		return ontologyPackage;
 	}

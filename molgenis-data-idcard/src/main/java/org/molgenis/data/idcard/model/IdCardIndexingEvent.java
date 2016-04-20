@@ -1,7 +1,7 @@
 package org.molgenis.data.idcard.model;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.DefaultEntity;
 
 public class IdCardIndexingEvent extends DefaultEntity

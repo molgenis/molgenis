@@ -1,6 +1,7 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -10,8 +11,8 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.filter.MultiAllelicResultFilter;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.testng.Assert;
@@ -24,8 +25,8 @@ import com.google.common.collect.Lists;
 public class MultiAllelicResultFilterTest
 {
 
-	private DefaultEntityMetaData emd;
-	private DefaultEntityMetaData resultEmd;
+	private EntityMetaData emd;
+	private EntityMetaData resultEmd;
 	private MapEntity entity1;
 	private MapEntity entity2;
 	private MapEntity entity3;
@@ -50,23 +51,22 @@ public class MultiAllelicResultFilterTest
 	@BeforeMethod
 	public void setUp()
 	{
-		emd = new DefaultEntityMetaData("entity");
+		emd = new EntityMetaData("entity");
 
-		resultEmd = new DefaultEntityMetaData("resultEntity");
+		resultEmd = new EntityMetaData("resultEntity");
 
-		emd.addAttributeMetaData(VcfRepository.CHROM_META);
-		emd.addAttributeMetaData(VcfRepository.POS_META);
-		emd.addAttributeMetaData(VcfRepository.REF_META);
-		emd.addAttributeMetaData(VcfRepository.ALT_META);
-		emd.addAttributeMetaData(VcfRepository.ID_META, ROLE_ID);
+		emd.addAttribute(VcfRepository.CHROM_META);
+		emd.addAttribute(VcfRepository.POS_META);
+		emd.addAttribute(VcfRepository.REF_META);
+		emd.addAttribute(VcfRepository.ALT_META);
+		emd.addAttribute(VcfRepository.ID_META, ROLE_ID);
 
-		resultEmd.addAttributeMetaData(VcfRepository.CHROM_META);
-		resultEmd.addAttributeMetaData(VcfRepository.POS_META);
-		resultEmd.addAttributeMetaData(VcfRepository.REF_META);
-		resultEmd.addAttributeMetaData(VcfRepository.ALT_META);
-		resultEmd.addAttributeMetaData(VcfRepository.ID_META, ROLE_ID);
-		resultEmd.addAttributeMetaData(
-				new DefaultAttributeMetaData("annotation", MolgenisFieldTypes.FieldTypeEnum.STRING));
+		resultEmd.addAttribute(VcfRepository.CHROM_META);
+		resultEmd.addAttribute(VcfRepository.POS_META);
+		resultEmd.addAttribute(VcfRepository.REF_META);
+		resultEmd.addAttribute(VcfRepository.ALT_META);
+		resultEmd.addAttribute(VcfRepository.ID_META, ROLE_ID);
+		resultEmd.addAttribute(new AttributeMetaData("annotation", STRING));
 
 		entity1 = new MapEntity(emd);
 		entity1.set(VcfRepository.CHROM, "1");
@@ -213,7 +213,7 @@ public class MultiAllelicResultFilterTest
 	public void filterResultsTest1()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(Collections
-				.singletonList(new DefaultAttributeMetaData("annotation", MolgenisFieldTypes.FieldTypeEnum.STRING)));
+				.singletonList(new AttributeMetaData("annotation", STRING)));
 		Optional<Entity> result1 = filter.filterResults(Collections.singletonList(resultEntity1), entity1);
 		assertEquals(Lists.newArrayList(result1.asSet()).get(0).getString("annotation"), "1");
 	}
@@ -222,7 +222,7 @@ public class MultiAllelicResultFilterTest
 	public void filterResultsTest2()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(Collections
-				.singletonList(new DefaultAttributeMetaData("annotation", MolgenisFieldTypes.FieldTypeEnum.STRING)));
+				.singletonList(new AttributeMetaData("annotation", STRING)));
 		Optional<Entity> result2 = filter.filterResults(Collections.singletonList(resultEntity2), entity1);
 		Assert.assertTrue(Lists.newArrayList(result2.asSet()).size() == 0);
 
@@ -232,7 +232,7 @@ public class MultiAllelicResultFilterTest
 	public void filterResultsTest3()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(Collections
-				.singletonList(new DefaultAttributeMetaData("annotation", MolgenisFieldTypes.FieldTypeEnum.STRING)));
+				.singletonList(new AttributeMetaData("annotation", STRING)));
 		Optional<Entity> result3 = filter.filterResults(Collections.singletonList(resultEntity3), entity2);
 		assertEquals(Lists.newArrayList(result3.asSet()).get(0).getString("annotation"), "3,4");
 
@@ -242,7 +242,7 @@ public class MultiAllelicResultFilterTest
 	public void filterResultsTest4()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(Collections
-				.singletonList(new DefaultAttributeMetaData("annotation", MolgenisFieldTypes.FieldTypeEnum.STRING)));
+				.singletonList(new AttributeMetaData("annotation", STRING)));
 		Optional<Entity> result4 = filter.filterResults(Collections.singletonList(resultEntity4), entity2);
 		assertEquals(Lists.newArrayList(result4.asSet()).get(0).getString("annotation"), "6,5");
 
@@ -252,7 +252,7 @@ public class MultiAllelicResultFilterTest
 	public void filterResultsTest5()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(Collections
-				.singletonList(new DefaultAttributeMetaData("annotation", MolgenisFieldTypes.FieldTypeEnum.STRING)));
+				.singletonList(new AttributeMetaData("annotation", STRING)));
 		Optional<Entity> result5 = filter.filterResults(Collections.singletonList(resultEntity5), entity3);
 		assertEquals(Lists.newArrayList(result5.asSet()).get(0).getString("annotation"), "8,9,7");
 
@@ -262,7 +262,7 @@ public class MultiAllelicResultFilterTest
 	public void filterResultsTest6()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(Collections
-				.singletonList(new DefaultAttributeMetaData("annotation", MolgenisFieldTypes.FieldTypeEnum.STRING)));
+				.singletonList(new AttributeMetaData("annotation", STRING)));
 		Optional<Entity> result6 = filter.filterResults(Collections.singletonList(resultEntity2), entity2);
 		assertEquals(Lists.newArrayList(result6.asSet()).get(0).getString("annotation"), ".,2");
 
@@ -272,7 +272,7 @@ public class MultiAllelicResultFilterTest
 	public void filterResultsTest7()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(Collections
-				.singletonList(new DefaultAttributeMetaData("annotation", MolgenisFieldTypes.FieldTypeEnum.STRING)));
+				.singletonList(new AttributeMetaData("annotation", STRING)));
 		Optional<Entity> result7 = filter.filterResults(Collections.singletonList(resultEntity6), entity3);
 		assertEquals(Lists.newArrayList(result7.asSet()).get(0).getString("annotation"), "11,.,10");
 
@@ -282,7 +282,7 @@ public class MultiAllelicResultFilterTest
 	public void filterResultsTest8()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(Collections
-				.singletonList(new DefaultAttributeMetaData("annotation", MolgenisFieldTypes.FieldTypeEnum.STRING)));
+				.singletonList(new AttributeMetaData("annotation", STRING)));
 		Optional<Entity> result8 = filter.filterResults(Collections.singletonList(resultEntity5), entity1);
 		assertEquals(Lists.newArrayList(result8.asSet()).get(0).getString("annotation"), "8");
 
@@ -292,7 +292,7 @@ public class MultiAllelicResultFilterTest
 	public void filterResultsTest9()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(Collections
-				.singletonList(new DefaultAttributeMetaData("annotation", MolgenisFieldTypes.FieldTypeEnum.STRING)));
+				.singletonList(new AttributeMetaData("annotation", STRING)));
 		Optional<Entity> result = filter.filterResults(Collections.singletonList(resultEntity7), entity7);
 		assertEquals(Lists.newArrayList(result.asSet()).get(0).getString("annotation"), "13");
 	}
@@ -301,7 +301,7 @@ public class MultiAllelicResultFilterTest
 	public void filterResultsTest10()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(Collections
-				.singletonList(new DefaultAttributeMetaData("annotation", MolgenisFieldTypes.FieldTypeEnum.STRING)));
+				.singletonList(new AttributeMetaData("annotation", STRING)));
 		Optional<Entity> result = filter.filterResults(Collections.singletonList(resultEntity8), entity8);
 		assertEquals(Lists.newArrayList(result.asSet()).get(0).getString("annotation"), "15");
 
@@ -311,7 +311,7 @@ public class MultiAllelicResultFilterTest
 	public void filterResultsTest11()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(Collections
-				.singletonList(new DefaultAttributeMetaData("annotation", MolgenisFieldTypes.FieldTypeEnum.STRING)));
+				.singletonList(new AttributeMetaData("annotation", STRING)));
 		Optional<Entity> result = filter.filterResults(Collections.singletonList(resultEntity9), entity9);
 		assertEquals(Lists.newArrayList(result.asSet()).get(0).getString("annotation"), "16");
 
@@ -321,7 +321,7 @@ public class MultiAllelicResultFilterTest
 	public void filterResultsTest12()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(Collections
-				.singletonList(new DefaultAttributeMetaData("annotation", MolgenisFieldTypes.FieldTypeEnum.STRING)));
+				.singletonList(new AttributeMetaData("annotation", STRING)));
 		Optional<Entity> result = filter.filterResults(Collections.singletonList(resultEntity10), entity10);
 		assertEquals(Lists.newArrayList(result.asSet()).get(0).getString("annotation"), "19");
 
@@ -331,7 +331,7 @@ public class MultiAllelicResultFilterTest
 	public void filterResultsSourceHasNoRef()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(Collections
-				.singletonList(new DefaultAttributeMetaData("annotation", MolgenisFieldTypes.FieldTypeEnum.STRING)));
+				.singletonList(new AttributeMetaData("annotation", STRING)));
 		Optional<Entity> result = filter.filterResults(Collections.singletonList(resultEntity10), entityNoRef);
 		assertEquals(result, Optional.absent());
 	}
@@ -340,7 +340,7 @@ public class MultiAllelicResultFilterTest
 	public void filterResultsMergeMultilineMismatchChrom()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(Collections.singletonList(
-				new DefaultAttributeMetaData("annotation", MolgenisFieldTypes.FieldTypeEnum.STRING)), true);
+				new AttributeMetaData("annotation", STRING)), true);
 		try
 		{
 			filter.filterResults(Arrays.asList(resultEntity10, entityMismatchChrom), entity10);
@@ -357,7 +357,7 @@ public class MultiAllelicResultFilterTest
 	public void filterResultsMergeMultilineMismatchPos()
 	{
 		MultiAllelicResultFilter filter = new MultiAllelicResultFilter(Collections.singletonList(
-				new DefaultAttributeMetaData("annotation", MolgenisFieldTypes.FieldTypeEnum.STRING)), true);
+				new AttributeMetaData("annotation", STRING)), true);
 		try
 		{
 			filter.filterResults(Arrays.asList(entityMismatchPos, resultEntity10), entity10);
@@ -391,13 +391,13 @@ public class MultiAllelicResultFilterTest
 	{
 		
 		String customAttrb = "MyAnnotation";
-		DefaultEntityMetaData multiLineTestEMD = new DefaultEntityMetaData("entity");
+		EntityMetaData multiLineTestEMD = new EntityMetaData("entity");
 
-		multiLineTestEMD.addAttributeMetaData(VcfRepository.CHROM_META);
-		multiLineTestEMD.addAttributeMetaData(VcfRepository.POS_META);
-		multiLineTestEMD.addAttributeMetaData(VcfRepository.ID_META, ROLE_ID);
-		multiLineTestEMD.addAttributeMetaData(VcfRepository.REF_META);
-		multiLineTestEMD.addAttributeMetaData(VcfRepository.ALT_META);
+		multiLineTestEMD.addAttribute(VcfRepository.CHROM_META);
+		multiLineTestEMD.addAttribute(VcfRepository.POS_META);
+		multiLineTestEMD.addAttribute(VcfRepository.ID_META, ROLE_ID);
+		multiLineTestEMD.addAttribute(VcfRepository.REF_META);
+		multiLineTestEMD.addAttribute(VcfRepository.ALT_META);
 		multiLineTestEMD.addAttribute(customAttrb).setDataType(MolgenisFieldTypes.STRING);
 			
 		Entity multiLineEntity1 = new MapEntity(multiLineTestEMD);

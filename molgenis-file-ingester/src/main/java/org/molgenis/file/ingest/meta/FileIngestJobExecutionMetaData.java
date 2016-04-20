@@ -2,12 +2,12 @@ package org.molgenis.file.ingest.meta;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.jobs.JobExecutionMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.file.FileMetaMetaData;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FileIngestJobExecutionMetaData extends DefaultEntityMetaData
+public class FileIngestJobExecutionMetaData extends EntityMetaData
 {
 	public static final String ENTITY_NAME = "FileIngestJobExecution";
 	public static final String FILE = "file";

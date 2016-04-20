@@ -1,14 +1,14 @@
 package org.molgenis.ontology.sorta.bean;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 
 public class OntologyTermHitEntity extends MapEntity
 {
 	private static final long serialVersionUID = 428705681838535084L;
 
-	public OntologyTermHitEntity(Entity entity, DefaultEntityMetaData entityMetaData)
+	public OntologyTermHitEntity(Entity entity, EntityMetaData entityMetaData)
 	{
 		super(entity, entityMetaData);
 	}

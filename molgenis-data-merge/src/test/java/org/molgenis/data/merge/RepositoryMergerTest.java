@@ -5,7 +5,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
@@ -15,16 +17,14 @@ import java.util.stream.Stream;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.ElasticsearchRepository;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.stereotype.Component;
@@ -40,16 +40,16 @@ import com.google.common.collect.Lists;
 @Component
 public class RepositoryMergerTest
 {
-	private DefaultAttributeMetaData idAttribute;
+	private AttributeMetaData idAttribute;
 	private AttributeMetaData metaDataa;
 	private AttributeMetaData metaDatab;
 	private Repository<Entity> repository1;
 	private Repository<Entity> elasticSearchRepository;
 	private DataService dataService;
-	private DefaultEntityMetaData entityMetaData1;
+	private EntityMetaData entityMetaData1;
 	private SearchService searchService;
-	private DefaultEntityMetaData entityMetaData2;
-	private DefaultEntityMetaData entityMetaDataMerged;
+	private EntityMetaData entityMetaData2;
+	private EntityMetaData entityMetaDataMerged;
 
 	@BeforeMethod
 	public void setUp() throws IOException
@@ -57,40 +57,38 @@ public class RepositoryMergerTest
 		repository1 = mock(Repository.class);
 		elasticSearchRepository = mock(ElasticsearchRepository.class);
 
-		entityMetaData1 = new DefaultEntityMetaData("meta1");
-		entityMetaData2 = new DefaultEntityMetaData("meta2");
-		entityMetaDataMerged = new DefaultEntityMetaData("mergedRepo");
+		entityMetaData1 = new EntityMetaData("meta1");
+		entityMetaData2 = new EntityMetaData("meta2");
+		entityMetaDataMerged = new EntityMetaData("mergedRepo");
 
 		// input metadata
-		metaDataa = new DefaultAttributeMetaData("a");
-		metaDatab = new DefaultAttributeMetaData("b");
-		DefaultAttributeMetaData metaData1c = new DefaultAttributeMetaData("c");
-		DefaultAttributeMetaData metaData1d = new DefaultAttributeMetaData("d");
-		DefaultAttributeMetaData metaData2c = new DefaultAttributeMetaData("c");
-		DefaultAttributeMetaData metaData2e = new DefaultAttributeMetaData("e");
-		entityMetaData1.addAttributeMetaData(metaDataa, ROLE_ID);
-		entityMetaData1.addAttributeMetaData(metaDatab);
-		entityMetaData1.addAttributeMetaData(metaData1c);
-		entityMetaData1.addAttributeMetaData(metaData1d);
-		entityMetaData2.addAttributeMetaData(metaDataa, ROLE_ID);
-		entityMetaData2.addAttributeMetaData(metaDatab);
-		entityMetaData2.addAttributeMetaData(metaData2c);
-		entityMetaData2.addAttributeMetaData(metaData2e);
+		metaDataa = new AttributeMetaData("a");
+		metaDatab = new AttributeMetaData("b");
+		AttributeMetaData metaData1c = new AttributeMetaData("c");
+		AttributeMetaData metaData1d = new AttributeMetaData("d");
+		AttributeMetaData metaData2c = new AttributeMetaData("c");
+		AttributeMetaData metaData2e = new AttributeMetaData("e");
+		entityMetaData1.addAttribute(metaDataa, ROLE_ID);
+		entityMetaData1.addAttribute(metaDatab);
+		entityMetaData1.addAttribute(metaData1c);
+		entityMetaData1.addAttribute(metaData1d);
+		entityMetaData2.addAttribute(metaDataa, ROLE_ID);
+		entityMetaData2.addAttribute(metaDatab);
+		entityMetaData2.addAttribute(metaData2c);
+		entityMetaData2.addAttribute(metaData2e);
 
 		// merged metadata
-		idAttribute = new DefaultAttributeMetaData("ID", MolgenisFieldTypes.FieldTypeEnum.STRING);
+		idAttribute = new AttributeMetaData("ID", STRING);
 		idAttribute.setNillable(false);
 		idAttribute.setVisible(false);
-		entityMetaDataMerged.addAttributeMetaData(idAttribute, ROLE_ID);
+		entityMetaDataMerged.addAttribute(idAttribute, ROLE_ID);
 
-		DefaultAttributeMetaData metaData1cMerged = new DefaultAttributeMetaData("meta1_c");
-		DefaultAttributeMetaData metaData1dMerged = new DefaultAttributeMetaData("meta1_d");
-		DefaultAttributeMetaData metaData2cMerged = new DefaultAttributeMetaData("meta2_c");
-		DefaultAttributeMetaData metaData2eMerged = new DefaultAttributeMetaData("meta2_e");
-		DefaultAttributeMetaData metaData1Compound = new DefaultAttributeMetaData("meta1",
-				MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
-		DefaultAttributeMetaData metaData2Compound = new DefaultAttributeMetaData("meta2",
-				MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
+		AttributeMetaData metaData1cMerged = new AttributeMetaData("meta1_c");
+		AttributeMetaData metaData1dMerged = new AttributeMetaData("meta1_d");
+		AttributeMetaData metaData2cMerged = new AttributeMetaData("meta2_c");
+		AttributeMetaData metaData2eMerged = new AttributeMetaData("meta2_e");
+		AttributeMetaData metaData1Compound = new AttributeMetaData("meta1", COMPOUND);
+		AttributeMetaData metaData2Compound = new AttributeMetaData("meta2", COMPOUND);
 
 		List<AttributeMetaData> compound1MetaData = new ArrayList<AttributeMetaData>();
 		compound1MetaData.add(metaData1cMerged);
@@ -102,10 +100,10 @@ public class RepositoryMergerTest
 		compound2MetaData.add(metaData2eMerged);
 		metaData2Compound.setAttributesMetaData(compound2MetaData);
 
-		entityMetaDataMerged.addAttributeMetaData(metaDataa);
-		entityMetaDataMerged.addAttributeMetaData(metaDatab);
-		entityMetaDataMerged.addAttributeMetaData(metaData1Compound);
-		entityMetaDataMerged.addAttributeMetaData(metaData2Compound);
+		entityMetaDataMerged.addAttribute(metaDataa);
+		entityMetaDataMerged.addAttribute(metaDatab);
+		entityMetaDataMerged.addAttribute(metaData1Compound);
+		entityMetaDataMerged.addAttribute(metaData2Compound);
 
 		searchService = mock(SearchService.class);
 		dataService = mock(DataService.class);

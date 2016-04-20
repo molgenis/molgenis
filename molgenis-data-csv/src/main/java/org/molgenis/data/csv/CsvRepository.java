@@ -1,5 +1,7 @@
 package org.molgenis.data.csv;
 
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,15 +11,12 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.util.StringUtils;
 
@@ -33,7 +32,7 @@ public class CsvRepository extends AbstractRepository
 	private final String sheetName;
 	private final File file;
 	private List<CellProcessor> cellProcessors;
-	private DefaultEntityMetaData entityMetaData;
+	private EntityMetaData entityMetaData;
 	private Character separator = null;
 
 	public CsvRepository(String file)
@@ -70,12 +69,12 @@ public class CsvRepository extends AbstractRepository
 	{
 		if (entityMetaData == null)
 		{
-			entityMetaData = new DefaultEntityMetaData(sheetName, MapEntity.class);
+			entityMetaData = new EntityMetaData(sheetName, MapEntity.class);
 
 			for (String attrName : new CsvIterator(file, sheetName, null, separator).getColNamesMap().keySet())
 			{
-				AttributeMetaData attr = new DefaultAttributeMetaData(attrName, MolgenisFieldTypes.FieldTypeEnum.STRING);
-				entityMetaData.addAttributeMetaData(attr);
+				AttributeMetaData attr = new AttributeMetaData(attrName, STRING);
+				entityMetaData.addAttribute(attr);
 			}
 		}
 

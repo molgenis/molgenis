@@ -19,8 +19,8 @@ import org.elasticsearch.search.aggregations.bucket.nested.NestedBuilder;
 import org.elasticsearch.search.aggregations.bucket.nested.ReverseNestedBuilder;
 import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityBuilder;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
+import org.molgenis.data.meta.AttributeMetaData;
 
 public class AggregateQueryGenerator
 {
@@ -38,11 +38,11 @@ public class AggregateQueryGenerator
 		{
 			throw new IllegalArgumentException("Aggregation requires at least one aggregateable attribute");
 		}
-		if (aggAttr1 != null && !aggAttr1.isAggregateable())
+		if (aggAttr1 != null && !aggAttr1.isAggregatable())
 		{
 			throw new IllegalArgumentException("Attribute is not aggregateable [ " + aggAttr1.getName() + "]");
 		}
-		if (aggAttr2 != null && !aggAttr2.isAggregateable())
+		if (aggAttr2 != null && !aggAttr2.isAggregatable())
 		{
 			throw new IllegalArgumentException("Attribute is not aggregateable [ " + aggAttr2.getName() + "]");
 		}

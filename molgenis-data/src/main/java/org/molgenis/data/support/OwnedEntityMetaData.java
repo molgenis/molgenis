@@ -2,6 +2,7 @@ package org.molgenis.data.support;
 
 import static org.molgenis.MolgenisFieldTypes.STRING;
 
+import org.molgenis.data.meta.EntityMetaData;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component;
  * inherit this behavior.
  */
 @Component
-public class OwnedEntityMetaData extends DefaultEntityMetaData
+public class OwnedEntityMetaData extends EntityMetaData
 {
 	public static final String ENTITY_NAME = "Owned";
 	public static final String ATTR_OWNER_USERNAME = "ownerUsername";

@@ -1,7 +1,7 @@
 package org.molgenis.integrationtest.data;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertEqualsNoOrder;
 import static org.testng.Assert.assertNotNull;
@@ -10,21 +10,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.i18n.I18nStringMetaData;
 import org.molgenis.data.i18n.I18nUtils;
 import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;;
+import org.testng.annotations.BeforeClass;
+
+;
 
 public abstract class AbstractI18nIT extends AbstractDataIntegrationIT
 {
@@ -52,7 +52,7 @@ public abstract class AbstractI18nIT extends AbstractDataIntegrationIT
 				languageAttrs.add(attr);
 			}
 		}
-		languageAttrs.forEach(AttributeMetaDataMetaData.INSTANCE::removeAttributeMetaData);
+		languageAttrs.forEach(AttributeMetaDataMetaData.INSTANCE::removeAttribute);
 
 		languageAttrs.clear();
 		for (AttributeMetaData attr : EntityMetaDataMetaData.INSTANCE.getAttributes())
@@ -62,7 +62,7 @@ public abstract class AbstractI18nIT extends AbstractDataIntegrationIT
 				languageAttrs.add(attr);
 			}
 		}
-		languageAttrs.forEach(EntityMetaDataMetaData.INSTANCE::removeAttributeMetaData);
+		languageAttrs.forEach(EntityMetaDataMetaData.INSTANCE::removeAttribute);
 	}
 
 	public void testLanguageService()
@@ -84,7 +84,7 @@ public abstract class AbstractI18nIT extends AbstractDataIntegrationIT
 
 	public void testMetaData()
 	{
-		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("I18nTest");
+		EntityMetaData entityMetaData = new EntityMetaData("I18nTest");
 		entityMetaData.setDescription("en", "The description");
 		entityMetaData.setDescription("nl", "De omschrijving");
 		entityMetaData.setLabel("en", "The label");
@@ -108,8 +108,6 @@ public abstract class AbstractI18nIT extends AbstractDataIntegrationIT
 		assertNotNull(attr);
 		assertEquals(attr.getDescription(languageCode), "De omschrijving (nl)");
 		assertEquals(attr.getLabel(languageCode), "Het label (nl)");
-		assertEqualsNoOrder(attr.getLabelLanguageCodes().toArray(), new String[]
-		{ "en", "nl" });
 		assertEquals(entityMetaData.getLabelAttribute(), attr);
 
 		
@@ -118,8 +116,6 @@ public abstract class AbstractI18nIT extends AbstractDataIntegrationIT
 		assertNotNull(attr);
 		assertEquals(attr.getDescription(languageCode), "De omschrijving (en)");
 		assertEquals(attr.getLabel(languageCode), "Het label (en)");
-		assertEqualsNoOrder(attr.getLabelLanguageCodes().toArray(), new String[]
-		{ "en", "nl" });
 		assertEquals(entityMetaData.getLabelAttribute(), attr);
 	}
 

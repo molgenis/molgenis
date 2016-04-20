@@ -3,9 +3,9 @@ package org.molgenis.data.elasticsearch.util;
 import java.util.List;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.support.QueryImpl;
 
 public class SearchRequest

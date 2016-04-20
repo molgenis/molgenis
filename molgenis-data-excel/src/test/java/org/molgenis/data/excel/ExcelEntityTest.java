@@ -15,9 +15,9 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -43,8 +43,7 @@ public class ExcelEntityTest
 		colNamesMap = new LinkedHashMap<String, Integer>();
 		colNamesMap.put("attr1", 0);
 
-		excelEntity = new ExcelEntity(row, colNamesMap, cellProcessors,
-				new DefaultEntityMetaData("Entity1", ExcelEntity.class));
+		excelEntity = new ExcelEntity(row, colNamesMap, cellProcessors, new EntityMetaData("Entity1", ExcelEntity.class));
 	}
 
 	@Test

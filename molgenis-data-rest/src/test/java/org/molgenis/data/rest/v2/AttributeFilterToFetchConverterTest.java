@@ -6,18 +6,17 @@ import static org.molgenis.MolgenisFieldTypes.COMPOUND;
 import static org.molgenis.MolgenisFieldTypes.FILE;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.XREF;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
 import java.util.Arrays;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.file.FileMeta;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -42,12 +41,12 @@ public class AttributeFilterToFetchConverterTest
 	private AttributeMetaData labelAttr;
 	private AttributeMetaData xrefAttr;
 	private EntityMetaData xrefEntityMeta;
-	private DefaultEntityMetaData selfRefEntityMetaData;
+	private EntityMetaData selfRefEntityMetaData;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		selfRefEntityMetaData = new DefaultEntityMetaData("SelfRefEntity");
+		selfRefEntityMetaData = new EntityMetaData("SelfRefEntity");
 		selfRefEntityMetaData.addAttribute("id", ROLE_ID);
 		selfRefEntityMetaData.addAttribute("label", ROLE_LABEL);
 		selfRefEntityMetaData.addAttribute("selfRef").setDataType(XREF).setRefEntity(selfRefEntityMetaData);

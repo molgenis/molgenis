@@ -3,12 +3,10 @@ package org.molgenis.data.meta;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.MolgenisFieldTypes.XREF;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 
-import org.molgenis.data.support.DefaultEntityMetaData;
-
-public class PackageMetaData extends DefaultEntityMetaData
+public class PackageMetaData extends EntityMetaData
 {
 	public static final String ENTITY_NAME = "packages";
 	public static final String FULL_NAME = "fullName";

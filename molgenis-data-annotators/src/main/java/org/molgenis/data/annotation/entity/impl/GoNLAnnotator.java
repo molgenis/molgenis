@@ -1,11 +1,11 @@
 package org.molgenis.data.annotation.entity.impl;
 
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
 import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.CHROMOSOMES;
 import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.FILEPATTERN;
 import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.OVERRIDE_CHROMOSOME_FILES;
 import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.ROOT_DIRECTORY;
 import static org.molgenis.data.vcf.VcfRepository.ALT;
-import static org.molgenis.data.vcf.VcfRepository.REF;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.elasticsearch.common.collect.Lists;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
@@ -28,14 +26,13 @@ import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.MultiFileResource;
 import org.molgenis.data.annotation.resources.impl.MultiResourceConfigImpl;
 import org.molgenis.data.annotation.resources.impl.TabixVcfRepositoryFactory;
-import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.base.Predicates;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 
 @Configuration
@@ -66,11 +63,11 @@ public class GoNLAnnotator
 	public RepositoryAnnotator gonl()
 	{
 		List<AttributeMetaData> attributes = new ArrayList<>();
-		DefaultAttributeMetaData goNlAfAttribute = new DefaultAttributeMetaData(GONL_GENOME_AF, FieldTypeEnum.STRING)
+		AttributeMetaData goNlAfAttribute = new AttributeMetaData(GONL_GENOME_AF, STRING)
 				.setDescription("The allele frequency for variants seen in the population used for the GoNL project")
 				.setLabel(GONL_AF_LABEL);
 
-		DefaultAttributeMetaData goNlGtcAttribute = new DefaultAttributeMetaData(GONL_GENOME_GTC, FieldTypeEnum.STRING)
+		AttributeMetaData goNlGtcAttribute = new AttributeMetaData(GONL_GENOME_GTC, STRING)
 				.setDescription(
 						"GenoType Counts. For each ALT allele in the same order as listed = 0/0,0/1,1/1,0/2,1/2,2/2,0/3,1/3,2/3,3/3,etc. Phasing is ignored; hence 1/0, 0|1 and 1|0 are all counted as 0/1. When one or more alleles is not called for a genotype in a specific sample (./., ./0, ./1, ./2, etc.), that sample's genotype is completely discarded for calculating GTC.")
 				.setLabel(GONL_GTC_LABEL);

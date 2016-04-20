@@ -28,14 +28,10 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.ManageableRepositoryCollection;
-import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.fieldtypes.CompoundField;
@@ -120,8 +116,8 @@ class AttributeMetaDataRepository
 				attributeMetaDataEntity.set(VISIBLE, attr.isVisible());
 				attributeMetaDataEntity.set(LABEL, attr.getLabel());
 				attributeMetaDataEntity.set(DESCRIPTION, attr.getDescription());
-				attributeMetaDataEntity.set(AGGREGATEABLE, attr.isAggregateable());
-				attributeMetaDataEntity.set(READ_ONLY, attr.isReadonly());
+				attributeMetaDataEntity.set(AGGREGATEABLE, attr.isAggregatable());
+				attributeMetaDataEntity.set(READ_ONLY, attr.isReadOnly());
 				attributeMetaDataEntity.set(UNIQUE, attr.isUnique());
 				attributeMetaDataEntity.set(EXPRESSION, attr.getExpression());
 				attributeMetaDataEntity.set(VISIBLE_EXPRESSION, attr.getVisibleExpression());
@@ -153,22 +149,23 @@ class AttributeMetaDataRepository
 					attributeMetaDataEntity.set(PARTS, attrPartsEntities);
 				}
 
-				// Language attributes
-				for (String languageCode : attr.getLabelLanguageCodes())
-				{
-					String attributeName = LABEL + '-' + languageCode;
-					String label = attr.getLabel(languageCode);
-					if (label != null) attributeMetaDataEntity.set(attributeName, label);
-				}
-
-				for (String languageCode : attr.getDescriptionLanguageCodes())
-				{
-					String attributeName = DESCRIPTION + '-' + languageCode;
-					String description = attr.getDescription(languageCode);
-					if (description != null) attributeMetaDataEntity.set(attributeName, description);
-				}
-
-				return attributeMetaDataEntity;
+//				// Language attributes
+//				for (String languageCode : attr.getLabelLanguageCodes())
+//				{
+//					String attributeName = LABEL + '-' + languageCode;
+//					String label = attr.getLabel(languageCode);
+//					if (label != null) attributeMetaDataEntity.set(attributeName, label);
+//				}
+//
+//				for (String languageCode : attr.getDescriptionLanguageCodes())
+//				{
+//					String attributeName = DESCRIPTION + '-' + languageCode;
+//					String description = attr.getDescription(languageCode);
+//					if (description != null) attributeMetaDataEntity.set(attributeName, description);
+//				}
+//
+//				return attributeMetaDataEntity;
+				throw new UnsupportedOperationException(); // FIXME
 			}
 		};
 	}
@@ -201,63 +198,64 @@ class AttributeMetaDataRepository
 	}
 
 	/**
-	 * Creates a {@link DefaultAttributeMetaData} instance for an Entity in the repository.
+	 * Creates a {@link AttributeMetaData} instance for an Entity in the repository.
 	 * 
 	 * @param entity
 	 *            {@link AttributeMetaDataMetaData} Entity
-	 * @return {@link DefaultAttributeMetaData}, with {@link DefaultAttributeMetaData#getRefEntity()} properly filled if
+	 * @return {@link AttributeMetaData}, with {@link AttributeMetaData#getRefEntity()} properly filled if
 	 *         needed.
 	 */
-	public DefaultAttributeMetaData toAttributeMetaData(Entity entity)
+	public AttributeMetaData toAttributeMetaData(Entity entity)
 	{
-		DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(entity.getString(NAME));
-		attributeMetaData.setDataType(MolgenisFieldTypes.getType(entity.getString(DATA_TYPE)));
-		attributeMetaData.setNillable(entity.getBoolean(NILLABLE));
-		attributeMetaData.setAuto(entity.getBoolean(AUTO));
-		attributeMetaData.setVisible(entity.getBoolean(VISIBLE));
-		attributeMetaData.setLabel(entity.getString(LABEL));
-		attributeMetaData.setDescription(entity.getString(DESCRIPTION));
-		attributeMetaData
-				.setAggregateable(entity.getBoolean(AGGREGATEABLE) == null ? false : entity.getBoolean(AGGREGATEABLE));
-		attributeMetaData.setEnumOptions(entity.getList(ENUM_OPTIONS));
-		attributeMetaData.setReadOnly(entity.getBoolean(READ_ONLY) == null ? false : entity.getBoolean(READ_ONLY));
-		attributeMetaData.setUnique(entity.getBoolean(UNIQUE) == null ? false : entity.getBoolean(UNIQUE));
-		attributeMetaData.setExpression(entity.getString(EXPRESSION));
-
-		Long rangeMin = entity.getLong(RANGE_MIN);
-		Long rangeMax = entity.getLong(RANGE_MAX);
-		if ((rangeMin != null) || (rangeMax != null))
-		{
-			attributeMetaData.setRange(new Range(rangeMin, rangeMax));
-		}
-		if (entity.get(REF_ENTITY) != null)
-		{
-			final String refEntityName = entity.getString(REF_ENTITY);
-			attributeMetaData.setRefEntity(entityMetaDataRepository.get(refEntityName));
-		}
-		Iterable<Entity> parts = entity.getEntities(PARTS);
-		if (parts != null)
-		{
-			stream(parts.spliterator(), false).map(this::toAttributeMetaData)
-					.forEach(attributeMetaData::addAttributePart);
-		}
-		attributeMetaData.setVisibleExpression(entity.getString(VISIBLE_EXPRESSION));
-		attributeMetaData.setValidationExpression(entity.getString(VALIDATION_EXPRESSION));
-		attributeMetaData.setDefaultValue(entity.getString(DEFAULT_VALUE));
-
-		// Language attributes
-		for (String languageCode : languageService.getLanguageCodes())
-		{
-			String attributeName = LABEL + '-' + languageCode;
-			String label = entity.getString(attributeName);
-			if (label != null) attributeMetaData.setLabel(languageCode, label);
-
-			attributeName = DESCRIPTION + '-' + languageCode;
-			String description = entity.getString(attributeName);
-			if (description != null) attributeMetaData.setDescription(languageCode, description);
-		}
-
-		return attributeMetaData;
+//		AttributeMetaData attributeMetaData = new AttributeMetaData(entity.getString(NAME));
+//		attributeMetaData.setDataType(MolgenisFieldTypes.getType(entity.getString(DATA_TYPE)));
+//		attributeMetaData.setNillable(entity.getBoolean(NILLABLE));
+//		attributeMetaData.setAuto(entity.getBoolean(AUTO));
+//		attributeMetaData.setVisible(entity.getBoolean(VISIBLE));
+//		attributeMetaData.setLabel(entity.getString(LABEL));
+//		attributeMetaData.setDescription(entity.getString(DESCRIPTION));
+//		attributeMetaData
+//				.setAggregatable(entity.getBoolean(AGGREGATEABLE) == null ? false : entity.getBoolean(AGGREGATEABLE));
+//		attributeMetaData.setEnumOptions(entity.getList(ENUM_OPTIONS));
+//		attributeMetaData.setReadOnly(entity.getBoolean(READ_ONLY) == null ? false : entity.getBoolean(READ_ONLY));
+//		attributeMetaData.setUnique(entity.getBoolean(UNIQUE) == null ? false : entity.getBoolean(UNIQUE));
+//		attributeMetaData.setExpression(entity.getString(EXPRESSION));
+//
+//		Long rangeMin = entity.getLong(RANGE_MIN);
+//		Long rangeMax = entity.getLong(RANGE_MAX);
+//		if ((rangeMin != null) || (rangeMax != null))
+//		{
+//			attributeMetaData.setRange(new Range(rangeMin, rangeMax));
+//		}
+//		if (entity.get(REF_ENTITY) != null)
+//		{
+//			final String refEntityName = entity.getString(REF_ENTITY);
+//			attributeMetaData.setRefEntity(entityMetaDataRepository.get(refEntityName));
+//		}
+//		Iterable<Entity> parts = entity.getEntities(PARTS);
+//		if (parts != null)
+//		{
+//			stream(parts.spliterator(), false).map(this::toAttributeMetaData)
+//					.forEach(attributeMetaData::addAttributePart);
+//		}
+//		attributeMetaData.setVisibleExpression(entity.getString(VISIBLE_EXPRESSION));
+//		attributeMetaData.setValidationExpression(entity.getString(VALIDATION_EXPRESSION));
+//		attributeMetaData.setDefaultValue(entity.getString(DEFAULT_VALUE));
+//
+//		// Language attributes
+//		for (String languageCode : languageService.getLanguageCodes())
+//		{
+//			String attributeName = LABEL + '-' + languageCode;
+//			String label = entity.getString(attributeName);
+//			if (label != null) attributeMetaData.setLabel(languageCode, label);
+//
+//			attributeName = DESCRIPTION + '-' + languageCode;
+//			String description = entity.getString(attributeName);
+//			if (description != null) attributeMetaData.setDescription(languageCode, description);
+//		}
+//
+//		return attributeMetaData;
+		throw new UnsupportedOperationException(); // FIXME
 	}
 
 }

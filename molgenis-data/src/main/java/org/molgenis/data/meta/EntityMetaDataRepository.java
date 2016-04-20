@@ -1,7 +1,5 @@
 package org.molgenis.data.meta;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
@@ -21,30 +19,24 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
 import org.molgenis.data.i18n.I18nStringMetaData;
 import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.system.ImportRunMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.DependencyResolver;
 
 import com.google.common.collect.Lists;
 
 /**
  * Helper class around the {@link EntityMetaDataMetaData} repository. Caches the metadata in
- * {@link DefaultEntityMetaData}. Internal implementation class, use {@link MetaDataServiceImpl} instead.
+ * {@link EntityMetaData}. Internal implementation class, use {@link MetaDataServiceImpl} instead.
  * 
  */
 class EntityMetaDataRepository
@@ -53,7 +45,7 @@ class EntityMetaDataRepository
 	private final Repository<Entity> repository;
 	private final PackageRepository packageRepository;
 	private final ManageableRepositoryCollection collection;
-	private final Map<String, DefaultEntityMetaData> entityMetaDataCache = new HashMap<>();
+	private final Map<String, EntityMetaData> entityMetaDataCache = new HashMap<>();
 	private final AttributeMetaDataRepository attributeRepository;
 	private final LanguageService languageService;
 
@@ -74,8 +66,8 @@ class EntityMetaDataRepository
 
 	/**
 	 * Fills the {@link #entityMetaDataCache} with {@link EntityMetaData}, based on the entities in {@link #repository}
-	 * and the {@link PackageImpl}s in {@link #packageRepository}. Adds the entities to the {@link #packageRepository}'s
-	 * {@link PackageImpl}s.
+	 * and the {@link Package}s in {@link #packageRepository}. Adds the entities to the {@link #packageRepository}'s
+	 * {@link Package}s.
 	 */
 	void fillEntityMetaDataCache()
 	{
@@ -106,41 +98,41 @@ class EntityMetaDataRepository
 		{
 			entities.add(entity);
 			String name = entity.getString(SIMPLE_NAME);
-			DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(name);
+			EntityMetaData entityMetaData = new EntityMetaData(name);
 			entityMetaData.setAbstract(entity.getBoolean(ABSTRACT));
 			entityMetaData.setLabel(entity.getString(LABEL));
 			entityMetaData.setDescription(entity.getString(DESCRIPTION));
 			entityMetaData.setBackend(entity.getString(BACKEND));
 
 			// Language attributes
-			for (String languageCode : languageService.getLanguageCodes())
-			{
-				String attributeName = DESCRIPTION + '-' + languageCode;
-				String description = entity.getString(attributeName);
-				if (description != null) entityMetaData.setDescription(languageCode, description);
-
-				attributeName = LABEL + '-' + languageCode;
-				String label = entity.getString(attributeName);
-				if (label != null) entityMetaData.setLabel(languageCode, label);
-			}
-
-			entityMetaDataCache.put(entity.getString(FULL_NAME), entityMetaData);
+//			for (String languageCode : languageService.getLanguageCodes())
+//			{
+//				String attributeName = DESCRIPTION + '-' + languageCode;
+//				String description = entity.getString(attributeName);
+//				if (description != null) entityMetaData.setDescription(languageCode, description);
+//
+//				attributeName = LABEL + '-' + languageCode;
+//				String label = entity.getString(attributeName);
+//				if (label != null) entityMetaData.setLabel(languageCode, label);
+//			}
+			throw new UnsupportedOperationException(); // FIXME
+//			entityMetaDataCache.put(entity.getString(FULL_NAME), entityMetaData);
 		}
 		// Only then create the AttributeMetaData objects, so that lookups of refEntity values work.
 		for (Entity entity : entities)
 		{
-			DefaultEntityMetaData entityMetaData = entityMetaDataCache.get(entity.getString(FULL_NAME));
+			EntityMetaData entityMetaData = entityMetaDataCache.get(entity.getString(FULL_NAME));
 			Iterable<Entity> attributeEntities = entity.getEntities(EntityMetaDataMetaData.ATTRIBUTES);
 			stream(attributeEntities.spliterator(), false).map(attributeRepository::toAttributeMetaData)
-					.forEach(entityMetaData::addAttributeMetaData);
+					.forEach(entityMetaData::addAttribute);
 		}
 		for (Entity entity : entities)
 		{
 			final Entity extendsEntity = entity.getEntity(EXTENDS);
-			final DefaultEntityMetaData entityMetaData = entityMetaDataCache.get(entity.getString(FULL_NAME));
+			final EntityMetaData entityMetaData = entityMetaDataCache.get(entity.getString(FULL_NAME));
 			if (extendsEntity != null)
 			{
-				final DefaultEntityMetaData extendsEntityMetaData = entityMetaDataCache
+				final EntityMetaData extendsEntityMetaData = entityMetaDataCache
 						.get(extendsEntity.getString(FULL_NAME));
 				entityMetaData.setExtends(extendsEntityMetaData);
 			}
@@ -148,13 +140,14 @@ class EntityMetaDataRepository
 
 			if (packageEntity != null)
 			{
-				PackageImpl p = (PackageImpl) packageRepository
-					.getPackage(packageEntity.getString(PackageMetaData.FULL_NAME));
-				if (null != p)
-				{
-					entityMetaData.setPackage(p);
-					p.addEntity(entityMetaData);
-				}
+//				Package p = (Package) packageRepository
+//					.getPackage(packageEntity.getString(PackageMetaData.FULL_NAME));
+//				if (null != p)
+//				{
+//					entityMetaData.setPackage(p);
+////					p.addEntity(entityMetaData);
+//				}
+				throw new UnsupportedOperationException(); // FIXME
 			}
 
 			// set id, label and lookup attrs
@@ -171,9 +164,10 @@ class EntityMetaDataRepository
 						entityMetaData.getAttribute(labelAttr.getString(AttributeMetaDataMetaData.NAME)));
 			}
 			Stream<Entity> lookupAttrs = stream(entity.getEntities(LOOKUP_ATTRIBUTES).spliterator(), false);
-			entityMetaData.setLookupAttributes(lookupAttrs.map(lookupAttrEntity -> {
-				return entityMetaData.getAttribute(lookupAttrEntity.getString(AttributeMetaDataMetaData.NAME));
-			}));
+//			entityMetaData.setLookupAttributes(lookupAttrs.map(lookupAttrEntity -> {
+//				return entityMetaData.getAttribute(lookupAttrEntity.getString(AttributeMetaDataMetaData.NAME));
+//			}));
+			throw new UnsupportedOperationException(); // FIXME
 		}
 
 	}
@@ -185,7 +179,7 @@ class EntityMetaDataRepository
 	 *            the fully qualified name of the entityMetaData
 	 * @return the EntityMetaData or null if none found
 	 */
-	public DefaultEntityMetaData get(String fullyQualifiedName)
+	public EntityMetaData get(String fullyQualifiedName)
 	{
 		return entityMetaDataCache.get(fullyQualifiedName);
 	}
@@ -199,82 +193,82 @@ class EntityMetaDataRepository
 	 */
 	public void add(EntityMetaData entityMetaData)
 	{
-		DefaultEntityMetaData emd = new DefaultEntityMetaData(entityMetaData.getSimpleName());
-		emd.setLabel(entityMetaData.getLabel());
-		emd.setAbstract(entityMetaData.isAbstract());
-		emd.setDescription(entityMetaData.getDescription());
-		emd.setBackend(entityMetaData.getBackend() == null ? collection.getName() : entityMetaData.getBackend());
-
-		// Language attributes
-		for (String languageCode : entityMetaData.getDescriptionLanguageCodes())
-		{
-			String description = entityMetaData.getDescription(languageCode);
-			if (description != null) emd.setDescription(languageCode, description);
-		}
-
-		for (String languageCode : entityMetaData.getLabelLanguageCodes())
-		{
-			String label = entityMetaData.getLabel(languageCode);
-			if (label != null) emd.setLabel(languageCode, label);
-		}
-
-		if (entityMetaData.getExtends() != null)
-		{
-			emd.setExtends(entityMetaDataCache.get(entityMetaData.getExtends().getName()));
-		}
-		if (entityMetaData.getPackage() == null)
-		{
-			emd.setPackage(PackageImpl.defaultPackage);
-		}
-		else
-		{
-			emd.setPackage(entityMetaData.getPackage());
-		}
-		entityMetaDataCache.put(emd.getName(), emd);
-		if (packageRepository.getPackage(emd.getPackage().getName()) == null)
-		{
-			packageRepository.add(emd.getPackage());
-		}
-		((PackageImpl) packageRepository.getPackage(emd.getPackage().getName())).addEntity(emd);
-		Entity entity = toEntity(emd);
-		Iterable<AttributeMetaData> attributes = entityMetaData.getOwnAttributes();
-		if (attributes != null)
-		{
-			Map<String, Entity> attrs = stream(attributeRepository.add(attributes).spliterator(), false)
-					.collect(toMap(attrEntity -> attrEntity.getString(AttributeMetaDataMetaData.NAME),
-							Function.<Entity> identity(), (u, v) -> {
-								throw new IllegalStateException(String.format("Duplicate key %s", u));
-							} , LinkedHashMap::new));
-			entity.set(ATTRIBUTES, attrs.values());
-			emd.addAllAttributeMetaData(attributes);
-
-			AttributeMetaData idAttribute = entityMetaData.getOwnIdAttribute();
-			if (idAttribute != null)
-			{
-				emd.setIdAttribute(idAttribute);
-				entity.set(ID_ATTRIBUTE, attrs.get(idAttribute.getName()));
-			}
-			AttributeMetaData labelAttribute = entityMetaData.getOwnLabelAttribute();
-			if (labelAttribute != null)
-			{
-				emd.setLabelAttribute(labelAttribute);
-				entity.set(LABEL_ATTRIBUTE, attrs.get(labelAttribute.getName()));
-			}
-
-			List<Entity> lookupAttrEntities = stream(entityMetaData.getOwnLookupAttributes().spliterator(), false)
-					.map(lookupAttr -> attrs.get(lookupAttr.getName())).collect(toList());
-			entity.set(LOOKUP_ATTRIBUTES, lookupAttrEntities);
-		}
-		else
-		{
-			entity.set(ATTRIBUTES, Collections.emptyList());
-			entity.set(LOOKUP_ATTRIBUTES, Collections.emptyList());
-		}
-
-		repository.add(entity);
+//		EntityMetaData emd = new EntityMetaData(entityMetaData.getSimpleName());
+//		emd.setLabel(entityMetaData.getLabel());
+//		emd.setAbstract(entityMetaData.isAbstract());
+//		emd.setDescription(entityMetaData.getDescription());
+//		emd.setBackend(entityMetaData.getBackend() == null ? collection.getName() : entityMetaData.getBackend());
+//
+////		// Language attributes
+////		for (String languageCode : entityMetaData.getDescriptionLanguageCodes())
+////		{
+////			String description = entityMetaData.getDescription(languageCode);
+////			if (description != null) emd.setDescription(languageCode, description);
+////		}
+//		throw new UnsupportedOperationException(); // FIXME
+////		for (String languageCode : entityMetaData.getLabelLanguageCodes())
+////		{
+////			String label = entityMetaData.getLabel(languageCode);
+////			if (label != null) emd.setLabel(languageCode, label);
+////		}
+//		throw new UnsupportedOperationException(); // FIXME
+//		if (entityMetaData.getExtends() != null)
+//		{
+//			emd.setExtends(entityMetaDataCache.get(entityMetaData.getExtends().getName()));
+//		}
+//		if (entityMetaData.getPackage() == null)
+//		{
+//			emd.setPackage(Package.defaultPackage);
+//		}
+//		else
+//		{
+//			emd.setPackage(entityMetaData.getPackage());
+//		}
+//		entityMetaDataCache.put(emd.getName(), emd);
+//		if (packageRepository.getPackage(emd.getPackage().getName()) == null)
+//		{
+//			packageRepository.add(emd.getPackage());
+//		}
+//		((Package) packageRepository.getPackage(emd.getPackage().getName())).addEntity(emd);
+//		Entity entity = toEntity(emd);
+//		Iterable<AttributeMetaData> attributes = entityMetaData.getOwnAttributes();
+//		if (attributes != null)
+//		{
+//			Map<String, Entity> attrs = stream(attributeRepository.add(attributes).spliterator(), false)
+//					.collect(toMap(attrEntity -> attrEntity.getString(AttributeMetaDataMetaData.NAME),
+//							Function.<Entity> identity(), (u, v) -> {
+//								throw new IllegalStateException(String.format("Duplicate key %s", u));
+//							} , LinkedHashMap::new));
+//			entity.set(ATTRIBUTES, attrs.values());
+//			emd.addAllAttributeMetaData(attributes);
+//
+//			AttributeMetaData idAttribute = entityMetaData.getOwnIdAttribute();
+//			if (idAttribute != null)
+//			{
+//				emd.setIdAttribute(idAttribute);
+//				entity.set(ID_ATTRIBUTE, attrs.get(idAttribute.getName()));
+//			}
+//			AttributeMetaData labelAttribute = entityMetaData.getOwnLabelAttribute();
+//			if (labelAttribute != null)
+//			{
+//				emd.setLabelAttribute(labelAttribute);
+//				entity.set(LABEL_ATTRIBUTE, attrs.get(labelAttribute.getName()));
+//			}
+//
+//			List<Entity> lookupAttrEntities = stream(entityMetaData.getOwnLookupAttributes().spliterator(), false)
+//					.map(lookupAttr -> attrs.get(lookupAttr.getName())).collect(toList());
+//			entity.set(LOOKUP_ATTRIBUTES, lookupAttrEntities);
+//		}
+//		else
+//		{
+//			entity.set(ATTRIBUTES, Collections.emptyList());
+//			entity.set(LOOKUP_ATTRIBUTES, Collections.emptyList());
+//		}
+//
+//		repository.add(entity);
 	}
 
-	public void update(DefaultEntityMetaData entityMeta)
+	public void update(EntityMetaData entityMeta)
 	{
 		repository.update(toEntity(entityMeta));
 		entityMetaDataCache.put(entityMeta.getName(), entityMeta);
@@ -282,37 +276,38 @@ class EntityMetaDataRepository
 
 	private Entity toEntity(EntityMetaData emd)
 	{
-		Entity entityMetaDataEntity = new MapEntity(META_DATA);
-		entityMetaDataEntity.set(FULL_NAME, emd.getName());
-		entityMetaDataEntity.set(SIMPLE_NAME, emd.getSimpleName());
-		if (emd.getPackage() != null)
-		{
-			entityMetaDataEntity.set(PACKAGE, packageRepository.getEntity(emd.getPackage().getName()));
-		}
-		entityMetaDataEntity.set(DESCRIPTION, emd.getDescription());
-		entityMetaDataEntity.set(ABSTRACT, emd.isAbstract());
-		entityMetaDataEntity.set(LABEL, emd.getLabel());
-		entityMetaDataEntity.set(BACKEND, emd.getBackend());
-		if (emd.getExtends() != null)
-		{
-			entityMetaDataEntity.set(EXTENDS, getEntity(emd.getExtends().getName()));
-		}
-
-		// Language attributes
-		for (String languageCode : emd.getDescriptionLanguageCodes())
-		{
-			String attributeName = DESCRIPTION + '-' + languageCode;
-			String description = emd.getDescription(languageCode);
-			if (description != null) entityMetaDataEntity.set(attributeName, description);
-		}
-
-		for (String languageCode : emd.getLabelLanguageCodes())
-		{
-			String attributeName = LABEL + '-' + languageCode;
-			String label = emd.getLabel(languageCode);
-			if (label != null) entityMetaDataEntity.set(attributeName, label);
-		}
-		return entityMetaDataEntity;
+//		Entity entityMetaDataEntity = new MapEntity(META_DATA);
+//		entityMetaDataEntity.set(FULL_NAME, emd.getName());
+//		entityMetaDataEntity.set(SIMPLE_NAME, emd.getSimpleName());
+//		if (emd.getPackage() != null)
+//		{
+//			entityMetaDataEntity.set(PACKAGE, packageRepository.getEntity(emd.getPackage().getName()));
+//		}
+//		entityMetaDataEntity.set(DESCRIPTION, emd.getDescription());
+//		entityMetaDataEntity.set(ABSTRACT, emd.isAbstract());
+//		entityMetaDataEntity.set(LABEL, emd.getLabel());
+//		entityMetaDataEntity.set(BACKEND, emd.getBackend());
+//		if (emd.getExtends() != null)
+//		{
+//			entityMetaDataEntity.set(EXTENDS, getEntity(emd.getExtends().getName()));
+//		}
+//
+//		// Language attributes
+//		for (String languageCode : emd.getDescriptionLanguageCodes())
+//		{
+//			String attributeName = DESCRIPTION + '-' + languageCode;
+//			String description = emd.getDescription(languageCode);
+//			if (description != null) entityMetaDataEntity.set(attributeName, description);
+//		}
+//
+//		for (String languageCode : emd.getLabelLanguageCodes())
+//		{
+//			String attributeName = LABEL + '-' + languageCode;
+//			String label = emd.getLabel(languageCode);
+//			if (label != null) entityMetaDataEntity.set(attributeName, label);
+//		}
+//		return entityMetaDataEntity;
+		throw new UnsupportedOperationException(); // FIXME
 	}
 
 	public void delete(String entityName)
@@ -368,9 +363,9 @@ class EntityMetaDataRepository
 
 	public EntityMetaData addAttribute(String fullyQualifiedEntityName, AttributeMetaData attr)
 	{
-		DefaultEntityMetaData entityMetaData = get(fullyQualifiedEntityName);
+		EntityMetaData entityMetaData = get(fullyQualifiedEntityName);
 		delete(fullyQualifiedEntityName);
-		entityMetaData.addAttributeMetaData(attr);
+		entityMetaData.addAttribute(attr);
 		add(entityMetaData);
 		return entityMetaData;
 	}

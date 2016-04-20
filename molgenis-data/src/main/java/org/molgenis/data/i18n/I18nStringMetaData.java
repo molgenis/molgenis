@@ -1,12 +1,12 @@
 package org.molgenis.data.i18n;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 
-public class I18nStringMetaData extends DefaultEntityMetaData
+public class I18nStringMetaData extends EntityMetaData
 {
 	public static final I18nStringMetaData INSTANCE = new I18nStringMetaData();
 	public static final String ENTITY_NAME = "i18nstrings";
@@ -36,6 +36,6 @@ public class I18nStringMetaData extends DefaultEntityMetaData
 	public void removeLanguage(String languageCode)
 	{
 		AttributeMetaData attr = getAttribute(languageCode);
-		if (attr != null) removeAttributeMetaData(attr);
+		if (attr != null) removeAttribute(attr);
 	}
 }

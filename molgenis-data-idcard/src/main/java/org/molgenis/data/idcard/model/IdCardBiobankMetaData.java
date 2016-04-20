@@ -6,16 +6,16 @@ import static org.molgenis.MolgenisFieldTypes.HYPERLINK;
 import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LOOKUP;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
 
 import org.molgenis.data.idcard.IdCardRepositoryCollection;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.springframework.stereotype.Component;
 
 @Component
-public class IdCardBiobankMetaData extends DefaultEntityMetaData
+public class IdCardBiobankMetaData extends EntityMetaData
 {
 	public IdCardBiobankMetaData()
 	{
@@ -25,8 +25,8 @@ public class IdCardBiobankMetaData extends DefaultEntityMetaData
 		setDescription("Biobank/Registry data from ID-Card");
 
 		addAttribute(IdCardBiobank.NAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Name");
-		addAttribute(IdCardBiobank.TYPE, ROLE_LOOKUP).setLabel("Type").setAggregateable(true);
-		addAttribute(IdCardBiobank.TARGET_POPULATION).setLabel("Target population").setAggregateable(true);
+		addAttribute(IdCardBiobank.TYPE, ROLE_LOOKUP).setLabel("Type").setAggregatable(true);
+		addAttribute(IdCardBiobank.TARGET_POPULATION).setLabel("Target population").setAggregatable(true);
 		addAttribute(IdCardBiobank.URL).setLabel("Website").setDataType(HYPERLINK);
 		addAttribute(IdCardBiobank.ID).setLabel("ID-Card").setDataType(HYPERLINK);
 		addAttribute(IdCardBiobank.ALSO_LISTED_IN).setLabel("also listed in").setDataType(TEXT).setVisible(false);
@@ -36,7 +36,7 @@ public class IdCardBiobankMetaData extends DefaultEntityMetaData
 
 		addAttribute(IdCardBiobank.NAME_OF_HOST_INSTITUTION).setLabel("Host institution");
 		addAttribute(IdCardBiobank.TYPE_OF_HOST_INSTITUTION).setLabel("Type of host institution")
-				.setAggregateable(true);
+				.setAggregatable(true);
 		// The salutation for the administrator in ID-Card. This is not relevant data to display in the catalogue.
 		addAttribute(IdCardBiobank.SALUTATION).setLabel("Salutation").setDataType(STRING).setVisible(false);
 		addAttribute(IdCardBiobank.FIRST_NAME).setLabel("First name").setDataType(STRING);

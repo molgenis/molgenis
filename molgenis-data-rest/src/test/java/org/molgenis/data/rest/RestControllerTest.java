@@ -7,6 +7,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.ENUM;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.INT;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 import static org.molgenis.data.rest.RestController.BASE_URI;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -25,11 +29,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.mockito.Matchers;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
@@ -39,11 +40,12 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.Sort;
 import org.molgenis.data.Sort.Direction;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.rest.RestControllerTest.RestControllerConfig;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rsql.MolgenisRSQL;
-import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.QueryResolver;
@@ -136,12 +138,12 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		Query<Entity> q2 = new QueryImpl<>().sort(new Sort().on("name", Direction.DESC)).pageSize(100).offset(0);
 		when(dataService.findAll(ENTITY_NAME, q2)).thenReturn(Stream.of(entity2, entity));
 
-		DefaultAttributeMetaData attrEnum = new DefaultAttributeMetaData("enum", FieldTypeEnum.ENUM)
+		AttributeMetaData attrEnum = new AttributeMetaData("enum", ENUM)
 				.setEnumOptions(Arrays.asList("enum0, enum1"));
 
-		DefaultAttributeMetaData attrName = new DefaultAttributeMetaData("name", FieldTypeEnum.STRING);
+		AttributeMetaData attrName = new AttributeMetaData("name", STRING);
 
-		DefaultAttributeMetaData attrId = new DefaultAttributeMetaData("id", FieldTypeEnum.STRING);
+		AttributeMetaData attrId = new AttributeMetaData("id", STRING);
 		attrId.setReadOnly(true);
 		attrId.setUnique(true);
 		attrId.setNillable(false);
@@ -396,17 +398,17 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		when(dataService.findOneById(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
 
-		DefaultAttributeMetaData attrName = new DefaultAttributeMetaData("name", FieldTypeEnum.XREF);
+		AttributeMetaData attrName = new AttributeMetaData("name", XREF);
 		EntityMetaData meta = mock(EntityMetaData.class);
 		when(dataService.getEntityMetaData(ENTITY_NAME)).thenReturn(meta);
 		when(repo.getEntityMetaData()).thenReturn(meta);
 
 		EntityMetaData refMeta = mock(EntityMetaData.class);
-		AttributeMetaData attrNameXREF = new DefaultAttributeMetaData("xrefValue", FieldTypeEnum.STRING);
+		AttributeMetaData attrNameXREF = new AttributeMetaData("xrefValue", STRING);
 		when(refMeta.getAtomicAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrNameXREF));
 		attrName.setRefEntity(refMeta);
 
-		DefaultAttributeMetaData attrId = new DefaultAttributeMetaData("id", FieldTypeEnum.INT);
+		AttributeMetaData attrId = new AttributeMetaData("id", INT);
 		attrId.setVisible(false);
 
 		when(meta.getAttribute("name")).thenReturn(attrName);

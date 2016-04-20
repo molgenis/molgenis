@@ -13,7 +13,6 @@ import java.util.Iterator;
 import java.util.stream.Stream;
 
 import org.mockito.ArgumentCaptor;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
@@ -31,7 +30,7 @@ public class AttributeMetaDataRepositoryTest
 	@SuppressWarnings(
 	{ "rawtypes", "unchecked" })
 	@Test
-	public void addAttributeMetaData()
+	public void addAttribute()
 	{
 		ManageableRepositoryCollection repoCollection = mock(ManageableRepositoryCollection.class);
 		Repository<Entity> repo = mock(Repository.class);

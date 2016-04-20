@@ -35,13 +35,9 @@ import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
-import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Package;
 import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
@@ -50,14 +46,15 @@ import org.molgenis.data.i18n.I18nStringMetaData;
 import org.molgenis.data.i18n.I18nUtils;
 import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaValidationUtils;
-import org.molgenis.data.meta.PackageImpl;
+import org.molgenis.data.meta.Package;
 import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.TagImpl;
-import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.fieldtypes.CompoundField;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
@@ -155,7 +152,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	/**
 	 * Parses all tags defined in the tags repository.
 	 * 
-	 * @param source
+	 * @param tagRepository
 	 *            the {@link Repository} that contains the tags entity
 	 * @return Map mapping tag Identifier to tag {@link Entity}, will be empty if no tags repository was found
 	 */
@@ -179,7 +176,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	/**
 	 * Load all attributes from the source repository and add it to the {@link IntermediateParseResults}.
 	 * 
-	 * @param source
+	 * @param attributesRepo
 	 *            Repository for the attributes
 	 * @param intermediateResults
 	 *            {@link IntermediateParseResults} with the tags already parsed
@@ -212,7 +209,7 @@ public class EmxMetaDataParser implements MetaDataParser
 					"attributes.entity is missing for attribute named: " + attributeName + " on line " + i);
 
 			// create attribute
-			DefaultAttributeMetaData attribute = new DefaultAttributeMetaData(attributeName);
+			AttributeMetaData attribute = new AttributeMetaData(attributeName);
 
 			Map<String, EmxAttribute> entitiesMap = attributesMap.get(entityName);
 			if (entitiesMap == null)
@@ -234,7 +231,7 @@ public class EmxMetaDataParser implements MetaDataParser
 
 			String attributeName = attributeEntity.getString(NAME);
 			EmxAttribute emxAttribute = entityMap.get(attributeName);
-			DefaultAttributeMetaData attribute = emxAttribute.getAttr();
+			AttributeMetaData attribute = emxAttribute.getAttr();
 
 			String attributeDataType = attributeEntity.getString(DATA_TYPE);
 			String refEntityName = attributeEntity.getString(REF_ENTITY);
@@ -292,7 +289,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				}
 			}
 
-			if (attributeAggregateable != null) attribute.setAggregateable(attributeAggregateable);
+			if (attributeAggregateable != null) attribute.setAggregatable(attributeAggregateable);
 			// cannot update ref entities yet, will do so later on
 			if (readOnly != null) attribute.setReadOnly(readOnly);
 			if (unique != null) attribute.setUnique(unique);
@@ -388,7 +385,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			}
 
 			if (((attribute.getDataType() instanceof XrefField) || (attribute.getDataType() instanceof MrefField))
-					&& attribute.isNillable() && attribute.isAggregateable())
+					&& attribute.isNillable() && attribute.isAggregatable())
 			{
 				throw new IllegalArgumentException(
 						"attributes.aggregatable error on line " + i + " (" + entityName + "." + attributeName
@@ -459,13 +456,13 @@ public class EmxMetaDataParser implements MetaDataParser
 			Map<String, EmxAttribute> entityMap = attributesMap.get(entityName);
 
 			String attributeName = attributeEntity.getString(NAME);
-			DefaultAttributeMetaData attribute = entityMap.get(attributeName).getAttr();
+			AttributeMetaData attribute = entityMap.get(attributeName).getAttr();
 
 			// register attribute parent-children relations for compound attributes
 			String partOfAttribute = attributeEntity.getString(PART_OF_ATTRIBUTE);
 			if (partOfAttribute != null && !partOfAttribute.isEmpty())
 			{
-				DefaultAttributeMetaData compoundAttribute = entityMap.get(partOfAttribute).getAttr();
+				AttributeMetaData compoundAttribute = entityMap.get(partOfAttribute).getAttr();
 
 				if (compoundAttribute == null)
 				{
@@ -557,7 +554,7 @@ public class EmxMetaDataParser implements MetaDataParser
 					entityName = packageName + Package.PACKAGE_SEPARATOR + entityName;
 				}
 
-				EditableEntityMetaData md = intermediateResults.getEntityMetaData(entityName);
+				EntityMetaData md = intermediateResults.getEntityMetaData(entityName);
 				if (md == null)
 				{
 					md = intermediateResults.addEntityMetaData(entityName);
@@ -575,7 +572,7 @@ public class EmxMetaDataParser implements MetaDataParser
 
 				if (packageName != null)
 				{
-					PackageImpl p = intermediateResults.getPackage(packageName);
+					Package p = intermediateResults.getPackage(packageName);
 					if (p == null)
 					{
 						throw new MolgenisDataException("Unknown package: '" + packageName + "' for entity '"
@@ -682,7 +679,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			String simpleName = name;
 			String description = pack.getString(org.molgenis.data.meta.PackageMetaData.DESCRIPTION);
 			String parentName = pack.getString(org.molgenis.data.meta.PackageMetaData.PARENT);
-			PackageImpl parent = null;
+			Package parent = null;
 			if (parentName != null)
 			{
 				if (!name.toLowerCase().startsWith(parentName.toLowerCase())) throw new MolgenisDataException(
@@ -691,7 +688,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				parent = intermediateResults.getPackage(parentName);
 			}
 
-			intermediateResults.addPackage(name, new PackageImpl(simpleName, description, parent));
+			intermediateResults.addPackage(name, new Package(simpleName, description, parent));
 		}
 	}
 
@@ -715,7 +712,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				if (tagIdentifiers != null)
 				{
 					String name = pack.getString(NAME);
-					PackageImpl p = intermediateResults.getPackage(name);
+					Package p = intermediateResults.getPackage(name);
 					if (p == null) throw new IllegalArgumentException("Unknown package '" + name + "'");
 
 					for (String tagIdentifier : tagIdentifiers)
@@ -725,7 +722,8 @@ public class EmxMetaDataParser implements MetaDataParser
 						{
 							throw new IllegalArgumentException("Unknown tag '" + tagIdentifier + "'");
 						}
-						p.addTag(TagImpl.<Package> asTag(p, tagEntity));
+						//p.addTag(TagImpl.<Package> asTag(p, tagEntity)); // FIXME
+						throw new UnsupportedOperationException();
 					}
 				}
 			}
@@ -802,13 +800,13 @@ public class EmxMetaDataParser implements MetaDataParser
 			i++;
 			if (refEntityName != null)
 			{
-				EntityMetaData defaultEntityMetaData = intermediateResults.getEntityMetaData(entityName);
-				DefaultAttributeMetaData defaultAttributeMetaData = (DefaultAttributeMetaData) defaultEntityMetaData
+				EntityMetaData EntityMetaData = intermediateResults.getEntityMetaData(entityName);
+				AttributeMetaData AttributeMetaData = (AttributeMetaData) EntityMetaData
 						.getAttribute(attributeName);
 
 				if (intermediateResults.knowsEntity(refEntityName))
 				{
-					defaultAttributeMetaData.setRefEntity(intermediateResults.getEntityMetaData(refEntityName));
+					AttributeMetaData.setRefEntity(intermediateResults.getEntityMetaData(refEntityName));
 				}
 				else
 				{
@@ -824,7 +822,7 @@ public class EmxMetaDataParser implements MetaDataParser
 					}
 
 					// allow computed xref attributes to refer to pre-existing entities
-					defaultAttributeMetaData.setRefEntity(refEntityMeta);
+					AttributeMetaData.setRefEntity(refEntityMeta);
 				}
 
 			}
@@ -837,7 +835,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		if (source.getRepository(EmxMetaDataParser.ATTRIBUTES) != null)
 		{
 			IntermediateParseResults intermediateResults = getEntityMetaDataFromSource(source);
-			List<EditableEntityMetaData> entities;
+			List<EntityMetaData> entities;
 			if ((defaultPackage == null) || Package.DEFAULT_PACKAGE_NAME.equalsIgnoreCase(defaultPackage))
 			{
 				entities = intermediateResults.getEntities();
@@ -882,18 +880,18 @@ public class EmxMetaDataParser implements MetaDataParser
 	/**
 	 * Put the entities that are not in a package in the selected package
 	 * 
-	 * @param metaDataList
+	 * @param intermediateResults
 	 * @param defaultPackageName
 	 * @return
 	 */
-	private List<EditableEntityMetaData> putEntitiesInDefaultPackage(IntermediateParseResults intermediateResults,
+	private List<EntityMetaData> putEntitiesInDefaultPackage(IntermediateParseResults intermediateResults,
 			String defaultPackageName)
 	{
-		PackageImpl p = intermediateResults.getPackage(defaultPackageName);
+		Package p = intermediateResults.getPackage(defaultPackageName);
 		if (p == null) throw new IllegalArgumentException("Unknown package '" + defaultPackageName + "'");
 
-		List<EditableEntityMetaData> entities = new ArrayList<>();
-		for (EditableEntityMetaData entityMetaData : intermediateResults.getEntities())
+		List<EntityMetaData> entities = new ArrayList<>();
+		for (EntityMetaData entityMetaData : intermediateResults.getEntities())
 		{
 			if (entityMetaData.getPackage() == null)
 			{
@@ -1021,17 +1019,17 @@ public class EmxMetaDataParser implements MetaDataParser
 
 	static class EmxAttribute
 	{
-		private final DefaultAttributeMetaData attr;
+		private final AttributeMetaData attr;
 		private boolean idAttr;
 		private boolean labelAttr;
 		private boolean lookupAttr;
 
-		public EmxAttribute(DefaultAttributeMetaData attr)
+		public EmxAttribute(AttributeMetaData attr)
 		{
 			this.attr = requireNonNull(attr);
 		}
 
-		public DefaultAttributeMetaData getAttr()
+		public AttributeMetaData getAttr()
 		{
 			return attr;
 		}

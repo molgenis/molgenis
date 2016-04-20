@@ -2,11 +2,11 @@ package org.molgenis.data.annotation.meta;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.jobs.JobExecutionMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AnnotationJobExecutionMetaData extends DefaultEntityMetaData
+public class AnnotationJobExecutionMetaData extends EntityMetaData
 {
 	public AnnotationJobExecutionMetaData()
 	{

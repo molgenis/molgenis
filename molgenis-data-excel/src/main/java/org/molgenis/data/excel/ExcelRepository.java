@@ -2,6 +2,7 @@ package org.molgenis.data.excel;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,17 +16,14 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellReference;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import com.google.common.collect.Iterables;
@@ -143,8 +141,7 @@ public class ExcelRepository extends AbstractRepository
 	{
 		if (entityMetaData == null)
 		{
-			EditableEntityMetaData editableEntityMetaData = new DefaultEntityMetaData(sheet.getSheetName(),
-					ExcelEntity.class);
+			EntityMetaData entityMetaData = new EntityMetaData(sheet.getSheetName(), ExcelEntity.class);
 
 			if (colNamesMap == null)
 			{
@@ -160,11 +157,11 @@ public class ExcelRepository extends AbstractRepository
 			{
 				for (String colName : colNamesMap.keySet())
 				{
-					editableEntityMetaData
-							.addAttributeMetaData(new DefaultAttributeMetaData(colName, FieldTypeEnum.STRING));
+					entityMetaData
+							.addAttribute(new AttributeMetaData(colName, STRING));
 				}
 			}
-			entityMetaData = editableEntityMetaData;
+			entityMetaData = entityMetaData;
 		}
 
 		return entityMetaData;

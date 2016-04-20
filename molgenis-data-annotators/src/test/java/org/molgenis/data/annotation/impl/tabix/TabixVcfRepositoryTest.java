@@ -2,7 +2,7 @@ package org.molgenis.data.annotation.impl.tabix;
 
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.VcfRepository.ALT;
 import static org.molgenis.data.vcf.VcfRepository.ALT_META;
 import static org.molgenis.data.vcf.VcfRepository.CHROM;
@@ -19,12 +19,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.annotator.tabix.TabixVcfRepository;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.util.ResourceUtils;
@@ -34,21 +33,21 @@ import org.testng.annotations.Test;
 public class TabixVcfRepositoryTest
 {
 	private TabixVcfRepository tabixVcfRepository;
-	private DefaultEntityMetaData repoMetaData;
+	private EntityMetaData repoMetaData;
 
 	@BeforeTest
 	public void beforeTest() throws IOException
 	{
-		repoMetaData = new DefaultEntityMetaData("TabixTest");
-		repoMetaData.addAttributeMetaData(CHROM_META);
-		repoMetaData.addAttributeMetaData(ALT_META);
-		repoMetaData.addAttributeMetaData(POS_META);
-		repoMetaData.addAttributeMetaData(REF_META);
-		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("FILTER", STRING));
-		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("QUAL", STRING));
-		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("ID", STRING));
-		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("INTERNAL_ID", STRING), ROLE_ID);
-		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("INFO", COMPOUND));
+		repoMetaData = new EntityMetaData("TabixTest");
+		repoMetaData.addAttribute(CHROM_META);
+		repoMetaData.addAttribute(ALT_META);
+		repoMetaData.addAttribute(POS_META);
+		repoMetaData.addAttribute(REF_META);
+		repoMetaData.addAttribute(new AttributeMetaData("FILTER", STRING));
+		repoMetaData.addAttribute(new AttributeMetaData("QUAL", STRING));
+		repoMetaData.addAttribute(new AttributeMetaData("ID", STRING));
+		repoMetaData.addAttribute(new AttributeMetaData("INTERNAL_ID", STRING), ROLE_ID);
+		repoMetaData.addAttribute(new AttributeMetaData("INFO", COMPOUND));
 		repoMetaData.addAttribute("INTERNAL_ID").setVisible(false);
 
 		File file = ResourceUtils.getFile(getClass(),

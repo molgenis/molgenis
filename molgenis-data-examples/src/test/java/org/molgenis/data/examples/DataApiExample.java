@@ -1,6 +1,6 @@
 package org.molgenis.data.examples;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
 import java.io.File;
 
@@ -9,7 +9,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.csv.CsvRepository;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +70,7 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 	public void testDynamic()
 	{
 		// Create new dynamic repo
-		DefaultEntityMetaData emd = new DefaultEntityMetaData("City");
+		EntityMetaData emd = new EntityMetaData("City");
 		emd.addAttribute("name", ROLE_ID);
 		emd.addAttribute("population").setDataType(MolgenisFieldTypes.INT);
 
@@ -112,7 +112,7 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 		dataService.getMeta().forEach((backend) -> System.out.println(backend.getName()));
 
 		// Add cities to MyRepo
-		DefaultEntityMetaData emd = new DefaultEntityMetaData("City1");
+		EntityMetaData emd = new EntityMetaData("City1");
 		emd.setBackend("MyRepos");
 		emd.addAttribute("name", ROLE_ID);
 		emd.addAttribute("population").setDataType(MolgenisFieldTypes.INT);

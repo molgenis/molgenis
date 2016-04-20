@@ -1,12 +1,14 @@
 package org.molgenis.data.system.core;
 
-import com.google.auto.value.AutoValue;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.auth.RuntimePropertyMetaData;
-
 import java.util.LinkedHashSet;
 import java.util.Set;
+
+import org.molgenis.auth.RuntimePropertyMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
+
+import com.google.auto.value.AutoValue;
 
 @AutoValue
 public class RuntimeProperty  extends org.molgenis.data.support.AbstractEntity implements org.molgenis.data.Entity{
@@ -147,7 +149,7 @@ public class RuntimeProperty  extends org.molgenis.data.support.AbstractEntity i
     }
 
     @Override
-    public org.molgenis.data.EntityMetaData getEntityMetaData()
+    public EntityMetaData getEntityMetaData()
     {
         return new RuntimePropertyMetaData();
     }

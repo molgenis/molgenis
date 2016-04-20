@@ -30,11 +30,10 @@ import java.util.Scanner;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisInvalidFormatException;
-import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.datastructures.Sample;
 import org.molgenis.data.vcf.datastructures.Trio;
@@ -375,7 +374,7 @@ public class VcfUtils
 		// double-quotes. Double-quote character can be escaped with backslash \ and backslash as \\."
 		if (StringUtils.isBlank(infoAttributeMetaData.getDescription()))
 		{
-			((DefaultAttributeMetaData) infoAttributeMetaData)
+			((AttributeMetaData) infoAttributeMetaData)
 					.setDescription(VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION);
 		}
 		sb.append(

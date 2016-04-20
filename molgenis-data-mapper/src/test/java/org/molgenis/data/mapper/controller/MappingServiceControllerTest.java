@@ -3,6 +3,8 @@ package org.molgenis.data.mapper.controller;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DATE;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.INT;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.testng.Assert.assertEquals;
@@ -10,7 +12,6 @@ import static org.testng.Assert.assertEquals;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
@@ -20,10 +21,10 @@ import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -76,8 +77,8 @@ public class MappingServiceControllerTest extends AbstractTestNGSpringContextTes
 	private MenuReaderService menuReaderService;
 
 	private MolgenisUser me = new MolgenisUser();
-	private DefaultEntityMetaData lifeLines;
-	private DefaultEntityMetaData hop;
+	private EntityMetaData lifeLines;
+	private EntityMetaData hop;
 	private MappingProject mappingProject;
 	private static final String ID = "mappingservice";
 
@@ -91,10 +92,10 @@ public class MappingServiceControllerTest extends AbstractTestNGSpringContextTes
 		authentication.setAuthenticated(true);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		hop = new DefaultEntityMetaData("HOP");
-		hop.addAttributeMetaData(new DefaultAttributeMetaData("age", FieldTypeEnum.INT));
-		lifeLines = new DefaultEntityMetaData("LifeLines");
-		hop.addAttributeMetaData(new DefaultAttributeMetaData("dob", FieldTypeEnum.DATE));
+		hop = new EntityMetaData("HOP");
+		hop.addAttribute(new AttributeMetaData("age", INT));
+		lifeLines = new EntityMetaData("LifeLines");
+		hop.addAttribute(new AttributeMetaData("dob", DATE));
 
 		mappingProject = new MappingProject("hop hop hop", me);
 		mappingProject.setIdentifier("asdf");

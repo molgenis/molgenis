@@ -1,6 +1,9 @@
 package org.molgenis.data.vcf;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.LONG;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.TEXT;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,13 +11,11 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.AbstractRepository;
-import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.vcf.format.VcfToEntity;
 import org.molgenis.vcf.VcfReader;
 import org.molgenis.vcf.VcfRecord;
@@ -52,28 +53,24 @@ public class VcfRepository extends AbstractRepository
 	public static final String ORIGINAL_NAME = "ORIGINAL_NAME";
 	public static final String PREFIX = "##";
 
-	public static final AttributeMetaData CHROM_META = new DefaultAttributeMetaData(CHROM,
-			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false)
+	public static final AttributeMetaData CHROM_META = new AttributeMetaData(CHROM,
+			STRING).setAggregatable(true).setNillable(false)
 					.setDescription("The chromosome on which the variant is observed");
 	// TEXT instead of STRING to handle large insertions/deletions
-	public static final AttributeMetaData ALT_META = new DefaultAttributeMetaData(ALT,
-			MolgenisFieldTypes.FieldTypeEnum.TEXT).setAggregateable(true).setNillable(false)
+	public static final AttributeMetaData ALT_META = new AttributeMetaData(ALT, TEXT).setAggregatable(true).setNillable(false)
 					.setDescription("The alternative allele observed");
-	public static final AttributeMetaData POS_META = new DefaultAttributeMetaData(POS,
-			MolgenisFieldTypes.FieldTypeEnum.LONG).setAggregateable(true).setNillable(false)
+	public static final AttributeMetaData POS_META = new AttributeMetaData(POS, LONG).setAggregatable(true).setNillable(false)
 					.setDescription("The position on the chromosome which the variant is observed");
 	// TEXT instead of STRING to handle large insertions/deletions
-	public static final AttributeMetaData REF_META = new DefaultAttributeMetaData(REF,
-			MolgenisFieldTypes.FieldTypeEnum.TEXT).setAggregateable(true).setNillable(false)
+	public static final AttributeMetaData REF_META = new AttributeMetaData(REF, TEXT).setAggregatable(true).setNillable(false)
 					.setDescription("The reference allele");
-	public static final AttributeMetaData FILTER_META = new DefaultAttributeMetaData(FILTER,
-			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true)
+	public static final AttributeMetaData FILTER_META = new AttributeMetaData(FILTER,
+			STRING).setAggregatable(true).setNillable(true)
 					.setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
-	public static final AttributeMetaData QUAL_META = new DefaultAttributeMetaData(QUAL,
-			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true)
+	public static final AttributeMetaData QUAL_META = new AttributeMetaData(QUAL,
+			STRING).setAggregatable(true).setNillable(true)
 					.setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
-	public static final AttributeMetaData ID_META = new DefaultAttributeMetaData(ID,
-			MolgenisFieldTypes.FieldTypeEnum.STRING).setNillable(true).setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
+	public static final AttributeMetaData ID_META = new AttributeMetaData(ID, STRING).setNillable(true).setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
 
 	private final String entityName;
 	protected Supplier<VcfToEntity> vcfToEntitySupplier;

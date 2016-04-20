@@ -2,7 +2,7 @@ package org.molgenis.pathways;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
@@ -17,9 +17,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.mockito.Mockito;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.pathways.model.Impact;
@@ -77,12 +76,12 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 	private WikiPathwaysService serviceMock;
 	@Autowired
 	private DataService dataService;
-	private DefaultEntityMetaData vcf;
+	private EntityMetaData vcf;
 
 	@BeforeTest
 	public void init()
 	{
-		vcf = new DefaultEntityMetaData("VCF");
+		vcf = new EntityMetaData("VCF");
 		vcf.addAttribute("id", ROLE_ID);
 		vcf.addAttribute("EFF");
 	}
@@ -116,7 +115,7 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 	public void testInit() throws RemoteException
 	{
 		when(dataService.getEntityNames()).thenReturn(Stream.of("NonVCF", "VCF"));
-		DefaultEntityMetaData nonVcf = new DefaultEntityMetaData("NonVCF");
+		EntityMetaData nonVcf = new EntityMetaData("NonVCF");
 		nonVcf.addAttribute("id", ROLE_ID);
 
 		when(dataService.getEntityMetaData("NonVCF")).thenReturn(nonVcf);

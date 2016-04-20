@@ -7,9 +7,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.entity.ResultFilter;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 
 import com.google.common.base.Optional;

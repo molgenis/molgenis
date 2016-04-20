@@ -7,9 +7,9 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
+import org.molgenis.data.meta.AttributeMetaData;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;

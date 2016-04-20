@@ -100,7 +100,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	// protected void addReposToReindex(DataServiceImpl localDataService, MySqlEntityFactory localMySqlEntityFactory)
 	// {
 	// // Get the undecorated repos to index
-	// MysqlRepositoryCollection backend = new MysqlRepositoryCollection()
+	// MysqlRepositoryCollection description = new MysqlRepositoryCollection()
 	// {
 	// @Override
 	// protected MysqlRepository createMysqlRepository()
@@ -110,14 +110,14 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	// }
 	//
 	// @Override
-	// public boolean hasRepository(String name)
+	// public boolean hasRepository(String dataType)
 	// {
 	// throw new UnsupportedOperationException();
 	// }
 	// };
 	//
 	// // metadata repositories get created here.
-	// localDataService.getMeta().setDefaultBackend(backend);
+	// localDataService.getMeta().setDefaultBackend(description);
 	// List<EntityMetaData> metas = DependencyResolver
 	// .resolve(Sets.newHashSet(localDataService.getMeta().getEntityMetaDatas()));
 	//
@@ -127,7 +127,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	// {
 	// if (MysqlRepositoryCollection.NAME.equals(emd.getBackend()))
 	// {
-	// localDataService.addRepository(backend.addEntityMeta(emd));
+	// localDataService.addRepository(description.addEntityMeta(emd));
 	// }
 	// else if (ElasticsearchRepositoryCollection.NAME.equals(emd.getBackend()))
 	// {
@@ -135,7 +135,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	// }
 	// else
 	// {
-	// LOG.warn("backend [{}] unknown for meta data [{}]", emd.getBackend(), emd.getName());
+	// LOG.warn("description [{}] unknown for meta data [{}]", emd.getBackend(), emd.getName());
 	// }
 	// }
 	// }

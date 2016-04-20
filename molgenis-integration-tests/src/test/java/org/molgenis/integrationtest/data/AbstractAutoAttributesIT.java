@@ -1,5 +1,6 @@
 package org.molgenis.integrationtest.data;
 
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -8,15 +9,14 @@ import java.util.stream.Stream;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 public abstract class AbstractAutoAttributesIT extends AbstractDataIntegrationIT
 {
 	public void testIt()
 	{
-		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("AutoTest");
+		EntityMetaData entityMetaData = new EntityMetaData("AutoTest");
 		entityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false).setAuto(true);
 		entityMetaData.addAttribute("dateAttr").setDataType(MolgenisFieldTypes.DATE).setAuto(true);
 		entityMetaData.addAttribute("datetimeAttr").setDataType(MolgenisFieldTypes.DATETIME).setAuto(true);

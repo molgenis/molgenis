@@ -13,10 +13,8 @@ import java.util.stream.Collectors;
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
@@ -28,8 +26,9 @@ import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.repository.MappingProjectRepository;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
-import org.molgenis.data.meta.PackageImpl;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.Package;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
@@ -169,8 +168,9 @@ public class MappingServiceImpl implements MappingService
 	@Override
 	public String applyMappings(MappingTarget mappingTarget, String entityName)
 	{
-		DefaultEntityMetaData targetMetaData = new DefaultEntityMetaData(entityName, mappingTarget.getTarget());
-		targetMetaData.setPackage(PackageImpl.defaultPackage);
+		EntityMetaData targetMetaData = EntityMetaData.newInstance(mappingTarget.getTarget());
+		targetMetaData.setName(entityName);
+		targetMetaData.setPackage(Package.defaultPackage);
 		targetMetaData.setLabel(entityName);
 		targetMetaData.addAttribute("source");
 
@@ -229,7 +229,7 @@ public class MappingServiceImpl implements MappingService
 		{
 			String mappingTargetAttrName = mappingTargetAttr.getName();
 			if (targetRepoAttributeMap.containsKey(mappingTargetAttrName)
-					&& targetRepoAttributeMap.get(mappingTargetAttrName).isSameAs(mappingTargetAttr))
+					&& targetRepoAttributeMap.get(mappingTargetAttrName).equals(mappingTargetAttr))
 			{
 				continue;
 			}

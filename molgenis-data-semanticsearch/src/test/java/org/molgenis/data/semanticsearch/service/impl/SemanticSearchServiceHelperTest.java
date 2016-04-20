@@ -14,19 +14,18 @@ import java.util.concurrent.ExecutionException;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
-import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.OntologyTerm;
@@ -94,10 +93,10 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 	@Test
 	public void testCreateTargetAttributeQueryTerms()
 	{
-		DefaultAttributeMetaData targetAttribute_1 = new DefaultAttributeMetaData("targetAttribute 1");
+		AttributeMetaData targetAttribute_1 = new AttributeMetaData("targetAttribute 1");
 		targetAttribute_1.setDescription("Height");
 
-		DefaultAttributeMetaData targetAttribute_2 = new DefaultAttributeMetaData("targetAttribute 2");
+		AttributeMetaData targetAttribute_2 = new AttributeMetaData("targetAttribute 2");
 		targetAttribute_2.setLabel("Height");
 
 		Multimap<Relation, OntologyTerm> tags = LinkedHashMultimap.<Relation, OntologyTerm> create();
@@ -159,7 +158,7 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 	@Test
 	public void testGetAttributeIdentifiers()
 	{
-		EntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("sourceEntityMetaData");
+		EntityMetaData sourceEntityMetaData = new EntityMetaData("sourceEntityMetaData");
 		Entity entityMetaDataEntity = mock(DefaultEntity.class);
 
 		when(dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME,

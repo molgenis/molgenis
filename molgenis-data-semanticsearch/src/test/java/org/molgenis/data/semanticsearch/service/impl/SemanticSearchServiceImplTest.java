@@ -18,11 +18,12 @@ import java.util.stream.Stream;
 
 import org.elasticsearch.common.collect.Sets;
 import org.mockito.Mockito;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
@@ -31,8 +32,6 @@ import org.molgenis.data.semanticsearch.semantic.Hit;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.semanticsearch.string.Stemmer;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.OntologyTerm;
@@ -78,7 +77,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 
 	private List<OntologyTerm> ontologyTerms;
 
-	private DefaultAttributeMetaData attribute;
+	private AttributeMetaData attribute;
 
 	@BeforeTest
 	public void beforeTest()
@@ -92,7 +91,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		hypertension = OntologyTerm.create("http://onto/hyp", "Hypertension");
 		maternalHypertension = OntologyTerm.create("http://onto/mhyp", "Maternal hypertension");
 		ontologyTerms = asList(standingHeight, bodyWeight, hypertension, maternalHypertension);
-		attribute = new DefaultAttributeMetaData("attr1");
+		attribute = new AttributeMetaData("attr1");
 	}
 
 	@BeforeMethod
@@ -207,7 +206,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void testFindAttributes()
 	{
-		DefaultEntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("sourceEntityMetaData");
+		EntityMetaData sourceEntityMetaData = new EntityMetaData("sourceEntityMetaData");
 
 		// Mock the id's of the attribute entities that should be searched
 		List<String> attributeIdentifiers = Arrays.asList("1", "2");
@@ -238,10 +237,10 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 				new QueryRule(AttributeMetaDataMetaData.IDENTIFIER, Operator.IN, attributeIdentifiers),
 				new QueryRule(Operator.AND), disMaxQueryRule);
 
-		AttributeMetaData attributeHeight = new DefaultAttributeMetaData("height_0");
-		AttributeMetaData attributeWeight = new DefaultAttributeMetaData("weight_0");
-		sourceEntityMetaData.addAttributeMetaData(attributeHeight);
-		sourceEntityMetaData.addAttributeMetaData(attributeWeight);
+		AttributeMetaData attributeHeight = new AttributeMetaData("height_0");
+		AttributeMetaData attributeWeight = new AttributeMetaData("weight_0");
+		sourceEntityMetaData.addAttribute(attributeHeight);
+		sourceEntityMetaData.addAttribute(attributeWeight);
 
 		// Case 1
 		when(dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME, new QueryImpl<>(disMaxQueryRules)))

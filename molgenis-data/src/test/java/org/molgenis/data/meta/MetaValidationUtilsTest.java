@@ -1,15 +1,12 @@
 package org.molgenis.data.meta;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.testng.annotations.Test;
 
 public class MetaValidationUtilsTest
@@ -90,12 +87,12 @@ public class MetaValidationUtilsTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateEntityMetaDataTooLong()
 	{
-		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
+		EntityMetaData emd = new EntityMetaData("entity");
 
 		List<AttributeMetaData> compAttrs = new ArrayList<>();
-		compAttrs.add(new DefaultAttributeMetaData("aCompStringWayTooLongToUseAsAnAttributeName1")
+		compAttrs.add(new AttributeMetaData("aCompStringWayTooLongToUseAsAnAttributeName1")
 				.setDataType(MolgenisFieldTypes.STRING));
-		compAttrs.add(new DefaultAttributeMetaData("aCompString2").setDataType(MolgenisFieldTypes.STRING));
+		compAttrs.add(new AttributeMetaData("aCompString2").setDataType(MolgenisFieldTypes.STRING));
 		emd.addAttribute("aComp").setDataType(MolgenisFieldTypes.COMPOUND).setAttributesMetaData(compAttrs);
 		emd.addAttribute("aString", ROLE_ID);
 
@@ -105,11 +102,11 @@ public class MetaValidationUtilsTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateEntityMetaDataStartsWithDigit()
 	{
-		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
+		EntityMetaData emd = new EntityMetaData("entity");
 
 		List<AttributeMetaData> compAttrs = new ArrayList<>();
-		compAttrs.add(new DefaultAttributeMetaData("aCompString1").setDataType(MolgenisFieldTypes.STRING));
-		compAttrs.add(new DefaultAttributeMetaData("2aCompString").setDataType(MolgenisFieldTypes.STRING));
+		compAttrs.add(new AttributeMetaData("aCompString1").setDataType(MolgenisFieldTypes.STRING));
+		compAttrs.add(new AttributeMetaData("2aCompString").setDataType(MolgenisFieldTypes.STRING));
 		emd.addAttribute("aComp").setDataType(MolgenisFieldTypes.COMPOUND).setAttributesMetaData(compAttrs);
 		emd.addAttribute("aString", ROLE_ID);
 
@@ -119,11 +116,11 @@ public class MetaValidationUtilsTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateEntityMetaDataInvalidChar()
 	{
-		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
+		EntityMetaData emd = new EntityMetaData("entity");
 
 		List<AttributeMetaData> compAttrs = new ArrayList<>();
-		compAttrs.add(new DefaultAttributeMetaData("aCompString1").setDataType(MolgenisFieldTypes.STRING));
-		compAttrs.add(new DefaultAttributeMetaData("aCompString2").setDataType(MolgenisFieldTypes.STRING));
+		compAttrs.add(new AttributeMetaData("aCompString1").setDataType(MolgenisFieldTypes.STRING));
+		compAttrs.add(new AttributeMetaData("aCompString2").setDataType(MolgenisFieldTypes.STRING));
 		emd.addAttribute("a.Comp").setDataType(MolgenisFieldTypes.COMPOUND).setAttributesMetaData(compAttrs);
 		emd.addAttribute("aString", ROLE_ID);
 
@@ -133,7 +130,7 @@ public class MetaValidationUtilsTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateEntityMetaDataIdAttributeWithDefaultValue()
 	{
-		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
+		EntityMetaData emd = new EntityMetaData("entity");
 		emd.addAttribute("id", ROLE_ID).setDefaultValue("5");
 
 		MetaValidationUtils.validateEntityMetaData(emd);
@@ -142,7 +139,7 @@ public class MetaValidationUtilsTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateEntityMetaDataUniqueAttributeWithDefaultValue()
 	{
-		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
+		EntityMetaData emd = new EntityMetaData("entity");
 		emd.addAttribute("id", ROLE_ID);
 		emd.addAttribute("uniqueAttribute").setUnique(true).setDefaultValue("5");
 
@@ -152,7 +149,7 @@ public class MetaValidationUtilsTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateEntityComputedAttributeWithDefaultValue()
 	{
-		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
+		EntityMetaData emd = new EntityMetaData("entity");
 		emd.addAttribute("id", ROLE_ID);
 		emd.addAttribute("expressionAttribute").setExpression("$('id').value()").setDefaultValue("5");
 
@@ -162,7 +159,7 @@ public class MetaValidationUtilsTest
 	@Test
 	public void testValidateEntityMetaDataOkayAttributeWithDefaultValue()
 	{
-		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
+		EntityMetaData emd = new EntityMetaData("entity");
 		emd.addAttribute("id", ROLE_ID);
 		emd.addAttribute("blah").setDefaultValue("5");
 

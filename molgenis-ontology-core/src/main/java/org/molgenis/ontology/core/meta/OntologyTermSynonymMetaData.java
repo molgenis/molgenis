@@ -1,16 +1,16 @@
 package org.molgenis.ontology.core.meta;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.ontology.core.model.OntologyPackage;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OntologyTermSynonymMetaData extends DefaultEntityMetaData
+public class OntologyTermSynonymMetaData extends EntityMetaData
 {
 	public final static String ID = "id";
 	public final static String ONTOLOGY_TERM_SYNONYM = "ontologyTermSynonym";
@@ -21,9 +21,9 @@ public class OntologyTermSynonymMetaData extends DefaultEntityMetaData
 	private OntologyTermSynonymMetaData()
 	{
 		super(SIMPLE_NAME, OntologyPackage.getPackageInstance());
-		addAttributeMetaData(new DefaultAttributeMetaData(ID).setVisible(false), ROLE_ID);
-		DefaultAttributeMetaData ontologyTermSynonymAttr = new DefaultAttributeMetaData(ONTOLOGY_TERM_SYNONYM,
+		addAttribute(new AttributeMetaData(ID).setVisible(false), ROLE_ID);
+		AttributeMetaData ontologyTermSynonymAttr = new AttributeMetaData(ONTOLOGY_TERM_SYNONYM,
 				FieldTypeEnum.TEXT).setNillable(false);
-		addAttributeMetaData(ontologyTermSynonymAttr, ROLE_LABEL);
+		addAttribute(ontologyTermSynonymAttr, ROLE_LABEL);
 	}
 }

@@ -1,5 +1,7 @@
 package org.molgenis.data.annotation.entity.impl;
 
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DECIMAL;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
 import static org.molgenis.data.annotator.websettings.ThousendGenomesAnnotatorSettings.Meta.CHROMOSOMES;
 import static org.molgenis.data.annotator.websettings.ThousendGenomesAnnotatorSettings.Meta.FILEPATTERN;
 import static org.molgenis.data.annotator.websettings.ThousendGenomesAnnotatorSettings.Meta.OVERRIDE_CHROMOSOME_FILES;
@@ -7,8 +9,6 @@ import static org.molgenis.data.annotator.websettings.ThousendGenomesAnnotatorSe
 
 import java.util.Collections;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
@@ -23,7 +23,7 @@ import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.MultiFileResource;
 import org.molgenis.data.annotation.resources.impl.MultiResourceConfigImpl;
 import org.molgenis.data.annotation.resources.impl.TabixVcfRepositoryFactory;
-import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,8 +50,7 @@ public class ThousandGenomesAnnotator
 	@Bean
 	public RepositoryAnnotator thousandGenomes()
 	{
-		DefaultAttributeMetaData outputAttribute = new DefaultAttributeMetaData(THOUSAND_GENOME_AF,
-				FieldTypeEnum.STRING).setDescription(
+		AttributeMetaData outputAttribute = new AttributeMetaData(THOUSAND_GENOME_AF, STRING).setDescription(
 				"The allele frequency for variants seen in the population used for the thousand genomes project")
 				.setLabel(THOUSAND_GENOME_AF_LABEL);
 
@@ -74,8 +73,7 @@ public class ThousandGenomesAnnotator
 
 		// TODO: properly test multiAllelicResultFilter
 		MultiAllelicResultFilter multiAllelicResultFilter = new MultiAllelicResultFilter(
-				Collections.singletonList(new DefaultAttributeMetaData(THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME,
-						FieldTypeEnum.DECIMAL)));
+				Collections.singletonList(new AttributeMetaData(THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME, DECIMAL)));
 
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(THOUSAND_GENOME_MULTI_FILE_RESOURCE, thousandGenomeInfo,
 				locusQueryCreator, multiAllelicResultFilter, dataService, resources, (annotationSourceFileName) -> {

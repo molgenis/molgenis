@@ -1,16 +1,16 @@
 package org.molgenis.ontology.core.meta;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.ontology.core.model.OntologyPackage;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OntologyTermMetaData extends DefaultEntityMetaData
+public class OntologyTermMetaData extends EntityMetaData
 {
 	public final static String ID = "id";
 	public final static String ONTOLOGY_TERM_IRI = "ontologyTermIRI";
@@ -27,17 +27,17 @@ public class OntologyTermMetaData extends DefaultEntityMetaData
 	{
 		super(SIMPLE_NAME, OntologyPackage.getPackageInstance());
 
-		addAttributeMetaData(new DefaultAttributeMetaData(ID).setVisible(false), ROLE_ID);
-		addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_IRI, FieldTypeEnum.STRING).setNillable(false));
-		addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_NAME, FieldTypeEnum.TEXT).setNillable(false),
+		addAttribute(new AttributeMetaData(ID).setVisible(false), ROLE_ID);
+		addAttribute(new AttributeMetaData(ONTOLOGY_TERM_IRI, FieldTypeEnum.STRING).setNillable(false));
+		addAttribute(new AttributeMetaData(ONTOLOGY_TERM_NAME, FieldTypeEnum.TEXT).setNillable(false),
 				ROLE_LABEL);
-		addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_SYNONYM, FieldTypeEnum.MREF).setNillable(true)
+		addAttribute(new AttributeMetaData(ONTOLOGY_TERM_SYNONYM, FieldTypeEnum.MREF).setNillable(true)
 				.setRefEntity(OntologyTermSynonymMetaData.INSTANCE));
-		addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_DYNAMIC_ANNOTATION, FieldTypeEnum.MREF)
+		addAttribute(new AttributeMetaData(ONTOLOGY_TERM_DYNAMIC_ANNOTATION, FieldTypeEnum.MREF)
 				.setNillable(true).setRefEntity(OntologyTermDynamicAnnotationMetaData.INSTANCE));
-		addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_NODE_PATH, FieldTypeEnum.MREF).setNillable(true)
+		addAttribute(new AttributeMetaData(ONTOLOGY_TERM_NODE_PATH, FieldTypeEnum.MREF).setNillable(true)
 				.setRefEntity(OntologyTermNodePathMetaData.INSTANCE));
-		addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY, FieldTypeEnum.XREF).setNillable(false)
+		addAttribute(new AttributeMetaData(ONTOLOGY, FieldTypeEnum.XREF).setNillable(false)
 				.setRefEntity(OntologyMetaData.INSTANCE));
 	}
 }

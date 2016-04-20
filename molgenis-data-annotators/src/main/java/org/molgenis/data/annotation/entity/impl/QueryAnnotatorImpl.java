@@ -1,14 +1,13 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -17,8 +16,8 @@ import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.QueryCreator;
 import org.molgenis.data.annotation.resources.Resources;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 
 /**
@@ -59,8 +58,7 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 	@Override
 	public AttributeMetaData getAnnotationAttributeMetaData()
 	{
-		DefaultAttributeMetaData result = new DefaultAttributeMetaData(ANNOTATORPREFIX + info.getCode(),
-				FieldTypeEnum.COMPOUND).setLabel(info.getCode());
+		AttributeMetaData result = new AttributeMetaData(ANNOTATORPREFIX + info.getCode(), COMPOUND).setLabel(info.getCode());
 		getInfo().getOutputAttributes().forEach(result::addAttributePart);
 
 		return result;
@@ -100,8 +98,8 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 				}
 			};
 		}
-		DefaultEntityMetaData meta = new DefaultEntityMetaData(entity.getEntityMetaData());
-		info.getOutputAttributes().forEach(meta::addAttributeMetaData);
+		EntityMetaData meta = new EntityMetaData(entity.getEntityMetaData());
+		info.getOutputAttributes().forEach(meta::addAttribute);
 		Entity resultEntity = new MapEntity(entity, meta);
 		processQueryResults(entity, annotatationSourceEntities, resultEntity);
 		return Collections.singletonList(resultEntity);

@@ -1,8 +1,8 @@
 package org.molgenis.data.elasticsearch;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 
 /**
  * Decorates a ManageableRepositoryCollection so it is indexed. Removes, creates ES mappings
@@ -28,9 +28,8 @@ public class IndexedManageableRepositoryCollectionDecorator extends IndexedRepos
 	public void addAttribute(String entityName, AttributeMetaData attribute)
 	{
 		getManageableRepositoryCollection().addAttribute(entityName, attribute);
-		DefaultEntityMetaData meta = new DefaultEntityMetaData(getManageableRepositoryCollection().getRepository(
-				entityName).getEntityMetaData());
-		meta.addAttributeMetaData(attribute);
+		EntityMetaData meta = new EntityMetaData(getManageableRepositoryCollection().getRepository(entityName).getEntityMetaData());
+		meta.addAttribute(attribute);
 		getSearchService().createMappings(meta);
 	}
 
@@ -39,13 +38,12 @@ public class IndexedManageableRepositoryCollectionDecorator extends IndexedRepos
 	{
 		getManageableRepositoryCollection().deleteAttribute(entityName, attributeName);
 
-		DefaultEntityMetaData meta = new DefaultEntityMetaData(getManageableRepositoryCollection().getRepository(
-				entityName).getEntityMetaData());
+		EntityMetaData meta = new EntityMetaData(getManageableRepositoryCollection().getRepository(entityName).getEntityMetaData());
 
 		AttributeMetaData attr = meta.getAttribute(attributeName);
 		if (attr != null)
 		{
-			meta.removeAttributeMetaData(attr);
+			meta.removeAttribute(attr);
 			getSearchService().createMappings(meta);
 		}
 	}
@@ -54,9 +52,8 @@ public class IndexedManageableRepositoryCollectionDecorator extends IndexedRepos
 	public void addAttributeSync(String entityName, AttributeMetaData attribute)
 	{
 		getManageableRepositoryCollection().addAttributeSync(entityName, attribute);
-		DefaultEntityMetaData meta = new DefaultEntityMetaData(getManageableRepositoryCollection().getRepository(
-				entityName).getEntityMetaData());
-		meta.addAttributeMetaData(attribute);
+		EntityMetaData meta = new EntityMetaData(getManageableRepositoryCollection().getRepository(entityName).getEntityMetaData());
+		meta.addAttribute(attribute);
 		getSearchService().createMappings(meta);
 	}
 

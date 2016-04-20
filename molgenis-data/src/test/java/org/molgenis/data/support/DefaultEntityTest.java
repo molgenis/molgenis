@@ -2,7 +2,7 @@ package org.molgenis.data.support;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -12,11 +12,11 @@ import java.util.Iterator;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -25,11 +25,11 @@ import com.google.common.collect.Lists;
 
 public class DefaultEntityTest
 {
-	private DefaultEntityMetaData refEmd;
+	private EntityMetaData refEmd;
 	private DefaultEntity refEntity1;
 	private DefaultEntity refEntity2;
 
-	private DefaultEntityMetaData emd;
+	private EntityMetaData emd;
 	private DefaultEntity entity;
 	private Date utilDate = new Date();
 
@@ -41,8 +41,8 @@ public class DefaultEntityTest
 	{
 		MockitoAnnotations.initMocks(this);
 
-		refEmd = new DefaultEntityMetaData("refEntity");
-		refEmd.addAttributeMetaData(new DefaultAttributeMetaData("id"), ROLE_ID);
+		refEmd = new EntityMetaData("refEntity");
+		refEmd.addAttribute(new AttributeMetaData("id"), ROLE_ID);
 
 		refEntity1 = new DefaultEntity(refEmd, dataService);
 		refEntity1.set("id", "test");
@@ -53,11 +53,11 @@ public class DefaultEntityTest
 		when(dataService.findOneById("refEntity", "test")).thenReturn(refEntity1);
 		when(dataService.findOneById("refEntity", "test2")).thenReturn(refEntity2);
 
-		emd = new DefaultEntityMetaData("Entity");
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("id"), ROLE_ID);
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("xdatetime", FieldTypeEnum.DATE_TIME));
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("xref", FieldTypeEnum.XREF).setRefEntity(refEmd));
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("mref", FieldTypeEnum.MREF).setRefEntity(refEmd));
+		emd = new EntityMetaData("Entity");
+		emd.addAttribute(new AttributeMetaData("id"), ROLE_ID);
+		emd.addAttribute(new AttributeMetaData("xdatetime", FieldTypeEnum.DATE_TIME));
+		emd.addAttribute(new AttributeMetaData("xref", FieldTypeEnum.XREF).setRefEntity(refEmd));
+		emd.addAttribute(new AttributeMetaData("mref", FieldTypeEnum.MREF).setRefEntity(refEmd));
 
 		entity = new DefaultEntity(emd, dataService);
 		entity.set("xdatetime", utilDate);

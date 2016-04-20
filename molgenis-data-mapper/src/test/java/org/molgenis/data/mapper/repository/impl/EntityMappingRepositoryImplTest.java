@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
@@ -19,11 +18,11 @@ import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -53,11 +52,11 @@ public class EntityMappingRepositoryImplTest extends AbstractTestNGSpringContext
 	@Test
 	public void testToEntityMappings()
 	{
-		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("targetAttribute");
+		AttributeMetaData targetAttributeMetaData = new AttributeMetaData("targetAttribute");
 		List<AttributeMetaData> sourceAttributeMetaDatas = new ArrayList<AttributeMetaData>();
-		DefaultEntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("source");
-		DefaultEntityMetaData targetEntityMetaData = new DefaultEntityMetaData("target");
-		targetEntityMetaData.addAttributeMetaData(targetAttributeMetaData);
+		EntityMetaData sourceEntityMetaData = new EntityMetaData("source");
+		EntityMetaData targetEntityMetaData = new EntityMetaData("target");
+		targetEntityMetaData.addAttribute(targetAttributeMetaData);
 
 		List<AttributeMapping> attributeMappings = new ArrayList<AttributeMapping>();
 		attributeMappings
@@ -95,11 +94,11 @@ public class EntityMappingRepositoryImplTest extends AbstractTestNGSpringContext
 	@Test
 	public void testUpsert()
 	{
-		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("targetAttribute");
+		AttributeMetaData targetAttributeMetaData = new AttributeMetaData("targetAttribute");
 		List<AttributeMetaData> sourceAttributeMetaDatas = new ArrayList<AttributeMetaData>();
-		DefaultEntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("source");
-		DefaultEntityMetaData targetEntityMetaData = new DefaultEntityMetaData("target");
-		targetEntityMetaData.addAttributeMetaData(targetAttributeMetaData);
+		EntityMetaData sourceEntityMetaData = new EntityMetaData("source");
+		EntityMetaData targetEntityMetaData = new EntityMetaData("target");
+		targetEntityMetaData.addAttribute(targetAttributeMetaData);
 
 		List<AttributeMapping> attributeMappings = new ArrayList<AttributeMapping>();
 		attributeMappings

@@ -1,19 +1,20 @@
 package org.molgenis.merge;
 
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.LONG;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.TEXT;
 import static org.molgenis.merge.GeneticRepositoryMergerController.URI;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.merge.RepositoryMerger;
-import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
@@ -41,14 +42,11 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 	public static final String ID = "geneticrepositorymerger";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
-	public static final DefaultAttributeMetaData CHROM = new DefaultAttributeMetaData("#CHROM",
-			MolgenisFieldTypes.FieldTypeEnum.STRING);
-	public static final DefaultAttributeMetaData POS = new DefaultAttributeMetaData("POS",
-			MolgenisFieldTypes.FieldTypeEnum.LONG);
-	public static final DefaultAttributeMetaData REF = new DefaultAttributeMetaData("REF",
-			MolgenisFieldTypes.FieldTypeEnum.TEXT);
-	public static final DefaultAttributeMetaData ALT = new DefaultAttributeMetaData("ALT",
-			MolgenisFieldTypes.FieldTypeEnum.TEXT);
+	public static final AttributeMetaData CHROM = new AttributeMetaData("#CHROM",
+			STRING);
+	public static final AttributeMetaData POS = new AttributeMetaData("POS", LONG);
+	public static final AttributeMetaData REF = new AttributeMetaData("REF", TEXT);
+	public static final AttributeMetaData ALT = new AttributeMetaData("ALT", TEXT);
 
 	private final ArrayList<AttributeMetaData> commonAttributes;
 	private final RepositoryMerger repositoryMerger;

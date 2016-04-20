@@ -5,11 +5,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Fetch;
+import org.molgenis.data.meta.EntityMetaData;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -20,12 +21,12 @@ public class PartialEntityTest
 	private Entity decoratedEntity;
 	private Fetch fetch;
 	private EntityManager entityManager;
-	private DefaultEntityMetaData meta;
+	private EntityMetaData meta;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		meta = new DefaultEntityMetaData("entity");
+		meta = new EntityMetaData("entity");
 		meta.addAttribute("id", ROLE_ID);
 
 		originalEntity = mock(Entity.class);

@@ -1,7 +1,10 @@
 package org.molgenis.data.mapper.algorithmgenerator.generator;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.INT;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -9,11 +12,10 @@ import java.util.stream.Stream;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -26,17 +28,17 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 {
 	OneToManyCategoryAlgorithmGenerator categoryAlgorithmGenerator;
 
-	DefaultAttributeMetaData targetAttributeMetaData;
+	AttributeMetaData targetAttributeMetaData;
 
-	DefaultAttributeMetaData sourceAttributeMetaData;
+	AttributeMetaData sourceAttributeMetaData;
 
-	DefaultAttributeMetaData sourceAttributeMetaData1;
+	AttributeMetaData sourceAttributeMetaData1;
 
-	DefaultAttributeMetaData sourceAttributeMetaData2;
+	AttributeMetaData sourceAttributeMetaData2;
 
-	DefaultEntityMetaData targetEntityMetaData;
+	EntityMetaData targetEntityMetaData;
 
-	DefaultEntityMetaData sourceEntityMetaData;
+	EntityMetaData sourceEntityMetaData;
 
 	@BeforeMethod
 	public void init()
@@ -44,15 +46,14 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 		DataService dataService = Mockito.mock(DataService.class);
 		categoryAlgorithmGenerator = new OneToManyCategoryAlgorithmGenerator(dataService);
 
-		DefaultEntityMetaData targetRefEntityMetaData = new DefaultEntityMetaData("POTATO_REF");
-		DefaultAttributeMetaData targetCodeAttributeMetaData = new DefaultAttributeMetaData("code", FieldTypeEnum.INT);
-		DefaultAttributeMetaData targetLabelAttributeMetaData = new DefaultAttributeMetaData("label",
-				FieldTypeEnum.STRING);
-		targetRefEntityMetaData.addAttributeMetaData(targetCodeAttributeMetaData, ROLE_ID);
-		targetRefEntityMetaData.addAttributeMetaData(targetLabelAttributeMetaData, ROLE_LABEL);
+		EntityMetaData targetRefEntityMetaData = new EntityMetaData("POTATO_REF");
+		AttributeMetaData targetCodeAttributeMetaData = new AttributeMetaData("code", INT);
+		AttributeMetaData targetLabelAttributeMetaData = new AttributeMetaData("label", STRING);
+		targetRefEntityMetaData.addAttribute(targetCodeAttributeMetaData, ROLE_ID);
+		targetRefEntityMetaData.addAttribute(targetLabelAttributeMetaData, ROLE_LABEL);
 
-		targetAttributeMetaData = new DefaultAttributeMetaData("Current Consumption Frequency of Potatoes",
-				FieldTypeEnum.CATEGORICAL);
+		targetAttributeMetaData = new AttributeMetaData("Current Consumption Frequency of Potatoes",
+				CATEGORICAL);
 		targetAttributeMetaData.setRefEntity(targetRefEntityMetaData);
 
 		MapEntity targetEntity1 = new MapEntity(ImmutableMap.of("code", 1, "label", "Almost daily + daily"));
@@ -70,12 +71,12 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 			}
 		});
 
-		targetEntityMetaData = new DefaultEntityMetaData("target");
-		targetEntityMetaData.addAttributeMetaData(targetAttributeMetaData);
+		targetEntityMetaData = new EntityMetaData("target");
+		targetEntityMetaData.addAttribute(targetAttributeMetaData);
 
-		DefaultEntityMetaData sourceRefEntityMetaData = createEntityMetaData("LifeLines_POTATO_REF");
+		EntityMetaData sourceRefEntityMetaData = createEntityMetaData("LifeLines_POTATO_REF");
 
-		sourceAttributeMetaData = new DefaultAttributeMetaData("MESHED_POTATO", FieldTypeEnum.CATEGORICAL);
+		sourceAttributeMetaData = new AttributeMetaData("MESHED_POTATO", CATEGORICAL);
 		sourceAttributeMetaData.setLabel(
 				"How often did you eat boiled or mashed potatoes (also in stew) in the past month? Baked potatoes are asked later");
 		sourceAttributeMetaData.setRefEntity(sourceRefEntityMetaData);
@@ -98,9 +99,9 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 			}
 		});
 
-		DefaultEntityMetaData sourceRefEntityMetaData1 = createEntityMetaData("Mitchelstown_POTATO_REF");
+		EntityMetaData sourceRefEntityMetaData1 = createEntityMetaData("Mitchelstown_POTATO_REF");
 
-		sourceAttributeMetaData1 = new DefaultAttributeMetaData("MESHED_POTATO_1", FieldTypeEnum.CATEGORICAL);
+		sourceAttributeMetaData1 = new AttributeMetaData("MESHED_POTATO_1", CATEGORICAL);
 		sourceAttributeMetaData1.setLabel(
 				"How often did you eat boiled or mashed potatoes (also in stew) in the past month? Baked potatoes are asked later");
 		sourceAttributeMetaData1.setRefEntity(sourceRefEntityMetaData1);
@@ -125,9 +126,9 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 			}
 		});
 
-		DefaultEntityMetaData sourceRefEntityMetaData2 = createEntityMetaData("Mitchelstown_Stroke_REF");
+		EntityMetaData sourceRefEntityMetaData2 = createEntityMetaData("Mitchelstown_Stroke_REF");
 
-		sourceAttributeMetaData2 = new DefaultAttributeMetaData("Stroke", FieldTypeEnum.CATEGORICAL);
+		sourceAttributeMetaData2 = new AttributeMetaData("Stroke", CATEGORICAL);
 		sourceAttributeMetaData2.setLabel("History of stroke");
 		sourceAttributeMetaData2.setRefEntity(sourceRefEntityMetaData2);
 
@@ -144,20 +145,19 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 			}
 		});
 
-		sourceEntityMetaData = new DefaultEntityMetaData("source");
-		sourceEntityMetaData.addAllAttributeMetaData(
+		sourceEntityMetaData = new EntityMetaData("source");
+		sourceEntityMetaData.addAttributes(
 				Lists.newArrayList(sourceAttributeMetaData, sourceAttributeMetaData1, sourceAttributeMetaData2));
 	}
 
-	private DefaultEntityMetaData createEntityMetaData(String entityName)
+	private EntityMetaData createEntityMetaData(String entityName)
 	{
-		DefaultEntityMetaData sourceRefEntityMetaData = new DefaultEntityMetaData(entityName);
+		EntityMetaData sourceRefEntityMetaData = new EntityMetaData(entityName);
 
-		DefaultAttributeMetaData sourceCodeAttributeMetaData = new DefaultAttributeMetaData("code", FieldTypeEnum.INT);
-		DefaultAttributeMetaData sourceLabelAttributeMetaData = new DefaultAttributeMetaData("label",
-				FieldTypeEnum.STRING);
-		sourceRefEntityMetaData.addAttributeMetaData(sourceCodeAttributeMetaData, ROLE_ID);
-		sourceRefEntityMetaData.addAttributeMetaData(sourceLabelAttributeMetaData, ROLE_LABEL);
+		AttributeMetaData sourceCodeAttributeMetaData = new AttributeMetaData("code", INT);
+		AttributeMetaData sourceLabelAttributeMetaData = new AttributeMetaData("label", STRING);
+		sourceRefEntityMetaData.addAttribute(sourceCodeAttributeMetaData, ROLE_ID);
+		sourceRefEntityMetaData.addAttribute(sourceLabelAttributeMetaData, ROLE_LABEL);
 		return sourceRefEntityMetaData;
 	}
 

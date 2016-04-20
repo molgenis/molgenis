@@ -3,9 +3,9 @@ package org.molgenis.data.elasticsearch;
 import java.util.Iterator;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.meta.EntityMetaData;
 
 /**
  * Adds indexing functionality to a RepositoryCollection

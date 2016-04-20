@@ -1,5 +1,7 @@
 package org.molgenis.data;
 
+import org.molgenis.data.meta.AttributeMetaData;
+
 public interface ManageableRepositoryCollection extends RepositoryCollection
 {
 	/**

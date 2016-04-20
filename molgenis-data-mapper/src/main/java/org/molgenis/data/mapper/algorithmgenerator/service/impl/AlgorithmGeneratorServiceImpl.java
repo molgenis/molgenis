@@ -1,5 +1,6 @@
 package org.molgenis.data.mapper.algorithmgenerator.service.impl;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_HIGH;
 import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_LOW;
 
@@ -13,9 +14,7 @@ import javax.measure.quantity.Quantity;
 import javax.measure.unit.Unit;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapper.algorithmgenerator.bean.GeneratedAlgorithm;
 import org.molgenis.data.mapper.algorithmgenerator.generator.AlgorithmGenerator;
 import org.molgenis.data.mapper.algorithmgenerator.generator.NumericAlgorithmGenerator;
@@ -26,10 +25,10 @@ import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.mapper.service.impl.AlgorithmTemplate;
 import org.molgenis.data.mapper.service.impl.AlgorithmTemplateService;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import static java.util.Objects.requireNonNull;
 
 import utils.AlgorithmGeneratorHelper;
 import utils.MagmaUnitConverter;

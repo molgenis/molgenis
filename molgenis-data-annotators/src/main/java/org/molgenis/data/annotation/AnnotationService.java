@@ -2,7 +2,7 @@ package org.molgenis.data.annotation;
 
 import java.util.List;
 
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 
 /**
  * Created with IntelliJ IDEA. User: charbonb Date: 19/02/14 Time: 12:50 To change this template use File | Settings |

@@ -6,8 +6,8 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.meta.PackageImpl;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.Package;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
@@ -26,14 +26,14 @@ public class EntityMetaDataUtilsTest
 	@Test
 	public void buildFullName()
 	{
-		assertEquals(EntityMetaDataUtils.buildFullName(PackageImpl.defaultPackage, "simpleName"), "simpleName");
+		assertEquals(EntityMetaDataUtils.buildFullName(Package.defaultPackage, "simpleName"), "simpleName");
 		
 		assertEquals(EntityMetaDataUtils.buildFullName(null, "simpleName"), "simpleName");
 
-		PackageImpl package_1 = new PackageImpl("base");
+		Package package_1 = new Package("base");
 		assertEquals(EntityMetaDataUtils.buildFullName(package_1, "simpleName"), "simpleName");
 
-		PackageImpl package_2 = new PackageImpl("my_first_package");
+		Package package_2 = new Package("my_first_package");
 		assertEquals(EntityMetaDataUtils.buildFullName(package_2, "simpleName"), "my_first_package_simpleName");
 	}
 }

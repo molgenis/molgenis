@@ -2,8 +2,8 @@ package org.molgenis.file.ingest.meta;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.jobs.JobExecution;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.file.FileMeta;
 
 public class FileIngestJobExecution extends JobExecution

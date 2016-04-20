@@ -2,7 +2,13 @@ package org.molgenis.data.annotation.entity.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.LONG;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.vcf.VcfRepository.ALT;
+import static org.molgenis.data.vcf.VcfRepository.CHROM;
+import static org.molgenis.data.vcf.VcfRepository.POS;
+import static org.molgenis.data.vcf.VcfRepository.REF;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
@@ -16,13 +22,11 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.utils.JarRunner;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.springframework.context.annotation.Bean;
@@ -38,7 +42,7 @@ import com.google.common.collect.Iterators;
 public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 {
 	private final ArrayList<Entity> entities = new ArrayList<>();;
-	private DefaultEntityMetaData metaDataCanAnnotate;
+	private EntityMetaData metaDataCanAnnotate;
 	private SnpEffAnnotator.SnpEffRepositoryAnnotator snpEffRepositoryAnnotator;
 	private JarRunner jarRunner;
 
@@ -49,19 +53,19 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 
 		snpEffRepositoryAnnotator = new SnpEffAnnotator.SnpEffRepositoryAnnotator(new MapEntity(), jarRunner);
 
-		metaDataCanAnnotate = new DefaultEntityMetaData("test");
-		AttributeMetaData attributeMetaDataChrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
-		AttributeMetaData attributeMetaDataPos = new DefaultAttributeMetaData(VcfRepository.POS,
-				MolgenisFieldTypes.FieldTypeEnum.LONG);
-		AttributeMetaData attributeMetaDataRef = new DefaultAttributeMetaData(VcfRepository.REF,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
-		AttributeMetaData attributeMetaDataAlt = new DefaultAttributeMetaData(VcfRepository.ALT,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom, ROLE_ID);
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataRef);
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataAlt);
+		metaDataCanAnnotate = new EntityMetaData("test");
+		AttributeMetaData attributeMetaDataChrom = new AttributeMetaData(CHROM,
+				STRING);
+		AttributeMetaData attributeMetaDataPos = new AttributeMetaData(POS,
+				LONG);
+		AttributeMetaData attributeMetaDataRef = new AttributeMetaData(REF,
+				STRING);
+		AttributeMetaData attributeMetaDataAlt = new AttributeMetaData(ALT,
+				STRING);
+		metaDataCanAnnotate.addAttribute(attributeMetaDataChrom, ROLE_ID);
+		metaDataCanAnnotate.addAttribute(attributeMetaDataPos);
+		metaDataCanAnnotate.addAttribute(attributeMetaDataRef);
+		metaDataCanAnnotate.addAttribute(attributeMetaDataAlt);
 
 		Entity entity1 = new MapEntity(metaDataCanAnnotate);
 		entity1.set(VcfRepository.CHROM, "1");

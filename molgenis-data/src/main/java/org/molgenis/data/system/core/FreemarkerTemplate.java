@@ -1,12 +1,14 @@
 package org.molgenis.data.system.core;
 
-import com.google.auto.value.AutoValue;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.meta.system.FreemarkerTemplateMetaData;
-
 import java.util.LinkedHashSet;
 import java.util.Set;
+
+import org.molgenis.data.Entity;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.system.FreemarkerTemplateMetaData;
+
+import com.google.auto.value.AutoValue;
 
 @AutoValue
 public class FreemarkerTemplate  extends org.molgenis.data.support.AbstractEntity implements org.molgenis.data.Entity{
@@ -145,7 +147,7 @@ public class FreemarkerTemplate  extends org.molgenis.data.support.AbstractEntit
     }
 
     @Override
-    public org.molgenis.data.EntityMetaData getEntityMetaData()
+    public EntityMetaData getEntityMetaData()
     {
         return new FreemarkerTemplateMetaData();
     }

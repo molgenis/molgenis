@@ -1,7 +1,14 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import static org.mockito.Mockito.mock;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.LONG;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.TEXT;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.vcf.VcfRepository.ALT;
+import static org.molgenis.data.vcf.VcfRepository.CHROM;
+import static org.molgenis.data.vcf.VcfRepository.POS;
+import static org.molgenis.data.vcf.VcfRepository.REF;
 import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
@@ -11,8 +18,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AnnotationService;
@@ -20,8 +25,8 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotator.websettings.CaddAnnotatorSettings;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.util.ResourceUtils;
@@ -42,8 +47,8 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	Resources resourcess;
 
-	public DefaultEntityMetaData metaDataCanAnnotate = new DefaultEntityMetaData("test");
-	public DefaultEntityMetaData metaDataCantAnnotate = new DefaultEntityMetaData("test");
+	public EntityMetaData metaDataCanAnnotate = new EntityMetaData("test");
+	public EntityMetaData metaDataCantAnnotate = new EntityMetaData("test");
 
 	public ArrayList<Entity> input;
 	public ArrayList<Entity> input1;
@@ -64,26 +69,26 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 	
 	public void setValues()
 	{
-		AttributeMetaData attributeMetaDataChrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
-		AttributeMetaData attributeMetaDataPos = new DefaultAttributeMetaData(VcfRepository.POS,
-				MolgenisFieldTypes.FieldTypeEnum.LONG);
-		AttributeMetaData attributeMetaDataRef = new DefaultAttributeMetaData(VcfRepository.REF,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT);
-		AttributeMetaData attributeMetaDataAlt = new DefaultAttributeMetaData(VcfRepository.ALT,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT);
-		AttributeMetaData attributeMetaDataCantAnnotateChrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
-				MolgenisFieldTypes.FieldTypeEnum.LONG);
+		AttributeMetaData attributeMetaDataChrom = new AttributeMetaData(CHROM,
+				STRING);
+		AttributeMetaData attributeMetaDataPos = new AttributeMetaData(POS,
+				LONG);
+		AttributeMetaData attributeMetaDataRef = new AttributeMetaData(REF,
+				TEXT);
+		AttributeMetaData attributeMetaDataAlt = new AttributeMetaData(ALT,
+				TEXT);
+		AttributeMetaData attributeMetaDataCantAnnotateChrom = new AttributeMetaData(CHROM,
+				LONG);
 
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom, ROLE_ID);
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataRef);
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataAlt);
+		metaDataCanAnnotate.addAttribute(attributeMetaDataChrom, ROLE_ID);
+		metaDataCanAnnotate.addAttribute(attributeMetaDataPos);
+		metaDataCanAnnotate.addAttribute(attributeMetaDataRef);
+		metaDataCanAnnotate.addAttribute(attributeMetaDataAlt);
 
-		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataCantAnnotateChrom);
-		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataPos);
-		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataRef);
-		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataAlt);
+		metaDataCantAnnotate.addAttribute(attributeMetaDataCantAnnotateChrom);
+		metaDataCantAnnotate.addAttribute(attributeMetaDataPos);
+		metaDataCantAnnotate.addAttribute(attributeMetaDataRef);
+		metaDataCantAnnotate.addAttribute(attributeMetaDataAlt);
 
 		entity = new MapEntity(metaDataCanAnnotate);
 		entity1 = new MapEntity(metaDataCanAnnotate);

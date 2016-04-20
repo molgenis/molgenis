@@ -11,8 +11,8 @@ import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.XREF;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
@@ -28,7 +28,6 @@ import org.mockito.Matchers;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
@@ -39,14 +38,14 @@ import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.UnitResolver;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
@@ -104,14 +103,14 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	public void testDate() throws ParseException
 	{
 		String idAttrName = "id";
-		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("LL");
+		EntityMetaData entityMetaData = new EntityMetaData("LL");
 		entityMetaData.addAttribute(idAttrName, ROLE_ID).setDataType(INT);
 		entityMetaData.addAttribute("dob").setDataType(DATE);
 		Entity source = new MapEntity(entityMetaData);
 		source.set(idAttrName, 1);
 		source.set("dob", new SimpleDateFormat("dd-MM-yyyy").parse("13-05-2015"));
 
-		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("bob");
+		AttributeMetaData targetAttributeMetaData = new AttributeMetaData("bob");
 		targetAttributeMetaData.setDataType(DATE);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
 		attributeMapping.setAlgorithm("$('dob').value()");
@@ -123,14 +122,14 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	public void testGetAgeScript() throws ParseException
 	{
 		String idAttrName = "id";
-		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("LL");
+		EntityMetaData entityMetaData = new EntityMetaData("LL");
 		entityMetaData.addAttribute(idAttrName, ROLE_ID).setDataType(INT);
 		entityMetaData.addAttribute("dob").setDataType(DATE);
 		Entity source = new MapEntity(entityMetaData);
 		source.set(idAttrName, 1);
 		source.set("dob", new SimpleDateFormat("dd-MM-yyyy").parse("28-08-1973"));
 
-		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("age");
+		AttributeMetaData targetAttributeMetaData = new AttributeMetaData("age");
 		targetAttributeMetaData.setDataType(INT);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
 		attributeMapping.setAlgorithm(
@@ -143,14 +142,14 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	public void testGetXrefScript() throws ParseException
 	{
 		// xref entities
-		DefaultEntityMetaData entityMetaDataXref = new DefaultEntityMetaData("xrefEntity1");
+		EntityMetaData entityMetaDataXref = new EntityMetaData("xrefEntity1");
 		entityMetaDataXref.addAttribute("id", ROLE_ID).setDataType(INT);
 		entityMetaDataXref.addAttribute("field1").setDataType(STRING);
 		Entity xref1a = new MapEntity(entityMetaDataXref);
 		xref1a.set("id", "1");
 		xref1a.set("field1", "Test");
 
-		DefaultEntityMetaData entityMetaDataXref2 = new DefaultEntityMetaData("xrefEntity2");
+		EntityMetaData entityMetaDataXref2 = new EntityMetaData("xrefEntity2");
 		entityMetaDataXref2.addAttribute("id", ROLE_ID).setDataType(INT);
 		entityMetaDataXref2.addAttribute("field1").setDataType(STRING);
 		Entity xref2a = new MapEntity(entityMetaDataXref2);
@@ -158,14 +157,14 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		xref2a.set("field2", "Test");
 
 		// source Entity
-		DefaultEntityMetaData entityMetaDataSource = new DefaultEntityMetaData("Source");
+		EntityMetaData entityMetaDataSource = new EntityMetaData("Source");
 		entityMetaDataSource.addAttribute("id", ROLE_ID).setDataType(INT);
 		entityMetaDataSource.addAttribute("xref").setDataType(XREF);
 		Entity source = new MapEntity(entityMetaDataSource);
 		source.set("id", "1");
 		source.set("xref", xref2a);
 
-		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("field1");
+		AttributeMetaData targetAttributeMetaData = new AttributeMetaData("field1");
 		targetAttributeMetaData.setDataType(XREF);
 		targetAttributeMetaData.setRefEntity(entityMetaDataXref);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
@@ -190,7 +189,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		String targetEntityAttrName = "mref-target";
 
 		// ref entities
-		DefaultEntityMetaData refEntityMeta = new DefaultEntityMetaData(refEntityName);
+		EntityMetaData refEntityMeta = new EntityMetaData(refEntityName);
 		refEntityMeta.addAttribute(refEntityIdAttrName, ROLE_ID);
 		refEntityMeta.addAttribute(refEntityLabelAttrName, ROLE_LABEL).setDataType(STRING);
 
@@ -203,7 +202,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		refEntity1.set(refEntityLabelAttrName, "label1");
 
 		// mapping
-		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData(targetEntityAttrName);
+		AttributeMetaData targetAttributeMetaData = new AttributeMetaData(targetEntityAttrName);
 		targetAttributeMetaData.setDataType(MREF).setNillable(false).setRefEntity(refEntityMeta);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
 		attributeMapping.setAlgorithm("$('" + sourceEntityAttrName + "').value()");
@@ -226,7 +225,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		});
 
 		// source Entity
-		DefaultEntityMetaData entityMetaDataSource = new DefaultEntityMetaData(sourceEntityName);
+		EntityMetaData entityMetaDataSource = new EntityMetaData(sourceEntityName);
 		entityMetaDataSource.addAttribute(refEntityIdAttrName, ROLE_ID).setDataType(INT).setAuto(true);
 		entityMetaDataSource.addAttribute(sourceEntityAttrName).setDataType(MREF).setNillable(false)
 				.setRefEntity(refEntityMeta);
@@ -249,18 +248,18 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		String targetEntityAttrName = "mref-target";
 
 		// ref entities
-		DefaultEntityMetaData refEntityMeta = new DefaultEntityMetaData(refEntityName);
+		EntityMetaData refEntityMeta = new EntityMetaData(refEntityName);
 		refEntityMeta.addAttribute(refEntityIdAttrName, ROLE_ID);
 		refEntityMeta.addAttribute(refEntityLabelAttrName, ROLE_LABEL).setDataType(STRING);
 
 		// mapping
-		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData(targetEntityAttrName);
+		AttributeMetaData targetAttributeMetaData = new AttributeMetaData(targetEntityAttrName);
 		targetAttributeMetaData.setDataType(MREF).setNillable(true).setRefEntity(refEntityMeta);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
 		attributeMapping.setAlgorithm("$('" + sourceEntityAttrName + "').value()");
 
 		// source Entity
-		DefaultEntityMetaData entityMetaDataSource = new DefaultEntityMetaData(sourceEntityName);
+		EntityMetaData entityMetaDataSource = new EntityMetaData(sourceEntityName);
 		entityMetaDataSource.addAttribute(refEntityIdAttrName, ROLE_ID).setDataType(INT).setAuto(true);
 		entityMetaDataSource.addAttribute(sourceEntityAttrName).setDataType(MREF).setNillable(true)
 				.setRefEntity(refEntityMeta);
@@ -275,15 +274,15 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testCreateAttributeMappingIfOnlyOneMatch()
 	{
-		DefaultEntityMetaData targetEntityMetaData = new DefaultEntityMetaData("target");
-		DefaultAttributeMetaData targetAttribute = new DefaultAttributeMetaData("targetHeight");
+		EntityMetaData targetEntityMetaData = new EntityMetaData("target");
+		AttributeMetaData targetAttribute = new AttributeMetaData("targetHeight");
 		targetAttribute.setDescription("height");
-		targetEntityMetaData.addAttributeMetaData(targetAttribute);
+		targetEntityMetaData.addAttribute(targetAttribute);
 
-		DefaultEntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("source");
-		DefaultAttributeMetaData sourceAttribute = new DefaultAttributeMetaData("sourceHeight");
+		EntityMetaData sourceEntityMetaData = new EntityMetaData("source");
+		AttributeMetaData sourceAttribute = new AttributeMetaData("sourceHeight");
 		sourceAttribute.setDescription("height");
-		sourceEntityMetaData.addAttributeMetaData(sourceAttribute);
+		sourceEntityMetaData.addAttribute(sourceAttribute);
 
 		MolgenisUser owner = new MolgenisUser();
 		owner.setUsername("flup");
@@ -319,15 +318,15 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testWhenSourceDoesNotMatchThenNoMappingGetsCreated()
 	{
-		DefaultEntityMetaData targetEntityMetaData = new DefaultEntityMetaData("target");
-		DefaultAttributeMetaData targetAttribute = new DefaultAttributeMetaData("targetHeight");
+		EntityMetaData targetEntityMetaData = new EntityMetaData("target");
+		AttributeMetaData targetAttribute = new AttributeMetaData("targetHeight");
 		targetAttribute.setDescription("height");
-		targetEntityMetaData.addAttributeMetaData(targetAttribute);
+		targetEntityMetaData.addAttribute(targetAttribute);
 
-		DefaultEntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("source");
-		DefaultAttributeMetaData sourceAttribute = new DefaultAttributeMetaData("sourceHeight");
+		EntityMetaData sourceEntityMetaData = new EntityMetaData("source");
+		AttributeMetaData sourceAttribute = new AttributeMetaData("sourceHeight");
 		sourceAttribute.setDescription("weight");
-		sourceEntityMetaData.addAttributeMetaData(sourceAttribute);
+		sourceEntityMetaData.addAttribute(sourceAttribute);
 
 		MolgenisUser owner = new MolgenisUser();
 		owner.setUsername("flup");
@@ -357,18 +356,18 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testWhenSourceHasMultipleMatchesThenFirstMappingGetsCreated()
 	{
-		DefaultEntityMetaData targetEntityMetaData = new DefaultEntityMetaData("target");
-		DefaultAttributeMetaData targetAttribute = new DefaultAttributeMetaData("targetHeight");
+		EntityMetaData targetEntityMetaData = new EntityMetaData("target");
+		AttributeMetaData targetAttribute = new AttributeMetaData("targetHeight");
 		targetAttribute.setDescription("height");
-		targetEntityMetaData.addAttributeMetaData(targetAttribute);
+		targetEntityMetaData.addAttribute(targetAttribute);
 
-		DefaultEntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("source");
-		DefaultAttributeMetaData sourceAttribute1 = new DefaultAttributeMetaData("sourceHeight1");
+		EntityMetaData sourceEntityMetaData = new EntityMetaData("source");
+		AttributeMetaData sourceAttribute1 = new AttributeMetaData("sourceHeight1");
 		sourceAttribute1.setDescription("height");
-		DefaultAttributeMetaData sourceAttribute2 = new DefaultAttributeMetaData("sourceHeight2");
+		AttributeMetaData sourceAttribute2 = new AttributeMetaData("sourceHeight2");
 		sourceAttribute2.setDescription("height");
 
-		sourceEntityMetaData.addAllAttributeMetaData(Arrays.asList(sourceAttribute1, sourceAttribute2));
+		sourceEntityMetaData.addAttributes(Arrays.asList(sourceAttribute1, sourceAttribute2));
 
 		MolgenisUser owner = new MolgenisUser();
 		owner.setUsername("flup");

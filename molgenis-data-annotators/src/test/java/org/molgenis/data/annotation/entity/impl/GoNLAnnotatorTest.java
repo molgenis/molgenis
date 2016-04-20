@@ -1,7 +1,7 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import static org.mockito.Mockito.mock;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -17,7 +17,7 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.util.ResourceUtils;
@@ -39,16 +39,16 @@ public class GoNLAnnotatorTest extends AbstractTestNGSpringContextTests
 
 	@Autowired
 	RepositoryAnnotator annotator;
-	private DefaultEntityMetaData emd;
+	private EntityMetaData emd;
 
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
-		emd = new DefaultEntityMetaData("gonl");
+		emd = new EntityMetaData("gonl");
 		emd.addAttribute(VcfRepository.CHROM, ROLE_ID);
-		emd.addAttributeMetaData(VcfRepository.POS_META);
-		emd.addAttributeMetaData(VcfRepository.REF_META);
-		emd.addAttributeMetaData(VcfRepository.ALT_META);
+		emd.addAttribute(VcfRepository.POS_META);
+		emd.addAttribute(VcfRepository.REF_META);
+		emd.addAttribute(VcfRepository.ALT_META);
 	}
 
 	// 14 tests below are test cases from the "test-edgecases.vcf"

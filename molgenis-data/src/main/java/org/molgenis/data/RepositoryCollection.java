@@ -3,6 +3,8 @@ package org.molgenis.data;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import org.molgenis.data.meta.EntityMetaData;
+
 /**
  * Repository collection
  */

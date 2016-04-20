@@ -1,7 +1,7 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DECIMAL;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.VcfRepository.ALT_META;
 import static org.molgenis.data.vcf.VcfRepository.CHROM_META;
 import static org.molgenis.data.vcf.VcfRepository.POS_META;
@@ -10,8 +10,6 @@ import static org.molgenis.data.vcf.VcfRepository.REF_META;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
@@ -27,8 +25,8 @@ import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.resources.impl.TabixRepositoryFactory;
 import org.molgenis.data.annotator.websettings.CaddAnnotatorSettings;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -57,7 +55,7 @@ public class CaddAnnotator
 	public RepositoryAnnotator cadd()
 	{
 		List<AttributeMetaData> attributes = new ArrayList<>();
-		DefaultAttributeMetaData cadd_abs = new DefaultAttributeMetaData(CADD_ABS, FieldTypeEnum.DECIMAL)
+		AttributeMetaData cadd_abs = new AttributeMetaData(CADD_ABS, DECIMAL)
 				.setDescription(
 						"\"Raw\" CADD scores come straight from the model, and are interpretable as the extent to which the annotation profile for a given variant suggests that "
 								+ "that variant is likely to be \"observed\" (negative values) vs \"simulated\" (positive values). These values have no absolute unit of meaning and are "
@@ -65,7 +63,7 @@ public class CaddAnnotator
 								+ "indicating that a variant is more likely to be simulated (or \"not observed\") and therefore more likely to have deleterious effects."
 								+ "(source: http://cadd.gs.washington.edu/info)")
 				.setLabel(CADD_ABS_LABEL);
-		DefaultAttributeMetaData cadd_scaled = new DefaultAttributeMetaData(CADD_SCALED, FieldTypeEnum.DECIMAL)
+		AttributeMetaData cadd_scaled = new AttributeMetaData(CADD_SCALED, DECIMAL)
 				.setDescription(
 						"Since the raw scores do have relative meaning, one can take a specific group of variants, define the rank for each variant within that group, and then use "
 								+ "that value as a \"normalized\" and now externally comparable unit of analysis. In our case, we scored and ranked all ~8.6 billion SNVs of the "
@@ -106,13 +104,13 @@ public class CaddAnnotator
 		Resource caddTabixResource = null;
 
 		String idAttrName = "id";
-		DefaultEntityMetaData repoMetaData = new DefaultEntityMetaData(CADD_TABIX_RESOURCE);
-		repoMetaData.addAttributeMetaData(CHROM_META);
-		repoMetaData.addAttributeMetaData(POS_META);
-		repoMetaData.addAttributeMetaData(REF_META);
-		repoMetaData.addAttributeMetaData(ALT_META);
-		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("CADD", DECIMAL));
-		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("CADD_SCALED", DECIMAL));
+		EntityMetaData repoMetaData = new EntityMetaData(CADD_TABIX_RESOURCE);
+		repoMetaData.addAttribute(CHROM_META);
+		repoMetaData.addAttribute(POS_META);
+		repoMetaData.addAttribute(REF_META);
+		repoMetaData.addAttribute(ALT_META);
+		repoMetaData.addAttribute(new AttributeMetaData("CADD", DECIMAL));
+		repoMetaData.addAttribute(new AttributeMetaData("CADD_SCALED", DECIMAL));
 		repoMetaData.addAttribute(idAttrName, ROLE_ID).setVisible(false);
 
 		caddTabixResource = new ResourceImpl(CADD_TABIX_RESOURCE,

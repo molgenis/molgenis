@@ -17,12 +17,9 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Package;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryDecoratorFactory;
@@ -34,8 +31,6 @@ import org.molgenis.data.i18n.LanguageRepositoryDecorator;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.system.ImportRunMetaData;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -346,7 +341,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
-	public DefaultEntityMetaData getEntityMetaData(String fullyQualifiedEntityName)
+	public EntityMetaData getEntityMetaData(String fullyQualifiedEntityName)
 	{
 		// at construction time, will be called when entityMetaDataRepository is still null
 		if (attributeMetaDataRepository == null)
@@ -495,7 +490,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	{
 		validatePermission(entityName, Permission.WRITEMETA);
 
-		DefaultEntityMetaData entityMeta = entityMetaDataRepository.get(entityName);
+		EntityMetaData entityMeta = entityMetaDataRepository.get(entityName);
 		if (entityMeta == null) throw new UnknownEntityException("Unknown entity '" + entityName + "'");
 		entityMeta.setBackend(backend);
 		entityMetaDataRepository.update(entityMeta);
@@ -552,11 +547,11 @@ public class MetaDataServiceImpl implements MetaDataService
 			{
 				if (!newAtomicAttributesMap.keySet().contains(oldAttribute.getName())) return false;
 
-				DefaultAttributeMetaData oldAttributDefault = new DefaultAttributeMetaData(oldAttribute);
-				DefaultAttributeMetaData newAttributDefault = new DefaultAttributeMetaData(
+				AttributeMetaData oldAttributDefault = AttributeMetaData.newInstance(oldAttribute);
+				AttributeMetaData newAttributDefault = AttributeMetaData.newInstance(
 						newAtomicAttributesMap.get(oldAttribute.getName()));
 
-				if (!oldAttributDefault.isSameAs(newAttributDefault)) return false;
+				if (!oldAttributDefault.equals(newAttributDefault)) return false;
 			}
 		}
 

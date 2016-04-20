@@ -4,8 +4,8 @@ import static java.util.stream.StreamSupport.stream;
 
 import java.util.Iterator;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Package;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.Package;
 
 public class EntityMetaDataUtils
 {

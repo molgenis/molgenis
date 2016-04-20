@@ -2,8 +2,8 @@ package org.molgenis.das.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_CHROM;
 import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_DESCRIPTION;
 import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_IDENTIFIER;
@@ -27,12 +27,11 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.elasticsearch.util.SearchResult;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -76,7 +75,7 @@ public class RepositoryRangeHandlingDataSourceTest
 		when(ctx.getBean(GenomicDataSettings.class)).thenReturn(genomicDataSettings);
 		new ApplicationContextProvider().setApplicationContext(ctx);
 
-		EntityMetaData metaData = new DefaultEntityMetaData("dataset");
+		EntityMetaData metaData = new EntityMetaData("dataset");
 		when(dataService.getEntityMetaData("dataset")).thenReturn(metaData);
 		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_CHROM, metaData)).thenReturn("CHROM");
 
@@ -104,14 +103,14 @@ public class RepositoryRangeHandlingDataSourceTest
 		Query<Entity> q = new QueryImpl<Entity>().eq("CHROM", "1");
 		q.pageSize(100);
 		SearchResult result = mock(SearchResult.class);
-		DefaultEntityMetaData emd = new DefaultEntityMetaData("DAS");
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("STOP"));
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("linkout"));
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("NAME"), ROLE_LABEL);
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("INFO"));
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("POS"));
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("ID"), ROLE_ID);
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("CHROM"));
+		EntityMetaData emd = new EntityMetaData("DAS");
+		emd.addAttribute(new AttributeMetaData("STOP"));
+		emd.addAttribute(new AttributeMetaData("linkout"));
+		emd.addAttribute(new AttributeMetaData("NAME"), ROLE_LABEL);
+		emd.addAttribute(new AttributeMetaData("INFO"));
+		emd.addAttribute(new AttributeMetaData("POS"));
+		emd.addAttribute(new AttributeMetaData("ID"), ROLE_ID);
+		emd.addAttribute(new AttributeMetaData("CHROM"));
 
 		MapEntity entity = new MapEntity(emd);
 

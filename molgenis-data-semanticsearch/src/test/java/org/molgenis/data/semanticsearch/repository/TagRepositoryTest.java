@@ -8,10 +8,10 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.UUID;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Repository;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.support.MapEntity;

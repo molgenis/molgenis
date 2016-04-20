@@ -27,7 +27,7 @@ import static org.molgenis.MolgenisFieldTypes.SCRIPT;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.MolgenisFieldTypes.XREF;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -50,7 +50,6 @@ import java.util.stream.Stream;
 import org.mockito.Matchers;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
@@ -58,11 +57,12 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.Package;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rest.v2.RestControllerV2Test.RestControllerV2Config;
-import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
@@ -157,11 +157,11 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		reset(dataService);
 		String refRefAttrId = "id";
 		refRefAttrValue = "value";
-		DefaultEntityMetaData refRefEntityMetaData = new DefaultEntityMetaData(REF_REF_ENTITY_NAME);
+		EntityMetaData refRefEntityMetaData = new EntityMetaData(REF_REF_ENTITY_NAME);
 		refRefEntityMetaData.addAttribute(refRefAttrId, ROLE_ID).setDataType(STRING);
 		refRefEntityMetaData.addAttribute(refRefAttrValue).setDataType(STRING);
 
-		DefaultEntityMetaData selfRefEntityMetaData = new DefaultEntityMetaData(SELF_REF_ENTITY_NAME);
+		EntityMetaData selfRefEntityMetaData = new EntityMetaData(SELF_REF_ENTITY_NAME);
 		selfRefEntityMetaData.addAttribute("id", ROLE_ID).setDataType(STRING);
 		selfRefEntityMetaData.addAttribute("selfRef").setDataType(XREF).setRefEntity(selfRefEntityMetaData);
 
@@ -172,7 +172,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		refAttrId = "id";
 		refAttrValue = "value";
 		refAttrRef = "ref";
-		DefaultEntityMetaData refEntityMetaData = new DefaultEntityMetaData(REF_ENTITY_NAME);
+		EntityMetaData refEntityMetaData = new EntityMetaData(REF_ENTITY_NAME);
 		refEntityMetaData.addAttribute(refAttrId, ROLE_ID).setDataType(STRING);
 		refEntityMetaData.addAttribute(refAttrValue).setDataType(STRING);
 		refEntityMetaData.addAttribute(refAttrRef).setDataType(XREF).setRefEntity(refRefEntityMetaData);
@@ -225,13 +225,13 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		String enum1 = "enum1";
 		String enum2 = "enum2";
 
-		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(ENTITY_NAME);
+		EntityMetaData entityMetaData = new EntityMetaData(ENTITY_NAME);
 		// required
 		entityMetaData.addAttribute(attrId, ROLE_ID).setDataType(STRING);
 		entityMetaData.addAttribute(attrBool).setDataType(BOOL);
 		entityMetaData.addAttribute(attrCategorical).setDataType(CATEGORICAL).setRefEntity(refEntityMetaData);
 		entityMetaData.addAttribute(attrCategoricalMref).setDataType(CATEGORICAL_MREF).setRefEntity(refEntityMetaData);
-		DefaultAttributeMetaData compoundAttr = entityMetaData.addAttribute(attrCompound).setDataType(COMPOUND);
+		AttributeMetaData compoundAttr = entityMetaData.addAttribute(attrCompound).setDataType(COMPOUND);
 		entityMetaData.addAttribute(attrDate).setDataType(DATE);
 		entityMetaData.addAttribute(attrDateTime).setDataType(DATETIME);
 		entityMetaData.addAttribute(attrDecimal).setDataType(DECIMAL).setReadOnly(true);
@@ -273,17 +273,17 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		entityMetaData.addAttribute(attrXrefOptional).setDataType(XREF).setRefEntity(refEntityMetaData)
 				.setNillable(true);
 
-		DefaultAttributeMetaData compoundAttrCompoundAttr0 = new DefaultAttributeMetaData(attrCompoundAttrCompoundAttr0)
+		AttributeMetaData compoundAttrCompoundAttr0 = new AttributeMetaData(attrCompoundAttrCompoundAttr0)
 				.setDataType(STRING);
-		DefaultAttributeMetaData compoundAttrCompoundAttr0Optional = new DefaultAttributeMetaData(
+		AttributeMetaData compoundAttrCompoundAttr0Optional = new AttributeMetaData(
 				attrCompoundAttrCompoundAttr0Optional).setDataType(STRING).setNillable(true);
-		DefaultAttributeMetaData compoundAttrCompound = new DefaultAttributeMetaData(attrCompoundAttrCompound)
+		AttributeMetaData compoundAttrCompound = new AttributeMetaData(attrCompoundAttrCompound)
 				.setDataType(COMPOUND);
 		compoundAttrCompound.addAttributePart(compoundAttrCompoundAttr0);
 		compoundAttrCompound.addAttributePart(compoundAttrCompoundAttr0Optional);
 
-		DefaultAttributeMetaData compoundAttr0 = new DefaultAttributeMetaData(attrCompoundAttr0).setDataType(STRING);
-		DefaultAttributeMetaData compoundAttr0Optional = new DefaultAttributeMetaData(attrCompoundAttr0Optional)
+		AttributeMetaData compoundAttr0 = new AttributeMetaData(attrCompoundAttr0).setDataType(STRING);
+		AttributeMetaData compoundAttr0Optional = new AttributeMetaData(attrCompoundAttr0Optional)
 				.setDataType(STRING).setNillable(true);
 		compoundAttr.addAttributePart(compoundAttr0);
 		compoundAttr.addAttributePart(compoundAttr0Optional);
@@ -572,7 +572,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		// Return package name
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 		when(repositoryToCopy.getEntityMetaData()).thenReturn(entityMetaData);
-		org.molgenis.data.Package package_ = mock(org.molgenis.data.Package.class);
+		Package package_ = mock(Package.class);
 		when(entityMetaData.getPackage()).thenReturn(package_);
 		when(package_.getName()).thenReturn("base");
 

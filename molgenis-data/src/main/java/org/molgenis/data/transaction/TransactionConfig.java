@@ -17,7 +17,7 @@ public class TransactionConfig
 	@Autowired
 	private MolgenisTransactionManager transactionManager;
 
-	@Value("${transaction.log.backend:ElasticSearch}")
+	@Value("${transaction.log.description:ElasticSearch}")
 	private String transactionLogBackend;
 
 	@Bean

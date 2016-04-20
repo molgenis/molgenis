@@ -1,14 +1,14 @@
 package org.molgenis.data.elasticsearch.logback;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.springframework.stereotype.Component;
 
 @Component
-public class LoggingEventMetaData extends DefaultEntityMetaData
+public class LoggingEventMetaData extends EntityMetaData
 {
 	public static final LoggingEventMetaData INSTANCE = new LoggingEventMetaData();
 	private static final String ENTITY_NAME = "LoggingEvent";

@@ -1,22 +1,21 @@
 package org.molgenis.data.merge;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.AbstractEntity;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -178,7 +177,7 @@ public class RepositoryMerger
 	public EntityMetaData mergeMetaData(List<Repository<Entity>> repositoryList, List<AttributeMetaData> commonAttrs,
 			AttributeMetaData commonIdAttr, String outRepositoryName)
 	{
-		DefaultEntityMetaData mergedMetaData = new DefaultEntityMetaData(outRepositoryName);
+		EntityMetaData mergedMetaData = new EntityMetaData(outRepositoryName);
 		mergedMetaData.setBackend(ElasticsearchRepositoryCollection.NAME);
 		mergedMetaData.addAttribute(ID, ROLE_ID).setVisible(false);
 
@@ -190,12 +189,12 @@ public class RepositoryMerger
 				if (commonAttr.isVisible())
 				{
 					// We added a new ID, save old attribute but do not use it as id
-					commonAttr = new DefaultAttributeMetaData(commonAttr);
+					commonAttr = AttributeMetaData.newInstance(commonAttr);
 				}
 			}
 			else
 			{
-				mergedMetaData.addAttributeMetaData(commonAttr);
+				mergedMetaData.addAttribute(commonAttr);
 			}
 		}
 
@@ -209,12 +208,12 @@ public class RepositoryMerger
 	/**
 	 * Add a compound attribute for a repository containing all "non-common" attributes
 	 */
-	private void mergeRepositoryMetaData(List<AttributeMetaData> commonAttributes, DefaultEntityMetaData mergedMetaData,
+	private void mergeRepositoryMetaData(List<AttributeMetaData> commonAttributes, EntityMetaData mergedMetaData,
 			Repository<Entity> repository)
 	{
 		EntityMetaData originalRepositoryMetaData = repository.getEntityMetaData();
-		DefaultAttributeMetaData repositoryCompoundAttribute = new DefaultAttributeMetaData(repository.getName(),
-				MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
+		AttributeMetaData repositoryCompoundAttribute = new AttributeMetaData(repository.getName(),
+				COMPOUND);
 		List<AttributeMetaData> attributeParts = new ArrayList<>();
 		for (AttributeMetaData originalRepositoryAttr : originalRepositoryMetaData.getAttributes())
 		{
@@ -223,7 +222,7 @@ public class RepositoryMerger
 				if (!originalRepositoryAttr.equals(originalRepositoryMetaData.getIdAttribute())
 						|| originalRepositoryAttr.isVisible())
 				{
-					DefaultAttributeMetaData attributePartMetaData = copyAndRename(originalRepositoryAttr,
+					AttributeMetaData attributePartMetaData = copyAndRename(originalRepositoryAttr,
 							getMergedAttributeName(repository, originalRepositoryAttr.getName()),
 							getMergedAttributeLabel(repository, originalRepositoryAttr.getLabel()));
 					if (originalRepositoryAttr.getDataType().getEnumType()
@@ -236,20 +235,20 @@ public class RepositoryMerger
 			}
 		}
 		repositoryCompoundAttribute.setAttributesMetaData(attributeParts);
-		mergedMetaData.addAttributeMetaData(repositoryCompoundAttribute);
+		mergedMetaData.addAttribute(repositoryCompoundAttribute);
 	}
 
 	/**
 	 * Recursively add all the attributes in an compound attribute
 	 */
 	private void addCompoundAttributeParts(Repository<Entity> repository, AttributeMetaData originalRepositoryAttributeMetaData,
-			DefaultAttributeMetaData attributePartMetaData)
+			AttributeMetaData attributePartMetaData)
 	{
 		List<AttributeMetaData> subAttributeParts = new ArrayList<AttributeMetaData>();
 		for (AttributeMetaData originalRepositorySubAttributeMetaData : originalRepositoryAttributeMetaData
 				.getAttributeParts())
 		{
-			DefaultAttributeMetaData subAttributePartMetaData = copyAndRename(originalRepositorySubAttributeMetaData,
+			AttributeMetaData subAttributePartMetaData = copyAndRename(originalRepositorySubAttributeMetaData,
 					getMergedAttributeName(repository, originalRepositorySubAttributeMetaData.getName()),
 					getMergedAttributeLabel(repository, originalRepositoryAttributeMetaData.getLabel()));
 			subAttributePartMetaData
@@ -293,10 +292,9 @@ public class RepositoryMerger
 		return attributeLabel + "(" + repository.getName() + ")";
 	}
 
-	private DefaultAttributeMetaData copyAndRename(AttributeMetaData attributeMetaData, String name, String label)
+	private AttributeMetaData copyAndRename(AttributeMetaData attributeMetaData, String name, String label)
 	{
-		DefaultAttributeMetaData result = new DefaultAttributeMetaData(name,
-				attributeMetaData.getDataType().getEnumType());
+		AttributeMetaData result = new AttributeMetaData(name, attributeMetaData.getDataType().getEnumType());
 		result.setDescription(attributeMetaData.getDescription());
 		result.setNillable(true);// We got a problem if a attr is required in one entitymeta and missing in another
 		result.setReadOnly(false);
@@ -305,7 +303,7 @@ public class RepositoryMerger
 		result.setLabel(label);
 		result.setVisible(attributeMetaData.isVisible());
 		result.setUnique(attributeMetaData.isUnique());
-		result.setAggregateable(attributeMetaData.isAggregateable());
+		result.setAggregatable(attributeMetaData.isAggregatable());
 		result.setRange(attributeMetaData.getRange());
 
 		return result;

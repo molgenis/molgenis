@@ -3,15 +3,15 @@ package org.molgenis.auth;
 import static org.molgenis.MolgenisFieldTypes.BOOL;
 import static org.molgenis.MolgenisFieldTypes.EMAIL;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LOOKUP;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
 
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MolgenisUserMetaData extends DefaultEntityMetaData
+public class MolgenisUserMetaData extends EntityMetaData
 {
 	public static final String ENTITY_NAME = "MolgenisUser";
 
@@ -30,10 +30,10 @@ public class MolgenisUserMetaData extends DefaultEntityMetaData
 		addAttribute(MolgenisUser.ACTIVATIONCODE).setLabel("Activation code").setNillable(true).setDescription(
 				"Used as alternative authentication mechanism to verify user email and/or if user has lost password.");
 		addAttribute(MolgenisUser.ACTIVE).setLabel("Active").setDataType(BOOL).setDefaultValue("false")
-				.setDescription("Boolean to indicate if this account can be used to login").setAggregateable(true)
+				.setDescription("Boolean to indicate if this account can be used to login").setAggregatable(true)
 				.setNillable(false);
 		addAttribute(MolgenisUser.SUPERUSER).setLabel("Superuser").setDataType(BOOL).setDefaultValue("false")
-				.setAggregateable(true).setDescription("").setNillable(false);
+				.setAggregatable(true).setDescription("").setNillable(false);
 		addAttribute(MolgenisUser.FIRSTNAME).setLabel("First name").setNillable(true).setDescription("");
 		addAttribute(MolgenisUser.MIDDLENAMES).setLabel("Middle names").setNillable(true).setDescription("");
 		addAttribute(MolgenisUser.LASTNAME, ROLE_LOOKUP).setLabel("Last name").setNillable(true).setDescription("");
@@ -64,7 +64,7 @@ public class MolgenisUserMetaData extends DefaultEntityMetaData
 		addAttribute(MolgenisUser.CHANGE_PASSWORD).setLabel("Change password").setDataType(BOOL)
 				.setDefaultValue("false")
 				.setDescription("If true the user must first change his password before he can proceed")
-				.setAggregateable(true).setNillable(false);
+				.setAggregatable(true).setNillable(false);
 		addAttribute(MolgenisUser.LANGUAGECODE).setLabel("Language code")
 				.setDescription("Selected language for this site.").setNillable(true);
 		addAttribute(MolgenisUser.GOOGLEACCOUNTID).setLabel("Google account ID")

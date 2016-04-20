@@ -1,18 +1,18 @@
 package org.molgenis.data.mapper.meta;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AttributeMappingMetaData extends DefaultEntityMetaData
+public class AttributeMappingMetaData extends EntityMetaData
 {
 	public static final String ENTITY_NAME = "AttributeMapping";
 	public static final String IDENTIFIER = "identifier";
