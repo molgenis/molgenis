@@ -92,7 +92,7 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 		ontologyTermEntity2.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME, "Weight");
 		ontologyTermEntity2.set(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Arrays.asList(synonymEntity4));
 
-		ArgumentCaptor<Query> queryCaptor = forClass(Query.class);
+		ArgumentCaptor<Query<Entity>> queryCaptor = forClass((Class) Query.class);
 		when(dataService.findAll(eq(OntologyTermMetaData.ENTITY_NAME), queryCaptor.capture()))
 				.thenReturn(Stream.of(ontologyTermEntity1, ontologyTermEntity2));
 
@@ -106,7 +106,7 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testFindOntologyTerms()
 	{
-		ArgumentCaptor<Query> queryCaptor = forClass(Query.class);
+		ArgumentCaptor<Query<Entity>> queryCaptor = forClass((Class) Query.class);
 		when(dataService.findAll(eq(OntologyTermMetaData.ENTITY_NAME), queryCaptor.capture()))
 				.thenReturn(Stream.of(ontologyTermEntity));
 
@@ -148,7 +148,7 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 		ontologyTerm_3.set(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Collections.emptyList());
 
 		when(dataService.findAll(OntologyTermMetaData.ENTITY_NAME,
-				new QueryImpl(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, Operator.FUZZY_MATCH,
+				new QueryImpl<Entity>(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, Operator.FUZZY_MATCH,
 						"\"0[0].1[1]\"")).and().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity)))
 								.thenReturn(Stream.of(ontologyTerm_2, ontologyTerm_3));
 

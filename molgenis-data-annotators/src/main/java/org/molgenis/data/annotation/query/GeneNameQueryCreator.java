@@ -21,7 +21,7 @@ public class GeneNameQueryCreator implements QueryCreator
 	}
 
 	@Override
-	public Query createQuery(Entity entity)
+	public Query<Entity> createQuery(Entity entity)
 	{
 		Object value = entity.get(SnpEffAnnotator.GENE_NAME);
 		return EQ(SnpEffAnnotator.GENE_NAME, value);

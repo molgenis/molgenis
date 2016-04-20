@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.CrudRepositoryAnnotator;
@@ -69,7 +70,7 @@ public class AnnotationJobFactory
 		RunAsUserToken runAsAuthentication = new RunAsUserToken("Job Execution", username, null,
 				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
 
-		Repository repository = dataService.getRepository(targetName);
+		Repository<Entity> repository = dataService.getRepository(targetName);
 		List<RepositoryAnnotator> availableAnnotators = annotationService.getAllAnnotators().stream()
 				.filter(RepositoryAnnotator::annotationDataExists).collect(toList());
 		List<RepositoryAnnotator> requestedAnnotators = Arrays.stream(annotatorNames.split(","))

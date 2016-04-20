@@ -18,9 +18,9 @@ public class TagRepository
 {
 	public static final TagMetaData META_DATA = TagMetaData.INSTANCE;
 	private final IdGenerator idGenerator;
-	private final Repository repository;
+	private final Repository<Entity> repository;
 
-	public TagRepository(Repository repository, IdGenerator idGenerator)
+	public TagRepository(Repository<Entity> repository, IdGenerator idGenerator)
 	{
 		this.repository = repository;
 		this.idGenerator = idGenerator;
@@ -41,7 +41,7 @@ public class TagRepository
 	 */
 	public Entity getTagEntity(String objectIRI, String label, Relation relation, String codeSystemIRI)
 	{
-		Query q = new QueryImpl().eq(TagMetaData.OBJECT_IRI, objectIRI).and()
+		Query<Entity> q = new QueryImpl<Entity>().eq(TagMetaData.OBJECT_IRI, objectIRI).and()
 				.eq(TagMetaData.RELATION_IRI, relation.getIRI()).and().eq(TagMetaData.CODE_SYSTEM, codeSystemIRI);
 		Entity result = repository.findOne(q);
 		if (result == null)

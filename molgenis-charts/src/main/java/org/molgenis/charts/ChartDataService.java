@@ -5,6 +5,7 @@ import java.util.List;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.charts.data.DataMatrix;
 import org.molgenis.charts.data.XYDataSerie;
+import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
 
@@ -19,11 +20,11 @@ public interface ChartDataService
 	DataMatrix getDataMatrix(String entityName, List<String> attributeNamesXaxis, String attributeNameYaxis,
 			List<QueryRule> queryRules);
 
-	List<XYDataSerie> getXYDataSeries(Repository repo, String entityName, String attributeNameXaxis,
+	List<XYDataSerie> getXYDataSeries(Repository<Entity> repo, String entityName, String attributeNameXaxis,
 			String attributeNameYaxis, FieldTypeEnum attributeXFieldTypeEnum, FieldTypeEnum attributeYFieldTypeEnum,
 			String split, List<QueryRule> queryRules);
 
-	XYDataSerie getXYDataSerie(Repository repo, String entityName, String attributeNameXaxis,
+	XYDataSerie getXYDataSerie(Repository<Entity> repo, String entityName, String attributeNameXaxis,
 			String attributeNameYaxis, FieldTypeEnum attributeXFieldTypeEnum, FieldTypeEnum attributeYFieldTypeEnum,
 			List<QueryRule> queryRules);
 

@@ -41,7 +41,7 @@ public class ResourcesImpl implements Resources
 	}
 
 	@Override
-	public Iterable<Entity> findAll(String name, Query q)
+	public Iterable<Entity> findAll(String name, Query<Entity> q)
 	{
 		if (resources.containsKey(name))
 		{

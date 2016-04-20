@@ -29,7 +29,7 @@ public class AttributeEqualsQueryCreator implements QueryCreator
 	}
 
 	@Override
-	public Query createQuery(Entity entity)
+	public Query<Entity> createQuery(Entity entity)
 	{
 		Object value = entity.get(attribute.getName());
 		return EQ(attribute.getName(), value);

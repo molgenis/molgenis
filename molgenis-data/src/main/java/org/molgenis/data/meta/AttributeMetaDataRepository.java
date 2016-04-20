@@ -55,7 +55,7 @@ class AttributeMetaDataRepository
 	public static final AttributeMetaDataMetaData META_DATA = AttributeMetaDataMetaData.INSTANCE;
 
 	private final UuidGenerator uuidGenerator;
-	private final Repository repository;
+	private final Repository<Entity> repository;
 	private EntityMetaDataRepository entityMetaDataRepository;
 	private final LanguageService languageService;
 
@@ -71,7 +71,7 @@ class AttributeMetaDataRepository
 		this.entityMetaDataRepository = entityMetaDataRepository;
 	}
 
-	Repository getRepository()
+	Repository<Entity> getRepository()
 	{
 		return repository;
 	}

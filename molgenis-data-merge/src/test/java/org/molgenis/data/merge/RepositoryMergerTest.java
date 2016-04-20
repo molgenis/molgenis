@@ -43,8 +43,8 @@ public class RepositoryMergerTest
 	private DefaultAttributeMetaData idAttribute;
 	private AttributeMetaData metaDataa;
 	private AttributeMetaData metaDatab;
-	private Repository repository1;
-	private Repository elasticSearchRepository;
+	private Repository<Entity> repository1;
+	private Repository<Entity> elasticSearchRepository;
 	private DataService dataService;
 	private DefaultEntityMetaData entityMetaData1;
 	private SearchService searchService;
@@ -123,7 +123,7 @@ public class RepositoryMergerTest
 		ElasticsearchRepository repo1 = new ElasticsearchRepository(entityMetaData1, searchService);
 		ElasticsearchRepository repo2 = new ElasticsearchRepository(entityMetaData2, searchService);
 
-		List<Repository> repositoryList = new ArrayList<Repository>();
+		List<Repository<Entity>> repositoryList = new ArrayList<Repository<Entity>>();
 		repositoryList.add(repo1);
 		repositoryList.add(repo2);
 
@@ -159,7 +159,7 @@ public class RepositoryMergerTest
 		existingEntity.set("a", "update_a");
 		existingEntity.set("b", "update_b");
 
-		Query findMergedEntityQuery = new QueryImpl();
+		Query<Entity> findMergedEntityQuery = new QueryImpl<Entity>();
 		findMergedEntityQuery.eq("a", "update_a").and();
 		findMergedEntityQuery.eq("b", "update_b");
 
@@ -179,7 +179,7 @@ public class RepositoryMergerTest
 		when(dataService.getRepository("mergedRepo")).thenReturn(elasticSearchRepository);
 
 		when(repository1.getEntityMetaData()).thenReturn(entityMetaData1);
-		List<Repository> repositoryList = new ArrayList<Repository>();
+		List<Repository<Entity>> repositoryList = new ArrayList<Repository<Entity>>();
 		repositoryList.add(repository1);
 		List<AttributeMetaData> commonAttributes = new ArrayList<AttributeMetaData>();
 		commonAttributes.add(metaDataa);

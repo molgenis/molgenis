@@ -70,7 +70,7 @@ public class HPORepository extends AbstractRepository
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		if (q.getRules().isEmpty()) return getEntities().stream();
 		if ((q.getRules().size() != 1) || (q.getRules().get(0).getOperator() != Operator.EQUALS))

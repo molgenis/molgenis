@@ -44,7 +44,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 		else
 		{
 			// Search in packages
-			Query q = new QueryImpl().search(searchTerm);
+			Query<Entity> q = new QueryImpl<>().search(searchTerm);
 			// for (Entity packageEntity : dataService.findAllAsIterable(PackageMetaData.ENTITY_NAME, q))
 			dataService.findAll(PackageMetaData.ENTITY_NAME, q).forEach(packageEntity -> {
 				Package p = metaDataService.getPackage(packageEntity.getString(PackageMetaData.FULL_NAME));

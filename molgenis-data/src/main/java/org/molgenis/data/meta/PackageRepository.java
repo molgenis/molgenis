@@ -34,7 +34,7 @@ class PackageRepository
 	/**
 	 * The repository where the package entities are stored.
 	 */
-	private final Repository repository;
+	private final Repository<Entity> repository;
 
 	/**
 	 * In-memory cache of all packages, filled with entities and attributes.
@@ -47,7 +47,7 @@ class PackageRepository
 	 * @param coll
 	 *            {@link ManageableRepositoryCollection} that will be used to store the package entities.
 	 */
-	public PackageRepository(Repository repository)
+	public PackageRepository(Repository<Entity> repository)
 	{
 		this.repository = repository;
 		updatePackageCache();

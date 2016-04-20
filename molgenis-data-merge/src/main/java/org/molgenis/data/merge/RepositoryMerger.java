@@ -51,8 +51,8 @@ public class RepositoryMerger
 	 *            is added or updated in the repository
 	 * @return mergedRepository ElasticSearchRepository containing the merged data
 	 */
-	public Repository merge(List<Repository> repositoryList, List<AttributeMetaData> commonAttributes,
-			Repository mergedRepository)
+	public Repository<Entity> merge(List<Repository<Entity>> repositoryList, List<AttributeMetaData> commonAttributes,
+			Repository<Entity> mergedRepository)
 	{
 		return merge(repositoryList, commonAttributes, mergedRepository, 1000);
 	}
@@ -72,8 +72,8 @@ public class RepositoryMerger
 	 *            number of records after which the result is added or updated in the repository
 	 * @return mergedRepository ElasticSearchRepository containing the merged data
 	 */
-	public Repository merge(List<Repository> repositoryList, List<AttributeMetaData> commonAttributes,
-			Repository mergedRepository, int batchSize)
+	public Repository<Entity> merge(List<Repository<Entity>> repositoryList, List<AttributeMetaData> commonAttributes,
+			Repository<Entity> mergedRepository, int batchSize)
 	{
 		mergeData(repositoryList, dataService.getRepository(mergedRepository.getName()), commonAttributes, batchSize);
 
@@ -83,10 +83,10 @@ public class RepositoryMerger
 	/**
 	 * Merge the data of all repositories based on the common columns
 	 */
-	private void mergeData(List<Repository> originalRepositoriesList, Repository resultRepository,
+	private void mergeData(List<Repository<Entity>> originalRepositoriesList, Repository<Entity> resultRepository,
 			List<AttributeMetaData> commonAttributes, int batchSize)
 	{
-		for (Repository repository : originalRepositoriesList)
+		for (Repository<Entity> repository : originalRepositoriesList)
 		{
 			List<Entity> addedEntities = new ArrayList<Entity>();
 			List<Entity> updatedEntities = new ArrayList<Entity>();
@@ -157,9 +157,9 @@ public class RepositoryMerger
 	/**
 	 * check if an entity for the common attributes already exists and if so, return it
 	 */
-	private Entity getMergedEntity(Repository repository, List<AttributeMetaData> commonAttributes, Entity entity)
+	private Entity getMergedEntity(Repository<Entity> repository, List<AttributeMetaData> commonAttributes, Entity entity)
 	{
-		Query findMergedEntityQuery = new QueryImpl();
+		Query<Entity> findMergedEntityQuery = new QueryImpl<Entity>();
 		for (AttributeMetaData attributeMetaData : commonAttributes)
 		{
 			if (!findMergedEntityQuery.getRules().isEmpty()) findMergedEntityQuery = findMergedEntityQuery.and();
@@ -175,7 +175,7 @@ public class RepositoryMerger
 	 * Create new EntityMetaData with the common attributes at root level, and all other columns in a compound attribute
 	 * per original repository
 	 */
-	public EntityMetaData mergeMetaData(List<Repository> repositoryList, List<AttributeMetaData> commonAttrs,
+	public EntityMetaData mergeMetaData(List<Repository<Entity>> repositoryList, List<AttributeMetaData> commonAttrs,
 			AttributeMetaData commonIdAttr, String outRepositoryName)
 	{
 		DefaultEntityMetaData mergedMetaData = new DefaultEntityMetaData(outRepositoryName);
@@ -199,7 +199,7 @@ public class RepositoryMerger
 			}
 		}
 
-		for (Repository repository : repositoryList)
+		for (Repository<Entity> repository : repositoryList)
 		{
 			mergeRepositoryMetaData(commonAttrs, mergedMetaData, repository);
 		}
@@ -210,7 +210,7 @@ public class RepositoryMerger
 	 * Add a compound attribute for a repository containing all "non-common" attributes
 	 */
 	private void mergeRepositoryMetaData(List<AttributeMetaData> commonAttributes, DefaultEntityMetaData mergedMetaData,
-			Repository repository)
+			Repository<Entity> repository)
 	{
 		EntityMetaData originalRepositoryMetaData = repository.getEntityMetaData();
 		DefaultAttributeMetaData repositoryCompoundAttribute = new DefaultAttributeMetaData(repository.getName(),
@@ -242,7 +242,7 @@ public class RepositoryMerger
 	/**
 	 * Recursively add all the attributes in an compound attribute
 	 */
-	private void addCompoundAttributeParts(Repository repository, AttributeMetaData originalRepositoryAttributeMetaData,
+	private void addCompoundAttributeParts(Repository<Entity> repository, AttributeMetaData originalRepositoryAttributeMetaData,
 			DefaultAttributeMetaData attributePartMetaData)
 	{
 		List<AttributeMetaData> subAttributeParts = new ArrayList<AttributeMetaData>();
@@ -279,7 +279,7 @@ public class RepositoryMerger
 	 * Create a name for an attribute based on the attribute name in the original repository and the original repository
 	 * name itself.
 	 */
-	private String getMergedAttributeName(Repository repository, String attributeName)
+	private String getMergedAttributeName(Repository<Entity> repository, String attributeName)
 	{
 		return repository.getName() + "_" + attributeName;
 	}
@@ -288,7 +288,7 @@ public class RepositoryMerger
 	 * Create a label for an attribute based on the attribute label in the original repository and the original
 	 * repository name itself.
 	 */
-	private String getMergedAttributeLabel(Repository repository, String attributeLabel)
+	private String getMergedAttributeLabel(Repository<Entity> repository, String attributeLabel)
 	{
 		return attributeLabel + "(" + repository.getName() + ")";
 	}

@@ -104,7 +104,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		reset(metaDataService);
 		when(dataService.getMeta()).thenReturn(metaDataService);
 
-		Repository repo = mock(Repository.class);
+		Repository<Entity> repo = mock(Repository.class);
 
 		Entity entityXref = new MapEntity("id");
 		entityXref.set("id", ENTITY_ID);
@@ -130,10 +130,10 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		when(dataService.findOneById(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
 
-		Query q = new QueryImpl().eq("name", "Piet").pageSize(10).offset(5);
+		Query<Entity> q = new QueryImpl<>().eq("name", "Piet").pageSize(10).offset(5);
 		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Stream.of(entity));
 
-		Query q2 = new QueryImpl().sort(new Sort().on("name", Direction.DESC)).pageSize(100).offset(0);
+		Query<Entity> q2 = new QueryImpl<>().sort(new Sort().on("name", Direction.DESC)).pageSize(100).offset(0);
 		when(dataService.findAll(ENTITY_NAME, q2)).thenReturn(Stream.of(entity2, entity));
 
 		DefaultAttributeMetaData attrEnum = new DefaultAttributeMetaData("enum", FieldTypeEnum.ENUM)
@@ -361,7 +361,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieveEntityAttributeUnknownAttribute() throws Exception
 	{
-		Repository repo = mock(Repository.class);
+		Repository<Entity> repo = mock(Repository.class);
 
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 		when(entityMetaData.getAttribute("name")).thenReturn(null);
@@ -383,7 +383,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	{
 		reset(dataService);
 
-		Repository repo = mock(Repository.class);
+		Repository<Entity> repo = mock(Repository.class);
 		when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
 		when(dataService.getEntityNames()).thenReturn(Stream.of(ENTITY_NAME));
 		Entity entityXref = new MapEntity("id");
@@ -436,7 +436,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void updateInternalRepoNotUpdateable() throws Exception
 	{
-		Repository repo = mock(Repository.class);
+		Repository<Entity> repo = mock(Repository.class);
 		when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
 		doThrow(new MolgenisDataException()).when(dataService).update(anyString(), any(Entity.class));
 		mockMvc.perform(put(HREF_ENTITY_ID).content("{name:Klaas}").contentType(APPLICATION_JSON))
@@ -446,7 +446,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void updateInternalRepoIdAttributeIsNull() throws Exception
 	{
-		Repository repo = mock(Repository.class);
+		Repository<Entity> repo = mock(Repository.class);
 		when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 		when(entityMetaData.getIdAttribute()).thenReturn(null);

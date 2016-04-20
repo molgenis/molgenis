@@ -82,7 +82,7 @@ public class SortaServiceImpl implements SortaService
 	public Entity getOntologyEntity(String ontologyIri)
 	{
 		return dataService.findOne(OntologyMetaData.ENTITY_NAME,
-				new QueryImpl().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
+				new QueryImpl<Entity>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
 	}
 
 	@Override
@@ -92,7 +92,7 @@ public class SortaServiceImpl implements SortaService
 		if (ontologyEntity != null)
 		{
 			return dataService.findOne(OntologyTermMetaData.ENTITY_NAME,
-					new QueryImpl().eq(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ontologyTermIri).and()
+					new QueryImpl<Entity>().eq(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ontologyTermIri).and()
 							.eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity));
 		}
 		return null;
@@ -191,7 +191,7 @@ public class SortaServiceImpl implements SortaService
 	{
 		List<Entity> ontologyTermAnnotationEntities = dataService
 				.findAll(OntologyTermDynamicAnnotationMetaData.ENTITY_NAME,
-						new QueryImpl(rulesForOtherFields).pageSize(Integer.MAX_VALUE))
+						new QueryImpl<Entity>(rulesForOtherFields).pageSize(Integer.MAX_VALUE))
 				.collect(Collectors.toList());
 
 		if (ontologyTermAnnotationEntities.size() > 0)
@@ -202,7 +202,7 @@ public class SortaServiceImpl implements SortaService
 							IN, ontologyTermAnnotationEntities));
 
 			Stream<Entity> ontologyTermEntities = dataService.findAll(OntologyTermMetaData.ENTITY_NAME,
-					new QueryImpl(rules).pageSize(Integer.MAX_VALUE));
+					new QueryImpl<Entity>(rules).pageSize(Integer.MAX_VALUE));
 
 			List<Entity> relevantOntologyTermEntities = ontologyTermEntities
 					.map(ontologyTermEntity -> calculateNGromOTAnnotations(inputEntity, ontologyTermEntity))
@@ -223,7 +223,7 @@ public class SortaServiceImpl implements SortaService
 				new QueryRule(AND), disMaxQueryRule);
 
 		Stream<Entity> lexicalMatchedOntologyTermEntities = dataService
-				.findAll(OntologyTermMetaData.ENTITY_NAME, new QueryImpl(finalQueryRules).pageSize(pageSize))
+				.findAll(OntologyTermMetaData.ENTITY_NAME, new QueryImpl<Entity>(finalQueryRules).pageSize(pageSize))
 				.map(ontologyTerm -> addLexicalScoreToMatchedEntity(inputEntity, ontologyTerm, ontologyIri));
 
 		lexicalMatchedOntologyTermEntities.forEach(matchedEntity -> {

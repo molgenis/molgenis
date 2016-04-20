@@ -347,7 +347,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		entity.set(attrTextOptional, null);
 		entity.set(attrXrefOptional, null);
 
-		Query q = new QueryImpl().offset(0).pageSize(100);
+		Query<Entity> q = new QueryImpl<Entity>().offset(0).pageSize(100);
 		when(dataService.findOneById(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
 		when(dataService.findOneById(eq(ENTITY_NAME), eq(ENTITY_ID), any(Fetch.class))).thenReturn(entity);
 		when(dataService.findOneById(eq(SELF_REF_ENTITY_NAME), eq("0"), any(Fetch.class))).thenReturn(selfRefEntity);
@@ -481,7 +481,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void testCopyEntity() throws Exception
 	{
-		Repository repositoryToCopy = mock(Repository.class);
+		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
 		String content = "{newEntityName: 'newEntity'}";
@@ -498,7 +498,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void testCopyEntityUnknownEntity() throws Exception
 	{
-		Repository repositoryToCopy = mock(Repository.class);
+		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
 		String content = "{newEntityName: 'newEntity'}";
@@ -513,7 +513,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void testCopyEntityDuplicateEntity() throws Exception
 	{
-		Repository repositoryToCopy = mock(Repository.class);
+		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
 		String content = "{newEntityName: 'entity'}";
@@ -528,7 +528,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void testCopyEntityNoReadPermissions() throws Exception
 	{
-		Repository repositoryToCopy = mock(Repository.class);
+		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
 		// Override mock
@@ -546,7 +546,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void testCopyEntityNoWriteCapabilities() throws Exception
 	{
-		Repository repositoryToCopy = mock(Repository.class);
+		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
 		// Override mock
@@ -563,7 +563,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		verify(dataService, never()).copyRepository(repositoryToCopy, "newEntity", "newEntity");
 	}
 
-	private void mocksForCopyEntitySucces(Repository repositoryToCopy)
+	private void mocksForCopyEntitySucces(Repository<Entity> repositoryToCopy)
 	{
 		when(dataService.hasRepository("entity")).thenReturn(true);
 		when(dataService.hasRepository("newEntity")).thenReturn(false);
@@ -581,7 +581,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		Set<RepositoryCapability> capabilities = Sets.newHashSet(RepositoryCapability.WRITABLE);
 		when(dataService.getCapabilities("entity")).thenReturn(capabilities);
 
-		Repository repository = mock(Repository.class);
+		Repository<Entity> repository = mock(Repository.class);
 		when(repository.getName()).thenReturn("newEntity");
 		when(dataService.getRepository("newEntity")).thenReturn(repository);
 		when(dataService.copyRepository(repositoryToCopy, "newEntity", "newEntity")).thenReturn(repository);

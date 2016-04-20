@@ -94,6 +94,18 @@ public abstract class AbstractDataApiTestConfig
 	}
 
 	@Bean
+	public IdGenerator idGenerator()
+	{
+		return new UuidGenerator();
+	}
+
+	@Bean
+	public MolgenisTransactionManager transactionManager()
+	{
+		return new MolgenisTransactionManager(idGenerator(), dataSource());
+	}
+
+	@Bean
 	public DataServiceImpl dataService()
 	{
 		return new DataServiceImpl(repositoryDecoratorFactory());
@@ -135,10 +147,10 @@ public abstract class AbstractDataApiTestConfig
 		return new RepositoryDecoratorFactory()
 		{
 			@Override
-			public Repository createDecoratedRepository(Repository repository)
+			public Repository<Entity> createDecoratedRepository(Repository<Entity> repository)
 			{
 				return new MolgenisRepositoryDecoratorFactory(entityManager(), transactionLogService,
-						entityAttributesValidator(), idGenerator, appSettings(), dataService(), expressionValidator,
+						entityAttributesValidator(), idGenerator(), appSettings(), dataService(), expressionValidator,
 						repositoryDecoratorRegistry()).createDecoratedRepository(repository);
 			}
 		};

@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
 import org.testng.annotations.AfterMethod;
@@ -51,11 +52,11 @@ public class ExcelRepositorySourceTest
 	@Test
 	public void getRepository()
 	{
-		Repository test = excelRepositoryCollection.getRepository("test");
+		Repository<Entity> test = excelRepositoryCollection.getRepository("test");
 		assertNotNull(test);
 		assertEquals(test.getName(), "test");
 
-		Repository blad2 = excelRepositoryCollection.getRepository("Blad2");
+		Repository<Entity> blad2 = excelRepositoryCollection.getRepository("Blad2");
 		assertNotNull(blad2);
 		assertEquals(blad2.getName(), "Blad2");
 	}

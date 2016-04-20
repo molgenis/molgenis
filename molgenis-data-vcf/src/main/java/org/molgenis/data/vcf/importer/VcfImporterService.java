@@ -69,7 +69,7 @@ public class VcfImporterService implements ImportService
 			Iterator<String> it = source.getEntityNames().iterator();
 			if (it.hasNext())
 			{
-				try (Repository repo = source.getRepository(it.next());)
+				try (Repository<Entity> repo = source.getRepository(it.next());)
 				{
 					report = importVcf(repo, addedEntities);
 				}
@@ -155,10 +155,10 @@ public class VcfImporterService implements ImportService
 		return false;
 	}
 
-	private EntityImportReport importVcf(Repository inRepository, List<EntityMetaData> addedEntities) throws IOException
+	private EntityImportReport importVcf(Repository<Entity> inRepository, List<EntityMetaData> addedEntities) throws IOException
 	{
 		EntityImportReport report = new EntityImportReport();
-		Repository sampleRepository = null;
+		Repository<Entity> sampleRepository = null;
 		String entityName = inRepository.getName();
 
 		if (dataService.hasRepository(entityName))
@@ -183,7 +183,7 @@ public class VcfImporterService implements ImportService
 		Iterator<Entity> inIterator = inRepository.iterator();
 		int sampleEntityCount = 0;
 		List<Entity> sampleEntities = new ArrayList<>();
-		try (Repository outRepository = dataService.getMeta().addEntityMeta(entityMetaData))
+		try (Repository<Entity> outRepository = dataService.getMeta().addEntityMeta(entityMetaData))
 		{
 			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 					Collections.singletonList(entityMetaData.getName()));

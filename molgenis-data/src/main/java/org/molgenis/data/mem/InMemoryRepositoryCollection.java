@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
@@ -14,7 +15,7 @@ import org.molgenis.data.Repository;
  */
 public class InMemoryRepositoryCollection implements ManageableRepositoryCollection
 {
-	private final Map<String, Repository> repos = new HashMap<>();
+	private final Map<String, Repository<Entity>> repos = new HashMap<>();
 	private String name = "Memory";
 
 	public InMemoryRepositoryCollection()
@@ -33,24 +34,24 @@ public class InMemoryRepositoryCollection implements ManageableRepositoryCollect
 	}
 
 	@Override
-	public Repository getRepository(String name)
+	public Repository<Entity> getRepository(String name)
 	{
 		return repos.get(name);
 	}
 
 	@Override
-	public Iterator<Repository> iterator()
+	public Iterator<Repository<Entity>> iterator()
 	{
 		return repos.values().iterator();
 	}
 
 	@Override
-	public Repository addEntityMeta(EntityMetaData entityMetaData)
+	public Repository<Entity> addEntityMeta(EntityMetaData entityMetaData)
 	{
 		String name = entityMetaData.getName();
 		if (!repos.containsKey(name))
 		{
-			Repository repo = new InMemoryRepository(entityMetaData);
+			Repository<Entity> repo = new InMemoryRepository(entityMetaData);
 			repos.put(name, repo);
 		}
 		return repos.get(name);

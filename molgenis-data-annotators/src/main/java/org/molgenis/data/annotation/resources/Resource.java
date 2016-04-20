@@ -25,5 +25,5 @@ public interface Resource
 	 *            the Query to use
 	 * @return the {@link Entity}s found
 	 */
-	Iterable<Entity> findAll(Query q);
+	Iterable<Entity> findAll(Query<Entity> q);
 }

@@ -242,7 +242,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 
 		when(
 				dataService.findOne(PackageMetaData.ENTITY_NAME,
-						new QueryImpl().eq(PackageMetaData.FULL_NAME, p.getName()))).thenReturn(pack);
+						new QueryImpl<Entity>().eq(PackageMetaData.FULL_NAME, p.getName()))).thenReturn(pack);
 
 		assertEquals(ontologyTagService.getTagsForPackage(p),
 				Arrays.asList(new TagImpl<Package, OntologyTerm, Ontology>("1234", p, Relation

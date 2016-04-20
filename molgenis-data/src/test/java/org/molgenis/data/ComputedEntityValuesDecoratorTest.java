@@ -20,7 +20,7 @@ import org.testng.annotations.Test;
 
 public class ComputedEntityValuesDecoratorTest
 {
-	private Repository decoratedRepo;
+	private Repository<Entity> decoratedRepo;
 	private ComputedEntityValuesDecorator computedEntityValuesDecorator;
 
 	@BeforeMethod
@@ -155,7 +155,7 @@ public class ComputedEntityValuesDecoratorTest
 		when(decoratedRepo.getEntityMetaData()).thenReturn(entityMeta);
 
 		Entity entity0 = mock(Entity.class);
-		Query query = mock(Query.class);
+		Query<Entity> query = mock(Query.class);
 		when(decoratedRepo.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = computedEntityValuesDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
@@ -171,7 +171,7 @@ public class ComputedEntityValuesDecoratorTest
 
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
-		Query query = mock(Query.class);
+		Query<Entity> query = mock(Query.class);
 		when(decoratedRepo.findAll(query)).thenReturn(Stream.of(entity0));
 		List<Entity> expectedEntities = computedEntityValuesDecorator.findAll(query).collect(Collectors.toList());
 		assertEquals(expectedEntities.size(), 1);

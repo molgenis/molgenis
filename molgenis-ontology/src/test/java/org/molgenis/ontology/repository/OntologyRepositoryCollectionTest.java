@@ -29,11 +29,11 @@ import org.testng.annotations.Test;
 
 public class OntologyRepositoryCollectionTest
 {
-	private static Repository ontologyRepository;
-	private static Repository ontologyTermDynamicAnnotationRepository;
-	private static Repository ontologyTermNodePathRepository;
-	private static Repository ontologyTermSynonymRepository;
-	private static Repository ontologyTermRepository;
+	private static Repository<Entity> ontologyRepository;
+	private static Repository<Entity> ontologyTermDynamicAnnotationRepository;
+	private static Repository<Entity> ontologyTermNodePathRepository;
+	private static Repository<Entity> ontologyTermSynonymRepository;
+	private static Repository<Entity> ontologyTermRepository;
 
 	@BeforeClass
 	public static void beforeClass() throws FileNotFoundException, IOException, OWLOntologyCreationException

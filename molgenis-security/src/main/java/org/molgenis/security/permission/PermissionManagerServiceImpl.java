@@ -145,7 +145,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 		List<Authority> userPermissions = getUserPermissions(molgenisUser, authorityPrefix);
 
 		List<MolgenisGroupMember> groupMembers = dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser), MolgenisGroupMember.class).collect(
+				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser), MolgenisGroupMember.class).collect(
 				toList());
 
 		if (!groupMembers.isEmpty())
@@ -236,7 +236,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	private List<Authority> getUserPermissions(MolgenisUser molgenisUser, final String authorityPrefix)
 	{
 		Stream<UserAuthority> authorities = dataService.findAll(UserAuthority.ENTITY_NAME,
-				new QueryImpl().eq(UserAuthority.MOLGENISUSER, molgenisUser), UserAuthority.class);
+				new QueryImpl<UserAuthority>().eq(UserAuthority.MOLGENISUSER, molgenisUser), UserAuthority.class);
 
 		return authorities.filter(authority -> {
 			return authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true;
@@ -261,7 +261,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	private List<Authority> getGroupPermissions(List<MolgenisGroup> molgenisGroups, final String authorityPrefix)
 	{
 		Stream<GroupAuthority> authorities = dataService.findAll(GroupAuthority.ENTITY_NAME,
-				new QueryImpl().in(GroupAuthority.MOLGENISGROUP, molgenisGroups), GroupAuthority.class);
+				new QueryImpl<GroupAuthority>().in(GroupAuthority.MOLGENISGROUP, molgenisGroups), GroupAuthority.class);
 
 		return authorities.filter(authority -> {
 			return authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true;

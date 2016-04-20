@@ -1,34 +1,5 @@
 package org.molgenis.integrationtest.data;
 
-import com.google.common.collect.Iterators;
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.EditableEntityMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityListener;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Package;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.Sort;
-import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.meta.PackageImpl;
-import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.support.QueryImpl;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.generate;
@@ -41,79 +12,45 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
+import org.molgenis.data.EditableEntityMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.Package;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.meta.PackageImpl;
+import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.QueryImpl;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+
+import com.google.common.collect.Iterators;
+
 public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 {
 	private static final String ENTITY_NAME = "test_TestEntity";
-	private static final String REF_ENTITY_NAME = "test_TestRefEntity";
+	private static final String ID = "id";
+	private static final String ATTR_STR = "strAttr";
 	private EditableEntityMetaData entityMetaData;
-	private DefaultEntityMetaData refEntityMetaData;
-
-	private static final String ATTR_ID = "id_attr";
-	private static final String ATTR_STRING = "string_attr";
-	private static final String ATTR_BOOL = "bool_attr";
-	private static final String ATTR_CATEGORICAL = "categorical_attr";
-	private static final String ATTR_CATEGORICAL_MREF = "categorical_mref_attr";
-	private static final String ATTR_DATE = "date_attr";
-	private static final String ATTR_DATETIME = "datetime_attr";
-	private static final String ATTR_DECIMAL = "decimal_attr";
-	private static final String ATTR_HTML = "html_attr";
-	private static final String ATTR_HYPERLINK = "hyperlink_attr";
-	private static final String ATTR_LONG = "long_attr";
-	private static final String ATTR_INT = "int_attr";
-	private static final String ATTR_SCRIPT = "script_attr";
-	private static final String ATTR_EMAIL = "email_attr";
-	private static final String ATTR_XREF = "xref_attr";
-	private static final String ATTR_MREF = "mref_attr";
-	private static final String ATTR_REF_ID = "ref_id_attr";
-	private static final String ATTR_REF_STRING = "ref_string_attr";
-	private DefaultEntity entity1;
-	private DefaultEntity entity2;
-	private DefaultEntity entity3;
-	private DefaultEntity entity4;
-	private DefaultEntity entity5;
-	private DefaultEntity entity6;
-	private DefaultEntity entity7;
-	private DefaultEntity entity8;
-	private DefaultEntity entity9;
-	private DefaultEntity entity10;
-	private DefaultEntity refEntity1;
-	private DefaultEntity refEntity2;
-	private DefaultEntity refEntity3;
-	private DefaultEntity refEntity4;
-	private DefaultEntity refEntity5;
-	private DefaultEntity refEntity6;
 
 	@BeforeClass
 	public void setUp()
 	{
 		Package p = new PackageImpl("test");
-		refEntityMetaData = new DefaultEntityMetaData("TestRefEntity", p);
-		refEntityMetaData.addAttribute(ATTR_REF_ID, ROLE_ID).setNillable(false);
-		refEntityMetaData.addAttribute(ATTR_REF_STRING).setNillable(true).setDataType(MolgenisFieldTypes.STRING);
-
 		entityMetaData = new DefaultEntityMetaData("TestEntity", p);
-		entityMetaData.addAttribute(ATTR_ID, ROLE_ID).setNillable(false).setAuto(true);
-		entityMetaData.addAttribute(ATTR_STRING).setNillable(true).setDataType(MolgenisFieldTypes.STRING);
-		entityMetaData.addAttribute(ATTR_BOOL).setNillable(true).setDataType(MolgenisFieldTypes.BOOL);
-		entityMetaData.addAttribute(ATTR_CATEGORICAL).setNillable(true).setDataType(MolgenisFieldTypes.CATEGORICAL)
-				.setRefEntity(refEntityMetaData);
-		entityMetaData.addAttribute(ATTR_CATEGORICAL_MREF).setNillable(true)
-				.setDataType(MolgenisFieldTypes.CATEGORICAL_MREF).setRefEntity(refEntityMetaData);
-		entityMetaData.addAttribute(ATTR_DATE).setNillable(true).setDataType(MolgenisFieldTypes.DATE);
-		entityMetaData.addAttribute(ATTR_DATETIME).setNillable(true).setDataType(MolgenisFieldTypes.DATETIME);
-		entityMetaData.addAttribute(ATTR_EMAIL).setNillable(true).setDataType(MolgenisFieldTypes.EMAIL);
-		entityMetaData.addAttribute(ATTR_DECIMAL).setNillable(true).setDataType(MolgenisFieldTypes.DECIMAL);
-		entityMetaData.addAttribute(ATTR_HTML).setNillable(true).setDataType(MolgenisFieldTypes.HTML);
-		entityMetaData.addAttribute(ATTR_HYPERLINK).setNillable(true).setDataType(MolgenisFieldTypes.HYPERLINK);
-		entityMetaData.addAttribute(ATTR_LONG).setNillable(true).setDataType(MolgenisFieldTypes.LONG);
-		entityMetaData.addAttribute(ATTR_INT).setNillable(true).setDataType(MolgenisFieldTypes.INT);
-		entityMetaData.addAttribute(ATTR_SCRIPT).setNillable(true).setDataType(MolgenisFieldTypes.SCRIPT);
-		entityMetaData.addAttribute(ATTR_XREF).setNillable(true).setDataType(MolgenisFieldTypes.XREF)
-				.setRefEntity(refEntityMetaData);
-		entityMetaData.addAttribute(ATTR_MREF).setNillable(true).setDataType(MolgenisFieldTypes.MREF)
-				.setRefEntity(refEntityMetaData);
-
-		metaDataService.addEntityMeta(refEntityMetaData);
+		entityMetaData.addAttribute(ID, ROLE_ID).setNillable(false).setAuto(true);
+		entityMetaData.addAttribute(ATTR_STR).setNillable(true);
 		metaDataService.addEntityMeta(entityMetaData);
 	}
 
@@ -172,8 +109,8 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(3);
 		dataService.add(ENTITY_NAME, entities.stream());
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl()), 3);
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl().eq(ATTR_ID, entities.get(0).getIdValue())), 1);
+		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 3);
+		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>().eq(ATTR_ID, entities.get(0).getIdValue())), 1);
 	}
 
 	public void testDelete()
@@ -200,20 +137,20 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl()), entities.size());
+		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), entities.size());
 
 		dataService.delete(ENTITY_NAME, entities.stream());
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl()), 0);
+		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 0);
 	}
 
 	public void testDeleteAll()
 	{
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl()), entities.size());
+		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), entities.size());
 
 		dataService.deleteAll(ENTITY_NAME);
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl()), 0);
+		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 0);
 	}
 
 	public void testFindAllEmpty()
@@ -273,7 +210,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
 		Supplier<Stream<Entity>> found = () -> dataService.findAll(ENTITY_NAME,
-				new QueryImpl().eq(ATTR_ID, entities.get(0).getIdValue()));
+				new QueryImpl<Entity>().eq(ATTR_ID, entities.get(0).getIdValue()));
 		assertEquals(found.get().count(), 1);
 		assertEquals(found.get().findFirst().get().getIdValue(), entities.get(0).getIdValue());
 	}
@@ -293,7 +230,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
 		Supplier<Stream<TestEntity>> found = () -> dataService.findAll(ENTITY_NAME,
-				new QueryImpl().eq(ATTR_ID, entities.get(0).getIdValue()), TestEntity.class);
+				new QueryImpl<TestEntity>().eq(ATTR_ID, entities.get(0).getIdValue()), TestEntity.class);
 		assertEquals(found.get().count(), 1);
 		assertEquals(found.get().findFirst().get().getId(), entities.get(0).getIdValue());
 	}
@@ -335,7 +272,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(1);
 		dataService.add(ENTITY_NAME, entities.stream());
-		Entity entity = dataService.findOne(ENTITY_NAME, new QueryImpl().eq(ATTR_ID, entities.get(0).getIdValue()));
+		Entity entity = dataService.findOne(ENTITY_NAME, new QueryImpl<Entity>().eq(ATTR_ID, entities.get(0).getIdValue()));
 		assertNotNull(entity);
 	}
 
@@ -343,7 +280,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(1);
 		dataService.add(ENTITY_NAME, entities.stream());
-		TestEntity entity = dataService.findOne(ENTITY_NAME, new QueryImpl().eq(ATTR_ID, entities.get(0).getIdValue()),
+		TestEntity entity = dataService.findOne(ENTITY_NAME, new QueryImpl<TestEntity>().eq(ATTR_ID, entities.get(0).getIdValue()),
 				TestEntity.class);
 		assertNotNull(entity);
 		assertEquals(entity.getId(), entities.get(0).getIdValue());
@@ -377,7 +314,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 
 	public void testGetRepository()
 	{
-		Repository repo = dataService.getRepository(ENTITY_NAME);
+		Repository<Entity> repo = dataService.getRepository(ENTITY_NAME);
 		assertNotNull(repo);
 		assertEquals(repo.getName(), ENTITY_NAME);
 
@@ -674,7 +611,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 
 	private void assertCount(int count)
 	{
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl()), count);
+		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), count);
 	}
 
 	public abstract List<RepositoryCapability> getExpectedCapabilities();

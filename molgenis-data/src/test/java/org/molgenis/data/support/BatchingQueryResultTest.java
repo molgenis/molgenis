@@ -19,18 +19,18 @@ public class BatchingQueryResultTest
 	public void getBatch()
 	{
 		final int batchSize = 2;
-		BatchingQueryResult bqr = new BatchingQueryResult(batchSize, new QueryImpl())
+		BatchingQueryResult<Entity> bqr = new BatchingQueryResult<Entity>(batchSize, new QueryImpl<>())
 		{
 			int batchCount = 0;
 
 			@Override
-			protected List<Entity> getBatch(Query q)
+			protected List<Entity> getBatch(Query<Entity> q)
 			{
 				assertEquals(q.getOffset(), batchCount * batchSize);
 				assertEquals(q.getPageSize(), batchSize);
 
 				if (++batchCount == 3) return Lists.newArrayList();
-				return Arrays.<Entity> asList(new MapEntity(), new MapEntity());
+				return Arrays.asList(new MapEntity(), new MapEntity());
 			}
 		};
 

@@ -200,7 +200,7 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 
 		String chromosomeAttribute = config.getAttributeNameForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_CHROM,
 				dataService.getEntityMetaData(dataSet));
-		Query q = new QueryImpl().eq(chromosomeAttribute, segmentId);
+		Query<Entity> q = new QueryImpl<Entity>().eq(chromosomeAttribute, segmentId);
 		q.pageSize(maxbins);
 		return dataService.findAll(dataSet, q);
 	}

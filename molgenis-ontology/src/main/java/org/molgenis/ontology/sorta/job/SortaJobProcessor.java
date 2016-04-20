@@ -54,7 +54,7 @@ public class SortaJobProcessor
 	public void process()
 	{
 		RunAsSystemProxy.runAsSystem(() -> {
-			long maxCount = dataService.count(inputRepositoryName, new QueryImpl());
+			long maxCount = dataService.count(inputRepositoryName, new QueryImpl<>());
 			progress.status("Matching " + maxCount + " input terms from " + inputRepositoryName
 					+ ".\nStoring results in " + resultRepositoryName);
 

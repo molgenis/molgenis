@@ -244,7 +244,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		sourceEntityMetaData.addAttributeMetaData(attributeWeight);
 
 		// Case 1
-		when(dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME, new QueryImpl(disMaxQueryRules)))
+		when(dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME, new QueryImpl<>(disMaxQueryRules)))
 				.thenReturn(Stream.of(entity1));
 
 		Map<AttributeMetaData, ExplainedAttributeMetaData> termsActual1 = semanticSearchService
@@ -256,7 +256,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		assertEquals(termsActual1.toString(), termsExpected1.toString());
 
 		// Case 2
-		when(dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME, new QueryImpl(disMaxQueryRules)))
+		when(dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME, new QueryImpl<>(disMaxQueryRules)))
 				.thenReturn(Stream.empty());
 
 		Map<AttributeMetaData, ExplainedAttributeMetaData> termsActual2 = semanticSearchService

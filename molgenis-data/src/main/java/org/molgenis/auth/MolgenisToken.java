@@ -1,12 +1,13 @@
 package org.molgenis.auth;
 
-import com.google.auto.value.AutoValue;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
+
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+
+import com.google.auto.value.AutoValue;
 
 @AutoValue
 public class MolgenisToken extends org.molgenis.data.support.AbstractEntity implements org.molgenis.data.Entity
@@ -186,7 +187,7 @@ public class MolgenisToken extends org.molgenis.data.support.AbstractEntity impl
 		}
 		if (MOLGENIS_USER.equalsIgnoreCase(attributeName))
 		{
-			org.molgenis.auth.MolgenisUser e = new org.molgenis.auth.MolgenisUser();
+			MolgenisUser e = new org.molgenis.auth.MolgenisUser();
 			e.set((Entity) value);
 			this.setMolgenisUser(e);
 			return;

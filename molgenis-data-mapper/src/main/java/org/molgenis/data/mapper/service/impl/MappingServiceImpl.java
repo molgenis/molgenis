@@ -113,7 +113,7 @@ public class MappingServiceImpl implements MappingService
 				clonedMappingProjectName = mappingProjectName + " - Copy (" + i + ")";
 			}
 
-			if (mappingProjectRepository.getMappingProjects(new QueryImpl().eq(NAME, clonedMappingProjectName))
+			if (mappingProjectRepository.getMappingProjects(new QueryImpl<Entity>().eq(NAME, clonedMappingProjectName))
 					.isEmpty())
 			{
 				break;
@@ -176,7 +176,7 @@ public class MappingServiceImpl implements MappingService
 
 		// add a new repository if the target repo doesn't exist, or check if the target repository is compatible with
 		// the result of the mappings
-		Repository targetRepo;
+		Repository<Entity> targetRepo;
 		if (!dataService.hasRepository(entityName))
 		{
 			targetRepo = dataService.getMeta().addEntityMeta(targetMetaData);
@@ -219,7 +219,7 @@ public class MappingServiceImpl implements MappingService
 	 *            the metadata of the mapping result entity
 	 * @return true if the mapping can be written to the target repository
 	 */
-	private boolean isTargetMetaCompatible(Repository targetRepository, EntityMetaData mappingTargetMetaData)
+	private boolean isTargetMetaCompatible(Repository<Entity> targetRepository, EntityMetaData mappingTargetMetaData)
 	{
 		Map<String, AttributeMetaData> targetRepoAttributeMap = Maps.newHashMap();
 		targetRepository.getEntityMetaData().getAtomicAttributes()
@@ -241,7 +241,7 @@ public class MappingServiceImpl implements MappingService
 		return true;
 	}
 
-	private void applyMappingsToRepositories(MappingTarget mappingTarget, Repository targetRepo)
+	private void applyMappingsToRepositories(MappingTarget mappingTarget, Repository<Entity> targetRepo)
 	{
 		for (EntityMapping sourceMapping : mappingTarget.getEntityMappings())
 		{
@@ -249,18 +249,18 @@ public class MappingServiceImpl implements MappingService
 		}
 	}
 
-	private void applyMappingToRepo(EntityMapping sourceMapping, Repository targetRepo)
+	private void applyMappingToRepo(EntityMapping sourceMapping, Repository<Entity> targetRepo)
 	{
 		EntityMetaData targetMetaData = targetRepo.getEntityMetaData();
-		Repository sourceRepo = dataService.getRepository(sourceMapping.getName());
+		Repository<Entity> sourceRepo = dataService.getRepository(sourceMapping.getName());
 
 		// delete all target entities from this source
-		List<Entity> deleteEntities = targetRepo.findAll(new QueryImpl().eq("source", sourceRepo.getName()))
+		List<Entity> deleteEntities = targetRepo.findAll(new QueryImpl<Entity>().eq("source", sourceRepo.getName()))
 				.filter(Objects::nonNull).collect(Collectors.toList());
 		targetRepo.delete(deleteEntities.stream());
 
 		Iterator<Entity> sourceEntities = sourceRepo.iterator();
-		List<MapEntity> mappedEntities = Lists.newArrayList();
+		List<Entity> mappedEntities = Lists.newArrayList();
 		while (sourceEntities.hasNext())
 		{
 			Entity sourceEntity = sourceEntities.next();
@@ -277,7 +277,7 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	private MapEntity applyMappingToEntity(EntityMapping sourceMapping, Entity sourceEntity,
-			EntityMetaData targetMetaData, EntityMetaData sourceEntityMetaData, Repository targetRepository)
+			EntityMetaData targetMetaData, EntityMetaData sourceEntityMetaData, Repository<Entity> targetRepository)
 	{
 		MapEntity target = new MapEntity(targetMetaData);
 		target.set("source", sourceMapping.getName());

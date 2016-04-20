@@ -8,5 +8,5 @@ import org.molgenis.data.Query;
  */
 public interface QueryCreator extends EntityProcessor
 {
-	Query createQuery(Entity entity);
+	Query<Entity> createQuery(Entity entity);
 }

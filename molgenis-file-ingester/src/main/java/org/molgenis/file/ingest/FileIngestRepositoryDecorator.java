@@ -18,13 +18,13 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 
-public class FileIngestRepositoryDecorator implements Repository
+public class FileIngestRepositoryDecorator implements Repository<Entity>
 {
-	private final Repository decorated;
+	private final Repository<Entity> decorated;
 	private final FileIngesterJobScheduler scheduler;
 	private final DataService dataService;
 
-	public FileIngestRepositoryDecorator(Repository decorated, FileIngesterJobScheduler scheduler,
+	public FileIngestRepositoryDecorator(Repository<Entity> decorated, FileIngesterJobScheduler scheduler,
 			DataService dataService)
 	{
 		this.decorated = decorated;
@@ -69,25 +69,25 @@ public class FileIngestRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Query query()
+	public Query<Entity> query()
 	{
 		return decorated.query();
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		return decorated.count(q);
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		return decorated.findAll(q);
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		return decorated.findOne(q);
 	}
@@ -130,7 +130,7 @@ public class FileIngestRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void update(Stream<? extends Entity> entities)
+	public void update(Stream<Entity> entities)
 	{
 		decorated.update(entities.filter(e -> {
 			scheduler.schedule(e);
@@ -140,7 +140,7 @@ public class FileIngestRepositoryDecorator implements Repository
 
 	private void removeJobExecutions(String entityId)
 	{
-		Query query = dataService.query(FileIngestJobExecutionMetaData.ENTITY_NAME).eq(FileIngestJobExecutionMetaData.FILE_INGEST, entityId);
+		Query<Entity> query = dataService.query(FileIngestJobExecutionMetaData.ENTITY_NAME).eq(FileIngestJobExecutionMetaData.FILE_INGEST, entityId);
 		dataService.delete(FileIngestJobExecutionMetaData.ENTITY_NAME, dataService.findAll(FileIngestJobExecutionMetaData.ENTITY_NAME, query));
 	}
 
@@ -154,7 +154,7 @@ public class FileIngestRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void delete(Stream<? extends Entity> entities)
+	public void delete(Stream<Entity> entities)
 	{
 		decorated.delete(entities.filter(e -> {
 			String entityId = e.getString(FileIngestMetaData.ID);
@@ -210,7 +210,7 @@ public class FileIngestRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Integer add(Stream<? extends Entity> entities)
+	public Integer add(Stream<Entity> entities)
 	{
 		return decorated.add(entities.filter(e -> {
 			scheduler.schedule(e);

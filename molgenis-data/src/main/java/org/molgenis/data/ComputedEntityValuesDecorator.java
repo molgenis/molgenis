@@ -10,11 +10,11 @@ import java.util.stream.StreamSupport;
 
 import org.molgenis.data.support.EntityWithComputedAttributes;
 
-public class ComputedEntityValuesDecorator implements Repository
+public class ComputedEntityValuesDecorator implements Repository<Entity>
 {
-	private final Repository decoratedRepo;
+	private final Repository<Entity> decoratedRepo;
 
-	public ComputedEntityValuesDecorator(Repository decoratedRepo)
+	public ComputedEntityValuesDecorator(Repository<Entity> decoratedRepo)
 	{
 		this.decoratedRepo = requireNonNull(decoratedRepo);
 	}
@@ -44,19 +44,19 @@ public class ComputedEntityValuesDecorator implements Repository
 	}
 
 	@Override
-	public Query query()
+	public Query<Entity> query()
 	{
 		return decoratedRepo.query();
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		return decoratedRepo.count(q);
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		Stream<Entity> entities = decoratedRepo.findAll(q);
 		// compute values with attributes with expressions
@@ -70,7 +70,7 @@ public class ComputedEntityValuesDecorator implements Repository
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		Entity entity = decoratedRepo.findOne(q);
 		// compute values with attributes with expressions
@@ -138,7 +138,7 @@ public class ComputedEntityValuesDecorator implements Repository
 	}
 
 	@Override
-	public void update(Stream<? extends Entity> entities)
+	public void update(Stream<Entity> entities)
 	{
 		decoratedRepo.update(entities);
 	}
@@ -150,7 +150,7 @@ public class ComputedEntityValuesDecorator implements Repository
 	}
 
 	@Override
-	public void delete(Stream<? extends Entity> entities)
+	public void delete(Stream<Entity> entities)
 	{
 		decoratedRepo.delete(entities);
 	}
@@ -180,7 +180,7 @@ public class ComputedEntityValuesDecorator implements Repository
 	}
 
 	@Override
-	public Integer add(Stream<? extends Entity> entities)
+	public Integer add(Stream<Entity> entities)
 	{
 		return decoratedRepo.add(entities);
 	}

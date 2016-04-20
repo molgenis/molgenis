@@ -312,7 +312,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	}
 
 	@Override
-	public long count(Query q, EntityMetaData entityMetaData)
+	public long count(Query<Entity> q, EntityMetaData entityMetaData)
 	{
 		String entityName = entityMetaData.getName();
 		String type = sanitizeMapperType(entityName);
@@ -373,7 +373,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 				long addedCount = countAddSearchResponse.getHits().totalHits();
 
 				// count deleted entities in transaction index
-				Query countDeletedQ = q != null ? new QueryImpl(q) : new QueryImpl();
+				Query<Entity> countDeletedQ = q != null ? new QueryImpl<>(q) : new QueryImpl<>();
 				if (countDeletedQ.getRules() != null && !countDeletedQ.getRules().isEmpty())
 				{
 					countDeletedQ.and();
@@ -863,19 +863,19 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	}
 
 	@Override
-	public Iterable<Entity> search(Query q, final EntityMetaData entityMetaData)
+	public Iterable<Entity> search(Query<Entity> q, final EntityMetaData entityMetaData)
 	{
 		return searchInternal(q, entityMetaData);
 	}
 
 	@Override
-	public Stream<Entity> searchAsStream(Query q, EntityMetaData entityMetaData)
+	public Stream<Entity> searchAsStream(Query<Entity> q, EntityMetaData entityMetaData)
 	{
 		ElasticsearchEntityIterable searchInternal = searchInternal(q, entityMetaData);
 		return new EntityStream(searchInternal.stream(), true);
 	}
 
-	private ElasticsearchEntityIterable searchInternal(Query q, EntityMetaData entityMetaData)
+	private ElasticsearchEntityIterable searchInternal(Query<Entity> q, EntityMetaData entityMetaData)
 	{
 		String[] indexNames = new String[]
 		{ indexName };
@@ -898,7 +898,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery, final EntityMetaData entityMetaData)
 	{
-		Query q = aggregateQuery.getQuery();
+		Query<Entity> q = aggregateQuery.getQuery();
 		AttributeMetaData xAttr = aggregateQuery.getAttributeX();
 		AttributeMetaData yAttr = aggregateQuery.getAttributeY();
 		AttributeMetaData distinctAttr = aggregateQuery.getAttributeDistinct();
@@ -947,7 +947,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 							+ ") is temporary build to make rebuilding of Elasticsearch entities posible."));
 
 			// Add temporary repository into Elasticsearch
-			Repository tempRepository = dataService.getMeta().addEntityMeta(tempEntityMetaData);
+			Repository<Entity> tempRepository = dataService.getMeta().addEntityMeta(tempEntityMetaData);
 
 			// Add temporary repository entities into Elasticsearch
 			dataService.add(tempRepository.getName(), stream(entities.spliterator(), false));
@@ -1045,10 +1045,10 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		{
 			EntityMetaData entityMetaData = pair.getA();
 
-			QueryImpl q = null;
+			QueryImpl<Entity> q = null;
 			for (AttributeMetaData attributeMetaData : pair.getB())
 			{
-				if (q == null) q = new QueryImpl();
+				if (q == null) q = new QueryImpl<Entity>();
 				else q.or();
 				q.eq(attributeMetaData.getName(), refEntity);
 			}
@@ -1134,10 +1134,10 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			if (!refEntityMetaData.getName().equals(EntityMetaDataMetaData.ENTITY_NAME)
 					&& !refEntityMetaData.getName().equals(AttributeMetaDataMetaData.ENTITY_NAME))
 			{
-				QueryImpl q = null;
+				QueryImpl<Entity> q = null;
 				for (AttributeMetaData attributeMetaData : pair.getB())
 				{
-					if (q == null) q = new QueryImpl();
+					if (q == null) q = new QueryImpl<Entity>();
 					else q.or();
 					q.in(attributeMetaData.getName(), ids);
 				}

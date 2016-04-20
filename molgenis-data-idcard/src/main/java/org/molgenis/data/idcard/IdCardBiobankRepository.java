@@ -75,19 +75,19 @@ public class IdCardBiobankRepository extends AbstractRepository
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		return elasticsearchService.count(q, getEntityMetaData());
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		return elasticsearchService.searchAsStream(q, getEntityMetaData());
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		Iterator<Entity> it = findAll(q).iterator();
 		return it.hasNext() ? it.next() : null;

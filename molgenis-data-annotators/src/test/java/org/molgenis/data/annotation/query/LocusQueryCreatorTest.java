@@ -25,7 +25,7 @@ public class LocusQueryCreatorTest
 
 		Entity entity = new MapEntity(map);
 
-		Query q = QueryImpl.EQ(VcfRepository.CHROM, "3").and().eq(VcfRepository.POS, 3276424L);
+		Query<Entity> q = QueryImpl.EQ(VcfRepository.CHROM, "3").and().eq(VcfRepository.POS, 3276424L);
 		assertEquals(q, new LocusQueryCreator().createQuery(entity));
 	}
 

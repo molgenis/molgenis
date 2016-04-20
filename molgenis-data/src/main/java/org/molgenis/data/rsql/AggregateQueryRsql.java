@@ -3,6 +3,7 @@ package org.molgenis.data.rsql;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.molgenis.data.AggregateQuery;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 
@@ -22,7 +23,7 @@ public class AggregateQueryRsql
 		this.rootNode = checkNotNull(rootNode);
 	}
 
-	public AggregateQuery createAggregateQuery(EntityMetaData entityMetaData, Query query)
+	public AggregateQuery createAggregateQuery(EntityMetaData entityMetaData, Query<Entity> query)
 	{
 		AggregateQueryRsqlVisitor rsqlVisitor = new AggregateQueryRsqlVisitor(entityMetaData, query);
 		return rootNode.accept(rsqlVisitor);

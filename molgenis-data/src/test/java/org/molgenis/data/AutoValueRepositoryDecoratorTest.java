@@ -37,7 +37,7 @@ public class AutoValueRepositoryDecoratorTest
 	private static final String ATTR_DATETIME_AUTO_TRUE = "datetime_auto-true";
 
 	private DefaultEntityMetaData entityMetaData;
-	private Repository decoratedRepository;
+	private Repository<Entity> decoratedRepository;
 	private AutoValueRepositoryDecorator repositoryDecorator;
 	private IdGenerator idGenerator;
 
@@ -181,7 +181,7 @@ public class AutoValueRepositoryDecoratorTest
 	public void findAllAsStream()
 	{
 		Entity entity0 = mock(Entity.class);
-		Query query = mock(Query.class);
+		Query<Entity> query = mock(Query.class);
 		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = repositoryDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
