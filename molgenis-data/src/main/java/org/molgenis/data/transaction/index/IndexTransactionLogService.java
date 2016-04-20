@@ -72,7 +72,7 @@ public class IndexTransactionLogService implements MolgenisTransactionListener
 			if (transactionId != null)
 			{
 				runAsSystem(() -> {
-					Entity transLog = dataService.findOne(IndexTransactionLogMetaData.ENTITY_NAME, transactionId);
+					Entity transLog = dataService.findOneById(IndexTransactionLogMetaData.ENTITY_NAME, transactionId);
 					if (transLog != null)
 					{
 						Entity transLogEntry = this.createLogEntry(transLog, entityMetaData.getName(), cudType,
@@ -122,7 +122,7 @@ public class IndexTransactionLogService implements MolgenisTransactionListener
 	private synchronized void finishTransaction(String transactionId, TransactionStatus transactionStatus)
 	{
 		RunAsSystemProxy.runAsSystem(() -> {
-			Entity transLog = dataService.findOne(IndexTransactionLogMetaData.ENTITY_NAME, transactionId);
+			Entity transLog = dataService.findOneById(IndexTransactionLogMetaData.ENTITY_NAME, transactionId);
 			transLog.set(IndexTransactionLogMetaData.END_TIME, new Date());
 			transLog.set(IndexTransactionLogMetaData.TRANSACTION_STATUS, transactionStatus);
 			dataService.update(IndexTransactionLogMetaData.ENTITY_NAME, transLog);

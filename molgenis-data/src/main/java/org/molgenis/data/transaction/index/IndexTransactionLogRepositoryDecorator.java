@@ -19,12 +19,12 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.transaction.index.IndexTransactionLogEntryMetaData.CudType;
 import org.molgenis.data.transaction.index.IndexTransactionLogEntryMetaData.DataType;
 
-public class IndexTransactionLogRepositoryDecorator implements Repository
+public class IndexTransactionLogRepositoryDecorator implements Repository<Entity>
 {
-	private final Repository decorated;
+	private final Repository<Entity> decorated;
 	private final IndexTransactionLogService indexTransactionLogService;
 
-	public IndexTransactionLogRepositoryDecorator(Repository decorated,
+	public IndexTransactionLogRepositoryDecorator(Repository<Entity> decorated,
 			IndexTransactionLogService indexTransactionLogService)
 	{
 		this.decorated = requireNonNull(decorated);
@@ -74,51 +74,27 @@ public class IndexTransactionLogRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Query query()
+	public Query<Entity> query()
 	{
 		return decorated.query();
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		return decorated.count(q);
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		return decorated.findAll(q);
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		return decorated.findOne(q);
-	}
-
-	@Override
-	public Entity findOne(Object id)
-	{
-		return decorated.findOne(id);
-	}
-
-	@Override
-	public Entity findOne(Object id, Fetch fetch)
-	{
-		return decorated.findOne(id, fetch);
-	}
-
-	@Override
-	public Stream<Entity> findAll(Stream<Object> ids)
-	{
-		return decorated.findAll(ids);
-	}
-
-	@Override
-	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
-	{
-		return decorated.findAll(ids, fetch);
 	}
 
 	@Override
@@ -136,13 +112,6 @@ public class IndexTransactionLogRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void update(Stream<? extends Entity> entities)
-	{
-		indexTransactionLogService.log(getEntityMetaData(), CudType.UPDATE, DataType.DATA, null);
-		decorated.update(entities);
-	}
-
-	@Override
 	public void delete(Entity entity)
 	{
 		indexTransactionLogService.log(getEntityMetaData(), CudType.DELETE, DataType.DATA, entity.getIdValue()
@@ -151,24 +120,10 @@ public class IndexTransactionLogRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void delete(Stream<? extends Entity> entities)
-	{
-		indexTransactionLogService.log(getEntityMetaData(), CudType.DELETE, DataType.DATA, null);
-		decorated.delete(entities);
-	}
-
-	@Override
 	public void deleteById(Object id)
 	{
 		indexTransactionLogService.log(getEntityMetaData(), CudType.DELETE, DataType.DATA, id.toString());
 		decorated.deleteById(id);
-	}
-
-	@Override
-	public void deleteById(Stream<Object> ids)
-	{
-		indexTransactionLogService.log(getEntityMetaData(), CudType.DELETE, DataType.DATA, null);
-		decorated.deleteById(ids);
 	}
 
 	@Override
@@ -186,7 +141,7 @@ public class IndexTransactionLogRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Integer add(Stream<? extends Entity> entities)
+	public Integer add(Stream<Entity> entities)
 	{
 		indexTransactionLogService.log(getEntityMetaData(), CudType.ADD, DataType.DATA, null);
 		return decorated.add(entities);
@@ -233,5 +188,50 @@ public class IndexTransactionLogRepositoryDecorator implements Repository
 	public void removeEntityListener(EntityListener entityListener)
 	{
 		decorated.removeEntityListener(entityListener);
+	}
+
+	@Override
+	public Entity findOneById(Object id)
+	{
+		return decorated.findOneById(id);
+	}
+
+	@Override
+	public Entity findOneById(Object id, Fetch fetch)
+	{
+		return decorated.findOneById(id, fetch);
+	}
+
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids)
+	{
+		return decorated.findAll(ids);
+	}
+
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
+	{
+		return decorated.findAll(ids, fetch);
+	}
+
+	@Override
+	public void update(Stream<Entity> entities)
+	{
+		indexTransactionLogService.log(getEntityMetaData(), CudType.UPDATE, DataType.DATA, null);
+		decorated.update(entities);
+	}
+
+	@Override
+	public void delete(Stream<Entity> entities)
+	{
+		indexTransactionLogService.log(getEntityMetaData(), CudType.DELETE, DataType.DATA, null);
+		decorated.delete(entities);
+	}
+
+	@Override
+	public void deleteAll(Stream<Object> ids)
+	{
+		indexTransactionLogService.log(getEntityMetaData(), CudType.DELETE, DataType.DATA, null);
+		decorated.deleteAll(ids);
 	}
 }

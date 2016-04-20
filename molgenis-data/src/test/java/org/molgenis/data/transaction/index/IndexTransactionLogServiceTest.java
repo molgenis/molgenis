@@ -93,7 +93,7 @@ public class IndexTransactionLogServiceTest
 	public void testLog()
 	{
 		DefaultEntity actualTransLog = this.createNewTransLogEntity("1");
-		when(dataService.findOne(IndexTransactionLogMetaData.ENTITY_NAME, "1")).thenReturn(actualTransLog);
+		when(dataService.findOneById(IndexTransactionLogMetaData.ENTITY_NAME, "1")).thenReturn(actualTransLog);
 
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 		when(entityMetaData.getName()).thenReturn("non_log_entity");
@@ -128,7 +128,7 @@ public class IndexTransactionLogServiceTest
 	public void commitTransaction()
 	{
 		Entity entity = mock(Entity.class);
-		when(dataService.findOne(IndexTransactionLogMetaData.ENTITY_NAME, "2")).thenReturn(entity);
+		when(dataService.findOneById(IndexTransactionLogMetaData.ENTITY_NAME, "2")).thenReturn(entity);
 		indexTransactionLogService.commitTransaction("2");
 		verify(entity).set(eq(IndexTransactionLogMetaData.END_TIME), any(Date.class));
 		verify(entity).set(IndexTransactionLogMetaData.TRANSACTION_STATUS, TransactionStatus.COMMITED);
@@ -139,7 +139,7 @@ public class IndexTransactionLogServiceTest
 	public void rollbackTransaction()
 	{
 		Entity entity = mock(Entity.class);
-		when(dataService.findOne(IndexTransactionLogMetaData.ENTITY_NAME, "2")).thenReturn(entity);
+		when(dataService.findOneById(IndexTransactionLogMetaData.ENTITY_NAME, "2")).thenReturn(entity);
 		indexTransactionLogService.rollbackTransaction("2");
 		verify(entity).set(eq(IndexTransactionLogMetaData.END_TIME), any(Date.class));
 		verify(entity).set(IndexTransactionLogMetaData.TRANSACTION_STATUS, TransactionStatus.ROLLBACK);

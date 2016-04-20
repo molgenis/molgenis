@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.Iterator;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
@@ -69,13 +70,13 @@ public class IndexTransactionLogRepositoryCollectionDecorator implements Managea
 	}
 
 	@Override
-	public Iterator<Repository> iterator()
+	public Iterator<Repository<Entity>> iterator()
 	{
 		return this.decorated.iterator();
 	}
 
 	@Override
-	public Repository addEntityMeta(EntityMetaData entityMeta)
+	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
 	{
 		this.indexTransactionLogService.log(entityMeta, CudType.ADD,
 				DataType.METADATA, null);
