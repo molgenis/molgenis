@@ -251,17 +251,17 @@ public class SortaServiceImpl implements SortaService
 	 */
 	private SortaHit calculateNGromOTAnnotations(SortaInput sortaInput, OntologyTerm ontologyTerm)
 	{
-		List<String> annotationMatchAttributes = sortaInput.getAnnotationMatchAttributes().stream()
-				.map(StringUtils::lowerCase).collect(Collectors.toList());
-
-		for (OntologyTermAnnotation annotation : ontologyTerm.getAnnotations())
+		for (String attributeName : sortaInput.getAnnotationMatchAttributes())
 		{
-			String annotationName = annotation.getName().toLowerCase();
-			String annotationValue = annotation.getValue();
-			if (annotationMatchAttributes.contains(annotationName)
-					&& sortaInput.getValue(annotationName).equalsIgnoreCase(annotationValue))
+			for (OntologyTermAnnotation annotation : ontologyTerm.getAnnotations())
 			{
-				return SortaHit.create(ontologyTerm, 100, 100);
+				String annotationName = annotation.getName();
+				String annotationValue = annotation.getValue();
+				if (attributeName.equalsIgnoreCase(annotationName)
+						&& sortaInput.getValue(attributeName).equalsIgnoreCase(annotationValue))
+				{
+					return SortaHit.create(ontologyTerm, 100, 100);
+				}
 			}
 		}
 
@@ -356,10 +356,10 @@ public class SortaServiceImpl implements SortaService
 
 	private String stemQuery(String queryString)
 	{
-		Set<String> collect = Stream.of(queryString.toLowerCase().trim().split(NON_WORD_SEPARATOR))
+		List<String> collect = Stream.of(queryString.toLowerCase().trim().split(NON_WORD_SEPARATOR))
 				.filter(w -> !STOPWORDSLIST.contains(w) && !ELASTICSEARCH_RESERVED_WORDS.contains(w)).map(Stemmer::stem)
-				.filter(StringUtils::isNotBlank).collect(Collectors.toSet());
-		return join(collect, SINGLE_WHITESPACE);
+				.filter(StringUtils::isNotBlank).collect(toList());
+		return join(Sets.newLinkedHashSet(collect), SINGLE_WHITESPACE);
 	}
 
 	private String fuzzyMatchQuerySyntax(String queryString)
