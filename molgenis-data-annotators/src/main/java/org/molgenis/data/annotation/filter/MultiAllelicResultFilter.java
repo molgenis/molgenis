@@ -10,6 +10,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.entity.ResultFilter;
+import org.molgenis.data.vcf.VcfRepository;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,7 +59,6 @@ import static org.molgenis.data.vcf.VcfRepository.REF_META;
  * another TCC. Finding and parsing these variants to correctly match them against databases such as 1000 Genomes and
  * ExAC would be very valuable.
  * 
- *
  */
 public class MultiAllelicResultFilter implements ResultFilter
 {
@@ -85,7 +85,7 @@ public class MultiAllelicResultFilter implements ResultFilter
 	}
 
 	@Override
-	public Optional<Entity> filterResults(Iterable<Entity> resourceEntities, Entity sourceEntity)
+	public Optional<Entity> filterResults(Iterable<Entity> resourceEntities, Entity sourceEntity, boolean updateMode)
 	{
 		List<Entity> processedResults = new ArrayList<>();
 
@@ -106,40 +106,55 @@ public class MultiAllelicResultFilter implements ResultFilter
 
 			if (resourceRef.equals(sourceRef))
 			{
-				processedResults.addAll(filter(sourceEntity, resourceEntity, "", ""));
+				processedResults.addAll(filter(sourceEntity, resourceEntity, "", "", updateMode));
 			}
 			// example: ref AGG, input A, substring AGG from index 1, so GG is the postfix to use to match against this
 			// reference
 			else if (resourceRef.startsWith(sourceRef))
 			{
 				String postFix = resourceRef.substring(sourceRef.length());
-				processedResults.addAll(filter(sourceEntity, resourceEntity, postFix, ""));
+				processedResults.addAll(filter(sourceEntity, resourceEntity, postFix, "", updateMode));
 			}
 			// example: ref T, input TC, substring TC from index 1, so C is the postfix to use to match against this
 			// input
 			else if (sourceRef.startsWith(resourceRef))
 			{
 				String postFix = sourceRef.substring(resourceRef.length());
-				processedResults.addAll(filter(sourceEntity, resourceEntity, "", postFix));
+				processedResults.addAll(filter(sourceEntity, resourceEntity, "", postFix, updateMode));
 			}
 		}
 		return from(processedResults).first();
 	}
 
-	private List<Entity> filter(Entity annotatedEntity, Entity entity, String sourcePostfix, String resourcePostfix)
+	private List<Entity> filter(Entity sourceEntity, Entity resourceEntity, String sourcePostfix,
+			String resourcePostfix, boolean updateMode)
 	{
 		List<Entity> result = Lists.newArrayList();
 		Map<String, String> alleleValueMap = new HashMap<>();
-		String[] alts = entity.getString(ALT).split(",");
+		Map<String, String> sourceAlleleValueMap = new HashMap<>();
+		String[] alts = resourceEntity.getString(VcfRepository.ALT).split(",");
+		String[] sourceAlts = sourceEntity.getString(VcfRepository.ALT).split(",");
 		for (AttributeMetaData attributeMetaData : attributes)
 		{
-			String[] values = entity.getString(attributeMetaData.getName()).split(",");
+			String[] values = resourceEntity.getString(attributeMetaData.getName()).split(",", -1);
 			for (int i = 0; i < alts.length; i++)
 			{
 				alleleValueMap.put(alts[i] + resourcePostfix, values[i]);
 			}
+
+			// also compile a list of original source alleles and their values for use in 'update mode'
+			if (updateMode && sourceEntity.getString(attributeMetaData.getName()) != null)
+			{
+				String[] sourceValues = sourceEntity.getString(attributeMetaData.getName()).split(",", -1);
+				for (int i = 0; i < sourceAlts.length; i++)
+				{
+					sourceAlleleValueMap.put(sourceAlts[i] + resourcePostfix,
+							sourceValues[i].isEmpty() ? "." : sourceValues[i]);
+				}
+			}
+
 			StringBuilder newAttributeValue = new StringBuilder();
-			String[] annotatedEntityAltAlleles = annotatedEntity.getString(ALT).split(",");
+			String[] annotatedEntityAltAlleles = sourceEntity.getString(ALT).split(",");
 			for (int i = 0; i < annotatedEntityAltAlleles.length; i++)
 			{
 				if (i != 0)
@@ -152,15 +167,33 @@ public class MultiAllelicResultFilter implements ResultFilter
 				}
 				else
 				{
-					// missing allele in source, add a dot
-					newAttributeValue.append(".");
+					// default: no data in in resource, add "." for missing value
+					// because we are not in update mode, don't check the original source
+					if (updateMode == false)
+					{
+						newAttributeValue.append(".");
+					}
+					else
+					{
+						// we are in update mode, so let's check the source entity if there was an original value
+						if (sourceAlleleValueMap.get(annotatedEntityAltAlleles[i] + sourcePostfix) != null)
+						{
+							newAttributeValue
+									.append(sourceAlleleValueMap.get(annotatedEntityAltAlleles[i] + sourcePostfix));
+						}
+						// if there was no original value either, add "." for missing value
+						else
+						{
+							newAttributeValue.append(".");
+						}
+					}
 				}
 			}
 			// add entity only if something was found, so no '.' or any multiple of '.,' (e.g. ".,.,.")
 			if (!newAttributeValue.toString().matches("[\\.,]+"))
 			{
-				entity.set(attributeMetaData.getName(), newAttributeValue.toString());
-				result.add(entity);
+				resourceEntity.set(attributeMetaData.getName(), newAttributeValue.toString());
+				result.add(resourceEntity);
 			}
 		}
 		return result;

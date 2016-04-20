@@ -57,7 +57,6 @@ public class GavinAnnotator
 	public static final double MAF_THRESHOLD = 0.00474;
 	private final GavinAlgorithm gavinAlgorithm = new GavinAlgorithm();
 
-
 	@Autowired
 	private Entity gavinAnnotatorSettings;
 
@@ -99,7 +98,8 @@ public class GavinAnnotator
 				AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE, NAME, description, attributes);
 		EntityAnnotator entityAnnotator = new QueryAnnotatorImpl(RESOURCE, gavinInfo, new GeneNameQueryCreator(),
 				dataService, resources, (annotationSourceFileName) -> {
-					gavinAnnotatorSettings.set(GavinAnnotatorSettings.Meta.VARIANT_FILE_LOCATION, annotationSourceFileName);
+					gavinAnnotatorSettings.set(GavinAnnotatorSettings.Meta.VARIANT_FILE_LOCATION,
+							annotationSourceFileName);
 				})
 		{
 			@Override
@@ -124,10 +124,15 @@ public class GavinAnnotator
 
 			@Override
 			protected void processQueryResults(Entity inputEntity, Iterable<Entity> annotationSourceEntities,
-					Entity resultEntity)
+					Entity resultEntity, boolean updateMode)
 			{
+				if (updateMode == true)
+				{
+					throw new MolgenisDataException("This annotator/filter does not support updating of values");
+				}
 				String alt = inputEntity.getString(EffectsMetaData.ALT);
-				if(alt == null){
+				if (alt == null)
+				{
 					resultEntity.set(CLASSIFICATION, "");
 					resultEntity.set(CONFIDENCE, "");
 					resultEntity.set(REASON, "Missing ALT allele no judgment could be determined.");
