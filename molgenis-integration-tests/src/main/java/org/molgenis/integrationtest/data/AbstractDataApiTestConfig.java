@@ -23,6 +23,7 @@ import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.data.transaction.TransactionConfig;
 import org.molgenis.data.transaction.TransactionLogService;
+import org.molgenis.data.transaction.index.IndexTransactionLogService;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.file.FileMetaMetaData;
@@ -64,6 +65,9 @@ public abstract class AbstractDataApiTestConfig
 
 	@Autowired
 	private TransactionLogService transactionLogService;
+
+	@Autowired
+	private IndexTransactionLogService indexTransactionLogService;
 
 	@Autowired
 	public ExpressionValidator expressionValidator;
@@ -152,7 +156,8 @@ public abstract class AbstractDataApiTestConfig
 			{
 				return new MolgenisRepositoryDecoratorFactory(entityManager(), transactionLogService,
 						entityAttributesValidator(), idGenerator(), appSettings(), dataService(), expressionValidator,
-						repositoryDecoratorRegistry()).createDecoratedRepository(repository);
+						repositoryDecoratorRegistry(), indexTransactionLogService)
+						.createDecoratedRepository(repository);
 			}
 		};
 	}
