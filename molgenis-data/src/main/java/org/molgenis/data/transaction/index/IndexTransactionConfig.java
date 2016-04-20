@@ -17,18 +17,18 @@ public class IndexTransactionConfig
 	@Autowired
 	private MolgenisTransactionManager transactionManager;
 
-	private final String backendName = "PostgreSQL";
+	public static final String INDEX_LOG_BACKEND_NAME = "PostgreSQL";
 
 	@Bean
 	public IndexTransactionLogMetaData indexTransactionLogMetaData()
 	{
-		return new IndexTransactionLogMetaData(backendName);
+		return new IndexTransactionLogMetaData(INDEX_LOG_BACKEND_NAME);
 	}
 
 	@Bean
 	public IndexTransactionLogEntryMetaData indexTransactionLogEntryMetaData()
 	{
-		return new IndexTransactionLogEntryMetaData(indexTransactionLogMetaData(), backendName);
+		return new IndexTransactionLogEntryMetaData(indexTransactionLogMetaData(), INDEX_LOG_BACKEND_NAME);
 	}
 
 	@Bean
