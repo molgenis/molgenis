@@ -4,6 +4,7 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
@@ -39,8 +40,8 @@ public abstract class IdAnnotatorImpl implements EntityAnnotator
 	private final CmdLineAnnotatorSettingsConfigurer cmdLineAnnotatorSettingsConfigurer;
 
 	public IdAnnotatorImpl(String sourceRepositoryName, AnnotatorInfo info, QueryCreator queryCreator,
-						   DataService dataService, Resources resources,
-						   CmdLineAnnotatorSettingsConfigurer cmdLineAnnotatorSettingsConfigurer)
+			DataService dataService, Resources resources,
+			CmdLineAnnotatorSettingsConfigurer cmdLineAnnotatorSettingsConfigurer)
 	{
 		this.sourceRepositoryName = sourceRepositoryName;
 		this.dataService = dataService;
@@ -81,8 +82,12 @@ public abstract class IdAnnotatorImpl implements EntityAnnotator
 	}
 
 	@Override
-	public List<Entity> annotateEntity(Entity entity)
+	public List<Entity> annotateEntity(Entity entity, boolean updateMode)
 	{
+		if (updateMode == true)
+		{
+			throw new MolgenisDataException("This annotator/filter does not support updating of values");
+		}
 		Query q = queryCreator.createQuery(entity);
 		Iterable<Entity> annotatationSourceEntities;
 		if (resources.hasRepository(sourceRepositoryName))

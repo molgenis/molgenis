@@ -204,6 +204,8 @@ public class CmdLineAnnotator
 		parser.acceptsAll(asList("h", "help"), "Prints this help text");
 		parser.acceptsAll(asList("r", "replace"),
 				"Enables output file override, replacing a file with the same name as the argument for the -o option");
+		parser.acceptsAll(asList("u", "update-annotations"),
+				"Enables add/updating of annotations, i.e. CADD scores from a different source, by reusing existing annotations when no match was found.");
 
 		return parser;
 	}
@@ -237,8 +239,9 @@ public class CmdLineAnnotator
 				List<String> outputAttributeNames = VcfUtils.getAtomicAttributesFromList(annotator.getOutputMetaData())
 						.stream().map((attr) -> attr.getName()).collect(Collectors.toList());
 
-				List<String> inputAttributeNames = VcfUtils.getAtomicAttributesFromList(vcfRepo.getEntityMetaData().getAtomicAttributes())
-						.stream().map((attr) -> attr.getName()).collect(Collectors.toList());
+				List<String> inputAttributeNames = VcfUtils
+						.getAtomicAttributesFromList(vcfRepo.getEntityMetaData().getAtomicAttributes()).stream()
+						.map((attr) -> attr.getName()).collect(Collectors.toList());
 
 				boolean stop = false;
 				for (Object attrName : attributesToInclude)
@@ -248,8 +251,10 @@ public class CmdLineAnnotator
 						System.out.println("Unknown output attribute '" + attrName + "'");
 						stop = true;
 					}
-					else if(inputAttributeNames.contains(attrName)){
-						System.out.println("The output attribute '" + attrName + "' is present in the inputfile, but is deselected in the current run, this is not supported");
+					else if (inputAttributeNames.contains(attrName))
+					{
+						System.out.println("The output attribute '" + attrName
+								+ "' is present in the inputfile, but is deselected in the current run, this is not supported");
 						stop = true;
 					}
 				}
@@ -293,12 +298,16 @@ public class CmdLineAnnotator
 			Iterable<Entity> entitiesToAnnotate;
 			if (annotator instanceof EffectsAnnotator)
 			{
-				entitiesToAnnotate = VcfUtils.createEntityStructureForVcf(vcfRepo.getEntityMetaData(), EFFECT, vcfRepo.stream());
+				entitiesToAnnotate = VcfUtils.createEntityStructureForVcf(vcfRepo.getEntityMetaData(), EFFECT,
+						vcfRepo.stream());
 			}
 			else
 			{
 				entitiesToAnnotate = vcfRepo;
 			}
+
+			System.out.println("update = " + options.has("u"));
+
 			Iterator<Entity> annotatedRecords = annotator.annotate(entitiesToAnnotate);
 
 			if (annotator instanceof RefEntityAnnotator || annotator instanceof EffectsAnnotator)
