@@ -45,6 +45,11 @@ public abstract class OntologyTerm
 		return new AutoValue_OntologyTerm(iri, label, description, singletonList(description), emptyList());
 	}
 
+	public static OntologyTerm create(String iri, String label, String description, List<String> synonyms)
+	{
+		return new AutoValue_OntologyTerm(iri, label, description, copyOf(synonyms), emptyList());
+	}
+
 	public static OntologyTerm create(String iri, String label, String description, List<String> synonyms,
 			List<OntologyTermAnnotation> annotations)
 	{
