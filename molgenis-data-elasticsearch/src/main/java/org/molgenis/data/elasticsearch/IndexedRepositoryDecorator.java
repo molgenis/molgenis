@@ -29,6 +29,10 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Decorator for indexed repositories. Sends all queries with operators that are not supported by the decorated
+ * repository to the index.
+ */
 public class IndexedRepositoryDecorator implements Repository<Entity>
 {
 	private static final int BATCH_SIZE = 1000;
@@ -237,6 +241,11 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 		decoratedRepository.drop();
 	}
 
+	/**
+	 * Gets the capabilities of the underlying repository and adds three read capabilities provided by the index:
+	 * {@link #INDEXABLE}, {@link #QUERYABLE} and {@link #AGGREGATEABLE}. Does not add other index capabilities like
+	 * {@link #WRITABLE} because those might conflict with the underlying repository.
+	 */
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
@@ -308,6 +317,10 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 		decoratedRepository.removeEntityListener(entityListener);
 	}
 
+	/**
+	 * Checks if the underlying repository can handle this query. Queries with unsupported operators or queries that use
+	 * attributes with computed values are delegated to the index.
+	 */
 	private boolean querySupported(Query<Entity> q)
 	{
 		if (QueryUtils.containsAnyOperator(q, unsupportedOperators))
