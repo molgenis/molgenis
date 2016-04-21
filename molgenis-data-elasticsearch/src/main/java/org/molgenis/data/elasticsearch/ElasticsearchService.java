@@ -298,6 +298,12 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		}
 	}
 
+	@Override
+	public void refreshIndex()
+	{
+		this.refresh(this.indexName);
+	}
+
 	private void refresh(String index)
 	{
 		if (LOG.isTraceEnabled()) LOG.trace("Refreshing Elasticsearch index [{}] ...", index);

@@ -168,5 +168,4 @@ public class MolgenisTransactionManager extends DataSourceTransactionManager
 		MolgenisTransaction molgenisTransaction = (MolgenisTransaction) transaction;
 		super.doResume(molgenisTransaction.getDataSourceTransaction(), suspendedResources);
 	}
-
 }

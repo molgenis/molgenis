@@ -172,4 +172,6 @@ public interface SearchService
 	 * Optimize the index for faster search operations, remove documents that are marked as deleted.
 	 */
 	void optimizeIndex();
+
+	void refreshIndex();
 }

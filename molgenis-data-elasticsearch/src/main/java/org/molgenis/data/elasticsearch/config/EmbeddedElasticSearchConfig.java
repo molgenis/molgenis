@@ -10,6 +10,8 @@ import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
+import org.molgenis.data.elasticsearch.transaction.RebuildIndexService;
+import org.molgenis.data.elasticsearch.transaction.RebuildIndexServiceImpl;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -73,5 +75,13 @@ public class EmbeddedElasticSearchConfig
 		molgenisTransactionManager.addTransactionListener(elasticSearchService);
 
 		return elasticSearchService;
+	}
+
+	@Bean
+	public RebuildIndexService rebuildIndexService()
+	{
+		RebuildIndexService rebuildIndexService = new RebuildIndexServiceImpl(dataService, searchService());
+		molgenisTransactionManager.addTransactionListener(rebuildIndexService);
+		return rebuildIndexService;
 	}
 }
