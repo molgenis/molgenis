@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import static org.molgenis.gavin.job.GavinJobExecutionMetaData.GAVIN_JOB_EXECUTION;
 @Component
 public class GavinJobFactory
 {
@@ -55,7 +56,7 @@ public class GavinJobFactory
 	@RunAsSystem
 	public GavinJob createJob(GavinJobExecution metaData)
 	{
-		dataService.add(GavinJobExecution.ENTITY_NAME, metaData);
+		dataService.add(GAVIN_JOB_EXECUTION, metaData);
 		String username = metaData.getUser().getUsername();
 
 		// create an authentication to run as the user that is listed as the owner of the job

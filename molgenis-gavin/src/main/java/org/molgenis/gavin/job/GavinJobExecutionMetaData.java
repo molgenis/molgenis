@@ -7,9 +7,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class GavinJobExecutionMetaData extends DefaultEntityMetaData
 {
+	public static final String GAVIN_JOB_EXECUTION = "GavinJobExecution";
 	public GavinJobExecutionMetaData()
 	{
-		super(GavinJobExecution.ENTITY_NAME, GavinJobExecution.class);
+		super(GAVIN_JOB_EXECUTION, GavinJobExecution.class);
 		setExtends(new JobExecutionMetaData());
 	}
 }

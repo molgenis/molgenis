@@ -8,7 +8,6 @@ public class GavinJobExecution extends JobExecution
 {
 	private static final long serialVersionUID = 1L;
 	public static final String GAVIN = "gavin";
-	public static final String ENTITY_NAME = "GavinJobExecution";
 
 	public static final EntityMetaData META_DATA = new GavinJobExecutionMetaData();
 
