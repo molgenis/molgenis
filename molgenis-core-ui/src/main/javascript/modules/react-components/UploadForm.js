@@ -8,6 +8,7 @@ var UploadForm = React.createClass({
 	displayName: 'UploadForm',
 	propTypes: {
 		width: React.PropTypes.oneOf(['1','2','3','4','5','6','7','8','9','10','11','12']),
+		showAction: React.PropTypes.bool,
 		onSubmit: React.PropTypes.func.isRequired
 	},
 	getInitialState: function() {
@@ -21,6 +22,7 @@ var UploadForm = React.createClass({
 	getDefaultProps: function() {
 		return {
 			width: '6',
+			showAction: false
 		};
 	},
 	render: function() {
@@ -38,10 +40,10 @@ var UploadForm = React.createClass({
 					<Input id='file-name-input-field' type='string' onValueChange={this._setFileName} required={true} value={this.state.fileName}/>
 				</div>
 				}
-				<div className='form-group'>
+				{this.props.showAction && <div className='form-group'>
 					<label htmlFor='action-field'>Action</label>
 					<RadioGroup name='action-field' layout='vertical' options={actions} type='radio' onValueChange={this._setAction} required={false} value={this.state.action} />
-				</div>
+				</div>}
 					
 				<div className='form-group'>
 					<Button id='upload-file-btn' type='submit' style='default' size='medium' onClick={this._onSubmit} text='Upload' 
