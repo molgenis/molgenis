@@ -63,7 +63,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	}
 
 	@SuppressWarnings("resource")
-	@Test(expectedExceptions = IllegalArgumentException.class)
+	@Test(expectedExceptions = NullPointerException.class)
 	public void ElasticSearchRepository()
 	{
 		new ElasticsearchRepositoryDecorator(null, null);

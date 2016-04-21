@@ -3,7 +3,6 @@ package org.molgenis.data.elasticsearch;
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.transaction.MolgenisTransactionManager.TRANSACTION_ID_RESOURCE_NAME;
 import static org.testng.Assert.assertEquals;
 
 import java.io.File;
@@ -30,7 +29,6 @@ import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -127,7 +125,7 @@ public class ElasticsearchServiceIntegrationTest
 		entity.set(idAttrName, "0");
 		entity.set(labelAttrName, "label");
 		elasticsearchService.index(entity, entityMeta, IndexingMode.ADD);
-		elasticsearchService.refresh(entityMeta);
+		elasticsearchService.refresh();
 		Entity updatedEntity = elasticsearchService.get("0", entityMeta);
 		assertEquals(updatedEntity, entity);
 	}
@@ -139,7 +137,7 @@ public class ElasticsearchServiceIntegrationTest
 		entity.set(idAttrName, "0");
 		entity.set(labelAttrName, "label");
 		elasticsearchService.index(Stream.of(entity), entityMeta, IndexingMode.ADD);
-		elasticsearchService.refresh(entityMeta);
+		elasticsearchService.refresh();
 		Entity updatedEntity = elasticsearchService.get("0", entityMeta);
 		assertEquals(updatedEntity, entity);
 	}
@@ -155,279 +153,10 @@ public class ElasticsearchServiceIntegrationTest
 		entity1.set(labelAttrName, "label1");
 
 		elasticsearchService.index(Stream.of(entity0, entity1), entityMeta, IndexingMode.ADD);
-		elasticsearchService.refresh(entityMeta);
+		elasticsearchService.refresh();
 		elasticsearchService.delete(Stream.of(entity0), entityMeta);
-		elasticsearchService.refresh(entityMeta);
+		elasticsearchService.refresh();
 		Iterable<Entity> updatedEntity = elasticsearchService.search(new QueryImpl<>(), entityMeta);
 		assertEquals(Lists.newArrayList(updatedEntity), Arrays.asList(entity1));
-	}
-
-	@Test
-	public void transactionalCountAddAndTransactionAdd()
-	{
-		// entity in existing index
-		Entity entity0 = new DefaultEntity(entityMeta, dataService);
-		entity0.set(idAttrName, "0");
-		entity0.set(labelAttrName, "label0");
-
-		elasticsearchService.index(entity0, entityMeta, IndexingMode.ADD);
-		elasticsearchService.refresh(entityMeta);
-		assertEquals(elasticsearchService.count(entityMeta), 1l);
-
-		String transactionId = "transaction0";
-		TransactionSynchronizationManager.bindResource(TRANSACTION_ID_RESOURCE_NAME, transactionId);
-		try
-		{
-			elasticsearchService.transactionStarted(transactionId);
-
-			Entity entity1 = new DefaultEntity(entityMeta, dataService);
-			entity1.set(idAttrName, "1");
-			entity1.set(labelAttrName, "label1");
-
-			elasticsearchService.index(entity1, entityMeta, IndexingMode.ADD);
-			elasticsearchService.refresh(entityMeta);
-			assertEquals(elasticsearchService.count(entityMeta), 2l);
-
-			elasticsearchService.commitTransaction(transactionId);
-		}
-		finally
-		{
-			TransactionSynchronizationManager.unbindResource(TRANSACTION_ID_RESOURCE_NAME);
-		}
-		assertEquals(elasticsearchService.count(entityMeta), 2l);
-	}
-
-	@Test
-	public void transactionalCountAddAndTransactionUpdate()
-	{
-		// entity in existing index
-		Entity entity0 = new DefaultEntity(entityMeta, dataService);
-		entity0.set(idAttrName, "0");
-		entity0.set(labelAttrName, "label0");
-
-		elasticsearchService.index(entity0, entityMeta, IndexingMode.ADD);
-		elasticsearchService.refresh(entityMeta);
-		assertEquals(elasticsearchService.count(entityMeta), 1l);
-
-		String transactionId = "transaction0";
-		TransactionSynchronizationManager.bindResource(TRANSACTION_ID_RESOURCE_NAME, transactionId);
-		try
-		{
-			elasticsearchService.transactionStarted(transactionId);
-
-			entity0.set(labelAttrName, "label0-update");
-
-			elasticsearchService.index(entity0, entityMeta, IndexingMode.UPDATE);
-			elasticsearchService.refresh(entityMeta);
-			assertEquals(elasticsearchService.count(entityMeta), 1l);
-
-			elasticsearchService.commitTransaction(transactionId);
-		}
-		finally
-		{
-			TransactionSynchronizationManager.unbindResource(TRANSACTION_ID_RESOURCE_NAME);
-		}
-		assertEquals(elasticsearchService.count(entityMeta), 1l);
-	}
-
-	@Test
-	public void transactionalCountAddAndTransactionDelete()
-	{
-		// entity in existing index
-		Entity entity0 = new DefaultEntity(entityMeta, dataService);
-		entity0.set(idAttrName, "0");
-		entity0.set(labelAttrName, "label0");
-
-		elasticsearchService.index(entity0, entityMeta, IndexingMode.ADD);
-		elasticsearchService.refresh(entityMeta);
-		assertEquals(elasticsearchService.count(entityMeta), 1l);
-
-		String transactionId = "transaction0";
-		TransactionSynchronizationManager.bindResource(TRANSACTION_ID_RESOURCE_NAME, transactionId);
-		try
-		{
-			elasticsearchService.transactionStarted(transactionId);
-
-			entity0.set(labelAttrName, "label0-update");
-
-			elasticsearchService.deleteById(entity0.getIdValue().toString(), entityMeta);
-			elasticsearchService.refresh(entityMeta);
-			assertEquals(elasticsearchService.count(entityMeta), 0l);
-
-			elasticsearchService.commitTransaction(transactionId);
-		}
-		finally
-		{
-			TransactionSynchronizationManager.unbindResource(TRANSACTION_ID_RESOURCE_NAME);
-		}
-		assertEquals(elasticsearchService.count(entityMeta), 0l);
-	}
-
-	@Test
-	public void transactionalCountAddAndTransactionDeleteAdd()
-	{
-		// entity in existing index
-		Entity entity0 = new DefaultEntity(entityMeta, dataService);
-		entity0.set(idAttrName, "0");
-		entity0.set(labelAttrName, "label0");
-
-		elasticsearchService.index(entity0, entityMeta, IndexingMode.ADD);
-		elasticsearchService.refresh(entityMeta);
-		assertEquals(elasticsearchService.count(entityMeta), 1l);
-
-		String transactionId = "transaction0";
-		TransactionSynchronizationManager.bindResource(TRANSACTION_ID_RESOURCE_NAME, transactionId);
-		try
-		{
-			elasticsearchService.transactionStarted(transactionId);
-
-			entity0.set(labelAttrName, "label0-update");
-
-			elasticsearchService.deleteById(entity0.getIdValue().toString(), entityMeta);
-			elasticsearchService.refresh(entityMeta);
-			assertEquals(elasticsearchService.count(entityMeta), 0l);
-
-			Entity entity1 = new DefaultEntity(entityMeta, dataService);
-			entity1.set(idAttrName, "1");
-			entity1.set(labelAttrName, "label1");
-
-			elasticsearchService.index(entity1, entityMeta, IndexingMode.ADD);
-			elasticsearchService.refresh(entityMeta);
-			assertEquals(elasticsearchService.count(entityMeta), 1l);
-
-			elasticsearchService.commitTransaction(transactionId);
-		}
-		finally
-		{
-			TransactionSynchronizationManager.unbindResource(TRANSACTION_ID_RESOURCE_NAME);
-		}
-		assertEquals(elasticsearchService.count(entityMeta), 1l);
-	}
-
-	@Test
-	public void transactionalCountAddAndTransactionAddUpdate()
-	{
-		// entity in existing index
-		Entity entity0 = new DefaultEntity(entityMeta, dataService);
-		entity0.set(idAttrName, "0");
-		entity0.set(labelAttrName, "label0");
-
-		elasticsearchService.index(entity0, entityMeta, IndexingMode.ADD);
-		elasticsearchService.refresh(entityMeta);
-		assertEquals(elasticsearchService.count(entityMeta), 1l);
-
-		String transactionId = "transaction0";
-		TransactionSynchronizationManager.bindResource(TRANSACTION_ID_RESOURCE_NAME, transactionId);
-		try
-		{
-			elasticsearchService.transactionStarted(transactionId);
-
-			Entity entity1 = new DefaultEntity(entityMeta, dataService);
-			entity1.set(idAttrName, "1");
-			entity1.set(labelAttrName, "label1");
-
-			elasticsearchService.index(entity1, entityMeta, IndexingMode.ADD);
-			elasticsearchService.refresh(entityMeta);
-			assertEquals(elasticsearchService.count(entityMeta), 2l);
-
-			entity0.set(labelAttrName, "label0-update");
-
-			elasticsearchService.index(entity1, entityMeta, IndexingMode.UPDATE);
-			elasticsearchService.refresh(entityMeta);
-			assertEquals(elasticsearchService.count(entityMeta), 2l);
-
-			elasticsearchService.commitTransaction(transactionId);
-		}
-		finally
-		{
-			TransactionSynchronizationManager.unbindResource(TRANSACTION_ID_RESOURCE_NAME);
-		}
-		assertEquals(elasticsearchService.count(entityMeta), 2l);
-	}
-
-	@Test
-	public void transactionalCountAddAndTransactionAddDelete()
-	{
-		// entity in existing index
-		Entity entity0 = new DefaultEntity(entityMeta, dataService);
-		entity0.set(idAttrName, "0");
-		entity0.set(labelAttrName, "label0");
-
-		elasticsearchService.index(entity0, entityMeta, IndexingMode.ADD);
-		elasticsearchService.refresh(entityMeta);
-		assertEquals(elasticsearchService.count(entityMeta), 1l);
-
-		String transactionId = "transaction0";
-		TransactionSynchronizationManager.bindResource(TRANSACTION_ID_RESOURCE_NAME, transactionId);
-		try
-		{
-			elasticsearchService.transactionStarted(transactionId);
-
-			Entity entity1 = new DefaultEntity(entityMeta, dataService);
-			entity1.set(idAttrName, "1");
-			entity1.set(labelAttrName, "label1");
-
-			elasticsearchService.index(entity1, entityMeta, IndexingMode.ADD);
-			elasticsearchService.refresh(entityMeta);
-			assertEquals(elasticsearchService.count(entityMeta), 2l);
-
-			elasticsearchService.deleteById(entity1.getIdValue().toString(), entityMeta);
-			elasticsearchService.refresh(entityMeta);
-			assertEquals(elasticsearchService.count(entityMeta), 1l);
-
-			elasticsearchService.commitTransaction(transactionId);
-		}
-		finally
-		{
-			TransactionSynchronizationManager.unbindResource(TRANSACTION_ID_RESOURCE_NAME);
-		}
-		assertEquals(elasticsearchService.count(entityMeta), 1l);
-	}
-
-	@Test
-	public void transactionalCountAddAndTransactionDeleteAddUpdate()
-	{
-		// entity in existing index
-		Entity entity0 = new DefaultEntity(entityMeta, dataService);
-		entity0.set(idAttrName, "0");
-		entity0.set(labelAttrName, "label0");
-
-		elasticsearchService.index(entity0, entityMeta, IndexingMode.ADD);
-		elasticsearchService.refresh(entityMeta);
-		assertEquals(elasticsearchService.count(entityMeta), 1l);
-
-		String transactionId = "transaction0";
-		TransactionSynchronizationManager.bindResource(TRANSACTION_ID_RESOURCE_NAME, transactionId);
-		try
-		{
-			elasticsearchService.transactionStarted(transactionId);
-
-			entity0.set(labelAttrName, "label0-update");
-
-			elasticsearchService.deleteById(entity0.getIdValue().toString(), entityMeta);
-			elasticsearchService.refresh(entityMeta);
-			assertEquals(elasticsearchService.count(entityMeta), 0l);
-
-			Entity entity1 = new DefaultEntity(entityMeta, dataService);
-			entity1.set(idAttrName, "1");
-			entity1.set(labelAttrName, "label1");
-
-			elasticsearchService.index(entity1, entityMeta, IndexingMode.ADD);
-			elasticsearchService.refresh(entityMeta);
-			assertEquals(elasticsearchService.count(entityMeta), 1l);
-
-			entity0.set(labelAttrName, "label0-update");
-
-			elasticsearchService.index(entity1, entityMeta, IndexingMode.UPDATE);
-			elasticsearchService.refresh(entityMeta);
-			assertEquals(elasticsearchService.count(entityMeta), 1l);
-
-			elasticsearchService.commitTransaction(transactionId);
-		}
-		finally
-		{
-			TransactionSynchronizationManager.unbindResource(TRANSACTION_ID_RESOURCE_NAME);
-		}
-		assertEquals(elasticsearchService.count(entityMeta), 1l);
 	}
 }

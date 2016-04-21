@@ -72,7 +72,6 @@ public class EmbeddedElasticSearchConfig
 	{
 		ElasticsearchService elasticSearchService = embeddedElasticSearchServiceFactory().create(dataService,
 				elasticsearchEntityFactory);
-		molgenisTransactionManager.addTransactionListener(elasticSearchService);
 
 		return elasticSearchService;
 	}

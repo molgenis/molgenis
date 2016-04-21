@@ -3,7 +3,6 @@ package org.molgenis.integrationtest.data;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
-import org.molgenis.DatabaseConfig;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityManagerImpl;
@@ -11,6 +10,10 @@ import org.molgenis.data.IdGenerator;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
+import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
+import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
+import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
@@ -18,8 +21,6 @@ import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.OwnedEntityMetaData;
 import org.molgenis.data.support.UuidGenerator;
-import org.molgenis.data.transaction.TransactionConfig;
-import org.molgenis.data.transaction.TransactionLogService;
 import org.molgenis.data.transaction.index.IndexTransactionLogService;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
@@ -48,15 +49,13 @@ import com.google.common.io.Files;
 @ComponentScan(
 { "org.molgenis.data.meta", "org.molgenis.data.elasticsearch.index", "org.molgenis.auth" })
 @Import(
-{TransactionConfig.class,
-		RunAsSystemBeanPostProcessor.class, FileMetaMetaData.class,
-		OwnedEntityMetaData.class, RhinoConfig.class, ExpressionValidator.class, LanguageService.class,
-		DatabaseConfig.class, UuidGenerator.class
-})
+{ EmbeddedElasticSearchConfig.class, ElasticsearchEntityFactory.class, ElasticsearchRepositoryCollection.class,
+		RunAsSystemBeanPostProcessor.class, FileMetaMetaData.class, OwnedEntityMetaData.class, RhinoConfig.class,
+		ExpressionValidator.class, LanguageService.class })
 public abstract class AbstractDataApiTestConfig
 {
 	@Autowired
-	private TransactionLogService transactionLogService;
+	protected SearchService searchService;
 
 	@Autowired
 	private IndexTransactionLogService indexTransactionLogService;
@@ -85,6 +84,7 @@ public abstract class AbstractDataApiTestConfig
 	}
 
 	protected abstract void setUp();
+
 	protected abstract ManageableRepositoryCollection getBackend();
 
 	@Bean
@@ -149,10 +149,9 @@ public abstract class AbstractDataApiTestConfig
 			@Override
 			public Repository<Entity> createDecoratedRepository(Repository<Entity> repository)
 			{
-				return new MolgenisRepositoryDecoratorFactory(entityManager(), transactionLogService,
-						entityAttributesValidator(), idGenerator(), appSettings(), dataService(), expressionValidator,
-						repositoryDecoratorRegistry(), indexTransactionLogService)
-						.createDecoratedRepository(repository);
+				return new MolgenisRepositoryDecoratorFactory(entityManager(), entityAttributesValidator(), idGenerator,
+						appSettings(), dataService(), expressionValidator, repositoryDecoratorRegistry(), indexTransactionLogService)
+								.createDecoratedRepository(repository);
 			}
 		};
 	}
