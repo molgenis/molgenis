@@ -44,7 +44,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	public XYDataChart getXYDataChart(String entityName, String attributeNameXaxis, String attributeNameYaxis,
 			String split, List<QueryRule> queryRules)
 	{
-		Repository repo = dataService.getRepository(entityName);
+		Repository<Entity> repo = dataService.getRepository(entityName);
 		EntityMetaData entityMetaData = repo.getEntityMetaData();
 
 		final FieldTypeEnum attributeXFieldTypeEnum = entityMetaData.getAttribute(attributeNameXaxis).getDataType()
@@ -86,7 +86,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	}
 
 	@Override
-	public XYDataSerie getXYDataSerie(Repository repo, String entityName, String attributeNameXaxis,
+	public XYDataSerie getXYDataSerie(Repository<Entity> repo, String entityName, String attributeNameXaxis,
 			String attributeNameYaxis, FieldTypeEnum attributeXFieldTypeEnum, FieldTypeEnum attributeYFieldTypeEnum,
 			List<QueryRule> queryRules)
 	{
@@ -111,7 +111,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	}
 
 	@Override
-	public List<XYDataSerie> getXYDataSeries(Repository repo, String entityName, String attributeNameXaxis,
+	public List<XYDataSerie> getXYDataSeries(Repository<Entity> repo, String entityName, String attributeNameXaxis,
 			String attributeNameYaxis, FieldTypeEnum attributeXFieldTypeEnum, FieldTypeEnum attributeYFieldTypeEnum,
 			String split, List<QueryRule> queryRules)
 
@@ -213,7 +213,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	public BoxPlotChart getBoxPlotChart(String entityName, String attributeName, List<QueryRule> queryRules,
 			String split, double scaleToCalcOutliers)
 	{
-		Repository repo = dataService.getRepository(entityName);
+		Repository<Entity> repo = dataService.getRepository(entityName);
 		EntityMetaData entityMetaData = repo.getEntityMetaData();
 
 		BoxPlotChart boxPlotChart = new BoxPlotChart();
@@ -330,17 +330,17 @@ public class ChartDataServiceImpl implements ChartDataService
 	 * @return
 	 */
 
-	private Iterable<Entity> getIterable(String entityName, Repository repo, List<QueryRule> queryRules, Sort sort)
+	private Iterable<Entity> getIterable(String entityName, Repository<Entity> repo, List<QueryRule> queryRules, Sort sort)
 	{
 
-		final Query q;
+		final Query<Entity> q;
 		if (queryRules == null)
 		{
-			q = new QueryImpl();
+			q = new QueryImpl<Entity>();
 		}
 		else
 		{
-			q = new QueryImpl(queryRules);
+			q = new QueryImpl<Entity>(queryRules);
 		}
 
 		if (null != sort)
@@ -403,7 +403,7 @@ public class ChartDataServiceImpl implements ChartDataService
 
 		if (queryRules != null && !queryRules.isEmpty())
 		{
-			QueryImpl q = new QueryImpl();
+			QueryImpl<Entity> q = new QueryImpl<Entity>();
 			for (QueryRule queryRule : queryRules)
 			{
 				q.addRule(queryRule);
@@ -415,7 +415,7 @@ public class ChartDataServiceImpl implements ChartDataService
 				@Override
 				public Iterator<Entity> iterator()
 				{
-					return ((Repository) AllEntitiesIterable).findAll(q).iterator();
+					return ((Repository<Entity>) AllEntitiesIterable).findAll(q).iterator();
 				}
 			};
 		}

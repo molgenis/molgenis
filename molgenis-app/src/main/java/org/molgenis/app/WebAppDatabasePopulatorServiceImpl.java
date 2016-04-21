@@ -11,7 +11,6 @@ import org.molgenis.auth.RuntimePropertyMetaData;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.auth.UserAuthorityMetaData;
 import org.molgenis.data.DataService;
-import org.molgenis.data.jobs.JobExecution;
 import org.molgenis.data.jobs.JobExecutionMetaData;
 import org.molgenis.data.meta.system.FreemarkerTemplateMetaData;
 import org.molgenis.data.meta.system.ImportRunMetaData;
@@ -73,6 +72,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	@RunAsSystem
 	public boolean isDatabasePopulated()
 	{
-		return dataService.count(MolgenisUser.ENTITY_NAME, new QueryImpl()) > 0;
+		return dataService.count(MolgenisUser.ENTITY_NAME, new QueryImpl<>()) > 0;
 	}
 }

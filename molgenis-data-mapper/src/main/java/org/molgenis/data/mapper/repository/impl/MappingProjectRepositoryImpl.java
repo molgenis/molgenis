@@ -83,7 +83,7 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 	}
 
 	@Override
-	public List<MappingProject> getMappingProjects(Query q)
+	public List<MappingProject> getMappingProjects(Query<Entity> q)
 	{
 		List<MappingProject> results = new ArrayList<>();
 		dataService.findAll(MappingProjectRepositoryImpl.META_DATA.getName(), q).forEach(entity -> {

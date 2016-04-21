@@ -4,16 +4,17 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 
 public class MyRepositoryCollection implements RepositoryCollection
 {
-	private final Map<String, Repository> repositories = new LinkedHashMap<>();
+	private final Map<String, Repository<Entity>> repositories = new LinkedHashMap<>();
 
 	@Override
-	public Iterator<Repository> iterator()
+	public Iterator<Repository<Entity>> iterator()
 	{
 		return repositories.values().iterator();
 	}
@@ -25,9 +26,9 @@ public class MyRepositoryCollection implements RepositoryCollection
 	}
 
 	@Override
-	public Repository addEntityMeta(EntityMetaData entityMeta)
+	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
 	{
-		Repository repo = new MyRepository(entityMeta);
+		Repository<Entity> repo = new MyRepository(entityMeta);
 		repositories.put(entityMeta.getName(), repo);
 
 		return repo;
@@ -40,7 +41,7 @@ public class MyRepositoryCollection implements RepositoryCollection
 	}
 
 	@Override
-	public Repository getRepository(String name)
+	public Repository<Entity> getRepository(String name)
 	{
 		return repositories.get(name);
 	}

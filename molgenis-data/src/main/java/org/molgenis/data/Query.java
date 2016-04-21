@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 /**
  * Definition of a query
  */
-public interface Query extends Iterable<Entity>
+public interface Query<E extends Entity> extends Iterable<E>
 {
 	/**
 	 * Count entities matching query
@@ -15,9 +15,9 @@ public interface Query extends Iterable<Entity>
 	 */
 	Long count();
 
-	Stream<Entity> findAll();
+	Stream<E> findAll();
 
-	Entity findOne();
+	E findOne();
 
 	/**
 	 * Filtering rules, seperated by QueryRule.AND and QueryRule.OR clauses
@@ -42,27 +42,27 @@ public interface Query extends Iterable<Entity>
 	/**
 	 * Search all fields
 	 */
-	Query search(String searchTerms);
+	Query<E> search(String searchTerms);
 
 	/**
 	 * Search field
 	 */
-	Query search(String field, String searchTerms);
+	Query<E> search(String field, String searchTerms);
 
 	/**
 	 * Occur operator 'or'. Example usage: query.eq("field0", "val0").or().eq("field1", "val1")
 	 */
-	Query or();
+	Query<E> or();
 
 	/**
 	 * Occur operator 'and'. Example usage: query.eq("field0", "val0").and().eq("field1", "val1")
 	 */
-	Query and();
+	Query<E> and();
 
 	/**
 	 * Occur operator 'not'. Example usage: query.not().eq("field0", "val0")
 	 */
-	Query not();
+	Query<E> not();
 
 	/**
 	 * 
@@ -70,7 +70,7 @@ public interface Query extends Iterable<Entity>
 	 * @param value
 	 * @return
 	 */
-	Query like(String field, String value);
+	Query<E> like(String field, String value);
 
 	/**
 	 * 
@@ -79,7 +79,7 @@ public interface Query extends Iterable<Entity>
 	 *            categorical/xref: entity or entity id; mref: entity iterable or id iterable; else: value
 	 * @return
 	 */
-	Query eq(String field, Object value);
+	Query<E> eq(String field, Object value);
 
 	/**
 	 * 
@@ -88,52 +88,52 @@ public interface Query extends Iterable<Entity>
 	 *            ids
 	 * @return
 	 */
-	Query in(String field, Iterable<?> values);
+	Query<E> in(String field, Iterable<?> values);
 
 	/**
 	 * Greater than
 	 */
-	Query gt(String field, Object value);
+	Query<E> gt(String field, Object value);
 
 	/**
 	 * Greater than or equal to
 	 */
-	Query ge(String field, Object value);
+	Query<E> ge(String field, Object value);
 
 	/**
 	 * Less than
 	 */
-	Query lt(String field, Object value);
+	Query<E> lt(String field, Object value);
 
 	/**
 	 * Less than or equal to
 	 */
-	Query le(String field, Object value);
+	Query<E> le(String field, Object value);
 
 	/**
 	 * Start nested query
 	 */
-	Query nest();
+	Query<E> nest();
 
 	/**
 	 * End nested query
 	 */
-	Query unnest();
+	Query<E> unnest();
 
-	Query unnestAll();
+	Query<E> unnestAll();
 
 	/**
 	 * Range (including smaller and bigger)
 	 */
-	Query rng(String field, Object smaller, Object bigger);
+	Query<E> rng(String field, Object smaller, Object bigger);
 
-	Query pageSize(int pageSize);
+	Query<E> pageSize(int pageSize);
 
-	Query offset(int offset);
+	Query<E> offset(int offset);
 
 	Sort sort();
 
-	Query sort(Sort sort);
+	Query<E> sort(Sort sort);
 
 	/**
 	 * Return the query {@link Fetch} that defines which entity attributes to retrieve.
@@ -162,5 +162,5 @@ public interface Query extends Iterable<Entity>
 	 * 
 	 * @return this query
 	 */
-	Query fetch(Fetch fetch);
+	Query<E> fetch(Fetch fetch);
 }

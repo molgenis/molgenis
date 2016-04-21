@@ -4,7 +4,6 @@ import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.data.DataService;
 import org.molgenis.data.i18n.LanguageMetaData;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.MolgenisUpgrade;
 import org.molgenis.security.account.AccountService;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
@@ -48,8 +47,7 @@ public class Step25LanguagesPermissions extends MolgenisUpgrade implements Appli
 		{
 			RunAsSystemProxy.runAsSystem(() -> {
 				// allow all users to read the app languages
-					MolgenisGroup allUsersGroup = dataService.findOne(MolgenisGroup.ENTITY_NAME,
-							QueryImpl.EQ(MolgenisGroup.NAME, AccountService.ALL_USER_GROUP), MolgenisGroup.class);
+				MolgenisGroup allUsersGroup = dataService.query(MolgenisGroup.ENTITY_NAME, MolgenisGroup.class).eq(MolgenisGroup.NAME, AccountService.ALL_USER_GROUP).findOne();
 
 					if (allUsersGroup != null)
 					{

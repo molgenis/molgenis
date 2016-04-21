@@ -1,7 +1,10 @@
 package org.molgenis.integrationtest.data;
 
-import com.google.common.io.Files;
+import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
+
 import org.molgenis.DatabaseConfig;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.IdGenerator;
@@ -38,8 +41,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
-import javax.annotation.PostConstruct;
-import javax.sql.DataSource;
+import com.google.common.io.Files;
 
 @EnableTransactionManagement(proxyTargetClass = true)
 @ComponentScan(
@@ -94,6 +96,12 @@ public abstract class AbstractDataApiTestConfig
 	}
 
 	@Bean
+	public IdGenerator idGenerator()
+	{
+		return new UuidGenerator();
+	}
+
+	@Bean
 	public DataServiceImpl dataService()
 	{
 		return new DataServiceImpl(repositoryDecoratorFactory());
@@ -135,10 +143,10 @@ public abstract class AbstractDataApiTestConfig
 		return new RepositoryDecoratorFactory()
 		{
 			@Override
-			public Repository createDecoratedRepository(Repository repository)
+			public Repository<Entity> createDecoratedRepository(Repository<Entity> repository)
 			{
 				return new MolgenisRepositoryDecoratorFactory(entityManager(), transactionLogService,
-						entityAttributesValidator(), idGenerator, appSettings(), dataService(), expressionValidator,
+						entityAttributesValidator(), idGenerator(), appSettings(), dataService(), expressionValidator,
 						repositoryDecoratorRegistry()).createDecoratedRepository(repository);
 			}
 		};

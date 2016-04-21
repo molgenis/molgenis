@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisQueryException;
 import org.molgenis.data.Query;
@@ -30,7 +31,7 @@ public class AggregateQueryRsqlVisitor extends NoArgRSQLVisitorAdapter<Aggregate
 	private final EntityMetaData entityMetaData;
 	private final AggregateQueryImpl aggsQ;
 
-	public AggregateQueryRsqlVisitor(EntityMetaData entityMetaData, Query query)
+	public AggregateQueryRsqlVisitor(EntityMetaData entityMetaData, Query<Entity> query)
 	{
 		this.entityMetaData = checkNotNull(entityMetaData);
 		this.aggsQ = new AggregateQueryImpl().query(query);

@@ -45,7 +45,7 @@ public class IndexRequestGenerator
 		this.elasticsearchEntityFactory = requireNonNull(elasticsearchEntityFactory);
 	}
 
-	public Iterable<BulkRequestBuilder> buildIndexRequest(final Repository repository)
+	public Iterable<BulkRequestBuilder> buildIndexRequest(final Repository<Entity> repository)
 	{
 		return new Iterable<BulkRequestBuilder>()
 		{
@@ -57,7 +57,7 @@ public class IndexRequestGenerator
 		};
 	}
 
-	private Iterator<BulkRequestBuilder> indexRequestIterator(final Repository repository)
+	private Iterator<BulkRequestBuilder> indexRequestIterator(final Repository<Entity> repository)
 	{
 		final Set<String> xrefAndMrefColumns = new HashSet<String>();
 		for (AttributeMetaData attr : repository.getEntityMetaData().getAtomicAttributes())

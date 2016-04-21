@@ -23,7 +23,7 @@ public class ResourceImpl implements Resource
 	// the file the current repository works on
 	private volatile File file;
 	// the current repository
-	private volatile Repository repository;
+	private volatile Repository<Entity> repository;
 
 	private static final Logger LOG = LoggerFactory.getLogger(ResourceImpl.class);
 
@@ -71,7 +71,7 @@ public class ResourceImpl implements Resource
 	 *             if the repository is not available
 	 */
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Iterable<Entity> findAll(Query<Entity> q)
 	{
 		return new Iterable<Entity>()
 		{
@@ -95,7 +95,7 @@ public class ResourceImpl implements Resource
 		return repository == null;
 	}
 
-	private Repository getRepository()
+	private Repository<Entity> getRepository()
 	{
 		if (repository == null && isAvailable())
 		{

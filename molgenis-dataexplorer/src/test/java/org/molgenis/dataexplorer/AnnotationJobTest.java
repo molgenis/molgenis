@@ -9,6 +9,7 @@ import java.io.IOException;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.CrudRepositoryAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
@@ -21,7 +22,6 @@ import org.molgenis.dataexplorer.controller.AnnotationJob;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -38,7 +38,7 @@ public class AnnotationJobTest
 	private RepositoryAnnotator exac;
 	@Mock
 	private RepositoryAnnotator cadd;
-	private Repository repository;
+	private Repository<Entity> repository;
 	@Mock
 	private Progress progress;
 	private DefaultEntityMetaData emd = new DefaultEntityMetaData("repo");

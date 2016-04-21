@@ -103,12 +103,12 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 
 		when(
 				dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
-						new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, user2), MolgenisGroupMember.class))
+						new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMember.MOLGENISUSER, user2), MolgenisGroupMember.class))
 				.thenReturn(Stream.of(molgenisGroupMember1));
 
 		when(
 				dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
-						new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, user1), MolgenisGroupMember.class))
+						new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMember.MOLGENISUSER, user1), MolgenisGroupMember.class))
 				.thenReturn(Stream.of(molgenisGroupMember1));
 
 		groupPlugin1Authority = mock(GroupAuthority.class);
@@ -148,22 +148,22 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 
 		when(
 				dataService.findAll(GroupAuthority.ENTITY_NAME,
-						new QueryImpl().in(GroupAuthority.MOLGENISGROUP, Arrays.<Entity> asList(group1)),
+						new QueryImpl<GroupAuthority>().in(GroupAuthority.MOLGENISGROUP, Arrays.<Entity> asList(group1)),
 						GroupAuthority.class)).thenReturn(
 				Stream.of(groupPlugin1Authority, groupPlugin2Authority, groupEntity1Authority, groupEntity2Authority));
 
 		when(
 				dataService.findAll(UserAuthority.ENTITY_NAME,
-						new QueryImpl().in(UserAuthority.MOLGENISUSER, Arrays.<Entity> asList(user1)),
+						new QueryImpl<UserAuthority>().in(UserAuthority.MOLGENISUSER, Arrays.<Entity> asList(user1)),
 						UserAuthority.class)).thenReturn(
 				Stream.of(userPlugin2Authority, userPlugin3Authority, userEntity2Authority, userEntity3Authority));
 
 		when(
-				dataService.findAll(UserAuthority.ENTITY_NAME, new QueryImpl().eq(UserAuthority.MOLGENISUSER, user1),
+				dataService.findAll(UserAuthority.ENTITY_NAME, new QueryImpl<UserAuthority>().eq(UserAuthority.MOLGENISUSER, user1),
 						UserAuthority.class)).thenReturn(
 				Stream.of(userPlugin2Authority, userPlugin3Authority, userEntity2Authority, userEntity3Authority));
 		when(
-				dataService.findAll(UserAuthority.ENTITY_NAME, new QueryImpl().eq(UserAuthority.MOLGENISUSER, user2),
+				dataService.findAll(UserAuthority.ENTITY_NAME, new QueryImpl<UserAuthority>().eq(UserAuthority.MOLGENISUSER, user2),
 						UserAuthority.class)).thenReturn(
 				Stream.of(userPlugin2Authority, userPlugin3Authority, userEntity2Authority, userEntity3Authority));
 

@@ -43,7 +43,7 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 	public String getAttributeValue(String term, String attributeName)
 	{
 		Entity entity = dataService.findOne(TermFrequencyEntityMetaData.ENTITY_NAME,
-				new QueryImpl().eq(TermFrequencyEntityMetaData.TERM, term));
+				new QueryImpl<Entity>().eq(TermFrequencyEntityMetaData.TERM, term));
 
 		if (entity == null)
 		{

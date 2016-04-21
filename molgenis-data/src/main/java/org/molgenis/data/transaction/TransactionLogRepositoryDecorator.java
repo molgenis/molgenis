@@ -18,12 +18,12 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 
-public class TransactionLogRepositoryDecorator implements Repository
+public class TransactionLogRepositoryDecorator implements Repository<Entity>
 {
-	private final Repository decorated;
+	private final Repository<Entity> decorated;
 	private final TransactionLogService transactionLogService;
 
-	public TransactionLogRepositoryDecorator(Repository decorated, TransactionLogService transactionLogService)
+	public TransactionLogRepositoryDecorator(Repository<Entity> decorated, TransactionLogService transactionLogService)
 	{
 		this.decorated = requireNonNull(decorated);
 		this.transactionLogService = requireNonNull(transactionLogService);
@@ -78,25 +78,25 @@ public class TransactionLogRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Query query()
+	public Query<Entity> query()
 	{
 		return decorated.query();
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		return decorated.count(q);
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		return decorated.findAll(q);
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		return decorated.findOne(q);
 	}
@@ -143,7 +143,7 @@ public class TransactionLogRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void update(Stream<? extends Entity> entities)
+	public void update(Stream<Entity> entities)
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
 		{
@@ -163,7 +163,7 @@ public class TransactionLogRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void delete(Stream<? extends Entity> entities)
+	public void delete(Stream<Entity> entities)
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
 		{
@@ -213,7 +213,7 @@ public class TransactionLogRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Integer add(Stream<? extends Entity> entities)
+	public Integer add(Stream<Entity> entities)
 	{
 		if (!TransactionLogService.EXCLUDED_ENTITIES.contains(getName()))
 		{

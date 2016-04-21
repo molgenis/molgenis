@@ -4,6 +4,7 @@ import static org.molgenis.MolgenisFieldTypes.BOOL;
 import static org.molgenis.MolgenisFieldTypes.DATE;
 import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.molgenis.MolgenisFieldTypes.XREF;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 import java.text.ParseException;
@@ -14,7 +15,6 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 public abstract class AbstractCountIT extends AbstractDataIntegrationIT
 {
@@ -35,8 +35,8 @@ public abstract class AbstractCountIT extends AbstractDataIntegrationIT
 		personMD.addAttribute("active").setDataType(BOOL);
 		personMD.addAttribute("country").setDataType(XREF).setRefEntity(countryMD);
 
-		Repository countries = dataService.getMeta().addEntityMeta(countryMD);
-		Repository persons = dataService.getMeta().addEntityMeta(personMD);
+		Repository<Entity> countries = dataService.getMeta().addEntityMeta(countryMD);
+		Repository<Entity> persons = dataService.getMeta().addEntityMeta(personMD);
 
 		// add country entities to repo
 		Entity c = new DefaultEntity(countryMD, dataService);
@@ -78,35 +78,35 @@ public abstract class AbstractCountIT extends AbstractDataIntegrationIT
 		assertEquals(persons.count(), 3);
 
 		// search all text/string fields
-		assertEquals(persons.count(new QueryImpl().search("doe")), 2);
+		assertEquals(persons.count(new QueryImpl<Entity>().search("doe")), 2);
 
 		// string
-		assertEquals(persons.count(new QueryImpl().eq("lastName", "doe")), 2);
-		assertEquals(persons.count(new QueryImpl().eq("lastName", "duck")), 1);
-		assertEquals(persons.count(new QueryImpl().eq("lastName", "duck").or().eq("lastName", "doe")), 3);
+		assertEquals(persons.count(new QueryImpl<Entity>().eq("lastName", "doe")), 2);
+		assertEquals(persons.count(new QueryImpl<Entity>().eq("lastName", "duck")), 1);
+		assertEquals(persons.count(new QueryImpl<Entity>().eq("lastName", "duck").or().eq("lastName", "doe")), 3);
 
 		// int
-		assertEquals(persons.count(new QueryImpl().eq("height", 180)), 1);
-		assertEquals(persons.count(new QueryImpl().lt("height", 180)), 2);
-		assertEquals(persons.count(new QueryImpl().le("height", 180)), 3);
-		assertEquals(persons.count(new QueryImpl().lt("height", 180).and().gt("height", 55)), 1);
-		assertEquals(persons.count(new QueryImpl().gt("height", 165).or().lt("height", 165)), 2);
+		assertEquals(persons.count(new QueryImpl<Entity>().eq("height", 180)), 1);
+		assertEquals(persons.count(new QueryImpl<Entity>().lt("height", 180)), 2);
+		assertEquals(persons.count(new QueryImpl<Entity>().le("height", 180)), 3);
+		assertEquals(persons.count(new QueryImpl<Entity>().lt("height", 180).and().gt("height", 55)), 1);
+		assertEquals(persons.count(new QueryImpl<Entity>().gt("height", 165).or().lt("height", 165)), 2);
 
 		// bool
-		assertEquals(persons.count(new QueryImpl().eq("active", true)), 2);
-		assertEquals(persons.count(new QueryImpl().eq("active", false)), 1);
-		assertEquals(persons.count(new QueryImpl().eq("active", true).or().eq("height", 165)), 3);
+		assertEquals(persons.count(new QueryImpl<Entity>().eq("active", true)), 2);
+		assertEquals(persons.count(new QueryImpl<Entity>().eq("active", false)), 1);
+		assertEquals(persons.count(new QueryImpl<Entity>().eq("active", true).or().eq("height", 165)), 3);
 
 		// date
-		assertEquals(persons.count(new QueryImpl().eq("birthday", sdf.parse("1950-01-31"))), 1);
-		assertEquals(persons.count(new QueryImpl().gt("birthday", sdf.parse("1950-01-31"))), 2);
+		assertEquals(persons.count(new QueryImpl<Entity>().eq("birthday", sdf.parse("1950-01-31"))), 1);
+		assertEquals(persons.count(new QueryImpl<Entity>().gt("birthday", sdf.parse("1950-01-31"))), 2);
 		assertEquals(
-				persons.count(new QueryImpl().gt("birthday", sdf.parse("1976-06-07")).or()
+				persons.count(new QueryImpl<Entity>().gt("birthday", sdf.parse("1976-06-07")).or()
 						.lt("birthday", sdf.parse("1976-06-07"))), 2);
 
 		// xref
-		assertEquals(persons.count(new QueryImpl().eq("country", "US")), 2);
-		assertEquals(persons.count(new QueryImpl().eq("country", "NL")), 1);
-		assertEquals(persons.count(new QueryImpl().eq("country", "US").and().gt("height", 165)), 1);
+		assertEquals(persons.count(new QueryImpl<Entity>().eq("country", "US")), 2);
+		assertEquals(persons.count(new QueryImpl<Entity>().eq("country", "NL")), 1);
+		assertEquals(persons.count(new QueryImpl<Entity>().eq("country", "US").and().gt("height", 165)), 1);
 	}
 }

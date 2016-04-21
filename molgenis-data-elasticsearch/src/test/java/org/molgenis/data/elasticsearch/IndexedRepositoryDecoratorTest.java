@@ -50,12 +50,12 @@ public class IndexedRepositoryDecoratorTest
 {
 	private IndexedRepositoryDecorator indexedRepositoryDecorator;
 	private ElasticsearchService elasticSearchService;
-	private Repository decoratedRepo;
+	private Repository<Entity> decoratedRepo;
 	private EntityMetaData repositoryEntityMetaData;
 	private String entityName;
 	private String idAttrName;
-	private Query query;
-	private Query unsupportedQuery;
+	private Query<Entity> query;
+	private Query<Entity> unsupportedQuery;
 	private List<QueryRule> queryRules;
 	private List<QueryRule> unsupportedQueryRules;
 

@@ -2,6 +2,7 @@ package org.molgenis.data.elasticsearch;
 
 import java.util.Iterator;
 
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
@@ -36,11 +37,11 @@ public class IndexedRepositoryCollectionDecorator implements RepositoryCollectio
 	}
 
 	@Override
-	public Iterator<Repository> iterator()
+	public Iterator<Repository<Entity>> iterator()
 	{
-		return new Iterator<Repository>()
+		return new Iterator<Repository<Entity>>()
 		{
-			Iterator<Repository> it = delegate.iterator();
+			Iterator<Repository<Entity>> it = delegate.iterator();
 
 			@Override
 			public boolean hasNext()
@@ -49,7 +50,7 @@ public class IndexedRepositoryCollectionDecorator implements RepositoryCollectio
 			}
 
 			@Override
-			public Repository next()
+			public Repository<Entity> next()
 			{
 				return new IndexedRepositoryDecorator(it.next(), searchService);
 			}
@@ -64,9 +65,9 @@ public class IndexedRepositoryCollectionDecorator implements RepositoryCollectio
 	}
 
 	@Override
-	public Repository addEntityMeta(EntityMetaData entityMeta)
+	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
 	{
-		Repository repo = delegate.addEntityMeta(entityMeta);
+		Repository<Entity> repo = delegate.addEntityMeta(entityMeta);
 		searchService.createMappings(entityMeta);
 
 		return new IndexedRepositoryDecorator(repo, searchService);
@@ -79,7 +80,7 @@ public class IndexedRepositoryCollectionDecorator implements RepositoryCollectio
 	}
 
 	@Override
-	public Repository getRepository(String name)
+	public Repository<Entity> getRepository(String name)
 	{
 		return new IndexedRepositoryDecorator(delegate.getRepository(name), searchService);
 	}
@@ -90,7 +91,7 @@ public class IndexedRepositoryCollectionDecorator implements RepositoryCollectio
 	 * @param name
 	 * @return
 	 */
-	public Repository getUnderlying(String name)
+	public Repository<Entity> getUnderlying(String name)
 	{
 		return delegate.getRepository(name);
 	}

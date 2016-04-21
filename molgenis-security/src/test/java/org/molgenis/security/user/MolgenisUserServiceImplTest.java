@@ -81,7 +81,7 @@ public class MolgenisUserServiceImplTest extends AbstractTestNGSpringContextTest
 		when(existingMolgenisUser.getPassword()).thenReturn("encrypted-password");
 
 		when(
-				dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, username),
+				dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl<MolgenisUser>().eq(MolgenisUser.USERNAME, username),
 						MolgenisUser.class)).thenReturn(existingMolgenisUser);
 
 		assertEquals(molgenisUserServiceImpl.getUser(username), existingMolgenisUser);

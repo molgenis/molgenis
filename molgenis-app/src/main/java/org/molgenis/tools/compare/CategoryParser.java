@@ -39,7 +39,7 @@ public class CategoryParser
 		List<String> listOfCategoricalFeatures = new ArrayList<String>();
 		Map<String, List<String>> hashCategories = new HashMap<String, List<String>>();
 
-		Repository repo = repositorySource.getRepository("observablefeature");
+		Repository<Entity> repo = repositorySource.getRepository("observablefeature");
 		try
 		{
 			for (Entity entity : repo)
@@ -56,7 +56,7 @@ public class CategoryParser
 			repo.close();
 		}
 
-		Repository readObservableDataMatrixRepo = repositorySource.getRepository(datasetMatrix);
+		Repository<Entity> readObservableDataMatrixRepo = repositorySource.getRepository(datasetMatrix);
 		try
 		{
 			for (Entity entity : readObservableDataMatrixRepo)

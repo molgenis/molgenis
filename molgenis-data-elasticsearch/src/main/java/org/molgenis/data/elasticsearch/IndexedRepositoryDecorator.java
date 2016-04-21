@@ -29,17 +29,17 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.springframework.transaction.annotation.Transactional;
 
-public class IndexedRepositoryDecorator implements Repository
+public class IndexedRepositoryDecorator implements Repository<Entity>
 {
 	private static final int BATCH_SIZE = 1000;
 
-	private final Repository decoratedRepository;
-	private final Repository indexRepository;
+	private final Repository<Entity> decoratedRepository;
+	private final Repository<Entity> indexRepository;
 	private SearchService elasticSearchService;
 
 	private Set<Operator> unsupportedOperators;
 
-	public IndexedRepositoryDecorator(Repository decoratedRepo, SearchService elasticSearchService)
+	public IndexedRepositoryDecorator(Repository<Entity> decoratedRepo, SearchService elasticSearchService)
 	{
 		this.elasticSearchService = requireNonNull(elasticSearchService);
 		this.decoratedRepository = requireNonNull(decoratedRepo);
@@ -65,7 +65,7 @@ public class IndexedRepositoryDecorator implements Repository
 
 	@Override
 	@Transactional
-	public Integer add(Stream<? extends Entity> entities)
+	public Integer add(Stream<Entity> entities)
 	{
 		// TODO look into performance improvements
 		AtomicInteger count = new AtomicInteger();
@@ -97,7 +97,7 @@ public class IndexedRepositoryDecorator implements Repository
 
 	@Override
 	@Transactional
-	public void update(Stream<? extends Entity> entities)
+	public void update(Stream<Entity> entities)
 	{
 		// TODO look into performance improvements
 		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
@@ -114,7 +114,7 @@ public class IndexedRepositoryDecorator implements Repository
 
 	@Override
 	@Transactional
-	public void delete(Stream<? extends Entity> entities)
+	public void delete(Stream<Entity> entities)
 	{
 		// TODO look into performance improvements
 		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
@@ -159,7 +159,7 @@ public class IndexedRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		if (querySupported(q))
 		{
@@ -185,7 +185,7 @@ public class IndexedRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		if (querySupported(q))
 		{
@@ -272,13 +272,13 @@ public class IndexedRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Query query()
+	public Query<Entity> query()
 	{
 		return decoratedRepository.query();
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		if (querySupported(q))
 		{
@@ -308,7 +308,7 @@ public class IndexedRepositoryDecorator implements Repository
 		decoratedRepository.removeEntityListener(entityListener);
 	}
 
-	private boolean querySupported(Query q)
+	private boolean querySupported(Query<Entity> q)
 	{
 		if (QueryUtils.containsAnyOperator(q, unsupportedOperators))
 		{

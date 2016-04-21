@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
@@ -17,7 +18,7 @@ import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 public class SourceFilteringGenerator implements QueryPartGenerator
 {
 	@Override
-	public void generate(SearchRequestBuilder searchRequestBuilder, Query query, EntityMetaData entityMetaData)
+	public void generate(SearchRequestBuilder searchRequestBuilder, Query<Entity> query, EntityMetaData entityMetaData)
 	{
 		if (ElasticsearchRepositoryCollection.NAME.equals(entityMetaData.getBackend()))
 		{

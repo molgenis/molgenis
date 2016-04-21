@@ -212,7 +212,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 		return columnHeaders;
 	}
 
-	private List<Map<String, Object>> matchInputWithOntologyTerm(Repository repository, String ontologyIri)
+	private List<Map<String, Object>> matchInputWithOntologyTerm(Repository<Entity> repository, String ontologyIri)
 	{
 		return FluentIterable.from(repository).transform(new Function<Entity, Map<String, Object>>()
 		{
@@ -253,7 +253,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 		}
 	}
 
-	private boolean validateUserInputHeader(Repository repository)
+	private boolean validateUserInputHeader(Repository<Entity> repository)
 	{
 		return Iterables.any(repository.getEntityMetaData().getAtomicAttributes(), new Predicate<AttributeMetaData>()
 		{

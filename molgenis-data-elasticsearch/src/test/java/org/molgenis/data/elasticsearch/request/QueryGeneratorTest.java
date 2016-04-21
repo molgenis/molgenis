@@ -113,7 +113,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleGreaterInvalidAttribute()
 	{
 		String value = "str";
-		Query q = new QueryImpl().gt(stringAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().gt(stringAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -127,7 +127,7 @@ public class QueryGeneratorTest
 	{
 		String date = "2015-01-22";
 		Date value = MolgenisDateFormat.getDateFormat().parse(date);
-		Query q = new QueryImpl().gt(dateAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().gt(dateAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -140,7 +140,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleGreaterDateTime() throws ParseException
 	{
 		Date value = MolgenisDateFormat.getDateTimeFormat().parse("2015-05-22T11:12:13+0500");
-		Query q = new QueryImpl().gt(dateTimeAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().gt(dateTimeAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -153,7 +153,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleGreaterDecimal()
 	{
 		Double value = Double.valueOf(1.23);
-		Query q = new QueryImpl().gt(decimalAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().gt(decimalAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -166,7 +166,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleGreaterInt()
 	{
 		Integer value = Integer.valueOf(1);
-		Query q = new QueryImpl().gt(intAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().gt(intAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -179,7 +179,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleGreaterLong()
 	{
 		Long value = Long.valueOf(1l);
-		Query q = new QueryImpl().gt(longAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().gt(longAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -192,7 +192,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleGreaterEqualInvalidAttribute()
 	{
 		String value = "str";
-		Query q = new QueryImpl().ge(stringAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().ge(stringAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -206,7 +206,7 @@ public class QueryGeneratorTest
 	{
 		String date = "2015-05-22";
 		Date value = MolgenisDateFormat.getDateFormat().parse(date);
-		Query q = new QueryImpl().ge(dateAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().ge(dateAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -219,7 +219,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleGreaterEqualDateTime() throws ParseException
 	{
 		Date value = MolgenisDateFormat.getDateTimeFormat().parse("2015-05-22T11:12:13+0500");
-		Query q = new QueryImpl().ge(dateTimeAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().ge(dateTimeAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -232,7 +232,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleGreaterEqualDecimal()
 	{
 		Double value = Double.valueOf(1.23);
-		Query q = new QueryImpl().ge(decimalAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().ge(decimalAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -245,7 +245,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleGreaterEqualInt()
 	{
 		Integer value = Integer.valueOf(1);
-		Query q = new QueryImpl().ge(intAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().ge(intAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -258,7 +258,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleGreaterEqualLong()
 	{
 		Long value = Long.valueOf(1l);
-		Query q = new QueryImpl().ge(longAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().ge(longAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -271,7 +271,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLesserEqualInvalidAttribute()
 	{
 		String value = "str";
-		Query q = new QueryImpl().le(stringAttributeName, value);
+		Query<Entity> q = new QueryImpl<>().le(stringAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -285,7 +285,7 @@ public class QueryGeneratorTest
 	{
 		String date = "2015-05-22";
 		Date value = MolgenisDateFormat.getDateFormat().parse(date);
-		Query q = new QueryImpl().le(dateAttributeName, value);
+		Query<Entity> q = new QueryImpl<>().le(dateAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -298,7 +298,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLesserEqualDateTime() throws ParseException
 	{
 		Date value = MolgenisDateFormat.getDateTimeFormat().parse("2015-05-22T11:12:13+0500");
-		Query q = new QueryImpl().le(dateTimeAttributeName, value);
+		Query<Entity> q = new QueryImpl<>().le(dateTimeAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -311,7 +311,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLesserEqualDecimal()
 	{
 		Double value = Double.valueOf(1.23);
-		Query q = new QueryImpl().le(decimalAttributeName, value);
+		Query<Entity> q = new QueryImpl<>().le(decimalAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -324,7 +324,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLesserEqualInt()
 	{
 		Integer value = Integer.valueOf(1);
-		Query q = new QueryImpl().le(intAttributeName, value);
+		Query<Entity> q = new QueryImpl<>().le(intAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -337,7 +337,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLesserEqualLong()
 	{
 		Long value = Long.valueOf(1l);
-		Query q = new QueryImpl().le(longAttributeName, value);
+		Query<Entity> q = new QueryImpl<>().le(longAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -350,7 +350,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLesserInvalidAttribute()
 	{
 		String value = "str";
-		Query q = new QueryImpl().lt(stringAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().lt(stringAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -363,7 +363,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleInBool()
 	{
 		Iterable<Object> values = Arrays.<Object> asList(Boolean.TRUE, Boolean.FALSE);
-		Query q = new QueryImpl().in(boolAttributeName, values);
+		Query<Entity> q = new QueryImpl<>().in(boolAttributeName, values);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -377,7 +377,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleInCategorical_Ids()
 	{
 		Iterable<String> values = Arrays.asList("id0", "id1", "id2");
-		Query q = new QueryImpl().in(categoricalAttributeName, values);
+		Query<Entity> q = new QueryImpl<>().in(categoricalAttributeName, values);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -400,7 +400,7 @@ public class QueryGeneratorTest
 		ref2.set(idAttributeName, "id2");
 
 		Iterable<Object> values = Arrays.<Object> asList(ref0, ref1, ref2);
-		Query q = new QueryImpl().in(categoricalAttributeName, values);
+		Query<Entity> q = new QueryImpl<>().in(categoricalAttributeName, values);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -418,7 +418,7 @@ public class QueryGeneratorTest
 		Date date1 = MolgenisDateFormat.getDateFormat().parse("2015-05-22");
 		Date date2 = MolgenisDateFormat.getDateFormat().parse("2015-05-23");
 		Iterable<Object> values = Arrays.<Object> asList(date1, date2);
-		Query q = new QueryImpl().in(dateAttributeName, values);
+		Query<Entity> q = new QueryImpl<>().in(dateAttributeName, values);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -434,7 +434,7 @@ public class QueryGeneratorTest
 		Date date1 = MolgenisDateFormat.getDateFormat().parse("2015-05-22");
 		Date date2 = MolgenisDateFormat.getDateFormat().parse("2015-05-23");
 		Iterable<Object> values = Arrays.<Object> asList(date1, date2);
-		Query q = new QueryImpl().in(dateTimeAttributeName, values);
+		Query<Entity> q = new QueryImpl<>().in(dateTimeAttributeName, values);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -450,7 +450,7 @@ public class QueryGeneratorTest
 		Double double1 = Double.valueOf(1.23);
 		Double double2 = Double.valueOf(2.34);
 		Iterable<Object> values = Arrays.<Object> asList(double1, double2);
-		Query q = new QueryImpl().in(decimalAttributeName, values);
+		Query<Entity> q = new QueryImpl<>().in(decimalAttributeName, values);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -466,7 +466,7 @@ public class QueryGeneratorTest
 		String value1 = "e@mail.com";
 		String value2 = "em@ail.com";
 		Iterable<Object> values = Arrays.<Object> asList(value1, value2);
-		Query q = new QueryImpl().in(emailAttributeName, values);
+		Query<Entity> q = new QueryImpl<>().in(emailAttributeName, values);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -482,7 +482,7 @@ public class QueryGeneratorTest
 		String value1 = "enum0";
 		String value2 = "enum1";
 		Iterable<Object> values = Arrays.<Object> asList(value1, value2);
-		Query q = new QueryImpl().in(enumAttributeName, values);
+		Query<Entity> q = new QueryImpl<>().in(enumAttributeName, values);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -498,7 +498,7 @@ public class QueryGeneratorTest
 		String value1 = "<h1>title</h1>";
 		String value2 = "<h2>subtitle</h2>";
 		Iterable<Object> values = Arrays.<Object> asList(value1, value2);
-		Query q = new QueryImpl().in(htmlAttributeName, values);
+		Query<Entity> q = new QueryImpl<>().in(htmlAttributeName, values);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -514,7 +514,7 @@ public class QueryGeneratorTest
 		String value1 = "http://www.site0.com/";
 		String value2 = "http://www.site1.com/";
 		Iterable<Object> values = Arrays.<Object> asList(value1, value2);
-		Query q = new QueryImpl().in(hyperlinkAttributeName, values);
+		Query<Entity> q = new QueryImpl<>().in(hyperlinkAttributeName, values);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -530,7 +530,7 @@ public class QueryGeneratorTest
 		Integer value1 = Integer.valueOf(1);
 		Integer value2 = Integer.valueOf(2);
 		Iterable<Object> values = Arrays.<Object> asList(value1, value2);
-		Query q = new QueryImpl().in(intAttributeName, values);
+		Query<Entity> q = new QueryImpl<>().in(intAttributeName, values);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -546,7 +546,7 @@ public class QueryGeneratorTest
 		Long value1 = Long.valueOf(0l);
 		Long value2 = Long.valueOf(1l);
 		Iterable<Object> values = Arrays.<Object> asList(value1, value2);
-		Query q = new QueryImpl().in(longAttributeName, values);
+		Query<Entity> q = new QueryImpl<>().in(longAttributeName, values);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -567,7 +567,7 @@ public class QueryGeneratorTest
 		ref2.set(idAttributeName, "id2");
 
 		Iterable<Object> values = Arrays.<Object> asList(ref0, ref1, ref2);
-		Query q = new QueryImpl().in(mrefAttributeName, values);
+		Query<Entity> q = new QueryImpl<>().in(mrefAttributeName, values);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -584,7 +584,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleInMref_Ids()
 	{
 		Iterable<String> values = Arrays.asList("id0", "id1", "id2");
-		Query q = new QueryImpl().in(mrefAttributeName, values);
+		Query<Entity> q = new QueryImpl<>().in(mrefAttributeName, values);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -603,7 +603,7 @@ public class QueryGeneratorTest
 		String value1 = "var a = 0;";
 		String value2 = "var b = 'a'";
 		Iterable<Object> values = Arrays.<Object> asList(value1, value2);
-		Query q = new QueryImpl().in(scriptAttributeName, values);
+		Query<Entity> q = new QueryImpl<>().in(scriptAttributeName, values);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -619,7 +619,7 @@ public class QueryGeneratorTest
 		String value1 = "str0";
 		String value2 = "str1";
 		Iterable<Object> values = Arrays.<Object> asList(value1, value2);
-		Query q = new QueryImpl().in(stringAttributeName, values);
+		Query<Entity> q = new QueryImpl<>().in(stringAttributeName, values);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -635,7 +635,7 @@ public class QueryGeneratorTest
 		String value1 = "some very long text";
 		String value2 = "a bit shorter text";
 		Iterable<Object> values = Arrays.<Object> asList(value1, value2);
-		Query q = new QueryImpl().in(textAttributeName, values);
+		Query<Entity> q = new QueryImpl<>().in(textAttributeName, values);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -649,7 +649,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleInXref_Ids()
 	{
 		Iterable<String> values = Arrays.asList("id0", "id1", "id2");
-		Query q = new QueryImpl().in(xrefAttributeName, values);
+		Query<Entity> q = new QueryImpl<>().in(xrefAttributeName, values);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -673,7 +673,7 @@ public class QueryGeneratorTest
 		ref2.set(idAttributeName, "id2");
 
 		Iterable<Object> values = Arrays.<Object> asList(ref0, ref1, ref2);
-		Query q = new QueryImpl().in(xrefAttributeName, values);
+		Query<Entity> q = new QueryImpl<>().in(xrefAttributeName, values);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -691,7 +691,7 @@ public class QueryGeneratorTest
 	{
 		String date = "2015-05-22";
 		Date value = MolgenisDateFormat.getDateFormat().parse(date);
-		Query q = new QueryImpl().lt(dateAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().lt(dateAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -704,7 +704,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLesserDateTime() throws ParseException
 	{
 		Date value = MolgenisDateFormat.getDateTimeFormat().parse("2015-05-22T11:12:13+0500");
-		Query q = new QueryImpl().lt(dateTimeAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().lt(dateTimeAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -717,7 +717,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLesserDecimal()
 	{
 		Double value = Double.valueOf(1.23);
-		Query q = new QueryImpl().lt(decimalAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().lt(decimalAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -730,7 +730,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLesserInt()
 	{
 		Integer value = Integer.valueOf(1);
-		Query q = new QueryImpl().lt(intAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().lt(intAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -743,7 +743,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLesserLong()
 	{
 		Long value = Long.valueOf(1l);
-		Query q = new QueryImpl().lt(longAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().lt(longAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -756,7 +756,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLikeBool()
 	{
 		String value = "value";
-		Query q = new QueryImpl().like(boolAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().like(boolAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 	}
 
@@ -764,7 +764,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLikeCategorical()
 	{
 		String value = "value";
-		Query q = new QueryImpl().like(categoricalAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().like(categoricalAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 	}
 
@@ -772,7 +772,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLikeCompound()
 	{
 		String value = "value";
-		Query q = new QueryImpl().like(compoundAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().like(compoundAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 	}
 
@@ -780,7 +780,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLikeCompoundPartString()
 	{
 		String value = "value";
-		Query q = new QueryImpl().like(compoundPart0AttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().like(compoundPart0AttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -794,7 +794,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLikeDate()
 	{
 		String value = "value";
-		Query q = new QueryImpl().like(dateAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().like(dateAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 	}
 
@@ -802,7 +802,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLikeDateTime()
 	{
 		String value = "value";
-		Query q = new QueryImpl().like(dateTimeAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().like(dateTimeAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 	}
 
@@ -810,7 +810,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLikeDecimal()
 	{
 		String value = "value";
-		Query q = new QueryImpl().like(decimalAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().like(decimalAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 	}
 
@@ -818,7 +818,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLikeEmail()
 	{
 		String value = "e@mail.com";
-		Query q = new QueryImpl().like(emailAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().like(emailAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -832,7 +832,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLikeEnum()
 	{
 		String value = "enum0";
-		Query q = new QueryImpl().like(enumAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().like(enumAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -846,7 +846,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLikeHtml()
 	{
 		String value = "<h1>html</h1>";
-		Query q = new QueryImpl().like(htmlAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().like(htmlAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 	}
 
@@ -854,7 +854,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLikeHyperlink()
 	{
 		String value = "http://www.website.com/";
-		Query q = new QueryImpl().like(hyperlinkAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().like(hyperlinkAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -868,7 +868,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLikeInt()
 	{
 		String value = "value";
-		Query q = new QueryImpl().like(intAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().like(intAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 	}
 
@@ -876,7 +876,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLikeLong()
 	{
 		String value = "value";
-		Query q = new QueryImpl().like(longAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().like(longAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 	}
 
@@ -884,7 +884,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLikeMref()
 	{
 		String value = "value";
-		Query q = new QueryImpl().like(mrefAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().like(mrefAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 	}
 
@@ -892,7 +892,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLikeScript()
 	{
 		String value = "int a = 1;";
-		Query q = new QueryImpl().like(scriptAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().like(scriptAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 	}
 
@@ -900,7 +900,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLikeString()
 	{
 		String value = "value";
-		Query q = new QueryImpl().like(stringAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().like(stringAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -914,7 +914,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLikeText()
 	{
 		String value = "some long text";
-		Query q = new QueryImpl().like(textAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().like(textAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 	}
 
@@ -922,7 +922,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleLikeXref()
 	{
 		String value = "value";
-		Query q = new QueryImpl().like(xrefAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().like(xrefAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 	}
 
@@ -930,7 +930,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsBoolNull()
 	{
 		Boolean value = null;
-		Query q = new QueryImpl().eq(boolAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(boolAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -945,7 +945,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsCategoricalNull()
 	{
 		String value = null;
-		Query q = new QueryImpl().eq(categoricalAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(categoricalAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -959,7 +959,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsCompoundNull()
 	{
 		Object value = null;
-		Query q = new QueryImpl().eq(compoundAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(compoundAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 	}
 
@@ -967,7 +967,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsCompoundPartStringNull()
 	{
 		String value = null;
-		Query q = new QueryImpl().eq(compoundPart0AttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(compoundPart0AttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -980,7 +980,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsDateNull() throws ParseException
 	{
 		Date value = null;
-		Query q = new QueryImpl().eq(dateAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(dateAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -993,7 +993,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsDateTimeNull() throws ParseException
 	{
 		Date value = null;
-		Query q = new QueryImpl().eq(dateTimeAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(dateTimeAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1006,7 +1006,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsDecimalNull()
 	{
 		Double value = null;
-		Query q = new QueryImpl().eq(decimalAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(decimalAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1019,7 +1019,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsEmailNull()
 	{
 		String value = null;
-		Query q = new QueryImpl().eq(emailAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(emailAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1032,7 +1032,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsEnumNull()
 	{
 		String value = null;
-		Query q = new QueryImpl().eq(enumAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(enumAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1045,7 +1045,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsHtmlNull()
 	{
 		String value = null;
-		Query q = new QueryImpl().eq(htmlAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(htmlAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1058,7 +1058,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsHyperlinkNull()
 	{
 		String value = null;
-		Query q = new QueryImpl().eq(hyperlinkAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(hyperlinkAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1071,7 +1071,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsIntNull()
 	{
 		Integer value = null;
-		Query q = new QueryImpl().eq(intAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(intAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1084,7 +1084,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsLongNull()
 	{
 		Long value = null;
-		Query q = new QueryImpl().eq(longAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(longAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1103,7 +1103,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsScriptNull()
 	{
 		String value = null;
-		Query q = new QueryImpl().eq(scriptAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(scriptAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1116,7 +1116,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsStringNull()
 	{
 		String value = null;
-		Query q = new QueryImpl().eq(stringAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(stringAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1129,7 +1129,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsTextNull()
 	{
 		String value = null;
-		Query q = new QueryImpl().eq(textAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(textAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1144,7 +1144,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsXrefNull()
 	{
 		String value = null;
-		Query q = new QueryImpl().eq(xrefAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(xrefAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1158,7 +1158,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsBoolNull()
 	{
 		Boolean value = null;
-		Query q = new QueryImpl().not().eq(boolAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(boolAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1174,7 +1174,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsCategoricalNull()
 	{
 		String value = null;
-		Query q = new QueryImpl().not().eq(categoricalAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(categoricalAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1189,7 +1189,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsCompoundNull()
 	{
 		Object value = null;
-		Query q = new QueryImpl().not().eq(compoundAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(compoundAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 	}
 
@@ -1197,7 +1197,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsCompoundPartStringNull()
 	{
 		String value = null;
-		Query q = new QueryImpl().not().eq(compoundPart0AttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(compoundPart0AttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1211,7 +1211,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsDateNull() throws ParseException
 	{
 		Date value = null;
-		Query q = new QueryImpl().not().eq(dateAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(dateAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1225,7 +1225,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsDateTimeNull() throws ParseException
 	{
 		Date value = null;
-		Query q = new QueryImpl().not().eq(dateTimeAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(dateTimeAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1239,7 +1239,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsDecimalNull()
 	{
 		Double value = null;
-		Query q = new QueryImpl().not().eq(decimalAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(decimalAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1253,7 +1253,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsEmailNull()
 	{
 		String value = null;
-		Query q = new QueryImpl().not().eq(emailAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(emailAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1267,7 +1267,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsEnumNull()
 	{
 		String value = null;
-		Query q = new QueryImpl().not().eq(enumAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(enumAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1281,7 +1281,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsHtmlNull()
 	{
 		String value = null;
-		Query q = new QueryImpl().not().eq(htmlAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(htmlAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1295,7 +1295,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsHyperlinkNull()
 	{
 		String value = null;
-		Query q = new QueryImpl().not().eq(hyperlinkAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(hyperlinkAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1309,7 +1309,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsIntNull()
 	{
 		Integer value = null;
-		Query q = new QueryImpl().not().eq(intAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(intAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1323,7 +1323,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsLongNull()
 	{
 		Long value = null;
-		Query q = new QueryImpl().not().eq(longAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(longAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1343,7 +1343,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsScriptNull()
 	{
 		String value = null;
-		Query q = new QueryImpl().not().eq(scriptAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(scriptAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1357,7 +1357,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsStringNull()
 	{
 		String value = null;
-		Query q = new QueryImpl().not().eq(stringAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(stringAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1371,7 +1371,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsTextNull()
 	{
 		String value = null;
-		Query q = new QueryImpl().not().eq(textAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(textAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1387,7 +1387,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsXrefNull()
 	{
 		String value = null;
-		Query q = new QueryImpl().not().eq(xrefAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(xrefAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1402,7 +1402,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsBool()
 	{
 		Boolean value = Boolean.TRUE;
-		Query q = new QueryImpl().eq(boolAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(boolAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1417,7 +1417,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsCategorical()
 	{
 		String value = "id";
-		Query q = new QueryImpl().eq(categoricalAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(categoricalAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1431,7 +1431,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsCompound()
 	{
 		Object value = "value";
-		Query q = new QueryImpl().eq(compoundAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(compoundAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 	}
 
@@ -1439,7 +1439,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsCompoundPartString()
 	{
 		String value = "value";
-		Query q = new QueryImpl().eq(compoundPart0AttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(compoundPart0AttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1452,7 +1452,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsDate() throws ParseException
 	{
 		Date value = MolgenisDateFormat.getDateFormat().parse("2015-01-15");
-		Query q = new QueryImpl().eq(dateAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(dateAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1465,7 +1465,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsDateTime() throws ParseException
 	{
 		Date value = MolgenisDateFormat.getDateTimeFormat().parse("2015-05-22T11:12:13+0500");
-		Query q = new QueryImpl().eq(dateTimeAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(dateTimeAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1478,7 +1478,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsDecimal()
 	{
 		Double value = Double.valueOf(1.23);
-		Query q = new QueryImpl().eq(decimalAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(decimalAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1491,7 +1491,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsEmail()
 	{
 		String value = "e@mail.com";
-		Query q = new QueryImpl().eq(emailAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(emailAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1504,7 +1504,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsEnum()
 	{
 		String value = "enum0";
-		Query q = new QueryImpl().eq(enumAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(enumAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1517,7 +1517,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsHtml()
 	{
 		String value = "<h1>html</h1>";
-		Query q = new QueryImpl().eq(htmlAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(htmlAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1530,7 +1530,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsHyperlink()
 	{
 		String value = "http://www.website.com/";
-		Query q = new QueryImpl().eq(hyperlinkAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(hyperlinkAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1543,7 +1543,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsInt()
 	{
 		Integer value = Integer.valueOf(1);
-		Query q = new QueryImpl().eq(intAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(intAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1556,7 +1556,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsLong()
 	{
 		Long value = Long.valueOf(1);
-		Query q = new QueryImpl().eq(longAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(longAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1575,7 +1575,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsScript()
 	{
 		String value = "int a = 1;";
-		Query q = new QueryImpl().eq(scriptAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(scriptAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1588,7 +1588,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsString()
 	{
 		String value = "value";
-		Query q = new QueryImpl().eq(stringAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(stringAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1601,7 +1601,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsText()
 	{
 		String value = "some long text";
-		Query q = new QueryImpl().eq(textAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(textAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1616,7 +1616,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleEqualsXref()
 	{
 		String value = "id";
-		Query q = new QueryImpl().eq(xrefAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().eq(xrefAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1630,7 +1630,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsBool()
 	{
 		Boolean value = Boolean.TRUE;
-		Query q = new QueryImpl().not().eq(boolAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(boolAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1645,7 +1645,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsCategorical()
 	{
 		String value = "id";
-		Query q = new QueryImpl().not().eq(categoricalAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(categoricalAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1663,7 +1663,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsCompound()
 	{
 		Object value = "value";
-		Query q = new QueryImpl().not().eq(compoundAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(compoundAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 	}
 
@@ -1671,7 +1671,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsCompoundPartString()
 	{
 		String value = "value";
-		Query q = new QueryImpl().not().eq(compoundPart0AttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(compoundPart0AttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1685,7 +1685,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsDate() throws ParseException
 	{
 		Date value = MolgenisDateFormat.getDateFormat().parse("2015-05-22");
-		Query q = new QueryImpl().not().eq(dateAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(dateAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1699,7 +1699,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsDateTime() throws ParseException
 	{
 		Date value = MolgenisDateFormat.getDateTimeFormat().parse("2015-05-22T11:12:13+0500");
-		Query q = new QueryImpl().not().eq(dateTimeAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(dateTimeAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1713,7 +1713,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsDecimal()
 	{
 		Double value = Double.valueOf(1.23);
-		Query q = new QueryImpl().not().eq(decimalAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(decimalAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1726,7 +1726,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsEmail()
 	{
 		String value = "e@mail.com";
-		Query q = new QueryImpl().not().eq(emailAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(emailAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1740,7 +1740,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsEnum()
 	{
 		String value = "enum0";
-		Query q = new QueryImpl().not().eq(enumAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(enumAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1754,7 +1754,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsHtml()
 	{
 		String value = "<h1>html</h1>";
-		Query q = new QueryImpl().not().eq(htmlAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(htmlAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1768,7 +1768,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsHyperlink()
 	{
 		String value = "http://www.website.com/";
-		Query q = new QueryImpl().not().eq(hyperlinkAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(hyperlinkAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1782,7 +1782,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsInt()
 	{
 		Integer value = Integer.valueOf(1);
-		Query q = new QueryImpl().not().eq(intAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(intAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1795,7 +1795,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsLong()
 	{
 		Long value = Long.valueOf(1);
-		Query q = new QueryImpl().not().eq(longAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(longAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1814,7 +1814,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsScript()
 	{
 		String value = "int a = 1;";
-		Query q = new QueryImpl().not().eq(scriptAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(scriptAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1828,7 +1828,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsString()
 	{
 		String value = "value";
-		Query q = new QueryImpl().not().eq(stringAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(stringAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1842,7 +1842,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsText()
 	{
 		String value = "some long text";
-		Query q = new QueryImpl().not().eq(textAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(textAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1858,7 +1858,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleNotEqualsXref()
 	{
 		String value = "id";
-		Query q = new QueryImpl().not().eq(xrefAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(xrefAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1873,7 +1873,7 @@ public class QueryGeneratorTest
 	{
 		Integer low = Integer.valueOf(3);
 		Integer high = Integer.valueOf(9);
-		Query q = new QueryImpl().rng(intAttributeName, low, high);
+		Query<Entity> q = new QueryImpl<Entity>().rng(intAttributeName, low, high);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1888,7 +1888,7 @@ public class QueryGeneratorTest
 	{
 		Long low = Long.valueOf(3);
 		Long high = Long.valueOf(9);
-		Query q = new QueryImpl().rng(longAttributeName, low, high);
+		Query<Entity> q = new QueryImpl<Entity>().rng(longAttributeName, low, high);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1902,7 +1902,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleSearchAllFields()
 	{
 		String value = "my text";
-		Query q = new QueryImpl().search(value);
+		Query<Entity> q = new QueryImpl<>().search(value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1914,7 +1914,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleSearchOneFieldBool()
 	{
 		String value = "value";
-		Query q = new QueryImpl().search(boolAttributeName, value);
+		Query<Entity> q = new QueryImpl<>().search(boolAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 	}
 
@@ -1922,7 +1922,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleSearchOneFieldCategorical()
 	{
 		String value = "text";
-		Query q = new QueryImpl().search(categoricalAttributeName, value);
+		Query<Entity> q = new QueryImpl<>().search(categoricalAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1935,7 +1935,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleSearchOneFieldCompound()
 	{
 		String value = "value";
-		Query q = new QueryImpl().search(compoundAttributeName, value);
+		Query<Entity> q = new QueryImpl<>().search(compoundAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 	}
 
@@ -1943,7 +1943,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleSearchOneFieldCompoundPartString()
 	{
 		String value = "value";
-		Query q = new QueryImpl().search(compoundPart0AttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().search(compoundPart0AttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1955,7 +1955,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleSearchOneFieldDate() throws ParseException
 	{
 		String value = MolgenisDateFormat.getDateFormat().parse("2015-05-22").toString();
-		Query q = new QueryImpl().search(dateAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().search(dateAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1967,7 +1967,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleSearchOneFieldDateTime() throws ParseException
 	{
 		String value = MolgenisDateFormat.getDateFormat().parse("2015-05-22T11:12:13+0500").toString();
-		Query q = new QueryImpl().search(dateTimeAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().search(dateTimeAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1979,7 +1979,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleSearchOneFieldDecimal()
 	{
 		String value = Double.valueOf(1.23).toString();
-		Query q = new QueryImpl().search(decimalAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().search(decimalAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -1991,7 +1991,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleSearchOneFieldEmail()
 	{
 		String value = "e@mail.com";
-		Query q = new QueryImpl().search(emailAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().search(emailAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -2003,7 +2003,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleSearchOneFieldEnum()
 	{
 		String value = "enum0";
-		Query q = new QueryImpl().search(enumAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().search(enumAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -2015,7 +2015,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleSearchOneFieldHtml()
 	{
 		String value = "<h1>html</h1>";
-		Query q = new QueryImpl().search(htmlAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().search(htmlAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -2027,7 +2027,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleSearchOneFieldHyperlink()
 	{
 		String value = "http://www.website.com/";
-		Query q = new QueryImpl().search(hyperlinkAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().search(hyperlinkAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -2039,7 +2039,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleSearchOneFieldInt()
 	{
 		String value = Integer.valueOf(1).toString();
-		Query q = new QueryImpl().search(intAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().search(intAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -2051,7 +2051,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleSearchOneFieldLong()
 	{
 		String value = Long.valueOf(1).toString();
-		Query q = new QueryImpl().search(longAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().search(longAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -2063,7 +2063,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleSearchOneFieldMref()
 	{
 		String value = "value";
-		Query q = new QueryImpl().search(mrefAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().search(mrefAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -2076,7 +2076,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleSearchOneFieldScript()
 	{
 		String value = "int a = 1;";
-		Query q = new QueryImpl().search(scriptAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().search(scriptAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -2088,7 +2088,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleSearchOneFieldString()
 	{
 		String value = "value";
-		Query q = new QueryImpl().search(stringAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().search(stringAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -2100,7 +2100,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleSearchOneFieldText()
 	{
 		String value = "some long text";
-		Query q = new QueryImpl().search(textAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().search(textAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -2112,7 +2112,7 @@ public class QueryGeneratorTest
 	public void generateOneQueryRuleSearchOneFieldXref()
 	{
 		String value = "text";
-		Query q = new QueryImpl().search(xrefAttributeName, value);
+		Query<Entity> q = new QueryImpl<Entity>().search(xrefAttributeName, value);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
 		verify(searchRequestBuilder).setQuery(captor.capture());
@@ -2128,7 +2128,7 @@ public class QueryGeneratorTest
 		Boolean booleanValue = Boolean.TRUE;
 		String stringValue = "str";
 		Integer intValue = 1;
-		Query q = new QueryImpl().eq(boolAttributeName, booleanValue).or().nest().eq(stringAttributeName, stringValue)
+		Query<Entity> q = new QueryImpl<Entity>().eq(boolAttributeName, booleanValue).or().nest().eq(stringAttributeName, stringValue)
 				.and().eq(intAttributeName, intValue).unnest();
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
@@ -2154,7 +2154,7 @@ public class QueryGeneratorTest
 		Boolean booleanValue = Boolean.TRUE;
 		String stringValue = "str";
 		Integer intValue = 1;
-		Query q = new QueryImpl().eq(boolAttributeName, booleanValue).and().not().eq(stringAttributeName, stringValue)
+		Query<Entity> q = new QueryImpl<Entity>().eq(boolAttributeName, booleanValue).and().not().eq(stringAttributeName, stringValue)
 				.and().not().eq(intAttributeName, intValue);
 		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
 		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);

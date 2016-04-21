@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Package;
@@ -104,12 +105,12 @@ public interface MetaDataService extends Iterable<RepositoryCollection>, Applica
 	 * @param entityMeta
 	 * @return
 	 */
-	Repository addEntityMeta(EntityMetaData entityMeta);
+	Repository<Entity> addEntityMeta(EntityMetaData entityMeta);
 
 	/**
 	 * Create and add a new Repository for an EntityMetaData with repository decorators applied
 	 */
-	Repository add(EntityMetaData entityMetaData, RepositoryDecoratorFactory decoratorFactory);
+	Repository<Entity> add(EntityMetaData entityMetaData, RepositoryDecoratorFactory decoratorFactory);
 
 	/**
 	 * Deletes an EntityMeta

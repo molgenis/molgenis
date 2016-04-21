@@ -1,5 +1,6 @@
 package org.molgenis.data.rsql;
 
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,7 @@ public class MolgenisRSQL
 {
 	private final RSQLParser rsqlParser = new RSQLParser();
 
-	public Query createQuery(String rsql, EntityMetaData entityMetaData) throws RSQLParserException
+	public Query<Entity> createQuery(String rsql, EntityMetaData entityMetaData) throws RSQLParserException
 	{
 		Node rootNode = rsqlParser.parse(rsql);
 		MolgenisRSQLVisitor visitor = new MolgenisRSQLVisitor(entityMetaData);

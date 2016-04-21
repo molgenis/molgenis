@@ -44,8 +44,7 @@ public class PythonScriptRunner implements ScriptRunner
 	/**
 	 * Run a Python script as freemarker template
 	 * 
-	 * @param scriptName
-	 * @param template
+	 * @param templateName
 	 * @param parameters
 	 * @throws IOException
 	 * @throws TemplateException
@@ -61,7 +60,7 @@ public class PythonScriptRunner implements ScriptRunner
 	 * Run an Python script as freemarker template
 	 * 
 	 * @param scriptName
-	 * @param template
+	 * @param templateName
 	 * @param parameters
 	 * @throws IOException
 	 * @throws TemplateException

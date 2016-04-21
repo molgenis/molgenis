@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.MolgenisDataException;
@@ -27,7 +28,7 @@ public class IdCardRepositoryCollection implements ManageableRepositoryCollectio
 
 	private final DataService dataService;
 	private final IdCardBiobankRepository idCardBiobankRepository;
-	private final Map<String, Repository> repositories;
+	private final Map<String, Repository<Entity>> repositories;
 
 	@Autowired
 	public IdCardRepositoryCollection(DataService dataService, IdCardBiobankRepository idCardBiobankRepository)
@@ -44,7 +45,7 @@ public class IdCardRepositoryCollection implements ManageableRepositoryCollectio
 	}
 
 	@Override
-	public Repository addEntityMeta(EntityMetaData entityMeta)
+	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
 	{
 		String entityName = entityMeta.getName();
 		if (!entityName.equals(IdCardBiobank.ENTITY_NAME))
@@ -70,7 +71,7 @@ public class IdCardRepositoryCollection implements ManageableRepositoryCollectio
 	}
 
 	@Override
-	public Repository getRepository(String name)
+	public Repository<Entity> getRepository(String name)
 	{
 		return repositories.get(name);
 	}
@@ -82,7 +83,7 @@ public class IdCardRepositoryCollection implements ManageableRepositoryCollectio
 	}
 
 	@Override
-	public Iterator<Repository> iterator()
+	public Iterator<Repository<Entity>> iterator()
 	{
 		return repositories.values().iterator();
 	}

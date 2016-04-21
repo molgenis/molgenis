@@ -25,11 +25,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-public class MolgenisUserDecorator implements Repository
+public class MolgenisUserDecorator implements Repository<Entity>
 {
-	private final Repository decoratedRepository;
+	private final Repository<Entity> decoratedRepository;
 
-	public MolgenisUserDecorator(Repository decoratedRepository)
+	public MolgenisUserDecorator(Repository<Entity> decoratedRepository)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
 	}
@@ -57,7 +57,7 @@ public class MolgenisUserDecorator implements Repository
 	}
 
 	@Override
-	public Integer add(Stream<? extends Entity> entities)
+	public Integer add(Stream<Entity> entities)
 	{
 		entities = entities.map(entity -> {
 			encodePassword(entity);
@@ -68,7 +68,7 @@ public class MolgenisUserDecorator implements Repository
 	}
 
 	@Override
-	public void update(Stream<? extends Entity> entities)
+	public void update(Stream<Entity> entities)
 	{
 		entities = entities.map(entity -> {
 			updatePassword(entity);
@@ -119,8 +119,8 @@ public class MolgenisUserDecorator implements Repository
 		MolgenisUser molgenisUser = new MolgenisUser();
 		molgenisUser.set(findOneById(entity.getIdValue()));
 
-		Repository userAuthorityRepository = getUserAuthorityRepository();
-		Entity suAuthorityEntity = userAuthorityRepository.findOne(new QueryImpl()
+		Repository<Entity> userAuthorityRepository = getUserAuthorityRepository();
+		Entity suAuthorityEntity = userAuthorityRepository.findOne(new QueryImpl<Entity>()
 				.eq(UserAuthority.MOLGENISUSER, molgenisUser).and().eq(UserAuthority.ROLE, SecurityUtils.AUTHORITY_SU));
 
 		Boolean isSuperuser = entity.getBoolean(MolgenisUser.SUPERUSER);
@@ -159,7 +159,7 @@ public class MolgenisUserDecorator implements Repository
 		return passwordEncoder;
 	}
 
-	private Repository getUserAuthorityRepository()
+	private Repository<Entity> getUserAuthorityRepository()
 	{
 		ApplicationContext applicationContext = ApplicationContextProvider.getApplicationContext();
 		if (applicationContext == null)
@@ -171,7 +171,7 @@ public class MolgenisUserDecorator implements Repository
 		{
 			throw new RuntimeException(new ApplicationContextException("missing required DataService bean"));
 		}
-		Repository userAuthorityRepository = dataService.getRepository(UserAuthority.class.getSimpleName());
+		Repository<Entity> userAuthorityRepository = dataService.getRepository(UserAuthority.class.getSimpleName());
 		if (userAuthorityRepository == null)
 		{
 			throw new RuntimeException("missing required UserAuthority repository");
@@ -228,25 +228,25 @@ public class MolgenisUserDecorator implements Repository
 	}
 
 	@Override
-	public Query query()
+	public Query<Entity> query()
 	{
 		return decoratedRepository.query();
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		return decoratedRepository.count(q);
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		return decoratedRepository.findAll(q);
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		return decoratedRepository.findOne(q);
 	}
@@ -282,7 +282,7 @@ public class MolgenisUserDecorator implements Repository
 	}
 
 	@Override
-	public void delete(Stream<? extends Entity> entities)
+	public void delete(Stream<Entity> entities)
 	{
 		decoratedRepository.delete(entities);
 	}

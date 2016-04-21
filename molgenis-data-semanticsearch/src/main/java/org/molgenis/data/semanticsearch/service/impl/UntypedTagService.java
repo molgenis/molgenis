@@ -169,7 +169,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	public Iterable<Tag<Package, LabeledResource, LabeledResource>> getTagsForPackage(Package p)
 	{
 		Entity packageEntity = dataService.findOne(PackageMetaData.ENTITY_NAME,
-				new QueryImpl().eq(PackageMetaData.FULL_NAME, p.getName()));
+				new QueryImpl<Entity>().eq(PackageMetaData.FULL_NAME, p.getName()));
 
 		if (packageEntity == null)
 		{

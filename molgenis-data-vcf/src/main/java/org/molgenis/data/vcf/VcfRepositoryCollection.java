@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
@@ -56,7 +57,7 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public Repository getRepository(String name)
+	public Repository<Entity> getRepository(String name)
 	{
 		if (!entityName.equals(name)) throw new MolgenisDataException("Unknown entity name [" + name + "]");
 		try
@@ -76,15 +77,15 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public Repository addEntityMeta(EntityMetaData entityMeta)
+	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
 	{
 		return getRepository(entityMeta.getName());
 	}
 
 	@Override
-	public Iterator<Repository> iterator()
+	public Iterator<Repository<Entity>> iterator()
 	{
-		return new Iterator<Repository>()
+		return new Iterator<Repository<Entity>>()
 		{
 			Iterator<String> it = getEntityNames().iterator();
 
@@ -95,7 +96,7 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 			}
 
 			@Override
-			public Repository next()
+			public Repository<Entity> next()
 			{
 				return getRepository(it.next());
 			}

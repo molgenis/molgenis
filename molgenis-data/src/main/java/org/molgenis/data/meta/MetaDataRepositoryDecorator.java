@@ -23,11 +23,11 @@ import org.molgenis.data.RepositoryCapability;
  * Removes the WRITABLE and MANAGEABLE capabilities, because the user must not directly edit these repos but use the
  * MetaDataServices
  */
-public class MetaDataRepositoryDecorator implements Repository
+public class MetaDataRepositoryDecorator implements Repository<Entity>
 {
-	private final Repository decorated;
+	private final Repository<Entity> decorated;
 
-	public MetaDataRepositoryDecorator(Repository decorated)
+	public MetaDataRepositoryDecorator(Repository<Entity> decorated)
 	{
 		this.decorated = decorated;
 	}
@@ -84,25 +84,25 @@ public class MetaDataRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Query query()
+	public Query<Entity> query()
 	{
 		return decorated.query();
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		return decorated.count(q);
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		return decorated.findAll(q);
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		return decorated.findOne(q);
 	}
@@ -144,7 +144,7 @@ public class MetaDataRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void update(Stream<? extends Entity> entities)
+	public void update(Stream<Entity> entities)
 	{
 		decorated.update(entities);
 	}
@@ -156,7 +156,7 @@ public class MetaDataRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void delete(Stream<? extends Entity> entities)
+	public void delete(Stream<Entity> entities)
 	{
 		decorated.delete(entities);
 	}
@@ -186,7 +186,7 @@ public class MetaDataRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Integer add(Stream<? extends Entity> entities)
+	public Integer add(Stream<Entity> entities)
 	{
 		return decorated.add(entities);
 	}

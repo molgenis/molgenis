@@ -25,7 +25,7 @@ public class ElasticsearchRepository extends AbstractElasticsearchRepository
 	@Override
 	public void rebuildIndex()
 	{
-		Iterable<Entity> entities = elasticSearchService.search(new QueryImpl(this), getEntityMetaData());
+		Iterable<Entity> entities = elasticSearchService.search(new QueryImpl<>(this), getEntityMetaData());
 		elasticSearchService.rebuildIndex(entities, entityMetaData);
 	}
 }

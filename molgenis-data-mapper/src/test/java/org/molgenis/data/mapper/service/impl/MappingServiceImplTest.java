@@ -126,7 +126,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		}
 
 		// add 3 Gene entities
-		Repository gene = dataService.getMeta().addEntityMeta(geneMetaData);
+		Repository<Entity> gene = dataService.getMeta().addEntityMeta(geneMetaData);
 		gene.deleteAll(); // refresh
 		for (int i = 1; i < 4; i++)
 		{
@@ -137,7 +137,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		}
 
 		// add 1 Exon entity
-		Repository exon = dataService.getMeta().addEntityMeta(exonMetaData);
+		Repository<Entity> exon = dataService.getMeta().addEntityMeta(exonMetaData);
 		exon.deleteAll(); // refresh
 		MapEntity geneEntity = new MapEntity(exonMetaData);
 		geneEntity.set("id", "A");
@@ -303,7 +303,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
 		createMappingProjectWithMappings(entityName);
 
-		Repository actual = dataService.getRepository(entityName);
+		Repository<Entity> actual = dataService.getRepository(entityName);
 		DefaultEntityMetaData expectedMetadata = new DefaultEntityMetaData(entityName, hopMetaData);
 		expectedMetadata.addAttribute("source");
 		assertEquals(actual.getEntityMetaData(), expectedMetadata);
@@ -348,7 +348,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		// apply mapping again
 		mappingService.applyMappings(project.getMappingTarget("HopEntity"), entityName);
 
-		Repository actual = dataService.getRepository(entityName);
+		Repository<Entity> actual = dataService.getRepository(entityName);
 		DefaultEntityMetaData expectedMetadata = new DefaultEntityMetaData(entityName, hopMetaData);
 		expectedMetadata.addAttribute("source");
 		assertEquals(actual.getEntityMetaData(), expectedMetadata);
@@ -394,7 +394,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		// apply mapping again
 		mappingService.applyMappings(project.getMappingTarget("HopEntity"), entityName);
 
-		Repository actual = dataService.getRepository(entityName);
+		Repository<Entity> actual = dataService.getRepository(entityName);
 		DefaultEntityMetaData expectedMetadata = new DefaultEntityMetaData(entityName, hopMetaData);
 		expectedMetadata.addAttribute("source");
 		assertEquals(actual.getEntityMetaData(), expectedMetadata);
@@ -434,7 +434,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		// apply mapping again, this should not delete entities mapped from source 2
 		mappingService.applyMappings(project.getMappingTarget("HopEntity"), entityName);
 
-		Repository actual = dataService.getRepository(entityName);
+		Repository<Entity> actual = dataService.getRepository(entityName);
 		DefaultEntityMetaData expectedMetadata = new DefaultEntityMetaData(entityName, hopMetaData);
 		expectedMetadata.addAttribute("source");
 		assertEquals(actual.getEntityMetaData(), expectedMetadata);

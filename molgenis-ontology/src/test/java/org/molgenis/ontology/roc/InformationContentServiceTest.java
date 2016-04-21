@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.mockito.Mockito;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.MapEntity;
@@ -42,10 +43,10 @@ public class InformationContentServiceTest
 		MapEntity ontologyEntity = new MapEntity(ImmutableMap.of(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
 
 		Mockito.when(dataService.findOne(OntologyMetaData.ENTITY_NAME,
-				new QueryImpl().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri))).thenReturn(ontologyEntity);
+				new QueryImpl<Entity>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri))).thenReturn(ontologyEntity);
 
 		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME,
-				new QueryImpl().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity))).thenReturn((long) 100);
+				new QueryImpl<Entity>().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity))).thenReturn((long) 100);
 
 		QueryRule queryRule = new QueryRule(
 				Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, "hear")));
@@ -53,7 +54,7 @@ public class InformationContentServiceTest
 		QueryRule finalQuery = new QueryRule(
 				Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
 						new QueryRule(Operator.AND), queryRule));
-		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl(finalQuery)))
+		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl<>(finalQuery)))
 				.thenReturn((long) 30);
 
 		QueryRule queryRule2 = new QueryRule(Arrays
@@ -62,7 +63,7 @@ public class InformationContentServiceTest
 		QueryRule finalQuery2 = new QueryRule(
 				Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
 						new QueryRule(Operator.AND), queryRule2));
-		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl(finalQuery2)))
+		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl<>(finalQuery2)))
 				.thenReturn((long) 10);
 
 		Map<String, Double> expectedWordIDF = informationContentService.createWordIDF("hearing impairment",
@@ -80,10 +81,10 @@ public class InformationContentServiceTest
 		MapEntity ontologyEntity = new MapEntity(ImmutableMap.of(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
 
 		Mockito.when(dataService.findOne(OntologyMetaData.ENTITY_NAME,
-				new QueryImpl().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri))).thenReturn(ontologyEntity);
+				new QueryImpl<Entity>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri))).thenReturn(ontologyEntity);
 
 		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME,
-				new QueryImpl().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity))).thenReturn((long) 100);
+				new QueryImpl<Entity>().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity))).thenReturn((long) 100);
 
 		QueryRule queryRule = new QueryRule(
 				Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, "hear")));
@@ -91,7 +92,7 @@ public class InformationContentServiceTest
 		QueryRule finalQuery = new QueryRule(
 				Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
 						new QueryRule(Operator.AND), queryRule));
-		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl(finalQuery)))
+		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl<>(finalQuery)))
 				.thenReturn((long) 30);
 
 		QueryRule queryRule2 = new QueryRule(Arrays
@@ -100,7 +101,7 @@ public class InformationContentServiceTest
 		QueryRule finalQuery2 = new QueryRule(
 				Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
 						new QueryRule(Operator.AND), queryRule2));
-		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl(finalQuery2)))
+		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl<>(finalQuery2)))
 				.thenReturn((long) 10);
 
 		Map<String, Double> redistributedNGramScore = informationContentService

@@ -24,12 +24,12 @@ import com.google.common.collect.Iterables;
 /**
  * Adds auto id capabilities to a Repository
  */
-public class AutoValueRepositoryDecorator implements Repository
+public class AutoValueRepositoryDecorator implements Repository<Entity>
 {
-	private final Repository decoratedRepository;
+	private final Repository<Entity> decoratedRepository;
 	private final IdGenerator idGenerator;
 
-	public AutoValueRepositoryDecorator(Repository decoratedRepository, IdGenerator idGenerator)
+	public AutoValueRepositoryDecorator(Repository<Entity> decoratedRepository, IdGenerator idGenerator)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
 		this.idGenerator = requireNonNull(idGenerator);
@@ -53,7 +53,7 @@ public class AutoValueRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Integer add(Stream<? extends Entity> entities)
+	public Integer add(Stream<Entity> entities)
 	{
 		List<AttributeMetaData> autoAttrs = getAutoAttrs();
 		if (!autoAttrs.isEmpty())
@@ -112,25 +112,25 @@ public class AutoValueRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Query query()
+	public Query<Entity> query()
 	{
 		return decoratedRepository.query();
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		return decoratedRepository.count(q);
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		return decoratedRepository.findAll(q);
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		return decoratedRepository.findOne(q);
 	}
@@ -172,7 +172,7 @@ public class AutoValueRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void update(Stream<? extends Entity> entities)
+	public void update(Stream<Entity> entities)
 	{
 		decoratedRepository.update(entities);
 	}
@@ -184,7 +184,7 @@ public class AutoValueRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void delete(Stream<? extends Entity> entities)
+	public void delete(Stream<Entity> entities)
 	{
 		decoratedRepository.delete(entities);
 	}

@@ -315,7 +315,7 @@ public class SortaServiceController extends MolgenisPluginController
 		if (isNotEmpty(filterQuery))
 		{
 			Iterable<String> filteredInputTermIds = dataService
-					.findAll(sortaJobExecution.getSourceEntityName(), new QueryImpl().search(filterQuery))
+					.findAll(sortaJobExecution.getSourceEntityName(), new QueryImpl<Entity>().search(filterQuery))
 					.map(inputEntity -> inputEntity.getString(SortaServiceImpl.DEFAULT_MATCHING_IDENTIFIER))
 					.collect(Collectors.toList());
 			QueryRule previousQueryRule = new QueryRule(queryRuleInputEntitiesInOneMatchingTask);
@@ -325,7 +325,7 @@ public class SortaServiceController extends MolgenisPluginController
 					queryRuleFilterInput);
 		}
 
-		Query query = new QueryImpl(queryRuleInputEntitiesInOneMatchingTask);
+		Query<Entity> query = new QueryImpl<>(queryRuleInputEntitiesInOneMatchingTask);
 		long count = dataService.count(resultEntityName, query);
 		int start = entityPager.getStart();
 		int num = entityPager.getNum();
@@ -466,7 +466,7 @@ public class SortaServiceController extends MolgenisPluginController
 							MatchingTaskContentEntityMetaData.SCORE, MatchingTaskContentEntityMetaData.VALIDATED));
 			csvWriter.writeAttributeNames(columnHeaders);
 
-			dataService.findAll(sortaJobExecution.getResultEntityName(), new QueryImpl())
+			dataService.findAll(sortaJobExecution.getResultEntityName(), new QueryImpl<>())
 					.forEach(resultEntity -> csvWriter.add(toDownloadRow(sortaJobExecution, resultEntity)));
 		}
 		finally
@@ -514,7 +514,7 @@ public class SortaServiceController extends MolgenisPluginController
 	{
 		final List<Entity> jobs = new ArrayList<>();
 		MolgenisUser currentUser = userAccountService.getCurrentUser();
-		Query query = QueryImpl.EQ(SortaJobExecution.USER, currentUser);
+		Query<Entity> query = QueryImpl.EQ(SortaJobExecution.USER, currentUser);
 		query.sort().on(SortaJobExecution.START_DATE, DESC);
 		RunAsSystemProxy.runAsSystem(() -> {
 			dataService.findAll(SortaJobExecution.ENTITY_NAME, query).forEach(job -> {
@@ -526,7 +526,7 @@ public class SortaServiceController extends MolgenisPluginController
 		return jobs;
 	}
 
-	private SortaJobExecution createJobExecution(Repository inputData, String jobName, String ontologyIri,
+	private SortaJobExecution createJobExecution(Repository<Entity> inputData, String jobName, String ontologyIri,
 			SecurityContext securityContext)
 	{
 		String resultEntityName = idGenerator.generateId();
@@ -564,7 +564,7 @@ public class SortaServiceController extends MolgenisPluginController
 		dataService.getMeta().addEntityMeta(resultEntityMetaData);
 	}
 
-	private void createInputRepository(Repository inputRepository)
+	private void createInputRepository(Repository<Entity> inputRepository)
 	{
 		// Add the original input dataset to database
 		dataService.getMeta().addEntityMeta(inputRepository.getEntityMetaData());
@@ -580,7 +580,7 @@ public class SortaServiceController extends MolgenisPluginController
 		QueryRule combinedRule = new QueryRule(
 				asList(validatedRule, new QueryRule(isMatched ? OR : AND), thresholdRule));
 
-		return dataService.count(sortaJobExecution.getResultEntityName(), new QueryImpl(combinedRule));
+		return dataService.count(sortaJobExecution.getResultEntityName(), new QueryImpl<>(combinedRule));
 	}
 
 	private String generateCsvFileName(String dataSetName)
@@ -589,7 +589,7 @@ public class SortaServiceController extends MolgenisPluginController
 		return dataSetName + "_" + dateFormat.format(new Date()) + ".csv";
 	}
 
-	private boolean validateFileHeader(Repository repository)
+	private boolean validateFileHeader(Repository<Entity> repository)
 	{
 		boolean containsName = StreamSupport.stream(repository.getEntityMetaData().getAttributes().spliterator(), false)
 				.map(AttributeMetaData::getName)
@@ -597,14 +597,14 @@ public class SortaServiceController extends MolgenisPluginController
 		return containsName;
 	}
 
-	private boolean validateEmptyFileHeader(Repository repository)
+	private boolean validateEmptyFileHeader(Repository<Entity> repository)
 	{
 		boolean evaluation = StreamSupport.stream(repository.getEntityMetaData().getAttributes().spliterator(), false)
 				.map(AttributeMetaData::getName).anyMatch(StringUtils::isNotBlank);
 		return evaluation;
 	}
 
-	private boolean validateInputFileContent(Repository repository)
+	private boolean validateInputFileContent(Repository<Entity> repository)
 	{
 		return repository.iterator().hasNext();
 	}
