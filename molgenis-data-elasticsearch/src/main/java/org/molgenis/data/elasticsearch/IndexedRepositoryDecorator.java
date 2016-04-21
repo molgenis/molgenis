@@ -251,7 +251,6 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	{
 		Set<RepositoryCapability> capabilities = decoratedRepository.getCapabilities();
 
-		// when a repository is indexed, it is automatically indexable, queryable and aggregateable
 		capabilities.addAll(EnumSet.of(INDEXABLE, QUERYABLE, AGGREGATEABLE));
 		return capabilities;
 	}
