@@ -46,7 +46,10 @@ public class AnnotatorImpl extends QueryAnnotatorImpl implements EntityAnnotator
 		{
 			for (AttributeMetaData attr : getInfo().getOutputAttributes())
 			{
-				resultEntity.set(attr.getName(), null);
+				if (!updateMode || resultEntity.get(attr.getName()) == null)
+				{
+					resultEntity.set(attr.getName(), null);
+				}
 			}
 		}
 	}
@@ -54,8 +57,10 @@ public class AnnotatorImpl extends QueryAnnotatorImpl implements EntityAnnotator
 	/**
 	 * Get the resource attribute value for one of this annotator's output attributes.
 	 * 
-	 * @param attr the name of the output attribute
-	 * @param entity the current entity
+	 * @param attr
+	 *            the name of the output attribute
+	 * @param entity
+	 *            the current entity
 	 * @return the value of the attribute to copy from the resource entity
 	 */
 	protected Object getResourceAttributeValue(AttributeMetaData attr, Entity entity)
