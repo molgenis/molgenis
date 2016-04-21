@@ -59,6 +59,7 @@ public class IndexedRepositoryDecoratorTest
 	private List<QueryRule> queryRules;
 	private List<QueryRule> unsupportedQueryRules;
 
+	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUp() throws IOException
 	{
@@ -136,7 +137,9 @@ public class IndexedRepositoryDecoratorTest
 		AttributeMetaData yAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("yAttr").getMock();
 		AttributeMetaData distinctAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("distinctAttr")
 				.getMock();
-		Query q = mock(Query.class);
+
+		@SuppressWarnings("unchecked")
+		Query<Entity> q = mock(Query.class);
 		AggregateQuery aggregateQuery = new AggregateQueryImpl().attrX(xAttr).attrY(yAttr).attrDistinct(distinctAttr)
 				.query(q);
 
@@ -443,7 +446,8 @@ public class IndexedRepositoryDecoratorTest
 	@Test
 	public void unsupportedQueryWithComputedAttributes()
 	{
-		Query q = mock(Query.class);
+		@SuppressWarnings("unchecked")
+		Query<Entity> q = mock(Query.class);
 		QueryRule qRule1 = mock(QueryRule.class);
 		QueryRule qRule2 = mock(QueryRule.class);
 

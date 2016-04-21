@@ -26,9 +26,10 @@ import autovalue.shaded.com.google.common.common.collect.Lists;
 
 public class QueryUtilsTest
 {
-	private Query query;
+	private Query<Entity> query;
 	private QueryRule rule3;
 
+	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void beforeMethod()
 	{
@@ -77,7 +78,7 @@ public class QueryUtilsTest
 	@Test
 	public void emptyQuery()
 	{
-		assertFalse(QueryUtils.containsAnyOperator(new QueryImpl(), EnumSet.allOf(Operator.class)));
+		assertFalse(QueryUtils.containsAnyOperator(new QueryImpl<Entity>(), EnumSet.allOf(Operator.class)));
 	}
 
 	@Test
@@ -95,7 +96,8 @@ public class QueryUtilsTest
 	{
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 
-		Query q = mock(Query.class);
+		@SuppressWarnings("unchecked")
+		Query<Entity> q = mock(Query.class);
 		QueryRule qRule1 = mock(QueryRule.class);
 		QueryRule qRule2 = mock(QueryRule.class);
 
@@ -123,7 +125,8 @@ public class QueryUtilsTest
 	{
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 
-		Query q = mock(Query.class);
+		@SuppressWarnings("unchecked")
+		Query<Entity> q = mock(Query.class);
 		QueryRule qRule1 = mock(QueryRule.class);
 		QueryRule qRule2 = mock(QueryRule.class);
 
@@ -151,7 +154,8 @@ public class QueryUtilsTest
 	{
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 
-		Query q = mock(Query.class);
+		@SuppressWarnings("unchecked")
+		Query<Entity> q = mock(Query.class);
 		QueryRule qRule1 = mock(QueryRule.class);
 		QueryRule qRule2 = mock(QueryRule.class);
 		QueryRule nestedRule1 = mock(QueryRule.class);
