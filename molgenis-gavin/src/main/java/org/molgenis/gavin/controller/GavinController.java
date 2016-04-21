@@ -126,12 +126,12 @@ public class GavinController
 		return new FileSystemResource(file);
 	}
 
-	@ExceptionHandler(IllegalArgumentException.class)
+	@ExceptionHandler(RuntimeException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
-		LOG.warn(e.getMessage());
+		LOG.warn(e.getMessage(), e);
 		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(e.getMessage()));
 	}
 }
