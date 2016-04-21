@@ -244,7 +244,7 @@ public class VcfWriterUtils
 		}
 		else
 		{
-			sb.append(infoAttributeMetaData.getDescription());
+			sb.append(infoAttributeMetaData.getDescription().replace("\"", "\\\"").replace("\n", " "));
 		}
 		sb.append("\">");
 		return sb.toString();
