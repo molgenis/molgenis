@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.fieldtypes.StringField;
 
 import com.google.common.base.Predicate;
@@ -84,6 +85,12 @@ public class AutoValueRepositoryDecorator implements Repository<Entity>
 	public Set<RepositoryCapability> getCapabilities()
 	{
 		return decoratedRepository.getCapabilities();
+	}
+
+	@Override
+	public Set<Operator> getQueryOperators()
+	{
+		return decoratedRepository.getQueryOperators();
 	}
 
 	@Override

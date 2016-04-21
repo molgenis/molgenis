@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
 
 public class EntityReferenceResolverDecorator implements Repository<Entity>
@@ -24,6 +25,12 @@ public class EntityReferenceResolverDecorator implements Repository<Entity>
 	public Set<RepositoryCapability> getCapabilities()
 	{
 		return decoratedRepo.getCapabilities();
+	}
+
+	@Override
+	public Set<Operator> getQueryOperators()
+	{
+		return decoratedRepo.getQueryOperators();
 	}
 
 	@Override

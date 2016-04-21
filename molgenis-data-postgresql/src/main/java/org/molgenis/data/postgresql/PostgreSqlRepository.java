@@ -1,9 +1,20 @@
 package org.molgenis.data.postgresql;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.QueryRule.Operator.AND;
+import static org.molgenis.data.QueryRule.Operator.EQUALS;
+import static org.molgenis.data.QueryRule.Operator.GREATER;
+import static org.molgenis.data.QueryRule.Operator.GREATER_EQUAL;
+import static org.molgenis.data.QueryRule.Operator.IN;
+import static org.molgenis.data.QueryRule.Operator.LESS;
+import static org.molgenis.data.QueryRule.Operator.LESS_EQUAL;
+import static org.molgenis.data.QueryRule.Operator.LIKE;
+import static org.molgenis.data.QueryRule.Operator.NESTED;
+import static org.molgenis.data.QueryRule.Operator.NOT;
+import static org.molgenis.data.QueryRule.Operator.OR;
+import static org.molgenis.data.QueryRule.Operator.RANGE;
 import static org.molgenis.data.RepositoryCapability.MANAGABLE;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 import static org.molgenis.data.RepositoryCapability.VALIDATE_NOTNULL_CONSTRAINT;
@@ -34,8 +45,8 @@ import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.isPersistedInPos
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +62,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.BatchingQueryResult;
@@ -85,10 +97,14 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	/** JDBC batch operation size */
 	private static final int BATCH_SIZE = 1000;
+
 	/** Repository capabilities */
-	private static final Set<RepositoryCapability> REPO_CAPABILITIES = unmodifiableSet(
-			new HashSet<>(asList(WRITABLE, MANAGABLE, QUERYABLE, VALIDATE_REFERENCE_CONSTRAINT,
-					VALIDATE_UNIQUE_CONSTRAINT, VALIDATE_NOTNULL_CONSTRAINT)));
+	private static final Set<RepositoryCapability> REPO_CAPABILITIES = unmodifiableSet(EnumSet.of(WRITABLE, MANAGABLE,
+			QUERYABLE, VALIDATE_REFERENCE_CONSTRAINT, VALIDATE_UNIQUE_CONSTRAINT, VALIDATE_NOTNULL_CONSTRAINT));
+
+	/** Supported query operators */
+	private static final Set<Operator> QUERY_OPERATORS = unmodifiableSet(
+			EnumSet.of(EQUALS, IN, LESS, LESS_EQUAL, GREATER, GREATER_EQUAL, RANGE, LIKE, NOT, AND, OR, NESTED));
 
 	private final PostgreSqlEntityFactory postgreSqlEntityFactory;
 	private final JdbcTemplate jdbcTemplate;
@@ -130,6 +146,12 @@ public class PostgreSqlRepository extends AbstractRepository
 	public Set<RepositoryCapability> getCapabilities()
 	{
 		return REPO_CAPABILITIES;
+	}
+
+	@Override
+	public Set<Operator> getQueryOperators()
+	{
+		return QUERY_OPERATORS;
 	}
 
 	@Override

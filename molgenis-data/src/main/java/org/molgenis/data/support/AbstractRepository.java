@@ -6,9 +6,12 @@ import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Maps.uniqueIndex;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -18,7 +21,9 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +50,18 @@ public abstract class AbstractRepository implements Repository<Entity>
 	}
 
 	@Override
+	public Set<Operator> getQueryOperators()
+	{
+		if (!getCapabilities().contains(RepositoryCapability.QUERYABLE))
+		{
+			return Collections.emptySet();
+		}
+		else
+		{
+			return EnumSet.allOf(Operator.class);
+		}
+	}
+
 	public Query<Entity> query()
 	{
 		return new QueryImpl<Entity>(this);
