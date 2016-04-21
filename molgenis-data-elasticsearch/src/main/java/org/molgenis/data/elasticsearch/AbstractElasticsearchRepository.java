@@ -8,6 +8,7 @@ import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
 import java.io.IOException;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -20,6 +21,7 @@ import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
@@ -41,6 +43,12 @@ public abstract class AbstractElasticsearchRepository implements Repository<Enti
 	public Set<RepositoryCapability> getCapabilities()
 	{
 		return Sets.newHashSet(AGGREGATEABLE, QUERYABLE, WRITABLE, INDEXABLE, MANAGABLE);
+	}
+
+	@Override
+	public Set<Operator> getQueryOperators()
+	{
+		return EnumSet.allOf(Operator.class);
 	}
 
 	@Override

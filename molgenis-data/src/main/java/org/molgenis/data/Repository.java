@@ -5,6 +5,8 @@ import java.util.Set;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import org.molgenis.data.QueryRule.Operator;
+
 /**
  * Repository gives access to a collection of Entity. Synonyms: EntityReader, EntitySource, EntityCollection
  */
@@ -28,6 +30,8 @@ public interface Repository<E extends Entity> extends Iterable<E>, Closeable
 	Stream<E> stream(Fetch fetch);
 
 	Set<RepositoryCapability> getCapabilities();
+
+	Set<Operator> getQueryOperators();
 
 	String getName();
 
