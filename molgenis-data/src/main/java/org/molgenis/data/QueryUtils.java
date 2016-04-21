@@ -1,6 +1,7 @@
 package org.molgenis.data;
 
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
 import org.molgenis.data.QueryRule.Operator;
@@ -14,10 +15,44 @@ public class QueryUtils
 
 	public static boolean containsAnyOperator(Query q, Set<Operator> operators)
 	{
-		boolean searchOperator = q.getRules().stream().anyMatch(e -> {
-			return operators.contains(e.getOperator());
-		});
+		return containsAnyOperator(q.getRules(), operators);
+	}
 
-		return searchOperator;
+	public static boolean containsAnyOperator(List<QueryRule> rules, Set<Operator> operators)
+	{
+		for (QueryRule rule : rules)
+		{
+			if (!rule.getNestedRules().isEmpty() && containsAnyOperator(rule.getNestedRules(), operators))
+			{
+				return true;
+			}
+
+			if (operators.contains(rule.getOperator()))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public static boolean containsComputedAttribute(List<QueryRule> rules, EntityMetaData entityMetaData)
+	{
+		for (QueryRule rule : rules)
+		{
+			List<QueryRule> nestedRules = rule.getNestedRules();
+			if (!nestedRules.isEmpty() && containsComputedAttribute(nestedRules, entityMetaData))
+			{
+				return true;
+			}
+
+			AttributeMetaData amd = entityMetaData.getAttribute(rule.getField());
+			if (amd != null && amd.getExpression() != null)
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

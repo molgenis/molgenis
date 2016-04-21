@@ -1,10 +1,14 @@
 package org.molgenis.data.elasticsearch;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.RepositoryCapability.AGGREGATEABLE;
+import static org.molgenis.data.RepositoryCapability.INDEXABLE;
 import static org.molgenis.data.RepositoryCapability.MANAGABLE;
+import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -13,7 +17,6 @@ import java.util.stream.Stream;
 import org.elasticsearch.common.collect.Iterators;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
@@ -32,11 +35,13 @@ public class IndexedRepositoryDecorator implements Repository
 
 	private final Repository decoratedRepository;
 	private final Repository indexRepository;
+	private SearchService elasticSearchService;
 
 	private Set<Operator> unsupportedOperators;
 
 	public IndexedRepositoryDecorator(Repository decoratedRepo, SearchService elasticSearchService)
 	{
+		this.elasticSearchService = requireNonNull(elasticSearchService);
 		this.decoratedRepository = requireNonNull(decoratedRepo);
 		this.indexRepository = new ElasticsearchRepository(getEntityMetaData(), elasticSearchService);
 
@@ -156,7 +161,7 @@ public class IndexedRepositoryDecorator implements Repository
 	@Override
 	public Entity findOne(Query q)
 	{
-		if (canHandleQuery(q))
+		if (querySupported(q))
 		{
 			return decoratedRepository.findOne(q);
 		}
@@ -182,7 +187,7 @@ public class IndexedRepositoryDecorator implements Repository
 	@Override
 	public Stream<Entity> findAll(Query q)
 	{
-		if (canHandleQuery(q))
+		if (querySupported(q))
 		{
 			return decoratedRepository.findAll(q);
 		}
@@ -207,9 +212,7 @@ public class IndexedRepositoryDecorator implements Repository
 	@Override
 	public void rebuildIndex()
 	{
-		// TODO check if works
-		indexRepository.rebuildIndex();
-		// elasticSearchService.rebuildIndex(decoratedRepository, getEntityMetaData());
+		elasticSearchService.rebuildIndex(decoratedRepository, getEntityMetaData());
 	}
 
 	@Override
@@ -237,13 +240,17 @@ public class IndexedRepositoryDecorator implements Repository
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return decoratedRepository.getCapabilities();
+		Set<RepositoryCapability> capabilities = decoratedRepository.getCapabilities();
+
+		// when a repository is indexed, it is automatically indexable, queryable and aggregateable
+		capabilities.addAll(EnumSet.of(INDEXABLE, QUERYABLE, AGGREGATEABLE));
+		return capabilities;
 	}
 
 	@Override
 	public Set<Operator> getQueryOperators()
 	{
-		return decoratedRepository.getQueryOperators();
+		return indexRepository.getQueryOperators();
 	}
 
 	@Override
@@ -273,7 +280,7 @@ public class IndexedRepositoryDecorator implements Repository
 	@Override
 	public long count(Query q)
 	{
-		if (canHandleQuery(q))
+		if (querySupported(q))
 		{
 			return decoratedRepository.count(q);
 		}
@@ -301,19 +308,16 @@ public class IndexedRepositoryDecorator implements Repository
 		decoratedRepository.removeEntityListener(entityListener);
 	}
 
-	private boolean canHandleQuery(Query q)
+	private boolean querySupported(Query q)
 	{
 		if (QueryUtils.containsAnyOperator(q, unsupportedOperators))
 		{
 			return false;
 		}
 
-		for (AttributeMetaData amd : getEntityMetaData().getAtomicAttributes())
+		if (QueryUtils.containsComputedAttribute(q.getRules(), getEntityMetaData()))
 		{
-			if (amd.getExpression() != null)
-			{
-				return false;
-			}
+			return false;
 		}
 
 		return true;
