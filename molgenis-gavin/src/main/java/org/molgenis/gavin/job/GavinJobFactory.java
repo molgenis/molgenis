@@ -1,11 +1,13 @@
 package org.molgenis.gavin.job;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.CrudRepositoryAnnotator;
 import org.molgenis.data.annotation.EffectsAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
+import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.file.FileStore;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +18,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.of;
 import static org.molgenis.gavin.job.GavinJobExecutionMetaData.GAVIN_JOB_EXECUTION;
+
 @Component
 public class GavinJobFactory
 {
@@ -66,5 +75,11 @@ public class GavinJobFactory
 		return new GavinJob(new ProgressImpl(metaData, jobExecutionUpdater, mailSender),
 				new TransactionTemplate(transactionManager), runAsAuthentication, metaData.getIdentifier(), fileStore,
 				null, cadd, exac, snpEff, gavin);
+	}
+
+	public List<String> getAnnotatorsWithMissingResources()
+	{
+		return of(cadd, exac, snpEff).filter(annotator -> !annotator.annotationDataExists())
+				.map(RepositoryAnnotator::getSimpleName).collect(toList());
 	}
 }

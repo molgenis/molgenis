@@ -1,23 +1,5 @@
 package org.molgenis.gavin.controller;
 
-import static java.io.File.separator;
-import static java.net.URLConnection.guessContentTypeFromName;
-import static org.molgenis.gavin.controller.GavinController.URI;
-import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.concurrent.ExecutorService;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.file.FileStore;
@@ -25,29 +7,46 @@ import org.molgenis.gavin.job.GavinJob;
 import org.molgenis.gavin.job.GavinJobExecution;
 import org.molgenis.gavin.job.GavinJobFactory;
 import org.molgenis.security.user.UserAccountService;
+import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.ErrorMessageResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+
+import static java.io.File.separator;
+import static java.lang.String.format;
+import static org.molgenis.gavin.controller.GavinController.URI;
+import static org.molgenis.gavin.job.GavinJobExecutionMetaData.GAVIN_JOB_EXECUTION;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
-public class GavinController
+public class GavinController extends MolgenisPluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(GavinController.class);
 
-	public static final String URI = "/gavin";
+	public static final String ID = "gavin";
+	static final String URI = PLUGIN_URI_PREFIX + ID;
+
+	public GavinController()
+	{
+		super(URI);
+	}
 
 	@Autowired
 	private DataService dataService;
@@ -64,6 +63,22 @@ public class GavinController
 	@Autowired
 	private UserAccountService userAccountService;
 
+	/**
+	 * Shows the gavin page.
+	 *
+	 * @return the view name
+	 */
+	@RequestMapping(method = RequestMethod.GET)
+	public String init(Model model)
+	{
+		List<String> annotatorsWithMissingResources = gavinJobFactory.getAnnotatorsWithMissingResources();
+		if (!annotatorsWithMissingResources.isEmpty())
+		{
+			model.addAttribute("annotatorsWithMissingResources", annotatorsWithMissingResources);
+		}
+		return "view-gavin";
+	}
+
 	@RequestMapping(value = "/annotate-file", method = POST)
 	@ResponseBody
 	public String annotateFile(HttpServletRequest request, @RequestParam(value = "file") MultipartFile inputFile)
@@ -76,40 +91,13 @@ public class GavinController
 		String gavinJobIdentifier = gavinJobExecution.getIdentifier();
 		String fileName = "gavin/" + gavinJobIdentifier + "/input.vcf";
 
-		// TODO Do this with mkDirs()
-		fileStore.createDirectory("gavin");
-		fileStore.createDirectory("gavin/" + gavinJobIdentifier);
-		fileStore.store(inputFile.getInputStream(), fileName);
+		File file = fileStore.getFile(fileName);
+		file.getParentFile().mkdirs();
+		inputFile.transferTo(file);
 
 		executorService.submit(gavinJob);
 
-		return "api/v2/GavinJobExecution/" + gavinJobIdentifier;
-	}
-
-	@RequestMapping(value = "/annotate-text-input", method = POST)
-	@ResponseBody
-	public String annotateTextInput(HttpServletRequest request, @RequestParam(value = "text") String text)
-			throws IOException
-	{
-		GavinJobExecution gavinJobExecution = new GavinJobExecution(dataService);
-		String fileName = "gavin/" + gavinJobExecution.getIdentifier() + "/input.vcf";
-
-		File inputFile = writeInputTextToFile(text, fileName);
-		fileStore.store(new FileInputStream(inputFile), fileName);
-
-		GavinJob gavinJob = gavinJobFactory.createJob(gavinJobExecution);
-		executorService.submit(gavinJob);
-
-		return "api/v2/GavinJobExecution/" + gavinJobExecution.getIdentifier();
-	}
-
-	private File writeInputTextToFile(String text, String fileName) throws IOException
-	{
-		File inputFile = new File(fileName);
-		BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(inputFile));
-		bufferedWriter.write(text);
-		bufferedWriter.close();
-		return inputFile;
+		return "/api/v2/GavinJobExecution/" + gavinJobIdentifier;
 	}
 
 	@RequestMapping(value = "/result/{jobIdentifier}", method = GET, produces = APPLICATION_OCTET_STREAM_VALUE)
