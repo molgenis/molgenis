@@ -14,8 +14,6 @@ import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.RepositorySecurityDecorator;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.OwnedEntityMetaData;
-import org.molgenis.data.transaction.TransactionLogRepositoryDecorator;
-import org.molgenis.data.transaction.TransactionLogService;
 import org.molgenis.data.transaction.index.IndexTransactionLogRepositoryDecorator;
 import org.molgenis.data.transaction.index.IndexTransactionLogService;
 import org.molgenis.data.validation.EntityAttributesValidator;
@@ -27,7 +25,6 @@ import org.molgenis.util.EntityUtils;
 public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFactory
 {
 	private final EntityManager entityManager;
-	private final TransactionLogService transactionLogService;
 	private final IndexTransactionLogService indexTansactionLogService;
 	private final EntityAttributesValidator entityAttributesValidator;
 	private final IdGenerator idGenerator;
@@ -36,14 +33,13 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final ExpressionValidator expressionValidator;
 	private final RepositoryDecoratorRegistry repositoryDecoratorRegistry;
 
-	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager, TransactionLogService transactionLogService,
+	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
 			EntityAttributesValidator entityAttributesValidator, IdGenerator idGenerator, AppSettings appSettings,
 			DataService dataService, ExpressionValidator expressionValidator,
 			RepositoryDecoratorRegistry repositoryDecoratorRegistry,
 			IndexTransactionLogService indexTansactionLogService)
 	{
 		this.entityManager = entityManager;
-		this.transactionLogService = transactionLogService;
 		this.entityAttributesValidator = entityAttributesValidator;
 		this.idGenerator = idGenerator;
 		this.appSettings = appSettings;
@@ -77,9 +73,6 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 
 		// 5. Entity listener
 		decoratedRepository = new EntityListenerRepositoryDecorator(decoratedRepository);
-
-		// 4. Transaction log decorator
-		decoratedRepository = new TransactionLogRepositoryDecorator(decoratedRepository, transactionLogService);
 
 		// 4. Index Transaction log decorator
 		decoratedRepository = new IndexTransactionLogRepositoryDecorator(decoratedRepository, indexTansactionLogService);

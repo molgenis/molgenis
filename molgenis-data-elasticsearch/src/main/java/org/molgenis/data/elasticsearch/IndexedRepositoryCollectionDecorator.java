@@ -52,7 +52,7 @@ public class IndexedRepositoryCollectionDecorator implements RepositoryCollectio
 			@Override
 			public Repository<Entity> next()
 			{
-				return new ElasticsearchRepositoryDecorator(it.next(), searchService);
+				return new IndexedRepositoryDecorator(it.next(), searchService);
 			}
 
 		};
@@ -70,7 +70,7 @@ public class IndexedRepositoryCollectionDecorator implements RepositoryCollectio
 		Repository<Entity> repo = delegate.addEntityMeta(entityMeta);
 		searchService.createMappings(entityMeta);
 
-		return new ElasticsearchRepositoryDecorator(repo, searchService);
+		return new IndexedRepositoryDecorator(repo, searchService);
 	}
 
 	@Override
@@ -82,7 +82,7 @@ public class IndexedRepositoryCollectionDecorator implements RepositoryCollectio
 	@Override
 	public Repository<Entity> getRepository(String name)
 	{
-		return new ElasticsearchRepositoryDecorator(delegate.getRepository(name), searchService);
+		return new IndexedRepositoryDecorator(delegate.getRepository(name), searchService);
 	}
 
 	/**

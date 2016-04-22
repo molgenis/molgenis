@@ -10,7 +10,6 @@ import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
-import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,9 +35,6 @@ public class EmbeddedElasticSearchConfig
 
 	@Autowired
 	private ElasticsearchEntityFactory elasticsearchEntityFactory;
-
-	@Autowired
-	public MolgenisTransactionManager molgenisTransactionManager;
 
 	@Bean(destroyMethod = "close")
 	public EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory()
@@ -70,7 +66,6 @@ public class EmbeddedElasticSearchConfig
 	{
 		ElasticsearchService elasticSearchService = embeddedElasticSearchServiceFactory().create(dataService,
 				elasticsearchEntityFactory);
-		molgenisTransactionManager.addTransactionListener(elasticSearchService);
 
 		return elasticSearchService;
 	}
