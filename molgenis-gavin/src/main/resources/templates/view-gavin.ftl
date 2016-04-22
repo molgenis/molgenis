@@ -4,7 +4,7 @@
 <#assign js=["gavin.js"]>
 <@header css js/>
 
-<div class="row">
+<div class="row" id="gavin-view">
     <div class="col-md-12">
         <div class="panel panel-primary" id="instant-import">
             <div class="panel-heading">
@@ -13,8 +13,15 @@
                 </h4>
             </div>
             <#if annotatorsWithMissingResources?has_content>
-                You need to configure the following annotators:
-                <#list annotatorsWithMissingResources as ann>${ann}</#list>
+                <div class="panel-body">
+                    <p>The following annotators have missing resources:</p>
+                    <ul>
+                        <#list annotatorsWithMissingResources as ann><li>${ann}
+                            <span id="${ann}-settings-btn" class="glyphicon glyphicon-cog" aria-hidden="true" style="cursor: pointer; margin-left: 5px;" data-name="${ann}"></span>
+                        </li></#list>
+                    </ul>
+                </div>
+                <div id="form"></div>
             <#else>
                 <div class="panel-body">
                     <div id="instant-import-alert"></div>

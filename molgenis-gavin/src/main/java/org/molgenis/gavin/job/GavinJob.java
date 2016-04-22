@@ -1,7 +1,9 @@
 package org.molgenis.gavin.job;
 
 import static java.io.File.separator;
+import static java.text.MessageFormat.format;
 import static java.util.Collections.emptyList;
+import static org.molgenis.gavin.controller.GavinController.GAVIN_APP;
 
 import java.io.File;
 
@@ -10,7 +12,6 @@ import org.molgenis.data.annotation.cmd.CmdLineAnnotator;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.file.FileStore;
-import org.molgenis.gavin.controller.GavinController;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -18,7 +19,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 public class GavinJob extends Job<Void>
 {
 	private String jobIdentifier;
-	private FileStore fileStore;
 	private MenuReaderService menuReaderService;
 
 	private RepositoryAnnotator cadd;
@@ -26,6 +26,7 @@ public class GavinJob extends Job<Void>
 	private RepositoryAnnotator snpeff;
 	private RepositoryAnnotator gavin;
 
+	private File inputFile;
 	private File caddOutputFile;
 	private File exacOutputFile;
 	private File snpeffOutputFile;
@@ -37,24 +38,28 @@ public class GavinJob extends Job<Void>
 	{
 		super(progress, transactionTemplate, authentication);
 		this.jobIdentifier = jobIdentifier;
-		this.fileStore = fileStore;
 		this.menuReaderService = menuReaderService;
 		this.cadd = cadd;
 		this.exac = exac;
 		this.snpeff = snpeff;
 		this.gavin = gavin;
 
-		this.caddOutputFile = fileStore.getFile("gavin" + separator + jobIdentifier + separator + "temp-cadd.vcf");
-		this.exacOutputFile = fileStore.getFile("gavin" + separator + jobIdentifier + separator + "temp-exac.vcf");
-		this.snpeffOutputFile = fileStore.getFile("gavin" + separator + jobIdentifier + separator + "temp-snpeff.vcf");
-		this.gavinOutputFile = fileStore.getFile("gavin" + separator + jobIdentifier + separator + "gavin-result.vcf");
+		this.inputFile = fileStore
+				.getFile(format("{0}{1}{2}{3}input.vcf", GAVIN_APP, separator, jobIdentifier, separator));
+		this.caddOutputFile = fileStore
+				.getFile(format("{0}{1}{2}{3}temp-cadd.vcf", GAVIN_APP, separator, jobIdentifier, separator));
+		this.exacOutputFile = fileStore
+				.getFile(format("{0}{1}{2}{3}temp-exac.vcf", GAVIN_APP, separator, jobIdentifier, separator));
+		this.snpeffOutputFile = fileStore.getFile(
+				format("{0}{1}{2}{3}temp-snpeff.vcf", GAVIN_APP, separator, jobIdentifier, separator));
+		this.gavinOutputFile = fileStore.getFile(
+				format("{0}{1}{2}{3}gavin-result.vcf", GAVIN_APP, separator, jobIdentifier, separator));
 	}
 
 	@Override
 	public Void call(Progress progress) throws Exception
 	{
 		progress.setProgressMax(4);
-		File inputFile = fileStore.getFile("gavin" + separator + jobIdentifier + separator + "input.vcf");
 		CmdLineAnnotator cmdLineAnnotator = new CmdLineAnnotator();
 
 		progress.progress(0, "Annotating with cadd...");
@@ -71,7 +76,8 @@ public class GavinJob extends Job<Void>
 		cmdLineAnnotator.annotate(gavin, snpeffOutputFile, gavinOutputFile, emptyList(), false);
 
 		progress.progress(4, "Result is ready for download.");
-		progress.setResultUrl("/gavin/result/" + jobIdentifier);
+		String path = menuReaderService.getMenu().findMenuItemPath(GAVIN_APP);
+		progress.setResultUrl(format("{0}/result/{1}", path, jobIdentifier));
 
 		return null;
 	}

@@ -4,6 +4,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.jobs.JobExecution;
 
+import static org.molgenis.gavin.job.GavinJobExecutionMetaData.FILENAME;
+
 public class GavinJobExecution extends JobExecution
 {
 	private static final long serialVersionUID = 1L;
@@ -15,5 +17,15 @@ public class GavinJobExecution extends JobExecution
 	{
 		super(dataService, META_DATA);
 		setType(GAVIN);
+	}
+
+	public String getFilename()
+	{
+		return getString(FILENAME);
+	}
+
+	public void setFilename(String fileName)
+	{
+		set(FILENAME, fileName);
 	}
 }

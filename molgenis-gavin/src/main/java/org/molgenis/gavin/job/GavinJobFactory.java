@@ -10,6 +10,7 @@ import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.file.FileStore;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
 import org.springframework.security.access.intercept.RunAsUserToken;
@@ -62,6 +63,9 @@ public class GavinJobFactory
 	@Autowired
 	private EffectsAnnotator gavin;
 
+	@Autowired
+	private MenuReaderService menuReaderService;
+
 	@RunAsSystem
 	public GavinJob createJob(GavinJobExecution metaData)
 	{
@@ -74,12 +78,12 @@ public class GavinJobFactory
 
 		return new GavinJob(new ProgressImpl(metaData, jobExecutionUpdater, mailSender),
 				new TransactionTemplate(transactionManager), runAsAuthentication, metaData.getIdentifier(), fileStore,
-				null, cadd, exac, snpEff, gavin);
+				menuReaderService, cadd, exac, snpEff, gavin);
 	}
 
 	public List<String> getAnnotatorsWithMissingResources()
 	{
-		return of(cadd, exac, snpEff).filter(annotator -> !annotator.annotationDataExists())
+		return of(cadd, exac, snpEff, gavin).filter(annotator -> !annotator.annotationDataExists())
 				.map(RepositoryAnnotator::getSimpleName).collect(toList());
 	}
 }

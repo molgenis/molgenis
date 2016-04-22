@@ -16,7 +16,7 @@ var UploadForm = React.createClass({
 			file: null,
 			showNameField: false,
 			fileName: null,
-			action: 'ADD',
+			action: 'ADD'
 		}
 	},
 	getDefaultProps: function() {
@@ -44,11 +44,11 @@ var UploadForm = React.createClass({
 					<label htmlFor='action-field'>Action</label>
 					<RadioGroup name='action-field' layout='vertical' options={actions} type='radio' onValueChange={this._setAction} required={false} value={this.state.action} />
 				</div>}
-					
-				<div className='form-group'>
-					<Button id='upload-file-btn' type='submit' style='default' size='medium' onClick={this._onSubmit} text='Upload' 
-						disabled={!this.state.file || !this.state.fileName && this.state.showNameField} />
-				</div>
+
+				{this.state.file && <div className='form-group'>
+					<Button id='upload-file-btn' type='submit' style='default' size='medium' onClick={this._onSubmit} text='Upload'
+							disabled={this.state.showNameField && !this.state.fileName}/>
+				</div>}
 			</div>
 		</form>
 	},
