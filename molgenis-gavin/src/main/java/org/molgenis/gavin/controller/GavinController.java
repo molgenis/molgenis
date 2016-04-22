@@ -144,4 +144,23 @@ public class GavinController extends MolgenisPluginController
 		LOG.warn(e.getMessage(), e);
 		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(e.getMessage()));
 	}
+
+	/**
+	 * Removes the working directory from the file store.
+	 */
+	@Scheduled(cron = "0 0 0 * * *")
+	public void cleanUp()
+	{
+		LOG.info("Clean up working directory in the file store...");
+		try
+		{
+			File file = fileStore.getFile(GAVIN_APP);
+			deleteDirectory(file);
+			LOG.info("Done.");
+		}
+		catch (IOException e)
+		{
+			LOG.error("Failed to clean up working directory");
+		}
+	}
 }
