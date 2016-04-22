@@ -1,6 +1,17 @@
 package org.molgenis.integrationtest.data.postgresql;
 
-import com.mchange.v2.c3p0.ComboPooledDataSource;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Properties;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
 import org.molgenis.data.DataService;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
@@ -20,16 +31,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Properties;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 @Import(
 { PostgreSqlEntityFactory.class, PostgreSqlConfiguration.class })

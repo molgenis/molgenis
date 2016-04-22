@@ -87,13 +87,13 @@ public class VcfImporterServiceTest
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
 		List<Entity> entities = Arrays.asList(entity0, entity1);
-		Repository repo0 = mock(Repository.class);
+		Repository<Entity> repo0 = mock(Repository.class);
 		when(repo0.getName()).thenReturn(entityName0);
 		when(repo0.getEntityMetaData()).thenReturn(entityMeta0);
 		when(repo0.stream()).thenReturn(entities.stream());
 		when(repo0.iterator()).thenReturn(entities.iterator());
 		when(dataService.hasRepository(entityName0)).thenReturn(false);
-		Repository outRepo0 = mock(Repository.class);
+		Repository<Entity> outRepo0 = mock(Repository.class);
 		when(metaDataService.addEntityMeta(argThat(eqName(entityMeta0)))).thenReturn(outRepo0);
 		when(outRepo0.add(any(Stream.class))).thenAnswer(new Answer<Integer>()
 		{
@@ -136,7 +136,7 @@ public class VcfImporterServiceTest
 		when(sampleEntityMeta0.getSimpleName()).thenReturn(sampleEntityName0);
 		when(sampleEntityMeta0.getOwnAttributes()).thenReturn(emptyList());
 		when(sampleEntityMeta0.getOwnLookupAttributes()).thenReturn(emptyList());
-		Repository outSampleRepo0 = mock(Repository.class);
+		Repository<Entity> outSampleRepo0 = mock(Repository.class);
 		when(outSampleRepo0.getName()).thenReturn(sampleEntityName0);
 		when(metaDataService.addEntityMeta(argThat(eqName(sampleEntityMeta0)))).thenReturn(outSampleRepo0);
 
@@ -159,13 +159,13 @@ public class VcfImporterServiceTest
 		Entity entity1 = mock(Entity.class);
 		when(entity1.getEntities(VcfRepository.SAMPLES)).thenReturn(Arrays.asList(entity1Sample0, entity1Sample1));
 		List<Entity> entities = Arrays.asList(entity0, entity1);
-		Repository repo0 = mock(Repository.class);
+		Repository<Entity> repo0 = mock(Repository.class);
 		when(repo0.getName()).thenReturn(entityName0);
 		when(repo0.getEntityMetaData()).thenReturn(entityMeta0);
 		when(repo0.stream()).thenReturn(entities.stream());
 		when(repo0.iterator()).thenReturn(entities.iterator());
 		when(dataService.hasRepository(entityName0)).thenReturn(false);
-		Repository outRepo0 = mock(Repository.class);
+		Repository<Entity> outRepo0 = mock(Repository.class);
 		when(metaDataService.addEntityMeta(argThat(eqName(entityMeta0)))).thenReturn(outRepo0);
 		when(outRepo0.add(any(Stream.class))).thenAnswer(new Answer<Integer>()
 		{
@@ -203,7 +203,7 @@ public class VcfImporterServiceTest
 		String entityName0 = "entity0";
 		List<String> entityNames = Arrays.asList(entityName0);
 
-		Repository repo0 = mock(Repository.class);
+		Repository<Entity> repo0 = mock(Repository.class);
 		when(repo0.getName()).thenReturn(entityName0);
 		RepositoryCollection source = mock(RepositoryCollection.class);
 		when(source.getEntityNames()).thenReturn(entityNames);
@@ -259,7 +259,7 @@ public class VcfImporterServiceTest
 		when(entityMeta0.getAtomicAttributes()).thenReturn(singletonList(attr0));
 		when(entityMeta0.getOwnLookupAttributes()).thenReturn(emptyList());
 
-		Repository repo0 = mock(Repository.class);
+		Repository<Entity> repo0 = mock(Repository.class);
 		when(repo0.getName()).thenReturn(entityName0);
 		when(repo0.getEntityMetaData()).thenReturn(entityMeta0);
 
@@ -300,7 +300,7 @@ public class VcfImporterServiceTest
 		when(entityMeta0.getAtomicAttributes()).thenReturn(singletonList(attr0));
 		when(entityMeta0.getOwnLookupAttributes()).thenReturn(emptyList());
 
-		Repository repo0 = mock(Repository.class);
+		Repository<Entity> repo0 = mock(Repository.class);
 		when(repo0.getName()).thenReturn(entityName0);
 		when(repo0.getEntityMetaData()).thenReturn(entityMeta0);
 
@@ -360,7 +360,7 @@ public class VcfImporterServiceTest
 		when(entityMeta0.getAtomicAttributes()).thenReturn(singletonList(sampleAttr));
 		when(entityMeta0.getOwnLookupAttributes()).thenReturn(emptyList());
 
-		Repository repo0 = mock(Repository.class);
+		Repository<Entity> repo0 = mock(Repository.class);
 		when(repo0.getName()).thenReturn(entityName0);
 		when(repo0.getEntityMetaData()).thenReturn(entityMeta0);
 
@@ -424,7 +424,7 @@ public class VcfImporterServiceTest
 		when(entityMeta0.getAtomicAttributes()).thenReturn(singletonList(sampleAttr));
 		when(entityMeta0.getOwnLookupAttributes()).thenReturn(emptyList());
 
-		Repository repo0 = mock(Repository.class);
+		Repository<Entity> repo0 = mock(Repository.class);
 		when(repo0.getName()).thenReturn(entityName0);
 		when(repo0.getEntityMetaData()).thenReturn(entityMeta0);
 

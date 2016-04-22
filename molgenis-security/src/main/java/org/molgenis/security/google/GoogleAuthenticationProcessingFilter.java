@@ -5,7 +5,6 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.MolgenisGroup.NAME;
 import static org.molgenis.auth.MolgenisUser.EMAIL;
 import static org.molgenis.auth.MolgenisUser.GOOGLEACCOUNTID;
-import static org.molgenis.data.support.QueryImpl.EQ;
 import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.springframework.http.HttpMethod.POST;
@@ -140,11 +139,11 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 		return runAsSystem(() -> {
 			MolgenisUser user;
 
-			user = dataService.findOne(MolgenisUser.ENTITY_NAME, EQ(GOOGLEACCOUNTID, principal), MolgenisUser.class);
+			user = dataService.query(MolgenisUser.ENTITY_NAME, MolgenisUser.class).eq(GOOGLEACCOUNTID, principal).findOne();
 			if (user == null)
 			{
 				// no user with google account
-				user = dataService.findOne(MolgenisUser.ENTITY_NAME, EQ(EMAIL, email), MolgenisUser.class);
+				user = dataService.query(MolgenisUser.ENTITY_NAME, MolgenisUser.class).eq(EMAIL, email).findOne();
 				if (user != null)
 				{
 					// connect google account to user
@@ -206,8 +205,7 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 
 		// add user to all-users group
 		MolgenisGroupMember groupMember = new MolgenisGroupMember();
-		MolgenisGroup group = dataService.findOne(MolgenisGroup.ENTITY_NAME, EQ(NAME, ALL_USER_GROUP),
-				MolgenisGroup.class);
+		MolgenisGroup group = dataService.query(MolgenisGroup.ENTITY_NAME, MolgenisGroup.class).eq(NAME, ALL_USER_GROUP).findOne();
 		groupMember.setMolgenisGroup(group);
 		groupMember.setMolgenisUser(user);
 		dataService.add(MolgenisGroupMember.ENTITY_NAME, groupMember);

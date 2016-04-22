@@ -42,9 +42,9 @@ public class MolgenisUserDetailsServiceTest
 		MolgenisUser userUser = when(mock(MolgenisUser.class).isSuperuser()).thenReturn(Boolean.FALSE).getMock();
 		when(userUser.getUsername()).thenReturn("user");
 		when(userUser.getPassword()).thenReturn("password");
-		Query qAdmin = new QueryImpl().eq(MolgenisUser.USERNAME, "admin");
+		Query<MolgenisUser> qAdmin = new QueryImpl<MolgenisUser>().eq(MolgenisUser.USERNAME, "admin");
 		when(dataService.findOne(MolgenisUser.ENTITY_NAME, qAdmin, MolgenisUser.class)).thenReturn(adminUser);
-		Query qUser = new QueryImpl().eq(MolgenisUser.USERNAME, "user");
+		Query<MolgenisUser> qUser = new QueryImpl<MolgenisUser>().eq(MolgenisUser.USERNAME, "user");
 		when(dataService.findOne(MolgenisUser.ENTITY_NAME, qUser, MolgenisUser.class)).thenReturn(userUser);
 		GrantedAuthoritiesMapper authoritiesMapper = new GrantedAuthoritiesMapper()
 		{
@@ -55,7 +55,7 @@ public class MolgenisUserDetailsServiceTest
 				return authorities;
 			}
 		};
-		when(dataService.findAll(UserAuthority.ENTITY_NAME, new QueryImpl().eq(UserAuthority.MOLGENISUSER, userUser),
+		when(dataService.findAll(UserAuthority.ENTITY_NAME, new QueryImpl<UserAuthority>().eq(UserAuthority.MOLGENISUSER, userUser),
 				UserAuthority.class)).thenAnswer(new Answer<Stream<UserAuthority>>()
 				{
 					@Override
@@ -64,7 +64,7 @@ public class MolgenisUserDetailsServiceTest
 						return Stream.empty();
 					}
 				});
-		when(dataService.findAll(UserAuthority.ENTITY_NAME, new QueryImpl().eq(UserAuthority.MOLGENISUSER, adminUser),
+		when(dataService.findAll(UserAuthority.ENTITY_NAME, new QueryImpl<UserAuthority>().eq(UserAuthority.MOLGENISUSER, adminUser),
 				UserAuthority.class)).thenAnswer(new Answer<Stream<UserAuthority>>()
 				{
 					@Override
@@ -74,7 +74,7 @@ public class MolgenisUserDetailsServiceTest
 					}
 				});
 		when(dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, userUser), MolgenisGroupMember.class))
+				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMember.MOLGENISUSER, userUser), MolgenisGroupMember.class))
 						.thenAnswer(new Answer<Stream<MolgenisGroupMember>>()
 						{
 							@Override
@@ -84,7 +84,7 @@ public class MolgenisUserDetailsServiceTest
 							}
 						});
 		when(dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, adminUser), MolgenisGroupMember.class))
+				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMember.MOLGENISUSER, adminUser), MolgenisGroupMember.class))
 						.thenAnswer(new Answer<Stream<MolgenisGroupMember>>()
 						{
 							@Override

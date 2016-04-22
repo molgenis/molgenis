@@ -3,6 +3,7 @@ package org.molgenis.integrationtest.data;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.IdGenerator;
@@ -19,6 +20,7 @@ import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.OwnedEntityMetaData;
+import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.file.FileMetaMetaData;
@@ -94,6 +96,12 @@ public abstract class AbstractDataApiTestConfig
 	}
 
 	@Bean
+	public IdGenerator idGenerator()
+	{
+		return new UuidGenerator();
+	}
+
+	@Bean
 	public DataServiceImpl dataService()
 	{
 		return new DataServiceImpl(repositoryDecoratorFactory());
@@ -135,7 +143,7 @@ public abstract class AbstractDataApiTestConfig
 		return new RepositoryDecoratorFactory()
 		{
 			@Override
-			public Repository createDecoratedRepository(Repository repository)
+			public Repository<Entity> createDecoratedRepository(Repository<Entity> repository)
 			{
 				return new MolgenisRepositoryDecoratorFactory(entityManager(), entityAttributesValidator(), idGenerator,
 						appSettings(), dataService(), expressionValidator, repositoryDecoratorRegistry())

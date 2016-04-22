@@ -105,7 +105,7 @@ public class OmimAnnotator
 				new RepositoryFactory()
 				{
 					@Override
-					public Repository createRepository(File file) throws IOException
+					public Repository<Entity> createRepository(File file) throws IOException
 					{
 						return new OmimRepository(file);
 					}

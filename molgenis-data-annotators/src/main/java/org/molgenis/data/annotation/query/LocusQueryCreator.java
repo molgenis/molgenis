@@ -6,8 +6,8 @@ import java.util.Collection;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.annotation.entity.QueryCreator;
+import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.vcf.VcfRepository;
 
@@ -17,7 +17,7 @@ import org.molgenis.data.vcf.VcfRepository;
 public class LocusQueryCreator implements QueryCreator
 {
 	@Override
-	public Query createQuery(Entity entity)
+	public Query<Entity> createQuery(Entity entity)
 	{
 		String chromosome = entity.getString(VcfRepository.CHROM);
 		Long position = entity.getLong(VcfRepository.POS);
@@ -25,7 +25,7 @@ public class LocusQueryCreator implements QueryCreator
 		return createQuery(locus);
 	}
 
-	public static Query createQuery(Locus locus)
+	public static Query<Entity> createQuery(Locus locus)
 	{
 		return QueryImpl.EQ(VcfRepository.CHROM, locus.getChrom()).and().eq(VcfRepository.POS, locus.getPos());
 	}

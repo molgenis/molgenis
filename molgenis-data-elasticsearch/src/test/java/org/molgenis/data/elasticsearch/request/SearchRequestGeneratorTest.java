@@ -9,6 +9,7 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.mockito.Matchers;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
@@ -36,7 +37,7 @@ public class SearchRequestGeneratorTest
 		String entityName = "test";
 		SearchType searchType = SearchType.COUNT;
 		gen.buildSearchRequest(searchRequestBuilderMock, entityName, searchType,
-				new QueryImpl().search("test").fetch(new Fetch().field("field1").field("field2")), null, null, null,
+				new QueryImpl<Entity>().search("test").fetch(new Fetch().field("field1").field("field2")), null, null, null,
 				entityMeta);
 		verify(searchRequestBuilderMock).setFrom(0);
 		verify(searchRequestBuilderMock).setSearchType(searchType);
@@ -55,7 +56,7 @@ public class SearchRequestGeneratorTest
 		String entityName = "test";
 		SearchType searchType = SearchType.COUNT;
 		gen.buildSearchRequest(searchRequestBuilderMock, entityName, searchType,
-				new QueryImpl().search("test").fetch(new Fetch().field("field1").field("field2")), null, null, null,
+				new QueryImpl<Entity>().search("test").fetch(new Fetch().field("field1").field("field2")), null, null, null,
 				entityMeta);
 		verify(searchRequestBuilderMock).setFrom(0);
 		verify(searchRequestBuilderMock).setSearchType(searchType);
@@ -72,7 +73,7 @@ public class SearchRequestGeneratorTest
 		String entityName = "test";
 		SearchType searchType = SearchType.COUNT;
 
-		gen.buildSearchRequest(searchRequestBuilderMock, entityName, searchType, new QueryImpl().search("test"), null,
+		gen.buildSearchRequest(searchRequestBuilderMock, entityName, searchType, new QueryImpl<Entity>().search("test"), null,
 				null, null, entityMeta);
 		verify(searchRequestBuilderMock).setFrom(0);
 		verify(searchRequestBuilderMock).setSearchType(searchType);
@@ -89,7 +90,7 @@ public class SearchRequestGeneratorTest
 		String entityName = "test";
 		SearchType searchType = SearchType.COUNT;
 
-		gen.buildSearchRequest(searchRequestBuilderMock, entityName, searchType, new QueryImpl().search("test"), null,
+		gen.buildSearchRequest(searchRequestBuilderMock, entityName, searchType, new QueryImpl<Entity>().search("test"), null,
 				null, null, entityMeta);
 		verify(searchRequestBuilderMock).setFrom(0);
 		verify(searchRequestBuilderMock).setSearchType(searchType);

@@ -188,7 +188,7 @@ class PostgreSqlQueryGenerator
 				.append(getColumnName(attr)).append(" = ?").toString();
 	}
 
-	public static String getSqlSelect(EntityMetaData entityMeta, Query q, List<Object> parameters)
+	public static <E extends Entity> String getSqlSelect(EntityMetaData entityMeta, Query<E> q, List<Object> parameters)
 	{
 		StringBuilder select = new StringBuilder("SELECT ");
 		StringBuilder group = new StringBuilder();
@@ -279,7 +279,7 @@ class PostgreSqlQueryGenerator
 	 * @param parameters
 	 * @return
 	 */
-	public static String getSqlCount(EntityMetaData entityMeta, Query q, List<Object> parameters)
+	public static <E extends Entity> String getSqlCount(EntityMetaData entityMeta, Query<E> q, List<Object> parameters)
 	{
 		StringBuilder sqlBuilder = new StringBuilder("SELECT COUNT");
 		String idAttribute = getColumnName(entityMeta.getIdAttribute());
@@ -386,7 +386,7 @@ class PostgreSqlQueryGenerator
 		return new StringBuilder("DROP TABLE ").append(tableName).toString();
 	}
 
-	private static String getSqlWhere(EntityMetaData entityMeta, Query q, List<Object> parameters, int mrefFilterIndex)
+	private static <E extends Entity> String getSqlWhere(EntityMetaData entityMeta, Query<E> q, List<Object> parameters, int mrefFilterIndex)
 	{
 		StringBuilder result = new StringBuilder();
 		for (QueryRule r : q.getRules())
@@ -412,7 +412,7 @@ class PostgreSqlQueryGenerator
 					result.append(" AND ");
 					break;
 				case NESTED:
-					QueryImpl nestedQ = new QueryImpl(r.getNestedRules());
+					QueryImpl<Entity> nestedQ = new QueryImpl<Entity>(r.getNestedRules());
 					result.append('(').append(getSqlWhere(entityMeta, nestedQ, parameters, mrefFilterIndex))
 							.append(')');
 					break;
@@ -555,7 +555,7 @@ class PostgreSqlQueryGenerator
 		return result.toString().trim();
 	}
 
-	private static String getSqlSort(EntityMetaData entityMeta, Query q)
+	private static <E extends Entity> String getSqlSort(EntityMetaData entityMeta, Query<E> q)
 	{
 		StringBuilder sortSql = new StringBuilder();
 		if (q.getSort() != null)
@@ -589,7 +589,7 @@ class PostgreSqlQueryGenerator
 		return sortSql.toString();
 	}
 
-	private static String getSqlFrom(EntityMetaData entityMeta, Query q)
+	private static <E extends Entity> String getSqlFrom(EntityMetaData entityMeta, Query<E> q)
 	{
 		StringBuilder from = new StringBuilder().append(" FROM ").append(getTableName(entityMeta)).append(" AS this");
 
@@ -620,7 +620,7 @@ class PostgreSqlQueryGenerator
 		return from.toString();
 	}
 
-	private static String getSqlFromForCount(EntityMetaData entityMeta, Query q,
+	private static <E extends Entity> String getSqlFromForCount(EntityMetaData entityMeta, Query<E> q,
 			List<AttributeMetaData> mrefAttrsInQuery)
 	{
 		StringBuilder from = new StringBuilder().append(" FROM ").append(getTableName(entityMeta)).append(" AS this");
@@ -668,7 +668,7 @@ class PostgreSqlQueryGenerator
 				.append("\"").toString();
 	}
 
-	private static List<AttributeMetaData> getMrefQueryAttrs(EntityMetaData entityMeta, Query q)
+	private static <E extends Entity> List<AttributeMetaData> getMrefQueryAttrs(EntityMetaData entityMeta, Query<E> q)
 	{
 		List<AttributeMetaData> mrefAttrsInQuery = new ArrayList<>();
 		getMrefQueryFieldsRec(entityMeta, q.getRules(), mrefAttrsInQuery);

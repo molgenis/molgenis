@@ -21,7 +21,7 @@ import org.testng.annotations.Test;
 
 public class I18nStringDecoratorTest
 {
-	private Repository decoratedRepo;
+	private Repository<Entity> decoratedRepo;
 	private I18nStringDecorator i18nStringDecorator;
 
 	@BeforeMethod
@@ -91,7 +91,7 @@ public class I18nStringDecoratorTest
 	public void findAllAsStream()
 	{
 		Entity entity0 = mock(Entity.class);
-		Query query = mock(Query.class);
+		Query<Entity> query = mock(Query.class);
 		when(decoratedRepo.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = i18nStringDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));

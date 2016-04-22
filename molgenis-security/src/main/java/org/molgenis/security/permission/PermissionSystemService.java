@@ -39,7 +39,7 @@ public class PermissionSystemService
 				&& !auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_SYSTEM")))
 		{
 			MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
-					new QueryImpl().eq(MolgenisUser.USERNAME, SecurityUtils.getUsername(auth)), MolgenisUser.class);
+					new QueryImpl<MolgenisUser>().eq(MolgenisUser.USERNAME, SecurityUtils.getUsername(auth)), MolgenisUser.class);
 
 			if (user != null)
 			{

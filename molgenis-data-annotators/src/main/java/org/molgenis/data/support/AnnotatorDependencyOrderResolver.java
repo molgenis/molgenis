@@ -1,17 +1,19 @@
 package org.molgenis.data.support;
 
-import autovalue.shaded.com.google.common.common.collect.Lists;
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Repository;
-import org.molgenis.data.annotation.RepositoryAnnotator;
-
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.stream.Collectors;
+
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Repository;
+import org.molgenis.data.annotation.RepositoryAnnotator;
+
+import autovalue.shaded.com.google.common.common.collect.Lists;
 
 public class AnnotatorDependencyOrderResolver
 {
@@ -19,7 +21,7 @@ public class AnnotatorDependencyOrderResolver
 
 	public Queue<RepositoryAnnotator> getAnnotatorSelectionDependencyList(
 			List<RepositoryAnnotator> availableAnnotatorList, List<RepositoryAnnotator> requestedAnnotatorList,
-			Repository repo)
+			Repository<Entity> repo)
 	{
 		Queue<RepositoryAnnotator> sortedList = new LinkedList<>();
 		for (RepositoryAnnotator annotator : requestedAnnotatorList)

@@ -1,10 +1,10 @@
 package org.molgenis.auth;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-
 import java.util.LinkedHashSet;
 import java.util.Set;
+
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
 
 public class GroupAuthority extends org.molgenis.data.support.AbstractEntity implements Authority
 {
@@ -123,7 +123,7 @@ public class GroupAuthority extends org.molgenis.data.support.AbstractEntity imp
 		}
 		if (MOLGENISGROUP.equals(attributeName))
 		{
-			org.molgenis.auth.MolgenisGroup e = new org.molgenis.auth.MolgenisGroup();
+			MolgenisGroup e = new org.molgenis.auth.MolgenisGroup();
 			e.set((Entity) value);
 			this.setMolgenisGroup(e);
 			return;

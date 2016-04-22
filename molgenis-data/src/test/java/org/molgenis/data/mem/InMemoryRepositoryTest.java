@@ -211,7 +211,7 @@ public class InMemoryRepositoryTest
 			Entity entity1 = when(mock(Entity.class).get(idAttrName)).thenReturn(id1).getMock();
 			inMemoryRepository.add(entity0);
 			inMemoryRepository.add(entity1);
-			List<Entity> entities = inMemoryRepository.findAll(new QueryImpl()).collect(Collectors.toList());
+			List<Entity> entities = inMemoryRepository.findAll(new QueryImpl<Entity>()).collect(Collectors.toList());
 			assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, entity1));
 		}
 		finally
@@ -245,7 +245,7 @@ public class InMemoryRepositoryTest
 
 			System.out.println(entity0.get(idAttrName));
 
-			List<Entity> entities = inMemoryRepository.findAll(new QueryImpl().eq("attr", "a")).filter(Objects::nonNull)
+			List<Entity> entities = inMemoryRepository.findAll(new QueryImpl<Entity>().eq("attr", "a")).filter(Objects::nonNull)
 					.collect(Collectors.toList());
 			assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, entity1));
 		}
@@ -262,7 +262,7 @@ public class InMemoryRepositoryTest
 		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityMeta);
 		try
 		{
-			inMemoryRepository.findAll(new QueryImpl().eq("attr", "val").and().eq("attr2", "val"))
+			inMemoryRepository.findAll(new QueryImpl<Entity>().eq("attr", "val").and().eq("attr2", "val"))
 					.collect(Collectors.toList());
 		}
 		finally

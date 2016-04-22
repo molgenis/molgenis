@@ -1,6 +1,7 @@
 package org.molgenis.data.mem;
 
 import java.io.IOException;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -29,7 +30,7 @@ import com.google.common.collect.Sets;
  * 
  * For testing purposes
  */
-public class InMemoryRepository implements Repository
+public class InMemoryRepository implements Repository<Entity>
 {
 	private final EntityMetaData metadata;
 	private final Map<Object, Entity> entities = new LinkedHashMap<Object, Entity>();
@@ -70,21 +71,21 @@ public class InMemoryRepository implements Repository
 	}
 
 	@Override
-	public Query query()
+	public Query<Entity> query()
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		return entities.size();
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
-		if (new QueryImpl().equals(q))
+		if (new QueryImpl<Entity>().equals(q))
 		{
 			return entities.values().stream();
 		}
@@ -113,7 +114,7 @@ public class InMemoryRepository implements Repository
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -160,7 +161,7 @@ public class InMemoryRepository implements Repository
 	}
 
 	@Override
-	public void update(Stream<? extends Entity> entities)
+	public void update(Stream<Entity> entities)
 	{
 		entities.forEach(this::update);
 	}
@@ -177,7 +178,7 @@ public class InMemoryRepository implements Repository
 	}
 
 	@Override
-	public void delete(Stream<? extends Entity> entities)
+	public void delete(Stream<Entity> entities)
 	{
 		entities.forEach(this::delete);
 	}
@@ -216,7 +217,7 @@ public class InMemoryRepository implements Repository
 	}
 
 	@Override
-	public Integer add(Stream<? extends Entity> entities)
+	public Integer add(Stream<Entity> entities)
 	{
 		AtomicInteger count = new AtomicInteger();
 		entities.forEach(entity -> {
@@ -242,6 +243,12 @@ public class InMemoryRepository implements Repository
 	public Set<RepositoryCapability> getCapabilities()
 	{
 		return Sets.newHashSet(RepositoryCapability.QUERYABLE, RepositoryCapability.WRITABLE);
+	}
+
+	@Override
+	public Set<Operator> getQueryOperators()
+	{
+		return EnumSet.allOf(Operator.class);
 	}
 
 	@Override

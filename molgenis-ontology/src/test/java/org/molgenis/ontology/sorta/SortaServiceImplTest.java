@@ -55,20 +55,20 @@ public class SortaServiceImplTest
 		ontologyEntity.set(OntologyMetaData.ONTOLOGY_IRI, ONTOLOGY_IRI);
 		// define dataService actions for test one
 		when(dataService.findOne(OntologyMetaData.ENTITY_NAME,
-				new QueryImpl().eq(OntologyMetaData.ONTOLOGY_IRI, ONTOLOGY_IRI))).thenReturn(ontologyEntity);
+				new QueryImpl<Entity>().eq(OntologyMetaData.ONTOLOGY_IRI, ONTOLOGY_IRI))).thenReturn(ontologyEntity);
 
 		when(dataService.count(OntologyTermMetaData.ENTITY_NAME,
-				new QueryImpl().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity))).thenReturn((long) 100);
+				new QueryImpl<Entity>().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity))).thenReturn((long) 100);
 
 		QueryRule queryRule = new QueryRule(
 				Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, "hear")));
 		queryRule.setOperator(Operator.DIS_MAX);
-		when(dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl(queryRule))).thenReturn((long) 50);
+		when(dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl<>(queryRule))).thenReturn((long) 50);
 
 		QueryRule queryRule2 = new QueryRule(Arrays
 				.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, "impair")));
 		queryRule2.setOperator(Operator.DIS_MAX);
-		when(dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl(queryRule2))).thenReturn((long) 50);
+		when(dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl<>(queryRule2))).thenReturn((long) 50);
 
 		when(dataService.findAll(OntologyMetaData.ENTITY_NAME)).thenReturn(Arrays.asList(ontologyEntity).stream());
 
@@ -76,7 +76,7 @@ public class SortaServiceImplTest
 		// Mock the first ontologyterm entity only with name
 		Entity ontologyTermSynonym_1 = new MapEntity();
 		ontologyTermSynonym_1.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM, "hearing impairment");
-		MapEntity ontologyTermEntity_1 = new MapEntity(OntologyTermMetaData.INSTANCE);
+		Entity ontologyTermEntity_1 = new MapEntity(OntologyTermMetaData.INSTANCE);
 		ontologyTermEntity_1.set(OntologyTermMetaData.ID, 1);
 		ontologyTermEntity_1.set(OntologyTermMetaData.ONTOLOGY, ontologyEntity);
 		ontologyTermEntity_1.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME, "hearing impairment");
@@ -104,7 +104,7 @@ public class SortaServiceImplTest
 				new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
 				new QueryRule(Operator.AND), disMaxRegularQueryRule);
 
-		when(dataService.findAll(OntologyTermMetaData.ENTITY_NAME, new QueryImpl(finalQueryRules).pageSize(50)))
+		when(dataService.findAll(OntologyTermMetaData.ENTITY_NAME, new QueryImpl<Entity>(finalQueryRules).pageSize(50)))
 				.thenReturn(Arrays.asList(ontologyTermEntity_1, ontologyTermEntity_2).stream());
 
 		// DataService action for n-gram matching ontologyterm synonyms
@@ -113,18 +113,18 @@ public class SortaServiceImplTest
 		disMaxNGramQueryRule.setOperator(Operator.DIS_MAX);
 		when(dataService
 				.findAll(OntologyTermMetaData.ENTITY_NAME,
-						new QueryImpl(Arrays.asList(
+						new QueryImpl<Entity>(Arrays.asList(
 								new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
 								new QueryRule(Operator.AND), disMaxNGramQueryRule)).pageSize(10)))
 										.thenReturn(Arrays.asList(ontologyTermEntity_1, ontologyTermEntity_2).stream());
 
 		// DataService action for querying specific ontologyterm based on ontologyIRI and ontologyTermIRI
 		when(dataService.findOne(OntologyTermMetaData.ENTITY_NAME,
-				new QueryImpl().eq(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ONTOLOGY_IRI + "1").and()
+				new QueryImpl<Entity>().eq(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ONTOLOGY_IRI + "1").and()
 						.eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity))).thenReturn(ontologyTermEntity_1);
 
 		when(dataService.findOne(OntologyTermMetaData.ENTITY_NAME,
-				new QueryImpl().eq(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ONTOLOGY_IRI + "2").and()
+				new QueryImpl<Entity>().eq(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ONTOLOGY_IRI + "2").and()
 						.eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity))).thenReturn(ontologyTermEntity_2);
 
 		// ########################### TEST TWO ###########################
@@ -156,12 +156,12 @@ public class SortaServiceImplTest
 						new QueryRule(OntologyTermDynamicAnnotationMetaData.VALUE, Operator.EQUALS, "123456")));
 
 		when(dataService.findAll(OntologyTermDynamicAnnotationMetaData.ENTITY_NAME,
-				new QueryImpl(Arrays.asList(annotationQueryRule)).pageSize(Integer.MAX_VALUE)))
+				new QueryImpl<Entity>(Arrays.asList(annotationQueryRule)).pageSize(Integer.MAX_VALUE)))
 						.thenReturn(Arrays.asList(ontologyTermDynamicAnnotation_3_1).stream());
 
 		when(dataService
 				.findAll(OntologyTermMetaData.ENTITY_NAME,
-						new QueryImpl(Arrays.asList(
+						new QueryImpl<Entity>(Arrays.asList(
 								new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
 								new QueryRule(Operator.AND),
 								new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION, Operator.IN,
@@ -175,7 +175,7 @@ public class SortaServiceImplTest
 		disMaxRegularQueryRule_2.setOperator(Operator.DIS_MAX);
 		when(dataService
 				.findAll(OntologyTermMetaData.ENTITY_NAME,
-						new QueryImpl(Arrays.asList(
+						new QueryImpl<Entity>(Arrays.asList(
 								new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
 								new QueryRule(Operator.AND), disMaxRegularQueryRule_2)).pageSize(49)))
 										.thenReturn(Stream.empty());
@@ -186,7 +186,7 @@ public class SortaServiceImplTest
 		disMaxNGramQueryRule_2.setOperator(Operator.DIS_MAX);
 		when(dataService
 				.findAll(OntologyTermMetaData.ENTITY_NAME,
-						new QueryImpl(Arrays.asList(
+						new QueryImpl<Entity>(Arrays.asList(
 								new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
 								new QueryRule(Operator.AND), disMaxNGramQueryRule_2)).pageSize(10)))
 										.thenReturn(Stream.empty());
@@ -222,7 +222,7 @@ public class SortaServiceImplTest
 
 		when(dataService
 				.findAll(OntologyTermMetaData.ENTITY_NAME,
-						new QueryImpl(Arrays.asList(
+						new QueryImpl<Entity>(Arrays.asList(
 								new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
 								new QueryRule(Operator.AND), disMaxRegularQueryRule_3)).pageSize(50)))
 										.thenReturn(Arrays.asList(ontologyTermEntity_4).stream());
@@ -235,7 +235,7 @@ public class SortaServiceImplTest
 
 		when(dataService
 				.findAll(OntologyTermMetaData.ENTITY_NAME,
-						new QueryImpl(Arrays.asList(
+						new QueryImpl<Entity>(Arrays.asList(
 								new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
 								new QueryRule(Operator.AND), disMaxNGramQueryRule_3)).pageSize(10)))
 										.thenReturn(Arrays.asList(ontologyTermEntity_4).stream());

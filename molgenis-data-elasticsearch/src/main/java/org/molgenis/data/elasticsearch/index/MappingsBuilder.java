@@ -6,6 +6,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
@@ -30,7 +31,7 @@ public class MappingsBuilder
 	 * @return
 	 * @throws IOException
 	 */
-	public static XContentBuilder buildMapping(Repository repository) throws IOException
+	public static XContentBuilder buildMapping(Repository<Entity> repository) throws IOException
 	{
 		return buildMapping(repository.getEntityMetaData());
 	}
@@ -47,7 +48,7 @@ public class MappingsBuilder
 	 * @throws IOException
 	 */
 	@Deprecated
-	public static XContentBuilder buildMapping(Repository repository, boolean storeSource, boolean enableNorms,
+	public static XContentBuilder buildMapping(Repository<Entity> repository, boolean storeSource, boolean enableNorms,
 			boolean createAllIndex) throws IOException
 	{
 		return buildMapping(repository.getEntityMetaData(), storeSource, enableNorms, createAllIndex);

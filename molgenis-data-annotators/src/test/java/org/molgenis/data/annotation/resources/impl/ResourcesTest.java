@@ -96,7 +96,7 @@ public class ResourcesTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void ifResourceExistsThenFindAllDelegatesWithoutCheckingAvailability()
 	{
-		Query q = QueryImpl.EQ("id", "5");
+		Query<Entity> q = QueryImpl.EQ("id", "5");
 		when(resource.findAll(q)).thenReturn(Arrays.asList(e1));
 		assertEquals(resources.findAll("resourceName", q), Arrays.asList(e1));
 		Mockito.verify(resource, Mockito.never()).isAvailable();
@@ -105,7 +105,7 @@ public class ResourcesTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void ifResourceExistsAndIsAvailableButQueryFailsThenExceptionGetsThrown()
 	{
-		Query q = QueryImpl.EQ("id", "5");
+		Query<Entity> q = QueryImpl.EQ("id", "5");
 		Exception ex = new RuntimeException();
 		when(resource.findAll(q)).thenThrow(ex);
 		when(resource.isAvailable()).thenReturn(true);
@@ -123,7 +123,7 @@ public class ResourcesTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void ifResourceIsUnavailableThenQueryIsDelegated()
 	{
-		Query q = QueryImpl.EQ("id", "5");
+		Query<Entity> q = QueryImpl.EQ("id", "5");
 		Exception ex = new RuntimeException();
 		when(resource.findAll(q)).thenThrow(ex);
 		when(resource.isAvailable()).thenReturn(false);
@@ -134,7 +134,7 @@ public class ResourcesTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void ifResourceDoesNotExistThenQueryIsDelegated()
 	{
-		Query q = QueryImpl.EQ("id", "5");
+		Query<Entity> q = QueryImpl.EQ("id", "5");
 		when(dataService.findAll("blah", q)).thenReturn(Stream.of(e1));
 		assertEquals(Lists.newArrayList(resources.findAll("blah", q)), Arrays.asList(e1));
 	}

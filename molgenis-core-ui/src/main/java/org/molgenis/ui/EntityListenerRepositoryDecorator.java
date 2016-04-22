@@ -14,18 +14,19 @@ import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 
-public class EntityListenerRepositoryDecorator implements Repository
+public class EntityListenerRepositoryDecorator implements Repository<Entity>
 {
-	private final Repository decoratedRepository;
+	private final Repository<Entity> decoratedRepository;
 	private SetMultimap<Object, EntityListener> entityListeners;
 
-	public EntityListenerRepositoryDecorator(Repository decoratedRepository)
+	public EntityListenerRepositoryDecorator(Repository<Entity> decoratedRepository)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
 	}
@@ -55,6 +56,12 @@ public class EntityListenerRepositoryDecorator implements Repository
 	}
 
 	@Override
+	public Set<Operator> getQueryOperators()
+	{
+		return decoratedRepository.getQueryOperators();
+	}
+
+	@Override
 	public String getName()
 	{
 		return decoratedRepository.getName();
@@ -73,25 +80,25 @@ public class EntityListenerRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Query query()
+	public Query<Entity> query()
 	{
 		return decoratedRepository.query();
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		return decoratedRepository.count(q);
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		return decoratedRepository.findAll(q);
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		return decoratedRepository.findOne(q);
 	}
@@ -141,7 +148,7 @@ public class EntityListenerRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void update(Stream<? extends Entity> entities)
+	public void update(Stream<Entity> entities)
 	{
 		if (entityListeners != null)
 		{
@@ -163,7 +170,7 @@ public class EntityListenerRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void delete(Stream<? extends Entity> entities)
+	public void delete(Stream<Entity> entities)
 	{
 		decoratedRepository.delete(entities);
 	}
@@ -193,7 +200,7 @@ public class EntityListenerRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Integer add(Stream<? extends Entity> entities)
+	public Integer add(Stream<Entity> entities)
 	{
 		return decoratedRepository.add(entities);
 	}

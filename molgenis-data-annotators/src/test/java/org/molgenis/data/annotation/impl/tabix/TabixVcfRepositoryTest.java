@@ -65,7 +65,7 @@ public class TabixVcfRepositoryTest
 	@Test
 	public void testQuery()
 	{
-		Query query = tabixVcfRepository.query().eq(VcfRepository.CHROM, "1").and().eq(VcfRepository.POS, "10352");
+		Query<Entity> query = tabixVcfRepository.query().eq(VcfRepository.CHROM, "1").and().eq(VcfRepository.POS, "10352");
 
 		Iterator<Entity> iterator = tabixVcfRepository.findAll(query).iterator();
 		iterator.hasNext();

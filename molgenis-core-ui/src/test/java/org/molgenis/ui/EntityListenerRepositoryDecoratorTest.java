@@ -21,7 +21,7 @@ import org.testng.annotations.Test;
 
 public class EntityListenerRepositoryDecoratorTest
 {
-	private Repository decoratedRepository;
+	private Repository<Entity> decoratedRepository;
 	private EntityListenerRepositoryDecorator entityListenerRepositoryDecorator;
 
 	@BeforeMethod
@@ -58,7 +58,7 @@ public class EntityListenerRepositoryDecoratorTest
 	@Test
 	public void updateEntityWithListener()
 	{
-		Repository decoratedRepository = mock(Repository.class);
+		Repository<Entity> decoratedRepository = mock(Repository.class);
 		EntityListenerRepositoryDecorator entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(
 				decoratedRepository);
 		EntityListener entityListener0 = when(mock(EntityListener.class).getEntityId()).thenReturn(Integer.valueOf(1))
@@ -76,7 +76,7 @@ public class EntityListenerRepositoryDecoratorTest
 	@Test
 	public void updateEntityWithListeners()
 	{
-		Repository decoratedRepository = mock(Repository.class);
+		Repository<Entity> decoratedRepository = mock(Repository.class);
 		EntityListenerRepositoryDecorator entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(
 				decoratedRepository);
 		EntityListener entityListener0 = when(mock(EntityListener.class).getEntityId()).thenReturn(Integer.valueOf(1))
@@ -98,7 +98,7 @@ public class EntityListenerRepositoryDecoratorTest
 	@Test
 	public void updateEntityWithoutListener()
 	{
-		Repository decoratedRepository = mock(Repository.class);
+		Repository<Entity> decoratedRepository = mock(Repository.class);
 		EntityListenerRepositoryDecorator entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(
 				decoratedRepository);
 		EntityListener entityListener0 = when(mock(EntityListener.class).getEntityId()).thenReturn(Integer.valueOf(-1))
@@ -116,7 +116,7 @@ public class EntityListenerRepositoryDecoratorTest
 	@Test
 	public void updateEntityNoListeners()
 	{
-		Repository decoratedRepository = mock(Repository.class);
+		Repository<Entity> decoratedRepository = mock(Repository.class);
 		EntityListenerRepositoryDecorator entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(
 				decoratedRepository);
 
@@ -131,7 +131,7 @@ public class EntityListenerRepositoryDecoratorTest
 	@Test
 	public void updateStreamWithListeners()
 	{
-		Repository decoratedRepository = mock(Repository.class);
+		Repository<Entity> decoratedRepository = mock(Repository.class);
 		EntityListenerRepositoryDecorator entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(
 				decoratedRepository);
 		EntityListener entityListener0 = when(mock(EntityListener.class).getEntityId()).thenReturn(Integer.valueOf(1))
@@ -159,7 +159,7 @@ public class EntityListenerRepositoryDecoratorTest
 	@Test
 	public void updateStreamWithSomeListeners()
 	{
-		Repository decoratedRepository = mock(Repository.class);
+		Repository<Entity> decoratedRepository = mock(Repository.class);
 		EntityListenerRepositoryDecorator entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(
 				decoratedRepository);
 		EntityListener entityListener1 = when(mock(EntityListener.class).getEntityId()).thenReturn(Integer.valueOf(2))
@@ -182,7 +182,7 @@ public class EntityListenerRepositoryDecoratorTest
 	@Test
 	public void updateStreamNoListeners()
 	{
-		Repository decoratedRepository = mock(Repository.class);
+		Repository<Entity> decoratedRepository = mock(Repository.class);
 		EntityListenerRepositoryDecorator entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(
 				decoratedRepository);
 
@@ -200,7 +200,7 @@ public class EntityListenerRepositoryDecoratorTest
 	@Test
 	public void removeEntityListener()
 	{
-		Repository decoratedRepository = mock(Repository.class);
+		Repository<Entity> decoratedRepository = mock(Repository.class);
 		EntityListenerRepositoryDecorator entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(
 				decoratedRepository);
 		EntityListener entityListener0 = when(mock(EntityListener.class).getEntityId()).thenReturn(Integer.valueOf(1))
@@ -246,7 +246,7 @@ public class EntityListenerRepositoryDecoratorTest
 	public void findAllAsStream()
 	{
 		Entity entity0 = mock(Entity.class);
-		Query query = mock(Query.class);
+		Query<Entity> query = mock(Query.class);
 		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = entityListenerRepositoryDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));

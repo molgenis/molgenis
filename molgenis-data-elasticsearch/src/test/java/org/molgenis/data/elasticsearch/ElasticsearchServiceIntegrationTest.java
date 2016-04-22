@@ -156,7 +156,7 @@ public class ElasticsearchServiceIntegrationTest
 		elasticsearchService.refresh();
 		elasticsearchService.delete(Stream.of(entity0), entityMeta);
 		elasticsearchService.refresh();
-		Iterable<Entity> updatedEntity = elasticsearchService.search(new QueryImpl(), entityMeta);
+		Iterable<Entity> updatedEntity = elasticsearchService.search(new QueryImpl<>(), entityMeta);
 		assertEquals(Lists.newArrayList(updatedEntity), Arrays.asList(entity1));
 	}
 }

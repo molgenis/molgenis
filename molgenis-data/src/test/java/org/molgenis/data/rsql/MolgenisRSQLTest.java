@@ -3,6 +3,7 @@ package org.molgenis.data.rsql;
 import static org.testng.Assert.assertEquals;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -30,14 +31,14 @@ public class MolgenisRSQLTest
 	@Test
 	public void testEquals() throws RSQLParserException
 	{
-		Query q = molgenisRSQL.createQuery("name==piet", entityMetaData);
-		assertEquals(q, new QueryImpl().eq("name", "piet"));
+		Query<Entity> q = molgenisRSQL.createQuery("name==piet", entityMetaData);
+		assertEquals(q, new QueryImpl<Entity>().eq("name", "piet"));
 
 		q = molgenisRSQL.createQuery("name=='piet paulusma'", entityMetaData);
-		assertEquals(q, new QueryImpl().eq("name", "piet paulusma"));
+		assertEquals(q, new QueryImpl<Entity>().eq("name", "piet paulusma"));
 
 		q = molgenisRSQL.createQuery("age==87", entityMetaData);
-		assertEquals(q, new QueryImpl().eq("age", 87));
+		assertEquals(q, new QueryImpl<Entity>().eq("age", 87));
 	}
 
 	@Test(expectedExceptions = UnknownAttributeException.class)
@@ -49,29 +50,29 @@ public class MolgenisRSQLTest
 	@Test
 	public void testGreaterThanOrEqual() throws RSQLParserException
 	{
-		Query q = molgenisRSQL.createQuery("age>=87", entityMetaData);
-		assertEquals(q, new QueryImpl().ge("age", 87));
+		Query<Entity> q = molgenisRSQL.createQuery("age>=87", entityMetaData);
+		assertEquals(q, new QueryImpl<Entity>().ge("age", 87));
 	}
 
 	@Test
 	public void testGreaterThan() throws RSQLParserException
 	{
-		Query q = molgenisRSQL.createQuery("age>87", entityMetaData);
-		assertEquals(q, new QueryImpl().gt("age", 87));
+		Query<Entity> q = molgenisRSQL.createQuery("age>87", entityMetaData);
+		assertEquals(q, new QueryImpl<Entity>().gt("age", 87));
 	}
 
 	@Test
 	public void testLessThanOrEqual() throws RSQLParserException
 	{
-		Query q = molgenisRSQL.createQuery("age<=87", entityMetaData);
-		assertEquals(q, new QueryImpl().le("age", 87));
+		Query<Entity> q = molgenisRSQL.createQuery("age<=87", entityMetaData);
+		assertEquals(q, new QueryImpl<Entity>().le("age", 87));
 	}
 
 	@Test
 	public void testLessThan() throws RSQLParserException
 	{
-		Query q = molgenisRSQL.createQuery("age<87", entityMetaData);
-		assertEquals(q, new QueryImpl().lt("age", 87));
+		Query<Entity> q = molgenisRSQL.createQuery("age<87", entityMetaData);
+		assertEquals(q, new QueryImpl<Entity>().lt("age", 87));
 	}
 
 	@Test
@@ -79,11 +80,11 @@ public class MolgenisRSQLTest
 	{
 		// ';' and 'and' or synonyms
 
-		Query q = molgenisRSQL.createQuery("name==piet and age==87", entityMetaData);
-		assertEquals(q, new QueryImpl().nest().eq("name", "piet").and().eq("age", 87).unnest());
+		Query<Entity> q = molgenisRSQL.createQuery("name==piet and age==87", entityMetaData);
+		assertEquals(q, new QueryImpl<Entity>().nest().eq("name", "piet").and().eq("age", 87).unnest());
 
 		q = molgenisRSQL.createQuery("name==piet;age==87", entityMetaData);
-		assertEquals(q, new QueryImpl().nest().eq("name", "piet").and().eq("age", 87).unnest());
+		assertEquals(q, new QueryImpl<Entity>().nest().eq("name", "piet").and().eq("age", 87).unnest());
 	}
 
 	@Test
@@ -91,11 +92,11 @@ public class MolgenisRSQLTest
 	{
 		// ',' and 'or' or synonyms
 
-		Query q = molgenisRSQL.createQuery("name==piet or age==87", entityMetaData);
-		assertEquals(q, new QueryImpl().nest().eq("name", "piet").or().eq("age", 87).unnest());
+		Query<Entity> q = molgenisRSQL.createQuery("name==piet or age==87", entityMetaData);
+		assertEquals(q, new QueryImpl<Entity>().nest().eq("name", "piet").or().eq("age", 87).unnest());
 
 		q = molgenisRSQL.createQuery("name==piet,age==87", entityMetaData);
-		assertEquals(q, new QueryImpl().nest().eq("name", "piet").or().eq("age", 87).unnest());
+		assertEquals(q, new QueryImpl<Entity>().nest().eq("name", "piet").or().eq("age", 87).unnest());
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
@@ -113,10 +114,10 @@ public class MolgenisRSQLTest
 	@Test
 	public void testComplexQuery() throws RSQLParserException
 	{
-		Query q = molgenisRSQL.createQuery("((name==piet;age==87),(name==klaas;age>100))", entityMetaData);
+		Query<Entity> q = molgenisRSQL.createQuery("((name==piet;age==87),(name==klaas;age>100))", entityMetaData);
 		assertEquals(
 				q,
-				new QueryImpl().nest().nest().eq("name", "piet").and().eq("age", 87).unnest().or().nest()
+				new QueryImpl<Entity>().nest().nest().eq("name", "piet").and().eq("age", 87).unnest().or().nest()
 						.eq("name", "klaas").and().gt("age", 100).unnest().unnest());
 	}
 }

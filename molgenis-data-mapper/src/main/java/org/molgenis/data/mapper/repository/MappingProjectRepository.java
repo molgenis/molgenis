@@ -2,6 +2,7 @@ package org.molgenis.data.mapper.repository;
 
 import java.util.List;
 
+import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 
@@ -42,7 +43,7 @@ public interface MappingProjectRepository
 	 * @param q
 	 * @return
 	 */
-	public abstract List<MappingProject> getMappingProjects(Query q);
+	public abstract List<MappingProject> getMappingProjects(Query<Entity> q);
 
 	/**
 	 * Delete a mapping project.

@@ -77,7 +77,7 @@ public abstract class AbstractDatatypeIT extends AbstractDataIntegrationIT
 
 		// Create new repository
 		EntityMetaData entityMetaData = createMetaData();
-		Repository repo = dataService.getMeta().addEntityMeta(entityMetaData);
+		Repository<Entity> repo = dataService.getMeta().addEntityMeta(entityMetaData);
 		assertNotNull(repo, entityMetaData.getName() + " repository not found.");
 		assertEquals(repo.getName(), entityMetaData.getName());
 

@@ -6,6 +6,7 @@ import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Sort;
@@ -23,7 +24,7 @@ public class SortGenerator implements QueryPartGenerator
 {
 
 	@Override
-	public void generate(SearchRequestBuilder searchRequestBuilder, Query query, EntityMetaData entityMetaData)
+	public void generate(SearchRequestBuilder searchRequestBuilder, Query<Entity> query, EntityMetaData entityMetaData)
 	{
 		if (query.getSort() != null)
 		{

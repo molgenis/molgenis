@@ -73,7 +73,7 @@ public class DependencyResolverTest
 		Entity marie = new MapEntity("name");
 		marie.set("name", "Marie");
 
-		Repository repo = mock(Repository.class);
+		Repository<Entity> repo = mock(Repository.class);
 		when(repo.getName()).thenReturn("Person");
 		when(repo.findOneById("Piet")).thenReturn(piet);
 		when(repo.findOneById("Jan")).thenReturn(jan);

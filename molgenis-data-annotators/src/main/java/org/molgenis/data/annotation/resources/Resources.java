@@ -24,7 +24,7 @@ public interface Resources
 	 *            the Query to use
 	 * @return {@link Entity}s found
 	 */
-	Iterable<Entity> findAll(String name, Query q);
+	Iterable<Entity> findAll(String name, Query<Entity> q);
 
 	/**
 	 * Indicates if a specific Resource is currently available.

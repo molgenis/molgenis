@@ -61,7 +61,7 @@ public class DataServiceTokenService implements TokenService
 	public String generateAndStoreToken(String username, String description)
 	{
 		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisUser.USERNAME, username), MolgenisUser.class);
+				new QueryImpl<MolgenisUser>().eq(MolgenisUser.USERNAME, username), MolgenisUser.class);
 
 		if (user == null) throw new IllegalArgumentException("Unknown username [" + username + "]");
 
@@ -89,7 +89,7 @@ public class DataServiceTokenService implements TokenService
 	private MolgenisToken getMolgenisToken(String token) throws UnknownTokenException
 	{
 		MolgenisToken molgenisToken = dataService.findOne(MolgenisToken.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisToken.TOKEN, token), MolgenisToken.class);
+				new QueryImpl<MolgenisToken>().eq(MolgenisToken.TOKEN, token), MolgenisToken.class);
 
 		if ((molgenisToken == null)
 				|| ((molgenisToken.getExpirationDate() != null) && new Date().after(molgenisToken.getExpirationDate())))

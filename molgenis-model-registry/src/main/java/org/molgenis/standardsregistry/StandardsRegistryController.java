@@ -154,7 +154,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 
 							// Check has data
 							if (!dataService.hasRepository(entityName)
-									|| dataService.count(entityName, new QueryImpl()) == 0) return false;
+									|| dataService.count(entityName, new QueryImpl<>()) == 0) return false;
 
 							return true;
 						}

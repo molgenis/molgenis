@@ -5,6 +5,7 @@ import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.AutoValueRepositoryDecorator;
 import org.molgenis.data.ComputedEntityValuesDecorator;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityReferenceResolverDecorator;
 import org.molgenis.data.IdGenerator;
@@ -44,9 +45,9 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	}
 
 	@Override
-	public Repository createDecoratedRepository(Repository repository)
+	public Repository<Entity> createDecoratedRepository(Repository<Entity> repository)
 	{
-		Repository decoratedRepository = repositoryDecoratorRegistry.decorate(repository);
+		Repository<Entity> decoratedRepository = repositoryDecoratorRegistry.decorate(repository);
 
 		if (decoratedRepository.getName().equals(MolgenisUserMetaData.ENTITY_NAME))
 		{

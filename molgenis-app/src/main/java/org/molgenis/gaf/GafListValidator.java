@@ -39,7 +39,7 @@ public class GafListValidator
 	@Autowired
 	private GafListSettings gafListSettings;
 
-	public GafListValidationReport validate(GafListValidationReport report, Repository repository, List<String> columns)
+	public GafListValidationReport validate(GafListValidationReport report, Repository<Entity> repository, List<String> columns)
 			throws IOException
 	{
 		final String gaflistEntityName = gafListSettings.getEntityName();
@@ -204,7 +204,7 @@ public class GafListValidator
 	 */
 	private boolean internalSampleIdExists(String gaflistEntityName, Integer internalSampleId)
 	{
-		QueryImpl q = new QueryImpl();
+		QueryImpl<Entity> q = new QueryImpl<Entity>();
 		q.eq(GAFCol.INTERNAL_SAMPLE_ID.toString(), internalSampleId);
 		return (null != dataService.findOne(gaflistEntityName, q));
 	}
