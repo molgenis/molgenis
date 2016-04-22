@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.molgenis.data.DataService;
+import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,6 @@ public abstract class AbstractDataIntegrationIT extends AbstractTestNGSpringCont
 	ConfigurableApplicationContext applicationContext;
 
 	@Autowired
-
 	EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
 
 	// FIXME
