@@ -12,6 +12,8 @@ import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.RepositorySecurityDecorator;
+import org.molgenis.data.elasticsearch.IndexedRepositoryDecorator;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.OwnedEntityMetaData;
 import org.molgenis.data.transaction.index.IndexTransactionLogRepositoryDecorator;
@@ -32,12 +34,13 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final DataService dataService;
 	private final ExpressionValidator expressionValidator;
 	private final RepositoryDecoratorRegistry repositoryDecoratorRegistry;
+	private final SearchService searchService;
 
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
 			EntityAttributesValidator entityAttributesValidator, IdGenerator idGenerator, AppSettings appSettings,
 			DataService dataService, ExpressionValidator expressionValidator,
 			RepositoryDecoratorRegistry repositoryDecoratorRegistry,
-			IndexTransactionLogService indexTansactionLogService)
+			IndexTransactionLogService indexTansactionLogService, SearchService searchService)
 	{
 		this.entityManager = entityManager;
 		this.entityAttributesValidator = entityAttributesValidator;
@@ -47,6 +50,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.expressionValidator = expressionValidator;
 		this.repositoryDecoratorRegistry = repositoryDecoratorRegistry;
 		this.indexTansactionLogService = indexTansactionLogService;
+		this.searchService = searchService;
 	}
 
 	@Override
@@ -73,6 +77,9 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 
 		// 5. Entity listener
 		decoratedRepository = new EntityListenerRepositoryDecorator(decoratedRepository);
+
+		// 4. Index Transaction log decorator //TODO JJ INDEXABLE
+		decoratedRepository = new IndexedRepositoryDecorator(decoratedRepository, searchService);
 
 		// 4. Index Transaction log decorator
 		decoratedRepository = new IndexTransactionLogRepositoryDecorator(decoratedRepository, indexTansactionLogService);
