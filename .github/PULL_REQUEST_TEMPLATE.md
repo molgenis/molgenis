@@ -1,3 +1,3 @@
 #### Checklist
-[] Unit tests
-[] Updated testplan
+- [ ] Unit tests
+- [ ] Updated testplan
