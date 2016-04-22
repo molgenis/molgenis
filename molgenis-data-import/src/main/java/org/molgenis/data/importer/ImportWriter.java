@@ -130,7 +130,7 @@ public class ImportWriter
 	{
 		if (!languages.isEmpty())
 		{
-			Repository repo = dataService.getRepository(LanguageMetaData.ENTITY_NAME);
+			Repository<Entity> repo = dataService.getRepository(LanguageMetaData.ENTITY_NAME);
 
 			List<Entity> transformed = languages.values().stream()
 					.map(e -> new DefaultEntityImporter(repo.getEntityMetaData(), dataService, e, false))
@@ -153,7 +153,7 @@ public class ImportWriter
 	{
 		if (!i18nStrings.isEmpty())
 		{
-			Repository repo = dataService.getRepository(I18nStringMetaData.ENTITY_NAME);
+			Repository<Entity> repo = dataService.getRepository(I18nStringMetaData.ENTITY_NAME);
 
 			List<Entity> transformed = i18nStrings.values().stream()
 					.map(e -> new DefaultEntityImporter(I18nStringMetaData.INSTANCE, dataService, e, false))
@@ -182,7 +182,7 @@ public class ImportWriter
 	}
 
 	/**
-	 * Imports entity data for all entities in {@link #resolved} from {@link #source}
+	 * Imports entity data for all entities in resolved from source
 	 */
 	private void importData(EntityImportReport report, Iterable<EntityMetaData> resolved, RepositoryCollection source,
 			DatabaseAction dbAction, String defaultPackage)
@@ -195,8 +195,8 @@ public class ImportWriter
 			if (!name.equalsIgnoreCase(LanguageMetaData.ENTITY_NAME)
 					&& !name.equalsIgnoreCase(I18nStringMetaData.ENTITY_NAME) && dataService.hasRepository(name))
 			{
-				Repository repository = dataService.getRepository(name);
-				Repository fileEntityRepository = source.getRepository(entityMetaData.getName());
+				Repository<Entity> repository = dataService.getRepository(name);
+				Repository<Entity> fileEntityRepository = source.getRepository(entityMetaData.getName());
 
 				// Try without default package
 				if ((fileEntityRepository == null) && (defaultPackage != null)
@@ -304,7 +304,7 @@ public class ImportWriter
 				{
 					LOG.debug("trying to create: " + name);
 					metaDataChanges.addEntity(name);
-					Repository repo = dataService.getMeta().addEntityMeta(entityMetaData);
+					Repository<Entity> repo = dataService.getMeta().addEntityMeta(entityMetaData);
 					if (repo != null)
 					{
 						report.addNewEntity(name);
@@ -320,7 +320,7 @@ public class ImportWriter
 	}
 
 	/**
-	 * Adds the packages from the packages sheet to the {@link #metaDataService}.
+	 * Adds the packages from the packages sheet to the {@link org.molgenis.data.meta.MetaDataService}.
 	 */
 	private void importPackages(ParsedMetaData parsedMetaData)
 	{
@@ -339,7 +339,7 @@ public class ImportWriter
 	// FIXME: can everybody always update a tag?
 	private void importTags(RepositoryCollection source)
 	{
-		Repository tagRepo = source.getRepository(TagMetaData.ENTITY_NAME);
+		Repository<Entity> tagRepo = source.getRepository(TagMetaData.ENTITY_NAME);
 		if (tagRepo != null)
 		{
 			for (Entity tag : tagRepo)
@@ -395,7 +395,7 @@ public class ImportWriter
 		{
 			if (dataService.hasRepository(entity))
 			{
-				Repository repo = dataService.getRepository(entity);
+				Repository<Entity> repo = dataService.getRepository(entity);
 				if (repo.getCapabilities().contains(RepositoryCapability.INDEXABLE))
 				{
 					repo.rebuildIndex();
@@ -451,7 +451,7 @@ public class ImportWriter
 	 *            {@link DatabaseAction} describing how to merge the existing entities
 	 * @return number of updated entities
 	 */
-	public int update(Repository repo, Iterable<? extends Entity> entities, DatabaseAction dbAction)
+	public int update(Repository<Entity> repo, Iterable<Entity> entities, DatabaseAction dbAction)
 	{
 		if (entities == null) return 0;
 
@@ -483,7 +483,7 @@ public class ImportWriter
 				if (repo.count() > 0)
 				{
 					int batchSize = 100;
-					Query q = new QueryImpl();
+					Query<Entity> q = new QueryImpl<Entity>();
 					Iterator<Object> it = ids.iterator();
 					int batchCount = 0;
 					while (it.hasNext())
@@ -496,7 +496,7 @@ public class ImportWriter
 							repo.findAll(q).forEach(existing -> {
 								existingIds.add(existing.getIdValue());
 							});
-							q = new QueryImpl();
+							q = new QueryImpl<Entity>();
 							batchCount = 0;
 						}
 						else
@@ -657,7 +657,7 @@ public class ImportWriter
 		}
 	}
 
-	private void updateInRepo(Repository repo, List<Entity> existingEntities, List<Integer> existingEntitiesRowIndex)
+	private void updateInRepo(Repository<Entity> repo, List<Entity> existingEntities, List<Integer> existingEntitiesRowIndex)
 	{
 		try
 		{
@@ -672,7 +672,7 @@ public class ImportWriter
 		existingEntitiesRowIndex.clear();
 	}
 
-	private void insertIntoRepo(Repository repo, List<Entity> newEntities, List<Integer> newEntitiesRowIndex)
+	private void insertIntoRepo(Repository<Entity> repo, List<Entity> newEntities, List<Integer> newEntitiesRowIndex)
 	{
 		try
 		{

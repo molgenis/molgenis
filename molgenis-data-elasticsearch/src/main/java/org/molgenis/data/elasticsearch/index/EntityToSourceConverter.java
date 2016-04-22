@@ -8,7 +8,6 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.stereotype.Component;
@@ -211,6 +210,7 @@ public class EntityToSourceConverter
 			case CATEGORICAL_MREF:
 			case MREF:
 			{
+				@SuppressWarnings("unchecked")
 				final Iterable<Entity> refEntities = (Iterable<Entity>) inputValue;
 				if (refEntities != null && !Iterables.isEmpty(refEntities))
 				{

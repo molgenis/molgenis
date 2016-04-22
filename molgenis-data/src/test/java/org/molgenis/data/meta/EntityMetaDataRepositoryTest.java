@@ -28,7 +28,7 @@ public class EntityMetaDataRepositoryTest
 	private PackageRepository packageRepository;
 	private EntityMetaDataRepository entityMetaDataRepository;
 	private AttributeMetaDataRepository attributeRepository;
-	private Repository entityMetaRepo;
+	private Repository<Entity> entityMetaRepo;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()

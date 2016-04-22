@@ -101,7 +101,7 @@ public class UserManagerServiceImpl implements UserManagerService
 
 		final List<MolgenisGroupMember> groupMembers = dataService
 				.findAll(MolgenisGroupMember.ENTITY_NAME,
-						new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser), MolgenisGroupMember.class)
+						new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser), MolgenisGroupMember.class)
 				.collect(toList());
 
 		return this.getAllMolgenisGroupsFromGroupMembers(groupMembers);
@@ -119,7 +119,7 @@ public class UserManagerServiceImpl implements UserManagerService
 
 		final List<MolgenisGroupMember> groupMembers = dataService
 				.findAll(MolgenisGroupMember.ENTITY_NAME,
-						new QueryImpl().eq(MolgenisGroupMember.MOLGENISGROUP, molgenisGroup), MolgenisGroupMember.class)
+						new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMember.MOLGENISGROUP, molgenisGroup), MolgenisGroupMember.class)
 				.collect(toList());
 
 		return this.getAllMolgenisUsersFromGroupMembers(groupMembers);
@@ -139,7 +139,7 @@ public class UserManagerServiceImpl implements UserManagerService
 
 		final List<MolgenisGroupMember> groupMembers = dataService
 				.findAll(MolgenisGroupMember.ENTITY_NAME,
-						new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser), MolgenisGroupMember.class)
+						new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser), MolgenisGroupMember.class)
 				.collect(toList());
 
 		final List<MolgenisGroup> groupsWhereUserIsMember = this.getAllMolgenisGroupsFromGroupMembers(groupMembers);
@@ -185,7 +185,7 @@ public class UserManagerServiceImpl implements UserManagerService
 			throw new RuntimeException("unknown user id [" + molgenisGroupId + "]");
 		}
 
-		Query q = new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser).and()
+		Query<MolgenisGroupMember> q = new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser).and()
 				.eq(MolgenisGroupMember.MOLGENISGROUP, molgenisGroup);
 
 		final List<MolgenisGroupMember> molgenisGroupMembers = dataService

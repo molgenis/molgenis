@@ -41,7 +41,7 @@ import com.google.common.collect.Lists;
  * intended for real time user request: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current
  * /search-request-scroll.html
  */
-class ElasticsearchEntityIterable extends BatchingQueryResult implements EntityCollection
+class ElasticsearchEntityIterable extends BatchingQueryResult<Entity> implements EntityCollection
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchEntityIterable.class);
 
@@ -55,7 +55,7 @@ class ElasticsearchEntityIterable extends BatchingQueryResult implements EntityC
 
 	private final String type;
 
-	public ElasticsearchEntityIterable(Query q, EntityMetaData entityMetaData, Client client,
+	public ElasticsearchEntityIterable(Query<Entity> q, EntityMetaData entityMetaData, Client client,
 			ElasticsearchEntityFactory elasticsearchEntityFactory, SearchRequestGenerator searchRequestGenerator,
 			String[] indexNames)
 	{
@@ -70,7 +70,7 @@ class ElasticsearchEntityIterable extends BatchingQueryResult implements EntityC
 	}
 
 	@Override
-	protected List<Entity> getBatch(Query q)
+	protected List<Entity> getBatch(Query<Entity> q)
 	{
 		if (LOG.isTraceEnabled())
 		{

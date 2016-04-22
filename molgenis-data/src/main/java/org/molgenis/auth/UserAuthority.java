@@ -1,10 +1,10 @@
 package org.molgenis.auth;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-
 import java.util.LinkedHashSet;
 import java.util.Set;
+
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
 
 public class UserAuthority extends org.molgenis.data.support.AbstractEntity
 		implements org.molgenis.data.Entity, org.molgenis.auth.Authority
@@ -126,7 +126,7 @@ public class UserAuthority extends org.molgenis.data.support.AbstractEntity
 		}
 		if (MOLGENISUSER.equals(attributeName))
 		{
-			org.molgenis.auth.MolgenisUser e = new org.molgenis.auth.MolgenisUser();
+			MolgenisUser e = new org.molgenis.auth.MolgenisUser();
 			e.set((Entity) value);
 			this.setMolgenisUser(e);
 			return;

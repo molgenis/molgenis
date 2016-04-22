@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.excel.ExcelSheetWriter;
@@ -37,7 +38,7 @@ public class DataExplorerDownloadHandler
 		ExcelWriter excelWriter = new ExcelWriter(outputStream, FileFormat.XLSX);
 		String entityName = dataRequest.getEntityName();
 
-		QueryImpl query = dataRequest.getQuery();
+		QueryImpl<Entity> query = dataRequest.getQuery();
 		ExcelSheetWriter excelSheetWriter = null;
 		try
 		{
@@ -117,7 +118,7 @@ public class DataExplorerDownloadHandler
 					break;
 			}
 
-			QueryImpl query = dataRequest.getQuery();
+			QueryImpl<Entity> query = dataRequest.getQuery();
 			csvWriter.add(dataService.findAll(entityName, query));
 		}
 		finally

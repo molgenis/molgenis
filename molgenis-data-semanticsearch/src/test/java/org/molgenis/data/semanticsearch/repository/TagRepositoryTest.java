@@ -9,6 +9,7 @@ import static org.testng.Assert.assertEquals;
 import java.util.UUID;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.TagMetaData;
@@ -29,7 +30,7 @@ import org.testng.annotations.Test;
 public class TagRepositoryTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
-	private Repository repository;
+	private Repository<Entity> repository;
 
 	private TagRepository tagRepository;
 
@@ -63,7 +64,7 @@ public class TagRepositoryTest extends AbstractTestNGSpringContextTests
 				"http://edamontology.org"), expected);
 
 		when(
-				repository.findOne(new QueryImpl().eq(TagMetaData.OBJECT_IRI, "http://edamontology.org/data_3031")
+				repository.findOne(new QueryImpl<Entity>().eq(TagMetaData.OBJECT_IRI, "http://edamontology.org/data_3031")
 						.and().eq(TagMetaData.RELATION_IRI, "http://molgenis.org/biobankconnect/instanceOf").and()
 						.eq(TagMetaData.CODE_SYSTEM, "http://edamontology.org"))).thenReturn(expected);
 
@@ -77,7 +78,7 @@ public class TagRepositoryTest extends AbstractTestNGSpringContextTests
 	public static class Config
 	{
 		@Bean
-		Repository repository()
+		Repository<Entity> repository()
 		{
 			return mock(Repository.class);
 		}

@@ -76,7 +76,7 @@ public class JobsController extends MolgenisPluginController
 		stream(dataService.getMeta().getEntityMetaDatas().spliterator(), false)
 				.filter(e -> e.getExtends() != null && e.getExtends().getName().equals(jobMetaDataMetaData.getName()))
 				.forEach(e -> {
-					Query q = dataService.query(e.getName()).ge(JobExecution.SUBMISSION_DATE, weekAgo);
+					Query<Entity> q = dataService.query(e.getName()).ge(JobExecution.SUBMISSION_DATE, weekAgo);
 					if (!currentUser.isSuperuser())
 					{
 						q.and().eq(JobExecution.USER, currentUser);

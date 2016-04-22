@@ -90,7 +90,7 @@ public class AccountServiceImpl implements AccountService
 
 		// add user to group
 		MolgenisGroup group = dataService.findOne(MolgenisGroup.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisGroup.NAME, ALL_USER_GROUP), MolgenisGroup.class);
+				new QueryImpl<MolgenisGroup>().eq(MolgenisGroup.NAME, ALL_USER_GROUP), MolgenisGroup.class);
 		MolgenisGroupMember molgenisGroupMember = null;
 		if (group != null)
 		{
@@ -139,7 +139,7 @@ public class AccountServiceImpl implements AccountService
 	public void activateUser(String activationCode)
 	{
 		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisUser.ACTIVE, false).and().eq(MolgenisUser.ACTIVATIONCODE, activationCode),
+				new QueryImpl<MolgenisUser>().eq(MolgenisUser.ACTIVE, false).and().eq(MolgenisUser.ACTIVATIONCODE, activationCode),
 				MolgenisUser.class);
 
 		if (molgenisUser != null)
@@ -165,7 +165,7 @@ public class AccountServiceImpl implements AccountService
 	public void changePassword(String username, String newPassword)
 	{
 		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisUser.USERNAME, username), MolgenisUser.class);
+				new QueryImpl<MolgenisUser>().eq(MolgenisUser.USERNAME, username), MolgenisUser.class);
 
 		if (molgenisUser == null)
 		{
@@ -184,7 +184,7 @@ public class AccountServiceImpl implements AccountService
 	public void resetPassword(String userEmail)
 	{
 		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisUser.EMAIL, userEmail), MolgenisUser.class);
+				new QueryImpl<MolgenisUser>().eq(MolgenisUser.EMAIL, userEmail), MolgenisUser.class);
 
 		if (molgenisUser != null)
 		{

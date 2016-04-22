@@ -61,7 +61,7 @@ public class GafListFileImporterService
 
 			try
 			{
-				Repository writableRepository = dataService.getRepository(gaflistEntityName);
+				Repository<Entity> writableRepository = dataService.getRepository(gaflistEntityName);
 				for (Entity entity : gafListFileRepositoryToImport)
 				{
 					writableRepository.add(entity);

@@ -3,6 +3,8 @@ package org.molgenis.integrationtest.data;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
+import org.molgenis.DatabaseConfig;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.IdGenerator;
@@ -19,6 +21,7 @@ import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.OwnedEntityMetaData;
+import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.file.FileMetaMetaData;
@@ -48,7 +51,7 @@ import com.google.common.io.Files;
 @Import(
 { EmbeddedElasticSearchConfig.class, ElasticsearchEntityFactory.class, ElasticsearchRepositoryCollection.class,
 		RunAsSystemBeanPostProcessor.class, FileMetaMetaData.class, OwnedEntityMetaData.class, RhinoConfig.class,
-		ExpressionValidator.class, LanguageService.class })
+		DatabaseConfig.class, UuidGenerator.class, ExpressionValidator.class, LanguageService.class })
 public abstract class AbstractDataApiTestConfig
 {
 	@Autowired
@@ -85,12 +88,6 @@ public abstract class AbstractDataApiTestConfig
 	public MetaDataService metaDataService()
 	{
 		return new MetaDataServiceImpl(dataService());
-	}
-
-	@Bean
-	public LanguageService languageService()
-	{
-		return new LanguageService(dataService(), appSettings());
 	}
 
 	@Bean
@@ -135,10 +132,10 @@ public abstract class AbstractDataApiTestConfig
 		return new RepositoryDecoratorFactory()
 		{
 			@Override
-			public Repository createDecoratedRepository(Repository repository)
+			public Repository<Entity> createDecoratedRepository(Repository<Entity> repository)
 			{
-				return new MolgenisRepositoryDecoratorFactory(entityManager(), entityAttributesValidator(), idGenerator,
-						appSettings(), dataService(), expressionValidator, repositoryDecoratorRegistry())
+				return new MolgenisRepositoryDecoratorFactory(entityManager(), entityAttributesValidator(),
+						idGenerator, appSettings(), dataService(), expressionValidator, repositoryDecoratorRegistry())
 								.createDecoratedRepository(repository);
 			}
 		};

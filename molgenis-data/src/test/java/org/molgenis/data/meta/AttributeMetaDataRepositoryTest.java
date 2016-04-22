@@ -34,7 +34,7 @@ public class AttributeMetaDataRepositoryTest
 	public void addAttributeMetaData()
 	{
 		ManageableRepositoryCollection repoCollection = mock(ManageableRepositoryCollection.class);
-		Repository repo = mock(Repository.class);
+		Repository<Entity> repo = mock(Repository.class);
 		LanguageService languageService = mock(LanguageService.class);
 		when(repoCollection.addEntityMeta(AttributeMetaDataRepository.META_DATA)).thenReturn(repo);
 		AttributeMetaDataRepository attributeMetaDataRepository = new AttributeMetaDataRepository(repoCollection,
@@ -54,7 +54,7 @@ public class AttributeMetaDataRepositoryTest
 	public void addIterableAttributeMetaData()
 	{
 		ManageableRepositoryCollection repoCollection = mock(ManageableRepositoryCollection.class);
-		Repository repo = mock(Repository.class);
+		Repository<Entity> repo = mock(Repository.class);
 		LanguageService languageService = mock(LanguageService.class);
 		when(repoCollection.addEntityMeta(AttributeMetaDataRepository.META_DATA)).thenReturn(repo);
 		AttributeMetaDataRepository attributeMetaDataRepository = new AttributeMetaDataRepository(repoCollection,

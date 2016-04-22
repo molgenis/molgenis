@@ -1,9 +1,20 @@
 package org.molgenis.data.postgresql;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.QueryRule.Operator.AND;
+import static org.molgenis.data.QueryRule.Operator.EQUALS;
+import static org.molgenis.data.QueryRule.Operator.GREATER;
+import static org.molgenis.data.QueryRule.Operator.GREATER_EQUAL;
+import static org.molgenis.data.QueryRule.Operator.IN;
+import static org.molgenis.data.QueryRule.Operator.LESS;
+import static org.molgenis.data.QueryRule.Operator.LESS_EQUAL;
+import static org.molgenis.data.QueryRule.Operator.LIKE;
+import static org.molgenis.data.QueryRule.Operator.NESTED;
+import static org.molgenis.data.QueryRule.Operator.NOT;
+import static org.molgenis.data.QueryRule.Operator.OR;
+import static org.molgenis.data.QueryRule.Operator.RANGE;
 import static org.molgenis.data.RepositoryCapability.MANAGABLE;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 import static org.molgenis.data.RepositoryCapability.VALIDATE_NOTNULL_CONSTRAINT;
@@ -34,8 +45,8 @@ import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.isPersistedInPos
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +62,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.BatchingQueryResult;
@@ -85,10 +97,14 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	/** JDBC batch operation size */
 	private static final int BATCH_SIZE = 1000;
+
 	/** Repository capabilities */
-	private static final Set<RepositoryCapability> REPO_CAPABILITIES = unmodifiableSet(
-			new HashSet<>(asList(WRITABLE, MANAGABLE, QUERYABLE, VALIDATE_REFERENCE_CONSTRAINT,
-					VALIDATE_UNIQUE_CONSTRAINT, VALIDATE_NOTNULL_CONSTRAINT)));
+	private static final Set<RepositoryCapability> REPO_CAPABILITIES = unmodifiableSet(EnumSet.of(WRITABLE, MANAGABLE,
+			QUERYABLE, VALIDATE_REFERENCE_CONSTRAINT, VALIDATE_UNIQUE_CONSTRAINT, VALIDATE_NOTNULL_CONSTRAINT));
+
+	/** Supported query operators */
+	private static final Set<Operator> QUERY_OPERATORS = unmodifiableSet(
+			EnumSet.of(EQUALS, IN, LESS, LESS_EQUAL, GREATER, GREATER_EQUAL, RANGE, LIKE, NOT, AND, OR, NESTED));
 
 	private final PostgreSqlEntityFactory postgreSqlEntityFactory;
 	private final JdbcTemplate jdbcTemplate;
@@ -110,7 +126,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	@Transactional(readOnly = true)
 	public Iterator<Entity> iterator()
 	{
-		Query q = new QueryImpl();
+		Query<Entity> q = new QueryImpl<Entity>();
 		return findAllBatching(q).iterator();
 	}
 
@@ -118,7 +134,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	@Transactional(readOnly = true)
 	public Stream<Entity> stream(Fetch fetch)
 	{
-		Query q = new QueryImpl();
+		Query<Entity> q = new QueryImpl<Entity>();
 		if (fetch != null)
 		{
 			q.fetch(fetch);
@@ -133,13 +149,19 @@ public class PostgreSqlRepository extends AbstractRepository
 	}
 
 	@Override
+	public Set<Operator> getQueryOperators()
+	{
+		return QUERY_OPERATORS;
+	}
+
+	@Override
 	public EntityMetaData getEntityMetaData()
 	{
 		return metaData;
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		List<Object> parameters = Lists.newArrayList();
 		String sql = getSqlCount(getEntityMetaData(), q, parameters);
@@ -157,13 +179,13 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	@Override
 	@Transactional(readOnly = true)
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		return StreamSupport.stream(findAllBatching(q).spliterator(), false);
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		Iterator<Entity> iterator = findAll(q).iterator();
 		if (iterator.hasNext())
@@ -180,7 +202,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		{
 			return null;
 		}
-		return findOne(new QueryImpl().eq(getEntityMetaData().getIdAttribute().getName(), id));
+		return findOne(new QueryImpl<Entity>().eq(getEntityMetaData().getIdAttribute().getName(), id));
 	}
 
 	@Override
@@ -190,7 +212,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		{
 			return null;
 		}
-		return findOne(new QueryImpl().eq(getEntityMetaData().getIdAttribute().getName(), id).fetch(fetch));
+		return findOne(new QueryImpl<Entity>().eq(getEntityMetaData().getIdAttribute().getName(), id).fetch(fetch));
 	}
 
 	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
@@ -202,7 +224,7 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
-	public void update(Stream<? extends Entity> entities)
+	public void update(Stream<Entity> entities)
 	{
 		updateBatching(entities.iterator());
 	}
@@ -216,7 +238,7 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
-	public void delete(Stream<? extends Entity> entities)
+	public void delete(Stream<Entity> entities)
 	{
 		deleteAll(entities.map(Entity::getIdValue));
 	}
@@ -288,7 +310,7 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	@Override
-	public Integer add(Stream<? extends Entity> entities)
+	public Integer add(Stream<Entity> entities)
 	{
 		return addBatching(entities.iterator());
 	}
@@ -423,8 +445,6 @@ public class PostgreSqlRepository extends AbstractRepository
 	 * @param addToEntityMetaData
 	 *            boolean indicating if the repository's {@link EntityMetaData} should be updated as well. This should
 	 *            not happen for parts of a compound attribute.
-	 * @param async
-	 *            boolean indicating if the alter table statement should be executed in a different thread or not.
 	 */
 	private void addAttributeRec(AttributeMetaData attr, boolean addToEntityMetaData)
 	{
@@ -512,12 +532,12 @@ public class PostgreSqlRepository extends AbstractRepository
 		}
 	}
 
-	private BatchingQueryResult findAllBatching(Query q)
+	private BatchingQueryResult<Entity> findAllBatching(Query<Entity> q)
 	{
-		BatchingQueryResult batchingQueryResult = new BatchingQueryResult(BATCH_SIZE, q)
+		BatchingQueryResult<Entity> batchingQueryResult = new BatchingQueryResult<Entity>(BATCH_SIZE, q)
 		{
 			@Override
-			protected List<Entity> getBatch(Query batchQuery)
+			protected List<Entity> getBatch(Query<Entity> batchQuery)
 			{
 				List<Object> parameters = new ArrayList<>();
 				String sql = getSqlSelect(getEntityMetaData(), batchQuery, parameters);

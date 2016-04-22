@@ -14,6 +14,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
@@ -79,7 +80,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public Repository getRepository(String name)
+	public Repository<Entity> getRepository(String name)
 	{
 		Sheet poiSheet = workbook.getSheet(name);
 		if (poiSheet == null)
@@ -138,15 +139,15 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public Repository addEntityMeta(EntityMetaData entityMeta)
+	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
 	{
 		return getRepository(entityMeta.getName());
 	}
 
 	@Override
-	public Iterator<Repository> iterator()
+	public Iterator<Repository<Entity>> iterator()
 	{
-		return new Iterator<Repository>()
+		return new Iterator<Repository<Entity>>()
 		{
 			Iterator<String> it = getEntityNames().iterator();
 
@@ -157,7 +158,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 			}
 
 			@Override
-			public Repository next()
+			public Repository<Entity> next()
 			{
 				return getRepository(it.next());
 			}

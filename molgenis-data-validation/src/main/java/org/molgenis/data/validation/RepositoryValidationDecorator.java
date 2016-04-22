@@ -37,6 +37,7 @@ import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.QueryImpl;
@@ -46,7 +47,7 @@ import org.molgenis.util.EntityUtils;
 import org.molgenis.util.HugeMap;
 import org.molgenis.util.HugeSet;
 
-public class RepositoryValidationDecorator implements Repository
+public class RepositoryValidationDecorator implements Repository<Entity>
 {
 	private enum ValidationMode
 	{
@@ -54,11 +55,11 @@ public class RepositoryValidationDecorator implements Repository
 	}
 
 	private final DataService dataService;
-	private final Repository decoratedRepository;
+	private final Repository<Entity> decoratedRepository;
 	private final EntityAttributesValidator entityAttributesValidator;
 	private final ExpressionValidator expressionValidator;
 
-	public RepositoryValidationDecorator(DataService dataService, Repository repository,
+	public RepositoryValidationDecorator(DataService dataService, Repository<Entity> repository,
 			EntityAttributesValidator entityAttributesValidator, ExpressionValidator expressionValidator)
 	{
 		this.dataService = requireNonNull(dataService);
@@ -78,7 +79,7 @@ public class RepositoryValidationDecorator implements Repository
 	}
 
 	@Override
-	public void update(Stream<? extends Entity> entities)
+	public void update(Stream<Entity> entities)
 	{
 		try (ValidationResource validationResource = new ValidationResource())
 		{
@@ -104,7 +105,7 @@ public class RepositoryValidationDecorator implements Repository
 	}
 
 	@Override
-	public Integer add(Stream<? extends Entity> entities)
+	public Integer add(Stream<Entity> entities)
 	{
 		try (ValidationResource validationResource = new ValidationResource())
 		{
@@ -162,25 +163,25 @@ public class RepositoryValidationDecorator implements Repository
 	}
 
 	@Override
-	public Query query()
+	public Query<Entity> query()
 	{
 		return decoratedRepository.query();
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		return decoratedRepository.count(q);
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		return decoratedRepository.findAll(q);
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		return decoratedRepository.findOne(q);
 	}
@@ -210,7 +211,7 @@ public class RepositoryValidationDecorator implements Repository
 	}
 
 	@Override
-	public void delete(Stream<? extends Entity> entities)
+	public void delete(Stream<Entity> entities)
 	{
 		decoratedRepository.delete(entities);
 	}
@@ -246,6 +247,12 @@ public class RepositoryValidationDecorator implements Repository
 	}
 
 	@Override
+	public Set<Operator> getQueryOperators()
+	{
+		return decoratedRepository.getQueryOperators();
+	}
+
+	@Override
 	public void create()
 	{
 		decoratedRepository.create();
@@ -276,7 +283,7 @@ public class RepositoryValidationDecorator implements Repository
 		decoratedRepository.removeEntityListener(entityListener);
 	}
 
-	private Stream<? extends Entity> validate(Stream<? extends Entity> entities, ValidationResource validationResource,
+	private Stream<Entity> validate(Stream<Entity> entities, ValidationResource validationResource,
 			ValidationMode validationMode)
 	{
 		// prepare validation
@@ -383,7 +390,7 @@ public class RepositoryValidationDecorator implements Repository
 					refEntityIds = new HugeSet<>();
 					refEntitiesIds.put(refEntityName, refEntityIds);
 
-					Query q = new QueryImpl().fetch(new Fetch().field(refEntityMeta.getIdAttribute().getName()));
+					Query<Entity> q = new QueryImpl<>().fetch(new Fetch().field(refEntityMeta.getIdAttribute().getName()));
 					for (Iterator<Entity> it = dataService.findAll(refEntityName, q).iterator(); it.hasNext();)
 					{
 						refEntityIds.add(it.next().getIdValue());
@@ -419,7 +426,7 @@ public class RepositoryValidationDecorator implements Repository
 					fetch.field(uniqueAttr.getName());
 				});
 
-				Query q = new QueryImpl().fetch(fetch);
+				Query<Entity> q = new QueryImpl<>().fetch(fetch);
 				decoratedRepository.findAll(q).forEach(entity -> {
 					uniqueAttrs.forEach(uniqueAttr -> {
 						HugeMap<Object, Object> uniqueAttrValues = uniqueAttrsValues.get(uniqueAttr.getName());

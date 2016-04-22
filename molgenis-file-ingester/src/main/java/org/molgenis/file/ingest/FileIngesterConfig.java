@@ -3,6 +3,7 @@ package org.molgenis.file.ingest;
 import javax.annotation.PostConstruct;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
@@ -29,7 +30,7 @@ public class FileIngesterConfig
 		repositoryDecoratorRegistry.addFactory(FileIngestMetaData.ENTITY_NAME, new RepositoryDecoratorFactory()
 		{
 			@Override
-			public Repository createDecoratedRepository(Repository repository)
+			public Repository<Entity> createDecoratedRepository(Repository<Entity> repository)
 			{
 				return new FileIngestRepositoryDecorator(repository, fileIngesterJobScheduler, dataService);
 			}

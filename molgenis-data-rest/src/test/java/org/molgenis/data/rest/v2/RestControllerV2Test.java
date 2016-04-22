@@ -347,7 +347,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		entity.set(attrTextOptional, null);
 		entity.set(attrXrefOptional, null);
 
-		Query q = new QueryImpl().offset(0).pageSize(100);
+		Query<Entity> q = new QueryImpl<Entity>().offset(0).pageSize(100);
 		when(dataService.findOneById(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
 		when(dataService.findOneById(eq(ENTITY_NAME), eq(ENTITY_ID), any(Fetch.class))).thenReturn(entity);
 		when(dataService.findOneById(eq(SELF_REF_ENTITY_NAME), eq("0"), any(Fetch.class))).thenReturn(selfRefEntity);
@@ -475,13 +475,13 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 				.andExpect(status().isCreated()).andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string(responseBody));
 
-		verify(dataService).add(eq(ENTITY_NAME), any(Stream.class));
+		verify(dataService).add(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
 	}
 
 	@Test
 	public void testCopyEntity() throws Exception
 	{
-		Repository repositoryToCopy = mock(Repository.class);
+		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
 		String content = "{newEntityName: 'newEntity'}";
@@ -498,7 +498,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void testCopyEntityUnknownEntity() throws Exception
 	{
-		Repository repositoryToCopy = mock(Repository.class);
+		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
 		String content = "{newEntityName: 'newEntity'}";
@@ -513,7 +513,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void testCopyEntityDuplicateEntity() throws Exception
 	{
-		Repository repositoryToCopy = mock(Repository.class);
+		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
 		String content = "{newEntityName: 'entity'}";
@@ -528,7 +528,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void testCopyEntityNoReadPermissions() throws Exception
 	{
-		Repository repositoryToCopy = mock(Repository.class);
+		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
 		// Override mock
@@ -546,7 +546,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void testCopyEntityNoWriteCapabilities() throws Exception
 	{
-		Repository repositoryToCopy = mock(Repository.class);
+		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
 		// Override mock
@@ -563,7 +563,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		verify(dataService, never()).copyRepository(repositoryToCopy, "newEntity", "newEntity");
 	}
 
-	private void mocksForCopyEntitySucces(Repository repositoryToCopy)
+	private void mocksForCopyEntitySucces(Repository<Entity> repositoryToCopy)
 	{
 		when(dataService.hasRepository("entity")).thenReturn(true);
 		when(dataService.hasRepository("newEntity")).thenReturn(false);
@@ -581,7 +581,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		Set<RepositoryCapability> capabilities = Sets.newHashSet(RepositoryCapability.WRITABLE);
 		when(dataService.getCapabilities("entity")).thenReturn(capabilities);
 
-		Repository repository = mock(Repository.class);
+		Repository<Entity> repository = mock(Repository.class);
 		when(repository.getName()).thenReturn("newEntity");
 		when(dataService.getRepository("newEntity")).thenReturn(repository);
 		when(dataService.copyRepository(repositoryToCopy, "newEntity", "newEntity")).thenReturn(repository);
@@ -636,7 +636,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testCreateEntitiesSystemException() throws Exception
 	{
 		Exception e = new MolgenisDataException("Check if this exception is not swallowed by the system");
-		doThrow(e).when(dataService).add(eq(ENTITY_NAME), any(Stream.class));
+		doThrow(e).when(dataService).add(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
 
 		String content = "{entities:[{id:'p1', name:'Example data'}]}";
 		ResultActions resultActions = mockMvc
@@ -655,7 +655,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		mockMvc.perform(put(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON)).andExpect(
 				status().isOk());
 
-		verify(dataService, times(1)).update(eq(ENTITY_NAME), any(Stream.class));
+		verify(dataService, times(1)).update(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -663,7 +663,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testUpdateEntitiesMolgenisDataException() throws Exception
 	{
 		Exception e = new MolgenisDataException("Check if this exception is not swallowed by the system");
-		doThrow(e).when(dataService).update(Matchers.eq(ENTITY_NAME), any(Stream.class));
+		doThrow(e).when(dataService).update(Matchers.eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
 
 		String content = "{entities:[{id:'p1', name:'Example data'}]}";
 		ResultActions resultActions = mockMvc
@@ -680,7 +680,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	{
 		Exception e = new MolgenisValidationException(Collections.singleton(new ConstraintViolation("Message", Long
 				.valueOf(5L))));
-		doThrow(e).when(dataService).update(eq(ENTITY_NAME), any(Stream.class));
+		doThrow(e).when(dataService).update(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
 
 		String content = "{entities:[{id:'p1', name:'Example data'}]}";
 		ResultActions resultActions = mockMvc
@@ -736,7 +736,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		mockMvc.perform(put(HREF_ENTITY_COLLECTION + "/date_time").content(content).contentType(APPLICATION_JSON))
 				.andExpect(status().isOk());
 
-		verify(dataService, times(1)).update(eq(ENTITY_NAME), any(Stream.class));
+		verify(dataService, times(1)).update(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
 
 		Entity entity = dataService.findOneById(ENTITY_NAME, ENTITY_ID);
 		assertEquals((new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME)).format(entity.get("date_time")),

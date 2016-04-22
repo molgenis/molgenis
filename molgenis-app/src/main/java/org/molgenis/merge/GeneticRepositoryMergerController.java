@@ -9,6 +9,7 @@ import java.util.List;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.merge.RepositoryMerger;
@@ -110,7 +111,7 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 		else
 		{
 			// create list of entities to merge
-			List<Repository> geneticRepositories = new ArrayList<Repository>();
+			List<Repository<Entity>> geneticRepositories = new ArrayList<Repository<Entity>>();
 			for (String name : inputSets)
 			{
 				if (!name.equals(resultSet))
@@ -132,7 +133,7 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 
 			EntityMetaData mergedEntityMetaData = repositoryMerger.mergeMetaData(geneticRepositories, commonAttributes,
 					null, resultSet);
-			Repository mergedRepository = dataService.getMeta().addEntityMeta(mergedEntityMetaData);
+			Repository<Entity> mergedRepository = dataService.getMeta().addEntityMeta(mergedEntityMetaData);
 			repositoryMerger.merge(geneticRepositories, commonAttributes, mergedRepository);
 		}
 		return resultSet;

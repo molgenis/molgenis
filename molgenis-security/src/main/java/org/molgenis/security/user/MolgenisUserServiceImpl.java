@@ -34,7 +34,7 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	public List<String> getSuEmailAddresses()
 	{
 		Stream<MolgenisUser> superUsers = dataService.findAll(MolgenisUser.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisUser.SUPERUSER, true), MolgenisUser.class);
+				new QueryImpl<MolgenisUser>().eq(MolgenisUser.SUPERUSER, true), MolgenisUser.class);
 		return superUsers.map(MolgenisUser::getEmail).collect(toList());
 	}
 
@@ -42,7 +42,7 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	@RunAsSystem
 	public MolgenisUser getUser(String username)
 	{
-		return dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, username),
+		return dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl<MolgenisUser>().eq(MolgenisUser.USERNAME, username),
 				MolgenisUser.class);
 	}
 
@@ -51,7 +51,7 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	public Iterable<MolgenisGroup> getUserGroups(String username)
 	{
 		Stream<MolgenisGroupMember> molgenisGroupMembers = dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, getUser(username)), MolgenisGroupMember.class);
+				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMember.MOLGENISUSER, getUser(username)), MolgenisGroupMember.class);
 		// N.B. Must collect the results in a list before yielding up the RunAsSystem privileges!
 		return molgenisGroupMembers.map(MolgenisGroupMember::getMolgenisGroup).collect(toList());
 	}
@@ -67,7 +67,7 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	@RunAsSystem
 	public MolgenisUser getUserByEmail(String email)
 	{
-		return dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.EMAIL, email),
+		return dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl<MolgenisUser>().eq(MolgenisUser.EMAIL, email),
 				MolgenisUser.class);
 	}
 }

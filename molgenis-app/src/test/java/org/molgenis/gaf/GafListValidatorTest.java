@@ -79,7 +79,7 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void valid() throws IOException
 	{
-		Repository repository = this.getDefaultValidSettingRepositoryMock();
+		Repository<Entity> repository = this.getDefaultValidSettingRepositoryMock();
 		MapEntity entity0 = getDefaultValidMapEntityMock();
 		when(repository.iterator()).thenReturn(Arrays.<Entity> asList(entity0).iterator());
 		gafListValidator.validate(report, repository, columns);
@@ -110,9 +110,9 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 		invalidTest(GAFCol.PROJECT.toString(), "1aA_+");
 	}
 
-	private Repository getDefaultValidSettingRepositoryMock()
+	private Repository<Entity> getDefaultValidSettingRepositoryMock()
 	{
-		Repository repository = mock(Repository.class);
+		Repository<Entity> repository = mock(Repository.class);
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 
 		// INTERNAL_SAMPLE_ID
@@ -175,7 +175,7 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 
 	private void invalidTest(String nameColumn, String value) throws IOException
 	{
-		Repository repository = this.getDefaultValidSettingRepositoryMock();
+		Repository<Entity> repository = this.getDefaultValidSettingRepositoryMock();
 		MapEntity entity0 = getDefaultValidMapEntityMock();
 
 		entity0.set(nameColumn, value);

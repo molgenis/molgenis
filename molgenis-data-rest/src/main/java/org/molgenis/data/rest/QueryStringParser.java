@@ -3,6 +3,7 @@ package org.molgenis.data.rest;
 import java.util.Map;
 
 import org.molgenis.data.DataConverter;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
@@ -38,9 +39,9 @@ public class QueryStringParser
 		this.molgenisRSQL = molgenisRSQL;
 	}
 
-	public Query parseQueryString(Map<String, String[]> parameterMap) throws RSQLParserException
+	public Query<Entity> parseQueryString(Map<String, String[]> parameterMap) throws RSQLParserException
 	{
-		QueryImpl q = new QueryImpl();
+		QueryImpl<Entity> q = new QueryImpl<Entity>();
 
 		for (Map.Entry<String, String[]> entry : parameterMap.entrySet())
 		{
@@ -59,7 +60,7 @@ public class QueryStringParser
 				}
 				else if (paramName.equalsIgnoreCase("q"))
 				{
-					Query query = molgenisRSQL.createQuery(paramValues[0], entityMetaData);
+					Query<Entity> query = molgenisRSQL.createQuery(paramValues[0], entityMetaData);
 					for (QueryRule rule : query.getRules())
 					{
 						q.addRule(rule);

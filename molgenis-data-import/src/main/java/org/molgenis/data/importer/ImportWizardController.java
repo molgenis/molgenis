@@ -244,7 +244,7 @@ public class ImportWizardController extends AbstractWizardController
 	private List<Authority> getGroupPermissions(MolgenisGroup molgenisGroup)
 	{
 		return dataService.findAll(GroupAuthority.ENTITY_NAME,
-				new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, molgenisGroup), GroupAuthority.class)
+				new QueryImpl<GroupAuthority>().eq(GroupAuthority.MOLGENISGROUP, molgenisGroup), GroupAuthority.class)
 				.collect(Collectors.toList());
 	}
 
@@ -308,7 +308,7 @@ public class ImportWizardController extends AbstractWizardController
 	{
 		GroupAuthority authority = new GroupAuthority();
 		Stream<GroupAuthority> stream = dataService.findAll(GroupAuthority.ENTITY_NAME,
-				new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, groupId), GroupAuthority.class);
+				new QueryImpl<GroupAuthority>().eq(GroupAuthority.MOLGENISGROUP, groupId), GroupAuthority.class);
 		for (Iterator<GroupAuthority> it = stream.iterator(); it.hasNext();)
 		{
 			GroupAuthority groupAuthority = it.next();

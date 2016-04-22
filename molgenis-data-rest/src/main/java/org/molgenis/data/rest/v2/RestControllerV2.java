@@ -232,7 +232,7 @@ class RestControllerV2
 	 * 
 	 * @param entityName
 	 * @param request
-	 * @param attributes
+	 * @param httpRequest
 	 * @return
 	 */
 	@RequestMapping(value = "/{entityName}", method = GET)
@@ -348,7 +348,7 @@ class RestControllerV2
 		// No repo
 		if (!dataService.hasRepository(entityName)) throw createUnknownEntityException(entityName);
 
-		Repository repositoryToCopyFrom = dataService.getRepository(entityName);
+		Repository<Entity> repositoryToCopyFrom = dataService.getRepository(entityName);
 
 		// Check if the entity already exists
 		String newFullName = EntityMetaDataUtils.buildFullName(repositoryToCopyFrom.getEntityMetaData().getPackage(),
@@ -372,7 +372,7 @@ class RestControllerV2
 		this.copyRepositoryRunAsSystem(repositoryToCopyFrom, request.getNewEntityName(), request.getNewEntityName());
 
 		// Retrieve new repo
-		Repository repository = dataService.getRepository(newFullName);
+		Repository<Entity> repository = dataService.getRepository(newFullName);
 		permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 				Collections.singletonList(repository.getName()));
 
@@ -382,7 +382,7 @@ class RestControllerV2
 		return repository.getName();
 	}
 
-	private void copyRepositoryRunAsSystem(Repository repositoryToCopyFrom, String newRepositoryId,
+	private void copyRepositoryRunAsSystem(Repository<Entity> repositoryToCopyFrom, String newRepositoryId,
 			String newRepositoryLabel)
 	{
 		RunAsSystemProxy.runAsSystem(() -> dataService.copyRepository(repositoryToCopyFrom, newRepositoryId,
@@ -602,7 +602,7 @@ class RestControllerV2
 	{
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 
-		Query q = request.getQ() != null ? request.getQ().createQuery(meta) : new QueryImpl();
+		Query<Entity> q = request.getQ() != null ? request.getQ().createQuery(meta) : new QueryImpl<>();
 		q.pageSize(request.getNum()).offset(request.getStart()).sort(request.getSort());
 		Fetch fetch = AttributeFilterToFetchConverter.convert(request.getAttrs(), meta,
 				languageService.getCurrentUserLanguageCode());

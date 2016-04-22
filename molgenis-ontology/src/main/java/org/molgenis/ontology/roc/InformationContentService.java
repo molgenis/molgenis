@@ -1,5 +1,7 @@
 package org.molgenis.ontology.roc;
 
+import static java.util.Objects.requireNonNull;
+
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,8 +30,6 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 
-import static java.util.Objects.requireNonNull;
-
 public class InformationContentService
 {
 	private static final String NON_WORD_SEPARATOR = "[^a-zA-Z0-9]";
@@ -42,11 +42,11 @@ public class InformationContentService
 				public Long load(String ontologyIri)
 				{
 					Entity ontologyEntity = dataService.findOne(OntologyMetaData.ENTITY_NAME,
-							new QueryImpl().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
+							new QueryImpl<Entity>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
 					if (ontologyEntity != null)
 					{
 						return dataService.count(OntologyTermMetaData.ENTITY_NAME,
-								new QueryImpl().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity));
+								new QueryImpl<Entity>().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity));
 					}
 					return (long) 0;
 				}
@@ -59,7 +59,7 @@ public class InformationContentService
 				{
 					String ontologyIri = key.getOntologyIri();
 					Entity ontologyEntity = dataService.findOne(OntologyMetaData.ENTITY_NAME,
-							new QueryImpl().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
+							new QueryImpl<Entity>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
 					if (ontologyEntity != null)
 					{
 						QueryRule queryRule = new QueryRule(Arrays.asList(new QueryRule(
@@ -68,7 +68,7 @@ public class InformationContentService
 						QueryRule finalQuery = new QueryRule(Arrays.asList(
 								new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
 								new QueryRule(Operator.AND), queryRule));
-						long wordCount = dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl(finalQuery));
+						long wordCount = dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl<>(finalQuery));
 						Long total = CACHED_TOTAL_WORD_COUNT.get(ontologyIri);
 						BigDecimal idfValue = new BigDecimal(
 								total == null ? 0 : (1 + Math.log((double) total / (wordCount + 1))));

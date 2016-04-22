@@ -30,7 +30,6 @@ public abstract class AbstractDataIntegrationIT extends AbstractTestNGSpringCont
 	ConfigurableApplicationContext applicationContext;
 
 	@Autowired
-
 	EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
 
 	// FIXME

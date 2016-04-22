@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
@@ -34,7 +35,7 @@ public class ElasticsearchRepositoryCollection implements ManageableRepositoryCo
 	}
 
 	@Override
-	public Repository addEntityMeta(EntityMetaData entityMeta)
+	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
 	{
 		ElasticsearchRepository repo = new ElasticsearchRepository(entityMeta, searchService);
 		if (!searchService.hasMapping(entityMeta)) repo.create();
@@ -56,19 +57,19 @@ public class ElasticsearchRepositoryCollection implements ManageableRepositoryCo
 	}
 
 	@Override
-	public Repository getRepository(String name)
+	public Repository<Entity> getRepository(String name)
 	{
 		return repositories.get(name);
 	}
 
 	@Override
-	public Iterator<Repository> iterator()
+	public Iterator<Repository<Entity>> iterator()
 	{
 		return Iterators.transform(repositories.values().iterator(),
-				new Function<AbstractElasticsearchRepository, Repository>()
+				new Function<AbstractElasticsearchRepository, Repository<Entity>>()
 				{
 					@Override
-					public Repository apply(AbstractElasticsearchRepository input)
+					public Repository<Entity> apply(AbstractElasticsearchRepository input)
 					{
 						return input;
 					}

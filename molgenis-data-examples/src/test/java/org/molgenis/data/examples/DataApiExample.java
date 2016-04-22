@@ -1,7 +1,6 @@
 package org.molgenis.data.examples;
 
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.support.QueryImpl.EQ;
 
 import java.io.File;
 
@@ -43,7 +42,7 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 		dataService.update(UserMetaData.ENTITY_NAME, klaas);
 
 		// Find all active
-		dataService.findAll(UserMetaData.ENTITY_NAME, EQ(UserMetaData.ACTIVE, true), User.class)
+		dataService.query(UserMetaData.ENTITY_NAME, User.class).eq(UserMetaData.ACTIVE, true).findAll()
 				.forEach(System.out::println);
 		// OR ??
 		dataService.getRepository(UserMetaData.ENTITY_NAME).query().eq(UserMetaData.ACTIVE, true)
@@ -75,7 +74,7 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 		emd.addAttribute("name", ROLE_ID);
 		emd.addAttribute("population").setDataType(MolgenisFieldTypes.INT);
 
-		Repository repo = dataService.getMeta().addEntityMeta(emd);
+		Repository<Entity> repo = dataService.getMeta().addEntityMeta(emd);
 
 		// Add entities to it
 		Entity amsterdam = new MapEntity();
@@ -118,7 +117,7 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 		emd.addAttribute("name", ROLE_ID);
 		emd.addAttribute("population").setDataType(MolgenisFieldTypes.INT);
 
-		Repository repo = dataService.getMeta().addEntityMeta(emd);
+		Repository<Entity> repo = dataService.getMeta().addEntityMeta(emd);
 		System.out.println(repo);
 
 		// Add entities to it

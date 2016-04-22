@@ -8,6 +8,7 @@ import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
 import java.io.IOException;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -20,6 +21,7 @@ import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
@@ -28,7 +30,7 @@ import org.molgenis.data.support.QueryImpl;
 
 import com.google.common.collect.Sets;
 
-public abstract class AbstractElasticsearchRepository implements Repository
+public abstract class AbstractElasticsearchRepository implements Repository<Entity>
 {
 	protected final SearchService elasticSearchService;
 
@@ -44,6 +46,12 @@ public abstract class AbstractElasticsearchRepository implements Repository
 	}
 
 	@Override
+	public Set<Operator> getQueryOperators()
+	{
+		return EnumSet.allOf(Operator.class);
+	}
+
+	@Override
 	public abstract EntityMetaData getEntityMetaData();
 
 	@Override
@@ -53,25 +61,25 @@ public abstract class AbstractElasticsearchRepository implements Repository
 	}
 
 	@Override
-	public Query query()
+	public Query<Entity> query()
 	{
-		return new QueryImpl(this);
+		return new QueryImpl<Entity>(this);
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		return elasticSearchService.count(q, getEntityMetaData());
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		return elasticSearchService.searchAsStream(q, getEntityMetaData());
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		Iterable<Entity> entities = elasticSearchService.search(q, getEntityMetaData());
 		Iterator<Entity> it = entities.iterator();
@@ -105,14 +113,14 @@ public abstract class AbstractElasticsearchRepository implements Repository
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		Query q = new QueryImpl();
+		Query<Entity> q = new QueryImpl<>();
 		return elasticSearchService.searchAsStream(q, getEntityMetaData()).iterator();
 	}
 
 	@Override
 	public Stream<Entity> stream(Fetch fetch)
 	{
-		Query q = new QueryImpl().fetch(fetch);
+		Query<Entity> q = new QueryImpl<Entity>().fetch(fetch);
 		return elasticSearchService.searchAsStream(q, getEntityMetaData());
 	}
 
@@ -142,7 +150,7 @@ public abstract class AbstractElasticsearchRepository implements Repository
 	}
 
 	@Override
-	public Integer add(Stream<? extends Entity> entities)
+	public Integer add(Stream<Entity> entities)
 	{
 		long nrIndexedEntities = elasticSearchService.index(entities, getEntityMetaData(), IndexingMode.ADD);
 		elasticSearchService.refresh();
@@ -169,7 +177,7 @@ public abstract class AbstractElasticsearchRepository implements Repository
 	}
 
 	@Override
-	public void update(Stream<? extends Entity> entities)
+	public void update(Stream<Entity> entities)
 	{
 		elasticSearchService.index(entities, getEntityMetaData(), IndexingMode.UPDATE);
 		elasticSearchService.refresh();
@@ -183,7 +191,7 @@ public abstract class AbstractElasticsearchRepository implements Repository
 	}
 
 	@Override
-	public void delete(Stream<? extends Entity> entities)
+	public void delete(Stream<Entity> entities)
 	{
 		elasticSearchService.delete(entities, getEntityMetaData());
 		elasticSearchService.refresh();

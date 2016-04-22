@@ -6,6 +6,7 @@ import java.util.List;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchType;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 
@@ -41,7 +42,7 @@ public class SearchRequestGenerator
 	 * @param entityMetaData
 	 */
 	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, List<String> entityNames,
-			SearchType searchType, Query query, AttributeMetaData aggAttr1, AttributeMetaData aggAttr2,
+			SearchType searchType, Query<Entity> query, AttributeMetaData aggAttr1, AttributeMetaData aggAttr2,
 			AttributeMetaData aggAttrDistinct, EntityMetaData entityMetaData)
 	{
 		searchRequestBuilder.setSearchType(searchType);
@@ -70,7 +71,7 @@ public class SearchRequestGenerator
 	}
 
 	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, String entityName, SearchType searchType,
-			Query query, AttributeMetaData aggregateField1, AttributeMetaData aggregateField2,
+			Query<Entity> query, AttributeMetaData aggregateField1, AttributeMetaData aggregateField2,
 			AttributeMetaData aggregateFieldDistinct, EntityMetaData entityMetaData)
 	{
 		buildSearchRequest(searchRequestBuilder, entityName == null ? null : Arrays.asList(entityName), searchType,

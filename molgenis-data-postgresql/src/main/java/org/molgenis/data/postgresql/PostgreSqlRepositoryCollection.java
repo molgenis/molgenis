@@ -13,6 +13,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
@@ -43,7 +44,7 @@ public abstract class PostgreSqlRepositoryCollection implements ManageableReposi
 	}
 
 	@Override
-	public Repository addEntityMeta(EntityMetaData entityMeta)
+	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
 	{
 		PostgreSqlRepository repository = createPostgreSqlRepository();
 		repository.setMetaData(entityMeta);
@@ -63,18 +64,18 @@ public abstract class PostgreSqlRepositoryCollection implements ManageableReposi
 	}
 
 	@Override
-	public Repository getRepository(String name)
+	public Repository<Entity> getRepository(String name)
 	{
 		return repositories.get(name);
 	}
 
 	@Override
-	public Iterator<Repository> iterator()
+	public Iterator<Repository<Entity>> iterator()
 	{
-		return Iterators.transform(repositories.values().iterator(), new Function<PostgreSqlRepository, Repository>()
+		return Iterators.transform(repositories.values().iterator(), new Function<PostgreSqlRepository, Repository<Entity>>()
 		{
 			@Override
-			public Repository apply(PostgreSqlRepository repo)
+			public Repository<Entity> apply(PostgreSqlRepository repo)
 			{
 				return repo;
 			}

@@ -247,7 +247,7 @@ public class IBDParser
 		}
 	}
 
-	private void writeCategoryOutput(Iterable<String> listOfAttributeNames, Repository categoryCsvOutput,
+	private void writeCategoryOutput(Iterable<String> listOfAttributeNames, Repository<Entity> categoryCsvOutput,
 			List<String> listOfFeatures) throws IOException
 	{
 		CsvWriter csvWriter = new CsvWriter(new File("/Users/Roan/Work/IBDParelsnoer/convert/output/category.csv"));
@@ -278,7 +278,7 @@ public class IBDParser
 		}
 	}
 
-	private void writeFeatureOutput(Iterable<String> listOfAttributeNames, Repository featureCsvInput,
+	private void writeFeatureOutput(Iterable<String> listOfAttributeNames, Repository<Entity> featureCsvInput,
 			List<String> listOfFeatures) throws IOException
 	{
 		List<String> headers = Arrays.asList("identifier", "name", "dataType", "description");

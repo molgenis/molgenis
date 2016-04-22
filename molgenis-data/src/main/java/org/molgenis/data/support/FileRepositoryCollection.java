@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.processor.CellProcessor;
@@ -46,5 +47,5 @@ public abstract class FileRepositoryCollection implements RepositoryCollection
 	public abstract Iterable<String> getEntityNames();
 
 	@Override
-	public abstract Repository getRepository(String name);
+	public abstract Repository<Entity> getRepository(String name);
 }

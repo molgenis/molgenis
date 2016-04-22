@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
+import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
 
 public class DataRequest
@@ -26,7 +27,7 @@ public class DataRequest
 	@NotNull
 	private String entityName;
 	@NotNull
-	private QueryImpl query;
+	private QueryImpl<Entity> query;
 	@NotNull
 	private List<String> attributeNames;
 	@NotNull
@@ -46,12 +47,12 @@ public class DataRequest
 		this.entityName = entityName;
 	}
 
-	public QueryImpl getQuery()
+	public QueryImpl<Entity> getQuery()
 	{
 		return query;
 	}
 
-	public void setQuery(QueryImpl query)
+	public void setQuery(QueryImpl<Entity> query)
 	{
 		this.query = query;
 	}

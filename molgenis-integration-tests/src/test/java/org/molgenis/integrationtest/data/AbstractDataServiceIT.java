@@ -1,6 +1,26 @@
 package org.molgenis.integrationtest.data;
 
-import com.google.common.collect.Iterators;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.generate;
+import static java.util.stream.Stream.of;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
@@ -20,26 +40,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Stream.concat;
-import static java.util.stream.Stream.generate;
-import static java.util.stream.Stream.of;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import com.google.common.collect.Iterators;
 
 public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 {
@@ -172,8 +173,8 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(3);
 		dataService.add(ENTITY_NAME, entities.stream());
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl()), 3);
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl().eq(ATTR_ID, entities.get(0).getIdValue())), 1);
+		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 3);
+		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>().eq(ATTR_ID, entities.get(0).getIdValue())), 1);
 	}
 
 	public void testDelete()
@@ -200,20 +201,20 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl()), entities.size());
+		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), entities.size());
 
 		dataService.delete(ENTITY_NAME, entities.stream());
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl()), 0);
+		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 0);
 	}
 
 	public void testDeleteAll()
 	{
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl()), entities.size());
+		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), entities.size());
 
 		dataService.deleteAll(ENTITY_NAME);
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl()), 0);
+		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 0);
 	}
 
 	public void testFindAllEmpty()
@@ -273,7 +274,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
 		Supplier<Stream<Entity>> found = () -> dataService.findAll(ENTITY_NAME,
-				new QueryImpl().eq(ATTR_ID, entities.get(0).getIdValue()));
+				new QueryImpl<>().eq(ATTR_ID, entities.get(0).getIdValue()));
 		assertEquals(found.get().count(), 1);
 		assertEquals(found.get().findFirst().get().getIdValue(), entities.get(0).getIdValue());
 	}
@@ -283,7 +284,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		dataService.add(REF_ENTITY_NAME, createTestRefEntities().stream());
 		dataService.add(ENTITY_NAME, createTestEntities().stream());
 		Supplier<Stream<Entity>> found = () -> dataService.findAll(ENTITY_NAME,
-				new QueryImpl().pageSize(2).offset(2).sort(new Sort(ATTR_INT)));
+				new QueryImpl<>().pageSize(2).offset(2).sort(new Sort(ATTR_INT)));
 		assertEquals(found.get().count(), 2);
 		assertTrue(found.get().collect(Collectors.toList()).containsAll(Arrays.asList(entity1,entity10)));
 	}
@@ -293,7 +294,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
 		Supplier<Stream<TestEntity>> found = () -> dataService.findAll(ENTITY_NAME,
-				new QueryImpl().eq(ATTR_ID, entities.get(0).getIdValue()), TestEntity.class);
+				new QueryImpl<TestEntity>().eq(ATTR_ID, entities.get(0).getIdValue()), TestEntity.class);
 		assertEquals(found.get().count(), 1);
 		assertEquals(found.get().findFirst().get().getId(), entities.get(0).getIdValue());
 	}
@@ -335,7 +336,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(1);
 		dataService.add(ENTITY_NAME, entities.stream());
-		Entity entity = dataService.findOne(ENTITY_NAME, new QueryImpl().eq(ATTR_ID, entities.get(0).getIdValue()));
+		Entity entity = dataService.findOne(ENTITY_NAME, new QueryImpl<>().eq(ATTR_ID, entities.get(0).getIdValue()));
 		assertNotNull(entity);
 	}
 
@@ -343,7 +344,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(1);
 		dataService.add(ENTITY_NAME, entities.stream());
-		TestEntity entity = dataService.findOne(ENTITY_NAME, new QueryImpl().eq(ATTR_ID, entities.get(0).getIdValue()),
+		TestEntity entity = dataService.findOne(ENTITY_NAME, new QueryImpl<TestEntity>().eq(ATTR_ID, entities.get(0).getIdValue()),
 				TestEntity.class);
 		assertNotNull(entity);
 		assertEquals(entity.getId(), entities.get(0).getIdValue());
@@ -674,7 +675,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 
 	private void assertCount(int count)
 	{
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl()), count);
+		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), count);
 	}
 
 	public abstract List<RepositoryCapability> getExpectedCapabilities();

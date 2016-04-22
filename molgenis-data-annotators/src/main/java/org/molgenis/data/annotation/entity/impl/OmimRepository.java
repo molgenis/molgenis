@@ -83,7 +83,7 @@ public class OmimRepository extends AbstractRepository
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		if (q.getRules().isEmpty())
 		{
