@@ -16,7 +16,8 @@ $(function () {
                 if(job.resultUrl){
                     document.location = job.resultUrl;
                 }
-            }
+            },
+            validExtensions: ['.vcf', '.vcf.gz']
         }), form[0]);
     } else {
         $('#gavin-view').on('click', '.glyphicon-cog', function(e) {

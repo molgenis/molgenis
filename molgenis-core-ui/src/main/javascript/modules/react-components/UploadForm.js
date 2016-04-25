@@ -1,7 +1,6 @@
 import React from 'react';
 import { Button } from './Button';
 import { Input } from './Input';
-import { Form } from './Form';
 import { RadioGroup } from './RadioGroup';
 
 var UploadForm = React.createClass({
@@ -9,7 +8,8 @@ var UploadForm = React.createClass({
 	propTypes: {
 		width: React.PropTypes.oneOf(['1','2','3','4','5','6','7','8','9','10','11','12']),
 		showAction: React.PropTypes.bool,
-		onSubmit: React.PropTypes.func.isRequired
+		onSubmit: React.PropTypes.func.isRequired,
+		validExtensions: React.PropTypes.array
 	},
 	getInitialState: function() {
 		return {
@@ -32,6 +32,7 @@ var UploadForm = React.createClass({
 			<div className={gridWidth}>
 				<div className='form-group'>
 					<input type="file" onChange={this._setFile} />
+					{this.state.warning && <span id="helpBlock" class="help-block">{this.state.warning}</span>}
 				</div>
 					
 				{this.state.showNameField &&	
@@ -53,21 +54,25 @@ var UploadForm = React.createClass({
 		</form>
 	},
 	_setFile: function(event) {
-		var file = event.target.files[0];
-		var showNameField = file.name.indexOf('vcf') > 0;
-		if(showNameField) {
-			var fileName = file.name;
-			// Remove extension
-			fileName = fileName.replace(/\.vcf|\.vcf\.gz/, '');
-			// Maximum length is 30 chars, but we need to take into account that the samples are post fixed "_SAMPLES"
-			fileName = fileName.substring(0, 21);
-			// Remove illegal chars
-			fileName = fileName.replace(/\-|\.|\*|\$|\&|\%|\^|\(|\)|\#|\!|\@|\?/g,'_');
-			// Don't allow entitynames starting with a number
-			fileName = fileName.replace(/^[0-9]/g,'_');
-			this.setState({fileName});
+		const file = event.target.files[0];
+		var fileName = file.name.toLowerCase();
+		var showNameField = fileName.endsWith('.vcf') || fileName.endsWith('.vcf.gz');
+		if( this.props.validExtensions && !this.props.validExtensions.find((extension) => fileName.endsWith(extension))){
+			this.setState({warning: 'Invalid file name, extension must be '+this.props.validExtensions})
+		} else {
+			if (showNameField) {
+				// Remove extension
+				fileName = fileName.replace(/\.vcf|\.vcf\.gz/, '');
+				// Maximum length is 30 chars, but we need to take into account that the samples are post fixed "_SAMPLES"
+				fileName = fileName.substring(0, 21);
+				// Remove illegal chars
+				fileName = fileName.replace(/\-|\.|\*|\$|\&|\%|\^|\(|\)|\#|\!|\@|\?/g, '_');
+				// Don't allow entitynames starting with a number
+				fileName = fileName.replace(/^[0-9]/g, '_');
+				this.setState({fileName});
+			}
+			this.setState({file, showNameField, warning: undefined});
 		}
-		this.setState({file, showNameField});
 	},
 	_setFileName: function(fileName) {
 		this.setState({fileName: fileName.value});

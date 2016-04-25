@@ -10,7 +10,8 @@ var UploadContainer = React.createClass({
 		url: React.PropTypes.string.isRequired,
 		width: React.PropTypes.oneOf(['1','2','3','4','5','6','7','8','9','10','11','12']),
 		onSubmit: React.PropTypes.func,
-		onCompletion: React.PropTypes.func
+		onCompletion: React.PropTypes.func,
+		validExtensions: React.PropTypes.array
 	},
 	getInitialState: function() {
 		return {
@@ -49,6 +50,7 @@ var UploadContainer = React.createClass({
 			/> : <UploadForm
 				width={this.props.width}
 				onSubmit={this._onSubmit}
+				validExtensions = {this.props.validExtensions}
 			/>}
 		</div>
 	},
