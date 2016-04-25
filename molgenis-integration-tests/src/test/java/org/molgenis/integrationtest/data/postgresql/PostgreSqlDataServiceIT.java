@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.integrationtest.data.AbstractDataServiceIT;
+import org.molgenis.integrationtest.data.abstracts.AbstractDataServiceIT;
 import org.molgenis.integrationtest.data.postgresql.PostgreSqlDataServiceIT.DataServicePostgreSqlTestConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
