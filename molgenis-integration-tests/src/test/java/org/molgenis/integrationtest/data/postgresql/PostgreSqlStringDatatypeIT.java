@@ -5,11 +5,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
-@ContextConfiguration(classes = PostgeSqlStringDatatypeIT.StringMySqlTestConfig.class)
-public class PostgeSqlStringDatatypeIT extends AbstractStringDatatypeIT
+@ContextConfiguration(classes = PostgreSqlStringDatatypeIT.StringPostgreSqlTestConfig.class)
+public class PostgreSqlStringDatatypeIT extends AbstractStringDatatypeIT
 {
 	@Configuration
-	public static class StringMySqlTestConfig extends AbstractPostgreSqlTestConfig
+	public static class StringPostgreSqlTestConfig extends AbstractPostgreSqlTestConfig
 	{
 	}
 

@@ -81,7 +81,6 @@ public class PostgreSqlDataValidationIT extends AbstractDataValidationIT
 	@Test
 	public void testNotNillable()
 	{
-		//FIXME: reactivate once the transaction mechanism is fixed
-		//super.testNotNillable();
+		super.testNotNillable();
 	}
 }
