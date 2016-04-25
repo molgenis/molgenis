@@ -139,7 +139,8 @@ public abstract class AbstractDataValidationIT extends AbstractDataIntegrationIT
 		}
 		catch (MolgenisValidationException e)
 		{
-			assertEquals(e.getMessage(), "The attribute 'stringAttr' of entity 'NotNillableTest' can not be null.");
+			assertEquals(e.getMessage(),
+					"The attribute 'stringAttr' of entity 'NotNillableTest' can not be null. (entity 1)");
 		}
 	}
 
