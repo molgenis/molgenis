@@ -98,7 +98,7 @@ class AttributeMetaDataRepository
 			public Iterator<Entity> iterator()
 			{
 				return stream(batches.spliterator(), false).flatMap(batch -> {
-					List<Entity> attrEntities = convertToAttrEntities(attrs);
+					List<Entity> attrEntities = convertToAttrEntities(batch);
 					repository.add(attrEntities.stream());
 					return attrEntities.stream();
 				}).iterator();
