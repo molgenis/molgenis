@@ -8,13 +8,13 @@ $(function () {
             'type': 'file',
             'name': 'gavin-uploader',
             'width': '12',
-            onSubmit: function(job){
-                console.log('onSubmit', job);
-            },
             onCompletion: function(job){
                 console.log(job, job.resultUrl);
                 if(job.resultUrl){
+                    molgenis.createAlert([{message:'Annotated '+job.filename}], 'success')
                     document.location = job.resultUrl;
+                } else {
+                    molgenis.createAlert([{message:'Failed to annotate file.'}], 'error')
                 }
             },
             validExtensions: ['.vcf', '.vcf.gz']
