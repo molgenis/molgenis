@@ -18,6 +18,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 public class GavinJob extends Job<Void>
 {
+	private CmdLineAnnotator cmdLineAnnotator;
 	private String jobIdentifier;
 	private MenuReaderService menuReaderService;
 
@@ -32,11 +33,13 @@ public class GavinJob extends Job<Void>
 	private File snpeffOutputFile;
 	private File gavinOutputFile;
 
-	public GavinJob(Progress progress, TransactionTemplate transactionTemplate, Authentication authentication,
-			String jobIdentifier, FileStore fileStore, MenuReaderService menuReaderService, RepositoryAnnotator cadd,
-			RepositoryAnnotator exac, RepositoryAnnotator snpeff, RepositoryAnnotator gavin)
+	public GavinJob(CmdLineAnnotator cmdLineAnnotator, Progress progress, TransactionTemplate transactionTemplate,
+			Authentication authentication, String jobIdentifier, FileStore fileStore,
+			MenuReaderService menuReaderService, RepositoryAnnotator cadd, RepositoryAnnotator exac,
+			RepositoryAnnotator snpeff, RepositoryAnnotator gavin)
 	{
 		super(progress, transactionTemplate, authentication);
+		this.cmdLineAnnotator = cmdLineAnnotator;
 		this.jobIdentifier = jobIdentifier;
 		this.menuReaderService = menuReaderService;
 		this.cadd = cadd;
@@ -50,17 +53,16 @@ public class GavinJob extends Job<Void>
 				.getFile(format("{0}{1}{2}{3}temp-cadd.vcf", GAVIN_APP, separator, jobIdentifier, separator));
 		this.exacOutputFile = fileStore
 				.getFile(format("{0}{1}{2}{3}temp-exac.vcf", GAVIN_APP, separator, jobIdentifier, separator));
-		this.snpeffOutputFile = fileStore.getFile(
-				format("{0}{1}{2}{3}temp-snpeff.vcf", GAVIN_APP, separator, jobIdentifier, separator));
-		this.gavinOutputFile = fileStore.getFile(
-				format("{0}{1}{2}{3}gavin-result.vcf", GAVIN_APP, separator, jobIdentifier, separator));
+		this.snpeffOutputFile = fileStore
+				.getFile(format("{0}{1}{2}{3}temp-snpeff.vcf", GAVIN_APP, separator, jobIdentifier, separator));
+		this.gavinOutputFile = fileStore
+				.getFile(format("{0}{1}{2}{3}gavin-result.vcf", GAVIN_APP, separator, jobIdentifier, separator));
 	}
 
 	@Override
 	public Void call(Progress progress) throws Exception
 	{
 		progress.setProgressMax(4);
-		CmdLineAnnotator cmdLineAnnotator = new CmdLineAnnotator();
 
 		progress.progress(0, "Annotating with cadd...");
 		cmdLineAnnotator.annotate(cadd, inputFile, caddOutputFile, emptyList(), false);
@@ -71,7 +73,6 @@ public class GavinJob extends Job<Void>
 		progress.progress(2, "Annotating with snpEff...");
 		cmdLineAnnotator.annotate(snpeff, exacOutputFile, snpeffOutputFile, emptyList(), false);
 
-		// TODO maybe use vcf validator on the result vcf
 		progress.progress(3, "Annotating with gavin...");
 		cmdLineAnnotator.annotate(gavin, snpeffOutputFile, gavinOutputFile, emptyList(), false);
 

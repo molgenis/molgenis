@@ -1,13 +1,12 @@
 package org.molgenis.gavin.job;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.CrudRepositoryAnnotator;
 import org.molgenis.data.annotation.EffectsAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.cmd.CmdLineAnnotator;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
-import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.file.FileStore;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -20,8 +19,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.of;
@@ -76,7 +73,7 @@ public class GavinJobFactory
 		RunAsUserToken runAsAuthentication = new RunAsUserToken("Job Execution", username, null,
 				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
 
-		return new GavinJob(new ProgressImpl(metaData, jobExecutionUpdater, mailSender),
+		return new GavinJob(new CmdLineAnnotator(), new ProgressImpl(metaData, jobExecutionUpdater, mailSender),
 				new TransactionTemplate(transactionManager), runAsAuthentication, metaData.getIdentifier(), fileStore,
 				menuReaderService, cadd, exac, snpEff, gavin);
 	}
