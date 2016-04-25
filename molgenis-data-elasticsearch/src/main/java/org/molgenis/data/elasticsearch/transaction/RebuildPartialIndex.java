@@ -18,6 +18,9 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.log.index.IndexTransactionLogEntryMetaData;
 import org.molgenis.data.transaction.log.index.IndexTransactionLogEntryMetaData.CudType;
 import org.molgenis.data.transaction.log.index.IndexTransactionLogEntryMetaData.DataType;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogMetaData;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogMetaData.IndexStatus;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogMetaData.TransactionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,73 +45,115 @@ public class RebuildPartialIndex implements Runnable
 	public void run()
 	{
 		runAsSystem(() -> {
-			rebuildIndex();
+			LOG.info("--- Start rebuilding index: [" + new Date() + "]");
+			Entity transLog = dataService.findOneById(IndexTransactionLogMetaData.ENTITY_NAME, this.transactionId);
+			TransactionStatus transactionStatus = TransactionStatus.valueOf(transLog
+					.getString(IndexTransactionLogMetaData.TRANSACTION_STATUS));
+			IndexStatus indexStatus = IndexStatus.valueOf(transLog.getString(IndexTransactionLogMetaData.INDEX_STATUS));
+
+			if (transactionStatus.equals(TransactionStatus.COMMITED) && indexStatus.equals(IndexStatus.NONE))
+			{
+				rebuildIndex();
+				transLog.set(IndexTransactionLogMetaData.INDEX_STATUS, IndexStatus.FINISHED);
+			}
+			else
+			{
+				transLog.set(IndexTransactionLogMetaData.INDEX_STATUS, IndexStatus.CANCELED);
+				LOG.error(
+						"[Reindex transaction [{}] is canceled] When rebuilding index transaction status must be COMMITED and index status must be NONE. Current values are: TRANSACTION_STATUS [{}] INDEX_STATUS [{}] ",
+						transactionId, transactionStatus, indexStatus);
+			}
+
+			dataService.update(IndexTransactionLogMetaData.ENTITY_NAME, transLog);
+			LOG.info("--- End rebuilding index: [{}]", new Date());
 		});
 	}
 
 	private void rebuildIndex()
 	{
-		LOG.info("## Start rebuilding index: [" + new Date() + "]");
-		
 		Stream<Entity> logEntries = getAllLogEntries(this.transactionId);
-
 		logEntries.forEach(e -> {
 			requireNonNull(e.getEntityMetaData());
-			if (e.getString(IndexTransactionLogEntryMetaData.ENTITY_ID) != null)
+			final CudType cudType = CudType.valueOf(e.getString(IndexTransactionLogEntryMetaData.CUD_TYPE));
+			final String entityFullName = e.getString(IndexTransactionLogEntryMetaData.ENTITY_FULL_NAME);
+			final EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(entityFullName);
+			final String entityId = e.getString(IndexTransactionLogEntryMetaData.ENTITY_ID);
+			final DataType dataType = DataType.valueOf(e.getString(IndexTransactionLogEntryMetaData.DATA_TYPE));
+			
+			if (entityId != null)
 			{
-				Entity entity = dataService.findOneById(e.getString(IndexTransactionLogEntryMetaData.ENTITY_FULL_NAME),
-						e.getString(IndexTransactionLogEntryMetaData.ENTITY_ID));
-
-				// TODO CHECK java.lang.NullPointerException give the right message when this happens
-				// Check if transaction is allready finished.
-
-				switch (CudType.valueOf(e.getString(IndexTransactionLogEntryMetaData.CUD_TYPE)))
-				{
-						case ADD:
-						this.searchService.index(entity, entity.getEntityMetaData(), IndexingMode.ADD);
-						break;
-						case DELETE:
-						this.searchService.delete(entity, entity.getEntityMetaData());
-						break;
-						case UPDATE:
-						this.searchService.index(entity, entity.getEntityMetaData(), IndexingMode.UPDATE);
-						break;
-					default:
-						break;
-				}
+				this.rebuildIndexOneEntity(this.transactionId, entityFullName, entityId, cudType);
 			}
-			else if (e.getString(IndexTransactionLogEntryMetaData.DATA_TYPE).equals(DataType.DATA.name()))
+			else if (dataType.equals(DataType.DATA))
 			{
-				String entityFullName = e.getString(IndexTransactionLogEntryMetaData.ENTITY_FULL_NAME);
-				EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(entityFullName);
-				Stream<Entity> entities = dataService.findAll(entityFullName);
-				this.searchService.delete(entityFullName);
-				this.searchService.createMappings(entityMetaData);
-				this.searchService.index(entities,entityMetaData, IndexingMode.ADD);
+				this.rebuildIndexBatchEntities(this.transactionId, entityFullName, entityMetaData, cudType);
 			}
 			else
 			{
-				String entityFullName = e.getString(IndexTransactionLogEntryMetaData.ENTITY_FULL_NAME);
-				EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(entityFullName);
-				Stream<Entity> entities = dataService.findAll(entityFullName);
-				this.searchService.delete(entityFullName);
-				switch (CudType.valueOf(e.getString(IndexTransactionLogEntryMetaData.CUD_TYPE)))
-				{
-					case UPDATE:
-					case ADD:
-						this.searchService.createMappings(entityMetaData);
-						this.searchService.index(entities, entityMetaData, IndexingMode.ADD);
-						break;
-					case DELETE:
-						break;
-					default:
-						break;
-				}
+				this.rebuildIndexEntityMeta(this.transactionId, entityFullName, entityMetaData, cudType);
 			}
 		});
 
 		this.searchService.refreshIndex();
-		LOG.info("## End rebuilding index: [{}]", new Date());
+	}
+
+	private void rebuildIndexOneEntity(String transactionId, String entityFullName, String entityId, CudType cudType)
+	{
+		Entity entity = dataService.findOneById(entityFullName, entityId);
+		switch (cudType)
+		{
+			case ADD:
+				this.searchService.index(entity, entity.getEntityMetaData(), IndexingMode.ADD);
+				break;
+			case UPDATE:
+				this.searchService.index(entity, entity.getEntityMetaData(), IndexingMode.UPDATE);
+				break;
+			case DELETE:
+				this.searchService.deleteByIdNoValidation(entityId, entityFullName);
+				break;
+			default:
+				break;
+		}
+	}
+	
+	private void rebuildIndexBatchEntities(String transactionId, String entityFullName, EntityMetaData entityMetaData,
+			CudType cudType)
+	{
+		Stream<Entity> entities = dataService.findAll(entityFullName);
+		switch (cudType)
+		{
+			case UPDATE:
+			case ADD:
+				this.searchService.deleteEntitiesNoValidation(entities, entityMetaData);
+				entities = dataService.findAll(entityFullName);
+				this.searchService.index(entities, entityMetaData, IndexingMode.ADD);
+				break;
+			case DELETE:
+				this.searchService.deleteEntitiesNoValidation(entities, entityMetaData);
+				break;
+			default:
+				break;
+		}
+	}
+
+	private void rebuildIndexEntityMeta(String transactionId, String entityFullName, EntityMetaData entityMetaData,
+			CudType cudType)
+	{
+		switch (cudType)
+		{
+			case UPDATE:
+			case ADD:
+				this.searchService.delete(entityFullName);
+				this.searchService.createMappings(entityMetaData);
+				Stream<Entity> entities = dataService.findAll(entityFullName);
+				this.searchService.index(entities, entityMetaData, IndexingMode.ADD);
+				break;
+			case DELETE:
+				this.searchService.delete(entityFullName);
+				break;
+			default:
+				break;
+		}
 	}
 
 	/**

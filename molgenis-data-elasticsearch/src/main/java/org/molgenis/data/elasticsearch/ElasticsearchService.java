@@ -418,13 +418,28 @@ public class ElasticsearchService implements SearchService
 					"Cannot delete entity because there are other entities referencing it. Delete these first.");
 		}
 
-		deleteById(indexName, id, entityMetaData);
+		deleteById(indexName, id, entityMetaData.getName());
 	}
 
-	private void deleteById(String index, String id, EntityMetaData entityMetaData)
+	@Override
+	public void deleteByIdNoValidation(String id, String entityFullName)
 	{
-		String entityName = entityMetaData.getName();
-		String type = sanitizeMapperType(entityName);
+		deleteById(indexName, id, entityFullName);
+	}
+
+	@Override
+	public void deleteEntitiesNoValidation(Stream<Entity> entities, EntityMetaData entityMetaData)
+	{
+		String attributeName = entityMetaData.getIdAttribute().getName();
+		String entityFullName = entityMetaData.getName();
+		entities.forEach(e -> {
+			deleteByIdNoValidation(e.get(attributeName).toString(), entityFullName);
+		});
+	}
+
+	private void deleteById(String index, String id, String entityFullName)
+	{
+		String type = sanitizeMapperType(entityFullName);
 
 		if (LOG.isTraceEnabled())
 		{
@@ -802,28 +817,29 @@ public class ElasticsearchService implements SearchService
 					return input;
 				}
 			});
+			entities = new DependencyResolver().resolveSelfReferences(iterable, entityMetaData);
+		}
+		if (hasMapping(entityMetaData))
+		{
+			delete(entityMetaData.getName());
+		}
+		createMappings(entityMetaData);
+		index(entities, entityMetaData, IndexingMode.ADD);
+	}
 
-			Iterable<Entity> resolved = new DependencyResolver().resolveSelfReferences(iterable, entityMetaData);
-			if (hasMapping(entityMetaData))
-			{
-				delete(entityMetaData.getName());
-			}
+	@Override
+	public void rebuildIndex(Stream<Entity> entities, EntityMetaData entityMetaData)
+	{
+		if (hasMapping(entityMetaData))
+		{
+			delete(entityMetaData.getName());
 			createMappings(entityMetaData);
-
-			for (Entity e : resolved)
-			{
-				index(e, entityMetaData, IndexingMode.ADD);
-			}
+			index(entities, entityMetaData, IndexingMode.ADD);
 		}
 		else
 		{
-			if (hasMapping(entityMetaData))
-			{
-				delete(entityMetaData.getName());
-			}
-			createMappings(entityMetaData);
-
-			index(entities, entityMetaData, IndexingMode.ADD);
+			throw new ElasticsearchException("You try to rebuild entity [" + entityMetaData.getName()
+					+ "], but it is unknown.");
 		}
 	}
 
