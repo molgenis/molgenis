@@ -10,14 +10,18 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Stream;
 
+import com.google.common.collect.Lists;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class AttributeMetaDataRepositoryTest
@@ -75,5 +79,24 @@ public class AttributeMetaDataRepositoryTest
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(repo, times(1)).add(captor.capture());
 		assertEquals(captor.getValue().collect(toList()), Arrays.asList(attrEntity0, attrEntity1));
+	}
+
+	@Test
+	public void addMoreThenBatchSizeIterableAttributeMetaData()
+	{
+		ManageableRepositoryCollection repoCollection = mock(ManageableRepositoryCollection.class);
+		Repository repo = mock(Repository.class);
+		LanguageService languageService = mock(LanguageService.class);
+		when(repoCollection.addEntityMeta(AttributeMetaDataRepository.META_DATA)).thenReturn(repo);
+		AttributeMetaDataRepository attributeMetaDataRepository = new AttributeMetaDataRepository(repoCollection,
+				languageService);
+
+		List<AttributeMetaData> attrs = Lists.newArrayList();
+		for(int i = 0; i < 2000; i++) {
+			attrs.add(new DefaultAttributeMetaData("attr"+i));
+		}
+
+		Iterable<Entity> attrEntities = attributeMetaDataRepository.add(attrs);
+		Assert.assertEquals(Lists.newArrayList(attrEntities).size(), attrs.size());
 	}
 }
