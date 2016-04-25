@@ -1,4 +1,4 @@
-package org.molgenis.data.transaction.index;
+package org.molgenis.data.transaction.log.index;
 
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 

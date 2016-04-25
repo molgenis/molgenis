@@ -16,8 +16,8 @@ import org.molgenis.data.elasticsearch.IndexedRepositoryDecorator;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.OwnedEntityMetaData;
-import org.molgenis.data.transaction.index.IndexTransactionLogRepositoryDecorator;
-import org.molgenis.data.transaction.index.IndexTransactionLogService;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogRepositoryDecorator;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogService;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
@@ -78,10 +78,12 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		// 5. Entity listener
 		decoratedRepository = new EntityListenerRepositoryDecorator(decoratedRepository);
 
-		// 4. Index Transaction log decorator //TODO JJ INDEXABLE
+		// 4. Index
+
+		// Index query analyzer
 		decoratedRepository = new IndexedRepositoryDecorator(decoratedRepository, searchService);
 
-		// 4. Index Transaction log decorator
+		// Index transaction log
 		decoratedRepository = new IndexTransactionLogRepositoryDecorator(decoratedRepository, indexTansactionLogService);
 
 		// 3. validation decorator

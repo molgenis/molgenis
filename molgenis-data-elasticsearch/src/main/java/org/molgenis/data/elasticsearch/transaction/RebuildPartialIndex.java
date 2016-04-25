@@ -15,9 +15,9 @@ import org.molgenis.data.Sort;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.transaction.index.IndexTransactionLogEntryMetaData;
-import org.molgenis.data.transaction.index.IndexTransactionLogEntryMetaData.CudType;
-import org.molgenis.data.transaction.index.IndexTransactionLogEntryMetaData.DataType;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogEntryMetaData;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogEntryMetaData.CudType;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogEntryMetaData.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +58,11 @@ public class RebuildPartialIndex implements Runnable
 			{
 				Entity entity = dataService.findOneById(e.getString(IndexTransactionLogEntryMetaData.ENTITY_FULL_NAME),
 						e.getString(IndexTransactionLogEntryMetaData.ENTITY_ID));
-					switch (CudType.valueOf(e.getString(IndexTransactionLogEntryMetaData.CUD_TYPE)))
+
+				// TODO CHECK java.lang.NullPointerException give the right message when this happens
+				// Check if transaction is allready finished.
+
+				switch (CudType.valueOf(e.getString(IndexTransactionLogEntryMetaData.CUD_TYPE)))
 				{
 						case ADD:
 						this.searchService.index(entity, entity.getEntityMetaData(), IndexingMode.ADD);

@@ -34,7 +34,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.transaction.index.IndexTransactionLogService;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogService;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.file.FileStore;

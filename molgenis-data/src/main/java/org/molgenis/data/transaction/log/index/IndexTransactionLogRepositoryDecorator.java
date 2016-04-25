@@ -1,4 +1,4 @@
-package org.molgenis.data.transaction.index;
+package org.molgenis.data.transaction.log.index;
 
 import static java.util.Objects.requireNonNull;
 
@@ -17,8 +17,8 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.transaction.index.IndexTransactionLogEntryMetaData.CudType;
-import org.molgenis.data.transaction.index.IndexTransactionLogEntryMetaData.DataType;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogEntryMetaData.CudType;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogEntryMetaData.DataType;
 
 public class IndexTransactionLogRepositoryDecorator implements Repository<Entity>
 {

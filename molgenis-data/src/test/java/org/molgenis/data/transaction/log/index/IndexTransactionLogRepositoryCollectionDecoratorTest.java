@@ -1,4 +1,4 @@
-package org.molgenis.data.transaction.index;
+package org.molgenis.data.transaction.log.index;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -10,8 +10,10 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.transaction.index.IndexTransactionLogEntryMetaData.CudType;
-import org.molgenis.data.transaction.index.IndexTransactionLogEntryMetaData.DataType;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogRepositoryCollectionDecorator;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogService;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogEntryMetaData.CudType;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogEntryMetaData.DataType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

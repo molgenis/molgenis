@@ -3,18 +3,21 @@ package org.molgenis.data.elasticsearch;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogService;
 
 /**
  * Decorates a ManageableRepositoryCollection so it is indexed. Removes, creates ES mappings
+ * 
+ * TODO This code is still not used!
  */
 public class IndexedManageableRepositoryCollectionDecorator extends IndexedRepositoryCollectionDecorator implements
 		ManageableRepositoryCollection
 {
 
 	public IndexedManageableRepositoryCollectionDecorator(SearchService searchService,
-			ManageableRepositoryCollection delegate)
+			ManageableRepositoryCollection delegate, IndexTransactionLogService indexTransactionLogService)
 	{
-		super(searchService, delegate);
+		super(searchService, delegate, indexTransactionLogService);
 	}
 
 	@Override

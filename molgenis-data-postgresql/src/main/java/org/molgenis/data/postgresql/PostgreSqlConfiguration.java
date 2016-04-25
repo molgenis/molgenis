@@ -3,8 +3,8 @@ package org.molgenis.data.postgresql;
 import javax.sql.DataSource;
 
 import org.molgenis.data.ManageableRepositoryCollection;
-import org.molgenis.data.transaction.index.IndexTransactionLogRepositoryCollectionDecorator;
-import org.molgenis.data.transaction.index.IndexTransactionLogService;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogRepositoryCollectionDecorator;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

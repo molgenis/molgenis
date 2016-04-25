@@ -6,24 +6,31 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogService;
 
 /**
  * Adds indexing functionality to a RepositoryCollection
+ * 
+ * TODO This code is still not used!
  */
 public class IndexedRepositoryCollectionDecorator implements RepositoryCollection
 {
 	private final SearchService searchService;
 	private RepositoryCollection delegate;
+	private IndexTransactionLogService indexTransactionLogService;
 
-	public IndexedRepositoryCollectionDecorator(SearchService searchService, RepositoryCollection delegate)
+	public IndexedRepositoryCollectionDecorator(SearchService searchService, RepositoryCollection delegate,
+			IndexTransactionLogService indexTransactionLogService)
 	{
 		this.searchService = searchService;
 		this.delegate = delegate;
+		this.indexTransactionLogService = indexTransactionLogService;
 	}
 
-	protected IndexedRepositoryCollectionDecorator(SearchService searchService)
+	protected IndexedRepositoryCollectionDecorator(SearchService searchService,
+			IndexTransactionLogService indexTransactionLogService)
 	{
-		this(searchService, null);
+		this(searchService, null, indexTransactionLogService);
 	}
 
 	protected void setDelegate(RepositoryCollection delegate)

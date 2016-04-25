@@ -1,5 +1,6 @@
 package org.molgenis.data.elasticsearch;
 
+import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.RepositoryCapability.AGGREGATEABLE;
 import static org.molgenis.data.RepositoryCapability.INDEXABLE;
@@ -9,6 +10,7 @@ import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -48,7 +50,6 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 		this.elasticSearchService = requireNonNull(elasticSearchService);
 		this.decoratedRepository = requireNonNull(decoratedRepo);
 		this.indexRepository = new ElasticsearchRepository(getEntityMetaData(), elasticSearchService);
-
 		Set<Operator> operators = indexRepository.getQueryOperators();
 		operators.removeAll(decoratedRepository.getQueryOperators());
 		unsupportedOperators = Collections.unmodifiableSet(operators);
@@ -249,10 +250,10 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		Set<RepositoryCapability> capabilities = decoratedRepository.getCapabilities();
-
+		Set<RepositoryCapability> capabilities = new HashSet<RepositoryCapability>();
+		capabilities.addAll(decoratedRepository.getCapabilities());
 		capabilities.addAll(EnumSet.of(INDEXABLE, QUERYABLE, AGGREGATEABLE));
-		return capabilities;
+		return unmodifiableSet(capabilities);
 	}
 
 	@Override

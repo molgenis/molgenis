@@ -1,4 +1,4 @@
-package org.molgenis.data.transaction.index;
+package org.molgenis.data.transaction.log.index;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -17,10 +17,14 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
-import org.molgenis.data.transaction.index.IndexTransactionLogEntryMetaData.CudType;
-import org.molgenis.data.transaction.index.IndexTransactionLogEntryMetaData.DataType;
-import org.molgenis.data.transaction.index.IndexTransactionLogMetaData.IndexStatus;
-import org.molgenis.data.transaction.index.IndexTransactionLogMetaData.TransactionStatus;
+import org.molgenis.data.transaction.log.index.IndexTransactionConfig;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogEntryMetaData;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogMetaData;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogService;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogEntryMetaData.CudType;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogEntryMetaData.DataType;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogMetaData.IndexStatus;
+import org.molgenis.data.transaction.log.index.IndexTransactionLogMetaData.TransactionStatus;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.testng.annotations.AfterMethod;
