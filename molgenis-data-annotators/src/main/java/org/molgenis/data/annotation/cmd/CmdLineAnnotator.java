@@ -11,6 +11,7 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.annotation.EffectsAnnotator;
 import org.molgenis.data.annotation.RefEntityAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
@@ -26,10 +27,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.env.JOptCommandLinePropertySource;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -226,7 +224,12 @@ public class CmdLineAnnotator
 	{
 		List<String> attributesToInclude = options.nonOptionArguments().stream().map(Object::toString)
 				.collect(Collectors.toList());
+		annotate(annotator, inputVcfFile, outputVCFFile, attributesToInclude, options.has("validate"));
+	}
 
+	public void annotate(RepositoryAnnotator annotator, File inputVcfFile, File outputVCFFile,
+			List<String> attributesToInclude, boolean validate) throws IOException, MolgenisInvalidFormatException
+	{
 		BufferedWriter outputVCFWriter = new BufferedWriter(
 				new OutputStreamWriter(new FileOutputStream(outputVCFFile), UTF_8));
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, inputVcfFile.getName());
@@ -306,8 +309,6 @@ public class CmdLineAnnotator
 				entitiesToAnnotate = vcfRepo;
 			}
 
-			System.out.println("update = " + options.has("u"));
-
 			Iterator<Entity> annotatedRecords = annotator.annotate(entitiesToAnnotate);
 
 			if (annotator instanceof RefEntityAnnotator || annotator instanceof EffectsAnnotator)
@@ -331,7 +332,7 @@ public class CmdLineAnnotator
 
 			vcfRepo.close();
 		}
-		if (options.has("validate"))
+		if (validate)
 		{
 			System.out.println("Validating produced VCF file...");
 			System.out.println(vcfValidator.validateVCF(outputVCFFile));

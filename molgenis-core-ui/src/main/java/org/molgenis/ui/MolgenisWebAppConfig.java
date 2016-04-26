@@ -77,6 +77,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.web.multipart.MultipartResolver;
@@ -176,6 +177,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		converters.add(gsonHttpMessageConverter);
 		converters.add(new BufferedImageHttpMessageConverter());
 		converters.add(new CsvHttpMessageConverter());
+		converters.add(new ResourceHttpMessageConverter());
 	}
 
 	@Bean
