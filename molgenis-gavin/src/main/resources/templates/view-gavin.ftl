@@ -12,10 +12,12 @@
                     Gavin annotation
                 </h4>
             </div>
+        <#--noinspection FtlReferencesInspection-->
             <#if annotatorsWithMissingResources?has_content>
                 <div class="panel-body">
                     <p>The following annotators have missing resources:</p>
                     <ul>
+                    <#--noinspection FtlReferencesInspection-->
                         <#list annotatorsWithMissingResources as ann><li>${ann}
                             <span id="${ann}-settings-btn" class="glyphicon glyphicon-cog" aria-hidden="true" style="cursor: pointer; margin-left: 5px;" data-name="${ann}"></span>
                         </li></#list>

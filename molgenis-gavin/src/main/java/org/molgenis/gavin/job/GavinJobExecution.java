@@ -9,8 +9,9 @@ import static org.molgenis.gavin.job.GavinJobExecutionMetaData.FILENAME;
 public class GavinJobExecution extends JobExecution
 {
 	private static final long serialVersionUID = 1L;
-	public static final String GAVIN = "gavin";
+	private static final String GAVIN = "gavin";
 
+	@SuppressWarnings("WeakerAccess")
 	public static final EntityMetaData META_DATA = new GavinJobExecutionMetaData();
 
 	public GavinJobExecution(DataService dataService)

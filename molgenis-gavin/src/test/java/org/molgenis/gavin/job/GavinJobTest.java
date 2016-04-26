@@ -15,7 +15,6 @@ import org.testng.annotations.Test;
 import java.io.File;
 
 import static java.util.Collections.emptyList;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.gavin.controller.GavinController.GAVIN_APP;

@@ -1,12 +1,5 @@
 package org.molgenis.gavin.job;
 
-import static java.io.File.separator;
-import static java.text.MessageFormat.format;
-import static java.util.Collections.emptyList;
-import static org.molgenis.gavin.controller.GavinController.GAVIN_APP;
-
-import java.io.File;
-
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.cmd.CmdLineAnnotator;
 import org.molgenis.data.jobs.Job;
@@ -16,22 +9,29 @@ import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.io.File;
+
+import static java.io.File.separator;
+import static java.text.MessageFormat.format;
+import static java.util.Collections.emptyList;
+import static org.molgenis.gavin.controller.GavinController.GAVIN_APP;
+
 public class GavinJob extends Job<Void>
 {
-	private CmdLineAnnotator cmdLineAnnotator;
-	private String jobIdentifier;
-	private MenuReaderService menuReaderService;
+	private final CmdLineAnnotator cmdLineAnnotator;
+	private final String jobIdentifier;
+	private final MenuReaderService menuReaderService;
 
-	private RepositoryAnnotator cadd;
-	private RepositoryAnnotator exac;
-	private RepositoryAnnotator snpeff;
-	private RepositoryAnnotator gavin;
+	private final RepositoryAnnotator cadd;
+	private final RepositoryAnnotator exac;
+	private final RepositoryAnnotator snpeff;
+	private final RepositoryAnnotator gavin;
 
-	private File inputFile;
-	private File caddOutputFile;
-	private File exacOutputFile;
-	private File snpeffOutputFile;
-	private File gavinOutputFile;
+	private final File inputFile;
+	private final File caddOutputFile;
+	private final File exacOutputFile;
+	private final File snpeffOutputFile;
+	private final File gavinOutputFile;
 
 	public GavinJob(CmdLineAnnotator cmdLineAnnotator, Progress progress, TransactionTemplate transactionTemplate,
 			Authentication authentication, String jobIdentifier, FileStore fileStore,
