@@ -22,10 +22,21 @@ import net.sf.samtools.util.RuntimeEOFException;
 
 public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 {
+	protected static final String FIRST_NAME = "firstName";
+	protected static final String LAST_NAME = "lastName";
+	protected static final String BIRTHDAY = "birthday";
+	protected static final String HEIGHT = "height";
+	protected static final String ACTIVE = "active";
+	protected static final String COUNTRY = "country";
+	protected static final String AUTHOR_OF = "authorOf";
+	protected static final String ID = "id";
+	protected static final String EMAIL = "email";
+
 	protected SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	protected Entity person1;
 	protected Entity person2;
 	protected Entity person3;
+	protected Repository<Entity> personsRepository = createTestRepo();
 
 	protected abstract void testInt();
 
@@ -45,7 +56,19 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 
 	protected abstract void testXref();
 
-	protected Repository<Entity> getTestRepo()
+	public void testIt() throws ParseException
+	{
+		testInt();
+		testDecimal();
+		testLong();
+		testString();
+		testDate();
+		testDateTime();
+		testXref();
+		testMref();
+	}
+
+	private Repository<Entity> createTestRepo()
 	{
 		// define model
 		DefaultEntityMetaData countryEMD = new DefaultEntityMetaData("query_country");
@@ -55,15 +78,15 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 		bookEMD.addAttribute("title", ROLE_ID).setNillable(false);
 
 		DefaultEntityMetaData personEMD = new DefaultEntityMetaData("query_person");
-		personEMD.addAttribute("id", ROLE_ID);
-		personEMD.addAttribute("email").setNillable(false);
-		personEMD.addAttribute("firstName");
-		personEMD.addAttribute("lastName");
-		personEMD.addAttribute("birthday").setDataType(DATE);
-		personEMD.addAttribute("height").setDataType(INT);
-		personEMD.addAttribute("active").setDataType(BOOL);
-		personEMD.addAttribute("country").setDataType(XREF).setRefEntity(countryEMD);
-		personEMD.addAttribute("authorOf").setDataType(MREF).setRefEntity(bookEMD);
+		personEMD.addAttribute(ID, ROLE_ID);
+		personEMD.addAttribute(EMAIL).setNillable(false);
+		personEMD.addAttribute(FIRST_NAME);
+		personEMD.addAttribute(LAST_NAME);
+		personEMD.addAttribute(BIRTHDAY).setDataType(DATE);
+		personEMD.addAttribute(HEIGHT).setDataType(INT);
+		personEMD.addAttribute(ACTIVE).setDataType(BOOL);
+		personEMD.addAttribute(COUNTRY).setDataType(XREF).setRefEntity(countryEMD);
+		personEMD.addAttribute(AUTHOR_OF).setDataType(MREF).setRefEntity(bookEMD);
 
 		Repository<Entity> countries = dataService.getMeta().addEntityMeta(countryEMD);
 		Repository<Entity> books = dataService.getMeta().addEntityMeta(bookEMD);
@@ -89,39 +112,39 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 		try
 		{
 			person1 = new DefaultEntity(personEMD, dataService);
-			person1.set("id", "person1");
-			person1.set("email", "foo@localhost");
-			person1.set("firstName", "john");
-			person1.set("lastName", "doe");
-			person1.set("birthday", (dateFormat.parse("1976-06-07")));
-			person1.set("height", 180);
-			person1.set("active", true);
-			person1.set("country", "US");
-			person1.set("authorOf", Lists.newArrayList(book1));
+			person1.set(ID, "person1");
+			person1.set(EMAIL, "foo@localhost");
+			person1.set(FIRST_NAME, "john");
+			person1.set(LAST_NAME, "doe");
+			person1.set(BIRTHDAY, (dateFormat.parse("1976-06-07")));
+			person1.set(HEIGHT, 180);
+			person1.set(ACTIVE, true);
+			person1.set(COUNTRY, "US");
+			person1.set(AUTHOR_OF, Lists.newArrayList(book1));
 			persons.add(person1);
 
 			person2 = new DefaultEntity(personEMD, dataService);
-			person2.set("id", "person2");
-			person2.set("email", "bar@localhost");
-			person2.set("firstName", "jane");
-			person2.set("lastName", "doe");
-			person2.set("birthday", dateFormat.parse("1980-06-07"));
-			person2.set("height", 165);
-			person2.set("active", false);
-			person2.set("country", "US");
-			person2.set("authorOf", Lists.newArrayList(book1, book2));
+			person2.set(ID, "person2");
+			person2.set(EMAIL, "bar@localhost");
+			person2.set(FIRST_NAME, "jane");
+			person2.set(LAST_NAME, "doe");
+			person2.set(BIRTHDAY, dateFormat.parse("1980-06-07"));
+			person2.set(HEIGHT, 165);
+			person2.set(ACTIVE, false);
+			person2.set(COUNTRY, "US");
+			person2.set(AUTHOR_OF, Lists.newArrayList(book1, book2));
 			persons.add(person2);
 
 			person3 = new DefaultEntity(personEMD, dataService);
-			person3.set("id", "person3");
-			person3.set("email", "donald@localhost");
-			person3.set("firstName", "donald");
-			person3.set("lastName", "duck");
-			person3.set("birthday", dateFormat.parse("1950-01-31"));
-			person3.set("height", 180);
-			person3.set("active", true);
-			person3.set("country", "NL");
-			person3.set("authorOf", null);
+			person3.set(ID, "person3");
+			person3.set(EMAIL, "donald@localhost");
+			person3.set(FIRST_NAME, "donald");
+			person3.set(LAST_NAME, "duck");
+			person3.set(BIRTHDAY, dateFormat.parse("1950-01-31"));
+			person3.set(HEIGHT, 180);
+			person3.set(ACTIVE, true);
+			person3.set(COUNTRY, "NL");
+			person3.set(AUTHOR_OF, null);
 			persons.add(person3);
 		}
 		catch (ParseException e)
@@ -130,17 +153,5 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 		}
 
 		return persons;
-	}
-
-	public void testIt() throws ParseException
-	{
-		testInt();
-		testDecimal();
-		testLong();
-		testString();
-		testDate();
-		testDateTime();
-		testXref();
-		testMref();
 	}
 }

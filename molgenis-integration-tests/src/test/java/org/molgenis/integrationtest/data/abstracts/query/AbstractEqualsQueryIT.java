@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
 
 import com.google.common.collect.Sets;
@@ -48,29 +47,26 @@ public abstract class AbstractEqualsQueryIT extends AbstractQueryIT
 	@Override
 	protected void testInt()
 	{
-		Repository<Entity> persons = getTestRepo();
 		Query<Entity> query = new QueryImpl<Entity>().eq("height", 180);
-		assertTrue(Sets.newHashSet(person1, person3).contains(persons.findOne(query)));
+		assertTrue(Sets.newHashSet(person1, person3).contains(personsRepository.findOne(query)));
 	}
 
 	@Override
 	protected void testString()
 	{
-		Repository<Entity> persons = getTestRepo();
 		Query<Entity> query = new QueryImpl<Entity>().eq("lastName", "doe");
-		assertTrue(Sets.newHashSet(person1, person2).contains(persons.findOne(query)));
-		assertEquals(persons.findAll(query).collect(Collectors.toSet()), Sets.newHashSet(person1, person2));
-		assertEquals(persons.count(query), 2);
+		assertTrue(Sets.newHashSet(person1, person2).contains(personsRepository.findOne(query)));
+		assertEquals(personsRepository.findAll(query).collect(Collectors.toSet()), Sets.newHashSet(person1, person2));
+		assertEquals(personsRepository.count(query), 2);
 	}
 
 	@Override
 	protected void testXref()
 	{
-		Repository<Entity> persons = getTestRepo();
 		Query<Entity> query = new QueryImpl<Entity>().eq("country", "US");
-		assertTrue(Sets.newHashSet(person1, person2).contains(persons.findOne(query)));
-		assertEquals(persons.findAll(query).collect(Collectors.toSet()), Sets.newHashSet(person1, person2));
-		assertEquals(persons.count(query), 2);
+		assertTrue(Sets.newHashSet(person1, person2).contains(personsRepository.findOne(query)));
+		assertEquals(personsRepository.findAll(query).collect(Collectors.toSet()), Sets.newHashSet(person1, person2));
+		assertEquals(personsRepository.count(query), 2);
 	}
 
 	@Override
@@ -111,11 +107,10 @@ public abstract class AbstractEqualsQueryIT extends AbstractQueryIT
 	@Override
 	protected void testMref()
 	{
-		Repository<Entity> persons = getTestRepo();
 		Query<Entity> query = new QueryImpl<Entity>().eq("authorOf", "MOLGENIS for dummies");
-		assertTrue(Sets.newHashSet(person1, person2).contains(persons.findOne(query)));
-		assertEquals(persons.findAll(query).collect(Collectors.toSet()), Sets.newHashSet(person1, person2));
-		assertEquals(persons.count(query), 2);
+		assertTrue(Sets.newHashSet(person1, person2).contains(personsRepository.findOne(query)));
+		assertEquals(personsRepository.findAll(query).collect(Collectors.toSet()), Sets.newHashSet(person1, person2));
+		assertEquals(personsRepository.count(query), 2);
 	}
 
 }
