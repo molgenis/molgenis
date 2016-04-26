@@ -66,6 +66,7 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 	public void testIt() throws ParseException
 	{
 		personsRepository = createTestRepo();
+
 		testInt();
 		testDecimal();
 		testLong();
