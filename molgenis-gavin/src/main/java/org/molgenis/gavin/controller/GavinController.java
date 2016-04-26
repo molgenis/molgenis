@@ -29,7 +29,6 @@ import java.util.concurrent.ExecutorService;
 
 import static java.io.File.separator;
 import static java.text.MessageFormat.format;
-import static org.apache.commons.io.FileUtils.deleteDirectory;
 import static org.molgenis.gavin.controller.GavinController.URI;
 import static org.molgenis.gavin.job.GavinJobExecutionMetaData.GAVIN_JOB_EXECUTION;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
@@ -44,7 +43,7 @@ public class GavinController extends MolgenisPluginController
 	private static final Logger LOG = LoggerFactory.getLogger(GavinController.class);
 
 	public static final String GAVIN_APP = "gavin-app";
-	public static final String URI = PLUGIN_URI_PREFIX + GAVIN_APP;
+	static final String URI = PLUGIN_URI_PREFIX + GAVIN_APP;
 
 	public GavinController()
 	{
@@ -95,17 +94,17 @@ public class GavinController extends MolgenisPluginController
 	public String annotateFile(@RequestParam(value = "file") MultipartFile inputFile, @RequestParam String entityName)
 			throws IOException
 	{
-		GavinJobExecution gavinJobExecution = new GavinJobExecution(dataService);
+		final GavinJobExecution gavinJobExecution = new GavinJobExecution(dataService);
 		gavinJobExecution.setFilename(entityName + "-gavin.vcf");
 		gavinJobExecution.setUser(userAccountService.getCurrentUser());
-		GavinJob gavinJob = gavinJobFactory.createJob(gavinJobExecution);
+		final GavinJob gavinJob = gavinJobFactory.createJob(gavinJobExecution);
 
-		String gavinJobIdentifier = gavinJobExecution.getIdentifier();
-		String fileName = format("{0}{1}{2}{3}input.vcf", GAVIN_APP, separator, gavinJobIdentifier, separator);
-
-		File file = fileStore.getFile(fileName);
-		file.getParentFile().mkdirs();
-		inputFile.transferTo(file);
+		final String gavinJobIdentifier = gavinJobExecution.getIdentifier();
+		fileStore.createDirectory(GAVIN_APP);
+		final String jobDir = format("{0}{1}{2}", GAVIN_APP, separator, gavinJobIdentifier);
+		fileStore.createDirectory(jobDir);
+		final String fileName = format("{0}{1}input.vcf", jobDir, separator);
+		inputFile.transferTo(fileStore.getFile(fileName));
 
 		executorService.submit(gavinJob);
 
@@ -130,7 +129,7 @@ public class GavinController extends MolgenisPluginController
 		if (!file.exists())
 		{
 			LOG.warn(format("File {0} not found for job {1}", file.getName(), jobIdentifier));
-			throw new MolgenisDataException("No output file found for this job");
+			throw new MolgenisDataException("No output file found for this job.");
 		}
 		response.setHeader("Content-Disposition", format("inline; filename=\"{0}\"", jobExecution.getFilename()));
 		return new FileSystemResource(file);
@@ -154,13 +153,12 @@ public class GavinController extends MolgenisPluginController
 		LOG.info("Clean up working directory in the file store...");
 		try
 		{
-			File file = fileStore.getFile(GAVIN_APP);
-			deleteDirectory(file);
+			fileStore.deleteDirectory(GAVIN_APP);
 			LOG.info("Done.");
 		}
 		catch (IOException e)
 		{
-			LOG.error("Failed to clean up working directory");
+			LOG.error("Failed to clean up working directory", e);
 		}
 	}
 }
