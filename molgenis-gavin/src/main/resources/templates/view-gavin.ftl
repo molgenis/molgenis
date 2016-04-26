@@ -27,7 +27,8 @@
             <#else>
                 <div class="panel-body">
                     <div id="instant-import-alert"></div>
-                    <h4>Upload your VCF file and we'll annotate it for you.</h4>
+                    <h4>Upload your VCF file and GAVIN will classify your variants</h4>
+                    <p>Your data will not be stored on the server.</p>
                     <div id="gavin-form"></div>
                 </div>
             </#if>
