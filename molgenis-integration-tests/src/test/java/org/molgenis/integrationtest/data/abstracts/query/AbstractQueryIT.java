@@ -2,7 +2,10 @@ package org.molgenis.integrationtest.data.abstracts.query;
 
 import static org.molgenis.MolgenisFieldTypes.BOOL;
 import static org.molgenis.MolgenisFieldTypes.DATE;
+import static org.molgenis.MolgenisFieldTypes.DATETIME;
+import static org.molgenis.MolgenisFieldTypes.DECIMAL;
 import static org.molgenis.MolgenisFieldTypes.INT;
+import static org.molgenis.MolgenisFieldTypes.LONG;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
@@ -22,39 +25,43 @@ import net.sf.samtools.util.RuntimeEOFException;
 
 public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 {
-	protected static final String FIRST_NAME = "firstName";
-	protected static final String LAST_NAME = "lastName";
-	protected static final String BIRTHDAY = "birthday";
-	protected static final String HEIGHT = "height";
-	protected static final String ACTIVE = "active";
-	protected static final String COUNTRY = "country";
-	protected static final String AUTHOR_OF = "authorOf";
-	protected static final String ID = "id";
-	protected static final String EMAIL = "email";
+	static final String FIRST_NAME = "firstName";
+	static final String LAST_NAME = "lastName";
+	static final String BIRTHDAY = "birthday";
+	static final String HEIGHT = "height";
+	static final String ACTIVE = "active";
+	static final String COUNTRY = "country";
+	static final String AUTHOR_OF = "authorOf";
+	static final String ID = "id";
+	static final String EMAIL = "email";
+	static final String ACCOUNT_BALANCE = "accountBalance";
+	static final String SERIAL_NUMBER = "serialNumber";
+	static final String BIRTHTIME = "birthTime";
 
-	protected SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-	protected Entity person1;
-	protected Entity person2;
-	protected Entity person3;
-	protected Repository<Entity> personsRepository;
+	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+	SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	Entity person1;
+	Entity person2;
+	Entity person3;
+	Repository<Entity> personsRepository;
 
-	protected abstract void testInt();
+	abstract void testInt();
 
-	protected abstract void testDecimal();
+	abstract void testDecimal();
 
-	protected abstract void testLong();
+	abstract void testLong();
 
-	protected abstract void testString();
+	abstract void testString();
 
-	protected abstract void testDate() throws ParseException;
+	abstract void testDate() throws ParseException;
 
-	protected abstract void testDateTime() throws ParseException;
+	abstract void testDateTime() throws ParseException;
 
-	protected abstract void testBool();
+	abstract void testBool();
 
-	protected abstract void testMref();
+	abstract void testMref();
 
-	protected abstract void testXref();
+	abstract void testXref();
 
 	public void testIt() throws ParseException
 	{
@@ -85,10 +92,13 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 		personEMD.addAttribute(FIRST_NAME);
 		personEMD.addAttribute(LAST_NAME);
 		personEMD.addAttribute(BIRTHDAY).setDataType(DATE);
+		personEMD.addAttribute(BIRTHTIME).setDataType(DATETIME);
 		personEMD.addAttribute(HEIGHT).setDataType(INT);
 		personEMD.addAttribute(ACTIVE).setDataType(BOOL);
 		personEMD.addAttribute(COUNTRY).setDataType(XREF).setRefEntity(countryEMD);
 		personEMD.addAttribute(AUTHOR_OF).setDataType(MREF).setRefEntity(bookEMD);
+		personEMD.addAttribute(ACCOUNT_BALANCE).setDataType(DECIMAL);
+		personEMD.addAttribute(SERIAL_NUMBER).setDataType(LONG);
 
 		Repository<Entity> countries = dataService.getMeta().addEntityMeta(countryEMD);
 		Repository<Entity> books = dataService.getMeta().addEntityMeta(bookEMD);
@@ -118,11 +128,14 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 			person1.set(EMAIL, "foo@localhost");
 			person1.set(FIRST_NAME, "john");
 			person1.set(LAST_NAME, "doe");
-			person1.set(BIRTHDAY, (dateFormat.parse("1976-06-07")));
+			person1.set(BIRTHDAY, dateFormat.parse("1976-06-07"));
+			person1.set(BIRTHTIME, dateTimeFormat.parse("1976-06-07 06:06:06"));
 			person1.set(HEIGHT, 180);
 			person1.set(ACTIVE, true);
 			person1.set(COUNTRY, "US");
 			person1.set(AUTHOR_OF, Lists.newArrayList(book1));
+			person1.set(ACCOUNT_BALANCE, 299.99);
+			person1.set(SERIAL_NUMBER, 374278348334L);
 			persons.add(person1);
 
 			person2 = new DefaultEntity(personEMD, dataService);
@@ -131,10 +144,13 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 			person2.set(FIRST_NAME, "jane");
 			person2.set(LAST_NAME, "doe");
 			person2.set(BIRTHDAY, dateFormat.parse("1980-06-07"));
+			person2.set(BIRTHTIME, dateTimeFormat.parse("1976-06-07 07:07:07"));
 			person2.set(HEIGHT, 165);
 			person2.set(ACTIVE, false);
 			person2.set(COUNTRY, "US");
 			person2.set(AUTHOR_OF, Lists.newArrayList(book1, book2));
+			person2.set(ACCOUNT_BALANCE, -0.70);
+			person2.set(SERIAL_NUMBER, 67986789879L);
 			persons.add(person2);
 
 			person3 = new DefaultEntity(personEMD, dataService);
@@ -143,10 +159,13 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 			person3.set(FIRST_NAME, "donald");
 			person3.set(LAST_NAME, "duck");
 			person3.set(BIRTHDAY, dateFormat.parse("1950-01-31"));
+			person3.set(BIRTHTIME, dateTimeFormat.parse("1976-06-07 08:08:08"));
 			person3.set(HEIGHT, 180);
 			person3.set(ACTIVE, true);
 			person3.set(COUNTRY, "NL");
 			person3.set(AUTHOR_OF, null);
+			person3.set(ACCOUNT_BALANCE, 1000.00);
+			person3.set(SERIAL_NUMBER, 23471900909L);
 			persons.add(person3);
 		}
 		catch (ParseException e)
