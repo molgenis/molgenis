@@ -1,7 +1,6 @@
 package org.molgenis.app;
 
 import static org.molgenis.security.core.utils.SecurityUtils.getPluginReadAuthority;
-import static org.springframework.security.core.authority.AuthorityUtils.createAuthorityList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,16 +8,19 @@ import java.util.List;
 import org.molgenis.security.MolgenisRoleHierarchy;
 import org.molgenis.security.MolgenisWebAppSecurityConfig;
 import org.molgenis.ui.security.MolgenisAccessDecisionVoter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.vote.AffirmativeBased;
+import org.springframework.security.access.vote.RoleVoter;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.web.access.expression.WebExpressionVoter;
 
 @Configuration
@@ -26,6 +28,12 @@ import org.springframework.security.web.access.expression.WebExpressionVoter;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 {
+	@Autowired
+	private MolgenisAccessDecisionVoter molgenisAccessDecisionVoter;
+
+	@Autowired
+	private RoleVoter roleVoter;
+
 	// TODO automate URL authorization configuration (ticket #2133)
 	@Override
 	protected void configureUrlAuthorization(
@@ -37,8 +45,8 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 		expressionInterceptUrlRegistry.accessDecisionManager(new AffirmativeBased(listOfVoters));
 
 		expressionInterceptUrlRegistry.antMatchers("/").permitAll()
-				// DAS datasource uses the database, unauthenticated users can
-				// not see any data
+		// DAS datasource uses the database, unauthenticated users can
+		// not see any data
 				.antMatchers("/das/**").permitAll()
 
 				.antMatchers("/myDas/**").permitAll()
@@ -49,16 +57,14 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 
 				.antMatchers("/phenotips/**").authenticated()
 
-				.antMatchers("/gavin/**").authenticated()
-
 				.antMatchers("/charts/**").authenticated();
 	}
 
 	@Override
 	protected List<GrantedAuthority> createAnonymousUserAuthorities()
 	{
-		String homePluginReadAuthority = getPluginReadAuthority("home");
-		return createAuthorityList(homePluginReadAuthority);
+		String s = getPluginReadAuthority("home");
+		return AuthorityUtils.createAuthorityList(s);
 	}
 
 	@Override
