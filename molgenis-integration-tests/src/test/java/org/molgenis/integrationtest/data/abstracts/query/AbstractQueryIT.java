@@ -36,7 +36,7 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 	protected Entity person1;
 	protected Entity person2;
 	protected Entity person3;
-	protected Repository<Entity> personsRepository = createTestRepo();
+	protected Repository<Entity> personsRepository;
 
 	protected abstract void testInt();
 
@@ -58,6 +58,8 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 
 	public void testIt() throws ParseException
 	{
+		personsRepository = createTestRepo();
+
 		testInt();
 		testDecimal();
 		testLong();

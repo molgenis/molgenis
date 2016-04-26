@@ -14,36 +14,6 @@ import com.google.common.collect.Sets;
 
 public abstract class AbstractEqualsQueryIT extends AbstractQueryIT
 {
-	public void testIt() throws ParseException
-	{
-		// Repository<Entity> persons = getTestRepo();
-		//
-		// // string
-		// Query<Entity> query = new QueryImpl<Entity>().eq("lastName", "doe");
-		// assertTrue(Sets.newHashSet(person1, person2).contains(persons.findOne(query)));
-		// assertEquals(persons.findAll(query).collect(Collectors.toSet()), Sets.newHashSet(person1, person2));
-		// assertEquals(persons.count(query), 2);
-		//
-		// // bool
-		// query = new QueryImpl<Entity>().eq("active", true);
-		// assertTrue(Sets.newHashSet(person1, person3).contains(persons.findOne(query)));
-		// assertEquals(persons.findAll(query).collect(Collectors.toSet()), Sets.newHashSet(person1, person3));
-		// assertEquals(persons.count(query), 2);
-		//
-		// // date
-		// query = new QueryImpl<Entity>().eq("birthday", dateFormat.parse("1976-06-07"));
-		// assertEquals(persons.findOne(query), person1);
-		// assertEquals(persons.findAll(query).collect(Collectors.toSet()), Sets.newHashSet(person1));
-		// assertEquals(persons.count(query), 1);
-		//
-		// // xref
-		// query = new QueryImpl<Entity>().eq("country", "US");
-		// assertTrue(Sets.newHashSet(person1, person2).contains(persons.findOne(query)));
-		// assertEquals(persons.findAll(query).collect(Collectors.toSet()), Sets.newHashSet(person1, person2));
-		// assertEquals(persons.count(query), 2);
-
-	}
-
 	@Override
 	protected void testInt()
 	{
