@@ -1,22 +1,14 @@
 package org.molgenis.data.annotation.cmd;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Arrays.asList;
-import static org.molgenis.MolgenisFieldTypes.MREF;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.ConsoleAppender;
+import joptsimple.OptionException;
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisInvalidFormatException;
@@ -35,15 +27,17 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.env.JOptCommandLinePropertySource;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.ConsoleAppender;
-import joptsimple.OptionException;
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
+import java.io.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Arrays.asList;
+import static org.molgenis.MolgenisFieldTypes.MREF;
 
 /**
  * 
@@ -234,8 +228,7 @@ public class CmdLineAnnotator
 	}
 
 	public void annotate(RepositoryAnnotator annotator, File inputVcfFile, File outputVCFFile,
-			List<String> attributesToInclude, boolean validate)
-					throws FileNotFoundException, IOException, MolgenisInvalidFormatException
+			List<String> attributesToInclude, boolean validate) throws IOException, MolgenisInvalidFormatException
 	{
 		BufferedWriter outputVCFWriter = new BufferedWriter(
 				new OutputStreamWriter(new FileOutputStream(outputVCFFile), UTF_8));
@@ -315,8 +308,6 @@ public class CmdLineAnnotator
 			{
 				entitiesToAnnotate = vcfRepo;
 			}
-
-			System.out.println("update = " + options.has("u"));
 
 			Iterator<Entity> annotatedRecords = annotator.annotate(entitiesToAnnotate);
 
