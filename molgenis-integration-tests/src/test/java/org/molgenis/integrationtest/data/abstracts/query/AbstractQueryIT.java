@@ -73,6 +73,7 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 		testString();
 		testDate();
 		testDateTime();
+		testBool();
 		testXref();
 		testMref();
 	}
