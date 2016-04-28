@@ -36,7 +36,7 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 	static final String EMAIL = "email";
 	static final String ACCOUNT_BALANCE = "accountBalance";
 	static final String SERIAL_NUMBER = "serialNumber";
-	static final String BIRTHTIME = "birthTime";
+	static final String BIRTH_TIME = "birthTime";
 
 	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -79,9 +79,8 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 
 	private Repository<Entity> createTestRepo()
 	{
-		// define model
 		DefaultEntityMetaData countryEMD = new DefaultEntityMetaData("query_country");
-		countryEMD.addAttribute("code", ROLE_ID).setNillable(false); // TODO: make this an enum!
+		countryEMD.addAttribute("code", ROLE_ID).setNillable(false);
 
 		DefaultEntityMetaData bookEMD = new DefaultEntityMetaData("query_book");
 		bookEMD.addAttribute("title", ROLE_ID).setNillable(false);
@@ -92,7 +91,7 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 		personEMD.addAttribute(FIRST_NAME);
 		personEMD.addAttribute(LAST_NAME);
 		personEMD.addAttribute(BIRTHDAY).setDataType(DATE);
-		personEMD.addAttribute(BIRTHTIME).setDataType(DATETIME);
+		personEMD.addAttribute(BIRTH_TIME).setDataType(DATETIME);
 		personEMD.addAttribute(HEIGHT).setDataType(INT);
 		personEMD.addAttribute(ACTIVE).setDataType(BOOL);
 		personEMD.addAttribute(COUNTRY).setDataType(XREF).setRefEntity(countryEMD);
@@ -129,7 +128,7 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 			person1.set(FIRST_NAME, "john");
 			person1.set(LAST_NAME, "doe");
 			person1.set(BIRTHDAY, dateFormat.parse("1976-06-07"));
-			person1.set(BIRTHTIME, dateTimeFormat.parse("1976-06-07 06:06:06"));
+			person1.set(BIRTH_TIME, dateTimeFormat.parse("1976-06-07 06:06:06"));
 			person1.set(HEIGHT, 180);
 			person1.set(ACTIVE, true);
 			person1.set(COUNTRY, "US");
@@ -144,7 +143,7 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 			person2.set(FIRST_NAME, "jane");
 			person2.set(LAST_NAME, "doe");
 			person2.set(BIRTHDAY, dateFormat.parse("1980-06-07"));
-			person2.set(BIRTHTIME, dateTimeFormat.parse("1976-06-07 07:07:07"));
+			person2.set(BIRTH_TIME, dateTimeFormat.parse("1976-06-07 07:07:07"));
 			person2.set(HEIGHT, 165);
 			person2.set(ACTIVE, false);
 			person2.set(COUNTRY, "US");
@@ -159,7 +158,7 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 			person3.set(FIRST_NAME, "donald");
 			person3.set(LAST_NAME, "duck");
 			person3.set(BIRTHDAY, dateFormat.parse("1950-01-31"));
-			person3.set(BIRTHTIME, dateTimeFormat.parse("1976-06-07 08:08:08"));
+			person3.set(BIRTH_TIME, dateTimeFormat.parse("1976-06-07 08:08:08"));
 			person3.set(HEIGHT, 180);
 			person3.set(ACTIVE, true);
 			person3.set(COUNTRY, "NL");

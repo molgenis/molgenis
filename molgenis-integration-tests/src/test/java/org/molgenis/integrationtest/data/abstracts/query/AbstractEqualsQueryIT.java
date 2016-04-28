@@ -7,7 +7,6 @@ import static org.testng.Assert.assertTrue;
 import java.text.ParseException;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
@@ -73,7 +72,7 @@ public abstract class AbstractEqualsQueryIT extends AbstractQueryIT
 	@Override
 	protected void testDateTime() throws ParseException
 	{
-		Query<Entity> query = new QueryImpl<>().eq(BIRTHTIME, dateTimeFormat.parse("1976-06-07 07:07:07"));
+		Query<Entity> query = new QueryImpl<>().eq(BIRTH_TIME, dateTimeFormat.parse("1976-06-07 07:07:07"));
 		assertEquals(personsRepository.findOne(query), person2);
 		assertEquals(personsRepository.findAll(query).collect(Collectors.toSet()), Sets.newHashSet(person2));
 		assertEquals(personsRepository.count(query), 1);

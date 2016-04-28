@@ -65,12 +65,12 @@ public class AbstractNotQueryIT extends AbstractQueryIT
 	protected void testDateTime() throws ParseException
 	{
 		assertTrue(newHashSet(person1, person2).contains(personsRepository
-				.findOne(notEqualsQueryBuilder(BIRTHTIME, dateTimeFormat.parse("1976-06-07 08:08:08")))));
+				.findOne(notEqualsQueryBuilder(BIRTH_TIME, dateTimeFormat.parse("1976-06-07 08:08:08")))));
 		assertEquals(
-				personsRepository.findAll(notEqualsQueryBuilder(BIRTHTIME, dateTimeFormat.parse("1976-06-07 08:08:08")))
+				personsRepository.findAll(notEqualsQueryBuilder(BIRTH_TIME, dateTimeFormat.parse("1976-06-07 08:08:08")))
 						.collect(toSet()), newHashSet(person1, person2));
 		assertEquals(
-				personsRepository.count(notEqualsQueryBuilder(BIRTHTIME, dateTimeFormat.parse("1976-06-07 08:08:08"))),
+				personsRepository.count(notEqualsQueryBuilder(BIRTH_TIME, dateTimeFormat.parse("1976-06-07 08:08:08"))),
 				2);
 	}
 
