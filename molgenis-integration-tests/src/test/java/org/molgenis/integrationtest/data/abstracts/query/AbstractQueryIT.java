@@ -1,5 +1,6 @@
 package org.molgenis.integrationtest.data.abstracts.query;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.molgenis.MolgenisFieldTypes.BOOL;
 import static org.molgenis.MolgenisFieldTypes.DATE;
 import static org.molgenis.MolgenisFieldTypes.DATETIME;
@@ -133,7 +134,7 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 			person1.set(HEIGHT, 180);
 			person1.set(ACTIVE, true);
 			person1.set(COUNTRY, "US");
-			person1.set(AUTHOR_OF, Lists.newArrayList(book1));
+			person1.set(AUTHOR_OF, newArrayList(book1));
 			person1.set(ACCOUNT_BALANCE, 299.99);
 			person1.set(SERIAL_NUMBER, 374278348334L);
 			persons.add(person1);
@@ -148,7 +149,7 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 			person2.set(HEIGHT, 165);
 			person2.set(ACTIVE, false);
 			person2.set(COUNTRY, "US");
-			person2.set(AUTHOR_OF, Lists.newArrayList(book1, book2));
+			person2.set(AUTHOR_OF, newArrayList(book1, book2));
 			person2.set(ACCOUNT_BALANCE, -0.70);
 			person2.set(SERIAL_NUMBER, 67986789879L);
 			persons.add(person2);
