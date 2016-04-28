@@ -12,6 +12,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -711,10 +712,7 @@ public class MysqlRepository extends AbstractRepository
 					// TODO needed when autoids are used to join
 					if (att.getDataType() instanceof MrefField)
 					{
-						select.append("GROUP_CONCAT(DISTINCT(").append('`').append(att.getName()).append('`')
-								.append('.').append('`').append(att.getName()).append('`').append(") ORDER BY `")
-								.append(att.getName()).append("`.`order`) AS ").append('`').append(att.getName())
-								.append('`');
+						select.append(MessageFormat.format("GROUP_CONCAT(DISTINCT(`{0}`.`{0}`) ORDER BY `{0}`.`order`) AS `{0}`", att.getName()));
 					}
 					else
 					{
