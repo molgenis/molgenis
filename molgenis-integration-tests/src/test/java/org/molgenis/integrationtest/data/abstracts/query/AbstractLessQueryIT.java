@@ -49,7 +49,7 @@ public class AbstractLessQueryIT extends AbstractQueryIT
 	@Override
 	void testString()
 	{
-		// TODO
+		// TODO NOT SUPPORTED
 	}
 
 	@Override
@@ -65,36 +65,30 @@ public class AbstractLessQueryIT extends AbstractQueryIT
 	@Override
 	void testDateTime() throws ParseException
 	{
-		// FIXME
-		// Query<Entity> query = new QueryImpl<>().lt(BIRTHDAY, dateTimeFormat.parse("2000-06-07 08:07:06"));
-		// Set<Entity> resultSet = Sets.newHashSet(person1, person2);
-		// assertTrue(resultSet.contains(personsRepository.findOne(query)));
-		// assertEquals(personsRepository.findAll(query).collect(Collectors.toSet()), resultSet);
-		// assertEquals(personsRepository.count(query), resultSet.size());
+		 Query<Entity> query = new QueryImpl<>().lt(BIRTH_TIME, dateTimeFormat.parse("2000-06-07 08:07:06"));
+		 Set<Entity> resultSet = Sets.newHashSet(person1, person2, person3);
+		 assertTrue(resultSet.contains(personsRepository.findOne(query)));
+		 assertEquals(personsRepository.findAll(query).collect(Collectors.toSet()), resultSet);
+		 assertEquals(personsRepository.count(query), resultSet.size());
 	}
 
 	@Override
 	void testBool()
 	{
-		// FIXME
-		// Query<Entity> query = new QueryImpl<>().lt(ACTIVE, false);
-		// Set<Entity> resultSet = Sets.newHashSet(person2);
-		// assertTrue(resultSet.contains(personsRepository.findOne(query)));
-		// assertEquals(personsRepository.findAll(query).collect(Collectors.toSet()), resultSet);
-		// assertEquals(personsRepository.count(query), resultSet.size());
+		// TODO NOT SUPPORTED
 	}
 
 	@Override
 	void testMref()
 	{
-		// TODO Auto-generated method stub
+		// TODO NOT SUPPORTED
 
 	}
 
 	@Override
 	void testXref()
 	{
-		// TODO Auto-generated method stub
+		// TODO NOT SUPPORTED
 
 	}
 
