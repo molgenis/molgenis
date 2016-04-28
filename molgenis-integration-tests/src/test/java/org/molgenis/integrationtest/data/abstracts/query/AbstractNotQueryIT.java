@@ -11,6 +11,7 @@ import static java.util.stream.Collectors.toSet;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+// FIXME The NOT operator fails in the PostgreSql query builder, builds ...NOT AND... instead of ...NOT...
 public class AbstractNotQueryIT extends AbstractQueryIT
 {
 	@Override
