@@ -37,9 +37,6 @@ public class IndexTransactionLogMetaData extends DefaultEntityMetaData
 
 	/**
 	 * Transaction status
-	 * 
-	 * @author jonathanjetten
-	 *
 	 */
 	public static enum TransactionStatus
 	{
@@ -59,9 +56,6 @@ public class IndexTransactionLogMetaData extends DefaultEntityMetaData
 
 	/**
 	 * Indexing transaction status
-	 * 
-	 * @author jonathanjetten
-	 *
 	 */
 	public static enum IndexStatus
 	{

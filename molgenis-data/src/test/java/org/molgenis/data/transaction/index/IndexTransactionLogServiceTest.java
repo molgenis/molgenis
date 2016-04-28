@@ -57,8 +57,6 @@ public class IndexTransactionLogServiceTest
 	{
 		Entity entity = indexTransactionLogService.createLog("1");
 		assertEquals(entity.get(IndexTransactionLogMetaData.TRANSACTION_ID), "1");
-		// assertEquals(entity.get(IndexTransactionLogMetaData.USER_NAME), null); // on server null on local machine
-		// "username"
 		assertNotNull(entity.get(IndexTransactionLogMetaData.START_TIME));
 		assertEquals(entity.get(IndexTransactionLogMetaData.TRANSACTION_STATUS), TransactionStatus.STARTED.name());
 		assertEquals(entity.get(IndexTransactionLogMetaData.INDEX_STATUS), IndexStatus.NONE.name());

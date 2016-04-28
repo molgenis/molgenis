@@ -22,12 +22,7 @@ import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.OwnedEntityMetaData;
 import org.molgenis.data.support.UuidGenerator;
-<<<<<<< HEAD
-import org.molgenis.data.transaction.TransactionConfig;
-import org.molgenis.data.transaction.TransactionLogService;
 import org.molgenis.data.transaction.index.IndexTransactionLogService;
-=======
->>>>>>> 83de4092ec8c103bbf0acc2758e9b8d27f0d8064
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.file.FileMetaMetaData;

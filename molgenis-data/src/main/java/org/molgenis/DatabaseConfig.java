@@ -7,7 +7,6 @@ import javax.sql.DataSource;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.JobExecutionUpdaterImpl;
-import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -66,15 +65,9 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 	}
 
 	@Bean
-	public IdGenerator idGenerator()
-	{
-		return new UuidGenerator();
-	}
-
-	@Bean
 	public MolgenisTransactionManager transactionManager()
 	{
-		return new MolgenisTransactionManager(idGenerator(), dataSource());
+		return new MolgenisTransactionManager(idGenerator, dataSource());
 	}
 
 	@Override

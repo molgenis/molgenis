@@ -25,7 +25,7 @@ import org.molgenis.util.EntityUtils;
 public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFactory
 {
 	private final EntityManager entityManager;
-	private final IndexTransactionLogService indexTansactionLogService;
+	private final IndexTransactionLogService indexTransactionLogService;
 	private final EntityAttributesValidator entityAttributesValidator;
 	private final IdGenerator idGenerator;
 	private final AppSettings appSettings;
@@ -37,7 +37,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			EntityAttributesValidator entityAttributesValidator, IdGenerator idGenerator, AppSettings appSettings,
 			DataService dataService, ExpressionValidator expressionValidator,
 			RepositoryDecoratorRegistry repositoryDecoratorRegistry,
-			IndexTransactionLogService indexTansactionLogService)
+			IndexTransactionLogService indexTransactionLogService)
 	{
 		this.entityManager = entityManager;
 		this.entityAttributesValidator = entityAttributesValidator;
@@ -46,7 +46,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.dataService = dataService;
 		this.expressionValidator = expressionValidator;
 		this.repositoryDecoratorRegistry = repositoryDecoratorRegistry;
-		this.indexTansactionLogService = indexTansactionLogService;
+		this.indexTransactionLogService = indexTransactionLogService;
 	}
 
 	@Override
@@ -75,7 +75,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		decoratedRepository = new EntityListenerRepositoryDecorator(decoratedRepository);
 
 		// 4. Index Transaction log decorator
-		decoratedRepository = new IndexTransactionLogRepositoryDecorator(decoratedRepository, indexTansactionLogService);
+		decoratedRepository = new IndexTransactionLogRepositoryDecorator(decoratedRepository,
+				indexTransactionLogService);
 
 		// 3. validation decorator
 		decoratedRepository = new RepositoryValidationDecorator(dataService, decoratedRepository,
