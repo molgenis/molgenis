@@ -1,5 +1,7 @@
 package org.molgenis.integrationtest.data.abstracts.query;
 
+import static autovalue.shaded.com.google.common.common.collect.Lists.*;
+import static java.util.stream.Collectors.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -20,39 +22,39 @@ public class AbstractInQueryIT extends AbstractQueryIT
 	@Override
 	void testInt()
 	{
-		Query<Entity> query = new QueryImpl<>().in(HEIGHT, Lists.newArrayList(180, 165, 20));
+		Query<Entity> query = new QueryImpl<>().in(HEIGHT, newArrayList(180, 165, 20));
 		Set<Entity> resultSet = Sets.newHashSet(person1, person2, person3);
 		assertTrue(resultSet.contains(personsRepository.findOne(query)));
-		assertEquals(personsRepository.findAll(query).collect(Collectors.toSet()), resultSet);
+		assertEquals(personsRepository.findAll(query).collect(toSet()), resultSet);
 		assertEquals(personsRepository.count(query), resultSet.size());
 	}
 
 	@Override
 	void testDecimal()
 	{
-		Query<Entity> query = new QueryImpl<>().in(ACCOUNT_BALANCE, Lists.newArrayList(1000.00, -0.70));
+		Query<Entity> query = new QueryImpl<>().in(ACCOUNT_BALANCE, newArrayList(1000.00, -0.70));
 		Set<Entity> resultSet = Sets.newHashSet(person2, person3);
 		assertTrue(resultSet.contains(personsRepository.findOne(query)));
-		assertEquals(personsRepository.findAll(query).collect(Collectors.toSet()), resultSet);
+		assertEquals(personsRepository.findAll(query).collect(toSet()), resultSet);
 		assertEquals(personsRepository.count(query), resultSet.size());
 	}
 
 	@Override
 	void testLong()
 	{
-		Query<Entity> query = new QueryImpl<>().in(SERIAL_NUMBER, Lists.newArrayList(374278348334L, 50L));
+		Query<Entity> query = new QueryImpl<>().in(SERIAL_NUMBER, newArrayList(374278348334L, 50L));
 		assertEquals(personsRepository.findOne(query), person1);
-		assertEquals(personsRepository.findAll(query).collect(Collectors.toList()), Lists.newArrayList(person1));
+		assertEquals(personsRepository.findAll(query).collect(toList()), newArrayList(person1));
 		assertEquals(personsRepository.count(query), 1);
 	}
 
 	@Override
 	void testString()
 	{
-		Query<Entity> query = new QueryImpl<>().in(LAST_NAME, Lists.newArrayList("doe", "re", "mi"));
+		Query<Entity> query = new QueryImpl<>().in(LAST_NAME, newArrayList("doe", "re", "mi"));
 		Set<Entity> resultSet = Sets.newHashSet(person1, person2);
 		assertTrue(resultSet.contains(personsRepository.findOne(query)));
-		assertEquals(personsRepository.findAll(query).collect(Collectors.toSet()), resultSet);
+		assertEquals(personsRepository.findAll(query).collect(toSet()), resultSet);
 		assertEquals(personsRepository.count(query), resultSet.size());
 	}
 
@@ -85,10 +87,10 @@ public class AbstractInQueryIT extends AbstractQueryIT
 	@Override
 	void testBool()
 	{
-		Query<Entity> query = new QueryImpl<>().in(ACTIVE, Lists.newArrayList(true, false));
+		Query<Entity> query = new QueryImpl<>().in(ACTIVE, newArrayList(true, false));
 		Set<Entity> resultSet = Sets.newHashSet(person1, person2, person3);
 		assertTrue(resultSet.contains(personsRepository.findOne(query)));
-		assertEquals(personsRepository.findAll(query).collect(Collectors.toSet()), resultSet);
+		assertEquals(personsRepository.findAll(query).collect(toSet()), resultSet);
 		assertEquals(personsRepository.count(query), resultSet.size());
 	}
 
@@ -96,20 +98,20 @@ public class AbstractInQueryIT extends AbstractQueryIT
 	void testMref()
 	{
 		Query<Entity> query = new QueryImpl<>().in(AUTHOR_OF,
-				Lists.newArrayList("MOLGENIS for dummies", "Your database at the push of a button"));
+				newArrayList("MOLGENIS for dummies", "Your database at the push of a button"));
 		Set<Entity> resultSet = Sets.newHashSet(person1, person2);
 		assertTrue(resultSet.contains(personsRepository.findOne(query)));
-		assertEquals(personsRepository.findAll(query).collect(Collectors.toSet()), resultSet);
+		assertEquals(personsRepository.findAll(query).collect(toSet()), resultSet);
 		assertEquals(personsRepository.count(query), resultSet.size());
 	}
 
 	@Override
 	void testXref()
 	{
-		Query<Entity> query = new QueryImpl<>().in(COUNTRY, Lists.newArrayList("NL", "DE", "XX"));
+		Query<Entity> query = new QueryImpl<>().in(COUNTRY, newArrayList("NL", "DE", "XX"));
 		Set<Entity> resultSet = Sets.newHashSet(person3);
 		assertTrue(resultSet.contains(personsRepository.findOne(query)));
-		assertEquals(personsRepository.findAll(query).collect(Collectors.toSet()), resultSet);
+		assertEquals(personsRepository.findAll(query).collect(toSet()), resultSet);
 		assertEquals(personsRepository.count(query), resultSet.size());
 	}
 

@@ -1,5 +1,6 @@
 package org.molgenis.integrationtest.data.abstracts.query;
 
+import static java.util.stream.Collectors.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -21,7 +22,7 @@ public class AbstractLessQueryIT extends AbstractQueryIT
 		Query<Entity> query = new QueryImpl<>().lt(HEIGHT, 180);
 		Set<Entity> resultSet = Sets.newHashSet(person2);
 		assertTrue(resultSet.contains(personsRepository.findOne(query)));
-		assertEquals(personsRepository.findAll(query).collect(Collectors.toSet()), resultSet);
+		assertEquals(personsRepository.findAll(query).collect(toSet()), resultSet);
 		assertEquals(personsRepository.count(query), resultSet.size());
 
 	}
@@ -32,7 +33,7 @@ public class AbstractLessQueryIT extends AbstractQueryIT
 		Query<Entity> query = new QueryImpl<>().lt(ACCOUNT_BALANCE, 1000.00);
 		Set<Entity> resultSet = Sets.newHashSet(person1, person2);
 		assertTrue(resultSet.contains(personsRepository.findOne(query)));
-		assertEquals(personsRepository.findAll(query).collect(Collectors.toSet()), resultSet);
+		assertEquals(personsRepository.findAll(query).collect(toSet()), resultSet);
 		assertEquals(personsRepository.count(query), resultSet.size());
 	}
 
@@ -42,7 +43,7 @@ public class AbstractLessQueryIT extends AbstractQueryIT
 		Query<Entity> query = new QueryImpl<>().lt(SERIAL_NUMBER, 67986789879L);
 		Set<Entity> resultSet = Sets.newHashSet(person3);
 		assertTrue(resultSet.contains(personsRepository.findOne(query)));
-		assertEquals(personsRepository.findAll(query).collect(Collectors.toSet()), resultSet);
+		assertEquals(personsRepository.findAll(query).collect(toSet()), resultSet);
 		assertEquals(personsRepository.count(query), resultSet.size());
 	}
 
@@ -58,7 +59,7 @@ public class AbstractLessQueryIT extends AbstractQueryIT
 		Query<Entity> query = new QueryImpl<>().lt(BIRTHDAY, dateFormat.parse("2000-06-07"));
 		Set<Entity> resultSet = Sets.newHashSet(person1, person2, person3);
 		assertTrue(resultSet.contains(personsRepository.findOne(query)));
-		assertEquals(personsRepository.findAll(query).collect(Collectors.toSet()), resultSet);
+		assertEquals(personsRepository.findAll(query).collect(toSet()), resultSet);
 		assertEquals(personsRepository.count(query), resultSet.size());
 	}
 
@@ -68,7 +69,7 @@ public class AbstractLessQueryIT extends AbstractQueryIT
 		 Query<Entity> query = new QueryImpl<>().lt(BIRTH_TIME, dateTimeFormat.parse("2000-06-07 08:07:06"));
 		 Set<Entity> resultSet = Sets.newHashSet(person1, person2, person3);
 		 assertTrue(resultSet.contains(personsRepository.findOne(query)));
-		 assertEquals(personsRepository.findAll(query).collect(Collectors.toSet()), resultSet);
+		 assertEquals(personsRepository.findAll(query).collect(toSet()), resultSet);
 		 assertEquals(personsRepository.count(query), resultSet.size());
 	}
 
