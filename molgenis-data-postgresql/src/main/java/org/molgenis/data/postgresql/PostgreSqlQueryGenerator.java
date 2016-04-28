@@ -533,7 +533,7 @@ class PostgreSqlQueryGenerator
 					parameters.add(convertedVal);
 
 					if (result.length() > 0 && !result.toString().endsWith(" OR ")
-							&& !result.toString().endsWith(" AND "))
+							&& !result.toString().endsWith(" AND ") && !result.toString().endsWith(" NOT "))
 					{
 						result.append(" AND ");
 					}
