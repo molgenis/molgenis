@@ -70,13 +70,12 @@ public class AbstractInQueryIT extends AbstractQueryIT
 	@Override
 	void testDateTime() throws ParseException
 	{
-		// FIXME
-		// Query<Entity> query = new QueryImpl<>().in(BIRTHDAY, Lists.newArrayList(
-		// dateTimeFormat.parse("1976-06-07 08:08:08"), dateTimeFormat.parse("1976-06-07 06:06:06")));
-		// Set<Entity> resultSet = Sets.newHashSet(person1, person3);
-		// assertTrue(resultSet.contains(personsRepository.findOne(query)));
-		// assertEquals(personsRepository.findAll(query).collect(Collectors.toSet()), resultSet);
-		// assertEquals(personsRepository.count(query), resultSet.size());
+		 Query<Entity> query = new QueryImpl<>().in(
+				 BIRTH_TIME, Lists.newArrayList(dateTimeFormat.parse("1976-06-07 08:08:08"), dateTimeFormat.parse("1976-06-07 06:06:06")));
+		 Set<Entity> resultSet = Sets.newHashSet(person1, person3);
+		 assertTrue(resultSet.contains(personsRepository.findOne(query)));
+		 assertEquals(personsRepository.findAll(query).collect(Collectors.toSet()), resultSet);
+		 assertEquals(personsRepository.count(query), resultSet.size());
 	}
 
 	@Override
