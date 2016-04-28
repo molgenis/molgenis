@@ -120,20 +120,9 @@ public class RebuildPartialIndex implements Runnable
 			CudType cudType)
 	{
 		Stream<Entity> entities = dataService.findAll(entityFullName);
-		switch (cudType)
-		{
-			case UPDATE:
-			case ADD:
-				this.searchService.deleteEntitiesNoValidation(entities, entityMetaData);
-				entities = dataService.findAll(entityFullName);
-				this.searchService.index(entities, entityMetaData, IndexingMode.ADD);
-				break;
-			case DELETE:
-				this.searchService.deleteEntitiesNoValidation(entities, entityMetaData);
-				break;
-			default:
-				break;
-		}
+		this.searchService.deleteEntitiesNoValidation(entities, entityMetaData);
+		entities = dataService.findAll(entityFullName);
+		this.searchService.index(entities, entityMetaData, IndexingMode.ADD);
 	}
 
 	private void rebuildIndexEntityMeta(String transactionId, String entityFullName, EntityMetaData entityMetaData,
