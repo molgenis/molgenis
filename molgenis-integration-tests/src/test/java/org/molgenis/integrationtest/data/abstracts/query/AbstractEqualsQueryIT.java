@@ -1,11 +1,13 @@
 package org.molgenis.integrationtest.data.abstracts.query;
 
+import static com.google.common.collect.Lists.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.text.ParseException;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
@@ -89,11 +91,14 @@ public abstract class AbstractEqualsQueryIT extends AbstractQueryIT
 	@Override
 	protected void testMref()
 	{
-		// TODO equals multiple references?
 		Query<Entity> query = new QueryImpl<>().eq(AUTHOR_OF, "MOLGENIS for dummies");
 		assertTrue(Sets.newHashSet(person1, person2).contains(personsRepository.findOne(query)));
 		assertEquals(personsRepository.findAll(query).collect(Collectors.toSet()), Sets.newHashSet(person1, person2));
 		assertEquals(personsRepository.count(query), 2);
-	}
 
+		query = new QueryImpl<>().eq(AUTHOR_OF, newArrayList("MOLGENIS for dummies", "Your database at the push of a button"));
+		assertTrue(Sets.newHashSet(person2).contains(personsRepository.findOne(query)));
+		assertEquals(personsRepository.findAll(query).collect(Collectors.toSet()), Sets.newHashSet(person2));
+		assertEquals(personsRepository.count(query), 1);
+	}
 }
