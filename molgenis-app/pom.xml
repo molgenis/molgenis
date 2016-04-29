@@ -9,45 +9,6 @@
 	<artifactId>molgenis-app</artifactId>
 	<packaging>war</packaging>
 
-	<repositories>
-		<repository>
-			<id>uoft-releases</id>
-			<name>UofT Releases repository</name>
-			<url>http://nexus.cs.toronto.edu/nexus/content/repositories/releases/</url>
-			<releases>
-				<enabled>true</enabled>
-				<checksumPolicy>fail</checksumPolicy>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-				<checksumPolicy>fail</checksumPolicy>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>uoft-snapshots</id>
-			<name>UofT Releases repository</name>
-			<url>http://nexus.cs.toronto.edu/nexus/content/repositories/snapshots/</url>
-			<releases>
-				<enabled>false</enabled>
-				<checksumPolicy>fail</checksumPolicy>
-			</releases>
-			<snapshots>
-				<checksumPolicy>fail</checksumPolicy>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>uoft-externals</id>
-			<name>UofT external repositories mirror</name>
-			<url>http://nexus.cs.toronto.edu/nexus/content/groups/public/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-
 	<build>
 		<resources>
 			<resource>
