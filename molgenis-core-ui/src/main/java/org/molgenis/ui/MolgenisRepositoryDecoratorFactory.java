@@ -12,10 +12,10 @@ import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.RepositorySecurityDecorator;
+import org.molgenis.data.elasticsearch.reindex.ReindexActionRegisterService;
+import org.molgenis.data.elasticsearch.reindex.ReindexActionRepositoryDecorator;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.OwnedEntityMetaData;
-import org.molgenis.data.transaction.index.IndexTransactionLogRepositoryDecorator;
-import org.molgenis.data.transaction.index.IndexTransactionLogService;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
@@ -25,7 +25,7 @@ import org.molgenis.util.EntityUtils;
 public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFactory
 {
 	private final EntityManager entityManager;
-	private final IndexTransactionLogService indexTransactionLogService;
+	private final ReindexActionRegisterService indexTransactionLogService;
 	private final EntityAttributesValidator entityAttributesValidator;
 	private final IdGenerator idGenerator;
 	private final AppSettings appSettings;
@@ -37,7 +37,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			EntityAttributesValidator entityAttributesValidator, IdGenerator idGenerator, AppSettings appSettings,
 			DataService dataService, ExpressionValidator expressionValidator,
 			RepositoryDecoratorRegistry repositoryDecoratorRegistry,
-			IndexTransactionLogService indexTransactionLogService)
+			ReindexActionRegisterService indexTransactionLogService)
 	{
 		this.entityManager = entityManager;
 		this.entityAttributesValidator = entityAttributesValidator;
@@ -75,7 +75,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		decoratedRepository = new EntityListenerRepositoryDecorator(decoratedRepository);
 
 		// 4. Index Transaction log decorator
-		decoratedRepository = new IndexTransactionLogRepositoryDecorator(decoratedRepository,
+		decoratedRepository = new ReindexActionRepositoryDecorator(decoratedRepository,
 				indexTransactionLogService);
 
 		// 3. validation decorator

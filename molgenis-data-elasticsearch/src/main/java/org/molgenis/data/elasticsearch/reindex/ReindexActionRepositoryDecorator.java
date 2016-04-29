@@ -1,4 +1,4 @@
-package org.molgenis.data.transaction.index;
+package org.molgenis.data.elasticsearch.reindex;
 
 import static java.util.Objects.requireNonNull;
 
@@ -17,19 +17,19 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.transaction.index.IndexTransactionLogEntryMetaData.CudType;
-import org.molgenis.data.transaction.index.IndexTransactionLogEntryMetaData.DataType;
+import org.molgenis.data.elasticsearch.reindex.ReindexActionMetaData.CudType;
+import org.molgenis.data.elasticsearch.reindex.ReindexActionMetaData.DataType;
 
-public class IndexTransactionLogRepositoryDecorator implements Repository<Entity>
+public class ReindexActionRepositoryDecorator implements Repository<Entity>
 {
 	private final Repository<Entity> decorated;
-	private final IndexTransactionLogService indexTransactionLogService;
+	private final ReindexActionRegisterService reindexActionRegisterService;
 
-	public IndexTransactionLogRepositoryDecorator(Repository<Entity> decorated,
-			IndexTransactionLogService indexTransactionLogService)
+	public ReindexActionRepositoryDecorator(Repository<Entity> decorated,
+			ReindexActionRegisterService reindexActionRegisterService)
 	{
 		this.decorated = requireNonNull(decorated);
-		this.indexTransactionLogService = requireNonNull(indexTransactionLogService);
+		this.reindexActionRegisterService = requireNonNull(reindexActionRegisterService);
 	}
 
 	@Override
@@ -108,14 +108,14 @@ public class IndexTransactionLogRepositoryDecorator implements Repository<Entity
 	public void update(Entity entity)
 	{
 		decorated.update(entity);
-		indexTransactionLogService.log(getEntityMetaData(), CudType.UPDATE, DataType.DATA, entity.getIdValue()
+		reindexActionRegisterService.register(getEntityMetaData(), CudType.UPDATE, DataType.DATA, entity.getIdValue()
 				.toString());
 	}
 
 	@Override
 	public void delete(Entity entity)
 	{
-		indexTransactionLogService.log(getEntityMetaData(), CudType.DELETE, DataType.DATA, entity.getIdValue()
+		reindexActionRegisterService.register(getEntityMetaData(), CudType.DELETE, DataType.DATA, entity.getIdValue()
 				.toString());
 		decorated.delete(entity);
 	}
@@ -123,14 +123,14 @@ public class IndexTransactionLogRepositoryDecorator implements Repository<Entity
 	@Override
 	public void deleteById(Object id)
 	{
-		indexTransactionLogService.log(getEntityMetaData(), CudType.DELETE, DataType.DATA, id.toString());
+		reindexActionRegisterService.register(getEntityMetaData(), CudType.DELETE, DataType.DATA, id.toString());
 		decorated.deleteById(id);
 	}
 
 	@Override
 	public void deleteAll()
 	{
-		indexTransactionLogService.log(getEntityMetaData(), CudType.DELETE, DataType.DATA, null);
+		reindexActionRegisterService.register(getEntityMetaData(), CudType.DELETE, DataType.DATA, null);
 		decorated.deleteAll();
 	}
 
@@ -138,13 +138,13 @@ public class IndexTransactionLogRepositoryDecorator implements Repository<Entity
 	public void add(Entity entity)
 	{
 		decorated.add(entity);
-		indexTransactionLogService.log(getEntityMetaData(), CudType.ADD, DataType.DATA, entity.getIdValue().toString());
+		reindexActionRegisterService.register(getEntityMetaData(), CudType.ADD, DataType.DATA, entity.getIdValue().toString());
 	}
 
 	@Override
 	public Integer add(Stream<Entity> entities)
 	{
-		indexTransactionLogService.log(getEntityMetaData(), CudType.ADD, DataType.DATA, null);
+		reindexActionRegisterService.register(getEntityMetaData(), CudType.ADD, DataType.DATA, null);
 		return decorated.add(entities);
 	}
 
@@ -175,7 +175,7 @@ public class IndexTransactionLogRepositoryDecorator implements Repository<Entity
 	@Override
 	public void rebuildIndex()
 	{
-		indexTransactionLogService.log(getEntityMetaData(), CudType.UPDATE, DataType.METADATA, null);
+		// FIXME GitHub #4809
 		decorated.rebuildIndex();
 	}
 
@@ -218,21 +218,21 @@ public class IndexTransactionLogRepositoryDecorator implements Repository<Entity
 	@Override
 	public void update(Stream<Entity> entities)
 	{
-		indexTransactionLogService.log(getEntityMetaData(), CudType.UPDATE, DataType.DATA, null);
+		reindexActionRegisterService.register(getEntityMetaData(), CudType.UPDATE, DataType.DATA, null);
 		decorated.update(entities);
 	}
 
 	@Override
 	public void delete(Stream<Entity> entities)
 	{
-		indexTransactionLogService.log(getEntityMetaData(), CudType.DELETE, DataType.DATA, null);
+		reindexActionRegisterService.register(getEntityMetaData(), CudType.DELETE, DataType.DATA, null);
 		decorated.delete(entities);
 	}
 
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
-		indexTransactionLogService.log(getEntityMetaData(), CudType.DELETE, DataType.DATA, null);
+		reindexActionRegisterService.register(getEntityMetaData(), CudType.DELETE, DataType.DATA, null);
 		decorated.deleteAll(ids);
 	}
 

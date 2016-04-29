@@ -1,4 +1,4 @@
-package org.molgenis.data.transaction.index;
+package org.molgenis.data.elasticsearch.reindex;
 
 import static java.util.Objects.requireNonNull;
 
@@ -9,19 +9,19 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
-import org.molgenis.data.transaction.index.IndexTransactionLogEntryMetaData.CudType;
-import org.molgenis.data.transaction.index.IndexTransactionLogEntryMetaData.DataType;
+import org.molgenis.data.elasticsearch.reindex.ReindexActionMetaData.CudType;
+import org.molgenis.data.elasticsearch.reindex.ReindexActionMetaData.DataType;
 
-public class IndexTransactionLogRepositoryCollectionDecorator implements ManageableRepositoryCollection
+public class ReindexActionRepositoryCollectionDecorator implements ManageableRepositoryCollection
 {
 	private final ManageableRepositoryCollection decorated;
-	private final IndexTransactionLogService indexTransactionLogService;
+	private final ReindexActionRegisterService reindexActionRegisterService;
 
-	public IndexTransactionLogRepositoryCollectionDecorator(ManageableRepositoryCollection decorated,
-			IndexTransactionLogService indexTransactionLogService)
+	public ReindexActionRepositoryCollectionDecorator(ManageableRepositoryCollection decorated,
+			ReindexActionRegisterService reindexActionRegisterService)
 	{
 		this.decorated = requireNonNull(decorated);
-		this.indexTransactionLogService = requireNonNull(indexTransactionLogService);
+		this.reindexActionRegisterService = requireNonNull(reindexActionRegisterService);
 	}
 
 	@Override
@@ -38,7 +38,7 @@ public class IndexTransactionLogRepositoryCollectionDecorator implements Managea
 	@Override
 	public void deleteEntityMeta(String entityName)
 	{
-		this.indexTransactionLogService.log(this.decorated.getRepository(entityName).getEntityMetaData(),
+		this.reindexActionRegisterService.register(this.decorated.getRepository(entityName).getEntityMetaData(),
 				CudType.DELETE, DataType.METADATA, null);
 		this.decorated.deleteEntityMeta(entityName);
 	}
@@ -46,7 +46,7 @@ public class IndexTransactionLogRepositoryCollectionDecorator implements Managea
 	@Override
 	public void addAttribute(String entityName, AttributeMetaData attribute)
 	{
-		this.indexTransactionLogService.log(this.decorated.getRepository(entityName).getEntityMetaData(),
+		this.reindexActionRegisterService.register(this.decorated.getRepository(entityName).getEntityMetaData(),
 				CudType.UPDATE,
 				DataType.METADATA, null);
 		this.decorated.addAttribute(entityName, attribute);
@@ -55,7 +55,7 @@ public class IndexTransactionLogRepositoryCollectionDecorator implements Managea
 	@Override
 	public void deleteAttribute(String entityName, String attributeName)
 	{
-		this.indexTransactionLogService.log(this.decorated.getRepository(entityName).getEntityMetaData(),
+		this.reindexActionRegisterService.register(this.decorated.getRepository(entityName).getEntityMetaData(),
 				CudType.UPDATE, DataType.METADATA, null);
 		this.decorated.deleteAttribute(entityName, attributeName);
 	}
@@ -63,7 +63,7 @@ public class IndexTransactionLogRepositoryCollectionDecorator implements Managea
 	@Override
 	public void addAttributeSync(String entityName, AttributeMetaData attribute)
 	{
-		this.indexTransactionLogService.log(this.decorated.getRepository(entityName).getEntityMetaData(),
+		this.reindexActionRegisterService.register(this.decorated.getRepository(entityName).getEntityMetaData(),
 				CudType.UPDATE,
 				DataType.METADATA, null);
 		this.decorated.addAttribute(entityName, attribute);
@@ -78,7 +78,7 @@ public class IndexTransactionLogRepositoryCollectionDecorator implements Managea
 	@Override
 	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
 	{
-		this.indexTransactionLogService.log(entityMeta, CudType.ADD,
+		this.reindexActionRegisterService.register(entityMeta, CudType.ADD,
 				DataType.METADATA, null);
 		return this.decorated.addEntityMeta(entityMeta);
 	}

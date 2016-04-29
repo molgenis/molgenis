@@ -15,6 +15,9 @@ import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
+import org.molgenis.data.elasticsearch.reindex.ReindexActionJobMetaData;
+import org.molgenis.data.elasticsearch.reindex.ReindexActionMetaData;
+import org.molgenis.data.elasticsearch.reindex.ReindexActionRegisterService;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
@@ -22,7 +25,6 @@ import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.OwnedEntityMetaData;
 import org.molgenis.data.support.UuidGenerator;
-import org.molgenis.data.transaction.index.IndexTransactionLogService;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.file.FileMetaMetaData;
@@ -59,7 +61,7 @@ public abstract class AbstractDataApiTestConfig
 	protected SearchService searchService;
 
 	@Autowired
-	private IndexTransactionLogService indexTransactionLogService;
+	private ReindexActionRegisterService reindexActionRegisterService;
 
 	@Autowired
 	public ExpressionValidator expressionValidator;
@@ -138,9 +140,9 @@ public abstract class AbstractDataApiTestConfig
 			@Override
 			public Repository<Entity> createDecoratedRepository(Repository<Entity> repository)
 			{
-				return new MolgenisRepositoryDecoratorFactory(entityManager(),
-						entityAttributesValidator(), idGenerator, appSettings(), dataService(), expressionValidator,
-						repositoryDecoratorRegistry(), indexTransactionLogService)
+				return new MolgenisRepositoryDecoratorFactory(entityManager(), entityAttributesValidator(),
+						idGenerator, appSettings(), dataService(), expressionValidator, repositoryDecoratorRegistry(),
+						reindexActionRegisterService())
 						.createDecoratedRepository(repository);
 			}
 		};
@@ -168,6 +170,14 @@ public abstract class AbstractDataApiTestConfig
 	public PasswordEncoder passwordEncoder()
 	{
 		return new MolgenisPasswordEncoder(new BCryptPasswordEncoder());
+	}
+	
+	@Bean
+	public ReindexActionRegisterService reindexActionRegisterService()
+	{
+		ReindexActionJobMetaData reindexActionJobMetaData = new ReindexActionJobMetaData(getBackend().getName());
+		ReindexActionMetaData reindexActionMetaData = new ReindexActionMetaData(reindexActionJobMetaData, getBackend().getName());
+		return new ReindexActionRegisterService(dataService(), reindexActionJobMetaData, reindexActionMetaData);
 	}
 
 }
