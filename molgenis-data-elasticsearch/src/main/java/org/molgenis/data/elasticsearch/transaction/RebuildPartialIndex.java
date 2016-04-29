@@ -82,22 +82,22 @@ public class RebuildPartialIndex implements Runnable
 			
 			if (entityId != null)
 			{
-				this.rebuildIndexOneEntity(this.transactionId, entityFullName, entityId, cudType);
+				this.rebuildIndexOneEntity(entityFullName, entityId, cudType);
 			}
 			else if (dataType.equals(DataType.DATA))
 			{
-				this.rebuildIndexBatchEntities(this.transactionId, entityFullName, entityMetaData, cudType);
+				this.rebuildIndexBatchEntities(entityFullName, entityMetaData);
 			}
 			else
 			{
-				this.rebuildIndexEntityMeta(this.transactionId, entityFullName, entityMetaData, cudType);
+				this.rebuildIndexEntityMeta(entityFullName, entityMetaData, cudType);
 			}
 		});
 
 		this.searchService.refreshIndex();
 	}
 
-	private void rebuildIndexOneEntity(String transactionId, String entityFullName, String entityId, CudType cudType)
+	private void rebuildIndexOneEntity(String entityFullName, String entityId, CudType cudType)
 	{
 		Entity entity = dataService.findOneById(entityFullName, entityId);
 		switch (cudType)
@@ -109,33 +109,26 @@ public class RebuildPartialIndex implements Runnable
 				this.searchService.index(entity, entity.getEntityMetaData(), IndexingMode.UPDATE);
 				break;
 			case DELETE:
-				this.searchService.deleteByIdNoValidation(entityId, entityFullName);
+				this.searchService.deleteById(entityId, entity.getEntityMetaData());
 				break;
 			default:
 				break;
 		}
 	}
 	
-	private void rebuildIndexBatchEntities(String transactionId, String entityFullName, EntityMetaData entityMetaData,
-			CudType cudType)
+	private void rebuildIndexBatchEntities(String entityFullName, EntityMetaData entityMetaData)
 	{
-		Stream<Entity> entities = dataService.findAll(entityFullName);
-		this.searchService.deleteEntitiesNoValidation(entities, entityMetaData);
-		entities = dataService.findAll(entityFullName);
-		this.searchService.index(entities, entityMetaData, IndexingMode.ADD);
+		this.searchService.rebuildIndex(dataService.getRepository(entityFullName), entityMetaData);
 	}
 
-	private void rebuildIndexEntityMeta(String transactionId, String entityFullName, EntityMetaData entityMetaData,
+	private void rebuildIndexEntityMeta(String entityFullName, EntityMetaData entityMetaData,
 			CudType cudType)
 	{
 		switch (cudType)
 		{
 			case UPDATE:
 			case ADD:
-				this.searchService.delete(entityFullName);
-				this.searchService.createMappings(entityMetaData);
-				Stream<Entity> entities = dataService.findAll(entityFullName);
-				this.searchService.index(entities, entityMetaData, IndexingMode.ADD);
+				this.searchService.rebuildIndex(dataService.getRepository(entityFullName), entityMetaData);
 				break;
 			case DELETE:
 				this.searchService.delete(entityFullName);
