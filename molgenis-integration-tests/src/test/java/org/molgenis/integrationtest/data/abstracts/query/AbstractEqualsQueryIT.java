@@ -97,7 +97,8 @@ public abstract class AbstractEqualsQueryIT extends AbstractQueryIT
 		assertEquals(personsRepository.findAll(query).collect(toSet()), newHashSet(person1, person2));
 		assertEquals(personsRepository.count(query), 2);
 
-		// FIXME Works for ElasticSearch repository, it does not work for the PostgreSql repository...
+		// FIXME PSQLException: Can't infer the SQL type to use for an instance of java.util.ArrayList.
+		// FIXME Use setObject() with an explicit Types value to specify the type to use
 //		query = new QueryImpl<>().eq(AUTHOR_OF, newArrayList("MOLGENIS for dummies", "Your database at the push of a button"));
 //		assertTrue(Sets.newHashSet(person2).contains(personsRepository.findOne(query)));
 //		assertEquals(personsRepository.findAll(query).collect(Collectors.toSet()), Sets.newHashSet(person2));
