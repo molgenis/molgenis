@@ -174,34 +174,4 @@ public interface SearchService
 	void optimizeIndex();
 
 	void refreshIndex();
-
-	/**
-	 * Try to delete a row in a type without circular dependencies
-	 * 
-	 * TODO JJ Write tests
-	 * 
-	 * @param id
-	 * @param entityFullName
-	 */
-	void deleteByIdNoValidation(String id, String entityFullName);
-
-	/**
-	 * Rebuild an entity
-	 * 
-	 * TODO JJ Write tests
-	 * 
-	 * @param entities
-	 * @param entityMetaData
-	 */
-	void rebuildIndex(Stream<Entity> entities, EntityMetaData entityMetaData);
-
-	/**
-	 * Delete all in a type without circular dependencies checks
-	 * 
-	 * TODO JJ Write tests
-	 * 
-	 * @param entities
-	 * @param entityMetaData
-	 */
-	void deleteEntitiesNoValidation(Stream<Entity> entities, EntityMetaData entityMetaData);
 }
