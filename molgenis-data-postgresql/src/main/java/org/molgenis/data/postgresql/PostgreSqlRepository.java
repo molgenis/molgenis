@@ -543,15 +543,8 @@ public class PostgreSqlRepository extends AbstractRepository
 				String sql = getSqlSelect(getEntityMetaData(), batchQuery, parameters);
 				RowMapper<Entity> entityMapper = postgreSqlEntityFactory.createRowMapper(getEntityMetaData(),
 						batchQuery.getFetch());
-
-				if (LOG.isDebugEnabled())
-				{
-					LOG.debug("Fetching [{}] data for query [{}]", getName(), batchQuery);
-					if (LOG.isTraceEnabled())
-					{
-						LOG.trace("SQL: {}, parameters: {}", sql, parameters);
-					}
-				}
+				LOG.debug("Fetching [{}] data for query [{}]", getName(), batchQuery);
+				LOG.trace("SQL: {}, parameters: {}", sql, parameters);
 				return jdbcTemplate.query(sql, parameters.toArray(new Object[0]), entityMapper);
 			}
 		};
@@ -573,14 +566,8 @@ public class PostgreSqlRepository extends AbstractRepository
 		Iterators.partition(entities, BATCH_SIZE).forEachRemaining(entitiesBatch -> {
 			final Map<String, List<Map<String, Object>>> mrefs = new HashMap<>();
 
-			if (LOG.isDebugEnabled())
-			{
-				LOG.debug("Adding {} [{}] entities", entitiesBatch.size(), getName());
-				if (LOG.isTraceEnabled())
-				{
-					LOG.trace("SQL: {}", insertSql);
-				}
-			}
+			LOG.debug("Adding {} [{}] entities", entitiesBatch.size(), getName());
+			LOG.trace("SQL: {}", insertSql);
 			jdbcTemplate.batchUpdate(insertSql, new BatchPreparedStatementSetter()
 			{
 				@Override
@@ -630,10 +617,7 @@ public class PostgreSqlRepository extends AbstractRepository
 					// create the mref records
 					for (AttributeMetaData attr : persistedMrefAttrs)
 					{
-						if (mrefs.get(attr.getName()) == null)
-						{
-							mrefs.put(attr.getName(), new ArrayList<>());
-						}
+						mrefs.putIfAbsent(attr.getName(), new ArrayList<>());
 						if (entity.get(attr.getName()) != null)
 						{
 							AtomicInteger seqNr = new AtomicInteger();
@@ -685,14 +669,8 @@ public class PostgreSqlRepository extends AbstractRepository
 			final List<Object> ids = new ArrayList<Object>();
 			final Map<String, List<Map<String, Object>>> mrefs = new HashMap<>();
 
-			if (LOG.isDebugEnabled())
-			{
-				LOG.debug("Updating {} [{}] entities", entitiesBatch.size(), getName());
-				if (LOG.isTraceEnabled())
-				{
-					LOG.trace("SQL: {}", updateSql);
-				}
-			}
+			LOG.debug("Updating {} [{}] entities", entitiesBatch.size(), getName());
+			LOG.trace("SQL: {}", updateSql);
 			jdbcTemplate.batchUpdate(updateSql, new BatchPreparedStatementSetter()
 			{
 				@Override
@@ -746,10 +724,7 @@ public class PostgreSqlRepository extends AbstractRepository
 					// create the mref records
 					for (AttributeMetaData attr : persistedMrefAttrs)
 					{
-						if (mrefs.get(attr.getName()) == null)
-						{
-							mrefs.put(attr.getName(), new ArrayList<>());
-						}
+						mrefs.putIfAbsent(attr.getName(), new ArrayList<>());
 						if (entity.get(attr.getName()) != null)
 						{
 							List<Entity> vals = Lists.newArrayList(entity.getEntities(attr.getName()));
