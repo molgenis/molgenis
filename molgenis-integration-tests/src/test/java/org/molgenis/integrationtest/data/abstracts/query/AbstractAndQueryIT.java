@@ -111,9 +111,7 @@ public class AbstractAndQueryIT extends AbstractQueryIT
 		Query<Entity> query = new QueryImpl<Entity>().eq(AUTHOR_OF, "MOLGENIS for dummies").and().eq(AUTHOR_OF, "Your database at the push of a button");
 		assertTrue(newHashSet(person2).contains(personsRepository.findOne(query)));
 		assertEquals(personsRepository.findAll(query).collect(toSet()), newHashSet(person2));
-
-		// FIXME org.postgresql.util.PSQLException: ERROR: table name "authorOf" specified more than once
-		// assertEquals(personsRepository.count(query), 1);
+		assertEquals(personsRepository.count(query), 1);
 	}
 
 	@Override
