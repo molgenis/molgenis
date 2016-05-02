@@ -3,6 +3,7 @@ package org.molgenis.data.elasticsearch.reindex;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -53,7 +54,10 @@ public class ReindexActionRepositoryDecorator implements Repository<Entity>
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return decorated.getCapabilities();
+		Set<RepositoryCapability> capabilities = new HashSet<RepositoryCapability>();
+		capabilities.add(RepositoryCapability.INDEXABLE);
+		capabilities.addAll(decorated.getCapabilities());
+		return capabilities;
 	}
 
 	@Override
