@@ -14,13 +14,10 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Sort;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.reindex.ReindexActionMetaData;
+import org.molgenis.data.elasticsearch.reindex.ReindexActionMetaData.CudType;
+import org.molgenis.data.elasticsearch.reindex.ReindexActionMetaData.DataType;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.transaction.log.index.IndexTransactionLogEntryMetaData;
-import org.molgenis.data.transaction.log.index.IndexTransactionLogEntryMetaData.CudType;
-import org.molgenis.data.transaction.log.index.IndexTransactionLogEntryMetaData.DataType;
-import org.molgenis.data.transaction.log.index.IndexTransactionLogMetaData;
-import org.molgenis.data.transaction.log.index.IndexTransactionLogMetaData.IndexStatus;
-import org.molgenis.data.transaction.log.index.IndexTransactionLogMetaData.TransactionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,41 +42,23 @@ public class RebuildPartialIndex implements Runnable
 	public void run()
 	{
 		runAsSystem(() -> {
-			LOG.info("--- Start rebuilding index: [" + new Date() + "]");
-			Entity transLog = dataService.findOneById(IndexTransactionLogMetaData.ENTITY_NAME, this.transactionId);
-			TransactionStatus transactionStatus = TransactionStatus.valueOf(transLog
-					.getString(IndexTransactionLogMetaData.TRANSACTION_STATUS));
-			IndexStatus indexStatus = IndexStatus.valueOf(transLog.getString(IndexTransactionLogMetaData.INDEX_STATUS));
-
-			if (transactionStatus.equals(TransactionStatus.COMMITED) && indexStatus.equals(IndexStatus.NONE))
-			{
-				rebuildIndex();
-				transLog.set(IndexTransactionLogMetaData.INDEX_STATUS, IndexStatus.FINISHED);
-			}
-			else
-			{
-				transLog.set(IndexTransactionLogMetaData.INDEX_STATUS, IndexStatus.CANCELED);
-				LOG.error(
-						"[Reindex transaction [{}] is canceled] When rebuilding index transaction status must be COMMITED and index status must be NONE. Current values are: TRANSACTION_STATUS [{}] INDEX_STATUS [{}] ",
-						transactionId, transactionStatus, indexStatus);
-			}
-
-			dataService.update(IndexTransactionLogMetaData.ENTITY_NAME, transLog);
+			LOG.info("--- Start rebuilding index: [{}]", new Date());
+			rebuildIndex();
 			LOG.info("--- End rebuilding index: [{}]", new Date());
 		});
 	}
 
 	private void rebuildIndex()
 	{
-		Stream<Entity> logEntries = getAllLogEntries(this.transactionId);
+		Stream<Entity> logEntries = getAllReindexActions(this.transactionId);
 		logEntries.forEach(e -> {
 			requireNonNull(e.getEntityMetaData());
-			final CudType cudType = CudType.valueOf(e.getString(IndexTransactionLogEntryMetaData.CUD_TYPE));
-			final String entityFullName = e.getString(IndexTransactionLogEntryMetaData.ENTITY_FULL_NAME);
+			final CudType cudType = CudType.valueOf(e.getString(ReindexActionMetaData.CUD_TYPE));
+			final String entityFullName = e.getString(ReindexActionMetaData.ENTITY_FULL_NAME);
 			final EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(entityFullName);
-			final String entityId = e.getString(IndexTransactionLogEntryMetaData.ENTITY_ID);
-			final DataType dataType = DataType.valueOf(e.getString(IndexTransactionLogEntryMetaData.DATA_TYPE));
-			
+			final String entityId = e.getString(ReindexActionMetaData.ENTITY_ID);
+			final DataType dataType = DataType.valueOf(e.getString(ReindexActionMetaData.DATA_TYPE));
+
 			if (entityId != null)
 			{
 				this.rebuildIndexOneEntity(entityFullName, entityId, cudType);
@@ -143,12 +122,11 @@ public class RebuildPartialIndex implements Runnable
 	 * 
 	 * @return
 	 */
-	private Stream<Entity> getAllLogEntries(String transactionId)
+	private Stream<Entity> getAllReindexActions(String transactionId)
 	{
-		QueryRule rule = new QueryRule(IndexTransactionLogEntryMetaData.MOLGENIS_TRANSACTION_LOG, Operator.EQUALS,
-				transactionId);
+		QueryRule rule = new QueryRule(ReindexActionMetaData.REINDEX_ACTION_GROUP, Operator.EQUALS, transactionId);
 		QueryImpl<Entity> q = new QueryImpl<Entity>(rule);
-		q.setSort(new Sort(IndexTransactionLogEntryMetaData.LOG_ORDER));
-		return dataService.findAll(IndexTransactionLogEntryMetaData.ENTITY_NAME, q);
+		q.setSort(new Sort(ReindexActionMetaData.ACTION_ORDER));
+		return dataService.findAll(ReindexActionMetaData.ENTITY_NAME, q);
 	}
 }

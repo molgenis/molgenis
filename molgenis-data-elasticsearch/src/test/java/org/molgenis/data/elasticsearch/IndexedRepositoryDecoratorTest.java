@@ -41,7 +41,6 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.AggregateQueryImpl;
-import org.molgenis.data.transaction.log.index.IndexTransactionLogService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -51,7 +50,6 @@ public class IndexedRepositoryDecoratorTest
 {
 	private IndexedRepositoryDecorator indexedRepositoryDecorator;
 	private ElasticsearchService elasticSearchService;
-	private IndexTransactionLogService indexTransactionLogService;
 	private Repository<Entity> decoratedRepo;
 	private EntityMetaData repositoryEntityMetaData;
 	private String entityName;
@@ -66,7 +64,6 @@ public class IndexedRepositoryDecoratorTest
 	public void setUp() throws IOException
 	{
 		elasticSearchService = mock(ElasticsearchService.class);
-		indexTransactionLogService = mock(IndexTransactionLogService.class);
 		decoratedRepo = mock(Repository.class);
 		entityName = "entity";
 		repositoryEntityMetaData = mock(EntityMetaData.class);
