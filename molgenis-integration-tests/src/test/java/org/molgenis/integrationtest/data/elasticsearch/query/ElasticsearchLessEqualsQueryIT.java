@@ -2,18 +2,18 @@ package org.molgenis.integrationtest.data.elasticsearch.query;
 
 import java.text.ParseException;
 
-import org.molgenis.integrationtest.data.abstracts.query.AbstractEqualsQueryIT;
+import org.molgenis.integrationtest.data.abstracts.query.AbstractLessEqualsQueryIT;
 import org.molgenis.integrationtest.data.elasticsearch.AbstractElasticsearchTestConfig;
-import org.molgenis.integrationtest.data.elasticsearch.query.ElasticsearchEqualsQueryIT.EqualsElasticsearchTestConfig;
+import org.molgenis.integrationtest.data.elasticsearch.query.ElasticsearchLessEqualsQueryIT.LessEqualsElasticsearchTestConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
-@ContextConfiguration(classes = EqualsElasticsearchTestConfig.class)
-public class ElasticsearchEqualsQueryIT extends AbstractEqualsQueryIT
+@ContextConfiguration(classes = LessEqualsElasticsearchTestConfig.class)
+public class ElasticsearchLessEqualsQueryIT extends AbstractLessEqualsQueryIT
 {
 	@Configuration
-	public static class EqualsElasticsearchTestConfig extends AbstractElasticsearchTestConfig
+	public static class LessEqualsElasticsearchTestConfig extends AbstractElasticsearchTestConfig
 	{
 	}
 
