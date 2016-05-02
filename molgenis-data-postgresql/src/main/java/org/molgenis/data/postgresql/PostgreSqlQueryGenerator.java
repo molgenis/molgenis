@@ -10,6 +10,7 @@ import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttr
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getTableName;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.isPersistedInPostgreSql;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -205,10 +206,8 @@ class PostgreSqlQueryGenerator
 				{
 					// TODO retrieve mref values in seperate queries to allow specifying limit and offset after nested
 					// MOLGENIS queries are implemented as sub-queries instead of query rules
-					select.append("array_agg(distinct array[").append(getColumnName(attr)).append('.')
-							.append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append("::text,")
-							.append(getColumnName(attr)).append('.').append(getColumnName(attr)).append("::text]) AS ")
-							.append(getColumnName(attr));
+					select.append(MessageFormat.format("array_agg(distinct array[{0}.{1}::text,{0}.{0}::text]) AS {0}",
+							getColumnName(attr), getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)));
 				}
 				else
 				{
