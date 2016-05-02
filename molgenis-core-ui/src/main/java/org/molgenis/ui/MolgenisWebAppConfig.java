@@ -28,6 +28,7 @@ import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
+import org.molgenis.data.elasticsearch.reindex.ReindexActionRegisterService;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
@@ -116,6 +117,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	// used by classes that extend from this class
 	@Autowired
 	public DataSource dataSource;
+
+	@Autowired
+	public ReindexActionRegisterService indexTransactionLogService;
 
 	@Autowired
 	public IdGenerator idGenerator;
@@ -515,9 +519,10 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 			@Override
 			public Repository<Entity> createDecoratedRepository(Repository<Entity> repository)
 			{
-				return new MolgenisRepositoryDecoratorFactory(entityManager(), entityAttributesValidator, idGenerator,
-						appSettings, dataService(), expressionValidator, repositoryDecoratorRegistry())
-								.createDecoratedRepository(repository);
+				return new MolgenisRepositoryDecoratorFactory(entityManager(),
+						entityAttributesValidator, idGenerator, appSettings, dataService(), expressionValidator,
+						repositoryDecoratorRegistry(), indexTransactionLogService)
+						.createDecoratedRepository(repository);
 			}
 		};
 	}
