@@ -31,7 +31,6 @@ public class DefaultEntity implements Entity
 	private static final long serialVersionUID = 1L;
 
 	private final Map<String, Object> values = new LinkedCaseInsensitiveMap<>();
-
 	private final EntityMetaData entityMetaData;
 	private transient final DataService dataService;
 

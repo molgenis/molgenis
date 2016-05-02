@@ -1,4 +1,4 @@
-package org.molgenis.data.transaction.log.index;
+package org.molgenis.data.elasticsearch.reindex;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -9,23 +9,21 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
+import org.molgenis.data.elasticsearch.reindex.ReindexActionMetaData.CudType;
+import org.molgenis.data.elasticsearch.reindex.ReindexActionMetaData.DataType;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.transaction.log.index.IndexTransactionLogRepositoryCollectionDecorator;
-import org.molgenis.data.transaction.log.index.IndexTransactionLogService;
-import org.molgenis.data.transaction.log.index.IndexTransactionLogEntryMetaData.CudType;
-import org.molgenis.data.transaction.log.index.IndexTransactionLogEntryMetaData.DataType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class IndexTransactionLogRepositoryCollectionDecoratorTest
+public class ReindexActionRepositoryCollectionDecoratorTest
 {
 	private final static String REPOSITORY_NAME = "repo";
 	private ManageableRepositoryCollection decoratedRepositoryCollection;
-	private Repository<Entity> repository;
 	private EntityMetaData entityMeta;
-	private IndexTransactionLogService indexTransactionLogService;
-	private IndexTransactionLogRepositoryCollectionDecorator indexTransactionLogRepositoryCollectionDecorator;
+	private ReindexActionRegisterService reindexActionRegisterService;
+	private ReindexActionRepositoryCollectionDecorator reindexActionRepositoryCollectionDecorator;
 
+	@SuppressWarnings("unchecked")
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
@@ -34,51 +32,51 @@ public class IndexTransactionLogRepositoryCollectionDecoratorTest
 		when(decoratedRepositoryCollection.getRepository(REPOSITORY_NAME)).thenReturn(repository);
 		entityMeta = mock(EntityMetaData.class);
 		when(repository.getEntityMetaData()).thenReturn(entityMeta);
-		indexTransactionLogService = mock(IndexTransactionLogService.class);
-		indexTransactionLogRepositoryCollectionDecorator = new IndexTransactionLogRepositoryCollectionDecorator(
+		reindexActionRegisterService = mock(ReindexActionRegisterService.class);
+		reindexActionRepositoryCollectionDecorator = new ReindexActionRepositoryCollectionDecorator(
 				decoratedRepositoryCollection,
-				indexTransactionLogService);
+				reindexActionRegisterService);
 	}
 
 	@Test
 	public void deleteEntityMeta()
 	{
-		indexTransactionLogRepositoryCollectionDecorator.deleteEntityMeta(REPOSITORY_NAME);
+		reindexActionRepositoryCollectionDecorator.deleteEntityMeta(REPOSITORY_NAME);
 		verify(decoratedRepositoryCollection, times(1)).deleteEntityMeta(REPOSITORY_NAME);
-		verify(indexTransactionLogService).log(entityMeta, CudType.DELETE, DataType.METADATA, null);
+		verify(reindexActionRegisterService).register(entityMeta, CudType.DELETE, DataType.METADATA, null);
 	}
 
 	@Test
 	public void addAttribute()
 	{
 		DefaultAttributeMetaData attribute = new DefaultAttributeMetaData("attribute");
-		indexTransactionLogRepositoryCollectionDecorator.addAttribute(REPOSITORY_NAME, attribute);
+		reindexActionRepositoryCollectionDecorator.addAttribute(REPOSITORY_NAME, attribute);
 		verify(decoratedRepositoryCollection, times(1)).addAttribute(REPOSITORY_NAME, attribute);
-		verify(indexTransactionLogService).log(entityMeta, CudType.UPDATE, DataType.METADATA, null);
+		verify(reindexActionRegisterService).register(entityMeta, CudType.UPDATE, DataType.METADATA, null);
 	}
 
 	@Test
 	public void deleteAttribute()
 	{
-		indexTransactionLogRepositoryCollectionDecorator.deleteAttribute(REPOSITORY_NAME, "attribute");
+		reindexActionRepositoryCollectionDecorator.deleteAttribute(REPOSITORY_NAME, "attribute");
 		verify(decoratedRepositoryCollection, times(1)).deleteAttribute(REPOSITORY_NAME, "attribute");
-		verify(indexTransactionLogService).log(entityMeta, CudType.UPDATE, DataType.METADATA, null);
+		verify(reindexActionRegisterService).register(entityMeta, CudType.UPDATE, DataType.METADATA, null);
 	}
 
 	@Test
 	public void addAttributeSync()
 	{
 		DefaultAttributeMetaData attribute = mock(DefaultAttributeMetaData.class);
-		indexTransactionLogRepositoryCollectionDecorator.addAttributeSync(REPOSITORY_NAME, attribute);
+		reindexActionRepositoryCollectionDecorator.addAttributeSync(REPOSITORY_NAME, attribute);
 		verify(decoratedRepositoryCollection, times(1)).addAttribute(REPOSITORY_NAME, attribute);
-		verify(indexTransactionLogService).log(entityMeta, CudType.UPDATE, DataType.METADATA, null);
+		verify(reindexActionRegisterService).register(entityMeta, CudType.UPDATE, DataType.METADATA, null);
 	}
 
 	@Test
 	public void addEntityMeta()
 	{
-		indexTransactionLogRepositoryCollectionDecorator.addEntityMeta(entityMeta);
+		reindexActionRepositoryCollectionDecorator.addEntityMeta(entityMeta);
 		verify(decoratedRepositoryCollection, times(1)).addEntityMeta(entityMeta);
-		verify(indexTransactionLogService).log(entityMeta, CudType.ADD, DataType.METADATA, null);
+		verify(reindexActionRegisterService).register(entityMeta, CudType.ADD, DataType.METADATA, null);
 	}
 }

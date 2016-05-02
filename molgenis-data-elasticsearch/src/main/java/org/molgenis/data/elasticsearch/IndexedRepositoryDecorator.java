@@ -3,7 +3,6 @@ package org.molgenis.data.elasticsearch;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.RepositoryCapability.AGGREGATEABLE;
-import static org.molgenis.data.RepositoryCapability.INDEXABLE;
 import static org.molgenis.data.RepositoryCapability.MANAGABLE;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 
@@ -31,6 +30,8 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.collect.Sets;
+
 /**
  * Decorator for indexed repositories. Sends all queries with operators that are not supported by the decorated
  * repository to the index.
@@ -49,7 +50,7 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	{
 		this.elasticSearchService = requireNonNull(elasticSearchService);
 		this.decoratedRepository = requireNonNull(decoratedRepo);
-		this.indexRepository = new ElasticsearchRepository(getEntityMetaData(), elasticSearchService);
+		this.indexRepository = this.getReadOnlyElasticsearchRepository();
 		Set<Operator> operators = indexRepository.getQueryOperators();
 		operators.removeAll(decoratedRepository.getQueryOperators());
 		unsupportedOperators = Collections.unmodifiableSet(operators);
@@ -252,7 +253,7 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	{
 		Set<RepositoryCapability> capabilities = new HashSet<RepositoryCapability>();
 		capabilities.addAll(decoratedRepository.getCapabilities());
-		capabilities.addAll(EnumSet.of(INDEXABLE, QUERYABLE, AGGREGATEABLE));
+		capabilities.addAll(EnumSet.of(QUERYABLE, AGGREGATEABLE));
 		return unmodifiableSet(capabilities);
 	}
 
@@ -334,5 +335,114 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 		}
 
 		return true;
+	}
+
+	private ElasticsearchRepository getReadOnlyElasticsearchRepository()
+	{
+		return new ElasticsearchRepository(getEntityMetaData(), elasticSearchService)
+		{
+
+			@Override
+			public Set<RepositoryCapability> getCapabilities()
+			{
+				return Sets.newHashSet(AGGREGATEABLE, QUERYABLE);
+			}
+
+			@Override
+			public void close() throws IOException
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void add(Entity entity)
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public Integer add(Stream<Entity> entities)
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void flush()
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void clearCache()
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void update(Entity entity)
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void update(Stream<Entity> entities)
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void delete(Entity entity)
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void delete(Stream<Entity> entities)
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void deleteById(Object id)
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void deleteAll(Stream<Object> ids)
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void deleteAll()
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void create()
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void drop()
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void addEntityListener(EntityListener entityListener)
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void removeEntityListener(EntityListener entityListener)
+			{
+				throw new UnsupportedOperationException();
+			}
+		};
 	}
 }
