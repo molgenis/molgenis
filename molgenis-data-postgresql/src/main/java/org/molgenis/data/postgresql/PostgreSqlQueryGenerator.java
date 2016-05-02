@@ -622,11 +622,6 @@ class PostgreSqlQueryGenerator
 			AttributeMetaData mrefAttr = mrefAttrsInQuery.get(i);
 
 			from.append(" LEFT JOIN ").append(getJunctionTableName(entityMeta, mrefAttr)).append(" AS ")
-					.append(getColumnName(mrefAttr)).append(" ON (this.").append(getColumnName(idAttribute))
-					.append(" = ").append(getColumnName(mrefAttr)).append('.').append(getColumnName(idAttribute))
-					.append(')');
-
-			from.append(" LEFT JOIN ").append(getJunctionTableName(entityMeta, mrefAttr)).append(" AS ")
 					.append(getFilterColumnName(mrefAttr, i + 1)).append(" ON (this.")
 					.append(getColumnName(idAttribute)).append(" = ").append(getFilterColumnName(mrefAttr, i + 1))
 					.append('.').append(getColumnName(idAttribute)).append(')');
