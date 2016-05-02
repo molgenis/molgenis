@@ -42,9 +42,9 @@ public class RebuildPartialIndex implements Runnable
 	public void run()
 	{
 		runAsSystem(() -> {
-			LOG.info("--- Start rebuilding index: [{}]", new Date());
+			LOG.info("--- Start rebuilding index: [{}] group id: [{}]", new Date(), transactionId);
 			rebuildIndex();
-			LOG.info("--- End rebuilding index: [{}]", new Date());
+			LOG.info("--- End rebuilding index: [{}] group id: [{}]", new Date(), transactionId);
 		});
 	}
 
@@ -78,17 +78,23 @@ public class RebuildPartialIndex implements Runnable
 
 	private void rebuildIndexOneEntity(String entityFullName, String entityId, CudType cudType)
 	{
-		Entity entity = dataService.findOneById(entityFullName, entityId);
 		switch (cudType)
 		{
 			case ADD:
-				this.searchService.index(entity, entity.getEntityMetaData(), IndexingMode.ADD);
+				Entity entityA = dataService.findOneById(entityFullName, entityId);
+				this.searchService.index(entityA, entityA.getEntityMetaData(), IndexingMode.ADD);
+				LOG.info("Reindex row id [{}] entity full name: [{}] cud: [{}]", entityId, entityFullName, CudType.ADD);
 				break;
 			case UPDATE:
-				this.searchService.index(entity, entity.getEntityMetaData(), IndexingMode.UPDATE);
+				Entity entityU = dataService.findOneById(entityFullName, entityId);
+				this.searchService.index(entityU, entityU.getEntityMetaData(), IndexingMode.UPDATE);
+				LOG.info("Reindex row id [{}] entity full name: [{}] cud: [{}]", entityId, entityFullName,
+						CudType.UPDATE);
 				break;
 			case DELETE:
-				this.searchService.deleteById(entityId, entity.getEntityMetaData());
+				this.searchService.deleteById(entityId, dataService.getMeta().getEntityMetaData(entityFullName));
+				LOG.info("Reindex row id [{}] entity full name: [{}] cud: [{}]", entityId, entityFullName,
+						CudType.DELETE);
 				break;
 			default:
 				break;
