@@ -10,17 +10,55 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.TextField;
 
+/**
+ * The reindex action is used to describe the action that need to be done to get the index consistent again.
+ */
 public class ReindexActionMetaData extends DefaultEntityMetaData
 {
-	public static final String ENTITY_NAME = "reindex_action";
+	public static final String ENTITY_NAME = "ReindexAction";
+
+	/**
+	 * Is auto generated
+	 */
 	public static final String ID = "id";
-	public static final String REINDEX_ACTION_GROUP = "reindex_action_group";
-	public static final String ACTION_ORDER = "action_order";
-	public static final String ENTITY_FULL_NAME = "entity_full_name";
-	public static final String ENTITY_ID = "entity_id";
-	public static final String CUD_TYPE = "cud_type";
-	public static final String DATA_TYPE = "data_type";
-	public static final String REINDEX_STATUS = "reindex_status";
+
+	/**
+	 * A reference to the group where it belongs
+	 */
+	public static final String REINDEX_ACTION_GROUP = "reindexActionGroup";
+
+	/**
+	 * The order in which the action is registered
+	 */
+	public static final String ACTION_ORDER = "actionOrder";
+
+	/**
+	 * The entity full name
+	 */
+	public static final String ENTITY_FULL_NAME = "entityFullName";
+
+	/**
+	 * Entity is filled when only one row of the entity "entityFullName" is effected
+	 */
+	public static final String ENTITY_ID = "entityId";
+
+	/**
+	 * Enum: The create, update and delete operations
+	 */
+	public static final String CUD_TYPE = "cudType";
+
+	/**
+	 * Enum: Tells you if the data or the metadata of the "entity_full_name" is effected
+	 */
+	public static final String DATA_TYPE = "dataType";
+
+	/**
+	 * Enum: the status of reindex action
+	 * 
+	 * FINISHED: reindex action is finished. CANCELED: reindex action is canceled FAILED: reindex action failed STARTED:
+	 * reindex action is started pending: reindex action is just created and is not proced
+	 */
+	public static final String REINDEX_STATUS = "reindexStatus";
 
 	public ReindexActionMetaData(ReindexActionJobMetaData indexTransactionLogMetaData, String backend)
 	{
@@ -75,7 +113,7 @@ public class ReindexActionMetaData extends DefaultEntityMetaData
 	 */
 	public static enum ReindexStatus
 	{
-		FINISHED, CANCELED, FAILED, STARTED, NONE;
+		FINISHED, CANCELED, FAILED, STARTED, PENDING;
 
 		private static List<String> getOptions()
 		{

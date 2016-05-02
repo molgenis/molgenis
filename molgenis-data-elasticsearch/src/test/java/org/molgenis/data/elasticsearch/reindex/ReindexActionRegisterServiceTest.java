@@ -68,7 +68,7 @@ public class ReindexActionRegisterServiceTest
 		assertEquals(reindexAction.get(ReindexActionMetaData.ENTITY_ID), "123");
 		assertEquals(reindexAction.get(ReindexActionMetaData.CUD_TYPE), CudType.ADD.name());
 		assertEquals(reindexAction.get(ReindexActionMetaData.DATA_TYPE), DataType.DATA.name());
-		assertEquals(reindexAction.get(ReindexActionMetaData.REINDEX_STATUS), ReindexStatus.NONE.name());
+		assertEquals(reindexAction.get(ReindexActionMetaData.REINDEX_STATUS), ReindexStatus.PENDING.name());
 
 		Entity reindexAction2 = reindexActionRegisterService.createReindexAction(reindexActionJob, "full_entity_name",
 				CudType.DELETE, DataType.METADATA, null, 2);
@@ -78,7 +78,7 @@ public class ReindexActionRegisterServiceTest
 		assertEquals(reindexAction2.getString(ReindexActionMetaData.ENTITY_ID), null);
 		assertEquals(reindexAction2.get(ReindexActionMetaData.CUD_TYPE), CudType.DELETE.name());
 		assertEquals(reindexAction2.get(ReindexActionMetaData.DATA_TYPE), DataType.METADATA.name());
-		assertEquals(reindexAction2.get(ReindexActionMetaData.REINDEX_STATUS), ReindexStatus.NONE.name());
+		assertEquals(reindexAction2.get(ReindexActionMetaData.REINDEX_STATUS), ReindexStatus.PENDING.name());
 	}
 
 	@Test

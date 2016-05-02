@@ -41,7 +41,7 @@ public class ReindexActionRegisterService
 	 * @param entityMetaData
 	 * @param cudType
 	 */
-	public synchronized void register(EntityMetaData entityMetaData, CudType cudType, DataType dataType, String entityId)
+	public void register(EntityMetaData entityMetaData, CudType cudType, DataType dataType, String entityId)
 	{
 		if (!ReindexActionRegisterService.EXCLUDED_ENTITIES.contains(entityMetaData.getName()))
 		{
@@ -65,12 +65,12 @@ public class ReindexActionRegisterService
 			}
 			else
 			{
-				LOG.debug("Transaction id is unknown");
+				LOG.warn("Transaction id is unknown");
 			}
 		}
 	}
 
-	private synchronized int increaseCountReindexActionJob(Entity reindexActionJob)
+	private int increaseCountReindexActionJob(Entity reindexActionJob)
 	{
 		int count = reindexActionJob.getInt(ReindexActionJobMetaData.COUNT).intValue() + 1;
 		reindexActionJob.set(ReindexActionJobMetaData.COUNT, count);
@@ -78,7 +78,7 @@ public class ReindexActionRegisterService
 		return count;
 	}
 
-	public synchronized DefaultEntity createReindexActionJob(String id)
+	public DefaultEntity createReindexActionJob(String id)
 	{
 		DefaultEntity reindexActionJob = new DefaultEntity(reindexActionJobMetaData, dataService);
 		reindexActionJob.set(ReindexActionJobMetaData.ID, id);
@@ -86,7 +86,7 @@ public class ReindexActionRegisterService
 		return reindexActionJob;
 	}
 
-	public synchronized DefaultEntity createReindexAction(Entity transLog, String fullName, CudType cudType,
+	public DefaultEntity createReindexAction(Entity transLog, String fullName, CudType cudType,
 			DataType dataType, String entityId, int actionOrder)
 	{
 		DefaultEntity reindexAction = new DefaultEntity(this.reindexActionMetaData, this.dataService);
@@ -96,7 +96,7 @@ public class ReindexActionRegisterService
 		reindexAction.set(ReindexActionMetaData.DATA_TYPE, dataType);
 		reindexAction.set(ReindexActionMetaData.ENTITY_ID, entityId);
 		reindexAction.set(ReindexActionMetaData.ACTION_ORDER, actionOrder);
-		reindexAction.set(ReindexActionMetaData.REINDEX_STATUS, ReindexActionMetaData.ReindexStatus.NONE);
+		reindexAction.set(ReindexActionMetaData.REINDEX_STATUS, ReindexActionMetaData.ReindexStatus.PENDING);
 		return reindexAction;
 	}
 }
