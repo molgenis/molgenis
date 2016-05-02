@@ -47,7 +47,7 @@ public class AbstractGreaterEqualsQueryIT extends AbstractQueryIT
 	@Override
 	protected void testString()
 	{
-		// TODO NOT SUPPORTED
+		// NOT SUPPORTED
 	}
 
 	@Override
@@ -76,20 +76,20 @@ public class AbstractGreaterEqualsQueryIT extends AbstractQueryIT
 	@Override
 	protected void testBool()
 	{
-		// TODO NOT SUPPORTED
+		// NOT SUPPORTED
 	}
 
 	@Override
 	protected void testMref()
 	{
-		// TODO NOT SUPPORTED
+		// NOT SUPPORTED
 
 	}
 
 	@Override
 	protected void testXref()
 	{
-		// TODO NOT SUPPORTED
+		// NOT SUPPORTED
 	}
 
 	private Query<Entity> greaterEqualsThenQueryBuilder(String fieldName, Object value)

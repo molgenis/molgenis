@@ -8,6 +8,7 @@ import static org.molgenis.MolgenisFieldTypes.DECIMAL;
 import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.molgenis.MolgenisFieldTypes.LONG;
 import static org.molgenis.MolgenisFieldTypes.MREF;
+import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
@@ -34,6 +35,7 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 	static final String ACCOUNT_BALANCE = "accountBalance";
 	static final String SERIAL_NUMBER = "serialNumber";
 	static final String BIRTH_TIME = "birthTime";
+	static final String QUOTE = "catchPhrase";
 
 	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -63,7 +65,7 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 		countryEMD.addAttribute("code", ROLE_ID).setNillable(false);
 
 		DefaultEntityMetaData bookEMD = new DefaultEntityMetaData("query_book");
-		bookEMD.addAttribute("title", ROLE_ID).setNillable(false);
+		bookEMD.addAttribute("title", ROLE_ID).setDataType(STRING).setNillable(false);
 
 		DefaultEntityMetaData personEMD = new DefaultEntityMetaData("query_person");
 		personEMD.addAttribute(ID, ROLE_ID);
@@ -78,6 +80,7 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 		personEMD.addAttribute(AUTHOR_OF).setDataType(MREF).setRefEntity(bookEMD);
 		personEMD.addAttribute(ACCOUNT_BALANCE).setDataType(DECIMAL);
 		personEMD.addAttribute(SERIAL_NUMBER).setDataType(LONG);
+		personEMD.addAttribute(QUOTE).setDataType(STRING);
 
 		Repository<Entity> countries = dataService.getMeta().addEntityMeta(countryEMD);
 		Repository<Entity> books = dataService.getMeta().addEntityMeta(bookEMD);
@@ -115,6 +118,7 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 			person1.set(AUTHOR_OF, newArrayList(book1));
 			person1.set(ACCOUNT_BALANCE, 299.99);
 			person1.set(SERIAL_NUMBER, 374278348334L);
+			person1.set(QUOTE, "Computer says no");
 			personsRepository.add(person1);
 
 			person2 = new DefaultEntity(personEMD, dataService);
@@ -130,6 +134,7 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 			person2.set(AUTHOR_OF, newArrayList(book1, book2));
 			person2.set(ACCOUNT_BALANCE, -0.70);
 			person2.set(SERIAL_NUMBER, 67986789879L);
+			person2.set(QUOTE, "To iterate is human, to recurse divine.");
 			personsRepository.add(person2);
 
 			person3 = new DefaultEntity(personEMD, dataService);
@@ -145,6 +150,7 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 			person3.set(AUTHOR_OF, null);
 			person3.set(ACCOUNT_BALANCE, 1000.00);
 			person3.set(SERIAL_NUMBER, 23471900909L);
+			person3.set(QUOTE, "If you're wrong about a boolean, you're only off by a bit");
 			personsRepository.add(person3);
 		}
 		catch (ParseException e)
