@@ -15,7 +15,8 @@ import static org.testng.Assert.assertTrue;
 
 public class AbstractNestedQueryIT extends AbstractQueryIT
 {
-	@Override void testInt()
+	@Override
+	protected void testInt()
 	{
 		Query<Entity> query = new QueryImpl<>().nest().eq(HEIGHT, 180).unnest();
 		assertTrue(newHashSet(person1, person3).contains(personsRepository.findOne(query)));

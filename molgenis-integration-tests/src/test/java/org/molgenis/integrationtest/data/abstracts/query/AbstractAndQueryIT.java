@@ -1,25 +1,21 @@
 package org.molgenis.integrationtest.data.abstracts.query;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Query;
-import org.molgenis.data.support.QueryImpl;
-
-import java.text.ParseException;
-import java.util.Collections;
-import java.util.stream.Collectors;
-
-import static com.google.common.collect.Sets.*;
-import static java.util.Collections.*;
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.stream.Collectors.toSet;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import java.text.ParseException;
+import java.util.stream.Collectors;
+
+import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
+import org.molgenis.data.support.QueryImpl;
+
 public class AbstractAndQueryIT extends AbstractQueryIT
 {
 	@Override
-	void testInt()
+	protected void testInt()
 	{
 		Query<Entity> findOneQuery = new QueryImpl<Entity>().eq(HEIGHT, 180).and().eq(FIRST_NAME, "john");
 		assertTrue(newHashSet(person1).contains(personsRepository.findOne(findOneQuery)));
@@ -32,7 +28,7 @@ public class AbstractAndQueryIT extends AbstractQueryIT
 	}
 
 	@Override
-	void testDecimal()
+	protected void testDecimal()
 	{
 		Query<Entity> findOneQuery = new QueryImpl<Entity>().eq(ACCOUNT_BALANCE, 299.99).and().eq(FIRST_NAME, "john");
 		assertTrue(newHashSet(person1).contains(personsRepository.findOne(findOneQuery)));
@@ -45,9 +41,10 @@ public class AbstractAndQueryIT extends AbstractQueryIT
 	}
 
 	@Override
-	void testLong()
+	protected void testLong()
 	{
-		Query<Entity> findOneQuery = new QueryImpl<Entity>().eq(SERIAL_NUMBER, 374278348334L).and().eq(FIRST_NAME, "john");
+		Query<Entity> findOneQuery = new QueryImpl<Entity>().eq(SERIAL_NUMBER, 374278348334L).and().eq(FIRST_NAME,
+				"john");
 		assertTrue(newHashSet(person1).contains(personsRepository.findOne(findOneQuery)));
 
 		Query<Entity> findAllQuery = new QueryImpl<Entity>().eq(SERIAL_NUMBER, 67986789879L).and().eq(LAST_NAME, "doe");
@@ -58,7 +55,7 @@ public class AbstractAndQueryIT extends AbstractQueryIT
 	}
 
 	@Override
-	void testString()
+	protected void testString()
 	{
 		Query<Entity> findOneQuery = new QueryImpl<Entity>().eq(FIRST_NAME, "john").and().eq(LAST_NAME, "doe");
 		assertTrue(newHashSet(person1).contains(personsRepository.findOne(findOneQuery)));
@@ -71,33 +68,39 @@ public class AbstractAndQueryIT extends AbstractQueryIT
 	}
 
 	@Override
-	void testDate() throws ParseException
+	protected void testDate() throws ParseException
 	{
-		Query<Entity> findOneQuery = new QueryImpl<Entity>().eq(BIRTHDAY, dateFormat.parse("1980-06-07")).and().eq(LAST_NAME, "doe");
+		Query<Entity> findOneQuery = new QueryImpl<Entity>().eq(BIRTHDAY, dateFormat.parse("1980-06-07")).and()
+				.eq(LAST_NAME, "doe");
 		assertTrue(newHashSet(person2).contains(personsRepository.findOne(findOneQuery)));
 
-		Query<Entity> findAllQuery = new QueryImpl<Entity>().eq(BIRTHDAY, dateFormat.parse("1976-06-07")).and().eq(HEIGHT, 180);
+		Query<Entity> findAllQuery = new QueryImpl<Entity>().eq(BIRTHDAY, dateFormat.parse("1976-06-07")).and()
+				.eq(HEIGHT, 180);
 		assertEquals(personsRepository.findAll(findAllQuery).collect(toSet()), newHashSet(person1));
 
-		Query<Entity> countQuery = new QueryImpl<Entity>().eq(BIRTHDAY, dateFormat.parse("1980-06-07")).and().eq(FIRST_NAME, "jane");
+		Query<Entity> countQuery = new QueryImpl<Entity>().eq(BIRTHDAY, dateFormat.parse("1980-06-07")).and()
+				.eq(FIRST_NAME, "jane");
 		assertEquals(personsRepository.count(countQuery), 1);
 	}
 
 	@Override
-	void testDateTime() throws ParseException
+	protected void testDateTime() throws ParseException
 	{
-		Query<Entity> findOneQuery = new QueryImpl<Entity>().eq(BIRTH_TIME, dateTimeFormat.parse("1976-06-07 06:06:06")).and().eq(HEIGHT, 180);
+		Query<Entity> findOneQuery = new QueryImpl<Entity>().eq(BIRTH_TIME, dateTimeFormat.parse("1976-06-07 06:06:06"))
+				.and().eq(HEIGHT, 180);
 		assertTrue(newHashSet(person1).contains(personsRepository.findOne(findOneQuery)));
 
-		Query<Entity> findAllQuery = new QueryImpl<Entity>().eq(BIRTH_TIME, dateTimeFormat.parse("1976-06-07 06:06:06")).and().eq(LAST_NAME, "doe");
+		Query<Entity> findAllQuery = new QueryImpl<Entity>().eq(BIRTH_TIME, dateTimeFormat.parse("1976-06-07 06:06:06"))
+				.and().eq(LAST_NAME, "doe");
 		assertEquals(personsRepository.findAll(findAllQuery).collect(toSet()), newHashSet(person1));
 
-		Query<Entity> countQuery = new QueryImpl<Entity>().eq(BIRTH_TIME, dateTimeFormat.parse("1976-06-07 07:07:07")).and().eq(ACTIVE, false);
+		Query<Entity> countQuery = new QueryImpl<Entity>().eq(BIRTH_TIME, dateTimeFormat.parse("1976-06-07 07:07:07"))
+				.and().eq(ACTIVE, false);
 		assertEquals(personsRepository.count(countQuery), 1);
 	}
 
 	@Override
-	void testBool()
+	protected void testBool()
 	{
 		Query<Entity> query = new QueryImpl<Entity>().eq(ACTIVE, true).and().eq(HEIGHT, 180);
 		assertTrue(newHashSet(person1, person3).contains(personsRepository.findOne(query)));
@@ -106,9 +109,10 @@ public class AbstractAndQueryIT extends AbstractQueryIT
 	}
 
 	@Override
-	void testMref()
+	protected void testMref()
 	{
-		Query<Entity> query = new QueryImpl<Entity>().eq(AUTHOR_OF, "MOLGENIS for dummies").and().eq(AUTHOR_OF, "Your database at the push of a button");
+		Query<Entity> query = new QueryImpl<Entity>().eq(AUTHOR_OF, "MOLGENIS for dummies").and().eq(AUTHOR_OF,
+				"Your database at the push of a button");
 		assertTrue(newHashSet(person2).contains(personsRepository.findOne(query)));
 		assertEquals(personsRepository.findAll(query).collect(toSet()), newHashSet(person2));
 
@@ -117,7 +121,7 @@ public class AbstractAndQueryIT extends AbstractQueryIT
 	}
 
 	@Override
-	void testXref()
+	protected void testXref()
 	{
 		Query<Entity> query = new QueryImpl<Entity>().eq(COUNTRY, "US").and().eq(LAST_NAME, "doe");
 		assertTrue(newHashSet(person1, person2).contains(personsRepository.findOne(query)));
