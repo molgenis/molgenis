@@ -1,19 +1,19 @@
 package org.molgenis.integrationtest.data.elasticsearch.query;
 
-import org.molgenis.integrationtest.data.abstracts.query.AbstractNotQueryIT;
+import org.molgenis.integrationtest.data.abstracts.query.AbstractOrQueryIT;
 import org.molgenis.integrationtest.data.elasticsearch.AbstractElasticsearchTestConfig;
-import org.molgenis.integrationtest.data.elasticsearch.query.ElasticSearchNotQueryIT.NotElasticSearchTestConfig;
+import org.molgenis.integrationtest.data.elasticsearch.query.ElasticsearchOrQueryIT.OrElasticsearchTestConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
 import java.text.ParseException;
 
-@ContextConfiguration(classes = NotElasticSearchTestConfig.class)
-public class ElasticSearchNotQueryIT extends AbstractNotQueryIT
+@ContextConfiguration(classes = OrElasticsearchTestConfig.class)
+public class ElasticsearchOrQueryIT extends AbstractOrQueryIT
 {
 	@Configuration
-	public static class NotElasticSearchTestConfig extends AbstractElasticsearchTestConfig
+	public static class OrElasticsearchTestConfig extends AbstractElasticsearchTestConfig
 	{
 	}
 
@@ -24,5 +24,3 @@ public class ElasticSearchNotQueryIT extends AbstractNotQueryIT
 		super.testIt();
 	}
 }
-
-

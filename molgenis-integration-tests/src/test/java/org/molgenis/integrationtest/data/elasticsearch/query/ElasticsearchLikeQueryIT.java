@@ -4,16 +4,16 @@ import java.text.ParseException;
 
 import org.molgenis.integrationtest.data.abstracts.query.AbstractLikeQueryIT;
 import org.molgenis.integrationtest.data.elasticsearch.AbstractElasticsearchTestConfig;
-import org.molgenis.integrationtest.data.elasticsearch.query.ElasticSearchLikeQueryIT.LikeElasticSearchTestConfig;
+import org.molgenis.integrationtest.data.elasticsearch.query.ElasticsearchLikeQueryIT.LikeElasticsearchTestConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
-@ContextConfiguration(classes = LikeElasticSearchTestConfig.class)
-public class ElasticSearchLikeQueryIT extends AbstractLikeQueryIT
+@ContextConfiguration(classes = LikeElasticsearchTestConfig.class)
+public class ElasticsearchLikeQueryIT extends AbstractLikeQueryIT
 {
 	@Configuration
-	public static class LikeElasticSearchTestConfig extends AbstractElasticsearchTestConfig
+	public static class LikeElasticsearchTestConfig extends AbstractElasticsearchTestConfig
 	{
 	}
 
