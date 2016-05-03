@@ -8,10 +8,11 @@ import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
@@ -23,6 +24,8 @@ import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.fieldtypes.EnumField;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
+
+import com.google.api.client.util.Lists;
 
 public abstract class AbstractDataValidationIT extends AbstractDataIntegrationIT
 {
@@ -139,8 +142,10 @@ public abstract class AbstractDataValidationIT extends AbstractDataIntegrationIT
 		}
 		catch (MolgenisValidationException e)
 		{
-			assertEquals(e.getMessage(),
-					"The attribute 'stringAttr' of entity 'NotNillableTest' can not be null. (entity 1)");
+			List<String> possibleMessages = Lists.newArrayList();
+			possibleMessages.add("The attribute 'stringAttr' of entity 'NotNillableTest' can not be null. (entity 1)");
+			possibleMessages.add("The attribute 'stringAttr' of entity 'NotNillableTest' can not be null.");
+			assertTrue(possibleMessages.contains(e.getMessage()));
 		}
 	}
 

@@ -425,7 +425,7 @@ class PostgreSqlQueryGenerator
 					}
 					else
 					{
-						result.append(" CAST(this.").append(getColumnName(attr)).append(" as CHAR)");
+						result.append(" CAST(this.").append(getColumnName(attr)).append(" as TEXT)");
 					}
 					result.append(" LIKE ?");
 					parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
@@ -532,7 +532,7 @@ class PostgreSqlQueryGenerator
 					parameters.add(convertedVal);
 
 					if (result.length() > 0 && !result.toString().endsWith(" OR ")
-							&& !result.toString().endsWith(" AND "))
+							&& !result.toString().endsWith(" AND ") && !result.toString().endsWith(" NOT "))
 					{
 						result.append(" AND ");
 					}
