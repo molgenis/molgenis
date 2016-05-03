@@ -104,25 +104,25 @@ public class AbstractSearchQueryIT extends AbstractQueryIT
 	@Override
 	protected void testMref()
 	{
-		// FIXME
-		// Query<Entity> query = new QueryImpl<>().search(AUTHOR_OF, "Your database at the push of a button");
-		// System.out.println(personsRepository.findOne(query));
-		// Set<Entity> resultSet = Sets.newHashSet(person2);
-		// assertTrue(resultSet.contains(personsRepository.findOne(query)));
-		// assertEquals(personsRepository.findAll(query).collect(toSet()), resultSet);
-		// assertEquals(personsRepository.count(query), resultSet.size());
+		// FIXME Returns null, but should find person 2
+//		 Query<Entity> query = new QueryImpl<>().search(AUTHOR_OF, "Your database at the push of a button");
+//		 System.out.println(personsRepository.findOne(query));
+//
+//		 assertTrue(newHashSet(person2).contains(personsRepository.findOne(query)));
+//		 assertEquals(personsRepository.findAll(query).collect(toSet()),  newHashSet(person2));
+//		 assertEquals(personsRepository.count(query), 1);
 	}
 
 	@Override
 	protected void testXref()
 	{
-		// FIXME
-		// Query<Entity> query = new QueryImpl<>().search(COUNTRY, "US");
-		// System.out.println(personsRepository.findOne(query));
-		// Set<Entity> resultSet = Sets.newHashSet(person1, person2);
-		// assertTrue(resultSet.contains(personsRepository.findOne(query)));
-		// assertEquals(personsRepository.findAll(query).collect(toSet()), resultSet);
-		// assertEquals(personsRepository.count(query), resultSet.size());
+		// FIXME Returns null, but should find person1 and person2
+//		 Query<Entity> query = new QueryImpl<>().search(COUNTRY, "US");
+//		 System.out.println(personsRepository.findOne(query));
+//
+//	 	assertTrue(newHashSet(person1, person2).contains(personsRepository.findOne(query)));
+//	 	assertEquals(personsRepository.findAll(query).collect(toSet()), newHashSet(person1, person2));
+//	 	assertEquals(personsRepository.count(query), 2);
 	}
 
 	protected void testAllFields()
