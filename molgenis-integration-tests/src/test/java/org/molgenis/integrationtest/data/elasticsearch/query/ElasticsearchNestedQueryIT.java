@@ -21,9 +21,6 @@ public class ElasticsearchNestedQueryIT extends AbstractNestedQueryIT
 	@Test
 	public void testIt() throws ParseException
 	{
-		createTestRepo();
-
-		// Data types INT, DECIMAL, LONG, DATE, DATE_TIME, BOOL, XREF and MREF not supported for operator LIKE
-		testString();
+		super.testIt();
 	}
 }
