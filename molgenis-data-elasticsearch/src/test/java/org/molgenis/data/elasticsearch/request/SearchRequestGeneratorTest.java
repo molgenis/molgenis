@@ -81,21 +81,4 @@ public class SearchRequestGeneratorTest
 		verify(searchRequestBuilderMock).setQuery(Matchers.<QueryBuilder> anyObject());
 		verifyNoMoreInteractions(searchRequestBuilderMock);
 	}
-
-	@Test
-	public void testBuildSearchRequestNoFetchBackendNotElasticsearch()
-	{
-		when(entityMeta.getBackend()).thenReturn("notElasticsearch");
-		SearchRequestGenerator gen = new SearchRequestGenerator();
-		String entityName = "test";
-		SearchType searchType = SearchType.COUNT;
-
-		gen.buildSearchRequest(searchRequestBuilderMock, entityName, searchType, new QueryImpl<Entity>().search("test"), null,
-				null, null, entityMeta);
-		verify(searchRequestBuilderMock).setFrom(0);
-		verify(searchRequestBuilderMock).setSearchType(searchType);
-		verify(searchRequestBuilderMock).setTypes(entityName);
-		verify(searchRequestBuilderMock).setQuery(Matchers.<QueryBuilder> anyObject());
-		verifyNoMoreInteractions(searchRequestBuilderMock);
-	}
 }
