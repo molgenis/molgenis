@@ -79,7 +79,16 @@ public class AbstractSearchQueryIT extends AbstractQueryIT
 	@Override
 	protected void testBool()
 	{
-		// UNSUPPORTED
+		try
+		{
+			String value = "true";
+			Query<Entity> query = new QueryImpl<Entity>().search(ACTIVE, value);
+			assertTrue(newHashSet(person2).contains(personsRepository.findOne(query)));
+			fail();
+		} catch(MolgenisQueryException e) {
+			// Expect a MolgenisQueryException
+		}
+
 	}
 
 	@Override
