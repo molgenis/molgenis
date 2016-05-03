@@ -18,12 +18,11 @@ public class AbstractRangeQueryIT extends AbstractQueryIT
 	@Override
 	protected void testInt()
 	{
-		// FIXME
-		// Query<Entity> query = new QueryImpl<>().rng(HEIGHT, 160, 180);
-		// Set<Entity> resultSet = Sets.newHashSet(person2);
-		// assertTrue(resultSet.contains(personsRepository.findOne(query)));
-		// assertEquals(personsRepository.findAll(query).collect(toSet()), resultSet);
-		// assertEquals(personsRepository.count(query), resultSet.size());
+		Query<Entity> query = new QueryImpl<>().rng(HEIGHT, 160, 179);
+		Set<Entity> resultSet = Sets.newHashSet(person2);
+		assertTrue(resultSet.contains(personsRepository.findOne(query)));
+		assertEquals(personsRepository.findAll(query).collect(toSet()), resultSet);
+		assertEquals(personsRepository.count(query), resultSet.size());
 	}
 
 	@Override
