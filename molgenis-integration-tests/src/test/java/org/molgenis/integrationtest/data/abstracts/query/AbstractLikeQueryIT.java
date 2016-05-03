@@ -81,10 +81,10 @@ public class AbstractLikeQueryIT extends AbstractQueryIT
 	protected void testMref()
 	{
 		// FIXME Throws 'PSQLException: ERROR: column this.authorOf does not exist' error
-		// assertTrue(newHashSet(person2).contains(personsRepository.findOne(likeQueryBuilder(AUTHOR_OF, "database"))));
-		// assertEquals(personsRepository.findAll(likeQueryBuilder(AUTHOR_OF, "MOLGENIS")).collect(toSet()),
-		// newHashSet(person1, person2));
-		// assertEquals(personsRepository.count(likeQueryBuilder(AUTHOR_OF, "milk")), 0);
+		assertTrue(newHashSet(person2).contains(personsRepository.findOne(likeQueryBuilder(AUTHOR_OF, "database"))));
+		assertEquals(personsRepository.findAll(likeQueryBuilder(AUTHOR_OF, "MOLGENIS")).collect(toSet()),
+				newHashSet(person1, person2));
+		assertEquals(personsRepository.count(likeQueryBuilder(AUTHOR_OF, "milk")), 0);
 	}
 
 	@Override
