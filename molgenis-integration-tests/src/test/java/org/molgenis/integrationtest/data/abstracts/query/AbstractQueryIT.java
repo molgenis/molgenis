@@ -8,6 +8,7 @@ import static org.molgenis.MolgenisFieldTypes.DECIMAL;
 import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.molgenis.MolgenisFieldTypes.LONG;
 import static org.molgenis.MolgenisFieldTypes.MREF;
+import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
@@ -19,10 +20,6 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.integrationtest.data.abstracts.AbstractDataIntegrationIT;
-
-import com.google.common.collect.Lists;
-
-import net.sf.samtools.util.RuntimeEOFException;
 
 public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 {
@@ -38,6 +35,7 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 	static final String ACCOUNT_BALANCE = "accountBalance";
 	static final String SERIAL_NUMBER = "serialNumber";
 	static final String BIRTH_TIME = "birthTime";
+	static final String QUOTE = "catchPhrase";
 
 	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -46,27 +44,9 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 	Entity person3;
 	Repository<Entity> personsRepository;
 
-	abstract void testInt();
-
-	abstract void testDecimal();
-
-	abstract void testLong();
-
-	abstract void testString();
-
-	abstract void testDate() throws ParseException;
-
-	abstract void testDateTime() throws ParseException;
-
-	abstract void testBool();
-
-	abstract void testMref();
-
-	abstract void testXref();
-
 	public void testIt() throws ParseException
 	{
-		personsRepository = createTestRepo();
+		createTestRepo();
 
 		testInt();
 		testDecimal();
@@ -79,13 +59,13 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 		testMref();
 	}
 
-	private Repository<Entity> createTestRepo()
+	protected void createTestRepo()
 	{
 		DefaultEntityMetaData countryEMD = new DefaultEntityMetaData("query_country");
 		countryEMD.addAttribute("code", ROLE_ID).setNillable(false);
 
 		DefaultEntityMetaData bookEMD = new DefaultEntityMetaData("query_book");
-		bookEMD.addAttribute("title", ROLE_ID).setNillable(false);
+		bookEMD.addAttribute("title", ROLE_ID).setDataType(STRING).setNillable(false);
 
 		DefaultEntityMetaData personEMD = new DefaultEntityMetaData("query_person");
 		personEMD.addAttribute(ID, ROLE_ID);
@@ -100,10 +80,11 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 		personEMD.addAttribute(AUTHOR_OF).setDataType(MREF).setRefEntity(bookEMD);
 		personEMD.addAttribute(ACCOUNT_BALANCE).setDataType(DECIMAL);
 		personEMD.addAttribute(SERIAL_NUMBER).setDataType(LONG);
+		personEMD.addAttribute(QUOTE).setDataType(STRING);
 
 		Repository<Entity> countries = dataService.getMeta().addEntityMeta(countryEMD);
 		Repository<Entity> books = dataService.getMeta().addEntityMeta(bookEMD);
-		Repository<Entity> persons = dataService.getMeta().addEntityMeta(personEMD);
+		personsRepository = dataService.getMeta().addEntityMeta(personEMD);
 
 		// add country entities to repo
 		Entity c = new DefaultEntity(countryEMD, dataService);
@@ -137,7 +118,8 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 			person1.set(AUTHOR_OF, newArrayList(book1));
 			person1.set(ACCOUNT_BALANCE, 299.99);
 			person1.set(SERIAL_NUMBER, 374278348334L);
-			persons.add(person1);
+			person1.set(QUOTE, "Computer says no");
+			personsRepository.add(person1);
 
 			person2 = new DefaultEntity(personEMD, dataService);
 			person2.set(ID, "person2");
@@ -152,7 +134,8 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 			person2.set(AUTHOR_OF, newArrayList(book1, book2));
 			person2.set(ACCOUNT_BALANCE, -0.70);
 			person2.set(SERIAL_NUMBER, 67986789879L);
-			persons.add(person2);
+			person2.set(QUOTE, "To iterate is human, to recurse divine.");
+			personsRepository.add(person2);
 
 			person3 = new DefaultEntity(personEMD, dataService);
 			person3.set(ID, "person3");
@@ -167,13 +150,30 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 			person3.set(AUTHOR_OF, null);
 			person3.set(ACCOUNT_BALANCE, 1000.00);
 			person3.set(SERIAL_NUMBER, 23471900909L);
-			persons.add(person3);
+			person3.set(QUOTE, "If you're wrong about a boolean, you're only off by a bit");
+			personsRepository.add(person3);
 		}
 		catch (ParseException e)
 		{
-			throw new RuntimeEOFException(e);
+			throw new RuntimeException(e);
 		}
-
-		return persons;
 	}
+
+	protected abstract void testInt();
+
+	protected abstract void testDecimal();
+
+	protected abstract void testLong();
+
+	protected abstract void testString();
+
+	protected abstract void testDate() throws ParseException;
+
+	protected abstract void testDateTime() throws ParseException;
+
+	protected abstract void testBool();
+
+	protected abstract void testMref();
+
+	protected abstract void testXref();
 }
