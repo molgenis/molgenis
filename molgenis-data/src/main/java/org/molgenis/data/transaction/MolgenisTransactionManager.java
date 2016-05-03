@@ -100,6 +100,10 @@ public class MolgenisTransactionManager extends DataSourceTransactionManager
 		}
 
 		super.doCommit(jpaTransactionStatus);
+		if (!status.isReadOnly())
+		{
+			transactionListeners.forEach(j -> j.afterCommitTransaction(transaction.getId()));
+		}
 	}
 
 	@Override

@@ -88,13 +88,13 @@ public class ReindexJob extends Job
 			else if (dataType.equals(DataType.DATA))
 			{
 				progress.progress(count.getAndIncrement(),
-						format("Reindexing entity {0} in batch. CUDType = {2}", entityFullName, cudType));
+						format("Reindexing entity {0} in batch. CUDType = {1}", entityFullName, cudType));
 				this.rebuildIndexBatchEntities(entityFullName, entityMetaData, cudType);
 			}
 			else
 			{
 				progress.progress(count.getAndIncrement(),
-						format("Reindexing entity {0} in batch due to metadata change. CUDType = {2}", entityFullName,
+						format("Reindexing entity {0} in batch due to metadata change. CUDType = {1}", entityFullName,
 								cudType));
 				this.rebuildIndexEntityMeta(entityFullName, entityMetaData, cudType);
 			}

@@ -4,12 +4,10 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
-import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
-import org.springframework.stereotype.Component;
 
 import static org.molgenis.data.elasticsearch.reindex.meta.ReindexJobExecutionMetaData.REINDEX_JOB_EXECUTION;
 

@@ -23,9 +23,12 @@ public class ReindexTransactionListener implements MolgenisTransactionListener
 	}
 
 	@Override
-	public void commitTransaction(String transactionId)
+	public void commitTransaction(String transactionId) {}
+
+	@Override
+	public void afterCommitTransaction(String transactionId)
 	{
-		LOG.info("commitTransaction [{}]", transactionId);
+		LOG.trace("afterCommitTransaction [{}]", transactionId);
 		rebuildIndexService.rebuildIndex(transactionId);
 	}
 

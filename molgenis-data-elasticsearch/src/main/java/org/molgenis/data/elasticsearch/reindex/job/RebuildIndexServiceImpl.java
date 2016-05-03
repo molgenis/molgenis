@@ -4,15 +4,12 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionJobMetaData;
-import org.molgenis.security.user.MolgenisUserDetailsService;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.user.MolgenisUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.stereotype.Component;
 
-import javax.xml.crypto.Data;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -36,9 +33,10 @@ public class RebuildIndexServiceImpl implements RebuildIndexService
 	}
 
 	@Override
+	@RunAsSystem
 	public void rebuildIndex(String transactionId)
 	{
-		LOG.debug("rebuildIndex {}", transactionId);
+		LOG.trace("rebuildIndex {}", transactionId);
 		Entity reindexActionJob = dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, transactionId);
 		MolgenisUser admin = molgenisUserService.getUser("admin");
 
@@ -52,7 +50,7 @@ public class RebuildIndexServiceImpl implements RebuildIndexService
 		}
 		else
 		{
-			LOG.warn("Skip reindex of transaction with id {}", transactionId);
+			LOG.debug("Skip reindex of transaction with id {}.", transactionId);
 		}
 
 	}

@@ -14,7 +14,7 @@ public class ReindexActionRegisterConfig
 	@Autowired
 	private DataService dataService;
 
-	public static final String BACKEND = "PostgreSQL";
+	public static final String BACKEND = "ElasticSearch";
 
 	@Bean
 	public ReindexActionJobMetaData reindexActionJobMetaData()
