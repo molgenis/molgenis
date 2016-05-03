@@ -1,6 +1,6 @@
 package org.molgenis.integrationtest.data.abstracts.query;
 
-import static com.google.common.collect.Sets.*;
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.stream.Collectors.toSet;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -96,7 +96,8 @@ public abstract class AbstractEqualsQueryIT extends AbstractQueryIT
 		assertEquals(personsRepository.findAll(query).collect(toSet()), newHashSet(person1, person2));
 		assertEquals(personsRepository.count(query), 2);
 
-		query = new QueryImpl<Entity>().eq(AUTHOR_OF, "MOLGENIS for dummies").and().eq(AUTHOR_OF, "Your database at the push of a button");
+		query = new QueryImpl<Entity>().eq(AUTHOR_OF, "MOLGENIS for dummies").and().eq(AUTHOR_OF,
+				"Your database at the push of a button");
 		assertTrue(Sets.newHashSet(person2).contains(personsRepository.findOne(query)));
 		assertEquals(personsRepository.findAll(query).collect(Collectors.toSet()), Sets.newHashSet(person2));
 		assertEquals(personsRepository.count(query), 1);
