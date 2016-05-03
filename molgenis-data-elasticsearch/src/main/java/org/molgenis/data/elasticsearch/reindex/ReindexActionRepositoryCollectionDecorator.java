@@ -9,8 +9,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.reindex.ReindexActionMetaData.CudType;
-import org.molgenis.data.elasticsearch.reindex.ReindexActionMetaData.DataType;
+import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.CudType;
+import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.DataType;
 
 public class ReindexActionRepositoryCollectionDecorator implements ManageableRepositoryCollection
 {

@@ -10,8 +10,11 @@ import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
-import org.molgenis.data.elasticsearch.transaction.RebuildIndexService;
-import org.molgenis.data.elasticsearch.transaction.RebuildIndexServiceImpl;
+import org.molgenis.data.elasticsearch.reindex.job.RebuildIndexService;
+import org.molgenis.data.elasticsearch.reindex.job.RebuildIndexServiceImpl;
+import org.molgenis.data.elasticsearch.reindex.job.ReindexJobFactory;
+import org.molgenis.data.elasticsearch.transaction.ReindexTransactionListener;
+import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -20,9 +23,8 @@ import org.springframework.context.annotation.Configuration;
 /**
  * Spring config for embedded elastic search server. Use this in your own app by importing this in your spring config:
  * <code> @Import(EmbeddedElasticSearchConfig.class)</code>
- * 
+ *
  * @author erwin
- * 
  */
 @Configuration
 public class EmbeddedElasticSearchConfig
@@ -70,17 +72,27 @@ public class EmbeddedElasticSearchConfig
 	@Bean
 	public SearchService searchService()
 	{
-		ElasticsearchService elasticSearchService = embeddedElasticSearchServiceFactory().create(dataService,
-				elasticsearchEntityFactory);
+		return embeddedElasticSearchServiceFactory().create(dataService, elasticsearchEntityFactory);
+	}
 
-		return elasticSearchService;
+	@Bean
+	public ReindexTransactionListener reindexTransactionListener()
+	{
+		final ReindexTransactionListener reindexTransactionListener = new ReindexTransactionListener(
+				rebuildIndexService());
+		molgenisTransactionManager.addTransactionListener(reindexTransactionListener);
+		return reindexTransactionListener;
+	}
+
+	@Bean
+	public ReindexJobFactory reindexJobFactory()
+	{
+		return new ReindexJobFactory(dataService, searchService());
 	}
 
 	@Bean
 	public RebuildIndexService rebuildIndexService()
 	{
-		RebuildIndexService rebuildIndexService = new RebuildIndexServiceImpl(dataService, searchService());
-		molgenisTransactionManager.addTransactionListener(rebuildIndexService);
-		return rebuildIndexService;
+		return new RebuildIndexServiceImpl(dataService, reindexJobFactory());
 	}
 }

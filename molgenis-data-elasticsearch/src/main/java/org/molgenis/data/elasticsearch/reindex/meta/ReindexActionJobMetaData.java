@@ -1,4 +1,4 @@
-package org.molgenis.data.elasticsearch.reindex;
+package org.molgenis.data.elasticsearch.reindex.meta;
 
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 

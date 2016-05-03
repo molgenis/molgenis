@@ -1,6 +1,9 @@
-package org.molgenis.data.elasticsearch.reindex;
+package org.molgenis.data.elasticsearch.reindex.meta;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.elasticsearch.reindex.ReindexActionRegisterService;
+import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionJobMetaData;
+import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

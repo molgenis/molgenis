@@ -1,9 +1,13 @@
-package org.molgenis.data.elasticsearch.transaction;
+package org.molgenis.data.elasticsearch.reindex.job;
 
+import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.elasticsearch.reindex.meta.ReindexActionJobMetaData.COUNT;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
+import java.text.MessageFormat;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import org.molgenis.data.DataService;
@@ -14,52 +18,57 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Sort;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.elasticsearch.reindex.ReindexActionJobMetaData;
-import org.molgenis.data.elasticsearch.reindex.ReindexActionMetaData;
-import org.molgenis.data.elasticsearch.reindex.ReindexActionMetaData.CudType;
-import org.molgenis.data.elasticsearch.reindex.ReindexActionMetaData.DataType;
-import org.molgenis.data.elasticsearch.reindex.ReindexActionMetaData.ReindexStatus;
+import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionJobMetaData;
+import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData;
+import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.CudType;
+import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.DataType;
+import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.ReindexStatus;
+import org.molgenis.data.jobs.Job;
+import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.transaction.support.TransactionTemplate;
 
-public class RebuildPartialIndex implements Runnable
+public class ReindexJob extends Job
 {
-	private static final Logger LOG = LoggerFactory.getLogger(RebuildPartialIndex.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ReindexJob.class);
 	private final String transactionId;
 	private final DataService dataService;
 	private final SearchService searchService;
 
-	public RebuildPartialIndex(String transactionId, DataService dataService, SearchService searchService)
+	ReindexJob(Progress progress, Authentication authentication, String transactionId, DataService dataService,
+			SearchService searchService)
 	{
+		super(progress, null, authentication);
 		this.transactionId = requireNonNull(transactionId);
 		this.dataService = requireNonNull(dataService);
 		this.searchService = requireNonNull(searchService);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Runnable#run()
-	 */
 	@Override
-	public void run()
+	public Void call(Progress progress)
 	{
-		runAsSystem(() -> {
-			Entity entity = this.dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, transactionId);
-			if (null != entity)
-			{
-				LOG.info("######## START Reindex transaction id: [{}] date: [{}] ########", transactionId, new Date());
-				rebuildIndex();
-				LOG.info("######## END Reindex transaction id: [{}] date: [{}] ########", transactionId, new Date());
-			}
-			else
-			{
-				LOG.info("No reindex action job found for transaction id: [{}]", transactionId);
-			}
-		});
+		Entity entity = this.dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, transactionId);
+		if (null != entity)
+		{
+			progress.setProgressMax(entity.getInt(COUNT));
+			progress.status(format("######## START Reindex transaction id: [{0}] ########", transactionId));
+			rebuildIndex(progress);
+			progress.status(format("######## END Reindex transaction id: [{0}] took {1} ms. ########", transactionId,
+					progress.timeRunning()));
+		}
+		else
+		{
+			progress.status(format("No reindex action job found for transaction id: [{0}]", transactionId));
+		}
+		return null;
 	}
 
-	private void rebuildIndex()
+	private void rebuildIndex(Progress progress)
 	{
+		AtomicInteger count = new AtomicInteger();
 		Stream<Entity> logEntries = getAllReindexActions(this.transactionId);
 		logEntries.forEach(e -> {
 			requireNonNull(e.getEntityMetaData());
@@ -72,21 +81,28 @@ public class RebuildPartialIndex implements Runnable
 			this.updateActionStatus(e, ReindexStatus.STARTED);
 			if (entityId != null)
 			{
+				progress.progress(count.getAndIncrement(),
+						format("Reindexing {0}.{1}. CUDType = {2}", entityFullName, entityId, cudType));
 				this.rebuildIndexOneEntity(entityFullName, entityId, cudType);
 			}
 			else if (dataType.equals(DataType.DATA))
 			{
+				progress.progress(count.getAndIncrement(),
+						format("Reindexing entity {0} in batch. CUDType = {2}", entityFullName, cudType));
 				this.rebuildIndexBatchEntities(entityFullName, entityMetaData, cudType);
 			}
 			else
 			{
+				progress.progress(count.getAndIncrement(),
+						format("Reindexing entity {0} in batch due to metadata change. CUDType = {2}", entityFullName,
+								cudType));
 				this.rebuildIndexEntityMeta(entityFullName, entityMetaData, cudType);
 			}
 			this.updateActionStatus(e, ReindexStatus.FINISHED);
-
 		});
-
+		progress.status("refreshIndex...");
 		this.searchService.refreshIndex();
+		progress.status("refreshIndex done.");
 	}
 
 	private void updateActionStatus(Entity e, ReindexStatus status)
@@ -115,15 +131,14 @@ public class RebuildPartialIndex implements Runnable
 				break;
 		}
 	}
-	
+
 	private void rebuildIndexBatchEntities(String entityFullName, EntityMetaData entityMetaData, CudType cudType)
 	{
 		LOG.info("# Reindex batch entities of entity: [{}] cud: [{}]", entityFullName, cudType);
 		this.searchService.rebuildIndex(dataService.getRepository(entityFullName), entityMetaData);
 	}
 
-	private void rebuildIndexEntityMeta(String entityFullName, EntityMetaData entityMetaData,
-			CudType cudType)
+	private void rebuildIndexEntityMeta(String entityFullName, EntityMetaData entityMetaData, CudType cudType)
 	{
 		LOG.info("# Reindex data and metadata rebuild whole index of entity: [{}] cud: [{}]", entityFullName, cudType);
 		switch (cudType)
@@ -134,6 +149,7 @@ public class RebuildPartialIndex implements Runnable
 				break;
 			case DELETE:
 				this.searchService.delete(entityFullName);
+				break;
 			default:
 				break;
 		}
@@ -141,7 +157,7 @@ public class RebuildPartialIndex implements Runnable
 
 	/**
 	 * Get all relevant logs with transaction id. Sort on log order
-	 * 
+	 *
 	 * @return
 	 */
 	private Stream<Entity> getAllReindexActions(String transactionId)

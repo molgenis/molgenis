@@ -1,4 +1,4 @@
-package org.molgenis.data.elasticsearch.reindex;
+package org.molgenis.data.elasticsearch.reindex.meta;
 
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionJobMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.TextField;
