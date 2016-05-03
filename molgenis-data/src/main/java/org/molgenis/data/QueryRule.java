@@ -1,9 +1,7 @@
 package org.molgenis.data;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.lang.reflect.Array;
+import java.util.*;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -214,6 +212,10 @@ public class QueryRule
 		{
 			throw new IllegalArgumentException(
 					"QueryRule(): Operator." + operator + " cannot be used with two arguments");
+		}
+		if(value instanceof Object[] || value instanceof Collection)
+		{
+			throw new IllegalArgumentException("QueryRule value cannot be a list or array.");
 		}
 		this.field = field;
 		this.operator = operator;

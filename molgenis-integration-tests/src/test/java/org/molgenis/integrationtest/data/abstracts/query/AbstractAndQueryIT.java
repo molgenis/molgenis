@@ -115,9 +115,7 @@ public class AbstractAndQueryIT extends AbstractQueryIT
 				"Your database at the push of a button");
 		assertTrue(newHashSet(person2).contains(personsRepository.findOne(query)));
 		assertEquals(personsRepository.findAll(query).collect(toSet()), newHashSet(person2));
-
-		// FIXME org.postgresql.util.PSQLException: ERROR: table name "authorOf" specified more than once
-		// assertEquals(personsRepository.count(query), 1);
+		assertEquals(personsRepository.count(query), 1);
 	}
 
 	@Override

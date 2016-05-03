@@ -10,6 +10,7 @@ import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttr
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getTableName;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.isPersistedInPostgreSql;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -190,9 +191,10 @@ class PostgreSqlQueryGenerator
 
 	public static <E extends Entity> String getSqlSelect(EntityMetaData entityMeta, Query<E> q, List<Object> parameters)
 	{
-		StringBuilder select = new StringBuilder("SELECT ");
-		StringBuilder group = new StringBuilder();
-		AtomicInteger count = new AtomicInteger();
+		final StringBuilder select = new StringBuilder("SELECT ");
+		final StringBuilder group = new StringBuilder();
+		final AtomicInteger count = new AtomicInteger();
+		final AttributeMetaData idAttribute = entityMeta.getIdAttribute();
 		getPersistedAttributes(entityMeta).forEach(attr -> {
 			if (q.getFetch() == null || q.getFetch().hasField(attr.getName()))
 			{
@@ -205,10 +207,12 @@ class PostgreSqlQueryGenerator
 				{
 					// TODO retrieve mref values in seperate queries to allow specifying limit and offset after nested
 					// MOLGENIS queries are implemented as sub-queries instead of query rules
-					select.append("array_agg(distinct array[").append(getColumnName(attr)).append('.')
-							.append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append("::text,")
-							.append(getColumnName(attr)).append('.').append(getColumnName(attr)).append("::text]) AS ")
-							.append(getColumnName(attr));
+					String mrefSelect = MessageFormat
+							.format("(SELECT array_agg(DISTINCT ARRAY[{0}.{1}::TEXT,{0}.{0}::TEXT]) "
+											+ "FROM {2} AS {0} WHERE this.{3} = {0}.{3}) AS {0}", getColumnName(attr),
+									getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME),
+									getJunctionTableName(entityMeta, attr), getColumnName(idAttribute));
+					select.append(mrefSelect);
 				}
 				else
 				{
@@ -233,11 +237,6 @@ class PostgreSqlQueryGenerator
 		if (where.length() > 0)
 		{
 			result.append(" WHERE ").append(where);
-		}
-		// group by
-		if (select.indexOf("array_agg") != -1 && group.length() > 0)
-		{
-			result.append(" GROUP BY ").append(group);
 		}
 		// order by
 		result.append(' ').append(getSqlSort(entityMeta, q));
@@ -595,16 +594,6 @@ class PostgreSqlQueryGenerator
 
 		AttributeMetaData idAttribute = entityMeta.getIdAttribute();
 
-		getPersistedAttributesMref(entityMeta).forEach(mrefAttr -> {
-			if (q.getFetch() == null || q.getFetch().hasField(mrefAttr.getName()))
-			{
-				from.append(" LEFT JOIN ").append(getJunctionTableName(entityMeta, mrefAttr)).append(" AS ")
-						.append(getColumnName(mrefAttr)).append(" ON (this.").append(getColumnName(idAttribute))
-						.append(" = ").append(getColumnName(mrefAttr)).append('.').append(getColumnName(idAttribute))
-						.append(')');
-			}
-		});
-
 		List<AttributeMetaData> mrefAttrsInQuery = getMrefQueryAttrs(entityMeta, q);
 		for (int i = 0; i < mrefAttrsInQuery.size(); i++)
 		{
@@ -631,11 +620,6 @@ class PostgreSqlQueryGenerator
 		{
 			// extra join so we can filter on the mrefs
 			AttributeMetaData mrefAttr = mrefAttrsInQuery.get(i);
-
-			from.append(" LEFT JOIN ").append(getJunctionTableName(entityMeta, mrefAttr)).append(" AS ")
-					.append(getColumnName(mrefAttr)).append(" ON (this.").append(getColumnName(idAttribute))
-					.append(" = ").append(getColumnName(mrefAttr)).append('.').append(getColumnName(idAttribute))
-					.append(')');
 
 			from.append(" LEFT JOIN ").append(getJunctionTableName(entityMeta, mrefAttr)).append(" AS ")
 					.append(getFilterColumnName(mrefAttr, i + 1)).append(" ON (this.")
