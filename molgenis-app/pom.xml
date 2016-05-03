@@ -73,7 +73,7 @@
 					<systemProperties>
 						<systemProperty>
 							<name>molgenis.home</name>
-							<value>${user.home}${file.separator}.molgenis${file.separator}molgenis</value>
+							<value>${user.home}${file.separator}.molgenis${file.separator}omx</value>
 						</systemProperty>
 					</systemProperties>
 					<webAppConfig>
