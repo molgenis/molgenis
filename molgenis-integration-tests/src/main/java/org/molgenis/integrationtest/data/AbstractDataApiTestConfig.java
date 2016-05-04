@@ -61,9 +61,6 @@ public abstract class AbstractDataApiTestConfig
 	protected SearchService searchService;
 
 	@Autowired
-	private ReindexActionRegisterService reindexActionRegisterService;
-
-	@Autowired
 	public ExpressionValidator expressionValidator;
 
 	@Autowired
