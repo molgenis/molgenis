@@ -91,9 +91,7 @@ public class AbstractSearchQueryIT extends AbstractQueryIT
 	{
 		try
 		{
-			String value = "true";
-			Query<Entity> query = new QueryImpl<Entity>().search(ACTIVE, value);
-			assertTrue(newHashSet(person2).contains(personsRepository.findOne(query)));
+			personsRepository.findOne(new QueryImpl<Entity>().search(ACTIVE, "true"));
 			fail();
 		} catch(MolgenisQueryException e) {
 			// Expect a MolgenisQueryException
