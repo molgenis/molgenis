@@ -5,7 +5,6 @@ import static java.util.stream.Collectors.joining;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.JUNCTION_TABLE_ORDER_ATTR_NAME;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getJunctionTableName;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributes;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributesMref;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributesNonMref;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getTableName;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.isPersistedInPostgreSql;
@@ -207,11 +206,11 @@ class PostgreSqlQueryGenerator
 				{
 					// TODO retrieve mref values in seperate queries to allow specifying limit and offset after nested
 					// MOLGENIS queries are implemented as sub-queries instead of query rules
-					String mrefSelect = MessageFormat
-							.format("(SELECT array_agg(DISTINCT ARRAY[{0}.{1}::TEXT,{0}.{0}::TEXT]) "
-											+ "FROM {2} AS {0} WHERE this.{3} = {0}.{3}) AS {0}", getColumnName(attr),
-									getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME),
-									getJunctionTableName(entityMeta, attr), getColumnName(idAttribute));
+					String mrefSelect = MessageFormat.format(
+							"(SELECT array_agg(DISTINCT ARRAY[{0}.{1}::TEXT,{0}.{0}::TEXT]) "
+									+ "FROM {2} AS {0} WHERE this.{3} = {0}.{3}) AS {0}",
+							getColumnName(attr), getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME),
+							getJunctionTableName(entityMeta, attr), getColumnName(idAttribute));
 					select.append(mrefSelect);
 				}
 				else
@@ -385,7 +384,8 @@ class PostgreSqlQueryGenerator
 		return new StringBuilder("DROP TABLE ").append(tableName).toString();
 	}
 
-	private static <E extends Entity> String getSqlWhere(EntityMetaData entityMeta, Query<E> q, List<Object> parameters, int mrefFilterIndex)
+	private static <E extends Entity> String getSqlWhere(EntityMetaData entityMeta, Query<E> q, List<Object> parameters,
+			int mrefFilterIndex)
 	{
 		StringBuilder result = new StringBuilder();
 		for (QueryRule r : q.getRules())
@@ -419,14 +419,26 @@ class PostgreSqlQueryGenerator
 					result.append(" OR ");
 					break;
 				case LIKE:
-					if (attr.getDataType() instanceof StringField || attr.getDataType() instanceof TextField)
+
+					String columnName;
+					if (attr.getDataType() instanceof MrefField)
 					{
-						result.append(" this.").append(getColumnName(attr));
+						columnName = getFilterColumnName(attr, mrefFilterIndex);
 					}
 					else
 					{
-						result.append(" CAST(this.").append(getColumnName(attr)).append(" as TEXT)");
+						columnName = "this." + getColumnName(attr);
 					}
+
+					if (attr.getDataType() instanceof StringField || attr.getDataType() instanceof TextField)
+					{
+						result.append(" ").append(columnName);
+					}
+					else
+					{
+						result.append(" CAST(").append(columnName).append(" as TEXT)");
+					}
+
 					result.append(" LIKE ?");
 					parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
 					break;
