@@ -14,4 +14,7 @@ public interface MolgenisTransactionListener
 	void afterCommitTransaction(String transactionId);
 
 	void rollbackTransaction(String transactionId);
+
+	void doCleanupAfterCompletion(String transactionId);
+
 }

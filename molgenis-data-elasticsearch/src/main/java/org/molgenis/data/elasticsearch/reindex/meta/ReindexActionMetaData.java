@@ -77,7 +77,7 @@ public class ReindexActionMetaData extends DefaultEntityMetaData
 				.setNillable(false);
 	}
 
-	public static enum CudType
+	public enum CudType
 	{
 		ADD, UPDATE, DELETE;
 
@@ -93,7 +93,7 @@ public class ReindexActionMetaData extends DefaultEntityMetaData
 		}
 	};
 
-	public static enum DataType
+	public enum DataType
 	{
 		DATA, METADATA;
 
@@ -112,7 +112,7 @@ public class ReindexActionMetaData extends DefaultEntityMetaData
 	/**
 	 * Indexing transaction status
 	 */
-	public static enum ReindexStatus
+	public enum ReindexStatus
 	{
 		FINISHED, CANCELED, FAILED, STARTED, PENDING;
 
