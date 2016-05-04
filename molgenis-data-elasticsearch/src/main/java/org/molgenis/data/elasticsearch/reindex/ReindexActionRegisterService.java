@@ -20,6 +20,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+/**
+ * Registers changes made to an indexed repository that need to be fixed by reindexing
+ * the relevant data.
+ */
 public class ReindexActionRegisterService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ReindexActionRegisterService.class);

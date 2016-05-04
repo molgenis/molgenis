@@ -11,6 +11,9 @@ import org.springframework.mail.MailSender;
 
 import static org.molgenis.data.elasticsearch.reindex.meta.ReindexJobExecutionMetaData.REINDEX_JOB_EXECUTION;
 
+/**
+ * Creates {@link ReindexJob}s. Injects the beans they need to do their work.
+ */
 public class ReindexJobFactory
 {
 	private DataService dataService;
@@ -25,6 +28,9 @@ public class ReindexJobFactory
 		this.searchService = searchService;
 	}
 
+	/**
+	 * Create a ReindexJob for a {@link ReindexJobExecution} entity.
+	 */
 	ReindexJob createJob(ReindexJobExecution reindexJobExecution)
 	{
 		RunAsSystemProxy.runAsSystem(() -> dataService.add(REINDEX_JOB_EXECUTION, reindexJobExecution));
