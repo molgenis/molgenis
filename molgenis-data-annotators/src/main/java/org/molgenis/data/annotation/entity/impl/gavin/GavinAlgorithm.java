@@ -108,13 +108,13 @@ public class GavinAlgorithm
 				if (caddScaled > spec95thPerCADDThreshold)
 				{
 					return new Judgment(Judgment.Classification.Pathognic, Judgment.Method.calibrated,
-							"Variant CADD score of " + caddScaled + " is greater than the 95% specificity threhold of "
+							"Variant CADD score of " + caddScaled + " is greater than the 95% specificity threshold of "
 									+ spec95thPerCADDThreshold + " for this gene. Also, " + mafReason);
 				}
 				else if (caddScaled < spec95thPerCADDThreshold)
 				{
 					return new Judgment(Judgment.Classification.Benign, Judgment.Method.calibrated,
-							"Variant CADD score of " + caddScaled + " is lesser than the 95% sensitivity threhold of "
+							"Variant CADD score of " + caddScaled + " is lesser than the 95% sensitivity threshold of "
 									+ spec95thPerCADDThreshold + " for this gene, although " + mafReason);
 				}
 			}
