@@ -77,6 +77,6 @@ public class ReindexActionRepositoryCollectionDecoratorTest
 	{
 		reindexActionRepositoryCollectionDecorator.addEntityMeta(entityMeta);
 		verify(decoratedRepositoryCollection, times(1)).addEntityMeta(entityMeta);
-		verify(reindexActionRegisterService).register(entityMeta, CudType.ADD, DataType.METADATA, null);
+		verify(reindexActionRegisterService).register(entityMeta, CudType.CREATE, DataType.METADATA, null);
 	}
 }

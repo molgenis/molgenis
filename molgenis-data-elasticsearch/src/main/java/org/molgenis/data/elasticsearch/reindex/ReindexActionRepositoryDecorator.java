@@ -71,13 +71,13 @@ public class ReindexActionRepositoryDecorator extends AbstractRepositoryDecorato
 	{
 		decorated.add(entity);
 		reindexActionRegisterService
-				.register(getEntityMetaData(), CudType.ADD, DataType.DATA, entity.getIdValue().toString());
+				.register(getEntityMetaData(), CudType.CREATE, DataType.DATA, entity.getIdValue().toString());
 	}
 
 	@Override
 	public Integer add(Stream<Entity> entities)
 	{
-		reindexActionRegisterService.register(getEntityMetaData(), CudType.ADD, DataType.DATA, null);
+		reindexActionRegisterService.register(getEntityMetaData(), CudType.CREATE, DataType.DATA, null);
 		return decorated.add(entities);
 	}
 

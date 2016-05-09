@@ -10,11 +10,10 @@ import java.util.List;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionJobMetaData;
 import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData;
 import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.CudType;
 import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.DataType;
-import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionJobMetaData;
-import org.molgenis.data.elasticsearch.reindex.meta.ReindexJobExecutionMetaData;
 import org.molgenis.data.support.DefaultEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +77,7 @@ public class ReindexActionRegisterService
 		}
 	}
 
-	private int increaseCountReindexActionJob(Entity reindexActionJob)
+	public int increaseCountReindexActionJob(Entity reindexActionJob)
 	{
 		int count = reindexActionJob.getInt(ReindexActionJobMetaData.COUNT).intValue() + 1;
 		reindexActionJob.set(ReindexActionJobMetaData.COUNT, count);
@@ -94,12 +93,12 @@ public class ReindexActionRegisterService
 		return reindexActionJob;
 	}
 
-	public DefaultEntity createReindexAction(Entity transLog, String fullName, CudType cudType,
+	public DefaultEntity createReindexAction(Entity reindexActionGroup, String entityFullName, CudType cudType,
 			DataType dataType, String entityId, int actionOrder)
 	{
 		DefaultEntity reindexAction = new DefaultEntity(this.reindexActionMetaData, this.dataService);
-		reindexAction.set(ReindexActionMetaData.REINDEX_ACTION_GROUP, transLog);
-		reindexAction.set(ReindexActionMetaData.ENTITY_FULL_NAME, fullName);
+		reindexAction.set(ReindexActionMetaData.REINDEX_ACTION_GROUP, reindexActionGroup);
+		reindexAction.set(ReindexActionMetaData.ENTITY_FULL_NAME, entityFullName);
 		reindexAction.set(ReindexActionMetaData.CUD_TYPE, cudType);
 		reindexAction.set(ReindexActionMetaData.DATA_TYPE, dataType);
 		reindexAction.set(ReindexActionMetaData.ENTITY_ID, entityId);

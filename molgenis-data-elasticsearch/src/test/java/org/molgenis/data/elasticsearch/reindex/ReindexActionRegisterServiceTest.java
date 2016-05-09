@@ -64,12 +64,12 @@ public class ReindexActionRegisterServiceTest
 		Entity reindexActionJob = reindexActionRegisterService.createReindexActionJob("1");
 
 		Entity reindexAction = reindexActionRegisterService.createReindexAction(reindexActionJob, "full_entity_name",
-				CudType.ADD, DataType.DATA, "123", 1);
+				CudType.CREATE, DataType.DATA, "123", 1);
 		assertNotNull(reindexAction.get(ReindexActionMetaData.REINDEX_ACTION_GROUP));
 		assertEquals(reindexAction.getInt(ReindexActionMetaData.ACTION_ORDER), Integer.valueOf(1));
 		assertEquals(reindexAction.getString(ReindexActionMetaData.ENTITY_FULL_NAME), "full_entity_name");
 		assertEquals(reindexAction.get(ReindexActionMetaData.ENTITY_ID), "123");
-		assertEquals(reindexAction.get(ReindexActionMetaData.CUD_TYPE), CudType.ADD.name());
+		assertEquals(reindexAction.get(ReindexActionMetaData.CUD_TYPE), CudType.CREATE.name());
 		assertEquals(reindexAction.get(ReindexActionMetaData.DATA_TYPE), DataType.DATA.name());
 		assertEquals(reindexAction.get(ReindexActionMetaData.REINDEX_STATUS), ReindexStatus.PENDING.name());
 
@@ -93,7 +93,7 @@ public class ReindexActionRegisterServiceTest
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 		when(entityMetaData.getName()).thenReturn("non_log_entity");
 
-		reindexActionRegisterService.register(entityMetaData, CudType.ADD, DataType.DATA, "123");
+		reindexActionRegisterService.register(entityMetaData, CudType.CREATE, DataType.DATA, "123");
 		
 		verify(dataService).update(eq(ReindexActionJobMetaData.ENTITY_NAME), any(Entity.class));
 		verify(dataService).add(eq(ReindexActionMetaData.ENTITY_NAME), any(Entity.class));
@@ -105,12 +105,12 @@ public class ReindexActionRegisterServiceTest
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 		when(entityMetaData.getName()).thenReturn(ReindexActionJobMetaData.ENTITY_NAME);
 
-		reindexActionRegisterService.register(entityMetaData, CudType.ADD, DataType.DATA, "123");
+		reindexActionRegisterService.register(entityMetaData, CudType.CREATE, DataType.DATA, "123");
 		verifyNoMoreInteractions(dataService);
 
 		when(entityMetaData.getName()).thenReturn(ReindexActionJobMetaData.ENTITY_NAME);
 
-		reindexActionRegisterService.register(entityMetaData, CudType.ADD, DataType.DATA, "123");
+		reindexActionRegisterService.register(entityMetaData, CudType.CREATE, DataType.DATA, "123");
 		verifyNoMoreInteractions(dataService);
 	}
 }

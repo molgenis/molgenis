@@ -94,7 +94,7 @@ public class ReindexActionMetaData extends DefaultEntityMetaData
 		/**
 		 * Entity data or metadata got added.
 		 */
-		ADD,
+		CREATE,
 		/**
 		 * Entity data or metadata got updated.
 		 */

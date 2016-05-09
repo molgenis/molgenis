@@ -82,7 +82,7 @@ public class ReindexActionRepositoryCollectionDecorator implements ManageableRep
 	@Override
 	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
 	{
-		this.reindexActionRegisterService.register(entityMeta, CudType.ADD,
+		this.reindexActionRegisterService.register(entityMeta, CudType.CREATE,
 				DataType.METADATA, null);
 		return this.decorated.addEntityMeta(entityMeta);
 	}

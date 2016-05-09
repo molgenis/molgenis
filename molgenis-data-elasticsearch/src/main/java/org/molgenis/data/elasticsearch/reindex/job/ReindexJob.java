@@ -6,18 +6,15 @@ import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.elasticsearch.reindex.meta.ReindexActionJobMetaData.COUNT;
 import static org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.ACTION_ORDER;
 import static org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.REINDEX_ACTION_GROUP;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
-import java.text.MessageFormat;
-import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
-import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Sort;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.SearchService;
@@ -32,7 +29,6 @@ import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
-import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * {@link Job} that executes a bunch of {@link ReindexActionMetaData} stored in a
@@ -73,7 +69,7 @@ public class ReindexJob extends Job
 		return null;
 	}
 
-	private void rebuildIndex(Progress progress)
+	void rebuildIndex(Progress progress)
 	{
 		AtomicInteger count = new AtomicInteger();
 		Stream<Entity> logEntries = getAllReindexActions(this.transactionId);
@@ -89,7 +85,7 @@ public class ReindexJob extends Job
 			if (entityId != null)
 			{
 				progress.progress(count.getAndIncrement(),
-						format("Reindexing {0}.{1}. CUDType = {2}", entityFullName, entityId, cudType));
+						format("Reindexing {0}.{1}, CUDType = {2}", entityFullName, entityId, cudType));
 				this.rebuildIndexOneEntity(entityFullName, entityId, cudType);
 			}
 			else if (dataType.equals(DataType.DATA))
@@ -109,7 +105,7 @@ public class ReindexJob extends Job
 		});
 		progress.status("refreshIndex...");
 		this.searchService.refreshIndex();
-		progress.status("refreshIndex done.");
+		progress.progress(count.get(), "refreshIndex done.");
 	}
 
 	private void updateActionStatus(Entity e, ReindexStatus status)
@@ -123,7 +119,7 @@ public class ReindexJob extends Job
 		LOG.info("# Reindex row id [{}] entity: [{}] cud: [{}]", entityId, entityFullName, cudType);
 		switch (cudType)
 		{
-			case ADD:
+			case CREATE:
 				Entity entityA = dataService.findOneById(entityFullName, entityId);
 				this.searchService.index(entityA, entityA.getEntityMetaData(), IndexingMode.ADD);
 				break;
@@ -151,7 +147,7 @@ public class ReindexJob extends Job
 		switch (cudType)
 		{
 			case UPDATE:
-			case ADD:
+			case CREATE:
 				this.searchService.rebuildIndex(dataService.getRepository(entityFullName), entityMetaData);
 				break;
 			case DELETE:
@@ -163,11 +159,20 @@ public class ReindexJob extends Job
 	/**
 	 * Retrieves the {@link ReindexActionMetaData} to execute in this job, sorted on log order.
 	 */
-	private Stream<Entity> getAllReindexActions(String transactionId)
+	Stream<Entity> getAllReindexActions(String transactionId)
+	{
+		Query<Entity> q = createQueryGetAllReindexActions(transactionId);
+		return dataService.findAll(ReindexActionMetaData.ENTITY_NAME, q);
+	}
+
+	/**
+	 * Retrieves the query to get all reindex actions sorted
+	 */
+	static Query<Entity> createQueryGetAllReindexActions(String transactionId)
 	{
 		QueryRule rule = new QueryRule(REINDEX_ACTION_GROUP, EQUALS, transactionId);
 		QueryImpl<Entity> q = new QueryImpl<>(rule);
 		q.setSort(new Sort(ACTION_ORDER));
-		return dataService.findAll(ReindexActionMetaData.ENTITY_NAME, q);
+		return q;
 	}
 }
