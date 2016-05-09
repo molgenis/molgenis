@@ -103,11 +103,11 @@
 									<#assign value = category[attributeName] />
 									<#assign dataType = attribute.dataType />
 									<#if dataType == "datetime">
-										${category[attributeName]?datetime}<#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+										${value?datetime}<#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
 									<#elseif dataType == "date">
-										${category[attributeName]?date}<#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+										${value?date}<#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
 									<#else>
-										${category[attributeName]?string}<#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+										${value?string}<#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
 									</#if>
 								</#if>
 							</#list>
