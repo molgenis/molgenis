@@ -88,7 +88,7 @@ public class GavinJobTest
 		verify(progress).progress(2, "Annotating with snpEff...");
 		verify(cmdLineAnnotator).annotate(snpeff, exacResult, snpEffResult, emptyList(), false, false);
 		verify(progress).progress(3, "Annotating with gavin...");
-		verify(cmdLineAnnotator).annotate(gavin, snpEffResult, gavinResult, emptyList(), false, true);
+		verify(cmdLineAnnotator).annotate(gavin, snpEffResult, gavinResult, emptyList(), false, false);
 		verify(progress).progress(4, "Result is ready for download.");
 		verify(progress).setResultUrl("/menu/plugins/gavin-app/result/ABCDE");
 
