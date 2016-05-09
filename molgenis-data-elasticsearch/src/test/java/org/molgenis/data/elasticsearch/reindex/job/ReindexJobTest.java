@@ -47,7 +47,6 @@ public class ReindexJobTest
 			ReindexActionRegisterConfig.BACKEND);
 	private ReindexActionRegisterService reindexActionRegisterService;
 	private ReindexJobFactory reindexJobFactory;
-	private RebuildIndexServiceImpl rebuildIndexServiceImpl;
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -58,7 +57,6 @@ public class ReindexJobTest
 		this.dataService = mock(DataService.class);
 		this.searchService = mock(SearchService.class);
 		this.reindexJobFactory = new ReindexJobFactory(this.dataService, this.searchService);
-		this.rebuildIndexServiceImpl = new RebuildIndexServiceImpl(dataService, reindexJobFactory);
 		this.reindexActionRegisterService = new ReindexActionRegisterService(dataService, reindexActionJobMetaData,
 				reindexActionMetaData);
 	}
@@ -88,9 +86,9 @@ public class ReindexJobTest
 		assertEquals(q.toString(),
 				"rules=['reindexActionGroup' = 'testme'], sort=Sort [orders=[Order [attr=actionOrder, direction=ASC]]]");
 	}
-
+	
 	@Test
-	private void rebuildIndexCreateSingleEntity()
+	private void rebuildIndexDeleteSingleEntityTest()
 	{
 		ReindexJob reindexJob = new ReindexJob(this.progress, this.authentication, this.transactionId,
 				this.dataService, this.searchService);
@@ -100,7 +98,7 @@ public class ReindexJobTest
 				reindexActionJob);
 
 		Entity entity = reindexActionRegisterService
-				.createReindexAction(reindexActionJob, "test", CudType.CREATE, DataType.DATA, "entityId",
+				.createReindexAction(reindexActionJob, "test", CudType.DELETE, DataType.DATA, "entityId",
 						reindexActionRegisterService.increaseCountReindexActionJob(reindexActionJob));
 		mockGetAllReindexActions(reindexJob, this.transactionId, Lists.<Entity> newArrayList(entity).stream());
 
@@ -114,9 +112,52 @@ public class ReindexJobTest
 
 		reindexJob.call(this.progress);
 		assertEquals(entity.get(ReindexActionMetaData.REINDEX_STATUS), ReindexStatus.FINISHED.name());
-		
-		verify(this.searchService).index(toReindexEntity, emd, IndexingMode.ADD);
-		verify(this.progress).progress(0, "Reindexing test.entityId, CUDType = CREATE");
+
+		verify(this.searchService).deleteById("entityId", emd);
+		verify(this.progress).progress(0, "Reindexing test.entityId, CUDType = " + CudType.DELETE);
+		verify(this.progress).progress(1, "refreshIndex done.");
+		verify(dataService, times(2)).update(ReindexActionMetaData.ENTITY_NAME, entity);
+	}
+
+	@Test
+	private void rebuildIndexCreateSingleEntityTest()
+	{
+		this.rebuildIndexSingleEntityTest(CudType.CREATE, IndexingMode.ADD);
+	}
+
+	@Test
+	private void rebuildIndexUpdateSingleEntityTest()
+	{
+		this.rebuildIndexSingleEntityTest(CudType.UPDATE, IndexingMode.UPDATE);
+	}
+
+	private void rebuildIndexSingleEntityTest(CudType cudType, IndexingMode indexingMode)
+	{
+		ReindexJob reindexJob = new ReindexJob(this.progress, this.authentication, this.transactionId,
+				this.dataService, this.searchService);
+
+		Entity reindexActionJob = reindexActionRegisterService.createReindexActionJob(this.transactionId);
+		when(this.dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, this.transactionId)).thenReturn(
+				reindexActionJob);
+
+		Entity entity = reindexActionRegisterService
+				.createReindexAction(reindexActionJob, "test", cudType, DataType.DATA, "entityId",
+						reindexActionRegisterService.increaseCountReindexActionJob(reindexActionJob));
+		mockGetAllReindexActions(reindexJob, this.transactionId, Lists.<Entity> newArrayList(entity).stream());
+
+		MetaDataService mds = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(mds);
+		EntityMetaData emd = new DefaultEntityMetaData("test");
+		when(mds.getEntityMetaData("test")).thenReturn(emd);
+
+		Entity toReindexEntity = new DefaultEntity(emd, dataService);
+		when(dataService.findOneById("test", "entityId")).thenReturn(toReindexEntity);
+
+		reindexJob.call(this.progress);
+		assertEquals(entity.get(ReindexActionMetaData.REINDEX_STATUS), ReindexStatus.FINISHED.name());
+
+		verify(this.searchService).index(toReindexEntity, emd, indexingMode);
+		verify(this.progress).progress(0, "Reindexing test.entityId, CUDType = " + cudType.name());
 		verify(this.progress).progress(1, "refreshIndex done.");
 		verify(dataService, times(2)).update(ReindexActionMetaData.ENTITY_NAME, entity);
 	}
