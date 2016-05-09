@@ -30,7 +30,6 @@ import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.io.FilenameUtils;
 import org.molgenis.auth.Authority;
 import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.MolgenisGroup;
