@@ -153,10 +153,10 @@ public class GavinAlgorithm
 				return new Judgment(Judgment.Classification.Pathognic, Method.genomewide,
 						"CADDscore > " + GavinAnnotator.CADD_MAXIMUM_THRESHOLD);
 			}
-			else if (caddScaled != null && caddScaled < GavinAnnotator.CADD_MINIMUM_THRESHOLD)
+			else if (caddScaled != null && caddScaled <= GavinAnnotator.CADD_MINIMUM_THRESHOLD)
 			{
 				return new Judgment(Judgment.Classification.Benign, Method.genomewide,
-						"CADDscore < " + GavinAnnotator.CADD_MINIMUM_THRESHOLD);
+						"CADDscore <= " + GavinAnnotator.CADD_MINIMUM_THRESHOLD);
 			}
 			else
 			{
