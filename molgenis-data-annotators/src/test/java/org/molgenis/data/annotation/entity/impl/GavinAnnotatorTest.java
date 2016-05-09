@@ -70,7 +70,7 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testAnnotate1()
+	public void testAnnotateHighMafBenign()
 	{
 		Entity variant_entity = new MapEntity(entityMetaData);
 
@@ -100,7 +100,7 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testAnnotate2()
+	public void testAnnotateLowCaddBenign()
 	{
 		Entity variant_entity = new MapEntity(entityMetaData);
 
@@ -121,7 +121,7 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 		Entity expectedEntity = new MapEntity("expected");
 		expectedEntity.set(GavinAnnotator.CLASSIFICATION, "Benign");
 		expectedEntity.set(GavinAnnotator.CONFIDENCE, "genomewide");
-		expectedEntity.set(GavinAnnotator.REASON, "CADDscore < 5");
+		expectedEntity.set(GavinAnnotator.REASON, "CADDscore <= 15");
 
 		assertEquals(resultEntity.get(GavinAnnotator.CLASSIFICATION), expectedEntity.get(GavinAnnotator.CLASSIFICATION));
 		assertEquals(resultEntity.get(GavinAnnotator.CONFIDENCE), expectedEntity.get(GavinAnnotator.CONFIDENCE));
@@ -130,17 +130,18 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testAnnotate3()
+	public void testAnnotateNoCaddVOUS()
 	{
 		Entity variant_entity = new MapEntity(entityMetaData);
 
 		variant_entity.set(VcfRepository.ALT, "A,T");
-		variant_entity.set(CaddAnnotator.CADD_SCALED, "6,6");
+//		variant_entity.set(CaddAnnotator.CADD_SCALED, "16,6");
 		variant_entity.set(ExacAnnotator.EXAC_AF,"0.00001,0.00001");
 
 		Entity effect_entity = new MapEntity(emd);
 		effect_entity.set(EffectsMetaData.ALT, "A");
 		effect_entity.set(EffectsMetaData.PUTATIVE_IMPACT, "HIGH");
+		effect_entity.set(EffectsMetaData.GENE_NAME, "TFR2");
 		effect_entity.set(GavinAnnotator.VARIANT_ENTITY, variant_entity);
 
 		Iterator<Entity> results = annotator.annotate(Collections.singletonList(effect_entity));
@@ -151,7 +152,7 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 		Entity expectedEntity = new MapEntity("expected");
 		expectedEntity.set(GavinAnnotator.CLASSIFICATION, "VOUS");
 		expectedEntity.set(GavinAnnotator.CONFIDENCE, "genomewide");
-		expectedEntity.set(GavinAnnotator.REASON, "Unable to classify variant as benign or pathogenic. The combination of HIGH impact, a CADD score 6.0 and MAF of 1.0E-5 in null is inconclusive.");
+		expectedEntity.set(GavinAnnotator.REASON, "Unable to classify variant as benign or pathogenic. The combination of HIGH impact, a CADD score [missing] and MAF of 1.0E-5 in TFR2 is inconclusive.");
 
 		assertEquals(resultEntity.get(GavinAnnotator.CLASSIFICATION), expectedEntity.get(GavinAnnotator.CLASSIFICATION));
 		assertEquals(resultEntity.get(GavinAnnotator.CONFIDENCE), expectedEntity.get(GavinAnnotator.CONFIDENCE));
@@ -160,7 +161,7 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testAnnotate4()
+	public void testAnnotateLowVariantCaddBenign()
 	{
 		Entity variant_entity = new MapEntity(entityMetaData);
 
@@ -182,7 +183,7 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 		Entity expectedEntity = new MapEntity("expected");
 		expectedEntity.set(GavinAnnotator.CLASSIFICATION, "Benign");
 		expectedEntity.set(GavinAnnotator.CONFIDENCE, "calibrated");
-		expectedEntity.set(GavinAnnotator.REASON, "Variant CADD score of 6.0 is lesser than the 95% sensitivity threhold of 35.35 for this gene, although the variant MAF of 1.0E-5 is lesser than the pathogenic 95th percentile MAF of 1.9269599999999953E-4.");
+		expectedEntity.set(GavinAnnotator.REASON, "Variant CADD score of 6.0 is lesser than the 95% sensitivity threshold of 35.35 for this gene, although the variant MAF of 1.0E-5 is lesser than the pathogenic 95th percentile MAF of 1.9269599999999953E-4.");
 
 		assertEquals(resultEntity.get(GavinAnnotator.CLASSIFICATION), expectedEntity.get(GavinAnnotator.CLASSIFICATION));
 		assertEquals(resultEntity.get(GavinAnnotator.CONFIDENCE), expectedEntity.get(GavinAnnotator.CONFIDENCE));
@@ -190,7 +191,7 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testAnnotate5()
+	public void testAnnotateHighCaddPathogenic()
 	{
 		Entity variant_entity = new MapEntity(entityMetaData);
 
@@ -212,7 +213,7 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 		Entity expectedEntity = new MapEntity("expected");
 		expectedEntity.set(GavinAnnotator.CLASSIFICATION, "Pathognic");
 		expectedEntity.set(GavinAnnotator.CONFIDENCE, "calibrated");
-		expectedEntity.set(GavinAnnotator.REASON, "Variant CADD score of 80.0 is greater than the 95% specificity threhold of 35.35 for this gene. Also, the variant MAF of 1.0E-5 is lesser than the pathogenic 95th percentile MAF of 1.9269599999999953E-4.");
+		expectedEntity.set(GavinAnnotator.REASON, "Variant CADD score of 80.0 is greater than the 95% specificity threshold of 35.35 for this gene. Also, the variant MAF of 1.0E-5 is lesser than the pathogenic 95th percentile MAF of 1.9269599999999953E-4.");
 
 		assertEquals(resultEntity.get(GavinAnnotator.CLASSIFICATION), expectedEntity.get(GavinAnnotator.CLASSIFICATION));
 		assertEquals(resultEntity.get(GavinAnnotator.CONFIDENCE), expectedEntity.get(GavinAnnotator.CONFIDENCE));

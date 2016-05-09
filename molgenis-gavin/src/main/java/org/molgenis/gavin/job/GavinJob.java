@@ -65,16 +65,16 @@ public class GavinJob extends Job<Void>
 		progress.setProgressMax(4);
 
 		progress.progress(0, "Annotating with cadd...");
-		cmdLineAnnotator.annotate(cadd, inputFile, caddOutputFile, emptyList(), false);
+		cmdLineAnnotator.annotate(cadd, inputFile, caddOutputFile, emptyList(), false, true);
 
 		progress.progress(1, "Annotating with exac...");
-		cmdLineAnnotator.annotate(exac, caddOutputFile, exacOutputFile, emptyList(), false);
+		cmdLineAnnotator.annotate(exac, caddOutputFile, exacOutputFile, emptyList(), false, true);
 
 		progress.progress(2, "Annotating with snpEff...");
-		cmdLineAnnotator.annotate(snpeff, exacOutputFile, snpeffOutputFile, emptyList(), false);
+		cmdLineAnnotator.annotate(snpeff, exacOutputFile, snpeffOutputFile, emptyList(), false, false);
 
 		progress.progress(3, "Annotating with gavin...");
-		cmdLineAnnotator.annotate(gavin, snpeffOutputFile, gavinOutputFile, emptyList(), false);
+		cmdLineAnnotator.annotate(gavin, snpeffOutputFile, gavinOutputFile, emptyList(), false, false);
 
 		progress.progress(4, "Result is ready for download.");
 		String path = menuReaderService.getMenu().findMenuItemPath(GAVIN_APP);
