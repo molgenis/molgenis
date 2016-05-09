@@ -161,4 +161,120 @@ public class ReindexJobTest
 		verify(this.progress).progress(1, "refreshIndex done.");
 		verify(dataService, times(2)).update(ReindexActionMetaData.ENTITY_NAME, entity);
 	}
+
+	@Test
+	private void rebuildIndexCreateBatchEntitiesTest()
+	{
+		this.rebuildIndexBatchEntitiesTest(CudType.CREATE);
+	}
+
+	@Test
+	private void rebuildIndexDeleteBatchEntitiesTest()
+	{
+		this.rebuildIndexBatchEntitiesTest(CudType.DELETE);
+	}
+
+	@Test
+	private void rebuildIndexUpdateBatchEntitiesTest()
+	{
+		this.rebuildIndexBatchEntitiesTest(CudType.UPDATE);
+	}
+
+	private void rebuildIndexBatchEntitiesTest(CudType cudType)
+	{
+		ReindexJob reindexJob = new ReindexJob(this.progress, this.authentication, this.transactionId,
+				this.dataService, this.searchService);
+
+		Entity reindexActionJob = reindexActionRegisterService.createReindexActionJob(this.transactionId);
+		when(this.dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, this.transactionId)).thenReturn(
+				reindexActionJob);
+
+		Entity entity = reindexActionRegisterService.createReindexAction(reindexActionJob, "test", cudType,
+				DataType.DATA, null, reindexActionRegisterService.increaseCountReindexActionJob(reindexActionJob));
+		mockGetAllReindexActions(reindexJob, this.transactionId, Lists.<Entity> newArrayList(entity).stream());
+
+		MetaDataService mds = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(mds);
+		EntityMetaData emd = new DefaultEntityMetaData("test");
+		when(mds.getEntityMetaData("test")).thenReturn(emd);
+
+		reindexJob.call(this.progress);
+		assertEquals(entity.get(ReindexActionMetaData.REINDEX_STATUS), ReindexStatus.FINISHED.name());
+
+		verify(this.searchService).rebuildIndex(this.dataService.getRepository("any"),
+				new DefaultEntityMetaData("test"));
+		verify(this.progress).progress(0, "Reindexing entity test in batch. CUDType = " + cudType.name());
+		verify(this.progress).progress(1, "refreshIndex done.");
+		verify(dataService, times(2)).update(ReindexActionMetaData.ENTITY_NAME, entity);
+	}
+
+	@Test
+	private void rebuildIndexCreateMetaDataTest()
+	{
+		this.rebuildIndexMetaDataTest(CudType.CREATE);
+	}
+
+	@Test
+	private void rebuildIndexUpdateMetaDataTest()
+	{
+		this.rebuildIndexMetaDataTest(CudType.UPDATE);
+	}
+
+	private void rebuildIndexMetaDataTest(CudType cudType)
+	{
+		ReindexJob reindexJob = new ReindexJob(this.progress, this.authentication, this.transactionId,
+				this.dataService, this.searchService);
+
+		Entity reindexActionJob = reindexActionRegisterService.createReindexActionJob(this.transactionId);
+		when(this.dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, this.transactionId)).thenReturn(
+				reindexActionJob);
+
+		Entity entity = reindexActionRegisterService.createReindexAction(reindexActionJob, "test", cudType,
+				DataType.METADATA, null, reindexActionRegisterService.increaseCountReindexActionJob(reindexActionJob));
+		mockGetAllReindexActions(reindexJob, this.transactionId, Lists.<Entity> newArrayList(entity).stream());
+
+		MetaDataService mds = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(mds);
+		EntityMetaData emd = new DefaultEntityMetaData("test");
+		when(mds.getEntityMetaData("test")).thenReturn(emd);
+
+		reindexJob.call(this.progress);
+		assertEquals(entity.get(ReindexActionMetaData.REINDEX_STATUS), ReindexStatus.FINISHED.name());
+
+		verify(this.searchService).rebuildIndex(this.dataService.getRepository("any"),
+				new DefaultEntityMetaData("test"));
+		verify(this.progress).progress(0,
+				"Reindexing entity test in batch due to metadata change. CUDType = " + cudType.name());
+		verify(this.progress).progress(1, "refreshIndex done.");
+		verify(dataService, times(2)).update(ReindexActionMetaData.ENTITY_NAME, entity);
+	}
+
+	@Test
+	private void rebuildIndexDeleteMetaDataEntityTest()
+	{
+		ReindexJob reindexJob = new ReindexJob(this.progress, this.authentication, this.transactionId,
+				this.dataService, this.searchService);
+
+		Entity reindexActionJob = reindexActionRegisterService.createReindexActionJob(this.transactionId);
+		when(this.dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, this.transactionId)).thenReturn(
+				reindexActionJob);
+
+		Entity entity = reindexActionRegisterService.createReindexAction(reindexActionJob, "test", CudType.DELETE,
+				DataType.METADATA, null, reindexActionRegisterService.increaseCountReindexActionJob(reindexActionJob));
+		mockGetAllReindexActions(reindexJob, this.transactionId, Lists.<Entity> newArrayList(entity).stream());
+
+		MetaDataService mds = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(mds);
+		EntityMetaData emd = new DefaultEntityMetaData("test");
+		when(mds.getEntityMetaData("test")).thenReturn(emd);
+
+		reindexJob.call(this.progress);
+		assertEquals(entity.get(ReindexActionMetaData.REINDEX_STATUS), ReindexStatus.FINISHED.name());
+
+		verify(this.searchService).delete("test");
+		verify(this.progress).progress(0,
+				"Reindexing entity test in batch due to metadata change. CUDType = " + CudType.DELETE.name());
+		verify(this.progress).progress(1, "refreshIndex done.");
+		verify(dataService, times(2)).update(ReindexActionMetaData.ENTITY_NAME, entity);
+	}
 }
