@@ -99,8 +99,13 @@
 						<#list categories as category>
 							<#list refEntityMetaData.attributes as attribute>
 								<#assign attributeName = attribute.name>
-								<#if (category[attributeName])??>	
-									 ${category[attributeName]?string}<#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+								<#if (category[attributeName])??>
+									<#assign value = category[attributeName] />
+									<#if value?is_date_like>
+										${category[attributeName]?date_if_unknown}<#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+									<#else>
+										${category[attributeName]?string}<#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+									</#if>
 								</#if>
 							</#list>
 							</br>
