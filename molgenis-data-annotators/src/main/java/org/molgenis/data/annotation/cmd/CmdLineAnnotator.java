@@ -224,11 +224,11 @@ public class CmdLineAnnotator
 	{
 		List<String> attributesToInclude = options.nonOptionArguments().stream().map(Object::toString)
 				.collect(Collectors.toList());
-		annotate(annotator, inputVcfFile, outputVCFFile, attributesToInclude, options.has("validate"));
+		annotate(annotator, inputVcfFile, outputVCFFile, attributesToInclude, options.has("validate"), options.has("u"));
 	}
 
 	public void annotate(RepositoryAnnotator annotator, File inputVcfFile, File outputVCFFile,
-			List<String> attributesToInclude, boolean validate) throws IOException, MolgenisInvalidFormatException
+			List<String> attributesToInclude, boolean validate, boolean update) throws IOException, MolgenisInvalidFormatException
 	{
 		BufferedWriter outputVCFWriter = new BufferedWriter(
 				new OutputStreamWriter(new FileOutputStream(outputVCFFile), UTF_8));
@@ -308,8 +308,6 @@ public class CmdLineAnnotator
 			{
 				entitiesToAnnotate = vcfRepo;
 			}
-
-			boolean update = options.has("u");
 			Iterator<Entity> annotatedRecords = annotator.annotate(entitiesToAnnotate, update);
 
 			if (annotator instanceof RefEntityAnnotator || annotator instanceof EffectsAnnotator)
