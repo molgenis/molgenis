@@ -1,11 +1,16 @@
 package org.molgenis.data.annotation.filter;
 
-import static com.google.common.collect.FluentIterable.from;
-import static java.util.Arrays.asList;
-import static org.molgenis.data.vcf.VcfRepository.ALT;
-import static org.molgenis.data.vcf.VcfRepository.ALT_META;
-import static org.molgenis.data.vcf.VcfRepository.REF;
-import static org.molgenis.data.vcf.VcfRepository.REF_META;
+import com.google.common.base.Optional;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.PeekingIterator;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.annotation.entity.ResultFilter;
+import org.molgenis.data.vcf.VcfRepository;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,17 +18,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.annotation.entity.ResultFilter;
-
-import com.google.common.base.Optional;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.PeekingIterator;
+import static com.google.common.collect.FluentIterable.from;
+import static java.util.Arrays.asList;
+import static org.molgenis.data.vcf.VcfRepository.ALT;
+import static org.molgenis.data.vcf.VcfRepository.ALT_META;
+import static org.molgenis.data.vcf.VcfRepository.REF;
+import static org.molgenis.data.vcf.VcfRepository.REF_META;
 
 /**
  * 
@@ -59,7 +59,6 @@ import com.google.common.collect.PeekingIterator;
  * another TCC. Finding and parsing these variants to correctly match them against databases such as 1000 Genomes and
  * ExAC would be very valuable.
  * 
- *
  */
 public class MultiAllelicResultFilter implements ResultFilter
 {
@@ -86,7 +85,7 @@ public class MultiAllelicResultFilter implements ResultFilter
 	}
 
 	@Override
-	public Optional<Entity> filterResults(Iterable<Entity> resourceEntities, Entity sourceEntity)
+	public Optional<Entity> filterResults(Iterable<Entity> resourceEntities, Entity sourceEntity, boolean updateMode)
 	{
 		List<Entity> processedResults = new ArrayList<>();
 
@@ -107,40 +106,55 @@ public class MultiAllelicResultFilter implements ResultFilter
 
 			if (resourceRef.equals(sourceRef))
 			{
-				processedResults.addAll(filter(sourceEntity, resourceEntity, "", ""));
+				processedResults.addAll(filter(sourceEntity, resourceEntity, "", "", updateMode));
 			}
 			// example: ref AGG, input A, substring AGG from index 1, so GG is the postfix to use to match against this
 			// reference
 			else if (resourceRef.startsWith(sourceRef))
 			{
 				String postFix = resourceRef.substring(sourceRef.length());
-				processedResults.addAll(filter(sourceEntity, resourceEntity, postFix, ""));
+				processedResults.addAll(filter(sourceEntity, resourceEntity, postFix, "", updateMode));
 			}
 			// example: ref T, input TC, substring TC from index 1, so C is the postfix to use to match against this
 			// input
 			else if (sourceRef.startsWith(resourceRef))
 			{
 				String postFix = sourceRef.substring(resourceRef.length());
-				processedResults.addAll(filter(sourceEntity, resourceEntity, "", postFix));
+				processedResults.addAll(filter(sourceEntity, resourceEntity, "", postFix, updateMode));
 			}
 		}
 		return from(processedResults).first();
 	}
 
-	private List<Entity> filter(Entity annotatedEntity, Entity entity, String sourcePostfix, String resourcePostfix)
+	private List<Entity> filter(Entity sourceEntity, Entity resourceEntity, String sourcePostfix,
+			String resourcePostfix, boolean updateMode)
 	{
 		List<Entity> result = Lists.newArrayList();
 		Map<String, String> alleleValueMap = new HashMap<>();
-		String[] alts = entity.getString(ALT).split(",");
+		Map<String, String> sourceAlleleValueMap = new HashMap<>();
+		String[] alts = resourceEntity.getString(VcfRepository.ALT).split(",");
+		String[] sourceAlts = sourceEntity.getString(VcfRepository.ALT).split(",");
 		for (AttributeMetaData attributeMetaData : attributes)
 		{
-			String[] values = entity.getString(attributeMetaData.getName()).split(",");
+			String[] values = resourceEntity.getString(attributeMetaData.getName()).split(",", -1);
 			for (int i = 0; i < alts.length; i++)
 			{
 				alleleValueMap.put(alts[i] + resourcePostfix, values[i]);
 			}
+
+			// also compile a list of original source alleles and their values for use in 'update mode'
+			if (updateMode && sourceEntity.getString(attributeMetaData.getName()) != null)
+			{
+				String[] sourceValues = sourceEntity.getString(attributeMetaData.getName()).split(",", -1);
+				for (int i = 0; i < sourceAlts.length; i++)
+				{
+					sourceAlleleValueMap.put(sourceAlts[i] + resourcePostfix,
+							sourceValues[i].isEmpty() ? "." : sourceValues[i]);
+				}
+			}
+
 			StringBuilder newAttributeValue = new StringBuilder();
-			String[] annotatedEntityAltAlleles = annotatedEntity.getString(ALT).split(",");
+			String[] annotatedEntityAltAlleles = sourceEntity.getString(ALT).split(",");
 			for (int i = 0; i < annotatedEntityAltAlleles.length; i++)
 			{
 				if (i != 0)
@@ -153,15 +167,33 @@ public class MultiAllelicResultFilter implements ResultFilter
 				}
 				else
 				{
-					// missing allele in source, add a dot
-					newAttributeValue.append(".");
+					// default: no data in in resource, add "." for missing value
+					// because we are not in update mode, don't check the original source
+					if (updateMode == false)
+					{
+						newAttributeValue.append(".");
+					}
+					else
+					{
+						// we are in update mode, so let's check the source entity if there was an original value
+						if (sourceAlleleValueMap.get(annotatedEntityAltAlleles[i] + sourcePostfix) != null)
+						{
+							newAttributeValue
+									.append(sourceAlleleValueMap.get(annotatedEntityAltAlleles[i] + sourcePostfix));
+						}
+						// if there was no original value either, add "." for missing value
+						else
+						{
+							newAttributeValue.append(".");
+						}
+					}
 				}
 			}
 			// add entity only if something was found, so no '.' or any multiple of '.,' (e.g. ".,.,.")
 			if (!newAttributeValue.toString().matches("[\\.,]+"))
 			{
-				entity.set(attributeMetaData.getName(), newAttributeValue.toString());
-				result.add(entity);
+				resourceEntity.set(attributeMetaData.getName(), newAttributeValue.toString());
+				result.add(resourceEntity);
 			}
 		}
 		return result;
@@ -171,21 +203,13 @@ public class MultiAllelicResultFilter implements ResultFilter
 	 * Combine ALT information per reference allele (in VCF there is only 1 reference by letting ALT vary, but that
 	 * might not always be the case)
 	 * 
-	 * So we want to support this hypothetical example:
-	 * 3	300	G	A	0.2|23.1
-	 * 3	300	G	T	-2.4|0.123
-	 * 3	300	G	X	-0.002|2.3
-	 * 3	300	G	C	0.5|14.5
-	 * 3	300	GC	A	0.2|23.1
-	 * 3	300	GC	T	-2.4|0.123
-	 * 3	300	C	GX	-0.002|2.3
-	 * 3	300	C	GC	0.5|14.5
+	 * So we want to support this hypothetical example: 3 300 G A 0.2|23.1 3 300 G T -2.4|0.123 3 300 G X -0.002|2.3 3
+	 * 300 G C 0.5|14.5 3 300 GC A 0.2|23.1 3 300 GC T -2.4|0.123 3 300 C GX -0.002|2.3 3 300 C GC 0.5|14.5
 	 * 
 	 * and it should become:
 	 * 
-	 * 3	300	G	A,T,X,C	0.2|23.1,-2.4|0.123,-0.002|2.3,0.5|14.5
-	 * 3	300	GC	A,T	0.2|23.1,-2.4|0.123
-	 * 3	300	C	GX,GC	-0.002|2.3,0.5|14.5
+	 * 3 300 G A,T,X,C 0.2|23.1,-2.4|0.123,-0.002|2.3,0.5|14.5 3 300 GC A,T 0.2|23.1,-2.4|0.123 3 300 C GX,GC
+	 * -0.002|2.3,0.5|14.5
 	 * 
 	 * so that the multi-allelic filter can then find back the appropriate values as if it were a multi-allelic VCF line
 	 * 
@@ -205,7 +229,7 @@ public class MultiAllelicResultFilter implements ResultFilter
 		// collect entities to be merged by ref
 		Multimap<String, Entity> refToMergedEntity = LinkedListMultimap.create();
 
-		while(resourceEntitiesIterator.hasNext())
+		while (resourceEntitiesIterator.hasNext())
 		{
 			Entity resourceEntity = resourceEntitiesIterator.next();
 			// verify if all results have the same chrom & pos
@@ -237,8 +261,7 @@ public class MultiAllelicResultFilter implements ResultFilter
 				else
 				{
 					// concatenate alleles
-					mergeWithMe.set(ALT,
-							mergeWithMe.get(ALT).toString() + "," + entityToBeMerged.get(ALT).toString());
+					mergeWithMe.set(ALT, mergeWithMe.get(ALT).toString() + "," + entityToBeMerged.get(ALT).toString());
 
 					// concatenate allele specific attributes
 					for (AttributeMetaData alleleSpecificAttributes : attributes)

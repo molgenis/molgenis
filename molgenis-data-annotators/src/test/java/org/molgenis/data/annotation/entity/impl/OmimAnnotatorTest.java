@@ -5,12 +5,12 @@ import static org.apache.commons.lang.StringUtils.join;
 import static org.mockito.Mockito.mock;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.OMIM_CYTO_LOCATIONS;
-import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.OMIM_CAUSAL_IDENTIFIER;
-import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.OMIM_DISORDER;
-import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.OMIM_ENTRY;
-import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.OMIM_TYPE;
-import static org.molgenis.data.annotation.entity.impl.SnpEffAnnotator.GENE_NAME;
+import static org.molgenis.data.annotation.entity.impl.omim.OmimAnnotator.OMIM_DISORDER;
+import static org.molgenis.data.annotation.entity.impl.omim.OmimAnnotator.OMIM_ENTRY;
+import static org.molgenis.data.annotation.entity.impl.omim.OmimAnnotator.OMIM_TYPE;
+import static org.molgenis.data.annotation.entity.impl.omim.OmimAnnotator.OMIM_CAUSAL_IDENTIFIER;
+import static org.molgenis.data.annotation.entity.impl.omim.OmimAnnotator.OMIM_CYTO_LOCATIONS;
+import static org.molgenis.data.support.EffectsMetaData.GENE_NAME;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
@@ -22,6 +22,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.entity.impl.omim.OmimAnnotator;
+import org.molgenis.data.annotation.entity.impl.snpEff.SnpEffAnnotator;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotator.websettings.OmimAnnotatorSettings;
@@ -57,7 +59,7 @@ public class OmimAnnotatorTest extends AbstractTestNGSpringContextTests
 		List<Entity> entitiesToAnnotate = newArrayList();
 
 		DefaultEntityMetaData inputEntityMetaData = new DefaultEntityMetaData("Test");
-		inputEntityMetaData.addAttribute(SnpEffAnnotator.GENE_NAME, ROLE_ID);
+		inputEntityMetaData.addAttribute(GENE_NAME, ROLE_ID);
 
 		Entity inputEntity = new MapEntity(inputEntityMetaData);
 		inputEntity.set(GENE_NAME, "CYP17A1");

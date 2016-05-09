@@ -1,22 +1,13 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.CHROMOSOMES;
-import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.FILEPATTERN;
-import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.OVERRIDE_CHROMOSOME_FILES;
-import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.ROOT_DIRECTORY;
-import static org.molgenis.data.vcf.VcfRepository.ALT;
-import static org.molgenis.data.vcf.VcfRepository.REF;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
@@ -34,9 +25,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.google.common.base.Predicates;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Iterables;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.CHROMOSOMES;
+import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.FILEPATTERN;
+import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.OVERRIDE_CHROMOSOME_FILES;
+import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.ROOT_DIRECTORY;
+import static org.molgenis.data.vcf.VcfRepository.ALT;
 
 @Configuration
 public class GoNLAnnotator
@@ -105,21 +103,25 @@ public class GoNLAnnotator
 
 			@Override
 			protected void processQueryResults(Entity inputEntity, Iterable<Entity> annotationSourceEntities,
-					Entity resultEntity)
+					Entity resultEntity, boolean updateMode)
 			{
+				if (updateMode == true)
+				{
+					throw new MolgenisDataException("This annotator/filter does not support updating of values");
+				}
 				String afs = null;
 				String gtcs = null;
 				List<Entity> refMatches = Lists.newArrayList();
 				for (Entity resourceEntity : annotationSourceEntities)
 				{
-					//situation example: input A, GoNL A
+					// situation example: input A, GoNL A
 					if (resourceEntity.get(VcfRepository.REF).equals(inputEntity.get(VcfRepository.REF)))
 					{
 						refMatches.add(resourceEntity);
 					}
-					//situation example: input ATC/TTC, GoNL A/T
-					//we then match on A (leaving TC), lengthen the GoNL ref to A+TC, and alt to T+TC
-					//now it has a match to ATC/TTC (as it should, but was not obvious due to notation)
+					// situation example: input ATC/TTC, GoNL A/T
+					// we then match on A (leaving TC), lengthen the GoNL ref to A+TC, and alt to T+TC
+					// now it has a match to ATC/TTC (as it should, but was not obvious due to notation)
 					else if (inputEntity.getString(VcfRepository.REF)
 							.indexOf(resourceEntity.getString(VcfRepository.REF)) == 0)
 					{
@@ -132,21 +134,24 @@ public class GoNLAnnotator
 						resourceEntity.set(VcfRepository.ALT, newAltString);
 						refMatches.add(resourceEntity);
 					}
-					//situation example: input T/G, GoNL TCT/GCT
-					//we then match on T (leaving CT), and shorten the GoNL ref to T (-CT), and alt to G (-CT)
-					//now it has a match to T/G (as it should, but was not obvious due to notation)
+					// situation example: input T/G, GoNL TCT/GCT
+					// we then match on T (leaving CT), and shorten the GoNL ref to T (-CT), and alt to G (-CT)
+					// now it has a match to T/G (as it should, but was not obvious due to notation)
 					else if (resourceEntity.getString(VcfRepository.REF)
 							.indexOf(inputEntity.getString(VcfRepository.REF)) == 0)
 					{
 						int postFixInputLength = resourceEntity.getString(VcfRepository.REF)
 								.substring(inputEntity.getString(VcfRepository.REF).length()).length();
-						//bugfix: matching A/G to ACT/A results in postFixInputLength=2, correctly updating ref from ACT to A,
-						//but then tries to substring the alt allele A to length -1 (1 minus 2) which is not allowed.
-						//added a check to prevent this: alt.length() > postFixInputLength ? trim the alt : change to 'n/a' because we cannot use this alt.
+						// bugfix: matching A/G to ACT/A results in postFixInputLength=2, correctly updating ref from
+						// ACT to A,
+						// but then tries to substring the alt allele A to length -1 (1 minus 2) which is not allowed.
+						// added a check to prevent this: alt.length() > postFixInputLength ? trim the alt : change to
+						// 'n/a' because we cannot use this alt.
 						resourceEntity.set(VcfRepository.REF, resourceEntity.getString(VcfRepository.REF).substring(0,
 								(resourceEntity.getString(VcfRepository.REF).length() - postFixInputLength)));
 						String newAltString = Arrays.asList(resourceEntity.getString(ALT).split(",")).stream()
-								.map(alt -> alt.length() > postFixInputLength ? alt.substring(0, (alt.length() - postFixInputLength)) : "n/a")
+								.map(alt -> alt.length() > postFixInputLength
+										? alt.substring(0, (alt.length() - postFixInputLength)) : "n/a")
 								.collect(Collectors.joining(","));
 						resourceEntity.set(VcfRepository.ALT, newAltString);
 						refMatches.add(resourceEntity);
@@ -167,8 +172,10 @@ public class GoNLAnnotator
 								.map(gonl -> gonl == null ? "."
 										: Double.toString(gonl.getDouble(INFO_AC) / gonl.getDouble(INFO_AN)))
 								.collect(Collectors.joining(","));
-						//update GTC field to separate allele combinations by pipe instead of comma, since we use comma to separate alt allele info
-						gtcs = alleleMatches.stream().map(gonl -> gonl == null ? "." : gonl.getString(INFO_GTC).replace(",", "|"))
+						// update GTC field to separate allele combinations by pipe instead of comma, since we use comma
+						// to separate alt allele info
+						gtcs = alleleMatches.stream()
+								.map(gonl -> gonl == null ? "." : gonl.getString(INFO_GTC).replace(",", "|"))
 								.collect(Collectors.joining(","));
 					}
 

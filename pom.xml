@@ -8,7 +8,7 @@
     </parent>
     <groupId>org.molgenis</groupId>
     <artifactId>molgenis</artifactId>
-    <version>1.20.0-SNAPSHOT</version>
+    <version>1.21.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <!-- More Project Information -->
@@ -692,5 +692,6 @@
 		<module>molgenis-file-ingester</module>
 		<module>molgenis-integration-tests</module>
 		<module>molgenis-jobs</module>
+		<module>molgenis-gavin</module>
     </modules>
 </project>

@@ -1,9 +1,5 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -11,6 +7,10 @@ import org.molgenis.data.annotation.AbstractRepositoryEntityAnnotator;
 import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RepositoryAnnotatorImpl extends AbstractRepositoryEntityAnnotator
 {
@@ -48,9 +48,9 @@ public class RepositoryAnnotatorImpl extends AbstractRepositoryEntityAnnotator
 	}
 
 	@Override
-	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
+	public List<Entity> annotateEntity(Entity entity, boolean updateMode) throws IOException, InterruptedException
 	{
-		return Lists.newArrayList(entityAnnotator.annotateEntity(entity));
+		return Lists.newArrayList(entityAnnotator.annotateEntity(entity, updateMode));
 	}
 
 	@Override

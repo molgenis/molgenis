@@ -1,12 +1,5 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -20,6 +13,13 @@ import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Base class for any {@link EntityAnnotator} that uses a {@link QueryCreator} to query the {@link DataService} or
@@ -81,7 +81,7 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 	}
 
 	@Override
-	public List<Entity> annotateEntity(Entity entity)
+	public List<Entity> annotateEntity(Entity entity, boolean updateMode)
 	{
 		Query q = queryCreator.createQuery(entity);
 		Iterable<Entity> annotatationSourceEntities;
@@ -103,7 +103,7 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 		DefaultEntityMetaData meta = new DefaultEntityMetaData(entity.getEntityMetaData());
 		info.getOutputAttributes().forEach(meta::addAttributeMetaData);
 		Entity resultEntity = new MapEntity(entity, meta);
-		processQueryResults(entity, annotatationSourceEntities, resultEntity);
+		processQueryResults(entity, annotatationSourceEntities, resultEntity, updateMode);
 		return Collections.singletonList(resultEntity);
 	}
 
@@ -124,6 +124,6 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 	 *            the result entity to write the annotation attributes to
 	 */
 	protected abstract void processQueryResults(Entity inputEntity, Iterable<Entity> annotationSourceEntities,
-			Entity resultEntity);
+			Entity resultEntity, boolean updateMode);
 
 }

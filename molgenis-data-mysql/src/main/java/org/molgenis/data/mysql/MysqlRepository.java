@@ -12,6 +12,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -700,6 +701,7 @@ public class MysqlRepository extends AbstractRepository
 		StringBuilder select = new StringBuilder("SELECT ");
 		StringBuilder group = new StringBuilder();
 		int count = 0;
+		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 		{
 			if (q.getFetch() == null || q.getFetch().hasField(att.getName()))
@@ -711,10 +713,11 @@ public class MysqlRepository extends AbstractRepository
 					// TODO needed when autoids are used to join
 					if (att.getDataType() instanceof MrefField)
 					{
-						select.append("GROUP_CONCAT(DISTINCT(").append('`').append(att.getName()).append('`')
-								.append('.').append('`').append(att.getName()).append('`').append(") ORDER BY `")
-								.append(att.getName()).append("`.`order`) AS ").append('`').append(att.getName())
-								.append('`');
+						select.append(MessageFormat
+								.format("(SELECT GROUP_CONCAT(DISTINCT(`{0}`.`{0}`) ORDER BY `{0}`.`order`) "
+												+ "FROM `{1}_{0}` AS `{0}` "
+												+ "WHERE (this.`{2}` = `{0}`.`{2}`) ) AS `{0}`", att.getName(),
+										getTableName(), idAttribute.getName()));
 					}
 					else
 					{
@@ -1502,22 +1505,6 @@ public class MysqlRepository extends AbstractRepository
 		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 		List<String> mrefQueryFields = Lists.newArrayList();
 		getMrefQueryFields(q.getRules(), mrefQueryFields);
-
-		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
-		{
-			if (q.getFetch() == null || q.getFetch().hasField(att.getName()))
-			{
-				if (att.getDataType() instanceof MrefField)
-				{
-					from.append(" LEFT JOIN ").append('`').append(getTableName()).append('_').append(att.getName())
-							.append('`').append(" AS ").append('`').append(att.getName()).append('`')
-							.append(" ON (this.").append('`').append(idAttribute.getName()).append('`').append(" = ")
-							.append('`').append(att.getName()).append('`').append('.').append('`')
-							.append(idAttribute.getName()).append('`').append(')');
-
-				}
-			}
-		}
 
 		for (int i = 0; i < mrefQueryFields.size(); i++)
 		{

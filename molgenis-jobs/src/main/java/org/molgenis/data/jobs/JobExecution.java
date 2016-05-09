@@ -165,7 +165,7 @@ public class JobExecution extends DefaultEntity
 
 	public String getResultUrl()
 	{
-		return getString(LOG);
+		return getString(RESULT_URL);
 	}
 
 	public void setResultUrl(String value)
