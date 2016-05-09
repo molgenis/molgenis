@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.elasticsearch.ElasticsearchException;
@@ -964,7 +965,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			this.rebuildIndexGeneric(tempEntities, entityMetaData);
 
 			// Remove temporary entity
-			dataService.delete(tempEntityMetaData.getName(), tempEntities);
+			dataService.delete(tempEntityMetaData.getName(), StreamSupport.stream(tempEntities.spliterator(), false));
 
 			// Remove temporary repository from Elasticsearch
 			dataService.getMeta().deleteEntityMeta(tempEntityMetaData.getName());
