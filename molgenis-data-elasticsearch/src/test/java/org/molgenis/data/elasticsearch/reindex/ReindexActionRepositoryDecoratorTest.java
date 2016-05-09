@@ -4,17 +4,23 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.RepositoryCapability.INDEXABLE;
+import static org.molgenis.data.RepositoryCapability.MANAGABLE;
 import static org.testng.Assert.assertEquals;
 
+import java.util.EnumSet;
 import java.util.stream.Stream;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.reindex.ReindexActionMetaData.CudType;
-import org.molgenis.data.elasticsearch.reindex.ReindexActionMetaData.DataType;
+import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.CudType;
+import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.DataType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.common.collect.Sets;
 
 public class ReindexActionRepositoryDecoratorTest
 {
@@ -29,6 +35,7 @@ public class ReindexActionRepositoryDecoratorTest
 	{
 		decoratedRepo = mock(Repository.class);
 		when(decoratedRepo.getName()).thenReturn("entity");
+		when(decoratedRepo.getCapabilities()).thenReturn(Sets.newHashSet(RepositoryCapability.MANAGABLE));
 		entityMeta = mock(EntityMetaData.class);
 		when(decoratedRepo.getEntityMetaData()).thenReturn(entityMeta);
 		reindexActionRegisterService = mock(ReindexActionRegisterService.class);
@@ -44,6 +51,12 @@ public class ReindexActionRepositoryDecoratorTest
 		reindexActionRepositoryDecorator.update(entity0);
 		verify(decoratedRepo, times(1)).update(entity0);
 		verify(reindexActionRegisterService).register(entityMeta, CudType.UPDATE, DataType.DATA, "1");
+	}
+
+	@Test
+	public void getCapabilities()
+	{
+		assertEquals(reindexActionRepositoryDecorator.getCapabilities(), EnumSet.of(INDEXABLE, MANAGABLE));
 	}
 
 	@Test
@@ -108,7 +121,7 @@ public class ReindexActionRepositoryDecoratorTest
 		when(entity0.getIdValue()).thenReturn("1");
 		reindexActionRepositoryDecorator.add(entity0);
 		verify(decoratedRepo, times(1)).add(entity0);
-		verify(reindexActionRegisterService).register(entityMeta, CudType.ADD, DataType.DATA, "1");
+		verify(reindexActionRegisterService).register(entityMeta, CudType.CREATE, DataType.DATA, "1");
 	}
 
 	@Test
@@ -118,7 +131,7 @@ public class ReindexActionRepositoryDecoratorTest
 		when(decoratedRepo.add(entities)).thenReturn(123);
 		assertEquals(reindexActionRepositoryDecorator.add(entities), Integer.valueOf(123));
 		verify(decoratedRepo, times(1)).add(entities);
-		verify(reindexActionRegisterService).register(entityMeta, CudType.ADD, DataType.DATA, null);
+		verify(reindexActionRegisterService).register(entityMeta, CudType.CREATE, DataType.DATA, null);
 	}
 
 	@Test

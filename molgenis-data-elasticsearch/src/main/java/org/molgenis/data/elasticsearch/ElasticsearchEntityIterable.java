@@ -90,7 +90,11 @@ class ElasticsearchEntityIterable extends BatchingQueryResult<Entity> implements
 					termQuery(ElasticsearchService.CRUD_TYPE_FIELD_NAME, CrudType.UPDATE.name()), indexNames[1]);
 
 			// Exclude the updated records from the first index
-			QueryBuilder excludeUpdatesQuery = indicesQuery(boolQuery().mustNot(findUpdatesQuery), indexNames[0]);
+			QueryBuilder excludeUpdatesQuery = indicesQuery(boolQuery().mustNot(findUpdatesQuery), indexNames[0]); // TODO
+																													// JJ
+																													// REMOVE
+																													// transactional
+																													// code
 
 			// NOTE: deletes cannot be handled by ES in this way, so if you do a delete then the entity will
 			// still be returned. Only after the commit of the transaction the queries won't return the

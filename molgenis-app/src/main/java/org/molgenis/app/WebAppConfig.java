@@ -11,7 +11,7 @@ import org.molgenis.data.config.HttpClientConfig;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
-import org.molgenis.data.elasticsearch.reindex.ReindexActionRegisterConfig;
+import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionRegisterConfig;
 import org.molgenis.data.elasticsearch.reindex.ReindexActionRegisterService;
 import org.molgenis.data.elasticsearch.reindex.ReindexActionRepositoryCollectionDecorator;
 import org.molgenis.data.system.RepositoryTemplateLoader;

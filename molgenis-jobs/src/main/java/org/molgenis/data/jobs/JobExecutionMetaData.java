@@ -16,6 +16,8 @@ public class JobExecutionMetaData extends DefaultEntityMetaData
 {
 	private final List<String> jobStatusOptions = newArrayList("PENDING", "RUNNING", "SUCCESS", "FAILED", "CANCELED");
 
+	public static final JobExecutionMetaData JOB_EXECUTION_META_DATA = new JobExecutionMetaData();
+
 	public JobExecutionMetaData()
 	{
 		super(JobExecution.ENTITY_NAME, JobExecution.class);

@@ -1,6 +1,8 @@
 package org.molgenis.data.support;
 
+import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.AGGREGATEABLE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.AUTO;
@@ -21,13 +23,8 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.VALIDATION_EXPRES
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE_EXPRESSION;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -41,7 +38,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
  * Default implementation of the AttributeMetaData interface
- * 
+ *
  */
 public class DefaultAttributeMetaData implements AttributeMetaData
 {
@@ -86,7 +83,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 
 	/**
 	 * Copy constructor
-	 * 
+	 *
 	 * @param attributeMetaData
 	 */
 	public DefaultAttributeMetaData(AttributeMetaData attributeMetaData)
@@ -416,6 +413,11 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		}
 
 		return null;
+	}
+
+	public DefaultAttributeMetaData setEnumOptions(Class<? extends Enum<?>> e)
+	{
+		return setEnumOptions(stream(e.getEnumConstants()).map(Enum::name).collect(toList()));
 	}
 
 	public DefaultAttributeMetaData setEnumOptions(List<String> enumOptions)

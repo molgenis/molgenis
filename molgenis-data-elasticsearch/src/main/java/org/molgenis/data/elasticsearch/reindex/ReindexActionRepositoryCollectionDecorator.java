@@ -9,9 +9,13 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.reindex.ReindexActionMetaData.CudType;
-import org.molgenis.data.elasticsearch.reindex.ReindexActionMetaData.DataType;
+import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.CudType;
+import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.DataType;
 
+/**
+ * Decorator around a {@link Repository} that registers changes made to its data with the
+ * {@link ReindexActionRegisterService}.
+ */
 public class ReindexActionRepositoryCollectionDecorator implements ManageableRepositoryCollection
 {
 	private final ManageableRepositoryCollection decorated;
@@ -78,7 +82,7 @@ public class ReindexActionRepositoryCollectionDecorator implements ManageableRep
 	@Override
 	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
 	{
-		this.reindexActionRegisterService.register(entityMeta, CudType.ADD,
+		this.reindexActionRegisterService.register(entityMeta, CudType.CREATE,
 				DataType.METADATA, null);
 		return this.decorated.addEntityMeta(entityMeta);
 	}

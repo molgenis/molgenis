@@ -15,8 +15,8 @@ import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
-import org.molgenis.data.elasticsearch.reindex.ReindexActionJobMetaData;
-import org.molgenis.data.elasticsearch.reindex.ReindexActionMetaData;
+import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionJobMetaData;
+import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData;
 import org.molgenis.data.elasticsearch.reindex.ReindexActionRegisterService;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataService;
@@ -139,8 +139,7 @@ public abstract class AbstractDataApiTestConfig
 			{
 				return new MolgenisRepositoryDecoratorFactory(entityManager(), entityAttributesValidator(),
 						idGenerator, appSettings(), dataService(), expressionValidator, repositoryDecoratorRegistry(),
-						reindexActionRegisterService())
-						.createDecoratedRepository(repository);
+						reindexActionRegisterService(), searchService).createDecoratedRepository(repository);
 			}
 		};
 	}

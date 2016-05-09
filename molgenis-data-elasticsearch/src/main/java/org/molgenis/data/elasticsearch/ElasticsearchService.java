@@ -276,6 +276,12 @@ public class ElasticsearchService implements SearchService
 		refresh(indexName);
 	}
 
+	@Override
+	public void refreshIndex()
+	{
+		this.refresh(this.indexName);
+	}
+
 	private void refresh(String index)
 	{
 		if (LOG.isTraceEnabled()) LOG.trace("Refreshing Elasticsearch index [{}] ...", index);
@@ -412,13 +418,12 @@ public class ElasticsearchService implements SearchService
 					"Cannot delete entity because there are other entities referencing it. Delete these first.");
 		}
 
-		deleteById(indexName, id, entityMetaData);
+		deleteById(indexName, id, entityMetaData.getName());
 	}
 
-	private void deleteById(String index, String id, EntityMetaData entityMetaData)
+	private void deleteById(String index, String id, String entityFullName)
 	{
-		String entityName = entityMetaData.getName();
-		String type = sanitizeMapperType(entityName);
+		String type = sanitizeMapperType(entityFullName);
 
 		if (LOG.isTraceEnabled())
 		{
@@ -472,16 +477,11 @@ public class ElasticsearchService implements SearchService
 	{
 		String type = sanitizeMapperType(entityName);
 
-		if (LOG.isTraceEnabled())
-		{
-			LOG.trace("Deleting all Elasticsearch '" + type + "' docs ...");
-		}
+		LOG.trace("Deleting all Elasticsearch '{}' docs ...", type);
 		TypesExistsResponse typesExistsResponse = client.admin().indices().prepareTypesExists(indexName).setTypes(type)
 				.get();
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("Checked whether type [{}] exists in index [{}]", type, indexName);
-		}
+
+		LOG.trace("Checked whether type [{}] exists in index [{}]", type, indexName);
 		if (typesExistsResponse.isExists())
 		{
 			DeleteMappingResponse deleteMappingResponse = client.admin().indices().prepareDeleteMapping(indexName)
@@ -490,11 +490,6 @@ public class ElasticsearchService implements SearchService
 			{
 				throw new ElasticsearchException("Delete of mapping '" + entityName + "' failed.");
 			}
-		}
-
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("Deleted all Elasticsearch '" + type + "' docs");
 		}
 
 		DeleteByQueryResponse deleteByQueryResponse = client.prepareDeleteByQuery(indexName)
@@ -508,6 +503,7 @@ public class ElasticsearchService implements SearchService
 				throw new ElasticsearchException("Delete all entities of type '" + entityName + "' failed.");
 			}
 		}
+		LOG.debug("Deleted all Elasticsearch '{}' docs", type);
 	}
 
 	/**
@@ -796,29 +792,14 @@ public class ElasticsearchService implements SearchService
 					return input;
 				}
 			});
-
-			Iterable<Entity> resolved = new DependencyResolver().resolveSelfReferences(iterable, entityMetaData);
-			if (hasMapping(entityMetaData))
-			{
-				delete(entityMetaData.getName());
-			}
-			createMappings(entityMetaData);
-
-			for (Entity e : resolved)
-			{
-				index(e, entityMetaData, IndexingMode.ADD);
-			}
+			entities = new DependencyResolver().resolveSelfReferences(iterable, entityMetaData);
 		}
-		else
+		if (hasMapping(entityMetaData))
 		{
-			if (hasMapping(entityMetaData))
-			{
-				delete(entityMetaData.getName());
-			}
-			createMappings(entityMetaData);
-
-			index(entities, entityMetaData, IndexingMode.ADD);
+			delete(entityMetaData.getName());
 		}
+		createMappings(entityMetaData);
+		index(entities, entityMetaData, IndexingMode.ADD);
 	}
 
 	@Override

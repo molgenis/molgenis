@@ -9,8 +9,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.reindex.ReindexActionMetaData.CudType;
-import org.molgenis.data.elasticsearch.reindex.ReindexActionMetaData.DataType;
+import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.CudType;
+import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.DataType;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -77,6 +77,6 @@ public class ReindexActionRepositoryCollectionDecoratorTest
 	{
 		reindexActionRepositoryCollectionDecorator.addEntityMeta(entityMeta);
 		verify(decoratedRepositoryCollection, times(1)).addEntityMeta(entityMeta);
-		verify(reindexActionRegisterService).register(entityMeta, CudType.ADD, DataType.METADATA, null);
+		verify(reindexActionRegisterService).register(entityMeta, CudType.CREATE, DataType.METADATA, null);
 	}
 }

@@ -100,6 +100,10 @@ public class MolgenisTransactionManager extends DataSourceTransactionManager
 		}
 
 		super.doCommit(jpaTransactionStatus);
+		if (!status.isReadOnly())
+		{
+			transactionListeners.forEach(j -> j.afterCommitTransaction(transaction.getId()));
+		}
 	}
 
 	@Override
@@ -153,6 +157,7 @@ public class MolgenisTransactionManager extends DataSourceTransactionManager
 		super.doCleanupAfterCompletion(molgenisTransaction.getDataSourceTransaction());
 
 		TransactionSynchronizationManager.unbindResourceIfPossible(TRANSACTION_ID_RESOURCE_NAME);
+		transactionListeners.forEach(j -> j.doCleanupAfterCompletion(molgenisTransaction.getId()));
 	}
 
 	@Override
@@ -168,5 +173,4 @@ public class MolgenisTransactionManager extends DataSourceTransactionManager
 		MolgenisTransaction molgenisTransaction = (MolgenisTransaction) transaction;
 		super.doResume(molgenisTransaction.getDataSourceTransaction(), suspendedResources);
 	}
-
 }

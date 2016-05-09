@@ -119,7 +119,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public DataSource dataSource;
 
 	@Autowired
-	public ReindexActionRegisterService indexTransactionLogService;
+	public ReindexActionRegisterService reindexActionRegisterService;
 
 	@Autowired
 	public IdGenerator idGenerator;
@@ -519,9 +519,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 			@Override
 			public Repository<Entity> createDecoratedRepository(Repository<Entity> repository)
 			{
-				return new MolgenisRepositoryDecoratorFactory(entityManager(),
-						entityAttributesValidator, idGenerator, appSettings, dataService(), expressionValidator,
-						repositoryDecoratorRegistry(), indexTransactionLogService)
+				return new MolgenisRepositoryDecoratorFactory(entityManager(), entityAttributesValidator, idGenerator,
+						appSettings, dataService(), expressionValidator, repositoryDecoratorRegistry(),
+						reindexActionRegisterService, searchService)
 						.createDecoratedRepository(repository);
 			}
 		};

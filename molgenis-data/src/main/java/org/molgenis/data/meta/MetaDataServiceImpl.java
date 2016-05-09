@@ -346,7 +346,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
-	public DefaultEntityMetaData getEntityMetaData(String fullyQualifiedEntityName)
+	public synchronized DefaultEntityMetaData getEntityMetaData(String fullyQualifiedEntityName)
 	{
 		// at construction time, will be called when entityMetaDataRepository is still null
 		if (attributeMetaDataRepository == null)
@@ -406,7 +406,7 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	// TODO make private
 	@Override
-	public void refreshCaches()
+	public synchronized void refreshCaches()
 	{
 		RunAsSystemProxy.runAsSystem(() -> {
 			packageRepository.updatePackageCache();

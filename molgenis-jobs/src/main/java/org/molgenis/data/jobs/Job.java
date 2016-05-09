@@ -1,5 +1,6 @@
 package org.molgenis.data.jobs;
 
+import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
@@ -8,8 +9,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.TransactionException;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
@@ -24,24 +23,9 @@ public abstract class Job<Result> implements Callable<Result>
 
 	public Job(Progress progress, TransactionTemplate transactionTemplate, Authentication authentication)
 	{
-		this.progress = progress;
+		this.progress = Objects.requireNonNull(progress);
 		this.transactionTemplate = transactionTemplate;
-		this.authentication = authentication;
-	}
-
-	private Result runWithAuthentication() throws Exception
-	{
-		SecurityContext originalContext = SecurityContextHolder.getContext();
-		try
-		{
-			SecurityContextHolder.setContext(SecurityContextHolder.createEmptyContext());
-			SecurityContextHolder.getContext().setAuthentication(authentication);
-			return call(progress);
-		}
-		finally
-		{
-			SecurityContextHolder.setContext(originalContext);
-		}
+		this.authentication = Objects.requireNonNull(authentication);
 	}
 
 	@Override
@@ -50,21 +34,15 @@ public abstract class Job<Result> implements Callable<Result>
 		progress.start();
 		try
 		{
-			Result result = transactionTemplate.execute(new TransactionCallback<Result>()
+			Result result;
+			if (transactionTemplate != null)
 			{
-				@Override
-				public Result doInTransaction(TransactionStatus status)
-				{
-					try
-					{
-						return runWithAuthentication();
-					}
-					catch (Exception e)
-					{
-						throw new JobExecutionException(e);
-					}
-				}
-			});
+				result = transactionTemplate.execute((status) -> tryRunWithAuthentication());
+			}
+			else
+			{
+				result = tryRunWithAuthentication();
+			}
 			progress.success();
 			return result;
 		}
@@ -87,11 +65,38 @@ public abstract class Job<Result> implements Callable<Result>
 			progress.failed(other);
 			throw other;
 		}
-	};
+	}
+
+	private Result tryRunWithAuthentication()
+	{
+		try
+		{
+			return runWithAuthentication();
+		}
+		catch (Exception e)
+		{
+			throw new JobExecutionException(e);
+		}
+	}
+
+	private Result runWithAuthentication() throws Exception
+	{
+		SecurityContext originalContext = SecurityContextHolder.getContext();
+		try
+		{
+			SecurityContextHolder.setContext(SecurityContextHolder.createEmptyContext());
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+			return call(progress);
+		}
+		finally
+		{
+			SecurityContextHolder.setContext(originalContext);
+		}
+	}
 
 	/**
 	 * Executes this job. For concrete subclasses to implement.
-	 * 
+	 *
 	 * @param progress
 	 * @throws Exception
 	 */

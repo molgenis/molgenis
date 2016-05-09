@@ -1,7 +1,5 @@
 package org.molgenis.data.transaction;
 
-import org.springframework.transaction.PlatformTransactionManager;
-
 /**
  * Class representing a transaction in Molgenis.
  */

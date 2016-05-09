@@ -1,4 +1,4 @@
-package org.molgenis.data.elasticsearch.reindex;
+package org.molgenis.data.elasticsearch.reindex.meta;
 
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
@@ -6,7 +6,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.support.DefaultEntityMetaData;
 
 /**
- * This entity is used to groups the reindex actions.
+ * This entity is used to group the reindex actions.
  */
 public class ReindexActionJobMetaData extends DefaultEntityMetaData
 {
@@ -25,6 +25,7 @@ public class ReindexActionJobMetaData extends DefaultEntityMetaData
 	public ReindexActionJobMetaData(String backend)
 	{
 		super(ENTITY_NAME);
+		setDescription("This entity is used to group the reindex actions.");
 		setBackend(backend);
 		addAttribute(ID, ROLE_ID);
 		addAttribute(COUNT).setDataType(MolgenisFieldTypes.INT).setNillable(false);
