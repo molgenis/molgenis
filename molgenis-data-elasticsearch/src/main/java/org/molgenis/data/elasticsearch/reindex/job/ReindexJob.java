@@ -2,7 +2,10 @@ package org.molgenis.data.elasticsearch.reindex.job;
 
 import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.elasticsearch.reindex.meta.ReindexActionJobMetaData.COUNT;
+import static org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.ACTION_ORDER;
+import static org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.REINDEX_ACTION_GROUP;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.text.MessageFormat;
@@ -31,6 +34,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionTemplate;
 
+/**
+ * {@link Job} that executes a bunch of {@link ReindexActionMetaData} stored in a
+ * {@link ReindexActionJobMetaData}.
+ */
 public class ReindexJob extends Job
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ReindexJob.class);
@@ -150,21 +157,17 @@ public class ReindexJob extends Job
 			case DELETE:
 				this.searchService.delete(entityFullName);
 				break;
-			default:
-				break;
 		}
 	}
 
 	/**
-	 * Get all relevant logs with transaction id. Sort on log order
-	 *
-	 * @return
+	 * Retrieves the {@link ReindexActionMetaData} to execute in this job, sorted on log order.
 	 */
 	private Stream<Entity> getAllReindexActions(String transactionId)
 	{
-		QueryRule rule = new QueryRule(ReindexActionMetaData.REINDEX_ACTION_GROUP, Operator.EQUALS, transactionId);
-		QueryImpl<Entity> q = new QueryImpl<Entity>(rule);
-		q.setSort(new Sort(ReindexActionMetaData.ACTION_ORDER));
+		QueryRule rule = new QueryRule(REINDEX_ACTION_GROUP, EQUALS, transactionId);
+		QueryImpl<Entity> q = new QueryImpl<>(rule);
+		q.setSort(new Sort(ACTION_ORDER));
 		return dataService.findAll(ReindexActionMetaData.ENTITY_NAME, q);
 	}
 }

@@ -8,7 +8,7 @@ import static org.molgenis.data.elasticsearch.reindex.meta.ReindexJobExecutionMe
 import static org.molgenis.data.elasticsearch.reindex.meta.ReindexJobExecutionMetaData.REINDEX_JOB_EXECUTION_META_DATA;
 
 /**
- * This entity is used to groups the reindex actions.
+ * This entity is used to keep track of the status of the execution of a reindex job.
  */
 public class ReindexJobExecution extends JobExecution
 {

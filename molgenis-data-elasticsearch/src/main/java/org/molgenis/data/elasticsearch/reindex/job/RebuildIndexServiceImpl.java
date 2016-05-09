@@ -13,15 +13,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/**
- * Schedules Reindex jobs.
- */
 public class RebuildIndexServiceImpl implements RebuildIndexService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(RebuildIndexServiceImpl.class);
 
 	private final DataService dataService;
 	private final ReindexJobFactory reindexJobFactory;
+	/**
+	 * The {@link ReindexJob}s are executed on this thread.
+	 */
 	private ExecutorService executorService = Executors.newSingleThreadExecutor();
 	@Autowired
 	private MolgenisUserService molgenisUserService;

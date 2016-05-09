@@ -31,7 +31,7 @@ public class JobExecution extends DefaultEntity
 	public static final String SUCCESS_EMAIL = "successEmail";
 	public static final String FAILURE_EMAIL = "failureEmail";
 
-	public static enum Status
+	public enum Status
 	{
 		PENDING, RUNNING, SUCCESS, FAILED, CANCELED
 	}
