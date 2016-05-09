@@ -101,8 +101,11 @@
 								<#assign attributeName = attribute.name>
 								<#if (category[attributeName])??>
 									<#assign value = category[attributeName] />
-									<#if value?is_date_like>
-										${category[attributeName]?date_if_unknown}<#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+									<#assign dataType = attribute.dataType />
+									<#if dataType == "datetime">
+										${category[attributeName]?datetime}<#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+									<#elseif dataType == "date">
+										${category[attributeName]?date}<#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
 									<#else>
 										${category[attributeName]?string}<#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
 									</#if>
