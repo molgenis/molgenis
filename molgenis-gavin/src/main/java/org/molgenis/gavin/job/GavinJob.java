@@ -71,7 +71,7 @@ public class GavinJob extends Job<Void>
 		cmdLineAnnotator.annotate(exac, caddOutputFile, exacOutputFile, emptyList(), false, true);
 
 		progress.progress(2, "Annotating with snpEff...");
-		cmdLineAnnotator.annotate(snpeff, exacOutputFile, snpeffOutputFile, emptyList(), false, true);
+		cmdLineAnnotator.annotate(snpeff, exacOutputFile, snpeffOutputFile, emptyList(), false, false);
 
 		progress.progress(3, "Annotating with gavin...");
 		cmdLineAnnotator.annotate(gavin, snpeffOutputFile, gavinOutputFile, emptyList(), false, true);
