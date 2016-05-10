@@ -15,11 +15,17 @@ import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
+import org.molgenis.data.elasticsearch.reindex.job.RebuildIndexService;
+import org.molgenis.data.elasticsearch.reindex.job.ReindexJobFactory;
+import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionRegisterConfig;
+import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
+import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.mail.MailSender;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -40,7 +46,7 @@ public class EmbeddedElasticSearchConfigTest
 
 		System.setProperty("molgenis.home", molgenisHomeDir.getAbsolutePath());
 		context = new AnnotationConfigApplicationContext(DataServiceImpl.class, EmbeddedElasticSearchConfig.class,
-				ElasticsearchEntityFactory.class, Config.class);
+				ElasticsearchEntityFactory.class, Config.class, ReindexActionRegisterConfig.class);
 	}
 
 	@AfterMethod
@@ -75,6 +81,24 @@ public class EmbeddedElasticSearchConfigTest
 		public MolgenisTransactionManager molgenisTransactionManager()
 		{
 			return mock(MolgenisTransactionManager.class);
+		}
+
+		@Bean
+		public JobExecutionUpdater jobExecutionUpdater()
+		{
+			return mock(JobExecutionUpdater.class);
+		}
+
+		@Bean
+		public MailSender mailSender()
+		{
+			return mock(MailSender.class);
+		}
+
+		@Bean
+		public MolgenisUserService molgenisUserService()
+		{
+			return mock(MolgenisUserService.class);
 		}
 	}
 
