@@ -280,7 +280,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 
 		if (!result.isPresent() && entityMetaDataEntity.get(EntityMetaDataMetaData.EXTENDS) != null)
 		{
-			return findAttributeEntity(entityMetaDataEntity.getString(EntityMetaDataMetaData.EXTENDS), attributeName);
+			return findAttributeEntity(entityMetaDataEntity.getEntity(EntityMetaDataMetaData.EXTENDS).getString(EntityMetaDataMetaData.FULL_NAME), attributeName);
 		}
 
 		return result.isPresent() ? result.get() : null;
