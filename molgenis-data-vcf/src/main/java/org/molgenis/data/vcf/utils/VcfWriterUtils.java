@@ -80,8 +80,8 @@ public class VcfWriterUtils
 	 * @throws IOException
 	 */
 	public static void writeVcfHeader(File inputVcfFile, BufferedWriter outputVCFWriter,
-									  List<AttributeMetaData> addedAttributes, List<String> attributesToInclude)
-			throws MolgenisInvalidFormatException, IOException
+			List<AttributeMetaData> addedAttributes, List<String> attributesToInclude)
+					throws MolgenisInvalidFormatException, IOException
 	{
 		System.out.println("Detecting VCF column header...");
 
@@ -189,26 +189,28 @@ public class VcfWriterUtils
 	{
 		Map<String, AttributeMetaData> annotatorAttributesMap = VcfUtils.getAttributesMapFromList(annotatorAttributes);
 		writeExistingInfoHeaders(outputVCFWriter, infoHeaderLinesMap, annotatorAttributesMap);
-		writeAddedInfoHeaders(outputVCFWriter, attributesToInclude, annotatorAttributesMap);
+		writeAddedInfoHeaders(outputVCFWriter, attributesToInclude, annotatorAttributesMap, infoHeaderLinesMap);
 	}
 
 	private static void writeAddedInfoHeaders(BufferedWriter outputVCFWriter, List<String> attributesToInclude,
-			Map<String, AttributeMetaData> annotatorAttributes) throws IOException
+			Map<String, AttributeMetaData> annotatorAttributes, Map<String, String> infoHeaderLinesMap)
+					throws IOException
 	{
 		for (AttributeMetaData annotatorInfoAttr : annotatorAttributes.values())
 		{
 			if (attributesToInclude.isEmpty() || attributesToInclude.contains(annotatorInfoAttr.getName())
 					|| annotatorInfoAttr.getDataType().equals(XREF) || annotatorInfoAttr.getDataType().equals(MREF))
 			{
-				outputVCFWriter.write(createInfoStringFromAttribute(
-						annotatorAttributes.get(annotatorInfoAttr.getName()), attributesToInclude));
+				outputVCFWriter
+						.write(createInfoStringFromAttribute(annotatorAttributes.get(annotatorInfoAttr.getName()),
+								attributesToInclude, infoHeaderLinesMap.get(annotatorInfoAttr.getName())));
 				outputVCFWriter.newLine();
 			}
 		}
 	}
 
 	private static String createInfoStringFromAttribute(AttributeMetaData infoAttributeMetaData,
-			List<String> attributesToInclude)
+			List<String> attributesToInclude, String currentInfoField)
 	{
 		String attributeName = infoAttributeMetaData.getName();
 		StringBuilder sb = new StringBuilder();
@@ -229,7 +231,11 @@ public class VcfWriterUtils
 			if ((infoAttributeMetaData.getDataType().equals(MREF) || infoAttributeMetaData.getDataType().equals(XREF))
 					&& !attributeName.equals(SAMPLES))
 			{
-				writeAttributesToInfoDescription(infoAttributeMetaData, attributesToInclude, attributeName, sb);
+				String currentAttributesString = currentInfoField != null
+						? currentInfoField.substring((currentInfoField.indexOf("'")+1), currentInfoField.lastIndexOf("'"))
+						: "";
+				writeRefAttributePartsToInfoDescription(infoAttributeMetaData, attributesToInclude, attributeName, sb,
+						currentAttributesString);
 			}
 			else
 			{
@@ -238,18 +244,23 @@ public class VcfWriterUtils
 		}
 		else
 		{
-			sb.append(infoAttributeMetaData.getDescription());
+			sb.append(infoAttributeMetaData.getDescription().replace("\"", "\\\"").replace("\n", " "));
 		}
 		sb.append("\">");
 		return sb.toString();
 	}
 
-	private static void writeAttributesToInfoDescription(AttributeMetaData infoAttributeMetaData,
-			List<String> attributesToInclude, String attributeName, StringBuilder sb)
+	private static void writeRefAttributePartsToInfoDescription(AttributeMetaData infoAttributeMetaData,
+			List<String> attributesToInclude, String attributeName, StringBuilder sb, String existingAttributes)
 	{
 		Iterable<AttributeMetaData> atomicAttributes = infoAttributeMetaData.getRefEntity().getAtomicAttributes();
 		sb.append(attributeName);
 		sb.append(" annotations: '");
+		if (!existingAttributes.isEmpty())
+		{
+			sb.append(existingAttributes);
+			sb.append(" | ");
+		}
 		sb.append(refAttributesToString(atomicAttributes, attributesToInclude).replace("\\", "\\\\")
 				.replace("\"", "\\\"").replace("\n", " "));
 		sb.append("'");
