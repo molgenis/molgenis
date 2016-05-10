@@ -33,7 +33,6 @@ public class AnnotationJobTest
 
 	@Mock
 	private CrudRepositoryAnnotator crudRepositoryAnnotator;
-	private String username = "fdlk";
 	@Mock
 	private RepositoryAnnotator exac;
 	@Mock
@@ -42,9 +41,8 @@ public class AnnotationJobTest
 	@Mock
 	private Progress progress;
 	private DefaultEntityMetaData emd = new DefaultEntityMetaData("repo");
-
+	@Mock
 	private Authentication authentication;
-
 	@Mock
 	private PlatformTransactionManager transactionManager;
 
@@ -57,10 +55,9 @@ public class AnnotationJobTest
 		emd.addAttributeMetaData(VcfRepository.POS_META);
 		emd.addAttribute("description");
 		emd.setLabel("My repo");
-		authentication = null;
 
 		repository = new InMemoryRepository(emd);
-		annotationJob = new AnnotationJob(crudRepositoryAnnotator, username, ImmutableList.of(exac, cadd), repository,
+		annotationJob = new AnnotationJob(crudRepositoryAnnotator, "fdlk", ImmutableList.of(exac, cadd), repository,
 				progress, authentication, new TransactionTemplate(transactionManager));
 	}
 
