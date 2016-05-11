@@ -201,14 +201,7 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public boolean hasMapping(EntityMetaData entityMetaData)
 	{
-		String docType = sanitizeMapperType(entityMetaData.getName());
-
-		GetMappingsResponse getMappingsResponse = client.admin().indices().prepareGetMappings(indexName).execute()
-				.actionGet();
-		ImmutableOpenMap<String, ImmutableOpenMap<String, MappingMetaData>> allMappings = getMappingsResponse
-				.getMappings();
-		final ImmutableOpenMap<String, MappingMetaData> indexMappings = allMappings.get(indexName);
-		return indexMappings.containsKey(docType);
+		return hasMapping(indexName, entityMetaData);
 	}
 
 	public boolean hasMapping(String index, EntityMetaData entityMetaData)
