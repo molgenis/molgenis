@@ -10,6 +10,7 @@ import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,6 +24,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
@@ -1987,6 +1989,8 @@ public class RepositoryValidationDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
 		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
@@ -2007,6 +2011,33 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.update(entity0);
 		verify(decoratedRepo, times(1)).update(entity0);
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityMeta);
+	}
+
+	@Test
+	public void updateNonExisting()
+	{
+		// entities
+		Entity entity0 = mock(Entity.class);
+		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(entity0.getIdValue()).thenReturn("id999");
+		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
+		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
+		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
+		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
+		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
+		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
+
+		// actual tests
+		try
+		{
+			repositoryValidationDecorator.update(entity0);
+			fail("Expected exception");
+		}
+		catch (MolgenisDataException expected)
+		{
+			assertEquals(expected.getMessage(), "The entity you are trying to update [id999] does not exist.");
+		}
 	}
 
 	@Test
@@ -2085,6 +2116,8 @@ public class RepositoryValidationDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(null); // violation error
 		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
@@ -2123,6 +2156,8 @@ public class RepositoryValidationDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(null); // valid, because the value is 'computed'
 		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
@@ -2151,6 +2186,8 @@ public class RepositoryValidationDecoratorTest
 		// entities
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
 
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(null); // valid, because visible expression resolved to false
@@ -2186,6 +2223,8 @@ public class RepositoryValidationDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
 		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
@@ -2214,6 +2253,8 @@ public class RepositoryValidationDecoratorTest
 		// entities
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
 
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(null); // violation error
@@ -2261,6 +2302,8 @@ public class RepositoryValidationDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
 		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
@@ -2295,6 +2338,8 @@ public class RepositoryValidationDecoratorTest
 		// entities
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
 
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
@@ -2334,6 +2379,8 @@ public class RepositoryValidationDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
 		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
@@ -2372,6 +2419,8 @@ public class RepositoryValidationDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(entity0); // self reference
 		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
@@ -2409,6 +2458,8 @@ public class RepositoryValidationDecoratorTest
 		// entities
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(decoratedRepo.findOne("id1")).thenReturn(entity0);
 
 		when(entity0.getIdValue()).thenReturn("id1");
 		when(entity0.getEntity(attrXrefName)).thenReturn(refEntityDoesNotExist);
@@ -2456,6 +2507,8 @@ public class RepositoryValidationDecoratorTest
 		Entity entity1 = mock(Entity.class);
 		when(entity1.getEntityMetaData()).thenReturn(entityMeta);
 
+		when(decoratedRepo.findOne("id1")).thenReturn(entity1);
+
 		when(entity1.getIdValue()).thenReturn("id1");
 		when(entity1.getEntity(attrXrefName)).thenReturn(refEntityDoesNotExist); // valid, because the value is computed
 		when(entity1.getEntity(attrNillableXrefName)).thenReturn(null);
@@ -2491,6 +2544,8 @@ public class RepositoryValidationDecoratorTest
 		// entities
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(decoratedRepo.findOne("id1")).thenReturn(entity0);
 
 		when(entity0.getIdValue()).thenReturn("id1");
 		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
@@ -2550,6 +2605,8 @@ public class RepositoryValidationDecoratorTest
 		// entities
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
 
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
@@ -2612,6 +2669,8 @@ public class RepositoryValidationDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
 		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
@@ -2662,6 +2721,8 @@ public class RepositoryValidationDecoratorTest
 		// entities
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
 
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
@@ -3049,6 +3110,8 @@ public class RepositoryValidationDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
 		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
@@ -3124,6 +3187,8 @@ public class RepositoryValidationDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
 		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
@@ -3141,6 +3206,8 @@ public class RepositoryValidationDecoratorTest
 		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
 
 		Entity entity1 = mock(Entity.class);
+		when(decoratedRepo.findOne("id1")).thenReturn(entity1);
+
 		when(entity1.getIdValue()).thenReturn("id1");
 		when(entity1.getEntityMetaData()).thenReturn(entityMeta);
 		when(entity1.getEntity(attrXrefName)).thenReturn(refEntity0);
@@ -3191,6 +3258,8 @@ public class RepositoryValidationDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(null); // violation error
 		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
@@ -3238,6 +3307,8 @@ public class RepositoryValidationDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(null); // valid, because the value is 'computed'
 		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
@@ -3274,6 +3345,8 @@ public class RepositoryValidationDecoratorTest
 		// entities
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
 
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(null); // valid, because visible expression resolved to false
@@ -3317,6 +3390,8 @@ public class RepositoryValidationDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
 		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
@@ -3353,6 +3428,8 @@ public class RepositoryValidationDecoratorTest
 		// entities
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
 
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(null); // violation error
@@ -3409,6 +3486,8 @@ public class RepositoryValidationDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
 		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
@@ -3451,6 +3530,8 @@ public class RepositoryValidationDecoratorTest
 		// entities
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
 
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
@@ -3499,6 +3580,8 @@ public class RepositoryValidationDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
 		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
@@ -3546,6 +3629,8 @@ public class RepositoryValidationDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(entity0); // self reference
 		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
@@ -3587,6 +3672,8 @@ public class RepositoryValidationDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(entity0); // self reference
 		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
@@ -3605,6 +3692,8 @@ public class RepositoryValidationDecoratorTest
 
 		Entity entity1 = mock(Entity.class);
 		when(entity1.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(decoratedRepo.findOne("id1")).thenReturn(entity1);
 
 		when(entity1.getIdValue()).thenReturn("id1");
 		when(entity1.getEntity(attrXrefName)).thenReturn(entity0); // reference to previously added entity
@@ -3653,6 +3742,8 @@ public class RepositoryValidationDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
 		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
@@ -3671,6 +3762,8 @@ public class RepositoryValidationDecoratorTest
 
 		Entity entity1 = mock(Entity.class);
 		when(entity1.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(decoratedRepo.findOne("id1")).thenReturn(entity1);
 
 		when(entity1.getIdValue()).thenReturn("id1");
 		when(entity1.getEntity(attrXrefName)).thenReturn(refEntityDoesNotExist);
@@ -3728,6 +3821,8 @@ public class RepositoryValidationDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
 		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
@@ -3746,6 +3841,8 @@ public class RepositoryValidationDecoratorTest
 
 		Entity entity1 = mock(Entity.class);
 		when(entity1.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(decoratedRepo.findOne("id1")).thenReturn(entity1);
 
 		when(entity1.getIdValue()).thenReturn("id1");
 		when(entity1.getEntity(attrXrefName)).thenReturn(refEntityDoesNotExist); // valid, because the value is computed
@@ -3792,6 +3889,8 @@ public class RepositoryValidationDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
 		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
@@ -3810,6 +3909,8 @@ public class RepositoryValidationDecoratorTest
 
 		Entity entity1 = mock(Entity.class);
 		when(entity1.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(decoratedRepo.findOne("id1")).thenReturn(entity1);
 
 		when(entity1.getIdValue()).thenReturn("id1");
 		when(entity1.getEntity(attrXrefName)).thenReturn(refEntity0);
@@ -3879,6 +3980,8 @@ public class RepositoryValidationDecoratorTest
 		// entities
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
 
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
@@ -3950,6 +4053,8 @@ public class RepositoryValidationDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
 		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
@@ -3987,6 +4092,8 @@ public class RepositoryValidationDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
+
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
 		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
@@ -4005,6 +4112,8 @@ public class RepositoryValidationDecoratorTest
 
 		Entity entity1 = mock(Entity.class);
 		when(entity1.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(decoratedRepo.findOne("id1")).thenReturn(entity1);
 
 		when(entity1.getIdValue()).thenReturn("id1");
 		when(entity1.getEntity(attrXrefName)).thenReturn(refEntity0);
@@ -4074,6 +4183,8 @@ public class RepositoryValidationDecoratorTest
 		// entities
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(decoratedRepo.findOne("id0")).thenReturn(entity0);
 
 		when(entity0.getIdValue()).thenReturn("id0");
 		when(entity0.getEntity(attrXrefName)).thenReturn(refEntity0);
