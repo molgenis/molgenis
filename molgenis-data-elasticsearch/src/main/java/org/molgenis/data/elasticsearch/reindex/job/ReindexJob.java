@@ -5,7 +5,12 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.elasticsearch.reindex.meta.ReindexActionJobMetaData.COUNT;
 import static org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.ACTION_ORDER;
+import static org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.CudType.DELETE;
+import static org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.DataType.DATA;
 import static org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.REINDEX_ACTION_GROUP;
+import static org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.ReindexStatus.FAILED;
+import static org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.ReindexStatus.FINISHED;
+import static org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.ReindexStatus.STARTED;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
@@ -34,7 +39,7 @@ import org.springframework.security.core.Authentication;
  * {@link Job} that executes a bunch of {@link ReindexActionMetaData} stored in a
  * {@link ReindexActionJobMetaData}.
  */
-public class ReindexJob extends Job
+class ReindexJob extends Job
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ReindexJob.class);
 	private final String transactionId;
@@ -53,116 +58,133 @@ public class ReindexJob extends Job
 	@Override
 	public Void call(Progress progress)
 	{
-		Entity entity = this.dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, transactionId);
-		if (null != entity)
+		requireNonNull(progress);
+		Entity reindexActionEntity = dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, transactionId);
+		if (reindexActionEntity != null && reindexActionEntity.getInt(COUNT) != null
+				&& reindexActionEntity.getInt(COUNT) > 0)
 		{
-			progress.setProgressMax(entity.getInt(COUNT));
+			progress.setProgressMax(reindexActionEntity.getInt(COUNT));
 			progress.status(format("######## START Reindex transaction id: [{0}] ########", transactionId));
-			rebuildIndex(progress);
-			progress.status(format("######## END Reindex transaction id: [{0}] took {1} ms. ########", transactionId,
-					progress.timeRunning()));
+			performReindexActions(progress);
+			progress.status(format("######## END Reindex transaction id: [{0}] ########", transactionId));
 		}
 		else
 		{
-			progress.status(format("No reindex action job found for transaction id: [{0}]", transactionId));
+			progress.status(format("No reindex actions found for transaction id: [{0}]", transactionId));
 		}
 		return null;
 	}
 
-	void rebuildIndex(Progress progress)
+	/**
+	 * Performs the ReindexActions.
+	 *
+	 * @param progress {@link Progress} instance to log progress information to
+	 */
+	private void performReindexActions(Progress progress)
 	{
 		AtomicInteger count = new AtomicInteger();
-		Stream<Entity> logEntries = getAllReindexActions(this.transactionId);
-		logEntries.forEach(e -> {
-			requireNonNull(e.getEntityMetaData());
-			final CudType cudType = CudType.valueOf(e.getString(ReindexActionMetaData.CUD_TYPE));
-			final String entityFullName = e.getString(ReindexActionMetaData.ENTITY_FULL_NAME);
-			final EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(entityFullName);
-			final String entityId = e.getString(ReindexActionMetaData.ENTITY_ID);
-			final DataType dataType = DataType.valueOf(e.getString(ReindexActionMetaData.DATA_TYPE));
-
-			this.updateActionStatus(e, ReindexStatus.STARTED);
-			if (entityId != null)
-			{
-				progress.progress(count.getAndIncrement(),
-						format("Reindexing {0}.{1}, CUDType = {2}", entityFullName, entityId, cudType));
-				this.rebuildIndexOneEntity(entityFullName, entityId, cudType);
-			}
-			else if (dataType.equals(DataType.DATA))
-			{
-				progress.progress(count.getAndIncrement(),
-						format("Reindexing entity {0} in batch. CUDType = {1}", entityFullName, cudType));
-				this.rebuildIndexBatchEntities(entityFullName, entityMetaData, cudType);
-			}
-			else
-			{
-				progress.progress(count.getAndIncrement(),
-						format("Reindexing entity {0} in batch due to metadata change. CUDType = {1}", entityFullName,
-								cudType));
-				this.rebuildIndexEntityMeta(entityFullName, entityMetaData, cudType);
-			}
-			this.updateActionStatus(e, ReindexStatus.FINISHED);
-		});
-		progress.status("refreshIndex...");
-		this.searchService.refreshIndex();
-		progress.progress(count.get(), "refreshIndex done.");
-	}
-
-	private void updateActionStatus(Entity e, ReindexStatus status)
-	{
-		e.set(ReindexActionMetaData.REINDEX_STATUS, status);
-		dataService.update(ReindexActionMetaData.ENTITY_NAME, e);
-	}
-
-	private void rebuildIndexOneEntity(String entityFullName, String entityId, CudType cudType)
-	{
-		LOG.info("# Reindex row id [{}] entity: [{}] cud: [{}]", entityId, entityFullName, cudType);
-		switch (cudType)
+		Stream<Entity> logEntries = dataService
+				.findAll(ReindexActionMetaData.ENTITY_NAME, createQueryGetAllReindexActions(this.transactionId));
+		try
 		{
-			case CREATE:
-				Entity entityA = dataService.findOneById(entityFullName, entityId);
-				this.searchService.index(entityA, entityA.getEntityMetaData(), IndexingMode.ADD);
-				break;
-			case UPDATE:
-				Entity entityU = dataService.findOneById(entityFullName, entityId);
-				this.searchService.index(entityU, entityU.getEntityMetaData(), IndexingMode.UPDATE);
-				break;
-			case DELETE:
-				this.searchService.deleteById(entityId, dataService.getMeta().getEntityMetaData(entityFullName));
-				break;
-			default:
-				break;
+			logEntries.forEach(e -> {
+				requireNonNull(e.getEntityMetaData());
+				final CudType cudType = CudType.valueOf(e.getString(ReindexActionMetaData.CUD_TYPE));
+				final String entityFullName = e.getString(ReindexActionMetaData.ENTITY_FULL_NAME);
+				final EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(entityFullName);
+				final String entityId = e.getString(ReindexActionMetaData.ENTITY_ID);
+				final DataType dataType = DataType.valueOf(e.getString(ReindexActionMetaData.DATA_TYPE));
+
+				this.updateActionStatus(e, STARTED);
+				try
+				{
+					if (entityId != null)
+					{
+						progress.progress(count.getAndIncrement(),
+								format("Reindexing {0}.{1}, CUDType = {2}", entityFullName, entityId, cudType));
+						this.rebuildIndexOneEntity(entityFullName, entityId, cudType);
+					}
+					else if (dataType.equals(DATA) || cudType != DELETE)
+					{
+						progress.progress(count.getAndIncrement(),
+								format("Reindexing repository {0}. CUDType = {1}", entityFullName, cudType));
+						this.rebuildIndexBatchEntities(entityMetaData);
+					}
+					else
+					{
+						progress.progress(count.getAndIncrement(),
+								format("Dropping index of repository {0}.", entityFullName));
+						this.searchService.delete(entityFullName);
+					}
+					this.updateActionStatus(e, FINISHED);
+				}
+				catch (Exception ex)
+				{
+					updateActionStatus(e, FAILED);
+					throw ex;
+				}
+			});
+			progress.progress(count.get(), "Executed all reindex actions.");
 		}
-	}
-
-	private void rebuildIndexBatchEntities(String entityFullName, EntityMetaData entityMetaData, CudType cudType)
-	{
-		LOG.info("# Reindex batch entities of entity: [{}] cud: [{}]", entityFullName, cudType);
-		this.searchService.rebuildIndex(dataService.getRepository(entityFullName), entityMetaData);
-	}
-
-	private void rebuildIndexEntityMeta(String entityFullName, EntityMetaData entityMetaData, CudType cudType)
-	{
-		LOG.info("# Reindex data and metadata rebuild whole index of entity: [{}] cud: [{}]", entityFullName, cudType);
-		switch (cudType)
+		finally
 		{
-			case UPDATE:
-			case CREATE:
-				this.searchService.rebuildIndex(dataService.getRepository(entityFullName), entityMetaData);
-				break;
-			case DELETE:
-				this.searchService.delete(entityFullName);
-				break;
+			progress.status("refreshIndex...");
+			this.searchService.refreshIndex();
+			progress.status("refreshIndex done.");
 		}
 	}
 
 	/**
-	 * Retrieves the {@link ReindexActionMetaData} to execute in this job, sorted on log order.
+	 * Updates the {@link ReindexStatus} of a ReindexAction and stores the change.
+	 *
+	 * @param reindexAction the ReindexAction of which the status is updated
+	 * @param status        the new {@link ReindexStatus}
 	 */
-	Stream<Entity> getAllReindexActions(String transactionId)
+	private void updateActionStatus(Entity reindexAction, ReindexStatus status)
 	{
-		Query<Entity> q = createQueryGetAllReindexActions(transactionId);
-		return dataService.findAll(ReindexActionMetaData.ENTITY_NAME, q);
+		reindexAction.set(ReindexActionMetaData.REINDEX_STATUS, status);
+		dataService.update(ReindexActionMetaData.ENTITY_NAME, reindexAction);
+	}
+
+	/**
+	 * Reindexes one single entity instance.
+	 *
+	 * @param entityFullName the fully qualified name of the entity's repository
+	 * @param entityId       the identifier of the entity to update
+	 * @param cudType        the {@link CudType} of the change that was made to the entity
+	 */
+	private void rebuildIndexOneEntity(String entityFullName, String entityId, CudType cudType)
+	{
+		LOG.debug("Reindexing [{}].[{}]... cud: [{}]", entityFullName, entityId, cudType);
+		switch (cudType)
+		{
+			case CREATE:
+				Entity entityA = dataService.findOneById(entityFullName, entityId);
+				searchService.index(entityA, entityA.getEntityMetaData(), IndexingMode.ADD);
+				break;
+			case UPDATE:
+				Entity entityU = dataService.findOneById(entityFullName, entityId);
+				searchService.index(entityU, entityU.getEntityMetaData(), IndexingMode.UPDATE);
+				break;
+			case DELETE:
+				// TODO This calls the version that checks for references! But to prevent race conditions the reindexer must delete the document even if references exist
+				searchService.deleteById(entityId, dataService.getMeta().getEntityMetaData(entityFullName));
+				break;
+		}
+		LOG.info("Reindexed [{}].[{}].", entityFullName, entityId);
+	}
+
+	/**
+	 * Reindexes all data in a {@link org.molgenis.data.Repository}
+	 *
+	 * @param entityMetaData the {@link EntityMetaData} of the {@link org.molgenis.data.Repository} to reindex.
+	 */
+	private void rebuildIndexBatchEntities(EntityMetaData entityMetaData)
+	{
+		String name = entityMetaData.getName();
+		LOG.debug("Reindexing [{}]...", name);
+		this.searchService.rebuildIndex(dataService.getRepository(name), entityMetaData);
+		LOG.info("Reindexed [{}].", name);
 	}
 
 	/**
