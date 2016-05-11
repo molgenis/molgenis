@@ -272,7 +272,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	}
 
 	@RunAsSystem
-	private Entity findAttributeEntity(String entityName, String attributeName)
+	public Entity findAttributeEntity(String entityName, String attributeName)
 	{
 		Entity entityMetaDataEntity = dataService.findOne(ENTITY_NAME, entityName);
 		Optional<Entity> result = stream(entityMetaDataEntity.getEntities(ATTRIBUTES).spliterator(), false).filter(
