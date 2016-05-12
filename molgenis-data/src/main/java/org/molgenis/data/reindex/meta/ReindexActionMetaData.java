@@ -1,4 +1,4 @@
-package org.molgenis.data.elasticsearch.reindex.meta;
+package org.molgenis.data.reindex.meta;
 
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
@@ -8,8 +8,8 @@ import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.TextField;
 
 /**
- * The reindex action is used to describe the action that needs to be done to make a {@link org.molgenis.data.Repository}'s
- * index consistent again.
+ * The reindex action is used to describe the action that needs to be done to make a
+ * {@link org.molgenis.data.Repository}'s index consistent again.
  */
 public class ReindexActionMetaData extends DefaultEntityMetaData
 {
@@ -68,19 +68,20 @@ public class ReindexActionMetaData extends DefaultEntityMetaData
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
 		addAttribute(REINDEX_ACTION_GROUP).setDescription("The group that this reindex action belongs to")
 				.setDataType(MolgenisFieldTypes.XREF).setRefEntity(indexTransactionLogMetaData);
-		addAttribute(ACTION_ORDER)
-				.setDescription("The order in which the action is registered within its ReindexActionJob")
-				.setNillable(false);
+		addAttribute(ACTION_ORDER).setDescription(
+				"The order in which the action is registered within its ReindexActionJob").setNillable(false);
 		addAttribute(ENTITY_FULL_NAME).setDescription("The full name of the entity that needs to be reindexed.")
 				.setNillable(false);
 		addAttribute(ENTITY_ID)
 				.setDescription("Filled when only one row of the entity \"" + ENTITY_FULL_NAME + "\" is reindexed")
 				.setDataType(new TextField()).setNillable(true);
-		addAttribute(CUD_TYPE).setDescription(
-				"Enum: The create, update and delete operation that got caused the need for the reindex")
+		addAttribute(CUD_TYPE)
+				.setDescription(
+						"Enum: The create, update and delete operation that got caused the need for the reindex")
 				.setDataType(new EnumField()).setEnumOptions(CudType.class).setNillable(false);
-		addAttribute(DATA_TYPE).setDescription(
-				"Enum: Tells you if the data or the metadata of the \"" + ENTITY_FULL_NAME + "\" is affected")
+		addAttribute(DATA_TYPE)
+				.setDescription(
+						"Enum: Tells you if the data or the metadata of the \"" + ENTITY_FULL_NAME + "\" is affected")
 				.setDataType(new EnumField()).setEnumOptions(DataType.class).setNillable(false);
 		addAttribute(REINDEX_STATUS).setDescription("The status of reindex action").setDataType(new EnumField())
 				.setEnumOptions(ReindexStatus.class).setNillable(false);

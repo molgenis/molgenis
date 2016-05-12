@@ -1,4 +1,4 @@
-package org.molgenis.data.elasticsearch.reindex;
+package org.molgenis.data.reindex;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -15,8 +15,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.CudType;
-import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.DataType;
+import org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType;
+import org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -50,7 +50,7 @@ public class ReindexActionRepositoryDecoratorTest
 		when(entity0.getIdValue()).thenReturn("1");
 		reindexActionRepositoryDecorator.update(entity0);
 		verify(decoratedRepo, times(1)).update(entity0);
-		verify(reindexActionRegisterService).register(entityMeta, CudType.UPDATE, DataType.DATA, "1");
+		verify(reindexActionRegisterService).register(entityMeta.getName(), CudType.UPDATE, DataType.DATA, "1");
 	}
 
 	@Test
@@ -65,7 +65,7 @@ public class ReindexActionRepositoryDecoratorTest
 		Stream<Entity> entities = Stream.empty();
 		reindexActionRepositoryDecorator.update(entities);
 		verify(decoratedRepo, times(1)).update(entities);
-		verify(reindexActionRegisterService).register(entityMeta, CudType.UPDATE, DataType.DATA, null);
+		verify(reindexActionRegisterService).register(entityMeta.getName(), CudType.UPDATE, DataType.DATA, null);
 	}
 
 	@Test
@@ -75,7 +75,7 @@ public class ReindexActionRepositoryDecoratorTest
 		when(entity0.getIdValue()).thenReturn("1");
 		reindexActionRepositoryDecorator.delete(entity0);
 		verify(decoratedRepo, times(1)).delete(entity0);
-		verify(reindexActionRegisterService).register(entityMeta, CudType.DELETE, DataType.DATA, "1");
+		verify(reindexActionRegisterService).register(entityMeta.getName(), CudType.DELETE, DataType.DATA, "1");
 	}
 
 	@Test
@@ -84,7 +84,8 @@ public class ReindexActionRepositoryDecoratorTest
 		Stream<Entity> entities = Stream.empty();
 		reindexActionRepositoryDecorator.delete(entities);
 		verify(decoratedRepo, times(1)).delete(entities);
-		verify(reindexActionRegisterService, times(1)).register(entityMeta, CudType.DELETE, DataType.DATA, null);
+		verify(reindexActionRegisterService, times(1)).register(entityMeta.getName(), CudType.DELETE, DataType.DATA,
+				null);
 	}
 
 	@Test
@@ -94,7 +95,7 @@ public class ReindexActionRepositoryDecoratorTest
 		when(entity0.getIdValue()).thenReturn("1");
 		reindexActionRepositoryDecorator.deleteById("1");
 		verify(decoratedRepo, times(1)).deleteById("1");
-		verify(reindexActionRegisterService).register(entityMeta, CudType.DELETE, DataType.DATA, "1");
+		verify(reindexActionRegisterService).register(entityMeta.getName(), CudType.DELETE, DataType.DATA, "1");
 	}
 
 	@Test
@@ -103,7 +104,8 @@ public class ReindexActionRepositoryDecoratorTest
 		Stream<Object> ids = Stream.empty();
 		reindexActionRepositoryDecorator.deleteAll(ids);
 		verify(decoratedRepo, times(1)).deleteAll(ids);
-		verify(reindexActionRegisterService, times(1)).register(entityMeta, CudType.DELETE, DataType.DATA, null);
+		verify(reindexActionRegisterService, times(1)).register(entityMeta.getName(), CudType.DELETE, DataType.DATA,
+				null);
 	}
 
 	@Test
@@ -111,7 +113,8 @@ public class ReindexActionRepositoryDecoratorTest
 	{
 		reindexActionRepositoryDecorator.deleteAll();
 		verify(decoratedRepo, times(1)).deleteAll();
-		verify(reindexActionRegisterService, times(1)).register(entityMeta, CudType.DELETE, DataType.DATA, null);
+		verify(reindexActionRegisterService, times(1)).register(entityMeta.getName(), CudType.DELETE, DataType.DATA,
+				null);
 	}
 
 	@Test
@@ -121,7 +124,7 @@ public class ReindexActionRepositoryDecoratorTest
 		when(entity0.getIdValue()).thenReturn("1");
 		reindexActionRepositoryDecorator.add(entity0);
 		verify(decoratedRepo, times(1)).add(entity0);
-		verify(reindexActionRegisterService).register(entityMeta, CudType.CREATE, DataType.DATA, "1");
+		verify(reindexActionRegisterService).register(entityMeta.getName(), CudType.CREATE, DataType.DATA, "1");
 	}
 
 	@Test
@@ -131,7 +134,7 @@ public class ReindexActionRepositoryDecoratorTest
 		when(decoratedRepo.add(entities)).thenReturn(123);
 		assertEquals(reindexActionRepositoryDecorator.add(entities), Integer.valueOf(123));
 		verify(decoratedRepo, times(1)).add(entities);
-		verify(reindexActionRegisterService).register(entityMeta, CudType.CREATE, DataType.DATA, null);
+		verify(reindexActionRegisterService).register(entityMeta.getName(), CudType.CREATE, DataType.DATA, null);
 	}
 
 	@Test

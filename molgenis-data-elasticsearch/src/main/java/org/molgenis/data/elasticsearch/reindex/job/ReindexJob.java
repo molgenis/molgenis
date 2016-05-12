@@ -3,14 +3,14 @@ package org.molgenis.data.elasticsearch.reindex.job;
 import static java.text.MessageFormat.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
-import static org.molgenis.data.elasticsearch.reindex.meta.ReindexActionJobMetaData.COUNT;
-import static org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.ACTION_ORDER;
-import static org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.CudType.DELETE;
-import static org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.DataType.DATA;
-import static org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.REINDEX_ACTION_GROUP;
-import static org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.ReindexStatus.FAILED;
-import static org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.ReindexStatus.FINISHED;
-import static org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.ReindexStatus.STARTED;
+import static org.molgenis.data.reindex.meta.ReindexActionJobMetaData.COUNT;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ACTION_ORDER;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION_GROUP;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType.DELETE;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType.DATA;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus.FAILED;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus.FINISHED;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus.STARTED;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
@@ -23,21 +23,20 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.Sort;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionJobMetaData;
-import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData;
-import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.CudType;
-import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.DataType;
-import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.ReindexStatus;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.Progress;
+import org.molgenis.data.reindex.meta.ReindexActionJobMetaData;
+import org.molgenis.data.reindex.meta.ReindexActionMetaData;
+import org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType;
+import org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType;
+import org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus;
 import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 
 /**
- * {@link Job} that executes a bunch of {@link ReindexActionMetaData} stored in a
- * {@link ReindexActionJobMetaData}.
+ * {@link Job} that executes a bunch of {@link ReindexActionMetaData} stored in a {@link ReindexActionJobMetaData}.
  */
 class ReindexJob extends Job
 {
@@ -78,13 +77,14 @@ class ReindexJob extends Job
 	/**
 	 * Performs the ReindexActions.
 	 *
-	 * @param progress {@link Progress} instance to log progress information to
+	 * @param progress
+	 *            {@link Progress} instance to log progress information to
 	 */
 	private void performReindexActions(Progress progress)
 	{
 		AtomicInteger count = new AtomicInteger();
-		Stream<Entity> logEntries = dataService
-				.findAll(ReindexActionMetaData.ENTITY_NAME, createQueryGetAllReindexActions(this.transactionId));
+		Stream<Entity> logEntries = dataService.findAll(ReindexActionMetaData.ENTITY_NAME,
+				createQueryGetAllReindexActions(this.transactionId));
 		try
 		{
 			logEntries.forEach(e -> {
@@ -137,8 +137,10 @@ class ReindexJob extends Job
 	/**
 	 * Updates the {@link ReindexStatus} of a ReindexAction and stores the change.
 	 *
-	 * @param reindexAction the ReindexAction of which the status is updated
-	 * @param status        the new {@link ReindexStatus}
+	 * @param reindexAction
+	 *            the ReindexAction of which the status is updated
+	 * @param status
+	 *            the new {@link ReindexStatus}
 	 */
 	private void updateActionStatus(Entity reindexAction, ReindexStatus status)
 	{
@@ -149,9 +151,12 @@ class ReindexJob extends Job
 	/**
 	 * Reindexes one single entity instance.
 	 *
-	 * @param entityFullName the fully qualified name of the entity's repository
-	 * @param entityId       the identifier of the entity to update
-	 * @param cudType        the {@link CudType} of the change that was made to the entity
+	 * @param entityFullName
+	 *            the fully qualified name of the entity's repository
+	 * @param entityId
+	 *            the identifier of the entity to update
+	 * @param cudType
+	 *            the {@link CudType} of the change that was made to the entity
 	 */
 	private void rebuildIndexOneEntity(String entityFullName, String entityId, CudType cudType)
 	{
@@ -167,7 +172,8 @@ class ReindexJob extends Job
 				searchService.index(entityU, entityU.getEntityMetaData(), IndexingMode.UPDATE);
 				break;
 			case DELETE:
-				// TODO This calls the version that checks for references! But to prevent race conditions the reindexer must delete the document even if references exist
+				// TODO This calls the version that checks for references! But to prevent race conditions the reindexer
+				// must delete the document even if references exist
 				searchService.deleteById(entityId, dataService.getMeta().getEntityMetaData(entityFullName));
 				break;
 		}
@@ -177,7 +183,8 @@ class ReindexJob extends Job
 	/**
 	 * Reindexes all data in a {@link org.molgenis.data.Repository}
 	 *
-	 * @param entityMetaData the {@link EntityMetaData} of the {@link org.molgenis.data.Repository} to reindex.
+	 * @param entityMetaData
+	 *            the {@link EntityMetaData} of the {@link org.molgenis.data.Repository} to reindex.
 	 */
 	private void rebuildIndexBatchEntities(EntityMetaData entityMetaData)
 	{

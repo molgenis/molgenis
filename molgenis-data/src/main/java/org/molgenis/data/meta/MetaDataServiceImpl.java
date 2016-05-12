@@ -166,7 +166,8 @@ public class MetaDataServiceImpl implements MetaDataService
 				attributeMetaDataRepository, languageService);
 		attributeMetaDataRepository.setEntityMetaDataRepository(entityMetaDataRepository);
 
-		dataService.addRepository(new MetaDataRepositoryDecorator(attributeMetaDataRepository.getRepository()));
+		dataService.addRepository(new MetaDataRepositoryDecorator(
+				attributeMetaDataRepository.getRepository()));
 		dataService.addRepository(new MetaDataRepositoryDecorator(entityMetaDataRepository.getRepository()));
 		entityMetaDataRepository.fillEntityMetaDataCache();
 	}

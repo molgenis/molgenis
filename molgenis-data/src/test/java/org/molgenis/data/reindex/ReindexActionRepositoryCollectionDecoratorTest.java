@@ -1,4 +1,4 @@
-package org.molgenis.data.elasticsearch.reindex;
+package org.molgenis.data.reindex;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -9,8 +9,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.CudType;
-import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.DataType;
+import org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType;
+import org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -43,7 +43,8 @@ public class ReindexActionRepositoryCollectionDecoratorTest
 	{
 		reindexActionRepositoryCollectionDecorator.deleteEntityMeta(REPOSITORY_NAME);
 		verify(decoratedRepositoryCollection, times(1)).deleteEntityMeta(REPOSITORY_NAME);
-		verify(reindexActionRegisterService).register(entityMeta, CudType.DELETE, DataType.METADATA, null);
+		verify(reindexActionRegisterService).registerDeleteEntityMetaData(entityMeta.getName());
+		verify(reindexActionRegisterService).register(entityMeta.getName(), CudType.DELETE, DataType.METADATA, null);
 	}
 
 	@Test
@@ -52,7 +53,7 @@ public class ReindexActionRepositoryCollectionDecoratorTest
 		DefaultAttributeMetaData attribute = new DefaultAttributeMetaData("attribute");
 		reindexActionRepositoryCollectionDecorator.addAttribute(REPOSITORY_NAME, attribute);
 		verify(decoratedRepositoryCollection, times(1)).addAttribute(REPOSITORY_NAME, attribute);
-		verify(reindexActionRegisterService).register(entityMeta, CudType.UPDATE, DataType.METADATA, null);
+		verify(reindexActionRegisterService).register(entityMeta.getName(), CudType.UPDATE, DataType.METADATA, null);
 	}
 
 	@Test
@@ -60,7 +61,7 @@ public class ReindexActionRepositoryCollectionDecoratorTest
 	{
 		reindexActionRepositoryCollectionDecorator.deleteAttribute(REPOSITORY_NAME, "attribute");
 		verify(decoratedRepositoryCollection, times(1)).deleteAttribute(REPOSITORY_NAME, "attribute");
-		verify(reindexActionRegisterService).register(entityMeta, CudType.UPDATE, DataType.METADATA, null);
+		verify(reindexActionRegisterService).register(entityMeta.getName(), CudType.UPDATE, DataType.METADATA, null);
 	}
 
 	@Test
@@ -69,7 +70,7 @@ public class ReindexActionRepositoryCollectionDecoratorTest
 		DefaultAttributeMetaData attribute = mock(DefaultAttributeMetaData.class);
 		reindexActionRepositoryCollectionDecorator.addAttributeSync(REPOSITORY_NAME, attribute);
 		verify(decoratedRepositoryCollection, times(1)).addAttribute(REPOSITORY_NAME, attribute);
-		verify(reindexActionRegisterService).register(entityMeta, CudType.UPDATE, DataType.METADATA, null);
+		verify(reindexActionRegisterService).register(entityMeta.getName(), CudType.UPDATE, DataType.METADATA, null);
 	}
 
 	@Test
@@ -77,6 +78,6 @@ public class ReindexActionRepositoryCollectionDecoratorTest
 	{
 		reindexActionRepositoryCollectionDecorator.addEntityMeta(entityMeta);
 		verify(decoratedRepositoryCollection, times(1)).addEntityMeta(entityMeta);
-		verify(reindexActionRegisterService).register(entityMeta, CudType.CREATE, DataType.METADATA, null);
+		verify(reindexActionRegisterService).register(entityMeta.getName(), CudType.CREATE, DataType.METADATA, null);
 	}
 }
