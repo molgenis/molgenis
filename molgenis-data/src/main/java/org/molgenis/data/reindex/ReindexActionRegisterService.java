@@ -50,7 +50,7 @@ public class ReindexActionRegisterService
 	 */
 	public synchronized void register(String entityFullName, CudType cudType, DataType dataType, String entityId)
 	{
-		LOG.info("register(entityFullName: [{}], cudType [{}], dataType: [{}], entityId: [{}])", entityFullName,
+		LOG.debug("register(entityFullName: [{}], cudType [{}], dataType: [{}], entityId: [{}])", entityFullName,
 				cudType, dataType, entityId);
 		if (!ReindexActionRegisterService.EXCLUDED_ENTITIES.contains(entityFullName))
 		{
