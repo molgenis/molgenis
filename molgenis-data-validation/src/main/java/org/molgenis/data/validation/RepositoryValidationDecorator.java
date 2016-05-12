@@ -33,7 +33,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
@@ -565,11 +564,6 @@ public class RepositoryValidationDecorator implements Repository
 	private void validateEntityValueReadOnly(Entity entity, ValidationResource validationResource)
 	{
 		Entity entityToUpdate = findOne(entity.getIdValue());
-		if (entityToUpdate == null)
-		{
-			throw new MolgenisDataException(
-					"The entity you are trying to update [" + entity.getIdValue() + "] does not exist.");
-		}
 		validationResource.getReadonlyAttrs().forEach(readonlyAttr -> {
 			Object value = entity.get(readonlyAttr.getName());
 			Object existingValue = entityToUpdate.get(readonlyAttr.getName());
