@@ -155,9 +155,11 @@ public class MolgenisTransactionManager extends DataSourceTransactionManager
 		}
 
 		super.doCleanupAfterCompletion(molgenisTransaction.getDataSourceTransaction());
-
 		TransactionSynchronizationManager.unbindResourceIfPossible(TRANSACTION_ID_RESOURCE_NAME);
-		transactionListeners.forEach(j -> j.doCleanupAfterCompletion(molgenisTransaction.getId()));
+
+		transactionListeners.forEach(j -> {
+			j.doCleanupAfterCompletion(molgenisTransaction.getId());
+		});
 	}
 
 	@Override

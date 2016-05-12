@@ -1,9 +1,7 @@
-package org.molgenis.data.elasticsearch.reindex.meta;
+package org.molgenis.data.reindex.meta;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.elasticsearch.reindex.ReindexActionRegisterService;
-import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionJobMetaData;
-import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData;
+import org.molgenis.data.reindex.ReindexActionRegisterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +29,6 @@ public class ReindexActionRegisterConfig
 	@Bean
 	public ReindexActionRegisterService reindexActionRegisterService()
 	{
-		return new ReindexActionRegisterService(dataService, reindexActionJobMetaData(),
- reindexActionMetaData());
+		return new ReindexActionRegisterService(dataService, reindexActionJobMetaData(), reindexActionMetaData());
 	}
 }

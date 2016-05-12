@@ -1,4 +1,4 @@
-package org.molgenis.data.elasticsearch.reindex;
+package org.molgenis.data.reindex;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -12,12 +12,12 @@ import static org.testng.Assert.assertNotNull;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData;
-import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.CudType;
-import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.DataType;
-import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionMetaData.ReindexStatus;
-import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionJobMetaData;
-import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionRegisterConfig;
+import org.molgenis.data.reindex.meta.ReindexActionJobMetaData;
+import org.molgenis.data.reindex.meta.ReindexActionMetaData;
+import org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType;
+import org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType;
+import org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus;
+import org.molgenis.data.reindex.meta.ReindexActionRegisterConfig;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -93,7 +93,7 @@ public class ReindexActionRegisterServiceTest
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 		when(entityMetaData.getName()).thenReturn("non_log_entity");
 
-		reindexActionRegisterService.register(entityMetaData, CudType.CREATE, DataType.DATA, "123");
+		reindexActionRegisterService.register(entityMetaData.getName(), CudType.CREATE, DataType.DATA, "123");
 		
 		verify(dataService).update(eq(ReindexActionJobMetaData.ENTITY_NAME), any(Entity.class));
 		verify(dataService).add(eq(ReindexActionMetaData.ENTITY_NAME), any(Entity.class));
@@ -105,12 +105,12 @@ public class ReindexActionRegisterServiceTest
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 		when(entityMetaData.getName()).thenReturn(ReindexActionJobMetaData.ENTITY_NAME);
 
-		reindexActionRegisterService.register(entityMetaData, CudType.CREATE, DataType.DATA, "123");
+		reindexActionRegisterService.register(entityMetaData.getName(), CudType.CREATE, DataType.DATA, "123");
 		verifyNoMoreInteractions(dataService);
 
 		when(entityMetaData.getName()).thenReturn(ReindexActionJobMetaData.ENTITY_NAME);
 
-		reindexActionRegisterService.register(entityMetaData, CudType.CREATE, DataType.DATA, "123");
+		reindexActionRegisterService.register(entityMetaData.getName(), CudType.CREATE, DataType.DATA, "123");
 		verifyNoMoreInteractions(dataService);
 	}
 }

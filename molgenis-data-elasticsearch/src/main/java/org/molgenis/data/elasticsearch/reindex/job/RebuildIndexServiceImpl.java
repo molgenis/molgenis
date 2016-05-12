@@ -1,17 +1,17 @@
 package org.molgenis.data.elasticsearch.reindex.job;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionJobMetaData;
+import org.molgenis.data.reindex.meta.ReindexActionJobMetaData;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.user.MolgenisUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class RebuildIndexServiceImpl implements RebuildIndexService
 {

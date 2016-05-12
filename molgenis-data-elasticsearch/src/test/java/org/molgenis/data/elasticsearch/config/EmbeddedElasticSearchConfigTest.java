@@ -15,10 +15,8 @@ import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
-import org.molgenis.data.elasticsearch.reindex.job.RebuildIndexService;
-import org.molgenis.data.elasticsearch.reindex.job.ReindexJobFactory;
-import org.molgenis.data.elasticsearch.reindex.meta.ReindexActionRegisterConfig;
 import org.molgenis.data.jobs.JobExecutionUpdater;
+import org.molgenis.data.reindex.ReindexActionRegisterServiceTest;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.security.user.MolgenisUserService;
@@ -46,7 +44,7 @@ public class EmbeddedElasticSearchConfigTest
 
 		System.setProperty("molgenis.home", molgenisHomeDir.getAbsolutePath());
 		context = new AnnotationConfigApplicationContext(DataServiceImpl.class, EmbeddedElasticSearchConfig.class,
-				ElasticsearchEntityFactory.class, Config.class, ReindexActionRegisterConfig.class);
+				ElasticsearchEntityFactory.class, Config.class, ReindexActionRegisterServiceTest.class);
 	}
 
 	@AfterMethod
