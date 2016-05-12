@@ -508,17 +508,17 @@ class PostgreSqlQueryGenerator
 					parameters.add(rangeValues.next()); // smaller
 					parameters.add(rangeValues.next()); // bigger
 
-					StringBuilder columnName = new StringBuilder();
+					StringBuilder column = new StringBuilder();
 					if (attr.getDataType() instanceof  MrefField)
 					{
-						columnName.append(getFilterColumnName(attr, mrefFilterIndex));
+						column.append(getFilterColumnName(attr, mrefFilterIndex));
 					}
 					else
 					{
-						columnName.append("this");
+						column.append("this");
 					}
-					columnName.append('.').append(getColumnName(r.getField()));
-					predicate.append(columnName).append(" >= ? AND ").append(columnName).append(" <= ?");
+					column.append('.').append(getColumnName(r.getField()));
+					predicate.append(column).append(" >= ? AND ").append(column).append(" <= ?");
 					result.append(predicate);
 					break;
 				case EQUALS:
