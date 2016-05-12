@@ -44,7 +44,7 @@ public class GavinAnnotator
 {
 	public static final String NAME = "Gavin";
 	public static final String RESOURCE = "gavin";
-	public static final String RESOURCE_ENTITY_NAME = "ccgg";
+	public static final String RESOURCE_ENTITY_NAME = "gavin";
 	private static final String CATEGORY = "Category";
 
 	public static final String CLASSIFICATION = "Classification";
