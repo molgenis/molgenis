@@ -18,6 +18,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.reindex.ReindexActionRegisterService;
 import org.testng.annotations.Test;
 
 public class AttributeMetaDataRepositoryTest
@@ -25,7 +26,7 @@ public class AttributeMetaDataRepositoryTest
 	@Test(expectedExceptions = NullPointerException.class)
 	public void AttributeMetaDataRepository()
 	{
-		new AttributeMetaDataRepository(null, null);
+		new AttributeMetaDataRepository(null, null, null);
 	}
 
 	@SuppressWarnings(
@@ -36,9 +37,10 @@ public class AttributeMetaDataRepositoryTest
 		ManageableRepositoryCollection repoCollection = mock(ManageableRepositoryCollection.class);
 		Repository<Entity> repo = mock(Repository.class);
 		LanguageService languageService = mock(LanguageService.class);
+		ReindexActionRegisterService reindexActionRegisterService = mock(ReindexActionRegisterService.class);
 		when(repoCollection.addEntityMeta(AttributeMetaDataRepository.META_DATA)).thenReturn(repo);
 		AttributeMetaDataRepository attributeMetaDataRepository = new AttributeMetaDataRepository(repoCollection,
-				languageService);
+				languageService, reindexActionRegisterService);
 		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
 		when(attr0.getDataType()).thenReturn(STRING);
 		Entity attrEntity0 = attributeMetaDataRepository.add(attr0);
@@ -56,9 +58,10 @@ public class AttributeMetaDataRepositoryTest
 		ManageableRepositoryCollection repoCollection = mock(ManageableRepositoryCollection.class);
 		Repository<Entity> repo = mock(Repository.class);
 		LanguageService languageService = mock(LanguageService.class);
+		ReindexActionRegisterService reindexActionRegisterService = mock(ReindexActionRegisterService.class);
 		when(repoCollection.addEntityMeta(AttributeMetaDataRepository.META_DATA)).thenReturn(repo);
 		AttributeMetaDataRepository attributeMetaDataRepository = new AttributeMetaDataRepository(repoCollection,
-				languageService);
+				languageService, reindexActionRegisterService);
 
 		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
 		when(attr0.getDataType()).thenReturn(STRING);

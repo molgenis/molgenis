@@ -33,6 +33,8 @@ import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.i18n.LanguageRepositoryDecorator;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.system.ImportRunMetaData;
+import org.molgenis.data.reindex.ReindexActionRegisterService;
+import org.molgenis.data.reindex.ReindexActionRepositoryDecorator;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -78,6 +80,9 @@ public class MetaDataServiceImpl implements MetaDataService
 	private final DataServiceImpl dataService;
 	private TransactionTemplate transactionTemplate;
 	private LanguageService languageService;
+
+	@Autowired
+	private ReindexActionRegisterService reindexActionRegisterService;
 
 	public MetaDataServiceImpl(DataServiceImpl dataService)
 	{
@@ -126,10 +131,12 @@ public class MetaDataServiceImpl implements MetaDataService
 	private void bootstrapMetaRepos()
 	{
 		Repository<Entity> languageRepo = defaultBackend.addEntityMeta(LanguageMetaData.INSTANCE);
-		dataService.addRepository(new LanguageRepositoryDecorator(languageRepo, dataService));
+		dataService.addRepository(new ReindexActionRepositoryDecorator(new LanguageRepositoryDecorator(languageRepo,
+				dataService), reindexActionRegisterService));
 
 		Repository<Entity> i18StringsRepo = defaultBackend.addEntityMeta(I18nStringMetaData.INSTANCE);
-		dataService.addRepository(new I18nStringDecorator(i18StringsRepo));
+		dataService.addRepository(new ReindexActionRepositoryDecorator(new I18nStringDecorator(i18StringsRepo),
+				reindexActionRegisterService));
 
 		Supplier<Stream<String>> languageCodes = () -> languageService.getLanguageCodes().stream();
 
@@ -159,15 +166,15 @@ public class MetaDataServiceImpl implements MetaDataService
 
 		Repository<Entity> packages = defaultBackend.addEntityMeta(PackageRepository.META_DATA);
 		dataService.addRepository(new MetaDataRepositoryDecorator(packages));
-		packageRepository = new PackageRepository(packages);
+		packageRepository = new PackageRepository(packages, reindexActionRegisterService);
 
-		attributeMetaDataRepository = new AttributeMetaDataRepository(defaultBackend, languageService);
+		attributeMetaDataRepository = new AttributeMetaDataRepository(defaultBackend, languageService,
+				reindexActionRegisterService);
 		entityMetaDataRepository = new EntityMetaDataRepository(defaultBackend, packageRepository,
-				attributeMetaDataRepository, languageService);
+				attributeMetaDataRepository, languageService, reindexActionRegisterService);
 		attributeMetaDataRepository.setEntityMetaDataRepository(entityMetaDataRepository);
 
-		dataService.addRepository(new MetaDataRepositoryDecorator(
-				attributeMetaDataRepository.getRepository()));
+		dataService.addRepository(new MetaDataRepositoryDecorator(attributeMetaDataRepository.getRepository()));
 		dataService.addRepository(new MetaDataRepositoryDecorator(entityMetaDataRepository.getRepository()));
 		entityMetaDataRepository.fillEntityMetaDataCache();
 	}

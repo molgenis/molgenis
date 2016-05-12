@@ -8,16 +8,12 @@ import java.util.List;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.EntityMetaDataMetaData;
-import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.reindex.job.ReindexJobExecutionMetaInterface;
 import org.molgenis.data.reindex.meta.ReindexActionJobMetaData;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType;
 import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -44,75 +40,6 @@ public class ReindexActionRegisterService
 		this.reindexActionJobMetaData = reindexActionJobMetaData;
 		this.reindexActionMetaData = reindexActionMetaData;
 	}
-	
-	/**
-	 * TODO JJ
-	 * 
-	 * @param entityFullName
-	 * @param attributeName
-	 */
-	public void registerAddAttribute(String entityFullName, String attributeName)
-	{
-		LOG.info("registerAddAttribute(entityFullName: {}, attributeName: {})", entityFullName,
-				attributeName);
-		this.register(entityFullName, CudType.UPDATE, DataType.METADATA, null);
-
-		/**
-		 * FIXME
-		 * Some entities are not registered in the entities table
-		 * fullEntityName = Entities; Attributes; Packages;
-		 */
-		if (!EntityMetaDataMetaData.ENTITY_NAME.equals(entityFullName)
-				&& !AttributeMetaDataMetaData.ENTITY_NAME.equals(entityFullName)
-				&& !PackageMetaData.ENTITY_NAME.equals(entityFullName))
-		{
-			QueryImpl<Entity> q1 = new QueryImpl<Entity>();
-			q1.eq(EntityMetaDataMetaData.FULL_NAME, entityFullName);
-			Entity e1 = dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME, q1);
-
-			QueryImpl<Entity> q2 = new QueryImpl<Entity>();
-			q2.eq(AttributeMetaDataMetaData.NAME, attributeName);
-			Entity e2 = dataService.findOne(AttributeMetaDataMetaData.ENTITY_NAME, q2);
-		}
-		else
-		{
-			LOG.info("Entity [{}] is not allowed", entityFullName);
-		}
-	}
-	
-	/**
-	 * TODO JJ
-	 * 
-	 * @param entityFullName
-	 */
-	public void registerDeleteEntityMetaData(String entityFullName)
-	{
-		LOG.info("registerDeleteEntityMetaData(entityFullName: {})", entityFullName);
-		this.register(entityFullName, CudType.DELETE, DataType.METADATA, null);
-	}
-	
-	/**
-	 * TODO JJ
-	 * 
-	 * @param entityFullName
-	 */
-	public void registerAddEntityMetaData(String entityFullName)
-	{
-		LOG.info("addEntityMetaData(entityFullName: {})", entityFullName);
-		this.register(entityFullName, CudType.CREATE, DataType.METADATA, null);
-	}
-
-	/**
-	 * TODO JJ
-	 * 
-	 * @param entityFullName
-	 * @param attributeName
-	 */
-	public void registerDeleteAttribute(String entityFullName, String attributeName)
-	{
-		LOG.info("registerDeleteAttribute(entityFullName: {}, attributeName: {})", entityFullName, attributeName);
-		this.register(entityFullName, CudType.UPDATE, DataType.METADATA, null);
-	}
 
 	/**
 	 * Log and create locks for an add/update/delete operation on a Repository
@@ -123,6 +50,8 @@ public class ReindexActionRegisterService
 	 */
 	public synchronized void register(String entityFullName, CudType cudType, DataType dataType, String entityId)
 	{
+		LOG.info("register(entityFullName: [{}], cudType [{}], dataType: [{}], entityId: [{}])", entityFullName,
+				cudType, dataType, entityId);
 		if (!ReindexActionRegisterService.EXCLUDED_ENTITIES.contains(entityFullName))
 		{
 			String transactionId = (String) TransactionSynchronizationManager.getResource(TRANSACTION_ID_RESOURCE_NAME);

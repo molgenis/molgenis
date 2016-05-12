@@ -43,7 +43,6 @@ public class ReindexActionRepositoryCollectionDecoratorTest
 	{
 		reindexActionRepositoryCollectionDecorator.deleteEntityMeta(REPOSITORY_NAME);
 		verify(decoratedRepositoryCollection, times(1)).deleteEntityMeta(REPOSITORY_NAME);
-		verify(reindexActionRegisterService).registerDeleteEntityMetaData(entityMeta.getName());
 		verify(reindexActionRegisterService).register(entityMeta.getName(), CudType.DELETE, DataType.METADATA, null);
 	}
 
