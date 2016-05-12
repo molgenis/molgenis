@@ -1,16 +1,19 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.EntityMetaData.AttributeRole.*;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ATTRIBUTES;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_NAME;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.FULL_NAME;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,6 +45,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -119,7 +123,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 				Arrays.asList(chromosomeNameTagEntity, geneAnnotationTagEntity));
 		attributeEntity.set(AttributeMetaDataMetaData.NAME, "Chr");
 		Entity entityMetaDataEntity = new MapEntity(EntityMetaDataMetaData.INSTANCE);
-		entityMetaDataEntity.set(EntityMetaDataMetaData.ATTRIBUTES, Collections.singleton(attributeEntity));
+		entityMetaDataEntity.set(EntityMetaDataMetaData.ATTRIBUTES, singleton(attributeEntity));
 		when(dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME, "org.molgenis.SNP")).thenReturn(
 				entityMetaDataEntity);
 
@@ -187,7 +191,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 				"1233", attributeMetaData, instanceOf, CHROMOSOME_NAME_ONTOLOGY_TERM, EDAM_ONTOLOGY);
 
 		Entity entityMetaDataEntity = new MapEntity(EntityMetaDataMetaData.INSTANCE);
-		entityMetaDataEntity.set(EntityMetaDataMetaData.ATTRIBUTES, Collections.singleton(attributeEntity));
+		entityMetaDataEntity.set(EntityMetaDataMetaData.ATTRIBUTES, singleton(attributeEntity));
 		when(dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME, "org.molgenis.SNP")).thenReturn(
 				entityMetaDataEntity);
 		when(
@@ -215,7 +219,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 				Arrays.asList(chromosomeNameTagEntity, geneAnnotationTagEntity));
 		attributeEntity.set(AttributeMetaDataMetaData.NAME, "Chr");
 		Entity entityMetaDataEntity = new MapEntity(EntityMetaDataMetaData.INSTANCE);
-		entityMetaDataEntity.set(EntityMetaDataMetaData.ATTRIBUTES, Collections.singleton(attributeEntity));
+		entityMetaDataEntity.set(EntityMetaDataMetaData.ATTRIBUTES, singleton(attributeEntity));
 		when(dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME, "org.molgenis.SNP")).thenReturn(
 				entityMetaDataEntity);
 
@@ -293,7 +297,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 				"1233", attributeMetaData, instanceOf, CHROMOSOME_NAME_ONTOLOGY_TERM, EDAM_ONTOLOGY);
 
 		Entity entityMetaDataEntity = new MapEntity(EntityMetaDataMetaData.INSTANCE);
-		entityMetaDataEntity.set(EntityMetaDataMetaData.ATTRIBUTES, Collections.singleton(attributeEntity));
+		entityMetaDataEntity.set(EntityMetaDataMetaData.ATTRIBUTES, singleton(attributeEntity));
 		when(dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME, "org.molgenis.SNP")).thenReturn(
 				entityMetaDataEntity);
 		when(
@@ -308,6 +312,35 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 		updatedEntity.set(AttributeMetaDataMetaData.NAME, "Chr");
 
 		assertEquals(ontologyTagService.tagAttributesInEntity("test", tags), attributeTagMap);
+	}
+
+	@Test
+	public void testFindAttributeEntity()
+	{
+		DefaultEntityMetaData extendedEntityMetaData = new DefaultEntityMetaData("TestEntity1", new PackageImpl("advanced"));
+		extendedEntityMetaData.addAttribute("ID", ROLE_ID);
+		extendedEntityMetaData.addAttribute(FULL_NAME);
+		extendedEntityMetaData.addAttribute(ATTRIBUTES);
+		extendedEntityMetaData.addAttribute(EXTENDS);
+
+		Entity extendedEntity = new MapEntity(extendedEntityMetaData);
+		extendedEntity.set(FULL_NAME, "advanced_TestEntity1");
+		extendedEntity.set(ATTRIBUTES, emptyList());
+		extendedEntity.set(EXTENDS, null);
+
+		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("TestEntity2");
+		entityMetaData.setExtends(extendedEntityMetaData);
+
+		Entity entity = new MapEntity(entityMetaData);
+		entity.set("ID", "1");
+		entity.set(ATTRIBUTES, emptyList());
+		entity.set(EXTENDS, extendedEntity);
+
+		when(dataService.findOne(ENTITY_NAME, "TestEntity2")).thenReturn(entity);
+		when(dataService.findOne(ENTITY_NAME, "advanced_TestEntity1")).thenReturn(extendedEntity);
+
+		Entity result = ontologyTagService.findAttributeEntity("TestEntity2", "nonExistingAttribute");
+		Assert.assertEquals(result, null);
 	}
 
 	@Configuration
