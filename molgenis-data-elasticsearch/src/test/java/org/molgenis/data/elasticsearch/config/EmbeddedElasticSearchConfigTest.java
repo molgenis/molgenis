@@ -16,7 +16,6 @@ import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFacto
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
 import org.molgenis.data.jobs.JobExecutionUpdater;
-import org.molgenis.data.reindex.ReindexActionRegisterServiceTest;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.security.user.MolgenisUserService;
@@ -44,7 +43,7 @@ public class EmbeddedElasticSearchConfigTest
 
 		System.setProperty("molgenis.home", molgenisHomeDir.getAbsolutePath());
 		context = new AnnotationConfigApplicationContext(DataServiceImpl.class, EmbeddedElasticSearchConfig.class,
-				ElasticsearchEntityFactory.class, Config.class, ReindexActionRegisterServiceTest.class);
+				ElasticsearchEntityFactory.class, Config.class);
 	}
 
 	@AfterMethod
@@ -107,6 +106,7 @@ public class EmbeddedElasticSearchConfigTest
 		assertNotNull(factory);
 	}
 
+	@Test
 	public void searchService()
 	{
 		SearchService searchService = context.getBean(SearchService.class);
