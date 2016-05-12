@@ -2036,7 +2036,7 @@ public class RepositoryValidationDecoratorTest
 		}
 		catch (MolgenisDataException expected)
 		{
-			assertEquals(expected.getMessage(), "The entity you are trying to update [id999] does not exist.");
+			assertEquals(expected.getMessage(), "Operation failed. Identifier: id999 is not valid");
 		}
 	}
 

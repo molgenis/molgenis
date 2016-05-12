@@ -37,6 +37,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.MolgenisTransactionLogEntryMetaData;
 import org.molgenis.data.transaction.MolgenisTransactionLogMetaData;
@@ -567,8 +568,7 @@ public class RepositoryValidationDecorator implements Repository
 		Entity entityToUpdate = findOne(entity.getIdValue());
 		if (entityToUpdate == null)
 		{
-			throw new MolgenisDataException(
-					"The entity you are trying to update [" + entity.getIdValue() + "] does not exist.");
+			throw new UnknownEntityException("Operation failed. Identifier: " + entity.getIdValue() + " is not valid");
 		}
 		validationResource.getReadonlyAttrs().forEach(readonlyAttr -> {
 			Object value = entity.get(readonlyAttr.getName());
