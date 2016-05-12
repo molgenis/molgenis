@@ -36,6 +36,7 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 	static final String SERIAL_NUMBER = "serialNumber";
 	static final String BIRTH_TIME = "birthTime";
 	static final String QUOTE = "catchPhrase";
+	static final String NUMBER = "number";
 
 	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -67,6 +68,9 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 		DefaultEntityMetaData bookEMD = new DefaultEntityMetaData("query_book");
 		bookEMD.addAttribute("title", ROLE_ID).setDataType(STRING).setNillable(false);
 
+		DefaultEntityMetaData numberEMD = new DefaultEntityMetaData("query_number");
+		numberEMD.addAttribute("id", ROLE_ID).setDataType(INT).setNillable(false);
+
 		DefaultEntityMetaData personEMD = new DefaultEntityMetaData("query_person");
 		personEMD.addAttribute(ID, ROLE_ID);
 		personEMD.addAttribute(EMAIL).setNillable(false);
@@ -81,9 +85,11 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 		personEMD.addAttribute(ACCOUNT_BALANCE).setDataType(DECIMAL);
 		personEMD.addAttribute(SERIAL_NUMBER).setDataType(LONG);
 		personEMD.addAttribute(QUOTE).setDataType(STRING);
+		personEMD.addAttribute(NUMBER).setDataType(MREF).setRefEntity(numberEMD);
 
 		Repository<Entity> countries = dataService.getMeta().addEntityMeta(countryEMD);
 		Repository<Entity> books = dataService.getMeta().addEntityMeta(bookEMD);
+		Repository<Entity> numbers = dataService.getMeta().addEntityMeta(numberEMD);
 		personsRepository = dataService.getMeta().addEntityMeta(personEMD);
 
 		// add country entities to repo
@@ -98,9 +104,22 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 		book1.set("title", "MOLGENIS for dummies");
 		Entity book2 = new DefaultEntity(bookEMD, dataService);
 		book2.set("title", "Your database at the push of a button");
-
 		books.add(book1);
 		books.add(book2);
+
+		// add number entities to repo
+		Entity number1 = new DefaultEntity(numberEMD, dataService);
+		number1.set("id", 11);
+		Entity number2 = new DefaultEntity(numberEMD, dataService);
+		number2.set("id", 22);
+		Entity number3 = new DefaultEntity(numberEMD, dataService);
+		number3.set("id", 33);
+		Entity number4 = new DefaultEntity(numberEMD, dataService);
+		number4.set("id", 44);
+		numbers.add(number1);
+		numbers.add(number2);
+		numbers.add(number3);
+		numbers.add(number4);
 
 		// add person entities to repo
 		try
@@ -119,6 +138,7 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 			person1.set(ACCOUNT_BALANCE, 299.99);
 			person1.set(SERIAL_NUMBER, 374278348334L);
 			person1.set(QUOTE, "Computer says no");
+			person1.set(NUMBER, newArrayList(number1, number2, number3));
 			personsRepository.add(person1);
 
 			person2 = new DefaultEntity(personEMD, dataService);
@@ -135,6 +155,7 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 			person2.set(ACCOUNT_BALANCE, -0.70);
 			person2.set(SERIAL_NUMBER, 67986789879L);
 			person2.set(QUOTE, "To iterate is human, to recurse divine.");
+			person2.set(NUMBER, newArrayList(number3, number4));
 			personsRepository.add(person2);
 
 			person3 = new DefaultEntity(personEMD, dataService);
@@ -151,6 +172,7 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 			person3.set(ACCOUNT_BALANCE, 1000.00);
 			person3.set(SERIAL_NUMBER, 23471900909L);
 			person3.set(QUOTE, "If you're wrong about a boolean, you're only off by a bit");
+			person3.set(NUMBER, null);
 			personsRepository.add(person3);
 		}
 		catch (ParseException e)
