@@ -80,13 +80,17 @@ public class MetaDataServiceImpl implements MetaDataService
 	private final DataServiceImpl dataService;
 	private TransactionTemplate transactionTemplate;
 	private LanguageService languageService;
-
-	@Autowired
 	private ReindexActionRegisterService reindexActionRegisterService;
 
 	public MetaDataServiceImpl(DataServiceImpl dataService)
 	{
 		this.dataService = dataService;
+	}
+
+	@Autowired
+	public void setReindexActionRegisterService(ReindexActionRegisterService reindexActionRegisterService)
+	{
+		this.reindexActionRegisterService = reindexActionRegisterService;
 	}
 
 	@Autowired
