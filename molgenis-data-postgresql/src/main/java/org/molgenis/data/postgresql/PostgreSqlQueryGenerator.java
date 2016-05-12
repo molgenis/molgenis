@@ -5,7 +5,6 @@ import static java.util.stream.Collectors.joining;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.JUNCTION_TABLE_ORDER_ATTR_NAME;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getJunctionTableName;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributes;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributesMref;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributesNonMref;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getTableName;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.isPersistedInPostgreSql;
@@ -482,9 +481,33 @@ class PostgreSqlQueryGenerator
 					result.append(" NOT ");
 					break;
 				case RANGE:
-					// TODO implement RANGE query operator
-					throw new UnsupportedOperationException(format(
-							"Query operator [%s] not supported by PostgreSQL repository", r.getOperator().toString()));
+					Object range = r.getValue();
+					if (range == null)
+					{
+						throw new MolgenisDataException("Missing value for RANGE query");
+					}
+					if (!(range instanceof Iterable<?>))
+					{
+						throw new MolgenisDataException(format("RANGE value is of type [%s] instead of [Iterable]",
+								range.getClass().getSimpleName()));
+					}
+					Iterator<Object> rangeValues = ((Iterable) range).iterator();
+					parameters.add(rangeValues.next()); // smaller
+					parameters.add(rangeValues.next()); // bigger
+
+					StringBuilder columnName = new StringBuilder();
+					if (attr.getDataType() instanceof  MrefField)
+					{
+						columnName.append(getFilterColumnName(attr, mrefFilterIndex));
+					}
+					else
+					{
+						columnName.append("this");
+					}
+					columnName.append('.').append(getColumnName(r.getField()));
+					predicate.append(columnName).append(" >= ? AND ").append(columnName).append(" <= ?");
+					result.append(predicate);
+					break;
 				case EQUALS:
 				case GREATER:
 				case GREATER_EQUAL:
