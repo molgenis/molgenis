@@ -142,7 +142,7 @@ class RestControllerV2
 
 	static UnknownEntityException createUnknownEntityExceptionNotValidId(String id)
 	{
-		return new UnknownEntityException("Operation failed. Identifier: " + id + " is not valid");
+		return new UnknownEntityException("The entity you are trying to update [" + id + "] does not exist.");
 	}
 
 	@Autowired
@@ -232,7 +232,7 @@ class RestControllerV2
 	 * 
 	 * @param entityName
 	 * @param request
-	 * @param attributes
+	 * @param httpRequest
 	 * @return
 	 */
 	@RequestMapping(value = "/{entityName}", method = GET)
