@@ -1,6 +1,9 @@
 package org.molgenis.data.elasticsearch.reindex.job;
 
 import com.google.common.collect.Lists;
+import com.sun.tools.javac.util.List;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
@@ -18,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
@@ -39,6 +43,11 @@ public class ReindexJobTest
 	private DataService dataService;
 	@Mock
 	private SearchService searchService;
+	@Mock
+	private MetaDataService mds;
+	@Captor
+	private ArgumentCaptor<Stream<Entity>> streamCaptor;
+
 
 	private final String transactionId = "aabbcc";
 
@@ -47,6 +56,7 @@ public class ReindexJobTest
 	private ReindexActionRegisterService reindexActionRegisterService;
 	private ReindexJob reindexJob;
 	private Entity reindexActionJob;
+	private EntityMetaData testEntityMetaData;
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -57,6 +67,9 @@ public class ReindexJobTest
 		reindexJob = new ReindexJob(progress, authentication, transactionId, dataService, searchService);
 		reindexActionJob = reindexActionRegisterService.createReindexActionJob(transactionId);
 		when(dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, transactionId)).thenReturn(reindexActionJob);
+		when(dataService.getMeta()).thenReturn(mds);
+		testEntityMetaData = new DefaultEntityMetaData("test");
+		when(mds.getEntityMetaData("test")).thenReturn(testEntityMetaData);
 	}
 
 	@Test
@@ -104,24 +117,19 @@ public class ReindexJobTest
 						reindexActionRegisterService.increaseCountReindexActionJob(reindexActionJob));
 		mockGetAllReindexActions(this.transactionId, Stream.of(reindexAction));
 
-		MetaDataService mds = mock(MetaDataService.class);
-		when(dataService.getMeta()).thenReturn(mds);
-		EntityMetaData emd = new DefaultEntityMetaData("test");
-		when(mds.getEntityMetaData("test")).thenReturn(emd);
-
-		Entity toReindexEntity = new DefaultEntity(emd, dataService);
+		Entity toReindexEntity = new DefaultEntity(testEntityMetaData, dataService);
 		when(dataService.findOneById("test", "entityId")).thenReturn(toReindexEntity);
 
 		reindexJob.call(progress);
 		assertEquals(reindexAction.get(REINDEX_STATUS), FINISHED.name());
 
-		verify(searchService).deleteById("entityId", emd);
+		verify(searchService).deleteById("entityId", testEntityMetaData);
 
 		// verify progress messages
 		verify(progress).status("######## START Reindex transaction id: [aabbcc] ########");
 		verify(progress).setProgressMax(1);
 		verify(progress).progress(0, "Reindexing test.entityId, CUDType = " + CudType.DELETE);
-		verify(progress).progress(1, "Executed all reindex actions.");
+		verify(progress).progress(1, "Executed all reindex actions, cleaning up the actions...");
 		verify(progress).status("refreshIndex...");
 		verify(progress).status("refreshIndex done.");
 		verify(progress).status("######## END Reindex transaction id: [aabbcc] ########");
@@ -165,7 +173,7 @@ public class ReindexJobTest
 		verify(progress).status("######## START Reindex transaction id: [aabbcc] ########");
 		verify(progress).setProgressMax(1);
 		verify(progress).progress(0, "Reindexing test.entityId, CUDType = " + cudType.name());
-		verify(progress).progress(1, "Executed all reindex actions.");
+		verify(progress).progress(1, "Executed all reindex actions, cleaning up the actions...");
 		verify(progress).status("refreshIndex...");
 		verify(progress).status("refreshIndex done.");
 		verify(progress).status("######## END Reindex transaction id: [aabbcc] ########");
@@ -213,7 +221,7 @@ public class ReindexJobTest
 		verify(progress).status("######## START Reindex transaction id: [aabbcc] ########");
 		verify(progress).setProgressMax(1);
 		verify(progress).progress(0, "Reindexing repository test. CUDType = " + cudType.name());
-		verify(progress).progress(1, "Executed all reindex actions.");
+		verify(progress).progress(1, "Executed all reindex actions, cleaning up the actions...");
 		verify(progress).status("refreshIndex...");
 		verify(progress).status("refreshIndex done.");
 		verify(progress).status("######## END Reindex transaction id: [aabbcc] ########");
@@ -240,11 +248,6 @@ public class ReindexJobTest
 						reindexActionRegisterService.increaseCountReindexActionJob(reindexActionJob));
 		mockGetAllReindexActions(this.transactionId, Stream.of(reindexAction));
 
-		//TODO: move to beforeMethod block
-		MetaDataService mds = mock(MetaDataService.class);
-		when(dataService.getMeta()).thenReturn(mds);
-		EntityMetaData emd = new DefaultEntityMetaData("test");
-		when(mds.getEntityMetaData("test")).thenReturn(emd);
 
 		reindexJob.call(this.progress);
 		assertEquals(reindexAction.get(REINDEX_STATUS), FINISHED.name());
@@ -255,12 +258,19 @@ public class ReindexJobTest
 		verify(progress).status("######## START Reindex transaction id: [aabbcc] ########");
 		verify(progress).setProgressMax(1);
 		verify(progress).progress(0, "Reindexing repository test. CUDType = " + cudType.name());
-		verify(progress).progress(1, "Executed all reindex actions.");
+		verify(progress).progress(1, "Executed all reindex actions, cleaning up the actions...");
 		verify(progress).status("refreshIndex...");
 		verify(progress).status("refreshIndex done.");
 		verify(progress).status("######## END Reindex transaction id: [aabbcc] ########");
 
 		verify(dataService, times(2)).update(ReindexActionMetaData.ENTITY_NAME, reindexAction);
+
+		// make sure both the actions and the action job got deleted
+		verify(dataService).delete(eq(ReindexActionMetaData.ENTITY_NAME), streamCaptor.capture());
+		assertEquals(streamCaptor.getValue().collect(Collectors.toList()), List.of(reindexAction));
+		verify(dataService).deleteById(ReindexActionJobMetaData.ENTITY_NAME, transactionId);
+
+		verify(dataService).deleteById(ReindexActionJobMetaData.ENTITY_NAME, transactionId);
 	}
 
 	@Test
@@ -284,7 +294,7 @@ public class ReindexJobTest
 		verify(progress).status("######## START Reindex transaction id: [aabbcc] ########");
 		verify(progress).setProgressMax(1);
 		verify(progress).progress(0, "Dropping index of repository test.");
-		verify(progress).progress(1, "Executed all reindex actions.");
+		verify(progress).progress(1, "Executed all reindex actions, cleaning up the actions...");
 		verify(progress).status("refreshIndex...");
 		verify(progress).status("refreshIndex done.");
 		verify(progress).status("######## END Reindex transaction id: [aabbcc] ########");
