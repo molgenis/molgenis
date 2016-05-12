@@ -166,6 +166,8 @@ public class MetaDataServiceImpl implements MetaDataService
 
 		Repository<Entity> packages = defaultBackend.addEntityMeta(PackageRepository.META_DATA);
 		dataService.addRepository(new MetaDataRepositoryDecorator(packages));
+		// FIXME Remove this comments after the bootstrap tasks for the metadata and the indexing are finished
+		// When starting/restarting MOLGENIS the Packages entity is not indexed.
 		packageRepository = new PackageRepository(packages, reindexActionRegisterService);
 
 		attributeMetaDataRepository = new AttributeMetaDataRepository(defaultBackend, languageService,
