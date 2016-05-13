@@ -16,6 +16,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.reindex.ReindexActionRegisterService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.testng.annotations.BeforeMethod;
@@ -39,8 +40,9 @@ public class EntityMetaDataRepositoryTest
 		packageRepository = mock(PackageRepository.class);
 		attributeRepository = mock(AttributeMetaDataRepository.class);
 		LanguageService languageService = mock(LanguageService.class);
+		ReindexActionRegisterService reindexActionRegisterService = mock(ReindexActionRegisterService.class);
 		entityMetaDataRepository = new EntityMetaDataRepository(collection, packageRepository, attributeRepository,
-				languageService);
+				languageService, reindexActionRegisterService);
 	}
 
 	@Test

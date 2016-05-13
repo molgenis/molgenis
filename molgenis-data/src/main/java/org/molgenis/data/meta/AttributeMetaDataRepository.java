@@ -35,6 +35,8 @@ import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.reindex.ReindexActionRegisterService;
+import org.molgenis.data.reindex.ReindexActionRepositoryDecorator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.UuidGenerator;
@@ -59,9 +61,11 @@ class AttributeMetaDataRepository
 	private EntityMetaDataRepository entityMetaDataRepository;
 	private final LanguageService languageService;
 
-	public AttributeMetaDataRepository(ManageableRepositoryCollection collection, LanguageService languageService)
+	public AttributeMetaDataRepository(ManageableRepositoryCollection collection, LanguageService languageService,
+			ReindexActionRegisterService reindexActionRegisterService)
 	{
-		this.repository = requireNonNull(collection).addEntityMeta(META_DATA);
+		this.repository = new ReindexActionRepositoryDecorator(requireNonNull(collection).addEntityMeta(META_DATA),
+				reindexActionRegisterService);
 		uuidGenerator = new UuidGenerator();
 		this.languageService = languageService;
 	}

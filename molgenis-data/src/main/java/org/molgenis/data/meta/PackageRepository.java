@@ -11,6 +11,8 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Package;
 import org.molgenis.data.Repository;
+import org.molgenis.data.reindex.ReindexActionRegisterService;
+import org.molgenis.data.reindex.ReindexActionRepositoryDecorator;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.semantic.TagImpl;
@@ -32,6 +34,19 @@ class PackageRepository
 	public static final PackageMetaData META_DATA = PackageMetaData.INSTANCE;
 
 	/**
+	 * Creates a new PackageRepository.
+	 * 
+	 * @param coll
+	 *            {@link ManageableRepositoryCollection} that will be used to store the package entities.
+	 */
+	public PackageRepository(Repository<Entity> repository, ReindexActionRegisterService reindexActionRegisterService)
+	{
+		this.repository = new ReindexActionRepositoryDecorator(repository, reindexActionRegisterService);
+		updatePackageCache();
+		addDefaultPackage();
+	}
+
+	/**
 	 * The repository where the package entities are stored.
 	 */
 	private final Repository<Entity> repository;
@@ -40,19 +55,6 @@ class PackageRepository
 	 * In-memory cache of all packages, filled with entities and attributes.
 	 */
 	private Map<String, PackageImpl> packageCache = new HashMap<>();
-
-	/**
-	 * Creates a new PackageRepository.
-	 * 
-	 * @param coll
-	 *            {@link ManageableRepositoryCollection} that will be used to store the package entities.
-	 */
-	public PackageRepository(Repository<Entity> repository)
-	{
-		this.repository = repository;
-		updatePackageCache();
-		addDefaultPackage();
-	}
 
 	/**
 	 * Adds the default package to the repository if it does not yet exist.
