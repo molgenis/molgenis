@@ -1,19 +1,18 @@
 package org.molgenis.data.elasticsearch.reindex.job;
 
 import com.google.common.collect.Lists;
-import com.sun.tools.javac.util.List;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.jobs.Progress;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.reindex.ReindexActionRegisterService;
 import org.molgenis.data.reindex.meta.ReindexActionJobMetaData;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType;
-import org.molgenis.data.jobs.Progress;
-import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -24,6 +23,8 @@ import org.testng.annotations.Test;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_STATUS;
@@ -267,7 +268,7 @@ public class ReindexJobTest
 
 		// make sure both the actions and the action job got deleted
 		verify(dataService).delete(eq(ReindexActionMetaData.ENTITY_NAME), streamCaptor.capture());
-		assertEquals(streamCaptor.getValue().collect(Collectors.toList()), List.of(reindexAction));
+		assertEquals(streamCaptor.getValue().collect(toList()), newArrayList(reindexAction));
 		verify(dataService).deleteById(ReindexActionJobMetaData.ENTITY_NAME, transactionId);
 
 		verify(dataService).deleteById(ReindexActionJobMetaData.ENTITY_NAME, transactionId);

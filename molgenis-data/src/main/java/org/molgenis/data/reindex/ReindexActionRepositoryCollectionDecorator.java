@@ -9,6 +9,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
+import org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType;
+import org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType;
 
 /**
  * Decorator around a {@link Repository} that registers changes made to its data with the
@@ -41,36 +43,36 @@ public class ReindexActionRepositoryCollectionDecorator implements ManageableRep
 	public void deleteEntityMeta(String entityFullName)
 	{
 		this.decorated.deleteEntityMeta(entityFullName);
-		this.reindexActionRegisterService.registerDeleteEntityMetaData(entityFullName);
+		this.reindexActionRegisterService.register(entityFullName, CudType.DELETE, DataType.METADATA, null);
 	}
 
 	@Override
 	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
 	{
-		this.reindexActionRegisterService.registerAddEntityMetaData(entityMeta.getName());
+		this.reindexActionRegisterService.register(entityMeta.getName(), CudType.CREATE, DataType.METADATA, null);
 		return this.decorated.addEntityMeta(entityMeta);
 
 	}
 
 	@Override
-	public void addAttribute(String entityName, AttributeMetaData attribute)
+	public void addAttribute(String entityFullName, AttributeMetaData attribute)
 	{
-		this.decorated.addAttribute(entityName, attribute);
-		this.reindexActionRegisterService.registerAddAttribute(entityName, attribute.getName());
+		this.decorated.addAttribute(entityFullName, attribute);
+		this.reindexActionRegisterService.register(entityFullName, CudType.UPDATE, DataType.METADATA, null);
 	}
 
 	@Override
 	public void deleteAttribute(String entityFullName, String attributeName)
 	{
 		this.decorated.deleteAttribute(entityFullName, attributeName);
-		this.reindexActionRegisterService.registerDeleteAttribute(entityFullName, attributeName);
+		this.reindexActionRegisterService.register(entityFullName, CudType.UPDATE, DataType.METADATA, null);
 	}
 
 	@Override
 	public void addAttributeSync(String entityFullName, AttributeMetaData attribute)
 	{
 		this.decorated.addAttributeSync(entityFullName, attribute);
-		this.reindexActionRegisterService.registerAddAttribute(entityFullName, attribute.getName());
+		this.reindexActionRegisterService.register(entityFullName, CudType.UPDATE, DataType.METADATA, null);
 	}
 
 	@Override

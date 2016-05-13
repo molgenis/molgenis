@@ -36,6 +36,8 @@ import org.molgenis.data.i18n.I18nStringMetaData;
 import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.system.ImportRunMetaData;
+import org.molgenis.data.reindex.ReindexActionRegisterService;
+import org.molgenis.data.reindex.ReindexActionRepositoryDecorator;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.DependencyResolver;
@@ -58,11 +60,12 @@ class EntityMetaDataRepository
 	private final LanguageService languageService;
 
 	public EntityMetaDataRepository(ManageableRepositoryCollection collection, PackageRepository packageRepository,
-			AttributeMetaDataRepository attributeRepository, LanguageService languageService)
+			AttributeMetaDataRepository attributeRepository, LanguageService languageService, ReindexActionRegisterService reindexActionRegisterService)
 	{
 		this.packageRepository = packageRepository;
 		this.attributeRepository = attributeRepository;
-		this.repository = collection.addEntityMeta(META_DATA);
+		this.repository = new ReindexActionRepositoryDecorator(collection.addEntityMeta(META_DATA),
+				reindexActionRegisterService);
 		this.collection = collection;
 		this.languageService = languageService;
 	}
