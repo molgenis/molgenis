@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
  * Jobs configuration
  */
 @Configuration
-public class Config
+public class JobConfig
 {
 	@Bean
 	public JobExecutionUpdater jobExecutionUpdater()
