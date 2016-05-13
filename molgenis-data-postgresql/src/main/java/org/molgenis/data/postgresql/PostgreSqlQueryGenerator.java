@@ -494,9 +494,33 @@ class PostgreSqlQueryGenerator
 					result.append(" NOT ");
 					break;
 				case RANGE:
-					// TODO implement RANGE query operator
-					throw new UnsupportedOperationException(format(
-							"Query operator [%s] not supported by PostgreSQL repository", r.getOperator().toString()));
+					Object range = r.getValue();
+					if (range == null)
+					{
+						throw new MolgenisDataException("Missing value for RANGE query");
+					}
+					if (!(range instanceof Iterable<?>))
+					{
+						throw new MolgenisDataException(format("RANGE value is of type [%s] instead of [Iterable]",
+								range.getClass().getSimpleName()));
+					}
+					Iterator<Object> rangeValues = ((Iterable) range).iterator();
+					parameters.add(rangeValues.next()); // from
+					parameters.add(rangeValues.next()); // to
+
+					StringBuilder column = new StringBuilder();
+					if (attr.getDataType() instanceof  MrefField)
+					{
+						column.append(getFilterColumnName(attr, mrefFilterIndex));
+					}
+					else
+					{
+						column.append("this");
+					}
+					column.append('.').append(getColumnName(r.getField()));
+					predicate.append(column).append(" >= ? AND ").append(column).append(" <= ?");
+					result.append(predicate);
+					break;
 				case EQUALS:
 				case GREATER:
 				case GREATER_EQUAL:
