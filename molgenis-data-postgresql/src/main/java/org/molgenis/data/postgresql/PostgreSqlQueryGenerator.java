@@ -505,8 +505,8 @@ class PostgreSqlQueryGenerator
 								range.getClass().getSimpleName()));
 					}
 					Iterator<Object> rangeValues = ((Iterable) range).iterator();
-					parameters.add(rangeValues.next()); // smaller
-					parameters.add(rangeValues.next()); // bigger
+					parameters.add(rangeValues.next()); // from
+					parameters.add(rangeValues.next()); // to
 
 					StringBuilder column = new StringBuilder();
 					if (attr.getDataType() instanceof  MrefField)
