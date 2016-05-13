@@ -14,7 +14,6 @@ import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus.STARTED;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -81,23 +80,23 @@ class ReindexJob extends Job
 	 */
 	private void performReindexActions(Progress progress)
 	{
-		AtomicInteger count = new AtomicInteger();
 		List<Entity> reindexActions = dataService
 				.findAll(ReindexActionMetaData.ENTITY_NAME, createQueryGetAllReindexActions(transactionId))
 				.collect(toList());
 		try
 		{
 			boolean success = true;
+			int count = 0;
 			for (Entity reindexAction : reindexActions)
 			{
-				success &= performAction(progress, count.getAndIncrement(), reindexAction);
+				success &= performAction(progress, count++, reindexAction);
 			}
 			if (success)
 			{
-				progress.progress(count.get(), "Executed all reindex actions, cleaning up the actions...");
+				progress.progress(count, "Executed all reindex actions, cleaning up the actions...");
 				dataService.delete(ReindexActionMetaData.ENTITY_NAME, reindexActions.stream());
 				dataService.deleteById(ReindexActionJobMetaData.ENTITY_NAME, transactionId);
-				progress.progress(count.get(), "Cleaned up the actions.");
+				progress.progress(count, "Cleaned up the actions.");
 			}
 		}
 		finally
