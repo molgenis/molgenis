@@ -36,7 +36,7 @@ public class JobExecutionMetaData extends DefaultEntityMetaData
 				.setNillable(true);
 		addAttribute(JobExecution.PROGRESS_MAX).setDataType(MolgenisFieldTypes.INT).setLabel("Maximum progress")
 				.setNillable(true);
-		addAttribute(JobExecution.PROGRESS_MESSAGE).setDataType(MolgenisFieldTypes.STRING).setLabel("Progress message")
+		addAttribute(JobExecution.PROGRESS_MESSAGE).setDataType(MolgenisFieldTypes.TEXT).setLabel("Progress message")
 				.setNillable(true);
 		addAttribute(JobExecution.LOG).setDataType(MolgenisFieldTypes.TEXT).setLabel("Log").setNillable(true);
 		addAttribute(JobExecution.RESULT_URL).setDataType(MolgenisFieldTypes.HYPERLINK).setLabel("Result URL")
