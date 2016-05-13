@@ -19,6 +19,7 @@ import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.UuidGenerator;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -34,6 +35,8 @@ import org.springframework.core.convert.support.DefaultConversionService;
 @CommandLineOnlyConfiguration
 public class CommandLineAnnotatorConfig
 {
+
+	private DataServiceImpl dataService = new DataServiceImpl();
 
 	@Value("${vcf-validator-location:@null}")
 	private String vcfValidatorLocation;
@@ -172,7 +175,13 @@ public class CommandLineAnnotatorConfig
 	@Bean
 	DataService dataService()
 	{
-		return new DataServiceImpl();
+		return dataService;
+	}
+
+	@Bean
+	PermissionSystemService permissionSystemService()
+	{
+		return new PermissionSystemService(dataService);
 	}
 
 	@Bean

@@ -9,6 +9,12 @@ import RestClientV2 from 'rest-client/RestClientV2';
 window.top.molgenis.RestClient = RestClientV1;
 window.top.molgenis.RestClientV2 = RestClientV2;
 
+import{
+	createRsqlQuery
+} from "rest-client/RestClientV2";
+
+window.top.molgenis.createRsqlQuery = createRsqlQuery;
+
 import {
     getAtomicAttributes,
     getCompoundAttributes,

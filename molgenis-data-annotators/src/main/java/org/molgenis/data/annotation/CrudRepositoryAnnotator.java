@@ -10,26 +10,37 @@ import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.security.permission.PermissionSystemService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 @Component
 public class CrudRepositoryAnnotator
 {
+	private static final Logger LOG = LoggerFactory.getLogger(CrudRepositoryAnnotator.class);
+
 	private static final int BATCH_SIZE = 1000;
 
 	private final DataService dataService;
+	private final PermissionSystemService permissionSystemService;
 
 	@Autowired
-	public CrudRepositoryAnnotator(DataService dataService)
+	public CrudRepositoryAnnotator(DataService dataService, PermissionSystemService permissionSystemService)
 	{
 		this.dataService = dataService;
+		this.permissionSystemService = permissionSystemService;
 	}
 
 	/**
@@ -51,6 +62,7 @@ public class CrudRepositoryAnnotator
 	@Transactional
 	public Repository annotate(RepositoryAnnotator annotator, Repository repository) throws IOException
 	{
+		EntityMetaData targetMetaData = null;
 		if (!repository.getCapabilities().contains(RepositoryCapability.WRITABLE))
 		{
 			throw new UnsupportedOperationException("Currently only writable repositories can be annotated");
@@ -62,16 +74,14 @@ public class CrudRepositoryAnnotator
 			Repository crudRepository;
 			if (annotator instanceof RefEntityAnnotator)
 			{
-				RepositoryAnnotator externalAnnotator = annotator;
-				EntityMetaData targetMetaData = ((RefEntityAnnotator) externalAnnotator)
-						.getOutputMetaData(entityMetaData);
-
+				targetMetaData = ((RefEntityAnnotator) annotator).getOutputMetaData(entityMetaData);
 				if (!dataService.hasRepository(targetMetaData.getName()))
 				{
 					// add new entities to new repo
 					Repository externalRepository = dataService.getMeta().addEntityMeta(targetMetaData);
-
-					crudRepository = iterateOverEntitiesAndAnnotate(repository, externalRepository, externalAnnotator,
+					permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
+							Collections.singletonList(externalRepository.getName()));
+					crudRepository = iterateOverEntitiesAndAnnotate(repository, externalRepository, annotator,
 							DatabaseAction.ADD);
 				}
 				else
@@ -86,8 +96,7 @@ public class CrudRepositoryAnnotator
 				DefaultAttributeMetaData compoundAttributeMetaData = AnnotatorUtils
 						.getCompoundResultAttribute(annotator, entityMetaData);
 
-				RunAsSystemProxy.runAsSystem(
-						() -> addAnnotatorMetadataToRepositories(entityMetaData, compoundAttributeMetaData));
+				runAsSystem(() -> addAnnotatorMetadataToRepositories(entityMetaData, compoundAttributeMetaData));
 				crudRepository = iterateOverEntitiesAndAnnotate(repository, repository, annotator,
 						DatabaseAction.UPDATE);
 			}
@@ -96,7 +105,27 @@ public class CrudRepositoryAnnotator
 		}
 		catch (Exception e)
 		{
+			deleteResultEntity(annotator, targetMetaData);
 			throw new RuntimeException(e);
+		}
+	}
+
+	private void deleteResultEntity(RepositoryAnnotator annotator, EntityMetaData targetMetaData)
+	{
+		try
+		{
+			if (annotator instanceof RefEntityAnnotator && targetMetaData != null)
+			{
+				RunAsSystemProxy.runAsSystem(() -> {
+					dataService.deleteAll(targetMetaData.getName());
+					dataService.getMeta().deleteEntityMeta(targetMetaData.getName());
+				});
+			}
+		}
+		catch (Exception ex)
+		{
+			// log the problem but throw the original exception
+			LOG.error("Failed to remove result entity: %s", targetMetaData.getName());
 		}
 	}
 
