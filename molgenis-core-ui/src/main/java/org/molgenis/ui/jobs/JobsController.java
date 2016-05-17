@@ -79,7 +79,7 @@ public class JobsController extends MolgenisPluginController
 					Query q = dataService.query(e.getName()).ge(JobExecution.SUBMISSION_DATE, weekAgo);
 					if (!currentUser.isSuperuser())
 					{
-						q.and().eq(JobExecution.USER, currentUser);
+						q.and().eq(JobExecution.USER, currentUser.getUsername());
 					}
 					dataService.findAll(e.getName(), q).forEach(jobs::add);
 				});

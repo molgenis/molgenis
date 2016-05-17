@@ -5,7 +5,6 @@ import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.file.FileMeta;
 import org.molgenis.file.ingest.execution.FileIngestJob;
@@ -58,10 +57,8 @@ public class FileIngesterQuartzJob implements Job
 	private void run(Object fileIngestId)
 	{
 		FileIngest fileIngest = dataService.findOne(FileIngestMetaData.ENTITY_NAME, fileIngestId, FileIngest.class);
-		MolgenisUser admin = dataService.findOne(MolgenisUser.ENTITY_NAME,
-				dataService.query(MolgenisUser.ENTITY_NAME).eq(MolgenisUser.USERNAME, "admin"), MolgenisUser.class);
 		FileIngestJobExecution jobExecution = new FileIngestJobExecution(dataService);
-		jobExecution.setUser(admin);// TODO system
+		jobExecution.setUser("admin");// TODO system
 		jobExecution.setFileIngest(fileIngest);
 		jobExecution.setFailureEmail(fileIngest.getFailureEmail());
 		try

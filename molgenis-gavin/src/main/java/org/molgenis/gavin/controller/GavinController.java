@@ -1,5 +1,20 @@
 package org.molgenis.gavin.controller;
 
+import static java.io.File.separator;
+import static java.text.MessageFormat.format;
+import static org.molgenis.gavin.controller.GavinController.URI;
+import static org.molgenis.gavin.job.GavinJobExecutionMetaData.GAVIN_JOB_EXECUTION;
+import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.file.FileStore;
@@ -18,22 +33,14 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-
-import static java.io.File.separator;
-import static java.text.MessageFormat.format;
-import static org.molgenis.gavin.controller.GavinController.URI;
-import static org.molgenis.gavin.job.GavinJobExecutionMetaData.GAVIN_JOB_EXECUTION;
-import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
@@ -70,7 +77,8 @@ public class GavinController extends MolgenisPluginController
 	 *
 	 * @return the view name
 	 */
-	@SuppressWarnings({ "SameReturnValue", "UnusedReturnValue" })
+	@SuppressWarnings(
+	{ "SameReturnValue", "UnusedReturnValue" })
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model)
 	{
@@ -85,8 +93,10 @@ public class GavinController extends MolgenisPluginController
 	/**
 	 * Starts a job to annotate a VCF file
 	 *
-	 * @param inputFile  the input file, should be VCF
-	 * @param entityName the name of the file, the download will be
+	 * @param inputFile
+	 *            the input file, should be VCF
+	 * @param entityName
+	 *            the name of the file, the download will be
 	 * @return the URL where the job progress can be monitored
 	 * @throws IOException
 	 */
@@ -97,7 +107,7 @@ public class GavinController extends MolgenisPluginController
 	{
 		final GavinJobExecution gavinJobExecution = new GavinJobExecution(dataService);
 		gavinJobExecution.setFilename(entityName + "-gavin.vcf");
-		gavinJobExecution.setUser(userAccountService.getCurrentUser());
+		gavinJobExecution.setUser(userAccountService.getCurrentUser().getUsername());
 		final GavinJob gavinJob = gavinJobFactory.createJob(gavinJobExecution);
 
 		final String gavinJobIdentifier = gavinJobExecution.getIdentifier();
@@ -105,7 +115,7 @@ public class GavinController extends MolgenisPluginController
 		final String jobDir = format("{0}{1}{2}", GAVIN_APP, separator, gavinJobIdentifier);
 		fileStore.createDirectory(jobDir);
 		final String fileName = format("{0}{1}input.vcf", jobDir, separator);
-		inputFile.transferTo(fileStore.getFile(fileName));
+		fileStore.writeToFile(inputFile.getInputStream(), fileName);
 
 		executorService.submit(gavinJob);
 
@@ -115,8 +125,10 @@ public class GavinController extends MolgenisPluginController
 	/**
 	 * Downloads the result of a gavin annotation job.
 	 *
-	 * @param response      {@link HttpServletResponse} to write the Content-Disposition header to with the filename
-	 * @param jobIdentifier GAVIN_APP of the annotation job
+	 * @param response
+	 *            {@link HttpServletResponse} to write the Content-Disposition header to with the filename
+	 * @param jobIdentifier
+	 *            GAVIN_APP of the annotation job
 	 * @return {@link FileSystemResource} with the annotated file
 	 */
 	@RequestMapping(value = "/result/{jobIdentifier}", method = GET, produces = APPLICATION_OCTET_STREAM_VALUE)
@@ -124,8 +136,8 @@ public class GavinController extends MolgenisPluginController
 	public FileSystemResource result(HttpServletResponse response,
 			@PathVariable(value = "jobIdentifier") String jobIdentifier)
 	{
-		GavinJobExecution jobExecution = dataService
-				.findOne(GAVIN_JOB_EXECUTION, jobIdentifier, GavinJobExecution.class);
+		GavinJobExecution jobExecution = dataService.findOne(GAVIN_JOB_EXECUTION, jobIdentifier,
+				GavinJobExecution.class);
 		File file = fileStore.getFile(GAVIN_APP + separator + jobIdentifier + separator + "gavin-result.vcf");
 		if (!file.exists())
 		{
