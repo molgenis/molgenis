@@ -1,5 +1,11 @@
 package org.molgenis.gavin.job;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.of;
+import static org.molgenis.gavin.job.GavinJobExecutionMetaData.GAVIN_JOB_EXECUTION;
+
+import java.util.List;
+
 import org.molgenis.data.DataService;
 import org.molgenis.data.annotation.CrudRepositoryAnnotator;
 import org.molgenis.data.annotation.EffectsAnnotator;
@@ -17,12 +23,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
-
-import java.util.List;
-
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Stream.of;
-import static org.molgenis.gavin.job.GavinJobExecutionMetaData.GAVIN_JOB_EXECUTION;
 
 @Component
 public class GavinJobFactory
@@ -67,7 +67,7 @@ public class GavinJobFactory
 	public GavinJob createJob(GavinJobExecution metaData)
 	{
 		dataService.add(GAVIN_JOB_EXECUTION, metaData);
-		String username = metaData.getUser().getUsername();
+		String username = metaData.getUser();
 
 		// create an authentication to run as the user that is listed as the owner of the job
 		RunAsUserToken runAsAuthentication = new RunAsUserToken("Job Execution", username, null,

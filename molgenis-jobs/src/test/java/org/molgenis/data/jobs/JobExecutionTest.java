@@ -35,7 +35,7 @@ public class JobExecutionTest
 		MolgenisUser me = new MolgenisUser();
 		me.setUsername("fdlk");
 		jobExecution.setUser(me);
-		assertEquals(jobExecution.getUser(), me);
+		assertEquals(jobExecution.getUser(), "fdlk");
 	}
 
 	@Test
@@ -98,7 +98,7 @@ public class JobExecutionTest
 		jobExecution.setProgressMax(1032);
 		assertEquals(jobExecution.getProgressMax(), new Integer(1032));
 	}
-	
+
 	@Test
 	public void testGetAndSetLog()
 	{
