@@ -18,6 +18,7 @@ import org.molgenis.data.annotation.entity.QueryCreator;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 
 /**
@@ -98,7 +99,7 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 				}
 			};
 		}
-		EntityMetaData meta = new EntityMetaData(entity.getEntityMetaData());
+		EntityMetaData meta = new EntityMetaDataImpl(entity.getEntityMetaData());
 		info.getOutputAttributes().forEach(meta::addAttribute);
 		Entity resultEntity = new MapEntity(entity, meta);
 		processQueryResults(entity, annotatationSourceEntities, resultEntity);

@@ -5,19 +5,19 @@ import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
 
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MolgenisGroupMetaData extends EntityMetaData
+public class MolgenisGroupMetaData extends SystemEntityMetaDataImpl
 {
-
 	public static final String ENTITY_NAME = "MolgenisGroup";
 
-	public MolgenisGroupMetaData()
+	@Override
+	public void init()
 	{
-		super(ENTITY_NAME);
-
+		setName(ENTITY_NAME);
 		setExtends(new AuthorityMetaData());
 		addAttribute(MolgenisGroup.ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");
 		addAttribute(MolgenisGroup.NAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Name").setDescription("")

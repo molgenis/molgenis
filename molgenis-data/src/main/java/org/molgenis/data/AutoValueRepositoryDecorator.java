@@ -17,6 +17,7 @@ import java.util.stream.StreamSupport;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.fieldtypes.StringField;
 
 import com.google.common.base.Predicate;

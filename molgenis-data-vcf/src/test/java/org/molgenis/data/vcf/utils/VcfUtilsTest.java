@@ -41,6 +41,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.util.ResourceUtils;
@@ -55,9 +56,9 @@ import com.google.common.collect.Lists;
 public class VcfUtilsTest
 {
 	private static final Logger LOG = LoggerFactory.getLogger(VcfUtilsTest.class);
-	private final EntityMetaData annotatedEntityMetadata = new EntityMetaData("test");
-	public EntityMetaData metaDataCanAnnotate = new EntityMetaData("test");
-	public EntityMetaData metaDataCantAnnotate = new EntityMetaData("test");
+	private final EntityMetaData annotatedEntityMetadata = new EntityMetaDataImpl("test");
+	public EntityMetaData metaDataCanAnnotate = new EntityMetaDataImpl("test");
+	public EntityMetaData metaDataCantAnnotate = new EntityMetaDataImpl("test");
 
 	public AttributeMetaData attributeMetaDataChrom = new AttributeMetaData(CHROM,
 			STRING);
@@ -173,13 +174,13 @@ public class VcfUtilsTest
 		String idAttrName = "idAttr";
 		String sampleIdAttrName = VcfRepository.NAME;
 
-		EntityMetaData sampleEntityMeta = new EntityMetaData("vcfSampleEntity");
+		EntityMetaData sampleEntityMeta = new EntityMetaDataImpl("vcfSampleEntity");
 		sampleEntityMeta.addAttribute(sampleIdAttrName, ROLE_ID);
 		sampleEntityMeta.addAttribute(formatDpAttrName);
 		sampleEntityMeta.addAttribute(formatEcAttrName);
 		sampleEntityMeta.addAttribute(formatGtAttrName);
 
-		EntityMetaData entityMeta = new EntityMetaData("vcfEntity");
+		EntityMetaData entityMeta = new EntityMetaDataImpl("vcfEntity");
 		entityMeta.addAttribute(idAttrName, ROLE_ID);
 		entityMeta.addAttribute(CHROM_META);
 		entityMeta.addAttribute(POS_META);

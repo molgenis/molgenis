@@ -16,7 +16,7 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.jobs.JobExecutionException;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.mem.InMemoryRepository;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.dataexplorer.controller.AnnotationJob;
 import org.springframework.security.core.Authentication;
@@ -41,7 +41,7 @@ public class AnnotationJobTest
 	private Repository<Entity> repository;
 	@Mock
 	private Progress progress;
-	private EntityMetaData emd = new EntityMetaData("repo");
+	private EntityMetaDataImpl emd = new EntityMetaDataImpl("repo");
 
 	private Authentication authentication;
 

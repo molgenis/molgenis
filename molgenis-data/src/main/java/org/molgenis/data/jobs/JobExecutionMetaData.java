@@ -7,18 +7,20 @@ import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.auth.MolgenisUserMetaData;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.molgenis.fieldtypes.EnumField;
 import org.springframework.stereotype.Component;
 
 @Component
-public class JobExecutionMetaData extends EntityMetaData
+public class JobExecutionMetaData extends SystemEntityMetaDataImpl
 {
 	private final List<String> jobStatusOptions = newArrayList("PENDING", "RUNNING", "SUCCESS", "FAILED", "CANCELED");
 
-	public JobExecutionMetaData()
+	@Override
+	public void init()
 	{
-		super(JobExecution.ENTITY_NAME, JobExecution.class);
+		setName(JobExecution.ENTITY_NAME);
 		setAbstract(true);
 		addAttribute(JobExecution.IDENTIFIER, ROLE_ID).setLabel("Job ID").setAuto(true).setNillable(false);
 		addAttribute(JobExecution.USER).setDataType(MolgenisFieldTypes.XREF).setRefEntity(new MolgenisUserMetaData())

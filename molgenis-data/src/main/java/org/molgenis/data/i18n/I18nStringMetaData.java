@@ -4,11 +4,12 @@ import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.springframework.stereotype.Component;
 
-public class I18nStringMetaData extends EntityMetaData
+@Component
+public class I18nStringMetaData extends SystemEntityMetaDataImpl
 {
-	public static final I18nStringMetaData INSTANCE = new I18nStringMetaData();
 	public static final String ENTITY_NAME = "i18nstrings";
 	public static final String MSGID = "msgid";
 	public static final String DESCRIPTION = "description";
@@ -16,7 +17,12 @@ public class I18nStringMetaData extends EntityMetaData
 
 	private I18nStringMetaData()
 	{
-		super(ENTITY_NAME);
+	}
+
+	@Override
+	public void init()
+	{
+		setName(ENTITY_NAME);
 		addAttribute(MSGID, ROLE_ID);
 		addAttribute(DESCRIPTION).setNillable(true).setDataType(MolgenisFieldTypes.TEXT);
 		addAttribute(EN).setNillable(true).setDataType(MolgenisFieldTypes.TEXT);

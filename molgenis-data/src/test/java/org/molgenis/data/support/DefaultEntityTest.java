@@ -17,6 +17,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -41,7 +42,7 @@ public class DefaultEntityTest
 	{
 		MockitoAnnotations.initMocks(this);
 
-		refEmd = new EntityMetaData("refEntity");
+		refEmd = new EntityMetaDataImpl("refEntity");
 		refEmd.addAttribute(new AttributeMetaData("id"), ROLE_ID);
 
 		refEntity1 = new DefaultEntity(refEmd, dataService);
@@ -53,7 +54,7 @@ public class DefaultEntityTest
 		when(dataService.findOneById("refEntity", "test")).thenReturn(refEntity1);
 		when(dataService.findOneById("refEntity", "test2")).thenReturn(refEntity2);
 
-		emd = new EntityMetaData("Entity");
+		emd = new EntityMetaDataImpl("Entity");
 		emd.addAttribute(new AttributeMetaData("id"), ROLE_ID);
 		emd.addAttribute(new AttributeMetaData("xdatetime", FieldTypeEnum.DATE_TIME));
 		emd.addAttribute(new AttributeMetaData("xref", FieldTypeEnum.XREF).setRefEntity(refEmd));
@@ -132,7 +133,7 @@ public class DefaultEntityTest
 	@Test
 	public void getAttributeNames()
 	{
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		EntityMetaData entityMeta = mock(EntityMetaDataImpl.class);
 		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
 		AttributeMetaData attr1 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr1").getMock();
 		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(attr0, attr1));
@@ -145,7 +146,7 @@ public class DefaultEntityTest
 	@Test
 	public void setStringObject()
 	{
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		EntityMetaData entityMeta = mock(EntityMetaDataImpl.class);
 		AttributeMetaData labelAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("label").getMock();
 		when(entityMeta.getLabelAttribute()).thenReturn(labelAttr);
 		DataService dataService = mock(DataService.class);

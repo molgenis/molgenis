@@ -1,15 +1,18 @@
 package org.molgenis.auth;
 
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AuthorityMetaData extends EntityMetaData
+public class AuthorityMetaData extends SystemEntityMetaDataImpl
 {
+	public static final String ENTITY_NAME = "authority";
 
-	public AuthorityMetaData()
+	@Override
+	public void init()
 	{
-		super("authority");
+		setName(ENTITY_NAME);
 		setAbstract(true);
 		addAttribute(Authority.ROLE).setLabel("role").setNillable(true);
 	}

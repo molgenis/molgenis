@@ -137,12 +137,11 @@ public class CGDAnnotator
 	@Bean
 	public RepositoryAnnotator cgd()
 	{
-		AnnotatorInfo info = getAnnotatorInfo();
-		QueryCreator queryCreator = new AttributeEqualsQueryCreator(new AttributeMetaData(GENE.getAttributeName()));
-		ResultFilter resultFilter = new FirstResultFilter();
+//		AnnotatorInfo info = getAnnotatorInfo();
+//		QueryCreator queryCreator = new AttributeEqualsQueryCreator(new AttributeMetaData(GENE.getAttributeName()));
+//		ResultFilter resultFilter = new FirstResultFilter();
 
-		EntityAnnotator entityAnnotator = new CGDEntityAnnotator(CGD_RESOURCE, info, queryCreator, resultFilter,
-				dataService, resources);
+		EntityAnnotator entityAnnotator = null;// FIXME new CGDEntityAnnotator(CGD_RESOURCE, info, queryCreator, resultFilter, dataService, resources);
 
 		return new RepositoryAnnotatorImpl(entityAnnotator);
 	}

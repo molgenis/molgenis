@@ -2,7 +2,8 @@ package org.molgenis.data.support;
 
 import static org.molgenis.MolgenisFieldTypes.STRING;
 
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,14 +15,15 @@ import org.springframework.stereotype.Component;
  * inherit this behavior.
  */
 @Component
-public class OwnedEntityMetaData extends EntityMetaData
+public class OwnedEntityMetaData extends SystemEntityMetaDataImpl
 {
 	public static final String ENTITY_NAME = "Owned";
 	public static final String ATTR_OWNER_USERNAME = "ownerUsername";
 
-	public OwnedEntityMetaData()
+	@Override
+	public void init()
 	{
-		super(ENTITY_NAME);
+		setName(ENTITY_NAME);
 		setAbstract(true);
 		addAttribute(ATTR_OWNER_USERNAME).setDataType(STRING).setVisible(false);
 	}

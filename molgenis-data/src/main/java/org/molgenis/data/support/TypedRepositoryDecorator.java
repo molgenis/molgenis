@@ -19,6 +19,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.util.EntityUtils;
 
 /**
@@ -252,6 +253,7 @@ public class TypedRepositoryDecorator<E extends Entity> implements Repository<E>
 		}
 		else
 		{
+			// FIXME adapt EntityUtils such that it can wrap an untypedEntity in a typed entity
 			typedEntity = EntityUtils.convert(untypedEntity, entityClass, null);
 		}
 		return typedEntity;

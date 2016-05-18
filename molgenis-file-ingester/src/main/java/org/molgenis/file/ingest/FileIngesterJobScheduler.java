@@ -33,7 +33,7 @@ import com.google.common.collect.Sets;
  * Schedule and unschedule FileIngestJobs
  */
 @Component
-public class FileIngesterJobScheduler implements ApplicationListener<ContextRefreshedEvent>
+public class FileIngesterJobScheduler
 {
 	public static final String TRIGGER_GROUP = "fileingest";
 	public static final String JOB_GROUP = "fileingest";
@@ -149,14 +149,6 @@ public class FileIngesterJobScheduler implements ApplicationListener<ContextRefr
 			LOG.error("Error unschedule FileIngesterJob '" + fileIngestId + "'", e);
 			throw new FileIngestException("Error unscheduling job", e);
 		}
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		// Schedule all FileIngest jobs
-		runAsSystem(
-				() -> dataService.findAll(FileIngestMetaData.ENTITY_NAME, FileIngest.class).forEach(this::schedule));
 	}
 
 	private void schedule(String id, Trigger trigger) throws SchedulerException

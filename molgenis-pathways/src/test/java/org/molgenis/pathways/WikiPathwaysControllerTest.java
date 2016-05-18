@@ -19,6 +19,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.pathways.model.Impact;
@@ -81,7 +82,7 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 	@BeforeTest
 	public void init()
 	{
-		vcf = new EntityMetaData("VCF");
+		vcf = new EntityMetaDataImpl("VCF");
 		vcf.addAttribute("id", ROLE_ID);
 		vcf.addAttribute("EFF");
 	}
@@ -115,7 +116,7 @@ public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests
 	public void testInit() throws RemoteException
 	{
 		when(dataService.getEntityNames()).thenReturn(Stream.of("NonVCF", "VCF"));
-		EntityMetaData nonVcf = new EntityMetaData("NonVCF");
+		EntityMetaData nonVcf = new EntityMetaDataImpl("NonVCF");
 		nonVcf.addAttribute("id", ROLE_ID);
 
 		when(dataService.getEntityMetaData("NonVCF")).thenReturn(nonVcf);

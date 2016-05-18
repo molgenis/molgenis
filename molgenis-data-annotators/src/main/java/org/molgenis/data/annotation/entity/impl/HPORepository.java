@@ -23,6 +23,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.MapEntity;
 
@@ -54,7 +55,7 @@ public class HPORepository extends AbstractRepository
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		EntityMetaData entityMeta = new EntityMetaData("HPO");
+		EntityMetaDataImpl entityMeta = new EntityMetaDataImpl("HPO");
 		entityMeta.addAttribute(HPO_DISEASE_ID_COL_NAME);
 		entityMeta.addAttribute(HPO_GENE_SYMBOL_COL_NAME);
 		entityMeta.addAttribute(HPO_ID_COL_NAME, ROLE_ID);

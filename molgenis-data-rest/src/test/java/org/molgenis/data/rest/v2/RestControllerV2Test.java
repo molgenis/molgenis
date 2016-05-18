@@ -59,6 +59,7 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.Package;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rest.v2.RestControllerV2Test.RestControllerV2Config;
@@ -157,11 +158,11 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		reset(dataService);
 		String refRefAttrId = "id";
 		refRefAttrValue = "value";
-		EntityMetaData refRefEntityMetaData = new EntityMetaData(REF_REF_ENTITY_NAME);
+		EntityMetaData refRefEntityMetaData = new EntityMetaDataImpl(REF_REF_ENTITY_NAME);
 		refRefEntityMetaData.addAttribute(refRefAttrId, ROLE_ID).setDataType(STRING);
 		refRefEntityMetaData.addAttribute(refRefAttrValue).setDataType(STRING);
 
-		EntityMetaData selfRefEntityMetaData = new EntityMetaData(SELF_REF_ENTITY_NAME);
+		EntityMetaData selfRefEntityMetaData = new EntityMetaDataImpl(SELF_REF_ENTITY_NAME);
 		selfRefEntityMetaData.addAttribute("id", ROLE_ID).setDataType(STRING);
 		selfRefEntityMetaData.addAttribute("selfRef").setDataType(XREF).setRefEntity(selfRefEntityMetaData);
 
@@ -172,7 +173,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		refAttrId = "id";
 		refAttrValue = "value";
 		refAttrRef = "ref";
-		EntityMetaData refEntityMetaData = new EntityMetaData(REF_ENTITY_NAME);
+		EntityMetaData refEntityMetaData = new EntityMetaDataImpl(REF_ENTITY_NAME);
 		refEntityMetaData.addAttribute(refAttrId, ROLE_ID).setDataType(STRING);
 		refEntityMetaData.addAttribute(refAttrValue).setDataType(STRING);
 		refEntityMetaData.addAttribute(refAttrRef).setDataType(XREF).setRefEntity(refRefEntityMetaData);
@@ -225,7 +226,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		String enum1 = "enum1";
 		String enum2 = "enum2";
 
-		EntityMetaData entityMetaData = new EntityMetaData(ENTITY_NAME);
+		EntityMetaData entityMetaData = new EntityMetaDataImpl(ENTITY_NAME);
 		// required
 		entityMetaData.addAttribute(attrId, ROLE_ID).setDataType(STRING);
 		entityMetaData.addAttribute(attrBool).setDataType(BOOL);
@@ -570,7 +571,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		when(dataService.getRepository("entity")).thenReturn(repositoryToCopy);
 
 		// Return package name
-		EntityMetaData entityMetaData = mock(EntityMetaData.class);
+		EntityMetaData entityMetaData = mock(EntityMetaDataImpl.class);
 		when(repositoryToCopy.getEntityMetaData()).thenReturn(entityMetaData);
 		Package package_ = mock(Package.class);
 		when(entityMetaData.getPackage()).thenReturn(package_);

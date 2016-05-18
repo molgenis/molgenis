@@ -27,6 +27,7 @@ import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotator.websettings.DannAnnotatorSettings;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.util.ResourceUtils;
@@ -48,10 +49,10 @@ public class DannAnnotatorTest extends AbstractTestNGSpringContextTests
 	Resources resourcess;
 
 	// Can annotate
-	public EntityMetaData metaDataCanAnnotate = new EntityMetaData("test");
+	public EntityMetaData metaDataCanAnnotate = new EntityMetaDataImpl("test");
 
 	// Negative test cannot annotate
-	public EntityMetaData metaDataCantAnnotate = new EntityMetaData("test");
+	public EntityMetaData metaDataCantAnnotate = new EntityMetaDataImpl("test");
 
 	public ArrayList<Entity> input1;
 	public ArrayList<Entity> input2;

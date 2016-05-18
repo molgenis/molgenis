@@ -15,6 +15,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.vcf.format.VcfToEntity;
 import org.molgenis.vcf.VcfReader;
@@ -53,24 +54,15 @@ public class VcfRepository extends AbstractRepository
 	public static final String ORIGINAL_NAME = "ORIGINAL_NAME";
 	public static final String PREFIX = "##";
 
-	public static final AttributeMetaData CHROM_META = new AttributeMetaData(CHROM,
-			STRING).setAggregatable(true).setNillable(false)
-					.setDescription("The chromosome on which the variant is observed");
+	public static final AttributeMetaData CHROM_META = null; // FIXME new AttributeMetaData(CHROM, STRING).setAggregatable(true).setNillable(false).setDescription("The chromosome on which the variant is observed");
 	// TEXT instead of STRING to handle large insertions/deletions
-	public static final AttributeMetaData ALT_META = new AttributeMetaData(ALT, TEXT).setAggregatable(true).setNillable(false)
-					.setDescription("The alternative allele observed");
-	public static final AttributeMetaData POS_META = new AttributeMetaData(POS, LONG).setAggregatable(true).setNillable(false)
-					.setDescription("The position on the chromosome which the variant is observed");
+	public static final AttributeMetaData ALT_META = null; // FIXME new AttributeMetaData(ALT, TEXT).setAggregatable(true).setNillable(false).setDescription("The alternative allele observed");
+	public static final AttributeMetaData POS_META = null; // FIXME new AttributeMetaData(POS, LONG).setAggregatable(true).setNillable(false).setDescription("The position on the chromosome which the variant is observed");
 	// TEXT instead of STRING to handle large insertions/deletions
-	public static final AttributeMetaData REF_META = new AttributeMetaData(REF, TEXT).setAggregatable(true).setNillable(false)
-					.setDescription("The reference allele");
-	public static final AttributeMetaData FILTER_META = new AttributeMetaData(FILTER,
-			STRING).setAggregatable(true).setNillable(true)
-					.setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
-	public static final AttributeMetaData QUAL_META = new AttributeMetaData(QUAL,
-			STRING).setAggregatable(true).setNillable(true)
-					.setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
-	public static final AttributeMetaData ID_META = new AttributeMetaData(ID, STRING).setNillable(true).setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
+	public static final AttributeMetaData REF_META = null; // FIXME new AttributeMetaData(REF, TEXT).setAggregatable(true).setNillable(false).setDescription("The reference allele");
+	public static final AttributeMetaData FILTER_META = null; // FIXME new AttributeMetaData(FILTER,STRING).setAggregatable(true).setNillable(true).setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
+	public static final AttributeMetaData QUAL_META = null; // FIXME new AttributeMetaData(QUAL,STRING).setAggregatable(true).setNillable(true).setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
+	public static final AttributeMetaData ID_META = null; // FIXME new AttributeMetaData(ID, STRING).setNillable(true).setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
 
 	private final String entityName;
 	protected Supplier<VcfToEntity> vcfToEntitySupplier;

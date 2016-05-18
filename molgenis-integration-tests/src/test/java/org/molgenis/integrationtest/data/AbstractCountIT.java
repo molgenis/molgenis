@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
 
@@ -23,10 +24,10 @@ public abstract class AbstractCountIT extends AbstractDataIntegrationIT
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
 		// define model
-		EntityMetaData countryMD = new EntityMetaData("query_country");
+		EntityMetaData countryMD = new EntityMetaDataImpl("query_country");
 		countryMD.addAttribute("code", ROLE_ID).setNillable(false); // TODO: make this an enum!
 
-		EntityMetaData personMD = new EntityMetaData("query_person");
+		EntityMetaData personMD = new EntityMetaDataImpl("query_person");
 		personMD.addAttribute("email", ROLE_ID).setNillable(false);
 		personMD.addAttribute("firstName");
 		personMD.addAttribute("lastName");

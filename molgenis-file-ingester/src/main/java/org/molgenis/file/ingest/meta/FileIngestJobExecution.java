@@ -10,11 +10,9 @@ public class FileIngestJobExecution extends JobExecution
 {
 	private static final long serialVersionUID = 1L;
 
-	public static final EntityMetaData META_DATA = new FileIngestJobExecutionMetaData();
-
 	public FileIngestJobExecution(DataService dataService)
 	{
-		super(dataService, META_DATA);
+		super(dataService, FileIngestJobExecutionMetaData.get());
 		setType("FileIngesterJob");
 	}
 

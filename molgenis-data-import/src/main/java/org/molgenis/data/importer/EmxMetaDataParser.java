@@ -49,6 +49,7 @@ import org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaValidationUtils;
 import org.molgenis.data.meta.Package;
@@ -908,8 +909,8 @@ public class EmxMetaDataParser implements MetaDataParser
 	 * Puts EntityMetaData in the right import order.
 	 * 
 	 * @param metaDataList
-	 *            {@link EntityMetaData} to put in the right order
-	 * @return List of {@link EntityMetaData}, in the import order
+	 *            {@link EntityMetaDataImpl} to put in the right order
+	 * @return List of {@link EntityMetaDataImpl}, in the import order
 	 */
 	private List<EntityMetaData> resolveEntityDependencies(List<? extends EntityMetaData> metaDataList)
 	{
@@ -942,7 +943,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private ImmutableMap<String, EntityMetaData> getEntityMetaDataFromDataService(DataService dataService,
 			Iterable<String> entityNames)
 	{
-		ImmutableMap.Builder<String, EntityMetaData> builder = ImmutableMap.<String, EntityMetaData> builder();
+		ImmutableMap.Builder<String, EntityMetaData> builder = ImmutableMap.builder();
 		for (String name : entityNames)
 		{
 			builder.put(name, dataService.getRepository(name).getEntityMetaData());

@@ -13,6 +13,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -26,7 +27,7 @@ public class SearchRequestGeneratorTest
 	public void beforeMethod()
 	{
 		searchRequestBuilderMock = mock(SearchRequestBuilder.class);
-		entityMeta = mock(EntityMetaData.class);
+		entityMeta = mock(EntityMetaDataImpl.class);
 	}
 
 	@Test

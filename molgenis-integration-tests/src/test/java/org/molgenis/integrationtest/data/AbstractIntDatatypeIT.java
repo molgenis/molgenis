@@ -6,6 +6,7 @@ import static org.testng.Assert.assertEquals;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 
 public class AbstractIntDatatypeIT extends AbstractDatatypeIT
 {
@@ -13,7 +14,7 @@ public class AbstractIntDatatypeIT extends AbstractDatatypeIT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EntityMetaData entityMetaData = new EntityMetaData("IntegerTest");
+		EntityMetaData entityMetaData = new EntityMetaDataImpl("IntegerTest");
 		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(INT).setNillable(false);
 		entityMetaData.addAttribute("col2").setDataType(INT);
 		entityMetaData.addAttribute("col3").setDataType(INT);

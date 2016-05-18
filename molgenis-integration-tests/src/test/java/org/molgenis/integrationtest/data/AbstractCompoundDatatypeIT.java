@@ -10,23 +10,23 @@ import java.util.Arrays;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-
+import org.molgenis.data.meta.EntityMetaDataImpl;
 
 public abstract class AbstractCompoundDatatypeIT extends AbstractDatatypeIT
 {
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EntityMetaData entityMetaData = new EntityMetaData("CompoundTest");
+		EntityMetaData entityMetaData = new EntityMetaDataImpl("CompoundTest");
 		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(BOOL).setNillable(false);
 
 		AttributeMetaData attributePart1 = new AttributeMetaData("col2").setDataType(BOOL);
 		AttributeMetaData attributePart2 = new AttributeMetaData("compound1").setDataType(COMPOUND);
-		attributePart2.setAttributesMetaData(
+		attributePart2.setAttributeParts(
 				Arrays.<AttributeMetaData> asList(new AttributeMetaData("col3").setDataType(BOOL)));
 
 		entityMetaData.addAttribute("compound").setDataType(COMPOUND)
-				.setAttributesMetaData(Arrays.<AttributeMetaData> asList(attributePart1, attributePart2));
+				.setAttributeParts(Arrays.<AttributeMetaData> asList(attributePart1, attributePart2));
 
 		return entityMetaData;
 	}

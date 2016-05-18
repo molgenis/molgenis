@@ -30,6 +30,7 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.Sort;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.Package;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.MapEntity;
@@ -85,11 +86,11 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	public void setUp()
 	{
 		Package p = new Package("test");
-		refEntityMetaData = new EntityMetaData("TestRefEntity", p);
+		refEntityMetaData = new EntityMetaDataImpl("TestRefEntity", p);
 		refEntityMetaData.addAttribute(ATTR_REF_ID, ROLE_ID).setNillable(false);
 		refEntityMetaData.addAttribute(ATTR_REF_STRING).setNillable(true).setDataType(MolgenisFieldTypes.STRING);
 
-		entityMetaData = new EntityMetaData("TestEntity", p);
+		entityMetaData = new EntityMetaDataImpl("TestEntity", p);
 		entityMetaData.addAttribute(ATTR_ID, ROLE_ID).setNillable(false).setAuto(true);
 		entityMetaData.addAttribute(ATTR_STRING).setNillable(true).setDataType(MolgenisFieldTypes.STRING);
 		entityMetaData.addAttribute(ATTR_BOOL).setNillable(true).setDataType(MolgenisFieldTypes.BOOL);

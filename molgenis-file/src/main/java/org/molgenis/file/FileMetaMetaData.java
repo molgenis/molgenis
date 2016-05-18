@@ -6,16 +6,18 @@ import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
 
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.molgenis.data.support.OwnedEntityMetaData;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FileMetaMetaData extends EntityMetaData
+public class FileMetaMetaData extends SystemEntityMetaDataImpl
 {
-	public FileMetaMetaData()
+	@Override
+	public void init()
 	{
-		super(FileMeta.ENTITY_NAME, FileMeta.class);
+		setName(FileMeta.ENTITY_NAME);
 		setExtends(new OwnedEntityMetaData());
 		addAttribute(FileMeta.ID, ROLE_ID).setVisible(false).setLabel("Id");
 		addAttribute(FileMeta.FILENAME, ROLE_LABEL, ROLE_LOOKUP).setDataType(STRING).setNillable(false)

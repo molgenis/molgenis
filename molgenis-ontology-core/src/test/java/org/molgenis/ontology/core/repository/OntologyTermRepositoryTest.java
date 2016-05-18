@@ -46,12 +46,18 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	OntologyTermRepository ontologyTermRepository;
 
+	@Autowired
+	OntologyTermMetaData ontologyTermMetaData;
+
+	@Autowired
+	OntologyTermSynonymMetaData ontologyTermSynonymMetaData;
+
 	private Entity ontologyTermEntity;
 
 	@BeforeTest
 	public void beforeTest()
 	{
-		ontologyTermEntity = new MapEntity(OntologyTermMetaData.INSTANCE);
+		ontologyTermEntity = new MapEntity(ontologyTermMetaData);
 		ontologyTermEntity.set(OntologyTermMetaData.ID, "12");
 		ontologyTermEntity.set(OntologyTermMetaData.ONTOLOGY, "34");
 		ontologyTermEntity.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI, "http://www.test.nl/iri");
@@ -61,19 +67,19 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testFindExcatOntologyTerms()
 	{
-		MapEntity synonymEntity1 = new MapEntity(OntologyTermSynonymMetaData.INSTANCE);
+		MapEntity synonymEntity1 = new MapEntity(ontologyTermSynonymMetaData);
 		synonymEntity1.set(OntologyTermSynonymMetaData.ID, "synonym-1");
 		synonymEntity1.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM, "Weight Reduction Diet");
 
-		MapEntity synonymEntity2 = new MapEntity(OntologyTermSynonymMetaData.INSTANCE);
+		MapEntity synonymEntity2 = new MapEntity(ontologyTermSynonymMetaData);
 		synonymEntity2.set(OntologyTermSynonymMetaData.ID, "synonym-2");
 		synonymEntity2.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM, "Weight loss Diet");
 
-		MapEntity synonymEntity3 = new MapEntity(OntologyTermSynonymMetaData.INSTANCE);
+		MapEntity synonymEntity3 = new MapEntity(ontologyTermSynonymMetaData);
 		synonymEntity3.set(OntologyTermSynonymMetaData.ID, "synonym-3");
 		synonymEntity3.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM, "Diet, Reducing");
 
-		MapEntity ontologyTermEntity1 = new MapEntity(OntologyTermMetaData.INSTANCE);
+		MapEntity ontologyTermEntity1 = new MapEntity(ontologyTermMetaData);
 		ontologyTermEntity1.set(OntologyTermMetaData.ID, "1");
 		ontologyTermEntity1.set(OntologyTermMetaData.ONTOLOGY, "34");
 		ontologyTermEntity1.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI, "http://www.test.nl/iri/1");
@@ -81,11 +87,11 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 		ontologyTermEntity1.set(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
 				Arrays.asList(synonymEntity1, synonymEntity2, synonymEntity3));
 
-		MapEntity synonymEntity4 = new MapEntity(OntologyTermSynonymMetaData.INSTANCE);
+		MapEntity synonymEntity4 = new MapEntity(ontologyTermSynonymMetaData);
 		synonymEntity4.set(OntologyTermSynonymMetaData.ID, "synonym-4");
 		synonymEntity4.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM, "Weight");
 
-		MapEntity ontologyTermEntity2 = new MapEntity(OntologyTermMetaData.INSTANCE);
+		MapEntity ontologyTermEntity2 = new MapEntity(ontologyTermMetaData);
 		ontologyTermEntity2.set(OntologyTermMetaData.ID, "12");
 		ontologyTermEntity2.set(OntologyTermMetaData.ONTOLOGY, "34");
 		ontologyTermEntity2.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI, "http://www.test.nl/iri/2");
@@ -96,11 +102,11 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 		when(dataService.findAll(eq(OntologyTermMetaData.ENTITY_NAME), queryCaptor.capture()))
 				.thenReturn(Stream.of(ontologyTermEntity1, ontologyTermEntity2));
 
-		List<OntologyTerm> exactOntologyTerms = ontologyTermRepository.findExcatOntologyTerms(asList("1", "2"),
-				of("weight"), 100);
+		List<OntologyTerm> exactOntologyTerms = ontologyTermRepository
+				.findExcatOntologyTerms(asList("1", "2"), of("weight"), 100);
 
-		Assert.assertEquals(exactOntologyTerms, Arrays
-				.asList(OntologyTerm.create("http://www.test.nl/iri/2", "Weight", null, Arrays.asList("Weight"))));
+		Assert.assertEquals(exactOntologyTerms, Arrays.asList(
+				OntologyTerm.create("http://www.test.nl/iri/2", "Weight", null, Arrays.asList("Weight"))));
 	}
 
 	@Test
@@ -110,11 +116,11 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 		when(dataService.findAll(eq(OntologyTermMetaData.ENTITY_NAME), queryCaptor.capture()))
 				.thenReturn(Stream.of(ontologyTermEntity));
 
-		List<OntologyTerm> terms = ontologyTermRepository.findOntologyTerms(asList("1", "2"),
-				of("term1", "term2", "term3"), 100);
+		List<OntologyTerm> terms = ontologyTermRepository
+				.findOntologyTerms(asList("1", "2"), of("term1", "term2", "term3"), 100);
 
-		assertEquals(terms, asList(
-				OntologyTerm.create("http://www.test.nl/iri", "Ontology term", null, Arrays.asList("Ontology term"))));
+		assertEquals(terms, asList(OntologyTerm
+				.create("http://www.test.nl/iri", "Ontology term", null, Arrays.asList("Ontology term"))));
 		assertEquals(queryCaptor.getValue().toString(),
 				"rules=['ontology' IN [1, 2], AND, ('ontologyTermSynonym' FUZZY_MATCH 'term1', OR, 'ontologyTermSynonym' FUZZY_MATCH 'term2', OR, 'ontologyTermSynonym' FUZZY_MATCH 'term3')], pageSize=100");
 	}
@@ -122,8 +128,9 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testGetChildOntologyTermsByNodePath()
 	{
-		Entity ontologyEntity = new MapEntity(ImmutableMap.of(OntologyMetaData.ONTOLOGY_IRI, "http://www.molgenis.org",
-				OntologyMetaData.ONTOLOGY_NAME, "molgenis"));
+		Entity ontologyEntity = new MapEntity(ImmutableMap
+				.of(OntologyMetaData.ONTOLOGY_IRI, "http://www.molgenis.org", OntologyMetaData.ONTOLOGY_NAME,
+						"molgenis"));
 
 		Entity nodePathEntity_1 = new MapEntity(
 				ImmutableMap.of(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH, "0[0].1[1]"));
@@ -136,8 +143,8 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 		ontologyTerm_2.set(OntologyTermMetaData.ONTOLOGY, ontologyEntity);
 		ontologyTerm_2.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI, "iri 2");
 		ontologyTerm_2.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME, "name 2");
-		ontologyTerm_2.set(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
-				Arrays.asList(nodePathEntity_1, nodePathEntity_2));
+		ontologyTerm_2
+				.set(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, Arrays.asList(nodePathEntity_1, nodePathEntity_2));
 		ontologyTerm_2.set(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Collections.emptyList());
 
 		MapEntity ontologyTerm_3 = new MapEntity();
@@ -147,10 +154,10 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 		ontologyTerm_3.set(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, Arrays.asList(nodePathEntity_3));
 		ontologyTerm_3.set(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Collections.emptyList());
 
-		when(dataService.findAll(OntologyTermMetaData.ENTITY_NAME,
-				new QueryImpl<Entity>(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, Operator.FUZZY_MATCH,
-						"\"0[0].1[1]\"")).and().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity)))
-								.thenReturn(Stream.of(ontologyTerm_2, ontologyTerm_3));
+		when(dataService.findAll(OntologyTermMetaData.ENTITY_NAME, new QueryImpl<Entity>(
+				new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, Operator.FUZZY_MATCH, "\"0[0].1[1]\""))
+				.and().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity)))
+				.thenReturn(Stream.of(ontologyTerm_2, ontologyTerm_3));
 
 		List<OntologyTerm> childOntologyTermsByNodePath = ontologyTermRepository
 				.getChildOntologyTermsByNodePath(ontologyEntity, nodePathEntity_1);
@@ -186,10 +193,9 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 	{
 		when(dataService.findOne(OntologyTermMetaData.ENTITY_NAME,
 				QueryImpl.EQ(OntologyTermMetaData.ONTOLOGY_TERM_IRI, "http://www.test.nl/iri")))
-						.thenReturn(ontologyTermEntity);
+				.thenReturn(ontologyTermEntity);
 
-		String[] iris =
-		{ "http://www.test.nl/iri" };
+		String[] iris = { "http://www.test.nl/iri" };
 
 		OntologyTerm ontologyTerm = ontologyTermRepository.getOntologyTerm(iris);
 		assertEquals(ontologyTerm,
@@ -209,6 +215,18 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 		public OntologyTermRepository ontologyTermRepository()
 		{
 			return new OntologyTermRepository(dataService());
+		}
+
+		@Bean
+		public OntologyTermMetaData ontologyTermMetaData()
+		{
+			return new OntologyTermMetaData();
+		}
+
+		@Bean
+		public OntologyTermSynonymMetaData ontologyTermSynonymMetaData()
+		{
+			return new OntologyTermSynonymMetaData();
 		}
 	}
 }

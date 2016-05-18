@@ -2,17 +2,22 @@ package org.molgenis.ontology.sorta.meta;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
+import org.springframework.stereotype.Component;
 
-public class OntologyTermHitEntityMetaData extends EntityMetaData
+@Component
+public class OntologyTermHitEntityMetaData extends SystemEntityMetaDataImpl
 {
+	public static final String ENTITY_NAME = "OntologyTermHit";
 	public static final String SCORE = "Score";
 	public static final String COMBINED_SCORE = "Combined_Score";
-	public static final EntityMetaData INSTANCE = new OntologyTermHitEntityMetaData();
 
-	public OntologyTermHitEntityMetaData()
+	@Override
+	public void init()
 	{
-		super(OntologyTermMetaData.INSTANCE);
+		setName(ENTITY_NAME);
 		addAttribute(SCORE).setDataType(MolgenisFieldTypes.DECIMAL);
 		addAttribute(COMBINED_SCORE).setDataType(MolgenisFieldTypes.DECIMAL);
 	}

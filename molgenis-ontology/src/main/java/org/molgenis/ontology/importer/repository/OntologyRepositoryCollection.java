@@ -16,6 +16,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.mem.InMemoryRepository;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.support.MapEntity;
@@ -48,16 +49,12 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	private final IdGenerator idGenerator = new UuidGenerator();
 
 	// repositories
-	private final Repository<Entity> ontologyRepository = new InMemoryRepository(OntologyMetaData.INSTANCE);
-	private final Repository<Entity> nodePathRepository = new InMemoryRepository(OntologyTermNodePathMetaData.INSTANCE);
-	private final Repository<Entity> ontologyTermRepository = new InMemoryRepository(OntologyTermMetaData.INSTANCE);
-	private final Repository<Entity> annotationRepository = new InMemoryRepository(
-			OntologyTermDynamicAnnotationMetaData.INSTANCE);
-	private final Repository<Entity> synonymRepository = new InMemoryRepository(OntologyTermSynonymMetaData.INSTANCE);
-	private Map<String, Repository<Entity>> repositories = ImmutableMap.of(OntologyTermDynamicAnnotationMetaData.ENTITY_NAME,
-			annotationRepository, OntologyTermSynonymMetaData.ENTITY_NAME, synonymRepository,
-			OntologyTermNodePathMetaData.ENTITY_NAME, nodePathRepository, OntologyMetaData.ENTITY_NAME,
-			ontologyRepository, OntologyTermMetaData.ENTITY_NAME, ontologyTermRepository);
+	private final Repository<Entity> ontologyRepository;
+	private final Repository<Entity> nodePathRepository;
+	private final Repository<Entity> ontologyTermRepository;
+	private final Repository<Entity> annotationRepository;
+	private final Repository<Entity> synonymRepository;
+	private final Map<String, Repository<Entity>> repositories;
 
 	private final OntologyLoader loader;
 	private final Multimap<String, Entity> nodePathsPerOntologyTerm = ArrayListMultimap.create();
@@ -91,6 +88,16 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 			throw new IllegalArgumentException("Not a obo.zip or owl.zip file [" + file.getName() + "]");
 		}
 
+		ontologyRepository = new InMemoryRepository(SystemEntityMetaDataRegistry.INSTANCE.getSystemEntityMetaData(OntologyMetaData.ENTITY_NAME));
+		nodePathRepository = new InMemoryRepository(SystemEntityMetaDataRegistry.INSTANCE.getSystemEntityMetaData(OntologyTermNodePathMetaData.ENTITY_NAME));
+		ontologyTermRepository = new InMemoryRepository(SystemEntityMetaDataRegistry.INSTANCE.getSystemEntityMetaData(OntologyTermMetaData.ENTITY_NAME));
+		annotationRepository = new InMemoryRepository(SystemEntityMetaDataRegistry.INSTANCE.getSystemEntityMetaData(OntologyTermDynamicAnnotationMetaData.ENTITY_NAME));
+		synonymRepository = new InMemoryRepository(SystemEntityMetaDataRegistry.INSTANCE.getSystemEntityMetaData(OntologyTermSynonymMetaData.ENTITY_NAME));
+		repositories = ImmutableMap.of(OntologyTermDynamicAnnotationMetaData.ENTITY_NAME,
+				annotationRepository, OntologyTermSynonymMetaData.ENTITY_NAME, synonymRepository,
+				OntologyTermNodePathMetaData.ENTITY_NAME, nodePathRepository, OntologyMetaData.ENTITY_NAME,
+				ontologyRepository, OntologyTermMetaData.ENTITY_NAME, ontologyTermRepository);
+
 		List<File> uploadedFiles = ZipFileUtil.unzip(file);
 		loader = new OntologyLoader(name, uploadedFiles.get(0));
 		createOntology();
@@ -103,7 +110,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	 */
 	private void createOntology()
 	{
-		ontologyEntity = new MapEntity(OntologyMetaData.INSTANCE);
+		ontologyEntity = new MapEntity(SystemEntityMetaDataRegistry.INSTANCE.getSystemEntityMetaData(OntologyMetaData.ENTITY_NAME));
 		ontologyEntity.set(OntologyMetaData.ID, idGenerator.generateId());
 		ontologyEntity.set(OntologyMetaData.ONTOLOGY_IRI, loader.getOntologyIRI());
 		ontologyEntity.set(OntologyMetaData.ONTOLOGY_NAME, loader.getOntologyName());
@@ -169,7 +176,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	{
 		String ontologyTermIRI = ontologyTerm.getIRI().toString();
 		String ontologyTermName = loader.getLabel(ontologyTerm);
-		Entity entity = new MapEntity(OntologyTermMetaData.INSTANCE);
+		Entity entity = new MapEntity(SystemEntityMetaDataRegistry.INSTANCE.getSystemEntityMetaData(OntologyTermMetaData.ENTITY_NAME));
 		entity.set(OntologyTermMetaData.ID, idGenerator.generateId());
 		entity.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ontologyTermIRI);
 		entity.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME, ontologyTermName);
@@ -202,7 +209,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	 */
 	private Entity createSynonym(String synonym)
 	{
-		MapEntity entity = new MapEntity(OntologyTermSynonymMetaData.INSTANCE);
+		MapEntity entity = new MapEntity(SystemEntityMetaDataRegistry.INSTANCE.getSystemEntityMetaData(OntologyTermSynonymMetaData.ENTITY_NAME));
 		entity.set(OntologyTermSynonymMetaData.ID, idGenerator.generateId());
 		entity.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM, synonym);
 		synonymRepository.add(entity);
@@ -230,7 +237,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	 */
 	private Entity createDynamicAnnotation(String label)
 	{
-		Entity entity = new MapEntity(OntologyTermDynamicAnnotationMetaData.INSTANCE);
+		Entity entity = new MapEntity(SystemEntityMetaDataRegistry.INSTANCE.getSystemEntityMetaData(OntologyTermDynamicAnnotationMetaData.ENTITY_NAME));
 		entity.set(OntologyTermDynamicAnnotationMetaData.ID, idGenerator.generateId());
 		String fragments[] = label.split(":");
 		entity.set(OntologyTermDynamicAnnotationMetaData.NAME, fragments[0]);
@@ -269,7 +276,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	 */
 	private Entity createNodePathEntity(OWLClassContainer container, String ontologyTermNodePath)
 	{
-		MapEntity entity = new MapEntity(OntologyTermNodePathMetaData.INSTANCE);
+		MapEntity entity = new MapEntity(SystemEntityMetaDataRegistry.INSTANCE.getSystemEntityMetaData(OntologyTermNodePathMetaData.ENTITY_NAME));
 		entity.set(OntologyTermNodePathMetaData.ID, idGenerator.generateId());
 		entity.set(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH, ontologyTermNodePath);
 		entity.set(OntologyTermNodePathMetaData.ROOT, container.isRoot());

@@ -74,7 +74,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		decoratedRepository = new EntityListenerRepositoryDecorator(decoratedRepository);
 
 		// 4. Transaction log decorator
-		decoratedRepository = new TransactionLogRepositoryDecorator(decoratedRepository, transactionLogService);
+//		decoratedRepository = new TransactionLogRepositoryDecorator(decoratedRepository, transactionLogService);
 
 		// 3. validation decorator
 		decoratedRepository = new RepositoryValidationDecorator(dataService, decoratedRepository,

@@ -20,6 +20,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +52,7 @@ public class ResourcesTest extends AbstractTestNGSpringContextTests
 	@BeforeSuite
 	public void beforeSuite()
 	{
-		emd = new EntityMetaData("resourceName");
+		emd = new EntityMetaDataImpl("resourceName");
 		emd.addAttribute("id", ROLE_ID, ROLE_LABEL);
 
 		e1 = new DefaultEntity(emd, dataService);

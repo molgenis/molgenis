@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.DefaultEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -42,7 +43,7 @@ public class EntityManagerImplTest
 	public void getReference()
 	{
 		String entityName = "entity";
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(entityName).getMock();
+		EntityMetaData entityMeta = when(mock(EntityMetaDataImpl.class).getName()).thenReturn(entityName).getMock();
 		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
 		AttributeMetaData lblAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("label").getMock();
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
@@ -64,7 +65,7 @@ public class EntityManagerImplTest
 	public void getReferences()
 	{
 		String entityName = "entity";
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(entityName).getMock();
+		EntityMetaData entityMeta = when(mock(EntityMetaDataImpl.class).getName()).thenReturn(entityName).getMock();
 		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
 		AttributeMetaData lblAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("label").getMock();
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
@@ -103,7 +104,7 @@ public class EntityManagerImplTest
 	@Test
 	public void resolveReferencesNoFetch()
 	{
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		EntityMetaData entityMeta = mock(EntityMetaDataImpl.class);
 
 		Entity entity0 = new DefaultEntity(entityMeta, dataService); // do not mock, setters will be called
 		Entity entity1 = new DefaultEntity(entityMeta, dataService); // do not mock, setters will be called
@@ -116,7 +117,7 @@ public class EntityManagerImplTest
 	@Test
 	public void resolveReferencesStreamNoFetch()
 	{
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		EntityMetaData entityMeta = mock(EntityMetaDataImpl.class);
 		AttributeMetaData labelAttr = mock(AttributeMetaData.class);
 		when(entityMeta.getLabelAttribute()).thenReturn(labelAttr);
 		Entity entity0 = new DefaultEntity(entityMeta, dataService); // do not mock, setters will be called

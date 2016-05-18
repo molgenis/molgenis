@@ -19,6 +19,7 @@ import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotator.websettings.ExacAnnotatorSettings;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.util.ResourceUtils;
@@ -39,7 +40,7 @@ public class ExacAnnotatorTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testAnnotate()
 	{
-		EntityMetaData emdIn = new EntityMetaData("exac");
+		EntityMetaData emdIn = new EntityMetaDataImpl("exac");
 		emdIn.addAttribute(VcfRepository.CHROM, ROLE_ID);
 		emdIn.addAttribute(VcfRepository.POS_META);
 		emdIn.addAttribute(VcfRepository.REF_META);

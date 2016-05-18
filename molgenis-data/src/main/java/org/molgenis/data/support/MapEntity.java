@@ -1,6 +1,7 @@
 package org.molgenis.data.support;
 
 import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
@@ -58,8 +59,7 @@ public class MapEntity extends AbstractEntity
 
 	public MapEntity(EntityMetaData metaData)
 	{
-		this.entityMetaData = metaData;
-		this.idAttributeName = entityMetaData.getIdAttribute().getName();
+		this.entityMetaData = requireNonNull(metaData);
 	}
 
 	/**
@@ -180,6 +180,18 @@ public class MapEntity extends AbstractEntity
 
 	public String getIdAttributeName()
 	{
+		String idAttributeName;
+		if(this.idAttributeName != null) {
+			return this.idAttributeName;
+		} else {
+			AttributeMetaData idAttribute = entityMetaData.getIdAttribute();
+			if(idAttribute != null) {
+				idAttributeName = idAttribute.getName();
+			}
+			else {
+				idAttributeName = null;
+			}
+		}
 		return idAttributeName;
 	}
 
@@ -211,7 +223,7 @@ public class MapEntity extends AbstractEntity
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((entityMetaData == null) ? 0 : entityMetaData.hashCode());
+//		result = prime * result + ((entityMetaData == null) ? 0 : entityMetaData.getName().hashCode());
 		result = prime * result + ((idAttributeName == null) ? 0 : idAttributeName.hashCode());
 		result = prime * result + ((values == null) ? 0 : values.hashCode());
 		return result;

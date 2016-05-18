@@ -2,15 +2,17 @@ package org.molgenis.data.annotation.meta;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.jobs.JobExecutionMetaData;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AnnotationJobExecutionMetaData extends EntityMetaData
+class AnnotationJobExecutionMetaData extends SystemEntityMetaDataImpl
 {
-	public AnnotationJobExecutionMetaData()
+	@Override
+	public void init()
 	{
-		super(AnnotationJobExecution.ENTITY_NAME, AnnotationJobExecution.class);
+		setName(AnnotationJobExecution.ENTITY_NAME);
 		setExtends(new JobExecutionMetaData());
 		addAttribute(AnnotationJobExecution.TARGET_NAME).setDataType(MolgenisFieldTypes.STRING).setLabel("target name")
 				.setDescription("Fully qualified name of the entity that is being annotated.").setNillable(false);

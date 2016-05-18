@@ -22,6 +22,7 @@ import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
 import org.molgenis.ontology.roc.InformationContentService;
+import org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
 import org.testng.annotations.BeforeClass;
@@ -48,7 +49,7 @@ public class SortaServiceImplTest
 
 		firstInput = new MapEntity(ImmutableMap.<String, Object> of("Name", "hearing impairment"));
 
-		sortaService = new SortaServiceImpl(dataService, new InformationContentService(dataService));
+		sortaService = new SortaServiceImpl(dataService, new InformationContentService(dataService), new OntologyTermHitEntityMetaData());
 
 		// Mock ontology entity
 		Entity ontologyEntity = new MapEntity();
@@ -76,7 +77,7 @@ public class SortaServiceImplTest
 		// Mock the first ontologyterm entity only with name
 		Entity ontologyTermSynonym_1 = new MapEntity();
 		ontologyTermSynonym_1.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM, "hearing impairment");
-		Entity ontologyTermEntity_1 = new MapEntity(OntologyTermMetaData.INSTANCE);
+		Entity ontologyTermEntity_1 = new MapEntity(new OntologyTermMetaData());
 		ontologyTermEntity_1.set(OntologyTermMetaData.ID, 1);
 		ontologyTermEntity_1.set(OntologyTermMetaData.ONTOLOGY, ontologyEntity);
 		ontologyTermEntity_1.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME, "hearing impairment");
@@ -87,7 +88,7 @@ public class SortaServiceImplTest
 		// Mock the second ontologyterm entity only with name
 		Entity ontologyTermSynonym_2 = new MapEntity();
 		ontologyTermSynonym_2.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM, "mixed hearing impairment");
-		Entity ontologyTermEntity_2 = new MapEntity(OntologyTermMetaData.INSTANCE);
+		Entity ontologyTermEntity_2 = new MapEntity(new OntologyTermMetaData());
 		ontologyTermEntity_2.set(OntologyTermMetaData.ID, 2);
 		ontologyTermEntity_2.set(OntologyTermMetaData.ONTOLOGY, ontologyEntity);
 		ontologyTermEntity_2.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME, "mixed hearing impairment");
@@ -140,7 +141,7 @@ public class SortaServiceImplTest
 		ontologyTermDynamicAnnotation_3_1.set(OntologyTermDynamicAnnotationMetaData.LABEL, "OMIM:123456");
 
 		// Mock ontologyTerm entity based on the previous entities defined
-		Entity ontologyTermEntity_3 = new MapEntity(OntologyTermMetaData.INSTANCE);
+		Entity ontologyTermEntity_3 = new MapEntity(new OntologyTermMetaData());
 		ontologyTermEntity_3.set(OntologyTermMetaData.ID, 3);
 		ontologyTermEntity_3.set(OntologyTermMetaData.ONTOLOGY, ontologyEntity);
 		ontologyTermEntity_3.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME, "ot_3");
@@ -205,7 +206,7 @@ public class SortaServiceImplTest
 		ontologyTermSynonym_4_3.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM, "Exophthalmos");
 
 		// Mock ontologyTerm entity based on the previous entities defined
-		Entity ontologyTermEntity_4 = new MapEntity(OntologyTermMetaData.INSTANCE);
+		Entity ontologyTermEntity_4 = new MapEntity(new OntologyTermMetaData());
 		ontologyTermEntity_4.set(OntologyTermMetaData.ID, 4);
 		ontologyTermEntity_4.set(OntologyTermMetaData.ONTOLOGY, ontologyEntity);
 		ontologyTermEntity_4.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME, "protruding eye");

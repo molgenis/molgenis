@@ -62,118 +62,118 @@ public class GoNLAnnotator
 	@Bean
 	public RepositoryAnnotator gonl()
 	{
-		List<AttributeMetaData> attributes = new ArrayList<>();
-		AttributeMetaData goNlAfAttribute = new AttributeMetaData(GONL_GENOME_AF, STRING)
-				.setDescription("The allele frequency for variants seen in the population used for the GoNL project")
-				.setLabel(GONL_AF_LABEL);
-
-		AttributeMetaData goNlGtcAttribute = new AttributeMetaData(GONL_GENOME_GTC, STRING)
-				.setDescription(
-						"GenoType Counts. For each ALT allele in the same order as listed = 0/0,0/1,1/1,0/2,1/2,2/2,0/3,1/3,2/3,3/3,etc. Phasing is ignored; hence 1/0, 0|1 and 1|0 are all counted as 0/1. When one or more alleles is not called for a genotype in a specific sample (./., ./0, ./1, ./2, etc.), that sample's genotype is completely discarded for calculating GTC.")
-				.setLabel(GONL_GTC_LABEL);
-
-		attributes.add(goNlGtcAttribute);
-		attributes.add(goNlAfAttribute);
-
-		AnnotatorInfo thousandGenomeInfo = AnnotatorInfo.create(Status.READY, AnnotatorInfo.Type.POPULATION_REFERENCE,
-				NAME,
-				"What genetic variation is to be found in the Dutch indigenous population? "
-						+ "Detailed knowledge about this is not only interesting in itself, "
-						+ "it also helps to extract useful biomedical information from Dutch biobanks. "
-						+ "The Dutch biobank collaboration BBMRI-NL has initiated the extensive Rainbow Project “Genome of the Netherlands” (GoNL) "
-						+ "because it offers unique opportunities for science and for the development of new treatments and diagnostic techniques. "
-						+ "A close-up look at the DNA of 750 Dutch people-250 trio’s of two parents and an adult child-plus a "
-						+ "global genetic profile of large numbers of Dutch will disclose a wealth of new information, new insights, "
-						+ "and possible applications.",
-				attributes);
-
-		LocusQueryCreator locusQueryCreator = new LocusQueryCreator();
-
-		EntityAnnotator entityAnnotator = new QueryAnnotatorImpl(GONL_MULTI_FILE_RESOURCE, thousandGenomeInfo,
-				locusQueryCreator, dataService, resources, (annotationSourceFileName) -> {
-					goNLAnnotatorSettings.set(ROOT_DIRECTORY, annotationSourceFileName);
-					goNLAnnotatorSettings.set(FILEPATTERN, "gonl.chr%s.snps_indels.r5.vcf.gz");
-					goNLAnnotatorSettings.set(OVERRIDE_CHROMOSOME_FILES, "X:gonl.chrX.release4.gtc.vcf.gz");
-					goNLAnnotatorSettings.set(CHROMOSOMES,
-							"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X");
-				})
-		{
-			public String postFixResource = "";
-
-			@Override
-			protected void processQueryResults(Entity inputEntity, Iterable<Entity> annotationSourceEntities,
-					Entity resultEntity)
-			{
-				String afs = null;
-				String gtcs = null;
-				List<Entity> refMatches = Lists.newArrayList();
-				for (Entity resourceEntity : annotationSourceEntities)
-				{
-					//situation example: input A, GoNL A
-					if (resourceEntity.get(VcfRepository.REF).equals(inputEntity.get(VcfRepository.REF)))
-					{
-						refMatches.add(resourceEntity);
-					}
-					//situation example: input ATC/TTC, GoNL A/T
-					//we then match on A (leaving TC), lengthen the GoNL ref to A+TC, and alt to T+TC
-					//now it has a match to ATC/TTC (as it should, but was not obvious due to notation)
-					else if (inputEntity.getString(VcfRepository.REF)
-							.indexOf(resourceEntity.getString(VcfRepository.REF)) == 0)
-					{
-						postFixResource = inputEntity.getString(VcfRepository.REF)
-								.substring(resourceEntity.getString(VcfRepository.REF).length());
-						resourceEntity.set(VcfRepository.REF,
-								resourceEntity.getString(VcfRepository.REF) + postFixResource);
-						String newAltString = Arrays.asList(resourceEntity.getString(ALT).split(",")).stream()
-								.map(alt -> alt + postFixResource).collect(Collectors.joining(","));
-						resourceEntity.set(VcfRepository.ALT, newAltString);
-						refMatches.add(resourceEntity);
-					}
-					//situation example: input T/G, GoNL TCT/GCT
-					//we then match on T (leaving CT), and shorten the GoNL ref to T (-CT), and alt to G (-CT)
-					//now it has a match to T/G (as it should, but was not obvious due to notation)
-					else if (resourceEntity.getString(VcfRepository.REF)
-							.indexOf(inputEntity.getString(VcfRepository.REF)) == 0)
-					{
-						int postFixInputLength = resourceEntity.getString(VcfRepository.REF)
-								.substring(inputEntity.getString(VcfRepository.REF).length()).length();
-						//bugfix: matching A/G to ACT/A results in postFixInputLength=2, correctly updating ref from ACT to A,
-						//but then tries to substring the alt allele A to length -1 (1 minus 2) which is not allowed.
-						//added a check to prevent this: alt.length() > postFixInputLength ? trim the alt : change to 'n/a' because we cannot use this alt.
-						resourceEntity.set(VcfRepository.REF, resourceEntity.getString(VcfRepository.REF).substring(0,
-								(resourceEntity.getString(VcfRepository.REF).length() - postFixInputLength)));
-						String newAltString = Arrays.asList(resourceEntity.getString(ALT).split(",")).stream()
-								.map(alt -> alt.length() > postFixInputLength ? alt.substring(0, (alt.length() - postFixInputLength)) : "n/a")
-								.collect(Collectors.joining(","));
-						resourceEntity.set(VcfRepository.ALT, newAltString);
-						refMatches.add(resourceEntity);
-					}
-				}
-				if (inputEntity.getString(ALT) != null)
-				{
-					List<Entity> alleleMatches = Lists.newArrayList();
-					for (String alt : inputEntity.getString(ALT).split(","))
-					{
-						alleleMatches
-								.add(Iterables.find(refMatches, gonl -> (alt).equals((gonl.getString(ALT))), null));
-					}
-
-					if (!Iterables.all(alleleMatches, Predicates.isNull()))
-					{
-						afs = alleleMatches.stream()
-								.map(gonl -> gonl == null ? "."
-										: Double.toString(gonl.getDouble(INFO_AC) / gonl.getDouble(INFO_AN)))
-								.collect(Collectors.joining(","));
-						//update GTC field to separate allele combinations by pipe instead of comma, since we use comma to separate alt allele info
-						gtcs = alleleMatches.stream().map(gonl -> gonl == null ? "." : gonl.getString(INFO_GTC).replace(",", "|"))
-								.collect(Collectors.joining(","));
-					}
-
-				}
-				resultEntity.set(GONL_GENOME_AF, afs);
-				resultEntity.set(GONL_GENOME_GTC, gtcs);
-			}
-		};
+//		List<AttributeMetaData> attributes = new ArrayList<>();
+//		AttributeMetaData goNlAfAttribute = new AttributeMetaData(GONL_GENOME_AF, STRING)
+//				.setDescription("The allele frequency for variants seen in the population used for the GoNL project")
+//				.setLabel(GONL_AF_LABEL);
+//
+//		AttributeMetaData goNlGtcAttribute = new AttributeMetaData(GONL_GENOME_GTC, STRING)
+//				.setDescription(
+//						"GenoType Counts. For each ALT allele in the same order as listed = 0/0,0/1,1/1,0/2,1/2,2/2,0/3,1/3,2/3,3/3,etc. Phasing is ignored; hence 1/0, 0|1 and 1|0 are all counted as 0/1. When one or more alleles is not called for a genotype in a specific sample (./., ./0, ./1, ./2, etc.), that sample's genotype is completely discarded for calculating GTC.")
+//				.setLabel(GONL_GTC_LABEL);
+//
+//		attributes.add(goNlGtcAttribute);
+//		attributes.add(goNlAfAttribute);
+//
+//		AnnotatorInfo thousandGenomeInfo = AnnotatorInfo.create(Status.READY, AnnotatorInfo.Type.POPULATION_REFERENCE,
+//				NAME,
+//				"What genetic variation is to be found in the Dutch indigenous population? "
+//						+ "Detailed knowledge about this is not only interesting in itself, "
+//						+ "it also helps to extract useful biomedical information from Dutch biobanks. "
+//						+ "The Dutch biobank collaboration BBMRI-NL has initiated the extensive Rainbow Project “Genome of the Netherlands” (GoNL) "
+//						+ "because it offers unique opportunities for science and for the development of new treatments and diagnostic techniques. "
+//						+ "A close-up look at the DNA of 750 Dutch people-250 trio’s of two parents and an adult child-plus a "
+//						+ "global genetic profile of large numbers of Dutch will disclose a wealth of new information, new insights, "
+//						+ "and possible applications.",
+//				attributes);
+//
+//		LocusQueryCreator locusQueryCreator = new LocusQueryCreator();
+//
+		EntityAnnotator entityAnnotator = null; //FIXME new QueryAnnotatorImpl(GONL_MULTI_FILE_RESOURCE, thousandGenomeInfo,
+//				locusQueryCreator, dataService, resources, (annotationSourceFileName) -> {
+//					goNLAnnotatorSettings.set(ROOT_DIRECTORY, annotationSourceFileName);
+//					goNLAnnotatorSettings.set(FILEPATTERN, "gonl.chr%s.snps_indels.r5.vcf.gz");
+//					goNLAnnotatorSettings.set(OVERRIDE_CHROMOSOME_FILES, "X:gonl.chrX.release4.gtc.vcf.gz");
+//					goNLAnnotatorSettings.set(CHROMOSOMES,
+//							"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X");
+//				})
+//		{
+//			public String postFixResource = "";
+//
+//			@Override
+//			protected void processQueryResults(Entity inputEntity, Iterable<Entity> annotationSourceEntities,
+//					Entity resultEntity)
+//			{
+//				String afs = null;
+//				String gtcs = null;
+//				List<Entity> refMatches = Lists.newArrayList();
+//				for (Entity resourceEntity : annotationSourceEntities)
+//				{
+//					//situation example: input A, GoNL A
+//					if (resourceEntity.get(VcfRepository.REF).equals(inputEntity.get(VcfRepository.REF)))
+//					{
+//						refMatches.add(resourceEntity);
+//					}
+//					//situation example: input ATC/TTC, GoNL A/T
+//					//we then match on A (leaving TC), lengthen the GoNL ref to A+TC, and alt to T+TC
+//					//now it has a match to ATC/TTC (as it should, but was not obvious due to notation)
+//					else if (inputEntity.getString(VcfRepository.REF)
+//							.indexOf(resourceEntity.getString(VcfRepository.REF)) == 0)
+//					{
+//						postFixResource = inputEntity.getString(VcfRepository.REF)
+//								.substring(resourceEntity.getString(VcfRepository.REF).length());
+//						resourceEntity.set(VcfRepository.REF,
+//								resourceEntity.getString(VcfRepository.REF) + postFixResource);
+//						String newAltString = Arrays.asList(resourceEntity.getString(ALT).split(",")).stream()
+//								.map(alt -> alt + postFixResource).collect(Collectors.joining(","));
+//						resourceEntity.set(VcfRepository.ALT, newAltString);
+//						refMatches.add(resourceEntity);
+//					}
+//					//situation example: input T/G, GoNL TCT/GCT
+//					//we then match on T (leaving CT), and shorten the GoNL ref to T (-CT), and alt to G (-CT)
+//					//now it has a match to T/G (as it should, but was not obvious due to notation)
+//					else if (resourceEntity.getString(VcfRepository.REF)
+//							.indexOf(inputEntity.getString(VcfRepository.REF)) == 0)
+//					{
+//						int postFixInputLength = resourceEntity.getString(VcfRepository.REF)
+//								.substring(inputEntity.getString(VcfRepository.REF).length()).length();
+//						//bugfix: matching A/G to ACT/A results in postFixInputLength=2, correctly updating ref from ACT to A,
+//						//but then tries to substring the alt allele A to length -1 (1 minus 2) which is not allowed.
+//						//added a check to prevent this: alt.length() > postFixInputLength ? trim the alt : change to 'n/a' because we cannot use this alt.
+//						resourceEntity.set(VcfRepository.REF, resourceEntity.getString(VcfRepository.REF).substring(0,
+//								(resourceEntity.getString(VcfRepository.REF).length() - postFixInputLength)));
+//						String newAltString = Arrays.asList(resourceEntity.getString(ALT).split(",")).stream()
+//								.map(alt -> alt.length() > postFixInputLength ? alt.substring(0, (alt.length() - postFixInputLength)) : "n/a")
+//								.collect(Collectors.joining(","));
+//						resourceEntity.set(VcfRepository.ALT, newAltString);
+//						refMatches.add(resourceEntity);
+//					}
+//				}
+//				if (inputEntity.getString(ALT) != null)
+//				{
+//					List<Entity> alleleMatches = Lists.newArrayList();
+//					for (String alt : inputEntity.getString(ALT).split(","))
+//					{
+//						alleleMatches
+//								.add(Iterables.find(refMatches, gonl -> (alt).equals((gonl.getString(ALT))), null));
+//					}
+//
+//					if (!Iterables.all(alleleMatches, Predicates.isNull()))
+//					{
+//						afs = alleleMatches.stream()
+//								.map(gonl -> gonl == null ? "."
+//										: Double.toString(gonl.getDouble(INFO_AC) / gonl.getDouble(INFO_AN)))
+//								.collect(Collectors.joining(","));
+//						//update GTC field to separate allele combinations by pipe instead of comma, since we use comma to separate alt allele info
+//						gtcs = alleleMatches.stream().map(gonl -> gonl == null ? "." : gonl.getString(INFO_GTC).replace(",", "|"))
+//								.collect(Collectors.joining(","));
+//					}
+//
+//				}
+//				resultEntity.set(GONL_GENOME_AF, afs);
+//				resultEntity.set(GONL_GENOME_GTC, gtcs);
+//			}
+//		};
 		return new RepositoryAnnotatorImpl(entityAnnotator);
 
 	}

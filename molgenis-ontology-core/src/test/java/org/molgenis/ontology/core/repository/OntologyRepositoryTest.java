@@ -33,12 +33,15 @@ public class OntologyRepositoryTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	OntologyRepository ontologyRepository;
 
+	@Autowired
+	OntologyMetaData ontologyMetaData;
+
 	private Entity ontologyEntity;
 
 	@BeforeTest
 	public void beforeTest()
 	{
-		ontologyEntity = new MapEntity(OntologyMetaData.INSTANCE);
+		ontologyEntity = new MapEntity(ontologyMetaData);
 		ontologyEntity.set(OntologyMetaData.ID, "1");
 		ontologyEntity.set(OntologyMetaData.ONTOLOGY_IRI, "http://www.ontology.com/test");
 		ontologyEntity.set(OntologyMetaData.ONTOLOGY_NAME, "testOntology");

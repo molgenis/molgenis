@@ -6,11 +6,12 @@ import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
 import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.mapper.repository.impl.MappingTargetRepositoryImpl;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MappingProjectMetaData extends EntityMetaData
+public class MappingProjectMetaData extends SystemEntityMetaDataImpl
 {
 	public static final String ENTITY_NAME = "MappingProject";
 	public static final String IDENTIFIER = "identifier";
@@ -18,10 +19,10 @@ public class MappingProjectMetaData extends EntityMetaData
 	public static final String OWNER = "owner";
 	public static final String MAPPINGTARGETS = "mappingtargets";
 
-	public MappingProjectMetaData()
+	@Override
+	public void init()
 	{
-		super(ENTITY_NAME);
-
+		setName(ENTITY_NAME);
 		addAttribute(IDENTIFIER, ROLE_ID);
 		addAttribute(NAME).setNillable(false);
 		addAttribute(OWNER).setDataType(XREF).setRefEntity(new MolgenisUserMetaData());

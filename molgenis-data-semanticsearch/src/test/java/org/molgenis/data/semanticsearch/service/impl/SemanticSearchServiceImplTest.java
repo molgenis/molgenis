@@ -24,6 +24,7 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
@@ -206,7 +207,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void testFindAttributes()
 	{
-		EntityMetaData sourceEntityMetaData = new EntityMetaData("sourceEntityMetaData");
+		EntityMetaData sourceEntityMetaData = new EntityMetaDataImpl("sourceEntityMetaData");
 
 		// Mock the id's of the attribute entities that should be searched
 		List<String> attributeIdentifiers = Arrays.asList("1", "2");

@@ -24,6 +24,11 @@ public class DannAnnotatorSettings extends DefaultSettingsEntity
 		public Meta()
 		{
 			super(ID);
+		}
+
+		@Override
+		public void init()
+		{
 			setLabel("Dann annotator settings");
 			addAttribute(DANN_LOCATION).setLabel("Dann file location");
 		}

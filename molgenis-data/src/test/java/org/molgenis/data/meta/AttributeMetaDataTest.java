@@ -1,5 +1,6 @@
-package org.molgenis.data.support;
+package org.molgenis.data.meta;
 
+import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -7,11 +8,52 @@ import static org.testng.Assert.assertNull;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Range;
-import org.molgenis.data.meta.AttributeMetaData;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
-public class AttributeMetaDataTest
+@ContextConfiguration(classes = AttributeMetaDataTest.Config.class)
+public class AttributeMetaDataTest extends AbstractTestNGSpringContextTests
 {
+	@Configuration
+	public static class Config {
+		@Bean
+		public AttributeMetaDataFactory attributeMetaDataFactory() {
+			return new AttributeMetaDataFactory();
+		}
+
+		@Bean
+		public EntityMetaDataMetaData entityMetaDataMetaData() {
+			return new EntityMetaDataMetaData();
+		}
+
+		@Bean
+		public AttributeMetaDataMetaData attrMetaDataMetaData() {
+			return new AttributeMetaDataMetaData();
+		}
+
+		@Bean
+		public PackageMetaData packageMetaData() {
+			return new PackageMetaData();
+		}
+
+		@Bean
+		public TagMetaData tagMetaData() {
+			return new TagMetaData();
+		}
+	}
+
+	@Autowired
+	private AttributeMetaDataMetaData attrMetaDataMetaData;
+
+	@Test
+	public void create() {
+		new AttributeMetaData(attrMetaDataMetaData);
+	}
+
 	@Test
 	public void AttributeMetaDataAttributeMetaData()
 	{
@@ -27,6 +69,8 @@ public class AttributeMetaDataTest
 		attr.setReadOnly(true);
 		attr.setUnique(true);
 		attr.setVisible(true);
+		attr.setAttributeParts(emptyList());
+		attr.setTags(emptyList());
 		assertEquals(AttributeMetaData.newInstance(attr), attr);
 	}
 

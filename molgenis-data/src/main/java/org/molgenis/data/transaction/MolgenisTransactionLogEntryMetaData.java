@@ -6,10 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.molgenis.fieldtypes.EnumField;
 
-public class MolgenisTransactionLogEntryMetaData extends EntityMetaData
+public class MolgenisTransactionLogEntryMetaData extends SystemEntityMetaDataImpl
 {
 	public static final String ENTITY_NAME = "MolgenisTransactionLogEntry";
 
@@ -29,7 +30,13 @@ public class MolgenisTransactionLogEntryMetaData extends EntityMetaData
 		addAttribute(TYPE).setDataType(new EnumField()).setEnumOptions(Type.getOptions()).setNillable(false);
 	}
 
-	public static enum Type
+	@Override
+	public void init()
+	{
+		// FIXME implement
+	}
+
+	public enum Type
 	{
 		ADD, UPDATE, DELETE;
 

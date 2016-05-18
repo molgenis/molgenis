@@ -27,12 +27,14 @@ public class LanguageRepositoryDecoratorTest
 	private Repository<Entity> decoratedRepo;
 	private DataService dataService;
 	private LanguageRepositoryDecorator languageRepositoryDecorator;
+	private LanguageMetaData languageMetaData;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
 		decoratedRepo = mock(Repository.class);
-		when(decoratedRepo.getEntityMetaData()).thenReturn(LanguageMetaData.INSTANCE);
+		languageMetaData = mock(LanguageMetaData.class);
+		when(decoratedRepo.getEntityMetaData()).thenReturn(languageMetaData);
 		dataService = mock(DataService.class);
 		MetaDataService metaDataService = mock(MetaDataService.class);
 		ManageableRepositoryCollection defaultBackend = mock(ManageableRepositoryCollection.class);
@@ -45,11 +47,11 @@ public class LanguageRepositoryDecoratorTest
 	public void addStream()
 	{
 		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityMetaData()).thenReturn(LanguageMetaData.INSTANCE);
+		when(entity0.getEntityMetaData()).thenReturn(languageMetaData);
 		when(entity0.getString(LanguageMetaData.CODE)).thenReturn("nl");
 
 		Entity entity1 = mock(Entity.class);
-		when(entity1.getEntityMetaData()).thenReturn(LanguageMetaData.INSTANCE);
+		when(entity1.getEntityMetaData()).thenReturn(languageMetaData);
 		when(entity1.getString(LanguageMetaData.CODE)).thenReturn("de");
 
 		Stream<Entity> entities = Arrays.asList(entity0, entity1).stream();
@@ -62,11 +64,11 @@ public class LanguageRepositoryDecoratorTest
 	public void deleteStream()
 	{
 		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityMetaData()).thenReturn(LanguageMetaData.INSTANCE);
+		when(entity0.getEntityMetaData()).thenReturn(languageMetaData);
 		when(entity0.getString(LanguageMetaData.CODE)).thenReturn("nl");
 
 		Entity entity1 = mock(Entity.class);
-		when(entity1.getEntityMetaData()).thenReturn(LanguageMetaData.INSTANCE);
+		when(entity1.getEntityMetaData()).thenReturn(languageMetaData);
 		when(entity1.getString(LanguageMetaData.CODE)).thenReturn("de");
 
 		languageRepositoryDecorator.delete(Stream.of(entity0, entity1));

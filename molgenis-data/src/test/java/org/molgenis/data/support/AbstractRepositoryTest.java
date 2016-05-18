@@ -19,6 +19,7 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -26,13 +27,13 @@ import org.testng.annotations.Test;
 public class AbstractRepositoryTest
 {
 	private AbstractRepository abstractRepository;
-	private EntityMetaData entityMetaData;
+	private EntityMetaDataImpl entityMetaData;
 
 	@BeforeTest
 	public void beforeTest()
 	{
 		String idAttrName = "id";
-		entityMetaData = new EntityMetaData("entity");
+		entityMetaData = new EntityMetaDataImpl("entity");
 		entityMetaData.addAttribute(idAttrName, ROLE_ID);
 		abstractRepository = Mockito.spy(new AbstractRepository()
 		{

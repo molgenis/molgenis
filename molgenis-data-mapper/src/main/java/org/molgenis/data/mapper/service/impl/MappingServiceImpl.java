@@ -28,6 +28,7 @@ import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.Package;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -168,10 +169,10 @@ public class MappingServiceImpl implements MappingService
 	@Override
 	public String applyMappings(MappingTarget mappingTarget, String entityName)
 	{
-		EntityMetaData targetMetaData = EntityMetaData.newInstance(mappingTarget.getTarget());
+		EntityMetaData targetMetaData = EntityMetaDataImpl.newInstance(mappingTarget.getTarget());
 		targetMetaData.setName(entityName);
-		targetMetaData.setPackage(Package.defaultPackage);
-		targetMetaData.setLabel(entityName);
+//		targetMetaData.setPackage(Package.defaultPackage);
+		targetMetaData.setLabel(entityName); // FIXME
 		targetMetaData.addAttribute("source");
 
 		// add a new repository if the target repo doesn't exist, or check if the target repository is compatible with

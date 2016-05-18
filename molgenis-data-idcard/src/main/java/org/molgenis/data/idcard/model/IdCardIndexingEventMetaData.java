@@ -9,16 +9,18 @@ import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.molgenis.fieldtypes.EnumField;
 import org.springframework.stereotype.Component;
 
 @Component
-public class IdCardIndexingEventMetaData extends EntityMetaData
+public class IdCardIndexingEventMetaData extends SystemEntityMetaDataImpl
 {
-	public IdCardIndexingEventMetaData()
+	@Override
+	public void init()
 	{
-		super(IdCardIndexingEvent.ENTITY_NAME, IdCardIndexingEvent.class);
+		setName(IdCardIndexingEvent.ENTITY_NAME);
 		addAttribute(IdCardIndexingEvent.ID, ROLE_ID).setVisible(false).setAuto(true).setLabel("Id");
 		addAttribute(IdCardIndexingEvent.DATE).setDataType(DATETIME).setNillable(false).setAuto(true).setLabel("Date");
 		addAttribute(IdCardIndexingEvent.STATUS, ROLE_LABEL, ROLE_LOOKUP)

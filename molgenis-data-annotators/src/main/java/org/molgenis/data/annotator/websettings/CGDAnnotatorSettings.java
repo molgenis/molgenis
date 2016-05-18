@@ -25,6 +25,11 @@ public class CGDAnnotatorSettings extends DefaultSettingsEntity
 		public Meta()
 		{
 			super(ID);
+		}
+
+		@Override
+		public void init()
+		{
 			setLabel("CGD annotator settings");
 
 			String defaultLocation = AnnotatorUtils.getAnnotatorResourceDir() + "/CGD/CGD.txt";

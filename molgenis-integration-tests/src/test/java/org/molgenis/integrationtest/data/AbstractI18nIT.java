@@ -18,6 +18,7 @@ import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.support.DefaultEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,18 @@ public abstract class AbstractI18nIT extends AbstractDataIntegrationIT
 {
 	@Autowired
 	LanguageService languageService;
+
+	@Autowired
+	private EntityMetaDataMetaData entityMetaDataMetaData;
+
+	@Autowired
+	private AttributeMetaDataMetaData attributeMetaDataMetaData;
+
+	@Autowired
+	private I18nStringMetaData i18nStringMetaData;
+
+	@Autowired
+	private LanguageMetaData languageMetaData;
 
 	@BeforeClass
 	public void setUp()
@@ -45,24 +58,24 @@ public abstract class AbstractI18nIT extends AbstractDataIntegrationIT
 		super.cleanUp();
 
 		List<AttributeMetaData> languageAttrs = new ArrayList<>();
-		for (AttributeMetaData attr : AttributeMetaDataMetaData.INSTANCE.getAttributes())
+		for (AttributeMetaData attr : attributeMetaDataMetaData.getAttributes())
 		{
 			if (I18nUtils.isI18n(attr.getName()))
 			{
 				languageAttrs.add(attr);
 			}
 		}
-		languageAttrs.forEach(AttributeMetaDataMetaData.INSTANCE::removeAttribute);
+		languageAttrs.forEach(attributeMetaDataMetaData::removeAttribute);
 
 		languageAttrs.clear();
-		for (AttributeMetaData attr : EntityMetaDataMetaData.INSTANCE.getAttributes())
+		for (AttributeMetaData attr : entityMetaDataMetaData.getAttributes())
 		{
 			if (I18nUtils.isI18n(attr.getName()))
 			{
 				languageAttrs.add(attr);
 			}
 		}
-		languageAttrs.forEach(EntityMetaDataMetaData.INSTANCE::removeAttribute);
+		languageAttrs.forEach(entityMetaDataMetaData::removeAttribute);
 	}
 
 	public void testLanguageService()
@@ -71,7 +84,7 @@ public abstract class AbstractI18nIT extends AbstractDataIntegrationIT
 		assertEqualsNoOrder(languageService.getLanguageCodes().toArray(), new String[]
 		{ "en", "nl" });
 
-		Entity car = new DefaultEntity(I18nStringMetaData.INSTANCE, dataService);
+		Entity car = new DefaultEntity(i18nStringMetaData, dataService);
 		car.set(I18nStringMetaData.MSGID, "car");
 		car.set("en", "car");
 		car.set("nl", "auto");
@@ -84,7 +97,7 @@ public abstract class AbstractI18nIT extends AbstractDataIntegrationIT
 
 	public void testMetaData()
 	{
-		EntityMetaData entityMetaData = new EntityMetaData("I18nTest");
+		EntityMetaData entityMetaData = new EntityMetaDataImpl("I18nTest");
 		entityMetaData.setDescription("en", "The description");
 		entityMetaData.setDescription("nl", "De omschrijving");
 		entityMetaData.setLabel("en", "The label");
@@ -134,12 +147,12 @@ public abstract class AbstractI18nIT extends AbstractDataIntegrationIT
 
 	protected void createLanguages()
 	{
-		Entity en = new DefaultEntity(LanguageMetaData.INSTANCE, dataService);
+		Entity en = new DefaultEntity(languageMetaData, dataService);
 		en.set(LanguageMetaData.CODE, "en");
 		en.set(LanguageMetaData.NAME, "English");
 		dataService.add(LanguageMetaData.ENTITY_NAME, en);
 
-		Entity nl = new DefaultEntity(LanguageMetaData.INSTANCE, dataService);
+		Entity nl = new DefaultEntity(languageMetaData, dataService);
 		nl.set(LanguageMetaData.CODE, "nl");
 		nl.set(LanguageMetaData.NAME, "Nederlands");
 		dataService.add(LanguageMetaData.ENTITY_NAME, nl);

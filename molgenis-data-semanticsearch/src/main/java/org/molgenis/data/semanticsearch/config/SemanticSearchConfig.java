@@ -55,7 +55,7 @@ public class SemanticSearchConfig
 	@Bean
 	public OntologyTagService ontologyTagService()
 	{
-		return new OntologyTagServiceImpl(dataService, ontologyService, tagRepository(), idGenerator);
+		return new OntologyTagServiceImpl(dataService, ontologyService, tagRepository(), idGenerator, null); // FIXME
 	}
 
 	@Bean
@@ -80,7 +80,7 @@ public class SemanticSearchConfig
 	@Bean
 	TagRepository tagRepository()
 	{
-		Repository<Entity> repo = dataService.getRepository(TagMetaData.ENTITY_NAME);
+		Repository<Entity> repo = null;//FIXME dataService.getRepository(TagMetaData.ENTITY_NAME);
 		return new TagRepository(repo, idGenerator);
 	}
 

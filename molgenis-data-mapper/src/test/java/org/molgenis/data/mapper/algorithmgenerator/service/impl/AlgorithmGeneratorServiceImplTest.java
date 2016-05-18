@@ -22,6 +22,7 @@ import org.molgenis.data.mapper.service.impl.AlgorithmTemplateServiceImpl;
 import org.molgenis.data.mapper.service.impl.UnitResolverImpl;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.support.QueryImpl;
@@ -66,13 +67,13 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractTestNGSpringConte
 	@Test
 	public void testGenerateTemplateBasedAlgorithm()
 	{
-		EntityMetaData targetEntityMetaData = new EntityMetaData("target");
+		EntityMetaData targetEntityMetaData = new EntityMetaDataImpl("target");
 		AttributeMetaData targetBMIAttribute = new AttributeMetaData("targetHeight");
 		targetBMIAttribute.setLabel("BMI kg/m²");
 		targetBMIAttribute.setDataType(MolgenisFieldTypes.DECIMAL);
 		targetEntityMetaData.addAttribute(targetBMIAttribute);
 
-		EntityMetaData sourceEntityMetaData = new EntityMetaData("source");
+		EntityMetaData sourceEntityMetaData = new EntityMetaDataImpl("source");
 		AttributeMetaData heightSourceAttribute = new AttributeMetaData("sourceHeight");
 		heightSourceAttribute.setDataType(MolgenisFieldTypes.DECIMAL);
 		heightSourceAttribute.setLabel("body length in cm");
@@ -111,13 +112,13 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractTestNGSpringConte
 	@Test
 	public void testConvertUnitsAlgorithm()
 	{
-		EntityMetaData targetEntityMetaData = new EntityMetaData("target");
+		EntityMetaData targetEntityMetaData = new EntityMetaDataImpl("target");
 		AttributeMetaData targetAttribute = new AttributeMetaData("targetHeight");
 		targetAttribute.setLabel("height in m");
 		targetAttribute.setDataType(MolgenisFieldTypes.DECIMAL);
 		targetEntityMetaData.addAttribute(targetAttribute);
 
-		EntityMetaData sourceEntityMetaData = new EntityMetaData("source");
+		EntityMetaData sourceEntityMetaData = new EntityMetaDataImpl("source");
 		AttributeMetaData sourceAttribute = new AttributeMetaData("sourceHeight");
 		sourceAttribute.setDataType(MolgenisFieldTypes.DECIMAL);
 		sourceAttribute.setLabel("body length in cm");

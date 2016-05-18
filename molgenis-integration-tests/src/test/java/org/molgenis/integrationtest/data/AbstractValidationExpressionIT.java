@@ -6,6 +6,7 @@ import static org.testng.Assert.fail;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.validation.MolgenisValidationException;
 
@@ -13,7 +14,7 @@ public abstract class AbstractValidationExpressionIT extends AbstractDataIntegra
 {
 	public void testIt()
 	{
-		EntityMetaData entityMetaData = new EntityMetaData("ValidationExpressionTest");
+		EntityMetaData entityMetaData = new EntityMetaDataImpl("ValidationExpressionTest");
 		entityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false).setAuto(true);
 		entityMetaData.addAttribute("intAttr").setDataType(INT);
 		entityMetaData.addAttribute("validationExpressionAttr").setDataType(INT)

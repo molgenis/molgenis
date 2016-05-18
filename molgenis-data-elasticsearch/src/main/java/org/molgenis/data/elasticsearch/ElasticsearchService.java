@@ -69,6 +69,7 @@ import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.Package;
 import org.molgenis.data.support.DefaultEntity;
@@ -940,7 +941,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		if (dataService.getMeta().hasBackend(ElasticsearchRepositoryCollection.NAME))
 		{
 			UuidGenerator uuidg = new UuidGenerator();
-			EntityMetaData tempEntityMetaData = EntityMetaData.newInstance(entityMetaData);
+			EntityMetaData tempEntityMetaData = EntityMetaDataImpl.newInstance(entityMetaData);
 			tempEntityMetaData.setName(uuidg.generateId());
 			tempEntityMetaData.setPackage(new Package("elasticsearch_temporary_entity",
 					"This entity (Original: " + entityMetaData.getName()

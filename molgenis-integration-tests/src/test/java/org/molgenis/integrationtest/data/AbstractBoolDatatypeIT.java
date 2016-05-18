@@ -6,6 +6,7 @@ import static org.testng.Assert.assertEquals;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 
 public abstract class AbstractBoolDatatypeIT extends AbstractDatatypeIT
 {
@@ -13,7 +14,7 @@ public abstract class AbstractBoolDatatypeIT extends AbstractDatatypeIT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EntityMetaData entityMetaData = new EntityMetaData("BoolTest");
+		EntityMetaData entityMetaData = new EntityMetaDataImpl("BoolTest");
 		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(BOOL).setNillable(false);
 		entityMetaData.addAttribute("col2").setDataType(BOOL);
 		entityMetaData.addAttribute("col3").setDataType(BOOL);

@@ -7,17 +7,19 @@ import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
 
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MolgenisUserMetaData extends EntityMetaData
+public class MolgenisUserMetaData extends SystemEntityMetaDataImpl
 {
 	public static final String ENTITY_NAME = "MolgenisUser";
 
-	public MolgenisUserMetaData()
+	@Override
+	public void init()
 	{
-		super(ENTITY_NAME);
+		setName(ENTITY_NAME);
 		setDescription("Anyone who can login");
 
 		addAttribute(MolgenisUser.ID, ROLE_ID).setAuto(true).setVisible(false)

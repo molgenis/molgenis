@@ -7,6 +7,7 @@ import java.util.Arrays;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.fieldtypes.EnumField;
 
 public class AbstractEnumDatatypeIT extends AbstractDatatypeIT
@@ -14,7 +15,7 @@ public class AbstractEnumDatatypeIT extends AbstractDatatypeIT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EntityMetaData entityMetaData = new EntityMetaData("EnumTest");
+		EntityMetaData entityMetaData = new EntityMetaDataImpl("EnumTest");
 
 		EnumField enumField = new EnumField();
 		enumField.setEnumOptions(Arrays.asList("ONE", "TWO"));

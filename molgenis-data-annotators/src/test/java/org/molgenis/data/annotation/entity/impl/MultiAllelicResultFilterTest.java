@@ -13,6 +13,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.filter.MultiAllelicResultFilter;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.testng.Assert;
@@ -51,9 +52,9 @@ public class MultiAllelicResultFilterTest
 	@BeforeMethod
 	public void setUp()
 	{
-		emd = new EntityMetaData("entity");
+		emd = new EntityMetaDataImpl("entity");
 
-		resultEmd = new EntityMetaData("resultEntity");
+		resultEmd = new EntityMetaDataImpl("resultEntity");
 
 		emd.addAttribute(VcfRepository.CHROM_META);
 		emd.addAttribute(VcfRepository.POS_META);
@@ -391,7 +392,7 @@ public class MultiAllelicResultFilterTest
 	{
 		
 		String customAttrb = "MyAnnotation";
-		EntityMetaData multiLineTestEMD = new EntityMetaData("entity");
+		EntityMetaData multiLineTestEMD = new EntityMetaDataImpl("entity");
 
 		multiLineTestEMD.addAttribute(VcfRepository.CHROM_META);
 		multiLineTestEMD.addAttribute(VcfRepository.POS_META);

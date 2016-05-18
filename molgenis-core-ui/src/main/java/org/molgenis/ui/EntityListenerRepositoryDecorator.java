@@ -16,6 +16,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;

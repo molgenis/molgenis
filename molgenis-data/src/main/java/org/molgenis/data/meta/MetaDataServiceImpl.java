@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.MolgenisDataException;
@@ -36,6 +35,7 @@ import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.DependencyResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +52,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 /**
- * MetaData service. Administration of the {@link Package}, {@link EntityMetaData} and {@link AttributeMetaData} of the
+ * MetaData service. Administration of the {@link Package}, {@link EntityMetaDataImpl} and {@link AttributeMetaData} of the
  * metadata of the repositories.
  * 
  * TODO: This class smells. It started out as a simple administration but taken on a new role: to bootstrap the
@@ -105,14 +105,16 @@ public class MetaDataServiceImpl implements MetaDataService
 		this.defaultBackend = backend;
 		backends.put(backend.getName(), backend);
 
-		I18nStringMetaData.INSTANCE.setBackend(backend.getName());
-		LanguageMetaData.INSTANCE.setBackend(backend.getName());
-		PackageMetaData.INSTANCE.setBackend(backend.getName());
-		TagMetaData.INSTANCE.setBackend(backend.getName());
-		EntityMetaDataMetaData.INSTANCE.setBackend(backend.getName());
-		AttributeMetaDataMetaData.INSTANCE.setBackend(backend.getName());
+		// FIXME
+//		I18nStringMetaData.INSTANCE.setBackend(backend.getName());
+//		LanguageMetaData.INSTANCE.setBackend(backend.getName());
+		// FIXME
+//		PackageMetaData.INSTANCE.setBackend(backend.getName());
+//		TagMetaData.INSTANCE.setBackend(backend.getName());
+//		EntityMetaDataMetaData.INSTANCE.setBackend(backend.getName());
+//		AttributeMetaDataMetaData.INSTANCE.setBackend(backend.getName());
 
-		ImportRunMetaData.INSTANCE.setBackend(backend.getName());
+//		ImportRunMetaData.INSTANCE.setBackend(backend.getName());
 
 		bootstrapMetaRepos();
 		return this;
@@ -120,50 +122,50 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	private void bootstrapMetaRepos()
 	{
-		Repository<Entity> languageRepo = defaultBackend.addEntityMeta(LanguageMetaData.INSTANCE);
-		dataService.addRepository(new LanguageRepositoryDecorator(languageRepo, dataService));
+//		Repository<Entity> languageRepo = defaultBackend.addEntityMeta(ApplicationContextProvider.getApplicationContext().getBean(LanguageMetaData.class));
+//		dataService.addRepository(new LanguageRepositoryDecorator(languageRepo, dataService));
+//
+//		Repository<Entity> i18StringsRepo = defaultBackend.addEntityMeta(ApplicationContextProvider.getApplicationContext().getBean(I18nStringMetaData.class));
+//		dataService.addRepository(new I18nStringDecorator(i18StringsRepo));
+//
+//		Supplier<Stream<String>> languageCodes = () -> languageService.getLanguageCodes().stream();
+// FIXME
+//		// Add language attributes to the AttributeMetaDataMetaData
+//		languageCodes.get().map(code -> AttributeMetaDataMetaData.LABEL + '-' + code)
+//				.forEach(AttributeMetaDataMetaData.INSTANCE::addAttribute);
+//
+//		// Add description attributes to the AttributeMetaDataMetaData
+//		languageCodes.get().map(code -> AttributeMetaDataMetaData.DESCRIPTION + '-' + code)
+//				.forEach(attrName -> AttributeMetaDataMetaData.INSTANCE.addAttribute(attrName)
+//						.setDataType(MolgenisFieldTypes.TEXT));
+//
+//		// Add description attributes to the EntityMetaDataMetaData
+//		languageCodes.get().map(code -> EntityMetaDataMetaData.DESCRIPTION + '-' + code)
+//				.forEach(attrName -> EntityMetaDataMetaData.INSTANCE.addAttribute(attrName)
+//						.setDataType(MolgenisFieldTypes.TEXT));
+//
+//		// Add language attributes to the EntityMetaDataMetaData
+//		languageCodes.get().map(code -> EntityMetaDataMetaData.LABEL + '-' + code)
+//				.forEach(EntityMetaDataMetaData.INSTANCE::addAttribute);
+//
+//		// Add language attributes to I18nStringMetaData
+//		languageCodes.get().forEach(I18nStringMetaData.INSTANCE::addLanguage);
+//
+//		Repository<Entity> tagRepo = defaultBackend.addEntityMeta(TagMetaData.INSTANCE);
+//		dataService.addRepository(tagRepo);
 
-		Repository<Entity> i18StringsRepo = defaultBackend.addEntityMeta(I18nStringMetaData.INSTANCE);
-		dataService.addRepository(new I18nStringDecorator(i18StringsRepo));
-
-		Supplier<Stream<String>> languageCodes = () -> languageService.getLanguageCodes().stream();
-
-		// Add language attributes to the AttributeMetaDataMetaData
-		languageCodes.get().map(code -> AttributeMetaDataMetaData.LABEL + '-' + code)
-				.forEach(AttributeMetaDataMetaData.INSTANCE::addAttribute);
-
-		// Add description attributes to the AttributeMetaDataMetaData
-		languageCodes.get().map(code -> AttributeMetaDataMetaData.DESCRIPTION + '-' + code)
-				.forEach(attrName -> AttributeMetaDataMetaData.INSTANCE.addAttribute(attrName)
-						.setDataType(MolgenisFieldTypes.TEXT));
-
-		// Add description attributes to the EntityMetaDataMetaData
-		languageCodes.get().map(code -> EntityMetaDataMetaData.DESCRIPTION + '-' + code)
-				.forEach(attrName -> EntityMetaDataMetaData.INSTANCE.addAttribute(attrName)
-						.setDataType(MolgenisFieldTypes.TEXT));
-
-		// Add language attributes to the EntityMetaDataMetaData
-		languageCodes.get().map(code -> EntityMetaDataMetaData.LABEL + '-' + code)
-				.forEach(EntityMetaDataMetaData.INSTANCE::addAttribute);
-
-		// Add language attributes to I18nStringMetaData
-		languageCodes.get().forEach(I18nStringMetaData.INSTANCE::addLanguage);
-
-		Repository<Entity> tagRepo = defaultBackend.addEntityMeta(TagMetaData.INSTANCE);
-		dataService.addRepository(tagRepo);
-
-		Repository<Entity> packages = defaultBackend.addEntityMeta(PackageRepository.META_DATA);
-		dataService.addRepository(new MetaDataRepositoryDecorator(packages));
-		packageRepository = new PackageRepository(packages);
-
-		attributeMetaDataRepository = new AttributeMetaDataRepository(defaultBackend, languageService);
-		entityMetaDataRepository = new EntityMetaDataRepository(defaultBackend, packageRepository,
-				attributeMetaDataRepository, languageService);
-		attributeMetaDataRepository.setEntityMetaDataRepository(entityMetaDataRepository);
-
-		dataService.addRepository(new MetaDataRepositoryDecorator(attributeMetaDataRepository.getRepository()));
-		dataService.addRepository(new MetaDataRepositoryDecorator(entityMetaDataRepository.getRepository()));
-		entityMetaDataRepository.fillEntityMetaDataCache();
+//		Repository<Entity> packages = defaultBackend.addEntityMeta(PackageRepository.META_DATA);
+//		dataService.addRepository(new MetaDataRepositoryDecorator(packages));
+//		packageRepository = new PackageRepository(packages);
+//
+//		attributeMetaDataRepository = new AttributeMetaDataRepository(defaultBackend, languageService);
+//		entityMetaDataRepository = new EntityMetaDataRepository(defaultBackend, packageRepository,
+//				attributeMetaDataRepository, languageService);
+//		attributeMetaDataRepository.setEntityMetaDataRepository(entityMetaDataRepository);
+//
+//		dataService.addRepository(new MetaDataRepositoryDecorator(attributeMetaDataRepository.getRepository()));
+//		dataService.addRepository(new MetaDataRepositoryDecorator(entityMetaDataRepository.getRepository()));
+//		entityMetaDataRepository.fillEntityMetaDataCache();
 	}
 
 	@Override
@@ -440,38 +442,39 @@ public class MetaDataServiceImpl implements MetaDataService
 	@RunAsSystem
 	public synchronized void onApplicationEvent(ContextRefreshedEvent event)
 	{
-		// Discover all backends
-		Map<String, RepositoryCollection> backendBeans = event.getApplicationContext()
-				.getBeansOfType(RepositoryCollection.class);
-		backendBeans.values().forEach(this::addBackend);
-
-		Map<String, EntityMetaData> emds = event.getApplicationContext().getBeansOfType(EntityMetaData.class);
-
-		// Create repositories from EntityMetaData in EntityMetaData repo
-		for (EntityMetaData emd : entityMetaDataRepository.getMetaDatas())
-		{
-			if (!emd.isAbstract() && !dataService.hasRepository(emd.getName()))
-			{
-				RepositoryCollection col = backends.get(emd.getBackend());
-				if (col == null) throw new MolgenisDataException("Unknown backend [" + emd.getBackend() + "]");
-				Repository<Entity> repo = col.addEntityMeta(emd);
-				dataService.addRepository(repo);
-			}
-		}
-
-		// Discover static EntityMetaData
-		Set<EntityMetaData> staticEmd = new HashSet<>(emds.values());
-		Set<EntityMetaData> allEmd = new HashSet<>(getEntityMetaDatas());
-		allEmd.addAll(staticEmd);
-
-		// Use all EntityMetaData for dependency resolving
-		List<EntityMetaData> resolved = DependencyResolver.resolve(allEmd);
-		resolved.retainAll(staticEmd);// Only keep the static EntityMetaData
-
-		resolved.stream().filter(emd -> !dataService.hasRepository(emd.getName())).forEach(this::addEntityMeta);
-
-		// Update update manageable backends
-		resolved.stream().filter(this::isManageableBackend).forEach(this::updateEntityMeta);
+		// FIXME
+//		// Discover all backends
+//		Map<String, RepositoryCollection> backendBeans = event.getApplicationContext()
+//				.getBeansOfType(RepositoryCollection.class);
+//		backendBeans.values().forEach(this::addBackend);
+//
+//		Map<String, EntityMetaData> emds = event.getApplicationContext().getBeansOfType(EntityMetaData.class);
+//
+//		// Create repositories from EntityMetaData in EntityMetaData repo
+//		for (EntityMetaData emd : entityMetaDataRepository.getMetaDatas())
+//		{
+//			if (!emd.isAbstract() && !dataService.hasRepository(emd.getName()))
+//			{
+//				RepositoryCollection col = backends.get(emd.getBackend());
+//				if (col == null) throw new MolgenisDataException("Unknown backend [" + emd.getBackend() + "]");
+//				Repository<Entity> repo = col.addEntityMeta(emd);
+//				dataService.addRepository(repo);
+//			}
+//		}
+//
+//		// Discover static EntityMetaData
+//		Set<EntityMetaData> staticEmd = new HashSet<>(emds.values());
+//		Set<EntityMetaData> allEmd = new HashSet<>(getEntityMetaDatas());
+//		allEmd.addAll(staticEmd);
+//
+//		// Use all EntityMetaData for dependency resolving
+//		List<EntityMetaData> resolved = DependencyResolver.resolve(allEmd);
+//		resolved.retainAll(staticEmd);// Only keep the static EntityMetaData
+//
+//		resolved.stream().filter(emd -> !dataService.hasRepository(emd.getName())).forEach(this::addEntityMeta);
+//
+//		// Update update manageable backends
+//		resolved.stream().filter(this::isManageableBackend).forEach(this::updateEntityMeta);
 	}
 
 	private boolean isManageableBackend(EntityMetaData emd)

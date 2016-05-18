@@ -31,6 +31,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.MapEntity;
 
@@ -66,7 +67,7 @@ public class OmimRepository extends AbstractRepository
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		EntityMetaData entityMetaData = new EntityMetaData(NAME);
+		EntityMetaDataImpl entityMetaData = new EntityMetaDataImpl(NAME);
 		entityMetaData.addAttribute(OMIM_GENE_SYMBOLS_COL_NAME, ROLE_ID);
 		entityMetaData.addAttribute(OMIM_PHENOTYPE_COL_NAME);
 		entityMetaData.addAttribute(OMIM_MIM_NUMBER_COL_NAME);

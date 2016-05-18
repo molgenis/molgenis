@@ -18,6 +18,7 @@ import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.util.ResourceUtils;
@@ -44,7 +45,7 @@ public class GoNLAnnotatorTest extends AbstractTestNGSpringContextTests
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
-		emd = new EntityMetaData("gonl");
+		emd = new EntityMetaDataImpl("gonl");
 		emd.addAttribute(VcfRepository.CHROM, ROLE_ID);
 		emd.addAttribute(VcfRepository.POS_META);
 		emd.addAttribute(VcfRepository.REF_META);

@@ -1,11 +1,11 @@
 package org.molgenis.gaf;
 
+import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,17 +23,18 @@ public class GafListDbSettings implements GafListSettings
 	}
 
 	@Component
-	public static class Meta extends EntityMetaData
+	public static class Meta extends SystemEntityMetaDataImpl
 	{
 		private static final String ENTITY_NAME = "GafListSettings";
 		private static final String NAME = "Name";
 		private static final String VALUE = "Value";
 
-		public Meta()
+		@Override
+		public void init()
 		{
-			super(ENTITY_NAME);
+			setName(ENTITY_NAME);
 			addAttribute(NAME, ROLE_ID);
-			addAttribute(VALUE).setNillable(false).setDataType(MolgenisFieldTypes.TEXT);
+			addAttribute(VALUE).setNillable(false).setDataType(TEXT);
 		}
 	}
 

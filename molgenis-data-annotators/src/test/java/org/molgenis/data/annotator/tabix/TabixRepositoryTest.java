@@ -21,6 +21,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.annotator.tabix.TabixReader.Iterator;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -38,7 +39,7 @@ public class TabixRepositoryTest
 	public void beforeTest()
 	{
 		initMocks(this);
-		EntityMetaData emd = new EntityMetaData("MyEntity");
+		EntityMetaData emd = new EntityMetaDataImpl("MyEntity");
 		emd.addAttribute(new AttributeMetaData("ID").setAuto(true), ROLE_ID);
 		emd.addAttributes(asList(CHROM_META, POS_META));
 		emd.addAttribute(new AttributeMetaData("Description").setNillable(false));

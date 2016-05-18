@@ -40,6 +40,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.MolgenisTransactionLogEntryMetaData;
 import org.molgenis.data.transaction.MolgenisTransactionLogMetaData;

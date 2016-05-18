@@ -22,6 +22,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.file.FileStore;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -57,7 +58,7 @@ public class RestServiceTest
 		String refEntityName = "refEntity";
 		AttributeMetaData refIdAttr = mock(AttributeMetaData.class);
 		when(refIdAttr.getDataType()).thenReturn(INT);
-		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
+		EntityMetaData refEntityMeta = mock(EntityMetaDataImpl.class);
 		when(refEntityMeta.getName()).thenReturn(refEntityName);
 		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
 		AttributeMetaData attr = mock(AttributeMetaData.class);
@@ -91,7 +92,7 @@ public class RestServiceTest
 		String refEntityName = "refEntity";
 		AttributeMetaData refIdAttr = mock(AttributeMetaData.class);
 		when(refIdAttr.getDataType()).thenReturn(STRING);
-		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
+		EntityMetaData refEntityMeta = mock(EntityMetaDataImpl.class);
 		when(refEntityMeta.getName()).thenReturn(refEntityName);
 		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
 		AttributeMetaData attr = mock(AttributeMetaData.class);

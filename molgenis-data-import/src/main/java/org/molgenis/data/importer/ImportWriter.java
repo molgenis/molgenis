@@ -87,23 +87,29 @@ public class ImportWriter
 	private final PermissionSystemService permissionSystemService;
 	private final TagService<LabeledResource, LabeledResource> tagService;
 	private final MolgenisPermissionService molgenisPermissionService;
+	private final TagMetaData tagMetaData;
+	private final I18nStringMetaData i18nStringMetaData;
 
 	/**
 	 * Creates the ImportWriter
-	 * 
 	 * @param dataService
 	 *            {@link DataService} to query existing repositories and transform entities
 	 * @param permissionSystemService
 	 *            {@link PermissionSystemService} to give permissions on uploaded entities
+	 * @param tagMetaData
+	 * @param i18nStringMetaData
 	 */
 	public ImportWriter(DataService dataService, PermissionSystemService permissionSystemService,
 			TagService<LabeledResource, LabeledResource> tagService,
-			MolgenisPermissionService molgenisPermissionService)
+			MolgenisPermissionService molgenisPermissionService, TagMetaData tagMetaData,
+			I18nStringMetaData i18nStringMetaData)
 	{
-		this.dataService = dataService;
-		this.permissionSystemService = permissionSystemService;
-		this.tagService = tagService;
-		this.molgenisPermissionService = molgenisPermissionService;
+		this.dataService = requireNonNull(dataService);
+		this.permissionSystemService = requireNonNull(permissionSystemService);
+		this.tagService = requireNonNull(tagService);
+		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
+		this.tagMetaData = requireNonNull(tagMetaData);
+		this.i18nStringMetaData = requireNonNull(i18nStringMetaData);
 	}
 
 	// Use transaction isolation level SERIALIZABLE to prevent problems with the async template, to do ddl statements
@@ -156,7 +162,7 @@ public class ImportWriter
 			Repository<Entity> repo = dataService.getRepository(I18nStringMetaData.ENTITY_NAME);
 
 			List<Entity> transformed = i18nStrings.values().stream()
-					.map(e -> new DefaultEntityImporter(I18nStringMetaData.INSTANCE, dataService, e, false))
+					.map(e -> new DefaultEntityImporter(i18nStringMetaData, dataService, e, false))
 					.collect(toList());
 
 			int count = update(repo, transformed, dbAction);
@@ -345,7 +351,7 @@ public class ImportWriter
 		{
 			for (Entity tag : tagRepo)
 			{
-				Entity transformed = new DefaultEntity(TagMetaData.INSTANCE, dataService, tag);
+				Entity transformed = new DefaultEntity(tagMetaData, dataService, tag);
 				Entity existingTag = dataService.findOneById(TagMetaData.ENTITY_NAME,
 						tag.getString(TagMetaData.IDENTIFIER));
 

@@ -4,13 +4,12 @@ import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.springframework.stereotype.Component;
 
 @Component
-public class LoggingEventMetaData extends EntityMetaData
+public class LoggingEventMetaData extends SystemEntityMetaDataImpl
 {
-	public static final LoggingEventMetaData INSTANCE = new LoggingEventMetaData();
 	private static final String ENTITY_NAME = "LoggingEvent";
 	public static final String IDENTIFIER = "identifier";
 	public static final String THREAD = "thread";
@@ -20,9 +19,10 @@ public class LoggingEventMetaData extends EntityMetaData
 	public static final String TIMESTAMP = "timestamp";
 	public static final String STACKTRACE = "stacktrace";
 
-	private LoggingEventMetaData()
+	@Override
+	public void init()
 	{
-		super(ENTITY_NAME);
+		setName(ENTITY_NAME);
 		setBackend(ElasticsearchRepositoryCollection.NAME);
 		addAttribute(IDENTIFIER, ROLE_ID).setVisible(false);
 		addAttribute(TIMESTAMP).setDataType(MolgenisFieldTypes.DATETIME);
@@ -32,5 +32,4 @@ public class LoggingEventMetaData extends EntityMetaData
 		addAttribute(MESSAGE).setDataType(MolgenisFieldTypes.TEXT);
 		addAttribute(STACKTRACE).setDataType(MolgenisFieldTypes.TEXT);
 	}
-
 }

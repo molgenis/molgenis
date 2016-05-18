@@ -3,15 +3,17 @@ package org.molgenis.script;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ScriptMetaData extends EntityMetaData
+public class ScriptMetaData extends SystemEntityMetaDataImpl
 {
-	public ScriptMetaData()
+	@Override
+	public void init()
 	{
-		super(Script.ENTITY_NAME, Script.class);
+		setName(Script.ENTITY_NAME);
 		addAttribute(Script.NAME, ROLE_ID).setNillable(false).setLabel("Name");
 		addAttribute(Script.TYPE).setNillable(false).setLabel("Type").setDataType(MolgenisFieldTypes.XREF)
 				.setRefEntity(ScriptType.META_DATA);

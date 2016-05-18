@@ -48,7 +48,7 @@ class AttributeMetaDataRepository
 {
 	private static final int BATCH_SIZE = 1000;
 
-	public static final AttributeMetaDataMetaData META_DATA = AttributeMetaDataMetaData.INSTANCE;
+	public static final AttributeMetaDataMetaData META_DATA = null; //FIXME AttributeMetaDataMetaData.INSTANCE;
 
 	private final UuidGenerator uuidGenerator;
 	private final Repository<Entity> repository;

@@ -18,6 +18,7 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -33,7 +34,7 @@ public class TransactionLogRepositoryDecoratorTest
 	{
 		decoratedRepo = mock(Repository.class);
 		when(decoratedRepo.getName()).thenReturn("entity");
-		entityMeta = mock(EntityMetaData.class);
+		entityMeta = mock(EntityMetaDataImpl.class);
 		when(decoratedRepo.getEntityMetaData()).thenReturn(entityMeta);
 		transactionLogService = mock(TransactionLogService.class);
 		transactionLogRepositoryDecorator = new TransactionLogRepositoryDecorator(decoratedRepo, transactionLogService);

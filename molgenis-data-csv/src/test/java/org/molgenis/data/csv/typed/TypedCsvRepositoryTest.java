@@ -15,6 +15,7 @@ import org.apache.commons.io.FileUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.AbstractEntity;
 import org.molgenis.util.CloseableIterator;
 import org.springframework.util.FileCopyUtils;
@@ -25,11 +26,11 @@ import com.google.common.collect.Lists;
 
 public class TypedCsvRepositoryTest
 {
-	private static EntityMetaData ENTITY_META_DATA;
+	private static EntityMetaDataImpl ENTITY_META_DATA;
 
 	public TypedCsvRepositoryTest()
 	{
-		EntityMetaData meta = new EntityMetaData("Test", TestEntity.class);
+		EntityMetaDataImpl meta = new EntityMetaDataImpl("Test");
 
 		AttributeMetaData attr = new AttributeMetaData("index", INT);
 		meta.addAttribute(attr, ROLE_ID);

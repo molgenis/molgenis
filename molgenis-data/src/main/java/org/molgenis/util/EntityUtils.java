@@ -12,6 +12,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.springframework.beans.BeanUtils;
 
 import com.google.common.base.Function;
@@ -65,7 +66,7 @@ public class EntityUtils
 			if (referencingAttributes != null)
 			{
 				referencingEntityMetaData.add(
-						new Pair<EntityMetaData, List<AttributeMetaData>>(otherEntityMetaData, referencingAttributes));
+						new Pair<>(otherEntityMetaData, referencingAttributes));
 			}
 		});
 

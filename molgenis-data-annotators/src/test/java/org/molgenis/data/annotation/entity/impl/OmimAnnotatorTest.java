@@ -25,6 +25,7 @@ import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotator.websettings.OmimAnnotatorSettings;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +56,7 @@ public class OmimAnnotatorTest extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> entitiesToAnnotate = newArrayList();
 
-		EntityMetaData inputEntityMetaData = new EntityMetaData("Test");
+		EntityMetaData inputEntityMetaData = new EntityMetaDataImpl("Test");
 		inputEntityMetaData.addAttribute(SnpEffAnnotator.GENE_NAME, ROLE_ID);
 
 		Entity inputEntity = new MapEntity(inputEntityMetaData);
@@ -64,7 +65,7 @@ public class OmimAnnotatorTest extends AbstractTestNGSpringContextTests
 		entitiesToAnnotate.add(inputEntity);
 		Iterator<Entity> results = annotator.annotate(entitiesToAnnotate);
 
-		EntityMetaData expectedEntityMetaData = new EntityMetaData("Test");
+		EntityMetaData expectedEntityMetaData = new EntityMetaDataImpl("Test");
 		expectedEntityMetaData.addAttribute(GENE_NAME, ROLE_ID);
 		expectedEntityMetaData.addAttribute(OMIM_DISORDER).setDataType(TEXT);
 		expectedEntityMetaData.addAttribute(OMIM_CAUSAL_IDENTIFIER).setDataType(TEXT);

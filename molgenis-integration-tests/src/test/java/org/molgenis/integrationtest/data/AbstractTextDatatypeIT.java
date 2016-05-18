@@ -7,13 +7,14 @@ import static org.testng.Assert.assertEquals;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 
 public class AbstractTextDatatypeIT extends AbstractDatatypeIT
 {
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EntityMetaData entityMetaData = new EntityMetaData("TextTest");
+		EntityMetaData entityMetaData = new EntityMetaDataImpl("TextTest");
 		entityMetaData.addAttribute("identifier", ROLE_ID).setDataType(INT).setNillable(false);// Cannot use
 																								// TEXT as
 																								// id

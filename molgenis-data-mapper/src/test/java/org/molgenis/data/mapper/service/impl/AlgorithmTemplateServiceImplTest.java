@@ -16,6 +16,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.support.QueryImpl;
@@ -66,7 +67,7 @@ public class AlgorithmTemplateServiceImplTest extends AbstractTestNGSpringContex
 	{
 		String sourceAttr0Name = "sourceAttr0";
 		String sourceAttr1Name = "sourceAttr1";
-		EntityMetaData sourceEntityMeta = new EntityMetaData("source");
+		EntityMetaData sourceEntityMeta = new EntityMetaDataImpl("source");
 		AttributeMetaData sourceAttr0 = sourceEntityMeta.addAttribute(sourceAttr0Name);
 		AttributeMetaData sourceAttr1 = sourceEntityMeta.addAttribute(sourceAttr1Name);
 

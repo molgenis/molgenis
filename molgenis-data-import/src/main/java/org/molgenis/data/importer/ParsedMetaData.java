@@ -6,6 +6,7 @@ import java.util.Map;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.Package;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.SemanticTag;
@@ -39,7 +40,7 @@ public final class ParsedMetaData
 			throw new NullPointerException("Null entities");
 		}
 
-		ImmutableMap.Builder<String, EntityMetaData> builder = ImmutableMap.<String, EntityMetaData> builder();
+		ImmutableMap.Builder<String, EntityMetaData> builder = ImmutableMap.builder();
 		for (EntityMetaData emd : entities)
 		{
 			builder.put(emd.getName(), emd);
@@ -50,7 +51,7 @@ public final class ParsedMetaData
 			throw new NullPointerException("Null packages");
 		}
 		this.packages = ImmutableMap.copyOf(packages);
-		ImmutableSetMultimap.Builder<EntityMetaData, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>> attrTagBuilder = ImmutableSetMultimap.<EntityMetaData, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>>builder();
+		ImmutableSetMultimap.Builder<EntityMetaData, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>> attrTagBuilder = ImmutableSetMultimap.builder();
 		for (String simpleEntityName : attributeTags.keys())
 		{
 			EntityMetaData emd = this.entities.get(simpleEntityName);

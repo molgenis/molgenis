@@ -35,7 +35,7 @@ public class AppConfig
 	@Bean
 	public UserMetaData userMetaData()
 	{
-		return UserMetaData.INSTANCE;
+		return null; // FIXME
 	}
 
 	@Bean

@@ -2,6 +2,7 @@ package org.molgenis.data.meta;
 
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -14,10 +15,10 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.AUTO;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DATA_TYPE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DEFAULT_VALUE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENTITY_NAME;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.EXPRESSION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.IDENTIFIER;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.INSTANCE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NILLABLE;
@@ -39,6 +40,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
+import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.support.AbstractEntity;
 import org.molgenis.data.support.MapEntity;
@@ -54,13 +56,23 @@ public class AttributeMetaData extends AbstractEntity
 	public AttributeMetaData(Entity entity)
 	{
 		this.entity = requireNonNull(entity);
+		if(!entity.getEntityMetaData().getName().equals(ENTITY_NAME)) {
+			throw new IllegalArgumentException(format("Entity must be of type [%s] instead of [%s]", ENTITY_NAME, entity.getEntityMetaData().getName()));
+		}
 	}
 
+	public AttributeMetaData(EntityMetaData attrMetaDataMetaData)
+	{
+		this.entity = new MapEntity(attrMetaDataMetaData);
+	}
+
+	@Deprecated
 	public AttributeMetaData(String name)
 	{
 		this(name, STRING);
 	}
 
+	@Deprecated
 	public AttributeMetaData(String name, FieldTypeEnum fieldType)
 	{
 		this.entity = new MapEntity(getEntityMetaData());
@@ -84,7 +96,7 @@ public class AttributeMetaData extends AbstractEntity
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return INSTANCE;
+		return SystemEntityMetaDataRegistry.INSTANCE.getSystemEntityMetaData(ENTITY_NAME);
 	}
 
 	@Override
@@ -223,7 +235,7 @@ public class AttributeMetaData extends AbstractEntity
 		return getEntities(PARTS, AttributeMetaData.class);
 	}
 
-	public AttributeMetaData setAttributesMetaData(Iterable<AttributeMetaData> parts)
+	public AttributeMetaData setAttributeParts(Iterable<AttributeMetaData> parts)
 	{
 		set(PARTS, parts);
 		return this;
@@ -236,7 +248,7 @@ public class AttributeMetaData extends AbstractEntity
 	 */
 	public EntityMetaData getRefEntity()
 	{
-		return getEntity(REF_ENTITY, EntityMetaData.class);
+		return getEntity(REF_ENTITY, EntityMetaDataImpl.class);
 	}
 
 	public AttributeMetaData setRefEntity(EntityMetaData refEntity)

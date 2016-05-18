@@ -7,6 +7,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.core.convert.ConversionFailedException;
 import org.testng.annotations.BeforeMethod;
@@ -23,7 +24,7 @@ public class MolgenisRSQLTest
 	public void beforeMethod()
 	{
 		molgenisRSQL = new MolgenisRSQL();
-		entityMetaData = new EntityMetaData("Person");
+		entityMetaData = new EntityMetaDataImpl("Person");
 		entityMetaData.addAttribute("name");
 		entityMetaData.addAttribute("age").setDataType(MolgenisFieldTypes.INT);
 	}

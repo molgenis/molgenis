@@ -8,6 +8,7 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.file.FileMeta;
@@ -18,12 +19,12 @@ import org.molgenis.file.FileMeta;
 public class AttributeFilterToFetchConverter
 {
 	/**
-	 * Converts {@link AttributeFilter} to {@link Fetch} based on {@link EntityMetaData}.
+	 * Converts {@link AttributeFilter} to {@link Fetch} based on {@link EntityMetaDataImpl}.
 	 * 
 	 * @param attrFilter
 	 *            the {@link AttributeFilter} to convert
 	 * @param entityMeta
-	 *            {@link EntityMetaData} for the entity
+	 *            {@link EntityMetaDataImpl} for the entity
 	 * @return {@link Fetch}, or null for 'all attributes' {@link AttributeFilter} there are no refEntities
 	 * @throws UnknownAttributeException
 	 *             if the entity does not have one of the attributes mentioned in the filter

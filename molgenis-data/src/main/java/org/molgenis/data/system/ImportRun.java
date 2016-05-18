@@ -8,7 +8,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.system.ImportRunMetaData;
-
+import org.molgenis.util.ApplicationContextProvider;
 
 public class ImportRun extends org.molgenis.data.support.AbstractEntity implements org.molgenis.data.Entity
 {
@@ -237,7 +237,7 @@ public class ImportRun extends org.molgenis.data.support.AbstractEntity implemen
 	public Iterable<String> getAttributeNames()
 	{
 		Set<String> attributeNames = new LinkedHashSet<String>();
-		for (AttributeMetaData attr : new ImportRunMetaData().getAttributes())
+		for (AttributeMetaData attr : getEntityMetaData().getAttributes())
 		{
 			attributeNames.add(attr.getName());
 		}
@@ -370,6 +370,6 @@ public class ImportRun extends org.molgenis.data.support.AbstractEntity implemen
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return new ImportRunMetaData();
+		return ApplicationContextProvider.getApplicationContext().getBean(ImportRunMetaData.class);
 	}
 }

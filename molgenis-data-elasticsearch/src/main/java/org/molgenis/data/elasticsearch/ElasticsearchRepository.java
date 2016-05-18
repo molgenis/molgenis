@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.QueryImpl;
 
 public class ElasticsearchRepository extends AbstractElasticsearchRepository

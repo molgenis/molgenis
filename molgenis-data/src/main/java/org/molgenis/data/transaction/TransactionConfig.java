@@ -11,43 +11,43 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class TransactionConfig
 {
-	@Autowired
-	private DataService dataService;
+//	@Autowired
+//	private DataService dataService;
+//
+//	@Autowired
+//	private MolgenisTransactionManager transactionManager;
+//
+//	@Value("${transaction.log.description:ElasticSearch}")
+//	private String transactionLogBackend;
+//
+//	@Bean
+//	public MolgenisTransactionLogMetaData molgenisTransactionLogMetaData()
+//	{
+//		return new MolgenisTransactionLogMetaData(transactionLogBackend);
+//	}
+//
+//	@Bean
+//	public MolgenisTransactionLogEntryMetaData molgenisTransactionLogEntryMetaData()
+//	{
+//		return new MolgenisTransactionLogEntryMetaData(molgenisTransactionLogMetaData(), transactionLogBackend);
+//	}
+//
+//	@Bean
+//	public AsyncTransactionLog asyncTransactionLog()
+//	{
+//		return new AsyncTransactionLog(dataService);
+//	}
+//
+//	@Bean
+//	public TransactionLogService transactionLogService()
+//	{
+//		return new TransactionLogService(dataService, molgenisTransactionLogMetaData(),
+//				molgenisTransactionLogEntryMetaData(), asyncTransactionLog());
+//	}
 
-	@Autowired
-	private MolgenisTransactionManager transactionManager;
-
-	@Value("${transaction.log.description:ElasticSearch}")
-	private String transactionLogBackend;
-
-	@Bean
-	public MolgenisTransactionLogMetaData molgenisTransactionLogMetaData()
-	{
-		return new MolgenisTransactionLogMetaData(transactionLogBackend);
-	}
-
-	@Bean
-	public MolgenisTransactionLogEntryMetaData molgenisTransactionLogEntryMetaData()
-	{
-		return new MolgenisTransactionLogEntryMetaData(molgenisTransactionLogMetaData(), transactionLogBackend);
-	}
-
-	@Bean
-	public AsyncTransactionLog asyncTransactionLog()
-	{
-		return new AsyncTransactionLog(dataService);
-	}
-
-	@Bean
-	public TransactionLogService transactionLogService()
-	{
-		return new TransactionLogService(dataService, molgenisTransactionLogMetaData(),
-				molgenisTransactionLogEntryMetaData(), asyncTransactionLog());
-	}
-
-	@PostConstruct
-	public void init()
-	{
-		transactionManager.addTransactionListener(transactionLogService());
-	}
+//	@PostConstruct
+//	public void init()
+//	{
+//		transactionManager.addTransactionListener(transactionLogService());
+//	}
 }

@@ -67,23 +67,23 @@ public class HPOAnnotator
 	@Bean
 	public RepositoryAnnotator hpo()
 	{
-		List<AttributeMetaData> attributes = new ArrayList<>();
-		attributes.add(new AttributeMetaData(HPO_IDS).setDataType(MolgenisFieldTypes.TEXT).setDescription(
-				"HPO identifiers"));
-		attributes.add(new AttributeMetaData(HPO_TERMS).setDataType(MolgenisFieldTypes.TEXT).setDescription(
-				"HPO terms"));
-
-		AnnotatorInfo info = AnnotatorInfo
-				.create(Status.READY,
-						Type.PHENOTYPE_ASSOCIATION,
-						NAME,
-						"The Human Phenotype Ontology (HPO) aims to provide a standardized vocabulary of phenotypic abnormalities encountered in human disease."
-								+ "Terms in the HPO describes a phenotypic abnormality, such as atrial septal defect.The HPO is currently being developed using the medical literature, Orphanet, DECIPHER, and OMIM. HPO currently contains approximately 11,000 terms and over 115,000 annotations to hereditary diseases.",
-						attributes);
-
-		EntityAnnotator entityAnnotator = new AnnotatorImpl(HPO_RESOURCE, info, new GeneNameQueryCreator(),
-				new HPOResultFilter(), dataService, resources,
-				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(HPO_LOCATION, HPOAnnotatorSettings));
+//		List<AttributeMetaData> attributes = new ArrayList<>();
+//		attributes.add(new AttributeMetaData(HPO_IDS).setDataType(MolgenisFieldTypes.TEXT).setDescription(
+//				"HPO identifiers"));
+//		attributes.add(new AttributeMetaData(HPO_TERMS).setDataType(MolgenisFieldTypes.TEXT).setDescription(
+//				"HPO terms"));
+//
+//		AnnotatorInfo info = AnnotatorInfo
+//				.create(Status.READY,
+//						Type.PHENOTYPE_ASSOCIATION,
+//						NAME,
+//						"The Human Phenotype Ontology (HPO) aims to provide a standardized vocabulary of phenotypic abnormalities encountered in human disease."
+//								+ "Terms in the HPO describes a phenotypic abnormality, such as atrial septal defect.The HPO is currently being developed using the medical literature, Orphanet, DECIPHER, and OMIM. HPO currently contains approximately 11,000 terms and over 115,000 annotations to hereditary diseases.",
+//						attributes);
+//
+		EntityAnnotator entityAnnotator = null; //FIXME new AnnotatorImpl(HPO_RESOURCE, info, new GeneNameQueryCreator(),
+//				new HPOResultFilter(), dataService, resources,
+//				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(HPO_LOCATION, HPOAnnotatorSettings));
 
 		return new RepositoryAnnotatorImpl(entityAnnotator);
 	}

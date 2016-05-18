@@ -11,6 +11,7 @@ import java.util.Iterator;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.Package;
 
 import com.google.common.collect.Iterables;
@@ -41,7 +42,7 @@ public abstract class AbstractMetaDataIT extends AbstractDataIntegrationIT
 		// assertEquals(retrieved.getRootPackage().getName(), "test");
 
 		// Create EntityMetaData
-		EntityMetaData entityMetaData = new EntityMetaData("TestEntity", testPackage1);
+		EntityMetaData entityMetaData = new EntityMetaDataImpl("TestEntity", testPackage1);
 		entityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false);
 		AttributeMetaData compound1 = entityMetaData.addAttribute("compoundAttr1").setDataType(
 				MolgenisFieldTypes.COMPOUND);
@@ -49,8 +50,8 @@ public abstract class AbstractMetaDataIT extends AbstractDataIntegrationIT
 				MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
 		AttributeMetaData intAttr = new AttributeMetaData("intAttr", MolgenisFieldTypes.FieldTypeEnum.INT);
 		entityMetaData.setLabelAttribute(intAttr);
-		compound2.setAttributesMetaData(Arrays.asList(intAttr));
-		compound1.setAttributesMetaData(Arrays.asList(compound2));
+		compound2.setAttributeParts(Arrays.asList(intAttr));
+		compound1.setAttributeParts(Arrays.asList(compound2));
 		metaDataService.addEntityMeta(entityMetaData);
 
 		EntityMetaData retrievedEntityMetaData = metaDataService.getEntityMetaData("test_test1_TestEntity");

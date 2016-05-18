@@ -38,6 +38,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.MetaValidationUtils;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
@@ -55,7 +56,7 @@ import com.google.common.collect.Lists;
 
 public class VcfToEntity
 {
-	private final EntityMetaData entityMetaData;
+	private final EntityMetaDataImpl entityMetaData;
 	private final EntityMetaData sampleEntityMetaData;
 	private final VcfMeta vcfMeta;
 
@@ -72,7 +73,7 @@ public class VcfToEntity
 		EntityMetaData result = null;
 		if (formatMetaData.iterator().hasNext())
 		{
-			result = new EntityMetaData(entityName + "_Sample");
+			result = new EntityMetaDataImpl(entityName + "_Sample");
 			AttributeMetaData idAttributeMetaData = new AttributeMetaData(ID, STRING).setAggregatable(true);
 			idAttributeMetaData.setVisible(false);
 
@@ -97,9 +98,9 @@ public class VcfToEntity
 		return result;
 	}
 
-	private EntityMetaData createEntityMetaData(String entityName, VcfMeta vcfMeta)
+	private EntityMetaDataImpl createEntityMetaData(String entityName, VcfMeta vcfMeta)
 	{
-		EntityMetaData entityMetaData = new EntityMetaData(entityName);
+		EntityMetaDataImpl entityMetaData = new EntityMetaDataImpl(entityName);
 		entityMetaData.addAttribute(CHROM_META);
 		entityMetaData.addAttribute(ALT_META);
 		entityMetaData.addAttribute(POS_META);
@@ -136,7 +137,7 @@ public class VcfToEntity
 					? VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION : info.getDescription());
 			metadataInfoField.add(attributeMetaData);
 		}
-		infoMetaData.setAttributesMetaData(metadataInfoField);
+		infoMetaData.setAttributeParts(metadataInfoField);
 		entityMetaData.addAttribute(infoMetaData);
 		if (sampleEntityMetaData != null)
 		{
@@ -373,7 +374,7 @@ public class VcfToEntity
 		}
 	}
 
-	public EntityMetaData getEntityMetaData()
+	public EntityMetaDataImpl getEntityMetaData()
 	{
 		return entityMetaData;
 	}

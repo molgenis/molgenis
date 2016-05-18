@@ -18,6 +18,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.util.MolgenisDateFormat;
@@ -35,7 +36,7 @@ public class EntityToSourceConverterTest
 
 		String refLabelAttributeName = "reflabel";
 		String refMrefAttributeName = "refmref";
-		EntityMetaData refEntityMetaData = new EntityMetaData(refEntityName);
+		EntityMetaData refEntityMetaData = new EntityMetaDataImpl(refEntityName);
 		refEntityMetaData.addAttribute(idAttributeName, ROLE_ID);
 		refEntityMetaData.addAttribute(refLabelAttributeName, ROLE_LABEL).setUnique(true);
 		refEntityMetaData.addAttribute(refMrefAttributeName).setDataType(MolgenisFieldTypes.MREF).setNillable(true)
@@ -61,7 +62,7 @@ public class EntityToSourceConverterTest
 		String textAttributeName = "xtext";
 		String xrefAttributeName = "xxref";
 
-		EntityMetaData entityMetaData = new EntityMetaData("entity");
+		EntityMetaData entityMetaData = new EntityMetaDataImpl("entity");
 		entityMetaData.addAttribute(idAttributeName, ROLE_ID);
 		entityMetaData.addAttribute(boolAttributeName).setDataType(MolgenisFieldTypes.BOOL);
 		entityMetaData.addAttribute(categoricalAttributeName).setDataType(MolgenisFieldTypes.CATEGORICAL)
@@ -71,7 +72,7 @@ public class EntityToSourceConverterTest
 		AttributeMetaData compoundPart1Attribute = new AttributeMetaData(compoundPart1AttributeName)
 				.setDataType(MolgenisFieldTypes.STRING);
 		entityMetaData.addAttribute(compoundAttributeName).setDataType(MolgenisFieldTypes.COMPOUND)
-				.setAttributesMetaData(
+				.setAttributeParts(
 						Arrays.<AttributeMetaData> asList(compoundPart0Attribute, compoundPart1Attribute));
 		entityMetaData.addAttribute(dateAttributeName).setDataType(MolgenisFieldTypes.DATE);
 		entityMetaData.addAttribute(dateTimeAttributeName).setDataType(MolgenisFieldTypes.DATETIME);

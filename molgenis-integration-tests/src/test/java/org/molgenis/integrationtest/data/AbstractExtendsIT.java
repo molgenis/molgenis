@@ -7,22 +7,23 @@ import static org.testng.Assert.assertNull;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 
 public class AbstractExtendsIT extends AbstractDatatypeIT
 {
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EntityMetaData superclass2 = new EntityMetaData("super0").setAbstract(true);
+		EntityMetaData superclass2 = new EntityMetaDataImpl("super0").setAbstract(true);
 		superclass2.addAttribute("col1", ROLE_ID).setDataType(BOOL).setNillable(false);
 		metaDataService.addEntityMeta(superclass2);
 
-		EntityMetaData superclass = new EntityMetaData("super1").setExtends(superclass2).setAbstract(
+		EntityMetaData superclass = new EntityMetaDataImpl("super1").setExtends(superclass2).setAbstract(
 				true);
 		superclass.addAttribute("col2").setDataType(BOOL);
 		metaDataService.addEntityMeta(superclass);
 
-		EntityMetaData subclass = new EntityMetaData("ExtendsTest").setExtends(superclass);
+		EntityMetaData subclass = new EntityMetaDataImpl("ExtendsTest").setExtends(superclass);
 		subclass.addAttribute("col3").setDataType(BOOL).setNillable(true).setDefaultValue("true");
 		metaDataService.addEntityMeta(subclass);
 

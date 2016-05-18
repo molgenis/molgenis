@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 
 public class MappingTarget
 {
@@ -65,7 +66,7 @@ public class MappingTarget
 	 * Adds a new {@link EntityMapping} to this target for a certain source.
 	 * 
 	 * @param source
-	 *            {@link EntityMetaData} for the source entity that is mapped to this target
+	 *            {@link EntityMetaDataImpl} for the source entity that is mapped to this target
 	 * @return the newly created empty {@link EntityMapping}
 	 */
 	public EntityMapping addSource(EntityMetaData source)

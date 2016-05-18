@@ -74,30 +74,31 @@ public class IdCardIndexerServiceImpl
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-		idCardIndexerSettings.addListener(new SettingsEntityListener()
-		{
-			@Override
-			public void postUpdate(Entity entity)
-			{
-				try
-				{
-					updateIndexerScheduler(false);
-				}
-				catch (SchedulerException e)
-				{
-					throw new RuntimeException(e);
-				}
-			}
-		});
-
-		try
-		{
-			updateIndexerScheduler(true);
-		}
-		catch (SchedulerException e)
-		{
-			throw new RuntimeException(e);
-		}
+		// FIXME
+//		idCardIndexerSettings.addListener(new SettingsEntityListener()
+//		{
+//			@Override
+//			public void postUpdate(Entity entity)
+//			{
+//				try
+//				{
+//					updateIndexerScheduler(false);
+//				}
+//				catch (SchedulerException e)
+//				{
+//					throw new RuntimeException(e);
+//				}
+//			}
+//		});
+//
+//		try
+//		{
+//			updateIndexerScheduler(true);
+//		}
+//		catch (SchedulerException e)
+//		{
+//			throw new RuntimeException(e);
+//		}
 	}
 
 	@Override

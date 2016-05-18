@@ -1,5 +1,6 @@
 package org.molgenis.data.meta;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.BOOL;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.SCRIPT;
@@ -11,8 +12,11 @@ import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.LongField;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public class AttributeMetaDataMetaData extends EntityMetaData
+@Component
+public class AttributeMetaDataMetaData extends SystemEntityMetaDataImpl
 {
 	public static final String ENTITY_NAME = "attributes";
 	public static final String IDENTIFIER = "identifier";
@@ -37,12 +41,15 @@ public class AttributeMetaDataMetaData extends EntityMetaData
 	public static final String VALIDATION_EXPRESSION = "validationExpression";
 	public static final String DEFAULT_VALUE = "defaultValue";
 
-	public static final AttributeMetaDataMetaData INSTANCE = new AttributeMetaDataMetaData();
+	private TagMetaData tagMetaData;
 
-	private AttributeMetaDataMetaData()
+	AttributeMetaDataMetaData()
 	{
-		super(ENTITY_NAME);
+	}
 
+	public void init()
+	{
+		setName(ENTITY_NAME);
 		addAttribute(IDENTIFIER, ROLE_ID).setVisible(false);
 		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setNillable(false);
 		addAttribute(DATA_TYPE).setDataType(new EnumField()).setEnumOptions(FieldTypeEnum.getOptionsLowercase())
@@ -61,9 +68,16 @@ public class AttributeMetaDataMetaData extends EntityMetaData
 		addAttribute(RANGE_MAX).setDataType(new LongField());
 		addAttribute(READ_ONLY).setDataType(BOOL).setNillable(false);
 		addAttribute(UNIQUE).setDataType(BOOL).setNillable(false);
-		addAttribute(TAGS).setDataType(MREF).setRefEntity(TagMetaData.INSTANCE);
+		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetaData);
 		addAttribute(VISIBLE_EXPRESSION).setDataType(SCRIPT).setNillable(true);
 		addAttribute(VALIDATION_EXPRESSION).setDataType(SCRIPT).setNillable(true);
 		addAttribute(DEFAULT_VALUE).setDataType(TEXT).setNillable(true);
+	}
+
+	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
+	@Autowired
+	public void setTagMetaData(TagMetaData tagMetaData)
+	{
+		this.tagMetaData = requireNonNull(tagMetaData);
 	}
 }

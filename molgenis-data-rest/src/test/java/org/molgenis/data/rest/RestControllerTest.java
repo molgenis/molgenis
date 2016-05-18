@@ -42,6 +42,7 @@ import org.molgenis.data.Sort.Direction;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.rest.RestControllerTest.RestControllerConfig;
 import org.molgenis.data.rest.service.RestService;
@@ -149,7 +150,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		attrId.setNillable(false);
 		attrId.setVisible(false);
 
-		EntityMetaData entityMetaData = mock(EntityMetaData.class);
+		EntityMetaData entityMetaData = mock(EntityMetaDataImpl.class);
 		when(entityMetaData.getAttribute("name")).thenReturn(attrName);
 		when(entityMetaData.getIdAttribute()).thenReturn(attrId);
 		when(entityMetaData.getAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId, attrEnum));
@@ -365,7 +366,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	{
 		Repository<Entity> repo = mock(Repository.class);
 
-		EntityMetaData entityMetaData = mock(EntityMetaData.class);
+		EntityMetaData entityMetaData = mock(EntityMetaDataImpl.class);
 		when(entityMetaData.getAttribute("name")).thenReturn(null);
 		when(repo.getEntityMetaData()).thenReturn(entityMetaData);
 		when(dataService.getEntityMetaData(ENTITY_NAME)).thenReturn(entityMetaData);
@@ -399,11 +400,11 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(dataService.findOneById(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
 
 		AttributeMetaData attrName = new AttributeMetaData("name", XREF);
-		EntityMetaData meta = mock(EntityMetaData.class);
+		EntityMetaData meta = mock(EntityMetaDataImpl.class);
 		when(dataService.getEntityMetaData(ENTITY_NAME)).thenReturn(meta);
 		when(repo.getEntityMetaData()).thenReturn(meta);
 
-		EntityMetaData refMeta = mock(EntityMetaData.class);
+		EntityMetaData refMeta = mock(EntityMetaDataImpl.class);
 		AttributeMetaData attrNameXREF = new AttributeMetaData("xrefValue", STRING);
 		when(refMeta.getAtomicAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrNameXREF));
 		attrName.setRefEntity(refMeta);
@@ -450,7 +451,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	{
 		Repository<Entity> repo = mock(Repository.class);
 		when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
-		EntityMetaData entityMetaData = mock(EntityMetaData.class);
+		EntityMetaData entityMetaData = mock(EntityMetaDataImpl.class);
 		when(entityMetaData.getIdAttribute()).thenReturn(null);
 		when(repo.getEntityMetaData()).thenReturn(entityMetaData);
 		when(dataService.getEntityMetaData(ENTITY_NAME)).thenReturn(entityMetaData);

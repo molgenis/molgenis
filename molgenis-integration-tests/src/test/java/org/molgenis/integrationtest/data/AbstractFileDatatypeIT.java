@@ -7,6 +7,7 @@ import static org.testng.Assert.assertNotNull;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.file.FileMeta;
 
 public class AbstractFileDatatypeIT extends AbstractDatatypeIT
@@ -14,7 +15,7 @@ public class AbstractFileDatatypeIT extends AbstractDatatypeIT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EntityMetaData entityMetaData = new EntityMetaData("FileTest");
+		EntityMetaData entityMetaData = new EntityMetaDataImpl("FileTest");
 		entityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false);
 		entityMetaData.addAttribute("file").setDataType(FILE).setRefEntity(FileMeta.META_DATA);
 

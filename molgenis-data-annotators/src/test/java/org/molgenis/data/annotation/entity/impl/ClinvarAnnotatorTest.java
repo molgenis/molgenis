@@ -25,6 +25,7 @@ import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotator.websettings.ClinvarAnnotatorSettings;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,7 @@ public class ClinvarAnnotatorTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void annotateIterable()
 	{
-		EntityMetaData sourceMeta = new EntityMetaData("clinvar");
+		EntityMetaData sourceMeta = new EntityMetaDataImpl("clinvar");
 		sourceMeta.addAttribute(CHROM, ROLE_ID);
 		sourceMeta.addAttribute(POS_META);
 		sourceMeta.addAttribute(REF_META);

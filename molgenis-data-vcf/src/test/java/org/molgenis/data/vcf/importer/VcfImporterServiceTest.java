@@ -37,6 +37,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.db.EntitiesValidationReport;
@@ -79,7 +80,7 @@ public class VcfImporterServiceTest
 		String entityName0 = "entity0";
 		List<String> entityNames = Arrays.asList(entityName0);
 
-		EntityMetaData entityMeta0 = mock(EntityMetaData.class);
+		EntityMetaData entityMeta0 = mock(EntityMetaDataImpl.class);
 		when(entityMeta0.getName()).thenReturn(entityName0);
 		when(entityMeta0.getSimpleName()).thenReturn(entityName0);
 		when(entityMeta0.getOwnAttributes()).thenReturn(emptyList());
@@ -131,7 +132,7 @@ public class VcfImporterServiceTest
 		List<String> entityNames = Arrays.asList(entityName0);
 
 		String sampleEntityName0 = "entity0sample";
-		EntityMetaData sampleEntityMeta0 = mock(EntityMetaData.class);
+		EntityMetaData sampleEntityMeta0 = mock(EntityMetaDataImpl.class);
 		when(sampleEntityMeta0.getName()).thenReturn(sampleEntityName0);
 		when(sampleEntityMeta0.getSimpleName()).thenReturn(sampleEntityName0);
 		when(sampleEntityMeta0.getOwnAttributes()).thenReturn(emptyList());
@@ -144,7 +145,7 @@ public class VcfImporterServiceTest
 		when(sampleAttr.getName()).thenReturn(VcfRepository.SAMPLES);
 		when(sampleAttr.getRefEntity()).thenReturn(sampleEntityMeta0);
 		when(sampleAttr.getDataType()).thenReturn(MREF);
-		EntityMetaData entityMeta0 = mock(EntityMetaData.class);
+		EntityMetaData entityMeta0 = mock(EntityMetaDataImpl.class);
 		when(entityMeta0.getName()).thenReturn(entityName0);
 		when(entityMeta0.getSimpleName()).thenReturn(entityName0);
 		when(entityMeta0.getAttribute(VcfRepository.SAMPLES)).thenReturn(sampleAttr);
@@ -252,7 +253,7 @@ public class VcfImporterServiceTest
 		AttributeMetaData attr0 = mock(AttributeMetaData.class);
 		when(attr0.getName()).thenReturn(attrName0);
 
-		EntityMetaData entityMeta0 = mock(EntityMetaData.class);
+		EntityMetaData entityMeta0 = mock(EntityMetaDataImpl.class);
 		when(entityMeta0.getName()).thenReturn(entityName0);
 		when(entityMeta0.getSimpleName()).thenReturn(entityName0);
 		when(entityMeta0.getOwnAttributes()).thenReturn(singletonList(attr0));
@@ -293,7 +294,7 @@ public class VcfImporterServiceTest
 		AttributeMetaData attr0 = mock(AttributeMetaData.class);
 		when(attr0.getName()).thenReturn(attrName0);
 
-		EntityMetaData entityMeta0 = mock(EntityMetaData.class);
+		EntityMetaData entityMeta0 = mock(EntityMetaDataImpl.class);
 		when(entityMeta0.getName()).thenReturn(entityName0);
 		when(entityMeta0.getSimpleName()).thenReturn(entityName0);
 		when(entityMeta0.getOwnAttributes()).thenReturn(singletonList(attr0));
@@ -340,7 +341,7 @@ public class VcfImporterServiceTest
 		when(sampleAttr0.getName()).thenReturn(sampleAttrName0);
 
 		String sampleEntityName0 = "entity0sample";
-		EntityMetaData sampleEntityMeta0 = mock(EntityMetaData.class);
+		EntityMetaData sampleEntityMeta0 = mock(EntityMetaDataImpl.class);
 		when(sampleEntityMeta0.getName()).thenReturn(sampleEntityName0);
 		when(sampleEntityMeta0.getSimpleName()).thenReturn(sampleEntityName0);
 		when(sampleEntityMeta0.getOwnAttributes()).thenReturn(emptyList());
@@ -352,7 +353,7 @@ public class VcfImporterServiceTest
 		when(sampleAttr.getRefEntity()).thenReturn(sampleEntityMeta0);
 		when(sampleAttr.getDataType()).thenReturn(MREF);
 
-		EntityMetaData entityMeta0 = mock(EntityMetaData.class);
+		EntityMetaData entityMeta0 = mock(EntityMetaDataImpl.class);
 		when(entityMeta0.getName()).thenReturn(entityName0);
 		when(entityMeta0.getSimpleName()).thenReturn(entityName0);
 		when(entityMeta0.getAttribute(VcfRepository.SAMPLES)).thenReturn(sampleAttr);
@@ -404,7 +405,7 @@ public class VcfImporterServiceTest
 		when(sampleAttr0.getName()).thenReturn(sampleAttrName0);
 
 		String sampleEntityName0 = "entity0sample";
-		EntityMetaData sampleEntityMeta0 = mock(EntityMetaData.class);
+		EntityMetaData sampleEntityMeta0 = mock(EntityMetaDataImpl.class);
 		when(sampleEntityMeta0.getName()).thenReturn(sampleEntityName0);
 		when(sampleEntityMeta0.getSimpleName()).thenReturn(sampleEntityName0);
 		when(sampleEntityMeta0.getOwnAttributes()).thenReturn(emptyList());
@@ -416,7 +417,7 @@ public class VcfImporterServiceTest
 		when(sampleAttr.getRefEntity()).thenReturn(sampleEntityMeta0);
 		when(sampleAttr.getDataType()).thenReturn(MREF);
 
-		EntityMetaData entityMeta0 = mock(EntityMetaData.class);
+		EntityMetaData entityMeta0 = mock(EntityMetaDataImpl.class);
 		when(entityMeta0.getName()).thenReturn(entityName0);
 		when(entityMeta0.getSimpleName()).thenReturn(entityName0);
 		when(entityMeta0.getAttribute(VcfRepository.SAMPLES)).thenReturn(sampleAttr);
@@ -478,7 +479,7 @@ public class VcfImporterServiceTest
 			@Override
 			public boolean matches(Object item)
 			{
-				if (!(item instanceof EntityMetaData))
+				if (!(item instanceof EntityMetaDataImpl))
 				{
 					return false;
 				}

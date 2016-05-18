@@ -1,14 +1,17 @@
 package org.molgenis.ontology.sorta.meta;
 
+import static org.molgenis.MolgenisFieldTypes.BOOL;
+import static org.molgenis.MolgenisFieldTypes.DECIMAL;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MatchingTaskContentEntityMetaData extends EntityMetaData
+public class MatchingTaskContentEntityMetaData extends SystemEntityMetaDataImpl
 {
 	public final static String ENTITY_NAME = "MatchingTaskContent";
 	public final static String IDENTIFIER = "identifier";
@@ -17,18 +20,16 @@ public class MatchingTaskContentEntityMetaData extends EntityMetaData
 	public final static String SCORE = "score";
 	public final static String VALIDATED = "validated";
 
-	public static final MatchingTaskContentEntityMetaData INSTANCE = new MatchingTaskContentEntityMetaData();
-
-	private MatchingTaskContentEntityMetaData()
+	@Override
+	public void init()
 	{
-		super(ENTITY_NAME);
+		setName(ENTITY_NAME);
 		setAbstract(true);
-		addAttribute(new AttributeMetaData(IDENTIFIER), ROLE_ID);
-		addAttribute(
-				new AttributeMetaData(MATCHED_TERM).setDescription("Matched ontology term").setNillable(true));
-		addAttribute(new AttributeMetaData(SCORE, FieldTypeEnum.DECIMAL)
-				.setDescription("Score of the match").setNillable(true));
-		addAttribute(new AttributeMetaData(VALIDATED, FieldTypeEnum.BOOL)
-				.setDescription("Indication if the match was validated").setNillable(false));
+		addAttribute(IDENTIFIER, ROLE_ID);
+		addAttribute(MATCHED_TERM).setDescription("Matched ontology term").setNillable(true);
+		addAttribute(SCORE).setDataType(DECIMAL)
+				.setDescription("Score of the match").setNillable(true);
+		addAttribute(VALIDATED).setDataType(BOOL)
+				.setDescription("Indication if the match was validated").setNillable(false);
 	}
 }

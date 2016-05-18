@@ -6,13 +6,14 @@ import static org.testng.Assert.assertEquals;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 
 public class AbstractDecimalDatatypeIT extends AbstractDatatypeIT
 {
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EntityMetaData entityMetaData = new EntityMetaData("DecimalTest");
+		EntityMetaData entityMetaData = new EntityMetaDataImpl("DecimalTest");
 		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(DECIMAL).setNillable(false);
 		entityMetaData.addAttribute("col2").setDataType(DECIMAL);
 		entityMetaData.addAttribute("col3").setDataType(DECIMAL);

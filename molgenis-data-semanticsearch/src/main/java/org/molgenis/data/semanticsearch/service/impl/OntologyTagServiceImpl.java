@@ -55,16 +55,18 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	private final TagRepository tagRepository;
 	private final OntologyService ontologyService;
 	private final IdGenerator idGenerator;
+	private final TagMetaData tagMetaData;
 
 	private static final Logger LOG = LoggerFactory.getLogger(OntologyTagServiceImpl.class);
 
-	public OntologyTagServiceImpl(DataService dataService, OntologyService ontologyService,
-			TagRepository tagRepository, IdGenerator idGenerator)
+	public OntologyTagServiceImpl(DataService dataService, OntologyService ontologyService, TagRepository tagRepository,
+			IdGenerator idGenerator, TagMetaData tagMetaData)
 	{
 		this.dataService = dataService;
 		this.tagRepository = tagRepository;
 		this.ontologyService = ontologyService;
 		this.idGenerator = idGenerator;
+		this.tagMetaData = tagMetaData;
 	}
 
 	@Override
@@ -158,7 +160,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	{
 		boolean added = false;
 		Entity attributeEntity = findAttributeEntity(entity, attribute);
-		Entity tagEntity = new DefaultEntity(TagRepository.META_DATA, dataService);
+		Entity tagEntity = new DefaultEntity(tagMetaData, dataService);
 		Stream<OntologyTerm> terms = ontologyTermIRIs.stream().map(ontologyService::getOntologyTerm);
 		OntologyTerm combinedOntologyTerm = OntologyTerm.and(terms.toArray(OntologyTerm[]::new));
 		Relation relation = Relation.forIRI(relationIRI);

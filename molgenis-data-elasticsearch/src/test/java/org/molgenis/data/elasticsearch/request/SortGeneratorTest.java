@@ -17,6 +17,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Sort;
 import org.molgenis.data.Sort.Direction;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -32,7 +33,7 @@ public class SortGeneratorTest
 	{
 		sortGenerator = new SortGenerator();
 		searchRequestBuilder = mock(SearchRequestBuilder.class);
-		EntityMetaData entityMetaData = new EntityMetaData("entity");
+		EntityMetaData entityMetaData = new EntityMetaDataImpl("entity");
 		entityMetaData.addAttribute("int").setDataType(MolgenisFieldTypes.INT);
 		entityMetaData.addAttribute("string").setDataType(MolgenisFieldTypes.STRING);
 		this.entityMetaData = entityMetaData;

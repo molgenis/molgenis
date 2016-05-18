@@ -36,12 +36,12 @@ import com.google.common.collect.Lists;
 
 /**
  * Helper class around the {@link EntityMetaDataMetaData} repository. Caches the metadata in
- * {@link EntityMetaData}. Internal implementation class, use {@link MetaDataServiceImpl} instead.
+ * {@link EntityMetaDataImpl}. Internal implementation class, use {@link MetaDataServiceImpl} instead.
  * 
  */
 class EntityMetaDataRepository
 {
-	public static final EntityMetaDataMetaData META_DATA = EntityMetaDataMetaData.INSTANCE;
+	public static final EntityMetaDataMetaData META_DATA = null; // FIXME EntityMetaDataMetaData.INSTANCE;
 	private final Repository<Entity> repository;
 	private final PackageRepository packageRepository;
 	private final ManageableRepositoryCollection collection;
@@ -65,110 +65,111 @@ class EntityMetaDataRepository
 	}
 
 	/**
-	 * Fills the {@link #entityMetaDataCache} with {@link EntityMetaData}, based on the entities in {@link #repository}
+	 * Fills the {@link #entityMetaDataCache} with {@link EntityMetaDataImpl}, based on the entities in {@link #repository}
 	 * and the {@link Package}s in {@link #packageRepository}. Adds the entities to the {@link #packageRepository}'s
 	 * {@link Package}s.
 	 */
 	void fillEntityMetaDataCache()
 	{
-		List<Entity> entities = new ArrayList<>();
-		entities.add(toEntity(I18nStringMetaData.INSTANCE));
-		entityMetaDataCache.put(I18nStringMetaData.INSTANCE.getName(), I18nStringMetaData.INSTANCE);
-
-		entities.add(toEntity(LanguageMetaData.INSTANCE));
-		entityMetaDataCache.put(LanguageMetaData.INSTANCE.getName(), LanguageMetaData.INSTANCE);
-
-		entities.add(toEntity(PackageMetaData.INSTANCE));
-		entityMetaDataCache.put(PackageMetaData.INSTANCE.getName(), PackageMetaData.INSTANCE);
-
-		entities.add(toEntity(TagMetaData.INSTANCE));
-		entityMetaDataCache.put(TagMetaData.INSTANCE.getName(), TagMetaData.INSTANCE);
-
-		entities.add(toEntity(EntityMetaDataMetaData.INSTANCE));
-		entityMetaDataCache.put(EntityMetaDataMetaData.INSTANCE.getName(), EntityMetaDataMetaData.INSTANCE);
-
-		entities.add(toEntity(AttributeMetaDataMetaData.INSTANCE));
-		entityMetaDataCache.put(AttributeMetaDataMetaData.INSTANCE.getName(), AttributeMetaDataMetaData.INSTANCE);
-
-		entities.add(toEntity(ImportRunMetaData.INSTANCE));
-		entityMetaDataCache.put(ImportRunMetaData.INSTANCE.getName(), ImportRunMetaData.INSTANCE);
-
-		// Fill the cache with EntityMetaData objects
-		for (Entity entity : repository)
-		{
-			entities.add(entity);
-			String name = entity.getString(SIMPLE_NAME);
-			EntityMetaData entityMetaData = new EntityMetaData(name);
-			entityMetaData.setAbstract(entity.getBoolean(ABSTRACT));
-			entityMetaData.setLabel(entity.getString(LABEL));
-			entityMetaData.setDescription(entity.getString(DESCRIPTION));
-			entityMetaData.setBackend(entity.getString(BACKEND));
-
-			// Language attributes
-//			for (String languageCode : languageService.getLanguageCodes())
-//			{
-//				String attributeName = DESCRIPTION + '-' + languageCode;
-//				String description = entity.getString(attributeName);
-//				if (description != null) entityMetaData.setDescription(languageCode, description);
+		// FIXME
+////		List<Entity> entities = new ArrayList<>();
+////		entities.add(toEntity(I18nStringMetaData.INSTANCE));
+////		entityMetaDataCache.put(I18nStringMetaData.INSTANCE.getName(), I18nStringMetaData.INSTANCE);
+////
+////		entities.add(toEntity(LanguageMetaData.INSTANCE));
+////		entityMetaDataCache.put(LanguageMetaData.INSTANCE.getName(), LanguageMetaData.INSTANCE);
+//// FIXME
+////		entities.add(toEntity(PackageMetaData.INSTANCE));
+////		entityMetaDataCache.put(PackageMetaData.INSTANCE.getName(), PackageMetaData.INSTANCE);
+////
+////		entities.add(toEntity(TagMetaData.INSTANCE));
+////		entityMetaDataCache.put(TagMetaData.INSTANCE.getName(), TagMetaData.INSTANCE);
+////
+////		entities.add(toEntity(EntityMetaDataMetaData.INSTANCE));
+////		entityMetaDataCache.put(EntityMetaDataMetaData.INSTANCE.getName(), EntityMetaDataMetaData.INSTANCE);
+////
+////		entities.add(toEntity(AttributeMetaDataMetaData.INSTANCE));
+////		entityMetaDataCache.put(AttributeMetaDataMetaData.INSTANCE.getName(), AttributeMetaDataMetaData.INSTANCE);
 //
-//				attributeName = LABEL + '-' + languageCode;
-//				String label = entity.getString(attributeName);
-//				if (label != null) entityMetaData.setLabel(languageCode, label);
+//		entities.add(toEntity(ImportRunMetaData.INSTANCE));
+//		entityMetaDataCache.put(ImportRunMetaData.INSTANCE.getName(), ImportRunMetaData.INSTANCE);
+//
+//		// Fill the cache with EntityMetaData objects
+//		for (Entity entity : repository)
+//		{
+//			entities.add(entity);
+//			String name = entity.getString(SIMPLE_NAME);
+//			EntityMetaData entityMetaData = new EntityMetaDataImpl(name);
+//			entityMetaData.setAbstract(entity.getBoolean(ABSTRACT));
+//			entityMetaData.setLabel(entity.getString(LABEL));
+//			entityMetaData.setDescription(entity.getString(DESCRIPTION));
+//			entityMetaData.setBackend(entity.getString(BACKEND));
+//
+//			// Language attributes
+////			for (String languageCode : languageService.getLanguageCodes())
+////			{
+////				String attributeName = DESCRIPTION + '-' + languageCode;
+////				String description = entity.getString(attributeName);
+////				if (description != null) entityMetaData.setDescription(languageCode, description);
+////
+////				attributeName = LABEL + '-' + languageCode;
+////				String label = entity.getString(attributeName);
+////				if (label != null) entityMetaData.setLabel(languageCode, label);
+////			}
+//			throw new UnsupportedOperationException(); // FIXME
+////			entityMetaDataCache.put(entity.getString(FULL_NAME), entityMetaData);
+//		}
+//		// Only then create the AttributeMetaData objects, so that lookups of refEntity values work.
+//		for (Entity entity : entities)
+//		{
+//			EntityMetaData entityMetaData = entityMetaDataCache.get(entity.getString(FULL_NAME));
+//			Iterable<Entity> attributeEntities = entity.getEntities(EntityMetaDataMetaData.ATTRIBUTES);
+//			stream(attributeEntities.spliterator(), false).map(attributeRepository::toAttributeMetaData)
+//					.forEach(entityMetaData::addAttribute);
+//		}
+//		for (Entity entity : entities)
+//		{
+//			final Entity extendsEntity = entity.getEntity(EXTENDS);
+//			final EntityMetaData entityMetaData = entityMetaDataCache.get(entity.getString(FULL_NAME));
+//			if (extendsEntity != null)
+//			{
+//				final EntityMetaData extendsEntityMetaData = entityMetaDataCache
+//						.get(extendsEntity.getString(FULL_NAME));
+//				entityMetaData.setExtends(extendsEntityMetaData);
 //			}
-			throw new UnsupportedOperationException(); // FIXME
-//			entityMetaDataCache.put(entity.getString(FULL_NAME), entityMetaData);
-		}
-		// Only then create the AttributeMetaData objects, so that lookups of refEntity values work.
-		for (Entity entity : entities)
-		{
-			EntityMetaData entityMetaData = entityMetaDataCache.get(entity.getString(FULL_NAME));
-			Iterable<Entity> attributeEntities = entity.getEntities(EntityMetaDataMetaData.ATTRIBUTES);
-			stream(attributeEntities.spliterator(), false).map(attributeRepository::toAttributeMetaData)
-					.forEach(entityMetaData::addAttribute);
-		}
-		for (Entity entity : entities)
-		{
-			final Entity extendsEntity = entity.getEntity(EXTENDS);
-			final EntityMetaData entityMetaData = entityMetaDataCache.get(entity.getString(FULL_NAME));
-			if (extendsEntity != null)
-			{
-				final EntityMetaData extendsEntityMetaData = entityMetaDataCache
-						.get(extendsEntity.getString(FULL_NAME));
-				entityMetaData.setExtends(extendsEntityMetaData);
-			}
-			final Entity packageEntity = entity.getEntity(PACKAGE);
-
-			if (packageEntity != null)
-			{
-//				Package p = (Package) packageRepository
-//					.getPackage(packageEntity.getString(PackageMetaData.FULL_NAME));
-//				if (null != p)
-//				{
-//					entityMetaData.setPackage(p);
-////					p.addEntity(entityMetaData);
-//				}
-				throw new UnsupportedOperationException(); // FIXME
-			}
-
-			// set id, label and lookup attrs
-			Entity idAttr = entity.getEntity(ID_ATTRIBUTE);
-			if (idAttr != null)
-			{
-				entityMetaData
-						.setIdAttribute(entityMetaData.getAttribute(idAttr.getString(AttributeMetaDataMetaData.NAME)));
-			}
-			Entity labelAttr = entity.getEntity(LABEL_ATTRIBUTE);
-			if (labelAttr != null)
-			{
-				entityMetaData.setLabelAttribute(
-						entityMetaData.getAttribute(labelAttr.getString(AttributeMetaDataMetaData.NAME)));
-			}
-			Stream<Entity> lookupAttrs = stream(entity.getEntities(LOOKUP_ATTRIBUTES).spliterator(), false);
-//			entityMetaData.setLookupAttributes(lookupAttrs.map(lookupAttrEntity -> {
-//				return entityMetaData.getAttribute(lookupAttrEntity.getString(AttributeMetaDataMetaData.NAME));
-//			}));
-			throw new UnsupportedOperationException(); // FIXME
-		}
+//			final Entity packageEntity = entity.getEntity(PACKAGE);
+//
+//			if (packageEntity != null)
+//			{
+////				Package p = (Package) packageRepository
+////					.getPackage(packageEntity.getString(PackageMetaData.FULL_NAME));
+////				if (null != p)
+////				{
+////					entityMetaData.setPackage(p);
+//////					p.addEntity(entityMetaData);
+////				}
+//				throw new UnsupportedOperationException(); // FIXME
+//			}
+//
+//			// set id, label and lookup attrs
+//			Entity idAttr = entity.getEntity(ID_ATTRIBUTE);
+//			if (idAttr != null)
+//			{
+//				entityMetaData
+//						.setIdAttribute(entityMetaData.getAttribute(idAttr.getString(AttributeMetaDataMetaData.NAME)));
+//			}
+//			Entity labelAttr = entity.getEntity(LABEL_ATTRIBUTE);
+//			if (labelAttr != null)
+//			{
+//				entityMetaData.setLabelAttribute(
+//						entityMetaData.getAttribute(labelAttr.getString(AttributeMetaDataMetaData.NAME)));
+//			}
+//			Stream<Entity> lookupAttrs = stream(entity.getEntities(LOOKUP_ATTRIBUTES).spliterator(), false);
+////			entityMetaData.setLookupAttributes(lookupAttrs.map(lookupAttrEntity -> {
+////				return entityMetaData.getAttribute(lookupAttrEntity.getString(AttributeMetaDataMetaData.NAME));
+////			}));
+//			throw new UnsupportedOperationException(); // FIXME
+//		}
 
 	}
 
@@ -185,11 +186,11 @@ class EntityMetaDataRepository
 	}
 
 	/**
-	 * Adds an {@link EntityMetaData} to the {@link #repository}. Will also add its attributes to the
+	 * Adds an {@link EntityMetaDataImpl} to the {@link #repository}. Will also add its attributes to the
 	 * {@link #attributeRepository}.
 	 * 
 	 * @param entityMetaData
-	 *            the {@link EntityMetaData} to add.
+	 *            the {@link EntityMetaDataImpl} to add.
 	 */
 	public void add(EntityMetaData entityMetaData)
 	{

@@ -23,7 +23,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.annotator.tabix.TabixRepository;
 import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.util.ResourceUtils;
@@ -33,12 +33,12 @@ import org.testng.annotations.Test;
 public class TabixRepositoryTest
 {
 	private TabixRepository tabixRepository;
-	private EntityMetaData repoMetaData;
+	private EntityMetaDataImpl repoMetaData;
 
 	@BeforeTest
 	public void beforeTest() throws IOException
 	{
-		repoMetaData = new EntityMetaData("CaddTest");
+		repoMetaData = new EntityMetaDataImpl("CaddTest");
 		repoMetaData.addAttribute(CHROM_META);
 		repoMetaData.addAttribute(POS_META);
 		repoMetaData.addAttribute(REF_META);

@@ -16,6 +16,7 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;
 import org.molgenis.data.processor.TrimProcessor;
@@ -25,7 +26,7 @@ import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
 
 public class SortaCsvRepository extends AbstractRepository
 {
-	private EntityMetaData entityMetaData = null;
+	private EntityMetaDataImpl entityMetaData = null;
 	private final CsvRepository csvRepository;
 	private final String entityName;
 	private final String entityLabel;
@@ -52,11 +53,10 @@ public class SortaCsvRepository extends AbstractRepository
 	{
 		if (entityMetaData == null)
 		{
-			entityMetaData = EntityMetaData.newInstance(csvRepository.getEntityMetaData());
+			entityMetaData = EntityMetaDataImpl.newInstance(csvRepository.getEntityMetaData());
 			entityMetaData.setName(entityName);
 			entityMetaData.setLabel(entityLabel);
-			entityMetaData.addAttribute(new AttributeMetaData(ALLOWED_IDENTIFIER).setNillable(false),
-					ROLE_ID);
+			entityMetaData.addAttribute(ALLOWED_IDENTIFIER, ROLE_ID).setNillable(false);
 			AttributeMetaData nameAttribute = entityMetaData.getAttribute(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD);
 			if (nameAttribute != null)
 			{

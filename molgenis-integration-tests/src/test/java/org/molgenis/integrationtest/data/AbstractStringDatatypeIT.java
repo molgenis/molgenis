@@ -6,13 +6,14 @@ import static org.testng.Assert.assertEquals;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 
 public class AbstractStringDatatypeIT extends AbstractDatatypeIT
 {
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EntityMetaData entityMetaData = new EntityMetaData("StringTest");
+		EntityMetaData entityMetaData = new EntityMetaDataImpl("StringTest");
 		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(STRING).setNillable(false);
 		entityMetaData.addAttribute("col2").setDataType(STRING);
 

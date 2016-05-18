@@ -26,6 +26,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.EnumField;
@@ -68,13 +69,13 @@ public class QueryGeneratorTest
 	{
 		searchRequestBuilder = mock(SearchRequestBuilder.class);
 
-		EntityMetaData refEntityMetaData = new EntityMetaData("ref_entity");
+		EntityMetaData refEntityMetaData = new EntityMetaDataImpl("ref_entity");
 		refEntityMetaData.addAttribute(idAttributeName, ROLE_ID);
 		refEntityMetaData.addAttribute(refStringAttributeName, ROLE_LABEL).setUnique(true);
 		refEntityMetaData.addAttribute(refMrefAttributeName).setDataType(MolgenisFieldTypes.MREF).setNillable(true)
 				.setRefEntity(refEntityMetaData);
 
-		EntityMetaData entityMetaData = new EntityMetaData("entity");
+		EntityMetaData entityMetaData = new EntityMetaDataImpl("entity");
 		entityMetaData.addAttribute(idAttributeName, ROLE_ID);
 		entityMetaData.addAttribute(boolAttributeName).setDataType(MolgenisFieldTypes.BOOL);
 		entityMetaData.addAttribute(categoricalAttributeName).setDataType(MolgenisFieldTypes.CATEGORICAL)
@@ -84,7 +85,7 @@ public class QueryGeneratorTest
 		AttributeMetaData compoundPart1Attribute = new AttributeMetaData(compoundPart1AttributeName)
 				.setDataType(MolgenisFieldTypes.STRING);
 		entityMetaData.addAttribute(compoundAttributeName).setDataType(MolgenisFieldTypes.COMPOUND)
-				.setAttributesMetaData(
+				.setAttributeParts(
 						Arrays.<AttributeMetaData> asList(compoundPart0Attribute, compoundPart1Attribute));
 		entityMetaData.addAttribute(dateAttributeName).setDataType(MolgenisFieldTypes.DATE);
 		entityMetaData.addAttribute(dateTimeAttributeName).setDataType(MolgenisFieldTypes.DATETIME);

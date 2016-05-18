@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
  * dataexplorer will be overwritten again on the next startup.
  */
 @Component
-public class I18nStringsPopulator implements ApplicationListener<ContextRefreshedEvent>, Ordered
+public class I18nStringsPopulator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(I18nStringsPopulator.class);
 
@@ -45,10 +45,8 @@ public class I18nStringsPopulator implements ApplicationListener<ContextRefreshe
 		this.fileStore = fileStore;
 	}
 
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
+	public void populate()
 	{
-		LOG.info("Importing i18n strings...");
 		final String i18nFileName = "i18n.xlsx";
 
 		// "i18n is saved as a Application/Library resource.
@@ -77,13 +75,5 @@ public class I18nStringsPopulator implements ApplicationListener<ContextRefreshe
 		{
 			throw new RuntimeException(e);
 		}
-
-		LOG.info("Importing i18n strings done");
-	}
-
-	@Override
-	public int getOrder()
-	{
-		return Ordered.LOWEST_PRECEDENCE;
 	}
 }

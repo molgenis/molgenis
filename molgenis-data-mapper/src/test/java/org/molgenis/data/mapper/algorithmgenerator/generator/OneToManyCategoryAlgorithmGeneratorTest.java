@@ -16,6 +16,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -46,7 +47,7 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 		DataService dataService = Mockito.mock(DataService.class);
 		categoryAlgorithmGenerator = new OneToManyCategoryAlgorithmGenerator(dataService);
 
-		EntityMetaData targetRefEntityMetaData = new EntityMetaData("POTATO_REF");
+		EntityMetaData targetRefEntityMetaData = new EntityMetaDataImpl("POTATO_REF");
 		AttributeMetaData targetCodeAttributeMetaData = new AttributeMetaData("code", INT);
 		AttributeMetaData targetLabelAttributeMetaData = new AttributeMetaData("label", STRING);
 		targetRefEntityMetaData.addAttribute(targetCodeAttributeMetaData, ROLE_ID);
@@ -71,7 +72,7 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 			}
 		});
 
-		targetEntityMetaData = new EntityMetaData("target");
+		targetEntityMetaData = new EntityMetaDataImpl("target");
 		targetEntityMetaData.addAttribute(targetAttributeMetaData);
 
 		EntityMetaData sourceRefEntityMetaData = createEntityMetaData("LifeLines_POTATO_REF");
@@ -145,14 +146,14 @@ public class OneToManyCategoryAlgorithmGeneratorTest
 			}
 		});
 
-		sourceEntityMetaData = new EntityMetaData("source");
+		sourceEntityMetaData = new EntityMetaDataImpl("source");
 		sourceEntityMetaData.addAttributes(
 				Lists.newArrayList(sourceAttributeMetaData, sourceAttributeMetaData1, sourceAttributeMetaData2));
 	}
 
 	private EntityMetaData createEntityMetaData(String entityName)
 	{
-		EntityMetaData sourceRefEntityMetaData = new EntityMetaData(entityName);
+		EntityMetaData sourceRefEntityMetaData = new EntityMetaDataImpl(entityName);
 
 		AttributeMetaData sourceCodeAttributeMetaData = new AttributeMetaData("code", INT);
 		AttributeMetaData sourceLabelAttributeMetaData = new AttributeMetaData("label", STRING);

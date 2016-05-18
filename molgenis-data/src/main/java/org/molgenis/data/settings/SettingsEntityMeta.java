@@ -2,23 +2,31 @@ package org.molgenis.data.settings;
 
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
-import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.Package;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SettingsEntityMeta extends EntityMetaData
+public class SettingsEntityMeta extends SystemEntityMetaDataImpl
 {
 	public static final String ENTITY_NAME = "settings";
 	public static final String PACKAGE_NAME = "settings";
-	public static final Package PACKAGE_SETTINGS = new Package(PACKAGE_NAME, "Application and plugin settings");
 	public static final String ID = "id";
 
-	public SettingsEntityMeta()
+	private SettingsPackage settingsPackage;
+
+	@Override
+	public void init()
 	{
-		super(ENTITY_NAME);
+		setName(ENTITY_NAME);
 		setAbstract(true);
-		setPackage(PACKAGE_SETTINGS);
+		setPackage(settingsPackage);
 		addAttribute(ID, ROLE_ID).setLabel("Id").setVisible(false);
+	}
+
+	@Autowired
+	public void setSettingsPackage(SettingsPackage settingsPackage) {
+		this.settingsPackage = settingsPackage;
 	}
 }

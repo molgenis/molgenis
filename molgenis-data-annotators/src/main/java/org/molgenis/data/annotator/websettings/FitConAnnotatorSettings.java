@@ -24,6 +24,11 @@ public class FitConAnnotatorSettings extends DefaultSettingsEntity
 		public Meta()
 		{
 			super(ID);
+		}
+
+		@Override
+		public void init()
+		{
 			setLabel("Fitcon annotator settings");
 			addAttribute(FITCON_LOCATION).setLabel("Fitcon file location");
 		}

@@ -12,18 +12,18 @@ import static org.molgenis.ontology.sorta.job.SortaJobExecution.SOURCE_ENTITY;
 import static org.molgenis.ontology.sorta.job.SortaJobExecution.THRESHOLD;
 
 import org.molgenis.data.jobs.JobExecutionMetaData;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.molgenis.ontology.sorta.job.SortaJobExecution;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SortaJobExecutionMetaData extends EntityMetaData
+public class SortaJobExecutionMetaData extends SystemEntityMetaDataImpl
 {
-	public final static SortaJobExecutionMetaData INSTANCE = new SortaJobExecutionMetaData();
-
-	public SortaJobExecutionMetaData()
+	@Override
+	public void init()
 	{
-		super(ENTITY_NAME, SortaJobExecution.class);
+		setName(ENTITY_NAME);
 		setExtends(new JobExecutionMetaData());
 		addAttribute(NAME).setDataType(STRING).setNillable(false);
 		addAttribute(RESULT_ENTITY).setDataType(STRING).setNillable(false);

@@ -4,8 +4,10 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.support.AbstractEntity;
+import org.molgenis.util.ApplicationContextProvider;
 
 // TODO validate IRI
 // TODO extends typed entity that stores entity and handles get/sets, also apply to other meta data entities
@@ -21,7 +23,7 @@ public class Tag extends AbstractEntity
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return TagMetaData.INSTANCE;
+		return ApplicationContextProvider.getApplicationContext().getBean(TagMetaData.class);
 	}
 
 	public String getIdentifier()

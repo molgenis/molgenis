@@ -87,13 +87,13 @@ public class MetaValidationUtilsTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateEntityMetaDataTooLong()
 	{
-		EntityMetaData emd = new EntityMetaData("entity");
+		EntityMetaData emd = new EntityMetaDataImpl("entity");
 
 		List<AttributeMetaData> compAttrs = new ArrayList<>();
 		compAttrs.add(new AttributeMetaData("aCompStringWayTooLongToUseAsAnAttributeName1")
 				.setDataType(MolgenisFieldTypes.STRING));
 		compAttrs.add(new AttributeMetaData("aCompString2").setDataType(MolgenisFieldTypes.STRING));
-		emd.addAttribute("aComp").setDataType(MolgenisFieldTypes.COMPOUND).setAttributesMetaData(compAttrs);
+		emd.addAttribute("aComp").setDataType(MolgenisFieldTypes.COMPOUND).setAttributeParts(compAttrs);
 		emd.addAttribute("aString", ROLE_ID);
 
 		MetaValidationUtils.validateEntityMetaData(emd);
@@ -102,12 +102,12 @@ public class MetaValidationUtilsTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateEntityMetaDataStartsWithDigit()
 	{
-		EntityMetaData emd = new EntityMetaData("entity");
+		EntityMetaData emd = new EntityMetaDataImpl("entity");
 
 		List<AttributeMetaData> compAttrs = new ArrayList<>();
 		compAttrs.add(new AttributeMetaData("aCompString1").setDataType(MolgenisFieldTypes.STRING));
 		compAttrs.add(new AttributeMetaData("2aCompString").setDataType(MolgenisFieldTypes.STRING));
-		emd.addAttribute("aComp").setDataType(MolgenisFieldTypes.COMPOUND).setAttributesMetaData(compAttrs);
+		emd.addAttribute("aComp").setDataType(MolgenisFieldTypes.COMPOUND).setAttributeParts(compAttrs);
 		emd.addAttribute("aString", ROLE_ID);
 
 		MetaValidationUtils.validateEntityMetaData(emd);
@@ -116,12 +116,12 @@ public class MetaValidationUtilsTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateEntityMetaDataInvalidChar()
 	{
-		EntityMetaData emd = new EntityMetaData("entity");
+		EntityMetaData emd = new EntityMetaDataImpl("entity");
 
 		List<AttributeMetaData> compAttrs = new ArrayList<>();
 		compAttrs.add(new AttributeMetaData("aCompString1").setDataType(MolgenisFieldTypes.STRING));
 		compAttrs.add(new AttributeMetaData("aCompString2").setDataType(MolgenisFieldTypes.STRING));
-		emd.addAttribute("a.Comp").setDataType(MolgenisFieldTypes.COMPOUND).setAttributesMetaData(compAttrs);
+		emd.addAttribute("a.Comp").setDataType(MolgenisFieldTypes.COMPOUND).setAttributeParts(compAttrs);
 		emd.addAttribute("aString", ROLE_ID);
 
 		MetaValidationUtils.validateEntityMetaData(emd);
@@ -130,7 +130,7 @@ public class MetaValidationUtilsTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateEntityMetaDataIdAttributeWithDefaultValue()
 	{
-		EntityMetaData emd = new EntityMetaData("entity");
+		EntityMetaData emd = new EntityMetaDataImpl("entity");
 		emd.addAttribute("id", ROLE_ID).setDefaultValue("5");
 
 		MetaValidationUtils.validateEntityMetaData(emd);
@@ -139,7 +139,7 @@ public class MetaValidationUtilsTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateEntityMetaDataUniqueAttributeWithDefaultValue()
 	{
-		EntityMetaData emd = new EntityMetaData("entity");
+		EntityMetaData emd = new EntityMetaDataImpl("entity");
 		emd.addAttribute("id", ROLE_ID);
 		emd.addAttribute("uniqueAttribute").setUnique(true).setDefaultValue("5");
 
@@ -149,7 +149,7 @@ public class MetaValidationUtilsTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateEntityComputedAttributeWithDefaultValue()
 	{
-		EntityMetaData emd = new EntityMetaData("entity");
+		EntityMetaData emd = new EntityMetaDataImpl("entity");
 		emd.addAttribute("id", ROLE_ID);
 		emd.addAttribute("expressionAttribute").setExpression("$('id').value()").setDefaultValue("5");
 
@@ -159,7 +159,7 @@ public class MetaValidationUtilsTest
 	@Test
 	public void testValidateEntityMetaDataOkayAttributeWithDefaultValue()
 	{
-		EntityMetaData emd = new EntityMetaData("entity");
+		EntityMetaData emd = new EntityMetaDataImpl("entity");
 		emd.addAttribute("id", ROLE_ID);
 		emd.addAttribute("blah").setDefaultValue("5");
 

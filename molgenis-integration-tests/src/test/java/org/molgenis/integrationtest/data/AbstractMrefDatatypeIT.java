@@ -14,6 +14,7 @@ import java.util.Iterator;
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.DefaultEntity;
 
 public class AbstractMrefDatatypeIT extends AbstractDatatypeIT
@@ -24,17 +25,17 @@ public class AbstractMrefDatatypeIT extends AbstractDatatypeIT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		refEntityMetaData = new EntityMetaData("StringTarget");
+		refEntityMetaData = new EntityMetaDataImpl("StringTarget");
 		refEntityMetaData.addAttribute("label", ROLE_LABEL);
 		refEntityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false);
 		refEntityMetaData.addAttribute("label");
 		metaDataService.addEntityMeta(refEntityMetaData);
 
-		refEntity2MetaData = new EntityMetaData("IntTarget");
+		refEntity2MetaData = new EntityMetaDataImpl("IntTarget");
 		refEntity2MetaData.addAttribute("identifier", ROLE_ID).setDataType(INT).setNillable(false);
 		metaDataService.addEntityMeta(refEntity2MetaData);
 
-		EntityMetaData entityMetaData = new EntityMetaData("MrefTest");
+		EntityMetaData entityMetaData = new EntityMetaDataImpl("MrefTest");
 		entityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false);
 		entityMetaData.addAttribute("stringRef").setDataType(MREF).setRefEntity(refEntityMetaData).setNillable(false);
 		entityMetaData.addAttribute("intRef").setDataType(MREF).setRefEntity(refEntity2MetaData).setNillable(true);

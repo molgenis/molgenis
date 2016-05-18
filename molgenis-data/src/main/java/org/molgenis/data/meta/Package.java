@@ -7,7 +7,6 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.PackageMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.PackageMetaData.ENTITY_NAME;
 import static org.molgenis.data.meta.PackageMetaData.FULL_NAME;
-import static org.molgenis.data.meta.PackageMetaData.INSTANCE;
 import static org.molgenis.data.meta.PackageMetaData.PARENT;
 import static org.molgenis.data.meta.PackageMetaData.SIMPLE_NAME;
 import static org.molgenis.data.meta.PackageMetaData.TAGS;
@@ -30,8 +29,6 @@ public class Package extends AbstractEntity
 
 	public static final String DEFAULT_PACKAGE_NAME = "base";
 	public static final String PACKAGE_SEPARATOR = "_";
-
-	public static final Package defaultPackage = new Package(DEFAULT_PACKAGE_NAME, "The default package");
 
 	public Package(Entity entity)
 	{
@@ -81,7 +78,7 @@ public class Package extends AbstractEntity
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return INSTANCE;
+		return ApplicationContextProvider.getApplicationContext().getBean(PackageMetaData.class);
 	}
 
 	@Override
@@ -215,11 +212,11 @@ public class Package extends AbstractEntity
 	 *
 	 * @return package entities
 	 */
-	public Iterable<EntityMetaData> getEntityMetaDatas()
+	public Iterable<EntityMetaDataImpl> getEntityMetaDatas()
 	{
 		// TODO Use one-to-many relationship for EntityMetaData.package
 		DataService dataService = ApplicationContextProvider.getApplicationContext().getBean(DataService.class);
-		Query<EntityMetaData> query = dataService.query(EntityMetaDataMetaData.ENTITY_NAME, EntityMetaData.class)
+		Query<EntityMetaDataImpl> query = dataService.query(EntityMetaDataMetaData.ENTITY_NAME, EntityMetaDataImpl.class)
 				.eq(EntityMetaDataMetaData.PACKAGE, getName());
 		return () -> query.findAll().iterator();
 	}

@@ -16,7 +16,6 @@ import org.molgenis.data.support.QueryImpl;
  */
 public class TagRepository
 {
-	public static final TagMetaData META_DATA = TagMetaData.INSTANCE;
 	private final IdGenerator idGenerator;
 	private final Repository<Entity> repository;
 
@@ -29,7 +28,7 @@ public class TagRepository
 	/**
 	 * Fetches a tag from the repository. Creates a new one if it does not yet exist.
 	 * 
-	 * @param objectIri
+	 * @param objectIRI
 	 *            IRI of the object
 	 * @param label
 	 *            label of the object

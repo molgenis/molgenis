@@ -8,13 +8,14 @@ import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
 import java.util.Arrays;
 
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.molgenis.fieldtypes.EnumField;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ImportRunMetaData extends EntityMetaData
+public class ImportRunMetaData extends SystemEntityMetaDataImpl
 {
+	public static final String ENTITY_NAME = "ImportRun";
 	public static final String ID = "id";
 	public static final String STARTDATE = "startDate";
 	public static final String ENDDATE = "endDate";
@@ -25,11 +26,14 @@ public class ImportRunMetaData extends EntityMetaData
 	public static final String IMPORTEDENTITIES = "importedEntities";
 	public static final String NOTIFY = "notify";
 
-	public static final ImportRunMetaData INSTANCE = new ImportRunMetaData();
-
-	public ImportRunMetaData()
+	private ImportRunMetaData()
 	{
-		super("ImportRun");
+	}
+
+	@Override
+	public void init()
+	{
+		setName(ENTITY_NAME);
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false)
 				.setDescription("automatically generated internal id, only for internal use.");
 		addAttribute(STARTDATE).setDataType(DATETIME).setNillable(false).setDescription("");

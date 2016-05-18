@@ -11,11 +11,10 @@ import org.molgenis.data.support.DefaultEntity;
 public class FileIngest extends DefaultEntity
 {
 	private static final long serialVersionUID = 1L;
-	public static final EntityMetaData META_DATA = new FileIngestMetaData();
 
 	public FileIngest(DataService dataService)
 	{
-		super(META_DATA, dataService);
+		super(FileIngestMetaData.get(), dataService);
 	}
 
 	public String getIdentifier()

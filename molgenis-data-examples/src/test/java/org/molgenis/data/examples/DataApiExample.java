@@ -10,6 +10,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +71,7 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 	public void testDynamic()
 	{
 		// Create new dynamic repo
-		EntityMetaData emd = new EntityMetaData("City");
+		EntityMetaData emd = new EntityMetaDataImpl("City");
 		emd.addAttribute("name", ROLE_ID);
 		emd.addAttribute("population").setDataType(MolgenisFieldTypes.INT);
 
@@ -112,7 +113,7 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 		dataService.getMeta().forEach((backend) -> System.out.println(backend.getName()));
 
 		// Add cities to MyRepo
-		EntityMetaData emd = new EntityMetaData("City1");
+		EntityMetaData emd = new EntityMetaDataImpl("City1");
 		emd.setBackend("MyRepos");
 		emd.addAttribute("name", ROLE_ID);
 		emd.addAttribute("population").setDataType(MolgenisFieldTypes.INT);

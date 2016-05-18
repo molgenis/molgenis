@@ -24,6 +24,7 @@ import java.util.Arrays;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.vcf.VcfReader;
 import org.molgenis.vcf.VcfRecord;
@@ -64,7 +65,7 @@ public class VcfToEntityTest
 	@Test
 	public void testGetEntityMetaData()
 	{
-		EntityMetaData expected = new EntityMetaData("EntityName");
+		EntityMetaData expected = new EntityMetaDataImpl("EntityName");
 		expected.addAttributes(
 				Arrays.asList(CHROM_META, ALT_META, POS_META, REF_META, FILTER_META, QUAL_META, ID_META));
 		AttributeMetaData internalIdMeta = new AttributeMetaData(INTERNAL_ID, STRING);

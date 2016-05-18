@@ -25,6 +25,7 @@ import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.MapEntity;
@@ -70,8 +71,8 @@ public class AttributeMappingRepositoryImplTest extends AbstractTestNGSpringCont
 		List<Entity> attributeMappingEntities = new ArrayList<Entity>();
 		attributeMappingEntities.add(attributeMappingEntity);
 
-		EntityMetaData sourceEntityMetaData = new EntityMetaData("source");
-		EntityMetaData targetEntityMetaData = new EntityMetaData("target");
+		EntityMetaData sourceEntityMetaData = new EntityMetaDataImpl("source");
+		EntityMetaData targetEntityMetaData = new EntityMetaDataImpl("target");
 		targetEntityMetaData.addAttribute(targetAttributeMetaData);
 
 		assertEquals(attributeMappingRepository.getAttributeMappings(attributeMappingEntities, sourceEntityMetaData,
@@ -139,7 +140,7 @@ public class AttributeMappingRepositoryImplTest extends AbstractTestNGSpringCont
 		AttributeMetaData attr1 = new AttributeMetaData("attribute_1");
 		AttributeMetaData attr2 = new AttributeMetaData("attribute_2");
 
-		EntityMetaData sourceEntityMetaData = new EntityMetaData("source");
+		EntityMetaData sourceEntityMetaData = new EntityMetaDataImpl("source");
 		sourceEntityMetaData.addAttribute(attr1);
 		sourceEntityMetaData.addAttribute(attr2);
 

@@ -56,7 +56,7 @@ public class FileIngesterQuartzJobTest
 
 		FileIngest fileIngest = new FileIngest(dataServiceMock);
 		fileIngest.set(FileIngestMetaData.FAILURE_EMAIL, "x@y.z");
-		Entity targetEntity = new DefaultEntity(EntityMetaDataMetaData.INSTANCE, dataServiceMock);
+		Entity targetEntity = new DefaultEntity(null /*EntityMetaDataMetaData.get()*/, dataServiceMock);
 		targetEntity.set(EntityMetaDataMetaData.FULL_NAME, "org_molgenis_test_TypeTest");
 		fileIngest.set(FileIngestMetaData.ENTITY_META_DATA, targetEntity);
 		when(dataServiceMock.findOneById(FileIngestMetaData.ENTITY_NAME, "abcde", FileIngest.class)).thenReturn(fileIngest);

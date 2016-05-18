@@ -31,6 +31,7 @@ import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotator.websettings.CGDAnnotatorSettings;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +53,7 @@ public class CGDAnnotatorTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void annotateTestMatch()
 	{
-		EntityMetaData emdIn = new EntityMetaData("Test");
+		EntityMetaData emdIn = new EntityMetaDataImpl("Test");
 		emdIn.addAttribute(GENE.getAttributeName(), ROLE_ID);
 		Entity inputEntity = new MapEntity(emdIn);
 		inputEntity.set(GENE.getAttributeName(), "LEPR");
@@ -101,7 +102,7 @@ public class CGDAnnotatorTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void annotateTestNoMatch()
 	{
-		EntityMetaData emdIn = new EntityMetaData("Test");
+		EntityMetaData emdIn = new EntityMetaDataImpl("Test");
 		emdIn.addAttribute(GENE.getAttributeName(), ROLE_ID);
 
 		Entity inputEntity = new MapEntity(emdIn);

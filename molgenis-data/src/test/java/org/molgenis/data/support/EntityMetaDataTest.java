@@ -15,6 +15,7 @@ import java.util.Arrays;
 
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.Package;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -27,7 +28,7 @@ public class EntityMetaDataTest
 	public void getName()
 	{
 		Package package_ = new Package("packageName");
-		EntityMetaData entityMeta = new EntityMetaData("entity", package_);
+		EntityMetaData entityMeta = new EntityMetaDataImpl("entity", package_);
 		assertEquals(entityMeta.getName(), "packageName" + Package.PACKAGE_SEPARATOR + "entity");
 
 		Package parentPackage = new Package("parent");
@@ -46,7 +47,7 @@ public class EntityMetaDataTest
 	@Test
 	public void EntityMetaDataStringEntityMetaData()
 	{
-		EntityMetaData entityMeta = new EntityMetaData("entity");
+		EntityMetaData entityMeta = new EntityMetaDataImpl("entity");
 		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
 		when(attr0.getDataType()).thenReturn(STRING);
 		AttributeMetaData attr1 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr1").getMock();
@@ -59,33 +60,33 @@ public class EntityMetaDataTest
 		entityMeta.addAttribute(attr0);
 		entityMeta.addAttribute(attr1);
 
-		EntityMetaData baseEntityMetaData = new EntityMetaData("baseEntity");
+		EntityMetaData baseEntityMetaData = new EntityMetaDataImpl("baseEntity");
 		AttributeMetaData baseAttr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("baseAttr0").getMock();
 		when(baseAttr0.getDataType()).thenReturn(STRING);
 		baseEntityMetaData.addAttribute(baseAttr0);
 
 		entityMeta.setExtends(baseEntityMetaData);
 
-		assertEntityMetaEquals(new EntityMetaData(entityMeta), entityMeta);
+		assertEntityMetaEquals(new EntityMetaDataImpl(entityMeta), entityMeta);
 	}
 
 	@Test
 	public void testCopyConstructorPreservesIdAttribute()
 	{
-		EntityMetaData emd = new EntityMetaData("name");
+		EntityMetaData emd = new EntityMetaDataImpl("name");
 		emd.addAttribute("id", ROLE_ID);
 
-		EntityMetaData emdCopy = new EntityMetaData(emd);
+		EntityMetaData emdCopy = new EntityMetaDataImpl(emd);
 		Assert.assertEquals(emdCopy.getIdAttribute().getName(), "id");
 	}
 
 	@Test
 	public void testCopyConstructorPreservesName()
 	{
-		EntityMetaData emd = new EntityMetaData("name");
+		EntityMetaData emd = new EntityMetaDataImpl("name");
 		emd.setPackage(new Package("test_package"));
 
-		EntityMetaData emdCopy = new EntityMetaData(emd);
+		EntityMetaData emdCopy = new EntityMetaDataImpl(emd);
 		assertEquals(emdCopy.getName(), "test_package_name");
 		assertEquals(emdCopy.getSimpleName(), "name");
 	}
@@ -94,10 +95,10 @@ public class EntityMetaDataTest
 	@Test
 	public void testExtendsEntityMetaDataMissingIdAttribute()
 	{
-		EntityMetaData extendsEntityMeta = new EntityMetaData("entity");
+		EntityMetaData extendsEntityMeta = new EntityMetaDataImpl("entity");
 		extendsEntityMeta.addAttribute("attr");
 
-		EntityMetaData entityMeta = new EntityMetaData("entity");
+		EntityMetaData entityMeta = new EntityMetaDataImpl("entity");
 		entityMeta.setExtends(extendsEntityMeta);
 		AttributeMetaData idAttr = entityMeta.addAttribute("id", ROLE_ID);
 		assertEquals(entityMeta.getIdAttribute(), idAttr);
@@ -106,19 +107,19 @@ public class EntityMetaDataTest
 	@Test
 	public void EntityMetaDataEntityMetaData()
 	{
-		EntityMetaData entityMetaData = new EntityMetaData("entity");
+		EntityMetaData entityMetaData = new EntityMetaDataImpl("entity");
 		entityMetaData.setAbstract(true);
 		entityMetaData.setDescription("description");
 		entityMetaData.setLabel("label");
 		entityMetaData.addAttribute("labelAttribute", ROLE_LABEL).setDescription("label attribute");
 		entityMetaData.addAttribute("id", ROLE_ID).setDescription("id attribute");
-		assertEquals(new EntityMetaData(entityMetaData), entityMetaData);
+		assertEquals(new EntityMetaDataImpl(entityMetaData), entityMetaData);
 	}
 
 	@Test
 	public void getAttributes()
 	{
-		EntityMetaData entityMeta = new EntityMetaData("entity");
+		EntityMetaData entityMeta = new EntityMetaDataImpl("entity");
 		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
 		when(attr0.getDataType()).thenReturn(STRING);
 		AttributeMetaData attr1 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr1").getMock();
@@ -137,7 +138,7 @@ public class EntityMetaDataTest
 	@Test
 	public void getAttributesExtends()
 	{
-		EntityMetaData entityMeta = new EntityMetaData("entity");
+		EntityMetaData entityMeta = new EntityMetaDataImpl("entity");
 		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
 		when(attr0.getDataType()).thenReturn(STRING);
 		AttributeMetaData attr1 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr1").getMock();
@@ -150,7 +151,7 @@ public class EntityMetaDataTest
 		entityMeta.addAttribute(attr0);
 		entityMeta.addAttribute(attr1);
 
-		EntityMetaData baseEntityMetaData = new EntityMetaData("baseEntity");
+		EntityMetaData baseEntityMetaData = new EntityMetaDataImpl("baseEntity");
 		AttributeMetaData baseAttr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("baseAttr0").getMock();
 		when(baseAttr0.getDataType()).thenReturn(STRING);
 		baseEntityMetaData.addAttribute(baseAttr0);
@@ -163,7 +164,7 @@ public class EntityMetaDataTest
 	@Test
 	public void getOwnAttributes()
 	{
-		EntityMetaData entityMeta = new EntityMetaData("entity");
+		EntityMetaData entityMeta = new EntityMetaDataImpl("entity");
 		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
 		when(attr0.getDataType()).thenReturn(STRING);
 		AttributeMetaData attr1 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr1").getMock();
@@ -182,7 +183,7 @@ public class EntityMetaDataTest
 	@Test
 	public void getOwnAttributesExtends()
 	{
-		EntityMetaData entityMeta = new EntityMetaData("entity");
+		EntityMetaData entityMeta = new EntityMetaDataImpl("entity");
 		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
 		when(attr0.getDataType()).thenReturn(STRING);
 		AttributeMetaData attr1 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr1").getMock();
@@ -195,7 +196,7 @@ public class EntityMetaDataTest
 		entityMeta.addAttribute(attr0);
 		entityMeta.addAttribute(attr1);
 
-		EntityMetaData baseEntityMetaData = new EntityMetaData("baseEntity");
+		EntityMetaData baseEntityMetaData = new EntityMetaDataImpl("baseEntity");
 		AttributeMetaData baseAttr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("baseAttr0").getMock();
 		when(baseAttr0.getDataType()).thenReturn(STRING);
 		baseEntityMetaData.addAttribute(baseAttr0);
@@ -208,7 +209,7 @@ public class EntityMetaDataTest
 	@Test
 	public void hasAttributeWithExpressionTrue()
 	{
-		EntityMetaData entityMeta = new EntityMetaData("entity");
+		EntityMetaData entityMeta = new EntityMetaDataImpl("entity");
 		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
 		when(attr.getDataType()).thenReturn(STRING);
 		AttributeMetaData attrWithExpression = when(mock(AttributeMetaData.class).getName()).thenReturn("attr1")
@@ -223,7 +224,7 @@ public class EntityMetaDataTest
 	@Test
 	public void hasAttributeWithExpressionFalse()
 	{
-		EntityMetaData entityMeta = new EntityMetaData("entity");
+		EntityMetaData entityMeta = new EntityMetaDataImpl("entity");
 		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
 		when(attr.getDataType()).thenReturn(STRING);
 		entityMeta.addAttribute(attr);
@@ -233,7 +234,7 @@ public class EntityMetaDataTest
 	@Test
 	public void getAtomicAttributes()
 	{
-		EntityMetaData entityMeta = new EntityMetaData("entity");
+		EntityMetaData entityMeta = new EntityMetaDataImpl("entity");
 		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
 		when(attr0.getDataType()).thenReturn(STRING);
 		entityMeta.addAttribute(attr0);
@@ -243,7 +244,7 @@ public class EntityMetaDataTest
 	@Test
 	public void getAtomicAttributesCompound()
 	{
-		EntityMetaData entityMeta = new EntityMetaData("entity");
+		EntityMetaData entityMeta = new EntityMetaDataImpl("entity");
 		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
 		when(attr0.getDataType()).thenReturn(STRING);
 		AttributeMetaData attr1 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr1").getMock();
@@ -262,12 +263,12 @@ public class EntityMetaDataTest
 	@Test
 	public void getAtomicAttributesExtends()
 	{
-		EntityMetaData entityMeta = new EntityMetaData("entity");
+		EntityMetaData entityMeta = new EntityMetaDataImpl("entity");
 		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
 		when(attr0.getDataType()).thenReturn(STRING);
 		entityMeta.addAttribute(attr0);
 
-		EntityMetaData baseEntityMetaData = new EntityMetaData("baseEntity");
+		EntityMetaData baseEntityMetaData = new EntityMetaDataImpl("baseEntity");
 		AttributeMetaData baseAttr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("baseAttr0").getMock();
 		when(baseAttr0.getDataType()).thenReturn(STRING);
 		baseEntityMetaData.addAttribute(baseAttr0);
@@ -280,7 +281,7 @@ public class EntityMetaDataTest
 	@Test
 	public void getOwnAtomicAttributes()
 	{
-		EntityMetaData entityMeta = new EntityMetaData("entity");
+		EntityMetaData entityMeta = new EntityMetaDataImpl("entity");
 		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
 		when(attr0.getDataType()).thenReturn(STRING);
 		entityMeta.addAttribute(attr0);
@@ -290,7 +291,7 @@ public class EntityMetaDataTest
 	@Test
 	public void getOwnAtomicAttributesCompound()
 	{
-		EntityMetaData entityMeta = new EntityMetaData("entity");
+		EntityMetaData entityMeta = new EntityMetaDataImpl("entity");
 		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
 		when(attr0.getDataType()).thenReturn(STRING);
 		AttributeMetaData attr1 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr1").getMock();
@@ -309,12 +310,12 @@ public class EntityMetaDataTest
 	@Test
 	public void getOwnAtomicAttributesExtends()
 	{
-		EntityMetaData entityMeta = new EntityMetaData("entity");
+		EntityMetaData entityMeta = new EntityMetaDataImpl("entity");
 		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
 		when(attr0.getDataType()).thenReturn(STRING);
 		entityMeta.addAttribute(attr0);
 
-		EntityMetaData baseEntityMetaData = new EntityMetaData("baseEntity");
+		EntityMetaData baseEntityMetaData = new EntityMetaDataImpl("baseEntity");
 		AttributeMetaData baseAttr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("baseAttr0").getMock();
 		when(baseAttr0.getDataType()).thenReturn(STRING);
 		baseEntityMetaData.addAttribute(baseAttr0);
@@ -327,7 +328,7 @@ public class EntityMetaDataTest
 	@Test
 	public void addAttributeIdAttr()
 	{
-		EntityMetaData entityMeta = new EntityMetaData("entity");
+		EntityMetaData entityMeta = new EntityMetaDataImpl("entity");
 		AttributeMetaData idAttr = entityMeta.addAttribute("idAttr", ROLE_ID);
 		assertEquals(entityMeta.getIdAttribute(), idAttr);
 	}
@@ -335,7 +336,7 @@ public class EntityMetaDataTest
 	@Test
 	public void addAttributeLabelAttr()
 	{
-		EntityMetaData entityMeta = new EntityMetaData("entity");
+		EntityMetaData entityMeta = new EntityMetaDataImpl("entity");
 		AttributeMetaData labelAttr = entityMeta.addAttribute("labelAttr", ROLE_LABEL);
 		assertEquals(entityMeta.getLabelAttribute(), labelAttr);
 	}
@@ -343,7 +344,7 @@ public class EntityMetaDataTest
 	@Test
 	public void addAttributeLookupAttr()
 	{
-		EntityMetaData entityMeta = new EntityMetaData("entity");
+		EntityMetaData entityMeta = new EntityMetaDataImpl("entity");
 		String lookupAttrName = "lookupAttr";
 		AttributeMetaData lookupAttr = entityMeta.addAttribute(lookupAttrName, ROLE_LOOKUP);
 		assertEquals(entityMeta.getLookupAttribute(lookupAttrName), lookupAttr);

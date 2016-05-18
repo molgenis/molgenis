@@ -26,6 +26,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.util.MolgenisDateFormat;
@@ -74,7 +75,7 @@ public class QueryGeneratorReferencesTest
 	{
 		searchRequestBuilder = mock(SearchRequestBuilder.class);
 
-		EntityMetaData refEntityMetaData = new EntityMetaData("ref_entity");
+		EntityMetaData refEntityMetaData = new EntityMetaDataImpl("ref_entity");
 		refEntityMetaData.addAttribute(refIdAttributeName, ROLE_ID);
 		refEntityMetaData.addAttribute(refBoolAttributeName).setDataType(MolgenisFieldTypes.BOOL);
 		refEntityMetaData.addAttribute(refCategoricalAttributeName).setDataType(MolgenisFieldTypes.CATEGORICAL)
@@ -84,7 +85,7 @@ public class QueryGeneratorReferencesTest
 		AttributeMetaData compoundPart1Attribute = new AttributeMetaData(refCompoundPart1AttributeName)
 				.setDataType(MolgenisFieldTypes.STRING);
 		refEntityMetaData.addAttribute(refCompoundAttributeName).setDataType(MolgenisFieldTypes.COMPOUND)
-				.setAttributesMetaData(
+				.setAttributeParts(
 						Arrays.<AttributeMetaData> asList(compoundPart0Attribute, compoundPart1Attribute));
 		refEntityMetaData.addAttribute(refDateAttributeName).setDataType(MolgenisFieldTypes.DATE);
 		refEntityMetaData.addAttribute(refDateTimeAttributeName).setDataType(MolgenisFieldTypes.DATETIME);
@@ -104,7 +105,7 @@ public class QueryGeneratorReferencesTest
 		refEntityMetaData.addAttribute(refXrefAttributeName).setDataType(MolgenisFieldTypes.XREF)
 				.setRefEntity(refEntityMetaData).setNillable(true);
 
-		EntityMetaData emd = new EntityMetaData("entity");
+		EntityMetaData emd = new EntityMetaDataImpl("entity");
 		emd.addAttribute(idAttributeName, ROLE_ID);
 		emd.addAttribute(stringAttributeName, ROLE_LABEL).setUnique(true);
 		emd.addAttribute(mrefAttributeName).setDataType(MolgenisFieldTypes.MREF).setNillable(true)

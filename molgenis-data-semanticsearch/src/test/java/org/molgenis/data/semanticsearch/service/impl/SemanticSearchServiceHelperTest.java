@@ -19,6 +19,7 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.semantic.Relation;
@@ -158,7 +159,7 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 	@Test
 	public void testGetAttributeIdentifiers()
 	{
-		EntityMetaData sourceEntityMetaData = new EntityMetaData("sourceEntityMetaData");
+		EntityMetaData sourceEntityMetaData = new EntityMetaDataImpl("sourceEntityMetaData");
 		Entity entityMetaDataEntity = mock(DefaultEntity.class);
 
 		when(dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME,

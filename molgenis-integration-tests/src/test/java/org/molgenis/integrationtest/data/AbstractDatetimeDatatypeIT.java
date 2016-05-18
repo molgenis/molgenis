@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 
 public class AbstractDatetimeDatatypeIT extends AbstractDatatypeIT
 {
@@ -17,7 +18,7 @@ public class AbstractDatetimeDatatypeIT extends AbstractDatatypeIT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EntityMetaData entityMetaData = new EntityMetaData("DatetimeTest");
+		EntityMetaData entityMetaData = new EntityMetaDataImpl("DatetimeTest");
 		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(DATETIME).setNillable(false);
 		entityMetaData.addAttribute("col2").setDataType(DATETIME);
 		entityMetaData.addAttribute("col3").setDataType(DATETIME).setDefaultValue("01-01-2014");

@@ -18,9 +18,9 @@ public class SortaJobExecution extends JobExecution
 
 	private static final String SORTA_MATCH_JOB_TYPE = "SORTA";
 
-	public SortaJobExecution(DataService dataService)
+	public SortaJobExecution(SortaJobExecutionMetaData sortaJobExecutionMetaData, DataService dataService)
 	{
-		super(dataService, SortaJobExecutionMetaData.INSTANCE);
+		super(dataService, sortaJobExecutionMetaData);
 
 		setType(SORTA_MATCH_JOB_TYPE);
 	}

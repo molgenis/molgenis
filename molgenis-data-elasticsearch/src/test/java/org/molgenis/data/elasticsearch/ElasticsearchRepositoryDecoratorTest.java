@@ -31,7 +31,7 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.Sort;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
@@ -42,7 +42,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	private ElasticsearchRepositoryDecorator elasticsearchRepositoryDecorator;
 	private ElasticsearchService elasticSearchService;
 	private Repository<Entity> decoratedRepo;
-	private EntityMetaData repositoryEntityMetaData;
+	private EntityMetaDataImpl repositoryEntityMetaData;
 	private String entityName;
 	private String idAttrName;
 
@@ -52,7 +52,7 @@ public class ElasticsearchRepositoryDecoratorTest
 		elasticSearchService = mock(ElasticsearchService.class);
 		decoratedRepo = mock(Repository.class);
 		entityName = "";
-		repositoryEntityMetaData = mock(EntityMetaData.class);
+		repositoryEntityMetaData = mock(EntityMetaDataImpl.class);
 		when(repositoryEntityMetaData.getName()).thenReturn(entityName);
 		idAttrName = "id";
 		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(idAttrName).getMock();

@@ -18,6 +18,7 @@ import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;

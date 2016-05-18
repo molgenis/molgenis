@@ -21,6 +21,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
@@ -45,7 +46,7 @@ public class ExcelRepository extends AbstractRepository
 	private List<CellProcessor> cellProcessors;
 	/** column names index */
 	private Map<String, Integer> colNamesMap;
-	private EntityMetaData entityMetaData;
+	private EntityMetaDataImpl entityMetaData;
 
 	public ExcelRepository(String fileName, Sheet sheet)
 	{
@@ -141,7 +142,7 @@ public class ExcelRepository extends AbstractRepository
 	{
 		if (entityMetaData == null)
 		{
-			EntityMetaData entityMetaData = new EntityMetaData(sheet.getSheetName(), ExcelEntity.class);
+			EntityMetaData entityMetaData = new EntityMetaDataImpl(sheet.getSheetName(), ExcelEntity.class);
 
 			if (colNamesMap == null)
 			{

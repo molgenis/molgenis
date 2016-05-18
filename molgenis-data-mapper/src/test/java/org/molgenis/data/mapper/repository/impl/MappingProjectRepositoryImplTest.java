@@ -29,7 +29,7 @@ import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.meta.MappingTargetMetaData;
 import org.molgenis.data.mapper.repository.MappingTargetRepository;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.user.MolgenisUserService;
@@ -83,9 +83,9 @@ public class MappingProjectRepositoryImplTest extends AbstractTestNGSpringContex
 		owner.setFirstName("Flup");
 		owner.setLastName("de Flap");
 
-		EntityMetaData target1 = new EntityMetaData("target1");
+		EntityMetaDataImpl target1 = new EntityMetaDataImpl("target1");
 		target1.addAttribute("id", ROLE_ID);
-		EntityMetaData target2 = new EntityMetaData("target2");
+		EntityMetaDataImpl target2 = new EntityMetaDataImpl("target2");
 		target2.addAttribute("id", ROLE_ID);
 
 		mappingProject = new MappingProject("My first mapping project", owner);

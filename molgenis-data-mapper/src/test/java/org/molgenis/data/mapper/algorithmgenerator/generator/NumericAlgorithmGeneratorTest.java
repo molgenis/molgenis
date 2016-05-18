@@ -14,6 +14,7 @@ import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.mapper.service.impl.UnitResolverImpl;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,13 +51,13 @@ public class NumericAlgorithmGeneratorTest extends AbstractTestNGSpringContextTe
 		when(ontologyService.getOntology("http://purl.obolibrary.org/obo/uo.owl"))
 				.thenReturn(Ontology.create("1", "http://purl.obolibrary.org/obo/uo.owl", "unit ontology"));
 
-		targetEntityMetaData = new EntityMetaData("target");
+		targetEntityMetaData = new EntityMetaDataImpl("target");
 		targetAttribute = new AttributeMetaData("targetHeight");
 		targetAttribute.setLabel("height in m");
 		targetAttribute.setDataType(MolgenisFieldTypes.DECIMAL);
 		targetEntityMetaData.addAttribute(targetAttribute);
 
-		sourceEntityMetaData = new EntityMetaData("source");
+		sourceEntityMetaData = new EntityMetaDataImpl("source");
 		sourceAttribute = new AttributeMetaData("sourceHeight");
 		sourceAttribute.setDataType(MolgenisFieldTypes.DECIMAL);
 		sourceAttribute.setLabel("body length in cm");

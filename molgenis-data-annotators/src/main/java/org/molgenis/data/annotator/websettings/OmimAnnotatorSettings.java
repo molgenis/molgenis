@@ -25,6 +25,11 @@ public class OmimAnnotatorSettings extends DefaultSettingsEntity
 		public Meta()
 		{
 			super(ID);
+		}
+
+		@Override
+		public void init()
+		{
 			setLabel("OMIM annotator settings");
 			String defaultLocation = AnnotatorUtils.getAnnotatorResourceDir() + "/omim/omim.txt";
 			addAttribute(OMIM_LOCATION).setLabel("OMIM morbid map File location").setDefaultValue(defaultLocation);

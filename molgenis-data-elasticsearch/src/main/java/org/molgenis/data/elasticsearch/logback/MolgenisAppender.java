@@ -30,6 +30,7 @@ public class MolgenisAppender extends AppenderBase<ILoggingEvent>
 
 	private BulkProcessor bulkProcessor;
 	private ElasticsearchEntityFactory elasticsearchEntityFactory;
+	private LoggingEventMetaData loggingEventMetaData;
 
 	@Override
 	protected void append(ILoggingEvent eventObject)
@@ -70,11 +71,17 @@ public class MolgenisAppender extends AppenderBase<ILoggingEvent>
 				elasticsearchEntityFactory = ctx.getBean(ElasticsearchEntityFactory.class);
 			}
 
+			if (loggingEventMetaData == null)
+			{
+				ApplicationContext ctx = ApplicationContextProvider.getApplicationContext();
+				loggingEventMetaData = ctx.getBean(LoggingEventMetaData.class);
+			}
+
 			Entity entity = toEntity(eventObject);
 			String id = entity.getString(LoggingEventMetaData.IDENTIFIER);
-			Map<String, Object> source = elasticsearchEntityFactory.create(LoggingEventMetaData.INSTANCE, entity);
+			Map<String, Object> source = elasticsearchEntityFactory.create(loggingEventMetaData, entity);
 
-			bulkProcessor.add(new IndexRequest(INDEX_NAME, LoggingEventMetaData.INSTANCE.getName(), id).source(source));
+			bulkProcessor.add(new IndexRequest(INDEX_NAME, loggingEventMetaData.getName(), id).source(source));
 		}
 		catch (Throwable t)
 		{

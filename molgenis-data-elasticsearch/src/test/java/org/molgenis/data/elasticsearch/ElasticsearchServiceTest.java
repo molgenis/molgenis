@@ -40,6 +40,7 @@ import org.molgenis.data.elasticsearch.ElasticsearchService.BulkProcessorFactory
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.molgenis.data.support.QueryImpl;
@@ -76,7 +77,7 @@ public class ElasticsearchServiceTest
 		when(bulkProcessor.awaitClose(any(Long.class), any(TimeUnit.class))).thenReturn(true);
 		when(bulkProcessorFactory.create(client)).thenReturn(bulkProcessor);
 		ElasticsearchService.setBulkProcessorFactory(bulkProcessorFactory);
-		doNothing().when(searchService).refresh(any(EntityMetaData.class));
+		doNothing().when(searchService).refresh(any(EntityMetaDataImpl.class));
 	}
 
 	@BeforeClass
@@ -166,7 +167,7 @@ public class ElasticsearchServiceTest
 			}
 		});
 		dataService.addRepository(repo);
-		EntityMetaData entityMetaData = new EntityMetaData("entity");
+		EntityMetaData entityMetaData = new EntityMetaDataImpl("entity");
 		entityMetaData.setBackend(ElasticsearchRepositoryCollection.NAME);
 		entityMetaData.addAttribute(idAttrName, ROLE_ID).setDataType(MolgenisFieldTypes.INT);
 		Query<Entity> q = new QueryImpl<>();

@@ -27,6 +27,7 @@ import org.molgenis.data.annotation.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotator.websettings.CaddAnnotatorSettings;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.util.ResourceUtils;
@@ -47,8 +48,8 @@ public class CaddAnnotatorTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	Resources resourcess;
 
-	public EntityMetaData metaDataCanAnnotate = new EntityMetaData("test");
-	public EntityMetaData metaDataCantAnnotate = new EntityMetaData("test");
+	public EntityMetaData metaDataCanAnnotate = new EntityMetaDataImpl("test");
+	public EntityMetaData metaDataCantAnnotate = new EntityMetaDataImpl("test");
 
 	public ArrayList<Entity> input;
 	public ArrayList<Entity> input1;

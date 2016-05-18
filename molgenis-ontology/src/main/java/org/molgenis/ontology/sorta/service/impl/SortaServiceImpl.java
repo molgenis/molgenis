@@ -63,12 +63,15 @@ public class SortaServiceImpl implements SortaService
 
 	private final DataService dataService;
 	private final InformationContentService informationContentService;
+	private final OntologyTermHitEntityMetaData ontologyTermHitEntityMetaData;
 
 	@Autowired
-	public SortaServiceImpl(DataService dataService, InformationContentService informationContentService)
+	public SortaServiceImpl(DataService dataService, InformationContentService informationContentService,
+			OntologyTermHitEntityMetaData ontologyTermHitEntityMetaData)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.informationContentService = requireNonNull(informationContentService);
+		this.ontologyTermHitEntityMetaData = requireNonNull(ontologyTermHitEntityMetaData);
 	}
 
 	@Override
@@ -255,8 +258,7 @@ public class SortaServiceImpl implements SortaService
 				}
 			}
 		}
-		OntologyTermHitEntity mapEntity = new OntologyTermHitEntity(ontologyTerm,
-				OntologyTermHitEntityMetaData.INSTANCE);
+		OntologyTermHitEntity mapEntity = new OntologyTermHitEntity(ontologyTerm, ontologyTermHitEntityMetaData);
 		mapEntity.set(SCORE, maxNgramScore);
 		mapEntity.set(COMBINED_SCORE, maxNgramIDFScore);
 		return mapEntity;
@@ -273,8 +275,7 @@ public class SortaServiceImpl implements SortaService
 	 */
 	private Entity calculateNGromOTAnnotations(Entity inputEntity, Entity ontologyTermEntity)
 	{
-		OntologyTermHitEntity mapEntity = new OntologyTermHitEntity(ontologyTermEntity,
-				OntologyTermHitEntityMetaData.INSTANCE);
+		OntologyTermHitEntity mapEntity = new OntologyTermHitEntity(ontologyTermEntity, ontologyTermHitEntityMetaData);
 		for (Entity annotationEntity : ontologyTermEntity
 				.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION))
 		{

@@ -40,6 +40,7 @@ import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
@@ -103,7 +104,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	public void testDate() throws ParseException
 	{
 		String idAttrName = "id";
-		EntityMetaData entityMetaData = new EntityMetaData("LL");
+		EntityMetaData entityMetaData = new EntityMetaDataImpl("LL");
 		entityMetaData.addAttribute(idAttrName, ROLE_ID).setDataType(INT);
 		entityMetaData.addAttribute("dob").setDataType(DATE);
 		Entity source = new MapEntity(entityMetaData);
@@ -122,7 +123,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	public void testGetAgeScript() throws ParseException
 	{
 		String idAttrName = "id";
-		EntityMetaData entityMetaData = new EntityMetaData("LL");
+		EntityMetaData entityMetaData = new EntityMetaDataImpl("LL");
 		entityMetaData.addAttribute(idAttrName, ROLE_ID).setDataType(INT);
 		entityMetaData.addAttribute("dob").setDataType(DATE);
 		Entity source = new MapEntity(entityMetaData);
@@ -142,14 +143,14 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	public void testGetXrefScript() throws ParseException
 	{
 		// xref entities
-		EntityMetaData entityMetaDataXref = new EntityMetaData("xrefEntity1");
+		EntityMetaData entityMetaDataXref = new EntityMetaDataImpl("xrefEntity1");
 		entityMetaDataXref.addAttribute("id", ROLE_ID).setDataType(INT);
 		entityMetaDataXref.addAttribute("field1").setDataType(STRING);
 		Entity xref1a = new MapEntity(entityMetaDataXref);
 		xref1a.set("id", "1");
 		xref1a.set("field1", "Test");
 
-		EntityMetaData entityMetaDataXref2 = new EntityMetaData("xrefEntity2");
+		EntityMetaData entityMetaDataXref2 = new EntityMetaDataImpl("xrefEntity2");
 		entityMetaDataXref2.addAttribute("id", ROLE_ID).setDataType(INT);
 		entityMetaDataXref2.addAttribute("field1").setDataType(STRING);
 		Entity xref2a = new MapEntity(entityMetaDataXref2);
@@ -157,7 +158,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		xref2a.set("field2", "Test");
 
 		// source Entity
-		EntityMetaData entityMetaDataSource = new EntityMetaData("Source");
+		EntityMetaData entityMetaDataSource = new EntityMetaDataImpl("Source");
 		entityMetaDataSource.addAttribute("id", ROLE_ID).setDataType(INT);
 		entityMetaDataSource.addAttribute("xref").setDataType(XREF);
 		Entity source = new MapEntity(entityMetaDataSource);
@@ -189,7 +190,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		String targetEntityAttrName = "mref-target";
 
 		// ref entities
-		EntityMetaData refEntityMeta = new EntityMetaData(refEntityName);
+		EntityMetaData refEntityMeta = new EntityMetaDataImpl(refEntityName);
 		refEntityMeta.addAttribute(refEntityIdAttrName, ROLE_ID);
 		refEntityMeta.addAttribute(refEntityLabelAttrName, ROLE_LABEL).setDataType(STRING);
 
@@ -225,7 +226,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		});
 
 		// source Entity
-		EntityMetaData entityMetaDataSource = new EntityMetaData(sourceEntityName);
+		EntityMetaData entityMetaDataSource = new EntityMetaDataImpl(sourceEntityName);
 		entityMetaDataSource.addAttribute(refEntityIdAttrName, ROLE_ID).setDataType(INT).setAuto(true);
 		entityMetaDataSource.addAttribute(sourceEntityAttrName).setDataType(MREF).setNillable(false)
 				.setRefEntity(refEntityMeta);
@@ -248,7 +249,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		String targetEntityAttrName = "mref-target";
 
 		// ref entities
-		EntityMetaData refEntityMeta = new EntityMetaData(refEntityName);
+		EntityMetaData refEntityMeta = new EntityMetaDataImpl(refEntityName);
 		refEntityMeta.addAttribute(refEntityIdAttrName, ROLE_ID);
 		refEntityMeta.addAttribute(refEntityLabelAttrName, ROLE_LABEL).setDataType(STRING);
 
@@ -259,7 +260,7 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 		attributeMapping.setAlgorithm("$('" + sourceEntityAttrName + "').value()");
 
 		// source Entity
-		EntityMetaData entityMetaDataSource = new EntityMetaData(sourceEntityName);
+		EntityMetaData entityMetaDataSource = new EntityMetaDataImpl(sourceEntityName);
 		entityMetaDataSource.addAttribute(refEntityIdAttrName, ROLE_ID).setDataType(INT).setAuto(true);
 		entityMetaDataSource.addAttribute(sourceEntityAttrName).setDataType(MREF).setNillable(true)
 				.setRefEntity(refEntityMeta);
@@ -274,12 +275,12 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testCreateAttributeMappingIfOnlyOneMatch()
 	{
-		EntityMetaData targetEntityMetaData = new EntityMetaData("target");
+		EntityMetaDataImpl targetEntityMetaData = new EntityMetaDataImpl("target");
 		AttributeMetaData targetAttribute = new AttributeMetaData("targetHeight");
 		targetAttribute.setDescription("height");
 		targetEntityMetaData.addAttribute(targetAttribute);
 
-		EntityMetaData sourceEntityMetaData = new EntityMetaData("source");
+		EntityMetaData sourceEntityMetaData = new EntityMetaDataImpl("source");
 		AttributeMetaData sourceAttribute = new AttributeMetaData("sourceHeight");
 		sourceAttribute.setDescription("height");
 		sourceEntityMetaData.addAttribute(sourceAttribute);
@@ -318,12 +319,12 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testWhenSourceDoesNotMatchThenNoMappingGetsCreated()
 	{
-		EntityMetaData targetEntityMetaData = new EntityMetaData("target");
+		EntityMetaDataImpl targetEntityMetaData = new EntityMetaDataImpl("target");
 		AttributeMetaData targetAttribute = new AttributeMetaData("targetHeight");
 		targetAttribute.setDescription("height");
 		targetEntityMetaData.addAttribute(targetAttribute);
 
-		EntityMetaData sourceEntityMetaData = new EntityMetaData("source");
+		EntityMetaData sourceEntityMetaData = new EntityMetaDataImpl("source");
 		AttributeMetaData sourceAttribute = new AttributeMetaData("sourceHeight");
 		sourceAttribute.setDescription("weight");
 		sourceEntityMetaData.addAttribute(sourceAttribute);
@@ -356,12 +357,12 @@ public class AlgorithmServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testWhenSourceHasMultipleMatchesThenFirstMappingGetsCreated()
 	{
-		EntityMetaData targetEntityMetaData = new EntityMetaData("target");
+		EntityMetaDataImpl targetEntityMetaData = new EntityMetaDataImpl("target");
 		AttributeMetaData targetAttribute = new AttributeMetaData("targetHeight");
 		targetAttribute.setDescription("height");
 		targetEntityMetaData.addAttribute(targetAttribute);
 
-		EntityMetaData sourceEntityMetaData = new EntityMetaData("source");
+		EntityMetaData sourceEntityMetaData = new EntityMetaDataImpl("source");
 		AttributeMetaData sourceAttribute1 = new AttributeMetaData("sourceHeight1");
 		sourceAttribute1.setDescription("height");
 		AttributeMetaData sourceAttribute2 = new AttributeMetaData("sourceHeight2");

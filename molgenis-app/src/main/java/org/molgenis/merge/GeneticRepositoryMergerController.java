@@ -42,11 +42,10 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 	public static final String ID = "geneticrepositorymerger";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
-	public static final AttributeMetaData CHROM = new AttributeMetaData("#CHROM",
-			STRING);
-	public static final AttributeMetaData POS = new AttributeMetaData("POS", LONG);
-	public static final AttributeMetaData REF = new AttributeMetaData("REF", TEXT);
-	public static final AttributeMetaData ALT = new AttributeMetaData("ALT", TEXT);
+	public static final AttributeMetaData CHROM = null; //FIXME new AttributeMetaData("#CHROM", STRING);
+	public static final AttributeMetaData POS = null;//FIXME new AttributeMetaData("POS", LONG);
+	public static final AttributeMetaData REF = null;//FIXME new AttributeMetaData("REF", TEXT);
+	public static final AttributeMetaData ALT = null;//FIXME new AttributeMetaData("ALT", TEXT);
 
 	private final ArrayList<AttributeMetaData> commonAttributes;
 	private final RepositoryMerger repositoryMerger;

@@ -2,6 +2,7 @@ package org.molgenis.js;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.mozilla.javascript.EcmaError;
 import org.testng.annotations.Test;
@@ -11,13 +12,13 @@ public class SandboxTest extends MolgenisJsTest
 	@Test
 	public void testAllowed()
 	{
-		ScriptEvaluator.eval("1 + 1", new MapEntity("firstName", "Piet"), new EntityMetaData("person"));
+		ScriptEvaluator.eval("1 + 1", new MapEntity("firstName", "Piet"), new EntityMetaDataImpl("person"));
 	}
 
 	@Test(expectedExceptions = EcmaError.class)
 	public void testCallingNonVisibleClass()
 	{
-		EntityMetaData emd = new EntityMetaData("person");
+		EntityMetaData emd = new EntityMetaDataImpl("person");
 		emd.addAttribute("firstName").setDataType(MolgenisFieldTypes.SCRIPT);
 
 		ScriptEvaluator.eval("new java.lang.Integer(6).toString()", new MapEntity("firstName", "Piet"), emd);
@@ -26,7 +27,7 @@ public class SandboxTest extends MolgenisJsTest
 	@Test
 	public void testGlobalMethod()
 	{
-		EntityMetaData emd = new EntityMetaData("person");
+		EntityMetaData emd = new EntityMetaDataImpl("person");
 		emd.addAttribute("firstName").setDataType(MolgenisFieldTypes.SCRIPT);
 
 		ScriptEvaluator.eval("$('firstName')", new MapEntity("firstName", "Piet"), emd);
@@ -37,7 +38,7 @@ public class SandboxTest extends MolgenisJsTest
 	{
 		try
 		{
-			EntityMetaData emd = new EntityMetaData("person");
+			EntityMetaData emd = new EntityMetaDataImpl("person");
 			emd.addAttribute("firstName").setDataType(MolgenisFieldTypes.SCRIPT);
 
 			ScriptEvaluator.eval("java.lang.Class.forName('java.util.Date').newInstance()", new MapEntity("firstName",

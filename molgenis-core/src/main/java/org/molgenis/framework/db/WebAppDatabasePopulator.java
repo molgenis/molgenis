@@ -1,38 +1,34 @@
 package org.molgenis.framework.db;
 
+import static java.util.Objects.requireNonNull;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
+import org.springframework.stereotype.Component;
 
-public class WebAppDatabasePopulator implements ApplicationListener<ContextRefreshedEvent>, Ordered
+/**
+ * Populates database with initial data
+ */
+@Component
+public class WebAppDatabasePopulator
 {
-	private static final Logger LOG = LoggerFactory.getLogger(WebAppDatabasePopulator.class);
-
 	private final WebAppDatabasePopulatorService webAppDatabasePopulatorService;
 
+	@Autowired
 	public WebAppDatabasePopulator(WebAppDatabasePopulatorService webAppDatabasePopulatorService)
 	{
-		if (webAppDatabasePopulatorService == null) throw new IllegalArgumentException(
-				"Web app database populator service is null");
-		this.webAppDatabasePopulatorService = webAppDatabasePopulatorService;
+		this.webAppDatabasePopulatorService = requireNonNull(webAppDatabasePopulatorService);
 	}
 
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
+	public void populateDatabase()
 	{
 		if (!webAppDatabasePopulatorService.isDatabasePopulated())
 		{
-			LOG.info("initializing application database");
 			webAppDatabasePopulatorService.populateDatabase();
-			LOG.info("initialized application database");
 		}
-	}
-
-	@Override
-	public int getOrder()
-	{
-		return Ordered.HIGHEST_PRECEDENCE + 100;
 	}
 }

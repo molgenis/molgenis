@@ -11,6 +11,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.testng.annotations.Test;
 
 public class AbstractEntityTest
@@ -20,7 +21,7 @@ public class AbstractEntityTest
 	public void getLabelValue()
 	{
 		String labelAttrName = "label";
-		EntityMetaData entityMetaData = new EntityMetaData("entity");
+		EntityMetaData entityMetaData = new EntityMetaDataImpl("entity");
 		entityMetaData.addAttribute(labelAttrName, ROLE_ID).setDataType(MolgenisFieldTypes.SCRIPT);
 		AbstractEntity entity = mock(AbstractEntity.class);
 		when(entity.getLabelValue()).thenCallRealMethod();
@@ -33,7 +34,7 @@ public class AbstractEntityTest
 	@Test
 	public void toString_()
 	{
-		final EntityMetaData entityMetaData = new EntityMetaData("entity");
+		final EntityMetaData entityMetaData = new EntityMetaDataImpl("entity");
 		entityMetaData.addAttribute("attr");
 		AttributeMetaData compoundAttr = entityMetaData.addAttribute("compound").setDataType(COMPOUND);
 		AttributeMetaData compoundPart1Attr = new AttributeMetaData("part1");

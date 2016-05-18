@@ -1,8 +1,5 @@
 package org.molgenis.data.i18n;
 
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL;
-
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
@@ -15,14 +12,11 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 
 public class LanguageRepositoryDecorator implements Repository<Entity>
 {
@@ -146,54 +140,55 @@ public class LanguageRepositoryDecorator implements Repository<Entity>
 	@Override
 	public void delete(Entity entity)
 	{
-		String languageCode = entity.getString(LanguageMetaData.CODE);
-		if (languageCode.equalsIgnoreCase(LanguageService.FALLBACK_LANGUAGE))
-		{
-			throw new MolgenisDataException(
-					"It is not possible to delete '" + languageCode + "'. This is the default language.");
-		}
-
-		decorated.delete(entity);
-
-		// Delete label-{languageCode} attr from AttributeMetaDataMetaData
-		AttributeMetaData attributeLabel = AttributeMetaDataMetaData.INSTANCE
-				.getAttribute(AttributeMetaDataMetaData.LABEL + '-' + languageCode);
-		if (attributeLabel != null)
-		{
-			dataService.getMeta().getDefaultBackend().deleteAttribute(AttributeMetaDataMetaData.ENTITY_NAME,
-					attributeLabel.getName());
-		}
-
-		// Delete description-{languageCode} attr from AttributeMetaDataMetaData
-		AttributeMetaData attributeDescription = AttributeMetaDataMetaData.INSTANCE
-				.getAttribute(AttributeMetaDataMetaData.DESCRIPTION + '-' + languageCode);
-		if (attributeDescription != null)
-		{
-			dataService.getMeta().getDefaultBackend().deleteAttribute(AttributeMetaDataMetaData.ENTITY_NAME,
-					attributeDescription.getName());
-		}
-
-		// Delete description-{languageCode} attr from EntityMetaDataMetaData
-		AttributeMetaData entityDescription = EntityMetaDataMetaData.INSTANCE
-				.getAttribute(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode);
-		if (entityDescription != null)
-		{
-			dataService.getMeta().getDefaultBackend().deleteAttribute(EntityMetaDataMetaData.ENTITY_NAME,
-					entityDescription.getName());
-		}
-
-		// Delete label-{languageCode} attr from EntityMetaDataMetaData
-		AttributeMetaData entityLabel = EntityMetaDataMetaData.INSTANCE
-				.getAttribute(EntityMetaDataMetaData.LABEL + '-' + languageCode);
-		if (entityLabel != null)
-		{
-			dataService.getMeta().getDefaultBackend().deleteAttribute(EntityMetaDataMetaData.ENTITY_NAME,
-					entityLabel.getName());
-		}
-
-		// Delete language attribute from I18nStringMetaData
-		dataService.getMeta().getDefaultBackend().deleteAttribute(I18nStringMetaData.ENTITY_NAME, languageCode);
-		I18nStringMetaData.INSTANCE.removeLanguage(languageCode);
+		// FIXME
+//		String languageCode = entity.getString(LanguageMetaData.CODE);
+//		if (languageCode.equalsIgnoreCase(LanguageService.FALLBACK_LANGUAGE))
+//		{
+//			throw new MolgenisDataException(
+//					"It is not possible to delete '" + languageCode + "'. This is the default language.");
+//		}
+//
+//		decorated.delete(entity);
+//
+//		// Delete label-{languageCode} attr from AttributeMetaDataMetaData
+//		AttributeMetaData attributeLabel = AttributeMetaDataMetaData.INSTANCE
+//				.getAttribute(AttributeMetaDataMetaData.LABEL + '-' + languageCode);
+//		if (attributeLabel != null)
+//		{
+//			dataService.getMeta().getDefaultBackend().deleteAttribute(AttributeMetaDataMetaData.ENTITY_NAME,
+//					attributeLabel.getName());
+//		}
+//
+//		// Delete description-{languageCode} attr from AttributeMetaDataMetaData
+//		AttributeMetaData attributeDescription = AttributeMetaDataMetaData.INSTANCE
+//				.getAttribute(AttributeMetaDataMetaData.DESCRIPTION + '-' + languageCode);
+//		if (attributeDescription != null)
+//		{
+//			dataService.getMeta().getDefaultBackend().deleteAttribute(AttributeMetaDataMetaData.ENTITY_NAME,
+//					attributeDescription.getName());
+//		}
+//
+//		// Delete description-{languageCode} attr from EntityMetaDataMetaData
+//		AttributeMetaData entityDescription = EntityMetaDataMetaData.INSTANCE
+//				.getAttribute(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode);
+//		if (entityDescription != null)
+//		{
+//			dataService.getMeta().getDefaultBackend().deleteAttribute(EntityMetaDataMetaData.ENTITY_NAME,
+//					entityDescription.getName());
+//		}
+//
+//		// Delete label-{languageCode} attr from EntityMetaDataMetaData
+//		AttributeMetaData entityLabel = EntityMetaDataMetaData.INSTANCE
+//				.getAttribute(EntityMetaDataMetaData.LABEL + '-' + languageCode);
+//		if (entityLabel != null)
+//		{
+//			dataService.getMeta().getDefaultBackend().deleteAttribute(EntityMetaDataMetaData.ENTITY_NAME,
+//					entityLabel.getName());
+//		}
+//
+//		// Delete language attribute from I18nStringMetaData
+//		dataService.getMeta().getDefaultBackend().deleteAttribute(I18nStringMetaData.ENTITY_NAME, languageCode);
+//		I18nStringMetaData.INSTANCE.removeLanguage(languageCode);
 	}
 
 	@Override
@@ -224,46 +219,47 @@ public class LanguageRepositoryDecorator implements Repository<Entity>
 	@Override
 	public void add(Entity entity)
 	{
-		// Add language
-		decorated.add(entity);
-
-		// Create new label and description attributes for the added language
-		String languageCode = entity.getString(LanguageMetaData.CODE);
-
-		// Attribute label
-		String attrName = LABEL + '-' + languageCode;
-		AttributeMetaData attrLabel = new AttributeMetaData(attrName).setNillable(true);
-
-		// Add the attribute to the attributes table
-		dataService.getMeta().getDefaultBackend().addAttribute(AttributeMetaDataMetaData.ENTITY_NAME, attrLabel);
-
-		// Update AttributeMetaDataMetaData
-		AttributeMetaDataMetaData.INSTANCE.addAttribute(attrLabel);
-
-		// Attribute description
-		AttributeMetaData attrDescription = new AttributeMetaData(
-				DESCRIPTION + '-' + languageCode).setNillable(true);
-		dataService.getMeta().getDefaultBackend().addAttribute(AttributeMetaDataMetaData.ENTITY_NAME, attrDescription);
-		AttributeMetaDataMetaData.INSTANCE.addAttribute(attrDescription);
-
-		// EntityMeta description
-		AttributeMetaData entityDescription = new AttributeMetaData(
-				EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true);
-		dataService.getMeta().getDefaultBackend().addAttribute(EntityMetaDataMetaData.ENTITY_NAME, entityDescription);
-		EntityMetaDataMetaData.INSTANCE.addAttribute(entityDescription);
-
-		// EntityMeta label
-		AttributeMetaData entityLabel = new AttributeMetaData(EntityMetaDataMetaData.LABEL + '-' + languageCode)
-				.setNillable(true);
-		dataService.getMeta().getDefaultBackend().addAttribute(EntityMetaDataMetaData.ENTITY_NAME, entityLabel);
-		EntityMetaDataMetaData.INSTANCE.addAttribute(entityLabel);
-
-		// I18nString
-		if (I18nStringMetaData.INSTANCE.addLanguage(languageCode))
-		{
-			dataService.getMeta().getDefaultBackend().addAttribute(I18nStringMetaData.ENTITY_NAME,
-					I18nStringMetaData.INSTANCE.getAttribute(languageCode));
-		}
+		// FIXME
+//		// Add language
+//		decorated.add(entity);
+//
+//		// Create new label and description attributes for the added language
+//		String languageCode = entity.getString(LanguageMetaData.CODE);
+//
+//		// Attribute label
+//		String attrName = LABEL + '-' + languageCode;
+//		AttributeMetaData attrLabel = new AttributeMetaData(attrName).setNillable(true);
+//
+//		// Add the attribute to the attributes table
+//		dataService.getMeta().getDefaultBackend().addAttribute(AttributeMetaDataMetaData.ENTITY_NAME, attrLabel);
+//
+//		// Update AttributeMetaDataMetaData
+//		AttributeMetaDataMetaData.INSTANCE.addAttribute(attrLabel);
+//
+//		// Attribute description
+//		AttributeMetaData attrDescription = new AttributeMetaData(
+//				DESCRIPTION + '-' + languageCode).setNillable(true);
+//		dataService.getMeta().getDefaultBackend().addAttribute(AttributeMetaDataMetaData.ENTITY_NAME, attrDescription);
+//		AttributeMetaDataMetaData.INSTANCE.addAttribute(attrDescription);
+//
+//		// EntityMeta description
+//		AttributeMetaData entityDescription = new AttributeMetaData(
+//				EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true);
+//		dataService.getMeta().getDefaultBackend().addAttribute(EntityMetaDataMetaData.ENTITY_NAME, entityDescription);
+//		EntityMetaDataMetaData.INSTANCE.addAttribute(entityDescription);
+//
+//		// EntityMeta label
+//		AttributeMetaData entityLabel = new AttributeMetaData(EntityMetaDataMetaData.LABEL + '-' + languageCode)
+//				.setNillable(true);
+//		dataService.getMeta().getDefaultBackend().addAttribute(EntityMetaDataMetaData.ENTITY_NAME, entityLabel);
+//		EntityMetaDataMetaData.INSTANCE.addAttribute(entityLabel);
+//
+//		// I18nString
+//		if (I18nStringMetaData.INSTANCE.addLanguage(languageCode))
+//		{
+//			dataService.getMeta().getDefaultBackend().addAttribute(I18nStringMetaData.ENTITY_NAME,
+//					I18nStringMetaData.INSTANCE.getAttribute(languageCode));
+//		}
 	}
 
 	@Override

@@ -12,6 +12,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.MapEntity;
@@ -26,11 +27,11 @@ public class DependencyResolverTest
 	@Test
 	public void resolve()
 	{
-		EntityMetaData e1 = new EntityMetaData("e1");
-		EntityMetaData e2 = new EntityMetaData("e2");
-		EntityMetaData e3 = new EntityMetaData("e3");
-		EntityMetaData e4 = new EntityMetaData("e4");
-		EntityMetaData e5 = new EntityMetaData("e5");
+		EntityMetaData e1 = new EntityMetaDataImpl("e1");
+		EntityMetaData e2 = new EntityMetaDataImpl("e2");
+		EntityMetaData e3 = new EntityMetaDataImpl("e3");
+		EntityMetaData e4 = new EntityMetaDataImpl("e4");
+		EntityMetaData e5 = new EntityMetaDataImpl("e5");
 
 		e1.addAttribute("ref").setDataType(MolgenisFieldTypes.XREF).setRefEntity(e5);
 		e5.setExtends(e3);
@@ -39,14 +40,14 @@ public class DependencyResolverTest
 		e4.addAttribute("ref").setDataType(MolgenisFieldTypes.XREF).setRefEntity(e2);
 
 		List<EntityMetaData> resolved = DependencyResolver
-				.resolve(Sets.<EntityMetaData> newHashSet(e1, e2, e3, e4, e5));
+				.resolve(Sets.newHashSet(e1, e2, e3, e4, e5));
 		assertEquals(resolved, Arrays.asList(e2, e4, e3, e5, e1));
 	}
 
 	@Test
 	public void resolveSelfReferences()
 	{
-		EntityMetaData emd = new EntityMetaData("Person");
+		EntityMetaData emd = new EntityMetaDataImpl("Person");
 		emd.addAttribute("name", ROLE_ID);
 		emd.addAttribute("father").setDataType(MolgenisFieldTypes.XREF).setNillable(true).setRefEntity(emd);
 		emd.addAttribute("mother").setDataType(MolgenisFieldTypes.XREF).setNillable(true).setRefEntity(emd);

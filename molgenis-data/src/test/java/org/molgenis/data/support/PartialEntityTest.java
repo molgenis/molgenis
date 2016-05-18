@@ -11,6 +11,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -26,7 +27,7 @@ public class PartialEntityTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		meta = new EntityMetaData("entity");
+		meta = new EntityMetaDataImpl("entity");
 		meta.addAttribute("id", ROLE_ID);
 
 		originalEntity = mock(Entity.class);

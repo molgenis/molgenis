@@ -9,6 +9,7 @@ import static org.testng.Assert.assertTrue;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.Test;
@@ -28,7 +29,7 @@ public class EntityUtilsTest
 	@Test
 	public void convert()
 	{
-		entityMetaData = new EntityMetaData("User");
+		entityMetaData = new EntityMetaDataImpl("User");
 		entityMetaData.addAttribute("name", ROLE_ID);
 
 		DataService dataService = mock(DataService.class);
@@ -48,14 +49,14 @@ public class EntityUtilsTest
 	@Test
 	public void doesExtend()
 	{
-		EntityMetaData grandfather = new EntityMetaData("grandfather");
+		EntityMetaData grandfather = new EntityMetaDataImpl("grandfather");
 		assertFalse(EntityUtils.doesExtend(grandfather, "grandfather"));
 
-		EntityMetaData father = new EntityMetaData("father");
+		EntityMetaData father = new EntityMetaDataImpl("father");
 		father.setExtends(grandfather);
 		assertTrue(EntityUtils.doesExtend(father, "grandfather"));
 
-		EntityMetaData child = new EntityMetaData("child");
+		EntityMetaData child = new EntityMetaDataImpl("child");
 		child.setExtends(father);
 		assertTrue(EntityUtils.doesExtend(child, "grandfather"));
 	}

@@ -21,6 +21,7 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.OwnedEntityMetaData;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,7 +37,7 @@ public class OwnedEntityRepositoryDecoratorTest
 	@BeforeMethod
 	public void setUp()
 	{
-		entityMeta = mock(EntityMetaData.class);
+		entityMeta = mock(EntityMetaDataImpl.class);
 		decoratedRepository = mock(Repository.class);
 		when(decoratedRepository.getEntityMetaData()).thenReturn(entityMeta);
 		ownedEntityRepositoryDecorator = new OwnedEntityRepositoryDecorator(decoratedRepository);

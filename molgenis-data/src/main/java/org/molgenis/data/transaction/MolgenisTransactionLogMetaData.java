@@ -5,11 +5,13 @@ import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.molgenis.fieldtypes.EnumField;
 
-public class MolgenisTransactionLogMetaData extends EntityMetaData
+public class MolgenisTransactionLogMetaData extends SystemEntityMetaDataImpl
 {
 	public static final String ENTITY_NAME = "MolgenisTransactionLog";
 
@@ -19,10 +21,16 @@ public class MolgenisTransactionLogMetaData extends EntityMetaData
 	public static final String STATUS = "transactionStatus";
 	public static final String END_TIME = "endTime";
 
-	MolgenisTransactionLogMetaData(String backend)
+	private final String transactionLogBackend;
+
+	public MolgenisTransactionLogMetaData(String transactionLogBackend)
 	{
-		super(ENTITY_NAME);
-		setBackend(backend);
+		this.transactionLogBackend = transactionLogBackend;
+	}
+
+	public void init() {
+		setSimpleName(ENTITY_NAME);
+		setBackend(transactionLogBackend);
 		addAttribute(TRANSACTION_ID, ROLE_ID);
 		addAttribute(USER_NAME).setNillable(true);
 		addAttribute(START_TIME).setDataType(MolgenisFieldTypes.DATETIME).setNillable(false);
@@ -30,7 +38,7 @@ public class MolgenisTransactionLogMetaData extends EntityMetaData
 		addAttribute(END_TIME).setDataType(MolgenisFieldTypes.DATETIME).setNillable(true);
 	}
 
-	public static enum Status
+	public enum Status
 	{
 		STARTED, COMMITED, ROLLBACK;
 
@@ -44,5 +52,5 @@ public class MolgenisTransactionLogMetaData extends EntityMetaData
 
 			return options;
 		}
-	};
+	}
 }

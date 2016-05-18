@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -63,7 +64,7 @@ public class ComputedEntityValuesDecoratorTest
 	@Test
 	public void findAllStreamNoComputedAttrs()
 	{
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		EntityMetaData entityMeta = mock(EntityMetaDataImpl.class);
 		when(entityMeta.hasAttributeWithExpression()).thenReturn(false);
 		when(entityMeta.getAtomicAttributes()).thenReturn(emptyList());
 		when(decoratedRepo.getEntityMetaData()).thenReturn(entityMeta);
@@ -83,7 +84,7 @@ public class ComputedEntityValuesDecoratorTest
 	@Test
 	public void findAllStreamComputedAttrs()
 	{
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		EntityMetaData entityMeta = mock(EntityMetaDataImpl.class);
 		when(entityMeta.hasAttributeWithExpression()).thenReturn(true);
 		when(entityMeta.getAtomicAttributes()).thenReturn(emptyList());
 		when(decoratedRepo.getEntityMetaData()).thenReturn(entityMeta);
@@ -106,7 +107,7 @@ public class ComputedEntityValuesDecoratorTest
 	public void findAllStreamFetchNoComputedAttrs()
 	{
 		Fetch fetch = new Fetch();
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		EntityMetaData entityMeta = mock(EntityMetaDataImpl.class);
 		when(entityMeta.hasAttributeWithExpression()).thenReturn(false);
 		when(entityMeta.getAtomicAttributes()).thenReturn(emptyList());
 		when(decoratedRepo.getEntityMetaData()).thenReturn(entityMeta);
@@ -126,7 +127,7 @@ public class ComputedEntityValuesDecoratorTest
 	@Test
 	public void findAllStreamFetchComputedAttrs()
 	{
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		EntityMetaData entityMeta = mock(EntityMetaDataImpl.class);
 		when(entityMeta.hasAttributeWithExpression()).thenReturn(true);
 		when(entityMeta.getAtomicAttributes()).thenReturn(emptyList());
 		when(decoratedRepo.getEntityMetaData()).thenReturn(entityMeta);
@@ -150,7 +151,7 @@ public class ComputedEntityValuesDecoratorTest
 	@Test
 	public void findAllAsStreamNoComputedAttrs()
 	{
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		EntityMetaData entityMeta = mock(EntityMetaDataImpl.class);
 		when(entityMeta.hasAttributeWithExpression()).thenReturn(false);
 		when(entityMeta.getAtomicAttributes()).thenReturn(emptyList());
 		when(decoratedRepo.getEntityMetaData()).thenReturn(entityMeta);
@@ -165,7 +166,7 @@ public class ComputedEntityValuesDecoratorTest
 	@Test
 	public void findAllAsStreamComputedAttrs()
 	{
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		EntityMetaData entityMeta = mock(EntityMetaDataImpl.class);
 		when(entityMeta.hasAttributeWithExpression()).thenReturn(true);
 		when(entityMeta.getAtomicAttributes()).thenReturn(emptyList());
 		when(decoratedRepo.getEntityMetaData()).thenReturn(entityMeta);
@@ -183,7 +184,7 @@ public class ComputedEntityValuesDecoratorTest
 	public void streamFetchNoComputedAttrs()
 	{
 		Fetch fetch = new Fetch();
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		EntityMetaData entityMeta = mock(EntityMetaDataImpl.class);
 		when(entityMeta.hasAttributeWithExpression()).thenReturn(false);
 		when(entityMeta.getAtomicAttributes()).thenReturn(emptyList());
 		when(decoratedRepo.getEntityMetaData()).thenReturn(entityMeta);
@@ -200,7 +201,7 @@ public class ComputedEntityValuesDecoratorTest
 	@Test
 	public void streamFetchComputedAttrs()
 	{
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		EntityMetaData entityMeta = mock(EntityMetaDataImpl.class);
 		when(entityMeta.hasAttributeWithExpression()).thenReturn(true);
 		when(entityMeta.getAtomicAttributes()).thenReturn(emptyList());
 		when(decoratedRepo.getEntityMetaData()).thenReturn(entityMeta);

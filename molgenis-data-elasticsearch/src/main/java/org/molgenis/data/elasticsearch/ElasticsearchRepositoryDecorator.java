@@ -22,6 +22,7 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Sets;

@@ -18,6 +18,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.base.Function;

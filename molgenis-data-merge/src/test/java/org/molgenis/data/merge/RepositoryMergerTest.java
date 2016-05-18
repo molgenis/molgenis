@@ -25,6 +25,7 @@ import org.molgenis.data.elasticsearch.ElasticsearchRepository;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.stereotype.Component;
@@ -57,9 +58,9 @@ public class RepositoryMergerTest
 		repository1 = mock(Repository.class);
 		elasticSearchRepository = mock(ElasticsearchRepository.class);
 
-		entityMetaData1 = new EntityMetaData("meta1");
-		entityMetaData2 = new EntityMetaData("meta2");
-		entityMetaDataMerged = new EntityMetaData("mergedRepo");
+		entityMetaData1 = new EntityMetaDataImpl("meta1");
+		entityMetaData2 = new EntityMetaDataImpl("meta2");
+		entityMetaDataMerged = new EntityMetaDataImpl("mergedRepo");
 
 		// input metadata
 		metaDataa = new AttributeMetaData("a");
@@ -93,12 +94,12 @@ public class RepositoryMergerTest
 		List<AttributeMetaData> compound1MetaData = new ArrayList<AttributeMetaData>();
 		compound1MetaData.add(metaData1cMerged);
 		compound1MetaData.add(metaData1dMerged);
-		metaData1Compound.setAttributesMetaData(compound1MetaData);
+		metaData1Compound.setAttributeParts(compound1MetaData);
 
 		List<AttributeMetaData> compound2MetaData = new ArrayList<AttributeMetaData>();
 		compound2MetaData.add(metaData2cMerged);
 		compound2MetaData.add(metaData2eMerged);
-		metaData2Compound.setAttributesMetaData(compound2MetaData);
+		metaData2Compound.setAttributeParts(compound2MetaData);
 
 		entityMetaDataMerged.addAttribute(metaDataa);
 		entityMetaDataMerged.addAttribute(metaDatab);

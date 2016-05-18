@@ -58,6 +58,7 @@ import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.support.MapEntity;
@@ -117,6 +118,9 @@ public class SortaServiceController extends MolgenisPluginController
 	private final MenuReaderService menuReaderService;
 	private final IdGenerator idGenerator;
 	private final PermissionSystemService permissionSystemService;
+	private final MatchingTaskContentEntityMetaData matchingTaskContentEntityMetaData;
+	private final SortaJobExecutionMetaData sortaJobExecutionMetaData;
+	private final OntologyTermMetaData ontologyTermMetaData;
 
 	public static final String MATCH_VIEW_NAME = "sorta-match-view";
 	public static final String ID = "sortaservice";
@@ -130,7 +134,9 @@ public class SortaServiceController extends MolgenisPluginController
 			SortaJobFactory sortaMatchJobFactory, ExecutorService taskExecutor, UserAccountService userAccountService,
 			FileStore fileStore, MolgenisPermissionService molgenisPermissionService, DataService dataService,
 			LanguageService languageService, MenuReaderService menuReaderService, IdGenerator idGenerator,
-			PermissionSystemService permissionSystemService)
+			PermissionSystemService permissionSystemService,
+			MatchingTaskContentEntityMetaData matchingTaskContentEntityMetaData,
+			SortaJobExecutionMetaData sortaJobExecutionMetaData, OntologyTermMetaData ontologyTermMetaData)
 	{
 		super(URI);
 		this.ontologyService = requireNonNull(ontologyService);
@@ -145,6 +151,9 @@ public class SortaServiceController extends MolgenisPluginController
 		this.menuReaderService = requireNonNull(menuReaderService);
 		this.idGenerator = requireNonNull(idGenerator);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
+		this.matchingTaskContentEntityMetaData = requireNonNull(matchingTaskContentEntityMetaData);
+		this.sortaJobExecutionMetaData = requireNonNull(sortaJobExecutionMetaData);
+		this.ontologyTermMetaData = requireNonNull(ontologyTermMetaData);
 	}
 
 	@RequestMapping(method = GET)
@@ -157,7 +166,7 @@ public class SortaServiceController extends MolgenisPluginController
 	private SortaJobExecution findSortaJobExecution(String sortaJobExecutionId)
 	{
 		Fetch fetch = new Fetch();
-		SortaJobExecutionMetaData.INSTANCE.getAtomicAttributes().forEach(attr -> fetch.field(attr.getName()));
+		sortaJobExecutionMetaData.getAtomicAttributes().forEach(attr -> fetch.field(attr.getName()));
 		SortaJobExecution result = RunAsSystemProxy.runAsSystem(() -> dataService.findOneById(SortaJobExecution.ENTITY_NAME,
 				sortaJobExecutionId, fetch, SortaJobExecution.class));
 		return result;
@@ -344,7 +353,7 @@ public class SortaServiceController extends MolgenisPluginController
 		});
 
 		EntityPager pager = new EntityPager(start, num, count, null);
-		return new EntityCollectionResponse(pager, entityMaps, "/match/retrieve", OntologyTermMetaData.INSTANCE,
+		return new EntityCollectionResponse(pager, entityMaps, "/match/retrieve", ontologyTermMetaData,
 				molgenisPermissionService, dataService, languageService);
 	}
 
@@ -529,7 +538,7 @@ public class SortaServiceController extends MolgenisPluginController
 	{
 		String resultEntityName = idGenerator.generateId();
 
-		SortaJobExecution sortaJobExecution = new SortaJobExecution(dataService);
+		SortaJobExecution sortaJobExecution = new SortaJobExecution(sortaJobExecutionMetaData, dataService);
 		sortaJobExecution.setIdentifier(resultEntityName);
 		sortaJobExecution.setName(jobName);
 		sortaJobExecution.setUser(userAccountService.getCurrentUser());
@@ -553,7 +562,7 @@ public class SortaServiceController extends MolgenisPluginController
 
 	private void createEmptyResultRepository(String jobName, String resultEntityName, EntityMetaData sourceMetaData)
 	{
-		EntityMetaData resultEntityMetaData = EntityMetaData.newInstance(MatchingTaskContentEntityMetaData.INSTANCE);
+		EntityMetaData resultEntityMetaData = EntityMetaDataImpl.newInstance(matchingTaskContentEntityMetaData);
 		resultEntityMetaData.setName(resultEntityName);
 		resultEntityMetaData.setAbstract(false);
 		resultEntityMetaData.addAttribute(new AttributeMetaData(INPUT_TERM, FieldTypeEnum.XREF)

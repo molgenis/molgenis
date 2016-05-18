@@ -32,6 +32,7 @@ import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -75,7 +76,7 @@ public class RepositoryRangeHandlingDataSourceTest
 		when(ctx.getBean(GenomicDataSettings.class)).thenReturn(genomicDataSettings);
 		new ApplicationContextProvider().setApplicationContext(ctx);
 
-		EntityMetaData metaData = new EntityMetaData("dataset");
+		EntityMetaData metaData = new EntityMetaDataImpl("dataset");
 		when(dataService.getEntityMetaData("dataset")).thenReturn(metaData);
 		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_CHROM, metaData)).thenReturn("CHROM");
 
@@ -103,7 +104,7 @@ public class RepositoryRangeHandlingDataSourceTest
 		Query<Entity> q = new QueryImpl<Entity>().eq("CHROM", "1");
 		q.pageSize(100);
 		SearchResult result = mock(SearchResult.class);
-		EntityMetaData emd = new EntityMetaData("DAS");
+		EntityMetaData emd = new EntityMetaDataImpl("DAS");
 		emd.addAttribute(new AttributeMetaData("STOP"));
 		emd.addAttribute(new AttributeMetaData("linkout"));
 		emd.addAttribute(new AttributeMetaData("NAME"), ROLE_LABEL);

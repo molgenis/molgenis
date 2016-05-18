@@ -25,11 +25,15 @@ public class ClinvarAnnotatorSettings extends DefaultSettingsEntity
 		public Meta()
 		{
 			super(ID);
+		}
+
+		@Override
+		public void init()
+		{
 			setLabel("Clinvar annotator settings");
 
 			String defaultLocation = AnnotatorUtils.getAnnotatorResourceDir() + "/Clinvar/clinvar.vcf.gz";
 			addAttribute(CLINVAR_LOCATION).setLabel("Clinvar file location").setDefaultValue(defaultLocation);
 		}
 	}
-
 }

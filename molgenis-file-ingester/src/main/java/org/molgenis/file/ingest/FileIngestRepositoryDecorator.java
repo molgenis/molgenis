@@ -15,6 +15,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 

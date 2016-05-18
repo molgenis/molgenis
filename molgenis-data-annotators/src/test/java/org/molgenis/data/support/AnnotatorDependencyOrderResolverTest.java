@@ -16,6 +16,7 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -49,7 +50,7 @@ public class AnnotatorDependencyOrderResolverTest
 		AttributeMetaData attri = new AttributeMetaData("I").setDataType(MolgenisFieldTypes.STRING);
 		AttributeMetaData attrj = new AttributeMetaData("J").setDataType(MolgenisFieldTypes.STRING);
 
-		EntityMetaData emd = new EntityMetaData("test");
+		EntityMetaData emd = new EntityMetaDataImpl("test");
 		emd.addAttributes(Arrays.asList(attra, attrb));
 		when(repo.getEntityMetaData()).thenReturn(emd);
 

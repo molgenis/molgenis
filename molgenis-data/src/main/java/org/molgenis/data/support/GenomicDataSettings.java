@@ -75,6 +75,11 @@ public class GenomicDataSettings extends DefaultSettingsEntity
 		public Meta()
 		{
 			super(ID);
+		}
+
+		@Override
+		public void init()
+		{
 			setLabel("Genomic data settings");
 			setDescription("Settings for genomic data sets.");
 

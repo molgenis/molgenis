@@ -26,7 +26,7 @@ import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.resources.impl.TabixRepositoryFactory;
 import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,36 +52,36 @@ public class DannAnnotator
 	@Bean
 	public RepositoryAnnotator dann()
 	{
-		List<AttributeMetaData> attributes = new ArrayList<>();
-		AttributeMetaData dann_score = new AttributeMetaData(DANN_SCORE, DECIMAL)
-				.setDescription("deleterious score of genetic variants using neural networks.")
-				.setLabel(DANN_SCORE_LABEL);
-
-		attributes.add(dann_score);
-
-		AnnotatorInfo dannInfo = AnnotatorInfo.create(Status.READY, AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE, NAME,
-				"Annotating genetic variants, especially non-coding variants, "
-						+ "for the purpose of identifying pathogenic variants remains a challenge."
-						+ " Combined annotation-dependent depletion (CADD) is an al- gorithm designed "
-						+ "to annotate both coding and non-coding variants, and has been shown to outper- form "
-						+ "other annotation algorithms. CADD trains a linear kernel support vector machine (SVM) "
-						+ "to dif- ferentiate evolutionarily derived, likely benign, alleles from simulated, "
-						+ "likely deleterious, variants. However, SVMs cannot capture non-linear relationships"
-						+ " among the features, which can limit performance. To address this issue, we have"
-						+ " developed DANN. DANN uses the same feature set and training data as CADD to train"
-						+ " a deep neural network (DNN). DNNs can capture non-linear relation- ships among "
-						+ "features and are better suited than SVMs for problems with a large number of samples "
-						+ "and features. We exploit Compute Unified Device Architecture-compatible "
-						+ "graphics processing units and deep learning techniques such as dropout and momentum "
-						+ "training to accelerate the DNN training. DANN achieves about a 19%relative reduction "
-						+ "in the error rate and about a 14%relative increase in the area under the curve (AUC) metric "
-						+ "over CADD’s SVM methodology. "
-						+ "All data and source code are available at https://cbcl.ics.uci.edu/ public_data/DANN/.",
-				attributes);
-
-		EntityAnnotator entityAnnotator = new AnnotatorImpl(DANN_TABIX_RESOURCE, dannInfo, new LocusQueryCreator(),
-				new MultiAllelicResultFilter(attributes), dataService, resources,
-				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(DANN_LOCATION, dannAnnotatorSettings));
+//		List<AttributeMetaData> attributes = new ArrayList<>();
+//		AttributeMetaData dann_score = new AttributeMetaData(DANN_SCORE, DECIMAL)
+//				.setDescription("deleterious score of genetic variants using neural networks.")
+//				.setLabel(DANN_SCORE_LABEL);
+//
+//		attributes.add(dann_score);
+//
+//		AnnotatorInfo dannInfo = AnnotatorInfo.create(Status.READY, AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE, NAME,
+//				"Annotating genetic variants, especially non-coding variants, "
+//						+ "for the purpose of identifying pathogenic variants remains a challenge."
+//						+ " Combined annotation-dependent depletion (CADD) is an al- gorithm designed "
+//						+ "to annotate both coding and non-coding variants, and has been shown to outper- form "
+//						+ "other annotation algorithms. CADD trains a linear kernel support vector machine (SVM) "
+//						+ "to dif- ferentiate evolutionarily derived, likely benign, alleles from simulated, "
+//						+ "likely deleterious, variants. However, SVMs cannot capture non-linear relationships"
+//						+ " among the features, which can limit performance. To address this issue, we have"
+//						+ " developed DANN. DANN uses the same feature set and training data as CADD to train"
+//						+ " a deep neural network (DNN). DNNs can capture non-linear relation- ships among "
+//						+ "features and are better suited than SVMs for problems with a large number of samples "
+//						+ "and features. We exploit Compute Unified Device Architecture-compatible "
+//						+ "graphics processing units and deep learning techniques such as dropout and momentum "
+//						+ "training to accelerate the DNN training. DANN achieves about a 19%relative reduction "
+//						+ "in the error rate and about a 14%relative increase in the area under the curve (AUC) metric "
+//						+ "over CADD’s SVM methodology. "
+//						+ "All data and source code are available at https://cbcl.ics.uci.edu/ public_data/DANN/.",
+//				attributes);
+//
+		EntityAnnotator entityAnnotator = null; // FIXME new AnnotatorImpl(DANN_TABIX_RESOURCE, dannInfo, new LocusQueryCreator(),
+//				new MultiAllelicResultFilter(attributes), dataService, resources,
+//				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(DANN_LOCATION, dannAnnotatorSettings));
 
 		return new RepositoryAnnotatorImpl(entityAnnotator);
 	}
@@ -90,19 +90,19 @@ public class DannAnnotator
 	Resource dannResource()
 	{
 		Resource dannTabixResource = null;
-
-		String idAttrName = "id";
-		EntityMetaData repoMetaData = new EntityMetaData(DANN_TABIX_RESOURCE);
-		repoMetaData.addAttribute(CHROM_META);
-		repoMetaData.addAttribute(POS_META);
-		repoMetaData.addAttribute(REF_META);
-		repoMetaData.addAttribute(ALT_META);
-		repoMetaData.addAttribute(new AttributeMetaData("DANN_SCORE", DECIMAL));
-		repoMetaData.addAttribute(idAttrName, ROLE_ID).setVisible(false);
-
-		dannTabixResource = new ResourceImpl(DANN_TABIX_RESOURCE,
-				new SingleResourceConfig(DANN_LOCATION, dannAnnotatorSettings),
-				new TabixRepositoryFactory(repoMetaData));
+// FIXME
+//		String idAttrName = "id";
+//		EntityMetaDataImpl repoMetaData = new EntityMetaDataImpl(DANN_TABIX_RESOURCE);
+//		repoMetaData.addAttribute(CHROM_META);
+//		repoMetaData.addAttribute(POS_META);
+//		repoMetaData.addAttribute(REF_META);
+//		repoMetaData.addAttribute(ALT_META);
+//		repoMetaData.addAttribute(new AttributeMetaData("DANN_SCORE", DECIMAL));
+//		repoMetaData.addAttribute(idAttrName, ROLE_ID).setVisible(false);
+//
+//		dannTabixResource = new ResourceImpl(DANN_TABIX_RESOURCE,
+//				new SingleResourceConfig(DANN_LOCATION, dannAnnotatorSettings),
+//				new TabixRepositoryFactory(repoMetaData));
 
 		return dannTabixResource;
 	}

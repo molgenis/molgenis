@@ -20,6 +20,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.MapEntity;
 import org.slf4j.Logger;
@@ -45,16 +46,16 @@ public class TabixRepository extends AbstractRepository
 	 * @param file
 	 *            the Tabix file
 	 * @param entityMetaData
-	 *            {@link EntityMetaData} for the tabix file. Attributes should be in the order of the file's columns
+	 *            {@link EntityMetaDataImpl} for the tabix file. Attributes should be in the order of the file's columns
 	 * @throws IOException
 	 *             if something goes wrong creating the {@link TabixReader} for the file
 	 */
-	public TabixRepository(File file, EntityMetaData entityMetaData) throws IOException
+	public TabixRepository(File file, EntityMetaDataImpl entityMetaData) throws IOException
 	{
 		this(file, entityMetaData, CHROM, POS);
 	}
 
-	public TabixRepository(File file, EntityMetaData entityMetaData, String chromosomeAttributeName,
+	public TabixRepository(File file, EntityMetaDataImpl entityMetaData, String chromosomeAttributeName,
 			String positionAttributeName) throws IOException
 	{
 		this.entityMetaData = entityMetaData;

@@ -59,21 +59,21 @@ public class LifeLinesCodeToEmxConvertor
 		ExcelWriter excelWriter = new ExcelWriter(lifeLinesCodeEmxFile);
 
 		ExcelSheetWriter ontologyExcelSheet = excelWriter.createWritable(OntologyMetaData.ENTITY_NAME, FluentIterable
-				.from(OntologyMetaData.INSTANCE.getAtomicAttributes()).transform(attr -> attr.getName()).toList());
+				.from(new OntologyMetaData().getAtomicAttributes()).transform(attr -> attr.getName()).toList());
 
 		ExcelSheetWriter ontologyTermExcelSheet = excelWriter.createWritable(
 				OntologyTermMetaData.ENTITY_NAME,
-				FluentIterable.from(OntologyTermMetaData.INSTANCE.getAtomicAttributes())
+				FluentIterable.from(new OntologyTermMetaData().getAtomicAttributes())
 						.transform(attr -> attr.getName()).toList());
 
 		ExcelSheetWriter ontologyTermSynonymExcelSheet = excelWriter.createWritable(
 				OntologyTermSynonymMetaData.ENTITY_NAME,
-				FluentIterable.from(OntologyTermSynonymMetaData.INSTANCE.getAtomicAttributes())
+				FluentIterable.from(new OntologyTermSynonymMetaData().getAtomicAttributes())
 						.transform(attr -> attr.getName()).toList());
 
 		ExcelSheetWriter ontologyTermNodePathExcelSheet = excelWriter.createWritable(
 				OntologyTermNodePathMetaData.ENTITY_NAME,
-				FluentIterable.from(OntologyTermNodePathMetaData.INSTANCE.getAtomicAttributes())
+				FluentIterable.from(new OntologyTermNodePathMetaData().getAtomicAttributes())
 						.transform(attr -> attr.getName()).toList());
 
 		ExcelRepositoryCollection excelRepositoryCollection = new ExcelRepositoryCollection(lifeLinesCodeFile);

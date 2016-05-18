@@ -11,6 +11,7 @@ import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.importer.EmxMetaDataParser.EmxAttribute;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.Package;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.SemanticTag;
@@ -114,7 +115,7 @@ public final class IntermediateParseResults
 			}
 		}
 
-		EntityMetaData emd = new EntityMetaData(simpleName);
+		EntityMetaData emd = new EntityMetaDataImpl(simpleName);
 		entities.put(name, emd);
 
 		return emd;
@@ -154,12 +155,12 @@ public final class IntermediateParseResults
 
 	public ImmutableMap<String, EntityMetaData> getEntityMap()
 	{
-		return ImmutableMap.<String, EntityMetaData> copyOf(entities);
+		return ImmutableMap.copyOf(entities);
 	}
 
 	public ImmutableList<EntityMetaData> getEntities()
 	{
-		return ImmutableList.<EntityMetaData> copyOf(entities.values());
+		return ImmutableList.copyOf(entities.values());
 	}
 
 	public ImmutableMap<String, Package> getPackages()

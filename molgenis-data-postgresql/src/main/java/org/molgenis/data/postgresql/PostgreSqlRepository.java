@@ -52,6 +52,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.BatchingQueryResult;
 import org.molgenis.data.support.QueryImpl;
@@ -396,7 +397,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		}
 		jdbcTemplate.execute(dropColumnSql);
 
-		EntityMetaData demd = new EntityMetaData(metaData);
+		EntityMetaDataImpl demd = new EntityMetaDataImpl(metaData);
 		demd.removeAttribute(demd.getAttribute(attrName));
 		setMetaData(demd);
 	}
@@ -420,7 +421,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	 * @param attr
 	 *            the {@link AttributeMetaData} to add
 	 * @param addToEntityMetaData
-	 *            boolean indicating if the repository's {@link EntityMetaData} should be updated as well. This should
+	 *            boolean indicating if the repository's {@link EntityMetaDataImpl} should be updated as well. This should
 	 *            not happen for parts of a compound attribute.
 	 */
 	private void addAttributeRec(AttributeMetaData attr, boolean addToEntityMetaData)
@@ -495,7 +496,7 @@ public class PostgreSqlRepository extends AbstractRepository
 					addAttributeRec(attrPart, false);
 				}
 			}
-			EntityMetaData demd = new EntityMetaData(metaData);
+			EntityMetaDataImpl demd = new EntityMetaDataImpl(metaData);
 			if (addToEntityMetaData)
 			{
 				demd.addAttribute(attr);

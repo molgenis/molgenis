@@ -7,12 +7,13 @@ import java.util.stream.Collectors;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.molgenis.fieldtypes.EnumField;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AttributeMappingMetaData extends EntityMetaData
+public class AttributeMappingMetaData extends SystemEntityMetaDataImpl
 {
 	public static final String ENTITY_NAME = "AttributeMapping";
 	public static final String IDENTIFIER = "identifier";
@@ -21,9 +22,10 @@ public class AttributeMappingMetaData extends EntityMetaData
 	public static final String ALGORITHM = "algorithm";
 	public static final String ALGORITHMSTATE = "algorithmState";
 
-	public AttributeMappingMetaData()
+	@Override
+	public void init()
 	{
-		super(ENTITY_NAME);
+		setName(ENTITY_NAME);
 
 		addAttribute(IDENTIFIER, ROLE_ID);
 		addAttribute(TARGETATTRIBUTEMETADATA).setNillable(false);

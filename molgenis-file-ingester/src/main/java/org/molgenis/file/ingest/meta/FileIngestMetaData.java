@@ -5,16 +5,18 @@ import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.StringField;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableList;
 
 @Component
-public class FileIngestMetaData extends EntityMetaData
+public class FileIngestMetaData extends SystemEntityMetaDataImpl
 {
 	public static final String ENTITY_NAME = "FileIngest";
 	public static final String ID = "id";
@@ -27,11 +29,22 @@ public class FileIngestMetaData extends EntityMetaData
 	public static final String ACTIVE = "active";
 	public static final String FAILURE_EMAIL = "failureEmail";
 
-	public static final ImmutableList<String> LOADERS = ImmutableList.of("CSV");
+	private static FileIngestMetaData INSTANCE;
 
-	public FileIngestMetaData()
+	public static final ImmutableList<String> LOADERS = ImmutableList.of("CSV");
+	private final EntityMetaDataMetaData entityMetaDataMetaData;
+
+	@Autowired
+	public FileIngestMetaData(EntityMetaDataMetaData entityMetaDataMetaData)
 	{
 		super(ENTITY_NAME);
+		this.entityMetaDataMetaData = entityMetaDataMetaData;
+		INSTANCE = this;
+	}
+
+	@Override
+	public void init()
+	{
 		addAttribute(ID, ROLE_ID).setAuto(true).setNillable(false);
 		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Name").setNillable(false);
 		addAttribute(DESCRIPTION).setDataType(MolgenisFieldTypes.TEXT).setLabel("Description").setNillable(true);
@@ -39,7 +52,7 @@ public class FileIngestMetaData extends EntityMetaData
 		addAttribute(LOADER).setDataType(new EnumField()).setEnumOptions(LOADERS).setLabel("Loader type")
 				.setNillable(false);
 		addAttribute(ENTITY_META_DATA).setDataType(MolgenisFieldTypes.XREF)
-				.setRefEntity(EntityMetaDataMetaData.INSTANCE).setLabel("Target EntityMetaData").setNillable(false);
+				.setRefEntity(entityMetaDataMetaData).setLabel("Target EntityMetaData").setNillable(false);
 		addAttribute(CRONEXPRESSION).setLabel("Cronexpression").setNillable(false)
 				.setValidationExpression("$('" + CRONEXPRESSION + "').matches(" + StringField.CRON_REGEX + ").value()");
 		addAttribute(ACTIVE).setDataType(MolgenisFieldTypes.BOOL).setLabel("Active").setNillable(false);
@@ -48,4 +61,8 @@ public class FileIngestMetaData extends EntityMetaData
 				.setNillable(true);
 	}
 
+	// access bean from classes other than spring-managed beans
+	public static FileIngestMetaData get() {
+		return INSTANCE;
+	}
 }

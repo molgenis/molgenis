@@ -34,13 +34,10 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.transaction.TransactionLogService;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.file.FileStore;
 import org.molgenis.framework.MolgenisUpgradeService;
-import org.molgenis.framework.db.WebAppDatabasePopulator;
-import org.molgenis.framework.db.WebAppDatabasePopulatorService;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
 import org.molgenis.messageconverter.CsvHttpMessageConverter;
@@ -63,7 +60,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
@@ -103,9 +99,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	private MolgenisPermissionService molgenisPermissionService;
 
 	@Autowired
-	private WebAppDatabasePopulatorService webAppDatabasePopulatorService;
-
-	@Autowired
 	public SearchService searchService;
 
 	@Autowired
@@ -118,8 +111,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Autowired
 	public DataSource dataSource;
 
-	@Autowired
-	public TransactionLogService transactionLogService;
+//	@Autowired
+//	public TransactionLogService transactionLogService;
 
 	@Autowired
 	public IdGenerator idGenerator;
@@ -215,12 +208,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public MolgenisPluginInterceptor molgenisPluginInterceptor()
 	{
 		return new MolgenisPluginInterceptor(molgenisUi(), molgenisPermissionService);
-	}
-
-	@Bean
-	public ApplicationListener<?> databasePopulator()
-	{
-		return new WebAppDatabasePopulator(webAppDatabasePopulatorService);
 	}
 
 	@Bean
@@ -481,9 +468,12 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		runAsSystem(() -> metaDataService().setDefaultBackend(getBackend()));
 	}
 
+	@Autowired
+	private EntityMetaDataMetaData entityMetaDataMetaData;
+
 	private boolean indexExists()
 	{
-		return searchService.hasMapping(EntityMetaDataMetaData.INSTANCE);
+		return searchService.hasMapping(entityMetaDataMetaData);
 	}
 
 	@Bean
@@ -519,7 +509,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 			@Override
 			public Repository<Entity> createDecoratedRepository(Repository<Entity> repository)
 			{
-				return new MolgenisRepositoryDecoratorFactory(entityManager(), transactionLogService,
+				return new MolgenisRepositoryDecoratorFactory(entityManager(), null,
 						entityAttributesValidator, idGenerator, appSettings, dataService(), expressionValidator,
 						repositoryDecoratorRegistry()).createDecoratedRepository(repository);
 			}

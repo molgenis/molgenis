@@ -1,5 +1,6 @@
 package org.molgenis.data.meta;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.BOOL;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
@@ -8,7 +9,11 @@ import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
 
-public class EntityMetaDataMetaData extends EntityMetaData
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+public class EntityMetaDataMetaData extends SystemEntityMetaDataImpl
 {
 	public static final String ENTITY_NAME = "entities";
 	public static final String SIMPLE_NAME = "simpleName";
@@ -25,23 +30,49 @@ public class EntityMetaDataMetaData extends EntityMetaData
 	public static final String TAGS = "tags";
 	public static final String ATTRIBUTES = "attributes";
 
-	public static final EntityMetaDataMetaData INSTANCE = new EntityMetaDataMetaData();
+	private AttributeMetaDataMetaData attributeMetaDataMetaData;
+	private PackageMetaData packageMetaData;
+	private TagMetaData tagMetaData;
 
-	private EntityMetaDataMetaData()
+	EntityMetaDataMetaData()
 	{
-		super(ENTITY_NAME);
+	}
+
+	public void init()
+	{
+		setName(ENTITY_NAME);
 		addAttribute(FULL_NAME, ROLE_ID).setUnique(true);
 		addAttribute(SIMPLE_NAME, ROLE_LABEL).setNillable(false);
 		addAttribute(BACKEND);
-		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(PackageRepository.META_DATA);
-		addAttribute(ID_ATTRIBUTE).setDataType(XREF).setRefEntity(AttributeMetaDataMetaData.INSTANCE);
-		addAttribute(LABEL_ATTRIBUTE).setDataType(XREF).setRefEntity(AttributeMetaDataMetaData.INSTANCE);
-		addAttribute(LOOKUP_ATTRIBUTES).setDataType(MREF).setRefEntity(AttributeMetaDataMetaData.INSTANCE);
+		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(packageMetaData);
+		addAttribute(ID_ATTRIBUTE).setDataType(XREF).setRefEntity(attributeMetaDataMetaData);
+		addAttribute(LABEL_ATTRIBUTE).setDataType(XREF).setRefEntity(attributeMetaDataMetaData);
+		addAttribute(LOOKUP_ATTRIBUTES).setDataType(MREF).setRefEntity(attributeMetaDataMetaData);
 		addAttribute(ABSTRACT).setDataType(BOOL);
 		addAttribute(LABEL, ROLE_LOOKUP);
-		addAttribute(EXTENDS).setDataType(XREF).setRefEntity(this);
+		addAttribute(EXTENDS).setDataType(XREF)
+				.setRefEntity(this); // TODO replace with autowired self-reference after update to Spring 4.3
 		addAttribute(DESCRIPTION).setDataType(TEXT);
-		addAttribute(TAGS).setDataType(MREF).setRefEntity(TagMetaData.INSTANCE);
-		addAttribute(ATTRIBUTES).setDataType(MREF).setRefEntity(AttributeMetaDataMetaData.INSTANCE);
+		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetaData);
+		addAttribute(ATTRIBUTES).setDataType(MREF).setRefEntity(attributeMetaDataMetaData);
+	}
+
+	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
+	@Autowired
+	public void setAttributeMetaDataMetaData(AttributeMetaDataMetaData attributeMetaDataMetaData)
+	{
+		this.attributeMetaDataMetaData = requireNonNull(attributeMetaDataMetaData);
+	}
+
+	@Autowired
+	public void setPackageMetaData(PackageMetaData packageMetaData)
+	{
+		this.packageMetaData = requireNonNull(packageMetaData);
+	}
+
+	@Autowired
+	public void setTagMetaData(TagMetaData tagMetaData)
+	{
+		this.tagMetaData = requireNonNull(tagMetaData);
 	}
 }

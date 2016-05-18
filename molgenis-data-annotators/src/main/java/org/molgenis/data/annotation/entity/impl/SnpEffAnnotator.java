@@ -35,6 +35,7 @@ import org.molgenis.data.annotation.utils.JarRunnerImpl;
 import org.molgenis.data.annotator.websettings.SnpEffAnnotatorSettings;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
@@ -157,9 +158,9 @@ public class SnpEffAnnotator
 		private static final String CHARSET = "UTF-8";
 		private String snpEffPath;
 		private final Entity pluginSettings;
-		private final AnnotatorInfo info = AnnotatorInfo.create(Status.READY, Type.EFFECT_PREDICTION, NAME,
-				"Genetic variant annotation and effect prediction toolbox. It annotates and predicts the effects of variants on genes (such as amino acid changes). ",
-				getOutputMetaData());
+		private final AnnotatorInfo info = null; //FIXME AnnotatorInfo.create(Status.READY, Type.EFFECT_PREDICTION, NAME,
+//				"Genetic variant annotation and effect prediction toolbox. It annotates and predicts the effects of variants on genes (such as amino acid changes). ",
+//				getOutputMetaData());
 		private final JarRunner jarRunner;
 
 		public SnpEffRepositoryAnnotator(Entity pluginSettings, JarRunner jarRunner)
@@ -226,7 +227,7 @@ public class SnpEffAnnotator
 					public Entity next()
 					{
 						Entity entity = it.next();
-						EntityMetaData meta = new EntityMetaData(entity.getEntityMetaData());
+						EntityMetaData meta = new EntityMetaDataImpl(entity.getEntityMetaData());
 						info.getOutputAttributes().forEach(meta::addAttribute);
 						Entity copy = new MapEntity(entity, meta);
 						try

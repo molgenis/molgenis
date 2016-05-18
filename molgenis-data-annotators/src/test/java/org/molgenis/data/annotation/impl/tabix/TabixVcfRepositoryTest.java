@@ -24,6 +24,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.annotator.tabix.TabixVcfRepository;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.util.ResourceUtils;
@@ -38,7 +39,7 @@ public class TabixVcfRepositoryTest
 	@BeforeTest
 	public void beforeTest() throws IOException
 	{
-		repoMetaData = new EntityMetaData("TabixTest");
+		repoMetaData = new EntityMetaDataImpl("TabixTest");
 		repoMetaData.addAttribute(CHROM_META);
 		repoMetaData.addAttribute(ALT_META);
 		repoMetaData.addAttribute(POS_META);

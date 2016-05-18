@@ -5,7 +5,8 @@ import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +15,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
 import org.springframework.transaction.annotation.Transactional;
 
-public abstract class DefaultSettingsEntityMetaData extends EntityMetaData
-		implements ApplicationListener<ContextRefreshedEvent>, Ordered
+public abstract class DefaultSettingsEntityMetaData extends SystemEntityMetaDataImpl
 {
 	public static final String ATTR_ID = "id";
 
@@ -28,8 +28,13 @@ public abstract class DefaultSettingsEntityMetaData extends EntityMetaData
 	public DefaultSettingsEntityMetaData(String id)
 	{
 		super(id);
+	}
+
+	@Override
+	public void init()
+	{
 		setExtends(settingsEntityMeta);
-		setPackage(SettingsEntityMeta.PACKAGE_SETTINGS);
+		setPackage(settingsEntityMeta.getPackage());
 		addAttribute(ATTR_ID, ROLE_ID).setLabel("Id").setVisible(false);
 	}
 
@@ -41,10 +46,10 @@ public abstract class DefaultSettingsEntityMetaData extends EntityMetaData
 
 	public static String getSettingsEntityName(String id)
 	{
-		return SettingsEntityMeta.PACKAGE_SETTINGS.getName() + '_' + id;
+		return SettingsEntityMeta.PACKAGE_NAME + '_' + id;
 	}
 
-	private Entity getDefaultSettings()
+	Entity getDefaultSettings()
 	{
 		MapEntity mapEntity = new MapEntity(this);
 		for (AttributeMetaData attr : this.getAtomicAttributes())
@@ -56,25 +61,5 @@ public abstract class DefaultSettingsEntityMetaData extends EntityMetaData
 			}
 		}
 		return mapEntity;
-	}
-
-	@Transactional
-	@RunAsSystem
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		Entity settingsEntity = getSettings();
-		if (settingsEntity == null)
-		{
-			Entity defaultSettingsEntity = getDefaultSettings();
-			defaultSettingsEntity.set(ATTR_ID, getSimpleName());
-			dataService.add(getName(), defaultSettingsEntity);
-		}
-	}
-
-	@Override
-	public int getOrder()
-	{
-		return Ordered.HIGHEST_PRECEDENCE + 110;
 	}
 }

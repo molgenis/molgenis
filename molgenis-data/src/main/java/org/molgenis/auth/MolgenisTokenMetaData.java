@@ -6,18 +6,19 @@ import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MolgenisTokenMetaData extends EntityMetaData
+public class MolgenisTokenMetaData extends SystemEntityMetaDataImpl
 {
-
 	public static final String ENTITY_NAME = "MolgenisToken";
 
-	public MolgenisTokenMetaData()
+	@Override
+	public void init()
 	{
-		super(ENTITY_NAME);
+		setName(ENTITY_NAME);
 		addAttribute(MolgenisToken.ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");
 		addAttribute(MolgenisToken.MOLGENIS_USER).setDataType(XREF).setRefEntity(new MolgenisUserMetaData())
 				.setAggregatable(true).setDescription("").setNillable(false);
@@ -29,6 +30,5 @@ public class MolgenisTokenMetaData extends EntityMetaData
 				.setReadOnly(true).setDescription("").setNillable(false);
 		addAttribute(MolgenisToken.DESCRIPTION).setDataType(TEXT).setLabel("Description").setNillable(true)
 				.setDescription("");
-
 	}
 }

@@ -17,6 +17,7 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.file.FileMeta;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -46,12 +47,12 @@ public class AttributeFilterToFetchConverterTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		selfRefEntityMetaData = new EntityMetaData("SelfRefEntity");
+		selfRefEntityMetaData = new EntityMetaDataImpl("SelfRefEntity");
 		selfRefEntityMetaData.addAttribute("id", ROLE_ID);
 		selfRefEntityMetaData.addAttribute("label", ROLE_LABEL);
 		selfRefEntityMetaData.addAttribute("selfRef").setDataType(XREF).setRefEntity(selfRefEntityMetaData);
 
-		xrefEntityMeta = mock(EntityMetaData.class);
+		xrefEntityMeta = mock(EntityMetaDataImpl.class);
 		when(xrefEntityMeta.getName()).thenReturn("xrefEntity");
 		AttributeMetaData refAttr0 = when(mock(AttributeMetaData.class).getName()).thenReturn(REF_ID_ATTR_NAME)
 				.getMock();
@@ -125,7 +126,7 @@ public class AttributeFilterToFetchConverterTest
 		when(xrefAttr.getDataType()).thenReturn(XREF);
 		when(xrefAttr.getRefEntity()).thenReturn(xrefEntityMeta);
 
-		entityMeta = mock(EntityMetaData.class);
+		entityMeta = mock(EntityMetaDataImpl.class);
 		when(entityMeta.getName()).thenReturn("entity");
 		when(entityMeta.getAttribute(ID_ATTR_NAME.toLowerCase())).thenReturn(idAttr);
 		when(entityMeta.getAttribute(ID_ATTR_NAME)).thenReturn(idAttr);

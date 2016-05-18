@@ -23,6 +23,7 @@ import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.security.user.MolgenisUserService;
@@ -78,7 +79,7 @@ public class MappingServiceControllerTest extends AbstractTestNGSpringContextTes
 
 	private MolgenisUser me = new MolgenisUser();
 	private EntityMetaData lifeLines;
-	private EntityMetaData hop;
+	private EntityMetaDataImpl hop;
 	private MappingProject mappingProject;
 	private static final String ID = "mappingservice";
 
@@ -92,9 +93,9 @@ public class MappingServiceControllerTest extends AbstractTestNGSpringContextTes
 		authentication.setAuthenticated(true);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		hop = new EntityMetaData("HOP");
+		hop = new EntityMetaDataImpl("HOP");
 		hop.addAttribute(new AttributeMetaData("age", INT));
-		lifeLines = new EntityMetaData("LifeLines");
+		lifeLines = new EntityMetaDataImpl("LifeLines");
 		hop.addAttribute(new AttributeMetaData("dob", DATE));
 
 		mappingProject = new MappingProject("hop hop hop", me);

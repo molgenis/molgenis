@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextAction;
 import org.mozilla.javascript.ContextFactory;
@@ -42,7 +43,7 @@ public class ScriptEvaluator
 	 * @param entity
 	 *            the {@link Entity} to evaluate the script on
 	 * @param entityMetaData
-	 *            {@link EntityMetaData} for the entity
+	 *            {@link EntityMetaDataImpl} for the entity
 	 * @return result of the evaluation, or a {@link RuntimeException} if one was thrown
 	 * @throws EcmaError
 	 *             if there's a syntax error in the script

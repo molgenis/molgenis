@@ -26,7 +26,7 @@ import org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
 import org.molgenis.data.mem.InMemoryRepository;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -50,7 +50,7 @@ public class ElasticsearchServiceIntegrationTest
 
 	private DataService dataService;
 	private ElasticsearchService elasticsearchService;
-	private EntityMetaData entityMeta = new EntityMetaData("entity");
+	private EntityMetaDataImpl entityMeta = new EntityMetaDataImpl("entity");
 	private String idAttrName = "id";
 	private String labelAttrName = "label";
 
@@ -93,7 +93,7 @@ public class ElasticsearchServiceIntegrationTest
 	{
 		new ElasticsearchIndexCreator(ELASTICSEARCH_CLIENT).createIndexIfNotExists(INDEX);
 
-		entityMeta = new EntityMetaData("entity");
+		entityMeta = new EntityMetaDataImpl("entity");
 		entityMeta.setBackend(ElasticsearchRepositoryCollection.NAME);
 		entityMeta.addAttribute(idAttrName, ROLE_ID);
 		entityMeta.addAttribute(labelAttrName, ROLE_LABEL).setNillable(true);
