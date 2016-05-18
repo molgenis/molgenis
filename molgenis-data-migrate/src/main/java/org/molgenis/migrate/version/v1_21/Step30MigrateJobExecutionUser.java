@@ -32,13 +32,34 @@ public class Step30MigrateJobExecutionUser extends MolgenisUpgrade
 	@Override
 	public void upgrade()
 	{
-		LOG.info("Upgrade user attribute in JobExecution entities...");
-		updateDataType("JobExecution", "user", "string");
-		dropForeignKey("SortaJobExecution");
-		dropForeignKey("FileIngestJobExecution");
-		dropForeignKey("AnnotationJobExecution");
-		dropForeignKey("GavinJobExecution");
-		LOG.info("Done.");
+		if (checkPreviouslyUpgraded())
+		{
+			LOG.info(
+					"Skipping the upgrading of JobExecution entities because it has already been done in a previous version.");
+		}
+		else
+		{
+			LOG.info("Upgrade user attribute in JobExecution entities...");
+			updateDataType("JobExecution", "user", "string");
+			dropForeignKey("SortaJobExecution");
+			dropForeignKey("FileIngestJobExecution");
+			dropForeignKey("AnnotationJobExecution");
+			dropForeignKey("GavinJobExecution");
+			LOG.info("Done.");
+		}
+	}
+
+	/**
+	 * Checks if this migration step needs to be executed for the current version. There is the possibility a previous
+	 * version has already done this upgrade because this migration step and its corresponding fix might be added to
+	 * older versions.
+	 */
+	private boolean checkPreviouslyUpgraded()
+	{
+		int count = jdbcTemplate.queryForObject(
+				"SELECT COUNT(*) FROM entities_attributes ea JOIN attributes a ON ea.attributes = a.identifier WHERE ea.fullName = 'JobExecution' AND a.name = 'user' AND dataType = 'xref'",
+				Integer.class);
+		return (count == 0);
 	}
 
 	private void updateDataType(String entityFullName, String attributeName, String newDataType)
