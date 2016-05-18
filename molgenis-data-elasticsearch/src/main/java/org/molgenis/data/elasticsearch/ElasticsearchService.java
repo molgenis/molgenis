@@ -1,60 +1,15 @@
 package org.molgenis.data.elasticsearch;
 
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.elasticsearch.request.SourceFilteringGenerator.toFetchFields;
-import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
-import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchIds;
-import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
-
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
+import com.google.common.collect.Iterables;
 import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.action.admin.indices.exists.types.TypesExistsResponse;
-import org.elasticsearch.action.admin.indices.mapping.delete.DeleteMappingResponse;
-import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
-import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
-import org.elasticsearch.action.admin.indices.optimize.OptimizeResponse;
 import org.elasticsearch.action.bulk.BulkProcessor;
-import org.elasticsearch.action.bulk.BulkRequest;
-import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.deletebyquery.DeleteByQueryResponse;
-import org.elasticsearch.action.deletebyquery.IndexDeleteByQueryResponse;
-import org.elasticsearch.action.get.GetRequestBuilder;
-import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.action.get.MultiGetRequest.Item;
-import org.elasticsearch.action.get.MultiGetRequestBuilder;
-import org.elasticsearch.action.get.MultiGetResponse;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.cluster.metadata.MappingMetaData;
-import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.collect.Iterators;
 import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.index.query.TermQueryBuilder;
-import org.elasticsearch.search.fetch.source.FetchSourceContext;
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.EntityStream;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
-import org.molgenis.data.Repository;
+import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
@@ -75,13 +30,27 @@ import org.molgenis.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.*;
+import java.util.stream.Stream;
+
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.StreamSupport.stream;
+import static org.elasticsearch.action.search.SearchType.QUERY_AND_FETCH;
+import static org.molgenis.data.elasticsearch.request.SourceFilteringGenerator.toFetchFields;
+import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
+import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchIds;
+import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
 
 /**
- * ElasticSearch implementation of the SearchService interface. TODO use scroll-scan where possible:
+ * ElasticSearch implementation of the SearchService interface.
+ * <p>
+ * TODO use scroll-scan where possible:
  * http://www.elasticsearch.org/guide/en/elasticsearch /reference/current/search-request-scroll.html#scroll-scans
- * 
+ *
  * @author erwin
  */
 public class ElasticsearchService implements SearchService
@@ -93,12 +62,12 @@ public class ElasticsearchService implements SearchService
 	public static final String CRUD_TYPE_FIELD_NAME = "MolgenisCrudType";
 	private static BulkProcessorFactory BULK_PROCESSOR_FACTORY = new BulkProcessorFactory();
 
-	public static enum IndexingMode
+	public enum IndexingMode
 	{
 		ADD, UPDATE
-	};
+	}
 
-	static enum CrudType
+	enum CrudType
 	{
 		ADD, UPDATE, DELETE
 	}
@@ -108,8 +77,8 @@ public class ElasticsearchService implements SearchService
 	private final String indexName;
 	private final Client client;
 	private final ResponseParser responseParser = new ResponseParser();
-	private final SearchRequestGenerator generator = new SearchRequestGenerator();
 	private final ElasticsearchUtils elasticsearchUtils;
+	private final SearchRequestGenerator generator = new SearchRequestGenerator();
 
 	public ElasticsearchService(Client client, String indexName, DataService dataService,
 			ElasticsearchEntityFactory elasticsearchEntityFactory)
@@ -118,13 +87,7 @@ public class ElasticsearchService implements SearchService
 	}
 
 	/**
-	 * Testability
-	 * 
-	 * @param client
-	 * @param indexName
-	 * @param dataService
-	 * @param elasticsearchEntityFactory
-	 * @param createIndexIfNotExists
+	 * Constructor for testability.
 	 */
 	ElasticsearchService(Client client, String indexName, DataService dataService,
 			ElasticsearchEntityFactory elasticsearchEntityFactory, boolean createIndexIfNotExists)
@@ -144,89 +107,41 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public Iterable<String> getTypes()
 	{
-		if (LOG.isTraceEnabled())
-		{
-			LOG.trace("Retrieving Elasticsearch mappings ...");
-		}
-		GetMappingsResponse mappingsResponse = client.admin().indices().prepareGetMappings(indexName).get();
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("Retrieved Elasticsearch mappings");
-		}
-
-		final ImmutableOpenMap<String, MappingMetaData> indexMappings = mappingsResponse.getMappings().get(indexName);
-		return new Iterable<String>()
-		{
-
-			@Override
-			public Iterator<String> iterator()
-			{
-				return indexMappings.keysIt();
-			}
-		};
+		return () -> elasticsearchUtils.getMappings(indexName).keysIt();
 	}
 
 	@Override
 	@Deprecated
 	public SearchResult search(SearchRequest request)
 	{
-		return search(SearchType.QUERY_AND_FETCH, request);
+		return search(QUERY_AND_FETCH, request);
 	}
 
 	private SearchResult search(SearchType searchType, SearchRequest request)
 	{
-		SearchRequestBuilder builder = client.prepareSearch(indexName);
+
 		// TODO : A quick fix now! Need to find a better way to get
 		// EntityMetaData in ElasticSearchService, because ElasticSearchService should not be
 		// aware of DataService. E.g. Put EntityMetaData in the SearchRequest object
-		EntityMetaData entityMetaData = (request.getDocumentType() != null && dataService != null
-				&& dataService.hasRepository(request.getDocumentType()))
-						? dataService.getEntityMetaData(request.getDocumentType()) : null;
+		EntityMetaData entityMetaData = (request.getDocumentType() != null && dataService != null && dataService
+				.hasRepository(request.getDocumentType())) ? dataService
+				.getEntityMetaData(request.getDocumentType()) : null;
 		String documentType = request.getDocumentType() == null ? null : sanitizeMapperType(request.getDocumentType());
-		if (LOG.isTraceEnabled())
-		{
-			LOG.trace("*** REQUEST\n" + builder);
-		}
-		generator.buildSearchRequest(builder, documentType, searchType, request.getQuery(),
-				request.getAggregateField1(), request.getAggregateField2(), request.getAggregateFieldDistinct(),
-				entityMetaData);
-		SearchResponse response = builder.get();
-		if (LOG.isTraceEnabled())
-		{
-			LOG.trace("*** RESPONSE\n" + response);
-		}
+		SearchResponse response = elasticsearchUtils
+				.search(searchType, request, entityMetaData, documentType, indexName);
 		return responseParser.parseSearchResponse(request, response, entityMetaData, dataService);
 	}
 
 	@Override
 	public boolean hasMapping(EntityMetaData entityMetaData)
 	{
-		return hasMapping(indexName, entityMetaData);
-	}
-
-	public boolean hasMapping(String index, EntityMetaData entityMetaData)
-	{
-		String docType = sanitizeMapperType(entityMetaData.getName());
-
-		GetMappingsResponse getMappingsResponse = client.admin().indices().prepareGetMappings(index).execute()
-				.actionGet();
-		ImmutableOpenMap<String, ImmutableOpenMap<String, MappingMetaData>> allMappings = getMappingsResponse
-				.getMappings();
-		final ImmutableOpenMap<String, MappingMetaData> indexMappings = allMappings.get(index);
-		return indexMappings.containsKey(docType);
+		return elasticsearchUtils.getMappings(indexName).containsKey(sanitizeMapperType(entityMetaData.getName()));
 	}
 
 	@Override
 	public void createMappings(EntityMetaData entityMetaData)
 	{
-		boolean storeSource = storeSource(entityMetaData);
-		createMappings(entityMetaData, storeSource, true, true);
-	}
-
-	public void createMappings(String index, EntityMetaData entityMetaData)
-	{
-		boolean storeSource = storeSource(entityMetaData);
-		createMappings(index, entityMetaData, storeSource, true, true);
+		createMappings(entityMetaData, storeSource(entityMetaData), true, true);
 	}
 
 	private void createMappings(String index, EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms,
@@ -234,21 +149,9 @@ public class ElasticsearchService implements SearchService
 	{
 		try
 		{
-			XContentBuilder jsonBuilder = MappingsBuilder.buildMapping(entityMetaData, storeSource, enableNorms,
-					createAllIndex);
-			if (LOG.isTraceEnabled()) LOG.trace("Creating Elasticsearch mapping [{}] ...", jsonBuilder.string());
-			String entityName = entityMetaData.getName();
-
-			PutMappingResponse response = client.admin().indices().preparePutMapping(index)
-					.setType(sanitizeMapperType(entityName)).setSource(jsonBuilder).get();
-
-			if (!response.isAcknowledged())
-			{
-				throw new ElasticsearchException(
-						"Creation of mapping for documentType [" + entityName + "] failed. Response=" + response);
-			}
-
-			if (LOG.isDebugEnabled()) LOG.debug("Created Elasticsearch mapping [{}]", jsonBuilder.string());
+			XContentBuilder jsonBuilder = MappingsBuilder
+					.buildMapping(entityMetaData, storeSource, enableNorms, createAllIndex);
+			elasticsearchUtils.putMapping(index, jsonBuilder, entityMetaData.getName());
 		}
 		catch (IOException e)
 		{
@@ -266,20 +169,13 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public void refresh()
 	{
-		refresh(indexName);
+		refreshIndex();
 	}
 
 	@Override
 	public void refreshIndex()
 	{
-		this.refresh(this.indexName);
-	}
-
-	private void refresh(String index)
-	{
-		if (LOG.isTraceEnabled()) LOG.trace("Refreshing Elasticsearch index [{}] ...", index);
-		elasticsearchUtils.refreshIndex(index);
-		if (LOG.isDebugEnabled()) LOG.debug("Refreshed Elasticsearch index [{}]", index);
+		elasticsearchUtils.refresh(indexName);
 	}
 
 	@Override
@@ -293,40 +189,7 @@ public class ElasticsearchService implements SearchService
 	{
 		String entityName = entityMetaData.getName();
 		String type = sanitizeMapperType(entityName);
-
-		if (LOG.isTraceEnabled())
-		{
-			if (q != null)
-			{
-				LOG.trace("Counting Elasticsearch [{}] docs using query [{}] ...", type, q);
-			}
-			else
-			{
-				LOG.trace("Counting Elasticsearch [{}] docs", type);
-			}
-		}
-		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
-		generator.buildSearchRequest(searchRequestBuilder, type, SearchType.COUNT, q, null, null, null, entityMetaData);
-		SearchResponse searchResponse = searchRequestBuilder.get();
-		if (searchResponse.getFailedShards() > 0)
-		{
-			throw new ElasticsearchException("Search failed. Returned headers:" + searchResponse.getHeaders());
-		}
-		long count = searchResponse.getHits().totalHits();
-		if (LOG.isDebugEnabled())
-		{
-			long ms = searchResponse.getTookInMillis();
-			if (q != null)
-			{
-				LOG.debug("Counted {} Elasticsearch [{}] docs using query [{}] in {}ms", count, type, q, ms);
-			}
-			else
-			{
-				LOG.debug("Counted {} Elasticsearch [{}] docs in {}ms", count, type, ms);
-			}
-		}
-
-		return count;
+		return elasticsearchUtils.getCount(q, entityMetaData, type, indexName);
 	}
 
 	@Override
@@ -373,10 +236,7 @@ public class ElasticsearchService implements SearchService
 				String id = toElasticsearchId(entity, entityMetaData);
 				Map<String, Object> source = elasticsearchEntityFactory.create(entityMetaData, entity);
 
-				if (LOG.isDebugEnabled())
-				{
-					LOG.debug("Indexing [{}] with id [{}] in index [{}] mode [{}] ...", type, id, index, crudType);
-				}
+				LOG.debug("Indexing [{}] with id [{}] in index [{}] mode [{}] ...", type, id, index, crudType);
 
 				bulkProcessor.add(new IndexRequest().index(index).type(type).id(id).source(source));
 				++nrIndexedEntities;
@@ -405,7 +265,7 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public void deleteById(String id, EntityMetaData entityMetaData)
 	{
-		if (!canBeDeleted(Arrays.asList(id), entityMetaData))
+		if (!canBeDeleted(singletonList(id), entityMetaData))
 		{
 			throw new MolgenisDataException(
 					"Cannot delete entity because there are other entities referencing it. Delete these first.");
@@ -417,25 +277,7 @@ public class ElasticsearchService implements SearchService
 	private void deleteById(String index, String id, String entityFullName)
 	{
 		String type = sanitizeMapperType(entityFullName);
-
-		if (LOG.isTraceEnabled())
-		{
-			LOG.trace("Deleting Elasticsearch '" + type + "' doc with id [" + id + "] ...");
-		}
-		GetResponse response = client.prepareGet(index, type, id).get();
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("Retrieved document type [{}] with id [{}] in index [{}]", type, id, index);
-		}
-		if (response.isExists())
-		{
-			client.prepareDelete(index, type, id).get();
-		}
-
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("Deleted Elasticsearch '" + type + "' doc with id [" + id + "]");
-		}
+		elasticsearchUtils.deleteById(index, id, type);
 	}
 
 	@Override
@@ -453,7 +295,7 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public void delete(Stream<? extends Entity> entities, EntityMetaData entityMetaData)
 	{
-		Stream<Object> entityIds = entities.map(entity -> entity.getIdValue());
+		Stream<Object> entityIds = entities.map(Entity::getIdValue);
 		Iterators.partition(entityIds.iterator(), BATCH_SIZE).forEachRemaining(batchEntityIds -> {
 			if (!canBeDeleted(batchEntityIds, entityMetaData))
 			{
@@ -470,33 +312,18 @@ public class ElasticsearchService implements SearchService
 	{
 		String type = sanitizeMapperType(entityName);
 
-		LOG.trace("Deleting all Elasticsearch '{}' docs ...", type);
-		TypesExistsResponse typesExistsResponse = client.admin().indices().prepareTypesExists(indexName).setTypes(type)
-				.get();
-
-		LOG.trace("Checked whether type [{}] exists in index [{}]", type, indexName);
-		if (typesExistsResponse.isExists())
+		if (elasticsearchUtils.isTypeExists(type, indexName))
 		{
-			DeleteMappingResponse deleteMappingResponse = client.admin().indices().prepareDeleteMapping(indexName)
-					.setType(type).get();
-			if (!deleteMappingResponse.isAcknowledged())
+			if (!elasticsearchUtils.deleteMapping(type, indexName))
 			{
 				throw new ElasticsearchException("Delete of mapping '" + entityName + "' failed.");
 			}
 		}
 
-		DeleteByQueryResponse deleteByQueryResponse = client.prepareDeleteByQuery(indexName)
-				.setQuery(new TermQueryBuilder("_type", type)).get();
-
-		if (deleteByQueryResponse != null)
+		if (!elasticsearchUtils.deleteAllDocumentsOfType(type, indexName))
 		{
-			IndexDeleteByQueryResponse idbqr = deleteByQueryResponse.getIndex(indexName);
-			if (idbqr != null && idbqr.getFailedShards() > 0)
-			{
-				throw new ElasticsearchException("Delete all entities of type '" + entityName + "' failed.");
-			}
+			throw new ElasticsearchException("Delete all entities of type '" + entityName + "' failed.");
 		}
-		LOG.debug("Deleted all Elasticsearch '{}' docs", type);
 	}
 
 	/**
@@ -515,39 +342,16 @@ public class ElasticsearchService implements SearchService
 		String type = sanitizeMapperType(entityName);
 		String id = toElasticsearchId(entityId);
 
-		if (LOG.isTraceEnabled())
+		Optional<Map<String, Object>> document;
+		if (fetch == null)
 		{
-			if (fetch == null)
-			{
-				LOG.trace("Retrieving Elasticsearch [{}] doc with id [{}] ...", type, id);
-			}
-			else
-			{
-				LOG.trace("Retrieving Elasticsearch [{}] doc with id [{}] and fetch [{}] ...", type, id, fetch);
-			}
+			document = elasticsearchUtils.getDocument(type, id, indexName);
 		}
-
-		GetRequestBuilder requestBuilder = client.prepareGet(indexName, type, id);
-		if (fetch != null)
+		else
 		{
-			requestBuilder.setFetchSource(toFetchFields(fetch), null);
+			document = elasticsearchUtils.getDocument(type, id, toFetchFields(fetch), indexName);
 		}
-		GetResponse response = requestBuilder.get();
-		if (LOG.isDebugEnabled())
-		{
-			if (fetch == null)
-			{
-				LOG.debug("Retrieved Elasticsearch [{}] doc with id [{}]", type, id);
-			}
-			else
-			{
-				LOG.debug("Retrieved Elasticsearch [{}] doc with id [{}] and fetch [{}]", type, id, fetch);
-			}
-		}
-
-		return response.isExists() ? elasticsearchEntityFactory.create(entityMetaData, response.getSource(), fetch)
-				: null;
-
+		return document.map(s -> elasticsearchEntityFactory.create(entityMetaData, s, fetch)).orElse(null);
 	}
 
 	/**
@@ -562,15 +366,9 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public Iterable<Entity> get(Iterable<Object> entityIds, final EntityMetaData entityMetaData, Fetch fetch)
 	{
-		return new Iterable<Entity>()
-		{
-			@Override
-			public Iterator<Entity> iterator()
-			{
-				Stream<Object> stream = stream(entityIds.spliterator(), false);
-				return get(stream, entityMetaData, fetch).iterator();
-			}
-
+		return () -> {
+			Stream<Object> stream = stream(entityIds.spliterator(), false);
+			return get(stream, entityMetaData, fetch).iterator();
 		};
 	}
 
@@ -588,71 +386,16 @@ public class ElasticsearchService implements SearchService
 	{
 		String entityName = entityMetaData.getName();
 		String type = sanitizeMapperType(entityName);
-
-		if (LOG.isTraceEnabled())
+		Stream<Map<String, Object>> sourceStream;
+		if (fetch == null)
 		{
-			if (fetch == null)
-			{
-				LOG.trace("Retrieving Elasticsearch [{}] docs with ids [{}] ...", type, entityIds);
-			}
-			else
-			{
-				LOG.trace("Retrieving Elasticsearch [{}] docs with ids [{}] and fetch [{}] ...", type, entityIds,
-						fetch);
-			}
+			sourceStream = elasticsearchUtils.getDocuments(type, entityIds, indexName);
 		}
-
-		MultiGetRequestBuilder request = client.prepareMultiGet();
-		entityIds.forEach(id -> {
-			request.add(createMultiGetItem(indexName, type, id, fetch));
-		});
-
-		if (request.request().getItems().isEmpty())
+		else
 		{
-			return Stream.<Entity> empty();
+			sourceStream = elasticsearchUtils.getDocuments(type, toFetchFields(fetch), entityIds, indexName);
 		}
-
-		MultiGetResponse response = request.get();
-
-		if (LOG.isDebugEnabled())
-		{
-			if (fetch == null)
-			{
-				LOG.debug("Retrieved Elasticsearch [{}] docs with ids [{}]", type, entityIds);
-			}
-			else
-			{
-				LOG.debug("Retrieved Elasticsearch [{}] docs with ids [{}] and fetch [{}]", type, entityIds, fetch);
-			}
-		}
-
-		return stream(response.spliterator(), false).flatMap(itemResponse -> {
-			if (itemResponse.isFailed())
-			{
-				throw new ElasticsearchException("Search failed. Returned headers:" + itemResponse.getFailure());
-			}
-			GetResponse getResponse = itemResponse.getResponse();
-			if (getResponse.isExists())
-			{
-				Map<String, Object> source = getResponse.getSource();
-				Entity entity = elasticsearchEntityFactory.create(entityMetaData, source, fetch);
-				return Stream.of(entity);
-			}
-			else
-			{
-				return Stream.<Entity> empty();
-			}
-		});
-	}
-
-	private Item createMultiGetItem(String indexName, String type, Object id, Fetch fetch)
-	{
-		Item item = new Item(indexName, type, toElasticsearchId(id));
-		if (fetch != null)
-		{
-			item.fetchSourceContext(new FetchSourceContext(toFetchFields(fetch)));
-		}
-		return item;
+		return sourceStream.map(source -> elasticsearchEntityFactory.create(entityMetaData, source, fetch));
 	}
 
 	@Override
@@ -670,11 +413,8 @@ public class ElasticsearchService implements SearchService
 
 	private ElasticsearchEntityIterable searchInternal(Query<Entity> q, EntityMetaData entityMetaData)
 	{
-		String[] indexNames = new String[]
-		{ indexName };
-
 		return new ElasticsearchEntityIterable(q, entityMetaData, client, elasticsearchEntityFactory, generator,
-				indexNames);
+				new String[] { indexName });
 	}
 
 	@Override
@@ -684,7 +424,7 @@ public class ElasticsearchService implements SearchService
 		AttributeMetaData xAttr = aggregateQuery.getAttributeX();
 		AttributeMetaData yAttr = aggregateQuery.getAttributeY();
 		AttributeMetaData distinctAttr = aggregateQuery.getAttributeDistinct();
-		SearchRequest searchRequest = new SearchRequest(entityMetaData.getName(), q, Collections.<String> emptyList(),
+		SearchRequest searchRequest = new SearchRequest(entityMetaData.getName(), q, emptyList(),
 				xAttr, yAttr, distinctAttr);
 		SearchResult searchResults = search(searchRequest);
 		return searchResults.getAggregate();
@@ -693,9 +433,7 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public void flush()
 	{
-		if (LOG.isTraceEnabled()) LOG.trace("Flushing Elasticsearch index [" + indexName + "] ...");
-		client.admin().indices().prepareFlush(indexName).get();
-		if (LOG.isDebugEnabled()) LOG.debug("Flushed Elasticsearch index [" + indexName + "]");
+		elasticsearchUtils.flushIndex(indexName);
 	}
 
 	@Override
@@ -714,7 +452,7 @@ public class ElasticsearchService implements SearchService
 	/**
 	 * Rebuild Elasticsearch index when the source is living in Elasticearch itself. This operation requires a way to
 	 * temporary save the data so we can drop and rebuild the index for this document.
-	 * 
+	 *
 	 * @param entities
 	 * @param entityMetaData
 	 */
@@ -724,12 +462,9 @@ public class ElasticsearchService implements SearchService
 		{
 			UuidGenerator uuidg = new UuidGenerator();
 			DefaultEntityMetaData tempEntityMetaData = new DefaultEntityMetaData(uuidg.generateId(), entityMetaData);
-			tempEntityMetaData
-					.setPackage(
-							new PackageImpl("elasticsearch_temporary_entity",
-									"This entity (Original: " + entityMetaData
-											.getName()
-									+ ") is temporary build to make rebuilding of Elasticsearch entities posible."));
+			tempEntityMetaData.setPackage(new PackageImpl("elasticsearch_temporary_entity",
+					"This entity (Original: " + entityMetaData.getName()
+							+ ") is temporary build to make rebuilding of Elasticsearch entities possible."));
 
 			// Add temporary repository into Elasticsearch
 			Repository<Entity> tempRepository = dataService.getMeta().addEntityMeta(tempEntityMetaData);
@@ -738,53 +473,37 @@ public class ElasticsearchService implements SearchService
 			dataService.add(tempRepository.getName(), stream(entities.spliterator(), false));
 
 			// Find the temporary saved entities
-			Iterable<? extends Entity> tempEntities = new Iterable<Entity>()
-			{
-				@Override
-				public Iterator<Entity> iterator()
-				{
-					return dataService.findAll(tempEntityMetaData.getName()).iterator();
-				}
-			};
+			Iterable<? extends Entity> tempEntities = (Iterable<Entity>) () -> dataService
+					.findAll(tempEntityMetaData.getName()).iterator();
 
 			this.rebuildIndexGeneric(tempEntities, entityMetaData);
 
 			// Remove temporary entity
-			dataService.delete(tempEntityMetaData.getName(), StreamSupport.stream(tempEntities.spliterator(), false));
+			dataService.delete(tempEntityMetaData.getName(), stream(tempEntities.spliterator(), false));
 
 			// Remove temporary repository from Elasticsearch
 			dataService.getMeta().deleteEntityMeta(tempEntityMetaData.getName());
 
-			if (LOG.isInfoEnabled()) LOG.info("Finished rebuilding index of entity: [" + entityMetaData.getName()
-					+ "] with backend ElasticSearch");
+			LOG.info("Finished rebuilding index of entity: [{}] with backend ElasticSearch", entityMetaData.getName());
 		}
 		else
 		{
-			if (LOG.isDebugEnabled()) LOG.debug("Rebuild index of entity: [" + entityMetaData.getName()
-					+ "] is skipped because the " + ElasticsearchRepositoryCollection.NAME + " backend is unknown");
+			LOG.debug("Rebuild index of entity: [{}] is skipped because the {} backend is unknown",
+					entityMetaData.getName(), ElasticsearchRepositoryCollection.NAME);
 		}
 	}
 
 	/**
 	 * Rebuild Elasticsearch index when the source is living in another backend than the Elasticsearch itself.
-	 * 
-	 * @param entities
-	 *            entities that will be reindexed.
-	 * @param entityMetaData
-	 *            meta data information about the entities that will be reindexed.
+	 *
+	 * @param entities       entities that will be reindexed.
+	 * @param entityMetaData meta data information about the entities that will be reindexed.
 	 */
 	private void rebuildIndexGeneric(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
 	{
 		if (DependencyResolver.hasSelfReferences(entityMetaData))
 		{
-			Iterable<Entity> iterable = Iterables.transform(entities, new Function<Entity, Entity>()
-			{
-				@Override
-				public Entity apply(Entity input)
-				{
-					return input;
-				}
-			});
+			Iterable<Entity> iterable = Iterables.transform(entities, input -> input);
 			entities = new DependencyResolver().resolveSelfReferences(iterable, entityMetaData);
 		}
 		if (hasMapping(entityMetaData))
@@ -798,14 +517,7 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public void optimizeIndex()
 	{
-		LOG.trace("Optimizing Elasticsearch index [{}] ...", indexName);
-		// setMaxNumSegments(1) fully optimizes the index
-		OptimizeResponse response = client.admin().indices().prepareOptimize(indexName).setMaxNumSegments(1).get();
-		if (response.getFailedShards() > 0)
-		{
-			throw new ElasticsearchException("Optimize failed. Returned headers:" + response.getHeaders());
-		}
-		LOG.debug("Optimized Elasticsearch index [{}]", indexName);
+		elasticsearchUtils.optimizeIndex(indexName);
 	}
 
 	private void updateReferences(Entity refEntity, EntityMetaData refEntityMetaData)
@@ -818,25 +530,17 @@ public class ElasticsearchService implements SearchService
 			QueryImpl<Entity> q = null;
 			for (AttributeMetaData attributeMetaData : pair.getB())
 			{
-				if (q == null) q = new QueryImpl<Entity>();
+				if (q == null) q = new QueryImpl<>();
 				else q.or();
 				q.eq(attributeMetaData.getName(), refEntity);
 			}
 
 			Iterable<Entity> entities = new ElasticsearchEntityIterable(q, entityMetaData, client,
-					elasticsearchEntityFactory, generator, new String[]
-			{ indexName });
+					elasticsearchEntityFactory, generator, new String[] { indexName });
 
 			// TODO discuss whether this is still required
 			// Don't use cached ref entities but make new ones
-			entities = Iterables.transform(entities, new Function<Entity, Entity>()
-			{
-				@Override
-				public Entity apply(Entity entity)
-				{
-					return new DefaultEntity(entityMetaData, dataService, entity);
-				}
-			});
+			entities = Iterables.transform(entities, entity -> new DefaultEntity(entityMetaData, dataService, entity));
 
 			index(indexName, entities.iterator(), entityMetaData, CrudType.UPDATE, false);
 		}
@@ -844,50 +548,12 @@ public class ElasticsearchService implements SearchService
 
 	/**
 	 * Testability, using the real Elasticsearch BulkProcessor results in infinite waits on close
-	 * 
+	 *
 	 * @param bulkProcessorFactory
 	 */
 	static void setBulkProcessorFactory(BulkProcessorFactory bulkProcessorFactory)
 	{
 		BULK_PROCESSOR_FACTORY = bulkProcessorFactory;
-	}
-
-	static class BulkProcessorFactory
-	{
-		public BulkProcessor create(Client client)
-		{
-			return BulkProcessor.builder(client, new BulkProcessor.Listener()
-			{
-				@Override
-				public void beforeBulk(long executionId, BulkRequest request)
-				{
-					if (LOG.isTraceEnabled())
-					{
-						LOG.trace("Going to execute new bulk composed of " + request.numberOfActions() + " actions");
-					}
-				}
-
-				@Override
-				public void afterBulk(long executionId, BulkRequest request, BulkResponse response)
-				{
-					if (LOG.isTraceEnabled())
-					{
-						LOG.trace("Executed bulk composed of " + request.numberOfActions() + " actions");
-					}
-				}
-
-				@Override
-				public void afterBulk(long executionId, BulkRequest request, Throwable failure)
-				{
-					LOG.warn("Error executing bulk", failure);
-				}
-			}).setConcurrentRequests(0).setBulkActions(50).build();
-		}
-	}
-
-	public GetMappingsResponse getMappings()
-	{
-		return client.admin().indices().prepareGetMappings(indexName).get();
 	}
 
 	// Checks if entities can be deleted, have no ref entities pointing to it
@@ -901,13 +567,13 @@ public class ElasticsearchService implements SearchService
 		{
 			EntityMetaData refEntityMetaData = pair.getA();
 
-			if (!refEntityMetaData.getName().equals(EntityMetaDataMetaData.ENTITY_NAME)
-					&& !refEntityMetaData.getName().equals(AttributeMetaDataMetaData.ENTITY_NAME))
+			if (!refEntityMetaData.getName().equals(EntityMetaDataMetaData.ENTITY_NAME) && !refEntityMetaData.getName()
+					.equals(AttributeMetaDataMetaData.ENTITY_NAME))
 			{
 				QueryImpl<Entity> q = null;
 				for (AttributeMetaData attributeMetaData : pair.getB())
 				{
-					if (q == null) q = new QueryImpl<Entity>();
+					if (q == null) q = new QueryImpl<>();
 					else q.or();
 					q.in(attributeMetaData.getName(), ids);
 				}
@@ -921,7 +587,7 @@ public class ElasticsearchService implements SearchService
 
 	/**
 	 * Entities are stored (in addition to indexed) in Elasticsearch only if the entity backend is Elasticsearch
-	 * 
+	 *
 	 * @param entityMeta
 	 * @return whether or not this entity class is stored in Elasticsearch
 	 */

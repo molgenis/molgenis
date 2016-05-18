@@ -13,7 +13,6 @@ import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.reindex.ReindexActionRegisterService;
 import org.molgenis.data.reindex.ReindexActionRepositoryCollectionDecorator;
-import org.molgenis.data.reindex.meta.ReindexActionRegisterConfig;
 import org.molgenis.data.system.RepositoryTemplateLoader;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.migrate.version.v1_11.Step20RebuildElasticsearchIndex;
@@ -52,7 +51,7 @@ import freemarker.template.TemplateException;
 @ComponentScan(basePackages = "org.molgenis", excludeFilters = @Filter(type = FilterType.ANNOTATION, value = CommandLineOnlyConfiguration.class))
 @Import(
 { WebAppSecurityConfig.class, DatabaseConfig.class, HttpClientConfig.class, EmbeddedElasticSearchConfig.class,
-		GsonConfig.class, ReindexActionRegisterConfig.class })
+		GsonConfig.class})
 public class WebAppConfig extends MolgenisWebAppConfig
 {
 	private static final Logger LOG = LoggerFactory.getLogger(WebAppConfig.class);

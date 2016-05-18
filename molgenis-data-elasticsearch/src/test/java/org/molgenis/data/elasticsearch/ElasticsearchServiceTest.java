@@ -36,7 +36,6 @@ import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.ElasticsearchService.BulkProcessorFactory;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
 import org.molgenis.data.support.DataServiceImpl;
