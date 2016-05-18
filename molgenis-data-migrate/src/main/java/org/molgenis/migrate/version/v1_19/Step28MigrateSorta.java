@@ -25,7 +25,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
  */
 public class Step28MigrateSorta extends MolgenisUpgrade
 {
-	private static final Logger LOG = LoggerFactory.getLogger(Step26migrateJpaBackend.class);
+	private static final Logger LOG = LoggerFactory.getLogger(Step28MigrateSorta.class);
 
 	private final JdbcTemplate jdbcTemplate;
 

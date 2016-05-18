@@ -29,7 +29,6 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.Sort;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.support.AggregateQueryImpl;
@@ -58,7 +57,6 @@ public class ElasticsearchRepositoryDecoratorTest
 		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(idAttrName).getMock();
 		when(repositoryEntityMetaData.getIdAttribute()).thenReturn(idAttr);
 		when(decoratedRepo.getEntityMetaData()).thenReturn(repositoryEntityMetaData);
-		when(decoratedRepo.getCapabilities()).thenReturn(Collections.singleton(RepositoryCapability.QUERYABLE));
 		elasticsearchRepositoryDecorator = new ElasticsearchRepositoryDecorator(decoratedRepo, elasticSearchService);
 	}
 
@@ -324,7 +322,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	}
 
 	@Test
-	public void findAllStreamQueryNoFetch()
+	public void findAllStreamQuery1()
 	{
 		QueryImpl q = new QueryImpl();
 		elasticsearchRepositoryDecorator.findAll(q);
@@ -332,7 +330,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	}
 
 	@Test
-	public void findAllStreamQueryEmptyFetch()
+	public void findAllStreamQuery2()
 	{
 		QueryImpl q = new QueryImpl();
 		Fetch fetch = mock(Fetch.class);
@@ -342,7 +340,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	}
 
 	@Test
-	public void findAllStreamQueryFetchWithOffset()
+	public void findAllStreamQuery3()
 	{
 		QueryImpl q = new QueryImpl();
 		Fetch fetch = mock(Fetch.class);
@@ -353,7 +351,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	}
 
 	@Test
-	public void findAllStreamQueryFetchWithOffsetAndPageSize()
+	public void findAllStreamQuery4()
 	{
 		QueryImpl q = new QueryImpl();
 		Fetch fetch = mock(Fetch.class);
@@ -365,7 +363,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	}
 
 	@Test
-	public void findAllStreamQueryFetchWithSort()
+	public void findAllStreamQuery5()
 	{
 		QueryImpl q = new QueryImpl();
 		Fetch fetch = mock(Fetch.class);
@@ -376,7 +374,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	}
 
 	@Test
-	public void findAllStreamQueryFetchWithOffsetAndPageSizeAndSort()
+	public void findAllStreamQuery6()
 	{
 		QueryImpl q = new QueryImpl();
 		Fetch fetch = mock(Fetch.class);
@@ -403,26 +401,6 @@ public class ElasticsearchRepositoryDecoratorTest
 		when(decoratedRepo.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = elasticsearchRepositoryDecorator.findAll(entityIds, fetch);
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
-	}
-
-	@Test
-	public void findAllStreamInQueryQueryableRepo()
-	{
-		QueryImpl q = new QueryImpl();
-		q.in("field", Arrays.asList("id0", "id1"));
-		elasticsearchRepositoryDecorator.findAll(q);
-		verify(decoratedRepo, times(1)).findAll(q);
-	}
-
-	@Test
-	public void findAllStreamInQueryNonQueryableRepo()
-	{
-		when(decoratedRepo.getCapabilities()).thenReturn(Collections.emptySet());
-
-		QueryImpl q = new QueryImpl();
-		q.in("field", Arrays.asList("id0", "id1"));
-		elasticsearchRepositoryDecorator.findAll(q);
-		verify(decoratedRepo, never()).findAll(q);
 	}
 
 	@Test

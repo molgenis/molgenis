@@ -63,7 +63,7 @@ public class AnnotationJobFactory
 		dataService.add(AnnotationJobExecution.ENTITY_NAME, metaData);
 		String annotatorNames = metaData.getAnnotators();
 		String targetName = metaData.getTargetName();
-		String username = metaData.getUser().getUsername();
+		String username = metaData.getUser();
 
 		// create an authentication to run as the user that is listed as the owner of the job
 		RunAsUserToken runAsAuthentication = new RunAsUserToken("Job Execution", username, null,
