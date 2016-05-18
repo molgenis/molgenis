@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 
 /**
- * This entity is used to groups the reindex actions.
+ * This entity is used to track the progress of the execution of a ReindexActionJob.
  */
 @Component
 public class ReindexJobExecutionMeta extends DefaultEntityMetaData
