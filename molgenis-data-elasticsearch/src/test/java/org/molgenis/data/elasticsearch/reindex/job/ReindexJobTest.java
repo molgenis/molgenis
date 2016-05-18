@@ -3,6 +3,7 @@ package org.molgenis.data.elasticsearch.reindex.job;
 import com.google.common.collect.Lists;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
@@ -30,7 +31,6 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_STATUS;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus.FAILED;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus.FINISHED;
-import static org.molgenis.data.reindex.meta.ReindexActionRegisterConfig.BACKEND;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
 
@@ -52,9 +52,8 @@ public class ReindexJobTest
 
 	private final String transactionId = "aabbcc";
 
-	private ReindexActionJobMetaData reindexActionJobMetaData = new ReindexActionJobMetaData(BACKEND);
-	private ReindexActionMetaData reindexActionMetaData = new ReindexActionMetaData(reindexActionJobMetaData, BACKEND);
-	private ReindexActionRegisterService reindexActionRegisterService;
+	@InjectMocks
+	private ReindexActionRegisterService reindexActionRegisterService = new ReindexActionRegisterService();
 	private ReindexJob reindexJob;
 	private Entity reindexActionJob;
 	private EntityMetaData testEntityMetaData;
@@ -63,8 +62,6 @@ public class ReindexJobTest
 	public void beforeMethod()
 	{
 		initMocks(this);
-		reindexActionRegisterService = new ReindexActionRegisterService(dataService, reindexActionJobMetaData,
-				reindexActionMetaData);
 		reindexJob = new ReindexJob(progress, authentication, transactionId, dataService, searchService);
 		reindexActionJob = reindexActionRegisterService.createReindexActionJob(transactionId);
 		when(dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, transactionId)).thenReturn(reindexActionJob);

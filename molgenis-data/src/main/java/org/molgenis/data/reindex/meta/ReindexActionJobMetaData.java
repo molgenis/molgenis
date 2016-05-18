@@ -4,10 +4,12 @@ import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.springframework.stereotype.Component;
 
 /**
  * This entity is used to group the reindex actions.
  */
+@Component
 public class ReindexActionJobMetaData extends DefaultEntityMetaData
 {
 	public static final String ENTITY_NAME = "ReindexActionJob";
@@ -22,11 +24,10 @@ public class ReindexActionJobMetaData extends DefaultEntityMetaData
 	 */
 	public static final String COUNT = "count";
 
-	public ReindexActionJobMetaData(String backend)
+	public ReindexActionJobMetaData()
 	{
 		super(ENTITY_NAME);
 		setDescription("This entity is used to group the reindex actions.");
-		setBackend(backend);
 		addAttribute(ID, ROLE_ID);
 		addAttribute(COUNT).setDataType(MolgenisFieldTypes.INT).setNillable(false);
 	}

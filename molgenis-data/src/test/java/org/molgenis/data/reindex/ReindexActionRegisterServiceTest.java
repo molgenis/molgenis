@@ -9,6 +9,9 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -17,7 +20,6 @@ import org.molgenis.data.reindex.meta.ReindexActionMetaData;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus;
-import org.molgenis.data.reindex.meta.ReindexActionRegisterConfig;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -27,21 +29,16 @@ import org.testng.annotations.Test;
 
 public class ReindexActionRegisterServiceTest
 {
-	private ReindexActionRegisterService reindexActionRegisterService;
+	@InjectMocks
+	private ReindexActionRegisterService reindexActionRegisterService = new ReindexActionRegisterService();
+	@Mock
 	private DataService dataService;
-	private ReindexActionJobMetaData reindexActionJobMetaData = new ReindexActionJobMetaData(
-			ReindexActionRegisterConfig.BACKEND);
-	private ReindexActionMetaData reindexActionMetaData = new ReindexActionMetaData(
-			reindexActionJobMetaData,
-			ReindexActionRegisterConfig.BACKEND);
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
+		MockitoAnnotations.initMocks(this);
 		TransactionSynchronizationManager.bindResource(MolgenisTransactionManager.TRANSACTION_ID_RESOURCE_NAME, "1");
-		dataService = mock(DataService.class);
-		reindexActionRegisterService = new ReindexActionRegisterService(dataService, reindexActionJobMetaData,
-				reindexActionMetaData);
 	}
 
 	@AfterMethod
@@ -103,7 +100,8 @@ public class ReindexActionRegisterServiceTest
 	public void testLogExcludedEntities()
 	{
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
-		when(entityMetaData.getName()).thenReturn(ReindexActionJobMetaData.ENTITY_NAME);
+		when(entityMetaData.getName()).thenReturn("ABC");
+		reindexActionRegisterService.addExcludedEntity("ABC");
 
 		reindexActionRegisterService.register(entityMetaData.getName(), CudType.CREATE, DataType.DATA, "123");
 		verifyNoMoreInteractions(dataService);

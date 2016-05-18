@@ -2,9 +2,9 @@ package org.molgenis.data.elasticsearch.reindex.job;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.reindex.meta.ReindexJobExecutionMeta;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
-import org.molgenis.data.reindex.job.ReindexJobExecutionMetaInterface;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ public class ReindexJobFactory
 	 */
 	ReindexJob createJob(ReindexJobExecution reindexJobExecution)
 	{
-		RunAsSystemProxy.runAsSystem(() -> dataService.add(ReindexJobExecutionMetaInterface.REINDEX_JOB_EXECUTION,
+		RunAsSystemProxy.runAsSystem(() -> dataService.add(ReindexJobExecutionMeta.REINDEX_JOB_EXECUTION,
 				reindexJobExecution));
 		ProgressImpl progress = new ProgressImpl(reindexJobExecution, jobExecutionUpdater, mailSender);
 		return new ReindexJob(progress, new SystemSecurityToken(), reindexJobExecution.getReindexActionJobID(),

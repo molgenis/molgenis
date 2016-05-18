@@ -590,8 +590,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public ReindexActionRegisterService reindexActionRegisterService()
 		{
-			return new ReindexActionRegisterService(dataService(), mock(ReindexActionJobMetaData.class),
-					mock(ReindexActionMetaData.class));
+			return new ReindexActionRegisterService();
 		}
 
 		@Bean
