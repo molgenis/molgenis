@@ -1,8 +1,6 @@
 package org.molgenis.ontology.sorta.job;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.SCORE;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -15,11 +13,13 @@ import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.controller.SortaServiceController;
-import org.molgenis.ontology.core.meta.OntologyTermMetaData;
+import org.molgenis.ontology.sorta.bean.SortaHit;
 import org.molgenis.ontology.sorta.meta.MatchingTaskContentEntityMetaData;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.ui.menu.MenuReaderService;
+
+import static java.util.Objects.requireNonNull;
 
 public class SortaJobProcessor
 {
@@ -68,13 +68,13 @@ public class SortaJobProcessor
 				resultEntity.set(MatchingTaskContentEntityMetaData.VALIDATED, false);
 				entitiesToAdd.add(resultEntity);
 
-				Iterable<Entity> ontologyTermEntities = sortaService.findOntologyTermEntities(ontologyIri, inputRow);
-				if (Iterables.size(ontologyTermEntities) > 0)
+				Iterable<SortaHit> sortaHits = sortaService.findOntologyTermEntities(ontologyIri, inputRow);
+				if (Iterables.size(sortaHits) > 0)
 				{
-					Entity firstMatchedOntologyTerm = Iterables.getFirst(ontologyTermEntities, new MapEntity());
+					SortaHit firstSortaHit = Iterables.get(sortaHits, 0);
 					resultEntity.set(MatchingTaskContentEntityMetaData.MATCHED_TERM,
-							firstMatchedOntologyTerm.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI));
-					resultEntity.set(MatchingTaskContentEntityMetaData.SCORE, firstMatchedOntologyTerm.get(SCORE));
+							firstSortaHit.getOntologyTerm().getIRI());
+					resultEntity.set(MatchingTaskContentEntityMetaData.SCORE, firstSortaHit.getScore());
 				}
 				else
 				{

@@ -73,8 +73,8 @@
 			var perfectMatches = [];
 			var partialMatches = [];
 			$.each(matchedResults, function(index, matchedResult){
-				if(matchedResult.ontologyTerm.length > 0){
-					var matchedScore = matchedResult.ontologyTerm[0].Combined_Score;
+				if(matchedResult.sortaHits.length > 0){
+					var matchedScore = matchedResult.sortaHits[0].weightedScore;
 					if(matchedScore && matchedScore.toFixed(2) >= THRESHOLD){
 						perfectMatches.push(matchedResult);
 					}else{
@@ -138,12 +138,12 @@
 				$('<th />').append('Match').appendTo(tableHeader);
 				$.each(matches, function(index, match){
 					var row = $('<tr />').appendTo(table);
-					var firstOntologyTerm = match.ontologyTerm ? match.ontologyTerm[0] : null;
+					var sortaHit = match.sortaHits ? match.sortaHits[0] : null;
 					$('<td />').append(getInputTermInfo(match.inputTerm)).appendTo(row);
-					$('<td />').append(getOntologyTermInfo(firstOntologyTerm)).appendTo(row);
-					$('<td />').append(getMatchScore(firstOntologyTerm)).appendTo(row);
-					$('<td />').append(getMatchAdjustedScore(firstOntologyTerm)).appendTo(row);
-					$('<td />').append(firstOntologyTerm ? '<button type="button" class="btn btn-default">Match</button>' : NOT_AVAILABLE).appendTo(row);
+					$('<td />').append(getOntologyTermInfo(sortaHit)).appendTo(row);
+					$('<td />').append(getMatchScore(sortaHit)).appendTo(row);
+					$('<td />').append(getMatchAdjustedScore(sortaHit)).appendTo(row);
+					$('<td />').append(sortaHit ? '<button type="button" class="btn btn-default">Match</button>' : NOT_AVAILABLE).appendTo(row);
 					row.find('button:eq(0)').click(function(){
 						var clearButton = $('<button />').attr('type','button').addClass('btn btn-danger pull-right').css({'margin-top':'-10px','margin-bottom':'10px'}).text('Clear').insertBefore(table);
 						table.find('tr:not(:first-child)').hide();
@@ -166,14 +166,14 @@
 		
 		function renderCandidateMatchTable(match, table){
 			var items = [];
-			if(match.ontologyTerm){
-				$.each(match.ontologyTerm, function(index, candidateMatch){
+			if(match.sortaHits){
+				$.each(match.sortaHits, function(index, sortaHit){
 					if(index >= 10) return;
 					var candidateMatchRow = $('<tr />');
 					$('<td />').append(index == 0 ? getInputTermInfo(match.inputTerm) : '').appendTo(candidateMatchRow);
-					$('<td />').append(getOntologyTermInfo(candidateMatch)).appendTo(candidateMatchRow);
-					$('<td />').append(getMatchScore(candidateMatch)).appendTo(candidateMatchRow);
-					$('<td />').append(getMatchAdjustedScore(candidateMatch)).appendTo(candidateMatchRow);
+					$('<td />').append(getOntologyTermInfo(sortaHit)).appendTo(candidateMatchRow);
+					$('<td />').append(getMatchScore(sortaHit)).appendTo(candidateMatchRow);
+					$('<td />').append(getMatchAdjustedScore(sortaHit)).appendTo(candidateMatchRow);
 					items.push(candidateMatchRow);
 				});
 			}
@@ -188,12 +188,12 @@
 			return inputTermDiv;
 		}
 		
-		function getOntologyTermInfo(ontologyTerm){
+		function getOntologyTermInfo(sortaHit){
 			var inputTermDiv = $('<div />');
-			if(ontologyTerm){
-				var divContainerOTName = getOntologyTermName(ontologyTerm);
-				var divContainerOTSynonym = getOntologyTermSynonyms(ontologyTerm);
-				var divContainerOTAnnotation = getOntologyTermAnnotations(ontologyTerm);
+			if(sortaHit){
+				var divContainerOTName = getOntologyTermName(sortaHit.ontologyTerm);
+				var divContainerOTSynonym = getOntologyTermSynonyms(sortaHit.ontologyTerm);
+				var divContainerOTAnnotation = getOntologyTermAnnotations(sortaHit.ontologyTerm);
 				inputTermDiv.append(divContainerOTName).append(divContainerOTSynonym).append(divContainerOTAnnotation);
 			}else{
 				inputTermDiv.append(NOT_AVAILABLE);
@@ -202,14 +202,14 @@
 		}
 		
 		function getOntologyTermName(ontologyTerm){
-			return $('<div />').append('Name : ').append('<a href="' + ontologyTerm.ontologyTermIRI + '" target="_blank">' + ontologyTerm.ontologyTermName + '</a>');
+			return $('<div />').append('Name : ').append('<a href="' + ontologyTerm.IRI + '" target="_blank">' + ontologyTerm.label + '</a>');
 		}
 		
 		function getOntologyTermAnnotations(ontologyTerm){
 			var divContainerOTAnnotations = [];
-			if(ontologyTerm.ontologyTermDynamicAnnotation.length > 0){
+			if(ontologyTerm.annotations.length > 0){
 				var annotationMap = {};
-				$.each(ontologyTerm.ontologyTermDynamicAnnotation, function(index, annotation){
+				$.each(ontologyTerm.annotations, function(index, annotation){
 					if(!annotationMap[annotation.name]){
 						annotationMap[annotation.name] = [];
 					}
@@ -225,10 +225,7 @@
 		function getOntologyTermSynonyms(ontologyTerm){
 			var divContainerOTSynonym = $('<div>Synonym : </div>');
 			if(ontologyTerm){
-				var synonyms = [];
-				$.each(ontologyTerm.ontologyTermSynonym, function(index, ontologyTermSynonym){
-					synonyms.push(ontologyTermSynonym.ontologyTermSynonym);
-				});
+				var synonyms = ontologyTerm.synonyms;
 				if(synonyms.length == 1){
 					divContainerOTSynonym.append(synonyms.join());		
 				}else{
@@ -245,12 +242,12 @@
 			return divContainerOTSynonym;
 		}
 		
-		function getMatchScore(ontologyTerm){
-			return ontologyTerm ? $('<div />').append(ontologyTerm.Score.toFixed(2) + '%') : NOT_AVAILABLE;
+		function getMatchScore(sortaHit){
+			return sortaHit ? $('<div />').append(sortaHit.score.toFixed(2) + '%') : NOT_AVAILABLE;
 		}
 		
-		function getMatchAdjustedScore(ontologyTerm){
-			return ontologyTerm ? $('<div />').append(ontologyTerm.Combined_Score.toFixed(2) + '%') : NOT_AVAILABLE;
+		function getMatchAdjustedScore(sortaHit){
+			return sortaHit ? $('<div />').append(sortaHit.weightedScore.toFixed(2) + '%') : NOT_AVAILABLE;
 		}
 	};
 }($, window.top.molgenis = window.top.molgenis || {}));

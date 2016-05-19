@@ -2,7 +2,6 @@ package org.molgenis.ontology.sorta;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.COMBINED_SCORE;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -21,7 +20,10 @@ import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
+import org.molgenis.ontology.core.model.Ontology;
+import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.ontology.roc.InformationContentService;
+import org.molgenis.ontology.sorta.bean.SortaHit;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
 import org.testng.annotations.BeforeClass;
@@ -35,6 +37,8 @@ public class SortaServiceImplTest
 
 	private SortaService sortaService;
 
+	private OntologyService ontologyService;
+
 	private Entity firstInput;
 
 	private Entity secondInput;
@@ -46,19 +50,21 @@ public class SortaServiceImplTest
 	{
 		DataService dataService = mock(DataService.class);
 
+		ontologyService = mock(OntologyService.class);
+
 		firstInput = new MapEntity(ImmutableMap.<String, Object> of("Name", "hearing impairment"));
 
-		sortaService = new SortaServiceImpl(dataService, new InformationContentService(dataService));
+		sortaService = new SortaServiceImpl(dataService, ontologyService, new InformationContentService(dataService));
 
 		// Mock ontology entity
-		Entity ontologyEntity = new MapEntity();
-		ontologyEntity.set(OntologyMetaData.ONTOLOGY_IRI, ONTOLOGY_IRI);
-		// define dataService actions for test one
-		when(dataService.findOne(OntologyMetaData.ENTITY_NAME,
-				new QueryImpl().eq(OntologyMetaData.ONTOLOGY_IRI, ONTOLOGY_IRI))).thenReturn(ontologyEntity);
+		Entity ontologyEntity = new MapEntity(ImmutableMap.of(OntologyMetaData.ID, "1", OntologyMetaData.ONTOLOGY_IRI,
+				ONTOLOGY_IRI, OntologyMetaData.ONTOLOGY_NAME, "ontology"));
+
+		Ontology ontology = Ontology.create("1", ONTOLOGY_IRI, "ontology");
+		when(ontologyService.getOntology(ONTOLOGY_IRI)).thenReturn(ontology);
 
 		when(dataService.count(OntologyTermMetaData.ENTITY_NAME,
-				new QueryImpl().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity))).thenReturn((long) 100);
+				new QueryImpl().eq(OntologyTermMetaData.ONTOLOGY, ontology.getId()))).thenReturn((long) 100);
 
 		QueryRule queryRule = new QueryRule(
 				Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, "hear")));
@@ -69,8 +75,6 @@ public class SortaServiceImplTest
 				.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, "impair")));
 		queryRule2.setOperator(Operator.DIS_MAX);
 		when(dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl(queryRule2))).thenReturn((long) 50);
-
-		when(dataService.findAll(OntologyMetaData.ENTITY_NAME)).thenReturn(Arrays.asList(ontologyEntity).stream());
 
 		// ########################### TEST ONE ###########################
 		// Mock the first ontologyterm entity only with name
@@ -95,37 +99,37 @@ public class SortaServiceImplTest
 		ontologyTermEntity_2.set(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Arrays.asList(ontologyTermSynonym_2));
 		ontologyTermEntity_2.set(OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION, Collections.emptyList());
 
-		// DataService action for regular matching ontologyterm synonyms
+		// DataService action for regular matching ontology term synonyms
 		QueryRule disMaxRegularQueryRule = new QueryRule(Arrays.asList(new QueryRule(
 				OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, "hear~0.8 impair~0.8")));
 		disMaxRegularQueryRule.setOperator(Operator.DIS_MAX);
 
 		List<QueryRule> finalQueryRules = Arrays.asList(
-				new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
+				new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontology.getId()),
 				new QueryRule(Operator.AND), disMaxRegularQueryRule);
 
 		when(dataService.findAll(OntologyTermMetaData.ENTITY_NAME, new QueryImpl(finalQueryRules).pageSize(50)))
 				.thenReturn(Arrays.asList(ontologyTermEntity_1, ontologyTermEntity_2).stream());
 
-		// DataService action for n-gram matching ontologyterm synonyms
+		// DataService action for n-gram matching ontology term synonyms
 		QueryRule disMaxNGramQueryRule = new QueryRule(Arrays.asList(
 				new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH_NGRAM, "hear impair")));
 		disMaxNGramQueryRule.setOperator(Operator.DIS_MAX);
 		when(dataService
 				.findAll(OntologyTermMetaData.ENTITY_NAME,
 						new QueryImpl(Arrays.asList(
-								new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
+								new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontology.getId()),
 								new QueryRule(Operator.AND), disMaxNGramQueryRule)).pageSize(10)))
 										.thenReturn(Arrays.asList(ontologyTermEntity_1, ontologyTermEntity_2).stream());
 
-		// DataService action for querying specific ontologyterm based on ontologyIRI and ontologyTermIRI
+		// DataService action for querying specific ontology term based on ontologyIRI and ontologyTermIRI
 		when(dataService.findOne(OntologyTermMetaData.ENTITY_NAME,
 				new QueryImpl().eq(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ONTOLOGY_IRI + "1").and()
-						.eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity))).thenReturn(ontologyTermEntity_1);
+						.eq(OntologyTermMetaData.ONTOLOGY, ontology.getId()))).thenReturn(ontologyTermEntity_1);
 
 		when(dataService.findOne(OntologyTermMetaData.ENTITY_NAME,
 				new QueryImpl().eq(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ONTOLOGY_IRI + "2").and()
-						.eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity))).thenReturn(ontologyTermEntity_2);
+						.eq(OntologyTermMetaData.ONTOLOGY, ontology.getId()))).thenReturn(ontologyTermEntity_2);
 
 		// ########################### TEST TWO ###########################
 		secondInput = new MapEntity(ImmutableMap.of("Name", "input", "OMIM", "123456"));
@@ -145,7 +149,7 @@ public class SortaServiceImplTest
 		ontologyTermEntity_3.set(OntologyTermMetaData.ONTOLOGY, ontologyEntity);
 		ontologyTermEntity_3.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME, "ot_3");
 		ontologyTermEntity_3.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ONTOLOGY_IRI + "3");
-		ontologyTermEntity_3.set(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Arrays.asList(ontologyTermEntity_3));
+		ontologyTermEntity_3.set(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Arrays.asList(ontologyTermSynonym_3));
 		ontologyTermEntity_3.set(OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
 				Arrays.asList(ontologyTermDynamicAnnotation_3_1));
 
@@ -162,7 +166,7 @@ public class SortaServiceImplTest
 		when(dataService
 				.findAll(OntologyTermMetaData.ENTITY_NAME,
 						new QueryImpl(Arrays.asList(
-								new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
+								new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontology.getId()),
 								new QueryRule(Operator.AND),
 								new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION, Operator.IN,
 										Arrays.asList(ontologyTermDynamicAnnotation_3_1))))
@@ -176,7 +180,7 @@ public class SortaServiceImplTest
 		when(dataService
 				.findAll(OntologyTermMetaData.ENTITY_NAME,
 						new QueryImpl(Arrays.asList(
-								new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
+								new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontology.getId()),
 								new QueryRule(Operator.AND), disMaxRegularQueryRule_2)).pageSize(49)))
 										.thenReturn(Stream.empty());
 
@@ -187,7 +191,7 @@ public class SortaServiceImplTest
 		when(dataService
 				.findAll(OntologyTermMetaData.ENTITY_NAME,
 						new QueryImpl(Arrays.asList(
-								new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
+								new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontology.getId()),
 								new QueryRule(Operator.AND), disMaxNGramQueryRule_2)).pageSize(10)))
 										.thenReturn(Stream.empty());
 
@@ -223,7 +227,7 @@ public class SortaServiceImplTest
 		when(dataService
 				.findAll(OntologyTermMetaData.ENTITY_NAME,
 						new QueryImpl(Arrays.asList(
-								new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
+								new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontology.getId()),
 								new QueryRule(Operator.AND), disMaxRegularQueryRule_3)).pageSize(50)))
 										.thenReturn(Arrays.asList(ontologyTermEntity_4).stream());
 
@@ -236,7 +240,7 @@ public class SortaServiceImplTest
 		when(dataService
 				.findAll(OntologyTermMetaData.ENTITY_NAME,
 						new QueryImpl(Arrays.asList(
-								new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
+								new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontology.getId()),
 								new QueryRule(Operator.AND), disMaxNGramQueryRule_3)).pageSize(10)))
 										.thenReturn(Arrays.asList(ontologyTermEntity_4).stream());
 	}
@@ -245,73 +249,38 @@ public class SortaServiceImplTest
 	public void findOntologyTermEntities()
 	{
 		// Test one: match only the name of input with ontologyterms
-		Iterable<Entity> ontologyTerms_test1 = sortaService.findOntologyTermEntities(ONTOLOGY_IRI, firstInput);
-		Iterator<Entity> iterator_test1 = ontologyTerms_test1.iterator();
+		List<SortaHit> ontologyTerms_test1 = sortaService.findOntologyTermEntities(ONTOLOGY_IRI, firstInput);
+		Iterator<SortaHit> iterator_test1 = ontologyTerms_test1.iterator();
 
 		assertEquals(iterator_test1.hasNext(), true);
-		Entity firstMatch_test1 = iterator_test1.next();
-		assertEquals(firstMatch_test1.getDouble(COMBINED_SCORE).intValue(), 100);
+		SortaHit firstMatch_test1 = iterator_test1.next();
+		assertEquals((int) firstMatch_test1.getWeightedScore(), 100);
 
 		assertEquals(iterator_test1.hasNext(), true);
-		Entity secondMatch_test1 = iterator_test1.next();
-		assertEquals(secondMatch_test1.getDouble(COMBINED_SCORE).intValue(), new Double(85).intValue());
+		SortaHit secondMatch_test1 = iterator_test1.next();
+		assertEquals((int) secondMatch_test1.getWeightedScore(), new Double(85).intValue());
 
 		assertEquals(iterator_test1.hasNext(), false);
 
 		// Test two: match the database annotation of input with ontologyterms
-		Iterable<Entity> ontologyTerms_test2 = sortaService.findOntologyTermEntities(ONTOLOGY_IRI, secondInput);
-		Iterator<Entity> iterator_test2 = ontologyTerms_test2.iterator();
+		Iterable<SortaHit> ontologyTerms_test2 = sortaService.findOntologyTermEntities(ONTOLOGY_IRI, secondInput);
+		Iterator<SortaHit> iterator_test2 = ontologyTerms_test2.iterator();
 
 		assertEquals(iterator_test2.hasNext(), true);
-		Entity firstMatch_test2 = iterator_test2.next();
-		assertEquals(firstMatch_test2.getDouble(COMBINED_SCORE).intValue(), 100);
+		SortaHit firstMatch_test2 = iterator_test2.next();
+		assertEquals((int) firstMatch_test2.getWeightedScore(), 100);
 
 		assertEquals(iterator_test2.hasNext(), false);
 
 		// Test three: match only the name of input with ontologyterms, since the name contains multiple synonyms
 		// therefore add up all the scores from synonyms
-		Iterable<Entity> ontologyTerms_test3 = sortaService.findOntologyTermEntities(ONTOLOGY_IRI, thirdInput);
-		Iterator<Entity> iterator_test3 = ontologyTerms_test3.iterator();
+		Iterable<SortaHit> ontologyTerms_test3 = sortaService.findOntologyTermEntities(ONTOLOGY_IRI, thirdInput);
+		Iterator<SortaHit> iterator_test3 = ontologyTerms_test3.iterator();
 
 		assertEquals(iterator_test3.hasNext(), true);
-		Entity firstMatch_test3 = iterator_test3.next();
-		assertEquals(firstMatch_test3.getDouble(COMBINED_SCORE).intValue(), 100);
+		SortaHit firstMatch_test3 = iterator_test3.next();
+		assertEquals((int) firstMatch_test3.getWeightedScore(), 100);
 
 		assertEquals(iterator_test3.hasNext(), false);
-	}
-
-	@Test
-	public void getAllOntologyEntities()
-	{
-		Iterable<Entity> allOntologyEntities = sortaService.getAllOntologyEntities();
-
-		Iterator<Entity> iterator = allOntologyEntities.iterator();
-
-		assertEquals(iterator.hasNext(), true);
-
-		Entity ontologyEntity = iterator.next();
-
-		assertEquals(ontologyEntity.getString(OntologyMetaData.ONTOLOGY_IRI), ONTOLOGY_IRI);
-
-		assertEquals(iterator.hasNext(), false);
-
-	}
-
-	@Test
-	public void getOntologyEntity()
-	{
-		Entity ontologyEntity = sortaService.getOntologyEntity(ONTOLOGY_IRI);
-		assertEquals(ONTOLOGY_IRI, ontologyEntity.getString(OntologyMetaData.ONTOLOGY_IRI));
-	}
-
-	@Test
-	public void getOntologyTermEntity()
-	{
-		Entity firstOntologyTermEntity = sortaService.getOntologyTermEntity(ONTOLOGY_IRI + 1, ONTOLOGY_IRI);
-		assertEquals(firstOntologyTermEntity.getString(OntologyTermMetaData.ONTOLOGY_TERM_NAME), "hearing impairment");
-
-		Entity secondOntologyTermEntity = sortaService.getOntologyTermEntity(ONTOLOGY_IRI + 2, ONTOLOGY_IRI);
-		assertEquals(secondOntologyTermEntity.getString(OntologyTermMetaData.ONTOLOGY_TERM_NAME),
-				"mixed hearing impairment");
 	}
 }

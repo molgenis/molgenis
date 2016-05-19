@@ -2,6 +2,7 @@ package org.molgenis.ontology.core.repository;
 
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ENTITY_NAME;
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION;
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_IRI;
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_NAME;
 
@@ -24,11 +25,13 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.model.OntologyTermAnnotation;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.FluentIterable;
@@ -344,7 +347,7 @@ public class OntologyTermRepository
 		}
 
 		// Collect synonyms if there are any
-		List<String> synonyms = new ArrayList<String>();
+		List<String> synonyms = new ArrayList<>();
 		Iterable<Entity> ontologyTermSynonymEntities = entity.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM);
 		if (ontologyTermSynonymEntities != null)
 		{
@@ -356,7 +359,20 @@ public class OntologyTermRepository
 			synonyms.add(entity.getString(ONTOLOGY_TERM_NAME));
 		}
 
+		// Collect annotations if there are any
+		List<OntologyTermAnnotation> annotations = new ArrayList<>();
+		Iterable<Entity> ontologyTermAnnotationEntities = entity.getEntities(ONTOLOGY_TERM_DYNAMIC_ANNOTATION);
+		if (ontologyTermAnnotationEntities != null)
+		{
+			for (Entity annotationEntity : ontologyTermAnnotationEntities)
+			{
+				String annotationName = annotationEntity.getString(OntologyTermDynamicAnnotationMetaData.NAME);
+				String annotationValue = annotationEntity.getString(OntologyTermDynamicAnnotationMetaData.VALUE);
+				annotations.add(OntologyTermAnnotation.create(annotationName, annotationValue));
+			}
+		}
+
 		return OntologyTerm.create(entity.getString(ONTOLOGY_TERM_IRI), entity.getString(ONTOLOGY_TERM_NAME), null,
-				synonyms);
+				synonyms, annotations);
 	}
 }
