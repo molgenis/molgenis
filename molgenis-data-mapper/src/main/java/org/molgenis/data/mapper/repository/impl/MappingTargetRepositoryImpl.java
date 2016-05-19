@@ -22,6 +22,7 @@ import com.google.common.collect.Lists;
 
 public class MappingTargetRepositoryImpl implements MappingTargetRepository
 {
+	// FIXME remove
 	public static final EntityMetaData META_DATA = new MappingTargetMetaData();
 
 	@Autowired

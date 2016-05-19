@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
@@ -20,7 +20,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
 
 @Component("ElasticsearchRepositoryCollection")
-public class ElasticsearchRepositoryCollection implements ManageableRepositoryCollection
+public class ElasticsearchRepositoryCollection implements RepositoryCollection
 {
 	public static final String NAME = "ElasticSearch";
 	private final SearchService searchService;
@@ -35,7 +35,7 @@ public class ElasticsearchRepositoryCollection implements ManageableRepositoryCo
 	}
 
 	@Override
-	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
+	public Repository<Entity> createRepository(EntityMetaData entityMeta)
 	{
 		ElasticsearchRepository repo = new ElasticsearchRepository(entityMeta, searchService);
 		if (!searchService.hasMapping(entityMeta)) repo.create();
@@ -63,6 +63,12 @@ public class ElasticsearchRepositoryCollection implements ManageableRepositoryCo
 	}
 
 	@Override
+	public Repository<Entity> getRepository(EntityMetaData entityMetaData)
+	{
+		return getRepository(entityMetaData.getName());
+	}
+
+	@Override
 	public Iterator<Repository<Entity>> iterator()
 	{
 		return Iterators.transform(repositories.values().iterator(),
@@ -77,7 +83,7 @@ public class ElasticsearchRepositoryCollection implements ManageableRepositoryCo
 	}
 
 	@Override
-	public void deleteEntityMeta(String entityName)
+	public void deleteRepository(String entityName)
 	{
 		// remove the repo
 		AbstractElasticsearchRepository r = repositories.get(entityName);
@@ -122,12 +128,6 @@ public class ElasticsearchRepositoryCollection implements ManageableRepositoryCo
 	}
 
 	@Override
-	public void addAttributeSync(String entityName, AttributeMetaData attribute)
-	{
-		addAttribute(entityName, attribute);
-	}
-
-	@Override
 	public boolean hasRepository(String name)
 	{
 		if (null == name) return false;
@@ -139,4 +139,9 @@ public class ElasticsearchRepositoryCollection implements ManageableRepositoryCo
 		return false;
 	}
 
+	@Override
+	public boolean hasRepository(EntityMetaData entityMeta)
+	{
+		return hasRepository(entityMeta.getName());
+	}
 }

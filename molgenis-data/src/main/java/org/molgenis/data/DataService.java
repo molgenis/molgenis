@@ -48,7 +48,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	 */
 	<E extends Entity> Stream<E> stream(String entityName, Fetch fetch, Class<E> clazz);
 
-	void setMeta(MetaDataService metaDataService);
+	void setMetaDataService(MetaDataService metaDataService);
 
 	/**
 	 * Get the MetaDataService

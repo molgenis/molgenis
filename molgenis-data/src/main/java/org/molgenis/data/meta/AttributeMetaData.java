@@ -40,7 +40,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
-import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
+import org.molgenis.data.meta.system.SystemEntityMetaDataRegistrySingleton;
 import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.support.AbstractEntity;
 import org.molgenis.data.support.MapEntity;
@@ -64,6 +64,15 @@ public class AttributeMetaData extends AbstractEntity
 	public AttributeMetaData(EntityMetaData attrMetaDataMetaData)
 	{
 		this.entity = new MapEntity(attrMetaDataMetaData);
+
+		// FIXME use default value for this
+		set(DATA_TYPE, toDataTypeString(MolgenisFieldTypes.getType(requireNonNull(STRING).toString().toLowerCase())));
+		set(NILLABLE, false);
+		set(AUTO, false);
+		set(VISIBLE, false);
+		set(AGGREGATEABLE, false);
+		set(READ_ONLY, false);
+		set(UNIQUE, false);
 	}
 
 	@Deprecated
@@ -96,7 +105,7 @@ public class AttributeMetaData extends AbstractEntity
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return SystemEntityMetaDataRegistry.INSTANCE.getSystemEntityMetaData(ENTITY_NAME);
+		return SystemEntityMetaDataRegistrySingleton.INSTANCE.getSystemEntityMetaData(ENTITY_NAME);
 	}
 
 	@Override

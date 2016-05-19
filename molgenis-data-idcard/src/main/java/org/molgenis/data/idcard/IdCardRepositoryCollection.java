@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownAttributeException;
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Maps;
 
 @Component
-public class IdCardRepositoryCollection implements ManageableRepositoryCollection
+public class IdCardRepositoryCollection implements RepositoryCollection
 {
 	public static final String NAME = "ID-Card";
 
@@ -45,7 +45,7 @@ public class IdCardRepositoryCollection implements ManageableRepositoryCollectio
 	}
 
 	@Override
-	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
+	public Repository<Entity> createRepository(EntityMetaData entityMeta)
 	{
 		String entityName = entityMeta.getName();
 		if (!entityName.equals(IdCardBiobank.ENTITY_NAME))
@@ -77,6 +77,13 @@ public class IdCardRepositoryCollection implements ManageableRepositoryCollectio
 	}
 
 	@Override
+	public Repository<Entity> getRepository(EntityMetaData entityMetaData)
+	{
+		return getRepository(entityMetaData.getName());
+	}
+
+
+	@Override
 	public boolean hasRepository(String name)
 	{
 		return repositories.containsKey(name);
@@ -89,7 +96,7 @@ public class IdCardRepositoryCollection implements ManageableRepositoryCollectio
 	}
 
 	@Override
-	public void deleteEntityMeta(String entityName)
+	public void deleteRepository(String entityName)
 	{
 		repositories.remove(entityName);
 	}
@@ -126,8 +133,8 @@ public class IdCardRepositoryCollection implements ManageableRepositoryCollectio
 	}
 
 	@Override
-	public void addAttributeSync(String entityName, AttributeMetaData attribute)
+	public boolean hasRepository(EntityMetaData entityMeta)
 	{
-		addAttribute(entityName, attribute);
+		return hasRepository(entityMeta.getName());
 	}
 }

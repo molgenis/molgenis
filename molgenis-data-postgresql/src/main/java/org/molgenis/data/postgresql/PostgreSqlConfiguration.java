@@ -2,7 +2,7 @@ package org.molgenis.data.postgresql;
 
 import javax.sql.DataSource;
 
-import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.RepositoryCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,20 +35,20 @@ public class PostgreSqlConfiguration
 
 	@Bean(name =
 	{ "PostgreSqlRepositoryCollection" })
-	public ManageableRepositoryCollection postgreSqlRepositoryCollection()
+	public RepositoryCollection postgreSqlRepositoryCollection()
 	{
 		PostgreSqlRepositoryCollection postgreSqlRepositoryCollection = new PostgreSqlRepositoryCollection(dataSource)
 		{
 			@Override
-			protected PostgreSqlRepository createPostgreSqlRepository()
-			{
-				return postgreSqlRepository();
-			}
-
-			@Override
 			public boolean hasRepository(String name)
 			{
 				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			protected PostgreSqlRepository createPostgreSqlRepository()
+			{
+				return postgreSqlRepository();
 			}
 		};
 		return postgreSqlRepositoryCollection;

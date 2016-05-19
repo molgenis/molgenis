@@ -1,20 +1,29 @@
 package org.molgenis.data.meta.system;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Map;
 
 import org.molgenis.data.meta.SystemEntityMetaData;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.core.PriorityOrdered;
 import org.springframework.stereotype.Component;
 
 /**
- * Discovers and registers {@link SystemEntityMetaData} beans with the {@link SystemEntityMetaDataRegistry}
+ * Discovers and registers {@link SystemEntityMetaData} beans with the {@link SystemEntityMetaDataRegistrySingleton}
  */
 @Component
 public class SystemEntityMetaDataRegistrar
 {
+	private final SystemEntityMetaDataRegistry systemEntityMetaDataRegistry;
+
+	@Autowired
+	public SystemEntityMetaDataRegistrar(SystemEntityMetaDataRegistry systemEntityMetaDataRegistry)
+	{
+		this.systemEntityMetaDataRegistry = requireNonNull(systemEntityMetaDataRegistry);
+	}
+
 	public void register(ContextRefreshedEvent event)
 	{
 		ApplicationContext ctx = event.getApplicationContext();
@@ -24,6 +33,6 @@ public class SystemEntityMetaDataRegistrar
 
 	private void register(SystemEntityMetaData systemEntityMetaData)
 	{
-		SystemEntityMetaDataRegistry.INSTANCE.addSystemEntityMetaData(systemEntityMetaData);
+		systemEntityMetaDataRegistry.addSystemEntityMetaData(systemEntityMetaData);
 	}
 }

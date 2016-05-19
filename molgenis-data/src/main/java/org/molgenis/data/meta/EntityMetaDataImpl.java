@@ -43,7 +43,8 @@ public class EntityMetaDataImpl extends AbstractEntity implements EntityMetaData
 
 	private final Entity entity;
 
-	protected EntityMetaDataImpl() {
+	protected EntityMetaDataImpl()
+	{
 		this.entity = new MapEntity(this);
 	}
 
@@ -99,7 +100,7 @@ public class EntityMetaDataImpl extends AbstractEntity implements EntityMetaData
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-//		return EntityMetaDataMetaData.get();
+		//		return EntityMetaDataMetaData.get();
 		return this;
 	}
 
@@ -300,6 +301,14 @@ public class EntityMetaDataImpl extends AbstractEntity implements EntityMetaData
 	public EntityMetaData setIdAttribute(AttributeMetaData idAttr)
 	{
 		set(ID_ATTRIBUTE, idAttr);
+		if (getLabelAttribute() == null)
+		{
+			setLabelAttribute(idAttr);
+		}
+		if (!getLookupAttributes().iterator().hasNext())
+		{
+			addLookupAttribute(idAttr);
+		}
 		return this;
 	}
 
@@ -365,6 +374,10 @@ public class EntityMetaDataImpl extends AbstractEntity implements EntityMetaData
 	public EntityMetaData setLabelAttribute(AttributeMetaData labelAttr)
 	{
 		set(LABEL_ATTRIBUTE, labelAttr);
+		if (!getLookupAttributes().iterator().hasNext())
+		{
+			addLookupAttribute(labelAttr);
+		}
 		return this;
 	}
 

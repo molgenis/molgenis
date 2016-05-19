@@ -16,7 +16,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.mem.InMemoryRepository;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
+import org.molgenis.data.meta.system.SystemEntityMetaDataRegistrySingleton;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.support.MapEntity;
@@ -88,11 +88,11 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 			throw new IllegalArgumentException("Not a obo.zip or owl.zip file [" + file.getName() + "]");
 		}
 
-		ontologyRepository = new InMemoryRepository(SystemEntityMetaDataRegistry.INSTANCE.getSystemEntityMetaData(OntologyMetaData.ENTITY_NAME));
-		nodePathRepository = new InMemoryRepository(SystemEntityMetaDataRegistry.INSTANCE.getSystemEntityMetaData(OntologyTermNodePathMetaData.ENTITY_NAME));
-		ontologyTermRepository = new InMemoryRepository(SystemEntityMetaDataRegistry.INSTANCE.getSystemEntityMetaData(OntologyTermMetaData.ENTITY_NAME));
-		annotationRepository = new InMemoryRepository(SystemEntityMetaDataRegistry.INSTANCE.getSystemEntityMetaData(OntologyTermDynamicAnnotationMetaData.ENTITY_NAME));
-		synonymRepository = new InMemoryRepository(SystemEntityMetaDataRegistry.INSTANCE.getSystemEntityMetaData(OntologyTermSynonymMetaData.ENTITY_NAME));
+		ontologyRepository = new InMemoryRepository(SystemEntityMetaDataRegistrySingleton.INSTANCE.getSystemEntityMetaData(OntologyMetaData.ENTITY_NAME));
+		nodePathRepository = new InMemoryRepository(SystemEntityMetaDataRegistrySingleton.INSTANCE.getSystemEntityMetaData(OntologyTermNodePathMetaData.ENTITY_NAME));
+		ontologyTermRepository = new InMemoryRepository(SystemEntityMetaDataRegistrySingleton.INSTANCE.getSystemEntityMetaData(OntologyTermMetaData.ENTITY_NAME));
+		annotationRepository = new InMemoryRepository(SystemEntityMetaDataRegistrySingleton.INSTANCE.getSystemEntityMetaData(OntologyTermDynamicAnnotationMetaData.ENTITY_NAME));
+		synonymRepository = new InMemoryRepository(SystemEntityMetaDataRegistrySingleton.INSTANCE.getSystemEntityMetaData(OntologyTermSynonymMetaData.ENTITY_NAME));
 		repositories = ImmutableMap.of(OntologyTermDynamicAnnotationMetaData.ENTITY_NAME,
 				annotationRepository, OntologyTermSynonymMetaData.ENTITY_NAME, synonymRepository,
 				OntologyTermNodePathMetaData.ENTITY_NAME, nodePathRepository, OntologyMetaData.ENTITY_NAME,
@@ -110,7 +110,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	 */
 	private void createOntology()
 	{
-		ontologyEntity = new MapEntity(SystemEntityMetaDataRegistry.INSTANCE.getSystemEntityMetaData(OntologyMetaData.ENTITY_NAME));
+		ontologyEntity = new MapEntity(SystemEntityMetaDataRegistrySingleton.INSTANCE.getSystemEntityMetaData(OntologyMetaData.ENTITY_NAME));
 		ontologyEntity.set(OntologyMetaData.ID, idGenerator.generateId());
 		ontologyEntity.set(OntologyMetaData.ONTOLOGY_IRI, loader.getOntologyIRI());
 		ontologyEntity.set(OntologyMetaData.ONTOLOGY_NAME, loader.getOntologyName());
@@ -176,7 +176,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	{
 		String ontologyTermIRI = ontologyTerm.getIRI().toString();
 		String ontologyTermName = loader.getLabel(ontologyTerm);
-		Entity entity = new MapEntity(SystemEntityMetaDataRegistry.INSTANCE.getSystemEntityMetaData(OntologyTermMetaData.ENTITY_NAME));
+		Entity entity = new MapEntity(SystemEntityMetaDataRegistrySingleton.INSTANCE.getSystemEntityMetaData(OntologyTermMetaData.ENTITY_NAME));
 		entity.set(OntologyTermMetaData.ID, idGenerator.generateId());
 		entity.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ontologyTermIRI);
 		entity.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME, ontologyTermName);
@@ -209,7 +209,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	 */
 	private Entity createSynonym(String synonym)
 	{
-		MapEntity entity = new MapEntity(SystemEntityMetaDataRegistry.INSTANCE.getSystemEntityMetaData(OntologyTermSynonymMetaData.ENTITY_NAME));
+		MapEntity entity = new MapEntity(SystemEntityMetaDataRegistrySingleton.INSTANCE.getSystemEntityMetaData(OntologyTermSynonymMetaData.ENTITY_NAME));
 		entity.set(OntologyTermSynonymMetaData.ID, idGenerator.generateId());
 		entity.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM, synonym);
 		synonymRepository.add(entity);
@@ -237,7 +237,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	 */
 	private Entity createDynamicAnnotation(String label)
 	{
-		Entity entity = new MapEntity(SystemEntityMetaDataRegistry.INSTANCE.getSystemEntityMetaData(OntologyTermDynamicAnnotationMetaData.ENTITY_NAME));
+		Entity entity = new MapEntity(SystemEntityMetaDataRegistrySingleton.INSTANCE.getSystemEntityMetaData(OntologyTermDynamicAnnotationMetaData.ENTITY_NAME));
 		entity.set(OntologyTermDynamicAnnotationMetaData.ID, idGenerator.generateId());
 		String fragments[] = label.split(":");
 		entity.set(OntologyTermDynamicAnnotationMetaData.NAME, fragments[0]);
@@ -276,7 +276,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	 */
 	private Entity createNodePathEntity(OWLClassContainer container, String ontologyTermNodePath)
 	{
-		MapEntity entity = new MapEntity(SystemEntityMetaDataRegistry.INSTANCE.getSystemEntityMetaData(OntologyTermNodePathMetaData.ENTITY_NAME));
+		MapEntity entity = new MapEntity(SystemEntityMetaDataRegistrySingleton.INSTANCE.getSystemEntityMetaData(OntologyTermNodePathMetaData.ENTITY_NAME));
 		entity.set(OntologyTermNodePathMetaData.ID, idGenerator.generateId());
 		entity.set(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH, ontologyTermNodePath);
 		entity.set(OntologyTermNodePathMetaData.ROOT, container.isRoot());
@@ -297,7 +297,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
+	public Repository<Entity> createRepository(EntityMetaData entityMeta)
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -325,5 +325,17 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 			if (entityNames.next().equals(name)) return true;
 		}
 		return false;
+	}
+
+	@Override
+	public boolean hasRepository(EntityMetaData entityMeta)
+	{
+		return hasRepository(entityMeta.getName());
+	}
+
+	@Override
+	public void deleteRepository(String name)
+	{
+		throw new UnsupportedOperationException(); // FIXME implement
 	}
 }

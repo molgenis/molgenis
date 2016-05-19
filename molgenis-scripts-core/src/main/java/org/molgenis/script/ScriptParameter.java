@@ -9,6 +9,8 @@ public class ScriptParameter extends DefaultEntity
 	private static final long serialVersionUID = 2005285224629134983L;
 	public static final String ENTITY_NAME = "ScriptParameter";
 	public static final String NAME = "name";
+
+	// FIXME remove
 	public static final EntityMetaData META_DATA = new ScriptParameterMetaData();
 
 	public ScriptParameter(DataService dataService)

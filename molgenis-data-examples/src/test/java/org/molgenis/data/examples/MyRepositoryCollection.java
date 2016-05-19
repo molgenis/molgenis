@@ -27,7 +27,7 @@ public class MyRepositoryCollection implements RepositoryCollection
 	}
 
 	@Override
-	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
+	public Repository<Entity> createRepository(EntityMetaData entityMeta)
 	{
 		Repository<Entity> repo = new MyRepository(entityMeta);
 		repositories.put(entityMeta.getName(), repo);
@@ -48,6 +48,12 @@ public class MyRepositoryCollection implements RepositoryCollection
 	}
 
 	@Override
+	public Repository<Entity> getRepository(EntityMetaData entityMetaData)
+	{
+		return getRepository(entityMetaData);
+	}
+
+	@Override
 	public boolean hasRepository(String name)
 	{
 		if (null == name) return false;
@@ -59,4 +65,9 @@ public class MyRepositoryCollection implements RepositoryCollection
 		return false;
 	}
 
+	@Override
+	public boolean hasRepository(EntityMetaData entityMeta)
+	{
+		return hasRepository(entityMeta.getName());
+	}
 }

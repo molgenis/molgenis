@@ -85,11 +85,11 @@ public class ThousandGenomesAnnotator
 //				})
 //		{
 //			@Override
-//			protected Object getResourceAttributeValue(AttributeMetaData attr, Entity entity)
+//			protected Object getResourceAttributeValue(AttributeMetaData attr, Entity entityMetaData)
 //			{
 //				String attrName = THOUSAND_GENOME_AF.equals(attr.getName()) ? THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME : attr
 //						.getName();
-//				return entity.get(attrName);
+//				return entityMetaData.get(attrName);
 //			}
 //		};
 

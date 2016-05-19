@@ -57,25 +57,25 @@ public class DependencyResolver
 		Map<String, EntityMetaData> metaDataByName = Maps.newHashMap();
 
 		// All dependencies of EntityMetaData
-		Map<String, Set<EntityMetaData>> dependenciesByName = Maps.newHashMap();
+		Map<String, Set<String>> dependenciesByName = Maps.newHashMap();
 
 		for (EntityMetaData meta : coll)
 		{
 			metaDataByName.put(meta.getName(), meta);
 
-			Set<EntityMetaData> dependencies = Sets.newHashSet();
+			Set<String> dependencies = Sets.newHashSet();
 			dependenciesByName.put(meta.getName(), dependencies);
 
 			if (meta.getExtends() != null)
 			{
-				dependencies.add(meta.getExtends());
+				dependencies.add(meta.getExtends().getName());
 			}
 
 			for (AttributeMetaData attr : meta.getAtomicAttributes())
 			{
 				if ((attr.getRefEntity() != null) && !attr.getRefEntity().equals(meta))// self reference
 				{
-					dependencies.add(attr.getRefEntity());
+					dependencies.add(attr.getRefEntity().getName());
 				}
 			}
 		}
@@ -87,7 +87,7 @@ public class DependencyResolver
 			final List<String> ready = Lists.newArrayList();
 
 			// Get all metadata without dependencies
-			for (Entry<String, Set<EntityMetaData>> entry : dependenciesByName.entrySet())
+			for (Entry<String, Set<String>> entry : dependenciesByName.entrySet())
 			{
 				if (entry.getValue().isEmpty())
 				{
@@ -105,14 +105,14 @@ public class DependencyResolver
 			}
 
 			// Remove found metadata from dependency graph
-			Set<EntityMetaData> remove = Sets.newHashSet();
+			Set<String> remove = Sets.newHashSet();
 			for (String name : ready)
 			{
 				dependenciesByName.remove(name);
-				remove.add(metaDataByName.get(name));
+				remove.add(name);
 			}
 
-			for (Set<EntityMetaData> dependencies : dependenciesByName.values())
+			for (Set<String> dependencies : dependenciesByName.values())
 			{
 				dependencies.removeAll(remove);
 			}

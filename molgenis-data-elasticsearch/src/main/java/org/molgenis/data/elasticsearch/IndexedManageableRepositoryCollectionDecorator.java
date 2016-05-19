@@ -1,35 +1,35 @@
 package org.molgenis.data.elasticsearch;
 
-import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataImpl;
 
 /**
- * Decorates a ManageableRepositoryCollection so it is indexed. Removes, creates ES mappings
+ * Decorates a RepositoryCollection so it is indexed. Removes, creates ES mappings
  */
-public class IndexedManageableRepositoryCollectionDecorator extends IndexedRepositoryCollectionDecorator implements
-		ManageableRepositoryCollection
+public class IndexedRepositoryCollectionDecorator extends IndexedRepositoryCollectionDecorator implements
+		RepositoryCollection
 {
 
-	public IndexedManageableRepositoryCollectionDecorator(SearchService searchService,
-			ManageableRepositoryCollection delegate)
+	public IndexedRepositoryCollectionDecorator(SearchService searchService,
+			RepositoryCollection delegate)
 	{
 		super(searchService, delegate);
 	}
 
 	@Override
-	public void deleteEntityMeta(String entityName)
+	public void deleteRepository(String entityName)
 	{
-		getManageableRepositoryCollection().deleteEntityMeta(entityName);
+		getRepositoryCollection().deleteRepository(entityName);
 		getSearchService().delete(entityName);
 	}
 
 	@Override
 	public void addAttribute(String entityName, AttributeMetaData attribute)
 	{
-		getManageableRepositoryCollection().addAttribute(entityName, attribute);
-		EntityMetaData meta = new EntityMetaDataImpl(getManageableRepositoryCollection().getRepository(entityName).getEntityMetaData());
+		getRepositoryCollection().addAttribute(entityName, attribute);
+		EntityMetaData meta = new EntityMetaDataImpl(getRepositoryCollection().getRepository(entityName).getEntityMetaData());
 		meta.addAttribute(attribute);
 		getSearchService().createMappings(meta);
 	}
@@ -37,9 +37,9 @@ public class IndexedManageableRepositoryCollectionDecorator extends IndexedRepos
 	@Override
 	public void deleteAttribute(String entityName, String attributeName)
 	{
-		getManageableRepositoryCollection().deleteAttribute(entityName, attributeName);
+		getRepositoryCollection().deleteAttribute(entityName, attributeName);
 
-		EntityMetaData meta = new EntityMetaDataImpl(getManageableRepositoryCollection().getRepository(entityName).getEntityMetaData());
+		EntityMetaData meta = new EntityMetaDataImpl(getRepositoryCollection().getRepository(entityName).getEntityMetaData());
 
 		AttributeMetaData attr = meta.getAttribute(attributeName);
 		if (attr != null)
@@ -49,17 +49,14 @@ public class IndexedManageableRepositoryCollectionDecorator extends IndexedRepos
 		}
 	}
 
-	@Override
-	public void addAttributeSync(String entityName, AttributeMetaData attribute)
+	protected RepositoryCollection getRepositoryCollection()
 	{
-		getManageableRepositoryCollection().addAttributeSync(entityName, attribute);
-		EntityMetaData meta = new EntityMetaDataImpl(getManageableRepositoryCollection().getRepository(entityName).getEntityMetaData());
-		meta.addAttribute(attribute);
-		getSearchService().createMappings(meta);
+		return (RepositoryCollection) getDelegate();
 	}
 
-	protected ManageableRepositoryCollection getManageableRepositoryCollection()
+	@Override
+	public boolean hasRepository(EntityMetaData entityMeta)
 	{
-		return (ManageableRepositoryCollection) getDelegate();
+		return hasRepository(entityMeta.getName());
 	}
 }

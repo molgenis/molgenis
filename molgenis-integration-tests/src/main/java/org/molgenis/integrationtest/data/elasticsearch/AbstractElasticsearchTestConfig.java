@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import javax.sql.DataSource;
 
-import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.elasticsearch.SearchService;
@@ -37,7 +37,7 @@ public abstract class AbstractElasticsearchTestConfig extends AbstractDataApiTes
 	protected DataSource dataSource;
 
 	@Override
-	protected ManageableRepositoryCollection getBackend()
+	protected RepositoryCollection getBackend()
 	{
 		return elasticsearchRepositoryCollection();
 	}

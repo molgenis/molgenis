@@ -365,13 +365,6 @@ class PostgreSqlQueryGenerator
 			{
 				sql.append(attr.getDataType().getPostgreSqlType());
 			}
-			// TODO remove Questionnaire entity hack
-			// not null
-			if (!attr.isNillable() && !EntityUtils.doesExtend(entityMeta, "Questionnaire")
-					&& (attr.getVisibleExpression() == null))
-			{
-				sql.append(" NOT NULL");
-			}
 			if (attr.getDataType() instanceof EnumField)
 			{
 				sql.append(" CHECK (").append(getColumnName(attr)).append(" IN (").append(

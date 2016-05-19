@@ -8,7 +8,7 @@ import static org.testng.Assert.assertEquals;
 import java.util.Arrays;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Repository;
 import org.molgenis.data.i18n.LanguageService;
 import org.testng.annotations.BeforeMethod;
@@ -26,9 +26,9 @@ public class EntityMetaDataRepositoryTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		ManageableRepositoryCollection collection = mock(ManageableRepositoryCollection.class);
+		RepositoryCollection collection = mock(RepositoryCollection.class);
 		entityMetaRepo = mock(Repository.class);
-		when(collection.addEntityMeta(EntityMetaDataRepository.META_DATA)).thenReturn(entityMetaRepo);
+		when(collection.createRepository(EntityMetaDataRepository.META_DATA)).thenReturn(entityMetaRepo);
 		packageRepository = mock(PackageRepository.class);
 		attributeRepository = mock(AttributeMetaDataRepository.class);
 		LanguageService languageService = mock(LanguageService.class);

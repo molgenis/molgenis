@@ -116,7 +116,7 @@ public class CrudRepositoryAnnotator
 		{
 			EntityMetaData newEntityMetaData = new EntityMetaDataImpl(entityMetaData);
 			newEntityMetaData.addAttribute(compoundAttributeMetaData);
-			dataService.getMeta().updateSync(newEntityMetaData);
+			dataService.getMeta().updateEntityMeta(newEntityMetaData);
 		}
 	}
 

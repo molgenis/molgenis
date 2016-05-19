@@ -54,7 +54,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Annotator that can add HGNC_ID and ENTREZ_GENE_ID and other attributes to an entity that has a attribute named 'GENE'
+ * Annotator that can add HGNC_ID and ENTREZ_GENE_ID and other attributes to an entityMetaData that has a attribute named 'GENE'
  * that must be the HGNC gene dataType.
  * 
  * It reads this info from a tab separated CGD file. The location of this file is defined by a RuntimeProperty named

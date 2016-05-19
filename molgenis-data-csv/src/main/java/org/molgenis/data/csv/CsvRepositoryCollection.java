@@ -119,7 +119,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
+	public Repository<Entity> createRepository(EntityMetaData entityMeta)
 	{
 		return getRepository(entityMeta.getName());
 	}
@@ -152,4 +152,9 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 		return entityNames.contains(name);
 	}
 
+	@Override
+	public boolean hasRepository(EntityMetaData entityMeta)
+	{
+		return hasRepository(entityMeta.getName());
+	}
 }

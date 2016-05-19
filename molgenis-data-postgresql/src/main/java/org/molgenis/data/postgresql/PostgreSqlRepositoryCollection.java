@@ -13,7 +13,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.AttributeMetaData;
@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 
-public abstract class PostgreSqlRepositoryCollection implements ManageableRepositoryCollection
+public abstract class PostgreSqlRepositoryCollection implements RepositoryCollection
 {
 	public static final String NAME = "PostgreSQL";
 
@@ -38,6 +38,7 @@ public abstract class PostgreSqlRepositoryCollection implements ManageableReposi
 		this.dataSource = requireNonNull(dataSource);
 	}
 
+
 	@Override
 	public String getName()
 	{
@@ -45,7 +46,7 @@ public abstract class PostgreSqlRepositoryCollection implements ManageableReposi
 	}
 
 	@Override
-	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
+	public Repository<Entity> createRepository(EntityMetaData entityMeta)
 	{
 		PostgreSqlRepository repository = createPostgreSqlRepository();
 		repository.setMetaData(entityMeta);
@@ -59,6 +60,12 @@ public abstract class PostgreSqlRepositoryCollection implements ManageableReposi
 	}
 
 	@Override
+	public boolean hasRepository(EntityMetaData entityMeta)
+	{
+		return isTableExists(entityMeta);
+	}
+
+	@Override
 	public Iterable<String> getEntityNames()
 	{
 		return repositories.keySet();
@@ -68,6 +75,14 @@ public abstract class PostgreSqlRepositoryCollection implements ManageableReposi
 	public Repository<Entity> getRepository(String name)
 	{
 		return repositories.get(name);
+	}
+
+	@Override
+	public Repository<Entity> getRepository(EntityMetaData entityMeta)
+	{
+		PostgreSqlRepository repository = createPostgreSqlRepository();
+		repository.setMetaData(entityMeta);
+		return repository;
 	}
 
 	@Override
@@ -84,7 +99,7 @@ public abstract class PostgreSqlRepositoryCollection implements ManageableReposi
 	}
 
 	@Override
-	public void deleteEntityMeta(String entityName)
+	public void deleteRepository(String entityName)
 	{
 		PostgreSqlRepository repo = repositories.get(entityName);
 		if (repo != null)
@@ -114,17 +129,6 @@ public abstract class PostgreSqlRepositoryCollection implements ManageableReposi
 			throw new UnknownEntityException(String.format("Unknown entity '%s'", entityName));
 		}
 		repo.dropAttribute(attributeName);
-	}
-
-	@Override
-	public void addAttributeSync(String entityName, AttributeMetaData attribute)
-	{
-		PostgreSqlRepository repo = repositories.get(entityName);
-		if (repo == null)
-		{
-			throw new UnknownEntityException(String.format("Unknown entity '%s'", entityName));
-		}
-		repo.addAttribute(attribute);
 	}
 
 	/**

@@ -78,7 +78,7 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
+	public Repository<Entity> createRepository(EntityMetaData entityMeta)
 	{
 		return getRepository(entityMeta.getName());
 	}
@@ -115,5 +115,17 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 			if (entityNames.next().equals(name)) return true;
 		}
 		return false;
+	}
+
+	@Override
+	public boolean hasRepository(EntityMetaData entityMeta)
+	{
+		return hasRepository(entityMeta.getName());
+	}
+
+	@Override
+	public void deleteRepository(String name)
+	{
+		throw new UnsupportedOperationException(); // FIXME implement
 	}
 }

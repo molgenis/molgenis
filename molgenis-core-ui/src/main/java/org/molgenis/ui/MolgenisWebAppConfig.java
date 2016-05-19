@@ -21,7 +21,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.IdGenerator;
-import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.convert.DateToStringConverter;
@@ -87,8 +87,6 @@ import freemarker.template.TemplateException;
 
 public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 {
-	private final Logger LOG = LoggerFactory.getLogger(getClass());
-
 	@Autowired
 	private AppSettings appSettings;
 
@@ -385,7 +383,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		return new CorsInterceptor();
 	}
 
-	protected abstract ManageableRepositoryCollection getBackend();
+	protected abstract RepositoryCollection getBackend();
 
 	// protected abstract void addReposToReindex(DataServiceImpl localDataService,
 	// MySqlEntityFactory localMySqlEntityFactory);
@@ -400,7 +398,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		//
 		// MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(localDataService);
 		// metaDataService.setLanguageService(new LanguageService(localDataService, appDbSettings));
-		// localDataService.setMeta(metaDataService);
+		// localDataService.setMetaDataService(metaDataService);
 		//
 		// addReposToReindex(localDataService, localMySqlEntityFactory);
 		//
@@ -442,31 +440,31 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		}
 	}
 
-	@PostConstruct
-	public void initRepositories()
-	{
-		addUpgrades();
-		boolean didUpgrade = upgradeService.upgrade();
-		dataService().setMeta(metaDataService());
-		if (didUpgrade)
-		{
-			LOG.info("Reindexing repositories due to MOLGENIS upgrade...");
-			reindex();
-			LOG.info("Reindexing done.");
-		}
-		else if (!indexExists())
-		{
-			LOG.info("Reindexing repositories due to missing Elasticsearch index...");
-			reindex();
-			LOG.info("Reindexing done.");
-		}
-		else
-		{
-			LOG.debug("Elasticsearch index exists, no need to reindex.");
-		}
-
-		runAsSystem(() -> metaDataService().setDefaultBackend(getBackend()));
-	}
+//	@PostConstruct
+//	public void initRepositories()
+//	{
+//		addUpgrades();
+//		boolean didUpgrade = upgradeService.upgrade();
+//		dataService().setMetaDataService(metaDataService());
+//		if (didUpgrade)
+//		{
+//			LOG.info("Reindexing repositories due to MOLGENIS upgrade...");
+//			reindex();
+//			LOG.info("Reindexing done.");
+//		}
+//		else if (!indexExists())
+//		{
+//			LOG.info("Reindexing repositories due to missing Elasticsearch index...");
+//			reindex();
+//			LOG.info("Reindexing done.");
+//		}
+//		else
+//		{
+//			LOG.debug("Elasticsearch index exists, no need to reindex.");
+//		}
+//
+//		runAsSystem(() -> metaDataService().setDefaultBackend(getBackend()));
+//	}
 
 	@Autowired
 	private EntityMetaDataMetaData entityMetaDataMetaData;
@@ -479,7 +477,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public DataService dataService()
 	{
-		return new DataServiceImpl(repositoryDecoratorFactory());
+		return new DataServiceImpl();
 	}
 
 	@Bean
@@ -500,21 +498,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		return new RepositoryDecoratorRegistry();
 	}
 
-	@Bean
-	public RepositoryDecoratorFactory repositoryDecoratorFactory()
-	{
-		// Moving this inner class to a separate class results in a FatalBeanException on application startup
-		return new RepositoryDecoratorFactory()
-		{
-			@Override
-			public Repository<Entity> createDecoratedRepository(Repository<Entity> repository)
-			{
-				return new MolgenisRepositoryDecoratorFactory(entityManager(), null,
-						entityAttributesValidator, idGenerator, appSettings, dataService(), expressionValidator,
-						repositoryDecoratorRegistry()).createDecoratedRepository(repository);
-			}
-		};
-	}
 
 	/**
 	 * Adds the upgrade steps to the {@link MolgenisUpgradeService}.

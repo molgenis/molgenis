@@ -9,6 +9,8 @@ public class ScriptType extends DefaultEntity
 	private static final long serialVersionUID = -762140082046982877L;
 	public static final String ENTITY_NAME = "ScriptType";
 	public static final String NAME = "name";
+
+	// FIXME remove
 	public static final EntityMetaData META_DATA = new ScriptTypeMetaData();
 
 	public ScriptType(String name, DataService dataService)

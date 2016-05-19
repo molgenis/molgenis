@@ -89,7 +89,6 @@ public class EmxImportService implements ImportService
 			{
 				// TODO rollback of languages
 				writer.rollbackSchemaChanges(job);
-				dataService.getMeta().refreshCaches();
 			}
 			catch (Exception ignore)
 			{

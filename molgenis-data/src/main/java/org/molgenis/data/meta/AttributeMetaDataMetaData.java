@@ -50,7 +50,7 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaDataImpl
 	public void init()
 	{
 		setName(ENTITY_NAME);
-		addAttribute(IDENTIFIER, ROLE_ID).setVisible(false);
+		addAttribute(IDENTIFIER, ROLE_ID).setVisible(false).setAuto(true);
 		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setNillable(false);
 		addAttribute(DATA_TYPE).setDataType(new EnumField()).setEnumOptions(FieldTypeEnum.getOptionsLowercase())
 				.setNillable(false);

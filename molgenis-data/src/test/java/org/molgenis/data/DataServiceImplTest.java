@@ -298,7 +298,7 @@ public class DataServiceImplTest
 		when(emd.getOwnAttributes()).thenReturn(Arrays.asList(attr1, attr2));
 		when(emd.getOwnLookupAttributes()).thenReturn(Arrays.asList(attr1, attr2));
 
-		dataService.setMeta(metaDataService);
+		dataService.setMetaDataService(metaDataService);
 
 		EntityMetaData emd2 = EntityMetaDataImpl.newInstance(emd);
 		emd2.setName("Entity2");
@@ -336,7 +336,7 @@ public class DataServiceImplTest
 		when(emd.getOwnAttributes()).thenReturn(Arrays.asList(attr1, attr2));
 		when(emd.getOwnLookupAttributes()).thenReturn(Arrays.asList(attr1, attr2));
 
-		dataService.setMeta(metaDataService);
+		dataService.setMetaDataService(metaDataService);
 
 		EntityMetaData emd2 = EntityMetaDataImpl.newInstance(emd);
 		emd2.setName("Entity2");

@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.Entity;
-import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Repository;
 import org.molgenis.data.i18n.LanguageService;
 import org.testng.annotations.Test;
@@ -32,10 +32,10 @@ public class AttributeMetaDataRepositoryTest
 	@Test
 	public void addAttribute()
 	{
-		ManageableRepositoryCollection repoCollection = mock(ManageableRepositoryCollection.class);
+		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
 		Repository<Entity> repo = mock(Repository.class);
 		LanguageService languageService = mock(LanguageService.class);
-		when(repoCollection.addEntityMeta(AttributeMetaDataRepository.META_DATA)).thenReturn(repo);
+		when(repoCollection.createRepository(AttributeMetaDataRepository.META_DATA)).thenReturn(repo);
 		AttributeMetaDataRepository attributeMetaDataRepository = new AttributeMetaDataRepository(repoCollection,
 				languageService);
 		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
@@ -52,10 +52,10 @@ public class AttributeMetaDataRepositoryTest
 	@Test
 	public void addIterableAttributeMetaData()
 	{
-		ManageableRepositoryCollection repoCollection = mock(ManageableRepositoryCollection.class);
+		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
 		Repository<Entity> repo = mock(Repository.class);
 		LanguageService languageService = mock(LanguageService.class);
-		when(repoCollection.addEntityMeta(AttributeMetaDataRepository.META_DATA)).thenReturn(repo);
+		when(repoCollection.createRepository(AttributeMetaDataRepository.META_DATA)).thenReturn(repo);
 		AttributeMetaDataRepository attributeMetaDataRepository = new AttributeMetaDataRepository(repoCollection,
 				languageService);
 

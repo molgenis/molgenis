@@ -1,8 +1,9 @@
 package org.molgenis.file.ingest.meta;
 
-import org.molgenis.MolgenisFieldTypes;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.XREF;
+
 import org.molgenis.data.jobs.JobExecutionMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.molgenis.file.FileMetaMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,29 +16,36 @@ public class FileIngestJobExecutionMetaData extends SystemEntityMetaDataImpl
 	public static final String FILE = "file";
 	public static final String FILE_INGEST = "fileIngest";
 
-	private static FileIngestJobExecutionMetaData INSTANCE;
-	private final FileIngestMetaData fileIngestMetaData;
-
-	@Autowired
-	public FileIngestJobExecutionMetaData(FileIngestMetaData fileIngestMetaData)
-	{
-		super(ENTITY_NAME);
-		this.fileIngestMetaData = fileIngestMetaData;
-		INSTANCE = this;
-	}
+	private FileMetaMetaData fileMetaMetaData;
+	private FileIngestMetaData fileIngestMetaData;
+	private JobExecutionMetaData jobExecutionMetaData;
 
 	@Override
 	public void init()
 	{
-		setExtends(new JobExecutionMetaData());
-		addAttribute(FILE).setLabel("File").setDescription("The imported file.").setDataType(MolgenisFieldTypes.XREF)
-				.setRefEntity(new FileMetaMetaData()).setNillable(true);
-		addAttribute(FILE_INGEST).setDataType(MolgenisFieldTypes.XREF).setRefEntity(fileIngestMetaData)
-				.setNillable(false);
+		setName(ENTITY_NAME);
+		setExtends(jobExecutionMetaData);
+		addAttribute(FILE).setLabel("File").setDescription("The imported file.").setDataType(XREF)
+				.setRefEntity(fileMetaMetaData).setNillable(true);
+		addAttribute(FILE_INGEST).setDataType(XREF).setRefEntity(fileIngestMetaData).setNillable(false);
 	}
 
-	// access bean from classes other than spring-managed beans
-	public static FileIngestJobExecutionMetaData get() {
-		return INSTANCE;
+	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
+	@Autowired
+	public void setFileMetaMetaData(FileMetaMetaData fileMetaMetaData)
+	{
+		this.fileMetaMetaData = requireNonNull(fileMetaMetaData);
+	}
+
+	@Autowired
+	public void setFileIngestMetaData(FileIngestMetaData fileIngestMetaData)
+	{
+		this.fileIngestMetaData = requireNonNull(fileIngestMetaData);
+	}
+
+	@Autowired
+	public void setJobExecutionMetaData(JobExecutionMetaData jobExecutionMetaData)
+	{
+		this.jobExecutionMetaData = requireNonNull(jobExecutionMetaData);
 	}
 }

@@ -113,7 +113,7 @@ public class SnpEffAnnotator
 	}
 
 	/**
-	 * Helper function to get gene dataType from entity
+	 * Helper function to get gene dataType from entityMetaData
 	 *
 	 * @param entity
 	 * @return
@@ -130,7 +130,7 @@ public class SnpEffAnnotator
 			String annField = entity.getString("ANN");
 			if (annField != null)
 			{
-				// if the entity is annotated with the snpEff annotator the split is already done
+				// if the entityMetaData is annotated with the snpEff annotator the split is already done
 				String[] split = annField.split("\\|", -1);
 				// TODO: ask Joeri to explain this line
 				if (split.length > 10)

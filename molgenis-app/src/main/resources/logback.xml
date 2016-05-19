@@ -6,7 +6,7 @@
 	</appender>
 	<!-- FIXME <appender name="MOLGENIS" class="org.molgenis.data.elasticsearch.logback.MolgenisAppender">
 	</appender>-->
-	<logger name="org.molgenis" level="INFO"/>
+	<logger name="org.molgenis" level="DEBUG"/>
 	<root level="WARN">
 		<appender-ref ref="STDOUT" />
 		<appender-ref ref="MOLGENIS" />

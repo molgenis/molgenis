@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Repository;
 import org.molgenis.util.DependencyResolver;
 import org.slf4j.Logger;
@@ -39,7 +39,7 @@ class PackageRepository
 	 * Creates a new PackageRepository.
 	 * 
 	 * @param repository
-	 *            {@link ManageableRepositoryCollection} that will be used to store the package entities.
+	 *            {@link RepositoryCollection} that will be used to store the package entities.
 	 */
 	public PackageRepository(Repository<Entity> repository)
 	{

@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 
 public class AttributeMappingRepositoryImpl implements AttributeMappingRepository
 {
+	// FIXME remove
 	public static final EntityMetaData META_DATA = new AttributeMappingMetaData();
 
 	@Autowired

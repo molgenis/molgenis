@@ -6,7 +6,7 @@ import java.util.Map;
 import org.molgenis.CommandLineOnlyConfiguration;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.data.DataService;
-import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.config.HttpClientConfig;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
@@ -59,7 +59,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 
 	@Autowired
 	@Qualifier("PostgreSqlRepositoryCollection")
-	private ManageableRepositoryCollection postgreSqlRepositoryCollection;
+	private RepositoryCollection postgreSqlRepositoryCollection;
 
 	@Autowired
 	private ElasticsearchRepositoryCollection elasticsearchRepositoryCollection;
@@ -77,7 +77,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	private Step23RebuildElasticsearchIndex step23RebuildElasticsearchIndex;
 
 	@Override
-	public ManageableRepositoryCollection getBackend()
+	public RepositoryCollection getBackend()
 	{
 		return postgreSqlRepositoryCollection;
 	}
@@ -127,11 +127,11 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	// {
 	// if (MysqlRepositoryCollection.NAME.equals(emd.getBackend()))
 	// {
-	// localDataService.addRepository(description.addEntityMeta(emd));
+	// localDataService.addRepository(description.createRepository(emd));
 	// }
 	// else if (ElasticsearchRepositoryCollection.NAME.equals(emd.getBackend()))
 	// {
-	// localDataService.addRepository(elasticsearchRepositoryCollection.addEntityMeta(emd));
+	// localDataService.addRepository(elasticsearchRepositoryCollection.createRepository(emd));
 	// }
 	// else
 	// {

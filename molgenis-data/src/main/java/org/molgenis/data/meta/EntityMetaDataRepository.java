@@ -2,34 +2,18 @@ package org.molgenis.data.meta;
 
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NAME;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ATTRIBUTES;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.BACKEND;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.FULL_NAME;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ID_ATTRIBUTE;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.LABEL;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.LABEL_ATTRIBUTE;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.LOOKUP_ATTRIBUTES;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.SIMPLE_NAME;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Repository;
-import org.molgenis.data.i18n.I18nStringMetaData;
-import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.system.ImportRunMetaData;
 import org.molgenis.util.DependencyResolver;
 
 import com.google.common.collect.Lists;
@@ -44,17 +28,17 @@ class EntityMetaDataRepository
 	public static final EntityMetaDataMetaData META_DATA = null; // FIXME EntityMetaDataMetaData.INSTANCE;
 	private final Repository<Entity> repository;
 	private final PackageRepository packageRepository;
-	private final ManageableRepositoryCollection collection;
+	private final RepositoryCollection collection;
 	private final Map<String, EntityMetaData> entityMetaDataCache = new HashMap<>();
 	private final AttributeMetaDataRepository attributeRepository;
 	private final LanguageService languageService;
 
-	public EntityMetaDataRepository(ManageableRepositoryCollection collection, PackageRepository packageRepository,
+	public EntityMetaDataRepository(RepositoryCollection collection, PackageRepository packageRepository,
 			AttributeMetaDataRepository attributeRepository, LanguageService languageService)
 	{
 		this.packageRepository = packageRepository;
 		this.attributeRepository = attributeRepository;
-		this.repository = collection.addEntityMeta(META_DATA);
+		this.repository = collection.createRepository(META_DATA);
 		this.collection = collection;
 		this.languageService = languageService;
 	}

@@ -8,7 +8,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.IdGenerator;
-import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.i18n.LanguageService;
@@ -76,12 +76,12 @@ public abstract class AbstractDataApiTestConfig
 	public void init()
 	{
 		SecuritySupport.login();
-		dataService().setMeta(metaDataService());
+		dataService().setMetaDataService(metaDataService());
 		metaDataService().setDefaultBackend(getBackend());
 	}
 
 	protected abstract void setUp();
-	protected abstract ManageableRepositoryCollection getBackend();
+	protected abstract RepositoryCollection getBackend();
 
 	@Bean
 	public MetaDataService metaDataService()

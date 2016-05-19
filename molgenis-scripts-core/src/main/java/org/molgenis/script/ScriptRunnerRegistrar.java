@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
 
-import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;

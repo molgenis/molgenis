@@ -7,6 +7,7 @@ import java.util.Set;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.processor.CellProcessor;
 
 import com.google.common.collect.Lists;
@@ -48,4 +49,16 @@ public abstract class FileRepositoryCollection implements RepositoryCollection
 
 	@Override
 	public abstract Repository<Entity> getRepository(String name);
+
+	@Override
+	public Repository<Entity> getRepository(EntityMetaData entityMetaData)
+	{
+		return getRepository(entityMetaData.getName());
+	}
+
+	@Override
+	public void deleteRepository(String name)
+	{
+		throw new UnsupportedOperationException(); // FIXME implement
+	}
 }

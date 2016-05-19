@@ -15,7 +15,7 @@ import org.mockito.ArgumentCaptor;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.MetaDataService;
@@ -37,7 +37,7 @@ public class LanguageRepositoryDecoratorTest
 		when(decoratedRepo.getEntityMetaData()).thenReturn(languageMetaData);
 		dataService = mock(DataService.class);
 		MetaDataService metaDataService = mock(MetaDataService.class);
-		ManageableRepositoryCollection defaultBackend = mock(ManageableRepositoryCollection.class);
+		RepositoryCollection defaultBackend = mock(RepositoryCollection.class);
 		when(metaDataService.getDefaultBackend()).thenReturn(defaultBackend);
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		languageRepositoryDecorator = new LanguageRepositoryDecorator(decoratedRepo, dataService);

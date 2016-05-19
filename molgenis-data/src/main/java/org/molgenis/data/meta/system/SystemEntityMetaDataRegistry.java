@@ -1,37 +1,41 @@
 package org.molgenis.data.meta.system;
 
-import static java.lang.String.format;
+import java.util.stream.Stream;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.SystemEntityMetaData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
-public enum SystemEntityMetaDataRegistry
+/**
+ * Registry containing all {@link SystemEntityMetaData}.
+ *
+ * @see SystemEntityMetaDataRegistrySingleton
+ */
+@Component
+public class SystemEntityMetaDataRegistry
 {
-	INSTANCE; // http://stackoverflow.com/a/71399
-
-	private final Logger LOG = LoggerFactory.getLogger(SystemEntityMetaDataRegistry.class);
-
-	private final Map<String, SystemEntityMetaData> systemEntityMetaDataMap = new HashMap<>();
-
 	public SystemEntityMetaData getSystemEntityMetaData(String entityName)
 	{
-		return systemEntityMetaDataMap.get(entityName);
+		return SystemEntityMetaDataRegistrySingleton.INSTANCE.getSystemEntityMetaData(entityName);
+	}
+
+	public Stream<SystemEntityMetaData> getSystemEntityMetaDatas()
+	{
+		return SystemEntityMetaDataRegistrySingleton.INSTANCE.getSystemEntityMetaDatas();
+	}
+
+	public boolean hasSystemEntityMetaData(String entityName)
+	{
+		return SystemEntityMetaDataRegistrySingleton.INSTANCE.hasSystemEntityMetaData(entityName);
 	}
 
 	public void addSystemEntityMetaData(SystemEntityMetaData systemEntityMetaData)
 	{
-		String systemEntityMetaDataName = systemEntityMetaData.getName();
-		if (systemEntityMetaDataName == null)
-		{
-			throw new IllegalArgumentException(format("[%s] is missing name, did you forget to call setName()?",
-					systemEntityMetaData.getClass().getSimpleName()));
-		}
+		SystemEntityMetaDataRegistrySingleton.INSTANCE.addSystemEntityMetaData(systemEntityMetaData);
+	}
 
-		LOG.trace("Registering system entity [{}] ...", systemEntityMetaDataName);
-		systemEntityMetaDataMap.put(systemEntityMetaDataName, systemEntityMetaData);
+	public AttributeMetaData getSystemAttributeMetaData(String attrIdentifier)
+	{
+		throw new UnsupportedOperationException(); // FIXME implement
 	}
 }

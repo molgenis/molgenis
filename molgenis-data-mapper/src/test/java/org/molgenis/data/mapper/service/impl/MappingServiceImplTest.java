@@ -23,7 +23,7 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
-import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.i18n.LanguageService;
@@ -72,7 +72,7 @@ import com.google.common.collect.Sets;
 public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
-	private ManageableRepositoryCollection repoCollection;
+	private RepositoryCollection repoCollection;
 
 	@Autowired
 	private DataServiceImpl dataService;
@@ -553,7 +553,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		ManageableRepositoryCollection manageableRepositoryCollection()
+		RepositoryCollection RepositoryCollection()
 		{
 			return new InMemoryRepositoryCollection("mem");
 		}
@@ -599,10 +599,10 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		public void initRepositories()
 		{
 			MetaDataService metaDataService = metaDataService();
-			dataService().setMeta(metaDataService);
+			dataService().setMetaDataService(metaDataService);
 
-			ManageableRepositoryCollection manageableRepositoryCollection = manageableRepositoryCollection();
-			metaDataService.setDefaultBackend(manageableRepositoryCollection);
+			RepositoryCollection RepositoryCollection = RepositoryCollection();
+			metaDataService.setDefaultBackend(RepositoryCollection);
 			metaDataService.addEntityMeta(new MolgenisUserMetaData());
 			metaDataService.addEntityMeta(AttributeMappingRepositoryImpl.META_DATA);
 			metaDataService.addEntityMeta(EntityMappingRepositoryImpl.META_DATA);

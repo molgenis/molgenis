@@ -6,7 +6,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 
 /**
  * Adds indexing functionality to a RepositoryCollection
@@ -66,9 +65,9 @@ public class IndexedRepositoryCollectionDecorator implements RepositoryCollectio
 	}
 
 	@Override
-	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
+	public Repository<Entity> createRepository(EntityMetaData entityMeta)
 	{
-		Repository<Entity> repo = delegate.addEntityMeta(entityMeta);
+		Repository<Entity> repo = delegate.createRepository(entityMeta);
 		searchService.createMappings(entityMeta);
 
 		return new ElasticsearchRepositoryDecorator(repo, searchService);
@@ -84,6 +83,12 @@ public class IndexedRepositoryCollectionDecorator implements RepositoryCollectio
 	public Repository<Entity> getRepository(String name)
 	{
 		return new ElasticsearchRepositoryDecorator(delegate.getRepository(name), searchService);
+	}
+
+	@Override
+	public Repository<Entity> getRepository(EntityMetaData entityMetaData)
+	{
+		return getRepository(entityMetaData.getName());
 	}
 
 	/**
@@ -114,4 +119,9 @@ public class IndexedRepositoryCollectionDecorator implements RepositoryCollectio
 		return false;
 	}
 
+	@Override
+	public boolean hasRepository(EntityMetaData entityMeta)
+	{
+		return hasRepository(entityMeta.getName());
+	}
 }

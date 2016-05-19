@@ -3,7 +3,7 @@ package org.molgenis.file.ingest.meta;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.jobs.JobExecution;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.system.SystemEntityMetaDataRegistrySingleton;
 import org.molgenis.file.FileMeta;
 
 public class FileIngestJobExecution extends JobExecution
@@ -12,7 +12,7 @@ public class FileIngestJobExecution extends JobExecution
 
 	public FileIngestJobExecution(DataService dataService)
 	{
-		super(dataService, FileIngestJobExecutionMetaData.get());
+		super(dataService, SystemEntityMetaDataRegistrySingleton.INSTANCE.getSystemEntityMetaData(FileIngestJobExecutionMetaData.ENTITY_NAME));
 		setType("FileIngesterJob");
 	}
 

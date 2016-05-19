@@ -15,8 +15,7 @@ import com.google.common.collect.Lists;
 
 public class MetaUtils
 {
-	public static List<AttributeMetaData> updateEntityMeta(MetaDataService metaDataService, EntityMetaData entityMeta,
-			boolean sync)
+	public static List<AttributeMetaData> updateEntityMeta(MetaDataService metaDataService, EntityMetaData entityMeta)
 	{
 		String backend = entityMeta.getBackend() != null ? entityMeta.getBackend() : metaDataService
 				.getDefaultBackend().getName();
@@ -65,8 +64,7 @@ public class MetaUtils
 			{
 				validatePermission(entityMeta.getName(), Permission.WRITEMETA);
 
-				if (sync) metaDataService.addAttributeSync(entityMeta.getName(), attr);
-				else metaDataService.addAttribute(entityMeta.getName(), attr);
+				metaDataService.addAttribute(entityMeta.getName(), attr);
 
 				addedAttributes.add(attr);
 			}

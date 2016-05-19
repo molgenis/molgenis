@@ -12,7 +12,7 @@ import java.util.List;
 
 import org.mockito.Mockito;
 import org.molgenis.data.Entity;
-import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.i18n.LanguageService;
@@ -40,7 +40,7 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 	private MetaDataServiceImpl metaDataServiceImpl;
 
 	@Autowired
-	private ManageableRepositoryCollection manageableCrudRepositoryCollection;
+	private RepositoryCollection manageableCrudRepositoryCollection;
 
 	private Package defaultPackage;
 
@@ -254,7 +254,7 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 	public static class Config
 	{
 		@Bean
-		ManageableRepositoryCollection manageableCrudRepositoryCollection()
+		RepositoryCollection manageableCrudRepositoryCollection()
 		{
 			return new InMemoryRepositoryCollection("mem");
 		}

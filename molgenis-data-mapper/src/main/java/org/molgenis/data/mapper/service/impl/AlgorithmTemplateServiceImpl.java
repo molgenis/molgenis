@@ -1,7 +1,6 @@
 package org.molgenis.data.mapper.service.impl;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.js.magma.JsMagmaScriptRegistrator.SCRIPT_TYPE_JAVASCRIPT_MAGMA;
 import static org.molgenis.script.Script.ENTITY_NAME;
 import static org.molgenis.script.Script.TYPE;
 
@@ -35,7 +34,7 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 	{
 		// get all algorithm templates
 		Stream<Script> jsScripts = dataService.findAll(ENTITY_NAME,
-				new QueryImpl<Script>().eq(TYPE, SCRIPT_TYPE_JAVASCRIPT_MAGMA), Script.class);
+				new QueryImpl<Script>().eq(TYPE, "FIXME"/*SCRIPT_TYPE_JAVASCRIPT_MAGMA*/), Script.class);
 
 		// select all algorithm templates that can be used with target and sources
 		return jsScripts.flatMap(script -> toAlgorithmTemplate(script, attrMatches));

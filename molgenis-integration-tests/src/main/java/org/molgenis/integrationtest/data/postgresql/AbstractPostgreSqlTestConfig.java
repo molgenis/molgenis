@@ -13,7 +13,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.postgresql.PostgreSqlEntityFactory;
 import org.molgenis.data.postgresql.PostgreSqlRepository;
@@ -50,7 +50,7 @@ public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestCo
 	JdbcTemplate jdbcTemplate;
 
 	@Override
-	protected ManageableRepositoryCollection getBackend()
+	protected RepositoryCollection getBackend()
 	{
 		return new PostgreSqlRepositoryCollection(dataSource)
 		{

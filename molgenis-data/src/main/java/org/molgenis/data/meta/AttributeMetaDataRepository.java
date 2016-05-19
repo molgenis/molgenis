@@ -29,7 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Repository;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.support.MapEntity;
@@ -55,9 +55,9 @@ class AttributeMetaDataRepository
 	private EntityMetaDataRepository entityMetaDataRepository;
 	private final LanguageService languageService;
 
-	public AttributeMetaDataRepository(ManageableRepositoryCollection collection, LanguageService languageService)
+	public AttributeMetaDataRepository(RepositoryCollection collection, LanguageService languageService)
 	{
-		this.repository = requireNonNull(collection).addEntityMeta(META_DATA);
+		this.repository = requireNonNull(collection).createRepository(META_DATA);
 		uuidGenerator = new UuidGenerator();
 		this.languageService = languageService;
 	}
