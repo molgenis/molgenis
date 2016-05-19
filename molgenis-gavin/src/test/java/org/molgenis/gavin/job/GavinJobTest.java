@@ -82,13 +82,13 @@ public class GavinJobTest
 
 		verify(progress).setProgressMax(4);
 		verify(progress).progress(0, "Annotating with cadd...");
-		verify(cmdLineAnnotator).annotate(cadd, inputFile, caddResult, emptyList(), false);
+		verify(cmdLineAnnotator).annotate(cadd, inputFile, caddResult, emptyList(), false, true);
 		verify(progress).progress(1, "Annotating with exac...");
-		verify(cmdLineAnnotator).annotate(exac, caddResult, exacResult, emptyList(), false);
+		verify(cmdLineAnnotator).annotate(exac, caddResult, exacResult, emptyList(), false, true);
 		verify(progress).progress(2, "Annotating with snpEff...");
-		verify(cmdLineAnnotator).annotate(snpeff, exacResult, snpEffResult, emptyList(), false);
+		verify(cmdLineAnnotator).annotate(snpeff, exacResult, snpEffResult, emptyList(), false, false);
 		verify(progress).progress(3, "Annotating with gavin...");
-		verify(cmdLineAnnotator).annotate(gavin, snpEffResult, gavinResult, emptyList(), false);
+		verify(cmdLineAnnotator).annotate(gavin, snpEffResult, gavinResult, emptyList(), false, false);
 		verify(progress).progress(4, "Result is ready for download.");
 		verify(progress).setResultUrl("/menu/plugins/gavin-app/result/ABCDE");
 
@@ -98,7 +98,7 @@ public class GavinJobTest
 	public void testRunCaddFails() throws Exception
 	{
 		RuntimeException ex = new RuntimeException();
-		doThrow(ex).when(cmdLineAnnotator).annotate(cadd, inputFile, caddResult, emptyList(), false);
+		doThrow(ex).when(cmdLineAnnotator).annotate(cadd, inputFile, caddResult, emptyList(), false, true);
 		try
 		{
 			job.call(progress);

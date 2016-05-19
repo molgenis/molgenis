@@ -47,7 +47,7 @@ public class FileIngestJobFactory
 	public FileIngestJob createJob(FileIngestJobExecution fileIngestJobExecution)
 	{
 		dataService.add(FileIngestJobExecutionMetaData.ENTITY_NAME, fileIngestJobExecution);
-		String username = fileIngestJobExecution.getUser().getUsername();
+		String username = fileIngestJobExecution.getUser();
 		Progress progress = new ProgressImpl(fileIngestJobExecution, jobExecutionUpdater, mailSender);
 		TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
 		RunAsUserToken runAsAuthentication = new RunAsUserToken("Job Execution", username, null,

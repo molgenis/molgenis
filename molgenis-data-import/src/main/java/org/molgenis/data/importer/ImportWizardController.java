@@ -1,6 +1,7 @@
 package org.molgenis.data.importer;
 
-import static org.apache.commons.io.FilenameUtils.*;
+import static org.apache.commons.io.FilenameUtils.getBaseName;
+import static org.apache.commons.io.FilenameUtils.getExtension;
 import static org.molgenis.data.importer.ImportWizardController.URI;
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.Permission.NONE;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
+
 
 import org.molgenis.auth.Authority;
 import org.molgenis.auth.GroupAuthority;

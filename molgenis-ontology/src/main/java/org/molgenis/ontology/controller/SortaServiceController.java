@@ -1,6 +1,7 @@
 package org.molgenis.ontology.controller;
 
 import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.molgenis.data.QueryRule.Operator.AND;
@@ -102,8 +103,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.collect.ImmutableMap;
 
-import static java.util.Objects.requireNonNull;
-
 @Controller
 @RequestMapping(URI)
 public class SortaServiceController extends MolgenisPluginController
@@ -190,8 +189,7 @@ public class SortaServiceController extends MolgenisPluginController
 			try
 			{
 				MolgenisUser currentUser = userAccountService.getCurrentUser();
-				if (currentUser.isSuperuser()
-						|| sortaJobExecution.getUser().getUsername().equals(currentUser.getUsername()))
+				if (currentUser.isSuperuser() || sortaJobExecution.getUser().equals(currentUser.getUsername()))
 				{
 					RunAsSystemProxy.runAsSystem(() -> {
 						Double thresholdValue = Double.parseDouble(threshold);
@@ -251,8 +249,7 @@ public class SortaServiceController extends MolgenisPluginController
 		if (sortaJobExecution != null)
 		{
 			MolgenisUser currentUser = userAccountService.getCurrentUser();
-			if (currentUser.isSuperuser()
-					|| sortaJobExecution.getUser().getUsername().equals(currentUser.getUsername()))
+			if (currentUser.isSuperuser() || sortaJobExecution.getUser().equals(currentUser.getUsername()))
 			{
 				RunAsSystemProxy.runAsSystem(() -> {
 					dataService.delete(SortaJobExecution.ENTITY_NAME, sortaJobExecution.getIdentifier());
