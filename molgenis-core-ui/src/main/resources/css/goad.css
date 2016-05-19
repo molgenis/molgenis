@@ -1,0 +1,151 @@
+#goadImage{
+	float:left;
+}
+
+#umcgImage{
+	float:right;
+}
+
+#divEmptyButton{
+	width:5%;
+}
+
+.panel-title{
+	color:#000000;	
+}
+
+.btn-primary, .btn.disabled {
+	border:0px;
+	background-color:#002080;
+	margin-bottom:5px;
+}
+
+#returnAccordion{
+	color:#002080 !important;
+	margin-bottom:5px;
+}
+
+#tutorialButton{
+	border:0px;
+	background-color:transparent;
+}
+
+#closeModal{
+	color:#ffffff !important; 
+}
+
+.modal-title{
+	background-color:#002080;
+	color:#ffffff;
+	padding:1em;
+}
+
+#publicationCard thead tr{
+	cursor:pointer;
+}
+
+#tutorialDEinfo, #tutorialQEinfo{
+	border:0px;
+	background-color:#002080;
+	margin-bottom:5px;
+	color:#ffffff;
+}
+
+#selectBar, #contactInfo, #selectBarMessage, #errorLengthForSubmit, #publicationPart, #refreshPublications, #QE_content, #searchQE, #QE_table, #searchBar_DE, #genePart, #dashboard, #DE_info, #QE_info, #DownloadQE, #selectBarQE, #NoDEGMessage{
+	display:none;
+	margin-bottom:1em;
+}
+
+#s2id_selectConditions, #informationStudy{
+	width:100% !important;
+	margin-bottom:1em !important;
+}
+
+#submitDEbutton{
+	align:center;
+}
+
+.table-scroll{
+	height:350px;
+	overflow:auto;
+}
+/* ----------------------------- */
+/* Content for the QE bar graphs */
+/* ----------------------------- */
+
+.tpmValsPlot {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.bar {
+  fill: "#002080";
+}
+
+.x.axis path {
+  display: none;
+}
+
+.d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+
+/* ----------------------------------- */
+/* Content for the QE dashboard graphs */
+/* ----------------------------------- */
+
+path {  stroke: #fff; }
+path:hover {  opacity:0.9; }
+.axis {  font: 10px sans-serif; }
+.legend tr{    border-bottom:1px solid grey; }
+.legend tr:first-child{    border-top:1px solid grey; }
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {  display: none; }
+.legend{
+    margin-bottom:76px;
+    display:inline-block;
+    border-collapse: collapse;
+    border-spacing: 0px;
+}
+.legend td{
+    padding:4px 5px;
+    vertical-align:bottom;
+}

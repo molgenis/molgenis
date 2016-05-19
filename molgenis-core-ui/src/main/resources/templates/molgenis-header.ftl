@@ -32,7 +32,8 @@
     <#if app_settings.cssHref?has_content>
         <link rel="stylesheet" href="<@resource_href "/css/${app_settings.cssHref?html}"/>" type="text/css">
     </#if> 
-
+		<script src="<@resource_href "/js/d3-3.5.6.min.js"/>"></script>
+		<script src="<@resource_href "/js/d3.tip.v0.6.3.js"/>"></script>
         <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
 		<script src="<@resource_href "/js/es6-promise.min.js"/>"></script>
 		<script src="<@resource_href "/js/promise-done-6.1.0.min.js"/>"></script>

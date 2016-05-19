@@ -1,0 +1,29 @@
+.scatterD3-tooltip {
+    position: absolute;
+    color: #222;
+    background: #fff;
+    padding: .5em;
+    text-shadow: #f5f5f5 0 1px 0;
+    border-radius: 2px;
+    box-shadow: 0px 0px 2px 0px #a6a6a6;
+    opacity: 0.9;
+    font-family: sans-serif;
+    font-size: 9px;
+    z-index: 10;
+}
+
+.hidden {
+    display: none;
+}
+
+.scatterD3 .point-label {
+  cursor: pointer;
+}
+
+.scatterD3 .pane {
+  cursor: move;
+}
+
+.scatterD3, .scatterD3:focus {
+  outline: 0px solid transparent
+}
