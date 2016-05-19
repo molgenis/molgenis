@@ -2,6 +2,8 @@ package org.molgenis.migrate.version.v1_21;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.List;
+
 import javax.sql.DataSource;
 
 import org.molgenis.framework.MolgenisUpgrade;
@@ -41,12 +43,17 @@ public class Step30MigrateJobExecutionUser extends MolgenisUpgrade
 		{
 			LOG.info("Upgrade user attribute in JobExecution entities...");
 			updateDataType("JobExecution", "user", "string");
-			dropForeignKey("SortaJobExecution");
-			dropForeignKey("FileIngestJobExecution");
-			dropForeignKey("AnnotationJobExecution");
-			dropForeignKey("GavinJobExecution");
+
+			getJobExecutionEntityNames().forEach(this::dropForeignKey);
+
 			LOG.info("Done.");
 		}
+	}
+
+	private List<String> getJobExecutionEntityNames()
+	{
+		return jdbcTemplate.query("SELECT fullName FROM entities WHERE extends = 'JobExecution'",
+				(rs, rowNum) -> rs.getString("fullName"));
 	}
 
 	/**
